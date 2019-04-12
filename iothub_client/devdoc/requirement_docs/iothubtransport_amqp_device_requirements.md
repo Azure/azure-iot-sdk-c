@@ -93,98 +93,98 @@ typedef struct DEVICE_CONFIG_TAG
     ON_DEVICE_STATE_CHANGED on_state_changed_callback;
     void* on_state_changed_context;
     IOTHUB_AUTHORIZATION_HANDLE authorization_module;
-} DEVICE_CONFIG;
+} AMQP_DEVICE_CONFIG;
 
 typedef struct DEVICE_INSTANCE* DEVICE_HANDLE;
 
-extern DEVICE_HANDLE device_create(DEVICE_CONFIG* config);
-extern void device_destroy(DEVICE_HANDLE handle);
-extern int device_start_async(DEVICE_HANDLE handle, SESSION_HANDLE session_handle, CBS_HANDLE cbs_handle);
-extern int device_stop(DEVICE_HANDLE handle);
-extern void device_do_work(DEVICE_HANDLE handle);
-extern int device_send_event_async(DEVICE_HANDLE handle, IOTHUB_MESSAGE_LIST* message, ON_DEVICE_D2C_EVENT_SEND_COMPLETE on_device_d2c_event_send_complete_callback, void* context);
-extern int device_send_twin_update_async(DEVICE_HANDLE handle, CONSTBUFFER_HANDLE data, DEVICE_SEND_TWIN_UPDATE_COMPLETE_CALLBACK on_send_twin_update_complete_callback, void* context);
-extern int device_subscribe_for_twin_updates(DEVICE_HANDLE handle, DEVICE_TWIN_UPDATE_RECEIVED_CALLBACK on_device_twin_update_received_callback, void* context);
-extern int device_unsubscribe_for_twin_updates(DEVICE_HANDLE handle);
-extern int device_get_twin_async(AMQP_DEVICE_HANDLE handle, DEVICE_TWIN_UPDATE_RECEIVED_CALLBACK on_device_get_twin_completed_callback, void* context);
-extern int device_get_send_status(DEVICE_HANDLE handle, DEVICE_SEND_STATUS *send_status);
-extern int device_subscribe_message(DEVICE_HANDLE handle, ON_DEVICE_C2D_MESSAGE_RECEIVED on_message_received_callback, void* context);
-extern int device_unsubscribe_message(DEVICE_HANDLE handle);
-extern int device_send_message_disposition(DEVICE_HANDLE device_handle, DEVICE_MESSAGE_DISPOSITION_INFO* disposition_info, DEVICE_MESSAGE_DISPOSITION_RESULT disposition_result);
-extern int device_set_retry_policy(DEVICE_HANDLE handle, IOTHUB_CLIENT_RETRY_POLICY policy, size_t retry_timeout_limit_in_seconds);
-extern int device_set_option(DEVICE_HANDLE handle, const char* name, void* value);
-extern OPTIONHANDLER_HANDLE device_retrieve_options(DEVICE_HANDLE handle);
-extern int device_set_stream_request_callback(AMQP_DEVICE_HANDLE handle, IOTHUB_CLIENT_INCOMING_STREAM_REQUEST_CALLBACK streamRequestCallback, const void* context);
-extern int device_send_stream_request_async(AMQP_DEVICE_HANDLE handle, STREAM_REQUEST_INFO* streamRequest, IOTHUB_CLIENT_OUTGOING_STREAM_REQUEST_CALLBACK streamRequestCallback, const void* context);
+extern DEVICE_HANDLE amqp_device_create(AMQP_DEVICE_CONFIG* config);
+extern void amqp_device_destroy(DEVICE_HANDLE handle);
+extern int amqp_device_start_async(DEVICE_HANDLE handle, SESSION_HANDLE session_handle, CBS_HANDLE cbs_handle);
+extern int amqp_device_stop(DEVICE_HANDLE handle);
+extern void amqp_device_do_work(DEVICE_HANDLE handle);
+extern int amqp_device_send_event_async(DEVICE_HANDLE handle, IOTHUB_MESSAGE_LIST* message, ON_DEVICE_D2C_EVENT_SEND_COMPLETE on_device_d2c_event_send_complete_callback, void* context);
+extern int amqp_device_send_twin_update_async(DEVICE_HANDLE handle, CONSTBUFFER_HANDLE data, DEVICE_SEND_TWIN_UPDATE_COMPLETE_CALLBACK on_send_twin_update_complete_callback, void* context);
+extern int amqp_device_subscribe_for_twin_updates(DEVICE_HANDLE handle, DEVICE_TWIN_UPDATE_RECEIVED_CALLBACK on_device_twin_update_received_callback, void* context);
+extern int amqp_device_unsubscribe_for_twin_updates(DEVICE_HANDLE handle);
+extern int amqp_device_get_twin_async(AMQP_DEVICE_HANDLE handle, DEVICE_TWIN_UPDATE_RECEIVED_CALLBACK on_device_get_twin_completed_callback, void* context);
+extern int amqp_device_get_send_status(DEVICE_HANDLE handle, DEVICE_SEND_STATUS *send_status);
+extern int amqp_device_subscribe_message(DEVICE_HANDLE handle, ON_DEVICE_C2D_MESSAGE_RECEIVED on_message_received_callback, void* context);
+extern int amqp_device_unsubscribe_message(DEVICE_HANDLE handle);
+extern int amqp_device_send_message_disposition(DEVICE_HANDLE device_handle, DEVICE_MESSAGE_DISPOSITION_INFO* disposition_info, DEVICE_MESSAGE_DISPOSITION_RESULT disposition_result);
+extern int amqp_device_set_retry_policy(DEVICE_HANDLE handle, IOTHUB_CLIENT_RETRY_POLICY policy, size_t retry_timeout_limit_in_seconds);
+extern int amqp_device_set_option(DEVICE_HANDLE handle, const char* name, void* value);
+extern OPTIONHANDLER_HANDLE amqp_device_retrieve_options(DEVICE_HANDLE handle);
+extern int amqp_amqp_device_set_stream_request_callback(AMQP_DEVICE_HANDLE handle, IOTHUB_CLIENT_INCOMING_STREAM_REQUEST_CALLBACK streamRequestCallback, const void* context);
+extern int amqp_amqp_device_send_stream_request_async(AMQP_DEVICE_HANDLE handle, STREAM_REQUEST_INFO* streamRequest, IOTHUB_CLIENT_OUTGOING_STREAM_REQUEST_CALLBACK streamRequestCallback, const void* context);
 ```
 
-Note: `instance` refers to the structure that holds the current state and control parameters of the device. 
-In each function (other than amqp_device_create) it shall derive from the AMQP_DEVICE_HANDLE handle passed as argument.  
+Note: `instance` refers to the structure that holds the current state and control parameters of the device.
+In each function (other than amqp_device_create) it shall derive from the AMQP_DEVICE_HANDLE handle passed as argument.
 
 
-### device_create
+### amqp_device_create
 
 ```c
-extern DEVICE_HANDLE device_create(DEVICE_CONFIG config);
+extern DEVICE_HANDLE amqp_device_create(AMQP_DEVICE_CONFIG config);
 ```
 
-**SRS_DEVICE_09_001: [**If `config`, `authorization_module` or `iothub_host_fqdn` or on_state_changed_callback are NULL then device_create shall fail and return NULL**]**
-**SRS_DEVICE_09_002: [**device_create shall allocate memory for the device instance structure**]**
-**SRS_DEVICE_09_003: [**If malloc fails, device_create shall fail and return NULL**]**
+**SRS_DEVICE_09_001: [**If `config`, `authorization_module` or `iothub_host_fqdn` or on_state_changed_callback are NULL then amqp_device_create shall fail and return NULL**]**
+**SRS_DEVICE_09_002: [**amqp_device_create shall allocate memory for the device instance structure**]**
+**SRS_DEVICE_09_003: [**If malloc fails, amqp_device_create shall fail and return NULL**]**
 **SRS_DEVICE_09_004: [**All `config` parameters shall be saved into `instance`**]**
-**SRS_DEVICE_09_005: [**If any `config` parameters fail to be saved into `instance`, device_create shall fail and return NULL**]**
+**SRS_DEVICE_09_005: [**If any `config` parameters fail to be saved into `instance`, amqp_device_create shall fail and return NULL**]**
 **SRS_DEVICE_09_006: [**If `instance->authentication_mode` is DEVICE_AUTH_MODE_CBS, `instance->authentication_handle` shall be set using authentication_create()**]**
-**SRS_DEVICE_09_007: [**If the AUTHENTICATION_HANDLE fails to be created, device_create shall fail and return NULL**]**
+**SRS_DEVICE_09_007: [**If the AUTHENTICATION_HANDLE fails to be created, amqp_device_create shall fail and return NULL**]**
 **SRS_DEVICE_09_008: [**`instance->messenger_handle` shall be set using telemetry_messenger_create()**]**
-**SRS_DEVICE_09_009: [**If the MESSENGER_HANDLE fails to be created, device_create shall fail and return NULL**]**
+**SRS_DEVICE_09_009: [**If the MESSENGER_HANDLE fails to be created, amqp_device_create shall fail and return NULL**]**
 
 **SRS_DEVICE_09_122: [**`instance->twin_messenger_handle` shall be set using twin_messenger_create()**]**
-**SRS_DEVICE_09_123: [**If the TWIN_MESSENGER_HANDLE fails to be created, device_create shall fail and return NULL**]**
+**SRS_DEVICE_09_123: [**If the TWIN_MESSENGER_HANDLE fails to be created, amqp_device_create shall fail and return NULL**]**
 
 **SRS_DEVICE_09_152: [**`instance->streaming_client_handle` shall be set using amqp_streaming_client_create()**]**
-**SRS_DEVICE_09_153: [**If the AMQP_STREAMING_CLIENT_HANDLE fails to be created, device_create shall fail and return NULL**]**
+**SRS_DEVICE_09_153: [**If the AMQP_STREAMING_CLIENT_HANDLE fails to be created, amqp_device_create shall fail and return NULL**]**
 
-**SRS_DEVICE_09_010: [**If device_create fails it shall release all memory it has allocated**]**
-**SRS_DEVICE_09_011: [**If device_create succeeds it shall return a handle to its `instance` structure**]**
+**SRS_DEVICE_09_010: [**If amqp_device_create fails it shall release all memory it has allocated**]**
+**SRS_DEVICE_09_011: [**If amqp_device_create succeeds it shall return a handle to its `instance` structure**]**
 
 
-### device_destroy
+### amqp_device_destroy
 
 ```c
-extern void device_destroy(DEVICE_HANDLE handle);
+extern void amqp_device_destroy(DEVICE_HANDLE handle);
 ```
 
-**SRS_DEVICE_09_012: [**If `handle` is NULL, device_destroy shall return**]**
-**SRS_DEVICE_09_013: [**If the device is in state DEVICE_STATE_STARTED or DEVICE_STATE_STARTING, device_stop() shall be invoked**]**
+**SRS_DEVICE_09_012: [**If `handle` is NULL, amqp_device_destroy shall return**]**
+**SRS_DEVICE_09_013: [**If the device is in state DEVICE_STATE_STARTED or DEVICE_STATE_STARTING, amqp_device_stop() shall be invoked**]**
 **SRS_DEVICE_09_014: [**`instance->messenger_handle shall be destroyed using telemetry_messenger_destroy()`**]**
 **SRS_DEVICE_09_154: [**`instance->streaming_client_handle` shall be destroyed using amqp_streaming_client_destroy()`**]**
 **SRS_DEVICE_09_015: [**If created, `instance->authentication_handle` shall be destroyed using authentication_destroy()`**]**
 **SRS_DEVICE_09_016: [**The contents of `instance->config` shall be detroyed and then it shall be freed**]**
 
 
-### device_start_async
- 
+### amqp_device_start_async
+
 ```c
-extern int device_start_async(DEVICE_HANDLE handle, SESSION_HANDLE session_handle, CBS_HANDLE cbs_handle);
+extern int amqp_device_start_async(DEVICE_HANDLE handle, SESSION_HANDLE session_handle, CBS_HANDLE cbs_handle);
 ```
 
-**SRS_DEVICE_09_017: [**If `handle` is NULL, device_start_async shall return a non-zero result**]**
-**SRS_DEVICE_09_018: [**If the device state is not DEVICE_STATE_STOPPED, device_start_async shall return a non-zero result**]**
-**SRS_DEVICE_09_019: [**If `session_handle` is NULL, device_start_async shall return a non-zero result**]**
-**SRS_DEVICE_09_020: [**If using CBS authentication and `cbs_handle` is NULL, device_start_async shall return a non-zero result**]**
+**SRS_DEVICE_09_017: [**If `handle` is NULL, amqp_device_start_async shall return a non-zero result**]**
+**SRS_DEVICE_09_018: [**If the device state is not DEVICE_STATE_STOPPED, amqp_device_start_async shall return a non-zero result**]**
+**SRS_DEVICE_09_019: [**If `session_handle` is NULL, amqp_device_start_async shall return a non-zero result**]**
+**SRS_DEVICE_09_020: [**If using CBS authentication and `cbs_handle` is NULL, amqp_device_start_async shall return a non-zero result**]**
 **SRS_DEVICE_09_021: [**`session_handle` and `cbs_handle` shall be saved into the `instance`**]**
 **SRS_DEVICE_09_022: [**The device state shall be updated to DEVICE_STATE_STARTING, and state changed callback invoked**]**
-**SRS_DEVICE_09_023: [**If no failures occur, device_start_async shall return 0**]**
+**SRS_DEVICE_09_023: [**If no failures occur, amqp_device_start_async shall return 0**]**
 
- 
-### device_stop
- 
+
+### amqp_device_stop
+
 ```c
-extern int device_stop(DEVICE_HANDLE handle);
+extern int amqp_device_stop(DEVICE_HANDLE handle);
 ```
 
-**SRS_DEVICE_09_024: [**If `handle` is NULL, device_stop shall return a non-zero result**]**
-**SRS_DEVICE_09_025: [**If the device state is already DEVICE_STATE_STOPPED or DEVICE_STATE_STOPPING, device_stop shall return a non-zero result**]**
+**SRS_DEVICE_09_024: [**If `handle` is NULL, amqp_device_stop shall return a non-zero result**]**
+**SRS_DEVICE_09_025: [**If the device state is already DEVICE_STATE_STOPPED or DEVICE_STATE_STOPPING, amqp_device_stop shall return a non-zero result**]**
 **SRS_DEVICE_09_026: [**The device state shall be updated to DEVICE_STATE_STOPPING, and state changed callback invoked**]**
 **SRS_DEVICE_09_027: [**If `instance->messenger_handle` state is not TELEMETRY_MESSENGER_STATE_STOPPED, telemetry_messenger_stop shall be invoked**]**
 **SRS_DEVICE_09_028: [**If telemetry_messenger_stop fails, the `instance` state shall be updated to DEVICE_STATE_ERROR_MSG and the function shall return non-zero result**]**
@@ -195,16 +195,16 @@ extern int device_stop(DEVICE_HANDLE handle);
 **SRS_DEVICE_09_029: [**If CBS authentication is used, if `instance->authentication_handle` state is not AUTHENTICATION_STATE_STOPPED, authentication_stop shall be invoked**]**
 **SRS_DEVICE_09_030: [**If authentication_stop fails, the `instance` state shall be updated to DEVICE_STATE_ERROR_AUTH and the function shall return non-zero result**]**
 **SRS_DEVICE_09_031: [**The device state shall be updated to DEVICE_STATE_STOPPED, and state changed callback invoked**]**
-**SRS_DEVICE_09_032: [**If no failures occur, device_stop shall return 0**]**
+**SRS_DEVICE_09_032: [**If no failures occur, amqp_device_stop shall return 0**]**
 
 
-### device_do_work
- 
+### amqp_device_do_work
+
 ```c
-extern void device_do_work(DEVICE_HANDLE handle);
+extern void amqp_device_do_work(DEVICE_HANDLE handle);
 ```
 
-**SRS_DEVICE_09_033: [**If `handle` is NULL, device_do_work shall return**]**
+**SRS_DEVICE_09_033: [**If `handle` is NULL, amqp_device_do_work shall return**]**
 
 #### device state DEVICE_STATE_STARTING
 
@@ -268,20 +268,20 @@ extern void device_do_work(DEVICE_HANDLE handle);
 **SRS_DEVICE_09_134: [**If `instance->twin_messenger_handle` state is not STOPPED or ERROR, twin_messenger_do_work shall be invoked**]**
 
 
-### device_send_event_async
- 
+### amqp_device_send_event_async
+
 ```c
-extern int device_send_event_async(DEVICE_HANDLE handle, IOTHUB_MESSAGE_LIST* message, ON_DEVICE_D2C_EVENT_SEND_COMPLETE on_device_d2c_event_send_complete_callback, void* context);
+extern int amqp_device_send_event_async(DEVICE_HANDLE handle, IOTHUB_MESSAGE_LIST* message, ON_DEVICE_D2C_EVENT_SEND_COMPLETE on_device_d2c_event_send_complete_callback, void* context);
 ```
 
-**SRS_DEVICE_09_051: [**If `handle` are `message` are NULL, device_send_event_async shall return a non-zero result**]**
+**SRS_DEVICE_09_051: [**If `handle` are `message` are NULL, amqp_device_send_event_async shall return a non-zero result**]**
 **SRS_DEVICE_09_052: [**A structure (`send_task`) shall be created to track the send state of the message**]**
-**SRS_DEVICE_09_053: [**If `send_task` fails to be created, device_send_event_async shall return a non-zero value**]**
+**SRS_DEVICE_09_053: [**If `send_task` fails to be created, amqp_device_send_event_async shall return a non-zero value**]**
 **SRS_DEVICE_09_054: [**`send_task` shall contain the user callback and the context provided**]**
 **SRS_DEVICE_09_055: [**The message shall be sent using telemetry_messenger_send_async, passing `on_event_send_complete_messenger_callback` and `send_task`**]**
-**SRS_DEVICE_09_056: [**If telemetry_messenger_send_async fails, device_send_event_async shall return a non-zero value**]**
-**SRS_DEVICE_09_057: [**If any failures occur, device_send_event_async shall release all memory it has allocated**]**
-**SRS_DEVICE_09_058: [**If no failures occur, device_send_event_async shall return 0**]**
+**SRS_DEVICE_09_056: [**If telemetry_messenger_send_async fails, amqp_device_send_event_async shall return a non-zero value**]**
+**SRS_DEVICE_09_057: [**If any failures occur, amqp_device_send_event_async shall release all memory it has allocated**]**
+**SRS_DEVICE_09_058: [**If no failures occur, amqp_device_send_event_async shall return 0**]**
 
 
 #### on_event_send_complete_messenger_callback
@@ -299,22 +299,22 @@ static void on_event_send_complete_messenger_callback(IOTHUB_MESSAGE_LIST* iothu
 **SRS_DEVICE_09_065: [**The memory allocated for `send_task` shall be released**]**
 
 
-### device_send_twin_update_async
+### amqp_device_send_twin_update_async
 ```c
-extern int device_send_twin_update_async(DEVICE_HANDLE handle, CONSTBUFFER_HANDLE data, DEVICE_SEND_TWIN_UPDATE_COMPLETE_CALLBACK on_send_twin_update_complete_callback, void* context);
+extern int amqp_device_send_twin_update_async(DEVICE_HANDLE handle, CONSTBUFFER_HANDLE data, DEVICE_SEND_TWIN_UPDATE_COMPLETE_CALLBACK on_send_twin_update_complete_callback, void* context);
 ```
 
-**SRS_DEVICE_09_135: [**If `handle` or `data` are NULL, device_send_twin_update_async shall return a non-zero result**]**
+**SRS_DEVICE_09_135: [**If `handle` or `data` are NULL, amqp_device_send_twin_update_async shall return a non-zero result**]**
 
 **SRS_DEVICE_09_136: [**A structure (`twin_ctx`) shall be created to track the send state of the twin report**]**
 
-**SRS_DEVICE_09_137: [**If `twin_ctx` fails to be created, device_send_twin_update_async shall return a non-zero value**]**
+**SRS_DEVICE_09_137: [**If `twin_ctx` fails to be created, amqp_device_send_twin_update_async shall return a non-zero value**]**
 
 **SRS_DEVICE_09_138: [**The twin report shall be sent using twin_messenger_report_state_async, passing `on_report_state_complete_callback` and `twin_ctx`**]**
 
-**SRS_DEVICE_09_139: [**If twin_messenger_report_state_async fails, device_send_twin_update_async shall return a non-zero value**]**
+**SRS_DEVICE_09_139: [**If twin_messenger_report_state_async fails, amqp_device_send_twin_update_async shall return a non-zero value**]**
 
-**SRS_DEVICE_09_140: [**If no failures occur, device_send_twin_update_async shall return 0**]**
+**SRS_DEVICE_09_140: [**If no failures occur, amqp_device_send_twin_update_async shall return 0**]**
 
 
 #### on_report_state_complete_callback
@@ -328,18 +328,18 @@ static void on_report_state_complete_callback(TWIN_REPORT_STATE_RESULT result, T
 
 
 
-### device_subscribe_for_twin_updates
+### amqp_device_subscribe_for_twin_updates
 ```c
-extern int device_subscribe_for_twin_updates(DEVICE_HANDLE handle, DEVICE_TWIN_UPDATE_RECEIVED_CALLBACK on_device_twin_update_received_callback, void* context);
+extern int amqp_device_subscribe_for_twin_updates(DEVICE_HANDLE handle, DEVICE_TWIN_UPDATE_RECEIVED_CALLBACK on_device_twin_update_received_callback, void* context);
 ```
 
-**SRS_DEVICE_09_143: [**If `handle` or `on_device_twin_update_received_callback` are NULL, device_subscribe_for_twin_updates shall return a non-zero result**]**
+**SRS_DEVICE_09_143: [**If `handle` or `on_device_twin_update_received_callback` are NULL, amqp_device_subscribe_for_twin_updates shall return a non-zero result**]**
 
 **SRS_DEVICE_09_144: [**twin_messenger_subscribe shall be invoked passing `on_twin_state_update_callback`**]**
 
-**SRS_DEVICE_09_145: [**If twin_messenger_subscribe fails, device_subscribe_for_twin_updates shall return a non-zero value**]**
+**SRS_DEVICE_09_145: [**If twin_messenger_subscribe fails, amqp_device_subscribe_for_twin_updates shall return a non-zero value**]**
 
-**SRS_DEVICE_09_146: [**If no failures occur, device_subscribe_for_twin_updates shall return 0**]**
+**SRS_DEVICE_09_146: [**If no failures occur, amqp_device_subscribe_for_twin_updates shall return 0**]**
 
 
 #### on_twin_state_update_callback
@@ -350,44 +350,44 @@ static void on_twin_state_update_callback(TWIN_UPDATE_TYPE update_type, const ch
 **SRS_DEVICE_09_151: [**on_device_twin_update_received_callback (provided by user) shall be invoked passing the corresponding update type, `payload` and `size`**]**
 
 
-### device_unsubscribe_for_twin_updates
+### amqp_device_unsubscribe_for_twin_updates
 ```c
-extern int device_unsubscribe_for_twin_updates(DEVICE_HANDLE handle);
+extern int amqp_device_unsubscribe_for_twin_updates(DEVICE_HANDLE handle);
 ```
 
-**SRS_DEVICE_09_147: [**If `handle` is NULL, device_unsubscribe_for_twin_updates shall return a non-zero result**]**
+**SRS_DEVICE_09_147: [**If `handle` is NULL, amqp_device_unsubscribe_for_twin_updates shall return a non-zero result**]**
 
 **SRS_DEVICE_09_148: [**twin_messenger_unsubscribe shall be invoked passing `on_twin_state_update_callback`**]**
 
-**SRS_DEVICE_09_149: [**If twin_messenger_unsubscribe fails, device_unsubscribe_for_twin_updates shall return a non-zero value**]**
+**SRS_DEVICE_09_149: [**If twin_messenger_unsubscribe fails, amqp_device_unsubscribe_for_twin_updates shall return a non-zero value**]**
 
-**SRS_DEVICE_09_150: [**If no failures occur, device_unsubscribe_for_twin_updates shall return 0**]**
+**SRS_DEVICE_09_150: [**If no failures occur, amqp_device_unsubscribe_for_twin_updates shall return 0**]**
 
 
-### device_get_twin_async
+### amqp_device_get_twin_async
 ```c
-extern int device_get_twin_async(AMQP_DEVICE_HANDLE handle, DEVICE_TWIN_UPDATE_RECEIVED_CALLBACK on_device_get_twin_completed_callback, void* context);
+extern int amqp_device_get_twin_async(AMQP_DEVICE_HANDLE handle, DEVICE_TWIN_UPDATE_RECEIVED_CALLBACK on_device_get_twin_completed_callback, void* context);
 ```
 
-**SRS_DEVICE_09_152: [**If `handle` or `on_device_get_twin_completed_callback` are NULL, device_get_twin_async shall return a non-zero result**]**
+**SRS_DEVICE_09_152: [**If `handle` or `on_device_get_twin_completed_callback` are NULL, amqp_device_get_twin_async shall return a non-zero result**]**
 
 **SRS_DEVICE_09_153: [**twin_messenger_get_twin_async shall be invoked **]**
 
-**SRS_DEVICE_09_154: [**If twin_messenger_get_twin_async fails, device_get_twin_async shall return a non-zero value**]**
+**SRS_DEVICE_09_154: [**If twin_messenger_get_twin_async fails, amqp_device_get_twin_async shall return a non-zero value**]**
 
-**SRS_DEVICE_09_155: [**If no failures occur, device_get_twin_async shall return 0**]**
+**SRS_DEVICE_09_155: [**If no failures occur, amqp_device_get_twin_async shall return 0**]**
 
 
-### device_subscribe_message
- 
+### amqp_device_subscribe_message
+
 ```c
-extern int device_subscribe_message(DEVICE_HANDLE handle, ON_DEVICE_C2D_MESSAGE_RECEIVED on_message_received_callback, void* context);
+extern int amqp_device_subscribe_message(DEVICE_HANDLE handle, ON_DEVICE_C2D_MESSAGE_RECEIVED on_message_received_callback, void* context);
 ```
 
-**SRS_DEVICE_09_066: [**If `handle` or `on_message_received_callback` or `context` is NULL, device_subscribe_message shall return a non-zero result**]**
+**SRS_DEVICE_09_066: [**If `handle` or `on_message_received_callback` or `context` is NULL, amqp_device_subscribe_message shall return a non-zero result**]**
 **SRS_DEVICE_09_067: [**telemetry_messenger_subscribe_for_messages shall be invoked passing `on_messenger_message_received_callback` and the user callback and context**]**
-**SRS_DEVICE_09_068: [**If telemetry_messenger_subscribe_for_messages fails, device_subscribe_message shall return a non-zero result**]**
-**SRS_DEVICE_09_069: [**If no failures occur, device_subscribe_message shall return 0**]**
+**SRS_DEVICE_09_068: [**If telemetry_messenger_subscribe_for_messages fails, amqp_device_subscribe_message shall return a non-zero result**]**
+**SRS_DEVICE_09_069: [**If no failures occur, amqp_device_subscribe_message shall return 0**]**
 
 
 #### on_messenger_message_received_callback
@@ -411,135 +411,135 @@ static TELEMETRY_MESSENGER_DISPOSITION_RESULT on_messenger_message_received_call
 
 
 
-### device_unsubscribe_message
- 
+### amqp_device_unsubscribe_message
+
 ```c
-extern int device_unsubscribe_message(DEVICE_HANDLE handle);
+extern int amqp_device_unsubscribe_message(DEVICE_HANDLE handle);
 ```
 
-**SRS_DEVICE_09_076: [**If `handle` is NULL, device_unsubscribe_message shall return a non-zero result**]**
+**SRS_DEVICE_09_076: [**If `handle` is NULL, amqp_device_unsubscribe_message shall return a non-zero result**]**
 **SRS_DEVICE_09_077: [**telemetry_messenger_unsubscribe_for_messages shall be invoked passing `instance->messenger_handle`**]**
-**SRS_DEVICE_09_078: [**If telemetry_messenger_unsubscribe_for_messages fails, device_unsubscribe_message shall return a non-zero result**]**
-**SRS_DEVICE_09_079: [**If no failures occur, device_unsubscribe_message shall return 0**]**
+**SRS_DEVICE_09_078: [**If telemetry_messenger_unsubscribe_for_messages fails, amqp_device_unsubscribe_message shall return a non-zero result**]**
+**SRS_DEVICE_09_079: [**If no failures occur, amqp_device_unsubscribe_message shall return 0**]**
 
 
-## device_send_message_disposition
+## amqp_device_send_message_disposition
 ```c
-extern int device_send_message_disposition(DEVICE_HANDLE device_handle, DEVICE_MESSAGE_DISPOSITION_INFO* disposition_info, DEVICE_MESSAGE_DISPOSITION_RESULT disposition_result);
+extern int amqp_device_send_message_disposition(DEVICE_HANDLE device_handle, DEVICE_MESSAGE_DISPOSITION_INFO* disposition_info, DEVICE_MESSAGE_DISPOSITION_RESULT disposition_result);
 ```
 
-**SRS_DEVICE_09_111: [**If `device_handle` or `disposition_info` are NULL, device_send_message_disposition() shall fail and return __FAILURE__**]**
+**SRS_DEVICE_09_111: [**If `device_handle` or `disposition_info` are NULL, amqp_device_send_message_disposition() shall fail and return MU_FAILURE**]**
 
-**SRS_DEVICE_09_112: [**If `disposition_info->source` is NULL, device_send_message_disposition() shall fail and return __FAILURE__**]**  
+**SRS_DEVICE_09_112: [**If `disposition_info->source` is NULL, amqp_device_send_message_disposition() shall fail and return MU_FAILURE**]**
 
-**SRS_DEVICE_09_113: [**A TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance shall be created with a copy of the `source` and `message_id` contained in `disposition_info`**]**  
+**SRS_DEVICE_09_113: [**A TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance shall be created with a copy of the `source` and `message_id` contained in `disposition_info`**]**
 
-**SRS_DEVICE_09_114: [**If the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO fails to be created, device_send_message_disposition() shall fail and return __FAILURE__**]**  
+**SRS_DEVICE_09_114: [**If the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO fails to be created, amqp_device_send_message_disposition() shall fail and return MU_FAILURE**]**
 
-**SRS_DEVICE_09_115: [**`telemetry_messenger_send_message_disposition()` shall be invoked passing the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance and the corresponding TELEMETRY_MESSENGER_DISPOSITION_RESULT**]**  
+**SRS_DEVICE_09_115: [**`telemetry_messenger_send_message_disposition()` shall be invoked passing the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance and the corresponding TELEMETRY_MESSENGER_DISPOSITION_RESULT**]**
 
-**SRS_DEVICE_09_116: [**If `telemetry_messenger_send_message_disposition()` fails, device_send_message_disposition() shall fail and return __FAILURE__**]**  
+**SRS_DEVICE_09_116: [**If `telemetry_messenger_send_message_disposition()` fails, amqp_device_send_message_disposition() shall fail and return MU_FAILURE**]**
 
-**SRS_DEVICE_09_117: [**device_send_message_disposition() shall destroy the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance**]**  
+**SRS_DEVICE_09_117: [**amqp_device_send_message_disposition() shall destroy the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance**]**
 
-**SRS_DEVICE_09_118: [**If no failures occurr, device_send_message_disposition() shall return 0**]**  
+**SRS_DEVICE_09_118: [**If no failures occurr, amqp_device_send_message_disposition() shall return 0**]**
 
 
-### device_set_retry_policy
- 
+### amqp_device_set_retry_policy
+
 ```c
-extern int device_set_retry_policy(DEVICE_HANDLE handle, IOTHUB_CLIENT_RETRY_POLICY policy, size_t retry_timeout_limit_in_seconds);
+extern int amqp_device_set_retry_policy(DEVICE_HANDLE handle, IOTHUB_CLIENT_RETRY_POLICY policy, size_t retry_timeout_limit_in_seconds);
 ```
 
 Note: this API is not currently implemented or supported.
 
-**SRS_DEVICE_09_080: [**If `handle` is NULL, device_set_retry_policy shall return a non-zero result**]**
-**SRS_DEVICE_09_081: [**device_set_retry_policy shall return a non-zero result**]**
+**SRS_DEVICE_09_080: [**If `handle` is NULL, amqp_device_set_retry_policy shall return a non-zero result**]**
+**SRS_DEVICE_09_081: [**amqp_device_set_retry_policy shall return a non-zero result**]**
 
 
-### device_set_option
- 
+### amqp_device_set_option
+
 ```c
-extern int device_set_option(DEVICE_HANDLE handle, const char* name, void* value);
+extern int amqp_device_set_option(DEVICE_HANDLE handle, const char* name, void* value);
 ```
 
-**SRS_DEVICE_09_082: [**If `handle` or `name` or `value` are NULL, device_set_option shall return a non-zero result**]**
-**SRS_DEVICE_09_083: [**If `name` refers to authentication but CBS authentication is not used, device_set_option shall return a non-zero result**]**
+**SRS_DEVICE_09_082: [**If `handle` or `name` or `value` are NULL, amqp_device_set_option shall return a non-zero result**]**
+**SRS_DEVICE_09_083: [**If `name` refers to authentication but CBS authentication is not used, amqp_device_set_option shall return a non-zero result**]**
 **SRS_DEVICE_09_084: [**If `name` refers to authentication, it shall be passed along with `value` to authentication_set_option**]**
-**SRS_DEVICE_09_085: [**If authentication_set_option fails, device_set_option shall return a non-zero result**]**
+**SRS_DEVICE_09_085: [**If authentication_set_option fails, amqp_device_set_option shall return a non-zero result**]**
 **SRS_DEVICE_09_086: [**If `name` refers to messenger module, it shall be passed along with `value` to telemetry_messenger_set_option**]**
-**SRS_DEVICE_09_087: [**If telemetry_messenger_set_option fails, device_set_option shall return a non-zero result**]**
-**SRS_DEVICE_09_088: [**If `name` is DEVICE_OPTION_SAVED_AUTH_OPTIONS but CBS authentication is not being used, device_set_option shall return a non-zero result**]**
+**SRS_DEVICE_09_087: [**If telemetry_messenger_set_option fails, amqp_device_set_option shall return a non-zero result**]**
+**SRS_DEVICE_09_088: [**If `name` is DEVICE_OPTION_SAVED_AUTH_OPTIONS but CBS authentication is not being used, amqp_device_set_option shall return a non-zero result**]**
 **SRS_DEVICE_09_089: [**If `name` is DEVICE_OPTION_SAVED_MESSENGER_OPTIONS, `value` shall be fed to `instance->messenger_handle` using OptionHandler_FeedOptions**]**
 **SRS_DEVICE_09_090: [**If `name` is DEVICE_OPTION_SAVED_OPTIONS, `value` shall be fed to `instance` using OptionHandler_FeedOptions**]**
-**SRS_DEVICE_09_091: [**If any call to OptionHandler_FeedOptions fails, device_set_option shall return a non-zero result**]**
-**SRS_DEVICE_09_092: [**If no failures occur, device_set_option shall return 0**]**
+**SRS_DEVICE_09_091: [**If any call to OptionHandler_FeedOptions fails, amqp_device_set_option shall return a non-zero result**]**
+**SRS_DEVICE_09_092: [**If no failures occur, amqp_device_set_option shall return 0**]**
 
-Note: 
+Note:
 - Authentication-related options: DEVICE_OPTION_CBS_REQUEST_TIMEOUT_SECS, DEVICE_OPTION_SAS_TOKEN_REFRESH_TIME_SECS, DEVICE_OPTION_SAS_TOKEN_LIFETIME_SECS
 - Messenger-related options: DEVICE_OPTION_EVENT_SEND_TIMEOUT_SECS
 
 
-### device_retrieve_options
- 
+### amqp_device_retrieve_options
+
 ```c
-extern OPTIONHANDLER_HANDLE device_retrieve_options(DEVICE_HANDLE handle);
+extern OPTIONHANDLER_HANDLE amqp_device_retrieve_options(DEVICE_HANDLE handle);
 ```
 
-**SRS_DEVICE_09_093: [**If `handle` is NULL, device_retrieve_options shall return NULL**]**
+**SRS_DEVICE_09_093: [**If `handle` is NULL, amqp_device_retrieve_options shall return NULL**]**
 
 **SRS_DEVICE_09_094: [**A OPTIONHANDLER_HANDLE instance, aka `options` shall be created using OptionHandler_Create**]**
-**SRS_DEVICE_09_095: [**If OptionHandler_Create fails, device_retrieve_options shall return NULL**]**
+**SRS_DEVICE_09_095: [**If OptionHandler_Create fails, amqp_device_retrieve_options shall return NULL**]**
 **SRS_DEVICE_09_096: [**If CBS authentication is used, `instance->authentication_handle` options shall be retrieved using authentication_retrieve_options**]**
-**SRS_DEVICE_09_097: [**If authentication_retrieve_options fails, device_retrieve_options shall return NULL**]**
+**SRS_DEVICE_09_097: [**If authentication_retrieve_options fails, amqp_device_retrieve_options shall return NULL**]**
 **SRS_DEVICE_09_098: [**The authentication options shall be added to `options` using OptionHandler_AddOption as DEVICE_OPTION_SAVED_AUTH_OPTIONS**]**
 **SRS_DEVICE_09_099: [**`instance->messenger_handle` options shall be retrieved using telemetry_messenger_retrieve_options**]**
-**SRS_DEVICE_09_100: [**If telemetry_messenger_retrieve_options fails, device_retrieve_options shall return NULL**]**
+**SRS_DEVICE_09_100: [**If telemetry_messenger_retrieve_options fails, amqp_device_retrieve_options shall return NULL**]**
 **SRS_DEVICE_09_101: [**The messenger options shall be added to `options` using OptionHandler_AddOption as DEVICE_OPTION_SAVED_MESSENGER_OPTIONS**]**
-**SRS_DEVICE_09_102: [**If any call to OptionHandler_AddOption fails, device_retrieve_options shall return NULL**]**
-**SRS_DEVICE_09_103: [**If any failure occurs, any memory allocated by device_retrieve_options shall be destroyed**]**
+**SRS_DEVICE_09_102: [**If any call to OptionHandler_AddOption fails, amqp_device_retrieve_options shall return NULL**]**
+**SRS_DEVICE_09_103: [**If any failure occurs, any memory allocated by amqp_device_retrieve_options shall be destroyed**]**
 **SRS_DEVICE_09_104: [**If no failures occur, a handle to `options` shall be return**]**
 
 
-### device_get_send_status
+### amqp_device_get_send_status
 
 ```c
-extern int device_get_send_status(DEVICE_HANDLE handle, DEVICE_SEND_STATUS *send_status);
+extern int amqp_device_get_send_status(DEVICE_HANDLE handle, DEVICE_SEND_STATUS *send_status);
 ```
 
-**SRS_DEVICE_09_105: [**If `handle` or `send_status` is NULL, device_get_send_status shall return a non-zero result**]**
+**SRS_DEVICE_09_105: [**If `handle` or `send_status` is NULL, amqp_device_get_send_status shall return a non-zero result**]**
 **SRS_DEVICE_09_106: [**The status of `instance->messenger_handle` shall be obtained using telemetry_messenger_get_send_status**]**
-**SRS_DEVICE_09_107: [**If telemetry_messenger_get_send_status fails, device_get_send_status shall return a non-zero result**]**
-**SRS_DEVICE_09_108: [**If telemetry_messenger_get_send_status returns TELEMETRY_MESSENGER_SEND_STATUS_IDLE, device_get_send_status return status DEVICE_SEND_STATUS_IDLE**]**
-**SRS_DEVICE_09_109: [**If telemetry_messenger_get_send_status returns TELEMETRY_MESSENGER_SEND_STATUS_BUSY, device_get_send_status return status DEVICE_SEND_STATUS_BUSY**]**
-**SRS_DEVICE_09_110: [**If device_get_send_status succeeds, it shall return zero as result**]**
+**SRS_DEVICE_09_107: [**If telemetry_messenger_get_send_status fails, amqp_device_get_send_status shall return a non-zero result**]**
+**SRS_DEVICE_09_108: [**If telemetry_messenger_get_send_status returns TELEMETRY_MESSENGER_SEND_STATUS_IDLE, amqp_device_get_send_status return status DEVICE_SEND_STATUS_IDLE**]**
+**SRS_DEVICE_09_109: [**If telemetry_messenger_get_send_status returns TELEMETRY_MESSENGER_SEND_STATUS_BUSY, amqp_device_get_send_status return status DEVICE_SEND_STATUS_BUSY**]**
+**SRS_DEVICE_09_110: [**If amqp_device_get_send_status succeeds, it shall return zero as result**]**
 
 
-### device_set_stream_request_callback
+### amqp_device_set_stream_request_callback
 
 ```c
-extern int device_set_stream_request_callback(AMQP_DEVICE_HANDLE handle, IOTHUB_CLIENT_INCOMING_STREAM_REQUEST_CALLBACK streamRequestCallback, const void* context);
+extern int amqp_device_set_stream_request_callback(AMQP_DEVICE_HANDLE handle, IOTHUB_CLIENT_INCOMING_STREAM_REQUEST_CALLBACK streamRequestCallback, const void* context);
 ```
 
-**SRS_DEVICE_09_164: [** If `handle` or `streamRequestCallback` are NULL, device_set_stream_request_callback() shall return a non-zero result **]**
+**SRS_DEVICE_09_164: [** If `handle` or `streamRequestCallback` are NULL, amqp_device_set_stream_request_callback() shall return a non-zero result **]**
 
 **SRS_DEVICE_09_165: [** amqp_streaming_client_set_stream_request_callback() shall be invoked passing `streamRequestCallback` and `context` **]**
 
-**SRS_DEVICE_09_166: [** If amqp_streaming_client_set_stream_request_callback() fails, device_set_stream_request_callback shall return a non-zero result **]**
+**SRS_DEVICE_09_166: [** If amqp_streaming_client_set_stream_request_callback() fails, amqp_device_set_stream_request_callback shall return a non-zero result **]**
 
-**SRS_DEVICE_09_167: [** If device_set_stream_request_callback succeeds, it shall return zero as result **]**
+**SRS_DEVICE_09_167: [** If amqp_device_set_stream_request_callback succeeds, it shall return zero as result **]**
 
 
-### device_send_stream_request_async
+### amqp_device_send_stream_request_async
 
 ```c
-extern int device_send_stream_request_async(AMQP_DEVICE_HANDLE handle, STREAM_REQUEST_INFO* streamRequest, IOTHUB_CLIENT_OUTGOING_STREAM_REQUEST_CALLBACK streamRequestCallback, const void* context);
+extern int amqp_amqp_device_send_stream_request_async(AMQP_DEVICE_HANDLE handle, STREAM_REQUEST_INFO* streamRequest, IOTHUB_CLIENT_OUTGOING_STREAM_REQUEST_CALLBACK streamRequestCallback, const void* context);
 ```
 
-**SRS_DEVICE_09_168: [** If `handle` or `streamRequest` are NULL, device_send_stream_request_async() shall return a non-zero result **]**
+**SRS_DEVICE_09_168: [** If `handle` or `streamRequest` are NULL, amqp_device_send_stream_request_async() shall return a non-zero result **]**
 
 **SRS_DEVICE_09_169: [** amqp_streaming_client_send_stream_request_async() shall be invoked passing `streamRequest`, `streamRequestCallback` and `context` **]**
 
-**SRS_DEVICE_09_170: [** If amqp_streaming_client_send_stream_request_async() fails, device_send_stream_request_async shall return a non-zero result **]**
+**SRS_DEVICE_09_170: [** If amqp_streaming_client_send_stream_request_async() fails, amqp_device_send_stream_request_async shall return a non-zero result **]**
 
-**SRS_DEVICE_09_171: [** If device_send_stream_request_async succeeds, it shall return zero as result **]**
+**SRS_DEVICE_09_171: [** If amqp_device_send_stream_request_async succeeds, it shall return zero as result **]**

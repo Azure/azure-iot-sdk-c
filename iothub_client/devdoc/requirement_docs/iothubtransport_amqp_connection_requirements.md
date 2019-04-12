@@ -34,7 +34,7 @@ azure-c-uamqp
 		bool create_sasl_io;
 		bool create_cbs_connection;
 		bool is_trace_on;
-		
+
 		ON_AMQP_CONNECTION_STATE_CHANGED on_state_changed_callback;
 		const void* on_state_changed_context;
 	} AMQP_CONNECTION_CONFIG;
@@ -71,7 +71,7 @@ AMQP_CONNECTION_HANDLE amqp_connection_create(AMQP_CONNECTION_CONFIG* config);
 **SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_061: [**`config->on_state_changed_context` shall be saved on `instance->on_state_changed_context`**]**
 
 
-### Creating SASL instances 
+### Creating SASL instances
 **SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_011: [**If `config->create_sasl_io` is true or `config->create_cbs_connection` is true, amqp_connection_create() shall create SASL I/O**]**
 **SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_012: [**`instance->sasl_mechanism` shall be created using saslmechanism_create()**]**
 **SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_013: [**If saslmechanism_create() fails, amqp_connection_create() shall fail and return NULL**]**
@@ -150,8 +150,8 @@ void amqp_connection_do_work(AMQP_CONNECTION_HANDLE conn_handle);
 int amqp_connection_get_session_handle(AMQP_CONNECTION_HANDLE conn_handle, SESSION_HANDLE* session_handle);
 ```
 
-**SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_043: [**If `conn_handle` is NULL, amqp_connection_get_session_handle() shall fail and return __FAILURE__**]**
-**SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_044: [**If `session_handle` is NULL, amqp_connection_get_session_handle() shall fail and return __FAILURE__**]**
+**SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_043: [**If `conn_handle` is NULL, amqp_connection_get_session_handle() shall fail and return MU_FAILURE**]**
+**SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_044: [**If `session_handle` is NULL, amqp_connection_get_session_handle() shall fail and return MU_FAILURE**]**
 **SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_045: [**`session_handle` shall be set to point to `instance->session_handle`**]**
 **SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_046: [**amqp_connection_get_session_handle() shall return success code 0**]**
 
@@ -162,9 +162,9 @@ int amqp_connection_get_session_handle(AMQP_CONNECTION_HANDLE conn_handle, SESSI
 int amqp_connection_get_cbs_handle(AMQP_CONNECTION_HANDLE conn_handle, CBS_HANDLE* cbs_handle);
 ```
 
-**SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_047: [**If `conn_handle` is NULL, amqp_connection_get_cbs_handle() shall fail and return __FAILURE__**]**
-**SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_048: [**If `cbs_handle` is NULL, amqp_connection_get_cbs_handle() shall fail and return __FAILURE__**]**
-**SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_049: [**If `instance->cbs_handle` is NULL, amqp_connection_get_cbs_handle() shall fail and return __FAILURE__**]**
+**SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_047: [**If `conn_handle` is NULL, amqp_connection_get_cbs_handle() shall fail and return MU_FAILURE**]**
+**SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_048: [**If `cbs_handle` is NULL, amqp_connection_get_cbs_handle() shall fail and return MU_FAILURE**]**
+**SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_049: [**If `instance->cbs_handle` is NULL, amqp_connection_get_cbs_handle() shall fail and return MU_FAILURE**]**
 **SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_050: [**`cbs_handle` shall be set to point to `instance->cbs_handle`**]**
 **SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_051: [**amqp_connection_get_cbs_handle() shall return success code 0**]**
 
@@ -175,10 +175,10 @@ int amqp_connection_get_cbs_handle(AMQP_CONNECTION_HANDLE conn_handle, CBS_HANDL
 int amqp_connection_set_logging(AMQP_CONNECTION_HANDLE conn_handle, bool is_trace_on);
 ```
 
-**SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_052: [**If `conn_handle` is NULL, amqp_connection_set_logging() shall fail and return __FAILURE__**]**
+**SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_052: [**If `conn_handle` is NULL, amqp_connection_set_logging() shall fail and return MU_FAILURE**]**
 **SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_053: [**`instance->is_trace_on` shall be set to `is_trace_on`**]**
 **SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_054: [**Tracing on `instance->sasl_io` shall be set to `instance->is_trace_on` if the value has changed**]**
-**SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_072: [**If xio_setoption() fails, amqp_connection_set_logging() shall fail and return __FAILURE__**]**
+**SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_072: [**If xio_setoption() fails, amqp_connection_set_logging() shall fail and return MU_FAILURE**]**
 **SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_055: [**Tracing on `instance->connection_handle` shall be set to `instance->is_trace_on` if the value has changed**]**
 **SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_056: [**amqp_connection_set_logging() shall return success code 0**]**
 

@@ -121,7 +121,7 @@ static int construct_device_id(const char* prefix, char** device_name)
     if (UniqueId_Generate(deviceGuid, DEVICE_GUID_SIZE) != UNIQUEID_OK)
     {
         LogError("Unable to generate unique Id.\r\n");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -130,7 +130,7 @@ static int construct_device_id(const char* prefix, char** device_name)
         if (*device_name == NULL)
         {
             LogError("Failure allocating device ID.\r\n");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -138,7 +138,7 @@ static int construct_device_id(const char* prefix, char** device_name)
             {
                 LogError("Failure constructing device ID.\r\n");
                 free(*device_name);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {

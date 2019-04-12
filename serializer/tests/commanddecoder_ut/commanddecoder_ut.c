@@ -135,7 +135,7 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_RESULT_VAL
 TEST_DEFINE_ENUM_TYPE(SCHEMA_ELEMENT_TYPE, SCHEMA_ELEMENT_TYPE_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(SCHEMA_ELEMENT_TYPE, SCHEMA_ELEMENT_TYPE_VALUES);
 
-DEFINE_ENUM_STRINGS(SCHEMA_ELEMENT_TYPE, SCHEMA_ELEMENT_TYPE_VALUES);
+MU_DEFINE_ENUM_STRINGS(SCHEMA_ELEMENT_TYPE, SCHEMA_ELEMENT_TYPE_VALUES);
 
 #define TEST_STRING_HANDLE_CHILD_NAME (STRING_HANDLE) 0x3
 #define TEST_DESIRED_PROPERTY_HANDLE_INT_FIELD (SCHEMA_DESIRED_PROPERTY_HANDLE)0x4
@@ -152,7 +152,7 @@ static SCHEMA_METHOD_HANDLE TEST_MODEL_METHOD_HANDLE = (SCHEMA_METHOD_HANDLE)0x5
 static SCHEMA_METHOD_ARGUMENT_HANDLE TEST_METHOD_ARGUMENT_HANDLE_0 = (SCHEMA_METHOD_ARGUMENT_HANDLE)0x57;
 static SCHEMA_METHOD_ARGUMENT_HANDLE TEST_METHOD_ARGUMENT_HANDLE_1 = (SCHEMA_METHOD_ARGUMENT_HANDLE)0x58;
 
-DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES);
+MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES);
 
 static void SetupCommand(const char* quotedActionName, const char* actionName)
 {
@@ -184,7 +184,7 @@ void SetupArgumentCalls(SCHEMA_ACTION_HANDLE actionHandle, size_t index, SCHEMA_
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
     ASSERT_FAIL(temp_str);
 }
 
@@ -225,7 +225,7 @@ static SCHEMA_MODEL_ELEMENT Schema_GetModelElementByName_modelInModel;
 char* umockvalue_stringify_SCHEMA_MODEL_ELEMENT(const SCHEMA_MODEL_ELEMENT* value)
 {
     char* result;
-    size_t needed = snprintf(NULL, 0, "{.elementType=%s, .elementHandle=%p}", ENUM_TO_STRING(SCHEMA_ELEMENT_TYPE, value->elementType), value->elementHandle.modelHandle);
+    size_t needed = snprintf(NULL, 0, "{.elementType=%s, .elementHandle=%p}", MU_ENUM_TO_STRING(SCHEMA_ELEMENT_TYPE, value->elementType), value->elementHandle.modelHandle);
     result = (char*)malloc(needed + 1);
     if (result == NULL)
     {
@@ -233,7 +233,7 @@ char* umockvalue_stringify_SCHEMA_MODEL_ELEMENT(const SCHEMA_MODEL_ELEMENT* valu
     }
     else
     {
-        (void) snprintf(result, needed+1, "{.elementType=%s, .elementHandle=%p}", ENUM_TO_STRING(SCHEMA_ELEMENT_TYPE, value->elementType), value->elementHandle.modelHandle);
+        (void) snprintf(result, needed+1, "{.elementType=%s, .elementHandle=%p}", MU_ENUM_TO_STRING(SCHEMA_ELEMENT_TYPE, value->elementType), value->elementHandle.modelHandle);
     }
     return result;
 }
@@ -370,7 +370,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, real_mallocAndStrcpy_s);
 
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __FAILURE__);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, MU_FAILURE);
 
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(MultiTree_GetChild, MULTITREE_ERROR);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_new, NULL);
@@ -381,7 +381,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         REGISTER_GLOBAL_MOCK_RETURN(CreateAgentDataType_From_String, AGENT_DATA_TYPES_OK);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(CreateAgentDataType_From_String, AGENT_DATA_TYPES_ERROR);
 
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(int_pfDesiredPropertyFromAGENT_DATA_TYPE, __FAILURE__);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(int_pfDesiredPropertyFromAGENT_DATA_TYPE, MU_FAILURE);
 
 
     }

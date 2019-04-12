@@ -167,7 +167,7 @@ static int IotHubTransportAMQP_Subscribe_InputQueue(IOTHUB_DEVICE_HANDLE handle)
     // Codes_SRS_IOTHUBTRANSPORTAMQP_31_021: [IoTHubTransportAMQP_Subscribe_InputQueue shall return a failure as input queues are not implemented for AMQP]
     (void)handle;
     LogError("AMQP does not support input queues");
-    return __FAILURE__;
+    return MU_FAILURE;
 }
 
 static void IotHubTransportAMQP_Unsubscribe_InputQueue(IOTHUB_DEVICE_HANDLE handle)
