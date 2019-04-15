@@ -6,7 +6,7 @@
 #include "azure_c_shared_utility/gballoc.h"
 
 #include "codefirst.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include <stddef.h>
