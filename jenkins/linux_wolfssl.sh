@@ -2,6 +2,8 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+set -e
+
 # Print version
 cat /etc/*release | grep VERSION*
 gcc --version
@@ -18,7 +20,7 @@ CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
 rm -r -f $build_folder
 mkdir -p $build_folder
 pushd $build_folder
-cmake $build_root -Duse_wolfssl:BOOL=ON -Drun_e2e_test=ON
+cmake $build_root -Duse_wolfssl:BOOL=ON -Drun_e2e_tests=ON
 make --jobs=$CORES
 
 ctest -j $CORES --output-on-failure

@@ -28,7 +28,7 @@ typedef void* USER_DEFINED_REASON;
     MESSAGE_QUEUE_TIMEOUT,            \
     MESSAGE_QUEUE_CANCELLED
 
-DEFINE_ENUM(MESSAGE_QUEUE_RESULT, MESSAGE_QUEUE_RESULT_STRINGS);
+MU_DEFINE_ENUM(MESSAGE_QUEUE_RESULT, MESSAGE_QUEUE_RESULT_STRINGS);
 
 /**
 * @brief    User-provided callback invoked by MESSAGE_QUEUE back to the user when a messages completes being processed.

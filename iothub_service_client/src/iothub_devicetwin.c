@@ -27,8 +27,8 @@
     IOTHUB_TWIN_REQUEST_REPLACE_DESIRED,   \
     IOTHUB_TWIN_REQUEST_UPDATE_DESIRED
 
-DEFINE_ENUM(IOTHUB_TWIN_REQUEST_MODE, IOTHUB_TWIN_REQUEST_MODE_VALUES);
-DEFINE_ENUM_STRINGS(IOTHUB_DEVICE_TWIN_RESULT, IOTHUB_DEVICE_TWIN_RESULT_VALUES);
+MU_DEFINE_ENUM(IOTHUB_TWIN_REQUEST_MODE, IOTHUB_TWIN_REQUEST_MODE_VALUES);
+MU_DEFINE_ENUM_STRINGS(IOTHUB_DEVICE_TWIN_RESULT, IOTHUB_DEVICE_TWIN_RESULT_VALUES);
 
 #define  HTTP_HEADER_KEY_AUTHORIZATION  "Authorization"
 #define  HTTP_HEADER_VAL_AUTHORIZATION  " "
@@ -408,7 +408,7 @@ static int malloc_and_copy_uchar(char** strDestination, BUFFER_HANDLE strSource)
     {
         /* If strDestination or strSource is a NULL pointer[...] function return line number where error is spotted */
         LogError("invalid parameter strDestination or strSource");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -417,7 +417,7 @@ static int malloc_and_copy_uchar(char** strDestination, BUFFER_HANDLE strSource)
         if (temp == NULL)
         {
             LogError("failed to malloc");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
