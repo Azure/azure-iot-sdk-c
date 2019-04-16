@@ -548,7 +548,7 @@ static int create_distributed_tracing_message_annotations(IOTHUB_MESSAGE_HANDLE 
             if (add_map_item(*message_annotations_map, AMQP_DISTRIBUTED_TRACING_KEY, distributed_tracing) != RESULT_OK)
             {
                 LogError("Failed adding distributed tracing property");
-                result = __FAILURE__;
+                result = MU_FAILURE;
                 if (annotation_created)
                 {
                     amqpvalue_destroy(*message_annotations_map);
@@ -569,12 +569,12 @@ static int create_message_annotations_to_encode(IOTHUB_MESSAGE_HANDLE messageHan
     if ((result = create_diagnostic_message_annotations(messageHandle, &message_annotations_map)) != RESULT_OK)
     {
         LogError("Failed creating message annotations");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((result = create_distributed_tracing_message_annotations(messageHandle, &message_annotations_map)) != RESULT_OK)
     {
         LogError("Failed creating distributed message annotations");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -586,12 +586,12 @@ static int create_message_annotations_to_encode(IOTHUB_MESSAGE_HANDLE messageHan
         if ((*message_annotations = amqpvalue_create_message_annotations(message_annotations_map)) == NULL)
         {
             LogError("Failed creating message annotations");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (amqpvalue_get_encoded_size(*message_annotations, message_annotations_length) != 0)
         {
             LogError("Failed getting size of annotations");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         amqpvalue_destroy(message_annotations_map);
     }

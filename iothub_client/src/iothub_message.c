@@ -830,7 +830,7 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetDistributedTracingSystemProperty(IOTHUB_M
     // Codes_SRS_IOTHUBMESSAGE_38_006: [If any of the parameters are NULL then IoTHubMessage_SetDistributedTracingSystemProperty shall return a IOTHUB_MESSAGE_INVALID_ARG value.]
     if (iotHubMessageHandle == NULL || distributedTracingTracestate == NULL)
     {
-        LogError("Invalid argument (iotHubMessageHandle=%p, distributedTracingTracestate=%s)", iotHubMessageHandle, P_OR_NULL(distributedTracingTracestate));
+        LogError("Invalid argument (iotHubMessageHandle=%p, distributedTracingTracestate=%s)", iotHubMessageHandle, MU_P_OR_NULL(distributedTracingTracestate));
         result = IOTHUB_MESSAGE_INVALID_ARG;
     }
     else
