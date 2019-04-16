@@ -1,8 +1,8 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-cmake_minimum_required(VERSION 3.0.0)
-project("azure_iot_sdks")
+cmake_minimum_required(VERSION 3.5.0)
+project(azure_iot_sdks)
 
 include("configs/azure_iot_sdksFunctions.cmake")
 
@@ -397,13 +397,15 @@ if (${use_installed_dependencies})
     )
     message("Main CMakeLists: Line 376: Installing parson libs....")
     message("parson_install_libs: ${parson_install_libs}")
-    install(TARGETS ${parson_install_libs} EXPORT "azure_iot_sdksTargets"
+    install(TARGETS ${parson_install_libs} ${iothub_client_libs} ${provisioning_libs} serializer iothub_test iothub_service_client 
+        EXPORT azure_iot_sdksTargets
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/../bin 
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
     )
     message("Main CMakeLists: line 372")
-    install(EXPORT "azure_iot_sdksTargets"
+    install(EXPORT azure_iot_sdksTargets
         FILE
             "${PROJECT_NAME}Targets.cmake"
         DESTINATION

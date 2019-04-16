@@ -359,12 +359,6 @@ if(${use_installed_dependencies})
         set(CMAKE_INSTALL_LIBDIR "lib")
     endif()
 
-    install(TARGETS ${provisioning_libs} EXPORT azure_prov_sdksTargets
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/../bin
-        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
-    )
     install(FILES ${provisioning_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot/azure_prov_client)
 
     include(CMakePackageConfigHelpers)
@@ -378,13 +372,6 @@ if(${use_installed_dependencies})
     configure_file("../configs/${PROJECT_NAME}Config.cmake"
         "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}Config.cmake"
         COPYONLY
-    )
-
-    install(EXPORT azure_prov_sdksTargets
-        FILE
-            "${PROJECT_NAME}Targets.cmake"
-        DESTINATION
-            ${package_location}
     )
 
     install(
@@ -403,10 +390,4 @@ else()
     install(FILES ${provisioning_headers}
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azure_prov_client)
     message("!!!!!! Provisioning Client CMakeLists: Line 405: ${provisioning_libs}")
-    install(TARGETS ${provisioning_libs} 
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/../bin
-        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-    )
 endif()

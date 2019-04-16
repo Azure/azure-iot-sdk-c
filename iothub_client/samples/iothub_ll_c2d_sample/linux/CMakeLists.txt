@@ -2,11 +2,18 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #this is CMakeLists.txt for iothub_ll_c2d_sample
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.5)
+project(iothub_ll_c2d_sample)
 
 if(WIN32)
     message(FATAL_ERROR "This CMake file is only support Linux builds!")
 endif()
+
+find_package(azure_iot_sdks CONFIG REQUIRED)
+
+find_package(CURL REQUIRED)
+include_directories(${AZUREIOT_INC_FOLDER})
+find_package(ZLIB REQUIRED)
 
 set(AZUREIOT_INC_FOLDER ".." "/usr/include/azureiot" "/usr/include/azureiot/inc")
 

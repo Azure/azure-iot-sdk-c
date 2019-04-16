@@ -1,6 +1,9 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+cmake_minimum_required(VERSION 3.5)
+project(iothub_ll_c2d_sample)
+
 if(NOT ${use_mqtt} AND NOT ${use_amqp} AND NOT ${use_http})
     message(FATAL_ERROR "iothub_ll_c2d_sample being generated without protocol support")
 endif()

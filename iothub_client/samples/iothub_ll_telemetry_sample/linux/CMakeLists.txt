@@ -8,6 +8,14 @@ if(WIN32)
     message(FATAL_ERROR "This CMake file is only support Linux builds!")
 endif()
 
+
+set(AZUREIOT_INC_FOLDER ".." "/usr/include/azureiot" "/usr/include/azureiot/inc")
+find_package(azure_iot_sdks CONFIG REQUIRED)
+
+find_package(CURL REQUIRED)
+include_directories(${AZUREIOT_INC_FOLDER})
+find_package(ZLIB REQUIRED)
+
 set(AZUREIOT_INC_FOLDER ".." "/usr/include/azureiot" "/usr/include/azureiot/inc")
 
 include_directories(${AZUREIOT_INC_FOLDER})
@@ -26,21 +34,14 @@ include_directories("../../../../certs")
 
 add_executable(iothub_ll_telemetry_sample ${iothub_c_files})
 
+target_include_directories(iothub_ll_telemetry_sample PRIVATE ${CURL_INCLUDE_DIRS})
+target_link_libraries(iothub_ll_telemetry_sample
+
 target_link_libraries(iothub_ll_telemetry_sample
     iothub_client_mqtt_transport
     iothub_client_amqp_transport
-    iothub_client_http_transport
     iothub_client
-    umqtt
-    prov_auth_client
-    hsm_security_client
-    uhttp
     aziotsharedutil
-    parson
-    uuid
-    pthread
-    curl
-    ssl
-    crypto
-    m
+    ${CURL_LIBRARIES}
+    ZLIB::ZLIB
 )

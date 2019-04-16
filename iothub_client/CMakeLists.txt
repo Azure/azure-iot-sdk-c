@@ -447,7 +447,6 @@ add_library(iothub_client
 )
 setSdkTargetBuildProperties(iothub_client)
 target_link_libraries(iothub_client ${iothub_client_libs})
-target_link_libraries(iothub_client parson)
 
 if (${use_prov_client_core})
     target_link_libraries(iothub_client hsm_security_client prov_auth_client)
@@ -490,12 +489,6 @@ if(${use_installed_dependencies})
         set(CMAKE_INSTALL_INCLUDEDIR "include")
     endif()
     message("IoTHub Client CMakeLists: Line 492: ${iothub_client_libs}")
-    install(TARGETS ${iothub_client_libs} EXPORT "azure_iot_sdksTargets"
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/../bin
-        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
-    )
     install(FILES ${iothub_client_h_install_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
 else()
     install(FILES ${iothub_client_h_install_files}
