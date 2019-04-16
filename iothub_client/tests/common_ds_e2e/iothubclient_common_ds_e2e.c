@@ -154,13 +154,10 @@ void ds_e2e_init(bool testing_modules)
     int result = IoTHub_Init();
     ASSERT_ARE_EQUAL(int, 0, result, "IoTHub_Init failed");
 
-    /* the return value from the second init is deliberatly ignored. */
-    (void)IoTHub_Init();
-
     g_iothubAcctInfo = IoTHubAccount_Init(testing_modules);
     ASSERT_IS_NOT_NULL(g_iothubAcctInfo);
-
-
+    /* the return value from the second init is deliberatly ignored. */
+    (void)IoTHub_Init();
 }
 
 void ds_e2e_deinit(void)
