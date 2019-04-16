@@ -55,7 +55,7 @@ static int sign_sas_data(IOTHUB_SECURITY_INFO* security_info, const char* payloa
         if (security_info->hsm_client_sign_data(security_info->hsm_client_handle, (const unsigned char*)payload, strlen(payload), output, len) != 0)
         {
             LogError("Failed signing data");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -71,17 +71,17 @@ static int sign_sas_data(IOTHUB_SECURITY_INFO* security_info, const char* payloa
         if (symmetrical_key == NULL)
         {
             LogError("Failed getting asymmetrical key");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if ((decoded_key = Azure_Base64_Decode(symmetrical_key)) == NULL)
         {
             LogError("Failed decoding symmetrical key");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if ((output_hash = BUFFER_new()) == NULL)
         {
             LogError("Failed allocating output hash buffer");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -91,7 +91,7 @@ static int sign_sas_data(IOTHUB_SECURITY_INFO* security_info, const char* payloa
             if (HMACSHA256_ComputeHash(decoded_key_bytes, decoded_key_len, (const unsigned char*)payload, payload_len, output_hash) != HMACSHA256_OK)
             {
                 LogError("Failed computing HMAC Hash");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -99,7 +99,7 @@ static int sign_sas_data(IOTHUB_SECURITY_INFO* security_info, const char* payloa
                 if ((*output = malloc(*len)) == NULL)
                 {
                     LogError("Failed allocating output buffer");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {

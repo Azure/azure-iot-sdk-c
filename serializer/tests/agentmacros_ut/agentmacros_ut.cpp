@@ -237,11 +237,11 @@ public:
 
         MOCK_STATIC_METHOD_2(, int, STRING_concat, STRING_HANDLE, s1, const char*, s2)
         currentSTRING_concat_call++;
-    MOCK_METHOD_END(int, (((whenShallSTRING_concat_fail>0) && (currentSTRING_concat_call == whenShallSTRING_concat_fail)) ? __FAILURE__ : BASEIMPLEMENTATION::STRING_concat(s1, s2)));
+    MOCK_METHOD_END(int, (((whenShallSTRING_concat_fail>0) && (currentSTRING_concat_call == whenShallSTRING_concat_fail)) ? MU_FAILURE : BASEIMPLEMENTATION::STRING_concat(s1, s2)));
 
     MOCK_STATIC_METHOD_2(, int, STRING_concat_with_STRING, STRING_HANDLE, s1, STRING_HANDLE, s2)
         currentSTRING_concat_with_STRING_call++;
-    MOCK_METHOD_END(int, (((whenShallSTRING_concat_with_STRING_fail>0) && (currentSTRING_concat_with_STRING_call == whenShallSTRING_concat_with_STRING_fail)) ? __FAILURE__ : BASEIMPLEMENTATION::STRING_concat_with_STRING(s1, s2)));
+    MOCK_METHOD_END(int, (((whenShallSTRING_concat_with_STRING_fail>0) && (currentSTRING_concat_with_STRING_call == whenShallSTRING_concat_with_STRING_fail)) ? MU_FAILURE : BASEIMPLEMENTATION::STRING_concat_with_STRING(s1, s2)));
 
     MOCK_STATIC_METHOD_1(, const char*, STRING_c_str, STRING_HANDLE, s)
         MOCK_METHOD_END(const char*, BASEIMPLEMENTATION::STRING_c_str(s))

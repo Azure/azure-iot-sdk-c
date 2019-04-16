@@ -19,7 +19,7 @@
 #include "internal/iothubtransport_amqp_streaming.h"
 #include "iothub_client_options.h"
 
-DEFINE_ENUM_STRINGS(AMQP_TYPE, AMQP_TYPE_VALUES);
+MU_DEFINE_ENUM_STRINGS(AMQP_TYPE, AMQP_TYPE_VALUES);
 
 #define RESULT_OK 0
 #define INDEFINITE_TIME ((time_t)(-1))
@@ -101,12 +101,12 @@ static int get_correlation_id(PROPERTIES_HANDLE properties, char** correlation_i
             if (amqpvalue_get_string(amqp_value, &value) != 0)
             {
                 LogError("Failed retrieving string from AMQP value");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if (mallocAndStrcpy_s(correlation_id, value) != 0)
             {
                 LogError("Failed cloning correlation-id");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -120,7 +120,7 @@ static int get_correlation_id(PROPERTIES_HANDLE properties, char** correlation_i
             if (amqpvalue_get_uuid(amqp_value, &value) != 0)
             {
                 LogError("Failed retrieving uuid from AMQP value");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -129,7 +129,7 @@ static int get_correlation_id(PROPERTIES_HANDLE properties, char** correlation_i
                 if ((uuid_string = UUID_to_string((const UUID_T*)&value)) == NULL)
                 {
                     LogError("Failed converting UUID_T to string");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -140,8 +140,8 @@ static int get_correlation_id(PROPERTIES_HANDLE properties, char** correlation_i
         }
         else
         {
-            LogError("Unexpected AMQP type (%s)", ENUM_TO_STRING(AMQP_TYPE, amqp_type));
-            result = __FAILURE__;
+            LogError("Unexpected AMQP type (%s)", MU_ENUM_TO_STRING(AMQP_TYPE, amqp_type));
+            result = MU_FAILURE;
         }
     }
     else
@@ -161,14 +161,14 @@ static int parse_message_properties(MESSAGE_HANDLE message, PARSED_STREAM_INFO* 
 	if (message_get_properties(message, &properties) != 0 || properties == NULL)
 	{
 		LogError("Failed getting the AMQP message properties");
-		result = __FAILURE__;
+		result = MU_FAILURE;
 	}
     else
     {
         if (get_correlation_id(properties, &parsed_info->request_id) != 0)
         {
             LogError("Failed getting the correlation id");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -189,12 +189,12 @@ static int set_application_properties(MESSAGE_HANDLE message, const char* correl
     if (message_get_properties(message, &properties) != 0)
     {
         LogError("Failed getting the AMQP message properties");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (properties == NULL && (properties = properties_create()) == NULL)
     {
         LogError("Failed creating properties for AMQP message");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -233,14 +233,14 @@ static int set_application_properties(MESSAGE_HANDLE message, const char* correl
 
         if (encoding_failed)
         {
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
             if (message_set_properties(message, properties) != RESULT_OK)
             {
                 LogError("Failed setting the AMQP message properties");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -263,14 +263,14 @@ static int add_application_property(AMQP_VALUE properties, const char* name, AMQ
     if ((map_key_value = amqpvalue_create_string(name)) == NULL)
     {
         LogError("Failed to create AMQP property key name.");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
         if (amqpvalue_set_map_value(properties, map_key_value, value) != 0)
         {
             LogError("Failed to set key/value into the the AMQP property map.");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -291,7 +291,7 @@ static int add_bool_application_property(AMQP_VALUE properties, const char* name
     if ((amqp_value = amqpvalue_create_boolean(value)) == NULL)
     {
         LogError("Failed to create AMQP value for property value.");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -409,13 +409,13 @@ static int parse_message_application_properties(MESSAGE_HANDLE message, PARSED_S
     if (message_get_application_properties(message, &application_properties) != 0)
     {
         LogError("Failed getting the AMQP message application properties");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
         if (application_properties == NULL)
         {
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -425,12 +425,12 @@ static int parse_message_application_properties(MESSAGE_HANDLE message, PARSED_S
             if ((application_properties_ipdv = amqpvalue_get_inplace_described_value(application_properties)) == NULL)
             {
                 LogError("Failed getting the map of AMQP message application properties.");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if ((result = amqpvalue_get_map_pair_count(application_properties_ipdv, &property_count)) != 0)
             {
                 LogError("Failed reading the number of values in the AMQP property map.");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -448,29 +448,29 @@ static int parse_message_application_properties(MESSAGE_HANDLE message, PARSED_S
                     if (amqpvalue_get_map_key_value_pair(application_properties_ipdv, i, &map_key_name, &map_key_value) != 0)
                     {
                         LogError("Failed reading the key/value pair from the uAMQP property map.");
-                        result = __FAILURE__;
+                        result = MU_FAILURE;
                     }
                     else if (amqpvalue_get_string(map_key_name, &key_name) != 0)
                     {
                         LogError("Failed parsing the uAMQP property name");
-                        result = __FAILURE__;
+                        result = MU_FAILURE;
                     }
                     else if (amqpvalue_get_string(map_key_value, &key_value) != 0)
                     {
                         LogError("Failed parsing the uAMQP property value");
-                        result = __FAILURE__;
+                        result = MU_FAILURE;
                     }
                     else if (key_name == NULL || key_value == NULL)
                     {
                         LogError("Invalid property name (%p) and/or value (%p)", key_name, key_value);
-                        result = __FAILURE__;
+                        result = MU_FAILURE;
                     }
                     else if (strcmp(STREAM_PROP_NAME, key_name) == 0)
                     {
                         if (mallocAndStrcpy_s(&parsed_info->name, key_value) != 0)
                         {
                             LogError("Failed copying property '%s'", key_name);
-                            result = __FAILURE__;
+                            result = MU_FAILURE;
                         }
                     }
                     else if (strcmp(STREAM_PROP_URL, key_name) == 0)
@@ -478,7 +478,7 @@ static int parse_message_application_properties(MESSAGE_HANDLE message, PARSED_S
                         if (mallocAndStrcpy_s(&parsed_info->url, key_value) != 0)
                         {
                             LogError("Failed copying property '%s'", key_name);
-                            result = __FAILURE__;
+                            result = MU_FAILURE;
                         }
                     }
                     else if (strcmp(STREAM_PROP_AUTH_TOKEN, key_name) == 0)
@@ -486,7 +486,7 @@ static int parse_message_application_properties(MESSAGE_HANDLE message, PARSED_S
                         if (mallocAndStrcpy_s(&parsed_info->authorization_token, key_value) != 0)
                         {
                             LogError("Failed copying property '%s'", key_name);
-                            result = __FAILURE__;
+                            result = MU_FAILURE;
                         }
                     }
                     else if (strcmp(STREAM_PROP_HOSTNAME, key_name) == 0)
@@ -494,7 +494,7 @@ static int parse_message_application_properties(MESSAGE_HANDLE message, PARSED_S
                         if (mallocAndStrcpy_s(&parsed_info->hostname, key_value) != 0)
                         {
                             LogError("Failed copying property '%s'", key_name);
-                            result = __FAILURE__;
+                            result = MU_FAILURE;
                         }
                     }
                     else if (strcmp(STREAM_PROP_PORT, key_name) == 0)
@@ -532,14 +532,14 @@ static int parse_amqp_message(MESSAGE_HANDLE message, PARSED_STREAM_INFO* parsed
     {
         LogError("Failed parsing message properties.");
         destroy_parsed_info(parsed_info);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (parse_message_application_properties(message, parsed_info) != 0)
     {
         // TODO: if application properties are empty, body may contain error message. Gotta process that.
         LogError("Failed parsing message application properties.");
         destroy_parsed_info(parsed_info);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -632,7 +632,7 @@ static int internal_amqp_streaming_client_stop(AMQP_STREAMING_CLIENT* streaming_
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_STREAMING_09_026: [If any failures occur, `instance->state` shall be set to AMQP_STREAMING_CLIENT_STATE_ERROR, and `instance->on_state_changed_callback` invoked if provided]
         update_state(streaming_client, AMQP_STREAMING_CLIENT_STATE_ERROR);
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_STREAMING_09_024: [If amqp_messenger_stop() fails, amqp_streaming_client_stop() fail and return a non-zero value]
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -799,7 +799,7 @@ static void on_amqp_messenger_state_changed_callback(void* context, AMQP_MESSENG
         else
         {
             LogError("Unexpected AMQP messenger state (%s, %s, %s)",
-                streaming_client->device_id, ENUM_TO_STRING(AMQP_STREAMING_CLIENT_STATE, streaming_client->state), ENUM_TO_STRING(AMQP_MESSENGER_STATE, new_state));
+                streaming_client->device_id, MU_ENUM_TO_STRING(AMQP_STREAMING_CLIENT_STATE, streaming_client->state), MU_ENUM_TO_STRING(AMQP_MESSENGER_STATE, new_state));
 
             update_state(streaming_client, AMQP_STREAMING_CLIENT_STATE_ERROR);
         }
@@ -837,7 +837,7 @@ static void on_amqp_messenger_subscription_changed_callback(void* context, bool 
         else
         {
             LogError("Unexpected AMQP messenger state (%s, %s, %d)",
-                streaming_client->device_id, ENUM_TO_STRING(AMQP_STREAMING_CLIENT_STATE, streaming_client->state), is_subscribed);
+                streaming_client->device_id, MU_ENUM_TO_STRING(AMQP_STREAMING_CLIENT_STATE, streaming_client->state), is_subscribed);
 
             update_state(streaming_client, AMQP_STREAMING_CLIENT_STATE_ERROR);
         }
@@ -860,7 +860,7 @@ static void on_amqp_send_response_complete_callback(AMQP_MESSENGER_SEND_RESULT r
         {
             LogError("Failed sending AMQP message (%s, %s, %s)",
                 client->module_id != NULL ? client->module_id : client->device_id,
-                ENUM_TO_STRING(AMQP_MESSENGER_SEND_RESULT, result), ENUM_TO_STRING(AMQP_MESSENGER_REASON, reason));
+                MU_ENUM_TO_STRING(AMQP_MESSENGER_SEND_RESULT, result), MU_ENUM_TO_STRING(AMQP_MESSENGER_REASON, reason));
 
             update_state(client, AMQP_STREAMING_CLIENT_STATE_ERROR);
         }
@@ -875,14 +875,14 @@ static int send_stream_c2d_response(AMQP_STREAMING_CLIENT* client, DEVICE_STREAM
     if ((amqp_message = create_amqp_message_from_stream_c2d_response(response)) == NULL)
     {
         LogError("Failed creating AMQP message for stream response");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
         if (amqp_messenger_send_async(client->amqp_msgr, amqp_message, on_amqp_send_response_complete_callback, client) != 0)
         {
             LogError("Failed sending response message for (%s, %s)", client->module_id != NULL ? client->module_id : client->device_id, response->request_id);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -1150,7 +1150,7 @@ int amqp_streaming_client_start(AMQP_STREAMING_CLIENT_HANDLE client_handle, SESS
     if (client_handle == NULL || session_handle == NULL)
     {
         LogError("Invalid argument (client_handle=%p, session_handle=%p)", client_handle, session_handle);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1166,7 +1166,7 @@ int amqp_streaming_client_start(AMQP_STREAMING_CLIENT_HANDLE client_handle, SESS
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_STREAMING_09_020: [If any failures occur, `instance->state` shall be set to AMQP_STREAMING_CLIENT_STATE_ERROR, and `instance->on_state_changed_callback` invoked if provided]
             update_state(streaming_client, AMQP_STREAMING_CLIENT_STATE_ERROR);
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_STREAMING_09_018: [If amqp_messenger_start() fails, amqp_streaming_client_start() fail and return a non-zero value]
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -1186,7 +1186,7 @@ int amqp_streaming_client_stop(AMQP_STREAMING_CLIENT_HANDLE client_handle)
     if (client_handle == NULL)
     {
         LogError("Invalid argument (client_handle is NULL)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1239,7 +1239,7 @@ int amqp_streaming_client_set_option(AMQP_STREAMING_CLIENT_HANDLE client_handle,
     if (client_handle == NULL || name == NULL || value == NULL)
     {
         LogError("Invalid argument (client_handle=%p, name=%p, value=%p)", client_handle, name, value);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1250,7 +1250,7 @@ int amqp_streaming_client_set_option(AMQP_STREAMING_CLIENT_HANDLE client_handle,
             if (OptionHandler_FeedOptions((OPTIONHANDLER_HANDLE)value, streaming_client->amqp_msgr) != OPTIONHANDLER_OK)
             {
                 LogError("Failed feeding options to AMQP messenger (%s)", streaming_client->device_id);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -1262,7 +1262,7 @@ int amqp_streaming_client_set_option(AMQP_STREAMING_CLIENT_HANDLE client_handle,
         {
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_STREAMING_09_037: [If amqp_messenger_set_option() fails, amqp_streaming_client_set_option() shall fail and return a non-zero value]
             LogError("Failed setting TWIN messenger option (%s, %s)", streaming_client->device_id, name);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -1323,7 +1323,7 @@ int amqp_streaming_client_set_stream_request_callback(AMQP_STREAMING_CLIENT_HAND
     if (client == NULL)
     {
         LogError("Invalid argument (client is NULL)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1345,22 +1345,22 @@ int amqp_streaming_client_send_stream_response(AMQP_STREAMING_CLIENT_HANDLE clie
     if (client == NULL || streamResponse == NULL)
     {
         LogError("Invalid argument (client=%p, streamResponse=%p)", client, streamResponse);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (client->amqp_msgr_state != AMQP_MESSENGER_STATE_STARTED)
     {
         LogError("The streaming client is not ready");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (streamResponse->request_id == NULL)
     {
         LogError("Response does not contain a request id");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (send_stream_c2d_response(client, streamResponse) != 0)
     {
         LogError("Failed sending stream c2d response");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {

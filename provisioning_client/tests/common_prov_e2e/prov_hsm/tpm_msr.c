@@ -103,7 +103,7 @@ static TPM2B_PUBLIC* GetSrkTemplate()
     if (act_size < arrSize)                                                     \
     {                                                                           \
         LogError("Unmarshaling " #dstPtr " failed: Need %d bytes, while only %d left", arrSize, act_size);  \
-        result = __FAILURE__;       \
+        result = MU_FAILURE;       \
     }                                                                           \
     else                            \
     {                                   \
@@ -119,12 +119,12 @@ static int create_tpm_session(TPM_INFO* tpm_info, TSS_SESSION* tpm_session)
     if (TSS_StartAuthSession(&tpm_info->tpm_device, TPM_SE_POLICY, TPM_ALG_SHA256, sess_attrib, tpm_session) != TPM_RC_SUCCESS)
     {
         LogError("Failure: Starting EK policy session");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (TSS_PolicySecret(&tpm_info->tpm_device, &null_pw_sess, TPM_RH_ENDORSEMENT, tpm_session, NULL, 0) != TPM_RC_SUCCESS)
     {
         LogError("Failure: PolicySecret() for EK");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -140,7 +140,7 @@ static int insert_key_in_tpm(TPM_INFO* tpm_info, const unsigned char* key, size_
     if (create_tpm_session(tpm_info, &ek_sess) != 0)
     {
         LogError("Failure: Starting EK policy session");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -173,12 +173,12 @@ static int insert_key_in_tpm(TPM_INFO* tpm_info, const unsigned char* key, size_
             &enc_key_blob, &tpm_enc_secret, &inner_wrap_key) != TPM_RC_SUCCESS)
         {
             LogError("Failure: TPM2_ActivateCredential");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (TPM2_Import(&tpm_info->tpm_device, &null_pw_sess, TPM_20_SRK_HANDLE, (TPM2B_DATA*)&inner_wrap_key, &id_key_Public, &id_key_dup_blob, &encrypt_wrap_key, &Aes128SymDef, &id_key_priv) != TPM_RC_SUCCESS)
         {
             LogError("Failure: importing dps Id key");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -206,12 +206,12 @@ static int insert_key_in_tpm(TPM_INFO* tpm_info, const unsigned char* key, size_
             if (TSS_Create(&tpm_info->tpm_device, &null_pw_sess, TPM_20_SRK_HANDLE, &sen_create, &symTemplate, &sym_priv, &sym_pub) != TPM_RC_SUCCESS)
             {
                 LogError("Failed to inject symmetric key data");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if (TPM2_Load(&tpm_info->tpm_device, &null_pw_sess, TPM_20_SRK_HANDLE, &id_key_priv, &id_key_Public, &load_id_key, NULL) != TPM_RC_SUCCESS)
             {
                 LogError("Failed Load Id key.");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -221,12 +221,12 @@ static int insert_key_in_tpm(TPM_INFO* tpm_info, const unsigned char* key, size_
                 if (TPM2_EvictControl(&tpm_info->tpm_device, &null_pw_sess, TPM_RH_OWNER, load_id_key, DPS_ID_KEY_HANDLE) != TPM_RC_SUCCESS)
                 {
                     LogError("Failed Load Id key.");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else if (TPM2_FlushContext(&tpm_info->tpm_device, load_id_key) != TPM_RC_SUCCESS)
                 {
                     LogError("Failed Load Id key.");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -244,22 +244,22 @@ static int initialize_tpm(TPM_INFO* tpm_info)
     if (TSS_CreatePwAuthSession(&null_auth_token, &null_pw_sess) != TPM_RC_SUCCESS)
     {
         LogError("Failure calling TSS_CreatePwAuthSession");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (Initialize_TPM_Codec(&tpm_info->tpm_device) != TPM_RC_SUCCESS)
     {
         LogError("Failure initializeing TPM Codec");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((TSS_CreatePersistentKey(&tpm_info->tpm_device, TPM_20_EK_HANDLE, &null_pw_sess, TPM_RH_ENDORSEMENT, GetEkTemplate(), &tpm_info->ek_pub)) == 0)
     {
         LogError("Failure calling creating persistent key for Endorsement key");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (TSS_CreatePersistentKey(&tpm_info->tpm_device, TPM_20_SRK_HANDLE, &null_pw_sess, TPM_RH_OWNER, GetSrkTemplate(), &tpm_info->srk_pub) == 0)
     {
         LogError("Failure calling creating persistent key for Storage Root key");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -396,7 +396,7 @@ int tpm_msr_sign_data(TPM_INFO_HANDLE handle, const unsigned char* data, size_t 
         {
             /* Codes_SRS_HSM_CLIENT_TPM_07_023: [ If an error is encountered hsm_client_tpm_sign_data shall return NULL. ] */
             LogError("Failure signing data from hash");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {

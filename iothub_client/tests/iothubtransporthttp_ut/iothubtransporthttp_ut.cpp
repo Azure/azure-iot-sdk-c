@@ -8,8 +8,8 @@
 #include "micromockcharstararenullterminatedstrings.h"
 
 #include "macro_utils.h"
-#undef DEFINE_ENUM
-#define DEFINE_ENUM(enumName, ...) typedef enum C2(enumName, _TAG) { FOR_EACH_1(DEFINE_ENUMERATION_CONSTANT, __VA_ARGS__)} enumName;
+#undef MU_DEFINE_ENUM
+#define MU_DEFINE_ENUM(enumName, ...) typedef enum C2(enumName, _TAG) { FOR_EACH_1(MU_DEFINE_ENUMERATION_CONSTANT, __VA_ARGS__)} enumName;
 
 #include "iothubtransporthttp.h"
 #include "iothub_client_options.h"
@@ -707,11 +707,11 @@ public:
 
     MOCK_STATIC_METHOD_2(, int, STRING_concat, STRING_HANDLE, s1, const char*, s2)
         currentSTRING_concat_call++;
-    MOCK_METHOD_END(int, (((whenShallSTRING_concat_fail > 0) && (currentSTRING_concat_call == whenShallSTRING_concat_fail)) ? __FAILURE__ : BASEIMPLEMENTATION::STRING_concat(s1, s2)));
+    MOCK_METHOD_END(int, (((whenShallSTRING_concat_fail > 0) && (currentSTRING_concat_call == whenShallSTRING_concat_fail)) ? MU_FAILURE : BASEIMPLEMENTATION::STRING_concat(s1, s2)));
 
     MOCK_STATIC_METHOD_2(, int, STRING_concat_with_STRING, STRING_HANDLE, s1, STRING_HANDLE, s2)
         currentSTRING_concat_with_STRING_call++;
-    MOCK_METHOD_END(int, (((currentSTRING_concat_with_STRING_call > 0) && (currentSTRING_concat_with_STRING_call == whenShallSTRING_concat_with_STRING_fail)) ? __FAILURE__ : BASEIMPLEMENTATION::STRING_concat_with_STRING(s1, s2)));
+    MOCK_METHOD_END(int, (((currentSTRING_concat_with_STRING_call > 0) && (currentSTRING_concat_with_STRING_call == whenShallSTRING_concat_with_STRING_fail)) ? MU_FAILURE : BASEIMPLEMENTATION::STRING_concat_with_STRING(s1, s2)));
 
     MOCK_STATIC_METHOD_1(, int, STRING_empty, STRING_HANDLE, s)
         currentSTRING_empty_call++;
@@ -1181,7 +1181,7 @@ public:
         if ((whenShallVECTOR_push_back_fail > 0) &&
             (currentVECTOR_push_back_call == whenShallVECTOR_push_back_fail))
         {
-            result2 = __FAILURE__;
+            result2 = MU_FAILURE;
         }
         else
         {
@@ -9812,7 +9812,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_with_1_event_items_puts_it_back_when_BU
             .IgnoreArgument(1)
             .IgnoreArgument(2)
             .IgnoreArgument(3)
-            .SetReturn(__FAILURE__);
+            .SetReturn(MU_FAILURE);
     }
 
     STRICT_EXPECTED_CALL(mocks, DList_AppendTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).IgnoreAllArguments();
