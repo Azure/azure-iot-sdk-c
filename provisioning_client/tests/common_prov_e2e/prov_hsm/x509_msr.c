@@ -123,18 +123,18 @@ static int generate_root_ca_info(X509_CERT_INFO* x509_info, RIOT_ECC_SIGNATURE* 
     if (X509GetDeviceCertTBS(&der_ctx, &X509_ROOT_TBS_DATA, &x509_info->ca_root_pub) != 0)
     {
         LogError("Failure: X509GetDeviceCertTBS");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     // Sign the DeviceID Certificate's TBS region
     else if ((status = RiotCrypt_Sign(tbs_sig, der_ctx.Buffer, der_ctx.Position, &x509_info->ca_root_priv)) != RIOT_SUCCESS)
     {
         LogError("Failure: RiotCrypt_Sign returned invalid status %d.", status);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (X509MakeRootCert(&der_ctx, tbs_sig) != 0)
     {
         LogError("Failure: X509MakeRootCert");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -144,17 +144,17 @@ static int generate_root_ca_info(X509_CERT_INFO* x509_info, RIOT_ECC_SIGNATURE* 
         if (DERtoPEM(&der_ctx, CERT_TYPE, x509_info->root_ca_pem, &x509_info->root_ca_length) != 0)
         {
             LogError("Failure: DERtoPEM return invalid value.");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (X509GetDEREcc(&der_pri_ctx, x509_info->ca_root_pub, x509_info->ca_root_priv) != 0)
         {
             LogError("Failure: X509GetDEREcc returned invalid status.");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (DERtoPEM(&der_pri_ctx, ECC_PRIVATEKEY_TYPE, x509_info->root_ca_priv_pem, &x509_info->root_ca_priv_length) != 0)
         {
             LogError("Failure: DERtoPEM returned invalid status.");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -177,18 +177,18 @@ static int produce_device_cert(X509_CERT_INFO* x509_info, RIOT_ECC_SIGNATURE tbs
     if (X509GetDeviceCertTBS(&der_ctx, &X509_DEVICE_TBS_DATA, &x509_info->device_id_pub) != 0)
     {
         LogError("Failure: X509GetDeviceCertTBS");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     // Sign the DeviceID Certificate's TBS region
     else if ((status = RiotCrypt_Sign(&tbs_sig, der_ctx.Buffer, der_ctx.Position, &x509_info->device_id_priv)) != RIOT_SUCCESS)
     {
         LogError("Failure: RiotCrypt_Sign returned invalid status %d.", status);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (X509MakeDeviceCert(&der_ctx, &tbs_sig) != 0)
     {
         LogError("Failure: X509MakeDeviceCert");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -196,7 +196,7 @@ static int produce_device_cert(X509_CERT_INFO* x509_info, RIOT_ECC_SIGNATURE tbs
         if (DERtoPEM(&der_ctx, CERT_TYPE, x509_info->device_signed_pem, &x509_info->device_signed_length) != 0)
         {
             LogError("Failure: DERtoPEM return invalid value.");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -213,7 +213,7 @@ static int produce_alias_key_cert(X509_CERT_INFO* x509_info, DERBuilderContext* 
     if (DERtoPEM(cert_ctx, CERT_TYPE, x509_info->alias_cert_pem, &x509_info->alias_cert_length) != 0)
     {
         LogError("Failure: DERtoPEM return invalid value.");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -233,7 +233,7 @@ static int produce_device_id_public(X509_CERT_INFO* x509_info)
     if (X509GetDEREccPub(&der_ctx, x509_info->device_id_pub) != 0)
     {
         LogError("Failure: X509GetDEREccPub returned invalid status.");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -241,7 +241,7 @@ static int produce_device_id_public(X509_CERT_INFO* x509_info)
         if (DERtoPEM(&der_ctx, PUBLICKEY_TYPE, x509_info->device_id_public_pem, &x509_info->device_id_length) != 0)
         {
             LogError("Failure: DERtoPEM returned invalid status.");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -261,7 +261,7 @@ static int produce_alias_key_pair(X509_CERT_INFO* x509_info)
     if (X509GetDEREcc(&der_ctx, x509_info->alias_key_pub, x509_info->alias_key_priv) != 0)
     {
         LogError("Failure: X509GetDEREcc returned invalid status.");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -269,7 +269,7 @@ static int produce_alias_key_pair(X509_CERT_INFO* x509_info)
         if (DERtoPEM(&der_ctx, ECC_PRIVATEKEY_TYPE, x509_info->alias_priv_key_pem, &x509_info->alias_key_length) != 0)
         {
             LogError("Failure: DERtoPEM returned invalid status.");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -287,43 +287,43 @@ static int process_riot_key_info(X509_CERT_INFO* x509_info)
     if (g_digest_initialized == 0)
     {
         LogError("Failure: secure_device_init was not called.");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((status = RiotCrypt_Hash(g_digest, RIOT_DIGEST_LENGTH, g_CDI, RIOT_DIGEST_LENGTH)) != RIOT_SUCCESS)
     {
         LogError("Failure: RiotCrypt_Hash returned invalid status %d.", status);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((status = RiotCrypt_DeriveEccKey(&x509_info->device_id_pub, &x509_info->device_id_priv,
         g_digest, RIOT_DIGEST_LENGTH, (const uint8_t*)RIOT_LABEL_IDENTITY, lblSize(RIOT_LABEL_IDENTITY))) != RIOT_SUCCESS)
     {
         LogError("Failure: RiotCrypt_DeriveEccKey returned invalid status %d.", status);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     // Combine CDI and FWID, result in digest
     else if ((status = RiotCrypt_Hash2(g_digest, RIOT_DIGEST_LENGTH, g_digest, RIOT_DIGEST_LENGTH, firmware_id, RIOT_DIGEST_LENGTH)) != RIOT_SUCCESS)
     {
         LogError("Failure: RiotCrypt_Hash2 returned invalid status %d.", status);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     // Derive Alias key pair from CDI and FWID
     else if ((status = RiotCrypt_DeriveEccKey(&x509_info->alias_key_pub, &x509_info->alias_key_priv,
         g_digest, RIOT_DIGEST_LENGTH, (const uint8_t*)RIOT_LABEL_ALIAS, lblSize(RIOT_LABEL_ALIAS))) != RIOT_SUCCESS)
     {
         LogError("Failure: RiotCrypt_DeriveEccKey returned invalid status %d.", status);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
         if (produce_device_id_public(x509_info) != 0)
         {
             LogError("Failure: produce_device_id_public returned invalid result.");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (produce_alias_key_pair(x509_info) != 0)
         {
             LogError("Failure: produce_alias_key_pair returned invalid result.");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -337,32 +337,32 @@ static int process_riot_key_info(X509_CERT_INFO* x509_info)
                 firmware_id, RIOT_DIGEST_LENGTH) != 0)
             {
                 LogError("Failure: X509GetAliasCertTBS returned invalid status.");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if ((status = RiotCrypt_Sign(&tbs_sig, cert_ctx.Buffer, cert_ctx.Position, &x509_info->device_id_priv)) != RIOT_SUCCESS)
             {
                 LogError("Failure: RiotCrypt_Sign returned invalid status %d.", status);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if (X509MakeAliasCert(&cert_ctx, &tbs_sig) != 0)
             {
                 LogError("Failure: X509MakeAliasCert returned invalid status.");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if (produce_alias_key_cert(x509_info, &cert_ctx) != 0)
             {
                 LogError("Failure: producing alias cert.");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if (generate_root_ca_info(x509_info, &tbs_sig) != 0)
             {
                 LogError("Failure: producing root ca.");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if (produce_device_cert(x509_info, tbs_sig) != 0)
             {
                 LogError("Failure: producing device certificate.");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {

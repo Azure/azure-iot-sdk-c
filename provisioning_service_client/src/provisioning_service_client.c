@@ -264,7 +264,7 @@ static int add_query_headers(HTTP_HEADERS_HANDLE headers, size_t page_size, cons
         if (HTTPHeaders_AddHeaderNameValuePair(headers, HEADER_KEY_CONTINUATION, cont_token) != HTTP_HEADERS_OK)
         {
             LogError("Failure adding continuation token header");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
     }
 
@@ -277,7 +277,7 @@ static int add_query_headers(HTTP_HEADERS_HANDLE headers, size_t page_size, cons
             if (HTTPHeaders_AddHeaderNameValuePair(headers, HEADER_KEY_MAX_ITEM_COUNT, page_size_s) != HTTP_HEADERS_OK)
             {
                 LogError("Failure adding max item count header");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
         }
     }
@@ -329,7 +329,7 @@ static int get_response_headers(PROV_SERVICE_CLIENT* prov_client, char** cont_to
     if (resp_headers == NULL)
     {
         LogError("Unable to retrieve headers");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -341,7 +341,7 @@ static int get_response_headers(PROV_SERVICE_CLIENT* prov_client, char** cont_to
                 if (mallocAndStrcpy_s(cont_token_ptr, cont_token) != 0)
                 {
                     LogError("Failed to copy continuation token");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
             }
             else
@@ -435,7 +435,7 @@ static int rest_call(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, HTTP_CLIENT
     if (http_client == NULL)
     {
         LogError("Failed connecting to service");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -449,7 +449,7 @@ static int rest_call(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, HTTP_CLIENT
                 {
                     LogError("Failure executing http request");
                     prov_client->http_state = HTTP_STATE_ERROR;
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -462,7 +462,7 @@ static int rest_call(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, HTTP_CLIENT
             }
             else if (prov_client->http_state == HTTP_STATE_ERROR)
             {
-                result = __FAILURE__;
+                result = MU_FAILURE;
                 LogError("HTTP error");
             }
         } while (prov_client->http_state != HTTP_STATE_COMPLETE && prov_client->http_state != HTTP_STATE_ERROR);
@@ -491,12 +491,12 @@ static int prov_sc_create_or_update_record(PROVISIONING_SERVICE_CLIENT_HANDLE pr
     if (prov_client == NULL)
     {
         LogError("Invalid Provisioning Client Handle");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((handle_ptr == NULL) || ((handle = *handle_ptr) == NULL))
     {
         LogError("Invalid handle");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -504,7 +504,7 @@ static int prov_sc_create_or_update_record(PROVISIONING_SERVICE_CLIENT_HANDLE pr
         if ((content = vector.serializeToJson(handle)) == NULL)
         {
             LogError("Failure serializing enrollment");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -513,12 +513,12 @@ static int prov_sc_create_or_update_record(PROVISIONING_SERVICE_CLIENT_HANDLE pr
             if ((id = vector.getId(handle)) == NULL)
             {
                 LogError("Given model does not have a valid ID");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if ((registration_path = create_registration_path(path_format, id)) == NULL)
             {
                 LogError("Failed to construct a registration path");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -526,7 +526,7 @@ static int prov_sc_create_or_update_record(PROVISIONING_SERVICE_CLIENT_HANDLE pr
                 if ((request_headers = construct_http_headers(prov_client, vector.getEtag(handle), HTTP_CLIENT_REQUEST_PUT)) == NULL)
                 {
                     LogError("Failure constructing headers");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -538,7 +538,7 @@ static int prov_sc_create_or_update_record(PROVISIONING_SERVICE_CLIENT_HANDLE pr
                         if ((new_handle = vector.deserializeFromJson(prov_client->response)) == NULL)
                         {
                             LogError("Failure constructing new enrollment structure from json response");
-                            result = __FAILURE__;
+                            result = MU_FAILURE;
                         }
 
                         //Free the user submitted enrollment, and replace the pointer reference to a new enrollment from the provisioning service
@@ -568,12 +568,12 @@ static int prov_sc_delete_record_by_param(PROVISIONING_SERVICE_CLIENT_HANDLE pro
     if (prov_client == NULL)
     {
         LogError("Invalid Provisioning Client Handle");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (id == NULL)
     {
         LogError("Invalid Id");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -581,7 +581,7 @@ static int prov_sc_delete_record_by_param(PROVISIONING_SERVICE_CLIENT_HANDLE pro
         if (registration_path == NULL)
         {
             LogError("Failed to construct a registration path");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -589,7 +589,7 @@ static int prov_sc_delete_record_by_param(PROVISIONING_SERVICE_CLIENT_HANDLE pro
             if ((request_headers = construct_http_headers(prov_client, etag, HTTP_CLIENT_REQUEST_DELETE)) == NULL)
             {
                 LogError("Failure constructing http headers");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -611,17 +611,17 @@ static int prov_sc_get_record(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, co
     if (prov_client == NULL)
     {
         LogError("Invalid Provisioning Client Handle");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (id == NULL)
     {
         LogError("Invalid id");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (handle_ptr == NULL)
     {
         LogError("Invalid handle");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -629,7 +629,7 @@ static int prov_sc_get_record(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, co
         if (registration_path == NULL)
         {
             LogError("Failed to construct a registration path");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -637,7 +637,7 @@ static int prov_sc_get_record(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, co
             if ((request_headers = construct_http_headers(prov_client, NULL, HTTP_CLIENT_REQUEST_GET)) == NULL)
             {
                 LogError("Failure constructing http headers");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -649,7 +649,7 @@ static int prov_sc_get_record(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, co
                     if ((handle = vector.deserializeFromJson(prov_client->response)) == NULL)
                     {
                         LogError("Failure constructing new enrollment structure from json response");
-                        result = __FAILURE__;
+                        result = MU_FAILURE;
                     }
                     *handle_ptr = handle;
                 }
@@ -670,22 +670,22 @@ static int prov_sc_run_bulk_operation(PROVISIONING_SERVICE_CLIENT_HANDLE prov_cl
     if (prov_client == NULL)
     {
         LogError("Invalid Provisioning Client Handle");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (bulk_op == NULL)
     {
         LogError("Invalid Bulk Op");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (bulk_op->version != PROVISIONING_BULK_OPERATION_VERSION_1)
     {
         LogError("Invalid Bulk Op Version #");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (bulk_res_ptr == NULL)
     {
         LogError("Invalid Bulk Op Result pointer");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -693,7 +693,7 @@ static int prov_sc_run_bulk_operation(PROVISIONING_SERVICE_CLIENT_HANDLE prov_cl
         if ((content = bulkOperation_serializeToJson(bulk_op)) == NULL)
         {
             LogError("Failure serializing bulk operation");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -701,7 +701,7 @@ static int prov_sc_run_bulk_operation(PROVISIONING_SERVICE_CLIENT_HANDLE prov_cl
             if (registration_path == NULL)
             {
                 LogError("Failed to construct a registration path");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -709,7 +709,7 @@ static int prov_sc_run_bulk_operation(PROVISIONING_SERVICE_CLIENT_HANDLE prov_cl
                 if ((request_headers = construct_http_headers(prov_client, NULL, HTTP_CLIENT_REQUEST_POST)) == NULL)
                 {
                     LogError("Failure constructing http headers");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -720,7 +720,7 @@ static int prov_sc_run_bulk_operation(PROVISIONING_SERVICE_CLIENT_HANDLE prov_cl
                         if ((*bulk_res_ptr = bulkOperationResult_deserializeFromJson(prov_client->response)) == NULL)
                         {
                             LogError("Failure deserializing bulk operation result");
-                            result = __FAILURE__;
+                            result = MU_FAILURE;
                         }
                     }
                     else
@@ -746,22 +746,22 @@ static int prov_sc_query_records(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client,
     if (prov_client == NULL)
     {
         LogError("Invalid Provisioning Client Handle");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (query_spec == NULL || query_spec->version != PROVISIONING_QUERY_SPECIFICATION_VERSION_1)
     {
         LogError("Invalid Query details");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (cont_token_ptr == NULL)
     {
         LogError("Invalid Continuation Token pointer");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (query_res_ptr == NULL)
     {
         LogError("Invalid Query Response pointer");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -771,7 +771,7 @@ static int prov_sc_query_records(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client,
         if ((query_spec->query_string != NULL) && ((content = querySpecification_serializeToJson(query_spec)) == NULL))
         {
             LogError("Failure serializing query specification");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -779,7 +779,7 @@ static int prov_sc_query_records(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client,
             if (registration_path == NULL)
             {
                 LogError("Failed to construct a registration path");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -787,12 +787,12 @@ static int prov_sc_query_records(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client,
                 if ((request_headers = construct_http_headers(prov_client, NULL, HTTP_CLIENT_REQUEST_POST)) == NULL)
                 {
                     LogError("Failure constructing http headers");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else if ((add_query_headers(request_headers, query_spec->page_size, *cont_token_ptr)) != 0)
                 {
                     LogError("Failure adding query headers");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -807,17 +807,17 @@ static int prov_sc_query_records(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client,
                         if (get_response_headers(prov_client, &new_cont_token, &resp_type) != 0)
                         {
                             LogError("Failure reading response headers");
-                            result = __FAILURE__;
+                            result = MU_FAILURE;
                         }
                         else if ((type = queryType_stringToEnum(resp_type)) == QUERY_TYPE_INVALID)
                         {
                             LogError("Failure to parse response type");
-                            result = __FAILURE__;
+                            result = MU_FAILURE;
                         }
                         else if ((*query_res_ptr = queryResponse_deserializeFromJson(prov_client->response, type)) == NULL)
                         {
                             LogError("Failure deserializing query response");
-                            result = __FAILURE__;
+                            result = MU_FAILURE;
                         }
                         free(*cont_token_ptr);
                         *cont_token_ptr = new_cont_token;
@@ -959,7 +959,7 @@ int prov_sc_set_certificate(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, cons
     if (prov_client == NULL)
     {
         LogError("Invalid prov_client");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (certificate == NULL)
     {
@@ -969,7 +969,7 @@ int prov_sc_set_certificate(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, cons
     else if (mallocAndStrcpy_overwrite(&prov_client->certificate, (char*)certificate) != 0)
     {
         LogError("Failed allocating memory for certificate");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
 
     return result;
@@ -982,25 +982,25 @@ int prov_sc_set_proxy(PROVISIONING_SERVICE_CLIENT_HANDLE prov_client, HTTP_PROXY
     if (prov_client == NULL)
     {
         LogError("Invalid prov_client");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (proxy_options == NULL)
     {
         LogError("Invalid proxy options");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
         if (proxy_options->host_address == NULL)
         {
             LogError("Null host address in proxy options");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (((proxy_options->username == NULL) || (proxy_options->password == NULL))
             && (proxy_options->username != proxy_options->password))
         {
             LogError("Only one of username and password for proxy settings was NULL");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {

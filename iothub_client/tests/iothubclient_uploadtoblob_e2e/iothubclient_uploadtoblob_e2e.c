@@ -123,7 +123,7 @@ void uploadToBlobCallback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT fileUploadResult, voi
     }
     else
     {
-        LogInfo("uploadToBlobCallback(%s), userContextCallback(%p)", ENUM_TO_STRING(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, fileUploadResult), userContextCallback);
+        LogInfo("uploadToBlobCallback(%s), userContextCallback(%p)", MU_ENUM_TO_STRING(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, fileUploadResult), userContextCallback);
 
         UPLOADTOBLOB_CALLBACK_STATUS* callbackStatus = (UPLOADTOBLOB_CALLBACK_STATUS*)userContextCallback;
         ASSERT_ARE_EQUAL(UPLOADTOBLOB_CALLBACK_STATUS, *callbackStatus, UPLOADTOBLOB_CALLBACK_PENDING);
@@ -236,7 +236,7 @@ void e2e_uploadtoblob_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACC
 IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT uploadToBlobGetDataEx(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
 {
     IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT callbackResult;
-    LogInfo("uploadToBlobCallback(%s), call number(%d)", ENUM_TO_STRING(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, result), uploadBlobNumber);
+    LogInfo("uploadToBlobCallback(%s), call number(%d)", MU_ENUM_TO_STRING(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, result), uploadBlobNumber);
 
     UPLOADTOBLOB_CALLBACK_STATUS* callbackStatus = (UPLOADTOBLOB_CALLBACK_STATUS*)context;
     ASSERT_ARE_EQUAL(UPLOADTOBLOB_CALLBACK_STATUS, *callbackStatus, UPLOADTOBLOB_CALLBACK_PENDING);

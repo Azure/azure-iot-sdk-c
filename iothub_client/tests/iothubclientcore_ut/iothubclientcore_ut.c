@@ -430,12 +430,12 @@ static IOTHUB_CLIENT_RESULT my_IoTHubClientCore_LL_GenericMethodInvoke(IOTHUB_CL
 }
 
 
-DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
     ASSERT_FAIL(temp_str);
 }
 
@@ -568,7 +568,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubTransport_GetLLTransport, NULL);
 
     REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, real_mallocAndStrcpy_s);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __FAILURE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, MU_FAILURE);
 
     REGISTER_GLOBAL_MOCK_RETURN(STRING_construct, TEST_STRING_HANDLE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_construct, NULL);
@@ -597,7 +597,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(VECTOR_move, real_VECTOR_move);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(VECTOR_move, NULL);
     REGISTER_GLOBAL_MOCK_HOOK(VECTOR_push_back, real_VECTOR_push_back);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(VECTOR_push_back, __FAILURE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(VECTOR_push_back, MU_FAILURE);
     REGISTER_GLOBAL_MOCK_HOOK(VECTOR_element, real_VECTOR_element);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(VECTOR_element, NULL);
     REGISTER_GLOBAL_MOCK_HOOK(VECTOR_clear, real_VECTOR_clear);
@@ -671,7 +671,7 @@ static int should_skip_index(size_t current_index, const size_t skip_array[], si
     {
         if (current_index == skip_array[index])
         {
-            result = __FAILURE__;
+            result = MU_FAILURE;
             break;
         }
     }
@@ -3368,7 +3368,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_method_callback_VECTOR_push_back_
 
     STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1)).SetReturn(__FAILURE__);
+    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1)).SetReturn(MU_FAILURE);
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
 
@@ -3574,7 +3574,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_incoming_method_callback_VECTOR_p
 
     STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1)).SetReturn(__FAILURE__);
+    STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1)).SetReturn(MU_FAILURE);
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
 

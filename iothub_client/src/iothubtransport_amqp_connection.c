@@ -40,7 +40,7 @@ typedef struct AMQP_CONNECTION_INSTANCE_TAG
 } AMQP_CONNECTION_INSTANCE;
 
 
-DEFINE_ENUM_STRINGS(AMQP_CONNECTION_STATE, AMQP_CONNECTION_STATE_VALUES);
+MU_DEFINE_ENUM_STRINGS(AMQP_CONNECTION_STATE, AMQP_CONNECTION_STATE_VALUES);
 
 
 static int create_sasl_components(AMQP_CONNECTION_INSTANCE* instance)
@@ -54,7 +54,7 @@ static int create_sasl_components(AMQP_CONNECTION_INSTANCE* instance)
     {
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_013: [If saslmechanism_create() fails, amqp_connection_create() shall fail and return NULL]
         LogError("Failed creating the SASL mechanism (saslmechanism_create failed)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -69,7 +69,7 @@ static int create_sasl_components(AMQP_CONNECTION_INSTANCE* instance)
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_016: [If xio_create() fails, amqp_connection_create() shall fail and return NULL]
             LogError("Failed creating the SASL I/O (xio_create failed)");
             saslmechanism_destroy(sasl_mechanism);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_017: [The sasl_io "logtrace" option shall be set using xio_setoption(), passing `instance->is_trace_on`]
         else if (xio_setoption(sasl_io, SASL_IO_OPTION_LOG_TRACE, (const void*)&instance->is_trace_on) != RESULT_OK)
@@ -77,7 +77,7 @@ static int create_sasl_components(AMQP_CONNECTION_INSTANCE* instance)
             LogError("Failed setting the SASL I/O logging trace option (xio_setoption failed)");
             xio_destroy(sasl_io);
             saslmechanism_destroy(sasl_mechanism);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -189,7 +189,7 @@ static int create_connection_handle(AMQP_CONNECTION_INSTANCE* instance)
 
         if (UniqueId_Generate(unique_container_id, DEFAULT_UNIQUE_ID_LENGTH) != UNIQUEID_OK)
         {
-            result = __FAILURE__;
+            result = MU_FAILURE;
             LogError("Failed creating the AMQP connection (UniqueId_Generate failed)");
         }
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_019: [`instance->connection_handle` shall be created using connection_create2(), passing the `connection_underlying_io`, `instance->iothub_host_fqdn` and an unique string as container ID]
@@ -197,19 +197,19 @@ static int create_connection_handle(AMQP_CONNECTION_INSTANCE* instance)
         else if ((instance->connection_handle = connection_create2(connection_io_transport, STRING_c_str(instance->iothub_fqdn), unique_container_id, NULL, NULL, on_connection_state_changed, (void*)instance, on_connection_io_error, (void*)instance)) == NULL)
         {
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_021: [If connection_create2() fails, amqp_connection_create() shall fail and return NULL]
-            result = __FAILURE__;
+            result = MU_FAILURE;
             LogError("Failed creating the AMQP connection (connection_create2 failed)");
         }
         else if (connection_set_idle_timeout(instance->connection_handle, 1000 * instance->svc2cl_keep_alive_timeout_secs) != RESULT_OK)
         {
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_074: [If connection_set_idle_timeout() fails, amqp_connection_create() shall fail and return NULL]
-            result = __FAILURE__;
+            result = MU_FAILURE;
             LogError("Failed creating the AMQP connection (connection_set_idle_timeout failed)");
         }
         else if (connection_set_remote_idle_timeout_empty_frame_send_ratio(instance->connection_handle, instance->cl2svc_keep_alive_send_ratio) != RESULT_OK)
         {
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_99_001: [If connection_set_remote_idle_timeout_empty_frame_send_ratio fails, amqp_connection_create() shall fail and return NULL]
-            result = __FAILURE__;
+            result = MU_FAILURE;
             LogError("Failed creating the AMQP connection (connection_set_remote_idle_timeout_empty_frame_send_ratio)");
         }
         else
@@ -237,7 +237,7 @@ static int create_session_handle(AMQP_CONNECTION_INSTANCE* instance)
     if ((instance->session_handle = session_create(instance->connection_handle, NULL, NULL)) == NULL)
     {
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_025: [If session_create() fails, amqp_connection_create() shall fail and return NULL]
-        result = __FAILURE__;
+        result = MU_FAILURE;
         LogError("Failed creating the AMQP connection (connection_create2 failed)");
     }
     else
@@ -268,14 +268,14 @@ static int create_cbs_handle(AMQP_CONNECTION_INSTANCE* instance)
     if ((instance->cbs_handle = cbs_create(instance->session_handle)) == NULL)
     {
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_030: [If cbs_create() fails, amqp_connection_create() shall fail and return NULL]
-        result = __FAILURE__;
+        result = MU_FAILURE;
         LogError("Failed to create the CBS connection.");
     }
     // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_031: [`instance->cbs_handle` shall be opened using `cbs_open_async`]
     else if (cbs_open_async(instance->cbs_handle, on_cbs_open_complete, instance, on_cbs_error, instance) != RESULT_OK)
     {
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_032: [If cbs_open() fails, amqp_connection_create() shall fail and return NULL]
-        result = __FAILURE__;
+        result = MU_FAILURE;
         LogError("Failed to open the connection with CBS.");
     }
     else
@@ -454,16 +454,16 @@ int amqp_connection_get_session_handle(AMQP_CONNECTION_HANDLE conn_handle, SESSI
 {
     int result;
 
-    // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_043: [If `conn_handle` is NULL, amqp_connection_get_session_handle() shall fail and return __FAILURE__]
+    // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_043: [If `conn_handle` is NULL, amqp_connection_get_session_handle() shall fail and return MU_FAILURE]
     if (conn_handle == NULL)
     {
-        result = __FAILURE__;
+        result = MU_FAILURE;
         LogError("amqp_connection_get_session_handle failed (conn_handle is NULL)");
     }
-    // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_044: [If `session_handle` is NULL, amqp_connection_get_session_handle() shall fail and return __FAILURE__]
+    // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_044: [If `session_handle` is NULL, amqp_connection_get_session_handle() shall fail and return MU_FAILURE]
     else if (session_handle == NULL)
     {
-        result = __FAILURE__;
+        result = MU_FAILURE;
         LogError("amqp_connection_get_session_handle failed (session_handle is NULL)");
     }
     else
@@ -484,26 +484,26 @@ int amqp_connection_get_cbs_handle(AMQP_CONNECTION_HANDLE conn_handle, CBS_HANDL
 {
     int result;
 
-    // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_047: [If `conn_handle` is NULL, amqp_connection_get_cbs_handle() shall fail and return __FAILURE__]
+    // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_047: [If `conn_handle` is NULL, amqp_connection_get_cbs_handle() shall fail and return MU_FAILURE]
     if (conn_handle == NULL)
     {
-        result = __FAILURE__;
+        result = MU_FAILURE;
         LogError("amqp_connection_get_cbs_handle failed (conn_handle is NULL)");
     }
-    // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_048: [If `cbs_handle` is NULL, amqp_connection_get_cbs_handle() shall fail and return __FAILURE__]
+    // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_048: [If `cbs_handle` is NULL, amqp_connection_get_cbs_handle() shall fail and return MU_FAILURE]
     else if (cbs_handle == NULL)
     {
-        result = __FAILURE__;
+        result = MU_FAILURE;
         LogError("amqp_connection_get_cbs_handle failed (parameter cbs_handle is NULL)");
     }
     else
     {
         AMQP_CONNECTION_INSTANCE* instance = (AMQP_CONNECTION_INSTANCE*)conn_handle;
 
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_049: [If `instance->cbs_handle` is NULL, amqp_connection_get_cbs_handle() shall fail and return __FAILURE__]
+        // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_049: [If `instance->cbs_handle` is NULL, amqp_connection_get_cbs_handle() shall fail and return MU_FAILURE]
         if (instance->cbs_handle == NULL)
         {
-            result = __FAILURE__;
+            result = MU_FAILURE;
             LogError("amqp_connection_get_cbs_handle failed (there is not a cbs_handle to be returned)");
         }
         else
@@ -523,10 +523,10 @@ int amqp_connection_set_logging(AMQP_CONNECTION_HANDLE conn_handle, bool is_trac
 {
     int result;
 
-    // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_052: [If `conn_handle` is NULL, amqp_connection_set_logging() shall fail and return __FAILURE__]
+    // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_052: [If `conn_handle` is NULL, amqp_connection_set_logging() shall fail and return MU_FAILURE]
     if (conn_handle == NULL)
     {
-        result = __FAILURE__;
+        result = MU_FAILURE;
         LogError("amqp_connection_set_logging failed (conn_handle is NULL)");
     }
     else
@@ -540,8 +540,8 @@ int amqp_connection_set_logging(AMQP_CONNECTION_HANDLE conn_handle, bool is_trac
         if (instance->sasl_io != NULL &&
             xio_setoption(instance->sasl_io, SASL_IO_OPTION_LOG_TRACE, (const void*)&instance->is_trace_on) != RESULT_OK)
         {
-            // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_072: [If xio_setoption() fails, amqp_connection_set_logging() shall fail and return __FAILURE__]
-            result = __FAILURE__;
+            // Codes_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_072: [If xio_setoption() fails, amqp_connection_set_logging() shall fail and return MU_FAILURE]
+            result = MU_FAILURE;
             LogError("amqp_connection_set_logging failed (xio_setoption() failed)");
         }
         else

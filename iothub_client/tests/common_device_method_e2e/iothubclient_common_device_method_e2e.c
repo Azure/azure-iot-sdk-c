@@ -159,7 +159,7 @@ static int MethodCallback(const char* method_name, const unsigned char* payload,
 
 void fileUploadCallback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, void* userContextCallback)
 {
-    LogInfo("fileUploadCallback(%s)", ENUM_TO_STRING(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, result));
+    LogInfo("fileUploadCallback(%s)", MU_ENUM_TO_STRING(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, result));
 
     IOTHUB_CONN_INFO* conn_info = (IOTHUB_CONN_INFO*)userContextCallback;
     if (Lock(conn_info->lock) != LOCK_OK)
