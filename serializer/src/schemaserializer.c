@@ -9,9 +9,9 @@
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/macro_utils.h"
 
-DEFINE_ENUM_STRINGS(SCHEMA_SERIALIZER_RESULT, SCHEMA_SERIALIZER_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS(SCHEMA_SERIALIZER_RESULT, SCHEMA_SERIALIZER_RESULT_VALUES);
 
-#define LOG_SCHEMA_SERIALIZER_ERROR(result) LogError("(result = %s)", ENUM_TO_STRING(SCHEMA_SERIALIZER_RESULT, (result)))
+#define LOG_SCHEMA_SERIALIZER_ERROR(result) LogError("(result = %s)", MU_ENUM_TO_STRING(SCHEMA_SERIALIZER_RESULT, (result)))
 
 static const char* ConvertType(const char* sourceType)
 {
@@ -38,7 +38,7 @@ SCHEMA_SERIALIZER_RESULT SchemaSerializer_SerializeCommandMetadata(SCHEMA_MODEL_
         (schemaText == NULL))
     {
         result = SCHEMA_SERIALIZER_INVALID_ARG;
-        LogError("(result = %s), modelHandle = %p, schemaText = %p", ENUM_TO_STRING(SCHEMA_SERIALIZER_RESULT, result), modelHandle, schemaText);
+        LogError("(result = %s), modelHandle = %p, schemaText = %p", MU_ENUM_TO_STRING(SCHEMA_SERIALIZER_RESULT, result), modelHandle, schemaText);
     }
     else
     {

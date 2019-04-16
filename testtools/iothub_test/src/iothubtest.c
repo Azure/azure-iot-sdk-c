@@ -60,7 +60,7 @@ const char* AMQP_SEND_AUTHCID_FMT = "iothubowner@sas.root.%s";
 #define MAX_SHORT_VALUE             32767         /* maximum (signed) short value */
 #define INDEFINITE_TIME             ((time_t)-1)
 
-DEFINE_ENUM_STRINGS(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
 
 typedef enum MESSAGE_SEND_STATE_TAG
 {
@@ -299,27 +299,27 @@ static int RetrieveIotHubClientInfo(const char* pszIotConnString, IOTHUB_VALIDAT
     if (sscanf(pszIotConnString, "HostName=%n%*[^.]%n.%n%*[^;];%nSharedAccessKeyName=*;SharedAccessKey=*", &beginName, &endName, &beginHost, &endHost) != 0)
     {
         LogError("Failure determinging string sizes in RetrieveIotHubClientInfo.");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
         if ( (dvhInfo->iotHubName = (char*)malloc(endName-beginName+1) ) == NULL)
         {
             LogError("Failure allocating iothubName in RetrieveIotHubClientInfo endName: %d beginName: %d.", endName, beginName);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if ( (dvhInfo->hostName = (char*)malloc(endHost-beginName+1) ) == NULL)
         {
             LogError("Failure allocating hostName in RetrieveIotHubClientInfo endHost: %d beginHost: %d.", endHost, beginName);
             free(dvhInfo->iotHubName);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (sscanf(pszIotConnString, "HostName=%[^.].%[^;];SharedAccessKeyName=*;SharedAccessKey=*", dvhInfo->iotHubName, dvhInfo->hostName + endName - beginName + 1) != 2)
         {
             LogError("Failure retrieving string values in RetrieveIotHubClientInfo.");
             free(dvhInfo->iotHubName);
             free(dvhInfo->hostName);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -340,27 +340,27 @@ static int RetrieveEventHubClientInfo(const char* pszconnString, IOTHUB_VALIDATI
     if (sscanf(pszconnString, "Endpoint=sb://%n%*[^.]%n.%n%*[^/]%n/;SharedAccessKeyName=owner;SharedAccessKey=%*s", &beginName, &endName, &beginHost, &endHost) != 0)
     {
         LogError("Failure determining string sizes in RetrieveEventHubClientInfo.");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
         if ( (dvhInfo->partnerName = (char*)malloc(endName+beginName+1) ) == NULL)
         {
             LogError("Failure allocating partnerName in RetrieveEventHubClientInfo endName: %d beginName: %d.", endName, beginName);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if ( (dvhInfo->partnerHost = (char*)malloc(endHost+beginHost+1) ) == NULL)
         {
             LogError("Failure allocating partnerHost in RetrieveEventHubClientInfo endHost: %d beginHost: %d.", endHost, beginHost);
             free(dvhInfo->partnerName);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (sscanf(pszconnString, "Endpoint=sb://%[^.].%[^/]/;SharedAccessKeyName=owner;SharedAccessKey=%*s", dvhInfo->partnerName, dvhInfo->partnerHost) != 2)
         {
             LogError("Failure retrieving string values in RetrieveEventHubClientInfo.");
             free(dvhInfo->partnerName);
             free(dvhInfo->partnerHost);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {

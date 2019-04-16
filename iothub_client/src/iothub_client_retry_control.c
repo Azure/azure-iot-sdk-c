@@ -103,7 +103,7 @@ static int evaluate_retry_action(RETRY_CONTROL_INSTANCE* retry_control, RETRY_AC
              retry_control->policy != IOTHUB_CLIENT_RETRY_IMMEDIATE)
     {
         LogError("Failed to evaluate retry action (last_retry_time is INDEFINITE_TIME)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -114,7 +114,7 @@ static int evaluate_retry_action(RETRY_CONTROL_INSTANCE* retry_control, RETRY_AC
         {
             // Codes_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_022: [If get_time() fails, the evaluation function shall return non-zero]
             LogError("Failed to evaluate retry action (get_time() failed)");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         // Codes_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_023: [If `retry_control->max_retry_time_in_secs` is not 0 and (`current_time` - `retry_control->first_retry_time`) is greater than or equal to `retry_control->max_retry_time_in_secs`, `retry_action` shall be set to RETRY_ACTION_STOP_RETRYING]
         else if (retry_control->max_retry_time_in_secs > 0 &&
@@ -207,13 +207,13 @@ int is_timeout_reached(time_t start_time, unsigned int timeout_in_secs, bool* is
     if (start_time == INDEFINITE_TIME)
     {
         LogError("Failed to verify timeout (start_time is INDEFINITE)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     // Codes_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_058: [If `is_timed_out` is NULL, `is_timeout_reached` shall fail and return non-zero]
     else if (is_timed_out == NULL)
     {
         LogError("Failed to verify timeout (is_timed_out is NULL)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -224,7 +224,7 @@ int is_timeout_reached(time_t start_time, unsigned int timeout_in_secs, bool* is
         {
             // Codes_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_060: [If get_time() fails, `is_timeout_reached` shall fail and return non-zero]
             LogError("Failed to verify timeout (get_time failed)");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -328,7 +328,7 @@ int retry_control_should_retry(RETRY_CONTROL_HANDLE retry_control_handle, RETRY_
     if ((retry_control_handle == NULL) || (retry_action == NULL))
     {
         LogError("Failed to evaluate if retry should be attempted (either retry_control_handle (%p) or retry_action (%p) are NULL)", retry_control_handle, retry_action);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -345,14 +345,14 @@ int retry_control_should_retry(RETRY_CONTROL_HANDLE retry_control_handle, RETRY_
         {
             // Codes_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_012: [If get_time() fails, `retry_control_should_retry` shall fail and return non-zero]
             LogError("Failed to evaluate if retry should be attempted (get_time() failed)");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         // Codes_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_013: [evaluate_retry_action() shall be invoked]
         else if (evaluate_retry_action(retry_control, retry_action) != RESULT_OK)
         {
             // Codes_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_014: [If evaluate_retry_action() fails, `retry_control_should_retry` shall fail and return non-zero]
             LogError("Failed to evaluate if retry should be attempted (evaluate_retry_action() failed)");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -387,7 +387,7 @@ int retry_control_set_option(RETRY_CONTROL_HANDLE retry_control_handle, const ch
     if (retry_control_handle == NULL || name == NULL || value == NULL)
     {
         LogError("Failed to set option (either retry_state_handle (%p), name (%p) or value (%p) are NULL)", retry_control_handle, name, value);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -401,7 +401,7 @@ int retry_control_set_option(RETRY_CONTROL_HANDLE retry_control_handle, const ch
             if (cast_value < 1)
             {
                 LogError("Failed to set option '%s' (value must be equal or greater to 1)", name);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -420,7 +420,7 @@ int retry_control_set_option(RETRY_CONTROL_HANDLE retry_control_handle, const ch
             if (cast_value > 100) // it's unsigned int, it doesn't need to be checked for less than zero.
             {
                 LogError("Failed to set option '%s' (value must be in the range 0 to 100)", name);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -438,7 +438,7 @@ int retry_control_set_option(RETRY_CONTROL_HANDLE retry_control_handle, const ch
             {
                 // Codes_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_042: [If OptionHandler_FeedOptions fails, `retry_control_set_option` shall fail and return non-zero]
                 LogError("messenger_set_option failed (OptionHandler_FeedOptions failed)");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -450,7 +450,7 @@ int retry_control_set_option(RETRY_CONTROL_HANDLE retry_control_handle, const ch
         else
         {
             LogError("messenger_set_option failed (option with name '%s' is not suppported)", name);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
     }
 

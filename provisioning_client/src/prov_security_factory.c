@@ -61,7 +61,7 @@ int prov_dev_security_init(SECURE_DEVICE_TYPE hsm_type)
     if (security_type_from_caller == IOTHUB_SECURITY_TYPE_UNKNOWN)
     {
         LogError("HSM type %d is not supported on this SDK build", hsm_type);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -75,7 +75,7 @@ int prov_dev_security_init(SECURE_DEVICE_TYPE hsm_type)
         else if (security_type_from_iot != security_type_from_caller)
         {
             LogError("Security HSM from caller %d (which maps to security type %d) does not match already specified security type %d", hsm_type, security_type_from_caller, security_type_from_iot);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -121,7 +121,7 @@ int prov_dev_set_symmetric_key_info(const char* registration_name, const char* s
     if (registration_name == NULL || symmetric_key == NULL)
     {
         LogError("Invalid parameter specified reg_name: %p, symm_key: %p", registration_name, symmetric_key);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -130,13 +130,13 @@ int prov_dev_set_symmetric_key_info(const char* registration_name, const char* s
         if (mallocAndStrcpy_s(&temp_name, registration_name) != 0)
         {
             LogError("Failure allocating registration name");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (mallocAndStrcpy_s(&temp_key, symmetric_key) != 0)
         {
             LogError("Failure allocating symmetric key");
             free(temp_name);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -157,7 +157,7 @@ int prov_dev_set_symmetric_key_info(const char* registration_name, const char* s
                 if (iothub_security_set_symmetric_key_info(g_symm_key_reg_name, g_symm_key) != 0)
                 {
                     LogError("Failure syncing dps & IoThub key information");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {

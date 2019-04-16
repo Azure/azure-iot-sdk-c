@@ -345,14 +345,14 @@ int initialTwin_setTags(INITIAL_TWIN_HANDLE twin, const char* tags)
     if (twin == NULL)
     {
         LogError("TwinState is NULL");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((tags != NULL) && (twin->tags == NULL))
     {
         if ((twin->tags = twinCollection_create(tags)) == NULL)
         {
             LogError("Failure creating Twin Collection for tags");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
     }
     else if (tags == NULL)
@@ -365,7 +365,7 @@ int initialTwin_setTags(INITIAL_TWIN_HANDLE twin, const char* tags)
         if (mallocAndStrcpy_overwrite(&(twin->tags->json), tags) != 0)
         {
             LogError("Failure setting tags");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
     }
 
@@ -403,14 +403,14 @@ int initialTwin_setDesiredProperties(INITIAL_TWIN_HANDLE twin, const char* desir
     if (twin == NULL)
     {
         LogError("TwinState is NULL");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((desired_properties != NULL) && (twin->properties == NULL))
     {
         if ((twin->properties = twinProperties_create(desired_properties)) == NULL)
         {
             LogError("Failure creating Twin Properties");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
     }
     else if ((desired_properties != NULL) && (twin->properties->desired == NULL))
@@ -418,7 +418,7 @@ int initialTwin_setDesiredProperties(INITIAL_TWIN_HANDLE twin, const char* desir
         if ((twin->properties->desired = twinCollection_create(desired_properties)) == NULL)
         {
             LogError("Failure creating Twin Collection for desired properties");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
     }
     else if (desired_properties == NULL)
@@ -432,7 +432,7 @@ int initialTwin_setDesiredProperties(INITIAL_TWIN_HANDLE twin, const char* desir
         if (mallocAndStrcpy_overwrite(&(twin->properties->desired->json), desired_properties) != 0)
         {
             LogError("Failure setting desired properties");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
     }
 

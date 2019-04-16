@@ -85,12 +85,12 @@ static int retry_sending_message(MESSAGE_QUEUE_HANDLE message_queue, LIST_ITEM_H
     if (singlylinkedlist_remove(message_queue->in_progress, list_item))
     {
         LogError("Failed removing message from in-progress list");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (singlylinkedlist_add(message_queue->pending, (const void*)mq_item) == NULL)
     {
         LogError("Failed moving message back to pending list");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -389,7 +389,7 @@ static int move_messages_between_lists(SINGLYLINKEDLIST_HANDLE from_list, SINGLY
         if (singlylinkedlist_remove(from_list, list_item) != 0)
         {
             LogError("failed removing message from list");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -403,7 +403,7 @@ static int move_messages_between_lists(SINGLYLINKEDLIST_HANDLE from_list, SINGLY
 
                 free(mq_item);
 
-                result = __FAILURE__;
+                result = MU_FAILURE;
 
                 break;
             }
@@ -425,7 +425,7 @@ int message_queue_move_all_back_to_pending(MESSAGE_QUEUE_HANDLE message_queue)
     if (message_queue == NULL)
     {
         LogError("invalid argument (message_queue is NULL)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -434,24 +434,24 @@ int message_queue_move_all_back_to_pending(MESSAGE_QUEUE_HANDLE message_queue)
         if ((temp_list = singlylinkedlist_create()) == NULL)
         {
             LogError("failed creating temporary list");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
             if (move_messages_between_lists(message_queue->in_progress, temp_list) != 0)
             {
                 LogError("failed moving in-progress message to temporary list");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if (move_messages_between_lists(message_queue->pending, temp_list) != 0)
             {
                 LogError("failed moving pending message to temporary list");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if (move_messages_between_lists(temp_list, message_queue->pending) != 0)
             {
                 LogError("failed moving pending message to temporary list");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -566,7 +566,7 @@ int message_queue_add(MESSAGE_QUEUE_HANDLE message_queue, MQ_MESSAGE_HANDLE mess
     if (message_queue == NULL || message == NULL)
     {
         LogError("invalid argument (message_queue=%p, message=%p)", message_queue, message);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -577,7 +577,7 @@ int message_queue_add(MESSAGE_QUEUE_HANDLE message_queue, MQ_MESSAGE_HANDLE mess
         {
             // Codes_SRS_MESSAGE_QUEUE_09_018: [If `mq_item` cannot be allocated, message_queue_add shall fail and return non-zero]
             LogError("failed creating container for message");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -590,7 +590,7 @@ int message_queue_add(MESSAGE_QUEUE_HANDLE message_queue, MQ_MESSAGE_HANDLE mess
                 LogError("failed setting message enqueue time");
                 // Codes_SRS_MESSAGE_QUEUE_09_024: [If any failures occur, message_queue_add shall release all memory it has allocated]
                 free(mq_item);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             // Codes_SRS_MESSAGE_QUEUE_09_021: [`mq_item` shall be added to `message_queue->pending` list]
             else if (singlylinkedlist_add(message_queue->pending, (const void*)mq_item) == NULL)
@@ -599,7 +599,7 @@ int message_queue_add(MESSAGE_QUEUE_HANDLE message_queue, MQ_MESSAGE_HANDLE mess
                 LogError("failed enqueing message");
                 // Codes_SRS_MESSAGE_QUEUE_09_024: [If any failures occur, message_queue_add shall release all memory it has allocated]
                 free(mq_item);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -625,7 +625,7 @@ int message_queue_is_empty(MESSAGE_QUEUE_HANDLE message_queue, bool* is_empty)
     if (message_queue == NULL || is_empty == NULL)
     {
         LogError("invalid argument (message_queue=%p, is_empty=%p)", message_queue, is_empty);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -657,7 +657,7 @@ int message_queue_set_max_message_enqueued_time_secs(MESSAGE_QUEUE_HANDLE messag
     if (message_queue == NULL)
     {
         LogError("invalid argument (message_queue is NULL)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -678,7 +678,7 @@ int message_queue_set_max_message_processing_time_secs(MESSAGE_QUEUE_HANDLE mess
     if (message_queue == NULL)
     {
         LogError("invalid argument (message_queue is NULL)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -699,7 +699,7 @@ int message_queue_set_max_retry_count(MESSAGE_QUEUE_HANDLE message_queue, size_t
     if (message_queue == NULL)
     {
         LogError("invalid argument (message_queue is NULL)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -719,14 +719,14 @@ static int setOption(void* handle, const char* name, const void* value)
     if (handle == NULL || name == NULL || value == NULL)
     {
         LogError("invalid argument (handle=%p, name=%p, value=%p)", handle, name, value);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (strcmp(SAVED_OPTION_MAX_ENQUEUE_TIME_SECS, name) == 0)
     {
         if (message_queue_set_max_message_enqueued_time_secs((MESSAGE_QUEUE_HANDLE)handle, *(size_t*)value) != RESULT_OK)
         {
             LogError("failed setting option %s", name);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -738,7 +738,7 @@ static int setOption(void* handle, const char* name, const void* value)
         if (message_queue_set_max_message_processing_time_secs((MESSAGE_QUEUE_HANDLE)handle, *(size_t*)value) != RESULT_OK)
         {
             LogError("failed setting option %s", name);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -750,7 +750,7 @@ static int setOption(void* handle, const char* name, const void* value)
         if (message_queue_set_max_retry_count((MESSAGE_QUEUE_HANDLE)handle, *(size_t*)value) != RESULT_OK)
         {
             LogError("failed setting option %s", name);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -760,7 +760,7 @@ static int setOption(void* handle, const char* name, const void* value)
     else
     {
         LogError("option %s is invalid", name);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
 
     return result;

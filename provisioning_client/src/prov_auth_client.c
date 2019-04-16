@@ -91,24 +91,24 @@ static int load_registration_id(PROV_AUTH_INFO* handle)
         if (handle->hsm_client_get_endorsement_key(handle->hsm_client_handle, &endorsement_key, &ek_len) != 0)
         {
             LogError("Failed getting device reg id");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
             if (SHA256Reset(&sha_ctx) != 0)
             {
                 LogError("Failed sha256 reset");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if (SHA256Input(&sha_ctx, endorsement_key, (unsigned int)ek_len) != 0)
             {
                 LogError("Failed SHA256Input");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if (SHA256Result(&sha_ctx, msg_digest) != 0)
             {
                 LogError("Failed SHA256Result");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -116,7 +116,7 @@ static int load_registration_id(PROV_AUTH_INFO* handle)
                 if (handle->registration_id == NULL)
                 {
                     LogError("Failed allocating registration Id");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -132,7 +132,7 @@ static int load_registration_id(PROV_AUTH_INFO* handle)
         if (handle->registration_id == NULL)
         {
             LogError("Failed getting common name from certificate");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -151,7 +151,7 @@ static int sign_sas_data(PROV_AUTH_INFO* auth_info, const char* payload, unsigne
         if (auth_info->hsm_client_sign_data(auth_info->hsm_client_handle, (const unsigned char*)payload, strlen(payload), output, len) != 0)
         {
             LogError("Failed signing data");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -167,17 +167,17 @@ static int sign_sas_data(PROV_AUTH_INFO* auth_info, const char* payload, unsigne
         if (symmetrical_key == NULL)
         {
             LogError("Failed getting asymmetrical key");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if ((decoded_key = Azure_Base64_Decode(symmetrical_key)) == NULL)
         {
             LogError("Failed decoding symmetrical key");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if ((output_hash = BUFFER_new()) == NULL)
         {
             LogError("Failed allocating output hash buffer");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -187,7 +187,7 @@ static int sign_sas_data(PROV_AUTH_INFO* auth_info, const char* payload, unsigne
             if (HMACSHA256_ComputeHash(decoded_key_bytes, decoded_key_len, (const unsigned char*)payload, payload_len, output_hash) != HMACSHA256_OK)
             {
                 LogError("Failed computing HMAC Hash");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -195,7 +195,7 @@ static int sign_sas_data(PROV_AUTH_INFO* auth_info, const char* payload, unsigne
                 if ( (*output = malloc(*len)) == NULL)
                 {
                     LogError("Failed allocating output buffer");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -400,19 +400,19 @@ int prov_auth_set_registration_id(PROV_AUTH_HANDLE handle, const char* registrat
     if (handle == NULL || registration_id == NULL)
     {
         LogError("Invalid parameter handle: %p, registration_id: %p", handle, registration_id);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
         if (handle->registration_id != NULL)
         {
             LogError("Registration_id has been previously set, registration can not be changed");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (mallocAndStrcpy_s(&handle->registration_id, registration_id) != 0)
         {
             LogError("Failed allocating registration key");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -507,13 +507,13 @@ int prov_auth_import_key(PROV_AUTH_HANDLE handle, const unsigned char* key_value
     {
         /* Codes_SRS_SECURE_ENCLAVE_CLIENT_07_027: [ If handle or key are NULL prov_auth_import_key shall return a non-zero value. ] */
         LogError("Invalid handle parameter");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (handle->sec_type != PROV_AUTH_TYPE_TPM)
     {
         /* Codes_SRS_SECURE_ENCLAVE_CLIENT_07_029: [ If the sec_type is not SECURE_ENCLAVE_TYPE_TPM, prov_auth_import_key shall return NULL. ] */
         LogError("Invalid type for operation");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -522,7 +522,7 @@ int prov_auth_import_key(PROV_AUTH_HANDLE handle, const unsigned char* key_value
         {
             /* SRS_SECURE_ENCLAVE_CLIENT_07_040: [ If hsm_client_import_key returns an error prov_auth_import_key shall return a non-zero value. ]*/
             LogError("failure importing key into tpm");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {

@@ -119,12 +119,12 @@ TEST_DEFINE_ENUM_TYPE(BLOB_RESULT, BLOB_RESULT_VALUES);
 #define X_MS_BLOB_TYPE "x-ms-blob-type"
 #define BLOCK_BLOB "BlockBlob"
 
-DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
     ASSERT_FAIL(temp_str);
 }
 
@@ -263,8 +263,8 @@ TEST_SUITE_INITIALIZE(TestSuiteInitialize)
     REGISTER_GLOBAL_MOCK_HOOK(Azure_Base64_Encode_Bytes, my_Azure_Base64_Encode_Bytes);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(Azure_Base64_Encode_Bytes, NULL);
 
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat, __FAILURE__);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat_with_STRING, __FAILURE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat, MU_FAILURE);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_concat_with_STRING, MU_FAILURE);
 
     REGISTER_GLOBAL_MOCK_RETURNS(HTTPAPIEX_SetOption, HTTPAPIEX_OK, HTTPAPIEX_ERROR);
 
