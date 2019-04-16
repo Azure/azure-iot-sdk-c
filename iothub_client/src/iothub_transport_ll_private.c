@@ -22,7 +22,7 @@ int IoTHub_Transport_ValidateCallbacks(const TRANSPORT_CALLBACKS_INFO* transport
         )
     {
         LogError("Failure callback function NULL");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {

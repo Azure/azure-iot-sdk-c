@@ -551,7 +551,7 @@ static int set_link_attach_properties(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iothub
     {
         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_145: [ If any call for creating or setting the link attach properties fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
         LogError("Cannot create the map for link attach properties");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -561,7 +561,7 @@ static int set_link_attach_properties(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iothub
         {
             /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_145: [ If any call for creating or setting the link attach properties fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
             LogError("Cannot create the channel correlation id property key for the link attach properties");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -573,13 +573,13 @@ static int set_link_attach_properties(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iothub
             {
                 /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_145: [ If any call for creating or setting the link attach properties fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
                 LogError("Cannot create the channel correlation id string for the link attach properties");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if ((channel_correlation_id_property_value = amqpvalue_create_string(STRING_c_str(correlation_id))) == NULL)
             {
                 /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_145: [ If any call for creating or setting the link attach properties fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
                 LogError("Cannot create the channel correlation id property key for the link attach properties");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -588,7 +588,7 @@ static int set_link_attach_properties(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iothub
                 {
                     /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_145: [ If any call for creating or setting the link attach properties fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
                     LogError("Cannot set the property for channel correlation on the link attach properties");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -598,7 +598,7 @@ static int set_link_attach_properties(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iothub
                     {
                         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_145: [ If any call for creating or setting the link attach properties fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
                         LogError("Cannot create the API version property key for the link attach properties");
-                        result = __FAILURE__;
+                        result = MU_FAILURE;
                     }
                     else
                     {
@@ -608,7 +608,7 @@ static int set_link_attach_properties(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iothub
                         {
                             /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_145: [ If any call for creating or setting the link attach properties fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
                             LogError("Cannot create the API version property value for the link attach properties");
-                            result = __FAILURE__;
+                            result = MU_FAILURE;
                         }
                         else
                         {
@@ -617,20 +617,20 @@ static int set_link_attach_properties(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iothub
                             {
                                 /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_145: [ If any call for creating or setting the link attach properties fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
                                 LogError("Cannot set the property for API version on the link attach properties");
-                                result = __FAILURE__;
+                                result = MU_FAILURE;
                             }
                             /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_144: [ The link attach properties shall be set on the receiver and sender link by calling `link_set_attach_properties`. ]*/
                             else if (link_set_attach_properties(iothubtransport_amqp_methods_handle->sender_link, link_attach_properties) != 0)
                             {
                                 /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_145: [ If any call for creating or setting the link attach properties fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
                                 LogError("Cannot set the link attach properties on the sender link");
-                                result = __FAILURE__;
+                                result = MU_FAILURE;
                             }
                             else if (link_set_attach_properties(iothubtransport_amqp_methods_handle->receiver_link, link_attach_properties) != 0)
                             {
                                 /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_145: [ If any call for creating or setting the link attach properties fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
                                 LogError("Cannot set the link attach properties on the receiver link");
-                                result = __FAILURE__;
+                                result = MU_FAILURE;
                             }
                             else
                             {
@@ -678,13 +678,13 @@ int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE io
     {
         LogError("Invalid arguments: iothubtransport_amqp_methods_handle=%p, session_handle=%p, on_methods_error=%p, on_method_request_received=%p, on_methods_unsubscribed=%p",
             iothubtransport_amqp_methods_handle, session_handle, on_methods_error, on_method_request_received, on_methods_unsubscribed);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_137: [ `iothubtransportamqp_methods_subscribe` after another succesfull `iothubtransportamqp_methods_subscribe` without any unsubscribe shall return a non-zero value without performing any subscribe action. ]*/
     else if (iothubtransport_amqp_methods_handle->subscribe_state != SUBSCRIBE_STATE_NOT_SUBSCRIBED)
     {
         LogError("Already subscribed");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -694,7 +694,7 @@ int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE io
         if (peer_endpoint_string == NULL)
         {
             /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_018: [ If `STRING_construct_sprintf` fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -711,7 +711,7 @@ int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE io
             {
                 /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_019: [ If creating the target or source values fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
                 LogError("Cannot create receiver source");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -722,7 +722,7 @@ int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE io
                 {
                     /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_019: [ If creating the target or source values fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
                     LogError("Cannot create receiver target");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -732,7 +732,7 @@ int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE io
                     {
                         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_153: [ If constructing the requests link name fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
                         LogError("Cannot create methods requests link name.");
-                        result = __FAILURE__;
+                        result = MU_FAILURE;
                     }
                     else
                     {
@@ -744,7 +744,7 @@ int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE io
                         {
                             /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_020: [ If creating the receiver link fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
                             LogError("Cannot create receiver link");
-                            result = __FAILURE__;
+                            result = MU_FAILURE;
                         }
                         else
                         {
@@ -755,7 +755,7 @@ int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE io
                             {
                                 /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_031: [ If creating the target or source values fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
                                 LogError("Cannot create sender source");
-                                result = __FAILURE__;
+                                result = MU_FAILURE;
                             }
                             else
                             {
@@ -765,7 +765,7 @@ int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE io
                                 {
                                     /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_031: [ If creating the target or source values fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
                                     LogError("Cannot create sender target");
-                                    result = __FAILURE__;
+                                    result = MU_FAILURE;
                                 }
                                 else
                                 {
@@ -775,7 +775,7 @@ int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE io
                                     {
                                         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_154: [ If constructing the responses link name fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
                                         LogError("Cannot create methods responses link name.");
-                                        result = __FAILURE__;
+                                        result = MU_FAILURE;
                                     }
                                     else
                                     {
@@ -787,13 +787,13 @@ int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE io
                                         {
                                             /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_032: [ If creating the receiver link fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
                                             LogError("Cannot create sender link");
-                                            result = __FAILURE__;
+                                            result = MU_FAILURE;
                                         }
                                         else
                                         {
                                             if (set_link_attach_properties(iothubtransport_amqp_methods_handle) != 0)
                                             {
-                                                result = __FAILURE__;
+                                                result = MU_FAILURE;
                                             }
                                             else
                                             {
@@ -804,7 +804,7 @@ int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE io
                                                 {
                                                     /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_034: [ If `messagereceiver_create` fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
                                                     LogError("Cannot create message receiver");
-                                                    result = __FAILURE__;
+                                                    result = MU_FAILURE;
                                                 }
                                                 else
                                                 {
@@ -815,7 +815,7 @@ int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE io
                                                     {
                                                         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_036: [ If `messagesender_create` fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
                                                         LogError("Cannot create message sender");
-                                                        result = __FAILURE__;
+                                                        result = MU_FAILURE;
                                                     }
                                                     else
                                                     {
@@ -824,7 +824,7 @@ int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE io
                                                         {
                                                             /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_038: [ If `messagesender_open` fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
                                                             LogError("Cannot open the message sender");
-                                                            result = __FAILURE__;
+                                                            result = MU_FAILURE;
                                                         }
                                                         else
                                                         {
@@ -834,7 +834,7 @@ int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE io
                                                             {
                                                                 /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_040: [ If `messagereceiver_open` fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
                                                                 LogError("Cannot open the message receiver");
-                                                                result = __FAILURE__;
+                                                                result = MU_FAILURE;
                                                             }
                                                             else
                                                             {
@@ -920,13 +920,13 @@ int iothubtransportamqp_methods_respond(IOTHUBTRANSPORT_AMQP_METHOD_HANDLE metho
     if (method_handle == NULL)
     {
         LogError("NULL method handle");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_108: [ If `response_size` is greater than zero and `response` is NULL, `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. ]*/
     else if ((response == NULL) && (response_size > 0))
     {
         LogError("NULL response buffer with > 0 response payload size");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -936,7 +936,7 @@ int iothubtransportamqp_methods_respond(IOTHUBTRANSPORT_AMQP_METHOD_HANDLE metho
         {
             /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_062: [ If the `message_create` call fails, `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. ]*/
             LogError("Cannot create message");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -946,7 +946,7 @@ int iothubtransportamqp_methods_respond(IOTHUBTRANSPORT_AMQP_METHOD_HANDLE metho
             {
                 /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_064: [ If the `properties_create call` fails, `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. ]*/
                 LogError("Cannot create properties");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -956,7 +956,7 @@ int iothubtransportamqp_methods_respond(IOTHUBTRANSPORT_AMQP_METHOD_HANDLE metho
                 {
                     /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_125: [ If `amqpvalue_create_uuid` fails, `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. ]*/
                     LogError("Cannot create correlation_id value");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -965,14 +965,14 @@ int iothubtransportamqp_methods_respond(IOTHUBTRANSPORT_AMQP_METHOD_HANDLE metho
                     {
                         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_066: [ If the `properties_set_correlation_id` call fails, `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. ]*/
                         LogError("Cannot set correlation_id on the properties");
-                        result = __FAILURE__;
+                        result = MU_FAILURE;
                     }
                     /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_148: [ The properties shall be set on the message by calling `message_set_properties`. ]*/
                     else if (message_set_properties(message, properties) != 0)
                     {
                         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_149: [ If `message_set_properties` fails, `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. ]*/
                         LogError("Cannot set properties on the response message");
-                        result = __FAILURE__;
+                        result = MU_FAILURE;
                     }
                     else
                     {
@@ -982,7 +982,7 @@ int iothubtransportamqp_methods_respond(IOTHUBTRANSPORT_AMQP_METHOD_HANDLE metho
                         {
                             /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_096: [ If any of the calls `amqpvalue_create_string`, `amqpvalue_create_int`, `amqpvalue_create_map`, `amqpvalue_set_map_value` or `message_set_application_properties` fails `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. ]*/
                             LogError("Cannot create map for application properties");
-                            result = __FAILURE__;
+                            result = MU_FAILURE;
                         }
                         else
                         {
@@ -992,7 +992,7 @@ int iothubtransportamqp_methods_respond(IOTHUBTRANSPORT_AMQP_METHOD_HANDLE metho
                             {
                                 /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_096: [ If any of the calls `amqpvalue_create_string`, `amqpvalue_create_int`, `amqpvalue_create_map`, `amqpvalue_set_map_value` or `message_set_application_properties` fails `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. ]*/
                                 LogError("Cannot create the property key for the status property");
-                                result = __FAILURE__;
+                                result = MU_FAILURE;
                             }
                             else
                             {
@@ -1002,7 +1002,7 @@ int iothubtransportamqp_methods_respond(IOTHUBTRANSPORT_AMQP_METHOD_HANDLE metho
                                 {
                                     /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_096: [ If any of the calls `amqpvalue_create_string`, `amqpvalue_create_int`, `amqpvalue_create_map`, `amqpvalue_set_map_value` or `message_set_application_properties` fails `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. ]*/
                                     LogError("Cannot create the status code property value for the application properties map");
-                                    result = __FAILURE__;
+                                    result = MU_FAILURE;
                                 }
                                 else
                                 {
@@ -1011,7 +1011,7 @@ int iothubtransportamqp_methods_respond(IOTHUBTRANSPORT_AMQP_METHOD_HANDLE metho
                                     {
                                         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_096: [ If any of the calls `amqpvalue_create_string`, `amqpvalue_create_int`, `amqpvalue_create_map`, `amqpvalue_set_map_value` or `message_set_application_properties` fails `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. ]*/
                                         LogError("Cannot add the status property to the application properties");
-                                        result = __FAILURE__;
+                                        result = MU_FAILURE;
                                     }
                                     else
                                     {
@@ -1020,7 +1020,7 @@ int iothubtransportamqp_methods_respond(IOTHUBTRANSPORT_AMQP_METHOD_HANDLE metho
                                         {
                                             /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_096: [ If any of the calls `amqpvalue_create_string`, `amqpvalue_create_int`, `amqpvalue_create_map`, `amqpvalue_set_map_value` or `message_set_application_properties` fails `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. ]*/
                                             LogError("Cannot set the application properties on the message");
-                                            result = __FAILURE__;
+                                            result = MU_FAILURE;
                                         }
                                         else
                                         {
@@ -1036,7 +1036,7 @@ int iothubtransportamqp_methods_respond(IOTHUBTRANSPORT_AMQP_METHOD_HANDLE metho
                                             {
                                                 /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_081: [ If the `message_add_body_amqp_data` call fails, `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. ]*/
                                                 LogError("Cannot set the response payload on the reponse message");
-                                                result = __FAILURE__;
+                                                result = MU_FAILURE;
                                             }
                                             else
                                             {
@@ -1047,7 +1047,7 @@ int iothubtransportamqp_methods_respond(IOTHUBTRANSPORT_AMQP_METHOD_HANDLE metho
                                                 {
                                                     /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_071: [ If the `messagesender_send` call fails, `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. ]*/
                                                     LogError("Cannot send response message");
-                                                    result = __FAILURE__;
+                                                    result = MU_FAILURE;
                                                 }
                                                 else
                                                 {

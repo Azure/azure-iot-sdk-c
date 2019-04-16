@@ -103,11 +103,11 @@ static int read_and_parse_edge_uri(HSM_CLIENT_HTTP_EDGE* hsm_client_http_edge)
     if ((workload_uri = environment_get_variable(ENVIRONMENT_VAR_WORKLOADURI)) == NULL)
     {
         LogError("Environment variable %s not specified", ENVIRONMENT_VAR_WORKLOADURI);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((hsm_client_http_edge->workload_protocol_type = get_workload_protocol_type(workload_uri)) == WORKLOAD_PROTOCOL_TYPE_UNSPECIFIED)
     {
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
 
     if (result == 0)
@@ -117,17 +117,17 @@ static int read_and_parse_edge_uri(HSM_CLIENT_HTTP_EDGE* hsm_client_http_edge)
             if ((colon_begin = strchr(workload_uri + http_prefix_len + 1, ':')) == NULL)
             {
                 LogError("WorkloadUri is set to %s, missing ':' to indicate port number", workload_uri);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if ((hsm_client_http_edge->workload_portnumber = atoi(colon_begin + 1)) == 0)
             {
                 LogError("WorkloadUri is set to %s, port number is not legal", workload_uri);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if ((hsm_client_http_edge->workload_hostname = malloc(colon_begin - workload_uri)) == NULL)
             {
                 LogError("Failed allocating workload_hostname");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -144,12 +144,12 @@ static int read_and_parse_edge_uri(HSM_CLIENT_HTTP_EDGE* hsm_client_http_edge)
             if (workload_uri[unix_domain_sockets_prefix_len] == 0)
             {
                 LogError("hostname does not have content after prefix");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if (mallocAndStrcpy_s(&hsm_client_http_edge->workload_hostname, workload_uri + unix_domain_sockets_prefix_len) != 0)
             {
                 LogError("Failed copying workload hostname");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -170,27 +170,27 @@ static int initialize_http_edge_device(HSM_CLIENT_HTTP_EDGE* hsm_client_http_edg
     if ((edge_module_generation_id = environment_get_variable(ENVIRONMENT_VAR_MODULE_GENERATION_ID)) == NULL)
     {
         LogError("Environment variable %s not specified", ENVIRONMENT_VAR_MODULE_GENERATION_ID);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((module_id = environment_get_variable(ENVIRONMENT_VAR_EDGEMODULEID)) == NULL)
     {
         LogError("Environment variable %s not specified", ENVIRONMENT_VAR_EDGEMODULEID);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (read_and_parse_edge_uri(hsm_client_http_edge) != 0)
     {
         LogError("read_and_parse_edge_uri failed");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (mallocAndStrcpy_s(&hsm_client_http_edge->edge_module_generation_id, edge_module_generation_id) != 0)
     {
         LogError("Failed copying edge_module_generation_id");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (mallocAndStrcpy_s(&hsm_client_http_edge->module_id, module_id) != 0)
     {
         LogError("Failed copying module_id");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -432,7 +432,7 @@ static int send_request_to_edge_workload(HTTP_CLIENT_HANDLE http_handle, HTTP_HE
         } while ((workload_context->continue_running == true) && (timed_out == false));
     }
 
-    return (workload_context->http_response != NULL) ? 0 : __FAILURE__;
+    return (workload_context->http_response != NULL) ? 0 : MU_FAILURE;
 }
 
 static BUFFER_HANDLE send_http_workload_request(HSM_CLIENT_HTTP_EDGE* hsm_client_http_edge, const char* uri_path, BUFFER_HANDLE json_to_send)
@@ -456,33 +456,33 @@ static BUFFER_HANDLE send_http_workload_request(HSM_CLIENT_HTTP_EDGE* hsm_client
     if ((http_handle = uhttp_client_create(socketio_get_interface_description(), &config, on_edge_hsm_http_error, &workload_context)) == NULL)
     {
         LogError("uhttp_client_create failed");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((hsm_client_http_edge->workload_protocol_type == WORKLOAD_PROTOCOL_TYPE_UNIX_DOMAIN_SOCKET) &&
              (uhttp_client_set_option(http_handle, OPTION_ADDRESS_TYPE, OPTION_ADDRESS_TYPE_DOMAIN_SOCKET) != 0))
     {
         LogError("setting unix domain socket option failed");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((http_open_result = uhttp_client_open(http_handle, hsm_client_http_edge->workload_hostname, hsm_client_http_edge->workload_portnumber, on_edge_hsm_http_connected, &workload_context) != HTTP_CLIENT_OK) != HTTP_CLIENT_OK)
     {
         LogError("uhttp_client_open failed, err=%d", http_open_result);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((json_to_send != NULL) && ((http_headers_handle = HTTPHeaders_Alloc()) == NULL))
     {
         LogError("HTTPAPIEX_Create failed");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((json_to_send != NULL) && ((http_headers_result = HTTPHeaders_AddHeaderNameValuePair(http_headers_handle, HTTP_HEADER_KEY_CONTENT_TYPE, HTTP_HEADER_VAL_CONTENT_TYPE)) != HTTP_HEADERS_OK))
     {
         LogError("HTTPHeaders_AddHeaderNameValuePair failed, error=%d", http_headers_result);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (send_request_to_edge_workload(http_handle, http_headers_handle, uri_path, json_to_send, &workload_context) != 0)
     {
         LogError("send_request_to_edge_workload failed");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -514,27 +514,27 @@ static int parse_json_signing_response(BUFFER_HANDLE http_response, unsigned cha
     if ((http_response_str = (const char*)BUFFER_u_char(http_response)) == NULL)
     {
         LogError("BUFFER_u_char reading http_response");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((root_value = json_parse_string(http_response_str)) == NULL)
     {
         LogError("json_parse_string failed");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((root_object = json_value_get_object(root_value)) == NULL)
     {
         LogError("json_value_get_object failed");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((digest = json_object_dotget_string(root_object, HSM_EDGE_SIGN_JSON_DIGEST)) == NULL)
     {
         LogError("json_value_get_object failed to get %s", HSM_EDGE_SIGN_JSON_DIGEST);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (mallocAndStrcpy_s((char**)signed_value, digest) != 0)
     {
         LogError("Allocating signed_value failed");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -557,7 +557,7 @@ int hsm_client_http_edge_sign_data(HSM_CLIENT_HANDLE handle, const unsigned char
     if (handle == NULL || data == NULL || data_len == 0 || signed_value == NULL || signed_len == NULL)
     {
         LogError("Invalid handle value specified handle: %p, data: %p, data_len: %zu, signed_value: %p, signed_len: %p", handle, data, data_len, signed_value, signed_len);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -566,22 +566,22 @@ int hsm_client_http_edge_sign_data(HSM_CLIENT_HANDLE handle, const unsigned char
         if ((uri_path = STRING_construct_sprintf("/modules/%s/genid/%s/sign?api-version=%s", hsm_client_http_edge->module_id, hsm_client_http_edge->edge_module_generation_id, HSM_HTTP_EDGE_VERSION)) == NULL)
         {
             LogError("STRING_construct_sprintf failed");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if ((json_to_send = construct_json_signing_blob((const char*)data)) == NULL)
         {
             LogError("construct_json_signing_blob failed");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if ((http_response = send_http_workload_request(hsm_client_http_edge, STRING_c_str(uri_path), json_to_send)) == NULL)
         {
             LogError("send_http_workload_request failed");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (parse_json_signing_response(http_response, signed_value, signed_len) != 0)
         {
             LogError("parse_json_signing_response failed");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {

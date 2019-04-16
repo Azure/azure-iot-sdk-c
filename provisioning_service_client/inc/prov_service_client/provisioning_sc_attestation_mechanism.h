@@ -24,7 +24,7 @@ typedef struct ATTESTATION_MECHANISM_TAG* ATTESTATION_MECHANISM_HANDLE;
         ATTESTATION_TYPE_TPM, \
         ATTESTATION_TYPE_X509 \
 //Note: ATTESTATION_TYPE_NONE is invalid, indicating error
-DEFINE_ENUM(ATTESTATION_TYPE, ATTESTATION_TYPE_VALUES);
+MU_DEFINE_ENUM(ATTESTATION_TYPE, ATTESTATION_TYPE_VALUES);
 
 
 /** @brief  Creates an Attestation Mechanism handle that uses a TPM Attestation for use in consequent APIs.

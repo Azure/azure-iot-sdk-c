@@ -12,8 +12,8 @@
 #pragma warning(disable: 4701) /* potentially uninitialized local variable 'result' used */ /* the scanner cannot track variable "i" and link it to childCount*/
 #endif
 
-DEFINE_ENUM_STRINGS(JSON_ENCODER_TOSTRING_RESULT, JSON_ENCODER_TOSTRING_RESULT_VALUES);
-DEFINE_ENUM_STRINGS(JSON_ENCODER_RESULT, JSON_ENCODER_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS(JSON_ENCODER_TOSTRING_RESULT, JSON_ENCODER_TOSTRING_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS(JSON_ENCODER_RESULT, JSON_ENCODER_RESULT_VALUES);
 
 JSON_ENCODER_RESULT JSONEncoder_EncodeTree(MULTITREE_HANDLE treeHandle, STRING_HANDLE destination, JSON_ENCODER_TOSTRING_FUNC toStringFunc)
 {
@@ -27,13 +27,13 @@ JSON_ENCODER_RESULT JSONEncoder_EncodeTree(MULTITREE_HANDLE treeHandle, STRING_H
         (toStringFunc == NULL))
     {
         result = JSON_ENCODER_INVALID_ARG;
-        LogError("(result = %s)", ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
+        LogError("(result = %s)", MU_ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
     }
     /*Codes_SRS_JSON_ENCODER_99_035:[ JSON encoder shall inquire the number of child nodes (further called childCount) of the current node (given by parameter treeHandle.]*/
     else if (MultiTree_GetChildCount(treeHandle, &childCount) != MULTITREE_OK)
     {
         result = JSON_ENCODER_MULTITREE_ERROR;
-        LogError("(result = %s)", ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
+        LogError("(result = %s)", MU_ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
     }
     else
     {
@@ -42,7 +42,7 @@ JSON_ENCODER_RESULT JSONEncoder_EncodeTree(MULTITREE_HANDLE treeHandle, STRING_H
         if (STRING_concat(destination,  "{") != 0)
         {
             result = JSON_ENCODER_ERROR;
-            LogError("(result = %s)", ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
+            LogError("(result = %s)", MU_ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
         }
         else
         {
@@ -55,12 +55,12 @@ JSON_ENCODER_RESULT JSONEncoder_EncodeTree(MULTITREE_HANDLE treeHandle, STRING_H
                     (STRING_concat(destination, ", ") != 0))
                 {
                     result = JSON_ENCODER_ERROR;
-                    LogError("(result = %s)", ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
+                    LogError("(result = %s)", MU_ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
                 }
                 else if (STRING_concat(destination, "\"") != 0)
                 {
                     result = JSON_ENCODER_ERROR;
-                    LogError("(result = %s)", ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
+                    LogError("(result = %s)", MU_ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
                 }
                 else
                 {
@@ -68,29 +68,29 @@ JSON_ENCODER_RESULT JSONEncoder_EncodeTree(MULTITREE_HANDLE treeHandle, STRING_H
                     if (name == NULL)
                     {
                         result = JSON_ENCODER_ERROR;
-                        LogError("(result = %s)", ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
+                        LogError("(result = %s)", MU_ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
                     }
                     else
                     {
                         if (MultiTree_GetChild(treeHandle, i, &childTreeHandle) != MULTITREE_OK)
                         {
                             result = JSON_ENCODER_MULTITREE_ERROR;
-                            LogError("(result = %s)", ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
+                            LogError("(result = %s)", MU_ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
                         }
                         else if (MultiTree_GetName(childTreeHandle, name) != MULTITREE_OK)
                         {
                             result = JSON_ENCODER_MULTITREE_ERROR;
-                            LogError("(result = %s)", ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
+                            LogError("(result = %s)", MU_ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
                         }
                         else if (STRING_concat_with_STRING(destination, name) != 0)
                         {
                             result = JSON_ENCODER_ERROR;
-                            LogError("(result = %s)", ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
+                            LogError("(result = %s)", MU_ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
                         }
                         else if (STRING_concat(destination, "\":") != 0)
                         {
                             result = JSON_ENCODER_ERROR;
-                            LogError("(result = %s)", ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
+                            LogError("(result = %s)", MU_ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
                         }
                         else
                         {
@@ -98,7 +98,7 @@ JSON_ENCODER_RESULT JSONEncoder_EncodeTree(MULTITREE_HANDLE treeHandle, STRING_H
                             if (MultiTree_GetChildCount(childTreeHandle, &innerChildCount) != MULTITREE_OK)
                             {
                                 result = JSON_ENCODER_MULTITREE_ERROR;
-                                LogError("(result = %s)", ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
+                                LogError("(result = %s)", MU_ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
                             }
                             else
                             {
@@ -108,18 +108,18 @@ JSON_ENCODER_RESULT JSONEncoder_EncodeTree(MULTITREE_HANDLE treeHandle, STRING_H
                                     if (child == NULL)
                                     {
                                         result = JSON_ENCODER_ERROR;
-                                        LogError("(result = %s)", ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
+                                        LogError("(result = %s)", MU_ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
                                     }
                                     else
                                     {
                                         if ((result = JSONEncoder_EncodeTree(childTreeHandle, child, toStringFunc)) != JSON_ENCODER_OK)
                                         {
-                                            LogError("(result = %s)", ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
+                                            LogError("(result = %s)", MU_ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
                                         }
                                         else if (STRING_concat_with_STRING(destination, child)!=0)
                                         {
                                             result = JSON_ENCODER_ERROR;
-                                            LogError("(result = %s)", ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
+                                            LogError("(result = %s)", MU_ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
                                         }
                                         STRING_delete(child);
                                     }
@@ -130,7 +130,7 @@ JSON_ENCODER_RESULT JSONEncoder_EncodeTree(MULTITREE_HANDLE treeHandle, STRING_H
                                     if (MultiTree_GetValue(childTreeHandle, &value) != MULTITREE_OK)
                                     {
                                         result = JSON_ENCODER_MULTITREE_ERROR;
-                                        LogError("(result = %s)", ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
+                                        LogError("(result = %s)", MU_ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
 
                                     }
                                     else
@@ -139,19 +139,19 @@ JSON_ENCODER_RESULT JSONEncoder_EncodeTree(MULTITREE_HANDLE treeHandle, STRING_H
                                         if (childValue == NULL)
                                         {
                                             result = JSON_ENCODER_ERROR;
-                                            LogError("(result = %s)", ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
+                                            LogError("(result = %s)", MU_ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
                                         }
                                         else
                                         {
                                             if (toStringFunc(childValue, value) != JSON_ENCODER_TOSTRING_OK)
                                             {
                                                 result = JSON_ENCODER_TOSTRING_FUNCTION_ERROR;
-                                                LogError("(result = %s)", ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
+                                                LogError("(result = %s)", MU_ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
                                             }
                                             else if (STRING_concat_with_STRING(destination, childValue)!=0)
                                             {
                                                 result = JSON_ENCODER_ERROR;
-                                                LogError("(result = %s)", ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
+                                                LogError("(result = %s)", MU_ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
                                             }
                                             else
                                             {
@@ -173,7 +173,7 @@ JSON_ENCODER_RESULT JSONEncoder_EncodeTree(MULTITREE_HANDLE treeHandle, STRING_H
                 if (STRING_concat(destination,  "}") != 0)
                 {
                     result = JSON_ENCODER_ERROR;
-                    LogError("(result = %s)", ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
+                    LogError("(result = %s)", MU_ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
                 }
                 else
                 {
@@ -199,14 +199,14 @@ JSON_ENCODER_TOSTRING_RESULT JSONEncoder_CharPtr_ToString(STRING_HANDLE destinat
         (value == NULL))
     {
         result = JSON_ENCODER_TOSTRING_INVALID_ARG;
-        LogError("(result = %s)", ENUM_TO_STRING(JSON_ENCODER_TOSTRING_RESULT, result));
+        LogError("(result = %s)", MU_ENUM_TO_STRING(JSON_ENCODER_TOSTRING_RESULT, result));
     }
     /*Codes_SRS_JSON_ENCODER_99_048:[ JSONEncoder_CharPtr_ToString shall use strcpy_s to copy from value to destination.]*/
     else if (STRING_concat(destination, (const char*)value) != 0)
     {
         /*Codes_SRS_JSON_ENCODER_99_049:[ If strcpy_s fails then JSONEncoder_CharPtr_ToString shall return JSON_ENCODER_TOSTRING_ERROR.]*/
         result = JSON_ENCODER_TOSTRING_ERROR;
-        LogError("(result = %s)", ENUM_TO_STRING(JSON_ENCODER_TOSTRING_RESULT, result));
+        LogError("(result = %s)", MU_ENUM_TO_STRING(JSON_ENCODER_TOSTRING_RESULT, result));
     }
     else
     {
