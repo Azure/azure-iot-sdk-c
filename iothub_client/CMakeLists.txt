@@ -10,6 +10,7 @@ endif()
 
 compileAsC99()
 
+
 set(iothub_client_c_files
     ./src/iothub.c
     ./src/iothub_client.c
