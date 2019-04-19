@@ -13,6 +13,7 @@ This document describes how to prepare your development environment to use the *
 ## Set up a Windows development environment
 
 - Install [Visual Studio 2017][visual-studio]. You can use the **Visual Studio Community** Free download if you meet the licensing requirements.  (**Visual Studio 2015** is also supported.)
+
 > Be sure to include Visual C++.
 
 - Install [git]. Confirm git is in your PATH by typing `git version` from a command prompt.
@@ -20,15 +21,18 @@ This document describes how to prepare your development environment to use the *
 - Install [CMake]. Make sure it is in your PATH by typing `cmake -version` from a command prompt. CMake will be used to create Visual Studio projects to build libraries and samples.
 
 - Locate the tag name for the [latest release][latest-release] of the SDK.
+
 > Our release tag names are date values in `yyyy-mm-dd` format.
 
 - Clone the latest release of SDK to your local machine using the tag name you found:
 
 ```Shell
-git clone -b <yyyy-mm-dd> --recursive https://github.com/Azure/azure-iot-sdk-c.git
+git clone -b <yyyy-mm-dd> https://github.com/Azure/azure-iot-sdk-c.git
+cd azure-iot-sdk-c
+git submodule update --init
 ```
 
-> The `--recursive` argument instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
+> If you are using a release before 2019-04-15 then you will need to use the `--recursive` argument to instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
 
 ### Build a sample application without building the SDK
 
@@ -45,7 +49,7 @@ static const char* connectionString = "[device connection string]";
 
 ...and replace `[device connection string]` with a valid device connection string for a device registered with your IoT Hub. For more information, see the [samples section](#samplecode) below.
 
-Build the sample project. 
+Build the sample project.
 
 ### Build the C SDK in Windows
 
@@ -103,11 +107,16 @@ For TLS operations, by default the C-SDK uses Schannel on Windows Platforms.  Yo
 You are responsible for updating your OpenSSL dependencies as security fixes for it become available.  Schannel on Windows is a system component automatically serviced by Windows Update.  OpenSSL on Linux is updated by Linux packaging mechanisms, such as apt-get on Debian based distributions.  Shipping the C-SDK on Windows using OpenSSL means you are responsible for getting updated versions of it to your devices.
 
 [OpenSSL] binaries that the C-SDK depends on are **ssleay32** and **libeay32**. To enable OpenSSL to be used on Windows, you need to
-* Obtain OpenSSL binaries.  There are many ways to do this, but one of the easier ways is to:
-  * Open the appropriate developer command prompt you plan on building the C-SDK from.
-  * Install [vcpkg], a Microsoft tool that helps you manage C and C++ libraries.
-  * Run `.\vcpkg install openssl` to obtain the required OpenSSL binaries.
-  * Make note of the directory that OpenSSL has been installed to by vcpkg, e.g. `C:\vcpkgRoot\vcpkg\packages\openssl_x86-windows`.
+
+- Obtain OpenSSL binaries.  There are many ways to do this, but one of the easier ways is to:
+
+- Open the appropriate developer command prompt you plan on building the C-SDK from.
+
+- Install [vcpkg], a Microsoft tool that helps you manage C and C++ libraries.
+
+- Run `.\vcpkg install openssl` to obtain the required OpenSSL binaries.
+
+- Make note of the directory that OpenSSL has been installed to by vcpkg, e.g. `C:\vcpkgRoot\vcpkg\packages\openssl_x86-windows`.
 
 * Make the C-SDK link against these OpenSSL binaries instead of the default Schannel.
   * Regardless of how you obtained OpenSSL binaries, set environment variables to point at its root directory.  *Be careful there are no leading spaces between the `=` and directory name as cmake's errors are not always obvious.*
@@ -126,7 +135,6 @@ You are responsible for updating your OpenSSL dependencies as security fixes for
      ```
 
 Building samples and your application should be the same as using the default Schannel at this point.
-
 
 <a name="linux"></a>
 
@@ -167,10 +175,12 @@ This section describes how to set up a development environment for the C SDK on 
 - Clone the latest release of SDK to your local machine using the tag name you found:
 
   ```Shell
-  git clone -b <yyyy-mm-dd> --recursive https://github.com/Azure/azure-iot-sdk-c.git
+  git clone -b <yyyy-mm-dd> https://github.com/Azure/azure-iot-sdk-c.git
+  cd azure-iot-sdk-c
+  git submodule update --init
   ```
 
-  > The `--recursive` argument instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
+  > If you are using a release before 2019-04-15 then you will need to use the `--recursive` argument to instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
 
 ### Build the C SDK in Linux
 
@@ -238,9 +248,12 @@ We've tested the device SDK for C on macOS High Sierra, with XCode version 9.2.
 - Clone the latest release of SDK to your local machine using the tag name you found:
 
   ```Shell
-  git clone -b <yyyy-mm-dd> --recursive https://github.com/Azure/azure-iot-sdk-c.git
+  git clone -b <yyyy-mm-dd> https://github.com/Azure/azure-iot-sdk-c.git
+  cd azure-iot-sdk-c
+  git submodule update --init
   ```
-  > The `--recursive` argument instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
+
+  > If you are using a release before 2019-04-15 then you will need to use the `--recursive` argument to instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
 
 #### Upgrade CURL on Mac OS
 

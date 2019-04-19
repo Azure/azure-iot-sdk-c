@@ -6,7 +6,7 @@
 #ifndef IOTHUB_MESSAGING_H
 #define IOTHUB_MESSAGING_H
 
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 
 #include "iothub_messaging_ll.h"
 

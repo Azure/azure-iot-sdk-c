@@ -19,3 +19,15 @@
 [submodule "provisioning_client/deps/utpm"]
 	path = provisioning_client/deps/utpm
 	url = https://github.com/Azure/azure-utpm-c.git
+[submodule "deps/azure-macro-utils-c"]
+	path = deps/azure-macro-utils-c
+	url = https://github.com/Azure/azure-macro-utils-c.git
+[submodule "deps/umock-c"]
+	path = deps/umock-c
+	url = https://github.com/Azure/umock-c.git
+[submodule "deps/azure-c-testrunnerswitcher"]
+	path = deps/azure-c-testrunnerswitcher
+	url = https://github.com/Azure/azure-c-testrunnerswitcher.git
+[submodule "deps/azure-ctest"]
+	path = deps/azure-ctest
+	url = https://github.com/Azure/azure-ctest.git

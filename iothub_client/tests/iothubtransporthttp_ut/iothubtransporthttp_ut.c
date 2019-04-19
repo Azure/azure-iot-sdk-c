@@ -14,12 +14,12 @@
 #include <stdbool.h>
 
 #include "testrunnerswitcher.h"
-#include "umock_c.h"
-#include "umock_c_prod.h"
-#include "umocktypes_charptr.h"
-#include "umock_c_negative_tests.h"
-#include "umocktypes_stdint.h"
-#include "umocktypes_bool.h"
+#include "umock_c/umock_c.h"
+#include "umock_c/umock_c_prod.h"
+#include "umock_c/umocktypes_charptr.h"
+#include "umock_c/umock_c_negative_tests.h"
+#include "umock_c/umocktypes_stdint.h"
+#include "umock_c/umocktypes_bool.h"
 
 static void* my_gballoc_malloc(size_t size)
 {
