@@ -133,7 +133,7 @@ Note: see section "Per-Device DoWork Requirements" below.
 
 #### Connection-Retry Logic
 
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_031: [**device_stop() shall be invoked on all `instance->registered_devices` that are not already stopped**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_031: [**amqp_device_stop() shall be invoked on all `instance->registered_devices` that are not already stopped**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_032: [** Each `instance->registered_devices` shall unsubscribe from receiving C2D method requests by calling `iothubtransportamqp_methods_unsubscribe`**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_033: [**`instance->connection` shall be destroyed using amqp_connection_destroy()**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_034: [**`instance->tls_io` options shall be saved on `instance->saved_tls_options` using xio_retrieveoptions()**]**
@@ -151,15 +151,15 @@ Note: all the components above will be re-created and re-started on the next cal
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_038: [**If amqp_connection_get_cbs_handle() fails, IoTHubTransport_AMQP_Common_DoWork shall fail and return**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_039: [**amqp_connection_get_session_handle() shall be invoked on `instance->connection`**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_040: [**If amqp_connection_get_session_handle() fails, IoTHubTransport_AMQP_Common_DoWork shall fail and return**]**
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_041: [**The device handle shall be started using device_start_async()**]**
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_042: [**If device_start_async() fails, IoTHubTransport_AMQP_Common_DoWork shall fail and skip to the next registered device**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_041: [**The device handle shall be started using amqp_device_start_async()**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_042: [**If amqp_device_start_async() fails, IoTHubTransport_AMQP_Common_DoWork shall fail and skip to the next registered device**]**
 
 
 ##### DEVICE_HANDLE Error Control
 
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_043: [**If the device handle is in state DEVICE_STATE_STARTING or DEVICE_STATE_STOPPING, it shall be checked for state change timeout**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_044: [**If the device times out in state DEVICE_STATE_STARTING or DEVICE_STATE_STOPPING, the registered device shall be marked with failure**]**
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_045: [**If the registered device has a failure, it shall be stopped using device_stop()**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_045: [**If the registered device has a failure, it shall be stopped using amqp_device_stop()**]**
 Note: this will cause the device to be restarted on the next call to DoWork.
 
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_046: [**If the device has failed for MAX_NUMBER_OF_DEVICE_FAILURES in a row, it shall trigger a connection retry on the transport**]**
@@ -171,9 +171,9 @@ Note: this will cause the device to be restarted on the next call to DoWork.
 
 ##### Send pending events
 
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_047: [**If the registered device is started, each event on `registered_device->wait_to_send_list` shall be removed from the list and sent using device_send_event_async()**]**
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_048: [**device_send_event_async() shall be invoked passing `on_event_send_complete`**]**
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_049: [**If device_send_event_async() fails, `on_event_send_complete` shall be invoked passing EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING and return**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_047: [**If the registered device is started, each event on `registered_device->wait_to_send_list` shall be removed from the list and sent using amqp_device_send_event_async()**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_048: [**amqp_device_send_event_async() shall be invoked passing `on_event_send_complete`**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_049: [**If amqp_device_send_event_async() fails, `on_event_send_complete` shall be invoked passing EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING and return**]**
 
 
 ###### on_event_send_complete
@@ -245,9 +245,9 @@ Note: the instance of AMQP_TRANSPORT_DEVICE_STATE will be referred below as `amq
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_068: [**IoTHubTransport_AMQP_Common_Register shall save the handle references to the IoTHubClient, transport, waitingToSend list on `amqp_device_instance`.**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_069: [**A copy of `config->deviceId` shall be saved into `device_state->device_id`**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_070: [**If STRING_construct() fails, IoTHubTransport_AMQP_Common_Register shall fail and return NULL**]**
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_071: [**`amqp_device_instance->device_handle` shall be set using device_create()**]**
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_072: [**The configuration for device_create shall be set according to the authentication preferred by IOTHUB_DEVICE_CONFIG**]**
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_073: [**If device_create() fails, IoTHubTransport_AMQP_Common_Register shall fail and return NULL**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_071: [**`amqp_device_instance->device_handle` shall be set using amqp_device_create()**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_072: [**The configuration for amqp_device_create shall be set according to the authentication preferred by IOTHUB_DEVICE_CONFIG**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_073: [**If amqp_device_create() fails, IoTHubTransport_AMQP_Common_Register shall fail and return NULL**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_010: [** `IoTHubTransport_AMQP_Common_Register` shall create a new iothubtransportamqp_methods instance by calling `iothubtransportamqp_methods_create` while passing to it the the fully qualified domain name, the device Id, and optional module Id.**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_011: [** If `iothubtransportamqp_methods_create` fails, `IoTHubTransport_AMQP_Common_Register` shall fail and return NULL**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_074: [**IoTHubTransport_AMQP_Common_Register shall add the `amqp_device_instance` to `instance->registered_devices`**]**
@@ -283,8 +283,8 @@ This function enables the transport to notify the upper client layer of new mess
 
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_084: [**If `handle` is NULL, IoTHubTransport_AMQP_Common_Subscribe shall return a non-zero result**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_085: [**If `amqp_device_instance` is not registered, IoTHubTransport_AMQP_Common_Subscribe shall return a non-zero result**]**
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_086: [**device_subscribe_message() shall be invoked passing `on_message_received_callback`**]**
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_087: [**If device_subscribe_message() fails, IoTHubTransport_AMQP_Common_Subscribe shall return a non-zero result**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_086: [**amqp_device_subscribe_message() shall be invoked passing `on_message_received_callback`**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_087: [**If amqp_device_subscribe_message() fails, IoTHubTransport_AMQP_Common_Subscribe shall return a non-zero result**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_088: [**If no failures occur, IoTHubTransport_AMQP_Common_Subscribe shall return 0**]**
 
 
@@ -309,7 +309,7 @@ This function disables the notifications to the upper client layer of new messag
 
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_093: [**If `handle` is NULL, IoTHubTransport_AMQP_Common_Subscribe shall return**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_094: [**If `amqp_device_instance` is not registered, IoTHubTransport_AMQP_Common_Subscribe shall return**]**
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_095: [**device_unsubscribe_message() shall be invoked passing `amqp_device_instance->device_handle`**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_095: [**amqp_device_unsubscribe_message() shall be invoked passing `amqp_device_instance->device_handle`**]**
 
 
 ### IoTHubTransport_AMQP_Common_SendMessageDisposition
@@ -339,10 +339,10 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_GetSendStatus(IOTHUB_DEVICE_HAN
 ```
 
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_096: [**If `handle` or `iotHubClientStatus` are NULL, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG**]**
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_097: [**IoTHubTransport_AMQP_Common_GetSendStatus shall invoke device_get_send_status()**]**
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_098: [**If device_get_send_status() fails, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_ERROR**]**
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_099: [**If device_get_send_status() returns DEVICE_SEND_STATUS_BUSY, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_BUSY**]**
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_100: [**If device_get_send_status() returns DEVICE_SEND_STATUS_IDLE, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_IDLE**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_097: [**IoTHubTransport_AMQP_Common_GetSendStatus shall invoke amqp_device_get_send_status()**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_098: [**If amqp_device_get_send_status() fails, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_ERROR**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_099: [**If amqp_device_get_send_status() returns DEVICE_SEND_STATUS_BUSY, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_BUSY**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_100: [**If amqp_device_get_send_status() returns DEVICE_SEND_STATUS_IDLE, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_IDLE**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_109: [**If no failures occur, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_OK**]**
 
   
@@ -370,8 +370,8 @@ Summary of options:
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_101: [**If `handle`, `option` or `value` are NULL then IoTHubTransport_AMQP_Common_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.**]**
 
 
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_102: [**If `option` is a device-specific option, it shall be saved and applied to each registered device using device_set_option()**]**
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_103: [**If device_set_option() fails, IoTHubTransport_AMQP_Common_SetOption shall return IOTHUB_CLIENT_ERROR**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_102: [**If `option` is a device-specific option, it shall be saved and applied to each registered device using amqp_device_set_option()**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_103: [**If amqp_device_set_option() fails, IoTHubTransport_AMQP_Common_SetOption shall return IOTHUB_CLIENT_ERROR**]**
 
 Note: device-specific options: sas_token_lifetime, sas_token_refresh_time, cbs_request_timeout, event_send_timeout_in_secs
 
@@ -420,8 +420,8 @@ int IoTHubTransport_AMQP_Common_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle
 ```
 
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_131: [**If `handle` is NULL, `IoTHubTransport_AMQP_Common_Subscribe_DeviceTwin` shall fail and return non-zero.**]**
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_134: [**device_subscribe_for_twin_updates() shall be invoked for the registered device, passing `on_device_twin_update_received_callback`**]**
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_135: [**If device_subscribe_for_twin_updates() fails, `IoTHubTransport_AMQP_Common_Subscribe_DeviceTwin` shall fail and return non-zero.**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_134: [**amqp_device_subscribe_for_twin_updates() shall be invoked for the registered device, passing `on_device_twin_update_received_callback`**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_135: [**If amqp_device_subscribe_for_twin_updates() fails, `IoTHubTransport_AMQP_Common_Subscribe_DeviceTwin` shall fail and return non-zero.**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_136: [**If no errors occur, `IoTHubTransport_AMQP_Common_Subscribe_DeviceTwin` shall return zero.**]**
 
 #### on_device_twin_update_received_callback
@@ -440,8 +440,8 @@ void IoTHubTransport_AMQP_Common_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE han
 ```
 
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_140: [**If `handle` is NULL, `IoTHubTransport_AMQP_Common_Unsubscribe_DeviceTwin` shall return.**]**
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_142: [**device_unsubscribe_for_twin_updates() shall be invoked for the registered device**]**
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_143: [**If `device_unsubscribe_for_twin_updates` fails, the error shall be ignored**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_142: [**amqp_device_unsubscribe_for_twin_updates() shall be invoked for the registered device**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_143: [**If `amqp_device_unsubscribe_for_twin_updates` fails, the error shall be ignored**]**
 
 
 ### IoTHubTransport_AMQP_Common_GetDeviceTwinAsync
@@ -451,9 +451,9 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_GetDeviceTwinAsync(IOTHUB_DEVIC
 
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_154: [** If `handle` or `completionCallback` are NULL, `IoTHubTransport_AMQP_Common_GetDeviceTwinAsync` shall fail and return IOTHUB_CLIENT_INVALID_ARG **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_155: [** device_get_twin_async() shall be invoked for the registered device, passing `on_device_get_twin_completed_callback`**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_155: [** amqp_device_get_twin_async() shall be invoked for the registered device, passing `on_device_get_twin_completed_callback`**]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_156: [** If device_get_twin_async() fails, `IoTHubTransport_AMQP_Common_GetDeviceTwinAsync` shall fail and return IOTHUB_CLIENT_ERROR **]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_156: [** If amqp_device_get_twin_async() fails, `IoTHubTransport_AMQP_Common_GetDeviceTwinAsync` shall fail and return IOTHUB_CLIENT_ERROR **]**
 
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_157: [** If no errors occur, `IoTHubTransport_AMQP_Common_GetDeviceTwinAsync` shall return IOTHUB_CLIENT_OK **]**
 
@@ -477,8 +477,8 @@ This function was introduced to be generic point for processing user requests, h
 
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_144: [**If `handle` or `iothub_item` are NULL, `IoTHubTransport_AMQP_Common_ProcessItem` shall fail and return IOTHUB_PROCESS_ERROR.**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_145: [**If `item_type` is not IOTHUB_TYPE_DEVICE_TWIN, `IoTHubTransport_AMQP_Common_ProcessItem` shall fail and return IOTHUB_PROCESS_ERROR.**]**
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_146: [**device_send_twin_update_async() shall be invoked passing `iothub_item->device_twin->report_data_handle` and `on_device_send_twin_update_complete_callback`**]**
-**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_147: [**If device_send_twin_update_async() fails, `IoTHubTransport_AMQP_Common_ProcessItem` shall fail and return IOTHUB_PROCESS_ERROR.**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_146: [**amqp_device_send_twin_update_async() shall be invoked passing `iothub_item->device_twin->report_data_handle` and `on_device_send_twin_update_complete_callback`**]**
+**SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_147: [**If amqp_device_send_twin_update_async() fails, `IoTHubTransport_AMQP_Common_ProcessItem` shall fail and return IOTHUB_PROCESS_ERROR.**]**
 **SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_150: [**If no errors occur, `IoTHubTransport_AMQP_Common_ProcessItem` shall return IOTHUB_PROCESS_OK.**]**
 
 

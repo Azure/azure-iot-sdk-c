@@ -34,6 +34,10 @@ if(${use_sample_trusted_cert})
     include_directories(../../../certs)
 endif()
 
+if(${use_wolfssl})
+    add_definitions(-DUSE_WOLFSSL)
+endif()
+
 include_directories(../common_ds_e2e)
 include_directories(${IOTHUB_TEST_INC_FOLDER})
 include_directories(${IOTHUB_SERVICE_CLIENT_INC_FOLDER})

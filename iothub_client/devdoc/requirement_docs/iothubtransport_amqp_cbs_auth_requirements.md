@@ -92,9 +92,9 @@ Note: the AUTHENTICATION_INSTANCE instance shall be referred to as `instance` th
 int authentication_start(AUTHENTICATION_HANDLE authentication_handle, const CBS_HANDLE cbs_handle)
 ```
 
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_025: [**If authentication_handle is NULL, authentication_start() shall fail and return __FAILURE__ as error code**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_026: [**If `cbs_handle` is NULL, authentication_start() shall fail and return __FAILURE__ as error code**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_027: [**If authenticate state has been started already, authentication_start() shall fail and return __FAILURE__ as error code**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_025: [**If authentication_handle is NULL, authentication_start() shall fail and return MU_FAILURE as error code**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_026: [**If `cbs_handle` is NULL, authentication_start() shall fail and return MU_FAILURE as error code**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_027: [**If authenticate state has been started already, authentication_start() shall fail and return MU_FAILURE as error code**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_028: [**authentication_start() shall save `cbs_handle` on `instance->cbs_handle`**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_029: [**If no failures occur, `instance->state` shall be set to AUTHENTICATION_STATE_STARTING and `instance->on_state_changed_callback` invoked**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_030: [**If no failures occur, authentication_start() shall return 0**]**
@@ -105,8 +105,8 @@ int authentication_start(AUTHENTICATION_HANDLE authentication_handle, const CBS_
 int authentication_stop(AUTHENTICATION_HANDLE authentication_handle, ON_AUTHENTICATION_STOP_COMPLETED on_stop_completed, const void* context)
 ```
 
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_031: [**If `authentication_handle` is NULL, authentication_stop() shall fail and return __FAILURE__**]**
-**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_032: [**If `instance->state` is AUTHENTICATION_STATE_STOPPED, authentication_stop() shall fail and return __FAILURE__**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_031: [**If `authentication_handle` is NULL, authentication_stop() shall fail and return MU_FAILURE**]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_032: [**If `instance->state` is AUTHENTICATION_STATE_STOPPED, authentication_stop() shall fail and return MU_FAILURE**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_033: [**`instance->cbs_handle` shall be set to NULL**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_034: [**`instance->state` shall be set to AUTHENTICATION_STATE_STOPPED and `instance->on_state_changed_callback` invoked**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_035: [**authentication_stop() shall return success code 0**]**

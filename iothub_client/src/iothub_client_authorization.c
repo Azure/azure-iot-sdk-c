@@ -42,7 +42,7 @@ static int get_seconds_since_epoch(size_t* seconds)
     if ((current_time = get_time(NULL)) == INDEFINITE_TIME)
     {
         LogError("Failed getting the current local time (get_time() failed)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -252,12 +252,12 @@ int IoTHubClient_Auth_Set_xio_Certificate(IOTHUB_AUTHORIZATION_HANDLE handle, XI
     if (handle == NULL || xio == NULL)
     {
         LogError("Invalid Parameter handle: %p xio: %p", handle, xio);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (handle->cred_type != IOTHUB_CREDENTIAL_TYPE_X509_ECC)
     {
         LogError("Invalid credential types for this operation");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -266,19 +266,19 @@ int IoTHubClient_Auth_Set_xio_Certificate(IOTHUB_AUTHORIZATION_HANDLE handle, XI
         if (cred_result == NULL)
         {
             LogError("Failure generating credentials");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
             if (xio_setoption(xio, OPTION_X509_ECC_CERT, cred_result->auth_cred_result.x509_result.x509_cert) != 0)
             {
                 LogError("Failure setting x509 cert on xio");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if (xio_setoption(xio, OPTION_X509_ECC_KEY, cred_result->auth_cred_result.x509_result.x509_alias_key) != 0)
             {
                 LogError("Failure setting x509 key on xio");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -288,7 +288,7 @@ int IoTHubClient_Auth_Set_xio_Certificate(IOTHUB_AUTHORIZATION_HANDLE handle, XI
         }
 #else
         LogError("Failed HSM module is not supported");
-        result = __FAILURE__;
+        result = MU_FAILURE;
 #endif
     }
     return result;
@@ -300,12 +300,12 @@ int IoTHubClient_Auth_Get_x509_info(IOTHUB_AUTHORIZATION_HANDLE handle, char** x
     if (handle == NULL || x509_cert == NULL || x509_key == NULL)
     {
         LogError("Invalid Parameter handle: %p, x509_cert: %p, x509_key: %p", handle, x509_cert, x509_key);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (handle->cred_type != IOTHUB_CREDENTIAL_TYPE_X509_ECC)
     {
         LogError("Invalid credential types for this operation");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -314,19 +314,19 @@ int IoTHubClient_Auth_Get_x509_info(IOTHUB_AUTHORIZATION_HANDLE handle, char** x
         if (cred_result == NULL)
         {
             LogError("Failure generating credentials");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
             if (mallocAndStrcpy_s(x509_cert, cred_result->auth_cred_result.x509_result.x509_cert) != 0)
             {
                 LogError("Failure copying certificate");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if (mallocAndStrcpy_s(x509_key, cred_result->auth_cred_result.x509_result.x509_alias_key) != 0)
             {
                 LogError("Failure copying private key");
-                result = __FAILURE__;
+                result = MU_FAILURE;
                 free(*x509_cert);
             }
             else
@@ -337,7 +337,7 @@ int IoTHubClient_Auth_Get_x509_info(IOTHUB_AUTHORIZATION_HANDLE handle, char** x
         }
 #else
         LogError("Failed HSM module is not supported");
-        result = __FAILURE__;
+        result = MU_FAILURE;
 #endif
     }
     return result;
@@ -673,13 +673,13 @@ int IoTHubClient_Auth_Set_SasToken_Expiry(IOTHUB_AUTHORIZATION_HANDLE handle, si
     if (handle == NULL)
     {
         LogError("Invalid handle value handle: NULL");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     // Validate the expiry_time in seconds
     else if (expiry_time_seconds < MIN_SAS_EXPIRY_TIME)
     {
         LogError("Failure setting expiry time to value %lu min value is %d", (unsigned long)expiry_time_seconds, MIN_SAS_EXPIRY_TIME);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {

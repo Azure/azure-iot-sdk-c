@@ -25,7 +25,7 @@ extern "C" {
     DEVICE_COMMAND_DECODER_FAILED,        \
     DEVICE_ERROR
 
-DEFINE_ENUM(DEVICE_RESULT, DEVICE_RESULT_VALUES)
+MU_DEFINE_ENUM(DEVICE_RESULT, DEVICE_RESULT_VALUES)
 
 #include "azure_c_shared_utility/umock_c_prod.h"
 

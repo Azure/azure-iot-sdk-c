@@ -38,8 +38,8 @@
     IDLE                              \
 
 /*Enumeration specifying firmware update status */
-DEFINE_ENUM(FIRMWARE_UPDATE_STATUS, FIRMWARE_UPDATE_STATUS_VALUES);
-DEFINE_ENUM_STRINGS(FIRMWARE_UPDATE_STATUS, FIRMWARE_UPDATE_STATUS_VALUES);
+MU_DEFINE_ENUM(FIRMWARE_UPDATE_STATUS, FIRMWARE_UPDATE_STATUS_VALUES);
+MU_DEFINE_ENUM_STRINGS(FIRMWARE_UPDATE_STATUS, FIRMWARE_UPDATE_STATUS_VALUES);
 
 /* Paste in your device connection string  */
 static const char* connectionString = "<connectionstring>";
@@ -101,7 +101,7 @@ static char* serializeToJson(Chiller* chiller)
 	(void)json_object_set_string(root_object, "SupportedMethods", chiller->supportedMethods);
 	(void)json_object_set_string(root_object, "Type", chiller->type);
 	(void)json_object_set_string(root_object, "Firmware", chiller->firmware);
-	(void)json_object_set_string(root_object, "FirmwareUpdateStatus", ENUM_TO_STRING(FIRMWARE_UPDATE_STATUS, chiller->firmwareUpdateStatus));
+	(void)json_object_set_string(root_object, "FirmwareUpdateStatus", MU_ENUM_TO_STRING(FIRMWARE_UPDATE_STATUS, chiller->firmwareUpdateStatus));
 	(void)json_object_set_string(root_object, "Location", chiller->location);
 	(void)json_object_set_number(root_object, "Latitude", chiller->latitude);
 	(void)json_object_set_number(root_object, "Longitude", chiller->longitude);
@@ -141,7 +141,7 @@ static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void
 {
 	(void)userContextCallback;
 	g_message_count_send_confirmations++;
-	(void)printf("Confirmation callback received for message %zu with result %s\r\n", g_message_count_send_confirmations, ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
+	(void)printf("Confirmation callback received for message %zu with result %s\r\n", g_message_count_send_confirmations, MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
 }
 
 static void reported_state_callback(int status_code, void* userContextCallback)

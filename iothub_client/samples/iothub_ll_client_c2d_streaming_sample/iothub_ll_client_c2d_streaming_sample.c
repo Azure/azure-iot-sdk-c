@@ -55,9 +55,9 @@ and removing calls to _DoWork will yield the same results. */
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-DEFINE_ENUM_STRINGS(WS_OPEN_RESULT, WS_OPEN_RESULT_VALUES)
-DEFINE_ENUM_STRINGS(WS_ERROR, WS_ERROR_VALUES)
-DEFINE_ENUM_STRINGS(WS_SEND_FRAME_RESULT, WS_SEND_FRAME_RESULT_VALUES)
+MU_DEFINE_ENUM_STRINGS(WS_OPEN_RESULT, WS_OPEN_RESULT_VALUES)
+MU_DEFINE_ENUM_STRINGS(WS_ERROR, WS_ERROR_VALUES)
+MU_DEFINE_ENUM_STRINGS(WS_SEND_FRAME_RESULT, WS_SEND_FRAME_RESULT_VALUES)
 
 
 /* Paste in the your iothub connection string  */
@@ -70,7 +70,7 @@ static char stream_payload[128];
 static void on_ws_open_complete(void* context, WS_OPEN_RESULT ws_open_result)
 {
     (void)context;
-    (void)printf("Client connected to the streaming gateway (%s)\r\n", ENUM_TO_STRING(WS_OPEN_RESULT, ws_open_result));
+    (void)printf("Client connected to the streaming gateway (%s)\r\n", MU_ENUM_TO_STRING(WS_OPEN_RESULT, ws_open_result));
 }
 
 // 
@@ -84,7 +84,7 @@ static void on_ws_send_frame_complete(void* context, WS_SEND_FRAME_RESULT ws_sen
     }
     else
     {
-        (void)printf("Failed sending stream data (%s)\r\n", ENUM_TO_STRING(WS_SEND_FRAME_RESULT, ws_send_frame_result));
+        (void)printf("Failed sending stream data (%s)\r\n", MU_ENUM_TO_STRING(WS_SEND_FRAME_RESULT, ws_send_frame_result));
     }
 
     g_continueRunning = false;
@@ -113,7 +113,7 @@ static void on_ws_peer_closed(void* context, uint16_t* close_code, const unsigne
 static void on_ws_error(void* context, WS_ERROR error_code)
 {
     (void)context;
-    (void)printf("on_ws_error (%s)\r\n", ENUM_TO_STRING(WS_ERROR, error_code));
+    (void)printf("on_ws_error (%s)\r\n", MU_ENUM_TO_STRING(WS_ERROR, error_code));
 }
 
 static UWS_CLIENT_HANDLE create_websocket_client(DEVICE_STREAM_C2D_REQUEST* stream_request)

@@ -17,10 +17,12 @@ BEGIN_TEST_SUITE(iothubclient_amqp_ds_e2e)
         ds_e2e_deinit();
     }
 
+#ifndef USE_WOLFSSL
     TEST_FUNCTION(IoTHub_Accept_Device_Streaming_Request_AMQP_e2e)
     {
         ds_e2e_receive_device_streaming_request(AMQP_Protocol, true);
     }
+#endif
 
     TEST_FUNCTION(IoTHub_Reject_Device_Streaming_Request_AMQP_e2e)
     {

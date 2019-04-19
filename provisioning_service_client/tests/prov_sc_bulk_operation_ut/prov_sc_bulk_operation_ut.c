@@ -63,12 +63,12 @@ MOCKABLE_FUNCTION(, int, json_object_get_boolean, const JSON_Object*, object, co
 
 static TEST_MUTEX_HANDLE g_testByTest;
 
-DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
     ASSERT_FAIL(temp_str);
 }
 
@@ -144,7 +144,7 @@ static void register_global_mocks()
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, real_malloc);
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, real_free);
     REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, my_mallocAndStrcpy_s);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __FAILURE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, MU_FAILURE);
 
     //parson
     REGISTER_GLOBAL_MOCK_RETURN(json_value_init_object, TEST_JSON_VALUE);
@@ -174,11 +174,11 @@ static void register_global_mocks()
 
     //shared helpers
     REGISTER_GLOBAL_MOCK_RETURN(json_serialize_and_set_struct_array, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_serialize_and_set_struct_array, __FAILURE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_serialize_and_set_struct_array, MU_FAILURE);
     REGISTER_GLOBAL_MOCK_HOOK(json_deserialize_and_get_struct_array, my_deserialize_and_get_struct_array);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_deserialize_and_get_struct_array, __FAILURE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_deserialize_and_get_struct_array, MU_FAILURE);
     REGISTER_GLOBAL_MOCK_HOOK(copy_json_string_field, my_copy_json_string_field);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(copy_json_string_field, __FAILURE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(copy_json_string_field, MU_FAILURE);
 
     //types
     REGISTER_UMOCK_ALIAS_TYPE(TO_JSON_FUNCTION, void*);
