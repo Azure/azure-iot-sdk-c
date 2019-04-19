@@ -379,7 +379,6 @@ extern int amqp_device_get_twin_async(AMQP_DEVICE_HANDLE handle, DEVICE_TWIN_UPD
 
 
 ### amqp_device_subscribe_message
-
 ```c
 extern int amqp_device_subscribe_message(DEVICE_HANDLE handle, ON_DEVICE_C2D_MESSAGE_RECEIVED on_message_received_callback, void* context);
 ```
@@ -446,7 +445,6 @@ extern int amqp_device_send_message_disposition(DEVICE_HANDLE device_handle, DEV
 
 
 ### amqp_device_set_retry_policy
-
 ```c
 extern int amqp_device_set_retry_policy(DEVICE_HANDLE handle, IOTHUB_CLIENT_RETRY_POLICY policy, size_t retry_timeout_limit_in_seconds);
 ```

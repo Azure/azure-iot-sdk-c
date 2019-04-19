@@ -580,7 +580,6 @@ static void set_expected_calls_for_Register(IOTHUB_DEVICE_CONFIG* device_config,
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .SetReturn(TEST_DEVICE_ID_CHAR_PTR)
         .CallCannotFail();
-
     STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_REGISTERED_DEVICES_LIST))
         .SetReturn(NULL)
         .CallCannotFail();
