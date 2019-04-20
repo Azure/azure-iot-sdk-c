@@ -269,14 +269,14 @@ phases:
     condition: always()
 - phase: wolfssl
   variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/vsts-c-wolfssl"
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/c-linux-wolfssl"
   queue: Hosted Ubuntu 1604
   displayName: 'wolfssl'
   steps:
   - script: |
       LD_LIBRARY_PATH=/usr/local/lib
       LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/my_library/
-      sudo jenkins/linux_wolfssl.sh
+      sudo -E jenkins/linux_wolfssl.sh
     displayName: 'build'
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)

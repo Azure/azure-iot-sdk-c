@@ -99,7 +99,7 @@ int hsm_client_set_key_info(HSM_CLIENT_HANDLE handle, const char* reg_name, cons
     if (handle == NULL || reg_name == NULL || symm_key == NULL)
     {
         LogError("Invalid parameter specified handle: %p, reg_name: %p, symm_key: %p", handle, reg_name, symm_key);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -110,13 +110,13 @@ int hsm_client_set_key_info(HSM_CLIENT_HANDLE handle, const char* reg_name, cons
         if (mallocAndStrcpy_s(&temp_reg_name, reg_name) != 0)
         {
             LogError("Failure allocating registration name");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (mallocAndStrcpy_s(&temp_key, symm_key) != 0)
         {
             LogError("Failure allocating symmetric key");
             free(temp_reg_name);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {

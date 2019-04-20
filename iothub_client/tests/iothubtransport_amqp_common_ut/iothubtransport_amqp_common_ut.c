@@ -134,7 +134,7 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(AMQP_CONNECTION_STATE, AMQP_CONNECTION_STATE_VALUES)
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 
-DEFINE_ENUM_STRINGS(AMQP_CONNECTION_STATE, AMQP_CONNECTION_STATE_VALUES);
+MU_DEFINE_ENUM_STRINGS(AMQP_CONNECTION_STATE, AMQP_CONNECTION_STATE_VALUES);
 
 static bool g_failDispositionMake;
 static bool g_failDispositionSend;
@@ -356,12 +356,12 @@ typedef struct MESSAGE_DISPOSITION_CONTEXT_TAG
 
 static TEST_MUTEX_HANDLE g_testByTest;
 
-DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
     ASSERT_FAIL(temp_str);
 }
 
@@ -465,7 +465,7 @@ static void set_expected_calls_for_Create(IOTHUBTRANSPORT_CONFIG* transport_conf
 
 static void set_expected_calls_for_GetSendStatus(DEVICE_SEND_STATUS send_status)
 {
-    STRICT_EXPECTED_CALL(device_get_send_status(TEST_DEVICE_HANDLE, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(amqp_device_get_send_status(TEST_DEVICE_HANDLE, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .CopyOutArgumentBuffer(2, &send_status, sizeof(DEVICE_SEND_STATUS))
         .SetReturn(0);
@@ -534,7 +534,7 @@ static void set_expected_calls_for_SendMessageDisposition(IOTHUBMESSAGE_DISPOSIT
     }
 
     set_expected_calls_for_create_device_message_disposition_info();
-    STRICT_EXPECTED_CALL(device_send_message_disposition(TEST_DEVICE_HANDLE, IGNORED_PTR_ARG, device_disposition_result))
+    STRICT_EXPECTED_CALL(amqp_device_send_message_disposition(TEST_DEVICE_HANDLE, IGNORED_PTR_ARG, device_disposition_result))
         .IgnoreArgument(2);
 
     STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_iotHubMessageHandle();
@@ -573,14 +573,13 @@ static void set_expected_calls_for_Register(IOTHUB_DEVICE_CONFIG* device_config,
     STRICT_EXPECTED_CALL(STRING_c_str(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE))
         .SetReturn(TEST_IOTHUB_HOST_FQDN_CHAR_PTR)
         .CallCannotFail();
-    EXPECTED_CALL(device_create(IGNORED_PTR_ARG));
+    EXPECTED_CALL(amqp_device_create(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .SetReturn(TEST_IOTHUB_HOST_FQDN_CHAR_PTR)
         .CallCannotFail();
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .SetReturn(TEST_DEVICE_ID_CHAR_PTR)
         .CallCannotFail();
-
     STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_REGISTERED_DEVICES_LIST))
         .SetReturn(NULL)
         .CallCannotFail();
@@ -593,12 +592,12 @@ static void set_expected_calls_for_Register(IOTHUB_DEVICE_CONFIG* device_config,
     STRICT_EXPECTED_CALL(amqp_streaming_client_create(IGNORED_PTR_ARG));
 
     // replicate_device_options_to
-    STRICT_EXPECTED_CALL(device_set_option(TEST_DEVICE_HANDLE, DEVICE_OPTION_EVENT_SEND_TIMEOUT_SECS, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(amqp_device_set_option(TEST_DEVICE_HANDLE, DEVICE_OPTION_EVENT_SEND_TIMEOUT_SECS, IGNORED_PTR_ARG))
         .IgnoreArgument(3);
 
     if (is_using_cbs)
     {
-        STRICT_EXPECTED_CALL(device_set_option(TEST_DEVICE_HANDLE, DEVICE_OPTION_CBS_REQUEST_TIMEOUT_SECS, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(amqp_device_set_option(TEST_DEVICE_HANDLE, DEVICE_OPTION_CBS_REQUEST_TIMEOUT_SECS, IGNORED_PTR_ARG))
             .IgnoreArgument(3);
     }
 
@@ -624,7 +623,7 @@ static void set_expected_calls_for_Unregister(IOTHUB_DEVICE_HANDLE iothub_device
 
     STRICT_EXPECTED_CALL(amqp_streaming_client_destroy(TEST_AMQP_STREAMING_CLIENT_HANDLE));
 
-    STRICT_EXPECTED_CALL(device_destroy(TEST_DEVICE_HANDLE));
+    STRICT_EXPECTED_CALL(amqp_device_destroy(TEST_DEVICE_HANDLE));
     STRICT_EXPECTED_CALL(STRING_delete(TEST_DEVICE_ID_STRING_HANDLE));
     EXPECTED_CALL(free(IGNORED_PTR_ARG));
 }
@@ -663,7 +662,7 @@ static void set_expected_calls_for_send_pending_events(PDLIST_ENTRY wts, int exp
         STRICT_EXPECTED_CALL(DList_IsListEmpty(wts));
         EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG));
 
-        STRICT_EXPECTED_CALL(device_send_event_async(TEST_DEVICE_HANDLE, TEST_IOTHUB_MESSAGE_LIST_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(amqp_device_send_event_async(TEST_DEVICE_HANDLE, TEST_IOTHUB_MESSAGE_LIST_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(3)
             .IgnoreArgument(4);
     }
@@ -718,11 +717,11 @@ static void set_expected_calls_for_Device_DoWork(PDLIST_ENTRY wts, int wts_lengt
             STRICT_EXPECTED_CALL(amqp_connection_get_cbs_handle(TEST_AMQP_CONNECTION_HANDLE, IGNORED_PTR_ARG))
                 .IgnoreArgument_cbs_handle();
 
-            STRICT_EXPECTED_CALL(device_start_async(TEST_DEVICE_HANDLE, TEST_SESSION_HANDLE, TEST_CBS_HANDLE));
+            STRICT_EXPECTED_CALL(amqp_device_start_async(TEST_DEVICE_HANDLE, TEST_SESSION_HANDLE, TEST_CBS_HANDLE));
         }
         else
         {
-            STRICT_EXPECTED_CALL(device_start_async(TEST_DEVICE_HANDLE, TEST_SESSION_HANDLE, IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(amqp_device_start_async(TEST_DEVICE_HANDLE, TEST_SESSION_HANDLE, IGNORED_PTR_ARG));
         }
     }
     else if (current_device_state == DEVICE_STATE_STARTING ||
@@ -737,7 +736,7 @@ static void set_expected_calls_for_Device_DoWork(PDLIST_ENTRY wts, int wts_lengt
         STRICT_EXPECTED_CALL(STRING_c_str(TEST_DEVICE_ID_STRING_HANDLE))
             .SetReturn(TEST_DEVICE_ID_CHAR_PTR);
 
-        STRICT_EXPECTED_CALL(device_stop(TEST_DEVICE_HANDLE));
+        STRICT_EXPECTED_CALL(amqp_device_stop(TEST_DEVICE_HANDLE));
     }
     else if (current_device_state == DEVICE_STATE_STARTED)
     {
@@ -751,7 +750,7 @@ static void set_expected_calls_for_Device_DoWork(PDLIST_ENTRY wts, int wts_lengt
         set_expected_calls_for_send_pending_events(wts, wts_length);
     }
 
-    STRICT_EXPECTED_CALL(device_do_work(TEST_DEVICE_HANDLE));
+    STRICT_EXPECTED_CALL(amqp_device_do_work(TEST_DEVICE_HANDLE));
 }
 
 static void set_expected_calls_for_get_new_underlying_io_transport(bool feed_options)
@@ -842,7 +841,7 @@ static void set_expected_calls_for_Subscribe(IOTHUB_DEVICE_CONFIG* device_config
 {
     set_expected_calls_for_is_device_registered(device_config, registered_device);
 
-    STRICT_EXPECTED_CALL(device_subscribe_message(TEST_DEVICE_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(amqp_device_subscribe_message(TEST_DEVICE_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(2)
         .IgnoreArgument(3);
 }
@@ -851,7 +850,7 @@ static void set_expected_calls_for_Unsubscribe(IOTHUB_DEVICE_CONFIG* device_conf
 {
     set_expected_calls_for_is_device_registered(device_config, registered_device);
 
-    STRICT_EXPECTED_CALL(device_unsubscribe_message(TEST_DEVICE_HANDLE));
+    STRICT_EXPECTED_CALL(amqp_device_unsubscribe_message(TEST_DEVICE_HANDLE));
 }
 
 static void set_expected_calls_for_prepare_device_for_connection_retry(DEVICE_STATE current_device_state)
@@ -860,7 +859,7 @@ static void set_expected_calls_for_prepare_device_for_connection_retry(DEVICE_ST
 
     if (current_device_state != DEVICE_STATE_STOPPED)
     {
-        STRICT_EXPECTED_CALL(device_stop(TEST_DEVICE_HANDLE));
+        STRICT_EXPECTED_CALL(amqp_device_stop(TEST_DEVICE_HANDLE));
     }
 }
 
@@ -963,7 +962,7 @@ static double TEST_get_difftime(time_t t1, time_t t0)
 static ON_DEVICE_STATE_CHANGED TEST_device_create_saved_on_state_changed_callback;
 static void* TEST_device_create_saved_on_state_changed_context;
 static AMQP_DEVICE_HANDLE TEST_device_create_return;
-static AMQP_DEVICE_HANDLE TEST_device_create(DEVICE_CONFIG* config)
+static AMQP_DEVICE_HANDLE TEST_device_create(AMQP_DEVICE_CONFIG* config)
 {
     TEST_device_create_saved_on_state_changed_callback = config->on_state_changed_callback;
     TEST_device_create_saved_on_state_changed_context = config->on_state_changed_context;
@@ -1183,7 +1182,7 @@ static void register_umock_alias_types()
     REGISTER_UMOCK_ALIAS_TYPE(CBS_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(CONNECTION_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(AMQP_DEVICE_HANDLE, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(DEVICE_CONFIG, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(AMQP_DEVICE_CONFIG, void*);
     REGISTER_UMOCK_ALIAS_TYPE(DEVICE_MESSAGE_DISPOSITION_RESULT, int);
     REGISTER_UMOCK_ALIAS_TYPE(DEVICE_SEND_STATUS, int);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_RESULT, int);
@@ -1265,8 +1264,8 @@ static void register_global_mock_hooks()
 
     REGISTER_GLOBAL_MOCK_HOOK(get_difftime, TEST_get_difftime);
 
-    REGISTER_GLOBAL_MOCK_HOOK(device_create, TEST_device_create);
-    REGISTER_GLOBAL_MOCK_HOOK(device_subscribe_message, TEST_device_subscribe_message);
+    REGISTER_GLOBAL_MOCK_HOOK(amqp_device_create, TEST_device_create);
+    REGISTER_GLOBAL_MOCK_HOOK(amqp_device_subscribe_message, TEST_device_subscribe_message);
 
     REGISTER_GLOBAL_MOCK_HOOK(Transport_MessageCallback, TEST_Transport_MessageCallback);
     REGISTER_GLOBAL_MOCK_RETURN(Transport_GetOption_Product_Info_Callback, TEST_PRODUCT_INFO_CHAR_PTR);
@@ -1291,32 +1290,32 @@ static void register_global_mock_returns()
 
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(singlylinkedlist_create, NULL);
 
-    REGISTER_GLOBAL_MOCK_RETURN(device_start_async, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(device_start_async, 1);
+    REGISTER_GLOBAL_MOCK_RETURN(amqp_device_start_async, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqp_device_start_async, 1);
 
-    REGISTER_GLOBAL_MOCK_RETURN(device_stop, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(device_stop, 1);
+    REGISTER_GLOBAL_MOCK_RETURN(amqp_device_stop, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqp_device_stop, 1);
 
     REGISTER_GLOBAL_MOCK_RETURN(IoTHub_Transport_ValidateCallbacks, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHub_Transport_ValidateCallbacks, __LINE__);
 
-    REGISTER_GLOBAL_MOCK_RETURN(device_set_option, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(device_set_option, 1);
+    REGISTER_GLOBAL_MOCK_RETURN(amqp_device_set_option, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqp_device_set_option, 1);
 
-    REGISTER_GLOBAL_MOCK_RETURN(device_subscribe_message, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(device_subscribe_message, 1);
+    REGISTER_GLOBAL_MOCK_RETURN(amqp_device_subscribe_message, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqp_device_subscribe_message, 1);
 
-    REGISTER_GLOBAL_MOCK_RETURN(device_unsubscribe_message, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(device_unsubscribe_message, 1);
+    REGISTER_GLOBAL_MOCK_RETURN(amqp_device_unsubscribe_message, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqp_device_unsubscribe_message, 1);
 
-    REGISTER_GLOBAL_MOCK_RETURN(device_get_send_status, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(device_get_send_status, 1);
+    REGISTER_GLOBAL_MOCK_RETURN(amqp_device_get_send_status, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqp_device_get_send_status, 1);
 
-    REGISTER_GLOBAL_MOCK_RETURN(device_send_message_disposition, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(device_send_message_disposition, 1);
+    REGISTER_GLOBAL_MOCK_RETURN(amqp_device_send_message_disposition, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqp_device_send_message_disposition, 1);
 
-    REGISTER_GLOBAL_MOCK_RETURN(device_get_twin_async, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(device_get_twin_async, 1);
+    REGISTER_GLOBAL_MOCK_RETURN(amqp_device_get_twin_async, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqp_device_get_twin_async, 1);
 
     REGISTER_GLOBAL_MOCK_RETURN(OptionHandler_FeedOptions, OPTIONHANDLER_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(OptionHandler_FeedOptions, OPTIONHANDLER_ERROR);
@@ -2419,7 +2418,7 @@ TEST_FUNCTION(Register_X509_transport_CBS_credentials)
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_067: [If malloc fails, IoTHubTransport_AMQP_Common_Register shall fail and return NULL.]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_070: [If STRING_construct() fails, IoTHubTransport_AMQP_Common_Register shall fail and return NULL]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_073: [If device_create() fails, IoTHubTransport_AMQP_Common_Register shall fail and return NULL]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_073: [If amqp_device_create() fails, IoTHubTransport_AMQP_Common_Register shall fail and return NULL]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_011: [ If `iothubtransportamqp_methods_create` fails, `IoTHubTransport_AMQP_Common_Register` shall fail and return NULL]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_075: [If it fails to add `amqp_device_instance`, IoTHubTransport_AMQP_Common_Register shall fail and return NULL]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_077: [If IoTHubTransport_AMQP_Common_Register fails, it shall free all memory it allocated]
@@ -2469,8 +2468,8 @@ TEST_FUNCTION(Register_failure_checks)
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_066: [IoTHubTransport_AMQP_Common_Register shall allocate an instance of AMQP_TRANSPORT_DEVICE_STATE to store the state of the new registered device.]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_068: [IoTHubTransport_AMQP_Common_Register shall save the handle references to the IoTHubClient, transport, waitingToSend list on `amqp_device_instance`.]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_069: [A copy of `config->deviceId` shall be saved into `device_state->device_id`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_071: [`amqp_device_instance->device_handle` shall be set using device_create()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_072: [The configuration for device_create shall be set according to the authentication preferred by IOTHUB_DEVICE_CONFIG]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_071: [`amqp_device_instance->device_handle` shall be set using amqp_device_create()]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_072: [The configuration for amqp_device_create shall be set according to the authentication preferred by IOTHUB_DEVICE_CONFIG]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_010: [ `IoTHubTransport_AMQP_Common_Register` shall create a new iothubtransportamqp_methods instance by calling `iothubtransportamqp_methods_create` while passing to it the the fully qualified domain name, the device Id, and optional module Id.]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_074: [IoTHubTransport_AMQP_Common_Register shall add the `amqp_device_instance` to `instance->registered_devices`]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_076: [If the device is the first being registered on the transport, IoTHubTransport_AMQP_Common_Register shall save its authentication mode as the transport preferred authentication mode]
@@ -2540,7 +2539,7 @@ TEST_FUNCTION(Subscribe_device_not_registered)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_086: [device_subscribe_message() shall be invoked passing `on_message_received_callback`]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_086: [amqp_device_subscribe_message() shall be invoked passing `on_message_received_callback`]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_088: [If no failures occur, IoTHubTransport_AMQP_Common_Subscribe shall return 0]
 TEST_FUNCTION(Subscribe_messages_succeeds)
 {
@@ -2567,7 +2566,7 @@ TEST_FUNCTION(Subscribe_messages_succeeds)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_087: [If device_subscribe_message() fails, IoTHubTransport_AMQP_Common_Subscribe shall return a non-zero result]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_087: [If amqp_device_subscribe_message() fails, IoTHubTransport_AMQP_Common_Subscribe shall return a non-zero result]
 TEST_FUNCTION(Subscribe_messages_failure_checks)
 {
     // arrange
@@ -2653,7 +2652,7 @@ TEST_FUNCTION(Unsubscribe_messages_device_not_registered)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_095: [device_unsubscribe_message() shall be invoked passing `amqp_device_instance->device_handle`]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_095: [amqp_device_unsubscribe_message() shall be invoked passing `amqp_device_instance->device_handle`]
 TEST_FUNCTION(Unsubscribe_messages_succeeds)
 {
     // arrange
@@ -2724,7 +2723,7 @@ TEST_FUNCTION(GetSendStatus_NULL_iotHubClientStatus)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_098: [If device_get_send_status() fails, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_ERROR]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_098: [If amqp_device_get_send_status() fails, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_ERROR]
 TEST_FUNCTION(GetSendStatus_failure_checks)
 {
     // arrange
@@ -2764,8 +2763,8 @@ TEST_FUNCTION(GetSendStatus_failure_checks)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_097: [IoTHubTransport_AMQP_Common_GetSendStatus shall invoke device_get_send_status()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_100: [If device_get_send_status() returns DEVICE_SEND_STATUS_IDLE, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_STATUS_IDLE]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_097: [IoTHubTransport_AMQP_Common_GetSendStatus shall invoke amqp_device_get_send_status()]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_100: [If amqp_device_get_send_status() returns DEVICE_SEND_STATUS_IDLE, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_STATUS_IDLE]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_109: [If no failures occur, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_OK]
 TEST_FUNCTION(GetSendStatus_IDLE_succeeds)
 {
@@ -2794,7 +2793,7 @@ TEST_FUNCTION(GetSendStatus_IDLE_succeeds)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_099: [If device_get_send_status() returns DEVICE_SEND_STATUS_BUSY, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_STATUS_BUSY]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_099: [If amqp_device_get_send_status() returns DEVICE_SEND_STATUS_BUSY, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_STATUS_BUSY]
 TEST_FUNCTION(GetSendStatus_BUSY_succeeds)
 {
     // arrange
@@ -2889,8 +2888,8 @@ TEST_FUNCTION(SetOption_NULL_value)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_102: [If `option` is a device-specific option, it shall be saved and applied to each registered device using device_set_option()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_103: [If device_set_option() fails, IoTHubTransport_AMQP_Common_SetOption shall return IOTHUB_CLIENT_ERROR]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_102: [If `option` is a device-specific option, it shall be saved and applied to each registered device using amqp_device_set_option()]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_103: [If amqp_device_set_option() fails, IoTHubTransport_AMQP_Common_SetOption shall return IOTHUB_CLIENT_ERROR]
 TEST_FUNCTION(SetOption_device_specific_failure_check)
 {
     // arrange
@@ -2906,7 +2905,7 @@ TEST_FUNCTION(SetOption_device_specific_failure_check)
     umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_REGISTERED_DEVICES_LIST));
     EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG)).SetReturn(device_handle);
-    STRICT_EXPECTED_CALL(device_set_option(TEST_DEVICE_HANDLE, DEVICE_OPTION_EVENT_SEND_TIMEOUT_SECS, &value))
+    STRICT_EXPECTED_CALL(amqp_device_set_option(TEST_DEVICE_HANDLE, DEVICE_OPTION_EVENT_SEND_TIMEOUT_SECS, &value))
         .SetReturn(1);
     STRICT_EXPECTED_CALL(STRING_c_str(TEST_DEVICE_ID_STRING_HANDLE))
         .SetReturn(TEST_DEVICE_ID_CHAR_PTR);
@@ -4122,7 +4121,7 @@ TEST_FUNCTION(on_message_received_fails)
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_037: [If transport is using CBS authentication, amqp_connection_get_cbs_handle() shall be invoked on `instance->connection`]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_039: [amqp_connection_get_session_handle() shall be invoked on `instance->connection`]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_040: [If amqp_connection_get_session_handle() fails, IoTHubTransport_AMQP_Common_DoWork shall fail and return]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_041: [The device handle shall be started using device_start_async()]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_041: [The device handle shall be started using amqp_device_start_async()]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_059: [`new_state` shall be saved in to the transport instance]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_061: [If `new_state` is the same as `previous_state`, on_device_state_changed_callback shall return]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_062: [If `new_state` shall be saved into the `registered_device` instance]
@@ -4667,7 +4666,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_NULL_CONTEXT_fa
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_004: [IoTHubTransport_AMQP_Common_SendMessageDisposition shall convert the given IOTHUBMESSAGE_DISPOSITION_RESULT to the equivalent DEVICE_MESSAGE_DISPOSITION_RESULT and send it via device_send_message_disposition.]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_004: [IoTHubTransport_AMQP_Common_SendMessageDisposition shall convert the given IOTHUBMESSAGE_DISPOSITION_RESULT to the equivalent DEVICE_MESSAGE_DISPOSITION_RESULT and send it via amqp_device_send_message_disposition.]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_112: [A DEVICE_MESSAGE_DISPOSITION_INFO instance shall be created with a copy of the `link_name` and `message_id` contained in `message_data`]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_114: [`IoTHubTransport_AMQP_Common_SendMessageDisposition()` shall destroy the DEVICE_MESSAGE_DISPOSITION_INFO instance]
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_ACCEPTED_succeeds)
@@ -4717,7 +4716,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_ACCEPTED_fails)
 
     umock_c_reset_all_calls();
     set_expected_calls_for_create_device_message_disposition_info();
-    STRICT_EXPECTED_CALL(device_send_message_disposition(TEST_DEVICE_HANDLE, IGNORED_PTR_ARG, DEVICE_MESSAGE_DISPOSITION_RESULT_ACCEPTED))
+    STRICT_EXPECTED_CALL(amqp_device_send_message_disposition(TEST_DEVICE_HANDLE, IGNORED_PTR_ARG, DEVICE_MESSAGE_DISPOSITION_RESULT_ACCEPTED))
         .IgnoreArgument(2)
         .SetReturn(1);
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
@@ -4822,7 +4821,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_ABANDONED_fails
 
     umock_c_reset_all_calls();
     set_expected_calls_for_create_device_message_disposition_info();
-    STRICT_EXPECTED_CALL(device_send_message_disposition(TEST_DEVICE_HANDLE, IGNORED_PTR_ARG, DEVICE_MESSAGE_DISPOSITION_RESULT_RELEASED))
+    STRICT_EXPECTED_CALL(amqp_device_send_message_disposition(TEST_DEVICE_HANDLE, IGNORED_PTR_ARG, DEVICE_MESSAGE_DISPOSITION_RESULT_RELEASED))
         .IgnoreArgument(2)
         .SetReturn(1);
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
@@ -4891,7 +4890,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_REJECTED_fails)
 
     umock_c_reset_all_calls();
     set_expected_calls_for_create_device_message_disposition_info();
-    STRICT_EXPECTED_CALL(device_send_message_disposition(TEST_DEVICE_HANDLE, IGNORED_PTR_ARG, DEVICE_MESSAGE_DISPOSITION_RESULT_REJECTED))
+    STRICT_EXPECTED_CALL(amqp_device_send_message_disposition(TEST_DEVICE_HANDLE, IGNORED_PTR_ARG, DEVICE_MESSAGE_DISPOSITION_RESULT_REJECTED))
         .IgnoreArgument(2)
         .SetReturn(1);
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
@@ -5154,7 +5153,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_SetCallbackContext_fail)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_155: [ device_get_twin_async() shall be invoked for the registered device, passing `on_device_get_twin_completed_callback`]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_155: [ amqp_device_get_twin_async() shall be invoked for the registered device, passing `on_device_get_twin_completed_callback`]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_157: [ If no errors occur, `IoTHubTransport_AMQP_Common_GetTwinAsync` shall return IOTHUB_CLIENT_OK ]
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetTwinAsync_success)
 {
@@ -5172,7 +5171,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetTwinAsync_success)
     STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(device_get_twin_async(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(amqp_device_get_twin_async(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_GetTwinAsync(handle, on_device_get_twin_completed_callback, (void*)0x5566);
@@ -5227,7 +5226,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetTwinAsync_NULL_callback)
     destroy_transport(handle, NULL, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_156: [ If device_get_twin_async() fails, `IoTHubTransport_AMQP_Common_GetTwinAsync` shall fail and return IOTHUB_CLIENT_ERROR ]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_156: [ If amqp_device_get_twin_async() fails, `IoTHubTransport_AMQP_Common_GetTwinAsync` shall fail and return IOTHUB_CLIENT_ERROR ]
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetTwinAsync_failure_checks)
 {
     // arrange
@@ -5247,7 +5246,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetTwinAsync_failure_checks)
     STRICT_EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_NUM_ARG))
         .CallCannotFail();
     STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(device_get_twin_async(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(amqp_device_get_twin_async(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     umock_c_negative_tests_snapshot();
 
     size_t count = umock_c_negative_tests_call_count();

@@ -112,7 +112,7 @@ static int parse_message(const char* data, char* test_id, unsigned int* message_
     if ((root_value = json_parse_string(data)) == NULL)
     {
         LogError("Failed parsing json string: %s", data == NULL ? "<NULL>" : data);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -122,12 +122,12 @@ static int parse_message(const char* data, char* test_id, unsigned int* message_
         if ((root_object = json_value_get_object(root_value)) == NULL)
         {
             LogError("Failed creating root json object: %s", data);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if ((test_id_ref = json_object_get_string(root_object, MESSAGE_TEST_ID_FIELD)) == NULL)
         {
             LogError("Failed getting message test id: %s", data);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -153,7 +153,7 @@ static int parse_twin_desired_properties(const char* data, char* test_id, unsign
     if ((root_value = json_parse_string(data)) == NULL)
     {
         LogError("Failed parsing json string: %s", data == NULL ? "<NULL>" : data);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -163,12 +163,12 @@ static int parse_twin_desired_properties(const char* data, char* test_id, unsign
         if ((root_object = json_value_get_object(root_value)) == NULL)
         {
             LogError("Failed creating root json object %s", data);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if ((test_id_ref = json_object_dotget_string(root_object, TWIN_DESIRED_BLOCK DOT MESSAGE_TEST_ID_FIELD)) == NULL)
         {
             LogError("Failed getting message test id %s", data);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -177,7 +177,7 @@ static int parse_twin_desired_properties(const char* data, char* test_id, unsign
             if (raw_message_id < 0)
             {
                 LogError("Unexpected message id (%f)", raw_message_id);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -186,7 +186,7 @@ static int parse_twin_desired_properties(const char* data, char* test_id, unsign
                 if ((*version = (int)json_object_dotget_number(root_object, TWIN_DESIRED_BLOCK DOT TWIN_FIELD_VERSION)) < 0)
                 {
                     LogError("Failed getting desired properties version (%d)", *message_id);
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -212,7 +212,7 @@ static int parse_twin_reported_properties(const char* data, int* prop_count, cha
     if ((root_value = json_parse_string(data)) == NULL)
     {
         LogError("Failed parsing json string: %s", data == NULL ? "<NULL>" : data);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -221,7 +221,7 @@ static int parse_twin_reported_properties(const char* data, int* prop_count, cha
         if ((root_object = json_value_get_object(root_value)) == NULL)
         {
             LogError("Failed getting root json object %s", data);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -230,7 +230,7 @@ static int parse_twin_reported_properties(const char* data, int* prop_count, cha
             if ((reported_root_object = json_object_dotget_object(root_object, TWIN_PROPERTIES_BLOCK DOT TWIN_REPORTED_BLOCK)) == NULL)
             {
                 LogError("Failed getting json reported properties block %s", data);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -399,7 +399,7 @@ static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS status, I
     if (iothub_client_statistics_add_connection_status(iotHubLonghaul->iotHubClientStats, status, reason) != 0)
     {
         LogError("Failed adding connection status statistics (%s, %s)",
-            ENUM_TO_STRING(IOTHUB_CLIENT_CONNECTION_STATUS, status), ENUM_TO_STRING(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason));
+            MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONNECTION_STATUS, status), MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason));
     }
 }
 
@@ -568,7 +568,7 @@ static int run_on_loop(RUN_ON_LOOP_ACTION action, size_t iterationDurationInSeco
     if ((start_time = time(NULL)) == INDEFINITE_TIME)
     {
         LogError("Failed setting start time");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -582,19 +582,19 @@ static int run_on_loop(RUN_ON_LOOP_ACTION action, size_t iterationDurationInSeco
             if ((iteration_start_time = time(NULL)) == INDEFINITE_TIME)
             {
                 LogError("Failed setting iteration start time");
-                result = __FAILURE__;
+                result = MU_FAILURE;
                 break;
             }
             else if (action(action_context) != 0)
             {
                 LogError("Loop terminated by action function result");
-                result = __FAILURE__;
+                result = MU_FAILURE;
                 break;
             }
             else if ((current_time = time(NULL)) == INDEFINITE_TIME)
             {
                 LogError("Failed getting current time");
-                result = __FAILURE__;
+                result = MU_FAILURE;
                 break;
             }
             else
@@ -865,7 +865,7 @@ static int on_message_received(void* context, const char* data, size_t size)
     if (data == NULL || size == 0)
     {
         LogError("Invalid message received (data=%s, size=%lu)", data, (unsigned long)size);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -888,7 +888,7 @@ static int on_message_received(void* context, const char* data, size_t size)
             if (iothub_client_statistics_add_telemetry_info(iotHubLonghaul->iotHubClientStats, TELEMETRY_RECEIVED, &info) != 0)
             {
                 LogError("Failed adding receive info for message %lu", (unsigned long)info.message_id);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -897,7 +897,7 @@ static int on_message_received(void* context, const char* data, size_t size)
         }
         else
         {
-            result = __FAILURE__; // This is not the message we expected. Abandoning it.
+            result = MU_FAILURE; // This is not the message we expected. Abandoning it.
         }
     }
 
@@ -911,7 +911,7 @@ int longhaul_start_listening_for_telemetry_messages(IOTHUB_LONGHAUL_RESOURCES_HA
     if (handle == NULL)
     {
         LogError("Invalid argument (handle is NULL)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -920,7 +920,7 @@ int longhaul_start_listening_for_telemetry_messages(IOTHUB_LONGHAUL_RESOURCES_HA
         if (iotHubLonghaul->iotHubTestHandle != NULL)
         {
             LogError("IoTHubTest already initialized");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -933,7 +933,7 @@ int longhaul_start_listening_for_telemetry_messages(IOTHUB_LONGHAUL_RESOURCES_HA
                 IoTHubAccount_GetEventhubConsumerGroup(iotHubLonghaul->iotHubAccountInfo))) == NULL)
             {
                 LogError("Failed initializing IoTHubTest");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -944,7 +944,7 @@ int longhaul_start_listening_for_telemetry_messages(IOTHUB_LONGHAUL_RESOURCES_HA
                     LogError("Could not define the time start range");
                     IoTHubTest_Deinit(iotHubLonghaul->iotHubTestHandle);
                     iotHubLonghaul->iotHubTestHandle = NULL;
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else if (
                     IoTHubTest_ListenForEventAsync(
@@ -955,7 +955,7 @@ int longhaul_start_listening_for_telemetry_messages(IOTHUB_LONGHAUL_RESOURCES_HA
                     LogError("Failed listening for device to cloud messages");
                     IoTHubTest_Deinit(iotHubLonghaul->iotHubTestHandle);
                     iotHubLonghaul->iotHubTestHandle = NULL;
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -975,7 +975,7 @@ int longhaul_stop_listening_for_telemetry_messages(IOTHUB_LONGHAUL_RESOURCES_HAN
     if (handle == NULL)
     {
         LogError("Invalid argument (handle is NULL)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -984,7 +984,7 @@ int longhaul_stop_listening_for_telemetry_messages(IOTHUB_LONGHAUL_RESOURCES_HAN
         if (iotHubLonghaul->iotHubTestHandle == NULL)
         {
             LogError("IoTHubTest not initialized");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -1171,7 +1171,7 @@ static int send_telemetry(const void* context)
     if ((message_id = generate_unique_id(longhaulResources)) == 0)
     {
         LogError("Failed generating telemetry message id");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1180,7 +1180,7 @@ static int send_telemetry(const void* context)
         if ((message = create_iothub_message(longhaulResources->test_id, message_id)) == NULL)
         {
             LogError("Failed creating telemetry message");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -1189,7 +1189,7 @@ static int send_telemetry(const void* context)
             if ((message_info = (SEND_TELEMETRY_CONTEXT*)malloc(sizeof(SEND_TELEMETRY_CONTEXT))) == NULL)
             {
                 LogError("Failed allocating context for telemetry message");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -1204,7 +1204,7 @@ static int send_telemetry(const void* context)
                 {
                     LogError("Failed sending telemetry message");
                     free(message_info);
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -1216,7 +1216,7 @@ static int send_telemetry(const void* context)
                 if (iothub_client_statistics_add_telemetry_info(longhaulResources->iotHubClientStats, TELEMETRY_QUEUED, &telemetry_info) != 0)
                 {
                     LogError("Failed adding telemetry statistics info (message_id=%d)", message_id);
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
             }
 
@@ -1231,7 +1231,7 @@ static void on_c2d_message_sent(void* context, IOTHUB_MESSAGING_RESULT messaging
 {
     if (context == NULL)
     {
-        LogError("Invalid argument (%p, %s)", context, ENUM_TO_STRING(IOTHUB_MESSAGING_RESULT, messagingResult));
+        LogError("Invalid argument (%p, %s)", context, MU_ENUM_TO_STRING(IOTHUB_MESSAGING_RESULT, messagingResult));
     }
     else
     {
@@ -1265,7 +1265,7 @@ static int send_c2d(const void* context)
     if ((message_id = generate_unique_id(iotHubLonghaul)) == 0)
     {
         LogError("Failed generating c2d message id");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1274,7 +1274,7 @@ static int send_c2d(const void* context)
         if ((message = create_iothub_message(iotHubLonghaul->test_id, message_id)) == NULL)
         {
             LogError("Failed creating C2D message text");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -1283,7 +1283,7 @@ static int send_c2d(const void* context)
             if ((send_context = (SEND_C2D_CONTEXT*)malloc(sizeof(SEND_C2D_CONTEXT))) == NULL)
             {
                 LogError("Failed allocating context for sending c2d message");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -1294,7 +1294,7 @@ static int send_c2d(const void* context)
                 {
                     LogError("Failed sending c2d message");
                     free(send_context);
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -1310,7 +1310,7 @@ static int send_c2d(const void* context)
                     if (iothub_client_statistics_add_c2d_info(iotHubLonghaul->iotHubClientStats, C2D_QUEUED, &c2d_msg_info) != 0)
                     {
                         LogError("Failed adding c2d message statistics info (message_id=%d)", message_id);
-                        result = __FAILURE__;
+                        result = MU_FAILURE;
                     }
                 }
             }
@@ -1331,7 +1331,7 @@ static int invoke_device_method(const void* context)
     if ((method_id = generate_unique_id(iotHubLonghaul)) == 0)
     {
         LogError("Failed generating device method id");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1340,7 +1340,7 @@ static int invoke_device_method(const void* context)
         if ((message = create_message(iotHubLonghaul->test_id, method_id)) == NULL)
         {
             LogError("Failed creating C2D message text");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -1366,7 +1366,7 @@ static int invoke_device_method(const void* context)
             if (iothub_client_statistics_add_device_method_info(iotHubLonghaul->iotHubClientStats, DEVICE_METHOD_INVOKED, &device_method_info) != 0)
             {
                 LogError("Failed adding device method statistics info (method_id=%d)", method_id);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -1420,7 +1420,7 @@ static int update_device_twin_desired_property(const void* context)
     if ((update_id = generate_unique_id(iotHubLonghaul)) == 0)
     {
         LogError("Failed generating device method id");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1429,14 +1429,14 @@ static int update_device_twin_desired_property(const void* context)
         if ((message = create_twin_desired_properties_update(iotHubLonghaul->test_id, update_id)) == NULL)
         {
             LogError("Failed creating twin desired property update");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
             if (Lock(iotHubLonghaul->lock) != LOCK_OK)
             {
                 LogError("Failed locking (%s, %d)", iotHubLonghaul->test_id, update_id);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -1462,7 +1462,7 @@ static int update_device_twin_desired_property(const void* context)
                 if (iothub_client_statistics_add_device_twin_desired_info(iotHubLonghaul->iotHubClientStats, DEVICE_TWIN_UPDATE_SENT, &device_twin_info) != 0)
                 {
                     LogError("Failed adding twin desired properties statistics info (update_id=%d)", update_id);
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -1559,7 +1559,7 @@ static int update_device_twin_reported_property(const void* context)
     if ((update_id = generate_unique_id(iotHubLonghaul)) == 0)
     {
         LogError("Failed generating device method id");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1568,7 +1568,7 @@ static int update_device_twin_reported_property(const void* context)
         if ((send_context = malloc(sizeof(SEND_TWIN_REPORTED_CONTEXT))) == NULL)
         {
             LogError("Failed allocating context for sending twin reported update");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -1581,7 +1581,7 @@ static int update_device_twin_reported_property(const void* context)
             {
                 LogError("Failed creating twin reported property update");
                 free(send_context);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -1598,7 +1598,7 @@ static int update_device_twin_reported_property(const void* context)
                 if (iothub_client_statistics_add_device_twin_reported_info(iotHubLonghaul->iotHubClientStats, DEVICE_TWIN_UPDATE_QUEUED, &device_twin_info) != 0)
                 {
                     LogError("Failed adding device twin reported properties statistics info (update_id=%d)", update_id);
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -1620,7 +1620,7 @@ int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t
     if (handle == NULL)
     {
         LogError("Invalig argument (handle is NULL)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1629,14 +1629,14 @@ int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t
         if (iotHubLonghaulRsrcs->iotHubClientHandle == NULL || iotHubLonghaulRsrcs->deviceInfo == NULL)
         {
             LogError("IoTHubClient not initialized.");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
             if (longhaul_start_listening_for_telemetry_messages(handle, iotHubLonghaulRsrcs->deviceInfo) != 0)
             {
                 LogError("Failed listening for telemetry messages");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -1653,7 +1653,7 @@ int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t
 
                 if (loop_result != 0)
                 {
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -1662,7 +1662,7 @@ int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t
                     if (iothub_client_statistics_get_telemetry_summary(stats_handle, &summary) != 0)
                     {
                         LogError("Failed gettting statistics summary");
-                        result = __FAILURE__;
+                        result = MU_FAILURE;
                     }
                     else
                     {
@@ -1671,7 +1671,7 @@ int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t
 
                         if (summary.messages_sent == 0 || summary.messages_received != summary.messages_sent || summary.max_travel_time_secs > MAX_TELEMETRY_TRAVEL_TIME_SECS)
                         {
-                            result = __FAILURE__;
+                            result = MU_FAILURE;
                         }
                         else
                         {
@@ -1695,7 +1695,7 @@ int longhaul_run_c2d_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t itera
     if (handle == NULL)
     {
         LogError("Invalig argument (handle is NULL)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1704,17 +1704,17 @@ int longhaul_run_c2d_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t itera
         if (iotHubLonghaul->iotHubClientHandle == NULL || iotHubLonghaul->deviceInfo == NULL)
         {
             LogError("IoTHubClient not initialized.");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (longhaul_initialize_service_client(iotHubLonghaul) == NULL)
         {
             LogError("Cannot send C2D messages, failed to initialize IoT hub service client");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (longhaul_initialize_service_c2d_messaging_client(iotHubLonghaul) == NULL)
         {
             LogError("Cannot send C2D messages, failed to initialize IoT hub service client c2d messenger");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -1731,7 +1731,7 @@ int longhaul_run_c2d_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t itera
 
             if (loop_result != 0)
             {
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -1740,7 +1740,7 @@ int longhaul_run_c2d_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t itera
                 if (iothub_client_statistics_get_c2d_summary(stats_handle, &summary) != 0)
                 {
                     LogError("Failed gettting statistics summary");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -1749,7 +1749,7 @@ int longhaul_run_c2d_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t itera
 
                     if (summary.messages_sent == 0 || summary.messages_received != summary.messages_sent || summary.max_travel_time_secs > MAX_C2D_TRAVEL_TIME_SECS)
                     {
-                        result = __FAILURE__;
+                        result = MU_FAILURE;
                     }
                     else
                     {
@@ -1770,7 +1770,7 @@ int longhaul_run_device_methods_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, s
     if (handle == NULL)
     {
         LogError("Invalig argument (handle is NULL)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1779,17 +1779,17 @@ int longhaul_run_device_methods_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, s
         if (iotHubLonghaul->iotHubClientHandle == NULL || iotHubLonghaul->deviceInfo == NULL)
         {
             LogError("IoTHubClient not initialized.");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (longhaul_initialize_service_client(iotHubLonghaul) == NULL)
         {
             LogError("Cannot invoke device methods, failed to initialize IoT hub service client");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (longhaul_initialize_service_device_method_client(iotHubLonghaul) == NULL)
         {
             LogError("Cannot invoke device methods, failed to initialize IoT hub service device method client");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -1807,7 +1807,7 @@ int longhaul_run_device_methods_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, s
 
             if (loop_result != 0)
             {
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -1816,7 +1816,7 @@ int longhaul_run_device_methods_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, s
                 if (iothub_client_statistics_get_device_method_summary(stats_handle, &summary) != 0)
                 {
                     LogError("Failed gettting statistics summary");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -1825,7 +1825,7 @@ int longhaul_run_device_methods_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, s
 
                     if (summary.methods_invoked == 0 || summary.methods_received != summary.methods_invoked || summary.max_travel_time_secs > MAX_DEVICE_METHOD_TRAVEL_TIME_SECS)
                     {
-                        result = __FAILURE__;
+                        result = MU_FAILURE;
                     }
                     else
                     {
@@ -1909,7 +1909,7 @@ int longhaul_run_twin_desired_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE 
     if (handle == NULL)
     {
         LogError("Invalig argument (handle is NULL)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1918,22 +1918,22 @@ int longhaul_run_twin_desired_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE 
         if (iotHubLonghaul->iotHubClientHandle == NULL || iotHubLonghaul->deviceInfo == NULL)
         {
             LogError("IoTHubClient not initialized.");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (IoTHubClient_SetDeviceTwinCallback(iotHubLonghaul->iotHubClientHandle, on_device_twin_update_received, iotHubLonghaul) != IOTHUB_CLIENT_OK)
         {
             LogError("Failed subscribing device client for twin desired properties updates");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (longhaul_initialize_service_client(iotHubLonghaul) == NULL)
         {
             LogError("Failed to initialize IoT hub service client");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (longhaul_initialize_service_device_twin_client(iotHubLonghaul) == NULL)
         {
             LogError("Failed to initialize IoT hub service device twin client");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -1948,7 +1948,7 @@ int longhaul_run_twin_desired_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE 
 
             if (loop_result != 0)
             {
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -1957,7 +1957,7 @@ int longhaul_run_twin_desired_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE 
                 if (iothub_client_statistics_get_device_twin_desired_summary(stats_handle, &summary) != 0)
                 {
                     LogError("Failed gettting statistics summary");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -1966,7 +1966,7 @@ int longhaul_run_twin_desired_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE 
 
                     if (summary.updates_sent == 0 || summary.updates_received != summary.updates_sent || summary.max_travel_time_secs > MAX_TWIN_DESIRED_PROP_TRAVEL_TIME_SECS)
                     {
-                        result = __FAILURE__;
+                        result = MU_FAILURE;
                     }
                     else
                     {
@@ -1987,7 +1987,7 @@ int longhaul_run_twin_reported_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE
     if (handle == NULL)
     {
         LogError("Invalig argument (handle is NULL)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1996,17 +1996,17 @@ int longhaul_run_twin_reported_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE
         if (iotHubLonghaul->iotHubClientHandle == NULL || iotHubLonghaul->deviceInfo == NULL)
         {
             LogError("IoTHubClient not initialized.");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (longhaul_initialize_service_client(iotHubLonghaul) == NULL)
         {
             LogError("Failed to initialize IoT hub service client");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (longhaul_initialize_service_device_twin_client(iotHubLonghaul) == NULL)
         {
             LogError("Failed to initialize IoT hub service device twin client");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -2025,7 +2025,7 @@ int longhaul_run_twin_reported_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE
 
             if (loop_result != 0)
             {
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -2034,7 +2034,7 @@ int longhaul_run_twin_reported_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE
                 if (iothub_client_statistics_get_device_twin_reported_summary(stats_handle, &summary) != 0)
                 {
                     LogError("Failed gettting statistics summary");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -2043,7 +2043,7 @@ int longhaul_run_twin_reported_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE
 
                     if (summary.updates_sent == 0 || summary.updates_received != summary.updates_sent || summary.max_travel_time_secs > MAX_TWIN_REPORTED_PROP_TRAVEL_TIME_SECS)
                     {
-                        result = __FAILURE__;
+                        result = MU_FAILURE;
                     }
                     else
                     {

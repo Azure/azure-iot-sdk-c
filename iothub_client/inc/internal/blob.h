@@ -44,7 +44,7 @@ extern "C"
     BLOB_INVALID_ARG,      \
     BLOB_ABORTED
 
-DEFINE_ENUM(BLOB_RESULT, BLOB_RESULT_VALUES)
+MU_DEFINE_ENUM(BLOB_RESULT, BLOB_RESULT_VALUES)
 
 /**
 * @brief  Synchronously uploads a byte array to blob storage

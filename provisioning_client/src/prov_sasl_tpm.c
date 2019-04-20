@@ -121,7 +121,7 @@ static int construct_send_data(SASL_TPM_INSTANCE* sasl_tpm_info, const char* sco
         if (sasl_tpm_info->data_buffer == NULL)
         {
             LogError("Failed allocating initial data");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -162,7 +162,7 @@ static int construct_send_data(SASL_TPM_INSTANCE* sasl_tpm_info, const char* sco
         if (sasl_tpm_info->data_buffer == NULL)
         {
             LogError("Failed allocating initial data");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -326,7 +326,7 @@ static int prov_sasltpm_get_init_bytes(CONCRETE_SASL_MECHANISM_HANDLE handle, SA
     {
         /* Codes_SRS_PROV_SASL_TPM_07_010: [ If handle or init_bytes are NULL, prov_sasltpm_get_init_bytes shall return NULL. ] */
         LogError("Bad arguments: sasl_mechanism_concrete_handle = %p, init_bytes = %p", handle, init_bytes);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -345,7 +345,7 @@ static int prov_sasltpm_get_init_bytes(CONCRETE_SASL_MECHANISM_HANDLE handle, SA
         {
             /* Codes_SRS_PROV_SASL_TPM_07_013: [ If any error is encountered, prov_sasltpm_get_init_bytes shall return a non-zero value. ] */
             LogError("Failed constructing send data");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -365,7 +365,7 @@ static int prov_sasltpm_challenge(CONCRETE_SASL_MECHANISM_HANDLE handle, const S
     {
         /* Codes_SRS_PROV_SASL_TPM_07_015: [ if handle or resp_bytes are NULL, prov_sasltpm_challenge shall return the X509_SECURITY_INTERFACE structure. ] */
         LogError("Bad arguments: concrete_sasl_mechanism: %p, response_bytes: %p", handle, resp_bytes);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -387,7 +387,7 @@ static int prov_sasltpm_challenge(CONCRETE_SASL_MECHANISM_HANDLE handle, const S
             {
                 /* Codes_SRS_PROV_SASL_TPM_07_020: [ If any error is encountered prov_sasltpm_challenge shall return a non-zero value. ] */
                 LogError("Failed constructing send data");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -401,7 +401,7 @@ static int prov_sasltpm_challenge(CONCRETE_SASL_MECHANISM_HANDLE handle, const S
             if (BUFFER_append_build(sasl_tpm_info->nonce_handle, ((unsigned char*)challenge_bytes->bytes)+1, challenge_bytes->length-1) != 0)
             {
                 LogError("Failed building nonce value");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -410,7 +410,7 @@ static int prov_sasltpm_challenge(CONCRETE_SASL_MECHANISM_HANDLE handle, const S
                 {
                     /* Codes_SRS_PROV_SASL_TPM_07_020: [ If any error is encountered prov_sasltpm_challenge shall return a non-zero value. ] */
                     LogError("Invalid sequence number received from sasl challenge");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else if (is_last_sequence(ctrl_byte))
                 {
@@ -420,7 +420,7 @@ static int prov_sasltpm_challenge(CONCRETE_SASL_MECHANISM_HANDLE handle, const S
                     {
                         /* Codes_SRS_PROV_SASL_TPM_07_020: [ If any error is encountered prov_sasltpm_challenge shall return a non-zero value. ] */
                         LogError("Failed creating sas token from challenge callback");
-                        result = __FAILURE__;
+                        result = MU_FAILURE;
                     }
                     else
                     {
@@ -429,7 +429,7 @@ static int prov_sasltpm_challenge(CONCRETE_SASL_MECHANISM_HANDLE handle, const S
                         {
                             /* Codes_SRS_PROV_SASL_TPM_07_020: [ If any error is encountered prov_sasltpm_challenge shall return a non-zero value. ] */
                             LogError("Sas Token is too large for sasl frame");
-                            result = __FAILURE__;
+                            result = MU_FAILURE;
                         }
                         else
                         {
@@ -438,7 +438,7 @@ static int prov_sasltpm_challenge(CONCRETE_SASL_MECHANISM_HANDLE handle, const S
                             {
                                 /* Codes_SRS_PROV_SASL_TPM_07_020: [ If any error is encountered prov_sasltpm_challenge shall return a non-zero value. ] */
                                 LogError("Failed allocating initial data value");
-                                result = __FAILURE__;
+                                result = MU_FAILURE;
                             }
                             else
                             {
@@ -461,7 +461,7 @@ static int prov_sasltpm_challenge(CONCRETE_SASL_MECHANISM_HANDLE handle, const S
                     {
                         /* Codes_SRS_PROV_SASL_TPM_07_020: [ If any error is encountered prov_sasltpm_challenge shall return a non-zero value. ] */
                         LogError("Failed allocating initial data value");
-                        result = __FAILURE__;
+                        result = MU_FAILURE;
                     }
                     else
                     {

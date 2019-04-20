@@ -111,8 +111,8 @@ typedef struct HTTPWORKER_THREAD_INFO_TAG
     CALLBACK_TYPE_DEVICE_STREAM
 
 
-DEFINE_ENUM(USER_CALLBACK_TYPE, USER_CALLBACK_TYPE_VALUES)
-DEFINE_ENUM_STRINGS(USER_CALLBACK_TYPE, USER_CALLBACK_TYPE_VALUES)
+MU_DEFINE_ENUM(USER_CALLBACK_TYPE, USER_CALLBACK_TYPE_VALUES)
+MU_DEFINE_ENUM_STRINGS(USER_CALLBACK_TYPE, USER_CALLBACK_TYPE_VALUES)
 
 typedef struct DEVICE_TWIN_CALLBACK_INFO_TAG
 {
@@ -344,7 +344,7 @@ static int make_method_calback_queue_context(USER_CALLBACK_INFO* queue_cb_info, 
     {
         /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_003: [ If a failure is encountered IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK shall return a non-NULL value. ]*/
         LogError("STRING_construct failed");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -353,7 +353,7 @@ static int make_method_calback_queue_context(USER_CALLBACK_INFO* queue_cb_info, 
             STRING_delete(queue_cb_info->iothub_callback.method_cb_info.method_name);
             /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_003: [ If a failure is encountered IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK shall return a non-NULL value. ]*/
             LogError("BUFFER_create failed");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -367,7 +367,7 @@ static int make_method_calback_queue_context(USER_CALLBACK_INFO* queue_cb_info, 
                 BUFFER_delete(queue_cb_info->iothub_callback.method_cb_info.payload);
                 /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_003: [ If a failure is encountered IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK shall return a non-NULL value. ]*/
                 LogError("VECTOR_push_back failed");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
         }
     }
@@ -381,7 +381,7 @@ static int iothub_ll_device_method_callback(const char* method_name, const unsig
     if (userContextCallback == NULL)
     {
         LogError("invalid parameter userContextCallback(NULL)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -394,7 +394,7 @@ static int iothub_ll_device_method_callback(const char* method_name, const unsig
         if (result != 0)
         {
             LogError("construction of method calback queue context failed");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
     }
     return result;
@@ -407,7 +407,7 @@ static int iothub_ll_inbound_device_method_callback(const char* method_name, con
     if (userContextCallback == NULL)
     {
         LogError("invalid parameter userContextCallback(NULL)");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -420,7 +420,7 @@ static int iothub_ll_inbound_device_method_callback(const char* method_name, con
         if (result != 0)
         {
             LogError("construction of method calback queue context failed");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
     }
     return result;
@@ -504,7 +504,7 @@ static void iothub_ll_device_twin_callback(DEVICE_TWIN_UPDATE_STATE update_state
             {
                 LogError("failure allocating payload in device twin callback.");
                 queue_cb_info.iothub_callback.dev_twin_cb_info.size = 0;
-                push_to_vector = __FAILURE__;
+                push_to_vector = MU_FAILURE;
             }
             else
             {
@@ -785,7 +785,7 @@ static void dispatch_user_callbacks(IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientIns
             }
 
             default:
-                LogError("Invalid callback type '%s'", ENUM_TO_STRING(USER_CALLBACK_TYPE, queued_cb->type));
+                LogError("Invalid callback type '%s'", MU_ENUM_TO_STRING(USER_CALLBACK_TYPE, queued_cb->type));
                 break;
             }
         }

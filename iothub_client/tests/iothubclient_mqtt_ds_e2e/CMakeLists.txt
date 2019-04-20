@@ -40,6 +40,10 @@ if(${use_sample_trusted_cert})
     include_directories(../../../certs)
 endif()
 
+if(${use_wolfssl})
+    add_definitions(-DUSE_WOLFSSL)
+endif()
+
 if(WIN32)
    if(TARGET ${theseTestsName}_dll)
            target_link_libraries(${theseTestsName}_dll

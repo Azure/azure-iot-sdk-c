@@ -161,7 +161,7 @@ static int IoTHubCallback(void* context, const char* data, size_t size)
 // Invoked when a connection status changes.  Tests poll the status in the connection_status_info to make sure expected transitions occur.
 static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS status, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void* userContextCallback)
 {
-    LogInfo("connection_status_callback: status=<%d>, reason=<%s>", status, ENUM_TO_STRING(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason));
+    LogInfo("connection_status_callback: status=<%d>, reason=<%s>", status, MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason));
 
     CONNECTION_STATUS_INFO* connection_status_info = (CONNECTION_STATUS_INFO*)userContextCallback;
     if (Lock(connection_status_info->lock) != LOCK_OK)
@@ -189,7 +189,7 @@ static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS status, I
 
 static void ReceiveConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
-    LogInfo("ReceiveConfirmationCallback invoked, result=<%s>, userContextCallback=<%p>", ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result), userContextCallback);
+    LogInfo("ReceiveConfirmationCallback invoked, result=<%s>, userContextCallback=<%p>", MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result), userContextCallback);
 
     EXPECTED_SEND_DATA* expectedData = (EXPECTED_SEND_DATA*)userContextCallback;
     if (expectedData != NULL)

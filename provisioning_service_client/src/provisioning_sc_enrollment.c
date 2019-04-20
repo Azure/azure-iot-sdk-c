@@ -43,7 +43,7 @@ typedef struct ENROLLMENT_GROUP_TAG
     char* updated_date_time_utc; //read only
 } ENROLLMENT_GROUP;
 
-DEFINE_ENUM_STRINGS(PROVISIONING_STATUS, PROVISIONING_STATUS_VALUES)
+MU_DEFINE_ENUM_STRINGS(PROVISIONING_STATUS, PROVISIONING_STATUS_VALUES)
 
 static const char* provisioningStatus_toJson(PROVISIONING_STATUS status)
 {
@@ -58,7 +58,7 @@ static const char* provisioningStatus_toJson(PROVISIONING_STATUS status)
     }
     else
     {
-        LogError("Could not convert '%s' to JSON", ENUM_TO_STRING(PROVISIONING_STATUS, status));
+        LogError("Could not convert '%s' to JSON", MU_ENUM_TO_STRING(PROVISIONING_STATUS, status));
     }
 
     return result;
@@ -638,12 +638,12 @@ int individualEnrollment_setAttestationMechanism(INDIVIDUAL_ENROLLMENT_HANDLE en
     if (enrollment == NULL)
     {
         LogError("enrollment handle is NULL");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (!attestationMechanism_isValidForIndividualEnrollment(att_mech))
     {
         LogError("Invalid attestation mechanism for Individual Enrollment");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -677,7 +677,7 @@ int individualEnrollment_setInitialTwin(INDIVIDUAL_ENROLLMENT_HANDLE enrollment,
     if (enrollment == NULL)
     {
         LogError("enrollment handle is NULL");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -711,7 +711,7 @@ int individualEnrollment_setDeviceCapabilities(INDIVIDUAL_ENROLLMENT_HANDLE enro
     if (enrollment == NULL)
     {
         LogError("enrollment handle is NULL");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -776,7 +776,7 @@ int individualEnrollment_setDeviceId(INDIVIDUAL_ENROLLMENT_HANDLE enrollment, co
     if (enrollment == NULL)
     {
         LogError("handle is NULL");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (device_id == NULL)
     {
@@ -786,7 +786,7 @@ int individualEnrollment_setDeviceId(INDIVIDUAL_ENROLLMENT_HANDLE enrollment, co
     else if (mallocAndStrcpy_overwrite(&(enrollment->device_id), device_id) != 0)
     {
         LogError("Failed to set device id");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
 
     return result;
@@ -831,7 +831,7 @@ int individualEnrollment_setEtag(INDIVIDUAL_ENROLLMENT_HANDLE enrollment, const 
     if (enrollment == NULL)
     {
         LogError("Invalid handle");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (etag == NULL)
     {
@@ -841,7 +841,7 @@ int individualEnrollment_setEtag(INDIVIDUAL_ENROLLMENT_HANDLE enrollment, const 
     else if (mallocAndStrcpy_overwrite(&(enrollment->etag), etag) != 0)
     {
         LogError("Failed to set etag");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
 
     return result;
@@ -870,12 +870,12 @@ int individualEnrollment_setProvisioningStatus(INDIVIDUAL_ENROLLMENT_HANDLE enro
     if (enrollment == NULL)
     {
         LogError("Invalid handle");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (prov_status == PROVISIONING_STATUS_NONE)
     {
         LogError("Invalid provisioning status");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -941,12 +941,12 @@ int enrollmentGroup_setAttestationMechanism(ENROLLMENT_GROUP_HANDLE enrollment, 
     if (enrollment == NULL)
     {
         LogError("enrollment handle is NULL");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (!attestationMechanism_isValidForEnrollmentGroup(att_mech))
     {
         LogError("Attestation Mechanism is invalid for Enrollment Group");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -980,7 +980,7 @@ int enrollmentGroup_setInitialTwin(ENROLLMENT_GROUP_HANDLE enrollment, INITIAL_T
     if (enrollment == NULL)
     {
         LogError("enrollment handle is NULL");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1046,7 +1046,7 @@ int enrollmentGroup_setEtag(ENROLLMENT_GROUP_HANDLE enrollment, const char* etag
     if (enrollment == NULL)
     {
         LogError("Invalid handle");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (etag == NULL)
     {
@@ -1056,7 +1056,7 @@ int enrollmentGroup_setEtag(ENROLLMENT_GROUP_HANDLE enrollment, const char* etag
     else if (mallocAndStrcpy_overwrite(&(enrollment->etag), etag) != 0)
     {
         LogError("Failed to set etag");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
 
     return result;
@@ -1085,12 +1085,12 @@ int enrollmentGroup_setProvisioningStatus(ENROLLMENT_GROUP_HANDLE enrollment, PR
     if (enrollment == NULL)
     {
         LogError("Invalid handle");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (prov_status == PROVISIONING_STATUS_NONE)
     {
         LogError("Invalid provisioning status");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
