@@ -62,7 +62,7 @@ static void my_gballoc_free(void* ptr)
 
 #include "azure_c_shared_utility/umock_c_prod.h"
 MOCKABLE_FUNCTION(, void, on_transport_register_data_cb, PROV_DEVICE_TRANSPORT_RESULT, transport_result, BUFFER_HANDLE, iothub_key, const char*, assigned_hub, const char*, device_id, void*, user_ctx);
-MOCKABLE_FUNCTION(, void, on_transport_status_cb, PROV_DEVICE_TRANSPORT_STATUS, transport_status, void*, user_ctx);
+MOCKABLE_FUNCTION(, void, on_transport_status_cb, PROV_DEVICE_TRANSPORT_STATUS, transport_status, uint32_t, retry_interval, void*, user_ctx);
 MOCKABLE_FUNCTION(, char*, on_transport_challenge_callback, const unsigned char*, nonce, size_t, nonce_len, const char*, key_name, void*, user_ctx);
 MOCKABLE_FUNCTION(, PROV_TRANSPORT_IO_INFO*, on_transport_io, const char*, fqdn, SASL_MECHANISM_HANDLE*, sasl_mechanism, const HTTP_PROXY_OPTIONS*, proxy_info);
 MOCKABLE_FUNCTION(, char*, on_transport_create_json_payload, const char*, ek_value, const char*, srk_value, void*, user_ctx);
@@ -451,9 +451,7 @@ MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
-    char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
-    ASSERT_FAIL(temp_str);
+    ASSERT_FAIL("umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
 }
 
 static TEST_MUTEX_HANDLE g_testByTest;
@@ -493,6 +491,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         REGISTER_UMOCK_ALIAS_TYPE(ON_LINK_ATTACHED, void*);
         REGISTER_UMOCK_ALIAS_TYPE(role, bool);
         REGISTER_UMOCK_ALIAS_TYPE(AMQP_VALUE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(AMQP_TYPE, int);
         REGISTER_UMOCK_ALIAS_TYPE(fields, void*);
         REGISTER_UMOCK_ALIAS_TYPE(receiver_settle_mode, uint8_t);
         REGISTER_UMOCK_ALIAS_TYPE(ON_MESSAGE_RECEIVER_STATE_CHANGED, void*);
@@ -501,7 +500,6 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         REGISTER_UMOCK_ALIAS_TYPE(MESSAGE_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(tickcounter_ms_t, uint32_t);
-
 
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
@@ -532,6 +530,17 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(messaging_create_target, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(link_create, my_link_create);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(link_create, NULL);
+        REGISTER_GLOBAL_MOCK_RETURN(message_get_application_properties, 0);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(message_get_application_properties, __LINE__);
+        REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_get_inplace_described_value, TEST_AMQP_VALUE);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqpvalue_get_inplace_described_value, NULL);
+        REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_get_map_pair_count, 0);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqpvalue_get_map_pair_count, __LINE__);
+        REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_get_map_key_value_pair, 0);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqpvalue_get_map_key_value_pair, __LINE__);
+        REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_get_int, 0);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqpvalue_get_int, __LINE__);
+
 
         REGISTER_GLOBAL_MOCK_HOOK(on_transport_challenge_callback, my_on_transport_challenge_callback);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(on_transport_challenge_callback, NULL);
@@ -646,6 +655,28 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         return result;
     }
 
+    static void setup_retry_after_mocks(AMQP_TYPE type)
+    {
+        uint32_t retry_after_count = 1;
+        const char* retry_after_string = "Retry-After";
+        STRICT_EXPECTED_CALL(message_get_application_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_get_inplace_described_value(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_get_map_pair_count(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_pair_count(&retry_after_count, sizeof(uint32_t));
+        STRICT_EXPECTED_CALL(amqpvalue_get_map_key_value_pair(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqpvalue_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_string_value(&retry_after_string, sizeof(char*));
+        STRICT_EXPECTED_CALL(amqpvalue_get_type(IGNORED_PTR_ARG)).SetReturn(type).CallCannotFail();
+        if (type == AMQP_TYPE_INT)
+        {
+            int32_t retry_after_value = 2;
+            STRICT_EXPECTED_CALL(amqpvalue_get_int(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_int_value(&retry_after_value, sizeof(int32_t));
+        }
+        else
+        {
+            char* retry_after_value = "2";
+            STRICT_EXPECTED_CALL(amqpvalue_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_string_value(&retry_after_value, sizeof(char*));
+        }
+    }
+
     static void setup_retrieve_amqp_property_mocks(const char* string_value)
     {
         STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
@@ -657,11 +688,12 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
     }
 
-    static void setup_on_message_recv_callback_mocks()
+    static void setup_on_message_recv_callback_mocks(AMQP_TYPE type)
     {
         STRICT_EXPECTED_CALL(message_get_body_type(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(message_get_body_amqp_data_in_place(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        setup_retry_after_mocks(type);
         STRICT_EXPECTED_CALL(messaging_delivery_accepted());
     }
 
@@ -1115,7 +1147,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         //arrange
         STRICT_EXPECTED_CALL(BUFFER_clone(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(BUFFER_clone(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
 
         umock_c_negative_tests_snapshot();
 
@@ -1611,7 +1643,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        setup_on_message_recv_callback_mocks();
+        setup_on_message_recv_callback_mocks(AMQP_TYPE_INT);
 
         //act
         result = g_on_msg_recv(msg_recv_callback_context, TEST_MESSAGE_HANDLE);
@@ -1640,7 +1672,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        setup_on_message_recv_callback_mocks();
+        setup_on_message_recv_callback_mocks(AMQP_TYPE_STRING);
 
         //act
         result = g_on_msg_recv(msg_recv_callback_context, TEST_MESSAGE_HANDLE);
@@ -1653,7 +1685,6 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         prov_transport_common_amqp_close(handle);
         prov_transport_common_amqp_destroy(handle);
     }
-
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_055: [ When then transport_state is set to TRANSPORT_CLIENT_STATE_STATUS_SEND, prov_transport_common_amqp_dowork shall send a AMQP_OPERATION_STATUS message ] */
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_056: [ Upon successful sending of a AMQP_OPERATION_STATUS message, prov_transport_common_amqp_dowork shall set the transport_state to TRANSPORT_CLIENT_STATE_STATUS_SENT ] */
     TEST_FUNCTION(prov_transport_common_amqp_dowork_send_status_succeed)

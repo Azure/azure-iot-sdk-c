@@ -53,7 +53,7 @@ static void my_gballoc_free(void* ptr)
 
 #include "azure_c_shared_utility/umock_c_prod.h"
 MOCKABLE_FUNCTION(, void, on_transport_register_data_cb, PROV_DEVICE_TRANSPORT_RESULT, transport_result, BUFFER_HANDLE, iothub_key, const char*, assigned_hub, const char*, device_id, void*, user_ctx);
-MOCKABLE_FUNCTION(, void, on_transport_status_cb, PROV_DEVICE_TRANSPORT_STATUS, transport_status, void*, user_ctx);
+MOCKABLE_FUNCTION(, void, on_transport_status_cb, PROV_DEVICE_TRANSPORT_STATUS, transport_status, uint32_t, retry_interval, void*, user_ctx);
 MOCKABLE_FUNCTION(, char*, on_transport_challenge_callback, const unsigned char*, nonce, size_t, nonce_len, const char*, key_name, void*, user_ctx);
 MOCKABLE_FUNCTION(, char*, on_transport_create_json_payload, const char*, ek_value, const char*, srk_value, void*, user_ctx);
 MOCKABLE_FUNCTION(, PROV_JSON_INFO*, on_transport_json_parse, const char*, json_document, void*, user_ctx);
@@ -334,10 +334,11 @@ static void my_on_transport_register_data_cb(PROV_DEVICE_TRANSPORT_RESULT transp
     (void)user_ctx;
 }
 
-static void my_on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS transport_status, void* user_ctx)
+static void my_on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS transport_status, uint32_t retry_after, void* user_ctx)
 {
     (void)transport_status;
     (void)user_ctx;
+    (void)retry_after;
 }
 
 MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
@@ -1075,6 +1076,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(NULL);
 
         //act
         g_on_http_reply_recv(g_http_execute_ctx, HTTP_CALLBACK_REASON_OK, (const unsigned char*)TEST_JSON_CONTENT, TEST_JSON_CONTENT_LEN, TEST_SUCCESS_STATUS_CODE, TEST_HTTP_HANDLE_VALUE);
@@ -1097,6 +1099,8 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         prov_dev_http_transport_dowork(handle);
         umock_c_reset_all_calls();
 
+        STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn("2");
+
         //act
         g_on_http_reply_recv(g_http_execute_ctx, HTTP_CALLBACK_REASON_OK, (const unsigned char*)TEST_JSON_CONTENT, TEST_JSON_CONTENT_LEN, TEST_FAILURE_STATUS_CODE, TEST_HTTP_HANDLE_VALUE);
 
@@ -1117,6 +1121,8 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         g_on_http_open(g_http_open_ctx, HTTP_CALLBACK_REASON_OK);
         prov_dev_http_transport_dowork(handle);
         umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn("5");
 
         //act
         g_on_http_reply_recv(g_http_execute_ctx, HTTP_CALLBACK_REASON_OK, (const unsigned char*)TEST_JSON_CONTENT, TEST_JSON_CONTENT_LEN, TEST_THROTTLE_STATUS_CODE, TEST_HTTP_HANDLE_VALUE);
@@ -1341,7 +1347,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         STRICT_EXPECTED_CALL(uhttp_client_dowork(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(on_transport_json_parse(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_ASSIGNING, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_ASSIGNING, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
         g_target_transport_status = PROV_DEVICE_TRANSPORT_STATUS_ASSIGNING;

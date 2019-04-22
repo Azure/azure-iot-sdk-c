@@ -106,6 +106,7 @@ typedef struct PROV_TRANSPORT_MQTT_INFO_TAG
     MQTT_TRANSPORT_STATE mqtt_state;
 
     XIO_HANDLE transport_io;
+    uint32_t retry_after_value;
 
     PROV_TRANSPORT_ERROR_CALLBACK error_cb;
     void* error_ctx;
@@ -271,6 +272,14 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
     }
 }
 
+static int get_retry_after_property(const char* topic_name, PROV_TRANSPORT_MQTT_INFO* mqtt_info)
+{
+    int result = 0;
+    (void)mqtt_info;
+    (void)topic_name;
+    return result;
+}
+
 static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE handle, void* user_ctx)
 {
     if (user_ctx != NULL)
@@ -294,6 +303,10 @@ static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE handle, void* user_ct
                     is_transient_error = true;
                 }
             }
+
+            // Get the retry after field on failures this value will
+            // be set to the default value
+            (void)get_retry_after_property(topic_resp, mqtt_info);
         }
         else
         {
@@ -366,9 +379,6 @@ static int send_mqtt_message(PROV_TRANSPORT_MQTT_INFO* mqtt_info, const char* ms
     }
     else
     {
-
-        printf("%s\r\n", prov_payload);
-
         if (mqtt_client_publish(mqtt_info->mqtt_client, msg_handle) != 0)
         {
             LogError("Failed publishing client message");
@@ -727,6 +737,7 @@ PROV_DEVICE_TRANSPORT_HANDLE prov_transport_common_mqtt_create(const char* uri, 
                 result->hsm_type = type;
                 result->error_cb = error_cb;
                 result->error_ctx = error_ctx;
+                result->retry_after_value = PROV_GET_THROTTLE_TIME;
             }
         }
     }
@@ -928,7 +939,7 @@ void prov_transport_common_mqtt_dowork(PROV_DEVICE_TRANSPORT_HANDLE handle)
             }
             else
             {
-                mqtt_info->status_cb(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, mqtt_info->status_ctx);
+                mqtt_info->status_cb(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, mqtt_info->retry_after_value, mqtt_info->status_ctx);
                 mqtt_info->mqtt_state = MQTT_STATE_SUBSCRIBING;
             }
         }
@@ -1003,7 +1014,7 @@ void prov_transport_common_mqtt_dowork(PROV_DEVICE_TRANSPORT_HANDLE handle)
                                     {
                                         if (mqtt_info->status_cb != NULL)
                                         {
-                                            mqtt_info->status_cb(parse_info->prov_status, mqtt_info->status_ctx);
+                                            mqtt_info->status_cb(parse_info->prov_status, mqtt_info->retry_after_value, mqtt_info->status_ctx);
                                         }
                                         mqtt_info->transport_state = TRANSPORT_CLIENT_STATE_IDLE;
                                     }
@@ -1030,7 +1041,7 @@ void prov_transport_common_mqtt_dowork(PROV_DEVICE_TRANSPORT_HANDLE handle)
                     case TRANSPORT_CLIENT_STATE_TRANSIENT:
                         if (mqtt_info->status_cb != NULL)
                         {
-                            mqtt_info->status_cb(PROV_DEVICE_TRANSPORT_STATUS_TRANSIENT, mqtt_info->status_ctx);
+                            mqtt_info->status_cb(PROV_DEVICE_TRANSPORT_STATUS_TRANSIENT, mqtt_info->retry_after_value, mqtt_info->status_ctx);
                         }
                         mqtt_info->transport_state = TRANSPORT_CLIENT_STATE_IDLE;
                         break;

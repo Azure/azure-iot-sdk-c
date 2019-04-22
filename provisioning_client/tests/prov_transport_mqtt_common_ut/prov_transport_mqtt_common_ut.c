@@ -49,7 +49,7 @@ static void my_gballoc_free(void* ptr)
 #include "azure_c_shared_utility/umock_c_prod.h"
 
 MOCKABLE_FUNCTION(, void, on_transport_register_data_cb, PROV_DEVICE_TRANSPORT_RESULT, transport_result, BUFFER_HANDLE, iothub_key, const char*, assigned_hub, const char*, device_id, void*, user_ctx);
-MOCKABLE_FUNCTION(, void, on_transport_status_cb, PROV_DEVICE_TRANSPORT_STATUS, transport_status, void*, user_ctx);
+MOCKABLE_FUNCTION(, void, on_transport_status_cb, PROV_DEVICE_TRANSPORT_STATUS, transport_status, uint32_t, retry_interval, void*, user_ctx);
 MOCKABLE_FUNCTION(, char*, on_transport_challenge_callback, const unsigned char*, nonce, size_t, nonce_len, const char*, key_name, void*, user_ctx);
 MOCKABLE_FUNCTION(, XIO_HANDLE, on_mqtt_transport_io, const char*, fully_qualified_name, const HTTP_PROXY_OPTIONS*, proxy_info);
 MOCKABLE_FUNCTION(, char*, on_transport_create_json_payload, const char*, ek_value, const char*, srk_value, void*, user_ctx);
@@ -1195,7 +1195,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         //arrange
         STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(mqtt_client_subscribe(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
 
         //act
         prov_transport_common_mqtt_dowork(handle);
@@ -1373,7 +1373,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         //arrange
         STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_PTR_ARG)).SetReturn("$dps/registrations/res/500/?$rid=1");
         STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_TRANSIENT, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_TRANSIENT, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
 
         //act
         g_on_msg_recv(TEST_MQTT_MESSAGE, g_msg_recv_callback_context);
@@ -1410,7 +1410,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         //arrange
         STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_PTR_ARG)).SetReturn("$dps/registrations/res/429/?$rid=1");
         STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_TRANSIENT, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_TRANSIENT, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
 
         //act
         g_on_msg_recv(TEST_MQTT_MESSAGE, g_msg_recv_callback_context);
@@ -1532,7 +1532,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         //arrange
         STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_PTR_ARG)).SetReturn("$dps/registrations/res/500/?$rid=1");
         STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_TRANSIENT, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_TRANSIENT, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
 
         //act
         g_on_msg_recv(TEST_MQTT_MESSAGE, g_msg_recv_callback_context);

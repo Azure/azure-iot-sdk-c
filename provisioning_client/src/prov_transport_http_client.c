@@ -16,6 +16,9 @@
 
 #include "azure_prov_client/prov_transport_http_client.h"
 #include "azure_prov_client/internal/prov_transport_private.h"
+#include "azure_prov_client/internal/prov_transport_utils.h"
+#include "azure_prov_client/prov_client_const.h"
+
 #include "azure_uhttp_c/uhttp.h"
 #include "parson.h"
 
@@ -31,6 +34,7 @@ static const char* const HEADER_USER_AGENT = "UserAgent";
 static const char* const HEADER_ACCEPT = "Accept";
 static const char* const HEADER_CONTENT_TYPE = "Content-Type";
 static const char* const HEADER_CONNECTION = "Connection";
+static const char* const HEADER_RETRY_AFTER_KEY_VALUE = "retry-after";
 static const char* const USER_AGENT_VALUE = "prov_device_client/1.0";
 static const char* const ACCEPT_VALUE = "application/json";
 static const char* const CONTENT_TYPE_VALUE = "application/json; charset=utf-8";
@@ -99,6 +103,7 @@ typedef struct PROV_TRANSPORT_HTTP_INFO_TAG
     TRANSPORT_HSM_TYPE hsm_type;
 
     HTTP_CLIENT_HANDLE http_client;
+    uint32_t retry_after_value;
 
     PROV_TRANSPORT_ERROR_CALLBACK error_cb;
     void* error_ctx;
@@ -182,6 +187,8 @@ static void on_http_reply_recv(void* callback_ctx, HTTP_CALLBACK_REASON request_
             LogError("Failure status code sent from the server: %u", status_code);
             http_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
         }
+        // The call to parse_retry_after_value can not fail
+        http_info->retry_after_value = parse_retry_after_value(HTTPHeaders_FindHeaderValue(responseHeadersHandle, HEADER_RETRY_AFTER_KEY_VALUE));
     }
     else
     {
@@ -198,7 +205,7 @@ static void on_http_connected(void* callback_ctx, HTTP_CALLBACK_REASON open_resu
         {
             if (http_info->status_cb != NULL)
             {
-                http_info->status_cb(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, http_info->status_ctx);
+                http_info->status_cb(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, http_info->retry_after_value, http_info->status_ctx);
             }
             http_info->http_connected = true;
         }
@@ -251,7 +258,7 @@ static HTTP_HEADERS_HANDLE construct_http_headers(const char* sas_token)
 
 static char* construct_json_data(PROV_TRANSPORT_HTTP_INFO* http_info)
 {
-    char* result = NULL;
+    char* result;
     bool data_success = true;
     STRING_HANDLE encoded_srk = NULL;
     STRING_HANDLE encoded_ek = NULL;
@@ -393,7 +400,7 @@ static int send_registration_info(PROV_TRANSPORT_HTTP_INFO* http_info)
     else if ((json_data = construct_json_data(http_info)) == NULL)
     {
         /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_021: [ If any error is encountered prov_transport_http_register_device shall return a non-zero value. ] */
-        LogError("Failure constructing uri path");
+        LogError("Failure constructing json payload");
         HTTPHeaders_Free(http_headers);
         free(uri_path);
         result = MU_FAILURE;
@@ -401,7 +408,7 @@ static int send_registration_info(PROV_TRANSPORT_HTTP_INFO* http_info)
     else
     {
         /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_020: [ prov_transport_http_register_device shall send the request using the http client. ] */
-        if (uhttp_client_execute_request(http_info->http_client, HTTP_CLIENT_REQUEST_PUT, uri_path, http_headers, NULL/*(const unsigned char*)json_data*/, 0/*strlen(json_data)*/, on_http_reply_recv, http_info) != HTTP_CLIENT_OK)
+        if (uhttp_client_execute_request(http_info->http_client, HTTP_CLIENT_REQUEST_PUT, uri_path, http_headers, (const unsigned char*)json_data, strlen(json_data), on_http_reply_recv, http_info) != HTTP_CLIENT_OK)
         {
             /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_021: [ If any error is encountered prov_transport_http_register_device shall return a non-zero value. ] */
             LogError("Failure sending http request");
@@ -670,6 +677,7 @@ PROV_DEVICE_TRANSPORT_HANDLE prov_transport_http_create(const char* uri, TRANSPO
             }
             else
             {
+                result->retry_after_value = PROV_GET_THROTTLE_TIME;
                 result->hsm_type = type;
                 result->error_cb = error_cb;
                 result->error_ctx = error_ctx;
@@ -978,7 +986,7 @@ void prov_transport_http_dowork(PROV_DEVICE_TRANSPORT_HANDLE handle)
                             {
                                 if (http_info->status_cb != NULL)
                                 {
-                                    http_info->status_cb(parse_info->prov_status, http_info->status_ctx);
+                                    http_info->status_cb(parse_info->prov_status, http_info->retry_after_value, http_info->status_ctx);
                                 }
                                 http_info->transport_state = TRANSPORT_CLIENT_STATE_IDLE;
                             }
@@ -998,7 +1006,7 @@ void prov_transport_http_dowork(PROV_DEVICE_TRANSPORT_HANDLE handle)
             case TRANSPORT_CLIENT_STATE_TRANSIENT:
                 if (http_info->status_cb != NULL)
                 {
-                    http_info->status_cb(PROV_DEVICE_TRANSPORT_STATUS_TRANSIENT, http_info->status_ctx);
+                    http_info->status_cb(PROV_DEVICE_TRANSPORT_STATUS_TRANSIENT, http_info->retry_after_value, http_info->status_ctx);
                 }
                 http_info->transport_state = TRANSPORT_CLIENT_STATE_IDLE;
                 break;

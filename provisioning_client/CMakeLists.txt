@@ -248,8 +248,10 @@ if(${use_prov_client})
         set(PROV_HTTP_CLIENT_H_FILES
             ./inc/azure_prov_client/prov_transport.h
             ./inc/azure_prov_client/internal/prov_transport_private.h
+            ./inc/azure_prov_client/internal/prov_transport_utils.h
             ./inc/azure_prov_client/prov_transport_http_client.h)
         set(PROV_HTTP_CLIENT_C_FILES
+            ./src/prov_transport_utils.c
             ./src/prov_transport_http_client.c)
 
         # Provisioning http Transport Client library
@@ -270,10 +272,12 @@ if(${use_prov_client})
             ./inc/azure_prov_client/prov_transport_amqp_client.h
             ./inc/azure_prov_client/internal/prov_transport_amqp_common.h
             ./inc/azure_prov_client/internal/prov_transport_private.h
+            ./inc/azure_prov_client/internal/prov_transport_utils.h
             ./inc/azure_prov_client/internal/prov_sasl_tpm.h)
         set(PROV_AMQP_CLIENT_C_FILES
             ./src/prov_transport_amqp_client.c
             ./src/prov_transport_amqp_common.c
+            ./src/prov_transport_utils.c
             ./src/prov_sasl_tpm.c)
 
         set(PROV_AMQP_WS_CLIENT_H_FILES
@@ -281,10 +285,12 @@ if(${use_prov_client})
             ./inc/azure_prov_client/prov_transport_amqp_ws_client.h
             ./inc/azure_prov_client/internal/prov_transport_amqp_common.h
             ./inc/azure_prov_client/internal/prov_transport_private.h
+            ./inc/azure_prov_client/internal/prov_transport_utils.h
             ./inc/azure_prov_client/internal/prov_sasl_tpm.h)
         set(PROV_AMQP_WS_CLIENT_C_FILES
             ./src/prov_transport_amqp_ws_client.c
             ./src/prov_transport_amqp_common.c
+            ./src/prov_transport_utils.c
             ./src/prov_sasl_tpm.c)
 
         add_library(prov_amqp_ws_transport ${PROV_AMQP_WS_CLIENT_C_FILES} ${PROV_AMQP_WS_CLIENT_H_FILES})
@@ -310,18 +316,22 @@ if(${use_prov_client})
             ./inc/azure_prov_client/prov_transport.h
             ./inc/azure_prov_client/prov_transport_mqtt_client.h
             ./inc/azure_prov_client/internal/prov_transport_private.h
+            ./inc/azure_prov_client/internal/prov_transport_utils.h
             ./inc/azure_prov_client/internal/prov_transport_mqtt_common.h)
         set(PROV_MQTT_CLIENT_C_FILES
             ./src/prov_transport_mqtt_client.c
+            ./src/prov_transport_utils.c
             ./src/prov_transport_mqtt_common.c)
 
         set(PROV_MQTT_WS_CLIENT_H_FILES
             ./inc/azure_prov_client/prov_transport.h
             ./inc/azure_prov_client/prov_transport_mqtt_ws_client.h
             ./inc/azure_prov_client/internal/prov_transport_private.h
+            ./inc/azure_prov_client/internal/prov_transport_utils.h
             ./inc/azure_prov_client/internal/prov_transport_mqtt_common.h)
         set(PROV_MQTT_WS_CLIENT_C_FILES
             ./src/prov_transport_mqtt_ws_client.c
+            ./src/prov_transport_utils.c
             ./src/prov_transport_mqtt_common.c)
 
         add_library(prov_mqtt_ws_transport ${PROV_MQTT_WS_CLIENT_C_FILES} ${PROV_MQTT_WS_CLIENT_H_FILES})

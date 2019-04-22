@@ -163,8 +163,9 @@ static int TEST_ERROR_STATUS_CODE = 500;
 #define TEST_JSON_STATUS_VALUE (JSON_Value*)0x11111114
 #define TEST_BUFFER_HANDLE_VALUE (BUFFER_HANDLE)0x11111115
 
-#define TEST_DPS_HUB_ERROR_NO_HUB        400208
-#define TEST_DPS_HUB_ERROR_UNAUTH        400209
+#define TEST_DPS_HUB_ERROR_NO_HUB       400208
+#define TEST_DPS_HUB_ERROR_UNAUTH       400209
+#define DEFAULT_RETRY_AFTER             2
 
 static unsigned char TEST_ENDORSMENT_KEY[] = { 'k', 'e', 'y' };
 
@@ -214,20 +215,20 @@ static void free_prov_json_info(PROV_JSON_INFO* parse_info)
     {
         switch (parse_info->prov_status)
         {
-        case PROV_DEVICE_TRANSPORT_STATUS_UNASSIGNED:
-            BUFFER_delete(parse_info->authorization_key);
-            free(parse_info->key_name);
-            break;
-        case PROV_DEVICE_TRANSPORT_STATUS_ASSIGNED:
-            BUFFER_delete(parse_info->authorization_key);
-            free(parse_info->iothub_uri);
-            free(parse_info->device_id);
-            break;
-        case PROV_DEVICE_TRANSPORT_STATUS_ASSIGNING:
-            free(parse_info->operation_id);
-            break;
-        default:
-            break;
+            case PROV_DEVICE_TRANSPORT_STATUS_UNASSIGNED:
+                BUFFER_delete(parse_info->authorization_key);
+                free(parse_info->key_name);
+                break;
+            case PROV_DEVICE_TRANSPORT_STATUS_ASSIGNED:
+                BUFFER_delete(parse_info->authorization_key);
+                free(parse_info->iothub_uri);
+                free(parse_info->device_id);
+                break;
+            case PROV_DEVICE_TRANSPORT_STATUS_ASSIGNING:
+                free(parse_info->operation_id);
+                break;
+            default:
+                break;
         }
         my_gballoc_free(parse_info);
     }
@@ -273,7 +274,7 @@ char* my_json_serialize_to_string(const JSON_Value* value)
 
 void my_json_free_serialized_string(char* string)
 {
-    (void)string;
+    my_gballoc_free(string);
 }
 
 static PROV_DEVICE_TRANSPORT_HANDLE my_prov_transport_create(const char* uri, TRANSPORT_HSM_TYPE type, const char* scope_id, const char* prov_api_version, PROV_TRANSPORT_ERROR_CALLBACK error_cb, void* error_ctx)
@@ -638,13 +639,13 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     }
 
     static void setup_destroy_prov_info_mocks(void)
     {
         setup_cleanup_prov_info_mocks();
 
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(prov_transport_destroy(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(prov_auth_destroy(IGNORED_PTR_ARG));
@@ -1049,7 +1050,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //arrange
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
         umock_c_reset_all_calls();
 
         setup_Prov_Device_LL_DoWork_register_send_mocks();
@@ -1069,7 +1070,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //arrange
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
         umock_c_reset_all_calls();
 
         int negativeTestsInitResult = umock_c_negative_tests_init();
@@ -1121,7 +1122,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //arrange
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
         Prov_Device_LL_DoWork(handle);
         umock_c_reset_all_calls();
 
@@ -1164,7 +1165,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //arrange
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
         Prov_Device_LL_DoWork(handle);
         umock_c_reset_all_calls();
 
@@ -1190,7 +1191,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //arrange
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
         Prov_Device_LL_DoWork(handle);
         umock_c_reset_all_calls();
 
@@ -1213,7 +1214,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //arrange
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
         Prov_Device_LL_DoWork(handle);
         umock_c_reset_all_calls();
 
@@ -1239,7 +1240,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //arrange
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
         Prov_Device_LL_DoWork(handle);
         umock_c_reset_all_calls();
 
@@ -1278,7 +1279,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //arrange
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
         Prov_Device_LL_DoWork(handle);
         umock_c_reset_all_calls();
 
@@ -1309,7 +1310,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //arrange
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
         Prov_Device_LL_DoWork(handle);
         umock_c_reset_all_calls();
 
@@ -1369,9 +1370,9 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //arrange
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
         Prov_Device_LL_DoWork(handle);
-        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_AUTHENTICATED, g_status_ctx);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_AUTHENTICATED, DEFAULT_RETRY_AFTER, g_status_ctx);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(prov_transport_dowork(IGNORED_PTR_ARG));
@@ -1394,9 +1395,9 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //arrange
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
         Prov_Device_LL_DoWork(handle);
-        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_AUTHENTICATED, g_status_ctx);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_AUTHENTICATED, DEFAULT_RETRY_AFTER, g_status_ctx);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(prov_transport_dowork(IGNORED_PTR_ARG));
@@ -1422,7 +1423,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //arrange
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
         Prov_Device_LL_DoWork(handle);
         umock_c_reset_all_calls();
 
@@ -1442,7 +1443,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //arrange
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
         Prov_Device_LL_DoWork(handle);
         umock_c_reset_all_calls();
 
@@ -1462,7 +1463,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //arrange
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
         Prov_Device_LL_DoWork(handle);
         umock_c_reset_all_calls();
 
@@ -1484,7 +1485,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //arrange
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
         Prov_Device_LL_DoWork(handle);
         umock_c_reset_all_calls();
 
@@ -1528,7 +1529,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //arrange
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
         Prov_Device_LL_DoWork(handle);
         umock_c_reset_all_calls();
 
@@ -1551,7 +1552,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //arrange
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
         Prov_Device_LL_DoWork(handle);
         umock_c_reset_all_calls();
 
@@ -1570,7 +1571,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //arrange
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
         Prov_Device_LL_DoWork(handle);
         umock_c_reset_all_calls();
 
@@ -1589,7 +1590,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //arrange
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
         Prov_Device_LL_DoWork(handle);
         umock_c_reset_all_calls();
 
@@ -1608,7 +1609,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //arrange
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
         Prov_Device_LL_DoWork(handle);
         umock_c_reset_all_calls();
 
@@ -1652,7 +1653,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //arrange
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
         Prov_Device_LL_DoWork(handle);
         umock_c_reset_all_calls();
 
@@ -1676,7 +1677,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //arrange
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
         Prov_Device_LL_DoWork(handle);
         umock_c_reset_all_calls();
 
@@ -1801,7 +1802,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //arrange
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(prov_transport_set_trace(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
@@ -1823,7 +1824,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //arrange
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(prov_transport_set_trace(IGNORED_PTR_ARG, IGNORED_NUM_ARG)).SetReturn(__LINE__);
@@ -1941,7 +1942,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //arrange
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
         umock_c_reset_all_calls();
 
         //act
@@ -2066,7 +2067,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //arrange
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
         Prov_Device_LL_DoWork(handle);
         umock_c_reset_all_calls();
 
@@ -2092,7 +2093,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //arrange
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, g_status_ctx);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
         Prov_Device_LL_DoWork(handle);
         umock_c_reset_all_calls();
 

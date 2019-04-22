@@ -115,11 +115,11 @@ MOCKABLE_FUNCTION(, const char*, Prov_Device_LL_GetVersionString);
 * @brief    Sets the Provisioning Data that is sent to the Provisioning service
 *
 * @param    handle          The handle created by a call to the create function.
-* @param    dataField       The data field that is sent to the service.  Setting dataField to NULL will unset the value previously set
+* @param    json            The data field that is sent to the service.  Setting json to NULL will unset the value previously set
 *
 * @return PROV_DEVICE_RESULT_OK upon success or an error code upon failure
 */
-MOCKABLE_FUNCTION(, PROV_DEVICE_RESULT, Prov_Device_LL_Set_Provisioning_Payload, PROV_DEVICE_LL_HANDLE, handle, const char*, json_payload);
+MOCKABLE_FUNCTION(, PROV_DEVICE_RESULT, Prov_Device_LL_Set_Provisioning_Payload, PROV_DEVICE_LL_HANDLE, handle, const char*, json);
 
 /**
 * @brief    Retrieves the Provisioning Data that is sent from the Provisioning service

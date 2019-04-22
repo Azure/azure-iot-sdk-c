@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "parson.h"
 
@@ -53,7 +54,6 @@ static const char* const JSON_STORAGE_ROOT_KEY_NODE = "storageRootKey";
 #define SAS_TOKEN_DEFAULT_LIFETIME  2400
 #define EPOCH_TIME_T_VALUE          (time_t)0
 #define MAX_AUTH_ATTEMPTS           3
-#define PROV_GET_THROTTLE_TIME      1
 #define PROV_DEFAULT_TIMEOUT        60
 
 typedef enum CLIENT_STATE_TAG
@@ -94,6 +94,7 @@ typedef struct PROV_INSTANCE_INFO_TAG
 
     tickcounter_ms_t status_throttle;
     tickcounter_ms_t timeout_value;
+    uint32_t retry_after_value;
 
     uint8_t prov_timeout;
 
@@ -682,13 +683,6 @@ static void cleanup_prov_info(PROV_INSTANCE_INFO* prov_info)
     free(prov_info->iothub_info.iothub_url);
     prov_info->iothub_info.iothub_url = NULL;
     prov_info->auth_attempts_made = 0;
-    free(prov_info->custom_request_data);
-    prov_info->custom_request_data = NULL;
-    if (prov_info->custom_response_data != NULL)
-    {
-        json_free_serialized_string(prov_info->custom_response_data);
-        prov_info->custom_response_data = NULL;
-    }
 }
 
 static void on_transport_registration_data(PROV_DEVICE_TRANSPORT_RESULT transport_result, BUFFER_HANDLE iothub_key, const char* assigned_hub, const char* device_id, void* user_ctx)
@@ -753,7 +747,7 @@ static void on_transport_registration_data(PROV_DEVICE_TRANSPORT_RESULT transpor
     }
 }
 
-static void on_transport_status(PROV_DEVICE_TRANSPORT_STATUS transport_status, void* user_ctx)
+static void on_transport_status(PROV_DEVICE_TRANSPORT_STATUS transport_status, uint32_t retry_interval, void* user_ctx)
 {
     if (user_ctx == NULL)
     {
@@ -762,6 +756,9 @@ static void on_transport_status(PROV_DEVICE_TRANSPORT_STATUS transport_status, v
     else
     {
         PROV_INSTANCE_INFO* prov_info = (PROV_INSTANCE_INFO*)user_ctx;
+
+        prov_info->retry_after_value = retry_interval;
+
         switch (transport_status)
         {
             case PROV_DEVICE_TRANSPORT_STATUS_CONNECTED:
@@ -815,6 +812,14 @@ static void on_transport_status(PROV_DEVICE_TRANSPORT_STATUS transport_status, v
 static void destroy_instance(PROV_INSTANCE_INFO* prov_info)
 {
     cleanup_prov_info(prov_info);
+    // Clean custom request data
+    free(prov_info->custom_request_data);
+    prov_info->custom_request_data = NULL;
+    if (prov_info->custom_response_data != NULL)
+    {
+        json_free_serialized_string(prov_info->custom_response_data);
+        prov_info->custom_response_data = NULL;
+    }
     prov_info->prov_transport_protocol->prov_transport_destroy(prov_info->transport_handle);
     prov_info->transport_handle = NULL;
     free(prov_info->scope_id);
@@ -846,6 +851,7 @@ PROV_DEVICE_LL_HANDLE Prov_Device_LL_Create(const char* uri, const char* id_scop
 
             /* Codes_SRS_PROV_CLIENT_07_028: [ CLIENT_STATE_READY is the initial state after the object is created which will send a uhttp_client_open call to the http endpoint. ] */
             result->prov_state = CLIENT_STATE_READY;
+            result->retry_after_value = PROV_GET_THROTTLE_TIME;
             result->prov_transport_protocol = protocol();
 
             /* Codes_SRS_PROV_CLIENT_07_034: [ Prov_Device_LL_Create shall construct a id_scope by base64 encoding the uri. ] */
@@ -896,7 +902,7 @@ PROV_DEVICE_LL_HANDLE Prov_Device_LL_Create(const char* uri, const char* id_scop
                 {
                     // Ensure that we are passed the throttling time and send on the first send
                     (void)tickcounter_get_current_ms(result->tick_counter, &result->status_throttle);
-                    result->status_throttle += (PROV_GET_THROTTLE_TIME * 1000);
+                    result->status_throttle += (result->retry_after_value * 1000);
                 }
             }
         }
@@ -1112,29 +1118,34 @@ void Prov_Device_LL_DoWork(PROV_DEVICE_LL_HANDLE handle)
                         prov_info->error_reason = PROV_DEVICE_RESULT_ERROR;
                         prov_info->prov_state = CLIENT_STATE_ERROR;
                     }
-                    else if ( (current_time - prov_info->status_throttle) / 1000 > PROV_GET_THROTTLE_TIME)
+                    else
                     {
-                        /* Codes_SRS_PROV_CLIENT_07_026: [ Upon receiving the reply of the CLIENT_STATE_URL_REQ_SEND message from  iothub_client shall process the the reply of the CLIENT_STATE_URL_REQ_SEND state ] */
-                        if (prov_info->prov_transport_protocol->prov_transport_get_op_status(prov_info->transport_handle) != 0)
+                        if ((current_time - prov_info->status_throttle) / 1000 > prov_info->retry_after_value)
                         {
-                            LogError("Failure sending operation status");
-                            if (prov_info->error_reason == PROV_DEVICE_RESULT_OK)
+                            time_t tm = time(NULL);
+LogInfo("Sending now %s", ctime(&tm));
+                            /* Codes_SRS_PROV_CLIENT_07_026: [ Upon receiving the reply of the CLIENT_STATE_URL_REQ_SEND message from  iothub_client shall process the the reply of the CLIENT_STATE_URL_REQ_SEND state ] */
+                            if (prov_info->prov_transport_protocol->prov_transport_get_op_status(prov_info->transport_handle) != 0)
                             {
-                                prov_info->error_reason = PROV_DEVICE_RESULT_TRANSPORT;
-                            }
-                            prov_info->prov_state = CLIENT_STATE_ERROR;
-                        }
-                        else
-                        {
-                            prov_info->prov_state = CLIENT_STATE_STATUS_SENT;
-                            if (tickcounter_get_current_ms(prov_info->tick_counter, &prov_info->timeout_value) != 0)
-                            {
-                                LogError("Failure getting the current time");
-                                prov_info->error_reason = PROV_DEVICE_RESULT_ERROR;
+                                LogError("Failure sending operation status");
+                                if (prov_info->error_reason == PROV_DEVICE_RESULT_OK)
+                                {
+                                    prov_info->error_reason = PROV_DEVICE_RESULT_TRANSPORT;
+                                }
                                 prov_info->prov_state = CLIENT_STATE_ERROR;
                             }
+                            else
+                            {
+                                prov_info->prov_state = CLIENT_STATE_STATUS_SENT;
+                                if (tickcounter_get_current_ms(prov_info->tick_counter, &prov_info->timeout_value) != 0)
+                                {
+                                    LogError("Failure getting the current time");
+                                    prov_info->error_reason = PROV_DEVICE_RESULT_ERROR;
+                                    prov_info->prov_state = CLIENT_STATE_ERROR;
+                                }
+                            }
+                            prov_info->status_throttle = current_time;
                         }
-                        prov_info->status_throttle = current_time;
                     }
                     break;
                 }
@@ -1350,5 +1361,4 @@ const char* Prov_Device_LL_Get_Provisioning_Payload(PROV_DEVICE_LL_HANDLE handle
         result = handle->custom_response_data;
     }
     return result;
-
 }
