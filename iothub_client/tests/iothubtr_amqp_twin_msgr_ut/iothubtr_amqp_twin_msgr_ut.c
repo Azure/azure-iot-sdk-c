@@ -1451,6 +1451,7 @@ TEST_FUNCTION(twin_msgr_stop_success)
     twin_messenger_destroy(handle);
 }
 
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_115: [If the client was subscribed for Twin updates, it must reset itself to continue receiving when twin_messenger_start is invoked ]
 TEST_FUNCTION(twin_msgr_stop_resets_to_resubscribe)
 {
     // arrange
