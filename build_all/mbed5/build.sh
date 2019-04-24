@@ -20,6 +20,7 @@ cp ../provisioning_client/adapters/hsm_client_riot.c mbed-iot-devkit-sdk/cores/a
 mkdir mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/deps/umock-c/
 rsync -av ../deps/umock-c/inc mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/deps/umock-c/inc
 rsync -av ../deps/umock-c/src mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/deps/umock-c/src
+rsync -av ../deps/azure-macro-utils-c/inc/ mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/deps/azure-macro-utils-c/inc/
 
 function fixMURenames
 {
