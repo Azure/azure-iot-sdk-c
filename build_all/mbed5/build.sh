@@ -17,6 +17,9 @@ cp ../c-utility/inc/azure_c_shared_utility/azure_base64.h mbed-iot-devkit-sdk/co
 cp ../c-utility/src/azure_base64.c mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/c-utility/src/azure_base64.c
 cp ../c-utility/src/base32.c mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/c-utility/src/base32_utility.c
 cp ../provisioning_client/adapters/hsm_client_riot.c mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/provisioning_client/adapters/hsm_client_riot.c
+mkdir mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/deps/umock-c/
+rsync -av ../deps/umock-c/inc mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/deps/umock-c/inc
+rsync -av ../deps/umock-c/src mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/deps/umock-c/src
 
 function fixMURenames
 {
