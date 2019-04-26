@@ -229,7 +229,7 @@ if %MAKE_NUGET_PKG% == yes (
 popd
 
 if %build_traceabilitytool%==1 (
-    rem invoke the traceabilitytool here instead of the second build step in Jenkins windows_c job
+    rem invoke the traceabilitytool here instead of the second build step in DevOps windows_c job
     msbuild /m %build-root%\tools\traceabilitytool\traceabilitytool.sln
     if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 )
