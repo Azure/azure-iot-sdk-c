@@ -81,7 +81,7 @@ jobs:
       itemPattern: 'drop/**/*e2e_exe'
 
   - bash: |
-      ./$(Build.SourcesDirectory)/jenkins/raspberrypi/run_tests.sh
+      $(Build.SourcesDirectory)/jenkins/raspberrypi/run_tests.sh
     workingDirectory: '$(System.ArtifactsDirectory)'
     displayName: 'Execute Test'
     # env:
