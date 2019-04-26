@@ -27,7 +27,7 @@ phases:
   steps:
   - script: |
       call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
-      call jenkins\windows_c.cmd
+      call devops\windows_c.cmd
     displayName: 'build'
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
@@ -44,7 +44,7 @@ phases:
       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
       # PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
   - script: |
-      call jenkins\collect_results.cmd iotsdk_win32
+      call devops\collect_results.cmd iotsdk_win32
     displayName: 'cmdLine Transform'
     condition: succeededOrFailed()
   - task: PublishTestResults@2
@@ -68,7 +68,7 @@ phases:
      whoami
      ls -lr
      pwd
-     sudo ./jenkins/raspberrypi_c.sh
+     sudo ./devops/raspberrypi_c.sh
     displayName: 'build'
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
@@ -79,7 +79,7 @@ phases:
   displayName: 'gcc4.4'
   steps:
   - script: |
-      sudo ./jenkins/linux_c_gcc44.sh
+      sudo ./devops/linux_c_gcc44.sh
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
       IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
@@ -97,7 +97,7 @@ phases:
   displayName: 'gcc-4.6'
   steps:
   - script: |
-      sudo ./jenkins/linux_c_gcc44.sh
+      sudo ./devops/linux_c_gcc44.sh
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
       IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
@@ -116,7 +116,7 @@ phases:
   queue: Hosted Ubuntu 1604
   displayName: 'linux-options'
   steps:
-  - script: 'sudo ./jenkins/linux_c_option_test.sh'
+  - script: 'sudo ./devops/linux_c_option_test.sh'
     displayName: 'build'
     condition: always()
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
@@ -128,7 +128,7 @@ phases:
   steps:
   - script: |
       call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
-      call jenkins\windows_c_build_as_dynamic.cmd
+      call devops\windows_c_build_as_dynamic.cmd
     displayName: 'build'
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
@@ -154,7 +154,7 @@ phases:
     name: Hosted macOS
   steps:
   - script: |
-      ./jenkins/osx_gcc_openssl.sh
+      ./devops/osx_gcc_openssl.sh
     displayName: 'build'
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
@@ -185,7 +185,7 @@ phases:
   - script: |
       export OPENSSL_ia32cap=0x00000000
       sudo chmod -R 755 .
-      sudo -E ./jenkins/ubuntu_clang.sh
+      sudo -E ./devops/ubuntu_clang.sh
     displayName: 'build'
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
@@ -216,7 +216,7 @@ phases:
   - script: |
       export OPENSSL_ia32cap=0x00000000
       sudo chmod -R 755 .
-      sudo -E ./jenkins/ubuntu1604_c.sh
+      sudo -E ./devops/ubuntu1604_c.sh
     displayName: 'build'
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
@@ -245,7 +245,7 @@ phases:
   displayName: 'debian'
   steps:
   - script: |
-      sudo ./jenkins/debian_c.sh
+      sudo ./devops/debian_c.sh
     displayName: 'build'
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
@@ -276,7 +276,7 @@ phases:
   - script: |
       LD_LIBRARY_PATH=/usr/local/lib
       LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/my_library/
-      sudo -E jenkins/linux_wolfssl.sh
+      sudo -E devops/linux_wolfssl.sh
     displayName: 'build'
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
@@ -305,7 +305,7 @@ phases:
   steps:
   - script: |
       call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
-      call jenkins\windows_c.cmd --platform x64
+      call devops\windows_c.cmd --platform x64
     displayName: 'build'
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
@@ -325,7 +325,7 @@ phases:
       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
   - script: |
-      call jenkins\collect_results.cmd iotsdk_x64
+      call devops\collect_results.cmd iotsdk_x64
     displayName: 'cmdLine Transform'
     condition: succeededOrFailed()
   - task: PublishTestResults@2
@@ -344,7 +344,7 @@ phases:
   steps:
   - script: |
       DYLD_LIBRARY_PATH=/usr/local/Cellar/curl/7.61.0/lib
-      ./jenkins/osx_xcode_native.sh
+      ./devops/osx_xcode_native.sh
     displayName: 'build'
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)

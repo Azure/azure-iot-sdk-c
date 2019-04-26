@@ -12,8 +12,8 @@ phases:
   displayName: 'longhaul_linux'
   steps:
   - script: |
-      sudo chmod 755 jenkins/longhaul_c.sh
-      sudo -E ./jenkins/longhaul_c.sh
+      sudo chmod 755 devops/longhaul_c.sh
+      sudo -E ./devops/longhaul_c.sh
     displayName: 'build'
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
@@ -43,7 +43,7 @@ phases:
   steps:
   - script: |
       call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
-      call jenkins\longhaul_c.cmd
+      call devops\longhaul_c.cmd
     displayName: 'build'
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
