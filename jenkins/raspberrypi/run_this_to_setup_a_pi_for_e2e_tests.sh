@@ -53,7 +53,7 @@ wget https://curl.haxx.se/download/curl-7.64.1.tar.gz
 
 tar -xzvf curl-7.64.1.tar.gz
 cd curl_source/curl-7.64.1/
-./configure --prefix=$CURL_ROOT --without-zlib --with-ssl
+./configure --without-zlib --with-ssl
 make -j
 sudo make install
 
