@@ -600,9 +600,9 @@ static void set_create_amqp_message_for_twin_operation_expected_calls(TWIN_OPERA
     STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
 }
 
-static void set_send_twin_operation_request_expected_calls(time_t current_time)
+static void set_send_twin_operation_request_expected_calls(time_t current_time, TWIN_OPERATION_TYPE op_type)
 {
-    set_create_amqp_message_for_twin_operation_expected_calls(TWIN_OPERATION_TYPE_PATCH);
+    set_create_amqp_message_for_twin_operation_expected_calls(op_type);
     STRICT_EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).SetReturn(current_time);
     STRICT_EXPECTED_CALL(amqp_messenger_send_async(TEST_AMQP_MESSENGER_HANDLE, TEST_MESSAGE_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(message_destroy(IGNORED_PTR_ARG));
@@ -612,6 +612,7 @@ static void set_twin_messenger_do_work_expected_calls(DOWORK_TEST_PROFILE* dwtp)
 {
     if (dwtp->current_state == TWIN_MESSENGER_STATE_STARTED)
     {
+        // This block is related to sending patches:
         STRICT_EXPECTED_CALL(singlylinkedlist_remove_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
         while (dwtp->number_of_pending_patches > 0)
@@ -620,13 +621,22 @@ static void set_twin_messenger_do_work_expected_calls(DOWORK_TEST_PROFILE* dwtp)
 
             STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
-            set_send_twin_operation_request_expected_calls(dwtp->current_time);
+            set_send_twin_operation_request_expected_calls(dwtp->current_time, TWIN_OPERATION_TYPE_PATCH);
 
             STRICT_EXPECTED_CALL(CONSTBUFFER_DecRef(IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
 
             dwtp->number_of_pending_patches--;
             dwtp->number_of_pending_operations++;
+        }
+
+        // This one is for receiving updates:
+        if (dwtp->subscription_state == TWIN_SUBSCRIPTION_STATE_GET_COMPLETE_PROPERTIES)
+        {
+            STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG)); // creating context.
+            set_generate_unique_id_expected_calls();
+            STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            set_send_twin_operation_request_expected_calls(dwtp->current_time, TWIN_OPERATION_TYPE_GET);
         }
     }
 
@@ -1435,6 +1445,49 @@ TEST_FUNCTION(twin_msgr_stop_success)
     ASSERT_ARE_EQUAL(int, 0, result);
     ASSERT_ARE_EQUAL(int, TWIN_MESSENGER_STATE_STARTING, TEST_on_state_changed_callback_previous_state);
     ASSERT_ARE_EQUAL(int, TWIN_MESSENGER_STATE_STOPPING, TEST_on_state_changed_callback_new_state);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    twin_messenger_destroy(handle);
+}
+
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_115: [If the client was subscribed for Twin updates, it must reset itself to continue receiving when twin_messenger_start is invoked ]
+TEST_FUNCTION(twin_msgr_stop_resets_to_resubscribe)
+{
+    // arrange
+    TWIN_MESSENGER_CONFIG* config = get_twin_messenger_config();
+    TWIN_MESSENGER_HANDLE handle = create_twin_messenger(config);
+    (void)twin_messenger_start(handle, TEST_SESSION_HANDLE);
+
+    umock_c_reset_all_calls();
+    set_twin_messenger_stop_expected_calls();
+    (void)twin_messenger_stop(handle);
+
+    set_twin_messenger_start_expected_calls();
+    (void)twin_messenger_start(handle, TEST_SESSION_HANDLE);
+
+    DOWORK_TEST_PROFILE dwtp;
+    reset_dowork_test_profile(&dwtp);
+
+    set_twin_messenger_do_work_expected_calls(&dwtp);
+    twin_messenger_do_work(handle);
+
+    TEST_amqp_messenger_create_config.on_state_changed_callback(
+        TEST_amqp_messenger_create_config.on_state_changed_context, AMQP_MESSENGER_STATE_STARTING, AMQP_MESSENGER_STATE_STARTED);
+
+    TEST_amqp_messenger_create_config.on_subscription_changed_callback(
+        TEST_amqp_messenger_create_config.on_subscription_changed_context, true);
+
+    umock_c_reset_all_calls();
+    dwtp.current_state = TWIN_MESSENGER_STATE_STARTED;
+    dwtp.subscription_state = TWIN_SUBSCRIPTION_STATE_GET_COMPLETE_PROPERTIES;
+    dwtp.number_of_pending_operations = 1; // after the GET is sent.
+    set_twin_messenger_do_work_expected_calls(&dwtp);
+
+    // act
+    twin_messenger_do_work(handle);
+
+    // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     // cleanup

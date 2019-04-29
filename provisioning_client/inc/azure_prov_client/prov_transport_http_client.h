@@ -17,7 +17,7 @@ extern "C" {
 #include "azure_macro_utils/macro_utils.h"
 #include "azure_prov_client/prov_transport.h"
 
-const PROV_DEVICE_TRANSPORT_PROVIDER* Prov_Device_HTTP_Protocol(void);
+MOCKABLE_FUNCTION(, const PROV_DEVICE_TRANSPORT_PROVIDER*, Prov_Device_HTTP_Protocol);
 
 #ifdef __cplusplus
 }
