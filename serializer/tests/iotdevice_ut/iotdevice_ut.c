@@ -20,11 +20,11 @@ void my_gballoc_free(void * t)
     free(t);
 }
 
-#include "umock_c.h"
-#include "umocktypes_charptr.h"
-#include "umocktypes_bool.h"
-#include "umocktypes_stdint.h"
-#include "umock_c_negative_tests.h"
+#include "umock_c/umock_c.h"
+#include "umock_c/umocktypes_charptr.h"
+#include "umock_c/umocktypes_bool.h"
+#include "umock_c/umocktypes_stdint.h"
+#include "umock_c/umock_c_negative_tests.h"
 
 #include "agenttypesystem.h"
 
@@ -48,7 +48,7 @@ TEST_DEFINE_ENUM_TYPE(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_RESULT_VALUES);
 
 #define ENABLE_MOCKS
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 MOCKABLE_FUNCTION(, EXECUTE_COMMAND_RESULT, DeviceActionCallback, DEVICE_HANDLE, deviceHandle, void*, callbackUserContext, const char*, relativeActionPath, const char*, actionName, size_t, argCount, const AGENT_DATA_TYPE*, arguments);
 MOCKABLE_FUNCTION(, METHODRETURN_HANDLE, deviceMethodCallback, DEVICE_HANDLE, deviceHandle, void*, callbackUserContext, const char*, relativeMethodPath, const char*, methodName, size_t, argCount, const AGENT_DATA_TYPE*, arguments);
 MOCKABLE_FUNCTION(, METHODRETURN_HANDLE, commandDecoderArgument, void*, methodCallbackContext, const char*, relativeMethodPath, const char*, methodName, size_t, argCount, const AGENT_DATA_TYPE*, args);

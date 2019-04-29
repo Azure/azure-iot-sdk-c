@@ -19,8 +19,8 @@
 #ifndef IOTHUB_SERVICE_CLIENT_AUTH_H
 #define IOTHUB_SERVICE_CLIENT_AUTH_H
 
-#include "azure_c_shared_utility/macro_utils.h"
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "azure_macro_utils/macro_utils.h"
+#include "umock_c/umock_c_prod.h"
 
 #define IOTHUB_DEVICE_STATUS_VALUES       \
     IOTHUB_DEVICE_STATUS_ENABLED,         \
@@ -40,7 +40,7 @@ extern "C"
 #else
 #endif
 
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 
 /** @brief Structure to store IoTHub authentication information
 */
