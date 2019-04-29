@@ -22,6 +22,7 @@
 if ! grep -Fxq "systemctl start ssh" /etc/rc.local
 then
     echo 'Enabling automatic start of ssh on bootup...'
+    #insert systemctl start ssh onto the 19th line of /etc/rc.local
     sudo sed -i '19i\systemctl start ssh' /etc/rc.local
     # code if not found
 fi
@@ -31,17 +32,14 @@ fi
 sudo apt-get update -y
 sudo apt-get install -y vim git build-essential pkg-config git cmake libssl-dev uuid-dev valgrind
 
-if ! grep -Fxq "CURL_ROOT" ~/.bashrc
-then
-    printf 'Enabling automatic start of ssh on bootup...'
-    echo 'export CURL_ROOT=/home/pi/curl_install' >> ~/.bashrc 
-    # code if not found
-fi
 
+###################################################################################################
+# INSTALL NEWEST VERSION OF CURL AND POINT TO THE NEW CURL LIBRARY
+###################################################################################################
 if ! grep -Fxq "LD_LIBRARY_PATH" ~/.bashrc
 then 
     echo 'export LD_LIBRARY_PATH'
-    echo 'export LD_LIBRARY_PATH=$CURL_ROOT/lib' >> ~/.bashrc
+    echo 'export LD_LIBRARY_PATH=/usr/local/lib' >> ~/.bashrc
 fi
 
 printf 'Setting variables by calling bashrc'
@@ -66,6 +64,25 @@ echo "Now you can run the cross compiled E2E tests!"
 # UNCOMMENT THE BELOW LINES AND COMMENT OUT THE CURL INSTALL LINES ABOVE IF YOU WANT TO
 # COMPILE THE SDK ON THE DEVICE AND RUN THE E2E TESTS
 ###################################################################################################
+# check if CURL_ROOT is already a variable set in bashrc...
+# if ! grep -Fxq "CURL_ROOT" ~/.bashrc
+# then
+#     printf 'Exporting variable CURL_ROOT...'
+#     echo 'export CURL_ROOT=/home/pi/curl_install' >> ~/.bashrc 
+#     source ~/.bashrc
+#     # code if not found
+# fi
+
+# if ! grep -Fxq "LD_LIBRARY_PATH" ~/.bashrc
+# then 
+#     echo 'export LD_LIBRARY_PATH'
+#     echo 'export LD_LIBRARY_PATH=$CURL_ROOT/lib' >> ~/.bashrc
+# fi
+
+# printf 'Setting variables by calling bashrc'
+# source ~/.bashrc
+# [ $? -eq 0 ] || { echo "bashrc source failed"; exit 1; }
+
 
 # # BUILD AND INSTALL NEW CURL TO CURL_ROOT
 # # We are commenting this out because it's useful info to have 
