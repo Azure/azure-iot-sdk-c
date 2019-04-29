@@ -10,30 +10,9 @@ RUN apt update && apt -y upgrade
 # Install wget git cmake xz-utils
 RUN apt install --fix-missing -y wget git build-essential cmake xz-utils ca-certificates pkg-config uuid-dev
 
-# SSH Tools
-
-RUN apt install -y \
-    gdbserver \
-    openssh-server
-
-EXPOSE 8082
-EXPOSE 22
-
-# get ready for ssh keys
-RUN mkdir -p /root/.ssh && chmod 700 /root/.ssh && touch /root/.ssh/authorized_keys && chmod 600 /root/.ssh/authorized_keys
-
-# make a key that we can use to connect to SSH and authorize it.  
-# people who want to use SSH can use docker cp to get the key out of the container
-RUN ssh-keygen -b 2048 -t rsa -f /root/.ssh/remote-debug -q -N ""
-RUN cat /root/.ssh/remote-debug.pub > /root/.ssh/authorized_keys
-
-#RUN mkdir RPiTools
-
-#WORKDIR RPiTools
-
-
 ENV WORK_ROOT=/toolchain
 WORKDIR ${WORK_ROOT}
+
 
 ########## LINARO INSTALL ##########
 ENV LINARO_SOURCE=gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabihf
@@ -159,9 +138,3 @@ RUN ls -la ./
 
 # Go to project root
 WORKDIR /
-
-
-
-
-
-
