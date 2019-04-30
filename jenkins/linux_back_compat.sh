@@ -12,7 +12,7 @@ sdk_root=$(cd "$(dirname "$0")/../.." && pwd)
 cd $sdk_root
 git clone https://github.com/Azure/azure-iot-c-back-compat.git --recursive
 
-back_compat_folder=$sdk_root"/azure-iot-c-back-compat/cmake/back_compat"
+back_compat_folder=$sdk_root"/azure-iot-c-back-compat/cmake"
 
 build_root="$sdk_root/azure-iot-sdk-c"
 cd $build_root
@@ -33,7 +33,7 @@ popd
 # Now run back compat
 cd $sdk_root
 cd "azure-iot-c-back-compat"
-mkdir -p cmake
+mkdir -p "cmake"
 pushd $back_compat_folder
 
 # By default back compat uses the installed components
