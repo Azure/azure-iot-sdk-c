@@ -86,6 +86,7 @@ jobs:
       mkdir -p $PWD/drop/copy/cmake/iothub_client/tests
       sudo setcap cap_net_raw,cap_net_admin+ep $PWD/drop/source_artifacts/cmake/iothub_client/tests/iothubclient_mqtt_e2e/iothubclient_mqtt_e2e_exe 
       cp -r $PWD/drop/source_artifacts/cmake/iothub_client/tests/ $PWD/drop/copy/cmake/iothub_client/
+      sudo -E su
       $PWD/drop/copy/cmake/iothub_client/tests/iothubclient_mqtt_e2e/iothubclient_mqtt_e2e_exe
       # sudo setcap cap_net_raw,cap_net_admin+ep $PWD/drop/source_artifacts/cmake/iothub_client/tests/iothubclient_amqp_e2e/iothubclient_amqp_e2e_exe \
       # cap_net_raw,cap_net_admin+ep $PWD/drop/source_artifacts/cmake/iothub_client/tests/iothubclient_mqtt_ws_e2e/iothubclient_mqtt_ws_e2e_exe \
