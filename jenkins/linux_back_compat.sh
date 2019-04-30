@@ -8,13 +8,13 @@ set -e
 cat /etc/*release | grep VERSION*
 gcc --version
 
-back_compat_root=$(cd "$(dirname "$0")/../.." && pwd)
-cd $back_compat_root
+sdk_root=$(cd "$(dirname "$0")/../.." && pwd)
+cd $sdk_root
 git clone https://github.com/Azure/azure-iot-c-back-compat.git --recursive
 
-back_compat_folder=$back_compat_root"/cmake/back_compat"
+back_compat_folder=$sdk_root"/azure-iot-c-back-compat/cmake/back_compat"
 
-build_root="$back_compat_root/azure-iot-sdk-c"
+build_root="$sdk_root/azure-iot-sdk-c"
 cd $build_root
 echo "sdk build root $build_root"
 
@@ -31,11 +31,13 @@ make install --jobs=$CORES
 popd
 
 # Now run back compat
-cd $back_compat_root
+cd $sdk_root
 cd "azure-iot-c-back-compat"
 mkdir -p cmake
 pushd $back_compat_folder
-cmake $back_compat_root
+
+# By default back compat uses the installed components
+cmake "$sdk_root/azure-iot-c-back-compat"
 make --jobs=$CORES
 
 ctest -j $CORES --output-on-failure
