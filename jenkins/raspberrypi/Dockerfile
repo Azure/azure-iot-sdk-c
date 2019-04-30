@@ -42,7 +42,7 @@ ENV STAGING_DIR=${TOOLCHAIN_SYSROOT}
 # Download OpenSSL source and expand it
 ENV OPENSSL_SOURCE=openssl-1.1.0j
 RUN wget https://www.openssl.org/source/${OPENSSL_SOURCE}.tar.gz
-RUN tar -xvzf ${OPENSSL_SOURCE}.tar.gz 
+RUN tar -xvf ${OPENSSL_SOURCE}.tar.gz 
 
 # Build OpenSSL
 
@@ -57,12 +57,12 @@ WORKDIR /${WORK_ROOT}
 # Download cURL source and expand it
 ENV CURL_SOURCE=curl-7.64.1
 RUN wget http://curl.haxx.se/download/${CURL_SOURCE}.tar.gz
-RUN tar -xvzf ${CURL_SOURCE}.tar.gz
+RUN tar -xvf ${CURL_SOURCE}.tar.gz
 
 # Build cURL
 # we need to set the path for openssl with --with-ssl=...
 WORKDIR /${WORK_ROOT}/${CURL_SOURCE}
-RUN ./configure --with-sysroot=${TOOLCHAIN_SYSROOT} --prefix=${TOOLCHAIN_PREFIX} --target=${TOOLCHAIN_NAME} --with-ssl=${TOOLCHAIN_PREFIX} --without-zlib --host=${TOOLCHAIN_NAME} --build=x86_64-linux-gnu
+RUN ./configure --with-sysroot=${TOOLCHAIN_SYSROOT} --prefix=${TOOLCHAIN_PREFIX} --target=${TOOLCHAIN_NAME} --with-ssl=${TOOLCHAIN_PREFIX} --with-zlib --host=${TOOLCHAIN_NAME} --build=x86_64-linux-gnu
 
 RUN make
 RUN make install
@@ -73,7 +73,7 @@ WORKDIR /${WORK_ROOT}
 # Download the Linux utilities for libuuid and expand it
 ENV UTIL_LINUX_SOURCE=util-linux-2.33-rc2
 RUN wget https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.33/${UTIL_LINUX_SOURCE}.tar.gz
-RUN tar -xvzf ${UTIL_LINUX_SOURCE}.tar.gz 
+RUN tar -xvf ${UTIL_LINUX_SOURCE}.tar.gz 
 
 # Build uuid
 WORKDIR /${WORK_ROOT}/${UTIL_LINUX_SOURCE}
@@ -117,7 +117,7 @@ RUN make install
 
 ########## PHASE 2: COMPILE BRANCH SPECIFIC INFORMATION ##########
 ARG CLIENTLIBRARY_COMMIT_SHA
-
+RUN echo $CLIENTLIBRARY_COMMIT_SHA
 WORKDIR /sdk
 RUN git fetch origin 
 RUN git checkout $CLIENTLIBRARY_COMMIT_SHA
