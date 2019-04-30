@@ -233,13 +233,18 @@ static int IotHubTransportMqtt_WS_SetCallbackContext(TRANSPORT_LL_HANDLE handle,
 
 static int IotHubTransportMqtt_WS_GetSupportedPlatformInfo(TRANSPORT_LL_HANDLE handle, PLATFORM_INFO_OPTION* info)
 {
+    int result;
     if (handle == NULL)
     {
-        return MU_FAILURE;
+        result = MU_FAILURE;
+    }
+    else
+    {
+        *info = PLATFORM_INFO_OPTION_RETRIEVE_SQM;
+        result = 0;
     }
 
-    *info = PLATFORM_INFO_OPTION_RETRIEVE_SQM;
-    return 0;
+    return result;
 }
 
 /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_011: [ This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for its fields:

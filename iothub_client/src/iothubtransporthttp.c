@@ -2509,13 +2509,18 @@ int IoTHubTransportHttp_SetCallbackContext(TRANSPORT_LL_HANDLE handle, void* ctx
 
 static int IoTHubTransportHttp_GetSupportedPlatformInfo(TRANSPORT_LL_HANDLE handle, PLATFORM_INFO_OPTION* info)
 {
+    int result;
     if (handle == NULL)
     {
-        return MU_FAILURE;
+        result = MU_FAILURE;
+    }
+    else
+    {
+        *info = PLATFORM_INFO_OPTION_DEFAULT;
+        result = 0;
     }
 
-    *info = PLATFORM_INFO_OPTION_DEFAULT;
-    return 0;
+    return result;
 }
 
 /*Codes_SRS_TRANSPORTMULTITHTTP_17_125: [This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for its fields:] */
