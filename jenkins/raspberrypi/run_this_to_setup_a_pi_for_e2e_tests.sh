@@ -32,6 +32,23 @@ fi
 sudo apt-get update -y
 sudo apt-get install -y vim git build-essential pkg-config git cmake libssl-dev uuid-dev valgrind
 
+###################################################################################################
+# DOWNLOAD AND INSTALL LINUX AGENT
+# FOR WALKTHROUGH: https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/v2-linux?view=azure-devops
+# NOTE: You need a Azure DevOps PAT Token. Described in the link above. 
+###################################################################################################
+cd ~
+wget https://vstsagentpackage.azureedge.net/agent/2.150.0/vsts-agent-linux-arm-2.150.0.tar.gz
+mkdir myagent && cd myagent
+if [[ $? -ne 0 ]]; then
+    echo "myagent already created, overwriting"
+    rm -r myagent && mkdir myagent && cd myagent
+fi
+tar zxvf ~/vsts-agent-linux-arm-2.150.0.tar.gz
+# Config will prompt for name of pool and PAT. 
+./config.sh
+./run.sh
+cd ~ 
 
 ###################################################################################################
 # INSTALL NEWEST VERSION OF CURL AND POINT TO THE NEW CURL LIBRARY
@@ -60,11 +77,11 @@ sudo ln -sf /usr/local/bin/curl /usr/bin/curl
 echo "Now you can run the cross compiled E2E tests!"
 
 
-###################################################################################################
-# UNCOMMENT THE BELOW LINES AND COMMENT OUT THE CURL INSTALL LINES ABOVE IF YOU WANT TO
-# COMPILE THE SDK ON THE DEVICE AND RUN THE E2E TESTS
-###################################################################################################
-# check if CURL_ROOT is already a variable set in bashrc...
+# ###################################################################################################
+# # UNCOMMENT THE BELOW LINES AND COMMENT OUT THE CURL INSTALL LINES ABOVE IF YOU WANT TO
+# # COMPILE THE SDK ON THE DEVICE AND RUN THE E2E TESTS
+# ###################################################################################################
+# # check if CURL_ROOT is already a variable set in bashrc...
 # if ! grep -Fxq "CURL_ROOT" ~/.bashrc
 # then
 #     printf 'Exporting variable CURL_ROOT...'
@@ -86,7 +103,7 @@ echo "Now you can run the cross compiled E2E tests!"
 
 # # BUILD AND INSTALL NEW CURL TO CURL_ROOT
 # # We are commenting this out because it's useful info to have 
-# but for the E2E tests it works when CURL is installed directly on the device.
+# # but for the E2E tests it works when CURL is installed directly on the device.
 # wget https://curl.haxx.se/download/curl-7.64.1.tar.gz
 # mkdir $CURL_ROOT
 # mkdir curl_source
@@ -102,10 +119,18 @@ echo "Now you can run the cross compiled E2E tests!"
 # cd ~
 # git clone --recursive https://github.com/Azure/azure-iot-sdk-c
 # cd azure-iot-sdk-c
+# if [ -d cmake ]   # for file "if [-f /home/rama/file]" 
+# then 
+#     echo "cmake present"
+#     rm -rf cmake 
+# else
+#     echo "cmake not present"
+# fi
 # mkdir cmake && cd cmake
 # cmake -Drun_unittests=ON -Drun_e2e_tests=ON -DCMAKE_BUILD_TYPE=Debug -DCURL_LIBRARY=$CURL_ROOT/lib/libcurl.a -DCURL_INCLUDE_DIR=$CURL_ROOT/include  ..
 # cd iothub_client/tests/iothubclient_mqtt_e2e
 # cmake --build .
-# sudo setcap cap_net_raw,cap_net_admin+ep iothubclient_mqtt_e2e_exe
+# sudo -E su
+# setcap cap_net_raw,cap_net_admin+ep iothubclient_mqtt_e2e_exe
 # ./iothubclient_mqtt_e2e_exe
 # # END RUN THE E2E TEST
