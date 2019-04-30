@@ -9,14 +9,12 @@ cat /etc/*release | grep VERSION*
 gcc --version
 
 back_compat_root=$(cd "$(dirname "$0")/../.." && pwd)
-echo "back compat root $back_compat_root"
 cd $back_compat_root
-git clone https://github.com/Azure/azure-iot-c-back-compat.git
+git clone https://github.com/Azure/azure-iot-c-back-compat.git --recursive
 
 back_compat_folder=$back_compat_root"/cmake/back_compat"
 
-
-build_root=$(cd "$(dirname "$0")/.." && pwd)
+build_root="$back_compat_root/azure-iot-sdk-c"
 cd $build_root
 echo "sdk build root $build_root"
 
@@ -24,7 +22,6 @@ build_folder=$build_root"/cmake/sdk"
 
 # Set the default cores
 CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
-
 
 rm -r -f $build_folder
 mkdir -p $build_folder
@@ -36,7 +33,7 @@ popd
 # Now run back compat
 cd $back_compat_root
 cd "azure-iot-c-back-compat"
-mkdir -p $back_compat_folder
+mkdir -p cmake
 pushd $back_compat_folder
 cmake $back_compat_root
 make --jobs=$CORES
