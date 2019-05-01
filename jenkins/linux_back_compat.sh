@@ -38,7 +38,7 @@ popd
 
 # Now run back compat
 cd $sdk_root
-cd "azure-iot-c-back-compat"
+cd "../azure-iot-c-back-compat"
 mkdir -p "cmake"
 pushd $back_compat_folder
 
