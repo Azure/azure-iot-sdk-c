@@ -1387,6 +1387,50 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
+    TEST_FUNCTION(prov_transport_common_mqtt_dowork_register_recv_retry_after_succeed)
+    {
+        CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
+        QOS_VALUE QosValue[] = { DELIVER_AT_LEAST_ONCE };
+        SUBSCRIBE_ACK suback;
+        suback.packetId = 1234;
+        suback.qosCount = 1;
+        suback.qosReturn = QosValue;
+
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
+        (void)prov_transport_common_mqtt_x509_cert(handle, TEST_X509_CERT_VALUE, TEST_PRIVATE_KEY_VALUE);
+        (void)prov_transport_common_mqtt_open(handle, TEST_REGISTRATION_ID_VALUE, NULL, NULL, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
+        (void)prov_transport_common_mqtt_register_device(handle, on_transport_json_parse, on_transport_create_json_payload, NULL);
+        prov_transport_common_mqtt_dowork(handle);
+        g_operation_cb(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_msg_recv_callback_context);
+        prov_transport_common_mqtt_dowork(handle);
+        g_operation_cb(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_msg_recv_callback_context);
+        prov_transport_common_mqtt_dowork(handle);
+        g_target_transport_status = PROV_DEVICE_TRANSPORT_STATUS_ASSIGNING;
+        umock_c_reset_all_calls();
+
+        //arrange
+        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_PTR_ARG)).SetReturn("$dps/registrations/res/202/?$rid=1&retry-after=8");
+        STRICT_EXPECTED_CALL(mqttmessage_getApplicationMsg(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(on_transport_json_parse(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_ASSIGNING, 8, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+
+        //act
+        g_on_msg_recv(TEST_MQTT_MESSAGE, g_msg_recv_callback_context);
+        prov_transport_common_mqtt_dowork(handle);
+
+        //assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_transport_common_mqtt_close(handle);
+        prov_transport_common_mqtt_destroy(handle);
+    }
+
     TEST_FUNCTION(prov_transport_common_mqtt_dowork_register_recv_transient_throttle_error_succeed)
     {
         CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };

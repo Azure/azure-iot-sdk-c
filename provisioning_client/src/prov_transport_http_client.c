@@ -34,7 +34,6 @@ static const char* const HEADER_USER_AGENT = "UserAgent";
 static const char* const HEADER_ACCEPT = "Accept";
 static const char* const HEADER_CONTENT_TYPE = "Content-Type";
 static const char* const HEADER_CONNECTION = "Connection";
-static const char* const HEADER_RETRY_AFTER_KEY_VALUE = "retry-after";
 static const char* const USER_AGENT_VALUE = "prov_device_client/1.0";
 static const char* const ACCEPT_VALUE = "application/json";
 static const char* const CONTENT_TYPE_VALUE = "application/json; charset=utf-8";
@@ -188,7 +187,7 @@ static void on_http_reply_recv(void* callback_ctx, HTTP_CALLBACK_REASON request_
             http_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
         }
         // The call to parse_retry_after_value can not fail
-        http_info->retry_after_value = parse_retry_after_value(HTTPHeaders_FindHeaderValue(responseHeadersHandle, HEADER_RETRY_AFTER_KEY_VALUE));
+        http_info->retry_after_value = parse_retry_after_value(HTTPHeaders_FindHeaderValue(responseHeadersHandle, RETRY_AFTER_KEY_VALUE));
     }
     else
     {

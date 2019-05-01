@@ -1122,8 +1122,6 @@ void Prov_Device_LL_DoWork(PROV_DEVICE_LL_HANDLE handle)
                     {
                         if ((current_time - prov_info->status_throttle) / 1000 > prov_info->retry_after_value)
                         {
-                            time_t tm = time(NULL);
-LogInfo("Sending now %s", ctime(&tm));
                             /* Codes_SRS_PROV_CLIENT_07_026: [ Upon receiving the reply of the CLIENT_STATE_URL_REQ_SEND message from  iothub_client shall process the the reply of the CLIENT_STATE_URL_REQ_SEND state ] */
                             if (prov_info->prov_transport_protocol->prov_transport_get_op_status(prov_info->transport_handle) != 0)
                             {

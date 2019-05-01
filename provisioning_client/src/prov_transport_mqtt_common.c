@@ -17,7 +17,9 @@
 #include "azure_c_shared_utility/http_proxy_io.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/http_proxy_io.h"
+
 #include "azure_prov_client/internal/prov_transport_mqtt_common.h"
+#include "azure_prov_client/internal/prov_transport_utils.h"
 #include "azure_umqtt_c/mqtt_client.h"
 
 #include "azure_prov_client/prov_client_const.h"
@@ -274,9 +276,33 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
 
 static int get_retry_after_property(const char* topic_name, PROV_TRANSPORT_MQTT_INFO* mqtt_info)
 {
-    int result = 0;
-    (void)mqtt_info;
-    (void)topic_name;
+    int result = MU_FAILURE;
+
+    const char* iterator = topic_name;
+
+    size_t topic_len = strlen(iterator);
+    size_t retry_len = strlen(RETRY_AFTER_KEY_VALUE);
+    while (iterator != NULL && *iterator != '\0')
+    {
+        if (topic_len > retry_len)
+        {
+            if (memcmp(iterator, RETRY_AFTER_KEY_VALUE, retry_len) == 0)
+            {
+                // send the retry-after value to parse
+                mqtt_info->retry_after_value = parse_retry_after_value(iterator + retry_len + 1);
+                result = 0;
+                break;
+            }
+        }
+        else
+        {
+            // Topic string is not there
+            result = MU_FAILURE;
+            break;
+        }
+        iterator++;
+        topic_len--;
+    }
     return result;
 }
 

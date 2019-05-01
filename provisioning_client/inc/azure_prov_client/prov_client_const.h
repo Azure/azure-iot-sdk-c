@@ -6,13 +6,14 @@
 
 #define PROV_DEVICE_CLIENT_VERSION "1.3.1"
 #define PROV_GET_THROTTLE_TIME      1
+#define MAX_PROV_GET_THROTTLE_TIME  2*60
 
 static const char* const PROV_ASSIGNED_STATUS = "assigned";
 static const char* const PROV_ASSIGNING_STATUS = "assigning";
 static const char* const PROV_UNASSIGNED_STATUS = "unassigned";
 static const char* const PROV_DISABLE_STATUS = "disabled";
 
-static const char* const RETRY_AFTER_KEY_VALUE = "Retry-After";
+static const char* const RETRY_AFTER_KEY_VALUE = "retry-after";
 
 static const char* const PROV_API_VERSION = "2019-03-31";
 

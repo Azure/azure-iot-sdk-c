@@ -238,9 +238,36 @@ static void on_message_receiver_state_changed_callback(const void* user_ctx, MES
     }
 }
 
+static void get_error_retry_after(PROV_TRANSPORT_AMQP_INFO* amqp_info, AMQP_VALUE delivery_state)
+{
+    if (amqpvalue_get_type(delivery_state) == AMQP_TYPE_LIST)
+    {
+        uint32_t list_count = 0;
+        if (amqpvalue_get_list_item_count(delivery_state, &list_count) == 0)
+        {
+            for (uint32_t index = 0; index < list_count; index++)
+            {
+                AMQP_VALUE list_item_value = amqpvalue_get_list_item(delivery_state, index);
+                if (list_item_value != NULL && amqpvalue_get_type(list_item_value) == AMQP_TYPE_DESCRIBED)
+                {
+                    AMQP_VALUE desc = amqpvalue_get_inplace_descriptor(list_item_value);
+                    if (desc != NULL && amqpvalue_get_type(desc) == AMQP_TYPE_ULONG)
+                    {
+                        uint64_t desc_value;
+                        if (amqpvalue_get_ulong(desc, &desc_value) == 0)
+                        {
+                            amqp_info->retry_after_value = (uint32_t)desc_value;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 static void on_amqp_send_complete(void* user_ctx, MESSAGE_SEND_RESULT send_result, AMQP_VALUE delivery_state)
 {
-    (void)delivery_state;
     if (user_ctx == NULL)
     {
         LogError("on_amqp_send_complete was invoked with a NULL context");
@@ -250,6 +277,9 @@ static void on_amqp_send_complete(void* user_ctx, MESSAGE_SEND_RESULT send_resul
         PROV_TRANSPORT_AMQP_INFO* amqp_info = (PROV_TRANSPORT_AMQP_INFO*)user_ctx;
         if (send_result != MESSAGE_SEND_OK)
         {
+            (void)delivery_state;
+            // To be included when a issue in the service is fixed.
+            //get_error_retry_after(amqp_info, delivery_state);
             amqp_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
             amqp_info->amqp_state = AMQP_STATE_ERROR;
         }

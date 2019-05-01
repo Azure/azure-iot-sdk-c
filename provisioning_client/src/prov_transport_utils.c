@@ -29,6 +29,10 @@ uint32_t parse_retry_after_value(const char* retry_after)
         if (retry_after[0] >= 0x30 || retry_after[0] <= 0x39)
         {
             result = atol(retry_after);
+            if (result < PROV_GET_THROTTLE_TIME || result > MAX_PROV_GET_THROTTLE_TIME)
+            {
+                result = PROV_GET_THROTTLE_TIME;
+            }
         }
         // Will need to parse the retry after for date information
     }
