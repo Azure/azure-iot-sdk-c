@@ -8,7 +8,7 @@ set -e
 cat /etc/*release | grep VERSION*
 gcc --version
 
-sdk_root=$(cd "$(dirname "$0")/../.." && pwd)
+sdk_root=$(cd "$(dirname "$0")/.." && pwd)
 echo $sdk_root
 cd $sdk_root
 git clone https://github.com/Azure/azure-iot-c-back-compat.git --recursive
@@ -24,7 +24,7 @@ build_folder=$build_root"/cmake/sdk"
 # Set the default cores
 CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
 
-rm -r -f $build_folder
+rm -rf $build_folder
 mkdir -p $build_folder
 pushd $build_folder
 cmake $build_root -Drun_e2e_tests=ON
