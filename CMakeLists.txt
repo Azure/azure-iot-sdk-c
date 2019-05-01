@@ -77,6 +77,8 @@ option(use_prov_client "Enable provisioning client" OFF)
 option(use_tpm_simulator "tpm simulator type of hsm used with the provisioning client" OFF)
 option(use_edge_modules "Enable support for running modules against Azure IoT Edge" OFF)
 option(use_custom_heap "use externally defined heap functions instead of the malloc family" OFF)
+option(use_control_flow_guard "use Control Flow Guard to combat memory corruption vulnerabilities" ON)
+option(use_qspectre "use QSpectre compiler option in Visual Studio 2017 to mitigate certain spectre vulnerabilities" ON)
 
 set(use_prov_client_core OFF)
 
@@ -104,6 +106,17 @@ if ((WIN32 AND "${use_openssl}") OR "${use_wolfssl}")
     option(use_sample_trusted_cert "Set flag in samples to use SDK's built-in CA as TrustedCerts" ON)
 else()
     option(use_sample_trusted_cert "Set flag in samples to use SDK's built-in CA as TrustedCerts" OFF)
+endif()
+
+# Enable QSpectre and Control Flow Guard Mitigations if building dynamically for Windows
+if(MSVC AND ${build_as_dynamic} AND (MSVC_VERSION GREATER 1900))
+	if (${use_control_flow_guard})
+		add_compile_options("/Qspectre")
+	endif()
+	if (${use_qspectre})
+		add_compile_options("/guard:cf")
+		SET(CMAKE_EXE_LINKER_FLAGS  "/guard:cf /DYNAMICBASE")
+	endif()
 endif()
 
 # Enable IoT SDK to act as a module for Edge
