@@ -248,6 +248,8 @@ int twin_messenger_stop(TWIN_MESSENGER_HANDLE twin_msgr_handle);
 
 **SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_055: [**If any failures occurr, `twin_msgr->state` shall be set to TWIN_MESSENGER_STATE_ERROR, and `twin_msgr->on_state_changed_callback` invoked if provided**]**
 
+**SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_115: [**If the client was subscribed for Twin updates, it must reset itself to continue receiving when twin_messenger_start is invoked **]**
+
 **SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_056: [**If no failures occurr, twin_messenger_stop() shall return 0**]**
 
 
