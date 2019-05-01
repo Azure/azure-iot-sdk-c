@@ -9,8 +9,8 @@ cat /etc/*release | grep VERSION*
 gcc --version
 
 # back out of jenkins folder
-echo "this is where we start "pwd
-cd ..
+# echo "this is where we start "$(pwd)
+# cd ..
 # save sdk root
 sdk_root=$(pwd)
 echo $sdk_root && ls
