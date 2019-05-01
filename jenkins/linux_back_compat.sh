@@ -12,6 +12,7 @@ gcc --version
 CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
 
 build_root=$(cd "$(dirname "$0")/.." && pwd)
+clone_root=$(cd "$(dirname "$0")/../.." && pwd)
 cd $build_root
 
 echo "Build Root $build_root"
@@ -26,12 +27,12 @@ cmake $build_root -Drun_e2e_tests=ON
 make install --jobs=$CORES
 popd
 
-cd "$build_root/.."
+cd "$clone_root"
 
-echo "Clone the back compat repo into " pwd
+echo "Clone the back compat repo"
 git clone https://github.com/Azure/azure-iot-c-back-compat.git --recursive
 
-back_compat_root="$build_root/azure-iot-c-back-compat"
+back_compat_root="$clone_root/azure-iot-c-back-compat"
 back_compat_build=$back_compat_root"/cmake"
 
 # Now run back compat
