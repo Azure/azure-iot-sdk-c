@@ -8,14 +8,16 @@ set -e
 cat /etc/*release | grep VERSION*
 gcc --version
 
-sdk_root=$(cd "$(dirname "$0")/.." && pwd)
-echo $sdk_root
-cd $sdk_root
+# back out of jenkins folder
+cd ..
+# save sdk root
+sdk_root=$(pwd)
+cd ..
 git clone https://github.com/Azure/azure-iot-c-back-compat.git --recursive
 
-back_compat_folder=$sdk_root"/azure-iot-c-back-compat/cmake"
+back_compat_folder=$sdk_root"../azure-iot-c-back-compat/cmake"
 ls
-build_root="$sdk_root/azure-iot-sdk-c"
+build_root="$sdk_root"
 cd $build_root
 echo "sdk build root $build_root"
 
