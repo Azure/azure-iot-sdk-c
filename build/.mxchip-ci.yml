@@ -1,0 +1,26 @@
+name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+resources:
+- repo: self
+  clean: true
+phases:
+- phase: iotz
+  queue:
+    name: devicelab-01
+  steps:
+  - script: |
+      sudo apt-get update && apt-get install -y \
+      curl \
+      git \
+      python-software-properties \
+      build-essential \
+      pkg-config
+      sudo curl -sL https://deb.nodesource.com/setup_6.x | bash -
+      sudo apt-get install -y nodejs
+    displayName: 'setup'
+  - script: |
+      . build_all/mbed5/build.sh
+    displayName: 'build'
+  - script: |
+      ls
+      cp ./mxchip/BUILD/AZ3166/GCC_ARM/mxchip.bin /media/john/AZ31661
+    displayName: 'deploy'
