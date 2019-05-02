@@ -1,0 +1,108 @@
+# Copyright (c) Microsoft. All rights reserved.
+# Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+variables:
+  ClientLibrary.Repo: $(Build.Repository.Uri)
+  ClientLibrary.Commit: $(Build.SourceBranch)
+  ClientLibrary.FrameworkRoot: $(Build.SourcesDirectory)
+
+
+jobs:
+- job: Cross_Compile
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.x'
+      architecture: 'x64'
+
+  - script: |
+      python3 -m pip install -r $(ClientLibrary.FrameworkRoot)/jenkins/raspberrypi/pyscripts/requirements.txt
+    displayName: "pip install requirements.txt"
+    condition: succeeded()
+
+  - powershell: |
+      $NormalizedRepo=$env:Repo
+      if ($NormalizedRepo -like 'https://github.com/*') {
+        $NormalizedRepo=$NormalizedRepo.Substring('https://github.com/'.length)
+      }
+      Write-Host "##vso[task.setvariable variable=normalizedRepo]${NormalizedRepo}"
+      Write-Host "normalizedRepo=${NormalizedRepo}"
+    displayName: Removing github.com from repo name if necessary
+    env:
+      Repo: $(ClientLibrary.Repo)
+    ignoreLASTEXITCODE: false
+    errorActionPreference: Stop
+    failOnStderr: true
+  
+  - script: |
+      python3 $(ClientLibrary.FrameworkRoot)/jenkins/raspberrypi/pyscripts/build_docker_image.py --repo ${NormalizedRepo}  --commit $(ClientLibrary.Commit) 
+    displayName: "build raspi-c docker image"
+    condition: succeeded()
+    env: 
+      IOTHUB_E2E_REPO_ADDRESS: $(IOTHUB-E2E-REPO-ADDRESS)
+      IOTHUB_E2E_REPO_USER: $(IOTHUB-E2E-REPO-USER)
+      IOTHUB_E2E_REPO_PASSWORD: $(IOTHUB-E2E-REPO-PASSWORD)
+      NormalizedRepo: $(NormalizedRepo)
+
+  - task: ExtractFiles@1
+    inputs:
+      archiveFilePatterns: '*.tar' 
+      destinationFolder: '$(Build.SourcesDirectory)/source_artifacts'
+
+  - script: |
+      cd $(Build.SourcesDirectory)
+      ls -al
+    displayName: "list Build.SourcesDirectory"
+
+  - script: |
+      cp -r $(Build.SourcesDirectory)/source_artifacts $(Build.ArtifactStagingDirectory)
+    displayName: "Copy Files Manually"
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifacts: drop'
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: 'drop'
+      publishLocation: 'Container'
+    condition: succeeded()
+
+- job: 'Run_Raspi_E2E_Tests'
+  pool: horton-raspi-c
+  steps:
+  - checkout: none
+  
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: drop
+      itemPattern: 'drop/**/*e2e_exe'
+
+  - bash: |
+      chmod -R 777 drop
+      sudo setcap cap_net_raw,cap_net_admin+ep drop/source_artifacts/cmake/iothub_client/tests/iothubclient_mqtt_e2e/iothubclient_mqtt_e2e_exe
+      cp drop/source_artifacts/cmake/iothub_client/tests/iothubclient_mqtt_e2e/iothubclient_mqtt_e2e_exe drop/source_artifacts/cmake/iothub_client/tests/iothubclient_mqtt_e2e/iothubclient_mqtt_e2e_but_better
+      drop/source_artifacts/cmake/iothub_client/tests/iothubclient_mqtt_e2e/iothubclient_mqtt_e2e_but_better
+    workingDirectory: '$(System.ArtifactsDirectory)'
+    displayName: 'Execute Test'
+    # env:
+    #   IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
+    #   IOTHUB_DEVICE_ID: $(IOTHUB-DEVICE-ID)
+    #   IOTHUB_DEVICE_KEY: $(IOTHUB-DEVICE-KEY)
+    #   IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
+    #   IOTHUB_EVENTHUB_LISTEN_NAME: $(IOTHUB-EVENTHUB-LISTEN-NAME)
+    #   IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+    #   IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+    #   IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-PRIVATE-KEY-BASE64)
+    #   IOTHUB_EVENTHUB_CONSUMER_GROUP: $(IOTHUB-EVENTHUB-CONSUMER-GROUP)
+    #   IOTHUB_PARTITION_COUNT: 16
+
+  - task: PublishTestResults@2
+    displayName: 'Publish Test Results "**/results-junit.xml"'
+    inputs:
+      testResultsFiles: "**/results-junit.xml"
+      testRunTitle: 'raspberry pi'
+  dependsOn: Cross_Compile
+  condition: succeeded()
