@@ -176,18 +176,7 @@ static int IotHubTransportMqtt_SetCallbackContext(TRANSPORT_LL_HANDLE handle, vo
 
 static int IotHubTransportMqtt_GetSupportedPlatformInfo(TRANSPORT_LL_HANDLE handle, PLATFORM_INFO_OPTION* info)
 {
-    int result;
-    if (handle == NULL)
-    {
-        result = MU_FAILURE;
-    }
-    else
-    {
-        *info = PLATFORM_INFO_OPTION_RETRIEVE_SQM;
-        result = 0;
-    }
-
-    return result;
+    return IoTHubTransport_MQTT_GetSupportedPlatformInfo(handle, info);
 }
 
 static TRANSPORT_PROVIDER myfunc =
