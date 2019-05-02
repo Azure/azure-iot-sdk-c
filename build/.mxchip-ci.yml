@@ -22,5 +22,5 @@ phases:
     displayName: 'build'
   - script: |
       ls
-      cp ./mxchip/BUILD/AZ3166/GCC_ARM/mxchip.bin /media/john/AZ31661
+      sudo cp ./mxchip/BUILD/AZ3166/GCC_ARM/mxchip.bin /media/john/AZ31661
     displayName: 'deploy'
