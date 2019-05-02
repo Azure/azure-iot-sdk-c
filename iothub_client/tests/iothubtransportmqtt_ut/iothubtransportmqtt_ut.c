@@ -919,22 +919,70 @@ TEST_FUNCTION(IoTHubTransportMqtt_SetCallbackContext_success)
     // cleanup
 }
 
-TEST_FUNCTION(IoTHubTransportMqtt_GetSupportedPlatformInfo_success)
+TEST_FUNCTION(IoTHubTransportMqtt_GetSupportedPlatformInfo)
 {
     // arrange
     IOTHUBTRANSPORT_CONFIG config = { 0 };
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
     TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config, g_transport_cb_info, NULL);
+
+    PLATFORM_INFO_OPTION expected_info = PLATFORM_INFO_OPTION_RETRIEVE_SQM;
+
     umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_GetSupportedPlatformInfo(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .CopyOutArgumentBuffer_info(&expected_info, sizeof(expected_info))
+        .SetReturn(0);
 
     // act
     PLATFORM_INFO_OPTION info;
     int result = IotHubTransportMqtt_GetSupportedPlatformInfo(handle, &info);
 
     // assert
+
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_ARE_EQUAL(int, result, 0);
-    ASSERT_ARE_EQUAL(PLATFORM_INFO_OPTION, info, PLATFORM_INFO_OPTION_RETRIEVE_SQM);
+    ASSERT_ARE_EQUAL(int, info, PLATFORM_INFO_OPTION_RETRIEVE_SQM);
+
+    // cleanup
+}
+
+TEST_FUNCTION(IoTHubTransportMqtt_GetSupportedPlatformInfo_NULL_handle)
+{
+    // arrange
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_GetSupportedPlatformInfo(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .SetReturn(1);
+
+    // act
+    PLATFORM_INFO_OPTION info;
+    int result = IotHubTransportMqtt_GetSupportedPlatformInfo(NULL, &info);
+
+    // assert
+
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_NOT_EQUAL(int, result, 0);
+
+    // cleanup
+}
+
+TEST_FUNCTION(IoTHubTransportMqtt_GetSupportedPlatformInfo_NULL_info)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config, g_transport_cb_info, NULL);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_GetSupportedPlatformInfo(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .SetReturn(1);
+
+    // act
+    int result = IotHubTransportMqtt_GetSupportedPlatformInfo(handle, NULL);
+
+    // assert
+
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_NOT_EQUAL(int, result, 0);
 
     // cleanup
 }
