@@ -11,7 +11,7 @@ extern "C" {
 #include <stddef.h>
 #endif /* __cplusplus */
 
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 #include "hsm_client_data.h"
 
 MOCKABLE_FUNCTION(, HSM_CLIENT_HANDLE, hsm_client_key_create);

@@ -51,11 +51,11 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 
 #include "testrunnerswitcher.h"
 
-#include "umock_c.h"
-#include "umock_c_negative_tests.h"
-#include "umocktypes_charptr.h"
-#include "umocktypes_bool.h"
-#include "umocktypes_stdint.h"
+#include "umock_c/umock_c.h"
+#include "umock_c/umock_c_negative_tests.h"
+#include "umock_c/umocktypes_charptr.h"
+#include "umock_c/umocktypes_bool.h"
+#include "umock_c/umocktypes_stdint.h"
 
 #define IOTHUB_CLIENT_CORE_H
 
@@ -2548,7 +2548,7 @@ TEST_FUNCTION(IoTHubClientCore_GetTwinAsync_fail)
 
     // act
     size_t count = umock_c_negative_tests_call_count();
-    
+
     for (size_t index = 0; index < count; index++)
     {
         if (!umock_c_negative_tests_can_call_fail(index))
