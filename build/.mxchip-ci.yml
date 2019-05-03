@@ -11,6 +11,7 @@ jobs:
 
   - script: |
       # . build_all/mbed5/build.sh
+      sudo rm -R -f mxchip
       git clone -b rajeev/latest_mbed https://github.com/massand/mxchip_az3166_firmware.git mxchip
       # rsync -avz --existing ./ mxchip/mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/
 
@@ -54,5 +55,5 @@ jobs:
       artifactName: 'drop'
 
   - script: |
-      cp ../a/drop/mxchip.bin /media/newt/AZ3166
+      cp $(System.ArtifactsDirectory)/drop/mxchip.bin /media/newt/AZ3166
     displayName: 'deploy'
