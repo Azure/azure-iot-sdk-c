@@ -302,7 +302,7 @@ static int get_retry_after_property(PROV_TRANSPORT_AMQP_INFO* amqp_info, MESSAGE
     int result;
     AMQP_VALUE app_prop = NULL;
     AMQP_VALUE prop_desc = NULL;
-    size_t prop_count = 0;
+    uint32_t prop_count = 0;
 
     if (message_get_application_properties(message, &app_prop) != 0)
     {
@@ -322,7 +322,7 @@ static int get_retry_after_property(PROV_TRANSPORT_AMQP_INFO* amqp_info, MESSAGE
     else
     {
         result = MU_FAILURE;
-        for (size_t index = 0; index < prop_count; index++)
+        for (uint32_t index = 0; index < prop_count; index++)
         {
             AMQP_VALUE map_key_name = NULL;
             AMQP_VALUE map_key_value = NULL;

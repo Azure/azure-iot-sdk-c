@@ -658,7 +658,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     static void setup_retry_after_mocks(AMQP_TYPE type)
     {
         uint32_t retry_after_count = 1;
-        const char* retry_after_string = "Retry-After";
+        const char* retry_after_string = "retry-after";
         STRICT_EXPECTED_CALL(message_get_application_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(amqpvalue_get_inplace_described_value(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(amqpvalue_get_map_pair_count(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_pair_count(&retry_after_count, sizeof(uint32_t));
