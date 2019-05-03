@@ -39,7 +39,7 @@ jobs:
     displayName: 'Publish Artifacts: drop'
     inputs:
       pathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      artifactName: 'drop.bin'
+      artifactName: 'drop'
       publishLocation: 'Container'
     condition: succeeded()
 
