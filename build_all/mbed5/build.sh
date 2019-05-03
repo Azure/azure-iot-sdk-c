@@ -1,12 +1,11 @@
-
-sudo rm -R -f mxchip
+mkdir mxchip
+cd mxchip
 git clone -b rajeev/latest_mbed https://github.com/massand/mxchip_az3166_firmware.git mxchip
 rsync -avz --existing ./ mxchip/mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/
 
 sudo npm install -g iotz
 sudo iotz update
 
-cd mxchip
 git checkout -- mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/provisioning_client/adapters/hsm_client_riot.c
 git checkout -- mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/provisioning_client/deps/RIoT/Reference/DICE/DiceSha256.c
 git checkout -- mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/provisioning_client/deps/RIoT/Reference/RIoT/Core/RIoTCrypt/RiotDerEnc.c
