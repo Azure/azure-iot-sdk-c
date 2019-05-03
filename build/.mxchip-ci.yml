@@ -55,5 +55,5 @@ jobs:
   - script: |
       pwd
       ls
-      cp drop/mxchip.bin /media/newt/AZ3166
+      cp ../a/drop/mxchip.bin /media/newt/AZ3166
     displayName: 'deploy'
