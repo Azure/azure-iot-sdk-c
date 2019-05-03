@@ -11,8 +11,6 @@ jobs:
   - script: |
       # . build_all/mbed5/build.sh
       # exploded for easy editing from DevOps
-      # mkdir mxchip
-      # cd mxchip
       git clone -b rajeev/latest_mbed https://github.com/massand/mxchip_az3166_firmware.git mxchip
       # rsync -avz --existing ./ mxchip/mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/
 
@@ -30,12 +28,7 @@ jobs:
       sudo iotz compile
 
       cd ..
-
     displayName: 'build'
-  # - script: |
-  #     cd $(Build.SourcesDirectory)
-  #     ls -al
-  #   displayName: "list Build.SourcesDirectory"
   - script: |
       # Check that this is the right source directory
       ls
@@ -58,9 +51,9 @@ jobs:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts'
     inputs:
-      artifactName: 'drop.bin'
+      artifactName: 'drop'
   - script: |
       pwd
       ls
-      cp drop.bin /media/newt/AZ3166
+      cp drop/mxchip.bin /media/newt/AZ3166
     displayName: 'deploy'
