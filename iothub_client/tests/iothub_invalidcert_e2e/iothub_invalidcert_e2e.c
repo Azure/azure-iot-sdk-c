@@ -4,7 +4,7 @@
 #include <time.h>
 #include <stdbool.h>
 #include "testrunnerswitcher.h"
-#include "umock_c.h"
+#include "umock_c/umock_c.h"
 
 #include "iothub.h"
 #include "iothub_device_client_ll.h"

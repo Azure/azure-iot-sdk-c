@@ -7,7 +7,7 @@
 #include "methodreturn.h"
 #include "agenttypesystem.h"
 #include "schema.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/strings.h"
 #include "iotdevice.h"
 
@@ -161,7 +161,7 @@ CODEFIRST_NOT_A_PROPERTY
 
 MU_DEFINE_ENUM(CODEFIRST_RESULT, CODEFIRST_RESULT_VALUES)
 
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 MOCKABLE_FUNCTION(, CODEFIRST_RESULT, CodeFirst_Init, const char*, overrideSchemaNamespace);
 MOCKABLE_FUNCTION(, void, CodeFirst_Deinit);
 MOCKABLE_FUNCTION(, SCHEMA_HANDLE, CodeFirst_RegisterSchema, const char*, schemaNamespace, const REFLECTED_DATA_FROM_DATAPROVIDER*, metadata);

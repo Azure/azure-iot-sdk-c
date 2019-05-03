@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include <stdlib.h>
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/xlogging.h"

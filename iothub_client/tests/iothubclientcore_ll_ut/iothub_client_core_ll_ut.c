@@ -27,11 +27,11 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 }
 
 #include "testrunnerswitcher.h"
-#include "umock_c.h"
-#include "umock_c_negative_tests.h"
-#include "umocktypes_charptr.h"
-#include "umocktypes_bool.h"
-#include "umocktypes_stdint.h"
+#include "umock_c/umock_c.h"
+#include "umock_c/umock_c_negative_tests.h"
+#include "umock_c/umocktypes_charptr.h"
+#include "umock_c/umocktypes_bool.h"
+#include "umock_c/umocktypes_stdint.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/optimize_size.h"
@@ -68,7 +68,7 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 #include "iothub_client_options.h"
 
 #define ENABLE_MOCKS
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 
 #ifndef DONT_USE_UPLOADTOBLOB
 #include "internal/iothub_client_ll_uploadtoblob.h"
@@ -5047,7 +5047,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_GetTwinAsync_succeed)
 {
     //arrange
     IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
-    
+
     umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_Subscribe_DeviceTwin(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
@@ -6779,7 +6779,7 @@ static void set_expected_calls_for_IoTHubClientCore_LL_CreateFromEnvironment_for
 #ifndef DONT_USE_UPLOADTOBLOB
     STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_SetOption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CallCannotFail();
 #endif
-    
+
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 }
@@ -6796,7 +6796,7 @@ static void set_expected_calls_for_IoTHubClientCore_LL_CreateFromEnvironment_for
 #ifndef DONT_USE_UPLOADTOBLOB
     STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_SetOption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CallCannotFail();
 #endif
-    
+
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 }

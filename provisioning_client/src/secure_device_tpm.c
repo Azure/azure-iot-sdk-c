@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/sastoken.h"
 #include "azure_c_shared_utility/azure_base64.h"

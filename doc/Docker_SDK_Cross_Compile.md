@@ -63,7 +63,9 @@ RUN wget https://downloads.openwrt.org/barrier_breaker/14.07/ramips/mt7620n/Open
 RUN tar -xvf OpenWrt-Toolchain-ramips-for-mipsel_24kec+dsp-gcc-4.8-linaro_uClibc-0.9.33.2.tar.bz2
 
 # Download the Azure IoT SDK for C
-RUN git clone --recursive https://github.com/azure/azure-iot-sdk-c.git
+RUN git clone https://github.com/azure/azure-iot-sdk-c.git
+RUN cd azure-iot-sdk-c
+RUN git submodule update --init
 
 # Download OpenSSL source and expand it
 RUN wget https://www.openssl.org/source/openssl-1.0.2o.tar.gz
