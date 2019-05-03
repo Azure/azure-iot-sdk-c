@@ -29,17 +29,17 @@ phases:
       publishLocation: 'Container'
     condition: succeeded()
 
-  - job: Execute
-    dependsOn: Cross_Compile
-    pool:
-      name: $(AGENTPOOL)
-    steps:
-    - task: DownloadBuildArtifacts@0
-      displayName: 'Download Build Artifacts'
-      inputs:
-        artifactName: 'drop.bin'
-    - script: |
-        pwd
-        ls
-        cp drop.bin /media/john/AZ31661
-      displayName: 'deploy'
+- job: Execute
+  dependsOn: Cross_Compile
+  pool:
+    name: $(AGENTPOOL)
+  steps:
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: 'drop.bin'
+  - script: |
+      pwd
+      ls
+      cp drop.bin /media/newt/AZ3166
+    displayName: 'deploy'
