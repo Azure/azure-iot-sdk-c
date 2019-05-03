@@ -3,8 +3,8 @@
 
 #include <stddef.h>
 
-#include "azure_c_shared_utility/macro_utils.h"
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "azure_macro_utils/macro_utils.h"
+#include "umock_c/umock_c_prod.h"
 
 #include "iothub_client_authorization.h"
 #include "iothub_client_core_common.h"

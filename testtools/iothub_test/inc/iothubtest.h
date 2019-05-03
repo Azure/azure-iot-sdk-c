@@ -14,7 +14,7 @@ extern "C"
 #include <time.h>
 #endif
 
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/buffer_.h"
 
 typedef void* IOTHUB_TEST_HANDLE;

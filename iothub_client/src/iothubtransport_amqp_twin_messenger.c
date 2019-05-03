@@ -2115,6 +2115,12 @@ int twin_messenger_stop(TWIN_MESSENGER_HANDLE twin_msgr_handle)
         }
         else
         {
+            // Codes_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_115: [If the client was subscribed for Twin updates, it must reset itself to continue receiving when twin_messenger_start is invoked ]
+            if (twin_msgr->subscription_state != TWIN_SUBSCRIPTION_STATE_UNSUBSCRIBE)
+            {
+                twin_msgr->subscription_state = TWIN_SUBSCRIPTION_STATE_GET_COMPLETE_PROPERTIES;
+            }
+
             // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_056: [If no failures occurr, twin_messenger_stop() shall return 0]
             result = RESULT_OK;
         }
