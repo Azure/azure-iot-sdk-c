@@ -97,6 +97,8 @@ phases:
   displayName: 'gcc-4.6'
   steps:
   - script: |
+      ls -lR
+      find / -name "*linux_c_gcc44.sh"
       sudo ./devops/linux_c_gcc44.sh
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
@@ -154,6 +156,7 @@ phases:
     name: Hosted macOS
   steps:
   - script: |
+      find / -name "*openssl.sh"
       ./devops/osx_gcc_openssl.sh
     displayName: 'build'
     env:
