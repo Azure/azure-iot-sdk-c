@@ -79,6 +79,7 @@ phases:
   displayName: 'gcc4.4'
   steps:
   - script: |
+      ls -lR
       sudo ./devops/linux_c_gcc44.sh
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
@@ -99,7 +100,8 @@ phases:
   - script: |
       ls -lR
       find / -name "*linux_c_gcc44.sh"
-      sudo ./devops/linux_c_gcc44.sh
+      chmod +x ./devops/linux_c_gcc44.sh
+      sudo .devops/linux_c_gcc44.sh
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
       IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
