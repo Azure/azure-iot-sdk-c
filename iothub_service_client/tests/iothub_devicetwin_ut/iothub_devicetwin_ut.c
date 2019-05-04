@@ -36,11 +36,11 @@ static int my_mallocAndStrcpy_s(char** destination, const char* source)
 }
 
 #include "testrunnerswitcher.h"
-#include "umock_c.h"
-#include "umock_c_negative_tests.h"
-#include "umocktypes_charptr.h"
-#include "umocktypes_bool.h"
-#include "umocktypes_stdint.h"
+#include "umock_c/umock_c.h"
+#include "umock_c/umock_c_negative_tests.h"
+#include "umock_c/umocktypes_charptr.h"
+#include "umock_c/umocktypes_bool.h"
+#include "umock_c/umocktypes_stdint.h"
 
 #define ENABLE_MOCKS
 
@@ -708,7 +708,7 @@ TEST_FUNCTION(IoTHubDeviceTwin_GetTwin_non_happy_path)
         {
             char message_on_error[64];
             sprintf(message_on_error, "Got unexpected non-NULL ptr on run %lu", (unsigned long)i);
-        
+
             const char* deviceId = " ";
             char* result = IoTHubDeviceTwin_GetTwin(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE, deviceId);
 

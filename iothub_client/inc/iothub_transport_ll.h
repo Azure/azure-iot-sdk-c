@@ -14,7 +14,7 @@ extern "C"
 #include <stdint.h>
 #endif
 
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 
 typedef void* TRANSPORT_LL_HANDLE;
 typedef void* IOTHUB_DEVICE_HANDLE;

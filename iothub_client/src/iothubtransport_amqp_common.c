@@ -19,7 +19,7 @@
 #include "azure_c_shared_utility/tlsio.h"
 #include "azure_c_shared_utility/optionhandler.h"
 #include "azure_c_shared_utility/shared_util_options.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 
 #include "azure_uamqp_c/cbs.h"
 #include "azure_uamqp_c/amqp_definitions.h"
