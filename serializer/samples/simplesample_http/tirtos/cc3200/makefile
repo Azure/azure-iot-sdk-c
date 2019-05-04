@@ -31,14 +31,14 @@
 #
 
 TREE_ROOT = ../../../../..
-include $(TREE_ROOT)/build_all/tirtos/products.mak
+include $(TREE_ROOT)/devops/scripts/tirtos/products.mak
 include makedefs
 
 CONFIG = main
 
 CFLAGS :=  -I../.. -I../../../../inc/ -I../../../../../c-utility/inc/ -I../../../../../c-utility/inc/azure_c_shared_utility -I../../../../../iothub_client/inc -I../../../../../iothub_client/inc/internal -g --cmd_file=./$(CONFIG)/compiler.opt $(CFLAGS)
 
-LIBS =  $(TREE_ROOT)/c-utility/build_all/tirtos/lib/common_sl.aem4 \
+LIBS =  $(TREE_ROOT)/c-utility/devops/scripts/tirtos/lib/common_sl.aem4 \
     $(TREE_ROOT)/iothub_client/build/tirtos/lib/iotclient_sl.aem4 \
     $(TREE_ROOT)/serializer/build/tirtos/lib/serializer_sl.aem4
 

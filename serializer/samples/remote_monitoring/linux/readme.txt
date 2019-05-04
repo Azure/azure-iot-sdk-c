@@ -17,9 +17,9 @@ git clone https://github.com/Azure/azure-iot-sdk-c.git
 cd azure-iot-sdk-c
 git submodule update --init
 
-6. go to linux build folder in ./build_all/linux
+6. go to linux build folder in ./devops/scripts/linux
 
-cd build_all/linux
+cd devops/scripts/linux
 
 7. switch to the folder of the remote monitoring machine source code:
 

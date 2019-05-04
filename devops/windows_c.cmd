@@ -11,7 +11,7 @@ rem // resolve to fully qualified path
 for %%i in ("%build-root%") do set build-root=%%~fi
 
 REM -- C --
-cd %build-root%\build_all\windows
+cd %build-root%\devops\scripts\windows
 call build.cmd --run-unittests --run-e2e-tests --run-sfc-tests --build-traceabilitytool --provisioning --use-edge-modules %*
 if errorlevel 1 goto :eof
 cd %build-root%

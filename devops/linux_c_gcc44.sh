@@ -12,6 +12,6 @@ build_root=$(cd "$(dirname "$0")/.." && pwd)
 cd $build_root
 
 # -- C --
-./build_all/linux/build.sh "$@"
+./devops/scripts/linux/build.sh "$@"
 [ $? -eq 0 ] || exit $?
 

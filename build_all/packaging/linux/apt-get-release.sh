@@ -26,7 +26,7 @@ setup_debian_folder()
 
 	# Remove the debian folder
 	dh_make -y -l -c mit -e aziotsdklinux@outlook.com -f ../$azureiot_c_zip_folder
-	cp -r ~/$azureiot_folder/$azureiot_c_folder/build_all/packaging/linux/debian ./
+	cp -r ~/$azureiot_folder/$azureiot_c_folder/devops/scripts/packaging/linux/debian ./
 }
 
 build_package()
