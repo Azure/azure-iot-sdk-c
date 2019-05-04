@@ -7,7 +7,7 @@
 #include "multitree.h"
 #include "schema.h"
 #include "agenttypesystem.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "methodreturn.h"
 
 #ifdef __cplusplus
@@ -39,7 +39,7 @@ typedef struct COMMAND_DECODER_HANDLE_DATA_TAG* COMMAND_DECODER_HANDLE;
 typedef EXECUTE_COMMAND_RESULT(*ACTION_CALLBACK_FUNC)(void* actionCallbackContext, const char* relativeActionPath, const char* actionName, size_t argCount, const AGENT_DATA_TYPE* args);
 typedef METHODRETURN_HANDLE(*METHOD_CALLBACK_FUNC)(void* methodCallbackContext, const char* relativeMethodPath, const char* methodName, size_t argCount, const AGENT_DATA_TYPE* args);
 
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 
 MOCKABLE_FUNCTION(,COMMAND_DECODER_HANDLE, CommandDecoder_Create, SCHEMA_MODEL_TYPE_HANDLE, modelHandle, ACTION_CALLBACK_FUNC, actionCallback, void*, actionCallbackContext, METHOD_CALLBACK_FUNC, methodCallback, void*, methodCallbackContext);
 MOCKABLE_FUNCTION(,EXECUTE_COMMAND_RESULT, CommandDecoder_ExecuteCommand, COMMAND_DECODER_HANDLE, handle, const char*, command);

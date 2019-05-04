@@ -2,14 +2,14 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "testrunnerswitcher.h"
 
-#include "umock_c.h"
-#include "umocktypes_charptr.h"
-#include "umocktypes_bool.h"
-#include "umocktypes_stdint.h"
-#include "umock_c_negative_tests.h"
+#include "umock_c/umock_c.h"
+#include "umock_c/umocktypes_charptr.h"
+#include "umock_c/umocktypes_bool.h"
+#include "umock_c/umocktypes_stdint.h"
+#include "umock_c/umock_c_negative_tests.h"
 
 #include "parson.h"
 
@@ -94,7 +94,7 @@ METHODRETURN_HANDLE my_methodA(basicModel_WithData15 *model, int a, int b)
 }
 
 #define ENABLE_MOCKS
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 MOCKABLE_FUNCTION(, void, on_desired_property_double15, void*, v);
     MOCKABLE_FUNCTION(, void, on_desired_property_int15, void*, v);
     MOCKABLE_FUNCTION(, void, on_desired_property_float15, void*, v);

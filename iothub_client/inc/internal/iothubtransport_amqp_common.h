@@ -5,7 +5,7 @@
 #define IOTHUBTRANSPORTAMQP_COMMON_H
 
 #include "azure_c_shared_utility/strings.h"
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 #include "internal/iothub_transport_ll_private.h"
 
 #ifdef __cplusplus

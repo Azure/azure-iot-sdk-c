@@ -8,8 +8,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include "azure_c_shared_utility/macro_utils.h"
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "azure_macro_utils/macro_utils.h"
+#include "umock_c/umock_c_prod.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 
 #include "provisioning_sc_models.h"
