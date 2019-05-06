@@ -82,7 +82,7 @@ def build_image(tags):
     build_args = {
         "CLIENTLIBRARY_REPO": tags.repo,
         "CLIENTLIBRARY_COMMIT_NAME": tags.commit_name,
-        "CLIENTLIBRARY_COMMIT_SHA": tags.commit_sha
+        "CLIENTLIBRARY_COMMIT_SHA": tags.commit_sha,
         "CLIENTLIBRARY_FORCEFLAG": str(force_flag)
     }
 
