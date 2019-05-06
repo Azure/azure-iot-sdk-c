@@ -25,7 +25,7 @@ phases:
 
       sudo chmod -R 755 .
 
-      sudo -E ./jenkins/linux_back_compat.sh
+      sudo -E ./devops/linux_back_compat.sh
 
     displayName: 'build'
 

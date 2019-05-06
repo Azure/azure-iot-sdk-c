@@ -11,7 +11,7 @@ set build-root=%current-path%\..\..\..
 for %%i in ("%build-root%") do set build-root=%%~fi
 echo Build root is %build-root%
 
-pushd %build-root%\devops\scripts\packaging\windows\
+pushd %build-root%\build_all\packaging\windows\
 
 where /q nuget.exe
 if not !errorlevel! == 0 (
