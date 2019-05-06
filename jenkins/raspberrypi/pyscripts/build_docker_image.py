@@ -66,12 +66,24 @@ def build_image(tags):
     print("BUILDING IMAGE")
     print(print_separator)
 
+    dockerfile = "Dockerfile"
+    dockerfile_directory = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../"))
+
+    # The force flag is used if we are running in azure devops. This is because in azure devops it creates 
+    # a new merge commit and so in the dockerfile the commit it tries to find won't exist. To avoid this 
+    # we compress the merged SDK repo into source.tar.gz and then copy it into the dockerfile. If this is
+    # necessary, force_flag is set.
+    force_flag = 0
+    if os.stat(dockerfile_directory + "/source.tar.gz").st_size > 0:
+        print("source.tar.gz exists. Setting force flag.")
+        force_flag = datetime.datetime.now().timestamp()
 
     api_client = docker.APIClient(base_url="unix://var/run/docker.sock")
     build_args = {
         "CLIENTLIBRARY_REPO": tags.repo,
         "CLIENTLIBRARY_COMMIT_NAME": tags.commit_name,
         "CLIENTLIBRARY_COMMIT_SHA": tags.commit_sha
+        "CLIENTLIBRARY_FORCEFLAG": str(force_flag)
     }
 
     if tags.image_tag_to_use_for_cache:
@@ -82,8 +94,6 @@ def build_image(tags):
     else:
         cache_from = []
 
-    dockerfile = "Dockerfile"
-    dockerfile_directory = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../"))
 
     print(
         Fore.YELLOW
