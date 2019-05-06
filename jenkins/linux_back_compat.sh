@@ -23,7 +23,7 @@ sdk_build_folder=$build_root"/cmake"
 rm -rf $sdk_build_folder
 mkdir -p $sdk_build_folder
 pushd $sdk_build_folder
-cmake $build_root -Drun_e2e_tests=ON
+cmake $build_root -Duse_prov_client=ON
 make install --jobs=$CORES
 popd
 
