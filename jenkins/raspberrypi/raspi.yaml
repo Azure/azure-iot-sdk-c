@@ -45,11 +45,7 @@ jobs:
       cp ${AGENT_BUILDDIRECTORY}/source.tar.gz $(Build.SourcesDirectory)/source_artifacts/ &&
       mv ${AGENT_BUILDDIRECTORY}/source.tar.gz ${CLIENTLIBRARY_FRAMEWORKROOT}/jenkins/raspberrypi/ 
     displayName: "pack local language repo"
-    condition: and(
-        succeeded(), 
-        eq(variables['buildImage'],'yes'),
-        not(eq(variables['Horton.FrameworkRoot'], variables['Build.SourcesDirectory']))
-        )
+    condition: succeeded()
 
   - script: |
       python3 $(ClientLibrary.FrameworkRoot)/jenkins/raspberrypi/pyscripts/build_docker_image.py --repo ${NormalizedRepo}  --commit $(ClientLibrary.Commit)
