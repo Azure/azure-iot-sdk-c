@@ -5,24 +5,24 @@ Overview
 The Schema module provides APIs for describing struct types and model types. A model type can be used to instantiate a specific device.
 Below is a layout if a schema:
 Schema
-```code 
+```code
  |--- <Schema Namespace>
- |--- <0..n Struct Type> 
+ |--- <0..n Struct Type>
  |	 |-- <Struct Name>
  |   |-- <0..n Property> (Primitive, Structs, User Defined)
  |   |-- <0..n ReportedProperty> (Primitive, Structs, User Defined)
  |   |-- <0..n DesiredProperty> (Primitive, Structs, User Defined)
- |	 |--- <0..n Model Type> 
+ |	 |--- <0..n Model Type>
  |            |--- <Model Name>
- |            |--- <0..n Property> (Primitive, Structs, User Defined) 
+ |            |--- <0..n Property> (Primitive, Structs, User Defined)
  |            |--- <0..n ReportedProperty> (Primitive, Structs, User Defined)
  |            |--- <0..n DesiredProperty> (Primitive, Structs, User Defined)
  |            |--- <0..n Actions>
  |            |--- <0..n Methods>
  |            |--- <0..n Models>
- |--- <0..n Model Type> 
+ |--- <0..n Model Type>
      |--- <Model Name>
-     |--- <0..n Property> (Primitive, Structs, User Defined) 
+     |--- <0..n Property> (Primitive, Structs, User Defined)
      |--- <0..n ReportedProperty> (Primitive, Structs, User Defined)
      |--- <0..n DesiredProperty> (Primitive, Structs, User Defined)
      |--- <0..n Actions>
@@ -85,7 +85,7 @@ typedef struct SCHEMA_MODEL_ELEMENT_TAG
     } elementHandle;
 }SCHEMA_MODEL_ELEMENT;
 
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 extern SCHEMA_HANDLE Schema_Create(const char* schemaNamespace, void* metadata);
 extern void* Schema_GetMetadata(SCHEMA_HANDLE schemaHandle);
 extern size_t Schema_GetSchemaCount(void);
@@ -653,7 +653,7 @@ extern bool Schema_ModelPropertyByPathExists(SCHEMA_MODEL_TYPE_HANDLE modelTypeH
 **SRS_SCHEMA_99_181: [** If the property cannot be found Schema_ModelPropertyByPathExists shall return false. **]**
 
 **SRS_SCHEMA_99_182: [** A single slash ('/') at the beginning of the path shall be ignored and the path shall still be valid. **]**
-Example: /model1/PropertyName. 
+Example: /model1/PropertyName.
 **SRS_SCHEMA_99_183: [** If the path propertyPath points to a sub-model, Schema_ModelPropertyByPathExists shall return true. **]**
 
 ### Schema_ModelReportedPropertyByPathExists
@@ -743,7 +743,7 @@ extern SCHEMA_RESULT Schema_GetModelDesiredPropertyCount(SCHEMA_MODEL_TYPE_HANDL
 **SRS_SCHEMA_02_032: [** Otherwise, `Schema_GetModelDesiredPropertyCount` shall succeed and write in `desiredPropertyCount` the existing number of desired properties. **]**
 
 ### Schema_GetModelDesiredPropertyByName
-```c 
+```c
 extern SCHEMA_DESIRED_PROPERTY_HANDLE Schema_GetModelDesiredPropertyByName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* desiredPropertyName);
 ```
 
@@ -850,7 +850,7 @@ const char* Schema_GetModelDesiredPropertyType(SCHEMA_DESIRED_PROPERTY_HANDLE de
 
 **SRS_SCHEMA_02_062: [** If `desiredPropertyHandle` is `NULL` then `Schema_GetModelDesiredPropertyType` shall fail and return `NULL`. **]**
 
-**SRS_SCHEMA_02_063: [** Otherwise, `Schema_GetModelDesiredPropertyType` shall return the type of the desired property. **]** 
+**SRS_SCHEMA_02_063: [** Otherwise, `Schema_GetModelDesiredPropertyType` shall return the type of the desired property. **]**
 
 ### Schema_GetModelDesiredProperty_pfDesiredPropertyDeinitialize
 ```c
@@ -885,19 +885,19 @@ extern SCHEMA_MODEL_ELEMENT Schema_GetModelElementByName(SCHEMA_MODEL_TYPE_HANDL
 
 **SRS_SCHEMA_02_077: [** If `elementName` is `NULL` then `Schema_GetModelElementByName` shall fail and set `SCHEMA_MODEL_ELEMENT.elementType` to `SCHEMA_SEARCH_INVALID_ARG`. **]**
 
-**SRS_SCHEMA_02_078: [** If `elementName` is a property then `Schema_GetModelElementByName` shall succeed and set `SCHEMA_MODEL_ELEMENT.elementType` to 
+**SRS_SCHEMA_02_078: [** If `elementName` is a property then `Schema_GetModelElementByName` shall succeed and set `SCHEMA_MODEL_ELEMENT.elementType` to
 `SCHEMA_PROPERTY` and `SCHEMA_MODEL_ELEMENT.elementHandle.propertyHandle` to the handle of the property. **]**
 
-**SRS_SCHEMA_02_079: [** If `elementName` is a reported property then `Schema_GetModelElementByName` shall succeed and set `SCHEMA_MODEL_ELEMENT.elementType` to 
+**SRS_SCHEMA_02_079: [** If `elementName` is a reported property then `Schema_GetModelElementByName` shall succeed and set `SCHEMA_MODEL_ELEMENT.elementType` to
 `SCHEMA_REPORTED_PROPERTY` and `SCHEMA_MODEL_ELEMENT.elementHandle.reportedPropertyHandle` to the handle of the reported property. **]**
 
-**SRS_SCHEMA_02_080: [** If `elementName` is a desired property then `Schema_GetModelElementByName` shall succeed and set `SCHEMA_MODEL_ELEMENT.elementType` to 
+**SRS_SCHEMA_02_080: [** If `elementName` is a desired property then `Schema_GetModelElementByName` shall succeed and set `SCHEMA_MODEL_ELEMENT.elementType` to
 `SCHEMA_DESIRED_PROPERTY` and `SCHEMA_MODEL_ELEMENT.elementHandle.desiredPropertyHandle` to the handle of the desired property. **]**
 
-**SRS_SCHEMA_02_081: [** If `elementName` is a model action then `Schema_GetModelElementByName` shall succeed and set `SCHEMA_MODEL_ELEMENT.elementType` to 
+**SRS_SCHEMA_02_081: [** If `elementName` is a model action then `Schema_GetModelElementByName` shall succeed and set `SCHEMA_MODEL_ELEMENT.elementType` to
 `SCHEMA_MODEL_ACTION` and `SCHEMA_MODEL_ELEMENT.elementHandle.actionHandle` to the handle of the action. **]**
 
-**SRS_SCHEMA_02_082: [** If `elementName` is a model in model then `Schema_GetModelElementByName` shall succeed and set `SCHEMA_MODEL_ELEMENT.elementType` to 
+**SRS_SCHEMA_02_082: [** If `elementName` is a model in model then `Schema_GetModelElementByName` shall succeed and set `SCHEMA_MODEL_ELEMENT.elementType` to
 `SCHEMA_MODEL_IN_MODEL` and `SCHEMA_MODEL_ELEMENT.elementHandle.modelHandle` to the handle of the model. **]**
 
 **SRS_SCHEMA_02_083: [** Otherwise  `Schema_GetModelElementByName` shall fail and set `SCHEMA_MODEL_ELEMENT.elementType` to `SCHEMA_NOT_FOUND`. **]**
@@ -995,10 +995,10 @@ SCHEMA_METHOD_HANDLE Schema_GetModelMethodByName(SCHEMA_MODEL_TYPE_HANDLE modelT
 
 **SRS_SCHEMA_02_117: [** If a method with the name `methodName` exists then `Schema_GetModelMethodByName` shall succeed and returns its handle. **]**
 
-**SRS_SCHEMA_02_118: [** Otherwise, `Schema_GetModelMethodByName` shall fail and return `NULL`. **]** 
+**SRS_SCHEMA_02_118: [** Otherwise, `Schema_GetModelMethodByName` shall fail and return `NULL`. **]**
 
 ### Schema_GetModelMethodArgumentCount
-```c 
+```c
 SCHEMA_RESULT Schema_GetModelMethodArgumentCount(SCHEMA_METHOD_HANDLE methodHandle, size_t* argumentCount)
 ```
 
@@ -1008,8 +1008,8 @@ SCHEMA_RESULT Schema_GetModelMethodArgumentCount(SCHEMA_METHOD_HANDLE methodHand
 
 **SRS_SCHEMA_02_120: [** If `argumentCount` is `NULL` then `Schema_GetModelMethodArgumentCount` shall fail and return `SCHEMA_INVALID_ARG`. **]**
 
-**SRS_SCHEMA_02_121: [** Otherwise, `Schema_GetModelMethodArgumentCount` shall succeed, return in `argumentCount` the number of arguments for the 
-method and return `SCHEMA_OK`. **]** 
+**SRS_SCHEMA_02_121: [** Otherwise, `Schema_GetModelMethodArgumentCount` shall succeed, return in `argumentCount` the number of arguments for the
+method and return `SCHEMA_OK`. **]**
 
 ### Schema_GetModelMethodArgumentByIndex
 ```c

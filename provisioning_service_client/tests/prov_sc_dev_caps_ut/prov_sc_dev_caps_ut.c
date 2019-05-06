@@ -20,10 +20,10 @@ void real_free(void* ptr)
 }
 
 #include "testrunnerswitcher.h"
-#include "azure_c_shared_utility/macro_utils.h"
-#include "umock_c.h"
-#include "umocktypes_bool.h"
-#include "umock_c_negative_tests.h"
+#include "azure_macro_utils/macro_utils.h"
+#include "umock_c/umock_c.h"
+#include "umock_c/umocktypes_bool.h"
+#include "umock_c/umock_c_negative_tests.h"
 
 #include "prov_service_client/provisioning_sc_device_capabilities.h"
 
@@ -32,7 +32,7 @@ void real_free(void* ptr)
 #include "prov_service_client/provisioning_sc_shared_helpers.h"
 #include "prov_service_client/provisioning_sc_models_serializer.h"
 #include "parson.h"
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 
 MOCKABLE_FUNCTION(, JSON_Value*, json_value_init_object);
 MOCKABLE_FUNCTION(, void, json_value_free, JSON_Value*, value);
