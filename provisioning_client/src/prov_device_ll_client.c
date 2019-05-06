@@ -481,6 +481,12 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
 
         // status can be NULL
         result->prov_status = retrieve_status_type(json_value_get_string(json_status));
+        // Under TPM the status will be error if this is an authorization request.  We need to make it unassigned.
+        if (result->prov_status == PROV_DEVICE_TRANSPORT_STATUS_ERROR && json_status == NULL && prov_info->hsm_type == PROV_AUTH_TYPE_TPM)
+        {
+            result->prov_status = PROV_DEVICE_TRANSPORT_STATUS_UNASSIGNED;
+        }
+
         switch (result->prov_status)
         {
             case PROV_DEVICE_TRANSPORT_STATUS_UNASSIGNED:

@@ -1038,7 +1038,7 @@ int prov_transport_http_set_trace(PROV_DEVICE_TRANSPORT_HANDLE handle, bool trac
     else
     {
         PROV_TRANSPORT_HTTP_INFO* http_info = (PROV_TRANSPORT_HTTP_INFO*)handle;
-        //if (http_info->hsm_type == TRANSPORT_HSM_TYPE_X509)
+        if (http_info->hsm_type == TRANSPORT_HSM_TYPE_X509)
         {
             http_info->log_trace = trace_on;
             if (http_info->http_client != NULL)
@@ -1049,11 +1049,11 @@ int prov_transport_http_set_trace(PROV_DEVICE_TRANSPORT_HANDLE handle, bool trac
             /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_042: [ On success prov_transport_http_set_trace shall return zero. ] */
             result = 0;
         }
-        /*else
+        else
         {
             LogError("Unable to enable logging when not using x509 certificates");
                 result = MU_FAILURE;
-        }*/
+        }
     }
     return result;
 }
