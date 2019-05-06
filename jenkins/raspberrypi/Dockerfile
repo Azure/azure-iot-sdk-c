@@ -114,33 +114,17 @@ RUN ls -al
 RUN cmake -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake -Duse_prov_client:BOOL=OFF -DCMAKE_INSTALL_PREFIX=${TOOLCHAIN_PREFIX} -Drun_e2e_tests:BOOL=ON -Drun_unittests=:BOOL=ON ..
 RUN make -j 2
 RUN make install
+RUN ls -al
 
 ########## PHASE 2: COMPILE BRANCH SPECIFIC INFORMATION ##########
 ARG CLIENTLIBRARY_COMMIT_SHA
 ARG CLIENTLIBRARY_COMMIT_NAME
 ARG CLIENTLIBRARY_FORCEFLAG
-
 RUN echo $CLIENTLIBRARY_COMMIT_NAME $CLIENTLIBRARY_COMMIT_SHA 
-WORKDIR /sdk
-RUN ls -al
 
-WORKDIR /temp
+COPY ./fetch.sh /
 COPY ./source.tar.gz /temp/
-RUN if [ -s /temp/source.tar.gz ]; then 
-RUN   mkdir /temp/source
-RUN   [ $? -eq 0 ] || { echo "mkdir /temp/source failed"; exit 1; }
-RUN   tar -zxf /temp/source.tar.gz -C /temp/source 
-RUN   [ $? -eq 0 ] || { echo "tar -zxf failed"; exit 1; }
-RUN   rsync --recursive --checksum --update --delete-during  /temp/source/ .
-RUN   [ $? -eq 0 ] || { echo "rsync failed"; exit 1; }
-RUN else
-RUN   git fetch origin 
-RUN   [ $? -eq 0 ] || { echo "git fetch failed"; exit 1; }
-RUN   git checkout $CLIENTLIBRARY_COMMIT_SHA
-RUN   [ $? -eq 0 ] || { echo "git checkout failed"; exit 1; }
-RUN   git submodule update --init 
-RUN   [ $? -eq 0 ] || { echo "git submodule failed"; exit 1; }
-RUN fi
+RUN /fetch.sh /temp 
 
 
 WORKDIR /sdk/cmake
