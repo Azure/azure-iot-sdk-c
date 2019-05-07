@@ -312,11 +312,13 @@ static int get_retry_after_property(PROV_TRANSPORT_AMQP_INFO* amqp_info, MESSAGE
     else if ((prop_desc = amqpvalue_get_inplace_described_value(app_prop)) == NULL)
     {
         LogError("Failure getting application property description");
+        application_properties_destroy(app_prop);
         result = MU_FAILURE;
     }
     else if (amqpvalue_get_map_pair_count(prop_desc, &prop_count) != 0)
     {
         LogError("Failure getting application property count");
+        application_properties_destroy(app_prop);
         result = MU_FAILURE;
     }
     else
@@ -382,6 +384,7 @@ static int get_retry_after_property(PROV_TRANSPORT_AMQP_INFO* amqp_info, MESSAGE
                 }
             }
         }
+        application_properties_destroy(app_prop);
     }
     return result;
 }
