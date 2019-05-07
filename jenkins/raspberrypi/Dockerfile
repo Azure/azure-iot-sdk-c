@@ -92,7 +92,15 @@ WORKDIR /sdk
 RUN git clone https://github.com/$CLIENTLIBRARY_REPO .
 RUN git checkout raspi-pipeline
 RUN git submodule update --init 
-  
+
+
+########## PHASE 2: COMPILE BRANCH SPECIFIC INFORMATION ##########
+ARG CLIENTLIBRARY_COMMIT_SHA
+ARG CLIENTLIBRARY_COMMIT_NAME
+ARG CLIENTLIBRARY_FORCEFLAG
+RUN echo $CLIENTLIBRARY_COMMIT_NAME $CLIENTLIBRARY_COMMIT_SHA 
+
+
 # CMAKE
 RUN mkdir cmake
 WORKDIR /sdk/cmake
@@ -116,12 +124,6 @@ RUN make -j 2
 RUN make install
 RUN ls -al
 
-########## PHASE 2: COMPILE BRANCH SPECIFIC INFORMATION ##########
-ARG CLIENTLIBRARY_COMMIT_SHA
-ARG CLIENTLIBRARY_COMMIT_NAME
-ARG CLIENTLIBRARY_FORCEFLAG
-RUN echo $CLIENTLIBRARY_COMMIT_NAME $CLIENTLIBRARY_COMMIT_SHA 
-
 COPY ./fetch.sh /
 COPY ./source.tar.gz /temp/
 
@@ -131,7 +133,6 @@ RUN ls -al
 WORKDIR /sdk
 RUN /fetch.sh /temp 
 RUN git submodule update --init 
-RUN ls -alR deps
 
 WORKDIR /sdk/cmake
 RUN cmake ..
