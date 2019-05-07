@@ -13,12 +13,6 @@ jobs:
   pool:
     vmImage: ubuntu-16.04
   steps:
-  - script: |
-      pushd $(Build.SourcesDirectory) && 
-      submodule update --init &&
-      popd
-    displayName: "submodule update"
-
   - task: UsePythonVersion@0
     inputs:
       versionSpec: '3.x'
@@ -34,10 +28,19 @@ jobs:
       if ($NormalizedRepo -like 'https://github.com/*') {
         $NormalizedRepo=$NormalizedRepo.Substring('https://github.com/'.length)
       }
+      $IsPr = "no"
+      $CommitToPass = $env:Commit
+      if ("$env:SYSTEMPULLREQUEST_TARGETBRANCH" -ne "") {
+        $CommitToPass = $env:SYSTEM_PULLREQUEST_TARGETBRANCH
+        $IsPr = "yes"
+      }
       Write-Host "##vso[task.setvariable variable=normalizedRepo]${NormalizedRepo}"
       Write-Host "normalizedRepo=${NormalizedRepo}"
-    displayName: Removing github.com from repo name if necessary
+      Write-Host "IsPr=${IsPr}"
+      Write-Host "CommitToPass=${CommitToPass}"
+    displayName: Custom task execution logic
     env:
+      Commit: $(ClientLibrary.Commit)
       Repo: $(ClientLibrary.Repo)
     ignoreLASTEXITCODE: false
     errorActionPreference: Stop
@@ -45,12 +48,17 @@ jobs:
   
   - script: |
       cd $(Build.SourcesDirectory) &&
-      tar --exclude .git/ -zcf ${AGENT_BUILDDIRECTORY}/source.tar.gz . &&
-      mkdir -p $(Build.SourcesDirectory)/source_artifacts
-      cp ${AGENT_BUILDDIRECTORY}/source.tar.gz $(Build.SourcesDirectory)/source_artifacts/ &&
-      mv ${AGENT_BUILDDIRECTORY}/source.tar.gz ${CLIENTLIBRARY_FRAMEWORKROOT}/jenkins/raspberrypi/ 
+      echo "saving patch from ${CommitToPass} to HEAD" &&
+      git diff -p origin/${CommitToPass} > ${AGENT_BUILDDIRECTORY}/patchfile &&
+      mkdir -p $(Build.ArtifactStagingDirectory)/${{ parameters.job_tag }} &&
+      cp ${AGENT_BUILDDIRECTORY}/patchfile $(Build.ArtifactStagingDirectory)/${{ parameters.job_tag }} &&
+      mv ${AGENT_BUILDDIRECTORY}/patchfile ${HORTON_FRAMEWORKROOT}/ci-wrappers/${{ parameters.language }}
     displayName: "pack local language repo"
-    condition: succeeded()
+    condition: and(
+      succeeded(),
+      eq(varaibles['isPr'],'yes')
+    env:
+      CommitToPass: $(CommitToPass)
 
   - script: |
       python3 $(ClientLibrary.FrameworkRoot)/jenkins/raspberrypi/pyscripts/build_docker_image.py --repo ${NormalizedRepo}  --commit $(ClientLibrary.Commit)

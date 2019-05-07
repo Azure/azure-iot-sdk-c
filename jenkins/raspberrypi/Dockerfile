@@ -90,28 +90,13 @@ WORKDIR /${WORK_ROOT}
 ########## CLIENT LIBRARY INSTALL ##########
 # clone azure  
 ARG CLIENTLIBRARY_REPO
-COPY ./fetch.sh /
-COPY ./source.tar.gz /temp/
-
 WORKDIR /sdk
+RUN git clone https://github.com/$CLIENTLIBRARY_REPO .
+RUN git submodule update --init
 
-########## PHASE 2: COMPILE BRANCH SPECIFIC INFORMATION ##########
-ARG CLIENTLIBRARY_COMMIT_SHA
-ARG CLIENTLIBRARY_COMMIT_NAME
-ARG CLIENTLIBRARY_FORCEFLAG
-RUN echo $CLIENTLIBRARY_COMMIT_NAME $CLIENTLIBRARY_COMMIT_SHA 
-
-WORKDIR /temp
-RUN ls -al
-
-WORKDIR /sdk
-RUN /fetch.sh /temp
-
-# CMAKE
 RUN mkdir cmake
 WORKDIR /sdk/cmake
 RUN ls -al
-
 
 # Create a cmake toolchain file on the fly
 RUN echo "SET(CMAKE_SYSTEM_NAME Linux)     # this one is important" > toolchain.cmake
@@ -131,6 +116,23 @@ RUN make -j 2
 RUN make install
 RUN ls -al
 
+########## PHASE 2: COMPILE BRANCH SPECIFIC INFORMATION ##########
+ARG CLIENTLIBRARY_COMMIT_SHA
+ARG CLIENTLIBRARY_COMMIT_NAME
+
+WORKDIR /sdk
+RUN git pull
+RUN git checkout $CLIENTLIBRARY_COMMIT_SHA
+
+COPY ./patchfile /
+RUN if [-s /patchfile ]; then git apply /patchfile; file
+
+RUN git submodule update --init 
+
+WORKDIR /sdk/cmake 
+RUN cmake .
+RUN make -j 2
+RUN make install
 
 # Finally a sanity check to make sure the files are there
 RUN ls -al ${TOOLCHAIN_PREFIX}/lib
