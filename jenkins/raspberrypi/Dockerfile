@@ -1,6 +1,10 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+# To run locally (example)
+# docker build -t rpiiotbuild:latest --build-arg "CLIENTLIBRARY_REPO=Azure/azure-iot-sdk-c" --build-arg "CLIENTLIBRARY_COMMIT_SHA=raspi-pipeline" . --network=host --file ./Dockerfile
+
+
 # Start with the latest version of the Debian Docker container
 FROM debian:stretch
 
@@ -86,13 +90,10 @@ WORKDIR /${WORK_ROOT}
 ########## CLIENT LIBRARY INSTALL ##########
 # clone azure  
 ARG CLIENTLIBRARY_REPO
+COPY ./fetch.sh /
+COPY ./source.tar.gz /temp/
 
 WORKDIR /sdk
-
-RUN git clone https://github.com/$CLIENTLIBRARY_REPO .
-RUN git checkout raspi-pipeline
-RUN git submodule update --init 
-
 
 ########## PHASE 2: COMPILE BRANCH SPECIFIC INFORMATION ##########
 ARG CLIENTLIBRARY_COMMIT_SHA
@@ -100,11 +101,17 @@ ARG CLIENTLIBRARY_COMMIT_NAME
 ARG CLIENTLIBRARY_FORCEFLAG
 RUN echo $CLIENTLIBRARY_COMMIT_NAME $CLIENTLIBRARY_COMMIT_SHA 
 
+WORKDIR /temp
+RUN ls -al
+
+WORKDIR /sdk
+RUN /fetch.sh /temp
 
 # CMAKE
 RUN mkdir cmake
 WORKDIR /sdk/cmake
 RUN ls -al
+
 
 # Create a cmake toolchain file on the fly
 RUN echo "SET(CMAKE_SYSTEM_NAME Linux)     # this one is important" > toolchain.cmake
@@ -124,21 +131,6 @@ RUN make -j 2
 RUN make install
 RUN ls -al
 
-COPY ./fetch.sh /
-COPY ./source.tar.gz /temp/
-
-WORKDIR /temp
-RUN ls -al
-
-WORKDIR /sdk
-RUN /fetch.sh /temp 
-RUN git submodule update --init 
-
-WORKDIR /sdk/cmake
-RUN cmake ..
-RUN make -j 2
-RUN make install
-# or RUN cmake --build .
 
 # Finally a sanity check to make sure the files are there
 RUN ls -al ${TOOLCHAIN_PREFIX}/lib

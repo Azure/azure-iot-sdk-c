@@ -13,7 +13,12 @@ jobs:
   pool:
     vmImage: ubuntu-16.04
   steps:
-  
+  - script: |
+      pushd $(Build.SourcesDirectory) && 
+      submodule update --init &&
+      popd
+    displayName: "submodule update"
+
   - task: UsePythonVersion@0
     inputs:
       versionSpec: '3.x'

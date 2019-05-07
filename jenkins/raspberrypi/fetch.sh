@@ -16,7 +16,7 @@ if [ -s /${temp}/source.tar.gz ]; then
 else
   git fetch origin 
   [ $? -eq 0 ] || { echo "git fetch failed"; exit 1; }
-  git checkout $HORTON_COMMIT_SHA
+  git checkout $CLIENTLIBRARY_COMMIT_SHA
   [ $? -eq 0 ] || { echo "git checkout failed"; exit 1; }
   git submodule update --init
   [ $? -eq 0 ] || { echo "git submodule failed"; exit 1; }
