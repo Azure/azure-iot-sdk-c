@@ -91,7 +91,7 @@ WORKDIR /sdk
 
 RUN git clone https://github.com/$CLIENTLIBRARY_REPO .
 RUN git checkout raspi-pipeline
-RUN git submodule update --init --recursive
+RUN git submodule update --init 
   
 # CMAKE
 RUN mkdir cmake
@@ -130,6 +130,7 @@ RUN ls -al
 
 WORKDIR /sdk
 RUN /fetch.sh /temp 
+RUN git submodule upadte --init 
 RUN ls -alR
 
 WORKDIR /sdk/cmake

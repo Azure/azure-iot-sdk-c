@@ -5,6 +5,7 @@
 export temp=$1
 
 if [ -s /${temp}/source.tar.gz ]; then 
+  echo "mkdir /tempt/source"
   mkdir /${temp}/source
   [ $? -eq 0 ] || { echo "mkdir /temp/source failed"; exit 1; }
   tar -zxf /${temp}/source.tar.gz -C /${temp}/source 
@@ -16,7 +17,7 @@ else
   [ $? -eq 0 ] || { echo "git fetch failed"; exit 1; }
   git checkout $HORTON_COMMIT_SHA
   [ $? -eq 0 ] || { echo "git checkout failed"; exit 1; }
-  git submodule update --init --recursive
+  git submodule update --init
   [ $? -eq 0 ] || { echo "git submodule failed"; exit 1; }
 fi
 
