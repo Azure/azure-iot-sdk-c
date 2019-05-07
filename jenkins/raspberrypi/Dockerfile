@@ -125,6 +125,9 @@ RUN echo $CLIENTLIBRARY_COMMIT_NAME $CLIENTLIBRARY_COMMIT_SHA
 COPY ./fetch.sh /
 COPY ./source.tar.gz /temp/
 
+WORKDIR /temp
+RUN ls -al
+
 WORKDIR /sdk
 RUN /fetch.sh /temp 
 RUN ls -alR
