@@ -487,12 +487,19 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
             {
                 result->prov_status = PROV_DEVICE_TRANSPORT_STATUS_ERROR;
             }
-
         }
         else
         {
             // status can be NULL
-            result->prov_status = retrieve_status_type(json_value_get_string(json_status));
+            const char* json_string = json_value_get_string(json_status);
+            if (json_string == NULL)
+            {
+                result->prov_status = PROV_DEVICE_TRANSPORT_STATUS_ERROR;
+            }
+            else
+            {
+                result->prov_status = retrieve_status_type(json_string);
+            }
         }
         switch (result->prov_status)
         {
