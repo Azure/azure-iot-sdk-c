@@ -7,7 +7,6 @@ variables:
   ClientLibrary.FrameworkRoot: $(Build.SourcesDirectory)
 
 
-
 jobs:
 - job: Cross_Compile
   pool:
