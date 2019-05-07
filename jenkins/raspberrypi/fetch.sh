@@ -5,7 +5,7 @@
 export temp=$1
 
 if [ -s /${temp}/source.tar.gz ]; then 
-  echo "mkdir /tempt/source"
+  echo "mkdir /temp/source"
   mkdir /${temp}/source
   [ $? -eq 0 ] || { echo "mkdir /temp/source failed"; exit 1; }
   tar -zxf /${temp}/source.tar.gz -C /${temp}/source 
