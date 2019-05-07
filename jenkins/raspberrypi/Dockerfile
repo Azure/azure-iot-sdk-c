@@ -119,13 +119,15 @@ RUN ls -al
 ########## PHASE 2: COMPILE BRANCH SPECIFIC INFORMATION ##########
 ARG CLIENTLIBRARY_COMMIT_SHA
 ARG CLIENTLIBRARY_COMMIT_NAME
+RUN echo "$CLIENTLIBRARY_COMMIT_NAME"
+RUN echo "$CLIENTLIBRARY_COMMIT_SHA"
 
 WORKDIR /sdk
 RUN git pull
 RUN git checkout $CLIENTLIBRARY_COMMIT_SHA
 
 COPY ./patchfile /
-RUN if [-s /patchfile ]; then git apply /patchfile; file
+RUN if [-s /patchfile ]; then git apply /patchfile; fi
 
 RUN git submodule update --init 
 
