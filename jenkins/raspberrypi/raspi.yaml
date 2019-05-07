@@ -50,9 +50,9 @@ jobs:
       cd $(Build.SourcesDirectory) &&
       echo "saving patch from ${CommitToPass} to HEAD" &&
       git diff -p origin/${CommitToPass} > ${AGENT_BUILDDIRECTORY}/patchfile &&
-      mkdir -p $(Build.ArtifactStagingDirectory)/${{ parameters.job_tag }} &&
-      cp ${AGENT_BUILDDIRECTORY}/patchfile $(Build.ArtifactStagingDirectory)/${{ parameters.job_tag }} &&
-      mv ${AGENT_BUILDDIRECTORY}/patchfile ${HORTON_FRAMEWORKROOT}/ci-wrappers/${{ parameters.language }}
+      mkdir -p $(Build.ArtifactStagingDirectory)/raspi-c &&
+      cp ${AGENT_BUILDDIRECTORY}/patchfile $(Build.ArtifactStagingDirectory)/raspi-c &&
+      mv ${AGENT_BUILDDIRECTORY}/patchfile ${CLIENTLIBRARY_FRAMEWORKROOT}/jenkins/raspberrypi
     displayName: "pack local language repo"
     condition: and(
       succeeded(),
