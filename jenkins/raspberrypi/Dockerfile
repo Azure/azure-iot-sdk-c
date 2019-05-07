@@ -130,8 +130,8 @@ RUN ls -al
 
 WORKDIR /sdk
 RUN /fetch.sh /temp 
-RUN git submodule upadte --init 
-RUN ls -alR
+RUN git submodule update --init 
+RUN ls -alR deps
 
 WORKDIR /sdk/cmake
 RUN cmake ..
