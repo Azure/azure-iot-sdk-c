@@ -92,7 +92,7 @@ WORKDIR /sdk
 RUN git clone https://github.com/$CLIENTLIBRARY_REPO .
 RUN git checkout raspi-pipeline
 RUN git submodule update --init --recursive
-
+  
 # CMAKE
 RUN mkdir cmake
 WORKDIR /sdk/cmake
@@ -124,6 +124,8 @@ RUN echo $CLIENTLIBRARY_COMMIT_NAME $CLIENTLIBRARY_COMMIT_SHA
 
 COPY ./fetch.sh /
 COPY ./source.tar.gz /temp/
+
+WORKDIR /sdk
 RUN /fetch.sh /temp 
 RUN ls -alR
 
