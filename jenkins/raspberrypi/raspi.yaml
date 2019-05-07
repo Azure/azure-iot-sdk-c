@@ -56,7 +56,7 @@ jobs:
     displayName: "pack local language repo"
     condition: and(
       succeeded(),
-      eq(varaibles['isPr'],'yes')
+      eq(varaibles['isPr'],'yes'))
     env:
       CommitToPass: $(CommitToPass)
 
