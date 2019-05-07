@@ -107,6 +107,9 @@ static const char* TEST_PASSWORD_VALUE = "password";
 static const char* TEST_JSON_REPLY = "{ json_reply }";
 static const char* TEST_XIO_OPTION_NAME = "test_option";
 static const char* TEST_CUSTOM_DATA = "custom data";
+static const char* TEST_500_REGISTRATION_VALUE = "$dps/registrations/res/500/?$rid=1";
+static const char* TEST_202_REGISTRATION_VALUE = "$dps/registrations/res/202/?$rid=1&retry-after=8";
+static const char* TEST_429_REGISTRATION_VALUE = "$dps/registrations/res/429/?$rid=1";
 
 static ON_MQTT_MESSAGE_RECV_CALLBACK g_on_msg_recv;
 static void* g_msg_recv_callback_context;
@@ -797,13 +800,10 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
-            char tmp_msg[64];
-            sprintf(tmp_msg, "prov_transport_common_mqtt_open failure in test %zu/%zu", index, count);
-
             int result = prov_transport_common_mqtt_open(handle, TEST_REGISTRATION_ID_VALUE, NULL, NULL, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
 
             //assert
-            ASSERT_ARE_NOT_EQUAL(int, 0, result, tmp_msg);
+            ASSERT_ARE_NOT_EQUAL(int, 0, result, "prov_transport_common_mqtt_open failure in test %zu/%zu", index, count);
         }
 
         //cleanup
@@ -1084,9 +1084,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
 
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
-
-            char tmp_msg[64];
-            sprintf(tmp_msg, "prov_transport_common_mqtt_dowork failure in test %zu/%zu", index, count);
 
             //act
             prov_transport_common_mqtt_dowork(handle);
@@ -1371,7 +1368,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_PTR_ARG)).SetReturn("$dps/registrations/res/500/?$rid=1");
+        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_PTR_ARG)).SetReturn(TEST_500_REGISTRATION_VALUE);
         STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_TRANSIENT, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
 
@@ -1409,7 +1406,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_PTR_ARG)).SetReturn("$dps/registrations/res/202/?$rid=1&retry-after=8");
+        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_PTR_ARG)).SetReturn(TEST_202_REGISTRATION_VALUE);
         STRICT_EXPECTED_CALL(mqttmessage_getApplicationMsg(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
@@ -1452,7 +1449,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_PTR_ARG)).SetReturn("$dps/registrations/res/429/?$rid=1");
+        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_PTR_ARG)).SetReturn(TEST_429_REGISTRATION_VALUE);
         STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_TRANSIENT, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
 
@@ -1574,7 +1571,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_PTR_ARG)).SetReturn("$dps/registrations/res/500/?$rid=1");
+        STRICT_EXPECTED_CALL(mqttmessage_getTopicName(IGNORED_PTR_ARG)).SetReturn(TEST_500_REGISTRATION_VALUE);
         STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_TRANSIENT, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
 
@@ -1684,14 +1681,11 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
-            char tmp_msg[64];
-            sprintf(tmp_msg, "prov_transport_common_mqtt_dowork failure in test %zu/%zu", index, count);
-
             //act
             int result = prov_transport_common_mqtt_x509_cert(handle, TEST_X509_CERT_VALUE, TEST_PRIVATE_KEY_VALUE);
 
             //assert
-            ASSERT_ARE_NOT_EQUAL(int, 0, result, tmp_msg);
+            ASSERT_ARE_NOT_EQUAL(int, 0, result, "prov_transport_common_mqtt_dowork failure in test %zu/%zu", index, count);
         }
 
         //cleanup
@@ -1912,14 +1906,11 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
-            char tmp_msg[64];
-            sprintf(tmp_msg, "prov_transport_common_mqtt_set_proxy failure in test %zu/%zu", index, count);
-
             //act
             int result = prov_transport_common_mqtt_set_proxy(handle, &proxy_options);
 
             //assert
-            ASSERT_ARE_NOT_EQUAL(int, 0, result, tmp_msg);
+            ASSERT_ARE_NOT_EQUAL(int, 0, result, "prov_transport_common_mqtt_set_proxy failure in test %zu/%zu", index, count);
         }
 
         //cleanup

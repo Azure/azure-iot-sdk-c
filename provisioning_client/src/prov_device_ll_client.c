@@ -214,11 +214,7 @@ static void on_transport_error(PROV_DEVICE_TRANSPORT_ERROR transport_error, void
 static PROV_DEVICE_TRANSPORT_STATUS retrieve_status_type(const char* prov_status)
 {
     PROV_DEVICE_TRANSPORT_STATUS result;
-    if (prov_status == NULL)
-    {
-        result = PROV_DEVICE_TRANSPORT_STATUS_ERROR;
-    }
-    else if (strcmp(prov_status, PROV_UNASSIGNED_STATUS) == 0)
+    if (strcmp(prov_status, PROV_UNASSIGNED_STATUS) == 0)
     {
         result = PROV_DEVICE_TRANSPORT_STATUS_UNASSIGNED;
     }
@@ -268,6 +264,7 @@ static int retrieve_json_number(JSON_Object* json_object, const char* field_name
 static void retrieve_json_payload(JSON_Object* json_object, PROV_INSTANCE_INFO* prov_info)
 {
     JSON_Value* json_field;
+
     // Returned Data is not available
     if ((json_field = json_object_get_value(json_object, JSON_NODE_RETURNED_DATA)) != NULL)
     {
@@ -479,14 +476,24 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
         PROV_INSTANCE_INFO* prov_info = (PROV_INSTANCE_INFO*)user_ctx;
         JSON_Value* json_status = json_object_get_value(json_object, JSON_NODE_STATUS);
 
-        // status can be NULL
-        result->prov_status = retrieve_status_type(json_value_get_string(json_status));
-        // Under TPM the status will be error if this is an authorization request.  We need to make it unassigned.
-        if (result->prov_status == PROV_DEVICE_TRANSPORT_STATUS_ERROR && json_status == NULL && prov_info->hsm_type == PROV_AUTH_TYPE_TPM)
+        if (json_status == NULL)
         {
-            result->prov_status = PROV_DEVICE_TRANSPORT_STATUS_UNASSIGNED;
-        }
+            // Under TPM the status will be error if this is an authorization request.  We need to make it unassigned.
+            if (prov_info->hsm_type == PROV_AUTH_TYPE_TPM)
+            {
+                result->prov_status = PROV_DEVICE_TRANSPORT_STATUS_UNASSIGNED;
+            }
+            else
+            {
+                result->prov_status = PROV_DEVICE_TRANSPORT_STATUS_ERROR;
+            }
 
+        }
+        else
+        {
+            // status can be NULL
+            result->prov_status = retrieve_status_type(json_value_get_string(json_status));
+        }
         switch (result->prov_status)
         {
             case PROV_DEVICE_TRANSPORT_STATUS_UNASSIGNED:
