@@ -22,6 +22,7 @@
 #include "azure_uamqp_c/messaging.h"
 #include "azure_uamqp_c/saslclientio.h"
 #include "azure_uamqp_c/sasl_plain.h"
+#include "azure_uamqp_c/amqp_definitions_application_properties.h"
 
 #include "azure_prov_client/internal/prov_sasl_tpm.h"
 #include "azure_prov_client/internal/prov_transport_utils.h"
