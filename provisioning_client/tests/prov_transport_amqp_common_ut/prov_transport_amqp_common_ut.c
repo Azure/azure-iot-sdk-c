@@ -694,6 +694,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         STRICT_EXPECTED_CALL(message_get_body_amqp_data_in_place(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         setup_retry_after_mocks(type);
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(messaging_delivery_accepted());
     }
 
