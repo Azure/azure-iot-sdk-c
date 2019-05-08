@@ -38,5 +38,5 @@ jobs:
       artifactName: 'drop'
 
   - script: |
-      cp $(System.ArtifactsDirectory)/drop/mxchip.bin /media/newt/AZ3166
+      echo $(NEWTIN) | sudo cp $(System.ArtifactsDirectory)/drop/mxchip.bin /media/newt/AZ3166
     displayName: 'deploy'
