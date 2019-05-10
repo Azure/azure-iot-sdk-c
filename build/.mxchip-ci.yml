@@ -1,28 +1,42 @@
-# Copyright (c) Microsoft. All rights reserved.
-# Licensed under the MIT license. See LICENSE file in the project root for full license information.
 name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
-resources:
-- repo: self
-  clean: true
-phases:
-- phase: iotz
-  queue:
-    name: devicelab-01
+
+jobs:
+- job: Cross_Compile
+  pool:
+    vmImage: ubuntu-16.04
   steps:
   - script: |
-      sudo apt-get update && apt-get install -y \
-      curl \
-      git \
-      python-software-properties \
-      build-essential \
-      pkg-config
-      sudo curl -sL https://deb.nodesource.com/setup_6.x | bash -
-      sudo apt-get install -y nodejs
+      . build_all/mbed5/setup.sh
     displayName: 'setup'
+
   - script: |
       . build_all/mbed5/build.sh
     displayName: 'build'
+
   - script: |
+      # Check that this is the right source directory
       ls
-      sudo cp ./mxchip/BUILD/AZ3166/GCC_ARM/mxchip.bin /media/john/AZ31661
+      cp mxchip/BUILD/AZ3166/GCC_ARM/mxchip.bin $(Build.ArtifactStagingDirectory)
+    displayName: "Copy Files into Artifact repo"
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifacts: drop'
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: 'drop'
+      publishLocation: 'Container'
+    condition: succeeded()
+
+- job: Execute
+  dependsOn: Cross_Compile
+  pool:
+    name: $(MXCHIPAGENTPOOL)
+  steps:
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: 'drop'
+
+  - script: |
+      echo $(NEWTIN) | sudo -S cp $(System.ArtifactsDirectory)/drop/mxchip.bin /media/newt/AZ3166
     displayName: 'deploy'
