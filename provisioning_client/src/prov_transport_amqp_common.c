@@ -25,7 +25,6 @@
 #include "azure_uamqp_c/amqp_definitions_application_properties.h"
 
 #include "azure_prov_client/internal/prov_sasl_tpm.h"
-#include "azure_prov_client/internal/prov_transport_utils.h"
 #include "azure_prov_client/prov_client_const.h"
 #include "azure_prov_client/internal/prov_transport_amqp_common.h"
 

@@ -11,7 +11,6 @@ set(${theseTestsName}_test_files
 )
 
 set(${theseTestsName}_c_files
-    ../../src/prov_transport_utils.c
     ../../src/prov_transport_amqp_common.c
 )
 

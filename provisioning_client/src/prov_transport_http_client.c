@@ -16,7 +16,6 @@
 
 #include "azure_prov_client/prov_transport_http_client.h"
 #include "azure_prov_client/internal/prov_transport_private.h"
-#include "azure_prov_client/internal/prov_transport_utils.h"
 #include "azure_prov_client/prov_client_const.h"
 
 #include "azure_uhttp_c/uhttp.h"
