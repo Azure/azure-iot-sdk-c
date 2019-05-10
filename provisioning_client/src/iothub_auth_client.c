@@ -64,58 +64,56 @@ static int sign_sas_data(IOTHUB_SECURITY_INFO* security_info, const char* payloa
     }
     else
     {
-        BUFFER_HANDLE decoded_key = NULL;
-        BUFFER_HANDLE output_hash = NULL;
-
         char* symmetrical_key = security_info->hsm_client_get_symm_key(security_info->hsm_client_handle);
         if (symmetrical_key == NULL)
         {
             LogError("Failed getting asymmetrical key");
             result = MU_FAILURE;
         }
-        else if ((decoded_key = Azure_Base64_Decode(symmetrical_key)) == NULL)
-        {
-            LogError("Failed decoding symmetrical key");
-            result = MU_FAILURE;
-        }
-        else if ((output_hash = BUFFER_new()) == NULL)
-        {
-            LogError("Failed allocating output hash buffer");
-            result = MU_FAILURE;
-        }
         else
         {
-            size_t decoded_key_len = BUFFER_length(decoded_key);
-            const unsigned char* decoded_key_bytes = BUFFER_u_char(decoded_key);
+            BUFFER_HANDLE decoded_key;
+            BUFFER_HANDLE output_hash;
 
-            if (HMACSHA256_ComputeHash(decoded_key_bytes, decoded_key_len, (const unsigned char*)payload, payload_len, output_hash) != HMACSHA256_OK)
+            if ((decoded_key = Azure_Base64_Decode(symmetrical_key)) == NULL)
             {
-                LogError("Failed computing HMAC Hash");
+                LogError("Failed decoding symmetrical key");
+                result = MU_FAILURE;
+            }
+            else if ((output_hash = BUFFER_new()) == NULL)
+            {
+                LogError("Failed allocating output hash buffer");
+                BUFFER_delete(decoded_key);
                 result = MU_FAILURE;
             }
             else
             {
-                *len = BUFFER_length(output_hash);
-                if ((*output = malloc(*len)) == NULL)
+                if (HMACSHA256_ComputeHash(BUFFER_u_char(decoded_key), BUFFER_length(decoded_key), (const unsigned char*)payload, payload_len, output_hash) != HMACSHA256_OK)
                 {
-                    LogError("Failed allocating output buffer");
+                    LogError("Failed computing HMAC Hash");
                     result = MU_FAILURE;
                 }
                 else
                 {
-                    const unsigned char* output_data = BUFFER_u_char(output_hash);
-                    memcpy(*output, output_data, *len);
-                    result = 0;
+                    *len = BUFFER_length(output_hash);
+                    if ((*output = malloc(*len)) == NULL)
+                    {
+                        LogError("Failed allocating output buffer");
+                        result = MU_FAILURE;
+                    }
+                    else
+                    {
+                        const unsigned char* output_data = BUFFER_u_char(output_hash);
+                        memcpy(*output, output_data, *len);
+                        result = 0;
+                    }
                 }
-
+                BUFFER_delete(decoded_key);
+                BUFFER_delete(output_hash);
             }
+            free(symmetrical_key);
         }
-
-        BUFFER_delete(decoded_key);
-        BUFFER_delete(output_hash);
-        free(symmetrical_key);
     }
-
     return result;
 }
 
