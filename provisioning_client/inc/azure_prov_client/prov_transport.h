@@ -12,8 +12,10 @@
 
 #ifdef __cplusplus
 extern "C" {
+#include <cstdint>
 #else
 #include <stdbool.h>
+#include <stdint.h>
 #endif /* __cplusplus */
 
     struct PROV_DEVICE_TRANSPORT_PROVIDER_TAG;

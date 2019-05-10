@@ -148,9 +148,6 @@ static const char* TEST_TRUSTED_CERT = "trusted_cert";
 static char* TEST_STRING_VALUE = "Test_String_Value";
 static const char* TEST_CUSTOM_DATA = "{ \"json_cust_data\": 123456 }";
 
-static const char* PROV_ASSIGNED_STATUS = "assigned";
-static const char* PROV_ASSIGNING_STATUS = "assigning";
-static const char* PROV_UNASSIGNED_STATUS = "unassigned";
 static const char* PROV_DISABLED_STATUS = "disabled";
 static const char* PROV_FAILURE_STATUS = "failure";
 

@@ -279,7 +279,6 @@ static void on_amqp_send_complete(void* user_ctx, MESSAGE_SEND_RESULT send_resul
         {
             (void)delivery_state;
             // To be included when a issue in the service is fixed.
-            //get_error_retry_after(amqp_info, delivery_state);
             amqp_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
             amqp_info->amqp_state = AMQP_STATE_ERROR;
         }
