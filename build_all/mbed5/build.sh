@@ -2,7 +2,7 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 sudo rm -R -f mxchip
 git clone -b rajeev/latest_mbed https://github.com/massand/mxchip_az3166_firmware.git mxchip
-# rsync -avz --existing ./ mxchip/mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/
+rsync -avz --existing ./ mxchip/mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/
 
 sudo npm install -g iotz
 sudo iotz update
