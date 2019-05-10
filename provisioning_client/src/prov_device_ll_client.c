@@ -393,6 +393,7 @@ static char* prov_transport_create_json_payload(const char* ek_value, const char
         }
         else
         {
+            bool error_encountered = false;
             if (prov_info->custom_request_data != NULL)
             {
                 JSON_Object* json_object;
@@ -401,14 +402,12 @@ static char* prov_transport_create_json_payload(const char* ek_value, const char
                 if ((json_object = json_value_get_object(json_root)) == NULL)
                 {
                     LogError("failure retrieving node root object");
-                    json_value_free(json_root);
-                    json_root = NULL;
+                    error_encountered = true;
                 }
                 else if ((json_custom_data = json_parse_string(prov_info->custom_request_data)) == NULL)
                 {
                     LogError("failure parsing custom info.  This custom info MUST be valid json");
-                    json_value_free(json_root);
-                    json_root = NULL;
+                    error_encountered = true;
                 }
                 // Success on json_object_set_value transfers ownership of json_custom_data to json_object, so do not
                 // explicitly free json_custom_data after this point.
@@ -416,12 +415,11 @@ static char* prov_transport_create_json_payload(const char* ek_value, const char
                 {
                     LogError("failure setting %s value", JSON_CUSTOM_DATA_TAG);
                     json_value_free(json_custom_data);
-                    json_value_free(json_root);
-                    json_root = NULL;
+                    error_encountered = true;
                 }
             }
 
-            if (json_root != NULL)
+            if (!error_encountered)
             {
                 char* json_string = json_serialize_to_string(json_root);
                 if (json_string == NULL)

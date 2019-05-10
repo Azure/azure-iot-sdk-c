@@ -925,6 +925,24 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         //cleanup
     }
 
+    TEST_FUNCTION(prov_transport_common_mqtt_register_device_cb_NULL_succeed)
+    {
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
+        umock_c_reset_all_calls();
+
+        //arrange
+
+        //act
+        int result = prov_transport_common_mqtt_register_device(handle, on_transport_json_parse, NULL, NULL);
+
+        //assert
+        ASSERT_ARE_NOT_EQUAL(int, 0, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_transport_common_mqtt_destroy(handle);
+    }
+
     /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_017: [ On success prov_transport_common_mqtt_register_device shall return a zero value. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_register_device_succeed)
     {

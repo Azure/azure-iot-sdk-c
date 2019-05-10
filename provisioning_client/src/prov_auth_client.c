@@ -189,8 +189,6 @@ static int sign_sas_data(PROV_AUTH_INFO* auth_info, const char* payload, unsigne
                 if (HMACSHA256_ComputeHash(decoded_key_bytes, decoded_key_len, (const unsigned char*)payload, payload_len, output_hash) != HMACSHA256_OK)
                 {
                     LogError("Failed computing HMAC Hash");
-                    BUFFER_delete(decoded_key);
-                    BUFFER_delete(output_hash);
                     result = MU_FAILURE;
                 }
                 else

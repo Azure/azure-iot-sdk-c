@@ -86,26 +86,27 @@ static int sign_sas_data(IOTHUB_SECURITY_INFO* security_info, const char* payloa
                 BUFFER_delete(decoded_key);
                 result = MU_FAILURE;
             }
-            else if (HMACSHA256_ComputeHash(BUFFER_u_char(decoded_key), BUFFER_length(decoded_key), (const unsigned char*)payload, payload_len, output_hash) != HMACSHA256_OK)
-            {
-                LogError("Failed computing HMAC Hash");
-                BUFFER_delete(decoded_key);
-                BUFFER_delete(output_hash);
-                result = MU_FAILURE;
-            }
             else
             {
-                *len = BUFFER_length(output_hash);
-                if ((*output = malloc(*len)) == NULL)
+                if (HMACSHA256_ComputeHash(BUFFER_u_char(decoded_key), BUFFER_length(decoded_key), (const unsigned char*)payload, payload_len, output_hash) != HMACSHA256_OK)
                 {
-                    LogError("Failed allocating output buffer");
+                    LogError("Failed computing HMAC Hash");
                     result = MU_FAILURE;
                 }
                 else
                 {
-                    const unsigned char* output_data = BUFFER_u_char(output_hash);
-                    memcpy(*output, output_data, *len);
-                    result = 0;
+                    *len = BUFFER_length(output_hash);
+                    if ((*output = malloc(*len)) == NULL)
+                    {
+                        LogError("Failed allocating output buffer");
+                        result = MU_FAILURE;
+                    }
+                    else
+                    {
+                        const unsigned char* output_data = BUFFER_u_char(output_hash);
+                        memcpy(*output, output_data, *len);
+                        result = 0;
+                    }
                 }
                 BUFFER_delete(decoded_key);
                 BUFFER_delete(output_hash);
