@@ -30,7 +30,7 @@ jobs:
 - job: Execute
   dependsOn: Cross_Compile
   pool:
-    name: $(AGENTPOOL)
+    name: $(MXCHIPAGENTPOOL)
   steps:
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts'
@@ -38,5 +38,5 @@ jobs:
       artifactName: 'drop'
 
   - script: |
-      cp $(System.ArtifactsDirectory)/drop/mxchip.bin /media/newt/AZ3166
+      echo $(NEWTIN) | sudo -S cp $(System.ArtifactsDirectory)/drop/mxchip.bin /media/newt/AZ3166
     displayName: 'deploy'
