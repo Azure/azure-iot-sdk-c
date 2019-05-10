@@ -117,7 +117,8 @@ echo "Now you can run the cross compiled E2E tests!"
 
 # # BUILD THE SDK
 # cd ~
-# git clone --recursive https://github.com/Azure/azure-iot-sdk-c
+# git clone https://github.com/Azure/azure-iot-sdk-c
+# git submodule update --init
 # cd azure-iot-sdk-c
 # if [ -d cmake ]   # for file "if [-f /home/rama/file]" 
 # then 
