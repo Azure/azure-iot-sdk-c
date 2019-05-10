@@ -337,14 +337,14 @@ static int get_retry_after_property(PROV_TRANSPORT_AMQP_INFO* amqp_info, MESSAGE
                 LogError("Failed reading the key/value pair from the uAMQP property map.");
                 result = MU_FAILURE;
             }
-            else if ((result = amqpvalue_get_string(map_key_name, &key_name)) != 0)
-            {
-                LogError("Failed parsing the uAMQP property name.");
-                result = MU_FAILURE;
-            }
             else
             {
-                if (key_name != NULL && strcmp(key_name, RETRY_AFTER_KEY_VALUE) == 0)
+                if ((result = amqpvalue_get_string(map_key_name, &key_name)) != 0)
+                {
+                    LogError("Failed parsing the uAMQP property name.");
+                    result = MU_FAILURE;
+                }
+                else if (key_name != NULL && strcmp(key_name, RETRY_AFTER_KEY_VALUE) == 0)
                 {
                     const char* key_value;
                     int32_t val_int;
@@ -383,6 +383,8 @@ static int get_retry_after_property(PROV_TRANSPORT_AMQP_INFO* amqp_info, MESSAGE
                     // If the message retry-after only got through it once
                     break;
                 }
+                amqpvalue_destroy(map_key_value);
+                amqpvalue_destroy(map_key_name);
             }
         }
         application_properties_destroy(app_prop);
