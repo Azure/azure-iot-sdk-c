@@ -1,6 +1,10 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+# To run locally (example)
+# docker build -t rpiiotbuild:latest --build-arg "CLIENTLIBRARY_REPO=Azure/azure-iot-sdk-c" --build-arg "CLIENTLIBRARY_COMMIT_SHA=raspi-pipeline" . --network=host --file ./Dockerfile
+
+
 # Start with the latest version of the Debian Docker container
 FROM debian:stretch
 
@@ -86,14 +90,10 @@ WORKDIR /${WORK_ROOT}
 ########## CLIENT LIBRARY INSTALL ##########
 # clone azure  
 ARG CLIENTLIBRARY_REPO
-
 WORKDIR /sdk
-
 RUN git clone https://github.com/$CLIENTLIBRARY_REPO .
-RUN git checkout raspi-pipeline
-RUN git submodule update --init --recursive
+RUN git submodule update --init
 
-# CMAKE
 RUN mkdir cmake
 WORKDIR /sdk/cmake
 RUN ls -al
@@ -114,21 +114,27 @@ RUN ls -al
 RUN cmake -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake -Duse_prov_client:BOOL=OFF -DCMAKE_INSTALL_PREFIX=${TOOLCHAIN_PREFIX} -Drun_e2e_tests:BOOL=ON -Drun_unittests=:BOOL=ON ..
 RUN make -j 2
 RUN make install
+RUN ls -al
 
 ########## PHASE 2: COMPILE BRANCH SPECIFIC INFORMATION ##########
 ARG CLIENTLIBRARY_COMMIT_SHA
-RUN echo $CLIENTLIBRARY_COMMIT_SHA
-WORKDIR /sdk
-RUN git fetch origin 
-RUN git checkout $CLIENTLIBRARY_COMMIT_SHA
-RUN git submodule update --init --recursive
-RUN ls -al
+ARG CLIENTLIBRARY_COMMIT_NAME
+RUN echo "$CLIENTLIBRARY_COMMIT_NAME"
+RUN echo "$CLIENTLIBRARY_COMMIT_SHA"
 
-WORKDIR /sdk/cmake
-RUN cmake ..
+WORKDIR /sdk
+RUN git pull
+RUN git checkout $CLIENTLIBRARY_COMMIT_SHA
+
+COPY ./patchfile /
+RUN if [-s /patchfile ]; then git apply /patchfile; fi
+
+RUN git submodule update --init 
+
+WORKDIR /sdk/cmake 
+RUN cmake .
 RUN make -j 2
 RUN make install
-# or RUN cmake --build .
 
 # Finally a sanity check to make sure the files are there
 RUN ls -al ${TOOLCHAIN_PREFIX}/lib
