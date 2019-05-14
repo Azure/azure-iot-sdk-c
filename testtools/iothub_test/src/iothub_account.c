@@ -18,13 +18,12 @@
 #include "iothub_account.h"
 
 #include "azure_c_shared_utility/httpapiexsas.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 #include "azure_c_shared_utility/hmacsha256.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/sastoken.h"
 
 #include "azure_c_shared_utility/httpapiexsas.h"
-#include "azure_c_shared_utility/base64.h"
 #include "azure_c_shared_utility/uniqueid.h"
 
 #include "iothub_service_client_auth.h"
@@ -117,7 +116,7 @@ static int generateDeviceName(const char* prefix, char** deviceName)
     if (UniqueId_Generate(deviceGuid, DEVICE_GUID_SIZE) != UNIQUEID_OK)
     {
         LogError("Unable to generate unique Id.\r\n");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -126,7 +125,7 @@ static int generateDeviceName(const char* prefix, char** deviceName)
         if (*deviceName == NULL)
         {
             LogError("Failure allocating device ID.\r\n");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -134,7 +133,7 @@ static int generateDeviceName(const char* prefix, char** deviceName)
             {
                 LogError("Failure constructing device ID.\r\n");
                 free(*deviceName);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -155,27 +154,27 @@ static int retrieveConnStringInfo(IOTHUB_ACCOUNT_INFO* accountInfo)
     if (sscanf(accountInfo->connString, "HostName=%n%*[^.]%n.%n%*[^;];%nSharedAccessKeyName=%n%*[^;];%nSharedAccessKey=%n", &beginHost, &endHost, &beginIothub, &endIothub, &beginName, &endName, &beginKey) != 0)
     {
         LogError("Failure determining the string length parameters.\r\n");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
         if ((accountInfo->iothubName = (char*)malloc(endHost - beginHost + 1)) == NULL)
         {
             LogError("Failure allocating iothubName.\r\n");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if ((accountInfo->hostname = (char*)malloc(endIothub - beginHost + 1)) == NULL)
         {
             LogError("Failure allocating hostname.\r\n");
             free(accountInfo->iothubName);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if ((accountInfo->keyName = (char*)malloc(endName - beginName + 1)) == NULL)
         {
             LogError("Failure allocating hostName.\r\n");
             free(accountInfo->iothubName);
             free(accountInfo->hostname);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if ((accountInfo->sharedAccessKey = (char*)malloc(totalLen + 1 - beginKey + 1)) == NULL)
         {
@@ -183,7 +182,7 @@ static int retrieveConnStringInfo(IOTHUB_ACCOUNT_INFO* accountInfo)
             free(accountInfo->iothubName);
             free(accountInfo->keyName);
             free(accountInfo->hostname);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (sscanf(accountInfo->connString, "HostName=%[^.].%[^;];SharedAccessKeyName=%[^;];SharedAccessKey=%s", accountInfo->iothubName,
             accountInfo->hostname + endHost - beginHost + 1,
@@ -195,7 +194,7 @@ static int retrieveConnStringInfo(IOTHUB_ACCOUNT_INFO* accountInfo)
             free(accountInfo->hostname);
             free(accountInfo->keyName);
             free(accountInfo->sharedAccessKey);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -208,7 +207,7 @@ static int retrieveConnStringInfo(IOTHUB_ACCOUNT_INFO* accountInfo)
                 free(accountInfo->hostname);
                 free(accountInfo->keyName);
                 free(accountInfo->sharedAccessKey);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -259,19 +258,19 @@ static int createSASConnectionString(IOTHUB_ACCOUNT_INFO* accountInfo, const cha
     if (conn == NULL)
     {
         LogError("Failed to allocate space for the SAS based connection string\r\n");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((moduleId == NULL) && sprintf_s(conn, connectionStringLength,"%s%s%s%s%s%s", CONN_HOST_PART, accountInfo->hostname, CONN_DEVICE_PART, (char*)deviceId, CONN_KEY_PART, (char*)primaryAuthentication) <= 0)
     {
         LogError("Failed to form the connection string for SAS based connection string.\r\n");
         free(conn);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((moduleId != NULL) && sprintf_s(conn, connectionStringLength,"%s%s%s%s%s%s%s%s", CONN_HOST_PART, accountInfo->hostname, CONN_DEVICE_PART, (char*)deviceId, CONN_KEY_PART, (char*)primaryAuthentication, CONN_MODULE_PART, moduleId) <= 0)
     {
         LogError("Failed to form the connection string for SAS based connection string.\r\n");
         free(conn);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -299,11 +298,11 @@ static int createX509ConnectionString(IOTHUB_ACCOUNT_INFO* accountInfo, char** c
     conn = (char*)malloc(connectionStringLength);
     if (conn == NULL) {
         LogError("Failed to allocate space for the SAS based connection string\r\n");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (sprintf_s(conn, connectionStringLength, "%s%s%s%s%s", CONN_HOST_PART, accountInfo->hostname, CONN_DEVICE_PART, (char*)accountInfo->x509Device.deviceId, CONN_X509_PART) <=0) {
         LogError("Failed to form the connection string for x509 based connection string.\r\n");
-        result = __FAILURE__;
+        result = MU_FAILURE;
         free(conn);
     }
     else
@@ -323,7 +322,7 @@ static int provisionDevice(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_ACCOUNT_AUTH
     if (generateDeviceName(method == IOTHUB_ACCOUNT_AUTH_CONNSTRING ?(SAS_DEVICE_PREFIX_FMT):(X509_DEVICE_PREFIX_FMT), &deviceId) != 0)
     {
         LogError("generateDeviceName failed\r\n");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -365,7 +364,7 @@ static int provisionDevice(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_ACCOUNT_AUTH
         {
             LogError("IoTHubRegistryManager_CreateDevice failed\r\n");
             free(deviceId);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -375,14 +374,14 @@ static int provisionDevice(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_ACCOUNT_AUTH
                 if (mallocAndStrcpy_s((char**)&deviceToProvision->primaryAuthentication, (char*)deviceInfo.primaryKey) != 0)
                 {
                     LogError("mallocAndStrcpy_s failed for primaryKey\r\n");
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
 
                 }
                 else
                 {
                     if (createSASConnectionString(accountInfo, deviceToProvision->deviceId, NULL, deviceToProvision->primaryAuthentication, &deviceToProvision->connectionString) != 0)
                     {
-                        result = __FAILURE__;
+                        result = MU_FAILURE;
                     }
                     else
                     {
@@ -394,7 +393,7 @@ static int provisionDevice(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_ACCOUNT_AUTH
             {
                 if (createX509ConnectionString(accountInfo, &deviceToProvision->connectionString) != 0)
                 {
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -446,7 +445,7 @@ static int provisionDevices(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_ACCOUNT_AUT
         if ((devicesToProvision[iterator] = malloc(sizeof(IOTHUB_PROVISIONED_DEVICE))) == NULL)
         {
             LogError("Failed creating IOTHUB_PROVISIONED_DEVICE instance for device number %lu", (unsigned long)iterator);
-            result = __FAILURE__;
+            result = MU_FAILURE;
             break;
         }
         else
@@ -456,7 +455,7 @@ static int provisionDevices(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_ACCOUNT_AUT
             if (provisionDevice(accountInfo, method, devicesToProvision[iterator]) != 0)
             {
                 LogError("Failed provisioning device number %lu", (unsigned long)iterator);
-                result = __FAILURE__;
+                result = MU_FAILURE;
                 break;
             }
         }
@@ -489,28 +488,28 @@ static int updateTestModule(IOTHUB_REGISTRYMANAGER_HANDLE iothub_registrymanager
     if (iothub_registrymanager_result != IOTHUB_REGISTRYMANAGER_OK)
     {
         LogError("IoTHubRegistryManager_UpdateModule failed, err=%d", iothub_registrymanager_result);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((iothub_registrymanager_result = IoTHubRegistryManager_GetModule(iothub_registrymanager_handle, deviceToProvision->deviceId, deviceToProvision->moduleId, &moduleInfo)) != IOTHUB_REGISTRYMANAGER_OK)
     {
         LogError("IoTHubRegistryManager_UpdateModule(deviceId=%s, moduleId=%s) failed, err=%d", deviceToProvision->deviceId, deviceToProvision->moduleId, iothub_registrymanager_result);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (strcmp(moduleInfo.moduleId, TEST_MODULE_NAME) != 0)
     {
         LogError("ModuleName expected (%s) does not match what was returned from IoTHubRegistryManager_CreateModule (%s)", TEST_MODULE_NAME, moduleInfo.moduleId);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (strcmp(deviceToProvision->deviceId, moduleInfo.deviceId) != 0)
     {
         LogError("DeviceId expected (%s) does not match what was returned from IoTHubRegistryManager_CreateModule (%s)", deviceToProvision->deviceId, moduleInfo.deviceId);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
 #if 0  // IoTHub currently returns incorrect value.  Will bring back in once fixed.
     else if (strcmp(moduleInfo.managedBy, TEST_MANAGED_BY_2) != 0)
     {
         LogError("IoTHubRegistryManager_UpdateModule sets managedBy=%s, expected=%s", moduleInfo.managedBy, TEST_MANAGED_BY_2);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
 #endif
     else
@@ -550,49 +549,49 @@ static int provisionModule(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_PROVISIONED_
     if (mallocAndStrcpy_s(&deviceToProvision->moduleId, TEST_MODULE_NAME) != 0)
     {
         LogError("mallocAndStrcpy_s failed");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((service_auth_from_device_connection = IoTHubServiceClientAuth_CreateFromConnectionString(deviceToProvision->connectionString)) == NULL)
     {
         LogError("IoTHubServiceClientAuth_CreateFromConnectionString(%s) failed", deviceToProvision->connectionString);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((iothub_registrymanager_handle = IoTHubRegistryManager_Create(service_auth_from_device_connection)) == NULL)
     {
         LogError("IoTHubServiceClientAuth_CreateFromConnectionString(%s) failed", deviceToProvision->connectionString);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((iothub_registrymanager_result = IoTHubRegistryManager_CreateModule(iothub_registrymanager_handle, &moduleCreate, &moduleInfo)) != IOTHUB_REGISTRYMANAGER_OK)
     {
         LogError("IoTHubRegistryManager_CreateModule failed, err=%d", iothub_registrymanager_result);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (strcmp(moduleInfo.moduleId, TEST_MODULE_NAME) != 0)
     {
         LogError("ModuleName expected (%s) does not match what was returned from IoTHubRegistryManager_CreateModule (%s)", TEST_MODULE_NAME, moduleInfo.moduleId);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (strcmp(deviceToProvision->deviceId, moduleInfo.deviceId) != 0)
     {
         LogError("DeviceId expected (%s) does not match what was returned from IoTHubRegistryManager_CreateModule (%s)", deviceToProvision->deviceId, moduleInfo.deviceId);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
 #if 0 // IoTHub currently returns incorrect value.  Will bring back in once fixed.
     else if (strcmp(TEST_MANAGED_BY_1, moduleInfo.managedBy) != 0)
     {
         LogError("managedBy expected (%s) does not match what was returned from IoTHubRegistryManager_CreateModule (%s)", TEST_MANAGED_BY_1, moduleInfo.managedBy);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
 #endif
     else if (updateTestModule(iothub_registrymanager_handle, deviceToProvision) != 0)
     {
         LogError("Unable to update test module");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (createSASConnectionString(accountInfo, deviceToProvision->deviceId, TEST_MODULE_NAME, deviceToProvision->primaryAuthentication, &deviceToProvision->moduleConnectionString) != 0)
     {
         LogError("createSASConnectionStringForModule failed");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -617,7 +616,7 @@ static int provisionModule(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_PROVISIONED_
 static char* convert_base64_to_string(const char* base64_cert)
 {
     char* result;
-    BUFFER_HANDLE raw_cert = Base64_Decoder(base64_cert);
+    BUFFER_HANDLE raw_cert = Azure_Base64_Decode(base64_cert);
     if (raw_cert == NULL)
     {
         LogError("Failure decoding base64 encoded cert.\r\n");

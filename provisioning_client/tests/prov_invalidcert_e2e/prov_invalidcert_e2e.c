@@ -4,7 +4,7 @@
 #include <time.h>
 #include <stdbool.h>
 #include "testrunnerswitcher.h"
-#include "umock_c.h"
+#include "umock_c/umock_c.h"
 
 #include "azure_c_shared_utility/platform.h"
 #include "azure_prov_client/prov_device_ll_client.h"

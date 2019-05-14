@@ -6,10 +6,10 @@
 
 typedef struct METHODRETURN_HANDLE_DATA_TAG* METHODRETURN_HANDLE;
 
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 
 /*the following macro expands to "const" if X is defined. If X is not defined, then it expands to nothing*/
-#define CONST_BY_COMPILATION_UNIT(X) IF(COUNT_ARG(X),const,)
+#define CONST_BY_COMPILATION_UNIT(X) MU_IF(MU_COUNT_ARG(X),const,)
 
 typedef struct METHODRETURN_DATA_TAG
 {
@@ -17,7 +17,7 @@ typedef struct METHODRETURN_DATA_TAG
     CONST_BY_COMPILATION_UNIT(METHODRETURN_C) char* jsonValue;
 }METHODRETURN_DATA;
 
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 
 #ifdef __cplusplus
 extern "C"

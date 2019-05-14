@@ -37,23 +37,23 @@
 #include "internal/iothub_client_edge.h"
 #endif
 
-#define LOG_ERROR_RESULT LogError("result = %s", ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, result));
+#define LOG_ERROR_RESULT LogError("result = %s", MU_ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, result));
 #define INDEFINITE_TIME ((time_t)(-1))
 
-DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, IOTHUB_CLIENT_FILE_UPLOAD_RESULT_VALUES);
-DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
-DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_RETRY_POLICY, IOTHUB_CLIENT_RETRY_POLICY_VALUES);
-DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_STATUS, IOTHUB_CLIENT_STATUS_VALUES);
-DEFINE_ENUM_STRINGS(IOTHUB_IDENTITY_TYPE, IOTHUB_IDENTITY_TYPE_VALUE);
-DEFINE_ENUM_STRINGS(IOTHUB_PROCESS_ITEM_RESULT, IOTHUB_PROCESS_ITEM_RESULT_VALUE);
-DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_IOTHUB_METHOD_STATUS, IOTHUB_CLIENT_IOTHUB_METHOD_STATUS_VALUES);
-DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES);
-DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_STATUS_VALUES);
-DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, IOTHUB_CLIENT_CONNECTION_STATUS_REASON_VALUES);
-DEFINE_ENUM_STRINGS(TRANSPORT_TYPE, TRANSPORT_TYPE_VALUES);
-DEFINE_ENUM_STRINGS(DEVICE_TWIN_UPDATE_STATE, DEVICE_TWIN_UPDATE_STATE_VALUES);
+MU_DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, IOTHUB_CLIENT_FILE_UPLOAD_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_RETRY_POLICY, IOTHUB_CLIENT_RETRY_POLICY_VALUES);
+MU_DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_STATUS, IOTHUB_CLIENT_STATUS_VALUES);
+MU_DEFINE_ENUM_STRINGS(IOTHUB_IDENTITY_TYPE, IOTHUB_IDENTITY_TYPE_VALUE);
+MU_DEFINE_ENUM_STRINGS(IOTHUB_PROCESS_ITEM_RESULT, IOTHUB_PROCESS_ITEM_RESULT_VALUE);
+MU_DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_IOTHUB_METHOD_STATUS, IOTHUB_CLIENT_IOTHUB_METHOD_STATUS_VALUES);
+MU_DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_STATUS_VALUES);
+MU_DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, IOTHUB_CLIENT_CONNECTION_STATUS_REASON_VALUES);
+MU_DEFINE_ENUM_STRINGS(TRANSPORT_TYPE, TRANSPORT_TYPE_VALUES);
+MU_DEFINE_ENUM_STRINGS(DEVICE_TWIN_UPDATE_STATE, DEVICE_TWIN_UPDATE_STATE_VALUES);
 #ifndef DONT_USE_UPLOADTOBLOB
-DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT_VALUES);
 #endif // DONT_USE_UPLOADTOBLOB
 
 #define CALLBACK_TYPE_VALUES \
@@ -61,8 +61,8 @@ DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT, IOTHUB_CLIENT_FIL
     CALLBACK_TYPE_SYNC,    \
     CALLBACK_TYPE_ASYNC
 
-DEFINE_ENUM(CALLBACK_TYPE, CALLBACK_TYPE_VALUES)
-DEFINE_ENUM_STRINGS(CALLBACK_TYPE, CALLBACK_TYPE_VALUES)
+MU_DEFINE_ENUM(CALLBACK_TYPE, CALLBACK_TYPE_VALUES)
+MU_DEFINE_ENUM_STRINGS(CALLBACK_TYPE, CALLBACK_TYPE_VALUES)
 
 typedef struct IOTHUB_METHOD_CALLBACK_DATA_TAG
 {
@@ -180,7 +180,7 @@ static int retrieve_edge_environment_variabes(EDGE_ENVIRONMENT_VARIABLES *edge_e
         if ((edge_environment_variables->ca_trusted_certificate_file = environment_get_variable(ENVIRONMENT_VAR_EDGEHUB_CACERTIFICATEFILE)) == NULL)
         {
             LogError("Environment variable %s is missing.  When %s is set, it is required", ENVIRONMENT_VAR_EDGEHUB_CACERTIFICATEFILE, ENVIRONMENT_VAR_EDGEHUB_CONNECTIONSTRING);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -195,49 +195,49 @@ static int retrieve_edge_environment_variabes(EDGE_ENVIRONMENT_VARIABLES *edge_e
         if ((edge_environment_variables->auth_scheme = environment_get_variable(ENVIRONMENT_VAR_EDGEAUTHSCHEME)) == NULL)
         {
             LogError("Environment %s not set", ENVIRONMENT_VAR_EDGEAUTHSCHEME);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (strcmp(edge_environment_variables->auth_scheme, SAS_TOKEN_AUTH) != 0)
         {
             LogError("Environment %s was set to %s, but only support for %s", ENVIRONMENT_VAR_EDGEAUTHSCHEME, edge_environment_variables->auth_scheme, SAS_TOKEN_AUTH);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if ((edge_environment_variables->device_id = environment_get_variable(ENVIRONMENT_VAR_EDGEDEVICEID)) == NULL)
         {
             LogError("Environment %s not set", ENVIRONMENT_VAR_EDGEDEVICEID);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if ((edgehubhostname = environment_get_variable(ENVIRONMENT_VAR_EDGEHUBHOSTNAME)) == NULL)
         {
             LogError("Environment %s not set", ENVIRONMENT_VAR_EDGEHUBHOSTNAME);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if ((edge_environment_variables->gatewayhostname = environment_get_variable(ENVIRONMENT_VAR_EDGEGATEWAYHOST)) == NULL)
         {
             LogError("Environment %s not set", ENVIRONMENT_VAR_EDGEGATEWAYHOST);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if ((edge_environment_variables->module_id = environment_get_variable(ENVIRONMENT_VAR_EDGEMODULEID)) == NULL)
         {
             LogError("Environment %s not set", ENVIRONMENT_VAR_EDGEMODULEID);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         // Make a copy of just ENVIRONMENT_VAR_EDGEHUBHOSTNAME.  We need to make changes in place (namely inserting a '\0')
         // and can't do this with system environment variable safely.
         else if (mallocAndStrcpy_s(&edge_environment_variables->iothub_buffer, edgehubhostname) != 0)
         {
             LogError("Unable to copy buffer");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if ((edgehubhostname_separator = strchr(edge_environment_variables->iothub_buffer, '.')) == NULL)
         {
             LogError("Environment edgehub %s invalid, requires '.' separator", edge_environment_variables->iothub_buffer);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (*(edgehubhostname_separator + 1) == 0)
         {
             LogError("Environment edgehub %s invalid, no content after '.' separator", edge_environment_variables->iothub_buffer);
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -353,7 +353,7 @@ static int create_edge_handle(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handle_data, co
         if (handle_data->methodHandle == NULL)
         {
             LogError("Unable to IoTHubModuleClient_LL_MethodHandle_Create");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -382,7 +382,7 @@ static int create_blob_upload_module(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handle_d
     if (handle_data->uploadToBlobHandle == NULL)
     {
         LogError("unable to IoTHubClientCore_LL_UploadToBlob_Create");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -465,7 +465,7 @@ static bool invoke_message_callback(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleDat
 static STRING_HANDLE make_product_info(const char* product)
 {
     STRING_HANDLE result;
-    STRING_HANDLE pfi = platform_get_platform_info();
+    STRING_HANDLE pfi = platform_get_platform_info(PLATFORM_INFO_OPTION_DEFAULT);
     if (pfi == NULL)
     {
         result = NULL;
@@ -720,7 +720,7 @@ static int IoTHubClientCore_LL_DeviceMethodComplete(const char* method_name, con
     {
         /* Codes_SRS_IOTHUBCLIENT_LL_07_017: [ If handle or response is NULL then IoTHubClientCore_LL_DeviceMethodComplete shall return 500. ] */
         LogError("Invalid argument ctx=%p", ctx);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -740,7 +740,7 @@ static int IoTHubClientCore_LL_DeviceMethodComplete(const char* method_name, con
                 }
                 else
                 {
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 if (payload_resp != NULL)
                 {
@@ -1477,6 +1477,11 @@ IOTHUB_CLIENT_CORE_LL_HANDLE IoTHubClientCore_LL_CreateFromConnectionString(cons
                                     break;
                                 }
                             }
+                            else
+                            {
+                                // If we get an unknown token, log it to error stream but do not cause a fatal error.
+                                LogError("Unknown token <%s> in connection string.  Ignoring error and continuing to parse", s_token);
+                            }
                         }
                     }
                 }
@@ -1749,7 +1754,7 @@ static int attach_ms_timesOutAfter(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData
         /*Codes_SRS_IOTHUBCLIENT_LL_02_039: [ "messageTimeout" - once IoTHubClientCore_LL_SendEventAsync is called the message shall timeout after value miliseconds. Value is a pointer to a tickcounter_ms_t. ]*/
         if (tickcounter_get_current_ms(handleData->tickCounter, &newEntry->ms_timesOutAfter) != 0)
         {
-            result = __FAILURE__;
+            result = MU_FAILURE;
             LogError("unable to get the current relative tickcount");
         }
         else
@@ -2938,7 +2943,7 @@ int IoTHubClientCore_LL_GetTransportCallbacks(TRANSPORT_CALLBACKS_INFO* transpor
     if (transport_cb == NULL)
     {
         LogError("Invalid parameter transport callback can not be NULL");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {

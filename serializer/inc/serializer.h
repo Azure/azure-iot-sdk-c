@@ -48,7 +48,7 @@
 #endif
 
 #include "azure_c_shared_utility/gballoc.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "iotdevice.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/xlogging.h"
@@ -100,12 +100,12 @@ extern "C"
 #define DECLARE_STRUCT(name, ...) \
     /* Codes_SRS_SERIALIZER_99_096:[ DECLARE_STRUCT shall declare a matching C struct data type named name, which can be referenced from any code that can access the declaration.] */ \
     typedef struct name##_TAG { \
-        FOR_EACH_2(INSERT_FIELD_INTO_STRUCT, __VA_ARGS__) \
+        MU_FOR_EACH_2(INSERT_FIELD_INTO_STRUCT, __VA_ARGS__) \
     } name; \
     /* Codes_SRS_SERIALIZER_99_081:[ DECLARE_STRUCT's name argument shall uniquely identify the struct within the schema.] */ \
     REFLECTED_STRUCT(name) \
     /* Codes_SRS_SERIALIZER_99_082:[ DECLARE_STRUCT's field<n>Name argument shall uniquely name a field within the struct.] */ \
-    FOR_EACH_2_KEEP_1(REFLECTED_FIELD, name, __VA_ARGS__) \
+    MU_FOR_EACH_2_KEEP_1(REFLECTED_FIELD, name, __VA_ARGS__) \
     TO_AGENT_DATA_TYPE(name, __VA_ARGS__) \
     /*Codes_SRS_SERIALIZER_99_042:[ The parameter types are either predefined parameter types (specs SRS_SERIALIZER_99_004-SRS_SERIALIZER_99_014) or a type introduced by DECLARE_STRUCT.]*/ \
     static AGENT_DATA_TYPES_RESULT FromAGENT_DATA_TYPE_##name(const AGENT_DATA_TYPE* source, name* destination) \
@@ -115,7 +115,7 @@ extern "C"
         { \
             result = AGENT_DATA_TYPES_INVALID_ARG; \
         } \
-        else if(DIV2(COUNT_ARG(__VA_ARGS__)) != source->value.edmComplexType.nMembers) \
+        else if(MU_DIV2(MU_COUNT_ARG(__VA_ARGS__)) != source->value.edmComplexType.nMembers) \
         { \
             /*too many or too few fields*/ \
             result = AGENT_DATA_TYPES_INVALID_ARG; \
@@ -123,21 +123,21 @@ extern "C"
         else \
         { \
             result = AGENT_DATA_TYPES_OK; \
-            FOR_EACH_2(BUILD_DESTINATION_FIELD, __VA_ARGS__); \
+            MU_FOR_EACH_2(BUILD_DESTINATION_FIELD, __VA_ARGS__); \
         } \
         return result; \
     } \
-    static void C2(destroyLocalParameter, name)(name * value) \
+    static void MU_C2(destroyLocalParameter, name)(name * value) \
     { \
-        FOR_EACH_2_KEEP_1(UNBUILD_DESTINATION_FIELD, value, __VA_ARGS__); \
+        MU_FOR_EACH_2_KEEP_1(UNBUILD_DESTINATION_FIELD, value, __VA_ARGS__); \
     } \
-    static void C2(GlobalInitialize_, name)(void* destination) \
+    static void MU_C2(GlobalInitialize_, name)(void* destination) \
     { \
-        FOR_EACH_2_KEEP_2(GLOBAL_INITIALIZE_STRUCT_FIELD, name, destination, __VA_ARGS__); \
+        MU_FOR_EACH_2_KEEP_2(GLOBAL_INITIALIZE_STRUCT_FIELD, name, destination, __VA_ARGS__); \
     } \
-    static void C2(GlobalDeinitialize_, name)(void* destination) \
+    static void MU_C2(GlobalDeinitialize_, name)(void* destination) \
     { \
-        FOR_EACH_2_KEEP_2(GLOBAL_DEINITIALIZE_STRUCT_FIELD, name, destination, __VA_ARGS__); \
+        MU_FOR_EACH_2_KEEP_2(GLOBAL_DEINITIALIZE_STRUCT_FIELD, name, destination, __VA_ARGS__); \
     } \
 
 
@@ -161,7 +161,7 @@ extern "C"
 
 #define CREATE_DESIRED_PROPERTY_CALLBACK_MODEL_ACTION(...)
 #define CREATE_DESIRED_PROPERTY_CALLBACK_MODEL_METHOD(...)
-#define CREATE_DESIRED_PROPERTY_CALLBACK_MODEL_DESIRED_PROPERTY(type, name, ...) IF(COUNT_ARG(__VA_ARGS__), void __VA_ARGS__ (void*);, )
+#define CREATE_DESIRED_PROPERTY_CALLBACK_MODEL_DESIRED_PROPERTY(type, name, ...) MU_IF(MU_COUNT_ARG(__VA_ARGS__), void __VA_ARGS__ (void*);, )
 #define CREATE_DESIRED_PROPERTY_CALLBACK_MODEL_PROPERTY(...)
 #define CREATE_DESIRED_PROPERTY_CALLBACK_MODEL_REPORTED_PROPERTY(...)
 
@@ -171,9 +171,9 @@ extern "C"
 
 #define DECLARE_MODEL(name, ...)                                                             \
     REFLECTED_MODEL(name)                                                                    \
-    FOR_EACH_1(CREATE_DESIRED_PROPERTY_CALLBACK, __VA_ARGS__)                                \
-    typedef struct name { int :1; FOR_EACH_1(BUILD_MODEL_STRUCT, __VA_ARGS__) } name;        \
-    FOR_EACH_1_KEEP_1(CREATE_MODEL_ELEMENT, name, __VA_ARGS__)                               \
+    MU_FOR_EACH_1(CREATE_DESIRED_PROPERTY_CALLBACK, __VA_ARGS__)                                \
+    typedef struct name { int :1; MU_FOR_EACH_1(BUILD_MODEL_STRUCT, __VA_ARGS__) } name;        \
+    MU_FOR_EACH_1_KEEP_1(CREATE_MODEL_ELEMENT, name, __VA_ARGS__)                               \
     TO_AGENT_DATA_TYPE(name, DROP_FIRST_COMMA_FROM_ARGS(EXPAND_MODEL_ARGS(__VA_ARGS__)))     \
     int FromAGENT_DATA_TYPE_##name(const AGENT_DATA_TYPE* source, void* destination)         \
     {                                                                                        \
@@ -182,15 +182,15 @@ extern "C"
         LogError("SHOULD NOT GET CALLED... EVER");                                           \
         return 0;                                                                            \
     }                                                                                        \
-    static void C2(GlobalInitialize_, name)(void* destination)                               \
+    static void MU_C2(GlobalInitialize_, name)(void* destination)                               \
     {                                                                                        \
         (void)destination;                                                                   \
-        FOR_EACH_1_KEEP_1(CREATE_MODEL_ELEMENT_GLOBAL_INITIALIZE, name, __VA_ARGS__)         \
+        MU_FOR_EACH_1_KEEP_1(CREATE_MODEL_ELEMENT_GLOBAL_INITIALIZE, name, __VA_ARGS__)         \
     }                                                                                        \
-    static void C2(GlobalDeinitialize_, name)(void* destination)                             \
+    static void MU_C2(GlobalDeinitialize_, name)(void* destination)                             \
     {                                                                                        \
         (void)destination;                                                                   \
-        FOR_EACH_1_KEEP_1(CREATE_MODEL_ELEMENT_GLOBAL_DEINITIALIZE, name, __VA_ARGS__)       \
+        MU_FOR_EACH_1_KEEP_1(CREATE_MODEL_ELEMENT_GLOBAL_DEINITIALIZE, name, __VA_ARGS__)       \
     }                                                                                        \
 
 
@@ -266,7 +266,7 @@ extern "C"
 /* Codes_SRS_SERIALIZER_99_094:[ GET_MODEL_HANDLE shall then call Schema_GetModelByName, passing the schemaHandle obtained from CodeFirst_RegisterSchema and modelName arguments, to retrieve the SCHEMA_MODEL_TYPE_HANDLE corresponding to the modelName argument.] */
 /* Codes_SRS_SERIALIZER_99_112:[ GET_MODEL_HANDLE will return the handle for the named model.] */
 #define GET_MODEL_HANDLE(schemaNamespace, modelName) \
-    Schema_GetModelByName(CodeFirst_RegisterSchema(TOSTRING(schemaNamespace), &ALL_REFLECTED(schemaNamespace)), #modelName)
+    Schema_GetModelByName(CodeFirst_RegisterSchema(MU_TOSTRING(schemaNamespace), &ALL_REFLECTED(schemaNamespace)), #modelName)
 
 /* Codes_SRS_SERIALIZER_01_002: [If the argument serializerIncludePropertyPath is specified, its value shall be passed to CodeFirst_Create.] */
 #define CREATE_DEVICE_WITH_INCLUDE_PROPERTY_PATH(schemaNamespace, modelName, serializerIncludePropertyPath) \
@@ -281,7 +281,7 @@ extern "C"
 /* Codes_SRS_SERIALIZER_99_107:[ If CodeFirst_CreateDevice fails, CREATE_MODEL_INSTANCE shall return NULL.] */
 /* Codes_SRS_SERIALIZER_99_108:[ If CodeFirst_CreateDevice succeeds, CREATE_MODEL_INSTANCE shall return a pointer to an instance of the C struct representing the model for the device.] */
 #define CREATE_MODEL_INSTANCE(schemaNamespace, ...) \
-    IF(DIV2(COUNT_ARG(__VA_ARGS__)), CREATE_DEVICE_WITH_INCLUDE_PROPERTY_PATH, CREATE_DEVICE_WITHOUT_INCLUDE_PROPERTY_PATH) (schemaNamespace, __VA_ARGS__)
+    MU_IF(MU_DIV2(MU_COUNT_ARG(__VA_ARGS__)), CREATE_DEVICE_WITH_INCLUDE_PROPERTY_PATH, CREATE_DEVICE_WITHOUT_INCLUDE_PROPERTY_PATH) (schemaNamespace, __VA_ARGS__)
 
 /* Codes_SRS_SERIALIZER_99_109:[ DESTROY_MODEL_INSTANCE shall call CodeFirst_DestroyDevice, passing the pointer returned from CREATE_MODEL_INSTANCE, to release all resources associated with the device.] */
 #define DESTROY_MODEL_INSTANCE(deviceData) \
@@ -305,13 +305,13 @@ extern "C"
 /*Codes_SRS_SERIALIZER_99_113:[ SERIALIZE shall call CodeFirst_SendAsync, passing a destination, destinationSize, the number of properties to publish, and pointers to the values for each property.] */
 /*Codes_SRS_SERIALIZER_99_117:[ If CodeFirst_SendAsync succeeds, SEND will return IOT_AGENT_OK.] */
 /*Codes_SRS_SERIALIZER_99_114:[ If CodeFirst_SendAsync fails, SEND shall return IOT_AGENT_SERIALIZE_FAILED.] */
-#define SERIALIZE(destination, destinationSize,...) CodeFirst_SendAsync(destination, destinationSize, COUNT_ARG(__VA_ARGS__) FOR_EACH_1(ADDRESS_MACRO, __VA_ARGS__))
+#define SERIALIZE(destination, destinationSize,...) CodeFirst_SendAsync(destination, destinationSize, MU_COUNT_ARG(__VA_ARGS__) MU_FOR_EACH_1(ADDRESS_MACRO, __VA_ARGS__))
 
-#define SERIALIZE_REPORTED_PROPERTIES(destination, destinationSize,...) CodeFirst_SendAsyncReported(destination, destinationSize, COUNT_ARG(__VA_ARGS__) FOR_EACH_1(ADDRESS_MACRO, __VA_ARGS__))
+#define SERIALIZE_REPORTED_PROPERTIES(destination, destinationSize,...) CodeFirst_SendAsyncReported(destination, destinationSize, MU_COUNT_ARG(__VA_ARGS__) MU_FOR_EACH_1(ADDRESS_MACRO, __VA_ARGS__))
 
 
 #define IDENTITY_MACRO(x) ,x
-#define SERIALIZE_REPORTED_PROPERTIES_FROM_POINTERS(destination, destinationSize, ...) CodeFirst_SendAsyncReported(destination, destinationSize, COUNT_ARG(__VA_ARGS__) FOR_EACH_1(IDENTITY_MACRO, __VA_ARGS__))
+#define SERIALIZE_REPORTED_PROPERTIES_FROM_POINTERS(destination, destinationSize, ...) CodeFirst_SendAsyncReported(destination, destinationSize, MU_COUNT_ARG(__VA_ARGS__) MU_FOR_EACH_1(IDENTITY_MACRO, __VA_ARGS__))
 
 /**
  * @def   EXECUTE_COMMAND(device, command)
@@ -351,30 +351,30 @@ extern "C"
 #ifdef _MSC_VER
 
 #define DROP_FIRST_COMMA(N, x) \
-x IFCOMMA_NOFIRST(N)
+x MU_IFCOMMA_NOFIRST(N)
 
 #define DROP_IF_EMPTY(N, x) \
-IF(COUNT_ARG(x),DROP_FIRST_COMMA(N,x),x)
+MU_IF(MU_COUNT_ARG(x),DROP_FIRST_COMMA(N,x),x)
 
 #define DROP_FIRST_COMMA_FROM_ARGS(...) \
-FOR_EACH_1_COUNTED(DROP_IF_EMPTY, C1(__VA_ARGS__))
+MU_FOR_EACH_1_COUNTED(DROP_IF_EMPTY, MU_C1(__VA_ARGS__))
 
 #else
 
 #define DROP_FIRST_COMMA_0(N, x) \
-    x IFCOMMA_NOFIRST(N)
+    x MU_IFCOMMA_NOFIRST(N)
 
 #define DROP_FIRST_COMMA_1(N, x) \
     x
 
 #define DROP_FIRST_COMMA(empty, N, x) \
-    C2(DROP_FIRST_COMMA_,empty)(N,x)
+    MU_C2(DROP_FIRST_COMMA_,empty)(N,x)
 
 #define DROP_IF_EMPTY(N, x) \
-    DROP_FIRST_COMMA(ISEMPTY(x),N,x)
+    DROP_FIRST_COMMA(MU_ISEMPTY(x),N,x)
 
 #define DROP_FIRST_COMMA_FROM_ARGS(...) \
-    FOR_EACH_1_COUNTED(DROP_IF_EMPTY, __VA_ARGS__)
+    MU_FOR_EACH_1_COUNTED(DROP_IF_EMPTY, __VA_ARGS__)
 
 #endif
 
@@ -395,7 +395,7 @@ Actions are discarded, since no marshalling will be done for those when sending 
 #define TO_AGENT_DT_EXPAND_ELEMENT_ARGS(N, ...) TO_AGENT_DT_EXPAND_##__VA_ARGS__
 
 #define EXPAND_MODEL_ARGS(...) \
-    FOR_EACH_1_COUNTED(TO_AGENT_DT_EXPAND_ELEMENT_ARGS, __VA_ARGS__)
+    MU_FOR_EACH_1_COUNTED(TO_AGENT_DT_EXPAND_ELEMENT_ARGS, __VA_ARGS__)
 
 #define TO_AGENT_DATA_TYPE(name, ...) \
     static AGENT_DATA_TYPES_RESULT ToAGENT_DATA_TYPE_##name(AGENT_DATA_TYPE *destination, const name value) \
@@ -403,7 +403,7 @@ Actions are discarded, since no marshalling will be done for those when sending 
         AGENT_DATA_TYPES_RESULT result = AGENT_DATA_TYPES_OK; \
         size_t iMember = 0; \
         DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(phantomName, 1); \
-        const char* memberNames[IF(DIV2(C1(COUNT_ARG(__VA_ARGS__))), DIV2(C1(COUNT_ARG(__VA_ARGS__))), 1)] = { 0 }; \
+        const char* memberNames[MU_IF(MU_DIV2(MU_C1(MU_COUNT_ARG(__VA_ARGS__))), MU_DIV2(MU_C1(MU_COUNT_ARG(__VA_ARGS__))), 1)] = { 0 }; \
         size_t memberCount = sizeof(memberNames) / sizeof(memberNames[0]); \
         (void)value; \
         if (memberCount == 0) \
@@ -414,11 +414,11 @@ Actions are discarded, since no marshalling will be done for those when sending 
         { \
             AGENT_DATA_TYPE members[sizeof(memberNames) / sizeof(memberNames[0])]; \
             DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(phantomName, 2); \
-            FOR_EACH_2(FIELD_AS_STRING, EXPAND_TWICE(__VA_ARGS__)) \
+            MU_FOR_EACH_2(FIELD_AS_STRING, MU_EXPAND_TWICE(__VA_ARGS__)) \
             iMember = 0; \
             { \
                 DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(phantomName, 3); \
-                FOR_EACH_2(CREATE_AGENT_DATA_TYPE, EXPAND_TWICE(__VA_ARGS__)) \
+                MU_FOR_EACH_2(CREATE_AGENT_DATA_TYPE, MU_EXPAND_TWICE(__VA_ARGS__)) \
                 {DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(phantomName, 4); } \
                 result = ((result == AGENT_DATA_TYPES_OK) && (Create_AGENT_DATA_TYPE_from_Members(destination, #name, sizeof(memberNames) / sizeof(memberNames[0]), memberNames, members) == AGENT_DATA_TYPES_OK)) \
                             ? AGENT_DATA_TYPES_OK \
@@ -438,66 +438,66 @@ Actions are discarded, since no marshalling will be done for those when sending 
 #define FIELD_AS_STRING(x,y) memberNames[iMember++] = #y;
 
 #define REFLECTED_LIST_HEAD(name) \
-    static const REFLECTED_DATA_FROM_DATAPROVIDER ALL_REFLECTED(name) = { &C2(REFLECTED_, C1(DEC(__COUNTER__))) };
+    static const REFLECTED_DATA_FROM_DATAPROVIDER ALL_REFLECTED(name) = { &MU_C2(REFLECTED_, MU_C1(MU_DEC(__COUNTER__))) };
 #define REFLECTED_STRUCT(name) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_STRUCT_TYPE,               &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {0}, {TOSTRING(name)}, {0}, {0}, {0}, {0}} };
+    static const REFLECTED_SOMETHING MU_C2(REFLECTED_, MU_C1(MU_INC(__COUNTER__))) = { REFLECTION_STRUCT_TYPE,               &MU_C2(REFLECTED_, MU_C1(MU_DEC(MU_DEC(__COUNTER__)))), { {0}, {0}, {0}, {MU_TOSTRING(name)}, {0}, {0}, {0}, {0}} };
 #define REFLECTED_FIELD(XstructName, XfieldType, XfieldName) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_FIELD_TYPE,                &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {TOSTRING(XfieldName), TOSTRING(XfieldType), TOSTRING(XstructName)}, {0}, {0}, {0} } };
+    static const REFLECTED_SOMETHING MU_C2(REFLECTED_, MU_C1(MU_INC(__COUNTER__))) = { REFLECTION_FIELD_TYPE,                &MU_C2(REFLECTED_, MU_C1(MU_DEC(MU_DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {MU_TOSTRING(XfieldName), MU_TOSTRING(XfieldType), MU_TOSTRING(XstructName)}, {0}, {0}, {0} } };
 #define REFLECTED_MODEL(name) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_MODEL_TYPE,                &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {0}, {0}, {0}, {TOSTRING(name)} } };
+    static const REFLECTED_SOMETHING MU_C2(REFLECTED_, MU_C1(MU_INC(__COUNTER__))) = { REFLECTION_MODEL_TYPE,                &MU_C2(REFLECTED_, MU_C1(MU_DEC(MU_DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {0}, {0}, {0}, {MU_TOSTRING(name)} } };
 #define REFLECTED_PROPERTY(type, name, modelName) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_PROPERTY_TYPE,             &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {0}, {TOSTRING(name), TOSTRING(type), Create_AGENT_DATA_TYPE_From_Ptr_##modelName##name, offsetof(modelName, name), sizeof(type), TOSTRING(modelName)}, {0}, {0} } };
+    static const REFLECTED_SOMETHING MU_C2(REFLECTED_, MU_C1(MU_INC(__COUNTER__))) = { REFLECTION_PROPERTY_TYPE,             &MU_C2(REFLECTED_, MU_C1(MU_DEC(MU_DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {0}, {MU_TOSTRING(name), MU_TOSTRING(type), Create_AGENT_DATA_TYPE_From_Ptr_##modelName##name, offsetof(modelName, name), sizeof(type), MU_TOSTRING(modelName)}, {0}, {0} } };
 #define REFLECTED_REPORTED_PROPERTY(type, name, modelName) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_REPORTED_PROPERTY_TYPE,    &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {TOSTRING(name), TOSTRING(type), Create_AGENT_DATA_TYPE_From_Ptr_##modelName##name, offsetof(modelName, name), sizeof(type), TOSTRING(modelName)}, {0}, {0}, {0}, {0}, {0} } };
+    static const REFLECTED_SOMETHING MU_C2(REFLECTED_, MU_C1(MU_INC(__COUNTER__))) = { REFLECTION_REPORTED_PROPERTY_TYPE,    &MU_C2(REFLECTED_, MU_C1(MU_DEC(MU_DEC(__COUNTER__)))), { {0}, {0}, {MU_TOSTRING(name), MU_TOSTRING(type), Create_AGENT_DATA_TYPE_From_Ptr_##modelName##name, offsetof(modelName, name), sizeof(type), MU_TOSTRING(modelName)}, {0}, {0}, {0}, {0}, {0} } };
 
 
 #define REFLECTED_DESIRED_PROPERTY_WITH_ON_DESIRED_PROPERTY_CHANGE(type, name, modelName, COUNTER, onDesiredPropertyChange) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(COUNTER))) =      { REFLECTION_DESIRED_PROPERTY_TYPE,     &C2(REFLECTED_, C1(DEC(COUNTER))),         { {0}, {onDesiredPropertyChange, DesiredPropertyInitialize_##modelName##name, DesiredPropertyDeinitialize_##modelName##name, TOSTRING(name), TOSTRING(type), (int(*)(const AGENT_DATA_TYPE*, void*))FromAGENT_DATA_TYPE_##type, offsetof(modelName, name), sizeof(type), TOSTRING(modelName)}, {0}, {0}, {0}, {0}, {0}, {0}} };
+    static const REFLECTED_SOMETHING MU_C2(REFLECTED_, MU_C1(MU_INC(COUNTER))) =      { REFLECTION_DESIRED_PROPERTY_TYPE,     &MU_C2(REFLECTED_, MU_C1(MU_DEC(COUNTER))),         { {0}, {onDesiredPropertyChange, DesiredPropertyInitialize_##modelName##name, DesiredPropertyDeinitialize_##modelName##name, MU_TOSTRING(name), MU_TOSTRING(type), (int(*)(const AGENT_DATA_TYPE*, void*))FromAGENT_DATA_TYPE_##type, offsetof(modelName, name), sizeof(type), MU_TOSTRING(modelName)}, {0}, {0}, {0}, {0}, {0}, {0}} };
 
 #define REFLECTED_DESIRED_PROPERTY(type, name, modelName, ...)                                                              \
-    IF(COUNT_ARG(__VA_ARGS__),                                                                                              \
+    MU_IF(MU_COUNT_ARG(__VA_ARGS__),                                                                                              \
         MACRO_UTILS_DELAY(REFLECTED_DESIRED_PROPERTY_WITH_ON_DESIRED_PROPERTY_CHANGE)(type, name, modelName,__COUNTER__, __VA_ARGS__),  \
-        MACRO_UTILS_DELAY(REFLECTED_DESIRED_PROPERTY_WITH_ON_DESIRED_PROPERTY_CHANGE)(type, name, modelName,DEC(__COUNTER__), NULL)     \
+        MACRO_UTILS_DELAY(REFLECTED_DESIRED_PROPERTY_WITH_ON_DESIRED_PROPERTY_CHANGE)(type, name, modelName,MU_DEC(__COUNTER__), NULL)     \
     )                                                                                                                       \
 
 #define REFLECTED_ACTION(name, argc, argv, fn, modelName) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_ACTION_TYPE,               &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {0}, {0}, {TOSTRING(name), argc, argv, fn, TOSTRING(modelName)}, {0}} };
+    static const REFLECTED_SOMETHING MU_C2(REFLECTED_, MU_C1(MU_INC(__COUNTER__))) = { REFLECTION_ACTION_TYPE,               &MU_C2(REFLECTED_, MU_C1(MU_DEC(MU_DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {0}, {0}, {MU_TOSTRING(name), argc, argv, fn, MU_TOSTRING(modelName)}, {0}} };
 
 #define REFLECTED_METHOD(name, argc, argv, fn, modelName) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_METHOD_TYPE,               &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {TOSTRING(name), argc, argv, fn, TOSTRING(modelName)}, {0}, {0}, {0}, {0}, {0}, {0}, {0}} };
+    static const REFLECTED_SOMETHING MU_C2(REFLECTED_, MU_C1(MU_INC(__COUNTER__))) = { REFLECTION_METHOD_TYPE,               &MU_C2(REFLECTED_, MU_C1(MU_DEC(MU_DEC(__COUNTER__)))), { {MU_TOSTRING(name), argc, argv, fn, MU_TOSTRING(modelName)}, {0}, {0}, {0}, {0}, {0}, {0}, {0}} };
 
 
 #define REFLECTED_END_OF_LIST \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, __COUNTER__) = {          REFLECTION_NOTHING,                   NULL,                                       { {0},{0}, {0}, {0}, {0}, {0}, {0}, {0}} };
+    static const REFLECTED_SOMETHING MU_C2(REFLECTED_, __COUNTER__) = {          REFLECTION_NOTHING,                   NULL,                                       { {0},{0}, {0}, {0}, {0}, {0}, {0}, {0}} };
 
-#define EXPAND_MODEL_PROPERTY(type, name) EXPAND_ARGS(MODEL_PROPERTY, type, name)
+#define EXPAND_MODEL_PROPERTY(type, name) MU_EXPAND_ARGS(MODEL_PROPERTY, type, name)
 
-#define EXPAND_MODEL_REPORTED_PROPERTY(type, name) EXPAND_ARGS(MODEL_REPORTED_PROPERTY, type, name)
+#define EXPAND_MODEL_REPORTED_PROPERTY(type, name) MU_EXPAND_ARGS(MODEL_REPORTED_PROPERTY, type, name)
 
-#define EXPAND_MODEL_DESIRED_PROPERTY(type, name, ...) EXPAND_ARGS(MODEL_DESIRED_PROPERTY, type, name, __VA_ARGS__)
+#define EXPAND_MODEL_DESIRED_PROPERTY(type, name, ...) MU_EXPAND_ARGS(MODEL_DESIRED_PROPERTY, type, name, __VA_ARGS__)
 
-#define EXPAND_MODEL_ACTION(...) EXPAND_ARGS(MODEL_ACTION, __VA_ARGS__)
+#define EXPAND_MODEL_ACTION(...) MU_EXPAND_ARGS(MODEL_ACTION, __VA_ARGS__)
 
-#define EXPAND_MODEL_METHOD(...) EXPAND_ARGS(MODEL_METHOD, __VA_ARGS__)
+#define EXPAND_MODEL_METHOD(...) MU_EXPAND_ARGS(MODEL_METHOD, __VA_ARGS__)
 
 #define BUILD_MODEL_STRUCT(elem) INSERT_FIELD_FOR_##elem
 
-#define CREATE_MODEL_ENTITY(modelName, callType, ...) EXPAND_ARGS(CREATE_##callType(modelName, __VA_ARGS__))
-#define CREATE_SOMETHING(modelName, ...) EXPAND_ARGS(CREATE_MODEL_ENTITY(modelName, __VA_ARGS__))
-#define CREATE_ELEMENT(modelName, elem) EXPAND_ARGS(CREATE_SOMETHING(modelName, EXPAND_ARGS(EXPAND_##elem)))
+#define CREATE_MODEL_ENTITY(modelName, callType, ...) MU_EXPAND_ARGS(CREATE_##callType(modelName, __VA_ARGS__))
+#define CREATE_SOMETHING(modelName, ...) MU_EXPAND_ARGS(CREATE_MODEL_ENTITY(modelName, __VA_ARGS__))
+#define CREATE_ELEMENT(modelName, elem) MU_EXPAND_ARGS(CREATE_SOMETHING(modelName, MU_EXPAND_ARGS(EXPAND_##elem)))
 
-#define CREATE_MODEL_ELEMENT(modelName, elem) EXPAND_ARGS(CREATE_ELEMENT(modelName, elem))
+#define CREATE_MODEL_ELEMENT(modelName, elem) MU_EXPAND_ARGS(CREATE_ELEMENT(modelName, elem))
 
 
-#define CREATE_MODEL_ENTITY_GLOBAL_INITIALIZATION(modelName, callType, ...) EXPAND_ARGS(CREATE_GLOBAL_INITIALIZE_##callType(modelName, __VA_ARGS__))
-#define CREATE_SOMETHING_GLOBAL_INITIALIZATION(modelName, ...) EXPAND_ARGS(CREATE_MODEL_ENTITY_GLOBAL_INITIALIZATION(modelName, __VA_ARGS__))
-#define CREATE_ELEMENT_GLOBAL_INITIALIZATION(modelName, elem) EXPAND_ARGS(CREATE_SOMETHING_GLOBAL_INITIALIZATION(modelName, EXPAND_ARGS(EXPAND_##elem)))
-#define CREATE_MODEL_ELEMENT_GLOBAL_INITIALIZE(modelName, elem) EXPAND_ARGS(CREATE_ELEMENT_GLOBAL_INITIALIZATION(modelName, elem))
+#define CREATE_MODEL_ENTITY_GLOBAL_INITIALIZATION(modelName, callType, ...) MU_EXPAND_ARGS(CREATE_GLOBAL_INITIALIZE_##callType(modelName, __VA_ARGS__))
+#define CREATE_SOMETHING_GLOBAL_INITIALIZATION(modelName, ...) MU_EXPAND_ARGS(CREATE_MODEL_ENTITY_GLOBAL_INITIALIZATION(modelName, __VA_ARGS__))
+#define CREATE_ELEMENT_GLOBAL_INITIALIZATION(modelName, elem) MU_EXPAND_ARGS(CREATE_SOMETHING_GLOBAL_INITIALIZATION(modelName, MU_EXPAND_ARGS(EXPAND_##elem)))
+#define CREATE_MODEL_ELEMENT_GLOBAL_INITIALIZE(modelName, elem) MU_EXPAND_ARGS(CREATE_ELEMENT_GLOBAL_INITIALIZATION(modelName, elem))
 
-#define CREATE_MODEL_ENTITY_GLOBAL_DEINITIALIZATION(modelName, callType, ...) EXPAND_ARGS(CREATE_GLOBAL_DEINITIALIZE_##callType(modelName, __VA_ARGS__))
-#define CREATE_SOMETHING_GLOBAL_DEINITIALIZATION(modelName, ...) EXPAND_ARGS(CREATE_MODEL_ENTITY_GLOBAL_DEINITIALIZATION(modelName, __VA_ARGS__))
-#define CREATE_ELEMENT_GLOBAL_DEINITIALIZATION(modelName, elem) EXPAND_ARGS(CREATE_SOMETHING_GLOBAL_DEINITIALIZATION(modelName, EXPAND_ARGS(EXPAND_##elem)))
-#define CREATE_MODEL_ELEMENT_GLOBAL_DEINITIALIZE(modelName, elem) EXPAND_ARGS(CREATE_ELEMENT_GLOBAL_DEINITIALIZATION(modelName, elem))
+#define CREATE_MODEL_ENTITY_GLOBAL_DEINITIALIZATION(modelName, callType, ...) MU_EXPAND_ARGS(CREATE_GLOBAL_DEINITIALIZE_##callType(modelName, __VA_ARGS__))
+#define CREATE_SOMETHING_GLOBAL_DEINITIALIZATION(modelName, ...) MU_EXPAND_ARGS(CREATE_MODEL_ENTITY_GLOBAL_DEINITIALIZATION(modelName, __VA_ARGS__))
+#define CREATE_ELEMENT_GLOBAL_DEINITIALIZATION(modelName, elem) MU_EXPAND_ARGS(CREATE_SOMETHING_GLOBAL_DEINITIALIZATION(modelName, MU_EXPAND_ARGS(EXPAND_##elem)))
+#define CREATE_MODEL_ELEMENT_GLOBAL_DEINITIALIZE(modelName, elem) MU_EXPAND_ARGS(CREATE_ELEMENT_GLOBAL_DEINITIALIZATION(modelName, elem))
 
 #define INSERT_FIELD_INTO_STRUCT(x, y) x y;
 
@@ -537,14 +537,14 @@ Actions are discarded, since no marshalling will be done for those when sending 
 #define IMPL_PROPERTY(propertyType, propertyName, modelName) \
     static int Create_AGENT_DATA_TYPE_From_Ptr_##modelName##propertyName(void* param, AGENT_DATA_TYPE* dest) \
     { \
-        return C1(ToAGENT_DATA_TYPE_##propertyType)(dest, *(propertyType*)param); \
+        return MU_C1(ToAGENT_DATA_TYPE_##propertyType)(dest, *(propertyType*)param); \
     } \
     REFLECTED_PROPERTY(propertyType, propertyName, modelName)
 
 #define IMPL_REPORTED_PROPERTY(propertyType, propertyName, modelName) \
     static int Create_AGENT_DATA_TYPE_From_Ptr_##modelName##propertyName(void* param, AGENT_DATA_TYPE* dest) \
     { \
-        return C1(ToAGENT_DATA_TYPE_##propertyType)(dest, *(propertyType*)param); \
+        return MU_C1(ToAGENT_DATA_TYPE_##propertyType)(dest, *(propertyType*)param); \
     } \
     REFLECTED_REPORTED_PROPERTY(propertyType, propertyName, modelName)
 
@@ -561,21 +561,21 @@ Actions are discarded, since no marshalling will be done for those when sending 
 
 #define CREATE_MODEL_ACTION(modelName, actionName, ...) \
     DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(modelName##actionName, 1); \
-    EXECUTE_COMMAND_RESULT actionName (modelName* device FOR_EACH_2(DEFINE_FUNCTION_PARAMETER, __VA_ARGS__)); \
-    static EXECUTE_COMMAND_RESULT C2(actionName, WRAPPER)(void* device, size_t ParameterCount, const AGENT_DATA_TYPE* values); \
+    EXECUTE_COMMAND_RESULT actionName (modelName* device MU_FOR_EACH_2(DEFINE_FUNCTION_PARAMETER, __VA_ARGS__)); \
+    static EXECUTE_COMMAND_RESULT MU_C2(actionName, WRAPPER)(void* device, size_t ParameterCount, const AGENT_DATA_TYPE* values); \
     /*for macro purposes, this array always has at least 1 element*/ \
     /*Codes_SRS_SERIALIZER_99_043:[ It is valid for a method not to have any parameters.]*/ \
     DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(actionName, 1); \
-    static const WRAPPER_ARGUMENT C2(actionName, WRAPPERARGUMENTS)[DIV2(INC(INC(COUNT_ARG(__VA_ARGS__))))] = { FOR_EACH_2_COUNTED(MAKE_WRAPPER_ARGUMENT, __VA_ARGS__) IFCOMMA(INC(INC(COUNT_ARG(__VA_ARGS__)))) {0} }; \
-    REFLECTED_ACTION(actionName, DIV2(COUNT_ARG(__VA_ARGS__)), C2(actionName, WRAPPERARGUMENTS), C2(actionName, WRAPPER), modelName) \
+    static const WRAPPER_ARGUMENT MU_C2(actionName, WRAPPERARGUMENTS)[MU_DIV2(MU_INC(MU_INC(MU_COUNT_ARG(__VA_ARGS__))))] = { MU_FOR_EACH_2_COUNTED(MAKE_WRAPPER_ARGUMENT, __VA_ARGS__) MU_IFCOMMA(MU_INC(MU_INC(MU_COUNT_ARG(__VA_ARGS__)))) {0} }; \
+    REFLECTED_ACTION(actionName, MU_DIV2(MU_COUNT_ARG(__VA_ARGS__)), MU_C2(actionName, WRAPPERARGUMENTS), MU_C2(actionName, WRAPPER), modelName) \
     /*Codes_SRS_SERIALIZER_99_040:[ In addition to declaring the function, DECLARE_IOT_METHOD shall provide a definition for a wrapper that takes as parameters a size_t parameterCount and const AGENT_DATA_TYPE*.] */ \
     /*Codes_SRS_SERIALIZER_99_041:[ This wrapper shall convert all the arguments to predefined types and then call the function written by the data provider developer.]*/ \
-    static EXECUTE_COMMAND_RESULT C2(actionName, WRAPPER)(void* device, size_t ParameterCount, const AGENT_DATA_TYPE* values) \
+    static EXECUTE_COMMAND_RESULT MU_C2(actionName, WRAPPER)(void* device, size_t ParameterCount, const AGENT_DATA_TYPE* values) \
     { \
         EXECUTE_COMMAND_RESULT result; \
         DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(actionName, 2); \
         /*Codes_SRS_SERIALIZER_99_045:[ If the number of passed parameters doesn't match the number of declared parameters, wrapper execution shall fail and return DATA_PROVIDER_INVALID_ARG;]*/ \
-        if(ParameterCount != DIV2(COUNT_ARG(__VA_ARGS__))) \
+        if(ParameterCount != MU_DIV2(MU_COUNT_ARG(__VA_ARGS__))) \
         { \
             result = EXECUTE_COMMAND_ERROR; \
         } \
@@ -583,67 +583,67 @@ Actions are discarded, since no marshalling will be done for those when sending 
         { \
             /*the below line takes care of initialized but not referenced parameter warning*/ \
             DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(actionName, 3); \
-            IF(DIV2(COUNT_ARG(__VA_ARGS__)), size_t iParameter = 0;, ) \
+            MU_IF(MU_DIV2(MU_COUNT_ARG(__VA_ARGS__)), size_t iParameter = 0;, ) \
             DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(actionName, 4); \
             /*the below line takes care of an unused parameter when values is really never questioned*/ \
             DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(actionName, 5); \
-            FOR_EACH_2(DEFINE_LOCAL_PARAMETER, __VA_ARGS__) \
+            MU_FOR_EACH_2(DEFINE_LOCAL_PARAMETER, __VA_ARGS__) \
             DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(actionName, 6); \
-            IF(DIV2(COUNT_ARG(__VA_ARGS__)), , (void)values;) \
+            MU_IF(MU_DIV2(MU_COUNT_ARG(__VA_ARGS__)), , (void)values;) \
             { \
                DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(actionName, 7); \
             } \
-            FOR_EACH_2_KEEP_1(START_BUILD_LOCAL_PARAMETER, EXECUTE_COMMAND_ERROR, __VA_ARGS__) \
+            MU_FOR_EACH_2_KEEP_1(START_BUILD_LOCAL_PARAMETER, EXECUTE_COMMAND_ERROR, __VA_ARGS__) \
             { \
                DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(actionName, 8); \
             } \
-            result = actionName((modelName*)device FOR_EACH_2(PUSH_LOCAL_PARAMETER, __VA_ARGS__)); \
-            FOR_EACH_2_REVERSE(END_BUILD_LOCAL_PARAMETER, __VA_ARGS__) \
+            result = actionName((modelName*)device MU_FOR_EACH_2(PUSH_LOCAL_PARAMETER, __VA_ARGS__)); \
+            MU_FOR_EACH_2_REVERSE(END_BUILD_LOCAL_PARAMETER, __VA_ARGS__) \
         } \
         return result; \
     }
 
 #define CREATE_MODEL_METHOD(modelName, methodName, ...) \
     DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(modelName##methodName, 1); \
-    METHODRETURN_HANDLE methodName (modelName* device FOR_EACH_2(DEFINE_FUNCTION_PARAMETER, __VA_ARGS__)); \
-    static METHODRETURN_HANDLE C2(methodName, WRAPPER)(void* device, size_t ParameterCount, const AGENT_DATA_TYPE* values); \
+    METHODRETURN_HANDLE methodName (modelName* device MU_FOR_EACH_2(DEFINE_FUNCTION_PARAMETER, __VA_ARGS__)); \
+    static METHODRETURN_HANDLE MU_C2(methodName, WRAPPER)(void* device, size_t ParameterCount, const AGENT_DATA_TYPE* values); \
     /*for macro purposes, this array always has at least 1 element*/ \
     /*Codes_SRS_SERIALIZER_H_02_030: [ It is valid for a method function not to have any parameters. ]*/ \
     DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(methodName, 1); \
-    static const WRAPPER_ARGUMENT C2(methodName, WRAPPERARGUMENTS)[DIV2(INC(INC(COUNT_ARG(__VA_ARGS__))))] = { FOR_EACH_2_COUNTED(MAKE_WRAPPER_ARGUMENT, __VA_ARGS__) IFCOMMA(INC(INC(COUNT_ARG(__VA_ARGS__)))) {0} }; \
-    REFLECTED_METHOD(methodName, DIV2(COUNT_ARG(__VA_ARGS__)), C2(methodName, WRAPPERARGUMENTS), C2(methodName, WRAPPER), modelName) \
+    static const WRAPPER_ARGUMENT MU_C2(methodName, WRAPPERARGUMENTS)[MU_DIV2(MU_INC(MU_INC(MU_COUNT_ARG(__VA_ARGS__))))] = { MU_FOR_EACH_2_COUNTED(MAKE_WRAPPER_ARGUMENT, __VA_ARGS__) MU_IFCOMMA(MU_INC(MU_INC(MU_COUNT_ARG(__VA_ARGS__)))) {0} }; \
+    REFLECTED_METHOD(methodName, MU_DIV2(MU_COUNT_ARG(__VA_ARGS__)), MU_C2(methodName, WRAPPERARGUMENTS), MU_C2(methodName, WRAPPER), modelName) \
     /*Codes_SRS_SERIALIZER_H_02_034: [ WITH_METHOD shall result in the declaration of a conversion function with the prototype METHODRETURN_HANDLE nameWRAPPER(size_t ParameterCount, const AGENT_DATA_TYPE* values)' ]*/ \
     /*Codes_SRS_SERIALIZER_H_02_031: [ The function shall convert the input arguments to the types declared in the method parameter list and then call the user-defined method function. ]*/ \
-    static METHODRETURN_HANDLE C2(methodName, WRAPPER)(void* device, size_t ParameterCount, const AGENT_DATA_TYPE* values) \
+    static METHODRETURN_HANDLE MU_C2(methodName, WRAPPER)(void* device, size_t ParameterCount, const AGENT_DATA_TYPE* values) \
     { \
         METHODRETURN_HANDLE result; \
         DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(methodName, 2); \
         /*Codes_SRS_SERIALIZER_H_02_032: [ If the number of arguments passed to the conversion function does not match the expected count, the function shall return DATAPROVIDER_INVALID_ARG. ]*/ \
-        if(ParameterCount != DIV2(COUNT_ARG(__VA_ARGS__))) \
+        if(ParameterCount != MU_DIV2(MU_COUNT_ARG(__VA_ARGS__))) \
         { \
-            LogError("expected parameter count (%lu) does not match the actual parameter count (%lu)", (unsigned long)ParameterCount, (unsigned long)COUNT_ARG(__VA_ARGS__)); \
+            LogError("expected parameter count (%lu) does not match the actual parameter count (%lu)", (unsigned long)ParameterCount, (unsigned long)MU_COUNT_ARG(__VA_ARGS__)); \
             result = NULL; \
         } \
         else \
         { \
             /*the below line takes care of initialized but not referenced parameter warning*/ \
             DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(methodName, 3); \
-            IF(DIV2(COUNT_ARG(__VA_ARGS__)), size_t iParameter = 0;, ) \
+            MU_IF(MU_DIV2(MU_COUNT_ARG(__VA_ARGS__)), size_t iParameter = 0;, ) \
             DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(methodName, 4); \
             /*the below line takes care of an unused parameter when values is really never questioned*/ \
             DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(methodName, 5); \
-            FOR_EACH_2(DEFINE_LOCAL_PARAMETER, __VA_ARGS__) \
+            MU_FOR_EACH_2(DEFINE_LOCAL_PARAMETER, __VA_ARGS__) \
             DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(methodName, 6); \
-            IF(DIV2(COUNT_ARG(__VA_ARGS__)), , (void)values;) \
+            MU_IF(MU_DIV2(MU_COUNT_ARG(__VA_ARGS__)), , (void)values;) \
             { \
                DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(actionName, 7); \
             } \
-            FOR_EACH_2_KEEP_1(START_BUILD_LOCAL_PARAMETER, NULL,__VA_ARGS__) \
+            MU_FOR_EACH_2_KEEP_1(START_BUILD_LOCAL_PARAMETER, NULL,__VA_ARGS__) \
             { \
                DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(actionName, 8); \
             } \
-            result = methodName((modelName*)device FOR_EACH_2(PUSH_LOCAL_PARAMETER, __VA_ARGS__)); \
-            FOR_EACH_2_REVERSE(END_BUILD_LOCAL_PARAMETER, __VA_ARGS__) \
+            result = methodName((modelName*)device MU_FOR_EACH_2(PUSH_LOCAL_PARAMETER, __VA_ARGS__)); \
+            MU_FOR_EACH_2_REVERSE(END_BUILD_LOCAL_PARAMETER, __VA_ARGS__) \
         } \
         return result; \
     }
@@ -660,9 +660,9 @@ Actions are discarded, since no marshalling will be done for those when sending 
         for (i = 0; i < source->value.edmComplexType.nMembers; i++) \
         { \
             /*the name of the field of the complex type must match the name of the field of the structure (parameter name here)*/ \
-            if (strcmp(source->value.edmComplexType.fields[i].fieldName, TOSTRING(name)) == 0) \
+            if (strcmp(source->value.edmComplexType.fields[i].fieldName, MU_TOSTRING(name)) == 0) \
             { /*Codes_SRS_SERIALIZER_99_017:[ These types can either be one of the types mentioned in WITH_DATA or it can be a type introduced by a previous DECLARE_STRUCT.]*/ \
-                wasFieldConverted = (C2(FromAGENT_DATA_TYPE_, type)(source->value.edmComplexType.fields[i].value, &(destination->name)) == AGENT_DATA_TYPES_OK); \
+                wasFieldConverted = (MU_C2(FromAGENT_DATA_TYPE_, type)(source->value.edmComplexType.fields[i].value, &(destination->name)) == AGENT_DATA_TYPES_OK); \
                 break; \
             } \
         } \
@@ -674,7 +674,7 @@ Actions are discarded, since no marshalling will be done for those when sending 
     }
 
 #define UNBUILD_DESTINATION_FIELD(value, type, name) \
-    C2(destroyLocalParameter, type)(&(value->name));
+    MU_C2(destroyLocalParameter, type)(&(value->name));
 
 
 #define ADDRESS_MACRO(x) ,&x
@@ -702,7 +702,7 @@ Actions are discarded, since no marshalling will be done for those when sending 
 
 #define EMPTY_TOKEN
 
-#define ANOTHERIF(x) C2(ANOTHERIF,x)
+#define ANOTHERIF(x) MU_C2(ANOTHERIF,x)
 #define ANOTHERIF0(a,b) a
 #define ANOTHERIF1(a,b) b
 #define ANOTHERIF2(a,b) b
@@ -717,80 +717,80 @@ Actions are discarded, since no marshalling will be done for those when sending 
 #define ANOTHERIF11(a,b) b
 #define ANOTHERIF12(a,b) b
 
-#define MAP_PROMOTED_TYPE(X) ANOTHERIF(DEC(COUNT_ARG(PROMOTIONMAP_##X))) (X, KEEP_FIRST(PROMOTIONMAP_##X))
-#define MAP_CAST_TYPE(X) ANOTHERIF(DEC(COUNT_ARG(CASTMAP_##X)))    (EMPTY_TOKEN, KEEP_FIRST(CASTMAP_##X)  )
+#define MAP_PROMOTED_TYPE(X) ANOTHERIF(MU_DEC(MU_COUNT_ARG(PROMOTIONMAP_##X))) (X, KEEP_FIRST(PROMOTIONMAP_##X))
+#define MAP_CAST_TYPE(X) ANOTHERIF(MU_DEC(MU_COUNT_ARG(CASTMAP_##X)))    (EMPTY_TOKEN, KEEP_FIRST(CASTMAP_##X)  )
 
-#define IFCOMMA(N) C2(IFCOMMA_, N)
-#define IFCOMMA_0
-#define IFCOMMA_2
-#define IFCOMMA_4 ,
-#define IFCOMMA_6 ,
-#define IFCOMMA_8 ,
-#define IFCOMMA_10 ,
-#define IFCOMMA_12 ,
-#define IFCOMMA_14 ,
-#define IFCOMMA_16 ,
-#define IFCOMMA_18 ,
-#define IFCOMMA_20 ,
-#define IFCOMMA_22 ,
-#define IFCOMMA_24 ,
-#define IFCOMMA_26 ,
-#define IFCOMMA_28 ,
-#define IFCOMMA_30 ,
-#define IFCOMMA_32 ,
-#define IFCOMMA_34 ,
-#define IFCOMMA_36 ,
-#define IFCOMMA_38 ,
-#define IFCOMMA_40 ,
-#define IFCOMMA_42 ,
-#define IFCOMMA_44 ,
-#define IFCOMMA_46 ,
-#define IFCOMMA_48 ,
-#define IFCOMMA_50 ,
-#define IFCOMMA_52 ,
-#define IFCOMMA_54 ,
-#define IFCOMMA_56 ,
-#define IFCOMMA_58 ,
-#define IFCOMMA_60 ,
-#define IFCOMMA_62 ,
-#define IFCOMMA_64 ,
-#define IFCOMMA_66 ,
-#define IFCOMMA_68 ,
-#define IFCOMMA_70 ,
-#define IFCOMMA_72 ,
-#define IFCOMMA_74 ,
-#define IFCOMMA_76 ,
-#define IFCOMMA_78 ,
-#define IFCOMMA_80 ,
-#define IFCOMMA_82 ,
-#define IFCOMMA_84 ,
-#define IFCOMMA_86 ,
-#define IFCOMMA_88 ,
-#define IFCOMMA_90 ,
-#define IFCOMMA_92 ,
-#define IFCOMMA_94 ,
-#define IFCOMMA_96 ,
-#define IFCOMMA_98 ,
-#define IFCOMMA_100 ,
-#define IFCOMMA_102 ,
-#define IFCOMMA_104 ,
-#define IFCOMMA_106 ,
-#define IFCOMMA_108 ,
-#define IFCOMMA_110 ,
-#define IFCOMMA_112 ,
-#define IFCOMMA_114 ,
-#define IFCOMMA_116 ,
-#define IFCOMMA_118 ,
-#define IFCOMMA_120 ,
-#define IFCOMMA_122 ,
-#define IFCOMMA_124 ,
-#define IFCOMMA_126 ,
-#define IFCOMMA_128 ,
+#define MU_IFCOMMA(N) MU_C2(MU_IFCOMMA_, N)
+#define MU_IFCOMMA_0
+#define MU_IFCOMMA_2
+#define MU_IFCOMMA_4 ,
+#define MU_IFCOMMA_6 ,
+#define MU_IFCOMMA_8 ,
+#define MU_IFCOMMA_10 ,
+#define MU_IFCOMMA_12 ,
+#define MU_IFCOMMA_14 ,
+#define MU_IFCOMMA_16 ,
+#define MU_IFCOMMA_18 ,
+#define MU_IFCOMMA_20 ,
+#define MU_IFCOMMA_22 ,
+#define MU_IFCOMMA_24 ,
+#define MU_IFCOMMA_26 ,
+#define MU_IFCOMMA_28 ,
+#define MU_IFCOMMA_30 ,
+#define MU_IFCOMMA_32 ,
+#define MU_IFCOMMA_34 ,
+#define MU_IFCOMMA_36 ,
+#define MU_IFCOMMA_38 ,
+#define MU_IFCOMMA_40 ,
+#define MU_IFCOMMA_42 ,
+#define MU_IFCOMMA_44 ,
+#define MU_IFCOMMA_46 ,
+#define MU_IFCOMMA_48 ,
+#define MU_IFCOMMA_50 ,
+#define MU_IFCOMMA_52 ,
+#define MU_IFCOMMA_54 ,
+#define MU_IFCOMMA_56 ,
+#define MU_IFCOMMA_58 ,
+#define MU_IFCOMMA_60 ,
+#define MU_IFCOMMA_62 ,
+#define MU_IFCOMMA_64 ,
+#define MU_IFCOMMA_66 ,
+#define MU_IFCOMMA_68 ,
+#define MU_IFCOMMA_70 ,
+#define MU_IFCOMMA_72 ,
+#define MU_IFCOMMA_74 ,
+#define MU_IFCOMMA_76 ,
+#define MU_IFCOMMA_78 ,
+#define MU_IFCOMMA_80 ,
+#define MU_IFCOMMA_82 ,
+#define MU_IFCOMMA_84 ,
+#define MU_IFCOMMA_86 ,
+#define MU_IFCOMMA_88 ,
+#define MU_IFCOMMA_90 ,
+#define MU_IFCOMMA_92 ,
+#define MU_IFCOMMA_94 ,
+#define MU_IFCOMMA_96 ,
+#define MU_IFCOMMA_98 ,
+#define MU_IFCOMMA_100 ,
+#define MU_IFCOMMA_102 ,
+#define MU_IFCOMMA_104 ,
+#define MU_IFCOMMA_106 ,
+#define MU_IFCOMMA_108 ,
+#define MU_IFCOMMA_110 ,
+#define MU_IFCOMMA_112 ,
+#define MU_IFCOMMA_114 ,
+#define MU_IFCOMMA_116 ,
+#define MU_IFCOMMA_118 ,
+#define MU_IFCOMMA_120 ,
+#define MU_IFCOMMA_122 ,
+#define MU_IFCOMMA_124 ,
+#define MU_IFCOMMA_126 ,
+#define MU_IFCOMMA_128 ,
 
-#define DEFINE_LOCAL_PARAMETER(type, name) type C2(name,_local); GlobalInitialize_##type(& C2(name, _local));
+#define DEFINE_LOCAL_PARAMETER(type, name) type MU_C2(name,_local); GlobalInitialize_##type(& MU_C2(name, _local));
 
 #define START_BUILD_LOCAL_PARAMETER(errorWhenItFails, type, name) \
-    if (C2(FromAGENT_DATA_TYPE_, type)(&values[iParameter], &C2(name, _local)) != AGENT_DATA_TYPES_OK) \
+    if (MU_C2(FromAGENT_DATA_TYPE_, type)(&values[iParameter], &MU_C2(name, _local)) != AGENT_DATA_TYPES_OK) \
     { \
         /*Codes_SRS_SERIALIZER_99_046:[ If the types of the parameters do not match the declared types, DATAPROVIDER_INVALID_ARG shall be returned.]*/ \
         result = errorWhenItFails; \
@@ -800,7 +800,7 @@ Actions are discarded, since no marshalling will be done for those when sending 
         iParameter++;
 
 #define END_BUILD_LOCAL_PARAMETER(type, name) \
-    (void)C2(destroyLocalParameter, type)(&C2(name, _local)); \
+    (void)MU_C2(destroyLocalParameter, type)(&MU_C2(name, _local)); \
     }
 
 /*The following constructs have been devised to work around the precompiler bug of Visual Studio 2005, version 14.00.50727.42*/
@@ -820,18 +820,18 @@ if two strings separated by a comma will lose the comma (myteriously) then they 
 "0" "1", "2", "3", "4", "5", "6", "7", "8", "9"
 #define DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(name, instance) static const char* eatThese_COMMA_##name##instance[] = {LOTS_OF_COMMA_TO_BE_EATEN}
 
-#define PUSH_LOCAL_PARAMETER(type, name) , C2(name, _local)
+#define PUSH_LOCAL_PARAMETER(type, name) , MU_C2(name, _local)
 #define DEFINE_FUNCTION_PARAMETER(type, name) , type name
-#define MAKE_WRAPPER_ARGUMENT(N, type, name) {TOSTRING(type), TOSTRING(name)} IFCOMMA(N)
+#define MAKE_WRAPPER_ARGUMENT(N, type, name) {MU_TOSTRING(type), MU_TOSTRING(name)} MU_IFCOMMA(N)
 
 /*Codes_SRS_SERIALIZER_99_019:[ Create_AGENT_DATA_TYPE_from_DOUBLE]*/
 /*Codes_SRS_SERIALIZER_99_004:[ The propertyType can be any of the following data types: double]*/
-static AGENT_DATA_TYPES_RESULT C2(ToAGENT_DATA_TYPE_, double)(AGENT_DATA_TYPE* dest, double source)
+static AGENT_DATA_TYPES_RESULT MU_C2(ToAGENT_DATA_TYPE_, double)(AGENT_DATA_TYPE* dest, double source)
 {
     return Create_AGENT_DATA_TYPE_from_DOUBLE(dest, source);
 }
 
-static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, double)(const AGENT_DATA_TYPE* agentData, double* dest)
+static AGENT_DATA_TYPES_RESULT MU_C2(FromAGENT_DATA_TYPE_, double)(const AGENT_DATA_TYPE* agentData, double* dest)
 {
     AGENT_DATA_TYPES_RESULT result;
     if (agentData->type != EDM_DOUBLE_TYPE)
@@ -846,24 +846,24 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, double)(const AGENT_DATA
     return result;
 }
 
-static void C2(GlobalInitialize_, double)(void* dest)
+static void MU_C2(GlobalInitialize_, double)(void* dest)
 {
     *(double*)dest = 0.0;
 }
 
-static void C2(GlobalDeinitialize_, double)(void* dest)
+static void MU_C2(GlobalDeinitialize_, double)(void* dest)
 {
     (void)(dest);
 }
 
 /*Codes_SRS_SERIALIZER_99_021:[ Create_AGENT_DATA_TYPE_from_FLOAT]*/
 /*Codes_SRS_SERIALIZER_99_006:[ float]*/
-static AGENT_DATA_TYPES_RESULT C2(ToAGENT_DATA_TYPE_, float)(AGENT_DATA_TYPE* dest, float source)
+static AGENT_DATA_TYPES_RESULT MU_C2(ToAGENT_DATA_TYPE_, float)(AGENT_DATA_TYPE* dest, float source)
 {
     return Create_AGENT_DATA_TYPE_from_FLOAT(dest, source);
 }
 
-static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, float)(const AGENT_DATA_TYPE* agentData, float* dest)
+static AGENT_DATA_TYPES_RESULT MU_C2(FromAGENT_DATA_TYPE_, float)(const AGENT_DATA_TYPE* agentData, float* dest)
 {
     AGENT_DATA_TYPES_RESULT result;
     if (agentData->type != EDM_SINGLE_TYPE)
@@ -878,12 +878,12 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, float)(const AGENT_DATA_
     return result;
 }
 
-static void C2(GlobalInitialize_, float)(void* dest)
+static void MU_C2(GlobalInitialize_, float)(void* dest)
 {
     *(float*)dest = 0.0f;
 }
 
-static void C2(GlobalDeinitialize_, float)(void* dest)
+static void MU_C2(GlobalDeinitialize_, float)(void* dest)
 {
     (void)(dest);
 }
@@ -891,12 +891,12 @@ static void C2(GlobalDeinitialize_, float)(void* dest)
 
 /*Codes_SRS_SERIALIZER_99_020:[ Create_AGENT_DATA_TYPE_from_SINT32]*/
 /*Codes_SRS_SERIALIZER_99_005:[ int], */
-static AGENT_DATA_TYPES_RESULT C2(ToAGENT_DATA_TYPE_, int)(AGENT_DATA_TYPE* dest, int source)
+static AGENT_DATA_TYPES_RESULT MU_C2(ToAGENT_DATA_TYPE_, int)(AGENT_DATA_TYPE* dest, int source)
 {
     return Create_AGENT_DATA_TYPE_from_SINT32(dest, source);
 }
 
-static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, int)(const AGENT_DATA_TYPE* agentData, int* dest)
+static AGENT_DATA_TYPES_RESULT MU_C2(FromAGENT_DATA_TYPE_, int)(const AGENT_DATA_TYPE* agentData, int* dest)
 {
     AGENT_DATA_TYPES_RESULT result;
     if (agentData->type != EDM_INT32_TYPE)
@@ -911,24 +911,24 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, int)(const AGENT_DATA_TY
     return result;
 }
 
-static void C2(GlobalInitialize_, int)(void* dest)
+static void MU_C2(GlobalInitialize_, int)(void* dest)
 {
     *(int*)dest = 0;
 }
 
-static void C2(GlobalDeinitialize_, int)(void* dest)
+static void MU_C2(GlobalDeinitialize_, int)(void* dest)
 {
     (void)(dest);
 }
 
 /*Codes_SRS_SERIALIZER_99_022:[ Create_AGENT_DATA_TYPE_from_SINT64]*/
 /*Codes_SRS_SERIALIZER_99_007:[ long]*/
-static AGENT_DATA_TYPES_RESULT C2(ToAGENT_DATA_TYPE_, long)(AGENT_DATA_TYPE* dest, long source)
+static AGENT_DATA_TYPES_RESULT MU_C2(ToAGENT_DATA_TYPE_, long)(AGENT_DATA_TYPE* dest, long source)
 {
     return Create_AGENT_DATA_TYPE_from_SINT64(dest, source);
 }
 
-static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, long)(const AGENT_DATA_TYPE* agentData, long* dest)
+static AGENT_DATA_TYPES_RESULT MU_C2(FromAGENT_DATA_TYPE_, long)(const AGENT_DATA_TYPE* agentData, long* dest)
 {
     AGENT_DATA_TYPES_RESULT result;
     if (agentData->type != EDM_INT64_TYPE)
@@ -943,12 +943,12 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, long)(const AGENT_DATA_T
     return result;
 }
 
-static void C2(GlobalInitialize_, long)(void* dest)
+static void MU_C2(GlobalInitialize_, long)(void* dest)
 {
     *(long*)dest = 0;
 }
 
-static void C2(GlobalDeinitialize_, long)(void* dest)
+static void MU_C2(GlobalDeinitialize_, long)(void* dest)
 {
     (void)(dest);
 }
@@ -956,12 +956,12 @@ static void C2(GlobalDeinitialize_, long)(void* dest)
 
 /*Codes_SRS_SERIALIZER_99_023:[ Create_AGENT_DATA_TYPE_from_SINT8]*/
 /*Codes_SRS_SERIALIZER_99_008:[ int8_t]*/
-static AGENT_DATA_TYPES_RESULT C2(ToAGENT_DATA_TYPE_, int8_t)(AGENT_DATA_TYPE* dest, int8_t source)
+static AGENT_DATA_TYPES_RESULT MU_C2(ToAGENT_DATA_TYPE_, int8_t)(AGENT_DATA_TYPE* dest, int8_t source)
 {
     return Create_AGENT_DATA_TYPE_from_SINT8(dest, source);
 }
 
-static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, int8_t)(const AGENT_DATA_TYPE* agentData, int8_t* dest)
+static AGENT_DATA_TYPES_RESULT MU_C2(FromAGENT_DATA_TYPE_, int8_t)(const AGENT_DATA_TYPE* agentData, int8_t* dest)
 {
     AGENT_DATA_TYPES_RESULT result;
     if (agentData->type != EDM_SBYTE_TYPE)
@@ -976,24 +976,24 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, int8_t)(const AGENT_DATA
     return result;
 }
 
-static void C2(GlobalInitialize_, int8_t)(void* dest)
+static void MU_C2(GlobalInitialize_, int8_t)(void* dest)
 {
     *(int8_t*)dest = 0;
 }
 
-static void C2(GlobalDeinitialize_, int8_t)(void* dest)
+static void MU_C2(GlobalDeinitialize_, int8_t)(void* dest)
 {
     (void)(dest);
 }
 
 /*Codes_SRS_SERIALIZER_99_024:[ Create_AGENT_DATA_TYPE_from_UINT8]*/
 /*Codes_SRS_SERIALIZER_99_009:[ uint8_t]*/
-static AGENT_DATA_TYPES_RESULT C2(ToAGENT_DATA_TYPE_, uint8_t)(AGENT_DATA_TYPE* dest, uint8_t source)
+static AGENT_DATA_TYPES_RESULT MU_C2(ToAGENT_DATA_TYPE_, uint8_t)(AGENT_DATA_TYPE* dest, uint8_t source)
 {
     return Create_AGENT_DATA_TYPE_from_UINT8(dest, source);
 }
 
-static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, uint8_t)(const AGENT_DATA_TYPE* agentData, uint8_t* dest)
+static AGENT_DATA_TYPES_RESULT MU_C2(FromAGENT_DATA_TYPE_, uint8_t)(const AGENT_DATA_TYPE* agentData, uint8_t* dest)
 {
     AGENT_DATA_TYPES_RESULT result;
     if (agentData->type != EDM_BYTE_TYPE)
@@ -1008,12 +1008,12 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, uint8_t)(const AGENT_DAT
     return result;
 }
 
-static void C2(GlobalInitialize_, uint8_t)(void* dest)
+static void MU_C2(GlobalInitialize_, uint8_t)(void* dest)
 {
     *(uint8_t*)dest = 0;
 }
 
-static void C2(GlobalDeinitialize_, uint8_t)(void* dest)
+static void MU_C2(GlobalDeinitialize_, uint8_t)(void* dest)
 {
     (void)(dest);
 }
@@ -1021,12 +1021,12 @@ static void C2(GlobalDeinitialize_, uint8_t)(void* dest)
 
 /*Codes_SRS_SERIALIZER_99_025:[ Create_AGENT_DATA_TYPE_from_SINT16]*/
 /*Codes_SRS_SERIALIZER_99_010:[ int16_t]*/
-static AGENT_DATA_TYPES_RESULT C2(ToAGENT_DATA_TYPE_, int16_t)(AGENT_DATA_TYPE* dest, int16_t source)
+static AGENT_DATA_TYPES_RESULT MU_C2(ToAGENT_DATA_TYPE_, int16_t)(AGENT_DATA_TYPE* dest, int16_t source)
 {
     return Create_AGENT_DATA_TYPE_from_SINT16(dest, source);
 }
 
-static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, int16_t)(const AGENT_DATA_TYPE* agentData, int16_t* dest)
+static AGENT_DATA_TYPES_RESULT MU_C2(FromAGENT_DATA_TYPE_, int16_t)(const AGENT_DATA_TYPE* agentData, int16_t* dest)
 {
     AGENT_DATA_TYPES_RESULT result;
     if (agentData->type != EDM_INT16_TYPE)
@@ -1041,24 +1041,24 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, int16_t)(const AGENT_DAT
     return result;
 }
 
-static void C2(GlobalInitialize_, int16_t)(void* dest)
+static void MU_C2(GlobalInitialize_, int16_t)(void* dest)
 {
     *(int16_t*)dest = 0;
 }
 
-static void C2(GlobalDeinitialize_, int16_t)(void* dest)
+static void MU_C2(GlobalDeinitialize_, int16_t)(void* dest)
 {
     (void)(dest);
 }
 
 /*Codes_SRS_SERIALIZER_99_026:[ Create_AGENT_DATA_TYPE_from_SINT32]*/
 /*Codes_SRS_SERIALIZER_99_011:[ int32_t]*/
-static AGENT_DATA_TYPES_RESULT C2(ToAGENT_DATA_TYPE_, int32_t)(AGENT_DATA_TYPE* dest, int32_t source)
+static AGENT_DATA_TYPES_RESULT MU_C2(ToAGENT_DATA_TYPE_, int32_t)(AGENT_DATA_TYPE* dest, int32_t source)
 {
     return Create_AGENT_DATA_TYPE_from_SINT32(dest, source);
 }
 
-static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, int32_t)(const AGENT_DATA_TYPE* agentData, int32_t* dest)
+static AGENT_DATA_TYPES_RESULT MU_C2(FromAGENT_DATA_TYPE_, int32_t)(const AGENT_DATA_TYPE* agentData, int32_t* dest)
 {
     AGENT_DATA_TYPES_RESULT result;
     if (agentData->type != EDM_INT32_TYPE)
@@ -1073,24 +1073,24 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, int32_t)(const AGENT_DAT
     return result;
 }
 
-static void C2(GlobalInitialize_, int32_t)(void* dest)
+static void MU_C2(GlobalInitialize_, int32_t)(void* dest)
 {
     *(int32_t*)dest = 0;
 }
 
-static void C2(GlobalDeinitialize_, int32_t)(void* dest)
+static void MU_C2(GlobalDeinitialize_, int32_t)(void* dest)
 {
     (void)(dest);
 }
 
 /*Codes_SRS_SERIALIZER_99_027:[ Create_AGENT_DATA_TYPE_from_SINT64]*/
 /*Codes_SRS_SERIALIZER_99_012:[ int64_t]*/
-static AGENT_DATA_TYPES_RESULT C2(ToAGENT_DATA_TYPE_, int64_t)(AGENT_DATA_TYPE* dest, int64_t source)
+static AGENT_DATA_TYPES_RESULT MU_C2(ToAGENT_DATA_TYPE_, int64_t)(AGENT_DATA_TYPE* dest, int64_t source)
 {
     return Create_AGENT_DATA_TYPE_from_SINT64(dest, source);
 }
 
-static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, int64_t)(const AGENT_DATA_TYPE* agentData, int64_t* dest)
+static AGENT_DATA_TYPES_RESULT MU_C2(FromAGENT_DATA_TYPE_, int64_t)(const AGENT_DATA_TYPE* agentData, int64_t* dest)
 {
     AGENT_DATA_TYPES_RESULT result;
     if (agentData->type != EDM_INT64_TYPE)
@@ -1105,23 +1105,23 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, int64_t)(const AGENT_DAT
     return result;
 }
 
-static void C2(GlobalInitialize_, int64_t)(void* dest)
+static void MU_C2(GlobalInitialize_, int64_t)(void* dest)
 {
     *(int64_t*)dest = 0;
 }
 
-static void C2(GlobalDeinitialize_, int64_t)(void* dest)
+static void MU_C2(GlobalDeinitialize_, int64_t)(void* dest)
 {
     (void)(dest);
 }
 
 /*Codes_SRS_SERIALIZER_99_013:[ bool]*/
-static AGENT_DATA_TYPES_RESULT C2(ToAGENT_DATA_TYPE_, bool)(AGENT_DATA_TYPE* dest, bool source)
+static AGENT_DATA_TYPES_RESULT MU_C2(ToAGENT_DATA_TYPE_, bool)(AGENT_DATA_TYPE* dest, bool source)
 {
     return Create_EDM_BOOLEAN_from_int(dest, source == true);
 }
 
-static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, bool)(const AGENT_DATA_TYPE* agentData, bool* dest)
+static AGENT_DATA_TYPES_RESULT MU_C2(FromAGENT_DATA_TYPE_, bool)(const AGENT_DATA_TYPE* agentData, bool* dest)
 {
     AGENT_DATA_TYPES_RESULT result;
     if (agentData->type != EDM_BOOLEAN_TYPE)
@@ -1136,23 +1136,23 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, bool)(const AGENT_DATA_T
     return result;
 }
 
-static void C2(GlobalInitialize_, bool)(void* dest)
+static void MU_C2(GlobalInitialize_, bool)(void* dest)
 {
     *(bool*)dest = false;
 }
 
-static void C2(GlobalDeinitialize_, bool)(void* dest)
+static void MU_C2(GlobalDeinitialize_, bool)(void* dest)
 {
     (void)(dest);
 }
 
 /*Codes_SRS_SERIALIZER_99_014:[ ascii_char_ptr]*/
-static AGENT_DATA_TYPES_RESULT C2(ToAGENT_DATA_TYPE_, ascii_char_ptr)(AGENT_DATA_TYPE* dest, ascii_char_ptr source)
+static AGENT_DATA_TYPES_RESULT MU_C2(ToAGENT_DATA_TYPE_, ascii_char_ptr)(AGENT_DATA_TYPE* dest, ascii_char_ptr source)
 {
     return Create_AGENT_DATA_TYPE_from_charz(dest, source);
 }
 
-static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, ascii_char_ptr)(const AGENT_DATA_TYPE* agentData, ascii_char_ptr* dest)
+static AGENT_DATA_TYPES_RESULT MU_C2(FromAGENT_DATA_TYPE_, ascii_char_ptr)(const AGENT_DATA_TYPE* agentData, ascii_char_ptr* dest)
 {
     AGENT_DATA_TYPES_RESULT result;
     if (agentData->type != EDM_STRING_TYPE)
@@ -1181,12 +1181,12 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, ascii_char_ptr)(const AG
     return result;
 }
 
-static void C2(GlobalInitialize_, ascii_char_ptr)(void* dest)
+static void MU_C2(GlobalInitialize_, ascii_char_ptr)(void* dest)
 {
     *(ascii_char_ptr*)dest = NULL;
 }
 
-static void C2(GlobalDeinitialize_, ascii_char_ptr)(void* dest)
+static void MU_C2(GlobalDeinitialize_, ascii_char_ptr)(void* dest)
 {
     if (*(ascii_char_ptr*)dest != NULL)
     {
@@ -1194,12 +1194,12 @@ static void C2(GlobalDeinitialize_, ascii_char_ptr)(void* dest)
     }
 }
 
-static AGENT_DATA_TYPES_RESULT C2(ToAGENT_DATA_TYPE_, ascii_char_ptr_no_quotes)(AGENT_DATA_TYPE* dest, ascii_char_ptr_no_quotes source)
+static AGENT_DATA_TYPES_RESULT MU_C2(ToAGENT_DATA_TYPE_, ascii_char_ptr_no_quotes)(AGENT_DATA_TYPE* dest, ascii_char_ptr_no_quotes source)
 {
     return Create_AGENT_DATA_TYPE_from_charz_no_quotes(dest, source);
 }
 
-static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, ascii_char_ptr_no_quotes)(const AGENT_DATA_TYPE* agentData, ascii_char_ptr_no_quotes* dest)
+static AGENT_DATA_TYPES_RESULT MU_C2(FromAGENT_DATA_TYPE_, ascii_char_ptr_no_quotes)(const AGENT_DATA_TYPE* agentData, ascii_char_ptr_no_quotes* dest)
 {
     AGENT_DATA_TYPES_RESULT result;
     if (agentData->type != EDM_STRING_NO_QUOTES_TYPE)
@@ -1227,12 +1227,12 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, ascii_char_ptr_no_quotes
     return result;
 }
 
-static void C2(GlobalInitialize_, ascii_char_ptr_no_quotes)(void* dest)
+static void MU_C2(GlobalInitialize_, ascii_char_ptr_no_quotes)(void* dest)
 {
     *(ascii_char_ptr_no_quotes*)dest = NULL;
 }
 
-static void C2(GlobalDeinitialize_, ascii_char_ptr_no_quotes)(void* dest)
+static void MU_C2(GlobalDeinitialize_, ascii_char_ptr_no_quotes)(void* dest)
 {
     if (*(ascii_char_ptr_no_quotes*)dest != NULL)
     {
@@ -1242,12 +1242,12 @@ static void C2(GlobalDeinitialize_, ascii_char_ptr_no_quotes)(void* dest)
 
 /*Codes_SRS_SERIALIZER_99_051:[ EDM_DATE_TIME_OFFSET*/
 /*Codes_SRS_SERIALIZER_99_053:[Create_AGENT_DATA_TYPE_from_EDM_DATE_TIME_OFFSET]*/
-static AGENT_DATA_TYPES_RESULT C2(ToAGENT_DATA_TYPE_, EDM_DATE_TIME_OFFSET)(AGENT_DATA_TYPE* dest, EDM_DATE_TIME_OFFSET source)
+static AGENT_DATA_TYPES_RESULT MU_C2(ToAGENT_DATA_TYPE_, EDM_DATE_TIME_OFFSET)(AGENT_DATA_TYPE* dest, EDM_DATE_TIME_OFFSET source)
 {
     return Create_AGENT_DATA_TYPE_from_EDM_DATE_TIME_OFFSET(dest, source);
 }
 
-static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, EDM_DATE_TIME_OFFSET)(const AGENT_DATA_TYPE* agentData, EDM_DATE_TIME_OFFSET* dest)
+static AGENT_DATA_TYPES_RESULT MU_C2(FromAGENT_DATA_TYPE_, EDM_DATE_TIME_OFFSET)(const AGENT_DATA_TYPE* agentData, EDM_DATE_TIME_OFFSET* dest)
 {
     AGENT_DATA_TYPES_RESULT result;
     if (agentData->type != EDM_DATE_TIME_OFFSET_TYPE)
@@ -1262,24 +1262,24 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, EDM_DATE_TIME_OFFSET)(co
     return result;
 }
 
-static void C2(GlobalInitialize_, EDM_DATE_TIME_OFFSET)(void* dest)
+static void MU_C2(GlobalInitialize_, EDM_DATE_TIME_OFFSET)(void* dest)
 {
     memset(dest, 0, sizeof(EDM_DATE_TIME_OFFSET));
 }
 
-static void C2(GlobalDeinitialize_, EDM_DATE_TIME_OFFSET)(void* dest)
+static void MU_C2(GlobalDeinitialize_, EDM_DATE_TIME_OFFSET)(void* dest)
 {
     (void)(dest);
 }
 
 /*Codes_SRS_SERIALIZER_99_072:[ EDM_GUID]*/
 /*Codes_SRS_SERIALIZER_99_073:[ Create_AGENT_DATA_TYPE_from_EDM_GUID]*/
-static AGENT_DATA_TYPES_RESULT C2(ToAGENT_DATA_TYPE_, EDM_GUID)(AGENT_DATA_TYPE* dest, EDM_GUID guid)
+static AGENT_DATA_TYPES_RESULT MU_C2(ToAGENT_DATA_TYPE_, EDM_GUID)(AGENT_DATA_TYPE* dest, EDM_GUID guid)
 {
     return Create_AGENT_DATA_TYPE_from_EDM_GUID(dest, guid);
 }
 
-static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, EDM_GUID)(const AGENT_DATA_TYPE* agentData, EDM_GUID* dest)
+static AGENT_DATA_TYPES_RESULT MU_C2(FromAGENT_DATA_TYPE_, EDM_GUID)(const AGENT_DATA_TYPE* agentData, EDM_GUID* dest)
 {
     AGENT_DATA_TYPES_RESULT result;
     if (agentData->type != EDM_GUID_TYPE)
@@ -1294,12 +1294,12 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, EDM_GUID)(const AGENT_DA
     return result;
 }
 
-static void C2(GlobalInitialize_, EDM_GUID)(void* dest)
+static void MU_C2(GlobalInitialize_, EDM_GUID)(void* dest)
 {
     memset(dest, 0, sizeof(EDM_GUID));
 }
 
-static void C2(GlobalDeinitialize_, EDM_GUID)(void* dest)
+static void MU_C2(GlobalDeinitialize_, EDM_GUID)(void* dest)
 {
     (void)(dest);
 }
@@ -1307,12 +1307,12 @@ static void C2(GlobalDeinitialize_, EDM_GUID)(void* dest)
 
 /*Codes_SRS_SERIALIZER_99_074:[ EDM_BINARY]*/
 /*Codes_SRS_SERIALIZER_99_075:[ Create_AGENT_DATA_TYPE_from_EDM_BINARY]*/
-static AGENT_DATA_TYPES_RESULT C2(ToAGENT_DATA_TYPE_, EDM_BINARY)(AGENT_DATA_TYPE* dest, EDM_BINARY edmBinary)
+static AGENT_DATA_TYPES_RESULT MU_C2(ToAGENT_DATA_TYPE_, EDM_BINARY)(AGENT_DATA_TYPE* dest, EDM_BINARY edmBinary)
 {
     return Create_AGENT_DATA_TYPE_from_EDM_BINARY(dest, edmBinary);
 }
 
-static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, EDM_BINARY)(const AGENT_DATA_TYPE* agentData, EDM_BINARY* dest)
+static AGENT_DATA_TYPES_RESULT MU_C2(FromAGENT_DATA_TYPE_, EDM_BINARY)(const AGENT_DATA_TYPE* agentData, EDM_BINARY* dest)
 {
     AGENT_DATA_TYPES_RESULT result;
     if (agentData->type != EDM_BINARY_TYPE)
@@ -1335,13 +1335,13 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, EDM_BINARY)(const AGENT_
     return result;
 }
 
-static void C2(GlobalInitialize_, EDM_BINARY)(void* dest)
+static void MU_C2(GlobalInitialize_, EDM_BINARY)(void* dest)
 {
     ((EDM_BINARY*)dest)->data = NULL;
     ((EDM_BINARY*)dest)->size = 0;
 }
 
-static void C2(GlobalDeinitialize_, EDM_BINARY)(void* dest)
+static void MU_C2(GlobalDeinitialize_, EDM_BINARY)(void* dest)
 {
     if ((((EDM_BINARY*)dest)->data) != NULL)
     {
@@ -1349,7 +1349,7 @@ static void C2(GlobalDeinitialize_, EDM_BINARY)(void* dest)
     }
 }
 
-static void C2(destroyLocalParameter, EDM_BINARY)(EDM_BINARY* value)
+static void MU_C2(destroyLocalParameter, EDM_BINARY)(EDM_BINARY* value)
 {
     if (value != NULL)
     {
@@ -1359,27 +1359,27 @@ static void C2(destroyLocalParameter, EDM_BINARY)(EDM_BINARY* value)
     }
 }
 
-static void C2(destroyLocalParameter, EDM_BOOLEAN)(EDM_BOOLEAN* value)
+static void MU_C2(destroyLocalParameter, EDM_BOOLEAN)(EDM_BOOLEAN* value)
 {
     (void)value;
 }
 
-static void C2(destroyLocalParameter, EDM_BYTE)(EDM_BYTE* value)
+static void MU_C2(destroyLocalParameter, EDM_BYTE)(EDM_BYTE* value)
 {
     (void)value;
 }
 
-static void C2(destroyLocalParameter, EDM_DATE)(EDM_DATE* value)
+static void MU_C2(destroyLocalParameter, EDM_DATE)(EDM_DATE* value)
 {
     (void)value;
 }
 
-static void C2(destroyLocalParameter, EDM_DATE_TIME_OFFSET)(EDM_DATE_TIME_OFFSET* value)
+static void MU_C2(destroyLocalParameter, EDM_DATE_TIME_OFFSET)(EDM_DATE_TIME_OFFSET* value)
 {
     (void)value;
 }
 
-static void C2(destroyLocalParameter, EDM_DECIMAL)(EDM_DECIMAL* value)
+static void MU_C2(destroyLocalParameter, EDM_DECIMAL)(EDM_DECIMAL* value)
 {
     if (value != NULL)
     {
@@ -1388,12 +1388,12 @@ static void C2(destroyLocalParameter, EDM_DECIMAL)(EDM_DECIMAL* value)
     }
 }
 
-static void C2(destroyLocalParameter, EDM_DOUBLE)(EDM_DOUBLE* value)
+static void MU_C2(destroyLocalParameter, EDM_DOUBLE)(EDM_DOUBLE* value)
 {
     (void)value;
 }
 
-static void C2(destroyLocalParameter, EDM_DURATION)(EDM_DURATION* value)
+static void MU_C2(destroyLocalParameter, EDM_DURATION)(EDM_DURATION* value)
 {
     if (value != NULL)
     {
@@ -1403,98 +1403,98 @@ static void C2(destroyLocalParameter, EDM_DURATION)(EDM_DURATION* value)
     }
 }
 
-static void C2(destroyLocalParameter, EDM_GUID)(EDM_GUID* value)
+static void MU_C2(destroyLocalParameter, EDM_GUID)(EDM_GUID* value)
 {
     (void)value;
 }
 
-static void C2(destroyLocalParameter, EDM_INT16)(EDM_INT16* value)
+static void MU_C2(destroyLocalParameter, EDM_INT16)(EDM_INT16* value)
 {
     (void)value;
 }
 
-static void C2(destroyLocalParameter, EDM_INT32)(EDM_INT32* value)
+static void MU_C2(destroyLocalParameter, EDM_INT32)(EDM_INT32* value)
 {
     (void)value;
 }
 
-static void C2(destroyLocalParameter, EDM_INT64)(EDM_INT64* value)
+static void MU_C2(destroyLocalParameter, EDM_INT64)(EDM_INT64* value)
 {
     (void)value;
 }
 
-static void C2(destroyLocalParameter, EDM_SBYTE)(EDM_SBYTE* value)
+static void MU_C2(destroyLocalParameter, EDM_SBYTE)(EDM_SBYTE* value)
 {
     (void)value;
 }
 
-static void C2(destroyLocalParameter, EDM_SINGLE)(EDM_SINGLE* value)
+static void MU_C2(destroyLocalParameter, EDM_SINGLE)(EDM_SINGLE* value)
 {
     (void)value;
 }
 
-static void C2(destroyLocalParameter, EDM_STRING)(EDM_STRING* value)
+static void MU_C2(destroyLocalParameter, EDM_STRING)(EDM_STRING* value)
 {
     (void)value;
 }
 
 
-static void C2(destroyLocalParameter, EDM_TIME_OF_DAY)(EDM_TIME_OF_DAY* value)
+static void MU_C2(destroyLocalParameter, EDM_TIME_OF_DAY)(EDM_TIME_OF_DAY* value)
 {
     (void)value;
 }
 
-static void C2(destroyLocalParameter, int)(int* value)
+static void MU_C2(destroyLocalParameter, int)(int* value)
 {
     (void)value;
 }
 
-static void C2(destroyLocalParameter, float)(float* value)
+static void MU_C2(destroyLocalParameter, float)(float* value)
 {
     (void)value;
 }
 
-static void C2(destroyLocalParameter, double)(double* value)
+static void MU_C2(destroyLocalParameter, double)(double* value)
 {
     (void)value;
 }
 
-static void C2(destroyLocalParameter, long)(long* value)
+static void MU_C2(destroyLocalParameter, long)(long* value)
 {
     (void)value;
 }
 
-static void C2(destroyLocalParameter, int8_t)(int8_t* value)
+static void MU_C2(destroyLocalParameter, int8_t)(int8_t* value)
 {
     (void)value;
 }
 
-static void C2(destroyLocalParameter, uint8_t)(uint8_t* value)
+static void MU_C2(destroyLocalParameter, uint8_t)(uint8_t* value)
 {
     (void)value;
 }
 
-static void C2(destroyLocalParameter, int16_t)(int16_t* value)
+static void MU_C2(destroyLocalParameter, int16_t)(int16_t* value)
 {
     (void)value;
 }
 
-static void C2(destroyLocalParameter, int32_t)(int32_t* value)
+static void MU_C2(destroyLocalParameter, int32_t)(int32_t* value)
 {
     (void)value;
 }
 
-static void C2(destroyLocalParameter, int64_t)(int64_t* value)
+static void MU_C2(destroyLocalParameter, int64_t)(int64_t* value)
 {
     (void)value;
 }
 
-static void C2(destroyLocalParameter, bool)(bool* value)
+static void MU_C2(destroyLocalParameter, bool)(bool* value)
 {
     (void)value;
 }
 
-static void C2(destroyLocalParameter, ascii_char_ptr)(ascii_char_ptr* value)
+static void MU_C2(destroyLocalParameter, ascii_char_ptr)(ascii_char_ptr* value)
 {
     if (value != NULL)
     {
@@ -1503,7 +1503,7 @@ static void C2(destroyLocalParameter, ascii_char_ptr)(ascii_char_ptr* value)
 
 }
 
-static void C2(destroyLocalParameter, ascii_char_ptr_no_quotes)(ascii_char_ptr_no_quotes* value)
+static void MU_C2(destroyLocalParameter, ascii_char_ptr_no_quotes)(ascii_char_ptr_no_quotes* value)
 {
     if (value != NULL)
     {

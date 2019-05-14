@@ -12,9 +12,9 @@
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/xlogging.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 
 #include "azure_prov_client/prov_device_ll_client.h"
 #include "azure_prov_client/prov_security_factory.h"
@@ -121,7 +121,7 @@ static int construct_device_id(const char* prefix, char** device_name)
     if (UniqueId_Generate(deviceGuid, DEVICE_GUID_SIZE) != UNIQUEID_OK)
     {
         LogError("Unable to generate unique Id.\r\n");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -130,7 +130,7 @@ static int construct_device_id(const char* prefix, char** device_name)
         if (*device_name == NULL)
         {
             LogError("Failure allocating device ID.\r\n");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -138,7 +138,7 @@ static int construct_device_id(const char* prefix, char** device_name)
             {
                 LogError("Failure constructing device ID.\r\n");
                 free(*device_name);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -170,8 +170,8 @@ static void create_tpm_enrollment_device()
         BUFFER_HANDLE ek_handle = prov_auth_get_endorsement_key(auth_handle);
         ASSERT_IS_NOT_NULL(ek_handle, "Failure prov_auth_get_endorsement_key");
 
-        STRING_HANDLE ek_value = Base64_Encoder(ek_handle);
-        ASSERT_IS_NOT_NULL(ek_value, "Failure Base64_Encoder Endorsement key");
+        STRING_HANDLE ek_value = Base64_Encode(ek_handle);
+        ASSERT_IS_NOT_NULL(ek_value, "Failure Base64_Encode Endorsement key");
 
         ATTESTATION_MECHANISM_HANDLE attest_handle = attestationMechanism_createWithTpm(STRING_c_str(ek_value), NULL);
         ASSERT_IS_NOT_NULL(attest_handle, "Failure attestationMechanism_createWithTpm");
@@ -208,8 +208,8 @@ static void create_x509_enrollment_device()
         char* x509_cert = prov_auth_get_certificate(auth_handle);
         ASSERT_IS_NOT_NULL(x509_cert, "Failure prov_auth_get_certificate");
 
-        STRING_HANDLE base64_cert = Base64_Encode_Bytes((const unsigned char*)x509_cert, strlen(x509_cert));
-        ASSERT_IS_NOT_NULL(base64_cert, "Failure Base64_Encode_Bytes");
+        STRING_HANDLE base64_cert = Azure_Base64_Encode_Bytes((const unsigned char*)x509_cert, strlen(x509_cert));
+        ASSERT_IS_NOT_NULL(base64_cert, "Failure Azure_Base64_Encode_Bytes");
 
         ATTESTATION_MECHANISM_HANDLE attest_handle = attestationMechanism_createWithX509ClientCert(STRING_c_str(base64_cert), NULL);
         ASSERT_IS_NOT_NULL(attest_handle, "Failure hsm_client_riot_get_certificate ");

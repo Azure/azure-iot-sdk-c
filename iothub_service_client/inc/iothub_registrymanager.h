@@ -6,8 +6,8 @@
 #ifndef IOTHUB_REGISTRYMANAGER_H
 #define IOTHUB_REGISTRYMANAGER_H
 
-#include "azure_c_shared_utility/macro_utils.h"
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "azure_macro_utils/macro_utils.h"
+#include "umock_c/umock_c_prod.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_c_shared_utility/map.h"
@@ -30,7 +30,7 @@ extern "C"
     IOTHUB_REGISTRYMANAGER_CALLBACK_NOT_SET,        \
     IOTHUB_REGISTRYMANAGER_INVALID_VERSION          \
 
-DEFINE_ENUM(IOTHUB_REGISTRYMANAGER_RESULT, IOTHUB_REGISTRYMANAGER_RESULT_VALUES);
+MU_DEFINE_ENUM(IOTHUB_REGISTRYMANAGER_RESULT, IOTHUB_REGISTRYMANAGER_RESULT_VALUES);
 
 #define IOTHUB_REGISTRYMANAGER_AUTH_METHOD_VALUES           \
     IOTHUB_REGISTRYMANAGER_AUTH_SPK,                        \
@@ -40,7 +40,7 @@ DEFINE_ENUM(IOTHUB_REGISTRYMANAGER_RESULT, IOTHUB_REGISTRYMANAGER_RESULT_VALUES)
     IOTHUB_REGISTRYMANAGER_AUTH_UNKNOWN                     \
 
 
-DEFINE_ENUM(IOTHUB_REGISTRYMANAGER_AUTH_METHOD, IOTHUB_REGISTRYMANAGER_AUTH_METHOD_VALUES);
+MU_DEFINE_ENUM(IOTHUB_REGISTRYMANAGER_AUTH_METHOD, IOTHUB_REGISTRYMANAGER_AUTH_METHOD_VALUES);
 
 #define IOTHUB_DEVICE_EX_VERSION_1 1
 typedef struct IOTHUB_DEVICE_EX_TAG

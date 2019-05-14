@@ -36,14 +36,14 @@ static int real_strcmp(const char* str1, const char* str2)
 
 #include "testrunnerswitcher.h"
 #include "azure_c_shared_utility/optimize_size.h"
-#include "azure_c_shared_utility/macro_utils.h"
-#include "umock_c.h"
-#include "umocktypes_charptr.h"
-#include "umocktypes_stdint.h"
-#include "umocktypes_bool.h"
-#include "umock_c_negative_tests.h"
-#include "umocktypes.h"
-#include "umocktypes_c.h"
+#include "azure_macro_utils/macro_utils.h"
+#include "umock_c/umock_c.h"
+#include "umock_c/umocktypes_charptr.h"
+#include "umock_c/umocktypes_stdint.h"
+#include "umock_c/umocktypes_bool.h"
+#include "umock_c/umock_c_negative_tests.h"
+#include "umock_c/umocktypes.h"
+#include "umock_c/umocktypes_c.h"
 
 #ifdef __cplusplus
 #include <climits>
@@ -57,7 +57,7 @@ static int real_strcmp(const char* str1, const char* str2)
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 #include "azure_c_shared_utility/agenttime.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "internal/iothub_client_authorization.h"
@@ -70,12 +70,12 @@ MOCKABLE_FUNCTION(, double, get_difftime, time_t, stopTime, time_t, startTime);
 
 static TEST_MUTEX_HANDLE g_testByTest;
 
-DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
     ASSERT_FAIL(temp_str);
 }
 
@@ -206,7 +206,7 @@ int STRING_sprintf(STRING_HANDLE handle, const char* format, ...)
 
     if (g_STRING_sprintf_call_count == g_STRING_sprintf_fail_on_count)
     {
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -622,7 +622,7 @@ TEST_FUNCTION(authentication_create_DEVICE_KEYS_succeeds)
     authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_025: [If authentication_handle is NULL, authentication_start() shall fail and return __FAILURE__ as error code]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_025: [If authentication_handle is NULL, authentication_start() shall fail and return MU_FAILURE as error code]
 TEST_FUNCTION(authentication_start_NULL_auth_handle)
 {
     // arrange
@@ -646,7 +646,7 @@ TEST_FUNCTION(authentication_start_NULL_auth_handle)
     authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_026: [If `cbs_handle` is NULL, authentication_start() shall fail and return __FAILURE__ as error code]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_026: [If `cbs_handle` is NULL, authentication_start() shall fail and return MU_FAILURE as error code]
 TEST_FUNCTION(authentication_start_NULL_cbs_handle)
 {
     // arrange
@@ -726,7 +726,7 @@ TEST_FUNCTION(authentication_start_succeeds_with_module)
 
 
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_027: [If authenticate state has been started already, authentication_start() shall fail and return __FAILURE__ as error code]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_027: [If authenticate state has been started already, authentication_start() shall fail and return MU_FAILURE as error code]
 TEST_FUNCTION(authentication_start_already_started_fails)
 {
     // arrange
@@ -748,7 +748,7 @@ TEST_FUNCTION(authentication_start_already_started_fails)
 }
 
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_031: [If `authentication_handle` is NULL, authentication_stop() shall fail and return __FAILURE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_031: [If `authentication_handle` is NULL, authentication_stop() shall fail and return MU_FAILURE]
 TEST_FUNCTION(authentication_stop_NULL_handle)
 {
     // arrange
@@ -769,7 +769,7 @@ TEST_FUNCTION(authentication_stop_NULL_handle)
     authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_032: [If `instance->state` is AUTHENTICATION_STATE_STOPPED, authentication_stop() shall fail and return __FAILURE__]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_032: [If `instance->state` is AUTHENTICATION_STATE_STOPPED, authentication_stop() shall fail and return MU_FAILURE]
 TEST_FUNCTION(authentication_stop_already_stoppped)
 {
     // arrange

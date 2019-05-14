@@ -15,8 +15,8 @@ extern "C" {
 #include <stdbool.h>
 #endif /* __cplusplus */
 
-#include "azure_c_shared_utility/umock_c_prod.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "umock_c/umock_c_prod.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "provisioning_sc_models.h"
 #include "parson.h"
 
@@ -28,12 +28,12 @@ BULK_OP_UPDATE, \
 BULK_OP_UPDATE_IF_MATCH_ETAG, \
 BULK_OP_DELETE
 
-DEFINE_ENUM(PROVISIONING_BULK_OPERATION_MODE, PROVISIONING_BULK_OPERATION_MODE_VALUES);
+MU_DEFINE_ENUM(PROVISIONING_BULK_OPERATION_MODE, PROVISIONING_BULK_OPERATION_MODE_VALUES);
 
 #define PROVISIONING_BULK_OPERATION_TYPE_VALUES \
 BULK_OP_INDIVIDUAL_ENROLLMENT
 
-DEFINE_ENUM(PROVISIONING_BULK_OPERATION_TYPE, PROVISIONING_BULK_OPERATION_TYPE_VALUES);
+MU_DEFINE_ENUM(PROVISIONING_BULK_OPERATION_TYPE, PROVISIONING_BULK_OPERATION_TYPE_VALUES);
 
 typedef struct PROVISIONING_BULK_OPERATION_ERROR_TAG
 {

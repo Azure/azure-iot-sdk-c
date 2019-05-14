@@ -9,9 +9,9 @@
 #ifndef IOTHUB_MESSAGE_H
 #define IOTHUB_MESSAGE_H
 
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/map.h"
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 
 #ifdef __cplusplus
 #include <cstddef>
@@ -30,7 +30,7 @@ extern "C"
 /** @brief Enumeration specifying the status of calls to various
 *  APIs in this module.
 */
-DEFINE_ENUM(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
+MU_DEFINE_ENUM(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
 
 #define IOTHUBMESSAGE_CONTENT_TYPE_VALUES \
 IOTHUBMESSAGE_BYTEARRAY, \
@@ -40,7 +40,7 @@ IOTHUBMESSAGE_UNKNOWN \
 /** @brief Enumeration specifying the content type of the a given
 * message.
 */
-DEFINE_ENUM(IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_CONTENT_TYPE_VALUES);
+MU_DEFINE_ENUM(IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_CONTENT_TYPE_VALUES);
 
 typedef struct IOTHUB_MESSAGE_HANDLE_DATA_TAG* IOTHUB_MESSAGE_HANDLE;
 

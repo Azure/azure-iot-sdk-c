@@ -53,14 +53,6 @@ static XIO_HANDLE mqtt_transport_io(const char* fqdn, const HTTP_PROXY_OPTIONS* 
             LogError("failed calling xio_create on underlying io");
             result = NULL;
         }
-        else
-        {
-#ifdef USE_OPENSSL
-            // requires tls 1.2
-            int tls_version = 12;
-            xio_setoption(result, OPTION_TLS_VERSION, &tls_version);
-#endif
-        }
     }
     /* Codes_PROV_TRANSPORT_MQTT_CLIENT_07_014: [ On success mqtt_transport_io shall return allocated XIO_HANDLE. ] */
     return result;
@@ -90,10 +82,10 @@ int prov_transport_mqtt_close(PROV_DEVICE_TRANSPORT_HANDLE handle)
     return prov_transport_common_mqtt_close(handle);
 }
 
-int prov_transport_mqtt_register_device(PROV_DEVICE_TRANSPORT_HANDLE handle, PROV_TRANSPORT_JSON_PARSE json_parse_cb, void* json_ctx)
+int prov_transport_mqtt_register_device(PROV_DEVICE_TRANSPORT_HANDLE handle, PROV_TRANSPORT_JSON_PARSE json_parse_cb, PROV_TRANSPORT_CREATE_JSON_PAYLOAD json_create_cb, void* json_ctx)
 {
     /* Codes_PROV_TRANSPORT_MQTT_CLIENT_07_005: [ prov_transport_mqtt_register_device shall invoke the prov_transport_common_mqtt_register_device method ] */
-    return prov_transport_common_mqtt_register_device(handle, json_parse_cb, json_ctx);
+    return prov_transport_common_mqtt_register_device(handle, json_parse_cb, json_create_cb, json_ctx);
 }
 
 int prov_transport_mqtt_get_operation_status(PROV_DEVICE_TRANSPORT_HANDLE handle)

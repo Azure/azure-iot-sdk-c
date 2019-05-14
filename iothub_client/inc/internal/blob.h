@@ -13,7 +13,7 @@
 #ifndef BLOB_H
 #define BLOB_H
 
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/strings_types.h"
 #include "azure_c_shared_utility/httpapiex.h"
@@ -28,7 +28,7 @@ extern "C"
 #include <stddef.h>
 #endif
 
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 
 /* Allow unit tests to override MAX_BLOCK_COUNT to something much smaller */
 #ifndef MAX_BLOCK_COUNT
@@ -44,7 +44,7 @@ extern "C"
     BLOB_INVALID_ARG,      \
     BLOB_ABORTED
 
-DEFINE_ENUM(BLOB_RESULT, BLOB_RESULT_VALUES)
+MU_DEFINE_ENUM(BLOB_RESULT, BLOB_RESULT_VALUES)
 
 /**
 * @brief  Synchronously uploads a byte array to blob storage

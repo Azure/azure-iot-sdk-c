@@ -5,7 +5,7 @@
 #define MULTITREE_H
 
 #include "azure_c_shared_utility/strings.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 
 #ifdef __cplusplus
 #include <cstddef>
@@ -28,12 +28,12 @@ typedef struct MULTITREE_HANDLE_DATA_TAG* MULTITREE_HANDLE;
     MULTITREE_ERROR,                      \
     MULTITREE_CHILD_NOT_FOUND             \
 
-DEFINE_ENUM(MULTITREE_RESULT, MULTITREE_RESULT_VALUES);
+MU_DEFINE_ENUM(MULTITREE_RESULT, MULTITREE_RESULT_VALUES);
 
 typedef void (*MULTITREE_FREE_FUNCTION)(void* value);
 typedef int (*MULTITREE_CLONE_FUNCTION)(void** destination, const void* source);
 
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 MOCKABLE_FUNCTION(, MULTITREE_HANDLE, MultiTree_Create, MULTITREE_CLONE_FUNCTION, cloneFunction, MULTITREE_FREE_FUNCTION, freeFunction);
 MOCKABLE_FUNCTION(, MULTITREE_RESULT, MultiTree_AddLeaf, MULTITREE_HANDLE, treeHandle, const char*, destinationPath, const void*, value);
 MOCKABLE_FUNCTION(, MULTITREE_RESULT, MultiTree_AddChild, MULTITREE_HANDLE, treeHandle, const char*, childName, MULTITREE_HANDLE*, childHandle);

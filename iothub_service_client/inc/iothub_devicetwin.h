@@ -12,7 +12,7 @@
 #include <time.h>
 #include "iothub_service_client_auth.h"
 
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -26,7 +26,7 @@ extern "C"
     IOTHUB_DEVICE_TWIN_ERROR,                \
     IOTHUB_DEVICE_TWIN_HTTPAPI_ERROR         \
 
-DEFINE_ENUM(IOTHUB_DEVICE_TWIN_RESULT, IOTHUB_DEVICE_TWIN_RESULT_VALUES);
+MU_DEFINE_ENUM(IOTHUB_DEVICE_TWIN_RESULT, IOTHUB_DEVICE_TWIN_RESULT_VALUES);
 
 /** @brief Handle to hide struct and use it in consequent APIs
 */

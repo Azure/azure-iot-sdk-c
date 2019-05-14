@@ -11,15 +11,15 @@ extern "C" {
     #include <stdlib.h>
 #endif /* __cplusplus */
 
-#include "azure_c_shared_utility/macro_utils.h"
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "azure_macro_utils/macro_utils.h"
+#include "umock_c/umock_c_prod.h"
 #include "parson.h"
 
 #define NECESSITY_VALUES    \
     REQUIRED,               \
     OPTIONAL                \
 
-DEFINE_ENUM(NECESSITY, NECESSITY_VALUES);
+MU_DEFINE_ENUM(NECESSITY, NECESSITY_VALUES);
 
 typedef JSON_Value*(*TO_JSON_FUNCTION)(void* handle);
 typedef void*(*FROM_JSON_FUNCTION)(JSON_Object* root_object);

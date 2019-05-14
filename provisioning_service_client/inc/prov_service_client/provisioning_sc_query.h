@@ -11,8 +11,8 @@ extern "C" {
 
 #include <stdlib.h>
 
-#include "azure_c_shared_utility/umock_c_prod.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "umock_c/umock_c_prod.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "provisioning_sc_models.h"
 #include "parson.h"
 
@@ -25,7 +25,7 @@ extern "C" {
     QUERY_TYPE_ENROLLMENT_GROUP, \
     QUERY_TYPE_DEVICE_REGISTRATION_STATE
 
-DEFINE_ENUM(PROVISIONING_QUERY_TYPE, PROVISIONING_QUERY_TYPE_VALUES);
+MU_DEFINE_ENUM(PROVISIONING_QUERY_TYPE, PROVISIONING_QUERY_TYPE_VALUES);
 
 typedef struct PROVISIONING_QUERY_SPECIFICATION_TAG
 {

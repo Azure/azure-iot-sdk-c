@@ -13,8 +13,8 @@ extern "C" {
 #include <stddef.h>
 #endif /* __cplusplus */
 
-#include "azure_c_shared_utility/umock_c_prod.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "umock_c/umock_c_prod.h"
+#include "azure_macro_utils/macro_utils.h"
 
 typedef struct IOTHUB_SECURITY_INFO_TAG* IOTHUB_SECURITY_HANDLE;
 
@@ -24,7 +24,7 @@ typedef struct IOTHUB_SECURITY_INFO_TAG* IOTHUB_SECURITY_HANDLE;
     AUTH_TYPE_X509,             \
     AUTH_TYPE_SYMM_KEY
 
-DEFINE_ENUM(DEVICE_AUTH_TYPE, DEVICE_AUTH_TYPE_VALUES);
+MU_DEFINE_ENUM(DEVICE_AUTH_TYPE, DEVICE_AUTH_TYPE_VALUES);
 
 typedef struct DEVICE_AUTH_SAS_INFO_TAG
 {

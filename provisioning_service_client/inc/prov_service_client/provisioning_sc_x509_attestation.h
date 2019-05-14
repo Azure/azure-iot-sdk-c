@@ -8,8 +8,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include "azure_c_shared_utility/umock_c_prod.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "umock_c/umock_c_prod.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "parson.h"
 
 #define X509_CERTIFICATE_TYPE_VALUES \
@@ -18,7 +18,7 @@ extern "C" {
             X509_CERTIFICATE_TYPE_SIGNING, \
             X509_CERTIFICATE_TYPE_CA_REFERENCES \
 //Note: X509_CERTIFICATE_TYPE_NONE is invalid, indicating error
-DEFINE_ENUM(X509_CERTIFICATE_TYPE, X509_CERTIFICATE_TYPE_VALUES);
+MU_DEFINE_ENUM(X509_CERTIFICATE_TYPE, X509_CERTIFICATE_TYPE_VALUES);
 
 typedef struct X509_ATTESTATION_TAG* X509_ATTESTATION_HANDLE;
 typedef struct X509_CERTIFICATE_WITH_INFO_TAG* X509_CERTIFICATE_HANDLE;

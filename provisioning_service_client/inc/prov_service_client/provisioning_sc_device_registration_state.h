@@ -8,8 +8,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include "azure_c_shared_utility/umock_c_prod.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "umock_c/umock_c_prod.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "parson.h"
 
 typedef struct DEVICE_REGISTRATION_STATE_TAG* DEVICE_REGISTRATION_STATE_HANDLE;
@@ -23,7 +23,7 @@ typedef struct DEVICE_REGISTRATION_STATE_TAG* DEVICE_REGISTRATION_STATE_HANDLE;
         REGISTRATION_STATUS_DISABLED \
 
 //Note: REGISTRATION_STATUS_ERROR is invalid, indicating error
-DEFINE_ENUM(REGISTRATION_STATUS, REGISTRATION_STATUS_VALUES);
+MU_DEFINE_ENUM(REGISTRATION_STATUS, REGISTRATION_STATUS_VALUES);
 
 /* Accessor Functions */
 MOCKABLE_FUNCTION(, const char*, deviceRegistrationState_getRegistrationId, DEVICE_REGISTRATION_STATE_HANDLE, drs);

@@ -4,8 +4,8 @@
 #ifndef IOTHUB_CLIENT_AUTHORIZATION_H
 #define IOTHUB_CLIENT_AUTHORIZATION_H
 
-#include "azure_c_shared_utility/macro_utils.h"
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "azure_macro_utils/macro_utils.h"
+#include "umock_c/umock_c_prod.h"
 #include "azure_c_shared_utility/xio.h"
 
 #ifdef __cplusplus
@@ -27,14 +27,14 @@ typedef struct IOTHUB_AUTHORIZATION_DATA_TAG* IOTHUB_AUTHORIZATION_HANDLE;
     IOTHUB_CREDENTIAL_TYPE_DEVICE_AUTH
 
 
-DEFINE_ENUM(IOTHUB_CREDENTIAL_TYPE, IOTHUB_CREDENTIAL_TYPE_VALUES);
+MU_DEFINE_ENUM(IOTHUB_CREDENTIAL_TYPE, IOTHUB_CREDENTIAL_TYPE_VALUES);
 
 #define SAS_TOKEN_STATUS_VALUES  \
     SAS_TOKEN_STATUS_FAILED,     \
     SAS_TOKEN_STATUS_VALID,      \
     SAS_TOKEN_STATUS_INVALID
 
-DEFINE_ENUM(SAS_TOKEN_STATUS, SAS_TOKEN_STATUS_VALUES);
+MU_DEFINE_ENUM(SAS_TOKEN_STATUS, SAS_TOKEN_STATUS_VALUES);
 
 MOCKABLE_FUNCTION(, IOTHUB_AUTHORIZATION_HANDLE, IoTHubClient_Auth_Create, const char*, device_key, const char*, device_id, const char*, device_sas_token, const char *, module_id);
 MOCKABLE_FUNCTION(, IOTHUB_AUTHORIZATION_HANDLE, IoTHubClient_Auth_CreateFromDeviceAuth, const char*, device_id, const char*, module_id);

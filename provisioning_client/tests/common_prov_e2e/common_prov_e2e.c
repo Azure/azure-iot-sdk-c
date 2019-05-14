@@ -10,18 +10,18 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <string.h>
-#include "umock_c.h"
+#include "umock_c/umock_c.h"
 #endif
 
 #include "testrunnerswitcher.h"
 
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/xlogging.h"
-#include "azure_c_shared_utility/base64.h"
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/uniqueid.h"
+#include "azure_c_shared_utility/azure_base64.h"
 
 #include "azure_prov_client/prov_device_ll_client.h"
 #include "azure_prov_client/prov_security_factory.h"
@@ -90,7 +90,7 @@ int construct_device_id(const char* prefix, char** device_name)
     if (UniqueId_Generate(deviceGuid, DEVICE_GUID_SIZE) != UNIQUEID_OK)
     {
         LogError("Unable to generate unique Id.\r\n");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -99,7 +99,7 @@ int construct_device_id(const char* prefix, char** device_name)
         if (*device_name == NULL)
         {
             LogError("Failure allocating device ID.\r\n");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -107,7 +107,7 @@ int construct_device_id(const char* prefix, char** device_name)
             {
                 LogError("Failure constructing device ID.\r\n");
                 free(*device_name);
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -131,6 +131,10 @@ void create_tpm_enrollment_device(const char* prov_conn_string, bool use_tracing
         prov_sc_set_trace(prov_sc_handle, TRACING_STATUS_ON);
     }
 
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+    ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_sc_set_certificate(prov_sc_handle, certificates), "Failure setting Trusted Cert option");
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
+
     PROV_AUTH_HANDLE auth_handle = prov_auth_create();
     ASSERT_IS_NOT_NULL(auth_handle, "Failure creating auth client");
 
@@ -142,8 +146,8 @@ void create_tpm_enrollment_device(const char* prov_conn_string, bool use_tracing
         BUFFER_HANDLE ek_handle = prov_auth_get_endorsement_key(auth_handle);
         ASSERT_IS_NOT_NULL(ek_handle, "Failure prov_auth_get_endorsement_key");
 
-        STRING_HANDLE ek_value = Base64_Encoder(ek_handle);
-        ASSERT_IS_NOT_NULL(ek_value, "Failure Base64_Encoder Endorsement key");
+        STRING_HANDLE ek_value = Azure_Base64_Encode(ek_handle);
+        ASSERT_IS_NOT_NULL(ek_value, "Failure Base64_Encode Endorsement key");
 
         ATTESTATION_MECHANISM_HANDLE attest_handle = attestationMechanism_createWithTpm(STRING_c_str(ek_value), NULL);
         ASSERT_IS_NOT_NULL(attest_handle, "Failure attestationMechanism_createWithTpm");
@@ -174,6 +178,10 @@ void create_symm_key_enrollment_device(const char* prov_conn_string, bool use_tr
         prov_sc_set_trace(prov_sc_handle, TRACING_STATUS_ON);
     }
 
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+    ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_sc_set_certificate(prov_sc_handle, certificates), "Failure setting Trusted Cert option");
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
+
     // Update enrollment
 
     prov_sc_destroy(prov_sc_handle);
@@ -190,6 +198,10 @@ void create_x509_enrollment_device(const char* prov_conn_string, bool use_tracin
     {
         prov_sc_set_trace(prov_sc_handle, TRACING_STATUS_ON);
     }
+
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+    ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_sc_set_certificate(prov_sc_handle, certificates), "Failure setting Trusted Cert option");
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
     PROV_AUTH_HANDLE auth_handle = prov_auth_create();
     ASSERT_IS_NOT_NULL(auth_handle, "Failure creating auth client");
@@ -247,6 +259,10 @@ void send_dps_test_registration(const char* global_uri, const char* scope_id, PR
     ASSERT_IS_NOT_NULL(handle, "Failure create a DPS HANDLE");
 
     Prov_Device_LL_SetOption(handle, PROV_OPTION_LOG_TRACE, &use_tracing);
+
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+    ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, Prov_Device_LL_SetOption(handle, OPTION_TRUSTED_CERT, certificates), "Failure setting Trusted Cert option");
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
     // act
     PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &prov_info, dps_registation_status, &prov_info);

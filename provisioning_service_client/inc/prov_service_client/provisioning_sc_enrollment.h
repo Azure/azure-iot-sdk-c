@@ -9,8 +9,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 #include "azure_c_shared_utility/agenttime.h"
-#include "azure_c_shared_utility/macro_utils.h"
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "azure_macro_utils/macro_utils.h"
+#include "umock_c/umock_c_prod.h"
 #include "provisioning_sc_attestation_mechanism.h"
 #include "provisioning_sc_device_registration_state.h"
 #include "provisioning_sc_device_capabilities.h"
@@ -28,7 +28,7 @@ typedef struct ENROLLMENT_GROUP_TAG* ENROLLMENT_GROUP_HANDLE;
         PROVISIONING_STATUS_DISABLED \
 
 //Note: PROVISIONING_STATUS_NONE is invalid, indicating error
-DEFINE_ENUM(PROVISIONING_STATUS, PROVISIONING_STATUS_VALUES);
+MU_DEFINE_ENUM(PROVISIONING_STATUS, PROVISIONING_STATUS_VALUES);
 
 
 /* OPERATION FUNCTIONS

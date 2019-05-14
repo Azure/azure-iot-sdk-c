@@ -2,10 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include <stdlib.h>
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/sastoken.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 #include "azure_c_shared_utility/sha.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/strings.h"
@@ -170,12 +170,12 @@ static int load_endorsement_key(TPM_INFO* tpm_info)
     /*if ( (get_ek_cmd = tpm_codec_get_endorsement_key_cmd(&cmd_len) ) == NULL)
     {
         LogError("Unable to construct endorsement Key tpm command");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((tpm_info->endorsement_key = tpm_comm_retrieve_tpm_data(get_ek_cmd, cmd_len) ) == NULL)
     {
         LogError("Unable to send command to the TPM");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -200,24 +200,24 @@ static int create_persistent_key(TPM_INFO* tpm_info, TPM_HANDLE request_handle, 
     else if (tpm_result != TPM_RC_HANDLE)
     {
         LogError("Failed calling TPM2_ReadPublic %d", tpm_result);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
         if (TSS_CreatePrimary(&tpm_info->tpm_device, &NullPwSession, hierarchy, inPub, &tpm_info->tpm_handle, outPub) != TPM_RC_SUCCESS)
         {
             LogError("Failed calling TSS_CreatePrimary");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (TPM2_EvictControl(&tpm_info->tpm_device, &NullPwSession, TPM_RH_OWNER, tpm_info->tpm_handle, request_handle) != TPM_RC_SUCCESS)
         {
             LogError("Failed calling TSS_CreatePrimary");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (TPM2_FlushContext(&tpm_info->tpm_device, tpm_info->tpm_handle) != TPM_RC_SUCCESS)
         {
             LogError("Failed calling TSS_CreatePrimary");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -236,19 +236,19 @@ static int initialize_tpm_device(TPM_INFO* tpm_info)
 
     if (Initialize_TPM_Codec(&tpm_info->tpm_device) != TPM_RC_SUCCESS)
     {
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (TSS_CreatePwAuthSession(&NullAuth, &NullPwSession) != TPM_RC_SUCCESS)
     {
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (create_persistent_key(tpm_info, TPM_20_EK_HANDLE, TPM_RH_ENDORSEMENT, GetEkTemplate(), &ekPub) != 0)
     {
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (create_persistent_key(tpm_info, TPM_20_SRK_HANDLE, TPM_RH_OWNER, GetSrkTemplate(), &srkPub) != 0)
     {
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -264,7 +264,7 @@ static int generate_hash_from_tpm(TPM_INFO* tpm_info, const char* data_payload, 
     //uint32_t data_len = strlen(data_payload);
 
     //unsigned char* rgb_data = (unsigned char*)data_payload;
-    result = __FAILURE__;
+    result = MU_FAILURE;
     return result;
 }
 
@@ -366,7 +366,7 @@ void* dev_auth_tpm_generate_credentials(CONCRETE_XDA_HANDLE handle, const DEVICE
                     STRING_HANDLE urlEncodedSignature;
                     STRING_HANDLE base64Signature;
                     STRING_HANDLE sas_token_handle;
-                    if ((base64Signature = Base64_Encode_Bytes(hmac_buffer, hmac_len)) == NULL)
+                    if ((base64Signature = Azure_Base64_Encode_Bytes(hmac_buffer, hmac_len)) == NULL)
                     {
                         result = NULL;
                         LogError("Failure constructing base64 encoding.");
@@ -416,7 +416,7 @@ int dev_auth_tpm_store_key(CONCRETE_XDA_HANDLE handle, KEY_TYPE key_type, const 
     if (handle == NULL || key == NULL || key_len == 0)
     {
         LogError("Invalid argument specified handle: %p || key: %p || key_len: %d.", handle, key, key_len);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -432,21 +432,21 @@ int dev_auth_tpm_store_key(CONCRETE_XDA_HANDLE handle, KEY_TYPE key_type, const 
             // Add into slot 1
             slot = 1;
         }
-        result = __FAILURE__;
+        result = MU_FAILURE;
 
         // Construct store tpm command
         /*size_t cmd_len;
         if ((store_key_cmd = tpm_codec_store_key_cmd(slot, &cmd_len) ) == NULL)
         {
             LogError("Unable to construct store_key tpm command");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
             if (tpm_comm_send_tpm_data(store_key_cmd, cmd_len) != 0)
             {
                 LogError("Unable to send command to the TPM");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -610,7 +610,7 @@ char* dev_auth_tpm_get_registration_key(CONCRETE_XDA_HANDLE handle)
             }
             else
             {
-                STRING_HANDLE encoded_key = Base64_Encode_Bytes(msg_digest, SHA256HashSize);
+                STRING_HANDLE encoded_key = Azure_Base64_Encode_Bytes(msg_digest, SHA256HashSize);
                 if (encoded_key == NULL)
                 {
                     LogError("Failed base64 encoding");

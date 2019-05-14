@@ -18,10 +18,10 @@ static void my_gballoc_free(void* ptr)
 }
 
 #include "testrunnerswitcher.h"
-#include "umock_c.h"
-#include "umocktypes_charptr.h"
-#include "umock_c_negative_tests.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "umock_c/umock_c.h"
+#include "umock_c/umocktypes_charptr.h"
+#include "umock_c/umock_c_negative_tests.h"
+#include "azure_macro_utils/macro_utils.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
@@ -31,7 +31,7 @@ static void my_gballoc_free(void* ptr)
 #include "azure_c_shared_utility/sastoken.h"
 #include "azure_c_shared_utility/agenttime.h"
 #include "azure_c_shared_utility/buffer_.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 
 #include "openssl/rsa.h"
 #include "openssl/pem.h"
@@ -39,7 +39,7 @@ static void my_gballoc_free(void* ptr)
 
 #include "parson.h"
 
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 
 MOCKABLE_FUNCTION(, JSON_Value*, json_parse_string, const char *, string);
 MOCKABLE_FUNCTION(, JSON_Status, json_serialize_to_file, const JSON_Value*, value, const char *, filename);
@@ -129,16 +129,16 @@ extern "C"
 }
 #endif
 
-DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
     ASSERT_FAIL(temp_str);
 }
 
-static BUFFER_HANDLE my_Base64_Decoder(const char* source)
+static BUFFER_HANDLE my_Azure_Base64_Decode(const char* source)
 {
     (void)source;
     return (BUFFER_HANDLE)my_gballoc_malloc(1);
@@ -268,8 +268,8 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(BUFFER_build, __LINE__);
         REGISTER_GLOBAL_MOCK_HOOK(BUFFER_delete, my_BUFFER_delete);
 
-        REGISTER_GLOBAL_MOCK_HOOK(Base64_Decoder, my_Base64_Decoder);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Decoder, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(Azure_Base64_Decode, my_Azure_Base64_Decode);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Azure_Base64_Decode, NULL);
 
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(BIO_new_mem_buf, NULL);
         REGISTER_GLOBAL_MOCK_RETURN(BIO_new_mem_buf, TEST_BIO_HANDLE);
@@ -425,11 +425,11 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
                 .IgnoreArgument_object();
             STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_PTR_ARG))
                 .IgnoreArgument_value();
-            STRICT_EXPECTED_CALL(Base64_Decoder(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(Azure_Base64_Decode(IGNORED_PTR_ARG))
                 .IgnoreArgument_source();
             STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_PTR_ARG))
                 .IgnoreArgument_value();
-            STRICT_EXPECTED_CALL(Base64_Decoder(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(Azure_Base64_Decode(IGNORED_PTR_ARG))
                 .IgnoreArgument_source();
             STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_PTR_ARG))
                 .IgnoreArgument_value();
@@ -438,7 +438,7 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
                 .IgnoreArgument_source();
             STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_PTR_ARG))
                 .IgnoreArgument_value();
-            STRICT_EXPECTED_CALL(Base64_Decoder(IGNORED_PTR_ARG))
+            STRICT_EXPECTED_CALL(Azure_Base64_Decode(IGNORED_PTR_ARG))
                 .IgnoreArgument_source();
 
             STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))

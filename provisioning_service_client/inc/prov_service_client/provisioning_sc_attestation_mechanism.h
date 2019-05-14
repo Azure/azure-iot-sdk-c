@@ -11,8 +11,8 @@ extern "C" {
 #include <stdbool.h>
 #endif /* __cplusplus */
 
-#include "azure_c_shared_utility/umock_c_prod.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "umock_c/umock_c_prod.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "provisioning_sc_tpm_attestation.h"
 #include "provisioning_sc_x509_attestation.h"
 #include "parson.h"
@@ -24,7 +24,7 @@ typedef struct ATTESTATION_MECHANISM_TAG* ATTESTATION_MECHANISM_HANDLE;
         ATTESTATION_TYPE_TPM, \
         ATTESTATION_TYPE_X509 \
 //Note: ATTESTATION_TYPE_NONE is invalid, indicating error
-DEFINE_ENUM(ATTESTATION_TYPE, ATTESTATION_TYPE_VALUES);
+MU_DEFINE_ENUM(ATTESTATION_TYPE, ATTESTATION_TYPE_VALUES);
 
 
 /** @brief  Creates an Attestation Mechanism handle that uses a TPM Attestation for use in consequent APIs.

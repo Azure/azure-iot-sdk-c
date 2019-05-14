@@ -17,6 +17,7 @@
 #include "azure_c_shared_utility/http_proxy_io.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/http_proxy_io.h"
+
 #include "azure_prov_client/internal/prov_transport_mqtt_common.h"
 #include "azure_umqtt_c/mqtt_client.h"
 
@@ -69,6 +70,7 @@ typedef struct PROV_TRANSPORT_MQTT_INFO_TAG
     PROV_TRANSPORT_CHALLENGE_CALLBACK challenge_cb;
     void* challenge_ctx;
     PROV_TRANSPORT_JSON_PARSE json_parse_cb;
+    PROV_TRANSPORT_CREATE_JSON_PAYLOAD json_create_cb;
     void* json_ctx;
 
     MQTT_CLIENT_HANDLE mqtt_client;
@@ -105,6 +107,7 @@ typedef struct PROV_TRANSPORT_MQTT_INFO_TAG
     MQTT_TRANSPORT_STATE mqtt_state;
 
     XIO_HANDLE transport_io;
+    uint32_t retry_after_value;
 
     PROV_TRANSPORT_ERROR_CALLBACK error_cb;
     void* error_ctx;
@@ -270,6 +273,38 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
     }
 }
 
+static int get_retry_after_property(const char* topic_name, PROV_TRANSPORT_MQTT_INFO* mqtt_info)
+{
+    int result = MU_FAILURE;
+
+    const char* iterator = topic_name;
+
+    size_t topic_len = strlen(iterator);
+    size_t retry_len = strlen(RETRY_AFTER_KEY_VALUE);
+    while (iterator != NULL && *iterator != '\0')
+    {
+        if (topic_len > retry_len)
+        {
+            if (memcmp(iterator, RETRY_AFTER_KEY_VALUE, retry_len) == 0)
+            {
+                // send the retry-after value to parse
+                mqtt_info->retry_after_value = parse_retry_after_value(iterator + retry_len + 1);
+                result = 0;
+                break;
+            }
+        }
+        else
+        {
+            // Topic string is not there
+            result = MU_FAILURE;
+            break;
+        }
+        iterator++;
+        topic_len--;
+    }
+    return result;
+}
+
 static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE handle, void* user_ctx)
 {
     if (user_ctx != NULL)
@@ -293,6 +328,10 @@ static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE handle, void* user_ct
                     is_transient_error = true;
                 }
             }
+
+            // Get the retry after field on failures this value will
+            // be set to the default value
+            (void)get_retry_after_property(topic_resp, mqtt_info);
         }
         else
         {
@@ -350,24 +389,32 @@ static int send_mqtt_message(PROV_TRANSPORT_MQTT_INFO* mqtt_info, const char* ms
 {
     int result;
     MQTT_MESSAGE_HANDLE msg_handle = NULL;
+    char* prov_payload;
 
-    if ((msg_handle = mqttmessage_create(get_next_packet_id(mqtt_info), msg_topic, DELIVER_AT_MOST_ONCE, NULL, 0)) == NULL)
+    if ((prov_payload = mqtt_info->json_create_cb(NULL, NULL, mqtt_info->json_ctx)) == NULL)
+    {
+        LogError("Failed creating json mqtt payload");
+        result = MU_FAILURE;
+    }
+    else if ((msg_handle = mqttmessage_create_in_place(get_next_packet_id(mqtt_info), msg_topic, DELIVER_AT_MOST_ONCE, (const uint8_t*)prov_payload, strlen(prov_payload))) == NULL)
     {
         LogError("Failed creating mqtt message");
-        result = __FAILURE__;
+        result = MU_FAILURE;
+        free(prov_payload);
     }
     else
     {
         if (mqtt_client_publish(mqtt_info->mqtt_client, msg_handle) != 0)
         {
             LogError("Failed publishing client message");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
             result = 0;
         }
         mqttmessage_destroy(msg_handle);
+        free(prov_payload);
     }
     return result;
 }
@@ -381,13 +428,13 @@ static int send_register_message(PROV_TRANSPORT_MQTT_INFO* mqtt_info)
     if ((msg_topic = malloc(length + 1)) == NULL)
     {
         LogError("Failed allocating mqtt registration message");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (sprintf(msg_topic, MQTT_REGISTER_MESSAGE_FMT, mqtt_info->packet_id) <= 0)
     {
         LogError("Failed setting registration message");
         free(msg_topic);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -406,13 +453,13 @@ static int send_operation_status_message(PROV_TRANSPORT_MQTT_INFO* mqtt_info)
     if ((msg_topic = malloc(length + 1)) == NULL)
     {
         LogError("Failed allocating mqtt status message");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (sprintf(msg_topic, MQTT_STATUS_MESSAGE_FMT, mqtt_info->packet_id, mqtt_info->operation_id) <= 0)
     {
         LogError("Failed creating mqtt status message");
         free(msg_topic);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -432,7 +479,7 @@ static int subscribe_to_topic(PROV_TRANSPORT_MQTT_INFO* mqtt_info)
     if (mqtt_client_subscribe(mqtt_info->mqtt_client, get_next_packet_id(mqtt_info), subscribe, SUBSCRIBE_TOPIC_COUNT) != 0)
     {
         LogError("Failed subscribing to topic.");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -479,7 +526,7 @@ static int create_transport_io_object(PROV_TRANSPORT_MQTT_INFO* mqtt_info)
         if ((mqtt_info->transport_io = mqtt_info->transport_io_cb(mqtt_info->hostname, transport_proxy)) == NULL)
         {
             LogError("Failure calling transport_io callback");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -500,14 +547,14 @@ static int construct_transport(PROV_TRANSPORT_MQTT_INFO* mqtt_info)
     if (create_transport_io_object(mqtt_info) != 0)
     {
         LogError("Failed constructing transport io");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
         if (mqtt_info->certificate != NULL && xio_setoption(mqtt_info->transport_io, OPTION_TRUSTED_CERT, mqtt_info->certificate) != 0)
         {
             LogError("Failure setting trusted certs");
-            result = __FAILURE__;
+            result = MU_FAILURE;
             xio_destroy(mqtt_info->transport_io);
             mqtt_info->transport_io = NULL;
         }
@@ -520,7 +567,7 @@ static int construct_transport(PROV_TRANSPORT_MQTT_INFO* mqtt_info)
                     LogError("Failure setting x509 cert on xio");
                     xio_destroy(mqtt_info->transport_io);
                     mqtt_info->transport_io = NULL;
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else if (xio_setoption(mqtt_info->transport_io, OPTION_X509_ECC_KEY, mqtt_info->private_key) != 0)
                 {
@@ -531,7 +578,7 @@ static int construct_transport(PROV_TRANSPORT_MQTT_INFO* mqtt_info)
                     }
                     xio_destroy(mqtt_info->transport_io);
                     mqtt_info->transport_io = NULL;
-                    result = __FAILURE__;
+                    result = MU_FAILURE;
                 }
                 else
                 {
@@ -543,7 +590,7 @@ static int construct_transport(PROV_TRANSPORT_MQTT_INFO* mqtt_info)
                 LogError("x509 certificate is NULL");
                 xio_destroy(mqtt_info->transport_io);
                 mqtt_info->transport_io = NULL;
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
         }
         else
@@ -565,13 +612,13 @@ static int create_connection(PROV_TRANSPORT_MQTT_INFO* mqtt_info)
     if ((username_info = construct_username(mqtt_info)) == NULL)
     {
         LogError("Failure creating username info");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (construct_transport(mqtt_info) != 0)
     {
         LogError("Failure constructing transport");
         free(username_info);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((mqtt_info->hsm_type == TRANSPORT_HSM_TYPE_SYMM_KEY) && (options.password = mqtt_info->challenge_cb(NULL, 0, KEY_NAME_VALUE, mqtt_info->challenge_ctx)) == NULL)
     {
@@ -579,7 +626,7 @@ static int create_connection(PROV_TRANSPORT_MQTT_INFO* mqtt_info)
         xio_destroy(mqtt_info->transport_io);
         mqtt_info->transport_io = NULL;
         free(username_info);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -595,7 +642,7 @@ static int create_connection(PROV_TRANSPORT_MQTT_INFO* mqtt_info)
             xio_destroy(mqtt_info->transport_io);
             mqtt_info->transport_io = NULL;
             LogError("Failure connecting to mqtt server");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -715,6 +762,7 @@ PROV_DEVICE_TRANSPORT_HANDLE prov_transport_common_mqtt_create(const char* uri, 
                 result->hsm_type = type;
                 result->error_cb = error_cb;
                 result->error_ctx = error_ctx;
+                result->retry_after_value = PROV_GET_THROTTLE_TIME;
             }
         }
     }
@@ -743,25 +791,25 @@ int prov_transport_common_mqtt_open(PROV_DEVICE_TRANSPORT_HANDLE handle, const c
     {
         /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_007: [ If handle, data_callback, or status_cb is NULL, prov_transport_common_mqtt_open shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p, data_callback: %p, status_cb: %p, registration_id: %p", handle, data_callback, status_cb, registration_id);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if ((mqtt_info->hsm_type == TRANSPORT_HSM_TYPE_TPM || mqtt_info->hsm_type == TRANSPORT_HSM_TYPE_SYMM_KEY) && reg_challenge_cb == NULL)
     {
         LogError("registration challenge callback must be set");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     // Should never be here since TPM is not supported, so I'm going to check to ensure compliance
     else if (ek != NULL || srk != NULL)
     {
         /* Codes_PROV_TRANSPORT_MQTT_COMMON_07_008: [ If hsm_type is TRANSPORT_HSM_TYPE_TPM and ek or srk is NULL, prov_transport_common_mqtt_open shall return a non-zero value. ] */
         LogError("Invalid parameter specified ek: %p, srk: %p", ek, srk);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (mallocAndStrcpy_s(&mqtt_info->registration_id, registration_id) != 0)
     {
         /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_003: [ If any error is encountered prov_transport_http_create shall return NULL. ] */
         LogError("failure constructing registration Id");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -787,7 +835,7 @@ int prov_transport_common_mqtt_close(PROV_DEVICE_TRANSPORT_HANDLE handle)
     {
         /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_011: [ If handle is NULL, prov_transport_common_mqtt_close shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p", handle);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -814,31 +862,32 @@ int prov_transport_common_mqtt_close(PROV_DEVICE_TRANSPORT_HANDLE handle)
     return result;
 }
 
-int prov_transport_common_mqtt_register_device(PROV_DEVICE_TRANSPORT_HANDLE handle, PROV_TRANSPORT_JSON_PARSE json_parse_cb, void* json_ctx)
+int prov_transport_common_mqtt_register_device(PROV_DEVICE_TRANSPORT_HANDLE handle, PROV_TRANSPORT_JSON_PARSE json_parse_cb, PROV_TRANSPORT_CREATE_JSON_PAYLOAD json_create_cb, void* json_ctx)
 {
     int result;
     PROV_TRANSPORT_MQTT_INFO* mqtt_info = (PROV_TRANSPORT_MQTT_INFO*)handle;
-    if (mqtt_info == NULL || json_parse_cb == NULL)
+    if (mqtt_info == NULL || json_parse_cb == NULL || json_create_cb == NULL)
     {
         /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_014: [ If handle is NULL, prov_transport_common_mqtt_register_device shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p, json_parse_cb: %p", handle, json_parse_cb);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_061: [ If the transport_state is TRANSPORT_CLIENT_STATE_REG_SEND or the the operation_id is NULL, prov_transport_common_mqtt_register_device shall return a non-zero value. ] */
     else if (mqtt_info->transport_state == TRANSPORT_CLIENT_STATE_REG_SEND || mqtt_info->operation_id != NULL)
     {
         LogError("Failure: device is currently in the registration process");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else if (mqtt_info->transport_state == TRANSPORT_CLIENT_STATE_ERROR)
     {
         LogError("Provisioning is in an error state, close the connection and try again.");
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
         mqtt_info->transport_state = TRANSPORT_CLIENT_STATE_REG_SEND;
         mqtt_info->json_parse_cb = json_parse_cb;
+        mqtt_info->json_create_cb = json_create_cb;
         mqtt_info->json_ctx = json_ctx;
 
         /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_017: [ On success prov_transport_common_mqtt_register_device shall return a zero value. ] */
@@ -854,7 +903,7 @@ int prov_transport_common_mqtt_get_operation_status(PROV_DEVICE_TRANSPORT_HANDLE
     {
         /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_018: [ If handle is NULL, prov_transport_common_mqtt_get_operation_status shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p", handle);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -863,12 +912,12 @@ int prov_transport_common_mqtt_get_operation_status(PROV_DEVICE_TRANSPORT_HANDLE
         {
             /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_019: [ If the operation_id is NULL, prov_transport_common_mqtt_get_operation_status shall return a non-zero value. ] */
             LogError("operation_id was not previously set in the challenge method");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else if (mqtt_info->transport_state == TRANSPORT_CLIENT_STATE_ERROR)
         {
             LogError("Provisioning is in an error state, close the connection and try again.");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -915,7 +964,7 @@ void prov_transport_common_mqtt_dowork(PROV_DEVICE_TRANSPORT_HANDLE handle)
             }
             else
             {
-                mqtt_info->status_cb(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, mqtt_info->status_ctx);
+                mqtt_info->status_cb(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, mqtt_info->retry_after_value, mqtt_info->status_ctx);
                 mqtt_info->mqtt_state = MQTT_STATE_SUBSCRIBING;
             }
         }
@@ -990,7 +1039,7 @@ void prov_transport_common_mqtt_dowork(PROV_DEVICE_TRANSPORT_HANDLE handle)
                                     {
                                         if (mqtt_info->status_cb != NULL)
                                         {
-                                            mqtt_info->status_cb(parse_info->prov_status, mqtt_info->status_ctx);
+                                            mqtt_info->status_cb(parse_info->prov_status, mqtt_info->retry_after_value, mqtt_info->status_ctx);
                                         }
                                         mqtt_info->transport_state = TRANSPORT_CLIENT_STATE_IDLE;
                                     }
@@ -1017,7 +1066,7 @@ void prov_transport_common_mqtt_dowork(PROV_DEVICE_TRANSPORT_HANDLE handle)
                     case TRANSPORT_CLIENT_STATE_TRANSIENT:
                         if (mqtt_info->status_cb != NULL)
                         {
-                            mqtt_info->status_cb(PROV_DEVICE_TRANSPORT_STATUS_TRANSIENT, mqtt_info->status_ctx);
+                            mqtt_info->status_cb(PROV_DEVICE_TRANSPORT_STATUS_TRANSIENT, mqtt_info->retry_after_value, mqtt_info->status_ctx);
                         }
                         mqtt_info->transport_state = TRANSPORT_CLIENT_STATE_IDLE;
                         break;
@@ -1048,7 +1097,7 @@ int prov_transport_common_mqtt_set_trace(PROV_DEVICE_TRANSPORT_HANDLE handle, bo
     {
         /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_023: [ If handle is NULL, prov_transport_common_mqtt_set_trace shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p", handle);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1072,7 +1121,7 @@ int prov_transport_common_mqtt_x509_cert(PROV_DEVICE_TRANSPORT_HANDLE handle, co
     {
         /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_026: [ If handle or certificate is NULL, prov_transport_common_mqtt_x509_cert shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p, certificate: %p", handle, certificate);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1093,7 +1142,7 @@ int prov_transport_common_mqtt_x509_cert(PROV_DEVICE_TRANSPORT_HANDLE handle, co
         if (mallocAndStrcpy_s(&mqtt_info->x509_cert, certificate) != 0)
         {
             /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_028: [ On any failure prov_transport_common_mqtt_x509_cert, shall return a non-zero value. ] */
-            result = __FAILURE__;
+            result = MU_FAILURE;
             LogError("failure allocating certificate");
         }
         else if (mallocAndStrcpy_s(&mqtt_info->private_key, private_key) != 0)
@@ -1102,7 +1151,7 @@ int prov_transport_common_mqtt_x509_cert(PROV_DEVICE_TRANSPORT_HANDLE handle, co
             LogError("failure allocating certificate");
             free(mqtt_info->x509_cert);
             mqtt_info->x509_cert = NULL;
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -1120,7 +1169,7 @@ int prov_transport_common_mqtt_set_trusted_cert(PROV_DEVICE_TRANSPORT_HANDLE han
     {
         /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_030: [ If handle or certificate is NULL, prov_transport_common_mqtt_set_trusted_cert shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p, certificate: %p", handle, certificate);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1136,7 +1185,7 @@ int prov_transport_common_mqtt_set_trusted_cert(PROV_DEVICE_TRANSPORT_HANDLE han
         if (mallocAndStrcpy_s(&mqtt_info->certificate, certificate) != 0)
         {
             /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_032: [ On any failure prov_transport_common_mqtt_set_trusted_cert, shall return a non-zero value. ] */
-            result = __FAILURE__;
+            result = MU_FAILURE;
             LogError("failure allocating certificate");
         }
         else
@@ -1155,7 +1204,7 @@ int prov_transport_common_mqtt_set_proxy(PROV_DEVICE_TRANSPORT_HANDLE handle, co
     {
         /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_034: [ If handle or proxy_options is NULL, prov_transport_common_mqtt_set_proxy shall return a non-zero value. ]*/
         LogError("Invalid parameter specified handle: %p, proxy_options: %p", handle, proxy_options);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1164,7 +1213,7 @@ int prov_transport_common_mqtt_set_proxy(PROV_DEVICE_TRANSPORT_HANDLE handle, co
         {
             /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_035: [ If HTTP_PROXY_OPTIONS host_address is NULL, prov_transport_common_mqtt_set_proxy shall return a non-zero value. ] */
             LogError("NULL host_address in proxy options");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_036: [ If HTTP_PROXY_OPTIONS password is not NULL and username is NULL, prov_transport_common_mqtt_set_proxy shall return a non-zero value. ] */
         else if (((proxy_options->username == NULL) || (proxy_options->password == NULL)) &&
@@ -1172,7 +1221,7 @@ int prov_transport_common_mqtt_set_proxy(PROV_DEVICE_TRANSPORT_HANDLE handle, co
         {
             /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_039: [ On any failure prov_transport_common_mqtt_set_proxy, shall return a non-zero value. ] */
             LogError("Only one of username and password for proxy settings was NULL");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {
@@ -1199,7 +1248,7 @@ int prov_transport_common_mqtt_set_proxy(PROV_DEVICE_TRANSPORT_HANDLE handle, co
             {
                 /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_039: [ On any failure prov_transport_common_mqtt_set_proxy, shall return a non-zero value. ] */
                 LogError("Failure setting proxy_host name");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if (proxy_options->username != NULL && mallocAndStrcpy_s((char**)&mqtt_info->proxy_option.username, proxy_options->username) != 0)
             {
@@ -1207,7 +1256,7 @@ int prov_transport_common_mqtt_set_proxy(PROV_DEVICE_TRANSPORT_HANDLE handle, co
                 LogError("Failure setting proxy username");
                 free((char*)mqtt_info->proxy_option.host_address);
                 mqtt_info->proxy_option.host_address = NULL;
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else if (proxy_options->password != NULL && mallocAndStrcpy_s((char**)&mqtt_info->proxy_option.password, proxy_options->password) != 0)
             {
@@ -1217,7 +1266,7 @@ int prov_transport_common_mqtt_set_proxy(PROV_DEVICE_TRANSPORT_HANDLE handle, co
                 mqtt_info->proxy_option.host_address = NULL;
                 free((char*)mqtt_info->proxy_option.username);
                 mqtt_info->proxy_option.username = NULL;
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             else
             {
@@ -1235,7 +1284,7 @@ int prov_transport_common_mqtt_set_option(PROV_DEVICE_TRANSPORT_HANDLE handle, c
     if (handle == NULL || option == NULL)
     {
         LogError("Invalid parameter specified handle: %p, option: %p", handle, option);
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1243,7 +1292,7 @@ int prov_transport_common_mqtt_set_option(PROV_DEVICE_TRANSPORT_HANDLE handle, c
         if (mqtt_info->transport_io == NULL && create_transport_io_object(mqtt_info) != 0)
         {
             LogError("Failure creating transport io object");
-            result = __FAILURE__;
+            result = MU_FAILURE;
         }
         else
         {

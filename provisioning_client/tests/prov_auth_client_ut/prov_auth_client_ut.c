@@ -22,15 +22,15 @@ static void my_gballoc_free(void* ptr)
 }
 
 #include "testrunnerswitcher.h"
-#include "umock_c.h"
-#include "umocktypes_charptr.h"
-#include "umocktypes_stdint.h"
-#include "umock_c_negative_tests.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "umock_c/umock_c.h"
+#include "umock_c/umocktypes_charptr.h"
+#include "umock_c/umocktypes_stdint.h"
+#include "umock_c/umock_c_negative_tests.h"
+#include "azure_macro_utils/macro_utils.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/base32.h"
 #include "azure_c_shared_utility/hmacsha256.h"
@@ -40,7 +40,7 @@ static void my_gballoc_free(void* ptr)
 #include "azure_prov_client/internal/prov_auth_client.h"
 
 #define ENABLE_MOCKS
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 #include "azure_c_shared_utility/sha.h"
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
@@ -114,6 +114,8 @@ static const char* TEST_TOKEN_SCOPE_VALUE = "token_scope";
 static const char* TEST_KEY_NAME_VALUE = "key_value";
 static const char* TEST_BASE32_VALUE = "aebagbaf";
 
+static const char* TEST_REGISTRATION_ID = "Registration Id";
+
 TEST_DEFINE_ENUM_TYPE(PROV_AUTH_RESULT, PROV_AUTH_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(PROV_AUTH_RESULT, PROV_AUTH_RESULT_VALUES);
 
@@ -123,7 +125,7 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(PROV_AUTH_TYPE, PROV_AUTH_TYPE_VALUES);
 TEST_DEFINE_ENUM_TYPE(HMACSHA256_RESULT, HMACSHA256_RESULT);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(HMACSHA256_RESULT, HMACSHA256_RESULT);
 
-static const HSM_CLIENT_TPM_INTERFACE test_tpm_interface = 
+static const HSM_CLIENT_TPM_INTERFACE test_tpm_interface =
 {
     secure_device_create,
     secure_device_destroy,
@@ -252,13 +254,13 @@ static int my_mallocAndStrcpy_s(char** destination, const char* source)
     return 0;
 }
 
-static STRING_HANDLE my_Base64_Encoder(BUFFER_HANDLE input)
+static STRING_HANDLE my_Base64_Encode(BUFFER_HANDLE input)
 {
     (void)input;
     return (STRING_HANDLE)my_gballoc_malloc(1);
 }
 
-static STRING_HANDLE my_Base64_Encode_Bytes(const unsigned char* source, size_t size)
+static STRING_HANDLE my_Azure_Base64_Encode_Bytes(const unsigned char* source, size_t size)
 {
     (void)source;
     (void)size;
@@ -276,7 +278,7 @@ static char* my_Base32_Encode_Bytes(const unsigned char* source, size_t size)
     return result;
 }
 
-static BUFFER_HANDLE my_Base64_Decoder(const char* source)
+static BUFFER_HANDLE my_Azure_Base64_Decode(const char* source)
 {
     (void)source;
     return (BUFFER_HANDLE)my_gballoc_malloc(1);
@@ -305,12 +307,12 @@ static void my_STRING_delete(STRING_HANDLE h)
     my_gballoc_free((void*)h);
 }
 
-DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
     ASSERT_FAIL(temp_str);
 }
 
@@ -374,8 +376,8 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
 
         REGISTER_GLOBAL_MOCK_HOOK(secure_device_sign_data, my_secure_device_sign_data);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(secure_device_sign_data, __LINE__);
-        REGISTER_GLOBAL_MOCK_HOOK(Base64_Encoder, my_Base64_Encoder);
-        REGISTER_GLOBAL_MOCK_RETURN(Base64_Encoder, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(Azure_Base64_Encode, my_Base64_Encode);
+        REGISTER_GLOBAL_MOCK_RETURN(Azure_Base64_Encode, NULL);
 
         REGISTER_GLOBAL_MOCK_RETURN(BUFFER_create, TEST_BUFFER_VALUE);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(BUFFER_create, NULL);
@@ -394,12 +396,12 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
 
         REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, my_mallocAndStrcpy_s);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __LINE__);
-        REGISTER_GLOBAL_MOCK_HOOK(Base64_Encode_Bytes, my_Base64_Encode_Bytes);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Encode_Bytes, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(Azure_Base64_Encode_Bytes, my_Azure_Base64_Encode_Bytes);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Azure_Base64_Encode_Bytes, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(Base32_Encode_Bytes, my_Base32_Encode_Bytes);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base32_Encode_Bytes, NULL);
-        REGISTER_GLOBAL_MOCK_HOOK(Base64_Decoder, my_Base64_Decoder);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Decoder, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(Azure_Base64_Decode, my_Azure_Base64_Decode);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Azure_Base64_Decode, NULL);
 
         REGISTER_GLOBAL_MOCK_HOOK(STRING_construct, my_STRING_construct);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_construct, NULL);
@@ -460,7 +462,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         if (use_key)
         {
             STRICT_EXPECTED_CALL(secure_device_get_symm_key(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(Base64_Decoder(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(Azure_Base64_Decode(IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(BUFFER_new());
             STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));
@@ -483,7 +485,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         STRICT_EXPECTED_CALL(size_tToString(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         setup_sign_sas_data(use_key);
-        STRICT_EXPECTED_CALL(Base64_Encode_Bytes(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(URL_Encode(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
@@ -1285,6 +1287,78 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
 
         //assert
         ASSERT_IS_NULL(result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_auth_destroy(sec_handle);
+    }
+
+    TEST_FUNCTION(prov_auth_set_registration_id_handle_NULL_fail)
+    {
+        //arrange
+
+        //act
+        int result = prov_auth_set_registration_id(NULL, TEST_REGISTRATION_ID);
+
+        //assert
+        ASSERT_ARE_NOT_EQUAL(int, 0, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+    }
+
+    TEST_FUNCTION(prov_auth_set_registration_id_registration_id_NULL_fail)
+    {
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
+        umock_c_reset_all_calls();
+
+        //arrange
+
+        //act
+        int result = prov_auth_set_registration_id(sec_handle, NULL);
+
+        //assert
+        ASSERT_ARE_NOT_EQUAL(int, 0, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_auth_destroy(sec_handle);
+    }
+
+    TEST_FUNCTION(prov_auth_set_registration_id_success)
+    {
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
+        umock_c_reset_all_calls();
+
+        //arrange
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+        //act
+        int result = prov_auth_set_registration_id(sec_handle, TEST_REGISTRATION_ID);
+
+        //assert
+        ASSERT_ARE_EQUAL(int, 0, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_auth_destroy(sec_handle);
+    }
+
+    TEST_FUNCTION(prov_auth_set_registration_id_2_calls_success)
+    {
+        PROV_AUTH_HANDLE sec_handle = prov_auth_create();
+        umock_c_reset_all_calls();
+
+        //arrange
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+        //act
+        int result = prov_auth_set_registration_id(sec_handle, TEST_REGISTRATION_ID);
+        ASSERT_ARE_EQUAL(int, 0, result);
+        result = prov_auth_set_registration_id(sec_handle, TEST_REGISTRATION_ID);
+
+        //assert
+        ASSERT_ARE_NOT_EQUAL(int, 0, result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup

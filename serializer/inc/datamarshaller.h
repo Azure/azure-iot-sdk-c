@@ -7,7 +7,7 @@
 #include <stdbool.h>
 #include "agenttypesystem.h"
 #include "schema.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/vector.h"
 #ifdef __cplusplus
 extern "C"
@@ -27,7 +27,7 @@ DATA_MARSHALLER_AGENT_DATA_TYPES_ERROR,         \
 DATA_MARSHALLER_MULTITREE_ERROR,                \
 DATA_MARSHALLER_ONLY_ONE_VALUE_ALLOWED          \
 
-DEFINE_ENUM(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_RESULT_VALUES);
+MU_DEFINE_ENUM(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_RESULT_VALUES);
 
 typedef struct DATA_MARSHALLER_VALUE_TAG
 {
@@ -36,7 +36,7 @@ typedef struct DATA_MARSHALLER_VALUE_TAG
 } DATA_MARSHALLER_VALUE;
 
 typedef struct DATA_MARSHALLER_HANDLE_DATA_TAG* DATA_MARSHALLER_HANDLE;
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 
 MOCKABLE_FUNCTION(,DATA_MARSHALLER_HANDLE, DataMarshaller_Create, SCHEMA_MODEL_TYPE_HANDLE, modelHandle, bool, includePropertyPath);
 MOCKABLE_FUNCTION(,void, DataMarshaller_Destroy, DATA_MARSHALLER_HANDLE, dataMarshallerHandle);

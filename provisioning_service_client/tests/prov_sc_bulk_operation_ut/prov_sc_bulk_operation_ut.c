@@ -20,10 +20,10 @@ void real_free(void* ptr)
 }
 
 #include "testrunnerswitcher.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/const_defines.h"
-#include "umock_c.h"
-#include "umock_c_negative_tests.h"
+#include "umock_c/umock_c.h"
+#include "umock_c/umock_c_negative_tests.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
@@ -32,7 +32,7 @@ void real_free(void* ptr)
 #include "prov_service_client/provisioning_sc_enrollment.h"
 #include "parson.h"
 
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 MOCKABLE_FUNCTION(, JSON_Value*, json_parse_string, const char*, string);
 MOCKABLE_FUNCTION(, char*, json_serialize_to_string, const JSON_Value*, value);
 MOCKABLE_FUNCTION(, const char*, json_object_get_string, const JSON_Object*, object, const char *, name);
@@ -63,12 +63,12 @@ MOCKABLE_FUNCTION(, int, json_object_get_boolean, const JSON_Object*, object, co
 
 static TEST_MUTEX_HANDLE g_testByTest;
 
-DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
     ASSERT_FAIL(temp_str);
 }
 
@@ -144,7 +144,7 @@ static void register_global_mocks()
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, real_malloc);
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, real_free);
     REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, my_mallocAndStrcpy_s);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __FAILURE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, MU_FAILURE);
 
     //parson
     REGISTER_GLOBAL_MOCK_RETURN(json_value_init_object, TEST_JSON_VALUE);
@@ -174,11 +174,11 @@ static void register_global_mocks()
 
     //shared helpers
     REGISTER_GLOBAL_MOCK_RETURN(json_serialize_and_set_struct_array, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_serialize_and_set_struct_array, __FAILURE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_serialize_and_set_struct_array, MU_FAILURE);
     REGISTER_GLOBAL_MOCK_HOOK(json_deserialize_and_get_struct_array, my_deserialize_and_get_struct_array);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_deserialize_and_get_struct_array, __FAILURE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_deserialize_and_get_struct_array, MU_FAILURE);
     REGISTER_GLOBAL_MOCK_HOOK(copy_json_string_field, my_copy_json_string_field);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(copy_json_string_field, __FAILURE__);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(copy_json_string_field, MU_FAILURE);
 
     //types
     REGISTER_UMOCK_ALIAS_TYPE(TO_JSON_FUNCTION, void*);

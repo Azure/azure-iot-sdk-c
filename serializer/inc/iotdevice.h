@@ -5,7 +5,7 @@
 #define IOTDEVICE_H
 
 #include <stdbool.h>
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "schema.h"
 #include "datapublisher.h"
 #include "commanddecoder.h"
@@ -25,9 +25,9 @@ extern "C" {
     DEVICE_COMMAND_DECODER_FAILED,        \
     DEVICE_ERROR
 
-DEFINE_ENUM(DEVICE_RESULT, DEVICE_RESULT_VALUES)
+MU_DEFINE_ENUM(DEVICE_RESULT, DEVICE_RESULT_VALUES)
 
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 
 typedef struct DEVICE_HANDLE_DATA_TAG* DEVICE_HANDLE;
 typedef EXECUTE_COMMAND_RESULT (*pfDeviceActionCallback)(DEVICE_HANDLE deviceHandle, void* callbackUserContext, const char* relativeActionPath, const char* actionName, size_t argCount, const AGENT_DATA_TYPE* args);

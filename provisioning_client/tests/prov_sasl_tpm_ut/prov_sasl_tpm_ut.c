@@ -22,19 +22,19 @@ static void my_gballoc_free(void* ptr)
 }
 
 #include "testrunnerswitcher.h"
-#include "umock_c.h"
-#include "umocktypes_charptr.h"
-#include "umock_c_negative_tests.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "umock_c/umock_c.h"
+#include "umock_c/umocktypes_charptr.h"
+#include "umock_c/umock_c_negative_tests.h"
+#include "azure_macro_utils/macro_utils.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_uamqp_c/sasl_mechanism.h"
 #include "azure_c_shared_utility/strings.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 
 MOCKABLE_FUNCTION(, char*, on_challenge_callback, BUFFER_HANDLE, data, void*, user_ctx);
 
@@ -95,7 +95,7 @@ static void my_STRING_delete(STRING_HANDLE handle)
     my_gballoc_free(handle);
 }
 
-static BUFFER_HANDLE my_Base64_Decoder(const char* source)
+static BUFFER_HANDLE my_Azure_Base64_Decode(const char* source)
 {
     (void)source;
     return (BUFFER_HANDLE)my_gballoc_malloc(1);
@@ -133,12 +133,12 @@ static STRING_HANDLE my_STRING_from_byte_array(const unsigned char* source, size
     return (STRING_HANDLE)my_gballoc_malloc(1);
 }
 
-DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
     ASSERT_FAIL(temp_str);
 }
 
@@ -172,8 +172,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(on_challenge_callback, my_on_challenge_callback);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(on_challenge_callback, NULL);
 
-    REGISTER_GLOBAL_MOCK_HOOK(Base64_Decoder, my_Base64_Decoder);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Decoder, NULL);
+    REGISTER_GLOBAL_MOCK_HOOK(Azure_Base64_Decode, my_Azure_Base64_Decode);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Azure_Base64_Decode, NULL);
 
     REGISTER_GLOBAL_MOCK_HOOK(STRING_new, my_STRING_new);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_new, NULL);

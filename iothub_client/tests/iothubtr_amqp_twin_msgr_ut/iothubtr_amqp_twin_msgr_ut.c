@@ -30,14 +30,14 @@ void real_free(void* ptr)
 
 #include "testrunnerswitcher.h"
 #include "azure_c_shared_utility/optimize_size.h"
-#include "azure_c_shared_utility/macro_utils.h"
-#include "umock_c.h"
-#include "umocktypes_charptr.h"
-#include "umocktypes_bool.h"
-#include "umocktypes_stdint.h"
-#include "umock_c_negative_tests.h"
-#include "umocktypes.h"
-#include "umocktypes_c.h"
+#include "azure_macro_utils/macro_utils.h"
+#include "umock_c/umock_c.h"
+#include "umock_c/umocktypes_charptr.h"
+#include "umock_c/umocktypes_bool.h"
+#include "umock_c/umocktypes_stdint.h"
+#include "umock_c/umock_c_negative_tests.h"
+#include "umock_c/umocktypes.h"
+#include "umock_c/umocktypes_c.h"
 
 #define ENABLE_MOCKS
 
@@ -57,11 +57,11 @@ void real_free(void* ptr)
 
 #include "internal/iothubtransport_amqp_twin_messenger.h"
 
-DEFINE_ENUM_STRINGS(AMQP_MESSENGER_SEND_STATUS, AMQP_MESSENGER_SEND_STATUS_VALUES);
-DEFINE_ENUM_STRINGS(AMQP_MESSENGER_SEND_RESULT, AMQP_MESSENGER_SEND_RESULT_VALUES);
-DEFINE_ENUM_STRINGS(AMQP_MESSENGER_REASON, AMQP_MESSENGER_REASON_VALUES);
-DEFINE_ENUM_STRINGS(AMQP_MESSENGER_DISPOSITION_RESULT, AMQP_MESSENGER_DISPOSITION_RESULT_VALUES);
-DEFINE_ENUM_STRINGS(AMQP_MESSENGER_STATE, AMQP_MESSENGER_STATE_VALUES);
+MU_DEFINE_ENUM_STRINGS(AMQP_MESSENGER_SEND_STATUS, AMQP_MESSENGER_SEND_STATUS_VALUES);
+MU_DEFINE_ENUM_STRINGS(AMQP_MESSENGER_SEND_RESULT, AMQP_MESSENGER_SEND_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS(AMQP_MESSENGER_REASON, AMQP_MESSENGER_REASON_VALUES);
+MU_DEFINE_ENUM_STRINGS(AMQP_MESSENGER_DISPOSITION_RESULT, AMQP_MESSENGER_DISPOSITION_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS(AMQP_MESSENGER_STATE, AMQP_MESSENGER_STATE_VALUES);
 
 typedef enum TWIN_OPERATION_TYPE_TAG
 {
@@ -85,12 +85,12 @@ typedef enum TWIN_SUBSCRIPTION_STATE_TAG
 
 static TEST_MUTEX_HANDLE g_testByTest;
 
-DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
     ASSERT_FAIL(temp_str);
 }
 
@@ -180,7 +180,7 @@ int STRING_sprintf(STRING_HANDLE handle, const char* format, ...)
 
     if (g_STRING_sprintf_call_count == g_STRING_sprintf_fail_on_count)
     {
-        result = __FAILURE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -600,9 +600,9 @@ static void set_create_amqp_message_for_twin_operation_expected_calls(TWIN_OPERA
     STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
 }
 
-static void set_send_twin_operation_request_expected_calls(time_t current_time)
+static void set_send_twin_operation_request_expected_calls(time_t current_time, TWIN_OPERATION_TYPE op_type)
 {
-    set_create_amqp_message_for_twin_operation_expected_calls(TWIN_OPERATION_TYPE_PATCH);
+    set_create_amqp_message_for_twin_operation_expected_calls(op_type);
     STRICT_EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).SetReturn(current_time);
     STRICT_EXPECTED_CALL(amqp_messenger_send_async(TEST_AMQP_MESSENGER_HANDLE, TEST_MESSAGE_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(message_destroy(IGNORED_PTR_ARG));
@@ -612,6 +612,7 @@ static void set_twin_messenger_do_work_expected_calls(DOWORK_TEST_PROFILE* dwtp)
 {
     if (dwtp->current_state == TWIN_MESSENGER_STATE_STARTED)
     {
+        // This block is related to sending patches:
         STRICT_EXPECTED_CALL(singlylinkedlist_remove_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
         while (dwtp->number_of_pending_patches > 0)
@@ -620,13 +621,22 @@ static void set_twin_messenger_do_work_expected_calls(DOWORK_TEST_PROFILE* dwtp)
 
             STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
-            set_send_twin_operation_request_expected_calls(dwtp->current_time);
+            set_send_twin_operation_request_expected_calls(dwtp->current_time, TWIN_OPERATION_TYPE_PATCH);
 
             STRICT_EXPECTED_CALL(CONSTBUFFER_DecRef(IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
 
             dwtp->number_of_pending_patches--;
             dwtp->number_of_pending_operations++;
+        }
+
+        // This one is for receiving updates:
+        if (dwtp->subscription_state == TWIN_SUBSCRIPTION_STATE_GET_COMPLETE_PROPERTIES)
+        {
+            STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG)); // creating context.
+            set_generate_unique_id_expected_calls();
+            STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            set_send_twin_operation_request_expected_calls(dwtp->current_time, TWIN_OPERATION_TYPE_GET);
         }
     }
 
@@ -774,7 +784,7 @@ static void register_global_mock_returns()
 
     REGISTER_GLOBAL_MOCK_RETURN(amqp_messenger_retrieve_options, TEST_OPTIONHANDLER_HANDLE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqp_messenger_retrieve_options, NULL);
-    
+
     REGISTER_GLOBAL_MOCK_RETURN(amqp_messenger_send_async, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqp_messenger_send_async, 1);
 
@@ -793,7 +803,7 @@ static void register_global_mock_returns()
 
     REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_create_message_annotations, TEST_MSG_ANNOTATIONS_AMQP_VALUE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqpvalue_create_message_annotations, NULL);
-    
+
     REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_set_map_value, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqpvalue_set_map_value, 1);
 
@@ -1441,6 +1451,49 @@ TEST_FUNCTION(twin_msgr_stop_success)
     twin_messenger_destroy(handle);
 }
 
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_115: [If the client was subscribed for Twin updates, it must reset itself to continue receiving when twin_messenger_start is invoked ]
+TEST_FUNCTION(twin_msgr_stop_resets_to_resubscribe)
+{
+    // arrange
+    TWIN_MESSENGER_CONFIG* config = get_twin_messenger_config();
+    TWIN_MESSENGER_HANDLE handle = create_twin_messenger(config);
+    (void)twin_messenger_start(handle, TEST_SESSION_HANDLE);
+
+    umock_c_reset_all_calls();
+    set_twin_messenger_stop_expected_calls();
+    (void)twin_messenger_stop(handle);
+
+    set_twin_messenger_start_expected_calls();
+    (void)twin_messenger_start(handle, TEST_SESSION_HANDLE);
+
+    DOWORK_TEST_PROFILE dwtp;
+    reset_dowork_test_profile(&dwtp);
+
+    set_twin_messenger_do_work_expected_calls(&dwtp);
+    twin_messenger_do_work(handle);
+
+    TEST_amqp_messenger_create_config.on_state_changed_callback(
+        TEST_amqp_messenger_create_config.on_state_changed_context, AMQP_MESSENGER_STATE_STARTING, AMQP_MESSENGER_STATE_STARTED);
+
+    TEST_amqp_messenger_create_config.on_subscription_changed_callback(
+        TEST_amqp_messenger_create_config.on_subscription_changed_context, true);
+
+    umock_c_reset_all_calls();
+    dwtp.current_state = TWIN_MESSENGER_STATE_STARTED;
+    dwtp.subscription_state = TWIN_SUBSCRIPTION_STATE_GET_COMPLETE_PROPERTIES;
+    dwtp.number_of_pending_operations = 1; // after the GET is sent.
+    set_twin_messenger_do_work_expected_calls(&dwtp);
+
+    // act
+    twin_messenger_do_work(handle);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    twin_messenger_destroy(handle);
+}
+
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_053: [If amqp_messenger_stop() fails, twin_messenger_stop() fail and return a non-zero value]
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_055: [If any failures occurr, `twin_msgr->state` shall be set to TWIN_MESSENGER_STATE_ERROR, and `twin_msgr->on_state_changed_callback` invoked if provided]
 TEST_FUNCTION(twin_msgr_stop_failure_checks)
@@ -1510,10 +1563,10 @@ TEST_FUNCTION(twin_msgr_retrieve_options_success)
     twin_messenger_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_110: [ `on_get_twin_completed_callback` and `context` shall be saved ] 
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_110: [ `on_get_twin_completed_callback` and `context` shall be saved ]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_111: [ An AMQP message shall be created to request a GET twin ]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_112: [ The AMQP message shall be sent to the twin send link ] 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_114: [If no failures occurr, twin_messenger_get_twin_async() shall return 0 ]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_112: [ The AMQP message shall be sent to the twin send link ]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_114: [If no failures occurr, twin_messenger_get_twin_async() shall return 0 ]
 TEST_FUNCTION(twin_messenger_get_twin_async_success)
 {
     // arrange
@@ -1541,7 +1594,7 @@ TEST_FUNCTION(twin_messenger_get_twin_async_success)
 }
 
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_109: [If `twin_msgr_handle` or `on_twin_state_update_callback` are NULL, twin_messenger_get_twin_async() shall fail and return a non-zero value]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_109: [If `twin_msgr_handle` or `on_twin_state_update_callback` are NULL, twin_messenger_get_twin_async() shall fail and return a non-zero value]
 TEST_FUNCTION(twin_messenger_get_twin_async_NULL_handle)
 {
     // arrange
@@ -1557,7 +1610,7 @@ TEST_FUNCTION(twin_messenger_get_twin_async_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_109: [If `twin_msgr_handle` or `on_twin_state_update_callback` are NULL, twin_messenger_get_twin_async() shall fail and return a non-zero value]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_109: [If `twin_msgr_handle` or `on_twin_state_update_callback` are NULL, twin_messenger_get_twin_async() shall fail and return a non-zero value]
 TEST_FUNCTION(twin_messenger_get_twin_async_NULL_callback)
 {
     // arrange
@@ -1577,7 +1630,7 @@ TEST_FUNCTION(twin_messenger_get_twin_async_NULL_callback)
     twin_messenger_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_113: [If any failures occurr, twin_messenger_get_twin_async() shall return a non-zero value ]  
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_113: [If any failures occurr, twin_messenger_get_twin_async() shall return a non-zero value ]
 TEST_FUNCTION(twin_messenger_get_twin_async_failure_checks)
 {
     // arrange

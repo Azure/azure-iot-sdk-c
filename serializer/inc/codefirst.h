@@ -7,7 +7,7 @@
 #include "methodreturn.h"
 #include "agenttypesystem.h"
 #include "schema.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/strings.h"
 #include "iotdevice.h"
 
@@ -138,9 +138,9 @@ typedef struct REFLECTED_DATA_FROM_DATAPROVIDER_TAG
     const REFLECTED_SOMETHING* reflectedData;
 }REFLECTED_DATA_FROM_DATAPROVIDER;
 
-#define ALL_SOMETHING_REFLECTED(schemaNamespace) C2(schemaNamespace, _allSomethingReflected)
-#define ALL_REFLECTED(schemaNamespace) C2(schemaNamespace, _allReflected)
-#define ADDRESS_OF_ALL_REFLECTED(schemaNamespace) & C2(schemaNamespace, _allReflected),
+#define ALL_SOMETHING_REFLECTED(schemaNamespace) MU_C2(schemaNamespace, _allSomethingReflected)
+#define ALL_REFLECTED(schemaNamespace) MU_C2(schemaNamespace, _allReflected)
+#define ADDRESS_OF_ALL_REFLECTED(schemaNamespace) & MU_C2(schemaNamespace, _allReflected),
 #define DECLARE_EXTERN_CONST_DATAPROVIDER_DATA(x) extern const REFLECTED_DATA_FROM_DATAPROVIDER ALL_REFLECTED(x);
 
 #define CODEFIRST_RESULT_VALUES                \
@@ -159,9 +159,9 @@ CODEFIRST_DEVICE_FAILED,                       \
 CODEFIRST_DEVICE_PUBLISH_FAILED,               \
 CODEFIRST_NOT_A_PROPERTY
 
-DEFINE_ENUM(CODEFIRST_RESULT, CODEFIRST_RESULT_VALUES)
+MU_DEFINE_ENUM(CODEFIRST_RESULT, CODEFIRST_RESULT_VALUES)
 
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 MOCKABLE_FUNCTION(, CODEFIRST_RESULT, CodeFirst_Init, const char*, overrideSchemaNamespace);
 MOCKABLE_FUNCTION(, void, CodeFirst_Deinit);
 MOCKABLE_FUNCTION(, SCHEMA_HANDLE, CodeFirst_RegisterSchema, const char*, schemaNamespace, const REFLECTED_DATA_FROM_DATAPROVIDER*, metadata);

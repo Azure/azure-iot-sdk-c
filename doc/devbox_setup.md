@@ -13,24 +13,30 @@ This document describes how to prepare your development environment to use the *
 ## Set up a Windows development environment
 
 - Install [Visual Studio 2017][visual-studio]. You can use the **Visual Studio Community** Free download if you meet the licensing requirements.  (**Visual Studio 2015** is also supported.)
-> Be sure to include Visual C++ and NuGet Package Manager.
+
+> Be sure to include Visual C++.
 
 - Install [git]. Confirm git is in your PATH by typing `git version` from a command prompt.
 
 - Install [CMake]. Make sure it is in your PATH by typing `cmake -version` from a command prompt. CMake will be used to create Visual Studio projects to build libraries and samples.
 
 - Locate the tag name for the [latest release][latest-release] of the SDK.
+
 > Our release tag names are date values in `yyyy-mm-dd` format.
 
 - Clone the latest release of SDK to your local machine using the tag name you found:
 
 ```Shell
-git clone -b <yyyy-mm-dd> --recursive https://github.com/Azure/azure-iot-sdk-c.git
+git clone -b <yyyy-mm-dd> https://github.com/Azure/azure-iot-sdk-c.git
+cd azure-iot-sdk-c
+git submodule update --init
 ```
 
-> The `--recursive` argument instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
+> If you are using a release before 2019-04-15 then you will need to use the `--recursive` argument to instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
 
 ### Build a sample application without building the SDK
+
+The sample applications build with the help of C SDK libraries and headers published from vcpkg (a library manager). To install the C SDK libraries and headers, follow the steps to [Setup C SDK vcpkg for Windows development environment](https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/setting_up_vcpkg.md#setup-c-sdk-vcpkg-for-windows-development-environment).
 
 To quickly build one of our sample applications, open the corresponding [solution file][sln-file] (.sln) in Visual Studio.
   For example, to build the **telemetry message sample**, open **iothub_client\samples\iothub_ll_telemetry_sample\windows\iothub_ll_telemetry_sample.sln**.
@@ -43,7 +49,7 @@ static const char* connectionString = "[device connection string]";
 
 ...and replace `[device connection string]` with a valid device connection string for a device registered with your IoT Hub. For more information, see the [samples section](#samplecode) below.
 
-Build the sample project. As part of the build, [NuGet] Package Manager will download packages for dependencies so you don't have to build the entire SDK. See **windows\packages.config** for the list of packages that will be downloaded.
+Build the sample project.
 
 ### Build the C SDK in Windows
 
@@ -101,11 +107,16 @@ For TLS operations, by default the C-SDK uses Schannel on Windows Platforms.  Yo
 You are responsible for updating your OpenSSL dependencies as security fixes for it become available.  Schannel on Windows is a system component automatically serviced by Windows Update.  OpenSSL on Linux is updated by Linux packaging mechanisms, such as apt-get on Debian based distributions.  Shipping the C-SDK on Windows using OpenSSL means you are responsible for getting updated versions of it to your devices.
 
 [OpenSSL] binaries that the C-SDK depends on are **ssleay32** and **libeay32**. To enable OpenSSL to be used on Windows, you need to
-* Obtain OpenSSL binaries.  There are many ways to do this, but one of the easier ways is to:
-  * Open the appropriate developer command prompt you plan on building the C-SDK from.
-  * Install [vcpkg], a Microsoft tool that helps you manage C and C++ libraries.
-  * Run `.\vcpkg install openssl` to obtain the required OpenSSL binaries.
-  * Make note of the directory that OpenSSL has been installed to by vcpkg, e.g. `C:\vcpkgRoot\vcpkg\packages\openssl_x86-windows`.
+
+- Obtain OpenSSL binaries.  There are many ways to do this, but one of the easier ways is to:
+
+- Open the appropriate developer command prompt you plan on building the C-SDK from.
+
+- Install [vcpkg], a Microsoft tool that helps you manage C and C++ libraries.
+
+- Run `.\vcpkg install openssl` to obtain the required OpenSSL binaries.
+
+- Make note of the directory that OpenSSL has been installed to by vcpkg, e.g. `C:\vcpkgRoot\vcpkg\packages\openssl_x86-windows`.
 
 * Make the C-SDK link against these OpenSSL binaries instead of the default Schannel.
   * Regardless of how you obtained OpenSSL binaries, set environment variables to point at its root directory.  *Be careful there are no leading spaces between the `=` and directory name as cmake's errors are not always obvious.*
@@ -124,7 +135,6 @@ You are responsible for updating your OpenSSL dependencies as security fixes for
      ```
 
 Building samples and your application should be the same as using the default Schannel at this point.
-
 
 <a name="linux"></a>
 
@@ -165,10 +175,12 @@ This section describes how to set up a development environment for the C SDK on 
 - Clone the latest release of SDK to your local machine using the tag name you found:
 
   ```Shell
-  git clone -b <yyyy-mm-dd> --recursive https://github.com/Azure/azure-iot-sdk-c.git
+  git clone -b <yyyy-mm-dd> https://github.com/Azure/azure-iot-sdk-c.git
+  cd azure-iot-sdk-c
+  git submodule update --init
   ```
 
-  > The `--recursive` argument instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
+  > If you are using a release before 2019-04-15 then you will need to use the `--recursive` argument to instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
 
 ### Build the C SDK in Linux
 
@@ -236,9 +248,12 @@ We've tested the device SDK for C on macOS High Sierra, with XCode version 9.2.
 - Clone the latest release of SDK to your local machine using the tag name you found:
 
   ```Shell
-  git clone -b <yyyy-mm-dd> --recursive https://github.com/Azure/azure-iot-sdk-c.git
+  git clone -b <yyyy-mm-dd> https://github.com/Azure/azure-iot-sdk-c.git
+  cd azure-iot-sdk-c
+  git submodule update --init
   ```
-  > The `--recursive` argument instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
+
+  > If you are using a release before 2019-04-15 then you will need to use the `--recursive` argument to instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
 
 #### Upgrade CURL on Mac OS
 
@@ -340,67 +355,6 @@ with</br>
 
 The example above assumes curl 7.58 has been compiled and saved into `/usr/local/Cellar/curl/7.58.0`. For more details please see section "Upgrade CURL on Mac OS".
 
-<a name="windowsce"></a>
-
-## [**DEPRECATED**: Set up a Windows Embedded Compact 2013 development environment
-***WINDOWS EMBEDDED COMPACT 2013 RECEIVES MINIMAL SUPPORT FROM AZURE IOT SDK.***  In particular please be aware:
-* No new features will be added to WEC.  
-* The only supported protocol is HTTPS.  Popular protocols like AMQP and MQTT, both over TCP directly and over WebSockets, are not and will not be supported.
-* HTTPS over proxy is not supported.
-* Developers may want to evaluate [Windows 10 IoT Core], which has much broader Azure IoT SDK support.
-
-**SETUP INSTRUCTIONS FOR WINDOWS EMBEDDED COMPACT 2013**
-
-- Install [Visual Studio 2015][visual-studio]. You can use the **Visual Studio Community** Free download if you meet the licensing requirements.
-  > Be sure to include Visual C++ and NuGet Package Manager.
-
-- Install [Application Builder for Windows Embedded Compact 2013][application-builder] for Visual Studio 2015
-- Install [Toradex Windows Embedded Compact 2013 SDK][toradex-CE8-sdk] or your own SDK.
-
-- Install [git]. Confirm git is in your PATH by typing `git version` from a command prompt.
-
-- Install [CMake]. Make sure it is in your PATH by typing `cmake -version` from a command prompt. CMake will be used to create Visual Studio projects to build libraries and samples.
-
-- Locate the tag name for the [latest release][latest-release] of the SDK.
-  > Our release tag names are date values in `yyyy-mm-dd` format.
-
-- Clone the latest release of SDK to your local machine using the tag name you found:
-
-  ```Shell
-  git clone -b <yyyy-mm-dd> --recursive https://github.com/Azure/azure-iot-sdk-c.git
-  ```
-
-  > The `--recursive` argument instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
-
-If you installed a different SDK please check azure-iot-sdk-c\\build_all\\windowsce\\build.cmd and replace:
-
-```Shell
-set SDKNAME=TORADEX_CE800
-set PROCESSOR=arm
-```
-
-with a reference to the name of the SDK and the processor architecture (arm/x86) you plan to use.
-
-### Verify your environment
-
-You can build the Windows samples to verify that your environment is set up correctly.
-
-- Open a "Developer Command Prompt for VS2015".
-- Navigate to the **build_all\\windowsce** folder in your local copy of the repository.
-- Run the following command:
-
-```Shell
-build
-```
-
-This script uses CMake to create a folder called "cmake\_ce8" in your home directory and generates in that folder a Visual Studio solution called azure_iot_sdks.sln. The script will then proceed to build the **HTTP** sample.
-
-> Note: you will not be able to run the samples until you configure them with a valid IoT hub device connection string. For more information, see [running a C sample application on Windows Embedded Compact 2013 on a Toradex module](https://github.com/Azure/azure-iot-device-ecosystem/blob/master/get_started/wince2013-toradex-module-c.md).
-
-To view the projects and examine the source code, open the **azure_iot_sdks.sln** solution file in Visual Studio.
-
-You can use one of the sample applications as a template to get started when you are creating your own client applications.
-
 <a name="samplecode"></a>
 
 ## Sample applications
@@ -436,7 +390,6 @@ make
 [azure-umqtt-c]:https://github.com/Azure/azure-umqtt-c
 [sln-file]:https://msdn.microsoft.com/en-us/library/bb165951.aspx
 [git]:http://www.git-scm.com
-[NuGet]:https://www.nuget.org/
 [CMake]:https://cmake.org/
 [MSBuild]:https://msdn.microsoft.com/en-us/library/0k6kkbsd.aspx
 [OpenSSL]:https://www.openssl.org/

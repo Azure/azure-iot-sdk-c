@@ -26,7 +26,7 @@
 typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_CLIENT_CORE_LL_HANDLE;
 
 #include <time.h>
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 #include "iothub_transport_ll.h"
 #include "iothub_client_core_common.h"
 

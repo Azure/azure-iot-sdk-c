@@ -4,11 +4,11 @@
 #ifndef SCHEMA_H
 #define SCHEMA_H
 
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "agenttypesystem.h"
 
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 
 #ifdef __cplusplus
 #include <cstddef>
@@ -46,7 +46,7 @@ SCHEMA_MODEL_IN_USE,            \
 SCHEMA_DEVICE_COUNT_ZERO,       \
 SCHEMA_ERROR
 
-DEFINE_ENUM(SCHEMA_RESULT, SCHEMA_RESULT_VALUES)
+MU_DEFINE_ENUM(SCHEMA_RESULT, SCHEMA_RESULT_VALUES)
 
 #define SCHEMA_ELEMENT_TYPE_VALUES \
 SCHEMA_NOT_FOUND, \
@@ -57,7 +57,7 @@ SCHEMA_DESIRED_PROPERTY, \
 SCHEMA_MODEL_ACTION, \
 SCHEMA_MODEL_IN_MODEL
 
-DEFINE_ENUM(SCHEMA_ELEMENT_TYPE, SCHEMA_ELEMENT_TYPE_VALUES);
+MU_DEFINE_ENUM(SCHEMA_ELEMENT_TYPE, SCHEMA_ELEMENT_TYPE_VALUES);
 
 typedef struct SCHEMA_MODEL_ELEMENT_TAG
 {

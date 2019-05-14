@@ -109,6 +109,8 @@ The minimum requirements are for the device platform to support the following:
 - **Support SHA-256** (optional): necessary to generate the secure token for authenticating the device with the service. Different authentication methods are available and not all require SHA-256.
 - **Have a Real Time Clock or implement code to connect to an NTP server**: necessary for both establishing the TLS connection and generating the secure token for authentication.
 - **Having at least 64KB of RAM**: the memory footprint of the SDK depends on the SDK and protocol used as well as the platform targeted. The smallest footprint is achieved targeting microcontrollers.
+- **Having at least 4KB of RAM set for incoming SSL max content length buffer**: For some TLS libraries, this may be a configurable option and default may have been set as **4KB** for low memory footprint devices. During TLS handshake, IoT Hub service will send Server Hello which includes IoT Hub server side certificates as part of Server Hello payload. 
+During **renewal** of these IoT Hub server side certificates, check will be made on IoT Hub service side to prevent **Server Hello** exceeding 4KB limit so that existing devices which are set for 4KB limit continue to work as before after certificate renewals.
 
 Platform support details can be found in [this document](https://docs.microsoft.com/azure/iot-hub/iot-hub-device-sdk-platform-support).
 You can find an exhaustive list of the OS platforms the various SDKs have been tested against in the [Azure Certified for IoT device catalog](https://catalog.azureiotsuite.com/). Note that you might still be able to use the SDKs on OS and hardware platforms that are not listed on this page: all the SDKs are open sourced and designed to be portable. If you have suggestions, feedback or issues to report, refer to the Contribution and Support sections below.
@@ -222,9 +224,8 @@ Below is a table showing the mapping of the LTS branches to the packages release
 
 | Package | Github Branch | LTS Status | LTS Start Date | Maintenance End Date | Removed Date |
 | :-----------: | :-----------: | :--------: | :------------: | :------------------: | :----------: |
+| Vcpkg: 1.2.14-1<br/> Xenial: 0.2.0.0-16xenial<br/> Trusty: 0.2.0-16trusty<br/> Bionic: 0.2.0.0-9bionic<br/>    | lts_01_2019   | Active     | 2019-01-31     | 2020-01-31           | 2020-01-31   |
 | Nuget: 1.2.10<br/> Xenial: 0.2.0.0-12xenial<br/> Trusty: 0.2.0-12trusty<br/> Bionic: 0.2.0.0-5bionic<br/>    | lts_10_2018   | Active     | 2018-10-03     | 2019-10-03           | 2019-10-03   |
-| Nuget: 1.1.33<br/> Xenial: 0.1.0.0-35xenial<br/> Trusty: 0.1.0-37trusty<br/>     | lts_01_2018   | Active     | 2018-01-01     | 2018-12-31           | 2018-04-31   |
-
 
 * <sup>1</sup> All scheduled dates are subject to change by the Azure IoT SDK team.
 

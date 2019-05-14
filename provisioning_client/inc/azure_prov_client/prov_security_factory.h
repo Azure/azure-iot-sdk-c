@@ -11,8 +11,8 @@ extern "C" {
 #include <stddef.h>
 #endif /* __cplusplus */
 
-#include "azure_c_shared_utility/umock_c_prod.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "umock_c/umock_c_prod.h"
+#include "azure_macro_utils/macro_utils.h"
 
 #define SECURE_DEVICE_TYPE_VALUES \
     SECURE_DEVICE_TYPE_UNKNOWN,   \
@@ -21,7 +21,7 @@ extern "C" {
     SECURE_DEVICE_TYPE_HTTP_EDGE, \
     SECURE_DEVICE_TYPE_SYMMETRIC_KEY
 
-DEFINE_ENUM(SECURE_DEVICE_TYPE, SECURE_DEVICE_TYPE_VALUES);
+MU_DEFINE_ENUM(SECURE_DEVICE_TYPE, SECURE_DEVICE_TYPE_VALUES);
 
 
 MOCKABLE_FUNCTION(, int, prov_dev_security_init, SECURE_DEVICE_TYPE, hsm_type);

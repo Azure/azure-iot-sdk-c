@@ -14,7 +14,7 @@ extern "C"
 
 #include "iothub_service_client_auth.h"
 
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 
 #define IOTHUB_DEVICE_METHOD_RESULT_VALUES     \
     IOTHUB_DEVICE_METHOD_OK,                   \
@@ -22,7 +22,7 @@ extern "C"
     IOTHUB_DEVICE_METHOD_ERROR,                \
     IOTHUB_DEVICE_METHOD_HTTPAPI_ERROR         \
 
-DEFINE_ENUM(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_RESULT_VALUES);
+MU_DEFINE_ENUM(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_RESULT_VALUES);
 
 /** @brief Handle to hide struct and use it in consequent APIs
 */

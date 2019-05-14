@@ -8,8 +8,8 @@
 #ifndef MESSAGE_QUEUE_H
 #define MESSAGE_QUEUE_H
 
-#include "azure_c_shared_utility/macro_utils.h"
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "azure_macro_utils/macro_utils.h"
+#include "umock_c/umock_c_prod.h"
 #include "azure_c_shared_utility/optionhandler.h"
 
 #ifdef __cplusplus
@@ -28,7 +28,7 @@ typedef void* USER_DEFINED_REASON;
     MESSAGE_QUEUE_TIMEOUT,            \
     MESSAGE_QUEUE_CANCELLED
 
-DEFINE_ENUM(MESSAGE_QUEUE_RESULT, MESSAGE_QUEUE_RESULT_STRINGS);
+MU_DEFINE_ENUM(MESSAGE_QUEUE_RESULT, MESSAGE_QUEUE_RESULT_STRINGS);
 
 /**
 * @brief    User-provided callback invoked by MESSAGE_QUEUE back to the user when a messages completes being processed.

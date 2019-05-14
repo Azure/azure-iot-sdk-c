@@ -20,12 +20,12 @@ static void my_gballoc_free(void* ptr)
 }
 
 #include "testrunnerswitcher.h"
-#include "umock_c.h"
-#include "umocktypes_charptr.h"
-#include "umocktypes_stdint.h"
-#include "umocktypes_bool.h"
-#include "umock_c_negative_tests.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "umock_c/umock_c.h"
+#include "umock_c/umocktypes_charptr.h"
+#include "umock_c/umocktypes_stdint.h"
+#include "umock_c/umocktypes_bool.h"
+#include "umock_c/umock_c_negative_tests.h"
+#include "azure_macro_utils/macro_utils.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/shared_util_options.h"
@@ -36,9 +36,9 @@ static void my_gballoc_free(void* ptr)
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 #include "azure_c_shared_utility/strings.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/platform.h"
@@ -51,10 +51,11 @@ static void my_gballoc_free(void* ptr)
 
 #include "parson.h"
 
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 MOCKABLE_FUNCTION(, void, on_transport_register_data_cb, PROV_DEVICE_TRANSPORT_RESULT, transport_result, BUFFER_HANDLE, iothub_key, const char*, assigned_hub, const char*, device_id, void*, user_ctx);
-MOCKABLE_FUNCTION(, void, on_transport_status_cb, PROV_DEVICE_TRANSPORT_STATUS, transport_status, void*, user_ctx);
+MOCKABLE_FUNCTION(, void, on_transport_status_cb, PROV_DEVICE_TRANSPORT_STATUS, transport_status, uint32_t, retry_interval, void*, user_ctx);
 MOCKABLE_FUNCTION(, char*, on_transport_challenge_callback, const unsigned char*, nonce, size_t, nonce_len, const char*, key_name, void*, user_ctx);
+MOCKABLE_FUNCTION(, char*, on_transport_create_json_payload, const char*, ek_value, const char*, srk_value, void*, user_ctx);
 MOCKABLE_FUNCTION(, PROV_JSON_INFO*, on_transport_json_parse, const char*, json_document, void*, user_ctx);
 MOCKABLE_FUNCTION(, void, on_transport_error, PROV_DEVICE_TRANSPORT_ERROR, transport_error, void*, user_context);
 
@@ -119,6 +120,7 @@ static const char* TEST_USERNAME_VALUE = "username";
 static const char* TEST_PASSWORD_VALUE = "password";
 static const char* TEST_JSON_CONTENT = "{test json content}";
 static const char* TEST_XIO_OPTION_NAME = "test_option";
+static const char* TEST_CUSTOM_DATA = "custom data";
 
 static pfprov_transport_create prov_dev_http_transport_create;
 static pfprov_transport_destroy prov_dev_http_transport_destroy;
@@ -216,6 +218,18 @@ static PROV_JSON_INFO* my_on_transport_json_parse(const char* json_document, voi
     return result;
 }
 
+static char* my_on_transport_create_json_payload(const char* ek_value, const char* srk_value, void* user_ctx)
+{
+    (void)ek_value;
+    (void)srk_value;
+    (void)user_ctx;
+    char* result;
+    size_t src_len = strlen(TEST_CUSTOM_DATA);
+    result = (char*)my_gballoc_malloc(src_len + 1);
+    strcpy(result, TEST_CUSTOM_DATA);
+    return result;
+}
+
 static HTTP_HEADERS_HANDLE my_HTTPHeaders_Alloc(void)
 {
     return (HTTP_HEADERS_HANDLE)my_gballoc_malloc(1);
@@ -226,13 +240,13 @@ static void my_HTTPHeaders_Free(HTTP_HEADERS_HANDLE handle)
     my_gballoc_free(handle);
 }
 
-static STRING_HANDLE my_Base64_Encoder(const BUFFER_HANDLE source)
+static STRING_HANDLE my_Base64_Encode(const BUFFER_HANDLE source)
 {
     (void)source;
     return (STRING_HANDLE)my_gballoc_malloc(1);
 }
 
-static BUFFER_HANDLE my_Base64_Decoder(const char* source)
+static BUFFER_HANDLE my_Azure_Base64_Decode(const char* source)
 {
     (void)source;
     return (BUFFER_HANDLE)my_gballoc_malloc(1);
@@ -320,18 +334,19 @@ static void my_on_transport_register_data_cb(PROV_DEVICE_TRANSPORT_RESULT transp
     (void)user_ctx;
 }
 
-static void my_on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS transport_status, void* user_ctx)
+static void my_on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS transport_status, uint32_t retry_after, void* user_ctx)
 {
     (void)transport_status;
     (void)user_ctx;
+    (void)retry_after;
 }
 
-DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
     ASSERT_FAIL(temp_str);
 }
 
@@ -367,6 +382,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         REGISTER_UMOCK_ALIAS_TYPE(ON_HTTP_OPEN_COMPLETE_CALLBACK, void*);
         REGISTER_UMOCK_ALIAS_TYPE(HTTP_CLIENT_REQUEST_TYPE, int);
         REGISTER_UMOCK_ALIAS_TYPE(XIO_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(PROV_TRANSPORT_CREATE_JSON_PAYLOAD, void*);
 
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
@@ -374,8 +390,8 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
 
         REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, my_mallocAndStrcpy_s);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __LINE__);
-        REGISTER_GLOBAL_MOCK_HOOK(Base64_Encoder, my_Base64_Encoder);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Encoder, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(Azure_Base64_Encode, my_Base64_Encode);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Azure_Base64_Encode, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(URL_EncodeString, my_URL_EncodeString);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(URL_EncodeString, NULL);
         REGISTER_GLOBAL_MOCK_RETURN(STRING_c_str, TEST_STRING_VALUE);
@@ -385,14 +401,15 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         REGISTER_GLOBAL_MOCK_HOOK(on_transport_challenge_callback, my_on_transport_challenge_callback);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(on_transport_challenge_callback, NULL);
 
-
         REGISTER_GLOBAL_MOCK_HOOK(on_transport_json_parse, my_on_transport_json_parse);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(on_transport_json_parse, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(on_transport_create_json_payload, my_on_transport_create_json_payload);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(on_transport_create_json_payload, NULL);
 
         REGISTER_GLOBAL_MOCK_HOOK(BUFFER_clone, my_BUFFER_clone);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(BUFFER_clone, NULL);
-        REGISTER_GLOBAL_MOCK_HOOK(Base64_Decoder, my_Base64_Decoder);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Decoder, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(Azure_Base64_Decode, my_Azure_Base64_Decode);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Azure_Base64_Decode, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(BUFFER_delete, my_BUFFER_delete);
 
         REGISTER_GLOBAL_MOCK_RETURN(platform_get_default_tlsio, TEST_INTERFACE_DESC);
@@ -519,16 +536,14 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
 
-        STRICT_EXPECTED_CALL(Base64_Encoder(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(Base64_Encoder(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(STRING_length(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Azure_Base64_Encode(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
 
+        STRICT_EXPECTED_CALL(on_transport_create_json_payload(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
 
         STRICT_EXPECTED_CALL(uhttp_client_execute_request(IGNORED_PTR_ARG, HTTP_CLIENT_REQUEST_PUT, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
@@ -1019,13 +1034,34 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         //arrange
 
         //act
-        int result = prov_dev_http_transport_register_device(NULL, on_transport_json_parse, NULL);
+        int result = prov_dev_http_transport_register_device(NULL, on_transport_json_parse, on_transport_create_json_payload, NULL);
 
         //assert
         ASSERT_ARE_NOT_EQUAL(int, 0, result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
+    }
+
+    TEST_FUNCTION(prov_transport_http_register_device_cb_NULL_succeed)
+    {
+        int result;
+
+        //arrange
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
+        (void)prov_dev_http_transport_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
+        umock_c_reset_all_calls();
+
+        //act
+        result = prov_dev_http_transport_register_device(handle, on_transport_json_parse, NULL, NULL);
+
+        //assert
+        ASSERT_ARE_NOT_EQUAL(int, 0, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_dev_http_transport_close(handle);
+        prov_dev_http_transport_destroy(handle);
     }
 
     /* Tests_PROV_TRANSPORT_HTTP_CLIENT_07_019: [ prov_transport_http_register_device shall construct the path to the DPS service in the following format: /<scope_id>/registrations/<url_encoded_registration_id>/register-me?api-version=<api_version> ] */
@@ -1039,7 +1075,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         umock_c_reset_all_calls();
 
         //act
-        result = prov_dev_http_transport_register_device(handle, on_transport_json_parse, NULL);
+        result = prov_dev_http_transport_register_device(handle, on_transport_json_parse, on_transport_create_json_payload, NULL);
 
         //assert
         ASSERT_ARE_EQUAL(int, 0, result);
@@ -1055,12 +1091,13 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         //arrange
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         (void)prov_dev_http_transport_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
-        (void)prov_dev_http_transport_register_device(handle, on_transport_json_parse, NULL);
+        (void)prov_dev_http_transport_register_device(handle, on_transport_json_parse, on_transport_create_json_payload, NULL);
         g_on_http_open(g_http_open_ctx, HTTP_CALLBACK_REASON_OK);
         prov_dev_http_transport_dowork(handle);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(NULL);
 
         //act
         g_on_http_reply_recv(g_http_execute_ctx, HTTP_CALLBACK_REASON_OK, (const unsigned char*)TEST_JSON_CONTENT, TEST_JSON_CONTENT_LEN, TEST_SUCCESS_STATUS_CODE, TEST_HTTP_HANDLE_VALUE);
@@ -1078,10 +1115,12 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         //arrange
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         (void)prov_dev_http_transport_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
-        (void)prov_dev_http_transport_register_device(handle, on_transport_json_parse, NULL);
+        (void)prov_dev_http_transport_register_device(handle, on_transport_json_parse, on_transport_create_json_payload, NULL);
         g_on_http_open(g_http_open_ctx, HTTP_CALLBACK_REASON_OK);
         prov_dev_http_transport_dowork(handle);
         umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn("2");
 
         //act
         g_on_http_reply_recv(g_http_execute_ctx, HTTP_CALLBACK_REASON_OK, (const unsigned char*)TEST_JSON_CONTENT, TEST_JSON_CONTENT_LEN, TEST_FAILURE_STATUS_CODE, TEST_HTTP_HANDLE_VALUE);
@@ -1099,10 +1138,12 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         //arrange
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         (void)prov_dev_http_transport_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
-        (void)prov_dev_http_transport_register_device(handle, on_transport_json_parse, NULL);
+        (void)prov_dev_http_transport_register_device(handle, on_transport_json_parse, on_transport_create_json_payload, NULL);
         g_on_http_open(g_http_open_ctx, HTTP_CALLBACK_REASON_OK);
         prov_dev_http_transport_dowork(handle);
         umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(HTTPHeaders_FindHeaderValue(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn("5");
 
         //act
         g_on_http_reply_recv(g_http_execute_ctx, HTTP_CALLBACK_REASON_OK, (const unsigned char*)TEST_JSON_CONTENT, TEST_JSON_CONTENT_LEN, TEST_THROTTLE_STATUS_CODE, TEST_HTTP_HANDLE_VALUE);
@@ -1157,7 +1198,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         //arrange
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         (void)prov_dev_http_transport_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
-        (void)prov_dev_http_transport_register_device(handle, on_transport_json_parse, NULL);
+        (void)prov_dev_http_transport_register_device(handle, on_transport_json_parse, on_transport_create_json_payload, NULL);
         g_on_http_open(g_http_open_ctx, HTTP_CALLBACK_REASON_OK);
         prov_dev_http_transport_dowork(handle);
         g_on_http_reply_recv(g_http_execute_ctx, HTTP_CALLBACK_REASON_OK, (const unsigned char*)TEST_JSON_CONTENT, TEST_JSON_CONTENT_LEN, HTTP_STATUS_CODE_UNAUTHORIZED, TEST_HTTP_HANDLE_VALUE);
@@ -1194,7 +1235,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
 
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         (void)prov_dev_http_transport_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
-        (void)prov_dev_http_transport_register_device(handle, on_transport_json_parse, NULL);
+        (void)prov_dev_http_transport_register_device(handle, on_transport_json_parse, on_transport_create_json_payload, NULL);
         g_on_http_open(g_http_open_ctx, HTTP_CALLBACK_REASON_OK);
         prov_dev_http_transport_dowork(handle);
         g_on_http_reply_recv(g_http_execute_ctx, HTTP_CALLBACK_REASON_OK, (const unsigned char*)TEST_JSON_CONTENT, TEST_JSON_CONTENT_LEN, HTTP_STATUS_CODE_UNAUTHORIZED, TEST_HTTP_HANDLE_VALUE);
@@ -1245,7 +1286,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         //arrange
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         (void)prov_dev_http_transport_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
-        (void)prov_dev_http_transport_register_device(handle, on_transport_json_parse, NULL);
+        (void)prov_dev_http_transport_register_device(handle, on_transport_json_parse, on_transport_create_json_payload, NULL);
         g_on_http_open(g_http_open_ctx, HTTP_CALLBACK_REASON_OK);
         prov_dev_http_transport_dowork(handle);
         g_on_http_reply_recv(g_http_execute_ctx, HTTP_CALLBACK_REASON_OK, (const unsigned char*)TEST_JSON_CONTENT, TEST_JSON_CONTENT_LEN, TEST_SUCCESS_STATUS_CODE, TEST_HTTP_HANDLE_VALUE);
@@ -1280,7 +1321,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         //arrange
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         (void)prov_dev_http_transport_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
-        (void)prov_dev_http_transport_register_device(handle, on_transport_json_parse, NULL);
+        (void)prov_dev_http_transport_register_device(handle, on_transport_json_parse, on_transport_create_json_payload, NULL);
         g_on_http_open(g_http_open_ctx, HTTP_CALLBACK_REASON_OK);
         // Send Registration here
         prov_dev_http_transport_dowork(handle);
@@ -1317,7 +1358,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         //arrange
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         (void)prov_dev_http_transport_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
-        (void)prov_dev_http_transport_register_device(handle, on_transport_json_parse, NULL);
+        (void)prov_dev_http_transport_register_device(handle, on_transport_json_parse, on_transport_create_json_payload, NULL);
         g_on_http_open(g_http_open_ctx, HTTP_CALLBACK_REASON_OK);
         // Send Registration here
         prov_dev_http_transport_dowork(handle);
@@ -1327,7 +1368,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         STRICT_EXPECTED_CALL(uhttp_client_dowork(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(on_transport_json_parse(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_ASSIGNING, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(on_transport_status_cb(PROV_DEVICE_TRANSPORT_STATUS_ASSIGNING, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
         g_target_transport_status = PROV_DEVICE_TRANSPORT_STATUS_ASSIGNING;
@@ -1349,7 +1390,7 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         //arrange
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_dev_http_transport_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_error, NULL);
         (void)prov_dev_http_transport_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
-        (void)prov_dev_http_transport_register_device(handle, on_transport_json_parse, NULL);
+        (void)prov_dev_http_transport_register_device(handle, on_transport_json_parse, on_transport_create_json_payload, NULL);
         g_on_http_open(g_http_open_ctx, HTTP_CALLBACK_REASON_OK);
         prov_dev_http_transport_dowork(handle);
         g_on_http_reply_recv(g_http_execute_ctx, HTTP_CALLBACK_REASON_ERROR, NULL, 0, TEST_FAILURE_STATUS_CODE, TEST_HTTP_HANDLE_VALUE);

@@ -20,16 +20,16 @@ void real_free(void* ptr)
 }
 
 #include "testrunnerswitcher.h"
-#include "azure_c_shared_utility/macro_utils.h"
-#include "umock_c.h"
-#include "umock_c_negative_tests.h"
+#include "azure_macro_utils/macro_utils.h"
+#include "umock_c/umock_c.h"
+#include "umock_c/umock_c_negative_tests.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "parson.h"
 
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 MOCKABLE_FUNCTION(, JSON_Value*, json_parse_string, const char*, string);
 MOCKABLE_FUNCTION(, char*, json_serialize_to_string, const JSON_Value*, value);
 MOCKABLE_FUNCTION(, const char*, json_object_get_string, const JSON_Object*, object, const char *, name);
@@ -62,12 +62,12 @@ static TEST_MUTEX_HANDLE g_testByTest;
 static int g_fromJson_calls;
 static int g_toJson_calls;
 
-DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
     ASSERT_FAIL(temp_str);
 }
 

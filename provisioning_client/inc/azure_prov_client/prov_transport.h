@@ -4,15 +4,18 @@
 #ifndef PROV_TRANSPORT_H
 #define PROV_TRANSPORT_H
 
-#include "azure_c_shared_utility/umock_c_prod.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "umock_c/umock_c_prod.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/buffer_.h"
+#include "azure_prov_client/prov_client_const.h"
 
 #ifdef __cplusplus
 extern "C" {
+#include <cstdint>
 #else
 #include <stdbool.h>
+#include <stdint.h>
 #endif /* __cplusplus */
 
     struct PROV_DEVICE_TRANSPORT_PROVIDER_TAG;
@@ -25,15 +28,34 @@ extern "C" {
     TRANSPORT_HSM_TYPE_X509,        \
     TRANSPORT_HSM_TYPE_SYMM_KEY
 
-    DEFINE_ENUM(TRANSPORT_HSM_TYPE, TRANSPORT_HSM_TYPE_VALUES);
+    MU_DEFINE_ENUM(TRANSPORT_HSM_TYPE, TRANSPORT_HSM_TYPE_VALUES);
 
 #define PROV_DEVICE_TRANSPORT_RESULT_VALUES     \
     PROV_DEVICE_TRANSPORT_RESULT_OK,            \
     PROV_DEVICE_TRANSPORT_RESULT_UNAUTHORIZED,  \
     PROV_DEVICE_TRANSPORT_RESULT_ERROR
 
-    DEFINE_ENUM(PROV_DEVICE_TRANSPORT_RESULT, PROV_DEVICE_TRANSPORT_RESULT_VALUES);
+    MU_DEFINE_ENUM(PROV_DEVICE_TRANSPORT_RESULT, PROV_DEVICE_TRANSPORT_RESULT_VALUES);
 
+
+    static inline uint32_t parse_retry_after_value(const char* retry_after)
+    {
+        uint32_t result = PROV_GET_THROTTLE_TIME;
+        if (retry_after != NULL)
+        {
+            // Is the retry after a number
+            if (retry_after[0] >= 0x30 || retry_after[0] <= 0x39)
+            {
+                result = atol(retry_after);
+                if (result < PROV_GET_THROTTLE_TIME || result > MAX_PROV_GET_THROTTLE_TIME)
+                {
+                    result = PROV_GET_THROTTLE_TIME;
+                }
+            }
+            // Will need to parse the retry after for date information
+        }
+        return result;
+    }
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

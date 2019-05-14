@@ -11,8 +11,8 @@ extern "C" {
 #include <stddef.h>
 #endif /* __cplusplus */
 
-#include "azure_c_shared_utility/umock_c_prod.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "umock_c/umock_c_prod.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/buffer_.h"
 
 #define IOTHUB_SECURITY_TYPE_VALUES \
@@ -23,7 +23,7 @@ extern "C" {
     IOTHUB_SECURITY_TYPE_SYMMETRIC_KEY
 
 
-DEFINE_ENUM(IOTHUB_SECURITY_TYPE, IOTHUB_SECURITY_TYPE_VALUES);
+MU_DEFINE_ENUM(IOTHUB_SECURITY_TYPE, IOTHUB_SECURITY_TYPE_VALUES);
 
 MOCKABLE_FUNCTION(, int, iothub_security_init, IOTHUB_SECURITY_TYPE, sec_type);
 MOCKABLE_FUNCTION(, void, iothub_security_deinit);

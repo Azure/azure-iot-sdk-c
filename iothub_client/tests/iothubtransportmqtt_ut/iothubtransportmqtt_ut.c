@@ -7,9 +7,9 @@
 #include <stdlib.h>
 #endif
 #include "testrunnerswitcher.h"
-#include "umock_c.h"
-#include "umock_c_negative_tests.h"
-#include "umocktypes_charptr.h"
+#include "umock_c/umock_c.h"
+#include "umock_c/umock_c_negative_tests.h"
+#include "umock_c/umocktypes_charptr.h"
 
 #if defined _MSC_VER
 #pragma warning(disable: 4054) /* MSC incorrectly fires this */
@@ -119,7 +119,7 @@ static TRANSPORT_LL_HANDLE my_IoTHubTransport_MQTT_Common_Create(const IOTHUBTRA
     return TEST_TRANSPORT_HANDLE;
 }
 
-DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
@@ -625,7 +625,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_GetTwinAsync_success)
     IOTHUBTRANSPORT_CONFIG config = { 0 };
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
     TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config, g_transport_cb_info, NULL);
-    
+
     umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_GetTwinAsync(handle, (IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)0x4444, (void*)0x4445));
 

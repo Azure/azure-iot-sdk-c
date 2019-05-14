@@ -48,7 +48,7 @@ This is a quick tutorial with the steps to create, update, get, and delete an In
             if ((am_handle = attestationMechanism_createWithTpm(endorsementKey)) == NULL)
             {
                 printf("Failed calling attestationMechanism_createWithTpm\n");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             ```
             **With**
@@ -56,7 +56,7 @@ This is a quick tutorial with the steps to create, update, get, and delete an In
             if ((am_handle = attestationMechanism_createWithX509ClientCert(clientCertificate, NULL)) == NULL)
             {
                 printf("Failed calling attestationMechanism_createWithX509ClientCert\n");
-                result = __FAILURE__;
+                result = MU_FAILURE;
             }
             ```
 4. Build as shown [here][devbox-setup-link] and run the sample.

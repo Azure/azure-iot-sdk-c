@@ -26,20 +26,20 @@ static void my_gballoc_free(void* ptr)
 }
 
 #include "testrunnerswitcher.h"
-#include "umock_c.h"
-#include "umocktypes_charptr.h"
-#include "umocktypes_stdint.h"
-#include "umocktypes_bool.h"
-#include "umock_c_negative_tests.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "umock_c/umock_c.h"
+#include "umock_c/umocktypes_charptr.h"
+#include "umock_c/umocktypes_stdint.h"
+#include "umock_c/umocktypes_bool.h"
+#include "umock_c/umock_c_negative_tests.h"
+#include "azure_macro_utils/macro_utils.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/sastoken.h"
-#include "azure_c_shared_utility/base64.h"
+#include "azure_c_shared_utility/azure_base64.h"
 #include "azure_c_shared_utility/sha.h"
 #include "azure_c_shared_utility/urlencode.h"
 
@@ -103,25 +103,25 @@ static int my_mallocAndStrcpy_s(char** destination, const char* source)
     return 0;
 }
 
-/*static BUFFER_HANDLE my_Base64_Decoder(const char* source)
+/*static BUFFER_HANDLE my_Azure_Base64_Decode(const char* source)
 {
     (void)source;
     return (BUFFER_HANDLE)my_gballoc_malloc(1);
 }*/
 
-STRING_HANDLE my_Base64_Encode_Bytes(const unsigned char* source, size_t size)
+STRING_HANDLE my_Azure_Base64_Encode_Bytes(const unsigned char* source, size_t size)
 {
     (void)source;
     (void)size;
     return (STRING_HANDLE)my_gballoc_malloc(1);
 }
 
-DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
     ASSERT_FAIL(temp_str);
 }
 
@@ -204,8 +204,8 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         REGISTER_GLOBAL_MOCK_RETURN(SignData, TEST_BUFFER_SIZE);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(SignData, 0);
 
-        //REGISTER_GLOBAL_MOCK_HOOK(Base64_Decoder, my_Base64_Decoder);
-        //REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Decoder, NULL);
+        //REGISTER_GLOBAL_MOCK_HOOK(Azure_Base64_Decode, my_Azure_Base64_Decode);
+        //REGISTER_GLOBAL_MOCK_FAIL_RETURN(Azure_Base64_Decode, NULL);
         //REGISTER_GLOBAL_MOCK_HOOK(BUFFER_create, my_BUFFER_create);
         //REGISTER_GLOBAL_MOCK_FAIL_RETURN(BUFFER_create, NULL);
 
@@ -215,8 +215,8 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         REGISTER_GLOBAL_MOCK_RETURN(STRING_c_str, TEST_STRING_VALUE);
         REGISTER_GLOBAL_MOCK_HOOK(STRING_delete, my_STRING_delete);
 
-        REGISTER_GLOBAL_MOCK_HOOK(Base64_Encode_Bytes, my_Base64_Encode_Bytes);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base64_Encode_Bytes, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(Azure_Base64_Encode_Bytes, my_Azure_Base64_Encode_Bytes);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Azure_Base64_Encode_Bytes, NULL);
 
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);

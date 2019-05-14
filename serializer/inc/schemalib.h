@@ -9,7 +9,7 @@
 #ifndef SCHEMALIB_H
 #define SCHEMALIB_H
 
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/strings.h"
 #include "iotdevice.h"
 
@@ -35,7 +35,7 @@ extern "C" {
 /** @brief Enumeration specifying the status of calls to various APIs in this
  * module.
  */
-DEFINE_ENUM(SERIALIZER_RESULT, SERIALIZER_RESULT_VALUES);
+MU_DEFINE_ENUM(SERIALIZER_RESULT, SERIALIZER_RESULT_VALUES);
 
 #define SERIALIZER_CONFIG_VALUES  \
     CommandPollingInterval,     \
@@ -44,7 +44,7 @@ DEFINE_ENUM(SERIALIZER_RESULT, SERIALIZER_RESULT_VALUES);
 /** @brief Enumeration specifying the option to set on the serializer when
  * calling ::serializer_setconfig.
  */
-DEFINE_ENUM(SERIALIZER_CONFIG, SERIALIZER_CONFIG_VALUES);
+MU_DEFINE_ENUM(SERIALIZER_CONFIG, SERIALIZER_CONFIG_VALUES);
 
 /**
  * @brief   Initializes the library.

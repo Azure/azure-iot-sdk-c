@@ -14,7 +14,7 @@ extern "C"
 #include <time.h>
 #endif
 
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/buffer_.h"
 
 typedef void* IOTHUB_TEST_HANDLE;
@@ -23,7 +23,7 @@ typedef void* IOTHUB_TEST_HANDLE;
     IOTHUB_TEST_CLIENT_OK, \
     IOTHUB_TEST_CLIENT_ERROR
 
-DEFINE_ENUM(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
+MU_DEFINE_ENUM(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
 
 typedef int (*pfIoTHubMessageCallback)(void* context, const char* data, size_t size);
 

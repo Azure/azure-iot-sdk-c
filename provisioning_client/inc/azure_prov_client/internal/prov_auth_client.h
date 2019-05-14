@@ -13,8 +13,8 @@ extern "C" {
 #include <stddef.h>
 #endif /* __cplusplus */
 
-#include "azure_c_shared_utility/umock_c_prod.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "umock_c/umock_c_prod.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/buffer_.h"
 
 typedef struct PROV_AUTH_INFO_TAG* PROV_AUTH_HANDLE;
@@ -26,7 +26,7 @@ typedef struct PROV_AUTH_INFO_TAG* PROV_AUTH_HANDLE;
     PROV_AUTH_STATUS_UNASSIGNED,   \
     PROV_AUTH_STATUS_ASSIGNING
 
-DEFINE_ENUM(PROV_AUTH_RESULT, PROV_AUTH_RESULT_VALUES);
+MU_DEFINE_ENUM(PROV_AUTH_RESULT, PROV_AUTH_RESULT_VALUES);
 
 #define PROV_AUTH_TYPE_VALUES \
     PROV_AUTH_TYPE_UNKNOWN,   \
@@ -34,7 +34,7 @@ DEFINE_ENUM(PROV_AUTH_RESULT, PROV_AUTH_RESULT_VALUES);
     PROV_AUTH_TYPE_X509,      \
     PROV_AUTH_TYPE_KEY
 
-DEFINE_ENUM(PROV_AUTH_TYPE, PROV_AUTH_TYPE_VALUES);
+MU_DEFINE_ENUM(PROV_AUTH_TYPE, PROV_AUTH_TYPE_VALUES);
 
 MOCKABLE_FUNCTION(, PROV_AUTH_HANDLE, prov_auth_create);
 MOCKABLE_FUNCTION(, void, prov_auth_destroy, PROV_AUTH_HANDLE, handle);

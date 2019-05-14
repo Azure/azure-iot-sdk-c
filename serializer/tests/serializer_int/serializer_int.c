@@ -6,11 +6,11 @@
 #include "macro_utils.h"
 #include "testrunnerswitcher.h"
 
-#include "umock_c.h"
-#include "umocktypes_charptr.h"
-#include "umocktypes_bool.h"
-#include "umocktypes_stdint.h"
-#include "umock_c_negative_tests.h"
+#include "umock_c/umock_c.h"
+#include "umock_c/umocktypes_charptr.h"
+#include "umock_c/umocktypes_bool.h"
+#include "umock_c/umocktypes_stdint.h"
+#include "umock_c/umock_c_negative_tests.h"
 
 #include "parson.h"
 
@@ -514,7 +514,7 @@ DECLARE_MODEL(basicModel_WithData15,
 END_NAMESPACE(basic15)
 
 #define ENABLE_MOCKS
-    #include "azure_c_shared_utility/umock_c_prod.h"
+    #include "umock_c/umock_c_prod.h"
     MOCKABLE_FUNCTION(, void, on_desired_property_double15, void*, v);
     MOCKABLE_FUNCTION(, void, on_desired_property_int15, void*, v);
     MOCKABLE_FUNCTION(, void, on_desired_property_float15, void*, v);
@@ -819,7 +819,7 @@ METHODRETURN_HANDLE method20(model_WithMethod20* model
 }
 
 #define ENABLE_MOCKS
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
     MOCKABLE_FUNCTION(, void, on_structure16, void*, v);
     MOCKABLE_FUNCTION(, void, on_inner_model16, void*, v);
 #undef ENABLE_MOCKS
@@ -853,11 +853,11 @@ static bool areTwoJsonsEqual(const unsigned char* left, size_t leftSize, const c
     return result;
 }
 
-DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
     ASSERT_FAIL(temp_str);
 }
 
