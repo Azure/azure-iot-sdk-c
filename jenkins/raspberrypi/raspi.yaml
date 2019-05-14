@@ -6,7 +6,6 @@ variables:
   ClientLibrary.Commit: $(Build.SourceBranch)
   ClientLibrary.FrameworkRoot: $(Build.SourcesDirectory)
 
-
 jobs:
 - job: Cross_Compile
   pool:
@@ -67,9 +66,9 @@ jobs:
     displayName: "build raspi-c docker image"
     condition: succeeded()
     env: 
-      IOTHUB_E2E_REPO_ADDRESS: $(IOTHUB-E2E-REPO-ADDRESS)
-      IOTHUB_E2E_REPO_USER: $(IOTHUB-E2E-REPO-USER)
-      IOTHUB_E2E_REPO_PASSWORD: $(IOTHUB-E2E-REPO-PASSWORD)
+      AZURECR_REPO_ADDRESS: $(IOTHUB-E2E-REPO-ADDRESS)
+      AZURECR_REPO_USER: $(IOTHUB-E2E-REPO-USER)
+      AZURECR_REPO_PASSWORD: $(IOTHUB-E2E-REPO-PASSWORD)
       NormalizedRepo: $(NormalizedRepo)
       CommitToPass: $(CommitToPass)
 

@@ -28,8 +28,8 @@ if args.repo == default_repo:
 print_separator = "".join("/\\" for _ in range(80))
 
 auth_config = {
-    "username": os.environ["IOTHUB_E2E_REPO_USER"],
-    "password": os.environ["IOTHUB_E2E_REPO_PASSWORD"],
+    "username": os.environ["AZURECR_REPO_USER"],
+    "password": os.environ["AZURECR_REPO_PASSWORD"],
 }
 
 
@@ -66,14 +66,11 @@ def build_image(tags):
     print("BUILDING IMAGE")
     print(print_separator)
 
-    dockerfile = "Dockerfile"
-    dockerfile_directory = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../"))
-
     api_client = docker.APIClient(base_url="unix://var/run/docker.sock")
     build_args = {
         "CLIENTLIBRARY_REPO": tags.repo,
         "CLIENTLIBRARY_COMMIT_NAME": tags.commit_name,
-        "CLIENTLIBRARY_COMMIT_SHA": tags.commit_sha,
+        "CLIENTLIBRARY_COMMIT_SHA": tags.commit_sha
     }
 
     if tags.image_tag_to_use_for_cache:
@@ -84,6 +81,8 @@ def build_image(tags):
     else:
         cache_from = []
 
+    dockerfile = "Dockerfile"
+    dockerfile_directory = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../"))
 
     print(
         Fore.YELLOW
@@ -100,7 +99,7 @@ def build_image(tags):
         dockerfile=dockerfile,
     ):
         try:
-            sys.stdout.write(json.loads(line.decode("utf-8"))["stream"])
+            print(json.loads(list(line.decode("utf-8"))["stream"]))
         except KeyError:
             print_filtered_docker_line(line)
 
