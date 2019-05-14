@@ -322,6 +322,7 @@ static int get_retry_after_property(PROV_TRANSPORT_AMQP_INFO* amqp_info, MESSAGE
     }
     else
     {
+        bool found_value = false;
         result = MU_FAILURE;
         for (uint32_t index = 0; index < prop_count; index++)
         {
@@ -329,7 +330,6 @@ static int get_retry_after_property(PROV_TRANSPORT_AMQP_INFO* amqp_info, MESSAGE
             AMQP_VALUE map_key_value = NULL;
             const char *key_name;
 
-            amqp_info->retry_after_value;
             if ((amqpvalue_get_map_key_value_pair(prop_desc, index, &map_key_name, &map_key_value)) != 0)
             {
                 LogError("Failed reading the key/value pair from the uAMQP property map.");
@@ -357,6 +357,7 @@ static int get_retry_after_property(PROV_TRANSPORT_AMQP_INFO* amqp_info, MESSAGE
                         else
                         {
                             amqp_info->retry_after_value = (uint32_t)val_int;
+                            found_value = true;
                             result = 0;
                         }
                     }
@@ -370,6 +371,7 @@ static int get_retry_after_property(PROV_TRANSPORT_AMQP_INFO* amqp_info, MESSAGE
                         else
                         {
                             amqp_info->retry_after_value = parse_retry_after_value(key_value);
+                            found_value = true;
                             result = 0;
                         }
                     }
@@ -378,11 +380,14 @@ static int get_retry_after_property(PROV_TRANSPORT_AMQP_INFO* amqp_info, MESSAGE
                         LogError("Failed parsing the uAMQP property value.");
                         result = MU_FAILURE;
                     }
-                    // If the message retry-after only got through it once
-                    break;
                 }
                 amqpvalue_destroy(map_key_value);
                 amqpvalue_destroy(map_key_name);
+            }
+            if (found_value)
+            {
+                // If the message retry-after only got through it once
+                break;
             }
         }
         application_properties_destroy(app_prop);
