@@ -6,7 +6,7 @@
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/azure_base64.h"
-#include "azure_c_shared_utility/base32.h"
+#include "azure_c_shared_utility/azure_base32.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/sha.h"
 #include "azure_c_shared_utility/strings.h"
@@ -47,7 +47,7 @@ static char* encode_value(const uint8_t* msg_digest, size_t digest_len)
 {
     char* result;
 
-    char* encoded_hash = Base32_Encode_Bytes(msg_digest, digest_len);
+    char* encoded_hash = Azure_Base32_Encode_Bytes(msg_digest, digest_len);
     if (encoded_hash == NULL)
     {
         LogError("Failure encoded Base32");
