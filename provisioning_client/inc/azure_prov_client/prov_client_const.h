@@ -6,7 +6,7 @@
 
 #define PROV_DEVICE_CLIENT_VERSION "1.3.2"
 #define PROV_GET_THROTTLE_TIME      1
-#define MAX_PROV_GET_THROTTLE_TIME  2*60
+#define MAX_PROV_GET_THROTTLE_TIME  5*60
 
 static const char* const PROV_ASSIGNED_STATUS = "assigned";
 static const char* const PROV_ASSIGNING_STATUS = "assigning";
