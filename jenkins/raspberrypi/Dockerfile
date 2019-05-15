@@ -127,7 +127,9 @@ RUN git pull
 RUN git checkout $CLIENTLIBRARY_COMMIT_SHA
 
 COPY ./patchfile /
-RUN if [-s /patchfile ]; then git apply /patchfile; fi
+# our base image might have some files checked out.  revert these.
+RUN git reset HEAD && git checkout && git clean  -df
+RUN if [-s /patchfile ]; then git apply --index /patchfile; fi
 
 RUN git submodule update --init 
 
