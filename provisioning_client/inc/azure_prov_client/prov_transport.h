@@ -37,7 +37,20 @@ extern "C" {
 
     MU_DEFINE_ENUM(PROV_DEVICE_TRANSPORT_RESULT, PROV_DEVICE_TRANSPORT_RESULT_VALUES);
 
+    // Snippit from RFC 7231 https://tools.ietf.org/html/rfc7231
+    // The value of this field can be either an HTTP - date or a number of
+    // seconds to delay after the response is received.
 
+    // Retry - After = HTTP - date / delay - seconds
+
+    // A delay - seconds value is a non - negative decimal integer, representing
+    // time in seconds.
+
+    // delay - seconds = 1 * DIGIT
+    // Two examples of its use are
+
+    // Retry-After: Fri, 31 Dec 1999 23 : 59 : 59 GMT
+    // Retry-After : 120
     static inline uint32_t parse_retry_after_value(const char* retry_after)
     {
         uint32_t result = PROV_GET_THROTTLE_TIME;
