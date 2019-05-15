@@ -1,6 +1,6 @@
 variables:
   Horton.FrameworkRoot: $(Agent.BuildDirectory)/e2e-fx
-  Horton.FrameworkRef: e284f306b7b57f600107fde6dac21e11500acbc3
+  Horton.FrameworkRef: snapshot
   Horton.Language: c
   Horton.Repo: $(Build.Repository.Uri)
   Horton.Commit: $(Build.SourceBranch)
