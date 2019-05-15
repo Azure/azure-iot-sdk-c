@@ -11,7 +11,7 @@ resources:
   - repository: e2e_fx
     type: github
     name: Azure/iot-sdks-e2e-fx
-    ref: refs/heads/master
+    ref: refs/heads/snapshot
     endpoint: 'GitHub OAuth - az-iot-builder-01'
 
 jobs:
