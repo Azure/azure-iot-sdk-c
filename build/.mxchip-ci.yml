@@ -1,0 +1,42 @@
+name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+
+jobs:
+- job: Cross_Compile
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - script: |
+      . build_all/mbed5/setup.sh
+    displayName: 'setup'
+
+  - script: |
+      . build_all/mbed5/build.sh
+    displayName: 'build'
+
+  - script: |
+      # Check that this is the right source directory
+      ls
+      cp mxchip/BUILD/AZ3166/GCC_ARM/mxchip.bin $(Build.ArtifactStagingDirectory)
+    displayName: "Copy Files into Artifact repo"
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifacts: drop'
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: 'drop'
+      publishLocation: 'Container'
+    condition: succeeded()
+
+- job: Execute
+  dependsOn: Cross_Compile
+  pool:
+    name: $(MXCHIPAGENTPOOL)
+  steps:
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: 'drop'
+
+  - script: |
+      echo $(NEWTIN) | sudo -S cp $(System.ArtifactsDirectory)/drop/mxchip.bin /media/newt/AZ3166
+    displayName: 'deploy'
