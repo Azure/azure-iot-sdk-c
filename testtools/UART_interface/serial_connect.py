@@ -34,8 +34,15 @@ def parse_opts():
 
 
 # If there is a sudden disconnect, program should report line in input script reached, and close files.
-def serial_write(ser, message):
-    # method to write to serial line with connection monitoring
+
+# method to write to serial line with connection monitoring
+def serial_write(ser, message, file=None):
+
+    # Check that the device is no longer sending bytes
+    if ser.in_waiting:
+        serial_read(ser, message, file)
+
+    # Check that the serial connection is open
     if ser.writable():
         bytes_written = ser.write(bytearray((message.strip()+'\r\n').encode('ascii')))
         return bytes_written
@@ -43,21 +50,40 @@ def serial_write(ser, message):
         try:
             time.sleep(2)
             ser.open()
-            serial_write(ser, message)
+            serial_write(ser, message, file)
         except:
             return False
 
+# Read from serial line with connection monitoring
 # If there is a sudden disconnect, program should report line in input script reached, and close files.
-def serial_read(ser):
-    # method to read from serial line with connection monitoring
+def serial_read(ser, message, file, first_read=False):
+
+    # Special per opt handling:
+    if "send_telemetry" in message:
+        time.sleep(.15)
+    elif "exit" in message and first_read:
+        time.sleep(serial_settings.wait_for_flash)
+        output = ser.in_waiting
+        while output < 4:
+            time.sleep(1)
+            output = ser.in_waiting
+            print("%d bytes in waiting" %output)
+
     if ser.readable():
         output = ser.readline(ser.in_waiting)
+        print(output.decode(encoding='utf-8'))
+        try:
+            # File must exist to write to it
+            file.writelines(output.decode(encoding='utf-8'))
+        except:
+            pass
+
         return output
     else:
         try:
             time.sleep(2)
             ser.open()
-            serial_read(ser)
+            serial_read(ser, message, file, first_read=True)
         except:
             return False
 
@@ -65,34 +91,28 @@ def serial_read(ser):
 def write_read(ser, input_file, output_file):
     if input_file:
         # set wait between read/write
-        wait = serial_settings.bits_to_cache/serial_settings.baud_rate
+        wait = (serial_settings.bits_to_cache/serial_settings.baud_rate)
         with open(input_file) as fp:
             # initialize input/output_file
             line = fp.readline()
-            f = open(output_file, 'w+')
+            f = open(output_file, 'w+') # Output file
             while line:
                 time.sleep(.1)
                 print("Sending %s" %line)
 
                 # Attempt to write to serial port
-                if not serial_write(ser, line):
+                if not serial_write(ser, line, f):
                     print("burger king")
                     f.close()
                     break
                 time.sleep(wait)
 
                 # Attempt to read serial port
-                output = serial_read(ser)
+                output = serial_read(ser, line, f, first_read=True)
 
-                print(output.decode(encoding='utf-8'))
-                f.writelines(output.decode(encoding='utf-8'))
-
-                # No need to check output in loop, as program will exit loop if output is empty
                 while(output):
                     time.sleep(wait)
-                    output = serial_read(ser)
-                    print(output.decode(encoding='utf-8'))
-                    f.writelines(output.decode(encoding='utf-8'))
+                    output = serial_read(ser, line, f)
                 line = fp.readline()
 
             f.close()
@@ -127,6 +147,12 @@ def run():
 
     write_read(ser, serial_settings.input_file, serial_settings.output_file)
 
+    while(ser.in_waiting):
+        time.sleep(.2)
+        output = ser.readline(ser.in_waiting)
+        print(output.strip().decode(encoding='utf-8'))
+        # output = input("howzit")
+        # serial_write(ser, output)
     ser.close()
 
 if __name__ == '__main__':
