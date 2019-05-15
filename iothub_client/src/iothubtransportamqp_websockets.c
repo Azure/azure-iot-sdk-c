@@ -236,7 +236,7 @@ static int IoTHubTransportAMQP_WS_SetCallbackContext(TRANSPORT_LL_HANDLE handle,
 
 static int IoTHubTransportAMQP_WS_GetSupportedPlatformInfo(TRANSPORT_LL_HANDLE handle, PLATFORM_INFO_OPTION* info)
 {
-    return IoTHubTransport_AMQP_GetSupportedPlatformInfo(handle, info);
+    return IoTHubTransport_AMQP_Common_GetSupportedPlatformInfo(handle, info);
 }
 
 static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls =

@@ -184,7 +184,7 @@ static int IoTHubTransportAMQP_SetCallbackContext(TRANSPORT_LL_HANDLE handle, vo
 
 static int IoTHubTransportAMQP_GetSupportedPlatformInfo(TRANSPORT_LL_HANDLE handle, PLATFORM_INFO_OPTION* info)
 {
-    return IoTHubTransport_AMQP_GetSupportedPlatformInfo(handle, info);
+    return IoTHubTransport_AMQP_Common_GetSupportedPlatformInfo(handle, info);
 }
 
 static TRANSPORT_PROVIDER thisTransportProvider =

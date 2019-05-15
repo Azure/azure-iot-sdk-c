@@ -794,7 +794,7 @@ TEST_FUNCTION(AMQP_GetSupportedPlatformInfo)
     PLATFORM_INFO_OPTION expected_info = PLATFORM_INFO_OPTION_RETRIEVE_SQM;
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_GetSupportedPlatformInfo(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_GetSupportedPlatformInfo(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .CopyOutArgumentBuffer_info(&expected_info, sizeof(expected_info))
         .SetReturn(0);
 
@@ -817,7 +817,7 @@ TEST_FUNCTION(AMQP_GetSupportedPlatformInfo_NULL_handle)
     TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_GetSupportedPlatformInfo(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_GetSupportedPlatformInfo(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .SetReturn(1);
 
     // act
@@ -838,7 +838,7 @@ TEST_FUNCTION(AMQP_GetSupportedPlatformInfo_NULL_info)
     TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_GetSupportedPlatformInfo(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_GetSupportedPlatformInfo(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .SetReturn(1);
 
     // act
