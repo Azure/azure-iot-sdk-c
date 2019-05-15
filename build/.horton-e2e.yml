@@ -1,6 +1,6 @@
 variables:
   Horton.FrameworkRoot: $(Agent.BuildDirectory)/e2e-fx
-  Horton.FrameworkRef: snapshot
+  Horton.FrameworkRef: snap
   Horton.Language: c
   Horton.Repo: $(Build.Repository.Uri)
   Horton.Commit: $(Build.SourceBranch)
@@ -11,7 +11,7 @@ resources:
   - repository: e2e_fx
     type: github
     name: Azure/iot-sdks-e2e-fx
-    ref: refs/heads/snapshot
+    ref: refs/heads/snap
     endpoint: 'GitHub OAuth - az-iot-builder-01'
 
 jobs:
