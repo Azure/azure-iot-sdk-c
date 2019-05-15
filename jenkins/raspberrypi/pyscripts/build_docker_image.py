@@ -99,7 +99,7 @@ def build_image(tags):
         dockerfile=dockerfile,
     ):
         try:
-            sys.stdout.write(json.loads(line.decode("utf-8"))["stream"])        
+            sys.stdout.write(json.loads(line.decode("utf-8"))["stream"])
         except KeyError:
             print_filtered_docker_line(line)
 
