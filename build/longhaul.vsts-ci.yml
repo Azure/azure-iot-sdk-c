@@ -2,11 +2,11 @@ name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Re
 resources:
 - repo: self
   clean: true
-phases:
-- phase: longhaul_linux
+jobs:
+- job: longhaul_linux
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
-  queue: 
+  pool: 
     name: 'aziotbld-lin01'
     timeoutInMinutes: 1200
   displayName: 'longhaul_linux'
@@ -36,8 +36,8 @@ phases:
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
     condition: always()
-- phase: longhaul_windows
-  queue:
+- job: longhaul_windows
+  pool:
     name: 'aziotbld-win10'
     timeoutInMinutes: 1200
   steps:
