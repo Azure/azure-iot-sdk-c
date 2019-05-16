@@ -42,7 +42,8 @@ jobs:
     displayName: 'deploy'
 
   - script: |
-      cd $(ClientLibrary.FrameworkRoot)/testtools/UART_interface/
+      ls
+      cd $(Build.SourcesDirectory)/testtools/UART_interface/
       . input.sh
       python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p "/dev/ttyACM1"
     env:
