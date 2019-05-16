@@ -46,8 +46,10 @@ jobs:
       cd $(Build.SourcesDirectory)/testtools/UART_interface/
       . input.sh
       python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p "/dev/ttyACM1" -m $(MXCHIP_TO_FLASH)
+      rm input.txt
     env:
       SERIAL_TASK: $(SERIAL_TASK)
+      IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
     displayName: 'run_test'
 
   - script: |
