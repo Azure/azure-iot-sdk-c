@@ -38,14 +38,14 @@ jobs:
       artifactName: 'drop'
 
   - script: |
-      echo $(NEWTIN) | sudo -S cp $(System.ArtifactsDirectory)/drop/mxchip.bin /media/newt/AZ31662
+      echo $(NEWTIN) | sudo -S cp $(System.ArtifactsDirectory)/drop/mxchip.bin /media/newt/$(MXCHIP_TO_FLASH)
     displayName: 'deploy'
 
   - script: |
       ls
       cd $(Build.SourcesDirectory)/testtools/UART_interface/
       . input.sh
-      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p "/dev/ttyACM1"
+      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p "/dev/ttyACM1" -m $(MXCHIP_TO_FLASH)
     env:
       SERIAL_TASK: $(SERIAL_TASK)
     displayName: 'run_test'
