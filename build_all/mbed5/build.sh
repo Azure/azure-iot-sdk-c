@@ -4,7 +4,7 @@ sudo rm -R -f mxchip
 
 git clone https://github.com/massand/mxchip_az3166_firmware.git mxchip
 cd mxchip
-git checkout $SOURCE_BRANCH
+git checkout cli_telemetry_and_post
 git submodule init
 cd ..
 rsync -avz --existing ./ mxchip/mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/
