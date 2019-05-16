@@ -38,5 +38,27 @@ jobs:
       artifactName: 'drop'
 
   - script: |
-      echo $(NEWTIN) | sudo -S cp $(System.ArtifactsDirectory)/drop/mxchip.bin /media/newt/AZ3166
+      echo $(NEWTIN) | sudo -S cp $(System.ArtifactsDirectory)/drop/mxchip.bin /media/newt/AZ31662
     displayName: 'deploy'
+
+  - script: |
+      cd $(ClientLibrary.FrameworkRoot)/testtools/UART_interface/
+      . input.sh
+      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p "/dev/ttyACM1"
+    env:
+      SERIAL_TASK: $(SERIAL_TASK)
+    displayName: 'run_test'
+
+  - script: |
+      # Check that this is the right source directory
+      ls
+      cp output.txt $(Build.ArtifactStagingDirectory)
+    displayName: "Copy Files into Artifact repo"
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifacts: log'
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: 'log'
+      publishLocation: 'Container'
+    condition: succeeded()
