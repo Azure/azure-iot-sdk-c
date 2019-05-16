@@ -4,6 +4,7 @@ sudo rm -R -f mxchip
 
 git clone https://github.com/massand/mxchip_az3166_firmware.git mxchip
 cd mxchip
+git checkout master
 git checkout cli_telemetry_and_post
 git submodule init
 cd ..
