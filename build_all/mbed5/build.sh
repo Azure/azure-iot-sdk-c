@@ -3,13 +3,13 @@
 sudo rm -R -f mxchip
 
 git clone -b cli_telemetry_and_post https://github.com/massand/devkit-mbedos5-getstarted.git mxchip
+cd mxchip
 git submodule update --init --recursive
 #rsync -avz --existing ./ mxchip/mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/
 
 sudo npm install -g iotz
 sudo iotz update
 
-cd mxchip
 #sudo git checkout -- mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/provisioning_client/adapters/hsm_client_riot.c
 #sudo git checkout -- mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/provisioning_client/deps/RIoT/Reference/DICE/DiceSha256.c
 #sudo git checkout -- mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/provisioning_client/deps/RIoT/Reference/RIoT/Core/RIoTCrypt/RiotDerEnc.c
