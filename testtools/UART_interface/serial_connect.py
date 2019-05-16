@@ -134,18 +134,25 @@ def run():
             print("MXCHIP drop path did not resolve, chip did not flash successfully.")
             raise FileExistsError
 
-    print(serial_settings.baud_rate)
     ser = serial.Serial(port=serial_settings.port, baudrate=serial_settings.baud_rate)
-
+    ser.flushInput()
     # print(ser.writable())
     # print(ser.readable())
-    time.sleep(3)
+    time.sleep(.5)
+
     # Print initial message
     output = ser.readline(ser.in_waiting)
-    print(output.strip().decode(encoding='utf-8'))
-    while(output):
+    output = output.strip().decode(encoding='utf-8')
+    print(output)
+
+    # Wait for WiFi and IoT Hub setup to complete
+    start_time = time.time()
+    while(serial_settings.setup_string not in output) and ((time.time() - start_time) < (3*serial_settings.wait_for_flash)):
+        time.sleep(.1)
         output = ser.readline(ser.in_waiting)
-        print(output.strip().decode(encoding='utf-8'))
+        output = output.strip().decode(encoding='utf-8')
+        if len(output) > 4:
+            print(output)
 
     write_read(ser, serial_settings.input_file, serial_settings.output_file)
 
