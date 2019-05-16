@@ -147,7 +147,7 @@ def run():
 
     # Wait for WiFi and IoT Hub setup to complete
     start_time = time.time()
-    while(serial_settings.setup_string not in output) and ((time.time() - start_time) < (3*serial_settings.wait_for_flash)):
+    while(serial_settings.setup_string not in output) and ((time.time() - start_time) < (3*serial_settings.wait_for_flash + 5)):
         time.sleep(.1)
         output = ser.readline(ser.in_waiting)
         output = output.strip().decode(encoding='utf-8')
