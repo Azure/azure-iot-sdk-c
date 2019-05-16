@@ -250,13 +250,23 @@ static void get_error_retry_after(PROV_TRANSPORT_AMQP_INFO* amqp_info, AMQP_VALU
                 AMQP_VALUE list_item_value = amqpvalue_get_list_item(delivery_state, index);
                 if (list_item_value != NULL && amqpvalue_get_type(list_item_value) == AMQP_TYPE_DESCRIBED)
                 {
+                    // Currently this comes back as ulong from the amqp value
                     AMQP_VALUE desc = amqpvalue_get_inplace_descriptor(list_item_value);
                     if (desc != NULL && amqpvalue_get_type(desc) == AMQP_TYPE_ULONG)
                     {
                         uint64_t desc_value;
                         if (amqpvalue_get_ulong(desc, &desc_value) == 0)
                         {
-                            amqp_info->retry_after_value = (uint32_t)desc_value;
+                            // If the value is greater than the max throttle time (5 min)
+                            // then set it to max throttle time
+                            if (desc_value > MAX_PROV_GET_THROTTLE_TIME)
+                            {
+                                amqp_info->retry_after_value = MAX_PROV_GET_THROTTLE_TIME;
+                            }
+                            else
+                            {
+                                amqp_info->retry_after_value = (uint32_t)desc_value;
+                            }
                             break;
                         }
                     }
@@ -322,6 +332,7 @@ static int get_retry_after_property(PROV_TRANSPORT_AMQP_INFO* amqp_info, MESSAGE
     }
     else
     {
+        bool found_value = false;
         result = MU_FAILURE;
         for (uint32_t index = 0; index < prop_count; index++)
         {
@@ -329,7 +340,6 @@ static int get_retry_after_property(PROV_TRANSPORT_AMQP_INFO* amqp_info, MESSAGE
             AMQP_VALUE map_key_value = NULL;
             const char *key_name;
 
-            amqp_info->retry_after_value;
             if ((amqpvalue_get_map_key_value_pair(prop_desc, index, &map_key_name, &map_key_value)) != 0)
             {
                 LogError("Failed reading the key/value pair from the uAMQP property map.");
@@ -346,6 +356,9 @@ static int get_retry_after_property(PROV_TRANSPORT_AMQP_INFO* amqp_info, MESSAGE
                 {
                     const char* key_value;
                     int32_t val_int;
+
+                    // The AMQP type is either int or string, for more information
+                    // on this see prov_transport.h:parse_retry_after_value function.
                     AMQP_TYPE type = amqpvalue_get_type(map_key_value);
                     if (type == AMQP_TYPE_INT)
                     {
@@ -357,6 +370,7 @@ static int get_retry_after_property(PROV_TRANSPORT_AMQP_INFO* amqp_info, MESSAGE
                         else
                         {
                             amqp_info->retry_after_value = (uint32_t)val_int;
+                            found_value = true;
                             result = 0;
                         }
                     }
@@ -370,6 +384,7 @@ static int get_retry_after_property(PROV_TRANSPORT_AMQP_INFO* amqp_info, MESSAGE
                         else
                         {
                             amqp_info->retry_after_value = parse_retry_after_value(key_value);
+                            found_value = true;
                             result = 0;
                         }
                     }
@@ -378,11 +393,14 @@ static int get_retry_after_property(PROV_TRANSPORT_AMQP_INFO* amqp_info, MESSAGE
                         LogError("Failed parsing the uAMQP property value.");
                         result = MU_FAILURE;
                     }
-                    // If the message retry-after only got through it once
-                    break;
                 }
                 amqpvalue_destroy(map_key_value);
                 amqpvalue_destroy(map_key_name);
+            }
+            if (found_value)
+            {
+                // If the message retry-after only got through it once
+                break;
             }
         }
         application_properties_destroy(app_prop);
