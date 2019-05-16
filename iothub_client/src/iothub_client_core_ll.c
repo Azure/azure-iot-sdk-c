@@ -992,6 +992,7 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
                     {
                         result->IoTHubTransport_Destroy(result->transportHandle);
                     }
+                    tickcounter_destroy(result->tickCounter);
                     destroy_blob_upload_module(result);
                     destroy_module_method_module(result);
                     IoTHubClient_Auth_Destroy(result->authorization_module);
@@ -1006,6 +1007,7 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
                     {
                         result->IoTHubTransport_Destroy(result->transportHandle);
                     }
+                    tickcounter_destroy(result->tickCounter);
                     destroy_blob_upload_module(result);
                     destroy_module_method_module(result);
                     IoTHubClient_Auth_Destroy(result->authorization_module);
