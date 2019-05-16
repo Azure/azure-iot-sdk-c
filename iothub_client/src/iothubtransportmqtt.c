@@ -174,6 +174,11 @@ static int IotHubTransportMqtt_SetCallbackContext(TRANSPORT_LL_HANDLE handle, vo
     return IoTHubTransport_MQTT_SetCallbackContext(handle, ctx);
 }
 
+static int IotHubTransportMqtt_GetSupportedPlatformInfo(TRANSPORT_LL_HANDLE handle, PLATFORM_INFO_OPTION* info)
+{
+    return IoTHubTransport_MQTT_GetSupportedPlatformInfo(handle, info);
+}
+
 static TRANSPORT_PROVIDER myfunc =
 {
     IoTHubTransportMqtt_SendMessageDisposition,     /*pfIotHubTransport_SendMessageDisposition IoTHubTransport_SendMessageDisposition;*/
@@ -197,7 +202,8 @@ static TRANSPORT_PROVIDER myfunc =
     IotHubTransportMqtt_Subscribe_InputQueue,       /*pfIoTHubTransport_Subscribe_InputQueue IoTHubTransport_Subscribe_InputQueue; */
     IotHubTransportMqtt_Unsubscribe_InputQueue,     /*pfIoTHubTransport_Unsubscribe_InputQueue IoTHubTransport_Unsubscribe_InputQueue; */
     IotHubTransportMqtt_SetCallbackContext,         /*pfIoTHubTransport_SetCallbackContext IoTHubTransport_SetCallbackContext; */
-    IoTHubTransportMqtt_GetTwinAsync                /*pfIoTHubTransport_GetTwinAsync IoTHubTransport_GetTwinAsync;*/
+    IoTHubTransportMqtt_GetTwinAsync,               /*pfIoTHubTransport_GetTwinAsync IoTHubTransport_GetTwinAsync;*/
+    IotHubTransportMqtt_GetSupportedPlatformInfo      /*pfIoTHubTransport_GetSupportedPlatformInfo IoTHubTransport_GetSupportedPlatformInfo;*/
 };
 
 /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_022: [This function shall return a pointer to a structure of type TRANSPORT_PROVIDER */
