@@ -12,6 +12,8 @@ jobs:
   - script: |
       . build_all/mbed5/build.sh
     displayName: 'build'
+    env:
+      SOURCE_BRANCH: '$Build.SourceBranchName'
 
   - script: |
       # Check that this is the right source directory
