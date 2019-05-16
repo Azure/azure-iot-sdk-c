@@ -2,7 +2,7 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 sudo rm -R -f mxchip
 
-git clone -b cli_telemetry_and_post https://github.com/massand/devkit-mbedos5-getstarted.git mxchip
+git clone -b $MXCHIP_REPO_SOURCE_BRANCH https://github.com/massand/devkit-mbedos5-getstarted.git mxchip
 cd mxchip
 git submodule update --init --recursive
 #rsync -avz --existing ./ mxchip/mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/
