@@ -4,8 +4,6 @@ sudo rm -R -f mxchip
 
 git clone -b cli_telemetry_and_post https://github.com/massand/devkit-mbedos5-getstarted.git mxchip
 git submodule update --init --recursive
-
-cd ..
 #rsync -avz --existing ./ mxchip/mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/
 
 sudo npm install -g iotz
