@@ -6,3 +6,4 @@ wait_for_flash = 10
 bits_to_cache = 1600
 mxchip_file = "/media/newt/AZ31662"
 setup_string = "Setup complete"
+skip_setup = False

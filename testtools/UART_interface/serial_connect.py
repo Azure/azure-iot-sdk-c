@@ -14,7 +14,7 @@ except:
 # Notes: This is designed to be used as a command line script with args (for automation purposes) to communicate over serial to a Microsoft mxchip device.
 
 def parse_opts():
-    options, remainder = getopt.gnu_getopt(sys.argv[1:], 'hi:o:b:p:m:', ['input', 'output', 'help', 'baudrate', 'port', 'mxchip_file'])
+    options, remainder = getopt.gnu_getopt(sys.argv[1:], 'hsi:o:b:p:m:', ['input', 'output', 'help', 'skip', 'baudrate', 'port', 'mxchip_file'])
     # print('OPTIONS   :', options)
 
     for opt, arg in options:
@@ -33,6 +33,9 @@ def parse_opts():
             serial_settings.port = arg
         elif opt in ('-m', '--mxchip_file'):
             serial_settings.mxchip_file = "/media/newt/" + arg
+        elif opt in ('-s', '--skip'):
+            # skip waiting for setup
+            serial_settings.skip_setup = True
 
 
 # If there is a sudden disconnect, program should report line in input script reached, and close files.
@@ -73,10 +76,11 @@ def serial_read(ser, message, file, first_read=False):
 
     if ser.readable():
         output = ser.readline(ser.in_waiting)
-        print(output.decode(encoding='utf-8'))
+        output = output.decode(encoding='utf-8')
+        print(output)
         try:
             # File must exist to write to it
-            file.writelines(output.decode(encoding='utf-8'))
+            file.writelines(output)
         except:
             pass
 
@@ -100,7 +104,9 @@ def write_read(ser, input_file, output_file):
             f = open(output_file, 'w+') # Output file
             while line:
                 time.sleep(.1)
-                print("Sending %s" %line)
+                # Print only instruction, not secret content
+                if line.split():
+                    print("Sending %s" %line.split()[0])
 
                 # Attempt to write to serial port
                 if not serial_write(ser, line, f):
@@ -116,6 +122,11 @@ def write_read(ser, input_file, output_file):
                     time.sleep(wait)
                     output = serial_read(ser, line, f)
                 line = fp.readline()
+
+            # read any trailing output, save to file
+            while (ser.in_waiting):
+                time.sleep(.2)
+                output = serial_read(ser, line, f)
 
             f.close()
 
@@ -135,7 +146,7 @@ def run():
             raise FileExistsError
 
     ser = serial.Serial(port=serial_settings.port, baudrate=serial_settings.baud_rate)
-    ser.flushInput()
+
     # print(ser.writable())
     # print(ser.readable())
     time.sleep(.5)
@@ -145,23 +156,27 @@ def run():
     output = output.strip().decode(encoding='utf-8')
     print(output)
 
-    # Wait for WiFi and IoT Hub setup to complete
-    start_time = time.time()
-    while(serial_settings.setup_string not in output) and ((time.time() - start_time) < (3*serial_settings.wait_for_flash)):
-        time.sleep(.1)
-        output = ser.readline(ser.in_waiting)
-        output = output.strip().decode(encoding='utf-8')
-        if len(output) > 4:
-            print(output)
+    if serial_settings.skip_setup:
+        # skip waiting for WiFi and IoT Hub setup
+        while (ser.in_waiting):
+            time.sleep(.1)
+            output = ser.readline(ser.in_waiting)
+            output = output.strip().decode(encoding='utf-8')
+            if len(output) > 4:
+                print(output)
+    else:
+        # Wait for WiFi and IoT Hub setup to complete
+        start_time = time.time()
+
+        while(serial_settings.setup_string not in output) and ((time.time() - start_time) < (3*serial_settings.wait_for_flash)):
+            time.sleep(.1)
+            output = ser.readline(ser.in_waiting)
+            output = output.strip().decode(encoding='utf-8')
+            if len(output) > 4:
+                print(output)
 
     write_read(ser, serial_settings.input_file, serial_settings.output_file)
 
-    while(ser.in_waiting):
-        time.sleep(.2)
-        output = ser.readline(ser.in_waiting)
-        print(output.strip().decode(encoding='utf-8'))
-        # output = input("howzit")
-        # serial_write(ser, output)
     ser.close()
 
 if __name__ == '__main__':
