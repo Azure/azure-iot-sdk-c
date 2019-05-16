@@ -28,7 +28,7 @@ def parse_opts():
             serial_settings.output_file = arg
         elif opt in ('-b', '--baudrate'):
             # print('Setting --baudrate.')
-            serial_settings.baud_rate = arg
+            serial_settings.baud_rate = int(arg)
         elif opt in ('-p', '--port'):
             serial_settings.port = arg
 
