@@ -139,7 +139,7 @@ def run():
 
     # print(ser.writable())
     # print(ser.readable())
-    time.sleep(.5)
+    time.sleep(3)
     # Print initial message
     output = ser.readline(ser.in_waiting)
     print(output.strip().decode(encoding='utf-8'))
