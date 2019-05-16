@@ -14,7 +14,7 @@ except:
 # Notes: This is designed to be used as a command line script with args (for automation purposes) to communicate over serial to a Microsoft mxchip device.
 
 def parse_opts():
-    options, remainder = getopt.gnu_getopt(sys.argv[1:], 'hi:o:b:p:', ['input', 'output', 'help', 'baudrate', 'port'])
+    options, remainder = getopt.gnu_getopt(sys.argv[1:], 'hi:o:b:p:m:', ['input', 'output', 'help', 'baudrate', 'port', 'mxchip_file'])
     # print('OPTIONS   :', options)
 
     for opt, arg in options:
@@ -31,6 +31,8 @@ def parse_opts():
             serial_settings.baud_rate = int(arg)
         elif opt in ('-p', '--port'):
             serial_settings.port = arg
+        elif opt in ('-m', '--mxchip_file'):
+            serial_settings.mxchip_file = "/media/newt/" + arg
 
 
 # If there is a sudden disconnect, program should report line in input script reached, and close files.
@@ -124,7 +126,7 @@ def run():
 
         # check to see that mxchip firmware drop path resolves
         for x in range(serial_settings.wait_for_flash):
-            exists = os.path.exists('/media/newt/AZ31661')
+            exists = os.path.exists(serial_settings.mxchip_file)
             if exists:
                 break
             time.sleep(1)
