@@ -12,13 +12,11 @@ jobs:
   - script: |
       . build_all/mbed5/build.sh
     displayName: 'build'
-    env:
-      SOURCE_BRANCH: $(Build.SourceBranchName)
 
   - script: |
       # Check that this is the right source directory
       ls
-      cp mxchip/BUILD/AZ3166/GCC_ARM/mxchip.bin $(Build.ArtifactStagingDirectory)
+      cp mxchip/BUILD/AZ3166/GCC_ARM/devkit-mbedos5-getstarted.bin $(Build.ArtifactStagingDirectory)
     displayName: "Copy Files into Artifact repo"
 
   - task: PublishBuildArtifacts@1
@@ -40,7 +38,7 @@ jobs:
       artifactName: 'drop'
 
   - script: |
-      echo $(NEWTIN) | sudo -S cp $(System.ArtifactsDirectory)/drop/mxchip.bin /media/newt/AZ31662
+      echo $(NEWTIN) | sudo -S cp $(System.ArtifactsDirectory)/drop/devkit-mbedos5-getstarted.bin /media/newt/AZ31662
     displayName: 'deploy'
 
   - script: |
