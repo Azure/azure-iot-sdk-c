@@ -177,7 +177,8 @@ def run():
                 print(output)
 
     write_read(ser, serial_settings.input_file, serial_settings.output_file)
-
+    
+    ser.flush()
     ser.close()
 
 if __name__ == '__main__':
