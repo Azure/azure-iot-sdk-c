@@ -127,10 +127,10 @@ int prov_transport_amqp_close(PROV_DEVICE_TRANSPORT_HANDLE handle)
     return prov_transport_common_amqp_close(handle);
 }
 
-int prov_transport_amqp_register_device(PROV_DEVICE_TRANSPORT_HANDLE handle, PROV_TRANSPORT_JSON_PARSE json_parse_cb, void* json_ctx)
+int prov_transport_amqp_register_device(PROV_DEVICE_TRANSPORT_HANDLE handle, PROV_TRANSPORT_JSON_PARSE json_parse_cb, PROV_TRANSPORT_CREATE_JSON_PAYLOAD json_create_cb, void* json_ctx)
 {
     /* Codes_PROV_TRANSPORT_AMQP_CLIENT_07_005: [ prov_transport_amqp_register_device shall invoke the prov_transport_common_amqp_register_device method ] */
-    return prov_transport_common_amqp_register_device(handle, json_parse_cb, json_ctx);
+    return prov_transport_common_amqp_register_device(handle, json_parse_cb, json_create_cb, json_ctx);
 }
 
 int prov_transport_amqp_get_operation_status(PROV_DEVICE_TRANSPORT_HANDLE handle)

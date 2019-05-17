@@ -13,6 +13,7 @@
 #ifdef __cplusplus
 extern "C" {
 #else
+#include <stdint.h>
 #include <stdbool.h>
 #endif /* __cplusplus */
 
@@ -49,9 +50,10 @@ extern "C" {
     } PROV_JSON_INFO;
 
     typedef void(*PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK)(PROV_DEVICE_TRANSPORT_RESULT transport_result, BUFFER_HANDLE iothub_key, const char* assigned_hub, const char* device_id, void* user_ctx);
-    typedef void(*PROV_DEVICE_TRANSPORT_STATUS_CALLBACK)(PROV_DEVICE_TRANSPORT_STATUS transport_status, void* user_ctx);
+    typedef void(*PROV_DEVICE_TRANSPORT_STATUS_CALLBACK)(PROV_DEVICE_TRANSPORT_STATUS transport_status, uint32_t retry_interval, void* user_ctx);
     typedef char*(*PROV_TRANSPORT_CHALLENGE_CALLBACK)(const unsigned char* nonce, size_t nonce_len, const char* key_name, void* user_ctx);
     typedef PROV_JSON_INFO*(*PROV_TRANSPORT_JSON_PARSE)(const char* json_document, void* user_ctx);
+    typedef char*(*PROV_TRANSPORT_CREATE_JSON_PAYLOAD)(const char* ek_value, const char* srk_value, void* user_ctx);
     typedef void(*PROV_TRANSPORT_ERROR_CALLBACK)(PROV_DEVICE_TRANSPORT_ERROR transport_error, void* user_context);
 
     typedef PROV_DEVICE_TRANSPORT_HANDLE(*pfprov_transport_create)(const char* uri, TRANSPORT_HSM_TYPE type, const char* scope_id, const char* api_version, PROV_TRANSPORT_ERROR_CALLBACK error_cb, void* error_ctx);
@@ -59,7 +61,7 @@ extern "C" {
     typedef int(*pfprov_transport_open)(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* registration_id, BUFFER_HANDLE ek, BUFFER_HANDLE srk, PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK data_callback, void* user_ctx, PROV_DEVICE_TRANSPORT_STATUS_CALLBACK status_cb, void* status_ctx, PROV_TRANSPORT_CHALLENGE_CALLBACK reg_challenge_cb, void* challenge_ctx);
     typedef int(*pfprov_transport_close)(PROV_DEVICE_TRANSPORT_HANDLE handle);
 
-    typedef int(*pfprov_transport_register_device)(PROV_DEVICE_TRANSPORT_HANDLE handle, PROV_TRANSPORT_JSON_PARSE json_parse_cb, void* json_ctx);
+    typedef int(*pfprov_transport_register_device)(PROV_DEVICE_TRANSPORT_HANDLE handle, PROV_TRANSPORT_JSON_PARSE json_parse_cb, PROV_TRANSPORT_CREATE_JSON_PAYLOAD json_create_cb, void* json_ctx);
     typedef int(*pfprov_transport_get_operation_status)(PROV_DEVICE_TRANSPORT_HANDLE handle);
     typedef void(*pfprov_transport_dowork)(PROV_DEVICE_TRANSPORT_HANDLE handle);
     typedef int(*pfprov_transport_set_trace)(PROV_DEVICE_TRANSPORT_HANDLE handle, bool trace_on);

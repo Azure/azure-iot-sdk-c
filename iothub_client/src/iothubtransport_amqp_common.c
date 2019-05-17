@@ -2526,3 +2526,21 @@ int IoTHubTransport_AMQP_SetCallbackContext(TRANSPORT_LL_HANDLE handle, void* ct
     }
     return result;
 }
+
+int IoTHubTransport_AMQP_Common_GetSupportedPlatformInfo(TRANSPORT_LL_HANDLE handle, PLATFORM_INFO_OPTION* info)
+{
+    int result;
+
+    if (handle == NULL || info == NULL)
+    {
+        LogError("Invalid parameter specified (handle: %p, info: %p)", handle, info);
+        result = MU_FAILURE;
+    }
+    else
+    {
+        *info = PLATFORM_INFO_OPTION_RETRIEVE_SQM;
+        result = 0;
+    }
+
+    return result;
+}
