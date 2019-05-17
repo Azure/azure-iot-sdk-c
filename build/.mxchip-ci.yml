@@ -50,6 +50,18 @@ jobs:
       python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p "/dev/ttyACM1" -m $(MXCHIP_TO_FLASH)
       rm input.txt
     env:
+      # Most up to date SERIAL_TASKs output can be learned by passing 'help' into input.txt,
+      # Current SERIAL_TASK commands:
+      # help, 
+      # version, 
+      # exit (also resets device), 
+      # set_wifissid [args],
+      # set_wifipwd [args], 
+      # set_az_iothub [args], 
+      # set_dps_uds [args], 
+      # enable_secure [args],
+      # send_telemetry [args]
+
       SERIAL_TASK: $(SERIAL_TASK)
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
     displayName: 'run_test'
