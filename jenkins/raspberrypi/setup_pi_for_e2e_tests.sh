@@ -135,3 +135,8 @@ echo "Now you can run the cross compiled E2E tests!"
 # setcap cap_net_raw,cap_net_admin+ep iothubclient_mqtt_e2e_exe
 # ./iothubclient_mqtt_e2e_exe
 # # END RUN THE E2E TEST
+
+
+sudo cp devops.service /lib/systemd/system/devops.service
+mkdir -p "/home/pi/myagent/logs" && touch "/home/pi/myagent/logs/devops_service.log"
+sudo systemctl daemon-reload
