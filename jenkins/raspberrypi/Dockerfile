@@ -113,7 +113,6 @@ RUN ls -al
 # Build the SDK. This will use the OpenSSL, cURL and uuid binaries that we built before
 RUN cmake -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake -Duse_prov_client:BOOL=OFF -DCMAKE_INSTALL_PREFIX=${TOOLCHAIN_PREFIX} -Drun_e2e_tests:BOOL=ON -Drun_unittests=:BOOL=ON ..
 RUN make -j 2
-RUN make install
 RUN ls -al
 
 ########## PHASE 2: COMPILE BRANCH SPECIFIC INFORMATION ##########
@@ -136,7 +135,6 @@ RUN git submodule update --init
 WORKDIR /sdk/cmake 
 RUN cmake .
 RUN make -j 2
-RUN make install
 
 # Finally a sanity check to make sure the files are there
 RUN ls -al ${TOOLCHAIN_PREFIX}/lib
