@@ -234,6 +234,11 @@ static int IoTHubTransportAMQP_WS_SetCallbackContext(TRANSPORT_LL_HANDLE handle,
     return IoTHubTransport_AMQP_SetCallbackContext(handle, ctx);
 }
 
+static int IoTHubTransportAMQP_WS_GetSupportedPlatformInfo(TRANSPORT_LL_HANDLE handle, PLATFORM_INFO_OPTION* info)
+{
+    return IoTHubTransport_AMQP_Common_GetSupportedPlatformInfo(handle, info);
+}
+
 static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls =
 {
     IoTHubTransportAMQP_WS_SendMessageDisposition,                     /*pfIotHubTransport_Send_Message_Disposition IoTHubTransport_Send_Message_Disposition;*/
@@ -257,7 +262,8 @@ static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls =
     IotHubTransportAMQP_WS_Subscribe_InputQueue,                       /*pfIoTHubTransport_Subscribe_InputQueue IoTHubTransport_Subscribe_InputQueue; */
     IotHubTransportAMQP_WS_Unsubscribe_InputQueue,                     /*pfIoTHubTransport_Unsubscribe_InputQueue IoTHubTransport_Unsubscribe_InputQueue; */
     IoTHubTransportAMQP_WS_SetCallbackContext,                         /*pfIoTHubTransport_SetCallbackContext IoTHubTransport_SetCallbackContext; */
-    IoTHubTransportAMQP_WS_GetTwinAsync                                /*pfIoTHubTransport_GetTwinAsync IoTHubTransport_GetTwinAsync;*/
+    IoTHubTransportAMQP_WS_GetTwinAsync,                               /*pfIoTHubTransport_GetTwinAsync IoTHubTransport_GetTwinAsync;*/
+    IoTHubTransportAMQP_WS_GetSupportedPlatformInfo                         /*pfIoTHubTransport_GetSupportedPlatformInfo IoTHubTransport_GetSupportedPlatformInfo;*/
 };
 
 /* Codes_SRS_IoTHubTransportAMQP_WS_09_019: [This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for it's fields:
@@ -277,7 +283,8 @@ IoTHubTransport_Unsubscribe = IoTHubTransportAMQP_WS_Unsubscribe
 IoTHubTransport_DoWork = IoTHubTransportAMQP_WS_DoWork
 IoTHubTransport_SetRetryLogic = IoTHubTransportAMQP_WS_SetRetryLogic
 IoTHubTransport_SetOption = IoTHubTransportAMQP_WS_SetOption
-IoTHubTransport_GetSendStatus = IoTHubTransportAMQP_WS_GetSendStatus] */
+IoTHubTransport_GetSendStatus = IoTHubTransportAMQP_WS_GetSendStatus
+IoTHubTransport_GetSupportedPlatformInfo = IoTHubTransportAMQP_WS_GetSupportedPlatformInfo] */
 extern const TRANSPORT_PROVIDER* AMQP_Protocol_over_WebSocketsTls(void)
 {
     return &thisTransportProvider_WebSocketsOverTls;
