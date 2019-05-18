@@ -107,7 +107,7 @@ jobs:
       itemPattern: 'drop/**/*e2e_exe'
 
   - bash: |
-      (sleep 600; sudo reboot ) &
+      (sleep 1200; sudo reboot ) &
     displayName: 'Trigger Reboot Thread'
   
   - bash: |
