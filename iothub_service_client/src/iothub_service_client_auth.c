@@ -211,9 +211,9 @@ static IOTHUB_SERVICE_CLIENT_AUTH_HANDLE create_from_connection_string(const cha
                     /*Codes_SRS_IOTHUBSERVICECLIENT_12_041: [** IoTHubServiceClientAuth_CreateFromSharedAccessSignature shall allocate memory and copy sharedAccessSignature to result->sharedAccessKey by prefixing it with "sas=". **] */
                     else if (useSharedAccessSignature &&
                         (sharedAccess != NULL) &&
-                        ((shared_access = STRING_construct(IOTHUBSASPREFIX)) != NULL) &&
-                        (STRING_concat(shared_access, sharedAccess) != 0) &&
-                        (mallocAndStrcpy_s(&result->sharedAccessKey, STRING_c_str(shared_access)) != 0))
+                        (((shared_access = STRING_construct(IOTHUBSASPREFIX)) == NULL) ||
+                        (STRING_concat(shared_access, sharedAccess) != 0) ||
+                        (mallocAndStrcpy_s(&result->sharedAccessKey, STRING_c_str(shared_access)) != 0)))
                     {
                         /*Codes_SRS_IOTHUBSERVICECLIENT_12_029: [** If the mallocAndStrcpy_s fails, IoTHubServiceClientAuth_CreateFromSharedAccessSignature shall do clean up and return NULL. **] */
                         LogError("mallocAndStrcpy_s failed for sharedAccessSignature");
