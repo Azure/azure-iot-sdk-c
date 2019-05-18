@@ -8239,4 +8239,66 @@ TEST_FUNCTION(IoTHubTransport_MQTT_SetCallbackContext_fail)
     // cleanup
 }
 
+TEST_FUNCTION(IoTHubTransport_MQTT_GetSupportedPlatformInfo_success)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, TEST_MODULE_ID);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
+
+    PLATFORM_INFO_OPTION info;
+
+    umock_c_reset_all_calls();
+
+    // act
+    int result = IoTHubTransport_MQTT_GetSupportedPlatformInfo(handle, &info);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, 0, result);
+    ASSERT_ARE_EQUAL(int, info, PLATFORM_INFO_OPTION_RETRIEVE_SQM);
+
+    // cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+TEST_FUNCTION(IoTHubTransport_MQTT_GetSupportedPlatformInfo_NULL_handle)
+{
+    // arrange
+    PLATFORM_INFO_OPTION info;
+
+    umock_c_reset_all_calls();
+
+    // act
+    int result = IoTHubTransport_MQTT_GetSupportedPlatformInfo(NULL, &info);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_NOT_EQUAL(int, 0, result);
+
+    // cleanup
+}
+
+TEST_FUNCTION(IoTHubTransport_MQTT_GetSupportedPlatformInfo_NULL_info)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, TEST_MODULE_ID);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
+
+    umock_c_reset_all_calls();
+
+    // act
+    int result = IoTHubTransport_MQTT_GetSupportedPlatformInfo(handle, NULL);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_NOT_EQUAL(int, 0, result);
+
+    // cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
 END_TEST_SUITE(iothubtransport_mqtt_common_ut)
