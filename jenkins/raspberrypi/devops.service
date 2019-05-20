@@ -9,14 +9,11 @@ EnvironmentFile=/etc/devops-environment
 
 User=pi
 Type=idle
-ExecStart=/bin/bash /home/pi/myagent/run.sh > /home/pi/myagent/run.log 2>&1
+ExecStart=/bin/bash /home/pi/myagent/run.sh
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=devopsagent
 
 [Install]
 WantedBy=multi-user.target
-
-
-
-
-
-
 

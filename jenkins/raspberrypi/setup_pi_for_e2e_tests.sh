@@ -137,6 +137,23 @@ echo "Now you can run the cross compiled E2E tests!"
 # # END RUN THE E2E TEST
 
 
+# ###################################################################################################
+# # CREATE SYSTEMD SERVICE: devops
+# # Installing the agent as a systemd service.
+# # This needs a manual step of creating the devops-enviroment file in /etc/
+# # Look at the template devops-environment to figure out the necessary credentials
+# ###################################################################################################
 sudo cp devops.service /lib/systemd/system/devops.service
-mkdir -p "/home/pi/myagent/logs" && touch "/home/pi/myagent/logs/devops_service.log"
-sudo systemctl daemon-reload
+mkdir -p "/home/pi/devops-logs" && touch "/home/pi/devops-logs/devopsagent.log"
+
+# This step redirects the journalctl logs for devops.service to a user log file.
+echo "CREATE DEVOPSAGENT.CONF"
+touch /etc/rsyslog.d/devopsagent.conf
+echo "if $programname == '<your program identifier>' then /home/pi/devops-logs/devopsagent.log" >> /etc/rsyslog.d/devopsagent.conf
+echo "& stop" >> /etc/rsyslog.d/devopsagent.conf
+sudo chown root:adm /home/pi/devops-logs/devopsagent.log
+
+echo "NOTE: USER INPUT NECESSARY!"
+echo "add credentials to devops-environment, then copy to /etc/devops-environment"
+echo "Once you have added /etc/devops-environment file, run:"
+echo "sudo systemctl daemon-reload"
