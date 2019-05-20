@@ -106,18 +106,18 @@ jobs:
       artifactName: drop
       itemPattern: 'drop/**/*e2e_exe'
 
-
   - bash: |
       chmod -R 777 drop
       sudo setcap cap_net_raw,cap_net_admin+ep drop/source_artifacts/cmake/iothub_client/tests/iothubclient_mqtt_e2e/iothubclient_mqtt_e2e_exe
       cp drop/source_artifacts/cmake/iothub_client/tests/iothubclient_mqtt_e2e/iothubclient_mqtt_e2e_exe drop/source_artifacts/cmake/iothub_client/tests/iothubclient_mqtt_e2e/iothubclient_mqtt_e2e_but_better
       drop/source_artifacts/cmake/iothub_client/tests/iothubclient_mqtt_e2e/iothubclient_mqtt_e2e_but_better
+    displayName: 'Execute Test'
+
   - bash: |
       (sleep 60; sudo reboot ) &
     displayName: 'Trigger Reboot Thread'
   
     workingDirectory: '$(System.ArtifactsDirectory)'
-    displayName: 'Execute Test'
     # env:
     #   IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
     #   IOTHUB_DEVICE_ID: $(IOTHUB-DEVICE-ID)
