@@ -54,7 +54,14 @@ def serial_write(ser, message, file=None):
 
     # Check that the serial connection is open
     if ser.writable():
-        bytes_written = ser.write(bytearray((message.strip()+'\r\n').encode('ascii')))
+        buf = bytearray((message.strip()+'\r\n').encode('ascii'))
+        bytes_written = 0
+        bytes_written += ser.write(buf[:128])
+        time.sleep(.01)
+        if len(buf) > 128:
+            for i in range(128, len(buf), 128):
+                time.sleep(.01)
+                bytes_written += ser.write(buf[i:i+128])
         return bytes_written
     else:
         try:
@@ -99,6 +106,7 @@ def serial_read(ser, message, file, first_read=False):
             return False
 
 
+# Note: the buffer size on the mxchip appears to be 128 Bytes.
 def write_read(ser, input_file, output_file):
     if input_file:
         # set wait between read/write
