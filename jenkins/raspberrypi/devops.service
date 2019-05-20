@@ -9,7 +9,7 @@ EnvironmentFile=/etc/devops-environment
 
 User=pi
 Type=idle
-ExecStart=/bin/bash /home/pi/myagent/run.sh
+ExecStart=/bin/bash /home/pi/myagent/devops_service.sh
 StandardOutput=syslog
 StandardError=syslog
 SyslogIdentifier=devopsagent
