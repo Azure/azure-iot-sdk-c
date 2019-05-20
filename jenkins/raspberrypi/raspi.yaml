@@ -84,7 +84,7 @@ jobs:
     displayName: "list Build.SourcesDirectory"
 
   - script: |
-      cp -r $(Build.SourcesDirectory)/source_artifacts/**/*e2e_exe  $(Build.ArtifactStagingDirectory)
+      cp -r $(Build.SourcesDirectory)/source_artifacts/  $(Build.ArtifactStagingDirectory)
     displayName: "Copy Files Manually"
 
   - task: PublishBuildArtifacts@1
