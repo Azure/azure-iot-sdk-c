@@ -116,7 +116,7 @@ def write_read(ser, input_file, output_file):
             line = fp.readline()
             f = open(output_file, 'w+') # Output file
             while line:
-                time.sleep(.1)
+                # time.sleep(.1)
                 # Print only instruction, not secret content
                 if line.split():
                     print("Sending %s" %line.split()[0])
@@ -126,7 +126,7 @@ def write_read(ser, input_file, output_file):
                     print("burger king")
                     f.close()
                     break
-                time.sleep(wait)
+                time.sleep(1)
 
                 # Attempt to read serial port
                 output = serial_read(ser, line, f, first_read=True)
