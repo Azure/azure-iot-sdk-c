@@ -84,7 +84,7 @@ jobs:
     displayName: "list Build.SourcesDirectory"
 
   - script: |
-      cp -r $(Build.SourcesDirectory)/source_artifacts/  $(Build.ArtifactStagingDirectory)
+      find $(Build.SourcesDirectory)/source_artifacts/ -type f | grep -i e2e_exe$ | xargs -i cp {} $(Build.ArtifactStagingDirectory)
     displayName: "Copy Files Manually"
 
   - task: PublishBuildArtifacts@1
@@ -112,6 +112,7 @@ jobs:
   
   - bash: |
       chmod -R 777 drop
+      ls
       sudo setcap cap_net_raw,cap_net_admin+ep drop/source_artifacts/cmake/iothub_client/tests/iothubclient_mqtt_e2e/iothubclient_mqtt_e2e_exe
       cp drop/source_artifacts/cmake/iothub_client/tests/iothubclient_mqtt_e2e/iothubclient_mqtt_e2e_exe drop/source_artifacts/cmake/iothub_client/tests/iothubclient_mqtt_e2e/iothubclient_mqtt_e2e_but_better
       drop/source_artifacts/cmake/iothub_client/tests/iothubclient_mqtt_e2e/iothubclient_mqtt_e2e_but_better
