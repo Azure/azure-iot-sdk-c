@@ -28,7 +28,7 @@ void real_free(void* ptr)
 #include "umock_c/umock_c_negative_tests.h"
 #include "umock_c/umocktypes.h"
 #include "umock_c/umocktypes_c.h"
-#include "umocktypes_bool.h"
+#include "umock_c/umocktypes_bool.h"
 
 static int saved_malloc_returns_count = 0;
 static void* saved_malloc_returns[20];
