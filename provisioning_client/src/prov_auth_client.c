@@ -6,7 +6,7 @@
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/azure_base64.h"
-#include "azure_c_shared_utility/base32.h"
+#include "azure_c_shared_utility/azure_base32.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/sha.h"
 #include "azure_c_shared_utility/strings.h"
@@ -47,7 +47,7 @@ static char* encode_value(const uint8_t* msg_digest, size_t digest_len)
 {
     char* result;
 
-    char* encoded_hash = Base32_Encode_Bytes(msg_digest, digest_len);
+    char* encoded_hash = Azure_Base32_Encode_Bytes(msg_digest, digest_len);
     if (encoded_hash == NULL)
     {
         LogError("Failure encoded Base32");
@@ -160,61 +160,62 @@ static int sign_sas_data(PROV_AUTH_INFO* auth_info, const char* payload, unsigne
     }
     else
     {
-        BUFFER_HANDLE decoded_key = NULL;
-        BUFFER_HANDLE output_hash = NULL;
-
         char* symmetrical_key = auth_info->hsm_client_get_symm_key(auth_info->hsm_client_handle);
         if (symmetrical_key == NULL)
         {
             LogError("Failed getting asymmetrical key");
             result = MU_FAILURE;
         }
-        else if ((decoded_key = Azure_Base64_Decode(symmetrical_key)) == NULL)
-        {
-            LogError("Failed decoding symmetrical key");
-            result = MU_FAILURE;
-        }
-        else if ((output_hash = BUFFER_new()) == NULL)
-        {
-            LogError("Failed allocating output hash buffer");
-            result = MU_FAILURE;
-        }
         else
         {
-            size_t decoded_key_len = BUFFER_length(decoded_key);
-            const unsigned char* decoded_key_bytes = BUFFER_u_char(decoded_key);
-
-            if (HMACSHA256_ComputeHash(decoded_key_bytes, decoded_key_len, (const unsigned char*)payload, payload_len, output_hash) != HMACSHA256_OK)
+            BUFFER_HANDLE decoded_key;
+            BUFFER_HANDLE output_hash;
+            if ((decoded_key = Azure_Base64_Decode(symmetrical_key)) == NULL)
             {
-                LogError("Failed computing HMAC Hash");
+                LogError("Failed decoding symmetrical key");
+                result = MU_FAILURE;
+            }
+            else if ((output_hash = BUFFER_new()) == NULL)
+            {
+                LogError("Failed allocating output hash buffer");
+                BUFFER_delete(decoded_key);
                 result = MU_FAILURE;
             }
             else
             {
-                *len = BUFFER_length(output_hash);
-                if ( (*output = malloc(*len)) == NULL)
+                size_t decoded_key_len = BUFFER_length(decoded_key);
+                const unsigned char* decoded_key_bytes = BUFFER_u_char(decoded_key);
+
+                if (HMACSHA256_ComputeHash(decoded_key_bytes, decoded_key_len, (const unsigned char*)payload, payload_len, output_hash) != HMACSHA256_OK)
                 {
-                    LogError("Failed allocating output buffer");
+                    LogError("Failed computing HMAC Hash");
                     result = MU_FAILURE;
                 }
                 else
                 {
-                    const unsigned char* output_data = BUFFER_u_char(output_hash);
-                    memcpy(*output, output_data, *len);
-                    result = 0;
+                    *len = BUFFER_length(output_hash);
+                    if ((*output = malloc(*len)) == NULL)
+                    {
+                        LogError("Failed allocating output buffer");
+                        result = MU_FAILURE;
+                    }
+                    else
+                    {
+                        const unsigned char* output_data = BUFFER_u_char(output_hash);
+                        memcpy(*output, output_data, *len);
+                        result = 0;
+                    }
                 }
-
+                BUFFER_delete(decoded_key);
+                BUFFER_delete(output_hash);
             }
         }
-
-        BUFFER_delete(decoded_key);
-        BUFFER_delete(output_hash);
         free(symmetrical_key);
     }
     return result;
 }
 
-PROV_AUTH_HANDLE prov_auth_create()
+PROV_AUTH_HANDLE prov_auth_create(void)
 {
     PROV_AUTH_INFO* result;
     /* Codes_SRS_PROV_AUTH_CLIENT_07_001: [ prov_auth_create shall allocate the PROV_AUTH_INFO. ] */
