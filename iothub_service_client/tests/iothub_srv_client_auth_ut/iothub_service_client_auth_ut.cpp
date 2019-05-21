@@ -949,7 +949,8 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_for_sharedAcces
 
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_SAS_PREFIX_STRING));
 
-    EXPECTED_CALL(mocks, STRING_concat(TEST_STRING_HANDLE, TEST_CHAR_PTR));
+    EXPECTED_CALL(mocks, STRING_concat(TEST_STRING_HANDLE, TEST_CHAR_PTR))
+        .SetReturn(0);
 
     EXPECTED_CALL(mocks, STRING_c_str(TEST_STRING_HANDLE))
         .SetReturn(TEST_CHAR_PTR);
@@ -1042,7 +1043,8 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
 
     STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_SAS_PREFIX_STRING));
 
-    EXPECTED_CALL(mocks, STRING_concat(TEST_STRING_HANDLE, TEST_CHAR_PTR));
+    EXPECTED_CALL(mocks, STRING_concat(TEST_STRING_HANDLE, TEST_CHAR_PTR))
+        .SetReturn(0);
 
     EXPECTED_CALL(mocks, STRING_c_str(TEST_STRING_HANDLE))
         .SetReturn(TEST_CHAR_PTR);
