@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-// CAVEAT: This sample is to demonstrate azure IoT client concepts only and is not a guide design principles or style
+// CAUTION: This sample is to demonstrate azure IoT client concepts only and is not a guide design principles or style
 // Checking of return codes and error values shall be omitted for brevity.  Please practice sound engineering practices
 // when writing production code.
 
@@ -17,6 +17,7 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/shared_util_options.h"
+#include "azure_c_shared_utility/tickcounter.h"
 
 /* This sample uses the convenience APIs of iothub_client for example purposes. */
 
@@ -241,8 +242,13 @@ int main(void)
         // Set any option that are neccessary.
         // For available options please see the iothub_sdk_options.md documentation
 
-        //bool traceOn = true;
-        //(void)IoTHubDeviceClient_SetOption(iothub_handle, OPTION_LOG_TRACE, &traceOn);
+        bool traceOn = true;
+        (void)IoTHubDeviceClient_SetOption(device_handle, OPTION_LOG_TRACE, &traceOn);
+
+        // ms_delay can be between 1 and 100 milliseconds
+        tickcounter_ms_t ms_delay = 10;
+        (void)IoTHubDeviceClient_SetOption(device_handle, OPTION_DO_WORK_FREQUENCY_IN_MS, &ms_delay);
+
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
         // Setting the Trusted Certificate.  This is only necessary on system with without
