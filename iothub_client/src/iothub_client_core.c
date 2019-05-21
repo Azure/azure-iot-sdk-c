@@ -48,7 +48,7 @@ typedef struct IOTHUB_CLIENT_CORE_INSTANCE_TAG
     struct IOTHUB_QUEUE_CONTEXT_TAG* connection_status_user_context;
     struct IOTHUB_QUEUE_CONTEXT_TAG* message_user_context;
     struct IOTHUB_QUEUE_CONTEXT_TAG* method_user_context;
-    unsigned int do_work_freq_ms;
+    tickcounter_ms_t do_work_freq_ms;
     tickcounter_ms_t currentMessageTimeout;
 } IOTHUB_CLIENT_CORE_INSTANCE;
 
@@ -804,7 +804,7 @@ static int ScheduleWork_Thread(void* threadArgument)
 
                 garbageCollectorImpl(iotHubClientInstance);
                 VECTOR_HANDLE call_backs = VECTOR_move(iotHubClientInstance->saved_user_callback_list);
-                sleeptime_in_ms = iotHubClientInstance->do_work_freq_ms; // Update the sleepval within the locked thread.
+                sleeptime_in_ms = (unsigned int)iotHubClientInstance->do_work_freq_ms; // Update the sleepval within the locked thread.
                 (void)Unlock(iotHubClientInstance->LockHandle);
                 if (call_backs == NULL)
                 {
@@ -1717,7 +1717,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetOption(IOTHUB_CLIENT_CORE_HANDLE iotHub
                     /* Codes_SRS_IOTHUBCLIENT_41_007: [** If parameter `optionName` is `OPTION_DO_WORK_FREQUENCY_IN_MS` then `value` should be of type `tickcounter_ms_t *`. **]*/
                     if ((!iotHubClientInstance->currentMessageTimeout) || ( *((tickcounter_ms_t*)value) < iotHubClientInstance->currentMessageTimeout))
                     {
-                        iotHubClientInstance->do_work_freq_ms = *((unsigned int *)value);
+                        iotHubClientInstance->do_work_freq_ms = *((tickcounter_ms_t *)value);
                         result = IOTHUB_CLIENT_OK;
                     }
                     else
@@ -1735,11 +1735,10 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetOption(IOTHUB_CLIENT_CORE_HANDLE iotHub
             /* Codes_SRS_IOTHUBCLIENT_41_005: [ If parameter `optionName` is `OPTION_MESSAGE_TIMEOUT` then `IoTHubClientCore_SetOption` shall set `currentMessageTimeout` parameter of `IoTHubClientInstance` ]*/
             else if (strcmp(OPTION_MESSAGE_TIMEOUT, optionName) == 0)
             {
-                tickcounter_ms_t foo = (tickcounter_ms_t)(*(tickcounter_ms_t*)value);
-                iotHubClientInstance->currentMessageTimeout = foo;
+                iotHubClientInstance->currentMessageTimeout = (tickcounter_ms_t)(*(tickcounter_ms_t*)value);
 
                 /* Codes_SRS_IOTHUBCLIENT_41_004: [ If `currentMessageTimeout` is not less than `do_work_freq_ms`, `IotHubClientCore_SetOption` shall return `IOTHUB_CLIENT_ERROR` ]*/
-				if ((tickcounter_ms_t)iotHubClientInstance->do_work_freq_ms < iotHubClientInstance->currentMessageTimeout)
+				if (iotHubClientInstance->do_work_freq_ms < iotHubClientInstance->currentMessageTimeout)
                 {
                     /*Codes_SRS_IOTHUBCLIENT_41_006: [ If parameter `optionName` is `OPTION_MESSAGE_TIMEOUT` then `IoTHubClientCore_SetOption` shall call `IoTHubClientCore_LL_SetOption` passing the same parameters and return what IoTHubClientCore_LL_SetOption returns. ] */
                     result = IoTHubClientCore_LL_SetOption(iotHubClientInstance->IoTHubClientLLHandle, optionName, value);
