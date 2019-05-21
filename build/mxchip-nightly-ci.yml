@@ -47,7 +47,7 @@ jobs:
       ls
       cd $(Build.SourcesDirectory)/testtools/UART_interface/
       . input.sh
-      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(MXCHIP_NIGHTLY_PORT) -m $(MXCHIP_NGIHTLY_FILE_DESCRIPTOR)
+      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(MXCHIP_NIGHTLY_PORT) -m $(MXCHIP_NIGHTLY_FILE_DESCRIPTOR)
       rm input.txt
     env:
       # Most up to date SERIAL_TASKs output can be learned by passing 'help' into input.txt,
