@@ -9,7 +9,7 @@ jobs:
       . build_all/mbed5/setup.sh
     displayName: 'setup'
 
-- script: |
+  - script: |
       . build_all/mbed5/build.sh
     displayName: 'build'
     env:
