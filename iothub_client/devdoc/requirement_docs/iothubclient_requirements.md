@@ -384,6 +384,8 @@ Options handled by IoTHubClient_SetOption:
 
 **SRS_IOTHUBCLIENT_41_006: [** If parameter `optionName` is `OPTION_MESSAGE_TIMEOUT` then `IoTHubClientCore_SetOption` shall call `IoTHubClientCore_LL_SetOption` passing the same parameters and return what IoTHubClientCore_LL_SetOption returns. **]**
 
+**SRS_IOTHUBCLIENT_41_007: [** If parameter `optionName` is `OPTION_DO_WORK_FREQUENCY_IN_MS` then `value` should be of type `tickcounter_ms_t *`. **]**
+
 
 ## IoTHubClient_SetDeviceTwinCallback
 
