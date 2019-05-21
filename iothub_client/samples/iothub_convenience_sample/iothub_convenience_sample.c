@@ -241,10 +241,10 @@ int main(void)
 
         // Set any option that are neccessary.
         // For available options please see the iothub_sdk_options.md documentation
-
+#ifndef SAMPLE_HTTP
         bool traceOn = true;
         (void)IoTHubDeviceClient_SetOption(device_handle, OPTION_LOG_TRACE, &traceOn);
-
+#endif
         // ms_delay can be between 1 and 100 milliseconds
         tickcounter_ms_t ms_delay = 10;
         (void)IoTHubDeviceClient_SetOption(device_handle, OPTION_DO_WORK_FREQUENCY_IN_MS, &ms_delay);
