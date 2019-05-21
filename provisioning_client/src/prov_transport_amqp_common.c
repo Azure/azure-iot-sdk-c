@@ -13,17 +13,20 @@
 #include "azure_c_shared_utility/http_proxy_io.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/http_proxy_io.h"
-#include "azure_prov_client/internal/prov_transport_amqp_common.h"
+#include "azure_c_shared_utility/strings.h"
+#include "azure_c_shared_utility/azure_base64.h"
+
 #include "azure_uamqp_c/message_sender.h"
 #include "azure_uamqp_c/message_receiver.h"
 #include "azure_uamqp_c/message.h"
 #include "azure_uamqp_c/messaging.h"
 #include "azure_uamqp_c/saslclientio.h"
 #include "azure_uamqp_c/sasl_plain.h"
-#include "azure_prov_client/internal/prov_sasl_tpm.h"
-#include "azure_c_shared_utility/strings.h"
+#include "azure_uamqp_c/amqp_definitions_application_properties.h"
 
+#include "azure_prov_client/internal/prov_sasl_tpm.h"
 #include "azure_prov_client/prov_client_const.h"
+#include "azure_prov_client/internal/prov_transport_amqp_common.h"
 
 #define AMQP_MAX_SENDER_MSG_SIZE    UINT64_MAX
 #define AMQP_MAX_RECV_MSG_SIZE      65536
@@ -74,6 +77,7 @@ typedef struct PROV_TRANSPORT_AMQP_INFO_TAG
     PROV_TRANSPORT_CHALLENGE_CALLBACK challenge_cb;
     void* challenge_ctx;
     PROV_TRANSPORT_JSON_PARSE json_parse_cb;
+    PROV_TRANSPORT_CREATE_JSON_PAYLOAD json_create_cb;
     void* json_ctx;
 
     char* hostname;
@@ -97,6 +101,7 @@ typedef struct PROV_TRANSPORT_AMQP_INFO_TAG
     char* payload_data;
 
     bool log_trace;
+    uint32_t retry_after_value;
 
     TRANSPORT_HSM_TYPE hsm_type;
 
@@ -182,7 +187,7 @@ static void on_message_sender_state_changed_callback(void* context, MESSAGE_SEND
                         amqp_info->amqp_state = AMQP_STATE_CONNECTED;
                         if (amqp_info->status_cb != NULL)
                         {
-                            amqp_info->status_cb(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, amqp_info->status_ctx);
+                            amqp_info->status_cb(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, amqp_info->retry_after_value, amqp_info->status_ctx);
                         }
                     }
                     break;
@@ -220,7 +225,7 @@ static void on_message_receiver_state_changed_callback(const void* user_ctx, MES
                     amqp_info->amqp_state = AMQP_STATE_CONNECTED;
                     if (amqp_info->status_cb != NULL)
                     {
-                        amqp_info->status_cb(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, amqp_info->status_ctx);
+                        amqp_info->status_cb(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, amqp_info->retry_after_value, amqp_info->status_ctx);
                     }
                 }
                 break;
@@ -233,9 +238,46 @@ static void on_message_receiver_state_changed_callback(const void* user_ctx, MES
     }
 }
 
+static void get_error_retry_after(PROV_TRANSPORT_AMQP_INFO* amqp_info, AMQP_VALUE delivery_state)
+{
+    if (amqpvalue_get_type(delivery_state) == AMQP_TYPE_LIST)
+    {
+        uint32_t list_count = 0;
+        if (amqpvalue_get_list_item_count(delivery_state, &list_count) == 0)
+        {
+            for (uint32_t index = 0; index < list_count; index++)
+            {
+                AMQP_VALUE list_item_value = amqpvalue_get_list_item(delivery_state, index);
+                if (list_item_value != NULL && amqpvalue_get_type(list_item_value) == AMQP_TYPE_DESCRIBED)
+                {
+                    // Currently this comes back as ulong from the amqp value
+                    AMQP_VALUE desc = amqpvalue_get_inplace_descriptor(list_item_value);
+                    if (desc != NULL && amqpvalue_get_type(desc) == AMQP_TYPE_ULONG)
+                    {
+                        uint64_t desc_value;
+                        if (amqpvalue_get_ulong(desc, &desc_value) == 0)
+                        {
+                            // If the value is greater than the max throttle time (5 min)
+                            // then set it to max throttle time
+                            if (desc_value > MAX_PROV_GET_THROTTLE_TIME)
+                            {
+                                amqp_info->retry_after_value = MAX_PROV_GET_THROTTLE_TIME;
+                            }
+                            else
+                            {
+                                amqp_info->retry_after_value = (uint32_t)desc_value;
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 static void on_amqp_send_complete(void* user_ctx, MESSAGE_SEND_RESULT send_result, AMQP_VALUE delivery_state)
 {
-    (void)delivery_state;
     if (user_ctx == NULL)
     {
         LogError("on_amqp_send_complete was invoked with a NULL context");
@@ -245,6 +287,8 @@ static void on_amqp_send_complete(void* user_ctx, MESSAGE_SEND_RESULT send_resul
         PROV_TRANSPORT_AMQP_INFO* amqp_info = (PROV_TRANSPORT_AMQP_INFO*)user_ctx;
         if (send_result != MESSAGE_SEND_OK)
         {
+            (void)delivery_state;
+            // To be included when a issue in the service is fixed.
             amqp_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
             amqp_info->amqp_state = AMQP_STATE_ERROR;
         }
@@ -258,6 +302,108 @@ static STRING_HANDLE construct_link_address(PROV_TRANSPORT_AMQP_INFO* amqp_info)
     if (result == NULL)
     {
         LogError("Failure constructing event address");
+    }
+    return result;
+}
+
+static int get_retry_after_property(PROV_TRANSPORT_AMQP_INFO* amqp_info, MESSAGE_HANDLE message)
+{
+    int result;
+    AMQP_VALUE app_prop = NULL;
+    AMQP_VALUE prop_desc = NULL;
+    uint32_t prop_count = 0;
+
+    if (message_get_application_properties(message, &app_prop) != 0)
+    {
+        LogError("Failure getting application property");
+        result = MU_FAILURE;
+    }
+    else if ((prop_desc = amqpvalue_get_inplace_described_value(app_prop)) == NULL)
+    {
+        LogError("Failure getting application property description");
+        application_properties_destroy(app_prop);
+        result = MU_FAILURE;
+    }
+    else if (amqpvalue_get_map_pair_count(prop_desc, &prop_count) != 0)
+    {
+        LogError("Failure getting application property count");
+        application_properties_destroy(app_prop);
+        result = MU_FAILURE;
+    }
+    else
+    {
+        bool found_value = false;
+        result = MU_FAILURE;
+        for (uint32_t index = 0; index < prop_count; index++)
+        {
+            AMQP_VALUE map_key_name = NULL;
+            AMQP_VALUE map_key_value = NULL;
+            const char *key_name;
+
+            if ((amqpvalue_get_map_key_value_pair(prop_desc, index, &map_key_name, &map_key_value)) != 0)
+            {
+                LogError("Failed reading the key/value pair from the uAMQP property map.");
+                result = MU_FAILURE;
+            }
+            else
+            {
+                if ((result = amqpvalue_get_string(map_key_name, &key_name)) != 0)
+                {
+                    LogError("Failed parsing the uAMQP property name.");
+                    result = MU_FAILURE;
+                }
+                else if (key_name != NULL && strcmp(key_name, RETRY_AFTER_KEY_VALUE) == 0)
+                {
+                    const char* key_value;
+                    int32_t val_int;
+
+                    // The AMQP type is either int or string, for more information
+                    // on this see prov_transport.h:parse_retry_after_value function.
+                    AMQP_TYPE type = amqpvalue_get_type(map_key_value);
+                    if (type == AMQP_TYPE_INT)
+                    {
+                        if (amqpvalue_get_int(map_key_value, &val_int) != 0)
+                        {
+                            LogError("Failed parsing the uAMQP property value.");
+                            result = MU_FAILURE;
+                        }
+                        else
+                        {
+                            amqp_info->retry_after_value = (uint32_t)val_int;
+                            found_value = true;
+                            result = 0;
+                        }
+                    }
+                    else if (type == AMQP_TYPE_STRING)
+                    {
+                        if (amqpvalue_get_string(map_key_value, &key_value) != 0)
+                        {
+                            LogError("Failed parsing the uAMQP property value.");
+                            result = MU_FAILURE;
+                        }
+                        else
+                        {
+                            amqp_info->retry_after_value = parse_retry_after_value(key_value);
+                            found_value = true;
+                            result = 0;
+                        }
+                    }
+                    else
+                    {
+                        LogError("Failed parsing the uAMQP property value.");
+                        result = MU_FAILURE;
+                    }
+                }
+                amqpvalue_destroy(map_key_value);
+                amqpvalue_destroy(map_key_name);
+            }
+            if (found_value)
+            {
+                // If the message retry-after only got through it once
+                break;
+            }
+        }
+        application_properties_destroy(app_prop);
     }
     return result;
 }
@@ -310,6 +456,10 @@ static AMQP_VALUE on_message_recv_callback(const void* user_ctx, MESSAGE_HANDLE 
             }
             else
             {
+                // Get the retry after field on failures this value will
+                // be set to the default value
+                (void)get_retry_after_property(amqp_info, message);
+
                 memset(amqp_info->payload_data, 0, binary_data.length + 1);
                 memcpy(amqp_info->payload_data, binary_data.bytes, binary_data.length);
                 if (amqp_info->transport_state == TRANSPORT_CLIENT_STATE_REG_SENT)
@@ -360,13 +510,70 @@ static int set_amqp_msg_property(AMQP_VALUE uamqp_prop_map, const char* key, con
     return result;
 }
 
+static char* construct_json_data(PROV_TRANSPORT_AMQP_INFO* amqp_info)
+{
+    char* result;
+    bool data_success = true;
+    STRING_HANDLE encoded_srk = NULL;
+    STRING_HANDLE encoded_ek = NULL;
+    const char* ek_value = NULL;
+    const char* srk_value = NULL;
+
+    // For TPM we need to add tpm encoded values
+    if (amqp_info->hsm_type == TRANSPORT_HSM_TYPE_TPM)
+    {
+        if ((encoded_ek = Azure_Base64_Encode(amqp_info->ek)) == NULL)
+        {
+            LogError("Failure encoding ek");
+            data_success = false;
+        }
+        else if ((encoded_srk = Azure_Base64_Encode(amqp_info->srk)) == NULL)
+        {
+            LogError("Failure encoding srk");
+            data_success = false;
+        }
+        else
+        {
+            ek_value = STRING_c_str(encoded_ek);
+            srk_value = STRING_c_str(encoded_srk);
+        }
+    }
+
+    if (data_success)
+    {
+        result = amqp_info->json_create_cb(ek_value, srk_value, amqp_info->json_ctx);
+    }
+    else
+    {
+        result = NULL;
+    }
+
+    if (encoded_srk != NULL)
+    {
+        STRING_delete(encoded_srk);
+    }
+    if (encoded_ek != NULL)
+    {
+        STRING_delete(encoded_ek);
+    }
+    return result;
+}
+
 static int send_amqp_message(PROV_TRANSPORT_AMQP_INFO* amqp_info, const char* msg_type)
 {
     int result;
     MESSAGE_HANDLE uamqp_message;
+    char* json_data;
+
     if ((uamqp_message = message_create()) == NULL)
     {
         LogError("Failed allocating the uAMQP message.");
+        result = MU_FAILURE;
+    }
+    else if ((json_data = construct_json_data(amqp_info)) == NULL)
+    {
+        LogError("Failed constructing json payload");
+        message_destroy(uamqp_message);
         result = MU_FAILURE;
     }
     else
@@ -374,8 +581,8 @@ static int send_amqp_message(PROV_TRANSPORT_AMQP_INFO* amqp_info, const char* ms
         AMQP_VALUE uamqp_prop_map;
 
         BINARY_DATA binary_data;
-        binary_data.bytes = NULL;
-        binary_data.length = 0;
+        binary_data.bytes = (const unsigned char*)json_data;
+        binary_data.length = strlen(json_data);
 
         if ((uamqp_prop_map = amqpvalue_create_map()) == NULL)
         {
@@ -435,6 +642,7 @@ static int send_amqp_message(PROV_TRANSPORT_AMQP_INFO* amqp_info, const char* ms
         }
         amqpvalue_destroy(uamqp_prop_map);
         message_destroy(uamqp_message);
+        free(json_data);
     }
     return result;
 }
@@ -1028,6 +1236,7 @@ PROV_DEVICE_TRANSPORT_HANDLE prov_transport_common_amqp_create(const char* uri, 
                 result->hsm_type = type;
                 result->error_cb = error_cb;
                 result->error_ctx = error_ctx;
+                result->retry_after_value = PROV_GET_THROTTLE_TIME;
             }
         }
     }
@@ -1184,11 +1393,11 @@ int prov_transport_common_amqp_close(PROV_DEVICE_TRANSPORT_HANDLE handle)
     return result;
 }
 
-int prov_transport_common_amqp_register_device(PROV_DEVICE_TRANSPORT_HANDLE handle, PROV_TRANSPORT_JSON_PARSE json_parse_cb, void* json_ctx)
+int prov_transport_common_amqp_register_device(PROV_DEVICE_TRANSPORT_HANDLE handle, PROV_TRANSPORT_JSON_PARSE json_parse_cb, PROV_TRANSPORT_CREATE_JSON_PAYLOAD json_create_cb, void* json_ctx)
 {
     int result;
     PROV_TRANSPORT_AMQP_INFO* amqp_info = (PROV_TRANSPORT_AMQP_INFO*)handle;
-    if (amqp_info == NULL || json_parse_cb == NULL)
+    if (amqp_info == NULL || json_parse_cb == NULL || json_create_cb == NULL)
     {
         /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_014: [ If handle is NULL, prov_transport_common_amqp_register_device shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p, json_parse_cb: %p", handle, json_parse_cb);
@@ -1211,6 +1420,7 @@ int prov_transport_common_amqp_register_device(PROV_DEVICE_TRANSPORT_HANDLE hand
         /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_017: [ On success prov_transport_common_amqp_register_device shall return a zero value. ] */
         amqp_info->transport_state = TRANSPORT_CLIENT_STATE_REG_SEND;
         amqp_info->json_parse_cb = json_parse_cb;
+        amqp_info->json_create_cb = json_create_cb;
         amqp_info->json_ctx = json_ctx;
 
         result = 0;
@@ -1330,7 +1540,7 @@ void prov_transport_common_amqp_dowork(PROV_DEVICE_TRANSPORT_HANDLE handle)
                                 {
                                     if (amqp_info->status_cb != NULL)
                                     {
-                                        amqp_info->status_cb(parse_info->prov_status, amqp_info->status_ctx);
+                                        amqp_info->status_cb(parse_info->prov_status, amqp_info->retry_after_value, amqp_info->status_ctx);
                                     }
                                 }
                                 break;

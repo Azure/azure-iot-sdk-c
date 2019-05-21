@@ -32,7 +32,7 @@ static void my_gballoc_free(void* ptr)
 #include "azure_c_shared_utility/gballoc.h"
 #include "umock_c/umock_c_prod.h"
 #include "azure_c_shared_utility/buffer_.h"
-#include "azure_c_shared_utility/base32.h"
+#include "azure_c_shared_utility/azure_base32.h"
 #include "azure_c_shared_utility/hmacsha256.h"
 #include "hsm_client_data.h"
 #undef ENABLE_MOCKS
@@ -398,8 +398,8 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __LINE__);
         REGISTER_GLOBAL_MOCK_HOOK(Azure_Base64_Encode_Bytes, my_Azure_Base64_Encode_Bytes);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Azure_Base64_Encode_Bytes, NULL);
-        REGISTER_GLOBAL_MOCK_HOOK(Base32_Encode_Bytes, my_Base32_Encode_Bytes);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Base32_Encode_Bytes, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(Azure_Base32_Encode_Bytes, my_Base32_Encode_Bytes);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Azure_Base32_Encode_Bytes, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(Azure_Base64_Decode, my_Azure_Base64_Decode);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Azure_Base64_Decode, NULL);
 
@@ -505,7 +505,7 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
             STRICT_EXPECTED_CALL(SHA256Reset(IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(SHA256Input(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
             STRICT_EXPECTED_CALL(SHA256Result(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(Base32_Encode_Bytes(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+            STRICT_EXPECTED_CALL(Azure_Base32_Encode_Bytes(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
             STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));

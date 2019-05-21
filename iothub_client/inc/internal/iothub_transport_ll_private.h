@@ -11,6 +11,7 @@ typedef union IOTHUB_IDENTITY_INFO_TAG IOTHUB_IDENTITY_INFO;
 
 #include "azure_c_shared_utility/doublylinkedlist.h"
 #include "azure_c_shared_utility/strings.h"
+#include "azure_c_shared_utility/platform.h"
 #include "internal/iothub_client_authorization.h"
 #include "iothub_message.h"
 
@@ -90,6 +91,7 @@ extern "C"
     typedef int(*pfIoTHubTransport_Subscribe_InputQueue)(IOTHUB_DEVICE_HANDLE handle);
     typedef void(*pfIoTHubTransport_Unsubscribe_InputQueue)(IOTHUB_DEVICE_HANDLE handle);
     typedef int(*pfIoTHubTransport_SetCallbackContext)(TRANSPORT_LL_HANDLE handle, void* ctx);
+    typedef int(*pfIoTHubTransport_GetSupportedPlatformInfo)(TRANSPORT_LL_HANDLE handle, PLATFORM_INFO_OPTION* info);
 
 #define TRANSPORT_PROVIDER_FIELDS                                                   \
 pfIotHubTransport_SendMessageDisposition IoTHubTransport_SendMessageDisposition;    \
@@ -113,7 +115,8 @@ pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus;                  
 pfIoTHubTransport_Subscribe_InputQueue IoTHubTransport_Subscribe_InputQueue;        \
 pfIoTHubTransport_Unsubscribe_InputQueue IoTHubTransport_Unsubscribe_InputQueue;    \
 pfIoTHubTransport_SetCallbackContext IoTHubTransport_SetCallbackContext;            \
-pfIoTHubTransport_GetTwinAsync IoTHubTransport_GetTwinAsync     /*there's an intentional missing ; on this line*/
+pfIoTHubTransport_GetTwinAsync IoTHubTransport_GetTwinAsync;                        \
+pfIoTHubTransport_GetSupportedPlatformInfo IoTHubTransport_GetSupportedPlatformInfo     /*there's an intentional missing ; on this line*/
 
     struct TRANSPORT_PROVIDER_TAG
     {

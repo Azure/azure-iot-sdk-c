@@ -77,6 +77,9 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_STATUS, IOTHUB_CLIENT_STATUS_VALUES);
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RETRY_POLICY, IOTHUB_CLIENT_RETRY_POLICY_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_RETRY_POLICY, IOTHUB_CLIENT_RETRY_POLICY_VALUES);
 
+TEST_DEFINE_ENUM_TYPE(PLATFORM_INFO_OPTION, PLATFORM_INFO_OPTION_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(PLATFORM_INFO_OPTION, PLATFORM_INFO_OPTION_VALUES);
+
 static TEST_MUTEX_HANDLE test_serialize_mutex;
 
 #define TEST_RETRY_POLICY IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER
@@ -568,6 +571,7 @@ static pfIoTHubTransport_Subscribe_DeviceMethod     IoTHubTransportMqtt_WS_Subsc
 static pfIoTHubTransport_Unsubscribe_DeviceMethod   IoTHubTransportMqtt_WS_Unsubscribe_DeviceMethod;
 static pfIoTHubTransport_ProcessItem                IoTHubTransportMqtt_WS_ProcessItem;
 static pfIoTHubTransport_SetCallbackContext         IotHubTransportMqtt_WS_SetCallbackContext;
+static pfIoTHubTransport_GetSupportedPlatformInfo   IotHubTransportMqtt_WS_GetSupportedPlatformInfo;
 
 static TRANSPORT_LL_HANDLE my_IoTHubTransport_MQTT_Common_Create(const IOTHUBTRANSPORT_CONFIG* config, MQTT_GET_IO_TRANSPORT get_io_transport, TRANSPORT_CALLBACKS_INFO* cb_info, void* ctx)
 {
@@ -659,6 +663,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     IoTHubTransportMqtt_WS_Unsubscribe_DeviceMethod = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_Unsubscribe_DeviceMethod;
     IoTHubTransportMqtt_WS_ProcessItem = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_ProcessItem;
     IotHubTransportMqtt_WS_SetCallbackContext = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_SetCallbackContext;
+    IotHubTransportMqtt_WS_GetSupportedPlatformInfo = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_GetSupportedPlatformInfo;
 }
 
 TEST_SUITE_CLEANUP(suite_cleanup)
@@ -1278,6 +1283,74 @@ TEST_FUNCTION(IoTHubTransportMqtt_WS_Unsubscribe_DeviceTwin_success)
 
     // cleanup
     IoTHubTransportMqtt_WS_Destroy(handle);
+}
+
+TEST_FUNCTION(IoTHubTransportMqtt_WS_GetSupportedPlatformInfo)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_WS_Create(&config, transport_cb_info, NULL);
+
+    PLATFORM_INFO_OPTION expected_info = PLATFORM_INFO_OPTION_RETRIEVE_SQM;
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_GetSupportedPlatformInfo(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .CopyOutArgumentBuffer_info(&expected_info, sizeof(expected_info))
+        .SetReturn(0);
+
+    // act
+    PLATFORM_INFO_OPTION info;
+    int result = IotHubTransportMqtt_WS_GetSupportedPlatformInfo(handle, &info);
+
+    // assert
+
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, result, 0);
+    ASSERT_ARE_EQUAL(int, info, PLATFORM_INFO_OPTION_RETRIEVE_SQM);
+
+    // cleanup
+}
+
+TEST_FUNCTION(IoTHubTransportMqtt_WS_GetSupportedPlatformInfo_NULL_handle)
+{
+    // arrange
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_GetSupportedPlatformInfo(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .SetReturn(1);
+
+    // act
+    PLATFORM_INFO_OPTION info;
+    int result = IotHubTransportMqtt_WS_GetSupportedPlatformInfo(NULL, &info);
+
+    // assert
+
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_NOT_EQUAL(int, result, 0);
+
+    // cleanup
+}
+
+TEST_FUNCTION(IoTHubTransportMqtt_WS_GetSupportedPlatformInfo_NULL_info)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_WS_Create(&config, transport_cb_info, NULL);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_GetSupportedPlatformInfo(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .SetReturn(1);
+
+    // act
+    int result = IotHubTransportMqtt_WS_GetSupportedPlatformInfo(handle, NULL);
+
+    // assert
+
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_NOT_EQUAL(int, result, 0);
+
+    // cleanup
 }
 
 END_TEST_SUITE(iothubtransportmqtt_ws_ut)
