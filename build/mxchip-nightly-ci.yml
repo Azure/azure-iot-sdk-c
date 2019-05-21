@@ -40,8 +40,11 @@ jobs:
       artifactName: 'drop'
 
   - script: |
-      echo $(NEWTIN) | sudo -S cp $(System.ArtifactsDirectory)/drop/mxchip.bin /media/newt/$(MXCHIP_NGIHTLY_FILE_DESCRIPTOR)
+      echo $(NEWTIN) | sudo -S cp $(System.ArtifactsDirectory)/drop/mxchip.bin /media/newt/$MXCHIP_NGIHTLY_FILE_DESCRIPTOR
     displayName: 'deploy'
+    env:
+      MXCHIP_NGIHTLY_FILE_DESCRIPTOR: $(MXCHIP_NGIHTLY_FILE_DESCRIPTOR)
+
 
   - script: |
       ls
