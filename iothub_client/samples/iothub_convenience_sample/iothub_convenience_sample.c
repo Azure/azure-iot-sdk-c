@@ -51,7 +51,7 @@ Please practice sound engineering practices when writing production code.
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 /* Paste in your device connection string  */
-static const char* connectionString = "[device connection string]";
+static const char* connectionString = "HostName=yosephhub.azure-devices.net;DeviceId=alpha;SharedAccessKey=gFbjxEU2Vkv6btXrGuZSh1Kix7ClD/ClskuOlZ18UYg=";
 
 static bool g_continueRunning = true;
 int g_interval = 10000;  // 10 sec send interval initially

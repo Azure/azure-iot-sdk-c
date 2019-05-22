@@ -2138,7 +2138,8 @@ TEST_FUNCTION(IoTHubClientCore_SetOption_do_work_loop_frequency_in_ms_succeed)
     IoTHubClientCore_Destroy(iothub_handle);
 }
 
-TEST_FUNCTION(IoTHubClientCore_SetOption_do_work_loop_frequency_in_ms_fail)
+/* Tests_SRS_IOTHUBCLIENT_41_003: [** The value of `OPTION_DO_WORK_FREQUENCY_IN_MS` shall be limited to 100 to follow SDK best practices by not reducing the DoWork frequency below 10 Hz **] */
+TEST_FUNCTION(IoTHubClientCore_SetOption_do_work_loop_frequency_in_ms_value_limits_fail)
 {
     // arrange
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
@@ -2147,12 +2148,17 @@ TEST_FUNCTION(IoTHubClientCore_SetOption_do_work_loop_frequency_in_ms_fail)
     const char* option_name = "do_work_freq_ms";
     tickcounter_ms_t tickcounter_value = 0;
     const void* option_value = (void*) &tickcounter_value;
+    tickcounter_ms_t tickcounter_value_2 = 200;
+    const void* option_value_2 = (void*) &tickcounter_value_2;
 
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SetOption(iothub_handle, option_name, option_value);
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SetOption(iothub_handle, option_name, option_value_2);
 
     // assert
     ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
@@ -2163,7 +2169,6 @@ TEST_FUNCTION(IoTHubClientCore_SetOption_do_work_loop_frequency_in_ms_fail)
 }
 
 
-/* SYNC DEVICE METHOD */
 TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_method_do_work_frequency_in_ms_success)
 {
     
@@ -2172,10 +2177,10 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_method_do_work_frequency_in_ms_su
     const void* option_value = (void*) &tickcounter_value;
 
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
-    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SetOption(iothub_handle, option_name, option_value);
+    (void)IoTHubClientCore_SetOption(iothub_handle, option_name, option_value);
 
-    // (void)IoTHubClientCore_SetDeviceMethodCallback(iothub_handle, test_method_callback, CALLBACK_CONTEXT);
-    // (void)g_inboundDeviceCallback(TEST_METHOD_NAME, TEST_DEVICE_METHOD_RESPONSE, TEST_DEVICE_RESP_LENGTH, TEST_METHOD_ID, g_userContextCallback);
+     (void)IoTHubClientCore_SetDeviceMethodCallback(iothub_handle, test_method_callback, CALLBACK_CONTEXT);
+     (void)g_inboundDeviceCallback(TEST_METHOD_NAME, TEST_DEVICE_METHOD_RESPONSE, TEST_DEVICE_RESP_LENGTH, TEST_METHOD_ID, g_userContextCallback);
     umock_c_reset_all_calls();
     g_how_thread_loops = 1;
 
@@ -2190,6 +2195,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_method_do_work_frequency_in_ms_su
     STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 
     // act
+	ASSERT_IS_NOT_NULL(g_thread_func);
     g_thread_func(g_thread_func_arg);
 
     // assert
