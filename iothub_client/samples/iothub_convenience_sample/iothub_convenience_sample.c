@@ -20,10 +20,17 @@ Please practice sound engineering practices when writing production code.
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/tickcounter.h"
 
-/* This sample uses the multithreaded APIs of iothub_client for example purposes. */
+/* 
+This sample uses the multithreaded APIs of iothub_client for example purposes. 
+The difference between multithreaded and singlethreaded (_ll_) API?
+Multithreaded creates a separate thread to perform DoWork calls, which are necessary 
+for the device client library to do anything. The benefit of using the 
+multithreaded API is that the calls to DoWork are abstracted away from your code. 
+*/
+
 
 // The protocol you wish to use should be uncommented
-//
+// 
 #define SAMPLE_MQTT
 //#define SAMPLE_MQTT_OVER_WEBSOCKETS
 //#define SAMPLE_AMQP
@@ -244,7 +251,7 @@ int main(void)
         // For available options please see the iothub_sdk_options.md documentation
 
         // Setting Log Tracing. 
-        // Log tracing is supported in MQTT and AMQP.
+        // Log tracing is supported in MQTT and AMQP. Not HTTP.
 #ifndef SAMPLE_HTTP
         bool traceOn = true;
         (void)IoTHubDeviceClient_SetOption(device_handle, OPTION_LOG_TRACE, &traceOn);
