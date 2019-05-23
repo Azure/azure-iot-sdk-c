@@ -44,6 +44,9 @@ static IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo3 = NULL;
 #define IOTHUB_COUNTER_MAX           10
 #define MAX_CLOUD_TRAVEL_TIME        60.0
 
+#define DEFAULT_CONSUMER_GROUP         "$Default"
+#define DEFAULT_PARTITION_COUNT        16
+
 TEST_DEFINE_ENUM_TYPE(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE(MAP_RESULT, MAP_RESULT_VALUES);
@@ -417,10 +420,13 @@ static void SendEvent(IOTHUB_PROVISIONED_DEVICE* deviceToUse)
     }
 
     {
-        IOTHUB_TEST_HANDLE iotHubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo1), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo1), deviceToUse->deviceId, IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo1), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo1), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo1), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo1));
+        const char* consumerGroup = IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo1);
+        int partitionCount = IoTHubAccount_GetIoTHubPartitionCount(g_iothubAcctInfo1);
+
+        IOTHUB_TEST_HANDLE iotHubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo1), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo1), deviceToUse->deviceId, IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo1), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo1), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo1), consumerGroup != NULL ? consumerGroup : DEFAULT_CONSUMER_GROUP);
         ASSERT_IS_NOT_NULL(iotHubTestHandle);
 
-        IOTHUB_TEST_CLIENT_RESULT result = IoTHubTest_ListenForEventForMaxDrainTime(iotHubTestHandle, IoTHubCallback, IoTHubAccount_GetIoTHubPartitionCount(g_iothubAcctInfo1), sendData);
+        IOTHUB_TEST_CLIENT_RESULT result = IoTHubTest_ListenForEventForMaxDrainTime(iotHubTestHandle, IoTHubCallback, partitionCount > 0 ? partitionCount : DEFAULT_PARTITION_COUNT, sendData);
         ASSERT_ARE_EQUAL(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_OK, result);
 
         IoTHubTest_Deinit(iotHubTestHandle);
