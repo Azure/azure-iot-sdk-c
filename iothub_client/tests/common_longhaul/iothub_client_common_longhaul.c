@@ -51,6 +51,9 @@
 #define MAX_TWIN_DESIRED_PROP_TRAVEL_TIME_SECS  300.0
 #define MAX_TWIN_REPORTED_PROP_TRAVEL_TIME_SECS 300.0
 
+#define DEFAULT_CONSUMER_GROUP         "$Default"
+#define DEFAULT_PARTITION_COUNT        16
+
 typedef struct IOTHUB_LONGHAUL_RESOURCES_TAG
 {
     char* test_id;
@@ -924,13 +927,15 @@ int longhaul_start_listening_for_telemetry_messages(IOTHUB_LONGHAUL_RESOURCES_HA
         }
         else
         {
+            const char* consumerGroup = IoTHubAccount_GetEventhubConsumerGroup(iotHubLonghaul->iotHubAccountInfo);
+
             if ((iotHubLonghaul->iotHubTestHandle = IoTHubTest_Initialize(
                 IoTHubAccount_GetEventHubConnectionString(iotHubLonghaul->iotHubAccountInfo),
                 IoTHubAccount_GetIoTHubConnString(iotHubLonghaul->iotHubAccountInfo),
                 deviceToUse->deviceId, IoTHubAccount_GetEventhubListenName(iotHubLonghaul->iotHubAccountInfo),
                 IoTHubAccount_GetEventhubAccessKey(iotHubLonghaul->iotHubAccountInfo),
                 IoTHubAccount_GetSharedAccessSignature(iotHubLonghaul->iotHubAccountInfo),
-                IoTHubAccount_GetEventhubConsumerGroup(iotHubLonghaul->iotHubAccountInfo))) == NULL)
+                consumerGroup != NULL ? consumerGroup : DEFAULT_CONSUMER_GROUP)) == NULL)
             {
                 LogError("Failed initializing IoTHubTest");
                 result = MU_FAILURE;
@@ -938,6 +943,7 @@ int longhaul_start_listening_for_telemetry_messages(IOTHUB_LONGHAUL_RESOURCES_HA
             else
             {
                 time_t time_start_range = add_seconds(time(NULL), SERVICE_EVENT_WAIT_TIME_DELTA_SECONDS);
+                int partitionCount = IoTHubAccount_GetIoTHubPartitionCount(iotHubLonghaul->iotHubAccountInfo);
 
                 if (time_start_range == INDEFINITE_TIME)
                 {
@@ -949,7 +955,7 @@ int longhaul_start_listening_for_telemetry_messages(IOTHUB_LONGHAUL_RESOURCES_HA
                 else if (
                     IoTHubTest_ListenForEventAsync(
                         iotHubLonghaul->iotHubTestHandle,
-                        IoTHubAccount_GetIoTHubPartitionCount(iotHubLonghaul->iotHubAccountInfo),
+                        partitionCount > 0 ? partitionCount : DEFAULT_PARTITION_COUNT,
                         time_start_range, on_message_received, iotHubLonghaul) != IOTHUB_TEST_CLIENT_OK)
                 {
                     LogError("Failed listening for device to cloud messages");
