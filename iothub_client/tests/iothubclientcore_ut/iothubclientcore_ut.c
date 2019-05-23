@@ -2146,10 +2146,10 @@ TEST_FUNCTION(IoTHubClientCore_SetOption_do_work_loop_frequency_in_ms_value_limi
     umock_c_reset_all_calls();
 
     const char* option_name = "do_work_freq_ms";
-    tickcounter_ms_t tickcounter_value = 0;
-    const void* option_value = (void*) &tickcounter_value;
-    tickcounter_ms_t tickcounter_value_2 = 200;
-    const void* option_value_2 = (void*) &tickcounter_value_2;
+    tickcounter_ms_t tickcounter_value_low = 0;
+    const void* option_value_low = (void*) &tickcounter_value_low;
+    tickcounter_ms_t tickcounter_value_high = 200;
+    const void* option_value_high = (void*) &tickcounter_value_high;
 
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
@@ -2157,11 +2157,13 @@ TEST_FUNCTION(IoTHubClientCore_SetOption_do_work_loop_frequency_in_ms_value_limi
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SetOption(iothub_handle, option_name, option_value);
-    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SetOption(iothub_handle, option_name, option_value_2);
+    IOTHUB_CLIENT_RESULT result_low = IoTHubClientCore_SetOption(iothub_handle, option_name, option_value_low);
+    IOTHUB_CLIENT_RESULT result_high = IoTHubClientCore_SetOption(iothub_handle, option_name, option_value_high);
 
     // assert
-    ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result_low);
+    ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result_high;
+
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     // cleanup
