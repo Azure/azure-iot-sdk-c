@@ -30,6 +30,8 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_CLIENT_CORE_LL_HAND
 #include "iothub_transport_ll.h"
 #include "iothub_client_core_common.h"
 
+#include "iothub_prov_transport.h"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -39,6 +41,7 @@ extern "C"
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_CORE_LL_HANDLE, IoTHubClientCore_LL_Create, const IOTHUB_CLIENT_CONFIG*, config);
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_CORE_LL_HANDLE, IoTHubClientCore_LL_CreateWithTransport, const IOTHUB_CLIENT_DEVICE_CONFIG*, config);
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_CORE_LL_HANDLE, IoTHubClientCore_LL_CreateFromDeviceAuth, const char*, iothub_uri, const char*, device_id, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol);
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_CORE_LL_HANDLE, IoTHubClientCore_LL_CreateFromProvisioning, const char*, prov_uri , const char*, id_scope, IOTHUB_PROV_CLIENT_TRANSPORT_PROVIDER, protocol);
      MOCKABLE_FUNCTION(, void, IoTHubClientCore_LL_Destroy, IOTHUB_CLIENT_CORE_LL_HANDLE, iotHubClientHandle);
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClientCore_LL_SendEventAsync, IOTHUB_CLIENT_CORE_LL_HANDLE, iotHubClientHandle, IOTHUB_MESSAGE_HANDLE, eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, eventConfirmationCallback, void*, userContextCallback);
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClientCore_LL_GetSendStatus, IOTHUB_CLIENT_CORE_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_STATUS*, iotHubClientStatus);
@@ -57,6 +60,8 @@ extern "C"
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClientCore_LL_DeviceMethodResponse, IOTHUB_CLIENT_CORE_LL_HANDLE, iotHubClientHandle, METHOD_HANDLE, methodId, const unsigned char*, response, size_t, respSize, int, statusCode);
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClientCore_LL_SendEventToOutputAsync, IOTHUB_CLIENT_CORE_LL_HANDLE, iotHubClientHandle, IOTHUB_MESSAGE_HANDLE, eventMessageHandle, const char*, outputName, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, eventConfirmationCallback, void*, userContextCallback);
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClientCore_LL_SetInputMessageCallback, IOTHUB_CLIENT_CORE_LL_HANDLE, iotHubClientHandle, const char*, inputName, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC, eventHandlerCallback, void*, userContextCallback);
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClientCore_LL_SetProvisioningPayload, IOTHUB_CLIENT_CORE_LL_HANDLE, iotHubClientHandle, const char*, json);
+     MOCKABLE_FUNCTION(, const char*, IoTHubClientCore_LL_GetProvisioningPayload, IOTHUB_CLIENT_CORE_LL_HANDLE, iotHubClientHandle);
 
 #ifndef DONT_USE_UPLOADTOBLOB
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClientCore_LL_UploadToBlob, IOTHUB_CLIENT_CORE_LL_HANDLE, iotHubClientHandle, const char*, destinationFileName, const unsigned char*, source, size_t, size);

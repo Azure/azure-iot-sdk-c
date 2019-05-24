@@ -57,6 +57,19 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     */
      MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CLIENT_LL_HANDLE, IoTHubDeviceClient_LL_CreateFromConnectionString, const char*, connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol);
 
+     /**
+     * @brief    Creates a IoT Hub client for communication with an existing IoT
+     *           Hub using the device auth module.
+     *
+     * @param    iothub_uri             Pointer to an ioThub hostname received in the registration process
+     * @param    device_id              Pointer to the device Id of the device
+     * @param    protocol               Function pointer for protocol implementation
+     *
+     * @return   A non-NULL @c IOTHUB_DEVICE_CLIENT_LL_HANDLE value that is used when
+     *           invoking other functions for IoT Hub client and @c NULL on failure.
+     */
+     MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CLIENT_LL_HANDLE, IoTHubDeviceClient_LL_CreateFromProvisioning, const char*, prov_uri, const char*, id_scope, IOTHUB_PROV_CLIENT_TRANSPORT_PROVIDER, protocol);
+
     /**
     * @brief    Creates a IoT Hub client for communication with an existing IoT
     *           Hub using the specified parameters.
@@ -359,6 +372,9 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
      * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
      */
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_DeviceMethodResponse, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle, METHOD_HANDLE, methodId, const unsigned char*, response, size_t, respSize, int, statusCode);
+
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_SetProvisioningPayload, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, json);
+     MOCKABLE_FUNCTION(, const char*, IoTHubDeviceClient_LL_GetProvisioningPayload, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle);
 
 #ifndef DONT_USE_UPLOADTOBLOB
     /**

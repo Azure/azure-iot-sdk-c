@@ -15,6 +15,12 @@ typedef union IOTHUB_IDENTITY_INFO_TAG IOTHUB_IDENTITY_INFO;
 #include "internal/iothub_client_authorization.h"
 #include "iothub_message.h"
 
+#ifdef USE_PROV_MODULE
+#include "azure_prov_client/internal/prov_transport_private.h"
+#include "azure_prov_client/prov_transport.h"
+#include "azure_prov_client/prov_device_ll_client.h"
+#endif
+
 struct MESSAGE_DISPOSITION_CONTEXT_TAG;
 typedef struct MESSAGE_DISPOSITION_CONTEXT_TAG* MESSAGE_DISPOSITION_CONTEXT_HANDLE;
 typedef struct MESSAGE_CALLBACK_INFO_TAG
@@ -124,6 +130,14 @@ pfIoTHubTransport_GetSupportedPlatformInfo IoTHubTransport_GetSupportedPlatformI
     };
 
     MOCKABLE_FUNCTION(, int, IoTHub_Transport_ValidateCallbacks, const TRANSPORT_CALLBACKS_INFO*, transport_cb);
+
+    struct IOTHUB_PROV_TRANSPORT_PROVIDER_TAG
+    {
+        IOTHUB_CLIENT_TRANSPORT_PROVIDER iothub_provider;
+#ifdef USE_PROV_MODULE
+        PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION prov_provider;
+#endif
+    };
 
 #ifdef __cplusplus
 }

@@ -183,6 +183,19 @@ if(${use_amqp})
         ${iothub_client_h_install_files}
         ./inc/iothubtransportamqp_websockets.h
     )
+
+    if (${use_prov_client_core})
+        set(iothub_client_amqp_transport_h_files
+            ${iothub_client_amqp_transport_h_files}
+            ./inc/iothub_prov_transport.h
+            ./inc/iothub_prov_amqp_transport.h
+        )
+        set(iothub_client_amqp_transport_c_files
+            ${iothub_client_amqp_transport_c_files}
+            ./src/iothub_prov_amqp_transport.c
+        )
+    endif()
+
 endif()
 
 if(${use_mqtt})
@@ -220,6 +233,17 @@ if(${use_mqtt})
         ./inc/internal/iothubtransport_mqtt_common.h
         ./inc/iothubtransportmqtt.h
     )
+if (${use_prov_client_core})
+    set(iothub_client_mqtt_transport_h_files
+        ${iothub_client_mqtt_transport_h_files}
+        ./inc/iothub_prov_transport.h
+        ./inc/iothub_prov_mqtt_transport.h
+    )
+    set(iothub_client_mqtt_transport_c_files
+        ${iothub_client_mqtt_transport_c_files}
+        ./src/iothub_prov_mqtt_transport.c
+    )
+endif()
 
     set(iothub_client_h_install_files
         ${iothub_client_h_install_files}
@@ -250,13 +274,12 @@ if(NOT ${dont_use_uploadtoblob} OR ${use_edge_modules})
     include_directories(../deps/parson)
 endif()
 
-include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
+if (${use_prov_client_core})
+    include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
+endif()
+
 include_directories(${AZURE_C_SHARED_UTILITY_INCLUDES})
 include_directories(${SHARED_UTIL_INC_FOLDER})
-
-if (WINCE)
-    include_directories(${SHARED_UTIL_INC_FOLDER}/azure_c_shared_utility/windowsce) #windowsce SDK doesn't have stdbool.h
-ENDIF()
 
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
 
@@ -450,7 +473,7 @@ target_link_libraries(iothub_client ${iothub_client_libs})
 target_link_libraries(iothub_client parson)
 
 if (${use_prov_client_core})
-    target_link_libraries(iothub_client hsm_security_client prov_auth_client)
+    target_link_libraries(iothub_client hsm_security_client prov_auth_client prov_device_ll_client)
 endif()
 
 linkSharedUtil(iothub_client)
