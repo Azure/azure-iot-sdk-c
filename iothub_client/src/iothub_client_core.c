@@ -1711,13 +1711,13 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetOption(IOTHUB_CLIENT_CORE_HANDLE iotHub
             if (strcmp(OPTION_DO_WORK_FREQUENCY_IN_MS, optionName) == 0)
             {
                 /* Codes_SRS_IOTHUBCLIENT_41_003: [ The value for `OPTION_DO_WORK_FREQUENCY_IN_MS` shall be limited to 100 to follow SDK best practices by not reducing the DoWork frequency below 10 Hz ]*/
-                if (0 < *(unsigned int*)value && *(unsigned int*)value <= 100)
+                if (0 < * (unsigned int *)value && * (unsigned int *)value <= 100)
                 {
                     /* Codes_SRS_IOTHUBCLIENT_41_004: [ If `currentMessageTimeout` is not greater than `do_work_freq_ms`, `IotHubClientCore_SetOption` shall return `IOTHUB_CLIENT_ERROR` ]*/
                     /* Codes_SRS_IOTHUBCLIENT_41_007: [** If parameter `optionName` is `OPTION_DO_WORK_FREQUENCY_IN_MS` then `value` should be of type `tickcounter_ms_t *`. **]*/
-                    if ((!iotHubClientInstance->currentMessageTimeout) || ( *((tickcounter_ms_t*)value) < iotHubClientInstance->currentMessageTimeout))
+                    if ((!iotHubClientInstance->currentMessageTimeout) || ( * (tickcounter_ms_t *)value < iotHubClientInstance->currentMessageTimeout))
                     {
-                        iotHubClientInstance->do_work_freq_ms = *((tickcounter_ms_t *)value);
+                        iotHubClientInstance->do_work_freq_ms = * (tickcounter_ms_t *)value;
                         result = IOTHUB_CLIENT_OK;
                     }
                     else
@@ -1735,7 +1735,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetOption(IOTHUB_CLIENT_CORE_HANDLE iotHub
             /* Codes_SRS_IOTHUBCLIENT_41_005: [ If parameter `optionName` is `OPTION_MESSAGE_TIMEOUT` then `IoTHubClientCore_SetOption` shall set `currentMessageTimeout` parameter of `IoTHubClientInstance` ]*/
             else if (strcmp(OPTION_MESSAGE_TIMEOUT, optionName) == 0)
             {
-                iotHubClientInstance->currentMessageTimeout = (tickcounter_ms_t)(*(tickcounter_ms_t*)value);
+                iotHubClientInstance->currentMessageTimeout = * (tickcounter_ms_t *)value;
 
                 /* Codes_SRS_IOTHUBCLIENT_41_004: [ If `currentMessageTimeout` is not greater than `do_work_freq_ms`, `IotHubClientCore_SetOption` shall return `IOTHUB_CLIENT_ERROR` ]*/
 				if (iotHubClientInstance->do_work_freq_ms < iotHubClientInstance->currentMessageTimeout)
