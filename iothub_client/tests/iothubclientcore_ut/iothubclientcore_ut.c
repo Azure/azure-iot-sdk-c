@@ -2161,8 +2161,8 @@ TEST_FUNCTION(IoTHubClientCore_SetOption_do_work_loop_frequency_in_ms_value_limi
     IOTHUB_CLIENT_RESULT result_high = IoTHubClientCore_SetOption(iothub_handle, option_name, option_value_high);
 
     // assert
-    ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result_low);
-    ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result_high);
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result_low);
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result_high);
 
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
@@ -2177,18 +2177,26 @@ TEST_FUNCTION(IoTHubClientCore_SetOption_do_work_freq_currentMessageTimeout_fail
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
     umock_c_reset_all_calls();
 
-    const char* option_name = "do_work_freq_ms";
-    tickcounter_ms_t tickcounter_value = 100;
-    const void* option_value = (void*) &tickcounter_value;
+    const char* freq_option = "do_work_freq_ms";
+    const char* timeout_option = "svc2cl_keep_alive_timeout_secs";
 
+    tickcounter_ms_t frequency = 30; // arbitrary
+    tickcounter_ms_t timeout = 20; // arbitrary; just lower than frequency
+    // const void* option_value = (void*) &frequency;
+
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SetOption(iothub_handle, option_name, option_value);
+    IOTHUB_CLIENT_RESULT timeout_result = IoTHubClientCore_SetOption(iothub_handle, timeout_option, &timeout);
+    IOTHUB_CLIENT_RESULT freq_result = IoTHubClientCore_SetOption(iothub_handle, freq_option, &frequency);
 
     // assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, timeout_result);
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, freq_result);
+
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     // cleanup
