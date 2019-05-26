@@ -378,7 +378,7 @@ Options handled by IoTHubClient_SetOption:
 
 **SRS_IOTHUBCLIENT_41_003: [** The value of `OPTION_DO_WORK_FREQUENCY_IN_MS` shall be limited to 100 to follow SDK best practices by not reducing the DoWork frequency below 10 Hz **]** 
 
-**SRS_IOTHUBCLIENT_41_004: [** If `currentMessageTimeout` is not greater than `do_work_freq_ms`, `IotHubClientCore_SetOption` shall return `IOTHUB_CLIENT_ERROR` **]**
+**SRS_IOTHUBCLIENT_41_004: [** If `currentMessageTimeout` is not greater than `do_work_freq_ms`, `IotHubClientCore_SetOption` shall return `IOTHUB_CLIENT_INVALID_ARG` **]**
 
 **SRS_IOTHUBCLIENT_41_005: [** If parameter `optionName` is `OPTION_MESSAGE_TIMEOUT` then `IoTHubClientCore_SetOption` shall set `currentMessageTimeout` parameter of `IoTHubClientInstance` **]** 
 

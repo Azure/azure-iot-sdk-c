@@ -2171,6 +2171,31 @@ TEST_FUNCTION(IoTHubClientCore_SetOption_do_work_loop_frequency_in_ms_value_limi
 }
 
 
+TEST_FUNCTION(IoTHubClientCore_SetOption_do_work_freq_currentMessageTimeout_fail)
+{
+    // arrange
+    IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
+    umock_c_reset_all_calls();
+
+    const char* option_name = "do_work_freq_ms";
+    tickcounter_ms_t tickcounter_value = 100;
+    const void* option_value = (void*) &tickcounter_value;
+
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SetOption(iothub_handle, option_name, option_value);
+
+    // assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubClientCore_Destroy(iothub_handle);
+}
+
+
 TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_method_do_work_frequency_in_ms_success)
 {
     
