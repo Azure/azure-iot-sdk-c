@@ -2114,7 +2114,7 @@ TEST_FUNCTION(IoTHubClientCore_SetOption_succeed)
     IoTHubClientCore_Destroy(iothub_handle);
 }
 
-TEST_FUNCTION(IoTHubClientCore_SetOption_do_work_loop_frequency_in_ms_succeed)
+TEST_FUNCTION(IoTHubClientCore_SetOption_DO_WORK_FREQUENCY_IN_MS_succeed)
 {
     // arrange
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
@@ -2139,7 +2139,7 @@ TEST_FUNCTION(IoTHubClientCore_SetOption_do_work_loop_frequency_in_ms_succeed)
 }
 
 /* Tests_SRS_IOTHUBCLIENT_41_003: [** The value of `OPTION_DO_WORK_FREQUENCY_IN_MS` shall be limited to 100 to follow SDK best practices by not reducing the DoWork frequency below 10 Hz **] */
-TEST_FUNCTION(IoTHubClientCore_SetOption_do_work_loop_frequency_in_ms_value_limits_fail)
+TEST_FUNCTION(IoTHubClientCore_SetOption_DO_WORK_FREQUENCY_IN_MS_value_limits_fail)
 {
     // arrange
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
@@ -2171,14 +2171,46 @@ TEST_FUNCTION(IoTHubClientCore_SetOption_do_work_loop_frequency_in_ms_value_limi
 }
 
 
-TEST_FUNCTION(IoTHubClientCore_SetOption_do_work_freq_currentMessageTimeout_fail)
+TEST_FUNCTION(IoTHubClientCore_SetOption_DO_WORK_FREQUENCY_IN_MS_and_MESSAGE_TIMEOUT_fail)
 {
     // arrange
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
     umock_c_reset_all_calls();
 
     const char* freq_option = "do_work_freq_ms";
-    const char* timeout_option = "svc2cl_keep_alive_timeout_secs";
+    const char* timeout_option = "messageTimeout";
+
+    tickcounter_ms_t frequency = 30; // arbitrary
+    tickcounter_ms_t timeout = 20; // arbitrary; just lower than frequency
+    // const void* option_value = (void*) &frequency;
+
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+
+    // act
+    IOTHUB_CLIENT_RESULT timeout_result = IoTHubClientCore_SetOption(iothub_handle, timeout_option, &timeout);
+    IOTHUB_CLIENT_RESULT freq_result = IoTHubClientCore_SetOption(iothub_handle, freq_option, &frequency);
+
+    // assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, timeout_result);
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, freq_result);
+
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubClientCore_Destroy(iothub_handle);
+}
+
+TEST_FUNCTION(IoTHubClientCore_SetOption_DO_WORK_FREQUENCY_IN_MS_and_SERVICE_SIDE_KEEP_ALIVE_FREQ_SECS_fail)
+{
+    // arrange
+    IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
+    umock_c_reset_all_calls();
+
+    const char* freq_option = "do_work_freq_ms"; // DO_WORK_FREQUENCY_IN_MS
+    const char* timeout_option = "svc2cl_keep_alive_timeout_secs"; // SERVICE_SIDE_KEEP_ALIVE_FREQ_SECS
 
     tickcounter_ms_t frequency = 30; // arbitrary
     tickcounter_ms_t timeout = 20; // arbitrary; just lower than frequency
@@ -2204,7 +2236,7 @@ TEST_FUNCTION(IoTHubClientCore_SetOption_do_work_freq_currentMessageTimeout_fail
 }
 
 
-TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_method_do_work_frequency_in_ms_success)
+TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_DO_WORK_FREQ_IN_MS_success)
 {
     
     const char* option_name = "do_work_freq_ms";
