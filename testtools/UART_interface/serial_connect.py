@@ -4,15 +4,16 @@ import sys
 import getopt
 import time
 try:
+    import testtools.UART_interface.azure_test_firmware_errors as azure_test_firmware_errors
     import testtools.UART_interface.serial_settings as serial_settings
     import testtools.UART_interface.serial_commands_dict as commands_dict
 except:
+    import azure_test_firmware_errors
     import serial_settings
     import serial_commands_dict as commands_dict
 
 
 # Note: commands on MXCHIP have line endings with \r AND \n
-# Oz request: Make this multidevice - buh how? Guess we gots ta figure out
 # Notes: This is designed to be used as a command line script with args (for automation purposes) to communicate over serial to a Microsoft mxchip device.
 
 # Iterates through command dictionary to print out script's opt usage
@@ -22,6 +23,7 @@ def usage():
         usage_txt += " - %s: " %commands + commands_dict.cmds[commands]['text'] + "\r\n"
 
     return usage_txt
+
 
 def parse_opts():
     options, remainder = getopt.gnu_getopt(sys.argv[1:], 'hsi:o:b:p:m:', ['input', 'output', 'help', 'skip', 'baudrate', 'port', 'mxchip_file'])
@@ -44,6 +46,17 @@ def parse_opts():
             serial_settings.skip_setup = True
 
 
+def check_firmware_errors(line):
+    if azure_test_firmware_errors.iot_init_failure in line:
+        print("Failed to connect to saved IoT Hub!")
+
+    elif azure_test_firmware_errors.sensor_init_failure in line:
+        print("Failed to init mxchip sensor")
+
+    elif azure_test_firmware_errors.wifi_failure in line:
+        print("Failed to connect to saved WiFi network.")
+
+
 # If there is a sudden disconnect, program should report line in input script reached, and close files.
 # method to write to serial line with connection monitoring
 def serial_write(ser, message, file=None):
@@ -54,14 +67,21 @@ def serial_write(ser, message, file=None):
 
     # Check that the serial connection is open
     if ser.writable():
+        wait = serial_settings.mxchip_buf_pause # wait for at least 50ms between 128 byte writes.
         buf = bytearray((message.strip()+'\r\n').encode('ascii'))
+        buf_len = len(buf) # needed for loop as buf is a destructed list
         bytes_written = 0
-        bytes_written += ser.write(buf[:128])
-        time.sleep(.01)
-        if len(buf) > 128:
-            for i in range(128, len(buf), 128):
-                time.sleep(.01)
-                bytes_written += ser.write(buf[i:i+128])
+        timeout = time.time()
+
+        while bytes_written < buf_len:
+            round = ser.write(buf[:128])
+            buf = buf[round:]
+            bytes_written += round
+            # print("bytes written: %d" %bytes_written)
+            time.sleep(wait)
+            if (time.time() - timeout > serial_settings.serial_comm_timeout):
+                break
+        # print("final written: %d" %bytes_written)
         return bytes_written
     else:
         try:
@@ -70,6 +90,7 @@ def serial_write(ser, message, file=None):
             serial_write(ser, message, file)
         except:
             return False
+
 
 # Read from serial line with connection monitoring
 # If there is a sudden disconnect, program should report line in input script reached, and close files.
@@ -88,7 +109,9 @@ def serial_read(ser, message, file, first_read=False):
 
     if ser.readable():
         output = ser.readline(ser.in_waiting)
-        output = output.decode(encoding='utf-8')
+        output = output.decode(encoding='utf-8', errors='ignore')
+
+        check_firmware_errors(output)
         print(output)
         try:
             # File must exist to write to it
@@ -123,7 +146,7 @@ def write_read(ser, input_file, output_file):
 
                 # Attempt to write to serial port
                 if not serial_write(ser, line, f):
-                    print("burger king")
+                    print("Failed to write to serial port, please diagnose connection.")
                     f.close()
                     break
                 time.sleep(1)
@@ -162,7 +185,7 @@ def run():
 
     # Print initial message
     output = ser.readline(ser.in_waiting)
-    output = output.strip().decode(encoding='utf-8')
+    output = output.strip().decode(encoding='utf-8', errors='ignore')
     print(output)
 
     if serial_settings.skip_setup:
@@ -170,7 +193,8 @@ def run():
         while (ser.in_waiting):
             time.sleep(.1)
             output = ser.readline(ser.in_waiting)
-            output = output.strip().decode(encoding='utf-8')
+            output = output.strip().decode(encoding='utf-8', errors='ignore')
+            # Do we want to save this output to file if there is an error printed?
             if len(output) > 4:
                 print(output)
     else:
@@ -180,13 +204,14 @@ def run():
         while(serial_settings.setup_string not in output) and ((time.time() - start_time) < (3*serial_settings.wait_for_flash + 5)):
             time.sleep(.1)
             output = ser.readline(ser.in_waiting)
-            output = output.strip().decode(encoding='utf-8')
+            output = output.strip().decode(encoding='utf-8', errors='ignore')
             if len(output) > 4:
                 print(output)
 
     write_read(ser, serial_settings.input_file, serial_settings.output_file)
-    
-    ser.flush()
+
+    ser.reset_input_buffer()
+    ser.reset_output_buffer()
     ser.close()
 
 if __name__ == '__main__':
