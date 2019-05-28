@@ -1728,7 +1728,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetOption(IOTHUB_CLIENT_CORE_HANDLE iotHub
                 }
                 else
                 {
-                    result = IOTHUB_CLIENT_ERROR;
+                    result = IOTHUB_CLIENT_INVALID_ARG;
                     LogError("Invalid value: OPTION_DO_WORK_FREQUENCY_IN_MS cannot exceed 100 ms. If you wish to reduce the frequency further, consider using the LL layer.");
                 }
             }
