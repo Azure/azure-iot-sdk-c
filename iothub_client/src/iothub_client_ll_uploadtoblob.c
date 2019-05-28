@@ -69,12 +69,12 @@ typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA_TAG
     char* hostname;
     IOTHUB_AUTHORIZATION_HANDLE authorization_module;
     IOTHUB_CREDENTIAL_TYPE cred_type;
-    union 
+    union
     {
         UPLOADTOBLOB_X509_CREDENTIALS x509_credentials;
         char* supplied_sas_token;
     } credentials;
-    
+
     char* certificates;
     HTTP_PROXY_OPTIONS http_proxy_options;
     UPOADTOBLOB_CURL_VERBOSITY curl_verbosity_level;
@@ -236,84 +236,68 @@ static int parse_result_json(const char* json_response, STRING_HANDLE correlatio
     return result;
 }
 
-IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE IoTHubClient_LL_UploadToBlob_Create(const IOTHUB_CLIENT_CONFIG* config, IOTHUB_AUTHORIZATION_HANDLE auth_handle)
+IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE IoTHubClient_LL_UploadToBlob_Create(const char* hostname, IOTHUB_AUTHORIZATION_HANDLE auth_handle)
 {
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* upload_data;
-    if (auth_handle == NULL || config == NULL)
+    if (auth_handle == NULL || hostname == NULL)
     {
-        LogError("Invalid arguments auth_handle: %p, config: %p", auth_handle, config);
+        LogError("Invalid arguments auth_handle: %p, hostname: %p", auth_handle, hostname);
         upload_data = NULL;
+    }
+    else if ((upload_data = malloc(sizeof(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA))) == NULL)
+    {
+        LogError("Failed malloc allocation");
+        /*return as is*/
     }
     else
     {
-        upload_data = malloc(sizeof(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA));
-        if (upload_data == NULL)
+        memset(upload_data, 0, sizeof(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA));
+
+        upload_data->authorization_module = auth_handle;
+
+        if (mallocAndStrcpy_s(&upload_data->hostname, hostname) != 0)
         {
             LogError("Failed malloc allocation");
-            /*return as is*/
+            free(upload_data);
+            upload_data = NULL;
+        }
+        else if ((upload_data->deviceId = IoTHubClient_Auth_Get_DeviceId(upload_data->authorization_module)) == NULL)
+        {
+            LogError("Failed retrieving device ID");
+            free(upload_data->hostname);
+            free(upload_data);
+            upload_data = NULL;
         }
         else
         {
-            memset(upload_data, 0, sizeof(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA));
-
-            upload_data->authorization_module = auth_handle;
-
-            size_t iotHubNameLength = strlen(config->iotHubName);
-            size_t iotHubSuffixLength = strlen(config->iotHubSuffix);
-            upload_data->hostname = malloc(iotHubNameLength + 1 + iotHubSuffixLength + 1); /*first +1 is because "." the second +1 is because \0*/
-            if (upload_data->hostname == NULL)
+            upload_data->cred_type = IoTHubClient_Auth_Get_Credential_Type(upload_data->authorization_module);
+            // If the credential type is unknown then it means that we are using x509 because the certs need to get
+            // passed down later in the process.
+            if (upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_UNKNOWN || upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_X509)
             {
-                LogError("Failed malloc allocation");
-                free(upload_data);
-                upload_data = NULL;
+                upload_data->cred_type = IOTHUB_CREDENTIAL_TYPE_X509;
+                upload_data->credentials.x509_credentials.x509certificate = NULL;
+                upload_data->credentials.x509_credentials.x509privatekey = NULL;
             }
-            else if ((upload_data->deviceId = IoTHubClient_Auth_Get_DeviceId(upload_data->authorization_module)) == NULL)
+            else if (upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_X509_ECC)
             {
-                LogError("Failed retrieving device ID");
-                free(upload_data->hostname);
-                free(upload_data);
-                upload_data = NULL;
+                if (IoTHubClient_Auth_Get_x509_info(upload_data->authorization_module, &upload_data->credentials.x509_credentials.x509certificate, &upload_data->credentials.x509_credentials.x509privatekey) != 0)
+                {
+                    LogError("Failed getting x509 certificate information");
+                    free(upload_data->hostname);
+                    free(upload_data);
+                    upload_data = NULL;
+                }
             }
-            else
+            else if (upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN)
             {
-                char* insert_pos = (char*)upload_data->hostname;
-                (void)memcpy((char*)insert_pos, config->iotHubName, iotHubNameLength);
-                insert_pos += iotHubNameLength;
-                *insert_pos = '.';
-                insert_pos += 1;
-                (void)memcpy(insert_pos, config->iotHubSuffix, iotHubSuffixLength); /*+1 will copy the \0 too*/
-                insert_pos += iotHubSuffixLength;
-                *insert_pos = '\0';
-
-                upload_data->cred_type = IoTHubClient_Auth_Get_Credential_Type(upload_data->authorization_module);
-                // If the credential type is unknown then it means that we are using x509 because the certs need to get
-                // passed down later in the process.
-                if (upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_UNKNOWN || upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_X509)
+                upload_data->credentials.supplied_sas_token = IoTHubClient_Auth_Get_SasToken(upload_data->authorization_module, NULL, 0, EMPTY_STRING);
+                if (upload_data->credentials.supplied_sas_token == NULL)
                 {
-                    upload_data->cred_type = IOTHUB_CREDENTIAL_TYPE_X509;
-                    upload_data->credentials.x509_credentials.x509certificate = NULL;
-                    upload_data->credentials.x509_credentials.x509privatekey = NULL;
-                }
-                else if (upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_X509_ECC)
-                {
-                    if (IoTHubClient_Auth_Get_x509_info(upload_data->authorization_module, &upload_data->credentials.x509_credentials.x509certificate, &upload_data->credentials.x509_credentials.x509privatekey) != 0)
-                    {
-                        LogError("Failed getting x509 certificate information");
-                        free(upload_data->hostname);
-                        free(upload_data);
-                        upload_data = NULL;
-                    }
-                }
-                else if (upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN)
-                {
-                    upload_data->credentials.supplied_sas_token = IoTHubClient_Auth_Get_SasToken(upload_data->authorization_module, NULL, 0, EMPTY_STRING);
-                    if (upload_data->credentials.supplied_sas_token == NULL)
-                    {
-                        LogError("Failed retrieving supplied sas token");
-                        free(upload_data->hostname);
-                        free(upload_data);
-                        upload_data = NULL;
-                    }
+                    LogError("Failed retrieving supplied sas token");
+                    free(upload_data->hostname);
+                    free(upload_data);
+                    upload_data = NULL;
                 }
             }
         }
@@ -920,11 +904,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTO
 
 void IoTHubClient_LL_UploadToBlob_Destroy(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE handle)
 {
-    if (handle == NULL)
-    {
-        LogError("unexpected NULL argument");
-    }
-    else
+    if (handle != NULL)
     {
         IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* upload_data = (IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA*)handle;
 

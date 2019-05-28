@@ -5,6 +5,7 @@
 #define IOTHUB_PROV_TRANSPORT_H
 
 #include "internal/iothub_transport_ll_private.h"
+#include "azure_prov_client/prov_security_factory.h"
 
 #ifdef __cplusplus
 #include <cstddef>
@@ -20,6 +21,16 @@ extern "C"
     typedef struct IOTHUB_PROV_TRANSPORT_PROVIDER_TAG IOTHUB_PROV_TRANSPORT_PROVIDER;
 
     typedef const IOTHUB_PROV_TRANSPORT_PROVIDER*(*IOTHUB_PROV_CLIENT_TRANSPORT_PROVIDER)(void);
+
+    typedef struct PROVISIONING_AUTH_INFO_TAG
+    {
+        const char* provisioning_uri;
+        const char* id_scope;
+        SECURE_DEVICE_TYPE hsm_type;
+        IOTHUB_PROV_CLIENT_TRANSPORT_PROVIDER transport;
+        const char* registration_id;
+        const char* symmetric_key;
+    } PROVISIONING_AUTH_INFO;
 
 #ifdef __cplusplus
 }

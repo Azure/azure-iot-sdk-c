@@ -195,7 +195,6 @@ if(${use_amqp})
             ./src/iothub_prov_amqp_transport.c
         )
     endif()
-
 endif()
 
 if(${use_mqtt})
@@ -233,17 +232,17 @@ if(${use_mqtt})
         ./inc/internal/iothubtransport_mqtt_common.h
         ./inc/iothubtransportmqtt.h
     )
-if (${use_prov_client_core})
-    set(iothub_client_mqtt_transport_h_files
-        ${iothub_client_mqtt_transport_h_files}
-        ./inc/iothub_prov_transport.h
-        ./inc/iothub_prov_mqtt_transport.h
-    )
-    set(iothub_client_mqtt_transport_c_files
-        ${iothub_client_mqtt_transport_c_files}
-        ./src/iothub_prov_mqtt_transport.c
-    )
-endif()
+    if (${use_prov_client_core})
+        set(iothub_client_mqtt_transport_h_files
+            ${iothub_client_mqtt_transport_h_files}
+            ./inc/iothub_prov_transport.h
+            ./inc/iothub_prov_mqtt_transport.h
+        )
+        set(iothub_client_mqtt_transport_c_files
+            ${iothub_client_mqtt_transport_c_files}
+            ./src/iothub_prov_mqtt_transport.c
+        )
+    endif()
 
     set(iothub_client_h_install_files
         ${iothub_client_h_install_files}
@@ -267,7 +266,14 @@ if(${use_amqp})
     set(IOTHUB_CLIENT_AMQP_TRANSPORT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client_amqp_transport lib" FORCE)
 endif()
 
-set(IOTHUB_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client lib" FORCE)
+set(ADDITIONAL_PROV_INC)
+
+if (${use_prov_client_core})
+    # If we're including Device auth then we need to add
+    set(ADDITIONAL_PROV_INC ${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
+endif()
+
+set(IOTHUB_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc ${ADDITIONAL_PROV_INC} CACHE INTERNAL "this is what needs to be included if using iothub_client lib" FORCE)
 
 
 if(NOT ${dont_use_uploadtoblob} OR ${use_edge_modules})
@@ -290,11 +296,6 @@ endif()
 IF(WIN32)
     #windows needs this define
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-    if (WINCE) # Be lax with WEC 2013 compiler
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3")
-        SET_SOURCE_FILES_PROPERTIES(src/iothub_client.c src/iothubtransport.c src/iothub_client_ll.c src/iothubtransporthttp.c src/blob.c PROPERTIES LANGUAGE CXX)
-    ENDIF(WINCE)
 ENDIF(WIN32)
 
 set(iothub_transport_source)
@@ -345,6 +346,11 @@ if(${use_amqp})
         iothub_client_amqp_ws_transport
     )
 
+    if (${use_prov_client_core})
+        target_link_libraries(iothub_client_amqp_transport prov_amqp_transport)
+        target_link_libraries(iothub_client_amqp_ws_transport prov_amqp_ws_transport)
+    endif()
+
     if (build_as_dynamic)
         set(iothub_transport_source ${iothub_transport_source}
             ${iothub_client_amqp_transport_c_files}
@@ -372,6 +378,7 @@ if(${use_mqtt})
         ${iothub_client_libs}
         iothub_client_mqtt_transport
     )
+
     include_directories(${IOTHUB_CLIENT_MQTT_TRANSPORT_INC_FOLDER} ${MQTT_INC_FOLDER})
     add_library(iothub_client_mqtt_ws_transport
         ${iothub_client_mqtt_ws_transport_c_files}
@@ -384,6 +391,11 @@ if(${use_mqtt})
         ${iothub_client_libs}
         iothub_client_mqtt_ws_transport
     )
+
+    if (${use_prov_client_core})
+        target_link_libraries(iothub_client_mqtt_transport prov_mqtt_transport)
+        target_link_libraries(iothub_client_mqtt_ws_transport prov_mqtt_ws_transport)
+    endif()
 
     if (build_as_dynamic)
         set(iothub_transport_source ${iothub_transport_source}

@@ -121,9 +121,9 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_DeviceMethodResponse(IOTHUB_DEVICE_CL
     return IoTHubClientCore_LL_DeviceMethodResponse((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, methodId, response, response_size, status_response);
 }
 
-IOTHUB_DEVICE_CLIENT_LL_HANDLE IoTHubDeviceClient_LL_CreateFromProvisioning(const char* prov_uri, const char* id_scope, IOTHUB_PROV_CLIENT_TRANSPORT_PROVIDER protocol)
+IOTHUB_DEVICE_CLIENT_LL_HANDLE IoTHubDeviceClient_LL_CreateFromProvisioning(const PROVISIONING_AUTH_INFO* provisioning_info)
 {
-    return IoTHubClientCore_LL_CreateFromProvisioning(prov_uri, id_scope, protocol);
+    return IoTHubClientCore_LL_CreateFromProvisioning(provisioning_info);
 }
 
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SetProvisioningPayload(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, const char* json)

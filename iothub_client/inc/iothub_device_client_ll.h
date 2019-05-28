@@ -68,7 +68,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
      * @return   A non-NULL @c IOTHUB_DEVICE_CLIENT_LL_HANDLE value that is used when
      *           invoking other functions for IoT Hub client and @c NULL on failure.
      */
-     MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CLIENT_LL_HANDLE, IoTHubDeviceClient_LL_CreateFromProvisioning, const char*, prov_uri, const char*, id_scope, IOTHUB_PROV_CLIENT_TRANSPORT_PROVIDER, protocol);
+     MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CLIENT_LL_HANDLE, IoTHubDeviceClient_LL_CreateFromProvisioning, const PROVISIONING_AUTH_INFO*, provisioning_info);
 
     /**
     * @brief    Creates a IoT Hub client for communication with an existing IoT
