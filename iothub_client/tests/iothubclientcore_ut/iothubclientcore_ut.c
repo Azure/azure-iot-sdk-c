@@ -2114,6 +2114,7 @@ TEST_FUNCTION(IoTHubClientCore_SetOption_succeed)
     IoTHubClientCore_Destroy(iothub_handle);
 }
 
+/* Tests_SRS_IOTHUBCLIENT_41_001: [** If parameter `optionName` is `OPTION_DO_WORK_FREQUENCY_IN_MS` then `IoTHubClientCore_SetOption` shall set `do_work_freq_ms` parameter of `IoTHubClientInstance` **] */
 TEST_FUNCTION(IoTHubClientCore_SetOption_DO_WORK_FREQUENCY_IN_MS_succeed)
 {
     // arrange
@@ -2170,7 +2171,7 @@ TEST_FUNCTION(IoTHubClientCore_SetOption_DO_WORK_FREQUENCY_IN_MS_value_limits_fa
     IoTHubClientCore_Destroy(iothub_handle);
 }
 
-
+/* Tests_SRS_IOTHUBCLIENT_41_004: [** If `currentMessageTimeout` is not greater than `do_work_freq_ms`, `IotHubClientCore_SetOption` shall return `IOTHUB_CLIENT_INVALID_ARG` **] */
 TEST_FUNCTION(IoTHubClientCore_SetOption_DO_WORK_FREQUENCY_IN_MS_and_MESSAGE_TIMEOUT_fail)
 {
     // arrange
@@ -2204,6 +2205,7 @@ TEST_FUNCTION(IoTHubClientCore_SetOption_DO_WORK_FREQUENCY_IN_MS_and_MESSAGE_TIM
     IoTHubClientCore_Destroy(iothub_handle);
 }
 
+/* Tests_SRS_IOTHUBCLIENT_41_004: [** If `currentMessageTimeout` is not greater than `do_work_freq_ms`, `IotHubClientCore_SetOption` shall return `IOTHUB_CLIENT_INVALID_ARG` **] */
 TEST_FUNCTION(IoTHubClientCore_SetOption_DO_WORK_FREQUENCY_IN_MS_and_SERVICE_SIDE_KEEP_ALIVE_FREQ_SECS_fail)
 {
     // arrange
