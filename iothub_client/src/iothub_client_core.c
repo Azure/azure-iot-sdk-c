@@ -1733,7 +1733,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetOption(IOTHUB_CLIENT_CORE_HANDLE iotHub
                 }
             }
             /* Codes_SRS_IOTHUBCLIENT_41_005: [ If parameter `optionName` is `OPTION_MESSAGE_TIMEOUT` then `IoTHubClientCore_SetOption` shall set `currentMessageTimeout` parameter of `IoTHubClientInstance` ]*/
-            else if (strcmp(OPTION_SERVICE_SIDE_KEEP_ALIVE_FREQ_SECS, optionName) == 0 || strcmp(OPTION_MESSAGE_TIMEOUT, optionName) == 0)
+            else if ((strcmp(OPTION_SERVICE_SIDE_KEEP_ALIVE_FREQ_SECS, optionName) == 0) || (strcmp(OPTION_MESSAGE_TIMEOUT, optionName) == 0))
             {
                 // if (strcmp(OPTION_MESSAGE_TIMEOUT, optionName) == 0)  {
                 //     LogInfo("OPTION_MESSAGE_TIMEOUT is DEPRECATED! Use OPTION_SERVICE_SIDE_KEEP_ALIVE_FREQ_SECS for AMQP; MQTT has no option available. OPTION_MESSAGE_TIMEOUT legacy variable will be kept for back-compat.");
