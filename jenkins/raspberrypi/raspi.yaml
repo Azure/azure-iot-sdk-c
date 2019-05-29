@@ -66,17 +66,10 @@ jobs:
       python3 $(ClientLibrary.FrameworkRoot)/jenkins/raspberrypi/pyscripts/build_docker_image.py --repo ${NormalizedRepo}  --commit $(CommitToPass)
     displayName: "build raspi-c docker image"
     condition: succeeded()
-<<<<<<< HEAD
     env:
-      IOTHUB_E2E_REPO_ADDRESS: $(IOTHUB-E2E-REPO-ADDRESS)
-      IOTHUB_E2E_REPO_USER: $(IOTHUB-E2E-REPO-USER)
-      IOTHUB_E2E_REPO_PASSWORD: $(IOTHUB-E2E-REPO-PASSWORD)
-=======
-    env: 
       AZURECR_REPO_ADDRESS: $(IOTHUB-E2E-REPO-ADDRESS)
       AZURECR_REPO_USER: $(IOTHUB-E2E-REPO-USER)
       AZURECR_REPO_PASSWORD: $(IOTHUB-E2E-REPO-PASSWORD)
->>>>>>> a862dc6ad4e7d5b1ca9ea4207cb337661f9663ce
       NormalizedRepo: $(NormalizedRepo)
       CommitToPass: $(CommitToPass)
 
@@ -116,7 +109,7 @@ jobs:
   - bash: |
       (sleep 600; sudo reboot ) &
     displayName: 'Trigger Reboot Thread'
-  
+
   - bash: |
       chmod -R 777 drop
       ls
