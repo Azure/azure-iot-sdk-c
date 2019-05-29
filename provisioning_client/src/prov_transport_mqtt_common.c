@@ -400,10 +400,7 @@ static int send_mqtt_message(PROV_TRANSPORT_MQTT_INFO* mqtt_info, const char* ms
     {
         LogError("Failed creating mqtt message");
         result = MU_FAILURE;
-<<<<<<< HEAD
-=======
         free(prov_payload);
->>>>>>> master
     }
     else
     {
