@@ -231,6 +231,11 @@ static int IotHubTransportMqtt_WS_SetCallbackContext(TRANSPORT_LL_HANDLE handle,
     return IoTHubTransport_MQTT_SetCallbackContext(handle, ctx);
 }
 
+static int IotHubTransportMqtt_WS_GetSupportedPlatformInfo(TRANSPORT_LL_HANDLE handle, PLATFORM_INFO_OPTION* info)
+{
+    return IoTHubTransport_MQTT_GetSupportedPlatformInfo(handle, info);
+}
+
 /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_011: [ This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for its fields:
 IoTHubTransport_SendMessageDisposition = IoTHubTransport_WS_SendMessageDisposition
 IoTHubTransport_Subscribe_DeviceMethod = IoTHubTransport_WS_Subscribe_DeviceMethod
@@ -243,7 +248,8 @@ IoTHubTransport_Destroy = IoTHubTransportMqtt_WS_Destroy
 IoTHubTransport_Subscribe = IoTHubTransportMqtt_WS_Subscribe
 IoTHubTransport_Unsubscribe = IoTHubTransportMqtt_WS_Unsubscribe
 IoTHubTransport_DoWork = IoTHubTransportMqtt_WS_DoWork
-IoTHubTransport_SetOption = IoTHubTransportMqtt_WS_SetOption ] */
+IoTHubTransport_SetOption = IoTHubTransportMqtt_WS_SetOption 
+IoTHubTransport_GetSupportedPlatformInfo = IoTHubTransportMqtt_WS_GetSupportedPlatformInfo ] */
 static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls = {
     IoTHubTransportMqtt_WS_SendMessageDisposition,
     IoTHubTransportMqtt_WS_Subscribe_DeviceMethod,
@@ -266,7 +272,8 @@ static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls = {
     IoTHubTransportMqtt_WS_Subscribe_InputQueue,
     IoTHubTransportMqtt_WS_Unsubscribe_InputQueue,
     IotHubTransportMqtt_WS_SetCallbackContext,
-    IoTHubTransportMqtt_WS_GetTwinAsync
+    IoTHubTransportMqtt_WS_GetTwinAsync,
+    IotHubTransportMqtt_WS_GetSupportedPlatformInfo
 };
 
 const TRANSPORT_PROVIDER* MQTT_WebSocket_Protocol(void)

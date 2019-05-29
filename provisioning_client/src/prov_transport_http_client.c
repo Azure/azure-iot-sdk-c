@@ -16,6 +16,8 @@
 
 #include "azure_prov_client/prov_transport_http_client.h"
 #include "azure_prov_client/internal/prov_transport_private.h"
+#include "azure_prov_client/prov_client_const.h"
+
 #include "azure_uhttp_c/uhttp.h"
 #include "parson.h"
 
@@ -36,8 +38,6 @@ static const char* const ACCEPT_VALUE = "application/json";
 static const char* const CONTENT_TYPE_VALUE = "application/json; charset=utf-8";
 static const char* const KEEP_ALIVE_VALUE = "keep-alive";
 static const char* const KEY_NAME_VALUE = "registration";
-static const char* const TPM_SECURITY_INFO = "{\"registrationId\":\"%s\",\"tpm\":{\"endorsementKey\":\"%s\", \"storageRootKey\":\"%s\"}}";
-static const char* const REG_SECURITY_INFO = "{ \"registrationId\":\"%s\" }";
 
 MU_DEFINE_ENUM_STRINGS(HTTP_CALLBACK_REASON, HTTP_CALLBACK_REASON_VALUES);
 
@@ -65,6 +65,7 @@ typedef struct PROV_TRANSPORT_HTTP_INFO_TAG
     void* status_ctx;
     PROV_TRANSPORT_CHALLENGE_CALLBACK challenge_cb;
     void* challenge_ctx;
+    PROV_TRANSPORT_CREATE_JSON_PAYLOAD json_create_cb;
     PROV_TRANSPORT_JSON_PARSE json_parse_cb;
     void* json_ctx;
 
@@ -100,6 +101,7 @@ typedef struct PROV_TRANSPORT_HTTP_INFO_TAG
     TRANSPORT_HSM_TYPE hsm_type;
 
     HTTP_CLIENT_HANDLE http_client;
+    uint32_t retry_after_value;
 
     PROV_TRANSPORT_ERROR_CALLBACK error_cb;
     void* error_ctx;
@@ -183,6 +185,8 @@ static void on_http_reply_recv(void* callback_ctx, HTTP_CALLBACK_REASON request_
             LogError("Failure status code sent from the server: %u", status_code);
             http_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
         }
+        // The call to parse_retry_after_value can not fail
+        http_info->retry_after_value = parse_retry_after_value(HTTPHeaders_FindHeaderValue(responseHeadersHandle, RETRY_AFTER_KEY_VALUE));
     }
     else
     {
@@ -199,7 +203,7 @@ static void on_http_connected(void* callback_ctx, HTTP_CALLBACK_REASON open_resu
         {
             if (http_info->status_cb != NULL)
             {
-                http_info->status_cb(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, http_info->status_ctx);
+                http_info->status_cb(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, http_info->retry_after_value, http_info->status_ctx);
             }
             http_info->http_connected = true;
         }
@@ -253,54 +257,48 @@ static HTTP_HEADERS_HANDLE construct_http_headers(const char* sas_token)
 static char* construct_json_data(PROV_TRANSPORT_HTTP_INFO* http_info)
 {
     char* result;
+    bool data_success = true;
+    STRING_HANDLE encoded_srk = NULL;
+    STRING_HANDLE encoded_ek = NULL;
+    const char* ek_value = NULL;
+    const char* srk_value = NULL;
+
+    // For TPM we need to add tpm encoded values
     if (http_info->hsm_type == TRANSPORT_HSM_TYPE_TPM)
     {
-        STRING_HANDLE encoded_srk = NULL;
-        STRING_HANDLE encoded_ek;
         if ((encoded_ek = Azure_Base64_Encode(http_info->ek)) == NULL)
         {
             LogError("Failure encoding ek");
-            result = NULL;
+            data_success = false;
         }
         else if ((encoded_srk = Azure_Base64_Encode(http_info->srk)) == NULL)
         {
             LogError("Failure encoding srk");
-            result = NULL;
+            data_success = false;
         }
         else
         {
-            size_t json_length = strlen(TPM_SECURITY_INFO) + strlen(http_info->registration_id) + STRING_length(encoded_ek) + STRING_length(encoded_srk);
-            result = (char*)malloc(json_length);
-            if (result == NULL)
-            {
-                LogError("Failure allocating json information");
-                result = NULL;
-            }
-            else if (sprintf(result, TPM_SECURITY_INFO, http_info->registration_id, STRING_c_str(encoded_ek), STRING_c_str(encoded_srk)) == 0)
-            {
-                LogError("Failure constructing json information");
-                free(result);
-                result = NULL;
-            }
-            STRING_delete(encoded_srk);
-            STRING_delete(encoded_ek);
+            ek_value = STRING_c_str(encoded_ek);
+            srk_value = STRING_c_str(encoded_srk);
         }
+    }
+
+    if (data_success)
+    {
+        result = http_info->json_create_cb(ek_value, srk_value, http_info->json_ctx);
     }
     else
     {
-        size_t json_length = strlen(REG_SECURITY_INFO) + strlen(http_info->registration_id);
-        result = (char*)malloc(json_length);
-        if (result == NULL)
-        {
-            LogError("Failure allocating json information");
-            result = NULL;
-        }
-        else if (sprintf(result, REG_SECURITY_INFO, http_info->registration_id) == 0)
-        {
-            LogError("Failure constructing json information");
-            free(result);
-            result = NULL;
-        }
+        result = NULL;
+    }
+
+    if (encoded_srk != NULL)
+    {
+        STRING_delete(encoded_srk);
+    }
+    if (encoded_ek != NULL)
+    {
+        STRING_delete(encoded_ek);
     }
     return result;
 }
@@ -400,7 +398,7 @@ static int send_registration_info(PROV_TRANSPORT_HTTP_INFO* http_info)
     else if ((json_data = construct_json_data(http_info)) == NULL)
     {
         /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_021: [ If any error is encountered prov_transport_http_register_device shall return a non-zero value. ] */
-        LogError("Failure constructing uri path");
+        LogError("Failure constructing json payload");
         HTTPHeaders_Free(http_headers);
         free(uri_path);
         result = MU_FAILURE;
@@ -677,6 +675,7 @@ PROV_DEVICE_TRANSPORT_HANDLE prov_transport_http_create(const char* uri, TRANSPO
             }
             else
             {
+                result->retry_after_value = PROV_GET_THROTTLE_TIME;
                 result->hsm_type = type;
                 result->error_cb = error_cb;
                 result->error_ctx = error_ctx;
@@ -825,11 +824,11 @@ int prov_transport_http_close(PROV_DEVICE_TRANSPORT_HANDLE handle)
     return result;
 }
 
-int prov_transport_http_register_device(PROV_DEVICE_TRANSPORT_HANDLE handle, PROV_TRANSPORT_JSON_PARSE json_parse_cb, void* json_ctx)
+int prov_transport_http_register_device(PROV_DEVICE_TRANSPORT_HANDLE handle, PROV_TRANSPORT_JSON_PARSE json_parse_cb, PROV_TRANSPORT_CREATE_JSON_PAYLOAD json_create_cb, void* json_ctx)
 {
     int result;
     PROV_TRANSPORT_HTTP_INFO* http_info = (PROV_TRANSPORT_HTTP_INFO*)handle;
-    if (http_info == NULL || json_parse_cb == NULL)
+    if (http_info == NULL || json_parse_cb == NULL || json_create_cb == NULL)
     {
         /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_017: [ If the argument handle or json_data is NULL, prov_transport_http_register_device shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p, json_parse_cb: %p", handle, json_parse_cb);
@@ -845,6 +844,7 @@ int prov_transport_http_register_device(PROV_DEVICE_TRANSPORT_HANDLE handle, PRO
         /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_022: [ On success prov_transport_http_register_device shall return 0. ] */
         http_info->transport_state = TRANSPORT_CLIENT_STATE_REG_SEND;
         http_info->json_parse_cb = json_parse_cb;
+        http_info->json_create_cb = json_create_cb;
         http_info->json_ctx = json_ctx;
 
         result = 0;
@@ -984,7 +984,7 @@ void prov_transport_http_dowork(PROV_DEVICE_TRANSPORT_HANDLE handle)
                             {
                                 if (http_info->status_cb != NULL)
                                 {
-                                    http_info->status_cb(parse_info->prov_status, http_info->status_ctx);
+                                    http_info->status_cb(parse_info->prov_status, http_info->retry_after_value, http_info->status_ctx);
                                 }
                                 http_info->transport_state = TRANSPORT_CLIENT_STATE_IDLE;
                             }
@@ -1004,7 +1004,7 @@ void prov_transport_http_dowork(PROV_DEVICE_TRANSPORT_HANDLE handle)
             case TRANSPORT_CLIENT_STATE_TRANSIENT:
                 if (http_info->status_cb != NULL)
                 {
-                    http_info->status_cb(PROV_DEVICE_TRANSPORT_STATUS_TRANSIENT, http_info->status_ctx);
+                    http_info->status_cb(PROV_DEVICE_TRANSPORT_STATUS_TRANSIENT, http_info->retry_after_value, http_info->status_ctx);
                 }
                 http_info->transport_state = TRANSPORT_CLIENT_STATE_IDLE;
                 break;
@@ -1037,28 +1037,21 @@ int prov_transport_http_set_trace(PROV_DEVICE_TRANSPORT_HANDLE handle, bool trac
     else
     {
         PROV_TRANSPORT_HTTP_INFO* http_info = (PROV_TRANSPORT_HTTP_INFO*)handle;
-        if (trace_on)
+        if (http_info->hsm_type == TRANSPORT_HSM_TYPE_X509)
         {
-            if (http_info->hsm_type == TRANSPORT_HSM_TYPE_X509)
+            http_info->log_trace = trace_on;
+            if (http_info->http_client != NULL)
             {
-                http_info->log_trace = trace_on;
-                if (http_info->http_client != NULL)
-                {
-                    /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_041: [ If the http client is not NULL, prov_transport_http_set_trace shall set the http client log trace function with the specified trace_on flag. ] */
-                    (void)uhttp_client_set_trace(http_info->http_client, http_info->log_trace, http_info->log_trace);
-                }
-                /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_042: [ On success prov_transport_http_set_trace shall return zero. ] */
-                result = 0;
+                /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_041: [ If the http client is not NULL, prov_transport_http_set_trace shall set the http client log trace function with the specified trace_on flag. ] */
+                (void)uhttp_client_set_trace(http_info->http_client, http_info->log_trace, http_info->log_trace);
             }
-            else
-            {
-                LogError("Unable to enable logging when not using x509 certificates");
-                result = MU_FAILURE;
-            }
+            /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_042: [ On success prov_transport_http_set_trace shall return zero. ] */
+            result = 0;
         }
         else
         {
-            result = 0;
+            LogError("Unable to enable logging when not using x509 certificates");
+                result = MU_FAILURE;
         }
     }
     return result;

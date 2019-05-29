@@ -1,6 +1,10 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+# To run locally (example)
+# docker build -t rpiiotbuild:latest --build-arg "CLIENTLIBRARY_REPO=Azure/azure-iot-sdk-c" --build-arg "CLIENTLIBRARY_COMMIT_SHA=raspi-pipeline" . --network=host --file ./Dockerfile
+
+
 # Start with the latest version of the Debian Docker container
 FROM debian:stretch
 
@@ -17,7 +21,7 @@ WORKDIR ${WORK_ROOT}
 ########## LINARO INSTALL ##########
 ENV LINARO_SOURCE=gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabihf
 RUN wget https://releases.linaro.org/components/toolchain/binaries/7.4-2019.02/arm-linux-gnueabihf/${LINARO_SOURCE}.tar.xz
-RUN tar -xvf ${LINARO_SOURCE}.tar.xz 
+RUN tar -xvf ${LINARO_SOURCE}.tar.xz
 
 # Set up environment variables for builds
 
@@ -42,7 +46,7 @@ ENV STAGING_DIR=${TOOLCHAIN_SYSROOT}
 # Download OpenSSL source and expand it
 ENV OPENSSL_SOURCE=openssl-1.1.0j
 RUN wget https://www.openssl.org/source/${OPENSSL_SOURCE}.tar.gz
-RUN tar -xvf ${OPENSSL_SOURCE}.tar.gz 
+RUN tar -xvf ${OPENSSL_SOURCE}.tar.gz
 
 # Build OpenSSL
 
@@ -73,7 +77,7 @@ WORKDIR /${WORK_ROOT}
 # Download the Linux utilities for libuuid and expand it
 ENV UTIL_LINUX_SOURCE=util-linux-2.33-rc2
 RUN wget https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.33/${UTIL_LINUX_SOURCE}.tar.gz
-RUN tar -xvf ${UTIL_LINUX_SOURCE}.tar.gz 
+RUN tar -xvf ${UTIL_LINUX_SOURCE}.tar.gz
 
 # Build uuid
 WORKDIR /${WORK_ROOT}/${UTIL_LINUX_SOURCE}
@@ -84,16 +88,12 @@ WORKDIR /${WORK_ROOT}
 
 
 ########## CLIENT LIBRARY INSTALL ##########
-# clone azure  
+# clone azure
 ARG CLIENTLIBRARY_REPO
-
 WORKDIR /sdk
-
 RUN git clone https://github.com/$CLIENTLIBRARY_REPO .
-RUN git checkout raspi-pipeline
-RUN git submodule update --init --recursive
+RUN git submodule update --init
 
-# CMAKE
 RUN mkdir cmake
 WORKDIR /sdk/cmake
 RUN ls -al
@@ -113,22 +113,28 @@ RUN ls -al
 # Build the SDK. This will use the OpenSSL, cURL and uuid binaries that we built before
 RUN cmake -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake -Duse_prov_client:BOOL=OFF -DCMAKE_INSTALL_PREFIX=${TOOLCHAIN_PREFIX} -Drun_e2e_tests:BOOL=ON -Drun_unittests=:BOOL=ON ..
 RUN make -j 2
-RUN make install
+RUN ls -al
 
 ########## PHASE 2: COMPILE BRANCH SPECIFIC INFORMATION ##########
 ARG CLIENTLIBRARY_COMMIT_SHA
-RUN echo $CLIENTLIBRARY_COMMIT_SHA
+ARG CLIENTLIBRARY_COMMIT_NAME
+RUN echo "$CLIENTLIBRARY_COMMIT_NAME"
+RUN echo "$CLIENTLIBRARY_COMMIT_SHA"
+
 WORKDIR /sdk
-RUN git fetch origin 
+RUN git pull
 RUN git checkout $CLIENTLIBRARY_COMMIT_SHA
-RUN git submodule update --init --recursive
-RUN ls -al
+
+COPY ./patchfile /
+# our base image might have some files checked out.  revert these.
+RUN git reset HEAD && git checkout && git clean  -df
+RUN if [-s /patchfile ]; then git apply --index /patchfile; fi
+
+RUN git submodule update --init
 
 WORKDIR /sdk/cmake
-RUN cmake ..
+RUN cmake .
 RUN make -j 2
-RUN make install
-# or RUN cmake --build .
 
 # Finally a sanity check to make sure the files are there
 RUN ls -al ${TOOLCHAIN_PREFIX}/lib
