@@ -28,8 +28,8 @@ if args.repo == default_repo:
 print_separator = "".join("/\\" for _ in range(80))
 
 auth_config = {
-    "username": os.environ["IOTHUB_E2E_REPO_USER"],
-    "password": os.environ["IOTHUB_E2E_REPO_PASSWORD"],
+    "username": os.environ["AZURECR_REPO_USER"],
+    "password": os.environ["AZURECR_REPO_PASSWORD"],
 }
 
 
@@ -73,7 +73,7 @@ def build_image(tags):
     build_args = {
         "CLIENTLIBRARY_REPO": tags.repo,
         "CLIENTLIBRARY_COMMIT_NAME": tags.commit_name,
-        "CLIENTLIBRARY_COMMIT_SHA": tags.commit_sha,
+        "CLIENTLIBRARY_COMMIT_SHA": tags.commit_sha
     }
 
     if tags.image_tag_to_use_for_cache:

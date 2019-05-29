@@ -66,10 +66,17 @@ jobs:
       python3 $(ClientLibrary.FrameworkRoot)/jenkins/raspberrypi/pyscripts/build_docker_image.py --repo ${NormalizedRepo}  --commit $(CommitToPass)
     displayName: "build raspi-c docker image"
     condition: succeeded()
+<<<<<<< HEAD
     env:
       IOTHUB_E2E_REPO_ADDRESS: $(IOTHUB-E2E-REPO-ADDRESS)
       IOTHUB_E2E_REPO_USER: $(IOTHUB-E2E-REPO-USER)
       IOTHUB_E2E_REPO_PASSWORD: $(IOTHUB-E2E-REPO-PASSWORD)
+=======
+    env: 
+      AZURECR_REPO_ADDRESS: $(IOTHUB-E2E-REPO-ADDRESS)
+      AZURECR_REPO_USER: $(IOTHUB-E2E-REPO-USER)
+      AZURECR_REPO_PASSWORD: $(IOTHUB-E2E-REPO-PASSWORD)
+>>>>>>> a862dc6ad4e7d5b1ca9ea4207cb337661f9663ce
       NormalizedRepo: $(NormalizedRepo)
       CommitToPass: $(CommitToPass)
 
@@ -84,7 +91,7 @@ jobs:
     displayName: "list Build.SourcesDirectory"
 
   - script: |
-      cp -r $(Build.SourcesDirectory)/source_artifacts $(Build.ArtifactStagingDirectory)
+      find $(Build.SourcesDirectory)/source_artifacts/ -type f | grep -i e2e_exe$ | xargs -i cp {} $(Build.ArtifactStagingDirectory)
     displayName: "Copy Files Manually"
 
   - task: PublishBuildArtifacts@1
@@ -107,10 +114,15 @@ jobs:
       itemPattern: 'drop/**/*e2e_exe'
 
   - bash: |
+      (sleep 600; sudo reboot ) &
+    displayName: 'Trigger Reboot Thread'
+  
+  - bash: |
       chmod -R 777 drop
-      sudo setcap cap_net_raw,cap_net_admin+ep drop/source_artifacts/cmake/iothub_client/tests/iothubclient_mqtt_e2e/iothubclient_mqtt_e2e_exe
-      cp drop/source_artifacts/cmake/iothub_client/tests/iothubclient_mqtt_e2e/iothubclient_mqtt_e2e_exe drop/source_artifacts/cmake/iothub_client/tests/iothubclient_mqtt_e2e/iothubclient_mqtt_e2e_but_better
-      drop/source_artifacts/cmake/iothub_client/tests/iothubclient_mqtt_e2e/iothubclient_mqtt_e2e_but_better
+      ls
+      sudo setcap cap_net_raw,cap_net_admin+ep drop/iothubclient_mqtt_e2e_exe
+      cp drop/iothubclient_mqtt_e2e_exe drop/iothubclient_mqtt_e2e_but_better
+      drop/iothubclient_mqtt_e2e_but_better
     workingDirectory: '$(System.ArtifactsDirectory)'
     displayName: 'Execute Test'
     # env:

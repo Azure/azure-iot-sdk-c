@@ -767,7 +767,7 @@ WARN_LOGFILE           =
 
 INPUT                  = mainpage.dox \
                          repo/c-utility/inc/azure_c_shared_utility/agenttime.h \
-                         repo/c-utility/inc/azure_c_shared_utility/base64.h \
+                         repo/c-utility/inc/azure_c_shared_utility/azure_base64.h \
                          repo/c-utility/inc/azure_c_shared_utility/httpapi.h \
                          repo/c-utility/inc/azure_c_shared_utility/httpapi.h \
                          repo/c-utility/inc/azure_c_shared_utility/httpapiex.h \
