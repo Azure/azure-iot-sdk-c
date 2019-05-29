@@ -5,7 +5,9 @@
 #define IOTHUB_PROV_TRANSPORT_H
 
 #include "internal/iothub_transport_ll_private.h"
+#ifdef USE_PROV_MODULE
 #include "azure_prov_client/prov_security_factory.h"
+#endif
 
 #ifdef __cplusplus
 #include <cstddef>
@@ -26,7 +28,9 @@ extern "C"
     {
         const char* provisioning_uri;
         const char* id_scope;
+#ifdef USE_PROV_MODULE
         SECURE_DEVICE_TYPE hsm_type;
+#endif
         IOTHUB_PROV_CLIENT_TRANSPORT_PROVIDER transport;
         const char* registration_id;
         const char* symmetric_key;
