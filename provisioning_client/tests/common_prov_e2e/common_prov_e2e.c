@@ -147,7 +147,7 @@ void create_tpm_enrollment_device(const char* prov_conn_string, bool use_tracing
         ASSERT_IS_NOT_NULL(ek_handle, "Failure prov_auth_get_endorsement_key");
 
         STRING_HANDLE ek_value = Azure_Base64_Encode(ek_handle);
-        ASSERT_IS_NOT_NULL(ek_value, "Failure Base64_Encode Endorsement key");
+        ASSERT_IS_NOT_NULL(ek_value, "Failure Azure_Base64_Encode Endorsement key");
 
         ATTESTATION_MECHANISM_HANDLE attest_handle = attestationMechanism_createWithTpm(STRING_c_str(ek_value), NULL);
         ASSERT_IS_NOT_NULL(attest_handle, "Failure attestationMechanism_createWithTpm");

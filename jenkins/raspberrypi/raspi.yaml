@@ -12,7 +12,6 @@ jobs:
   pool:
     vmImage: ubuntu-16.04
   steps:
-  
   - task: UsePythonVersion@0
     inputs:
       versionSpec: '3.x'
@@ -28,28 +27,55 @@ jobs:
       if ($NormalizedRepo -like 'https://github.com/*') {
         $NormalizedRepo=$NormalizedRepo.Substring('https://github.com/'.length)
       }
+      $IsPr = "no"
+      $CommitToPass = $env:Commit
+      if ("$env:SYSTEM_PULLREQUEST_TARGETBRANCH" -ne "") {
+        $CommitToPass = $env:SYSTEM_PULLREQUEST_TARGETBRANCH
+        $IsPr = "yes"
+      }
       Write-Host "##vso[task.setvariable variable=normalizedRepo]${NormalizedRepo}"
+      Write-Host "##vso[task.setvariable variable=IsPr]${IsPr}"
+      Write-Host "##vso[task.setvariable variable=CommitToPass]${CommitToPass}"
       Write-Host "normalizedRepo=${NormalizedRepo}"
-    displayName: Removing github.com from repo name if necessary
+      Write-Host "IsPr=${IsPr}"
+      Write-Host "CommitToPass=${CommitToPass}"
+      Write-Host "$env:SYSTEM_PULLREQUEST_TARGETBRANCH"
+    displayName: Custom task execution logic
     env:
+      Commit: $(ClientLibrary.Commit)
       Repo: $(ClientLibrary.Repo)
     ignoreLASTEXITCODE: false
     errorActionPreference: Stop
     failOnStderr: true
-  
+
   - script: |
-      python3 $(ClientLibrary.FrameworkRoot)/jenkins/raspberrypi/pyscripts/build_docker_image.py --repo ${NormalizedRepo}  --commit $(ClientLibrary.Commit) 
+      cd $(Build.SourcesDirectory) &&
+      echo "saving patch from ${CommitToPass} to HEAD" &&
+      git diff -p origin/${CommitToPass} > ${AGENT_BUILDDIRECTORY}/patchfile &&
+      mkdir -p $(Build.ArtifactStagingDirectory)/raspi-c &&
+      cp ${AGENT_BUILDDIRECTORY}/patchfile $(Build.ArtifactStagingDirectory)/raspi-c &&
+      mv ${AGENT_BUILDDIRECTORY}/patchfile ${CLIENTLIBRARY_FRAMEWORKROOT}/jenkins/raspberrypi
+    displayName: "pack local language repo"
+    condition: and(
+      succeeded(),
+      eq(variables['IsPr'],'yes'))
+    env:
+      CommitToPass: $(CommitToPass)
+
+  - script: |
+      python3 $(ClientLibrary.FrameworkRoot)/jenkins/raspberrypi/pyscripts/build_docker_image.py --repo ${NormalizedRepo}  --commit $(CommitToPass)
     displayName: "build raspi-c docker image"
     condition: succeeded()
-    env: 
-      IOTHUB_E2E_REPO_ADDRESS: $(IOTHUB-E2E-REPO-ADDRESS)
-      IOTHUB_E2E_REPO_USER: $(IOTHUB-E2E-REPO-USER)
-      IOTHUB_E2E_REPO_PASSWORD: $(IOTHUB-E2E-REPO-PASSWORD)
+    env:
+      AZURECR_REPO_ADDRESS: $(IOTHUB-E2E-REPO-ADDRESS)
+      AZURECR_REPO_USER: $(IOTHUB-E2E-REPO-USER)
+      AZURECR_REPO_PASSWORD: $(IOTHUB-E2E-REPO-PASSWORD)
       NormalizedRepo: $(NormalizedRepo)
+      CommitToPass: $(CommitToPass)
 
   - task: ExtractFiles@1
     inputs:
-      archiveFilePatterns: '*.tar' 
+      archiveFilePatterns: '*.tar'
       destinationFolder: '$(Build.SourcesDirectory)/source_artifacts'
 
   - script: |
@@ -58,7 +84,7 @@ jobs:
     displayName: "list Build.SourcesDirectory"
 
   - script: |
-      cp -r $(Build.SourcesDirectory)/source_artifacts $(Build.ArtifactStagingDirectory)
+      find $(Build.SourcesDirectory)/source_artifacts/ -type f | grep -i e2e_exe$ | xargs -i cp {} $(Build.ArtifactStagingDirectory)
     displayName: "Copy Files Manually"
 
   - task: PublishBuildArtifacts@1
@@ -73,7 +99,7 @@ jobs:
   pool: horton-raspi-c
   steps:
   - checkout: none
-  
+
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts'
     inputs:
@@ -81,10 +107,15 @@ jobs:
       itemPattern: 'drop/**/*e2e_exe'
 
   - bash: |
+      (sleep 600; sudo reboot ) &
+    displayName: 'Trigger Reboot Thread'
+
+  - bash: |
       chmod -R 777 drop
-      sudo setcap cap_net_raw,cap_net_admin+ep drop/source_artifacts/cmake/iothub_client/tests/iothubclient_mqtt_e2e/iothubclient_mqtt_e2e_exe
-      cp drop/source_artifacts/cmake/iothub_client/tests/iothubclient_mqtt_e2e/iothubclient_mqtt_e2e_exe drop/source_artifacts/cmake/iothub_client/tests/iothubclient_mqtt_e2e/iothubclient_mqtt_e2e_but_better
-      drop/source_artifacts/cmake/iothub_client/tests/iothubclient_mqtt_e2e/iothubclient_mqtt_e2e_but_better
+      ls
+      sudo setcap cap_net_raw,cap_net_admin+ep drop/iothubclient_mqtt_e2e_exe
+      cp drop/iothubclient_mqtt_e2e_exe drop/iothubclient_mqtt_e2e_but_better
+      drop/iothubclient_mqtt_e2e_but_better
     workingDirectory: '$(System.ArtifactsDirectory)'
     displayName: 'Execute Test'
     # env:

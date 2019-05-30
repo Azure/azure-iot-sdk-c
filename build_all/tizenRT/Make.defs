@@ -13,7 +13,7 @@ $(AZURE_CLIENT_DIR)/src/iothub_message.c $(AZURE_CLIENT_DIR)/src/iothubtransport
 $(AZURE_CLIENT_DIR)/src/iothub_client_ll.c $(AZURE_CLIENT_DIR)/src/iothubtransporthttp.c	\
 $(AZURE_CLIENT_DIR)/src/version.c $(AZURE_CLIENT_DIR)/src/iothub_client_ll_uploadtoblob.c
 
-CSRCS += $(AZURE_UTIL_DIR)/src/base64.c $(AZURE_UTIL_DIR)/src/buffer.c  \
+CSRCS += $(AZURE_UTIL_DIR)/src/azure_base64.c $(AZURE_UTIL_DIR)/src/buffer.c  \
 $(AZURE_UTIL_DIR)/src/connection_string_parser.c $(AZURE_UTIL_DIR)/src/consolelogger.c  \
 $(AZURE_UTIL_DIR)/src/constbuffer.c $(AZURE_UTIL_DIR)/src/constmap.c	\
 $(AZURE_UTIL_DIR)/src/crt_abstractions.c $(AZURE_UTIL_DIR)/src/doublylinkedlist.c	\
