@@ -138,7 +138,7 @@ jobs:
     inputs:
       testResultsFiles: "**/results-junit.xml"
       testRunTitle: 'raspberry pi'
-    condition: succeeded()
+    # condition: succeeded()
 
   - bash: |
       JOJ="$(pgrep sleep)"
