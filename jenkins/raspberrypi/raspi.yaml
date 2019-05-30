@@ -140,7 +140,7 @@ jobs:
       testRunTitle: 'raspberry pi'
     # condition: succeeded()
 
-  - bash: |
+  - script: |
       JOJ="$(pgrep sleep)"
       kill "${JOJ}"
     displayName: 'clear reset process'
