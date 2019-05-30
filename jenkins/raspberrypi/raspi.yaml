@@ -144,3 +144,4 @@ jobs:
       JOJ="$(pgrep sleep)"
       kill "${JOJ}"
     displayName: 'clear reset process'
+    condition: succeededOrFailed()
