@@ -137,3 +137,8 @@ jobs:
       testRunTitle: 'raspberry pi'
   dependsOn: Cross_Compile
   condition: succeeded()
+  - bash: |
+    # kill reset process if test succeeded
+    JOJ="$(pgrep sleep)"
+    kill "${JOJ}"
+    # sudo reboot -f # optional reboot if we want a clean state
