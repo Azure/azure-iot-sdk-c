@@ -138,10 +138,10 @@ jobs:
     inputs:
       testResultsFiles: "**/results-junit.xml"
       testRunTitle: 'raspberry pi'
-    # condition: succeeded()
+    condition: succeeded()
 
   - script: |
-      JOJ="$(pgrep sleep)"
+      JOJ="$(ps | grep sleep)"
       kill "${JOJ}"
     displayName: 'clear reset process'
     condition: succeededOrFailed()
