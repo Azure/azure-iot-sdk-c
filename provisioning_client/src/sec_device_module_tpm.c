@@ -485,7 +485,7 @@ char* dev_auth_tpm_get_endorsement_key(CONCRETE_XDA_HANDLE handle)
         }
         else
         {
-            STRING_HANDLE encoded_key = Base64_Encode(tpm_info->endorsement_key);
+            STRING_HANDLE encoded_key = Azure_Base64_Encode(tpm_info->endorsement_key);
             if (encoded_key == NULL)
             {
                 LogError("Failed base64 encoding");
@@ -540,7 +540,7 @@ char* dev_auth_tpm_get_storage_key(CONCRETE_XDA_HANDLE handle)
         }
         else
         {
-            STRING_HANDLE encoded_key = Base64_Encode(tpm_info->storage_root_key);
+            STRING_HANDLE encoded_key = Azure_Base64_Encode(tpm_info->storage_root_key);
             if (encoded_key == NULL)
             {
                 LogError("Failed base64 encoding");
