@@ -63,9 +63,6 @@ option(run_e2e_tests "set run_e2e_tests to ON to run e2e tests (default is OFF)"
 option(run_unittests "set run_unittests to ON to run unittests (default is OFF)" OFF)
 option(run_longhaul_tests "set run_longhaul_tests to ON to run longhaul tests (default is OFF)[if possible, they are always build]" OFF)
 option(skip_samples "set skip_samples to ON to skip building samples (default is OFF)[if possible, they are always build]" OFF)
-option(compileOption_C "passes a string to the command line of the C compiler" OFF)
-option(compileOption_CXX "passes a string to the command line of the C++ compiler" OFF)
-option(linkerOption "passes a string to the shared and exe linker options of the C compiler" OFF)
 option(build_service_client "controls whether the iothub_service_client is built or not" ON)
 option(build_provisioning_service_client "controls whether the provisioning_service_client is built or not" ON)
 option(build_python "builds the Python native iothub_client module" OFF)
@@ -77,6 +74,9 @@ option(use_prov_client "Enable provisioning client" OFF)
 option(use_tpm_simulator "tpm simulator type of hsm used with the provisioning client" OFF)
 option(use_edge_modules "Enable support for running modules against Azure IoT Edge" OFF)
 option(use_custom_heap "use externally defined heap functions instead of the malloc family" OFF)
+set(compileOption_C CACHE STRING "passes a string to the command line of the C compiler")
+set(compileOption_CXX CACHE STRING "passes a string to the command line of the C++ compiler")
+set(linkerOption CACHE STRING "passes a string to the shared and exe linker options of the C compiler")
 
 set(use_prov_client_core OFF)
 
@@ -182,15 +182,15 @@ if (LINUX)
 endif()
 
 # if any compiler has a command line switch called "OFF" then it will need special care
-if (NOT "${compileOption_C}" STREQUAL "OFF")
+if (NOT "${compileOption_C}" STREQUAL "")
     set(CMAKE_C_FLAGS "${compileOption_C} ${CMAKE_C_FLAGS}")
 endif()
 
-if (NOT "${compileOption_CXX}" STREQUAL "OFF")
+if (NOT "${compileOption_CXX}" STREQUAL "")
     set(CMAKE_CXX_FLAGS "${compileOption_CXX} ${CMAKE_CXX_FLAGS}")
 endif()
 
-if (NOT "${linkerOption}" STREQUAL "OFF")
+if (NOT "${linkerOption}" STREQUAL "")
     message("linkerOption: ${CMAKE_SHARED_LINKER_FLAGS}")
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${linkerOption}")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${linkerOption}")
