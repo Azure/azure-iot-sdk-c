@@ -37,11 +37,11 @@ void my_gballoc_free(void * t)
 #undef GBALLOC_H
 #undef CRT_ABSTRACTIONS_H
 
-#include "umock_c.h"
-#include "umocktypes_charptr.h"
-#include "umocktypes_bool.h"
-#include "umocktypes_stdint.h"
-#include "umock_c_negative_tests.h"
+#include "umock_c/umock_c.h"
+#include "umock_c/umocktypes_charptr.h"
+#include "umock_c/umocktypes_bool.h"
+#include "umock_c/umocktypes_stdint.h"
+#include "umock_c/umock_c_negative_tests.h"
 
 /*not very nice source level preprocessor mocking... */
 #define GBALLOC_H

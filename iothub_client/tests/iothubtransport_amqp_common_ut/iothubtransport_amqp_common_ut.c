@@ -30,15 +30,15 @@ void real_free(void* ptr)
 
 #include "testrunnerswitcher.h"
 #include "azure_c_shared_utility/optimize_size.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/shared_util_options.h"
-#include "umock_c.h"
-#include "umocktypes_charptr.h"
-#include "umocktypes_stdint.h"
-#include "umocktypes_bool.h"
-#include "umock_c_negative_tests.h"
-#include "umocktypes.h"
-#include "umocktypes_c.h"
+#include "umock_c/umock_c.h"
+#include "umock_c/umocktypes_charptr.h"
+#include "umock_c/umocktypes_stdint.h"
+#include "umock_c/umocktypes_bool.h"
+#include "umock_c/umock_c_negative_tests.h"
+#include "umock_c/umocktypes.h"
+#include "umock_c/umocktypes_c.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -5166,7 +5166,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetTwinAsync_success)
     registered_devices[0] = register_device(handle, device_config, &TEST_waitingToSend, true);
 
     crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, false, false);
-    
+
     umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_NUM_ARG));
@@ -5271,6 +5271,63 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetTwinAsync_failure_checks)
     // cleanup
     destroy_transport(handle, NULL, NULL);
     umock_c_negative_tests_deinit();
+}
+
+
+TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetSupportedPlatformInfo_success)
+{
+    // arrange
+    TRANSPORT_LL_HANDLE handle = create_transport();
+
+    PLATFORM_INFO_OPTION info;
+
+    umock_c_reset_all_calls();
+
+    // act
+    int result = IoTHubTransport_AMQP_Common_GetSupportedPlatformInfo(handle, &info);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, 0, result);
+    ASSERT_ARE_EQUAL(int, info, PLATFORM_INFO_OPTION_RETRIEVE_SQM);
+
+    // cleanup
+    destroy_transport(handle, NULL, NULL);
+}
+
+TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetSupportedPlatformInfo_NULL_handle)
+{
+    // arrange
+    PLATFORM_INFO_OPTION info;
+
+    umock_c_reset_all_calls();
+
+    // act
+    int result = IoTHubTransport_AMQP_Common_GetSupportedPlatformInfo(NULL, &info);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_NOT_EQUAL(int, 0, result);
+
+    // cleanup
+}
+
+TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetSupportedPlatformInfo_NULL_info)
+{
+    // arrange
+    TRANSPORT_LL_HANDLE handle = create_transport();
+
+    umock_c_reset_all_calls();
+
+    // act
+    int result = IoTHubTransport_AMQP_Common_GetSupportedPlatformInfo(handle, NULL);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_NOT_EQUAL(int, 0, result);
+
+    // cleanup
+    destroy_transport(handle, NULL, NULL);
 }
 
 END_TEST_SUITE(iothubtransport_amqp_common_ut)

@@ -19,7 +19,7 @@
 #include "azure_c_shared_utility/tlsio.h"
 #include "azure_c_shared_utility/optionhandler.h"
 #include "azure_c_shared_utility/shared_util_options.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 
 #include "azure_uamqp_c/cbs.h"
 #include "azure_uamqp_c/amqp_definitions.h"
@@ -2744,3 +2744,20 @@ int IoTHubTransport_AMQP_SetCallbackContext(TRANSPORT_LL_HANDLE handle, void* ct
     return result;
 }
 
+int IoTHubTransport_AMQP_Common_GetSupportedPlatformInfo(TRANSPORT_LL_HANDLE handle, PLATFORM_INFO_OPTION* info)
+{
+    int result;
+
+    if (handle == NULL || info == NULL)
+    {
+        LogError("Invalid parameter specified (handle: %p, info: %p)", handle, info);
+        result = MU_FAILURE;
+    }
+    else
+    {
+        *info = PLATFORM_INFO_OPTION_RETRIEVE_SQM;
+        result = 0;
+    }
+
+    return result;
+}

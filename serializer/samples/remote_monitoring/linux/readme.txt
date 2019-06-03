@@ -8,13 +8,14 @@ sudo apt-get install git cmake libcurl4-openssl-dev build-essential
 
 4. Once these packages have been installed, clone the repository by using
 
-git clone --recursive https://github.com/Azure/azure-iot-sdk-c.git
+git clone https://github.com/Azure/azure-iot-sdk-c.git
 
     It will prompt for a user name and a password. The password needs to be a token from github.com : Personal Settings -> Applications -> Personal access tokens. It cannot be the account password.
 
-5. Switch to directory azure-iot-sdk-c
+5. Switch to directory azure-iot-sdk-c and initialize submodules
 
 cd azure-iot-sdk-c
+git submodule update --init
 
 6. go to linux build folder in ./build_all/linux
 

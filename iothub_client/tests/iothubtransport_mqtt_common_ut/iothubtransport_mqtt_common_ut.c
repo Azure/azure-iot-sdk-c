@@ -33,14 +33,14 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 
 #include "testrunnerswitcher.h"
 #include "azure_c_shared_utility/optimize_size.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/shared_util_options.h"
-#include "umock_c.h"
-#include "azure_c_shared_utility/umock_c_prod.h"
-#include "umock_c_negative_tests.h"
-#include "umocktypes_charptr.h"
-#include "umocktypes_bool.h"
-#include "umocktypes_stdint.h"
+#include "umock_c/umock_c.h"
+#include "umock_c/umock_c_prod.h"
+#include "umock_c/umock_c_negative_tests.h"
+#include "umock_c/umocktypes_charptr.h"
+#include "umock_c/umocktypes_bool.h"
+#include "umock_c/umocktypes_stdint.h"
 
 #define ENABLE_MOCKS
 
@@ -2402,7 +2402,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_fail)
 
         char tmp_msg[64];
         sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_DoWork failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
-        
+
         IoTHubTransport_MQTT_Common_DoWork(handle);
     }
 
@@ -2638,7 +2638,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetTwinAsync_Succeed)
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, NULL);
 
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
-    
+
     umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -2650,7 +2650,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetTwinAsync_Succeed)
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
-    
+
     //cleanup
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
@@ -2762,7 +2762,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_return_pending_get_twin_reques
     EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG));
     EXPECTED_CALL(free(IGNORED_PTR_ARG));
     EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG));
-    
+
     STRICT_EXPECTED_CALL(mqtt_client_deinit(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(retry_control_destroy(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(tickcounter_destroy(IGNORED_PTR_ARG)).IgnoreArgument(1);
@@ -6409,7 +6409,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_Properties_fail)
 
         char tmp_msg[64];
         sprintf(tmp_msg, "g_fnMqttMsgRecv failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
-        
+
         g_fnMqttMsgRecv(TEST_MQTT_MESSAGE_HANDLE, g_callbackCtx);
     }
 
@@ -6618,21 +6618,21 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_deviceKey_provided_null_retur
     deviceConfig.deviceSasToken = TEST_DEVICE_SAS;
     deviceConfig.moduleId = NULL;
     //deviceConfig.authorization_module.cred_type = IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY;
- 
+
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
     umock_c_reset_all_calls();
- 
+
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_DEVICE_ID);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(NULL);
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG)).SetReturn(IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY);
- 
+
     // act
     IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransport_MQTT_Common_Register(handle, &deviceConfig, config.waitingToSend);
- 
+
     // assert
     ASSERT_IS_NULL(devHandle);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
- 
+
     //cleanup
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
@@ -8599,6 +8599,68 @@ TEST_FUNCTION(IoTHubTransport_MQTT_SetCallbackContext_fail)
     ASSERT_ARE_NOT_EQUAL(int, 0, result);
 
     // cleanup
+}
+
+TEST_FUNCTION(IoTHubTransport_MQTT_GetSupportedPlatformInfo_success)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, TEST_MODULE_ID);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
+
+    PLATFORM_INFO_OPTION info;
+
+    umock_c_reset_all_calls();
+
+    // act
+    int result = IoTHubTransport_MQTT_GetSupportedPlatformInfo(handle, &info);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, 0, result);
+    ASSERT_ARE_EQUAL(int, info, PLATFORM_INFO_OPTION_RETRIEVE_SQM);
+
+    // cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+TEST_FUNCTION(IoTHubTransport_MQTT_GetSupportedPlatformInfo_NULL_handle)
+{
+    // arrange
+    PLATFORM_INFO_OPTION info;
+
+    umock_c_reset_all_calls();
+
+    // act
+    int result = IoTHubTransport_MQTT_GetSupportedPlatformInfo(NULL, &info);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_NOT_EQUAL(int, 0, result);
+
+    // cleanup
+}
+
+TEST_FUNCTION(IoTHubTransport_MQTT_GetSupportedPlatformInfo_NULL_info)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, TEST_MODULE_ID);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
+
+    umock_c_reset_all_calls();
+
+    // act
+    int result = IoTHubTransport_MQTT_GetSupportedPlatformInfo(handle, NULL);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_NOT_EQUAL(int, 0, result);
+
+    // cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
 END_TEST_SUITE(iothubtransport_mqtt_common_ut)
