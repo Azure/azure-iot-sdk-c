@@ -44,7 +44,7 @@ MU_DEFINE_ENUM(IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_CONTENT_TYPE_VALUES);
 
 #define IOTHUB_MESSAGE_CATEGORY_VALUE   \
     MESSAGE_CATEGORY_TELEMETRY,         \
-    MESSAGE_CATEGORY_SECURITY
+    MESSAGE_CATEGORY_SECURITY               // Note: Security messages are special messages only accessable through the ASC portal
 
 MU_DEFINE_ENUM(IOTHUB_MESSAGE_CATEGORY, IOTHUB_MESSAGE_CATEGORY_VALUE);
 
@@ -354,7 +354,7 @@ MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetConnectionDeviceId, IOTHUB_MES
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetConnectionDeviceId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, connectionDeviceId);
 
 /**
-* @brief   Marks a IoTHub message as a security message. CAUTION: Security messages are special messages not easily accessable by the user.
+* @brief   Marks a IoTHub message of a given message category.
 *
 * @param   iotHubMessageHandle Handle to the message.
 * @param   category The category for the iothub message.
@@ -363,7 +363,7 @@ MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetConnectionDeviceId, 
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetMessageCategory, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, IOTHUB_MESSAGE_CATEGORY, category);
 
 /**
-* @brief   returns if this message is a IoTHub security message or not
+* @brief   returns the message category of the IoTHub message
 *
 * @param   iotHubMessageHandle Handle to the message.
 *
