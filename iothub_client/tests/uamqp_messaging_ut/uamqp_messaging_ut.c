@@ -199,7 +199,7 @@ static void set_exp_calls_for_create_encoded_annotations_properties(bool has_dia
         STRICT_EXPECTED_CALL(IoTHubMessage_GetDiagnosticPropertyData(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(NULL);
     }
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_IsSecurityMessage(TEST_IOTHUB_MESSAGE_HANDLE)).CallCannotFail().SetReturn(has_security_props);
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetMessageCategory(TEST_IOTHUB_MESSAGE_HANDLE)).CallCannotFail().SetReturn(has_security_props ? MESSAGE_CATEGORY_SECURITY : MESSAGE_CATEGORY_TELEMETRY);
     if (has_security_props)
     {
         set_add_map_item();
@@ -516,7 +516,6 @@ static void reset_test_data()
     memset(saved_malloc_returns, 0, sizeof(saved_malloc_returns));
 }
 
-
 BEGIN_TEST_SUITE(uamqp_messaging_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
@@ -546,6 +545,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_UMOCK_ALIAS_TYPE(AMQPVALUE_ENCODER_OUTPUT, void*);
     REGISTER_UMOCK_ALIAS_TYPE(data, void*);
     REGISTER_UMOCK_ALIAS_TYPE(message_annotations, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_MESSAGE_CATEGORY, int);
 
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, TEST_malloc);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
@@ -675,7 +675,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_SetContentEncodingSystemProperty, IOTHUB_MESSAGE_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_SetContentEncodingSystemProperty, IOTHUB_MESSAGE_ERROR);
 
-    REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_IsSecurityMessage, false);
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_GetMessageCategory, MESSAGE_CATEGORY_TELEMETRY);
 
     REGISTER_GLOBAL_MOCK_RETURN(UUID_to_string, TEST_UUID_STRING);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(UUID_to_string, NULL);

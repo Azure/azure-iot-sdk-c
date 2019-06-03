@@ -277,7 +277,7 @@ static int set_system_properties(IOTHUB_MESSAGE_LIST* message, HTTP_HEADERS_HAND
         LogError("unable to HTTPHeaders_ReplaceHeaderNameValuePair (content-encoding)");
         result = __LINE__;
     }
-    else if (IoTHubMessage_IsSecurityMessage(message->messageHandle) && HTTPHeaders_ReplaceHeaderNameValuePair(headers, SECURITY_INTERFACE_ID, SECURITY_INTERFACE_ID_VALUE) != HTTP_HEADERS_OK)
+    else if ((IoTHubMessage_GetMessageCategory(message->messageHandle) == MESSAGE_CATEGORY_SECURITY) && HTTPHeaders_ReplaceHeaderNameValuePair(headers, SECURITY_INTERFACE_ID, SECURITY_INTERFACE_ID_VALUE) != HTTP_HEADERS_OK)
     {
         LogError("unable to set security message header info");
         result = __LINE__;

@@ -42,6 +42,12 @@ IOTHUBMESSAGE_UNKNOWN \
 */
 MU_DEFINE_ENUM(IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_CONTENT_TYPE_VALUES);
 
+#define IOTHUB_MESSAGE_CATEGORY_VALUE   \
+    MESSAGE_CATEGORY_TELEMETRY,         \
+    MESSAGE_CATEGORY_SECURITY
+
+MU_DEFINE_ENUM(IOTHUB_MESSAGE_CATEGORY, IOTHUB_MESSAGE_CATEGORY_VALUE);
+
 typedef struct IOTHUB_MESSAGE_HANDLE_DATA_TAG* IOTHUB_MESSAGE_HANDLE;
 
 /** @brief diagnostic related data*/
@@ -347,25 +353,23 @@ MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetConnectionDeviceId, IOTHUB_MES
 */
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetConnectionDeviceId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, connectionDeviceId);
 
-
 /**
 * @brief   Marks a IoTHub message as a security message. CAUTION: Security messages are special messages not easily accessable by the user.
 *
 * @param   iotHubMessageHandle Handle to the message.
+* @param   category The category for the iothub message.
 *
-* @return  Returns IOTHUB_MESSAGE_OK if the Security Message was set successfully
-*          or an error code otherwise.
 */
-MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetAsSecurityMessage, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
+MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetMessageCategory, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, IOTHUB_MESSAGE_CATEGORY, category);
 
 /**
 * @brief   returns if this message is a IoTHub security message or not
 *
 * @param   iotHubMessageHandle Handle to the message.
 *
-* @return  Returns true if the Message is a security message false otherwise.
+* @return  Returns the IOTHUB_MESSAGE_CATEGORY of the message
 */
-MOCKABLE_FUNCTION(, bool, IoTHubMessage_IsSecurityMessage, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
+MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_CATEGORY, IoTHubMessage_GetMessageCategory, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 
 /**
 * @brief   Frees all resources associated with the given message handle.

@@ -755,6 +755,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(ON_MQTT_DISCONNECTED_CALLBACK, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUBMESSAGE_CONTENT_TYPE, int);
     REGISTER_UMOCK_ALIAS_TYPE(DEVICE_TWIN_UPDATE_STATE, int);
+    REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_MESSAGE_CATEGORY, int);
 
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
@@ -915,7 +916,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_SetInputName, IOTHUB_MESSAGE_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_SetInputName, IOTHUB_MESSAGE_ERROR);
 
-    REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_IsSecurityMessage, false);
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_GetMessageCategory, MESSAGE_CATEGORY_TELEMETRY);
 
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_SetConnectionDeviceId, IOTHUB_MESSAGE_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_SetConnectionDeviceId, IOTHUB_MESSAGE_ERROR);
@@ -1260,7 +1261,7 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_emtpy_msg_mocks(void)
     //Add Properties
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(IGNORED_PTR_ARG));
         EXPECTED_CALL(Map_GetInternals(TEST_MESSAGE_PROP_MAP, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_IsSecurityMessage(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetMessageCategory(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_GetMessageId(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentTypeSystemProperty(IGNORED_PTR_ARG));
@@ -1348,7 +1349,7 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_resend_events_mocks(
             }
         }
     }
-    STRICT_EXPECTED_CALL(IoTHubMessage_IsSecurityMessage(IGNORED_PTR_ARG)).SetReturn(security_msg);
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetMessageCategory(IGNORED_PTR_ARG)).SetReturn(security_msg ? MESSAGE_CATEGORY_SECURITY : MESSAGE_CATEGORY_TELEMETRY);
     if (security_msg)
     {
         STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
@@ -1493,7 +1494,7 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(
             }
         }
     }
-    STRICT_EXPECTED_CALL(IoTHubMessage_IsSecurityMessage(IGNORED_PTR_ARG)).SetReturn(security_msg);
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetMessageCategory(IGNORED_PTR_ARG)).SetReturn(security_msg ? MESSAGE_CATEGORY_SECURITY : MESSAGE_CATEGORY_TELEMETRY);
     STRICT_EXPECTED_CALL(IoTHubMessage_GetCorrelationId(IGNORED_PTR_ARG)).SetReturn(core_id);
     if (auto_urlencode && (core_id != NULL))
     {

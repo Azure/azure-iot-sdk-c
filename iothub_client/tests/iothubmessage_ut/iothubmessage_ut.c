@@ -92,13 +92,14 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES)
 TEST_DEFINE_ENUM_TYPE(IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_CONTENT_TYPE_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_CONTENT_TYPE_VALUES);
 
+TEST_DEFINE_ENUM_TYPE(IOTHUB_MESSAGE_CATEGORY, IOTHUB_MESSAGE_CATEGORY_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_MESSAGE_CATEGORY, IOTHUB_MESSAGE_CATEGORY_VALUES);
+
 MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
-    char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
-    ASSERT_FAIL(temp_str);
+    ASSERT_FAIL("umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
 }
 
 static MAP_HANDLE my_Map_Create(MAP_FILTER_CALLBACK mapFilterFunc)
@@ -155,7 +156,6 @@ static void set_string_NULL_handle_fails_impl(PFN_MESSAGE_SET_STRING pfnSetMessa
 
     //cleanup
 }
-
 
 static void set_string_NULL_string_fails_impl(PFN_MESSAGE_SET_STRING pfnSetMessageString)
 {
@@ -234,8 +234,6 @@ static void get_string_not_set_fails_impl(PFN_MESSAGE_GET_STRING pfnGetMessageSt
     IoTHubMessage_Destroy(h);
 }
 
-
-
 /* Tests_SRS_IOTHUBMESSAGE_07_011: [IoTHubMessage_GetMessageId shall return the messageId as a const char*.] */
 static void get_string_succeeds_impl(PFN_MESSAGE_SET_STRING pfnSetMessageString, PFN_MESSAGE_GET_STRING pfnGetMessageString, const char *test_value)
 {
@@ -255,7 +253,6 @@ static void get_string_succeeds_impl(PFN_MESSAGE_SET_STRING pfnSetMessageString,
     //cleanup
     IoTHubMessage_Destroy(h);
 }
-
 
 static TEST_MUTEX_HANDLE g_testByTest;
 
@@ -338,20 +335,6 @@ TEST_FUNCTION_CLEANUP(method_cleanup)
 {
     reset_test_data();
     TEST_MUTEX_RELEASE(g_testByTest);
-}
-
-static int should_skip_index(size_t current_index, const size_t skip_array[], size_t length)
-{
-    int result = 0;
-    for (size_t index = 0; index < length; index++)
-    {
-        if (current_index == skip_array[index])
-        {
-            result = __LINE__;
-            break;
-        }
-    }
-    return result;
 }
 
 /*Tests_SRS_IOTHUBMESSAGE_02_022: [IoTHubMessage_CreateFromByteArray shall call BUFFER_create passing byteArray and size as parameters.]*/
@@ -2066,12 +2049,12 @@ TEST_FUNCTION(IoTHubMessage_GetConnectionDeviceId_SUCCEED)
     get_string_succeeds_impl(IoTHubMessage_SetConnectionDeviceId, IoTHubMessage_GetConnectionDeviceId, TEST_CONNECTION_DEVICE_ID);
 }
 
-TEST_FUNCTION(IoTHubMessage_SetAsSecurityMessage_handle_NULL_fail)
+TEST_FUNCTION(IoTHubMessage_SetMessageCategory_handle_NULL_fail)
 {
     //arrange
 
     //act
-    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetAsSecurityMessage(NULL);
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetMessageCategory(NULL, MESSAGE_CATEGORY_TELEMETRY);
 
     //assert
     ASSERT_ARE_NOT_EQUAL(int, IOTHUB_MESSAGE_OK, result);
@@ -2080,7 +2063,7 @@ TEST_FUNCTION(IoTHubMessage_SetAsSecurityMessage_handle_NULL_fail)
     //cleanup
 }
 
-TEST_FUNCTION(IoTHubMessage_SetAsSecurityMessage_Succeed)
+TEST_FUNCTION(IoTHubMessage_SetMessageCategory_Succeed)
 {
     //arrange
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
@@ -2089,7 +2072,7 @@ TEST_FUNCTION(IoTHubMessage_SetAsSecurityMessage_Succeed)
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
     //act
-    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetAsSecurityMessage(h);
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetMessageCategory(h, MESSAGE_CATEGORY_SECURITY);
 
     //assert
     ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_OK, result);
@@ -2103,48 +2086,48 @@ TEST_FUNCTION(IoTHubMessage_Clone_SecurityMessage_Succeed)
 {
     //arrange
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
-    IoTHubMessage_SetAsSecurityMessage(h);
+    IoTHubMessage_SetMessageCategory(h, MESSAGE_CATEGORY_SECURITY);
     umock_c_reset_all_calls();
 
     //act
     IOTHUB_MESSAGE_HANDLE clone_msg = IoTHubMessage_Clone(h);
-    bool result = IoTHubMessage_IsSecurityMessage(h);
+    IOTHUB_MESSAGE_CATEGORY msg_cat = IoTHubMessage_GetMessageCategory(clone_msg);
 
     //assert
-    ASSERT_IS_TRUE(result);
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_CATEGORY, MESSAGE_CATEGORY_SECURITY, msg_cat);
 
     //cleanup
     IoTHubMessage_Destroy(h);
     IoTHubMessage_Destroy(clone_msg);
 }
 
-TEST_FUNCTION(IoTHubMessage_IsSecurityMessage_handle_NULL_fail)
+TEST_FUNCTION(IoTHubMessage_GetMessageCategory_handle_NULL_fail)
 {
     //arrange
     umock_c_reset_all_calls();
 
     //act
-    bool result = IoTHubMessage_IsSecurityMessage(NULL);
+    IOTHUB_MESSAGE_CATEGORY result = IoTHubMessage_GetMessageCategory(NULL);
 
     //assert
-    ASSERT_IS_FALSE(result);
+    ASSERT_ARE_NOT_EQUAL(IOTHUB_MESSAGE_CATEGORY, MESSAGE_CATEGORY_SECURITY, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
 }
 
-TEST_FUNCTION(IoTHubMessage_IsSecurityMessage_true_Succeed)
+TEST_FUNCTION(IoTHubMessage_GetMessageCategory_Telemetry_Succeed)
 {
     //arrange
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
-    IoTHubMessage_SetAsSecurityMessage(h);
+    IoTHubMessage_SetMessageCategory(h, MESSAGE_CATEGORY_SECURITY);
     umock_c_reset_all_calls();
 
     //act
-    bool result = IoTHubMessage_IsSecurityMessage(h);
+    IOTHUB_MESSAGE_CATEGORY result = IoTHubMessage_GetMessageCategory(h);
 
     //assert
-    ASSERT_IS_TRUE(result);
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_CATEGORY, MESSAGE_CATEGORY_SECURITY, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -2158,10 +2141,10 @@ TEST_FUNCTION(IoTHubMessage_IsSecurityMessage_false_Succeed)
     umock_c_reset_all_calls();
 
     //act
-    bool result = IoTHubMessage_IsSecurityMessage(h);
+    IOTHUB_MESSAGE_CATEGORY result = IoTHubMessage_GetMessageCategory(NULL);
 
     //assert
-    ASSERT_IS_FALSE(result);
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_CATEGORY, MESSAGE_CATEGORY_TELEMETRY, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
