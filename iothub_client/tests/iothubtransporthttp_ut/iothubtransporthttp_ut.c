@@ -137,6 +137,9 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_STATUS, IOTHUB_CLIENT_STATUS_VALUES);
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES);
 
+TEST_DEFINE_ENUM_TYPE(PLATFORM_INFO_OPTION, PLATFORM_INFO_OPTION_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(PLATFORM_INFO_OPTION, PLATFORM_INFO_OPTION_VALUES);
+
 #define TEST_DEVICE_ID "thisIsDeviceID"
 #define TEST_DEVICE_ID2 "aSecondDeviceID"
 #define TEST_DEVICE_KEY "thisIsDeviceKey"
@@ -506,7 +509,7 @@ static void* transport_cb_ctx = (void*)0x499922;
 static pfIotHubTransport_SendMessageDisposition         IoTHubTransportHttp_SendMessageDisposition;
 static pfIoTHubTransport_Subscribe_DeviceTwin           IoTHubTransportHttp_Subscribe_DeviceTwin;
 static pfIoTHubTransport_Unsubscribe_DeviceTwin         IoTHubTransportHttp_Unsubscribe_DeviceTwin;
-static pfIoTHubTransport_GetTwinAsync             IoTHubTransportHttp_GetTwinAsync;
+static pfIoTHubTransport_GetTwinAsync                   IoTHubTransportHttp_GetTwinAsync;
 static pfIoTHubTransport_GetHostname                    IoTHubTransportHttp_GetHostname;
 static pfIoTHubTransport_SetOption                      IoTHubTransportHttp_SetOption;
 static pfIoTHubTransport_Create                         IoTHubTransportHttp_Create;
@@ -520,6 +523,7 @@ static pfIoTHubTransport_GetSendStatus                  IoTHubTransportHttp_GetS
 static pfIoTHubTransport_SetStreamRequestCallback       IoTHubTransportHttp_SetStreamRequestCallback;
 static pfIoTHubTransport_SendStreamResponse             IoTHubTransportHttp_SendStreamResponse;
 static pfIoTHubTransport_SetCallbackContext             IoTHubTransportHttp_SetCallbackContext;
+static pfIoTHubTransport_GetSupportedPlatformInfo       IoTHubTransportHttp_GetSupportedPlatformInfo;
 
 static TEST_MUTEX_HANDLE g_testByTest;
 
@@ -1327,6 +1331,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     IoTHubTransportHttp_SetStreamRequestCallback = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_SetStreamRequestCallback;
     IoTHubTransportHttp_SendStreamResponse = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_SendStreamResponse;
     IoTHubTransportHttp_SetCallbackContext = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_SetCallbackContext;
+    IoTHubTransportHttp_GetSupportedPlatformInfo = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_GetSupportedPlatformInfo;
 
     TEST_STRING_HANDLE = real_STRING_construct(TEST_STRING_DATA);
 }
@@ -14395,6 +14400,25 @@ TEST_FUNCTION(IoTHubTransportHttp_SetCallbackContext_fail)
     ASSERT_ARE_NOT_EQUAL(int, 0, result);
 
     // cleanup
+}
+
+TEST_FUNCTION(IoTHubTransportHttp_GetSupportedPlatformInfo_returns)
+{
+    //arrange
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+
+    umock_c_reset_all_calls();
+
+    //act
+    PLATFORM_INFO_OPTION info;
+    int result = IoTHubTransportHttp_GetSupportedPlatformInfo(handle, &info);
+
+    //assert
+    ASSERT_ARE_EQUAL(int, result, 0);
+    ASSERT_ARE_EQUAL(PLATFORM_INFO_OPTION, info, PLATFORM_INFO_OPTION_DEFAULT);
+
+    //cleanup
+    IoTHubTransportHttp_Destroy(handle);
 }
 
 END_TEST_SUITE(iothubtransporthttp_ut)

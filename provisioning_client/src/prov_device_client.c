@@ -271,3 +271,33 @@ const char* Prov_Device_GetVersionString(void)
     return Prov_Device_LL_GetVersionString();
 }
 
+PROV_DEVICE_RESULT Prov_Device_Set_Provisioning_Payload(PROV_DEVICE_HANDLE handle, const char* json)
+{
+    PROV_DEVICE_RESULT result;
+    if (handle == NULL)
+    {
+        LogError("Invalid parameter specified handle: %p", handle);
+        result = PROV_DEVICE_RESULT_INVALID_ARG;
+    }
+    else
+    {
+        result = Prov_Device_LL_Set_Provisioning_Payload(handle->ProvDeviceLLHandle, json);
+    }
+    return result;
+}
+
+const char* Prov_Device_Get_Provisioning_Payload(PROV_DEVICE_HANDLE handle)
+{
+    const char* result;
+    if (handle == NULL)
+    {
+        LogError("Invalid parameter specified handle: %p", handle);
+        result = NULL;
+    }
+    else
+    {
+        result = Prov_Device_LL_Get_Provisioning_Payload(handle->ProvDeviceLLHandle);
+    }
+    return result;
+}
+

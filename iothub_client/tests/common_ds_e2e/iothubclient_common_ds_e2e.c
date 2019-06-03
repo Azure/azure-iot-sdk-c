@@ -473,6 +473,9 @@ static int ds_e2e_send_device_streaming_request_async(const char* deviceId, cons
                                         expDSReq->response->isAccepted = isAccepted;
                                         expDSReq->response->url = url;
                                         expDSReq->response->authorizationToken = authorizationToken;
+
+                                        LogInfo("Service Client SGW url: %s", expDSReq->response->url);
+
                                         result = 0;
                                     }
                                 }
@@ -751,6 +754,8 @@ static DEVICE_STREAM_C2D_RESPONSE* on_device_streaming_request_received(DEVICE_S
     {
         expDSReq->request = copy_of_request;
     }
+
+    LogInfo("Device Client SGW url: %s", expDSReq->request->url);
 
     return response;
 }
