@@ -1108,6 +1108,12 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
 
                         result->diagnostic_setting.currentMessageNumber = 0;
                         result->diagnostic_setting.diagSamplingPercentage = 0;
+
+                        result->distributedTracing_setting.policyEnabled = false;
+                        result->distributedTracing_setting.samplingMode = IOTHUB_DISTRIBUTED_TRACING_SAMPLING_MODE_NOT_SET;
+                        result->distributedTracing_setting.samplingRate = 0;
+                        result->distributedTracing_setting.currentMessageNumber = 0;
+
                         /*Codes_SRS_IOTHUBCLIENT_LL_25_124: [ `IoTHubClientCore_LL_Create` shall set the default retry policy as Exponential backoff with jitter and if succeed and return a `non-NULL` handle. ]*/
                         if (IoTHubClientCore_LL_SetRetryPolicy(result, IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER, 0) != IOTHUB_CLIENT_OK)
                         {
@@ -1125,39 +1131,6 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
                             STRING_delete(result->product_info);
                             free(result);
                             result = NULL;
-                        }
-                        else
-                        {
-                            /*Codes_SRS_IOTHUBCLIENT_LL_02_042: [ By default, messages shall not timeout. ]*/
-                            result->currentMessageTimeout = 0;
-                            result->current_device_twin_timeout = 0;
-
-                            result->diagnostic_setting.currentMessageNumber = 0;
-                            result->diagnostic_setting.diagSamplingPercentage = 0;
-
-                            result->distributedTracing_setting.policyEnabled = false;
-                            result->distributedTracing_setting.samplingMode = IOTHUB_DISTRIBUTED_TRACING_SAMPLING_MODE_NOT_SET;
-                            result->distributedTracing_setting.samplingRate = 0;
-                            result->distributedTracing_setting.currentMessageNumber = 0;
-
-                            /*Codes_SRS_IOTHUBCLIENT_LL_25_124: [ `IoTHubClientCore_LL_Create` shall set the default retry policy as Exponential backoff with jitter and if succeed and return a `non-NULL` handle. ]*/
-                            if (IoTHubClientCore_LL_SetRetryPolicy(result, IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER, 0) != IOTHUB_CLIENT_OK)
-                            {
-                                LogError("Setting default retry policy in transport failed");
-                                result->IoTHubTransport_Unregister(result->deviceHandle);
-                                IoTHubClient_Auth_Destroy(result->authorization_module);
-                                // Codes_SRS_IOTHUBCLIENT_LL_09_010: [ If any failure occurs `IoTHubClientCore_LL_Create` shall destroy the `transportHandle` only if it has created it ]
-                                if (!result->isSharedTransport)
-                                {
-                                    result->IoTHubTransport_Destroy(result->transportHandle);
-                                }
-                                destroy_blob_upload_module(result);
-                                destroy_module_method_module(result);
-                                tickcounter_destroy(result->tickCounter);
-                                STRING_delete(product_info);
-                                free(result);
-                                result = NULL;
-                            }
                         }
                     }
                 }
