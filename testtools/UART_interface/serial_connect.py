@@ -12,7 +12,6 @@ except:
     import serial_settings
     import serial_commands_dict as commands_dict
 
-
 # Note: commands on MXCHIP have line endings with \r AND \n
 # Notes: This is designed to be used as a command line script with args (for automation purposes) to communicate over serial to a Microsoft mxchip device.
 
@@ -47,6 +46,8 @@ def parse_opts():
 
 
 def check_firmware_errors(line):
+    if "ERROR:" in line:
+        azure_test_firmware_errors.SDK_ERRORS += 1
     if azure_test_firmware_errors.iot_init_failure in line:
         print("Failed to connect to saved IoT Hub!")
 
@@ -213,6 +214,8 @@ def run():
     ser.reset_input_buffer()
     ser.reset_output_buffer()
     ser.close()
+
+    sys.exit(azure_test_firmware_errors.SDK_ERRORS)
 
 if __name__ == '__main__':
     parse_opts()
