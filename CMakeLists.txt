@@ -74,9 +74,9 @@ option(use_prov_client "Enable provisioning client" OFF)
 option(use_tpm_simulator "tpm simulator type of hsm used with the provisioning client" OFF)
 option(use_edge_modules "Enable support for running modules against Azure IoT Edge" OFF)
 option(use_custom_heap "use externally defined heap functions instead of the malloc family" OFF)
-set(compileOption_C CACHE STRING "passes a string to the command line of the C compiler")
-set(compileOption_CXX CACHE STRING "passes a string to the command line of the C++ compiler")
-set(linkerOption CACHE STRING "passes a string to the shared and exe linker options of the C compiler")
+set(compileOption_C "" CACHE STRING "passes a string to the command line of the C compiler")
+set(compileOption_CXX "" CACHE STRING "passes a string to the command line of the C++ compiler")
+set(linkerOption "" CACHE STRING "passes a string to the shared and exe linker options of the C compiler")
 
 set(use_prov_client_core OFF)
 
