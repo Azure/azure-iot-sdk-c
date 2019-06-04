@@ -215,6 +215,7 @@ def run():
     ser.reset_output_buffer()
     ser.close()
 
+    print("Exit Code: %d" %azure_test_firmware_errors.SDK_ERRORS)
     sys.exit(azure_test_firmware_errors.SDK_ERRORS)
 
 if __name__ == '__main__':
