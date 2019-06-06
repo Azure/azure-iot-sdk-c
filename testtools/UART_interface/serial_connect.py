@@ -44,18 +44,22 @@ def parse_opts():
         elif opt in ('-s', '--skip'):
             serial_settings.skip_setup = True
 
-
-def check_firmware_errors(line):
+def check_sdk_errors(line):
     if "ERROR:" in line:
         azure_test_firmware_errors.SDK_ERRORS += 1
+
+def check_firmware_errors(line):
     if azure_test_firmware_errors.iot_init_failure in line:
         print("Failed to connect to saved IoT Hub!")
+        azure_test_firmware_errors.SDK_ERRORS += 1
 
     elif azure_test_firmware_errors.sensor_init_failure in line:
         print("Failed to init mxchip sensor")
+        azure_test_firmware_errors.SDK_ERRORS += 1
 
     elif azure_test_firmware_errors.wifi_failure in line:
         print("Failed to connect to saved WiFi network.")
+        azure_test_firmware_errors.SDK_ERRORS += 1
 
 
 # If there is a sudden disconnect, program should report line in input script reached, and close files.
@@ -98,7 +102,7 @@ def serial_write(ser, message, file=None):
 def serial_read(ser, message, file, first_read=False):
 
     # Special per opt handling:
-    if "send_telemetry" in message:
+    if "send_telemetry" in message or "set_az_iothub" in message:
         time.sleep(.15)
     elif "exit" in message and first_read:
         time.sleep(serial_settings.wait_for_flash)
@@ -113,6 +117,7 @@ def serial_read(ser, message, file, first_read=False):
         output = output.decode(encoding='utf-8', errors='ignore')
 
         check_firmware_errors(output)
+        check_sdk_errors(output)
         print(output)
         try:
             # File must exist to write to it
@@ -195,6 +200,7 @@ def run():
             time.sleep(.1)
             output = ser.readline(ser.in_waiting)
             output = output.strip().decode(encoding='utf-8', errors='ignore')
+            check_firmware_errors(output)
             # Do we want to save this output to file if there is an error printed?
             if len(output) > 4:
                 print(output)
@@ -206,6 +212,7 @@ def run():
             time.sleep(.1)
             output = ser.readline(ser.in_waiting)
             output = output.strip().decode(encoding='utf-8', errors='ignore')
+            check_firmware_errors(output)
             if len(output) > 4:
                 print(output)
 
@@ -215,7 +222,7 @@ def run():
     ser.reset_output_buffer()
     ser.close()
 
-    print("Exit Code: %d" %azure_test_firmware_errors.SDK_ERRORS)
+    print("Num of Errors: %d" %azure_test_firmware_errors.SDK_ERRORS)
     sys.exit(azure_test_firmware_errors.SDK_ERRORS)
 
 if __name__ == '__main__':
