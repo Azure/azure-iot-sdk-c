@@ -10,14 +10,14 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <string.h>
-#include "umock_c.h"
+#include "umock_c/umock_c.h"
 #endif
 
 #include "testrunnerswitcher.h"
 
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/uniqueid.h"
@@ -147,7 +147,7 @@ void create_tpm_enrollment_device(const char* prov_conn_string, bool use_tracing
         ASSERT_IS_NOT_NULL(ek_handle, "Failure prov_auth_get_endorsement_key");
 
         STRING_HANDLE ek_value = Azure_Base64_Encode(ek_handle);
-        ASSERT_IS_NOT_NULL(ek_value, "Failure Base64_Encode Endorsement key");
+        ASSERT_IS_NOT_NULL(ek_value, "Failure Azure_Base64_Encode Endorsement key");
 
         ATTESTATION_MECHANISM_HANDLE attest_handle = attestationMechanism_createWithTpm(STRING_c_str(ek_value), NULL);
         ASSERT_IS_NOT_NULL(attest_handle, "Failure attestationMechanism_createWithTpm");

@@ -1,0 +1,3 @@
+docker==3.5.0
+requests>=2.20.0
+colorama>=0.4.1

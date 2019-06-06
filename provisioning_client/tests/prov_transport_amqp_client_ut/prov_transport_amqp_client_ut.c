@@ -20,10 +20,10 @@ static void my_gballoc_free(void* ptr)
 }
 
 #include "testrunnerswitcher.h"
-#include "umock_c.h"
-#include "umocktypes_bool.h"
-#include "umock_c_negative_tests.h"
-#include "azure_c_shared_utility/macro_utils.h"
+#include "umock_c/umock_c.h"
+#include "umock_c/umocktypes_bool.h"
+#include "umock_c/umock_c_negative_tests.h"
+#include "azure_macro_utils/macro_utils.h"
 
 #define ENABLE_MOCKS
 #include "azure_prov_client/internal/prov_transport_amqp_common.h"
@@ -39,12 +39,13 @@ static void my_gballoc_free(void* ptr)
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/tlsio.h"
 
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 MOCKABLE_FUNCTION(, void, on_transport_register_data_cb, PROV_DEVICE_TRANSPORT_RESULT, transport_result, BUFFER_HANDLE, iothub_key, const char*, assigned_hub, const char*, device_id, void*, user_ctx);
-MOCKABLE_FUNCTION(, void, on_transport_status_cb, PROV_DEVICE_TRANSPORT_STATUS, transport_status, void*, user_ctx);
+MOCKABLE_FUNCTION(, void, on_transport_status_cb, PROV_DEVICE_TRANSPORT_STATUS, transport_status, uint32_t, retry_interval, void*, user_ctx);
 MOCKABLE_FUNCTION(, char*, on_transport_challenge_callback, const unsigned char*, nonce, size_t, nonce_len, const char*, key_name, void*, user_ctx);
 MOCKABLE_FUNCTION(, XIO_HANDLE, on_amqp_transport_io, const char*, fqdn, SASL_MECHANISM_HANDLE*, sasl_mechanism, const HTTP_PROXY_IO_CONFIG*, proxy_info);
 MOCKABLE_FUNCTION(, PROV_JSON_INFO*, on_transport_json_parse, const char*, json_document, void*, user_ctx);
+MOCKABLE_FUNCTION(, char*, on_transport_create_json_payload, const char*, ek_value, const char*, srk_value, void*, user_ctx);
 MOCKABLE_FUNCTION(, void, on_transport_error, PROV_DEVICE_TRANSPORT_ERROR, transport_error, void*, user_context);
 #undef ENABLE_MOCKS
 
@@ -134,6 +135,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_client_ut)
         REGISTER_UMOCK_ALIAS_TYPE(PROV_AMQP_TRANSPORT_IO, void*);
         REGISTER_UMOCK_ALIAS_TYPE(HTTP_CLIENT_REQUEST_TYPE, int);
         REGISTER_UMOCK_ALIAS_TYPE(PROV_TRANSPORT_JSON_PARSE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(PROV_TRANSPORT_CREATE_JSON_PAYLOAD, void*);
         REGISTER_UMOCK_ALIAS_TYPE(XIO_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(PROV_TRANSPORT_ERROR_CALLBACK, void*);
 
@@ -402,10 +404,10 @@ BEGIN_TEST_SUITE(prov_transport_amqp_client_ut)
     TEST_FUNCTION(prov_transport_amqp_register_device_succeed)
     {
         //arrange
-        STRICT_EXPECTED_CALL(prov_transport_common_amqp_register_device(TEST_DPS_HANDLE, on_transport_json_parse, NULL));
+        STRICT_EXPECTED_CALL(prov_transport_common_amqp_register_device(TEST_DPS_HANDLE, on_transport_json_parse, on_transport_create_json_payload, NULL));
 
         //act
-        int result = prov_amqp_transport_register_device(TEST_DPS_HANDLE, on_transport_json_parse, NULL);
+        int result = prov_amqp_transport_register_device(TEST_DPS_HANDLE, on_transport_json_parse, on_transport_create_json_payload, NULL);
 
         //assert
         ASSERT_ARE_EQUAL(int, 0, result);

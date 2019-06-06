@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include <stdlib.h>
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/sastoken.h"
 #include "azure_c_shared_utility/azure_base64.h"
@@ -485,7 +485,7 @@ char* dev_auth_tpm_get_endorsement_key(CONCRETE_XDA_HANDLE handle)
         }
         else
         {
-            STRING_HANDLE encoded_key = Base64_Encode(tpm_info->endorsement_key);
+            STRING_HANDLE encoded_key = Azure_Base64_Encode(tpm_info->endorsement_key);
             if (encoded_key == NULL)
             {
                 LogError("Failed base64 encoding");
@@ -540,7 +540,7 @@ char* dev_auth_tpm_get_storage_key(CONCRETE_XDA_HANDLE handle)
         }
         else
         {
-            STRING_HANDLE encoded_key = Base64_Encode(tpm_info->storage_root_key);
+            STRING_HANDLE encoded_key = Azure_Base64_Encode(tpm_info->storage_root_key);
             if (encoded_key == NULL)
             {
                 LogError("Failed base64 encoding");

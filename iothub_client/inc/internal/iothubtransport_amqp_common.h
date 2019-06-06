@@ -5,7 +5,7 @@
 #define IOTHUBTRANSPORTAMQP_COMMON_H
 
 #include "azure_c_shared_utility/strings.h"
-#include "azure_c_shared_utility/umock_c_prod.h"
+#include "umock_c/umock_c_prod.h"
 #include "internal/iothub_transport_ll_private.h"
 #include "iothub_client_streaming.h"
 
@@ -46,7 +46,7 @@ MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubTransport_AMQP_Common_SendMessag
 MOCKABLE_FUNCTION(, int, IoTHubTransport_AMQP_SetCallbackContext, TRANSPORT_LL_HANDLE, handle, void*, ctx);
 MOCKABLE_FUNCTION(, int, IoTHubTransport_AMQP_Common_SetStreamRequestCallback, IOTHUB_DEVICE_HANDLE, handle, DEVICE_STREAM_C2D_REQUEST_CALLBACK, streamRequestCallback, void*, context);
 MOCKABLE_FUNCTION(, int, IoTHubTransport_AMQP_Common_SendStreamResponse, IOTHUB_DEVICE_HANDLE, handle, DEVICE_STREAM_C2D_RESPONSE*, response);
-
+MOCKABLE_FUNCTION(, int, IoTHubTransport_AMQP_Common_GetSupportedPlatformInfo, TRANSPORT_LL_HANDLE, handle, PLATFORM_INFO_OPTION*, info);
 
 #ifdef __cplusplus
 }
