@@ -7,5 +7,5 @@ bits_to_cache = 1600
 mxchip_file = "/media/newt/AZ31662"
 setup_string = "Setup complete"
 skip_setup = False
-mxchip_buf_pause = .08
+mxchip_buf_pause = .06
 serial_comm_timeout = 2
