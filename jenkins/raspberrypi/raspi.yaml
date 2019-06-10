@@ -107,7 +107,8 @@ jobs:
       itemPattern: 'drop/**/*e2e_exe'
 
   - bash: |
-      cd $(Build.ArtifactsDirectory)
+      ls
+      # cd $(Build.ArtifactsDirectory)
       echo $(NEWTIN) | sudo -S chmod -R 777 drop
       echo $(NEWTIN) | sudo -S setcap cap_net_raw,cap_net_admin+ep drop/iothubclient_mqtt_e2e_exe
       cp drop/iothubclient_mqtt_e2e_exe $(Build.SourcesDirectory)/testtools/UART_interface/
