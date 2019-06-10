@@ -109,10 +109,6 @@ jobs:
       itemPattern: 'drop/**/*e2e_exe'
 
   - bash: |
-      (sleep 600; sudo reboot ) &
-    displayName: 'Trigger Reboot Thread'
-  
-  - bash: |
       chmod -R 777 drop
       ls
       sudo setcap cap_net_raw,cap_net_admin+ep drop/iothubclient_mqtt_e2e_exe
