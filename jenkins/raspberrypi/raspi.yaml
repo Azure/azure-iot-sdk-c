@@ -96,6 +96,8 @@ jobs:
     condition: succeeded()
 
 - job: 'Run_Raspi_E2E_Tests'
+  dependsOn: Cross_Compile
+  condition: succeeded()
   pool: devicelab-02
   steps:
   - checkout: none
