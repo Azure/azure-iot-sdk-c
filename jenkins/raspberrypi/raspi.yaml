@@ -109,9 +109,12 @@ jobs:
       itemPattern: 'drop/**/*e2e_exe'
 
   - bash: |
-      chmod -R 777 drop
+      cd $(Build.ArtifactsDirectory)
+      echo $(NEWTIN) | sudo -S chmod -R 777 drop
+      echo $(NEWTIN) | sudo -S setcap cap_net_raw,cap_net_admin+ep drop/iothubclient_mqtt_e2e_exe
+      cp drop/iothubclient_mqtt_e2e_exe $(Build.SourcesDirectory)/testtools/UART_interface/
       ls
-      sudo setcap cap_net_raw,cap_net_admin+ep drop/iothubclient_mqtt_e2e_exe
+      cd $(Build.SourcesDirectory)/testtools/UART_interface/
       . rpi_input.sh
       python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi
       rm input.txt
