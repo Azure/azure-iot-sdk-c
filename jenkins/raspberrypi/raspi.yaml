@@ -99,9 +99,7 @@ jobs:
   dependsOn: Cross_Compile
   condition: succeeded()
   pool: devicelab-02
-  steps:
-  - checkout: none
-  
+  steps:  
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts'
     inputs:
