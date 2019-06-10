@@ -96,7 +96,7 @@ jobs:
     condition: succeeded()
 
 - job: 'Run_Raspi_E2E_Tests'
-  pool: horton-raspi-c
+  pool: devicelab-02
   steps:
   - checkout: none
   
