@@ -114,11 +114,17 @@ jobs:
       chmod -R 777 drop
       ls
       sudo setcap cap_net_raw,cap_net_admin+ep drop/iothubclient_mqtt_e2e_exe
-      cp drop/iothubclient_mqtt_e2e_exe drop/iothubclient_mqtt_e2e_but_better
-      drop/iothubclient_mqtt_e2e_but_better
+      . rpi_input.sh
+      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi
+      rm input.txt
     workingDirectory: '$(System.ArtifactsDirectory)'
     displayName: 'Execute Test'
-    # env:
+    env:
+      RASPI_USER: $(RASPI_USER)
+      RASPI_PWD: $(RASPI_PWD)
+      RASPI_PORT: $(RASPI_PORT)
+      RASPI_TEST_FILE: $(RASPI_TEST_FILE)
+      RASPI_SERIAL_TASK: $(RASPI_SERIAL_TASK) 
     #   IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
     #   IOTHUB_DEVICE_ID: $(IOTHUB-DEVICE-ID)
     #   IOTHUB_DEVICE_KEY: $(IOTHUB-DEVICE-KEY)
@@ -130,10 +136,10 @@ jobs:
     #   IOTHUB_EVENTHUB_CONSUMER_GROUP: $(IOTHUB-EVENTHUB-CONSUMER-GROUP)
     #   IOTHUB_PARTITION_COUNT: 16
 
-  - task: PublishTestResults@2
-    displayName: 'Publish Test Results "**/results-junit.xml"'
-    inputs:
-      testResultsFiles: "**/results-junit.xml"
-      testRunTitle: 'raspberry pi'
-  dependsOn: Cross_Compile
-  condition: succeeded()
+  # - task: PublishTestResults@2
+  #   displayName: 'Publish Test Results "**/results-junit.xml"'
+  #   inputs:
+  #     testResultsFiles: "**/results-junit.xml"
+  #     testRunTitle: 'raspberry pi'
+  # dependsOn: Cross_Compile
+  # condition: succeeded()
