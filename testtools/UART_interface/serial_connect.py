@@ -95,10 +95,10 @@ def run():
         # for rpi, transfer pipeline/artifact files from agent to device
         # get filepath, walk it
         # for each file, send rz, then sz file to rpi port
-        
 
 
-    if 'rpi' in serial_settings.device_type:
+
+    if 'rpi' in serial_settings.device_type or 'raspi' in serial_settings.device_type:
         uart = rpi_uart_interface.rpi_uart_interface()
     else:
         uart = mxchip_uart_interface.mxchip_uart_interface()
