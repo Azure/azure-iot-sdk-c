@@ -100,15 +100,15 @@ jobs:
   condition: succeeded()
   pool: devicelab-02
   steps:  
-  - task: DownloadBuildArtifacts@0
-    displayName: 'Download Build Artifacts'
-    inputs:
-      artifactName: drop
-      itemPattern: 'drop/**/*e2e_exe'
+  # - task: DownloadBuildArtifacts@0
+  #   displayName: 'Download Build Artifacts'
+  #   inputs:
+  #     artifactName: drop
+  #     itemPattern: 'drop/**/*e2e_exe'
 
   - bash: |
-      ls
       # cd $(Build.ArtifactsDirectory)
+      ls
       echo $(NEWTIN) | sudo -S chmod -R 777 drop
       echo $(NEWTIN) | sudo -S setcap cap_net_raw,cap_net_admin+ep drop/iothubclient_mqtt_e2e_exe
       cp drop/iothubclient_mqtt_e2e_exe $(Build.SourcesDirectory)/testtools/UART_interface/
