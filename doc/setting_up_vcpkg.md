@@ -19,6 +19,7 @@ vcpkg integrate install
 # Install azure-iot-sdk-c package
 vcpkg install azure-iot-sdk-c
 
+# Optionnal, useful if you need to share or restore a box with the sdk without building it
 # Export nuget package locally
 vcpkg export azure-iot-sdk-c --nuget
 
