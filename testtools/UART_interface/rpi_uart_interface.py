@@ -53,7 +53,17 @@ class rpi_uart_interface(uart_interface):
             if "sz " in message:
                 round = ser.write(bytearray("rz\r\n".encode('ascii'))) #
                 os.system(message)#"sz -a test.sh > /dev/ttyUSB0 < /dev/ttyUSB0")
-                time.sleep(2)
+
+                # check for completion
+                output = ser.readline(ser.in_waiting)
+                output = output.decode(encoding='utf-8', errors='ignore')
+                print(output)
+                start_time = time.time()
+                while ("Transfer" not in output) and (time.time() - start_time) < serial_settings.wait_for_flash:
+                    time.sleep(.01)
+                    output = ser.readline(ser.in_waiting)
+                    output = output.decode(encoding='utf-8', errors='ignore')
+
                 return round
             # special handling for receiving a file, Note: input file should use rz <filepath> when a file from the RPi is desired
             elif "rz " in message:
