@@ -108,7 +108,7 @@ jobs:
       itemPattern: 'drop/**/*e2e_exe'
 
   - script: |
-      cd $(Build.ArtifactsDirectory)
+      cd $(Build.ArtifactStagingDirectory)
       ls
       echo $(NEWTIN) | sudo -S chmod -R 777 drop
       echo $(NEWTIN) | sudo -S setcap cap_net_raw,cap_net_admin+ep drop/iothubclient_mqtt_e2e_exe
