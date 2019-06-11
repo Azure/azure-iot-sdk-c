@@ -98,7 +98,8 @@ jobs:
 - job: 'Run_Raspi_E2E_Tests'
   dependsOn: Cross_Compile
   condition: succeeded()
-  pool: devicelab-02
+  pool: 
+    name: devicelab-02
   steps:  
   # - task: DownloadBuildArtifacts@0
   #   displayName: 'Download Build Artifacts'
@@ -106,7 +107,7 @@ jobs:
   #     artifactName: drop
   #     itemPattern: 'drop/**/*e2e_exe'
 
-  - bash: |
+  - script: |
       # cd $(Build.ArtifactsDirectory)
       ls
       echo $(NEWTIN) | sudo -S chmod -R 777 drop
