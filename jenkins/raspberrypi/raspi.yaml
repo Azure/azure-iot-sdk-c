@@ -101,11 +101,11 @@ jobs:
   pool: 
     name: devicelab-02
   steps:  
-  # - task: DownloadBuildArtifacts@0
-  #   displayName: 'Download Build Artifacts'
-  #   inputs:
-  #     artifactName: drop
-  #     itemPattern: 'drop/**/*e2e_exe'
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: drop
+      itemPattern: 'drop/**/*e2e_exe'
 
   - script: |
       cd $(Build.ArtifactsDirectory)
