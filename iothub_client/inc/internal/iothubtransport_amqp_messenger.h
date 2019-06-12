@@ -93,7 +93,6 @@ typedef struct AMQP_MESSENGER_LINK_CONFIG_TAG
 
 typedef struct AMQP_MESSENGER_CONFIG_TAG
 {
-    char* client_version;
     char* device_id;
     char* module_id;
     char* iothub_host_fqdn;
@@ -106,6 +105,9 @@ typedef struct AMQP_MESSENGER_CONFIG_TAG
 
     AMQP_MESSENGER_SUBSCRIPTION_CALLBACK on_subscription_changed_callback;
     void* on_subscription_changed_context;
+
+    pfTransport_GetOption_Product_Info_Callback prod_info_cb;
+    void* prod_info_ctx;
 } AMQP_MESSENGER_CONFIG;
 
 MOCKABLE_FUNCTION(, AMQP_MESSENGER_HANDLE, amqp_messenger_create, const AMQP_MESSENGER_CONFIG*, messenger_config);

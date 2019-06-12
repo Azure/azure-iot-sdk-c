@@ -53,11 +53,9 @@ void real_free(void* ptr)
 #include "internal/iothubtransport_amqp_cbs_auth.h"
 #include "internal/iothub_client_authorization.h"
 
-
 #undef ENABLE_MOCKS
 
 #include "internal/iothubtransport_amqp_device.h"
-
 
 static TEST_MUTEX_HANDLE g_testByTest;
 
@@ -65,9 +63,7 @@ MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
-    char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
-    ASSERT_FAIL(temp_str);
+    ASSERT_FAIL("umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
 }
 
 // ---------- Defines and Test Data ---------- //
@@ -110,6 +106,12 @@ static time_t TEST_current_time;
 
 #define TEST_MESSAGE_SOURCE_NAME_CHAR_PTR                 "link_name"
 static delivery_number TEST_MESSAGE_ID;
+
+static const char* test_get_product_info(void* ctx)
+{
+    (void)ctx;
+    return "test_product_info";
+}
 
 // ---------- Time-related Test Helpers ---------- //
 static time_t add_seconds(time_t base_time, unsigned int seconds)
@@ -200,9 +202,10 @@ static AUTHENTICATION_HANDLE TEST_authentication_create(const AUTHENTICATION_CON
 static ON_TELEMETRY_MESSENGER_STATE_CHANGED_CALLBACK TEST_telemetry_messenger_create_saved_on_state_changed_callback;
 static void* TEST_telemetry_messenger_create_saved_on_state_changed_context;
 static TELEMETRY_MESSENGER_HANDLE TEST_telemetry_messenger_create_return;
-static TELEMETRY_MESSENGER_HANDLE TEST_telemetry_messenger_create(const TELEMETRY_MESSENGER_CONFIG *config, const char* pfi)
+static TELEMETRY_MESSENGER_HANDLE TEST_telemetry_messenger_create(const TELEMETRY_MESSENGER_CONFIG *config, pfTransport_GetOption_Product_Info_Callback prod_info_cb, void* prod_info_ctx)
 {
-    (void)pfi;
+    (void)prod_info_cb;
+    (void)prod_info_ctx;
     TEST_telemetry_messenger_create_saved_on_state_changed_callback = config->on_state_changed_callback;
     TEST_telemetry_messenger_create_saved_on_state_changed_context = config->on_state_changed_context;
     return TEST_telemetry_messenger_create_return;
@@ -295,7 +298,8 @@ static AMQP_DEVICE_CONFIG* get_device_config(DEVICE_AUTH_MODE auth_mode)
 {
     memset(&TEST_device_config, 0, sizeof(AMQP_DEVICE_CONFIG));
     TEST_device_config.device_id = TEST_DEVICE_ID_CHAR_PTR;
-    TEST_device_config.product_info = TEST_PRODUCT_INFO_CHAR_PTR;
+    TEST_device_config.prod_info_cb = test_get_product_info;
+    TEST_device_config.prod_info_ctx = NULL;
     TEST_device_config.iothub_host_fqdn = TEST_IOTHUB_HOST_FQDN_CHAR_PTR;
     TEST_device_config.authentication_mode = auth_mode;
     TEST_device_config.on_state_changed_callback = TEST_on_state_changed_callback;
@@ -400,6 +404,7 @@ static void register_umock_alias_types()
     REGISTER_UMOCK_ALIAS_TYPE(DEVICE_MESSAGE_DISPOSITION_RESULT, int);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_AUTHORIZATION_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(DEVICE_TWIN_UPDATE_RECEIVED_CALLBACK, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(pfTransport_GetOption_Product_Info_Callback, void*);
 }
 
 static void register_global_mock_hooks()
@@ -502,11 +507,10 @@ static void set_expected_calls_for_is_timeout_reached(time_t current_time)
 static void set_expected_calls_for_clone_device_config(AMQP_DEVICE_CONFIG *config)
 {
     STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, config->product_info));
 
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, config->iothub_host_fqdn));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_DeviceId(TEST_AUTHORIZATION_HANDLE));
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_ModuleId(TEST_AUTHORIZATION_HANDLE)).SetReturn(config->module_id);
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_DeviceId(TEST_AUTHORIZATION_HANDLE)).CallCannotFail();
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_ModuleId(TEST_AUTHORIZATION_HANDLE)).SetReturn(config->module_id).CallCannotFail();
 }
 
 static void set_expected_calls_for_create_authentication_instance(AMQP_DEVICE_CONFIG *config)
@@ -518,7 +522,7 @@ static void set_expected_calls_for_create_authentication_instance(AMQP_DEVICE_CO
 static void set_expected_calls_for_create_messenger_instance(AMQP_DEVICE_CONFIG *config)
 {
     (void)config;
-    EXPECTED_CALL(telemetry_messenger_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    EXPECTED_CALL(telemetry_messenger_create(IGNORED_PTR_ARG, test_get_product_info, NULL));
 }
 
 static void set_expected_calls_for_create_twin_messenger(AMQP_DEVICE_CONFIG *config)
@@ -645,7 +649,6 @@ static void set_expected_calls_for_device_destroy(AMQP_DEVICE_HANDLE handle, AMQ
     }
 
     // destroy config
-    STRICT_EXPECTED_CALL(free(config->product_info));
     STRICT_EXPECTED_CALL(free(config->iothub_host_fqdn));
     EXPECTED_CALL(free(IGNORED_PTR_ARG));
 
@@ -963,22 +966,16 @@ TEST_FUNCTION(device_create_failure_checks)
     for (i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
         // arrange
-        char error_msg[64];
-
-        if (i == 4 || i == 5)
+        if (umock_c_negative_tests_can_call_fail(i))
         {
-            // for the IoTHubClient_Auth_Get_DeviceId and IoTHubClient_Auth_Get_ModuleId
-            continue;
+            umock_c_negative_tests_reset();
+            umock_c_negative_tests_fail_call(i);
+
+            AMQP_DEVICE_HANDLE handle = amqp_device_create(config);
+
+            // assert
+            ASSERT_IS_NULL(handle, "On failed call %lu", (unsigned long)i);
         }
-
-        umock_c_negative_tests_reset();
-        umock_c_negative_tests_fail_call(i);
-
-        AMQP_DEVICE_HANDLE handle = amqp_device_create(config);
-
-        // assert
-        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
-        ASSERT_IS_NULL(handle, error_msg);
     }
 
     // cleanup
