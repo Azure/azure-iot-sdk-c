@@ -32,7 +32,7 @@ cd azure-iot-sdk-c
 git submodule update --init
 ```
 
-> If you are using a release before 2019-04-15 then you will need to use the `--recursive` argument to instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
+>If you are using a release before 2019-04-15 then you will need to use the `--recursive` argument to instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
 
 ### Build sample application using vcpkg to build the SDK 
 
@@ -70,9 +70,11 @@ cd cmake
   cmake .. -G "Visual Studio 14 2015" ## For Visual Studio 2015
 # or
   cmake .. -G "Visual Studio 15 2017" ## For Visual Studio 2017
+# or
+  cmake .. -G "Visual Studio 16 2019" -A Win32
 ```
 
-> This builds x86 libraries. To build for x64 for Visual Studio 2015, modify the cmake generator argument: `cmake .. -G "Visual Studio 14 2015 Win64"` or for Visual Studio 2017, `cmake .. -G "Visual Studio 15 2017 Win64"`
+> This builds x86 libraries. To build for x64 for Visual Studio 2015, modify the cmake generator argument: `cmake .. -G "Visual Studio 14 2015 Win64"` or for Visual Studio 2017, `cmake .. -G "Visual Studio 15 2017 Win64"` or for Visual Studio 2019, `cmake .. -G "Visual Studio 16 2019 -A x64"`
 
 When the project generation completes successfully, you should see a Visual Studio solution file (.sln) under the `cmake` folder. To build the SDK, do one of the following:
 
@@ -87,13 +89,13 @@ cmake --build . -- /m /p:Configuration=Release
 > There are many CMake configuration options available for building the SDK. For example, you can disable one of the available protocol stacks by adding an argument to the CMake project generation command:
 
 ```Shell
-cmake -G "Visual Studio 14 2015" -Duse_amqp=OFF ..
+cmake -G "Visual Studio 14 2015" -Duse_amqp=OFF .. // same with 2017 and 2019 generator (see above)
 ```
 
 > Also, you can build and run unit tests:
 
 ```Shell
-cmake -G "Visual Studio 14 2015" -Drun_unittests=ON ..
+cmake -G "Visual Studio 14 2015" -Drun_unittests=ON ..  // same with 2017 and 2019 generator (see above) 
 cmake --build . -- /m /p:Configuration=Debug
 ctest -C "debug" -V
 ```
