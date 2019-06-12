@@ -12,7 +12,7 @@ This document describes how to prepare your development environment to use the *
 
 ## Set up a Windows development environment
 
-- Install [Visual Studio 2019][visual-studio]. You can use the **Visual Studio Community** Free download if you meet the licensing requirements.  (**Visual Studio 2015** and **Visual Studio 2017**  are also supported.)
+- Install [Visual Studio 2019][visual-studio]. You can use the **Visual Studio Community** free download if you meet the licensing requirements.  (**Visual Studio 2015** and **Visual Studio 2017**  are also supported.)
 
 > Be sure to include Visual C++.
 
@@ -38,7 +38,7 @@ git submodule update --init
 
 The sample applications build with the help of C SDK libraries and headers built with vcpkg (a C++ package manager who facilitate building C and C++ libraries). To install the C SDK libraries and headers, follow these steps [Setup C SDK vcpkg for Windows development environment](https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/setting_up_vcpkg.md#setup-c-sdk-vcpkg-for-windows-development-environment).
 
-note: vcpkg creates a directory with all the headers and .lib files on your machine, if you are using Visual Studio ( from 2015) the command 'vcpkg integrate install' let Visual Studio knows where are the headers and lib. If you're using other IDE just add the vcpkg directories to your compiler as usual. 
+note: vcpkg creates a directory with all the headers and .lib files on your machine, if you are using Visual Studio (from 2015) the command 'vcpkg integrate install' let Visual Studio knows where are the headers and lib. If you're using other IDE just add the vcpkg directories to your compiler as usual. 
 
 To quickly build one of our sample applications, open the corresponding [solution file][sln-file] (.sln) in Visual Studio.
   For example, to build the **telemetry message sample**, open **iothub_client\samples\iothub_ll_telemetry_sample\windows\iothub_ll_telemetry_sample.sln**.
