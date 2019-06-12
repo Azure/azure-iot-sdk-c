@@ -19,6 +19,8 @@ extern "C"
 #include <stdint.h>
 #endif /* __cplusplus */
 
+    #define PROVISIONING_INFO_VERSION       1;
+
     struct IOTHUB_PROV_TRANSPORT_PROVIDER_TAG;
     typedef struct IOTHUB_PROV_TRANSPORT_PROVIDER_TAG IOTHUB_PROV_TRANSPORT_PROVIDER;
 
@@ -26,10 +28,11 @@ extern "C"
 
     typedef struct PROVISIONING_AUTH_INFO_TAG
     {
+        unsigned int version;
         const char* provisioning_uri;
         const char* id_scope;
 #ifdef USE_PROV_MODULE
-        SECURE_DEVICE_TYPE hsm_type;
+        SECURE_DEVICE_TYPE attestation_type;
 #endif
         IOTHUB_PROV_CLIENT_TRANSPORT_PROVIDER transport;
         const char* registration_id;

@@ -1240,21 +1240,21 @@ static void close_provisioning_info(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* iothub_ha
 static int initialize_hsm_info(const PROVISIONING_AUTH_INFO* prov_info)
 {
     int result;
-    if (prov_dev_security_init(prov_info->hsm_type) != 0)
+    if (prov_dev_security_init(prov_info->attestation_type) != 0)
     {
         LogError("Failure initializing security hsm");
         result = MU_FAILURE;
     }
     else
     {
-        if (prov_info->hsm_type == SECURE_DEVICE_TYPE_SYMMETRIC_KEY)
+        if (prov_info->attestation_type == SECURE_DEVICE_TYPE_SYMMETRIC_KEY)
         {
             if (prov_info->registration_id == NULL || prov_info->symmetric_key == NULL)
             {
                 LogError("Input parameter Symmetric key requires registrations id and symmetric key parameters");
                 result = MU_FAILURE;
             }
-            else if (prov_dev_security_init(prov_info->hsm_type) != 0)
+            else if (prov_dev_security_init(prov_info->attestation_type) != 0)
             {
                 LogError("Failure initializing security hsm");
                 result = MU_FAILURE;
@@ -3142,6 +3142,11 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_UploadToBlob(IOTHUB_CLIENT_CORE_LL_HAND
         LogError("invalid parameters IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle=%p, const char* destinationFileName=%s, const unsigned char* source=%p, size_t size=%lu", iotHubClientHandle, destinationFileName, source, (unsigned long)size);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
+    else if (iotHubClientHandle->registration_state != OP_STATE_IOT_STAGE)
+    {
+        LogError("unable to initialize upload process till device is provisioned");
+        result = IOTHUB_CLIENT_PROVISIONING_NOT_COMPLETE;
+    }
     else if (iotHubClientHandle->uploadToBlobHandle == NULL && create_blob_upload_module(iotHubClientHandle) != 0)
     {
         LogError("Failure creating blob upload handle");
@@ -3183,6 +3188,16 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_UploadMultipleBlocksToBlob(IOTHUB_CLIEN
         LogError("invalid parameters IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle=%p, const char* destinationFileName=%p, getDataCallback=%p", iotHubClientHandle, destinationFileName, getDataCallback);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
+    else if (iotHubClientHandle->registration_state != OP_STATE_IOT_STAGE)
+    {
+        LogError("unable to initialize upload process till device is provisioned");
+        result = IOTHUB_CLIENT_PROVISIONING_NOT_COMPLETE;
+    }
+    if (iotHubClientHandle->uploadToBlobHandle == NULL && create_blob_upload_module(iotHubClientHandle) != 0)
+    {
+        LogError("Failure creating upload module");
+        result = IOTHUB_CLIENT_ERROR;
+    }
     else
     {
         UPLOAD_MULTIPLE_BLOCKS_WRAPPER_CONTEXT uploadMultipleBlocksWrapperContext;
@@ -3209,17 +3224,19 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx(IOTHUB_CLI
         LogError("invalid parameters IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle=%p, destinationFileName=%p, getDataCallbackEx=%p", iotHubClientHandle, destinationFileName, getDataCallbackEx);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
+    else if (iotHubClientHandle->registration_state != OP_STATE_IOT_STAGE)
+    {
+        LogError("unable to initialize upload process till device is provisioned");
+        result = IOTHUB_CLIENT_PROVISIONING_NOT_COMPLETE;
+    }
+    else if (iotHubClientHandle->uploadToBlobHandle == NULL && create_blob_upload_module(iotHubClientHandle) != 0)
+    {
+        LogError("Failure creating upload module");
+        result = IOTHUB_CLIENT_ERROR;
+    }
     else
     {
-        if (iotHubClientHandle->uploadToBlobHandle == NULL && create_blob_upload_module(iotHubClientHandle) != 0)
-        {
-            LogError("Failure creating upload module");
-            result = IOTHUB_CLIENT_ERROR;
-        }
-        else
-        {
-            result = IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(iotHubClientHandle->uploadToBlobHandle, destinationFileName, getDataCallbackEx, context);
-        }
+        result = IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(iotHubClientHandle->uploadToBlobHandle, destinationFileName, getDataCallbackEx, context);
     }
     return result;
 }

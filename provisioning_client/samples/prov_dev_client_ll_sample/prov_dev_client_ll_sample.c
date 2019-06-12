@@ -4,6 +4,8 @@
 // CAVEAT: This sample is to demonstrate azure IoT client concepts only and is not a guide design principles or style
 // Checking of return codes and error values shall be omitted for brevity.  Please practice sound engineering practices
 // when writing production code.
+
+#include <vld.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -68,6 +70,33 @@ typedef struct IOTHUB_CLIENT_SAMPLE_INFO_TAG
     int stop_running;
 } IOTHUB_CLIENT_SAMPLE_INFO;
 
+static int device_method_callback(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* response_size, void* userContextCallback)
+{
+    (void)userContextCallback;
+    (void)payload;
+    (void)size;
+    int result;
+
+    if (strcmp("getCarVIN", method_name) == 0)
+    {
+        const char deviceMethodResponse[] = "{ \"Response\": \"1HGCM82633A004352\" }";
+        *response_size = sizeof(deviceMethodResponse) - 1;
+        *response = malloc(*response_size);
+        (void)memcpy(*response, deviceMethodResponse, *response_size);
+        result = 200;
+    }
+    else
+    {
+        // All other entries are ignored.
+        const char deviceMethodResponse[] = "{ }";
+        *response_size = sizeof(deviceMethodResponse) - 1;
+        *response = malloc(*response_size);
+        (void)memcpy(*response, deviceMethodResponse, *response_size);
+        result = -1;
+    }
+    return result;
+}
+
 static IOTHUBMESSAGE_DISPOSITION_RESULT receive_msg_callback(IOTHUB_MESSAGE_HANDLE message, void* user_context)
 {
     (void)message;
@@ -75,6 +104,15 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT receive_msg_callback(IOTHUB_MESSAGE_HAND
     (void)printf("Stop message recieved from IoTHub\r\n");
     iothub_info->stop_running = 1;
     return IOTHUBMESSAGE_ACCEPTED;
+}
+
+static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
+{
+    (void)result;
+    size_t* msg_count = (size_t*)userContextCallback;
+    // When a message is sent this callback will get envoked
+    (*msg_count)++;
+    (void)printf("IoTHubClient_LL_SendEventAsync accepted message [%zu] for transmission to IoT Hub.\r\n", *msg_count);
 }
 
 static void iothub_connection_status(IOTHUB_CLIENT_CONNECTION_STATUS result, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void* user_context)
@@ -99,14 +137,20 @@ static void iothub_connection_status(IOTHUB_CLIENT_CONNECTION_STATUS result, IOT
     }
 }
 
+static void reportedStateCallback(int status_code, void* userContextCallback)
+{
+    (void)userContextCallback;
+    printf("Device Twin reported properties update completed with result: %d\r\n", status_code);
+}
+
 int main()
 {
-    PROVISIONING_AUTH_INFO prov_auth_info;
-    //prov_auth_info.hsm_type = SECURE_DEVICE_TYPE_TPM;
-    prov_auth_info.hsm_type = SECURE_DEVICE_TYPE_X509;
-    //prov_auth_info.hsm_type = SECURE_DEVICE_TYPE_SYMMETRIC_KEY;
+    PROVISIONING_AUTH_INFO prov_auth_info = { 0 };
+    //prov_auth_info.attestation_type = SECURE_DEVICE_TYPE_TPM;
+    prov_auth_info.attestation_type = SECURE_DEVICE_TYPE_X509;
+    //prov_auth_info.attestation_type = SECURE_DEVICE_TYPE_SYMMETRIC_KEY;
 
-    bool traceOn = false;
+    bool traceOn = true;
 
     (void)IoTHub_Init();
 
@@ -166,7 +210,10 @@ int main()
         IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-        //(void)IoTHubDeviceClient_LL_SetMessageCallback(device_ll_handle, receive_msg_callback, &iothub_info);
+        (void)IoTHubDeviceClient_LL_SetMessageCallback(device_ll_handle, receive_msg_callback, &iothub_info);
+        //(void)IoTHubDeviceClient_GetTwinAsync(device_ll_handle, getCompleteDeviceTwinOnDemandCallback, NULL);
+        (void)IoTHubDeviceClient_LL_SendReportedState(device_ll_handle, (const unsigned char*)"{ test: 3 }", strlen("{ test: 3 }"), reportedStateCallback, NULL);
+        (void)IoTHubDeviceClient_LL_SetDeviceMethodCallback(device_ll_handle, device_method_callback, NULL);
 
         (void)printf("Sending 1 messages to IoTHub every %d seconds for %d messages (Send any message to stop)\r\n", TIME_BETWEEN_MESSAGES, MESSAGES_TO_SEND);
         do
@@ -178,7 +225,7 @@ int main()
                 if ((current_tick - last_send_time) / 1000 > TIME_BETWEEN_MESSAGES && msg_count < MESSAGES_TO_SEND)
                 {
                     static char msgText[1024];
-                    sprintf_s(msgText, sizeof(msgText), "{ \"message_index\" : \"%zu\" }", msg_count++);
+                    sprintf_s(msgText, sizeof(msgText), "{ \"message_index\" : \"%zu\" }", msg_count);
 
                     IOTHUB_MESSAGE_HANDLE msg_handle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText));
                     if (msg_handle == NULL)
@@ -187,15 +234,13 @@ int main()
                     }
                     else
                     {
-                        if (IoTHubDeviceClient_LL_SendEventAsync(device_ll_handle, msg_handle, NULL, NULL) != IOTHUB_CLIENT_OK)
+                        if (IoTHubDeviceClient_LL_SendEventAsync(device_ll_handle, msg_handle, send_confirm_callback, &msg_count) != IOTHUB_CLIENT_OK)
                         {
                             (void)printf("ERROR: IoTHubClient_LL_SendEventAsync..........FAILED!\r\n");
                         }
                         else
                         {
                             (void)tickcounter_get_current_ms(tick_counter_handle, &last_send_time);
-                            (void)printf("IoTHubClient_LL_SendEventAsync accepted message [%zu] for transmission to IoT Hub.\r\n", msg_count);
-
                         }
                         IoTHubMessage_Destroy(msg_handle);
                     }
