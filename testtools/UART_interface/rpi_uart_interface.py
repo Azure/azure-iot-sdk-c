@@ -70,20 +70,20 @@ class rpi_uart_interface(uart_interface):
                 os.system('rz')
                 message.replace('rz ', 'sz ')
 
-            wait = serial_settings.mxchip_buf_pause  # wait for at least 50ms between 128 byte writes. -- may not be necessary on rpi
+            # wait = serial_settings.mxchip_buf_pause # wait for at least 50ms between 128 byte writes. -- may not be necessary on rpi
             buf = bytearray((message.strip() + '\r\n').encode('ascii'))
-            buf_len = len(buf)  # needed for loop as buf is a destructed list
-            bytes_written = 0
-            timeout = time.time()
-
-            while bytes_written < buf_len:
-                round = ser.write(buf[:128])
-                buf = buf[round:]
-                bytes_written += round
-                # print("bytes written: %d" %bytes_written)
-                time.sleep(wait)
-                if (time.time() - timeout > serial_settings.serial_comm_timeout):
-                    break
+            # buf_len = len(buf)  # needed for loop as buf is a destructed list
+            # bytes_written = 0
+            bytes_written = ser.write(buf)
+            # timeout = time.time()
+            # while bytes_written < buf_len:
+            #     round = ser.write(buf[:128])
+            #     buf = buf[round:]
+            #     bytes_written += round
+            #     # print("bytes written: %d" %bytes_written)
+            #     time.sleep(wait)
+            #     if (time.time() - timeout > serial_settings.serial_comm_timeout):
+            #         break
             # print("final written: %d" %bytes_written)
             return bytes_written
         else:
