@@ -139,8 +139,8 @@ jobs:
       cd $(Build.ArtifactStagingDirectory)
       ls
       echo $(NEWTIN) | sudo -S chmod -R 777 drop
-      echo $(NEWTIN) | sudo -S setcap cap_net_raw,cap_net_admin+ep drop/iothubclient_mqtt_e2e_exe
-      cp drop/iothubclient_mqtt_e2e_exe $(Build.SourcesDirectory)/testtools/UART_interface/
+      echo $(NEWTIN) | sudo -S setcap cap_net_raw,cap_net_admin+ep drop/$RASPI_TEST_FILE
+      cp drop/$RASPI_TEST_FILE $(Build.SourcesDirectory)/testtools/UART_interface/
       cd $(Build.SourcesDirectory)/testtools/UART_interface/
       ls
       . rpi_input.sh
