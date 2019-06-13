@@ -19,7 +19,7 @@ def device_setup():
     pass
 
 def check_sdk_errors(line):
-    if "ERROR:" in line:
+    if "Error:" in line:
         azure_test_firmware_errors.SDK_ERRORS += 1
 
 def check_firmware_errors(line):
@@ -57,7 +57,7 @@ class rpi_uart_interface(uart_interface):
                 # check for completion
                 output = ser.readline(ser.in_waiting)
                 output = output.decode(encoding='utf-8', errors='ignore')
-                print(output)
+                # print(output)
                 start_time = time.time()
                 while ("Transfer" not in output) and (time.time() - start_time) < serial_settings.wait_for_flash:
                     time.sleep(.01)
@@ -71,7 +71,8 @@ class rpi_uart_interface(uart_interface):
                 message.replace('rz ', 'sz ')
 
             # wait = serial_settings.mxchip_buf_pause # wait for at least 50ms between 128 byte writes. -- may not be necessary on rpi
-            buf = bytearray((message.strip() + '\r\n').encode('ascii'))
+            buf = bytearray((message).encode('ascii'))
+            print(buf)
             # buf_len = len(buf)  # needed for loop as buf is a destructed list
             # bytes_written = 0
             bytes_written = ser.write(buf)
@@ -114,7 +115,6 @@ class rpi_uart_interface(uart_interface):
             output = ser.readline(ser.in_waiting)
             output = output.decode(encoding='utf-8', errors='ignore')
 
-            check_firmware_errors(output)
             check_sdk_errors(output)
             print(output)
             try:
