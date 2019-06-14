@@ -176,11 +176,12 @@ class rpi_uart_interface(uart_interface):
                     while((time.time() - session_start) < serial_settings.test_timeout):
                     # while (ser.in_waiting):
                         time.sleep(.2)
-                        output = self.serial_read(ser, line, f)
+                        output = ser.readline(ser.in_waiting)#self.serial_read(ser, line, f)
+                        output = output.decode(encoding='utf-8', errors='ignore')
                         check_test_failures(output)
 
-                        # if len(output) > 4:
-                        #     print(output)
+                        if len(output) > 4:
+                            print(output)
 
                         #for now we can assume one test suite is run
                         if " tests run" in output:
