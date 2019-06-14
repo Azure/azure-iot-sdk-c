@@ -10,3 +10,4 @@ skip_setup = False
 mxchip_buf_pause = .06
 serial_comm_timeout = 2
 device_type = 'mxchip'
+test_timeout = None

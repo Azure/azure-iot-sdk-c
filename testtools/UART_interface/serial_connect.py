@@ -30,7 +30,7 @@ def usage():
     return usage_txt
 
 def parse_opts():
-    options, remainder = getopt.gnu_getopt(sys.argv[1:], 'hsi:o:b:p:m:d:', ['input', 'output', 'help', 'skip', 'baudrate', 'port', 'mxchip_file', 'device'])
+    options, remainder = getopt.gnu_getopt(sys.argv[1:], 'hsi:o:b:p:m:d:t:', ['input', 'output', 'help', 'skip', 'baudrate', 'port', 'mxchip_file', 'device', 'timeout'])
     # print('OPTIONS   :', options)
 
     for opt, arg in options:
@@ -50,6 +50,8 @@ def parse_opts():
             serial_settings.skip_setup = True
         elif opt in ('-d', '--device'):
             serial_settings.device_type = arg
+        elif opt in ('-t', '--timeout'):
+            serial_settings.test_timeout = int(arg)
 
 
 def run():

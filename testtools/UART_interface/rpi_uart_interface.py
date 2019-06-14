@@ -142,6 +142,7 @@ class rpi_uart_interface(uart_interface):
 
     # Note: the buffer size on the mxchip appears to be 128 Bytes.
     def write_read(self, ser, input_file, output_file):
+        session_start = time.time()
         if input_file:
             # set wait between read/write
             wait = (serial_settings.bits_to_cache/serial_settings.baud_rate)
@@ -171,11 +172,26 @@ class rpi_uart_interface(uart_interface):
                     line = fp.readline()
 
                 # read any trailing output, save to file
-                while (ser.in_waiting):
-                    time.sleep(.2)
-                    output = self.serial_read(ser, line, f)
-                    output = output.decode(encoding='utf-8', errors='ignore')
-                    check_test_failures(output)
-                    print(output)
+                if serial_settings.test_timeout:
+                    while((time.time() - session_start) < serial_settings.test_timeout):
+                    # while (ser.in_waiting):
+                        time.sleep(.2)
+                        output = self.serial_read(ser, line, f)
+                        output = output.decode(encoding='utf-8', errors='ignore')
+                        check_test_failures(output)
+
+                        if len(output) > 4:
+                            print(output)
+
+                        #for now we can assume one test suite is run
+                        if " tests run" in output:
+                            break
+                else:
+                    while (ser.in_waiting):
+                        time.sleep(.2)
+                        output = self.serial_read(ser, line, f)
+                        output = output.decode(encoding='utf-8', errors='ignore')
+                        check_sdk_errors(output)
+                        print(output)
 
                 f.close()
