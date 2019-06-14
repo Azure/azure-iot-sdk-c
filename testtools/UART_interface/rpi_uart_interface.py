@@ -22,6 +22,13 @@ def check_sdk_errors(line):
     if "Error:" in line:
         azure_test_firmware_errors.SDK_ERRORS += 1
 
+def check_test_failures(line):
+    if " tests ran" in line:
+        result = [int(s) for s in line.split() if s.isdigit()]
+        azure_test_firmware_errors.SDK_ERRORS = result[1]
+        return result
+
+
 def check_firmware_errors(line):
     if azure_test_firmware_errors.iot_init_failure in line:
         print("Failed to connect to saved IoT Hub!")
@@ -115,7 +122,8 @@ class rpi_uart_interface(uart_interface):
             output = ser.readline(ser.in_waiting)
             output = output.decode(encoding='utf-8', errors='ignore')
 
-            check_sdk_errors(output)
+            # check_sdk_errors(output)
+            check_test_failures(output)
             print(output)
             try:
                 # File must exist to write to it
@@ -166,5 +174,8 @@ class rpi_uart_interface(uart_interface):
                 while (ser.in_waiting):
                     time.sleep(.2)
                     output = self.serial_read(ser, line, f)
+                    output = output.decode(encoding='utf-8', errors='ignore')
+                    check_test_failures(output)
+                    print(output)
 
                 f.close()
