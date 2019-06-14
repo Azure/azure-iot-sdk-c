@@ -186,6 +186,8 @@ class rpi_uart_interface(uart_interface):
                         #for now we can assume one test suite is run
                         if " tests run" in output:
                             break
+                    # reset after every test
+                    ser.write(bytearray("sudo reboot\n".encode("ascii")))
                 else:
                     while (ser.in_waiting):
                         time.sleep(.2)
