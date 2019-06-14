@@ -177,11 +177,10 @@ class rpi_uart_interface(uart_interface):
                     # while (ser.in_waiting):
                         time.sleep(.2)
                         output = self.serial_read(ser, line, f)
-                        output = output.decode(encoding='utf-8', errors='ignore')
                         check_test_failures(output)
 
-                        if len(output) > 4:
-                            print(output)
+                        # if len(output) > 4:
+                        #     print(output)
 
                         #for now we can assume one test suite is run
                         if " tests run" in output:
@@ -190,8 +189,6 @@ class rpi_uart_interface(uart_interface):
                     while (ser.in_waiting):
                         time.sleep(.2)
                         output = self.serial_read(ser, line, f)
-                        output = output.decode(encoding='utf-8', errors='ignore')
                         check_sdk_errors(output)
-                        print(output)
 
                 f.close()
