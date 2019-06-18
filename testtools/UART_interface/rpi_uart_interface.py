@@ -80,19 +80,8 @@ class rpi_uart_interface(uart_interface):
             # wait = serial_settings.mxchip_buf_pause # wait for at least 50ms between 128 byte writes. -- may not be necessary on rpi
             buf = bytearray((message).encode('ascii'))
             print(buf)
-            # buf_len = len(buf)  # needed for loop as buf is a destructed list
-            # bytes_written = 0
             bytes_written = ser.write(buf)
-            # timeout = time.time()
-            # while bytes_written < buf_len:
-            #     round = ser.write(buf[:128])
-            #     buf = buf[round:]
-            #     bytes_written += round
-            #     # print("bytes written: %d" %bytes_written)
-            #     time.sleep(wait)
-            #     if (time.time() - timeout > serial_settings.serial_comm_timeout):
-            #         break
-            # print("final written: %d" %bytes_written)
+
             return bytes_written
         else:
             try:
@@ -120,7 +109,7 @@ class rpi_uart_interface(uart_interface):
 
         if ser.readable():
             output = ser.readline(ser.in_waiting)
-            output = output.decode(encoding='utf-8', errors='ignore').split()
+            output = output.decode(encoding='utf-8', errors='ignore').strip()
 
             # check_sdk_errors(output)
             check_test_failures(output)
@@ -134,6 +123,7 @@ class rpi_uart_interface(uart_interface):
             return output
         else:
             try:
+                #This exists purely if the serial line becomes unreadable during operation, will likely never be hit, if so, check your cable
                 time.sleep(2)
                 ser.open()
                 self.serial_read(ser, message, file, first_read=True)
@@ -174,7 +164,6 @@ class rpi_uart_interface(uart_interface):
                 # read any trailing output, save to file
                 if serial_settings.test_timeout:
                     while((time.time() - session_start) < serial_settings.test_timeout):
-                    # while (ser.in_waiting):
                         time.sleep(.2)
                         output = ser.readline(ser.in_waiting)#self.serial_read(ser, line, f)
                         output = output.decode(encoding='utf-8', errors='ignore')
@@ -186,12 +175,15 @@ class rpi_uart_interface(uart_interface):
                         #for now we can assume one test suite is run
                         if " tests run" in output:
                             break
-                    # reset after every test
-                    ser.write(bytearray("sudo reboot\n".encode("ascii")))
+
                 else:
                     while (ser.in_waiting):
                         time.sleep(.2)
                         output = self.serial_read(ser, line, f)
                         check_sdk_errors(output)
+
+                # reset after every test if setting
+                if serial_settings.reset_device:
+                    ser.write(bytearray("sudo reboot\n".encode("ascii")))
 
                 f.close()
