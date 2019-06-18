@@ -111,7 +111,7 @@ jobs:
       cd $(Build.SourcesDirectory)/testtools/UART_interface/
       ls
       . rpi_e2e_env_setup.sh
-      python3 serial_connect.py -i setup.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi
+      python3 serial_connect.py -i setup.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -s
       rm setup.txt
     displayName: 'Setup Environment Variables'
     env:
