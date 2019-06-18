@@ -120,7 +120,7 @@ class rpi_uart_interface(uart_interface):
 
         if ser.readable():
             output = ser.readline(ser.in_waiting)
-            output = output.decode(encoding='utf-8', errors='ignore')
+            output = output.decode(encoding='utf-8', errors='ignore').split()
 
             # check_sdk_errors(output)
             check_test_failures(output)
