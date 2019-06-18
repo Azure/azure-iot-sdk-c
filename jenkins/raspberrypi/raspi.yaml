@@ -144,7 +144,7 @@ jobs:
       cd $(Build.SourcesDirectory)/testtools/UART_interface/
       ls
       . rpi_input.sh
-      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -t 620
+      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -t 620 $(RESET_DEVICE)
       rm input.txt
     displayName: 'Execute Test'
     env:
@@ -153,11 +153,4 @@ jobs:
       RASPI_PORT: $(RASPI_PORT)
       RASPI_TEST_FILE: $(RASPI_TEST_FILE)
       RASPI_SERIAL_TASK: $(RASPI_SERIAL_TASK)
-
-  # - task: PublishTestResults@2
-  #   displayName: 'Publish Test Results "**/results-junit.xml"'
-  #   inputs:
-  #     testResultsFiles: "**/results-junit.xml"
-  #     testRunTitle: 'raspberry pi'
-  # dependsOn: Cross_Compile
-  # condition: succeeded()
+      RESET_DEVICE: $(RESET_RASPI)
