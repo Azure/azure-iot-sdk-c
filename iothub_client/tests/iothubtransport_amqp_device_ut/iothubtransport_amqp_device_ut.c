@@ -800,7 +800,6 @@ static AMQP_DEVICE_HANDLE create_and_start_and_crank_device(AMQP_DEVICE_CONFIG* 
     return handle;
 }
 
-
 BEGIN_TEST_SUITE(iothubtransport_amqp_device_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
