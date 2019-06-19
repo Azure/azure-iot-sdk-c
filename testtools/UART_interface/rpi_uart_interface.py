@@ -133,6 +133,8 @@ class rpi_uart_interface(uart_interface):
     # Note: the buffer size on the mxchip appears to be 128 Bytes.
     def write_read(self, ser, input_file, output_file):
         session_start = time.time()
+        # set bits to cache variable to allow for mxchip to pass bytes into serial buffer
+        serial_settings.bits_to_cache = 800
         if input_file:
             # set wait between read/write
             wait = (serial_settings.bits_to_cache/serial_settings.baud_rate)
@@ -151,7 +153,7 @@ class rpi_uart_interface(uart_interface):
                         print("Failed to write to serial port, please diagnose connection.")
                         f.close()
                         break
-                    time.sleep(1)
+                    time.sleep(.2)
 
                     # Attempt to read serial port
                     output = self.serial_read(ser, line, f, first_read=True)
