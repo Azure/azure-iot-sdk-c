@@ -12,6 +12,7 @@
 #include "azure_uamqp_c/link.h"
 #include "azure_uamqp_c/amqp_definitions_sequence_no.h"
 #include "azure_uamqp_c/amqp_definitions_delivery_number.h"
+#include "internal/iothub_transport_ll_private.h"
 
 #ifdef __cplusplus
 extern "C"
