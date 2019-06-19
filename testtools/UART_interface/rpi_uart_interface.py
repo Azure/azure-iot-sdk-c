@@ -26,6 +26,7 @@ def check_test_failures(line):
     if " tests ran" in line:
         result = [int(s) for s in line.split() if s.isdigit()]
         azure_test_firmware_errors.SDK_ERRORS = result[1]
+        serial_settings.tests_run = True
         return result
 
 
@@ -175,7 +176,7 @@ class rpi_uart_interface(uart_interface):
                             print(output)
 
                         #for now we can assume one test suite is run
-                        if " tests run" in output:
+                        if " tests run" in output or serial_settings.tests_run:
                             break
 
                 else:
