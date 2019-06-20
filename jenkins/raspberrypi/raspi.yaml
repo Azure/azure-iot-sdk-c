@@ -169,7 +169,7 @@ jobs:
       cd $(Build.SourcesDirectory)/testtools/UART_interface/
       ls
       . rpi_input.sh
-      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -t 620 $(RESET_RASPI)
+      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -t 620
       rm input.txt
     displayName: 'Execute Test'
     env:
@@ -177,6 +177,56 @@ jobs:
       RASPI_PWD: $(RASPI_PWD)
       RASPI_PORT: $(RASPI_PORT)
       RASPI_TEST_FILE: iothubclient_mqtt_dt_e2e_exe
+      RASPI_SERIAL_TASK: $(RASPI_SERIAL_TASK)
+      RESET_RASPI: $(RESET_RASPI)
+
+- job: 'Run_AMQP_DM_E2E_Test'
+  dependsOn: Run_MQTT_DT_E2E_Test
+  pool: 
+    name: devicelab-02
+  steps:  
+  - script: |
+      cd $(Build.ArtifactStagingDirectory)
+      ls
+      echo $(NEWTIN) | sudo -S chmod -R 777 drop
+      echo $(NEWTIN) | sudo -S setcap cap_net_raw,cap_net_admin+ep drop/$RASPI_TEST_FILE
+      cp drop/$RASPI_TEST_FILE $(Build.SourcesDirectory)/testtools/UART_interface/
+      cd $(Build.SourcesDirectory)/testtools/UART_interface/
+      ls
+      . rpi_input.sh
+      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -t 620 
+      rm input.txt
+    displayName: 'Execute Test'
+    env:
+      RASPI_USER: $(RASPI_USER)
+      RASPI_PWD: $(RASPI_PWD)
+      RASPI_PORT: $(RASPI_PORT)
+      RASPI_TEST_FILE: iothubclient_amqp_device_method_e2e_exe
+      RASPI_SERIAL_TASK: $(RASPI_SERIAL_TASK)
+      RESET_RASPI: $(RESET_RASPI)
+
+- job: 'Run_MQTT_DM_E2E_Test'
+  dependsOn: Run_AMQP_DM_E2E_Test
+  pool: 
+    name: devicelab-02
+  steps:  
+  - script: |
+      cd $(Build.ArtifactStagingDirectory)
+      ls
+      echo $(NEWTIN) | sudo -S chmod -R 777 drop
+      echo $(NEWTIN) | sudo -S setcap cap_net_raw,cap_net_admin+ep drop/$RASPI_TEST_FILE
+      cp drop/$RASPI_TEST_FILE $(Build.SourcesDirectory)/testtools/UART_interface/
+      cd $(Build.SourcesDirectory)/testtools/UART_interface/
+      ls
+      . rpi_input.sh
+      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -t 620 $(RESET_RASPI)
+      rm input.txt
+    displayName: 'Execute Test'
+    env:
+      RASPI_USER: $(RASPI_USER)
+      RASPI_PWD: $(RASPI_PWD)
+      RASPI_PORT: $(RASPI_PORT)
+      RASPI_TEST_FILE: iothubclient_mqtt_device_method_e2e_exe
       RASPI_SERIAL_TASK: $(RASPI_SERIAL_TASK)
       RESET_RASPI: $(RESET_RASPI)
 
