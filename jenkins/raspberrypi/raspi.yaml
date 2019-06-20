@@ -231,7 +231,7 @@ jobs:
       RESET_RASPI: $(RESET_RASPI)
 
 - job: 'Run_EXTRA_Test'
-  dependsOn: Run_MQTT_DT_E2E_Test
+  dependsOn: Run_MQTT_DM_E2E_Test
   condition: variables['ADDITIONAL_TEST']
   pool: 
     name: devicelab-02
