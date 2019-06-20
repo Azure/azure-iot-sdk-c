@@ -182,7 +182,7 @@ jobs:
 
 - job: 'Run_EXTRA_Test'
   dependsOn: Run_MQTT_DT_E2E_Test
-  condition: $(ADDITIONAL_TEST)
+  condition: eq('True', variable['ADDITIONAL_TEST'])
   pool: 
     name: devicelab-02
   steps:  
