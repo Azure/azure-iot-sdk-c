@@ -97,7 +97,7 @@ jobs:
 
 - job: 'Run_AMQP_DT_E2E_Test'
   dependsOn: Cross_Compile
-  condition: and(succeeded(), ne('True', variables['ADDITIONAL_TEST']))
+  condition: and(succeeded(), not(in('True', 'True'))
   pool: 
     name: devicelab-02
   steps:  
