@@ -11,6 +11,8 @@ extern "C" {
 #include <stddef.h>
 #endif /* __cplusplus */
 
+#include <azure_c_shared_utility/tlsio_cryptodev.h>
+
 typedef void* HSM_CLIENT_HANDLE;
 
 typedef HSM_CLIENT_HANDLE (*HSM_CLIENT_CREATE)();
@@ -25,6 +27,7 @@ typedef int (*HSM_CLIENT_SIGN_WITH_IDENTITY)(HSM_CLIENT_HANDLE handle, const uns
 // x509
 typedef char* (*HSM_CLIENT_GET_CERTIFICATE)(HSM_CLIENT_HANDLE handle);
 typedef char* (*HSM_CLIENT_GET_ALIAS_KEY)(HSM_CLIENT_HANDLE handle);
+typedef TLSIO_CRYPTODEV_PKEY* (*HSM_CLIENT_GET_CRYPTODEV_KEY)(HSM_CLIENT_HANDLE handle);
 typedef char* (*HSM_CLIENT_GET_COMMON_NAME)(HSM_CLIENT_HANDLE handle);
 
 // Edge
@@ -53,6 +56,7 @@ typedef struct HSM_CLIENT_X509_INTERFACE_TAG
 
     HSM_CLIENT_GET_CERTIFICATE hsm_client_get_cert;
     HSM_CLIENT_GET_ALIAS_KEY hsm_client_get_key;
+    HSM_CLIENT_GET_CRYPTODEV_KEY hsm_client_get_cryptodev_key;
     HSM_CLIENT_GET_COMMON_NAME hsm_client_get_common_name;
 } HSM_CLIENT_X509_INTERFACE;
 

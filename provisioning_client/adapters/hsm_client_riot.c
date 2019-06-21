@@ -152,6 +152,7 @@ static const HSM_CLIENT_X509_INTERFACE x509_interface =
     hsm_client_riot_destroy,
     hsm_client_riot_get_certificate,
     hsm_client_riot_get_alias_key,
+    hsm_client_riot_get_cryptodev_key,
     hsm_client_riot_get_common_name
 };
 
@@ -618,6 +619,11 @@ char* hsm_client_riot_get_alias_key(HSM_CLIENT_HANDLE handle)
         }
     }
     return result;
+}
+
+TLSIO_CRYPTODEV_PKEY* hsm_client_riot_get_cryptodev_key(HSM_CLIENT_HANDLE handle)
+{
+    return NULL;
 }
 
 char* hsm_client_riot_get_device_cert(HSM_CLIENT_HANDLE handle)

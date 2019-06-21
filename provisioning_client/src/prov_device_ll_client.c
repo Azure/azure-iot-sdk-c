@@ -1001,9 +1001,11 @@ PROV_DEVICE_RESULT Prov_Device_LL_Register_Device(PROV_DEVICE_LL_HANDLE handle, 
             }
             else if (handle->hsm_type == PROV_AUTH_TYPE_X509)
             {
-                char* x509_cert;
-                char* x509_private_key;
-                if ((x509_cert = prov_auth_get_certificate(handle->prov_auth_handle)) == NULL)
+                char* x509_cert = prov_auth_get_certificate(handle->prov_auth_handle);
+                char* x509_private_key = prov_auth_get_alias_key(handle->prov_auth_handle);
+                TLSIO_CRYPTODEV_PKEY* cryptodev_private_key = prov_auth_get_cryptodev_key(handle->prov_auth_handle);
+
+                if (x509_cert == NULL)
                 {
                     LogError("Could not get the x509 certificate");
                     if (!handle->user_supplied_reg_id)
@@ -1013,20 +1015,19 @@ PROV_DEVICE_RESULT Prov_Device_LL_Register_Device(PROV_DEVICE_LL_HANDLE handle, 
                     }
                     result = PROV_DEVICE_RESULT_ERROR;
                 }
-                else if ((x509_private_key = prov_auth_get_alias_key(handle->prov_auth_handle)) == NULL)
+                else if (x509_private_key == NULL && cryptodev_private_key == NULL)
                 {
-                    LogError("Could not get the x509 alias key");
+                    LogError("Could not get the private key");
                     if (!handle->user_supplied_reg_id)
                     {
                         free(handle->registration_id);
                         handle->registration_id = NULL;
                     }
-                    free(x509_cert);
                     result = PROV_DEVICE_RESULT_ERROR;
                 }
                 else
                 {
-                    if (handle->prov_transport_protocol->prov_transport_x509_cert(handle->transport_handle, x509_cert, x509_private_key) != 0)
+                    if (x509_private_key && handle->prov_transport_protocol->prov_transport_x509_cert(handle->transport_handle, x509_cert, x509_private_key) != 0)
                     {
                         LogError("unable to set the x509 certificate information on transport");
                         if (!handle->user_supplied_reg_id)
@@ -1036,13 +1037,25 @@ PROV_DEVICE_RESULT Prov_Device_LL_Register_Device(PROV_DEVICE_LL_HANDLE handle, 
                         }
                         result = PROV_DEVICE_RESULT_ERROR;
                     }
+                    else if (cryptodev_private_key && handle->prov_transport_protocol->prov_transport_x509_cert_cryptodev(handle->transport_handle, x509_cert, cryptodev_private_key) != 0)
+                    {
+                        LogError("unable to set the x509 certificate information on transport");
+                        if (!handle->user_supplied_reg_id)
+                        {
+                            free(handle->registration_id);
+                            handle->registration_id = NULL;
+                        }
+                        result = PROV_DEVICE_RESULT_ERROR;
+                    }
+ 
                     else
                     {
                         result = PROV_DEVICE_RESULT_OK;
                     }
-                    free(x509_cert);
-                    free(x509_private_key);
                 }
+                free(x509_cert);
+                free(x509_private_key);
+                free(cryptodev_private_key);
             }
             else
             {

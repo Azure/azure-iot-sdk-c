@@ -37,6 +37,7 @@ typedef struct PROV_AUTH_INFO_TAG
 
     HSM_CLIENT_GET_CERTIFICATE hsm_client_get_cert;
     HSM_CLIENT_GET_ALIAS_KEY hsm_client_get_alias_key;
+    HSM_CLIENT_GET_CRYPTODEV_KEY hsm_client_get_cryptodev_key;
     HSM_CLIENT_GET_COMMON_NAME hsm_client_get_common_name;
 
     HSM_CLIENT_GET_SYMMETRICAL_KEY hsm_client_get_symm_key;
@@ -260,7 +261,8 @@ PROV_AUTH_HANDLE prov_auth_create(void)
                 ((result->hsm_client_destroy = x509_interface->hsm_client_x509_destroy) == NULL) ||
                 ((result->hsm_client_get_cert = x509_interface->hsm_client_get_cert) == NULL) ||
                 ((result->hsm_client_get_common_name = x509_interface->hsm_client_get_common_name) == NULL) ||
-                ((result->hsm_client_get_alias_key = x509_interface->hsm_client_get_key) == NULL)
+                ((result->hsm_client_get_alias_key = x509_interface->hsm_client_get_key) == NULL) ||
+                ((result->hsm_client_get_cryptodev_key = x509_interface->hsm_client_get_cryptodev_key) == NULL)
                 )
             {
                 LogError("Invalid x509 secure device interface was specified");
@@ -661,6 +663,29 @@ char* prov_auth_get_alias_key(PROV_AUTH_HANDLE handle)
     {
         /* Codes_SRS_SECURE_ENCLAVE_CLIENT_07_034: [ prov_auth_get_alias_key shall import the specified alias key into the client using hsm_client_get_ak secure enclave function. ] */
         result = handle->hsm_client_get_alias_key(handle->hsm_client_handle);
+    }
+    return result;
+}
+
+TLSIO_CRYPTODEV_PKEY* prov_auth_get_cryptodev_key(PROV_AUTH_HANDLE handle)
+{
+    TLSIO_CRYPTODEV_PKEY* result;
+    if (handle == NULL)
+    {
+        /* TODO: Codes_SRS_SECURE_ENCLAVE_CLIENT_07_033: [ If handle or key are NULL prov_auth_get_alias_key shall return a non-zero value. ] */
+        LogError("Invalid handle parameter");
+        result = NULL;
+    }
+    else if (handle->sec_type != PROV_AUTH_TYPE_X509)
+    {
+        /* TODO: Codes_SRS_SECURE_ENCLAVE_CLIENT_07_035: [ If the sec_type is not PROV_AUTH_TYPE_X509, prov_auth_get_alias_key shall return NULL. ] */
+        LogError("Invalid type for operation");
+        result = NULL;
+    }
+    else
+    {
+        /* TODO: Codes_SRS_SECURE_ENCLAVE_CLIENT_07_034: [ prov_auth_get_alias_key shall import the specified alias key into the client using hsm_client_get_ak secure enclave function. ] */
+        result = handle->hsm_client_get_cryptodev_key(handle->hsm_client_handle);
     }
     return result;
 }

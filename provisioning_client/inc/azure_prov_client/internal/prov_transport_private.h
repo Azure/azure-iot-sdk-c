@@ -6,6 +6,7 @@
 
 #include "umock_c/umock_c_prod.h"
 #include "azure_macro_utils/macro_utils.h"
+#include "azure_c_shared_utility/tlsio_cryptodev.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_prov_client/prov_transport.h"
@@ -66,6 +67,7 @@ extern "C" {
     typedef void(*pfprov_transport_dowork)(PROV_DEVICE_TRANSPORT_HANDLE handle);
     typedef int(*pfprov_transport_set_trace)(PROV_DEVICE_TRANSPORT_HANDLE handle, bool trace_on);
     typedef int(*pfprov_transport_set_x509_cert)(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* certificate, const char* private_key);
+    typedef int(*pfprov_transport_set_x509_cert_cryptodev)(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* certificate, const TLSIO_CRYPTODEV_PKEY*);
     typedef int(*pfprov_transport_set_trusted_cert)(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* certificate);
     typedef int(*pfprov_transport_set_proxy)(PROV_DEVICE_TRANSPORT_HANDLE handle, const HTTP_PROXY_OPTIONS* proxy_option);
     typedef int(*pfprov_transport_set_option)(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* option_name, const void* value);
@@ -81,6 +83,7 @@ extern "C" {
         pfprov_transport_dowork prov_transport_dowork;
         pfprov_transport_set_trace prov_transport_set_trace;
         pfprov_transport_set_x509_cert prov_transport_x509_cert;
+        pfprov_transport_set_x509_cert_cryptodev prov_transport_x509_cert_cryptodev;
         pfprov_transport_set_trusted_cert prov_transport_trusted_cert;
         pfprov_transport_set_proxy prov_transport_set_proxy;
         pfprov_transport_set_option prov_transport_set_option;

@@ -86,6 +86,7 @@ typedef struct PROV_TRANSPORT_AMQP_INFO_TAG
 
     char* x509_cert;
     char* private_key;
+    TLSIO_CRYPTODEV_PKEY* private_key_cryptodev;
 
     char* certificate;
 
@@ -916,7 +917,7 @@ static int create_amqp_connection(PROV_TRANSPORT_AMQP_INFO* amqp_info)
     {
         if (amqp_info->hsm_type == TRANSPORT_HSM_TYPE_X509)
         {
-            if (amqp_info->x509_cert != NULL && amqp_info->private_key != NULL)
+            if (amqp_info->x509_cert != NULL && (amqp_info->private_key != NULL || amqp_info->private_key_cryptodev != NULL))
             {
                 if (xio_setoption(amqp_info->underlying_io, OPTION_X509_ECC_CERT, amqp_info->x509_cert) != 0)
                 {
@@ -925,7 +926,7 @@ static int create_amqp_connection(PROV_TRANSPORT_AMQP_INFO* amqp_info)
                     xio_destroy(amqp_info->underlying_io);
                     amqp_info->underlying_io = NULL;
                 }
-                else if (xio_setoption(amqp_info->underlying_io, OPTION_X509_ECC_KEY, amqp_info->private_key) != 0)
+                else if ((amqp_info->private_key != NULL) && (xio_setoption(amqp_info->underlying_io, OPTION_X509_ECC_KEY, amqp_info->private_key) != 0))
                 {
                     LogError("Failure setting x509 key on xio");
                     if (amqp_info->error_cb != NULL)
@@ -936,6 +937,18 @@ static int create_amqp_connection(PROV_TRANSPORT_AMQP_INFO* amqp_info)
                     xio_destroy(amqp_info->underlying_io);
                     amqp_info->underlying_io = NULL;
                 }
+                else if ((amqp_info->private_key_cryptodev != NULL) && (xio_setoption(amqp_info->underlying_io, SU_OPTION_X509_CRYPTODEV_PRIVATE_KEY, amqp_info->private_key_cryptodev) != 0))
+                {
+                    LogError("Failure setting cryptodev key on xio");
+                    if (amqp_info->error_cb != NULL)
+                    {
+                        amqp_info->error_cb(PROV_DEVICE_ERROR_KEY_FAIL, amqp_info->error_ctx);
+                    }
+                    result = MU_FAILURE;
+                    xio_destroy(amqp_info->underlying_io);
+                    amqp_info->underlying_io = NULL;
+                }
+
                 else
                 {
                     result = 0;
@@ -1174,6 +1187,7 @@ void cleanup_amqp_data(PROV_TRANSPORT_AMQP_INFO* amqp_info)
     free((char*)amqp_info->proxy_option.password);
     free(amqp_info->x509_cert);
     free(amqp_info->private_key);
+    free(amqp_info->private_key_cryptodev);
     free(amqp_info->sas_token);
     free(amqp_info->payload_data);
     if (amqp_info->transport_io != NULL)
@@ -1646,6 +1660,11 @@ int prov_transport_common_amqp_x509_cert(PROV_DEVICE_TRANSPORT_HANDLE handle, co
             free(amqp_info->private_key);
             amqp_info->private_key = NULL;
         }
+        if (amqp_info->private_key_cryptodev != NULL)
+        {
+            free(amqp_info->private_key_cryptodev);
+            amqp_info->private_key_cryptodev = NULL;
+        }
 
         /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_027: [ prov_transport_common_amqp_x509_cert shall copy the certificate and private_key values. ] */
         if (mallocAndStrcpy_s(&amqp_info->x509_cert, certificate) != 0)
@@ -1665,6 +1684,60 @@ int prov_transport_common_amqp_x509_cert(PROV_DEVICE_TRANSPORT_HANDLE handle, co
         else
         {
             /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_029: [ On success prov_transport_common_amqp_x509_cert shall return a zero value. ] */
+            result = 0;
+        }
+    }
+    return result;
+}
+
+int prov_transport_common_amqp_x509_cert_cryptodev(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* certificate, const TLSIO_CRYPTODEV_PKEY* private_key)
+{
+    int result;
+    if (handle == NULL || certificate == NULL)
+    {
+        /* TODO: Codes_PROV_TRANSPORT_AMQP_COMMON_07_026: [ If handle or certificate is NULL, prov_transport_common_amqp_x509_
+cert shall return a non-zero value. ] */
+        LogError("Invalid parameter specified handle: %p, certificate: %p", handle, certificate);
+        result = MU_FAILURE;
+    }
+    else
+    {
+        PROV_TRANSPORT_AMQP_INFO* amqp_info = (PROV_TRANSPORT_AMQP_INFO*)handle;
+
+        if (amqp_info->x509_cert != NULL)
+        {
+            free(amqp_info->x509_cert);
+            amqp_info->x509_cert = NULL;
+        }
+        if (amqp_info->private_key != NULL)
+        {
+            free(amqp_info->private_key);
+            amqp_info->private_key = NULL;
+        }
+        if (amqp_info->private_key_cryptodev != NULL)
+        {
+            free(amqp_info->private_key_cryptodev);
+            amqp_info->private_key_cryptodev = NULL;
+        }
+
+        /* TODO: Codes_PROV_TRANSPORT_AMQP_COMMON_07_027: [ prov_transport_common_amqp_x509_cert shall copy the certificate and private_key values. ] */
+        if (mallocAndStrcpy_s(&amqp_info->x509_cert, certificate) != 0)
+        {
+            /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_028: [ On any failure prov_transport_common_amqp_x509_cert, shall return a non-zero value. ] */
+            result = MU_FAILURE;
+            LogError("failure allocating certificate");
+        }
+        else if ((amqp_info->private_key_cryptodev = (TLSIO_CRYPTODEV_PKEY*) malloc (sizeof(TLSIO_CRYPTODEV_PKEY))) == NULL)
+        {
+            /* TODO: Codes_PROV_TRANSPORT_AMQP_COMMON_07_028: [ On any failure prov_transport_common_amqp_x509_cert, shall return a non-zero value. ] */
+            LogError("failure allocating certificate");
+            free(amqp_info->x509_cert);
+            amqp_info->x509_cert = NULL;
+            result = MU_FAILURE;
+        }
+        else
+        {
+            /* TODO: Codes_PROV_TRANSPORT_AMQP_COMMON_07_029: [ On success prov_transport_common_amqp_x509_cert shall return a zero value. ] */
             result = 0;
         }
     }

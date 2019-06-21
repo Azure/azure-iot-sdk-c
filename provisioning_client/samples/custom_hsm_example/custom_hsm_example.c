@@ -150,6 +150,11 @@ char* custom_hsm_get_key(HSM_CLIENT_HANDLE handle)
     return result;
 }
 
+TLSIO_CRYPTODEV_PKEY* custom_hsm_get_cryptodev_key(HSM_CLIENT_HANDLE handle)
+{
+  return NULL;
+}
+
 char* custom_hsm_get_common_name(HSM_CLIENT_HANDLE handle)
 {
     char* result;
@@ -341,6 +346,7 @@ static const HSM_CLIENT_X509_INTERFACE x509_interface =
     custom_hsm_destroy,
     custom_hsm_get_certificate,
     custom_hsm_get_key,
+    custom_hsm_get_cryptodev_key,
     custom_hsm_get_common_name
 };
 

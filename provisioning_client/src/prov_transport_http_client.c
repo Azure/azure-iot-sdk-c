@@ -77,6 +77,7 @@ typedef struct PROV_TRANSPORT_HTTP_INFO_TAG
 
     char* x509_cert;
     char* private_key;
+    TLSIO_CRYPTODEV_PKEY* cryptodev_private_key;
 
     char* certificate;
 
@@ -499,6 +500,7 @@ static void free_allocated_data(PROV_TRANSPORT_HTTP_INFO* http_info)
     free(http_info->proxy_host);
     free(http_info->x509_cert);
     free(http_info->private_key);
+    free(http_info->cryptodev_private_key);
     free(http_info->username);
     free(http_info->password);
     free(http_info->payload_data);
@@ -588,12 +590,17 @@ static int create_connection(PROV_TRANSPORT_HTTP_INFO* http_info)
         {
             if (http_info->hsm_type == TRANSPORT_HSM_TYPE_X509)
             {
-                if (http_info->x509_cert == NULL || http_info->private_key == NULL)
+                if (http_info->x509_cert == NULL || (http_info->private_key == NULL && http_info->cryptodev_private_key == NULL))
                 {
                     LogError("x509 certificate information was not properly set");
                     result = MU_FAILURE;
                 }
-                else if (uhttp_client_set_X509_cert(http_info->http_client, true, http_info->x509_cert, http_info->private_key) != HTTP_CLIENT_OK)
+                else if (http_info->private_key && uhttp_client_set_X509_cert(http_info->http_client, true, http_info->x509_cert, http_info->private_key) != HTTP_CLIENT_OK)
+                {
+                    LogError("failed to set x509 certificate information");
+                    result = MU_FAILURE;
+                }
+                else if (http_info->cryptodev_private_key && uhttp_client_set_X509_cert_cryptodev(http_info->http_client, true, http_info->x509_cert, http_info->cryptodev_private_key) != HTTP_CLIENT_OK)
                 {
                     LogError("failed to set x509 certificate information");
                     result = MU_FAILURE;
@@ -1072,10 +1079,17 @@ static int prov_transport_http_x509_cert(PROV_DEVICE_TRANSPORT_HANDLE handle, co
         if (http_info->x509_cert != NULL)
         {
             free(http_info->x509_cert);
+            http_info->x509_cert = NULL;
         }
         if (http_info->private_key != NULL)
         {
             free(http_info->private_key);
+            http_info->private_key = NULL;
+        }
+        if (http_info->cryptodev_private_key != NULL)
+        {
+            free(http_info->cryptodev_private_key);
+            http_info->cryptodev_private_key = NULL;
         }
 
         /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_045: [ prov_transport_http_x509_cert shall store the certificate and private_key for use when the http client connects. ] */
@@ -1101,6 +1115,60 @@ static int prov_transport_http_x509_cert(PROV_DEVICE_TRANSPORT_HANDLE handle, co
     }
     return result;
 }
+
+static int prov_transport_http_x509_cert_cryptodev(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* certificate, const TLSIO_CRYPTODEV_PKEY* private_key)
+{
+    int result;
+    if (handle == NULL || certificate == NULL || private_key == NULL)
+    {
+        /* TODO: Codes_PROV_TRANSPORT_HTTP_CLIENT_07_043: [ If the argument handle, private_key or certificate is NULL, prov_transport_http_x509_cert shall return a non-zero value. ] */
+        LogError("Invalid parameter specified handle: %p, certificate: %p, private_key: %p", handle, certificate, private_key);
+        result = MU_FAILURE;
+    }
+    else
+    {
+        PROV_TRANSPORT_HTTP_INFO* http_info = (PROV_TRANSPORT_HTTP_INFO*)handle;
+        if (http_info->x509_cert != NULL)
+        {
+            free(http_info->x509_cert);
+           http_info->x509_cert = NULL;
+        }
+        if (http_info->private_key != NULL)
+        {
+            free(http_info->private_key);
+           http_info->private_key = NULL;
+        }
+        if (http_info->cryptodev_private_key != NULL)
+        {
+            free(http_info->cryptodev_private_key);
+           http_info->cryptodev_private_key = NULL;
+        }
+
+        /* TODO: Codes_PROV_TRANSPORT_HTTP_CLIENT_07_045: [ prov_transport_http_x509_cert shall store the certificate and private_key for use when the http client connects. ] */
+        if (mallocAndStrcpy_s(&http_info->x509_cert, certificate) != 0)
+        {
+            /* TODO: Codes_PROV_TRANSPORT_HTTP_CLIENT_07_044: [ If any error is encountered prov_transport_http_x509_cert shall return a non-zero value. ] */
+            result = MU_FAILURE;
+            LogError("failure allocating certificate");
+        }
+        else if ((http_info->cryptodev_private_key = malloc(sizeof(*http_info->cryptodev_private_key))) == NULL)
+        {
+            /* TODO: Codes_PROV_TRANSPORT_HTTP_CLIENT_07_044: [ If any error is encountered prov_transport_http_x509_cert shall return a non-zero value. ] */
+            free(http_info->x509_cert);
+            http_info->x509_cert = NULL;
+           result = MU_FAILURE;
+            LogError("failure allocating certificate");
+        }
+        else
+        {
+            memcpy(http_info->cryptodev_private_key, private_key, sizeof(*http_info->cryptodev_private_key));
+            /* TODO: Codes_PROV_TRANSPORT_HTTP_CLIENT_07_046: [ On success prov_transport_http_set_trace shall return zero. ] */
+            result = 0;
+        }
+    }
+    return result;
+}
+
 
 static int prov_transport_http_set_trusted_cert(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* certificate)
 {
@@ -1248,6 +1316,7 @@ static PROV_DEVICE_TRANSPORT_PROVIDER prov_http_func =
     prov_transport_http_dowork,
     prov_transport_http_set_trace,
     prov_transport_http_x509_cert,
+    prov_transport_http_x509_cert_cryptodev,
     prov_transport_http_set_trusted_cert,
     prov_transport_http_set_proxy,
     prov_transport_http_set_option

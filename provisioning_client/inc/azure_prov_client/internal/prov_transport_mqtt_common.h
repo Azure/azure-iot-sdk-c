@@ -19,6 +19,7 @@ extern "C" {
 #include "azure_prov_client/prov_transport.h"
 #include "azure_prov_client/internal/prov_transport_private.h"
 #include "azure_c_shared_utility/http_proxy_io.h"
+#include "azure_c_shared_utility/tlsio_cryptodev.h"
 
 typedef XIO_HANDLE(*PROV_MQTT_TRANSPORT_IO)(const char* fully_qualified_name, const HTTP_PROXY_OPTIONS* proxy_info);
 
@@ -33,6 +34,7 @@ MOCKABLE_FUNCTION(, int, prov_transport_common_mqtt_set_trace, PROV_DEVICE_TRANS
 MOCKABLE_FUNCTION(, int, prov_transport_common_mqtt_set_proxy, PROV_DEVICE_TRANSPORT_HANDLE, handle, const HTTP_PROXY_OPTIONS*, proxy_options);
 MOCKABLE_FUNCTION(, int, prov_transport_common_mqtt_set_trusted_cert, PROV_DEVICE_TRANSPORT_HANDLE, handle, const char*, certificate);
 MOCKABLE_FUNCTION(, int, prov_transport_common_mqtt_x509_cert, PROV_DEVICE_TRANSPORT_HANDLE, handle, const char*, certificate, const char*, private_key);
+MOCKABLE_FUNCTION(, int, prov_transport_common_mqtt_x509_cert_cryptodev, PROV_DEVICE_TRANSPORT_HANDLE, handle, const char*, certificate, const TLSIO_CRYPTODEV_PKEY*, private_key_cryptodev);
 MOCKABLE_FUNCTION(, int, prov_transport_common_mqtt_set_option, PROV_DEVICE_TRANSPORT_HANDLE, handle, const char*, option, const void*, value);
 
 #ifdef __cplusplus

@@ -112,6 +112,12 @@ static int prov_transport_mqtt_x509_cert(PROV_DEVICE_TRANSPORT_HANDLE handle, co
     return prov_transport_common_mqtt_x509_cert(handle, certificate, private_key);
 }
 
+static int prov_transport_mqtt_x509_cert_cryptodev(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* certificate, const TLSIO_CRYPTODEV_PKEY* private_key)
+{
+    /* TODO: Codes_PROV_TRANSPORT_MQTT_CLIENT_07_009: [ prov_transport_mqtt_x509_cert shall invoke the prov_trans_common_mqtt_x509_cert method ]*/
+    return prov_transport_common_mqtt_x509_cert_cryptodev(handle, certificate, private_key);
+}
+
 static int prov_transport_mqtt_set_trusted_cert(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* certificate)
 {
     /* Codes_PROV_TRANSPORT_MQTT_CLIENT_07_010: [ prov_transport_mqtt_set_trusted_cert shall invoke the prov_transport_common_mqtt_set_trusted_cert method ] */
@@ -140,6 +146,7 @@ static PROV_DEVICE_TRANSPORT_PROVIDER prov_mqtt_func =
     prov_transport_mqtt_dowork,
     prov_transport_mqtt_set_trace,
     prov_transport_mqtt_x509_cert,
+    prov_transport_mqtt_x509_cert_cryptodev,
     prov_transport_mqtt_set_trusted_cert,
     prov_transport_mqtt_set_proxy,
     prov_transport_mqtt_set_option

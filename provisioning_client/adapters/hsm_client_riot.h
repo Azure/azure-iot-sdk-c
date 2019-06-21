@@ -21,6 +21,7 @@ MOCKABLE_FUNCTION(, HSM_CLIENT_HANDLE, hsm_client_riot_create);
 MOCKABLE_FUNCTION(, void, hsm_client_riot_destroy, HSM_CLIENT_HANDLE, handle);
 MOCKABLE_FUNCTION(, char*, hsm_client_riot_get_certificate, HSM_CLIENT_HANDLE, handle);
 MOCKABLE_FUNCTION(, char*, hsm_client_riot_get_alias_key, HSM_CLIENT_HANDLE, handle);
+MOCKABLE_FUNCTION(, TLSIO_CRYPTODEV_PKEY*, hsm_client_riot_get_cryptodev_key, HSM_CLIENT_HANDLE, handle);
 
 MOCKABLE_FUNCTION(, char*, hsm_client_riot_get_signer_cert, HSM_CLIENT_HANDLE, handle);
 MOCKABLE_FUNCTION(, char*, hsm_client_riot_get_root_cert, HSM_CLIENT_HANDLE, handle);

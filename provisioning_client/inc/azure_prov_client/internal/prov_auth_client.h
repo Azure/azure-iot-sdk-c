@@ -15,6 +15,7 @@ extern "C" {
 
 #include "umock_c/umock_c_prod.h"
 #include "azure_macro_utils/macro_utils.h"
+#include "azure_c_shared_utility/tlsio_cryptodev.h"
 #include "azure_c_shared_utility/buffer_.h"
 
 typedef struct PROV_AUTH_INFO_TAG* PROV_AUTH_HANDLE;
@@ -51,6 +52,7 @@ MOCKABLE_FUNCTION(, char*, prov_auth_construct_sas_token, PROV_AUTH_HANDLE, hand
 // X509
 MOCKABLE_FUNCTION(, char*, prov_auth_get_certificate, PROV_AUTH_HANDLE, handle);
 MOCKABLE_FUNCTION(, char*, prov_auth_get_alias_key, PROV_AUTH_HANDLE, handle);
+MOCKABLE_FUNCTION(, TLSIO_CRYPTODEV_PKEY*, prov_auth_get_cryptodev_key, PROV_AUTH_HANDLE, handle);
 
 #ifdef __cplusplus
 }
