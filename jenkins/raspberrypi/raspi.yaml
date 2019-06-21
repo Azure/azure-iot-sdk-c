@@ -239,7 +239,7 @@ jobs:
 
 - job: 'Run_EXTRA_Test'
   dependsOn: Cross_Compile
-  condition: in('TEST', variables['ADDITIONAL_TEST'].)
+  condition: in('TEST', variables['ADDITIONAL_TEST'])
   pool: 
     name: devicelab-02
   steps:
