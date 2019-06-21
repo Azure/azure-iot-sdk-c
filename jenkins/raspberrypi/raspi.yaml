@@ -97,7 +97,7 @@ jobs:
 
 - job: 'Run_AMQP_DT_E2E_Test'
   dependsOn: Cross_Compile
-  condition: and(succeeded(), not(variables['ADDITIONAL_TEST']))
+  condition: and(succeeded(), neq('True', variables['ADDITIONAL_TEST']))
   pool: 
     name: devicelab-02
   steps:  
@@ -158,7 +158,7 @@ jobs:
 
 - job: 'Run_MQTT_DT_E2E_Test'
   dependsOn: Run_AMQP_DT_E2E_Test
-  condition: not(variables['ADDITIONAL_TEST'])
+  condition: neq('True', variables['ADDITIONAL_TEST'])
   pool: 
     name: devicelab-02
   steps:  
@@ -185,7 +185,7 @@ jobs:
 
 - job: 'Run_AMQP_DM_E2E_Test'
   dependsOn: Run_MQTT_DT_E2E_Test
-  condition: not(variables['ADDITIONAL_TEST'])
+  condition: neq('True', variables['ADDITIONAL_TEST'])
   pool: 
     name: devicelab-02
   steps:  
@@ -212,7 +212,7 @@ jobs:
 
 - job: 'Run_MQTT_DM_E2E_Test'
   dependsOn: Run_AMQP_DM_E2E_Test
-  condition: not(variables['ADDITIONAL_TEST'])
+  condition: neq('True', variables['ADDITIONAL_TEST'])
   pool: 
     name: devicelab-02
   steps:  
@@ -239,7 +239,7 @@ jobs:
 
 - job: 'Run_EXTRA_Test'
   dependsOn: Cross_Compile
-  condition: variables['ADDITIONAL_TEST']
+  condition: eq('True', variables['ADDITIONAL_TEST'])
   pool: 
     name: devicelab-02
   steps:
