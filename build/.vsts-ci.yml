@@ -272,7 +272,7 @@ phases:
 - phase: debian
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/c-debian"
-  queue: c-df
+  queue: aziotbld-lin02
   displayName: 'debian'
   steps:
   - script: |
