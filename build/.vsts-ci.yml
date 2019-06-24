@@ -1,5 +1,4 @@
 name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
-    
 resources:
 - repo: self
   clean: true
