@@ -97,7 +97,7 @@ jobs:
 
 - job: 'Run_AMQP_DT_E2E_Test'
   dependsOn: Cross_Compile
-  condition: and(succeeded(), not(in('True', 'True')))
+  condition: succeeded()
   pool: 
     name: devicelab-02
   steps:  
@@ -239,7 +239,8 @@ jobs:
 
 - job: 'Run_EXTRA_Test'
   dependsOn: Cross_Compile
-  condition: in('TEST', variables['ADDITIONAL_TEST'])
+  # Disabling extra task for now until feedback on use of Library Variables in conditional statements
+  condition: in('True', 'False')
   pool: 
     name: devicelab-02
   steps:
