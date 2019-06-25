@@ -73,6 +73,8 @@ extern void e2e_c2d_svc_fault_ctrl_message_quota_exceeded(IOTHUB_CLIENT_TRANSPOR
 extern void e2e_c2d_svc_fault_ctrl_auth_error(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 extern void e2e_c2d_svc_fault_ctrl_MQTT_shut_down(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 
+extern void e2e_send_security_event_test_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
+
 typedef void* D2C_MESSAGE_HANDLE;
 
 extern bool client_wait_for_d2c_confirmation(D2C_MESSAGE_HANDLE d2cMessage, IOTHUB_CLIENT_CONFIRMATION_RESULT expectedClientResult);
@@ -86,7 +88,7 @@ extern bool client_wait_for_connection_restored();
 extern bool client_status_restored();
 extern bool wait_for_client_authenticated(size_t wait_time);
 
-extern void service_wait_for_d2c_event_arrival(IOTHUB_PROVISIONED_DEVICE* deviceToUse, D2C_MESSAGE_HANDLE d2cMessage);
+extern void service_wait_for_d2c_event_arrival(IOTHUB_PROVISIONED_DEVICE* deviceToUse, D2C_MESSAGE_HANDLE d2cMessage, double max_wait_time);
 extern bool service_received_the_message(D2C_MESSAGE_HANDLE d2cMessage);
 extern void destroy_d2c_message_handle(D2C_MESSAGE_HANDLE d2cMessage);
 
