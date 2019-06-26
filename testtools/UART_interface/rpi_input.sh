@@ -5,4 +5,4 @@
 set -e
 
 # basic setup of input script for python
-echo -e "help\r\nset_az_iothub $IOTHUB_CONNECTION_STRING\r\n\r\n$SERIAL_TASK\r\n\r\nversion" | cat > input.txt
+echo -e "$RASPI_USER\n$RASPI_PWD\n\nrm $RASPI_TEST_FILE\nsz -a $RASPI_TEST_FILE > $RASPI_PORT < $RASPI_PORT\n\ncp $RASPI_TEST_FILE e2e_clone\n./e2e_clone\n\n$RASPI_SERIAL_TASK\n\n" | cat > input.txt

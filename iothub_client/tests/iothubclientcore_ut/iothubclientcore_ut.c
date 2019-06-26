@@ -2114,15 +2114,16 @@ TEST_FUNCTION(IoTHubClientCore_SetOption_succeed)
     IoTHubClientCore_Destroy(iothub_handle);
 }
 
-TEST_FUNCTION(IoTHubClientCore_SetOption_do_work_loop_frequency_in_ms_succeed)
+/* Tests_SRS_IOTHUBCLIENT_41_001: [** If parameter `optionName` is `OPTION_DO_WORK_FREQUENCY_IN_MS` then `IoTHubClientCore_SetOption` shall set `do_work_freq_ms` parameter of `IoTHubClientInstance` **] */
+TEST_FUNCTION(IoTHubClientCore_SetOption_DO_WORK_FREQUENCY_IN_MS_succeed)
 {
     // arrange
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
     umock_c_reset_all_calls();
 
     const char* option_name = "do_work_freq_ms";
-    uint16_t timeval = 100;
-    const void* option_value = (void*) &timeval;
+    tickcounter_ms_t tickcounter_value = 100;
+    const void* option_value = (void*) &tickcounter_value;
 
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
@@ -2137,6 +2138,109 @@ TEST_FUNCTION(IoTHubClientCore_SetOption_do_work_loop_frequency_in_ms_succeed)
     // cleanup
     IoTHubClientCore_Destroy(iothub_handle);
 }
+
+/* Tests_SRS_IOTHUBCLIENT_41_003: [** The value of `OPTION_DO_WORK_FREQUENCY_IN_MS` shall be limited to 100 to follow SDK best practices by not reducing the DoWork frequency below 10 Hz **] */
+TEST_FUNCTION(IoTHubClientCore_SetOption_DO_WORK_FREQUENCY_IN_MS_value_limits_fail)
+{
+    // arrange
+    IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
+    umock_c_reset_all_calls();
+
+    const char* option_name = "do_work_freq_ms";
+    tickcounter_ms_t tickcounter_value_low = 0;
+    const void* option_value_low = (void*) &tickcounter_value_low;
+    tickcounter_ms_t tickcounter_value_high = 200;
+    const void* option_value_high = (void*) &tickcounter_value_high;
+
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+
+    // act
+    IOTHUB_CLIENT_RESULT result_low = IoTHubClientCore_SetOption(iothub_handle, option_name, option_value_low);
+    IOTHUB_CLIENT_RESULT result_high = IoTHubClientCore_SetOption(iothub_handle, option_name, option_value_high);
+
+    // assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result_low);
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result_high);
+
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubClientCore_Destroy(iothub_handle);
+}
+
+/* Tests_SRS_IOTHUBCLIENT_41_004: [** If `currentMessageTimeout` is not greater than `do_work_freq_ms`, `IotHubClientCore_SetOption` shall return `IOTHUB_CLIENT_INVALID_ARG` **] */
+TEST_FUNCTION(IoTHubClientCore_SetOption_DO_WORK_FREQUENCY_IN_MS_and_MESSAGE_TIMEOUT_fail)
+{
+    // arrange
+    IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
+    umock_c_reset_all_calls();
+
+    const char* freq_option = "do_work_freq_ms";
+    const char* timeout_option = "messageTimeout";
+
+    tickcounter_ms_t frequency = 30; // arbitrary
+    tickcounter_ms_t timeout = 20; // arbitrary; just lower than frequency
+    // const void* option_value = (void*) &frequency;
+
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetOption(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, timeout_option, &timeout));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+
+    // act
+    IOTHUB_CLIENT_RESULT timeout_result = IoTHubClientCore_SetOption(iothub_handle, timeout_option, &timeout);
+    IOTHUB_CLIENT_RESULT freq_result = IoTHubClientCore_SetOption(iothub_handle, freq_option, &frequency);
+
+    // assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, timeout_result);
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, freq_result);
+
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubClientCore_Destroy(iothub_handle);
+}
+
+TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_DO_WORK_FREQ_IN_MS_success)
+{
+    
+    const char* option_name = "do_work_freq_ms";
+    tickcounter_ms_t tickcounter_value = 57;
+    const void* option_value = (void*) &tickcounter_value;
+
+    IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
+    (void)IoTHubClientCore_SetOption(iothub_handle, option_name, option_value);
+
+     (void)IoTHubClientCore_SetDeviceMethodCallback(iothub_handle, test_method_callback, CALLBACK_CONTEXT);
+     (void)g_inboundDeviceCallback(TEST_METHOD_NAME, TEST_DEVICE_METHOD_RESPONSE, TEST_DEVICE_RESP_LENGTH, TEST_METHOD_ID, g_userContextCallback);
+    umock_c_reset_all_calls();
+    g_how_thread_loops = 1;
+
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_DoWork(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE));
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_SLL_HANDLE));
+    STRICT_EXPECTED_CALL(VECTOR_move(IGNORED_PTR_ARG)).SetReturn(NULL);
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Sleep(57));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
+
+    // act
+	ASSERT_IS_NOT_NULL(g_thread_func);
+    g_thread_func(g_thread_func_arg);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    IoTHubClientCore_Destroy(iothub_handle);
+}
+
 
 /* Tests_SRS_IOTHUBCLIENT_02_038: [If optionName doesn't match one of the options handled by this module then IoTHubClientCore_SetOption shall call IoTHubClientCore_LL_SetOption passing the same parameters and return what IoTHubClientCore_LL_SetOption returns.]*/
 /* Tests_SRS_IOTHUBCLIENT_01_042: [If acquiring the lock fails, IoTHubClientCore_GetLastMessageReceiveTime shall return IOTHUB_CLIENT_ERROR. ]*/
