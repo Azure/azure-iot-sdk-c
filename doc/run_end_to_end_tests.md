@@ -97,6 +97,6 @@ This document describes how to run the end to end tests.
   set -a
   source ./iot_device_params.txt
   ```
-- Navigate to the folder c/build_all/linux in your local copy of the repository.
+- Navigate to the folder c/devops/scripts/linux in your local copy of the repository.
 - Run the build.sh script.
 - In your home folder, in the cmake folder, run the ctest command with parameters -C "Debug"

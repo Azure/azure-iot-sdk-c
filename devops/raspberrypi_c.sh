@@ -5,7 +5,7 @@
 
 # Tested on RPi2 debian verion 7.8
 
-install_root="/home/jenkins" 
+install_root="/home/devops" 
 build_root=$(cd "$(dirname "$0")/.." && pwd) 
 cd $build_root
 
@@ -52,7 +52,7 @@ export RPI_ROOT=$(pwd)
 # -- Create toolchain-rpi.cmake 
 # -----------------------------------------------------------------------------
 echo ---------- Creating toolchain cmake file ---------- 
-FILE="$build_root/build_all/linux/toolchain-rpi.cmake" 
+FILE="$build_root/devops/scripts/linux/toolchain-rpi.cmake" 
 
 /bin/cat <<EOM >$FILE
 INCLUDE(CMakeForceCompiler) 
@@ -85,6 +85,6 @@ sed -i 's/\[device connection string\]/'$IOTHUB_DEVICE_CONN_STR'/g' iothub_clien
 # -- Build the SDK 
 # -----------------------------------------------------------------------------
 echo ---------- Building the SDK by executing build.sh script ---------- 
-cd $build_root/build_all/linux 
+cd $build_root/devops/scripts/linux 
 ./build.sh --toolchain-file toolchain-rpi.cmake -cl --sysroot=$RPI_ROOT 
 [ $? -eq 0 ] || exit $?

@@ -18,7 +18,7 @@ jobs:
       architecture: 'x64'
 
   - script: |
-      python3 -m pip install -r $(ClientLibrary.FrameworkRoot)/jenkins/raspberrypi/pyscripts/requirements.txt
+      python3 -m pip install -r $(ClientLibrary.FrameworkRoot)/devops/raspberrypi/pyscripts/requirements.txt
     displayName: "pip install requirements.txt"
     condition: succeeded()
 
@@ -63,7 +63,7 @@ jobs:
       CommitToPass: $(CommitToPass)
 
   - script: |
-      python3 $(ClientLibrary.FrameworkRoot)/jenkins/raspberrypi/pyscripts/build_docker_image.py --repo ${NormalizedRepo}  --commit $(CommitToPass)
+      python3 $(ClientLibrary.FrameworkRoot)/devops/raspberrypi/pyscripts/build_docker_image.py --repo ${NormalizedRepo}  --commit $(CommitToPass)
     displayName: "build raspi-c docker image"
     condition: succeeded()
     env: 

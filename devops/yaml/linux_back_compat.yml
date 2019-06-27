@@ -12,7 +12,9 @@ jobs:
   - script: |
       export OPENSSL_ia32cap=0x00000000
       sudo chmod -R 755 .
-      sudo -E ./jenkins/linux_back_compat.sh
+
+      sudo -E ./devops/linux_back_compat.sh
+
     displayName: 'build'
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)

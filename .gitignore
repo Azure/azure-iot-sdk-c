@@ -200,7 +200,7 @@ common/tools/macro_utils_h_generator/macro_utils_h_generator.exe
 # C/C++ extension for VS Code
 .browse.VC.db*
 
-build_all/windows/nuget.exe
+devops/scripts/windows/nuget.exe
 
 /cmake
 /build
