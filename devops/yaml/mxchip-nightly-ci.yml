@@ -6,11 +6,11 @@ jobs:
     vmImage: ubuntu-16.04
   steps:
   - script: |
-      . devops/mbed5/setup.sh
+      . devops/scripts/mbed5/setup.sh
     displayName: 'setup'
 
   - script: |
-      . devops/mbed5/build.sh
+      . devops/scripts/mbed5/build.sh
     displayName: 'build'
     env:
       MXCHIP_REPO_SOURCE_BRANCH: $(MXCHIP_REPO_SOURCE_BRANCH)
