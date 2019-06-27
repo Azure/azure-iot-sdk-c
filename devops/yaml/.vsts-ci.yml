@@ -281,7 +281,7 @@ jobs:
   - script: |
       export OPENSSL_ia32cap=0x00000000
       sudo chmod -R 755 .
-      sudo -E ./jenkins/linux_install_deps.sh
+      sudo -E ./devops/linux_install_deps.sh
     displayName: 'build'
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
