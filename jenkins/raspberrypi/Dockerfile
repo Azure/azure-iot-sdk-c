@@ -133,7 +133,8 @@ RUN if [-s /patchfile ]; then git apply --index /patchfile; fi
 RUN git submodule update --init 
 
 WORKDIR /sdk/cmake 
-RUN cmake .
+RUN if [ -f "CMakeCache.txt" ]; then rm CMakeCache.txt; fi
+RUN cmake ..
 RUN make -j 2
 
 # Finally a sanity check to make sure the files are there
