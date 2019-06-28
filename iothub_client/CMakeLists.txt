@@ -8,6 +8,8 @@ if(POLICY CMP0042)
     cmake_policy(SET CMP0042 NEW)
 endif()
 
+set(use_uhttp_upload ON)
+
 compileAsC99()
 
 set(iothub_client_c_files
@@ -53,17 +55,26 @@ set(install_staticlibs
 )
 
 if(NOT dont_use_uploadtoblob)
-    set(iothub_client_c_files
-        ${iothub_client_c_files}
-        ./src/iothub_client_ll_uploadtoblob.c
-        ./src/blob.c
-    )
+    if (${use_uhttp_upload})
+        set(iothub_client_c_files
+            ${iothub_client_c_files}
+            ./src/iothub_client_ll_uploadtoblob_uhttp.c
+            ./src/blob_uhttp.c
+        )
+    else()
+        set(iothub_client_c_files
+            ${iothub_client_c_files}
+            ./src/iothub_client_ll_uploadtoblob.c
+            ./src/blob.c
+        )
+    endif()
 
     set(iothub_client_h_files
         ${iothub_client_h_files}
         ./inc/internal/blob.h
         ./inc/internal/iothub_client_ll_uploadtoblob.h
     )
+    include_directories(${UHTTP_C_INC_FOLDER})
 endif()
 
 if (use_edge_modules)
@@ -451,6 +462,10 @@ target_link_libraries(iothub_client parson)
 
 if (${use_prov_client_core})
     target_link_libraries(iothub_client hsm_security_client prov_auth_client)
+endif()
+
+if(NOT ${dont_use_uploadtoblob} AND ${use_uhttp_upload})
+    target_link_libraries(iothub_client uhttp)
 endif()
 
 linkSharedUtil(iothub_client)

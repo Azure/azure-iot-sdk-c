@@ -7,7 +7,6 @@
 *    @details IoTHub client needs to upload a byte array by using blob storage API
 *             IoTHub service provides the complete SAS URI to execute a PUT request
 *             that will upload the data.
-*
 */
 
 #ifndef BLOB_H
@@ -16,9 +15,9 @@
 #include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/strings_types.h"
-#include "azure_c_shared_utility/httpapiex.h"
 #include "iothub_client_core_ll.h"
 #include "azure_c_shared_utility/shared_util_options.h"
+#include "azure_uhttp_c/uhttp.h"
 
 #ifdef __cplusplus
 #include <cstddef>
@@ -59,7 +58,7 @@ MU_DEFINE_ENUM(BLOB_RESULT, BLOB_RESULT_VALUES)
 *
 * @return    A @c BLOB_RESULT. BLOB_OK means the blob has been uploaded successfully. Any other value indicates an error
 */
-MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadMultipleBlocksFromSasUri, const char*, SASURI, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, getDataCallbackEx, void*, context, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse, const char*, certificates, HTTP_PROXY_OPTIONS*, proxyOptions)
+MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadMultipleBlocksFromSasUri, const char*, sas_uri, const char*, certificate, HTTP_PROXY_OPTIONS*, proxyOptions, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, getDataCallbackEx, void*, context, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse)
 
 /**
 * @brief  Synchronously uploads a byte array as a new block to blob storage
@@ -73,7 +72,7 @@ MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadMultipleBlocksFromSasUri, const char
 * @param  httpResponse        A BUFFER_HANDLE that receives the HTTP response from the server (available only when the return value is BLOB_OK)
 */
 //MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadNextBlock, BUFFER_HANDLE, requestContent, unsigned int, blockID, STRING_HANDLE, xml, const char*, relativePath, HTTPAPIEX_HANDLE, httpApiExHandle, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse)
-MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadBlock, HTTPAPIEX_HANDLE, httpApiExHandle, const char*, relativePath, BUFFER_HANDLE, requestContent, unsigned int, blockID, STRING_HANDLE, blockIDList, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse)
+//MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadBlock, const char*, hostname, const char*, relativePath, BUFFER_HANDLE, requestContent, unsigned int, blockID, STRING_HANDLE, blockIDList, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse)
 #ifdef __cplusplus
 }
 #endif
