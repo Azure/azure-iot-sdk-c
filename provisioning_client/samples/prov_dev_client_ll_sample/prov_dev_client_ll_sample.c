@@ -65,7 +65,7 @@ MU_DEFINE_ENUM_STRINGS(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
 MU_DEFINE_ENUM_STRINGS(PROV_DEVICE_REG_STATUS, PROV_DEVICE_REG_STATUS_VALUES);
 
 static const char* global_prov_uri = "global.azure-devices-provisioning.net";
-static const char* id_scope = "[ID Scope]";
+static const char* id_scope = "0ne0005093D";
 
 static bool g_use_proxy = false;
 static const char* PROXY_ADDRESS = "127.0.0.1";
@@ -151,6 +151,8 @@ static void register_device_callback(PROV_DEVICE_RESULT register_result, const c
     }
 }
 
+#define HELLO_WORLD "Hello World from IoTHubClient_LL_UploadToBlob"
+
 int main()
 {
     SECURE_DEVICE_TYPE hsm_type;
@@ -221,7 +223,7 @@ int main()
         Prov_Device_LL_SetOption(handle, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-        // This option sets the registration ID it overrides the registration ID that is 
+        // This option sets the registration ID it overrides the registration ID that is
         // set within the HSM so be cautious if setting this value
         //Prov_Device_SetOption(prov_device_handle, PROV_REGISTRATION_ID, "[REGISTRATION ID]");
 
@@ -292,52 +294,25 @@ int main()
             IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-            (void)IoTHubDeviceClient_LL_SetMessageCallback(device_ll_handle, receive_msg_callback, &iothub_info);
+            //HTTP_PROXY_OPTIONS http_proxy_options = { 0 };
+            //http_proxy_options.host_address = proxyHost;
+            //http_proxy_options.port = proxyPort;
 
-            (void)printf("Sending 1 messages to IoTHub every %d seconds for %d messages (Send any message to stop)\r\n", TIME_BETWEEN_MESSAGES, MESSAGES_TO_SEND);
-            do
+            /*if (proxyHost != NULL && IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_HTTP_PROXY, &http_proxy_options) != IOTHUB_CLIENT_OK)
             {
-                if (iothub_info.connected != 0)
-                {
-                    // Send a message every TIME_BETWEEN_MESSAGES seconds
-                    (void)tickcounter_get_current_ms(tick_counter_handle, &current_tick);
-                    if ((current_tick - last_send_time) / 1000 > TIME_BETWEEN_MESSAGES)
-                    {
-                        static char msgText[1024];
-                        sprintf_s(msgText, sizeof(msgText), "{ \"message_index\" : \"%zu\" }", msg_count++);
-
-                        IOTHUB_MESSAGE_HANDLE msg_handle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText));
-                        if (msg_handle == NULL)
-                        {
-                            (void)printf("ERROR: iotHubMessageHandle is NULL!\r\n");
-                        }
-                        else
-                        {
-                            if (IoTHubDeviceClient_LL_SendEventAsync(device_ll_handle, msg_handle, NULL, NULL) != IOTHUB_CLIENT_OK)
-                            {
-                                (void)printf("ERROR: IoTHubClient_LL_SendEventAsync..........FAILED!\r\n");
-                            }
-                            else
-                            {
-                                (void)tickcounter_get_current_ms(tick_counter_handle, &last_send_time);
-                                (void)printf("IoTHubClient_LL_SendEventAsync accepted message [%zu] for transmission to IoT Hub.\r\n", msg_count);
-
-                            }
-                            IoTHubMessage_Destroy(msg_handle);
-                        }
-                    }
-                }
-                IoTHubDeviceClient_LL_DoWork(device_ll_handle);
-                ThreadAPI_Sleep(1);
-            } while (iothub_info.stop_running == 0 && msg_count < MESSAGES_TO_SEND);
-
-            size_t index = 0;
-            for (index = 0; index < 10; index++)
-            {
-                IoTHubDeviceClient_LL_DoWork(device_ll_handle);
-                ThreadAPI_Sleep(1);
+                (void)printf("failure to set proxy\n");
             }
-            tickcounter_destroy(tick_counter_handle);
+            else
+            {*/
+                if (IoTHubDeviceClient_LL_UploadToBlob(device_ll_handle, "subdir/hello_world.txt", (const unsigned char*)HELLO_WORLD, sizeof(HELLO_WORLD) - 1) != IOTHUB_CLIENT_OK)
+                {
+                    (void)printf("hello world failed to upload\n");
+                }
+                else
+                {
+                    (void)printf("hello world has been created\n");
+                }
+            //}
             // Clean up the iothub sdk handle
             IoTHubDeviceClient_LL_Destroy(device_ll_handle);
         }
