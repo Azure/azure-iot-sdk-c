@@ -1,16 +1,15 @@
 import os
 import sys
 import time
-try:
-    from testtools.UART_interface.base_uart_interface import uart_interface
-except:
-    from base_uart_interface import uart_interface
 
 try:
+    from testtools.UART_interface.base_uart_interface import uart_interface
     import testtools.UART_interface.azure_test_firmware_errors as azure_test_firmware_errors
     import testtools.UART_interface.serial_settings as serial_settings
     import testtools.UART_interface.serial_commands_dict as commands_dict
+
 except:
+    from base_uart_interface import uart_interface
     import azure_test_firmware_errors
     import serial_settings
     import serial_commands_dict as commands_dict
@@ -51,6 +50,11 @@ def check_firmware_errors(line):
 # ------- interface class -------
 class mxchip_uart_interface(uart_interface):
 
+    def wait(self):
+        time.sleep((serial_settings.bits_to_cache/serial_settings.baud_rate))
+
+    def write(self, ser, message, file=None):
+        return self.serial_write(ser, message, file)
     # If there is a sudden disconnect, program should report line in input script reached, and close files.
     # method to write to serial line with connection monitoring
     def serial_write(self, ser, message, file=None):
@@ -85,6 +89,8 @@ class mxchip_uart_interface(uart_interface):
             except:
                 return False
 
+    def read(self, ser, message, file, first_read=False):
+        return self.serial_read(ser, message, file, first_read)
     # Read from serial line with connection monitoring
     # If there is a sudden disconnect, program should report line in input script reached, and close files.
     def serial_read(self, ser, message, file, first_read=False):
@@ -124,7 +130,7 @@ class mxchip_uart_interface(uart_interface):
 
     # Note: the buffer size on the mxchip appears to be 128 Bytes.
     def write_read(self, ser, input_file, output_file):
-        serial_settings.bits_to_cache = 1600
+        # serial_settings.bits_to_cache = 1600
         if input_file:
             # set wait between read/write
             wait = (serial_settings.bits_to_cache/serial_settings.baud_rate)

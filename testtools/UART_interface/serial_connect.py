@@ -3,18 +3,24 @@ import os
 import sys
 import getopt
 import time
+import subprocess
+
 try:
     import testtools.UART_interface.azure_test_firmware_errors as azure_test_firmware_errors
     import testtools.UART_interface.serial_settings as serial_settings
     import testtools.UART_interface.serial_commands_dict as commands_dict
     import testtools.UART_interface.rpi_uart_interface
     import testtools.UART_interface.mxchip_uart_interface
+    import testtools.UART_interface.lin_ipc_interface
+    import testtools.UART_interface.interactive_shell
 except:
     import azure_test_firmware_errors
     import serial_settings
     import serial_commands_dict as commands_dict
     import rpi_uart_interface
     import mxchip_uart_interface
+    import lin_ipc_interface
+    import interactive_shell
 
 # Note: commands on MXCHIP have line endings with \r AND \n
 # Notes: This is designed to be used as a command line script with args (for automation purposes) to communicate over serial to a Microsoft mxchip device.
@@ -30,7 +36,8 @@ def usage():
     return usage_txt
 
 def parse_opts():
-    options, remainder = getopt.gnu_getopt(sys.argv[1:], 'hsri:o:b:p:m:d:t:', ['input', 'output', 'help', 'skip', 'baudrate', 'port', 'mxchip_file', 'device', 'timeout', 'reset'])
+    options, remainder = getopt.gnu_getopt(sys.argv[1:], 'chsri:o:b:p:m:d:t:',
+                                           ['console', 'input', 'output', 'help', 'skip', 'baudrate', 'port', 'mxchip_file', 'device', 'timeout', 'reset'])
     # print('OPTIONS   :', options)
 
     for opt, arg in options:
@@ -38,6 +45,8 @@ def parse_opts():
             print(usage())
         elif opt in ('-i', '--input'):
             serial_settings.input_file = arg
+        elif opt in ('-c', '--console'):
+            serial_settings.console_mode = True
         elif opt in ('-o', '--output'):
             serial_settings.output_file = arg
         elif opt in ('-b', '--baudrate'):
@@ -73,126 +82,95 @@ def check_firmware_errors(line):
         azure_test_firmware_errors.SDK_ERRORS += 1
 
 
-# If there is a sudden disconnect, program should report line in input script reached, and close files.
-# method to write to serial line with connection monitoring
-def serial_write(ser, message, file=None):
-
-    # Check that the device is no longer sending bytes
-    if ser.in_waiting:
-        serial_read(ser, message, file)
-
-    # Check that the serial connection is open
-    if ser.writable():
-        wait = serial_settings.mxchip_buf_pause # wait for at least 50ms between 128 byte writes.
-        buf = bytearray((message.strip()+'\r\n').encode('ascii'))
-        buf_len = len(buf) # needed for loop as buf is a destructed list
-        bytes_written = 0
-        timeout = time.time()
-
-        while bytes_written < buf_len:
-            round = ser.write(buf[:128])
-            buf = buf[round:]
-            bytes_written += round
-            # print("bytes written: %d" %bytes_written)
-            time.sleep(wait)
-            if (time.time() - timeout > serial_settings.serial_comm_timeout):
-                break
-        # print("final written: %d" %bytes_written)
-        return bytes_written
-    else:
-        try:
-            time.sleep(2)
-            ser.open()
-            serial_write(ser, message, file)
-        except:
-            return False
-
-
-# Read from serial line with connection monitoring
-# If there is a sudden disconnect, program should report line in input script reached, and close files.
-def serial_read(ser, message, file, first_read=False):
-
-    # Special per opt handling:
-    if "send_telemetry" in message or "set_az_iothub" in message:
-        time.sleep(.15)
-    elif "exit" in message and first_read:
-        time.sleep(serial_settings.wait_for_flash)
-        output = ser.in_waiting
-        while output < 4:
-            time.sleep(1)
-            output = ser.in_waiting
-            print("%d bytes in waiting" %output)
-
-    if ser.readable():
-        output = ser.readline(ser.in_waiting)
-        output = output.decode(encoding='utf-8', errors='ignore')
-
-        check_firmware_errors(output)
-        check_sdk_errors(output)
-        print(output)
-        try:
-            # File must exist to write to it
-            file.writelines(output)
-        except:
-            pass
-
 def run():
 
+    if serial_settings.console_mode:
+        connection_handle = None
+        if 'mxchip' in serial_settings.device_type: #'rpi' in serial_settings.device_type or 'raspi' in serial_settings.device_type:
+            connection_handle = serial.Serial(port=serial_settings.port, baudrate=serial_settings.baud_rate)
+
+            shelly = interactive_shell.interactive_shell()
+            shelly.setup(mxchip_uart_interface.mxchip_uart_interface(), connection_handle)
+            shelly.cmdloop()
+            connection_handle.close()
+
+        elif 'rpi' in serial_settings.device_type or 'raspi' in serial_settings.device_type:
+            connection_handle = serial.Serial(port=serial_settings.port, baudrate=serial_settings.baud_rate)
+
+            shelly = interactive_shell.interactive_shell()
+            shelly.setup(rpi_uart_interface.rpi_uart_interface(), connection_handle)
+            shelly.cmdloop()
+            connection_handle.close()
+
+        elif 'linux' in serial_settings.device_type or 'win' in serial_settings.device_type or 'windows' in serial_settings.device_type:
+            connection_handle = subprocess.Popen('ls', stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+            shelly = interactive_shell.interactive_shell()
+            shelly.setup(lin_ipc_interface.lin_ipc_interface(), connection_handle)
+            shelly.cmdloop()
+
+        print("Num of Errors: %d" % azure_test_firmware_errors.SDK_ERRORS)
+        sys.exit(azure_test_firmware_errors.SDK_ERRORS)
+        return
+
+    # This is where we will branch between different interfaces
     if 'mxchip' in serial_settings.device_type:
+        # Initial wait for mxchip to be flashed
         mxchip_uart_interface.device_setup()
 
-    ser = serial.Serial(port=serial_settings.port, baudrate=serial_settings.baud_rate)
+    if 'mxchip' in serial_settings.device_type or 'rpi' in serial_settings.device_type or 'raspi' in serial_settings.device_type:
+        # If using a serial interface
+        ser = serial.Serial(port=serial_settings.port, baudrate=serial_settings.baud_rate)
 
-    time.sleep(.5)
+        time.sleep(.5)
 
-    # Print initial message
-    output = ser.readline(ser.in_waiting)
-    output = output.strip().decode(encoding='utf-8', errors='ignore')
-    print(output)
+        # Print initial message
+        output = ser.readline(ser.in_waiting)
+        output = output.strip().decode(encoding='utf-8', errors='ignore')
+        print(output)
 
-    if serial_settings.skip_setup:
-        # skip waiting for WiFi and IoT Hub setup
-        while (ser.in_waiting):
-            time.sleep(.1)
-            output = ser.readline(ser.in_waiting)
-            output = output.strip().decode(encoding='utf-8', errors='ignore')
+        if serial_settings.skip_setup:
+            # skip waiting for WiFi and IoT Hub setup
+            while (ser.in_waiting):
+                time.sleep(.1)
+                output = ser.readline(ser.in_waiting)
+                output = output.strip().decode(encoding='utf-8', errors='ignore')
 
-            mxchip_uart_interface.check_firmware_errors(output)
-            # Do we want to save this output to file if there is an error printed?
-            if len(output) > 4:
-                print(output)
-    else:
+                mxchip_uart_interface.check_firmware_errors(output)
+                # Do we want to save this output to file if there is an error printed?
+                if len(output) > 4:
+                    print(output)
+        else:
 
-        # Wait for WiFi and IoT Hub setup to complete
-        start_time = time.time()
+            # Wait for WiFi and IoT Hub setup to complete
+            start_time = time.time()
 
-        # for mxchip, branch this away
-        while(serial_settings.setup_string not in output) and ((time.time() - start_time) < (3*serial_settings.wait_for_flash + 5)):
-            time.sleep(.1)
-            output = ser.readline(ser.in_waiting)
-            output = output.strip().decode(encoding='utf-8', errors='ignore')
+            # for mxchip, branch this away
+            while(serial_settings.setup_string not in output) and ((time.time() - start_time) < (3*serial_settings.wait_for_flash + 5)):
+                time.sleep(.1)
+                output = ser.readline(ser.in_waiting)
+                output = output.strip().decode(encoding='utf-8', errors='ignore')
 
-            mxchip_uart_interface.check_firmware_errors(output)
-            if len(output) > 4:
-                print(output)
-
-        # for rpi, transfer pipeline/artifact files from agent to device
-        # get filepath, walk it
-        # for each file, send rz, then sz file to rpi port
+                mxchip_uart_interface.check_firmware_errors(output)
+                if len(output) > 4:
+                    print(output)
 
 
+        if 'rpi' in serial_settings.device_type or 'raspi' in serial_settings.device_type:
+            uart = rpi_uart_interface.rpi_uart_interface()
+        else:
+            uart = mxchip_uart_interface.mxchip_uart_interface()
 
-    if 'rpi' in serial_settings.device_type or 'raspi' in serial_settings.device_type:
-        uart = rpi_uart_interface.rpi_uart_interface()
-    else:
-        uart = mxchip_uart_interface.mxchip_uart_interface()
 
+        uart.write_read(ser, serial_settings.input_file, serial_settings.output_file)
 
-    uart.write_read(ser, serial_settings.input_file, serial_settings.output_file)
+        ser.reset_input_buffer()
+        ser.reset_output_buffer()
+        ser.close()
 
-    ser.reset_input_buffer()
-    ser.reset_output_buffer()
-    ser.close()
+    elif 'windows' in serial_settings.device_type or 'win' in serial_settings.device_type or 'linux' in serial_settings.device_type:
+        interface = lin_ipc_interface.lin_ipc_interface()
+        interface.write_read(serial_settings.input_file, serial_settings.output_file)
 
     print("Num of Errors: %d" %azure_test_firmware_errors.SDK_ERRORS)
     sys.exit(azure_test_firmware_errors.SDK_ERRORS)

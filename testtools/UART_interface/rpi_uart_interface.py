@@ -6,13 +6,12 @@ try:
     from testtools.UART_interface.base_uart_interface import uart_interface
     import testtools.UART_interface.azure_test_firmware_errors as azure_test_firmware_errors
     import testtools.UART_interface.serial_settings as serial_settings
-    import testtools.UART_interface.serial_commands_dict as commands_dict
+
 except:
     import azure_test_firmware_errors
     import serial_settings
     import serial_commands_dict as commands_dict
     from base_uart_interface import uart_interface
-
 
 # ------- global usecase fcns -------
 def device_setup():
@@ -52,6 +51,15 @@ def check_firmware_errors(line):
 
 # ------- interface class -------
 class rpi_uart_interface(uart_interface):
+
+    # def __init__(self):
+    #     serial_settings.bits_to_cache = 800
+
+    def wait(self):
+        time.sleep(3*(serial_settings.bits_to_cache/serial_settings.baud_rate))
+
+    def write(self, ser, message, file=None):
+        return self.serial_write(ser, message, file)
     # If there is a sudden disconnect, program should report line in input script reached, and close files.
     # method to write to serial line with connection monitoring
     def serial_write(self, ser, message, file=None):
@@ -88,8 +96,8 @@ class rpi_uart_interface(uart_interface):
                 message.replace('rz ', 'sz ')
 
             # wait = serial_settings.mxchip_buf_pause # wait for at least 50ms between 128 byte writes. -- may not be necessary on rpi
-            buf = bytearray((message).encode('ascii'))
-            print(buf)
+            buf = bytearray((message.strip() + '\n').encode('ascii'))
+            # print(buf)
             bytes_written = ser.write(buf)
 
             return bytes_written
@@ -101,6 +109,8 @@ class rpi_uart_interface(uart_interface):
             except:
                 return False
 
+    def read(self, ser, message, file, first_read=False):
+        return self.serial_read(ser, message, file, first_read)
     # Read from serial line with connection monitoring
     # If there is a sudden disconnect, program should report line in input script reached, and close files.
     def serial_read(self, ser, message, file, first_read=False):
@@ -144,7 +154,6 @@ class rpi_uart_interface(uart_interface):
     def write_read(self, ser, input_file, output_file):
         session_start = time.time()
         # set bits to cache variable to allow for mxchip to pass bytes into serial buffer
-        serial_settings.bits_to_cache = 800
         if input_file:
             # set wait between read/write
             wait = (serial_settings.bits_to_cache/serial_settings.baud_rate)
