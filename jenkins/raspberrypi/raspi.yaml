@@ -1,11 +1,17 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+schedules:
+- cron: "0 0 * * *"
+  displayName: Daily midnight build
+  branches:
+    include:
+    - master
+
 variables:
   ClientLibrary.Repo: $(Build.Repository.Uri)
   ClientLibrary.Commit: $(Build.SourceBranch)
   ClientLibrary.FrameworkRoot: $(Build.SourcesDirectory)
-
 
 jobs:
 - job: Cross_Compile
