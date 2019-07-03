@@ -153,6 +153,7 @@ class rpi_uart_interface(uart_interface):
     # Note: the buffer size on the mxchip appears to be 128 Bytes.
     def write_read(self, ser, input_file, output_file):
         session_start = time.time()
+        serial_settings.bits_to_cache = 800
         # set bits to cache variable to allow for mxchip to pass bytes into serial buffer
         if input_file:
             # set wait between read/write

@@ -1,9 +1,4 @@
-import serial
-import os
-import sys
-import getopt
 import time
-import subprocess
 import cmd
 
 try:
@@ -22,7 +17,7 @@ except:
     import lin_ipc_interface
 
 class interactive_shell(cmd.Cmd):
-    intro = "Welcome to the interactive version of the Azure C SDK\'s device test cli tool!"
+    intro = "Welcome to the interactive version of the Azure C SDK\'s device test cli tool!\nType bye or close to exit."
     interface = None
     # prompt = ''
     connection_handle = None
@@ -74,8 +69,6 @@ class interactive_shell(cmd.Cmd):
             if (time.time() - begin) > 2:
                 break
 
-        # self.interface.write(self.connection_handle, "\n", self.output_file)
-        # self.interface.wait()
         while(output):
             # print('printing')
             self.interface.wait()
