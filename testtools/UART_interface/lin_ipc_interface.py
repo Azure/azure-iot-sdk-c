@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import re
 from subprocess import PIPE, Popen
 
 try:
@@ -43,7 +44,10 @@ def check_test_failures(line):
 
 def make_int(s):
     s = s.strip()
-    return int(s) if s else 0
+    j = re.search(r'\d+', s)
+    if j:
+        return int(j.group())
+    return 0
 
 # ------- interface class -------
 class lin_ipc_interface():
@@ -63,7 +67,7 @@ class lin_ipc_interface():
         try:
             if not ser.poll(): # previous process has yet to return
                 output = ser.communicate(timeout=(2*serial_settings.wait_for_flash))
-                self.subprocess_read(ser, message, file)
+                self.read_all_helper(output, message, file)
         except:
             pass
 
@@ -95,7 +99,7 @@ class lin_ipc_interface():
         return None
         # return self.subprocess_read(ser, message, file)
     # Read from saved subprocess output
-    def subprocess_read(self, ser, message, file=None, first_read=False):
+    def subprocess_read(self, ser, message, file=None):
 
         # # Special per opt handling:
         # if "send_telemetry" in message or "set_az_iothub" in message:
@@ -109,13 +113,7 @@ class lin_ipc_interface():
         #         print("%d bytes in waiting" % output)
 
         # if not output:
-        try:
-            if not ser.poll(): # previous process has yet to return
-                output = ser.communicate(timeout=(2*serial_settings.wait_for_flash))
-                self.subprocess_read(ser, message, file)
-        except:
-            pass
-        output = ser.stdout.readline()
+        output = ser.readline()
         output = output.decode(encoding='utf-8', errors='ignore')
         check_sdk_errors(output)
         check_test_failures(output)
@@ -139,6 +137,22 @@ class lin_ipc_interface():
 
         return output
 
+    def read_all_helper(self, output, message, file):
+        err_string = output[1].decode(encoding='utf-8', errors='ignore')
+        print(err_string)
+        azure_test_firmware_errors.SDK_ERRORS += make_int(err_string)
+        printo = output[0].decode(encoding='utf-8', errors='ignore').split('\n')
+        for line in printo:
+            check_sdk_errors(line)
+            check_test_failures(line)
+            print(line)
+            try:
+                # File must exist to write to it
+                file.writelines(line)
+            except:
+                pass
+
+
     def write_read(self, input_file, output_file):
         session_start = time.time()
         if input_file:
@@ -161,7 +175,15 @@ class lin_ipc_interface():
 
                     # Attempt to read stdout
                     azure_test_firmware_errors.SDK_ERRORS += make_int(output[1].decode(encoding='utf-8', errors='ignore'))
-                    output = self.subprocess_read(self.ipc_process, line, output, first_read=True)
+                    # try:
+                    #     if not self.ipc_process.poll():
+                    #         output = self.ipc_process.communicate(timeout=(2 * serial_settings.wait_for_flash))
+                    # except:
+                    #     print("ipc_process not initialized.")
+                    #     raise ValueError
+                    self.read_all_helper(output, line, f)
+                    # while output[0]:
+                    #     self.subprocess_read(output[0], line, f)
 
                     line = fp.readline()
 

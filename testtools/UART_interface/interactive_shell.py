@@ -58,10 +58,11 @@ class interactive_shell(cmd.Cmd):
             return True
         output = self.interface.read(self.connection_handle, line, self.output_file)
 
+        # Need to devise a way to skip all this for ipc interface
         cont = not bool(output)
         begin = time.time()
         while cont:
-            print('trying')
+            # print('trying')
             self.interface.wait()
             output = self.interface.read(self.connection_handle, line, self.output_file)
             cont = not bool(output)
