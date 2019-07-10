@@ -4,11 +4,11 @@ resources:
   clean: true
 jobs:
 - job: longhaul_linux
+  timeoutInMinutes: 1200
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
   pool: 
     name: 'aziotbld-lin01'
-    timeoutInMinutes: 1200
   displayName: 'longhaul_linux'
   steps:
   - script: |
@@ -39,12 +39,12 @@ jobs:
 - job: longhaul_windows
   pool:
     name: 'aziotbld-win10'
-    timeoutInMinutes: 1200
   steps:
   - script: |
       call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
       call jenkins\longhaul_c.cmd
     displayName: 'build'
+    timeoutInMinutes: 1200
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
       IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
