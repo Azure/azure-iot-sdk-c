@@ -22,11 +22,19 @@ def check_sdk_errors(line):
     if "Error:" in line:
         azure_test_firmware_errors.SDK_ERRORS += 1
 
+    # if "Transfer incomplete" in line:
+    #     return False
+    #
+    # return True
+
 def check_test_failures(line):
     if " tests ran" in line:
         result = [int(s) for s in line.split() if s.isdigit()]
         azure_test_firmware_errors.SDK_ERRORS = result[1]
-        return result
+        serial_settings.tests_run = True
+        return False
+
+    return True
 
 
 def check_firmware_errors(line):
@@ -44,7 +52,6 @@ def check_firmware_errors(line):
 
 # ------- interface class -------
 class rpi_uart_interface(uart_interface):
-
     # If there is a sudden disconnect, program should report line in input script reached, and close files.
     # method to write to serial line with connection monitoring
     def serial_write(self, ser, message, file=None):
@@ -55,10 +62,9 @@ class rpi_uart_interface(uart_interface):
 
         # Check that the serial connection is open
         if ser.writable():
-
             # special handling for sending a file
             if "sz " in message:
-                round = ser.write(bytearray("rz\r\n".encode('ascii'))) #
+                temp_written = ser.write(bytearray("rz\r\n".encode('ascii')))
                 os.system(message)#"sz -a test.sh > /dev/ttyUSB0 < /dev/ttyUSB0")
 
                 # check for completion
@@ -70,8 +76,12 @@ class rpi_uart_interface(uart_interface):
                     time.sleep(.01)
                     output = ser.readline(ser.in_waiting)
                     output = output.decode(encoding='utf-8', errors='ignore')
+                    if "incomplete" in output:
+                        serial_settings.tests_run = True
+                        azure_test_firmware_errors.SDK_ERRORS += 1
+                        return False
 
-                return round
+                return temp_written
             # special handling for receiving a file, Note: input file should use rz <filepath> when a file from the RPi is desired
             elif "rz " in message:
                 os.system('rz')
@@ -111,7 +121,7 @@ class rpi_uart_interface(uart_interface):
             output = ser.readline(ser.in_waiting)
             output = output.decode(encoding='utf-8', errors='ignore').strip()
 
-            # check_sdk_errors(output)
+            check_sdk_errors(output)
             check_test_failures(output)
             print(output)
             try:
@@ -133,6 +143,8 @@ class rpi_uart_interface(uart_interface):
     # Note: the buffer size on the mxchip appears to be 128 Bytes.
     def write_read(self, ser, input_file, output_file):
         session_start = time.time()
+        # set bits to cache variable to allow for mxchip to pass bytes into serial buffer
+        serial_settings.bits_to_cache = 800
         if input_file:
             # set wait between read/write
             wait = (serial_settings.bits_to_cache/serial_settings.baud_rate)
@@ -173,7 +185,7 @@ class rpi_uart_interface(uart_interface):
                             print(output)
 
                         #for now we can assume one test suite is run
-                        if " tests run" in output:
+                        if " tests run" in output or serial_settings.tests_run:
                             break
 
                 else:
