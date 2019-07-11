@@ -37,6 +37,7 @@ jobs:
     displayName: 'cleanup'
     condition: always()
 - job: longhaul_windows
+  timeoutInMinutes: 1200
   pool:
     name: 'aziotbld-win10'
   steps:
@@ -44,7 +45,6 @@ jobs:
       call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
       call jenkins\longhaul_c.cmd
     displayName: 'build'
-    timeoutInMinutes: 1200
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
       IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
