@@ -20,12 +20,13 @@
 #include "umock_c/umocktypes_stdint.h"
 
 #define ENABLE_MOCKS
-#include "iothub_client_core_ll.h"
+#include "iothub_client_core_common.h"
 #undef ENABLE_MOCKS
 
 #include "iothub_client_ll.h"
 
 #define ENABLE_MOCKS
+#include "iothub_client_core_ll.h"
 #include "internal/iothub_client_private.h"
 #include "iothub_device_client_ll.h"
 #undef ENABLE_MOCKS
