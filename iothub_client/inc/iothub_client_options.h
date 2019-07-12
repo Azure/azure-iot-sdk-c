@@ -21,6 +21,7 @@ extern "C"
     static STATIC_VAR_UNUSED const char* OPTION_LOG_TRACE = "logtrace";
     static STATIC_VAR_UNUSED const char* OPTION_X509_CERT = "x509certificate";
     static STATIC_VAR_UNUSED const char* OPTION_X509_PRIVATE_KEY = "x509privatekey";
+    static STATIC_VAR_UNUSED const char* OPTION_X509_CRYPTODEV_PRIVATE_KEY = "x509cryptodevprivatekey";
     static STATIC_VAR_UNUSED const char* OPTION_KEEP_ALIVE = "keepalive";
     static STATIC_VAR_UNUSED const char* OPTION_CONNECTION_TIMEOUT = "connect_timeout";
 
