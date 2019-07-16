@@ -356,7 +356,7 @@ if (${build_service_client})
     add_subdirectory(iothub_service_client)
 endif()
 
-if (${run_e2e_tests} OR ${run_longhaul_tests} OR ${nuget_e2e_tests} OR ${run_sfc_tests})
+if (${run_e2e_tests} OR ${run_longhaul_tests} OR ${nuget_e2e_tests} OR ${run_sfc_tests} OR ${run_unittests})
     add_subdirectory(testtools)
 endif()
 

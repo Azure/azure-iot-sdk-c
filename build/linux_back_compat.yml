@@ -2,11 +2,11 @@ name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Re
 resources:
 - repo: self
   clean: true
-phases:
-- phase: ubuntu1604
+jobs:
+- job: ubuntu1604
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
-  queue: aziotbld-lin02
+  pool: aziotbld-lin02
   displayName: 'ubuntu1604'
   steps:
   - script: |
