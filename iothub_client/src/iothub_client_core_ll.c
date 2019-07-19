@@ -1360,7 +1360,7 @@ static void provisioning_status_callback(PROV_DEVICE_REG_STATUS reg_status, void
             if (reg_status == PROV_DEVICE_REG_STATUS_ASSIGNED)
             {
                 // Space out before and after provisioning
-                LOG(AZ_LOG_TRACE, LOG_LINE, "");
+                LOG(AZ_LOG_TRACE, LOG_LINE, " ");
             }
         }
     }
@@ -1411,7 +1411,17 @@ static void provisioning_device_callback(PROV_DEVICE_RESULT register_result, con
                 }
                 else
                 {
-                    iothub_handle->registration_state = OP_STATE_REGISTERED;
+                    const char* trusted_cert = Prov_Device_LL_Get_Trusted_Certificate(iothub_handle->prov_handle);
+                    // Set the trusted certificate
+                    if (trusted_cert != NULL && iothub_handle->IoTHubTransport_SetOption(iothub_handle->transportHandle, OPTION_TRUSTED_CERT, trusted_cert) != IOTHUB_CLIENT_OK)
+                    {
+                        LogError("Failed processing device auth");
+                        iothub_handle->registration_state = OP_STATE_ERROR;
+                    }
+                    else
+                    {
+                        iothub_handle->registration_state = OP_STATE_REGISTERED;
+                    }
                 }
             }
         }
@@ -1433,13 +1443,13 @@ static int initialize_queued_iothub_handle(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* ha
             handleData->messageCallback.userContextCallback = NULL;
         }
     }
-    
+
     if (handleData->iothub_op_init & IOTHUB_OP_MSG_DISPOSITION)
     {
         //if (handleData->IoTHubTransport_SendMessageDisposition(message_data, disposition) !=
 
     }
-    
+
     if (handleData->iothub_op_init & IOTHUB_OP_DEVICE_TWIN_SUB)
     {
         if (handleData->IoTHubTransport_Subscribe_DeviceTwin(handleData->transportHandle) != 0)
@@ -1470,7 +1480,7 @@ static void process_provisioning_dowork(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handl
     if (handleData->registration_state == OP_STATE_REGISTERED)
     {
         close_provisioning_info(handleData);
-        
+
         initialize_queued_iothub_handle(handleData);
 
         handleData->registration_state = OP_STATE_IOT_STAGE;

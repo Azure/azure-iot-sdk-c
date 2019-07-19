@@ -69,6 +69,7 @@ extern "C" {
     typedef int(*pfprov_transport_set_trusted_cert)(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* certificate);
     typedef int(*pfprov_transport_set_proxy)(PROV_DEVICE_TRANSPORT_HANDLE handle, const HTTP_PROXY_OPTIONS* proxy_option);
     typedef int(*pfprov_transport_set_option)(PROV_DEVICE_TRANSPORT_HANDLE handle, const char* option_name, const void* value);
+    typedef const char* (*pfprov_transport_get_trusted_cert)(PROV_DEVICE_TRANSPORT_HANDLE handle);
 
     struct PROV_DEVICE_TRANSPORT_PROVIDER_TAG
     {
@@ -84,6 +85,7 @@ extern "C" {
         pfprov_transport_set_trusted_cert prov_transport_trusted_cert;
         pfprov_transport_set_proxy prov_transport_set_proxy;
         pfprov_transport_set_option prov_transport_set_option;
+        pfprov_transport_get_trusted_cert prov_transport_get_trusted_cert;
     };
 
 #ifdef __cplusplus

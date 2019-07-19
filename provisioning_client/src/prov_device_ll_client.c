@@ -1060,7 +1060,7 @@ PROV_DEVICE_RESULT Prov_Device_LL_Register_Device(PROV_DEVICE_LL_HANDLE handle, 
 
             handle->register_status_cb = reg_status_cb;
             handle->status_user_ctx = status_ctx;
-            
+
             // Free the custom data if its been allocated
             if (handle->custom_response_data != NULL)
             {
@@ -1378,6 +1378,21 @@ const char* Prov_Device_LL_Get_Provisioning_Payload(PROV_DEVICE_LL_HANDLE handle
     else
     {
         result = handle->custom_response_data;
+    }
+    return result;
+}
+
+const char* Prov_Device_LL_Get_Trusted_Certificate(PROV_DEVICE_LL_HANDLE handle)
+{
+    const char* result;
+    if (handle == NULL)
+    {
+        LogError("Invalid parameter specified handle: %p", handle);
+        result = NULL;
+    }
+    else
+    {
+        result = handle->prov_transport_protocol->prov_transport_get_trusted_cert(handle->transport_handle);
     }
     return result;
 }

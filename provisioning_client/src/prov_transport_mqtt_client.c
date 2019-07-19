@@ -118,6 +118,12 @@ static int prov_transport_mqtt_set_trusted_cert(PROV_DEVICE_TRANSPORT_HANDLE han
     return prov_transport_common_mqtt_set_trusted_cert(handle, certificate);
 }
 
+static const char* prov_transport_mqtt_get_trusted_cert(PROV_DEVICE_TRANSPORT_HANDLE handle)
+{
+    /* Codes_PROV_TRANSPORT_MQTT_CLIENT_07_010: [ prov_transport_mqtt_set_trusted_cert shall invoke the prov_transport_common_mqtt_set_trusted_cert method ] */
+    return prov_transport_common_mqtt_get_trusted_cert(handle);
+}
+
 static int prov_transport_mqtt_set_proxy(PROV_DEVICE_TRANSPORT_HANDLE handle, const HTTP_PROXY_OPTIONS* proxy_options)
 {
     /* Codes_PROV_TRANSPORT_MQTT_CLIENT_07_011: [ prov_transport_mqtt_set_proxy shall invoke the prov_transport_common_mqtt_set_proxy method ] */
@@ -142,7 +148,8 @@ static PROV_DEVICE_TRANSPORT_PROVIDER prov_mqtt_func =
     prov_transport_mqtt_x509_cert,
     prov_transport_mqtt_set_trusted_cert,
     prov_transport_mqtt_set_proxy,
-    prov_transport_mqtt_set_option
+    prov_transport_mqtt_set_option,
+    prov_transport_mqtt_get_trusted_cert
 };
 
 const PROV_DEVICE_TRANSPORT_PROVIDER* Prov_Device_MQTT_Protocol(void)

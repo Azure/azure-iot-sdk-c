@@ -1040,7 +1040,7 @@ static int create_sasl_handler(PROV_TRANSPORT_AMQP_INFO* amqp_info)
         char* sas_token;
 
         if ((sasl_username = construct_username(amqp_info)) == NULL)
-        { 
+        {
             LogError("failed creating symmetical sasl username");
             result = MU_FAILURE;
         }
@@ -1702,6 +1702,22 @@ int prov_transport_common_amqp_set_trusted_cert(PROV_DEVICE_TRANSPORT_HANDLE han
             /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_033: [ On success prov_transport_common_amqp_set_trusted_cert shall return a zero value. ] */
             result = 0;
         }
+    }
+    return result;
+}
+
+const char* prov_transport_common_amqp_get_trusted_cert(PROV_DEVICE_TRANSPORT_HANDLE handle)
+{
+    const char* result;
+    if (handle == NULL)
+    {
+        /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_030: [ If handle or certificate is NULL, prov_transport_common_mqtt_set_trusted_cert shall return a non-zero value. ] */
+        LogError("Invalid parameter specified handle: NULL");
+        result = NULL;
+    }
+    else
+    {
+        result = ((PROV_TRANSPORT_AMQP_INFO*)handle)->certificate;
     }
     return result;
 }

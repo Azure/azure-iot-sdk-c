@@ -1197,6 +1197,22 @@ int prov_transport_common_mqtt_set_trusted_cert(PROV_DEVICE_TRANSPORT_HANDLE han
     return result;
 }
 
+const char* prov_transport_common_mqtt_get_trusted_cert(PROV_DEVICE_TRANSPORT_HANDLE handle)
+{
+    const char* result;
+    if (handle == NULL)
+    {
+        /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_030: [ If handle or certificate is NULL, prov_transport_common_mqtt_set_trusted_cert shall return a non-zero value. ] */
+        LogError("Invalid parameter specified handle: NULL");
+        result = NULL;
+    }
+    else
+    {
+        result = ((PROV_TRANSPORT_MQTT_INFO*)handle)->certificate;
+    }
+    return result;
+}
+
 int prov_transport_common_mqtt_set_proxy(PROV_DEVICE_TRANSPORT_HANDLE handle, const HTTP_PROXY_OPTIONS* proxy_options)
 {
     int result;

@@ -130,6 +130,15 @@ MOCKABLE_FUNCTION(, PROV_DEVICE_RESULT, Prov_Device_LL_Set_Provisioning_Payload,
 */
 MOCKABLE_FUNCTION(, const char*, Prov_Device_LL_Get_Provisioning_Payload, PROV_DEVICE_LL_HANDLE, handle);
 
+/**
+* @brief    Retrieves the Provisioning trusted cert that is set through the call
+*
+* @param    handle          The handle created by a call to the create function.
+*
+* @return A pointer the the trusted certificate
+*/
+MOCKABLE_FUNCTION(, const char*, Prov_Device_LL_Get_Trusted_Certificate, PROV_DEVICE_LL_HANDLE, handle);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
