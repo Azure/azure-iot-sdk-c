@@ -55,11 +55,6 @@ MU_DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, IOTHUB_CLIENT_CON
 MU_DEFINE_ENUM_STRINGS(TRANSPORT_TYPE, TRANSPORT_TYPE_VALUES);
 MU_DEFINE_ENUM_STRINGS(DEVICE_TWIN_UPDATE_STATE, DEVICE_TWIN_UPDATE_STATE_VALUES);
 
-#ifdef USE_PROV_MODULE
-MU_DEFINE_ENUM_STRINGS(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
-MU_DEFINE_ENUM_STRINGS(PROV_DEVICE_REG_STATUS, PROV_DEVICE_REG_STATUS_VALUES);
-#endif // #ifdef USE_PROV_MODULE
-
 #ifndef DONT_USE_UPLOADTOBLOB
 MU_DEFINE_ENUM_STRINGS(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT_VALUES);
 #endif // DONT_USE_UPLOADTOBLOB
@@ -1262,7 +1257,13 @@ static int initialize_hsm_info(const PROVISIONING_AUTH_INFO* prov_info)
             LogError("Input parameter Symmetric key requires registrations id and symmetric key parameters");
             result = MU_FAILURE;
         }
+        else if (prov_dev_set_symmetric_key_info(prov_info->registration_id, prov_info->symmetric_key) != 0)
+        {
+            LogError("Failure setting symmetric key information");
+            result = MU_FAILURE;
+        }
     }
+
     if (result == 0 && prov_dev_security_init(prov_info->attestation_type) != 0)
     {
         LogError("Failure initializing security hsm");
@@ -2656,14 +2657,19 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetOption(IOTHUB_CLIENT_CORE_LL_HANDLE 
                 handleData->product_info = NULL;
             }
 
+            result = IOTHUB_CLIENT_OK;
             PLATFORM_INFO_OPTION supportedPlatformInfo;
-            if (handleData->IoTHubTransport_GetSupportedPlatformInfo(handleData->transportHandle, &supportedPlatformInfo) != 0)
+            if (handleData->IoTHubTransport_GetSupportedPlatformInfo != NULL)
             {
-                LogError("IoTHubTransport_GetSupportedPlatformInfo failed");
-                result = IOTHUB_CLIENT_ERROR;
+                if (handleData->IoTHubTransport_GetSupportedPlatformInfo(handleData->transportHandle, &supportedPlatformInfo) != 0)
+                {
+                    LogError("IoTHubTransport_GetSupportedPlatformInfo failed");
+                    result = IOTHUB_CLIENT_ERROR;
+                }
             }
+
             /*Codes_SRS_IOTHUBCLIENT_LL_10_035: [If string concatenation fails, `IoTHubClientCore_LL_SetOption` shall return `IOTHUB_CLIENT_ERROR`. Otherwise, `IOTHUB_CLIENT_OK` shall be returned. ]*/
-            else if ((handleData->product_info = make_product_info((const char*)value, supportedPlatformInfo)) == NULL)
+            if (result == IOTHUB_CLIENT_OK && (handleData->product_info = make_product_info((const char*)value, supportedPlatformInfo)) == NULL)
             {
                 LogError("STRING_construct_sprintf failed");
                 result = IOTHUB_CLIENT_ERROR;
@@ -2728,6 +2734,41 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetOption(IOTHUB_CLIENT_CORE_LL_HANDLE 
                 result = IOTHUB_CLIENT_OK;
             }
         }
+        else if (strcmp(optionName, OPTION_TRUSTED_CERT) == 0)
+        {
+            if (handleData->registration_state == OP_STATE_IOT_STAGE)
+            {
+                result = handleData->IoTHubTransport_SetOption(handleData->transportHandle, optionName, value);
+                if (result != IOTHUB_CLIENT_OK)
+                {
+                    LogError("unable to IoTHubTransport_SetOption");
+                }
+                else
+                {
+                    result = IOTHUB_CLIENT_OK;
+                }
+            }
+#ifdef USE_PROV_MODULE
+            else
+            {
+                // We need to capture certificate and then pass it down to the lower layer
+                if (Prov_Device_LL_SetOption(handleData->prov_handle, optionName, value) != PROV_DEVICE_RESULT_OK)
+                {
+                    LogError("Failure setting certificate in provisioning");
+                    result = IOTHUB_CLIENT_ERROR;
+                }
+                else
+                {
+                    result = IOTHUB_CLIENT_OK;
+                }
+            }
+#else
+            else
+            {
+                result = IOTHUB_CLIENT_OK;
+            }
+#endif
+        }
         else if (strcmp(optionName, OPTION_LOG_TRACE) == 0)
         {
             handleData->log_trace = *((bool*)value);
@@ -2768,21 +2809,29 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetOption(IOTHUB_CLIENT_CORE_LL_HANDLE 
         {
             // This section is unusual for SetOption calls because it attempts to pass unhandled options
             // to two downstream targets (IoTHubTransport_SetOption and IoTHubClientCore_LL_UploadToBlob_SetOption) instead of one.
-
-            /*Codes_SRS_IOTHUBCLIENT_LL_30_011: [ IoTHubClientCore_LL_SetOption shall always pass unhandled options to Transport_SetOption. ]*/
-            /*Codes_SRS_IOTHUBCLIENT_LL_30_012: [ If Transport_SetOption fails, IoTHubClientCore_LL_SetOption shall return that failure code. ]*/
-            result = handleData->IoTHubTransport_SetOption(handleData->transportHandle, optionName, value);
-            if(result != IOTHUB_CLIENT_OK)
+            if (handleData->IoTHubTransport_SetOption != NULL)
             {
-                LogError("unable to IoTHubTransport_SetOption");
-            }
+                /*Codes_SRS_IOTHUBCLIENT_LL_30_011: [ IoTHubClientCore_LL_SetOption shall always pass unhandled options to Transport_SetOption. ]*/
+                /*Codes_SRS_IOTHUBCLIENT_LL_30_012: [ If Transport_SetOption fails, IoTHubClientCore_LL_SetOption shall return that failure code. ]*/
+                result = handleData->IoTHubTransport_SetOption(handleData->transportHandle, optionName, value);
+                if (result != IOTHUB_CLIENT_OK)
+                {
+                    LogError("unable to IoTHubTransport_SetOption");
+                }
 #ifndef DONT_USE_UPLOADTOBLOB
+                else
+                {
+                    /*Codes_SRS_IOTHUBCLIENT_LL_30_013: [ If the DONT_USE_UPLOADTOBLOB compiler switch is undefined, IoTHubClientCore_LL_SetOption shall pass unhandled options to IoTHubClient_UploadToBlob_SetOption and ignore the result. ]*/
+                    (void)IoTHubClient_LL_UploadToBlob_SetOption(handleData->uploadToBlobHandle, optionName, value);
+                }
+#endif /*DONT_USE_UPLOADTOBLOB*/
+
+            }
             else
             {
-                /*Codes_SRS_IOTHUBCLIENT_LL_30_013: [ If the DONT_USE_UPLOADTOBLOB compiler switch is undefined, IoTHubClientCore_LL_SetOption shall pass unhandled options to IoTHubClient_UploadToBlob_SetOption and ignore the result. ]*/
-                (void)IoTHubClient_LL_UploadToBlob_SetOption(handleData->uploadToBlobHandle, optionName, value);
+                LogError("Failed setting option, transport has not been initialized");
+                result = IOTHUB_CLIENT_ERROR;
             }
-#endif /*DONT_USE_UPLOADTOBLOB*/
         }
     }
     return result;

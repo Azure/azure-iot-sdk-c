@@ -23,7 +23,6 @@ if(${use_sample_trusted_cert})
 endif()
 
 include_directories(.)
-include_directories(${IOTHUB_CLIENT_INC_FOLDER})
 include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
 include_directories(${SHARED_UTIL_INC_FOLDER})
 include_directories(${CMAKE_CURRENT_LIST_DIR}/adapters)
@@ -31,7 +30,6 @@ include_directories(${CMAKE_CURRENT_LIST_DIR}/adapters)
 add_executable(prov_dev_client_sample ${prov_dev_client_sample_c_files} ${prov_dev_client_sample_h_files})
 
 target_link_libraries(prov_dev_client_sample
-    iothub_client
     prov_device_client)
 
 if(${use_openssl})
@@ -47,10 +45,10 @@ if (${use_http})
     target_link_libraries(prov_dev_client_sample prov_http_transport)
 endif()
 if (${use_mqtt})
-    target_link_libraries(prov_dev_client_sample iothub_client_mqtt_transport prov_mqtt_transport prov_mqtt_ws_transport)
+    target_link_libraries(prov_dev_client_sample prov_mqtt_transport prov_mqtt_ws_transport)
 endif()
 if (${use_amqp})
-    target_link_libraries(prov_dev_client_sample iothub_client_amqp_transport prov_amqp_ws_transport prov_amqp_transport)
+    target_link_libraries(prov_dev_client_sample prov_amqp_ws_transport prov_amqp_transport)
     linkUAMQP(prov_dev_client_sample)
 endif()
 
