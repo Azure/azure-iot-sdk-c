@@ -3012,7 +3012,6 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_GetTwinAsync(IOTHUB_CLIENT_CORE_LL_HAND
     return result;
 }
 
-
 IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetDeviceMethodCallback(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback, void* userContextCallback)
 {
     IOTHUB_CLIENT_RESULT result;
@@ -3243,7 +3242,6 @@ typedef struct UPLOAD_MULTIPLE_BLOCKS_WRAPPER_CONTEXT_TAG
     IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK getDataCallback;
     void* context;
 } UPLOAD_MULTIPLE_BLOCKS_WRAPPER_CONTEXT;
-
 
 static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT uploadMultipleBlocksCallbackWrapper(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
 {
