@@ -75,7 +75,7 @@ typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA_TAG
         char* supplied_sas_token;
     } credentials;
 
-    char* certificates;
+    const char* certificates;
     HTTP_PROXY_OPTIONS http_proxy_options;
     UPOADTOBLOB_CURL_VERBOSITY curl_verbosity_level;
     size_t blob_upload_timeout_secs;
@@ -919,10 +919,6 @@ void IoTHubClient_LL_UploadToBlob_Destroy(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h
         }
 
         free((void*)upload_data->hostname);
-        if (upload_data->certificates != NULL)
-        {
-            free(upload_data->certificates);
-        }
         if (upload_data->http_proxy_options.host_address != NULL)
         {
             free((char *)upload_data->http_proxy_options.host_address);
@@ -1025,21 +1021,8 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
             }
             else
             {
-                char* tempCopy;
-                if (mallocAndStrcpy_s(&tempCopy, value) != 0)
-                {
-                    LogError("failure in mallocAndStrcpy_s");
-                    result = IOTHUB_CLIENT_ERROR;
-                }
-                else
-                {
-                    if (upload_data->certificates != NULL)
-                    {
-                        free(upload_data->certificates);
-                    }
-                    upload_data->certificates = tempCopy;
-                    result = IOTHUB_CLIENT_OK;
-                }
+                upload_data->certificates = value;
+                result = IOTHUB_CLIENT_OK;
             }
         }
         /*Codes_SRS_IOTHUBCLIENT_LL_32_008: [ OPTION_HTTP_PROXY - then the value will be a pointer to HTTP_PROXY_OPTIONS structure. ]*/

@@ -178,6 +178,11 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, IOTHUB_CLIEN
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RETRY_POLICY, IOTHUB_CLIENT_RETRY_POLICY_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_RETRY_POLICY, IOTHUB_CLIENT_RETRY_POLICY_VALUES);
 
+#ifdef USE_PROV_MODULE
+MU_DEFINE_ENUM_STRINGS(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
+MU_DEFINE_ENUM_STRINGS(PROV_DEVICE_REG_STATUS, PROV_DEVICE_REG_STATUS_VALUES);
+#endif
+
 static TEST_MUTEX_HANDLE test_serialize_mutex;
 
 bool g_fail_string_construct_sprintf;
@@ -2107,6 +2112,50 @@ TEST_FUNCTION(provisioning_device_callback_success)
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_Register(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SetOption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Prov_Device_LL_Get_Trusted_Certificate(IGNORED_PTR_ARG));
+
+    //act
+    g_prov_register_callback(PROV_DEVICE_RESULT_OK, TEST_HOSTNAME_VALUE, TEST_DEVICE_ID, g_prov_reg_ctx);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubClientCore_LL_Destroy(handle);
+}
+
+TEST_FUNCTION(provisioning_device_set_trusted_cert_callback_success)
+{
+    //arrange
+    PROVISIONING_AUTH_INFO prov_auth_info = { 0 };
+    prov_auth_info.id_scope = TEST_SCOPE_ID;
+    prov_auth_info.provisioning_uri = TEST_GLOBAL_URI;
+    prov_auth_info.attestation_type = SECURE_DEVICE_TYPE_X509;
+    prov_auth_info.transport = provideProvFAKE;
+
+    IOTHUB_CLIENT_CORE_LL_HANDLE handle = IoTHubClientCore_LL_CreateFromProvisioning(&prov_auth_info);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_CreateFromDeviceAuth(TEST_DEVICE_ID, NULL));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SetRetryPolicy(IGNORED_PTR_ARG, TEST_RETRY_POLICY, 0));
+
+    PLATFORM_INFO_OPTION supportedPlatformInfo = PLATFORM_INFO_OPTION_RETRIEVE_SQM;
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_GetSupportedPlatformInfo(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .SetReturn(0)
+        .CopyOutArgumentBuffer(2, &supportedPlatformInfo, sizeof(supportedPlatformInfo))
+        .CallCannotFail();
+    STRICT_EXPECTED_CALL(platform_get_platform_info(PLATFORM_INFO_OPTION_RETRIEVE_SQM));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_Register(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SetOption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Prov_Device_LL_Get_Trusted_Certificate(IGNORED_PTR_ARG)).SetReturn(TEST_CERTIFICATE);
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SetOption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
     //act

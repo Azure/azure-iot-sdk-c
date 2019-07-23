@@ -1358,8 +1358,6 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_x509_trusted_cert_succeeds)
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(TEST_HOSTNAME, TEST_AUTH_HANDLE);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_CERT));
-
     //act
     IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_SetOption(h, OPTION_TRUSTED_CERT, TEST_CERT);
 

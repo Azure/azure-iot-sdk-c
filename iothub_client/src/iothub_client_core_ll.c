@@ -70,7 +70,7 @@ MU_DEFINE_ENUM_STRINGS(CALLBACK_TYPE, CALLBACK_TYPE_VALUES)
 typedef enum IOTHUB_OPERATION_INITIALIZE_TAG
 {
     IOTHUB_OP_C2D_SUB           = 0x00000001,
-    IOTHUB_OP_MSG_DISPOSITION   = 0x00000002,
+    //IOTHUB_OP_MSG_DISPOSITION   = 0x00000002,
     IOTHUB_OP_DEVICE_TWIN_SUB   = 0x00000004,
     IOTHUB_OP_METHOD_SUB        = 0x00000008,
 } IOTHUB_OPERATION_INITIALIZE;
@@ -150,6 +150,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG
 #ifdef USE_EDGE_MODULES
     IOTHUB_CLIENT_EDGE_HANDLE methodHandle;
 #endif
+    char* trusted_cert;
     uint32_t data_msg_id;
     bool complete_twin_update_encountered;
     IOTHUB_AUTHORIZATION_HANDLE authorization_module;
@@ -1444,13 +1445,7 @@ static int initialize_queued_iothub_handle(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* ha
         }
     }
 
-    if (handleData->iothub_op_init & IOTHUB_OP_MSG_DISPOSITION)
-    {
-        //if (handleData->IoTHubTransport_SendMessageDisposition(message_data, disposition) !=
-
-    }
-
-    if (handleData->iothub_op_init & IOTHUB_OP_DEVICE_TWIN_SUB)
+    if (result == IOTHUB_CLIENT_OK && handleData->iothub_op_init & IOTHUB_OP_DEVICE_TWIN_SUB)
     {
         if (handleData->IoTHubTransport_Subscribe_DeviceTwin(handleData->transportHandle) != 0)
         {
@@ -1459,7 +1454,7 @@ static int initialize_queued_iothub_handle(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* ha
         }
     }
 
-    if (handleData->iothub_op_init & IOTHUB_OP_METHOD_SUB)
+    if (result == IOTHUB_CLIENT_OK && handleData->iothub_op_init & IOTHUB_OP_METHOD_SUB)
     {
         if (handleData->IoTHubTransport_Subscribe_DeviceMethod(handleData->deviceHandle) != 0)
         {
@@ -2459,6 +2454,11 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SendMessageDisposition(IOTHUB_CLIENT_CO
         LogError("Invalid argument handle=%p, message=%p", iotHubClientHandle, message_data);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
+    else if (iotHubClientHandle->registration_state != OP_STATE_IOT_STAGE)
+    {
+        LogError("unable to get send message disposition till the device is provisioned");
+        result = IOTHUB_CLIENT_PROVISIONING_NOT_COMPLETE;
+    }
     else
     {
         IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)iotHubClientHandle;
@@ -2667,26 +2667,34 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetOption(IOTHUB_CLIENT_CORE_LL_HANDLE 
                 handleData->product_info = NULL;
             }
 
-            result = IOTHUB_CLIENT_OK;
-            PLATFORM_INFO_OPTION supportedPlatformInfo;
-            if (handleData->IoTHubTransport_GetSupportedPlatformInfo != NULL)
+            if (iotHubClientHandle->registration_state != OP_STATE_IOT_STAGE)
             {
-                if (handleData->IoTHubTransport_GetSupportedPlatformInfo(handleData->transportHandle, &supportedPlatformInfo) != 0)
-                {
-                    LogError("IoTHubTransport_GetSupportedPlatformInfo failed");
-                    result = IOTHUB_CLIENT_ERROR;
-                }
-            }
-
-            /*Codes_SRS_IOTHUBCLIENT_LL_10_035: [If string concatenation fails, `IoTHubClientCore_LL_SetOption` shall return `IOTHUB_CLIENT_ERROR`. Otherwise, `IOTHUB_CLIENT_OK` shall be returned. ]*/
-            if (result == IOTHUB_CLIENT_OK && (handleData->product_info = make_product_info((const char*)value, supportedPlatformInfo)) == NULL)
-            {
-                LogError("STRING_construct_sprintf failed");
+                LogError("Product information can not be called before the iothub has been registrered with DPS");
                 result = IOTHUB_CLIENT_ERROR;
             }
             else
             {
                 result = IOTHUB_CLIENT_OK;
+                PLATFORM_INFO_OPTION supportedPlatformInfo = PLATFORM_INFO_OPTION_DEFAULT;
+                if (handleData->IoTHubTransport_GetSupportedPlatformInfo != NULL)
+                {
+                    if (handleData->IoTHubTransport_GetSupportedPlatformInfo(handleData->transportHandle, &supportedPlatformInfo) != 0)
+                    {
+                        LogError("IoTHubTransport_GetSupportedPlatformInfo failed");
+                        result = IOTHUB_CLIENT_ERROR;
+                    }
+                }
+
+                /*Codes_SRS_IOTHUBCLIENT_LL_10_035: [If string concatenation fails, `IoTHubClientCore_LL_SetOption` shall return `IOTHUB_CLIENT_ERROR`. Otherwise, `IOTHUB_CLIENT_OK` shall be returned. ]*/
+                if (result == IOTHUB_CLIENT_OK && (handleData->product_info = make_product_info((const char*)value, supportedPlatformInfo)) == NULL)
+                {
+                    LogError("STRING_construct_sprintf failed");
+                    result = IOTHUB_CLIENT_ERROR;
+                }
+                else
+                {
+                    result = IOTHUB_CLIENT_OK;
+                }
             }
         }
         else if (strcmp(optionName, OPTION_DIAGNOSTIC_SAMPLING_PERCENTAGE) == 0)
@@ -2709,20 +2717,28 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetOption(IOTHUB_CLIENT_CORE_LL_HANDLE 
         else if ((strcmp(optionName, OPTION_BLOB_UPLOAD_TIMEOUT_SECS) == 0) || (strcmp(optionName, OPTION_CURL_VERBOSE) == 0))
         {
 #ifndef DONT_USE_UPLOADTOBLOB
-            result = IOTHUB_CLIENT_OK;
-            if (handleData->uploadToBlobHandle == NULL && create_blob_upload_module(handleData) != 0)
+            if (handleData->registration_state != OP_STATE_IOT_STAGE)
             {
-                LogError("Failure creating upload to blob object");
+                LogError("upload timeout can not be called before the iothub has been registrered with DPS");
                 result = IOTHUB_CLIENT_ERROR;
             }
-            else if (result == IOTHUB_CLIENT_OK)
+            else
             {
-                // This option just gets passed down into IoTHubClientCore_LL_UploadToBlob
-                /*Codes_SRS_IOTHUBCLIENT_LL_30_010: [ blob_xfr_timeout - IoTHubClientCore_LL_SetOption shall pass this option to IoTHubClient_UploadToBlob_SetOption and return its result. ]*/
-                result = IoTHubClient_LL_UploadToBlob_SetOption(handleData->uploadToBlobHandle, optionName, value);
-                if(result != IOTHUB_CLIENT_OK)
+                result = IOTHUB_CLIENT_OK;
+                if (handleData->uploadToBlobHandle == NULL && create_blob_upload_module(handleData) != 0)
                 {
-                    LogError("unable to IoTHubClientCore_LL_UploadToBlob_SetOption, result=%d", result);
+                    LogError("Failure creating upload to blob object");
+                    result = IOTHUB_CLIENT_ERROR;
+                }
+                else if (result == IOTHUB_CLIENT_OK)
+                {
+                    // This option just gets passed down into IoTHubClientCore_LL_UploadToBlob
+                    /*Codes_SRS_IOTHUBCLIENT_LL_30_010: [ blob_xfr_timeout - IoTHubClientCore_LL_SetOption shall pass this option to IoTHubClient_UploadToBlob_SetOption and return its result. ]*/
+                    result = IoTHubClient_LL_UploadToBlob_SetOption(handleData->uploadToBlobHandle, optionName, value);
+                    if (result != IOTHUB_CLIENT_OK)
+                    {
+                        LogError("unable to IoTHubClientCore_LL_UploadToBlob_SetOption, result=%d", result);
+                    }
                 }
             }
 #else
@@ -2748,15 +2764,42 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetOption(IOTHUB_CLIENT_CORE_LL_HANDLE 
         {
             if (handleData->registration_state == OP_STATE_IOT_STAGE)
             {
-                result = handleData->IoTHubTransport_SetOption(handleData->transportHandle, optionName, value);
-                if (result != IOTHUB_CLIENT_OK)
+                // If upload to blob is enabled we need to cache the trusted cert
+                // on the chance that they do an upload to blob.  If we're not, then we just
+                // send the cert down to the transport
+#ifndef DONT_USE_UPLOADTOBLOB
+                char* temp_cert;
+                if (mallocAndStrcpy_s(&temp_cert, value) != 0)
                 {
-                    LogError("unable to IoTHubTransport_SetOption");
+                    LogError("Failure setting certificate in provisioning");
+                    result = IOTHUB_CLIENT_ERROR;
+                }
+                else if (handleData->IoTHubTransport_SetOption(handleData->transportHandle, optionName, value) != IOTHUB_CLIENT_OK)
+                {
+                    LogError("Failure setting certificate in provisioning");
+                    free(temp_cert);
+                    result = IOTHUB_CLIENT_ERROR;
+                }
+                else
+                {
+                    if (handleData->trusted_cert != NULL)
+                    {
+                        free(handleData->trusted_cert);
+                    }
+                    handleData->trusted_cert = temp_cert;
+                    result = IOTHUB_CLIENT_OK;
+                }
+#else
+                if (handleData->IoTHubTransport_SetOption(handleData->transportHandle, optionName, value) != IOTHUB_CLIENT_OK)
+                {
+                    LogError("Failure setting certificate in provisioning");
+                    result = IOTHUB_CLIENT_ERROR;
                 }
                 else
                 {
                     result = IOTHUB_CLIENT_OK;
                 }
+#endif
             }
 #ifdef USE_PROV_MODULE
             else
@@ -2835,7 +2878,6 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetOption(IOTHUB_CLIENT_CORE_LL_HANDLE 
                     (void)IoTHubClient_LL_UploadToBlob_SetOption(handleData->uploadToBlobHandle, optionName, value);
                 }
 #endif /*DONT_USE_UPLOADTOBLOB*/
-
             }
             else
             {
@@ -3230,9 +3272,21 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_UploadToBlob(IOTHUB_CLIENT_CORE_LL_HAND
         LogError("Failure creating blob upload handle");
         result = IOTHUB_CLIENT_ERROR;
     }
+    else if (iotHubClientHandle->trusted_cert != NULL && IoTHubClient_LL_UploadToBlob_SetOption(iotHubClientHandle->uploadToBlobHandle, OPTION_TRUSTED_CERT, iotHubClientHandle->trusted_cert) != IOTHUB_CLIENT_OK)
+    {
+        LogError("Failure setting trusted cert for blob upload");
+        IoTHubClient_LL_UploadToBlob_Destroy(iotHubClientHandle->uploadToBlobHandle);
+        result = IOTHUB_CLIENT_ERROR;
+    }
+    else if (IoTHubClient_LL_UploadToBlob_Impl(iotHubClientHandle->uploadToBlobHandle, destinationFileName, source, size) )
+    {
+        LogError("Failure setting trusted cert for blob upload");
+        IoTHubClient_LL_UploadToBlob_Destroy(iotHubClientHandle->uploadToBlobHandle);
+        result = IOTHUB_CLIENT_ERROR;
+    }
     else
     {
-        result = IoTHubClient_LL_UploadToBlob_Impl(iotHubClientHandle->uploadToBlobHandle, destinationFileName, source, size);
+        result = IOTHUB_CLIENT_OK;
     }
     return result;
 }
