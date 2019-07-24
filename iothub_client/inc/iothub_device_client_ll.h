@@ -61,9 +61,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
      * @brief    Creates a IoT Hub client for communication with an existing IoT
      *           Hub using the device auth module.
      *
-     * @param    iothub_uri             Pointer to an ioThub hostname received in the registration process
-     * @param    device_id              Pointer to the device Id of the device
-     * @param    protocol               Function pointer for protocol implementation
+     * @param    provisioning_info  Pointer to a @c PROVISIONING_AUTH_INFO structure
      *
      * @return   A non-NULL @c IOTHUB_DEVICE_CLIENT_LL_HANDLE value that is used when
      *           invoking other functions for IoT Hub client and @c NULL on failure.

@@ -4052,16 +4052,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_succeeds_when_IoTHubClient_LL_Upload
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SetOption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-    .IgnoreArgument_handle()
-    .IgnoreArgument_optionName()
-    .IgnoreArgument_value()
     .SetReturn(IOTHUB_CLIENT_OK);
-
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_SetOption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-    .IgnoreArgument_handle()
-    .IgnoreArgument_optionName()
-    .IgnoreArgument_value()
-    .SetReturn(IOTHUB_CLIENT_INVALID_ARG);
 
     //act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SetOption(handle, "a", "b");
@@ -6965,13 +6956,11 @@ static void set_expected_calls_for_IoTHubClientCore_LL_CreateFromEnvironment_for
     STRICT_EXPECTED_CALL(environment_get_variable(IGNORED_PTR_ARG)).SetReturn(TEST_VAR_MODULEID);
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(iothub_security_init(IOTHUB_SECURITY_TYPE_HTTP_EDGE));
-    setup_IoTHubClientCore_LL_create_mocks(true, false, true);
+    setup_IoTHubClientCore_LL_create_mocks(false, true, true);
 
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_TrustBundle(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SetOption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-#ifndef DONT_USE_UPLOADTOBLOB
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_SetOption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CallCannotFail();
-#endif
 
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
@@ -6985,10 +6974,9 @@ static void set_expected_calls_for_IoTHubClientCore_LL_CreateFromEnvironment_for
     setup_IoTHubClientCore_LL_createfromconnectionstring_mocks(TEST_DEVICEKEY_TOKEN, TEST_STRING_VALUE, false, false);
 
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_TrustBundle(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SetOption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-#ifndef DONT_USE_UPLOADTOBLOB
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_SetOption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CallCannotFail();
-#endif
 
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
