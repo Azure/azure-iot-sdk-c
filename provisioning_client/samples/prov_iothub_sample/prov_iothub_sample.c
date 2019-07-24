@@ -5,7 +5,6 @@
 // Checking of return codes and error values shall be omitted for brevity.  Please practice sound engineering practices
 // when writing production code.
 
-#include <vld.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -78,9 +77,9 @@ static int device_method_callback(const char* method_name, const unsigned char* 
     (void)size;
     int result;
 
-    if (strcmp("getCarVIN", method_name) == 0)
+    if (strcmp("getTargeDevice", method_name) == 0)
     {
-        const char deviceMethodResponse[] = "{ \"Response\": \"1HGCM82633A004352\" }";
+        const char deviceMethodResponse[] = "{ \"Response\": \"TargetResponse\" }";
         *response_size = sizeof(deviceMethodResponse) - 1;
         *response = malloc(*response_size);
         (void)memcpy(*response, deviceMethodResponse, *response_size);
@@ -151,7 +150,7 @@ int main()
     //prov_auth_info.attestation_type = SECURE_DEVICE_TYPE_TPM;
     //prov_auth_info.attestation_type = SECURE_DEVICE_TYPE_SYMMETRIC_KEY;
 
-    bool traceOn = false;
+    bool traceOn = true;
 
     (void)IoTHub_Init();
 
@@ -159,8 +158,8 @@ int main()
     prov_auth_info.provisioning_uri = global_prov_uri;
 
     // Set the symmetric key if using they auth type
-    prov_auth_info.registration_id = "<symm_registration_id>";
-    prov_auth_info.symmetric_key = "<symmetric_Key>";
+    //prov_auth_info.registration_id = "<symm_registration_id>";
+    //prov_auth_info.symmetric_key = "<symmetric_Key>";
 
     // Protocol to USE - HTTP, AMQP, AMQP_WS, MQTT, MQTT_WS
 #ifdef SAMPLE_MQTT
@@ -213,9 +212,10 @@ int main()
 
         bool upload_2blob = true;
         (void)IoTHubDeviceClient_LL_SetMessageCallback(device_ll_handle, receive_msg_callback, &iothub_info);
-        //(void)IoTHubDeviceClient_GetTwinAsync(device_ll_handle, getCompleteDeviceTwinOnDemandCallback, NULL);
-        (void)IoTHubDeviceClient_LL_SendReportedState(device_ll_handle, (const unsigned char*)"{ test: 3 }", strlen("{ test: 3 }"), reportedStateCallback, NULL);
         (void)IoTHubDeviceClient_LL_SetDeviceMethodCallback(device_ll_handle, device_method_callback, NULL);
+
+        //long timeout = 10;
+        //(void)IoTHubClientCore_LL_SetOption(device_ll_handle, OPTION_BLOB_UPLOAD_TIMEOUT_SECS, &timeout);
 
         (void)printf("Sending 1 messages to IoTHub every %d seconds for %d messages (Send any message to stop)\r\n", TIME_BETWEEN_MESSAGES, MESSAGES_TO_SEND);
         do
@@ -224,6 +224,7 @@ int main()
             {
                 if (upload_2blob)
                 {
+                    // Set upload to blob
                     if (IoTHubDeviceClient_LL_UploadToBlob(device_ll_handle, "new_prov_test.txt", (const unsigned char*)HELLO_WORLD, sizeof(HELLO_WORLD) - 1) != IOTHUB_CLIENT_OK)
                     {
                         (void)printf("hello world failed to upload\n");
