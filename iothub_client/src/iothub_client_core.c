@@ -1738,7 +1738,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetOption(IOTHUB_CLIENT_CORE_HANDLE iotHub
                 iotHubClientInstance->currentMessageTimeout = * (tickcounter_ms_t *)value;
 
                 /* Codes_SRS_IOTHUBCLIENT_41_004: [ If `currentMessageTimeout` is not greater than `do_work_freq_ms`, `IotHubClientCore_SetOption` shall return `IOTHUB_CLIENT_INVALID_ARG` ]*/
-				if (iotHubClientInstance->do_work_freq_ms < iotHubClientInstance->currentMessageTimeout)
+                if (iotHubClientInstance->do_work_freq_ms < iotHubClientInstance->currentMessageTimeout)
                 {
                     /*Codes_SRS_IOTHUBCLIENT_41_006: [ If parameter `optionName` is `OPTION_MESSAGE_TIMEOUT` then `IoTHubClientCore_SetOption` shall call `IoTHubClientCore_LL_SetOption` passing the same parameters and return what IoTHubClientCore_LL_SetOption returns. ] */
                     result = IoTHubClientCore_LL_SetOption(iotHubClientInstance->IoTHubClientLLHandle, optionName, value);

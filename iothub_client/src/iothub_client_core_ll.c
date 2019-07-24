@@ -456,8 +456,14 @@ static int create_blob_upload_module(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handle_d
             LogError("unable to IoTHubClientCore_LL_UploadToBlob_Create");
             result = MU_FAILURE;
         }
+        // Set the certificates if this is x509
         else
         {
+            if (IoTHubClient_Auth_Get_Credential_Type(handle_data->authorization_module) == IOTHUB_CREDENTIAL_TYPE_X509)
+            {
+
+            }
+
             result = 0;
         }
         STRING_delete(hostname);
@@ -2822,6 +2828,35 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetOption(IOTHUB_CLIENT_CORE_LL_HANDLE 
             }
 #endif
         }
+        else if (strcmp(SU_OPTION_X509_CERT, optionName) == 0 || strcmp(OPTION_X509_ECC_CERT, optionName) == 0 ||
+                strcmp(SU_OPTION_X509_PRIVATE_KEY, optionName) == 0 || strcmp(OPTION_X509_ECC_KEY, optionName) == 0)
+        {
+            result = handleData->IoTHubTransport_SetOption(handleData->transportHandle, optionName, value);
+            if (result != IOTHUB_CLIENT_OK)
+            {
+                LogError("unable to IoTHubTransport_SetOption");
+            }
+#ifndef DONT_USE_UPLOADTOBLOB
+            else
+            {
+                // You have to create the upload handle here because the certificate is not retrieviable after this call
+                if (handleData->uploadToBlobHandle == NULL && create_blob_upload_module(handleData) != 0)
+                {
+                    LogError("Failure creating upload to blob object");
+                    result = IOTHUB_CLIENT_ERROR;
+                }
+                else if (IoTHubClient_LL_UploadToBlob_SetOption(handleData->uploadToBlobHandle, optionName, value) != IOTHUB_CLIENT_OK)
+                {
+                    LogError("Failure setting iothub options %s", optionName);
+                    result = IOTHUB_CLIENT_ERROR;
+                }
+                else
+                {
+                    result = IOTHUB_CLIENT_OK;
+                }
+            }
+#endif /*DONT_USE_UPLOADTOBLOB*/
+        }
         else if (strcmp(optionName, OPTION_LOG_TRACE) == 0)
         {
             handleData->log_trace = *((bool*)value);
@@ -2874,8 +2909,11 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetOption(IOTHUB_CLIENT_CORE_LL_HANDLE 
 #ifndef DONT_USE_UPLOADTOBLOB
                 else
                 {
-                    /*Codes_SRS_IOTHUBCLIENT_LL_30_013: [ If the DONT_USE_UPLOADTOBLOB compiler switch is undefined, IoTHubClientCore_LL_SetOption shall pass unhandled options to IoTHubClient_UploadToBlob_SetOption and ignore the result. ]*/
-                    (void)IoTHubClient_LL_UploadToBlob_SetOption(handleData->uploadToBlobHandle, optionName, value);
+                    if (handleData->uploadToBlobHandle != NULL)
+                    {
+                        /*Codes_SRS_IOTHUBCLIENT_LL_30_013: [ If the DONT_USE_UPLOADTOBLOB compiler switch is undefined, IoTHubClientCore_LL_SetOption shall pass unhandled options to IoTHubClient_UploadToBlob_SetOption and ignore the result. ]*/
+                        (void)IoTHubClient_LL_UploadToBlob_SetOption(handleData->uploadToBlobHandle, optionName, value);
+                    }
                 }
 #endif /*DONT_USE_UPLOADTOBLOB*/
             }

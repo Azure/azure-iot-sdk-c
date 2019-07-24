@@ -43,6 +43,10 @@ set(IOTHUB_SERVICE_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNA
 
 include_directories(${CMAKE_CURRENT_LIST_DIR}/../deps/parson ${IOTHUB_SERVICE_CLIENT_INC_FOLDER} ${CMAKE_CURRENT_LIST_DIR}/../iothub_client/inc)
 
+if (${use_prov_client_core})
+    include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
+endif()
+
 IF(WIN32)
     #windows needs this define
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)

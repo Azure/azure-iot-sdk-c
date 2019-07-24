@@ -221,14 +221,14 @@ void e2e_uploadtoblob_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACC
     result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_CURL_VERBOSE, &curl_verbose);
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set curl_verbose opt");
 #endif
-	
+    
     UPLOADTOBLOB_CALLBACK_STATUS uploadToBlobStatus = UPLOADTOBLOB_CALLBACK_PENDING;
     result = IoTHubClient_UploadToBlobAsync(iotHubClientHandle, UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE, UPLOADTOBLOB_E2E_TEST_DATA, strlen((const char*)UPLOADTOBLOB_E2E_TEST_DATA), uploadToBlobCallback, &uploadToBlobStatus);
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
 
     poll_for_upload_completion(&uploadToBlobStatus);
     check_upload_result(uploadToBlobStatus);
-	ThreadAPI_Sleep(3000);
+    ThreadAPI_Sleep(3000);
     IoTHubClient_Destroy(iotHubClientHandle);
 }
 
@@ -476,7 +476,7 @@ TEST_FUNCTION(IoTHub_HTTP_UploadToBlob_x509)
 #endif // __APPLE__
 
 
-#endif // TEST_HTTP
+#endif // TEST_HTTP*/
 
 
 END_TEST_SUITE(iothubclient_uploadtoblob_e2e)
