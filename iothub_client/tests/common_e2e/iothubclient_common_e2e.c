@@ -1054,7 +1054,10 @@ void e2e_send_security_event_test_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     // Send ASC message, it should not arrive in the IoTHub EventHub
     sendeventasync_on_device_or_module(send_data->msgHandle, send_data);
 
-    // Wait for the message to arrive
+    // close the client connection
+    destroy_on_device_or_module();
+
+    // Wait for the message to not arrive since it's going to an ASC eventhub
     service_wait_for_security_d2c_event_arrival(deviceToUse, send_data, MAX_SECURITY_DEVICE_WAIT_TIME);
 
     // Done with ASC test, restore string
@@ -1062,9 +1065,6 @@ void e2e_send_security_event_test_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 
     // cleanup
     EventData_Destroy(send_data);
-
-    // close the client connection
-    destroy_on_device_or_module();
 }
 
 // Simulates a fault occurring in end-to-end testing (with special opcodes forcing service failure on certain white-listed Hubs) and
