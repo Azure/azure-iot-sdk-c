@@ -2095,7 +2095,7 @@ TEST_FUNCTION(provisioning_device_callback_success)
     IOTHUB_CLIENT_CORE_LL_HANDLE handle = IoTHubClientCore_LL_CreateFromProvisioning(&prov_auth_info);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_CreateFromDeviceAuth(TEST_DEVICE_ID, NULL));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_CreateFromDeviceAuth(IGNORED_PTR_ARG, NULL));
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -2137,7 +2137,7 @@ TEST_FUNCTION(provisioning_device_set_trusted_cert_callback_success)
     IOTHUB_CLIENT_CORE_LL_HANDLE handle = IoTHubClientCore_LL_CreateFromProvisioning(&prov_auth_info);
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(IoTHubClient_Auth_CreateFromDeviceAuth(TEST_DEVICE_ID, NULL));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_CreateFromDeviceAuth(IGNORED_PTR_ARG, NULL));
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));

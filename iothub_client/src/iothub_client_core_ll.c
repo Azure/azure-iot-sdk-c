@@ -469,15 +469,6 @@ static int create_blob_upload_module(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handle_d
     return result;
 }
 
-static void destroy_blob_upload_module(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handle_data)
-{
-    (void)handle_data;
-#ifndef DONT_USE_UPLOADTOBLOB
-    /*Codes_SRS_IOTHUBCLIENT_LL_02_046: [ If creating the TICK_COUNTER_HANDLE fails then IoTHubClientCore_LL_Create shall fail and return NULL. ]*/
-    IoTHubClient_LL_UploadToBlob_Destroy(handle_data->uploadToBlobHandle);
-#endif
-}
-
 static void destroy_module_method_module(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handle_data)
 {
     (void)handle_data;
