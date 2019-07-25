@@ -276,11 +276,13 @@ static int retrieve_edge_environment_variabes(EDGE_ENVIRONMENT_VARIABLES *edge_e
         }
         else if ((edgehubhostname_separator = strchr(edge_environment_variables->iothub_buffer, '.')) == NULL)
         {
+            free(edge_environment_variables->iothub_buffer);
             LogError("Environment edgehub %s invalid, requires '.' separator", edge_environment_variables->iothub_buffer);
             result = MU_FAILURE;
         }
         else if (*(edgehubhostname_separator + 1) == 0)
         {
+            free(edge_environment_variables->iothub_buffer);
             LogError("Environment edgehub %s invalid, no content after '.' separator", edge_environment_variables->iothub_buffer);
             result = MU_FAILURE;
         }
@@ -292,7 +294,6 @@ static int retrieve_edge_environment_variabes(EDGE_ENVIRONMENT_VARIABLES *edge_e
             result = 0;
         }
     }
-
     return result;
 }
 
@@ -3680,7 +3681,12 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_GenericMethodInvoke(IOTHUB_CLIENT_CORE_
     IOTHUB_CLIENT_RESULT result;
     if (iotHubClientHandle != NULL)
     {
-        if (moduleId != NULL)
+        if (iotHubClientHandle->registration_state != OP_STATE_IOT_STAGE)
+        {
+            LogError("unable to invoke method until device is provisioned");
+            result = IOTHUB_CLIENT_PROVISIONING_NOT_COMPLETE;
+        }
+        else if (moduleId != NULL)
         {
             result = IoTHubClient_Edge_ModuleMethodInvoke(iotHubClientHandle->methodHandle, deviceId, moduleId, methodName, methodPayload, timeout, responseStatus, responsePayload, responsePayloadSize);
         }
