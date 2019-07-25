@@ -677,7 +677,7 @@ static int addSystemPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_messag
     int result = 0;
     size_t index = *index_ptr;
 
-    bool is_security_msg = (IoTHubMessage_GetMessageCategory(iothub_message_handle) == MESSAGE_CATEGORY_SECURITY);
+    bool is_security_msg = IoTHubMessage_IsSecurityMessage(iothub_message_handle);
     /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_052: [ IoTHubTransport_MQTT_Common_DoWork shall check for the CorrelationId property and if found add the value as a system property in the format of $.cid=<id> ] */
     const char* correlation_id = IoTHubMessage_GetCorrelationId(iothub_message_handle);
     if (correlation_id != NULL)

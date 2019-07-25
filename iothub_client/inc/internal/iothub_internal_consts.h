@@ -15,7 +15,7 @@ extern "C"
     static const char* SECURITY_INTERFACE_INTERNAL_ID_VALUE = "security*azureiot*com^SecurityAgent^1*0*0";
     static const char* SECURITY_INTERFACE_ID = "iothub-interface-id";
     static const char* SECURITY_INTERFACE_ID_MQTT = "ifid";
-    static const char* SECURITY_INTERFACE_ID_VALUE = "http://security.azureiot.com/SecurityAgent/1.0.0";
+    static const char* SECURITY_INTERFACE_ID_VALUE = "urn:azureiot:Security:SecurityAgent:1";
     static const char* SECURITY_MESSAGE_SCHEMA = "iothub-message-schema";
     static const char* SECURITY_MESSAGE_SCHEMA_VALUE = "sevent";
 

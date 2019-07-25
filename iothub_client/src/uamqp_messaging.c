@@ -525,7 +525,7 @@ static int create_security_message_annotations(IOTHUB_MESSAGE_HANDLE messageHand
 {
     int result = RESULT_OK;
     bool annotation_created = false;
-    if (IoTHubMessage_GetMessageCategory(messageHandle) == MESSAGE_CATEGORY_SECURITY)
+    if (IoTHubMessage_IsSecurityMessage(messageHandle))
     {
         if (*message_annotations_map == NULL)
         {

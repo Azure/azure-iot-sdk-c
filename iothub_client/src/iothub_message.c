@@ -34,7 +34,7 @@ typedef struct IOTHUB_MESSAGE_HANDLE_DATA_TAG
     char* connectionModuleId;
     char* connectionDeviceId;
     IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA_HANDLE diagnosticData;
-    IOTHUB_MESSAGE_CATEGORY msg_category;
+    bool is_security_message;
 }IOTHUB_MESSAGE_HANDLE_DATA;
 
 static bool ContainsOnlyUsAscii(const char* asciiValue)
@@ -190,7 +190,7 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateFromByteArray(const unsigned char* byt
             memset(result, 0, sizeof(*result));
             /*Codes_SRS_IOTHUBMESSAGE_02_026: [The type of the new message shall be IOTHUBMESSAGE_BYTEARRAY.] */
             result->contentType = IOTHUBMESSAGE_BYTEARRAY;
-            result->msg_category = MESSAGE_CATEGORY_TELEMETRY;
+
             if (size != 0)
             {
                 /*Codes_SRS_IOTHUBMESSAGE_06_002: [If size is NOT zero then byteArray MUST NOT be NULL*/
@@ -306,7 +306,7 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
         {
             memset(result, 0, sizeof(*result));
             result->contentType = source->contentType;
-            result->msg_category = source->msg_category;
+            result->is_security_message = source->is_security_message;
 
             if (source->messageId != NULL && mallocAndStrcpy_s(&result->messageId, source->messageId) != 0)
             {
@@ -973,8 +973,10 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetConnectionModuleId(IOTHUB_MESSAGE_HANDLE 
         }
 
     }
+
     return result;
 }
+
 
 const char* IoTHubMessage_GetConnectionDeviceId(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
 {
@@ -1031,7 +1033,7 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetConnectionDeviceId(IOTHUB_MESSAGE_HANDLE 
     return result;
 }
 
-IOTHUB_MESSAGE_RESULT IoTHubMessage_SetMessageCategory(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, IOTHUB_MESSAGE_CATEGORY category)
+IOTHUB_MESSAGE_RESULT IoTHubMessage_SetAsSecurityMessage(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
 {
     IOTHUB_MESSAGE_RESULT result;
     if (iotHubMessageHandle == NULL)
@@ -1041,31 +1043,31 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetMessageCategory(IOTHUB_MESSAGE_HANDLE iot
     }
     else
     {
-        result = IOTHUB_MESSAGE_OK;
-        iotHubMessageHandle->msg_category = category;
-        if (iotHubMessageHandle->msg_category == MESSAGE_CATEGORY_SECURITY)
+        iotHubMessageHandle->is_security_message = true;
+        if (set_content_encoding(iotHubMessageHandle, SECURITY_CLIENT_JSON_ENCODING) != 0)
         {
-            if (set_content_encoding(iotHubMessageHandle, SECURITY_CLIENT_JSON_ENCODING) != 0)
-            {
-                LogError("Failure setting security message content encoding");
-                result = IOTHUB_MESSAGE_ERROR;
-            }
+            LogError("Failure setting security message content encoding");
+            result = IOTHUB_MESSAGE_ERROR;
+        }
+        else
+        {
+            result = IOTHUB_MESSAGE_OK;
         }
     }
     return result;
 }
 
-IOTHUB_MESSAGE_CATEGORY IoTHubMessage_GetMessageCategory(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
+bool IoTHubMessage_IsSecurityMessage(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
 {
-    IOTHUB_MESSAGE_CATEGORY result;
+    bool result;
     if (iotHubMessageHandle == NULL)
     {
         LogError("Invalid argument (iotHubMessageHandle is NULL)");
-        result = MESSAGE_CATEGORY_TELEMETRY;
+        result = false;
     }
     else
     {
-        result = iotHubMessageHandle->msg_category;
+        result = iotHubMessageHandle->is_security_message;
     }
     return result;
 }
@@ -1076,6 +1078,6 @@ void IoTHubMessage_Destroy(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
     if (iotHubMessageHandle != NULL)
     {
         /*Codes_SRS_IOTHUBMESSAGE_01_003: [IoTHubMessage_Destroy shall free all resources associated with iotHubMessageHandle.]  */
-        DestroyMessageData((IOTHUB_MESSAGE_HANDLE_DATA* )iotHubMessageHandle);
+        DestroyMessageData((IOTHUB_MESSAGE_HANDLE_DATA*)iotHubMessageHandle);
     }
 }
