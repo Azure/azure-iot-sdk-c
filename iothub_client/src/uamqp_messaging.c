@@ -19,6 +19,9 @@
 #include "azure_uamqp_c/message.h"
 #include "azure_uamqp_c/amqpvalue.h"
 #include "iothub_message.h"
+
+#include "internal/iothub_internal_consts.h"
+
 #ifndef RESULT_OK
 #define RESULT_OK 0
 #endif
@@ -444,47 +447,140 @@ static int add_map_item(AMQP_VALUE map, const char* name, const char* value)
     return result;
 }
 
-static int create_message_annotations_to_encode(IOTHUB_MESSAGE_HANDLE messageHandle, AMQP_VALUE *message_annotations, size_t *message_annotations_length)
+static int create_diagnostic_message_annotations(IOTHUB_MESSAGE_HANDLE messageHandle, AMQP_VALUE* message_annotations_map)
 {
-    AMQP_VALUE message_annotations_map = NULL;
-    int result;
+    int result = RESULT_OK;
+
+    // Deprecated: maintained for backwards compatibility; use IoTHubMessage_GetDistributedTracingSystemProperty instead.
     const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* diagnosticData;
+    bool annotation_created = false;
 
     if ((diagnosticData = IoTHubMessage_GetDiagnosticPropertyData(messageHandle)) != NULL &&
         diagnosticData->diagnosticId != NULL && diagnosticData->diagnosticCreationTimeUtc != NULL)
     {
         // Codes_SRS_UAMQP_MESSAGING_32_001: [If optional diagnostic properties are present in the iot hub message, encode them into the AMQP message as annotation properties. Errors stop processing on this message.]
-        if ((message_annotations_map = amqpvalue_create_map()) == NULL)
+        if (*message_annotations_map == NULL)
         {
-            LogError("Failed amqpvalue_create_map for annotations");
-            result = MU_FAILURE;
+            if ((*message_annotations_map = amqpvalue_create_map()) == NULL)
+            {
+                LogError("Failed amqpvalue_create_map for annotations");
+                result = MU_FAILURE;
+            }
+            else
+            {
+                annotation_created = true;
+            }
         }
-        else
+
+        if (result == RESULT_OK)
         {
             char* diagContextBuffer = NULL;
-
-            if (add_map_item(message_annotations_map, AMQP_DIAGNOSTIC_ID_KEY, diagnosticData->diagnosticId) != RESULT_OK)
+            if (add_map_item(*message_annotations_map, AMQP_DIAGNOSTIC_ID_KEY, diagnosticData->diagnosticId) != RESULT_OK)
             {
                 LogError("Failed adding diagnostic id");
                 result = MU_FAILURE;
+                if (annotation_created)
+                {
+                    amqpvalue_destroy(*message_annotations_map);
+                    *message_annotations_map = NULL;
+                }
             }
             else if ((diagContextBuffer = (char*)malloc(strlen(AMQP_DIAGNOSTIC_CREATION_TIME_UTC_KEY) + 1
                 + strlen(diagnosticData->diagnosticCreationTimeUtc) + 1)) == NULL)
             {
                 LogError("Failed malloc for diagnostic context");
                 result = MU_FAILURE;
+                if (annotation_created)
+                {
+                    amqpvalue_destroy(*message_annotations_map);
+                    *message_annotations_map = NULL;
+                }
             }
             else if (sprintf(diagContextBuffer, "%s=%s", AMQP_DIAGNOSTIC_CREATION_TIME_UTC_KEY, diagnosticData->diagnosticCreationTimeUtc) < 0)
             {
                 LogError("Failed sprintf diagnostic context");
                 result = MU_FAILURE;
+                if (annotation_created)
+                {
+                    amqpvalue_destroy(*message_annotations_map);
+                    *message_annotations_map = NULL;
+                }
             }
-            else if (add_map_item(message_annotations_map, AMQP_DIAGNOSTIC_CONTEXT_KEY, diagContextBuffer) != RESULT_OK)
+            else if (add_map_item(*message_annotations_map, AMQP_DIAGNOSTIC_CONTEXT_KEY, diagContextBuffer) != RESULT_OK)
             {
                 LogError("Failed adding diagnostic context");
                 result = MU_FAILURE;
+                if (annotation_created)
+                {
+                    amqpvalue_destroy(*message_annotations_map);
+                    *message_annotations_map = NULL;
+                }
             }
-            else if((*message_annotations = amqpvalue_create_message_annotations(message_annotations_map)) == NULL)
+            free(diagContextBuffer);
+        }
+    }
+    return result;
+}
+static int create_security_message_annotations(IOTHUB_MESSAGE_HANDLE messageHandle, AMQP_VALUE* message_annotations_map)
+{
+    int result = RESULT_OK;
+    bool annotation_created = false;
+    if (IoTHubMessage_IsSecurityMessage(messageHandle))
+    {
+        if (*message_annotations_map == NULL)
+        {
+            if ((*message_annotations_map = amqpvalue_create_map()) == NULL)
+            {
+                LogError("Failed amqpvalue_create_map for annotations");
+                result = MU_FAILURE;
+            }
+            else
+            {
+                annotation_created = true;
+            }
+        }
+
+        if (result == RESULT_OK)
+        {
+            if (add_map_item(*message_annotations_map, SECURITY_INTERFACE_ID, SECURITY_INTERFACE_ID_VALUE) != RESULT_OK)
+            {
+                LogError("Failed adding Security interface id");
+                result = MU_FAILURE;
+                if (annotation_created)
+                {
+                    amqpvalue_destroy(*message_annotations_map);
+                    *message_annotations_map = NULL;
+                }
+            }
+        }
+    }
+    return result;
+}
+
+static int create_message_annotations_to_encode(IOTHUB_MESSAGE_HANDLE messageHandle, AMQP_VALUE *message_annotations, size_t *message_annotations_length)
+{
+    AMQP_VALUE message_annotations_map = NULL;
+    int result;
+
+    if ((result = create_diagnostic_message_annotations(messageHandle, &message_annotations_map)) != RESULT_OK)
+    {
+        LogError("Failed creating message annotations");
+        result = MU_FAILURE;
+    }
+    else if ((result = create_security_message_annotations(messageHandle, &message_annotations_map)) != RESULT_OK)
+    {
+        LogError("Failed creating message annotations");
+        result = MU_FAILURE;
+    }
+    else
+    {
+        result = RESULT_OK;
+    }
+    if (message_annotations_map != NULL)
+    {
+        if (result == RESULT_OK)
+        {
+            if ((*message_annotations = amqpvalue_create_message_annotations(message_annotations_map)) == NULL)
             {
                 LogError("Failed creating message annotations");
                 result = MU_FAILURE;
@@ -494,21 +590,9 @@ static int create_message_annotations_to_encode(IOTHUB_MESSAGE_HANDLE messageHan
                 LogError("Failed getting size of annotations");
                 result = MU_FAILURE;
             }
-            else
-            {
-                result = RESULT_OK;
-            }
-
-            free(diagContextBuffer);
-            amqpvalue_destroy(message_annotations_map);
         }
+        amqpvalue_destroy(message_annotations_map);
     }
-    else
-    {
-        // Codes_SRS_UAMQP_MESSAGING_32_002: [If optional diagnostic properties are not present in the iot hub message, no error should happen.]
-        result = RESULT_OK;
-    }
-
     return result;
 }
 

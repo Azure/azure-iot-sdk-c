@@ -75,7 +75,7 @@ def get_docker_tags_from_commit(repo, commit):
     tags.repo = repo
     tags.commit_name = get_commit_name(commit)
     tags.commit_sha = github.get_sha_from_commit(repo, commit)
-    
+
     """
     The importance of tags:
 
