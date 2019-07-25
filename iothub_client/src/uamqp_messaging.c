@@ -576,18 +576,20 @@ static int create_message_annotations_to_encode(IOTHUB_MESSAGE_HANDLE messageHan
     {
         result = RESULT_OK;
     }
-
-    if (result == RESULT_OK && message_annotations_map != NULL)
+    if (message_annotations_map != NULL)
     {
-        if ((*message_annotations = amqpvalue_create_message_annotations(message_annotations_map)) == NULL)
+        if (result == RESULT_OK)
         {
-            LogError("Failed creating message annotations");
-            result = MU_FAILURE;
-        }
-        else if (amqpvalue_get_encoded_size(*message_annotations, message_annotations_length) != 0)
-        {
-            LogError("Failed getting size of annotations");
-            result = MU_FAILURE;
+            if ((*message_annotations = amqpvalue_create_message_annotations(message_annotations_map)) == NULL)
+            {
+                LogError("Failed creating message annotations");
+                result = MU_FAILURE;
+            }
+            else if (amqpvalue_get_encoded_size(*message_annotations, message_annotations_length) != 0)
+            {
+                LogError("Failed getting size of annotations");
+                result = MU_FAILURE;
+            }
         }
         amqpvalue_destroy(message_annotations_map);
     }

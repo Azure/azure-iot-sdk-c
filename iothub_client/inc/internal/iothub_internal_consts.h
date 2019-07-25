@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#ifndef IOTHUB_INTERNAL_CONST_H
-#define IOTHUB_INTERNAL_CONST_H
+#ifndef IOTHUB_INTERNAL_CONSTS_H
+#define IOTHUB_INTERNAL_CONSTS_H
 
 #ifdef __cplusplus
 extern "C"
@@ -23,4 +23,4 @@ extern "C"
 }
 #endif
 
-#endif /* IOTHUB_INTERNAL_CONST_H */
+#endif /* IOTHUB_INTERNAL_CONSTS_H */

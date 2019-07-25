@@ -1043,7 +1043,6 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetAsSecurityMessage(IOTHUB_MESSAGE_HANDLE i
     }
     else
     {
-        iotHubMessageHandle->is_security_message = true;
         if (set_content_encoding(iotHubMessageHandle, SECURITY_CLIENT_JSON_ENCODING) != 0)
         {
             LogError("Failure setting security message content encoding");
@@ -1051,6 +1050,7 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetAsSecurityMessage(IOTHUB_MESSAGE_HANDLE i
         }
         else
         {
+            iotHubMessageHandle->is_security_message = true;
             result = IOTHUB_MESSAGE_OK;
         }
     }

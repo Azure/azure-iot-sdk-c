@@ -1004,7 +1004,7 @@ void e2e_send_security_event_test_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     //IOTHUB_MESSAGE_HANDLE msgHandle;
 
-    char test_telemetry_message[1024];
+    //char* test_telemetry_message;
     const char* TEST_ASC_SECURITY_MESSAGE = "{ \
         \"AgentVersion\": \"0.0.1\", \
         \"AgentId\" : \"{A3B5D80C-06AA-4D84-BA2D-5470ADAE33A3}\", \
@@ -1022,57 +1022,46 @@ void e2e_send_security_event_test_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
             \"Payload\": { \"data\": \"test\" } \
         } \
     }";
-    EXPECTED_SEND_DATA send_data = { 0 };
-    IOTHUB_PROVISIONED_DEVICE* deviceToUse;
-
-    // arrange
-    deviceToUse = IoTHubAccount_GetSASDevice(g_iothubAcctInfo);
 
     // Create the IoT Hub Data
+    IOTHUB_PROVISIONED_DEVICE* deviceToUse;
+    deviceToUse = IoTHubAccount_GetSASDevice(g_iothubAcctInfo);
     client_connect_to_hub(deviceToUse, protocol);
 
-    time_t t = time(NULL);
-    sprintf(test_telemetry_message, TEST_EVENT_DATA_FMT, ctime(&t), g_iotHubTestId);
+    EXPECTED_SEND_DATA* send_data = (EXPECTED_SEND_DATA*)client_create_and_send_d2c(TEST_MESSAGE_CREATE_STRING);
+    bool dataWasRecv = client_wait_for_d2c_confirmation((D2C_MESSAGE_HANDLE)send_data, IOTHUB_CLIENT_CONFIRMATION_OK);
+    ASSERT_IS_TRUE(dataWasRecv, "Failure sending data to IotHub"); // was received by the callback...
 
-    ASSERT_IS_NOT_NULL((send_data.lock = Lock_Init()), "Failed to create lock");
-    send_data.expectedString = test_telemetry_message;
-    send_data.wasFound = false;
-    send_data.dataWasRecv = false;
-    send_data.result = IOTHUB_CLIENT_CONFIRMATION_ERROR;
-
+    // Free the message
+    IoTHubMessage_Destroy(send_data->msgHandle);
+ 
     // Send the messages to the ASC Event hub
-    send_data.msgHandle = IoTHubMessage_CreateFromString(test_telemetry_message);
-    ASSERT_IS_NOT_NULL(send_data.msgHandle, "Could not create the D2C message to be sent");
-
-    // Send IoTHub message
-    sendeventasync_on_device_or_module(send_data.msgHandle, &send_data);
-
-    // Wait for the message to arrive
-    service_wait_for_d2c_event_arrival(deviceToUse, &send_data, MAX_SERVICE_EVENT_WAIT_TIME_SECONDS);
-
-    IoTHubMessage_Destroy(send_data.msgHandle);
-
     // Create an ASC Security Message
-    send_data.msgHandle = IoTHubMessage_CreateFromString(TEST_ASC_SECURITY_MESSAGE);
-    ASSERT_IS_NOT_NULL(send_data.msgHandle, "Could not create the ASC Security message to be sent");
-    send_data.expectedString = TEST_ASC_SECURITY_MESSAGE;
-    send_data.wasFound = false;
-    send_data.dataWasRecv = false;
-    send_data.result = IOTHUB_CLIENT_CONFIRMATION_ERROR;
+    LogInfo("Sending ASC message to endpoint");
+
+    const char* temp_string_val = send_data->expectedString;
+
+    send_data->msgHandle = IoTHubMessage_CreateFromString(TEST_ASC_SECURITY_MESSAGE);
+    ASSERT_IS_NOT_NULL(send_data->msgHandle, "Could not create the ASC Security message to be sent");
+    send_data->wasFound = false;
+    send_data->dataWasRecv = false;
+    send_data->result = IOTHUB_CLIENT_CONFIRMATION_ERROR;
+    send_data->expectedString = TEST_ASC_SECURITY_MESSAGE;
 
     // Send the messages to the ASC Event hub
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, IoTHubMessage_SetAsSecurityMessage(send_data.msgHandle), "Failure setting message as a security message");
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, IoTHubMessage_SetAsSecurityMessage(send_data->msgHandle), "Failure setting message as a security message");
 
-    // Send IoTHub message again, it should not arrive in the IoTHub EventHub
-    sendeventasync_on_device_or_module(send_data.msgHandle, &send_data);
+    // Send ASC message, it should not arrive in the IoTHub EventHub
+    sendeventasync_on_device_or_module(send_data->msgHandle, send_data);
 
     // Wait for the message to arrive
-    service_wait_for_security_d2c_event_arrival(deviceToUse, &send_data, MAX_SECURITY_DEVICE_WAIT_TIME);
+    service_wait_for_security_d2c_event_arrival(deviceToUse, send_data, MAX_SECURITY_DEVICE_WAIT_TIME);
+
+    // Done with ASC test, restore string
+    send_data->expectedString = temp_string_val;
 
     // cleanup
-    IoTHubMessage_Destroy(send_data.msgHandle);
-
-    (void)Lock_Deinit(send_data.lock);
+    EventData_Destroy(send_data);
 
     // close the client connection
     destroy_on_device_or_module();
@@ -1115,7 +1104,7 @@ void e2e_d2c_with_svc_fault_ctrl(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, cons
     dataWasRecv = client_wait_for_d2c_confirmation(d2cMessageFaultInjection, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT);
     ASSERT_IS_TRUE(dataWasRecv, "Failure recieving server fault message timeout"); // was received by the callback...
 
-    // Send the Event from the client
+    // Send the Event fromsend_data. the client
     LogInfo("Send message after the server fault and then sleeping...");
     d2cMessageDuringRetry = client_create_and_send_d2c(TEST_MESSAGE_CREATE_STRING);
     ThreadAPI_Sleep(8000);

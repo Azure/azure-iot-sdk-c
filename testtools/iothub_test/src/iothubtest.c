@@ -984,26 +984,6 @@ static AMQP_CONN_INFO* createAmqpConnection(IOTHUB_VALIDATION_INFO* devhubValInf
     return result;
 }
 
-/*IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ASCLogAnalytics(IOTHUB_TEST_HANDLE devhubHandle)
-{
-    //Azure Active Directory authentication authority for public cloud
-    const char* AuthenticationAuthorityTemplate = "https://login.windows.net/{0}";
-    //Azure Log Analytics Authentication token audience
-    const char* Audience = "https://api.loganalytics.io/";
-    //Azure Log Analytics query URL
-    const char* QueryUriTemplate = "https://api.loganalytics.io/v1/workspaces/%s/query";
-    //Azure Log Analytics API version
-    const char* LogAnalyticsApiVersion = "v1";
-    //Query template for querying a SecurityIoTRawEvent by device id and raw event id
-    const char* RawEventQueryTemplate = "SecurityIoTRawEvent | where DeviceId == \"%s\" | where IoTRawEventId == \"%s\"";
-
-    IOTHUB_VALIDATION_INFO* validation_info = (IOTHUB_VALIDATION_INFO*)devhubHandle;
-
-    STRING_HANDLE query_uri = STRING_construct_sprintf(QueryUriTemplate, validation_info->logAnalyiticsWorkspaceId);
-    STRING_HANDLE authority = STRING_construct_sprintf(AuthenticationAuthorityTemplate, validation_info->aad_tenant);
-
-}*/
-
 IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEventAsync(IOTHUB_TEST_HANDLE devhubHandle, size_t partitionCount, time_t receiveTimeRangeStart, pfIoTHubMessageCallback msgCallback, void* context)
 {
     IOTHUB_TEST_CLIENT_RESULT result;
