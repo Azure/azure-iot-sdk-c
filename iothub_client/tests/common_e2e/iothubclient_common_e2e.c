@@ -911,6 +911,24 @@ void clear_connection_status_info_flags()
     }
 }
 
+static void service_wait_for_security_d2c_event_arrival(IOTHUB_PROVISIONED_DEVICE* deviceToUse, D2C_MESSAGE_HANDLE d2cMessage, double max_wait_time)
+{
+    EXPECTED_SEND_DATA* sendData = (EXPECTED_SEND_DATA*)d2cMessage;
+
+    IOTHUB_TEST_HANDLE iotHubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo), deviceToUse->deviceId, IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo));
+    ASSERT_IS_NOT_NULL(iotHubTestHandle, "Could not initialize IoTHubTest in order to listen for events");
+
+    LogInfo("Beginning to listen for d2c event arrival.  Waiting up to %f seconds...", max_wait_time);
+    IOTHUB_TEST_CLIENT_RESULT result = IoTHubTest_ListenForEvent(iotHubTestHandle, IoTHubCallback, IoTHubAccount_GetIoTHubPartitionCount(g_iothubAcctInfo), sendData, time(NULL)-SERVICE_EVENT_WAIT_TIME_DELTA_SECONDS, max_wait_time);
+    ASSERT_ARE_EQUAL(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_ERROR, result, "Listening for the event failed");
+
+    ASSERT_IS_FALSE(sendData->wasFound, "Failure event was not routed correctly when sending security event"); // was found is written by the callback...
+
+    IoTHubTest_Deinit(iotHubTestHandle);
+
+    LogInfo("Completed listening for security event arrival.");
+}
+
 void service_wait_for_d2c_event_arrival(IOTHUB_PROVISIONED_DEVICE* deviceToUse, D2C_MESSAGE_HANDLE d2cMessage, double max_wait_time)
 {
     EXPECTED_SEND_DATA* sendData = (EXPECTED_SEND_DATA*)d2cMessage;
@@ -984,8 +1002,26 @@ void e2e_send_event_test_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 
 void e2e_send_security_event_test_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
-    IOTHUB_MESSAGE_HANDLE msgHandle;
-    const char* TEST_ASC_SECURITY_MESSAGE = "json";
+    //IOTHUB_MESSAGE_HANDLE msgHandle;
+
+    char test_telemetry_message[1024];
+    const char* TEST_ASC_SECURITY_MESSAGE = "{ \
+        \"AgentVersion\": \"0.0.1\", \
+        \"AgentId\" : \"{A3B5D80C-06AA-4D84-BA2D-5470ADAE33A3}\", \
+        \"MessageSchemaVersion\" : \"1.0\", \
+        \"Events\" : \
+        { \
+            \"EventType\": \"Security\", \
+            \"Category\" : \"Periodic\", \
+            \"Name\" : \"ListeningPorts\", \
+            \"IsEmpty\" : true, \
+            \"PayloadSchemaVersion\" : \"1.0\", \
+            \"Id\" : \"12432\", \
+            \"TimestampLocal\" : \"2012-04-23T18:25:43.511Z\", \
+            \"TimestampUTC\" : \"2012-04-23T18:25:43.511Z\" }, \
+            \"Payload\": { \"data\": \"test\" } \
+        } \
+    }";
     EXPECTED_SEND_DATA send_data = { 0 };
     IOTHUB_PROVISIONED_DEVICE* deviceToUse;
 
@@ -995,35 +1031,50 @@ void e2e_send_security_event_test_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     // Create the IoT Hub Data
     client_connect_to_hub(deviceToUse, protocol);
 
+    time_t t = time(NULL);
+    sprintf(test_telemetry_message, TEST_EVENT_DATA_FMT, ctime(&t), g_iotHubTestId);
+
     ASSERT_IS_NOT_NULL((send_data.lock = Lock_Init()), "Failed to create lock");
+    send_data.expectedString = test_telemetry_message;
+    send_data.wasFound = false;
+    send_data.dataWasRecv = false;
+    send_data.result = IOTHUB_CLIENT_CONFIRMATION_ERROR;
 
     // Send the messages to the ASC Event hub
-    msgHandle = IoTHubMessage_CreateFromString(TEST_ASC_SECURITY_MESSAGE);
-    ASSERT_IS_NOT_NULL(msgHandle, "Could not create the D2C message to be sent");
+    send_data.msgHandle = IoTHubMessage_CreateFromString(test_telemetry_message);
+    ASSERT_IS_NOT_NULL(send_data.msgHandle, "Could not create the D2C message to be sent");
 
     // Send IoTHub message
-    sendeventasync_on_device_or_module(msgHandle, &send_data);
+    sendeventasync_on_device_or_module(send_data.msgHandle, &send_data);
 
     // Wait for the message to arrive
-    service_wait_for_d2c_event_arrival(deviceToUse, &send_data, MAX_SECURITY_DEVICE_WAIT_TIME);
+    service_wait_for_d2c_event_arrival(deviceToUse, &send_data, MAX_SERVICE_EVENT_WAIT_TIME_SECONDS);
+
+    IoTHubMessage_Destroy(send_data.msgHandle);
+
+    // Create an ASC Security Message
+    send_data.msgHandle = IoTHubMessage_CreateFromString(TEST_ASC_SECURITY_MESSAGE);
+    ASSERT_IS_NOT_NULL(send_data.msgHandle, "Could not create the ASC Security message to be sent");
+    send_data.expectedString = TEST_ASC_SECURITY_MESSAGE;
+    send_data.wasFound = false;
+    send_data.dataWasRecv = false;
+    send_data.result = IOTHUB_CLIENT_CONFIRMATION_ERROR;
 
     // Send the messages to the ASC Event hub
-    msgHandle = IoTHubMessage_CreateFromString(TEST_ASC_SECURITY_MESSAGE);
-    ASSERT_IS_NOT_NULL(msgHandle, "Could not create the D2C message to be sent");
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, IoTHubMessage_SetAsSecurityMessage(send_data.msgHandle), "Failure setting message as a security message");
 
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, IoTHubMessage_SetAsSecurityMessage(msgHandle), "Failure setting message as a security message");
+    // Send IoTHub message again, it should not arrive in the IoTHub EventHub
+    sendeventasync_on_device_or_module(send_data.msgHandle, &send_data);
 
     // Wait for the message to arrive
-    //service_wait_for_d2c_event_arrival(deviceToUse, &send_data, MAX_SECURITY_DEVICE_WAIT_TIME);
+    service_wait_for_security_d2c_event_arrival(deviceToUse, &send_data, MAX_SECURITY_DEVICE_WAIT_TIME);
 
-    send_data.result = IOTHUB_CLIENT_CONFIRMATION_ERROR;
+    // cleanup
+    IoTHubMessage_Destroy(send_data.msgHandle);
+    //send_data.result = IOTHUB_CLIENT_CONFIRMATION_ERROR;
 
     // close the client connection
     destroy_on_device_or_module();
-
-
-    // cleanup
-    IoTHubMessage_Destroy(msgHandle);
 }
 
 // Simulates a fault occurring in end-to-end testing (with special opcodes forcing service failure on certain white-listed Hubs) and

@@ -96,9 +96,7 @@ MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
-    char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
-    ASSERT_FAIL(temp_str);
+    ASSERT_FAIL("umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
 }
 
 static MAP_HANDLE my_Map_Create(MAP_FILTER_CALLBACK mapFilterFunc)
@@ -155,7 +153,6 @@ static void set_string_NULL_handle_fails_impl(PFN_MESSAGE_SET_STRING pfnSetMessa
 
     //cleanup
 }
-
 
 static void set_string_NULL_string_fails_impl(PFN_MESSAGE_SET_STRING pfnSetMessageString)
 {
@@ -234,8 +231,6 @@ static void get_string_not_set_fails_impl(PFN_MESSAGE_GET_STRING pfnGetMessageSt
     IoTHubMessage_Destroy(h);
 }
 
-
-
 /* Tests_SRS_IOTHUBMESSAGE_07_011: [IoTHubMessage_GetMessageId shall return the messageId as a const char*.] */
 static void get_string_succeeds_impl(PFN_MESSAGE_SET_STRING pfnSetMessageString, PFN_MESSAGE_GET_STRING pfnGetMessageString, const char *test_value)
 {
@@ -255,7 +250,6 @@ static void get_string_succeeds_impl(PFN_MESSAGE_SET_STRING pfnSetMessageString,
     //cleanup
     IoTHubMessage_Destroy(h);
 }
-
 
 static TEST_MUTEX_HANDLE g_testByTest;
 
@@ -338,20 +332,6 @@ TEST_FUNCTION_CLEANUP(method_cleanup)
 {
     reset_test_data();
     TEST_MUTEX_RELEASE(g_testByTest);
-}
-
-static int should_skip_index(size_t current_index, const size_t skip_array[], size_t length)
-{
-    int result = 0;
-    for (size_t index = 0; index < length; index++)
-    {
-        if (current_index == skip_array[index])
-        {
-            result = __LINE__;
-            break;
-        }
-    }
-    return result;
 }
 
 /*Tests_SRS_IOTHUBMESSAGE_02_022: [IoTHubMessage_CreateFromByteArray shall call BUFFER_create passing byteArray and size as parameters.]*/
