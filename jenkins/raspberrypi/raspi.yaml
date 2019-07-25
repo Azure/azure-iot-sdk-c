@@ -40,8 +40,8 @@ jobs:
         $IsPr = "yes"
       }
       Write-Host "##vso[task.setvariable variable=normalizedRepo]${NormalizedRepo}"
-      Write-Host "##vso[task.setvariable variable=IsPr]${IsPr}" 
-      Write-Host "##vso[task.setvariable variable=CommitToPass]${CommitToPass}" 
+      Write-Host "##vso[task.setvariable variable=IsPr]${IsPr}"
+      Write-Host "##vso[task.setvariable variable=CommitToPass]${CommitToPass}"
       Write-Host "normalizedRepo=${NormalizedRepo}"
       Write-Host "IsPr=${IsPr}"
       Write-Host "CommitToPass=${CommitToPass}"
@@ -53,7 +53,7 @@ jobs:
     ignoreLASTEXITCODE: false
     errorActionPreference: Stop
     failOnStderr: true
-  
+
   - script: |
       cd $(Build.SourcesDirectory) &&
       echo "saving patch from ${CommitToPass} to HEAD" &&
@@ -72,7 +72,7 @@ jobs:
       python3 $(ClientLibrary.FrameworkRoot)/jenkins/raspberrypi/pyscripts/build_docker_image.py --repo ${NormalizedRepo}  --commit $(CommitToPass)
     displayName: "build raspi-c docker image"
     condition: succeeded()
-    env: 
+    env:
       AZURECR_REPO_ADDRESS: $(IOTHUB-E2E-REPO-ADDRESS)
       AZURECR_REPO_USER: $(IOTHUB-E2E-REPO-USER)
       AZURECR_REPO_PASSWORD: $(IOTHUB-E2E-REPO-PASSWORD)
@@ -81,7 +81,7 @@ jobs:
 
   - task: ExtractFiles@1
     inputs:
-      archiveFilePatterns: '*.tar' 
+      archiveFilePatterns: '*.tar'
       destinationFolder: '$(Build.SourcesDirectory)/source_artifacts'
 
   - script: |
@@ -101,20 +101,37 @@ jobs:
       publishLocation: 'Container'
     condition: succeeded()
 
+<<<<<<< HEAD
+- job: 'Run_Raspi_E2E_Tests'
+  pool: horton-raspi-c
+  steps:
+  - checkout: none
+
+=======
 - job: 'Run_AMQP_DT_E2E_Test'
   dependsOn: Cross_Compile
   condition: succeeded()
   pool: 
     name: devicelab-02
   steps:  
+>>>>>>> 4a39bf868111a1eb37e817d5fe2480756aac0c99
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts'
     inputs:
       artifactName: drop
       itemPattern: 'drop/**/*e2e_exe'
 
+<<<<<<< HEAD
+  - bash: |
+      (sleep 600; sudo reboot ) &
+    displayName: 'Trigger Reboot Thread'
+
+  - bash: |
+      chmod -R 777 drop
+=======
   - script: |
       cd $(Build.SourcesDirectory)/testtools/UART_interface/
+>>>>>>> 4a39bf868111a1eb37e817d5fe2480756aac0c99
       ls
       . rpi_e2e_env_setup.sh
       python3 serial_connect.py -i setup.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -s
