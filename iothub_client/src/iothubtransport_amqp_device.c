@@ -483,7 +483,6 @@ static void destroy_device_config(AMQP_DEVICE_CONFIG* config)
 {
     if (config != NULL)
     {
-        free(config->product_info);
         free(config->iothub_host_fqdn);
         free(config);
     }
@@ -502,13 +501,7 @@ static AMQP_DEVICE_CONFIG* clone_device_config(AMQP_DEVICE_CONFIG *config)
         int result;
         memset(new_config, 0, sizeof(AMQP_DEVICE_CONFIG));
 
-        if (config->product_info != NULL &&
-            mallocAndStrcpy_s(&new_config->product_info, config->product_info) != RESULT_OK)
-        {
-            LogError("Failed copying the AMQP_DEVICE_CONFIG (failed copying product_info)");
-            result = MU_FAILURE;
-        }
-        else if (mallocAndStrcpy_s(&new_config->iothub_host_fqdn, config->iothub_host_fqdn) != RESULT_OK)
+        if (mallocAndStrcpy_s(&new_config->iothub_host_fqdn, config->iothub_host_fqdn) != RESULT_OK)
         {
             LogError("Failed copying the AMQP_DEVICE_CONFIG (failed copying iothub_host_fqdn)");
             result = MU_FAILURE;
@@ -521,6 +514,8 @@ static AMQP_DEVICE_CONFIG* clone_device_config(AMQP_DEVICE_CONFIG *config)
             new_config->on_state_changed_context = config->on_state_changed_context;
             new_config->device_id = IoTHubClient_Auth_Get_DeviceId(config->authorization_module);
             new_config->module_id = IoTHubClient_Auth_Get_ModuleId(config->authorization_module);
+            new_config->prod_info_cb = config->prod_info_cb;
+            new_config->prod_info_ctx = config->prod_info_ctx;
             result = RESULT_OK;
         }
 
@@ -593,7 +588,7 @@ static int create_authentication_instance(AMQP_DEVICE_INSTANCE *instance)
     return result;
 }
 
-static int create_telemetry_messenger_instance(AMQP_DEVICE_INSTANCE* instance, const char* pi)
+static int create_telemetry_messenger_instance(AMQP_DEVICE_INSTANCE* instance, pfTransport_GetOption_Product_Info_Callback prod_info_cb, void* prod_info_ctx)
 {
     int result;
 
@@ -604,7 +599,7 @@ static int create_telemetry_messenger_instance(AMQP_DEVICE_INSTANCE* instance, c
     messenger_config.on_state_changed_callback = on_messenger_state_changed_callback;
     messenger_config.on_state_changed_context = instance;
 
-    if ((instance->messenger_handle = telemetry_messenger_create(&messenger_config, pi)) == NULL)
+    if ((instance->messenger_handle = telemetry_messenger_create(&messenger_config, prod_info_cb, prod_info_ctx)) == NULL)
     {
         LogError("Failed creating the TELEMETRY_MESSENGER_HANDLE (messenger_create failed)");
         result = MU_FAILURE;
@@ -622,7 +617,8 @@ static int create_twin_messenger(AMQP_DEVICE_INSTANCE* instance)
     int result;
     TWIN_MESSENGER_CONFIG twin_msgr_config;
 
-    twin_msgr_config.client_version = instance->config->product_info;
+    twin_msgr_config.prod_info_cb = instance->config->prod_info_cb;
+    twin_msgr_config.prod_info_ctx = instance->config->prod_info_ctx;
     twin_msgr_config.device_id = instance->config->device_id;
     twin_msgr_config.module_id = instance->config->module_id;
     twin_msgr_config.iothub_host_fqdn = instance->config->iothub_host_fqdn;
@@ -749,7 +745,7 @@ AMQP_DEVICE_HANDLE amqp_device_create(AMQP_DEVICE_CONFIG *config)
             result = MU_FAILURE;
         }
         // Codes_SRS_DEVICE_09_008: [`instance->messenger_handle` shall be set using telemetry_messenger_create()]
-        else if (create_telemetry_messenger_instance(instance, config->product_info) != RESULT_OK)
+        else if (create_telemetry_messenger_instance(instance, config->prod_info_cb, config->prod_info_ctx) != RESULT_OK)
         {
             // Codes_SRS_DEVICE_09_009: [If the TELEMETRY_MESSENGER_HANDLE fails to be created, amqp_device_create shall fail and return NULL]
             LogError("Failed creating the device instance for device '%s' (failed creating the messenger instance)", instance->config->device_id);
