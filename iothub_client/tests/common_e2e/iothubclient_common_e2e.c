@@ -1071,7 +1071,8 @@ void e2e_send_security_event_test_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 
     // cleanup
     IoTHubMessage_Destroy(send_data.msgHandle);
-    //send_data.result = IOTHUB_CLIENT_CONFIRMATION_ERROR;
+
+    (void)Lock_Deinit(send_data.lock);
 
     // close the client connection
     destroy_on_device_or_module();
