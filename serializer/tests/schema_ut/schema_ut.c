@@ -11,17 +11,17 @@
 #include <stddef.h>
 #endif
 
-void* my_gballoc_malloc(size_t t)
+static void* my_gballoc_malloc(size_t t)
 {
     return malloc(t);
 }
 
-void* my_gballoc_realloc(void* v, size_t t)
+static void* my_gballoc_realloc(void* v, size_t t)
 {
     return realloc(v, t);
 }
 
-void my_gballoc_free(void * t)
+static void my_gballoc_free(void * t)
 {
     free(t);
 }
@@ -55,13 +55,13 @@ void my_gballoc_free(void * t)
 
 /*want crt_abstractions to use real malloc*/
 #define GBALLOC_H
-#define mallocAndStrcpy_s real_mallocAndStrcpy_s
-#define unsignedIntToString real_unsignedIntToString
-#define size_tToString real_size_tToString
-#include "crt_abstractions.c"
-#undef mallocAndStrcpy_s
-#undef unsignedIntToString
-#undef size_tToString
+//#define mallocAndStrcpy_s real_mallocAndStrcpy_s
+//#define unsignedIntToString real_unsignedIntToString
+//#define size_tToString real_size_tToString
+//#include "crt_abstractions.c"
+//#undef mallocAndStrcpy_s
+//#undef unsignedIntToString
+//#undef size_tToString
 
 #undef CRT_ABSTRACTIONS_H
 
@@ -102,9 +102,7 @@ MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
-    char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
-    ASSERT_FAIL(temp_str);
+    ASSERT_FAIL("umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
 }
 
 static int g_pfDesiredPropertyFromAGENT_DATA_TYPE(const AGENT_DATA_TYPE* source, void* dest)
@@ -127,6 +125,17 @@ static void g_onDesiredProperty(void* destination)
 {
     (void)(destination);
 }
+
+static int my_mallocAndStrcpy_s(char** destination, const char* source)
+{
+    size_t l = strlen(source);
+    char* temp = (char*)my_gballoc_malloc(l + 1);
+    (void)memcpy(temp, source, l + 1);
+    *destination = temp;
+    return 0;
+}
+//static int unsignedIntToString(char*, destination, size_t, destinationSize, unsigned int, value);
+//static int size_tToString(char*, destination, size_t, destinationSize, size_t, value);
 
 
 BEGIN_TEST_SUITE(Schema_ut)
@@ -158,7 +167,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         REGISTER_GLOBAL_MOCK_HOOK(VECTOR_find_if, real_VECTOR_find_if);
         REGISTER_GLOBAL_MOCK_HOOK(VECTOR_size, real_VECTOR_size);
 
-        REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, real_mallocAndStrcpy_s);
+        REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, my_mallocAndStrcpy_s);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, MU_FAILURE);
         REGISTER_GLOBAL_MOCK_HOOK(unsignedIntToString, real_unsignedIntToString);
         REGISTER_GLOBAL_MOCK_HOOK(size_tToString, real_size_tToString);
@@ -6120,10 +6129,7 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     static void Schema_AddModelMethodArgument_inert_path(void)
     {
-        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreArgument_handle()
-            .IgnoreArgument_pred()
-            .IgnoreArgument_value();
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
             .IgnoreArgument_size();

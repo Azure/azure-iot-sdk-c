@@ -7,12 +7,15 @@ cmake_minimum_required(VERSION 2.8.11)
 compileAsC99()
 set(theseTestsName schema_ut)
 set(${theseTestsName}_test_files
-${theseTestsName}.c
+    ${theseTestsName}.c
 )
 
+include_directories(${SHARED_UTIL_REAL_TEST_FOLDER})
+
 set(${theseTestsName}_c_files
-../../src/schema.c
-${LOCK_C_FILE}
+    ../../src/schema.c
+    ${SHARED_UTIL_REAL_TEST_FOLDER}/real_crt_abstractions.c
+    ${LOCK_C_FILE}
 )
 
 set(${theseTestsName}_h_files
