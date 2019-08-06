@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/gballoc.h"
@@ -50,11 +51,11 @@ int copy_json_string_field(char** dest, JSON_Object* root_object, const char* js
     return result;
 }
 
-int json_serialize_and_set_struct(JSON_Object* root_object, const char* json_key, void* structure, TO_JSON_FUNCTION toJson, NECESSITY necessity)
+int json_serialize_and_set_struct(JSON_Object* root_object, const char* json_key, void* structure, TO_JSON_FUNCTION toJson, bool is_required)
 {
     int result;
 
-    if (necessity == OPTIONAL && structure == NULL)
+    if (!is_required && structure == NULL)
     {
         result = 0;
     }
@@ -85,16 +86,16 @@ int json_serialize_and_set_struct(JSON_Object* root_object, const char* json_key
     return result;
 }
 
-int json_deserialize_and_get_struct(void** dest, JSON_Object* root_object, const char* json_key, FROM_JSON_FUNCTION fromJson, NECESSITY necessity)
+int json_deserialize_and_get_struct(void** dest, JSON_Object* root_object, const char* json_key, FROM_JSON_FUNCTION fromJson, bool is_required)
 {
     int result;
 
     JSON_Object* struct_object = json_object_get_object(root_object, json_key);
-    if (necessity == OPTIONAL && struct_object == NULL)
+    if (!is_required && struct_object == NULL)
     {
         result = 0;
     }
-    else if (necessity == REQUIRED && struct_object == NULL)
+    else if (is_required && struct_object == NULL)
     {
         LogError("object required");
         result = MU_FAILURE;
