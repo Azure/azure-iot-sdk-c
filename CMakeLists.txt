@@ -101,7 +101,7 @@ endif()
 option(use_mbedtls "set use_mbedtls to ON to use mbedtls." OFF)
 
 # openssl samples on Windows need to have a trusted cert set
-if ((WIN32 AND "${use_openssl}") OR "${use_wolfssl}" OR "${use_mbedtls}")
+if ((WIN32 AND "${use_openssl}") OR "${use_wolfssl}" OR "${use_mbedtls}" OR "${use_bearssl}")
     option(use_sample_trusted_cert "Set flag in samples to use SDK's built-in CA as TrustedCerts" ON)
 else()
     option(use_sample_trusted_cert "Set flag in samples to use SDK's built-in CA as TrustedCerts" OFF)
