@@ -44,7 +44,7 @@ namespace BASEIMPLEMENTATION
 #include "strings.c"
 };
 
-//MU_DEFINE_MICROMOCK_ENUM_TO_STRING(MULTITREE_RESULT, MULTITREE_RESULT_VALUES);
+DEFINE_MICROMOCK_ENUM_TO_STRING(MULTITREE_RESULT, MULTITREE_RESULT_VALUES);
 
 static int StringClone(void** destination, const void* source)
 {
@@ -333,8 +333,7 @@ TEST_FUNCTION_INITIALIZE(init)
     whenShallSTRING_empty_fail = 0;
 
     currentSTRING_concat_with_STRING_call = 0;
-    whenShallSTRING_concat_with_STRING_fail = 0; 
-
+    whenShallSTRING_concat_with_STRING_fail = 0;
 }
 
 TEST_FUNCTION_CLEANUP(clean)
@@ -994,7 +993,7 @@ TEST_FUNCTION(MultiTree_AddLeaf_with_alternate_names_succeeds)
     auto res5 = MultiTree_AddLeaf(treeHandle, CHILD312PATH_ALTERNATE, (void*)CHILD312VALUE);
     auto res6 = MultiTree_AddLeaf(treeHandle, CHILD313PATH_ALTERNATE, (void*)CHILD313VALUE);
     auto res7 = MultiTree_AddLeaf(treeHandle, CHILD314PATH_ALTERNATE, (void*)CHILD313VALUE);
-    
+
     ///assert
     ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_OK, res1);
     ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_OK, res2);
@@ -1003,7 +1002,7 @@ TEST_FUNCTION(MultiTree_AddLeaf_with_alternate_names_succeeds)
     ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_OK, res5);
     ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_OK, res6);
     ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_OK, res7);
-    
+
     //cleanup
     MultiTree_Destroy(treeHandle);
     mocks.ResetAllCalls();
@@ -1541,7 +1540,7 @@ TEST_FUNCTION(MultiTree_Destroy_with_one_child_tree_calls_free_5_times)
     - children in root
     - root itself*/
     ///arrange
-    CMultiTreeMocks mocks; 
+    CMultiTreeMocks mocks;
 
     MULTITREE_HANDLE treeHandle = MultiTree_Create(StringClone, StringFree);
     (void)MultiTree_AddLeaf(treeHandle, "child", (void*)"value");
@@ -2332,7 +2331,7 @@ void VerifyMultiTreeExpectedAfterDeleteChild(MULTITREE_HANDLE treeHandle, const 
     ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_OK, result);
 
     ASSERT_ARE_EQUAL(int, 0, strcmp(firstChildName, STRING_c_str(global_bufferTemp)));
-    
+
     // Verify the 1st element of the tree matches secondChildName
     result = MultiTree_GetChild(treeHandle, 1, &childHandle);
     ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_OK, result);
