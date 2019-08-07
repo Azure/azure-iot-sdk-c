@@ -491,7 +491,7 @@ static X509_CERTIFICATES* x509Certificates_create(const char* primary_cert, cons
             new_x509Certs = NULL;
         }
 
-        //Secondary Cert is false
+        //Secondary Cert is optional
         else if ((secondary_cert != NULL) && ((new_x509Certs->secondary = x509CertificateWithInfo_create(secondary_cert)) == NULL))
         {
             LogError("Failed to create Secondary Certificate");

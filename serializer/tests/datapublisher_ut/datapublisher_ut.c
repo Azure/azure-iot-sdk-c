@@ -33,8 +33,6 @@ static void my_gballoc_free(void * t)
 #include "umock_c/umocktypes_stdint.h"
 #include "umock_c/umock_c_negative_tests.h"
 
-/*not very nice source level preprocessor mocking... */
-
 #include "testrunnerswitcher.h"
 #define ENABLE_MOCKS
 #include "schema.h"

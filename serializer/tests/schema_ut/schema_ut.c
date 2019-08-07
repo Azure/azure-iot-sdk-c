@@ -95,9 +95,6 @@ static int my_mallocAndStrcpy_s(char** destination, const char* source)
     *destination = temp;
     return 0;
 }
-//static int unsignedIntToString(char*, destination, size_t, destinationSize, unsigned int, value);
-//static int size_tToString(char*, destination, size_t, destinationSize, size_t, value);
-
 
 BEGIN_TEST_SUITE(Schema_ut)
 
