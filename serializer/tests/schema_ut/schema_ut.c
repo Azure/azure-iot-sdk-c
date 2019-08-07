@@ -26,45 +26,6 @@ static void my_gballoc_free(void * t)
     free(t);
 }
 
-/*want VECTOR to use real malloc*/
-#define GBALLOC_H
-#define VECTOR_create real_VECTOR_create
-#define VECTOR_destroy real_VECTOR_destroy
-#define VECTOR_push_back real_VECTOR_push_back
-#define VECTOR_erase real_VECTOR_erase
-#define VECTOR_clear real_VECTOR_clear
-#define VECTOR_element real_VECTOR_element
-#define VECTOR_front real_VECTOR_front
-#define VECTOR_back real_VECTOR_back
-#define VECTOR_find_if real_VECTOR_find_if
-#define VECTOR_size real_VECTOR_size
-#define VECTOR_move real_VECTOR_move
-#include "vector.c"
-#undef VECTOR_create
-#undef VECTOR_destroy
-#undef VECTOR_push_back
-#undef VECTOR_erase
-#undef VECTOR_clear
-#undef VECTOR_element
-#undef VECTOR_front
-#undef VECTOR_back
-#undef VECTOR_find_if
-#undef VECTOR_size
-#undef VECTOR_move
-#undef VECTOR_H
-
-/*want crt_abstractions to use real malloc*/
-#define GBALLOC_H
-//#define mallocAndStrcpy_s real_mallocAndStrcpy_s
-//#define unsignedIntToString real_unsignedIntToString
-//#define size_tToString real_size_tToString
-//#include "crt_abstractions.c"
-//#undef mallocAndStrcpy_s
-//#undef unsignedIntToString
-//#undef size_tToString
-
-#undef CRT_ABSTRACTIONS_H
-
 #include "umock_c/umock_c.h"
 #include "umock_c/umocktypes_charptr.h"
 #include "umock_c/umocktypes_bool.h"

@@ -15,7 +15,7 @@ include_directories(${SHARED_UTIL_REAL_TEST_FOLDER})
 set(${theseTestsName}_c_files
     ../../src/schema.c
     ${SHARED_UTIL_REAL_TEST_FOLDER}/real_crt_abstractions.c
-    ${LOCK_C_FILE}
+    ${SHARED_UTIL_REAL_TEST_FOLDER}/real_vector.c
 )
 
 set(${theseTestsName}_h_files

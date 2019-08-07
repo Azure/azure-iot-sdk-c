@@ -11,6 +11,8 @@
 #include <stdexcept>
 #include "multitree.h"
 
+#include "azure_macro_utils/macro_utils.h"
+
 /*this is what we test*/
 #include "jsonencoder.h"
 
