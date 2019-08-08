@@ -60,7 +60,7 @@ class mxchip_uart_interface(uart_interface):
     def serial_write(self, ser, message, file=None):
 
         # Check that the device is no longer sending bytes
-        if ser.in_waiting:
+        while ser.in_waiting:
             self.serial_read(ser, message, file)
 
         # Check that the serial connection is open

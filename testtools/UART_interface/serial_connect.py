@@ -170,6 +170,7 @@ def run():
 
     elif 'windows' in serial_settings.device_type or 'win' in serial_settings.device_type or 'linux' in serial_settings.device_type:
         interface = lin_ipc_interface.lin_ipc_interface()
+        interface.ipc_process = subprocess.Popen('ls', stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         interface.write_read(serial_settings.input_file, serial_settings.output_file)
 
     print("Num of Errors: %d" %azure_test_firmware_errors.SDK_ERRORS)
