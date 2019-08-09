@@ -9,14 +9,12 @@
 #include <stddef.h>
 #endif
 
-#define UNREFERENCED_PARAMETER(x) x
-
-void* real_malloc(size_t size)
+static void* real_malloc(size_t size)
 {
     return malloc(size);
 }
 
-void real_free(void* ptr)
+static void real_free(void* ptr)
 {
     free(ptr);
 }

@@ -13,27 +13,15 @@
 #pragma warning(disable: 4054) /* MSC incorrectly fires this */
 #endif
 
-void* my_gballoc_malloc(size_t t)
+static void* my_gballoc_malloc(size_t t)
 {
     return malloc(t);
 }
 
-void my_gballoc_free(void * t)
+static void my_gballoc_free(void * t)
 {
     free(t);
 }
-
-#define GBALLOC_H
-/*want crt_abstractions to use real malloc*/
-#define mallocAndStrcpy_s real_mallocAndStrcpy_s
-#define unsignedIntToString real_unsignedIntToString
-#define size_tToString real_size_tToString
-#include "crt_abstractions.c"
-#undef mallocAndStrcpy_s
-#undef unsignedIntToString
-#undef size_tToString
-#undef CRT_ABSTRACTIONS_H
-#undef GBALLOC_H
 
 #include "umock_c/umock_c.h"
 #include "umock_c/umocktypes_charptr.h"
