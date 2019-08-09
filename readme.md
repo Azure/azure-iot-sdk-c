@@ -5,8 +5,10 @@
 This repository contains the following:
 * **Azure IoT Hub Device C SDK** to connect devices running C code to Azure IoT Hub.
 * **Azure IoT Hub Device Provisioning Service Client SDK** for enrolling devices with [Azure IoT Device Provisioning Services](https://docs.microsoft.com/azure/iot-dps/) and managing enrollments lists.
+* **DigitalTwin Device SDK** to connect devices running C code to Azure IoT Hub and Azure IoT Central as a [Digital Twin](https://aka.ms/iotpnpglossary).
 * **Azure IoT Hub Service C SDK** to interface with an Azure IoT Hub service instance from a server-side C application.
 * **Serializer Library for C** to help serialize and deserialize data on your device.
+
 
 ## Packages and Libraries
   The simplest way to get started with the Azure IoT SDKs is to use the following packages and libraries:
@@ -19,6 +21,7 @@ This repository contains the following:
 ## Samples
   Here are a set of simple samples that will help you get started:
   * [Device SDK Samples](./iothub_client/samples/)
+  * [Digital Twin Device SDK Samples](./digitaltwin_client/samples/)
   * [Service SDK Samples](./iothub_service_client/samples/)
   * [Serializer Library Samples](./serializer/samples/)
 
@@ -26,6 +29,7 @@ This repository contains the following:
 
 When no package or library is available for your platform or if you want to modify the SDK code, or port the SDK to a new platform, then you can leverage the build environment provided in the repository.
   * [Device SDK](./iothub_client/readme.md#compile)
+  * [Digital Twin Device SDK](./digitaltwin_client/readme.md#digitalTwinInitialDevSetup)
   * [Service SDK](./iothub_service_client/readme.md#compile)
 
 ## SDK API Reference Documentation
@@ -62,6 +66,9 @@ To learn more about building Azure IoT Applications, you can visit the [Azure Io
 This SDK also contains options you can set and platform specific features.  You can find detail list in this [document](./doc/Iothub_sdk_options.md).
 
 
+### Digital Twin Device SDK
+The Digital Twin Device SDK is *only* supported over MQTT and MQTT-WS.  Additional information is available [here](./digitaltwin_client/readme.md).
+
 ### Service Client SDK
 :heavy_check_mark: feature available  :heavy_multiplication_x: feature planned but not supported  :heavy_minus_sign: no support planned
 
@@ -76,7 +83,7 @@ This SDK also contains options you can set and platform specific features.  You 
 | [File Upload](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-file-upload)                    | :heavy_multiplication_x:                | Set up your backend app to send file upload notification receiver.                                                                 |
 
 ### Provisioning client SDK
-This repository contains [provisioning client SDK](./provisioning_client) for the [Device Provisioning Service](https://docs.microsoft.com/azure/iot-dps/).  
+This repository contains [provisioning client SDK](./provisioning_client) for the [Device Provisioning Service](https://docs.microsoft.com/azure/iot-dps/).
 
 :heavy_check_mark: feature available  :heavy_multiplication_x: feature planned but not supported  :heavy_minus_sign: no support planned
 
@@ -86,7 +93,6 @@ This repository contains [provisioning client SDK](./provisioning_client) for th
 | TPM Individual Enrollment   | :heavy_minus_sign: | :heavy_minus_sign: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | This SDK supports connecting your device to the Device Provisioning Service via [individual enrollment](https://docs.microsoft.com/azure/iot-dps/concepts-service#enrollment) using [Trusted Platform Module](https://docs.microsoft.com/azure/iot-dps/concepts-security#trusted-platform-module-tpm).  This [quickstart](https://docs.microsoft.com/azure/iot-dps/quick-create-simulated-device) reviews how to create a simulated device for individual enrollment with TPM. TPM over MQTT is currently not supported by the Device Provisioning Service.                                                                                                                                                                                                               |
 | X.509 Individual Enrollment | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | This SDK supports connecting your device to the Device Provisioning Service via [individual enrollment](https://docs.microsoft.com/azure/iot-dps/concepts-service#enrollment) using [X.509 leaf certificate](https://docs.microsoft.com/azure/iot-dps/concepts-security#leaf-certificate).  This [quickstart](https://docs.microsoft.com/azure/iot-dps/quick-create-simulated-device-x509) reviews how to create a simulated device for individual enrollment with X.509. |
 | X.509 Enrollment Group      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | This SDK supports connecting your device to the Device Provisioning Service via [enrollment group](https://docs.microsoft.com/azure/iot-dps/concepts-service#enrollment) using [X.509 root certificate](https://docs.microsoft.com/azure/iot-dps/concepts-security#root-certificate).                                                                                                                                                                                         |
-
 ### Provisioniong Service SDK
 This repository contains [provisioning service client SDK](./provisioning/service/) for the Device Provisioning Service to [programmatically enroll devices](https://docs.microsoft.com/en-us/azure/iot-dps/how-to-manage-enrollments-sdks).
 
