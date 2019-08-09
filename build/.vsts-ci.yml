@@ -338,7 +338,7 @@ jobs:
   - script: |
       LD_LIBRARY_PATH=/usr/local/lib
       LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/my_library/
-      sudo -E jenkins/linux_bearssl.sh
+      sudo -E bash jenkins/linux_bearssl.sh
     displayName: 'build'
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
