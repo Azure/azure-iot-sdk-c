@@ -93,8 +93,7 @@ typedef struct DEVICE_CONFIG_TAG
 {
     const char* device_id;
     const char* module_id;
-    pfTransport_GetOption_Product_Info_Callback prod_info_cb;
-    void* prod_info_ctx;
+    char* product_info;
     char* iothub_host_fqdn;
     DEVICE_AUTH_MODE authentication_mode;
     ON_DEVICE_STATE_CHANGED on_state_changed_callback;

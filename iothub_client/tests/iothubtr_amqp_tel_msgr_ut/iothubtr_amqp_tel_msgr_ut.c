@@ -85,7 +85,6 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 
 #define UNIQUE_ID_BUFFER_SIZE                             37
 #define TEST_UNIQUE_ID                                    "A1234DE234A1234DE234A1234DE234A1234DEA1234DE234A1234DE234A1234DE234A1234DEA1234DE234A1234DE234A1234DE234A1234DE"
-#define TEST_CLIENT_VERSION_STR                           "client x (version y)"
 
 #define TEST_DEVICE_ID                                    "my_device"
 #define TEST_DEVICE_ID_STRING_HANDLE                      (STRING_HANDLE)0x4442
@@ -258,11 +257,6 @@ static void TEST_free(void* ptr)
     }
 }
 
-static const char* test_get_product_info(void* ctx)
-{
-    (void)ctx;
-    return TEST_CLIENT_VERSION_STR;
-}
 
 static int saved_wait_to_send_list_count;
 static const void* saved_wait_to_send_list[20];
@@ -780,6 +774,7 @@ static void set_expected_calls_for_telemetry_messenger_create(TELEMETRY_MESSENGE
     {
         STRICT_EXPECTED_CALL(STRING_construct(config->module_id)).SetReturn(TEST_MODULE_ID_STRING_HANDLE);
     }
+    STRICT_EXPECTED_CALL(STRING_construct(config->device_id)).SetReturn(TEST_DEVICE_ID_STRING_HANDLE);
     STRICT_EXPECTED_CALL(STRING_construct(config->iothub_host_fqdn)).SetReturn(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE);
     STRICT_EXPECTED_CALL(singlylinkedlist_create()).SetReturn(TEST_WAIT_TO_SEND_LIST);
     STRICT_EXPECTED_CALL(singlylinkedlist_create()).SetReturn(TEST_IN_PROGRESS_LIST);
@@ -789,7 +784,8 @@ static void set_expected_calls_for_attach_device_client_type_to_link(LINK_HANDLE
 {
     STRICT_EXPECTED_CALL(amqpvalue_create_map());
     STRICT_EXPECTED_CALL(amqpvalue_create_symbol("com.microsoft:client-version"));
-    STRICT_EXPECTED_CALL(amqpvalue_create_string(TEST_CLIENT_VERSION_STR));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_create_string(TEST_IOTHUB_HOST_FQDN));
 
     STRICT_EXPECTED_CALL(amqpvalue_set_map_value(TEST_LINK_ATTACH_PROPERTIES, TEST_LINK_DEVICE_TYPE_NAME_AMQP_VALUE, TEST_LINK_DEVICE_TYPE_VALUE_AMQP_VALUE)).SetReturn(amqpvalue_set_map_value_result);
 
@@ -1530,6 +1526,7 @@ static void set_expected_calls_for_telemetry_messenger_destroy(TELEMETRY_MESSENG
     STRICT_EXPECTED_CALL(STRING_delete(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE));
     STRICT_EXPECTED_CALL(STRING_delete(TEST_DEVICE_ID_STRING_HANDLE));
     STRICT_EXPECTED_CALL(STRING_delete(testing_modules ? TEST_MODULE_ID_STRING_HANDLE : NULL));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(free(messenger_handle));
 }
 
@@ -1613,7 +1610,7 @@ static TELEMETRY_MESSENGER_HANDLE create_and_start_messenger(TELEMETRY_MESSENGER
 {
     umock_c_reset_all_calls();
     set_expected_calls_for_telemetry_messenger_create(config);
-    TELEMETRY_MESSENGER_HANDLE handle = telemetry_messenger_create(config, test_get_product_info, NULL);
+    TELEMETRY_MESSENGER_HANDLE handle = telemetry_messenger_create(config, TEST_DEVICE_ID);
 
     umock_c_reset_all_calls();
     set_expected_calls_for_telemetry_messenger_start(config, handle);
@@ -1938,7 +1935,7 @@ TEST_FUNCTION(telemetry_messenger_create_NULL_config)
     umock_c_reset_all_calls();
 
     // act
-    TELEMETRY_MESSENGER_HANDLE handle = telemetry_messenger_create(NULL, test_get_product_info, NULL);
+    TELEMETRY_MESSENGER_HANDLE handle = telemetry_messenger_create(NULL, TEST_DEVICE_ID);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -1957,7 +1954,7 @@ TEST_FUNCTION(telemetry_messenger_create_config_NULL_device_id)
     umock_c_reset_all_calls();
 
     // act
-    TELEMETRY_MESSENGER_HANDLE handle = telemetry_messenger_create(config, test_get_product_info, NULL);
+    TELEMETRY_MESSENGER_HANDLE handle = telemetry_messenger_create(config, TEST_DEVICE_ID);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -1976,7 +1973,7 @@ TEST_FUNCTION(telemetry_messenger_create_config_NULL_iothub_host_fqdn)
     umock_c_reset_all_calls();
 
     // act
-    TELEMETRY_MESSENGER_HANDLE handle = telemetry_messenger_create(config, test_get_product_info, NULL);
+    TELEMETRY_MESSENGER_HANDLE handle = telemetry_messenger_create(config, TEST_DEVICE_ID);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -2006,7 +2003,7 @@ static void telemetry_messenger_create_success_impl(bool testing_modules)
     set_expected_calls_for_telemetry_messenger_create(config);
 
     // act
-    TELEMETRY_MESSENGER_HANDLE handle = telemetry_messenger_create(config, test_get_product_info, NULL);
+    TELEMETRY_MESSENGER_HANDLE handle = telemetry_messenger_create(config, TEST_DEVICE_ID);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -2059,7 +2056,7 @@ TEST_FUNCTION(telemetry_messenger_create_failure_checks)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
 
-        TELEMETRY_MESSENGER_HANDLE handle = telemetry_messenger_create(config, test_get_product_info, NULL);
+        TELEMETRY_MESSENGER_HANDLE handle = telemetry_messenger_create(config, TEST_DEVICE_ID);
 
         // assert
         sprintf(error_msg, "On failed call %lu", (unsigned long)i);
@@ -2129,7 +2126,7 @@ TEST_FUNCTION(telemetry_messenger_start_succeeds)
 
     umock_c_reset_all_calls();
     set_expected_calls_for_telemetry_messenger_create(config);
-    TELEMETRY_MESSENGER_HANDLE handle = telemetry_messenger_create(config, test_get_product_info, NULL);
+    TELEMETRY_MESSENGER_HANDLE handle = telemetry_messenger_create(config, TEST_DEVICE_ID);
 
     umock_c_reset_all_calls();
     set_expected_calls_for_telemetry_messenger_start(config, handle);
@@ -2227,7 +2224,7 @@ TEST_FUNCTION(telemetry_messenger_stop_messenger_not_started)
 
     umock_c_reset_all_calls();
     set_expected_calls_for_telemetry_messenger_create(config);
-    TELEMETRY_MESSENGER_HANDLE handle = telemetry_messenger_create(config, test_get_product_info, NULL);
+    TELEMETRY_MESSENGER_HANDLE handle = telemetry_messenger_create(config, TEST_DEVICE_ID);
 
     umock_c_reset_all_calls();
 
@@ -2388,7 +2385,7 @@ TEST_FUNCTION(telemetry_messenger_do_work_not_started)
 
     umock_c_reset_all_calls();
     set_expected_calls_for_telemetry_messenger_create(config);
-    TELEMETRY_MESSENGER_HANDLE handle = telemetry_messenger_create(config, test_get_product_info, NULL);
+    TELEMETRY_MESSENGER_HANDLE handle = telemetry_messenger_create(config, TEST_DEVICE_ID);
 
     umock_c_reset_all_calls();
 
@@ -3347,7 +3344,6 @@ TEST_FUNCTION(telemetry_messenger_set_option_OptionHandler_FeedOptions_fails)
     // arrange
     TELEMETRY_MESSENGER_CONFIG* config = get_messenger_config();
     TELEMETRY_MESSENGER_HANDLE handle = create_and_start_messenger2(config, false);
-    umock_c_reset_all_calls();
 
     OPTIONHANDLER_HANDLE value = TEST_OPTIONHANDLER_HANDLE;
     STRICT_EXPECTED_CALL(OptionHandler_FeedOptions(value, handle)).SetReturn(OPTIONHANDLER_ERROR);

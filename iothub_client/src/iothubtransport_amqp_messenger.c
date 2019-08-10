@@ -113,14 +113,14 @@ static bool is_valid_configuration(const AMQP_MESSENGER_CONFIG* config)
         LogError("Invalid configuration (NULL)");
         result = false;
     }
-    else if (config->prod_info_cb == NULL ||
+    else if (config->client_version == NULL ||
         config->device_id == NULL ||
         config->iothub_host_fqdn == NULL ||
         config->receive_link.source_suffix == NULL ||
         config->send_link.target_suffix == NULL)
     {
-        LogError("Invalid configuration (prod_info_cb=%p, device_id=%p, iothub_host_fqdn=%p, receive_link (source_suffix=%p), send_link (target_suffix=%p))",
-            config->prod_info_cb, config->device_id, config->iothub_host_fqdn,
+        LogError("Invalid configuration (client_version=%p, device_id=%p, iothub_host_fqdn=%p, receive_link (source_suffix=%p), send_link (target_suffix=%p))",
+            config->client_version, config->device_id, config->iothub_host_fqdn,
             config->receive_link.source_suffix, config->send_link.target_suffix);
         result = false;
     }
@@ -157,6 +157,11 @@ static void destroy_configuration(AMQP_MESSENGER_CONFIG* config)
 {
     if (config != NULL)
     {
+        if (config->client_version != NULL)
+        {
+            free((void*)config->client_version);
+        }
+
         if (config->device_id != NULL)
         {
             free((void*)config->device_id);
@@ -226,7 +231,13 @@ static AMQP_MESSENGER_CONFIG* clone_configuration(const AMQP_MESSENGER_CONFIG* c
     {
         memset(result, 0, sizeof(AMQP_MESSENGER_CONFIG));
 
-        if (mallocAndStrcpy_s(&result->device_id, config->device_id) != 0)
+        if (mallocAndStrcpy_s(&result->client_version, config->client_version) != 0)
+        {
+            LogError("Failed copying device_id");
+            destroy_configuration(result);
+            result = NULL;
+        }
+        else if (mallocAndStrcpy_s(&result->device_id, config->device_id) != 0)
         {
             LogError("Failed copying device_id");
             destroy_configuration(result);
@@ -258,8 +269,6 @@ static AMQP_MESSENGER_CONFIG* clone_configuration(const AMQP_MESSENGER_CONFIG* c
         }
         else
         {
-            result->prod_info_cb = config->prod_info_cb;
-            result->prod_info_ctx = config->prod_info_ctx;
             result->on_state_changed_callback = config->on_state_changed_callback;
             result->on_state_changed_context = config->on_state_changed_context;
             result->on_subscription_changed_callback = config->on_subscription_changed_callback;

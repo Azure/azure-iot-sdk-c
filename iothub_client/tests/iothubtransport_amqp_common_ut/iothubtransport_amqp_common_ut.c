@@ -481,7 +481,10 @@ static void set_expected_calls_for_is_device_registered_ex(IOTHUB_DEVICE_CONFIG*
     (void)device_config;
 
     STRICT_EXPECTED_CALL(singlylinkedlist_find(TEST_REGISTERED_DEVICES_LIST, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .SetReturn((LIST_ITEM_HANDLE)registered_device).CallCannotFail();
+        .IgnoreArgument(2)
+        .IgnoreArgument(3)
+        .SetReturn((LIST_ITEM_HANDLE)registered_device)
+        .CallCannotFail();
 }
 
 static MESSAGE_DISPOSITION_CONTEXT* TRANSPORT_CONTEXT_DATA_create2(IOTHUB_DEVICE_HANDLE device_handle)
@@ -562,10 +565,14 @@ static void set_expected_calls_for_Register(IOTHUB_DEVICE_CONFIG* device_config,
     // Nothing to expect.
 
     EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_PRODUCT_INFO_CHAR_PTR))
+        .CallCannotFail();
     STRICT_EXPECTED_CALL(STRING_construct(device_config->deviceId))
         .SetReturn(TEST_DEVICE_ID_STRING_HANDLE);
     STRICT_EXPECTED_CALL(STRING_c_str(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE))
-        .SetReturn(TEST_IOTHUB_HOST_FQDN_CHAR_PTR).CallCannotFail();
+        .SetReturn(TEST_IOTHUB_HOST_FQDN_CHAR_PTR)
+        .CallCannotFail();
     EXPECTED_CALL(amqp_device_create(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .SetReturn(TEST_IOTHUB_HOST_FQDN_CHAR_PTR)
@@ -574,22 +581,29 @@ static void set_expected_calls_for_Register(IOTHUB_DEVICE_CONFIG* device_config,
         .SetReturn(TEST_DEVICE_ID_CHAR_PTR)
         .CallCannotFail();
     STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_REGISTERED_DEVICES_LIST))
-        .SetReturn(NULL).CallCannotFail();
+        .SetReturn(NULL)
+        .CallCannotFail();
 
-    STRICT_EXPECTED_CALL(STRING_c_str(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE)).SetReturn(TEST_IOTHUB_HOST_FQDN_CHAR_PTR).CallCannotFail();
+    STRICT_EXPECTED_CALL(STRING_c_str(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE))
+        .SetReturn(TEST_IOTHUB_HOST_FQDN_CHAR_PTR)
+        .CallCannotFail();
     EXPECTED_CALL(iothubtransportamqp_methods_create(TEST_IOTHUB_HOST_FQDN_CHAR_PTR, device_config->deviceId, NULL));
 
     STRICT_EXPECTED_CALL(amqp_streaming_client_create(IGNORED_PTR_ARG));
 
     // replicate_device_options_to
-    STRICT_EXPECTED_CALL(amqp_device_set_option(TEST_DEVICE_HANDLE, DEVICE_OPTION_EVENT_SEND_TIMEOUT_SECS, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(amqp_device_set_option(TEST_DEVICE_HANDLE, DEVICE_OPTION_EVENT_SEND_TIMEOUT_SECS, IGNORED_PTR_ARG))
+        .IgnoreArgument(3);
 
     if (is_using_cbs)
     {
-        STRICT_EXPECTED_CALL(amqp_device_set_option(TEST_DEVICE_HANDLE, DEVICE_OPTION_CBS_REQUEST_TIMEOUT_SECS, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(amqp_device_set_option(TEST_DEVICE_HANDLE, DEVICE_OPTION_CBS_REQUEST_TIMEOUT_SECS, IGNORED_PTR_ARG))
+            .IgnoreArgument(3);
     }
 
-    STRICT_EXPECTED_CALL(singlylinkedlist_add(TEST_REGISTERED_DEVICES_LIST, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_add(TEST_REGISTERED_DEVICES_LIST, IGNORED_PTR_ARG))
+        .IgnoreArgument(2);
+    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
 }
 
 static void set_expected_calls_for_Unregister(IOTHUB_DEVICE_HANDLE iothub_device_handle)
@@ -1491,18 +1505,23 @@ TEST_FUNCTION(when_creating_the_methods_handler_fails_then_IoTHubTransport_AMQP_
     size_t n = umock_c_negative_tests_call_count();
     for (i = 0; i < n; i++)
     {
-        if (umock_c_negative_tests_can_call_fail(i))
+        if (!umock_c_negative_tests_can_call_fail(i))
         {
-            // arrange
-            umock_c_negative_tests_reset();
-            umock_c_negative_tests_fail_call(i);
-
-            // act
-            device_handle = IoTHubTransport_AMQP_Common_Register(handle, &device_config, &TEST_waitingToSend);
-
-            // assert
-            ASSERT_IS_NULL(device_handle, "On failed call %lu", (unsigned long)i);
+            continue;
         }
+
+        // arrange
+        char error_msg[64];
+
+        umock_c_negative_tests_reset();
+        umock_c_negative_tests_fail_call(i);
+
+        // act
+        device_handle = IoTHubTransport_AMQP_Common_Register(handle, &device_config, &TEST_waitingToSend);
+
+        // assert
+        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
+        ASSERT_IS_NULL(device_handle, error_msg);
     }
 
     // cleanup
@@ -3070,6 +3089,8 @@ TEST_FUNCTION(SetOption_xio_option_fails)
     STRICT_EXPECTED_CALL(STRING_c_str(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE))
         .SetReturn(TEST_IOTHUB_HOST_FQDN_CHAR_PTR);
     STRICT_EXPECTED_CALL(xio_setoption(TEST_UNDERLYING_IO_TRANSPORT, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreArgument(2)
+        .IgnoreArgument(3)
         .SetReturn(1);
 
     // act
@@ -4504,7 +4525,7 @@ TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_no_network)
     crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, false, false);
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_NETWORK, IGNORED_PTR_ARG));
+	STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_NETWORK, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(get_time(NULL)).SetReturn(TEST_current_time);
 
     // act
@@ -4538,7 +4559,7 @@ TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_retry_expired)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_NETWORK, IGNORED_PTR_ARG));
+	STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_NETWORK, IGNORED_PTR_ARG));
     RETRY_ACTION retry_action = RETRY_ACTION_STOP_RETRYING;
     STRICT_EXPECTED_CALL(retry_control_should_retry(TEST_RETRY_CONTROL_HANDLE, IGNORED_PTR_ARG))
         .CopyOutArgumentBuffer_retry_action(&retry_action, sizeof(RETRY_ACTION));

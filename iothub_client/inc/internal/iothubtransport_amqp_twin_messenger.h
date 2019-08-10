@@ -61,8 +61,7 @@ extern "C"
 
     typedef struct TWIN_MESSENGER_CONFIG_TAG
     {
-        pfTransport_GetOption_Product_Info_Callback prod_info_cb;
-        void* prod_info_ctx;
+        const char* client_version;
         const char* device_id;
         const char* module_id;
         char* iothub_host_fqdn;
