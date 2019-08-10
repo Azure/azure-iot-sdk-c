@@ -43,7 +43,7 @@ MU_DEFINE_ENUM_STRINGS(IOTHUB_DEVICE_TWIN_RESULT, IOTHUB_DEVICE_TWIN_RESULT_VALU
 #define  HTTP_HEADER_VAL_IFMATCH  "*"
 #define UID_LENGTH 37
 
-static const char* URL_API_VERSION = "?api-version=2017-11-08-preview";
+static const char* URL_API_VERSION = "?api-version=2019-07-01-preview";
 
 static const char* RELATIVE_PATH_FMT_TWIN = "/twins/%s%s";
 static const char* RELATIVE_PATH_FMT_TWIN_MODULE = "/twins/%s/modules/%s%s";

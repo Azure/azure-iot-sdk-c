@@ -29,6 +29,8 @@ rm -r -f $build_folder
 mkdir -p $build_folder
 pushd $build_folder
 cmake -Drun_valgrind:BOOL=ON $build_root -Drun_unittests:BOOL=ON
+
+echo "Running: make --jobs=$CORES --max-load=$LOADLIMIT"
 make --jobs=$CORES --max-load=$LOADLIMIT
 
 #use doctored openssl

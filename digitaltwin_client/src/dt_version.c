@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#define COMPILING_REAL_STRINGS_C
+#include "digitaltwin_client_version.h"
 
-#define GBALLOC_H
-#include "real_strings.h"
-#include "strings.c"
+const char* DigitalTwin_Client_GetVersionString(void)
+{
+    return DIGITALTWIN_CLIENT_SDK_VERSION;
+}
