@@ -124,7 +124,7 @@ JSON_Value* attestationMechanism_toJson(const ATTESTATION_MECHANISM_HANDLE att_m
     {
         if (att_mech->type == ATTESTATION_TYPE_TPM)
         {
-            if (json_serialize_and_set_struct(root_object, ATTESTATION_MECHANISM_JSON_KEY_TPM, att_mech->attestation.tpm, (TO_JSON_FUNCTION)tpmAttestation_toJson, REQUIRED) != 0)
+            if (json_serialize_and_set_struct(root_object, ATTESTATION_MECHANISM_JSON_KEY_TPM, att_mech->attestation.tpm, (TO_JSON_FUNCTION)tpmAttestation_toJson, true) != 0)
             {
                 LogError("Failed to set '%s' in JSON string representation of Attestation Mechanism", ATTESTATION_MECHANISM_JSON_KEY_TPM);
                 json_value_free(root_value);
@@ -133,7 +133,7 @@ JSON_Value* attestationMechanism_toJson(const ATTESTATION_MECHANISM_HANDLE att_m
         }
         else if (att_mech->type == ATTESTATION_TYPE_X509)
         {
-            if (json_serialize_and_set_struct(root_object, ATTESTATION_MECHANISM_JSON_KEY_X509, att_mech->attestation.x509, (TO_JSON_FUNCTION)x509Attestation_toJson, REQUIRED) != 0)
+            if (json_serialize_and_set_struct(root_object, ATTESTATION_MECHANISM_JSON_KEY_X509, att_mech->attestation.x509, (TO_JSON_FUNCTION)x509Attestation_toJson, true) != 0)
             {
                 LogError("Failed to set '%s' in JSON string representation of Attestation Mechanism", ATTESTATION_MECHANISM_JSON_KEY_X509);
                 json_value_free(root_value);
@@ -170,7 +170,7 @@ ATTESTATION_MECHANISM_HANDLE attestationMechanism_fromJson(JSON_Object* root_obj
         }
         else if (new_attMech->type == ATTESTATION_TYPE_TPM)
         {
-            if (json_deserialize_and_get_struct((void**)&(new_attMech->attestation.tpm), root_object, ATTESTATION_MECHANISM_JSON_KEY_TPM, (FROM_JSON_FUNCTION)tpmAttestation_fromJson, REQUIRED) != 0)
+            if (json_deserialize_and_get_struct((void**)&(new_attMech->attestation.tpm), root_object, ATTESTATION_MECHANISM_JSON_KEY_TPM, (FROM_JSON_FUNCTION)tpmAttestation_fromJson, true) != 0)
             {
                 LogError("Failed to set '%s' in Attestation Mechanism", ATTESTATION_MECHANISM_JSON_KEY_TPM);
                 attestationMechanism_destroy(new_attMech);
@@ -179,7 +179,7 @@ ATTESTATION_MECHANISM_HANDLE attestationMechanism_fromJson(JSON_Object* root_obj
         }
         else if (new_attMech->type == ATTESTATION_TYPE_X509)
         {
-            if (json_deserialize_and_get_struct((void**)&(new_attMech->attestation.x509), root_object, ATTESTATION_MECHANISM_JSON_KEY_X509, (FROM_JSON_FUNCTION)x509Attestation_fromJson, REQUIRED) != 0)
+            if (json_deserialize_and_get_struct((void**)&(new_attMech->attestation.x509), root_object, ATTESTATION_MECHANISM_JSON_KEY_X509, (FROM_JSON_FUNCTION)x509Attestation_fromJson, true) != 0)
             {
                 LogError("Failed to set '%s' in Attestation Mechanism", ATTESTATION_MECHANISM_JSON_KEY_X509);
                 attestationMechanism_destroy(new_attMech);
