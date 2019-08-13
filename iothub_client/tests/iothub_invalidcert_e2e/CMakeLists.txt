@@ -47,7 +47,7 @@ if(WIN32)
             )
             linkUAMQP(${theseTestsName}_dll)
         endif()
-        if(${use_http} AND NOT ${use_bearssl} )
+        if(${use_http})
             add_definitions(-DUSE_HTTP)
             target_link_libraries(${theseTestsName}_dll
                 iothub_client_http_transport
@@ -72,7 +72,7 @@ if(WIN32)
             )
             linkUAMQP(${theseTestsName}_exe)
         endif()
-        if(${use_http} AND NOT ${use_bearssl})
+        if(${use_http})
             add_definitions(-DUSE_HTTP)
             target_link_libraries(${theseTestsName}_exe
                 iothub_client_http_transport
@@ -126,7 +126,7 @@ else()
             )
             linkUAMQP(${theseTestsName}_exe)
         endif()
-        if(${use_http} AND NOT ${use_bearssl})
+        if(${use_http})
             add_definitions(-DUSE_HTTP)
             target_link_libraries(${theseTestsName}_exe
                 iothub_client_http_transport
