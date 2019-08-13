@@ -57,14 +57,23 @@ endif()
         ENDIF(WIN32)
 
         add_library(msr_riot ${msr_riot_c_files} ${msr_riot_h_files})
+	set_target_properties(msr_riot PROPERTIES
+            ENABLE_EXPORTS YES
+            VERSION ${PROV_SDK_VERSION}
+            SOVERSION ${PROV_SDK_VERSION_MAJOR}
+            BUILD_WITH_INSTALL_RPATH TRUE
+        )
     endif()
 
     if(${hsm_type_sastoken})
-        # Default tpm implementation
+      # Default tpm implementation
+      if (${use_installed_dependencies})
+	find_package(utpm REQUIRED CONFIG)
+      else()
         if (${use_tpm_simulator})
-            set(use_emulator ON CACHE BOOL "enable use_emulator in utpm" FORCE)
+          set(use_emulator ON CACHE BOOL "enable use_emulator in utpm" FORCE)
         else()
-            set(use_emulator OFF CACHE BOOL "disable use_emulator in utpm" FORCE)
+          set(use_emulator OFF CACHE BOOL "disable use_emulator in utpm" FORCE)
         endif()
 
         set(original_run_e2e_tests ${run_e2e_tests})

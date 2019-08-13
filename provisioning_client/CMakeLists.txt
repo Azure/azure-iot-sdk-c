@@ -66,6 +66,7 @@ elseif (${use_prov_client})
         add_subdirectory(./tests/common_prov_e2e/prov_hsm)
 
         set(HSM_CLIENT_LIBRARY ${HSM_CLIENT_LIBRARY} msr_riot utpm prov_hsm)
+	set(provisioning_libs ${provisioning_libs} msr_riot)
         if (WIN32)
             set(HSM_CLIENT_LIBRARY ${HSM_CLIENT_LIBRARY} Tbs)
         endif ()
@@ -86,6 +87,7 @@ elseif (${use_prov_client})
             include_directories(./deps/RIoT/Emulator/RIoT/RIoTCrypt/include)
 
             set(HSM_CLIENT_LIBRARY ${HSM_CLIENT_LIBRARY} msr_riot)
+	    set(provisioning_libs ${provisioning_libs} msr_riot)
         endif()
 
         if (${hsm_type_sastoken})
