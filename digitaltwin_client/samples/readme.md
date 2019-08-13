@@ -8,7 +8,8 @@ This directory contains samples demonstrating creating and using Digital Twin in
 * [digitaltwin_sample_ll_device](./digitaltwin_sample_ll_device) - executable that interacts with the other Digital Twin interfaces in this directory, using the \_LL\_ layer and enabling Device Provisioning Service (DPS).
 * [digitaltwin_sample_device_info](./digitaltwin_sample_device_info) - library that implements a sample device info Digital Twin interface.  This interface reports information about the device - such as OS version, amount of storage, , etc.
 * [digitaltwin_sample_environmental_sensor](./digitaltwin_sample_environmental_sensor) library that implements a sample environmental sensor Digital Twin interface.  This interface demonstrates all concepts of the implementing a Digital Twin model: commands (synchronous and asynchronous), properties, and telemetry.
-* [digitaltwin_sample_model_definition](./digitaltwin_sample_model_definition) demonstrates the `urn_azureiot_ModelDiscovery_ModelDefinition` interface.  This interface allows service applications to query for the the Digital Twin Definition Language (DTDT, aka the model definition) file(s) that it is populated with.
+* [digitaltwin_sample_model_definition](./digitaltwin_sample_model_definition) demonstrates the `urn_azureiot_ModelDiscovery_ModelDefinition` interface.  This interface allows service applications to query for the the Digital Twin Definition Language (DTDT, aka the model definition) file(s) that it is populated with.  
+The `ModelDiscovery` interface is optional.  Constrained devices should never include it as both the code and the need to store DTDL's locally consume valuable RAM and ROM space.  This interface is not registered by the samples below unless `ENABLE_MODEL_DEFINITION_INTERFACE` is defined.
 
 ## Getting started
 
