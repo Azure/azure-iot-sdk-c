@@ -24,7 +24,18 @@
 #define json_value_get_object               real_json_value_get_object
 #define json_value_get_array                real_json_value_get_array
 #define json_object                         real_json_object
-
+#define json_object_set_value               real_json_object_set_value
+#define json_object_dotget_object           real_json_object_dotget_object
+#define json_object_get_count               real_json_object_get_count
+#define json_object_get_value_at            real_json_object_get_value_at
+#define json_object_set_null                real_json_object_set_null
+#define json_value_init_array               real_json_value_init_array
+#define json_array_append_string            real_json_array_append_string
+#define json_object_get_object              real_json_object_get_object
+#define json_object_dotget_number           real_json_object_dotget_number
+#define json_object_get_value               real_json_object_get_value
+#define json_object_get_name                real_json_object_get_name
+#define json_object_dotget_value            real_json_object_dotget_value
 #include "parson.h"
 
 #ifndef COMPILING_REAL_PARSON_C
@@ -48,8 +59,18 @@
 #undef json_value_get_object
 #undef json_value_get_array
 #undef json_object
-
-
+#undef json_object_set_value
+#undef json_object_dotget_object
+#undef json_object_get_count
+#undef json_object_get_value_at
+#undef json_object_set_null
+#undef json_value_init_array
+#undef json_array_append_string
+#undef json_object_get_object
+#undef json_object_dotget_number
+#undef json_object_get_value
+#undef json_object_get_name
+#undef json_object_dotget_value
 #endif
 
 #endif

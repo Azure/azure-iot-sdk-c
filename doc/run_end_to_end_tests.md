@@ -1,6 +1,6 @@
 # Run End to End Tests
 
-This document describes how to run the end to end tests.
+This document describes how to run the end to end tests, with exception of Digital Twin E2E tests.  Digital Twin E2E test setup is described [here](../digitaltwin_client/tests/dt_e2e/readme.md).
 
 - [Set up the test parameters](#testparams)
 - [Run end to end tests on a Windows development environment](#windows_client)

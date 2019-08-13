@@ -436,6 +436,7 @@ static const char* retrieve_mqtt_return_codes(CONNECT_RETURN_CODE rtn_code)
 static int retrieve_device_method_rid_info(const char* resp_topic, STRING_HANDLE method_name, STRING_HANDLE request_id)
 {
     int result;
+
     STRING_TOKENIZER_HANDLE token_handle = STRING_TOKENIZER_create_from_char(resp_topic);
     if (token_handle == NULL)
     {
@@ -492,6 +493,7 @@ static int retrieve_device_method_rid_info(const char* resp_topic, STRING_HANDLE
         }
         STRING_TOKENIZER_destroy(token_handle);
     }
+
     return result;
 }
 
