@@ -90,8 +90,6 @@ static const char* STREAM_PROPERTY_AUTH = "$auth";
 #define MIN_DEVICE_STREAMING_NUM_OF_PARAMETERS 4
 #define MAX_DEVICE_STREAMING_NUM_OF_PARAMETERS 5
 
-static const char* IOTHUB_API_VERSION = "2019-07-01-preview";
-
 static const char* PROPERTY_SEPARATOR = "&";
 static const char* REPORTED_PROPERTIES_TOPIC = "$iothub/twin/PATCH/properties/reported/?$rid=%"PRIu16;
 static const char* GET_PROPERTIES_TOPIC = "$iothub/twin/GET/?$rid=%"PRIu16;

@@ -31,7 +31,8 @@ extern "C"
 
     typedef struct AMQP_STREAMING_CLIENT_CONFIG_TAG
 	{
-		const char* client_version;
+		pfTransport_GetOption_Product_Info_Callback prod_info_cb;
+		void* prod_info_ctx;
 		const char* device_id;
 		const char* module_id;
 		const char* iothub_host_fqdn;

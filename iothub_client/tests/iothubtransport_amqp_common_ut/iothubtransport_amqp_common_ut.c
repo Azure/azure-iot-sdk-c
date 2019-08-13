@@ -971,7 +971,6 @@ static bool TEST_Transport_MessageCallback(MESSAGE_CALLBACK_INFO* messageData, v
     return g_MessageCallback_return;
 }
 
-static const char* TEST_amqp_streaming_client_create_saved_client_config_client_version;
 static const char* TEST_amqp_streaming_client_create_saved_client_config_iothub_host_fqdn;
 static const char* TEST_amqp_streaming_client_create_saved_client_config_device_id;
 static const char* TEST_amqp_streaming_client_create_saved_client_config_module_id;
@@ -980,7 +979,6 @@ static const void* TEST_amqp_streaming_client_create_saved_client_config_on_stat
 static AMQP_STREAMING_CLIENT_HANDLE TEST_amqp_streaming_client_create_result;
 static AMQP_STREAMING_CLIENT_HANDLE TEST_amqp_streaming_client_create(const AMQP_STREAMING_CLIENT_CONFIG* client_config)
 {
-    TEST_amqp_streaming_client_create_saved_client_config_client_version = client_config->client_version;
     TEST_amqp_streaming_client_create_saved_client_config_iothub_host_fqdn = client_config->iothub_host_fqdn;
     TEST_amqp_streaming_client_create_saved_client_config_device_id = client_config->device_id;
     TEST_amqp_streaming_client_create_saved_client_config_module_id = client_config->module_id;
@@ -1357,7 +1355,6 @@ static void reset_test_data()
     g_on_methods_unsubscribed_context = NULL;
     expected_AMQP_TRANSPORT_PROXY_OPTIONS = NULL;
 
-    TEST_amqp_streaming_client_create_saved_client_config_client_version = NULL;
     TEST_amqp_streaming_client_create_saved_client_config_iothub_host_fqdn = NULL;
     TEST_amqp_streaming_client_create_saved_client_config_device_id = NULL;
     TEST_amqp_streaming_client_create_saved_client_config_module_id = NULL;
