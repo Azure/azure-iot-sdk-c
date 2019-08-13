@@ -2,12 +2,12 @@
 
 ## Initial development environment setup
 To get setup to build applications that enable the Digital Twin for C:
-* Clone and perform initial cmake on the private GitHub repo containing the Digital Twin private preview SDK.
+* Clone and perform initial cmake on the GitHub repo containing the Digital Twin public preview SDK.
 
 
 ```
- git clone -b public-preview-utopia --recursive https://github.com/Azure/azure-iot-sdk-c-pnp
- cd azure-iot-sdk-c-pnp
+ git clone -b public-preview --recursive https://github.com/Azure/azure-iot-sdk-c
+ cd azure-iot-sdk-c
  mkdir cmake
  cd cmake
  cmake .. -Duse_prov_client=ON -Dhsm_type_symm_key:BOOL=ON
