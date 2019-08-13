@@ -54,12 +54,8 @@ static const int commandStatusNotPresent = 501;
 //
 // What we respond to various commands with.  Must be valid JSON.
 //
-static const char digitaltwinSample_EnviromentalSensor_BlinkResponse[] = "{ \"status\": 12, \"description\": \"leds blinking\" }";
-static const char digitaltwinSample_EnviromentalSensor_TurnOnLightResponse[] = "{ \"status\": 1, \"description\": \"light on\" }";
-static const char digitaltwinSample_EnviromentalSensor_TurnOffLightResponse[] = "{ \"status\": 1, \"description\": \"light off\" }";
-static const char digitaltwinSample_EnviromentalSensor_EmptyBody[] = "\" \"";
+static const char digitaltwinSample_EnviromentalSensor_BlinkResponse[] = "{ \"description\": \"leds blinking\" }";
 
-static const char digitaltwinSample_EnviromentalSensor_RunDiagnosticsStarted[] = "\"Started diagnostics run\"";
 static const char digitaltwinSample_EnviromentalSensor_OutOfMemory[] = "\"Out of memory\"";
 static const char digitaltwinSample_EnviromentalSensor_NotImplemented[] = "\"Requested command not implemented on this interface\"";
 static const char digitaltwinSample_EnviromentalSensor_RunDiagnosticsBusy[] = "\"Running of diagnostics already active.  Only one request may be active at a time\"";
@@ -127,6 +123,14 @@ static int DigitalTwinSampleEnvironmentalSensor_SetCommandResponse(DIGITALTWIN_C
     return result;
 }
 
+static int DigitalTwinSampleEnvironmentalSensor_SetCommandResponseEmptyBody(DIGITALTWIN_CLIENT_COMMAND_RESPONSE* dtCommandResponse, int status)
+{
+    memset(dtCommandResponse, 0, sizeof(*dtCommandResponse));
+    dtCommandResponse->version = DIGITALTWIN_CLIENT_COMMAND_RESPONSE_VERSION_1;
+    dtCommandResponse->status = status;
+    return 0;
+}
+
 // Implement the callback to process the command "blink".  Information pertaining to the request is specified in DIGITALTWIN_CLIENT_COMMAND_REQUEST,
 // and the callback fills out data it wishes to return to the caller on the service in DIGITALTWIN_CLIENT_COMMAND_RESPONSE.
 static void DigitalTwinSampleEnvironmentalSensor_BlinkCallback(const DIGITALTWIN_CLIENT_COMMAND_REQUEST* dtCommandRequest, DIGITALTWIN_CLIENT_COMMAND_RESPONSE* dtCommandResponse, void* userInterfaceContext)
@@ -150,7 +154,7 @@ static void DigitalTwinSampleEnvironmentalSensor_TurnOnLightCallback(const DIGIT
     LogInfo("ENVIRONMENTAL_SENSOR_INTERFACE: Turn on light command invoked");
     LogInfo("ENVIRONMENTAL_SENSOR_INTERFACE: Turn on light data=<%.*s>", (int)dtCommandRequest->requestDataLen, dtCommandRequest->requestData);
 
-    (void)DigitalTwinSampleEnvironmentalSensor_SetCommandResponse(dtCommandResponse, digitaltwinSample_EnviromentalSensor_TurnOnLightResponse, commandStatusSuccess);
+    (void)DigitalTwinSampleEnvironmentalSensor_SetCommandResponseEmptyBody(dtCommandResponse, commandStatusSuccess);
 }
 
 // Implement the callback to process the command "turnoff".
@@ -162,7 +166,7 @@ static void DigitalTwinSampleEnvironmentalSensor_TurnOffLightCallback(const DIGI
     LogInfo("ENVIRONMENTAL_SENSOR_INTERFACE: Turn off light command invoked");
     LogInfo("ENVIRONMENTAL_SENSOR_INTERFACE: Turn off light data=<%.*s>", (int)dtCommandRequest->requestDataLen, dtCommandRequest->requestData);
 
-    (void)DigitalTwinSampleEnvironmentalSensor_SetCommandResponse(dtCommandResponse, digitaltwinSample_EnviromentalSensor_TurnOffLightResponse, commandStatusSuccess);
+    (void)DigitalTwinSampleEnvironmentalSensor_SetCommandResponseEmptyBody(dtCommandResponse, commandStatusSuccess);
 }
 
 
@@ -190,7 +194,7 @@ static void DigitalTwinSampleEnvironmentalSensor_RunDiagnosticsCallback(const DI
         LogError("ENVIRONMENTAL_SENSOR_INTERFACE: Cannot allocate requestId.");
         (void)DigitalTwinSampleEnvironmentalSensor_SetCommandResponse(dtCommandResponse, digitaltwinSample_EnviromentalSensor_OutOfMemory, commandStatusFailure);
     }
-    else if (DigitalTwinSampleEnvironmentalSensor_SetCommandResponse(dtCommandResponse, digitaltwinSample_EnviromentalSensor_RunDiagnosticsStarted, commandStatusPending) != 0)
+    else if (DigitalTwinSampleEnvironmentalSensor_SetCommandResponseEmptyBody(dtCommandResponse, commandStatusPending) != 0)
     {
         // Because DigitalTwinSampleEnvironmentalSensor_SetCommandResponse failed, it means 
         // the server will get an error response back.  Do NOT change our diagnosticState
