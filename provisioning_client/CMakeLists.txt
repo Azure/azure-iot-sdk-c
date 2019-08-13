@@ -357,7 +357,7 @@ endif ()
 if(${use_installed_dependencies})
 
     # Install Provisioning libs
-    set(package_location "share/cmake/${PROJECT_NAME}")
+    set(package_location "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
 
     if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
         set(CMAKE_INSTALL_LIBDIR "lib")
@@ -409,7 +409,7 @@ else()
     install(TARGETS ${provisioning_libs}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/../bin
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
 endif()
