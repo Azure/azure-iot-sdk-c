@@ -10,6 +10,7 @@
 #include "iothub_device_client_ll.h"
 #include "iothub_client_core_ll.h"
 #include "azure_c_shared_utility/shared_util_options.h"
+#include "azure_c_shared_utility/xlogging.h"
 
 #ifdef USE_MQTT
 #include "iothubtransportmqtt.h"
@@ -55,6 +56,7 @@ static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void
     CONNECTION_STATUS_INFO* conn_status = (CONNECTION_STATUS_INFO*)user_ctx;
     ASSERT_IS_NOT_NULL(conn_status, "connection status callback context is NULL");
 
+    LogInfo("I confirm a connection callback");
     conn_status->status_set = true;
     conn_status->current_confirmation = result;
 }
@@ -64,6 +66,7 @@ static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS status, I
     CONNECTION_STATUS_INFO* conn_status = (CONNECTION_STATUS_INFO*)user_ctx;
     ASSERT_IS_NOT_NULL(conn_status, "connection status callback context is NULL");
 
+    LogInfo("I got a connection callback");
     conn_status->status_set = true;
     conn_status->current_status = status;
     conn_status->currentStatusReason = reason;
