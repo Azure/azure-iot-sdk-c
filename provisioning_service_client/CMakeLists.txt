@@ -43,7 +43,9 @@ set(provisioning_service_client_h_files
 
 include_directories(${SHARED_UTIL_INC_FOLDER})
 include_directories(${UHTTP_C_INC_FOLDER})
-include_directories(${CMAKE_CURRENT_LIST_DIR}/../deps/parson)
+if (NOT ${use_installed_dependencies})
+  include_directories(${CMAKE_CURRENT_LIST_DIR}/../deps/parson)
+endif()
 
 set(PROVISIONING_SERVICE_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "This is the include folder for provisioning_service_client" FORCE)
 
@@ -59,7 +61,7 @@ ENDIF(WIN32)
 add_library(provisioning_service_client
     ${provisioning_service_client_c_files}
     ${provisioning_service_client_h_files})
-target_link_libraries(provisioning_service_client parson uhttp)
+target_link_libraries(provisioning_service_client parson::parson uhttp)
 
 if (NOT ${ARCHITECTURE} STREQUAL "ARM")
     if (NOT ${skip_samples})

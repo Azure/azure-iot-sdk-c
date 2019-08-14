@@ -158,15 +158,19 @@ endif()
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # build the parson library for json parsing
-add_library(parson
+if (NOT ${use_installed_dependencies})
+  add_library(parson
     ./deps/parson/parson.c
     ./deps/parson/parson.h
-)
-if (MSVC)
+    )
+  if (MSVC)
     set_source_files_properties(../deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
+  endif()
+  set(parson_h_install_files ./deps/parson/parson.h)
+  set(parson_install_libs parson)
+else()
+  find_package(parson REQUIRED CONFIG)
 endif()
-set(parson_h_install_files ./deps/parson/parson.h)
-set(parson_install_libs parson)
 
 if (IN_OPENWRT)
     ADD_DEFINITIONS("$ENV{TARGET_LDFLAGS}" "$ENV{TARGET_CPPFLAGS}" "$ENV{TARGET_CFLAGS}")
@@ -398,16 +402,16 @@ if (${use_installed_dependencies})
         "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}Config.cmake"
         COPYONLY
     )
-
-    install(FILES ${parson_h_install_files}
+    if (NOT ${use_installed_dependencies})
+      install(FILES ${parson_h_install_files}
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
-    )
-    install(TARGETS ${parson_install_libs} EXPORT azure_iot_sdksTargets
+	)
+      install(TARGETS ${parson_install_libs} EXPORT azure_iot_sdksTargets
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
-    )
-
+	)
+    endif()
     install(EXPORT azure_iot_sdksTargets
         FILE
             "${PROJECT_NAME}Targets.cmake"
