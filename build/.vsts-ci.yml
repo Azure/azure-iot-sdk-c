@@ -21,314 +21,314 @@ jobs:
       npm install check_submodules
       ./../../node_modules/.bin/check_submodules . master
     displayName: 'build'
-- job: windowsx86
-  pool:
-    name: 'aziotbld-win03'
-  steps:
-  - script: |
-      call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
-      call jenkins\windows_c.cmd
-    displayName: 'build'
-    env:
-      IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-      IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-      IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-      STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-      IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-      IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-      IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-      DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-      # PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-  - script: |
-      call jenkins\collect_results.cmd iotsdk_win32
-    displayName: 'cmdLine Transform'
-    condition: succeededOrFailed()
-  - task: PublishTestResults@2
-    displayName: 'Publish windowsx86 results'
-    inputs:
-      testResultsFiles: '**/results-junit.xml'
-      mergeTestResults: true
-      testRunTitle: 'windowsx86'
-    condition: succeededOrFailed()
-  - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
-    displayName: 'cleanup'
-    condition: always()
-- job: raspberrypi
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/raspberrypi-c"
-  pool: Hosted Ubuntu 1604
-  displayName: raspberrypi
-  steps:
-  - script: |
-     $HOME
-     whoami
-     ls -lr
-     pwd
-     sudo ./jenkins/raspberrypi_c.sh
-    displayName: 'build'
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'cleanup'
-- job: gcc44
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-gcc4.4"
-  pool: Hosted Ubuntu 1604
-  displayName: 'gcc4.4'
-  steps:
-  - script: |
-      sudo ./jenkins/linux_c_gcc44.sh
-    env:
-      IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-      IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-      IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-    displayName: 'build'
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'cleanup'
-    condition: always()
-- job: gcc46
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/gcc-4.6:latest"
-  pool: Hosted Ubuntu 1604
-  displayName: 'gcc-4.6'
-  steps:
-  - script: |
-      sudo ./jenkins/linux_c_gcc44.sh
-    env:
-      IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-      IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-      IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-      IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-      IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-    displayName: 'build'
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'cleanup'
-    condition: always()
-- job: linuxoptions
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/vsts-linux-c-ubuntu"
-  pool: Hosted Ubuntu 1604
-  displayName: 'linux-options'
-  steps:
-  - script: 'sudo ./jenkins/linux_c_option_test.sh'
-    displayName: 'build'
-    condition: always()
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'cleanup'
-    condition: always()
-- job: windowsdynamic
-  pool:
-    name: 'aziotbld-win03'
-  steps:
-  - script: |
-      call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
-      call jenkins\windows_c_build_as_dynamic.cmd
-    displayName: 'build'
-    env:
-      IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-      IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-      IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-      STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-      IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-      IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-      IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-      IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-      IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-      DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-      PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-  - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
-    displayName: 'cleanup'
-    condition: always()
-- job: OSX
-  pool:
-    name: Hosted macOS
-  steps:
-  - script: |
-      ./jenkins/osx_gcc_openssl.sh
-    displayName: 'build'
-    env:
-      IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-      IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-      IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-      STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-      IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-      IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-      IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-      IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-      IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-      IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-      DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-      PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-  - script: rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'cleanup'
-    condition: always()
-- job: clang
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/ubuntu-clang"
-  pool: aziotbld-lin01
-  displayName: 'clang'
-  steps:
-  - script: |
-      export OPENSSL_ia32cap=0x00000000
-      sudo chmod -R 755 .
-      sudo -E ./jenkins/ubuntu_clang.sh
-    displayName: 'build'
-    env:
-      IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-      IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-      IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-      STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-      IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-      IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-      IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-      IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-      IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-      IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-      DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-      PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'cleanup'
-    condition: always()
-- job: ubuntu1604
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
-  pool: aziotbld-lin02
-  displayName: 'ubuntu1604'
-  steps:
-  - script: |
-      export OPENSSL_ia32cap=0x00000000
-      sudo chmod -R 755 .
-      sudo -E ./jenkins/ubuntu1604_c.sh
-    displayName: 'build'
-    env:
-      IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-      IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-      IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-      STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-      IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-      IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-      IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-      IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-      IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-      IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-      DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-      PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'cleanup'
-    condition: always()
-- job: debian
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/c-debian"
-  pool: aziotbld-lin02
-  displayName: 'debian'
-  steps:
-  - script: |
-      sudo ./jenkins/debian_c.sh
-    displayName: 'build'
-    env:
-      IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-      IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-      IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-      STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-      IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-      IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-      IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-      IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-      IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-      IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-      DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-      PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'cleanup'
-    condition: always()
-- job: linux_installed_deps
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
-  pool: aziotbld-lin02
-  displayName: 'linux_installed_deps'
-  steps:
-  - script: |
-      export OPENSSL_ia32cap=0x00000000
-      sudo chmod -R 755 .
-      sudo -E ./jenkins/linux_install_deps.sh
-    displayName: 'build'
-    env:
-      IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-      IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-      IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-      STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-      IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-      IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-      IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-      IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-      IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-      IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-      DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-      PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'cleanup'
-    condition: always()
-- job: wolfssl
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/c-linux-wolfssl"
-  pool: Hosted Ubuntu 1604
-  displayName: 'wolfssl'
-  steps:
-  - script: |
-      LD_LIBRARY_PATH=/usr/local/lib
-      LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/my_library/
-      sudo -E jenkins/linux_wolfssl.sh
-    displayName: 'build'
-    env:
-      IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-      IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-      IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-      STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-      IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-      IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-      IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-      IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-      IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-      IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-      DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-      PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'cleanup'
-    condition: always()
+# - job: windowsx86
+#   pool:
+#     name: 'aziotbld-win03'
+#   steps:
+#   - script: |
+#       call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
+#       call jenkins\windows_c.cmd
+#     displayName: 'build'
+#     env:
+#       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
+#       IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
+#       IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+#       IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+#       IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+#       IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
+#       STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
+#       IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
+#       IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
+#       IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
+#       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+#       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+#       # PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+#   - script: |
+#       call jenkins\collect_results.cmd iotsdk_win32
+#     displayName: 'cmdLine Transform'
+#     condition: succeededOrFailed()
+#   - task: PublishTestResults@2
+#     displayName: 'Publish windowsx86 results'
+#     inputs:
+#       testResultsFiles: '**/results-junit.xml'
+#       mergeTestResults: true
+#       testRunTitle: 'windowsx86'
+#     condition: succeededOrFailed()
+#   - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
+#     displayName: 'cleanup'
+#     condition: always()
+# - job: raspberrypi
+#   variables:
+#     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/raspberrypi-c"
+#   pool: Hosted Ubuntu 1604
+#   displayName: raspberrypi
+#   steps:
+#   - script: |
+#      $HOME
+#      whoami
+#      ls -lr
+#      pwd
+#      sudo ./jenkins/raspberrypi_c.sh
+#     displayName: 'build'
+#   - script: sudo rm -rf $(Agent.BuildDirectory)/*
+#     displayName: 'cleanup'
+# - job: gcc44
+#   variables:
+#     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-gcc4.4"
+#   pool: Hosted Ubuntu 1604
+#   displayName: 'gcc4.4'
+#   steps:
+#   - script: |
+#       sudo ./jenkins/linux_c_gcc44.sh
+#     env:
+#       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
+#       IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
+#       IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+#       IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+#       IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
+#     displayName: 'build'
+#   - script: sudo rm -rf $(Agent.BuildDirectory)/*
+#     displayName: 'cleanup'
+#     condition: always()
+# - job: gcc46
+#   variables:
+#     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/gcc-4.6:latest"
+#   pool: Hosted Ubuntu 1604
+#   displayName: 'gcc-4.6'
+#   steps:
+#   - script: |
+#       sudo ./jenkins/linux_c_gcc44.sh
+#     env:
+#       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
+#       IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
+#       IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+#       IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+#       IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
+#       IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
+#       IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
+#     displayName: 'build'
+#   - script: sudo rm -rf $(Agent.BuildDirectory)/*
+#     displayName: 'cleanup'
+#     condition: always()
+# - job: linuxoptions
+#   variables:
+#     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/vsts-linux-c-ubuntu"
+#   pool: Hosted Ubuntu 1604
+#   displayName: 'linux-options'
+#   steps:
+#   - script: 'sudo ./jenkins/linux_c_option_test.sh'
+#     displayName: 'build'
+#     condition: always()
+#   - script: sudo rm -rf $(Agent.BuildDirectory)/*
+#     displayName: 'cleanup'
+#     condition: always()
+# - job: windowsdynamic
+#   pool:
+#     name: 'aziotbld-win03'
+#   steps:
+#   - script: |
+#       call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
+#       call jenkins\windows_c_build_as_dynamic.cmd
+#     displayName: 'build'
+#     env:
+#       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
+#       IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
+#       IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+#       IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+#       IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+#       IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
+#       STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
+#       IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
+#       IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
+#       IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
+#       IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
+#       IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
+#       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+#       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+#       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+#   - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
+#     displayName: 'cleanup'
+#     condition: always()
+# - job: OSX
+#   pool:
+#     name: Hosted macOS
+#   steps:
+#   - script: |
+#       ./jenkins/osx_gcc_openssl.sh
+#     displayName: 'build'
+#     env:
+#       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
+#       IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
+#       IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+#       IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+#       IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+#       IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
+#       STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
+#       IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
+#       IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
+#       IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
+#       IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
+#       IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+#       IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
+#       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+#       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+#       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+#   - script: rm -rf $(Agent.BuildDirectory)/*
+#     displayName: 'cleanup'
+#     condition: always()
+# - job: clang
+#   variables:
+#     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/ubuntu-clang"
+#   pool: aziotbld-lin01
+#   displayName: 'clang'
+#   steps:
+#   - script: |
+#       export OPENSSL_ia32cap=0x00000000
+#       sudo chmod -R 755 .
+#       sudo -E ./jenkins/ubuntu_clang.sh
+#     displayName: 'build'
+#     env:
+#       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
+#       IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
+#       IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+#       IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+#       IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+#       IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
+#       STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
+#       IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
+#       IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
+#       IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
+#       IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
+#       IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+#       IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
+#       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+#       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+#       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+#   - script: sudo rm -rf $(Agent.BuildDirectory)/*
+#     displayName: 'cleanup'
+#     condition: always()
+# - job: ubuntu1604
+#   variables:
+#     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
+#   pool: aziotbld-lin02
+#   displayName: 'ubuntu1604'
+#   steps:
+#   - script: |
+#       export OPENSSL_ia32cap=0x00000000
+#       sudo chmod -R 755 .
+#       sudo -E ./jenkins/ubuntu1604_c.sh
+#     displayName: 'build'
+#     env:
+#       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
+#       IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
+#       IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+#       IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+#       IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+#       IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
+#       STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
+#       IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
+#       IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
+#       IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
+#       IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
+#       IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+#       IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
+#       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+#       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+#       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+#   - script: sudo rm -rf $(Agent.BuildDirectory)/*
+#     displayName: 'cleanup'
+#     condition: always()
+# - job: debian
+#   variables:
+#     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/c-debian"
+#   pool: aziotbld-lin02
+#   displayName: 'debian'
+#   steps:
+#   - script: |
+#       sudo ./jenkins/debian_c.sh
+#     displayName: 'build'
+#     env:
+#       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
+#       IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
+#       IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+#       IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+#       IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+#       IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
+#       STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
+#       IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
+#       IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
+#       IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
+#       IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
+#       IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+#       IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
+#       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+#       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+#       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+#   - script: sudo rm -rf $(Agent.BuildDirectory)/*
+#     displayName: 'cleanup'
+#     condition: always()
+# - job: linux_installed_deps
+#   variables:
+#     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
+#   pool: aziotbld-lin02
+#   displayName: 'linux_installed_deps'
+#   steps:
+#   - script: |
+#       export OPENSSL_ia32cap=0x00000000
+#       sudo chmod -R 755 .
+#       sudo -E ./jenkins/linux_install_deps.sh
+#     displayName: 'build'
+#     env:
+#       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
+#       IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
+#       IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+#       IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+#       IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+#       IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
+#       STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
+#       IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
+#       IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
+#       IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
+#       IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
+#       IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+#       IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
+#       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+#       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+#       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+#   - script: sudo rm -rf $(Agent.BuildDirectory)/*
+#     displayName: 'cleanup'
+#     condition: always()
+# - job: wolfssl
+#   variables:
+#     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/c-linux-wolfssl"
+#   pool: Hosted Ubuntu 1604
+#   displayName: 'wolfssl'
+#   steps:
+#   - script: |
+#       LD_LIBRARY_PATH=/usr/local/lib
+#       LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/my_library/
+#       sudo -E jenkins/linux_wolfssl.sh
+#     displayName: 'build'
+#     env:
+#       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
+#       IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
+#       IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+#       IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+#       IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+#       IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
+#       STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
+#       IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
+#       IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
+#       IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
+#       IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
+#       IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+#       IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
+#       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+#       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+#       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+#   - script: sudo rm -rf $(Agent.BuildDirectory)/*
+#     displayName: 'cleanup'
+#     condition: always()
 - job: bearssl
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/vsts-c-bearssl"
@@ -360,71 +360,71 @@ jobs:
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
     condition: always()
-- job: windowsx64
-  pool:
-    name: 'aziotbld-win03'
-  displayName: 'windowsx64'
-  steps:
-  - script: |
-      call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
-      call jenkins\windows_c.cmd --platform x64
-    displayName: 'build'
-    env:
-      IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-      IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-      IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-      STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-      IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-      IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-      IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-      IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-      IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-      IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-      DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-      PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-  - script: |
-      call jenkins\collect_results.cmd iotsdk_x64
-    displayName: 'cmdLine Transform'
-    condition: succeededOrFailed()
-  - task: PublishTestResults@2
-    displayName: 'Publish windowsx64 results'
-    inputs:
-      testResultsFiles: '**/results-junit.xml'
-      mergeTestResults: true
-      testRunTitle: 'windowsx64'
-    condition: succeededOrFailed()
-  - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
-    displayName: 'cleanup'
-    condition: always()
-- job: xcodenative
-  pool:
-    name: OSX
-  steps:
-  - script: |
-      DYLD_LIBRARY_PATH=/usr/local/Cellar/curl/7.61.0/lib
-      ./jenkins/osx_xcode_native.sh
-    displayName: 'build'
-    env:
-      IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-      IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-      IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-      STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-      IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-      IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-      IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-      IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-      IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-      IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-      DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-      PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-  - script: rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'cleanup'
-    condition: always()
+# - job: windowsx64
+#   pool:
+#     name: 'aziotbld-win03'
+#   displayName: 'windowsx64'
+#   steps:
+#   - script: |
+#       call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
+#       call jenkins\windows_c.cmd --platform x64
+#     displayName: 'build'
+#     env:
+#       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
+#       IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
+#       IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+#       IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+#       IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+#       IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
+#       STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
+#       IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
+#       IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
+#       IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
+#       IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
+#       IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+#       IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
+#       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+#       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+#       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+#   - script: |
+#       call jenkins\collect_results.cmd iotsdk_x64
+#     displayName: 'cmdLine Transform'
+#     condition: succeededOrFailed()
+#   - task: PublishTestResults@2
+#     displayName: 'Publish windowsx64 results'
+#     inputs:
+#       testResultsFiles: '**/results-junit.xml'
+#       mergeTestResults: true
+#       testRunTitle: 'windowsx64'
+#     condition: succeededOrFailed()
+#   - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
+#     displayName: 'cleanup'
+#     condition: always()
+# - job: xcodenative
+#   pool:
+#     name: OSX
+#   steps:
+#   - script: |
+#       DYLD_LIBRARY_PATH=/usr/local/Cellar/curl/7.61.0/lib
+#       ./jenkins/osx_xcode_native.sh
+#     displayName: 'build'
+#     env:
+#       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
+#       IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
+#       IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+#       IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+#       IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+#       IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
+#       STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
+#       IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
+#       IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
+#       IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
+#       IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
+#       IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+#       IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
+#       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+#       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+#       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+#   - script: rm -rf $(Agent.BuildDirectory)/*
+#     displayName: 'cleanup'
+#     condition: always()
