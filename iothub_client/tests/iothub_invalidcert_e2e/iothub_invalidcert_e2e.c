@@ -120,7 +120,7 @@ static void wait_for_unauthorized_connection(IOTHUB_DEVICE_CLIENT_LL_HANDLE dev_
         }
     } while (
         (nowTime = time(NULL)),
-        (difftime(nowTime, beginOperation) < 2*MAX_CONNECT_CALLBACK_WAIT_TIME) && (!conn_status->status_set) // time box
+        (difftime(nowTime, beginOperation) < MAX_CONNECT_CALLBACK_WAIT_TIME) && (!conn_status->status_set) // time box
         );
     ASSERT_IS_TRUE(conn_status->status_set, "Status callback did not get executed");
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, conn_status->current_status, "Connection was successful and should not have been");
