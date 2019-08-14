@@ -23,7 +23,11 @@
 //
 #include <digitaltwin_device_client.h>
 #include <digitaltwin_interface_client.h>
+
+// #define ENABLE_MODEL_DEFINITION_INTERFACE to enable ModelDefinition interface.  It is left out of default sample because it is not required and will add resources on constrained devices.
+#ifdef ENABLE_MODEL_DEFINITION_INTERFACE
 #include <digitaltwin_model_definition.h>
+#endif 
 
 
 //
@@ -35,7 +39,11 @@
 
 
 // Number of DigitalTwin Interfaces that this DigitalTwin Device supports.
+#ifdef ENABLE_MODEL_DEFINITION_INTERFACE
 #define DIGITALTWIN_SAMPLE_DEVICE_MAX_INTERFACES 3
+#else
+#define DIGITALTWIN_SAMPLE_DEVICE_MAX_INTERFACES 2
+#endif
 #define DIGITALTWIN_SAMPLE_DEVICE_INFO_INDEX 0
 #define DIGITALTWIN_SAMPLE_ENVIRONMENTAL_SENSOR_INDEX 1
 #define DIGITALTWIN_SAMPLE_MODEL_DEFINITION_INDEX 2
@@ -175,7 +183,9 @@ int main(int argc, char *argv[])
     IOTHUB_DEVICE_HANDLE deviceHandle = NULL; 
     DIGITALTWIN_DEVICE_CLIENT_HANDLE dtDeviceClientHandle = NULL;
     DIGITALTWIN_INTERFACE_CLIENT_HANDLE interfaceClientHandles[DIGITALTWIN_SAMPLE_DEVICE_MAX_INTERFACES];
+#ifdef ENABLE_MODEL_DEFINITION_INTERFACE
     MODEL_DEFINITION_CLIENT_HANDLE modeldefClientHandle = NULL;
+#endif
 
     memset(&interfaceClientHandles, 0, sizeof(interfaceClientHandles));
 
@@ -212,6 +222,7 @@ int main(int argc, char *argv[])
     {
         LogError("DigitalTwinSampleEnvironmentalSensor_CreateInterface failed");
     }
+#ifdef ENABLE_MODEL_DEFINITION_INTERFACE
     // Invoke to create Model Definition interface - implemented in a separate library - to create DIGITALTWIN_INTERFACE_CLIENT_HANDLE.
     else if ((result = DigitalTwin_ModelDefinition_Create(&modeldefClientHandle, &(interfaceClientHandles[DIGITALTWIN_SAMPLE_MODEL_DEFINITION_INDEX]))) != DIGITALTWIN_CLIENT_OK)
     {
@@ -222,6 +233,7 @@ int main(int argc, char *argv[])
     {
         LogError("DigitalTwinSampleModelDefinition_ParseAndPublish failed");
     }
+#endif
     // Register the interface we've created with Azure IoT.  This call will block until interfaces
     // are successfully registered, we get a failure from server, or we timeout.
     else if (DigitalTwinSampleDevice_RegisterDigitalTwinInterfacesAndWait(dtDeviceClientHandle, interfaceClientHandles, DIGITALTWIN_SAMPLE_DEVICE_MAX_INTERFACES) != DIGITALTWIN_CLIENT_OK)
@@ -260,11 +272,13 @@ int main(int argc, char *argv[])
         DigitalTwinSampleDeviceInfo_Close(interfaceClientHandles[DIGITALTWIN_SAMPLE_DEVICE_INFO_INDEX]);
     }
 
+#ifdef ENABLE_MODEL_DEFINITION_INTERFACE
     if (modeldefClientHandle != NULL)
     {
         // Model definition object handles cleanup of interface DigitalTwin Interface Client object
         DigitalTwin_ModelDefinition_Destroy(modeldefClientHandle);
     }
+#endif
 
     if (dtDeviceClientHandle != NULL)
     {
