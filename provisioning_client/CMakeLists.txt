@@ -357,7 +357,7 @@ endif ()
 if(${use_installed_dependencies})
 
     # Install Provisioning libs
-    set(package_location "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
+    set(package_location "${CMAKE_INSTALL_LIBDIR}/cmake/azure_prov_sdks")
 
     if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
         set(CMAKE_INSTALL_LIBDIR "lib")
@@ -366,7 +366,7 @@ if(${use_installed_dependencies})
     install(TARGETS ${provisioning_libs} EXPORT azure_prov_sdksTargets
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/../bin
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
     )
     install(FILES ${provisioning_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot/azure_prov_client)
@@ -374,27 +374,27 @@ if(${use_installed_dependencies})
     include(CMakePackageConfigHelpers)
 
     write_basic_package_version_file(
-        "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}ConfigVersion.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/azure_prov_sdks/azure_prov_sdksConfigVersion.cmake"
         VERSION ${PROV_SDK_VERSION}
         COMPATIBILITY SameMajorVersion
     )
 
     configure_file("../configs/${PROJECT_NAME}Config.cmake"
-        "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}Config.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/azure_prov_sdks/azure_prov_sdksConfig.cmake"
         COPYONLY
     )
 
     install(EXPORT azure_prov_sdksTargets
         FILE
-            "${PROJECT_NAME}Targets.cmake"
+            "azure_prov_sdksTargets.cmake"
         DESTINATION
             ${package_location}
     )
 
     install(
         FILES
-            "../configs/${PROJECT_NAME}Config.cmake"
-            "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}ConfigVersion.cmake"
+            "configs/azure_prov_sdksConfig.cmake"
+            "${CMAKE_CURRENT_BINARY_DIR}/azure_prov_sdks/azure_prov_sdksConfigVersion.cmake"
         DESTINATION
             ${package_location}
     )
