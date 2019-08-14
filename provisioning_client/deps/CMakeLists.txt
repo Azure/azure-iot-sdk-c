@@ -67,9 +67,7 @@ endif()
 
     if(${hsm_type_sastoken})
       # Default tpm implementation
-      if (${use_installed_dependencies})
-	find_package(utpm REQUIRED CONFIG)
-      else()
+      if (NOT ${use_installed_dependencies})
         if (${use_tpm_simulator})
           set(use_emulator ON CACHE BOOL "enable use_emulator in utpm" FORCE)
         else()
@@ -86,5 +84,6 @@ endif()
 
         set(run_e2e_tests ${original_run_e2e_tests})
         set(run_unittests ${original_run_unittests})
+      endif()
     endif()
 endif()

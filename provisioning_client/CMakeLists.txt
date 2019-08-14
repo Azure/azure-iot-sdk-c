@@ -9,6 +9,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_PROV_MODULE")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_PROV_MODULE")
 
 add_subdirectory(./deps)
+if (${use_installed_dependencies})
+  find_package(utpm REQUIRED CONFIG)
+endif()
 
 set(provisioning_libs)
 set(provisioning_headers)
