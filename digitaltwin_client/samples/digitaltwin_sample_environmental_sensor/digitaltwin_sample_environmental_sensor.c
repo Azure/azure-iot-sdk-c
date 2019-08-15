@@ -17,8 +17,8 @@
 
 
 // DigitalTwin interface name from service perspective.
-static const char DigitalTwinSampleEnvironmentalSensor_InterfaceId[] = "urn:contoso:com:EnvironmentalSensor:1";
-static const char DigitalTwinSampleEnvironmentalSensor_InterfaceInstanceName[] = "environmentalSensor";
+static const char DigitalTwinSampleEnvironmentalSensor_InterfaceId[] = "urn:<YOUR_COMPANY_NAME_HERE>:EnvironmentalSensor:1";
+static const char DigitalTwinSampleEnvironmentalSensor_InterfaceInstanceName[] = "sensor";
 
 //  
 //  Telemetry names for this interface.
