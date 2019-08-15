@@ -405,8 +405,7 @@ if (${build_as_dynamic})
 
     add_library(iothub_client_dll SHARED
         ${iothub_client_c_files}
-        ${iothub_client_h_files}
-        ${iothub_def_file}
+        ${iothub_client_h_files}       
         ${iothub_transport_source}
     )
 
