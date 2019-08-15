@@ -12,17 +12,17 @@ else()
 
     if(${hsm_type_x509})
         set(msr_riot_c_files
-            ./RIoT/Emulator/DICE/DiceSha256.c
-            ./RIoT/Emulator/RIoT/RIoTCrypt/RiotAes128.c
-            ./RIoT/Emulator/RIoT/RIoTCrypt/RiotAesTables.c
-            ./RIoT/Emulator/RIoT/RIoTCrypt/RiotCrypt.c
-            ./RIoT/Emulator/RIoT/RIoTCrypt/RiotDerEnc.c
-            ./RIoT/Emulator/RIoT/RIoTCrypt/RiotEcc.c
-            ./RIoT/Emulator/RIoT/RIoTCrypt/RiotHmac.c
-            ./RIoT/Emulator/RIoT/RIoTCrypt/RiotKdf.c
-            ./RIoT/Emulator/RIoT/RIoTCrypt/RiotSha256.c
-            ./RIoT/Emulator/RIoT/RIoTCrypt/RiotX509Bldr.c
-            ./RIoT/Emulator/RIoT/RIoTCrypt/RiotBase64.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Emulator/DICE/DiceSha256.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Emulator/RIoT/RIoTCrypt/RiotAes128.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Emulator/RIoT/RIoTCrypt/RiotAesTables.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Emulator/RIoT/RIoTCrypt/RiotCrypt.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Emulator/RIoT/RIoTCrypt/RiotDerEnc.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Emulator/RIoT/RIoTCrypt/RiotEcc.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Emulator/RIoT/RIoTCrypt/RiotHmac.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Emulator/RIoT/RIoTCrypt/RiotKdf.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Emulator/RIoT/RIoTCrypt/RiotSha256.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Emulator/RIoT/RIoTCrypt/RiotX509Bldr.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Emulator/RIoT/RIoTCrypt/RiotBase64.c
         )
 
         set(msr_riot_h_files
@@ -56,7 +56,7 @@ endif()
             add_definitions(-DWIN32)
         ENDIF(WIN32)
 
-        add_library(msr_riot ${msr_riot_c_files} ${msr_riot_h_files})
+        target_sources(msr_riot PRIVATE ${msr_riot_c_files})
 	set_target_properties(msr_riot PROPERTIES
             ENABLE_EXPORTS YES
             VERSION ${PROV_SDK_VERSION}
