@@ -21,8 +21,8 @@ typedef struct MODEL_DEFINITION_CLIENT_TAG
 }MODEL_DEFINITION_CLIENT;
 
 // DigitalTwin interface name from service perspective.
-static const char DigitalTwinSampleModelDefinition_InterfaceId[] = "urn:azureiot:ModelDiscovery:ModelDefinition:1";
-static const char DigitalTwinSampleModelDefinition_InterfaceInstanceName[] = "urn_azureiot_ModelDiscovery_ModelDefinition";
+#define DigitalTwinSampleModelDefinition_InterfaceId             "urn:azureiot:ModelDiscovery:ModelDefinition:1";
+#define DigitalTwinSampleModelDefinition_InterfaceInstanceName   "urn_azureiot_ModelDiscovery_ModelDefinition";
 
 //
 //  Callback function declarations and DigitalTwin command names for this interface.
@@ -32,10 +32,7 @@ static void DTMD_GetDefinitionCallback(const DIGITALTWIN_CLIENT_COMMAND_REQUEST*
 //
 //  Callback command names for this interface.
 //
-static const char digitaltwinSample_GetModelDefinitionCommand[] = "getModelDefinition";
-
-// Key value for Model Definition command
-static const char digitaltwinSample_GetModelDefinitionCommand_Id[] = "id";
+#define digitaltwinSample_GetModelDefinitionCommand   "getModelDefinition";
 
 // Command Status for Model Definition command
 static const int commandStatusSuccess = 200;
@@ -179,11 +176,13 @@ static char * DTMD_EncodeModelDefinition(char *data)
 // to the functions to perform the actual processing.
 static void DTMD_ProcessCommandUpdate(const DIGITALTWIN_CLIENT_COMMAND_REQUEST* dtCommandRequest, DIGITALTWIN_CLIENT_COMMAND_RESPONSE* dtCommandResponse, void* userInterfaceContext)
 {
+    const char* modeDefinitionCommandName = digitaltwinSample_GetModelDefinitionCommand;
+    
     if (userInterfaceContext == NULL)
     {
         LogError("MODEL_DEFINITION_INTERFACE: invalid arguments");
     }
-    else if (strcmp(dtCommandRequest->commandName, digitaltwinSample_GetModelDefinitionCommand) == 0)
+    else if (strcmp(dtCommandRequest->commandName, modeDefinitionCommandName) == 0)
     {
         DTMD_GetDefinitionCallback(dtCommandRequest, dtCommandResponse, userInterfaceContext);
     }
@@ -202,6 +201,9 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_ModelDefinition_Create(MODEL_DEFINITION_CL
     DIGITALTWIN_CLIENT_RESULT result;
     MODEL_DEFINITION_CLIENT_HANDLE mdHandle = NULL;
 
+    const char* interfaceId = DigitalTwinSampleModelDefinition_InterfaceId;
+    const char* interfaceName = DigitalTwinSampleModelDefinition_InterfaceInstanceName;
+
     if ((mdHandle = (MODEL_DEFINITION_CLIENT*)calloc(1, (sizeof(MODEL_DEFINITION_CLIENT)))) == NULL)
     {
         LogError("MODEL_DEFINITION_INTERFACE: Unable to allocate memory for handle");
@@ -212,9 +214,9 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_ModelDefinition_Create(MODEL_DEFINITION_CL
         LogError("MODEL_DEFINITION_INTERFACE: Unable to allocate memory for map");
         result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
     }
-    else if ((result = DigitalTwin_InterfaceClient_Create(DigitalTwinSampleModelDefinition_InterfaceId, DigitalTwinSampleModelDefinition_InterfaceInstanceName, DTMD_InterfaceRegisteredCallback, (void *)mdHandle, &interfaceClientHandle)) != DIGITALTWIN_CLIENT_OK)
+    else if ((result = DigitalTwin_InterfaceClient_Create(interfaceId, interfaceName, DTMD_InterfaceRegisteredCallback, (void *)mdHandle, &interfaceClientHandle)) != DIGITALTWIN_CLIENT_OK)
     {
-        LogError("MODEL_DEFINITION_INTERFACE: Unable to allocate interface client handle for interfaceId=<%s>, InterfaceInstanceName=<%s>, error=<%s>", DigitalTwinSampleModelDefinition_InterfaceId, DigitalTwinSampleModelDefinition_InterfaceInstanceName, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
+        LogError("MODEL_DEFINITION_INTERFACE: Unable to allocate interface client handle for interfaceId=<%s>, InterfaceInstanceName=<%s>, error=<%s>", interfaceId, interfaceName, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
         interfaceClientHandle = NULL;
         result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
     }
@@ -226,7 +228,7 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_ModelDefinition_Create(MODEL_DEFINITION_CL
     }
     else
     {
-        LogInfo("MODEL_DEFINITION_INTERFACE: Created DIGITALTWIN_INTERFACE_CLIENT_HANDLE. interfaceId=<%s>, InterfaceInstanceName=<%s>, handle=<%p>", DigitalTwinSampleModelDefinition_InterfaceId, DigitalTwinSampleModelDefinition_InterfaceInstanceName, interfaceClientHandle);
+        LogInfo("MODEL_DEFINITION_INTERFACE: Created DIGITALTWIN_INTERFACE_CLIENT_HANDLE. interfaceId=<%s>, InterfaceInstanceName=<%s>, handle=<%p>", interfaceId, interfaceName, interfaceClientHandle);
         mdHandle->dt_handle = interfaceClientHandle;
         result = DIGITALTWIN_CLIENT_OK;
     }
