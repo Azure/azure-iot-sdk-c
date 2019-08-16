@@ -54,7 +54,7 @@
 //
 
 // TODO: Fill in DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_ID
-#define DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_ID "[Enter Capability Model Id]"
+#define DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_ID "urn:YOUR_COMPANY_NAME_HERE:sample_device:1"
 
 #ifdef ENABLE_IOT_CENTRAL
 // TODO: Specify ID scope if you intend on using IoT Central
