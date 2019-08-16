@@ -142,7 +142,8 @@ MOCKABLE_FUNCTION(, IOTHUBMESSAGE_CONTENT_TYPE, IoTHubMessage_GetContentType, IO
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetContentTypeSystemProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, contentType);
 
 /**
-* @brief   Returns the content-type of the message payload, if defined.
+* @brief   Returns the content-type of the message payload, if defined. No new memory is allocated,
+*          the caller is not responsible for freeing the memory.
 *
 * @param   iotHubMessageHandle Handle to the message.
 *
@@ -162,7 +163,8 @@ MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetContentTypeSystemProperty, IOT
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetContentEncodingSystemProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, contentEncoding);
 
 /**
-* @brief   Returns the content-encoding of the message payload, if defined.
+* @brief   Returns the content-encoding of the message payload, if defined. No new memory is allocated,
+*          the caller is not responsible for freeing the memory.
 *
 * @param   iotHubMessageHandle Handle to the message.
 *
@@ -195,7 +197,8 @@ MOCKABLE_FUNCTION(, MAP_HANDLE, IoTHubMessage_Properties, IOTHUB_MESSAGE_HANDLE,
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, key, const char*, value);
 
 /**
-* @brief   Gets a IotHub Message's properties item.
+* @brief   Gets a IotHub Message's properties item. No new memory is allocated,
+*          the caller is not responsible for freeing the memory.
 *
 * @param   iotHubMessageHandle Handle to the message.
 *
@@ -206,7 +209,8 @@ MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetProperty, IOTHUB_MES
 MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, key);
 
 /**
-* @brief   Gets the MessageId from the IOTHUB_MESSAGE_HANDLE.
+* @brief   Gets the MessageId from the IOTHUB_MESSAGE_HANDLE. No new memory is allocated,
+*          the caller is not responsible for freeing the memory.
 *
 * @param   iotHubMessageHandle Handle to the message.
 *
@@ -226,7 +230,8 @@ MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetMessageId, IOTHUB_MESSAGE_HAND
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetMessageId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, messageId);
 
 /**
-* @brief   Gets the CorrelationId from the IOTHUB_MESSAGE_HANDLE.
+* @brief   Gets the CorrelationId from the IOTHUB_MESSAGE_HANDLE. No new memory is allocated,
+*          the caller is not responsible for freeing the memory.
 *
 * @param   iotHubMessageHandle Handle to the message.
 *
@@ -266,7 +271,8 @@ MOCKABLE_FUNCTION(, const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA*, IoTHubMessag
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetDiagnosticPropertyData, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA*, diagnosticData);
 
 /**
-* @brief   Gets the output name from the IOTHUB_MESSAGE_HANDLE.
+* @brief   Gets the output name from the IOTHUB_MESSAGE_HANDLE. No new memory is allocated,
+*          the caller is not responsible for freeing the memory.
 *
 * @param   iotHubMessageHandle Handle to the message.
 *
@@ -288,7 +294,8 @@ MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetOutputName, IOTHUB_M
 
 
 /**
-* @brief   Gets the input name from the IOTHUB_MESSAGE_HANDLE.
+* @brief   Gets the input name from the IOTHUB_MESSAGE_HANDLE. No new memory is allocated,
+*          the caller is not responsible for freeing the memory.
 *
 * @param   iotHubMessageHandle Handle to the message.
 *
@@ -308,7 +315,8 @@ MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetInputName, IOTHUB_MESSAGE_HAND
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetInputName, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, inputName);
 
 /**
-* @brief   Gets the module name from the IOTHUB_MESSAGE_HANDLE.
+* @brief   Gets the module name from the IOTHUB_MESSAGE_HANDLE. No new memory is allocated,
+*          the caller is not responsible for freeing the memory.
 *
 * @param   iotHubMessageHandle Handle to the message.
 *
@@ -329,7 +337,8 @@ MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetConnectionModuleId, 
 
 
 /**
-* @brief   Gets the connection device ID from the IOTHUB_MESSAGE_HANDLE.
+* @brief   Gets the connection device ID from the IOTHUB_MESSAGE_HANDLE. No new memory is allocated,
+*          the caller is not responsible for freeing the memory.
 *
 * @param   iotHubMessageHandle Handle to the message.
 *
