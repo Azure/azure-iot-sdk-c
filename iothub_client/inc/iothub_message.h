@@ -108,7 +108,8 @@ MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_GetByteArray, IOTHUB_ME
 /**
 * @brief   Returns the null terminated string stored in the message.
 *          If the content type of the message is not @c IOTHUBMESSAGE_STRING
-*          then the function returns @c NULL.
+*          then the function returns @c NULL. No new memory is allocated,
+*          the caller is not responsible for freeing the memory.
 *
 * @param   iotHubMessageHandle Handle to the message.
 *
