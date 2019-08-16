@@ -54,8 +54,6 @@ MOCKABLE_FUNCTION(, JSON_Object *, json_object, const JSON_Value *, value);
 MOCKABLE_FUNCTION(, JSON_Status, json_object_clear, JSON_Object*, object);
 MOCKABLE_FUNCTION(, void, json_value_free, JSON_Value*, value);
 
-
-
 #ifdef __cplusplus
 }
 #endif
@@ -114,6 +112,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_value_init_object, NULL);
     REGISTER_GLOBAL_MOCK_HOOK(json_object, real_json_object);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object, NULL);
+    REGISTER_GLOBAL_MOCK_HOOK(json_serialize_to_string, real_json_serialize_to_string);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_serialize_to_string, NULL);   
     REGISTER_GLOBAL_MOCK_HOOK(json_value_get_object, real_json_value_get_object);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_value_get_object, NULL);   
@@ -158,11 +157,7 @@ static void set_expected_calls_for_DigitalTwin_ModelDefinition_Create(void)
 
 static void set_expected_calls_for_DigitalTwin_ModelDefinition_Publish_Interface()
 {
-    STRICT_EXPECTED_CALL(json_value_init_object());
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_PTR_ARG)).CallCannotFail().SetReturn(TEST_READ_DATA);
-    STRICT_EXPECTED_CALL(json_object_clear(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CallCannotFail().SetReturn(MAP_OK);
 }
@@ -178,12 +173,8 @@ static MODEL_DEFINITION_CLIENT_HANDLE create_test_MD_handle()
     result = DigitalTwin_ModelDefinition_Create(&h, &ih);
     ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result);
 
-    set_expected_calls_for_DigitalTwin_ModelDefinition_Publish_Interface();
-    result = DigitalTwin_ModelDefinition_Publish_Interface(TEST_KEY, TEST_VALUE, h);
-
     ASSERT_IS_NOT_NULL(h);
     ASSERT_IS_NOT_NULL(ih);
-    ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result);
     umock_c_reset_all_calls();
     return h;
 }

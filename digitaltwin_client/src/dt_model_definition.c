@@ -236,6 +236,7 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_ModelDefinition_Create(MODEL_DEFINITION_CL
     if (result != DIGITALTWIN_CLIENT_OK)
     {
         DigitalTwin_ModelDefinition_Destroy(mdHandle);
+        mdHandle = NULL;
     }
 
     *mdHandle_result = mdHandle;
