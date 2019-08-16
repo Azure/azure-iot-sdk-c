@@ -38,20 +38,19 @@ extern "C"
 
     typedef void(*IOTHUB_METHOD_INVOKE_CALLBACK)(IOTHUB_CLIENT_RESULT result, int responseStatus, unsigned char* responsePayload, size_t responsePayloadSize, void* context);
 
-#define IOTHUB_CLIENT_RETRY_POLICY_VALUES     \
-    IOTHUB_CLIENT_RETRY_NONE,                   \
-    IOTHUB_CLIENT_RETRY_IMMEDIATE,                  \
-    IOTHUB_CLIENT_RETRY_INTERVAL,      \
-    IOTHUB_CLIENT_RETRY_LINEAR_BACKOFF,      \
-    IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF,                 \
-    IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER,                 \
-    IOTHUB_CLIENT_RETRY_RANDOM
-
-    /** @brief Enumeration passed in by the IoT Hub when the event confirmation
-    *           callback is invoked to indicate status of the event processing in
-    *           the hub.
-    */
-    MU_DEFINE_ENUM(IOTHUB_CLIENT_RETRY_POLICY, IOTHUB_CLIENT_RETRY_POLICY_VALUES);
+/** @brief Enumeration passed in by the IoT Hub when the event confirmation
+*           callback is invoked to indicate status of the event processing in
+*           the hub.
+*/
+MU_DEFINE_ENUM(IOTHUB_CLIENT_RETRY_POLICY, 
+    IOTHUB_CLIENT_RETRY_NONE,                               /**<No re-connections are ever attempted*/
+    IOTHUB_CLIENT_RETRY_IMMEDIATE,                          /**<Re-connections shall be tried immediately, no wait time*/          
+    IOTHUB_CLIENT_RETRY_INTERVAL,                           /**<First re-connection attempted immediately, fixed-interval between subsequent retries*/
+    IOTHUB_CLIENT_RETRY_LINEAR_BACKOFF,                     /**<First re-connection attempted immediately, linear increase between subsequent retries*/
+    IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF,                /**<First re-connection attempted immediately, delay doubles between subsequent retries*/
+    IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER,    /**<First re-connection attempted immediately, delay doubles with random jitter deduction between subsequent retries
+    IOTHUB_CLIENT_RETRY_RANDOM                              /**<First re-connection attempted immediately, random delay between 0 and 5 seconds between subsequent retries*/
+);
 
     struct IOTHUBTRANSPORT_CONFIG_TAG;
     typedef struct IOTHUBTRANSPORT_CONFIG_TAG IOTHUBTRANSPORT_CONFIG;
@@ -98,17 +97,18 @@ extern "C"
     MU_DEFINE_ENUM(IOTHUB_CLIENT_IOTHUB_METHOD_STATUS, IOTHUB_CLIENT_IOTHUB_METHOD_STATUS_VALUES);
 
 
-#define IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES     \
-    IOTHUB_CLIENT_CONFIRMATION_OK,                   \
-    IOTHUB_CLIENT_CONFIRMATION_BECAUSE_DESTROY,      \
-    IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT,      \
-    IOTHUB_CLIENT_CONFIRMATION_ERROR                 \
-
-    /** @brief Enumeration passed in by the IoT Hub when the event confirmation
-    *           callback is invoked to indicate status of the event processing in
-    *           the hub.
-    */
-    MU_DEFINE_ENUM(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES);
+/** @brief Enumeration passed in by the IoT Hub when the event confirmation
+*           callback is invoked to indicate status of the event processing in
+*           the hub.
+*/
+MU_DEFINE_ENUM(
+    IOTHUB_CLIENT_CONFIRMATION_RESULT, 
+        
+    IOTHUB_CLIENT_CONFIRMATION_OK,                /**<Event send succesful */
+    IOTHUB_CLIENT_CONFIRMATION_BECAUSE_DESTROY,   /**<Event not sent due to IoTHubClient_Destroy */
+    IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT,   /**<Event not sent due to exceeded timeout */
+    IOTHUB_CLIENT_CONFIRMATION_ERROR              /**<Event send failure */
+);
 
 #define IOTHUB_CLIENT_CONNECTION_STATUS_VALUES             \
     IOTHUB_CLIENT_CONNECTION_AUTHENTICATED,                \
