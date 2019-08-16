@@ -24,7 +24,7 @@
 static const char* dtdl_path = "EnvironmentalSensor.interface.json";
 
 // Digital Twin iterface which we want to add for the device
-static const char toPublish_InterfaceName[] = "urn:contoso:com:EnvironmentalSensor:1";
+static const char toPublish_InterfaceName[] = "urn:<YOUR_COMPANY_NAME_HERE>:EnvironmentalSensor:1";
 
 // Read file AND store in memory
 static char *DigitalTwinSampleModelDefinition_ReadFile(const char *dtdl_file_path)
