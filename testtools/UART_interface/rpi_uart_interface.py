@@ -31,6 +31,7 @@ def check_test_failures(line):
     if " tests ran" in line:
         result = [int(s) for s in line.split() if s.isdigit()]
         azure_test_firmware_errors.SDK_ERRORS = result[1]
+        print("Result is an array of values: " + str(result))
         serial_settings.tests_run = True
         return False
 
