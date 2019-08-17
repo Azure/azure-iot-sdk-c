@@ -30,8 +30,12 @@ def check_sdk_errors(line):
 def check_test_failures(line):
     if " tests ran" in line:
         result = [int(s) for s in line.split() if s.isdigit()]
-        azure_test_firmware_errors.SDK_ERRORS = result[1]
-        print("Result is an array of values: " + str(result))
+        print("line is: " + line)
+        if len(result) == 2:
+            azure_test_firmware_errors.SDK_ERRORS = result[0]
+        else:
+            azure_test_firmware_errors.SDK_ERRORS = result[1]        
+        
         serial_settings.tests_run = True
         return False
 
