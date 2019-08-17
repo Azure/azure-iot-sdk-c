@@ -18,13 +18,24 @@
 #include "digitaltwin_interface_client.h"
 #include "digitaltwin_sample_model_definition.h"
 
+//
+// TODO`s: Configure core settings of your Digital Twin sample interface
+//
+
+// TODO: Fill in DIGITALTWIN_SAMPLE_INTERFACE_ID_TO_PUBLISH. E.g. 
+#define DIGITALTWIN_SAMPLE_INTERFACE_ID_TO_PUBLISH "urn:YOUR_COMPANY_NAME_HERE:EnvironmentalSensor:1"
+
+//
+// END TODO section
+//
+
 // Path to the interface dtdl on Device, 
 // This is a sample json which is used to show how to add/publish its content 
-// So that SDK can return it when requested for this interface i.e. environmentalSensor
+// So that SDK can return it when requested for this interface i.e. the built-in environmentalSensor interface
 static const char* dtdl_path = "EnvironmentalSensor.interface.json";
 
 // Digital Twin iterface which we want to add for the device
-static const char toPublish_InterfaceName[] = "urn:<YOUR_COMPANY_NAME_HERE>:EnvironmentalSensor:1";
+static const char toPublish_InterfaceName[] = DIGITALTWIN_SAMPLE_INTERFACE_ID_TO_PUBLISH;
 
 // Read file AND store in memory
 static char *DigitalTwinSampleModelDefinition_ReadFile(const char *dtdl_file_path)

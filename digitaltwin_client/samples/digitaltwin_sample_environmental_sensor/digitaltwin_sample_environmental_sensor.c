@@ -15,9 +15,20 @@
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 
+//
+// TODO`s: Configure core settings of your Digital Twin sample interface
+//
+
+// TODO: Fill in DIGITALTWIN_SAMPLE_ENVIRONMENTAL_SENSOR_INTERFACE_ID. E.g. 
+#define DIGITALTWIN_SAMPLE_ENVIRONMENTAL_SENSOR_INTERFACE_ID "urn:YOUR_COMPANY_NAME_HERE:EnvironmentalSensor:1"
+
+//
+// END TODO section
+//
+
 
 // DigitalTwin interface name from service perspective.
-static const char DigitalTwinSampleEnvironmentalSensor_InterfaceId[] = "urn:<YOUR_COMPANY_NAME_HERE>:EnvironmentalSensor:1";
+static const char DigitalTwinSampleEnvironmentalSensor_InterfaceId[] = DIGITALTWIN_SAMPLE_ENVIRONMENTAL_SENSOR_INTERFACE_ID;
 static const char DigitalTwinSampleEnvironmentalSensor_InterfaceInstanceName[] = "sensor";
 
 //  
