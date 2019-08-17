@@ -31,6 +31,7 @@ def check_test_failures(line):
     if " tests ran" in line:
         result = [int(s) for s in line.split() if s.isdigit()]
         print("line is: " + line)
+        print("result is: " + str(result))
         if len(result) == 2:
             azure_test_firmware_errors.SDK_ERRORS = result[0]
         else:
