@@ -28,7 +28,7 @@ static void my_gballoc_free(void* ptr)
 #include "umock_c/umocktypes_stdint.h"
 #include "umock_c/umocktypes_bool.h"
 
-#include "../../../serializer/tests/datamarshaller_ut/real_parson.h"
+#include "real_parson.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
