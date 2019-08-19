@@ -10,7 +10,7 @@ class DockerTags:
         self.repo = None
         self.commit_name = None
         self.commit_sha = None
-        self.docker_repo = os.environ.get("IOTHUB_E2E_REPO_ADDRESS")
+        self.docker_repo = os.environ.get("AZURECR_REPO_ADDRESS")
         self.image_tags = []
         self.image_tag_to_use_for_cache = None
 
@@ -75,7 +75,7 @@ def get_docker_tags_from_commit(repo, commit):
     tags.repo = repo
     tags.commit_name = get_commit_name(commit)
     tags.commit_sha = github.get_sha_from_commit(repo, commit)
-    
+
     """
     The importance of tags:
 

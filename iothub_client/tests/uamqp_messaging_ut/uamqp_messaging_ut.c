@@ -28,6 +28,7 @@ void real_free(void* ptr)
 #include "umock_c/umock_c_negative_tests.h"
 #include "umock_c/umocktypes.h"
 #include "umock_c/umocktypes_c.h"
+#include "umock_c/umocktypes_bool.h"
 
 static int saved_malloc_returns_count = 0;
 static void* saved_malloc_returns[20];
@@ -176,6 +177,15 @@ static void set_add_map_item(void)
     STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
 }
 
+static void set_exp_calls_for_create_encoded_annotations_properties(bool has_diagnostic_properties, bool has_security_props)
+{
+    STRICT_EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_set_map_value(TEST_AMQP_VALUE, TEST_AMQP_VALUE, TEST_AMQP_VALUE));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
+}
+
 static bool set_exp_calls_for_create_encoded_annotations_properties(bool has_diagnostic_properties, bool has_distributed_tracing_property)
 {
     bool has_annotations;
@@ -225,7 +235,20 @@ static bool set_exp_calls_for_create_encoded_annotations_properties(bool has_dia
             .SetReturn(NULL);
     }
 
-    if (has_diagnostic_properties || has_distributed_tracing_property)
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    }
+    else
+    {
+        STRICT_EXPECTED_CALL(IoTHubMessage_GetDiagnosticPropertyData(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(NULL);
+    }
+
+    STRICT_EXPECTED_CALL(IoTHubMessage_IsSecurityMessage(TEST_IOTHUB_MESSAGE_HANDLE)).CallCannotFail().SetReturn(has_security_props);
+    if (has_security_props)
+    {
+        set_add_map_item();
+    }
+
+    if (has_diagnostic_properties || has_security_props || has_distributed_tracing_property)
     {
         STRICT_EXPECTED_CALL(amqpvalue_create_message_annotations(TEST_AMQP_VALUE));
         STRICT_EXPECTED_CALL(amqpvalue_get_encoded_size(TEST_AMQP_VALUE, IGNORED_PTR_ARG))
@@ -549,7 +572,6 @@ static void reset_test_data()
     memset(saved_malloc_returns, 0, sizeof(saved_malloc_returns));
 }
 
-
 BEGIN_TEST_SUITE(uamqp_messaging_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
@@ -562,6 +584,8 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     int result = umocktypes_charptr_register_types();
     ASSERT_ARE_EQUAL(int, 0, result);
     result = umocktypes_stdint_register_types();
+    ASSERT_ARE_EQUAL(int, 0, result);
+    result = umocktypes_bool_register_types();
     ASSERT_ARE_EQUAL(int, 0, result);
 
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_MESSAGE_HANDLE, void*);
@@ -705,6 +729,8 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_SetContentTypeSystemProperty, IOTHUB_MESSAGE_ERROR);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_SetContentEncodingSystemProperty, IOTHUB_MESSAGE_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_SetContentEncodingSystemProperty, IOTHUB_MESSAGE_ERROR);
+
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_IsSecurityMessage, false);
 
     REGISTER_GLOBAL_MOCK_RETURN(UUID_to_string, TEST_UUID_STRING);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(UUID_to_string, NULL);
@@ -912,6 +938,25 @@ TEST_FUNCTION(message_create_from_iothub_message_no_content_type_success)
     // arrange
     umock_c_reset_all_calls();
     set_exp_calls_for_message_create_uamqp_encoding_from_iothub_message(1, IOTHUBMESSAGE_STRING, true, false, true, false, NULL, TEST_CONTENT_ENCODING);
+
+    BINARY_DATA binary_data;
+    memset(&binary_data, 0, sizeof(binary_data));
+
+    ///act
+    int result = message_create_uamqp_encoding_from_iothub_message(NULL, TEST_IOTHUB_MESSAGE_HANDLE, &binary_data);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, result, 0);
+
+    // cleanup
+}
+
+TEST_FUNCTION(message_create_from_iothub_message_security_msg_success)
+{
+    // arrange
+    umock_c_reset_all_calls();
+    set_exp_calls_for_message_create_uamqp_encoding_from_iothub_message(1, IOTHUBMESSAGE_STRING, true, false, true, true, NULL, TEST_CONTENT_ENCODING);
 
     BINARY_DATA binary_data;
     memset(&binary_data, 0, sizeof(binary_data));

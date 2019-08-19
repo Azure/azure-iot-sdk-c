@@ -17,6 +17,7 @@
 ###################################################################################################
 ###################################################################################################
 
+MYDIR="$(dirname "$0")"
 
 # ENABLE SSH BY DEFAULT 
 if ! grep -Fxq "systemctl start ssh" /etc/rc.local
@@ -49,6 +50,41 @@ tar zxvf ~/vsts-agent-linux-arm-2.150.0.tar.gz
 ./config.sh
 ./run.sh
 cd ~ 
+
+# ###################################################################################################
+# # CREATE SYSTEMD SERVICE: devops
+# # Installing the agent as a systemd service.
+# # This needs a manual step of creating the devops-enviroment file in /etc/
+# # Look at the template devops-environment to figure out the necessary credentials
+# ###################################################################################################
+
+
+sudo cp devops.service /lib/systemd/system/devops.service
+mkdir -p "/home/pi/devops-logs" && touch "/home/pi/devops-logs/devopsagent.log"
+
+# This step redirects the journalctl logs for devops.service to a user log file.
+echo "CREATE DEVOPSAGENT.CONF"
+touch /etc/rsyslog.d/devopsagent.conf
+echo "if $programname == '<your program identifier>' then /home/pi/devops-logs/devopsagent.log" >> /etc/rsyslog.d/devopsagent.conf
+echo "& stop" >> /etc/rsyslog.d/devopsagent.conf
+sudo chown root:adm /home/pi/devops-logs/devopsagent.log
+
+echo "NOTE: USER INPUT NECESSARY!"
+echo "add credentials to devops-environment, then copy to /etc/devops-environment"
+echo "Once you have added /etc/devops-environment file, run:"
+echo "sudo systemctl daemon-reload"
+
+read -r -p "Have you added your credentials to the devops_service.sh file? [y/N] " response
+if [[ "$response" =~ ^([yY][eE][sS]|[yY])+$ ]]
+then
+    echo "copying devops_service.sh to /home/pi/myagent/"
+    cp $MYDIR/devops_service.sh /home/pi/myagent/devops_service.sh
+else
+    echo "Before you can run the daemon you must update your credentials."
+    echo "Once the credentials have been updated then copy devops_service into myagent:"
+    echo 'cp $MYDIR/devops_service.sh /home/pi/myagent/devops_service.sh'
+fi
+
 
 ###################################################################################################
 # INSTALL NEWEST VERSION OF CURL AND POINT TO THE NEW CURL LIBRARY
@@ -135,3 +171,5 @@ echo "Now you can run the cross compiled E2E tests!"
 # setcap cap_net_raw,cap_net_admin+ep iothubclient_mqtt_e2e_exe
 # ./iothubclient_mqtt_e2e_exe
 # # END RUN THE E2E TEST
+
+
