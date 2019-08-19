@@ -72,8 +72,6 @@ static const char* TOPIC_INPUT_QUEUE_NAME = "devices/%s/modules/%s/#";
 
 static const char* TOPIC_DEVICE_METHOD_SUBSCRIBE = "$iothub/methods/POST/#";
 
-static const char* IOTHUB_API_VERSION = "2019-07-01-preview";
-
 static const char* PROPERTY_SEPARATOR = "&";
 static const char* REPORTED_PROPERTIES_TOPIC = "$iothub/twin/PATCH/properties/reported/?$rid=%"PRIu16;
 static const char* GET_PROPERTIES_TOPIC = "$iothub/twin/GET/?$rid=%"PRIu16;
