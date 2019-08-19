@@ -554,16 +554,6 @@ static int create_security_message_annotations(IOTHUB_MESSAGE_HANDLE messageHand
                     *message_annotations_map = NULL;
                 }
             }
-            if (add_map_item(*message_annotations_map, AMQP_DISTRIBUTED_TRACING_KEY, distributed_tracing) != RESULT_OK)
-            {
-                LogError("Failed adding distributed tracing property");
-                result = MU_FAILURE;
-                if (annotation_created)
-                {
-                    amqpvalue_destroy(*message_annotations_map);
-                    *message_annotations_map = NULL;
-                }
-            }
         }
     }
     return result;
