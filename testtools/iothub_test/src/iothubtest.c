@@ -27,6 +27,7 @@
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/strings.h"
 
 #include "azure_c_shared_utility/shared_util_options.h"
 
@@ -92,6 +93,8 @@ typedef struct IOTHUB_VALIDATION_INFO_TAG
     char* eventhubName;
     char* iotSharedSig;
     char* eventhubAccessKey;
+    char* logAnalyiticsWorkspaceId;
+    char* aad_tenant;
     volatile sig_atomic_t messageThreadExit;
     AMQP_CONN_INFO *amqp_connection;
     pfIoTHubMessageCallback onMessageReceivedCallback;
