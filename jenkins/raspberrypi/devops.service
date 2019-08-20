@@ -1,0 +1,19 @@
+[Unit]
+Description=Azure DevOps Agent
+After=multi-user.target
+
+[Service]
+# Client Env Vars
+# /etc/devops-environment is a file containing the necessary credentials for running E2E Tests 
+EnvironmentFile=/etc/devops-environment
+
+User=pi
+Type=idle
+ExecStart=/bin/bash /home/pi/myagent/devops_service.sh
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=devopsagent
+
+[Install]
+WantedBy=multi-user.target
+
