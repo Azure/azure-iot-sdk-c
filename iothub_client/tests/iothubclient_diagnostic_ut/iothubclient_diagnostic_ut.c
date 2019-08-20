@@ -66,6 +66,9 @@ MOCKABLE_FUNCTION(, void, json_value_free, JSON_Value *, value);
 MOCKABLE_FUNCTION(, char *, json_serialize_to_string_pretty, const JSON_Value *, value);
 MOCKABLE_FUNCTION(, JSON_Status, json_object_dotset_value, JSON_Object *, object, const char *, name, JSON_Value *, value);
 MOCKABLE_FUNCTION(, JSON_Object *, json_object, const JSON_Value *, value);
+MOCKABLE_FUNCTION(, JSON_Object*, json_object_get_object, const JSON_Object*, object, const char*, name);
+MOCKABLE_FUNCTION(, JSON_Value*, json_object_dotget_value, const JSON_Object*, object, const char*, name);
+MOCKABLE_FUNCTION(, double, json_object_dotget_number, const JSON_Object*, object, const char*, name);
 
 #ifdef __cplusplus
 }
