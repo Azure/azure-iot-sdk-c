@@ -149,29 +149,6 @@ static void DTMD_GetDefinitionCallback(const DIGITALTWIN_CLIENT_COMMAND_REQUEST*
     }
 }
 
-// Encoding JSON file content before storing for all upcoming dtdl request handling.
-static char * DTMD_EncodeModelDefinition(char *data)
-{
-    char* encodedModelDefinition = NULL;
-    JSON_Value* v = NULL;
-
-    if ((v = json_value_init_string(data)) == NULL)
-    {
-        LogError("json_value_init_string failed");
-    }
-    else if ((encodedModelDefinition = json_serialize_to_string(v)) == NULL)
-    {
-        LogError("json_serialize_to_string failed");
-    }
-
-    if (v != NULL)
-    {
-        json_value_free(v);
-    }
-
-    return encodedModelDefinition;
-}
-
 // DTMD_ProcessCommandUpdate receives commands from the server.  This implementation acts as a simple dispatcher
 // to the functions to perform the actual processing.
 static void DTMD_ProcessCommandUpdate(const DIGITALTWIN_CLIENT_COMMAND_REQUEST* dtCommandRequest, DIGITALTWIN_CLIENT_COMMAND_RESPONSE* dtCommandResponse, void* userInterfaceContext)
@@ -272,23 +249,16 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_ModelDefinition_Publish_Interface(const ch
 {       
     DIGITALTWIN_CLIENT_RESULT result;
     MAP_RESULT mapResult;
-    char* encodedModelDefinition;
 
     if ((interfaceId == NULL) || (data == NULL) || (mdHandle == NULL))
     {
         LogError("MODEL_DEFINITION_INTERFACE: invalid parameter(s)");
         result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
     }
-    else if ((encodedModelDefinition = DTMD_EncodeModelDefinition(data)) == NULL)
-    {
-        LogError("DTMD_EncodeModelDefinition failed");
-        result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
-    }
-    else if ((mapResult = Map_AddOrUpdate(mdHandle->map, interfaceId, encodedModelDefinition)) != MAP_OK)
+    else if ((mapResult = Map_AddOrUpdate(mdHandle->map, interfaceId, data)) != MAP_OK)
     {
         LogError("Map_AddOrUpdate failed, err=%d", mapResult);
         // Because the map does not own the memory, free it here
-        free(encodedModelDefinition);
         result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
     }
     else

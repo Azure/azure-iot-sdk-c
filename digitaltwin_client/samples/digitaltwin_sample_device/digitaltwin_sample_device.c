@@ -24,6 +24,8 @@
 #include <digitaltwin_device_client.h>
 #include <digitaltwin_interface_client.h>
 
+#define ENABLE_MODEL_DEFINITION_INTERFACE
+
 // #define ENABLE_MODEL_DEFINITION_INTERFACE to enable ModelDefinition interface.  It is left out of default sample because it is not required and will add resources on constrained devices.
 #ifdef ENABLE_MODEL_DEFINITION_INTERFACE
 #include <digitaltwin_model_definition.h>
