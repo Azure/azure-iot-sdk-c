@@ -2409,7 +2409,8 @@ IOTHUB_DEVICE_HANDLE IoTHubTransport_AMQP_Common_Register(TRANSPORT_LL_HANDLE ha
                     else
                     {
                         AMQP_STREAMING_CLIENT_CONFIG streaming_config;
-                        streaming_config.client_version = local_product_info;
+                        streaming_config.prod_info_cb = transport_instance->transport_callbacks.prod_info_cb;
+                        streaming_config.prod_info_ctx = transport_instance->transport_ctx;
                         streaming_config.iothub_host_fqdn = STRING_c_str(amqp_device_instance->transport_instance->iothub_host_fqdn);
                         streaming_config.device_id = STRING_c_str(amqp_device_instance->device_id);
                         streaming_config.module_id = device->moduleId;

@@ -88,7 +88,7 @@ static const char* TEST_UNIQUE_ID =                          "a123123-13123-1231
 #define TEST_DEVICE_ID_STRING_HANDLE                         (STRING_HANDLE)0x4442
 #define TEST_IOTHUB_HOST_FQDN_STRING_HANDLE                  (STRING_HANDLE)0x4443
 #define TEST_IOTHUB_HOST_FQDN                                "some.fqdn.com"
-#define TEST_CLIENT_VERSION_STR                              "client x (version y)"
+static const char* TEST_CLIENT_VERSION_STR = "client x (version y)";
 #define TEST_ON_STATE_CHANGED_CB_CONTEXT                     (void*)0x4445
 #define TEST_STRING_HANDLE                                   (STRING_HANDLE)0x4446
 #define TEST_SESSION_HANDLE                                  (SESSION_HANDLE)0x4447
@@ -221,7 +221,8 @@ static AMQP_MESSENGER_HANDLE TEST_amqp_messenger_create(const AMQP_MESSENGER_CON
 {
     TEST_amqp_messenger_create_config.device_id = (char*)messenger_config->device_id;
     TEST_amqp_messenger_create_config.iothub_host_fqdn = messenger_config->iothub_host_fqdn;
-    TEST_amqp_messenger_create_config.client_version = messenger_config->client_version;
+    TEST_amqp_messenger_create_config.prod_info_cb = messenger_config->prod_info_cb;
+    TEST_amqp_messenger_create_config.prod_info_ctx = messenger_config->prod_info_ctx;
 
     TEST_amqp_messenger_create_config.send_link.target_suffix = messenger_config->send_link.target_suffix;
     TEST_amqp_messenger_create_config.send_link.attach_properties = messenger_config->send_link.attach_properties;
@@ -329,10 +330,11 @@ static void set_generate_correlation_id_expected_calls()
 
 static void set_create_link_attach_properties_expected_calls(AMQP_STREAMING_CLIENT_CONFIG* config)
 {
+    (void)config;
     set_generate_correlation_id_expected_calls();
     STRICT_EXPECTED_CALL(Map_Create(NULL)).SetReturn(TEST_ATTACH_PROPERTIES);
     STRICT_EXPECTED_CALL(Map_Add(TEST_ATTACH_PROPERTIES, STREAM_CORRELATION_ID_PROPERTY_NAME, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Map_Add(TEST_ATTACH_PROPERTIES, CLIENT_VERSION_PROPERTY_NAME, config->client_version));
+    STRICT_EXPECTED_CALL(Map_Add(TEST_ATTACH_PROPERTIES, CLIENT_VERSION_PROPERTY_NAME, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Map_Add(TEST_ATTACH_PROPERTIES, STREAM_API_VERSION_PROPERTY_NAME, STREAM_API_VERSION_NUMBER));
     STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG)); // 13
 }
@@ -345,8 +347,6 @@ static void set_destroy_link_attach_properties_expected_calls()
 static void set_expected_calls_for_amqp_streaming_client_create(AMQP_STREAMING_CLIENT_CONFIG* config)
 {
     STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, config->client_version))
-        .CopyOutArgumentBuffer(1, &config->client_version, sizeof(config->client_version));
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, config->device_id))
         .CopyOutArgumentBuffer(1, &config->device_id, sizeof(config->device_id));
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, config->iothub_host_fqdn))
@@ -653,10 +653,17 @@ static void set_expected_calls_for_amqp_streaming_client_do_work()
 
 // ---------- Consolidated Helpers ---------- //
 
+static const char* get_product_info(void* ctx)
+{
+    (void)ctx;
+    return TEST_CLIENT_VERSION_STR;
+}
+
 static AMQP_STREAMING_CLIENT_CONFIG g_stream_client_config;
 static AMQP_STREAMING_CLIENT_CONFIG* get_stream_client_config()
 {
-    g_stream_client_config.client_version = TEST_CLIENT_VERSION_STR;
+    g_stream_client_config.prod_info_cb = get_product_info;
+    g_stream_client_config.prod_info_ctx = NULL;
     g_stream_client_config.device_id = TEST_DEVICE_ID;
     g_stream_client_config.iothub_host_fqdn = TEST_IOTHUB_HOST_FQDN;
     g_stream_client_config.on_state_changed_callback = TEST_on_state_changed_callback;
@@ -1160,7 +1167,7 @@ TEST_FUNCTION(amqp_streaming_create_success)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_ARE_EQUAL(char_ptr, TEST_DEVICE_ID, TEST_amqp_messenger_create_config.device_id);
     ASSERT_ARE_EQUAL(char_ptr, TEST_IOTHUB_HOST_FQDN, TEST_amqp_messenger_create_config.iothub_host_fqdn);
-    ASSERT_ARE_EQUAL(char_ptr, TEST_CLIENT_VERSION_STR, TEST_amqp_messenger_create_config.client_version);
+    ASSERT_IS_NOT_NULL(TEST_amqp_messenger_create_config.prod_info_cb);
     ASSERT_ARE_EQUAL(void_ptr, (void*)TEST_ATTACH_PROPERTIES, (void*)TEST_amqp_messenger_create_config.send_link.attach_properties);
     ASSERT_ARE_EQUAL(void_ptr, (void*)TEST_ATTACH_PROPERTIES, (void*)TEST_amqp_messenger_create_config.receive_link.attach_properties);
     ASSERT_ARE_EQUAL(char_ptr, DEFAULT_STREAMS_SEND_LINK_SOURCE_NAME, (void*)TEST_amqp_messenger_create_config.send_link.target_suffix);
@@ -1191,7 +1198,7 @@ TEST_FUNCTION(amqp_streaming_create_failure_checks)
     size_t i;
     for (i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
-        if (i == 7 || i == 12 || i == 15)
+        if (!umock_c_negative_tests_can_call_fail(i))
         {
             // These expected calls do not cause the API to fail.
             continue;
@@ -1273,7 +1280,7 @@ TEST_FUNCTION(amqp_streaming_create_NULL_client_config_field_client_version)
 {
     // arrange
     AMQP_STREAMING_CLIENT_CONFIG* config = get_stream_client_config();
-    config->client_version = NULL;
+    config->prod_info_cb = NULL;
 
     umock_c_reset_all_calls();
 
@@ -1469,7 +1476,6 @@ TEST_FUNCTION(amqp_streaming_destroy_success)
     umock_c_reset_all_calls();
     set_expected_calls_for_amqp_streaming_client_stop();
     STRICT_EXPECTED_CALL(amqp_messenger_destroy(TEST_AMQP_MESSENGER_HANDLE));
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));

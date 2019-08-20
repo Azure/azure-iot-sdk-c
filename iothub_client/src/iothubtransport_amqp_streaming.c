@@ -52,7 +52,9 @@ static const char* STREAMING_CLIENT_AMQP_MSGR_OPTIONS = "streaming_client_amqp_m
 
 typedef struct AMQP_STREAMING_CLIENT_TAG
 {
-	char* client_version;
+	pfTransport_GetOption_Product_Info_Callback prod_info_cb;
+	void* prod_info_ctx;
+
 	char* device_id;
 	char* module_id;
 	char* iothub_host_fqdn;
@@ -651,12 +653,6 @@ static void internal_streaming_client_destroy(AMQP_STREAMING_CLIENT* streaming_c
         amqp_messenger_destroy(streaming_client->amqp_msgr);
     }
 
-    // Codes_IOTHUBTRANSPORT_AMQP_AMQP_STREAMING_CLIENT_09_102: [AMQP_STREAMING_CLIENT_destroy() shall release all memory allocated for and within `streaming_client`]  
-    if (streaming_client->client_version != NULL)
-    {
-        free(streaming_client->client_version);
-    }
-
     if (streaming_client->device_id != NULL)
     {
         free(streaming_client->device_id);
@@ -702,9 +698,9 @@ static MAP_HANDLE create_link_attach_properties(AMQP_STREAMING_CLIENT* streaming
             destroy_link_attach_properties(result);
             result = NULL;
         }
-        else if (Map_Add(result, CLIENT_VERSION_PROPERTY_NAME, streaming_client->client_version) != MAP_OK)
+        else if (Map_Add(result, CLIENT_VERSION_PROPERTY_NAME, streaming_client->prod_info_cb(streaming_client->prod_info_ctx)) != MAP_OK)
         {
-            LogError("Failed adding AMQP link property 'client version' (%s)", streaming_client->device_id);
+            LogError("Failed adding AMQP link property 'prod_info_cb' (%s)", streaming_client->device_id);
             destroy_link_attach_properties(result);
             result = NULL;
         }
@@ -1030,10 +1026,10 @@ AMQP_STREAMING_CLIENT_HANDLE amqp_streaming_client_create(const AMQP_STREAMING_C
         result = NULL;
     }
     // Codes_SRS_IOTHUBTRANSPORT_AMQP_STREAMING_09_002: [If `client_config`'s `device_id`, `iothub_host_fqdn` or `client_version` is NULL, amqp_streaming_client_create() shall return NULL]  
-    else if (client_config->device_id == NULL || client_config->iothub_host_fqdn == NULL || client_config->client_version == NULL)
+    else if (client_config->device_id == NULL || client_config->iothub_host_fqdn == NULL || client_config->prod_info_cb == NULL)
     {
-        LogError("Invalid argument (device_id=%p, iothub_host_fqdn=%p, client_version=%p)",
-            client_config->device_id, client_config->iothub_host_fqdn, client_config->client_version);
+        LogError("Invalid argument (device_id=%p, iothub_host_fqdn=%p, prod_info_cb=%p)",
+            client_config->device_id, client_config->iothub_host_fqdn, client_config->prod_info_cb);
         result = NULL;
     }
     else
@@ -1053,14 +1049,10 @@ AMQP_STREAMING_CLIENT_HANDLE amqp_streaming_client_create(const AMQP_STREAMING_C
             result->amqp_msgr_state = AMQP_MESSENGER_STATE_STOPPED;
 
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_STREAMING_09_005: [amqp_streaming_client_create() shall save a copy of `client_config` info into `instance`]
-            if (mallocAndStrcpy_s(&result->client_version, client_config->client_version) != 0)
-            {
-                // Codes_SRS_IOTHUBTRANSPORT_AMQP_STREAMING_09_006: [If any `client_config` info fails to be copied, amqp_streaming_client_create() shall fail and return NULL]
-                LogError("Failed copying client_version (%s)", client_config->device_id);
-                internal_streaming_client_destroy(result);
-                result = NULL;
-            }
-            else if (mallocAndStrcpy_s(&result->device_id, client_config->device_id) != 0)
+            result->prod_info_cb = client_config->prod_info_cb;
+            result->prod_info_ctx = client_config->prod_info_ctx;
+            
+            if (mallocAndStrcpy_s(&result->device_id, client_config->device_id) != 0)
             {
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_STREAMING_09_006: [If any `client_config` info fails to be copied, amqp_streaming_client_create() shall fail and return NULL]
                 LogError("Failed copying device_id (%s)", client_config->device_id);
@@ -1096,7 +1088,8 @@ AMQP_STREAMING_CLIENT_HANDLE amqp_streaming_client_create(const AMQP_STREAMING_C
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_STREAMING_09_012: [`amqp_msgr_config` shall have send and receive link attach properties set as "com.microsoft:client-version" = `instance->client_version`, "com.microsoft:channel-correlation-id" = `stream:<UUID>`, "com.microsoft:api-version" = "2016-11-14"]
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_STREAMING_09_013: [`amqp_msgr_config` shall be set with `on_amqp_messenger_state_changed_callback` and `on_amqp_messenger_subscription_changed_callback` callbacks]
                 AMQP_MESSENGER_CONFIG amqp_msgr_config;
-                amqp_msgr_config.client_version = result->client_version;
+                amqp_msgr_config.prod_info_cb = result->prod_info_cb;
+                amqp_msgr_config.prod_info_ctx = result->prod_info_ctx;
                 amqp_msgr_config.device_id = result->device_id;
                 amqp_msgr_config.module_id = result->module_id;
                 amqp_msgr_config.iothub_host_fqdn = result->iothub_host_fqdn;
