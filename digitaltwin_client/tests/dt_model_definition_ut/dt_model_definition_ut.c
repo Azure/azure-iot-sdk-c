@@ -157,8 +157,6 @@ static void set_expected_calls_for_DigitalTwin_ModelDefinition_Create(void)
 
 static void set_expected_calls_for_DigitalTwin_ModelDefinition_Publish_Interface()
 {
-    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_PTR_ARG)).CallCannotFail().SetReturn(TEST_READ_DATA);
-    STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CallCannotFail().SetReturn(MAP_OK);
 }
 
