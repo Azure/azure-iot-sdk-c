@@ -21,7 +21,7 @@ WORKDIR ${WORK_ROOT}
 ########## LINARO INSTALL ##########
 ENV LINARO_SOURCE=gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabihf
 RUN wget https://releases.linaro.org/components/toolchain/binaries/7.4-2019.02/arm-linux-gnueabihf/${LINARO_SOURCE}.tar.xz
-RUN tar -xvf ${LINARO_SOURCE}.tar.xz 
+RUN tar -xvf ${LINARO_SOURCE}.tar.xz
 
 # Set up environment variables for builds
 
@@ -46,7 +46,7 @@ ENV STAGING_DIR=${TOOLCHAIN_SYSROOT}
 # Download OpenSSL source and expand it
 ENV OPENSSL_SOURCE=openssl-1.1.0j
 RUN wget https://www.openssl.org/source/${OPENSSL_SOURCE}.tar.gz
-RUN tar -xvf ${OPENSSL_SOURCE}.tar.gz 
+RUN tar -xvf ${OPENSSL_SOURCE}.tar.gz
 
 # Build OpenSSL
 
@@ -77,7 +77,7 @@ WORKDIR /${WORK_ROOT}
 # Download the Linux utilities for libuuid and expand it
 ENV UTIL_LINUX_SOURCE=util-linux-2.33-rc2
 RUN wget https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.33/${UTIL_LINUX_SOURCE}.tar.gz
-RUN tar -xvf ${UTIL_LINUX_SOURCE}.tar.gz 
+RUN tar -xvf ${UTIL_LINUX_SOURCE}.tar.gz
 
 # Build uuid
 WORKDIR /${WORK_ROOT}/${UTIL_LINUX_SOURCE}
@@ -88,7 +88,7 @@ WORKDIR /${WORK_ROOT}
 
 
 ########## CLIENT LIBRARY INSTALL ##########
-# clone azure  
+# clone azure
 ARG CLIENTLIBRARY_REPO
 WORKDIR /sdk
 RUN git clone https://github.com/$CLIENTLIBRARY_REPO .
@@ -130,10 +130,11 @@ COPY ./patchfile /
 RUN git reset HEAD && git checkout && git clean  -df
 RUN if [-s /patchfile ]; then git apply --index /patchfile; fi
 
-RUN git submodule update --init 
+RUN git submodule update --init
 
 WORKDIR /sdk/cmake 
-RUN cmake .
+RUN if [ -f "CMakeCache.txt" ]; then rm CMakeCache.txt; fi
+RUN cmake ..
 RUN make -j 2
 
 # Finally a sanity check to make sure the files are there

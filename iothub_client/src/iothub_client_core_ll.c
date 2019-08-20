@@ -1074,7 +1074,7 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
                     result->messageCallback.type = CALLBACK_TYPE_NONE;
                     result->lastMessageReceiveTime = INDEFINITE_TIME;
                     result->data_msg_id = 1;
-                        
+
                     IOTHUB_DEVICE_CONFIG deviceConfig;
                     deviceConfig.deviceId = config->deviceId;
                     deviceConfig.deviceKey = config->deviceKey;
@@ -1702,11 +1702,11 @@ IOTHUB_CLIENT_CORE_LL_HANDLE IoTHubClientCore_LL_CreateFromEnvironment(IOTHUB_CL
 
     if (result != NULL)
     {
-        // Because the Edge Hub almost always use self-signed certificates, we need to specify which certificates to trust.  We need to do 
+        // Because the Edge Hub almost always use self-signed certificates, we need to specify which certificates to trust.  We need to do
         // this regardless of how we created the underlying IOTHUB_CLIENT_CORE_LL_HANDLE_DATA.
         IOTHUB_CLIENT_RESULT setTrustResult;
         char* trustedCertificate = IoTHubClient_Auth_Get_TrustBundle(result->authorization_module, edge_environment_variables.ca_trusted_certificate_file);
-        
+
         if (trustedCertificate == NULL)
         {
             LogError("IoTHubClient_Auth_Get_TrustBundle failed");
@@ -1719,7 +1719,7 @@ IOTHUB_CLIENT_CORE_LL_HANDLE IoTHubClientCore_LL_CreateFromEnvironment(IOTHUB_CL
             IoTHubClientCore_LL_Destroy(result);
             result = NULL;
         }
-        
+
         free(trustedCertificate);
     }
 
