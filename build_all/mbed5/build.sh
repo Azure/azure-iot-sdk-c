@@ -5,7 +5,7 @@ sudo rm -R -f mxchip
 git clone -b $MXCHIP_REPO_SOURCE_BRANCH https://github.com/massand/devkit-mbedos5-getstarted.git mxchip
 cd mxchip
 git submodule update --init --recursive
-#rsync -avz --existing ./ mxchip/mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/
+rsync -avz --existing ./ mbed-iot-devkit-sdk/components/azure-iot-sdk-c/
 
 sudo npm install -g iotz
 sudo iotz update

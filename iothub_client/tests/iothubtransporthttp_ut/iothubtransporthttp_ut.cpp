@@ -60,7 +60,7 @@ namespace BASEIMPLEMENTATION
 #undef Lock_Deinit
 
 #include "doublylinkedlist.c"
-#include "base64.c"
+#include "azure_base64.c"
 #include "strings.c"
 #include "buffer.c"
 #include "vector.c"
