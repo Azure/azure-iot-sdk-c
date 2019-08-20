@@ -13,7 +13,8 @@ MU_DEFINE_ENUM_STRINGS(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
 MU_DEFINE_ENUM_STRINGS(IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_CONTENT_TYPE_VALUES);
 
 #define LOG_IOTHUB_MESSAGE_ERROR() \
-    LogError("(result = %s)", MU_ENUM_TO_STRING(IOTHUB_MESSAGE_RESULT, result));
+    LogError("(result = %s)", ENUM_TO_STRING(IOTHUB_MESSAGE_RESULT, result));
+static const char* SECURITY_CLIENT_JSON_ENCODING = "application/json";
 
 static const char* SECURITY_CLIENT_JSON_ENCODING = "application/json";
 
@@ -34,6 +35,7 @@ typedef struct IOTHUB_MESSAGE_HANDLE_DATA_TAG
     char* inputName;
     char* connectionModuleId;
     char* connectionDeviceId;
+    bool is_security_message;
     IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA_HANDLE diagnosticData; //Deprecated
     char* distributedTracingTracestate;
     bool is_security_message;
@@ -1110,7 +1112,6 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetAsSecurityMessage(IOTHUB_MESSAGE_HANDLE i
     }
     else
     {
-        iotHubMessageHandle->is_security_message = true;
         if (set_content_encoding(iotHubMessageHandle, SECURITY_CLIENT_JSON_ENCODING) != 0)
         {
             LogError("Failure setting security message content encoding");
@@ -1118,6 +1119,7 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetAsSecurityMessage(IOTHUB_MESSAGE_HANDLE i
         }
         else
         {
+            iotHubMessageHandle->is_security_message = true;
             result = IOTHUB_MESSAGE_OK;
         }
     }
@@ -1145,6 +1147,6 @@ void IoTHubMessage_Destroy(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
     if (iotHubMessageHandle != NULL)
     {
         /*Codes_SRS_IOTHUBMESSAGE_01_003: [IoTHubMessage_Destroy shall free all resources associated with iotHubMessageHandle.]  */
-        DestroyMessageData((IOTHUB_MESSAGE_HANDLE_DATA* )iotHubMessageHandle);
+        DestroyMessageData((IOTHUB_MESSAGE_HANDLE_DATA*)iotHubMessageHandle);
     }
 }

@@ -177,7 +177,8 @@ static void set_add_map_item(void)
     STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_AMQP_VALUE));
 }
 
-static bool set_exp_calls_for_create_encoded_annotations_properties(bool has_diagnostic_properties, bool has_distributed_tracing_property, bool has_security_props)
+
+static bool set_exp_calls_for_create_encoded_annotations_properties(bool has_diagnostic_properties, bool has_security_props, bool has_distributed_tracing_property)
 {
     bool has_annotations;
 
@@ -202,7 +203,13 @@ static bool set_exp_calls_for_create_encoded_annotations_properties(bool has_dia
         STRICT_EXPECTED_CALL(IoTHubMessage_GetDiagnosticPropertyData(TEST_IOTHUB_MESSAGE_HANDLE)).SetReturn(NULL);
     }
 
-    if (has_distributed_tracing_property)
+    STRICT_EXPECTED_CALL(IoTHubMessage_IsSecurityMessage(TEST_IOTHUB_MESSAGE_HANDLE)).CallCannotFail().SetReturn(has_security_props);
+    if (has_security_props)
+    {
+        set_add_map_item();
+    }
+	
+	if (has_distributed_tracing_property)
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_GetDistributedTracingSystemProperty(IGNORED_PTR_ARG))
             .CallCannotFail()
@@ -222,13 +229,7 @@ static bool set_exp_calls_for_create_encoded_annotations_properties(bool has_dia
             .SetReturn(NULL);
     }
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_IsSecurityMessage(TEST_IOTHUB_MESSAGE_HANDLE)).CallCannotFail().SetReturn(has_security_props);
-    if (has_security_props)
-    {
-        set_add_map_item();
-    }
-
-    if (has_diagnostic_properties || has_distributed_tracing_property || has_security_props)
+    if (has_diagnostic_properties || has_security_props || has_distributed_tracing_property)
     {
         STRICT_EXPECTED_CALL(amqpvalue_create_message_annotations(TEST_AMQP_VALUE));
         STRICT_EXPECTED_CALL(amqpvalue_get_encoded_size(TEST_AMQP_VALUE, IGNORED_PTR_ARG))
@@ -351,13 +352,13 @@ static void set_exp_calls_for_create_encoded_data(IOTHUBMESSAGE_CONTENT_TYPE msg
 
 static void set_exp_calls_for_message_create_uamqp_encoding_from_iothub_message(
     size_t number_of_app_properties, IOTHUBMESSAGE_CONTENT_TYPE msg_content_type, bool has_message_id, bool has_correlation_id, 
-    bool has_diag_properties, bool has_distributed_tracing_property, bool has_security_props, const char* content_type, const char* content_encoding)
+    bool has_diag_properties, bool has_security_props, bool has_distributed_tracing_property, const char* content_type, const char* content_encoding)
 {
     bool has_annotations;
 
     set_exp_calls_for_create_encoded_message_properties(has_message_id, has_correlation_id, content_type, content_encoding);
     set_exp_calls_for_create_encoded_application_properties(number_of_app_properties);
-    has_annotations = set_exp_calls_for_create_encoded_annotations_properties(has_diag_properties, has_distributed_tracing_property, has_security_props);
+    has_annotations = set_exp_calls_for_create_encoded_annotations_properties(has_diag_properties, has_security_props, has_distributed_tracing_property);
     set_exp_calls_for_create_encoded_data(msg_content_type);
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -551,7 +552,6 @@ static void reset_test_data()
     saved_malloc_returns_count = 0;
     memset(saved_malloc_returns, 0, sizeof(saved_malloc_returns));
 }
-
 
 BEGIN_TEST_SUITE(uamqp_messaging_ut)
 
@@ -798,7 +798,7 @@ TEST_FUNCTION(message_create_uamqp_encoding_from_iothub_message_with_distributed
 {
     // arrange
     umock_c_reset_all_calls();
-    set_exp_calls_for_message_create_uamqp_encoding_from_iothub_message(1, IOTHUBMESSAGE_BYTEARRAY, true, true, true, true, false, TEST_CONTENT_TYPE, TEST_CONTENT_ENCODING);
+    set_exp_calls_for_message_create_uamqp_encoding_from_iothub_message(1, IOTHUBMESSAGE_BYTEARRAY, true, true, true, false, true, TEST_CONTENT_TYPE, TEST_CONTENT_ENCODING);
 
     BINARY_DATA binary_data;
     memset(&binary_data, 0, sizeof(binary_data));
@@ -937,7 +937,7 @@ TEST_FUNCTION(message_create_from_iothub_message_security_msg_success)
 {
     // arrange
     umock_c_reset_all_calls();
-    set_exp_calls_for_message_create_uamqp_encoding_from_iothub_message(1, IOTHUBMESSAGE_STRING, true, false, true, true, true, NULL, TEST_CONTENT_ENCODING);
+    set_exp_calls_for_message_create_uamqp_encoding_from_iothub_message(1, IOTHUBMESSAGE_STRING, true, false, true, true, false, NULL, TEST_CONTENT_ENCODING);
 
     BINARY_DATA binary_data;
     memset(&binary_data, 0, sizeof(binary_data));

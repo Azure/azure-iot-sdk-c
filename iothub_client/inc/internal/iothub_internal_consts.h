@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#ifndef IOTHUB_INTERNAL_CONST_H
-#define IOTHUB_INTERNAL_CONST_H
+#ifndef IOTHUB_INTERNAL_CONSTS_H
+#define IOTHUB_INTERNAL_CONSTS_H
 
 #ifdef __cplusplus
 extern "C"
@@ -15,7 +15,7 @@ extern "C"
     static const char* SECURITY_INTERFACE_INTERNAL_ID_VALUE = "security*azureiot*com^SecurityAgent^1*0*0";
     static const char* SECURITY_INTERFACE_ID = "iothub-interface-id";
     static const char* SECURITY_INTERFACE_ID_MQTT = "ifid";
-    static const char* SECURITY_INTERFACE_ID_VALUE = "http://security.azureiot.com/SecurityAgent/1.0.0";
+    static const char* SECURITY_INTERFACE_ID_VALUE = "urn:azureiot:Security:SecurityAgent:1";
     static const char* SECURITY_MESSAGE_SCHEMA = "iothub-message-schema";
     static const char* SECURITY_MESSAGE_SCHEMA_VALUE = "sevent";
 
@@ -23,4 +23,4 @@ extern "C"
 }
 #endif
 
-#endif /* IOTHUB_INTERNAL_CONST_H */
+#endif /* IOTHUB_INTERNAL_CONSTS_H */

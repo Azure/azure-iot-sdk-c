@@ -21,21 +21,18 @@ typedef struct MODEL_DEFINITION_CLIENT_TAG
 }MODEL_DEFINITION_CLIENT;
 
 // DigitalTwin interface name from service perspective.
-static const char DigitalTwinSampleModelDefinition_InterfaceId[] = "urn:azureiot:ModelDiscovery:ModelDefinition:1";
-static const char DigitalTwinSampleModelDefinition_InterfaceInstanceName[] = "urn_azureiot_ModelDiscovery_ModelDefinition";
+#define DigitalTwinSampleModelDefinition_InterfaceId             "urn:azureiot:ModelDiscovery:ModelDefinition:1";
+#define DigitalTwinSampleModelDefinition_InterfaceInstanceName   "urn_azureiot_ModelDiscovery_ModelDefinition";
 
 //
 //  Callback function declarations and DigitalTwin command names for this interface.
 //
-static void DTMD_DataCallback(const DIGITALTWIN_CLIENT_COMMAND_REQUEST* dtClientCommandContext, DIGITALTWIN_CLIENT_COMMAND_RESPONSE* dtClientCommandResponseContext, void* userContextCallback);
+static void DTMD_GetDefinitionCallback(const DIGITALTWIN_CLIENT_COMMAND_REQUEST* dtClientCommandContext, DIGITALTWIN_CLIENT_COMMAND_RESPONSE* dtClientCommandResponseContext, void* userContextCallback);
 
 //
 //  Callback command names for this interface.
 //
-static const char digitaltwinSample_GetModelDefinitionCommand[] = "getModelDefinition";
-
-// Key value for Model Definition command
-static const char digitaltwinSample_GetModelDefinitionCommand_Id[] = "id";
+#define digitaltwinSample_GetModelDefinitionCommand   "getModelDefinition";
 
 // Command Status for Model Definition command
 static const int commandStatusSuccess = 200;
@@ -44,31 +41,6 @@ static const int commandStatusFailure = 500;
 static const int commandStatusNotPresent = 501;
 
 static const char digitaltwinSample_ModelDefinition_NotImplemented[] = "\"Requested command not implemented on this interface\"";
-
-static DIGITALTWIN_CLIENT_RESULT DTMD_AddInterfaceDtdl(const char *interfaceId, char *data, MODEL_DEFINITION_CLIENT_HANDLE mdHandle)
-{
-    DIGITALTWIN_CLIENT_RESULT result = DIGITALTWIN_CLIENT_ERROR;
-    
-    if (NULL == interfaceId || NULL == data || NULL == mdHandle)
-    {
-        LogError("handle is NULL");
-        result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
-    }
-    else
-    {
-        if (Map_AddOrUpdate(mdHandle->map, interfaceId, data) != MAP_OK)
-        {
-            LogError("failed to Map_AddOrUpdate, result= %d", result);
-            result = DIGITALTWIN_CLIENT_ERROR;
-        }
-        else
-        {
-            result = DIGITALTWIN_CLIENT_OK;
-        }
-    }
-
-    return result;
-}
 
 // DTMD_InterfaceRegisteredCallback is invoked when this interface
 // is successfully or unsuccessfully registered with the service, and also when the interface is deleted.
@@ -103,7 +75,7 @@ static int DTMD_SetCommandResponse(DIGITALTWIN_CLIENT_COMMAND_RESPONSE* dtClient
     {
         size_t responseLen = strlen(responseData);
 
-        // Allocate a copy of the response data to return to the invoker.  The DigitalTwin layer that invoked DTMD_DataCallback
+        // Allocate a copy of the response data to return to the invoker.  The DigitalTwin layer that invoked DTMD_GetDefinitionCallback
         // takes responsibility for freeing this data.
         if ((dtClientCommandResponseContext->responseData = malloc(responseLen + 1)) == NULL)
         {
@@ -126,120 +98,70 @@ static int DTMD_SetCommandResponse(DIGITALTWIN_CLIENT_COMMAND_RESPONSE* dtClient
     return result;
 }
 
-static const char *DTMD_Process_CmdRequest(const char *jsonPayload, MODEL_DEFINITION_CLIENT *mdHandle)
+// DTMD_Lookup_Interface converts the jsonPayload into an interfaceId to be queried in the map list
+static const char *DTMD_Lookup_Interface(const char *jsonPayload, MODEL_DEFINITION_CLIENT *mdHandle)
 {
-    const char *dtdl = NULL;
+    const char *modelDefinition = NULL;
     JSON_Value* rootValue = NULL;
-    JSON_Object* rootObject = NULL;
     const char* interfaceId = NULL;
 
-    if ((NULL == jsonPayload) || (NULL == mdHandle))
+    // Parse request json payload.  The interface is stored as a string, however as it is a JValue string
+    // we still need to parse so we can turn the ""InterfaceId"" into the "InterfaceId".
+    if ((rootValue = json_parse_string(jsonPayload)) == NULL)
     {
-        LogError("Invalid input parameters");
+        LogError("json_parse_string failed");
     }
-    else
+    else if ((interfaceId = json_value_get_string(rootValue)) == NULL)
     {
-        // Parse request json payload
-        if ((rootValue = json_parse_string(jsonPayload)) == NULL)
-        {
-            LogError("json_parse_string failed");
-        }
-        else if ((rootObject = json_value_get_object(rootValue)) == NULL)
-        {
-            LogError("json_value_get_object fails");
-        }
-        else if ((interfaceId = json_object_get_string(rootObject, digitaltwinSample_GetModelDefinitionCommand_Id)) == NULL)
-        {
-            LogError("json value <%s> is not available", "id");
-        }
-        else if (NULL == (dtdl = Map_GetValueFromKey(mdHandle->map, interfaceId)))
-        {
-            LogError("Could not retrive value for the given key\n");
-        }
+        LogError("json_value_get_string fails");
     }
-
-    if (rootObject != NULL)
+    else if ((modelDefinition = Map_GetValueFromKey(mdHandle->map, interfaceId)) == NULL)
     {
-        json_object_clear(rootObject);
-    }
+        LogError("Could not retrive value for the given key");
+    } 
 
     if (rootValue != NULL)
     {
         json_value_free(rootValue);
     }
 
-    return dtdl;
+    return modelDefinition;
 }
+
 
 // Implement the callback to process the command "getModelDefinition".  Information pertaining to the request is specified in DIGITALTWIN_CLIENT_COMMAND_REQUEST,
 // and the callback fills out data it wishes to return to the caller on the service in DIGITALTWIN_CLIENT_COMMAND_RESPONSE.
-static void DTMD_DataCallback(const DIGITALTWIN_CLIENT_COMMAND_REQUEST* dtClientCommandContext, DIGITALTWIN_CLIENT_COMMAND_RESPONSE* dtClientCommandResponseContext, void* userContextCallback)
+static void DTMD_GetDefinitionCallback(const DIGITALTWIN_CLIENT_COMMAND_REQUEST* dtClientCommandContext, DIGITALTWIN_CLIENT_COMMAND_RESPONSE* dtClientCommandResponseContext, void* userContextCallback)
 {
-    MODEL_DEFINITION_CLIENT *md_handle = (MODEL_DEFINITION_CLIENT *)userContextCallback;
+    MODEL_DEFINITION_CLIENT *mdHandle = (MODEL_DEFINITION_CLIENT *)userContextCallback;
     LogInfo("MODEL_DEFINITION_INTERFACE:  Request received for interface=<%s>", dtClientCommandContext->requestData);
 
-    if (NULL != userContextCallback)
+    const char * DTMD_DataResponse = DTMD_Lookup_Interface((const char *)dtClientCommandContext->requestData, mdHandle);
+    if (DTMD_DataResponse == NULL)
     {
-        const char * DTMD_DataResponse = DTMD_Process_CmdRequest((const char *)dtClientCommandContext->requestData, md_handle);
-        if (NULL == DTMD_DataResponse)
-        {
-            (void)DTMD_SetCommandResponse(dtClientCommandResponseContext, DTMD_DataResponse, commandStatusNotFound);
-        }
-        else
-        {
-            (void)DTMD_SetCommandResponse(dtClientCommandResponseContext, DTMD_DataResponse, commandStatusSuccess);
-        }
+        LogError("MODEL_DEFINITION_INTERFACE:  Indicating failure of lookup of <%s>", dtClientCommandContext->requestData);
+        (void)DTMD_SetCommandResponse(dtClientCommandResponseContext, DTMD_DataResponse, commandStatusNotFound);
     }
     else
     {
-        LogError("MODEL_DEFINITION_INTERFACE: invalid arguments");
+        LogInfo("MODEL_DEFINITION_INTERFACE:  Indicating successful lookup of <%s>", dtClientCommandContext->requestData);
+        (void)DTMD_SetCommandResponse(dtClientCommandResponseContext, DTMD_DataResponse, commandStatusSuccess);
     }
-}
-
-// Encoding JSON file content before storing for all upcoming dtdl request handling.
-static char * DTMD_ParseDTDL(char *data)
-{
-    char * parsedData = NULL;
-    JSON_Value* v = NULL;
-    JSON_Object* o = NULL;
-
-    if (NULL != (v = json_value_init_object()))
-    {
-        if (NULL != (o = json_value_get_object(v)))
-        {
-            json_object_set_string(o, "Value", data);
-            parsedData = json_serialize_to_string(v);
-        }
-        else
-        {
-            LogError("json_value_get_object failed");
-        }
-    }
-    else
-    {
-        LogError("json_value_init_object failed");
-    }
-
-    if (o != NULL)
-    {
-        json_object_clear(o);
-    }
-
-    if (v != NULL)
-    {
-        json_value_free(v);
-    }
-
-    return parsedData;
 }
 
 // DTMD_ProcessCommandUpdate receives commands from the server.  This implementation acts as a simple dispatcher
 // to the functions to perform the actual processing.
 static void DTMD_ProcessCommandUpdate(const DIGITALTWIN_CLIENT_COMMAND_REQUEST* dtCommandRequest, DIGITALTWIN_CLIENT_COMMAND_RESPONSE* dtCommandResponse, void* userInterfaceContext)
 {
-    if (strcmp(dtCommandRequest->commandName, digitaltwinSample_GetModelDefinitionCommand) == 0)
+    const char* modeDefinitionCommandName = digitaltwinSample_GetModelDefinitionCommand;
+    
+    if (userInterfaceContext == NULL)
     {
-        DTMD_DataCallback(dtCommandRequest, dtCommandResponse, userInterfaceContext);
+        LogError("MODEL_DEFINITION_INTERFACE: invalid arguments");
+    }
+    else if (strcmp(dtCommandRequest->commandName, modeDefinitionCommandName) == 0)
+    {
+        DTMD_GetDefinitionCallback(dtCommandRequest, dtCommandResponse, userInterfaceContext);
     }
     else
     {
@@ -249,95 +171,101 @@ static void DTMD_ProcessCommandUpdate(const DIGITALTWIN_CLIENT_COMMAND_REQUEST* 
     }
 }
 
-DIGITALTWIN_CLIENT_RESULT DigitalTwin_ModelDefinition_Create(MODEL_DEFINITION_CLIENT_HANDLE *md_handle_result, DIGITALTWIN_INTERFACE_CLIENT_HANDLE *md_interface_client_handle)
+// DigitalTwin_ModelDefinition_Create creates the md_interface_client_handle for later applications to use the Model Definition logic.
+DIGITALTWIN_CLIENT_RESULT DigitalTwin_ModelDefinition_Create(MODEL_DEFINITION_CLIENT_HANDLE *mdHandle_result, DIGITALTWIN_INTERFACE_CLIENT_HANDLE *md_interface_client_handle)
 {
     DIGITALTWIN_INTERFACE_CLIENT_HANDLE interfaceClientHandle = NULL;
-    DIGITALTWIN_CLIENT_RESULT result = DIGITALTWIN_CLIENT_ERROR;
-    MODEL_DEFINITION_CLIENT_HANDLE md_handle = NULL;
+    DIGITALTWIN_CLIENT_RESULT result;
+    MODEL_DEFINITION_CLIENT_HANDLE mdHandle = NULL;
 
-    md_handle = (MODEL_DEFINITION_CLIENT*)calloc(1, (sizeof(MODEL_DEFINITION_CLIENT)));
+    const char* interfaceId = DigitalTwinSampleModelDefinition_InterfaceId;
+    const char* interfaceName = DigitalTwinSampleModelDefinition_InterfaceInstanceName;
 
-    if (NULL == md_handle)
+    if ((mdHandle = (MODEL_DEFINITION_CLIENT*)calloc(1, (sizeof(MODEL_DEFINITION_CLIENT)))) == NULL)
     {
         LogError("MODEL_DEFINITION_INTERFACE: Unable to allocate memory for handle");
+        result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
     }
-    else if (NULL == (md_handle->map = Map_Create(NULL)))
+    else if ((mdHandle->map = Map_Create(NULL)) == NULL)
     {
         LogError("MODEL_DEFINITION_INTERFACE: Unable to allocate memory for map");
+        result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
+    }
+    else if ((result = DigitalTwin_InterfaceClient_Create(interfaceId, interfaceName, DTMD_InterfaceRegisteredCallback, (void *)mdHandle, &interfaceClientHandle)) != DIGITALTWIN_CLIENT_OK)
+    {
+        LogError("MODEL_DEFINITION_INTERFACE: Unable to allocate interface client handle for interfaceId=<%s>, InterfaceInstanceName=<%s>, error=<%s>", interfaceId, interfaceName, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
+        interfaceClientHandle = NULL;
+        result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
+    }
+    else if ((result = DigitalTwin_InterfaceClient_SetCommandsCallback(interfaceClientHandle, DTMD_ProcessCommandUpdate)) != DIGITALTWIN_CLIENT_OK)
+    {
+        LogError("MODEL_DEFINITION_INTERFACE: DigitalTwin_InterfaceClient_SetCommandsCallback failed. error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
+        interfaceClientHandle = NULL;
         result = DIGITALTWIN_CLIENT_ERROR;
-        DigitalTwin_ModelDefinition_Destroy(md_handle);
-        md_handle = NULL;
     }
     else
     {
-        if ((result = DigitalTwin_InterfaceClient_Create(DigitalTwinSampleModelDefinition_InterfaceId, DigitalTwinSampleModelDefinition_InterfaceInstanceName, DTMD_InterfaceRegisteredCallback, (void *)md_handle, &interfaceClientHandle)) != DIGITALTWIN_CLIENT_OK)
-        {
-            LogError("MODEL_DEFINITION_INTERFACE: Unable to allocate interface client handle for interfaceId=<%s>, InterfaceInstanceName=<%s>, error=<%s>", DigitalTwinSampleModelDefinition_InterfaceId, DigitalTwinSampleModelDefinition_InterfaceInstanceName, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
-            interfaceClientHandle = NULL;
-            DigitalTwin_ModelDefinition_Destroy(md_handle);
-            md_handle = NULL;
-        }
-        else if ((result = DigitalTwin_InterfaceClient_SetCommandsCallback(interfaceClientHandle, DTMD_ProcessCommandUpdate)) != DIGITALTWIN_CLIENT_OK)
-        {
-            LogError("MODEL_DEFINITION_INTERFACE: DigitalTwin_InterfaceClient_SetCommandsCallback failed. error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
-            interfaceClientHandle = NULL;
-            DigitalTwin_ModelDefinition_Destroy(md_handle);
-            md_handle = NULL;
-        }
-        else
-        {
-            LogInfo("MODEL_DEFINITION_INTERFACE: Created DIGITALTWIN_INTERFACE_CLIENT_HANDLE. interfaceId=<%s>, InterfaceInstanceName=<%s>, handle=<%p>", DigitalTwinSampleModelDefinition_InterfaceId, DigitalTwinSampleModelDefinition_InterfaceInstanceName, interfaceClientHandle);
-            md_handle->dt_handle = interfaceClientHandle;
-        }
+        LogInfo("MODEL_DEFINITION_INTERFACE: Created DIGITALTWIN_INTERFACE_CLIENT_HANDLE. interfaceId=<%s>, InterfaceInstanceName=<%s>, handle=<%p>", interfaceId, interfaceName, interfaceClientHandle);
+        mdHandle->dt_handle = interfaceClientHandle;
+        result = DIGITALTWIN_CLIENT_OK;
     }
 
-    *md_handle_result = md_handle;
+    if (result != DIGITALTWIN_CLIENT_OK)
+    {
+        DigitalTwin_ModelDefinition_Destroy(mdHandle);
+        mdHandle = NULL;
+    }
+
+    *mdHandle_result = mdHandle;
     *md_interface_client_handle = interfaceClientHandle;
     return result;
 }
 
-void DigitalTwin_ModelDefinition_Destroy(MODEL_DEFINITION_CLIENT_HANDLE handle)
+// DigitalTwin_ModelDefinition_Destroy destroyes the
+void DigitalTwin_ModelDefinition_Destroy(MODEL_DEFINITION_CLIENT_HANDLE mdHandle)
 {
-    if (NULL != handle)
+    if (mdHandle != NULL)
     {
         // On shutdown, in general the first call made should be to DigitalTwin_InterfaceClient_Destroy.
         // This will block if there are any active callbacks in this interface, and then
         // mark the underlying handle such that no future callbacks shall come to it.
-        if (NULL != handle->dt_handle)
+        if (NULL != mdHandle->dt_handle)
         {
-            DigitalTwin_InterfaceClient_Destroy(handle->dt_handle);
+            DigitalTwin_InterfaceClient_Destroy(mdHandle->dt_handle);
         }
 
         // Destroy map
-        if(NULL != handle->map)
+        if (NULL != mdHandle->map)
         { 
-            Map_Destroy(handle->map);
+            Map_Destroy(mdHandle->map);
         }
 
-        free(handle);
+        free(mdHandle);
     }
 }
 
+// DigitalTwin_ModelDefinition_Publish_Interface adds a new interface to the internal map.
 DIGITALTWIN_CLIENT_RESULT DigitalTwin_ModelDefinition_Publish_Interface(const char *interfaceId, char *data, MODEL_DEFINITION_CLIENT *mdHandle)
 {       
-    DIGITALTWIN_CLIENT_RESULT result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
-    if (NULL != data)
+    DIGITALTWIN_CLIENT_RESULT result;
+    MAP_RESULT mapResult;
+
+    if ((interfaceId == NULL) || (data == NULL) || (mdHandle == NULL))
     {
-        char* modelDefEncoded = DTMD_ParseDTDL(data);
-
-        if (NULL != modelDefEncoded)
-        {
-            result = DTMD_AddInterfaceDtdl(interfaceId, data, mdHandle);
-
-            if (DIGITALTWIN_CLIENT_OK != result)
-            {
-                free(modelDefEncoded);
-            }
-        }
+        LogError("MODEL_DEFINITION_INTERFACE: invalid parameter(s)");
+        result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
+    }
+    else if ((mapResult = Map_AddOrUpdate(mdHandle->map, interfaceId, data)) != MAP_OK)
+    {
+        LogError("Map_AddOrUpdate failed, err=%d", mapResult);
+        // Because the map does not own the memory, free it here
+        result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
     }
     else
     {
-        LogError("MODEL_DEFINITION_INTERFACE: NULL input data for Publish Interface\n");
+        result = DIGITALTWIN_CLIENT_OK;
     }
+    
     return result;
 }
+

@@ -24,6 +24,8 @@
 #include <digitaltwin_device_client.h>
 #include <digitaltwin_interface_client.h>
 
+#define ENABLE_MODEL_DEFINITION_INTERFACE
+
 // #define ENABLE_MODEL_DEFINITION_INTERFACE to enable ModelDefinition interface.  It is left out of default sample because it is not required and will add resources on constrained devices.
 #ifdef ENABLE_MODEL_DEFINITION_INTERFACE
 #include <digitaltwin_model_definition.h>
@@ -62,9 +64,16 @@ static const int digitalTwinSampleDevice_mainPollingInterval = 1000;
 // Everytime the main loop wakes up, on the digitalTwinSampleDevice_sendTelemetryFrequency(th) pass will send a telemetry message 
 static const int digitalTwinSampleDevice_sendTelemetryFrequency = 20;
 
-// Name of the device capability model 
-#define DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_URI "urn:azureiot:testdevicecapabilitymodel:1"
+//
+// TODO`s: Configure core settings of application for your Digital Twin
+//
 
+// TODO: Fill in DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_ID. E.g. 
+#define DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_ID "urn:YOUR_COMPANY_NAME_HERE:sample_device:1"
+
+//
+// END TODO section
+//
 
 // State of DigitalTwin registration process.  We cannot proceed with DigitalTwin until we get into the state APP_DIGITALTWIN_REGISTRATION_SUCCEEDED.
 typedef enum APP_DIGITALTWIN_REGISTRATION_STATUS_TAG
@@ -103,7 +112,7 @@ static DIGITALTWIN_CLIENT_RESULT DigitalTwinSampleDevice_RegisterDigitalTwinInte
     DIGITALTWIN_CLIENT_RESULT result;
 
     // Give DigitalTwin interfaces to register.  DigitalTwin_DeviceClient_RegisterInterfacesAsync returns immediately
-    if ((result = DigitalTwin_DeviceClient_RegisterInterfacesAsync(dtDeviceClientHandle, DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_URI, interfaceClientHandles, numInterfaceClientHandles, DigitalTwinSampleDevice_InterfacesRegistered, &appDigitalTwinRegistrationStatus)) != DIGITALTWIN_CLIENT_OK)
+    if ((result = DigitalTwin_DeviceClient_RegisterInterfacesAsync(dtDeviceClientHandle, DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_ID, interfaceClientHandles, numInterfaceClientHandles, DigitalTwinSampleDevice_InterfacesRegistered, &appDigitalTwinRegistrationStatus)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("DigitalTwin_DeviceClient_RegisterInterfacesAsync failed, error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
     }

@@ -73,13 +73,14 @@ E2E_TEST_OPTIONS g_e2e_test_options;
 static IOTHUB_DEVICE_CLIENT_HANDLE iothub_deviceclient_handle = NULL;
 static IOTHUB_MODULE_CLIENT_HANDLE iothub_moduleclient_handle = NULL;
 
-
 #define IOTHUB_COUNTER_MAX           10
 #define MAX_CLOUD_TRAVEL_TIME        120.0
 // Wait for 60 seconds for the service to tell us that an event was received.
 #define MAX_SERVICE_EVENT_WAIT_TIME_SECONDS 60
 // When waiting for events, start listening for events that happened up to 60 seconds in the past.
 #define SERVICE_EVENT_WAIT_TIME_DELTA_SECONDS 60
+
+#define MAX_SECURITY_DEVICE_WAIT_TIME   30
 
 TEST_DEFINE_ENUM_TYPE(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
@@ -910,15 +911,33 @@ void clear_connection_status_info_flags()
     }
 }
 
-void service_wait_for_d2c_event_arrival(IOTHUB_PROVISIONED_DEVICE* deviceToUse, D2C_MESSAGE_HANDLE d2cMessage)
+static void service_wait_for_security_d2c_event_arrival(IOTHUB_PROVISIONED_DEVICE* deviceToUse, D2C_MESSAGE_HANDLE d2cMessage, double max_wait_time)
 {
     EXPECTED_SEND_DATA* sendData = (EXPECTED_SEND_DATA*)d2cMessage;
 
     IOTHUB_TEST_HANDLE iotHubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo), deviceToUse->deviceId, IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo));
     ASSERT_IS_NOT_NULL(iotHubTestHandle, "Could not initialize IoTHubTest in order to listen for events");
 
-    LogInfo("Beginning to listen for d2c event arrival.  Waiting up to %d seconds...", MAX_SERVICE_EVENT_WAIT_TIME_SECONDS);
-    IOTHUB_TEST_CLIENT_RESULT result = IoTHubTest_ListenForEvent(iotHubTestHandle, IoTHubCallback, IoTHubAccount_GetIoTHubPartitionCount(g_iothubAcctInfo), sendData, time(NULL)-SERVICE_EVENT_WAIT_TIME_DELTA_SECONDS, MAX_SERVICE_EVENT_WAIT_TIME_SECONDS);
+    LogInfo("Beginning to listen for d2c event arrival.  Waiting up to %f seconds...", max_wait_time);
+    IOTHUB_TEST_CLIENT_RESULT result = IoTHubTest_ListenForEvent(iotHubTestHandle, IoTHubCallback, IoTHubAccount_GetIoTHubPartitionCount(g_iothubAcctInfo), sendData, time(NULL)-SERVICE_EVENT_WAIT_TIME_DELTA_SECONDS, max_wait_time);
+    ASSERT_ARE_EQUAL(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_ERROR, result, "Listening for the event failed");
+
+    ASSERT_IS_FALSE(sendData->wasFound, "Failure event was not routed correctly when sending security event"); // was found is written by the callback...
+
+    IoTHubTest_Deinit(iotHubTestHandle);
+
+    LogInfo("Completed listening for security event arrival.");
+}
+
+void service_wait_for_d2c_event_arrival(IOTHUB_PROVISIONED_DEVICE* deviceToUse, D2C_MESSAGE_HANDLE d2cMessage, double max_wait_time)
+{
+    EXPECTED_SEND_DATA* sendData = (EXPECTED_SEND_DATA*)d2cMessage;
+
+    IOTHUB_TEST_HANDLE iotHubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo), deviceToUse->deviceId, IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo));
+    ASSERT_IS_NOT_NULL(iotHubTestHandle, "Could not initialize IoTHubTest in order to listen for events");
+
+    LogInfo("Beginning to listen for d2c event arrival.  Waiting up to %f seconds...", max_wait_time);
+    IOTHUB_TEST_CLIENT_RESULT result = IoTHubTest_ListenForEvent(iotHubTestHandle, IoTHubCallback, IoTHubAccount_GetIoTHubPartitionCount(g_iothubAcctInfo), sendData, time(NULL)-SERVICE_EVENT_WAIT_TIME_DELTA_SECONDS, max_wait_time);
     ASSERT_ARE_EQUAL(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_OK, result, "Listening for the event failed");
 
     ASSERT_IS_TRUE(sendData->wasFound, "Failure retrieving data that was sent to eventhub"); // was found is written by the callback...
@@ -963,7 +982,7 @@ static void send_event_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIEN
         destroy_on_device_or_module();
 
         // Wait for the message to arrive
-        service_wait_for_d2c_event_arrival(deviceToUse, d2cMessage);
+        service_wait_for_d2c_event_arrival(deviceToUse, d2cMessage, MAX_SERVICE_EVENT_WAIT_TIME_SECONDS);
 
         // cleanup
         destroy_d2c_message_handle(d2cMessage);
@@ -979,6 +998,73 @@ void e2e_send_event_test_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 void e2e_send_event_test_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     send_event_test(IoTHubAccount_GetX509Device(g_iothubAcctInfo), protocol);
+}
+
+void e2e_send_security_event_test_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+{
+    //IOTHUB_MESSAGE_HANDLE msgHandle;
+
+    //char* test_telemetry_message;
+    const char* TEST_ASC_SECURITY_MESSAGE = "{ \
+        \"AgentVersion\": \"0.0.1\", \
+        \"AgentId\" : \"{A3B5D80C-06AA-4D84-BA2D-5470ADAE33A3}\", \
+        \"MessageSchemaVersion\" : \"1.0\", \
+        \"Events\" : \
+        { \
+            \"EventType\": \"Security\", \
+            \"Category\" : \"Periodic\", \
+            \"Name\" : \"ListeningPorts\", \
+            \"IsEmpty\" : true, \
+            \"PayloadSchemaVersion\" : \"1.0\", \
+            \"Id\" : \"12432\", \
+            \"TimestampLocal\" : \"2012-04-23T18:25:43.511Z\", \
+            \"TimestampUTC\" : \"2012-04-23T18:25:43.511Z\" }, \
+            \"Payload\": { \"data\": \"test\" } \
+        } \
+    }";
+
+    // Create the IoT Hub Data
+    IOTHUB_PROVISIONED_DEVICE* deviceToUse;
+    deviceToUse = IoTHubAccount_GetSASDevice(g_iothubAcctInfo);
+    client_connect_to_hub(deviceToUse, protocol);
+
+    EXPECTED_SEND_DATA* send_data = (EXPECTED_SEND_DATA*)client_create_and_send_d2c(TEST_MESSAGE_CREATE_STRING);
+    bool dataWasRecv = client_wait_for_d2c_confirmation((D2C_MESSAGE_HANDLE)send_data, IOTHUB_CLIENT_CONFIRMATION_OK);
+    ASSERT_IS_TRUE(dataWasRecv, "Failure sending data to IotHub"); // was received by the callback...
+
+    // Free the message
+    IoTHubMessage_Destroy(send_data->msgHandle);
+ 
+    // Send the messages to the ASC Event hub
+    // Create an ASC Security Message
+    LogInfo("Sending ASC message to endpoint");
+
+    const char* temp_string_val = send_data->expectedString;
+
+    send_data->msgHandle = IoTHubMessage_CreateFromString(TEST_ASC_SECURITY_MESSAGE);
+    ASSERT_IS_NOT_NULL(send_data->msgHandle, "Could not create the ASC Security message to be sent");
+    send_data->wasFound = false;
+    send_data->dataWasRecv = false;
+    send_data->result = IOTHUB_CLIENT_CONFIRMATION_ERROR;
+    send_data->expectedString = TEST_ASC_SECURITY_MESSAGE;
+
+    // Send the messages to the ASC Event hub
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, IoTHubMessage_SetAsSecurityMessage(send_data->msgHandle), "Failure setting message as a security message");
+
+    // Send ASC message, it should not arrive in the IoTHub EventHub
+    sendeventasync_on_device_or_module(send_data->msgHandle, send_data);
+
+    // close the client connection
+    destroy_on_device_or_module();
+
+    // Wait for the message to not arrive since it's going to an ASC eventhub
+    service_wait_for_security_d2c_event_arrival(deviceToUse, send_data, MAX_SECURITY_DEVICE_WAIT_TIME);
+
+    // Done with ASC test, restore string
+    send_data->expectedString = temp_string_val;
+
+    // cleanup
+    EventData_Destroy(send_data);
 }
 
 // Simulates a fault occurring in end-to-end testing (with special opcodes forcing service failure on certain white-listed Hubs) and
@@ -1018,7 +1104,7 @@ void e2e_d2c_with_svc_fault_ctrl(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, cons
     dataWasRecv = client_wait_for_d2c_confirmation(d2cMessageFaultInjection, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT);
     ASSERT_IS_TRUE(dataWasRecv, "Failure recieving server fault message timeout"); // was received by the callback...
 
-    // Send the Event from the client
+    // Send the Event fromsend_data. the client
     LogInfo("Send message after the server fault and then sleeping...");
     d2cMessageDuringRetry = client_create_and_send_d2c(TEST_MESSAGE_CREATE_STRING);
     ThreadAPI_Sleep(8000);
@@ -1034,7 +1120,7 @@ void e2e_d2c_with_svc_fault_ctrl(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, cons
 
     // Wait for the message to arrive
     LogInfo("waiting for d2c arrive...");
-    service_wait_for_d2c_event_arrival(deviceToUse, d2cMessageDuringRetry);
+    service_wait_for_d2c_event_arrival(deviceToUse, d2cMessageDuringRetry, MAX_SERVICE_EVENT_WAIT_TIME_SECONDS);
 
     // cleanup
     destroy_d2c_message_handle(d2cMessageDuringRetry);
@@ -1120,7 +1206,7 @@ void e2e_d2c_with_svc_fault_ctrl_with_transport_status(IOTHUB_CLIENT_TRANSPORT_P
 
     // Wait for the message to arrive
     LogInfo("waiting for d2c arrive...");
-    service_wait_for_d2c_event_arrival(deviceToUse, d2cMessageDuringRetry);
+    service_wait_for_d2c_event_arrival(deviceToUse, d2cMessageDuringRetry, MAX_SERVICE_EVENT_WAIT_TIME_SECONDS);
 
     // cleanup
     destroy_d2c_message_handle(d2cMessageInitial);

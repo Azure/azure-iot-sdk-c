@@ -54,7 +54,7 @@ typedef struct AMQP_STREAMING_CLIENT_TAG
 {
 	pfTransport_GetOption_Product_Info_Callback prod_info_cb;
 	void* prod_info_ctx;
-	
+
 	char* device_id;
 	char* module_id;
 	char* iothub_host_fqdn;
@@ -653,7 +653,6 @@ static void internal_streaming_client_destroy(AMQP_STREAMING_CLIENT* streaming_c
         amqp_messenger_destroy(streaming_client->amqp_msgr);
     }
 
-    // Codes_IOTHUBTRANSPORT_AMQP_AMQP_STREAMING_CLIENT_09_102: [AMQP_STREAMING_CLIENT_destroy() shall release all memory allocated for and within `streaming_client`]  
     if (streaming_client->device_id != NULL)
     {
         free(streaming_client->device_id);
@@ -701,7 +700,7 @@ static MAP_HANDLE create_link_attach_properties(AMQP_STREAMING_CLIENT* streaming
         }
         else if (Map_Add(result, CLIENT_VERSION_PROPERTY_NAME, streaming_client->prod_info_cb(streaming_client->prod_info_ctx)) != MAP_OK)
         {
-            LogError("Failed adding AMQP link property 'client version' (%s)", streaming_client->device_id);
+            LogError("Failed adding AMQP link property 'prod_info_cb' (%s)", streaming_client->device_id);
             destroy_link_attach_properties(result);
             result = NULL;
         }
@@ -1029,7 +1028,7 @@ AMQP_STREAMING_CLIENT_HANDLE amqp_streaming_client_create(const AMQP_STREAMING_C
     // Codes_SRS_IOTHUBTRANSPORT_AMQP_STREAMING_09_002: [If `client_config`'s `device_id`, `iothub_host_fqdn` or `client_version` is NULL, amqp_streaming_client_create() shall return NULL]  
     else if (client_config->device_id == NULL || client_config->iothub_host_fqdn == NULL || client_config->prod_info_cb == NULL)
     {
-        LogError("Invalid argument (device_id=%p, iothub_host_fqdn=%p, client_version=%p)",
+        LogError("Invalid argument (device_id=%p, iothub_host_fqdn=%p, prod_info_cb=%p)",
             client_config->device_id, client_config->iothub_host_fqdn, client_config->prod_info_cb);
         result = NULL;
     }

@@ -1,5 +1,5 @@
 {
-  "@id": "urn:<YOUR_COMPANY_NAME_HERE>:EnvironmentalSensor:1",
+  "@id": "urn:YOUR_COMPANY_NAME_HERE:EnvironmentalSensor:1",
   "@type": "Interface",
   "displayName": "Environmental Sensor",
   "description": "Provides functionality to report temperature, humidity. Provides telemetry, commands and read-write properties",

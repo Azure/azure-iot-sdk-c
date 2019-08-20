@@ -10,6 +10,7 @@
 #include <iothubtransportmqtt.h>
 #include <azure_c_shared_utility/threadapi.h>
 #include <azure_c_shared_utility/xlogging.h>
+#include "parson.h"
 
 //
 // Header files for interacting with DigitalTwin layer.
@@ -18,64 +19,35 @@
 #include "digitaltwin_interface_client.h"
 #include "digitaltwin_sample_model_definition.h"
 
+//
+// TODO`s: Configure core settings of your Digital Twin sample interface
+//
+
+// TODO: Fill in DIGITALTWIN_SAMPLE_INTERFACE_ID_TO_PUBLISH. E.g. 
+#define DIGITALTWIN_SAMPLE_INTERFACE_ID_TO_PUBLISH "urn:YOUR_COMPANY_NAME_HERE:EnvironmentalSensor:1"
+
+//
+// END TODO section
+//
+
 // Path to the interface dtdl on Device, 
 // This is a sample json which is used to show how to add/publish its content 
-// So that SDK can return it when requested for this interface i.e. environmentalSensor
+// So that SDK can return it when requested for this interface i.e. the built-in environmentalSensor interface
 static const char* dtdl_path = "EnvironmentalSensor.interface.json";
 
 // Digital Twin iterface which we want to add for the device
-static const char toPublish_InterfaceName[] = "urn:contoso:com:EnvironmentalSensor:1";
+static const char toPublish_InterfaceName[] = DIGITALTWIN_SAMPLE_INTERFACE_ID_TO_PUBLISH;
 
 // Read file AND store in memory
 static char *DigitalTwinSampleModelDefinition_ReadFile(const char *dtdl_file_path)
 {
-    /* Pointer to the file */
-    FILE *dtdlfp = NULL;
-    char* result;
-
-    if (NULL == (dtdlfp = fopen(dtdl_file_path, "r")))
+    JSON_Value *dtdlJSONValue = json_parse_file(dtdl_file_path);
+    char* result = NULL;
+    
+    if (dtdlJSONValue != NULL)
     {
-        LogError("Error could not open file for reading %s", dtdl_file_path);
-        result = NULL;
-    }
-    else if (0 != fseek(dtdlfp, 0, SEEK_END))
-    {
-        LogError("fseek on file %s fails, errno=%d", dtdl_file_path, errno);
-        result = NULL;
-    }
-    else
-    {
-        long filesize = ftell(dtdlfp);
-        if (0 > filesize)
-        {
-            LogError("ftell fails reading %s, errno=%d",  dtdl_file_path, errno);
-            result = NULL;
-        }
-        else if (0 == filesize)
-        {
-            LogError("file %s is 0 bytes, which is not valid dtdl json",  dtdl_file_path);
-            result = NULL;
-        }
-        else
-        {
-            rewind(dtdlfp);
-
-            if (NULL == (result = calloc(1, ((size_t)filesize) + 1)))
-            {
-                 LogError("Cannot allocate %lu bytes", (unsigned long)filesize);
-            }
-            else if ((0 == fread(result, 1, filesize, dtdlfp)) || (0 != ferror(dtdlfp)))
-            {
-                LogError("fread failed on file %s, errno=%d", dtdl_file_path, errno);
-                free(result);
-                result = NULL;
-            }
-        }
-    }    
-
-    if (NULL != dtdlfp)
-    {
-        (void)fclose(dtdlfp);
+        result = json_serialize_to_string(dtdlJSONValue);
+        json_value_free(dtdlJSONValue);
     }
 
     return result;
@@ -87,7 +59,7 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwinSampleModelDefinition_ParseAndPublish(MODEL
     char *addIface = DigitalTwinSampleModelDefinition_ReadFile(dtdl_path);
     DIGITALTWIN_CLIENT_RESULT result = DIGITALTWIN_CLIENT_ERROR;
 
-    if (NULL != addIface)
+    if (addIface != NULL)
     {
         if (DIGITALTWIN_CLIENT_OK != (result = DigitalTwin_ModelDefinition_Publish_Interface(toPublish_InterfaceName, addIface, md_handle)))
         {

@@ -20,6 +20,7 @@ set(${theseTestsName}_c_files
 )
 
 set(${theseTestsName}_h_files
+    ${IOTHUB_TEST_REAL_INC_FOLDER}/real_parson.h
 )
 
 build_c_test_artifacts(${theseTestsName} ON "tests/azure_iothub_client_tests")
