@@ -8,6 +8,7 @@
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/http_proxy_io.h"
 #include "iothubtransportmqtt_websockets.h"
+#include "iothub_client_streaming.h"
 #include "internal/iothubtransport_mqtt_common.h"
 
 static XIO_HANDLE getWebSocketsIOTransport(const char* fully_qualified_name, const MQTT_TRANSPORT_PROXY_OPTIONS* mqtt_transport_proxy_options)
@@ -226,6 +227,18 @@ static void IoTHubTransportMqtt_WS_Unsubscribe_InputQueue(IOTHUB_DEVICE_HANDLE h
     (void)handle;
 }
 
+static int IoTHubTransportMqtt_WS_SetStreamRequestCallback(IOTHUB_DEVICE_HANDLE handle, DEVICE_STREAM_C2D_REQUEST_CALLBACK streamRequestCallback, void* context)
+{
+    // Codes_SRS_IOTHUB_MQTT_TRANSPORT_09_010: [ IotHubTransportMqtt_WS_SetStreamRequestCallback shall call into the IoTHubTransport_MQTT_Common_SetStreamRequestCallback function. ]
+    return IoTHubTransport_MQTT_Common_SetStreamRequestCallback(handle, streamRequestCallback, context);
+}
+
+static int IoTHubTransportMqtt_WS_SendStreamResponse(IOTHUB_DEVICE_HANDLE handle, DEVICE_STREAM_C2D_RESPONSE* response)
+{
+    // Codes_SRS_IOTHUB_MQTT_TRANSPORT_09_011: [ IotHubTransportMqtt_WS_SendStreamResponse shall call into the IoTHubTransport_MQTT_Common_SendStreamResponse function. ]
+    return IoTHubTransport_MQTT_Common_SendStreamResponse(handle, response);
+}
+
 static int IotHubTransportMqtt_WS_SetCallbackContext(TRANSPORT_LL_HANDLE handle, void* ctx)
 {
     return IoTHubTransport_MQTT_SetCallbackContext(handle, ctx);
@@ -267,6 +280,8 @@ static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls = {
     IoTHubTransportMqtt_WS_Subscribe,
     IoTHubTransportMqtt_WS_Unsubscribe,
     IoTHubTransportMqtt_WS_DoWork,
+    IoTHubTransportMqtt_WS_SetStreamRequestCallback,
+    IoTHubTransportMqtt_WS_SendStreamResponse,
     IoTHubTransportMqtt_WS_SetRetryPolicy,
     IoTHubTransportMqtt_WS_GetSendStatus,
     IoTHubTransportMqtt_WS_Subscribe_InputQueue,

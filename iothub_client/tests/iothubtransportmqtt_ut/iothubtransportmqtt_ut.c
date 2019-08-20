@@ -111,6 +111,8 @@ static pfIoTHubTransport_DeviceMethod_Response      IoTHubTransportMqtt_DeviceMe
 static pfIoTHubTransport_ProcessItem                IoTHubTransportMqtt_ProcessItem;
 static pfIoTHubTransport_Subscribe_InputQueue       IoTHubTransportMqtt_Subscribe_InputQueue;
 static pfIoTHubTransport_Unsubscribe_InputQueue     IoTHubTransportMqtt_Unsubscribe_InputQueue;
+static pfIoTHubTransport_SetStreamRequestCallback   IotHubTransportMqtt_SetStreamRequestCallback;
+static pfIoTHubTransport_SendStreamResponse         IotHubTransportMqtt_SendStreamResponse;
 static pfIoTHubTransport_SetCallbackContext         IoTHubTransportMqtt_SetCallbackContext;
 static pfIoTHubTransport_GetSupportedPlatformInfo   IotHubTransportMqtt_GetSupportedPlatformInfo;
 
@@ -314,6 +316,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_RETRY_POLICY, int);
     REGISTER_UMOCK_ALIAS_TYPE(METHOD_HANDLE, void*);
     REGISTER_TYPE(TLSIO_CONFIG*, TLSIO_CONFIG_ptr);
+    REGISTER_UMOCK_ALIAS_TYPE(DEVICE_STREAM_C2D_REQUEST_CALLBACK, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(DEVICE_STREAM_D2C_RESPONSE_CALLBACK, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, void*);
 
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubTransport_MQTT_Common_Create, my_IoTHubTransport_MQTT_Common_Create);
@@ -356,6 +360,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     IoTHubTransportMqtt_ProcessItem = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_ProcessItem;
     IoTHubTransportMqtt_Subscribe_InputQueue = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_Subscribe_InputQueue;
     IoTHubTransportMqtt_Unsubscribe_InputQueue = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_Unsubscribe_InputQueue;
+    IotHubTransportMqtt_SetStreamRequestCallback = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_SetStreamRequestCallback;
+    IotHubTransportMqtt_SendStreamResponse = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_SendStreamResponse;
     IoTHubTransportMqtt_SetCallbackContext = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_SetCallbackContext;
     IotHubTransportMqtt_GetSupportedPlatformInfo = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_GetSupportedPlatformInfo;
 }
@@ -895,6 +901,49 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Unsubscribe_InputQueue_success)
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+}
+
+// Tests_SRS_IOTHUB_MQTT_TRANSPORT_09_008: [ IotHubTransportMqtt_SetStreamRequestCallback shall call into the IoTHubTransport_MQTT_Common_SetStreamRequestCallback function. ]
+TEST_FUNCTION(IotHubTransportMqtt_SetStreamRequestCallback_success)
+{
+    // arrange
+    int result;
+    DEVICE_STREAM_C2D_REQUEST_CALLBACK callback = (DEVICE_STREAM_C2D_REQUEST_CALLBACK)0x4445;
+    void* context = (void*)0x4446;
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_SetStreamRequestCallback(TEST_DEVICE_HANDLE, callback, context))
+        .SetReturn(33);
+
+    // act
+    result = IoTHubTransport_MQTT_Common_SetStreamRequestCallback(TEST_DEVICE_HANDLE, callback, context);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, 33, result);
+
+    //cleanup
+}
+
+// Tests_SRS_IOTHUB_MQTT_TRANSPORT_09_009: [ IotHubTransportMqtt_SendStreamResponse shall call into the IoTHubTransport_MQTT_Common_SendStreamResponse function. ]
+TEST_FUNCTION(IotHubTransportMqtt_SendStreamResponse_success)
+{
+    // arrange
+    int result;
+    DEVICE_STREAM_C2D_RESPONSE* response = (DEVICE_STREAM_C2D_RESPONSE*)0x4445;
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_SendStreamResponse(TEST_DEVICE_HANDLE, response))
+        .SetReturn(33);
+
+    // act
+    result = IotHubTransportMqtt_SendStreamResponse(TEST_DEVICE_HANDLE, response);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, 33, result);
 
     //cleanup
 }

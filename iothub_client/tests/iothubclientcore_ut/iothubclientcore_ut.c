@@ -63,10 +63,10 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 #include "azure_c_shared_utility/lock.h"
 #include "azure_c_shared_utility/vector.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
+#include "iothub_client_streaming.h"
 #include "iothub_client_core_ll.h"
 #include "iothub_module_client_ll.h"
 #include "internal/iothubtransport.h"
-
 #undef ENABLE_MOCKS
 
 #undef IOTHUB_CLIENT_CORE_H
@@ -429,6 +429,28 @@ static IOTHUB_CLIENT_RESULT my_IoTHubClientCore_LL_GenericMethodInvoke(IOTHUB_CL
     return IOTHUB_CLIENT_OK;
 }
 
+static IOTHUB_CLIENT_RESULT my_IoTHubClientCore_LL_SetStreamRequestCallback_result;
+static IOTHUB_CLIENT_CORE_LL_HANDLE my_IoTHubClientCore_LL_SetStreamRequestCallback_saved_iotHubClientHandle;
+static DEVICE_STREAM_C2D_REQUEST_CALLBACK my_IoTHubClientCore_LL_SetStreamRequestCallback_saved_streamRequestCallback;
+static void* my_IoTHubClientCore_LL_SetStreamRequestCallback_saved_context;
+static IOTHUB_CLIENT_RESULT my_IoTHubClientCore_LL_SetStreamRequestCallback(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, DEVICE_STREAM_C2D_REQUEST_CALLBACK streamRequestCallback, void* context)
+{
+    my_IoTHubClientCore_LL_SetStreamRequestCallback_saved_iotHubClientHandle = iotHubClientHandle;
+    my_IoTHubClientCore_LL_SetStreamRequestCallback_saved_streamRequestCallback = streamRequestCallback;
+    my_IoTHubClientCore_LL_SetStreamRequestCallback_saved_context = context;
+    return my_IoTHubClientCore_LL_SetStreamRequestCallback_result;
+}
+
+static DEVICE_STREAM_C2D_RESPONSE* on_stream_request_received_result;
+static DEVICE_STREAM_C2D_REQUEST* on_stream_request_received_saved_request;
+static void* on_stream_request_received_saved_context;
+static DEVICE_STREAM_C2D_RESPONSE* on_stream_request_received(DEVICE_STREAM_C2D_REQUEST* request, void* context)
+{
+    on_stream_request_received_saved_request = request;
+    on_stream_request_received_saved_context = context;
+    return on_stream_request_received_result;
+}
+
 
 MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
@@ -497,6 +519,13 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, void*);
     REGISTER_UMOCK_ALIAS_TYPE(THREADAPI_RESULT, int);
+    REGISTER_UMOCK_ALIAS_TYPE(DEVICE_STREAM_D2C_RESPONSE_CALLBACK, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(DEVICE_STREAM_C2D_REQUEST_CALLBACK, void*);
+    
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubClientCore_LL_SetStreamRequestCallback, IOTHUB_CLIENT_OK);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClientCore_LL_SetStreamRequestCallback, IOTHUB_CLIENT_ERROR);
+
+    REGISTER_GLOBAL_MOCK_HOOK(IoTHubClientCore_LL_SetStreamRequestCallback, my_IoTHubClientCore_LL_SetStreamRequestCallback);
 
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
@@ -649,6 +678,11 @@ static void reset_test_data()
     g_fail_my_gballoc_malloc = false;
     my_malloc_count = 0;
     memset(my_malloc_items, 0, sizeof(my_malloc_items));
+
+    my_IoTHubClientCore_LL_SetStreamRequestCallback_saved_iotHubClientHandle = NULL;
+    my_IoTHubClientCore_LL_SetStreamRequestCallback_saved_streamRequestCallback = NULL;
+    my_IoTHubClientCore_LL_SetStreamRequestCallback_saved_context = NULL;
+    my_IoTHubClientCore_LL_SetStreamRequestCallback_result = IOTHUB_CLIENT_OK;
 }
 
 TEST_FUNCTION_INITIALIZE(method_init)
@@ -4492,5 +4526,101 @@ TEST_FUNCTION(IoTHubClientCore_GenericMethodInvoke_fail)
     IoTHubClientCore_Destroy(iothub_handle);
 }
 #endif
+
+// Tests_SRS_IOTHUBCLIENT_09_002: [ `IoTHubClientCore_SetStreamRequestCallback` shall start the worker thread if it was not previously started. ]
+// Tests_SRS_IOTHUBCLIENT_09_004: [ The function shall acquire the lock to make the following block thread-safe. ]
+// Tests_SRS_IOTHUBCLIENT_09_006: [ `IoTHubClientCore_SetStreamRequestCallback` shall call `IoTHubClient_LL_SetStreamRequestCallback`, passing the `iothub_ll_device_stream_request_callback` ]
+// Tests_SRS_IOTHUBCLIENT_09_007: [ `IoTHubClientCore_SetStreamRequestCallback` shall return the result of `IoTHubClientCore_LL_SetStreamRequestCallback`. ]
+// Tests_SRS_IOTHUBCLIENT_09_008: [ `IoTHubClientCore_SetStreamRequestCallback` shall release the thread lock. ]
+TEST_FUNCTION(IoTHubClientCore_SetStreamRequestCallback_succeed)
+{
+    // arrange
+    void* context = (void*)0x4444;
+    IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
+
+    umock_c_reset_all_calls();
+    // Start worker thread
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetStreamRequestCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SetStreamRequestCallback(iothub_handle, on_stream_request_received, context);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+
+    // cleanup
+    IoTHubClientCore_Destroy(iothub_handle);
+}
+
+// Tests_SRS_IOTHUBCLIENT_09_003: [ If starting the thread fails, `IoTHubClientCore_SetStreamRequestCallback` shall return `IOTHUB_CLIENT_ERROR`. ]
+// Tests_SRS_IOTHUBCLIENT_09_005: [ If acquiring the lock fails, `IoTHubClientCore_SetStreamRequestCallback` shall return `IOTHUB_CLIENT_ERROR`. ]
+TEST_FUNCTION(IoTHubClientCore_SetStreamRequestCallback_negative_tests)
+{
+    // arrange
+    ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
+
+    size_t index, count;
+    void* context = (void*)0x4444;
+    IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
+
+    umock_c_reset_all_calls();
+    // Start worker thread
+    EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClientCore_LL_SetStreamRequestCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    umock_c_negative_tests_snapshot();
+
+    count = umock_c_negative_tests_call_count();
+    for (index = 0; index < count; index++)
+    {
+        char tmp_msg[128];
+        IOTHUB_CLIENT_RESULT result;
+
+        if (index == 2 /*because gballoc not mocked*/ || index == 3 || index == 4)
+        {
+            continue;
+        }
+
+        umock_c_negative_tests_reset();
+        umock_c_negative_tests_fail_call(index);
+
+        (void)sprintf(tmp_msg, "Test failed on call %zu/%zu", index, count);
+
+        //act
+        result = IoTHubClientCore_SetStreamRequestCallback(iothub_handle, on_stream_request_received, context);
+
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result, tmp_msg);
+    }
+
+    // cleanup
+    IoTHubClientCore_Destroy(iothub_handle);
+    umock_c_negative_tests_deinit();
+}
+
+// Tests_SRS_IOTHUBCLIENT_09_001: [ If `iotHubClientHandle` is `NULL` the function shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]
+TEST_FUNCTION(IoTHubClientCore_SetStreamRequestCallback_NULL_clientHandle)
+{
+    // arrange
+    umock_c_reset_all_calls();
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SetStreamRequestCallback(NULL, (DEVICE_STREAM_C2D_REQUEST_CALLBACK)0x4445, (void*)0x4446);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+
+    // cleanup
+}
 
 END_TEST_SUITE(iothubclientcore_ut)

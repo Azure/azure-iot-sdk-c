@@ -46,7 +46,7 @@ static void my_gballoc_free(void* ptr)
 #include "azure_c_shared_utility/vector_types_internal.h"
 #include "azure_c_shared_utility/lock.h"
 #include "azure_c_shared_utility/agenttime.h"
-
+#include "iothub_client_streaming.h"
 #include "iothub_client_options.h"
 #include "iothub_client_version.h"
 #include "internal/iothub_client_private.h"
@@ -520,6 +520,8 @@ static pfIoTHubTransport_Subscribe                      IoTHubTransportHttp_Subs
 static pfIoTHubTransport_Unsubscribe                    IoTHubTransportHttp_Unsubscribe;
 static pfIoTHubTransport_DoWork                         IoTHubTransportHttp_DoWork;
 static pfIoTHubTransport_GetSendStatus                  IoTHubTransportHttp_GetSendStatus;
+static pfIoTHubTransport_SetStreamRequestCallback       IoTHubTransportHttp_SetStreamRequestCallback;
+static pfIoTHubTransport_SendStreamResponse             IoTHubTransportHttp_SendStreamResponse;
 static pfIoTHubTransport_SetCallbackContext             IoTHubTransportHttp_SetCallbackContext;
 static pfIoTHubTransport_GetSupportedPlatformInfo       IoTHubTransportHttp_GetSupportedPlatformInfo;
 
@@ -1295,6 +1297,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(DList_AppendTailList, real_DList_AppendTailList);
     REGISTER_GLOBAL_MOCK_HOOK(DList_RemoveEntryList, real_DList_RemoveEntryList);
     REGISTER_GLOBAL_MOCK_HOOK(DList_RemoveHeadList, real_DList_RemoveHeadList);
+    REGISTER_UMOCK_ALIAS_TYPE(DEVICE_STREAM_D2C_RESPONSE_CALLBACK, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(DEVICE_STREAM_C2D_REQUEST_CALLBACK, void*);
 
     bigBufferOverflow = (unsigned char*)my_gballoc_malloc(TEST_BIG_BUFFER_1_OVERFLOW_SIZE);
     memset(bigBufferOverflow, '3', TEST_BIG_BUFFER_1_OVERFLOW_SIZE);
@@ -1323,6 +1327,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     IoTHubTransportHttp_Unsubscribe = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_Unsubscribe;
     IoTHubTransportHttp_DoWork = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_DoWork;
     IoTHubTransportHttp_GetSendStatus = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_GetSendStatus;
+    IoTHubTransportHttp_SetStreamRequestCallback = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_SetStreamRequestCallback;
+    IoTHubTransportHttp_SendStreamResponse = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_SendStreamResponse;
     IoTHubTransportHttp_SetCallbackContext = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_SetCallbackContext;
     IoTHubTransportHttp_GetSupportedPlatformInfo = ((TRANSPORT_PROVIDER*)HTTP_Protocol())->IoTHubTransport_GetSupportedPlatformInfo;
 
@@ -14389,6 +14395,45 @@ TEST_FUNCTION(IoTHubTransportHttp_Subscribe_DeviceTwin_returns)
     //cleanup
     IoTHubTransportHttp_Destroy(handle);
 }
+
+TEST_FUNCTION(IoTHubTransportHttp_SetStreamRequestCallback_success)
+{
+    //arrange
+    DEVICE_STREAM_C2D_REQUEST_CALLBACK callback = (DEVICE_STREAM_C2D_REQUEST_CALLBACK)0x4444;
+    void* context = (void*)0x4445;
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+
+    umock_c_reset_all_calls();
+
+    //act
+    int result = IoTHubTransportHttp_SetStreamRequestCallback(handle, callback, context);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_NOT_EQUAL(int, 0, result);
+
+    //cleanup
+    IoTHubTransportHttp_Destroy(handle);
+}
+
+TEST_FUNCTION(IoTHubTransportHttp_SendStreamResponse_success)
+{
+    //arrange
+    DEVICE_STREAM_C2D_RESPONSE* response = (DEVICE_STREAM_C2D_RESPONSE * )0x4445;
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+
+    umock_c_reset_all_calls();
+
+    //act
+    int result = IoTHubTransportHttp_SendStreamResponse(handle, response);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_NOT_EQUAL(int, 0, result);
+
+    //cleanup
+    IoTHubTransportHttp_Destroy(handle);
+}	
 
 // Tests_SRS_TRANSPORTMULTITHTTP_09_005: [ `IoTHubTransportHttp_GetTwinAsync` shall return IOTHUB_CLIENT_ERROR]
 TEST_FUNCTION(IoTHubTransportHttp_GetTwinAsync_returns)

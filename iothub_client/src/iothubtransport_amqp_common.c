@@ -30,6 +30,7 @@
 #include "iothub_client_options.h"
 #include "internal/iothub_client_private.h"
 #include "internal/iothubtransportamqp_methods.h"
+#include "internal/iothubtransport_amqp_streaming.h"
 #include "internal/iothub_client_retry_control.h"
 #include "internal/iothubtransport_amqp_common.h"
 #include "internal/iothubtransport_amqp_connection.h"
@@ -94,6 +95,8 @@ MU_DEFINE_LOCAL_ENUM(AMQP_TRANSPORT_STATE, AMQP_TRANSPORT_STATE_STRINGS);
 #pragma clang diagnostic pop
 #endif
 
+MU_DEFINE_ENUM_STRINGS(AMQP_STREAMING_CLIENT_STATE, AMQP_STREAMING_CLIENT_STATE_VALUES);
+
 typedef struct AMQP_TRANSPORT_INSTANCE_TAG
 {
     STRING_HANDLE iothub_host_fqdn;                                     // FQDN of the IoT Hub.
@@ -142,6 +145,12 @@ typedef struct AMQP_TRANSPORT_DEVICE_INSTANCE_TAG
     bool subscribe_methods_needed;                                       // Indicates if should subscribe for device methods.
     // is the transport subscribed for methods?
     bool subscribed_for_methods;                                         // Indicates if device is subscribed for device methods.
+
+    bool use_streaming_client;
+    AMQP_STREAMING_CLIENT_HANDLE streaming_handle;                       // Handle for the AMQP TRANSPORT STREAMING CLIENT
+    AMQP_STREAMING_CLIENT_STATE streaming_client_previous_state;         // Previous state of the streaming client.
+    AMQP_STREAMING_CLIENT_STATE streaming_client_current_state;          // Current state of the streaming client.
+    time_t time_of_last_streaming_client_state_change;                   // Time the device_handle last changed state; used to track timeouts of device_start_async and device_stop.
 
     TRANSPORT_CALLBACKS_INFO transport_callbacks;
     void* transport_ctx;
@@ -226,6 +235,11 @@ static void internal_destroy_amqp_device_instance(AMQP_TRANSPORT_DEVICE_INSTANCE
     if (trdev_inst->methods_handle != NULL)
     {
         iothubtransportamqp_methods_destroy(trdev_inst->methods_handle);
+    }
+
+    if (trdev_inst->streaming_handle != NULL)
+    {
+        amqp_streaming_client_destroy(trdev_inst->streaming_handle);
     }
 
     if (trdev_inst->device_handle != NULL)
@@ -874,6 +888,14 @@ static void prepare_device_for_connection_retry(AMQP_TRANSPORT_DEVICE_INSTANCE* 
     iothubtransportamqp_methods_unsubscribe(registered_device->methods_handle);
     registered_device->subscribed_for_methods = 0;
 
+    if (registered_device->streaming_client_current_state != AMQP_STREAMING_CLIENT_STATE_STOPPED)
+    {
+        if (amqp_streaming_client_stop(registered_device->streaming_handle) != 0)
+        {
+            LogError("Failed preparing streaming client for connection retry (stop failed; '%s')", STRING_c_str(registered_device->device_id));
+        }
+    }
+
     // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_031: [amqp_device_stop() shall be invoked on all `instance->registered_devices` that are not already stopped]
     if (registered_device->device_state != DEVICE_STATE_STOPPED)
     {
@@ -1076,6 +1098,124 @@ static int send_pending_events(AMQP_TRANSPORT_DEVICE_INSTANCE* device_state)
     return result;
 }
 
+static void on_amqp_streaming_client_state_changed(const void* context, AMQP_STREAMING_CLIENT_STATE previous_state, AMQP_STREAMING_CLIENT_STATE new_state)
+{
+    if (context == NULL)
+    {
+        LogError("Invalid argument (context is NULL)");
+    }
+    else if (new_state != previous_state)
+    {
+        AMQP_TRANSPORT_DEVICE_INSTANCE* client = (AMQP_TRANSPORT_DEVICE_INSTANCE*)context;
+        client->streaming_client_previous_state = client->streaming_client_current_state;
+        client->streaming_client_current_state = new_state;
+        client->time_of_last_streaming_client_state_change = get_time(NULL);
+    }
+}
+
+static int manage_streaming_client(AMQP_TRANSPORT_DEVICE_INSTANCE* registered_device)
+{
+    int result;
+
+    if (!registered_device->use_streaming_client)
+    {
+        result = RESULT_OK;
+    }
+    else
+    {
+        if (registered_device->streaming_client_current_state == AMQP_STREAMING_CLIENT_STATE_STARTED)
+        {
+            result = RESULT_OK;
+        }
+        else if (registered_device->streaming_client_current_state == AMQP_STREAMING_CLIENT_STATE_ERROR)
+        {
+            LogError("AMQP streaming client in error state");
+            result = MU_FAILURE;
+        }
+        else if (registered_device->streaming_client_current_state == AMQP_STREAMING_CLIENT_STATE_STOPPED)
+        {
+            SESSION_HANDLE session_handle;
+
+            if (amqp_connection_get_session_handle(registered_device->transport_instance->amqp_connection, &session_handle) != 0)
+            {
+                LogError("Failed retrieving the AMQP session handle");
+                result = MU_FAILURE;
+            }
+            else if (amqp_streaming_client_start(registered_device->streaming_handle, session_handle) != 0)
+            {
+                LogError("Failed starting the amqp streaming client.");
+                result = MU_FAILURE;
+            }
+            else
+            {
+                result = RESULT_OK;
+            }
+        }
+        else if (registered_device->streaming_client_current_state == AMQP_STREAMING_CLIENT_STATE_STOPPING)
+        {
+            bool is_timed_out;
+            if (is_timeout_reached(registered_device->time_of_last_streaming_client_state_change, registered_device->max_state_change_timeout_secs, &is_timed_out) != RESULT_OK)
+            {
+                LogError("Failed tracking timeout streaming client state (%s)", STRING_c_str(registered_device->device_id));
+                result = MU_FAILURE;
+            }
+            else if (is_timed_out)
+            {
+                LogError("Streaming client failed to stop within expected timeout ('%s')", STRING_c_str(registered_device->device_id));
+                result = MU_FAILURE;
+            }
+            else
+            {
+                result = RESULT_OK;
+            }
+        }
+        else if (registered_device->streaming_client_current_state == AMQP_STREAMING_CLIENT_STATE_STARTING)
+        {
+            bool is_timed_out;
+            if (is_timeout_reached(registered_device->time_of_last_streaming_client_state_change, registered_device->max_state_change_timeout_secs, &is_timed_out) != RESULT_OK)
+            {
+                LogError("Failed tracking timeout streaming client state (%s)", STRING_c_str(registered_device->device_id));
+                result = MU_FAILURE;
+            }
+            else if (is_timed_out)
+            {
+                LogError("Streaming client failed to start within expected timeout ('%s')", STRING_c_str(registered_device->device_id));
+                result = MU_FAILURE;
+            }
+            else
+            {
+                result = RESULT_OK;
+            }
+        }
+        else
+        {
+            LogError("Unrecognized state of streaming client (%s)", MU_ENUM_TO_STRING(AMQP_STREAMING_CLIENT_STATE, registered_device->streaming_client_current_state));
+            result = MU_FAILURE;
+        }
+
+        amqp_streaming_client_do_work(registered_device->streaming_handle);
+    }
+
+    return result;
+}
+
+static int manage_sub_clients(AMQP_TRANSPORT_DEVICE_INSTANCE* registered_device)
+{
+    int result;
+
+    if (manage_streaming_client(registered_device) != 0)
+    {
+        update_state(registered_device->transport_instance, AMQP_TRANSPORT_STATE_RECONNECTION_REQUIRED);
+        result = MU_FAILURE;
+    }
+    else
+    {
+        result = RESULT_OK;
+    }
+
+    return result;
+}
+
 // @brief
 //     Auxiliary function for the public DoWork API, performing DoWork activities (authenticate, messaging) for a specific device.
 // @requires
@@ -1167,6 +1307,11 @@ static int IoTHubTransport_AMQP_Common_Device_DoWork(AMQP_TRANSPORT_DEVICE_INSTA
                 result = RESULT_OK;
             }
         }
+    }
+    else if (manage_sub_clients(registered_device) != 0)
+    {
+        LogError("Failed managing amqp sub clients");
+        result = MU_FAILURE;
     }
     // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_031: [ Once the device is authenticated, `iothubtransportamqp_methods_subscribe` shall be invoked (subsequent DoWork calls shall not call it if already subscribed). ]
     else if (registered_device->subscribe_methods_needed &&
@@ -2231,6 +2376,7 @@ IOTHUB_DEVICE_HANDLE IoTHubTransport_AMQP_Common_Register(TRANSPORT_LL_HANDLE ha
                 amqp_device_instance->subscribed_for_methods = false;
                 amqp_device_instance->transport_ctx = transport_instance->transport_ctx;
                 amqp_device_instance->transport_callbacks = transport_instance->transport_callbacks;
+                amqp_device_instance->use_streaming_client = false;
 
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_069: [A copy of `config->deviceId` shall be saved into `device_state->device_id`]
                 if ((amqp_device_instance->device_id = STRING_construct(device->deviceId)) == NULL)
@@ -2262,6 +2408,15 @@ IOTHUB_DEVICE_HANDLE IoTHubTransport_AMQP_Common_Register(TRANSPORT_LL_HANDLE ha
                     }
                     else
                     {
+                        AMQP_STREAMING_CLIENT_CONFIG streaming_config;
+                        streaming_config.prod_info_cb = transport_instance->transport_callbacks.prod_info_cb;
+                        streaming_config.prod_info_ctx = transport_instance->transport_ctx;
+                        streaming_config.iothub_host_fqdn = STRING_c_str(amqp_device_instance->transport_instance->iothub_host_fqdn);
+                        streaming_config.device_id = STRING_c_str(amqp_device_instance->device_id);
+                        streaming_config.module_id = device->moduleId;
+                        streaming_config.on_state_changed_callback = on_amqp_streaming_client_state_changed;
+                        streaming_config.on_state_changed_context = amqp_device_instance;
+
                         bool is_first_device_being_registered = (singlylinkedlist_get_head_item(transport_instance->registered_devices) == NULL);
 
                         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_010: [ `IoTHubTransport_AMQP_Common_Register` shall create a new iothubtransportamqp_methods instance by calling `iothubtransportamqp_methods_create` while passing to it the the fully qualified domain name, the device Id, and optional module Id. ]*/
@@ -2270,6 +2425,11 @@ IOTHUB_DEVICE_HANDLE IoTHubTransport_AMQP_Common_Register(TRANSPORT_LL_HANDLE ha
                         {
                             /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_011: [ If `iothubtransportamqp_methods_create` fails, `IoTHubTransport_AMQP_Common_Create` shall fail and return NULL. ]*/
                             LogError("Transport failed to register device '%s' (Cannot create the methods module)", device->deviceId);
+                            result = NULL;
+                        }
+                        else if ((amqp_device_instance->streaming_handle = amqp_streaming_client_create(&streaming_config)) == NULL)
+                        {
+                            LogError("Transport failed to register device '%s' (Cannot create the streaming module)", device->deviceId);
                             result = NULL;
                         }
                         else
@@ -2301,6 +2461,9 @@ IOTHUB_DEVICE_HANDLE IoTHubTransport_AMQP_Common_Register(TRANSPORT_LL_HANDLE ha
                                         transport_instance->preferred_authentication_mode = AMQP_TRANSPORT_AUTHENTICATION_MODE_X509;
                                     }
                                 }
+
+                                amqp_device_instance->streaming_client_current_state = AMQP_STREAMING_CLIENT_STATE_STOPPED;
+                                amqp_device_instance->streaming_client_previous_state = AMQP_STREAMING_CLIENT_STATE_STOPPED;
 
                                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_078: [IoTHubTransport_AMQP_Common_Register shall return a handle to `amqp_device_instance` as a IOTHUB_DEVICE_HANDLE]
                                 result = (IOTHUB_DEVICE_HANDLE)amqp_device_instance;
@@ -2494,6 +2657,61 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SendMessageDisposition(MESSAGE_
         }
 
         MESSAGE_CALLBACK_INFO_Destroy(message_data);
+    }
+
+    return result;
+}
+
+int IoTHubTransport_AMQP_Common_SetStreamRequestCallback(IOTHUB_DEVICE_HANDLE deviceHandle, DEVICE_STREAM_C2D_REQUEST_CALLBACK streamRequestCallback, void* context)
+{
+    int result;
+
+    if (deviceHandle == NULL)
+    {
+        LogError("Invalid argument (handle=%p)", deviceHandle);
+        result = MU_FAILURE;
+    }
+    else
+    {
+        AMQP_TRANSPORT_DEVICE_INSTANCE* registered_device = (AMQP_TRANSPORT_DEVICE_INSTANCE*)deviceHandle;
+
+        if (amqp_streaming_client_set_stream_request_callback(registered_device->streaming_handle, streamRequestCallback, context) != 0)
+        {
+            LogError("Failed setting stream request callback");
+            result = MU_FAILURE;
+        }
+        else
+        {
+            registered_device->use_streaming_client = true;
+            result = RESULT_OK;
+        }
+    }
+
+    return result;
+}
+
+int IoTHubTransport_AMQP_Common_SendStreamResponse(IOTHUB_DEVICE_HANDLE deviceHandle, DEVICE_STREAM_C2D_RESPONSE* response)
+{
+    int result;
+
+    if (deviceHandle == NULL || response == NULL)
+    {
+        LogError("Invalid argument (handle=%p, response=%p)", deviceHandle, response);
+        result = MU_FAILURE;
+    }
+    else
+    {
+        AMQP_TRANSPORT_DEVICE_INSTANCE* registered_device = (AMQP_TRANSPORT_DEVICE_INSTANCE*)deviceHandle;
+
+        if (amqp_streaming_client_send_stream_response(registered_device->streaming_handle, response) != 0)
+        {
+            LogError("Failed sending stream C2D response");
+            result = MU_FAILURE;
+        }
+        else
+        {
+            result = RESULT_OK;
+        }
     }
 
     return result;

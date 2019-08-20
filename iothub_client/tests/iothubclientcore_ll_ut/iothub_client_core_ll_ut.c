@@ -51,6 +51,7 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 #include "iothub_message.h"
 #include "internal/iothub_client_authorization.h"
 #include "internal/iothub_client_diagnostic.h"
+#include "iothub_client_streaming.h"
 
 #ifdef USE_EDGE_MODULES
 #include "internal/iothub_client_edge.h"
@@ -111,6 +112,9 @@ MOCKABLE_FUNCTION(, void, FAKE_IotHubTransport_Unsubscribe_InputQueue, IOTHUB_DE
 MOCKABLE_FUNCTION(, int, FAKE_IoTHubTransport_SetCallbackContext, TRANSPORT_LL_HANDLE, handle, void*, ctx);
 MOCKABLE_FUNCTION(, int, FAKE_IoTHubTransport_GetSupportedPlatformInfo, TRANSPORT_LL_HANDLE, handle, PLATFORM_INFO_OPTION*, info);
 MOCKABLE_FUNCTION(, bool, messageInputCallbackEx, MESSAGE_CALLBACK_INFO*, messageData, void*, userContextCallback);
+
+MOCKABLE_FUNCTION(, int, FAKE_IoTHubTransport_SetStreamRequestCallback, IOTHUB_DEVICE_HANDLE, handle, DEVICE_STREAM_C2D_REQUEST_CALLBACK, streamRequestCallback, void*, context);
+MOCKABLE_FUNCTION(, int, FAKE_IoTHubTransport_SendStreamResponse, IOTHUB_DEVICE_HANDLE, handle, DEVICE_STREAM_C2D_RESPONSE*, response);
 
 MOCKABLE_FUNCTION(, bool, Transport_MessageCallbackFromInput, MESSAGE_CALLBACK_INFO*, messageData, void*, ctx);
 MOCKABLE_FUNCTION(, bool, Transport_MessageCallback, MESSAGE_CALLBACK_INFO*, messageData, void*, ctx);
@@ -613,6 +617,8 @@ static TRANSPORT_PROVIDER FAKE_transport_provider =
     FAKE_IoTHubTransport_Subscribe,     /*pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;        */
     FAKE_IoTHubTransport_Unsubscribe,   /*pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;    */
     FAKE_IoTHubTransport_DoWork,        /*pfIoTHubTransport_DoWork IoTHubTransport_DoWork;              */
+    FAKE_IoTHubTransport_SetStreamRequestCallback,     /*pfIoTHubTransport_SetStreamRequestCallback*/
+    FAKE_IoTHubTransport_SendStreamResponse,           /*pfIoTHubTransport_SendStreamResponse*/
     FAKE_IoTHubTransport_SetRetryPolicy,/*pfIoTHubTransport_SetRetryPolicy IoTHubTransport_SetRetryPolicy;*/
     FAKE_IoTHubTransport_GetSendStatus, /*pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus;*/
     FAKE_IotHubTransport_Subscribe_InputQueue, /*pfIoTHubTransport_Subscribe_InputQueue IoTHubTransport_Subscribe_InputQueue; */
@@ -733,6 +739,17 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
     ASSERT_FAIL(temp_str);
 }
 
+static DEVICE_STREAM_C2D_RESPONSE* on_stream_requests_received_result;
+static DEVICE_STREAM_C2D_REQUEST* on_stream_requests_received_saved_request;
+static void* on_stream_requests_received_saved_context;
+static DEVICE_STREAM_C2D_RESPONSE* on_stream_requests_received(DEVICE_STREAM_C2D_REQUEST* request, void* context)
+{
+    on_stream_requests_received_saved_request = request;
+    on_stream_requests_received_saved_context = context;
+    return on_stream_requests_received_result;
+}
+
+
 BEGIN_TEST_SUITE(iothub_client_core_ll_ut)
 
 TEST_SUITE_INITIALIZE(suite_init)
@@ -793,6 +810,9 @@ TEST_SUITE_INITIALIZE(suite_init)
 #ifdef USE_EDGE_MODULES
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_EDGE_HANDLE, void*);
 #endif // USE_EDGE_MODULES
+
+    REGISTER_UMOCK_ALIAS_TYPE(DEVICE_STREAM_D2C_RESPONSE_CALLBACK, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(DEVICE_STREAM_C2D_REQUEST_CALLBACK, void*);
 
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_GetVersionString, "version 1.0");
 
@@ -6626,6 +6646,162 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallbackEx_with_NULL_inputName_
 
     //cleanup
     IoTHubClientCore_LL_Destroy(handle);
+}
+
+/* Tests_SRS_IOTHUBCLIENT_LL_09_012: [ The transport's `IoTHubTransport_SetStreamRequestCallback` shall be invoked passing `streamRequestCallback` and `context`. ] */
+/* Tests_SRS_IOTHUBCLIENT_LL_09_014: [ If no failures occur `IoTHubClientCore_LL_SetStreamRequestCallback` shall return IOTHUB_CLIENT_OK. ] */
+TEST_FUNCTION(IoTHubClientCore_LL_SetStreamRequestCallback_succeeds)
+{
+    //arrange
+    IOTHUB_DEVICE_CONFIG device;
+    device.deviceId = TEST_CONFIG.deviceId;
+    device.deviceKey = TEST_CONFIG.deviceKey;
+    device.deviceSasToken = NULL;
+
+    setup_IoTHubClientCore_LL_create_mocks(false, false);
+    IOTHUB_CLIENT_CORE_LL_HANDLE clientHandle = IoTHubClientCore_LL_Create(&TEST_CONFIG);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SetStreamRequestCallback(IGNORED_PTR_ARG, on_stream_requests_received, (void*)0x4444));
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SetStreamRequestCallback(clientHandle, on_stream_requests_received, (void*)0x4444);
+
+    ///assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
+
+    //cleanup
+    IoTHubClientCore_LL_Destroy(clientHandle);
+}
+
+/* Tests_SRS_IOTHUBCLIENT_LL_09_013: [ If `IoTHubTransport_SetStreamRequestCallback` fails, `IoTHubClientCore_LL_SetStreamRequestCallback` shall return IOTHUB_CLIENT_ERROR. ] */
+TEST_FUNCTION(IoTHubClientCore_LL_SetStreamRequestCallback_negative_tests)
+{
+    //arrange
+    IOTHUB_DEVICE_CONFIG device;
+    device.deviceId = TEST_CONFIG.deviceId;
+    device.deviceKey = TEST_CONFIG.deviceKey;
+    device.deviceSasToken = NULL;
+
+    setup_IoTHubClientCore_LL_create_mocks(false, false);
+    IOTHUB_CLIENT_CORE_LL_HANDLE clientHandle = IoTHubClientCore_LL_Create(&TEST_CONFIG);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SetStreamRequestCallback(IGNORED_PTR_ARG, on_stream_requests_received, (void*)0x4444))
+        .SetReturn(MU_FAILURE);
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SetStreamRequestCallback(clientHandle, on_stream_requests_received, (void*)0x4444);
+
+    ///assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_ERROR, result);
+
+    //cleanup
+    IoTHubClientCore_LL_Destroy(clientHandle);
+}
+
+/* Tests_SRS_IOTHUBCLIENT_LL_09_011: [ If `iotHubClientHandle` is NULL, `IoTHubClientCore_LL_SetStreamRequestCallback` shall return IOTHUB_CLIENT_INVALID_ARG. ] */
+TEST_FUNCTION(IoTHubClientCore_LL_SetStreamRequestCallback_NULL_client_handle)
+{
+    //arrange
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SetStreamRequestCallback(NULL, on_stream_requests_received, (void*)0x4444);
+
+    ///assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_INVALID_ARG, result);
+
+    //cleanup
+}
+
+/* Tests_SRS_IOTHUBCLIENT_LL_09_016: [ The transport's `IoTHubTransport_SendStreamResponse` shall be invoked passing `response`. ] */
+/* Tests_SRS_IOTHUBCLIENT_LL_09_018: [ If no failures occur `IoTHubClientCore_LL_SendStreamResponse` shall return IOTHUB_CLIENT_OK. ] */
+TEST_FUNCTION(IoTHubClientCore_LL_SendStreamResponse_succeeds)
+{
+    //arrange
+    IOTHUB_DEVICE_CONFIG device;
+    device.deviceId = TEST_CONFIG.deviceId;
+    device.deviceKey = TEST_CONFIG.deviceKey;
+    device.deviceSasToken = NULL;
+
+    setup_IoTHubClientCore_LL_create_mocks(false, false);
+    IOTHUB_CLIENT_CORE_LL_HANDLE clientHandle = IoTHubClientCore_LL_Create(&TEST_CONFIG);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SendStreamResponse(IGNORED_PTR_ARG, (DEVICE_STREAM_C2D_RESPONSE*)0x4444));
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SendStreamResponse(clientHandle, (DEVICE_STREAM_C2D_RESPONSE*)0x4444);
+
+    ///assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
+
+    //cleanup
+    IoTHubClientCore_LL_Destroy(clientHandle);
+}
+
+/* Tests_SRS_IOTHUBCLIENT_LL_09_017: [ If `IoTHubTransport_SendStreamResponse` fails, `IoTHubClientCore_LL_SendStreamResponse` shall return IOTHUB_CLIENT_ERROR. ] */
+TEST_FUNCTION(IoTHubClientCore_LL_SendStreamResponse_negative_tests)
+{
+    //arrange
+    IOTHUB_DEVICE_CONFIG device;
+    device.deviceId = TEST_CONFIG.deviceId;
+    device.deviceKey = TEST_CONFIG.deviceKey;
+    device.deviceSasToken = NULL;
+
+    setup_IoTHubClientCore_LL_create_mocks(false, false);
+    IOTHUB_CLIENT_CORE_LL_HANDLE clientHandle = IoTHubClientCore_LL_Create(&TEST_CONFIG);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SendStreamResponse(IGNORED_PTR_ARG, (DEVICE_STREAM_C2D_RESPONSE*)0x4444))
+        .SetReturn(MU_FAILURE);
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SendStreamResponse(clientHandle, (DEVICE_STREAM_C2D_RESPONSE*)0x4444);
+
+    ///assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_ERROR, result);
+
+    //cleanup
+    IoTHubClientCore_LL_Destroy(clientHandle);
+}
+
+/* Tests_SRS_IOTHUBCLIENT_LL_09_015: [ If `iotHubClientHandle` or `response` are NULL, `IoTHubClientCore_LL_SendStreamResponse` shall return IOTHUB_CLIENT_INVALID_ARG. ] */
+TEST_FUNCTION(IoTHubClientCore_LL_SendStreamResponse_NULL_handle)
+{
+    //arrange
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SendStreamResponse(NULL, (DEVICE_STREAM_C2D_RESPONSE*)0x4444);
+
+    ///assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_INVALID_ARG, result);
+
+    //cleanup
+}
+
+/* Tests_SRS_IOTHUBCLIENT_LL_09_015: [ If `iotHubClientHandle` or `response` are NULL, `IoTHubClientCore_LL_SendStreamResponse` shall return IOTHUB_CLIENT_INVALID_ARG. ] */
+TEST_FUNCTION(IoTHubClientCore_LL_SendStreamResponse_NULL_response)
+{
+    //arrange
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SendStreamResponse((IOTHUB_CLIENT_CORE_LL_HANDLE)0x4443, NULL);
+
+    ///assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_INVALID_ARG, result);
+
+    //cleanup
 }
 
 #ifdef USE_EDGE_MODULES

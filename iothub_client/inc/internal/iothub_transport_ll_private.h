@@ -13,6 +13,7 @@ typedef union IOTHUB_IDENTITY_INFO_TAG IOTHUB_IDENTITY_INFO;
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/platform.h"
 #include "internal/iothub_client_authorization.h"
+#include "iothub_client_streaming.h"
 #include "iothub_message.h"
 
 struct MESSAGE_DISPOSITION_CONTEXT_TAG;
@@ -91,6 +92,8 @@ extern "C"
     typedef int(*pfIoTHubTransport_Subscribe_InputQueue)(IOTHUB_DEVICE_HANDLE handle);
     typedef void(*pfIoTHubTransport_Unsubscribe_InputQueue)(IOTHUB_DEVICE_HANDLE handle);
     typedef int(*pfIoTHubTransport_SetCallbackContext)(TRANSPORT_LL_HANDLE handle, void* ctx);
+    typedef int(*pfIoTHubTransport_SetStreamRequestCallback)(IOTHUB_DEVICE_HANDLE handle, DEVICE_STREAM_C2D_REQUEST_CALLBACK streamRequestCallback, void* context);
+    typedef int(*pfIoTHubTransport_SendStreamResponse)(IOTHUB_DEVICE_HANDLE handle, DEVICE_STREAM_C2D_RESPONSE* response);
     typedef int(*pfIoTHubTransport_GetSupportedPlatformInfo)(TRANSPORT_LL_HANDLE handle, PLATFORM_INFO_OPTION* info);
 
 #define TRANSPORT_PROVIDER_FIELDS                                                   \
@@ -110,6 +113,8 @@ pfIotHubTransport_Unregister IoTHubTransport_Unregister;                        
 pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;                              \
 pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;                          \
 pfIoTHubTransport_DoWork IoTHubTransport_DoWork;                                    \
+pfIoTHubTransport_SetStreamRequestCallback IoTHubTransport_SetStreamRequestCallback;   \
+pfIoTHubTransport_SendStreamResponse IoTHubTransport_SendStreamResponse;               \
 pfIoTHubTransport_SetRetryPolicy IoTHubTransport_SetRetryPolicy;                    \
 pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus;                      \
 pfIoTHubTransport_Subscribe_InputQueue IoTHubTransport_Subscribe_InputQueue;        \

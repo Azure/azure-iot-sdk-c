@@ -894,6 +894,17 @@ const char* IoTHubAccount_GetEventHubConnectionString(IOTHUB_ACCOUNT_INFO_HANDLE
     return result;
 }
 
+const char* IoTHubAccount_GetIoTHubHostName(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
+{
+    const char* result = NULL;
+    IOTHUB_ACCOUNT_INFO* acctInfo = (IOTHUB_ACCOUNT_INFO*)acctHandle;
+    if (acctInfo != NULL)
+    {
+        result = acctInfo->hostname;
+    }
+    return result;
+}
+
 const char* IoTHubAccount_GetIoTHubName(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
 {
     const char* result = NULL;
@@ -986,6 +997,30 @@ const char* IoTHubAccount_GetIoTHubConnString(IOTHUB_ACCOUNT_INFO_HANDLE acctHan
     {
         return NULL;
     }
+}
+
+const char* IoTHubAccount_GetSharedAccessKey(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
+{
+    const char* result = NULL;
+    IOTHUB_ACCOUNT_INFO* acctInfo = (IOTHUB_ACCOUNT_INFO*)acctHandle;
+    if (acctInfo != NULL)
+    {
+        result = acctInfo->sharedAccessKey;
+    }
+
+    return result;
+}
+
+const char* IoTHubAccount_GetSharedAccessKeyName(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
+{
+    const char* result = NULL;
+    IOTHUB_ACCOUNT_INFO* acctInfo = (IOTHUB_ACCOUNT_INFO*)acctHandle;
+    if (acctInfo != NULL)
+    {
+        result = acctInfo->keyName;
+    }
+
+    return result;
 }
 
 const char* IoTHubAccount_GetSharedAccessSignature(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)

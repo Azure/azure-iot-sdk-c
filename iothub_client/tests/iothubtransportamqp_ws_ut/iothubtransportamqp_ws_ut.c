@@ -78,9 +78,10 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 #define TEST_STRING                         "SOME TEXT"
 #define TEST_IOTHUB_DEVICE_CONFIG_HANDLE    ((const IOTHUB_DEVICE_CONFIG*)0x4444)
 #define TEST_WAITING_TO_SEND_LIST           ((PDLIST_ENTRY)0x4445)
-#define TEST_IOTHUB_DEVICE_HANDLE           ((IOTHUB_DEVICE_HANDLE)0x4446)
 #define TEST_IOTHUB_IDENTITY_TYPE           IOTHUB_TYPE_DEVICE_TWIN
 #define TEST_IOTHUB_IDENTITY_INFO_HANDLE    ((IOTHUB_IDENTITY_INFO*)0x4449)
+
+static const IOTHUB_DEVICE_HANDLE TEST_IOTHUB_DEVICE_HANDLE = ((IOTHUB_DEVICE_HANDLE)0x4446);
 
 static IO_INTERFACE_DESCRIPTION* TEST_WSIO_INTERFACE_DESCRIPTION = (IO_INTERFACE_DESCRIPTION*)0x1182;
 static IO_INTERFACE_DESCRIPTION* TEST_TLSIO_INTERFACE_DESCRIPTION = (IO_INTERFACE_DESCRIPTION*)0x1183;
@@ -591,6 +592,8 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_UMOCK_ALIAS_TYPE(PDLIST_ENTRY, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_IDENTITY_TYPE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(AMQP_GET_IO_TRANSPORT, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(DEVICE_STREAM_C2D_REQUEST_CALLBACK, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(DEVICE_STREAM_D2C_RESPONSE_CALLBACK, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, void*);
     REGISTER_TYPE(WSIO_CONFIG*, WSIO_CONFIG_ptr);
     REGISTER_TYPE(TLSIO_CONFIG*, TLSIO_CONFIG_ptr);
@@ -1167,6 +1170,51 @@ TEST_FUNCTION(AMQP_Destroy)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     // cleanup
+}
+
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_023: [IoTHubTransportAMQP_WS_SetStreamRequestCallback shall call into the IoTHubTransport_AMQP_Common_SetStreamRequestCallback()]
+TEST_FUNCTION(IoTHubTransportAMQP_WS_SetStreamRequestCallback_success)
+{
+    // arrange
+    TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol_over_WebSocketsTls();
+    int result;
+    DEVICE_STREAM_C2D_REQUEST_CALLBACK callback = (DEVICE_STREAM_C2D_REQUEST_CALLBACK)0x4445;
+    void* context = (void*)0x4446;
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_SetStreamRequestCallback(TEST_IOTHUB_DEVICE_HANDLE, callback, context))
+        .SetReturn(33);
+
+    // act
+    result = provider->IoTHubTransport_SetStreamRequestCallback(TEST_IOTHUB_DEVICE_HANDLE, callback, context);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, 33, result);
+
+    //cleanup
+}
+
+// Tests_SRS_IOTHUBTRANSPORTAMQP_09_024: [IoTHubTransportAMQP_WS_SendStreamResponse shall call into the IoTHubTransport_AMQP_Common_SendStreamResponse()]
+TEST_FUNCTION(IoTHubTransportAMQP_WS_SendStreamResponse_success)
+{
+    // arrange
+    TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol_over_WebSocketsTls();
+    int result;
+    DEVICE_STREAM_C2D_RESPONSE* response = (DEVICE_STREAM_C2D_RESPONSE*)0x4445;
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_SendStreamResponse(TEST_IOTHUB_DEVICE_HANDLE, response))
+        .SetReturn(33);
+
+    // act
+    result = provider->IoTHubTransport_SendStreamResponse(TEST_IOTHUB_DEVICE_HANDLE, response);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, 33, result);
+
+    //cleanup
 }
 
 TEST_FUNCTION(IoTHubTransportAmqp_SetCallbackContext_success)

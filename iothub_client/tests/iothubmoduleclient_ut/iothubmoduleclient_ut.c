@@ -81,6 +81,7 @@ TEST_SUITE_INITIALIZE(suite_init)
 
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_MODULE_CLIENT_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_CORE_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_RESULT, int);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_MESSAGE_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_TRANSPORT_PROVIDER, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_CONFIG, void*);
@@ -97,6 +98,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(DEVICE_STREAM_D2C_RESPONSE_CALLBACK, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(DEVICE_STREAM_C2D_REQUEST_CALLBACK, void*);
 
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClientCore_CreateFromConnectionString, TEST_IOTHUB_CLIENT_CORE_HANDLE);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClientCore_SendEventAsync, IOTHUB_CLIENT_OK);
@@ -332,5 +335,41 @@ TEST_FUNCTION(IoTHubModuleClient_SetInputMessageCallback_Test)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
+/*
+TEST_FUNCTION(IoTHubModuleClient_SetStreamRequestCallback_Test)
+{
+    //arrange
+    DEVICE_STREAM_C2D_REQUEST_CALLBACK callback = (DEVICE_STREAM_C2D_REQUEST_CALLBACK)0x4445;
+    void* context = (void*)0x4446;
 
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(IoTHubClientCore_SetStreamRequestCallback(TEST_IOTHUB_CLIENT_CORE_HANDLE, callback, context))
+        .SetReturn(IOTHUB_CLIENT_OK);
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubModuleClient_SetStreamRequestCallback(TEST_IOTHUB_MODULE_CLIENT_HANDLE, callback, context);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
+}
+
+TEST_FUNCTION(IoTHubModuleClient_SetStreamRequestCallback_Negative_Test)
+{
+    //arrange
+    DEVICE_STREAM_C2D_REQUEST_CALLBACK callback = (DEVICE_STREAM_C2D_REQUEST_CALLBACK)0x4445;
+    void* context = (void*)0x4446;
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(IoTHubClientCore_SetStreamRequestCallback(TEST_IOTHUB_CLIENT_CORE_HANDLE, callback, context))
+        .SetReturn(IOTHUB_CLIENT_ERROR);
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubModuleClient_SetStreamRequestCallback(TEST_IOTHUB_MODULE_CLIENT_HANDLE, callback, context);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_ERROR, result);
+}
+*/
 END_TEST_SUITE(iothubmoduleclient_ut)

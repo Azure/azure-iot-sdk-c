@@ -290,6 +290,8 @@ static void setTransportProtocol(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData, 
     handleData->IoTHubTransport_DeviceMethod_Response = protocol->IoTHubTransport_DeviceMethod_Response;
     handleData->IoTHubTransport_Subscribe_InputQueue = protocol->IoTHubTransport_Subscribe_InputQueue;
     handleData->IoTHubTransport_Unsubscribe_InputQueue = protocol->IoTHubTransport_Unsubscribe_InputQueue;
+    handleData->IoTHubTransport_SetStreamRequestCallback = protocol->IoTHubTransport_SetStreamRequestCallback;
+    handleData->IoTHubTransport_SendStreamResponse = protocol->IoTHubTransport_SendStreamResponse;
     handleData->IoTHubTransport_SetCallbackContext = protocol->IoTHubTransport_SetCallbackContext;
     handleData->IoTHubTransport_GetSupportedPlatformInfo = protocol->IoTHubTransport_GetSupportedPlatformInfo;
 }
@@ -628,7 +630,6 @@ static void IoTHubClientCore_LL_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTIO
             handleData->conStatusCallback(status, reason, handleData->conStatusUserContextCallback);
         }
     }
-
 }
 
 static const char* IoTHubClientCore_LL_GetProductInfo(void* ctx)
@@ -3097,6 +3098,68 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_EnablePolicyConfiguration(IOTHUB_CLIENT
     {
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetStreamRequestCallback(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, DEVICE_STREAM_C2D_REQUEST_CALLBACK streamRequestCallback, void* context)
+{
+    IOTHUB_CLIENT_RESULT result;
+
+    // Codes_SRS_IOTHUBCLIENT_LL_09_011: [ If `iotHubClientHandle` is NULL, `IoTHubClientCore_LL_SetStreamRequestCallback` shall return IOTHUB_CLIENT_INVALID_ARG. ]
+    if (iotHubClientHandle == NULL)
+    {
+        result = IOTHUB_CLIENT_INVALID_ARG;
+        LOG_ERROR_RESULT;
+    }
+    else
+    {
+        IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)iotHubClientHandle;
+
+        // Codes_SRS_IOTHUBCLIENT_LL_09_012: [ The transport's `IoTHubTransport_SetStreamRequestCallback` shall be invoked passing `streamRequestCallback` and `context`. ]
+        if (handleData->IoTHubTransport_SetStreamRequestCallback(handleData->deviceHandle, streamRequestCallback, context) != 0)
+        {
+            // Codes_SRS_IOTHUBCLIENT_LL_09_013: [ If `IoTHubTransport_SetStreamRequestCallback` fails, `IoTHubClientCore_LL_SetStreamRequestCallback` shall return IOTHUB_CLIENT_ERROR. ]
+            LogError("Failed to subscribe/unsubscribe for Stream requests at the transport level");
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        else
+        {
+            // Codes_SRS_IOTHUBCLIENT_LL_09_014: [ If no failures occur `IoTHubClientCore_LL_SetStreamRequestCallback` shall return IOTHUB_CLIENT_OK. ]
+            result = IOTHUB_CLIENT_OK;
+        }
+    }
+
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SendStreamResponse(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, DEVICE_STREAM_C2D_RESPONSE* response)
+{
+    IOTHUB_CLIENT_RESULT result;
+
+    // Codes_SRS_IOTHUBCLIENT_LL_09_015: [ If `iotHubClientHandle` or `response` are NULL, `IoTHubClientCore_LL_SendStreamResponse` shall return IOTHUB_CLIENT_INVALID_ARG. ]
+    if (iotHubClientHandle == NULL || response == NULL)
+    {
+        result = IOTHUB_CLIENT_INVALID_ARG;
+        LOG_ERROR_RESULT;
+    }
+    else
+    {
+        IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)iotHubClientHandle;
+
+        // Codes_SRS_IOTHUBCLIENT_LL_09_016: [ The transport's `IoTHubTransport_SendStreamResponse` shall be invoked passing `response`. ]
+        if (handleData->IoTHubTransport_SendStreamResponse(handleData->deviceHandle, response) != 0)
+        {
+            // Codes_SRS_IOTHUBCLIENT_LL_09_017: [ If `IoTHubTransport_SendStreamResponse` fails, `IoTHubClientCore_LL_SendStreamResponse` shall return IOTHUB_CLIENT_ERROR. ]
+            LogError("Failed to send the Stream response");
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        else
+        {
+            // Codes_SRS_IOTHUBCLIENT_LL_09_018: [ If no failures occur `IoTHubClientCore_LL_SendStreamResponse` shall return IOTHUB_CLIENT_OK. ]
+            result = IOTHUB_CLIENT_OK;
+        }
+    }
+
     return result;
 }
 
