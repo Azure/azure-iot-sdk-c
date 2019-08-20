@@ -111,3 +111,8 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync(IOTHUB_D
 }
 
 #endif /*DONT_USE_UPLOADTOBLOB*/
+
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_EnablePolicyConfiguration(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, POLICY_CONFIGURATION_TYPE policyType, bool enablePolicyConfiguration)
+{
+    return IoTHubClientCore_EnablePolicyConfiguration((IOTHUB_CLIENT_CORE_HANDLE)iotHubClientHandle, policyType, enablePolicyConfiguration);
+}

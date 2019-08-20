@@ -90,6 +90,8 @@ static const char* CONNECTION_MODULE_ID_PROPERTY = "cmid";
 
 static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtimeutc";
 
+static const char* DISTRIBUTED_TRACING_PROPERTY = "tracestate";
+
 #define TOLOWER(c) (((c>='A') && (c<='Z'))?c-'A'+'a':c)
 
 #define UNSUBSCRIBE_FROM_TOPIC                  0x0000
@@ -680,6 +682,8 @@ static int addSystemPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_messag
     size_t index = *index_ptr;
 
     bool is_security_msg = IoTHubMessage_IsSecurityMessage(iothub_message_handle);
+    const char* tracestate = IoTHubMessage_GetDistributedTracingSystemProperty(iothub_message_handle);
+
     /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_052: [ IoTHubTransport_MQTT_Common_DoWork shall check for the CorrelationId property and if found add the value as a system property in the format of $.cid=<id> ] */
     const char* correlation_id = IoTHubMessage_GetCorrelationId(iothub_message_handle);
     if (correlation_id != NULL)
@@ -734,10 +738,29 @@ static int addSystemPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_messag
             }
         }
     }
+
+    // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_38_012: [ `IoTHubTransport_MQTT_Common_DoWork` shall check for the DistributedTracing property and if found add the `value` as a system property in the format of `$.tracestate=<value>` ]
+    if (result == 0)
+    {
+        if (tracestate != NULL)
+        {
+            // The distributed tracing tracestate value must be encoded
+            if (addSystemPropertyToTopicString(topic_string, index++, DISTRIBUTED_TRACING_PROPERTY, tracestate, true) != 0)
+            {
+                LogError("Failed setting distributed tracing tracestate");
+                result = MU_FAILURE;
+            }
+            else
+            {
+                result = 0;
+            }
+        }
+    }
     *index_ptr = index;
     return result;
 }
 
+// Deprecated
 static int addDiagnosticPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_message_handle, STRING_HANDLE topic_string, size_t* index_ptr)
 {
     int result = 0;
@@ -826,6 +849,7 @@ static STRING_HANDLE addPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_me
         STRING_delete(result);
         result = NULL;
     }
+    //Deprecated
     else if (addDiagnosticPropertiesTouMqttMessage(iothub_message_handle, result, &index) != 0)
     {
         LogError("Failed adding Diagnostic Properties to uMQTT Message");

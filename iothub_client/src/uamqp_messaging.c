@@ -28,6 +28,8 @@
 
 #define MESSAGE_ID_MAX_SIZE 128
 
+#define AMQP_DISTRIBUTED_TRACING_KEY "tracestate"
+
 #define AMQP_DIAGNOSTIC_ID_KEY "Diagnostic-Id"
 #define AMQP_DIAGNOSTIC_CONTEXT_KEY "Correlation-Context"
 #define AMQP_DIAGNOSTIC_CREATION_TIME_UTC_KEY "creationtimeutc"
@@ -557,6 +559,46 @@ static int create_security_message_annotations(IOTHUB_MESSAGE_HANDLE messageHand
     return result;
 }
 
+static int create_distributed_tracing_message_annotations(IOTHUB_MESSAGE_HANDLE messageHandle, AMQP_VALUE* message_annotations_map)
+{
+    int result = RESULT_OK;
+    const char* distributed_tracing = IoTHubMessage_GetDistributedTracingSystemProperty(messageHandle);
+    bool annotation_created = false;
+
+    if (distributed_tracing != NULL)
+    {
+        if (*message_annotations_map == NULL)
+        {
+            // Codes_SRS_UAMQP_MESSAGING_32_001: [If optional diagnostic properties are present in the iot hub message, encode them into the AMQP message as annotation properties. Errors stop processing on this message.]
+            if ((*message_annotations_map = amqpvalue_create_map()) == NULL)
+            {
+                LogError("Failed amqpvalue_create_map for annotations");
+                result = MU_FAILURE;
+            }
+            else
+            {
+                annotation_created = true;
+            }
+        }
+
+        if (result == RESULT_OK)
+        {
+            if (add_map_item(*message_annotations_map, AMQP_DISTRIBUTED_TRACING_KEY, distributed_tracing) != RESULT_OK)
+            {
+                LogError("Failed adding distributed tracing property");
+                result = MU_FAILURE;
+                if (annotation_created)
+                {
+                    amqpvalue_destroy(*message_annotations_map);
+                    *message_annotations_map = NULL;
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
 static int create_message_annotations_to_encode(IOTHUB_MESSAGE_HANDLE messageHandle, AMQP_VALUE *message_annotations, size_t *message_annotations_length)
 {
     AMQP_VALUE message_annotations_map = NULL;
@@ -570,6 +612,11 @@ static int create_message_annotations_to_encode(IOTHUB_MESSAGE_HANDLE messageHan
     else if ((result = create_security_message_annotations(messageHandle, &message_annotations_map)) != RESULT_OK)
     {
         LogError("Failed creating message annotations");
+        result = MU_FAILURE;
+    }
+    else if ((result = create_distributed_tracing_message_annotations(messageHandle, &message_annotations_map)) != RESULT_OK)
+    {
+        LogError("Failed creating distributed message annotations");
         result = MU_FAILURE;
     }
     else

@@ -51,7 +51,6 @@ typedef struct IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA_TAG
     char* diagnosticCreationTimeUtc;
 }IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA, *IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA_HANDLE;
 
-static const char DIAG_CREATION_TIME_UTC_PROPERTY_NAME[] = "diag_creation_time_utc";
 
 /**
 * @brief   Creates a new IoT hub message from a byte array. The type of the
@@ -246,6 +245,7 @@ MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetCorrelationId, IOTHU
 
 /**
 * @brief   Gets the DiagnosticData from the IOTHUB_MESSAGE_HANDLE. CAUTION: SDK user should not call it directly, it is for internal use only.
+** DEPRECATED: Use IoTHubMessage_GetDistributedTracingSystemProperty instead. **
 *
 * @param   iotHubMessageHandle Handle to the message.
 *
@@ -255,6 +255,7 @@ MOCKABLE_FUNCTION(, const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA*, IoTHubMessag
 
 /**
 * @brief   Sets the DiagnosticData for the IOTHUB_MESSAGE_HANDLE. CAUTION: SDK user should not call it directly, it is for internal use only.
+** DEPRECATED: Use IoTHubMessage_SetDistributedTracingSystemProperty instead. **
 *
 * @param   iotHubMessageHandle Handle to the message.
 * @param   diagnosticData Pointer to the memory location of the diagnosticData
@@ -263,6 +264,26 @@ MOCKABLE_FUNCTION(, const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA*, IoTHubMessag
 *          or an error code otherwise.
 */
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetDiagnosticPropertyData, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA*, diagnosticData);
+
+/**
+* @brief   Gets the tracestate (current timestamp) from the IOTHUB_MESSAGE_HANDLE.
+*
+* @param   iotHubMessageHandle Handle to the message.
+*
+* @return  A const char* pointing to the distributed tracing tracestate value.
+*/
+MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetDistributedTracingSystemProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
+
+/**
+* @brief   Sets the distributed tracing system property for the IOTHUB_MESSAGE_HANDLE.
+*
+* @param   iotHubMessageHandle Handle to the message.
+* @param   distributedTracingTracestate Pointer to the memory location of the Distributed Tracing tracestate.
+*
+* @return  Returns IOTHUB_MESSAGE_OK if the Distributed Tracing tracestate was set successfully
+*          or an error code otherwise.
+*/
+MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetDistributedTracingSystemProperty,  IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, distributedTracingTracestate);
 
 /**
 * @brief   Gets the output name from the IOTHUB_MESSAGE_HANDLE.
