@@ -272,23 +272,16 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_ModelDefinition_Publish_Interface(const ch
 {       
     DIGITALTWIN_CLIENT_RESULT result;
     MAP_RESULT mapResult;
-    char* encodedModelDefinition;
 
     if ((interfaceId == NULL) || (data == NULL) || (mdHandle == NULL))
     {
         LogError("MODEL_DEFINITION_INTERFACE: invalid parameter(s)");
         result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
     }
-    else if ((encodedModelDefinition = DTMD_EncodeModelDefinition(data)) == NULL)
-    {
-        LogError("DTMD_EncodeModelDefinition failed");
-        result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
-    }
-    else if ((mapResult = Map_AddOrUpdate(mdHandle->map, interfaceId, encodedModelDefinition)) != MAP_OK)
+    else if ((mapResult = Map_AddOrUpdate(mdHandle->map, interfaceId, data)) != MAP_OK)
     {
         LogError("Map_AddOrUpdate failed, err=%d", mapResult);
         // Because the map does not own the memory, free it here
-        free(encodedModelDefinition);
         result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
     }
     else
