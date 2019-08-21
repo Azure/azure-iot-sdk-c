@@ -338,7 +338,7 @@ jobs:
     name: 'aziotbld-win03'
   displayName: 'windowsx64'
   steps:
-    - task: NodeTool@0
+  - task: NodeTool@0
     displayName: 'Use Node 10.x'
     inputs:
       versionSpec: 10.x
