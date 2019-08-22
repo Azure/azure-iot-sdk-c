@@ -70,6 +70,7 @@ This document describes how to run the end to end tests, with exception of Digit
 <a name="windows_client"></a>
 ## Run end to end tests on a Windows development environment
 
+- Install Node 10 or later.
 - Start the Windows PowerShell in Administrator mode. Update execution policy by entering "set-executionpolicy unrestricted"
 - Navigate to azure-iot-sdk-c\cmake  
 - From cmake directory, run cmake with option to enable e2e testing: Cmake -Drun_e2e_tests=ON ..

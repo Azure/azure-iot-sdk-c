@@ -25,6 +25,10 @@ jobs:
   pool:
     name: 'aziotbld-win03'
   steps:
+  - task: NodeTool@0
+    displayName: 'Use Node 10.x'
+    inputs:
+      versionSpec: 10.x
   - script: |
       call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
       call jenkins\windows_c.cmd
@@ -334,6 +338,10 @@ jobs:
     name: 'aziotbld-win03'
   displayName: 'windowsx64'
   steps:
+  - task: NodeTool@0
+    displayName: 'Use Node 10.x'
+    inputs:
+      versionSpec: 10.x
   - script: |
       call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
       call jenkins\windows_c.cmd --platform x64
