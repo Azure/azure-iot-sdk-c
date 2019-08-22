@@ -11,10 +11,10 @@ set(${theseTestsName}_test_files
 ${theseTestsName}.c
 )
 
-include_directories(${SHARED_UTIL_REAL_TEST_FOLDER})
+include_directories(${SHARED_UTIL_REAL_TEST_FOLDER} ${IOTHUB_TEST_REAL_INC_FOLDER})
 
 set(${theseTestsName}_c_files
-    real_parson.c
+    ${IOTHUB_TEST_REAL_SRC_FOLDER}/real_parson.c
     ${SHARED_UTIL_REAL_TEST_FOLDER}/real_vector.c
     ${SHARED_UTIL_REAL_TEST_FOLDER}/real_crt_abstractions.c
     ${SHARED_UTIL_REAL_TEST_FOLDER}/real_strings.c
@@ -23,12 +23,12 @@ ${LOCK_C_FILE}
 )
 
 set(${theseTestsName}_h_files
-    real_parson.h
+    ${IOTHUB_TEST_REAL_INC_FOLDER}/real_parson.h
     ${SHARED_UTIL_REAL_TEST_FOLDER}/real_strings.h
 )
 
 if(MSVC)
-    set_source_files_properties(real_parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
+    set_source_files_properties(${IOTHUB_TEST_REAL_SRC_FOLDER}/real_parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
 endif()
 
 

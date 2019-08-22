@@ -68,9 +68,9 @@ class mxchip_uart_interface(uart_interface):
             timeout = time.time()
 
             while bytes_written < buf_len:
-                round = ser.write(buf[:128])
-                buf = buf[round:]
-                bytes_written += round
+                temp_written = ser.write(buf[:128])
+                buf = buf[temp_written:]
+                bytes_written += temp_written
                 # print("bytes written: %d" %bytes_written)
                 time.sleep(wait)
                 if (time.time() - timeout > serial_settings.serial_comm_timeout):
@@ -124,6 +124,7 @@ class mxchip_uart_interface(uart_interface):
 
     # Note: the buffer size on the mxchip appears to be 128 Bytes.
     def write_read(self, ser, input_file, output_file):
+        serial_settings.bits_to_cache = 1600
         if input_file:
             # set wait between read/write
             wait = (serial_settings.bits_to_cache/serial_settings.baud_rate)

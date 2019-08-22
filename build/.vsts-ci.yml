@@ -2,9 +2,9 @@ name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Re
 resources:
 - repo: self
   clean: true
-phases:
-- phase: checksubmodule
-  queue:
+jobs:
+- job: checksubmodule
+  pool:
     name: Hosted Ubuntu 1604
   steps:
   - script: |
@@ -21,8 +21,8 @@ phases:
       npm install check_submodules
       ./../../node_modules/.bin/check_submodules . master
     displayName: 'build'
-- phase: windowsx86
-  queue:
+- job: windowsx86
+  pool:
     name: 'aziotbld-win03'
   steps:
   - script: |
@@ -57,10 +57,10 @@ phases:
   - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
     displayName: 'cleanup'
     condition: always()
-- phase: raspberrypi
+- job: raspberrypi
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/raspberrypi-c"
-  queue: Hosted Ubuntu 1604
+  pool: Hosted Ubuntu 1604
   displayName: raspberrypi
   steps:
   - script: |
@@ -72,10 +72,10 @@ phases:
     displayName: 'build'
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
-- phase: gcc44
+- job: gcc44
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-gcc4.4"
-  queue: Hosted Ubuntu 1604
+  pool: Hosted Ubuntu 1604
   displayName: 'gcc4.4'
   steps:
   - script: |
@@ -90,10 +90,10 @@ phases:
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
     condition: always()
-- phase: gcc46
+- job: gcc46
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/gcc-4.6:latest"
-  queue: Hosted Ubuntu 1604
+  pool: Hosted Ubuntu 1604
   displayName: 'gcc-4.6'
   steps:
   - script: |
@@ -110,10 +110,10 @@ phases:
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
     condition: always()
-- phase: linuxoptions
+- job: linuxoptions
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/vsts-linux-c-ubuntu"
-  queue: Hosted Ubuntu 1604
+  pool: Hosted Ubuntu 1604
   displayName: 'linux-options'
   steps:
   - script: 'sudo ./jenkins/linux_c_option_test.sh'
@@ -122,8 +122,8 @@ phases:
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
     condition: always()
-- phase: windowsdynamic
-  queue:
+- job: windowsdynamic
+  pool:
     name: 'aziotbld-win03'
   steps:
   - script: |
@@ -149,8 +149,8 @@ phases:
   - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
     displayName: 'cleanup'
     condition: always()
-- phase: OSX
-  queue:
+- job: OSX
+  pool:
     name: Hosted macOS
   steps:
   - script: |
@@ -176,10 +176,10 @@ phases:
   - script: rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
     condition: always()
-- phase: clang
+- job: clang
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/ubuntu-clang"
-  queue: aziotbld-lin01
+  pool: aziotbld-lin01
   displayName: 'clang'
   steps:
   - script: |
@@ -207,10 +207,10 @@ phases:
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
     condition: always()
-- phase: ubuntu1604
+- job: ubuntu1604
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
-  queue: aziotbld-lin02
+  pool: aziotbld-lin02
   displayName: 'ubuntu1604'
   steps:
   - script: |
@@ -238,10 +238,39 @@ phases:
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
     condition: always()
-- phase: linux_installed_deps
+- job: debian
+  variables:
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/c-debian"
+  pool: aziotbld-lin02
+  displayName: 'debian'
+  steps:
+  - script: |
+      sudo ./jenkins/debian_c.sh
+    displayName: 'build'
+    env:
+      IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
+      IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
+      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+      IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
+      IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
+      IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
+      IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
+      IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+      IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
+      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+      PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+  - script: sudo rm -rf $(Agent.BuildDirectory)/*
+    displayName: 'cleanup'
+    condition: always()
+- job: linux_installed_deps
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
-  queue: aziotbld-lin02
+  pool: aziotbld-lin02
   displayName: 'linux_installed_deps'
   steps:
   - script: |
@@ -269,39 +298,10 @@ phases:
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
     condition: always()
-- phase: debian
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/c-debian"
-  queue: aziotbld-lin02
-  displayName: 'debian'
-  steps:
-  - script: |
-      sudo ./jenkins/debian_c.sh
-    displayName: 'build'
-    env:
-      IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-      IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
-      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-      IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
-      STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-      IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
-      IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
-      IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
-      IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
-      IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
-      IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-      DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-      PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
-    displayName: 'cleanup'
-    condition: always()
-- phase: wolfssl
+- job: wolfssl
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/c-linux-wolfssl"
-  queue: Hosted Ubuntu 1604
+  pool: Hosted Ubuntu 1604
   displayName: 'wolfssl'
   steps:
   - script: |
@@ -329,8 +329,8 @@ phases:
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
     condition: always()
-- phase: windowsx64
-  queue:
+- job: windowsx64
+  pool:
     name: 'aziotbld-win03'
   displayName: 'windowsx64'
   steps:
@@ -369,8 +369,8 @@ phases:
   - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
     displayName: 'cleanup'
     condition: always()
-- phase: xcodenative
-  queue:
+- job: xcodenative
+  pool:
     name: OSX
   steps:
   - script: |
