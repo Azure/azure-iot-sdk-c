@@ -331,7 +331,7 @@ jobs:
     condition: always()
 - job: bearssl
   variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/vsts-c-bearssl"
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/devops-c-bearssl"
   pool: Hosted Ubuntu 1604
   displayName: 'bearssl'
   steps:
