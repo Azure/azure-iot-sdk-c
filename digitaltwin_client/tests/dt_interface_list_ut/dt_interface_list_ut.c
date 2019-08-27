@@ -41,7 +41,6 @@ static void my_gballoc_free(void* ptr)
 #define ENABLE_MOCKS
 #include "internal/dt_lock_thread_binding.h"
 #include "internal/dt_client_core.h"
-#include "internal/dt_raw_interface.h"
 #include "internal/dt_interface_private.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "parson.h"
@@ -194,12 +193,6 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
     ASSERT_FAIL(temp_str);
 }
 
-const char* impl_testDT_Get_RawInterfaceId(const char* dtInterface)
-{
-    (void)dtInterface;
-    return (const char*)(my_gballoc_malloc(1));
-}
-
 const char* test_dtInterfaceList_ExpectedMessageBody;
 
 DIGITALTWIN_CLIENT_RESULT impl_test_DT_InterfaceClient_CreateTelemetryMessage(const char* interfaceId, const char* interfaceInstanceName, const char* telemetryName, const char* messageData, IOTHUB_MESSAGE_HANDLE* telemetryMessageHandle)
@@ -306,9 +299,6 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(DT_InterfaceClient_CreateTelemetryMessage, impl_test_DT_InterfaceClient_CreateTelemetryMessage);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(DT_InterfaceClient_CreateTelemetryMessage, DIGITALTWIN_CLIENT_ERROR);
     
-    REGISTER_GLOBAL_MOCK_HOOK(DT_Get_RawInterfaceId, impl_testDT_Get_RawInterfaceId);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(DT_Get_RawInterfaceId, NULL);
-
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(DT_InterfaceClient_GetInterfaceId, NULL);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(DT_InterfaceClient_GetInterfaceInstanceName, NULL);
 

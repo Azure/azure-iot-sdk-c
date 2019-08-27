@@ -23,6 +23,7 @@
 #define json_value_free                     real_json_value_free
 #define json_value_get_object               real_json_value_get_object
 #define json_value_get_array                real_json_value_get_array
+#define json_value_get_string               real_json_value_get_string
 #define json_object                         real_json_object
 #define json_object_set_value               real_json_object_set_value
 #define json_object_dotget_object           real_json_object_dotget_object
@@ -58,6 +59,7 @@
 #undef json_value_free
 #undef json_value_get_object
 #undef json_value_get_array
+#undef json_value_get_string
 #undef json_object
 #undef json_object_set_value
 #undef json_object_dotget_object

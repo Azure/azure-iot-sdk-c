@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 2.8.11)
 compileAsC11()
 set(theseTestsName dt_model_definition_ut)
 
-include_directories(${SHARED_UTIL_REAL_TEST_FOLDER} ${IOTHUB_TEST_REAL_INC_FOLDER})
+include_directories(${SHARED_UTIL_REAL_TEST_FOLDER} ${IOTHUB_TEST_REAL_INC_FOLDER} ../../../serializer/tests/serializer_dt_ut ${SHARED_UTIL_INC_FOLDER})
 
 set(${theseTestsName}_test_files
 ${theseTestsName}.c
@@ -17,10 +17,12 @@ set(${theseTestsName}_c_files
 ${SHARED_UTIL_REAL_TEST_FOLDER}/real_map.c
 ${IOTHUB_TEST_REAL_SRC_FOLDER}/real_parson.c
 ../../src/dt_model_definition.c
+../../../serializer/tests/serializer_dt_ut/real_crt_abstractions.c
 )
 
 set(${theseTestsName}_h_files
 ${SHARED_UTIL_REAL_TEST_FOLDER}/real_map.h
+../../../serializer/tests/serializer_dt_ut/real_crt_abstractions.h
 )
 
 build_c_test_artifacts(${theseTestsName} ON "tests/UnitTests")

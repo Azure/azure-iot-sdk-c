@@ -34,7 +34,6 @@ set(digitaltwin_client_h_files
     ./inc/internal/dt_lock_thread_binding.h
     ./inc/internal/dt_lock_thread_binding_impl.h
     ./inc/internal/dt_lock_thread_binding_stub.h
-    ./inc/internal/dt_raw_interface.h
 )
 
 set(digitaltwin_client_libs)
