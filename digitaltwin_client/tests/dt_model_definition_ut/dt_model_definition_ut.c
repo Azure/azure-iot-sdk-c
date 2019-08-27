@@ -85,8 +85,7 @@ static char *TEST_INTERFACE_DATA1 = "TEST DATA TO PUBLISH1";
 static char *TEST_INTERFACE_DATA2 = "TEST DATA TO PUBLISH2";
 
 static char* TEST_INTERFACE_NAME_JSON1 = "\"Test Interface1\"";
-static char *TEST_INTERFACE_DATA_JSON1 = "TEST DATA TO PUBLISH1";
-
+static char* TEST_INTERFACE_NAME_DOESNOT_EXIST_JSON = "\"Json Does Not Exist\"";
 
 
 static DIGITALTWIN_INTERFACE_CLIENT_HANDLE temp_interface_handle = (DIGITALTWIN_INTERFACE_CLIENT_HANDLE)0x1234;
@@ -151,9 +150,6 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_parse_string, NULL);
     REGISTER_GLOBAL_MOCK_HOOK(json_value_get_string, real_json_value_get_string);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_value_get_string, NULL);
-
-    
-
 
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_calloc, my_gballoc_calloc);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_calloc, NULL);
@@ -486,27 +482,8 @@ TEST_FUNCTION(DigitalTwin_ModelDefinition_Publish_Interface_fails)
 static const char* test_DT_GetModelDefinitionCommand = "getModelDefinition";
 static const char* test_DT_RequestId = "1234";
 
-// set_test_command_params fills in the COMMAND structures that the DigitalTwin SDK typically would in production
-// on a command callback.  By default we setup only legit parameters.
-static void set_test_command_params(DIGITALTWIN_CLIENT_COMMAND_REQUEST* commandRequest, DIGITALTWIN_CLIENT_COMMAND_RESPONSE* commandResponse)
+static MODEL_DEFINITION_CLIENT_HANDLE create_test_MD_Handle_and_PublishInterface()
 {
-    memset(commandRequest, 0, sizeof(*commandRequest));
-    commandRequest->version = DIGITALTWIN_CLIENT_COMMAND_REQUEST_VERSION_1;
-    commandRequest->commandName = test_DT_GetModelDefinitionCommand;
-    commandRequest->requestId = test_DT_RequestId;
-
-    memset(commandResponse, 0, sizeof(*commandResponse));
-    commandResponse->version = DIGITALTWIN_CLIENT_COMMAND_RESPONSE_VERSION_1;
-}
-
-static void set_expected_calls_for_DigitalTwin_ModelDefinition_ProcessCommand()
-{
-
-}
-
-TEST_FUNCTION(DigitalTwin_ModelDefinition_ProcessCommand_OK)
-{
-    // arrange
     DIGITALTWIN_CLIENT_RESULT result;
     MODEL_DEFINITION_CLIENT_HANDLE h = create_test_MD_handle();
     set_expected_calls_for_DigitalTwin_ModelDefinition_Publish_Interface(true);
@@ -516,27 +493,143 @@ TEST_FUNCTION(DigitalTwin_ModelDefinition_ProcessCommand_OK)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result);
 
-    // act
+    umock_c_reset_all_calls();
+    return h;
+}
+
+// set_test_command_params fills in the COMMAND structures that the DigitalTwin SDK typically would in production
+// on a command callback.  By default we setup only legit parameters.
+static void set_test_command_params(DIGITALTWIN_CLIENT_COMMAND_REQUEST* commandRequest, DIGITALTWIN_CLIENT_COMMAND_RESPONSE* commandResponse, const char* requestData)
+{
+    memset(commandRequest, 0, sizeof(*commandRequest));
+    commandRequest->version = DIGITALTWIN_CLIENT_COMMAND_REQUEST_VERSION_1;
+    commandRequest->commandName = test_DT_GetModelDefinitionCommand;
+    commandRequest->requestId = test_DT_RequestId;
+    commandRequest->requestData = (const unsigned char*)requestData;
+    commandRequest->requestDataLen = strlen(requestData);
+
+
+    memset(commandResponse, 0, sizeof(*commandResponse));
+    commandResponse->version = DIGITALTWIN_CLIENT_COMMAND_RESPONSE_VERSION_1;
+}
+
+static void set_expected_calls_for_DigitalTwin_ModelDefinition_ProcessCommand()
+{
+    STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Map_GetValueFromKey(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
+}
+
+TEST_FUNCTION(DigitalTwin_ModelDefinition_ProcessCommand_OK)
+{
+    // arrange
+    MODEL_DEFINITION_CLIENT_HANDLE h = create_test_MD_Handle_and_PublishInterface();
+
+    set_expected_calls_for_DigitalTwin_ModelDefinition_ProcessCommand();
+
     DIGITALTWIN_CLIENT_COMMAND_REQUEST commandRequest;
     DIGITALTWIN_CLIENT_COMMAND_RESPONSE commandResponse;
 
-    set_test_command_params(&commandRequest, &commandResponse);
-    commandRequest.requestData = (const unsigned char*)TEST_INTERFACE_NAME_JSON1;
-    commandRequest.requestDataLen = strlen(TEST_INTERFACE_NAME_JSON1);
+    set_test_command_params(&commandRequest, &commandResponse, TEST_INTERFACE_NAME_JSON1);
 
+    // act
     testModelCommandCallback(&commandRequest, &commandResponse, h);
 
     // assert
     ASSERT_ARE_EQUAL(int, commandResponse.status, 200);
     ASSERT_ARE_EQUAL(char_ptr, (const char*)commandResponse.responseData, TEST_INTERFACE_DATA1);
     ASSERT_ARE_EQUAL(int, commandResponse.responseDataLen, strlen(TEST_INTERFACE_DATA1));
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     // cleanup
     DigitalTwin_ModelDefinition_Destroy(h);
 }
 
+TEST_FUNCTION(DigitalTwin_ModelDefinition_ProcessCommand_interface_doesnotexist_fails)
+{
+    // arrange
+    MODEL_DEFINITION_CLIENT_HANDLE h = create_test_MD_Handle_and_PublishInterface();
 
+    DIGITALTWIN_CLIENT_COMMAND_REQUEST commandRequest;
+    DIGITALTWIN_CLIENT_COMMAND_RESPONSE commandResponse;
 
+    set_test_command_params(&commandRequest, &commandResponse, TEST_INTERFACE_NAME_DOESNOT_EXIST_JSON);
+
+    // act
+    testModelCommandCallback(&commandRequest, &commandResponse, h);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, commandResponse.status, 404);
+    ASSERT_IS_NULL(commandResponse.responseData);
+    ASSERT_ARE_EQUAL(int, commandResponse.responseDataLen, 0);
+
+    // cleanup
+    DigitalTwin_ModelDefinition_Destroy(h);
+}
+
+TEST_FUNCTION(DigitalTwin_ModelDefinition_ProcessCommand_NULL_userInterfaceContext_fails)
+{
+    // arrange
+    MODEL_DEFINITION_CLIENT_HANDLE h = create_test_MD_Handle_and_PublishInterface();
+
+    DIGITALTWIN_CLIENT_COMMAND_REQUEST commandRequest;
+    DIGITALTWIN_CLIENT_COMMAND_RESPONSE commandResponse;
+
+    set_test_command_params(&commandRequest, &commandResponse, TEST_INTERFACE_NAME_DOESNOT_EXIST_JSON);
+
+    // act
+    testModelCommandCallback(&commandRequest, &commandResponse, NULL);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, commandResponse.status, 500);
+    ASSERT_IS_NULL(commandResponse.responseData);
+    ASSERT_ARE_EQUAL(int, commandResponse.responseDataLen, 0);
+
+    // cleanup
+    DigitalTwin_ModelDefinition_Destroy(h);
+}
+
+TEST_FUNCTION(DigitalTwin_ModelDefinition_ProcessCommand_fail)
+{
+    // arrange
+    int result = umock_c_negative_tests_init();
+    ASSERT_ARE_EQUAL(int, 0, result);
+
+    MODEL_DEFINITION_CLIENT_HANDLE h = create_test_MD_Handle_and_PublishInterface();
+
+    DIGITALTWIN_CLIENT_COMMAND_REQUEST commandRequest;
+    DIGITALTWIN_CLIENT_COMMAND_RESPONSE commandResponse;
+
+    set_test_command_params(&commandRequest, &commandResponse, TEST_INTERFACE_NAME_JSON1);
+
+    set_expected_calls_for_DigitalTwin_ModelDefinition_ProcessCommand();
+
+    umock_c_negative_tests_snapshot();
+
+    //act
+    size_t count = umock_c_negative_tests_call_count();
+    for (size_t index = 0; index < count; index++)
+    {
+        if (umock_c_negative_tests_can_call_fail(index))
+        {
+            umock_c_negative_tests_reset();
+            umock_c_negative_tests_fail_call(index);
+
+            testModelCommandCallback(&commandRequest, &commandResponse, h);
+
+            //assert
+            ASSERT_ARE_NOT_EQUAL(int, commandResponse.status, 200);
+            ASSERT_IS_NULL(commandResponse.responseData);
+            ASSERT_ARE_EQUAL(int, commandResponse.responseDataLen, 0);
+        }
+    }
+
+    // cleanup
+    DigitalTwin_ModelDefinition_Destroy(h);    
+    umock_c_negative_tests_deinit();
+}
 
 END_TEST_SUITE(dt_model_definition_ut)
 

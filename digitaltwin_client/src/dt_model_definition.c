@@ -77,7 +77,7 @@ static int DTMD_SetCommandResponse(DIGITALTWIN_CLIENT_COMMAND_RESPONSE* dtClient
 
         // Allocate a copy of the response data to return to the invoker.  The DigitalTwin layer that invoked DTMD_GetDefinitionCallback
         // takes responsibility for freeing this data.
-        if ((dtClientCommandResponseContext->responseData = malloc(responseLen + 1)) == NULL)
+        if ((dtClientCommandResponseContext->responseData = calloc(1, responseLen + 1)) == NULL)
         {
             LogError("MODEL_DEFINITION_INTERFACE: Unable to allocate response data");
             dtClientCommandResponseContext->status = commandStatusFailure;
@@ -156,6 +156,7 @@ static void DTMD_ProcessCommandUpdate(const DIGITALTWIN_CLIENT_COMMAND_REQUEST* 
     if (userInterfaceContext == NULL)
     {
         LogError("MODEL_DEFINITION_INTERFACE: invalid arguments");
+        dtCommandResponse->status = commandStatusFailure;
     }
     else if (strcmp(dtCommandRequest->commandName, digitaltwin_GetModelDefinitionCommand) == 0)
     {
