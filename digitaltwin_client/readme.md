@@ -27,4 +27,4 @@ Reference guidance for the API's is available in the [public headers](./inc) the
 
 ## If something is broken
 
-If you hit an issue with the C SDK Digital Twin, please open a GitHub issue in https://github.com/Azure/azure-iot-sdk-c-pnp.
+If you hit an issue with the C SDK Digital Twin, please open a GitHub issue in https://github.com/Azure/azure-iot-sdk-c.

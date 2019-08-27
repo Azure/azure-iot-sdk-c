@@ -120,6 +120,7 @@ void DT_E2E_Util_InvokeCommand(const char** commandNames, const DIGITALTWIN_COMM
     {
         LogError("Command <%s> not found in callback entries", dtCommandRequest->commandName);
         SetCommandResponseEmptyPayload(dtCommandResponse, 501);
+        DT_E2E_Util_Fatal_Error_Occurred();
     }
 }
 
