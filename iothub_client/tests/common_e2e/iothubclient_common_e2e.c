@@ -75,6 +75,8 @@ static IOTHUB_MODULE_CLIENT_HANDLE iothub_moduleclient_handle = NULL;
 
 #define IOTHUB_COUNTER_MAX           10
 #define MAX_CLOUD_TRAVEL_TIME        120.0
+// Wait for 5 mins (arbitrary value since 2 mins didn't work for fault injection tests)
+#define MAX_CLOUD_TRAVEL_TIME_FAULT_INJECTION 300.0
 // Wait for 60 seconds for the service to tell us that an event was received.
 #define MAX_SERVICE_EVENT_WAIT_TIME_SECONDS 60
 // When waiting for events, start listening for events that happened up to 60 seconds in the past.
@@ -798,7 +800,7 @@ bool client_wait_for_connection_fault()
     beginOperation = time(NULL);
     while (
         (nowTime = time(NULL)),
-        (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) // time box
+        (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME_FAULT_INJECTION) // time box
         )
     {
         if (client_status_fault_happened())
