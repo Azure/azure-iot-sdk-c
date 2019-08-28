@@ -49,7 +49,7 @@ static char *DigitalTwinSampleModelDefinition_ReadFile(const char *dtdl_file_pat
         LogError("Unable to json parse file <%s>", dtdl_file_path);
         result = NULL;
     }
-    else if ((result = json_serialize_to_string(dtdlJSONValue) == NULL))
+    else if ((result = json_serialize_to_string(dtdlJSONValue)) == NULL)
     {
         LogError("Unable to json serialize string of file <%s>", dtdl_file_path);
     }

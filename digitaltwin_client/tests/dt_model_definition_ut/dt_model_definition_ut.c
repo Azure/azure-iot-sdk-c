@@ -545,6 +545,7 @@ TEST_FUNCTION(DigitalTwin_ModelDefinition_ProcessCommand_OK)
 
     // cleanup
     DigitalTwin_ModelDefinition_Destroy(h);
+    free(commandResponse.responseData);
 }
 
 TEST_FUNCTION(DigitalTwin_ModelDefinition_ProcessCommand_interface_doesnotexist_fails)
