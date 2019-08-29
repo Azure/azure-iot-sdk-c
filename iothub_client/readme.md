@@ -118,7 +118,7 @@ In addition to the simple samples found in the current repository, you can find 
 [devbox-setup]: ../doc/devbox_setup.md
 [setup-iothub]: https://aka.ms/howtocreateazureiothub
 [c-sdk-intro]: https://azure.microsoft.com/documentation/articles/iot-hub-device-sdk-c-intro/
-[c-porting-guide]: ../doc/porting_guide.md
+[c-porting-guide]: https://github.com/Azure/azure-c-shared-utility/blob/master/devdoc/porting_guide.md
 [c-cross-compile]: ../doc/SDK_cross_compile_example.md
 [c-api-reference]: https://azure.github.io/azure-iot-sdk-c
 [apt-get-instructions]: ../doc/ubuntu_apt-get_sample_setup.md
