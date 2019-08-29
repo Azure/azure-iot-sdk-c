@@ -5,10 +5,12 @@
 #include <cstdlib>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #else
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 #endif
 
 static void* my_gballoc_calloc(size_t num, size_t size)
@@ -21,11 +23,19 @@ static void my_gballoc_free(void* ptr)
     free(ptr);
 }
 
+static int my_mallocAndStrcpy_s(char** destination, const char* source)
+{
+    size_t len = strlen(source);
+    *destination = (char*)my_gballoc_calloc(1, len+1);
+    (void)strcpy(*destination, source);
+    return 0;
+}
+
+
 #include "azure_macro_utils/macro_utils.h"
 #include "testrunnerswitcher.h"
 
 #include "real_parson.h"
-#include "real_crt_abstractions.h"
 
 #include "umock_c/umock_c.h"
 #include "umock_c/umocktypes.h"
@@ -87,6 +97,8 @@ static char *TEST_INTERFACE_DATA2 = "TEST DATA TO PUBLISH2";
 static char* TEST_INTERFACE_NAME_JSON1 = "\"Test Interface1\"";
 static char* TEST_INTERFACE_NAME_DOESNOT_EXIST_JSON = "\"Json Does Not Exist\"";
 
+static const char* test_DT_GetModelDefinitionCommand = "getModelDefinition";
+static const char* test_DT_RequestId = "1234";
 
 static DIGITALTWIN_INTERFACE_CLIENT_HANDLE temp_interface_handle = (DIGITALTWIN_INTERFACE_CLIENT_HANDLE)0x1234;
 static DIGITALTWIN_COMMAND_EXECUTE_CALLBACK testModelCommandCallback;
@@ -155,7 +167,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_calloc, NULL);
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, my_gballoc_free);
 
-    REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, real_mallocAndStrcpy_s);
+    REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, my_mallocAndStrcpy_s);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, MU_FAILURE);
 
     REGISTER_MAP_GLOBAL_MOCK_HOOK;
@@ -210,7 +222,6 @@ static MODEL_DEFINITION_CLIENT_HANDLE create_test_MD_handle()
     
     ASSERT_IS_NOT_NULL(h);
     ASSERT_IS_NOT_NULL(ih);
-    ASSERT_IS_NOT_NULL(testModelCommandCallback);
     umock_c_reset_all_calls();
     return h;
 }
@@ -479,9 +490,6 @@ TEST_FUNCTION(DigitalTwin_ModelDefinition_Publish_Interface_fails)
 // DigitalTwin_ModelDefinition_ProcessCommand 
 // Simulates DigitalTwin SDK invoking the command that looks up model information
 ///////////////////////////////////////////////////////////////////////////////
-static const char* test_DT_GetModelDefinitionCommand = "getModelDefinition";
-static const char* test_DT_RequestId = "1234";
-
 static MODEL_DEFINITION_CLIENT_HANDLE create_test_MD_Handle_and_PublishInterface()
 {
     DIGITALTWIN_CLIENT_RESULT result;
