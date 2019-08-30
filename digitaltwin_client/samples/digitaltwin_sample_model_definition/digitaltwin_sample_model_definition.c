@@ -38,17 +38,23 @@ static const char* dtdl_path = "EnvironmentalSensor.interface.json";
 // Digital Twin iterface which we want to add for the device
 static const char toPublish_InterfaceName[] = DIGITALTWIN_SAMPLE_INTERFACE_ID_TO_PUBLISH;
 
-// Read file AND store in memory
+// Read file and store in memory.
 static char *DigitalTwinSampleModelDefinition_ReadFile(const char *dtdl_file_path)
 {
-    JSON_Value *dtdlJSONValue = json_parse_file(dtdl_file_path);
-    char* result = NULL;
-    
-    if (dtdlJSONValue != NULL)
+    char* result;
+    JSON_Value* dtdlJSONValue;
+
+    if ((dtdlJSONValue = json_parse_file(dtdl_file_path)) == NULL)
     {
-        result = json_serialize_to_string(dtdlJSONValue);
-        json_value_free(dtdlJSONValue);
+        LogError("Unable to json parse file <%s>", dtdl_file_path);
+        result = NULL;
     }
+    else if ((result = json_serialize_to_string(dtdlJSONValue)) == NULL)
+    {
+        LogError("Unable to json serialize string of file <%s>", dtdl_file_path);
+    }
+
+    json_value_free(dtdlJSONValue);
 
     return result;
 }

@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 2.8.11)
 compileAsC11()
 set(theseTestsName dt_model_definition_ut)
 
-include_directories(${SHARED_UTIL_REAL_TEST_FOLDER} ${IOTHUB_TEST_REAL_INC_FOLDER})
+include_directories(${SHARED_UTIL_REAL_TEST_FOLDER} ${IOTHUB_TEST_REAL_INC_FOLDER} ${SHARED_UTIL_INC_FOLDER})
 
 set(${theseTestsName}_test_files
 ${theseTestsName}.c

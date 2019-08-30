@@ -68,12 +68,14 @@ static void DT_E2E_ProcessUpdatedProperty(const DIGITALTWIN_CLIENT_PROPERTY_UPDA
         if (strcmp(DT_E2E_properties_property_names[i], dtClientPropertyUpdate->propertyName) == 0)
         {
             DT_E2E_properties_Callbacks[i](dtClientPropertyUpdate, userInterfaceContext);
+            break;
         }
     }
 
     if (i == DT_E2E_number_PropertiesUpdate)
     {
         LogError("Property <%s> is not supported by this test", dtClientPropertyUpdate->propertyName);
+        DT_E2E_Util_Fatal_Error_Occurred();
     }
 }
 

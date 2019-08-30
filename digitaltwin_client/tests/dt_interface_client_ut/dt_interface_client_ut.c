@@ -43,7 +43,6 @@ static void my_gballoc_free(void* ptr)
 #define ENABLE_MOCKS
 #include "internal/dt_lock_thread_binding.h"
 #include "internal/dt_client_core.h"
-#include "internal/dt_raw_interface.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/uuid.h"
 #include "iothub_message.h"
