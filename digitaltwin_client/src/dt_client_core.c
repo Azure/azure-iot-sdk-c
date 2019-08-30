@@ -666,6 +666,22 @@ static DT_SEND_TELEMETRY_CALLBACK_CONTEXT* CreateDTSendTelemetryCallbackContext(
     return dtSendTelemetryCallbackContext;
 }
 
+// ReportedSdkInfo_Callback is invoked when SendSdkInformation property is acknowledged. Because this is best
+// effort only, we simply log the result for diagnostics purposes but take no further action.
+static void ReportedSdkInfo_Callback(int status_code, void* userContextCallback)
+{
+    (void)userContextCallback;
+    if (status_code < 300)
+    {
+        LogInfo("Sending SDKInformation properties to server successful, status=<%d>", status_code);
+    }
+    else
+    {
+        LogError("Sending SDKInformation properties to server failed, status=<%d>", status_code);
+    }
+}
+
+
 // SendSdkInformation sends information about this SDK to the corresponding reported properties.
 // This sending of SDK info is a best effort only; if it fails, we will not otherwise block application
 // from using the rest of the SDK.
@@ -684,7 +700,7 @@ static void SendSdkInformation(DT_CLIENT_CORE* dtClientCore)
         const size_t sdkInfoLen = strlen(sdkInfoString);
 
         LogInfo("Sending reported state for sdkInfo=%s", sdkInfoString);
-        (void)InvokeBindingSendReportedStateAsync(dtClientCore, (unsigned const char*)sdkInfoString, sdkInfoLen, ReportedDTStateUpdate_Callback, NULL);
+        (void)InvokeBindingSendReportedStateAsync(dtClientCore, (unsigned const char*)sdkInfoString, sdkInfoLen, ReportedSdkInfo_Callback, NULL);
     }
 
     STRING_delete(sdkInfo);
