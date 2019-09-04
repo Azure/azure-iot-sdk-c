@@ -22,11 +22,6 @@ def check_sdk_errors(line):
     if "Error:" in line:
         azure_test_firmware_errors.SDK_ERRORS += 1
 
-    # if "Transfer incomplete" in line:
-    #     return False
-    #
-    # return True
-
 def check_test_failures(line):
     if " tests ran" in line:
         result = [int(s) for s in line.split() if s.isdigit()]
@@ -71,7 +66,7 @@ class rpi_uart_interface(uart_interface):
             # special handling for sending a file
             if "sz " in message:
                 temp_written = ser.write(bytearray("rz\r\n".encode('ascii')))
-                os.system(message)#"sz -a test.sh > /dev/ttyUSB0 < /dev/ttyUSB0")
+                os.system(message)
 
                 # check for completion
                 output = ser.readline(ser.in_waiting)
@@ -93,7 +88,6 @@ class rpi_uart_interface(uart_interface):
                 os.system('rz')
                 message.replace('rz ', 'sz ')
 
-            # wait = serial_settings.mxchip_buf_pause # wait for at least 50ms between 128 byte writes. -- may not be necessary on rpi
             buf = bytearray((message).encode('ascii'))
             print(buf)
             bytes_written = ser.write(buf)
@@ -183,7 +177,7 @@ class rpi_uart_interface(uart_interface):
                 if serial_settings.test_timeout:
                     while((time.time() - session_start) < serial_settings.test_timeout):
                         time.sleep(.2)
-                        output = ser.readline(ser.in_waiting)#self.serial_read(ser, line, f)
+                        output = ser.readline(ser.in_waiting)
                         output = output.decode(encoding='utf-8', errors='ignore')
                         check_test_failures(output)
 
