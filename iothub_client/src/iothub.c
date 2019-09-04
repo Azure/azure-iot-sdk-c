@@ -18,6 +18,7 @@ int IoTHub_Init(void)
     }
     else
     {
+        srand((unsigned int)time(NULL));
         result = 0;
     }
     return result;

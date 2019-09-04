@@ -1135,6 +1135,21 @@ static int prov_transport_http_set_trusted_cert(PROV_DEVICE_TRANSPORT_HANDLE han
     return result;
 }
 
+const char* prov_transport_http_get_trusted_cert(PROV_DEVICE_TRANSPORT_HANDLE handle)
+{
+    const char* result;
+    if (handle == NULL)
+    {
+        LogError("Invalid parameter specified handle: NULL");
+        result = NULL;
+    }
+    else
+    {
+        result = ((PROV_TRANSPORT_HTTP_INFO*)handle)->certificate;
+    }
+    return result;
+}
+
 static int prov_transport_http_set_proxy(PROV_DEVICE_TRANSPORT_HANDLE handle, const HTTP_PROXY_OPTIONS* proxy_options)
 {
     int result;
@@ -1250,7 +1265,8 @@ static PROV_DEVICE_TRANSPORT_PROVIDER prov_http_func =
     prov_transport_http_x509_cert,
     prov_transport_http_set_trusted_cert,
     prov_transport_http_set_proxy,
-    prov_transport_http_set_option
+    prov_transport_http_set_option,
+    prov_transport_http_get_trusted_cert
 };
 
 const PROV_DEVICE_TRANSPORT_PROVIDER* Prov_Device_HTTP_Protocol(void)

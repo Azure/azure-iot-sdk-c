@@ -8,18 +8,18 @@ set(theseTestsName message_queue_ut )
 
 if(WIN32)
     if (ARCHITECTURE STREQUAL "x86_64")
-		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /bigobj")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
-	endif()
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /bigobj")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
+    endif()
 endif()
 
 set(${theseTestsName}_test_files
-	${theseTestsName}.c
+    ${theseTestsName}.c
 )
 
 set(${theseTestsName}_c_files
     ../../src/message_queue.c
-	../../../c-utility/tests/real_test_files/real_singlylinkedlist.c
+    ../../../c-utility/tests/real_test_files/real_singlylinkedlist.c
 )
 
 set(${theseTestsName}_h_files

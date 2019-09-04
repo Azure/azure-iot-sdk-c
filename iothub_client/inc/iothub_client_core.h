@@ -35,6 +35,7 @@ extern "C"
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_CORE_HANDLE, IoTHubClientCore_Create, const IOTHUB_CLIENT_CONFIG*, config);
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_CORE_HANDLE, IoTHubClientCore_CreateWithTransport, TRANSPORT_HANDLE, transportHandle, const IOTHUB_CLIENT_CONFIG*, config);
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_CORE_HANDLE, IoTHubClientCore_CreateFromDeviceAuth, const char*, iothub_uri, const char*, device_id, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_CORE_HANDLE, IoTHubClientCore_CreateFromProvisioning, const PROVISIONING_AUTH_INFO*, provisioning_info);
     MOCKABLE_FUNCTION(, void, IoTHubClientCore_Destroy, IOTHUB_CLIENT_CORE_HANDLE, iotHubClientHandle);
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClientCore_SendEventAsync, IOTHUB_CLIENT_CORE_HANDLE, iotHubClientHandle, IOTHUB_MESSAGE_HANDLE, eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, eventConfirmationCallback, void*, userContextCallback);
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClientCore_GetSendStatus, IOTHUB_CLIENT_CORE_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_STATUS*, iotHubClientStatus);

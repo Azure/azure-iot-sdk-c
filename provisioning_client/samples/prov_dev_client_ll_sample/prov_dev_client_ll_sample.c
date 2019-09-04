@@ -61,9 +61,6 @@
 // This sample is to demostrate iothub reconnection with provisioning and should not
 // be confused as production code
 
-MU_DEFINE_ENUM_STRINGS(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
-MU_DEFINE_ENUM_STRINGS(PROV_DEVICE_REG_STATUS, PROV_DEVICE_REG_STATUS_VALUES);
-
 static const char* global_prov_uri = "global.azure-devices-provisioning.net";
 static const char* id_scope = "[ID Scope]";
 
@@ -221,7 +218,7 @@ int main()
         Prov_Device_LL_SetOption(handle, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-        // This option sets the registration ID it overrides the registration ID that is 
+        // This option sets the registration ID it overrides the registration ID that is
         // set within the HSM so be cautious if setting this value
         //Prov_Device_SetOption(prov_device_handle, PROV_REGISTRATION_ID, "[REGISTRATION ID]");
 

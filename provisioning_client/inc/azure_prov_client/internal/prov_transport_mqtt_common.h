@@ -32,6 +32,7 @@ MOCKABLE_FUNCTION(, void, prov_transport_common_mqtt_dowork, PROV_DEVICE_TRANSPO
 MOCKABLE_FUNCTION(, int, prov_transport_common_mqtt_set_trace, PROV_DEVICE_TRANSPORT_HANDLE, handle, bool, trace_on);
 MOCKABLE_FUNCTION(, int, prov_transport_common_mqtt_set_proxy, PROV_DEVICE_TRANSPORT_HANDLE, handle, const HTTP_PROXY_OPTIONS*, proxy_options);
 MOCKABLE_FUNCTION(, int, prov_transport_common_mqtt_set_trusted_cert, PROV_DEVICE_TRANSPORT_HANDLE, handle, const char*, certificate);
+MOCKABLE_FUNCTION(, const char*, prov_transport_common_mqtt_get_trusted_cert, PROV_DEVICE_TRANSPORT_HANDLE, handle);
 MOCKABLE_FUNCTION(, int, prov_transport_common_mqtt_x509_cert, PROV_DEVICE_TRANSPORT_HANDLE, handle, const char*, certificate, const char*, private_key);
 MOCKABLE_FUNCTION(, int, prov_transport_common_mqtt_set_option, PROV_DEVICE_TRANSPORT_HANDLE, handle, const char*, option, const void*, value);
 

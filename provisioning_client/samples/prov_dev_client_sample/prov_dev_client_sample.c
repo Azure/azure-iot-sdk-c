@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "iothub.h"
+#include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/http_proxy_io.h"
 #include "azure_c_shared_utility/threadapi.h"
@@ -30,23 +30,18 @@
 //#define SAMPLE_HTTP
 
 #ifdef SAMPLE_MQTT
-#include "iothubtransportmqtt.h"
 #include "azure_prov_client/prov_transport_mqtt_client.h"
 #endif // SAMPLE_MQTT
 #ifdef SAMPLE_MQTT_OVER_WEBSOCKETS
-#include "iothubtransportmqtt_websockets.h"
 #include "azure_prov_client/prov_transport_mqtt_ws_client.h"
 #endif // SAMPLE_MQTT_OVER_WEBSOCKETS
 #ifdef SAMPLE_AMQP
-#include "iothubtransportamqp.h"
 #include "azure_prov_client/prov_transport_amqp_client.h"
 #endif // SAMPLE_AMQP
 #ifdef SAMPLE_AMQP_OVER_WEBSOCKETS
-#include "iothubtransportamqp_websockets.h"
 #include "azure_prov_client/prov_transport_amqp_ws_client.h"
 #endif // SAMPLE_AMQP_OVER_WEBSOCKETS
 #ifdef SAMPLE_HTTP
-#include "iothubtransportmqtt.h"
 #include "azure_prov_client/prov_transport_http_client.h"
 #endif // SAMPLE_HTTP
 
@@ -56,9 +51,6 @@
 
 // This sample is to demostrate iothub reconnection with provisioning and should not
 // be confused as production code
-
-MU_DEFINE_ENUM_STRINGS(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
-MU_DEFINE_ENUM_STRINGS(PROV_DEVICE_REG_STATUS, PROV_DEVICE_REG_STATUS_VALUES);
 
 static const char* global_prov_uri = "global.azure-devices-provisioning.net";
 static const char* id_scope = "[ID Scope]";
@@ -99,7 +91,7 @@ int main()
     //hsm_type = SECURE_DEVICE_TYPE_SYMMETRIC_KEY;
 
     // Used to initialize IoTHub SDK subsystem
-    (void)IoTHub_Init();
+    (void)platform_init();
     (void)prov_dev_security_init(hsm_type);
 
     // Set the symmetric key if using they auth type
@@ -173,7 +165,7 @@ int main()
     prov_dev_security_deinit();
 
     // Free all the sdk subsystem
-    IoTHub_Deinit();
+    platform_deinit();
 
     (void)printf("Press enter key to exit:\r\n");
     (void)getchar();

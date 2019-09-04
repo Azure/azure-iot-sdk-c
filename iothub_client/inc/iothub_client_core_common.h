@@ -29,7 +29,9 @@ extern "C"
     IOTHUB_CLIENT_INVALID_ARG,            \
     IOTHUB_CLIENT_ERROR,                  \
     IOTHUB_CLIENT_INVALID_SIZE,           \
-    IOTHUB_CLIENT_INDEFINITE_TIME
+    IOTHUB_CLIENT_INDEFINITE_TIME,        \
+    IOTHUB_CLIENT_PROVISIONING_NOT_COMPLETE
+
 
     /** @brief Enumeration specifying the status of calls to various APIs in this module.
     */
@@ -128,7 +130,8 @@ extern "C"
     IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED,                \
     IOTHUB_CLIENT_CONNECTION_NO_NETWORK,                   \
     IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR,          \
-    IOTHUB_CLIENT_CONNECTION_OK                            \
+    IOTHUB_CLIENT_CONNECTION_OK,                           \
+    IOTHUB_CLIENT_PROVISIONING_FAILED
 
     /** @brief Enumeration passed in by the IoT Hub when the connection status
     *           callback is invoked to indicate status of the connection in

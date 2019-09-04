@@ -201,7 +201,8 @@ typedef enum CREATE_HUB_INSTANCE_TYPE_TAG
     CREATE_HUB_INSTANCE_FROM_EDGE_ENVIRONMENT,
     CREATE_HUB_INSTANCE_FROM_TRANSPORT,
     CREATE_HUB_INSTANCE_FROM_CLIENT_CONFIG,
-    CREATE_HUB_INSTANCE_FROM_DEVICE_AUTH
+    CREATE_HUB_INSTANCE_FROM_DEVICE_AUTH,
+    CREATE_HUB_INSTANCE_FROM_PROVISIONING
 } CREATE_HUB_INSTANCE_TYPE;
 
 static void freeHttpWorkerThreadInfo(HTTPWORKER_THREAD_INFO* threadInfo)
@@ -867,7 +868,7 @@ static IOTHUB_CLIENT_RESULT StartWorkerThreadIfNeeded(IOTHUB_CLIENT_CORE_INSTANC
     return result;
 }
 
-static IOTHUB_CLIENT_CORE_INSTANCE* create_iothub_instance(CREATE_HUB_INSTANCE_TYPE create_hub_instance_type, const IOTHUB_CLIENT_CONFIG* config, TRANSPORT_HANDLE transportHandle, const char* connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char* iothub_uri, const char* device_id)
+static IOTHUB_CLIENT_CORE_INSTANCE* create_iothub_instance(CREATE_HUB_INSTANCE_TYPE create_hub_instance_type, const IOTHUB_CLIENT_CONFIG* config, TRANSPORT_HANDLE transportHandle, const char* connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char* iothub_uri, const char* device_id, const PROVISIONING_AUTH_INFO* provisioning_info)
 {
     /* Codes_SRS_IOTHUBCLIENT_12_020: [** `IoTHubClient_CreateFromDeviceAuth` shall allocate a new `IoTHubClient` instance. **] */
     IOTHUB_CLIENT_CORE_INSTANCE* result = (IOTHUB_CLIENT_CORE_INSTANCE*)malloc(sizeof(IOTHUB_CLIENT_CORE_INSTANCE));
@@ -1009,6 +1010,23 @@ static IOTHUB_CLIENT_CORE_INSTANCE* create_iothub_instance(CREATE_HUB_INSTANCE_T
                     }
                 }
 #endif
+#ifdef USE_PROV_MODULE
+                else if (create_hub_instance_type == CREATE_HUB_INSTANCE_FROM_PROVISIONING)
+                {
+                    result->LockHandle = Lock_Init();
+                    if (result->LockHandle == NULL)
+                    {
+                        /* Codes_SRS_IOTHUBCLIENT_01_030: [If creating the lock fails, then IoTHubClient_Create shall return NULL.] */
+                        /* Codes_SRS_IOTHUBCLIENT_01_031: [If IoTHubClient_Create fails, all resources allocated by it shall be freed.] */
+                        LogError("Failure creating Lock object");
+                        result->IoTHubClientLLHandle = NULL;
+                    }
+                    else
+                    {
+                        result->IoTHubClientLLHandle = IoTHubClientCore_LL_CreateFromProvisioning(provisioning_info);
+                    }
+                }
+#endif
                 else
                 {
                     result->LockHandle = Lock_Init();
@@ -1073,7 +1091,7 @@ IOTHUB_CLIENT_CORE_HANDLE IoTHubClientCore_CreateFromConnectionString(const char
     }
     else
     {
-        result = create_iothub_instance(CREATE_HUB_INSTANCE_FROM_CONNECTION_STRING, NULL, NULL, connectionString, protocol, NULL, NULL);
+        result = create_iothub_instance(CREATE_HUB_INSTANCE_FROM_CONNECTION_STRING, NULL, NULL, connectionString, protocol, NULL, NULL, NULL);
     }
     return result;
 }
@@ -1088,7 +1106,7 @@ IOTHUB_CLIENT_CORE_HANDLE IoTHubClientCore_Create(const IOTHUB_CLIENT_CONFIG* co
     }
     else
     {
-        result = create_iothub_instance(CREATE_HUB_INSTANCE_FROM_CLIENT_CONFIG, config, NULL, NULL, NULL, NULL, NULL);
+        result = create_iothub_instance(CREATE_HUB_INSTANCE_FROM_CLIENT_CONFIG, config, NULL, NULL, NULL, NULL, NULL, NULL);
     }
     return result;
 }
@@ -1105,7 +1123,7 @@ IOTHUB_CLIENT_CORE_HANDLE IoTHubClientCore_CreateWithTransport(TRANSPORT_HANDLE 
     }
     else
     {
-        result = create_iothub_instance(CREATE_HUB_INSTANCE_FROM_TRANSPORT, config, transportHandle, NULL, NULL, NULL, NULL);
+        result = create_iothub_instance(CREATE_HUB_INSTANCE_FROM_TRANSPORT, config, transportHandle, NULL, NULL, NULL, NULL, NULL);
     }
     return result;
 }
@@ -1138,7 +1156,30 @@ IOTHUB_CLIENT_CORE_HANDLE IoTHubClientCore_CreateFromDeviceAuth(const char* ioth
         /* Codes_SRS_IOTHUBCLIENT_12_023: [** If creating the lock fails, then IoTHubClient_CreateFromDeviceAuth shall return NULL. **] */
         /* Codes_SRS_IOTHUBCLIENT_12_024: [** If IoTHubClient_CreateFromDeviceAuth fails, all resources allocated by it shall be freed. **] */
         /* Codes_SRS_IOTHUBCLIENT_12_025: [** `IoTHubClient_CreateFromDeviceAuth` shall instantiate a new `IoTHubClientCore_LL` instance by calling `IoTHubClientCore_LL_CreateFromDeviceAuth` and passing iothub_uri, device_id and protocol argument.  **] */
-        result = create_iothub_instance(CREATE_HUB_INSTANCE_FROM_DEVICE_AUTH, NULL, NULL, NULL, protocol, iothub_uri, device_id);
+        result = create_iothub_instance(CREATE_HUB_INSTANCE_FROM_DEVICE_AUTH, NULL, NULL, NULL, protocol, iothub_uri, device_id, NULL);
+    }
+    return result;
+}
+
+IOTHUB_CLIENT_CORE_HANDLE IoTHubClientCore_CreateFromProvisioning(const PROVISIONING_AUTH_INFO* provisioning_info)
+{
+    IOTHUB_CLIENT_CORE_INSTANCE* result;
+
+    /* Codes_SRS_IOTHUBCLIENT_12_019: [** `IoTHubClient_CreateFromDeviceAuth` shall verify the input parameters and if any of them `NULL` then return `NULL`. **] */
+    if (provisioning_info == NULL || provisioning_info->transport == NULL)
+    {
+        LogError("Input parameter is NULL: provisioning_info");
+        result = NULL;
+    }
+    else
+    {
+        /* Codes_SRS_IOTHUBCLIENT_12_020: [** `IoTHubClient_CreateFromDeviceAuth` shall allocate a new `IoTHubClient` instance. **] */
+        /* Codes_SRS_IOTHUBCLIENT_12_021: [** If allocating memory for the new `IoTHubClient` instance fails, then `IoTHubClient_CreateFromDeviceAuth` shall return `NULL`. **] */
+        /* Codes_SRS_IOTHUBCLIENT_12_022: [** `IoTHubClient_CreateFromDeviceAuth` shall create a lock object to be used later for serializing IoTHubClient calls. **] */
+        /* Codes_SRS_IOTHUBCLIENT_12_023: [** If creating the lock fails, then IoTHubClient_CreateFromDeviceAuth shall return NULL. **] */
+        /* Codes_SRS_IOTHUBCLIENT_12_024: [** If IoTHubClient_CreateFromDeviceAuth fails, all resources allocated by it shall be freed. **] */
+        /* Codes_SRS_IOTHUBCLIENT_12_025: [** `IoTHubClient_CreateFromDeviceAuth` shall instantiate a new `IoTHubClientCore_LL` instance by calling `IoTHubClientCore_LL_CreateFromDeviceAuth` and passing iothub_uri, device_id and protocol argument.  **] */
+        result = create_iothub_instance(CREATE_HUB_INSTANCE_FROM_PROVISIONING, NULL, NULL, NULL, NULL, NULL, NULL, provisioning_info);
     }
     return result;
 }
@@ -1146,7 +1187,7 @@ IOTHUB_CLIENT_CORE_HANDLE IoTHubClientCore_CreateFromDeviceAuth(const char* ioth
 #ifdef USE_EDGE_MODULES
 IOTHUB_CLIENT_CORE_HANDLE IoTHubClientCore_CreateFromEnvironment(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
-    return create_iothub_instance(CREATE_HUB_INSTANCE_FROM_EDGE_ENVIRONMENT, NULL, NULL, NULL, protocol, NULL, NULL);
+    return create_iothub_instance(CREATE_HUB_INSTANCE_FROM_EDGE_ENVIRONMENT, NULL, NULL, NULL, protocol, NULL, NULL, NULL);
 }
 #endif
 
@@ -1735,7 +1776,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetOption(IOTHUB_CLIENT_CORE_HANDLE iotHub
                 iotHubClientInstance->currentMessageTimeout = * (tickcounter_ms_t *)value;
 
                 /* Codes_SRS_IOTHUBCLIENT_41_004: [ If `currentMessageTimeout` is not greater than `do_work_freq_ms`, `IotHubClientCore_SetOption` shall return `IOTHUB_CLIENT_INVALID_ARG` ]*/
-				if (iotHubClientInstance->do_work_freq_ms < iotHubClientInstance->currentMessageTimeout)
+                if (iotHubClientInstance->do_work_freq_ms < iotHubClientInstance->currentMessageTimeout)
                 {
                     /*Codes_SRS_IOTHUBCLIENT_41_006: [ If parameter `optionName` is `OPTION_MESSAGE_TIMEOUT` then `IoTHubClientCore_SetOption` shall call `IoTHubClientCore_LL_SetOption` passing the same parameters and return what IoTHubClientCore_LL_SetOption returns. ] */
                     result = IoTHubClientCore_LL_SetOption(iotHubClientInstance->IoTHubClientLLHandle, optionName, value);

@@ -159,7 +159,7 @@ set(PROV_DEVICE_LL_CLEINT_SOURCE_H_FILES
     ./inc/azure_prov_client/prov_client_const.h
     ./inc/azure_prov_client/prov_device_ll_client.h)
 
-set(DEV_AUTH_MODULES_CLIENT_INC_FOLDER "${CMAKE_CURRENT_LIST_DIR}/inc" "${CMAKE_CURRENT_LIST_DIR}/inc/internal" CACHE INTERNAL "this is what needs to be included if using iothub_client lib" FORCE)
+set(DEV_AUTH_MODULES_CLIENT_INC_FOLDER "${CMAKE_CURRENT_LIST_DIR}/inc" CACHE INTERNAL "this is what needs to be included if using iothub_client lib" FORCE)
 
 include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
 include_directories(${SHARED_UTIL_INC_FOLDER})

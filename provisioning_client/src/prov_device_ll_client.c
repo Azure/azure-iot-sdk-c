@@ -56,6 +56,9 @@ static const char* const JSON_STORAGE_ROOT_KEY_NODE = "storageRootKey";
 #define MAX_AUTH_ATTEMPTS           3
 #define PROV_DEFAULT_TIMEOUT        60
 
+MU_DEFINE_ENUM_STRINGS(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
+MU_DEFINE_ENUM_STRINGS(PROV_DEVICE_REG_STATUS, PROV_DEVICE_REG_STATUS_VALUES);
+
 typedef enum CLIENT_STATE_TAG
 {
     CLIENT_STATE_READY,
@@ -1064,7 +1067,7 @@ PROV_DEVICE_RESULT Prov_Device_LL_Register_Device(PROV_DEVICE_LL_HANDLE handle, 
 
             handle->register_status_cb = reg_status_cb;
             handle->status_user_ctx = status_ctx;
-            
+
             // Free the custom data if its been allocated
             if (handle->custom_response_data != NULL)
             {
@@ -1382,6 +1385,21 @@ const char* Prov_Device_LL_Get_Provisioning_Payload(PROV_DEVICE_LL_HANDLE handle
     else
     {
         result = handle->custom_response_data;
+    }
+    return result;
+}
+
+const char* Prov_Device_LL_Get_Trusted_Certificate(PROV_DEVICE_LL_HANDLE handle)
+{
+    const char* result;
+    if (handle == NULL)
+    {
+        LogError("Invalid parameter specified handle: %p", handle);
+        result = NULL;
+    }
+    else
+    {
+        result = handle->prov_transport_protocol->prov_transport_get_trusted_cert(handle->transport_handle);
     }
     return result;
 }

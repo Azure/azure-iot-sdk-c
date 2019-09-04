@@ -62,6 +62,11 @@ include_directories(../deps/parson)
 include_directories(${SERIALIZER_INC_FOLDER} ${SHARED_UTIL_INC_FOLDER})
 include_directories(${AZURE_C_SHARED_UTILITY_INCLUDES})
 
+if (${use_prov_client_core})
+    # If we're including Device auth then we need to add the correct directory
+    include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
+endif()
+
 IF(WIN32)
     #windows needs this define
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)

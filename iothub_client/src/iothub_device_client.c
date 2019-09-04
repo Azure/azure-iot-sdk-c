@@ -28,6 +28,11 @@ IOTHUB_DEVICE_CLIENT_HANDLE IoTHubDeviceClient_CreateFromDeviceAuth(const char* 
     return (IOTHUB_DEVICE_CLIENT_HANDLE)IoTHubClientCore_CreateFromDeviceAuth(iothub_uri, device_id, protocol);
 }
 
+IOTHUB_DEVICE_CLIENT_HANDLE IoTHubDeviceClient_CreateFromProvisioning(const PROVISIONING_AUTH_INFO* provisioning_info)
+{
+    return (IOTHUB_DEVICE_CLIENT_HANDLE)IoTHubClientCore_CreateFromProvisioning(provisioning_info);
+}
+
 void IoTHubDeviceClient_Destroy(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle)
 {
     IoTHubClientCore_Destroy((IOTHUB_CLIENT_CORE_HANDLE)iotHubClientHandle);

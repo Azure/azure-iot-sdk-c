@@ -20,12 +20,13 @@
 #include "umock_c/umocktypes_stdint.h"
 
 #define ENABLE_MOCKS
-#include "iothub_client_core_ll.h"
+#include "iothub_client_core_common.h"
 #undef ENABLE_MOCKS
 
 #include "iothub_client_ll.h"
 
 #define ENABLE_MOCKS
+#include "iothub_client_core_ll.h"
 #include "internal/iothub_client_private.h"
 #include "iothub_device_client_ll.h"
 #undef ENABLE_MOCKS
@@ -67,9 +68,7 @@ MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
-    char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
-    ASSERT_FAIL(temp_str);
+    ASSERT_FAIL("umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
 }
 
 BEGIN_TEST_SUITE(iothubclient_ll_ut)
