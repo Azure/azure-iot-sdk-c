@@ -13,3 +13,4 @@ device_type = 'mxchip'
 test_timeout = None
 reset_device = False
 tests_run = False
+console_mode = False
