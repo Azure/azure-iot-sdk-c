@@ -7,12 +7,16 @@ cmake_minimum_required(VERSION 2.8.11)
 compileAsC99()
 set(theseTestsName datapublisher_ut)
 
+include_directories(${SHARED_UTIL_REAL_TEST_FOLDER})
+
 set(${theseTestsName}_test_files
-${theseTestsName}.c
+    ${theseTestsName}.c
 )
 
 set(${theseTestsName}_c_files
-../../src/datapublisher.c
+    ../../src/datapublisher.c
+    ${SHARED_UTIL_REAL_TEST_FOLDER}/real_crt_abstractions.c
+    ${SHARED_UTIL_REAL_TEST_FOLDER}/real_vector.c
 )
 
 set(${theseTestsName}_h_files

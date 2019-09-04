@@ -14,11 +14,11 @@ ${theseTestsName}.c
 
 set(${theseTestsName}_c_files
     ../../src/methodreturn.c
-    real_strings.c
+    ${SHARED_UTIL_REAL_TEST_FOLDER}/real_strings.c
 )
 
 set(${theseTestsName}_h_files
-    real_strings.h
+    ${SHARED_UTIL_REAL_TEST_FOLDER}/real_strings.h
 )
 
 build_c_test_artifacts(${theseTestsName} ON "tests/UnitTests")

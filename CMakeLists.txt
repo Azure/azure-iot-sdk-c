@@ -101,7 +101,9 @@ endif()
 option(use_mbedtls "set use_mbedtls to ON to use mbedtls." OFF)
 
 # openssl samples on Windows need to have a trusted cert set
-if ((WIN32 AND "${use_openssl}") OR "${use_wolfssl}" OR "${use_mbedtls}")
+if ((WIN32 AND "${use_openssl}") OR "${use_wolfssl}" OR "${use_mbedtls}" OR "${use_bearssl}")
+    option(use_sample_trusted_cert "Set flag in samples to use SDK's built-in CA as TrustedCerts" ON)
+elseif("${use_bearssl}")
     option(use_sample_trusted_cert "Set flag in samples to use SDK's built-in CA as TrustedCerts" ON)
 else()
     option(use_sample_trusted_cert "Set flag in samples to use SDK's built-in CA as TrustedCerts" OFF)
@@ -355,7 +357,7 @@ if (${build_service_client})
     add_subdirectory(iothub_service_client)
 endif()
 
-if (${run_e2e_tests} OR ${run_longhaul_tests} OR ${nuget_e2e_tests} OR ${run_sfc_tests})
+if (${run_e2e_tests} OR ${run_longhaul_tests} OR ${nuget_e2e_tests} OR ${run_sfc_tests} OR ${run_unittests})
     add_subdirectory(testtools)
 endif()
 

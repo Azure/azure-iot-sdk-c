@@ -581,7 +581,14 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
                         else
                         {
                             const char* nonce_field = json_value_get_string(auth_key);
-                            if ((result->authorization_key = Azure_Base64_Decode(nonce_field)) == NULL)
+                            if (nonce_field == NULL)
+                            {
+                                LogError("failure getting nonce field from json");
+                                prov_info->error_reason = PROV_DEVICE_RESULT_MEMORY;
+                                free(result);
+                                result = NULL;
+                            }
+                            else if ((result->authorization_key = Azure_Base64_Decode(nonce_field)) == NULL)
                             {
                                 LogError("failure creating buffer nonce field");
                                 prov_info->error_reason = PROV_DEVICE_RESULT_MEMORY;

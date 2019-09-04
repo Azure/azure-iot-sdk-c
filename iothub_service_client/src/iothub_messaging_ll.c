@@ -26,6 +26,8 @@
 #include "iothub_messaging_ll.h"
 #include "iothub_sc_version.h"
 
+#define SIZE_OF_PERCENT_S_IN_FMT_STRING 2
+
 MU_DEFINE_ENUM_STRINGS(IOTHUB_FEEDBACK_STATUS_CODE, IOTHUB_FEEDBACK_STATUS_CODE_VALUES);
 MU_DEFINE_ENUM_STRINGS(IOTHUB_MESSAGE_SEND_STATE, IOTHUB_MESSAGE_SEND_STATE_VALUES);
 MU_DEFINE_ENUM_STRINGS(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_RESULT_VALUES);
@@ -457,15 +459,17 @@ static char* createAuthCid(IOTHUB_MESSAGING_HANDLE messagingHandle)
     }
     else
     {
-        const char* AMQP_SEND_AUTHCID_FMT = "iothubowner@sas.root.%s";
-        size_t authCidLen = strlen(AMQP_SEND_AUTHCID_FMT) + strlen(messagingHandle->iothubName);
+        const char AMQP_SEND_AUTHCID_FMT[] = "%s@sas.root.%s";
+        const int AMQP_SEND_AUTHCID_FMT_LENGTH = sizeof(AMQP_SEND_AUTHCID_FMT) - 2 * SIZE_OF_PERCENT_S_IN_FMT_STRING;
+
+        size_t authCidLen = strlen(messagingHandle->keyName) + AMQP_SEND_AUTHCID_FMT_LENGTH + strlen(messagingHandle->iothubName);
 
         if ((buffer = (char*)malloc(authCidLen + 1)) == NULL)
         {
             LogError("Malloc failed for authCid.");
             result = NULL;
         }
-        else if ((snprintf(buffer, authCidLen + 1, AMQP_SEND_AUTHCID_FMT, messagingHandle->iothubName)) < 0)
+        else if ((snprintf(buffer, authCidLen + 1, AMQP_SEND_AUTHCID_FMT, messagingHandle->keyName, messagingHandle->iothubName)) < 0)
         {
             LogError("sprintf_s failed for authCid.");
             free(buffer);
