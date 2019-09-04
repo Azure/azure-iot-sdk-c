@@ -89,6 +89,10 @@ static time_t g_lastTrafficPrintTime;
 #define TRAFFIC_COUNTERS_PRINT_FREQ_IN_SECS 10
 #define INDEFINITE_TIME ((time_t)-1)
 
+// This is the maximum individual payload size currently supported by Azure IoT Device Streaming Gateway.
+// When sending more data, split it it chunks with sizes no bigger than the value below.
+static const size_t MAX_WEBSOCKET_PAYLOAD_SIZE_IN_BYTES = 65536;
+
 // Functions for socket connection to local service:
 
 static void on_ws_send_frame_complete(void* context, WS_SEND_FRAME_RESULT ws_send_frame_result)
@@ -107,13 +111,23 @@ static void on_bytes_received(void* context, const unsigned char* buffer, size_t
 
     if (g_is_uws_client_ready)
     {
-        if (uws_client_send_frame_async(g_uws_client_handle, 2, buffer, size, true, on_ws_send_frame_complete, NULL) != 0)
-        {
-            (void)printf("Failed sending data to the local service\r\n");
-            g_continueRunning = false;
-        }
+        size_t send_size;
 
-        g_outgoingByteCount += size;
+        while (size > 0)
+        {
+            send_size = size <= MAX_WEBSOCKET_PAYLOAD_SIZE_IN_BYTES ? size : MAX_WEBSOCKET_PAYLOAD_SIZE_IN_BYTES;
+
+            if (uws_client_send_frame_async(g_uws_client_handle, 2, buffer, send_size, true, on_ws_send_frame_complete, NULL) != 0)
+            {
+                (void)printf("Failed sending data to the local service\r\n");
+                g_continueRunning = false;
+                break;
+            }
+
+            g_outgoingByteCount += size;
+            size -= send_size;
+            buffer += send_size;
+        }
     }
 }
 static void on_io_open_complete(void* context, IO_OPEN_RESULT open_result)
