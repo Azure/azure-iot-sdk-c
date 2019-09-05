@@ -1040,7 +1040,7 @@ static int create_sasl_handler(PROV_TRANSPORT_AMQP_INFO* amqp_info)
         char* sas_token;
 
         if ((sasl_username = construct_username(amqp_info)) == NULL)
-        { 
+        {
             LogError("failed creating symmetical sasl username");
             result = MU_FAILURE;
         }

@@ -52,13 +52,13 @@ jobs:
     env:
       # Most up to date SERIAL_TASKs output can be learned by passing 'help' into input.txt,
       # Current SERIAL_TASK commands:
-      # help, 
-      # version, 
-      # exit (also resets device), 
+      # help,
+      # version,
+      # exit (also resets device),
       # set_wifissid [args],
-      # set_wifipwd [args], 
-      # set_az_iothub [args], 
-      # set_dps_uds [args], 
+      # set_wifipwd [args],
+      # set_az_iothub [args],
+      # set_dps_uds [args],
       # enable_secure [args],
       # send_telemetry [args]
 

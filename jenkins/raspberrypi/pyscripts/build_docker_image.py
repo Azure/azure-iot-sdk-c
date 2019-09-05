@@ -24,7 +24,7 @@ args = parser.parse_args()
 if args.repo == default_repo:
     args.repo = "Azure/azure-iot-sdk-c"
     print(Fore.YELLOW + "Repo not specified.  Defaulting to " + args.repo)
-    
+
 print_separator = "".join("/\\" for _ in range(80))
 
 auth_config = {
@@ -61,7 +61,7 @@ def print_filtered_docker_line(line):
 
 
 def build_image(tags):
-    
+
     print(print_separator)
     print("BUILDING IMAGE")
     print(print_separator)
@@ -134,7 +134,7 @@ def extract_artifacts(tags):
     print(print_separator)
     # Publish directory should be in the top level folder of the sdk.
     source_artifacts = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../source_artifacts.tar"))
-    
+
     api_client = docker.APIClient(base_url="unix://var/run/docker.sock")
     for image in api_client.images():
         print("Image:")
@@ -148,7 +148,7 @@ def extract_artifacts(tags):
     with open(source_artifacts, 'wb') as f:
         for chunk in bits:
             f.write(chunk)
-    
+
 
 def prefetch_cached_images(tags):
     if docker_tags.running_on_azure_pipelines():

@@ -12,6 +12,8 @@
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/tickcounter.h"
 
+#include "azure_c_shared_utility/threadapi.h"
+
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/tlsio.h"
 #include "azure_c_shared_utility/http_proxy_io.h"
@@ -369,6 +371,7 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* sas_uri, const char*
                         }
                         blockID++;
                     }
+                    ThreadAPI_Sleep(100);
                 }
                 while(uploadOneMoreBlock && !isError);
 

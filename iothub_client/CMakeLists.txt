@@ -36,6 +36,7 @@ set(iothub_client_h_files
     ./inc/iothub_client_core_common.h
     ./inc/iothub_client_ll.h
     ./inc/internal/iothub_client_diagnostic.h
+    ./inc/internal/iothub_internal_consts.h
     ./inc/iothub_client_options.h
     ./inc/internal/iothub_client_private.h
     ./inc/iothub_client_version.h

@@ -62,7 +62,7 @@ add_unittest_directory(message_queue_ut)
 add_unittest_directory(iothubmoduleclient_ll_ut)
 add_unittest_directory(iothubmoduleclient_ut)
 
-if(${use_http} AND NOT ${use_wolfssl})
+if(${use_http} AND NOT ("${use_wolfssl}" OR "${use_bearssl}"))
     add_unittest_directory(iothubtransporthttp_ut)
     add_e2etest_directory(iothubclient_http_e2e)
 endif()

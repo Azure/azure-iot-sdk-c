@@ -39,4 +39,7 @@ target_link_libraries(iothub_client_sample_upload_to_blob
 )
 
 linkSharedUtil(iothub_client_sample_upload_to_blob)
+target_link_libraries(iothub_client_sample_upload_to_blob iothub_client_amqp_transport)
+linkUAMQP(iothub_client_sample_upload_to_blob)
+
 linkHttp(iothub_client_sample_upload_to_blob)
