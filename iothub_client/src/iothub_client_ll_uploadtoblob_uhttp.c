@@ -36,6 +36,7 @@
 #define FILE_UPLOAD_FAILED_BODY "{ \"isSuccess\":false, \"statusCode\":-1,\"statusDescription\" : \"client not able to connect with the server\" }"
 #define FILE_UPLOAD_ABORTED_BODY "{ \"isSuccess\":false, \"statusCode\":-1,\"statusDescription\" : \"file upload aborted\" }"
 #define INDEFINITE_TIME                            ((time_t)-1)
+#define MAX_CLOSE_DOWORK_COUNT                  10
 
 static const char* const EMPTY_STRING = "";
 static const char* const HEADER_AUTHORIZATION = "Authorization";
@@ -172,14 +173,14 @@ static void on_http_reply_recv(void* callback_ctx, HTTP_CALLBACK_REASON request_
             else
             {
                 upload_data->http_state = HTTP_STATE_ERROR;
+                LogError("Failure encountered status code: %d\n%.*s", (int)status_code, (int)content_len, content);
             }
 
             // if there is a json response save it to process later
-            if (content != NULL)
+            if (content != NULL  && upload_data->http_state != HTTP_STATE_ERROR)
             {
                 // Clear the buffer
                 (void)BUFFER_unbuild(upload_data->response_data);
-
                 if (BUFFER_build(upload_data->response_data, content, content_len) != 0)
                 {
                     upload_data->http_state = HTTP_STATE_ERROR;
@@ -265,11 +266,27 @@ static HTTP_CLIENT_HANDLE create_http_client(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDL
     return result;
 }
 
+static void on_http_close_callback(void* callback_ctx)
+{
+    if (callback_ctx == NULL)
+    {
+        LogError("NULL callback_ctx specified in close callback");
+    }
+    else
+    {
+        int* close_value = (int*)callback_ctx;
+        *close_value = 1;
+    }
+}
+
 static void close_http_client(HTTP_CLIENT_HANDLE http_client)
 {
-    uhttp_client_close(http_client, NULL, NULL);
-    uhttp_client_dowork(http_client);
-    uhttp_client_dowork(http_client);
+    int close_value = 0;
+    uhttp_client_close(http_client, on_http_close_callback, &close_value);
+    for (size_t index = 0; index < MAX_CLOSE_DOWORK_COUNT && close_value == 0; index++)
+    {
+        uhttp_client_dowork(http_client);
+    }
 }
 
 static int send_http_request(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* upload_client, HTTP_CLIENT_HANDLE http_client, const char* relative_path, HTTP_HEADERS_HANDLE request_header, STRING_HANDLE blob_data)
@@ -755,6 +772,7 @@ static int initiate_blob_upload(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* uploa
                     else
                     {
                         // do again snprintf
+
                         if (IoTHubClient_LL_UploadToBlob_step3(upload_data, STRING_c_str(correlation_id), http_client, request_header, req_string) != 0)
                         {
                             LogError("IoTHubClient_LL_UploadToBlob_step3 failed");

@@ -54,7 +54,6 @@ static void on_http_recv(void* callback_ctx, HTTP_CALLBACK_REASON request_result
             {
                 // Clear the buffer
                 (void)BUFFER_unbuild(blob_data->http_data);
-
                 if (BUFFER_build(blob_data->http_data, content, content_len) != 0)
                 {
                     LogError("Failure unable to create blob response BUFFER");
@@ -371,7 +370,9 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* sas_uri, const char*
                         }
                         blockID++;
                     }
-                    ThreadAPI_Sleep(100);
+                    // ensure that we don't get throttled by the 
+                    // storage
+                    ThreadAPI_Sleep(20);
                 }
                 while(uploadOneMoreBlock && !isError);
 
