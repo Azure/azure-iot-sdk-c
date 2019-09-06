@@ -279,7 +279,7 @@ static int create_and_put_SAS_token_to_cbs(AUTHENTICATION_INSTANCE* instance)
         {
             /* Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_07_002: [ If credential Type is SAS_TOKEN authentication_do_work() shall validate the sas_token, and fail if it's not valid. ] */
             SAS_TOKEN_STATUS token_status = IoTHubClient_Auth_Is_SasToken_Valid(instance->authorization_module);
-            if (token_status == SAS_TOKEN_STATUS_INVALID)
+            if (token_status == SAS_TOKEN_STATUS_NOT_VALID)
             {
                 LogError("sas token is invalid.");
                 sas_token = NULL;
