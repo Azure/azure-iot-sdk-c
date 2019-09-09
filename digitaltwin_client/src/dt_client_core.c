@@ -861,7 +861,7 @@ DIGITALTWIN_CLIENT_RESULT DT_ClientCoreRegisterInterfacesAsync(DT_CLIENT_CORE_HA
 
     if ((dtClientCoreHandle == NULL) || (deviceCapabilityModel == NULL))
     {
-        LogError("Invalid parameter(s). dtClientCoreHandle=%p, deviceCapabilityModel=%p, numDTInterfaces=%d", dtClientCoreHandle, deviceCapabilityModel, numDTInterfaces);
+        LogError("Invalid parameter(s). dtClientCoreHandle=%p, deviceCapabilityModel=%p", dtClientCoreHandle, deviceCapabilityModel);
         result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
     }
     else if (DT_InterfaceClient_CheckNameValid(deviceCapabilityModel, true) != 0)

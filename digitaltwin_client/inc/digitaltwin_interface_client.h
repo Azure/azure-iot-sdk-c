@@ -146,7 +146,7 @@ typedef struct DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE_TAG
   @remarks The callback is specified initially during the call to <c>DigitalTwin_InterfaceClient_SetPropertiesUpdatedCallback</c>.
 
   @param[in] dtClientPropertyUpdate             <c>DIGITALTWIN_CLIENT_PROPERTY_UPDATE</c>structure filled in by the SDK with information about the updated property.  This memory is owned by the SDK.
-  @param[in] propertyCallbackContext            Context pointer that was specified in the parameter *propertyCallbackContext* during the device application's <c>DigitalTwin_InterfaceClient_SetPropertiesUpdatedCallback</c> call.
+  @param[in] propertyCallbackContext            Context pointer that was specified in the parameter <c>propertyCallbackContext</c> during the device application's <c>DigitalTwin_InterfaceClient_SetPropertiesUpdatedCallback</c> call.
 
   @return N/A.
 */
@@ -202,7 +202,7 @@ typedef void(*DIGITALTWIN_REPORTED_PROPERTY_UPDATED_CALLBACK)(DIGITALTWIN_CLIENT
 
   @return N/A
 */
-typedef void(*DIGITALTWIN_CLIENT_TELEMETRY_CONFIRMATION_CALLBACK)(DIGITALTWIN_CLIENT_RESULT dtUpdateAsyncCommandStatus, void* userContextCallback);
+typedef void(*DIGITALTWIN_CLIENT_TELEMETRY_CONFIRMATION_CALLBACK)(DIGITALTWIN_CLIENT_RESULT dtTelemetryStatus, void* userContextCallback);
 
 /** 
   @brief Function signature for the callback that is invoked by the Digital Twin SDK when updating command's status asynchronously succeeds or fails.
@@ -216,7 +216,7 @@ typedef void(*DIGITALTWIN_CLIENT_TELEMETRY_CONFIRMATION_CALLBACK)(DIGITALTWIN_CL
 
   @return N/A
 */
-typedef void(*DIGITALTWIN_CLIENT_UPDATE_ASYNC_COMMAND_CALLBACK)(DIGITALTWIN_CLIENT_RESULT dtReportedStatus, void* userContextCallback);
+typedef void(*DIGITALTWIN_CLIENT_UPDATE_ASYNC_COMMAND_CALLBACK)(DIGITALTWIN_CLIENT_RESULT dtUpdateAsyncCommandStatus, void* userContextCallback);
 
 
 /** 

@@ -112,7 +112,7 @@ MOCKABLE_FUNCTION(, void, testDTClientTelemetryConfirmationCallback, DIGITALTWIN
 MOCKABLE_FUNCTION(, void, testDTClientReportedPropertyCallback, DIGITALTWIN_CLIENT_RESULT, dtReportedStatus, void*, userContextCallback);
 MOCKABLE_FUNCTION(, void, testDTClientCommandCallback, const DIGITALTWIN_CLIENT_COMMAND_REQUEST*, dtClientCommandContext, DIGITALTWIN_CLIENT_COMMAND_RESPONSE*, dtClientCommandResponseContext, void*, userInterfaceContext);
 MOCKABLE_FUNCTION(, void, testDTClientPropertyUpdate, const DIGITALTWIN_CLIENT_PROPERTY_UPDATE*, dtClientPropertyUpdate, void*, userInterfaceContext);
-MOCKABLE_FUNCTION(, void, testDTClientUpdateAsyncCallback, DIGITALTWIN_CLIENT_RESULT, dtReportedStatus, void*, userContextCallback);
+MOCKABLE_FUNCTION(, void, testDTClientUpdateAsyncCallback, DIGITALTWIN_CLIENT_RESULT, dtUpdateAsyncCommandStatus, void*, userContextCallback);
 #undef ENABLE_MOCKS
 
 static void* testBindingIotHubBindingLockHandle = (void*)0x1221;

@@ -422,7 +422,7 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_Create(const char* interfa
 }
 
 // DigitalTwin_InterfaceClient_SetPropertiesUpdatedCallback sets the passed dtPropertyUpdatedCallback to the interface.
-DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_SetPropertiesUpdatedCallback(DIGITALTWIN_INTERFACE_CLIENT_HANDLE dtInterfaceClientHandle, DIGITALTWIN_PROPERTY_UPDATE_CALLBACK dtPropertyUpdatedCallback, void *propertyCallbackContext)
+DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_SetPropertiesUpdatedCallback(DIGITALTWIN_INTERFACE_CLIENT_HANDLE dtInterfaceClientHandle, DIGITALTWIN_PROPERTY_UPDATE_CALLBACK dtPropertyUpdatedCallback, void* propertyCallbackContext)
 {
     DT_INTERFACE_CLIENT* dtInterfaceClient = (DT_INTERFACE_CLIENT*)dtInterfaceClientHandle;
     DIGITALTWIN_CLIENT_RESULT result;
