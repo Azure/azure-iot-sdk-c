@@ -2318,7 +2318,7 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
         if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_NOT_CONNECTED && transport_data->isRecoverableError)
         {
             // Note: in case retry_control_should_retry fails, the reconnection shall be attempted anyway (defaulting to policy IOTHUB_CLIENT_RETRY_IMMEDIATE).
-            if (transport_data->connectFailCount == 0 || retry_control_should_retry(transport_data->retry_control_handle, &retry_action) != 0 || retry_action == RETRY_ACTION_RETRY_NOW)
+            if (!transport_data->conn_attempted || retry_control_should_retry(transport_data->retry_control_handle, &retry_action) != 0 || retry_action == RETRY_ACTION_RETRY_NOW)
             {
                 if (tickcounter_get_current_ms(transport_data->msgTickCounter, &transport_data->connectTick) != 0)
                 {
