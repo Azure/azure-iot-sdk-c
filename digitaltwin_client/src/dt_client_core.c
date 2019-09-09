@@ -799,6 +799,58 @@ static DIGITALTWIN_CLIENT_RESULT SendInterfacesToRegisterMessage(DT_CLIENT_CORE*
     return result;
 }
 
+// VerifyInterfaceInstancesUnique makes sure that the interfaceInstanceName of each handle is unique.  E.G. one connection cannot have
+// to instances both named "frontCamera".  We check here, instead of solely relying on server policy, because if this fails on server
+// side for MQTT then the connection will be dropped and it will be hard for application developer to debug.
+// Duplicate interfaces ARE allowed - e.g. app can have two "urn:contoso:camera:1" interfaces as long as instances are different.
+static DIGITALTWIN_CLIENT_RESULT VerifyInterfaceInstancesUnique(DIGITALTWIN_INTERFACE_CLIENT_HANDLE* dtInterfaces, unsigned int numDTInterfaces)
+{
+    DIGITALTWIN_CLIENT_RESULT result = DIGITALTWIN_CLIENT_ERROR;
+    unsigned int i;
+    unsigned int j;
+
+    for (i = 0; i < numDTInterfaces; i++)
+    {
+        const char* interfaceInstanceName1 = DT_InterfaceClient_GetInterfaceInstanceName(dtInterfaces[i]);
+        if (interfaceInstanceName1 == NULL)
+        {   
+            LogError("DT_InterfaceClient_GetInterfaceInstanceName failed on element %d in handle list", i);
+            result = DIGITALTWIN_CLIENT_ERROR;
+            break;
+        }
+
+        for (j = i+1; j < numDTInterfaces; j++)
+        {
+            const char* interfaceInstanceName2 = DT_InterfaceClient_GetInterfaceInstanceName(dtInterfaces[j]);
+            if (interfaceInstanceName2 == NULL)
+            {   
+                LogError("DT_InterfaceClient_GetInterfaceInstanceName failed on element %d in handle list", j);
+                result = DIGITALTWIN_CLIENT_ERROR;
+                break;
+            }
+
+            if (strcmp(interfaceInstanceName1, interfaceInstanceName2) == 0)
+            {
+                LogError("The interface instance name %s was repeated on element %d and %d", interfaceInstanceName1, i, j);
+                result = DIGITALTWIN_CLIENT_ERROR_DUPLICATE_INTERFACE_INSTANCES;
+                break;
+            }
+        }
+
+        if (j != numDTInterfaces)
+        {
+            break;
+        }
+    }
+
+    if (i == numDTInterfaces)
+    {
+        result = DIGITALTWIN_CLIENT_OK;
+    }
+
+    return result;
+}
+
 // DT_ClientCoreRegisterInterfacesAsync updates the list of interfaces we're supporting and begins 
 // protocol update of server.
 DIGITALTWIN_CLIENT_RESULT DT_ClientCoreRegisterInterfacesAsync(DT_CLIENT_CORE_HANDLE dtClientCoreHandle, const char* deviceCapabilityModel, DIGITALTWIN_INTERFACE_CLIENT_HANDLE* dtInterfaces, unsigned int numDTInterfaces, DIGITALTWIN_INTERFACE_REGISTERED_CALLBACK dtInterfaceRegisteredCallback, void* userContextCallback)
@@ -809,13 +861,17 @@ DIGITALTWIN_CLIENT_RESULT DT_ClientCoreRegisterInterfacesAsync(DT_CLIENT_CORE_HA
 
     if ((dtClientCoreHandle == NULL) || (deviceCapabilityModel == NULL))
     {
-        LogError("Invalid parameter(s). dtClientCoreHandle=%p, deviceCapabilityModel=%p", dtClientCoreHandle, deviceCapabilityModel);
+        LogError("Invalid parameter(s). dtClientCoreHandle=%p, deviceCapabilityModel=%p, numDTInterfaces=%d", dtClientCoreHandle, deviceCapabilityModel, numDTInterfaces);
         result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
     }
     else if (DT_InterfaceClient_CheckNameValid(deviceCapabilityModel, true) != 0)
     {
         LogError("Invalid deviceCapabilityModel %s", deviceCapabilityModel);
         result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
+    }
+    else if ((result = VerifyInterfaceInstancesUnique(dtInterfaces, numDTInterfaces)) != DIGITALTWIN_CLIENT_OK)
+    {
+        LogError("VerifyInterfaceInstancesUnique failed, result = %d", result);
     }
     else if (InvokeBindingLock(dtClientCore, &lockHeld) != 0)
     {

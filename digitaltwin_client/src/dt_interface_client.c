@@ -83,6 +83,8 @@ typedef struct DT_INTERFACE_CLIENT_TAG
     // Because they can't be modified(other than at create/delete time), they don't require lock when reading them.
     DT_CLIENT_CORE_HANDLE dtClientCoreHandle;
     void* userInterfaceContext;
+    void* commandCallbackContext;
+    void* propertyCallbackContext;
     char* interfaceId;
     char* interfaceInstanceName;
     size_t interfaceInstanceNameLen;
@@ -97,9 +99,23 @@ typedef struct DT_REPORTED_PROPERTIES_UPDATE_CALLBACK_CONTEXT_TAG
     void* userContextCallback;
 } DT_REPORT_PROPERTIES_UPDATE_CALLBACK_CONTEXT;
 
+
+// DT_APPLICATION_SEND_TYPE indicates how the application has come to send this telemetry
+// message (e.g. via a straight telemetry send or because of updating an async command)
+typedef enum DT_APPLICATION_SEND_TYPE_TAG
+{
+    DT_APPLICATION_SEND_TYPE_TELEMETRY,
+    DT_APPLICATION_SEND_TYPE_UPDATE_ASYNC_COMMAND
+} DT_APPLICATION_SEND_TYPE;
+
 typedef struct DT_INTERFACE_SEND_TELEMETRY_CALLBACK_CONTEXT_TAG
 {
-    DIGITALTWIN_CLIENT_TELEMETRY_CONFIRMATION_CALLBACK telemetryConfirmationCallback;
+    DT_APPLICATION_SEND_TYPE applicationSendType;
+    union
+    {
+        DIGITALTWIN_CLIENT_TELEMETRY_CONFIRMATION_CALLBACK telemetryConfirmationCallback;
+        DIGITALTWIN_CLIENT_UPDATE_ASYNC_COMMAND_CALLBACK updateAsyncCommandCallback;
+    } u;
     void* userContextCallback;
 } DT_INTERFACE_SEND_TELEMETRY_CALLBACK_CONTEXT;
 
@@ -406,7 +422,7 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_Create(const char* interfa
 }
 
 // DigitalTwin_InterfaceClient_SetPropertiesUpdatedCallback sets the passed dtPropertyUpdatedCallback to the interface.
-DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_SetPropertiesUpdatedCallback(DIGITALTWIN_INTERFACE_CLIENT_HANDLE dtInterfaceClientHandle, DIGITALTWIN_PROPERTY_UPDATE_CALLBACK dtPropertyUpdatedCallback)
+DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_SetPropertiesUpdatedCallback(DIGITALTWIN_INTERFACE_CLIENT_HANDLE dtInterfaceClientHandle, DIGITALTWIN_PROPERTY_UPDATE_CALLBACK dtPropertyUpdatedCallback, void *propertyCallbackContext)
 {
     DT_INTERFACE_CLIENT* dtInterfaceClient = (DT_INTERFACE_CLIENT*)dtInterfaceClientHandle;
     DIGITALTWIN_CLIENT_RESULT result;
@@ -430,6 +446,7 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_SetPropertiesUpdatedCallba
     else
     {
         dtInterfaceClient->propertyUpdatedCallback = dtPropertyUpdatedCallback;
+        dtInterfaceClient->propertyCallbackContext = propertyCallbackContext;
         result = DIGITALTWIN_CLIENT_OK;
     }
 
@@ -437,7 +454,7 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_SetPropertiesUpdatedCallba
 }
 
 // DigitalTwin_InterfaceClient_SetCommandsCallback sets the passed dtCommandExecuteCallback to the interface.
-DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_SetCommandsCallback(DIGITALTWIN_INTERFACE_CLIENT_HANDLE dtInterfaceClientHandle, DIGITALTWIN_COMMAND_EXECUTE_CALLBACK dtCommandExecuteCallback)
+DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_SetCommandsCallback(DIGITALTWIN_INTERFACE_CLIENT_HANDLE dtInterfaceClientHandle, DIGITALTWIN_COMMAND_EXECUTE_CALLBACK dtCommandExecuteCallback, void* commandCallbackContext)
 {
     DT_INTERFACE_CLIENT* dtInterfaceClient = (DT_INTERFACE_CLIENT*)dtInterfaceClientHandle;
     DIGITALTWIN_CLIENT_RESULT result;
@@ -461,6 +478,7 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_SetCommandsCallback(DIGITA
     else
     {
         dtInterfaceClient->commandExecuteCallback = dtCommandExecuteCallback;
+        dtInterfaceClient->commandCallbackContext = commandCallbackContext;
         result = DIGITALTWIN_CLIENT_OK;
     }
 
@@ -883,7 +901,7 @@ DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_CreateTelemetryMessage(const char* 
     return result;
 }
 
-// Creates a DT_INTERFACE_SEND_TELEMETRY_CALLBACK_CONTEXT item.
+// Creates a DT_INTERFACE_SEND_TELEMETRY_CALLBACK_CONTEXT item when sending telemetry.
 static DT_INTERFACE_SEND_TELEMETRY_CALLBACK_CONTEXT* CreateInterfaceSendTelemetryCallbackContext(DIGITALTWIN_CLIENT_TELEMETRY_CONFIRMATION_CALLBACK telemetryConfirmationCallback, void* userContextCallback)
 {
     DT_INTERFACE_SEND_TELEMETRY_CALLBACK_CONTEXT* result;
@@ -894,12 +912,33 @@ static DT_INTERFACE_SEND_TELEMETRY_CALLBACK_CONTEXT* CreateInterfaceSendTelemetr
     }
     else
     {
-        result->telemetryConfirmationCallback = telemetryConfirmationCallback;
+        result->applicationSendType = DT_APPLICATION_SEND_TYPE_TELEMETRY;
+        result->u.telemetryConfirmationCallback = telemetryConfirmationCallback;
         result->userContextCallback = userContextCallback;
     }
 
     return result;
 }
+
+// Creates a DT_INTERFACE_SEND_TELEMETRY_CALLBACK_CONTEXT item when sending an update async command.
+static DT_INTERFACE_SEND_TELEMETRY_CALLBACK_CONTEXT* CreateInterfaceAsyncCommandUpdateCallbackContext(DIGITALTWIN_CLIENT_UPDATE_ASYNC_COMMAND_CALLBACK updateAsyncCommandCallback, void* userContextCallback)
+{
+    DT_INTERFACE_SEND_TELEMETRY_CALLBACK_CONTEXT* result;
+
+    if ((result = calloc(1, sizeof(DT_INTERFACE_SEND_TELEMETRY_CALLBACK_CONTEXT))) == NULL)
+    {
+        LogError("Cannot allocate context for DT_INTERFACE_SEND_TELEMETRY_CALLBACK_CONTEXT");
+    }
+    else
+    {
+        result->applicationSendType = DT_APPLICATION_SEND_TYPE_UPDATE_ASYNC_COMMAND;
+        result->u.updateAsyncCommandCallback = updateAsyncCommandCallback;
+        result->userContextCallback = userContextCallback;
+    }
+
+    return result;
+}
+
 
 // DigitalTwin_InterfaceClient_SendTelemetryAsync sends the specified telemetry to Azure IoTHub in proper DigitalTwin data format.
 DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_SendTelemetryAsync(DIGITALTWIN_INTERFACE_CLIENT_HANDLE dtInterfaceClientHandle, const char* telemetryName, const char* messageData, DIGITALTWIN_CLIENT_TELEMETRY_CONFIRMATION_CALLBACK telemetryConfirmationCallback, void* userContextCallback)
@@ -1057,10 +1096,10 @@ static void ProcessPropertyUpdateIfNeededFromDesired(DT_INTERFACE_CLIENT* dtInte
             dtClientPropertyUpdate.propertyDesiredLen = strlen(payloadForDesiredProperty);
             dtClientPropertyUpdate.desiredVersion = jsonVersion;
         
-            DigitalTwinLogInfo("DigitalTwin Interface : Invoking property callback for interface %s, propertyName=%s, userInterfaceContext=%p", 
-                                dtInterfaceClient->interfaceInstanceName, propertyName, dtInterfaceClient->userInterfaceContext);
+            DigitalTwinLogInfo("DigitalTwin Interface : Invoking property callback for interface %s, propertyName=%s, propertyCallbackContext=%p", 
+                                dtInterfaceClient->interfaceInstanceName, propertyName, dtInterfaceClient->propertyCallbackContext);
                 
-            dtInterfaceClient->propertyUpdatedCallback(&dtClientPropertyUpdate, dtInterfaceClient->userInterfaceContext);
+            dtInterfaceClient->propertyUpdatedCallback(&dtClientPropertyUpdate, dtInterfaceClient->propertyCallbackContext);
 
             DigitalTwinLogInfo("DigitalTwin Interface: Invoking property callback returned");
         }
@@ -1275,7 +1314,7 @@ static void InvokeDTCommand(DT_INTERFACE_CLIENT* dtInterfaceClient, const char* 
     
     DigitalTwinLogInfo("DigitalTwin Interface : Invoking callback to process command %s on interface name %s", commandName, dtInterfaceClient->interfaceInstanceName);
 
-    dtInterfaceClient->commandExecuteCallback(&dtClientCommandRequest, &dtClientResponse, dtInterfaceClient->userInterfaceContext);
+    dtInterfaceClient->commandExecuteCallback(&dtClientCommandRequest, &dtClientResponse, dtInterfaceClient->commandCallbackContext);
     
     DigitalTwinLogInfo("DigitalTwin Interface: Callback to process command returned.  responseData=%p, responseLen=%lu, responseStatus=%d", 
                         dtClientResponse.responseData, (unsigned long)dtClientResponse.responseDataLen, dtClientResponse.status);
@@ -1465,12 +1504,13 @@ static DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_SetAsyncResponseProperties(I
 
 // DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAsync is invoked by application when an async DigitalTwin command is executing, updating
 // DigitalTwin server with status information provided by caller in a specially formatted telemetry message.
-DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAsync(DIGITALTWIN_INTERFACE_CLIENT_HANDLE dtInterfaceClientHandle, const DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE* dtClientAsyncCommandUpdate)
+DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAsync(DIGITALTWIN_INTERFACE_CLIENT_HANDLE dtInterfaceClientHandle, const DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE* dtClientAsyncCommandUpdate, DIGITALTWIN_CLIENT_UPDATE_ASYNC_COMMAND_CALLBACK dtUpdateAsyncCommandCallback, void* userContextCallback)
 {
     DT_INTERFACE_CLIENT* dtInterfaceClient = (DT_INTERFACE_CLIENT*)dtInterfaceClientHandle;
     DIGITALTWIN_CLIENT_RESULT result;
     STRING_HANDLE jsonToSend = NULL;
     IOTHUB_MESSAGE_HANDLE telemetryMessageHandle = NULL;
+    DT_INTERFACE_SEND_TELEMETRY_CALLBACK_CONTEXT* sendTelemetryCallbackContext = NULL;
 
     if ((dtInterfaceClientHandle == NULL) || (dtClientAsyncCommandUpdate == NULL))
     {
@@ -1494,14 +1534,17 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAs
     else if ((result = DT_InterfaceClient_CreateTelemetryMessage(NULL, dtInterfaceClient->interfaceInstanceName, DT_AsyncResultSchema, STRING_c_str(jsonToSend),  &telemetryMessageHandle)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("Cannot create send telemetry message, error = %d", result);
-        result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
     }
     else if ((result = DT_InterfaceClient_SetAsyncResponseProperties(telemetryMessageHandle, dtClientAsyncCommandUpdate)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("Cannot create send telemetry message, error = %d", result);
+    }
+    else if ((sendTelemetryCallbackContext = CreateInterfaceAsyncCommandUpdateCallbackContext(dtUpdateAsyncCommandCallback, userContextCallback)) == NULL)
+    {
+        LogError("Cannot create callback context");
         result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
     }
-    else if ((result = DT_ClientCoreSendTelemetryAsync(dtInterfaceClient->dtClientCoreHandle, dtInterfaceClientHandle, telemetryMessageHandle, NULL)) != DIGITALTWIN_CLIENT_OK)
+    else if ((result = DT_ClientCoreSendTelemetryAsync(dtInterfaceClient->dtClientCoreHandle, dtInterfaceClientHandle, telemetryMessageHandle, sendTelemetryCallbackContext)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("DT_ClientCoreSendTelemetryAsync failed, error = %d", result);
     }
@@ -1510,9 +1553,52 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAs
         result = DIGITALTWIN_CLIENT_OK;
     }
 
+    if ((result != DIGITALTWIN_CLIENT_OK) && (sendTelemetryCallbackContext != NULL))
+    {
+        free(sendTelemetryCallbackContext);
+    }
+
     IoTHubMessage_Destroy(telemetryMessageHandle);
     STRING_delete(jsonToSend);
     return result;
+}
+
+void InvokeSendTelemetryCallback(DT_INTERFACE_CLIENT* dtInterfaceClient, DT_INTERFACE_SEND_TELEMETRY_CALLBACK_CONTEXT* sendTelemetryCallbackContext, DIGITALTWIN_CLIENT_RESULT dtSendTelemetryStatus)
+{
+    if (sendTelemetryCallbackContext->u.updateAsyncCommandCallback == NULL)
+    {
+        // Caller did not register a callback for this telemetry.  Not an error, no logging needed.
+        ;
+    }
+    else
+    {
+        (void)dtInterfaceClient; // When DIGITALTWIN_LOGGING_ENABLED is 0, dtInterfaceClient not used and otherwise causes a false positive on -Wunused-variable.
+        DigitalTwinLogInfo("DigitalTwin Interface: Invoking telemetry confirmation callback for interface=%s, reportedStatus=%s, userContextCallback=%p", 
+                   dtInterfaceClient->interfaceInstanceName, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, dtSendTelemetryStatus), sendTelemetryCallbackContext->userContextCallback);
+    
+        sendTelemetryCallbackContext->u.telemetryConfirmationCallback(dtSendTelemetryStatus, sendTelemetryCallbackContext->userContextCallback);
+    
+        DigitalTwinLogInfo("DigitalTwin Interface: Invoking telemetry confirmation returned");
+    }
+}
+
+void InvokeUpdateAsyncCommandStatusCallback(DT_INTERFACE_CLIENT* dtInterfaceClient, DT_INTERFACE_SEND_TELEMETRY_CALLBACK_CONTEXT* sendTelemetryCallbackContext, DIGITALTWIN_CLIENT_RESULT dtSendTelemetryStatus)
+{
+    if (sendTelemetryCallbackContext->u.updateAsyncCommandCallback == NULL)
+    {
+        // Caller did not register a callback for this telemetry.  Not an error, no logging needed.
+        ;
+    }
+    else
+    {
+        (void)dtInterfaceClient; // When DIGITALTWIN_LOGGING_ENABLED is 0, dtInterfaceClient not used and otherwise causes a false positive on -Wunused-variable.
+        DigitalTwinLogInfo("DigitalTwin Interface: Invoking update async command status confirmation callback for interface=%s, reportedStatus=%s, userContextCallback=%p", 
+                   dtInterfaceClient->interfaceInstanceName, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, dtSendTelemetryStatus), sendTelemetryCallbackContext->userContextCallback);
+    
+        sendTelemetryCallbackContext->u.updateAsyncCommandCallback(dtSendTelemetryStatus, sendTelemetryCallbackContext->userContextCallback);
+    
+        DigitalTwinLogInfo("DigitalTwin Interface: Invoking update async command status callback returned");
+    }
 }
 
 // Processes callback for Sending a DigitalTwin Telemetry.
@@ -1534,23 +1620,24 @@ DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_ProcessTelemetryCallback(DIGITALTWI
     else
     {
         DT_INTERFACE_SEND_TELEMETRY_CALLBACK_CONTEXT* sendTelemetryCallbackContext = (DT_INTERFACE_SEND_TELEMETRY_CALLBACK_CONTEXT*)userContextCallback;
-
-        if (sendTelemetryCallbackContext->telemetryConfirmationCallback == NULL)
+        switch (sendTelemetryCallbackContext->applicationSendType)
         {
-            // Caller did not register a callback for this telemetry.  Not an error, no logging needed.
-            result = DIGITALTWIN_CLIENT_OK;
-        }
-        else
-        {
-            (void)dtInterfaceClient; // When DIGITALTWIN_LOGGING_ENABLED is 0, dtInterfaceClient not used and otherwise causes a false positive on -Wunused-variable.
-            DigitalTwinLogInfo("DigitalTwin Interface: Invoking telemetry confirmation callback for interface=%s, reportedStatus=%s, userContextCallback=%p", 
-                       dtInterfaceClient->interfaceInstanceName, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, dtSendTelemetryStatus), sendTelemetryCallbackContext->userContextCallback);
+            case DT_APPLICATION_SEND_TYPE_TELEMETRY:
+                InvokeSendTelemetryCallback(dtInterfaceClient, sendTelemetryCallbackContext, dtSendTelemetryStatus);
+                result = DIGITALTWIN_CLIENT_OK;
+                break;
 
-            sendTelemetryCallbackContext->telemetryConfirmationCallback(dtSendTelemetryStatus, sendTelemetryCallbackContext->userContextCallback);
+            case DT_APPLICATION_SEND_TYPE_UPDATE_ASYNC_COMMAND:
+                InvokeUpdateAsyncCommandStatusCallback(dtInterfaceClient, sendTelemetryCallbackContext, dtSendTelemetryStatus);
+                result = DIGITALTWIN_CLIENT_OK;
+                break;
 
-            DigitalTwinLogInfo("DigitalTwin Interface: Invoking telemetry confirmation returned");
-            result = DIGITALTWIN_CLIENT_OK;
+            default:
+                LogError("Unknown application sender type %d", sendTelemetryCallbackContext->applicationSendType);
+                result = DIGITALTWIN_CLIENT_ERROR;
+                break;
         }
+
         free(sendTelemetryCallbackContext);
     }
 

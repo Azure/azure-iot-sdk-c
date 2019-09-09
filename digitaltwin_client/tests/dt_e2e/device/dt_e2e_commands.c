@@ -69,7 +69,7 @@ DIGITALTWIN_INTERFACE_CLIENT_HANDLE DT_E2E_Commands_CreateInterface(void)
         LogError("TEST_COMMANDS_INTERFACE: Unable to allocate interface client handle for <%s>, error=<%s>", DT_E2E_Properties_InterfaceName, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
         interfaceHandle = NULL;
     }
-    else if ((result =  DigitalTwin_InterfaceClient_SetCommandsCallback(interfaceHandle, DT_E2E_CommandCallbackProcess)) != DIGITALTWIN_CLIENT_OK)
+    else if ((result =  DigitalTwin_InterfaceClient_SetCommandsCallback(interfaceHandle, DT_E2E_CommandCallbackProcess, DT_E2E_CommandContext)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("TEST_COMMANDS_INTERFACE: DigitalTwin_InterfaceClient_SetCommandsCallbacks failed, error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
         DigitalTwin_InterfaceClient_Destroy(interfaceHandle);
