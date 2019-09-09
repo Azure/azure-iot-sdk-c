@@ -2189,7 +2189,7 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     else if (cred_type == IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN)
     {
         SAS_TOKEN_STATUS token_status = IoTHubClient_Auth_Is_SasToken_Valid(transport_data->authorization_module);
-        if (token_status == SAS_TOKEN_STATUS_NOT_VALID)
+        if (token_status == SAS_TOKEN_STATUS_INVALID)
         {
             transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN, transport_data->transport_ctx);
             result = MU_FAILURE;

@@ -561,7 +561,7 @@ SAS_TOKEN_STATUS IoTHubClient_Auth_Is_SasToken_Valid(IOTHUB_AUTHORIZATION_HANDLE
                 {
                     if (!SASToken_Validate(strSasToken))
                     {
-                        result = SAS_TOKEN_STATUS_NOT_VALID;
+                        result = SAS_TOKEN_STATUS_INVALID;
                     }
                     else
                     {
