@@ -12,11 +12,6 @@
 // Core header files for C and IoTHub layer
 //
 
-// ENABLE_IOT_CENTRAL is defined when connecting to IoT Central, NOT IoTHub.  Note that
-// additional cmake options (in particular -Duse_prov_client:BOOL=ON and potentially others
-// to specify the correct HSM) are required for the SDK to generate the required provisioning libraries.
-#define ENABLE_IOT_CENTRAL
-
 // USE_DPS_AUTH_SYMM_KEY uses symmetric key based authentication.  This requires the cmake option -Dhsm_type_symm_key:BOOL=ON 
 // to be set so the underlying Azure IoT C SDK and provisioning client have the correct settings.
 #define USE_DPS_AUTH_SYMM_KEY
@@ -29,18 +24,25 @@
 #include <azure_c_shared_utility/threadapi.h>
 #include <azure_c_shared_utility/xlogging.h>
 #include <azure_c_shared_utility/crt_abstractions.h>
+#include "parson.h"
 
-//
-// Hedaer files for interacting with DigitalTwin layer.
-//
+// IoT Central requires DPS.  Include required header and constants compared to non-DPS scenario.
+#include "azure_prov_client/iothub_security_factory.h"
+#include "azure_prov_client/prov_device_ll_client.h"
+#include "azure_prov_client/prov_transport_mqtt_client.h"
+#include "azure_prov_client/prov_security_factory.h"
+
+// Header files for interacting with DigitalTwin layer.
 #include <digitaltwin_device_client_ll.h>
 #include <digitaltwin_interface_client.h>
 
-// #define ENABLE_MODEL_DEFINITION_INTERFACE to enable ModelDefinition interface.  It is left out of default sample because it is not required and will add resources on constrained devices.
+// #define ENABLE_MODEL_DEFINITION_INTERFACE to enable ModelDefinition interface.  Remove it if your DTDL definitions will be 
+// available on the cloud already (e.g. a private repository) to save space on constrained devices.
+
+#define ENABLE_MODEL_DEFINITION_INTERFACE
 #ifdef ENABLE_MODEL_DEFINITION_INTERFACE
 #include <digitaltwin_model_definition.h>
 #endif
-
 
 //
 // Headers that implement the sample interfaces that this sample device registers
@@ -49,35 +51,28 @@
 #include <../digitaltwin_sample_environmental_sensor/digitaltwin_sample_environmental_sensor.h>
 #include <../digitaltwin_sample_model_definition/digitaltwin_sample_model_definition.h>
 
-//
-// TODO`s: Configure core settings of application for your Digital Twin/IoTHub/IoT Central instance
-//
-
 // TODO: Fill in DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_ID
 #define DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_ID "urn:YOUR_COMPANY_NAME_HERE:sample_device:1"
 
-#ifdef ENABLE_IOT_CENTRAL
-// TODO: Specify ID scope if you intend on using IoT Central
+typedef enum DIGITALTWIN_SAMPLE_SECURITY_TYPE_TAG
+{
+    DIGITALTWIN_SAMPLE_SECURITY_TYPE_CONNECTION_STRING,
+    DIGITALTWIN_SAMPLE_SECURITY_TYPE_DPS_SYMMETRIC_KEY,
+    DIGITALTWIN_SAMPLE_SECURITY_TYPE_DPS_X509
+} DIGITALTWIN_SAMPLE_SECURITY_TYPE;
+
+typedef struct DIGITALTWIN_SAMLPE_CONFIGURATION_TAG
+{
+   DIGITALTWIN_SAMPLE_SECURITY_TYPE securityType;
+   const char* connectionString;
+   const char* IDScope;
+   const char* deviceId;
+   const char* deviceKey;
+} DIGITALTWIN_SAMLPE_CONFIGURATION;
+
+DIGITALTWIN_SAMLPE_CONFIGURATION digitaltwinSampleConfig;
 static const char* digitalTwinSampleDevice_GlobalProvUri = "global.azure-devices-provisioning.net";
-static const char* digitalTwinSampleDevice_IdScope = "[ID Scope]";
-#endif
 
-#ifdef USE_DPS_AUTH_SYMM_KEY
-// TODO: Specify deviceId and keys if you intend on using IoT Central and symmetric key based auth.
-static const char* digitalTwinSampleDevice_deviceId = "[Device ID]";
-static const char* digitalTwinSampleDevice_key      = "[Device Key]";
-#endif
-
-//
-// END TODO section
-//
-
-#ifdef ENABLE_IOT_CENTRAL
-// IoT Central requires DPS.  Include required header and constants
-#include "azure_prov_client/iothub_security_factory.h"
-#include "azure_prov_client/prov_device_ll_client.h"
-#include "azure_prov_client/prov_transport_mqtt_client.h"
-#include "azure_prov_client/prov_security_factory.h"
 
 // State of DPS registration process.  We cannot proceed with DPS until we get into the state APP_DPS_REGISTRATION_SUCCEEDED.
 typedef enum APP_DPS_REGISTRATION_STATUS_TAG
@@ -87,16 +82,6 @@ typedef enum APP_DPS_REGISTRATION_STATUS_TAG
     APP_DPS_REGISTRATION_FAILED
 } APP_DPS_REGISTRATION_STATUS;
 
-#ifdef USE_DPS_AUTH_SYMM_KEY
-const SECURE_DEVICE_TYPE secureDeviceTypeForProvisioning = SECURE_DEVICE_TYPE_SYMMETRIC_KEY;
-const IOTHUB_SECURITY_TYPE secureDeviceTypeForIotHub = IOTHUB_SECURITY_TYPE_SYMMETRIC_KEY;
-
-#else // USE_DPS_AUTH_SYMM_KEY
-const SECURE_DEVICE_TYPE secureDeviceTypeForProvisioning = SECURE_DEVICE_TYPE_X509;
-const IOTHUB_SECURITY_TYPE secureDeviceTypeForIotHub = IOTHUB_SECURITY_TYPE_X509;
-
-
-#endif // USE_DPS_AUTH_SYMM_KEY
 
 // Amount to sleep between querying state from DPS registration loop
 static const int digitalTwinSampleDevice_dpsRegistrationPollSleep = 1000;
@@ -104,15 +89,22 @@ static const int digitalTwinSampleDevice_dpsRegistrationPollSleep = 1000;
 // Maximum amount of times we'll poll for DPS registration being ready.
 static const int digitalTwinSampleDevice_dpsRegistrationMaxPolls = 60;
 
-static const char* digitaltwinSample_InitialRegistrationWithIoTCentral = "InitialRegistrationWithIoTCentral";
-
 static const char* digitaltwinSample_CustomProvisioningData = "{"
                                                           "\"__iot:interfaces\":"
                                                           "{"
                                                               "\"CapabilityModelId\": \"" DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_ID "\""
                                                           "}"
                                                       "}";
-#endif
+
+// Names of JSON fields and possible values for configuration of this sample
+static const char* ConfigOption_SecurityType = "securityType";
+static const char* ConfigOption_ConnectionString = "connectionString";
+static const char* ConfigOption_IDScope = "IDScope";
+static const char* ConfigOption_DeviceId = "deviceId";
+static const char* ConfigOption_DeviceKey = "deviceKey";
+static const char* ConfigValue_ConnectionString = "ConnectionString";
+static const char* ConfigValue_DPSSymmetricKey = "DPSSymmetricKey";
+static const char* ConfigValue_DPSSX509 = "DPS X509";
 
 
 // Number of DigitalTwin Interfaces that this DigitalTwin device supports.
@@ -213,7 +205,6 @@ static DIGITALTWIN_CLIENT_RESULT DigitalTwinSampleDevice_LL_RegisterDigitalTwinI
 }
 
 
-#ifdef ENABLE_IOT_CENTRAL
 char* digitaltwinSample_provisioning_IoTHubUri;
 char* digitaltwinSample_provisioning_DeviceId;
 
@@ -248,23 +239,35 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE DigitalTwinSampleDevice_LL_InitializeIotHu
     PROV_DEVICE_LL_HANDLE provDeviceLLHandle = NULL;
     IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceLLHandle = NULL;
 
+    SECURE_DEVICE_TYPE secureDeviceTypeForProvisioning;
+    IOTHUB_SECURITY_TYPE secureDeviceTypeForIotHub;
+
+    if (digitaltwinSampleConfig.securityType == DIGITALTWIN_SAMPLE_SECURITY_TYPE_DPS_SYMMETRIC_KEY)
+    {
+        secureDeviceTypeForProvisioning = SECURE_DEVICE_TYPE_SYMMETRIC_KEY;
+        secureDeviceTypeForIotHub = IOTHUB_SECURITY_TYPE_SYMMETRIC_KEY;
+    }
+    else
+    {
+        secureDeviceTypeForProvisioning = SECURE_DEVICE_TYPE_X509;
+        secureDeviceTypeForIotHub = IOTHUB_SECURITY_TYPE_X509;
+    }
+
     APP_DPS_REGISTRATION_STATUS appDpsRegistrationStatus = APP_DPS_REGISTRATION_PENDING;
 
     if (IoTHub_Init() != 0)
     {
         LogError("IoTHub_Init failed");
     }
-#ifdef USE_DPS_AUTH_SYMM_KEY
-    else if (prov_dev_set_symmetric_key_info(digitalTwinSampleDevice_deviceId, digitalTwinSampleDevice_key) != 0) 
+    else if ((digitaltwinSampleConfig.securityType == DIGITALTWIN_SAMPLE_SECURITY_TYPE_DPS_SYMMETRIC_KEY) && (prov_dev_set_symmetric_key_info(digitaltwinSampleConfig.deviceId, digitaltwinSampleConfig.deviceKey) != 0))
     {
         LogError("prov_dev_set_symmetric_key_info failed.");
     }
-#endif
     else if (prov_dev_security_init(secureDeviceTypeForProvisioning) != 0)
     {
         LogError("prov_dev_security_init failed");
     }
-    else if ((provDeviceLLHandle = Prov_Device_LL_Create(digitalTwinSampleDevice_GlobalProvUri, digitalTwinSampleDevice_IdScope, Prov_Device_MQTT_Protocol)) == NULL)
+    else if ((provDeviceLLHandle = Prov_Device_LL_Create(digitalTwinSampleDevice_GlobalProvUri, digitaltwinSampleConfig.IDScope, Prov_Device_MQTT_Protocol)) == NULL)
     {
         LogError("failed calling Prov_Device_Create");
     }
@@ -346,12 +349,11 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE DigitalTwinSampleDevice_LL_InitializeIotHu
 
     return deviceLLHandle;
 }
-#endif
 
 
 // DigitalTwinSampleDevice_InitializeIotHubDeviceHandle initializes underlying IoTHub client, creates a device handle with the specified connection string,
 // and sets some options on this handle prior to beginning.
-static IOTHUB_DEVICE_CLIENT_LL_HANDLE DigitalTwinSampleDevice_LL_InitializeIotHubViaConnectionString(const char* connectionString, bool traceOn)
+static IOTHUB_DEVICE_CLIENT_LL_HANDLE DigitalTwinSampleDevice_LL_InitializeIotHubViaConnectionString(bool traceOn)
 {
     IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceLLHandle = NULL;
     IOTHUB_CLIENT_RESULT iothubClientResult;
@@ -360,7 +362,7 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE DigitalTwinSampleDevice_LL_InitializeIotHu
     {
         LogError("IoTHub_Init failed");
     }
-    else if ((deviceLLHandle = IoTHubDeviceClient_LL_CreateFromConnectionString(connectionString, MQTT_Protocol)) == NULL)
+    else if ((deviceLLHandle = IoTHubDeviceClient_LL_CreateFromConnectionString(digitaltwinSampleConfig.connectionString, MQTT_Protocol)) == NULL)
     {
         LogError("Failed to create device ll handle");
     }
@@ -387,27 +389,99 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE DigitalTwinSampleDevice_LL_InitializeIotHu
 
 
 // commandArgument is either the connection string or else it's a flag for using DPS for IoT Central
-static IOTHUB_DEVICE_CLIENT_LL_HANDLE DigitalTwinSampleDevice_LL_CreateHandle(const char* commandArgument)
+static IOTHUB_DEVICE_CLIENT_LL_HANDLE DigitalTwinSampleDevice_LL_CreateHandle()
 {
     IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceLLHandle = NULL;
 
-#ifdef ENABLE_IOT_CENTRAL
-    if (0 == strcmp(commandArgument, digitaltwinSample_InitialRegistrationWithIoTCentral))
+    if (digitaltwinSampleConfig.securityType == DIGITALTWIN_SAMPLE_SECURITY_TYPE_CONNECTION_STRING)
     {
-        deviceLLHandle = DigitalTwinSampleDevice_LL_InitializeIotHubViaProvisioning(true);
+        deviceLLHandle = DigitalTwinSampleDevice_LL_InitializeIotHubViaConnectionString(false);
     }
     else
     {
-        deviceLLHandle = DigitalTwinSampleDevice_LL_InitializeIotHubViaConnectionString(commandArgument, false);
+        deviceLLHandle = DigitalTwinSampleDevice_LL_InitializeIotHubViaProvisioning(false);
     }
-#else
-    // If IoTCentral not enabled, always treat command argument as a connection string
-    deviceLLHandle = DigitalTwinSampleDevice_LL_InitializeIotHubViaConnectionString(commandArgument, false);
-#endif
 
     return deviceLLHandle;
 }
 
+// DigitalTwinSampleDevice_LL_ParseConfigFile parses the configuration file.
+static int DigitalTwinSampleDevice_LL_ParseConfigFile(const char* configFileName, JSON_Value** json_config_value)
+{
+    // Do not free or clear json_config_object - the json_config_value owns cleaning this up.
+    JSON_Object* json_config_object = NULL;
+    int result;
+    const char* securityType;
+
+    memset(&digitaltwinSampleConfig, 0, sizeof(digitaltwinSampleConfig));
+
+    if ((*json_config_value = json_parse_file(configFileName)) == NULL)
+    {
+        LogError("parsing configuration file %s failed", configFileName);
+        result = MU_FAILURE;
+    }
+    else if ((json_config_object = json_value_get_object(*json_config_value)) == NULL)
+    {
+        LogError("json_value_get_object failed");
+        result = MU_FAILURE;
+    }
+    else if ((securityType = json_object_get_string(json_config_object, ConfigOption_SecurityType)) == NULL)
+    {
+        LogError("Could not read field %s from config file.  It is required", ConfigOption_SecurityType);
+        result = MU_FAILURE;
+    }
+    else
+    {
+        if (strcmp(securityType, ConfigValue_ConnectionString) == 0)
+        {
+            if ((digitaltwinSampleConfig.connectionString = json_object_get_string(json_config_object, ConfigOption_ConnectionString)) == NULL)
+            {
+                LogError("Could not read field %s from config file.  It is required when using %s securityType", ConfigOption_ConnectionString, ConfigValue_ConnectionString);
+                result = MU_FAILURE;
+            }
+            else
+            {
+                digitaltwinSampleConfig.securityType = DIGITALTWIN_SAMPLE_SECURITY_TYPE_CONNECTION_STRING;
+                result = 0;
+            }
+        }
+        else if (strcmp(securityType, ConfigValue_DPSSymmetricKey) == 0)
+        {
+            if (((digitaltwinSampleConfig.IDScope = json_object_get_string(json_config_object, ConfigOption_IDScope)) == NULL) ||
+                ((digitaltwinSampleConfig.deviceId = json_object_get_string(json_config_object, ConfigOption_DeviceId)) == NULL) ||
+                ((digitaltwinSampleConfig.deviceKey = json_object_get_string(json_config_object, ConfigOption_DeviceKey)) == NULL))
+            {
+                LogError("Cannot read one or more fields from file that are required when using %s securityType", ConfigValue_DPSSymmetricKey);
+                result = MU_FAILURE;
+            }
+            else
+            {
+                digitaltwinSampleConfig.securityType = DIGITALTWIN_SAMPLE_SECURITY_TYPE_DPS_SYMMETRIC_KEY;
+                result = 0;
+            }
+        }
+        else if (strcmp(securityType, ConfigValue_DPSSX509) == 0)
+        {
+            if ((digitaltwinSampleConfig.IDScope = json_object_get_string(json_config_object, ConfigOption_IDScope)) == NULL)
+            {
+                LogError("Could not read field %s from config file.  It is required when using %s securityType", ConfigOption_IDScope, ConfigValue_DPSSX509);
+                result = MU_FAILURE;
+            }
+            else
+            {
+                digitaltwinSampleConfig.securityType = DIGITALTWIN_SAMPLE_SECURITY_TYPE_DPS_X509;
+                result = 0;
+            }
+        }
+        else 
+        {
+            LogError("securityType %s is unknown", securityType);
+            result = MU_FAILURE;
+        }
+    }
+
+    return result;
+}
 
 // main entry point.  Takes one argument, an IoTHub connection string to run the DIGITALTWIN_DEVICE_CLIENT off of.
 int main(int argc, char *argv[])
@@ -419,6 +493,7 @@ int main(int argc, char *argv[])
 #ifdef ENABLE_MODEL_DEFINITION_INTERFACE
     MODEL_DEFINITION_CLIENT_HANDLE modeldefClientHandle = NULL;
 #endif
+    JSON_Value* json_config_value = NULL;
 
     memset(&interfaceClientHandles, 0, sizeof(interfaceClientHandles));
 
@@ -428,10 +503,14 @@ int main(int argc, char *argv[])
     // automatically via DPS.
     if (argc != 2)
     {
-        LogError("USAGE: digitaltwin_sample_device [IoTHub device connection string || InitialRegistrationWithIoTCentral]");
+        LogError("USAGE: digitaltwin_sample_device [configurationFile]");
+    }
+    else if (DigitalTwinSampleDevice_LL_ParseConfigFile(argv[1], &json_config_value) != 0)
+    {
+        LogError("Parsing %s failed", argv[1]);
     }
     // First, we create a standard IOTHUB_DEVICE_CLIENT_LL_HANDLE handle for DigitalTwin to consume.
-    else if ((deviceLLHandle = DigitalTwinSampleDevice_LL_CreateHandle(argv[1])) == NULL)
+    else if ((deviceLLHandle = DigitalTwinSampleDevice_LL_CreateHandle()) == NULL)
     {
         LogError("Could not allocate IoTHub Device handle");
     }
@@ -537,6 +616,10 @@ int main(int argc, char *argv[])
         IoTHub_Deinit();
     }
 
+    if (json_config_value != NULL)
+    {
+        json_value_free(json_config_value);
+    }
     return 0;
 }
 
