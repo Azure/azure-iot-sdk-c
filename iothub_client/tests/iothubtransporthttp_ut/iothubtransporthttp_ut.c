@@ -877,6 +877,7 @@ static void setupCreateHappyPathAlloc(bool deallocateCreated)
     {
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     }
+    STRICT_EXPECTED_CALL(HTTPAPIEX_Init());
 }
 
 static void setupCreateHappyPathHostname(bool deallocateCreated)
@@ -1213,6 +1214,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_empty, MU_FAILURE);
 
     REGISTER_GLOBAL_MOCK_HOOK(HTTPAPIEX_Create, my_HTTPAPIEX_Create);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPAPIEX_Init, HTTPAPIEX_ERROR);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPAPIEX_Create, NULL);
     REGISTER_GLOBAL_MOCK_HOOK(HTTPAPIEX_Destroy, my_HTTPAPIEX_Destroy);
 
@@ -1560,6 +1562,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Create_happy_path_with_gwhostname)
 //Tests_SRS_TRANSPORTMULTITHTTP_17_006: [ If creating the hostname fails then IoTHubTransportHttp_Create shall fail and return NULL. ]
 //Tests_SRS_TRANSPORTMULTITHTTP_17_006: [ If creating the hostname fails then IoTHubTransportHttp_Create shall fail and return NULL. ]
 //Tests_SRS_TRANSPORTMULTITHTTP_17_131: [ If allocation fails, IoTHubTransportHttp_Create shall fail and return NULL. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_21_143: [ If HTTPAPIEX_Init fails, IoTHubTransportHttp_Create shall fail and return NULL. ]
 TEST_FUNCTION(IoTHubTransportHttp_Create_fails)
 {
     int negativeTestsInitResult = umock_c_negative_tests_init();
@@ -1573,7 +1576,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Create_fails)
 
     umock_c_negative_tests_snapshot();
 
-    size_t calls_cannot_fail[] = { 5 };
+    size_t calls_cannot_fail[] = { 6 };
 
     //act
     size_t count = umock_c_negative_tests_call_count();
