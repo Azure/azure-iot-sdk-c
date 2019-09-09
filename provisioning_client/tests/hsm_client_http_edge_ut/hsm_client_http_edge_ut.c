@@ -90,8 +90,6 @@ static const char * const TEST_ENV_WORKLOADURI_HTTP_NO_ADDRESS = "http://:8080";
 static const char * const TEST_ENV_WORKLOADURI_DOMAIN_SOCKET = "unix:///test-socket";
 static const char * const TEST_ENV_WORKLOADURI_DOMAIN_SOCKET_NO_NAME = "unix://";
 
-
-
 static const unsigned char* TEST_SIGNING_DATA = (const unsigned char* )"Test/Data/To/Sign\nExpiry";
 static const int TEST_SIGNING_DATA_LENGTH = sizeof(TEST_SIGNING_DATA) - 1;
 
@@ -100,8 +98,6 @@ typedef enum TEST_PROTOCOL_TAG
    TEST_HTTP_PROTOCOL,
    TEST_DOMAIN_SOCKET_PROTOCOL
 } TEST_PROTOCOL;
-
-
 
 MOCKABLE_FUNCTION(, JSON_Value*, json_parse_string, const char *, string);
 MOCKABLE_FUNCTION(, char*, json_serialize_to_string, const JSON_Value*, value);
@@ -112,7 +108,6 @@ MOCKABLE_FUNCTION(, JSON_Status, json_object_clear, JSON_Object*, object);
 MOCKABLE_FUNCTION(, JSON_Value*, json_value_init_object);
 MOCKABLE_FUNCTION(, JSON_Object*, json_value_get_object, const JSON_Value *, value);
 MOCKABLE_FUNCTION(, void, json_value_free, JSON_Value*, value);
-
 
 #undef ENABLE_MOCKS
 
@@ -130,13 +125,9 @@ MOCKABLE_FUNCTION(, void, json_value_free, JSON_Value*, value);
 #define TEST_TIME_FOR_TIMEOUT ((double)100000000)
 #define TEST_TIME_FOR_TIMEOUT_T ((time_t)TEST_TIME_FOR_TIMEOUT)
 
-
-
-
 #define TEST_HTTP_CLIENT_HANDLE (HTTP_CLIENT_HANDLE)0x49
 #define TEST_HTTP_HEADERS_HANDLE (HTTP_HEADERS_HANDLE)0x50
 #define TEST_SOCKETIO_INTERFACE_DESCRIPTION     (const IO_INTERFACE_DESCRIPTION*)0x51
-
 
 static int my_mallocAndStrcpy_s(char** destination, const char* source)
 {
@@ -181,14 +172,12 @@ static void my_STRING_delete(STRING_HANDLE h)
     my_gballoc_free((void*)h);
 }
 
-
 HSM_HTTP_WORKLOAD_CONTEXT* workload_context;
 static int g_uhttp_client_dowork_call_count;
 static ON_HTTP_OPEN_COMPLETE_CALLBACK g_on_http_open;
 static void* g_http_open_ctx;
 static ON_HTTP_REQUEST_CALLBACK g_on_http_reply_recv;
 static void* g_http_reply_recv_ctx;
-
 
 static HTTP_CLIENT_HANDLE my_uhttp_client_create(const IO_INTERFACE_DESCRIPTION* io_interface_desc, const void* xio_param, ON_HTTP_ERROR_CALLBACK on_http_error, void* callback_ctx)
 {
