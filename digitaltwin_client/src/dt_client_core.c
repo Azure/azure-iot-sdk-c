@@ -799,9 +799,9 @@ static DIGITALTWIN_CLIENT_RESULT SendInterfacesToRegisterMessage(DT_CLIENT_CORE*
     return result;
 }
 
-// VerifyInterfaceInstancesUnique makes sure that the interfaceInstanceName of each handle is unique.  E.G. one connection cannot have
-// to instances both named "frontCamera".  We check here, instead of solely relying on server policy, because if this fails on server
-// side for MQTT then the connection will be dropped and it will be hard for application developer to debug.
+// VerifyInterfaceInstancesUnique makes sure that the interfaceInstanceName of each handle is unique.  E.g. one connection cannot have
+// two instances both named "frontCamera".  We check here, instead of solely relying on server policy, because if this fails on server
+// side for MQTT then the connection may be dropped and it will be hard for application developer to debug.
 // Duplicate interfaces ARE allowed - e.g. app can have two "urn:contoso:camera:1" interfaces as long as instances are different.
 static DIGITALTWIN_CLIENT_RESULT VerifyInterfaceInstancesUnique(DIGITALTWIN_INTERFACE_CLIENT_HANDLE* dtInterfaces, unsigned int numDTInterfaces)
 {
@@ -829,6 +829,7 @@ static DIGITALTWIN_CLIENT_RESULT VerifyInterfaceInstancesUnique(DIGITALTWIN_INTE
                 break;
             }
 
+            // Interface names are case sensitive, so compare they're not equal with strcmp
             if (strcmp(interfaceInstanceName1, interfaceInstanceName2) == 0)
             {
                 LogError("The interface instance name %s was repeated on element %d and %d", interfaceInstanceName1, i, j);
