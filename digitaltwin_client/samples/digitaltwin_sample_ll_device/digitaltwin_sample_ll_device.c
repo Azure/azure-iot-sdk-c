@@ -103,8 +103,8 @@ static const char* ConfigOption_IDScope = "IDScope";
 static const char* ConfigOption_DeviceId = "deviceId";
 static const char* ConfigOption_DeviceKey = "deviceKey";
 static const char* ConfigValue_ConnectionString = "ConnectionString";
-static const char* ConfigValue_DPSSymmetricKey = "DPSSymmetricKey";
-static const char* ConfigValue_DPSSX509 = "DPSX509";
+static const char* ConfigValue_DPSSymmetricKey = "DPS_SymmetricKey";
+static const char* ConfigValue_DPSSX509 = "DPS_X509";
 
 
 // Number of DigitalTwin Interfaces that this DigitalTwin device supports.
