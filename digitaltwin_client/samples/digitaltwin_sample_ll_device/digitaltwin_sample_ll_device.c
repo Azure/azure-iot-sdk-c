@@ -104,7 +104,7 @@ static const char* ConfigOption_DeviceId = "deviceId";
 static const char* ConfigOption_DeviceKey = "deviceKey";
 static const char* ConfigValue_ConnectionString = "ConnectionString";
 static const char* ConfigValue_DPSSymmetricKey = "DPSSymmetricKey";
-static const char* ConfigValue_DPSSX509 = "DPS X509";
+static const char* ConfigValue_DPSSX509 = "DPSX509";
 
 
 // Number of DigitalTwin Interfaces that this DigitalTwin device supports.
@@ -389,17 +389,17 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE DigitalTwinSampleDevice_LL_InitializeIotHu
 
 
 // commandArgument is either the connection string or else it's a flag for using DPS for IoT Central
-static IOTHUB_DEVICE_CLIENT_LL_HANDLE DigitalTwinSampleDevice_LL_CreateHandle()
+static IOTHUB_DEVICE_CLIENT_LL_HANDLE DigitalTwinSampleDevice_LL_CreateHandle(bool traceOn)
 {
     IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceLLHandle = NULL;
 
     if (digitaltwinSampleConfig.securityType == DIGITALTWIN_SAMPLE_SECURITY_TYPE_CONNECTION_STRING)
     {
-        deviceLLHandle = DigitalTwinSampleDevice_LL_InitializeIotHubViaConnectionString(false);
+        deviceLLHandle = DigitalTwinSampleDevice_LL_InitializeIotHubViaConnectionString(traceOn);
     }
     else
     {
-        deviceLLHandle = DigitalTwinSampleDevice_LL_InitializeIotHubViaProvisioning(false);
+        deviceLLHandle = DigitalTwinSampleDevice_LL_InitializeIotHubViaProvisioning(traceOn);
     }
 
     return deviceLLHandle;
@@ -510,7 +510,7 @@ int main(int argc, char *argv[])
         LogError("Parsing %s failed", argv[1]);
     }
     // First, we create a standard IOTHUB_DEVICE_CLIENT_LL_HANDLE handle for DigitalTwin to consume.
-    else if ((deviceLLHandle = DigitalTwinSampleDevice_LL_CreateHandle()) == NULL)
+    else if ((deviceLLHandle = DigitalTwinSampleDevice_LL_CreateHandle(true)) == NULL)
     {
         LogError("Could not allocate IoTHub Device handle");
     }
