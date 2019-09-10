@@ -14089,7 +14089,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetMessageId_succeeds)
     IoTHubTransportHttp_DoWork(handle);
 
     //assert
-    ASSERT_IS_NULL(last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest);
+    ASSERT_IS_NOT_NULL(last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest);
     ASSERT_ARE_EQUAL(int, 0, memcmp(real_BUFFER_u_char(last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest), buffer6, buffer6_size));
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 

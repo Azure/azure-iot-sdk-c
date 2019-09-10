@@ -230,6 +230,8 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessaging_LL_SetFeedbackMessageCallback, IOTHUB_MESSAGING_ERROR);
 
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessaging_LL_SetTrustedCert, IOTHUB_MESSAGING_OK);
+
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessaging_LL_Send, IOTHUB_MESSAGING_OK);
 }
 
 TEST_SUITE_CLEANUP(TestClassCleanup)
@@ -637,11 +639,9 @@ TEST_FUNCTION(IoTHubMessaging_SendAsync_happy_path)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG))
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
 
-    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
+    STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
     /* If modules are re-enabled, re-enable this code and add testing_module paramater to this function
     if (testing_module == true)
