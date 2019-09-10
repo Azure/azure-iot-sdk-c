@@ -2968,7 +2968,7 @@ static void testDT_UpdateAsyncCommandStatus_AsyncUpdateStruct_invalid(const DIGI
     test_free_bound_interface_handle(h);
 }
 
-void testDT_SetAsyncUpdate(DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE* dtClientAsyncCommandUpdate)
+static void testDT_SetAsyncUpdate(DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE* dtClientAsyncCommandUpdate)
 {
     memset(dtClientAsyncCommandUpdate, 0, sizeof(*dtClientAsyncCommandUpdate));
     dtClientAsyncCommandUpdate->version = DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE_VERSION_1;
