@@ -45,6 +45,7 @@ DPS_LL_SetOption(handle, OPTION_HTTP_PROXY, &http_proxy);
 | `"blob_upload_timeout_secs"`  | OPTION_BLOB_UPLOAD_TIMEOUT_SECS | size_t*            | Timeout in seconds of blob uploads
 | `"product_info"`                | OPTION_PRODUCT_INFO             | const char*        | User defined Product identifier sent to the IoThub service
 | `"TrustedCerts"`                | OPTION_TRUSTED_CERT             | const char*        | Azure Server certificate used to validate TLS connection to iothub
+| `"retry_interval_sec"`          | OPTION_RETRY_INTERVAL_SEC       |  int*              | Amount of seconds between retries when using the interval retry policy
 
 <a name="transport_option"></a>
 
