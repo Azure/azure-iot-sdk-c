@@ -272,12 +272,13 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     *                - @b CURLOPT_VERBOSE - only available for HTTP protocol and only
     *                  when CURL is used. It has the same meaning as CURL's option with the same
     *                  name. @p value is pointer to a long.
-    *              - @b keepalive - available for MQTT protocol.  Integer value that sets the
-    *                interval in seconds when pings are sent to the server.
-    *              - @b logtrace - available for MQTT protocol.  Boolean value that turns on and
-    *                off the diagnostic logging.
-    *              - @b sas_token_lifetime - available for MQTT & AMQP protocol.  size_t value that that determines the
-    *                sas token timeout length.
+    *                - @b keepalive - available for MQTT protocol.  Integer value that sets the
+    *                  interval in seconds when pings are sent to the server.
+    *                - @b logtrace - available for MQTT protocol.  Boolean value that turns on and
+    *                  off the diagnostic logging.
+    *                - @b sas_token_lifetime - available for MQTT & AMQP protocol.  size_t value that that determines the
+    *                  sas token timeout length.
+    *                - @b OPTION_TRUSTED_CERT - Azure Server certificate used to validate TLS connection to iothub.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
