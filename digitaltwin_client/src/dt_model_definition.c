@@ -151,16 +151,16 @@ static void DTMD_GetDefinitionCallback(const DIGITALTWIN_CLIENT_COMMAND_REQUEST*
 
 // DTMD_ProcessCommandUpdate receives commands from the server.  This implementation acts as a simple dispatcher
 // to the functions to perform the actual processing.
-static void DTMD_ProcessCommandUpdate(const DIGITALTWIN_CLIENT_COMMAND_REQUEST* dtCommandRequest, DIGITALTWIN_CLIENT_COMMAND_RESPONSE* dtCommandResponse, void* userInterfaceContext)
+static void DTMD_ProcessCommandUpdate(const DIGITALTWIN_CLIENT_COMMAND_REQUEST* dtCommandRequest, DIGITALTWIN_CLIENT_COMMAND_RESPONSE* dtCommandResponse, void* commandCallbackContext)
 {
-    if (userInterfaceContext == NULL)
+    if (commandCallbackContext == NULL)
     {
         LogError("MODEL_DEFINITION_INTERFACE: invalid arguments");
         dtCommandResponse->status = commandStatusFailure;
     }
     else if (strcmp(dtCommandRequest->commandName, digitaltwin_GetModelDefinitionCommand) == 0)
     {
-        DTMD_GetDefinitionCallback(dtCommandRequest, dtCommandResponse, userInterfaceContext);
+        DTMD_GetDefinitionCallback(dtCommandRequest, dtCommandResponse, commandCallbackContext);
     }
     else
     {
@@ -198,7 +198,7 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_ModelDefinition_Create(MODEL_DEFINITION_CL
         interfaceClientHandle = NULL;
         result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
     }
-    else if ((result = DigitalTwin_InterfaceClient_SetCommandsCallback(interfaceClientHandle, DTMD_ProcessCommandUpdate)) != DIGITALTWIN_CLIENT_OK)
+    else if ((result = DigitalTwin_InterfaceClient_SetCommandsCallback(interfaceClientHandle, DTMD_ProcessCommandUpdate, (void *)mdHandle)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("MODEL_DEFINITION_INTERFACE: DigitalTwin_InterfaceClient_SetCommandsCallback failed. error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
         interfaceClientHandle = NULL;

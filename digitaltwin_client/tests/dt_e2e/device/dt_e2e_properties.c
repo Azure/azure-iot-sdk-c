@@ -107,13 +107,13 @@ DIGITALTWIN_INTERFACE_CLIENT_HANDLE DT_E2E_Properties_CreateInterface(void)
         LogError("TEST_PROPERTIES_INTERFACE: Unable to allocate interface client handle for <%s>, error=<%s>", DT_E2E_Properties_InterfaceName, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
         interfaceHandle = NULL;
     }
-    else if ((result =  DigitalTwin_InterfaceClient_SetCommandsCallback(interfaceHandle, DT_E2E_PropertiesCommandCallbackProcess)) != DIGITALTWIN_CLIENT_OK)
+    else if ((result =  DigitalTwin_InterfaceClient_SetCommandsCallback(interfaceHandle, DT_E2E_PropertiesCommandCallbackProcess, &DT_E2E_PropertiesTest_Context)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("TEST_PROPERTIES_INTERFACE: DigitalTwin_InterfaceClient_SetCommandsCallbacks failed, error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
         DigitalTwin_InterfaceClient_Destroy(interfaceHandle);
         interfaceHandle = NULL;
     }
-    else if ((result = DigitalTwin_InterfaceClient_SetPropertiesUpdatedCallback(interfaceHandle, DT_E2E_ProcessUpdatedProperty)) != DIGITALTWIN_CLIENT_OK)
+    else if ((result = DigitalTwin_InterfaceClient_SetPropertiesUpdatedCallback(interfaceHandle, DT_E2E_ProcessUpdatedProperty, &DT_E2E_PropertiesTest_Context)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("ENVIRONMENTAL_SENSOR_INTERFACE: DigitalTwin_InterfaceClient_SetPropertiesUpdatedCallbacks failed. error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
         DigitalTwin_InterfaceClient_Destroy(interfaceHandle);

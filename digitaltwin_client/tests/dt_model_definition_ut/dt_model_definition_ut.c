@@ -110,9 +110,10 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 
 // test_DigitalTwin_InterfaceClient_SetCommandsCallback intercepts the production code's command callback routine
 // so that the UT layer can directly invoke it later.
-static DIGITALTWIN_CLIENT_RESULT test_DigitalTwin_InterfaceClient_SetCommandsCallback(DIGITALTWIN_INTERFACE_CLIENT_HANDLE dtInterfaceClientHandle, DIGITALTWIN_COMMAND_EXECUTE_CALLBACK dtCommandExecuteCallback)
+static DIGITALTWIN_CLIENT_RESULT test_DigitalTwin_InterfaceClient_SetCommandsCallback(DIGITALTWIN_INTERFACE_CLIENT_HANDLE dtInterfaceClientHandle, DIGITALTWIN_COMMAND_EXECUTE_CALLBACK dtCommandExecuteCallback, void* commandCallbackContext)
 {
     (void)dtInterfaceClientHandle;
+    (void)commandCallbackContext;
     testModelCommandCallback = dtCommandExecuteCallback;
     return DIGITALTWIN_CLIENT_OK;
 }
@@ -196,7 +197,7 @@ static void set_expected_calls_for_DigitalTwin_ModelDefinition_Create(void)
     STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(Map_Create(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(DigitalTwin_InterfaceClient_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_dtInterfaceClientHandle(&temp_interface_handle, 1);
-    STRICT_EXPECTED_CALL(DigitalTwin_InterfaceClient_SetCommandsCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(DigitalTwin_InterfaceClient_SetCommandsCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 }
 
 static void set_expected_calls_for_DigitalTwin_ModelDefinition_Publish_Interface(bool firstAddOfKey)
