@@ -19,6 +19,10 @@
 
 #define DT_INTERFACE_PREFIX "$iotin:"
 
+// When we're poll active callbacks to drain while shutting down DigitalTwin Client Core,
+// this is the amount of time to sleep between poll intervals.
+static const unsigned int pollTimeWaitForCallbacksMilliseconds = 10;
+
 static const char DT_InterfaceIdPrefix[] = "urn:";
 static const size_t DT_InterfaceIdPrefixLen = sizeof(DT_InterfaceIdPrefix) - 1;
 
@@ -77,6 +81,7 @@ MU_DEFINE_ENUM_STRINGS(DT_INTERFACE_STATE, DT_INTERFACE_STATE_VALUES);
 // DT_INTERFACE_CLIENT corresponds to an application level handle (e.g. DIGITALTWIN_INTERFACE_CLIENT_HANDLE).
 typedef struct DT_INTERFACE_CLIENT_TAG
 {
+    bool processingCallback;    // Whether we're in the middle of processing a callback or not.
     DT_INTERFACE_STATE interfaceState;
     DT_LOCK_THREAD_BINDING lockThreadBinding;
     // The remaining fields are read only after DT_InterfaceClientCore_Create and the callback registration.
@@ -204,6 +209,16 @@ static void InvokeBindingInterfaceLockDeinitIfNeeded(DT_INTERFACE_CLIENT* dtInte
     }
 }
 
+// Invokes Thread_Sleep (for convenience layer based handles) or else a no-op (for _LL_)
+static void InvokeBindingInterfaceSleep(DT_INTERFACE_CLIENT* dtInterfaceClient, unsigned int milliseconds)
+{
+    if (dtInterfaceClient->lockThreadBinding.dtBindingThreadSleep != NULL)
+    {
+        dtInterfaceClient->lockThreadBinding.dtBindingThreadSleep(milliseconds);
+    }
+}
+
+
 // Destroys DT_INTERFACE_CLIENT memory.
 static void FreeDTInterface(DT_INTERFACE_CLIENT* dtInterfaceClient)
 {
@@ -213,6 +228,64 @@ static void FreeDTInterface(DT_INTERFACE_CLIENT* dtInterfaceClient)
     free(dtInterfaceClient);
 }
 
+// BeginInterfaceCallbackProcessing is invoked as the first step when DT_INTERFACE_CLIENT receives
+// a callback from the DigitalTwin ClientCore layer.  If client is shutting down it will immediately
+// exit out of the callback.  Otherwise mark our state as processing callback, as DigitalTwin_InterfaceClient_Destroy 
+// respects this setting.  
+// Note that we CANNOT change both to processing (or not) a callback and our interfaceState at the same time.
+// Both of these state changes only happen on the DigitalTwin dispatcher thread.
+static int BeginInterfaceCallbackProcessing(DT_INTERFACE_CLIENT* dtInterfaceClient)
+{
+    int result;
+    bool lockHeld = false;
+
+    if (InvokeBindingInterfaceLock(dtInterfaceClient, &lockHeld) != 0)
+    {
+        LogError("Unable to obtain lock");
+        result = MU_FAILURE;
+    }
+    else if (dtInterfaceClient->interfaceState == DT_INTERFACE_STATE_PENDING_DESTROY)
+    {
+        LogError("Cannot process callback for clientCore.  It is in process of being destroyed");
+        result = MU_FAILURE;
+    }
+    else
+    {
+        dtInterfaceClient->processingCallback = true;
+        result = 0;
+    }
+
+    (void)InvokeBindingInterfaceUnlock(dtInterfaceClient, &lockHeld);
+    return result;
+}
+
+// EndInterfaceCallbackProcessing is invoked on completion of a callback function
+// to change DT_CLIENT_CORE's state such that it's not processing the callback anymore.
+static void EndInterfaceCallbackProcessing(DT_INTERFACE_CLIENT* dtInterfaceClient)
+{
+    bool lockHeld = false;
+
+    if (InvokeBindingInterfaceLock(dtInterfaceClient, &lockHeld) != 0)
+    {
+        LogError("Unable to obtain lock");
+    }
+
+    // Even if we can't grab the lock, unconditionally set this.
+    dtInterfaceClient->processingCallback = false;
+    (void)InvokeBindingInterfaceUnlock(dtInterfaceClient, &lockHeld);
+}
+
+// Polls for whether there are any active callbacks, because destroying an interface handle
+// cannot proceed if there are active workers.  Enters and leaves with lock held.
+static void BlockOnActiveCallbacks(DT_INTERFACE_CLIENT* dtInterfaceClient, bool *lockHeld)
+{
+    while (dtInterfaceClient->processingCallback == true)
+    {
+        (void)InvokeBindingInterfaceUnlock(dtInterfaceClient, lockHeld);
+        InvokeBindingInterfaceSleep(dtInterfaceClient, pollTimeWaitForCallbacksMilliseconds);
+        (void)InvokeBindingInterfaceLock(dtInterfaceClient, lockHeld);
+    }
+}
 
 // Implement a local isalpha because some compilers for embedded do not have this
 static bool DT_IsAlpha(char c)
@@ -1014,6 +1087,12 @@ void DigitalTwin_InterfaceClient_Destroy(DIGITALTWIN_INTERFACE_CLIENT_HANDLE dtI
     }
     else
     {
+        // If there is a callback active, block until it is complete.  Once this function returns
+        // the caller may immediately start freeing resources associated with the handle.  If they're
+        // processing a callback while they do that it's a problem.  They could build code to check this 
+        // themselves, but easier for SDK to protect them.
+        //BlockOnActiveCallbacks(dtInterfaceClient, &lockHeld);
+    
         bool freeInterface = IsInterfaceReadyForDestruction(dtInterfaceClient);
         SetInterfaceState(dtInterfaceClient, DT_INTERFACE_STATE_PENDING_DESTROY);
 
