@@ -1233,6 +1233,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(URL_EncodeString, my_URL_EncodeString);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(URL_EncodeString, NULL);
 
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_GetContentType, IOTHUBMESSAGE_BYTEARRAY);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_GetContentType, IOTHUBMESSAGE_UNKNOWN);
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubMessage_CreateFromByteArray, my_IoTHubMessage_CreateFromByteArray);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_CreateFromByteArray, NULL);
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubMessage_GetByteArray, my_IoTHubMessage_GetByteArray);
@@ -1285,6 +1287,8 @@ TEST_SUITE_INITIALIZE(suite_init)
 
     REGISTER_GLOBAL_MOCK_HOOK(Map_GetInternals, my_Map_GetInternals);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(Map_GetInternals, MAP_ERROR);
+    REGISTER_GLOBAL_MOCK_RETURN(Map_AddOrUpdate, MAP_OK);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Map_AddOrUpdate, MAP_ERROR);
 
     REGISTER_GLOBAL_MOCK_HOOK(HTTPAPIEX_SAS_Destroy, my_HTTPAPIEX_SAS_Destroy);
 
@@ -14085,6 +14089,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_GetMessageId_succeeds)
     IoTHubTransportHttp_DoWork(handle);
 
     //assert
+    ASSERT_IS_NOT_NULL(last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest);
     ASSERT_ARE_EQUAL(int, 0, memcmp(real_BUFFER_u_char(last_BUFFER_HANDLE_to_HTTPAPIEX_ExecuteRequest), buffer6, buffer6_size));
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
