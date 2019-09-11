@@ -238,6 +238,8 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_GLOBAL_MOCK_HOOK(Schema_GetModelDesiredPropertyCount, my_Schema_GetModelDesiredPropertyCount);
     REGISTER_GLOBAL_MOCK_HOOK(Schema_GetModelModelCount, my_Schema_GetModelModelCount);
 
+    REGISTER_GLOBAL_MOCK_RETURN(Schema_AddDeviceRef, SCHEMA_OK);
+
 }
 
 TEST_SUITE_CLEANUP(TestClassCleanup)

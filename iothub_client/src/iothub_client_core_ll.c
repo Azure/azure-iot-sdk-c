@@ -1021,6 +1021,7 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
                     DList_InitializeListHead(&(result->iot_msg_queue));
                     DList_InitializeListHead(&(result->iot_ack_queue));
                     result->messageCallback.type = CALLBACK_TYPE_NONE;
+                    result->methodCallback.type = CALLBACK_TYPE_NONE;
                     result->lastMessageReceiveTime = INDEFINITE_TIME;
                     result->data_msg_id = 1;
 

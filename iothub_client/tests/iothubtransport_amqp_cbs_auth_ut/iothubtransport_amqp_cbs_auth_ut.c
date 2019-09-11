@@ -266,6 +266,10 @@ static void register_global_mock_returns()
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_SasToken_Expiry, 3600);
 
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_ModuleId, NULL);
+
+    
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(OptionHandler_FeedOptions, OPTIONHANDLER_ERROR);
+    REGISTER_GLOBAL_MOCK_RETURN(OptionHandler_FeedOptions, OPTIONHANDLER_OK);
 }
 
 // Auxiliary Functions
@@ -1525,7 +1529,7 @@ TEST_FUNCTION(authentication_set_option_saved_options_succeeds)
     umock_c_reset_all_calls();
 
     OPTIONHANDLER_HANDLE value = TEST_OPTIONHANDLER_HANDLE;
-    STRICT_EXPECTED_CALL(OptionHandler_FeedOptions(value, handle)).SetReturn(OPTIONHANDLER_OK);
+    STRICT_EXPECTED_CALL(OptionHandler_FeedOptions(value, handle));
 
     // act
     int result = authentication_set_option(handle, AUTHENTICATION_OPTION_SAVED_OPTIONS, &value);

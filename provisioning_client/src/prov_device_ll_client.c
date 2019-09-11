@@ -878,6 +878,7 @@ PROV_DEVICE_LL_HANDLE Prov_Device_LL_Create(const char* uri, const char* id_scop
             result->prov_state = CLIENT_STATE_READY;
             result->retry_after_value = PROV_GET_THROTTLE_TIME;
             result->prov_transport_protocol = protocol();
+            result->error_reason = PROV_DEVICE_RESULT_OK;
 
             /* Codes_SRS_PROV_CLIENT_07_034: [ Prov_Device_LL_Create shall construct a id_scope by base64 encoding the uri. ] */
             if (mallocAndStrcpy_s(&result->scope_id, id_scope) != 0)
