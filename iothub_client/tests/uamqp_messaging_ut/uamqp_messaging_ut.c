@@ -10,12 +10,12 @@
 #include <stdbool.h>
 #endif
 
-void* real_malloc(size_t size)
+static void* real_malloc(size_t size)
 {
     return malloc(size);
 }
 
-void real_free(void* ptr)
+static void real_free(void* ptr)
 {
     free(ptr);
 }
@@ -681,6 +681,9 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_GetDiagnosticPropertyData, &TEST_DIAGNOSTIC_DATA);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_GetDiagnosticPropertyData, NULL);
+
+    REGISTER_GLOBAL_MOCK_RETURN(Map_GetInternals, MAP_OK);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Map_GetInternals, MAP_ERROR);
 
     // Initialization of variables.
     TEST_MAP_KEYS = (char**)real_malloc(sizeof(char*) * 5);

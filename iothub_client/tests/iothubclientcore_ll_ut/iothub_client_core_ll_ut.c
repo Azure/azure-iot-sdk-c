@@ -796,7 +796,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(FAKE_IoTHubTransport_GetTwinAsync, IOTHUB_CLIENT_ERROR);
     REGISTER_GLOBAL_MOCK_HOOK(FAKE_IoTHubTransport_GetTwinAsync, my_FAKE_IoTHubTransport_GetTwinAsync);
 
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(FAKE_IoTHubTransport_ProcessItem, IOTHUB_PROCESS_OK);
+    REGISTER_GLOBAL_MOCK_RETURN(FAKE_IoTHubTransport_ProcessItem, IOTHUB_PROCESS_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(FAKE_IoTHubTransport_ProcessItem, IOTHUB_PROCESS_ERROR);
 
     REGISTER_GLOBAL_MOCK_HOOK(FAKE_IoTHubTransport_GetHostname, my_FAKE_IoTHubTransport_GetHostname);
@@ -4484,25 +4484,19 @@ TEST_FUNCTION(IoTHubClientCore_LL_DoWork_SendReportedState_succeed)
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)); /*_DoWork will ask "what's the time"*/
-
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_ProcessItem(IGNORED_PTR_ARG, IOTHUB_TYPE_DEVICE_TWIN, IGNORED_PTR_ARG))
-        .IgnoreArgument(1)
-        .IgnoreArgument_item_type()
-        .IgnoreArgument(3);
-
+        .IgnoreArgument_item_type();
     STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG));
-
     STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_DoWork(IGNORED_PTR_ARG));
 
     //act
     IoTHubClientCore_LL_DoWork(h);
 
-    ///assert
+    //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
-    ///cleanup
+    //cleanup
     IoTHubClientCore_LL_Destroy(h);
 }
 
