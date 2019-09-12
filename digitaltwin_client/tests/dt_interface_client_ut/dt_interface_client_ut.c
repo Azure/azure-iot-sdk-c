@@ -3184,6 +3184,7 @@ TEST_FUNCTION(DT_InterfaceClient_ProcessTelemetryCallback_for_update_async_comma
     test_DT_InterfaceClient_ProcessTelemetryCallback_for_callback_after_updateasync_command(DIGITALTWIN_CLIENT_ERROR);
 }
 
+
 TEST_FUNCTION(DT_InterfaceClient_ProcessTelemetryCallback_NULL_interface_handle_fails)
 {
     //arrange
