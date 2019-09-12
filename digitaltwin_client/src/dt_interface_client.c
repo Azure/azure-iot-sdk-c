@@ -277,7 +277,7 @@ static void EndInterfaceCallbackProcessing(DT_INTERFACE_CLIENT* dtInterfaceClien
 
 // Polls for whether there are any active callbacks, because destroying an interface handle
 // cannot proceed if there are active workers.  Enters and leaves with lock held.
-static void BlockOnActiveCallbacks(DT_INTERFACE_CLIENT* dtInterfaceClient, bool *lockHeld)
+static void BlockOnActiveInterfaceCallbacks(DT_INTERFACE_CLIENT* dtInterfaceClient, bool *lockHeld)
 {
     while (dtInterfaceClient->processingCallback == true)
     {
@@ -702,11 +702,19 @@ void DT_InterfaceClient_RegistrationCompleteCallback(DIGITALTWIN_INTERFACE_CLIEN
         {
             SetInterfaceState(dtInterfaceClient, DT_INTERFACE_STATE_REGISTERED);
         }
-        (void)InvokeBindingInterfaceUnlock(dtInterfaceClient, &lockHeld);
 
         if (dtInterfaceClient->dtInterfaceRegisteredCallback != NULL)
         {
+            // Mark the fact we're in middle of a callback so that if a call to destroy on this handle arrives at same time,
+            // we'll block destroy call until we exit.  This is basically what BeginInterfaceCallbackProcessing does, 
+            // though this case is different as we have the lock held and are making state checks above already.
+            dtInterfaceClient->processingCallback = true;
+            (void)InvokeBindingInterfaceUnlock(dtInterfaceClient, &lockHeld);
+            
             dtInterfaceClient->dtInterfaceRegisteredCallback(dtInterfaceStatus, dtInterfaceClient->userInterfaceContext);
+
+            (void)InvokeBindingInterfaceLock(dtInterfaceClient, &lockHeld);
+            dtInterfaceClient->processingCallback = false;
         }
     }
 
@@ -1091,7 +1099,7 @@ void DigitalTwin_InterfaceClient_Destroy(DIGITALTWIN_INTERFACE_CLIENT_HANDLE dtI
         // the caller may immediately start freeing resources associated with the handle.  If they're
         // processing a callback while they do that it's a problem.  They could build code to check this 
         // themselves, but easier for SDK to protect them.
-        //BlockOnActiveCallbacks(dtInterfaceClient, &lockHeld);
+        BlockOnActiveInterfaceCallbacks(dtInterfaceClient, &lockHeld);
     
         bool freeInterface = IsInterfaceReadyForDestruction(dtInterfaceClient);
         SetInterfaceState(dtInterfaceClient, DT_INTERFACE_STATE_PENDING_DESTROY);
@@ -1337,9 +1345,15 @@ DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_ProcessTwinCallback(DIGITALTWIN_INT
             LogError("GetDesiredAndReportedJsonObjects failed");
             result = DIGITALTWIN_CLIENT_ERROR;
         }
+        else if (BeginInterfaceCallbackProcessing(dtInterfaceClient) != 0)
+        {
+            LogError("Unable to mark callback as being processed for interface instance.  Skipping callback");
+            result = DIGITALTWIN_CLIENT_ERROR;
+        }
         else
         {
             ProcessPropertiesForTwin(dtInterfaceClient, desiredObject, reportedObject);
+            EndInterfaceCallbackProcessing(dtInterfaceClient);
             result = DIGITALTWIN_CLIENT_OK;
         }
 
@@ -1506,12 +1520,18 @@ DT_COMMAND_PROCESSOR_RESULT DT_InterfaceClient_InvokeCommandIfSupported(DIGITALT
         LogError("Payload request <%.*s> is not properly formatted json", (int)size, payload);
         result = DT_COMMAND_PROCESSOR_ERROR;
     }
+    else if (BeginInterfaceCallbackProcessing(dtInterfaceClient) != 0)
+    {
+        LogError("Unable to mark callback as being processed for interface instance.  Skipping callback");
+        result = DIGITALTWIN_CLIENT_ERROR;
+    }
     else
     {
         // Skip past the <interfaceInstanceName>* preamble to get the actual command name from DigitalTwin layer to map back to
         const char* commandName = methodName + DT_INTERFACE_PREFIX_LENGTH + dtInterfaceClient->interfaceInstanceNameLen + 1;
-
         InvokeDTCommand(dtInterfaceClient, commandName, requestId, payloadForCallback, response, response_size, responseCode);
+
+        EndInterfaceCallbackProcessing(dtInterfaceClient);
         result = DT_COMMAND_PROCESSOR_PROCESSED;
     }
 
@@ -1686,6 +1706,8 @@ DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_ProcessTelemetryCallback(DIGITALTWI
     DT_INTERFACE_CLIENT* dtInterfaceClient = (DT_INTERFACE_CLIENT*)dtInterfaceClientHandle;
     DIGITALTWIN_CLIENT_RESULT result;
 
+    DT_INTERFACE_SEND_TELEMETRY_CALLBACK_CONTEXT* sendTelemetryCallbackContext = (DT_INTERFACE_SEND_TELEMETRY_CALLBACK_CONTEXT*)userContextCallback;
+
     if (dtInterfaceClientHandle == NULL)
     {
         LogError("Invalid parameter, dtInterfaceClientHandle=%p", dtInterfaceClientHandle);
@@ -1696,9 +1718,13 @@ DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_ProcessTelemetryCallback(DIGITALTWI
         // userContextCallback being NULL is not an error as not all telemetry invokers may care about callback notification.
         result = DIGITALTWIN_CLIENT_OK;
     }
+    else if (BeginInterfaceCallbackProcessing(dtInterfaceClient) != 0)
+    {
+        LogError("Unable to mark callback as being processed for interface instance.  Skipping callback");
+        result = DIGITALTWIN_CLIENT_ERROR;
+    }
     else
     {
-        DT_INTERFACE_SEND_TELEMETRY_CALLBACK_CONTEXT* sendTelemetryCallbackContext = (DT_INTERFACE_SEND_TELEMETRY_CALLBACK_CONTEXT*)userContextCallback;
         switch (sendTelemetryCallbackContext->applicationSendType)
         {
             case DT_APPLICATION_SEND_TYPE_TELEMETRY:
@@ -1717,9 +1743,10 @@ DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_ProcessTelemetryCallback(DIGITALTWI
                 break;
         }
 
-        free(sendTelemetryCallbackContext);
+        EndInterfaceCallbackProcessing(dtInterfaceClient);
     }
 
+    free(sendTelemetryCallbackContext);
     return result;
 }
 
