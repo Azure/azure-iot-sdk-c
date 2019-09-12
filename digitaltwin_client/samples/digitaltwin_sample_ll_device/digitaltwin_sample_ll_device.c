@@ -109,9 +109,9 @@ static const char* ConfigValue_DPSSX509 = "DPS_X509";
 
 // Number of DigitalTwin Interfaces that this DigitalTwin device supports.
 #ifdef ENABLE_MODEL_DEFINITION_INTERFACE
-#define DIGITALTWIN_SAMPLE_DEVICE_MAX_INTERFACES 3
+#define DIGITALTWIN_SAMPLE_DEVICE_NUM_INTERFACES 3
 #else
-#define DIGITALTWIN_SAMPLE_DEVICE_MAX_INTERFACES 2
+#define DIGITALTWIN_SAMPLE_DEVICE_NUM_INTERFACES 2
 #endif
 #define DIGITALTWIN_SAMPLE_DEVICE_INFO_INDEX 0
 #define DIGITALTWIN_SAMPLE_ENVIRONMENTAL_SENSOR_INDEX 1
@@ -489,7 +489,7 @@ int main(int argc, char *argv[])
     DIGITALTWIN_CLIENT_RESULT result;
     IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceLLHandle = NULL;
     DIGITALTWIN_DEVICE_CLIENT_LL_HANDLE digitaltwinDeviceClientLLHandle = NULL;
-    DIGITALTWIN_INTERFACE_CLIENT_HANDLE interfaceClientHandles[DIGITALTWIN_SAMPLE_DEVICE_MAX_INTERFACES];
+    DIGITALTWIN_INTERFACE_CLIENT_HANDLE interfaceClientHandles[DIGITALTWIN_SAMPLE_DEVICE_NUM_INTERFACES];
 #ifdef ENABLE_MODEL_DEFINITION_INTERFACE
     MODEL_DEFINITION_CLIENT_HANDLE modeldefClientHandle = NULL;
 #endif
@@ -552,7 +552,7 @@ int main(int argc, char *argv[])
 #endif
     // Register the interface we've created with Azure IoT.  This call will block until interfaces
     // are successfully registered, we get a failure from server, or we timeout.
-    else if (DigitalTwinSampleDevice_LL_RegisterDigitalTwinInterfacesAndWait(digitaltwinDeviceClientLLHandle, interfaceClientHandles, DIGITALTWIN_SAMPLE_DEVICE_MAX_INTERFACES) != DIGITALTWIN_CLIENT_OK)
+    else if (DigitalTwinSampleDevice_LL_RegisterDigitalTwinInterfacesAndWait(digitaltwinDeviceClientLLHandle, interfaceClientHandles, DIGITALTWIN_SAMPLE_DEVICE_NUM_INTERFACES) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("DigitalTwinSampleDevice_LL_RegisterDigitalTwinInterfacesAndWait failed");
     }
