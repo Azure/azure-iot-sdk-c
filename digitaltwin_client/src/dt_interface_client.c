@@ -1523,7 +1523,7 @@ DT_COMMAND_PROCESSOR_RESULT DT_InterfaceClient_InvokeCommandIfSupported(DIGITALT
     else if (BeginInterfaceCallbackProcessing(dtInterfaceClient) != 0)
     {
         LogError("Unable to mark callback as being processed for interface instance.  Skipping callback");
-        result = DIGITALTWIN_CLIENT_ERROR;
+        result = DT_COMMAND_PROCESSOR_ERROR;
     }
     else
     {
