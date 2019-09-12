@@ -232,8 +232,6 @@ static void FreeDTInterface(DT_INTERFACE_CLIENT* dtInterfaceClient)
 // a callback from the DigitalTwin ClientCore layer.  If client is shutting down it will immediately
 // exit out of the callback.  Otherwise mark our state as processing callback, as DigitalTwin_InterfaceClient_Destroy 
 // respects this setting.  
-// Note that we CANNOT change both to processing (or not) a callback and our interfaceState at the same time.
-// Both of these state changes only happen on the DigitalTwin dispatcher thread.
 static int BeginInterfaceCallbackProcessing(DT_INTERFACE_CLIENT* dtInterfaceClient)
 {
     int result;
