@@ -39,7 +39,7 @@ static const char* const CONTENT_TYPE_VALUE = "application/json; charset=utf-8";
 static const char* const KEEP_ALIVE_VALUE = "keep-alive";
 static const char* const KEY_NAME_VALUE = "registration";
 
-MU_DEFINE_ENUM_STRINGS(HTTP_CALLBACK_REASON, HTTP_CALLBACK_REASON_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(HTTP_CALLBACK_REASON, HTTP_CALLBACK_REASON_VALUES);
 
 typedef enum PROV_TRANSPORT_STATE_TAG
 {
