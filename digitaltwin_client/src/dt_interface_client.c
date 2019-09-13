@@ -19,7 +19,7 @@
 
 #define DT_INTERFACE_PREFIX "$iotin:"
 
-// When we're poll active callbacks to drain while shutting down DigitalTwin Client Core,
+// When we poll active callbacks to drain while shutting down DigitalTwin Client Core,
 // this is the amount of time to sleep between poll intervals.
 static const unsigned int pollTimeWaitForCallbacksMilliseconds = 10;
 
