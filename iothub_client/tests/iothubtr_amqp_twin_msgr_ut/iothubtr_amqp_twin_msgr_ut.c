@@ -126,7 +126,6 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 #define TWIN_RESOURCE_DESIRED                                "/notifications/twin/properties/desired"
 #define TWIN_RESOURCE_REPORTED                               "/properties/reported"
 
-#define CLIENT_VERSION_PROPERTY_NAME                         "com.microsoft:client-version"
 #define TWIN_CORRELATION_ID_PROPERTY_NAME                    "com.microsoft:channel-correlation-id"
 #define TWIN_API_VERSION_PROPERTY_NAME                       "com.microsoft:api-version"
 #define TWIN_API_VERSION_NUMBER                              "2016-11-14"
@@ -463,6 +462,7 @@ static void set_twin_messenger_report_state_async_expected_calls(CONSTBUFFER_HAN
 
 static void set_twin_messenger_start_expected_calls()
 {
+    STRICT_EXPECTED_CALL(amqp_messenger_set_option(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(amqp_messenger_start(IGNORED_PTR_ARG, TEST_SESSION_HANDLE));
 }
 
@@ -781,6 +781,9 @@ static void register_global_mock_returns()
 
     REGISTER_GLOBAL_MOCK_RETURN(amqp_messenger_subscribe_for_messages, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqp_messenger_subscribe_for_messages, 1);
+
+    REGISTER_GLOBAL_MOCK_RETURN(amqp_messenger_set_option, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqp_messenger_set_option, 1);
 
     REGISTER_GLOBAL_MOCK_RETURN(amqp_messenger_start, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqp_messenger_start, 1);
@@ -1391,17 +1394,30 @@ TEST_FUNCTION(twin_msgr_start_failure_checks)
     set_twin_messenger_start_expected_calls();
     umock_c_negative_tests_snapshot();
 
-    umock_c_negative_tests_reset();
-    umock_c_negative_tests_fail_call(0);
+    size_t count = umock_c_negative_tests_call_count();
 
     // act
-    int result = twin_messenger_start(handle, TEST_SESSION_HANDLE);
+    for (size_t index = 0; index < count; index++)
+    {
+        if (!umock_c_negative_tests_can_call_fail(index))
+        {
+            continue;
+        }
+
+        umock_c_negative_tests_reset();
+        umock_c_negative_tests_fail_call(index);
+
+        char tmp_msg[64];
+        sprintf(tmp_msg, "Failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
+        int result = twin_messenger_start(handle, TEST_SESSION_HANDLE);
+
+        // assert
+        ASSERT_ARE_NOT_EQUAL(int, 0, result, tmp_msg);
+    }
 
     // assert
-    ASSERT_ARE_NOT_EQUAL(int, 0, result);
     ASSERT_ARE_EQUAL(int, TWIN_MESSENGER_STATE_STARTING, TEST_on_state_changed_callback_previous_state);
     ASSERT_ARE_EQUAL(int, TWIN_MESSENGER_STATE_ERROR, TEST_on_state_changed_callback_new_state);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     // cleanup
     twin_messenger_destroy(handle);
