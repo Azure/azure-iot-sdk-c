@@ -320,7 +320,7 @@ static int create_application_properties_to_encode(MESSAGE_HANDLE message_batch_
         LogError("Failed to get property map from IoTHub message.");
         result = MU_FAILURE;
     }
-    else if (Map_GetInternals(properties_map, &property_keys, &property_values, &property_count) != 0)
+    else if (Map_GetInternals(properties_map, &property_keys, &property_values, &property_count) != MAP_OK)
     {
         LogError("Failed reading the incoming uAMQP message properties");
         result = MU_FAILURE;

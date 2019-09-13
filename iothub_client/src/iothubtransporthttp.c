@@ -258,29 +258,29 @@ static int set_system_properties(IOTHUB_MESSAGE_LIST* message, HTTP_HEADERS_HAND
     if (msgId != NULL && HTTPHeaders_ReplaceHeaderNameValuePair(headers, IOTHUB_MESSAGE_ID, msgId) != HTTP_HEADERS_OK)
     {
         LogError("unable to HTTPHeaders_ReplaceHeaderNameValuePair");
-        result = __LINE__;
+        result = MU_FAILURE;
     }
     else if ((corrId = IoTHubMessage_GetCorrelationId(message->messageHandle)) != NULL && HTTPHeaders_ReplaceHeaderNameValuePair(headers, IOTHUB_CORRELATION_ID, corrId) != HTTP_HEADERS_OK)
     {
         LogError("unable to HTTPHeaders_ReplaceHeaderNameValuePair");
-        result = __LINE__;
+        result = MU_FAILURE;
     }
     // Codes_SRS_TRANSPORTMULTITHTTP_09_001: [ If the IoTHubMessage being sent contains property `content-type` it shall be added to the HTTP headers as "iothub-contenttype":"value". ]
     else if ((content_type = IoTHubMessage_GetContentTypeSystemProperty(message->messageHandle)) != NULL && HTTPHeaders_ReplaceHeaderNameValuePair(headers, IOTHUB_CONTENT_TYPE_D2C, content_type) != HTTP_HEADERS_OK)
     {
         LogError("unable to HTTPHeaders_ReplaceHeaderNameValuePair (content-type)");
-        result = __LINE__;
+        result = MU_FAILURE;
     }
     // Codes_SRS_TRANSPORTMULTITHTTP_09_002: [ If the IoTHubMessage being sent contains property `content-encoding` it shall be added to the HTTP headers as "iothub-contentencoding":"value". ]
     else if ((contentEncoding = IoTHubMessage_GetContentEncodingSystemProperty(message->messageHandle)) != NULL && HTTPHeaders_ReplaceHeaderNameValuePair(headers, IOTHUB_CONTENT_ENCODING_D2C, contentEncoding) != HTTP_HEADERS_OK)
     {
         LogError("unable to HTTPHeaders_ReplaceHeaderNameValuePair (content-encoding)");
-        result = __LINE__;
+        result = MU_FAILURE;
     }
     else if (IoTHubMessage_IsSecurityMessage(message->messageHandle) && HTTPHeaders_ReplaceHeaderNameValuePair(headers, SECURITY_INTERFACE_ID, SECURITY_INTERFACE_ID_VALUE) != HTTP_HEADERS_OK)
     {
         LogError("unable to set security message header info");
-        result = __LINE__;
+        result = MU_FAILURE;
     }
     else
     {
