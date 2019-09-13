@@ -710,6 +710,24 @@ static void test_free_bound_interface_handle(DIGITALTWIN_INTERFACE_CLIENT_HANDLE
     DigitalTwin_InterfaceClient_Destroy(h);
 }
 
+static void set_expected_calls_for_BlockForActiveInterfaceCallers()
+{
+    STRICT_EXPECTED_CALL(testBindingUnlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(testBindingLock(IGNORED_PTR_ARG));
+}
+
+static void set_expected_calls_for_BeginInterfaceCallbackProcessing()
+{
+    STRICT_EXPECTED_CALL(testBindingLock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(testBindingUnlock(IGNORED_PTR_ARG)).CallCannotFail();
+}
+
+static void set_expected_calls_for_EndInterfaceCallbackProcessing()
+{
+    STRICT_EXPECTED_CALL(testBindingLock(IGNORED_PTR_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(testBindingUnlock(IGNORED_PTR_ARG)).CallCannotFail();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // DigitalTwin_InterfaceClient_Create
 ///////////////////////////////////////////////////////////////////////////////
@@ -2103,6 +2121,8 @@ static void set_expected_calls_for_DT_InterfaceClient_RegistrationCompleteCallba
     STRICT_EXPECTED_CALL(testBindingLock(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(testBindingUnlock(IGNORED_PTR_ARG)).CallCannotFail();
     STRICT_EXPECTED_CALL(testInterfaceRegisteredCallback(dtInterfaceStatus, testDTInterfaceCallbackContext));
+    STRICT_EXPECTED_CALL(testBindingLock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(testBindingUnlock(IGNORED_PTR_ARG)).CallCannotFail();
 }
 
 static void testDTInterfaceClientCore_RegistrationCompleteCallback_failure_code(DIGITALTWIN_CLIENT_RESULT status)
@@ -2318,7 +2338,9 @@ static void set_expected_calls_for_DT_InterfaceClient_ProcessTwinCallback(const 
     STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG));
 
     set_expected_calls_for_GetDesiredAndReportedJsonObjects(twinCallbackInfo);
+    set_expected_calls_for_BeginInterfaceCallbackProcessing();
     set_expected_calls_for_ProcessPropertiesForTwin(twinCallbackInfo);
+    set_expected_calls_for_EndInterfaceCallbackProcessing();
 
     STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
@@ -2683,14 +2705,18 @@ static void set_expected_calls_for_DT_InterfaceClient_InvokeCommandIfSupported(i
     {
         case DT_TEST_EXPECTED_COMMAND_SYNC_CALLBACK:
             set_expected_calls_for_DT_InterfaceClient_InvokeCommandIfSupported_json_parsing();
+            set_expected_calls_for_BeginInterfaceCallbackProcessing();
             STRICT_EXPECTED_CALL(testDTClientCommandCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            set_expected_calls_for_EndInterfaceCallbackProcessing();
             set_expected_calls_for_DT_InterfaceClient_InvokeCommandIfSupported_resource_deallocation(false);
         break;
 
         case DT_TEST_EXPECTED_COMMAND_SYNC_CALLBACK_RETURNS_NULL_RESPONSE:
             set_expected_calls_for_DT_InterfaceClient_InvokeCommandIfSupported_json_parsing();
+            set_expected_calls_for_BeginInterfaceCallbackProcessing();
             STRICT_EXPECTED_CALL(testDTClientCommandCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            set_expected_calls_for_EndInterfaceCallbackProcessing();
             set_expected_calls_for_DT_InterfaceClient_InvokeCommandIfSupported_resource_deallocation(false);
         break;
 
@@ -3074,7 +3100,9 @@ TEST_FUNCTION(DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAsync_fail)
 ///////////////////////////////////////////////////////////////////////////////
 static void set_expected_calls_for_DT_InterfaceClient_ProcessTelemetryCallback(DIGITALTWIN_CLIENT_RESULT expectedDTSendTelemetryStatus, void* expectedUserContextCallback)
 {
+    set_expected_calls_for_BeginInterfaceCallbackProcessing();
     STRICT_EXPECTED_CALL(testDTClientTelemetryConfirmationCallback(expectedDTSendTelemetryStatus, expectedUserContextCallback));
+    set_expected_calls_for_EndInterfaceCallbackProcessing();
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 }
 
@@ -3118,8 +3146,10 @@ static void test_DT_InterfaceClient_ProcessTelemetryCallback_for_callback_after_
     ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result);
     ASSERT_IS_NOT_NULL(clientCore_SendTelemetryAsync_userContext, "User context not set during mocked client core sendTelemetry callback");
     umock_c_reset_all_calls();
-    
+
+    set_expected_calls_for_BeginInterfaceCallbackProcessing();
     STRICT_EXPECTED_CALL(testDTClientUpdateAsyncCallback(expectedAsyncCommandCallbackResult, testDTClientUpdateAsyncCommandCallbackContext));
+    set_expected_calls_for_EndInterfaceCallbackProcessing();
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     //act
@@ -3157,8 +3187,11 @@ TEST_FUNCTION(DT_InterfaceClient_ProcessTelemetryCallback_for_update_async_comma
 
 TEST_FUNCTION(DT_InterfaceClient_ProcessTelemetryCallback_NULL_interface_handle_fails)
 {
+    //arrange
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+
     //act
-    DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceClient_ProcessTelemetryCallback(NULL, DIGITALTWIN_CLIENT_OK, testDTClientSendTelemetryCallbackContext);
+    DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceClient_ProcessTelemetryCallback(NULL, DIGITALTWIN_CLIENT_OK, NULL);
 
     //assert
     ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG, result);
@@ -3169,6 +3202,7 @@ TEST_FUNCTION(DT_InterfaceClient_ProcessTelemetryCallback_NULL_user_context_succ
 {
     //arrange
     DIGITALTWIN_INTERFACE_CLIENT_HANDLE h = test_allocate_and_register_DT_interface_with_callbacks();
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     //act
     DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceClient_ProcessTelemetryCallback(h, DIGITALTWIN_CLIENT_OK, NULL);
@@ -3215,7 +3249,6 @@ TEST_FUNCTION(DT_InterfaceClient_ProcessTelemetryCallback_fail)
     }
 
     //cleanup
-    free(clientCore_SendTelemetryAsync_userContext);
     test_free_bound_interface_handle(h);
     umock_c_negative_tests_deinit();
 }
