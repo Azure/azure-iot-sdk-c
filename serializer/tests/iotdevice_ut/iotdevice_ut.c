@@ -54,7 +54,7 @@ MOCKABLE_FUNCTION(, METHODRETURN_HANDLE, deviceMethodCallback, DEVICE_HANDLE, de
 MOCKABLE_FUNCTION(, METHODRETURN_HANDLE, commandDecoderArgument, void*, methodCallbackContext, const char*, relativeMethodPath, const char*, methodName, size_t, argCount, const AGENT_DATA_TYPE*, args);
 #undef ENABLE_MOCKS
 
-MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 #define TEST_CALLBACK_CONTEXT           (void*)0x4246
 

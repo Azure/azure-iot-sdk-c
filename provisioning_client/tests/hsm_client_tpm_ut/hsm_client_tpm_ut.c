@@ -116,7 +116,7 @@ STRING_HANDLE my_Azure_Base64_Encode_Bytes(const unsigned char* source, size_t s
     return (STRING_HANDLE)my_gballoc_malloc(1);
 }
 
-MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
