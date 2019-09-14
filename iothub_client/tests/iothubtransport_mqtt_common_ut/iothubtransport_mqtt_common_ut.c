@@ -681,7 +681,7 @@ static void on_get_device_twin_completed_callback(DEVICE_TWIN_UPDATE_STATE updat
     get_twin_userContextCallback = userContextCallback;
 }
 
-MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
