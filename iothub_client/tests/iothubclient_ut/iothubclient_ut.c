@@ -60,7 +60,7 @@ static size_t TEST_SIZE_T = 10;
 static const char* TEST_CHAR_PTR = "char ptr";
 
 static TEST_MUTEX_HANDLE test_serialize_mutex;
-MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
