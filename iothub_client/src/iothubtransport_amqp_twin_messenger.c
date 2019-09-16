@@ -2083,7 +2083,7 @@ int twin_messenger_start(TWIN_MESSENGER_HANDLE twin_msgr_handle, SESSION_HANDLE 
         }
         else
         {
-            LogError("Failed starting the AMQP messenger (%s)", twin_msgr->device_id);
+            LogError("Failed to set the product info option (%s)", twin_msgr->device_id);
             // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_049: [If any failures occurr, `twin_msgr->state` shall be set to TWIN_MESSENGER_STATE_ERROR, and `twin_msgr->on_state_changed_callback` invoked if provided]
             update_state(twin_msgr, TWIN_MESSENGER_STATE_ERROR);
             result = MU_FAILURE;

@@ -1640,13 +1640,13 @@ int amqp_messenger_set_option(AMQP_MESSENGER_HANDLE messenger_handle, const char
                 }
                 else
                 {
-                    LogError("Failed setting option %s", CLIENT_VERSION_PROPERTY_NAME);
+                    LogError("Failed setting option %s for receive link", CLIENT_VERSION_PROPERTY_NAME);
                     result = MU_FAILURE;
                 }
             }
             else
             {
-                LogError("Failed setting option %s", CLIENT_VERSION_PROPERTY_NAME);
+                LogError("Failed setting option %s for send link", CLIENT_VERSION_PROPERTY_NAME);
                 result = MU_FAILURE;
             }
         }
