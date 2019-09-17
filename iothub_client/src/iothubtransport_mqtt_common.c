@@ -168,6 +168,8 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     STRING_HANDLE module_id;
     STRING_HANDLE devicesAndModulesPath;
     int portNum;
+    // conn_attempted indicates whether a connection has *ever* been attempted on the lifetime
+    // of this handle.  Even if a given xio transport is added/removed, this always stays true.
     bool conn_attempted;
 
     MQTT_GET_IO_TRANSPORT get_io_transport;
@@ -293,7 +295,6 @@ static void DestroyXioTransport(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
     xio_destroy(transport_data->xioTransport);
     transport_data->xioTransport = NULL;
-    transport_data->conn_attempted = false;
 }
 
 static void set_saved_tls_options(PMQTTTRANSPORT_HANDLE_DATA transport, OPTIONHANDLER_HANDLE new_options)
