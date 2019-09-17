@@ -2124,6 +2124,8 @@ static void set_expected_calls_for_free_transport_handle_data()
     EXPECTED_CALL(STRING_delete(NULL));
     EXPECTED_CALL(STRING_delete(NULL));
 
+    STRICT_EXPECTED_CALL(xio_destroy(IGNORED_PTR_ARG));
+
     EXPECTED_CALL(gballoc_free(NULL));
 }
 
@@ -2199,6 +2201,58 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_succeeds)
 
     // assert
 }
+
+
+static void set_expected_calls_for_IoTHubTransport_MQTT_Common_Destroy()
+{
+    STRICT_EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG));
+    set_expected_calls_for_free_transport_handle_data();
+}
+
+// Tests that if MQTT has entered a disconnected state and stays there over time, Destroy performs a proper cleanup
+// https://github.com/Azure/azure-iot-sdk-c/issues/924 was hit in field where SDK previously wasn't performing this correctly.
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_from_disconnected_state)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config ={ 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, NULL);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransport_MQTT_Common_Subscribe(handle);
+    CONNECT_ACK connack ={ true, CONNECTION_ACCEPTED };
+
+    setup_initialize_connection_mocks();
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+
+
+    // Signal an error to put us into the pending disconnect state.
+    g_fnMqttErrorCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_NO_PING_RESPONSE, g_callbackCtx);
+    // The initial call to DoWork() is required to process the disconnection and move us into the disconnected state.
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    // A future Dowork call is required to re-allocate the xio.  As part of this, make the mqtt_client_connect fail.  
+    // This has the effect of allocationg the xio but leaving us in a disconnected state.
+
+    // Using the REGISTER_GLOBAL_MOCK_RETURN to force an error in a LONG list of calls there's not otherwise need
+    // to STRICT_EXPECTED_CALL mocks on.
+    REGISTER_GLOBAL_MOCK_RETURN(mqtt_client_connect, MU_FAILURE);
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+    REGISTER_GLOBAL_MOCK_RETURN(mqtt_client_connect, 0);
+
+    umock_c_reset_all_calls();
+
+    set_expected_calls_for_IoTHubTransport_MQTT_Common_Destroy();
+   
+    // act
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+}
+
 
 /* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_015: [If parameter handle is NULL than IoTHubTransport_MQTT_Common_Subscribe shall return a non-zero value.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_parameter_NULL_fail)
@@ -2658,21 +2712,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_return_pending_get_twin_reques
     EXPECTED_CALL(free(IGNORED_PTR_ARG));
     EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG));
 
-    STRICT_EXPECTED_CALL(mqtt_client_deinit(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(retry_control_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(tickcounter_destroy(IGNORED_PTR_ARG)).IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    set_expected_calls_for_free_transport_handle_data();
 
     // act
     IoTHubTransport_MQTT_Common_Destroy(handle);
