@@ -2229,7 +2229,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_from_disconnected_state)
 
 
     // Signal an error to put us into the pending disconnect state.
-    g_fnMqttErrorCallback(handle, MQTT_CLIENT_NO_PING_RESPONSE, g_callbackCtx);
+    g_fnMqttErrorCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_NO_PING_RESPONSE, g_callbackCtx);
     // The initial call to DoWork() is required to process the disconnection and move us into the disconnected state.
     IoTHubTransport_MQTT_Common_DoWork(handle);
 
