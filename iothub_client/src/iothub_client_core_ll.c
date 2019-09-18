@@ -765,7 +765,7 @@ static int IoTHubClientCore_LL_DeviceMethodComplete(const char* method_name, con
 static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_CLIENT_CONFIG* client_config, const IOTHUB_CLIENT_DEVICE_CONFIG* device_config, bool use_dev_auth, const char* module_id)
 {
     IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* result;
-    srand((unsigned int)time(NULL));
+    srand((unsigned int)get_time(NULL));
 
     result = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)malloc(sizeof(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA));
     if (result == NULL)

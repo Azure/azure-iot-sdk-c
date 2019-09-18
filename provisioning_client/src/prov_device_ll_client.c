@@ -864,6 +864,8 @@ PROV_DEVICE_LL_HANDLE Prov_Device_LL_Create(const char* uri, const char* id_scop
     }
     else
     {
+        srand((unsigned int)get_time(NULL));
+
         /* Codes_SRS_PROV_CLIENT_07_002: [ Prov_Device_LL_CreateFromUri shall allocate a PROV_DEVICE_LL_HANDLE and initialize all members. ] */
         result = (PROV_INSTANCE_INFO*)malloc(sizeof(PROV_INSTANCE_INFO));
         if (result == NULL)

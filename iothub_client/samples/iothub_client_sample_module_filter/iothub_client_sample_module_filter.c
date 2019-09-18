@@ -231,8 +231,6 @@ int main(void)
 {
     IOTHUB_MODULE_CLIENT_LL_HANDLE iotHubModuleClientHandle;
 
-    srand((unsigned int)time(NULL));
-
     if ((iotHubModuleClientHandle = InitializeConnectionForFilter()) == NULL)
     {
         ;

@@ -63,6 +63,7 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 #include "azure_c_shared_utility/lock.h"
 #include "azure_c_shared_utility/vector.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/agenttime.h"
 #include "iothub_client_core_ll.h"
 #include "iothub_module_client_ll.h"
 #include "internal/iothubtransport.h"
@@ -229,9 +230,11 @@ static const unsigned char* TEST_DEVICE_METHOD_RESPONSE = (const unsigned char*)
 static size_t TEST_DEVICE_RESP_LENGTH = 1;
 static void* CALLBACK_CONTEXT = (void*)0x1210;
 static void* CALLBACK_CONTEXT2 = (void*)0x1211;
-
+static const time_t TEST_TIME_VALUE = (time_t)123456;
 
 #define REPORTED_STATE_STATUS_CODE      200
+
+
 
 const char *TEST_METHOD_PAYLOAD = "MethodPayload";
 const int TEST_INVOKE_TIMEOUT = 1234;
@@ -549,6 +552,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClientCore_LL_CreateFromEnvironment, NULL);
 #endif
 
+    REGISTER_GLOBAL_MOCK_RETURN(get_time, (time_t)TEST_TIME_VALUE);
+
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClientCore_LL_GetRetryPolicy, IOTHUB_CLIENT_OK);
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClientCore_LL_Destroy, my_IoTHubClient_LL_Destroy);
     REGISTER_GLOBAL_MOCK_HOOK(test_event_confirmation_callback, my_test_event_confirmation_callback);
@@ -810,6 +815,7 @@ static void setup_iothubclient_uploadtoblobasync()
     EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
 
+    STRICT_EXPECTED_CALL(get_time(IGNORED_NUM_ARG)).CallCannotFail();
     STRICT_EXPECTED_CALL(IoTHubClientCore_LL_UploadToBlob(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1)); /*this is the thread calling into _LL layer*/
     STRICT_EXPECTED_CALL(test_file_upload_callback(FILE_UPLOAD_OK, IGNORED_PTR_ARG))
         .IgnoreArgument(1);
@@ -823,6 +829,7 @@ static void setup_iothubclient_uploadtoblobasync()
 // Initial time we loop through ScheduleWork, including DoWork and into the always run dispatch_user_callbacks functions.
 static void set_expected_calls_first_ScheduleWork_Thread_loop(size_t expected_callbacks_length)
 {
+    STRICT_EXPECTED_CALL(get_time(IGNORED_NUM_ARG)).CallCannotFail();
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClientCore_LL_DoWork(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE));
     STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_SLL_HANDLE));
@@ -2184,6 +2191,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_DO_WORK_FREQ_IN_MS_success)
     umock_c_reset_all_calls();
     g_how_thread_loops = 1;
 
+    STRICT_EXPECTED_CALL(get_time(IGNORED_NUM_ARG)).CallCannotFail();
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClientCore_LL_DoWork(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE));
     STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_SLL_HANDLE));
@@ -3081,6 +3089,8 @@ static void IoTHubClientCore_UploadMultipleBlocksToBlobAsync_succeeds_Impl(bool 
     STRICT_EXPECTED_CALL(ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
 
+    STRICT_EXPECTED_CALL(get_time(IGNORED_NUM_ARG)).CallCannotFail();
+
     /* thread uploading function */
     if (exCall)
     {
@@ -3297,6 +3307,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_method_callback_VECTOR_move_FAILS
     umock_c_reset_all_calls();
     g_how_thread_loops = 1;
 
+    STRICT_EXPECTED_CALL(get_time(IGNORED_NUM_ARG)).CallCannotFail();
     STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClientCore_LL_DoWork(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE));
     STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_SLL_HANDLE));

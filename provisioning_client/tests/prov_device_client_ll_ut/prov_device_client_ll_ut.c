@@ -586,6 +586,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
 
     static void setup_Prov_Device_LL_Create_mocks(PROV_AUTH_TYPE type)
     {
+        STRICT_EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).CallCannotFail();
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(prov_auth_create());
