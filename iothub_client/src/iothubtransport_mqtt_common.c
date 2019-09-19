@@ -100,7 +100,7 @@ static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtime
 #define SUBSCRIBE_INPUT_QUEUE_TOPIC             0x0010
 #define SUBSCRIBE_TOPIC_COUNT                   5
 
-MU_DEFINE_ENUM_STRINGS(MQTT_CLIENT_EVENT_ERROR, MQTT_CLIENT_EVENT_ERROR_VALUES)
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(MQTT_CLIENT_EVENT_ERROR, MQTT_CLIENT_EVENT_ERROR_VALUES)
 
 typedef struct SYSTEM_PROPERTY_INFO_TAG
 {
@@ -168,6 +168,8 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     STRING_HANDLE module_id;
     STRING_HANDLE devicesAndModulesPath;
     int portNum;
+    // conn_attempted indicates whether a connection has *ever* been attempted on the lifetime
+    // of this handle.  Even if a given xio transport is added/removed, this always stays true.
     bool conn_attempted;
 
     MQTT_GET_IO_TRANSPORT get_io_transport;
@@ -288,6 +290,13 @@ static void free_proxy_data(MQTTTRANSPORT_HANDLE_DATA* mqtt_transport_instance)
     }
 }
 
+// Destroys xio transport associated with MQTT handle and resets appropriate state
+static void DestroyXioTransport(PMQTTTRANSPORT_HANDLE_DATA transport_data)
+{
+    xio_destroy(transport_data->xioTransport);
+    transport_data->xioTransport = NULL;
+}
+
 static void set_saved_tls_options(PMQTTTRANSPORT_HANDLE_DATA transport, OPTIONHANDLER_HANDLE new_options)
 {
     if (transport->saved_tls_options != NULL)
@@ -326,6 +335,8 @@ static void free_transport_handle_data(MQTTTRANSPORT_HANDLE_DATA* transport_data
     STRING_delete(transport_data->topic_NotifyState);
     STRING_delete(transport_data->topic_DeviceMethods);
     STRING_delete(transport_data->topic_InputQueue);
+
+    DestroyXioTransport(transport_data);
 
     free(transport_data);
 }
@@ -1735,7 +1746,7 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
                         }
                         else if (connack->returnCode == CONN_REFUSED_NOT_AUTHORIZED)
                         {
-                            transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_DEVICE_DISABLED, transport_data->transport_ctx);
+                            transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL, transport_data->transport_ctx);
                         }
                         else if (connack->returnCode == CONN_REFUSED_UNACCEPTABLE_VERSION)
                         {
@@ -1811,9 +1822,7 @@ static void ResetConnectionIfNecessary(PMQTTTRANSPORT_HANDLE_DATA transport_data
     {
         OPTIONHANDLER_HANDLE options = xio_retrieveoptions(transport_data->xioTransport);
         set_saved_tls_options(transport_data, options);
-
-        xio_destroy(transport_data->xioTransport);
-        transport_data->xioTransport = NULL;
+        DestroyXioTransport(transport_data);
     }
 }
 
@@ -1848,8 +1857,7 @@ static void DisconnectFromClient(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 ThreadAPI_Sleep(50);
             } while ((disconnect_ctr < MAX_DISCONNECT_VALUE) && (transport_data->disconnect_recv_flag == 0));
         }
-        xio_destroy(transport_data->xioTransport);
-        transport_data->xioTransport = NULL;
+        DestroyXioTransport(transport_data);
 
         transport_data->device_twin_get_sent = false;
         transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_NOT_CONNECTED;

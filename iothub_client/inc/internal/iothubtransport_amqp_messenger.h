@@ -21,6 +21,7 @@ extern "C"
 
 
 static const char* AMQP_MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS = "amqp_event_send_timeout_secs";
+static const char *CLIENT_VERSION_PROPERTY_NAME = "com.microsoft:client-version";
 
 typedef struct AMQP_MESSENGER_INSTANCE* AMQP_MESSENGER_HANDLE;
 

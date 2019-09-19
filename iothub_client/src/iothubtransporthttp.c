@@ -98,7 +98,7 @@ typedef struct MESSAGE_DISPOSITION_CONTEXT_TAG
     char* etagValue;
 } MESSAGE_DISPOSITION_CONTEXT;
 
-MU_DEFINE_ENUM_STRINGS(IOTHUBMESSAGE_DISPOSITION_RESULT, IOTHUBMESSAGE_DISPOSITION_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUBMESSAGE_DISPOSITION_RESULT, IOTHUBMESSAGE_DISPOSITION_RESULT_VALUES);
 
 static void destroy_eventHTTPrelativePath(HTTPTRANSPORT_PERDEVICE_DATA* handleData)
 {
@@ -1060,6 +1060,13 @@ static TRANSPORT_LL_HANDLE IoTHubTransportHttp_Create(const IOTHUBTRANSPORT_CONF
             /*Codes_SRS_TRANSPORTMULTITHTTP_17_131: [ If allocation fails, IoTHubTransportHttp_Create shall fail and return NULL. ]*/
             LogError("unable to malloc");
         }
+        else if (HTTPAPIEX_Init() == HTTPAPIEX_ERROR)
+        {
+            /*Codes_SRS_TRANSPORTMULTITHTTP_21_143: [ If HTTPAPIEX_Init fails, IoTHubTransportHttp_Create shall fail and return NULL. ]*/
+            LogError("Error initializing HTTP");
+            free(result);
+            result = NULL;
+        }
         else
         {
             bool was_hostName_ok = create_hostName(result, config);
@@ -1079,6 +1086,7 @@ static TRANSPORT_LL_HANDLE IoTHubTransportHttp_Create(const IOTHUBTRANSPORT_CONF
             {
                 if (was_httpApiExHandle_ok) destroy_httpApiExHandle(result);
                 if (was_hostName_ok) destroy_hostName(result);
+                HTTPAPIEX_Deinit();
 
                 free(result);
                 result = NULL;
@@ -1110,6 +1118,7 @@ static void IoTHubTransportHttp_Destroy(TRANSPORT_LL_HANDLE handle)
         destroy_hostName((HTTPTRANSPORT_HANDLE_DATA *)handle);
         destroy_httpApiExHandle((HTTPTRANSPORT_HANDLE_DATA *)handle);
         destroy_perDeviceList((HTTPTRANSPORT_HANDLE_DATA *)handle);
+        HTTPAPIEX_Deinit();
         free(handle);
     }
 }
