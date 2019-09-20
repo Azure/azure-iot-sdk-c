@@ -151,8 +151,8 @@ static void my_STRING_delete(STRING_HANDLE handle)
 
 static STRING_HANDLE my_URL_EncodeString(const char* textEncode)
 {
-    (void)textEncode;
-    return (STRING_HANDLE)my_gballoc_malloc(1);
+(void)textEncode;
+return (STRING_HANDLE)my_gballoc_malloc(1);
 }
 
 static HTTP_HEADERS_HANDLE my_HTTPHeaders_Alloc(void)
@@ -205,7 +205,7 @@ static int my_mallocAndStrcpy_s(char** destination, const char* source)
 {
     size_t l = strlen(source);
     *destination = (char*)malloc(l + 1);
-    (void)memcpy(*destination, source, l+1);
+    (void)memcpy(*destination, source, l + 1);
     return 0;
 }
 
@@ -216,7 +216,7 @@ static char* my_IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handl
     (void)expiry_time_relative_seconds;
     (void)key_name;
     size_t l = strlen(TEST_SAS_TOKEN);
-    char* result = (char*)my_gballoc_malloc(l+1);
+    char* result = (char*)my_gballoc_malloc(l + 1);
     strcpy(result, TEST_SAS_TOKEN);
     return result;
 }
@@ -248,6 +248,12 @@ static HTTP_CLIENT_HANDLE my_uhttp_client_create(const IO_INTERFACE_DESCRIPTION*
 static void my_uhttp_client_destroy(HTTP_CLIENT_HANDLE handle)
 {
     my_gballoc_free(handle);
+}
+
+static void my_uhttp_client_close(HTTP_CLIENT_HANDLE handle, ON_HTTP_CLOSED_CALLBACK on_close_callback, void* callback_ctx)
+{
+    (void)handle;
+    on_close_callback(callback_ctx);
 }
 
 static HTTP_CLIENT_RESULT my_uhttp_client_execute_request(HTTP_CLIENT_HANDLE handle, HTTP_CLIENT_REQUEST_TYPE request_type, const char* relative_path,
@@ -351,7 +357,7 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE (IOTHUB_CLIENT_FILE_UPLOAD_RESULT, IOTHUB_CLIENT_FIL
 TEST_DEFINE_ENUM_TYPE       (IOTHUB_CREDENTIAL_TYPE, IOTHUB_CREDENTIAL_TYPE_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE (IOTHUB_CREDENTIAL_TYPE, IOTHUB_CREDENTIAL_TYPE_VALUES);
 
-MU_DEFINE_ENUM_STRINGS      (IOTHUB_CREDENTIAL_TYPE, IOTHUB_CREDENTIAL_TYPE_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_CREDENTIAL_TYPE, IOTHUB_CREDENTIAL_TYPE_VALUES);
 
 TEST_DEFINE_ENUM_TYPE       (HTTP_CLIENT_REQUEST_TYPE, HTTP_CLIENT_REQUEST_TYPE_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE (HTTP_CLIENT_REQUEST_TYPE, HTTP_CLIENT_REQUEST_TYPE_VALUES);
@@ -462,6 +468,8 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_GLOBAL_MOCK_HOOK(uhttp_client_dowork, my_uhttp_client_dowork);
 
     REGISTER_GLOBAL_MOCK_RETURN(uhttp_client_get_underlying_xio, TEST_XIO_HANDLE);
+
+    REGISTER_GLOBAL_MOCK_HOOK(uhttp_client_close, my_uhttp_client_close);
 
     REGISTER_GLOBAL_MOCK_HOOK(uhttp_client_execute_request, my_uhttp_client_execute_request);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(uhttp_client_execute_request, HTTP_CLIENT_ERROR);
@@ -648,8 +656,8 @@ static void setup_parse_result_json_mocks(void)
 static void setup_close_http_client(void)
 {
     STRICT_EXPECTED_CALL(uhttp_client_close(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(uhttp_client_dowork(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(uhttp_client_dowork(IGNORED_PTR_ARG));
+    //STRICT_EXPECTED_CALL(uhttp_client_dowork(IGNORED_PTR_ARG));
+    //STRICT_EXPECTED_CALL(uhttp_client_dowork(IGNORED_PTR_ARG));
 }
 
 static void setup_step3_mocks(IOTHUB_CREDENTIAL_TYPE cred_type)
@@ -1003,7 +1011,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Impl_fail)
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
     IOTHUB_CREDENTIAL_TYPE cred_type_list[] = {
-        IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN, 
+        IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN//, 
         //IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY
         //IOTHUB_CREDENTIAL_TYPE_X509,
         //IOTHUB_CREDENTIAL_TYPE_X509_ECC,
