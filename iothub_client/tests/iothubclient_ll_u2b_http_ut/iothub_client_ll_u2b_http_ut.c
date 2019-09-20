@@ -317,31 +317,28 @@ static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT FileUpload_GetData_Callback(IOT
     uploadContext->lastResult = result;
     uploadContext->lastData = data;
     uploadContext->lastSize = size;
-    if (data == NULL || size == NULL)
+
+    if (result == FILE_UPLOAD_OK)
     {
-        // This is the last call
-    }
-    else if (result != FILE_UPLOAD_OK)
-    {
-        // Last call failed
-        *data = NULL;
-        *size = 0;
-    }
-    else if (uploadContext->toUpload == 0)
-    {
-        // Everything has been uploaded
-        *data = NULL;
-        *size = 0;
+        if (data != NULL && size != NULL)
+        {
+            // Upload next block
+            size_t thisBlockSize = (uploadContext->toUpload > BLOCK_SIZE) ? BLOCK_SIZE : uploadContext->toUpload;
+            *data = (unsigned char*)uploadContext->source;
+            *size = thisBlockSize;
+            uploadContext->toUpload -= thisBlockSize;
+        }
+        else
+        {
+            // Last call failed
+            *data = NULL;
+            *size = 0;
+        }
     }
     else
     {
-        // Upload next block
-        size_t thisBlockSize = (uploadContext->toUpload > BLOCK_SIZE) ? BLOCK_SIZE : uploadContext->toUpload;
-        *data = (unsigned char*)uploadContext->source + (uploadContext->size - uploadContext->toUpload);
-        *size = thisBlockSize;
-        uploadContext->toUpload -= thisBlockSize;
+        // Check failure
     }
-
     return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK;
 }
 
@@ -436,8 +433,6 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(HTTP_HEADERS_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(HTTP_HANDLE, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(HTTPAPIEX_HANDLE, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(HTTPAPIEX_SAS_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(const unsigned char*, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, void*);
@@ -555,11 +550,6 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     TEST_MUTEX_DESTROY(g_testByTest);
 }
 
-static void reset_test_data()
-{
-    memset(&context, 0, sizeof(context));
-}
-
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
 {
     if (TEST_MUTEX_ACQUIRE(g_testByTest))
@@ -567,7 +557,6 @@ TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
         ASSERT_FAIL("our mutex is ABANDONED. Failure in test framework");
     }
 
-    reset_test_data();
     umock_c_reset_all_calls();
     g_on_request_callback = NULL;
     g_on_request_callback_ctx = NULL;
@@ -576,7 +565,6 @@ TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
 
 TEST_FUNCTION_CLEANUP(TestMethodCleanup)
 {
-    reset_test_data();
     TEST_MUTEX_RELEASE(g_testByTest);
 }
 
@@ -656,8 +644,6 @@ static void setup_parse_result_json_mocks(void)
 static void setup_close_http_client(void)
 {
     STRICT_EXPECTED_CALL(uhttp_client_close(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    //STRICT_EXPECTED_CALL(uhttp_client_dowork(IGNORED_PTR_ARG));
-    //STRICT_EXPECTED_CALL(uhttp_client_dowork(IGNORED_PTR_ARG));
 }
 
 static void setup_step3_mocks(IOTHUB_CREDENTIAL_TYPE cred_type)
@@ -684,6 +670,45 @@ static void setup_step3_mocks(IOTHUB_CREDENTIAL_TYPE cred_type)
         setup_send_http_request_mocks();
     }
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+}
+
+static void setup_initiate_multiple_blob_upload_mocks(bool use_proxy, bool use_cert, IOTHUB_CREDENTIAL_TYPE cred_type)
+{
+    setup_create_http_client_mocks(use_proxy, use_cert, cred_type);
+
+    STRICT_EXPECTED_CALL(STRING_new());
+    STRICT_EXPECTED_CALL(STRING_new());
+
+    setup_http_header_mocks(cred_type);
+
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
+    setup_send_http_request_mocks();
+
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(STRING_from_byte_array(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
+
+    setup_parse_result_json_mocks();
+
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+
+    setup_close_http_client();
+
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG)).CallCannotFail();
+
+    // Upload step 3
+    setup_step3_mocks(cred_type);
+
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(uhttp_client_destroy(IGNORED_PTR_ARG));
 }
 
 static void setup_initiate_blob_upload_mocks(bool use_proxy, bool use_cert, IOTHUB_CREDENTIAL_TYPE cred_type)
@@ -1052,6 +1077,43 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Impl_fail)
 
     //cleanup
     umock_c_negative_tests_deinit();
+}
+
+TEST_FUNCTION(IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl_success)
+{
+    //arrange
+    IOTHUB_CREDENTIAL_TYPE cred_type_list[] = {
+        IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN/*,
+        IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY,
+        IOTHUB_CREDENTIAL_TYPE_X509,
+        IOTHUB_CREDENTIAL_TYPE_X509_ECC,
+        IOTHUB_CREDENTIAL_TYPE_DEVICE_AUTH*/
+    };
+
+    size_t type_count = sizeof(cred_type_list) / sizeof(cred_type_list[0]);
+    for (size_t type_index = 0; type_index < type_count; type_index++)
+    {
+        BLOB_UPLOAD_CONTEXT blob_ctx = { 0 };
+        blob_ctx.toUpload = 1024;
+        blob_ctx.source = (unsigned char*)0x2345;
+
+        setup_uploadtoblob_create_mocks(cred_type_list[type_index]);
+        IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE handle = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS, TEST_AUTH_HANDLE);
+        umock_c_reset_all_calls();
+
+        setup_initiate_multiple_blob_upload_mocks(false, false, cred_type_list[type_index]);
+
+        //act
+        IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(handle, TEST_DESTINASTION_FILENAME, FileUpload_GetData_Callback, &blob_ctx);
+
+        //assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "IoTHubClient_LL_UploadToBlob_Impl failure in test cred type %s", MU_ENUM_TO_STRING(IOTHUB_CREDENTIAL_TYPE, cred_type_list[type_index]));
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        IoTHubClient_LL_UploadToBlob_Destroy(handle);
+        umock_c_reset_all_calls();
+    }
 }
 
 END_TEST_SUITE(iothubclient_ll_u2b_http_ut)

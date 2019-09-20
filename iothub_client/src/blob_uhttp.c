@@ -21,6 +21,8 @@
 #include "azure_uhttp_c/uhttp.h"
 
 #define DEFAULT_HTTPS_PORT                   443
+#define MAX_CLOSE_DOWORK_COUNT                  10
+
 static const char* const AUTHORIZATION_HEADER = "Authorization";
 
 typedef struct BLOB_CONTEXT_DATA_TAG
@@ -53,8 +55,12 @@ static void on_http_recv(void* callback_ctx, HTTP_CALLBACK_REASON request_result
             if (content != NULL)
             {
                 // Clear the buffer
-                (void)BUFFER_unbuild(blob_data->http_data);
-                if (BUFFER_build(blob_data->http_data, content, content_len) != 0)
+                if (BUFFER_unbuild(blob_data->http_data) != 0)
+                {
+                    LogError("Failure unable to buffer_unbuild");
+                    blob_data->http_error = 1;
+                }
+                else if (BUFFER_build(blob_data->http_data, content, content_len) != 0)
                 {
                     LogError("Failure unable to create blob response BUFFER");
                     blob_data->http_error = 1;
@@ -74,10 +80,27 @@ static void on_http_recv(void* callback_ctx, HTTP_CALLBACK_REASON request_result
     }
 }
 
+static void on_http_close_callback(void* callback_ctx)
+{
+    if (callback_ctx == NULL)
+    {
+        LogError("NULL callback_ctx specified in close callback");
+    }
+    else
+    {
+        int* close_value = (int*)callback_ctx;
+        *close_value = 1;
+    }
+}
+
 static void close_http_handle(HTTP_CLIENT_HANDLE http_client)
 {
-    uhttp_client_close(http_client, NULL, NULL);
-    uhttp_client_dowork(http_client);
+    int close_value = 0;
+    uhttp_client_close(http_client, on_http_close_callback, &close_value);
+    for (size_t index = 0; index < MAX_CLOSE_DOWORK_COUNT && close_value == 0; index++)
+    {
+        uhttp_client_dowork(http_client);
+    }
 }
 
 static int send_http_handle(HTTP_CLIENT_HANDLE http_client, const char* relative_path, const unsigned char* content_data, size_t content_len, BLOB_CONTEXT_DATA* blob_data)
@@ -95,7 +118,15 @@ static int send_http_handle(HTTP_CLIENT_HANDLE http_client, const char* relative
         {
             uhttp_client_dowork(http_client);
         } while (blob_data->http_resp_recv == 0 && blob_data->http_error == 0);
-        result = 0;
+
+        if (blob_data->http_error != 0)
+        {
+            result = MU_FAILURE;
+        }
+        else
+        {
+            result = 0;
+        }
     }
     return result;
 }
@@ -218,7 +249,7 @@ static HTTP_CLIENT_HANDLE create_http_client(const char* hostname, BLOB_CONTEXT_
     tls_io_config.port = DEFAULT_HTTPS_PORT;
 
     // Setup proxy
-    if (proxyOptions->host_address != NULL)
+    if (proxyOptions != NULL && proxyOptions->host_address != NULL)
     {
         memset(&http_proxy, 0, sizeof(HTTP_PROXY_IO_CONFIG));
         http_proxy.hostname = hostname;
@@ -263,7 +294,6 @@ static HTTP_CLIENT_HANDLE create_http_client(const char* hostname, BLOB_CONTEXT_
 
 BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* sas_uri, const char* certificate, HTTP_PROXY_OPTIONS* proxyOptions, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX getDataCallbackEx, void* context, unsigned int* httpStatus, BUFFER_HANDLE httpResponse)
 {
-    (void)sas_uri;
     (void)getDataCallbackEx;
     (void)context;
     (void)httpResponse;
@@ -277,7 +307,7 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* sas_uri, const char*
     }
     else
     {
-        char* hostname;
+        char* hostname = NULL;
 
         /*Codes_SRS_BLOB_02_017: [ Blob_UploadMultipleBlocksFromSasUri shall copy from SASURI the hostname to a new const char* ]*/
         /*to find the hostname, the following logic is applied:*/
@@ -372,10 +402,12 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* sas_uri, const char*
                     }
                     // ensure that we don't get throttled by the 
                     // storage
-                    ThreadAPI_Sleep(20);
+                    if (uploadOneMoreBlock != 0)
+                    {
+                        ThreadAPI_Sleep(20);
+                    }
                 }
                 while(uploadOneMoreBlock && !isError);
-
 
                 if (isError == 0 && result == BLOB_OK)
                 {
