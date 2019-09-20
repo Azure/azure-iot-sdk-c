@@ -4239,6 +4239,7 @@ static void set_expected_calls_For_MethodInvokeThread()
     unsigned char* responseData = (unsigned char* )my_gballoc_malloc(1);
     ASSERT_IS_NOT_NULL(responseData, "failed allocating responseData");
 
+    STRICT_EXPECTED_CALL(get_time(IGNORED_NUM_ARG)).CallCannotFail();
     STRICT_EXPECTED_CALL(IoTHubClientCore_LL_GenericMethodInvoke(TEST_IOTHUB_CLIENT_CORE_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG,
                                                                  IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
                             .CopyOutArgumentBuffer(7, &responseStatus, sizeof(responseStatus))

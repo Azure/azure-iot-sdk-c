@@ -2590,6 +2590,8 @@ static int uploadMethodInvoke_thread(void* data)
 
     HTTPWORKER_THREAD_INFO* threadInfo = (HTTPWORKER_THREAD_INFO*)data;
 
+    srand((unsigned int)get_time(NULL));
+
     int responseStatus;
     unsigned char* responsePayload = NULL;
     size_t responsePayloadSize;
