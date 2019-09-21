@@ -380,6 +380,7 @@ TEST_FUNCTION_CLEANUP(TestMethodCleanup)
 static void setup_close_http_client_mocks(void)
 {
     STRICT_EXPECTED_CALL(uhttp_client_close(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(uhttp_client_destroy(IGNORED_PTR_ARG));
 }
 
 static void setup_create_http_client_mocks(bool use_proxy, bool use_cert)
@@ -438,6 +439,7 @@ static void setup_upload_multiple_blocks_mocks(size_t iterations)
     setup_send_http_data_mocks();
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
     setup_close_http_client_mocks();
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 }
@@ -458,7 +460,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_uri_NULL_fail)
     ASSERT_ARE_NOT_EQUAL(BLOB_RESULT, BLOB_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
-    //cleanup 
+    //cleanup
 }
 
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_success)
@@ -480,7 +482,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_success)
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
-    //cleanup 
+    //cleanup
 }
 
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_fail)
@@ -539,7 +541,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_10_iterations_success)
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
-    //cleanup 
+    //cleanup
 }
 
 END_TEST_SUITE(blob_uhttp_ut);

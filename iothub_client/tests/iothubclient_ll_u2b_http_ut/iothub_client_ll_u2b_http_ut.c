@@ -312,33 +312,10 @@ BLOB_UPLOAD_CONTEXT context;
 
 static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT FileUpload_GetData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* _uploadContext)
 {
-    BLOB_UPLOAD_CONTEXT* uploadContext = (BLOB_UPLOAD_CONTEXT*) _uploadContext;
-
-    uploadContext->lastResult = result;
-    uploadContext->lastData = data;
-    uploadContext->lastSize = size;
-
-    if (result == FILE_UPLOAD_OK)
-    {
-        if (data != NULL && size != NULL)
-        {
-            // Upload next block
-            size_t thisBlockSize = (uploadContext->toUpload > BLOCK_SIZE) ? BLOCK_SIZE : uploadContext->toUpload;
-            *data = (unsigned char*)uploadContext->source;
-            *size = thisBlockSize;
-            uploadContext->toUpload -= thisBlockSize;
-        }
-        else
-        {
-            // Last call failed
-            *data = NULL;
-            *size = 0;
-        }
-    }
-    else
-    {
-        // Check failure
-    }
+    (void)result;
+    (void)data;
+    (void)size;
+    (void)_uploadContext;
     return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK;
 }
 
@@ -934,6 +911,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Destroy_x509_success)
 
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(tickcounter_destroy(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
@@ -1036,7 +1014,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Impl_fail)
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
     IOTHUB_CREDENTIAL_TYPE cred_type_list[] = {
-        IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN//, 
+        IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN//,
         //IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY
         //IOTHUB_CREDENTIAL_TYPE_X509,
         //IOTHUB_CREDENTIAL_TYPE_X509_ECC,

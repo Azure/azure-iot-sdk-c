@@ -101,6 +101,7 @@ static void close_http_handle(HTTP_CLIENT_HANDLE http_client)
     {
         uhttp_client_dowork(http_client);
     }
+    uhttp_client_destroy(http_client);
 }
 
 static int send_http_handle(HTTP_CLIENT_HANDLE http_client, const char* relative_path, const unsigned char* content_data, size_t content_len, BLOB_CONTEXT_DATA* blob_data)
@@ -400,7 +401,7 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* sas_uri, const char*
                         }
                         blockID++;
                     }
-                    // ensure that we don't get throttled by the 
+                    // ensure that we don't get throttled by the
                     // storage
                     if (uploadOneMoreBlock != 0)
                     {
@@ -444,6 +445,10 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* sas_uri, const char*
                 }
                 STRING_delete(blockIDList);
 
+                if (blob_data.http_data != NULL)
+                {
+                    BUFFER_delete(blob_data.http_data);
+                }
                 close_http_handle(http_client);
             }
             // Close the http client

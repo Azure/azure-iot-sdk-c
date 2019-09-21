@@ -73,12 +73,12 @@ typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA_TAG
     HTTP_CONNECTION_STATE http_state;
     IOTHUB_AUTHORIZATION_HANDLE authorization_module;
     IOTHUB_CREDENTIAL_TYPE cred_type;
-    union 
+    union
     {
         UPLOADTOBLOB_X509_CREDENTIALS x509_credentials;
         char* supplied_sas_token;
     } credentials;
-    
+
     char* certificates;
     HTTP_PROXY_OPTIONS http_proxy_options;
     UPOADTOBLOB_CURL_VERBOSITY curl_verbosity_level;
@@ -564,6 +564,7 @@ static int IoTHubClient_LL_UploadToBlob_step3(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HAND
     else if (uhttp_client_open(http_client, upload_data->hostname, DEFAULT_HTTPS_PORT, NULL, NULL) != HTTP_CLIENT_OK)
     {
         LogError("Failed opening http url %s", upload_data->hostname);
+        STRING_delete(relativePathNotification);
         result = BLOB_HTTP_ERROR;
     }
     else
@@ -735,6 +736,7 @@ static int initiate_blob_upload(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* uploa
                             // Codes_SRS_IOTHUBCLIENT_LL_99_009: [ If step 2 is aborted by the client and if step 3 succeeds, then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall return `IOTHUB_CLIENT_OK`. ]
                             result = IOTHUB_CLIENT_OK;
                         }
+                        STRING_delete(hub_content);
                     }
                     else
                     {
@@ -750,7 +752,7 @@ static int initiate_blob_upload(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* uploa
                     STRING_HANDLE content_data;
                     /*do step 3*/ /*try*/
                     // Codes_SRS_IOTHUBCLIENT_LL_02_091: [ If step 2 fails without establishing an HTTP dialogue, then the HTTP message body shall look like: ]
-                    if ((content_data = STRING_construct(FILE_UPLOAD_FAILED_BODY)) == 0)
+                    if ((content_data = STRING_construct(FILE_UPLOAD_FAILED_BODY)) != NULL)
                     {
                         if (IoTHubClient_LL_UploadToBlob_step3(upload_data, STRING_c_str(correlation_id), http_client, request_header, content_data) != 0)
                         {
@@ -957,6 +959,7 @@ IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE IoTHubClient_LL_UploadToBlob_Create(const I
                     {
                         LogError("Failed getting x509 certificate information");
                         free(upload_data->hostname);
+                        BUFFER_delete(upload_data->response_data);
                         tickcounter_destroy(upload_data->tick_counter);
                         free(upload_data);
                         upload_data = NULL;
@@ -969,6 +972,7 @@ IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE IoTHubClient_LL_UploadToBlob_Create(const I
                     {
                         LogError("Failed retrieving supplied sas token");
                         free(upload_data->hostname);
+                        BUFFER_delete(upload_data->response_data);
                         tickcounter_destroy(upload_data->tick_counter);
                         free(upload_data);
                         upload_data = NULL;
@@ -981,6 +985,7 @@ IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE IoTHubClient_LL_UploadToBlob_Create(const I
                     {
                         LogError("Failure constructing supplied sas token");
                         free(upload_data->hostname);
+                        BUFFER_delete(upload_data->response_data);
                         tickcounter_destroy(upload_data->tick_counter);
                         free(upload_data);
                         upload_data = NULL;
@@ -991,6 +996,7 @@ IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE IoTHubClient_LL_UploadToBlob_Create(const I
                         {
                             LogError("Failure generating sas token");
                             free(upload_data->hostname);
+                            BUFFER_delete(upload_data->response_data);
                             tickcounter_destroy(upload_data->tick_counter);
                             free(upload_data);
                             upload_data = NULL;
@@ -1019,7 +1025,7 @@ void IoTHubClient_LL_UploadToBlob_Destroy(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h
             free(upload_data->credentials.x509_credentials.x509certificate);
             free(upload_data->credentials.x509_credentials.x509privatekey);
         }
-        else if (upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN)
+        else if (upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN || upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY)
         {
             free(upload_data->credentials.supplied_sas_token);
         }
@@ -1040,6 +1046,10 @@ void IoTHubClient_LL_UploadToBlob_Destroy(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h
         if (upload_data->http_proxy_options.password != NULL)
         {
             free((char *)upload_data->http_proxy_options.password);
+        }
+        if (upload_data->response_data != NULL)
+        {
+            BUFFER_delete(upload_data->response_data);
         }
         tickcounter_destroy(upload_data->tick_counter);
         free(upload_data);
