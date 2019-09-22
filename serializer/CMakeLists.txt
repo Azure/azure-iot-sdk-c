@@ -58,7 +58,9 @@ set(serializer_h_files
 #the following "set" statement exports across the project a global variable called SHARED_UTIL_INC_FOLDER that expands to whatever needs to included when using COMMON library
 set(SERIALIZER_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using serializer lib" FORCE)
 
-include_directories(../deps/parson)
+if (NOT ${use_installed_dependencies})
+  include_directories(../deps/parson)
+endif()
 include_directories(${SERIALIZER_INC_FOLDER} ${SHARED_UTIL_INC_FOLDER})
 include_directories(${AZURE_C_SHARED_UTILITY_INCLUDES})
 
@@ -68,7 +70,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 add_library(serializer ${serializer_c_files} ${serializer_h_files})
-target_link_libraries(serializer parson)
+target_link_libraries(serializer parson::parson)
 
 set (install_libs serializer)
 
@@ -77,13 +79,13 @@ if (${build_as_dynamic})
         serializer_dll SHARED ${serializer_c_files} ${serializer_h_files} ./src/serializer.def
     )
     target_link_libraries(serializer_dll
-        aziotsharedutil_dll
-        parson
+        aziotsharedutil
+        parson::parson
     )
 
     if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
         target_link_libraries(serializer_dll
-            "-Wl,--exclude-libs,libparson.a"
+	  parson::parson
         )
     endif()
 
@@ -129,7 +131,7 @@ if(${use_installed_dependencies})
     install(TARGETS serializer EXPORT azure_iot_sdksTargets
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/../bin
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
     )
     install(FILES ${serializer_h_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)

@@ -41,7 +41,7 @@ include_directories(${UAMQP_INCLUDES})
 
 set(IOTHUB_SERVICE_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "This is the include folder for iothub_service_client" FORCE)
 
-include_directories(${CMAKE_CURRENT_LIST_DIR}/../deps/parson ${IOTHUB_SERVICE_CLIENT_INC_FOLDER} ${CMAKE_CURRENT_LIST_DIR}/../iothub_client/inc)
+include_directories(${IOTHUB_SERVICE_CLIENT_INC_FOLDER} ${CMAKE_CURRENT_LIST_DIR}/../iothub_client/inc)
 
 IF(WIN32)
     #windows needs this define
@@ -58,11 +58,11 @@ if (${build_as_dynamic})
     add_library(iothub_service_client_dll SHARED ${iothub_service_client_c_files} ${iothub_service_client_h_files} ./src/iothub_service_client.def)
     linkSharedUtil(iothub_service_client_dll)
 
-    target_link_libraries(iothub_service_client_dll uamqp parson)
+    target_link_libraries(iothub_service_client_dll uamqp parson::parson)
 
     if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
         target_link_libraries(iothub_service_client_dll
-            "-Wl,--exclude-libs,libparson.a"
+            parson::parson
         )
     endif()
 
@@ -81,9 +81,9 @@ endif()
 setSdkTargetBuildProperties(iothub_service_client)
 
 if(NOT ${nuget_e2e_tests})
-    target_link_libraries(iothub_service_client uamqp parson)
+    target_link_libraries(iothub_service_client uamqp parson::parson)
 else()
-    target_link_libraries(iothub_service_client parson)
+    target_link_libraries(iothub_service_client parson::parson)
 endif()
 
 if (NOT ${ARCHITECTURE} STREQUAL "ARM")

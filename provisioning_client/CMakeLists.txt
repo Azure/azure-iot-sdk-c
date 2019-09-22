@@ -8,7 +8,11 @@ compileAsC99()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_PROV_MODULE")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_PROV_MODULE")
 
+add_library(msr_riot "")
 add_subdirectory(./deps)
+if (${use_installed_dependencies})
+  find_package(utpm REQUIRED CONFIG)
+endif()
 
 set(provisioning_libs)
 set(provisioning_headers)
@@ -66,6 +70,7 @@ elseif (${use_prov_client})
         add_subdirectory(./tests/common_prov_e2e/prov_hsm)
 
         set(HSM_CLIENT_LIBRARY ${HSM_CLIENT_LIBRARY} msr_riot utpm prov_hsm)
+	set(provisioning_libs ${provisioning_libs} msr_riot)
         if (WIN32)
             set(HSM_CLIENT_LIBRARY ${HSM_CLIENT_LIBRARY} Tbs)
         endif ()
@@ -86,6 +91,7 @@ elseif (${use_prov_client})
             include_directories(./deps/RIoT/Emulator/RIoT/RIoTCrypt/include)
 
             set(HSM_CLIENT_LIBRARY ${HSM_CLIENT_LIBRARY} msr_riot)
+	    set(provisioning_libs ${provisioning_libs} msr_riot)
         endif()
 
         if (${hsm_type_sastoken})
@@ -163,7 +169,9 @@ set(DEV_AUTH_MODULES_CLIENT_INC_FOLDER "${CMAKE_CURRENT_LIST_DIR}/inc" "${CMAKE_
 
 include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
 include_directories(${SHARED_UTIL_INC_FOLDER})
-include_directories(${CMAKE_CURRENT_LIST_DIR}/../deps/parson)
+if (NOT ${use_installed_dependencies})
+  include_directories(${CMAKE_CURRENT_LIST_DIR}/../deps/parson)
+endif()
 include_directories(${UHTTP_C_INC_FOLDER})
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
 include_directories(${CMAKE_CURRENT_LIST_DIR}/adapters)
@@ -203,14 +211,14 @@ if(${use_prov_client})
     link_security_client(prov_device_ll_client)
     set(provisioning_libs ${provisioning_libs} prov_device_ll_client)
     set(provisioning_headers ${provisioning_headers} ${PROV_DEVICE_LL_CLEINT_SOURCE_H_FILES})
-    target_link_libraries(prov_device_ll_client parson)
+    target_link_libraries(prov_device_ll_client parson::parson)
 
     add_library(prov_device_client ${PROV_DEVICE_CLIENT_SOURCE_C_FILES} ${PROV_DEVICE_CLIENT_SOURCE_H_FILES})
     setSdkTargetBuildProperties(prov_device_client)
     target_link_libraries(prov_device_client  prov_device_ll_client)
     set(provisioning_libs ${provisioning_libs} prov_device_client)
     set(provisioning_headers ${provisioning_headers} ${PROV_DEVICE_CLIENT_SOURCE_H_FILES})
-    target_link_libraries(prov_device_client parson)
+    target_link_libraries(prov_device_client parson::parson)
 
 
     if (${build_as_dynamic})
@@ -222,7 +230,7 @@ if(${use_prov_client})
             ./src/prov_device_client_dll.def
         )
         linkSharedUtil(prov_device_client_dll)
-        target_link_libraries(prov_device_client_dll prov_device_ll_client parson)
+        target_link_libraries(prov_device_client_dll prov_device_ll_client parson::parson)
 
         if(NOT WIN32)
             set_target_properties(prov_device_client_dll PROPERTIES OUTPUT_NAME "prov_device_client")
@@ -238,7 +246,7 @@ if(${use_prov_client})
         )
         if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
             target_link_libraries(prov_device_client_dll
-                "-Wl,--exclude-libs,libparson.a"
+	      parson::parson
             )
         endif()
         set(provisioning_libs ${provisioning_libs} prov_device_client_dll)
@@ -353,7 +361,7 @@ endif ()
 if(${use_installed_dependencies})
 
     # Install Provisioning libs
-    set(package_location "share/cmake/${PROJECT_NAME}")
+    set(package_location "${CMAKE_INSTALL_LIBDIR}/cmake/azure_prov_sdks")
 
     if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
         set(CMAKE_INSTALL_LIBDIR "lib")
@@ -362,7 +370,7 @@ if(${use_installed_dependencies})
     install(TARGETS ${provisioning_libs} EXPORT azure_prov_sdksTargets
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/../bin
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
     )
     install(FILES ${provisioning_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot/azure_prov_client)
@@ -370,27 +378,27 @@ if(${use_installed_dependencies})
     include(CMakePackageConfigHelpers)
 
     write_basic_package_version_file(
-        "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}ConfigVersion.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/azure_prov_sdks/azure_prov_sdksConfigVersion.cmake"
         VERSION ${PROV_SDK_VERSION}
         COMPATIBILITY SameMajorVersion
     )
 
     configure_file("../configs/${PROJECT_NAME}Config.cmake"
-        "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}Config.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/azure_prov_sdks/azure_prov_sdksConfig.cmake"
         COPYONLY
     )
 
     install(EXPORT azure_prov_sdksTargets
         FILE
-            "${PROJECT_NAME}Targets.cmake"
+            "azure_prov_sdksTargets.cmake"
         DESTINATION
             ${package_location}
     )
 
     install(
         FILES
-            "../configs/${PROJECT_NAME}Config.cmake"
-            "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}ConfigVersion.cmake"
+            "configs/azure_prov_sdksConfig.cmake"
+            "${CMAKE_CURRENT_BINARY_DIR}/azure_prov_sdks/azure_prov_sdksConfigVersion.cmake"
         DESTINATION
             ${package_location}
     )
@@ -405,7 +413,7 @@ else()
     install(TARGETS ${provisioning_libs}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/../bin
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
 endif()

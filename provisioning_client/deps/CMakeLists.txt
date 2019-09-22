@@ -12,17 +12,17 @@ else()
 
     if(${hsm_type_x509})
         set(msr_riot_c_files
-            ./RIoT/Emulator/DICE/DiceSha256.c
-            ./RIoT/Emulator/RIoT/RIoTCrypt/RiotAes128.c
-            ./RIoT/Emulator/RIoT/RIoTCrypt/RiotAesTables.c
-            ./RIoT/Emulator/RIoT/RIoTCrypt/RiotCrypt.c
-            ./RIoT/Emulator/RIoT/RIoTCrypt/RiotDerEnc.c
-            ./RIoT/Emulator/RIoT/RIoTCrypt/RiotEcc.c
-            ./RIoT/Emulator/RIoT/RIoTCrypt/RiotHmac.c
-            ./RIoT/Emulator/RIoT/RIoTCrypt/RiotKdf.c
-            ./RIoT/Emulator/RIoT/RIoTCrypt/RiotSha256.c
-            ./RIoT/Emulator/RIoT/RIoTCrypt/RiotX509Bldr.c
-            ./RIoT/Emulator/RIoT/RIoTCrypt/RiotBase64.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Emulator/DICE/DiceSha256.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Emulator/RIoT/RIoTCrypt/RiotAes128.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Emulator/RIoT/RIoTCrypt/RiotAesTables.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Emulator/RIoT/RIoTCrypt/RiotCrypt.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Emulator/RIoT/RIoTCrypt/RiotDerEnc.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Emulator/RIoT/RIoTCrypt/RiotEcc.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Emulator/RIoT/RIoTCrypt/RiotHmac.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Emulator/RIoT/RIoTCrypt/RiotKdf.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Emulator/RIoT/RIoTCrypt/RiotSha256.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Emulator/RIoT/RIoTCrypt/RiotX509Bldr.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Emulator/RIoT/RIoTCrypt/RiotBase64.c
         )
 
         set(msr_riot_h_files
@@ -56,15 +56,22 @@ endif()
             add_definitions(-DWIN32)
         ENDIF(WIN32)
 
-        add_library(msr_riot ${msr_riot_c_files} ${msr_riot_h_files})
+        target_sources(msr_riot PRIVATE ${msr_riot_c_files})
+	set_target_properties(msr_riot PROPERTIES
+            ENABLE_EXPORTS YES
+            VERSION ${PROV_SDK_VERSION}
+            SOVERSION ${PROV_SDK_VERSION_MAJOR}
+            BUILD_WITH_INSTALL_RPATH TRUE
+        )
     endif()
 
     if(${hsm_type_sastoken})
-        # Default tpm implementation
+      # Default tpm implementation
+      if (NOT ${use_installed_dependencies})
         if (${use_tpm_simulator})
-            set(use_emulator ON CACHE BOOL "enable use_emulator in utpm" FORCE)
+          set(use_emulator ON CACHE BOOL "enable use_emulator in utpm" FORCE)
         else()
-            set(use_emulator OFF CACHE BOOL "disable use_emulator in utpm" FORCE)
+          set(use_emulator OFF CACHE BOOL "disable use_emulator in utpm" FORCE)
         endif()
 
         set(original_run_e2e_tests ${run_e2e_tests})
@@ -77,5 +84,6 @@ endif()
 
         set(run_e2e_tests ${original_run_e2e_tests})
         set(run_unittests ${original_run_unittests})
+      endif()
     endif()
 endif()
