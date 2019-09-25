@@ -5,6 +5,8 @@ compileAsC99()
 
 include(ExternalProject)
 
+set(MSR_RIOT_VERSION 1.0.1)
+
 if (${hsm_type_custom})
     set(hsm_type_custom ON PARENT_SCOPE)
     set(CUSTOM_HSM_LIB "${hsm_custom_lib}" PARENT_SCOPE)
@@ -45,9 +47,9 @@ else()
         include_directories(./RIoT/Emulator/RIoT)
         include_directories(./RIoT/Emulator/RIoT/RIoTCrypt/include)
 
-if(MSVC)
-    set_source_files_properties(./RIoT/Emulator/RIoT/RIoTCrypt/RiotKdf.c PROPERTIES COMPILE_FLAGS "/wd4100")
-endif()
+        if(MSVC)
+            set_source_files_properties(./RIoT/Emulator/RIoT/RIoTCrypt/RiotKdf.c PROPERTIES COMPILE_FLAGS "/wd4100")
+        endif()
 
         IF(WIN32)
             #windows needs this define
@@ -57,6 +59,36 @@ endif()
         ENDIF(WIN32)
 
         add_library(msr_riot ${msr_riot_c_files} ${msr_riot_h_files})
+        set(package_location "cmake")
+        install(TARGETS msr_riot EXPORT msr_riotTargets
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/../bin
+            INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
+        )
+        install(FILES ${msr_riot_h_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot/msr_riot)
+
+        include(CMakePackageConfigHelpers)
+
+        write_basic_package_version_file(
+            "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}ConfigVersion.cmake"
+            VERSION ${MSR_RIOT_VERSION}
+            COMPATIBILITY SameMajorVersion
+        )
+
+        install(EXPORT msr_riotTargets
+            FILE
+            "${PROJECT_NAME}Targets.cmake"
+            DESTINATION
+            ${package_location}
+        )
+
+        install(
+            FILES
+            "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}ConfigVersion.cmake"
+            DESTINATION
+            ${package_location}
+        )
     endif()
 
     if(${hsm_type_sastoken})
