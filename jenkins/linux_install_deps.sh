@@ -34,3 +34,11 @@ pushd $sdk_build_folder
 cmake $build_root -Duse_installed_dependencies=ON
 make --jobs=$CORES
 popd
+
+# Now use the deps
+rm -rf $sdk_build_folder
+mkdir -p $sdk_build_folder
+pushd $sdk_build_folder
+cmake $build_root -Duse_installed_dependencies=ON -Duse_prov_client:BOOL=ON
+make --jobs=$CORES
+popd
