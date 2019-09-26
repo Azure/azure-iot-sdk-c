@@ -99,7 +99,7 @@ typedef struct MESSAGE_DISPOSITION_CONTEXT_TAG
     char* etagValue;
 } MESSAGE_DISPOSITION_CONTEXT;
 
-MU_DEFINE_ENUM_STRINGS(IOTHUBMESSAGE_DISPOSITION_RESULT, IOTHUBMESSAGE_DISPOSITION_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUBMESSAGE_DISPOSITION_RESULT, IOTHUBMESSAGE_DISPOSITION_RESULT_VALUES);
 
 static void destroy_eventHTTPrelativePath(HTTPTRANSPORT_PERDEVICE_DATA* handleData)
 {
@@ -259,29 +259,29 @@ static int set_system_properties(IOTHUB_MESSAGE_LIST* message, HTTP_HEADERS_HAND
     if (msgId != NULL && HTTPHeaders_ReplaceHeaderNameValuePair(headers, IOTHUB_MESSAGE_ID, msgId) != HTTP_HEADERS_OK)
     {
         LogError("unable to HTTPHeaders_ReplaceHeaderNameValuePair");
-        result = __LINE__;
+        result = MU_FAILURE;
     }
     else if ((corrId = IoTHubMessage_GetCorrelationId(message->messageHandle)) != NULL && HTTPHeaders_ReplaceHeaderNameValuePair(headers, IOTHUB_CORRELATION_ID, corrId) != HTTP_HEADERS_OK)
     {
         LogError("unable to HTTPHeaders_ReplaceHeaderNameValuePair");
-        result = __LINE__;
+        result = MU_FAILURE;
     }
     // Codes_SRS_TRANSPORTMULTITHTTP_09_001: [ If the IoTHubMessage being sent contains property `content-type` it shall be added to the HTTP headers as "iothub-contenttype":"value". ]
     else if ((content_type = IoTHubMessage_GetContentTypeSystemProperty(message->messageHandle)) != NULL && HTTPHeaders_ReplaceHeaderNameValuePair(headers, IOTHUB_CONTENT_TYPE_D2C, content_type) != HTTP_HEADERS_OK)
     {
         LogError("unable to HTTPHeaders_ReplaceHeaderNameValuePair (content-type)");
-        result = __LINE__;
+        result = MU_FAILURE;
     }
     // Codes_SRS_TRANSPORTMULTITHTTP_09_002: [ If the IoTHubMessage being sent contains property `content-encoding` it shall be added to the HTTP headers as "iothub-contentencoding":"value". ]
     else if ((contentEncoding = IoTHubMessage_GetContentEncodingSystemProperty(message->messageHandle)) != NULL && HTTPHeaders_ReplaceHeaderNameValuePair(headers, IOTHUB_CONTENT_ENCODING_D2C, contentEncoding) != HTTP_HEADERS_OK)
     {
         LogError("unable to HTTPHeaders_ReplaceHeaderNameValuePair (content-encoding)");
-        result = __LINE__;
+        result = MU_FAILURE;
     }
     else if (IoTHubMessage_IsSecurityMessage(message->messageHandle) && HTTPHeaders_ReplaceHeaderNameValuePair(headers, SECURITY_INTERFACE_ID, SECURITY_INTERFACE_ID_VALUE) != HTTP_HEADERS_OK)
     {
         LogError("unable to set security message header info");
-        result = __LINE__;
+        result = MU_FAILURE;
     }
     else
     {
@@ -1061,6 +1061,13 @@ static TRANSPORT_LL_HANDLE IoTHubTransportHttp_Create(const IOTHUBTRANSPORT_CONF
             /*Codes_SRS_TRANSPORTMULTITHTTP_17_131: [ If allocation fails, IoTHubTransportHttp_Create shall fail and return NULL. ]*/
             LogError("unable to malloc");
         }
+        else if (HTTPAPIEX_Init() == HTTPAPIEX_ERROR)
+        {
+            /*Codes_SRS_TRANSPORTMULTITHTTP_21_143: [ If HTTPAPIEX_Init fails, IoTHubTransportHttp_Create shall fail and return NULL. ]*/
+            LogError("Error initializing HTTP");
+            free(result);
+            result = NULL;
+        }
         else
         {
             bool was_hostName_ok = create_hostName(result, config);
@@ -1080,6 +1087,7 @@ static TRANSPORT_LL_HANDLE IoTHubTransportHttp_Create(const IOTHUBTRANSPORT_CONF
             {
                 if (was_httpApiExHandle_ok) destroy_httpApiExHandle(result);
                 if (was_hostName_ok) destroy_hostName(result);
+                HTTPAPIEX_Deinit();
 
                 free(result);
                 result = NULL;
@@ -1111,6 +1119,7 @@ static void IoTHubTransportHttp_Destroy(TRANSPORT_LL_HANDLE handle)
         destroy_hostName((HTTPTRANSPORT_HANDLE_DATA *)handle);
         destroy_httpApiExHandle((HTTPTRANSPORT_HANDLE_DATA *)handle);
         destroy_perDeviceList((HTTPTRANSPORT_HANDLE_DATA *)handle);
+        HTTPAPIEX_Deinit();
         free(handle);
     }
 }
