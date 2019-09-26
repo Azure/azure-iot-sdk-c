@@ -841,21 +841,15 @@ static int ScheduleWork_Thread(void* threadArgument)
 static IOTHUB_CLIENT_RESULT StartWorkerThreadIfNeeded(IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientInstance)
 {
     IOTHUB_CLIENT_RESULT result;
-    if (iotHubClientInstance->TransportHandle == NULL)
+
+    if (iotHubClientInstance->ThreadHandle == NULL)
     {
-        if (iotHubClientInstance->ThreadHandle == NULL)
+        iotHubClientInstance->StopThread = 0;
+        if (ThreadAPI_Create(&iotHubClientInstance->ThreadHandle, ScheduleWork_Thread, iotHubClientInstance) != THREADAPI_OK)
         {
-            iotHubClientInstance->StopThread = 0;
-            if (ThreadAPI_Create(&iotHubClientInstance->ThreadHandle, ScheduleWork_Thread, iotHubClientInstance) != THREADAPI_OK)
-            {
-                LogError("ThreadAPI_Create failed");
-                iotHubClientInstance->ThreadHandle = NULL;
-                result = IOTHUB_CLIENT_ERROR;
-            }
-            else
-            {
-                result = IOTHUB_CLIENT_OK;
-            }
+            LogError("ThreadAPI_Create failed");
+            iotHubClientInstance->ThreadHandle = NULL;
+            result = IOTHUB_CLIENT_ERROR;
         }
         else
         {
@@ -864,9 +858,17 @@ static IOTHUB_CLIENT_RESULT StartWorkerThreadIfNeeded(IOTHUB_CLIENT_CORE_INSTANC
     }
     else
     {
-        /*Codes_SRS_IOTHUBCLIENT_17_012: [ If the transport connection is shared, the thread shall be started by calling IoTHubTransport_StartWorkerThread. ]*/
-        /*Codes_SRS_IOTHUBCLIENT_17_011: [ If the transport connection is shared, the thread shall be started by calling IoTHubTransport_StartWorkerThread*/
-        result = IoTHubTransport_StartWorkerThread(iotHubClientInstance->TransportHandle, iotHubClientInstance, ScheduleWork_Thread_ForMultiplexing);
+        result = IOTHUB_CLIENT_OK;
+    }
+
+    if (result == IOTHUB_CLIENT_OK)
+    {
+        if (iotHubClientInstance->TransportHandle != NULL)
+        {
+            /*Codes_SRS_IOTHUBCLIENT_17_012: [ If the transport connection is shared, the thread shall be started by calling IoTHubTransport_StartWorkerThread. ]*/
+            /*Codes_SRS_IOTHUBCLIENT_17_011: [ If the transport connection is shared, the thread shall be started by calling IoTHubTransport_StartWorkerThread*/
+            result = IoTHubTransport_StartWorkerThread(iotHubClientInstance->TransportHandle, iotHubClientInstance, ScheduleWork_Thread_ForMultiplexing);
+        }
     }
     return result;
 }

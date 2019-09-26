@@ -22,6 +22,10 @@
 #include "iothub_message.h"
 #include "parson.h"
 
+// The create iothub API
+// Comment this line to create the device from transport instead of connection string.
+#define SAMPLE_USE_CREATE_FROM_CONNECTION_STRING
+
 // The protocol you wish to use should be uncommented
 //
 #define SAMPLE_MQTT
@@ -50,8 +54,16 @@
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-/* Paste in the your iothub device connection string  */
+#ifdef SAMPLE_USE_CREATE_FROM_CONNECTION_STRING
+/* Paste in the your iothub device connection string. */
 static const char* connectionString = "[device connection string]";
+#else
+/* Paste in the your iothub device id, device key and iothub name. */
+static const char* deviceId = "[device id string]";         /*ex: mydevice1*/
+static const char* deviceKey = "[device key string]";       /*ex: abcdefghijklmnopqrstuvwxyz=*/
+static const char* iotHubName = "[iothub name string]";     /*ex: myhub*/
+static const char* iotHubSuffix = "azure-devices.net";
+#endif
 
 #define DOWORK_LOOP_NUM     3
 
@@ -315,7 +327,23 @@ static void iothub_client_device_twin_and_methods_sample_run(void)
     }
     else
     {
-        if ((iotHubClientHandle = IoTHubDeviceClient_CreateFromConnectionString(connectionString, protocol)) == NULL)
+#ifdef SAMPLE_USE_CREATE_FROM_CONNECTION_STRING
+        iotHubClientHandle = IoTHubDeviceClient_CreateFromConnectionString(connectionString, protocol);
+#else
+        TRANSPORT_HANDLE transport = IoTHubTransport_Create(protocol, iotHubName, iotHubSuffix);
+
+        IOTHUB_CLIENT_CONFIG client_config;
+        // Ensure that fields are correctly set to null.
+        memset(&client_config, 0, sizeof(client_config));
+        client_config.deviceId = deviceId;
+        client_config.deviceKey = deviceKey;
+        client_config.protocol = protocol;
+        client_config.iotHubName = iotHubName;
+        client_config.iotHubSuffix = iotHubSuffix;
+
+        iotHubClientHandle = IoTHubDeviceClient_CreateWithTransport(transport, &client_config);
+#endif
+        if (iotHubClientHandle == NULL)
         {
             (void)printf("ERROR: iotHubClientHandle is NULL!\r\n");
         }
@@ -345,10 +373,17 @@ static void iothub_client_device_twin_and_methods_sample_run(void)
 
             char* reportedProperties = serializeToJson(&car);
 
-            (void)IoTHubDeviceClient_GetTwinAsync(iotHubClientHandle, getCompleteDeviceTwinOnDemandCallback, NULL);
-            (void)IoTHubDeviceClient_SendReportedState(iotHubClientHandle, (const unsigned char*)reportedProperties, strlen(reportedProperties), reportedStateCallback, NULL);
             (void)IoTHubDeviceClient_SetDeviceMethodCallback(iotHubClientHandle, deviceMethodCallback, NULL);
             (void)IoTHubDeviceClient_SetDeviceTwinCallback(iotHubClientHandle, deviceTwinCallback, &car);
+            (void)IoTHubDeviceClient_GetTwinAsync(iotHubClientHandle, getCompleteDeviceTwinOnDemandCallback, NULL);
+
+            ThreadAPI_Sleep(3000);
+
+            (void)IoTHubDeviceClient_SendReportedState(iotHubClientHandle, (const unsigned char*)reportedProperties, strlen(reportedProperties), reportedStateCallback, NULL);
+
+            ThreadAPI_Sleep(3000);
+
+            (void)IoTHubDeviceClient_GetTwinAsync(iotHubClientHandle, getCompleteDeviceTwinOnDemandCallback, NULL);
 
             (void)getchar();
 
@@ -357,6 +392,9 @@ static void iothub_client_device_twin_and_methods_sample_run(void)
             free(car.changeOilReminder);
         }
 
+#ifndef SAMPLE_USE_CREATE_FROM_CONNECTION_STRING
+        IoTHubTransport_Destroy(transport);
+#endif
         IoTHub_Deinit();
     }
 }
