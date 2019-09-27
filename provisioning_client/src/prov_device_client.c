@@ -30,6 +30,9 @@ static int ScheduleWork_Thread(void* threadArgument)
 {
     PROV_DEVICE_INSTANCE* prov_device_instance = (PROV_DEVICE_INSTANCE*)threadArgument;
     uint16_t sleeptime_in_ms = DO_WORK_FREQ_DEFAULT;
+
+    srand((unsigned int)get_time(NULL));
+
     while (1)
     {
         if (Lock(prov_device_instance->LockHandle) == LOCK_OK)

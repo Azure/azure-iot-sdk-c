@@ -120,7 +120,7 @@ static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtime
 #define SUBSCRIBE_STREAMS_RESP_TOPIC            0x0040
 #define SUBSCRIBE_TOPIC_COUNT                   7
 
-MU_DEFINE_ENUM_STRINGS(MQTT_CLIENT_EVENT_ERROR, MQTT_CLIENT_EVENT_ERROR_VALUES)
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(MQTT_CLIENT_EVENT_ERROR, MQTT_CLIENT_EVENT_ERROR_VALUES)
 
 typedef struct SYSTEM_PROPERTY_INFO_TAG
 {
@@ -189,6 +189,8 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     STRING_HANDLE module_id;
     STRING_HANDLE devicesAndModulesPath;
     int portNum;
+    // conn_attempted indicates whether a connection has *ever* been attempted on the lifetime
+    // of this handle.  Even if a given xio transport is added/removed, this always stays true.
     bool conn_attempted;
 
     MQTT_GET_IO_TRANSPORT get_io_transport;
@@ -312,6 +314,13 @@ static void free_proxy_data(MQTTTRANSPORT_HANDLE_DATA* mqtt_transport_instance)
     }
 }
 
+// Destroys xio transport associated with MQTT handle and resets appropriate state
+static void DestroyXioTransport(PMQTTTRANSPORT_HANDLE_DATA transport_data)
+{
+    xio_destroy(transport_data->xioTransport);
+    transport_data->xioTransport = NULL;
+}
+
 static void set_saved_tls_options(PMQTTTRANSPORT_HANDLE_DATA transport, OPTIONHANDLER_HANDLE new_options)
 {
     if (transport->saved_tls_options != NULL)
@@ -350,9 +359,9 @@ static void free_transport_handle_data(MQTTTRANSPORT_HANDLE_DATA* transport_data
     STRING_delete(transport_data->topic_NotifyState);
     STRING_delete(transport_data->topic_DeviceMethods);
     STRING_delete(transport_data->topic_InputQueue);
-
     STRING_delete(transport_data->topic_StreamsPost);
     STRING_delete(transport_data->topic_StreamsResp);
+    DestroyXioTransport(transport_data);
 
     free(transport_data);
 }
@@ -2140,7 +2149,7 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
                         }
                         else if (connack->returnCode == CONN_REFUSED_NOT_AUTHORIZED)
                         {
-                            transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_DEVICE_DISABLED, transport_data->transport_ctx);
+                            transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL, transport_data->transport_ctx);
                         }
                         else if (connack->returnCode == CONN_REFUSED_UNACCEPTABLE_VERSION)
                         {
@@ -2216,9 +2225,7 @@ static void ResetConnectionIfNecessary(PMQTTTRANSPORT_HANDLE_DATA transport_data
     {
         OPTIONHANDLER_HANDLE options = xio_retrieveoptions(transport_data->xioTransport);
         set_saved_tls_options(transport_data, options);
-
-        xio_destroy(transport_data->xioTransport);
-        transport_data->xioTransport = NULL;
+        DestroyXioTransport(transport_data);
     }
 }
 
@@ -2253,8 +2260,7 @@ static void DisconnectFromClient(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 ThreadAPI_Sleep(50);
             } while ((disconnect_ctr < MAX_DISCONNECT_VALUE) && (transport_data->disconnect_recv_flag == 0));
         }
-        xio_destroy(transport_data->xioTransport);
-        transport_data->xioTransport = NULL;
+        DestroyXioTransport(transport_data);
 
         transport_data->device_twin_get_sent = false;
         transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_NOT_CONNECTED;
@@ -2283,11 +2289,13 @@ static void mqtt_error_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_ERR
             case MQTT_CLIENT_NO_PING_RESPONSE:
             {
                 LogError("Mqtt Ping Response was not encountered.  Reconnecting device...");
+                transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_PING_RESPONSE, transport_data->transport_ctx);
                 break;
             }
             case MQTT_CLIENT_PARSE_ERROR:
             case MQTT_CLIENT_MEMORY_ERROR:
             case MQTT_CLIENT_UNKNOWN_ERROR:
+            default:
             {
                 LogError("INTERNAL ERROR: unexpected error value received %s", MU_ENUM_TO_STRING(MQTT_CLIENT_EVENT_ERROR, error));
                 break;
@@ -2742,7 +2750,7 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
         if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_NOT_CONNECTED && transport_data->isRecoverableError)
         {
             // Note: in case retry_control_should_retry fails, the reconnection shall be attempted anyway (defaulting to policy IOTHUB_CLIENT_RETRY_IMMEDIATE).
-            if (retry_control_should_retry(transport_data->retry_control_handle, &retry_action) != 0 || retry_action == RETRY_ACTION_RETRY_NOW)
+            if (!transport_data->conn_attempted || retry_control_should_retry(transport_data->retry_control_handle, &retry_action) != 0 || retry_action == RETRY_ACTION_RETRY_NOW)
             {
                 if (tickcounter_get_current_ms(transport_data->msgTickCounter, &transport_data->connectTick) != 0)
                 {
@@ -2765,7 +2773,7 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                         result = 0;
                     }
                 }
-            }   
+            }
             else if (retry_action == RETRY_ACTION_STOP_RETRYING)
             {
                 // Set callback if retry expired
@@ -3628,24 +3636,24 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_GetSendStatus(TRANSPORT_LL_HAND
 
     if (handle == NULL || iotHubClientStatus == NULL)
     {
-        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_023: [IoTHubTransport_MQTT_Common_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter.] */
-        LogError("invalid arument.");
-        result = IOTHUB_CLIENT_INVALID_ARG;
+    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_023: [IoTHubTransport_MQTT_Common_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter.] */
+    LogError("invalid arument.");
+    result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
     {
-        MQTTTRANSPORT_HANDLE_DATA* handleData = (MQTTTRANSPORT_HANDLE_DATA*)handle;
-        if (!DList_IsListEmpty(handleData->waitingToSend) || !DList_IsListEmpty(&(handleData->telemetry_waitingForAck)))
-        {
-            /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_025: [IoTHubTransport_MQTT_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_BUSY if there are currently event items to be sent or being sent.] */
-            *iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_BUSY;
-        }
-        else
-        {
-            /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_024: [IoTHubTransport_MQTT_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_IDLE if there are currently no event items to be sent or being sent.] */
-            *iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_IDLE;
-        }
-        result = IOTHUB_CLIENT_OK;
+    MQTTTRANSPORT_HANDLE_DATA* handleData = (MQTTTRANSPORT_HANDLE_DATA*)handle;
+    if (!DList_IsListEmpty(handleData->waitingToSend) || !DList_IsListEmpty(&(handleData->telemetry_waitingForAck)))
+    {
+        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_025: [IoTHubTransport_MQTT_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_BUSY if there are currently event items to be sent or being sent.] */
+        *iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_BUSY;
+    }
+    else
+    {
+        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_024: [IoTHubTransport_MQTT_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_IDLE if there are currently no event items to be sent or being sent.] */
+        *iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_IDLE;
+    }
+    result = IOTHUB_CLIENT_OK;
     }
     return result;
 }
@@ -3723,6 +3731,18 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SetOption(TRANSPORT_LL_HANDLE h
         {
             LogError("x509privatekey specified, but authentication method is not x509");
             result = IOTHUB_CLIENT_INVALID_ARG;
+        }
+        else if (strcmp(OPTION_RETRY_INTERVAL_SEC, option) == 0)
+        {
+            if (retry_control_set_option(transport_data->retry_control_handle, RETRY_CONTROL_OPTION_INITIAL_WAIT_TIME_IN_SECS, value) != 0)
+            {
+                LogError("Failure setting retry interval option");
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else
+            {
+                result = IOTHUB_CLIENT_OK;
+            }
         }
         else if (strcmp(OPTION_HTTP_PROXY, option) == 0)
         {

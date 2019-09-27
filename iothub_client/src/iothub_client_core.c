@@ -22,6 +22,7 @@
 #include "azure_c_shared_utility/vector.h"
 #include "iothub_client_options.h"
 #include "azure_c_shared_utility/tickcounter.h"
+#include "azure_c_shared_utility/agenttime.h"
 
 
 #define DO_WORK_FREQ_DEFAULT 1
@@ -40,8 +41,6 @@ typedef struct IOTHUB_CLIENT_CORE_INSTANCE_TAG
     int created_with_transport_handle;
     VECTOR_HANDLE saved_user_callback_list;
     IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK desired_state_callback;
-    IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK event_confirm_callback;
-    IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reported_state_callback;
     IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK connection_status_callback;
     IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC device_method_callback;
     IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK inbound_device_method_callback;
@@ -111,8 +110,8 @@ typedef struct HTTPWORKER_THREAD_INFO_TAG
     CALLBACK_TYPE_DEVICE_STREAM
 
 
-MU_DEFINE_ENUM(USER_CALLBACK_TYPE, USER_CALLBACK_TYPE_VALUES)
-MU_DEFINE_ENUM_STRINGS(USER_CALLBACK_TYPE, USER_CALLBACK_TYPE_VALUES)
+MU_DEFINE_ENUM_WITHOUT_INVALID(USER_CALLBACK_TYPE, USER_CALLBACK_TYPE_VALUES)
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(USER_CALLBACK_TYPE, USER_CALLBACK_TYPE_VALUES)
 
 typedef struct DEVICE_TWIN_CALLBACK_INFO_TAG
 {
@@ -131,11 +130,13 @@ typedef struct DEVICE_STREAM_CALLBACK_INFO_TAG
 typedef struct EVENT_CONFIRM_CALLBACK_INFO_TAG
 {
     IOTHUB_CLIENT_CONFIRMATION_RESULT confirm_result;
+    IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback;
 } EVENT_CONFIRM_CALLBACK_INFO;
 
 typedef struct REPORTED_STATE_CALLBACK_INFO_TAG
 {
     int status_code;
+    IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reportedStateCallback;
 } REPORTED_STATE_CALLBACK_INFO;
 
 typedef struct CONNECTION_STATUS_CALLBACK_INFO_TAG
@@ -178,6 +179,11 @@ typedef struct IOTHUB_QUEUE_CONTEXT_TAG
 {
     IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientHandle;
     void* userContextCallback;
+    union IOTHUB_CALLBACK_FUNCTION
+    {
+        IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback;
+        IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reportedStateCallback;
+    } callbackFunction;
 } IOTHUB_QUEUE_CONTEXT;
 
 typedef struct IOTHUB_QUEUE_CONSOLIDATED_CONTEXT_TAG
@@ -452,6 +458,7 @@ static void iothub_ll_event_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT r
         queue_cb_info.type = CALLBACK_TYPE_EVENT_CONFIRM;
         queue_cb_info.userContextCallback = queue_context->userContextCallback;
         queue_cb_info.iothub_callback.event_confirm_cb_info.confirm_result = result;
+        queue_cb_info.iothub_callback.event_confirm_cb_info.eventConfirmationCallback = queue_context->callbackFunction.eventConfirmationCallback;
         if (VECTOR_push_back(queue_context->iotHubClientHandle->saved_user_callback_list, &queue_cb_info, 1) != 0)
         {
             LogError("event confirm callback vector push failed.");
@@ -469,6 +476,7 @@ static void iothub_ll_reported_state_callback(int status_code, void* userContext
         queue_cb_info.type = CALLBACK_TYPE_REPORTED_STATE;
         queue_cb_info.userContextCallback = queue_context->userContextCallback;
         queue_cb_info.iothub_callback.reported_state_cb_info.status_code = status_code;
+        queue_cb_info.iothub_callback.reported_state_cb_info.reportedStateCallback = queue_context->callbackFunction.reportedStateCallback;
         if (VECTOR_push_back(queue_context->iotHubClientHandle->saved_user_callback_list, &queue_cb_info, 1) != 0)
         {
             LogError("reported state callback vector push failed.");
@@ -587,8 +595,6 @@ static void dispatch_user_callbacks(IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientIns
     size_t index;
 
     IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK desired_state_callback = NULL;
-    IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK event_confirm_callback = NULL;
-    IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reported_state_callback = NULL;
     IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK connection_status_callback = NULL;
     IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC device_method_callback = NULL;
     IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK inbound_device_method_callback = NULL;
@@ -605,8 +611,6 @@ static void dispatch_user_callbacks(IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientIns
     else
     {
         desired_state_callback = iotHubClientInstance->desired_state_callback;
-        event_confirm_callback = iotHubClientInstance->event_confirm_callback;
-        reported_state_callback = iotHubClientInstance->reported_state_callback;
         connection_status_callback = iotHubClientInstance->connection_status_callback;
         device_method_callback = iotHubClientInstance->device_method_callback;
         inbound_device_method_callback = iotHubClientInstance->inbound_device_method_callback;
@@ -662,15 +666,15 @@ static void dispatch_user_callbacks(IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientIns
                 break;
             }
             case CALLBACK_TYPE_EVENT_CONFIRM:
-                if (event_confirm_callback)
+                if (queued_cb->iothub_callback.event_confirm_cb_info.eventConfirmationCallback)
                 {
-                    event_confirm_callback(queued_cb->iothub_callback.event_confirm_cb_info.confirm_result, queued_cb->userContextCallback);
+                    queued_cb->iothub_callback.event_confirm_cb_info.eventConfirmationCallback(queued_cb->iothub_callback.event_confirm_cb_info.confirm_result, queued_cb->userContextCallback);
                 }
                 break;
             case CALLBACK_TYPE_REPORTED_STATE:
-                if (reported_state_callback)
+                if (queued_cb->iothub_callback.reported_state_cb_info.reportedStateCallback)
                 {
-                    reported_state_callback(queued_cb->iothub_callback.reported_state_cb_info.status_code, queued_cb->userContextCallback);
+                    queued_cb->iothub_callback.reported_state_cb_info.reportedStateCallback(queued_cb->iothub_callback.reported_state_cb_info.status_code, queued_cb->userContextCallback);
                 }
                 break;
             case CALLBACK_TYPE_CONNECTION_STATUS:
@@ -822,6 +826,9 @@ static int ScheduleWork_Thread(void* threadArgument)
 {
     IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientInstance = (IOTHUB_CLIENT_CORE_INSTANCE*)threadArgument;
     unsigned int sleeptime_in_ms = DO_WORK_FREQ_DEFAULT;
+
+    srand((unsigned int)get_time(NULL));
+
     while (1)
     {
         if (Lock(iotHubClientInstance->LockHandle) == LOCK_OK)
@@ -1077,8 +1084,6 @@ static IOTHUB_CLIENT_CORE_INSTANCE* create_iothub_instance(CREATE_HUB_INSTANCE_T
                 {
                     result->ThreadHandle = NULL;
                     result->desired_state_callback = NULL;
-                    result->event_confirm_callback = NULL;
-                    result->reported_state_callback = NULL;
                     result->devicetwin_user_context = NULL;
                     result->connection_status_callback = NULL;
                     result->connection_status_user_context = NULL;
@@ -1293,9 +1298,9 @@ void IoTHubClientCore_Destroy(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle)
                 }
                 else if (queue_cb_info->type == CALLBACK_TYPE_EVENT_CONFIRM)
                 {
-                    if (iotHubClientInstance->event_confirm_callback)
+                    if (queue_cb_info->iothub_callback.event_confirm_cb_info.eventConfirmationCallback)
                     {
-                        iotHubClientInstance->event_confirm_callback(queue_cb_info->iothub_callback.event_confirm_cb_info.confirm_result, queue_cb_info->userContextCallback);
+                        queue_cb_info->iothub_callback.event_confirm_cb_info.eventConfirmationCallback(queue_cb_info->iothub_callback.event_confirm_cb_info.confirm_result, queue_cb_info->userContextCallback);
                     }
                 }
                 else if (queue_cb_info->type == CALLBACK_TYPE_DEVICE_STREAM)
@@ -1370,11 +1375,6 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SendEventAsync(IOTHUB_CLIENT_CORE_HANDLE i
             }
             else
             {
-                if (iotHubClientInstance->created_with_transport_handle == 0)
-                {
-                    iotHubClientInstance->event_confirm_callback = eventConfirmationCallback;
-                }
-
                 if (iotHubClientInstance->created_with_transport_handle != 0 || eventConfirmationCallback == NULL)
                 {
                     result = IoTHubClientCore_LL_SendEventAsync(iotHubClientInstance->IoTHubClientLLHandle, eventMessageHandle, eventConfirmationCallback, userContextCallback);
@@ -1392,6 +1392,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SendEventAsync(IOTHUB_CLIENT_CORE_HANDLE i
                     {
                         queue_context->iotHubClientHandle = iotHubClientInstance;
                         queue_context->userContextCallback = userContextCallback;
+                        queue_context->callbackFunction.eventConfirmationCallback = eventConfirmationCallback;
                         /* Codes_SRS_IOTHUBCLIENT_01_012: [IoTHubClient_SendEventAsync shall call IoTHubClientCore_LL_SendEventAsync, while passing the IoTHubClientCore_LL handle created by IoTHubClient_Create and the parameters eventMessageHandle, eventConfirmationCallback and userContextCallback.] */
                         /* Codes_SRS_IOTHUBCLIENT_01_013: [When IoTHubClientCore_LL_SendEventAsync is called, IoTHubClient_SendEventAsync shall return the result of IoTHubClientCore_LL_SendEventAsync.] */
                         result = IoTHubClientCore_LL_SendEventAsync(iotHubClientInstance->IoTHubClientLLHandle, eventMessageHandle, iothub_ll_event_confirm_callback, queue_context);
@@ -1925,11 +1926,6 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SendReportedState(IOTHUB_CLIENT_CORE_HANDL
             }
             else
             {
-                if (iotHubClientInstance->created_with_transport_handle == 0)
-                {
-                    iotHubClientInstance->reported_state_callback = reportedStateCallback;
-                }
-
                 if (iotHubClientInstance->created_with_transport_handle != 0 || reportedStateCallback == NULL)
                 {
                     /*Codes_SRS_IOTHUBCLIENT_10_017: [** `IoTHubClient_SendReportedState` shall call `IoTHubClientCore_LL_SendReportedState`, while passing the `IoTHubClientCore_LL handle` created by `IoTHubClientCore_LL_Create` along with the parameters `reportedState`, `size`, `reportedStateCallback`, and `userContextCallback`. ]*/
@@ -1949,6 +1945,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SendReportedState(IOTHUB_CLIENT_CORE_HANDL
                     {
                         queue_context->iotHubClientHandle = iotHubClientInstance;
                         queue_context->userContextCallback = userContextCallback;
+                        queue_context->callbackFunction.reportedStateCallback = reportedStateCallback;
                         /*Codes_SRS_IOTHUBCLIENT_10_017: [** `IoTHubClient_SendReportedState` shall call `IoTHubClientCore_LL_SendReportedState`, while passing the `IoTHubClientCore_LL handle` created by `IoTHubClientCore_LL_Create` along with the parameters `reportedState`, `size`, `iothub_ll_reported_state_callback` and IOTHUB_QUEUE_CONTEXT variable. ]*/
                         /*Codes_SRS_IOTHUBCLIENT_10_018: [** When `IoTHubClientCore_LL_SendReportedState` is called, `IoTHubClient_SendReportedState` shall return the result of `IoTHubClientCore_LL_SendReportedState`. **]*/
                         result = IoTHubClientCore_LL_SendReportedState(iotHubClientInstance->IoTHubClientLLHandle, reportedState, size, iothub_ll_reported_state_callback, queue_context);
@@ -2367,6 +2364,8 @@ static int uploadingThread(void *data)
     IOTHUB_CLIENT_FILE_UPLOAD_RESULT upload_result;
     HTTPWORKER_THREAD_INFO* threadInfo = (HTTPWORKER_THREAD_INFO*)data;
 
+    srand((unsigned int)get_time(NULL));
+
     /*it so happens that IoTHubClientCore_LL_UploadToBlob is thread-safe because there's no saved state in the handle and there are no globals, so no need to protect it*/
     /*not having it protected means multiple simultaneous uploads can happen*/
     /*Codes_SRS_IOTHUBCLIENT_02_054: [ The thread shall call IoTHubClientCore_LL_UploadToBlob passing the information packed in the structure. ]*/
@@ -2450,6 +2449,8 @@ static int uploadMultipleBlock_thread(void* data)
 
     /*Codes_SRS_IOTHUBCLIENT_99_078: [ The thread shall call `IoTHubClientCore_LL_UploadMultipleBlocksToBlob` or `IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx` passing the information packed in the structure. ]*/
     IOTHUB_CLIENT_RESULT result;
+
+    srand((unsigned int)get_time(NULL));
 
     if (threadInfo->uploadBlobMultiblockSavedData.getDataCallback != NULL)
     {
@@ -2635,6 +2636,8 @@ static int uploadMethodInvoke_thread(void* data)
     IOTHUB_CLIENT_RESULT result;
 
     HTTPWORKER_THREAD_INFO* threadInfo = (HTTPWORKER_THREAD_INFO*)data;
+
+    srand((unsigned int)get_time(NULL));
 
     int responseStatus;
     unsigned char* responsePayload = NULL;
