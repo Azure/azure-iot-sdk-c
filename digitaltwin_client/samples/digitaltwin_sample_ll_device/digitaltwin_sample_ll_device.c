@@ -97,14 +97,14 @@ static const char* digitaltwinSample_CustomProvisioningData = "{"
                                                       "}";
 
 // Names of JSON fields and possible values for configuration of this sample
-static const char* ConfigOption_SecurityType = "securityType";
-static const char* ConfigOption_ConnectionString = "connectionString";
-static const char* ConfigOption_IDScope = "IDScope";
-static const char* ConfigOption_DeviceId = "deviceId";
-static const char* ConfigOption_DeviceKey = "deviceKey";
-static const char* ConfigValue_ConnectionString = "ConnectionString";
-static const char* ConfigValue_DPSSymmetricKey = "DPS_SymmetricKey";
-static const char* ConfigValue_DPSSX509 = "DPS_X509";
+static const char ConfigOption_SecurityType[] = "securityType";
+static const char ConfigOption_ConnectionString[] = "connectionString";
+static const char ConfigOption_IDScope[] = "IDScope";
+static const char ConfigOption_DeviceId[] = "deviceId";
+static const char ConfigOption_DeviceKey[] = "deviceKey";
+static const char ConfigValue_ConnectionString[] = "ConnectionString";
+static const char ConfigValue_DPSSymmetricKey[] = "DPS_SymmetricKey";
+static const char ConfigValue_DPSSX509[] = "DPS_X509";
 
 
 // Number of DigitalTwin Interfaces that this DigitalTwin device supports.
@@ -432,7 +432,7 @@ static int DigitalTwinSampleDevice_LL_ParseConfigFile(const char* configFileName
     }
     else
     {
-        if (strcmp(securityType, ConfigValue_ConnectionString) == 0)
+        if (strncmp(securityType, ConfigValue_ConnectionString, sizeof(ConfigValue_ConnectionString) -1) == 0)
         {
             if ((digitaltwinSampleConfig.connectionString = json_object_get_string(json_config_object, ConfigOption_ConnectionString)) == NULL)
             {
@@ -445,7 +445,7 @@ static int DigitalTwinSampleDevice_LL_ParseConfigFile(const char* configFileName
                 result = 0;
             }
         }
-        else if (strcmp(securityType, ConfigValue_DPSSymmetricKey) == 0)
+        else if (strncmp(securityType, ConfigValue_DPSSymmetricKey, sizeof(ConfigValue_DPSSymmetricKey) - 1) == 0)
         {
             if (((digitaltwinSampleConfig.IDScope = json_object_get_string(json_config_object, ConfigOption_IDScope)) == NULL) ||
                 ((digitaltwinSampleConfig.deviceId = json_object_get_string(json_config_object, ConfigOption_DeviceId)) == NULL) ||
@@ -460,7 +460,7 @@ static int DigitalTwinSampleDevice_LL_ParseConfigFile(const char* configFileName
                 result = 0;
             }
         }
-        else if (strcmp(securityType, ConfigValue_DPSSX509) == 0)
+        else if (strncmp(securityType, ConfigValue_DPSSX509, sizeof(ConfigValue_DPSSX509) - 1) == 0)
         {
             if ((digitaltwinSampleConfig.IDScope = json_object_get_string(json_config_object, ConfigOption_IDScope)) == NULL)
             {
