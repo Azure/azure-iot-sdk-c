@@ -8,11 +8,14 @@ compileAsC99()
 set(theseTestsName commanddecoder_ut)
 
 set(${theseTestsName}_test_files
-${theseTestsName}.c
+    ${theseTestsName}.c
 )
 
+include_directories(${SHARED_UTIL_REAL_TEST_FOLDER})
+
 set(${theseTestsName}_c_files
-../../src/commanddecoder.c
+    ../../src/commanddecoder.c
+    ${SHARED_UTIL_REAL_TEST_FOLDER}/real_crt_abstractions.c
 )
 
 set(${theseTestsName}_h_files

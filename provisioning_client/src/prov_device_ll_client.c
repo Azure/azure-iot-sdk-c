@@ -581,7 +581,14 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
                         else
                         {
                             const char* nonce_field = json_value_get_string(auth_key);
-                            if ((result->authorization_key = Azure_Base64_Decode(nonce_field)) == NULL)
+                            if (nonce_field == NULL)
+                            {
+                                LogError("failure getting nonce field from json");
+                                prov_info->error_reason = PROV_DEVICE_RESULT_MEMORY;
+                                free(result);
+                                result = NULL;
+                            }
+                            else if ((result->authorization_key = Azure_Base64_Decode(nonce_field)) == NULL)
                             {
                                 LogError("failure creating buffer nonce field");
                                 prov_info->error_reason = PROV_DEVICE_RESULT_MEMORY;
@@ -857,6 +864,8 @@ PROV_DEVICE_LL_HANDLE Prov_Device_LL_Create(const char* uri, const char* id_scop
     }
     else
     {
+        srand((unsigned int)get_time(NULL));
+
         /* Codes_SRS_PROV_CLIENT_07_002: [ Prov_Device_LL_CreateFromUri shall allocate a PROV_DEVICE_LL_HANDLE and initialize all members. ] */
         result = (PROV_INSTANCE_INFO*)malloc(sizeof(PROV_INSTANCE_INFO));
         if (result == NULL)
@@ -871,6 +880,7 @@ PROV_DEVICE_LL_HANDLE Prov_Device_LL_Create(const char* uri, const char* id_scop
             result->prov_state = CLIENT_STATE_READY;
             result->retry_after_value = PROV_GET_THROTTLE_TIME;
             result->prov_transport_protocol = protocol();
+            result->error_reason = PROV_DEVICE_RESULT_OK;
 
             /* Codes_SRS_PROV_CLIENT_07_034: [ Prov_Device_LL_Create shall construct a id_scope by base64 encoding the uri. ] */
             if (mallocAndStrcpy_s(&result->scope_id, id_scope) != 0)

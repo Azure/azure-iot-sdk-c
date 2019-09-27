@@ -183,8 +183,8 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(PROV_DEVICE_REG_STATUS, PROV_DEVICE_REG_STATUS_VALUE
 TEST_DEFINE_ENUM_TYPE(PROV_AUTH_RESULT, PROV_AUTH_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(PROV_AUTH_RESULT, PROV_AUTH_RESULT_VALUES);
 
-TEST_DEFINE_ENUM_TYPE(TRANSPORT_HSM_TYPE, HSM_AUTH_TYPE_VALUES);
-IMPLEMENT_UMOCK_C_ENUM_TYPE(TRANSPORT_HSM_TYPE, HSM_AUTH_TYPE_VALUES);
+TEST_DEFINE_ENUM_TYPE(TRANSPORT_HSM_TYPE, TRANSPORT_HSM_TYPE_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(TRANSPORT_HSM_TYPE, TRANSPORT_HSM_TYPE_VALUES);
 
 #ifdef __cplusplus
 extern "C"
@@ -569,20 +569,6 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         TEST_MUTEX_RELEASE(g_testByTest);
     }
 
-    static int should_skip_index(size_t current_index, const size_t skip_array[], size_t length)
-    {
-        int result = 0;
-        for (size_t index = 0; index < length; index++)
-        {
-            if (current_index == skip_array[index])
-            {
-                result = __LINE__;
-                break;
-            }
-        }
-        return result;
-    }
-
     static void setup_retrieve_json_item_mocks(const char* return_item)
     {
         STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -592,21 +578,22 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
 
     static void setup_Prov_Device_LL_on_registration_data_mocks(void)
     {
-        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG)).CallCannotFail();
+        STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG)).CallCannotFail();
         STRICT_EXPECTED_CALL(prov_auth_import_key(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(on_prov_register_device_callback(PROV_DEVICE_RESULT_OK, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     }
 
     static void setup_Prov_Device_LL_Create_mocks(PROV_AUTH_TYPE type)
     {
+        STRICT_EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).CallCannotFail();
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(prov_auth_create());
         STRICT_EXPECTED_CALL(tickcounter_create());
-        STRICT_EXPECTED_CALL(prov_auth_get_type(IGNORED_PTR_ARG)).SetReturn(type);
+        STRICT_EXPECTED_CALL(prov_auth_get_type(IGNORED_PTR_ARG)).SetReturn(type).CallCannotFail();
         STRICT_EXPECTED_CALL(prov_transport_create(IGNORED_PTR_ARG, type == PROV_AUTH_TYPE_TPM ? TRANSPORT_HSM_TYPE_TPM : TRANSPORT_HSM_TYPE_X509, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CallCannotFail();
     }
 
     static void setup_Prov_Device_LL_Register_Device_mocks(bool tpm)
@@ -659,11 +646,11 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
 
     static void setup_challenge_callback_mocks(void)
     {
-        STRICT_EXPECTED_CALL(get_time(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).CallCannotFail();
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(prov_auth_import_key(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_NUM_ARG)).CallCannotFail();
         STRICT_EXPECTED_CALL(prov_auth_construct_sas_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
@@ -732,7 +719,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
     }
 
-    static void setup_parse_json_assigned_mocks(bool data_return)
+    static void setup_parse_json_assigned_mocks(bool use_tpm, bool data_return)
     {
         STRICT_EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
@@ -741,11 +728,14 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_PTR_ARG)).SetReturn(PROV_ASSIGNED_STATUS);
 
         STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_PTR_ARG)).SetReturn(PROV_ASSIGNED_STATUS);
-        STRICT_EXPECTED_CALL(Azure_Base64_Decode(IGNORED_PTR_ARG));
 
+        if (use_tpm)
+        {
+            STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(json_value_get_string(IGNORED_PTR_ARG)).SetReturn(PROV_ASSIGNED_STATUS);
+            STRICT_EXPECTED_CALL(Azure_Base64_Decode(IGNORED_PTR_ARG));
+        }
         setup_retrieve_json_item_mocks(TEST_STRING_VALUE);
         setup_retrieve_json_item_mocks(TEST_STRING_VALUE);
 
@@ -756,7 +746,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         }
         else
         {
-            STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(NULL);
+            STRICT_EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(NULL).CallCannotFail();
         }
 
         STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
@@ -808,27 +798,20 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
 
         umock_c_negative_tests_snapshot();
 
-        size_t calls_cannot_fail[] = { 4, 6 };
-
         //act
         size_t count = umock_c_negative_tests_call_count();
         for (size_t index = 0; index < count; index++)
         {
-            if (should_skip_index(index, calls_cannot_fail, sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0])) != 0)
+            if (umock_c_negative_tests_can_call_fail(index))
             {
-                continue;
+                umock_c_negative_tests_reset();
+                umock_c_negative_tests_fail_call(index);
+
+                PROV_DEVICE_LL_HANDLE result = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
+
+                // assert
+                ASSERT_IS_NULL(result, "Prov_Device_LL_Create failure in test %zu/%zu", index, count);
             }
-
-            umock_c_negative_tests_reset();
-            umock_c_negative_tests_fail_call(index);
-
-            char tmp_msg[64];
-            sprintf(tmp_msg, "Prov_Device_LL_Create failure in test %zu/%zu", index, count);
-
-            PROV_DEVICE_LL_HANDLE result = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
-
-            // assert
-            ASSERT_IS_NULL(result, tmp_msg);
         }
 
         //cleanup
@@ -952,28 +935,21 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
 
         umock_c_negative_tests_snapshot();
 
-        size_t calls_cannot_fail[] = { 4, 5 };
-
         //act
         size_t count = umock_c_negative_tests_call_count();
         for (size_t index = 0; index < count; index++)
         {
-            if (should_skip_index(index, calls_cannot_fail, sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0])) != 0)
+            if (umock_c_negative_tests_can_call_fail(index))
             {
-                continue;
+                umock_c_negative_tests_reset();
+                umock_c_negative_tests_fail_call(index);
+
+                //act
+                PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
+
+                //assert
+                ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_ERROR, prov_result, "Prov_Device_LL_Register_Device failure in test %zu/%zu", index, count);
             }
-
-            umock_c_negative_tests_reset();
-            umock_c_negative_tests_fail_call(index);
-
-            char tmp_msg[64];
-            sprintf(tmp_msg, "Prov_Device_LL_Register_Device failure in test %zu/%zu", index, count);
-
-            //act
-            PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-
-            //assert
-            ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_ERROR, prov_result, tmp_msg);
         }
 
         //cleanup
@@ -995,28 +971,21 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
 
         umock_c_negative_tests_snapshot();
 
-        size_t calls_cannot_fail[] = { 4, 5, 7, 8 };
-
         //act
         size_t count = umock_c_negative_tests_call_count();
         for (size_t index = 0; index < count; index++)
         {
-            if (should_skip_index(index, calls_cannot_fail, sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0])) != 0)
+            if (umock_c_negative_tests_can_call_fail(index))
             {
-                continue;
+                umock_c_negative_tests_reset();
+                umock_c_negative_tests_fail_call(index);
+
+                //act
+                PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
+
+                //assert
+                ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_ERROR, prov_result, "Prov_Device_LL_Register_Device failure in test %zu/%zu", index, count);
             }
-
-            umock_c_negative_tests_reset();
-            umock_c_negative_tests_fail_call(index);
-
-            char tmp_msg[64];
-            sprintf(tmp_msg, "Prov_Device_LL_Register_Device failure in test %zu/%zu", index, count);
-
-            //act
-            PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-
-            //assert
-            ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_ERROR, prov_result, tmp_msg);
         }
 
         //cleanup
@@ -1077,31 +1046,24 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
 
         umock_c_negative_tests_snapshot();
 
-        size_t calls_cannot_fail[] = { 0 };
-
         //act
         size_t count = umock_c_negative_tests_call_count();
         for (size_t index = 0; index < count; index++)
         {
-            if (should_skip_index(index, calls_cannot_fail, sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0])) != 0)
+            if (umock_c_negative_tests_can_call_fail(index))
             {
-                continue;
+                (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
+
+                umock_c_negative_tests_reset();
+                umock_c_negative_tests_fail_call(index);
+
+                //act
+                Prov_Device_LL_DoWork(handle);
+                // To Get the device back in registration mode
+                Prov_Device_LL_DoWork(handle);
+
+                //assert
             }
-
-            (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
-
-            umock_c_negative_tests_reset();
-            umock_c_negative_tests_fail_call(index);
-
-            char tmp_msg[64];
-            sprintf(tmp_msg, "Prov_Device_LL_DoWork failure in test %zu/%zu", index, count);
-
-            //act
-            Prov_Device_LL_DoWork(handle);
-            // To Get the device back in registration mode
-            Prov_Device_LL_DoWork(handle);
-
-            //assert
         }
 
         //cleanup
@@ -1127,28 +1089,20 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
 
         umock_c_negative_tests_snapshot();
 
-        size_t calls_cannot_fail[] = { 3, 4, 6, 9, 11 };
-
         //act
         size_t count = umock_c_negative_tests_call_count();
         for (size_t index = 0; index < count; index++)
         {
-            if (should_skip_index(index, calls_cannot_fail, sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0])) != 0)
+            if (umock_c_negative_tests_can_call_fail(index))
             {
-                continue;
+                umock_c_negative_tests_reset();
+                umock_c_negative_tests_fail_call(index);
+
+                result = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
+
+                //assert
+                ASSERT_IS_NULL(result, "g_json_parse_cb failure in test %zu/%zu", index, count);
             }
-
-            umock_c_negative_tests_reset();
-            umock_c_negative_tests_fail_call(index);
-
-            char tmp_msg[64];
-            sprintf(tmp_msg, "g_json_parse_cb failure in test %zu/%zu", index, count);
-
-
-            result = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
-
-            //assert
-            ASSERT_IS_NULL(result, tmp_msg);
         }
 
         //cleanup
@@ -1235,6 +1189,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
         //arrange
+        setup_Prov_Device_LL_Create_mocks(PROV_AUTH_TYPE_X509);
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
         g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
@@ -1245,24 +1200,20 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
 
         umock_c_negative_tests_snapshot();
 
-        size_t calls_cannot_fail[] = { 3, 4, 6, 8 };
-
         //act
         size_t count = umock_c_negative_tests_call_count();
         for (size_t index = 0; index < count; index++)
         {
-            if (should_skip_index(index, calls_cannot_fail, sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0])) != 0)
+            if (umock_c_negative_tests_can_call_fail(index))
             {
-                continue;
+                umock_c_negative_tests_reset();
+                umock_c_negative_tests_fail_call(index);
+
+                result = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
+
+                //assert
+                ASSERT_IS_NULL(result, "g_json_parse_cb failure in test %zu/%zu", index, count);
             }
-
-            umock_c_negative_tests_reset();
-            umock_c_negative_tests_fail_call(index);
-
-            result = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
-
-            //assert
-            ASSERT_IS_NULL(result, "g_json_parse_cb failure in test %zu/%zu", index, count);
         }
 
         //cleanup
@@ -1280,7 +1231,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         Prov_Device_LL_DoWork(handle);
         umock_c_reset_all_calls();
 
-        setup_parse_json_assigned_mocks(false);
+        setup_parse_json_assigned_mocks(true, false);
 
         //act
         result = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
@@ -1305,37 +1256,31 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
         //arrange
+        setup_Prov_Device_LL_Create_mocks(PROV_AUTH_TYPE_X509);
         PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
         g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
         Prov_Device_LL_DoWork(handle);
         umock_c_reset_all_calls();
 
-        setup_parse_json_assigned_mocks(false);
+        setup_parse_json_assigned_mocks(false, false);
 
         umock_c_negative_tests_snapshot();
-
-        size_t calls_cannot_fail[] = { 3, 4, 8, 11, 14, 16, 17 };
 
         //act
         size_t count = umock_c_negative_tests_call_count();
         for (size_t index = 0; index < count; index++)
         {
-            if (should_skip_index(index, calls_cannot_fail, sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0])) != 0)
+            if (umock_c_negative_tests_can_call_fail(index))
             {
-                continue;
+                umock_c_negative_tests_reset();
+                umock_c_negative_tests_fail_call(index);
+
+                result = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
+
+                //assert
+                ASSERT_IS_NULL(result, "g_json_parse_cb failure in test %zu/%zu", index, count);
             }
-
-            umock_c_negative_tests_reset();
-            umock_c_negative_tests_fail_call(index);
-
-            char tmp_msg[64];
-            sprintf(tmp_msg, "g_json_parse_cb failure in test %zu/%zu", index, count);
-
-            result = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
-
-            //assert
-            ASSERT_IS_NULL(result, tmp_msg);
         }
 
         //cleanup
@@ -1493,27 +1438,20 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
 
         umock_c_negative_tests_snapshot();
 
-        size_t calls_cannot_fail[] = { 0, 4, 6, 7 };
-
         //act
         size_t count = umock_c_negative_tests_call_count();
         for (size_t index = 0; index < count; index++)
         {
-            if (should_skip_index(index, calls_cannot_fail, sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0])) != 0)
+            if (umock_c_negative_tests_can_call_fail(index))
             {
-                continue;
+                umock_c_negative_tests_reset();
+                umock_c_negative_tests_fail_call(index);
+
+                char* result = g_challenge_callback(TEST_DATA, TEST_DATA_LEN, TEST_STRING_HANDLE_VALUE, g_challenge_ctx);
+
+                //assert
+                ASSERT_IS_NULL(result, "g_challenge_callback failure in test %zu/%zu", index, count);
             }
-
-            umock_c_negative_tests_reset();
-            umock_c_negative_tests_fail_call(index);
-
-            char tmp_msg[64];
-            sprintf(tmp_msg, "g_challenge_callback failure in test %zu/%zu", index, count);
-
-            char* result = g_challenge_callback(TEST_DATA, TEST_DATA_LEN, TEST_STRING_HANDLE_VALUE, g_challenge_ctx);
-
-            //assert
-            ASSERT_IS_NULL(result, tmp_msg);
         }
 
         //cleanup
@@ -1617,27 +1555,20 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
 
         umock_c_negative_tests_snapshot();
 
-        size_t calls_cannot_fail[] = { 1, 2, 5 };
-
         //act
         size_t count = umock_c_negative_tests_call_count();
         for (size_t index = 0; index < count; index++)
         {
-            if (should_skip_index(index, calls_cannot_fail, sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0])) != 0)
+            if (umock_c_negative_tests_can_call_fail(index))
             {
-                continue;
+                umock_c_negative_tests_reset();
+                umock_c_negative_tests_fail_call(index);
+
+                //act
+                g_registration_callback(PROV_DEVICE_TRANSPORT_RESULT_OK, TEST_BUFFER_HANDLE_VALUE, TEST_IOTHUB, TEST_DEVICE_ID, g_registration_ctx);
+
+                //assert
             }
-
-            umock_c_negative_tests_reset();
-            umock_c_negative_tests_fail_call(index);
-
-            char tmp_msg[64];
-            sprintf(tmp_msg, "g_registration_callback failure in test %zu/%zu", index, count);
-
-            //act
-            g_registration_callback(PROV_DEVICE_TRANSPORT_RESULT_OK, TEST_BUFFER_HANDLE_VALUE, TEST_IOTHUB, TEST_DEVICE_ID, g_registration_ctx);
-
-            //assert
         }
 
         //cleanup
@@ -2068,7 +1999,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         Prov_Device_LL_DoWork(handle);
         umock_c_reset_all_calls();
 
-        setup_parse_json_assigned_mocks(true);
+        setup_parse_json_assigned_mocks(true, true);
         PROV_JSON_INFO* parse_info = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
         umock_c_reset_all_calls();
 
@@ -2094,7 +2025,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         Prov_Device_LL_DoWork(handle);
         umock_c_reset_all_calls();
 
-        setup_parse_json_assigned_mocks(false);
+        setup_parse_json_assigned_mocks(true, false);
         PROV_JSON_INFO* parse_info = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
         umock_c_reset_all_calls();
 

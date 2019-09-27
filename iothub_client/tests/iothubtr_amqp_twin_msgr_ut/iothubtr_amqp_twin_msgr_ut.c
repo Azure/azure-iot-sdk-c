@@ -57,11 +57,11 @@ void real_free(void* ptr)
 
 #include "internal/iothubtransport_amqp_twin_messenger.h"
 
-MU_DEFINE_ENUM_STRINGS(AMQP_MESSENGER_SEND_STATUS, AMQP_MESSENGER_SEND_STATUS_VALUES);
-MU_DEFINE_ENUM_STRINGS(AMQP_MESSENGER_SEND_RESULT, AMQP_MESSENGER_SEND_RESULT_VALUES);
-MU_DEFINE_ENUM_STRINGS(AMQP_MESSENGER_REASON, AMQP_MESSENGER_REASON_VALUES);
-MU_DEFINE_ENUM_STRINGS(AMQP_MESSENGER_DISPOSITION_RESULT, AMQP_MESSENGER_DISPOSITION_RESULT_VALUES);
-MU_DEFINE_ENUM_STRINGS(AMQP_MESSENGER_STATE, AMQP_MESSENGER_STATE_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(AMQP_MESSENGER_SEND_STATUS, AMQP_MESSENGER_SEND_STATUS_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(AMQP_MESSENGER_SEND_RESULT, AMQP_MESSENGER_SEND_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(AMQP_MESSENGER_REASON, AMQP_MESSENGER_REASON_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(AMQP_MESSENGER_DISPOSITION_RESULT, AMQP_MESSENGER_DISPOSITION_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(AMQP_MESSENGER_STATE, AMQP_MESSENGER_STATE_VALUES);
 
 typedef enum TWIN_OPERATION_TYPE_TAG
 {
@@ -126,7 +126,6 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 #define TWIN_RESOURCE_DESIRED                                "/notifications/twin/properties/desired"
 #define TWIN_RESOURCE_REPORTED                               "/properties/reported"
 
-#define CLIENT_VERSION_PROPERTY_NAME                         "com.microsoft:client-version"
 #define TWIN_CORRELATION_ID_PROPERTY_NAME                    "com.microsoft:channel-correlation-id"
 #define TWIN_API_VERSION_PROPERTY_NAME                       "com.microsoft:api-version"
 #define TWIN_API_VERSION_NUMBER                              "2016-11-14"
@@ -268,6 +267,10 @@ extern "C"
     void real_CONSTBUFFER_IncRef(CONSTBUFFER_HANDLE constbufferHandle);
     const CONSTBUFFER* real_CONSTBUFFER_GetContent(CONSTBUFFER_HANDLE constbufferHandle);
     void real_CONSTBUFFER_DecRef(CONSTBUFFER_HANDLE constbufferHandle);
+
+    CONSTBUFFER_HANDLE real_CONSTBUFFER_CreateWithMoveMemory(unsigned char* source, size_t size);
+    CONSTBUFFER_HANDLE real_CONSTBUFFER_CreateWithCustomFree(const unsigned char* source, size_t size, CONSTBUFFER_CUSTOM_FREE_FUNC customFreeFunc, void* customFreeFuncContext);
+    CONSTBUFFER_HANDLE real_CONSTBUFFER_CreateFromOffsetAndSize(CONSTBUFFER_HANDLE handle, size_t offset, size_t size);
 
 #ifdef __cplusplus
 }
@@ -459,6 +462,7 @@ static void set_twin_messenger_report_state_async_expected_calls(CONSTBUFFER_HAN
 
 static void set_twin_messenger_start_expected_calls()
 {
+    STRICT_EXPECTED_CALL(amqp_messenger_set_option(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(amqp_messenger_start(IGNORED_PTR_ARG, TEST_SESSION_HANDLE));
 }
 
@@ -777,6 +781,9 @@ static void register_global_mock_returns()
 
     REGISTER_GLOBAL_MOCK_RETURN(amqp_messenger_subscribe_for_messages, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqp_messenger_subscribe_for_messages, 1);
+
+    REGISTER_GLOBAL_MOCK_RETURN(amqp_messenger_set_option, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqp_messenger_set_option, 1);
 
     REGISTER_GLOBAL_MOCK_RETURN(amqp_messenger_start, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqp_messenger_start, 1);
@@ -1373,6 +1380,7 @@ TEST_FUNCTION(twin_msgr_start_success)
     twin_messenger_destroy(handle);
 }
 
+// Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_116: [amqp_messenger_set_option() shall be invoked passing the OPTION_PRODUCT_INFO and product info returned from the prod_info callback]
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_047: [If amqp_messenger_start() fails, twin_messenger_start() fail and return a non-zero value]
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_049: [If any failures occurr, `twin_msgr->state` shall be set to TWIN_MESSENGER_STATE_ERROR, and `twin_msgr->on_state_changed_callback` invoked if provided]
 TEST_FUNCTION(twin_msgr_start_failure_checks)
@@ -1387,17 +1395,30 @@ TEST_FUNCTION(twin_msgr_start_failure_checks)
     set_twin_messenger_start_expected_calls();
     umock_c_negative_tests_snapshot();
 
-    umock_c_negative_tests_reset();
-    umock_c_negative_tests_fail_call(0);
+    size_t count = umock_c_negative_tests_call_count();
 
     // act
-    int result = twin_messenger_start(handle, TEST_SESSION_HANDLE);
+    for (size_t index = 0; index < count; index++)
+    {
+        if (!umock_c_negative_tests_can_call_fail(index))
+        {
+            continue;
+        }
+
+        umock_c_negative_tests_reset();
+        umock_c_negative_tests_fail_call(index);
+
+        char tmp_msg[64];
+        sprintf(tmp_msg, "Failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
+        int result = twin_messenger_start(handle, TEST_SESSION_HANDLE);
+
+        // assert
+        ASSERT_ARE_NOT_EQUAL(int, 0, result, tmp_msg);
+    }
 
     // assert
-    ASSERT_ARE_NOT_EQUAL(int, 0, result);
     ASSERT_ARE_EQUAL(int, TWIN_MESSENGER_STATE_STARTING, TEST_on_state_changed_callback_previous_state);
     ASSERT_ARE_EQUAL(int, TWIN_MESSENGER_STATE_ERROR, TEST_on_state_changed_callback_new_state);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     // cleanup
     twin_messenger_destroy(handle);

@@ -10,7 +10,7 @@ include_directories(${SERIALIZER_INC_FOLDER})
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
 
 set(${theseTestsName}_test_files
-${theseTestsName}.c
+    ${theseTestsName}.c
 )
 
 set(${theseTestsName}_c_files
