@@ -29,6 +29,7 @@ static void my_gballoc_free(void* ptr)
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/lock.h"
+#include "azure_c_shared_utility/agenttime.h"
 #include "parson.h"
 #ifdef __cplusplus
 #include <csignal>

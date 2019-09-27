@@ -631,6 +631,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_RETURN(platform_get_default_tlsio, TEST_TLSIO_INTERFACE_DESCRIPTION);
     REGISTER_GLOBAL_MOCK_RETURN(http_proxy_io_get_interface_description, TEST_HTTP_PROXY_IO_INTERFACE_DESCRIPTION);
 
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_MQTT_Common_GetTwinAsync, IOTHUB_CLIENT_OK);
+
     /* Tests_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_011: [ This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for its fields:
 
     IoTHubTransport_GetHostname = IoTHubTransportMqtt_WS_GetHostname
