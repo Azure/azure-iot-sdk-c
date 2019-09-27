@@ -1062,11 +1062,14 @@ static void removeExpiredTwinRequestsFromList(PMQTTTRANSPORT_HANDLE_DATA transpo
 
         if (item_timed_out)
         {
-            if (msg_entry->userCallback != NULL)
+            if (msg_entry->device_twin_msg_type == RETRIEVE_PROPERTIES)
             {
-                msg_entry->userCallback(DEVICE_TWIN_UPDATE_COMPLETE, NULL, 0, msg_entry->userContext);
+                if (msg_entry->userCallback != NULL)
+                {
+                    msg_entry->userCallback(DEVICE_TWIN_UPDATE_COMPLETE, NULL, 0, msg_entry->userContext);
+                }
             }
-            else
+            else if (msg_entry->device_twin_msg_type == REPORTED_STATE)
             {
                 transport_data->transport_callbacks.twin_rpt_state_complete_cb(msg_entry->iothub_msg_id, STATUS_CODE_TIMEOUT_VALUE, transport_data->transport_ctx);
             }

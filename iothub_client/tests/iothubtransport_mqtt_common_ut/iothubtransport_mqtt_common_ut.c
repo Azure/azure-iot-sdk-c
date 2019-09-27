@@ -268,6 +268,9 @@ static METHOD_HANDLE g_method_handle_value = NULL;
 #define TEST_HOSTNAME_STRING_HANDLE    (STRING_HANDLE)0x5555
 #define TEST_RETRY_CONTROL_HANDLE      (RETRY_CONTROL_HANDLE)0x6666
 
+#define STATUS_CODE_TIMEOUT_VALUE           408
+
+
 #define DEFAULT_RETRY_POLICY                IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER
 #define DEFAULT_RETRY_TIMEOUT_IN_SECONDS    0
 
@@ -6124,6 +6127,127 @@ TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_twin_fail)
     IoTHubTransport_MQTT_Common_Destroy(handle);
     umock_c_negative_tests_deinit();
 }
+
+// Initial, common calls for a run through DoWork that is going to destined to have timeouts
+static void set_expected_calls_for_DoWork_for_twin_timeouts()
+{
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+}
+
+// Subscribe for a twin notification, which implicitly initiates a GetTwin, and have the request timeout.
+TEST_FUNCTION(IoTHubTransportMqtt_implicit_gettwin_timeout)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, NULL);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin(handle);
+
+    CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    QOS_VALUE QosValue[] = { DELIVER_AT_LEAST_ONCE };
+    SUBSCRIBE_ACK suback;
+    suback.packetId = 2;
+    suback.qosCount = 1;
+    suback.qosReturn = QosValue;
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_callbackCtx);
+
+    IoTHubTransport_MQTT_Common_DoWork(handle);    
+
+    umock_c_reset_all_calls();
+    set_expected_calls_for_DoWork_for_twin_timeouts();
+
+
+    // Set up the returned time such that it's far enough into the future to trigger time out related logic.
+    g_current_ms += 6*60*1000;
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .CopyOutArgumentBuffer(2, &g_current_ms, sizeof(g_current_ms));
+
+
+    // The initial message removed is the implicit GetTwin() created on a listen for twin subscription.
+    // This is not reported back to the application, by convention.
+    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+
+    // act
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+
+// Test that if a Reported Property is timed out, then appropriate application callbacks are notified
+TEST_FUNCTION(IoTHubTransportMqtt_reported_property_timeout)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, NULL);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin(handle);
+
+    CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    QOS_VALUE QosValue[] = { DELIVER_AT_LEAST_ONCE };
+    SUBSCRIBE_ACK suback;
+    suback.packetId = 2;
+    suback.qosCount = 1;
+    suback.qosReturn = QosValue;
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_callbackCtx);
+
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+    CONSTBUFFER cbuff;
+    cbuff.buffer = appMessage;
+    cbuff.size = appMsgSize;
+    STRICT_EXPECTED_CALL(CONSTBUFFER_GetContent(IGNORED_PTR_ARG)).SetReturn(&cbuff);
+    IOTHUB_DEVICE_TWIN device_twin;
+    device_twin.report_data_handle = TEST_CONST_BUFFER_HANDLE;
+    device_twin.item_id = 1;
+    IOTHUB_IDENTITY_INFO identity_info;
+    identity_info.device_twin = &device_twin;
+    (void)IoTHubTransport_MQTT_Common_ProcessItem(handle, IOTHUB_TYPE_DEVICE_TWIN, &identity_info);
+
+    umock_c_reset_all_calls();
+    set_expected_calls_for_DoWork_for_twin_timeouts();
+
+    // Set up the returned time such that it's far enough into the future to trigger time out related logic.
+    g_current_ms += 6*60*1000;
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .CopyOutArgumentBuffer(2, &g_current_ms, sizeof(g_current_ms));
+
+    // The initial message removed is the implicit GetTwin() created on a listen for twin subscription.
+    // This is not reported back to the application, by convention.
+    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+
+    // The next message was queued there by the UT's request to send a reported property.
+    STRICT_EXPECTED_CALL(Transport_Twin_ReportedStateComplete_Callback(1, STATUS_CODE_TIMEOUT_VALUE, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+
+    // act
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
 
 /* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_054: [ If type is IOTHUB_TYPE_DEVICE_TWIN, then on success if msg_type is RETRIEVE_PROPERTIES then mqtt_notification_callback shall call IoTHubClientCore_LL_RetrievePropertyComplete... ]*/
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties_succeed)
