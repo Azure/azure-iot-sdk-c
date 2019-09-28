@@ -13,12 +13,12 @@
 #include <inttypes.h>
 #endif
 
-void* my_gballoc_malloc(size_t t)
+static void* my_gballoc_malloc(size_t t)
 {
     return malloc(t);
 }
 
-void my_gballoc_free(void * t)
+static void my_gballoc_free(void * t)
 {
     free(t);
 }
@@ -774,6 +774,11 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         REGISTER_GLOBAL_MOCK_HOOK(Device_StartTransaction, my_Device_StartTransaction);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Device_StartTransaction, NULL);
 
+        REGISTER_GLOBAL_MOCK_RETURN(Device_IngestDesiredProperties, DEVICE_OK);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Device_IngestDesiredProperties, DEVICE_ERROR);
+        REGISTER_GLOBAL_MOCK_RETURN(Device_ExecuteCommand, EXECUTE_COMMAND_SUCCESS);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Device_ExecuteCommand, EXECUTE_COMMAND_ERROR);
+
         REGISTER_GLOBAL_MOCK_HOOK(Device_CancelTransaction, my_Device_CancelTransaction);
         REGISTER_GLOBAL_MOCK_HOOK(Create_AGENT_DATA_TYPE_from_SINT32, my_Create_AGENT_DATA_TYPE_from_SINT32);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Create_AGENT_DATA_TYPE_from_SINT32, AGENT_DATA_TYPES_JSON_ENCODER_ERRROR);
@@ -801,7 +806,11 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         REGISTER_GLOBAL_MOCK_HOOK(Device_DestroyTransaction_ReportedProperties, my_Device_DestroyTransaction_ReportedProperties);
 
-        REGISTER_GLOBAL_MOCK_HOOK(Schema_GetModelDesiredPropertyCount, my_Schema_GetModelDesiredPropertyCount);
+        
+        REGISTER_GLOBAL_MOCK_RETURN(Schema_AddDeviceRef, SCHEMA_OK);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_AddDeviceRef, SCHEMA_ERROR);
+
+            REGISTER_GLOBAL_MOCK_HOOK(Schema_GetModelDesiredPropertyCount, my_Schema_GetModelDesiredPropertyCount);
         REGISTER_GLOBAL_MOCK_HOOK(Schema_GetModelModelCount, my_Schema_GetModelModelCount);
 
 
@@ -1951,11 +1960,10 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             .IgnoreArgument_desiredPropertyCount(); /*0 desired properties*/
         STRICT_EXPECTED_CALL(Schema_GetModelModelCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
             .IgnoreArgument_modelCount(); /*0 model in model*/
-        STRICT_EXPECTED_CALL(Schema_ReleaseDeviceRef(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(Schema_DestroyIfUnused(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(Schema_ReleaseDeviceRef(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Schema_DestroyIfUnused(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(Device_Destroy(TEST_DEVICE_HANDLE));
+
         // act
         CodeFirst_DestroyDevice(device);
 

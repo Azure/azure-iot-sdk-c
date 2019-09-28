@@ -13,27 +13,15 @@
 #pragma warning(disable: 4054) /* MSC incorrectly fires this */
 #endif
 
-void* my_gballoc_malloc(size_t t)
+static void* my_gballoc_malloc(size_t t)
 {
     return malloc(t);
 }
 
-void my_gballoc_free(void * t)
+static void my_gballoc_free(void * t)
 {
     free(t);
 }
-
-#define GBALLOC_H
-/*want crt_abstractions to use real malloc*/
-#define mallocAndStrcpy_s real_mallocAndStrcpy_s
-#define unsignedIntToString real_unsignedIntToString
-#define size_tToString real_size_tToString
-#include "crt_abstractions.c"
-#undef mallocAndStrcpy_s
-#undef unsignedIntToString
-#undef size_tToString
-#undef CRT_ABSTRACTIONS_H
-#undef GBALLOC_H
 
 #include "umock_c/umock_c.h"
 #include "umock_c/umocktypes_charptr.h"
@@ -135,7 +123,7 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_RESULT_VAL
 TEST_DEFINE_ENUM_TYPE(SCHEMA_ELEMENT_TYPE, SCHEMA_ELEMENT_TYPE_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(SCHEMA_ELEMENT_TYPE, SCHEMA_ELEMENT_TYPE_VALUES);
 
-MU_DEFINE_ENUM_STRINGS(SCHEMA_ELEMENT_TYPE, SCHEMA_ELEMENT_TYPE_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(SCHEMA_ELEMENT_TYPE, SCHEMA_ELEMENT_TYPE_VALUES);
 
 #define TEST_STRING_HANDLE_CHILD_NAME (STRING_HANDLE) 0x3
 #define TEST_DESIRED_PROPERTY_HANDLE_INT_FIELD (SCHEMA_DESIRED_PROPERTY_HANDLE)0x4
@@ -350,6 +338,13 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(MultiTree_GetChildByName, MULTITREE_ERROR);
         REGISTER_GLOBAL_MOCK_RETURN(MultiTree_GetValue, MULTITREE_OK);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(MultiTree_GetValue, MULTITREE_ERROR);
+        REGISTER_GLOBAL_MOCK_RETURN(MultiTree_DeleteChild, MULTITREE_OK);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(MultiTree_DeleteChild, MULTITREE_ERROR);
+        REGISTER_GLOBAL_MOCK_RETURN(MultiTree_GetChild, MULTITREE_OK);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(MultiTree_GetChild, MULTITREE_ERROR);
+        REGISTER_GLOBAL_MOCK_RETURN(MultiTree_GetName, MULTITREE_OK);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(MultiTree_GetName, MULTITREE_ERROR);
+
         REGISTER_GLOBAL_MOCK_RETURN(Schema_GetModelModelByName, TEST_CHILD_MODEL_HANDLE);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetModelModelByName, NULL);
 
@@ -361,12 +356,15 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetMethodArgumentName, NULL);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetMethodArgumentType, NULL);
 
-
+        REGISTER_GLOBAL_MOCK_RETURN(Schema_GetModelActionArgumentCount, SCHEMA_OK);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetModelActionArgumentCount, SCHEMA_ERROR);
 
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetModelMethodByName, NULL);
         REGISTER_GLOBAL_MOCK_RETURN(Schema_GetModelMethodArgumentCount, SCHEMA_OK);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetModelMethodArgumentCount, SCHEMA_ERROR);
 
+        REGISTER_GLOBAL_MOCK_RETURN(Schema_GetStructTypePropertyCount, SCHEMA_OK);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetStructTypePropertyCount, SCHEMA_ERROR);
 
         REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, real_mallocAndStrcpy_s);
 
@@ -2999,12 +2997,9 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             .IgnoreArgument_json()
             .IgnoreArgument_multiTreeHandle();
 
-        STRICT_EXPECTED_CALL(MultiTree_DeleteChild(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreArgument_treeHandle()
-            .IgnoreArgument_childName();
+        STRICT_EXPECTED_CALL(MultiTree_DeleteChild(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CallCannotFail();
 
-        STRICT_EXPECTED_CALL(MultiTree_GetChildCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*2*/
-            .IgnoreArgument_treeHandle()
+        STRICT_EXPECTED_CALL(MultiTree_GetChildCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CallCannotFail()
             .CopyOutArgumentBuffer_count(&one, sizeof(one));
 
         STRICT_EXPECTED_CALL(MultiTree_GetChild(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG))
@@ -3017,20 +3012,24 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         STRICT_EXPECTED_CALL(MultiTree_GetName(childHandle, TEST_STRING_HANDLE_CHILD_NAME)); /*this fills in TEST_STRING_HANDLE_CHILD_NAME with "int_field"*/
 
         STRICT_EXPECTED_CALL(STRING_c_str(TEST_STRING_HANDLE_CHILD_NAME)) /*6*/
-            .SetReturn("int_field");
+            .SetReturn("int_field")
+            .CallCannotFail();
 
         STRICT_EXPECTED_CALL(Schema_GetModelElementByName(TEST_MODEL_HANDLE, "int_field"))
             .SetReturn(Schema_GetModelElementByName_desiredProperty_int_field);
 
         STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyType(TEST_DESIRED_PROPERTY_HANDLE_INT_FIELD))
+            .CallCannotFail()
             .SetReturn("int");
 
         STRICT_EXPECTED_CALL(Schema_GetSchemaForModelType(TEST_MODEL_HANDLE))
+            .CallCannotFail()
             .SetReturn(TEST_SCHEMA);
 
         /*this is DecodeValueFromNode expected calls*/
 
         STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("int"))
+            .CallCannotFail()
             .SetReturn(EDM_INT32_TYPE);
 
         STRICT_EXPECTED_CALL(MultiTree_GetValue(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
@@ -3043,34 +3042,32 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             .SetReturn(AGENT_DATA_TYPES_OK);
 
         STRICT_EXPECTED_CALL(Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE(TEST_DESIRED_PROPERTY_HANDLE_INT_FIELD))
+            .CallCannotFail()
             .SetReturn(int_pfDesiredPropertyFromAGENT_DATA_TYPE);
 
         STRICT_EXPECTED_CALL(Schema_GetModelDesiredProperty_offset(TEST_DESIRED_PROPERTY_HANDLE_INT_FIELD))
+            .CallCannotFail()
             .SetReturn(2);
 
         STRICT_EXPECTED_CALL(int_pfDesiredPropertyFromAGENT_DATA_TYPE(IGNORED_PTR_ARG, (unsigned char*)deviceMemoryArea + 2))
             .IgnoreArgument_source();
 
         STRICT_EXPECTED_CALL(Schema_GetModelDesiredProperty_pfOnDesiredProperty(IGNORED_PTR_ARG))
-            .IgnoreArgument_desiredPropertyHandle()
+            .CallCannotFail()
             .SetReturn(desiredPropertyHasCallback ? onDesiredPropertySimpleProperty : NULL);
 
         if (desiredPropertyHasCallback)
         {
-            STRICT_EXPECTED_CALL(onDesiredPropertySimpleProperty(IGNORED_PTR_ARG))
-                .IgnoreArgument_v();
+            STRICT_EXPECTED_CALL(onDesiredPropertySimpleProperty(IGNORED_PTR_ARG));
         }
 
-        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG))
-            .IgnoreArgument_agentData();
+        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
 
         STRICT_EXPECTED_CALL(STRING_delete(TEST_STRING_HANDLE_CHILD_NAME));
 
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
-            .IgnoreArgument_treeHandle();
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG));
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
-            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     }
 
     /*case1: a simple property (non-recursive) is ingested*/
@@ -3121,6 +3118,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         umock_c_negative_tests_snapshot();
 
+#if 0
         size_t calls_that_cannot_fail[] =
         {
             2, /*MultiTree_DeleteChild*/
@@ -3139,30 +3137,21 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             20, /*MultiTree_Destroy*/
             21 /*gballoc_free*/
         };
-
-        for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
+#endif
+        size_t count = umock_c_negative_tests_call_count();
+        for (size_t i = 0; i < count; i++)
         {
-            size_t j;
             umock_c_negative_tests_reset();
 
-            for (j = 0;j<sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]);j++) /*not running the tests that cannot fail*/
+            if (umock_c_negative_tests_can_call_fail(i))
             {
-                if (calls_that_cannot_fail[j] == i)
-                    break;
-            }
-
-            if (j == sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]))
-            {
-
                 umock_c_negative_tests_fail_call(i);
-                char temp_str[128];
-                sprintf(temp_str, "On failed call %lu", (unsigned long)i);
 
-                ///act
+                //act
                 EXECUTE_COMMAND_RESULT result = CommandDecoder_IngestDesiredProperties(deviceMemoryArea, commandDecoderHandle, desiredPropertiesJSON, false);
 
-                ///assert
-                ASSERT_ARE_NOT_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS, result, temp_str);
+                //assert
+                ASSERT_ARE_NOT_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS, result, "CommandDecoder_IngestDesiredProperties failure in test %zu/%zu", i, count);
             }
         }
 
@@ -3360,7 +3349,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             30, /*gballoc_free*/
         };
 
-        for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
+        size_t count = umock_c_negative_tests_call_count();
+        for (size_t i = 0; i < count; i++)
         {
             size_t j;
             umock_c_negative_tests_reset();
@@ -3382,7 +3372,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
                 EXECUTE_COMMAND_RESULT result = CommandDecoder_IngestDesiredProperties(deviceMemoryArea, commandDecoderHandle, desiredPropertiesJSON, false);
 
                 ///assert
-                ASSERT_ARE_NOT_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS, result, temp_str);
+                ASSERT_ARE_NOT_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS, result, "CommandDecoder_IngestDesiredProperties failure in test %zu/%zu", i, count);
             }
 
         }
@@ -3567,11 +3557,10 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_ExecuteMethod_with_NULL_payload_inert_path(&zero);
         umock_c_negative_tests_snapshot();
 
-        for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
+        size_t count = umock_c_negative_tests_call_count();
+        for (size_t i = 0; i < count; i++)
         {
-            if (
-                (i!=5) /*gballoc_free*/
-                )
+            if (umock_c_negative_tests_can_call_fail(i))
             {
                 umock_c_negative_tests_reset();
                 umock_c_negative_tests_fail_call(i);
@@ -3580,7 +3569,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
                 METHODRETURN_HANDLE methodReturn = CommandDecoder_ExecuteMethod(commandDecoderHandle, "methodA", NULL);
 
                 ///assert
-                ASSERT_IS_NULL(methodReturn);
+                ASSERT_IS_NULL(methodReturn, "CommandDecoder_ExecuteMethod failure in test %zu/%zu", i, count);
             }
         }
 
@@ -3735,12 +3724,9 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         STRICT_EXPECTED_CALL(gballoc_malloc(1)); /*this is the string "" for relative relativeMethodPath*/
         STRICT_EXPECTED_CALL(Schema_GetModelMethodByName(TEST_MODEL_HANDLE, "methodA"));
         STRICT_EXPECTED_CALL(Schema_GetModelMethodArgumentCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreArgument_methodHandle()
-            .IgnoreArgument_argumentCount()
             .CopyOutArgumentBuffer_argumentCount(two, sizeof(*two));
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is the array holding 1 x AGENT_DATA_TYPE */
-            .IgnoreArgument_size();
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
 
         { /*scope for processing every individual argument*/
             STRICT_EXPECTED_CALL(Schema_GetModelMethodArgumentByIndex(TEST_MODEL_METHOD_HANDLE, 0))
@@ -3756,10 +3742,9 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
             { /*scope for DecodeValueFromNode*/
                 STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("int"))
+                    .CallCannotFail()
                     .SetReturn(EDM_INT32_TYPE);
                 STRICT_EXPECTED_CALL(MultiTree_GetValue(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                    .IgnoreArgument_treeHandle()
-                    .IgnoreArgument_destination()
                     .CopyOutArgumentBuffer_destination(aValue, sizeof(aValue));
                 STRICT_EXPECTED_CALL(CreateAgentDataType_From_String("2", EDM_INT32_TYPE, IGNORED_PTR_ARG))
                     .IgnoreArgument_agentData();
@@ -3778,10 +3763,9 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
             { /*scope for DecodeValueFromNode*/
                 STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("int"))
+                    .CallCannotFail()
                     .SetReturn(EDM_INT32_TYPE);
                 STRICT_EXPECTED_CALL(MultiTree_GetValue(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                    .IgnoreArgument_treeHandle()
-                    .IgnoreArgument_destination()
                     .CopyOutArgumentBuffer_destination(bValue, sizeof(bValue));
                 STRICT_EXPECTED_CALL(CreateAgentDataType_From_String("3", EDM_INT32_TYPE, IGNORED_PTR_ARG)) /*20*/
                     .IgnoreArgument_agentData();
@@ -3791,20 +3775,14 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         STRICT_EXPECTED_CALL(methodCallbackMock(TEST_CALLBACK_CONTEXT_VALUE, "", "methodA", 2, IGNORED_PTR_ARG))
             .IgnoreArgument_parameterValues();
 
-        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG))
-            .IgnoreArgument_agentData();
-        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG))
-            .IgnoreArgument_agentData();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
-            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*this is freeing the relativeMethodPath*/
-            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
-            .IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
-            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     }
 
@@ -3859,26 +3837,19 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_ExecuteMethod_with_2_arg_payload_inert_path(&two, methodPayload, &aValue, &bValue);
         umock_c_negative_tests_snapshot();
 
-        for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
+        size_t count = umock_c_negative_tests_call_count();
+        for (size_t i = 0; i < count; i++)
         {
-            if (
-                (i != 11) && /*CodeFirst_GetPrimitiveType*/
-                (i != 22) && /*Destroy_AGENT_DATA_TYPE*/
-                (i != 23) && /*gballoc_free*/
-                (i != 24) && /*gballoc_free*/
-                (i != 25) && /*MultiTree_Destroy*/
-                (i != 26) && /*MultiTree_Destroy*/
-                (i != 27)  /*gballoc_free*/
-                )
+            if (umock_c_negative_tests_can_call_fail(i))
             {
                 umock_c_negative_tests_reset();
                 umock_c_negative_tests_fail_call(i);
 
-                ///act
+                //act
                 METHODRETURN_HANDLE methodReturn = CommandDecoder_ExecuteMethod(commandDecoderHandle, "methodA", methodPayload);
 
-                ///assert
-                ASSERT_IS_NULL(methodReturn);
+                //assert
+                ASSERT_IS_NULL(methodReturn, "CommandDecoder_ExecuteMethod failure in test %zu/%zu", i, count);
             }
         }
 
@@ -3891,25 +3862,19 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
     {
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, methodPayload))
             .IgnoreArgument_destination();
-        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreArgument_json()
-            .IgnoreArgument_multiTreeHandle();
+        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(Schema_GetSchemaForModelType(TEST_MODEL_HANDLE));
         STRICT_EXPECTED_CALL(gballoc_malloc(11)); /*this is the string "innermodel" for relative relativeMethodPath*/
         STRICT_EXPECTED_CALL(Schema_GetModelModelByName(TEST_MODEL_HANDLE, "innermodel"));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*this is the string "innermodel" for relative relativeMethodPath*/
-            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)); /*this is the string "innermodel" for relative relativeMethodPath*/
 
         STRICT_EXPECTED_CALL(gballoc_malloc(11)); /*this is the string "innermodel" for relative relativeMethodPath*/
 
         STRICT_EXPECTED_CALL(Schema_GetModelMethodByName(TEST_CHILD_MODEL_HANDLE, "methodA"));
         STRICT_EXPECTED_CALL(Schema_GetModelMethodArgumentCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreArgument_methodHandle()
-            .IgnoreArgument_argumentCount()
             .CopyOutArgumentBuffer_argumentCount(two, sizeof(*two));
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is the array holding 1 x AGENT_DATA_TYPE */
-            .IgnoreArgument_size();
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
 
         { /*scope for processing every individual argument*/
             STRICT_EXPECTED_CALL(Schema_GetModelMethodArgumentByIndex(TEST_MODEL_METHOD_HANDLE, 0))
@@ -3927,8 +3892,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
                 STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("int"))
                     .SetReturn(EDM_INT32_TYPE);
                 STRICT_EXPECTED_CALL(MultiTree_GetValue(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                    .IgnoreArgument_treeHandle()
-                    .IgnoreArgument_destination()
                     .CopyOutArgumentBuffer_destination(aValue, sizeof(aValue));
                 STRICT_EXPECTED_CALL(CreateAgentDataType_From_String("2", EDM_INT32_TYPE, IGNORED_PTR_ARG))
                     .IgnoreArgument_agentData();
@@ -3947,7 +3910,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
             { /*scope for DecodeValueFromNode*/
                 STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("int"))
-                    .SetReturn(EDM_INT32_TYPE);
+                    .SetReturn(EDM_INT32_TYPE).CallCannotFail();
                 STRICT_EXPECTED_CALL(MultiTree_GetValue(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
                     .IgnoreArgument_treeHandle()
                     .IgnoreArgument_destination()
@@ -3960,20 +3923,14 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         STRICT_EXPECTED_CALL(methodCallbackMock(TEST_CALLBACK_CONTEXT_VALUE, "innermodel", "methodA", 2, IGNORED_PTR_ARG))
             .IgnoreArgument_parameterValues();
 
-        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG))
-            .IgnoreArgument_agentData();
-        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG))
-            .IgnoreArgument_agentData();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
-            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*this is freeing the relativeMethodPath*/
-            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
-        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
-            .IgnoreArgument_treeHandle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
-            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     }
 
@@ -4028,28 +3985,19 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_ExecuteMethod_model_in_model_with_2_arg_payload_inert_path(&two, methodPayload, &aValue, &bValue);
         umock_c_negative_tests_snapshot();
 
-        for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
+        size_t count = umock_c_negative_tests_call_count();
+        for (size_t i = 0; i < count; i++)
         {
-            if (
-                (i!=5)  && /*gballoc_free*/
-                (i != 15) && /*CodeFirst_GetPrimitiveType*/
-                (i != 25) && /*CodeFirst_GetPrimitiveType*/
-                (i != 26) && /*Destroy_AGENT_DATA_TYPE*/
-                (i != 27) && /*gballoc_free*/
-                (i != 28) && /*gballoc_free*/
-                (i != 29) && /*MultiTree_Destroy*/
-                (i != 30) && /*MultiTree_Destroy*/
-                (i != 31)  /*gballoc_free*/
-                )
+            if (umock_c_negative_tests_can_call_fail(i))
             {
                 umock_c_negative_tests_reset();
                 umock_c_negative_tests_fail_call(i);
 
-                ///act
+                //act
                 METHODRETURN_HANDLE methodReturn = CommandDecoder_ExecuteMethod(commandDecoderHandle, "innermodel/methodA", methodPayload);
 
-                ///assert
-                ASSERT_IS_NULL(methodReturn);
+                //assert
+                ASSERT_IS_NULL(methodReturn, "CommandDecoder_ExecuteMethod failure in test %zu/%zu", i, count);
             }
         }
 
