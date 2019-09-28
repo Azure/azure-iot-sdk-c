@@ -25,7 +25,7 @@ static void my_gballoc_free(void* s)
 #include "real_vector.h"
 #include "real_crt_abstractions.h"
 
-#include "macro_utils.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "testrunnerswitcher.h"
 
 #include "umock_c/umock_c.h"

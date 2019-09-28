@@ -28,7 +28,7 @@ typedef struct DEVICE_HANDLE_DATA_TAG
     COMMAND_DECODER_HANDLE commandDecoderHandle;
 } DEVICE_HANDLE_DATA;
 
-MU_DEFINE_ENUM_STRINGS(DEVICE_RESULT, DEVICE_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(DEVICE_RESULT, DEVICE_RESULT_VALUES);
 
 static EXECUTE_COMMAND_RESULT DeviceInvokeAction(void* actionCallbackContext, const char* relativeActionPath, const char* actionName, size_t argCount, const AGENT_DATA_TYPE* args)
 {

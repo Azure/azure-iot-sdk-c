@@ -15,7 +15,7 @@
 #include "codefirst.h"
 #include "jsondecoder.h"
 
-MU_DEFINE_ENUM_STRINGS(COMMANDDECODER_RESULT, COMMANDDECODER_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(COMMANDDECODER_RESULT, COMMANDDECODER_RESULT_VALUES);
 
 typedef struct COMMAND_DECODER_HANDLE_DATA_TAG
 {
@@ -795,7 +795,7 @@ void CommandDecoder_Destroy(COMMAND_DECODER_HANDLE commandDecoderHandle)
     }
 }
 
-MU_DEFINE_ENUM_STRINGS(AGENT_DATA_TYPE_TYPE, AGENT_DATA_TYPE_TYPE_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(AGENT_DATA_TYPE_TYPE, AGENT_DATA_TYPE_TYPE_VALUES);
 
 /*validates that the multitree (coming from a JSON) is actually a serialization of the model (complete or incomplete)*/
 /*if the serialization contains more than the model, then it fails.*/
