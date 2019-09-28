@@ -459,12 +459,12 @@ static BUFFER_HANDLE send_http_workload_request(HSM_CLIENT_HTTP_EDGE* hsm_client
         result = MU_FAILURE;
     }
     else if ((hsm_client_http_edge->workload_protocol_type == WORKLOAD_PROTOCOL_TYPE_UNIX_DOMAIN_SOCKET) &&
-             (uhttp_client_set_option(http_handle, OPTION_ADDRESS_TYPE, OPTION_ADDRESS_TYPE_DOMAIN_SOCKET) != 0))
+             (uhttp_client_set_option(http_handle, OPTION_ADDRESS_TYPE, OPTION_ADDRESS_TYPE_DOMAIN_SOCKET) != HTTP_CLIENT_OK))
     {
         LogError("setting unix domain socket option failed");
         result = MU_FAILURE;
     }
-    else if ((http_open_result = uhttp_client_open(http_handle, hsm_client_http_edge->workload_hostname, hsm_client_http_edge->workload_portnumber, on_edge_hsm_http_connected, &workload_context) != HTTP_CLIENT_OK) != HTTP_CLIENT_OK)
+    else if ((http_open_result = uhttp_client_open(http_handle, hsm_client_http_edge->workload_hostname, hsm_client_http_edge->workload_portnumber, on_edge_hsm_http_connected, &workload_context)) != HTTP_CLIENT_OK)
     {
         LogError("uhttp_client_open failed, err=%d", http_open_result);
         result = MU_FAILURE;

@@ -9,14 +9,12 @@
 #include <stddef.h>
 #endif
 
-#define UNREFERENCED_PARAMETER(x) x
-
-void* real_malloc(size_t size)
+static void* real_malloc(size_t size)
 {
     return malloc(size);
 }
 
-void real_free(void* ptr)
+static void real_free(void* ptr)
 {
     free(ptr);
 }
@@ -65,9 +63,7 @@ MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
-    char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
-    ASSERT_FAIL(temp_str);
+    ASSERT_FAIL("umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
 }
 
 //Control Parameters
@@ -226,7 +222,7 @@ static void expected_calls_x509CertificateInfo_free(bool is_processed)
 
 static void expected_calls_x509CAReferences_free(bool has_secondary_ref)
 {
-    UNREFERENCED_PARAMETER(has_secondary_ref);
+    (void)has_secondary_ref;
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
