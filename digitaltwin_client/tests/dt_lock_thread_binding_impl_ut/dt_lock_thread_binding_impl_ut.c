@@ -105,7 +105,8 @@ TEST_FUNCTION(DT_LockBinding_Unlock_Impl_ok)
 TEST_FUNCTION(DT_LockBinding_LockDeinit_Impl_ok)
 {
     //arrange
-    STRICT_EXPECTED_CALL(Lock_Deinit(DT_TEST_LOCK_HANDLE));
+    STRICT_EXPECTED_CALL(Lock_Deinit(DT_TEST_LOCK_HANDLE))
+        .SetReturn(LOCK_OK);
 
     //act
     LOCK_RESULT lockResult = DT_LockBinding_LockDeinit_Impl(DT_TEST_LOCK_HANDLE);

@@ -122,8 +122,8 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(PROV_AUTH_RESULT, PROV_AUTH_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE(PROV_AUTH_TYPE, PROV_AUTH_TYPE_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(PROV_AUTH_TYPE, PROV_AUTH_TYPE_VALUES);
 
-TEST_DEFINE_ENUM_TYPE(HMACSHA256_RESULT, HMACSHA256_RESULT);
-IMPLEMENT_UMOCK_C_ENUM_TYPE(HMACSHA256_RESULT, HMACSHA256_RESULT);
+TEST_DEFINE_ENUM_TYPE(HMACSHA256_RESULT, HMACSHA256_RESULT_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(HMACSHA256_RESULT, HMACSHA256_RESULT_VALUES);
 
 static const HSM_CLIENT_TPM_INTERFACE test_tpm_interface =
 {
@@ -311,9 +311,7 @@ MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
-    char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
-    ASSERT_FAIL(temp_str);
+    ASSERT_FAIL("umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
 }
 
 static TEST_MUTEX_HANDLE g_testByTest;
@@ -443,20 +441,6 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         TEST_MUTEX_RELEASE(g_testByTest);
     }
 
-    static int should_skip_index(size_t current_index, const size_t skip_array[], size_t length)
-    {
-        int result = 0;
-        for (size_t index = 0; index < length; index++)
-        {
-            if (current_index == skip_array[index])
-            {
-                result = __LINE__;
-                break;
-            }
-        }
-        return result;
-    }
-
     static void setup_sign_sas_data(bool use_key)
     {
         if (use_key)
@@ -464,12 +448,12 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
             STRICT_EXPECTED_CALL(secure_device_get_symm_key(IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(Azure_Base64_Decode(IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(BUFFER_new());
-            STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG)).CallCannotFail();
+            STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG)).CallCannotFail();
             STRICT_EXPECTED_CALL(HMACSHA256_ComputeHash(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG)).CallCannotFail();
             STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-            STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG)).CallCannotFail();
             STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
@@ -482,13 +466,13 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
 
     static void setup_prov_auth_construct_sas_token_mocks(bool use_key)
     {
-        STRICT_EXPECTED_CALL(size_tToString(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(size_tToString(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG)).CallCannotFail();
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         setup_sign_sas_data(use_key);
         STRICT_EXPECTED_CALL(Azure_Base64_Encode_Bytes(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(URL_Encode(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
@@ -764,27 +748,20 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
 
         umock_c_negative_tests_snapshot();
 
-        size_t calls_cannot_fail[] = { 6, 7 };
-
         //act
         size_t count = umock_c_negative_tests_call_count();
         for (size_t index = 0; index < count; index++)
         {
-            if (should_skip_index(index, calls_cannot_fail, sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0])) != 0)
+            if (umock_c_negative_tests_can_call_fail(index))
             {
-                continue;
+                umock_c_negative_tests_reset();
+                umock_c_negative_tests_fail_call(index);
+
+                char* result = prov_auth_get_registration_id(sec_handle);
+
+                //assert
+                ASSERT_IS_NULL(result, "prov_auth_get_registration_id failure in test %zu/%zu", index, count);
             }
-
-            umock_c_negative_tests_reset();
-            umock_c_negative_tests_fail_call(index);
-
-            char tmp_msg[64];
-            sprintf(tmp_msg, "prov_auth_get_registration_id failure in test %zu/%zu", index, count);
-
-            char* result = prov_auth_get_registration_id(sec_handle);
-
-            //assert
-            ASSERT_IS_NULL(result, tmp_msg);
         }
 
         //cleanup
@@ -832,27 +809,20 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
 
         umock_c_negative_tests_snapshot();
 
-        size_t calls_cannot_fail[] = { 2, 3 };
-
         //act
         size_t count = umock_c_negative_tests_call_count();
         for (size_t index = 0; index < count; index++)
         {
-            if (should_skip_index(index, calls_cannot_fail, sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0])) != 0)
+            if (umock_c_negative_tests_can_call_fail(index))
             {
-                continue;
+                umock_c_negative_tests_reset();
+                umock_c_negative_tests_fail_call(index);
+
+                char* result = prov_auth_get_registration_id(sec_handle);
+
+                //assert
+                ASSERT_IS_NULL(result, "prov_auth_get_registration_id failure in test %zu/%zu", index, count);
             }
-
-            umock_c_negative_tests_reset();
-            umock_c_negative_tests_fail_call(index);
-
-            char tmp_msg[64];
-            sprintf(tmp_msg, "prov_auth_get_registration_id failure in test %zu/%zu", index, count);
-
-            char* result = prov_auth_get_registration_id(sec_handle);
-
-            //assert
-            ASSERT_IS_NULL(result, tmp_msg);
         }
 
         //cleanup
@@ -1233,27 +1203,20 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
 
         umock_c_negative_tests_snapshot();
 
-        size_t calls_cannot_fail[] = { 5, 6, 8, 9, 10, 11, 12, 13 };
-
         //act
         size_t count = umock_c_negative_tests_call_count();
         for (size_t index = 0; index < count; index++)
         {
-            if (should_skip_index(index, calls_cannot_fail, sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0])) != 0)
+            if (umock_c_negative_tests_can_call_fail(index))
             {
-                continue;
+                umock_c_negative_tests_reset();
+                umock_c_negative_tests_fail_call(index);
+
+                char* result = prov_auth_construct_sas_token(sec_handle, TEST_TOKEN_SCOPE_VALUE, TEST_KEY_NAME_VALUE, TEST_EXPIRY_TIME_T_VALUE);
+
+                //assert
+                ASSERT_IS_NULL(result, "prov_auth_construct_sas_token failure in test %zu/%zu", index, count);
             }
-
-            umock_c_negative_tests_reset();
-            umock_c_negative_tests_fail_call(index);
-
-            char tmp_msg[128];
-            sprintf(tmp_msg, "prov_auth_construct_sas_token failure in test %zu/%zu", index, count);
-
-            char* result = prov_auth_construct_sas_token(sec_handle, TEST_TOKEN_SCOPE_VALUE, TEST_KEY_NAME_VALUE, TEST_EXPIRY_TIME_T_VALUE);
-
-            //assert
-            ASSERT_IS_NULL(result, tmp_msg);
         }
 
         //cleanup
