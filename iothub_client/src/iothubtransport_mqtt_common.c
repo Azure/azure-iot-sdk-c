@@ -1053,27 +1053,20 @@ static void removeExpiredTwinRequestsFromList(PMQTTTRANSPORT_HANDLE_DATA transpo
             (((current_ms - msg_entry->msgEnqueueTime) / 1000) >= ON_DEMAND_GET_TWIN_REQUEST_TIMEOUT_SECS))
         {
             item_timed_out = true;
+            if (msg_entry->userCallback != NULL)
+            {
+                msg_entry->userCallback(DEVICE_TWIN_UPDATE_COMPLETE, NULL, 0, msg_entry->userContext);
+            }
         }
         else if ((msg_entry->device_twin_msg_type == REPORTED_STATE) &&
                  (((current_ms - msg_entry->msgEnqueueTime) / 1000) >= TWIN_REPORT_UPDATE_TIMEOUT_SECS))
         {
             item_timed_out = true;
+            transport_data->transport_callbacks.twin_rpt_state_complete_cb(msg_entry->iothub_msg_id, STATUS_CODE_TIMEOUT_VALUE, transport_data->transport_ctx);
         }
 
         if (item_timed_out)
         {
-            if (msg_entry->device_twin_msg_type == RETRIEVE_PROPERTIES)
-            {
-                if (msg_entry->userCallback != NULL)
-                {
-                    msg_entry->userCallback(DEVICE_TWIN_UPDATE_COMPLETE, NULL, 0, msg_entry->userContext);
-                }
-            }
-            else if (msg_entry->device_twin_msg_type == REPORTED_STATE)
-            {
-                transport_data->transport_callbacks.twin_rpt_state_complete_cb(msg_entry->iothub_msg_id, STATUS_CODE_TIMEOUT_VALUE, transport_data->transport_ctx);
-            }
-
             (void)DList_RemoveEntryList(list_item);
             destroy_device_twin_get_message(msg_entry);
         }
