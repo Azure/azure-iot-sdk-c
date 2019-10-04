@@ -56,6 +56,7 @@
 #define MAX_DISCONNECT_VALUE                50
 
 #define ON_DEMAND_GET_TWIN_REQUEST_TIMEOUT_SECS    60
+#define TWIN_REPORT_UPDATE_TIMEOUT_SECS           (60*5)
 
 static const char TOPIC_DEVICE_TWIN_PREFIX[] = "$iothub/twin";
 static const char TOPIC_DEVICE_METHOD_PREFIX[] = "$iothub/methods";
@@ -1036,59 +1037,53 @@ static void sendPendingGetTwinRequests(PMQTTTRANSPORT_HANDLE_DATA transportData)
     }
 }
 
-static void removeExpiredPendingGetTwinRequests(PMQTTTRANSPORT_HANDLE_DATA transport_data)
+
+static void removeExpiredTwinRequestsFromList(PMQTTTRANSPORT_HANDLE_DATA transport_data, tickcounter_ms_t current_ms, DLIST_ENTRY* twin_list)
 {
-    tickcounter_ms_t current_ms;
-
-    if (tickcounter_get_current_ms(transport_data->msgTickCounter, &current_ms) == 0)
+    PDLIST_ENTRY list_item = twin_list->Flink;
+    
+    while (list_item != twin_list)
     {
-        PDLIST_ENTRY listItem = transport_data->pending_get_twin_queue.Flink;
+        DLIST_ENTRY next_list_item;
+        next_list_item.Flink = list_item->Flink;
+        MQTT_DEVICE_TWIN_ITEM* msg_entry = containingRecord(list_item, MQTT_DEVICE_TWIN_ITEM, entry);
+        bool item_timed_out = false;
 
-        while (listItem != &transport_data->pending_get_twin_queue)
+        if ((msg_entry->device_twin_msg_type == RETRIEVE_PROPERTIES) &&
+            (((current_ms - msg_entry->msgEnqueueTime) / 1000) >= ON_DEMAND_GET_TWIN_REQUEST_TIMEOUT_SECS))
         {
-            DLIST_ENTRY nextListItem;
-            nextListItem.Flink = listItem->Flink;
-            MQTT_DEVICE_TWIN_ITEM* msg_entry = containingRecord(listItem, MQTT_DEVICE_TWIN_ITEM, entry);
-
-            if (((current_ms - msg_entry->msgEnqueueTime) / 1000) >= ON_DEMAND_GET_TWIN_REQUEST_TIMEOUT_SECS)
+            item_timed_out = true;
+            if (msg_entry->userCallback != NULL)
             {
-                (void)DList_RemoveEntryList(listItem);
                 msg_entry->userCallback(DEVICE_TWIN_UPDATE_COMPLETE, NULL, 0, msg_entry->userContext);
-                destroy_device_twin_get_message(msg_entry);
             }
-
-            listItem = nextListItem.Flink;
         }
+        else if ((msg_entry->device_twin_msg_type == REPORTED_STATE) &&
+                 (((current_ms - msg_entry->msgEnqueueTime) / 1000) >= TWIN_REPORT_UPDATE_TIMEOUT_SECS))
+        {
+            item_timed_out = true;
+            transport_data->transport_callbacks.twin_rpt_state_complete_cb(msg_entry->iothub_msg_id, STATUS_CODE_TIMEOUT_VALUE, transport_data->transport_ctx);
+        }
+
+        if (item_timed_out)
+        {
+            (void)DList_RemoveEntryList(list_item);
+            destroy_device_twin_get_message(msg_entry);
+        }
+
+        list_item = next_list_item.Flink;
     }
+
 }
 
-static void removeExpiredGetTwinRequestsPendingAck(PMQTTTRANSPORT_HANDLE_DATA transport_data)
+static void removeExpiredTwinRequests(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
     tickcounter_ms_t current_ms;
 
     if (tickcounter_get_current_ms(transport_data->msgTickCounter, &current_ms) == 0)
     {
-        PDLIST_ENTRY listItem = transport_data->ack_waiting_queue.Flink;
-
-        while (listItem != &transport_data->ack_waiting_queue)
-        {
-            DLIST_ENTRY nextListItem;
-            nextListItem.Flink = listItem->Flink;
-            MQTT_DEVICE_TWIN_ITEM* msg_entry = containingRecord(listItem, MQTT_DEVICE_TWIN_ITEM, entry);
-
-            // Check if it is a on-demand get-twin request.
-            if (msg_entry->device_twin_msg_type == RETRIEVE_PROPERTIES && msg_entry->userCallback != NULL)
-            {
-                if (((current_ms - msg_entry->msgEnqueueTime) / 1000) >= ON_DEMAND_GET_TWIN_REQUEST_TIMEOUT_SECS)
-                {
-                    (void)DList_RemoveEntryList(listItem);
-                    msg_entry->userCallback(DEVICE_TWIN_UPDATE_COMPLETE, NULL, 0, msg_entry->userContext);
-                    destroy_device_twin_get_message(msg_entry);
-                }
-            }
-
-            listItem = nextListItem.Flink;
-        }
+        removeExpiredTwinRequestsFromList(transport_data, current_ms, &transport_data->pending_get_twin_queue);
+        removeExpiredTwinRequestsFromList(transport_data, current_ms, &transport_data->ack_waiting_queue);
     }
 }
 
@@ -3192,8 +3187,7 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle)
 
         // Check the ack messages timeouts
         process_queued_ack_messages(transport_data);
-        removeExpiredPendingGetTwinRequests(transport_data);
-        removeExpiredGetTwinRequestsPendingAck(transport_data);
+        removeExpiredTwinRequests(transport_data);
     }
 }
 
