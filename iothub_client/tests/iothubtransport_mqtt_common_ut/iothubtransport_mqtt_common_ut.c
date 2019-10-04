@@ -222,7 +222,7 @@ static CONSTBUFFER g_cbuff;
 static IOTHUB_CLIENT_CONFIG g_iothubClientConfig = { 0 };
 static DLIST_ENTRY g_waitingToSend;
 
-static tickcounter_ms_t g_current_ms = 0;
+static tickcounter_ms_t g_current_ms;
 static size_t g_tokenizerIndex;
 
 static CONSTBUFFER_HANDLE TEST_CONST_BUFFER_HANDLE = (CONSTBUFFER_HANDLE)0x2331;
@@ -954,7 +954,11 @@ static void reset_test_data()
     g_errorcallbackCtx = NULL;
     g_method_handle_value = NULL;
 
-    g_current_ms = 0;
+    // We set the counter somewhat far off into the future.  Previously
+    // there were bugs that this UT let slip through because timers were initialized
+    // to 0 in UT itself AND the product code was wrongly leaving timers as 0.
+    // Now if a product timer was uninitialized at 0, it would trigger unexpected timeouts.
+    g_current_ms = 1000*60*30;
     g_tokenizerIndex = 0;
     g_nullMapVariable = true;
 
@@ -1599,9 +1603,9 @@ static void setup_message_recv_device_method_mocks()
 
 static void setup_processItem_mocks(bool fail_test)
 {
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-
     STRICT_EXPECTED_CALL(CONSTBUFFER_GetContent(IGNORED_PTR_ARG)).SetReturn(&g_cbuff);
 
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
@@ -2580,6 +2584,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetTwinAsync_Succeed)
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
 
     umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -2645,6 +2650,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_GetTwinAsync_fails)
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
 
     umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -6228,12 +6234,10 @@ TEST_FUNCTION(IoTHubTransportMqtt_implicit_gettwin_timeout)
     umock_c_reset_all_calls();
     set_expected_calls_for_DoWork_for_twin_timeouts();
 
-
     // Set up the returned time such that it's far enough into the future to trigger time out related logic.
     g_current_ms += 6*60*1000;
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .CopyOutArgumentBuffer(2, &g_current_ms, sizeof(g_current_ms));
-
 
     // The initial message removed is the implicit GetTwin() created on a listen for twin subscription.
     // This is not reported back to the application, by convention.
