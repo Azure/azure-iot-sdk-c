@@ -441,6 +441,9 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 
     REGISTER_GLOBAL_MOCK_RETURN(uhttp_client_get_underlying_xio, TEST_XIO_HANDLE);
 
+    REGISTER_GLOBAL_MOCK_RETURN(xio_setoption, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(xio_setoption, __LINE__);
+
     REGISTER_GLOBAL_MOCK_HOOK(uhttp_client_close, my_uhttp_client_close);
 
     REGISTER_GLOBAL_MOCK_HOOK(uhttp_client_execute_request, my_uhttp_client_execute_request);
@@ -579,8 +582,15 @@ static void setup_create_http_client_mocks(bool use_proxy, bool use_cert, IOTHUB
     }
     if (cred_type == IOTHUB_CREDENTIAL_TYPE_X509_ECC || cred_type == IOTHUB_CREDENTIAL_TYPE_X509)
     {
+#ifdef USE_PROV_MODULE
         STRICT_EXPECTED_CALL(uhttp_client_get_underlying_xio(IGNORED_PTR_ARG)).CallCannotFail();
         STRICT_EXPECTED_CALL(IoTHubClient_Auth_Set_xio_Certificate(TEST_AUTH_HANDLE, IGNORED_PTR_ARG));
+#else
+        STRICT_EXPECTED_CALL(uhttp_client_get_underlying_xio(IGNORED_PTR_ARG)).CallCannotFail();
+        STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, OPTION_X509_CERT, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(uhttp_client_get_underlying_xio(IGNORED_PTR_ARG)).CallCannotFail();
+        STRICT_EXPECTED_CALL(xio_setoption(IGNORED_PTR_ARG, OPTION_X509_PRIVATE_KEY, IGNORED_PTR_ARG));
+#endif
     }
     //STRICT_EXPECTED_CALL(uhttp_client_set_trace(IGNORED_PTR_ARG, true, true));
     STRICT_EXPECTED_CALL(uhttp_client_open(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 443, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -674,14 +684,17 @@ static void setup_initiate_multiple_blob_upload_mocks(bool use_proxy, bool use_c
 
     setup_close_http_client();
 
+    STRICT_EXPECTED_CALL(BUFFER_new());
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
     STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG)).CallCannotFail();
 
     // Upload step 3
     setup_step3_mocks(cred_type);
 
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
@@ -713,14 +726,17 @@ static void setup_initiate_blob_upload_mocks(bool use_proxy, bool use_cert, IOTH
 
     setup_close_http_client();
 
+    STRICT_EXPECTED_CALL(BUFFER_new());
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
     STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG)).CallCannotFail();
 
     // Upload step 3
     setup_step3_mocks(cred_type);
 
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(HTTPHeaders_Free(IGNORED_PTR_ARG));
@@ -1014,11 +1030,11 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Impl_fail)
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
     IOTHUB_CREDENTIAL_TYPE cred_type_list[] = {
-        IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN//,
-        //IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY
-        //IOTHUB_CREDENTIAL_TYPE_X509,
-        //IOTHUB_CREDENTIAL_TYPE_X509_ECC,
-        //IOTHUB_CREDENTIAL_TYPE_DEVICE_AUTH
+        IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN/*,
+        IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY,
+        IOTHUB_CREDENTIAL_TYPE_X509,
+        IOTHUB_CREDENTIAL_TYPE_X509_ECC,
+        IOTHUB_CREDENTIAL_TYPE_DEVICE_AUTH*/
     };
 
     size_t type_count = sizeof(cred_type_list) / sizeof(cred_type_list[0]);
@@ -1061,11 +1077,11 @@ TEST_FUNCTION(IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl_success)
 {
     //arrange
     IOTHUB_CREDENTIAL_TYPE cred_type_list[] = {
-        IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN/*,
+        IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN,
         IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY,
         IOTHUB_CREDENTIAL_TYPE_X509,
         IOTHUB_CREDENTIAL_TYPE_X509_ECC,
-        IOTHUB_CREDENTIAL_TYPE_DEVICE_AUTH*/
+        IOTHUB_CREDENTIAL_TYPE_DEVICE_AUTH
     };
 
     size_t type_count = sizeof(cred_type_list) / sizeof(cred_type_list[0]);

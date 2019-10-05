@@ -239,9 +239,16 @@ static HTTP_CLIENT_HANDLE create_http_client(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDL
         uhttp_client_destroy(result);
         result = NULL;
     }
+#ifdef USE_PROV_MODULE
     else if ((upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_X509 || upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_X509_ECC) &&
         ((IoTHubClient_Auth_Set_xio_Certificate(upload_data->authorization_module, uhttp_client_get_underlying_xio(result))) != 0)
         )
+#else
+    else if ((upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_X509 || upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_X509_ECC) &&
+            ((xio_setoption(uhttp_client_get_underlying_xio(result), OPTION_X509_CERT, upload_data->credentials.x509_credentials.x509certificate) != 0) ||
+            (xio_setoption(uhttp_client_get_underlying_xio(result), OPTION_X509_PRIVATE_KEY, upload_data->credentials.x509_credentials.x509privatekey) != 0))
+        )
+#endif
     {
         LogError("unable to uhttp_client_set_X509_cert for x509 certificate");
         uhttp_client_destroy(result);
