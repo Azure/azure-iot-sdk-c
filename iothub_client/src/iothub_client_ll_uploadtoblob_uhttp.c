@@ -712,80 +712,100 @@ static int initiate_blob_upload(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* uploa
             }
             else
             {
-                BUFFER_HANDLE hub_response = NULL;
+                BUFFER_HANDLE hub_response;
                 STRING_HANDLE hub_content;
 
                 close_http_client(http_client);
 
-                // Codes_SRS_IOTHUBCLIENT_LL_02_083: [ IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall call Blob_UploadFromSasUri and capture the HTTP return code and HTTP body. ]
-                BLOB_RESULT uploadMultipleBlocksResult = Blob_UploadMultipleBlocksFromSasUri(STRING_c_str(sas_uri), upload_data->certificates, &upload_data->http_proxy_options, getDataCallbackEx, context, &upload_data->status_code, hub_response);
-                if (uploadMultipleBlocksResult == BLOB_ABORTED)
+                if ((hub_response = BUFFER_new() ) == NULL)
                 {
-                    // Codes_SRS_IOTHUBCLIENT_LL_99_008: [ If step 2 is aborted by the client, then the HTTP message body shall look like:  ]
-                    LogInfo("Blob_UploadFromSasUri aborted file upload");
-
-                    if ((hub_content = STRING_construct(FILE_UPLOAD_ABORTED_BODY)) == NULL)
-                    {
-                        if (IoTHubClient_LL_UploadToBlob_step3(upload_data, STRING_c_str(correlation_id), http_client, request_header, hub_content) != 0)
-                        {
-                            LogError("IoTHubClient_LL_UploadToBlob_step3 failed");
-                            result = IOTHUB_CLIENT_ERROR;
-                        }
-                        else
-                        {
-                            // Codes_SRS_IOTHUBCLIENT_LL_99_009: [ If step 2 is aborted by the client and if step 3 succeeds, then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall return `IOTHUB_CLIENT_OK`. ]
-                            result = IOTHUB_CLIENT_OK;
-                        }
-                        STRING_delete(hub_content);
-                    }
-                    else
-                    {
-                        LogError("Unable to BUFFER_build, can't perform IoTHubClient_LL_UploadToBlob_step3");
-                        result = IOTHUB_CLIENT_ERROR;
-                    }
-                }
-                else if (uploadMultipleBlocksResult != BLOB_OK)
-                {
-                    /*Codes_SRS_IOTHUBCLIENT_LL_02_084: [ If Blob_UploadFromSasUri fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-                    LogError("unable to Blob_UploadFromSasUri");
-
-                    STRING_HANDLE content_data;
-                    /*do step 3*/ /*try*/
-                    // Codes_SRS_IOTHUBCLIENT_LL_02_091: [ If step 2 fails without establishing an HTTP dialogue, then the HTTP message body shall look like: ]
-                    if ((content_data = STRING_construct(FILE_UPLOAD_FAILED_BODY)) != NULL)
-                    {
-                        if (IoTHubClient_LL_UploadToBlob_step3(upload_data, STRING_c_str(correlation_id), http_client, request_header, content_data) != 0)
-                        {
-                            LogError("IoTHubClient_LL_UploadToBlob_step3 failed");
-                        }
-                        STRING_delete(content_data);
-                    }
+                    LogError("Failure creating response buffer");
                     result = IOTHUB_CLIENT_ERROR;
                 }
                 else
                 {
-                    // must make a json
-                    STRING_HANDLE req_string = STRING_construct_sprintf("{\"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":\"%s\"}", ((upload_data->status_code < 300) ? "true" : "false"), upload_data->status_code, BUFFER_u_char(hub_response));
-                    if (req_string == NULL)
+                    // Codes_SRS_IOTHUBCLIENT_LL_02_083: [ IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall call Blob_UploadFromSasUri and capture the HTTP return code and HTTP body. ]
+                    BLOB_RESULT uploadMultipleBlocksResult = Blob_UploadMultipleBlocksFromSasUri(STRING_c_str(sas_uri), upload_data->certificates, &upload_data->http_proxy_options, getDataCallbackEx, context, &upload_data->status_code, hub_response);
+                    if (uploadMultipleBlocksResult == BLOB_ABORTED)
                     {
-                        LogError("Failure constructing string");
+                        // Codes_SRS_IOTHUBCLIENT_LL_99_008: [ If step 2 is aborted by the client, then the HTTP message body shall look like:  ]
+                        LogInfo("Blob_UploadFromSasUri aborted file upload");
+
+                        if ((hub_content = STRING_construct(FILE_UPLOAD_ABORTED_BODY)) == NULL)
+                        {
+                            if (IoTHubClient_LL_UploadToBlob_step3(upload_data, STRING_c_str(correlation_id), http_client, request_header, hub_content) != 0)
+                            {
+                                LogError("IoTHubClient_LL_UploadToBlob_step3 failed");
+                                result = IOTHUB_CLIENT_ERROR;
+                            }
+                            else
+                            {
+                                // Codes_SRS_IOTHUBCLIENT_LL_99_009: [ If step 2 is aborted by the client and if step 3 succeeds, then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall return `IOTHUB_CLIENT_OK`. ]
+                                result = IOTHUB_CLIENT_OK;
+                            }
+                            STRING_delete(hub_content);
+                        }
+                        else
+                        {
+                            LogError("Unable to BUFFER_build, can't perform IoTHubClient_LL_UploadToBlob_step3");
+                            result = IOTHUB_CLIENT_ERROR;
+                        }
+                    }
+                    else if (uploadMultipleBlocksResult != BLOB_OK)
+                    {
+                        /*Codes_SRS_IOTHUBCLIENT_LL_02_084: [ If Blob_UploadFromSasUri fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+                        LogError("unable to Blob_UploadFromSasUri");
+
+                        STRING_HANDLE content_data;
+                        /*do step 3*/ /*try*/
+                        // Codes_SRS_IOTHUBCLIENT_LL_02_091: [ If step 2 fails without establishing an HTTP dialogue, then the HTTP message body shall look like: ]
+                        if ((content_data = STRING_construct(FILE_UPLOAD_FAILED_BODY)) != NULL)
+                        {
+                            if (IoTHubClient_LL_UploadToBlob_step3(upload_data, STRING_c_str(correlation_id), http_client, request_header, content_data) != 0)
+                            {
+                                LogError("IoTHubClient_LL_UploadToBlob_step3 failed");
+                            }
+                            STRING_delete(content_data);
+                        }
                         result = IOTHUB_CLIENT_ERROR;
                     }
                     else
                     {
-                        // do again snprintf
+                        // must make a json
+                        unsigned char* blob_resp = BUFFER_u_char(hub_response);
+                        size_t resp_len = BUFFER_length(hub_response);
+                        STRING_HANDLE req_string;
 
-                        if (IoTHubClient_LL_UploadToBlob_step3(upload_data, STRING_c_str(correlation_id), http_client, request_header, req_string) != 0)
+                        if (blob_resp == NULL)
                         {
-                            LogError("IoTHubClient_LL_UploadToBlob_step3 failed");
+                            req_string = STRING_construct_sprintf("{\"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":""}", ((upload_data->status_code < 300) ? "true" : "false"), upload_data->status_code, resp_len, blob_resp);
+                        }
+                        else
+                        {
+                            req_string = STRING_construct_sprintf("{\"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":\"%.*s\"}", ((upload_data->status_code < 300) ? "true" : "false"), upload_data->status_code, resp_len, blob_resp);
+                        }
+                        if (req_string == NULL)
+                        {
+                            LogError("Failure constructing string");
                             result = IOTHUB_CLIENT_ERROR;
                         }
                         else
                         {
-                            result = (upload_data->status_code < 300) ? IOTHUB_CLIENT_OK : IOTHUB_CLIENT_ERROR;
+                            // do again snprintf
+
+                            if (IoTHubClient_LL_UploadToBlob_step3(upload_data, STRING_c_str(correlation_id), http_client, request_header, req_string) != 0)
+                            {
+                                LogError("IoTHubClient_LL_UploadToBlob_step3 failed");
+                                result = IOTHUB_CLIENT_ERROR;
+                            }
+                            else
+                            {
+                                result = (upload_data->status_code < 300) ? IOTHUB_CLIENT_OK : IOTHUB_CLIENT_ERROR;
+                            }
+                            STRING_delete(req_string);
                         }
-                        STRING_delete(req_string);
                     }
+                    BUFFER_delete(hub_response);
                 }
             }
             STRING_delete(sas_uri);

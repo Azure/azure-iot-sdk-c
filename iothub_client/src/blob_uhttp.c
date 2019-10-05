@@ -34,6 +34,8 @@ typedef struct BLOB_CONTEXT_DATA_TAG
     HTTP_PROXY_OPTIONS http_proxy_options;
 } BLOB_CONTEXT_DATA;
 
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(HTTP_CALLBACK_REASON, HTTP_CALLBACK_REASON_VALUES);
+
 static void on_http_error(void* callback_ctx, HTTP_CALLBACK_REASON error_result)
 {
     (void)error_result;
@@ -66,12 +68,13 @@ static void on_http_recv(void* callback_ctx, HTTP_CALLBACK_REASON request_result
                     blob_data->http_error = 1;
                 }
             }
-            blob_data->status_code = statusCode;
         }
         else
         {
+            LogError("Failure Reason code uploading to blob %s", MU_ENUM_TO_STRING(HTTP_CALLBACK_REASON, request_result));
             blob_data->http_error = 1;
         }
+        blob_data->status_code = statusCode;
         blob_data->http_resp_recv = 1;
     }
     else
@@ -295,15 +298,11 @@ static HTTP_CLIENT_HANDLE create_http_client(const char* hostname, BLOB_CONTEXT_
 
 BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* sas_uri, const char* certificate, HTTP_PROXY_OPTIONS* proxyOptions, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX getDataCallbackEx, void* context, unsigned int* httpStatus, BUFFER_HANDLE httpResponse)
 {
-    (void)getDataCallbackEx;
-    (void)context;
-    (void)httpResponse;
-
     BLOB_RESULT result = 0;
     /*Codes_SRS_BLOB_02_001: [ If SASURI is NULL then Blob_UploadMultipleBlocksFromSasUri shall fail and return BLOB_INVALID_ARG. ]*/
     if (sas_uri == NULL || getDataCallbackEx == NULL)
     {
-        LogError("parameter sas uri is NULL");
+        LogError("invalid parameter specified sas_uri: %p, getDataCallbackEx: %p, httpResponse: %p", sas_uri, getDataCallbackEx, httpResponse);
         result = BLOB_INVALID_ARG;
     }
     else
