@@ -326,7 +326,7 @@ static DIGITALTWIN_CLIENT_RESULT CreateDTInterfacesJson(DT_INTERFACE_LIST* dtInt
         for (i = 0; i < dtInterfaceList->numDtInterfaceClientHandles; i++)
         {
             const char* interfaceId;
-            const char* interfaceInstanceName;
+            const char* componentName;
 
             if ((interfaceId = DT_InterfaceClient_GetInterfaceId(dtInterfaceList->dtInterfaceClientHandles[i])) == NULL)
             {
@@ -334,13 +334,13 @@ static DIGITALTWIN_CLIENT_RESULT CreateDTInterfacesJson(DT_INTERFACE_LIST* dtInt
                 result = DIGITALTWIN_CLIENT_ERROR;
                 break;
             }
-            else if ((interfaceInstanceName = DT_InterfaceClient_GetInterfaceInstanceName(dtInterfaceList->dtInterfaceClientHandles[i])) == NULL)
+            else if ((componentName = DT_InterfaceClient_GetComponentName(dtInterfaceList->dtInterfaceClientHandles[i])) == NULL)
             {
-                LogError("DT_InterfaceClient_GetInterfaceInstanceName failed");
+                LogError("DT_InterfaceClient_GetComponentName failed");
                 result = DIGITALTWIN_CLIENT_ERROR;
                 break;
             }
-            else if (json_object_set_string(interfacesObject, interfaceInstanceName, interfaceId) != JSONSuccess)
+            else if (json_object_set_string(interfacesObject, componentName, interfaceId) != JSONSuccess)
             {
                 LogError("json_object_set_string failed");
                 result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;

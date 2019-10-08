@@ -22,7 +22,7 @@ typedef struct MODEL_DEFINITION_CLIENT_TAG
 
 // DigitalTwin interface name from service perspective.
 static const char* DigitalTwinModelDefinition_InterfaceId = "urn:azureiot:ModelDiscovery:ModelDefinition:1";
-static const char* DigitalTwinModelDefinition_InterfaceInstanceName = "urn_azureiot_ModelDiscovery_ModelDefinition";
+static const char* DigitalTwinModelDefinition_ComponentName = "urn_azureiot_ModelDiscovery_ModelDefinition";
 
 //
 //  Callback function declarations and DigitalTwin command names for this interface.
@@ -192,9 +192,9 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_ModelDefinition_Create(MODEL_DEFINITION_CL
         LogError("MODEL_DEFINITION_INTERFACE: Unable to allocate memory for map");
         result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
     }
-    else if ((result = DigitalTwin_InterfaceClient_Create(DigitalTwinModelDefinition_InterfaceId, DigitalTwinModelDefinition_InterfaceInstanceName, DTMD_InterfaceRegisteredCallback, (void *)mdHandle, &interfaceClientHandle)) != DIGITALTWIN_CLIENT_OK)
+    else if ((result = DigitalTwin_InterfaceClient_Create(DigitalTwinModelDefinition_InterfaceId, DigitalTwinModelDefinition_ComponentName, DTMD_InterfaceRegisteredCallback, (void *)mdHandle, &interfaceClientHandle)) != DIGITALTWIN_CLIENT_OK)
     {
-        LogError("MODEL_DEFINITION_INTERFACE: Unable to allocate interface client handle for interfaceId=<%s>, InterfaceInstanceName=<%s>, error=<%s>", DigitalTwinModelDefinition_InterfaceId, DigitalTwinModelDefinition_InterfaceInstanceName, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
+        LogError("MODEL_DEFINITION_INTERFACE: Unable to allocate interface client handle for interfaceId=<%s>, ComponentName=<%s>, error=<%s>", DigitalTwinModelDefinition_InterfaceId, DigitalTwinModelDefinition_ComponentName, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
         interfaceClientHandle = NULL;
         result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
     }
@@ -206,7 +206,7 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_ModelDefinition_Create(MODEL_DEFINITION_CL
     }
     else
     {
-        LogInfo("MODEL_DEFINITION_INTERFACE: Created DIGITALTWIN_INTERFACE_CLIENT_HANDLE. interfaceId=<%s>, InterfaceInstanceName=<%s>, handle=<%p>", DigitalTwinModelDefinition_InterfaceId, DigitalTwinModelDefinition_InterfaceInstanceName, interfaceClientHandle);
+        LogInfo("MODEL_DEFINITION_INTERFACE: Created DIGITALTWIN_INTERFACE_CLIENT_HANDLE. interfaceId=<%s>, ComponentName=<%s>, handle=<%p>", DigitalTwinModelDefinition_InterfaceId, DigitalTwinModelDefinition_ComponentName, interfaceClientHandle);
         mdHandle->dt_handle = interfaceClientHandle;
         result = DIGITALTWIN_CLIENT_OK;
     }

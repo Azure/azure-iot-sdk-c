@@ -104,13 +104,13 @@ MOCKABLE_FUNCTION(, void, testBindingThreadSleep, unsigned int, milliseconds);
 #define DT_TEST_INTERFACE_ID_2 "urn:testOnly:testInterface2:5"
 #define DT_TEST_INTERFACE_ID_3 "urn:testOnly:testInterface3:1"
 
-#define DT_TEST_INTERFACE_NAME_1 "TestOnly_TestInterface1"
-#define DT_TEST_INTERFACE_NAME_2 "TestOnly_TestInterface2"
-#define DT_TEST_INTERFACE_NAME_3 "TestOnly_TestInterface3"
+#define DT_TEST_COMPONENT_NAME_1 "TestOnly_TestComponent1"
+#define DT_TEST_COMPONENT_NAME_2 "TestOnly_TestComponent2"
+#define DT_TEST_COMPONENT_NAME_3 "TestOnly_TestComponent3"
 
 #define DT_TEST_CAPABILITY_MODEL_ID "urn:testOnly:testDeviceCapabilityModel:1"
-static const char* dtTestInterfaceIds[] =  {DT_TEST_INTERFACE_ID_1, DT_TEST_INTERFACE_ID_2, DT_TEST_INTERFACE_ID_3};
-static const char* dtTestInterfaceInstanceNames[] =  {DT_TEST_INTERFACE_NAME_1, DT_TEST_INTERFACE_NAME_2, DT_TEST_INTERFACE_NAME_3 };
+static const char* dtTestInterfaceIds[] = {DT_TEST_INTERFACE_ID_1, DT_TEST_INTERFACE_ID_2, DT_TEST_INTERFACE_ID_3};
+static const char* dtTestComponentNames[] = {DT_TEST_COMPONENT_NAME_1, DT_TEST_COMPONENT_NAME_2, DT_TEST_COMPONENT_NAME_3};
 
 TEST_DEFINE_ENUM_TYPE(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_RESULT_VALUES);
@@ -147,9 +147,9 @@ static DIGITALTWIN_INTERFACE_CLIENT_HANDLE dtTestInterfaceArray[] = { DT_TEST_IN
 #define DT_TEST_INTERFACE_MODEL_DISCOVERY_TUPLE DT_TEST_BUILD_JSON_TUPLE(DT_MODEL_DISCOVERY_INTERFACE_NAME, DT_MODEL_DISCOVERY_INTERFACE_ID)
 #define DT_TEST_SDK_INFORMATION_TUPLE DT_TEST_BUILD_JSON_TUPLE(DT_SDK_INFORMATION_INTERFACE_NAME, DT_SDK_INFORMATION_INTERFACE_ID)
 
-#define DT_TEST_INTERFACE_JSON_TUPLE_1 DT_TEST_BUILD_JSON_TUPLE(DT_TEST_INTERFACE_NAME_1, DT_TEST_INTERFACE_ID_1)
-#define DT_TEST_INTERFACE_JSON_TUPLE_2 DT_TEST_BUILD_JSON_TUPLE(DT_TEST_INTERFACE_NAME_2, DT_TEST_INTERFACE_ID_2)
-#define DT_TEST_INTERFACE_JSON_TUPLE_3 DT_TEST_BUILD_JSON_TUPLE(DT_TEST_INTERFACE_NAME_3, DT_TEST_INTERFACE_ID_3)
+#define DT_TEST_INTERFACE_JSON_TUPLE_1 DT_TEST_BUILD_JSON_TUPLE(DT_TEST_COMPONENT_NAME_1, DT_TEST_INTERFACE_ID_1)
+#define DT_TEST_INTERFACE_JSON_TUPLE_2 DT_TEST_BUILD_JSON_TUPLE(DT_TEST_COMPONENT_NAME_2, DT_TEST_INTERFACE_ID_2)
+#define DT_TEST_INTERFACE_JSON_TUPLE_3 DT_TEST_BUILD_JSON_TUPLE(DT_TEST_COMPONENT_NAME_3, DT_TEST_INTERFACE_ID_3)
 
 #define DT_TEST_INTERFACE_REGISTER_START  "{\"modelInformation\":{\"capabilityModelId\":\"" DT_TEST_CAPABILITY_MODEL_ID "\",\"interfaces\":{" DT_TEST_INTERFACE_MODEL_DISCOVERY_TUPLE "," DT_TEST_SDK_INFORMATION_TUPLE ","
 
@@ -195,13 +195,13 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 
 const char* test_dtInterfaceList_ExpectedMessageBody;
 
-DIGITALTWIN_CLIENT_RESULT impl_test_DT_InterfaceClient_CreateTelemetryMessage(const char* interfaceId, const char* interfaceInstanceName, const char* telemetryName, const char* messageData, IOTHUB_MESSAGE_HANDLE* telemetryMessageHandle)
+DIGITALTWIN_CLIENT_RESULT impl_test_DT_InterfaceClient_CreateTelemetryMessage(const char* interfaceId, const char* componentName, const char* telemetryName, const char* messageData, IOTHUB_MESSAGE_HANDLE* telemetryMessageHandle)
 {
     // Verify that the JSON generated during message creation (and hence being passed to this function) is as expected
     ASSERT_ARE_EQUAL(char_ptr, test_dtInterfaceList_ExpectedMessageBody, messageData);
 
     (void)interfaceId;
-    (void)interfaceInstanceName;
+    (void)componentName;
     (void)telemetryName;
     (void)telemetryMessageHandle;
     return DIGITALTWIN_CLIENT_OK;
@@ -300,7 +300,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(DT_InterfaceClient_CreateTelemetryMessage, DIGITALTWIN_CLIENT_ERROR);
     
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(DT_InterfaceClient_GetInterfaceId, NULL);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(DT_InterfaceClient_GetInterfaceInstanceName, NULL);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(DT_InterfaceClient_GetComponentName, NULL);
 
     REGISTER_STRING_GLOBAL_MOCK_HOOK;
 }
@@ -876,7 +876,7 @@ static void set_expected_calls_for_DT_InterfaceList_CreateRegistrationMessage(in
     for (i = 0; i < numInterfacesToRegister; i++)
     {
         STRICT_EXPECTED_CALL(DT_InterfaceClient_GetInterfaceId(IGNORED_PTR_ARG)).SetReturn(dtTestInterfaceIds[i]);
-        STRICT_EXPECTED_CALL(DT_InterfaceClient_GetInterfaceInstanceName(IGNORED_PTR_ARG)).SetReturn(dtTestInterfaceInstanceNames[i]);
+        STRICT_EXPECTED_CALL(DT_InterfaceClient_GetComponentName(IGNORED_PTR_ARG)).SetReturn(dtTestComponentNames[i]);
         STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     }
 

@@ -9,7 +9,7 @@ This document will cover high-level concepts that are C SDK specific.  However i
 ## Initial interface client creation and registration
 
 * A `DIGITALTWIN_INTERFACE_CLIENT_HANDLE` handle is created by the Digital Twin SDK function `DigitalTwin_InterfaceClient_Create`.  
-  * The application specifies the `interfaceId` and `interfaceInstanceName` in this step.  These are used during registration and to route method and property requests coming from the server.
+  * The application specifies the `interfaceId` and `componentName` in this step.  These are used during registration and to route method and property requests coming from the server.
   * The application may optionally specify a callback function to be invoked when the interface has registered, registration has failed, or its owning device handle has closed it.
 * The application optionally invokes `DigitalTwin_InterfaceClient_SetPropertiesUpdatedCallback` and/or `DigitalTwin_InterfaceClient_SetCommandsCallback`, depending on whether the model that the interface implements supports commands and/or properties.
   * These callback commands **MUST** be invoked prior to the interface handle being registered.  Attempts to set callbacks post-registration will fail.

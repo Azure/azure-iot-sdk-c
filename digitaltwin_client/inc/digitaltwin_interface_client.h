@@ -226,7 +226,7 @@ typedef void(*DIGITALTWIN_CLIENT_UPDATE_ASYNC_COMMAND_CALLBACK)(DIGITALTWIN_CLIE
            This handle cannot be used until it is registered with the service.
 
   @param[in]  interfaceId                       The interfaceId of interface to be registered.  For example, urn:contoso:com:EnvironmentalSensor:1.
-  @param[in]  interfaceInstanceName             The interface instance name associated with this interface Id.  For example, environmentalSensor.
+  @param[in]  componentName                     The component name associated with this interface Id.  For example, environmentalSensor.
   @param[in]  dtInterfaceRegisteredCallback     (Optional) Function pointer to be invoked when the interface status (e.g. is registered or fails to register) changes.
   @param[in]  userInterfaceContext              (Optional) Context pointer passed to dtInterfaceRegisteredCallback function on interface changes.
   @param[out] dtInterfaceClientHandle           Handle created in this call. 
@@ -236,7 +236,7 @@ typedef void(*DIGITALTWIN_CLIENT_UPDATE_ASYNC_COMMAND_CALLBACK)(DIGITALTWIN_CLIE
 
   @returns  A DIGITALTWIN_CLIENT_RESULT.
 */
-MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_InterfaceClient_Create, const char*, interfaceId, const char*, interfaceInstanceName, DIGITALTWIN_INTERFACE_REGISTERED_CALLBACK, dtInterfaceRegisteredCallback, void*, userInterfaceContext, DIGITALTWIN_INTERFACE_CLIENT_HANDLE*, dtInterfaceClientHandle);
+MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_InterfaceClient_Create, const char*, interfaceId, const char*, componentName, DIGITALTWIN_INTERFACE_REGISTERED_CALLBACK, dtInterfaceRegisteredCallback, void*, userInterfaceContext, DIGITALTWIN_INTERFACE_CLIENT_HANDLE*, dtInterfaceClientHandle);
 
 /** 
   @brief Specifies callback function to process property updates from the server.
