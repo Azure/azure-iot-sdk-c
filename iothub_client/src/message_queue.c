@@ -428,12 +428,12 @@ int message_queue_move_all_back_to_pending(MESSAGE_QUEUE_HANDLE message_queue)
         // Codes_SRS_MESSAGE_QUEUE_21_070: [The message_queue_move_all_back_to_pending shall add all in_progress message in front of the pending messages.]
         if (move_messages_between_lists(message_queue->pending, message_queue->in_progress) != 0)
         {
-            LogError("failed moving in-progress message to temporary list");
+            LogError("failed moving pending messages at the end of in-progress");
             result = MU_FAILURE;
         }
         else if (move_messages_between_lists(message_queue->in_progress, message_queue->pending) != 0)
         {
-            LogError("failed moving pending message to temporary list");
+            LogError("failed moving all in-progress messages back to pending");
             result = MU_FAILURE;
         }
         else
