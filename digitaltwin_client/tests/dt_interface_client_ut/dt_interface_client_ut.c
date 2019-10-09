@@ -217,8 +217,8 @@ static const char* dtTestOneProperty[1] = { DT_TEST_PROPERTY_NAME1 };
 static const char* dtTestTwoProperties[2] = { DT_TEST_PROPERTY_NAME1, DT_TEST_PROPERTY_NAME2  };
 static const char* dtTestThreeProperties[3] = { DT_TEST_PROPERTY_NAME1, DT_TEST_PROPERTY_NAME2, DT_TEST_PROPERTY_NAME3 };
 
-// Builds up DT-ified command by concatenating interfaceInstanceName, separator, and commandName into a string.
-#define DT_TEST_BUILD_COMMAND_NAME(interfaceInstanceName, commandName) "$iotin:" interfaceInstanceName "*" commandName
+// Builds up DT-ified command by concatenating componentName, separator, and commandName into a string.
+#define DT_TEST_BUILD_COMMAND_NAME(componentName, commandName) "$iotin:" componentName "*" commandName
 
 #define DT_TEST_PAYLOAD_PASSED_TO_CALLBACK "{\"foo\":1234}"
 static const size_t dtTestPayloadPassedToCallbackLen = sizeof(DT_TEST_PAYLOAD_PASSED_TO_CALLBACK) - 1;
@@ -278,11 +278,11 @@ static const char dtTestAsyncCommandResponseExpected3[] = "{\"payload\":" DT_TES
 #define DT_TEST_PROPERTY_3_PREVIOUSLY_REPORTED_CONTENT "{" DT_TEST_PROPERTY_3_PREVIOUSLY_REPORTED_CONTENT_NO_BRACES "}"
 
 #define DT_TEST_INTERFACE_ID_1 "urn:testonly:testinterface:1"
-#define DT_TEST_INTERFACE_NAME_1 "testonly_testinterface"
+#define DT_TEST_COMPONENT_NAME_1 "testonly_testinterface"
 
 
 static const char* dtTestInterfaceId1 = DT_TEST_INTERFACE_ID_1;
-static const char* dtTestInterfaceInstanceName1 = DT_TEST_INTERFACE_NAME_1;
+static const char* dtTestComponentName1 = DT_TEST_COMPONENT_NAME_1;
 
 
 #define DT_TEST_DESIRED_VERSION_JSON ", \"$version\": 12"
@@ -291,30 +291,30 @@ static const char* dtTestInterfaceInstanceName1 = DT_TEST_INTERFACE_NAME_1;
 #define DT_TEST_DESIRED_JSON "{  \"desired\": { "
 #define DT_TEST_REPORTED_JSON "}, \"reported\": { "
 
-#define DT_TEST_INTERFACE_NAME_1_OBJECT "\"$iotin:"  DT_TEST_INTERFACE_NAME_1 "\": "
+#define DT_TEST_COMPONENT_NAME_1_OBJECT "\"$iotin:"  DT_TEST_COMPONENT_NAME_1 "\": "
 
 // Property DTTestProperty1 is being updated for this interface, as a full twin.
-static const char updatePropertiesPropertyFullTwin1[] = DT_TEST_DESIRED_JSON DT_TEST_INTERFACE_NAME_1_OBJECT DT_TEST_PROPERTY_1_CONTENT DT_TEST_DESIRED_VERSION_JSON  DT_TEST_REPORTED_JSON DT_TEST_TWIN_VERSION_JSON "}";
+static const char updatePropertiesPropertyFullTwin1[] = DT_TEST_DESIRED_JSON DT_TEST_COMPONENT_NAME_1_OBJECT DT_TEST_PROPERTY_1_CONTENT DT_TEST_DESIRED_VERSION_JSON  DT_TEST_REPORTED_JSON DT_TEST_TWIN_VERSION_JSON "}";
 static const size_t updatePropertiesPropertyFullTwin1Len= sizeof(updatePropertiesPropertyFullTwin1) - 1;
 
 // Property DTTestProperty2 is being updated for this interface, as a full twin.
-static const char updatePropertiesPropertyFullTwin2[] = DT_TEST_DESIRED_JSON DT_TEST_INTERFACE_NAME_1_OBJECT DT_TEST_PROPERTY_2_CONTENT  DT_TEST_DESIRED_VERSION_JSON DT_TEST_REPORTED_JSON DT_TEST_TWIN_VERSION_JSON "}";
+static const char updatePropertiesPropertyFullTwin2[] = DT_TEST_DESIRED_JSON DT_TEST_COMPONENT_NAME_1_OBJECT DT_TEST_PROPERTY_2_CONTENT  DT_TEST_DESIRED_VERSION_JSON DT_TEST_REPORTED_JSON DT_TEST_TWIN_VERSION_JSON "}";
 static const size_t updatePropertiesPropertyFullTwin2Len= sizeof(updatePropertiesPropertyFullTwin2) - 1;
 
 // Property DTTestProperty3 is being updated for this interface, as a full twin.  Note DTTestProperty3 uses a complex JSON value for additional testing, here & throughout.
-static const char updatePropertiesPropertyFullTwin3[] = DT_TEST_DESIRED_JSON DT_TEST_INTERFACE_NAME_1_OBJECT DT_TEST_PROPERTY_3_CONTENT  DT_TEST_DESIRED_VERSION_JSON  DT_TEST_REPORTED_JSON DT_TEST_TWIN_VERSION_JSON  "}";
+static const char updatePropertiesPropertyFullTwin3[] = DT_TEST_DESIRED_JSON DT_TEST_COMPONENT_NAME_1_OBJECT DT_TEST_PROPERTY_3_CONTENT  DT_TEST_DESIRED_VERSION_JSON  DT_TEST_REPORTED_JSON DT_TEST_TWIN_VERSION_JSON  "}";
 static const size_t updatePropertiesPropertyFullTwin3Len= sizeof(updatePropertiesPropertyFullTwin3) - 1;
 
 // Property DTTestProperty1 is being updated for this interface, as a twin update.
-static const char updatePropertiesPropertyUpdateTwin1[] = "{" DT_TEST_INTERFACE_NAME_1_OBJECT DT_TEST_PROPERTY_1_CONTENT DT_TEST_DESIRED_VERSION_JSON "}";
+static const char updatePropertiesPropertyUpdateTwin1[] = "{" DT_TEST_COMPONENT_NAME_1_OBJECT DT_TEST_PROPERTY_1_CONTENT DT_TEST_DESIRED_VERSION_JSON "}";
 static const size_t updatePropertiesPropertyUpdateTwin1Len= sizeof(updatePropertiesPropertyUpdateTwin1) - 1;
 
 // Property DTTestProperty2 is being updated for this interface, as a twin update.
-static const char updatePropertiesPropertyUpdateTwin2[] = "{" DT_TEST_INTERFACE_NAME_1_OBJECT DT_TEST_PROPERTY_2_CONTENT DT_TEST_DESIRED_VERSION_JSON "}";
+static const char updatePropertiesPropertyUpdateTwin2[] = "{" DT_TEST_COMPONENT_NAME_1_OBJECT DT_TEST_PROPERTY_2_CONTENT DT_TEST_DESIRED_VERSION_JSON "}";
 static const size_t updatePropertiesPropertyUpdateTwin2Len= sizeof(updatePropertiesPropertyUpdateTwin2) - 1;
 
 // Property DTTestProperty3 is being updated for this interface, as a twin update.
-static const char updatePropertiesPropertyUpdateTwin3[] = "{" DT_TEST_INTERFACE_NAME_1_OBJECT DT_TEST_PROPERTY_3_CONTENT DT_TEST_DESIRED_VERSION_JSON "}";
+static const char updatePropertiesPropertyUpdateTwin3[] = "{" DT_TEST_COMPONENT_NAME_1_OBJECT DT_TEST_PROPERTY_3_CONTENT DT_TEST_DESIRED_VERSION_JSON "}";
 static const size_t updatePropertiesPropertyUpdateTwin3Len= sizeof(updatePropertiesPropertyUpdateTwin3) - 1;
 
 // Property DTTestProperty1 is being updated *but for a different interface* than we're testing.  So should be ignored.
@@ -322,15 +322,15 @@ static const char updatePropertiesDifferentInterfaceFullTwin[] = "{  \"$iotin:DI
 static const size_t updatePropertiesDifferentInterfaceFullTwinLen= sizeof(updatePropertiesDifferentInterfaceFullTwin) - 1;
 
 // Property DTTestProperty1 is being updated for this interface, as a full twin.  There is a totally unrelated interface included which should be ignored.
-static const char updatePropertiesPropertyFullTwin1AndRandomInterfaces[] = DT_TEST_DESIRED_JSON DT_TEST_INTERFACE_NAME_1_OBJECT DT_TEST_PROPERTY_1_CONTENT ", \"$iotin:DIFFERENT-INTERFACE\":" DT_TEST_PROPERTY_2_CONTENT  DT_TEST_DESIRED_VERSION_JSON DT_TEST_REPORTED_JSON DT_TEST_TWIN_VERSION_JSON "}";
+static const char updatePropertiesPropertyFullTwin1AndRandomInterfaces[] = DT_TEST_DESIRED_JSON DT_TEST_COMPONENT_NAME_1_OBJECT DT_TEST_PROPERTY_1_CONTENT ", \"$iotin:DIFFERENT-INTERFACE\":" DT_TEST_PROPERTY_2_CONTENT  DT_TEST_DESIRED_VERSION_JSON DT_TEST_REPORTED_JSON DT_TEST_TWIN_VERSION_JSON "}";
 static const size_t updatePropertiesPropertyFullTwin1AndRandomInterfacesLen= sizeof(updatePropertiesPropertyFullTwin1AndRandomInterfaces) - 1;
 
 // All desired properties are updated, full twin
-static const char updatePropertiesPropertyFullTwinAll[] = DT_TEST_DESIRED_JSON DT_TEST_INTERFACE_NAME_1_OBJECT "{" DT_TEST_PROPERTY_1_CONTENT_NO_BRACES ","  DT_TEST_PROPERTY_2_CONTENT_NO_BRACES "," DT_TEST_PROPERTY_3_CONTENT_NO_BRACES "}" DT_TEST_DESIRED_VERSION_JSON DT_TEST_REPORTED_JSON DT_TEST_TWIN_VERSION_JSON "} }";
+static const char updatePropertiesPropertyFullTwinAll[] = DT_TEST_DESIRED_JSON DT_TEST_COMPONENT_NAME_1_OBJECT "{" DT_TEST_PROPERTY_1_CONTENT_NO_BRACES ","  DT_TEST_PROPERTY_2_CONTENT_NO_BRACES "," DT_TEST_PROPERTY_3_CONTENT_NO_BRACES "}" DT_TEST_DESIRED_VERSION_JSON DT_TEST_REPORTED_JSON DT_TEST_TWIN_VERSION_JSON "} }";
 static const size_t updatePropertiesPropertyFullTwinAllLen= sizeof(updatePropertiesPropertyFullTwinAll) - 1;
 
 // All desired and reported properties are updated, full twin
-static const char updatePropertiesDesiredAndReportedFullTwinAll[] = DT_TEST_DESIRED_JSON DT_TEST_INTERFACE_NAME_1_OBJECT "{" DT_TEST_PROPERTY_1_CONTENT_NO_BRACES "," DT_TEST_PROPERTY_2_CONTENT_NO_BRACES "," DT_TEST_PROPERTY_3_CONTENT_NO_BRACES "}" DT_TEST_DESIRED_VERSION_JSON  DT_TEST_REPORTED_JSON DT_TEST_INTERFACE_NAME_1_OBJECT "{"  DT_TEST_PROPERTY_1_PREVIOUSLY_REPORTED_CONTENT_NO_BRACES "," DT_TEST_PROPERTY_2_PREVIOUSLY_REPORTED_CONTENT_NO_BRACES "," DT_TEST_PROPERTY_3_PREVIOUSLY_REPORTED_CONTENT_NO_BRACES DT_TEST_TWIN_VERSION_JSON "} }";
+static const char updatePropertiesDesiredAndReportedFullTwinAll[] = DT_TEST_DESIRED_JSON DT_TEST_COMPONENT_NAME_1_OBJECT "{" DT_TEST_PROPERTY_1_CONTENT_NO_BRACES "," DT_TEST_PROPERTY_2_CONTENT_NO_BRACES "," DT_TEST_PROPERTY_3_CONTENT_NO_BRACES "}" DT_TEST_DESIRED_VERSION_JSON  DT_TEST_REPORTED_JSON DT_TEST_COMPONENT_NAME_1_OBJECT "{"  DT_TEST_PROPERTY_1_PREVIOUSLY_REPORTED_CONTENT_NO_BRACES "," DT_TEST_PROPERTY_2_PREVIOUSLY_REPORTED_CONTENT_NO_BRACES "," DT_TEST_PROPERTY_3_PREVIOUSLY_REPORTED_CONTENT_NO_BRACES DT_TEST_TWIN_VERSION_JSON "} }";
 static const size_t updatePropertiesDesiredAndReportedFullTwinAllLen= sizeof(updatePropertiesDesiredAndReportedFullTwinAll) - 1;
 
 // JSon is not legal
@@ -353,7 +353,7 @@ static const char* DT_TEST_Valid_InterfaceIds[] = {
 static const size_t DT_TEST_Valid_InterfaceIdsLen = sizeof(DT_TEST_Valid_InterfaceIds) / sizeof(DT_TEST_Valid_InterfaceIds[0]);
 
 // Valid interface names
-static const char* DT_TEST_Valid_InterfaceInstanceNames[] = {
+static const char* DT_TEST_Valid_ComponentNames[] = {
     "goodName",
     "good_Name",
     "good_Name_Name2",
@@ -362,7 +362,7 @@ static const char* DT_TEST_Valid_InterfaceInstanceNames[] = {
     "good_maximum_length_000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000_1"
 };
 
-static const size_t DT_TEST_Valid_InterfaceInstanceNamesLen = sizeof(DT_TEST_Valid_InterfaceInstanceNames) / sizeof(DT_TEST_Valid_InterfaceInstanceNames[0]);
+static const size_t DT_TEST_Valid_ComponentNamesLen = sizeof(DT_TEST_Valid_ComponentNames) / sizeof(DT_TEST_Valid_ComponentNames[0]);
 
 // Interface IDs that are missing the "urn:" of some flavor
 static const char* DT_TEST_MissingUrn_InterfaceIds[] = {
@@ -377,7 +377,7 @@ static const size_t DT_TEST_MissingUrn_InterfaceIdsLen = sizeof(DT_TEST_MissingU
 
 // Interfaces that are too long
 static const char DT_Test_InterfaceIdTooLong[]   = "urn:too_long_length_000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000:10";
-static const char DT_Test_InterfaceInstanceNameTooLong[] = "urn:too_long_length_000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000_10";
+static const char DT_Test_ComponentNameTooLong[] = "urn:too_long_length_000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000_10";
 
 // If mocked command callback is invoked, whether or not it should set a response or else leave it as NULL
 static bool intefaceClient_CommandCallbackSetsData;
@@ -746,7 +746,7 @@ TEST_FUNCTION(DigitalTwin_InterfaceClient_Create_ok)
     set_expected_calls_for_DigitalTwin_InterfaceClient_Create();
 
     //act
-    result = DigitalTwin_InterfaceClient_Create(dtTestInterfaceId1, dtTestInterfaceInstanceName1, NULL, NULL, &h);
+    result = DigitalTwin_InterfaceClient_Create(dtTestInterfaceId1, dtTestComponentName1, NULL, NULL, &h);
 
     //assert
     ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result);
@@ -765,7 +765,7 @@ TEST_FUNCTION(DigitalTwin_InterfaceClient_Create_register_callback_ok)
     set_expected_calls_for_DigitalTwin_InterfaceClient_Create();
 
     //act
-    result = DigitalTwin_InterfaceClient_Create(dtTestInterfaceId1, dtTestInterfaceInstanceName1, testInterfaceRegisteredCallback, NULL, &h);
+    result = DigitalTwin_InterfaceClient_Create(dtTestInterfaceId1, dtTestComponentName1, testInterfaceRegisteredCallback, NULL, &h);
 
     //assert
     ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result);
@@ -782,7 +782,7 @@ TEST_FUNCTION(DigitalTwin_InterfaceClient_Create_NULL_interface_id_fails)
     DIGITALTWIN_INTERFACE_CLIENT_HANDLE h = NULL;
 
     //act
-    result = DigitalTwin_InterfaceClient_Create(NULL, dtTestInterfaceInstanceName1, NULL, NULL, &h);
+    result = DigitalTwin_InterfaceClient_Create(NULL, dtTestComponentName1, NULL, NULL, &h);
 
     //assert
     ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG, result);
@@ -811,7 +811,7 @@ TEST_FUNCTION(DigitalTwin_InterfaceClient_Create_NULL_handle_fails)
     DIGITALTWIN_INTERFACE_CLIENT_HANDLE h = NULL;
 
     //act
-    result = DigitalTwin_InterfaceClient_Create(dtTestInterfaceId1, dtTestInterfaceInstanceName1, NULL, NULL, NULL);
+    result = DigitalTwin_InterfaceClient_Create(dtTestInterfaceId1, dtTestComponentName1, NULL, NULL, NULL);
 
     //assert
     ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG, result);
@@ -838,7 +838,7 @@ TEST_FUNCTION(DigitalTwin_InterfaceClient_Create_fail)
         umock_c_negative_tests_fail_call(i);
 
         //act
-        result = DigitalTwin_InterfaceClient_Create(dtTestInterfaceId1, dtTestInterfaceInstanceName1, testInterfaceRegisteredCallback, testDTInterfaceCallbackContext, &h);
+        result = DigitalTwin_InterfaceClient_Create(dtTestInterfaceId1, dtTestComponentName1, testInterfaceRegisteredCallback, testDTInterfaceCallbackContext, &h);
 
         //assert
         ASSERT_ARE_NOT_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result, "Failure in test %lu", (unsigned long)i);
@@ -856,7 +856,7 @@ static DIGITALTWIN_INTERFACE_CLIENT_HANDLE test_allocateDT_interface()
     DIGITALTWIN_CLIENT_RESULT result;
     DIGITALTWIN_INTERFACE_CLIENT_HANDLE h;
 
-    result = DigitalTwin_InterfaceClient_Create(dtTestInterfaceId1, dtTestInterfaceInstanceName1, testInterfaceRegisteredCallback, testDTInterfaceCallbackContext, &h);
+    result = DigitalTwin_InterfaceClient_Create(dtTestInterfaceId1, dtTestComponentName1, testInterfaceRegisteredCallback, testDTInterfaceCallbackContext, &h);
 
     ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result);
     ASSERT_IS_NOT_NULL(h);
@@ -872,7 +872,7 @@ static DIGITALTWIN_INTERFACE_CLIENT_HANDLE test_allocateDT_interface_with_callba
     DIGITALTWIN_CLIENT_RESULT result;
     DIGITALTWIN_INTERFACE_CLIENT_HANDLE h;
 
-    result = DigitalTwin_InterfaceClient_Create(dtTestInterfaceId1, dtTestInterfaceInstanceName1, testInterfaceRegisteredCallback, testDTInterfaceCallbackContext, &h);
+    result = DigitalTwin_InterfaceClient_Create(dtTestInterfaceId1, dtTestComponentName1, testInterfaceRegisteredCallback, testDTInterfaceCallbackContext, &h);
 
     ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result);
     ASSERT_IS_NOT_NULL(h);
@@ -1331,7 +1331,7 @@ TEST_FUNCTION(DT_InterfaceClient_CreateTelemetryMessage_no_interfaceId_ok)
     set_expected_calls_for_DT_InterfaceClient_CreateTelemetryMessage(false);
 
     //act
-    DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceClient_CreateTelemetryMessage(NULL, DT_TEST_INTERFACE_NAME_1,  dtTestTelemetryName, dtTestMessageData, &messageHandle);
+    DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceClient_CreateTelemetryMessage(NULL, DT_TEST_COMPONENT_NAME_1,  dtTestTelemetryName, dtTestMessageData, &messageHandle);
 
     //assert
     ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result);
@@ -1349,7 +1349,7 @@ TEST_FUNCTION(DT_InterfaceClient_CreateTelemetryMessage_with_interfaceId_ok)
     set_expected_calls_for_DT_InterfaceClient_CreateTelemetryMessage(true);
 
     //act
-    DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceClient_CreateTelemetryMessage(DT_TEST_INTERFACE_ID_1, DT_TEST_INTERFACE_NAME_1,  dtTestTelemetryName, dtTestMessageData, &messageHandle);
+    DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceClient_CreateTelemetryMessage(DT_TEST_INTERFACE_ID_1, DT_TEST_COMPONENT_NAME_1,  dtTestTelemetryName, dtTestMessageData, &messageHandle);
 
     //assert
     ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result);
@@ -1360,7 +1360,7 @@ TEST_FUNCTION(DT_InterfaceClient_CreateTelemetryMessage_with_interfaceId_ok)
     my_IoTHubMessage_Destroy(messageHandle);
 }
 
-TEST_FUNCTION(DT_InterfaceClient_CreateTelemetryMessage_NULL_InterfaceInstanceName_fails)
+TEST_FUNCTION(DT_InterfaceClient_CreateTelemetryMessage_NULL_ComponentName_fails)
 {
     //arrange
     IOTHUB_MESSAGE_HANDLE messageHandle = NULL;
@@ -1381,7 +1381,7 @@ TEST_FUNCTION(DT_InterfaceClient_CreateTelemetryMessage_NULL_telemetry_name_fail
     IOTHUB_MESSAGE_HANDLE messageHandle = NULL;
     
     //act
-    DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceClient_CreateTelemetryMessage(DT_TEST_INTERFACE_ID_1, DT_TEST_INTERFACE_NAME_1, NULL, dtTestMessageData, &messageHandle);
+    DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceClient_CreateTelemetryMessage(DT_TEST_INTERFACE_ID_1, DT_TEST_COMPONENT_NAME_1, NULL, dtTestMessageData, &messageHandle);
 
     //assert
     ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG, result);
@@ -1395,7 +1395,7 @@ TEST_FUNCTION(DT_InterfaceClient_CreateTelemetryMessage_NULL_messageData_fails)
     IOTHUB_MESSAGE_HANDLE messageHandle = NULL;
     
     //act
-    DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceClient_CreateTelemetryMessage(DT_TEST_INTERFACE_ID_1, DT_TEST_INTERFACE_NAME_1, dtTestTelemetryName, NULL, &messageHandle);
+    DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceClient_CreateTelemetryMessage(DT_TEST_INTERFACE_ID_1, DT_TEST_COMPONENT_NAME_1, dtTestTelemetryName, NULL, &messageHandle);
 
     //assert
     ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG, result);
@@ -1406,7 +1406,7 @@ TEST_FUNCTION(DT_InterfaceClient_CreateTelemetryMessage_NULL_messageData_fails)
 TEST_FUNCTION(DT_InterfaceClient_CreateTelemetryMessage_NULL_messageHandle_fails)
 {
     //act
-    DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceClient_CreateTelemetryMessage(DT_TEST_INTERFACE_ID_1, DT_TEST_INTERFACE_NAME_1, dtTestTelemetryName, dtTestMessageData, NULL);
+    DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceClient_CreateTelemetryMessage(DT_TEST_INTERFACE_ID_1, DT_TEST_COMPONENT_NAME_1, dtTestTelemetryName, dtTestMessageData, NULL);
 
     //assert
     ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG, result);
@@ -1433,7 +1433,7 @@ TEST_FUNCTION(DT_InterfaceClient_CreateTelemetryMessage_fail)
             umock_c_negative_tests_fail_call(i);
 
             //act
-            DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceClient_CreateTelemetryMessage(DT_TEST_INTERFACE_ID_1, DT_TEST_INTERFACE_NAME_1,  dtTestTelemetryName, dtTestMessageData, &messageHandle);
+            DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceClient_CreateTelemetryMessage(DT_TEST_INTERFACE_ID_1, DT_TEST_COMPONENT_NAME_1,  dtTestTelemetryName, dtTestMessageData, &messageHandle);
 
             //assert
             ASSERT_ARE_NOT_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result, "Failure in test %lu", (unsigned long)i);
@@ -1601,7 +1601,7 @@ static DIGITALTWIN_INTERFACE_CLIENT_HANDLE test_allocate_and_register_DT_interfa
     DIGITALTWIN_CLIENT_RESULT result;
     DIGITALTWIN_INTERFACE_CLIENT_HANDLE h;
 
-    result = DigitalTwin_InterfaceClient_Create(dtTestInterfaceId1, dtTestInterfaceInstanceName1, testInterfaceRegisteredCallback, testDTInterfaceCallbackContext, &h);
+    result = DigitalTwin_InterfaceClient_Create(dtTestInterfaceId1, dtTestComponentName1, testInterfaceRegisteredCallback, testDTInterfaceCallbackContext, &h);
 
     ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result);
     ASSERT_IS_NOT_NULL(h);
@@ -1822,9 +1822,9 @@ TEST_FUNCTION(DT_InterfaceClient_CheckNameValid_ok)
         ASSERT_ARE_EQUAL(int, 0, DT_InterfaceClient_CheckNameValid(valueToCheck, true), "Value=%s failed but should have succeeded", valueToCheck);
     }
 
-    for (i = 0; i < DT_TEST_Valid_InterfaceInstanceNamesLen; i++)
+    for (i = 0; i < DT_TEST_Valid_ComponentNamesLen; i++)
     {
-        const char* valueToCheck = DT_TEST_Valid_InterfaceInstanceNames[i];
+        const char* valueToCheck = DT_TEST_Valid_ComponentNames[i];
         ASSERT_ARE_EQUAL(int, 0, DT_InterfaceClient_CheckNameValid(valueToCheck, false), "Value=%s failed but should have succeeded", valueToCheck);
     }
 }
@@ -1883,7 +1883,7 @@ TEST_FUNCTION(DT_InterfaceClient_CheckNameValid_invalid_character_in_name_fails)
     char* invalidNamePointer = invalidName + 5;
 
     // Copy to local buffer since we can't overwrite const field
-    strcpy(invalidName, DT_TEST_Valid_InterfaceInstanceNames[0]);
+    strcpy(invalidName, DT_TEST_Valid_ComponentNames[0]);
 
     // Iterate through each char, 1 to 0xff.  Put any invalid characters into the array in 5th location.
     for (i = 1; i < 256; i++)
@@ -1910,33 +1910,33 @@ TEST_FUNCTION(DT_InterfaceClient_CheckNameValid_name_too_long_fails)
 {
     // ASSERT
     ASSERT_ARE_NOT_EQUAL(int, 0, DT_InterfaceClient_CheckNameValid(DT_Test_InterfaceIdTooLong, true), "Value=%s failed but should have succeeded", DT_Test_InterfaceIdTooLong);
-    ASSERT_ARE_NOT_EQUAL(int, 0, DT_InterfaceClient_CheckNameValid(DT_Test_InterfaceInstanceNameTooLong, false), "Value=%s failed but should have succeeded", DT_Test_InterfaceInstanceNameTooLong);
+    ASSERT_ARE_NOT_EQUAL(int, 0, DT_InterfaceClient_CheckNameValid(DT_Test_ComponentNameTooLong, false), "Value=%s failed but should have succeeded", DT_Test_ComponentNameTooLong);
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// DT_InterfaceClient_GetInterfaceInstanceName
+// DT_InterfaceClient_GetComponentName
 ///////////////////////////////////////////////////////////////////////////////
-TEST_FUNCTION(DT_InterfaceClient_GetInterfaceInstanceName_ok)
+TEST_FUNCTION(DT_InterfaceClient_GetComponentName_ok)
 {
     //arrange
     DIGITALTWIN_INTERFACE_CLIENT_HANDLE h = test_allocate_and_register_DT_interface_with_callbacks();
 
     //act
-    const char* result = DT_InterfaceClient_GetInterfaceInstanceName(h);
+    const char* result = DT_InterfaceClient_GetComponentName(h);
 
     //assert
-    ASSERT_ARE_EQUAL(char_ptr, dtTestInterfaceInstanceName1, result);
+    ASSERT_ARE_EQUAL(char_ptr, dtTestComponentName1, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
     test_free_bound_interface_handle(h);
 }
 
-TEST_FUNCTION(DT_InterfaceClient_GetInterfaceInstanceName_NULL_handle_returns_NULL)
+TEST_FUNCTION(DT_InterfaceClient_GetComponentName_NULL_handle_returns_NULL)
 {
     //act
-    const char* result = DT_InterfaceClient_GetInterfaceInstanceName(NULL);
+    const char* result = DT_InterfaceClient_GetComponentName(NULL);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, NULL, result);
@@ -2799,17 +2799,17 @@ static void test_DT_InterfaceClient_InvokeCommandIfSupported(DIGITALTWIN_COMMAND
     test_free_bound_interface_handle(h);
 }
 
-// The interface instance name is a match and response returned from callback is valid string.
-TEST_FUNCTION(DT_InterfaceClient_InvokeCommandIfSupported_InterfaceInstanceName_matches_ok)
+// The component name is a match and response returned from callback is valid string.
+TEST_FUNCTION(DT_InterfaceClient_InvokeCommandIfSupported_ComponentName_matches_ok)
 {
-    const char* testCommandName = DT_TEST_BUILD_COMMAND_NAME(DT_TEST_INTERFACE_NAME_1, DT_TEST_COMMAND_NAME);
+    const char* testCommandName = DT_TEST_BUILD_COMMAND_NAME(DT_TEST_COMPONENT_NAME_1, DT_TEST_COMMAND_NAME);
     test_DT_InterfaceClient_InvokeCommandIfSupported(testDTClientCommandCallback, DT_COMMAND_PROCESSOR_PROCESSED, testCommandName, DT_TEST_EXPECTED_COMMAND_SYNC_CALLBACK);
 }
 
-// The interface instance name is a match, but response returned from callback is NULL
-TEST_FUNCTION(DT_InterfaceClient_InvokeCommandIfSupported_InterfaceInstanceName_no_response_set_matches_ok)
+// The component name is a match, but response returned from callback is NULL
+TEST_FUNCTION(DT_InterfaceClient_InvokeCommandIfSupported_ComponentName_no_response_set_matches_ok)
 {
-    const char* testCommandName = DT_TEST_BUILD_COMMAND_NAME(DT_TEST_INTERFACE_NAME_1, DT_TEST_COMMAND_NAME);
+    const char* testCommandName = DT_TEST_BUILD_COMMAND_NAME(DT_TEST_COMPONENT_NAME_1, DT_TEST_COMMAND_NAME);
     test_DT_InterfaceClient_InvokeCommandIfSupported(testDTClientCommandCallback, DT_COMMAND_PROCESSOR_PROCESSED, testCommandName, DT_TEST_EXPECTED_COMMAND_SYNC_CALLBACK_RETURNS_NULL_RESPONSE);
 }
 
@@ -2819,7 +2819,7 @@ TEST_FUNCTION(DT_InterfaceClient_InvokeCommandIfSupported_InterfaceInstanceName_
 TEST_FUNCTION(DT_InterfaceClient_InvokeCommandIfSupported_no_commands_registered_fail)
 {
     // This interface doesn't have any commands registered to it.
-    const char* testCommandName = DT_TEST_BUILD_COMMAND_NAME(DT_TEST_INTERFACE_NAME_1, DT_TEST_COMMAND_NAME);
+    const char* testCommandName = DT_TEST_BUILD_COMMAND_NAME(DT_TEST_COMPONENT_NAME_1, DT_TEST_COMMAND_NAME);
     test_DT_InterfaceClient_InvokeCommandIfSupported(NULL, DT_COMMAND_PROCESSOR_NOT_APPLICABLE, testCommandName, DT_TEST_EXPECTED_INTERFACE_NO_MATCH);
 }
 
@@ -2861,7 +2861,7 @@ TEST_FUNCTION(DT_InterfaceClient_InvokeCommandIfSupported_NULL_response_fail)
 {
     //arrange
     DIGITALTWIN_INTERFACE_CLIENT_HANDLE h = test_allocate_and_register_DT_interface_with_callbacks_specifying_commands(testDTClientCommandCallback);
-    const char* testCommandName = DT_TEST_BUILD_COMMAND_NAME(DT_TEST_INTERFACE_NAME_1, DT_TEST_COMMAND_NAME);
+    const char* testCommandName = DT_TEST_BUILD_COMMAND_NAME(DT_TEST_COMPONENT_NAME_1, DT_TEST_COMMAND_NAME);
 
     //act
     unsigned char* response = NULL;
@@ -2882,7 +2882,7 @@ TEST_FUNCTION(DT_InterfaceClient_InvokeCommandIfSupported_NULL_response_len_fail
 {
     //arrange
     DIGITALTWIN_INTERFACE_CLIENT_HANDLE h = test_allocate_and_register_DT_interface_with_callbacks_specifying_commands(testDTClientCommandCallback);
-    const char* testCommandName = DT_TEST_BUILD_COMMAND_NAME(DT_TEST_INTERFACE_NAME_1, DT_TEST_COMMAND_NAME);
+    const char* testCommandName = DT_TEST_BUILD_COMMAND_NAME(DT_TEST_COMPONENT_NAME_1, DT_TEST_COMMAND_NAME);
 
     //act
     unsigned char* response = NULL;
@@ -2903,7 +2903,7 @@ TEST_FUNCTION(DT_InterfaceClient_InvokeCommandIfSupported_NULL_response_code_fai
 {
     //arrange
     DIGITALTWIN_INTERFACE_CLIENT_HANDLE h = test_allocate_and_register_DT_interface_with_callbacks_specifying_commands(testDTClientCommandCallback);
-    const char* testCommandName = DT_TEST_BUILD_COMMAND_NAME(DT_TEST_INTERFACE_NAME_1, DT_TEST_COMMAND_NAME);
+    const char* testCommandName = DT_TEST_BUILD_COMMAND_NAME(DT_TEST_COMPONENT_NAME_1, DT_TEST_COMMAND_NAME);
 
     //act
     unsigned char* response = NULL;
@@ -2925,7 +2925,7 @@ TEST_FUNCTION(DT_InterfaceClient_InvokeCommandIfSupported_fail)
 {
     // arrange
     DIGITALTWIN_INTERFACE_CLIENT_HANDLE h = test_allocate_and_register_DT_interface_with_callbacks_specifying_commands(testDTClientCommandCallback);
-    const char* testCommandName = DT_TEST_BUILD_COMMAND_NAME(DT_TEST_INTERFACE_NAME_1, DT_TEST_COMMAND_NAME);
+    const char* testCommandName = DT_TEST_BUILD_COMMAND_NAME(DT_TEST_COMPONENT_NAME_1, DT_TEST_COMMAND_NAME);
 
     int negativeTestsInitResult = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);

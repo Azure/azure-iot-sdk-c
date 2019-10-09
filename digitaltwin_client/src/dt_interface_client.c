@@ -91,8 +91,8 @@ typedef struct DT_INTERFACE_CLIENT_TAG
     void* commandCallbackContext;
     void* propertyCallbackContext;
     char* interfaceId;
-    char* interfaceInstanceName;
-    size_t interfaceInstanceNameLen;
+    char* componentName;
+    size_t componentNameLen;
     DIGITALTWIN_INTERFACE_REGISTERED_CALLBACK dtInterfaceRegisteredCallback;
     DIGITALTWIN_PROPERTY_UPDATE_CALLBACK propertyUpdatedCallback;
     DIGITALTWIN_COMMAND_EXECUTE_CALLBACK commandExecuteCallback;
@@ -224,7 +224,7 @@ static void FreeDTInterface(DT_INTERFACE_CLIENT* dtInterfaceClient)
 {
     InvokeBindingInterfaceLockDeinitIfNeeded(dtInterfaceClient);
     free(dtInterfaceClient->interfaceId);
-    free(dtInterfaceClient->interfaceInstanceName);
+    free(dtInterfaceClient->componentName);
     free(dtInterfaceClient);
 }
 
@@ -370,7 +370,7 @@ const char* DT_InterfaceClient_GetInterfaceId(DIGITALTWIN_INTERFACE_CLIENT_HANDL
 }
 
 // Retrieves a shallow copy of the interface name for caller.
-const char* DT_InterfaceClient_GetInterfaceInstanceName(DIGITALTWIN_INTERFACE_CLIENT_HANDLE dtInterfaceClientHandle)
+const char* DT_InterfaceClient_GetComponentName(DIGITALTWIN_INTERFACE_CLIENT_HANDLE dtInterfaceClientHandle)
 {
     const char* result;
     DT_INTERFACE_CLIENT* dtInterfaceClient = (DT_INTERFACE_CLIENT*)dtInterfaceClientHandle;
@@ -382,7 +382,7 @@ const char* DT_InterfaceClient_GetInterfaceInstanceName(DIGITALTWIN_INTERFACE_CL
     }
     else
     {
-        result = dtInterfaceClient->interfaceInstanceName;
+        result = dtInterfaceClient->componentName;
     }
     return result;
 }
@@ -435,21 +435,21 @@ static bool IsDesiredInterfaceStateTransitionAllowed(DT_INTERFACE_CLIENT* dtInte
 
 static void SetInterfaceState(DT_INTERFACE_CLIENT* dtInterfaceClient, DT_INTERFACE_STATE desiredState)
 {
-    DigitalTwinLogInfo("DigitalTwin Interface : Changing interface state on interface %s from %s to %s", dtInterfaceClient->interfaceInstanceName,  
+    DigitalTwinLogInfo("DigitalTwin Interface : Changing interface state on interface %s from %s to %s", dtInterfaceClient->componentName,
                                                                                              MU_ENUM_TO_STRING(DT_INTERFACE_STATE, dtInterfaceClient->interfaceState), 
                                                                                              MU_ENUM_TO_STRING(DT_INTERFACE_STATE, desiredState));
     dtInterfaceClient->interfaceState = desiredState;
 }
 
 // DigitalTwin_InterfaceClient_Create initializes a DIGITALTWIN_INTERFACE_CLIENT_HANDLE
-DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_Create(const char* interfaceId, const char* interfaceInstanceName, DIGITALTWIN_INTERFACE_REGISTERED_CALLBACK dtInterfaceRegisteredCallback, void* userInterfaceContext, DIGITALTWIN_INTERFACE_CLIENT_HANDLE* dtInterfaceClient)
+DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_Create(const char* interfaceId, const char* componentName, DIGITALTWIN_INTERFACE_REGISTERED_CALLBACK dtInterfaceRegisteredCallback, void* userInterfaceContext, DIGITALTWIN_INTERFACE_CLIENT_HANDLE* dtInterfaceClient)
 {
     DIGITALTWIN_CLIENT_RESULT result;
     DT_INTERFACE_CLIENT* dtNewHandle;
         
-    if ((interfaceId == NULL) || (interfaceInstanceName == NULL) || (dtInterfaceClient == NULL))
+    if ((interfaceId == NULL) || (componentName == NULL) || (dtInterfaceClient == NULL))
     {
-        LogError("Invalid parameter(s): interfaceId=%p, interfaceInstanceName=%p, dtInterfaceClient=%p", interfaceId, interfaceInstanceName, dtInterfaceClient);
+        LogError("Invalid parameter(s): interfaceId=%p, componentName=%p, dtInterfaceClient=%p", interfaceId, componentName, dtInterfaceClient);
         result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
     }
     else if (DT_InterfaceClient_CheckNameValid(interfaceId, true) != 0)
@@ -457,9 +457,9 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_Create(const char* interfa
         LogError("Invalid interfaceId %s", interfaceId);
         result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
     }
-    else if (DT_InterfaceClient_CheckNameValid(interfaceInstanceName, false) != 0)
+    else if (DT_InterfaceClient_CheckNameValid(componentName, false) != 0)
     {
-        LogError("Invalid interfaceInstanceName %s", interfaceInstanceName);
+        LogError("Invalid componentName %s", componentName);
         result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
     }
     else if ((dtNewHandle = calloc(1, sizeof(DT_INTERFACE_CLIENT))) == NULL)
@@ -469,13 +469,13 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_Create(const char* interfa
     }
     else if (mallocAndStrcpy_s(&dtNewHandle->interfaceId, interfaceId) != 0)
     {
-        LogError("Cannot allocate interfaceInstanceName");
+        LogError("Cannot allocate componentName");
         FreeDTInterface(dtNewHandle);
         result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
     }
-    else if (mallocAndStrcpy_s(&dtNewHandle->interfaceInstanceName, interfaceInstanceName) != 0)
+    else if (mallocAndStrcpy_s(&dtNewHandle->componentName, componentName) != 0)
     {
-        LogError("Cannot allocate interfaceInstanceName");
+        LogError("Cannot allocate componentName");
         FreeDTInterface(dtNewHandle);
         result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
     }
@@ -484,7 +484,7 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_Create(const char* interfa
         SetInterfaceState(dtNewHandle, DT_INTERFACE_STATE_CREATED);
         dtNewHandle->userInterfaceContext = userInterfaceContext;
         dtNewHandle->dtInterfaceRegisteredCallback = dtInterfaceRegisteredCallback;
-        dtNewHandle->interfaceInstanceNameLen = strlen(dtNewHandle->interfaceInstanceName);
+        dtNewHandle->componentNameLen = strlen(dtNewHandle->componentName);
         *dtInterfaceClient = dtNewHandle;
         result = DIGITALTWIN_CLIENT_OK;
     }
@@ -693,7 +693,7 @@ void DT_InterfaceClient_RegistrationCompleteCallback(DIGITALTWIN_INTERFACE_CLIEN
     {
         if (dtInterfaceStatus != DIGITALTWIN_CLIENT_OK)
         {
-            LogError("Interface %s failed on registration with error %s.  Interface is NOT registered, remaining in state=%s", dtInterfaceClient->interfaceInstanceName, 
+            LogError("Interface %s failed on registration with error %s.  Interface is NOT registered, remaining in state=%s", dtInterfaceClient->componentName,
                       MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, dtInterfaceStatus), MU_ENUM_TO_STRING(DT_INTERFACE_STATE, dtInterfaceClient->interfaceState));
         }
         else 
@@ -726,7 +726,7 @@ static DIGITALTWIN_CLIENT_RESULT CreateJsonForPropertyWithoutResponse(DT_INTERFA
     DIGITALTWIN_CLIENT_RESULT result;
 
     // We need to copy propertyData into propertyDataString because the caller didn't necessarily NULL terminate this string.
-    if ((*jsonToSend = STRING_construct_sprintf(DT_PropertyWithoutResponseSchema, dtInterfaceClient->interfaceInstanceName, propertyName, propertyData)) == NULL)
+    if ((*jsonToSend = STRING_construct_sprintf(DT_PropertyWithoutResponseSchema, dtInterfaceClient->componentName, propertyName, propertyData)) == NULL)
     {
         LogError("Cannot allocate string handle");
         result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
@@ -746,7 +746,7 @@ static DIGITALTWIN_CLIENT_RESULT CreateJsonForPropertyWithResponse(DT_INTERFACE_
 
     // See comments in CreateJsonForPropertyWithoutResponse about why we can't safely use parson to process propertyData.
     if ((*jsonToSend = STRING_construct_sprintf(DT_PropertyWithResponseSchema, 
-                                                dtInterfaceClient->interfaceInstanceName, propertyName, propertyData, dtResponse->statusCode, 
+                                                dtInterfaceClient->componentName, propertyName, propertyData, dtResponse->statusCode,
                                                 dtResponse->statusDescription, dtResponse->responseVersion)) == NULL)
     {
         LogError("Cannot allocate string handle");
@@ -922,15 +922,15 @@ static DIGITALTWIN_CLIENT_RESULT CreateJsonForTelemetryMessage(const char* telem
 }
 
 // Allocates a properly setup IOTHUB_MESSAGE_HANDLE for processing onto IoTHub.
-DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_CreateTelemetryMessage(const char* interfaceId, const char* interfaceInstanceName, const char* telemetryName, const char* messageData, IOTHUB_MESSAGE_HANDLE* telemetryMessageHandle)
+DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_CreateTelemetryMessage(const char* interfaceId, const char* componentName, const char* telemetryName, const char* messageData, IOTHUB_MESSAGE_HANDLE* telemetryMessageHandle)
 {
     DIGITALTWIN_CLIENT_RESULT result;
     IOTHUB_MESSAGE_RESULT iothubMessageResult;
 
-    if ((interfaceInstanceName == NULL) || (telemetryName == NULL) || (messageData == NULL) || (telemetryMessageHandle == NULL))
+    if ((componentName == NULL) || (telemetryName == NULL) || (messageData == NULL) || (telemetryMessageHandle == NULL))
     {
-        LogError("Invalid parameter(s): interfaceInstanceName=%p, telemetryName=%p, messageData=%p, telemetryMessageHandle=%p",
-                 interfaceInstanceName, telemetryName, messageData, telemetryMessageHandle);
+        LogError("Invalid parameter(s): componentName=%p, telemetryName=%p, messageData=%p, telemetryMessageHandle=%p",
+			componentName, telemetryName, messageData, telemetryMessageHandle);
         result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
     }
     else
@@ -947,7 +947,7 @@ DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_CreateTelemetryMessage(const char* 
             LogError("Cannot set property %s, error = %d", DT_INTERFACE_ID_PROPERTY, iothubMessageResult);
             result = DIGITALTWIN_CLIENT_ERROR;
         }
-        else if ((iothubMessageResult = IoTHubMessage_SetProperty(*telemetryMessageHandle, DT_INTERFACE_NAME_PROPERTY, interfaceInstanceName)) != IOTHUB_MESSAGE_OK)
+        else if ((iothubMessageResult = IoTHubMessage_SetProperty(*telemetryMessageHandle, DT_INTERFACE_NAME_PROPERTY, componentName)) != IOTHUB_MESSAGE_OK)
         {
             LogError("Cannot set property %s, error = %d", DT_INTERFACE_ID_PROPERTY, iothubMessageResult);
             result = DIGITALTWIN_CLIENT_ERROR;
@@ -1046,7 +1046,7 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_SendTelemetryAsync(DIGITAL
     {
         const char* dataToSend = STRING_c_str(jsonToSend);
 
-        if ((result = DT_InterfaceClient_CreateTelemetryMessage(NULL, dtInterfaceClient->interfaceInstanceName, telemetryName, dataToSend, &telemetryMessageHandle)) != DIGITALTWIN_CLIENT_OK)
+        if ((result = DT_InterfaceClient_CreateTelemetryMessage(NULL, dtInterfaceClient->componentName, telemetryName, dataToSend, &telemetryMessageHandle)) != DIGITALTWIN_CLIENT_OK)
         {
             LogError("Cannot create send telemetry message, error = %d", result);
             result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
@@ -1157,7 +1157,7 @@ static void ProcessPropertyUpdateIfNeededFromDesired(DT_INTERFACE_CLIENT* dtInte
 
         if ((payloadForDesiredProperty = GetPayloadFromProperty(dtInterfaceDesiredJson, propertyName)) == NULL)
         {
-            LogError("Unable to retrieve payload for property %s on interface %s", propertyName, dtInterfaceClient->interfaceInstanceName);
+            LogError("Unable to retrieve payload for property %s on interface %s", propertyName, dtInterfaceClient->componentName);
         }
         else
         {
@@ -1182,7 +1182,7 @@ static void ProcessPropertyUpdateIfNeededFromDesired(DT_INTERFACE_CLIENT* dtInte
             dtClientPropertyUpdate.desiredVersion = jsonVersion;
         
             DigitalTwinLogInfo("DigitalTwin Interface : Invoking property callback for interface %s, propertyName=%s, propertyCallbackContext=%p", 
-                                dtInterfaceClient->interfaceInstanceName, propertyName, dtInterfaceClient->propertyCallbackContext);
+                                dtInterfaceClient->componentName, propertyName, dtInterfaceClient->propertyCallbackContext);
                 
             dtInterfaceClient->propertyUpdatedCallback(&dtClientPropertyUpdate, dtInterfaceClient->propertyCallbackContext);
 
@@ -1205,11 +1205,11 @@ static void ProcessPropertiesForTwin(DT_INTERFACE_CLIENT* dtInterfaceClient, JSO
 
     // If there are property updates for this interface - which there may or may not be - the will in the passed in JSON 
     // under the paths built up in 'desiredPathForInterface' and 'reportedPathForInterface'.
-    if ((desiredPathForInterface = STRING_construct_sprintf("%s%s", DT_INTERFACE_PREFIX, dtInterfaceClient->interfaceInstanceName)) == NULL)
+    if ((desiredPathForInterface = STRING_construct_sprintf("%s%s", DT_INTERFACE_PREFIX, dtInterfaceClient->componentName)) == NULL)
     {   
         LogError("Cannot build desiredPathForInterface string");
     }
-    else if ((reportedPathForInterface = STRING_construct_sprintf("%s%s", DT_INTERFACE_PREFIX, dtInterfaceClient->interfaceInstanceName)) == NULL)
+    else if ((reportedPathForInterface = STRING_construct_sprintf("%s%s", DT_INTERFACE_PREFIX, dtInterfaceClient->componentName)) == NULL)
     {
         LogError("Cannot build reportedPathForInterface string");
     }
@@ -1314,7 +1314,7 @@ DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_ProcessTwinCallback(DIGITALTWIN_INT
     {
         // Not having a callback is not an error.  There's no point in parsing any twin data in this case, though, if 
         // there would be nothing to process it in the first place.
-        LogInfo("Interface name <%s> does not have a property update callback registered with it.  Skipping twin update processing", dtInterfaceClient->interfaceInstanceName);
+        LogInfo("Component name <%s> does not have a property update callback registered with it.  Skipping twin update processing", dtInterfaceClient->componentName);
         result = DIGITALTWIN_CLIENT_OK;
     }
     else
@@ -1345,7 +1345,7 @@ DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_ProcessTwinCallback(DIGITALTWIN_INT
         }
         else if (BeginInterfaceCallbackProcessing(dtInterfaceClient) != 0)
         {
-            LogError("Unable to mark callback as being processed for interface instance.  Skipping callback");
+            LogError("Unable to mark callback as being processed for component.  Skipping callback");
             result = DIGITALTWIN_CLIENT_ERROR;
         }
         else
@@ -1366,8 +1366,8 @@ DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_ProcessTwinCallback(DIGITALTWIN_INT
 }
 
 // Indicates whether given command is processed by this interface.  Commands arrive in the format
-// "<interfaceInstanceName>*<commandOnInterfaceToInvoke>", so we need to match "<interfaceInstanceName>*" here.
-static bool IsCommandMatchForInterfaceInstanceName(DT_INTERFACE_CLIENT* dtInterfaceClient, const char* methodName)
+// "<componentName>*<commandOnInterfaceToInvoke>", so we need to match "<componentName>*" here.
+static bool IsCommandMatchForComponentName(DT_INTERFACE_CLIENT* dtInterfaceClient, const char* methodName)
 {
     bool result;
 
@@ -1376,10 +1376,10 @@ static bool IsCommandMatchForInterfaceInstanceName(DT_INTERFACE_CLIENT* dtInterf
         LogError("Method name not prefixed with %s identifier.  Invalid request", DT_INTERFACE_PREFIX);
         result = false;
     }
-    else if (strncmp(dtInterfaceClient->interfaceInstanceName, methodName + DT_INTERFACE_PREFIX_LENGTH, dtInterfaceClient->interfaceInstanceNameLen) == 0)
+    else if (strncmp(dtInterfaceClient->componentName, methodName + DT_INTERFACE_PREFIX_LENGTH, dtInterfaceClient->componentNameLen) == 0)
     {
         // If we match on length, still need to check that what's being queried has a command separator as character immediately following.
-        result = (methodName[dtInterfaceClient->interfaceInstanceNameLen + DT_INTERFACE_PREFIX_LENGTH] == commandSeparator);
+        result = (methodName[dtInterfaceClient->componentNameLen + DT_INTERFACE_PREFIX_LENGTH] == commandSeparator);
     }
     else
     {
@@ -1403,7 +1403,7 @@ static void InvokeDTCommand(DT_INTERFACE_CLIENT* dtInterfaceClient, const char* 
     memset(&dtClientResponse, 0, sizeof(dtClientResponse));
     dtClientResponse.version = DIGITALTWIN_CLIENT_COMMAND_RESPONSE_VERSION_1;
     
-    DigitalTwinLogInfo("DigitalTwin Interface : Invoking callback to process command %s on interface name %s", commandName, dtInterfaceClient->interfaceInstanceName);
+    DigitalTwinLogInfo("DigitalTwin Interface : Invoking callback to process command %s on interface name %s", commandName, dtInterfaceClient->componentName);
 
     dtInterfaceClient->commandExecuteCallback(&dtClientCommandRequest, &dtClientResponse, dtInterfaceClient->commandCallbackContext);
     
@@ -1503,14 +1503,14 @@ DT_COMMAND_PROCESSOR_RESULT DT_InterfaceClient_InvokeCommandIfSupported(DIGITALT
         LogError("Invalid parameter(s).  dtInterfaceClientHandle=%p, methodName=%p, response=%p, response_size=%p, responseCode=%p", dtInterfaceClientHandle, methodName, response, response_size, responseCode);
         result = DT_COMMAND_PROCESSOR_ERROR;
     }
-    else if (IsCommandMatchForInterfaceInstanceName(dtInterfaceClient, methodName) == false)
+    else if (IsCommandMatchForComponentName(dtInterfaceClient, methodName) == false)
     {
         // The method name is coming for a different interface.  There's nothing for us to do but silently ignore in this case.
         result = DT_COMMAND_PROCESSOR_NOT_APPLICABLE;
     }
     else if (dtInterfaceClient->commandExecuteCallback == NULL)
     {
-        LogError("Interface <%s> cannot support this command because no callbacks are tied to it", dtInterfaceClient->interfaceInstanceName);
+        LogError("Interface <%s> cannot support this command because no callbacks are tied to it", dtInterfaceClient->componentName);
         result = DT_COMMAND_PROCESSOR_NOT_APPLICABLE;
     }
     else if (ParseCommandPayload(payload, size, &rootValue, &requestId, &payloadForCallback) != 0)
@@ -1520,13 +1520,13 @@ DT_COMMAND_PROCESSOR_RESULT DT_InterfaceClient_InvokeCommandIfSupported(DIGITALT
     }
     else if (BeginInterfaceCallbackProcessing(dtInterfaceClient) != 0)
     {
-        LogError("Unable to mark callback as being processed for interface instance.  Skipping callback");
+        LogError("Unable to mark callback as being processed for component.  Skipping callback");
         result = DT_COMMAND_PROCESSOR_ERROR;
     }
     else
     {
-        // Skip past the <interfaceInstanceName>* preamble to get the actual command name from DigitalTwin layer to map back to
-        const char* commandName = methodName + DT_INTERFACE_PREFIX_LENGTH + dtInterfaceClient->interfaceInstanceNameLen + 1;
+        // Skip past the <componentName>* preamble to get the actual command name from DigitalTwin layer to map back to
+        const char* commandName = methodName + DT_INTERFACE_PREFIX_LENGTH + dtInterfaceClient->componentNameLen + 1;
         InvokeDTCommand(dtInterfaceClient, commandName, requestId, payloadForCallback, response, response_size, responseCode);
 
         EndInterfaceCallbackProcessing(dtInterfaceClient);
@@ -1628,7 +1628,7 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAs
     {
         LogError("CreateJsonForTelemetryMessage failed, error = %d", result);
     }
-    else if ((result = DT_InterfaceClient_CreateTelemetryMessage(NULL, dtInterfaceClient->interfaceInstanceName, DT_AsyncResultSchema, STRING_c_str(jsonToSend),  &telemetryMessageHandle)) != DIGITALTWIN_CLIENT_OK)
+    else if ((result = DT_InterfaceClient_CreateTelemetryMessage(NULL, dtInterfaceClient->componentName, DT_AsyncResultSchema, STRING_c_str(jsonToSend),  &telemetryMessageHandle)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("Cannot create send telemetry message, error = %d", result);
     }
@@ -1670,8 +1670,8 @@ void InvokeSendTelemetryCallback(DT_INTERFACE_CLIENT* dtInterfaceClient, DT_INTE
     else
     {
         (void)dtInterfaceClient; // When DIGITALTWIN_LOGGING_ENABLED is 0, dtInterfaceClient not used and otherwise causes a false positive on -Wunused-variable.
-        DigitalTwinLogInfo("DigitalTwin Interface: Invoking telemetry confirmation callback for interface=%s, reportedStatus=%s, userContextCallback=%p", 
-                   dtInterfaceClient->interfaceInstanceName, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, dtSendTelemetryStatus), sendTelemetryCallbackContext->userContextCallback);
+        DigitalTwinLogInfo("DigitalTwin Interface: Invoking telemetry confirmation callback for component name=%s, reportedStatus=%s, userContextCallback=%p", 
+                   dtInterfaceClient->componentName, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, dtSendTelemetryStatus), sendTelemetryCallbackContext->userContextCallback);
     
         sendTelemetryCallbackContext->u.telemetryConfirmationCallback(dtSendTelemetryStatus, sendTelemetryCallbackContext->userContextCallback);
     
@@ -1689,8 +1689,8 @@ void InvokeUpdateAsyncCommandStatusCallback(DT_INTERFACE_CLIENT* dtInterfaceClie
     else
     {
         (void)dtInterfaceClient; // When DIGITALTWIN_LOGGING_ENABLED is 0, dtInterfaceClient not used and otherwise causes a false positive on -Wunused-variable.
-        DigitalTwinLogInfo("DigitalTwin Interface: Invoking update async command status confirmation callback for interface=%s, reportedStatus=%s, userContextCallback=%p", 
-                   dtInterfaceClient->interfaceInstanceName, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, dtSendTelemetryStatus), sendTelemetryCallbackContext->userContextCallback);
+        DigitalTwinLogInfo("DigitalTwin Interface: Invoking update async command status confirmation callback for component name=%s, reportedStatus=%s, userContextCallback=%p", 
+                   dtInterfaceClient->componentName, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, dtSendTelemetryStatus), sendTelemetryCallbackContext->userContextCallback);
     
         sendTelemetryCallbackContext->u.updateAsyncCommandCallback(dtSendTelemetryStatus, sendTelemetryCallbackContext->userContextCallback);
     
@@ -1718,7 +1718,7 @@ DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_ProcessTelemetryCallback(DIGITALTWI
     }
     else if (BeginInterfaceCallbackProcessing(dtInterfaceClient) != 0)
     {
-        LogError("Unable to mark callback as being processed for interface instance.  Skipping callback");
+        LogError("Unable to mark callback as being processed for component.  Skipping callback");
         result = DIGITALTWIN_CLIENT_ERROR;
     }
     else
@@ -1777,8 +1777,8 @@ DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_ProcessReportedPropertiesUpdateCall
         else
         {
             (void)dtInterfaceClient; // When DIGITALTWIN_LOGGING_ENABLED is 0, dtInterfaceClient not used and otherwise causes a false positive on -Wunused-variable.
-            DigitalTwinLogInfo("DigitalTwin Interface: Invoking reported property update for interface=%s, reportedStatus=%s, userContextCallback=%p", 
-                        dtInterfaceClient->interfaceInstanceName, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, dtReportedStatus), dtReportedPropertyCallback->userContextCallback);
+            DigitalTwinLogInfo("DigitalTwin Interface: Invoking reported property update for component name=%s, reportedStatus=%s, userContextCallback=%p", 
+                        dtInterfaceClient->componentName, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, dtReportedStatus), dtReportedPropertyCallback->userContextCallback);
             
             dtReportedPropertyCallback->dtReportedPropertyCallback(dtReportedStatus, dtReportedPropertyCallback->userContextCallback);
 
