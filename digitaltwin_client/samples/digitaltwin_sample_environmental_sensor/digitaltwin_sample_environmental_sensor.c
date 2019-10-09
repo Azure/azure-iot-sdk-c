@@ -43,7 +43,7 @@ static const char* DigitalTwinSampleEnvironmentalSensor_HumidityTelemetry = "hum
 //
 // digitaltwinSample_DeviceState* represents the environmental sensor's read-only property, whether its online or not.
 static const char digitaltwinSample_DeviceStateProperty[] = "state";
-static const char digitaltwinSample_DeviceStateData[] = "true";
+static const unsigned char digitaltwinSample_DeviceStateData[] = "true";
 static const int digitaltwinSample_DeviceStateDataLen = sizeof(digitaltwinSample_DeviceStateData) - 1;
 
 //
@@ -65,13 +65,13 @@ static const int commandStatusNotPresent = 501;
 //
 // What we respond to various commands with.  Must be valid JSON.
 //
-static const char digitaltwinSample_EnviromentalSensor_BlinkResponse[] = "{ \"description\": \"leds blinking\" }";
+static const unsigned char digitaltwinSample_EnviromentalSensor_BlinkResponse[] = "{ \"description\": \"leds blinking\" }";
 
-static const char digitaltwinSample_EnviromentalSensor_OutOfMemory[] = "\"Out of memory\"";
-static const char digitaltwinSample_EnviromentalSensor_NotImplemented[] = "\"Requested command not implemented on this interface\"";
-static const char digitaltwinSample_EnviromentalSensor_RunDiagnosticsBusy[] = "\"Running of diagnostics already active.  Only one request may be active at a time\"";
-static const char digitaltwinSample_EnviromentalSensor_DiagnosticInProgress[] = "\"Diagnostic still in progress\"";
-static const char digitaltwinSample_EnviromentalSensor_DiagnosticsComplete[] = "\"Successfully run diagnostics\"";
+static const unsigned char digitaltwinSample_EnviromentalSensor_OutOfMemory[] = "\"Out of memory\"";
+static const unsigned char digitaltwinSample_EnviromentalSensor_NotImplemented[] = "\"Requested command not implemented on this interface\"";
+static const unsigned char digitaltwinSample_EnviromentalSensor_RunDiagnosticsBusy[] = "\"Running of diagnostics already active.  Only one request may be active at a time\"";
+static const unsigned char digitaltwinSample_EnviromentalSensor_DiagnosticInProgress[] = "\"Diagnostic still in progress\"";
+static const unsigned char digitaltwinSample_EnviromentalSensor_DiagnosticsComplete[] = "\"Successfully run diagnostics\"";
 
 
 //
@@ -109,16 +109,16 @@ typedef struct DIGITALTWIN_SAMPLE_ENVIRONMENTAL_SENSOR_STATE_TAG
 static DIGITALTWIN_SAMPLE_ENVIRONMENTAL_SENSOR_STATE digitaltwinSample_EnvironmentalSensorState;
 
 // DigitalTwinSampleEnvironmentalSensor_SetCommandResponse is a helper that fills out a DIGITALTWIN_CLIENT_COMMAND_RESPONSE
-static int DigitalTwinSampleEnvironmentalSensor_SetCommandResponse(DIGITALTWIN_CLIENT_COMMAND_RESPONSE* dtCommandResponse, const char* responseData, int status)
+static int DigitalTwinSampleEnvironmentalSensor_SetCommandResponse(DIGITALTWIN_CLIENT_COMMAND_RESPONSE* dtCommandResponse, const unsigned char* responseData, int status)
 {
-    size_t responseLen = strlen(responseData);
+    size_t responseLen = strlen((const char *)responseData);
     memset(dtCommandResponse, 0, sizeof(*dtCommandResponse));
     dtCommandResponse->version = DIGITALTWIN_CLIENT_COMMAND_RESPONSE_VERSION_1;
     int result;
 
     // Allocate a copy of the response data to return to the invoker.  The DigitalTwin layer that invoked the application callback
     // takes responsibility for freeing this data.
-    if (mallocAndStrcpy_s((char**)&dtCommandResponse->responseData, responseData) != 0)
+    if (mallocAndStrcpy_s((char**)&dtCommandResponse->responseData, (const char *)responseData) != 0)
     {
         LogError("ENVIRONMENTAL_SENSOR_INTERFACE: Unable to allocate response data");
         dtCommandResponse->status = commandStatusFailure;
@@ -222,7 +222,7 @@ static void DigitalTwinSampleEnvironmentalSensor_RunDiagnosticsCallback(const DI
 }
 
 // DigitalTwinSampleEnvironmentalSensor_SetAsyncUpdateState is a helper to fill in a DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE structure.
-static void DigitalTwinSampleEnvironmentalSensor_SetAsyncUpdateState(DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE *asyncCommandUpdate, const char* propertyData, int status)
+static void DigitalTwinSampleEnvironmentalSensor_SetAsyncUpdateState(DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE *asyncCommandUpdate, const unsigned char* propertyData, int status)
 {
     memset(asyncCommandUpdate, 0, sizeof(*asyncCommandUpdate));
     asyncCommandUpdate->version = DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE_VERSION_1;
@@ -352,8 +352,9 @@ static void DigitalTwinSampleEnvironmentalSensor_CustomerNameCallback(const DIGI
     //
     // DigitalTwin_InterfaceClient_ReportPropertyAsync takes the DIGITALTWIN_CLIENT_PROPERTY_RESPONSE and returns information back to service.
     //
-    result = DigitalTwin_InterfaceClient_ReportPropertyAsync(sensorState->interfaceClientHandle, digitaltwinSample_EnvironmentalSensorPropertyCustomerName, (const char*)dtClientPropertyUpdate->propertyDesired,
-                                                             &propertyResponse, DigitalTwinSampleEnvironmentalSensor_PropertyCallback, (void*)digitaltwinSample_EnvironmentalSensorPropertyCustomerName);
+    result = DigitalTwin_InterfaceClient_ReportPropertyAsync(sensorState->interfaceClientHandle, digitaltwinSample_EnvironmentalSensorPropertyCustomerName,
+                                                             dtClientPropertyUpdate->propertyDesired, dtClientPropertyUpdate->propertyDesiredLen, &propertyResponse,
+                                                             DigitalTwinSampleEnvironmentalSensor_PropertyCallback, (void*)digitaltwinSample_EnvironmentalSensorPropertyCustomerName);
     if (result != DIGITALTWIN_CLIENT_OK)
     {
         LogError("ENVIRONMENTAL_SENSOR_INTERFACE: DigitalTwin_InterfaceClient_ReportPropertyAsync for CustomerName failed, error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
@@ -423,7 +424,8 @@ static void DigitalTwinSampleEnvironmentalSensor_BrightnessCallback(const DIGITA
     //
     // DigitalTwin_InterfaceClient_ReportPropertyAsync takes the DIGITALTWIN_CLIENT_PROPERTY_RESPONSE and returns information back to service.
     //
-    result = DigitalTwin_InterfaceClient_ReportPropertyAsync(sensorState->interfaceClientHandle, digitaltwinSample_EnvironmentalSensorPropertyBrightness, (const char*)dtClientPropertyUpdate->propertyDesired, &propertyResponse,
+    result = DigitalTwin_InterfaceClient_ReportPropertyAsync(sensorState->interfaceClientHandle, digitaltwinSample_EnvironmentalSensorPropertyBrightness,
+                                                             dtClientPropertyUpdate->propertyDesired, dtClientPropertyUpdate->propertyDesiredLen, &propertyResponse,
                                                              DigitalTwinSampleEnvironmentalSensor_PropertyCallback, (void*)digitaltwinSample_EnvironmentalSensorPropertyBrightness);
     if (result != DIGITALTWIN_CLIENT_OK)
     {
@@ -440,8 +442,9 @@ static DIGITALTWIN_CLIENT_RESULT DigitalTwinSampleEnvironmentalSensor_ReportDevi
 {
     DIGITALTWIN_CLIENT_RESULT result;
 
-    result = DigitalTwin_InterfaceClient_ReportPropertyAsync(interfaceHandle, digitaltwinSample_DeviceStateProperty, digitaltwinSample_DeviceStateData,
-                                                             NULL, DigitalTwinSampleEnvironmentalSensor_PropertyCallback, (void*)digitaltwinSample_DeviceStateProperty);
+    result = DigitalTwin_InterfaceClient_ReportPropertyAsync(interfaceHandle, digitaltwinSample_DeviceStateProperty, 
+                                                             digitaltwinSample_DeviceStateData, digitaltwinSample_DeviceStateDataLen, NULL,
+                                                             DigitalTwinSampleEnvironmentalSensor_PropertyCallback, (void*)digitaltwinSample_DeviceStateProperty);
 
     if (result != DIGITALTWIN_CLIENT_OK)
     {
@@ -607,13 +610,13 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwinSampleEnvironmentalSensor_SendTelemetryMess
     sprintf(currentHumidityMessage, "%.3f", currentHumidity);
 
     if ((result = DigitalTwin_InterfaceClient_SendTelemetryAsync(interfaceHandle, DigitalTwinSampleEnvironmentalSensor_TemperatureTelemetry, 
-                                                         currentTemperatureMessage, DigitalTwinSampleEnvironmentalSensor_TelemetryCallback, 
+                                                         (unsigned char *)currentTemperatureMessage, strlen(currentTemperatureMessage), DigitalTwinSampleEnvironmentalSensor_TelemetryCallback,
                                                          (void*)DigitalTwinSampleEnvironmentalSensor_TemperatureTelemetry)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("ENVIRONMENTAL_SENSOR_INTERFACE: DigitalTwin_InterfaceClient_SendTelemetryAsync failed for sending %s", DigitalTwinSampleEnvironmentalSensor_TemperatureTelemetry);
     }
     else if ((result = DigitalTwin_InterfaceClient_SendTelemetryAsync(interfaceHandle, DigitalTwinSampleEnvironmentalSensor_HumidityTelemetry, 
-                                                         currentHumidityMessage, DigitalTwinSampleEnvironmentalSensor_TelemetryCallback, 
+                                                         (unsigned char*)currentHumidityMessage, strlen(currentHumidityMessage), DigitalTwinSampleEnvironmentalSensor_TelemetryCallback,
                                                          (void*)DigitalTwinSampleEnvironmentalSensor_HumidityTelemetry)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("ENVIRONMENTAL_SENSOR_INTERFACE: DigitalTwin_InterfaceClient_SendTelemetryAsync failed for sending %s", DigitalTwinSampleEnvironmentalSensor_HumidityTelemetry);

@@ -47,8 +47,8 @@ static const char DT_JSON_COMMAND_REQUEST_ID[] = "commandRequest.requestId";
 static const char DT_JSON_COMMAND_REQUEST_PAYLOAD[] = "commandRequest.value";
 static const char DT_JSON_NULL[] = "null";
 
-static const char DT_PropertyWithResponseSchema[] =  "{\""  DT_INTERFACE_PREFIX "%s\": { \"%s\": { \"value\":  %s, \"sc\": %d, \"sd\": \"%s\", \"sv\": %d } } }";
-static const char DT_PropertyWithoutResponseSchema[] = "{\""  DT_INTERFACE_PREFIX "%s\": { \"%s\": { \"value\": %s } } }";
+static const char DT_PropertyWithResponseSchema[] =  "{\""  DT_INTERFACE_PREFIX "%s\": { \"%s\": { \"value\":  %.*s, \"sc\": %d, \"sd\": \"%s\", \"sv\": %d } } }";
+static const char DT_PropertyWithoutResponseSchema[] = "{\""  DT_INTERFACE_PREFIX "%s\": { \"%s\": { \"value\": %.*s } } }";
 static const char DT_AsyncResultSchema[] = "asyncResult";
 
 #define DT_SDK_INFORMATION_LANGUAGE_PROPERTY "\"language\":"
@@ -721,12 +721,12 @@ void DT_InterfaceClient_RegistrationCompleteCallback(DIGITALTWIN_INTERFACE_CLIEN
 
 // For specified property, generate appropriate json for updating it.  The json returned is 
 // of the form { "IdForThisInterface" : { "propertyName" : propertyValue }.
-static DIGITALTWIN_CLIENT_RESULT CreateJsonForPropertyWithoutResponse(DT_INTERFACE_CLIENT* dtInterfaceClient, const char* propertyName, const char* propertyData, STRING_HANDLE* jsonToSend)
+static DIGITALTWIN_CLIENT_RESULT CreateJsonForPropertyWithoutResponse(DT_INTERFACE_CLIENT* dtInterfaceClient, const char* propertyName, const unsigned char* propertyData, size_t propertyDataLen, STRING_HANDLE* jsonToSend)
 {
     DIGITALTWIN_CLIENT_RESULT result;
 
     // We need to copy propertyData into propertyDataString because the caller didn't necessarily NULL terminate this string.
-    if ((*jsonToSend = STRING_construct_sprintf(DT_PropertyWithoutResponseSchema, dtInterfaceClient->componentName, propertyName, propertyData)) == NULL)
+    if ((*jsonToSend = STRING_construct_sprintf(DT_PropertyWithoutResponseSchema, dtInterfaceClient->componentName, propertyName, (int)propertyDataLen, propertyData)) == NULL)
     {
         LogError("Cannot allocate string handle");
         result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
@@ -740,13 +740,13 @@ static DIGITALTWIN_CLIENT_RESULT CreateJsonForPropertyWithoutResponse(DT_INTERFA
 }
 
 // Creates json blob for indicating a property response
-static DIGITALTWIN_CLIENT_RESULT CreateJsonForPropertyWithResponse(DT_INTERFACE_CLIENT* dtInterfaceClient, const char* propertyName, const char* propertyData, const DIGITALTWIN_CLIENT_PROPERTY_RESPONSE* dtResponse, STRING_HANDLE* jsonToSend)
+static DIGITALTWIN_CLIENT_RESULT CreateJsonForPropertyWithResponse(DT_INTERFACE_CLIENT* dtInterfaceClient, const char* propertyName, const unsigned char* propertyData, size_t propertyDataLen, const DIGITALTWIN_CLIENT_PROPERTY_RESPONSE* dtResponse, STRING_HANDLE* jsonToSend)
 {
     DIGITALTWIN_CLIENT_RESULT result;
 
     // See comments in CreateJsonForPropertyWithoutResponse about why we can't safely use parson to process propertyData.
     if ((*jsonToSend = STRING_construct_sprintf(DT_PropertyWithResponseSchema, 
-                                                dtInterfaceClient->componentName, propertyName, propertyData, dtResponse->statusCode,
+                                                dtInterfaceClient->componentName, propertyName, (int)propertyDataLen, propertyData, dtResponse->statusCode,
                                                 dtResponse->statusDescription, dtResponse->responseVersion)) == NULL)
     {
         LogError("Cannot allocate string handle");
@@ -808,17 +808,17 @@ static bool IsInterfaceAvailable(DT_INTERFACE_CLIENT* dtInterfaceClient)
 }
 
 // CreateJsonForProperty is used to build up the JSON for a given property.
-static DIGITALTWIN_CLIENT_RESULT CreateJsonForProperty(DT_INTERFACE_CLIENT* dtInterfaceClient, const char* propertyName, const char* propertyData, const DIGITALTWIN_CLIENT_PROPERTY_RESPONSE* dtResponse, STRING_HANDLE* jsonToSend)
+static DIGITALTWIN_CLIENT_RESULT CreateJsonForProperty(DT_INTERFACE_CLIENT* dtInterfaceClient, const char* propertyName, const unsigned char* propertyData, size_t propertyDataLen, const DIGITALTWIN_CLIENT_PROPERTY_RESPONSE* dtResponse, STRING_HANDLE* jsonToSend)
 {
     DIGITALTWIN_CLIENT_RESULT result;
 
     if (dtResponse == NULL)
     {
-        result = CreateJsonForPropertyWithoutResponse(dtInterfaceClient, propertyName, propertyData, jsonToSend);
+        result = CreateJsonForPropertyWithoutResponse(dtInterfaceClient, propertyName, propertyData, propertyDataLen, jsonToSend);
     }
     else
     {
-        result = CreateJsonForPropertyWithResponse(dtInterfaceClient, propertyName, propertyData, dtResponse, jsonToSend);
+        result = CreateJsonForPropertyWithResponse(dtInterfaceClient, propertyName, propertyData, propertyDataLen, dtResponse, jsonToSend);
     }
 
     return result;
@@ -847,7 +847,7 @@ static int VerifyPropertyResponseIfNeeded(const DIGITALTWIN_CLIENT_PROPERTY_RESP
     return result;
 }
 
-DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_ReportPropertyAsync(DIGITALTWIN_INTERFACE_CLIENT_HANDLE dtInterfaceClientHandle, const char* propertyName, const char* propertyData, const DIGITALTWIN_CLIENT_PROPERTY_RESPONSE* dtResponse, DIGITALTWIN_REPORTED_PROPERTY_UPDATED_CALLBACK dtReportedPropertyCallback, void* userContextCallback)
+DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_ReportPropertyAsync(DIGITALTWIN_INTERFACE_CLIENT_HANDLE dtInterfaceClientHandle, const char* propertyName, const unsigned char* propertyData, size_t propertyDataLen, const DIGITALTWIN_CLIENT_PROPERTY_RESPONSE* dtResponse, DIGITALTWIN_REPORTED_PROPERTY_UPDATED_CALLBACK dtReportedPropertyCallback, void* userContextCallback)
 {
     STRING_HANDLE jsonToSend = NULL;
     DIGITALTWIN_CLIENT_RESULT result;
@@ -869,7 +869,7 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_ReportPropertyAsync(DIGITA
         LogError("Interface not registered with Cloud");
         result = DIGITALTWIN_CLIENT_ERROR_INTERFACE_NOT_REGISTERED;
     }
-    else if ((result = CreateJsonForProperty(dtInterfaceClient, propertyName, propertyData, dtResponse, &jsonToSend)) != DIGITALTWIN_CLIENT_OK)
+    else if ((result = CreateJsonForProperty(dtInterfaceClient, propertyName, propertyData, propertyDataLen, dtResponse, &jsonToSend)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("Error creating json for reported property %s.  err = %d", propertyName, result);
     }
@@ -903,12 +903,12 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_ReportPropertyAsync(DIGITA
 }
 
 // CreateJsonForTelemetryMessage returns a body that has the telemetry name wrapping the message contents
-static DIGITALTWIN_CLIENT_RESULT CreateJsonForTelemetryMessage(const char* telemetryName, const char* messageData, STRING_HANDLE* jsonToSend)
+static DIGITALTWIN_CLIENT_RESULT CreateJsonForTelemetryMessage(const char* telemetryName, const unsigned char* messageData, size_t messageDataLen, STRING_HANDLE* jsonToSend)
 {
     DIGITALTWIN_CLIENT_RESULT result;
 
     // See comments in CreateJsonForPropertyWithoutResponse about why we can't safely use parson to process propertyData.
-    if ((*jsonToSend = STRING_construct_sprintf("{ \"%s\": %s }", telemetryName, messageData)) == NULL)
+    if ((*jsonToSend = STRING_construct_sprintf("{ \"%s\": %.*s }", telemetryName, (int)messageDataLen, messageData)) == NULL)
     {
         LogError("Cannot allocate string handle for telemetry message");
         result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
@@ -922,7 +922,7 @@ static DIGITALTWIN_CLIENT_RESULT CreateJsonForTelemetryMessage(const char* telem
 }
 
 // Allocates a properly setup IOTHUB_MESSAGE_HANDLE for processing onto IoTHub.
-DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_CreateTelemetryMessage(const char* interfaceId, const char* componentName, const char* telemetryName, const char* messageData, IOTHUB_MESSAGE_HANDLE* telemetryMessageHandle)
+DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_CreateTelemetryMessage(const char* interfaceId, const char* componentName, const char* telemetryName, const unsigned char* messageData, size_t messageDataLen, IOTHUB_MESSAGE_HANDLE* telemetryMessageHandle)
 {
     DIGITALTWIN_CLIENT_RESULT result;
     IOTHUB_MESSAGE_RESULT iothubMessageResult;
@@ -935,9 +935,7 @@ DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_CreateTelemetryMessage(const char* 
     }
     else
     {
-        size_t messageDataLen = strlen((const char*)messageData);
-
-        if ((*telemetryMessageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)messageData, messageDataLen)) == NULL)
+        if ((*telemetryMessageHandle = IoTHubMessage_CreateFromByteArray(messageData, messageDataLen)) == NULL)
         {
             LogError("Cannot allocate IoTHubMessage for telemetry");
             result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
@@ -1020,7 +1018,7 @@ static DT_INTERFACE_SEND_TELEMETRY_CALLBACK_CONTEXT* CreateInterfaceAsyncCommand
 
 
 // DigitalTwin_InterfaceClient_SendTelemetryAsync sends the specified telemetry to Azure IoTHub in proper DigitalTwin data format.
-DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_SendTelemetryAsync(DIGITALTWIN_INTERFACE_CLIENT_HANDLE dtInterfaceClientHandle, const char* telemetryName, const char* messageData, DIGITALTWIN_CLIENT_TELEMETRY_CONFIRMATION_CALLBACK telemetryConfirmationCallback, void* userContextCallback)
+DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_SendTelemetryAsync(DIGITALTWIN_INTERFACE_CLIENT_HANDLE dtInterfaceClientHandle, const char* telemetryName, const unsigned char* messageData, size_t messageDataLen, DIGITALTWIN_CLIENT_TELEMETRY_CONFIRMATION_CALLBACK telemetryConfirmationCallback, void* userContextCallback)
 {
     DIGITALTWIN_CLIENT_RESULT result;
     DT_INTERFACE_CLIENT* dtInterfaceClient = (DT_INTERFACE_CLIENT*)dtInterfaceClientHandle;
@@ -1038,7 +1036,7 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_SendTelemetryAsync(DIGITAL
         LogError("Interface not registered with Cloud");
         result = DIGITALTWIN_CLIENT_ERROR_INTERFACE_NOT_REGISTERED;
     }
-    else if ((result = CreateJsonForTelemetryMessage(telemetryName, messageData, &jsonToSend)) != DIGITALTWIN_CLIENT_OK)
+    else if ((result = CreateJsonForTelemetryMessage(telemetryName, messageData, messageDataLen, &jsonToSend)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("Error creating json for telemetry message.  telemetryName=%s.  err = %d", telemetryName, result);
     }
@@ -1046,7 +1044,7 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_SendTelemetryAsync(DIGITAL
     {
         const char* dataToSend = STRING_c_str(jsonToSend);
 
-        if ((result = DT_InterfaceClient_CreateTelemetryMessage(NULL, dtInterfaceClient->componentName, telemetryName, dataToSend, &telemetryMessageHandle)) != DIGITALTWIN_CLIENT_OK)
+        if ((result = DT_InterfaceClient_CreateTelemetryMessage(NULL, dtInterfaceClient->componentName, telemetryName, (const unsigned char*)dataToSend, strlen(dataToSend), &telemetryMessageHandle)) != DIGITALTWIN_CLIENT_OK)
         {
             LogError("Cannot create send telemetry message, error = %d", result);
             result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
@@ -1618,11 +1616,11 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAs
         LogError("Interface not registered with Cloud");
         result = DIGITALTWIN_CLIENT_ERROR_INTERFACE_NOT_REGISTERED;
     }
-    else if ((result = CreateJsonForTelemetryMessage(DT_AsyncResultSchema, dtClientAsyncCommandUpdate->propertyData, &jsonToSend)) != DIGITALTWIN_CLIENT_OK)
+    else if ((result = CreateJsonForTelemetryMessage(DT_AsyncResultSchema, dtClientAsyncCommandUpdate->propertyData, dtClientAsyncCommandUpdate->propertyDataLen, &jsonToSend)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("CreateJsonForTelemetryMessage failed, error = %d", result);
     }
-    else if ((result = DT_InterfaceClient_CreateTelemetryMessage(NULL, dtInterfaceClient->componentName, DT_AsyncResultSchema, STRING_c_str(jsonToSend),  &telemetryMessageHandle)) != DIGITALTWIN_CLIENT_OK)
+    else if ((result = DT_InterfaceClient_CreateTelemetryMessage(NULL, dtInterfaceClient->componentName, DT_AsyncResultSchema, (const unsigned char*)STRING_c_str(jsonToSend), strlen(STRING_c_str(jsonToSend)), &telemetryMessageHandle)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("Cannot create send telemetry message, error = %d", result);
     }

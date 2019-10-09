@@ -125,7 +125,9 @@ typedef struct DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE_TAG
     const char* requestId;
     /** @brief  Payload that the device should send to the service. */
     /** @warning This data must be valid JSON.  See conceptual documentation on data_format.md for more information. */
-    const char* propertyData;
+    const unsigned char* propertyData;
+    /** @brief Length of the property specified in propertyData */
+    size_t propertyDataLen;
     /** @brief  Status code to map back to the server.  Roughly maps to HTTP status codes.*/
     int statusCode;
 } DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE;
@@ -282,12 +284,13 @@ MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_InterfaceClient_SetCo
   @param[in] dtInterfaceClientHandle            Handle for the interface client.
   @param[in] telemetryName                      Name of the telemetry message to send.  This should match the model associated with this interface.
   @param[in] messageData                        Value of the telemetry data to send.  The schema must match the data specified in the model document.
+  @param[in] messageDataLen                     Length of the telemetry data to send.
   @param[in] telemetryConfirmationCallback      (Optional) Function pointer to be invoked when the telemetry message is successfully delivered or fails.
   @param[in] userContextCallback                (Optional) Context pointer passed to telemetryConfirmationCallback function when it is invoked.
 
   @returns  A DIGITALTWIN_CLIENT_RESULT.
 */
-MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_InterfaceClient_SendTelemetryAsync, DIGITALTWIN_INTERFACE_CLIENT_HANDLE, dtInterfaceClientHandle, const char*, telemetryName, const char*, messageData, DIGITALTWIN_CLIENT_TELEMETRY_CONFIRMATION_CALLBACK, telemetryConfirmationCallback, void*, userContextCallback);
+MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_InterfaceClient_SendTelemetryAsync, DIGITALTWIN_INTERFACE_CLIENT_HANDLE, dtInterfaceClientHandle, const char*, telemetryName, const unsigned char*, messageData, size_t, messageDataLen, DIGITALTWIN_CLIENT_TELEMETRY_CONFIRMATION_CALLBACK, telemetryConfirmationCallback, void*, userContextCallback);
 
 /** 
   @brief Sends a Digital Twin property to the server.
@@ -323,13 +326,14 @@ MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_InterfaceClient_SendT
   @param[in] dtInterfaceClientHandle        Handle for the interface client.
   @param[in] propertyName                   Name of the property to report.  This should match the model associated with this interface.
   @param[in] propertyData                   Value of the property to report.
+  @param[in] propertyDataLen                Length of the property to report.
   @param[in] dtReportedPropertyCallback     (Optional) Function pointer to be invoked when the property is successfully reported or fails.
   @param[in] userContextCallback            (Optional) Context pointer passed to dtReportedPropertyCallback function when it is invoked.
 
   @returns  A DIGITALTWIN_CLIENT_RESULT.
 */
 
-MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_InterfaceClient_ReportPropertyAsync, DIGITALTWIN_INTERFACE_CLIENT_HANDLE, dtInterfaceClientHandle, const char*, propertyName, const char*, propertyData, const DIGITALTWIN_CLIENT_PROPERTY_RESPONSE*, dtResponse, DIGITALTWIN_REPORTED_PROPERTY_UPDATED_CALLBACK, dtReportedPropertyCallback, void*, userContextCallback);
+MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_InterfaceClient_ReportPropertyAsync, DIGITALTWIN_INTERFACE_CLIENT_HANDLE, dtInterfaceClientHandle, const char*, propertyName, const unsigned char*, propertyData, size_t, propertyDataLen, const DIGITALTWIN_CLIENT_PROPERTY_RESPONSE*, dtResponse, DIGITALTWIN_REPORTED_PROPERTY_UPDATED_CALLBACK, dtReportedPropertyCallback, void*, userContextCallback);
 
 /** 
   @brief Sends an update of the status of a pending asynchronous command.

@@ -56,7 +56,7 @@ static DIGITALTWIN_CLIENT_RESULT DigitalTwinSampleDeviceInfo_ReportPropertyAsync
     DIGITALTWIN_CLIENT_RESULT result;
 
     result = DigitalTwin_InterfaceClient_ReportPropertyAsync(interfaceHandle, propertyName, 
-                                                             propertyData, NULL,
+                                                             (const unsigned char *)propertyData, strlen(propertyData), NULL,
                                                              DigitalTwinSampleDeviceInfo_PropertyCallback, (void*)propertyName);
 
     if (result != DIGITALTWIN_CLIENT_OK)
