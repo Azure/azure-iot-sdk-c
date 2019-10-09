@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Microsoft Azure IoT Device SDK for C
-   &#160;<span id="projectnumber">1.3.3</span>
+   &#160;<span id="projectnumber">1.3.6</span>
    </div>
    <div id="projectbrief">The Microsoft Azure IoT device libraries for C contain code that facilitates building devices and applications that connect to and are managed by Azure IoT Hub services.</div>
   </td>
@@ -100,14 +100,14 @@ typedef struct <a class="el" href="struct_i_o_t_h_u_b___m_e_s_s_a_g_e___d_i_a_g_
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:af383cc7060157d79745b5aa0f66daf70"><td class="memItemLeft" align="right" valign="top"><a id="af383cc7060157d79745b5aa0f66daf70"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#af383cc7060157d79745b5aa0f66daf70">MU_DEFINE_ENUM</a> (IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES)</td></tr>
-<tr class="memdesc:af383cc7060157d79745b5aa0f66daf70"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enumeration specifying the status of calls to various APIs in this module. <br /></td></tr>
-<tr class="separator:af383cc7060157d79745b5aa0f66daf70"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aef601fafed0a637de6e3aa827ea72596"><td class="memItemLeft" align="right" valign="top"><a id="aef601fafed0a637de6e3aa827ea72596"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#aef601fafed0a637de6e3aa827ea72596">MU_DEFINE_ENUM</a> (IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_CONTENT_TYPE_VALUES)</td></tr>
-<tr class="memdesc:aef601fafed0a637de6e3aa827ea72596"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enumeration specifying the content type of the a given message. <br /></td></tr>
-<tr class="separator:aef601fafed0a637de6e3aa827ea72596"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65432f09a9d9194e2dcea15d09f9ac7f"><td class="memItemLeft" align="right" valign="top"><a id="a65432f09a9d9194e2dcea15d09f9ac7f"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a65432f09a9d9194e2dcea15d09f9ac7f">MU_DEFINE_ENUM_WITHOUT_INVALID</a> (IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES)</td></tr>
+<tr class="memdesc:a65432f09a9d9194e2dcea15d09f9ac7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enumeration specifying the status of calls to various APIs in this module. <br /></td></tr>
+<tr class="separator:a65432f09a9d9194e2dcea15d09f9ac7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb15b3facffd36ed82310ffd7ffb196e"><td class="memItemLeft" align="right" valign="top"><a id="aeb15b3facffd36ed82310ffd7ffb196e"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#aeb15b3facffd36ed82310ffd7ffb196e">MU_DEFINE_ENUM_WITHOUT_INVALID</a> (IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_CONTENT_TYPE_VALUES)</td></tr>
+<tr class="memdesc:aeb15b3facffd36ed82310ffd7ffb196e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enumeration specifying the content type of the a given message. <br /></td></tr>
+<tr class="separator:aeb15b3facffd36ed82310ffd7ffb196e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad0a1fd500a76febb5bb1de1f90b7708d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#ad0a1fd500a76febb5bb1de1f90b7708d">MOCKABLE_FUNCTION</a> (, IOTHUB_MESSAGE_HANDLE, IoTHubMessage_CreateFromByteArray, const unsigned char *, byteArray, size_t, size)</td></tr>
 <tr class="memdesc:ad0a1fd500a76febb5bb1de1f90b7708d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new IoT hub message from a byte array. The type of the message will be set to <code>IOTHUBMESSAGE_BYTEARRAY</code>.  <a href="#ad0a1fd500a76febb5bb1de1f90b7708d">More...</a><br /></td></tr>
 <tr class="separator:ad0a1fd500a76febb5bb1de1f90b7708d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -121,7 +121,7 @@ Functions</h2></td></tr>
 <tr class="memdesc:a232e47c21f817c91ab6abe9cdbfe294e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetches a pointer and size for the data associated with the IoT hub message handle. If the content type of the message is not <code>IOTHUBMESSAGE_BYTEARRAY</code> then the function returns <code>IOTHUB_MESSAGE_INVALID_ARG</code>.  <a href="#a232e47c21f817c91ab6abe9cdbfe294e">More...</a><br /></td></tr>
 <tr class="separator:a232e47c21f817c91ab6abe9cdbfe294e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad64ee4675286c216c3725c05f767938e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#ad64ee4675286c216c3725c05f767938e">MOCKABLE_FUNCTION</a> (, const char *, IoTHubMessage_GetString, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)</td></tr>
-<tr class="memdesc:ad64ee4675286c216c3725c05f767938e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the null terminated string stored in the message. If the content type of the message is not <code>IOTHUBMESSAGE_STRING</code> then the function returns <code>NULL</code>.  <a href="#ad64ee4675286c216c3725c05f767938e">More...</a><br /></td></tr>
+<tr class="memdesc:ad64ee4675286c216c3725c05f767938e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the null terminated string stored in the message. If the content type of the message is not <code>IOTHUBMESSAGE_STRING</code> then the function returns <code>NULL</code>. No new memory is allocated, the caller is not responsible for freeing the memory. The memory is valid until IoTHubMessage_Destroy is called on the message.  <a href="#ad64ee4675286c216c3725c05f767938e">More...</a><br /></td></tr>
 <tr class="separator:ad64ee4675286c216c3725c05f767938e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a80499b619e1ed446f36ae22b8b454102"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a80499b619e1ed446f36ae22b8b454102">MOCKABLE_FUNCTION</a> (, IOTHUBMESSAGE_CONTENT_TYPE, IoTHubMessage_GetContentType, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)</td></tr>
 <tr class="memdesc:a80499b619e1ed446f36ae22b8b454102"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the content type of the message given by parameter <code>iotHubMessageHandle</code>.  <a href="#a80499b619e1ed446f36ae22b8b454102">More...</a><br /></td></tr>
@@ -130,13 +130,13 @@ Functions</h2></td></tr>
 <tr class="memdesc:abfe451794e31287c738bc02374be6a1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the content-type of the message payload, as per supported values on RFC 2046.  <a href="#abfe451794e31287c738bc02374be6a1b">More...</a><br /></td></tr>
 <tr class="separator:abfe451794e31287c738bc02374be6a1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af3b5e00902311e90370c57f2fbb6eac2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#af3b5e00902311e90370c57f2fbb6eac2">MOCKABLE_FUNCTION</a> (, const char *, IoTHubMessage_GetContentTypeSystemProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)</td></tr>
-<tr class="memdesc:af3b5e00902311e90370c57f2fbb6eac2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the content-type of the message payload, if defined.  <a href="#af3b5e00902311e90370c57f2fbb6eac2">More...</a><br /></td></tr>
+<tr class="memdesc:af3b5e00902311e90370c57f2fbb6eac2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the content-type of the message payload, if defined. No new memory is allocated, the caller is not responsible for freeing the memory. The memory is valid until IoTHubMessage_Destroy is called on the message.  <a href="#af3b5e00902311e90370c57f2fbb6eac2">More...</a><br /></td></tr>
 <tr class="separator:af3b5e00902311e90370c57f2fbb6eac2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3fb3a234da76be0d0cf41b049d338394"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a3fb3a234da76be0d0cf41b049d338394">MOCKABLE_FUNCTION</a> (, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetContentEncodingSystemProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char *, contentEncoding)</td></tr>
 <tr class="memdesc:a3fb3a234da76be0d0cf41b049d338394"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the content-encoding of the message payload, as per supported values on RFC 2616.  <a href="#a3fb3a234da76be0d0cf41b049d338394">More...</a><br /></td></tr>
 <tr class="separator:a3fb3a234da76be0d0cf41b049d338394"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5534dba8566ba4f59be53c95a6384be5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a5534dba8566ba4f59be53c95a6384be5">MOCKABLE_FUNCTION</a> (, const char *, IoTHubMessage_GetContentEncodingSystemProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)</td></tr>
-<tr class="memdesc:a5534dba8566ba4f59be53c95a6384be5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the content-encoding of the message payload, if defined.  <a href="#a5534dba8566ba4f59be53c95a6384be5">More...</a><br /></td></tr>
+<tr class="memdesc:a5534dba8566ba4f59be53c95a6384be5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the content-encoding of the message payload, if defined. No new memory is allocated, the caller is not responsible for freeing the memory. The memory is valid until IoTHubMessage_Destroy is called on the message.  <a href="#a5534dba8566ba4f59be53c95a6384be5">More...</a><br /></td></tr>
 <tr class="separator:a5534dba8566ba4f59be53c95a6384be5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a323de720a59d18d6884d6bfa3bde8690"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a323de720a59d18d6884d6bfa3bde8690">MOCKABLE_FUNCTION</a> (, MAP_HANDLE, IoTHubMessage_Properties, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)</td></tr>
 <tr class="memdesc:a323de720a59d18d6884d6bfa3bde8690"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a handle to the message's properties map. Note that when sending messages via the HTTP transport, the key names in the map must not contain spaces.  <a href="#a323de720a59d18d6884d6bfa3bde8690">More...</a><br /></td></tr>
@@ -145,16 +145,16 @@ Functions</h2></td></tr>
 <tr class="memdesc:adcffcec98c180295dc54a2bec363cab6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets a property on a Iothub Message.  <a href="#adcffcec98c180295dc54a2bec363cab6">More...</a><br /></td></tr>
 <tr class="separator:adcffcec98c180295dc54a2bec363cab6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a535438915ed185127d36b147b09e4b28"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a535438915ed185127d36b147b09e4b28">MOCKABLE_FUNCTION</a> (, const char *, IoTHubMessage_GetProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char *, key)</td></tr>
-<tr class="memdesc:a535438915ed185127d36b147b09e4b28"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a IotHub Message's properties item.  <a href="#a535438915ed185127d36b147b09e4b28">More...</a><br /></td></tr>
+<tr class="memdesc:a535438915ed185127d36b147b09e4b28"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a IotHub Message's properties item. No new memory is allocated, the caller is not responsible for freeing the memory. The memory is valid until IoTHubMessage_Destroy is called on the message.  <a href="#a535438915ed185127d36b147b09e4b28">More...</a><br /></td></tr>
 <tr class="separator:a535438915ed185127d36b147b09e4b28"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5649d03f68c367aa5673b4bf7c650ba4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a5649d03f68c367aa5673b4bf7c650ba4">MOCKABLE_FUNCTION</a> (, const char *, IoTHubMessage_GetMessageId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)</td></tr>
-<tr class="memdesc:a5649d03f68c367aa5673b4bf7c650ba4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the MessageId from the IOTHUB_MESSAGE_HANDLE.  <a href="#a5649d03f68c367aa5673b4bf7c650ba4">More...</a><br /></td></tr>
+<tr class="memdesc:a5649d03f68c367aa5673b4bf7c650ba4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the MessageId from the IOTHUB_MESSAGE_HANDLE. No new memory is allocated, the caller is not responsible for freeing the memory. The memory is valid until IoTHubMessage_Destroy is called on the message.  <a href="#a5649d03f68c367aa5673b4bf7c650ba4">More...</a><br /></td></tr>
 <tr class="separator:a5649d03f68c367aa5673b4bf7c650ba4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a152a07d185da20ac4562d829da22ea81"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a152a07d185da20ac4562d829da22ea81">MOCKABLE_FUNCTION</a> (, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetMessageId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char *, messageId)</td></tr>
 <tr class="memdesc:a152a07d185da20ac4562d829da22ea81"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the MessageId for the IOTHUB_MESSAGE_HANDLE.  <a href="#a152a07d185da20ac4562d829da22ea81">More...</a><br /></td></tr>
 <tr class="separator:a152a07d185da20ac4562d829da22ea81"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5aed99916e05a742acb95baa38225cab"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a5aed99916e05a742acb95baa38225cab">MOCKABLE_FUNCTION</a> (, const char *, IoTHubMessage_GetCorrelationId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)</td></tr>
-<tr class="memdesc:a5aed99916e05a742acb95baa38225cab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the CorrelationId from the IOTHUB_MESSAGE_HANDLE.  <a href="#a5aed99916e05a742acb95baa38225cab">More...</a><br /></td></tr>
+<tr class="memdesc:a5aed99916e05a742acb95baa38225cab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the CorrelationId from the IOTHUB_MESSAGE_HANDLE. No new memory is allocated, the caller is not responsible for freeing the memory. The memory is valid until IoTHubMessage_Destroy is called on the message.  <a href="#a5aed99916e05a742acb95baa38225cab">More...</a><br /></td></tr>
 <tr class="separator:a5aed99916e05a742acb95baa38225cab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aab959f77e294c2d579634e8c15c0e8c1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#aab959f77e294c2d579634e8c15c0e8c1">MOCKABLE_FUNCTION</a> (, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetCorrelationId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char *, correlationId)</td></tr>
 <tr class="memdesc:aab959f77e294c2d579634e8c15c0e8c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the CorrelationId for the IOTHUB_MESSAGE_HANDLE.  <a href="#aab959f77e294c2d579634e8c15c0e8c1">More...</a><br /></td></tr>
@@ -166,29 +166,35 @@ Functions</h2></td></tr>
 <tr class="memdesc:ad77bdf72ad35ad622e1f02359b76e546"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the DiagnosticData for the IOTHUB_MESSAGE_HANDLE. CAUTION: SDK user should not call it directly, it is for internal use only.  <a href="#ad77bdf72ad35ad622e1f02359b76e546">More...</a><br /></td></tr>
 <tr class="separator:ad77bdf72ad35ad622e1f02359b76e546"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afe33f8a9201abd0a430e8da0a482a75d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#afe33f8a9201abd0a430e8da0a482a75d">MOCKABLE_FUNCTION</a> (, const char *, IoTHubMessage_GetOutputName, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)</td></tr>
-<tr class="memdesc:afe33f8a9201abd0a430e8da0a482a75d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the output name from the IOTHUB_MESSAGE_HANDLE.  <a href="#afe33f8a9201abd0a430e8da0a482a75d">More...</a><br /></td></tr>
+<tr class="memdesc:afe33f8a9201abd0a430e8da0a482a75d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the output name from the IOTHUB_MESSAGE_HANDLE. No new memory is allocated, the caller is not responsible for freeing the memory. The memory is valid until IoTHubMessage_Destroy is called on the message.  <a href="#afe33f8a9201abd0a430e8da0a482a75d">More...</a><br /></td></tr>
 <tr class="separator:afe33f8a9201abd0a430e8da0a482a75d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a940bc7bbd3084e62947cbeb31dab4ef5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a940bc7bbd3084e62947cbeb31dab4ef5">MOCKABLE_FUNCTION</a> (, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetOutputName, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char *, outputName)</td></tr>
 <tr class="memdesc:a940bc7bbd3084e62947cbeb31dab4ef5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets output for named queues. CAUTION: SDK user should not call it directly, it is for internal use only.  <a href="#a940bc7bbd3084e62947cbeb31dab4ef5">More...</a><br /></td></tr>
 <tr class="separator:a940bc7bbd3084e62947cbeb31dab4ef5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6d580b787402552e7f0ed1b1d4e276c4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a6d580b787402552e7f0ed1b1d4e276c4">MOCKABLE_FUNCTION</a> (, const char *, IoTHubMessage_GetInputName, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)</td></tr>
-<tr class="memdesc:a6d580b787402552e7f0ed1b1d4e276c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the input name from the IOTHUB_MESSAGE_HANDLE.  <a href="#a6d580b787402552e7f0ed1b1d4e276c4">More...</a><br /></td></tr>
+<tr class="memdesc:a6d580b787402552e7f0ed1b1d4e276c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the input name from the IOTHUB_MESSAGE_HANDLE. No new memory is allocated, the caller is not responsible for freeing the memory. The memory is valid until IoTHubMessage_Destroy is called on the message.  <a href="#a6d580b787402552e7f0ed1b1d4e276c4">More...</a><br /></td></tr>
 <tr class="separator:a6d580b787402552e7f0ed1b1d4e276c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a70268b5c9871a521ce0ec2ad21d59718"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a70268b5c9871a521ce0ec2ad21d59718">MOCKABLE_FUNCTION</a> (, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetInputName, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char *, inputName)</td></tr>
 <tr class="memdesc:a70268b5c9871a521ce0ec2ad21d59718"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets input for named queues. CAUTION: SDK user should not call it directly, it is for internal use only.  <a href="#a70268b5c9871a521ce0ec2ad21d59718">More...</a><br /></td></tr>
 <tr class="separator:a70268b5c9871a521ce0ec2ad21d59718"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ace298808b5377850099b0273bd5b8fe9"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#ace298808b5377850099b0273bd5b8fe9">MOCKABLE_FUNCTION</a> (, const char *, IoTHubMessage_GetConnectionModuleId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)</td></tr>
-<tr class="memdesc:ace298808b5377850099b0273bd5b8fe9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the module name from the IOTHUB_MESSAGE_HANDLE.  <a href="#ace298808b5377850099b0273bd5b8fe9">More...</a><br /></td></tr>
+<tr class="memdesc:ace298808b5377850099b0273bd5b8fe9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the module name from the IOTHUB_MESSAGE_HANDLE. No new memory is allocated, the caller is not responsible for freeing the memory. The memory is valid until IoTHubMessage_Destroy is called on the message.  <a href="#ace298808b5377850099b0273bd5b8fe9">More...</a><br /></td></tr>
 <tr class="separator:ace298808b5377850099b0273bd5b8fe9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac21691d20b495d97b8fce8205432d8bd"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#ac21691d20b495d97b8fce8205432d8bd">MOCKABLE_FUNCTION</a> (, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetConnectionModuleId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char *, connectionModuleId)</td></tr>
 <tr class="memdesc:ac21691d20b495d97b8fce8205432d8bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets connection module ID. CAUTION: SDK user should not call it directly, it is for internal use only.  <a href="#ac21691d20b495d97b8fce8205432d8bd">More...</a><br /></td></tr>
 <tr class="separator:ac21691d20b495d97b8fce8205432d8bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6496b3eeb1058e534c528b70b6bbc625"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a6496b3eeb1058e534c528b70b6bbc625">MOCKABLE_FUNCTION</a> (, const char *, IoTHubMessage_GetConnectionDeviceId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)</td></tr>
-<tr class="memdesc:a6496b3eeb1058e534c528b70b6bbc625"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the connection device ID from the IOTHUB_MESSAGE_HANDLE.  <a href="#a6496b3eeb1058e534c528b70b6bbc625">More...</a><br /></td></tr>
+<tr class="memdesc:a6496b3eeb1058e534c528b70b6bbc625"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the connection device ID from the IOTHUB_MESSAGE_HANDLE. No new memory is allocated, the caller is not responsible for freeing the memory. The memory is valid until IoTHubMessage_Destroy is called on the message.  <a href="#a6496b3eeb1058e534c528b70b6bbc625">More...</a><br /></td></tr>
 <tr class="separator:a6496b3eeb1058e534c528b70b6bbc625"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab5f1030c210cb9e454d7ccae1b6bcad0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#ab5f1030c210cb9e454d7ccae1b6bcad0">MOCKABLE_FUNCTION</a> (, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetConnectionDeviceId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char *, connectionDeviceId)</td></tr>
 <tr class="memdesc:ab5f1030c210cb9e454d7ccae1b6bcad0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets connection device Id. CAUTION: SDK user should not call it directly, it is for internal use only.  <a href="#ab5f1030c210cb9e454d7ccae1b6bcad0">More...</a><br /></td></tr>
 <tr class="separator:ab5f1030c210cb9e454d7ccae1b6bcad0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab870bea116033ac336f4554ccf3db699"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#ab870bea116033ac336f4554ccf3db699">MOCKABLE_FUNCTION</a> (, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetAsSecurityMessage, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)</td></tr>
+<tr class="memdesc:ab870bea116033ac336f4554ccf3db699"><td class="mdescLeft">&#160;</td><td class="mdescRight">Marks a IoTHub message as a security message. CAUTION: Security messages are special messages not easily accessable by the user.  <a href="#ab870bea116033ac336f4554ccf3db699">More...</a><br /></td></tr>
+<tr class="separator:ab870bea116033ac336f4554ccf3db699"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a90c339cabf4fe949e8bc360bf356b351"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a90c339cabf4fe949e8bc360bf356b351">MOCKABLE_FUNCTION</a> (, bool, IoTHubMessage_IsSecurityMessage, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)</td></tr>
+<tr class="memdesc:a90c339cabf4fe949e8bc360bf356b351"><td class="mdescLeft">&#160;</td><td class="mdescRight">returns if this message is a IoTHub security message or not  <a href="#a90c339cabf4fe949e8bc360bf356b351">More...</a><br /></td></tr>
+<tr class="separator:a90c339cabf4fe949e8bc360bf356b351"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a43f0f6f728663bcc073ab12b2e3160b5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__message_8h.html#a43f0f6f728663bcc073ab12b2e3160b5">MOCKABLE_FUNCTION</a> (, void, IoTHubMessage_Destroy, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle)</td></tr>
 <tr class="memdesc:a43f0f6f728663bcc073ab12b2e3160b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Frees all resources associated with the given message handle.  <a href="#a43f0f6f728663bcc073ab12b2e3160b5">More...</a><br /></td></tr>
 <tr class="separator:a43f0f6f728663bcc073ab12b2e3160b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -197,7 +203,7 @@ Functions</h2></td></tr>
 <div class="textblock"><p>The <code>IoTHub_Message</code> component encapsulates one message that can be transferred by an IoT hub client. </p>
 </div><h2 class="groupheader">Function Documentation</h2>
 <a id="ad0a1fd500a76febb5bb1de1f90b7708d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad0a1fd500a76febb5bb1de1f90b7708d">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[1/28]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ad0a1fd500a76febb5bb1de1f90b7708d">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[1/30]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -259,7 +265,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="afe8c94f90656b38e5f338f116891ba91"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afe8c94f90656b38e5f338f116891ba91">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[2/28]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#afe8c94f90656b38e5f338f116891ba91">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[2/30]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -308,7 +314,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a6f8542b8fe04cf978a9634f8fee7613e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6f8542b8fe04cf978a9634f8fee7613e">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[3/28]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a6f8542b8fe04cf978a9634f8fee7613e">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[3/30]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -357,7 +363,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a232e47c21f817c91ab6abe9cdbfe294e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a232e47c21f817c91ab6abe9cdbfe294e">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[4/28]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a232e47c21f817c91ab6abe9cdbfe294e">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[4/30]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -432,7 +438,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="ad64ee4675286c216c3725c05f767938e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad64ee4675286c216c3725c05f767938e">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[5/28]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ad64ee4675286c216c3725c05f767938e">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[5/30]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -469,7 +475,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Returns the null terminated string stored in the message. If the content type of the message is not <code>IOTHUBMESSAGE_STRING</code> then the function returns <code>NULL</code>. </p>
+<p>Returns the null terminated string stored in the message. If the content type of the message is not <code>IOTHUBMESSAGE_STRING</code> then the function returns <code>NULL</code>. No new memory is allocated, the caller is not responsible for freeing the memory. The memory is valid until IoTHubMessage_Destroy is called on the message. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message.</td></tr>
@@ -481,7 +487,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a80499b619e1ed446f36ae22b8b454102"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a80499b619e1ed446f36ae22b8b454102">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[6/28]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a80499b619e1ed446f36ae22b8b454102">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[6/30]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -531,7 +537,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="abfe451794e31287c738bc02374be6a1b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abfe451794e31287c738bc02374be6a1b">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[7/28]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#abfe451794e31287c738bc02374be6a1b">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[7/30]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -593,7 +599,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="af3b5e00902311e90370c57f2fbb6eac2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af3b5e00902311e90370c57f2fbb6eac2">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[8/28]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#af3b5e00902311e90370c57f2fbb6eac2">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[8/30]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -630,7 +636,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Returns the content-type of the message payload, if defined. </p>
+<p>Returns the content-type of the message payload, if defined. No new memory is allocated, the caller is not responsible for freeing the memory. The memory is valid until IoTHubMessage_Destroy is called on the message. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message.</td></tr>
@@ -642,7 +648,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a3fb3a234da76be0d0cf41b049d338394"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3fb3a234da76be0d0cf41b049d338394">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[9/28]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a3fb3a234da76be0d0cf41b049d338394">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[9/30]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -704,7 +710,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a5534dba8566ba4f59be53c95a6384be5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5534dba8566ba4f59be53c95a6384be5">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[10/28]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a5534dba8566ba4f59be53c95a6384be5">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[10/30]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -741,7 +747,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Returns the content-encoding of the message payload, if defined. </p>
+<p>Returns the content-encoding of the message payload, if defined. No new memory is allocated, the caller is not responsible for freeing the memory. The memory is valid until IoTHubMessage_Destroy is called on the message. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message.</td></tr>
@@ -753,7 +759,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a323de720a59d18d6884d6bfa3bde8690"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a323de720a59d18d6884d6bfa3bde8690">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[11/28]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a323de720a59d18d6884d6bfa3bde8690">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[11/30]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -802,7 +808,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="adcffcec98c180295dc54a2bec363cab6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adcffcec98c180295dc54a2bec363cab6">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[12/28]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#adcffcec98c180295dc54a2bec363cab6">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[12/30]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -877,7 +883,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a535438915ed185127d36b147b09e4b28"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a535438915ed185127d36b147b09e4b28">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[13/28]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a535438915ed185127d36b147b09e4b28">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[13/30]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -926,7 +932,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gets a IotHub Message's properties item. </p>
+<p>Gets a IotHub Message's properties item. No new memory is allocated, the caller is not responsible for freeing the memory. The memory is valid until IoTHubMessage_Destroy is called on the message. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message.</td></tr>
@@ -939,7 +945,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a5649d03f68c367aa5673b4bf7c650ba4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5649d03f68c367aa5673b4bf7c650ba4">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[14/28]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a5649d03f68c367aa5673b4bf7c650ba4">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[14/30]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -976,7 +982,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gets the MessageId from the IOTHUB_MESSAGE_HANDLE. </p>
+<p>Gets the MessageId from the IOTHUB_MESSAGE_HANDLE. No new memory is allocated, the caller is not responsible for freeing the memory. The memory is valid until IoTHubMessage_Destroy is called on the message. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message.</td></tr>
@@ -988,7 +994,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a152a07d185da20ac4562d829da22ea81"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a152a07d185da20ac4562d829da22ea81">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[15/28]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a152a07d185da20ac4562d829da22ea81">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[15/30]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1050,7 +1056,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a5aed99916e05a742acb95baa38225cab"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5aed99916e05a742acb95baa38225cab">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[16/28]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a5aed99916e05a742acb95baa38225cab">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[16/30]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1087,7 +1093,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gets the CorrelationId from the IOTHUB_MESSAGE_HANDLE. </p>
+<p>Gets the CorrelationId from the IOTHUB_MESSAGE_HANDLE. No new memory is allocated, the caller is not responsible for freeing the memory. The memory is valid until IoTHubMessage_Destroy is called on the message. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message.</td></tr>
@@ -1099,7 +1105,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="aab959f77e294c2d579634e8c15c0e8c1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aab959f77e294c2d579634e8c15c0e8c1">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[17/28]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#aab959f77e294c2d579634e8c15c0e8c1">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[17/30]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1161,7 +1167,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="adc688915743fc9f853ba3f4cdca6ca4d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adc688915743fc9f853ba3f4cdca6ca4d">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[18/28]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#adc688915743fc9f853ba3f4cdca6ca4d">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[18/30]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1210,7 +1216,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="ad77bdf72ad35ad622e1f02359b76e546"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad77bdf72ad35ad622e1f02359b76e546">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[19/28]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ad77bdf72ad35ad622e1f02359b76e546">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[19/30]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1272,7 +1278,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="afe33f8a9201abd0a430e8da0a482a75d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afe33f8a9201abd0a430e8da0a482a75d">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[20/28]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#afe33f8a9201abd0a430e8da0a482a75d">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[20/30]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1309,7 +1315,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gets the output name from the IOTHUB_MESSAGE_HANDLE. </p>
+<p>Gets the output name from the IOTHUB_MESSAGE_HANDLE. No new memory is allocated, the caller is not responsible for freeing the memory. The memory is valid until IoTHubMessage_Destroy is called on the message. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message.</td></tr>
@@ -1321,7 +1327,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a940bc7bbd3084e62947cbeb31dab4ef5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a940bc7bbd3084e62947cbeb31dab4ef5">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[21/28]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a940bc7bbd3084e62947cbeb31dab4ef5">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[21/30]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1383,7 +1389,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a6d580b787402552e7f0ed1b1d4e276c4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6d580b787402552e7f0ed1b1d4e276c4">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[22/28]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d580b787402552e7f0ed1b1d4e276c4">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[22/30]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1420,7 +1426,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gets the input name from the IOTHUB_MESSAGE_HANDLE. </p>
+<p>Gets the input name from the IOTHUB_MESSAGE_HANDLE. No new memory is allocated, the caller is not responsible for freeing the memory. The memory is valid until IoTHubMessage_Destroy is called on the message. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message.</td></tr>
@@ -1432,7 +1438,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a70268b5c9871a521ce0ec2ad21d59718"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a70268b5c9871a521ce0ec2ad21d59718">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[23/28]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a70268b5c9871a521ce0ec2ad21d59718">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[23/30]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1494,7 +1500,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="ace298808b5377850099b0273bd5b8fe9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ace298808b5377850099b0273bd5b8fe9">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[24/28]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ace298808b5377850099b0273bd5b8fe9">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[24/30]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1531,7 +1537,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gets the module name from the IOTHUB_MESSAGE_HANDLE. </p>
+<p>Gets the module name from the IOTHUB_MESSAGE_HANDLE. No new memory is allocated, the caller is not responsible for freeing the memory. The memory is valid until IoTHubMessage_Destroy is called on the message. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message.</td></tr>
@@ -1543,7 +1549,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="ac21691d20b495d97b8fce8205432d8bd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac21691d20b495d97b8fce8205432d8bd">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[25/28]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ac21691d20b495d97b8fce8205432d8bd">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[25/30]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1605,7 +1611,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a6496b3eeb1058e534c528b70b6bbc625"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6496b3eeb1058e534c528b70b6bbc625">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[26/28]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a6496b3eeb1058e534c528b70b6bbc625">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[26/30]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1642,7 +1648,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gets the connection device ID from the IOTHUB_MESSAGE_HANDLE. </p>
+<p>Gets the connection device ID from the IOTHUB_MESSAGE_HANDLE. No new memory is allocated, the caller is not responsible for freeing the memory. The memory is valid until IoTHubMessage_Destroy is called on the message. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message.</td></tr>
@@ -1654,7 +1660,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="ab5f1030c210cb9e454d7ccae1b6bcad0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab5f1030c210cb9e454d7ccae1b6bcad0">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[27/28]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ab5f1030c210cb9e454d7ccae1b6bcad0">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[27/30]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1715,8 +1721,106 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="ab870bea116033ac336f4554ccf3db699"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab870bea116033ac336f4554ccf3db699">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[28/30]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td>(</td>
+          <td class="paramtype">IOTHUB_MESSAGE_RESULT&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IoTHubMessage_SetAsSecurityMessage&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IOTHUB_MESSAGE_HANDLE&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">iotHubMessageHandle&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Marks a IoTHub message as a security message. CAUTION: Security messages are special messages not easily accessable by the user. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns IOTHUB_MESSAGE_OK if the Security Message was set successfully or an error code otherwise. </dd></dl>
+
+</div>
+</div>
+<a id="a90c339cabf4fe949e8bc360bf356b351"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a90c339cabf4fe949e8bc360bf356b351">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[29/30]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IoTHubMessage_IsSecurityMessage&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IOTHUB_MESSAGE_HANDLE&#160;</td>
+          <td class="paramname">, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">iotHubMessageHandle&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>returns if this message is a IoTHub security message or not </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iotHubMessageHandle</td><td>Handle to the message.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns true if the Message is a security message false otherwise. </dd></dl>
+
+</div>
+</div>
 <a id="a43f0f6f728663bcc073ab12b2e3160b5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a43f0f6f728663bcc073ab12b2e3160b5">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[28/28]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a43f0f6f728663bcc073ab12b2e3160b5">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[30/30]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
