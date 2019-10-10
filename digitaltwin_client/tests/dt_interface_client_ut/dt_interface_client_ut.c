@@ -2328,7 +2328,6 @@ static void set_expected_calls_for_ProcessPropertiesForTwin(const TestProcessTwi
     }
 
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
 }
 
 static void set_expected_calls_for_DT_InterfaceClient_ProcessTwinCallback(const TestProcessTwinCallback_Info* twinCallbackInfo)

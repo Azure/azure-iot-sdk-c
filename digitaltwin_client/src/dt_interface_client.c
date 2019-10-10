@@ -1200,27 +1200,22 @@ static void ProcessPropertiesForTwin(DT_INTERFACE_CLIENT* dtInterfaceClient, JSO
     JSON_Object* dtInterfaceDesiredJson;
     JSON_Object* dtInterfaceReportedJson;
 
-    STRING_HANDLE desiredPathForInterface = NULL;
-    STRING_HANDLE reportedPathForInterface = NULL;
+    STRING_HANDLE pathForInterface = NULL;
 
-    // If there are property updates for this interface - which there may or may not be - the will in the passed in JSON 
-    // under the paths built up in 'desiredPathForInterface' and 'reportedPathForInterface'.
-    if ((desiredPathForInterface = STRING_construct_sprintf("%s%s", DT_INTERFACE_PREFIX, dtInterfaceClient->componentName)) == NULL)
+    // If there are property updates for this interface - which there may or may not be - they will be in the passed in JSON 
+    // under the paths built up in 'pathForInterface'.
+    if ((pathForInterface = STRING_construct_sprintf("%s%s", DT_INTERFACE_PREFIX, dtInterfaceClient->componentName)) == NULL)
     {   
-        LogError("Cannot build desiredPathForInterface string");
-    }
-    else if ((reportedPathForInterface = STRING_construct_sprintf("%s%s", DT_INTERFACE_PREFIX, dtInterfaceClient->componentName)) == NULL)
-    {
-        LogError("Cannot build reportedPathForInterface string");
+        LogError("Cannot build pathForInterface string");
     }
     else
     {
         // Now that we have constructed the path to query, actually query the json object itself.
-        dtInterfaceDesiredJson = json_object_get_object(desiredObject, STRING_c_str(desiredPathForInterface));
+        dtInterfaceDesiredJson = json_object_get_object(desiredObject, STRING_c_str(pathForInterface));
         if (reportedObject != NULL)
         {
             // If we're getting full twin, then it will include reported properties, too.
-            dtInterfaceReportedJson = json_object_get_object(reportedObject, STRING_c_str(reportedPathForInterface));
+            dtInterfaceReportedJson = json_object_get_object(reportedObject, STRING_c_str(pathForInterface));
         }
         else
         {
@@ -1229,7 +1224,7 @@ static void ProcessPropertiesForTwin(DT_INTERFACE_CLIENT* dtInterfaceClient, JSO
 
         if ((dtInterfaceDesiredJson== NULL) && (dtInterfaceReportedJson == NULL))
         {
-            ; // Not being able to find this interface's name is json is not an error.
+            ; // Not being able to find this interface's name in json is not an error.
         }
         else
         {
@@ -1244,8 +1239,7 @@ static void ProcessPropertiesForTwin(DT_INTERFACE_CLIENT* dtInterfaceClient, JSO
         }
     }
 
-    STRING_delete(reportedPathForInterface);
-    STRING_delete(desiredPathForInterface);
+    STRING_delete(pathForInterface);
 }
 
 // GetDesiredAndReportedJsonObjects will return from rootValue JSON_Object(s) representing desired and (for full twin only) reported of the twin
