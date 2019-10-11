@@ -386,32 +386,27 @@ static int move_messages_between_lists(SINGLYLINKEDLIST_HANDLE from_list, SINGLY
 
     while ((list_item = singlylinkedlist_get_head_item(from_list)) != NULL)
     {
+        MESSAGE_QUEUE_ITEM* mq_item = (MESSAGE_QUEUE_ITEM*)singlylinkedlist_item_get_value(list_item);
+
         if (singlylinkedlist_remove(from_list, list_item) != 0)
         {
             LogError("failed removing message from list");
             result = MU_FAILURE;
+            break;
         }
-        else
+        else if (mq_item == NULL)
         {
-            MESSAGE_QUEUE_ITEM* mq_item = (MESSAGE_QUEUE_ITEM*)singlylinkedlist_item_get_value(list_item);
-
-            if (singlylinkedlist_add(to_list, (const void*)mq_item) != 0)
-            {
-                LogError("failed moving message to list");
-
-                fire_message_callback(mq_item, MESSAGE_QUEUE_CANCELLED, NULL);
-
-                free(mq_item);
-
-                result = MU_FAILURE;
-
-                break;
-            }
-            else
-            {
-                mq_item->number_of_attempts = 0;
-                mq_item->processing_start_time = INDEFINITE_TIME;
-            }
+            LogError("failed moving message to list");
+            result = MU_FAILURE;
+            break;
+        }
+        else if (singlylinkedlist_add(to_list, (const void*)mq_item) == NULL)
+        {
+            LogError("failed moving message to list");
+            fire_message_callback(mq_item, MESSAGE_QUEUE_CANCELLED, NULL);
+            free(mq_item);
+            result = MU_FAILURE;
+            break;
         }
     }
 
@@ -422,6 +417,7 @@ int message_queue_move_all_back_to_pending(MESSAGE_QUEUE_HANDLE message_queue)
 {
     int result;
 
+    // Codes_SRS_MESSAGE_QUEUE_21_071: [If the message_queue is NULL, the message_queue_move_all_back_to_pending shall return non-zero result.]
     if (message_queue == NULL)
     {
         LogError("invalid argument (message_queue is NULL)");
@@ -429,46 +425,27 @@ int message_queue_move_all_back_to_pending(MESSAGE_QUEUE_HANDLE message_queue)
     }
     else
     {
-        SINGLYLINKEDLIST_HANDLE temp_list;
-
-        if ((temp_list = singlylinkedlist_create()) == NULL)
+        // Codes_SRS_MESSAGE_QUEUE_21_070: [The message_queue_move_all_back_to_pending shall add all in_progress message in front of the pending messages.]
+        if (move_messages_between_lists(message_queue->pending, message_queue->in_progress) != 0)
         {
-            LogError("failed creating temporary list");
+            LogError("failed moving pending messages at the end of in-progress");
+            result = MU_FAILURE;
+        }
+        else if (move_messages_between_lists(message_queue->in_progress, message_queue->pending) != 0)
+        {
+            LogError("failed moving all in-progress messages back to pending");
             result = MU_FAILURE;
         }
         else
         {
-            if (move_messages_between_lists(message_queue->in_progress, temp_list) != 0)
-            {
-                LogError("failed moving in-progress message to temporary list");
-                result = MU_FAILURE;
-            }
-            else if (move_messages_between_lists(message_queue->pending, temp_list) != 0)
-            {
-                LogError("failed moving pending message to temporary list");
-                result = MU_FAILURE;
-            }
-            else if (move_messages_between_lists(temp_list, message_queue->pending) != 0)
-            {
-                LogError("failed moving pending message to temporary list");
-                result = MU_FAILURE;
-            }
-            else
-            {
-                result = RESULT_OK;
-            }
+            result = RESULT_OK;
+        }
 
-            if (result != RESULT_OK)
-            {
-                LIST_ITEM_HANDLE list_item;
-
-                while ((list_item = singlylinkedlist_get_head_item(temp_list)) != NULL)
-                {
-                    dequeue_message_and_fire_callback(temp_list, list_item, MESSAGE_QUEUE_CANCELLED, NULL);
-                }
-            }
-
-            singlylinkedlist_destroy(temp_list);
+        // Codes_SRS_MESSAGE_QUEUE_21_072: [If move pending messages failed, the message_queue_move_all_back_to_pending shall delete all elements in the queue and return non-zero.]
+        // Codes_SRS_MESSAGE_QUEUE_21_073: [If move in_progress messages failed, the message_queue_move_all_back_to_pending shall delete all elements in the queue and return non-zero.]
+        if (result != RESULT_OK)
+        {
+            message_queue_remove_all(message_queue);
         }
     }
 
