@@ -413,6 +413,12 @@ static const char* retrieve_mqtt_return_codes(CONNECT_RETURN_CODE rtn_code)
             return "Unknown";
     }
 }
+#else
+static const char* retrieve_mqtt_return_codes(CONNECT_RETURN_CODE rtn_code)
+{
+    UNUSED(rtn_code);
+    return NULL;
+}
 #endif // NO_LOGGING
 
 static int retrieve_device_method_rid_info(const char* resp_topic, STRING_HANDLE method_name, STRING_HANDLE request_id)
