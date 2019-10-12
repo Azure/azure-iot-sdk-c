@@ -27,13 +27,13 @@ and removing calls to _DoWork will yield the same results. */
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 #define ITERATIONS    1
-#define MAX_BLOCK_SIZE_BYTES    10000000
+#define MAX_BLOCK_SIZE_BYTES    4194304
 
 /*Optional string with http proxy host and integer for http proxy port (Linux only)         */
 static const char* proxyHost = NULL;
 static int proxyPort = 0;
 
-static char data_to_upload[MAX_BLOCK_SIZE_BYTES + 1] = { 0 };
+static char data_to_upload[MAX_BLOCK_SIZE_BYTES] = { 0 };
 static int blocks_sent = 0;
 static int blocks_count = 0;
 static int block_size = 0;
@@ -101,7 +101,7 @@ int write_local_file()
 
     blocks_sent = 0;
     
-    if ((fp = fopen(file_name, "w")) == NULL)
+    if ((fp = fopen(file_name, "wb")) == NULL)
     {
         (void)printf("Failed to create local reference file.\n");
     }
@@ -126,11 +126,16 @@ int write_local_file()
     return failed;
 }
 
-void upload_test_file(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, const char* fileName, int blockSize, int blockCount)
+int upload_test_file(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, const char* fileName, int blockSize, int blockCount)
 {
+    int failed = 0;
+
+    (void)printf("BLOB UPLOAD: [%s] block_size=[%d] block_count=[%d]\n---\n\n", fileName, blockSize, blockCount);
+
     if (blockSize > MAX_BLOCK_SIZE_BYTES)
     {
         (void)printf("Block size exceeds maximum allowed block size.");
+        failed = 1;
     }
     else
     {
@@ -142,6 +147,7 @@ void upload_test_file(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, const c
         if (write_local_file() != 0)
         {
             (void)printf("Failed to create local reference file.\n");
+            failed = 1;
         }
         else
         {
@@ -150,6 +156,7 @@ void upload_test_file(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, const c
             if (IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob(iotHubClientHandle, fileName, getDataCallback, NULL) != IOTHUB_CLIENT_OK)
             {
                 (void)printf("%s failed to upload\n", fileName);
+                failed = 1;
             }
             else
             {
@@ -157,11 +164,13 @@ void upload_test_file(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, const c
             }
         }
     }
+    return failed;
 }
 
 int main(int argc, char* argv[])
 {
     IOTHUB_DEVICE_CLIENT_LL_HANDLE device_ll_handle;
+
 
     (void)IoTHub_Init();
     (void)printf("Starting the IoTHub client sample upload to blob with multiple blocks...\r\n");
@@ -195,13 +204,17 @@ int main(int argc, char* argv[])
         }
         else
         {
+            upload_test_file(device_ll_handle, "blob1x1.bin", 1, 1);
+            upload_test_file(device_ll_handle, "blob123x1.bin", 123, 1);
+            upload_test_file(device_ll_handle, "blob1x123.bin", 1, 123);
             upload_test_file(device_ll_handle, "blob100x2000.bin", 100, 2000);
             upload_test_file(device_ll_handle, "blob1000000x2.bin", 1000000, 2);
             upload_test_file(device_ll_handle, "blob100x500.bin", 100, 500);
+            upload_test_file(device_ll_handle, "blob4194303x1.bin", 4194303, 1);
+            upload_test_file(device_ll_handle, "blob4194303x10.bin", 4000000, 10); 
+            upload_test_file(device_ll_handle, "blob4194304x1.bin", 4194304, 1);
+            upload_test_file(device_ll_handle, "blob4194304x10.bin", 4194304, 10); 
         }
-
-        printf("Press any key to continue");
-        (void)getchar();
 
         // Clean up the iothub sdk handle
         IoTHubDeviceClient_LL_Destroy(device_ll_handle);
@@ -210,3 +223,4 @@ int main(int argc, char* argv[])
     return 0;
 }
 #endif /*DONT_USE_UPLOADTOBLOB*/
+
