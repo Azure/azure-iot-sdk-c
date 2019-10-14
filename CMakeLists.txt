@@ -75,6 +75,7 @@ option(use_tpm_simulator "tpm simulator type of hsm used with the provisioning c
 option(use_edge_modules "Enable support for running modules against Azure IoT Edge" OFF)
 option(use_custom_heap "use externally defined heap functions instead of the malloc family" OFF)
 option(use_uhttp_upload "set use_uhttp_upload to ON to use uhttp for upload to blob" OFF)
+option(use_uhttp_upload_logging "set use_uhttp_upload_logging to ON to enable uhttp blob logging (only when use_uhttp_upload is also ON)" OFF)
 set(compileOption_C "" CACHE STRING "passes a string to the command line of the C compiler")
 set(compileOption_CXX "" CACHE STRING "passes a string to the command line of the C++ compiler")
 set(linkerOption "" CACHE STRING "passes a string to the shared and exe linker options of the C compiler")
@@ -83,6 +84,10 @@ set(use_prov_client_core OFF)
 
 # Temporary for now
 set(${use_uhttp_upload} ON)
+
+if(${use_uhttp_upload_logging} ON)
+    add_definitions(-DUSE_UHTTP_UPLOAD_LOGGING)
+endif()
 
 if(${use_custom_heap})
     add_definitions(-DGB_USE_CUSTOM_HEAP)

@@ -30,8 +30,9 @@ and removing calls to _DoWork will yield the same results. */
 #define MAX_BLOCK_SIZE_BYTES    4194304
 
 /*Optional string with http proxy host and integer for http proxy port (Linux only)         */
-static const char* proxyHost = NULL;
-static int proxyPort = 0;
+static const char* proxyHost = "127.0.0.1";
+static int proxyPort = 81;
+static int enableVerboseLogging = 1;
 
 static char data_to_upload[MAX_BLOCK_SIZE_BYTES] = { 0 };
 static int blocks_sent = 0;
@@ -202,9 +203,14 @@ int main(int argc, char* argv[])
         {
             (void)printf("failure to set proxy\n");
         }
+        else if (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_CURL_VERBOSE, &enableVerboseLogging) != IOTHUB_CLIENT_OK)
+        {
+            (void)printf("failure to enable logging\n");
+        }
         else
         {
             upload_test_file(device_ll_handle, "blob1x1.bin", 1, 1);
+            upload_test_file(device_ll_handle, "blob1x123.bin", 10, 10);
             upload_test_file(device_ll_handle, "blob123x1.bin", 123, 1);
             upload_test_file(device_ll_handle, "blob1x123.bin", 1, 123);
             upload_test_file(device_ll_handle, "blob100x2000.bin", 100, 2000);

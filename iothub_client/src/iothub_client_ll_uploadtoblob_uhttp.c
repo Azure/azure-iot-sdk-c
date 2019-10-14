@@ -568,12 +568,6 @@ static int IoTHubClient_LL_UploadToBlob_step3(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HAND
         result = MU_FAILURE;
         LogError("Failure constructing string");
     }
-    else if (uhttp_client_open(http_client, upload_data->hostname, DEFAULT_HTTPS_PORT, NULL, NULL) != HTTP_CLIENT_OK)
-    {
-        LogError("Failed opening http url %s", upload_data->hostname);
-        STRING_delete(relativePathNotification);
-        result = BLOB_HTTP_ERROR;
-    }
     else
     {
         /*Codes_SRS_IOTHUBCLIENT_LL_02_086: [ If performing the HTTP request fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
@@ -590,7 +584,13 @@ static int IoTHubClient_LL_UploadToBlob_step3(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HAND
             case IOTHUB_CREDENTIAL_TYPE_X509_ECC:
             case IOTHUB_CREDENTIAL_TYPE_DEVICE_AUTH:
             {
-                if (send_http_request(upload_data, http_client, STRING_c_str(relativePathNotification), request_header, messageBody) != 0)
+                // Codes_SRS_IOTHUBCLIENT_LL_02_065: [ If creating the HTTPAPIEX_HANDLE fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]
+                if ((http_client = create_http_client(upload_data)) == NULL)
+                {
+                    LogError("unable to HTTPAPIEX_Create");
+                    result = IOTHUB_CLIENT_ERROR;
+                }
+                else if (send_http_request(upload_data, http_client, STRING_c_str(relativePathNotification), request_header, messageBody) != 0)
                 {
                     LogError("unable to execute HTTPAPIEX_ExecuteRequest");
                     result = MU_FAILURE;
@@ -613,7 +613,13 @@ static int IoTHubClient_LL_UploadToBlob_step3(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HAND
                 else
                 {
                     HTTP_HEADERS_RESULT hdr_result;
-                    if (construct_sas_token(upload_data, STRING_c_str(uriResource)) != 0)
+                    // Codes_SRS_IOTHUBCLIENT_LL_02_065: [ If creating the HTTPAPIEX_HANDLE fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]
+                    if ((http_client = create_http_client(upload_data)) == NULL)
+                    {
+                    LogError("unable to HTTPAPIEX_Create");
+                    result = IOTHUB_CLIENT_ERROR;
+                    }
+                    else if (construct_sas_token(upload_data, STRING_c_str(uriResource)) != 0)
                     {
                         LogError("Failure constructing string");
                         result = MU_FAILURE;
@@ -723,6 +729,8 @@ static int initiate_blob_upload(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* uploa
                 STRING_HANDLE hub_content;
 
                 close_http_client(http_client);
+                uhttp_client_destroy(http_client);
+                http_client = NULL;
 
                 if ((hub_response = BUFFER_new() ) == NULL)
                 {
