@@ -2313,8 +2313,9 @@ static int uploadingThread(void *data)
     IOTHUB_CLIENT_FILE_UPLOAD_RESULT upload_result;
     HTTPWORKER_THREAD_INFO* threadInfo = (HTTPWORKER_THREAD_INFO*)data;
 
-    /*it so happens that IoTHubClientCore_LL_UploadToBlob is thread-safe because there's no saved state in the handle and there are no globals, so no need to protect it*/
-    /*not having it protected means multiple simultaneous uploads can happen*/
+    /*It so happens that IoTHubClientCore_LL_UploadToBlob is thread-safe because there's no saved state in the handle and there are no globals, so no need to protect it*/
+    /*not having it protected means multiple simultaneous uploads can happen. This is not true for uhttp_client.
+    */
     /*Codes_SRS_IOTHUBCLIENT_02_054: [ The thread shall call IoTHubClientCore_LL_UploadToBlob passing the information packed in the structure. ]*/
     if (IoTHubClientCore_LL_UploadToBlob(threadInfo->iotHubClientHandle->IoTHubClientLLHandle, threadInfo->destinationFileName, threadInfo->uploadBlobSavedData.source, threadInfo->uploadBlobSavedData.size) == IOTHUB_CLIENT_OK)
     {

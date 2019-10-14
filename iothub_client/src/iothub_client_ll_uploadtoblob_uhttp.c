@@ -330,7 +330,7 @@ static int send_http_request(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* upload_c
         if (result != 0 || len == 0)
         {
             result = MU_FAILURE;
-            LogError("Failure recieved from data");
+            LogError("Failure received from data");
         }
     }
     return result;
@@ -738,7 +738,7 @@ static int initiate_blob_upload(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* uploa
                         // Codes_SRS_IOTHUBCLIENT_LL_99_008: [ If step 2 is aborted by the client, then the HTTP message body shall look like:  ]
                         LogInfo("Blob_UploadFromSasUri aborted file upload");
 
-                        if ((hub_content = STRING_construct(FILE_UPLOAD_ABORTED_BODY)) == NULL)
+                        if ((hub_content = STRING_construct(FILE_UPLOAD_ABORTED_BODY)) != NULL)
                         {
                             if (IoTHubClient_LL_UploadToBlob_step3(upload_data, STRING_c_str(correlation_id), http_client, request_header, hub_content) != 0)
                             {
