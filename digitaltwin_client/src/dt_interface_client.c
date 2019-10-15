@@ -854,9 +854,10 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_ReportPropertyAsync(DIGITA
     DT_INTERFACE_CLIENT* dtInterfaceClient = (DT_INTERFACE_CLIENT*)dtInterfaceClientHandle;
     DT_REPORT_PROPERTIES_UPDATE_CALLBACK_CONTEXT* sendPropertiesUpdateContext = NULL;
 
-    if ((dtInterfaceClientHandle == NULL) || (propertyName == NULL) || (propertyData == NULL))
+    if ((dtInterfaceClientHandle == NULL) || (propertyName == NULL) || (propertyData == NULL) || (propertyDataLen == 0))
     {
-        LogError("Invalid parameter, one or more paramaters is NULL. dtInterfaceClientHandle=%p, propertyName=%p", dtInterfaceClientHandle, propertyName);
+        LogError("Invalid parameter, one or more paramaters is NULL. dtInterfaceClientHandle=%p, propertyName=%p, propertyData=%p, propertyDataLen=%lu", 
+                  dtInterfaceClientHandle, propertyName, propertyData, (unsigned long)propertyDataLen);
         result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
     }
     else if (VerifyPropertyResponseIfNeeded(dtResponse) != 0)
@@ -927,10 +928,10 @@ DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_CreateTelemetryMessage(const char* 
     DIGITALTWIN_CLIENT_RESULT result;
     IOTHUB_MESSAGE_RESULT iothubMessageResult;
 
-    if ((componentName == NULL) || (telemetryName == NULL) || (messageData == NULL) || (telemetryMessageHandle == NULL))
+    if ((componentName == NULL) || (telemetryName == NULL) || (messageData == NULL) || (telemetryMessageHandle == NULL) || (messageDataLen == 0))
     {
-        LogError("Invalid parameter(s): componentName=%p, telemetryName=%p, messageData=%p, telemetryMessageHandle=%p",
-			componentName, telemetryName, messageData, telemetryMessageHandle);
+        LogError("Invalid parameter(s): componentName=%p, telemetryName=%p, messageData=%p, telemetryMessageHandle=%p, messageDataLen=%lu",
+			componentName, telemetryName, messageData, telemetryMessageHandle, (unsigned long)messageDataLen);
         result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
     }
     else
@@ -1026,9 +1027,10 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_SendTelemetryAsync(DIGITAL
     DT_INTERFACE_SEND_TELEMETRY_CALLBACK_CONTEXT* sendTelemetryCallbackContext = NULL;
     STRING_HANDLE jsonToSend = NULL;
 
-    if ((dtInterfaceClientHandle == NULL) || (telemetryName == NULL) || (messageData == NULL))
+    if ((dtInterfaceClientHandle == NULL) || (telemetryName == NULL) || (messageData == NULL) || (messageDataLen == 0))
     {
-        LogError("Invalid parameter, one or more paramaters is NULL. dtInterfaceClientHandle=%p, telemetryName=%p", dtInterfaceClientHandle, telemetryName);
+        LogError("Invalid parameter, one or more paramaters is NULL. dtInterfaceClientHandle=%p, telemetryName=%p, messageData=%p, messageDataLen=%lu",
+                 dtInterfaceClientHandle, telemetryName, messageData, (unsigned long)messageDataLen);
         result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
     }
     else if (IsInterfaceAvailable(dtInterfaceClient) == false)
