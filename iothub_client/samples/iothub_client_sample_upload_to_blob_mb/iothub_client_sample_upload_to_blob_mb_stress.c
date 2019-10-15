@@ -216,7 +216,7 @@ int main(int argc, char* argv[])
         else
         {
             upload_test_file(device_ll_handle, "blob1x1.bin", 1, 1);
-            upload_test_file(device_ll_handle, "blob1x123.bin", 10, 10);
+            upload_test_file(device_ll_handle, "blob10x10.bin", 10, 10);
             upload_test_file(device_ll_handle, "blob123x1.bin", 123, 1);
             upload_test_file(device_ll_handle, "blob1x123.bin", 1, 123);
             upload_test_file(device_ll_handle, "blob100x2000.bin", 100, 2000);
