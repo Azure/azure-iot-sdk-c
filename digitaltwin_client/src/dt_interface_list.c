@@ -438,7 +438,7 @@ DIGITALTWIN_CLIENT_RESULT DT_InterfaceList_CreateRegistrationMessage(DIGITALTWIN
     }
     else if ((result = DT_InterfaceClient_CreateTelemetryMessage(DT_MODEL_DISCOVERY_INTERFACE_ID, DT_MODEL_DISCOVERY_INTERFACE_NAME, 
                                                                  DT_CAPABILITY_REPORT_INTERFACE_TELEMETRY_TYPE,
-                                                                 messageBody, messageHandle)) != DIGITALTWIN_CLIENT_OK)
+                                                                 (unsigned char *)messageBody, strlen(messageBody), messageHandle)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("DT_InterfaceClient_CreateTelemetryMessage failed, error = %d", result);
         result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;

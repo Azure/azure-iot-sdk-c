@@ -27,6 +27,7 @@ static void DT_E2E_VerifyPropertiesAcknowledged(const DIGITALTWIN_CLIENT_COMMAND
 static void DT_E2E_ProcessUpdatedProperty1(const DIGITALTWIN_CLIENT_PROPERTY_UPDATE* dtClientPropertyUpdate, void* userInterfaceContext);
 
 #define DT_E2E_PROCESS_UPDATED_PROPERTY1_NAME "ProcessUpdatedProperty1"
+#define DT_E2E_PROPERTY_VALUE_SET_1 "\"ValueOfPropertyBeingSet_1\""
 
 static const char* DT_E2E_properties_property_names[] = { 
     DT_E2E_PROCESS_UPDATED_PROPERTY1_NAME
@@ -216,7 +217,7 @@ static void DT_E2E_SendReportedProperty1(const DIGITALTWIN_CLIENT_COMMAND_REQUES
     DIGITALTWIN_CLIENT_RESULT result;
     DT_E2E_PROPERTIES_TEST_CONTEXT* propertiesTestContext = (DT_E2E_PROPERTIES_TEST_CONTEXT*)userInterfaceContext;
 
-    if ((result = DigitalTwin_InterfaceClient_ReportPropertyAsync(propertiesTestContext->interfaceHandle, DT_E2E_SendProperty1_PropertyName, DT_E2E_SendProperty1_PropertyData, NULL, DT_E2E_SendReportedProperty_Callback, propertiesTestContext)) != DIGITALTWIN_CLIENT_OK)
+    if ((result = DigitalTwin_InterfaceClient_ReportPropertyAsync(propertiesTestContext->interfaceHandle, DT_E2E_SendProperty1_PropertyName, (const unsigned char*)DT_E2E_SendProperty1_PropertyData, strlen(DT_E2E_SendProperty1_PropertyData), NULL, DT_E2E_SendReportedProperty_Callback, propertiesTestContext)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("TEST_PROPERTIES_INTERFACE: DigitalTwin_InterfaceClient_ReportPropertyAsync failed, error=<%d>", result);
         DT_E2E_Util_Fatal_Error_Occurred();
@@ -268,7 +269,7 @@ void DT_E2E_ProcessUpdatedProperty1(const DIGITALTWIN_CLIENT_PROPERTY_UPDATE* dt
 {
     DT_E2E_PROPERTIES_TEST_CONTEXT* propertiesTestContext = (DT_E2E_PROPERTIES_TEST_CONTEXT*)userInterfaceContext;
 
-    if (VerifyExpectedProperty(__FUNCTION__, dtClientPropertyUpdate, "\"ValueOfPropertyBeingSet_1\"", userInterfaceContext) == 0)
+    if (VerifyExpectedProperty(__FUNCTION__, dtClientPropertyUpdate, DT_E2E_PROPERTY_VALUE_SET_1, userInterfaceContext) == 0)
     {
         DIGITALTWIN_CLIENT_PROPERTY_RESPONSE propertyResponse;
         propertyResponse.version = DIGITALTWIN_CLIENT_PROPERTY_RESPONSE_VERSION_1;
@@ -279,7 +280,7 @@ void DT_E2E_ProcessUpdatedProperty1(const DIGITALTWIN_CLIENT_PROPERTY_UPDATE* dt
         DIGITALTWIN_CLIENT_RESULT result;
 
         result = DigitalTwin_InterfaceClient_ReportPropertyAsync(propertiesTestContext->interfaceHandle, DT_E2E_PROCESS_UPDATED_PROPERTY1_NAME, 
-                                                                 "\"ValueOfPropertyBeingSet_1\"", &propertyResponse, NULL, NULL);
+                                                                 (const unsigned char *)DT_E2E_PROPERTY_VALUE_SET_1, strlen(DT_E2E_PROPERTY_VALUE_SET_1), &propertyResponse, NULL, NULL);
         if (result != DIGITALTWIN_CLIENT_OK)
         {
             LogError("DigitalTwin_InterfaceClient_ReportPropertyAsync failed, error = <%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
