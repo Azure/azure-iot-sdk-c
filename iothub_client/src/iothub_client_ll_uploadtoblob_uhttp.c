@@ -254,7 +254,7 @@ static HTTP_CLIENT_HANDLE create_http_client(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDL
         uhttp_client_destroy(result);
         result = NULL;
     }
-    else if (upload_data->curl_verbosity_level != UPOADTOBLOB_CURL_VERBOSITY_UNSET && uhttp_client_set_trace(result, true, true) != HTTP_CLIENT_OK)
+    else if (upload_data->curl_verbosity_level == UPOADTOBLOB_CURL_VERBOSITY_ON && uhttp_client_set_trace(result, true, true) != HTTP_CLIENT_OK)
     {
         LogError("Failed setting trace");
         uhttp_client_destroy(result);
@@ -730,6 +730,7 @@ static int initiate_blob_upload(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* uploa
 
                 close_http_client(http_client);
                 uhttp_client_destroy(http_client);
+
                 http_client = NULL;
 
                 if ((hub_response = BUFFER_new() ) == NULL)
@@ -955,14 +956,14 @@ IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE IoTHubClient_LL_UploadToBlob_Create(const I
             }
             else if ((upload_data->tick_counter = tickcounter_create()) == NULL)
             {
-                LogError("Failed retrieving device ID");
+                LogError("Failed creating tick counter");
                 free(upload_data->hostname);
                 free(upload_data);
                 upload_data = NULL;
             }
             else if ((upload_data->response_data = BUFFER_new()) == NULL)
             {
-                LogError("Failed retrieving device ID");
+                LogError("Failed creating response_data buffer");
                 tickcounter_destroy(upload_data->tick_counter);
                 free(upload_data->hostname);
                 free(upload_data);
