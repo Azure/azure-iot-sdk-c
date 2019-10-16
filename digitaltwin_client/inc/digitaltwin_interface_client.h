@@ -282,7 +282,6 @@ MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_InterfaceClient_SetCo
   @warning The data specified in <c>messageData</c> must be valid JSON.  See conceptual documentation on data_format.md for more information.
 
   @param[in] dtInterfaceClientHandle            Handle for the interface client.
-  @param[in] telemetryName                      Name of the telemetry message to send.  This should match the model associated with this interface.
   @param[in] messageData                        Value of the telemetry data to send.  The schema must match the data specified in the model document.
   @param[in] messageDataLen                     Length of the telemetry data to send.
   @param[in] telemetryConfirmationCallback      (Optional) Function pointer to be invoked when the telemetry message is successfully delivered or fails.
@@ -290,7 +289,7 @@ MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_InterfaceClient_SetCo
 
   @returns  A DIGITALTWIN_CLIENT_RESULT.
 */
-MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_InterfaceClient_SendTelemetryAsync, DIGITALTWIN_INTERFACE_CLIENT_HANDLE, dtInterfaceClientHandle, const char*, telemetryName, const unsigned char*, messageData, size_t, messageDataLen, DIGITALTWIN_CLIENT_TELEMETRY_CONFIRMATION_CALLBACK, telemetryConfirmationCallback, void*, userContextCallback);
+MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_InterfaceClient_SendTelemetryAsync, DIGITALTWIN_INTERFACE_CLIENT_HANDLE, dtInterfaceClientHandle, const unsigned char*, messageData, size_t, messageDataLen, DIGITALTWIN_CLIENT_TELEMETRY_CONFIRMATION_CALLBACK, telemetryConfirmationCallback, void*, userContextCallback);
 
 /** 
   @brief Sends a Digital Twin property to the server.

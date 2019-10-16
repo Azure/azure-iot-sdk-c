@@ -928,10 +928,10 @@ DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_CreateTelemetryMessage(const char* 
     DIGITALTWIN_CLIENT_RESULT result;
     IOTHUB_MESSAGE_RESULT iothubMessageResult;
 
-    if ((componentName == NULL) || (telemetryName == NULL) || (messageData == NULL) || (telemetryMessageHandle == NULL) || (messageDataLen == 0))
+    if ((componentName == NULL) || (messageData == NULL) || (telemetryMessageHandle == NULL) || (messageDataLen == 0))
     {
-        LogError("Invalid parameter(s): componentName=%p, telemetryName=%p, messageData=%p, telemetryMessageHandle=%p, messageDataLen=%lu",
-			componentName, telemetryName, messageData, telemetryMessageHandle, (unsigned long)messageDataLen);
+        LogError("Invalid parameter(s): componentName=%p, messageData=%p, telemetryMessageHandle=%p, messageDataLen=%lu",
+			componentName, messageData, telemetryMessageHandle, (unsigned long)messageDataLen);
         result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
     }
     else
@@ -948,10 +948,10 @@ DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_CreateTelemetryMessage(const char* 
         }
         else if ((iothubMessageResult = IoTHubMessage_SetProperty(*telemetryMessageHandle, DT_INTERFACE_NAME_PROPERTY, componentName)) != IOTHUB_MESSAGE_OK)
         {
-            LogError("Cannot set property %s, error = %d", DT_INTERFACE_ID_PROPERTY, iothubMessageResult);
+            LogError("Cannot set property %s, error = %d", DT_INTERFACE_NAME_PROPERTY, iothubMessageResult);
             result = DIGITALTWIN_CLIENT_ERROR;
         }        
-        else if ((iothubMessageResult = IoTHubMessage_SetProperty(*telemetryMessageHandle, DT_MESSAGE_SCHEMA_PROPERTY, telemetryName)) != IOTHUB_MESSAGE_OK)
+        else if ((telemetryName != NULL) && ((iothubMessageResult = IoTHubMessage_SetProperty(*telemetryMessageHandle, DT_MESSAGE_SCHEMA_PROPERTY, telemetryName)) != IOTHUB_MESSAGE_OK))
         {
             LogError("Cannot set property %s, error = %d", DT_MESSAGE_SCHEMA_PROPERTY, iothubMessageResult);
             result = DIGITALTWIN_CLIENT_ERROR;
@@ -1019,7 +1019,7 @@ static DT_INTERFACE_SEND_TELEMETRY_CALLBACK_CONTEXT* CreateInterfaceAsyncCommand
 
 
 // DigitalTwin_InterfaceClient_SendTelemetryAsync sends the specified telemetry to Azure IoTHub in proper DigitalTwin data format.
-DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_SendTelemetryAsync(DIGITALTWIN_INTERFACE_CLIENT_HANDLE dtInterfaceClientHandle, const char* telemetryName, const unsigned char* messageData, size_t messageDataLen, DIGITALTWIN_CLIENT_TELEMETRY_CONFIRMATION_CALLBACK telemetryConfirmationCallback, void* userContextCallback)
+DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_SendTelemetryAsync(DIGITALTWIN_INTERFACE_CLIENT_HANDLE dtInterfaceClientHandle, const unsigned char* messageData, size_t messageDataLen, DIGITALTWIN_CLIENT_TELEMETRY_CONFIRMATION_CALLBACK telemetryConfirmationCallback, void* userContextCallback)
 {
     DIGITALTWIN_CLIENT_RESULT result;
     DT_INTERFACE_CLIENT* dtInterfaceClient = (DT_INTERFACE_CLIENT*)dtInterfaceClientHandle;
@@ -1027,10 +1027,10 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_SendTelemetryAsync(DIGITAL
     DT_INTERFACE_SEND_TELEMETRY_CALLBACK_CONTEXT* sendTelemetryCallbackContext = NULL;
     STRING_HANDLE jsonToSend = NULL;
 
-    if ((dtInterfaceClientHandle == NULL) || (telemetryName == NULL) || (messageData == NULL) || (messageDataLen == 0))
+    if ((dtInterfaceClientHandle == NULL) || (messageData == NULL) || (messageDataLen == 0))
     {
-        LogError("Invalid parameter, one or more paramaters is NULL. dtInterfaceClientHandle=%p, telemetryName=%p, messageData=%p, messageDataLen=%lu",
-                 dtInterfaceClientHandle, telemetryName, messageData, (unsigned long)messageDataLen);
+        LogError("Invalid parameter, one or more paramaters is NULL. dtInterfaceClientHandle=%p, messageData=%p, messageDataLen=%lu",
+                 dtInterfaceClientHandle, messageData, (unsigned long)messageDataLen);
         result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
     }
     else if (IsInterfaceAvailable(dtInterfaceClient) == false)
@@ -1038,15 +1038,9 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_SendTelemetryAsync(DIGITAL
         LogError("Interface not registered with Cloud");
         result = DIGITALTWIN_CLIENT_ERROR_INTERFACE_NOT_REGISTERED;
     }
-    else if ((result = CreateJsonForTelemetryMessage(telemetryName, messageData, messageDataLen, &jsonToSend)) != DIGITALTWIN_CLIENT_OK)
-    {
-        LogError("Error creating json for telemetry message.  telemetryName=%s.  err = %d", telemetryName, result);
-    }
     else
     {
-        const char* dataToSend = STRING_c_str(jsonToSend);
-
-        if ((result = DT_InterfaceClient_CreateTelemetryMessage(NULL, dtInterfaceClient->componentName, telemetryName, (const unsigned char*)dataToSend, strlen(dataToSend), &telemetryMessageHandle)) != DIGITALTWIN_CLIENT_OK)
+        if ((result = DT_InterfaceClient_CreateTelemetryMessage(NULL, dtInterfaceClient->componentName, NULL, messageData, messageDataLen, &telemetryMessageHandle)) != DIGITALTWIN_CLIENT_OK)
         {
             LogError("Cannot create send telemetry message, error = %d", result);
             result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;

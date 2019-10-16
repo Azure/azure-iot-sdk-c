@@ -142,8 +142,8 @@ static void DT_E2E_SendTelemetryMessage(const DIGITALTWIN_CLIENT_COMMAND_REQUEST
 
     DIGITALTWIN_CLIENT_RESULT result;
 
-    if ((result = DigitalTwin_InterfaceClient_SendTelemetryAsync(telemetryTestContext->interfaceHandle, DT_E2E_Telemetry_MessageName,
-                                                                 dtCommandRequest->requestData, dtCommandRequest->requestDataLen, DT_E2E_TelemetryConfirmationCallback, telemetryTestContext)) != DIGITALTWIN_CLIENT_OK)
+    if ((result = DigitalTwin_InterfaceClient_SendTelemetryAsync(telemetryTestContext->interfaceHandle, dtCommandRequest->requestData, dtCommandRequest->requestDataLen,
+                                                                 DT_E2E_TelemetryConfirmationCallback, telemetryTestContext)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("TEST_TELEMETRY_INTERFACE: DigitalTwin_InterfaceClient_SendTelemetryAsync fails, error=<%d>", result);
         DT_E2E_Util_Fatal_Error_Occurred();
