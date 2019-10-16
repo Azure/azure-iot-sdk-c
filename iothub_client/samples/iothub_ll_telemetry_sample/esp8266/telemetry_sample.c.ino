@@ -73,15 +73,11 @@ const char* telemetry_msg = "test_message";
 #ifdef SAMPLE_MQTT
     IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol = MQTT_Protocol;
 #endif // SAMPLE_MQTT
-#ifdef SAMPLE_MQTT_OVER_WEBSOCKETS
-    protocol = MQTT_WebSocket_Protocol;
-#endif // SAMPLE_MQTT_OVER_WEBSOCKETS
 #ifdef SAMPLE_HTTP
    IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol = HTTP_Protocol;
 #endif // SAMPLE_HTTP
 
 IOTHUB_DEVICE_CLIENT_LL_HANDLE device_ll_handle;
-//const IO_INTERFACE_DESCRIPTION* io_interface_description = platform_get_default_tlsio();
 
 static int callbackCounter;
 int receiveContext = 0; 
@@ -148,14 +144,12 @@ static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS result, I
 
 void setup() {
     int result = 0;
-
-//    wdt_disable();
     wdt_enable(5000);
-
+    
     sample_init(ssid, pass);
-//    gdbstub_init();
 
     device_ll_handle = IoTHubDeviceClient_LL_CreateFromConnectionString(connectionString, protocol);
+
     // Used to initialize IoTHub SDK subsystem
     (void)IoTHub_Init();
 
@@ -240,8 +234,7 @@ void setup() {
     // Free all the sdk subsystem
     IoTHub_Deinit();
 
-//    (void)getchar();
-    LogInfo("done with thing");
+    LogInfo("done with messages");
     return;
 }
 
