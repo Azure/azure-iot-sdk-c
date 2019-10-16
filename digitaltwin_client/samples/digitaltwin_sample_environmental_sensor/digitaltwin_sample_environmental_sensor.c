@@ -581,6 +581,8 @@ DIGITALTWIN_INTERFACE_CLIENT_HANDLE DigitalTwinSampleEnvironmentalSensor_CreateI
 // more detailed state information as part of this callback.
 static void DigitalTwinSampleEnvironmentalSensor_TelemetryCallback(DIGITALTWIN_CLIENT_RESULT dtTelemetryStatus, void* userContextCallback)
 {
+    (void)userContextCallback;
+
     if (dtTelemetryStatus == DIGITALTWIN_CLIENT_OK)
     {
         // This tends to overwhelm the logging on output based on how frequently this function is invoked, so removing by default.
@@ -588,7 +590,7 @@ static void DigitalTwinSampleEnvironmentalSensor_TelemetryCallback(DIGITALTWIN_C
     }
     else
     {
-        LogError("ENVIRONMENTAL_SENSOR_INTERFACE: DigitalTwin failed delivered telemetry message for <%s>, error=<%s>", (const char*)userContextCallback, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT,dtTelemetryStatus));
+        LogError("ENVIRONMENTAL_SENSOR_INTERFACE: DigitalTwin failed delivered telemetry message, error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT,dtTelemetryStatus));
     }
 }
 
@@ -604,23 +606,16 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwinSampleEnvironmentalSensor_SendTelemetryMess
     float currentTemperature = 20.0f + ((float)rand() / RAND_MAX) * 15.0f;
     float currentHumidity = 60.0f + ((float)rand() / RAND_MAX) * 20.0f;
 
-    char currentTemperatureMessage[128];
-    char currentHumidityMessage[128];
+    char currentMessage[128];
 
-    sprintf(currentTemperatureMessage, "%.3f", currentTemperature);
-    sprintf(currentHumidityMessage, "%.3f", currentHumidity);
+    sprintf(currentMessage, "{\"%s\":%.3f, \"%s\":%.3f}", 
+            DigitalTwinSampleEnvironmentalSensor_TemperatureTelemetry, currentTemperature,
+            DigitalTwinSampleEnvironmentalSensor_HumidityTelemetry, currentHumidity);
 
-    if ((result = DigitalTwin_InterfaceClient_SendTelemetryAsync(interfaceHandle, DigitalTwinSampleEnvironmentalSensor_TemperatureTelemetry, 
-                                                         (unsigned char *)currentTemperatureMessage, strlen(currentTemperatureMessage), DigitalTwinSampleEnvironmentalSensor_TelemetryCallback,
-                                                         (void*)DigitalTwinSampleEnvironmentalSensor_TemperatureTelemetry)) != DIGITALTWIN_CLIENT_OK)
+    if ((result = DigitalTwin_InterfaceClient_SendTelemetryAsync(interfaceHandle, (unsigned char*)currentMessage, strlen(currentMessage),
+                                                                 DigitalTwinSampleEnvironmentalSensor_TelemetryCallback, NULL)) != DIGITALTWIN_CLIENT_OK)
     {
-        LogError("ENVIRONMENTAL_SENSOR_INTERFACE: DigitalTwin_InterfaceClient_SendTelemetryAsync failed for sending %s", DigitalTwinSampleEnvironmentalSensor_TemperatureTelemetry);
-    }
-    else if ((result = DigitalTwin_InterfaceClient_SendTelemetryAsync(interfaceHandle, DigitalTwinSampleEnvironmentalSensor_HumidityTelemetry, 
-                                                         (unsigned char*)currentHumidityMessage, strlen(currentHumidityMessage), DigitalTwinSampleEnvironmentalSensor_TelemetryCallback,
-                                                         (void*)DigitalTwinSampleEnvironmentalSensor_HumidityTelemetry)) != DIGITALTWIN_CLIENT_OK)
-    {
-        LogError("ENVIRONMENTAL_SENSOR_INTERFACE: DigitalTwin_InterfaceClient_SendTelemetryAsync failed for sending %s", DigitalTwinSampleEnvironmentalSensor_HumidityTelemetry);
+        LogError("ENVIRONMENTAL_SENSOR_INTERFACE: DigitalTwin_InterfaceClient_SendTelemetryAsync failed for sending.");
     }
 
     return result;
