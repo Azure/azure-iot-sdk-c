@@ -57,6 +57,7 @@ static const char digitaltwinSample_EnvironmentalSensorCommandRunDiagnostics[] =
 //
 // Command status codes
 //
+static const int commandStatusProcessing = 102;
 static const int commandStatusSuccess = 200;
 static const int commandStatusPending = 202;
 static const int commandStatusFailure = 500;
@@ -255,7 +256,7 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwinSampleEnvironmentalSensor_ProcessDiagnostic
             
         // In phase1 of the diagnostic, we *only* report that the diagnostic is in progress but not yet complete.  We also transition to the next stage.
         DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE asyncCommandUpdate;
-        DigitalTwinSampleEnvironmentalSensor_SetAsyncUpdateState(&asyncCommandUpdate, digitaltwinSample_EnviromentalSensor_DiagnosticInProgress, commandStatusPending);
+        DigitalTwinSampleEnvironmentalSensor_SetAsyncUpdateState(&asyncCommandUpdate, digitaltwinSample_EnviromentalSensor_DiagnosticInProgress, commandStatusProcessing);
 
         if ((result = DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAsync(interfaceHandle, &asyncCommandUpdate, NULL, NULL)) != DIGITALTWIN_CLIENT_OK)
         {
