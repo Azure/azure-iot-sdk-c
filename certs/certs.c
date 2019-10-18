@@ -30,7 +30,7 @@ const char certificates[] =
 "-----END CERTIFICATE-----\r\n"
 #ifndef LEAN_CERTS
 //Note: for devices with limited resources, other certs are defined out to save space. 
-//For Europe and China regions, please change which certs are defined out to the appropriate ones.
+//For Germany, China, and other regions, please change which certs are defined out to the appropriate ones.
 /*DigiCert Global Root CA --China--*/
 "-----BEGIN CERTIFICATE-----\r\n"
 "MIIDrzCCApegAwIBAgIQCDvgVpBCRrGhdWrJWZHHSjANBgkqhkiG9w0BAQUFADBh\r\n"
@@ -54,7 +54,7 @@ const char certificates[] =
 "YSEY1QSteDwsOoBrp+uvFRTp2InBuThs4pFsiv9kuXclVzDAGySj4dzp30d8tbQk\r\n"
 "CAUw7C29C79Fv1C5qfPrmAESrciIxpg0X40KPMbp1ZWVbd4=\r\n"
 "-----END CERTIFICATE-----\r\n"
-/*D-TRUST Root Class 3 CA 2 2009 --Europe--*/
+/*D-TRUST Root Class 3 CA 2 2009 --Germany--*/
 "-----BEGIN CERTIFICATE-----\r\n"
 "MIIEMzCCAxugAwIBAgIDCYPzMA0GCSqGSIb3DQEBCwUAME0xCzAJBgNVBAYTAkRF\r\n"
 "MRUwEwYDVQQKDAxELVRydXN0IEdtYkgxJzAlBgNVBAMMHkQtVFJVU1QgUm9vdCBD\r\n"
