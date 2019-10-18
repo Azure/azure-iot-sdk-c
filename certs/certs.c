@@ -6,7 +6,7 @@
 #include "certs.h"
 
 const char certificates[] =
-/* DigiCert Baltimore Root --America--*/
+/* DigiCert Baltimore Root --Global--*/
 "-----BEGIN CERTIFICATE-----\r\n"
 "MIIDdzCCAl+gAwIBAgIEAgAAuTANBgkqhkiG9w0BAQUFADBaMQswCQYDVQQGEwJJ\r\n"
 "RTESMBAGA1UEChMJQmFsdGltb3JlMRMwEQYDVQQLEwpDeWJlclRydXN0MSIwIAYD\r\n"
@@ -30,7 +30,7 @@ const char certificates[] =
 "-----END CERTIFICATE-----\r\n"
 #ifndef LEAN_CERTS
 //Note: for devices with limited resources, other certs are defined out to save space. 
-//For Germany, China, and other regions, please change which certs are defined out to the appropriate ones.
+//For Germany and China regions, please change which certs are defined out to the appropriate ones.
 /*DigiCert Global Root CA --China--*/
 "-----BEGIN CERTIFICATE-----\r\n"
 "MIIDrzCCApegAwIBAgIQCDvgVpBCRrGhdWrJWZHHSjANBgkqhkiG9w0BAQUFADBh\r\n"
