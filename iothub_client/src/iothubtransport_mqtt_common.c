@@ -55,6 +55,7 @@
 #define MAX_DISCONNECT_VALUE                50
 
 #define ON_DEMAND_GET_TWIN_REQUEST_TIMEOUT_SECS    60
+#define TWIN_REPORT_UPDATE_TIMEOUT_SECS           (60*5)
 
 static const char TOPIC_DEVICE_TWIN_PREFIX[] = "$iothub/twin";
 static const char TOPIC_DEVICE_METHOD_PREFIX[] = "$iothub/methods";
@@ -169,6 +170,8 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     STRING_HANDLE module_id;
     STRING_HANDLE devicesAndModulesPath;
     int portNum;
+    // conn_attempted indicates whether a connection has *ever* been attempted on the lifetime
+    // of this handle.  Even if a given xio transport is added/removed, this always stays true.
     bool conn_attempted;
 
     MQTT_GET_IO_TRANSPORT get_io_transport;
@@ -240,10 +243,9 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
 
 typedef struct MQTT_DEVICE_TWIN_ITEM_TAG
 {
-    tickcounter_ms_t msgEnqueueTime;
+    tickcounter_ms_t msgCreationTime;
     tickcounter_ms_t msgPublishTime;
     size_t retryCount;
-    IOTHUB_IDENTITY_TYPE iothub_type;
     uint16_t packet_id;
     uint32_t iothub_msg_id;
     IOTHUB_DEVICE_TWIN* device_twin_data;
@@ -289,6 +291,13 @@ static void free_proxy_data(MQTTTRANSPORT_HANDLE_DATA* mqtt_transport_instance)
     }
 }
 
+// Destroys xio transport associated with MQTT handle and resets appropriate state
+static void DestroyXioTransport(PMQTTTRANSPORT_HANDLE_DATA transport_data)
+{
+    xio_destroy(transport_data->xioTransport);
+    transport_data->xioTransport = NULL;
+}
+
 static void set_saved_tls_options(PMQTTTRANSPORT_HANDLE_DATA transport, OPTIONHANDLER_HANDLE new_options)
 {
     if (transport->saved_tls_options != NULL)
@@ -327,6 +336,8 @@ static void free_transport_handle_data(MQTTTRANSPORT_HANDLE_DATA* transport_data
     STRING_delete(transport_data->topic_NotifyState);
     STRING_delete(transport_data->topic_DeviceMethods);
     STRING_delete(transport_data->topic_InputQueue);
+
+    DestroyXioTransport(transport_data);
 
     free(transport_data);
 }
@@ -921,26 +932,28 @@ static void destroy_device_twin_get_message(MQTT_DEVICE_TWIN_ITEM* msg_entry)
     free(msg_entry);
 }
 
-static MQTT_DEVICE_TWIN_ITEM* create_device_twin_get_message(MQTTTRANSPORT_HANDLE_DATA* transport_data)
+static MQTT_DEVICE_TWIN_ITEM* create_device_twin_message(MQTTTRANSPORT_HANDLE_DATA* transport_data, DEVICE_TWIN_MSG_TYPE device_twin_msg_type, uint32_t iothub_msg_id)
 {
     MQTT_DEVICE_TWIN_ITEM* result;
+    tickcounter_ms_t current_time;
 
-    if ((result = (MQTT_DEVICE_TWIN_ITEM*)malloc(sizeof(MQTT_DEVICE_TWIN_ITEM))) == NULL)
+    if (tickcounter_get_current_ms(transport_data->msgTickCounter, &current_time) != 0)
+    {
+        LogError("Failed retrieving tickcounter info");
+        result = NULL;
+    }
+    else if ((result = (MQTT_DEVICE_TWIN_ITEM*)malloc(sizeof(MQTT_DEVICE_TWIN_ITEM))) == NULL)
     {
         LogError("Failed allocating device twin data.");
+        result = NULL;
     }
     else
     {
+        memset(result, 0, sizeof(*result));
+        result->msgCreationTime = current_time;
         result->packet_id = get_next_packet_id(transport_data);
-        result->iothub_msg_id = 0;
-        result->device_twin_msg_type = RETRIEVE_PROPERTIES;
-        result->retryCount = 0;
-        result->msgPublishTime = 0;
-        result->msgEnqueueTime = 0;
-        result->iothub_type = IOTHUB_TYPE_DEVICE_TWIN;
-        result->device_twin_data = NULL;
-        result->userCallback = NULL;
-        result->userContext = NULL;
+        result->iothub_msg_id = iothub_msg_id;
+        result->device_twin_msg_type = device_twin_msg_type;
     }
 
     return result;
@@ -1009,67 +1022,58 @@ static void sendPendingGetTwinRequests(PMQTTTRANSPORT_HANDLE_DATA transportData)
     }
 }
 
-static void removeExpiredPendingGetTwinRequests(PMQTTTRANSPORT_HANDLE_DATA transport_data)
+static void removeExpiredTwinRequestsFromList(PMQTTTRANSPORT_HANDLE_DATA transport_data, tickcounter_ms_t current_ms, DLIST_ENTRY* twin_list)
 {
-    tickcounter_ms_t current_ms;
+    PDLIST_ENTRY list_item = twin_list->Flink;
 
-    if (tickcounter_get_current_ms(transport_data->msgTickCounter, &current_ms) == 0)
+    while (list_item != twin_list)
     {
-        PDLIST_ENTRY listItem = transport_data->pending_get_twin_queue.Flink;
+        DLIST_ENTRY next_list_item;
+        next_list_item.Flink = list_item->Flink;
+        MQTT_DEVICE_TWIN_ITEM* msg_entry = containingRecord(list_item, MQTT_DEVICE_TWIN_ITEM, entry);
+        bool item_timed_out = false;
 
-        while (listItem != &transport_data->pending_get_twin_queue)
+        if ((msg_entry->device_twin_msg_type == RETRIEVE_PROPERTIES) &&
+            (((current_ms - msg_entry->msgCreationTime) / 1000) >= ON_DEMAND_GET_TWIN_REQUEST_TIMEOUT_SECS))
         {
-            DLIST_ENTRY nextListItem;
-            nextListItem.Flink = listItem->Flink;
-            MQTT_DEVICE_TWIN_ITEM* msg_entry = containingRecord(listItem, MQTT_DEVICE_TWIN_ITEM, entry);
-
-            if (((current_ms - msg_entry->msgEnqueueTime) / 1000) >= ON_DEMAND_GET_TWIN_REQUEST_TIMEOUT_SECS)
+            item_timed_out = true;
+            if (msg_entry->userCallback != NULL)
             {
-                (void)DList_RemoveEntryList(listItem);
                 msg_entry->userCallback(DEVICE_TWIN_UPDATE_COMPLETE, NULL, 0, msg_entry->userContext);
-                destroy_device_twin_get_message(msg_entry);
             }
-
-            listItem = nextListItem.Flink;
         }
+        else if ((msg_entry->device_twin_msg_type == REPORTED_STATE) &&
+            (((current_ms - msg_entry->msgCreationTime) / 1000) >= TWIN_REPORT_UPDATE_TIMEOUT_SECS))
+        {
+            item_timed_out = true;
+            transport_data->transport_callbacks.twin_rpt_state_complete_cb(msg_entry->iothub_msg_id, STATUS_CODE_TIMEOUT_VALUE, transport_data->transport_ctx);
+        }
+
+        if (item_timed_out)
+        {
+            (void)DList_RemoveEntryList(list_item);
+            destroy_device_twin_get_message(msg_entry);
+        }
+
+        list_item = next_list_item.Flink;
     }
+
 }
 
-static void removeExpiredGetTwinRequestsPendingAck(PMQTTTRANSPORT_HANDLE_DATA transport_data)
+static void removeExpiredTwinRequests(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
     tickcounter_ms_t current_ms;
 
     if (tickcounter_get_current_ms(transport_data->msgTickCounter, &current_ms) == 0)
     {
-        PDLIST_ENTRY listItem = transport_data->ack_waiting_queue.Flink;
-
-        while (listItem != &transport_data->ack_waiting_queue)
-        {
-            DLIST_ENTRY nextListItem;
-            nextListItem.Flink = listItem->Flink;
-            MQTT_DEVICE_TWIN_ITEM* msg_entry = containingRecord(listItem, MQTT_DEVICE_TWIN_ITEM, entry);
-
-            // Check if it is a on-demand get-twin request.
-            if (msg_entry->device_twin_msg_type == RETRIEVE_PROPERTIES && msg_entry->userCallback != NULL)
-            {
-                if (((current_ms - msg_entry->msgEnqueueTime) / 1000) >= ON_DEMAND_GET_TWIN_REQUEST_TIMEOUT_SECS)
-                {
-                    (void)DList_RemoveEntryList(listItem);
-                    msg_entry->userCallback(DEVICE_TWIN_UPDATE_COMPLETE, NULL, 0, msg_entry->userContext);
-                    destroy_device_twin_get_message(msg_entry);
-                }
-            }
-
-            listItem = nextListItem.Flink;
-        }
+        removeExpiredTwinRequestsFromList(transport_data, current_ms, &transport_data->pending_get_twin_queue);
+        removeExpiredTwinRequestsFromList(transport_data, current_ms, &transport_data->ack_waiting_queue);
     }
 }
 
 static int publish_device_twin_message(MQTTTRANSPORT_HANDLE_DATA* transport_data, IOTHUB_DEVICE_TWIN* device_twin_info, MQTT_DEVICE_TWIN_ITEM* mqtt_info)
 {
     int result;
-    mqtt_info->packet_id = get_next_packet_id(transport_data);
-    mqtt_info->device_twin_msg_type = REPORTED_STATE;
 
     STRING_HANDLE msgTopic = STRING_construct_sprintf(REPORTED_PROPERTIES_TOPIC, mqtt_info->packet_id);
     if (msgTopic == NULL)
@@ -1795,9 +1799,7 @@ static void ResetConnectionIfNecessary(PMQTTTRANSPORT_HANDLE_DATA transport_data
     {
         OPTIONHANDLER_HANDLE options = xio_retrieveoptions(transport_data->xioTransport);
         set_saved_tls_options(transport_data, options);
-
-        xio_destroy(transport_data->xioTransport);
-        transport_data->xioTransport = NULL;
+        DestroyXioTransport(transport_data);
     }
 }
 
@@ -1832,8 +1834,7 @@ static void DisconnectFromClient(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 ThreadAPI_Sleep(50);
             } while ((disconnect_ctr < MAX_DISCONNECT_VALUE) && (transport_data->disconnect_recv_flag == 0));
         }
-        xio_destroy(transport_data->xioTransport);
-        transport_data->xioTransport = NULL;
+        DestroyXioTransport(transport_data);
 
         transport_data->device_twin_get_sent = false;
         transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_NOT_CONNECTED;
@@ -2790,13 +2791,13 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_GetTwinAsync(IOTHUB_DEVICE_HAND
         PMQTTTRANSPORT_HANDLE_DATA transport_data = (PMQTTTRANSPORT_HANDLE_DATA)handle;
         MQTT_DEVICE_TWIN_ITEM* mqtt_info;
 
-        if ((mqtt_info = create_device_twin_get_message(transport_data)) == NULL)
+        if ((mqtt_info = create_device_twin_message(transport_data, RETRIEVE_PROPERTIES, 0)) == NULL)
         {
             LogError("Failed creating the device twin get request message");
             // Codes_SRS_IOTHUB_MQTT_TRANSPORT_09_003: [ If any failure occurs, IoTHubTransport_MQTT_Common_GetTwinAsync shall return IOTHUB_CLIENT_ERROR ]
             result = IOTHUB_CLIENT_ERROR;
         }
-        else if (tickcounter_get_current_ms(transport_data->msgTickCounter, &mqtt_info->msgEnqueueTime) != 0)
+        else if (tickcounter_get_current_ms(transport_data->msgTickCounter, &mqtt_info->msgCreationTime) != 0)
         {
             LogError("Failed setting the get twin request enqueue time");
             destroy_device_twin_get_message(mqtt_info);
@@ -3017,7 +3018,7 @@ IOTHUB_PROCESS_ITEM_RESULT IoTHubTransport_MQTT_Common_ProcessItem(TRANSPORT_LL_
             // Ensure the reported property suback has been received
             if (item_type == IOTHUB_TYPE_DEVICE_TWIN && transport_data->twin_resp_sub_recv)
             {
-                MQTT_DEVICE_TWIN_ITEM* mqtt_info = (MQTT_DEVICE_TWIN_ITEM*)malloc(sizeof(MQTT_DEVICE_TWIN_ITEM));
+                MQTT_DEVICE_TWIN_ITEM* mqtt_info = create_device_twin_message(transport_data, REPORTED_STATE, iothub_item->device_twin->item_id);
                 if (mqtt_info == NULL)
                 {
                     /* Codes_SRS_IOTHUBCLIENT_LL_07_004: [ If any errors are encountered IoTHubTransport_MQTT_Common_ProcessItem shall return IOTHUB_PROCESS_ERROR. ]*/
@@ -3026,12 +3027,6 @@ IOTHUB_PROCESS_ITEM_RESULT IoTHubTransport_MQTT_Common_ProcessItem(TRANSPORT_LL_
                 else
                 {
                     /*Codes_SRS_IOTHUBCLIENT_LL_07_003: [ IoTHubTransport_MQTT_Common_ProcessItem shall publish a message to the mqtt protocol with the message topic for the message type.]*/
-                    mqtt_info->iothub_type = item_type;
-                    mqtt_info->iothub_msg_id = iothub_item->device_twin->item_id;
-                    mqtt_info->retryCount = 0;
-                    mqtt_info->userCallback = NULL;
-                    mqtt_info->userContext = NULL;
-                    mqtt_info->msgEnqueueTime = 0;
 
                     /* Codes_SRS_IOTHUBCLIENT_LL_07_005: [ If successful IoTHubTransport_MQTT_Common_ProcessItem shall add mqtt info structure acknowledgement queue. ] */
                     DList_InsertTailList(&transport_data->ack_waiting_queue, &mqtt_info->entry);
@@ -3091,7 +3086,7 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle)
                     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_055: [ IoTHubTransport_MQTT_Common_DoWork shall send a device twin get property message upon successfully retrieving a SUBACK on device twin topics. ] */
                     MQTT_DEVICE_TWIN_ITEM* mqtt_info;
 
-                    if ((mqtt_info = create_device_twin_get_message(transport_data)) == NULL)
+                    if ((mqtt_info = create_device_twin_message(transport_data, RETRIEVE_PROPERTIES, 0)) == NULL)
                     {
                         LogError("Failure: could not create message for twin get command");
                     }
@@ -3166,8 +3161,7 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle)
 
         // Check the ack messages timeouts
         process_queued_ack_messages(transport_data);
-        removeExpiredPendingGetTwinRequests(transport_data);
-        removeExpiredGetTwinRequestsPendingAck(transport_data);
+        removeExpiredTwinRequests(transport_data);
     }
 }
 
