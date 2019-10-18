@@ -29,7 +29,7 @@ const char certificates[] =
 "R9I4LtD+gdwyah617jzV/OeBHRnDJELqYzmp\r\n"
 "-----END CERTIFICATE-----\r\n"
 #ifndef LEAN_CERTS
-//Note: for devices with limited resources, other certs are defined out to save on space. 
+//Note: for devices with limited resources, other certs are defined out to save space. 
 //For Europe and China regions, please change which certs are defined out to the appropriate ones.
 /*DigiCert Global Root CA --China--*/
 "-----BEGIN CERTIFICATE-----\r\n"
