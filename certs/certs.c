@@ -6,7 +6,7 @@
 #include "certs.h"
 
 const char certificates[] =
-/* DigiCert Baltimore Root */
+/* DigiCert Baltimore Root --America--*/
 "-----BEGIN CERTIFICATE-----\r\n"
 "MIIDdzCCAl+gAwIBAgIEAgAAuTANBgkqhkiG9w0BAQUFADBaMQswCQYDVQQGEwJJ\r\n"
 "RTESMBAGA1UEChMJQmFsdGltb3JlMRMwEQYDVQQLEwpDeWJlclRydXN0MSIwIAYD\r\n"
@@ -28,7 +28,10 @@ const char certificates[] =
 "ksLi4xaNmjICq44Y3ekQEe5+NauQrz4wlHrQMz2nZQ/1/I6eYs9HRCwBXbsdtTLS\r\n"
 "R9I4LtD+gdwyah617jzV/OeBHRnDJELqYzmp\r\n"
 "-----END CERTIFICATE-----\r\n"
-/*DigiCert Global Root CA*/
+#ifndef LEAN_CERTS
+//Note: for the ESP8266, other certs are defined out to save on space. 
+//For Europe and China regions, please change which certs are defined out to the appropriate ones.
+/*DigiCert Global Root CA --China--*/
 "-----BEGIN CERTIFICATE-----\r\n"
 "MIIDrzCCApegAwIBAgIQCDvgVpBCRrGhdWrJWZHHSjANBgkqhkiG9w0BAQUFADBh\r\n"
 "MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3\r\n"
@@ -51,7 +54,7 @@ const char certificates[] =
 "YSEY1QSteDwsOoBrp+uvFRTp2InBuThs4pFsiv9kuXclVzDAGySj4dzp30d8tbQk\r\n"
 "CAUw7C29C79Fv1C5qfPrmAESrciIxpg0X40KPMbp1ZWVbd4=\r\n"
 "-----END CERTIFICATE-----\r\n"
-/*D-TRUST Root Class 3 CA 2 2009*/
+/*D-TRUST Root Class 3 CA 2 2009 --Europe--*/
 "-----BEGIN CERTIFICATE-----\r\n"
 "MIIEMzCCAxugAwIBAgIDCYPzMA0GCSqGSIb3DQEBCwUAME0xCzAJBgNVBAYTAkRF\r\n"
 "MRUwEwYDVQQKDAxELVRydXN0IEdtYkgxJzAlBgNVBAMMHkQtVFJVU1QgUm9vdCBD\r\n"
@@ -77,4 +80,6 @@ const char certificates[] =
 "PIWmawomDeCTmGCufsYkl4phX5GOZpIJhzbNi5stPvZR1FDUWSi9g/LMKHtThm3Y\r\n"
 "Johw1+qRzT65ysCQblrGXnRl11z+o+I=\r\n"
 "-----END CERTIFICATE-----\r\n"
+#endif
+
 ;
