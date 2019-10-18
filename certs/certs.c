@@ -80,6 +80,6 @@ const char certificates[] =
 "PIWmawomDeCTmGCufsYkl4phX5GOZpIJhzbNi5stPvZR1FDUWSi9g/LMKHtThm3Y\r\n"
 "Johw1+qRzT65ysCQblrGXnRl11z+o+I=\r\n"
 "-----END CERTIFICATE-----\r\n"
-#endif
+#endif /* LEAN_CERTS */
 
 ;
