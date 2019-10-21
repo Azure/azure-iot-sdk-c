@@ -4,9 +4,12 @@
 /* This file contains certs needed to communicate with Azure (IoT) */
 
 #include "certs.h"
+//Note: for devices with limited resources, only one cert should be loaded. #defines are used to reduce memory footprint of certificates.
+//For Germany and China regions, please build with -DUSE_GERMANY_CERT_ONLY or -DUSE_CHINA_CERT_ONLY if you wish to load ONLY those certs.
 
 const char certificates[] =
-/* DigiCert Baltimore Root --Global--*/
+#if not (defined(USE_CHINA_CERT_ONLY) || defined(USE_GERMANY_CERT_ONLY))
+/* DigiCert Baltimore Root --Used Globally--*/
 "-----BEGIN CERTIFICATE-----\r\n"
 "MIIDdzCCAl+gAwIBAgIEAgAAuTANBgkqhkiG9w0BAQUFADBaMQswCQYDVQQGEwJJ\r\n"
 "RTESMBAGA1UEChMJQmFsdGltb3JlMRMwEQYDVQQLEwpDeWJlclRydXN0MSIwIAYD\r\n"
@@ -28,9 +31,9 @@ const char certificates[] =
 "ksLi4xaNmjICq44Y3ekQEe5+NauQrz4wlHrQMz2nZQ/1/I6eYs9HRCwBXbsdtTLS\r\n"
 "R9I4LtD+gdwyah617jzV/OeBHRnDJELqYzmp\r\n"
 "-----END CERTIFICATE-----\r\n"
-#ifndef LEAN_CERTS
-//Note: for devices with limited resources, other certs are defined out to save space. 
-//For Germany and China regions, please change which certs are defined out to the appropriate ones.
+#endif /* BALTIMORE_CERT */
+
+#if not (defined(USE_BALTIMORE_CERT_ONLY) || defined(USE_GERMANY_CERT_ONLY))
 /*DigiCert Global Root CA --China--*/
 "-----BEGIN CERTIFICATE-----\r\n"
 "MIIDrzCCApegAwIBAgIQCDvgVpBCRrGhdWrJWZHHSjANBgkqhkiG9w0BAQUFADBh\r\n"
@@ -54,6 +57,9 @@ const char certificates[] =
 "YSEY1QSteDwsOoBrp+uvFRTp2InBuThs4pFsiv9kuXclVzDAGySj4dzp30d8tbQk\r\n"
 "CAUw7C29C79Fv1C5qfPrmAESrciIxpg0X40KPMbp1ZWVbd4=\r\n"
 "-----END CERTIFICATE-----\r\n"
+#endif /* CHINA_CERT */
+
+#if not (defined(USE_CHINA_CERT_ONLY) || defined(USE_BALTIMORE_CERT_ONLY))
 /*D-TRUST Root Class 3 CA 2 2009 --Germany--*/
 "-----BEGIN CERTIFICATE-----\r\n"
 "MIIEMzCCAxugAwIBAgIDCYPzMA0GCSqGSIb3DQEBCwUAME0xCzAJBgNVBAYTAkRF\r\n"
@@ -80,6 +86,6 @@ const char certificates[] =
 "PIWmawomDeCTmGCufsYkl4phX5GOZpIJhzbNi5stPvZR1FDUWSi9g/LMKHtThm3Y\r\n"
 "Johw1+qRzT65ysCQblrGXnRl11z+o+I=\r\n"
 "-----END CERTIFICATE-----\r\n"
-#endif /* LEAN_CERTS */
+#endif /* GERMANY_CERT */
 
 ;
