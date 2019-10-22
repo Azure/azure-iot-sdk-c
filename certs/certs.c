@@ -10,6 +10,7 @@
 const char certificates[] =
 #if !(defined(USE_CHINA_CERT_ONLY) || defined(USE_GERMANY_CERT_ONLY))
 /* DigiCert Baltimore Root --Used Globally--*/
+// This cert should be used when connecting to Azure IoT on the Azure Cloud available globally. When in doubt, use this cert.
 "-----BEGIN CERTIFICATE-----\r\n"
 "MIIDdzCCAl+gAwIBAgIEAgAAuTANBgkqhkiG9w0BAQUFADBaMQswCQYDVQQGEwJJ\r\n"
 "RTESMBAGA1UEChMJQmFsdGltb3JlMRMwEQYDVQQLEwpDeWJlclRydXN0MSIwIAYD\r\n"
