@@ -8,7 +8,7 @@
 //For Germany and China regions, please build with -DUSE_GERMANY_CERT_ONLY or -DUSE_CHINA_CERT_ONLY if you wish to load ONLY those certs.
 
 const char certificates[] =
-#if not (defined(USE_CHINA_CERT_ONLY) || defined(USE_GERMANY_CERT_ONLY))
+#if !(defined(USE_CHINA_CERT_ONLY) || defined(USE_GERMANY_CERT_ONLY))
 /* DigiCert Baltimore Root --Used Globally--*/
 "-----BEGIN CERTIFICATE-----\r\n"
 "MIIDdzCCAl+gAwIBAgIEAgAAuTANBgkqhkiG9w0BAQUFADBaMQswCQYDVQQGEwJJ\r\n"
@@ -33,7 +33,7 @@ const char certificates[] =
 "-----END CERTIFICATE-----\r\n"
 #endif /* BALTIMORE_CERT */
 
-#if not (defined(USE_BALTIMORE_CERT_ONLY) || defined(USE_GERMANY_CERT_ONLY))
+#if !(defined(USE_BALTIMORE_CERT_ONLY) || defined(USE_GERMANY_CERT_ONLY))
 /*DigiCert Global Root CA --China--*/
 "-----BEGIN CERTIFICATE-----\r\n"
 "MIIDrzCCApegAwIBAgIQCDvgVpBCRrGhdWrJWZHHSjANBgkqhkiG9w0BAQUFADBh\r\n"
@@ -59,7 +59,7 @@ const char certificates[] =
 "-----END CERTIFICATE-----\r\n"
 #endif /* CHINA_CERT */
 
-#if not (defined(USE_CHINA_CERT_ONLY) || defined(USE_BALTIMORE_CERT_ONLY))
+#if !(defined(USE_CHINA_CERT_ONLY) || defined(USE_BALTIMORE_CERT_ONLY))
 /*D-TRUST Root Class 3 CA 2 2009 --Germany--*/
 "-----BEGIN CERTIFICATE-----\r\n"
 "MIIEMzCCAxugAwIBAgIDCYPzMA0GCSqGSIb3DQEBCwUAME0xCzAJBgNVBAYTAkRF\r\n"
