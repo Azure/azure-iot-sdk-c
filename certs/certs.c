@@ -34,7 +34,8 @@ const char certificates[] =
 #endif /* BALTIMORE_CERT */
 
 #if !(defined(USE_BALTIMORE_CERT_ONLY) || defined(USE_GERMANY_CERT_ONLY))
-/*DigiCert Global Root CA --China--*/
+/*DigiCert Global Root CA --China/Mooncake--*/
+// This cert should be used when connecting to Azure IoT on the Azure China Cloud (a.k.a. Mooncake).
 "-----BEGIN CERTIFICATE-----\r\n"
 "MIIDrzCCApegAwIBAgIQCDvgVpBCRrGhdWrJWZHHSjANBgkqhkiG9w0BAQUFADBh\r\n"
 "MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3\r\n"
@@ -60,7 +61,8 @@ const char certificates[] =
 #endif /* CHINA_CERT */
 
 #if !(defined(USE_CHINA_CERT_ONLY) || defined(USE_BALTIMORE_CERT_ONLY))
-/*D-TRUST Root Class 3 CA 2 2009 --Germany--*/
+/*D-TRUST Root Class 3 CA 2 2009 --Germany/Black Forest--*/
+// This cert should be used when connecting to Azure IoT on the Azure Germany Cloud (a.k.a. Black Forest).
 "-----BEGIN CERTIFICATE-----\r\n"
 "MIIEMzCCAxugAwIBAgIDCYPzMA0GCSqGSIb3DQEBCwUAME0xCzAJBgNVBAYTAkRF\r\n"
 "MRUwEwYDVQQKDAxELVRydXN0IEdtYkgxJzAlBgNVBAMMHkQtVFJVU1QgUm9vdCBD\r\n"
