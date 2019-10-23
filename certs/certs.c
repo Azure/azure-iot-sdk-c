@@ -5,10 +5,17 @@
 
 #include "certs.h"
 //Note: for devices with limited resources, only one cert should be loaded. #defines are used to reduce memory footprint of certificates.
-//For Germany and China regions, please build with -DUSE_GERMANY_CERT_ONLY or -DUSE_CHINA_CERT_ONLY if you wish to load ONLY those certs.
+//For Black Forest and Mooncake regions, please build with -DUSE_BLACK_FOREST_CERT or -DUSE_MOONCAKE_CERT, respectively, if you wish to load ONLY those certs.
+
+#if !defined(USE_BALTIMORE_CERT) && !defined(USE_BLACK_FOREST_CERT) && !defined(USE_MOONCAKE_CERT)
+// For legacy, if no certificates were explicitly selected then include all of them
+#define USE_BALTIMORE_CERT
+#define USE_BLACK_FOREST_CERT
+#define USE_MOONCAKE_CERT
+#endif
 
 const char certificates[] =
-#if !(defined(USE_CHINA_CERT_ONLY) || defined(USE_GERMANY_CERT_ONLY))
+#if defined(USE_BALTIMORE_CERT)
 /* DigiCert Baltimore Root --Used Globally--*/
 // This cert should be used when connecting to Azure IoT on the Azure Cloud available globally. When in doubt, use this cert.
 "-----BEGIN CERTIFICATE-----\r\n"
@@ -34,9 +41,9 @@ const char certificates[] =
 "-----END CERTIFICATE-----\r\n"
 #endif /* BALTIMORE_CERT */
 
-#if !(defined(USE_BALTIMORE_CERT_ONLY) || defined(USE_GERMANY_CERT_ONLY))
-/*DigiCert Global Root CA --China/Mooncake--*/
-// This cert should be used when connecting to Azure IoT on the Azure China Cloud (a.k.a. Mooncake).
+#if defined(USE_MOONCAKE_CERT)
+/*DigiCert Global Root CA --Mooncake--*/
+// This cert should be used when connecting to Azure IoT on the https://portal.azure.cn Cloud address.
 "-----BEGIN CERTIFICATE-----\r\n"
 "MIIDrzCCApegAwIBAgIQCDvgVpBCRrGhdWrJWZHHSjANBgkqhkiG9w0BAQUFADBh\r\n"
 "MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3\r\n"
@@ -59,11 +66,11 @@ const char certificates[] =
 "YSEY1QSteDwsOoBrp+uvFRTp2InBuThs4pFsiv9kuXclVzDAGySj4dzp30d8tbQk\r\n"
 "CAUw7C29C79Fv1C5qfPrmAESrciIxpg0X40KPMbp1ZWVbd4=\r\n"
 "-----END CERTIFICATE-----\r\n"
-#endif /* CHINA_CERT */
+#endif /* MOONCAKE_CERT */
 
-#if !(defined(USE_CHINA_CERT_ONLY) || defined(USE_BALTIMORE_CERT_ONLY))
-/*D-TRUST Root Class 3 CA 2 2009 --Germany/Black Forest--*/
-// This cert should be used when connecting to Azure IoT on the Azure Germany Cloud (a.k.a. Black Forest).
+#if defined(USE_BLACK_FOREST_CERT)
+/*D-TRUST Root Class 3 CA 2 2009 --Black Forest--*/
+// This cert should be used when connecting to Azure IoT on the https://portal.microsoftazure.de Cloud address.
 "-----BEGIN CERTIFICATE-----\r\n"
 "MIIEMzCCAxugAwIBAgIDCYPzMA0GCSqGSIb3DQEBCwUAME0xCzAJBgNVBAYTAkRF\r\n"
 "MRUwEwYDVQQKDAxELVRydXN0IEdtYkgxJzAlBgNVBAMMHkQtVFJVU1QgUm9vdCBD\r\n"
@@ -89,6 +96,6 @@ const char certificates[] =
 "PIWmawomDeCTmGCufsYkl4phX5GOZpIJhzbNi5stPvZR1FDUWSi9g/LMKHtThm3Y\r\n"
 "Johw1+qRzT65ysCQblrGXnRl11z+o+I=\r\n"
 "-----END CERTIFICATE-----\r\n"
-#endif /* GERMANY_CERT */
+#endif /* BLACK_FOREST_CERT */
 
 ;
