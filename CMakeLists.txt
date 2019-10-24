@@ -28,17 +28,6 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     add_definitions(-DMACOSX)
 endif()
 
-if (USE_BALTIMORE_CERT)
-    add_definitions(-DUSE_BALTIMORE_CERT)
-endif()
-
-if (USE_MICROSOFTAZURE_DE_CERT)
-    add_definitions(-DUSE_MICROSOFTAZURE_DE_CERT)
-endif()
-
-if (USE_PORTAL_AZURE_CN_CERT)
-    add_definitions(-DUSE_PORTAL_AZURE_CN_CERT)
-endif()
 
 include (CTest)
 
@@ -86,6 +75,10 @@ option(use_prov_client "Enable provisioning client" OFF)
 option(use_tpm_simulator "tpm simulator type of hsm used with the provisioning client" OFF)
 option(use_edge_modules "Enable support for running modules against Azure IoT Edge" OFF)
 option(use_custom_heap "use externally defined heap functions instead of the malloc family" OFF)
+option(use_baltimore_cert "set use_baltimore_cert to ON if the Baltimore cert is to be used, set to OFF to not use it" OFF)
+option(use_microsoftazure_de_cert "set use_microsoftazure_de_cert to ON if the MicrosoftAzure DE cert is to be used, set to OFF to not use it" OFF)
+option(use_portal_azure_cn_cert "set use_portal_azure_cn_cert to ON if the Portal Azure CN cert is to be used, set to OFF to not use it" OFF)
+
 set(compileOption_C "" CACHE STRING "passes a string to the command line of the C compiler")
 set(compileOption_CXX "" CACHE STRING "passes a string to the command line of the C++ compiler")
 set(linkerOption "" CACHE STRING "passes a string to the shared and exe linker options of the C compiler")
@@ -119,6 +112,19 @@ elseif("${use_bearssl}")
     option(use_sample_trusted_cert "Set flag in samples to use SDK's built-in CA as TrustedCerts" ON)
 else()
     option(use_sample_trusted_cert "Set flag in samples to use SDK's built-in CA as TrustedCerts" OFF)
+endif()
+
+# Enable specific certs
+if (${use_baltimore_cert})
+    add_definitions(-DUSE_BALTIMORE_CERT)
+endif()
+
+if (${use_microsoftazure_de_cert})
+    add_definitions(-DUSE_MICROSOFTAZURE_DE_CERT)
+endif()
+
+if (${use_portal_azure_cn_cert})
+    add_definitions(-DUSE_PORTAL_AZURE_CN_CERT)
 endif()
 
 # Enable IoT SDK to act as a module for Edge
