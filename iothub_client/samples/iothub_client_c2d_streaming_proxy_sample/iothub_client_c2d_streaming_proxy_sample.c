@@ -229,7 +229,7 @@ static void on_ws_error(void* context, WS_ERROR error_code)
     g_continueRunning = false;
 }
 
-static UWS_CLIENT_HANDLE create_websocket_client(DEVICE_STREAM_C2D_REQUEST* stream_request)
+static UWS_CLIENT_HANDLE create_websocket_client(const DEVICE_STREAM_C2D_REQUEST* stream_request)
 {
     UWS_CLIENT_HANDLE result;
     HTTP_PROXY_IO_CONFIG http_proxy_io_config;
@@ -244,7 +244,7 @@ static UWS_CLIENT_HANDLE create_websocket_client(DEVICE_STREAM_C2D_REQUEST* stre
     size_t host_length;
     const char* path;
     size_t path_length;
-    int port;
+    size_t port;
 
     char host_address[1024];
     char resource_name[1024];
@@ -252,7 +252,7 @@ static UWS_CLIENT_HANDLE create_websocket_client(DEVICE_STREAM_C2D_REQUEST* stre
     ws_url = ws_url_create(stream_request->url);
     (void)ws_url_get_host(ws_url, &host, &host_length);
     (void)ws_url_get_path(ws_url, &path, &path_length);
-    (void)ws_url_get_port(ws_url, (size_t*)&port);
+    (void)ws_url_get_port(ws_url, &port);
 
     (void)memcpy(host_address, host, host_length);
     host_address[host_length] = '\0';
@@ -276,7 +276,7 @@ static UWS_CLIENT_HANDLE create_websocket_client(DEVICE_STREAM_C2D_REQUEST* stre
     tlsio_interface = platform_get_default_tlsio();
 
     tls_io_config.hostname = host_address;
-    tls_io_config.port = port;
+    tls_io_config.port = (int)port;
 
     if (proxy_host != NULL)
     {
@@ -285,16 +285,16 @@ static UWS_CLIENT_HANDLE create_websocket_client(DEVICE_STREAM_C2D_REQUEST* stre
         http_proxy_io_config.username = proxy_username;
         http_proxy_io_config.password = proxy_password;
         http_proxy_io_config.hostname = host_address;
-        http_proxy_io_config.port = port;
+        http_proxy_io_config.port = (int)port;
 
         tls_io_config.underlying_io_interface = http_proxy_io_get_interface_description();
         tls_io_config.underlying_io_parameters = &http_proxy_io_config;
 
-        result = uws_client_create_with_io(tlsio_interface, &tls_io_config, host_address, port, resource_name, &protocols, 1);
+        result = uws_client_create_with_io(tlsio_interface, &tls_io_config, host_address, (int)port, resource_name, &protocols, 1);
     }
     else
     {
-        result = uws_client_create(host_address, port, resource_name, true, &protocols, 1);
+        result = uws_client_create(host_address, (int)port, resource_name, true, &protocols, 1);
     }
     (void)uws_client_set_request_header(result, "Authorization", auth_header_value);
     (void)uws_client_open_async(result, on_ws_open_complete, NULL, on_ws_frame_received, NULL, on_ws_peer_closed, NULL, on_ws_error, NULL);
@@ -304,7 +304,7 @@ static UWS_CLIENT_HANDLE create_websocket_client(DEVICE_STREAM_C2D_REQUEST* stre
     return result;
 }
 
-static DEVICE_STREAM_C2D_RESPONSE* streamRequestCallback(DEVICE_STREAM_C2D_REQUEST* stream_request, void* context)
+static DEVICE_STREAM_C2D_RESPONSE* streamRequestCallback(const DEVICE_STREAM_C2D_REQUEST* stream_request, void* context)
 {
     (void)context;
 

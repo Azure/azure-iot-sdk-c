@@ -25,17 +25,17 @@ typedef struct DEVICE_STREAM_C2D_RESPONSE_TAG
 
 typedef DEVICE_STREAM_C2D_RESPONSE* (*DEVICE_STREAM_C2D_REQUEST_CALLBACK)(DEVICE_STREAM_C2D_REQUEST* request, const void* context);
 
-extern DEVICE_STREAM_C2D_RESPONSE* stream_c2d_response_create(DEVICE_STREAM_C2D_REQUEST* request, bool accept, char* data, char* content_type, char* content_encoding);
-extern DEVICE_STREAM_C2D_REQUEST* stream_c2d_request_clone(DEVICE_STREAM_C2D_REQUEST* request);
-extern void stream_c2d_response_destroy(DEVICE_STREAM_C2D_RESPONSE* response);
-extern void stream_c2d_request_destroy(DEVICE_STREAM_C2D_REQUEST* request);
+extern DEVICE_STREAM_C2D_RESPONSE* IoTHubClient_StreamC2DResponseCreate(DEVICE_STREAM_C2D_REQUEST* request, bool accept, char* data, char* content_type, char* content_encoding);
+extern DEVICE_STREAM_C2D_REQUEST* IoTHubClient_StreamC2DRequestClone(DEVICE_STREAM_C2D_REQUEST* request);
+extern void IoTHubClient_StreamC2DResponseDestroy(DEVICE_STREAM_C2D_RESPONSE* response);
+extern void IoTHubClient_StreamC2DRequestDestroy(DEVICE_STREAM_C2D_REQUEST* request);
 ```
 
 
-### stream_c2d_response_create
+### IoTHubClient_StreamC2DResponseCreate
 
 ```c
-extern DEVICE_STREAM_C2D_RESPONSE* stream_c2d_response_create(DEVICE_STREAM_C2D_REQUEST* request, bool accept, char* data, char* content_type, char* content_encoding);
+extern DEVICE_STREAM_C2D_RESPONSE* IoTHubClient_StreamC2DResponseCreate(DEVICE_STREAM_C2D_REQUEST* request, bool accept, char* data, char* content_type, char* content_encoding);
 ```
 
 **SRS_IOTHUB_CLIENT_STREAMING_09_010: [** If `request` is NULL, the function shall return NULL **]**
@@ -47,10 +47,10 @@ extern DEVICE_STREAM_C2D_RESPONSE* stream_c2d_response_create(DEVICE_STREAM_C2D_
 **SRS_IOTHUB_CLIENT_STREAMING_09_013: [** `request->request_id` shall be copied into `response->request_id` **]**
 
 
-### stream_c2d_request_clone
+### IoTHubClient_StreamC2DRequestClone
 
 ```c
-extern DEVICE_STREAM_C2D_REQUEST* stream_c2d_request_clone(DEVICE_STREAM_C2D_REQUEST* request);
+extern DEVICE_STREAM_C2D_REQUEST* IoTHubClient_StreamC2DRequestClone(DEVICE_STREAM_C2D_REQUEST* request);
 ```
 
 **SRS_IOTHUB_CLIENT_STREAMING_09_016: [** If `request` is NULL, the function shall return NULL **]**
@@ -65,10 +65,10 @@ extern DEVICE_STREAM_C2D_REQUEST* stream_c2d_request_clone(DEVICE_STREAM_C2D_REQ
 
 
 
-### stream_c2d_response_destroy
+### IoTHubClient_StreamC2DResponseDestroy
 
 ```c
-extern void stream_c2d_response_destroy(DEVICE_STREAM_C2D_RESPONSE* response);
+extern void IoTHubClient_StreamC2DResponseDestroy(DEVICE_STREAM_C2D_RESPONSE* response);
 ```
 
 **SRS_IOTHUB_CLIENT_STREAMING_09_021: [** If `request` is NULL, the function shall return **]**
@@ -76,10 +76,10 @@ extern void stream_c2d_response_destroy(DEVICE_STREAM_C2D_RESPONSE* response);
 **SRS_IOTHUB_CLIENT_STREAMING_09_022: [** The memory allocated for `response` shall be released **]**
 
 
-### stream_c2d_request_destroy
+### IoTHubClient_StreamC2DRequestDestroy
 
 ```c
-extern void stream_c2d_request_destroy(DEVICE_STREAM_C2D_REQUEST* request);
+extern void IoTHubClient_StreamC2DRequestDestroy(DEVICE_STREAM_C2D_REQUEST* request);
 ```
 
 **SRS_IOTHUB_CLIENT_STREAMING_09_023: [** If `request` is NULL, the function shall return **]**

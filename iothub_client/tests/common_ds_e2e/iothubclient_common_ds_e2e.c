@@ -715,7 +715,7 @@ static bool find_expected_request_by_name(LIST_ITEM_HANDLE list_item, const void
     return (target_name != NULL && expDSReq != NULL && (strcmp(expDSReq->streamName, target_name) == 0));
 }
 
-static DEVICE_STREAM_C2D_RESPONSE* on_device_streaming_request_received(DEVICE_STREAM_C2D_REQUEST* request, void* context)
+static DEVICE_STREAM_C2D_RESPONSE* on_device_streaming_request_received(const DEVICE_STREAM_C2D_REQUEST* request, void* context)
 {
     DEVICE_STREAM_C2D_RESPONSE* response;
     DEVICE_STREAMING_TEST_CONTEXT* dsTestCtx = (DEVICE_STREAMING_TEST_CONTEXT*)context;
