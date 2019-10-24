@@ -4,9 +4,11 @@
 /* This file contains certs needed to communicate with Azure (IoT) */
 
 #include "certs.h"
-//Note: for devices with limited resources, only one cert should be loaded. #defines are used to reduce memory footprint of certificates.
-//For DE and CN regions, please build with -DUSE_MICROSOFTAZURE_DE_CERT or -DUSE_PORTAL_AZURE_CN_CERT, respectively, if you wish to load ONLY those certs.
-
+/* Note: for devices with limited resources, only one cert should be loaded. 
+   #defines are used to reduce memory footprint of certificates.
+   For DE and CN regions, please build with -DUSE_MICROSOFTAZURE_DE_CERT or -DUSE_PORTAL_AZURE_CN_CERT, respectively, 
+   if you wish to load ONLY those certs.
+*/
 #if !defined(USE_BALTIMORE_CERT) && !defined(USE_MICROSOFTAZURE_DE_CERT) && !defined(USE_PORTAL_AZURE_CN_CERT)
 // For legacy, if no certificates were explicitly selected then include all of them
 #define USE_BALTIMORE_CERT
