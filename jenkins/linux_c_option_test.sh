@@ -56,7 +56,7 @@ declare -a arr=(
     "-Drun_longhaul_tests=ON"
     "-Duse_prov_client=ON -Dhsm_custom_lib=$custom_hsm_lib"
     "-Drun_e2e_tests=ON -Drun_sfc_tests=ON -Duse_edge_modules=ON"
-    "-Drun_e2e_tests=ON -DUSE_BALTIMORE_CERT_ONLY=ON"
+    "-Drun_e2e_tests=ON -DUSE_BALTIMORE_CERT=ON"
 )
 
 for item in "${arr[@]}"
