@@ -7,11 +7,11 @@
 //Note: for devices with limited resources, only one cert should be loaded. #defines are used to reduce memory footprint of certificates.
 //For Black Forest and Mooncake regions, please build with -DUSE_BLACK_FOREST_CERT or -DUSE_MOONCAKE_CERT, respectively, if you wish to load ONLY those certs.
 
-#if !defined(USE_BALTIMORE_CERT) && !defined(USE_BLACK_FOREST_CERT) && !defined(USE_MOONCAKE_CERT)
+#if !defined(USE_BALTIMORE_CERT) && !defined(USE_MICROSOFTAZURE_DE_CERT) && !defined(USE_PORTAL_AZURE_CN_CERT)
 // For legacy, if no certificates were explicitly selected then include all of them
 #define USE_BALTIMORE_CERT
-#define USE_BLACK_FOREST_CERT
-#define USE_MOONCAKE_CERT
+#define USE_MICROSOFTAZURE_DE_CERT 
+#define USE_PORTAL_AZURE_CN_CERT
 #endif
 
 const char certificates[] =
@@ -41,8 +41,8 @@ const char certificates[] =
 "-----END CERTIFICATE-----\r\n"
 #endif /* BALTIMORE_CERT */
 
-#if defined(USE_MOONCAKE_CERT)
-/*DigiCert Global Root CA --Mooncake--*/
+#if defined(USE_PORTAL_AZURE_CN_CERT)
+/* DigiCert Global Root CA */
 // This cert should be used when connecting to Azure IoT on the https://portal.azure.cn Cloud address.
 "-----BEGIN CERTIFICATE-----\r\n"
 "MIIDrzCCApegAwIBAgIQCDvgVpBCRrGhdWrJWZHHSjANBgkqhkiG9w0BAQUFADBh\r\n"
@@ -66,10 +66,10 @@ const char certificates[] =
 "YSEY1QSteDwsOoBrp+uvFRTp2InBuThs4pFsiv9kuXclVzDAGySj4dzp30d8tbQk\r\n"
 "CAUw7C29C79Fv1C5qfPrmAESrciIxpg0X40KPMbp1ZWVbd4=\r\n"
 "-----END CERTIFICATE-----\r\n"
-#endif /* MOONCAKE_CERT */
+#endif /* PORTAL_AZURE_CN_CERT */
 
-#if defined(USE_BLACK_FOREST_CERT)
-/*D-TRUST Root Class 3 CA 2 2009 --Black Forest--*/
+#if defined(USE_MICROSOFTAZURE_DE_CERT)
+/* D-TRUST Root Class 3 CA 2 2009 */
 // This cert should be used when connecting to Azure IoT on the https://portal.microsoftazure.de Cloud address.
 "-----BEGIN CERTIFICATE-----\r\n"
 "MIIEMzCCAxugAwIBAgIDCYPzMA0GCSqGSIb3DQEBCwUAME0xCzAJBgNVBAYTAkRF\r\n"
@@ -96,6 +96,6 @@ const char certificates[] =
 "PIWmawomDeCTmGCufsYkl4phX5GOZpIJhzbNi5stPvZR1FDUWSi9g/LMKHtThm3Y\r\n"
 "Johw1+qRzT65ysCQblrGXnRl11z+o+I=\r\n"
 "-----END CERTIFICATE-----\r\n"
-#endif /* BLACK_FOREST_CERT */
+#endif /* MICROSOFTAZURE_DE_CERT */
 
 ;
