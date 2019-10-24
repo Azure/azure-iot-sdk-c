@@ -28,6 +28,18 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     add_definitions(-DMACOSX)
 endif()
 
+if (USE_BALTIMORE_CERT)
+    add_definitions(-DUSE_BALTIMORE_CERT)
+endif()
+
+if (USE_MICROSOFTAZURE_DE_CERT)
+    add_definitions(-DUSE_MICROSOFTAZURE_DE_CERT)
+endif()
+
+if (USE_PORTAL_AZURE_CN_CERT)
+    add_definitions(-DUSE_PORTAL_AZURE_CN_CERT)
+endif()
+
 include (CTest)
 
 if (MSVC)
