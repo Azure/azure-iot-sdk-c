@@ -58,10 +58,10 @@ typedef struct DEVICE_STREAM_C2D_RESPONSE_TAG
 */
 typedef DEVICE_STREAM_C2D_RESPONSE* (*DEVICE_STREAM_C2D_REQUEST_CALLBACK)(const DEVICE_STREAM_C2D_REQUEST* request, void* context);
 
-MOCKABLE_FUNCTION(, DEVICE_STREAM_C2D_RESPONSE*, stream_c2d_response_create, const DEVICE_STREAM_C2D_REQUEST*, request, bool, accept);
-MOCKABLE_FUNCTION(, DEVICE_STREAM_C2D_REQUEST*, stream_c2d_request_clone, const DEVICE_STREAM_C2D_REQUEST*, request);
-MOCKABLE_FUNCTION(, void, stream_c2d_response_destroy, DEVICE_STREAM_C2D_RESPONSE*, response);
-MOCKABLE_FUNCTION(, void, stream_c2d_request_destroy, DEVICE_STREAM_C2D_REQUEST*, request);
+MOCKABLE_FUNCTION(, DEVICE_STREAM_C2D_RESPONSE*, IoTHubClient_StreamC2DResponseCreate, const DEVICE_STREAM_C2D_REQUEST*, request, bool, accept);
+MOCKABLE_FUNCTION(, DEVICE_STREAM_C2D_REQUEST*, IoTHubClient_StreamC2DRequestClone, const DEVICE_STREAM_C2D_REQUEST*, request);
+MOCKABLE_FUNCTION(, void, IoTHubClient_StreamC2DResponseDestroy, DEVICE_STREAM_C2D_RESPONSE*, response);
+MOCKABLE_FUNCTION(, void, IoTHubClient_StreamC2DRequestDestroy, DEVICE_STREAM_C2D_REQUEST*, request);
 
 #ifdef __cplusplus
 }

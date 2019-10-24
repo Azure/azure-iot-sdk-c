@@ -7,7 +7,7 @@
 #include "azure_c_shared_utility/xlogging.h"
 #include "iothub_client_streaming.h"
 
-void stream_c2d_response_destroy(DEVICE_STREAM_C2D_RESPONSE* response)
+void IoTHubClient_StreamC2DResponseDestroy(DEVICE_STREAM_C2D_RESPONSE* response)
 {
     // Codes_SRS_IOTHUB_CLIENT_STREAMING_09_021: [ If `request` is NULL, the function shall return ]
     if (response != NULL)
@@ -22,7 +22,7 @@ void stream_c2d_response_destroy(DEVICE_STREAM_C2D_RESPONSE* response)
     }
 }
 
-void stream_c2d_request_destroy(DEVICE_STREAM_C2D_REQUEST* request)
+void IoTHubClient_StreamC2DRequestDestroy(DEVICE_STREAM_C2D_REQUEST* request)
 {
     // Codes_SRS_IOTHUB_CLIENT_STREAMING_09_023: [ If `request` is NULL, the function shall return ]
     if (request != NULL)
@@ -53,7 +53,7 @@ void stream_c2d_request_destroy(DEVICE_STREAM_C2D_REQUEST* request)
 }
 
 
-DEVICE_STREAM_C2D_REQUEST* stream_c2d_request_clone(const DEVICE_STREAM_C2D_REQUEST* request)
+DEVICE_STREAM_C2D_REQUEST* IoTHubClient_StreamC2DRequestClone(const DEVICE_STREAM_C2D_REQUEST* request)
 {
     DEVICE_STREAM_C2D_REQUEST* result;
 
@@ -78,7 +78,7 @@ DEVICE_STREAM_C2D_REQUEST* stream_c2d_request_clone(const DEVICE_STREAM_C2D_REQU
         {
             LogError("Failed cloning request id");
             // Codes_SRS_IOTHUB_CLIENT_STREAMING_09_020: [ If any field fails to be copied, the function shall release the memory allocated and return NULL ]
-            stream_c2d_request_destroy(result);
+            IoTHubClient_StreamC2DRequestDestroy(result);
             result = NULL;
         }
         // Codes_SRS_IOTHUB_CLIENT_STREAMING_09_019: [ All fields of `request` shall be copied into `clone` ]
@@ -86,7 +86,7 @@ DEVICE_STREAM_C2D_REQUEST* stream_c2d_request_clone(const DEVICE_STREAM_C2D_REQU
         {
             LogError("Failed cloning name");
             // Codes_SRS_IOTHUB_CLIENT_STREAMING_09_020: [ If any field fails to be copied, the function shall release the memory allocated and return NULL ]
-            stream_c2d_request_destroy(result);
+            IoTHubClient_StreamC2DRequestDestroy(result);
             result = NULL;
         }
         // Codes_SRS_IOTHUB_CLIENT_STREAMING_09_019: [ All fields of `request` shall be copied into `clone` ]
@@ -94,7 +94,7 @@ DEVICE_STREAM_C2D_REQUEST* stream_c2d_request_clone(const DEVICE_STREAM_C2D_REQU
         {
             LogError("Failed cloning uri");
             // Codes_SRS_IOTHUB_CLIENT_STREAMING_09_020: [ If any field fails to be copied, the function shall release the memory allocated and return NULL ]
-            stream_c2d_request_destroy(result);
+            IoTHubClient_StreamC2DRequestDestroy(result);
             result = NULL;
         }
         // Codes_SRS_IOTHUB_CLIENT_STREAMING_09_019: [ All fields of `request` shall be copied into `clone` ]
@@ -102,7 +102,7 @@ DEVICE_STREAM_C2D_REQUEST* stream_c2d_request_clone(const DEVICE_STREAM_C2D_REQU
         {
             LogError("Failed cloning authorization token");
             // Codes_SRS_IOTHUB_CLIENT_STREAMING_09_020: [ If any field fails to be copied, the function shall release the memory allocated and return NULL ]
-            stream_c2d_request_destroy(result);
+            IoTHubClient_StreamC2DRequestDestroy(result);
             result = NULL;
         }
     }
@@ -110,7 +110,7 @@ DEVICE_STREAM_C2D_REQUEST* stream_c2d_request_clone(const DEVICE_STREAM_C2D_REQU
     return result;
 }
 
-DEVICE_STREAM_C2D_RESPONSE* stream_c2d_response_create(const DEVICE_STREAM_C2D_REQUEST* request, bool accept)
+DEVICE_STREAM_C2D_RESPONSE* IoTHubClient_StreamC2DResponseCreate(const DEVICE_STREAM_C2D_REQUEST* request, bool accept)
 {
     DEVICE_STREAM_C2D_RESPONSE* result;
 
@@ -135,7 +135,7 @@ DEVICE_STREAM_C2D_RESPONSE* stream_c2d_response_create(const DEVICE_STREAM_C2D_R
         {
             LogError("Failed to copy request id");
             // Codes_SRS_IOTHUB_CLIENT_STREAMING_09_015: [ If any values fail to be copied, the function shall release the memory allocated and return NULL ]
-            stream_c2d_response_destroy(result);
+            IoTHubClient_StreamC2DResponseDestroy(result);
             result = NULL;
         }
         else

@@ -312,7 +312,7 @@ static DEVICE_STREAM_C2D_RESPONSE* streamRequestCallback(DEVICE_STREAM_C2D_REQUE
 
     g_uws_client_handle = create_websocket_client(stream_request);
 
-    return stream_c2d_response_create(stream_request, true);
+    return IoTHubClient_StreamC2DResponseCreate(stream_request, true);
 }
 
 static void print_traffic_counters()

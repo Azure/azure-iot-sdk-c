@@ -1788,7 +1788,7 @@ static void setup_message_recv_callback_STREAM_C2D_REQUEST_mocks(
     STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG)); // topic level array
     STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
 
-    STRICT_EXPECTED_CALL(stream_c2d_request_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_StreamC2DRequestDestroy(IGNORED_PTR_ARG));
 }
 
 static XIO_HANDLE get_IO_transport_fail(const char* fully_qualified_name, const MQTT_TRANSPORT_PROXY_OPTIONS* mqtt_transport_proxy_options)

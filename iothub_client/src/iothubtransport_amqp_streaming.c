@@ -732,25 +732,25 @@ static DEVICE_STREAM_C2D_REQUEST* create_stream_c2d_request_from_parsed_info(PAR
         if (mallocAndStrcpy_s(&result->request_id, parsed_info->request_id) != 0)
         {
             LogError("Failed setting stream c2d response request-id");
-            stream_c2d_request_destroy(result);
+            IoTHubClient_StreamC2DRequestDestroy(result);
             result = NULL;
         }
         else if (mallocAndStrcpy_s(&result->name, parsed_info->name) != 0)
         {
             LogError("Failed setting stream c2d response name");
-            stream_c2d_request_destroy(result);
+            IoTHubClient_StreamC2DRequestDestroy(result);
             result = NULL;
         }
         else if (mallocAndStrcpy_s(&result->url, parsed_info->url) != 0)
         {
             LogError("Failed setting stream c2d response url");
-            stream_c2d_request_destroy(result);
+            IoTHubClient_StreamC2DRequestDestroy(result);
             result = NULL;
         }
         else if (mallocAndStrcpy_s(&result->authorization_token, parsed_info->authorization_token) != 0)
         {
             LogError("Failed setting stream c2d response authorization token");
-            stream_c2d_request_destroy(result);
+            IoTHubClient_StreamC2DRequestDestroy(result);
             result = NULL;
         }
     }
@@ -948,7 +948,7 @@ static AMQP_MESSENGER_DISPOSITION_RESULT on_amqp_message_received_callback(MESSA
                             disposition_result = AMQP_MESSENGER_DISPOSITION_RESULT_ACCEPTED;
                         }
 
-                        stream_c2d_response_destroy(response);
+                        IoTHubClient_StreamC2DResponseDestroy(response);
                     }
                     else
                     {
@@ -956,7 +956,7 @@ static AMQP_MESSENGER_DISPOSITION_RESULT on_amqp_message_received_callback(MESSA
                         disposition_result = AMQP_MESSENGER_DISPOSITION_RESULT_ACCEPTED;
                     }
 
-                    stream_c2d_request_destroy(request);
+                    IoTHubClient_StreamC2DRequestDestroy(request);
                 }
             }
 

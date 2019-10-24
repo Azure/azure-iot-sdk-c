@@ -289,7 +289,7 @@ extern "C"
 #endif
 
 
-void real_stream_c2d_request_destroy(DEVICE_STREAM_C2D_REQUEST* request)
+void real_IoTHubClient_StreamC2DRequestDestroy(DEVICE_STREAM_C2D_REQUEST* request)
 {
     // Not destroying the inner fiels because they are mocked.
     real_free(request);
@@ -596,7 +596,7 @@ static void set_expected_calls_for_on_amqp_message_received_callback()
 
     set_expected_calls_for_create_stream_c2d_request_from_parsed_info();
 
-    STRICT_EXPECTED_CALL(stream_c2d_request_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_StreamC2DRequestDestroy(IGNORED_PTR_ARG));
 
     set_expected_calls_for_destroy_parsed_info();
 }
@@ -807,7 +807,7 @@ static void register_global_mock_hooks()
     REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_find, real_singlylinkedlist_find);
     REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_foreach, real_singlylinkedlist_foreach);
     REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_remove_if, real_singlylinkedlist_remove_if);
-    REGISTER_GLOBAL_MOCK_HOOK(stream_c2d_request_destroy, real_stream_c2d_request_destroy);
+    REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_StreamC2DRequestDestroy, real_IoTHubClient_StreamC2DRequestDestroy);
 }
 
 static void register_global_mock_aliases()
