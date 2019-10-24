@@ -750,7 +750,7 @@ static AMQP_STREAMING_CLIENT_HANDLE create_start_and_crank_amqp_streaming_client
 static DEVICE_STREAM_C2D_REQUEST saved_stream_c2d_requests[10];
 static size_t saved_stream_c2d_requests_count;
 static DEVICE_STREAM_C2D_RESPONSE* on_device_stream_c2d_request_received_result;
-static DEVICE_STREAM_C2D_RESPONSE* on_device_stream_c2d_request_received(DEVICE_STREAM_C2D_REQUEST* request, void* context)
+static DEVICE_STREAM_C2D_RESPONSE* on_device_stream_c2d_request_received(const DEVICE_STREAM_C2D_REQUEST* request, void* context)
 {
     (void)context;
 

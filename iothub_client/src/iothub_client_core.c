@@ -2696,7 +2696,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_GenericMethodInvoke(IOTHUB_CLIENT_CORE_HAN
 }
 #endif /* USE_EDGE_MODULES */
 
-static DEVICE_STREAM_C2D_RESPONSE* iothub_ll_device_stream_request_callback(DEVICE_STREAM_C2D_REQUEST* request, void* context)
+static DEVICE_STREAM_C2D_RESPONSE* iothub_ll_device_stream_request_callback(const DEVICE_STREAM_C2D_REQUEST* request, void* context)
 {
     DEVICE_STREAM_C2D_RESPONSE* result;
 

@@ -56,10 +56,10 @@ typedef struct DEVICE_STREAM_C2D_RESPONSE_TAG
 * @param     context         User-defined context, as provided in the call to *_SetStreamRequestCallback.
 * @return    An instance of DEVICE_STREAM_C2D_RESPONSE indicating if the stream request is accepted or rejected.
 */
-typedef DEVICE_STREAM_C2D_RESPONSE* (*DEVICE_STREAM_C2D_REQUEST_CALLBACK)(DEVICE_STREAM_C2D_REQUEST* request, void* context);
+typedef DEVICE_STREAM_C2D_RESPONSE* (*DEVICE_STREAM_C2D_REQUEST_CALLBACK)(const DEVICE_STREAM_C2D_REQUEST* request, void* context);
 
-MOCKABLE_FUNCTION(, DEVICE_STREAM_C2D_RESPONSE*, stream_c2d_response_create, DEVICE_STREAM_C2D_REQUEST*, request, bool, accept);
-MOCKABLE_FUNCTION(, DEVICE_STREAM_C2D_REQUEST*, stream_c2d_request_clone, DEVICE_STREAM_C2D_REQUEST*, request);
+MOCKABLE_FUNCTION(, DEVICE_STREAM_C2D_RESPONSE*, stream_c2d_response_create, const DEVICE_STREAM_C2D_REQUEST*, request, bool, accept);
+MOCKABLE_FUNCTION(, DEVICE_STREAM_C2D_REQUEST*, stream_c2d_request_clone, const DEVICE_STREAM_C2D_REQUEST*, request);
 MOCKABLE_FUNCTION(, void, stream_c2d_response_destroy, DEVICE_STREAM_C2D_RESPONSE*, response);
 MOCKABLE_FUNCTION(, void, stream_c2d_request_destroy, DEVICE_STREAM_C2D_REQUEST*, request);
 

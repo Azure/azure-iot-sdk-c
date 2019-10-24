@@ -449,9 +449,9 @@ static IOTHUB_CLIENT_RESULT my_IoTHubClientCore_LL_SetStreamRequestCallback(IOTH
 }
 
 static DEVICE_STREAM_C2D_RESPONSE* on_stream_request_received_result;
-static DEVICE_STREAM_C2D_REQUEST* on_stream_request_received_saved_request;
+static const DEVICE_STREAM_C2D_REQUEST* on_stream_request_received_saved_request;
 static void* on_stream_request_received_saved_context;
-static DEVICE_STREAM_C2D_RESPONSE* on_stream_request_received(DEVICE_STREAM_C2D_REQUEST* request, void* context)
+static DEVICE_STREAM_C2D_RESPONSE* on_stream_request_received(const DEVICE_STREAM_C2D_REQUEST* request, void* context)
 {
     on_stream_request_received_saved_request = request;
     on_stream_request_received_saved_context = context;

@@ -53,7 +53,7 @@ void stream_c2d_request_destroy(DEVICE_STREAM_C2D_REQUEST* request)
 }
 
 
-DEVICE_STREAM_C2D_REQUEST* stream_c2d_request_clone(DEVICE_STREAM_C2D_REQUEST* request)
+DEVICE_STREAM_C2D_REQUEST* stream_c2d_request_clone(const DEVICE_STREAM_C2D_REQUEST* request)
 {
     DEVICE_STREAM_C2D_REQUEST* result;
 
@@ -110,7 +110,7 @@ DEVICE_STREAM_C2D_REQUEST* stream_c2d_request_clone(DEVICE_STREAM_C2D_REQUEST* r
     return result;
 }
 
-DEVICE_STREAM_C2D_RESPONSE* stream_c2d_response_create(DEVICE_STREAM_C2D_REQUEST* request, bool accept)
+DEVICE_STREAM_C2D_RESPONSE* stream_c2d_response_create(const DEVICE_STREAM_C2D_REQUEST* request, bool accept)
 {
     DEVICE_STREAM_C2D_RESPONSE* result;
 
