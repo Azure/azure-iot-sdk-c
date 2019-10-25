@@ -151,7 +151,7 @@ EXPORTS
     TRANSPORT_TYPEStrings
     DEVICE_TWIN_UPDATE_STATEStrings
 
-    stream_c2d_response_create
-    stream_c2d_request_clone
-    stream_c2d_response_destroy
-    stream_c2d_request_destroy
+    IoTHubClient_StreamC2DResponseCreate
+    IoTHubClient_StreamC2DRequestClone
+    IoTHubClient_StreamC2DResponseDestroy
+    IoTHubClient_StreamC2DRequestDestroy

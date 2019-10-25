@@ -778,12 +778,12 @@ static void dispatch_user_callbacks(IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientIns
                         LogError("Failed sending stream response");
                     }
 
-                    stream_c2d_response_destroy(response);
+                    IoTHubClient_StreamC2DResponseDestroy(response);
                 }
 
                 if (queued_cb->iothub_callback.dev_stream_cb_info.request)
                 {
-                    stream_c2d_request_destroy(queued_cb->iothub_callback.dev_stream_cb_info.request);
+                    IoTHubClient_StreamC2DRequestDestroy(queued_cb->iothub_callback.dev_stream_cb_info.request);
                 }
                 break;
             }
@@ -1307,7 +1307,7 @@ void IoTHubClientCore_Destroy(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle)
                 {
                     if (queue_cb_info->iothub_callback.dev_stream_cb_info.request != NULL)
                     {
-                        stream_c2d_request_destroy(queue_cb_info->iothub_callback.dev_stream_cb_info.request);
+                        IoTHubClient_StreamC2DRequestDestroy(queue_cb_info->iothub_callback.dev_stream_cb_info.request);
                     }
                 }
             }
@@ -2696,7 +2696,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_GenericMethodInvoke(IOTHUB_CLIENT_CORE_HAN
 }
 #endif /* USE_EDGE_MODULES */
 
-static DEVICE_STREAM_C2D_RESPONSE* iothub_ll_device_stream_request_callback(DEVICE_STREAM_C2D_REQUEST* request, void* context)
+static DEVICE_STREAM_C2D_RESPONSE* iothub_ll_device_stream_request_callback(const DEVICE_STREAM_C2D_REQUEST* request, void* context)
 {
     DEVICE_STREAM_C2D_RESPONSE* result;
 
@@ -2704,7 +2704,7 @@ static DEVICE_STREAM_C2D_RESPONSE* iothub_ll_device_stream_request_callback(DEVI
     if (context == NULL || request == NULL)
     {
         LogError("Invalid argument (context=%p, request=%p)", context, request);
-        result = request != NULL ? stream_c2d_response_create(request, false) : NULL;
+        result = request != NULL ? IoTHubClient_StreamC2DResponseCreate(request, false) : NULL;
     }
     else
     {
@@ -2714,20 +2714,20 @@ static DEVICE_STREAM_C2D_RESPONSE* iothub_ll_device_stream_request_callback(DEVI
         USER_CALLBACK_INFO queue_cb_info;
         queue_cb_info.type = CALLBACK_TYPE_DEVICE_STREAM;
         queue_cb_info.userContextCallback = queue_context->userContextCallback;
-        queue_cb_info.iothub_callback.dev_stream_cb_info.request = stream_c2d_request_clone(request);
+        queue_cb_info.iothub_callback.dev_stream_cb_info.request = IoTHubClient_StreamC2DRequestClone(request);
 
         if (queue_cb_info.iothub_callback.dev_stream_cb_info.request == NULL)
         {
             // Codes_SRS_IOTHUBCLIENT_09_019: [ If the stream request fails to be added to the callback list, the function shall fail and return a response rejecting the stream request. ]
             LogError("Failed to clone the device stream request");
-            result = stream_c2d_response_create(request, false);
+            result = IoTHubClient_StreamC2DResponseCreate(request, false);
         }
         else if (VECTOR_push_back(queue_context->iotHubClientHandle->saved_user_callback_list, &queue_cb_info, 1) != 0)
         {
             // Codes_SRS_IOTHUBCLIENT_09_019: [ If the stream request fails to be added to the callback list, the function shall fail and return a response rejecting the stream request. ]
             LogError("Failed to push the device stream callback into the vector");
-            result = stream_c2d_response_create(request, false);
-            stream_c2d_request_destroy(queue_cb_info.iothub_callback.dev_stream_cb_info.request);
+            result = IoTHubClient_StreamC2DResponseCreate(request, false);
+            IoTHubClient_StreamC2DRequestDestroy(queue_cb_info.iothub_callback.dev_stream_cb_info.request);
         }
         else
         {

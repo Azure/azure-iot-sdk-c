@@ -693,7 +693,7 @@ static bool destroy_expected_streaming_request_in_list(const void* item, const v
 static bool destroy_device_streaming_requests_in_list(const void* item, const void* match_context, bool* continue_processing)
 {
     (void)match_context;
-    stream_c2d_request_destroy((DEVICE_STREAM_C2D_REQUEST*)item);
+    IoTHubClient_StreamC2DRequestDestroy((DEVICE_STREAM_C2D_REQUEST*)item);
     *continue_processing = true;
     return true;
 }
@@ -715,7 +715,7 @@ static bool find_expected_request_by_name(LIST_ITEM_HANDLE list_item, const void
     return (target_name != NULL && expDSReq != NULL && (strcmp(expDSReq->streamName, target_name) == 0));
 }
 
-static DEVICE_STREAM_C2D_RESPONSE* on_device_streaming_request_received(DEVICE_STREAM_C2D_REQUEST* request, void* context)
+static DEVICE_STREAM_C2D_RESPONSE* on_device_streaming_request_received(const DEVICE_STREAM_C2D_REQUEST* request, void* context)
 {
     DEVICE_STREAM_C2D_RESPONSE* response;
     DEVICE_STREAMING_TEST_CONTEXT* dsTestCtx = (DEVICE_STREAMING_TEST_CONTEXT*)context;
@@ -741,10 +741,10 @@ static DEVICE_STREAM_C2D_RESPONSE* on_device_streaming_request_received(DEVICE_S
         shouldAccept = false;
     }
 
-    copy_of_request = stream_c2d_request_clone(request);
+    copy_of_request = IoTHubClient_StreamC2DRequestClone(request);
     ASSERT_IS_NOT_NULL(copy_of_request, "Failed cloning request");
 
-    response = stream_c2d_response_create(request, shouldAccept);
+    response = IoTHubClient_StreamC2DResponseCreate(request, shouldAccept);
     ASSERT_IS_NOT_NULL(response, "Failed creating device streaming response");
 
     ASSERT_IS_NOT_NULL(singlylinkedlist_add(dsTestCtx->requestsReceived, copy_of_request));

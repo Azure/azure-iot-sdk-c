@@ -1861,7 +1861,7 @@ static DEVICE_STREAM_C2D_REQUEST* parse_stream_c2d_request(MQTT_MESSAGE_HANDLE m
             &result->authorization_token) != 0)
         {
             LogError("Failed parsing the MQTT message into a stream request");
-            stream_c2d_request_destroy(result);
+            IoTHubClient_StreamC2DRequestDestroy(result);
             result = NULL;
         }
     }
@@ -2011,10 +2011,10 @@ static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE msgHandle, void* call
                                 LogError("Failed sending response for Stream request");
                             }
 
-                            stream_c2d_response_destroy(response);
+                            IoTHubClient_StreamC2DResponseDestroy(response);
                         }
 
-                        stream_c2d_request_destroy(request);
+                        IoTHubClient_StreamC2DRequestDestroy(request);
                     }
                 }
             }
