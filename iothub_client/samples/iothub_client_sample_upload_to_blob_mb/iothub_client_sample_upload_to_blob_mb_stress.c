@@ -29,7 +29,7 @@ and removing calls to _DoWork will yield the same results. */
 #define ITERATIONS    1
 #define MAX_BLOCK_SIZE_BYTES    4194304
 
-/*Optional string with http proxy host and integer for http proxy port. (Both Win and Lin when uhttp is used.)*/
+/*Optional string with http proxy host and integer for http proxy port.*/
 static const char* proxyHost = NULL;
 static int proxyPort = 0;
 
