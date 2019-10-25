@@ -58,7 +58,7 @@ static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT getDataCallback(IOTHUB_CLIENT_F
                 *data = (const unsigned char*)data_to_upload;
                 *size = block_size;
                 blocks_sent++;
-                (void)printf(".");
+                (void)printf("."); fflush(stdout);
             }
             else
             {
