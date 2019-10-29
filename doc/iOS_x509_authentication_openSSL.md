@@ -2,7 +2,7 @@
 
 Follow these instructions to enable x509 authentication on iOS using OpenSSL. 
 
-Big thanks to user alain-noa who provided these in github isue (#1247)[https://github.com/Azure/azure-iot-sdk-c/issues/1247].
+Big thanks to user alain-noa who provided these in github isue [#1247](https://github.com/Azure/azure-iot-sdk-c/issues/1247).
 
 ## 1. Import OpenSSL library and cURL library to iOS project
 
@@ -50,4 +50,4 @@ openssl
 - After step 2, you will get all C SDK libraries you need in /cmake folder in your C SDK project. However,  the headers and static libraries are scattered in different paths, you have to link them to your iOS project.
 - You can refer to C SDK sample project to check all the header search path, for example, open `azure_iot_sdks.xcodeproj`, go to **Build Settings** > **Search Paths** of any target for sample (like iothub_II_Client_x509_sample), you can see the search path for each library.
   
-You can refer to GitHub issue (#1260)[https://github.com/Azure/azure-iot-sdk-c/issues/1260] if there are any build problems.
+You can refer to GitHub issue [#1260](https://github.com/Azure/azure-iot-sdk-c/issues/1260) if there are any build problems.
