@@ -3327,34 +3327,5 @@ TEST_FUNCTION(DT_InterfaceClient_ProcessReportedPropertiesUpdateCallback_fail)
     umock_c_negative_tests_deinit();
 }
 
-//
-// DT_InterfaceClient_GetSdkInformation
-//
-static void set_expected_calls_for_DT_InterfaceClient_GetSdkInformation()
-{
-    STRICT_EXPECTED_CALL(DigitalTwin_Client_GetVersionString()).CallCannotFail();
-}
-
-TEST_FUNCTION(DT_InterfaceClient_GetSdkInformation_ok)
-{
-    //arrange
-    DIGITALTWIN_CLIENT_RESULT result;
-    STRING_HANDLE sdkInfo;
-
-    set_expected_calls_for_DT_InterfaceClient_GetSdkInformation();
-
-    //act
-    result = DT_InterfaceClient_GetSdkInformation(&sdkInfo);
-
-    //assert
-    ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    ASSERT_IS_NOT_NULL(sdkInfo);
-    ASSERT_ARE_EQUAL(char_ptr, dtTestExpectedSdkInfo, STRING_c_str(sdkInfo));
-
-    //cleanup
-    STRING_delete(sdkInfo);
-}
-
 END_TEST_SUITE(dt_interface_client_ut)
 

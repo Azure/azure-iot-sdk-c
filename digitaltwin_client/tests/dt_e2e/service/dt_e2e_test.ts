@@ -286,16 +286,6 @@ function updateProperties(done) {
 }
 
 //
-// verifySdkInfoPropertiesSet makes sure that the SDKInformation interface has been correctly filled out by the client
-//
-function verifySdkInfoPropertiesSet(interfaceInfo) {
-    assert.equal(interfaceInfo.interfaces.urn_azureiot_Client_SDKInformation.properties.vendor.reported.value, "Microsoft")
-    assert.equal(interfaceInfo.interfaces.urn_azureiot_Client_SDKInformation.properties.language.reported.value, "C")
-    assert.notEqual(interfaceInfo.interfaces.urn_azureiot_Client_SDKInformation.properties.version.reported.value, null)
-    // We don't currently check version field, as this can change over time.
-}
-
-//
 // veryAllInterfacesAreRegistered makes sure that the e2e test interfaces were successfully registered.  These are stored
 // in properties of the modelDiscovery interface
 //
@@ -315,9 +305,7 @@ function veryAllInterfacesAreRegistered(done) {
             assert.equal(interfaces.testCommands, testCommandInterfaceId)
             assert.equal(interfaces.testProperties, testPropertyInterfaceId)
             assert.equal(interfaces.testTelemetry, testTelemetryInterfaceID)
-            assert.equal(interfaces.urn_azureiot_Client_SDKInformation, sdkInformationInterfaceId)
             assert.equal(interfaces.urn_azureiot_ModelDiscovery_ModelInformation, modelDiscoveryInterfaceId)
-            verifySdkInfoPropertiesSet(interfaceInfo)
             done()
         }
     })

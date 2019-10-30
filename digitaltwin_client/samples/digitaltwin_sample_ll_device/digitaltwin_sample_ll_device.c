@@ -48,6 +48,7 @@
 // Headers that implement the sample interfaces that this sample device registers
 //
 #include <../digitaltwin_sample_device_info/digitaltwin_sample_device_info.h>
+#include <../digitaltwin_sample_sdk_info/digitaltwin_sample_sdk_info.h>
 #include <../digitaltwin_sample_environmental_sensor/digitaltwin_sample_environmental_sensor.h>
 #include <../digitaltwin_sample_model_definition/digitaltwin_sample_model_definition.h>
 
@@ -109,13 +110,14 @@ static const char ConfigValue_DPSSX509[] = "DPS_X509";
 
 // Number of DigitalTwin Interfaces that this DigitalTwin device supports.
 #ifdef ENABLE_MODEL_DEFINITION_INTERFACE
-#define DIGITALTWIN_SAMPLE_DEVICE_NUM_INTERFACES 3
+#define DIGITALTWIN_SAMPLE_DEVICE_NUM_INTERFACES 4
 #else
-#define DIGITALTWIN_SAMPLE_DEVICE_NUM_INTERFACES 2
+#define DIGITALTWIN_SAMPLE_DEVICE_NUM_INTERFACES 3
 #endif
 #define DIGITALTWIN_SAMPLE_DEVICE_INFO_INDEX 0
-#define DIGITALTWIN_SAMPLE_ENVIRONMENTAL_SENSOR_INDEX 1
-#define DIGITALTWIN_SAMPLE_MODEL_DEFINITION_INDEX 2
+#define DIGITALTWIN_SAMPLE_SDK_INFO_INDEX 1
+#define DIGITALTWIN_SAMPLE_ENVIRONMENTAL_SENSOR_INDEX 2
+#define DIGITALTWIN_SAMPLE_MODEL_DEFINITION_INDEX 3
 
 // Amount to sleep between querying state from the register interface loop
 static const int digitalTwinSampleDevice_ll_registerInterfacePollSleep = 100;
@@ -533,6 +535,11 @@ int main(int argc, char *argv[])
     {
         LogError("DigitalTwinSampleDeviceInfo_CreateInterface failed");
     }
+    // Invoke to the SdkInfo interface - implemented in a separate library - to create DIGITALTWIN_INTERFACE_CLIENT_HANDLE.
+    else if ((interfaceClientHandles[DIGITALTWIN_SAMPLE_SDK_INFO_INDEX] = DigitalTwinSampleSdkInfo_CreateInterface()) == NULL)
+    {
+        LogError("DigitalTwinSampleSdkInfo_CreateInterface failed");
+    }
     // Invoke to create Environmental Sensor interface - implemented in a separate library - to create DIGITALTWIN_INTERFACE_CLIENT_HANDLE.
     else if ((interfaceClientHandles[DIGITALTWIN_SAMPLE_ENVIRONMENTAL_SENSOR_INDEX] = DigitalTwinSampleEnvironmentalSensor_CreateInterface()) == NULL)
     {
@@ -590,6 +597,11 @@ int main(int argc, char *argv[])
     if (interfaceClientHandles[DIGITALTWIN_SAMPLE_DEVICE_INFO_INDEX] != NULL)
     {
         DigitalTwinSampleDeviceInfo_Close(interfaceClientHandles[DIGITALTWIN_SAMPLE_DEVICE_INFO_INDEX]);
+    }
+
+    if (interfaceClientHandles[DIGITALTWIN_SAMPLE_SDK_INFO_INDEX] != NULL)
+    {
+        DigitalTwinSampleSdkInfo_Close(interfaceClientHandles[DIGITALTWIN_SAMPLE_SDK_INFO_INDEX]);
     }
 
 #ifdef ENABLE_MODEL_DEFINITION_INTERFACE

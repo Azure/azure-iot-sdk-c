@@ -51,20 +51,6 @@ static const char DT_PropertyWithResponseSchema[] =  "{\""  DT_INTERFACE_PREFIX 
 static const char DT_PropertyWithoutResponseSchema[] = "{\""  DT_INTERFACE_PREFIX "%s\": { \"%s\": { \"value\": %.*s } } }";
 static const char DT_AsyncResultSchema[] = "asyncResult";
 
-#define DT_SDK_INFORMATION_LANGUAGE_PROPERTY "\"language\":"
-#define DT_SDK_INFORMATION_VERSION_PROPERTY "\"version\":"
-#define DT_SDK_INFORMATION_VENDOR_PROPERTY "\"vendor\":"
-#define DT_JSON_VALUE_STRING_BLOCK "{ \"value\":\"%s\"}"
-
-static const char DT_SdkLanguage[] = "C";
-static const char DT_SdkVendor[] = "Microsoft";
-  
-static const char DT_SdkInfoSchema[] = "{\"" DT_INTERFACE_PREFIX DT_SDK_INFORMATION_INTERFACE_NAME "\": "
-                                            " { " DT_SDK_INFORMATION_LANGUAGE_PROPERTY DT_JSON_VALUE_STRING_BLOCK ","
-                                                  DT_SDK_INFORMATION_VERSION_PROPERTY DT_JSON_VALUE_STRING_BLOCK ","
-                                                  DT_SDK_INFORMATION_VENDOR_PROPERTY DT_JSON_VALUE_STRING_BLOCK "}"
-                                       "}";
-
 #define DT_MAX_STATUS_CODE_STRINGLEN    16
 
 #define DT_INTERFACE_STATE_VALUES                   \
@@ -1775,24 +1761,6 @@ DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_ProcessReportedPropertiesUpdateCall
         }
 
         free(dtReportedPropertyCallback);
-    }
-
-    return result;
-}
-
-// Dt_InterfaceClient_GetSdkInfo returns a STRING_HANDLE containing properly formatted JSON containing the properties for this interface
-DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_GetSdkInformation(STRING_HANDLE* sdkInfoHandle)
-{
-    DIGITALTWIN_CLIENT_RESULT result;
-
-    if ((*sdkInfoHandle = STRING_construct_sprintf(DT_SdkInfoSchema, DT_SdkLanguage, DigitalTwin_Client_GetVersionString(), DT_SdkVendor)) == NULL)
-    {
-        LogError("STRING_construct_sprintf trying to create sdkInfo value");
-        result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
-    }
-    else
-    {
-        result = DIGITALTWIN_CLIENT_OK;
     }
 
     return result;

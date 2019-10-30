@@ -21,8 +21,6 @@ static const char* DT_MODEL_DISCOVERY_INTERFACE_ID = "urn:azureiot:ModelDiscover
 static const char* DT_MODEL_DISCOVERY_INTERFACE_NAME = "urn_azureiot_ModelDiscovery_ModelInformation";
 static const char* DT_CAPABILITY_REPORT_INTERFACE_TELEMETRY_TYPE = "modelInformation";
 
-static const char* DT_SDK_INFORMATION_INTERFACE_ID = "urn:azureiot:Client:SDKInformation:1";
-
 // DT_INTERFACE_LIST represents the list of currently registered interfaces.  It also
 // tracks the interfaces as registered by the server.
 typedef struct DT_INTERFACE_LIST_TAG
@@ -310,12 +308,6 @@ static DIGITALTWIN_CLIENT_RESULT CreateDTInterfacesJson(DT_INTERFACE_LIST* dtInt
     // The modelInformation interface is implemented by the DigitalTwin SDK itself
     // (it must be since it's what's used for interface registration).  Add it here.
     else if (json_object_set_string(interfacesObject, DT_MODEL_DISCOVERY_INTERFACE_NAME, DT_MODEL_DISCOVERY_INTERFACE_ID) != JSONSuccess)
-    {
-        LogError("json_object_set_string failed");
-        result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
-    }
-    // The SDKInformation interface is also implemented directly by the DigitalTwin SDK.
-    else if (json_object_set_string(interfacesObject, DT_SDK_INFORMATION_INTERFACE_NAME, DT_SDK_INFORMATION_INTERFACE_ID) != JSONSuccess)
     {
         LogError("json_object_set_string failed");
         result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
