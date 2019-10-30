@@ -3,8 +3,6 @@
 
 #this is CMakeLists.txt for iothub_client_sample_upload_to_blob_mb
 
-option(use_upload_to_blob_stress "set use_upload_to_blob_stress to run a blob stress test." OFF)
-
 compileAsC99()
 
 if(NOT ${use_http})

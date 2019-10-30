@@ -291,7 +291,9 @@ static HTTP_CLIENT_HANDLE create_http_client(const char* hostname, BLOB_CONTEXT_
     }
     else
     {
+#ifdef USE_UHTTP_UPLOAD_LOGGING
         uhttp_client_set_trace(result, true, true);
+#endif //  USE_UHTTP_UPLOAD_LOGGING
     }
     return result;
 }
@@ -404,6 +406,10 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* sas_uri, const char*
                     // storage
                     if (uploadOneMoreBlock != 0)
                     {
+                        // Reset the blob_data structure state.
+                        blob_data.http_error = 0;
+                        blob_data.http_resp_recv = 0;
+                        blob_data.status_code = 0;
                         ThreadAPI_Sleep(20);
                     }
                 }

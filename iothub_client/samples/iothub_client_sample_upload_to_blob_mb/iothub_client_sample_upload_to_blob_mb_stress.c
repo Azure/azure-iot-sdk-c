@@ -29,9 +29,13 @@ and removing calls to _DoWork will yield the same results. */
 #define ITERATIONS    1
 #define MAX_BLOCK_SIZE_BYTES    4194304
 
-/*Optional string with http proxy host and integer for http proxy port (Linux only)         */
+/*Optional string with http proxy host and integer for http proxy port.*/
 static const char* proxyHost = NULL;
 static int proxyPort = 0;
+
+// Enables verbose logging for IoT Hub communications. 
+// Use CMake flag -Duse_uhttp_upload_logging=ON to enable BLOB verbose logging.
+static int enableVerboseLogging = 0;
 
 static char data_to_upload[MAX_BLOCK_SIZE_BYTES] = { 0 };
 static int blocks_sent = 0;
@@ -54,6 +58,7 @@ static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT getDataCallback(IOTHUB_CLIENT_F
                 *data = (const unsigned char*)data_to_upload;
                 *size = block_size;
                 blocks_sent++;
+                (void)printf("."); fflush(stdout);
             }
             else
             {
@@ -63,7 +68,7 @@ static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT getDataCallback(IOTHUB_CLIENT_F
                 *data = NULL;
                 *size = 0;
 
-                (void)printf("Indicating upload is complete (%d blocks uploaded)\r\n", blocks_sent);
+                (void)printf("\nIndicating upload is complete (%d blocks uploaded)\r\n", blocks_sent);
             }
         }
         else
@@ -71,12 +76,12 @@ static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT getDataCallback(IOTHUB_CLIENT_F
             // The last call to this callback is to indicate the result of uploading the previous data block provided.
             // Note: In this last call, data and size pointers are NULL.
 
-            (void)printf("Last call to getDataCallback (result for %dth block uploaded: %s)\r\n", blocks_sent, MU_ENUM_TO_STRING(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, result));
+            (void)printf("\nLast call to getDataCallback (result for %dth block uploaded: %s)\r\n", blocks_sent, MU_ENUM_TO_STRING(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, result));
         }
     }
     else
     {
-        (void)printf("Received unexpected result %s\r\n", MU_ENUM_TO_STRING(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, result));
+        (void)printf("\nReceived unexpected result %s\r\n", MU_ENUM_TO_STRING(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, result));
     }
 
     // This callback returns IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK to indicate that the upload shall continue.
@@ -130,7 +135,7 @@ int upload_test_file(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, const ch
 {
     int failed = 0;
 
-    (void)printf("BLOB UPLOAD: [%s] block_size=[%d] block_count=[%d]\n---\n\n", fileName, blockSize, blockCount);
+    (void)printf("--- BLOB UPLOAD STARTED: [%s] block_size=[%d] block_count=[%d]\n", fileName, blockSize, blockCount);
 
     if (blockSize > MAX_BLOCK_SIZE_BYTES)
     {
@@ -164,6 +169,8 @@ int upload_test_file(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, const ch
             }
         }
     }
+
+    (void)printf("--- BLOB UPLOAD %s: [%s] \n", failed ? "FAILED": "SUCCESS", fileName);
     return failed;
 }
 
@@ -202,9 +209,14 @@ int main(int argc, char* argv[])
         {
             (void)printf("failure to set proxy\n");
         }
+        else if (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_CURL_VERBOSE, &enableVerboseLogging) != IOTHUB_CLIENT_OK)
+        {
+            (void)printf("failure to enable logging\n");
+        }
         else
         {
             upload_test_file(device_ll_handle, "blob1x1.bin", 1, 1);
+            upload_test_file(device_ll_handle, "blob10x10.bin", 10, 10);
             upload_test_file(device_ll_handle, "blob123x1.bin", 123, 1);
             upload_test_file(device_ll_handle, "blob1x123.bin", 1, 123);
             upload_test_file(device_ll_handle, "blob100x2000.bin", 100, 2000);

@@ -254,7 +254,7 @@ static HTTP_CLIENT_HANDLE create_http_client(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDL
         uhttp_client_destroy(result);
         result = NULL;
     }
-    else if (upload_data->curl_verbosity_level != UPOADTOBLOB_CURL_VERBOSITY_UNSET && uhttp_client_set_trace(result, true, true) != HTTP_CLIENT_OK)
+    else if (upload_data->curl_verbosity_level == UPOADTOBLOB_CURL_VERBOSITY_ON && uhttp_client_set_trace(result, true, true) != HTTP_CLIENT_OK)
     {
         LogError("Failed setting trace");
         uhttp_client_destroy(result);
@@ -568,12 +568,6 @@ static int IoTHubClient_LL_UploadToBlob_step3(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HAND
         result = MU_FAILURE;
         LogError("Failure constructing string");
     }
-    else if (uhttp_client_open(http_client, upload_data->hostname, DEFAULT_HTTPS_PORT, NULL, NULL) != HTTP_CLIENT_OK)
-    {
-        LogError("Failed opening http url %s", upload_data->hostname);
-        STRING_delete(relativePathNotification);
-        result = BLOB_HTTP_ERROR;
-    }
     else
     {
         /*Codes_SRS_IOTHUBCLIENT_LL_02_086: [ If performing the HTTP request fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
@@ -723,6 +717,9 @@ static int initiate_blob_upload(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* uploa
                 STRING_HANDLE hub_content;
 
                 close_http_client(http_client);
+                uhttp_client_destroy(http_client);
+
+                http_client = NULL;
 
                 if ((hub_response = BUFFER_new() ) == NULL)
                 {
@@ -740,7 +737,13 @@ static int initiate_blob_upload(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* uploa
 
                         if ((hub_content = STRING_construct(FILE_UPLOAD_ABORTED_BODY)) != NULL)
                         {
-                            if (IoTHubClient_LL_UploadToBlob_step3(upload_data, STRING_c_str(correlation_id), http_client, request_header, hub_content) != 0)
+                            if ((http_client = create_http_client(upload_data)) == NULL)
+                            {
+                                // Codes_SRS_IOTHUBCLIENT_LL_02_065: [ If creating the HTTPAPIEX_HANDLE fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]
+                                LogError("unable to HTTPAPIEX_Create");
+                                result = IOTHUB_CLIENT_ERROR;
+                            }
+                            else if (IoTHubClient_LL_UploadToBlob_step3(upload_data, STRING_c_str(correlation_id), http_client, request_header, hub_content) != 0)
                             {
                                 LogError("IoTHubClient_LL_UploadToBlob_step3 failed");
                                 result = IOTHUB_CLIENT_ERROR;
@@ -768,7 +771,13 @@ static int initiate_blob_upload(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* uploa
                         // Codes_SRS_IOTHUBCLIENT_LL_02_091: [ If step 2 fails without establishing an HTTP dialogue, then the HTTP message body shall look like: ]
                         if ((content_data = STRING_construct(FILE_UPLOAD_FAILED_BODY)) != NULL)
                         {
-                            if (IoTHubClient_LL_UploadToBlob_step3(upload_data, STRING_c_str(correlation_id), http_client, request_header, content_data) != 0)
+                            if ((http_client = create_http_client(upload_data)) == NULL)
+                            {
+                                // Codes_SRS_IOTHUBCLIENT_LL_02_065: [ If creating the HTTPAPIEX_HANDLE fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]
+                                LogError("unable to HTTPAPIEX_Create");
+                                result = IOTHUB_CLIENT_ERROR;
+                            }
+                            else if (IoTHubClient_LL_UploadToBlob_step3(upload_data, STRING_c_str(correlation_id), http_client, request_header, content_data) != 0)
                             {
                                 LogError("IoTHubClient_LL_UploadToBlob_step3 failed");
                             }
@@ -798,9 +807,13 @@ static int initiate_blob_upload(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* uploa
                         }
                         else
                         {
-                            // do again snprintf
-
-                            if (IoTHubClient_LL_UploadToBlob_step3(upload_data, STRING_c_str(correlation_id), http_client, request_header, req_string) != 0)
+                            if ((http_client = create_http_client(upload_data)) == NULL)
+                            {
+                                // Codes_SRS_IOTHUBCLIENT_LL_02_065: [ If creating the HTTPAPIEX_HANDLE fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]
+                                LogError("unable to HTTPAPIEX_Create");
+                                result = IOTHUB_CLIENT_ERROR;
+                            }
+                            else if (IoTHubClient_LL_UploadToBlob_step3(upload_data, STRING_c_str(correlation_id), http_client, request_header, req_string) != 0)
                             {
                                 LogError("IoTHubClient_LL_UploadToBlob_step3 failed");
                                 result = IOTHUB_CLIENT_ERROR;
@@ -947,14 +960,14 @@ IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE IoTHubClient_LL_UploadToBlob_Create(const I
             }
             else if ((upload_data->tick_counter = tickcounter_create()) == NULL)
             {
-                LogError("Failed retrieving device ID");
+                LogError("Failed creating tick counter");
                 free(upload_data->hostname);
                 free(upload_data);
                 upload_data = NULL;
             }
             else if ((upload_data->response_data = BUFFER_new()) == NULL)
             {
-                LogError("Failed retrieving device ID");
+                LogError("Failed creating response_data buffer");
                 tickcounter_destroy(upload_data->tick_counter);
                 free(upload_data->hostname);
                 free(upload_data);

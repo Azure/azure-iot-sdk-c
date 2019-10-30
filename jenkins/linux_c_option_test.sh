@@ -46,6 +46,8 @@ make --jobs=$MAKE_CORES
 custom_hsm_lib=$hsm_folder"/libcustom_hsm_example.a"
 
 declare -a arr=(
+    "-Dno_logging=OFF -Duse_uhttp_upload_logging=ON -Duse_upload_to_blob_stress=ON"
+    "-Dno_logging=ON -Duse_uhttp_upload_logging=ON -Duse_upload_to_blob_stress=ON"
     "-Duse_http=OFF"
     "-Duse_amqp=OFF -Duse_http=OFF -Dno_logging=OFF -Ddont_use_uploadtoblob=ON"
     "-Duse_prov_client=ON -Dbuild_provisioning_service_client=OFF"
@@ -63,8 +65,9 @@ do
     rm -r -f $build_folder
     mkdir -p $build_folder
     pushd $build_folder
-
-    echo "executing cmake/make with options <<$item>>"
+    echo
+    echo "--- Executing cmake/make with options <<$item>> ---"
+    echo
     cmake $build_root "$item"
 
     make --jobs=$MAKE_CORES
