@@ -2,7 +2,7 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 cmake_minimum_required(VERSION 2.8.11)
-#this is CMakeLists for digitaltwin_sample_model_definition
+#this is CMakeLists for digitaltwin_sample_sdk_info
 
 if(POLICY CMP0042)
     cmake_policy(SET CMP0042 NEW)
@@ -10,20 +10,18 @@ endif()
 
 compileAsC99()
 
-set(digitaltwin_sample_model_definition_c_files
-    ./digitaltwin_sample_model_definition.c
+set(digitaltwin_sample_sdk_info_c_files
+    ./digitaltwin_sample_sdk_info.c
 )
 
-set(digitaltwin_sample_model_definition_h_files
-    ./digitaltwin_sample_model_definition.h
+set(digitaltwin_sample_sdk_info_h_files
+    ./digitaltwin_sample_sdk_info.h
 )
 
-set(DIGITALTWIN_SAMPLE_MODEL_DEFINITION_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR})
+set(DIGITALTWIN_SAMPLE_SDK_INFO_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR})
 
-include_directories(../deps/parson)
 include_directories(${AZURE_C_SHARED_UTILITY_INCLUDES})
 include_directories(${SHARED_UTIL_INC_FOLDER})
-include_directories(${IOTHUB_CLIENT_INC_FOLDER})
 include_directories(${DIGITALTWIN_CLIENT_INC_FOLDER})
 
 if(${memory_trace})
@@ -38,10 +36,10 @@ IF(WIN32)
 ENDIF(WIN32)
 
 
-add_library(digitaltwin_sample_model_definition
-    ${digitaltwin_sample_model_definition_c_files}
-    ${digitaltwin_sample_model_definition_h_files}
+add_library(digitaltwin_sample_sdk_info
+    ${digitaltwin_sample_sdk_info_c_files}
+    ${digitaltwin_sample_sdk_info_h_files}
 )
-setSdkTargetBuildProperties(digitaltwin_sample_model_definition)
+setSdkTargetBuildProperties(digitaltwin_sample_sdk_info)
 
-target_link_libraries(digitaltwin_sample_model_definition digitaltwin_client)
+target_link_libraries(digitaltwin_sample_sdk_info digitaltwin_client)

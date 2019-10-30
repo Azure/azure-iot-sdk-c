@@ -213,14 +213,6 @@ void impl_testDigitalTwin_InterfaceList_Destroy(DIGITALTWIN_INTERFACE_LIST_HANDL
     my_gballoc_free((void*)dtInterfaceListHandle);
 }
 
-// Need to stub out this function so it returns an actual STRING_HANDLE for product code to manipulate
-DIGITALTWIN_CLIENT_RESULT impl_testDT_InterfaceClient_GetSdkInformation(STRING_HANDLE* sdkInfo)
-{
-    *sdkInfo = real_STRING_construct(dtTestSdkInformation);
-    ASSERT_IS_NOT_NULL(*sdkInfo);
-    return DIGITALTWIN_CLIENT_OK;
-}
-
 
 // impl_DTClientExecuteCallback is invoked when a mocked DigitalTwin command is invoked.  Add extra verification here that we get expected data and return data for caller to verify, also.
 static void impl_DTClientExecuteCallback(const DIGITALTWIN_CLIENT_COMMAND_REQUEST* dtClientCommandRequest, DIGITALTWIN_CLIENT_COMMAND_RESPONSE* dtClientCommandResponse, void* userContextCallback)
@@ -391,8 +383,6 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(DigitalTwin_InterfaceList_Create, impl_testDigitalTwin_InterfaceList_Create);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(DigitalTwin_InterfaceList_Create, NULL);
     REGISTER_GLOBAL_MOCK_HOOK(DT_InterfaceList_Destroy, impl_testDigitalTwin_InterfaceList_Destroy);    
-
-    REGISTER_GLOBAL_MOCK_HOOK(DT_InterfaceClient_GetSdkInformation, impl_testDT_InterfaceClient_GetSdkInformation);
 
     REGISTER_GLOBAL_MOCK_RETURN(DT_InterfaceClient_CheckNameValid, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(DT_InterfaceClient_CheckNameValid, DIGITALTWIN_CLIENT_ERROR);
@@ -795,16 +785,6 @@ static void set_expected_calls_for_DT_ClientCore_process_twin()
     set_expected_calls_for_EndClientCoreCallbackProcessing();
 }
 
-// Sets expected behavior when sending the SDKInformation twin update.  Mark non-void
-// functions as CallCannotFail() because this is best effort only; SDK continues on if failures occur.
-static void set_expected_calls_for_SendSdkInformation()
-{
-    STRICT_EXPECTED_CALL(DT_InterfaceClient_GetSdkInformation(IGNORED_PTR_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(testBindingDTDeviceSendReportedState(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-}
-
 // Sets expected behavior for reported properties.
 static void set_expected_calls_for_properties_reported_callback()
 {
@@ -812,9 +792,6 @@ static void set_expected_calls_for_properties_reported_callback()
 
     STRICT_EXPECTED_CALL(testBindingDTDeviceSetMethodCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(testBindingDTDeviceSetTwinCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-
-    set_expected_calls_for_SendSdkInformation();
-
     STRICT_EXPECTED_CALL(DT_InterfaceList_RegistrationCompleteCallback(IGNORED_PTR_ARG, DIGITALTWIN_CLIENT_OK));
     STRICT_EXPECTED_CALL(testInterfaceRegisteredCallback(DIGITALTWIN_CLIENT_OK, testDTRegisterInterfacesAsyncContext));
 

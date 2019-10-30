@@ -28,7 +28,7 @@ set(digitaltwin_sample_device_info_h_files
     ./digitaltwin_sample_device_info.h
 )
 
-set(DIGITALTWIN_SAMPLE_DEVICE_INFO_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "this is what needs to be included if using digitaltwin_client lib" FORCE)
+set(DIGITALTWIN_SAMPLE_DEVICE_INFO_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR})
 
 include_directories(${AZURE_C_SHARED_UTILITY_INCLUDES})
 include_directories(${SHARED_UTIL_INC_FOLDER})
