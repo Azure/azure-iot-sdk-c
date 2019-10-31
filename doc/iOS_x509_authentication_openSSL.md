@@ -6,7 +6,14 @@ Big thanks to user alain-noa who provided these in github isue [#1247](https://g
 
 ## 1. Import OpenSSL library and cURL library to iOS project
 
-You can easily find their source code on github but it's not friendly to generate libraries for iOS. It's easiest to use the [pod library](https://github.com/krzyzanowskim/OpenSSL) for OpenSSL and [framework](https://github.com/Cogosense/iOSCurlFramework/releases) for cURL, just add the pod for OpenSSL and import the framework for cURL in the iOS project.
+You can easily find their source code on github but it's not friendly to generate libraries for iOS. Instead, use the [pod library](https://github.com/krzyzanowskim/OpenSSL) for OpenSSL and [framework](https://github.com/Cogosense/iOSCurlFramework/releases) for cURL. 
+
+In your iOS project:
+1. Add the pod for OpenSSL
+
+2. Import the framework for cURL
+
+3. Add `-lz` to **Other Linker Flags** in your project build settings, this will against the built-in zlib.
 
 > It's still recommended to build the libraries from source code if it is comfortable for you.
 
