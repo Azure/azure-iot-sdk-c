@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 /* This sample uses the _LL APIs of iothub_client for example purposes.
 That does not mean that HTTP only works with the _LL APIs.
@@ -41,11 +42,13 @@ static char data_to_upload[MAX_BLOCK_SIZE_BYTES] = { 0 };
 static int blocks_sent = 0;
 static int blocks_count = 0;
 static int block_size = 0;
+static time_t startTime = 0;
 static const char* file_name = NULL;
 
 static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT getDataCallback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
 {
     (void)context;
+    long bps = 0;
 
     if (result == FILE_UPLOAD_OK)
     {
@@ -55,10 +58,20 @@ static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT getDataCallback(IOTHUB_CLIENT_F
 
             if (blocks_sent < blocks_count)
             {
+                time_t currentTime;
+                time(&currentTime);
+                long timediff = difftime(currentTime, startTime);
+
+                if (blocks_sent > 0 && timediff > 0)
+                {
+                    bps = (((long long)block_size * blocks_sent * 8 ) / timediff);
+                }
+
                 *data = (const unsigned char*)data_to_upload;
                 *size = block_size;
                 blocks_sent++;
-                (void)printf("."); fflush(stdout);
+                (void)printf("\b\b\b\b\b\b\b\b\b\b\b\b.%8ld%s", bps > 1024 ? bps / 1024 : bps, bps > 1024 ? "Kbps" : " bps");
+                fflush(stdout);
             }
             else
             {
@@ -105,7 +118,7 @@ int write_local_file()
     int failed = 0;
 
     blocks_sent = 0;
-    
+
     if ((fp = fopen(file_name, "wb")) == NULL)
     {
         (void)printf("Failed to create local reference file.\n");
@@ -134,8 +147,9 @@ int write_local_file()
 int upload_test_file(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, const char* fileName, int blockSize, int blockCount)
 {
     int failed = 0;
+    time(&startTime);;
 
-    (void)printf("--- BLOB UPLOAD STARTED: [%s] block_size=[%d] block_count=[%d]\n", fileName, blockSize, blockCount);
+    (void)printf("--- BLOB UPLOAD STARTED: [%s] block_size=[%d] block_count=[%d]\n            ", fileName, blockSize, blockCount);
 
     if (blockSize > MAX_BLOCK_SIZE_BYTES)
     {
@@ -170,7 +184,9 @@ int upload_test_file(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, const ch
         }
     }
 
-    (void)printf("--- BLOB UPLOAD %s: [%s] \n", failed ? "FAILED": "SUCCESS", fileName);
+    time_t endTime;
+    time(&endTime);
+    (void)printf("--- BLOB UPLOAD %s: [%s] @ %ld sec\n", failed ? "FAILED" : "SUCCESS", fileName, (long)difftime(endTime, startTime));
     return failed;
 }
 
@@ -225,7 +241,9 @@ int main(int argc, char* argv[])
             upload_test_file(device_ll_handle, "blob4194303x1.bin", 4194303, 1);
             upload_test_file(device_ll_handle, "blob4194303x10.bin", 4000000, 10); 
             upload_test_file(device_ll_handle, "blob4194304x1.bin", 4194304, 1);
-            upload_test_file(device_ll_handle, "blob4194304x10.bin", 4194304, 10); 
+            upload_test_file(device_ll_handle, "blob4194304x10.bin", 4194304, 10);
+            upload_test_file(device_ll_handle, "blob1048576x100.bin", 1048576, 100);
+            upload_test_file(device_ll_handle, "blob4194304x25.bin", 4194304, 25);
         }
 
         // Clean up the iothub sdk handle
