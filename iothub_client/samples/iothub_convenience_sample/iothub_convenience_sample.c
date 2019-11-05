@@ -188,7 +188,7 @@ static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS result, I
 static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
     (void)userContextCallback;
-    // When a message is sent this callback will get envoked
+    // When a message is sent this callback will get invoked
     g_message_count_send_confirmations++;
     (void)printf("Confirmation callback received for message %lu with result %s\r\n", (unsigned long)g_message_count_send_confirmations, MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
 }
@@ -235,10 +235,24 @@ int main(void)
     device_handle = IoTHubDeviceClient_CreateFromConnectionString(connectionString, protocol);
     if (device_handle == NULL)
     {
-        (void)printf("Failure createing Iothub device.  Hint: Check you connection string.\r\n");
+        (void)printf("Failure creating Iothub device.  Hint: Check you connection string.\r\n");
     }
     else
     {
+        if (proxy_host)
+        {
+            HTTP_PROXY_OPTIONS http_proxy_options = { 0 };
+            http_proxy_options.host_address = proxy_host;
+            http_proxy_options.port = proxy_port;
+            http_proxy_options.username = proxy_username;
+            http_proxy_options.password = proxy_password;
+
+            if (IoTHubDeviceClient_SetOption(device_handle, OPTION_HTTP_PROXY, &http_proxy_options) != IOTHUB_CLIENT_OK)
+            {
+                (void)printf("failure to set proxy\n");
+            }
+        }		
+
         // Setting message callback to get C2D messages
         (void)IoTHubDeviceClient_SetMessageCallback(device_handle, receive_msg_callback, NULL);
         // Setting method callback to handle a SetTelemetryInterval method to control
@@ -247,7 +261,7 @@ int main(void)
         // Setting connection status callback to get indication of connection to iothub
         (void)IoTHubDeviceClient_SetConnectionStatusCallback(device_handle, connection_status_callback, NULL);
 
-        // Set any option that are neccessary.
+        // Set any option that are necessary.
         // For available options please see the iothub_sdk_options.md documentation
 
         // Setting Log Tracing. 
@@ -264,7 +278,6 @@ int main(void)
         tickcounter_ms_t ms_delay = 10;
         (void)IoTHubDeviceClient_SetOption(device_handle, OPTION_DO_WORK_FREQUENCY_IN_MS, &ms_delay);
 
-
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
         // Setting the Trusted Certificate.  This is only necessary on system with without
         // built in certificate stores.
@@ -278,20 +291,6 @@ int main(void)
         //bool urlEncodeOn = true;
         //(void)IoTHubDeviceClient_SetOption(device_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
 #endif
-
-        if (proxy_host)
-        {
-            HTTP_PROXY_OPTIONS http_proxy_options = { 0 };
-            http_proxy_options.host_address = proxy_host;
-            http_proxy_options.port = proxy_port;
-            http_proxy_options.username = proxy_username;
-            http_proxy_options.password = proxy_password;
-
-            if (IoTHubDeviceClient_SetOption(device_handle, OPTION_HTTP_PROXY, &http_proxy_options) != IOTHUB_CLIENT_OK)
-            {
-                (void)printf("failure to set proxy\n");
-            }
-        }		
 
         while(g_continueRunning)
         {

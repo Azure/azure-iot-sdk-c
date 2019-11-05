@@ -342,8 +342,8 @@ function generate_device_certificate()
     rm -f ./certs/new-device.key.pem
     rm -f ./certs/new-device-full-chain.cert.pem
     generate_leaf_certificate "${1}" "new-device" \
-                              ${intermediate_ca_dir} ${intermediate_ca_password} \
-                              ${openssl_intermediate_config_file}
+                              ${root_ca_dir} ${root_ca_password} \
+                              ${openssl_root_config_file}
 }
 
 ###############################################################################

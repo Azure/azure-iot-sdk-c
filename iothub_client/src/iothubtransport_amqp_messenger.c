@@ -16,12 +16,13 @@
 #include "internal/message_queue.h"
 #include "internal/iothub_client_retry_control.h"
 #include "internal/iothubtransport_amqp_messenger.h"
+#include "iothub_client_options.h"
 
-MU_DEFINE_ENUM_STRINGS(AMQP_MESSENGER_SEND_STATUS, AMQP_MESSENGER_SEND_STATUS_VALUES);
-MU_DEFINE_ENUM_STRINGS(AMQP_MESSENGER_SEND_RESULT, AMQP_MESSENGER_SEND_RESULT_VALUES);
-MU_DEFINE_ENUM_STRINGS(AMQP_MESSENGER_REASON, AMQP_MESSENGER_REASON_VALUES);
-MU_DEFINE_ENUM_STRINGS(AMQP_MESSENGER_DISPOSITION_RESULT, AMQP_MESSENGER_DISPOSITION_RESULT_VALUES);
-MU_DEFINE_ENUM_STRINGS(AMQP_MESSENGER_STATE, AMQP_MESSENGER_STATE_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(AMQP_MESSENGER_SEND_STATUS, AMQP_MESSENGER_SEND_STATUS_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(AMQP_MESSENGER_SEND_RESULT, AMQP_MESSENGER_SEND_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(AMQP_MESSENGER_REASON, AMQP_MESSENGER_REASON_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(AMQP_MESSENGER_DISPOSITION_RESULT, AMQP_MESSENGER_DISPOSITION_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(AMQP_MESSENGER_STATE, AMQP_MESSENGER_STATE_VALUES);
 
 
 #define RESULT_OK 0
@@ -1627,6 +1628,26 @@ int amqp_messenger_set_option(AMQP_MESSENGER_HANDLE messenger_handle, const char
             {
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_131: [If no errors occur, amqp_messenger_set_option shall return 0]
                 result = RESULT_OK;
+            }
+        }
+        else if(strcmp(OPTION_PRODUCT_INFO, name) == 0)
+        {
+            if (Map_AddOrUpdate(instance->config->send_link.attach_properties, CLIENT_VERSION_PROPERTY_NAME, value) == MAP_OK)
+            {
+                if (Map_AddOrUpdate(instance->config->receive_link.attach_properties, CLIENT_VERSION_PROPERTY_NAME, value) == MAP_OK)
+                {
+                    result = RESULT_OK;
+                }
+                else
+                {
+                    LogError("Failed setting option %s for receive link", CLIENT_VERSION_PROPERTY_NAME);
+                    result = MU_FAILURE;
+                }
+            }
+            else
+            {
+                LogError("Failed setting option %s for send link", CLIENT_VERSION_PROPERTY_NAME);
+                result = MU_FAILURE;
             }
         }
         else
