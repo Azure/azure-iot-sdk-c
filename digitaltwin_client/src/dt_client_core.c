@@ -893,10 +893,9 @@ DIGITALTWIN_CLIENT_RESULT DT_ClientCoreRegisterInterfacesAsync(DT_CLIENT_CORE_HA
     {
         LogError("DT_InterfaceList_BindInterfaces failed, result = %d", result);
     }
-    else if (SendInterfacesToRegisterMessage(dtClientCore, deviceCapabilityModel) != 0)
+    else if ((result = SendInterfacesToRegisterMessage(dtClientCore, deviceCapabilityModel)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("SendInterfacesToRegisterMessage failed");
-        result = DIGITALTWIN_CLIENT_ERROR;
     }
     else
     {
