@@ -350,11 +350,11 @@ static DIGITALTWIN_CLIENT_RESULT CreateDTInterfacesJson(DT_INTERFACE_LIST* dtInt
 
         if (i == dtInterfaceList->numDtInterfaceClientHandles)
         {
-            result = 0;
+            result = DIGITALTWIN_CLIENT_OK;
         }
     }
 
-    if (result != 0)
+    if (result != DIGITALTWIN_CLIENT_OK)
     {
         if (interfacesObject != NULL)
         {
