@@ -57,6 +57,9 @@ declare -a arr=(
     "-Duse_prov_client=ON -Dhsm_custom_lib=$custom_hsm_lib"
     "-Drun_e2e_tests=ON -Drun_sfc_tests=ON -Duse_edge_modules=ON"
     "-Drun_e2e_tests=ON -Duse_baltimore_cert=ON"
+    "-Duse_prov_client:BOOL=ON -Dhsm_type_symm_key:BOOL=ON"
+    "-Duse_prov_client:BOOL=ON -Dhsm_type_x509:BOOL=ON"
+    "-Duse_prov_client:BOOL=ON -hsm_type_sastoken:BOOL=ON"
 )
 
 for item in "${arr[@]}"
