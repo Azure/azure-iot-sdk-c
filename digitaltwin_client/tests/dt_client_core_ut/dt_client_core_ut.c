@@ -397,6 +397,12 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_RETURN(DT_InterfaceClient_CheckNameValid, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(DT_InterfaceClient_CheckNameValid, DIGITALTWIN_CLIENT_ERROR);
 
+    REGISTER_GLOBAL_MOCK_RETURN(DT_InterfaceList_BindInterfaces, DIGITALTWIN_CLIENT_OK);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(DT_InterfaceList_BindInterfaces, DIGITALTWIN_CLIENT_ERROR);
+
+    REGISTER_GLOBAL_MOCK_RETURN(DT_InterfaceList_CreateRegistrationMessage, DIGITALTWIN_CLIENT_OK);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(DT_InterfaceList_CreateRegistrationMessage, DIGITALTWIN_CLIENT_ERROR);
+
     REGISTER_STRING_GLOBAL_MOCK_HOOK;
 }
 
@@ -809,7 +815,7 @@ static void set_expected_calls_for_properties_reported_callback()
 
     set_expected_calls_for_SendSdkInformation();
 
-    STRICT_EXPECTED_CALL(DT_InterfaceList_RegistrationCompleteCallback(IGNORED_PTR_ARG, (DIGITALTWIN_CLIENT_RESULT)IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(DT_InterfaceList_RegistrationCompleteCallback(IGNORED_PTR_ARG, DIGITALTWIN_CLIENT_OK));
     STRICT_EXPECTED_CALL(testInterfaceRegisteredCallback(DIGITALTWIN_CLIENT_OK, testDTRegisterInterfacesAsyncContext));
 
     set_expected_calls_for_EndClientCoreCallbackProcessing();
