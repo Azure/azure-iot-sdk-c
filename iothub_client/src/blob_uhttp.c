@@ -121,6 +121,9 @@ static int send_http_handle(HTTP_CLIENT_HANDLE http_client, const char* relative
         do
         {
             uhttp_client_dowork(http_client);
+            
+            // Yield the thread to avoid staying on-cpu while busy-waiting.
+            ThreadAPI_Sleep(0);
         } while (blob_data->http_resp_recv == 0 && blob_data->http_error == 0);
 
         if (blob_data->http_error != 0)
