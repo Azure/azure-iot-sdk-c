@@ -32,7 +32,7 @@ The first step in using the Digital Twin SDK is to create the appropriate `IOTHU
 
 **NOTE: The only protocols supported for Digital Twin for the C SDK are MQTT and MQTT over Web Sockets.**  Attempts to use AMQP, AMQP over Web Sockets, or HTTP for C will fail.
 
-Once the handle is created, you may need to [set options on it](../../doc/Iothub_sdk_options.md).  Some of the options you may need to set include enabling web proxies, enabling verbose logging at the transport layer, configuring client certificates, and more.  All options that need to be set should be *before* the next step.
+Once the handle is created, you may need to [set options on it](../../doc/Iothub_sdk_options.md).  Some of the options you may need to set include enabling web proxies, enabling verbose logging at the transport layer, configuring client certificates, and more.  If you want to receive notifications of the status of the connection to IoTHub, this is also the time to do so via the `IoTHubDeviceClient_SetConnectionStatusCallback` (or analogous function).  All options that need to be set should be *before* the next step.
 
 Once the `IOTHUB_*_HANDLE` has been successfully created, it needs to be passed to create a `DIGITALTWIN_*_HANDLE`.  Use the appropriate `DigitalTwin*_CreateFrom*Handle` referenced in the table above.
 
