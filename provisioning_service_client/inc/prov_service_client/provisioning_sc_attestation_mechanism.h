@@ -19,12 +19,14 @@ extern "C" {
 
 typedef struct ATTESTATION_MECHANISM_TAG* ATTESTATION_MECHANISM_HANDLE;
 
-#define ATTESTATION_TYPE_VALUES \
-        ATTESTATION_TYPE_NONE, \
-        ATTESTATION_TYPE_TPM, \
-        ATTESTATION_TYPE_X509 \
+typedef enum ATTESTATION_TYPE_VALUES_TAG
+{
+    ATTESTATION_TYPE_NONE = 0,
+    ATTESTATION_TYPE_TPM = 1,
+    ATTESTATION_TYPE_X509 = 2
+} ATTESTATION_TYPE_VALUES;
+
 //Note: ATTESTATION_TYPE_NONE is invalid, indicating error
-MU_DEFINE_ENUM_WITHOUT_INVALID(ATTESTATION_TYPE, ATTESTATION_TYPE_VALUES);
 
 
 /** @brief  Creates an Attestation Mechanism handle that uses a TPM Attestation for use in consequent APIs.
