@@ -8,6 +8,7 @@
 familiarity with their basic usage. Some more detail about the Azure IoT CocoaPods
 may be found [here](./CocoaPods.md).
 * An IoT Hub and a connection string for a client device.
+* [Azure IoT Explorer](https://github.com/Azure/azure-iot-explorer) recommended.
 
 #### 1. Clone the Azure IoT C SDK repo
 
