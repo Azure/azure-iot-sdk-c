@@ -69,7 +69,7 @@ do
     pushd $build_folder
 
     echo "executing cmake/make with options <<$item>>"
-    cmake $build_root "$item"
+    cmake $build_root $item
 
     make --jobs=$MAKE_CORES
 done
