@@ -43,7 +43,6 @@ int snprintf(char * s, size_t n, const char * format, ...)
 
 /*Codes_SRS_IOTHUBCLIENT_LL_02_085: [ IoTHubClient_LL_UploadToBlob shall use the same authorization as step 1. to prepare and perform a HTTP request with the following parameters: ]*/
 static const char* const RESPONSE_BODY_FORMAT = "{\"correlationId\":\"%s\", \"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":\"%s\"}";
-static const char* const RESPONSE_BODY_FORMAT_FAILURE="";
 static const char* const RESPONSE_BODY_ABORTED_MESSAGE = "file upload aborted";
 static const char* const RESPONSE_BODY_FAILED_MESSAGE = "client not able to connect with the server";
 static const char* const RESPONSE_BODY_ERROR_RETURN_CODE = "-1";
