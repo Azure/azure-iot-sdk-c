@@ -84,7 +84,7 @@ MOCKABLE_FUNCTION(, double, json_object_dotget_number, const JSON_Object *, obje
 MOCKABLE_FUNCTION(, JSON_Value*, json_object_get_value, const JSON_Object *, object, const char *, name);
 MOCKABLE_FUNCTION(, const char *, json_object_get_name, const JSON_Object *, object, size_t, index);
 MOCKABLE_FUNCTION(, JSON_Value *, json_object_dotget_value, const JSON_Object *, object, const char *, name);
-
+MOCKABLE_FUNCTION(, JSON_Status, json_object_remove, JSON_Object *, object, const char*, name);
 
 MOCKABLE_FUNCTION(, LOCK_HANDLE, testBindingLockInit);
 MOCKABLE_FUNCTION(, LOCK_RESULT, testBindingLock, LOCK_HANDLE, bindingLock);
@@ -171,6 +171,8 @@ typedef enum DT_TEST_PROPERTY_UPDATE_TEST_TAG
     DT_TEST_PROPERTY_UPDATE_TEST_REPORTED_EXPECTED,
     // No reported properties are expected with this update
     DT_TEST_PROPERTY_UPDATE_TEST_NO_REPORTED_EXPECTED,
+    // Reported-Only properties are expected with this update
+    DT_TEST_PROPERTY_UPDATE_TEST_REPORTED_ONLY_EXPECTED,
     // This test is running as part of a failure test; skip parameter validation
     // because reported may or may not be present based on which call had failed
     DT_TEST_PROPERTY_UPDATE_TEST_FAILURE_TEST
@@ -284,12 +286,13 @@ static const char dtTestAsyncCommandResponseExpected3[] = "{\"payload\":" DT_TES
 static const char* dtTestInterfaceId1 = DT_TEST_INTERFACE_ID_1;
 static const char* dtTestComponentName1 = DT_TEST_COMPONENT_NAME_1;
 
-
+#define DT_TEST_DESIRED_VERSION_JSON_NO_COMMA "\"$version\": 12"
 #define DT_TEST_DESIRED_VERSION_JSON ", \"$version\": 12"
 #define DT_TEST_TWIN_VERSION_JSON "}, \"$version\": 18"
 
 #define DT_TEST_DESIRED_JSON "{  \"desired\": { "
 #define DT_TEST_REPORTED_JSON "}, \"reported\": { "
+
 
 #define DT_TEST_COMPONENT_NAME_1_OBJECT "\"$iotin:"  DT_TEST_COMPONENT_NAME_1 "\": "
 
@@ -332,6 +335,14 @@ static const size_t updatePropertiesPropertyFullTwinAllLen= sizeof(updatePropert
 // All desired and reported properties are updated, full twin
 static const char updatePropertiesDesiredAndReportedFullTwinAll[] = DT_TEST_DESIRED_JSON DT_TEST_COMPONENT_NAME_1_OBJECT "{" DT_TEST_PROPERTY_1_CONTENT_NO_BRACES "," DT_TEST_PROPERTY_2_CONTENT_NO_BRACES "," DT_TEST_PROPERTY_3_CONTENT_NO_BRACES "}" DT_TEST_DESIRED_VERSION_JSON  DT_TEST_REPORTED_JSON DT_TEST_COMPONENT_NAME_1_OBJECT "{"  DT_TEST_PROPERTY_1_PREVIOUSLY_REPORTED_CONTENT_NO_BRACES "," DT_TEST_PROPERTY_2_PREVIOUSLY_REPORTED_CONTENT_NO_BRACES "," DT_TEST_PROPERTY_3_PREVIOUSLY_REPORTED_CONTENT_NO_BRACES DT_TEST_TWIN_VERSION_JSON "} }";
 static const size_t updatePropertiesDesiredAndReportedFullTwinAllLen= sizeof(updatePropertiesDesiredAndReportedFullTwinAll) - 1;
+
+// One desired and reported properties are updated, two reported-only property included in the full twin
+static const char updatePropertiesAndOneReportedOnlyPropertyFullTwinAll[] = DT_TEST_DESIRED_JSON DT_TEST_COMPONENT_NAME_1_OBJECT "{" DT_TEST_PROPERTY_1_CONTENT_NO_BRACES "}" DT_TEST_DESIRED_VERSION_JSON  DT_TEST_REPORTED_JSON DT_TEST_COMPONENT_NAME_1_OBJECT "{"  DT_TEST_PROPERTY_1_PREVIOUSLY_REPORTED_CONTENT_NO_BRACES "," DT_TEST_PROPERTY_2_PREVIOUSLY_REPORTED_CONTENT_NO_BRACES "," DT_TEST_PROPERTY_3_PREVIOUSLY_REPORTED_CONTENT_NO_BRACES DT_TEST_TWIN_VERSION_JSON "} }";
+static const size_t updatePropertiesAndOneReportedOnlyPropertyFullTwinAllLen = sizeof(updatePropertiesAndOneReportedOnlyPropertyFullTwinAll) - 1;
+
+// All reported only properties full twin
+static const char updatePropertiesReportedOnlyFullTwinAll[] = DT_TEST_DESIRED_JSON DT_TEST_DESIRED_VERSION_JSON_NO_COMMA DT_TEST_REPORTED_JSON DT_TEST_COMPONENT_NAME_1_OBJECT "{"  DT_TEST_PROPERTY_1_PREVIOUSLY_REPORTED_CONTENT_NO_BRACES "," DT_TEST_PROPERTY_2_PREVIOUSLY_REPORTED_CONTENT_NO_BRACES "," DT_TEST_PROPERTY_3_PREVIOUSLY_REPORTED_CONTENT_NO_BRACES DT_TEST_TWIN_VERSION_JSON "} }";
+static const size_t updatePropertiesReportedOnlyFullTwinAllLen = sizeof(updatePropertiesDesiredAndReportedFullTwinAll) - 1;
 
 // JSon is not legal
 static const char updatePropertiesInvalidJson[] = "{Not-valid-json";
@@ -419,15 +430,31 @@ static void test_Impl_DT_PropertyUpdate(const DIGITALTWIN_CLIENT_PROPERTY_UPDATE
         ASSERT_IS_TRUE(currentProperty < dtTestExpectedPropertyStatus.maxProperty,
                        "Only expected %d property callbacks but received more", dtTestExpectedPropertyStatus.maxProperty);
 
-        const char* expectedPropertyName = dtTestExpectedPropertyStatus.expectedPropertyName[currentProperty];
-        const char* expectedDesiredPropertyData = dtTestExpectedPropertyStatus.expectedDesiredData[currentProperty];
+        int i=0;
+        const char* expectedPropertyName = NULL;
+        const char* expectedDesiredPropertyData = NULL;
+        for (i = 0; i < dtTestExpectedPropertyStatus.maxProperty; i++)
+        {
+            expectedPropertyName = dtTestExpectedPropertyStatus.expectedPropertyName[i];
+            expectedDesiredPropertyData = dtTestExpectedPropertyStatus.expectedDesiredData[i];
+
+            if (strcmp(expectedPropertyName, (char*)dtClientPropertyUpdate->propertyName) == 0)
+            {
+                break;
+            }
+        }
 
         ASSERT_ARE_EQUAL(int, 0, strcmp(expectedPropertyName, (char*)dtClientPropertyUpdate->propertyName),
                          "Expected property name <%s> does not match actual name <%s>", expectedPropertyName, (char*)dtClientPropertyUpdate->propertyDesired);
-        ASSERT_ARE_EQUAL(size_t, strlen(expectedDesiredPropertyData), dtClientPropertyUpdate->propertyDesiredLen,
-                         "Expected desired property length <%d> does not match actual <%d>", strlen(expectedDesiredPropertyData), dtClientPropertyUpdate->propertyDesiredLen);
-        ASSERT_ARE_EQUAL(int, 0, strncmp(expectedDesiredPropertyData, (char*)dtClientPropertyUpdate->propertyDesired, dtClientPropertyUpdate->propertyDesiredLen),
-                         "Expected desired property data <%s> does not match actual <%.*s>", expectedPropertyName, (int)dtClientPropertyUpdate->propertyDesiredLen, (char*)dtClientPropertyUpdate->propertyDesired);
+        
+        if (!(dtTestPropertyUpdateTest == DT_TEST_PROPERTY_UPDATE_TEST_REPORTED_ONLY_EXPECTED) && (expectedDesiredPropertyData == NULL))
+        {
+            ASSERT_ARE_EQUAL(size_t, strlen(expectedDesiredPropertyData), dtClientPropertyUpdate->propertyDesiredLen,
+                "Expected desired property length <%d> does not match actual <%d>", strlen(expectedDesiredPropertyData), dtClientPropertyUpdate->propertyDesiredLen);
+            ASSERT_ARE_EQUAL(int, 0, strncmp(expectedDesiredPropertyData, (char*)dtClientPropertyUpdate->propertyDesired, dtClientPropertyUpdate->propertyDesiredLen),
+                "Expected desired property data <%s> does not match actual <%.*s>", expectedPropertyName, (int)dtClientPropertyUpdate->propertyDesiredLen, (char*)dtClientPropertyUpdate->propertyDesired);
+        }
+        
         ASSERT_ARE_EQUAL(void_ptr, testDTPropertyCallbackContext, userInterfaceContext, 
                          "User callback context does not match expected");
         ASSERT_ARE_EQUAL(int, DT_TEST_PROPERTY_VERSION, dtClientPropertyUpdate->desiredVersion, 
@@ -435,7 +462,7 @@ static void test_Impl_DT_PropertyUpdate(const DIGITALTWIN_CLIENT_PROPERTY_UPDATE
 
         if (dtTestPropertyUpdateTest == DT_TEST_PROPERTY_UPDATE_TEST_REPORTED_EXPECTED)
         {
-            const char* expectedReportedPropertyData = dtTestExpectedPropertyStatus.expectedReportedData[currentProperty];
+            const char* expectedReportedPropertyData = dtTestExpectedPropertyStatus.expectedReportedData[i];
             ASSERT_IS_NOT_NULL(dtClientPropertyUpdate->propertyReported, "Reported property is NULL");
             ASSERT_ARE_EQUAL(int, strlen(expectedReportedPropertyData), dtClientPropertyUpdate->propertyReportedLen,
                              "Expected propertyReportedLen <%d> does not match actual <%d>", strlen(expectedReportedPropertyData), dtClientPropertyUpdate->propertyReportedLen);
@@ -609,6 +636,9 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object_get_name, NULL);
 
     REGISTER_GLOBAL_MOCK_HOOK(json_object_dotget_value, real_json_object_dotget_value);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object_dotget_value, NULL);
+
+    REGISTER_GLOBAL_MOCK_HOOK(json_object_remove, real_json_object_remove);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object_dotget_value, NULL);
 
     REGISTER_GLOBAL_MOCK_HOOK(json_object_set_null, real_json_object_set_null);
@@ -2251,6 +2281,7 @@ typedef struct TestProcessTwinCallback_Info_Tag
     bool fullTwin; // Specifies whether this is a fullTwin or partial twin update; impacts STRICT_EXPETED_CALL's
     unsigned int numDesiredPropertiesFromJson; // Number of child elements of "desired" for this interface.  Does NOT matter how they are mapped to interface handle, just that its from JSON proper
     bool expectReportedJsonForCurrentInterface; // Whether this particular interface has any "reported { <intfName>" json for it
+    unsigned int numReportedOnlyPropertiesFromJson; // Number of child elements of "reported" for this interface which doesn't have a corresponding "desired". 
 } TestProcessTwinCallback_Info;
 
 static void set_expected_calls_for_GetDesiredAndReportedJsonObjects(const TestProcessTwinCallback_Info* twinCallbackInfo)
@@ -2286,6 +2317,7 @@ static void set_expected_calls_for_ProcessPropertyUpdateIfNeededFromDesired(cons
     {
         // If the twin had a reported section, then product code will GetPayloadFromProperty on it.
         set_expected_calls_for_GetPayloadFromProperty();
+        STRICT_EXPECTED_CALL(json_object_remove(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CallCannotFail();
     }
         
     STRICT_EXPECTED_CALL(testDTClientPropertyUpdate(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -2293,6 +2325,16 @@ static void set_expected_calls_for_ProcessPropertyUpdateIfNeededFromDesired(cons
     STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_PTR_ARG));
  }
+
+static void set_expected_calls_for_ProcessPropertyUpdateIfNeededFromReportedOnly()
+{
+    STRICT_EXPECTED_CALL(json_object_get_name(IGNORED_PTR_ARG, IGNORED_NUM_ARG)).CallCannotFail();
+    set_expected_calls_for_GetPayloadFromProperty();
+
+    STRICT_EXPECTED_CALL(testDTClientPropertyUpdate(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+    STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_PTR_ARG));
+}
 
 static void set_expected_calls_for_ProcessPropertiesForTwin(const TestProcessTwinCallback_Info* twinCallbackInfo)
 {
@@ -2307,16 +2349,34 @@ static void set_expected_calls_for_ProcessPropertiesForTwin(const TestProcessTwi
         STRICT_EXPECTED_CALL(json_object_get_object(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CallCannotFail();
     }
 
-    if ((twinCallbackInfo->numDesiredPropertiesFromJson > 0) || (twinCallbackInfo->expectReportedJsonForCurrentInterface == true))
+    if ((twinCallbackInfo->numDesiredPropertiesFromJson > 0) || //(twinCallbackInfo->expectReportedJsonForCurrentInterface == true) ||
+        (twinCallbackInfo->numReportedOnlyPropertiesFromJson > 0))
     {
         // Mark CallCannotFail() because Parson always returns numbers (even if 0), not proper errors, so there is no way to error test.
         STRICT_EXPECTED_CALL(json_object_dotget_number(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CallCannotFail();
-        STRICT_EXPECTED_CALL(json_object_get_count(IGNORED_PTR_ARG)).CallCannotFail();
 
-        for (unsigned int i = 0; i < twinCallbackInfo->numDesiredPropertiesFromJson; i++)
+        if (twinCallbackInfo->numDesiredPropertiesFromJson > 0)
         {
-            set_expected_calls_for_ProcessPropertyUpdateIfNeededFromDesired(twinCallbackInfo);
+            STRICT_EXPECTED_CALL(json_object_get_count(IGNORED_PTR_ARG)).CallCannotFail();
+            for (unsigned int i = 0; i < twinCallbackInfo->numDesiredPropertiesFromJson; i++)
+            {
+                set_expected_calls_for_ProcessPropertyUpdateIfNeededFromDesired(twinCallbackInfo);
+            }
         }
+
+        if (twinCallbackInfo->numReportedOnlyPropertiesFromJson > 0)
+        {
+            STRICT_EXPECTED_CALL(json_object_get_count(IGNORED_PTR_ARG)).CallCannotFail();
+            for (unsigned int i = 0; i < twinCallbackInfo->numReportedOnlyPropertiesFromJson; i++)
+            {
+                set_expected_calls_for_ProcessPropertyUpdateIfNeededFromReportedOnly();
+            }
+        }
+    }
+
+    if ((twinCallbackInfo->numReportedOnlyPropertiesFromJson == 0)  && (twinCallbackInfo->expectReportedJsonForCurrentInterface == true))
+    {
+        STRICT_EXPECTED_CALL(json_object_get_count(IGNORED_PTR_ARG)).CallCannotFail();
     }
 
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
@@ -2363,7 +2423,8 @@ TEST_FUNCTION(DT_InterfaceClient_ProcessTwinCallback_property1_set_full_twin_ok)
     TestProcessTwinCallback_Info callbackInfo = { 
         true,  // Using a full twin
         1,     // There is 1 desired property specified in twin
-        false  // No reported properties are present 
+        false,  // No reported properties (corresponding the desired) are present 
+        0      // There are 0 reported-only properties specified in twin
     };
 
     dtTestExpectedPropertyStatus.expectedPropertyName[0] = DT_TEST_PROPERTY_NAME1;
@@ -2381,7 +2442,8 @@ TEST_FUNCTION(DT_InterfaceClient_ProcessTwinCallback_property2_set_full_twin_ok)
     TestProcessTwinCallback_Info callbackInfo = { 
         true, // Using a full twin
         1,    // There is 1 desired property specified in twin
-        false // No reported properties are present
+        false,  // No reported properties (corresponding the desired) are present 
+        0      // There are 0 reported-only properties specified in twin
     };
 
     dtTestExpectedPropertyStatus.expectedPropertyName[0] = DT_TEST_PROPERTY_NAME2;
@@ -2399,7 +2461,8 @@ TEST_FUNCTION(DT_InterfaceClient_ProcessTwinCallback_property3_set_full_twin_ok)
     TestProcessTwinCallback_Info callbackInfo = { 
         true, // Using a full twin
         1,    // There is 1 desired property specified in twin
-        false // No reported properties are present
+        false, // No reported properties (corresponding the desired) are present 
+        0      // There are 0 reported-only properties specified in twin
      };
 
     dtTestExpectedPropertyStatus.expectedPropertyName[0] = DT_TEST_PROPERTY_NAME3;
@@ -2417,7 +2480,8 @@ TEST_FUNCTION(DT_InterfaceClient_ProcessTwinCallback_property1_set_update_twin_o
     TestProcessTwinCallback_Info callbackInfo = { 
         false, // Using a non-full twin
         1,     // There is 1 desired property specified in twin
-        false  // No reported properties are present
+        false,  // No reported properties (corresponding the desired) are present 
+        0      // There are 0 reported-only properties specified in twin
     };
 
     dtTestExpectedPropertyStatus.expectedPropertyName[0] = DT_TEST_PROPERTY_NAME1;
@@ -2435,7 +2499,8 @@ TEST_FUNCTION(DT_InterfaceClient_ProcessTwinCallback_property2_set_update_twin_o
     TestProcessTwinCallback_Info callbackInfo = { 
         false, // Using a non-full twin
         1,     // There is 1 desired property specified in twin
-        false  // No reported properties are present
+        false,  // No reported properties (corresponding the desired) are present 
+        0      // There are 0 reported-only properties specified in twin
     };
 
     dtTestExpectedPropertyStatus.expectedPropertyName[0] = DT_TEST_PROPERTY_NAME2;
@@ -2453,7 +2518,8 @@ TEST_FUNCTION(DT_InterfaceClient_ProcessTwinCallback_property3_update_twin_set_o
     TestProcessTwinCallback_Info callbackInfo = { 
         false, // Using a non-full twin
         1,     // There is 1 desired property specified in twin
-        false  // No reported properties are present
+        false,  // No reported properties (corresponding the desired) are present 
+        0      // There are 0 reported-only properties specified in twin
     };
 
     dtTestExpectedPropertyStatus.expectedPropertyName[0] = DT_TEST_PROPERTY_NAME3;
@@ -2471,7 +2537,8 @@ TEST_FUNCTION(DT_InterfaceClient_ProcessTwinCallback_property3_different_interfa
     TestProcessTwinCallback_Info callbackInfo = { 
         false, // Using a non-full twin
         0,     // There is 0 desired property specified in twin (because it arrives on different interface)
-        false  // No reported properties are present
+        false,  // No reported properties (corresponding the desired) are present 
+        0      // There are 0 reported-only properties specified in twin
     };
 
     test_DT_InterfaceClient_ProcessTwinCallback(updatePropertiesDifferentInterfaceFullTwin, updatePropertiesDifferentInterfaceFullTwinLen, &callbackInfo);
@@ -2485,7 +2552,8 @@ TEST_FUNCTION(DT_InterfaceClient_ProcessTwinCallback_property1_and_unrelated_int
     TestProcessTwinCallback_Info callbackInfo = { 
         true, // Using a full twin
         1,    // There is 1 desired property specified in twin
-        false // No reported properties are present
+        false,  // No reported properties (corresponding the desired) are present 
+        0      // There are 0 reported-only properties specified in twin
     };
 
     dtTestExpectedPropertyStatus.expectedPropertyName[0] = DT_TEST_PROPERTY_NAME1;
@@ -2503,7 +2571,8 @@ TEST_FUNCTION(DT_InterfaceClient_ProcessTwinCallback_three_properties_update_ful
     TestProcessTwinCallback_Info callbackInfo = { 
         true, // Using a full twin
         3,    // There are 3 desired property specified in twin
-        false // No reported properties are present
+        false,  // No reported properties (corresponding the desired) are present 
+        0      // There are 0 reported-only properties specified in twin
     };
 
     dtTestExpectedPropertyStatus.expectedPropertyName[0] = DT_TEST_PROPERTY_NAME1;
@@ -2545,7 +2614,8 @@ TEST_FUNCTION(DT_InterfaceClient_ProcessTwinCallback_three_properties_update_ful
     TestProcessTwinCallback_Info callbackInfo = { 
         true, // Using a full twin
         3,    // There are 3 desired properties specified in twin
-        true  // Reported properties are present
+        true,  // Reported properties (corresponding to the desired) are present
+        0      // There are 0 reported only properties specified in twin
     };
 
     dtTestExpectedPropertyStatus.expectedPropertyName[0] = DT_TEST_PROPERTY_NAME1;
@@ -2561,6 +2631,55 @@ TEST_FUNCTION(DT_InterfaceClient_ProcessTwinCallback_three_properties_update_ful
     dtTestExpectedPropertyStatus.maxProperty = 3;
 
     test_DT_InterfaceClient_ProcessTwinCallback(updatePropertiesDesiredAndReportedFullTwinAll, updatePropertiesDesiredAndReportedFullTwinAllLen, &callbackInfo);
+}
+
+// Tests that when all 3 properties are updated (for both desired + reported), everything is processed correctly
+TEST_FUNCTION(DT_InterfaceClient_ProcessTwinCallback_one_properties_update_full_twin_and_one_reported_only_prop_ok)
+{
+    dtTestPropertyUpdateTest = DT_TEST_PROPERTY_UPDATE_TEST_REPORTED_ONLY_EXPECTED;
+
+    TestProcessTwinCallback_Info callbackInfo = {
+        true, // Using a full twin
+        1,    // There are 1 desired properties specified in twin
+        true,  // Reported properties (corresponding to the desired) are present
+        2     // There are 2 reported only properties specified in twin
+    };
+
+    dtTestExpectedPropertyStatus.expectedPropertyName[0] = DT_TEST_PROPERTY_NAME1;
+    dtTestExpectedPropertyStatus.expectedPropertyName[1] = DT_TEST_PROPERTY_NAME2;
+    dtTestExpectedPropertyStatus.expectedPropertyName[2] = DT_TEST_PROPERTY_NAME3;
+    dtTestExpectedPropertyStatus.expectedDesiredData[0] = DT_TEST_PROPERTY_DESIRED_VALUE1;
+    dtTestExpectedPropertyStatus.expectedReportedData[0] = DT_TEST_PROPERTY_REPORTED_VALUE1;
+    dtTestExpectedPropertyStatus.expectedReportedData[1] = DT_TEST_PROPERTY_REPORTED_VALUE2;
+    dtTestExpectedPropertyStatus.expectedReportedData[2] = DT_TEST_PROPERTY_REPORTED_VALUE3;
+
+    dtTestExpectedPropertyStatus.maxProperty = 3;
+
+    test_DT_InterfaceClient_ProcessTwinCallback(updatePropertiesAndOneReportedOnlyPropertyFullTwinAll, updatePropertiesAndOneReportedOnlyPropertyFullTwinAllLen, &callbackInfo);
+}
+
+// Tests that when all 3 properties are updated (for both desired + reported), everything is processed correctly
+TEST_FUNCTION(DT_InterfaceClient_ProcessTwinCallback_three_reported_only_properties_update_full_twin_ok)
+{
+    dtTestPropertyUpdateTest = DT_TEST_PROPERTY_UPDATE_TEST_REPORTED_ONLY_EXPECTED;
+
+    TestProcessTwinCallback_Info callbackInfo = {
+        true, // Using a full twin
+        0,    // There are 1 desired properties specified in twin
+        false,  // Reported properties (corresponding to the desired) are present
+        3     // There are 2 reported only properties specified in twin
+    };
+
+    dtTestExpectedPropertyStatus.expectedPropertyName[0] = DT_TEST_PROPERTY_NAME1;
+    dtTestExpectedPropertyStatus.expectedPropertyName[1] = DT_TEST_PROPERTY_NAME2;
+    dtTestExpectedPropertyStatus.expectedPropertyName[2] = DT_TEST_PROPERTY_NAME3;
+    dtTestExpectedPropertyStatus.expectedReportedData[0] = DT_TEST_PROPERTY_REPORTED_VALUE1;
+    dtTestExpectedPropertyStatus.expectedReportedData[1] = DT_TEST_PROPERTY_REPORTED_VALUE2;
+    dtTestExpectedPropertyStatus.expectedReportedData[2] = DT_TEST_PROPERTY_REPORTED_VALUE3;
+
+    dtTestExpectedPropertyStatus.maxProperty = 3;
+
+    test_DT_InterfaceClient_ProcessTwinCallback(updatePropertiesReportedOnlyFullTwinAll, updatePropertiesReportedOnlyFullTwinAllLen, &callbackInfo);
 }
 
 TEST_FUNCTION(DT_InterfaceClient_ProcessTwinCallback_invalid_json)
