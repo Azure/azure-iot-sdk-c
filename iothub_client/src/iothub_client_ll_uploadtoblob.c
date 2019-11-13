@@ -42,8 +42,7 @@ int snprintf(char * s, size_t n, const char * format, ...)
 #endif
 
 /*Codes_SRS_IOTHUBCLIENT_LL_02_085: [ IoTHubClient_LL_UploadToBlob shall use the same authorization as step 1. to prepare and perform a HTTP request with the following parameters: ]*/
-#define FILE_UPLOAD_FAILED_BODY "{ \"correlationId\":\"%s\", \"isSuccess\":false, \"statusCode\":-1,\"statusDescription\" : \"client not able to connect with the server\" }"
-#define FILE_UPLOAD_ABORTED_BODY "{ \"correlationId\":\"%s\", \"isSuccess\":false, \"statusCode\":-1,\"statusDescription\" : \"file upload aborted\" }"
+static const char* const RESPONSE_BODY_FORMAT = "{\"correlationId\":\"%s\", \"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":\"%s\"}";
 #define INDEFINITE_TIME                            ((time_t)-1)
 
 static const char* const EMPTY_STRING = "";
@@ -788,7 +787,11 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
                                             /*Codes_SRS_IOTHUBCLIENT_LL_99_008: [ If step 2 is aborted by the client, then the HTTP message body shall look like:  ]*/
                                             LogInfo("Blob_UploadFromSasUri aborted file upload");
 
-                                            STRING_HANDLE aborted_response = STRING_construct_sprintf(FILE_UPLOAD_ABORTED_BODY, STRING_c_str(correlationId));
+                                            STRING_HANDLE aborted_response = STRING_construct_sprintf(RESPONSE_BODY_FORMAT,
+                                                                                        STRING_c_str(correlationId),
+                                                                                        (const unsigned char*)"false",
+                                                                                        (const unsigned char*)"-1",
+                                                                                        (const unsigned char*)"file upload aborted");
                                             if(aborted_response == NULL)
                                             {
                                                 LogError("STRING_construct_sprintf failed");
@@ -825,7 +828,11 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
 
                                             /*do step 3*/ /*try*/
                                             /*Codes_SRS_IOTHUBCLIENT_LL_02_091: [ If step 2 fails without establishing an HTTP dialogue, then the HTTP message body shall look like: ]*/
-                                            STRING_HANDLE failed_response = STRING_construct_sprintf(FILE_UPLOAD_FAILED_BODY, STRING_c_str(correlationId));
+                                            STRING_HANDLE failed_response = STRING_construct_sprintf(RESPONSE_BODY_FORMAT, 
+                                                                                        STRING_c_str(correlationId), 
+                                                                                        (const unsigned char*)"false",
+                                                                                        (const unsigned char*)"-1",
+                                                                                        (const unsigned char*)"client not able to connect with the server");
                                             if(failed_response == NULL)
                                             {
                                                 LogError("STRING_construct_sprintf failed");
@@ -850,16 +857,11 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
                                             /*must make a json*/
                                             unsigned char * response = BUFFER_u_char(responseToIoTHub);
                                             STRING_HANDLE req_string;
-                                            if(response == NULL)
-                                            {
-                                                req_string = STRING_construct_sprintf("{\"correlationId\":\"%s\", \"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":""}", 
-                                                                                        STRING_c_str(correlationId), ((httpResponse < 300) ? "true" : "false"), httpResponse);
-                                        	}
-                                            else
-                                            {
-                                                req_string = STRING_construct_sprintf("{\"correlationId\":\"%s\", \"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":\"%s\"}", 
-                                                                                        STRING_c_str(correlationId), ((httpResponse < 300) ? "true" : "false"), httpResponse, response);
-                                            }
+                                            req_string = STRING_construct_sprintf(RESPONSE_BODY_FORMAT,
+                                                                                        STRING_c_str(correlationId),
+                                                                                        ((httpResponse < 300) ? "true" : "false"),
+                                                                                        httpResponse, 
+                                                                                        (response == NULL ? (const unsigned char*)"" : response));
                                             if (req_string == NULL)
                                             {
                                                 LogError("Failure constructing string");
