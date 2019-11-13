@@ -43,6 +43,12 @@ int snprintf(char * s, size_t n, const char * format, ...)
 
 /*Codes_SRS_IOTHUBCLIENT_LL_02_085: [ IoTHubClient_LL_UploadToBlob shall use the same authorization as step 1. to prepare and perform a HTTP request with the following parameters: ]*/
 static const char* const RESPONSE_BODY_FORMAT = "{\"correlationId\":\"%s\", \"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":\"%s\"}";
+static const char* const RESPONSE_BODY_FORMAT_FAILURE="";
+static const char* const RESPONSE_BODY_ABORTED_MESSAGE = "file upload aborted";
+static const char* const RESPONSE_BODY_FAILED_MESSAGE = "client not able to connect with the server";
+static const char* const RESPONSE_BODY_ERROR_RETURN_CODE = "-1";
+static const char* const RESPONSE_BODY_ERROR_BOOLEAN_STRING = "false";
+
 #define INDEFINITE_TIME                            ((time_t)-1)
 
 static const char* const EMPTY_STRING = "";
@@ -789,9 +795,9 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
 
                                             STRING_HANDLE aborted_response = STRING_construct_sprintf(RESPONSE_BODY_FORMAT,
                                                                                         STRING_c_str(correlationId),
-                                                                                        (const unsigned char*)"false",
-                                                                                        (const unsigned char*)"-1",
-                                                                                        (const unsigned char*)"file upload aborted");
+                                                                                        RESPONSE_BODY_ERROR_BOOLEAN_STRING,
+                                                                                        RESPONSE_BODY_ERROR_RETURN_CODE,
+                                                                                        RESPONSE_BODY_ABORTED_MESSAGE);
                                             if(aborted_response == NULL)
                                             {
                                                 LogError("STRING_construct_sprintf failed");
@@ -830,9 +836,9 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
                                             /*Codes_SRS_IOTHUBCLIENT_LL_02_091: [ If step 2 fails without establishing an HTTP dialogue, then the HTTP message body shall look like: ]*/
                                             STRING_HANDLE failed_response = STRING_construct_sprintf(RESPONSE_BODY_FORMAT, 
                                                                                         STRING_c_str(correlationId), 
-                                                                                        (const unsigned char*)"false",
-                                                                                        (const unsigned char*)"-1",
-                                                                                        (const unsigned char*)"client not able to connect with the server");
+                                                                                        RESPONSE_BODY_ERROR_BOOLEAN_STRING,
+                                                                                        RESPONSE_BODY_ERROR_RETURN_CODE,
+                                                                                        RESPONSE_BODY_FAILED_MESSAGE);
                                             if(failed_response == NULL)
                                             {
                                                 LogError("STRING_construct_sprintf failed");
