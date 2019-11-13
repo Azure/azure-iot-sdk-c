@@ -1154,7 +1154,10 @@ static void ProcessPropertyUpdateIfNeededFromDesired(DT_INTERFACE_CLIENT* dtInte
 
             if (dtInterfaceReportedJson)
             {
+                // If there is a corresponding reported property, the callback will be invoked with it.
+                // It is removed from the json to indicate that the callback has been triggered.
                 payloadForInitialProperty = GetPayloadFromProperty(dtInterfaceReportedJson, propertyName);
+                json_object_remove(dtInterfaceReportedJson, propertyName);
             }
             else
             {
@@ -1177,6 +1180,47 @@ static void ProcessPropertyUpdateIfNeededFromDesired(DT_INTERFACE_CLIENT* dtInte
 
         json_free_serialized_string(payloadForDesiredProperty);
         json_free_serialized_string(payloadForInitialProperty);
+    }
+}
+
+// For each high-level property associated with this interface, determine if there is a callback function associated with it.
+static void ProcessPropertyUpdateIfNeededFromReportedOnly(DT_INTERFACE_CLIENT* dtInterfaceClient, JSON_Object* dtInterfaceReportedJson, size_t propertyNumber, int jsonVersion)
+{
+    const char* propertyName;
+    if ((propertyName = json_object_get_name(dtInterfaceReportedJson, propertyNumber)) == NULL)
+    {
+        LogError("json_object_get_name fails");
+    }
+    else
+    {
+        char* payloadForReportedOnlyProperty = NULL;
+
+        if ((payloadForReportedOnlyProperty = GetPayloadFromProperty(dtInterfaceReportedJson, propertyName)) == NULL)
+        {
+            LogError("Unable to retrieve payload for property %s on interface %s", propertyName, dtInterfaceClient->componentName);
+        }
+        else
+        {
+            DIGITALTWIN_CLIENT_PROPERTY_UPDATE dtClientPropertyUpdate;
+
+            dtClientPropertyUpdate.version = DIGITALTWIN_CLIENT_PROPERTY_UPDATE_VERSION_1;
+            dtClientPropertyUpdate.propertyName = propertyName;
+
+            dtClientPropertyUpdate.propertyReported = (unsigned const char*)payloadForReportedOnlyProperty;
+            dtClientPropertyUpdate.propertyReportedLen = payloadForReportedOnlyProperty ? strlen(payloadForReportedOnlyProperty) : 0;
+            dtClientPropertyUpdate.propertyDesired = NULL;
+            dtClientPropertyUpdate.propertyDesiredLen = 0;
+            dtClientPropertyUpdate.desiredVersion = jsonVersion;
+
+            DigitalTwinLogInfo("DigitalTwin Interface : Invoking property callback for interface %s, propertyName=%s, propertyCallbackContext=%p",
+                dtInterfaceClient->componentName, propertyName, dtInterfaceClient->propertyCallbackContext);
+
+            dtInterfaceClient->propertyUpdatedCallback(&dtClientPropertyUpdate, dtInterfaceClient->propertyCallbackContext);
+
+            DigitalTwinLogInfo("DigitalTwin Interface: Invoking property callback returned");
+        }
+
+        json_free_serialized_string(payloadForReportedOnlyProperty);
     }
 }
 
@@ -1221,6 +1265,15 @@ static void ProcessPropertiesForTwin(DT_INTERFACE_CLIENT* dtInterfaceClient, JSO
             for (size_t i = 0; i < numDesiredChildrenOnInterface; i++)
             {
                 ProcessPropertyUpdateIfNeededFromDesired(dtInterfaceClient, dtInterfaceDesiredJson, dtInterfaceReportedJson, i, jsonVersion);
+            }
+
+            // After processing the desired properties (and the corresponding reported properties), only reported-only properties are left
+            // in the "reported" field of the json.  Further processing is followed.
+            size_t numReportedOnlyChildrenOnInterface = dtInterfaceReportedJson ? json_object_get_count(dtInterfaceReportedJson) : 0;
+
+            for (size_t i = 0; i < numReportedOnlyChildrenOnInterface; i++)
+            {
+                ProcessPropertyUpdateIfNeededFromReportedOnly(dtInterfaceClient, dtInterfaceReportedJson, i, jsonVersion);
             }
         }
     }

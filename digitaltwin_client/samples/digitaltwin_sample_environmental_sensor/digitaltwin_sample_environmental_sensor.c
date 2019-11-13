@@ -524,6 +524,11 @@ static void DigitalTwinSampleEnvironmentalSensor_ProcessPropertyUpdate(const DIG
     {
         DigitalTwinSampleEnvironmentalSensor_BrightnessCallback(dtClientPropertyUpdate, propertyCallbackContext);
     }
+    else if (strcmp(dtClientPropertyUpdate->propertyName, digitaltwinSample_DeviceStateProperty) == 0)
+    {
+        LogInfo("ENVIRONMENTAL_SENSOR_INTERFACE: Property name <%s>, last reported value=<%.*s>", 
+            dtClientPropertyUpdate->propertyName, (int)dtClientPropertyUpdate->propertyReportedLen, dtClientPropertyUpdate->propertyReported);
+    }
     else
     {
         // If the property is not implemented by this interface, presently we only record a log message but do not have a mechanism to report back to the service
