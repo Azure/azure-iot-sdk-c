@@ -460,5 +460,5 @@ jobs:
 pr:
   paths:
     exclude:
-      - README.md
+      - readme.md
 
