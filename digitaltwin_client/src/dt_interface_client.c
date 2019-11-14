@@ -37,6 +37,7 @@ static const char DT_INTERFACE_ID_PROPERTY[] = "$.ifid";
 static const char DT_INTERFACE_NAME_PROPERTY[] = "$.ifname";
 static const char DT_MESSAGE_SCHEMA_PROPERTY[] = "$.schema";
 static const char DT_JSON_MESSAGE_CONTENT_TYPE[] = "application/json";
+static const char DT_JSON_MESSAGE_CONTENT_ENCODING[] = "utf-8";
 static const char DT_REQUEST_ID_PROPERTY[] = "iothub-command-request-id";
 static const char DT_STATUS_CODE_PROPERTY[] = "iothub-command-statuscode";
 static const char DT_COMMAND_NAME_PROPERTY[] = "iothub-command-name";
@@ -944,7 +945,12 @@ DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_CreateTelemetryMessage(const char* 
         }
         else if ((iothubMessageResult = IoTHubMessage_SetContentTypeSystemProperty(*telemetryMessageHandle, DT_JSON_MESSAGE_CONTENT_TYPE)) != IOTHUB_MESSAGE_OK)
         {
-            LogError("Cannot set property %s, error = %d", DT_MESSAGE_SCHEMA_PROPERTY, iothubMessageResult);
+            LogError("Cannot set content type system property error = %d", iothubMessageResult);
+            result = DIGITALTWIN_CLIENT_ERROR;
+        }
+        else if ((iothubMessageResult = IoTHubMessage_SetContentEncodingSystemProperty(*telemetryMessageHandle, DT_JSON_MESSAGE_CONTENT_ENCODING)) != IOTHUB_MESSAGE_OK)
+        {
+            LogError("Cannot set content encoding system property error = %d", iothubMessageResult);
             result = DIGITALTWIN_CLIENT_ERROR;
         }
         else
