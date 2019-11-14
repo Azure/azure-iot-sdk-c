@@ -366,7 +366,7 @@ if (${use_prov_client_core})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_PROV_MODULE")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_PROV_MODULE")
 
-    if (${build_provisioning_service_client} AND ${use_prov_client})
+    if ((${build_provisioning_service_client} AND ${use_prov_client}) OR ${run_e2e_tests})
         add_subdirectory(provisioning_service_client)
     endif()
 
