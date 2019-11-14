@@ -457,3 +457,8 @@ jobs:
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
     condition: always()
+pr:
+  paths:
+    exclude:
+      - README.md
+
