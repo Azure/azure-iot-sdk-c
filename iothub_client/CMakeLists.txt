@@ -23,6 +23,9 @@ set(iothub_client_c_files
     ./src/iothub_module_client.c
     ./src/iothub_module_client_ll.c
     ./src/iothubtransport.c
+    ./src/iotsecurity/utils.c
+    ./src/iotsecurity/collector_network.c
+    ./src/iotsecurity/message_schema_consts.c
     ./src/version.c
 )
 
@@ -44,6 +47,10 @@ set(iothub_client_h_files
     ./inc/iothub_module_client_ll.h
     ./inc/iothub_transport_ll.h
     ./inc/iothub_message.h
+    ./inc/iotsecurity/utils.h
+    ./inc/iotsecurity/message_schema_consts.h
+    ./inc/iotsecurity/collector.h
+    ./inc/iotsecurity/collector_network.h
     ./inc/internal/iothubtransport.h
 )
 

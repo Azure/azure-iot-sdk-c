@@ -1,0 +1,243 @@
+{
+      "EventType": "Security",
+      "Category": "Periodic",
+      "Name": "ListeningPorts",
+      "IsEmpty": false,
+      "PayloadSchemaVersion": "1.0",
+      "Id": "050743bd-a18b-4b1b-8250-82ffaa4b56e1",
+      "TimestampLocal": "2019-11-12T15:53:55.057894+00:00",
+      "TimestampUTC": "2019-11-12T15:53:55.057894Z",
+      "Payload": [
+        {
+          "Protocol": "tcp",
+          "LocalAddress": "0.0.0.0",
+          "LocalPort": "22",
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": "*",
+          "ExtraDetails": {
+            "Pid": "7856"
+          }
+        },
+        {
+          "Protocol": "tcp",
+          "LocalAddress": "0.0.0.0",
+          "LocalPort": "666",
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": "*",
+          "ExtraDetails": {
+            "Pid": "628"
+          }
+        },
+        {
+          "Protocol": "tcp",
+          "LocalAddress": "0.0.0.0",
+          "LocalPort": "667",
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": "*",
+          "ExtraDetails": {
+            "Pid": "628"
+          }
+        },
+        {
+          "Protocol": "tcp",
+          "LocalAddress": "163.188.112.139",
+          "LocalPort": "22",
+          "RemoteAddress": "100.106.145.22",
+          "RemotePort": "51529",
+          "ExtraDetails": {
+            "Pid": "2418"
+          }
+        },
+        {
+          "Protocol": "tcp",
+          "LocalAddress": "172.18.0.1",
+          "LocalPort": "40532",
+          "RemoteAddress": "172.18.0.3",
+          "RemotePort": "8883",
+          "ExtraDetails": {
+            "Pid": "29116"
+          }
+        },
+        {
+          "Protocol": "tcp",
+          "LocalAddress": "163.188.112.139",
+          "LocalPort": "22",
+          "RemoteAddress": "100.106.145.22",
+          "RemotePort": "55677",
+          "ExtraDetails": {
+            "Pid": "15848"
+          }
+        },
+        {
+          "Protocol": "tcp",
+          "LocalAddress": "163.188.112.139",
+          "LocalPort": "22",
+          "RemoteAddress": "100.106.145.22",
+          "RemotePort": "55497",
+          "ExtraDetails": {
+            "Pid": "13230"
+          }
+        },
+        {
+          "Protocol": "tcp",
+          "LocalAddress": "163.188.112.139",
+          "LocalPort": "22",
+          "RemoteAddress": "100.106.145.22",
+          "RemotePort": "51538",
+          "ExtraDetails": {
+            "Pid": "2439"
+          }
+        },
+        {
+          "Protocol": "tcp6",
+          "LocalAddress": "::",
+          "LocalPort": "8883",
+          "RemoteAddress": "::",
+          "RemotePort": "*",
+          "ExtraDetails": {
+            "Pid": "29116"
+          }
+        },
+        {
+          "Protocol": "tcp6",
+          "LocalAddress": "::",
+          "LocalPort": "22",
+          "RemoteAddress": "::",
+          "RemotePort": "*",
+          "ExtraDetails": {
+            "Pid": "7856"
+          }
+        },
+        {
+          "Protocol": "tcp6",
+          "LocalAddress": "::",
+          "LocalPort": "666",
+          "RemoteAddress": "::",
+          "RemotePort": "*",
+          "ExtraDetails": {
+            "Pid": "628"
+          }
+        },
+        {
+          "Protocol": "tcp6",
+          "LocalAddress": "::",
+          "LocalPort": "667",
+          "RemoteAddress": "::",
+          "RemotePort": "*",
+          "ExtraDetails": {
+            "Pid": "628"
+          }
+        },
+        {
+          "Protocol": "tcp6",
+          "LocalAddress": "127.0.0.1",
+          "LocalPort": "44141",
+          "RemoteAddress": "127.0.1.1",
+          "RemotePort": "8883",
+          "ExtraDetails": {
+            "Pid": "9743"
+          }
+        },
+        {
+          "Protocol": "tcp6",
+          "LocalAddress": "127.0.1.1",
+          "LocalPort": "8883",
+          "RemoteAddress": "127.0.0.1",
+          "RemotePort": "44141",
+          "ExtraDetails": {
+            "Pid": "29116"
+          }
+        },
+        {
+          "Protocol": "udp",
+          "LocalAddress": "0.0.0.0",
+          "LocalPort": "53",
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": "*",
+          "ExtraDetails": {
+            "Pid": "562"
+          }
+        },
+        {
+          "Protocol": "udp",
+          "LocalAddress": "0.0.0.0",
+          "LocalPort": "68",
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": "*",
+          "ExtraDetails": {
+            "Pid": "1698"
+          }
+        },
+        {
+          "Protocol": "udp",
+          "LocalAddress": "0.0.0.0",
+          "LocalPort": "68",
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": "*",
+          "ExtraDetails": {
+            "Pid": "700"
+          }
+        },
+        {
+          "Protocol": "udp",
+          "LocalAddress": "163.188.112.139",
+          "LocalPort": "123",
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": "*",
+          "ExtraDetails": {
+            "Pid": "770"
+          }
+        },
+        {
+          "Protocol": "udp",
+          "LocalAddress": "172.18.0.1",
+          "LocalPort": "123",
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": "*",
+          "ExtraDetails": {
+            "Pid": "770"
+          }
+        },
+        {
+          "Protocol": "udp",
+          "LocalAddress": "172.17.0.1",
+          "LocalPort": "123",
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": "*",
+          "ExtraDetails": {
+            "Pid": "770"
+          }
+        },
+        {
+          "Protocol": "udp",
+          "LocalAddress": "127.0.0.1",
+          "LocalPort": "123",
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": "*",
+          "ExtraDetails": {
+            "Pid": "770"
+          }
+        },
+        {
+          "Protocol": "udp",
+          "LocalAddress": "0.0.0.0",
+          "LocalPort": "123",
+          "RemoteAddress": "0.0.0.0",
+          "RemotePort": "*",
+          "ExtraDetails": {
+            "Pid": "770"
+          }
+        },
+        {
+          "Protocol": "udp6",
+          "LocalAddress": "::",
+          "LocalPort": "123",
+          "RemoteAddress": "::",
+          "RemotePort": "*",
+          "ExtraDetails": {
+            "Pid": "770"
+          }
+        }
+      ]
+    }
+}
