@@ -300,7 +300,7 @@ jobs:
     condition: always()
 - job: wolfssl
   variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/c-linux-wolfssl"
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu:wolfssl"
   pool: Hosted Ubuntu 1604
   displayName: 'wolfssl'
   steps:
