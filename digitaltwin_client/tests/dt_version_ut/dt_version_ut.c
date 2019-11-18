@@ -6,14 +6,9 @@
 
 BEGIN_TEST_SUITE(dt_version_ut)
 
-    TEST_FUNCTION(dt_client_sdk_version_define_has_expected_value)
-    {
-        ASSERT_ARE_EQUAL(char_ptr, "0.9.0", DIGITALTWIN_CLIENT_SDK_VERSION);
-    }
-
     TEST_FUNCTION(DigitalTwin_Client_GetVersionString_ok)
     {
-        ASSERT_ARE_EQUAL(char_ptr, DIGITALTWIN_CLIENT_SDK_VERSION, DigitalTwin_Client_GetVersionString());
+        ASSERT_ARE_EQUAL(char_ptr, "0.9.0", DigitalTwin_Client_GetVersionString());
     }
 
 END_TEST_SUITE(dt_version_ut)

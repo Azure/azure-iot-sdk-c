@@ -87,11 +87,14 @@ static DIGITALTWIN_CLIENT_RESULT DigitalTwinSampleSdkInfo_ReportSdkInfoAsync(DIG
 {
     DIGITALTWIN_CLIENT_RESULT result;
 
+    char versionString[32];
+    sprintf(versionString, "\"%s\"", DigitalTwin_Client_GetVersionString());
+
     // NOTE: Future versions of SDK will support ability to send mulitiple properties in a single
     // send.  For now, one at a time is sufficient albeit less effecient.
 
     if (((result = DigitalTwinSampleSdkInfo_ReportPropertyAsync(interfaceHandle, DT_SdkLanguage_Property, DT_SdkLanguage)) != DIGITALTWIN_CLIENT_OK) ||
-        ((result = DigitalTwinSampleSdkInfo_ReportPropertyAsync(interfaceHandle, DT_SdkVersion_Property, "\"" DIGITALTWIN_CLIENT_SDK_VERSION "\"" )) != DIGITALTWIN_CLIENT_OK) ||
+        ((result = DigitalTwinSampleSdkInfo_ReportPropertyAsync(interfaceHandle, DT_SdkVersion_Property, versionString)) != DIGITALTWIN_CLIENT_OK) ||
         ((result = DigitalTwinSampleSdkInfo_ReportPropertyAsync(interfaceHandle, DT_SdkVendor_Property, DT_SdkVendor)) != DIGITALTWIN_CLIENT_OK))
     {
         LogError("SDK_INFO: Reporting properties failed.");

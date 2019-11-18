@@ -3,6 +3,8 @@
 
 #include "digitaltwin_client_version.h"
 
+#define DIGITALTWIN_CLIENT_SDK_VERSION "0.9.0"
+
 const char* DigitalTwin_Client_GetVersionString(void)
 {
     return DIGITALTWIN_CLIENT_SDK_VERSION;

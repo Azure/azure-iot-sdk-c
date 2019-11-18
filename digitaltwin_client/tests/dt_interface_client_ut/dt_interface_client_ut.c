@@ -698,7 +698,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(testDTClientPropertyUpdate, test_Impl_DT_PropertyUpdate);
     REGISTER_GLOBAL_MOCK_HOOK(testInterfaceRegisteredCallback, impl_testInterfaceRegisteredCallback);
 
-    REGISTER_GLOBAL_MOCK_RETURN(DigitalTwin_Client_GetVersionString, DIGITALTWIN_CLIENT_SDK_VERSION);
+    REGISTER_GLOBAL_MOCK_RETURN(DigitalTwin_Client_GetVersionString, "0.9.0");
 
     REGISTER_STRING_GLOBAL_MOCK_HOOK;
 }

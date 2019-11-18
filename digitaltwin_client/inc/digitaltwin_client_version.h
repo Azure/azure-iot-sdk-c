@@ -14,9 +14,6 @@
 #include "azure_macro_utils/macro_utils.h"
 #include "umock_c/umock_c_prod.h"
 
-/** @brief Pre-processor friendly representation of Digital Twin Client version. */
-#define DIGITALTWIN_CLIENT_SDK_VERSION "0.9.0"
-
 #ifdef __cplusplus
 extern "C"
 {
