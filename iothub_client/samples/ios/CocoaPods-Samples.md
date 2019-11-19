@@ -56,8 +56,8 @@ Make sure you open the workspace, and not the similarly-named (without the `WS` 
 #### 4. Modify your sample file
 
 1. Select the MQTT Cleint Sample project, open the MQTT Client Sample folder, and open the ViewController.swift
-2. Add your iot device Connection String to the private let connectionString by replacing the empty quotes with your connection string.
-3. Below the connectionString variable, select a single protocol that you want to use, and assign it to the iotProtocol variable:
+2. Add your iot device Connection String to the `private let connectionString` by replacing the empty quotes with your connection string.
+3. Below the connectionString variable, select a single protocol that you want to use, and assign it to the `iotProtocol` variable:
     * HTTP_Protocol
     * MQTT_Protocol
     * AMQP_Protocol
