@@ -29,13 +29,6 @@ extern "C"
 */
 typedef void* DIGITALTWIN_INTERFACE_CLIENT_HANDLE;
 
-/// @cond DO_NOT_DOCUMENT
-#ifdef DIGITALTWIN_LOGGING_ENABLED
-#define DigitalTwinLogInfo LogInfo
-#else
-#define DigitalTwinLogInfo(...)
-#endif
-
 #define DIGITALTWIN_CLIENT_RESULT_VALUES                        \
         DIGITALTWIN_CLIENT_OK,                                  \
         DIGITALTWIN_CLIENT_ERROR_INVALID_ARG,                   \
