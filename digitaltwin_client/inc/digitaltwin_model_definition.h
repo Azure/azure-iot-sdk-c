@@ -4,13 +4,17 @@
 #define DIGITALTWIN_MODEL_DEFINITION_H
 
 #include <stdio.h>
-#include <stdlib.h>
+
 #include "umock_c/umock_c_prod.h"
 #include "digitaltwin_client_common.h"
+
 
 #ifdef __cplusplus
 extern "C"
 {
+#include <cstdlib>
+#else
+#include <stdlib.h>
 #endif
 
 typedef struct MODEL_DEFINITION_CLIENT_TAG * MODEL_DEFINITION_CLIENT_HANDLE;
@@ -38,14 +42,6 @@ MOCKABLE_FUNCTION(, void, DigitalTwin_ModelDefinition_Destroy, MODEL_DEFINITION_
 */
 
 MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_ModelDefinition_Publish_Interface, const char *, interfaceId, char *, data, MODEL_DEFINITION_CLIENT_HANDLE, mdHandle);
-
-/**
-    * @brief   DigitalTwin_ModelDefinition_Get_Data gets definition langauge json stored in memory
-    *
-    * @return  char * to dtdl content or NULL if content not found.
-*/
-
-MOCKABLE_FUNCTION(, const char *, DigitalTwin_ModelDefinition_Get_Data, const char *, interfaceId, MODEL_DEFINITION_CLIENT_HANDLE, mdHandle);
 
 #ifdef __cplusplus
 }

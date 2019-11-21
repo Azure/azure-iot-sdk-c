@@ -24,13 +24,13 @@
 #include <digitaltwin_device_client.h>
 #include <digitaltwin_interface_client.h>
 
+// #define ENABLE_MODEL_DEFINITION_INTERFACE to enable ModelDefinition interface.  Remove it if your DTDL definitions will be 
+// available on the cloud already (e.g. a private repository) to save space on constrained devices.
 #define ENABLE_MODEL_DEFINITION_INTERFACE
 
-// #define ENABLE_MODEL_DEFINITION_INTERFACE to enable ModelDefinition interface.  It is left out of default sample because it is not required and will add resources on constrained devices.
 #ifdef ENABLE_MODEL_DEFINITION_INTERFACE
 #include <digitaltwin_model_definition.h>
 #endif 
-
 
 //
 // Headers that implement the sample interfaces that this sample device registers
@@ -42,9 +42,9 @@
 
 // Number of DigitalTwin Interfaces that this DigitalTwin Device supports.
 #ifdef ENABLE_MODEL_DEFINITION_INTERFACE
-#define DIGITALTWIN_SAMPLE_DEVICE_MAX_INTERFACES 3
+#define DIGITALTWIN_SAMPLE_DEVICE_NUM_INTERFACES 3
 #else
-#define DIGITALTWIN_SAMPLE_DEVICE_MAX_INTERFACES 2
+#define DIGITALTWIN_SAMPLE_DEVICE_NUM_INTERFACES 2
 #endif
 #define DIGITALTWIN_SAMPLE_DEVICE_INFO_INDEX 0
 #define DIGITALTWIN_SAMPLE_ENVIRONMENTAL_SENSOR_INDEX 1
@@ -191,7 +191,7 @@ int main(int argc, char *argv[])
     DIGITALTWIN_CLIENT_RESULT result;
     IOTHUB_DEVICE_HANDLE deviceHandle = NULL; 
     DIGITALTWIN_DEVICE_CLIENT_HANDLE dtDeviceClientHandle = NULL;
-    DIGITALTWIN_INTERFACE_CLIENT_HANDLE interfaceClientHandles[DIGITALTWIN_SAMPLE_DEVICE_MAX_INTERFACES];
+    DIGITALTWIN_INTERFACE_CLIENT_HANDLE interfaceClientHandles[DIGITALTWIN_SAMPLE_DEVICE_NUM_INTERFACES];
 #ifdef ENABLE_MODEL_DEFINITION_INTERFACE
     MODEL_DEFINITION_CLIENT_HANDLE modeldefClientHandle = NULL;
 #endif
@@ -245,7 +245,7 @@ int main(int argc, char *argv[])
 #endif
     // Register the interface we've created with Azure IoT.  This call will block until interfaces
     // are successfully registered, we get a failure from server, or we timeout.
-    else if (DigitalTwinSampleDevice_RegisterDigitalTwinInterfacesAndWait(dtDeviceClientHandle, interfaceClientHandles, DIGITALTWIN_SAMPLE_DEVICE_MAX_INTERFACES) != DIGITALTWIN_CLIENT_OK)
+    else if (DigitalTwinSampleDevice_RegisterDigitalTwinInterfacesAndWait(dtDeviceClientHandle, interfaceClientHandles, DIGITALTWIN_SAMPLE_DEVICE_NUM_INTERFACES) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("DigitalTwinSampleDevice_RegisterDigitalTwinInterfacesAndWait failed");
     }

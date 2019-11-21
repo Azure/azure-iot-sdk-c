@@ -666,6 +666,22 @@ static DT_SEND_TELEMETRY_CALLBACK_CONTEXT* CreateDTSendTelemetryCallbackContext(
     return dtSendTelemetryCallbackContext;
 }
 
+// ReportedSdkInfo_Callback is invoked when SendSdkInformation property is acknowledged. Because this is best
+// effort only, we simply log the result for diagnostics purposes but take no further action.
+static void ReportedSdkInfo_Callback(int status_code, void* userContextCallback)
+{
+    (void)userContextCallback;
+    if (status_code < 300)
+    {
+        LogInfo("Sending SDKInformation properties to server successful, status=<%d>", status_code);
+    }
+    else
+    {
+        LogError("Sending SDKInformation properties to server failed, status=<%d>", status_code);
+    }
+}
+
+
 // SendSdkInformation sends information about this SDK to the corresponding reported properties.
 // This sending of SDK info is a best effort only; if it fails, we will not otherwise block application
 // from using the rest of the SDK.
@@ -684,7 +700,7 @@ static void SendSdkInformation(DT_CLIENT_CORE* dtClientCore)
         const size_t sdkInfoLen = strlen(sdkInfoString);
 
         LogInfo("Sending reported state for sdkInfo=%s", sdkInfoString);
-        (void)InvokeBindingSendReportedStateAsync(dtClientCore, (unsigned const char*)sdkInfoString, sdkInfoLen, ReportedDTStateUpdate_Callback, NULL);
+        (void)InvokeBindingSendReportedStateAsync(dtClientCore, (unsigned const char*)sdkInfoString, sdkInfoLen, ReportedSdkInfo_Callback, NULL);
     }
 
     STRING_delete(sdkInfo);
@@ -783,6 +799,59 @@ static DIGITALTWIN_CLIENT_RESULT SendInterfacesToRegisterMessage(DT_CLIENT_CORE*
     return result;
 }
 
+// VerifyComponentsUnique makes sure that the componentName of each handle is unique.  E.g. one connection cannot have
+// two components both named "frontCamera".  We check here, instead of solely relying on server policy, because if this fails on server
+// side for MQTT then the connection may be dropped and it will be hard for application developer to debug.
+// Duplicate interfaces ARE allowed - e.g. app can have two "urn:contoso:camera:1" interfaces as long as the component names are different.
+static DIGITALTWIN_CLIENT_RESULT VerifyComponentsUnique(DIGITALTWIN_INTERFACE_CLIENT_HANDLE* dtInterfaces, unsigned int numDTInterfaces)
+{
+    DIGITALTWIN_CLIENT_RESULT result = DIGITALTWIN_CLIENT_ERROR;
+    unsigned int i;
+    unsigned int j;
+
+    for (i = 0; i < numDTInterfaces; i++)
+    {
+        const char* componentName1 = DT_InterfaceClient_GetComponentName(dtInterfaces[i]);
+        if (componentName1 == NULL)
+        {   
+            LogError("DT_InterfaceClient_GetComponentName failed on element %d in handle list", i);
+            result = DIGITALTWIN_CLIENT_ERROR;
+            break;
+        }
+
+        for (j = i+1; j < numDTInterfaces; j++)
+        {
+            const char* componentName2 = DT_InterfaceClient_GetComponentName(dtInterfaces[j]);
+            if (componentName2 == NULL)
+            {   
+                LogError("DT_InterfaceClient_GetComponentName failed on element %d in handle list", j);
+                result = DIGITALTWIN_CLIENT_ERROR;
+                break;
+            }
+
+            // Interface names are case sensitive, so compare they're not equal with strcmp
+            if (strcmp(componentName1, componentName2) == 0)
+            {
+                LogError("The component name %s was repeated on element %d and %d", componentName1, i, j);
+                result = DIGITALTWIN_CLIENT_ERROR_DUPLICATE_COMPONENTS;
+                break;
+            }
+        }
+
+        if (j != numDTInterfaces)
+        {
+            break;
+        }
+    }
+
+    if (i == numDTInterfaces)
+    {
+        result = DIGITALTWIN_CLIENT_OK;
+    }
+
+    return result;
+}
+
 // DT_ClientCoreRegisterInterfacesAsync updates the list of interfaces we're supporting and begins 
 // protocol update of server.
 DIGITALTWIN_CLIENT_RESULT DT_ClientCoreRegisterInterfacesAsync(DT_CLIENT_CORE_HANDLE dtClientCoreHandle, const char* deviceCapabilityModel, DIGITALTWIN_INTERFACE_CLIENT_HANDLE* dtInterfaces, unsigned int numDTInterfaces, DIGITALTWIN_INTERFACE_REGISTERED_CALLBACK dtInterfaceRegisteredCallback, void* userContextCallback)
@@ -800,6 +869,10 @@ DIGITALTWIN_CLIENT_RESULT DT_ClientCoreRegisterInterfacesAsync(DT_CLIENT_CORE_HA
     {
         LogError("Invalid deviceCapabilityModel %s", deviceCapabilityModel);
         result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
+    }
+    else if ((result = VerifyComponentsUnique(dtInterfaces, numDTInterfaces)) != DIGITALTWIN_CLIENT_OK)
+    {
+        LogError("VerifyComponentsUnique failed, result = %d", result);
     }
     else if (InvokeBindingLock(dtClientCore, &lockHeld) != 0)
     {
@@ -820,10 +893,9 @@ DIGITALTWIN_CLIENT_RESULT DT_ClientCoreRegisterInterfacesAsync(DT_CLIENT_CORE_HA
     {
         LogError("DT_InterfaceList_BindInterfaces failed, result = %d", result);
     }
-    else if (SendInterfacesToRegisterMessage(dtClientCore, deviceCapabilityModel) != 0)
+    else if ((result = SendInterfacesToRegisterMessage(dtClientCore, deviceCapabilityModel)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("SendInterfacesToRegisterMessage failed");
-        result = DIGITALTWIN_CLIENT_ERROR;
     }
     else
     {
