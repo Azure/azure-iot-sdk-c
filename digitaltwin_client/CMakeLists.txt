@@ -65,8 +65,6 @@ IF(WIN32)
     add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
 ENDIF(WIN32)
 
-add_definitions(-DDIGITALTWIN_LOGGING_ENABLED)
-
 
 add_library(digitaltwin_client
     ${digitaltwin_client_c_files}

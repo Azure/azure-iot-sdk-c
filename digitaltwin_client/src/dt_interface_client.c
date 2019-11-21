@@ -422,7 +422,7 @@ static bool IsDesiredInterfaceStateTransitionAllowed(DT_INTERFACE_CLIENT* dtInte
 
 static void SetInterfaceState(DT_INTERFACE_CLIENT* dtInterfaceClient, DT_INTERFACE_STATE desiredState)
 {
-    DigitalTwinLogInfo("DigitalTwin Interface : Changing interface state on interface %s from %s to %s", dtInterfaceClient->componentName,
+    LogInfo("DigitalTwin Interface : Changing interface state on interface %s from %s to %s", dtInterfaceClient->componentName,
                                                                                              MU_ENUM_TO_STRING(DT_INTERFACE_STATE, dtInterfaceClient->interfaceState), 
                                                                                              MU_ENUM_TO_STRING(DT_INTERFACE_STATE, desiredState));
     dtInterfaceClient->interfaceState = desiredState;
@@ -1170,12 +1170,12 @@ static void ProcessPropertyUpdateIfNeededFromDesired(DT_INTERFACE_CLIENT* dtInte
             dtClientPropertyUpdate.propertyDesiredLen = strlen(payloadForDesiredProperty);
             dtClientPropertyUpdate.desiredVersion = jsonVersion;
         
-            DigitalTwinLogInfo("DigitalTwin Interface : Invoking property callback for interface %s, propertyName=%s, propertyCallbackContext=%p", 
+            LogInfo("DigitalTwin Interface : Invoking property callback for interface %s, propertyName=%s, propertyCallbackContext=%p", 
                                 dtInterfaceClient->componentName, propertyName, dtInterfaceClient->propertyCallbackContext);
                 
             dtInterfaceClient->propertyUpdatedCallback(&dtClientPropertyUpdate, dtInterfaceClient->propertyCallbackContext);
 
-            DigitalTwinLogInfo("DigitalTwin Interface: Invoking property callback returned");
+            LogInfo("DigitalTwin Interface: Invoking property callback returned");
         }
 
         json_free_serialized_string(payloadForDesiredProperty);
@@ -1212,12 +1212,12 @@ static void ProcessPropertyUpdateIfNeededFromReportedOnly(DT_INTERFACE_CLIENT* d
             dtClientPropertyUpdate.propertyDesiredLen = 0;
             dtClientPropertyUpdate.desiredVersion = jsonVersion;
 
-            DigitalTwinLogInfo("DigitalTwin Interface : Invoking property callback for interface %s, propertyName=%s, propertyCallbackContext=%p",
+            LogInfo("DigitalTwin Interface : Invoking property callback for interface %s, propertyName=%s, propertyCallbackContext=%p",
                 dtInterfaceClient->componentName, propertyName, dtInterfaceClient->propertyCallbackContext);
 
             dtInterfaceClient->propertyUpdatedCallback(&dtClientPropertyUpdate, dtInterfaceClient->propertyCallbackContext);
 
-            DigitalTwinLogInfo("DigitalTwin Interface: Invoking property callback returned");
+            LogInfo("DigitalTwin Interface: Invoking property callback returned");
         }
 
         json_free_serialized_string(payloadForReportedOnlyProperty);
@@ -1436,11 +1436,11 @@ static void InvokeDTCommand(DT_INTERFACE_CLIENT* dtInterfaceClient, const char* 
     memset(&dtClientResponse, 0, sizeof(dtClientResponse));
     dtClientResponse.version = DIGITALTWIN_CLIENT_COMMAND_RESPONSE_VERSION_1;
     
-    DigitalTwinLogInfo("DigitalTwin Interface : Invoking callback to process command %s on interface name %s", commandName, dtInterfaceClient->componentName);
+    LogInfo("DigitalTwin Interface : Invoking callback to process command %s on interface name %s", commandName, dtInterfaceClient->componentName);
 
     dtInterfaceClient->commandExecuteCallback(&dtClientCommandRequest, &dtClientResponse, dtInterfaceClient->commandCallbackContext);
     
-    DigitalTwinLogInfo("DigitalTwin Interface: Callback to process command returned.  responseData=%p, responseLen=%lu, responseStatus=%d", 
+    LogInfo("DigitalTwin Interface: Callback to process command returned.  responseData=%p, responseLen=%lu, responseStatus=%d", 
                         dtClientResponse.responseData, (unsigned long)dtClientResponse.responseDataLen, dtClientResponse.status);
 
     if (dtClientResponse.responseData == NULL)
@@ -1702,13 +1702,13 @@ void InvokeSendTelemetryCallback(DT_INTERFACE_CLIENT* dtInterfaceClient, DT_INTE
     }
     else
     {
-        (void)dtInterfaceClient; // When DIGITALTWIN_LOGGING_ENABLED is 0, dtInterfaceClient not used and otherwise causes a false positive on -Wunused-variable.
-        DigitalTwinLogInfo("DigitalTwin Interface: Invoking telemetry confirmation callback for component name=%s, reportedStatus=%s, userContextCallback=%p", 
+        (void)dtInterfaceClient; // When logging is disabled, dtInterfaceClient not used and otherwise causes a false positive on -Wunused-variable.
+        LogInfo("DigitalTwin Interface: Invoking telemetry confirmation callback for component name=%s, reportedStatus=%s, userContextCallback=%p", 
                    dtInterfaceClient->componentName, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, dtSendTelemetryStatus), sendTelemetryCallbackContext->userContextCallback);
     
         sendTelemetryCallbackContext->u.telemetryConfirmationCallback(dtSendTelemetryStatus, sendTelemetryCallbackContext->userContextCallback);
     
-        DigitalTwinLogInfo("DigitalTwin Interface: Invoking telemetry confirmation returned");
+        LogInfo("DigitalTwin Interface: Invoking telemetry confirmation returned");
     }
 }
 
@@ -1721,13 +1721,13 @@ void InvokeUpdateAsyncCommandStatusCallback(DT_INTERFACE_CLIENT* dtInterfaceClie
     }
     else
     {
-        (void)dtInterfaceClient; // When DIGITALTWIN_LOGGING_ENABLED is 0, dtInterfaceClient not used and otherwise causes a false positive on -Wunused-variable.
-        DigitalTwinLogInfo("DigitalTwin Interface: Invoking update async command status confirmation callback for component name=%s, reportedStatus=%s, userContextCallback=%p", 
+        (void)dtInterfaceClient; // When logging is disabled, dtInterfaceClient not used and otherwise causes a false positive on -Wunused-variable.
+        LogInfo("DigitalTwin Interface: Invoking update async command status confirmation callback for component name=%s, reportedStatus=%s, userContextCallback=%p", 
                    dtInterfaceClient->componentName, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, dtSendTelemetryStatus), sendTelemetryCallbackContext->userContextCallback);
     
         sendTelemetryCallbackContext->u.updateAsyncCommandCallback(dtSendTelemetryStatus, sendTelemetryCallbackContext->userContextCallback);
     
-        DigitalTwinLogInfo("DigitalTwin Interface: Invoking update async command status callback returned");
+        LogInfo("DigitalTwin Interface: Invoking update async command status callback returned");
     }
 }
 
@@ -1809,13 +1809,13 @@ DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_ProcessReportedPropertiesUpdateCall
         }
         else
         {
-            (void)dtInterfaceClient; // When DIGITALTWIN_LOGGING_ENABLED is 0, dtInterfaceClient not used and otherwise causes a false positive on -Wunused-variable.
-            DigitalTwinLogInfo("DigitalTwin Interface: Invoking reported property update for component name=%s, reportedStatus=%s, userContextCallback=%p", 
+            (void)dtInterfaceClient; // When logging is disabled, dtInterfaceClient not used and otherwise causes a false positive on -Wunused-variable.
+            LogInfo("DigitalTwin Interface: Invoking reported property update for component name=%s, reportedStatus=%s, userContextCallback=%p", 
                         dtInterfaceClient->componentName, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, dtReportedStatus), dtReportedPropertyCallback->userContextCallback);
             
             dtReportedPropertyCallback->dtReportedPropertyCallback(dtReportedStatus, dtReportedPropertyCallback->userContextCallback);
 
-            DigitalTwinLogInfo("DigitalTwin Interface: Invoking reported property update returned"); 
+            LogInfo("DigitalTwin Interface: Invoking reported property update returned"); 
             result = DIGITALTWIN_CLIENT_OK;
         }
 
