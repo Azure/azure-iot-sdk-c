@@ -28,6 +28,7 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     add_definitions(-DMACOSX)
 endif()
 
+
 include (CTest)
 
 if (MSVC)
@@ -74,6 +75,10 @@ option(use_prov_client "Enable provisioning client" OFF)
 option(use_tpm_simulator "tpm simulator type of hsm used with the provisioning client" OFF)
 option(use_edge_modules "Enable support for running modules against Azure IoT Edge" OFF)
 option(use_custom_heap "use externally defined heap functions instead of the malloc family" OFF)
+option(use_baltimore_cert "set use_baltimore_cert to ON if the Baltimore cert is to be used, set to OFF to not use it" OFF)
+option(use_microsoftazure_de_cert "set use_microsoftazure_de_cert to ON if the MicrosoftAzure DE cert is to be used, set to OFF to not use it" OFF)
+option(use_portal_azure_cn_cert "set use_portal_azure_cn_cert to ON if the Portal Azure CN cert is to be used, set to OFF to not use it" OFF)
+
 set(compileOption_C "" CACHE STRING "passes a string to the command line of the C compiler")
 set(compileOption_CXX "" CACHE STRING "passes a string to the command line of the C++ compiler")
 set(linkerOption "" CACHE STRING "passes a string to the shared and exe linker options of the C compiler")
@@ -109,6 +114,19 @@ else()
     option(use_sample_trusted_cert "Set flag in samples to use SDK's built-in CA as TrustedCerts" OFF)
 endif()
 
+# Enable specific certs
+if (${use_baltimore_cert})
+    add_definitions(-DUSE_BALTIMORE_CERT)
+endif()
+
+if (${use_microsoftazure_de_cert})
+    add_definitions(-DUSE_MICROSOFTAZURE_DE_CERT)
+endif()
+
+if (${use_portal_azure_cn_cert})
+    add_definitions(-DUSE_PORTAL_AZURE_CN_CERT)
+endif()
+
 # Enable IoT SDK to act as a module for Edge
 if(${use_edge_modules})
     set(use_prov_client_core ON)
@@ -121,11 +139,13 @@ endif()
 # Set Provisioning Information.  This will also setup appropriate HSM
 if (${use_prov_client})
     set(use_prov_client_core ON)
-
     if ("${hsm_custom_lib}" STREQUAL "")
-        set(hsm_type_x509 ON)
-        set(hsm_type_sastoken ON)
-        set(hsm_type_symm_key ON)
+        if ((NOT ${hsm_type_x509}) AND (NOT ${hsm_type_sastoken}) AND (NOT ${hsm_type_symm_key}))
+            # If the cmake option did not explicitly configure an hsm type, then enable them all.
+            set(hsm_type_x509 ON)
+            set(hsm_type_sastoken ON)
+            set(hsm_type_symm_key ON)
+        endif()
     else()
         set(hsm_type_custom ON)
     endif()
@@ -346,7 +366,7 @@ if (${use_prov_client_core})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_PROV_MODULE")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_PROV_MODULE")
 
-    if (${build_provisioning_service_client} AND ${use_prov_client})
+    if ((${build_provisioning_service_client} AND ${use_prov_client}) OR ${run_e2e_tests})
         add_subdirectory(provisioning_service_client)
     endif()
 

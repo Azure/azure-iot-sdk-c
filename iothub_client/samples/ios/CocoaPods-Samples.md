@@ -8,6 +8,7 @@
 familiarity with their basic usage. Some more detail about the Azure IoT CocoaPods
 may be found [here](./CocoaPods.md).
 * An IoT Hub and a connection string for a client device.
+* [Azure IoT Explorer](https://github.com/Azure/azure-iot-explorer) recommended.
 
 #### 1. Clone the Azure IoT C SDK repo
 
@@ -43,7 +44,7 @@ The `azure-iot-sdk-c/iothub_client/samples` directory some Azure IoT samples tha
 are appropriate for working with the iOS sample application:
 
 * **iothub_ll_c2d_sample** (cloud to device) This sample demonstrates sending messages
-from the cloud to the device. Device Explorer can be used to send the messages.
+from the cloud to the device. Azure IoT Explorer can be used to send the messages.
 * **iothub_ll_telemetry_sample** The telemetry sample demonstrates sending messages
 from the device to the cloud. See 
 [here](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-messages-d2c) for details.
@@ -90,6 +91,6 @@ rotate the simulator.
 The `iothub_ll_telemetry_sample` will send messages to the cloud and report its responses, as will
 iothub_client_sample_device_twin.
 The `iothub_ll_c2d_sample` will wait for messages from the cloud and display them
-when they arrive. Device Explorer can send such messages.
+when they arrive. Azure IoT Explorer can send such messages.
 
 

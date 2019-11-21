@@ -35,7 +35,7 @@ MU_DEFINE_ENUM(DT_COMMAND_PROCESSOR_RESULT, DT_COMMAND_PROCESSOR_RESULT_VALUES);
 #define DT_COMMAND_ERROR_NOT_IMPLEMENTED_CODE 501
 
 MOCKABLE_FUNCTION(, int, DT_InterfaceClient_CheckNameValid, const char*, valueToCheck, bool, isInterfaceId);
-MOCKABLE_FUNCTION(, const char*, DT_InterfaceClient_GetInterfaceInstanceName, DIGITALTWIN_INTERFACE_CLIENT_HANDLE, dtInterfaceClientHandle);
+MOCKABLE_FUNCTION(, const char*, DT_InterfaceClient_GetComponentName, DIGITALTWIN_INTERFACE_CLIENT_HANDLE, dtInterfaceClientHandle);
 MOCKABLE_FUNCTION(, const char*, DT_InterfaceClient_GetInterfaceId, DIGITALTWIN_INTERFACE_CLIENT_HANDLE, dtInterfaceClientHandle);
 
 
@@ -48,7 +48,7 @@ MOCKABLE_FUNCTION(, void, DT_InterfaceClient_RegistrationCompleteCallback, DIGIT
 MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DT_InterfaceClient_ProcessTelemetryCallback, DIGITALTWIN_INTERFACE_CLIENT_HANDLE, dtInterfaceClientHandle, DIGITALTWIN_CLIENT_RESULT, dtSendTelemetryStatus, void*, userContextCallback);
 MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DT_InterfaceClient_ProcessReportedPropertiesUpdateCallback, DIGITALTWIN_INTERFACE_CLIENT_HANDLE, dtInterfaceClientHandle, DIGITALTWIN_CLIENT_RESULT, dtReportedStatus, void*, userContextCallback);
 
-MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DT_InterfaceClient_CreateTelemetryMessage, const char*, interfaceId, const char*, interfaceInstanceName, const char*, telemetryName, const char*, messageData, IOTHUB_MESSAGE_HANDLE*, telemetryMessageHandle);
+MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DT_InterfaceClient_CreateTelemetryMessage, const char*, interfaceId, const char*, componentName, const char*, telemetryName, const unsigned char*, messageData, size_t, messageDataLen, IOTHUB_MESSAGE_HANDLE*, telemetryMessageHandle);
 MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DT_InterfaceClient_GetSdkInformation, STRING_HANDLE*, sdkInfoHandle);
 
 

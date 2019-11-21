@@ -326,7 +326,7 @@ static DIGITALTWIN_CLIENT_RESULT CreateDTInterfacesJson(DT_INTERFACE_LIST* dtInt
         for (i = 0; i < dtInterfaceList->numDtInterfaceClientHandles; i++)
         {
             const char* interfaceId;
-            const char* interfaceInstanceName;
+            const char* componentName;
 
             if ((interfaceId = DT_InterfaceClient_GetInterfaceId(dtInterfaceList->dtInterfaceClientHandles[i])) == NULL)
             {
@@ -334,13 +334,13 @@ static DIGITALTWIN_CLIENT_RESULT CreateDTInterfacesJson(DT_INTERFACE_LIST* dtInt
                 result = DIGITALTWIN_CLIENT_ERROR;
                 break;
             }
-            else if ((interfaceInstanceName = DT_InterfaceClient_GetInterfaceInstanceName(dtInterfaceList->dtInterfaceClientHandles[i])) == NULL)
+            else if ((componentName = DT_InterfaceClient_GetComponentName(dtInterfaceList->dtInterfaceClientHandles[i])) == NULL)
             {
-                LogError("DT_InterfaceClient_GetInterfaceInstanceName failed");
+                LogError("DT_InterfaceClient_GetComponentName failed");
                 result = DIGITALTWIN_CLIENT_ERROR;
                 break;
             }
-            else if (json_object_set_string(interfacesObject, interfaceInstanceName, interfaceId) != JSONSuccess)
+            else if (json_object_set_string(interfacesObject, componentName, interfaceId) != JSONSuccess)
             {
                 LogError("json_object_set_string failed");
                 result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
@@ -350,11 +350,11 @@ static DIGITALTWIN_CLIENT_RESULT CreateDTInterfacesJson(DT_INTERFACE_LIST* dtInt
 
         if (i == dtInterfaceList->numDtInterfaceClientHandles)
         {
-            result = 0;
+            result = DIGITALTWIN_CLIENT_OK;
         }
     }
 
-    if (result != 0)
+    if (result != DIGITALTWIN_CLIENT_OK)
     {
         if (interfacesObject != NULL)
         {
@@ -438,7 +438,7 @@ DIGITALTWIN_CLIENT_RESULT DT_InterfaceList_CreateRegistrationMessage(DIGITALTWIN
     }
     else if ((result = DT_InterfaceClient_CreateTelemetryMessage(DT_MODEL_DISCOVERY_INTERFACE_ID, DT_MODEL_DISCOVERY_INTERFACE_NAME, 
                                                                  DT_CAPABILITY_REPORT_INTERFACE_TELEMETRY_TYPE,
-                                                                 messageBody, messageHandle)) != DIGITALTWIN_CLIENT_OK)
+                                                                 (unsigned char *)messageBody, strlen(messageBody), messageHandle)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("DT_InterfaceClient_CreateTelemetryMessage failed, error = %d", result);
         result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
