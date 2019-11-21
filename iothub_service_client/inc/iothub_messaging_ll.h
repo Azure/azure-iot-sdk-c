@@ -68,7 +68,7 @@ typedef struct IOTHUB_SERVICE_FEEDBACK_BATCH_TAG
 typedef struct IOTHUB_MESSAGING_TAG* IOTHUB_MESSAGING_HANDLE;
 
 typedef void(*IOTHUB_OPEN_COMPLETE_CALLBACK)(void* context);
-typedef void(*IOTHUB_SEND_COMPLETE_CALLBACK)(void* context = ,
+typedef void(*IOTHUB_SEND_COMPLETE_CALLBACK)(void* context, IOTHUB_MESSAGING_RESULT messagingResult);
 typedef void(*IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK)(void* context, IOTHUB_SERVICE_FEEDBACK_BATCH* feedbackBatch);
 
 /** @brief    Creates a IoT Hub Service Client Messaging handle for use it in consequent APIs.
