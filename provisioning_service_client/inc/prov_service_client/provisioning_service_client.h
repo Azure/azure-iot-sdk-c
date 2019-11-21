@@ -16,11 +16,11 @@ extern "C" {
 #include "provisioning_sc_query.h"
 #include "provisioning_sc_bulk_operation.h"
 
-typedef enum TRACING_STATUS_VALUES_TAG
+typedef enum TRACING_STATUS_TAG
 {
     TRACING_STATUS_ON = 0,
     TRACING_STATUS_OFF = 1
-} TRACING_STATUS_VALUES;
+} TRACING_STATUS;
 
 /** @brief  Handle to hide struct and use it in consequent APIs
 */

@@ -12,13 +12,13 @@ extern "C" {
 #include "azure_macro_utils/macro_utils.h"
 #include "parson.h"
 
-typedef enum X509_CERTIFICATE_TYPE_VALUES_TAG
+typedef enum X509_CERTIFICATE_TYPE_TAG
 {
     X509_CERTIFICATE_TYPE_NONE = 0,
     X509_CERTIFICATE_TYPE_CLIENT = 1,
     X509_CERTIFICATE_TYPE_SIGNING = 2,
     X509_CERTIFICATE_TYPE_CA_REFERENCES = 3
-} X509_CERTIFICATE_TYPE_VALUES;
+} X509_CERTIFICATE_TYPE;
 
 //Note: X509_CERTIFICATE_TYPE_NONE is invalid, indicating error
 

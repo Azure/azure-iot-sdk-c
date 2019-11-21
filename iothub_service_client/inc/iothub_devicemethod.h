@@ -16,13 +16,13 @@ extern "C"
 
 #include "umock_c/umock_c_prod.h"
 
-typedef enum IOTHUB_DEVICE_METHOD_RESULT_VALUES_TAG
+typedef enum IOTHUB_DEVICE_METHOD_RESULT_TAG
 {
     IOTHUB_DEVICE_METHOD_OK = 0,
     IOTHUB_DEVICE_METHOD_INVALID_ARG = 1,
     IOTHUB_DEVICE_METHOD_ERROR = 2,
     IOTHUB_DEVICE_METHOD_HTTPAPI_ERROR = 3
-} IOTHUB_DEVICE_METHOD_RESULT_VALUES;
+} IOTHUB_DEVICE_METHOD_RESULT;
 
 /** @brief Handle to hide struct and use it in consequent APIs
 */

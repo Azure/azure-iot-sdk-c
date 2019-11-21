@@ -14,14 +14,14 @@ extern "C" {
 #include "umock_c/umock_c_prod.h"
 #include "azure_macro_utils/macro_utils.h"
 
-typedef enum SECURE_DEVICE_TYPE_VALUES_TAG
+typedef enum SECURE_DEVICE_TYPE_TAG
 {
     SECURE_DEVICE_TYPE_UNKNOWN = 0,
     SECURE_DEVICE_TYPE_TPM = 1,
     SECURE_DEVICE_TYPE_X509 = 2,
     SECURE_DEVICE_TYPE_HTTP_EDGE = 3,
     SECURE_DEVICE_TYPE_SYMMETRIC_KEY = 4
-} SECURE_DEVICE_TYPE_VALUES;
+} SECURE_DEVICE_TYPE;
 
 MOCKABLE_FUNCTION(, int, prov_dev_security_init, SECURE_DEVICE_TYPE, hsm_type);
 MOCKABLE_FUNCTION(, void, prov_dev_security_deinit);

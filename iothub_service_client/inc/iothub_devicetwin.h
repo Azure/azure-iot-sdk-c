@@ -20,13 +20,13 @@ extern "C"
 #else
 #endif
 
-typedef enum IOTHUB_DEVICE_TWIN_RESULT_VALUES_TAG
+typedef enum IOTHUB_DEVICE_TWIN_RESULT_TAG
 {
     IOTHUB_DEVICE_TWIN_OK = 0,
     IOTHUB_DEVICE_TWIN_INVALID_ARG = 1,
     IOTHUB_DEVICE_TWIN_ERROR = 2,
     IOTHUB_DEVICE_TWIN_HTTPAPI_ERROR = 3
-} IOTHUB_DEVICE_TWIN_RESULT_VALUES;
+} IOTHUB_DEVICE_TWIN_RESULT;
 
 /** @brief Handle to hide struct and use it in consequent APIs
 */
