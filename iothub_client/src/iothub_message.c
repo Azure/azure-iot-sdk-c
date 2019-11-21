@@ -9,8 +9,47 @@
 
 #include "iothub_message.h"
 
-MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
-MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_CONTENT_TYPE_VALUES);
+const char * IOTHUB_MESSAGE_RESULTStringStorage[4] = 
+{
+    "IOTHUB_MESSAGE_OK",
+    "IOTHUB_MESSAGE_INVALID_ARG",
+    "IOTHUB_MESSAGE_INVALID_TYPE",
+    "IOTHUB_MESSAGE_ERROR",
+};
+static const size_t IOTHUB_MESSAGE_RESULTStringStorageLen = sizeof(IOTHUB_MESSAGE_RESULTStringStorage[0]) / sizeof(IOTHUB_MESSAGE_RESULTStringStorage);
+
+const char * IOTHUB_MESSAGE_RESULTStrings(IOTHUB_MESSAGE_RESULT value) 
+{
+    if ((size_t) IOTHUB_MESSAGE_RESULTStringStorageLen < 0 || (size_t) value >= IOTHUB_MESSAGE_RESULTStringStorageLen)
+    {
+        return "NULL";
+    } 
+    else 
+    {
+        return IOTHUB_MESSAGE_RESULTStringStorage[value];
+    }
+}
+
+
+const char * IOTHUBMESSAGE_CONTENT_TYPEStringStorage[3] = 
+{
+    "IOTHUBMESSAGE_BYTEARRAY",
+    "IOTHUBMESSAGE_STRING",
+    "IOTHUBMESSAGE_UNKNOWN",
+};
+static const size_t IOTHUBMESSAGE_CONTENT_TYPEStringStorageLen = sizeof(IOTHUBMESSAGE_CONTENT_TYPEStringStorage) / sizeof(IOTHUBMESSAGE_CONTENT_TYPEStringStorage[0]);
+
+const char * IOTHUBMESSAGE_CONTENT_TYPEStrings(IOTHUBMESSAGE_CONTENT_TYPE value)
+{
+    if ((size_t) value < 0 || (size_t) value >= IOTHUBMESSAGE_CONTENT_TYPEStringStorageLen) 
+    {
+        return "NULL";
+    } 
+    else 
+    {
+        return IOTHUBMESSAGE_CONTENT_TYPEStringStorage[value];
+    }
+}
 
 static const char* SECURITY_CLIENT_JSON_ENCODING = "application/json";
 

@@ -40,28 +40,164 @@
 #define LOG_ERROR_RESULT LogError("result = %s", MU_ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, result));
 #define INDEFINITE_TIME ((time_t)(-1))
 
-MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, IOTHUB_CLIENT_FILE_UPLOAD_RESULT_VALUES);
-MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
-MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_CLIENT_RETRY_POLICY, IOTHUB_CLIENT_RETRY_POLICY_VALUES);
-MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_CLIENT_STATUS, IOTHUB_CLIENT_STATUS_VALUES);
-MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_IDENTITY_TYPE, IOTHUB_IDENTITY_TYPE_VALUE);
-MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_PROCESS_ITEM_RESULT, IOTHUB_PROCESS_ITEM_RESULT_VALUE);
-MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_CLIENT_IOTHUB_METHOD_STATUS, IOTHUB_CLIENT_IOTHUB_METHOD_STATUS_VALUES);
+static const char * IOTHUB_CLIENT_FILE_UPLOAD_RESULTStringStorage[2] = 
+{
+    "FILE_UPLOAD_OK",
+    "FILE_UPLOAD_ERROR",
+};
+static const size_t IOTHUB_CLIENT_FILE_UPLOAD_RESULTStringStorageLen = sizeof(IOTHUB_CLIENT_FILE_UPLOAD_RESULTStringStorage) / sizeof(IOTHUB_CLIENT_FILE_UPLOAD_RESULTStringStorage[0]);
+    
+const char * IOTHUB_CLIENT_FILE_UPLOAD_RESULTStrings(IOTHUB_CLIENT_FILE_UPLOAD_RESULT value) 
+{
+    if ((size_t) value < 0 || (size_t) value >= IOTHUB_CLIENT_FILE_UPLOAD_RESULTStringStorageLen) 
+    {
+        return "NULL";
+    } 
+    else 
+    {
+        return IOTHUB_CLIENT_FILE_UPLOAD_RESULTStringStorage[value];
+    }
+}
 
+const char * IOTHUB_CLIENT_RESULTStringStorage[5] = 
+{
+    "IOTHUB_CLIENT_OK",
+    "IOTHUB_CLIENT_INVALID_ARG",
+    "IOTHUB_CLIENT_ERROR",
+    "IOTHUB_CLIENT_INVALID_SIZE",
+    "IOTHUB_CLIENT_INDEFINITE_TIME",
+};
+static const size_t IOTHUB_CLIENT_RESULTStringStorageLen = sizeof(IOTHUB_CLIENT_RESULTStringStorage) / sizeof(IOTHUB_CLIENT_RESULTStringStorage[0]);
+    
+const char * IOTHUB_CLIENT_RESULTStrings(IOTHUB_CLIENT_RESULT value) 
+{
+    if ((size_t) value < 0 || (size_t) value >= IOTHUB_CLIENT_RESULTStringStorageLen) 
+    {
+        return "NULL";
+    } 
+    else 
+    {
+        return IOTHUB_CLIENT_RESULTStringStorage[value];
+    }
+}
 
-//MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES);
+const char * IOTHUB_CLIENT_RETRY_POLICYStringStorage[7] = 
+{
+    "IOTHUB_CLIENT_RETRY_NONE",
+    "IOTHUB_CLIENT_RETRY_IMMEDIATE",
+    "IOTHUB_CLIENT_RETRY_INTERVAL",
+    "IOTHUB_CLIENT_RETRY_LINEAR_BACKOFF",
+    "IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF",
+    "IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER",
+    "IOTHUB_CLIENT_RETRY_RANDOM",
+};
+static const size_t IOTHUB_CLIENT_RETRY_POLICYStringStorageLen = sizeof(IOTHUB_CLIENT_RETRY_POLICYStringStorage) / sizeof(IOTHUB_CLIENT_RETRY_POLICYStringStorage[0]);
 
-static const char * IOTHUB_CLIENT_CONFIRMATION_RESULTStringStorage[4] = 
+const char * IOTHUB_CLIENT_RETRY_POLICYStrings(IOTHUB_CLIENT_RETRY_POLICY value) 
+{
+    if ((size_t) value < 0 || (size_t) value >= IOTHUB_CLIENT_RETRY_POLICYStringStorageLen) 
+    {
+        return "NULL";
+    } 
+    else 
+    {
+        return IOTHUB_CLIENT_RETRY_POLICYStringStorage[value];
+    }
+}
+
+const char * IOTHUB_CLIENT_STATUSStringStorage[2] =
+{
+    "IOTHUB_CLIENT_SEND_STATUS_IDLE",
+    "IOTHUB_CLIENT_SEND_STATUS_BUSY",
+};
+static const size_t IOTHUB_CLIENT_STATUSStringStorageLen = sizeof(IOTHUB_CLIENT_STATUSStringStorage) / sizeof(IOTHUB_CLIENT_STATUSStringStorage[0]);
+
+const char * IOTHUB_CLIENT_STATUSStrings(IOTHUB_CLIENT_STATUS value) 
+{
+    if ((size_t) value < 0 || (size_t) value >= IOTHUB_CLIENT_STATUSStringStorageLen) 
+    {
+        return "NULL";
+    } 
+    else 
+    {
+        return IOTHUB_CLIENT_STATUSStringStorage[value];
+    }
+}
+
+const char * IOTHUB_IDENTITY_TYPEStringStorage[4] = 
+{
+    "IOTHUB_TYPE_TELEMETRY",
+    "IOTHUB_TYPE_DEVICE_TWIN",
+    "IOTHUB_TYPE_DEVICE_METHODS",
+    "IOTHUB_TYPE_EVENT_QUEUE",
+};
+static const size_t IOTHUB_IDENTITY_TYPEStringStorageLen = sizeof(IOTHUB_IDENTITY_TYPEStringStorage) / sizeof(IOTHUB_IDENTITY_TYPEStringStorage[0]);
+
+const char * IOTHUB_IDENTITY_TYPEStrings(IOTHUB_IDENTITY_TYPE value) 
+{
+    if ((size_t) value < 0 || (size_t) value >= IOTHUB_IDENTITY_TYPEStringStorageLen) 
+    {
+        return "NULL";
+    } 
+    else 
+    {
+        return IOTHUB_IDENTITY_TYPEStringStorage[value];
+    }
+}
+
+const char * IOTHUB_PROCESS_ITEM_RESULTStringStorage[4] = 
+{
+    "IOTHUB_PROCESS_OK",
+    "IOTHUB_PROCESS_ERROR",
+    "IOTHUB_PROCESS_NOT_CONNECTED",
+    "IOTHUB_PROCESS_CONTINUE",
+};
+static const size_t IOTHUB_PROCESS_ITEM_RESULTStringStorageLen = sizeof(IOTHUB_PROCESS_ITEM_RESULTStringStorage) / sizeof(IOTHUB_PROCESS_ITEM_RESULTStringStorage[0]);
+
+const char * IOTHUB_PROCESS_ITEM_RESULTStrings(IOTHUB_PROCESS_ITEM_RESULT value) 
+{
+    if ((size_t) value < 0 || (size_t) value >= IOTHUB_PROCESS_ITEM_RESULTStringStorageLen) 
+    {
+        return "NULL";
+    } 
+    else 
+    {
+        return IOTHUB_PROCESS_ITEM_RESULTStringStorage[value];
+    }
+}
+
+const char * IOTHUB_CLIENT_IOTHUB_METHOD_STATUSStringStorage[2] = 
+{
+    "IOTHUB_CLIENT_IOTHUB_METHOD_STATUS_SUCCESS",
+    "IOTHUB_CLIENT_IOTHUB_METHOD_STATUS_ERROR",
+};
+
+static const size_t IOTHUB_CLIENT_IOTHUB_METHOD_STATUSStringStorageLen = sizeof(IOTHUB_CLIENT_IOTHUB_METHOD_STATUSStringStorage) / sizeof(IOTHUB_CLIENT_IOTHUB_METHOD_STATUSStringStorage[0]);
+
+const char * IOTHUB_CLIENT_IOTHUB_METHOD_STATUSStrings(IOTHUB_CLIENT_IOTHUB_METHOD_STATUS value) 
+{
+    if ((size_t) value < 0 || (size_t) value >= IOTHUB_CLIENT_IOTHUB_METHOD_STATUSStringStorageLen) 
+    {
+        return "NULL";
+    } 
+    else 
+    {
+        return IOTHUB_CLIENT_IOTHUB_METHOD_STATUSStringStorage[value];
+    }
+}
+
+const char * IOTHUB_CLIENT_CONFIRMATION_RESULTStringStorage[4] = 
 {
     "IOTHUB_CLIENT_CONFIRMATION_OK",
     "IOTHUB_CLIENT_CONFIRMATION_BECAUSE_DESTROY",
     "IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT",
     "IOTHUB_CLIENT_CONFIRMATION_ERROR",
 };
-static const int IOTHUB_CLIENT_CONFIRMATION_RESULTStringStorageLen = (int) sizeof(IOTHUB_CLIENT_CONFIRMATION_RESULTStringStorage) / sizeof(IOTHUB_CLIENT_CONFIRMATION_RESULTStringStorage[0]);
-    
-const char * IOTHUB_CLIENT_CONFIRMATION_RESULTStrings(IOTHUB_CLIENT_CONFIRMATION_RESULT value) {
-    if ((int) value < 0 || (int) value >= IOTHUB_CLIENT_CONFIRMATION_RESULTStringStorageLen) 
+static const size_t IOTHUB_CLIENT_CONFIRMATION_RESULTStringStorageLen = sizeof(IOTHUB_CLIENT_CONFIRMATION_RESULTStringStorage) / sizeof(IOTHUB_CLIENT_CONFIRMATION_RESULTStringStorage[0]);
+
+const char * IOTHUB_CLIENT_CONFIRMATION_RESULTStrings(IOTHUB_CLIENT_CONFIRMATION_RESULT value) 
+{
+    if ((size_t) value < 0 || (size_t) value >= IOTHUB_CLIENT_CONFIRMATION_RESULTStringStorageLen) 
     {
         return "NULL";
     } 
@@ -71,13 +207,106 @@ const char * IOTHUB_CLIENT_CONFIRMATION_RESULTStrings(IOTHUB_CLIENT_CONFIRMATION
     }
 }
 
+const char * IOTHUB_CLIENT_CONNECTION_STATUSStringStorage[2] = 
+{
+    "IOTHUB_CLIENT_CONNECTION_AUTHENTICATED",
+    "IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED",
+};
+static const size_t IOTHUB_CLIENT_CONNECTION_STATUSStringStorageLen = sizeof(IOTHUB_CLIENT_CONNECTION_STATUSStringStorage) / sizeof(IOTHUB_CLIENT_CONNECTION_STATUSStringStorage[0]);
 
-MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_STATUS_VALUES);
-MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, IOTHUB_CLIENT_CONNECTION_STATUS_REASON_VALUES);
-MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(TRANSPORT_TYPE, TRANSPORT_TYPE_VALUES);
-MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(DEVICE_TWIN_UPDATE_STATE, DEVICE_TWIN_UPDATE_STATE_VALUES);
+const char * IOTHUB_CLIENT_CONNECTION_STATUSStrings(IOTHUB_CLIENT_CONNECTION_STATUS value) 
+{
+    if ((size_t) value < 0 || (size_t) value >= IOTHUB_CLIENT_CONNECTION_STATUSStringStorageLen) 
+    {
+        return "NULL";
+    } 
+    else 
+    {
+        return IOTHUB_CLIENT_CONNECTION_STATUSStringStorage[value];
+    }
+}
+
+const char * IOTHUB_CLIENT_CONNECTION_STATUS_REASONStringStorage[8] = 
+{
+    "IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN",
+    "IOTHUB_CLIENT_CONNECTION_DEVICE_DISABLED",
+    "IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL",
+    "IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED",
+    "IOTHUB_CLIENT_CONNECTION_NO_NETWORK",
+    "IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR",
+    "IOTHUB_CLIENT_CONNECTION_NO_PING_RESPONSE",
+    "IOTHUB_CLIENT_CONNECTION_OK",
+};
+static const size_t IOTHUB_CLIENT_CONNECTION_STATUS_REASONStringStorageLen = sizeof(IOTHUB_CLIENT_CONNECTION_STATUS_REASONStringStorage) / sizeof(IOTHUB_CLIENT_CONNECTION_STATUS_REASONStringStorage[0]);
+
+const char * IOTHUB_CLIENT_CONNECTION_STATUS_REASONStrings(IOTHUB_CLIENT_CONNECTION_STATUS_REASON value) 
+{
+    if ((size_t) value < 0 || (size_t) value >= IOTHUB_CLIENT_CONNECTION_STATUS_REASONStringStorageLen) 
+    {
+        return "NULL";
+    } 
+    else 
+    {
+        return IOTHUB_CLIENT_CONNECTION_STATUS_REASONStringStorage[value];
+    }
+}
+
+const char * TRANSPORT_TYPEStringStorage[2] = 
+{
+    "TRANSPORT_LL",
+    "TRANSPORT_THREADED",
+};
+static const size_t TRANSPORT_TYPEStringStorageLen = sizeof(TRANSPORT_TYPEStringStorage) / sizeof(TRANSPORT_TYPEStringStorage[0]);
+
+const char * TRANSPORT_TYPEStrings(TRANSPORT_TYPE value) 
+{
+    if ((size_t) value < 0 || (size_t) value >= TRANSPORT_TYPEStringStorageLen) 
+    {
+        return "NULL";
+    } 
+    else 
+    {
+        return TRANSPORT_TYPEStringStorage[value];
+    }
+}
+
+const char * DEVICE_TWIN_UPDATE_STATEStringStorage[2] = 
+{
+    "DEVICE_TWIN_UPDATE_COMPLETE",
+    "DEVICE_TWIN_UPDATE_PARTIAL",
+};
+static const size_t DEVICE_TWIN_UPDATE_STATEStringStorageLen = sizeof(DEVICE_TWIN_UPDATE_STATEStringStorage) / sizeof(DEVICE_TWIN_UPDATE_STATEStringStorage[0]);
+
+const char * DEVICE_TWIN_UPDATE_STATEStrings(DEVICE_TWIN_UPDATE_STATE value) 
+{
+    if ((size_t) value < 0 || (size_t) value >= DEVICE_TWIN_UPDATE_STATEStringStorageLen) 
+    {
+        return "NULL";
+    } 
+    else 
+    {
+        return DEVICE_TWIN_UPDATE_STATEStringStorage[value];
+    }
+}
+
 #ifndef DONT_USE_UPLOADTOBLOB
-MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT_VALUES);
+const char * IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULTStringStorage[2] = 
+{
+    "IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK",
+    "IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_ABORT",
+};
+static const size_t IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULTStringStorageLen = sizeof(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULTStringStorage) / sizeof(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULTStringStorage[0]);
+
+const char * IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULTStrings(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT value) {
+    if ((size_t) value < 0 || (size_t) value >= IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULTStringStorageLen) 
+    {
+        return "NULL";
+    } 
+    else 
+    {
+        return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULTStringStorage[value];
+    }
+}
 #endif // DONT_USE_UPLOADTOBLOB
 
 #define CALLBACK_TYPE_VALUES \
