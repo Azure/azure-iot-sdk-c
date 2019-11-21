@@ -29,26 +29,8 @@
 
 MU_DEFINE_ENUM(IOTHUB_TWIN_REQUEST_MODE, IOTHUB_TWIN_REQUEST_MODE_VALUES);
 
-static const char * IOTHUB_DEVICE_TWIN_RESULTStringStorage[4] = 
-    {
-    "IOTHUB_DEVICE_TWIN_OK",
-    "IOTHUB_DEVICE_TWIN_INVALID_ARG",
-    "IOTHUB_DEVICE_TWIN_ERROR",
-    "IOTHUB_DEVICE_TWIN_HTTPAPI_ERROR",
-};
-static const size_t IOTHUB_DEVICE_TWIN_RESULTStringStorageLen = sizeof(IOTHUB_DEVICE_TWIN_RESULTStringStorage) / sizeof(IOTHUB_DEVICE_TWIN_RESULTStringStorage[0]);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_DEVICE_TWIN_RESULT, IOTHUB_DEVICE_TWIN_RESULT_VALUES);
 
-const char * IOTHUB_DEVICE_TWIN_RESULTStrings(IOTHUB_DEVICE_TWIN_RESULT value) 
-{
-    if ((size_t) value < 0 || (size_t) value >= IOTHUB_DEVICE_TWIN_RESULTStringStorageLen) 
-    {
-        return "NULL";
-    } 
-    else 
-    {
-        return IOTHUB_DEVICE_TWIN_RESULTStringStorage[value];
-    }
-}
 
 #define  HTTP_HEADER_KEY_AUTHORIZATION  "Authorization"
 #define  HTTP_HEADER_VAL_AUTHORIZATION  " "

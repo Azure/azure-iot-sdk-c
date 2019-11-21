@@ -19,26 +19,7 @@
 #include "iothub_devicemethod.h"
 #include "iothub_sc_version.h"
 
-static const char * IOTHUB_DEVICE_METHOD_RESULTStringStorage[4] = 
-{
-    "IOTHUB_DEVICE_METHOD_OK",
-    "IOTHUB_DEVICE_METHOD_INVALID_ARG",
-    "IOTHUB_DEVICE_METHOD_ERROR",
-    "IOTHUB_DEVICE_METHOD_HTTPAPI_ERROR",
-};
-static const size_t IOTHUB_DEVICE_METHOD_RESULTStringStorageLen = sizeof(IOTHUB_DEVICE_METHOD_RESULTStringStorage) / sizeof(IOTHUB_DEVICE_METHOD_RESULTStringStorage[0]);
-
-const char * IOTHUB_DEVICE_METHOD_RESULTStrings(IOTHUB_DEVICE_METHOD_RESULT value) 
-{
-    if ((size_t) value < 0 || (size_t) value >= IOTHUB_DEVICE_METHOD_RESULTStringStorageLen) 
-    {
-        return "NULL";
-    } 
-    else 
-    {
-        return IOTHUB_DEVICE_METHOD_RESULTStringStorage[value];
-    }
-}
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_RESULT_VALUES);
 
 #define IOTHUB_DEVICE_METHOD_REQUEST_MODE_VALUES    \
     IOTHUB_DEVICEMETHOD_REQUEST_INVOKE
