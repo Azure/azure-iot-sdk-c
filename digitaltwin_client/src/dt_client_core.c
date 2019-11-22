@@ -352,7 +352,7 @@ static int DTDeviceMethod_Callback(const char* method_name, const unsigned char*
     {
         DT_CLIENT_CORE* dtClientCore = (DT_CLIENT_CORE*)userContextCallback;
 
-        DigitalTwinLogInfo("DigitalTwin Client Core: Processing method callback for method %s, payload=%p, size=%lu", method_name, payload, (unsigned long)size);
+        LogInfo("DigitalTwin Client Core: Processing method callback for method %s, payload=%p, size=%lu", method_name, payload, (unsigned long)size);
 
         if (BeginClientCoreCallbackProcessing(dtClientCore) != 0)
         {
@@ -594,7 +594,7 @@ static void ReportedDTStateUpdate_Callback(int status_code, void* userContextCal
         DT_REPORTED_PROPERTY_CALLBACK_CONTEXT* dtReportedPropertyCallbackContext = (DT_REPORTED_PROPERTY_CALLBACK_CONTEXT*)userContextCallback;
         DT_CLIENT_CORE* dtClientCore = dtReportedPropertyCallbackContext->dtClientCore;
 
-        DigitalTwinLogInfo("DigitalTwin Client Core: Processing callback for reported state update.  status=%d, userContextCallback=%p", status_code, userContextCallback);
+        LogInfo("DigitalTwin Client Core: Processing callback for reported state update.  status=%d, userContextCallback=%p", status_code, userContextCallback);
 
         if (status_code == httpBadRequestStatusCode)
         {
@@ -631,7 +631,7 @@ static void DeviceTwinDT_Callback(DEVICE_TWIN_UPDATE_STATE update_state, const u
     {
         DT_CLIENT_CORE* dtClientCore = (DT_CLIENT_CORE*)userContextCallback;
 
-        DigitalTwinLogInfo("DigitalTwin Client Core: Device Twin callback called.  updateState=%s, payload=%p, size=%lu, userContextCallback=%p", 
+        LogInfo("DigitalTwin Client Core: Device Twin callback called.  updateState=%s, payload=%p, size=%lu, userContextCallback=%p", 
                     MU_ENUM_TO_STRING(DEVICE_TWIN_UPDATE_STATE,update_state), payLoad, (unsigned long)size, userContextCallback);
         
         if (BeginClientCoreCallbackProcessing(dtClientCore) != 0)
@@ -670,7 +670,7 @@ static DT_SEND_TELEMETRY_CALLBACK_CONTEXT* CreateDTSendTelemetryCallbackContext(
 // RegisterDTInterfaces_Callback is called when we receive acknowledgement from the service that the message we sent registering the interfaces was received.
 static void RegisterDTInterfaces_Callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
-    DigitalTwinLogInfo("DigitalTwin Client Core: Processing register DigitalTwin interfaces callback.  confirmationResult=%s", MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT,result));
+    LogInfo("DigitalTwin Client Core: Processing register DigitalTwin interfaces callback.  confirmationResult=%s", MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT,result));
 
     if (userContextCallback == NULL)
     {
@@ -693,7 +693,7 @@ static void RegisterDTInterfaces_Callback(IOTHUB_CLIENT_CONFIRMATION_RESULT resu
             {
                 // Only after we've registered our interfaces should we start listening for incoming commands and properties.
                 // If either of these fail, we will report an error to the application.
-                DigitalTwinLogInfo("DigitalTwin Client Core: Interfaces successfully registered.  Register for device method and twin callbacks if needed");
+                LogInfo("DigitalTwin Client Core: Interfaces successfully registered.  Register for device method and twin callbacks if needed");
 
                 if (InvokeBindingSetDeviceMethodCallbackIfNeeded(dtClientCore, DTDeviceMethod_Callback) != 0)
                 {
@@ -875,7 +875,7 @@ static void SendDTTelemetry_Callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, v
         DT_SEND_TELEMETRY_CALLBACK_CONTEXT* dtSendTelemetryCallbackContext = (DT_SEND_TELEMETRY_CALLBACK_CONTEXT*)userContextCallback;
         DT_CLIENT_CORE* dtClientCore = dtSendTelemetryCallbackContext->dtClientCore;
 
-        DigitalTwinLogInfo("DigitalTwin Client Core: Processing telemetry callback.  confirmationResult=%s, userContextCallback=%p", MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT,result), userContextCallback);
+        LogInfo("DigitalTwin Client Core: Processing telemetry callback.  confirmationResult=%s, userContextCallback=%p", MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT,result), userContextCallback);
 
         if (BeginClientCoreCallbackProcessing(dtClientCore) != 0)
         {
