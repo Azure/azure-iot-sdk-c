@@ -171,20 +171,11 @@ static const size_t TEST_DATA_LEN = 3;
 static const char* TEST_DECRYPTED_NONCE = "decrypted_nonce";
 static const size_t TEST_DECRYPTED_NONCE_LEN = sizeof("decrypted_nonce");
 
-TEST_DEFINE_ENUM_TYPE(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
-IMPLEMENT_UMOCK_C_ENUM_TYPE(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
-
 TEST_DEFINE_ENUM_TYPE(PROV_AUTH_TYPE, PROV_AUTH_TYPE_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(PROV_AUTH_TYPE, PROV_AUTH_TYPE_VALUES);
 
-TEST_DEFINE_ENUM_TYPE(PROV_DEVICE_REG_STATUS, PROV_DEVICE_REG_STATUS_VALUES);
-IMPLEMENT_UMOCK_C_ENUM_TYPE(PROV_DEVICE_REG_STATUS, PROV_DEVICE_REG_STATUS_VALUES);
-
 TEST_DEFINE_ENUM_TYPE(PROV_AUTH_RESULT, PROV_AUTH_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(PROV_AUTH_RESULT, PROV_AUTH_RESULT_VALUES);
-
-TEST_DEFINE_ENUM_TYPE(TRANSPORT_HSM_TYPE, TRANSPORT_HSM_TYPE_VALUES);
-IMPLEMENT_UMOCK_C_ENUM_TYPE(TRANSPORT_HSM_TYPE, TRANSPORT_HSM_TYPE_VALUES);
 
 #ifdef __cplusplus
 extern "C"
@@ -436,11 +427,11 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         result = umocktypes_stdint_register_types();
         ASSERT_ARE_EQUAL(int, 0, result);
 
-        REGISTER_TYPE(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT);
+        REGISTER_UMOCK_ALIAS_TYPE(PROV_DEVICE_RESULT, int);
         REGISTER_TYPE(PROV_AUTH_TYPE, PROV_AUTH_TYPE);
-        REGISTER_TYPE(PROV_DEVICE_REG_STATUS, PROV_DEVICE_REG_STATUS);
+        REGISTER_UMOCK_ALIAS_TYPE(PROV_DEVICE_REG_STATUS, int);
         REGISTER_TYPE(PROV_AUTH_RESULT, PROV_AUTH_RESULT);
-        REGISTER_TYPE(TRANSPORT_HSM_TYPE, TRANSPORT_HSM_TYPE);
+        REGISTER_UMOCK_ALIAS_TYPE(TRANSPORT_HSM_TYPE, int);
 
         REGISTER_UMOCK_ALIAS_TYPE(XDA_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(XIO_HANDLE, void*);
@@ -859,7 +850,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(NULL, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
 
         //assert
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_INVALID_ARG, prov_result);
+        ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_INVALID_ARG, prov_result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
@@ -876,7 +867,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, NULL, NULL, on_prov_register_status_callback, NULL);
 
         //assert
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_INVALID_ARG, prov_result);
+        ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_INVALID_ARG, prov_result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
@@ -895,7 +886,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
 
         //assert
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result);
+        ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_OK, prov_result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
@@ -915,7 +906,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
 
         //assert
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result);
+        ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_OK, prov_result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
@@ -948,7 +939,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
                 PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
 
                 //assert
-                ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_ERROR, prov_result, "Prov_Device_LL_Register_Device failure in test %zu/%zu", index, count);
+                ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_ERROR, prov_result, "Prov_Device_LL_Register_Device failure in test %zu/%zu", index, count);
             }
         }
 
@@ -984,7 +975,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
                 PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
 
                 //assert
-                ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_ERROR, prov_result, "Prov_Device_LL_Register_Device failure in test %zu/%zu", index, count);
+                ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_ERROR, prov_result, "Prov_Device_LL_Register_Device failure in test %zu/%zu", index, count);
             }
         }
 
@@ -1636,7 +1627,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_SetOption(NULL, OPTION_HTTP_PROXY, &http_proxy);
 
         //assert
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_INVALID_ARG, prov_result);
+        ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_INVALID_ARG, prov_result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
@@ -1656,7 +1647,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_SetOption(NULL, NULL, &http_proxy);
 
         //assert
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_INVALID_ARG, prov_result);
+        ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_INVALID_ARG, prov_result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
@@ -1673,7 +1664,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_SetOption(NULL, OPTION_HTTP_PROXY, NULL);
 
         //assert
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_INVALID_ARG, prov_result);
+        ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_INVALID_ARG, prov_result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
@@ -1694,7 +1685,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_SetOption(handle, OPTION_HTTP_PROXY, &http_proxy);
 
         //assert
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result);
+        ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_OK, prov_result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
@@ -1718,7 +1709,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_SetOption(handle, OPTION_HTTP_PROXY, &http_proxy);
 
         //assert
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_ERROR, prov_result);
+        ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_ERROR, prov_result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
@@ -1740,7 +1731,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_SetOption(handle, "logtrace", &trace);
 
         //assert
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result);
+        ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_OK, prov_result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
@@ -1762,7 +1753,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_SetOption(handle, "logtrace", &trace);
 
         //assert
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_ERROR, prov_result);
+        ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_ERROR, prov_result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
@@ -1781,7 +1772,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_SetOption(handle, "TrustedCerts", TEST_TRUSTED_CERT);
 
         //assert
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result);
+        ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_OK, prov_result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
@@ -1800,7 +1791,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_SetOption(handle, "TrustedCerts", TEST_TRUSTED_CERT);
 
         //assert
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_ERROR, prov_result);
+        ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_ERROR, prov_result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
@@ -1820,7 +1811,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_SetOption(handle, PROV_REGISTRATION_ID, TEST_REGISTRATION_ID);
 
         //assert
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result);
+        ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_OK, prov_result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
@@ -1841,7 +1832,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_SetOption(handle, PROV_REGISTRATION_ID, TEST_REGISTRATION_ID);
 
         //assert
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_ERROR, prov_result);
+        ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_ERROR, prov_result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
@@ -1858,7 +1849,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_SetOption(handle, PROV_REGISTRATION_ID, NULL);
 
         //assert
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_ERROR, prov_result);
+        ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_ERROR, prov_result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
@@ -1877,7 +1868,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_SetOption(handle, PROV_REGISTRATION_ID, TEST_REGISTRATION_ID);
 
         //assert
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_ERROR, prov_result);
+        ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_ERROR, prov_result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
@@ -1894,7 +1885,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_SetOption(handle, PROV_OPTION_TIMEOUT, NULL);
 
         //assert
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_ERROR, prov_result);
+        ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_ERROR, prov_result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
@@ -1913,7 +1904,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_SetOption(handle, PROV_OPTION_TIMEOUT, &prov_timeout);
 
         //assert
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result);
+        ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_OK, prov_result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
@@ -1928,7 +1919,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Set_Provisioning_Payload(NULL, TEST_CUSTOM_DATA);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result);
+        ASSERT_ARE_NOT_EQUAL(int, PROV_DEVICE_RESULT_OK, prov_result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
@@ -1946,7 +1937,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Set_Provisioning_Payload(handle, TEST_CUSTOM_DATA);
 
         //assert
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result);
+        ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_OK, prov_result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
@@ -1965,11 +1956,11 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
 
         //act
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Set_Provisioning_Payload(handle, TEST_CUSTOM_DATA);
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result);
+        ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_OK, prov_result);
         prov_result = Prov_Device_LL_Set_Provisioning_Payload(handle, TEST_CUSTOM_DATA);
 
         //assert
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result);
+        ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_OK, prov_result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup

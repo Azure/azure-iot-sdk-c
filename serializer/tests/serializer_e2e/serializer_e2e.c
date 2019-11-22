@@ -55,20 +55,8 @@ static IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo = NULL;
 TEST_DEFINE_ENUM_TYPE(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
 
-TEST_DEFINE_ENUM_TYPE(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
-IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
-
-TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
-IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
-
 TEST_DEFINE_ENUM_TYPE(CODEFIRST_RESULT, CODEFIRST_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(CODEFIRST_RESULT, CODEFIRST_RESULT_VALUES);
-
-TEST_DEFINE_ENUM_TYPE(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_RESULT_VALUES);
-IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_RESULT_VALUES);
-
-TEST_DEFINE_ENUM_TYPE(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_RESULT_VALUES);
-IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_RESULT_VALUES);
 
 static const char* TEST_SEND_DATA_FMT = "{\"ExampleData\": { \"SendDate\": \"%.24s\", \"UniqueId\":%d} }";
 static const char* TEST_RECV_DATA_FMT = "{\\\"Name\\\": \\\"testaction\\\", \\\"Parameters\\\": { \\\"property1\\\": \\\"%.24s\\\", \\\"UniqueId\\\":%d}}";
@@ -442,10 +430,10 @@ BEGIN_TEST_SUITE(serializer_e2e)
         ASSERT_IS_NOT_NULL(iotHubMessagingHandle, "Could not initialize IoTHubMessaging to send C2D messages to the device");
 
         iotHubMessagingResult = IoTHubMessaging_Open(iotHubMessagingHandle, openCompleteCallback, "Context string for open");
-        ASSERT_ARE_EQUAL(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_OK, iotHubMessagingResult);
+        ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_OK, iotHubMessagingResult);
 
         iotHubMessagingResult = IoTHubMessaging_SendAsync(iotHubMessagingHandle, deviceToUse->deviceId, messageHandle, sendCompleteCallback, NULL);
-        ASSERT_ARE_EQUAL(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_OK, iotHubMessagingResult, "IoTHubMessaging_SendAsync failed, could not send C2D message to the device");
+        ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_OK, iotHubMessagingResult, "IoTHubMessaging_SendAsync failed, could not send C2D message to the device");
 
         iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, AMQP_Protocol);
         ASSERT_IS_NOT_NULL(iotHubClientHandle);
@@ -453,16 +441,16 @@ BEGIN_TEST_SUITE(serializer_e2e)
         if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509) {
             IOTHUB_CLIENT_RESULT result;
             result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
-            ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
+            ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
             result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
-            ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
+            ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
         }
 
         deviceModel* devModel = CREATE_MODEL_INSTANCE(MacroE2EModelAction, deviceModel);
         ASSERT_IS_NOT_NULL(devModel);
 
         IOTHUB_CLIENT_RESULT setMessageResult = IoTHubClient_SetMessageCallback(iotHubClientHandle, IoTHubMessage, devModel);
-        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, setMessageResult);
+        ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, setMessageResult);
 
         beginOperation = time(NULL);
         continue_run = true;
@@ -536,9 +524,9 @@ BEGIN_TEST_SUITE(serializer_e2e)
             if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509) {
                 IOTHUB_CLIENT_RESULT result;
                 result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
-                ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
+                ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
                 result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
-                ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
+                ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
             }
 
             devModel = CREATE_MODEL_INSTANCE(MacroE2EModelAction, deviceModel);
@@ -555,7 +543,7 @@ BEGIN_TEST_SUITE(serializer_e2e)
             free(destination);
 
             IOTHUB_CLIENT_RESULT iothubClientResult = IoTHubClient_SendEventAsync(iotHubClientHandle, iothubMessageHandle, iotHubMacroCallBack, expectedData);
-            ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, iothubClientResult);
+            ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, iothubClientResult);
 
             IoTHubMessage_Destroy(iothubMessageHandle);
             // Wait til the data gets sent to the callback
@@ -659,14 +647,14 @@ BEGIN_TEST_SUITE(serializer_e2e)
         ASSERT_IS_NOT_NULL(iotHubMessagingHandle, "Could not initialize IoTHubMessaging to send C2D messages to the device");
 
         iotHubMessagingResult = IoTHubMessaging_Open(iotHubMessagingHandle, openCompleteCallback, "Context string for open");
-        ASSERT_ARE_EQUAL(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_OK, iotHubMessagingResult);
+        ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_OK, iotHubMessagingResult);
 
         // Create message
         messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)g_recvMacroData->toBeSend, g_recvMacroData->toBeSendSize);
 
         // act
         iotHubMessagingResult = IoTHubMessaging_SendAsync(iotHubMessagingHandle, deviceToUse->deviceId, messageHandle, sendCompleteCallback, NULL);
-        ASSERT_ARE_EQUAL(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_OK, iotHubMessagingResult, "IoTHubMessaging_SendAsync failed, could not send C2D message to the device");
+        ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_OK, iotHubMessagingResult, "IoTHubMessaging_SendAsync failed, could not send C2D message to the device");
 
         //step 3: data is retrieved by HTTP
         {
@@ -678,9 +666,9 @@ BEGIN_TEST_SUITE(serializer_e2e)
             if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509) {
                 IOTHUB_CLIENT_RESULT result;
                 result = IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
-                ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
+                ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
                 result = IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
-                ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
+                ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
             }
 
             unsigned int minimumPollingTime = 0; /*because it should not wait*/
@@ -693,7 +681,7 @@ BEGIN_TEST_SUITE(serializer_e2e)
             ASSERT_IS_NOT_NULL(devModel);
 
             IOTHUB_CLIENT_RESULT setMessageResult = IoTHubClient_LL_SetMessageCallback(iotHubClientHandle, IoTHubMessage, devModel);
-            ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, setMessageResult);
+            ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, setMessageResult);
 
             beginOperation = time(NULL);
             while (
@@ -755,9 +743,9 @@ BEGIN_TEST_SUITE(serializer_e2e)
             if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509) {
                 IOTHUB_CLIENT_RESULT result;
                 result = IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
-                ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
+                ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
                 result = IoTHubClient_LL_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
-                ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
+                ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
             }
 
             devModel = CREATE_MODEL_INSTANCE(MacroE2EModelAction, deviceModel);
@@ -774,7 +762,7 @@ BEGIN_TEST_SUITE(serializer_e2e)
             free(destination);
 
             IOTHUB_CLIENT_RESULT iothubClientResult = IoTHubClient_LL_SendEventAsync(iotHubClientHandle, iothubMessageHandle, iotHubMacroCallBack, expectedData);
-            ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, iothubClientResult);
+            ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, iothubClientResult);
 
             IoTHubMessage_Destroy(iothubMessageHandle);
 
@@ -896,13 +884,13 @@ BEGIN_TEST_SUITE(serializer_e2e)
 
         if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509) {
             result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
-            ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
+            ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
             result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
-            ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
+            ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
         }
 
         result = IoTHubClient_SetDeviceMethodCallback(iotHubClientHandle, DeviceMethodCallback, device);
-        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device method callback");
+        ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "Could not set the device method callback");
 
         // Wait for the method subscription to go through
         ThreadAPI_Sleep(3 * 1000);
@@ -919,7 +907,7 @@ BEGIN_TEST_SUITE(serializer_e2e)
         size_t responsePayloadSize;
         IOTHUB_DEVICE_METHOD_RESULT invokeResult = IoTHubDeviceMethod_Invoke(serviceClientDeviceMethodHandle, deviceToUse->deviceId, "theSumOfThings", "{\"a\":3, \"b\":33}", 120, &responseStatus, &responsePayload, &responsePayloadSize);
 
-        ASSERT_ARE_EQUAL(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_OK, invokeResult, "IoTHubDeviceMethod_Invoke failed");
+        ASSERT_ARE_EQUAL(int, IOTHUB_DEVICE_METHOD_OK, invokeResult, "IoTHubDeviceMethod_Invoke failed");
         ASSERT_ARE_EQUAL(int, 10, responseStatus, "response status is incorrect");
 
         /*make sure the response is null terminated*/
@@ -985,9 +973,9 @@ BEGIN_TEST_SUITE(serializer_e2e)
         if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509) {
             IOTHUB_CLIENT_RESULT result;
             result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
-            ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
+            ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
             result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
-            ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
+            ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
         }
 
         /*step 2: create an instance of the model*/
@@ -996,7 +984,7 @@ BEGIN_TEST_SUITE(serializer_e2e)
         /* step 3: set the model instance's value to something; send it!*/
         model->reported_int = 199;
         IOTHUB_CLIENT_RESULT res = IoTHubDeviceTwin_SendReportedStatedeviceModel(model, my_IOTHUB_CLIENT_REPORTED_STATE_CALLBACK, NULL);
-        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, res);
+        ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, res);
 
         /*step 4: wait for the callback to be called (it needs to indicate success)*/
         /*time bound it to 1 minute*/

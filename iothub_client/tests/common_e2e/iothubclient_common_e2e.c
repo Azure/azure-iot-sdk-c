@@ -541,7 +541,7 @@ static void setoption_on_device_or_module(const char * optionName, const void * 
         result = IoTHubDeviceClient_SetOption(iothub_deviceclient_handle, optionName, optionData);
     }
 
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, errorMessage);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, errorMessage);
 }
 
 static void setconnectionstatuscallback_on_device_or_module()
@@ -557,7 +557,7 @@ static void setconnectionstatuscallback_on_device_or_module()
         result = IoTHubDeviceClient_SetConnectionStatusCallback(iothub_deviceclient_handle, connection_status_callback, &g_connection_status_info);
     }
 
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set connection Status Callback");
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "Could not set connection Status Callback");
 }
 
 static void sendeventasync_on_device_or_module(IOTHUB_MESSAGE_HANDLE msgHandle, EXPECTED_SEND_DATA* sendData)
@@ -573,7 +573,7 @@ static void sendeventasync_on_device_or_module(IOTHUB_MESSAGE_HANDLE msgHandle, 
         result = IoTHubDeviceClient_SendEventAsync(iothub_deviceclient_handle, msgHandle, ReceiveConfirmationCallback, sendData);
     }
 
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "SendEventAsync failed");
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "SendEventAsync failed");
 }
 
 static void setmessagecallback_on_device_or_module(EXPECTED_RECEIVE_DATA* receiveUserContext)
@@ -589,7 +589,7 @@ static void setmessagecallback_on_device_or_module(EXPECTED_RECEIVE_DATA* receiv
         result = IoTHubDeviceClient_SetMessageCallback(iothub_deviceclient_handle, ReceiveMessageCallback, receiveUserContext);
     }
 
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "IoTHubDeviceClient_SetMessageCallback failed");
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "IoTHubDeviceClient_SetMessageCallback failed");
 }
 
 
@@ -781,10 +781,10 @@ D2C_MESSAGE_HANDLE send_error_injection_message(const char* faultOperationType, 
     msgHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)sendData->expectedString, strlen(sendData->expectedString));
     ASSERT_IS_NOT_NULL(msgHandle, "Could not create the D2C message to be sent");
 
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, IoTHubMessage_SetProperty(msgHandle, "AzIoTHub_FaultOperationType", faultOperationType));
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, IoTHubMessage_SetProperty(msgHandle, "AzIoTHub_FaultOperationCloseReason", faultOperationCloseReason));
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, IoTHubMessage_SetProperty(msgHandle, "AzIoTHub_FaultOperationDelayInSecs", faultOperationDelayInSecs));
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, IoTHubMessage_SetProperty(msgHandle, "AzIoTHub_FaultOperationDurationInSecs", "20"));
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_OK, IoTHubMessage_SetProperty(msgHandle, "AzIoTHub_FaultOperationType", faultOperationType));
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_OK, IoTHubMessage_SetProperty(msgHandle, "AzIoTHub_FaultOperationCloseReason", faultOperationCloseReason));
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_OK, IoTHubMessage_SetProperty(msgHandle, "AzIoTHub_FaultOperationDelayInSecs", faultOperationDelayInSecs));
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_OK, IoTHubMessage_SetProperty(msgHandle, "AzIoTHub_FaultOperationDurationInSecs", "20"));
 
     sendData->msgHandle = msgHandle;
 
@@ -1051,7 +1051,7 @@ void e2e_send_security_event_test_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     send_data->expectedString = TEST_ASC_SECURITY_MESSAGE;
 
     // Send the messages to the ASC Event hub
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, IoTHubMessage_SetAsSecurityMessage(send_data->msgHandle), "Failure setting message as a security message");
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_OK, IoTHubMessage_SetAsSecurityMessage(send_data->msgHandle), "Failure setting message as a security message");
 
     // Send ASC message, it should not arrive in the IoTHub EventHub
     sendeventasync_on_device_or_module(send_data->msgHandle, send_data);

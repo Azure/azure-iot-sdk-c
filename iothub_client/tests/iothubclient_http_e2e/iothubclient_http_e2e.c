@@ -373,14 +373,14 @@ static void SendEvent(IOTHUB_PROVISIONED_DEVICE* deviceToUse)
 
         if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509) {
             result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
-            ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
+            ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
             result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
-            ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
+            ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
         }
 
         // act
         result = IoTHubClient_SendEventAsync(iotHubClientHandle, msgHandle, ReceiveConfirmationCallback, sendData);
-        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Failure calling IoTHubClient_SendEventAsync");
+        ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "Failure calling IoTHubClient_SendEventAsync");
     }
 
     time_t beginOperation, nowTime;
@@ -493,13 +493,13 @@ static void RecvMessage(IOTHUB_PROVISIONED_DEVICE* deviceToUse)
     if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509) {
         IOTHUB_CLIENT_RESULT result;
         result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
-        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
+        ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
         result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
-        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
+        ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
     }
 
     IOTHUB_CLIENT_RESULT result = IoTHubClient_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, receiveUserContext);
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Failure setting message callback");
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "Failure setting message callback");
 
     unsigned int minimumPollingTime = 1; /*because it should not wait*/
     if (IoTHubClient_SetOption(iotHubClientHandle, OPTION_MIN_POLLING_TIME, &minimumPollingTime) != IOTHUB_CLIENT_OK)
@@ -635,7 +635,7 @@ TEST_FUNCTION(IoTHub_HTTP_SendEvent_Shared_e2e)
 
         // act
         result = IoTHubClient_SendEventAsync(iotHubClientHandle1, msgHandle1, ReceiveConfirmationCallback, sendData1);
-        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Failure calling IoTHubClient_SendEventAsync");
+        ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "Failure calling IoTHubClient_SendEventAsync");
     }
 
     // Send the Event device 2
@@ -650,7 +650,7 @@ TEST_FUNCTION(IoTHub_HTTP_SendEvent_Shared_e2e)
 
         // act
         result = IoTHubClient_SendEventAsync(iotHubClientHandle2, msgHandle2, ReceiveConfirmationCallback, sendData2);
-        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Failure calling IoTHubClient_SendEventAsync");
+        ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "Failure calling IoTHubClient_SendEventAsync");
     }
 
     time_t beginOperation, nowTime;
@@ -860,9 +860,9 @@ TEST_FUNCTION(IoTHub_HTTP_RecvMessage_shared_E2ETest)
     ASSERT_IS_NOT_NULL(iotHubClientHandle2, "Failure creating Iothub Client, device 2");
 
     IOTHUB_CLIENT_RESULT result1 = IoTHubClient_SetMessageCallback(iotHubClientHandle1, ReceiveMessageCallback, receiveUserContext1);
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result1, "Failure setting message callback, device 1");
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result1, "Failure setting message callback, device 1");
     IOTHUB_CLIENT_RESULT result2 = IoTHubClient_SetMessageCallback(iotHubClientHandle2, ReceiveMessageCallback, receiveUserContext2);
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result2, "Failure setting message callback device 2");
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result2, "Failure setting message callback device 2");
 
     unsigned int minimumPollingTime = 1; /*because it should not wait*/
     if (IoTHubClient_SetOption(iotHubClientHandle1, OPTION_MIN_POLLING_TIME, &minimumPollingTime) != IOTHUB_CLIENT_OK)

@@ -293,7 +293,7 @@ BEGIN_TEST_SUITE(dps_client_e2e)
 
         // act
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &prov_info, dps_registation_status, &prov_info);
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
+        ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
 
         wait_for_dps_result(handle, &prov_info);
 
@@ -318,7 +318,7 @@ BEGIN_TEST_SUITE(dps_client_e2e)
 
         // act
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &prov_info, dps_registation_status, &prov_info);
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
+        ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
 
         wait_for_dps_result(handle, &prov_info);
 
@@ -342,7 +342,7 @@ BEGIN_TEST_SUITE(dps_client_e2e)
 
         // act
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &prov_info, dps_registation_status, &prov_info);
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
+        ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
 
         wait_for_dps_result(handle, &prov_info);
 
@@ -368,7 +368,7 @@ BEGIN_TEST_SUITE(dps_client_e2e)
 
         // act
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &prov_info, dps_registation_status, &prov_info);
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
+        ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
 
         wait_for_dps_result(handle, &prov_info);
 
@@ -392,7 +392,7 @@ BEGIN_TEST_SUITE(dps_client_e2e)
 
         // act
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &prov_info, dps_registation_status, &prov_info);
-        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
+        ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
 
         wait_for_dps_result(handle, &prov_info);
 

@@ -31,15 +31,6 @@
 
 #define MAX_CONNECT_CALLBACK_WAIT_TIME        10
 
-TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
-IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
-
-TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_STATUS_VALUES);
-IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_STATUS_VALUES);
-
-TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES);
-IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES);
-
 typedef struct CONNECTION_STATUS_DATA_TAG
 {
     bool status_set;
@@ -82,7 +73,7 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE create_client(IOTHUB_CLIENT_TRANSPORT_PROV
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
     IOTHUB_CLIENT_RESULT result = IoTHubDeviceClient_LL_SetConnectionStatusCallback(iothub_handle, connection_status_callback, conn_status);
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set connection Status Callback");
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "Could not set connection Status Callback");
 
     return iothub_handle;
 }
@@ -100,7 +91,7 @@ static void wait_for_unauthorized_send(IOTHUB_DEVICE_CLIENT_LL_HANDLE dev_handle
         (difftime(nowTime, beginOperation) < MAX_CONNECT_CALLBACK_WAIT_TIME) && (!conn_status->status_set) // time box
         );
     ASSERT_IS_TRUE(conn_status->status_set, "Status callback did not get executed");
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_ERROR, conn_status->current_confirmation, "Sending message was successful and should not have been");
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_CONFIRMATION_ERROR, conn_status->current_confirmation, "Sending message was successful and should not have been");
 }
 
 static void wait_for_unauthorized_connection(IOTHUB_DEVICE_CLIENT_LL_HANDLE dev_handle, CONNECTION_STATUS_INFO* conn_status)
@@ -120,7 +111,7 @@ static void wait_for_unauthorized_connection(IOTHUB_DEVICE_CLIENT_LL_HANDLE dev_
         (difftime(nowTime, beginOperation) < MAX_CONNECT_CALLBACK_WAIT_TIME) && (!conn_status->status_set) // time box
         );
     ASSERT_IS_TRUE(conn_status->status_set, "Status callback did not get executed");
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, conn_status->current_status, "Connection was successful and should not have been");
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, conn_status->current_status, "Connection was successful and should not have been");
 }
 
 static void run_invalidcert_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)

@@ -48,9 +48,6 @@ static TEST_MUTEX_HANDLE g_testByTest;
 // Control parameters
 MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
-TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
-IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
-
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
@@ -752,7 +749,7 @@ TEST_FUNCTION(AMQP_SendMessageDisposition)
     IOTHUB_CLIENT_RESULT result = provider->IoTHubTransport_SendMessageDisposition(NULL, IOTHUBMESSAGE_ACCEPTED);
 
     // assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_OK);
+    ASSERT_ARE_EQUAL(int, result, IOTHUB_CLIENT_OK);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     // cleanup

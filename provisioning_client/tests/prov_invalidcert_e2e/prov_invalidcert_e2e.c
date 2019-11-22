@@ -75,7 +75,7 @@ static void wait_for_unauthorized_connection(PROV_DEVICE_LL_HANDLE prov_handle, 
         (difftime(nowTime, beginOperation) < MAX_CONNECT_CALLBACK_WAIT_TIME) && (!conn_status->status_set) // time box
         );
     ASSERT_IS_TRUE(conn_status->status_set, "Status callback did not get executed");
-    ASSERT_ARE_NOT_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, conn_status->current_result, "Connection was successful and should not have been");
+    ASSERT_ARE_NOT_EQUAL(int, PROV_DEVICE_RESULT_OK, conn_status->current_result, "Connection was successful and should not have been");
 }
 
 static void run_invalidcert_test(PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION prov_transport)
