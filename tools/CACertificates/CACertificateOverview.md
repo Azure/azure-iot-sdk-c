@@ -79,7 +79,7 @@ In both cases, the scripts will output the name of the file containing `"CN=106A
 
 Finally, let's create an application and corresponding device on IoT Hub that shows how CA Certificates are used.
 
-On Azure IoT Hub, navigate to the "Device Explorer".  Add a new device (e.g. `mydevice`), and for its authentication type chose "X.509 CA Signed".  Devices can authenticate to IoT Hub using a certificate that is signed by the Root CA from Step 2.
+On Azure IoT Hub, navigate to the IoT Devices section, or launch Azure IoT Explorer.  Add a new device (e.g. `mydevice`), and for its authentication type chose "X.509 CA Signed".  Devices can authenticate to IoT Hub using a certificate that is signed by the Root CA from Step 2.
 
 Note that if you're using this certificate as a DPS registration ID, the ID **must be lower case** or the server will reject it.
 

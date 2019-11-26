@@ -196,7 +196,7 @@ target_link_libraries(prov_auth_client hsm_security_client)
 set(provisioning_libs ${provisioning_libs} prov_auth_client)
 set(provisioning_headers ${provisioning_headers} ${AUTH_CLIENT_H_FILES})
 
-if(${use_prov_client})
+if(${use_prov_client} OR (${use_prov_client_core} AND ${run_e2e_tests}))
     add_library(prov_device_ll_client ${PROV_DEVICE_LL_CLIENT_SOURCE_C_FILES} ${PROV_DEVICE_LL_CLEINT_SOURCE_H_FILES})
     setSdkTargetBuildProperties(prov_device_ll_client)
     linkSharedUtil(prov_device_ll_client)
