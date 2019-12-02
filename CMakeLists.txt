@@ -381,6 +381,7 @@ endif()
 
 add_subdirectory(iothub_client)
 add_subdirectory(serializer)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/tinycbor)
 
 if (NOT ${skip_samples})
   add_subdirectory(samples/solutions)
