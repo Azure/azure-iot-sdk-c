@@ -462,12 +462,24 @@ static void set_expected_calls_for_Create(IOTHUBTRANSPORT_CONFIG* transport_conf
         .SetReturn(TEST_REGISTERED_DEVICES_LIST);
 }
 
-static void set_expected_calls_for_GetSendStatus(DEVICE_SEND_STATUS send_status)
+static void set_expected_calls_for_GetSendStatus(bool is_waiting_to_send_list_empty, DEVICE_SEND_STATUS send_status)
 {
-    STRICT_EXPECTED_CALL(amqp_device_get_send_status(TEST_DEVICE_HANDLE, IGNORED_PTR_ARG))
-        .IgnoreArgument(2)
-        .CopyOutArgumentBuffer(2, &send_status, sizeof(DEVICE_SEND_STATUS))
-        .SetReturn(0);
+    if (!is_waiting_to_send_list_empty)
+    {
+        STRICT_EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG))
+            .SetReturn(0)
+            .CallCannotFail();
+    }
+    else
+    {
+        STRICT_EXPECTED_CALL(DList_IsListEmpty(IGNORED_PTR_ARG))
+            .SetReturn(1)
+            .CallCannotFail();
+        STRICT_EXPECTED_CALL(amqp_device_get_send_status(TEST_DEVICE_HANDLE, IGNORED_PTR_ARG))
+            .IgnoreArgument(2)
+            .CopyOutArgumentBuffer(2, &send_status, sizeof(DEVICE_SEND_STATUS))
+            .SetReturn(0);
+    }
 }
 
 static void set_expected_calls_for_GetHostname()
@@ -2614,13 +2626,18 @@ TEST_FUNCTION(GetSendStatus_failure_checks)
     ASSERT_IS_NOT_NULL(device_handle);
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_GetSendStatus(DEVICE_SEND_STATUS_IDLE);
+    set_expected_calls_for_GetSendStatus(true, DEVICE_SEND_STATUS_IDLE);
     umock_c_negative_tests_snapshot();
 
     // act
     size_t i;
     for (i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
+        if (!umock_c_negative_tests_can_call_fail(i))
+        {
+            continue;
+        }
+
         // arrange
         char error_msg[64];
         IOTHUB_CLIENT_STATUS iotHubClientStatus;
@@ -2655,7 +2672,7 @@ TEST_FUNCTION(GetSendStatus_IDLE_succeeds)
     ASSERT_IS_NOT_NULL(device_handle);
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_GetSendStatus(DEVICE_SEND_STATUS_IDLE);
+    set_expected_calls_for_GetSendStatus(true, DEVICE_SEND_STATUS_IDLE);
 
     IOTHUB_CLIENT_STATUS iotHubClientStatus;
 
@@ -2683,7 +2700,34 @@ TEST_FUNCTION(GetSendStatus_BUSY_succeeds)
     ASSERT_IS_NOT_NULL(device_handle);
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_GetSendStatus(DEVICE_SEND_STATUS_BUSY);
+    set_expected_calls_for_GetSendStatus(true, DEVICE_SEND_STATUS_BUSY);
+
+    IOTHUB_CLIENT_STATUS iotHubClientStatus;
+
+    // act
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_GetSendStatus(device_handle, &iotHubClientStatus);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_SEND_STATUS_BUSY, iotHubClientStatus);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    destroy_transport(handle, device_handle, NULL);
+}
+
+TEST_FUNCTION(GetSendStatus_waiting_to_send_not_empty_BUSY)
+{
+    // arrange
+    initialize_test_variables();
+    TRANSPORT_LL_HANDLE handle = create_transport();
+
+    IOTHUB_DEVICE_CONFIG* device_config = create_device_config(TEST_DEVICE_ID_CHAR_PTR, true);
+    IOTHUB_DEVICE_HANDLE device_handle = register_device(handle, device_config, &TEST_waitingToSend, true);
+    ASSERT_IS_NOT_NULL(device_handle);
+
+    umock_c_reset_all_calls();
+    set_expected_calls_for_GetSendStatus(false, DEVICE_SEND_STATUS_BUSY);
 
     IOTHUB_CLIENT_STATUS iotHubClientStatus;
 
