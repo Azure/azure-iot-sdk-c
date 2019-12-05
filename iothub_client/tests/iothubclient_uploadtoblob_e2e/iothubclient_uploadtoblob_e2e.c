@@ -240,13 +240,13 @@ IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT uploadToBlobGetDataEx(IOTHUB_CLIENT_FI
 
     UPLOADTOBLOB_CALLBACK_STATUS* callbackStatus = (UPLOADTOBLOB_CALLBACK_STATUS*)context;
     ASSERT_ARE_EQUAL(UPLOADTOBLOB_CALLBACK_STATUS, *callbackStatus, UPLOADTOBLOB_CALLBACK_PENDING);
-    ASSERT_ARE_EQUAL(int, (int)result, (int)FILE_UPLOAD_OK);
+    ASSERT_ARE_EQUAL(int, (int)FILE_UPLOAD_OK, (int)result);
 
     static char* uploadData0 = "AAA-";
     static char* uploadData1 = "BBBBB-";
     static char* uploadData2 = "CCCCCC-";
 
-    ASSERT_ARE_EQUAL(int, (int)Lock(updateBlobTestLock), (int)LOCK_OK);
+    ASSERT_ARE_EQUAL(int, (int)LOCK_OK, (int)Lock(updateBlobTestLock));
 
     if (data == NULL)
     {
