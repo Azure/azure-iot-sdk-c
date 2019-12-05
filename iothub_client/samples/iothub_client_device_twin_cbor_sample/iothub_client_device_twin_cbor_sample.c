@@ -19,7 +19,6 @@
 #include "iothub_message.h"
 #include "parson.h"
 #include "cbor.h"
-#include "json2cbor.h"
 
 // The protocol you wish to use should be uncommented
 //
