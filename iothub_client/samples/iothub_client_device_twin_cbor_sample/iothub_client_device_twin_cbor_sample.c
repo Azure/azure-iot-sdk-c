@@ -161,29 +161,30 @@ static char* serialize_to_cbor(Car* car)
     CborEncoder cbor_encoder_root_container;
     cbor_encoder_init(&cbor_encoder_root, cbor_buf, CBOR_BUFFER_SIZE, 0);
 
-    CborError cbor_error;
-    cbor_error = cbor_encoder_create_map(&cbor_encoder_root, &cbor_encoder_root_container, 3);
-    cbor_error = cbor_encode_text_string(&cbor_encoder_root_container, "lastOilChangeDate", sizeof("lastOilChangeDate") - 1);
-    cbor_error = cbor_encode_text_string(&cbor_encoder_root_container, car->lastOilChangeDate, strlen(car->lastOilChangeDate));
-    cbor_error = cbor_encode_text_string(&cbor_encoder_root_container, "maker", sizeof("maker") - 1);
-    cbor_error = cbor_encoder_create_map(&cbor_encoder_root_container, &cbor_encoder_maker, 3);
-    cbor_error = cbor_encode_text_string(&cbor_encoder_maker, "makerName", sizeof("makerName") - 1);
-    cbor_error = cbor_encode_text_string(&cbor_encoder_maker, car->maker.makerName, strlen(car->maker.makerName));
-    cbor_error = cbor_encode_text_string(&cbor_encoder_maker, "style", sizeof("style") - 1);
-    cbor_error = cbor_encode_text_string(&cbor_encoder_maker, car->maker.style, strlen(car->maker.style));
-    cbor_error = cbor_encode_text_string(&cbor_encoder_maker, "year", sizeof("year") - 1);
-    cbor_error = cbor_encode_uint(&cbor_encoder_maker, car->maker.year);
-    cbor_error = cbor_encoder_close_container(&cbor_encoder_root_container, &cbor_encoder_maker);
-    cbor_error = cbor_encode_text_string(&cbor_encoder_root_container, "state", sizeof("state") - 1);
-    cbor_error = cbor_encoder_create_map(&cbor_encoder_root_container, &cbor_encoder_maker, 3);
-    cbor_error = cbor_encode_text_string(&cbor_encoder_maker, "reported_maxSpeed", sizeof("reported_maxSpeed") - 1);
-    cbor_error = cbor_encode_uint(&cbor_encoder_maker, car->state.reported_maxSpeed);
-    cbor_error = cbor_encode_text_string(&cbor_encoder_maker, "softwareVersion", sizeof("softwareVersion") - 1);
-    cbor_error = cbor_encode_uint(&cbor_encoder_maker, car->state.softwareVersion);
-    cbor_error = cbor_encode_text_string(&cbor_encoder_maker, "vanityPlate", sizeof("vanityPlate") - 1);
-    cbor_error = cbor_encode_text_string(&cbor_encoder_maker, car->state.vanityPlate, strlen(car->state.vanityPlate));
-    cbor_error = cbor_encoder_close_container(&cbor_encoder_root_container, &cbor_encoder_maker);
-    cbor_error = cbor_encoder_close_container(&cbor_encoder_root, &cbor_encoder_root_container);
+    (void)cbor_encoder_create_map(&cbor_encoder_root, &cbor_encoder_root_container, 3);
+        (void)cbor_encode_text_string(&cbor_encoder_root_container, "lastOilChangeDate", sizeof("lastOilChangeDate") - 1);
+        (void)cbor_encode_text_string(&cbor_encoder_root_container, car->lastOilChangeDate, strlen(car->lastOilChangeDate));
+
+        (void)cbor_encode_text_string(&cbor_encoder_root_container, "maker", sizeof("maker") - 1);
+        (void)cbor_encoder_create_map(&cbor_encoder_root_container, &cbor_encoder_maker, 3);
+            (void)cbor_encode_text_string(&cbor_encoder_maker, "makerName", sizeof("makerName") - 1);
+            (void)cbor_encode_text_string(&cbor_encoder_maker, car->maker.makerName, strlen(car->maker.makerName));
+            (void)cbor_encode_text_string(&cbor_encoder_maker, "style", sizeof("style") - 1);
+            (void)cbor_encode_text_string(&cbor_encoder_maker, car->maker.style, strlen(car->maker.style));
+            (void)cbor_encode_text_string(&cbor_encoder_maker, "year", sizeof("year") - 1);
+            (void)cbor_encode_uint(&cbor_encoder_maker, car->maker.year);
+        (void)cbor_encoder_close_container(&cbor_encoder_root_container, &cbor_encoder_maker);
+
+        (void)cbor_encode_text_string(&cbor_encoder_root_container, "state", sizeof("state") - 1);
+        (void)cbor_encoder_create_map(&cbor_encoder_root_container, &cbor_encoder_maker, 3);
+            (void)cbor_encode_text_string(&cbor_encoder_maker, "reported_maxSpeed", sizeof("reported_maxSpeed") - 1);
+            (void)cbor_encode_uint(&cbor_encoder_maker, car->state.reported_maxSpeed);
+            (void)cbor_encode_text_string(&cbor_encoder_maker, "softwareVersion", sizeof("softwareVersion") - 1);
+            (void)cbor_encode_uint(&cbor_encoder_maker, car->state.softwareVersion);
+            (void)cbor_encode_text_string(&cbor_encoder_maker, "vanityPlate", sizeof("vanityPlate") - 1);
+            (void)cbor_encode_text_string(&cbor_encoder_maker, car->state.vanityPlate, strlen(car->state.vanityPlate));
+        (void)cbor_encoder_close_container(&cbor_encoder_root_container, &cbor_encoder_maker);
+    (void)cbor_encoder_close_container(&cbor_encoder_root, &cbor_encoder_root_container);
 
     return cbor_buf;
 }
@@ -320,14 +321,18 @@ static CborError cbor_parse_recursive(CborValue *it, int nesting_level)
 }
 
 //  Converts the desired properties of the Device Twin JSON blob received from IoT Hub into a Car object.
-static Car* parse_from_cbor(Car* car, CborValue* val, CborEncoder* cbor_encoder, DEVICE_TWIN_UPDATE_STATE update_state)
+static Car* parse_from_cbor(Car* car, CborValue* val, DEVICE_TWIN_UPDATE_STATE update_state)
 {
 
     // Only desired properties:
-    // JSON_Value* changeOilReminder;
-    // JSON_Value* desired_maxSpeed;
-    // JSON_Value* latitude;
-    // JSON_Value* longitude;
+    CborValue* model;
+    CborValue model_recurse;
+    CborValue* changeOilReminder;
+    CborValue* desired_maxSpeed;
+    CborValue* latitude;
+    CborValue* longitude;
+
+    CborType val_type = cbor_value_get_type(val);
 
     if (update_state == DEVICE_TWIN_UPDATE_COMPLETE)
     {
@@ -338,7 +343,8 @@ static Car* parse_from_cbor(Car* car, CborValue* val, CborEncoder* cbor_encoder,
     }
     else
     {
-        // changeOilReminder = json_object_dotget_value(root_object, "changeOilReminder");
+        // cbor_value_enter_container(val, model);
+        cbor_value_map_find_value(model, "maker", &model_recurse);
         // desired_maxSpeed = json_object_dotget_value(root_object, "settings.desired_maxSpeed");
         // latitude = json_object_dotget_value(root_object, "settings.location.latitude");
         // longitude = json_object_dotget_value(root_object, "settings.location.longitude");
@@ -524,7 +530,8 @@ static void iothub_client_device_twin_and_methods_sample_run(void)
             CborParser cbor_parser;
             CborValue cbor_value;
             cbor_parser_init((const uint8_t*)reported_properties_cbor, strlen(reported_properties_cbor), 0, &cbor_parser, &cbor_value);
-            cbor_parse_recursive(&cbor_value, 0);
+            parse_from_cbor(&car, &cbor_value, DEVICE_TWIN_UPDATE_PARTIAL);
+            // cbor_parse_recursive(&cbor_value, 0);
 
             // (void)IoTHubDeviceClient_GetTwinAsync(iotHubClientHandle, get_complete_device_twin_on_demand_callback, NULL);
             // (void)IoTHubDeviceClient_SendReportedState(iotHubClientHandle, (const unsigned char*)reportedProperties, strlen(reportedProperties), reported_state_callback, NULL);
