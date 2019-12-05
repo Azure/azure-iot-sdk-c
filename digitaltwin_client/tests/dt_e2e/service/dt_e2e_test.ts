@@ -15,6 +15,7 @@ import {
 } from './digitaltwin_service_sdk/iotHubGatewayServiceAPIs20190701Preview';
 
 import { IoTHubTokenCredentials } from './digitaltwin_service_sdk/iothub_token_credentials'
+import { EventHubClient, EventPosition } from '@azure/event-hubs';
 
 // testDeviceInfo contains the settings for our test device on the IoTHub.
 var testDeviceInfo:any = null
@@ -311,6 +312,58 @@ function veryAllInterfacesAreRegistered(done) {
     })
 }
 
+//
+// veryAllInterfacesAreRegistered makes sure that the e2e test interfaces were successfully registered.  These are stored
+// in properties of the modelDiscovery interface
+//
+function runTestCommandAndCheckMessageAtEventHub(testData:CommandTestData, numberInvocationAttempts:number, done) {
+    let receiveOK = false;
+    let ehClient: EventHubClient;
+
+    const waitAfterReceiverStart = 3000;
+    const startAfterTime = new Date(Date.now());
+    const onEventHubError = (err) => {
+      throw err;
+    };
+    const onEventHubMessage = (receivedMsg) => {
+        if((receivedMsg.annotations['iothub-connection-device-id'] === testDeviceInfo.deviceId) &&
+        (receivedMsg.annotations['iothub-interface-name'] === testData.interfaceName)){
+            console.log('received a message from the test device: ');
+            console.log(JSON.stringify(receivedMsg.body));
+            if (receivedMsg.body && receivedMsg.body === testData.payload) {
+                console.log('found telemetry message from test device. test successful.');
+                ehClient.close()
+                done()
+            } else {
+                console.log('Incoming device id is: ' + receivedMsg.annotations['iothub-connection-device-id']);
+            }
+        }
+    };
+
+    EventHubClient.createFromIotHubConnectionString(testHubConnectionString)
+        .then((client) => ehClient = client)
+        .then(() => ehClient.getPartitionIds())
+        .then((partitionIds) => {
+          partitionIds.forEach((partitionId) => {
+            ehClient.receive(partitionId, onEventHubMessage, onEventHubError, { eventPosition: EventPosition.fromEnqueuedTime(startAfterTime) });
+          });
+          return new Promise((resolve) => setTimeout(() => resolve(), waitAfterReceiverStart));
+        }).then(() => {
+            runTestCommand(testData, 0, (err, responsepPayload, responseStatus) => {
+                if (err){
+                    ehClient.close()
+                    done(err)
+                }
+                else{
+                    console.log('Telemetry sent, waiting to receive from EventHub...')
+                }
+            })
+        })
+        .catch((err) => {
+          throw err;
+        });
+}
+
 var argv = require('yargs')
     .usage('Usage: $0 --connectionstring <HUB CONNECTION STRING> --testexe <PATH OF EXECUTABLE TO HOST C SDK TESTS>')
     .option('connectionstring', {
@@ -360,19 +413,22 @@ describe("DigitalTwin Command E2E tests", function() {
 // Tests for DigitalTwin telemetry
 //
 describe("DigitalTwin Telemetry E2E tests", function() {
-    var telemetryTest1 = new CommandTestData_TestTelemetry('SendTelemetryMessage', "123", 200, `"Successfully Queued Telemetry message"`)
+    this.timeout(60000);
+    var telemetryTest1 = new CommandTestData_TestTelemetry('SendTelemetryMessage', "234", 200, `"Successfully Queued Telemetry message"`)
+    var telemetryTest2 = new CommandTestData_TestTelemetry('SendTelemetryMessage', "345", 200, `"Successfully Queued Telemetry message"`)
+    var telemetryTest3 = new CommandTestData_TestTelemetry('SendTelemetryMessage', "456", 200, `"Successfully Queued Telemetry message"`)
     var telemetryAckVerify = new CommandTestData_TestTelemetry('VerifyTelemetryAcknowledged', "3", 200, `"All telemetry messages sent have been acknowledged"`)
 
     it("Cause telemetry to be invoked (initial message)", function runTelemetryTest(done) {
-        runTestCommand(telemetryTest1, 0, done)
+        runTestCommandAndCheckMessageAtEventHub(telemetryTest1, 0, done)
     })
 
     it("Cause telemetry to be invoked (second message)", function runTelemetryTest(done) {
-        runTestCommand(telemetryTest1, 0, done)
+        runTestCommandAndCheckMessageAtEventHub(telemetryTest2, 0, done)
     })
 
     it("Cause telemetry to be invoked (third message)", function runTelemetryTest(done) {
-        runTestCommand(telemetryTest1, 0, done)
+        runTestCommandAndCheckMessageAtEventHub(telemetryTest3, 0, done)
     })
 
     it("Check telemetry messages ack'd", function checkTelemetryMessagesAckd(done) {
