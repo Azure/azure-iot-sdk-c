@@ -57,19 +57,19 @@ static uint8_t test_cbor_value[] = { 0xd8, 0x20, 0x76, 0x68, 0x74, 0x74, 0x70, 0
                                 0x77, 0x77, 0x2e, 0x65, 0x78, 0x61, 0x6d, 0x70, 0x6c, 0x65, 0x2e, 0x63, 0x6f, 0x6d }; // http://example.com
 
 /*
-{
-    "lastOilChangeDate": "2016",
-    "maker": {
-        "makerName": "Fabrikam",
-        "style": "sedan",
-        "year": 2014
-    },
-    "state": {
-        "reported_maxSpeed": 100,
-        "softwareVersion": 1,
-        "vanityPlate": "1I1"
+    {
+        "lastOilChangeDate": "2016",
+        "maker": {
+            "makerName": "Fabrikam",
+            "style": "sedan",
+            "year": 2014
+        },
+        "state": {
+            "reported_maxSpeed": 100,
+            "softwareVersion": 1,
+            "vanityPlate": "1I1"
+        }
     }
-}
 */
 static uint8_t test_cbor_twin[] = {0xA1, 0x67, 0x64, 0x65, 0x73, 0x69, 0x72, 0x65, 0x64, 0xA4, 0x71, 0x6C, 0x61, 0x73, 
                             0x74, 0x4F, 0x69, 0x6C, 0x43, 0x68, 0x61, 0x6E, 0x67, 0x65, 0x44, 0x61, 0x74, 0x65, 0x64, 0x32, 0x30, 
@@ -122,7 +122,7 @@ typedef struct CAR_SETTINGS_TAG
 typedef struct CAR_TAG
 {
     char* lastOilChangeDate;        // reported property
-    char* changeOilReminder;        // desired property
+    char* change_oil_reminder;        // desired property
     Maker maker;                    // reported property
     CarState state;                 // reported property
     CarSettings settings;           // desired property
@@ -325,44 +325,66 @@ static Car* parse_from_cbor(Car* car, CborValue* val, DEVICE_TWIN_UPDATE_STATE u
 {
 
     // Only desired properties:
-    CborValue* model;
+    CborValue maker_value;
     CborValue model_recurse;
-    CborValue* changeOilReminder;
+    CborValue model_recurse_next;
+
+    char* change_oil_reminder = NULL;
+    char* maker_style = NULL;
+    uint64_t software_version = 0;
     CborValue* desired_maxSpeed;
     CborValue* latitude;
     CborValue* longitude;
 
     CborType val_type = cbor_value_get_type(val);
-
+    
+    size_t model_length;
+    size_t style_length;
     if (update_state == DEVICE_TWIN_UPDATE_COMPLETE)
     {
-        // changeOilReminder = json_object_dotget_value(root_object, "desired.changeOilReminder");
+        // change_oil_reminder = json_object_dotget_value(root_object, "desired.change_oil_reminder");
         // desired_maxSpeed = json_object_dotget_value(root_object, "desired.settings.desired_maxSpeed");
         // latitude = json_object_dotget_value(root_object, "desired.settings.location.latitude");
         // longitude = json_object_dotget_value(root_object, "desired.settings.location.longitude");
     }
     else
     {
-        // cbor_value_enter_container(val, model);
-        cbor_value_map_find_value(model, "maker", &model_recurse);
+        CborError find_result = cbor_value_map_find_value(val, "lastOilChangeDate", &model_recurse);
+        if(cbor_value_is_valid(&model_recurse))
+        {
+            cbor_value_get_string_length(&model_recurse, &model_length);
+            change_oil_reminder = (char*)malloc(model_length * sizeof(char));
+            cbor_value_copy_text_string(&model_recurse, change_oil_reminder, &model_length, &model_recurse_next);
+        }
+
+        find_result = cbor_value_map_find_value(val, "maker", &maker_value);
+        if(cbor_value_is_valid(&maker_value))
+        {
+            cbor_value_map_find_value(&maker_value , "style", &model_recurse_next);
+            cbor_value_get_string_length(&model_recurse_next, &style_length);
+            maker_style = (char*)malloc(style_length * sizeof(char));
+            cbor_value_copy_text_string(&model_recurse_next, maker_style, &style_length, &model_recurse_next);
+        }
+
+        CborValue state_value;
+        CborType state_type;
+        find_result = cbor_value_map_find_value(val, "state", &state_value);
+        if(cbor_value_is_valid(&state_value))
+        {
+            cbor_value_map_find_value(&state_value, "softwareVersion", &model_recurse);
+            state_type = cbor_value_get_type(&model_recurse);
+            cbor_value_get_uint64(&model_recurse, &software_version);
+        }
+
         // desired_maxSpeed = json_object_dotget_value(root_object, "settings.desired_maxSpeed");
         // latitude = json_object_dotget_value(root_object, "settings.location.latitude");
         // longitude = json_object_dotget_value(root_object, "settings.location.longitude");
     }
 
-    // if (changeOilReminder != NULL)
-    // {
-    //     const char* data = json_value_get_string(changeOilReminder);
-
-    //     if (data != NULL)
-    //     {
-    //         car->changeOilReminder = malloc(strlen(data) + 1);
-    //         if (NULL != car->changeOilReminder)
-    //         {
-    //             (void)strcpy(car->changeOilReminder, data);
-    //         }
-    //     }
-    // }
+    if (change_oil_reminder != NULL)
+    {
+        car->change_oil_reminder = change_oil_reminder;
+    }
 
     // if (desired_maxSpeed != NULL)
     // {
@@ -406,20 +428,20 @@ static void device_twin_callback(DEVICE_TWIN_UPDATE_STATE update_state, const un
     Car* oldCar = (Car*)userContextCallback;
     Car* newCar = parse_from_json((const char*)payLoad, update_state);
 
-    if (newCar->changeOilReminder != NULL)
+    if (newCar->change_oil_reminder != NULL)
     {
-        if ((oldCar->changeOilReminder != NULL) && (strcmp(oldCar->changeOilReminder, newCar->changeOilReminder) != 0))
+        if ((oldCar->change_oil_reminder != NULL) && (strcmp(oldCar->change_oil_reminder, newCar->change_oil_reminder) != 0))
         {
-            free(oldCar->changeOilReminder);
+            free(oldCar->change_oil_reminder);
         }
         
-        if (oldCar->changeOilReminder == NULL)
+        if (oldCar->change_oil_reminder == NULL)
         {
-            printf("Received a new changeOilReminder = %s\n", newCar->changeOilReminder);
-            if ( NULL != (oldCar->changeOilReminder = malloc(strlen(newCar->changeOilReminder) + 1)))
+            printf("Received a new change_oil_reminder = %s\n", newCar->change_oil_reminder);
+            if ( NULL != (oldCar->change_oil_reminder = malloc(strlen(newCar->change_oil_reminder) + 1)))
             {
-                (void)strcpy(oldCar->changeOilReminder, newCar->changeOilReminder);
-                free(newCar->changeOilReminder);
+                (void)strcpy(oldCar->change_oil_reminder, newCar->change_oil_reminder);
+                free(newCar->change_oil_reminder);
             }
         }
     }
@@ -541,7 +563,7 @@ static void iothub_client_device_twin_and_methods_sample_run(void)
 
             // IoTHubDeviceClient_Destroy(iotHubClientHandle);
             // free(reportedProperties);
-            free(car.changeOilReminder);
+            free(car.change_oil_reminder);
         // }
 
         // IoTHub_Deinit();
