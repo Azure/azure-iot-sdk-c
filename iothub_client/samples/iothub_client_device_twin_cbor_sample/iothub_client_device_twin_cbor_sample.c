@@ -19,6 +19,8 @@
 #include "iothub_message.h"
 #include "parson.h"
 #include "cbor.h"
+#include "cbor_helper.h"
+#include <cjson/cJSON.h>
 
 // The protocol you wish to use should be uncommented
 //
@@ -48,111 +50,32 @@
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-#define CBOR_BUFFER_SIZE 200
+#define CBOR_BUFFER_SIZE 512
 static uint8_t cbor_buf[CBOR_BUFFER_SIZE];
 
 /* Paste in the your iothub device connection string  */
-static const char* connectionString = "HostName=dawalton-hub.azure-devices.net;DeviceId=dawalton-test2;SharedAccessKey=45vmWGYHdtOHdD+cipw5yR/GtmJ4h9Z07ipHwu4WnPQ=";
-static uint8_t test_cbor_value[] = { 0xd8, 0x20, 0x76, 0x68, 0x74, 0x74, 0x70, 0x3a, 0x2f, 0x2f, 0x77, 
-                                0x77, 0x77, 0x2e, 0x65, 0x78, 0x61, 0x6d, 0x70, 0x6c, 0x65, 0x2e, 0x63, 0x6f, 0x6d }; // http://example.com
+static const char* connectionString = "HostName=dawalton-hub.azure-devices.net;DeviceId=dane_cbor;SharedAccessKey=JmNRulx5IPuA4ax2IbyL9N9so3jr341oj0JgHIxtLcU=";
+static const char const DEVICE_MODEL_NAME[] = "Contoso5000";
 
-/*
-    {
-        "lastOilChangeDate": "2016",
-        "maker": {
-            "makerName": "Fabrikam",
-            "style": "sedan",
-            "year": 2014
-        },
-        "state": {
-            "reported_maxSpeed": 100,
-            "softwareVersion": 1,
-            "vanityPlate": "1I1"
-        }
-    }
-*/
-static uint8_t test_cbor_twin[] = {0xA1, 0x67, 0x64, 0x65, 0x73, 0x69, 0x72, 0x65, 0x64, 0xA4, 0x71, 0x6C, 0x61, 0x73, 
-                            0x74, 0x4F, 0x69, 0x6C, 0x43, 0x68, 0x61, 0x6E, 0x67, 0x65, 0x44, 0x61, 0x74, 0x65, 0x64, 0x32, 0x30, 
-                            0x31, 0x38, 0x71, 0x63, 0x68, 0x61, 0x6E, 0x67, 0x65, 0x4F, 0x69, 0x6C, 0x52, 0x65, 0x6D, 0x69, 0x6E, 
-                            0x64, 0x65, 0x72, 0x64, 0x32, 0x30, 0x31, 0x37, 0x69, 0x24, 0x6D, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 
-                            0x61, 0xA4, 0x6C, 0x24, 0x6C, 0x61, 0x73, 0x74, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x78, 0x1C, 
-                            0x32, 0x30, 0x31, 0x39, 0x2D, 0x31, 0x32, 0x2D, 0x30, 0x33, 0x54, 0x32, 0x33, 0x3A, 0x35, 0x33, 0x3A, 
-                            0x35, 0x38, 0x2E, 0x34, 0x39, 0x38, 0x36, 0x30, 0x32, 0x39, 0x5A, 0x73, 0x24, 0x6C, 0x61, 0x73, 0x74, 
-                            0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6F, 0x6E, 0x0B, 0x71, 0x6C, 
-                            0x61, 0x73, 0x74, 0x4F, 0x69, 0x6C, 0x43, 0x68, 0x61, 0x6E, 0x67, 0x65, 0x44, 0x61, 0x74, 0x65, 0xA2, 
-                            0x6C, 0x24, 0x6C, 0x61, 0x73, 0x74, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x78, 0x1C, 0x32, 0x30, 
-                            0x31, 0x39, 0x2D, 0x31, 0x32, 0x2D, 0x30, 0x33, 0x54, 0x32, 0x33, 0x3A, 0x35, 0x33, 0x3A, 0x35, 0x38, 
-                            0x2E, 0x34, 0x39, 0x38, 0x36, 0x30, 0x32, 0x39, 0x5A, 0x73, 0x24, 0x6C, 0x61, 0x73, 0x74, 0x55, 0x70, 
-                            0x64, 0x61, 0x74, 0x65, 0x64, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6F, 0x6E, 0x0B, 0x71, 0x63, 0x68, 0x61, 
-                            0x6E, 0x67, 0x65, 0x4F, 0x69, 0x6C, 0x52, 0x65, 0x6D, 0x69, 0x6E, 0x64, 0x65, 0x72, 0xA2, 0x6C, 0x24, 
-                            0x6C, 0x61, 0x73, 0x74, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x78, 0x1C, 0x32, 0x30, 0x31, 0x39, 
-                            0x2D, 0x31, 0x32, 0x2D, 0x30, 0x33, 0x54, 0x32, 0x33, 0x3A, 0x35, 0x33, 0x3A, 0x35, 0x38, 0x2E, 0x34, 
-                            0x39, 0x38, 0x36, 0x30, 0x32, 0x39, 0x5A, 0x73, 0x24, 0x6C, 0x61, 0x73, 0x74, 0x55, 0x70, 0x64, 0x61, 
-                            0x74, 0x65, 0x64, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6F, 0x6E, 0x0B, 0x68, 0x24, 0x76, 0x65, 0x72, 0x73, 
-                            0x69, 0x6F, 0x6E, 0x0B};
+static const char const DEVICE_TELEMETRY_STATUS_SUCCESS[] = "success";
+static const char const DEVICE_TELEMETRY_STATUS_FAILED[] = "failed";
 
-CborParser cbor_parser;
-
-typedef struct MAKER_TAG
+typedef struct CONTOSO_TELEMETRY_CONFIG_TAG
 {
-    char* makerName;
-    char* style;
-    uint64_t year;
-} Maker;
+    uint64_t frequency;
+    char* status;
+} CONTOSO_TELEMETRY_CONFIG;
 
-typedef struct GEO_TAG
+typedef struct CONTOSO_DEVICE_TAG
 {
-    double longitude;
-    double latitude;
-} Geo;
+    uint64_t battery_level;
+    uint64_t device_number;
+    char* device_model;
+    CONTOSO_TELEMETRY_CONFIG telemetry_config;
+} CONTOSO_DEVICE;
 
-typedef struct CAR_STATE_TAG
-{
-    int32_t softwareVersion;        // reported property
-    uint8_t reported_maxSpeed;      // reported property
-    char* vanityPlate;              // reported property
-} CarState;
 
-typedef struct CAR_SETTINGS_TAG
-{
-    uint8_t desired_maxSpeed;       // desired property
-    Geo location;                   // desired property
-} CarSettings;
-
-typedef struct CAR_TAG
-{
-    char* lastOilChangeDate;        // reported property
-    char* change_oil_reminder;        // desired property
-    Maker maker;                    // reported property
-    CarState state;                 // reported property
-    CarSettings settings;           // desired property
-} Car;
-
-//  Converts the Car object into a JSON blob with reported properties that is ready to be sent across the wire as a twin.
-static char* serialize_to_json(Car* car)
-{
-    char* result;
-
-    JSON_Value* root_value = json_value_init_object();
-    JSON_Object* root_object = json_value_get_object(root_value);
-
-    // Only reported properties:
-    (void)json_object_set_string(root_object, "lastOilChangeDate", car->lastOilChangeDate);
-    (void)json_object_dotset_string(root_object, "maker.makerName", car->maker.makerName);
-    (void)json_object_dotset_string(root_object, "maker.style", car->maker.style);
-    (void)json_object_dotset_number(root_object, "maker.year", car->maker.year);
-    (void)json_object_dotset_number(root_object, "state.reported_maxSpeed", car->state.reported_maxSpeed);
-    (void)json_object_dotset_number(root_object, "state.softwareVersion", car->state.softwareVersion);
-    (void)json_object_dotset_string(root_object, "state.vanityPlate", car->state.vanityPlate);
-
-    result = json_serialize_to_string(root_value);
-
-    json_value_free(root_value);
-
-    return result;
-}
-
-static char* serialize_to_cbor(Car* car)
+static char* serialize_to_cbor(CONTOSO_DEVICE* device)
 {
     char* result;
 
@@ -161,319 +84,166 @@ static char* serialize_to_cbor(Car* car)
     CborEncoder cbor_encoder_root_container;
     cbor_encoder_init(&cbor_encoder_root, cbor_buf, CBOR_BUFFER_SIZE, 0);
 
-    (void)cbor_encoder_create_map(&cbor_encoder_root, &cbor_encoder_root_container, 3);
-        (void)cbor_encode_text_string(&cbor_encoder_root_container, "lastOilChangeDate", sizeof("lastOilChangeDate") - 1);
-        (void)cbor_encode_text_string(&cbor_encoder_root_container, car->lastOilChangeDate, strlen(car->lastOilChangeDate));
+    (void)cbor_encoder_create_map(&cbor_encoder_root, &cbor_encoder_root_container, 4);
+        (void)cbor_encode_text_string(&cbor_encoder_root_container, "batteryLevel", sizeof("batteryLevel") - 1);
+        (void)cbor_encode_uint(&cbor_encoder_root_container, device->battery_level);
 
-        (void)cbor_encode_text_string(&cbor_encoder_root_container, "maker", sizeof("maker") - 1);
-        (void)cbor_encoder_create_map(&cbor_encoder_root_container, &cbor_encoder_maker, 3);
-            (void)cbor_encode_text_string(&cbor_encoder_maker, "makerName", sizeof("makerName") - 1);
-            (void)cbor_encode_text_string(&cbor_encoder_maker, car->maker.makerName, strlen(car->maker.makerName));
-            (void)cbor_encode_text_string(&cbor_encoder_maker, "style", sizeof("style") - 1);
-            (void)cbor_encode_text_string(&cbor_encoder_maker, car->maker.style, strlen(car->maker.style));
-            (void)cbor_encode_text_string(&cbor_encoder_maker, "year", sizeof("year") - 1);
-            (void)cbor_encode_uint(&cbor_encoder_maker, car->maker.year);
-        (void)cbor_encoder_close_container(&cbor_encoder_root_container, &cbor_encoder_maker);
+        (void)cbor_encode_text_string(&cbor_encoder_root_container, "deviceNumber", sizeof("deviceNumber") - 1);
+        (void)cbor_encode_uint(&cbor_encoder_root_container, device->device_number);
 
-        (void)cbor_encode_text_string(&cbor_encoder_root_container, "state", sizeof("state") - 1);
-        (void)cbor_encoder_create_map(&cbor_encoder_root_container, &cbor_encoder_maker, 3);
-            (void)cbor_encode_text_string(&cbor_encoder_maker, "reported_maxSpeed", sizeof("reported_maxSpeed") - 1);
-            (void)cbor_encode_uint(&cbor_encoder_maker, car->state.reported_maxSpeed);
-            (void)cbor_encode_text_string(&cbor_encoder_maker, "softwareVersion", sizeof("softwareVersion") - 1);
-            (void)cbor_encode_uint(&cbor_encoder_maker, car->state.softwareVersion);
-            (void)cbor_encode_text_string(&cbor_encoder_maker, "vanityPlate", sizeof("vanityPlate") - 1);
-            (void)cbor_encode_text_string(&cbor_encoder_maker, car->state.vanityPlate, strlen(car->state.vanityPlate));
+        (void)cbor_encode_text_string(&cbor_encoder_root_container, "deviceModel", sizeof("deviceModel") - 1);
+        (void)cbor_encode_text_string(&cbor_encoder_root_container, device->device_model, strlen(device->device_model));
+
+        (void)cbor_encode_text_string(&cbor_encoder_root_container, "telemetryConfig", sizeof("telemetryConfig") - 1);
+        (void)cbor_encoder_create_map(&cbor_encoder_root_container, &cbor_encoder_maker, 2);
+            (void)cbor_encode_text_string(&cbor_encoder_maker, "frequency", sizeof("frequency") - 1);
+            (void)cbor_encode_uint(&cbor_encoder_maker, device->telemetry_config.frequency);
+            (void)cbor_encode_text_string(&cbor_encoder_maker, "status", sizeof("status") - 1);
+            (void)cbor_encode_text_string(&cbor_encoder_maker, device->telemetry_config.status, strlen(device->telemetry_config.status));
         (void)cbor_encoder_close_container(&cbor_encoder_root_container, &cbor_encoder_maker);
     (void)cbor_encoder_close_container(&cbor_encoder_root, &cbor_encoder_root_container);
 
     return cbor_buf;
 }
 
-static void dumpbytes(const uint8_t *buf, size_t len)
+static char* serialize_to_json(CONTOSO_DEVICE* device)
 {
-    while (len--)
-        printf("%02X ", *buf++);
+    char* result;
+
+    JSON_Value* root_value = json_value_init_object();
+    JSON_Object* root_object = json_value_get_object(root_value);
+
+    //Report device props
+    (void)json_object_set_number(root_object, "batteryLevel", device->battery_level);
+    (void)json_object_set_number(root_object, "deviceNumber", device->device_number);
+    (void)json_object_set_string(root_object, "deviceModel", device->device_model);
+    (void)json_object_dotset_number(root_object, "telemetryConfig.frequency", device->telemetry_config.frequency);
+    (void)json_object_dotset_string(root_object, "telemetryConfig.status", device->telemetry_config.status);
+
+    result = json_serialize_to_string(root_value);
+
+    return result;
 }
 
-static void indent(int nestingLevel)
+static int find_and_copy_cbor_string(CborValue* val, const char* const find_string, char** assign_value)
 {
-    while (nestingLevel--)
-        puts("  ");
-}
+    int return_val;
 
-static CborError cbor_parse_recursive(CborValue *it, int nesting_level)
-{
-    while (!cbor_value_at_end(it)) {
-        CborError err;
-        CborType type = cbor_value_get_type(it);
-
-        indent(nesting_level);
-        switch (type) {
-        case CborArrayType:
-        case CborMapType: {
-            // recursive type
-            CborValue recursed;
-            assert(cbor_value_is_container(it));
-            puts(type == CborArrayType ? "Array[" : "Map[");
-            err = cbor_value_enter_container(it, &recursed);
-            if (err)
-                return err;       // parse error
-            err = cbor_parse_recursive(&recursed, nesting_level + 1);
-            if (err)
-                return err;       // parse error
-            err = cbor_value_leave_container(it, &recursed);
-            if (err)
-                return err;       // parse error
-            indent(nesting_level);
-            puts("]");
-            continue;
-        }
-
-        case CborIntegerType: {
-            int64_t val;
-            cbor_value_get_int64(it, &val);     // can't fail
-            printf("%lld\n", (long long)val);
-            break;
-        }
-
-        case CborByteStringType: {
-            uint8_t *buf;
-            size_t n;
-            err = cbor_value_dup_byte_string(it, &buf, &n, it);
-            if (err)
-                return err;     // parse error
-            dumpbytes(buf, n);
-            puts("");
-            free(buf);
-            continue;
-        }
-
-        case CborTextStringType: {
-            char *buf;
-            size_t n;
-            err = cbor_value_dup_text_string(it, &buf, &n, it);
-            if (err)
-                return err;     // parse error
-            puts(buf);
-            free(buf);
-            continue;
-        }
-
-        case CborTagType: {
-            CborTag tag;
-            cbor_value_get_tag(it, &tag);       // can't fail
-            printf("Tag(%lld)\n", (long long)tag);
-            break;
-        }
-
-        case CborSimpleType: {
-            uint8_t type;
-            cbor_value_get_simple_type(it, &type);  // can't fail
-            printf("simple(%u)\n", type);
-            break;
-        }
-
-        case CborNullType:
-            puts("null");
-            break;
-
-        case CborUndefinedType:
-            puts("undefined");
-            break;
-
-        case CborBooleanType: {
-            bool val;
-            cbor_value_get_boolean(it, &val);       // can't fail
-            puts(val ? "true" : "false");
-            break;
-        }
-
-        case CborDoubleType: {
-            double val;
-            if (false) {
-                float f;
-        case CborFloatType:
-                cbor_value_get_float(it, &f);
-                val = f;
-            } else {
-                cbor_value_get_double(it, &val);
-            }
-            printf("%g\n", val);
-            break;
-        }
-        case CborHalfFloatType: {
-            uint16_t val;
-            cbor_value_get_half_float(it, &val);
-            printf("__f16(%04x)\n", val);
-            break;
-        }
-
-        case CborInvalidType:
-            assert(false);      // can't happen
-            break;
-        }
-
-        err = cbor_value_advance_fixed(it);
-        if (err)
-            return err;
-    }
-    return CborNoError;
-}
-
-//  Converts the desired properties of the Device Twin JSON blob received from IoT Hub into a Car object.
-static Car* parse_from_cbor(Car* car, CborValue* val, DEVICE_TWIN_UPDATE_STATE update_state)
-{
-
-    // Only desired properties:
-    CborValue maker_value;
-    CborValue model_recurse;
-    CborValue model_recurse_next;
-
-    char* change_oil_reminder = NULL;
-    char* maker_style = NULL;
-    uint64_t software_version = 0;
-    CborValue* desired_maxSpeed;
-    CborValue* latitude;
-    CborValue* longitude;
-
-    CborType val_type = cbor_value_get_type(val);
-    
-    size_t model_length;
-    size_t style_length;
-    if (update_state == DEVICE_TWIN_UPDATE_COMPLETE)
+    CborValue value_out;
+    size_t value_length;
+    cbor_value_map_find_value(val, find_string, &value_out);
+    if(cbor_value_is_valid(&value_out))
     {
-        // change_oil_reminder = json_object_dotget_value(root_object, "desired.change_oil_reminder");
-        // desired_maxSpeed = json_object_dotget_value(root_object, "desired.settings.desired_maxSpeed");
-        // latitude = json_object_dotget_value(root_object, "desired.settings.location.latitude");
-        // longitude = json_object_dotget_value(root_object, "desired.settings.location.longitude");
+        cbor_value_get_string_length(&value_out, &value_length);
+        *assign_value = (char*)malloc(value_length * sizeof(char) + 1);
+        cbor_value_copy_text_string(&value_out, *assign_value, &value_length, NULL);
+        *(*assign_value + value_length) = '\0';
+        return_val = 0;
     }
     else
     {
-        CborError find_result = cbor_value_map_find_value(val, "lastOilChangeDate", &model_recurse);
-        if(cbor_value_is_valid(&model_recurse))
-        {
-            cbor_value_get_string_length(&model_recurse, &model_length);
-            change_oil_reminder = (char*)malloc(model_length * sizeof(char));
-            cbor_value_copy_text_string(&model_recurse, change_oil_reminder, &model_length, &model_recurse_next);
-        }
-
-        find_result = cbor_value_map_find_value(val, "maker", &maker_value);
-        if(cbor_value_is_valid(&maker_value))
-        {
-            cbor_value_map_find_value(&maker_value , "style", &model_recurse_next);
-            cbor_value_get_string_length(&model_recurse_next, &style_length);
-            maker_style = (char*)malloc(style_length * sizeof(char));
-            cbor_value_copy_text_string(&model_recurse_next, maker_style, &style_length, &model_recurse_next);
-        }
-
-        CborValue state_value;
-        CborType state_type;
-        find_result = cbor_value_map_find_value(val, "state", &state_value);
-        if(cbor_value_is_valid(&state_value))
-        {
-            cbor_value_map_find_value(&state_value, "softwareVersion", &model_recurse);
-            state_type = cbor_value_get_type(&model_recurse);
-            cbor_value_get_uint64(&model_recurse, &software_version);
-        }
-
-        // desired_maxSpeed = json_object_dotget_value(root_object, "settings.desired_maxSpeed");
-        // latitude = json_object_dotget_value(root_object, "settings.location.latitude");
-        // longitude = json_object_dotget_value(root_object, "settings.location.longitude");
+        *assign_value = NULL;
+        return_val = 1;
     }
 
-    if (change_oil_reminder != NULL)
-    {
-        car->change_oil_reminder = change_oil_reminder;
-    }
-
-    // if (desired_maxSpeed != NULL)
-    // {
-    //     car->settings.desired_maxSpeed = (uint8_t)json_value_get_number(desired_maxSpeed);
-    // }
-
-    // if (latitude != NULL)
-    // {
-    //     car->settings.location.latitude = json_value_get_number(latitude);
-    // }
-
-    // if (longitude != NULL)
-    // {
-    //     car->settings.location.longitude = json_value_get_number(longitude);
-    // }
-
-    return car;
+    return return_val;
 }
 
-static Car* parse_from_json(const char* json, DEVICE_TWIN_UPDATE_STATE update_state)
+static int find_and_copy_cbor_uint64(CborValue* val, const char* const find_string, uint64_t* assign_value)
 {
-    //Convert to CBOR
-    CborEncoder cbor_encoder;
-    // decode_json(json, &cbor_encoder);
-    CborValue cbor_val;
-    // cbor_parser_init((const uint8_t*)cbor, 100, 0, &cbor_parser, &cbor_val);
+    int return_val;
 
-    CborValue root;
-    Car* car = malloc(sizeof(Car));
-    if (car != NULL)
+    CborValue value_out;
+    cbor_value_map_find_value(val, find_string, &value_out);
+    if(cbor_value_is_valid(&value_out))
     {
-        // parse_from_cbor(car, root);
+        cbor_value_get_uint64(&value_out, assign_value);
+        return_val = 0;
     }
+    else
+    {
+        *assign_value = 0;
+        return_val = 1;
+    }
+
+    return return_val;
 }
 
-static void device_twin_callback(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback)
+//  Converts the desired properties of the Device Twin JSON blob received from IoT Hub into a Car object.
+static void parse_from_cbor(CONTOSO_DEVICE* contoso_device, const char* const cbor_string, DEVICE_TWIN_UPDATE_STATE update_state)
+{
+    CborParser cbor_parser;
+    CborValue val;
+    CborValue* root = &val;
+    cbor_parser_init((const uint8_t*)cbor_string, strlen(cbor_string), 0, &cbor_parser, root);
+
+    // Only desired properties:
+    CborValue val_advance;
+    CborValue returned_cbor_value;
+
+    if (update_state == DEVICE_TWIN_UPDATE_COMPLETE)
+    {
+        cbor_value_map_find_value(root, "desired", &val_advance);
+        root = &val_advance;
+    }
+
+    find_and_copy_cbor_uint64(root, "batteryLevel", &contoso_device->battery_level);
+    find_and_copy_cbor_uint64(root, "deviceNumber", &contoso_device->device_number);
+    find_and_copy_cbor_string(root, "deviceModel", &contoso_device->device_model);
+
+    cbor_value_map_find_value(root, "telemetryConfig", &returned_cbor_value);
+    if(cbor_value_is_valid(&returned_cbor_value))
+    {
+        find_and_copy_cbor_uint64(&returned_cbor_value, "frequency", &contoso_device->telemetry_config.frequency);
+    }
+
+}
+
+static void device_twin_callback(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payload, size_t size, void* userContextCallback)
 {
     (void)update_state;
     (void)size;
 
-    Car* oldCar = (Car*)userContextCallback;
-    Car* newCar = parse_from_json((const char*)payLoad, update_state);
+    CONTOSO_DEVICE* old_contoso_device = (CONTOSO_DEVICE*)userContextCallback;
+    cJSON* parsed_json = cJSON_Parse(payload);
+    CborEncoder cbor_encoder;
+    CborEncoder cbor_encoder_container;
+    cbor_encoder_init(&cbor_encoder, cbor_buf, sizeof(cbor_buf), 0);
+    CborError decode_error = decode_json(parsed_json, &cbor_encoder);
+    CONTOSO_DEVICE new_contoso_device;
+    memset(&new_contoso_device, 0, sizeof(CONTOSO_DEVICE));
+    parse_from_cbor(&new_contoso_device, cbor_buf, 0); 
 
-    if (newCar->change_oil_reminder != NULL)
+    if ((&new_contoso_device)->device_number != 0)
     {
-        if ((oldCar->change_oil_reminder != NULL) && (strcmp(oldCar->change_oil_reminder, newCar->change_oil_reminder) != 0))
+        if ((&new_contoso_device)->device_number != old_contoso_device->device_number)
         {
-            free(oldCar->change_oil_reminder);
+            printf("New device number: %" PRIu64 "\r\n", (&new_contoso_device)->device_number);
+            old_contoso_device->device_number = (&new_contoso_device)->device_number;
         }
-        
-        if (oldCar->change_oil_reminder == NULL)
+    }
+
+    if ((&new_contoso_device)->device_model != NULL)
+    {
+        if (strcmp((&new_contoso_device)->device_model, old_contoso_device->device_model))
         {
-            printf("Received a new change_oil_reminder = %s\n", newCar->change_oil_reminder);
-            if ( NULL != (oldCar->change_oil_reminder = malloc(strlen(newCar->change_oil_reminder) + 1)))
+            printf("New device model: %s\r\n", (&new_contoso_device)->device_model);
+            if(old_contoso_device->device_model != DEVICE_MODEL_NAME)
             {
-                (void)strcpy(oldCar->change_oil_reminder, newCar->change_oil_reminder);
-                free(newCar->change_oil_reminder);
+                free(old_contoso_device->device_model);
             }
+            old_contoso_device->device_model = (&new_contoso_device)->device_model;
         }
     }
 
-    if (newCar->settings.desired_maxSpeed != 0)
+    if((&new_contoso_device)->telemetry_config.frequency != 0)
     {
-        if (newCar->settings.desired_maxSpeed != oldCar->settings.desired_maxSpeed)
+        if ((&new_contoso_device)->telemetry_config.frequency != old_contoso_device->telemetry_config.frequency)
         {
-            printf("Received a new desired_maxSpeed = %" PRIu8 "\n", newCar->settings.desired_maxSpeed);
-            oldCar->settings.desired_maxSpeed = newCar->settings.desired_maxSpeed;
+            printf("New telemetry frequency: %" PRIu64 "\r\n", (&new_contoso_device)->telemetry_config.frequency);
+            old_contoso_device->telemetry_config.frequency = (&new_contoso_device)->telemetry_config.frequency;
         }
     }
-
-    if (newCar->settings.location.latitude != 0)
-    {
-        if (newCar->settings.location.latitude != oldCar->settings.location.latitude)
-        {
-            printf("Received a new latitude = %f\n", newCar->settings.location.latitude);
-            oldCar->settings.location.latitude = newCar->settings.location.latitude;
-        }
-    }
-
-    if (newCar->settings.location.longitude != 0)
-    {
-        if (newCar->settings.location.longitude != oldCar->settings.location.longitude)
-        {
-            printf("Received a new longitude = %f\n", newCar->settings.location.longitude);
-            oldCar->settings.location.longitude = newCar->settings.location.longitude;
-        }
-    }
-
-    free(newCar);
 }
 
 static void get_complete_device_twin_on_demand_callback(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback)
@@ -492,82 +262,80 @@ static void reported_state_callback(int status_code, void* userContextCallback)
 
 static void iothub_client_device_twin_and_methods_sample_run(void)
 {
-//     IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;
-//     IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle;
+    IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;
+    IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle;
 
-//     // Select the Protocol to use with the connection
-// #ifdef SAMPLE_MQTT
-//     protocol = MQTT_Protocol;
-// #endif // SAMPLE_MQTT
-// #ifdef SAMPLE_MQTT_OVER_WEBSOCKETS
-//     protocol = MQTT_WebSocket_Protocol;
-// #endif // SAMPLE_MQTT_OVER_WEBSOCKETS
-// #ifdef SAMPLE_AMQP
-//     protocol = AMQP_Protocol;
-// #endif // SAMPLE_AMQP
-// #ifdef SAMPLE_AMQP_OVER_WEBSOCKETS
-//     protocol = AMQP_Protocol_over_WebSocketsTls;
-// #endif // SAMPLE_AMQP_OVER_WEBSOCKETS
-// #ifdef SAMPLE_HTTP
-//     protocol = HTTP_Protocol;
-// #endif // SAMPLE_HTTP
+    // Select the Protocol to use with the connection
+#ifdef SAMPLE_MQTT
+    protocol = MQTT_Protocol;
+#endif // SAMPLE_MQTT
+#ifdef SAMPLE_MQTT_OVER_WEBSOCKETS
+    protocol = MQTT_WebSocket_Protocol;
+#endif // SAMPLE_MQTT_OVER_WEBSOCKETS
+#ifdef SAMPLE_AMQP
+    protocol = AMQP_Protocol;
+#endif // SAMPLE_AMQP
+#ifdef SAMPLE_AMQP_OVER_WEBSOCKETS
+    protocol = AMQP_Protocol_over_WebSocketsTls;
+#endif // SAMPLE_AMQP_OVER_WEBSOCKETS
+#ifdef SAMPLE_HTTP
+    protocol = HTTP_Protocol;
+#endif // SAMPLE_HTTP
 
-//     if (IoTHub_Init() != 0)
-//     {
-//         (void)printf("Failed to initialize the platform.\r\n");
-//     }
-//     else
-//     {
-//         if ((iotHubClientHandle = IoTHubDeviceClient_CreateFromConnectionString(connectionString, protocol)) == NULL)
-//         {
-//             (void)printf("ERROR: iotHubClientHandle is NULL!\r\n");
-//         }
-//         else
-//         {
-//             // Uncomment the following lines to enable verbose logging (e.g., for debugging).
-//             //bool traceOn = true;
-//             //(void)IoTHubDeviceClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &traceOn);
+    if (IoTHub_Init() != 0)
+    {
+        (void)printf("Failed to initialize the platform.\r\n");
+    }
+    else
+    {
+        if ((iotHubClientHandle = IoTHubDeviceClient_CreateFromConnectionString(connectionString, protocol)) == NULL)
+        {
+            (void)printf("ERROR: iotHubClientHandle is NULL!\r\n");
+        }
+        else
+        {
+            // Uncomment the following lines to enable verbose logging (e.g., for debugging).
+            //bool traceOn = true;
+            //(void)IoTHubDeviceClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &traceOn);
 
-// #ifdef SET_TRUSTED_CERT_IN_SAMPLES
-//             // For mbed add the certificate information
-//             if (IoTHubDeviceClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
-//             {
-//                 (void)printf("failure to set option \"TrustedCerts\"\r\n");
-//             }
-// #endif // SET_TRUSTED_CERT_IN_SAMPLES
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+            // For mbed add the certificate information
+            if (IoTHubDeviceClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+            {
+                (void)printf("failure to set option \"TrustedCerts\"\r\n");
+            }
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-            Car car;
-            memset(&car, 0, sizeof(Car));
-            car.lastOilChangeDate = "2016";
-            car.maker.makerName = "Fabrikam";
-            car.maker.style = "sedan";
-            car.maker.year = 2014;
-            car.state.reported_maxSpeed = 100;
-            car.state.softwareVersion = 1;
-            car.state.vanityPlate = "1I1";
+            CONTOSO_DEVICE device;
+            device.battery_level = 98;
+            device.device_number = 1;
+            device.device_model = (char*)DEVICE_MODEL_NAME;
+            device.telemetry_config.frequency = 60;
+            device.telemetry_config.status = (char*)DEVICE_TELEMETRY_STATUS_SUCCESS;
 
-            // char* reportedProperties = serialize_to_json(&car);
-            char* reported_properties_cbor = serialize_to_cbor(&car);
+            char* reported_properties_cbor = serialize_to_cbor(&device);
+            char* reported_properties_json = serialize_to_json(&device);
 
-            CborParser cbor_parser;
-            CborValue cbor_value;
-            cbor_parser_init((const uint8_t*)reported_properties_cbor, strlen(reported_properties_cbor), 0, &cbor_parser, &cbor_value);
-            parse_from_cbor(&car, &cbor_value, DEVICE_TWIN_UPDATE_PARTIAL);
-            // cbor_parse_recursive(&cbor_value, 0);
+            printf("Size of encoded cbor: %zu\r\nSize of encoded json: %zu\r\n", 
+                        strlen(reported_properties_cbor), strlen(reported_properties_json));
 
             // (void)IoTHubDeviceClient_GetTwinAsync(iotHubClientHandle, get_complete_device_twin_on_demand_callback, NULL);
-            // (void)IoTHubDeviceClient_SendReportedState(iotHubClientHandle, (const unsigned char*)reportedProperties, strlen(reportedProperties), reported_state_callback, NULL);
-            // (void)IoTHubDeviceClient_SetDeviceTwinCallback(iotHubClientHandle, device_twin_callback, &car);
+            (void)IoTHubDeviceClient_SendReportedState(iotHubClientHandle, (const unsigned char*)reported_properties_json, 
+                                                            strlen(reported_properties_json), reported_state_callback, NULL);
+            (void)IoTHubDeviceClient_SetDeviceTwinCallback(iotHubClientHandle, device_twin_callback, &device);
 
             (void)getchar();
 
-            // IoTHubDeviceClient_Destroy(iotHubClientHandle);
+            IoTHubDeviceClient_Destroy(iotHubClientHandle);
             // free(reportedProperties);
-            free(car.change_oil_reminder);
-        // }
+            if(device.device_model != DEVICE_MODEL_NAME)
+            {
+                free(device.device_model);
+            }
+        }
 
-        // IoTHub_Deinit();
-    // }
+        IoTHub_Deinit();
+    }
 }
 
 int main(void)

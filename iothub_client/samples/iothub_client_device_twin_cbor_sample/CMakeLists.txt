@@ -11,12 +11,19 @@ compileAsC99()
 
 add_executable(iothub_client_device_twin_cbor_sample 
     iothub_client_device_twin_cbor_sample.c
+    cbor_helper.c
+)
+
+find_library(CJSON_LIB
+    NAMES
+        libcjson.a
 )
 
 target_link_libraries(iothub_client_device_twin_cbor_sample
     aziotsharedutil
     iothub_client
     tinycbor
+    ${CJSON_LIB}
 )
 
 IF(WIN32)
