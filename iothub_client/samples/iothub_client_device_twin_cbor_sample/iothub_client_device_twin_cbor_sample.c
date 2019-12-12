@@ -54,7 +54,7 @@
 static uint8_t cbor_buf[CBOR_BUFFER_SIZE];
 
 /* Paste in the your iothub device connection string  */
-static const char* connectionString = "HostName=dawalton-hub.azure-devices.net;DeviceId=dane_cbor;SharedAccessKey=JmNRulx5IPuA4ax2IbyL9N9so3jr341oj0JgHIxtLcU=";
+static const char* connectionString = "CONNECTION STRING HERE";
 static const char const DEVICE_MODEL_NAME[] = "Contoso5000";
 
 static const char const DEVICE_TELEMETRY_STATUS_SUCCESS[] = "success";
