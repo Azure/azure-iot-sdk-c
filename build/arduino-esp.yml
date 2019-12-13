@@ -1,0 +1,67 @@
+name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+
+jobs:
+- job: Pull_Sync_SDK
+  pool:
+      name: $(MXCHIPAGENTPOOL)
+  steps:
+  - script: |
+      . build_all/arduino/setup_esp.sh
+    displayName: 'setup'
+    env:
+      IOTHUB_CONNECTION_STRING: $(MXCHIP_NIGHTLY_DEVICE_STRING)
+      SSID: $(WIFI_SSID)
+      PWD:  $(WIFI_PWD)
+      
+- job: Build_Upload_ESP8266
+  dependsOn: Pull_Sync_SDK
+  pool:
+    name: $(MXCHIPAGENTPOOL)
+  steps:
+  - script: |
+      ls
+      cd $(NEW_ARDUINO_LIB_PATH)/
+      arduino --verify --upload --board esp8266:esp8266 --port $(ESP8266_PORT) --pref sketchbook.path=$(NEW_ARDUINO_LIB_PATH) --verbose-build telemetry_sample.c.ino 
+      # should fail job if build/upload fails
+
+- job: Execute_ESP8266
+  dependsOn: Build_Upload_ESP8266
+  condition: succeeded()
+  pool:
+    name: $(MXCHIPAGENTPOOL)
+  steps:
+  - script: |
+      
+  - script: |
+      ls
+      cd $(Build.SourcesDirectory)/testtools/UART_interface/
+      . input .sh
+      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p "/dev/ttyACM1" -m $(MXCHIP_TO_FLASH)
+      rm input.txt
+    env:
+      # Most up to date SERIAL_TASKs output can be learned by passing 'help' into input.txt,
+      # Current SERIAL_TASK commands:
+      # help,
+      # version,
+      # exit (also resets device),
+      # set_wifissid [args],
+      # set_wifipwd [args],
+      # set_az_iothub [args],
+      # set_dps_uds [args],
+      # enable_secure [args],
+      # send_telemetry [args]
+    displayName: 'run_test'
+
+  - script: |
+      # Check that this is the right source directory
+      ls
+      cp $(Build.SourcesDirectory)/testtools/UART_interface/output.txt $(Build.ArtifactStagingDirectory)
+    displayName: "Copy Files into Artifact repo"
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifacts: log'
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: 'log'
+      publishLocation: 'Container'
+    condition: succeeded()
