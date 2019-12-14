@@ -6,12 +6,13 @@ jobs:
       name: $(MXCHIPAGENTPOOL)
   steps:
   - script: |
-      . build_all/arduino/setup_esp.sh
-    displayName: 'setup'
+      . build_all/arduino/setup_arduino_libraries.sh
+    displayName: 'setup libraries'
     env:
-      IOTHUB_CONNECTION_STRING: $(MXCHIP_NIGHTLY_DEVICE_STRING)
-      SSID: $(WIFI_SSID)
-      PWD:  $(WIFI_PWD)
+      IOTHUB_CONNECTION_DEVICE_STRING: $(MXCHIP_NIGHTLY_DEVICE_STRING)
+      WIFI_SSID: $(WIFI_SSID)
+      WIFI_PWD:  $(WIFI_PWD)
+      ARDUINO_LIBRARY_DIR: ""
       
 - job: Build_Upload_ESP8266
   dependsOn: Pull_Sync_SDK
@@ -20,36 +21,65 @@ jobs:
   steps:
   - script: |
       ls
-      cd $(NEW_ARDUINO_LIB_PATH)/
-      arduino --verify --upload --board esp8266:esp8266 --port $(ESP8266_PORT) --pref sketchbook.path=$(NEW_ARDUINO_LIB_PATH) --verbose-build telemetry_sample.c.ino 
+      cd $(ARDUINO_LIBRARY_DIR)/AzureIoTHub/examples/iothub_ll_telemetry_sample/
+      arduino --verify --upload --board esp8266:esp8266 --port $(ESP8266_PORT) --pref sketchbook.path=$(ARDUINO_LIBRARY_DIR) --verbose-build telemetry_sample.c.ino 
       # should fail job if build/upload fails
+    env:
+      ARDUNIO_LIBRARY_DIR: ""
 
-- job: Execute_ESP8266
+- job: test_ESP8266
   dependsOn: Build_Upload_ESP8266
   condition: succeeded()
   pool:
     name: $(MXCHIPAGENTPOOL)
   steps:
   - script: |
-      
+      ls
+      cd $(Build.SourcesDirectory)/testtools/UART_interface/
+      . input .sh
+      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p "/dev/ttyUSB2" 
+      rm input.txt
+    displayName: 'run_test'
+
+  - script: |
+      # Check that this is the right source directory
+      ls
+      cp $(Build.SourcesDirectory)/testtools/UART_interface/output.txt $(Build.ArtifactStagingDirectory)
+    displayName: "Copy Files into Artifact repo"
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifacts: log'
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: 'log'
+      publishLocation: 'Container'
+    condition: succeeded()
+
+- job: Build_Upload_ESP32
+  dependsOn: Pull_Sync_SDK
+  pool:
+    name: $(MXCHIPAGENTPOOL)
+  steps:
+  - script: |
+      ls
+      cd $(ARDUINO_LIBRARY_DIR)/AzureIoTHub/examples/iothub_ll_telemetry_sample/
+      arduino --verify --upload --board esp32:esp32 --port $(ESP32_PORT) --pref sketchbook.path=$(ARDUINO_LIBRARY_DIR) --verbose-build telemetry_sample.c.ino 
+      # should fail job if build/upload fails
+    env:
+      ARDUNIO_LIBRARY_DIR: ""
+
+- job: test_ESP32
+  dependsOn: Build_Upload_ESP32
+  condition: succeeded()
+  pool:
+    name: $(MXCHIPAGENTPOOL)
+  steps:
   - script: |
       ls
       cd $(Build.SourcesDirectory)/testtools/UART_interface/
       . input .sh
-      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p "/dev/ttyACM1" -m $(MXCHIP_TO_FLASH)
+      python3 serial_connect.py -i input.txt -o output.txt -b 1000000 -p "/dev/ttyUSB3" 
       rm input.txt
-    env:
-      # Most up to date SERIAL_TASKs output can be learned by passing 'help' into input.txt,
-      # Current SERIAL_TASK commands:
-      # help,
-      # version,
-      # exit (also resets device),
-      # set_wifissid [args],
-      # set_wifipwd [args],
-      # set_az_iothub [args],
-      # set_dps_uds [args],
-      # enable_secure [args],
-      # send_telemetry [args]
     displayName: 'run_test'
 
   - script: |
