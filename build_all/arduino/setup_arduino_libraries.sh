@@ -12,4 +12,4 @@ python3 make_sdk.py -o $ARDUINO_LIBRARY_DIR -d esp32
 cd $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/
 sed -i 's/your-wifi-name/'$WIFI_SSID'/g' *
 sed -i 's/your-wifi-pwd/'$WIFI_PWD'/g' *
-sed -i 's/your-iothub-DEVICE-connection-string/'IOTHUB_CONNECTION_DEVICE_STRING'/g' *
+sed -i 's/your-iothub-DEVICE-connection-string/'$IOTHUB_CONNECTION_DEVICE_STRING'/g' *
