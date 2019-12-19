@@ -12,7 +12,7 @@ jobs:
       IOTHUB_CONNECTION_DEVICE_STRING: $(MXCHIP_NIGHTLY_DEVICE_STRING)
       WIFI_SSID: $(WIFI_SSID)
       WIFI_PWD:  $(WIFI_PWD)
-      ARDUINO_LIBRARY_DIR: ""
+      ARDUINO_LIBRARY_DIR: $(Agent.BuildDirectory)/libraries/
       
 - job: Build_Upload_ESP8266
   dependsOn: Pull_Sync_SDK
@@ -25,7 +25,7 @@ jobs:
       arduino --verify --upload --board esp8266:esp8266 --port $(ESP8266_PORT) --pref sketchbook.path=$(ARDUINO_LIBRARY_DIR) --verbose-build telemetry_sample.c.ino 
       # should fail job if build/upload fails
     env:
-      ARDUNIO_LIBRARY_DIR: ""
+      ARDUNIO_LIBRARY_DIR: $(Agent.BuildDirectory)
 
 - job: test_ESP8266
   dependsOn: Build_Upload_ESP8266
@@ -37,7 +37,7 @@ jobs:
       ls
       cd $(Build.SourcesDirectory)/testtools/UART_interface/
       . input .sh
-      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p "/dev/ttyUSB2" 
+      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p "/dev/ttyUSB2" -d esp8266
       rm input.txt
     displayName: 'run_test'
 
@@ -66,7 +66,7 @@ jobs:
       arduino --verify --upload --board esp32:esp32 --port $(ESP32_PORT) --pref sketchbook.path=$(ARDUINO_LIBRARY_DIR) --verbose-build telemetry_sample.c.ino 
       # should fail job if build/upload fails
     env:
-      ARDUNIO_LIBRARY_DIR: ""
+      ARDUNIO_LIBRARY_DIR: $(Agent.BuildDirectory)
 
 - job: test_ESP32
   dependsOn: Build_Upload_ESP32
@@ -78,7 +78,7 @@ jobs:
       ls
       cd $(Build.SourcesDirectory)/testtools/UART_interface/
       . input .sh
-      python3 serial_connect.py -i input.txt -o output.txt -b 1000000 -p "/dev/ttyUSB3" 
+      python3 serial_connect.py -i input.txt -o output.txt -b 1000000 -p "/dev/ttyUSB1" -d esp32
       rm input.txt
     displayName: 'run_test'
 
