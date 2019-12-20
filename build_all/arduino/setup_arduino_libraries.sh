@@ -1,10 +1,13 @@
 echo $NEWTIN | sudo -S rm -r azure-iot-pal-arduino
 git clone -b make-sdk-python https://github.com/Azure/azure-iot-pal-arduino.git 
+
+cd azure-iot-pal-arduino
+
 git submodule update --init --recursive
 
 rsync -avz --existing ./ sdk/
 
-cd azure-iot-pal-arduino/build_all
+cd build_all
 
 python3 make_sdk.py -o $ARDUINO_LIBRARY_DIR -d esp32
 
