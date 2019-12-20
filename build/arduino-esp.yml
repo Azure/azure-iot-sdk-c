@@ -23,7 +23,7 @@ jobs:
   - script: |
       ls
       cd $(ARDUINO_LIBRARY_DIR)/libraries/AzureIoTHub/examples/iothub_ll_telemetry_sample/
-      arduino --verify --upload --board esp8266:esp8266 --port $(ESP8266_PORT) --pref sketchbook.path=$(ARDUINO_LIBRARY_DIR) --verbose-build telemetry_sample.c.ino 
+      arduino --verify --upload --board esp8266:esp8266 --port $(ESP8266_PORT) --pref sketchbook.path=$ARDUINO_LIBRARY_DIR --verbose-build telemetry_sample.c.ino 
       # should fail job if build/upload fails
     env:
       ARDUNIO_LIBRARY_DIR: $(Agent.BuildDirectory)/../
@@ -64,7 +64,7 @@ jobs:
   - script: |
       ls
       cd $(ARDUINO_LIBRARY_DIR)/libraries/AzureIoTHub/examples/iothub_ll_telemetry_sample/
-      arduino --verify --upload --board esp32:esp32 --port $(ESP32_PORT) --pref sketchbook.path=$(ARDUINO_LIBRARY_DIR) --verbose-build telemetry_sample.c.ino 
+      arduino --verify --upload --board esp32:esp32 --port $(ESP32_PORT) --pref sketchbook.path=$ARDUINO_LIBRARY_DIR --verbose-build telemetry_sample.c.ino 
       # should fail job if build/upload fails
     env:
       ARDUNIO_LIBRARY_DIR: $(Agent.BuildDirectory)/../
