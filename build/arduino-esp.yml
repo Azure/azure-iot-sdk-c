@@ -64,7 +64,7 @@ jobs:
   - script: |
       ls
       cd $(Agent.WorkFolder)/libraries/AzureIoTHub/examples/iothub_ll_telemetry_sample/
-      arduino --upload --board esp32:esp32:huzzah --port $(ESP32_PORT) --pref sketchbook.path=$ARDUINO_LIBRARY_DIR --verbose-build telemetry_sample.c.ino 
+      arduino --upload --board esp32:esp32:feather_esp32 --port $(ESP32_PORT) --pref sketchbook.path=$ARDUINO_LIBRARY_DIR --verbose-build telemetry_sample.c.ino 
       # should fail job if build/upload fails
     env:
       ARDUNIO_LIBRARY_DIR: $(Agent.WorkFolder)
