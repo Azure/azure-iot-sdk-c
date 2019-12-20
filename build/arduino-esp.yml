@@ -12,7 +12,7 @@ jobs:
       IOTHUB_CONNECTION_DEVICE_STRING: $(MXCHIP_NIGHTLY_DEVICE_STRING)
       WIFI_SSID: $(WIFI_SSID)
       WIFI_PWD:  $(WIFI_PWD)
-      ARDUINO_LIBRARY_DIR: $(Agent.BuildDirectory)/../libraries/
+      ARDUINO_LIBRARY_DIR: $(Agent.WorkFolder)/libraries/
       NEWTIN: $(NEWTIN)
       
 - job: Build_Upload_ESP8266
@@ -26,7 +26,7 @@ jobs:
       arduino --verify --upload --board esp8266:esp8266 --port $(ESP8266_PORT) --pref sketchbook.path=$ARDUINO_LIBRARY_DIR --verbose-build telemetry_sample.c.ino 
       # should fail job if build/upload fails
     env:
-      ARDUNIO_LIBRARY_DIR: $(Agent.BuildDirectory)/../
+      ARDUNIO_LIBRARY_DIR: $(Agent.WorkFolder)
 
 - job: test_ESP8266
   dependsOn: Build_Upload_ESP8266
@@ -63,11 +63,11 @@ jobs:
   steps:
   - script: |
       ls
-      cd $(ARDUINO_LIBRARY_DIR)/libraries/AzureIoTHub/examples/iothub_ll_telemetry_sample/
+      cd $ARDUINO_LIBRARY_DIR/libraries/AzureIoTHub/examples/iothub_ll_telemetry_sample/
       arduino --verify --upload --board esp32:esp32 --port $(ESP32_PORT) --pref sketchbook.path=$ARDUINO_LIBRARY_DIR --verbose-build telemetry_sample.c.ino 
       # should fail job if build/upload fails
     env:
-      ARDUNIO_LIBRARY_DIR: $(Agent.BuildDirectory)/../
+      ARDUNIO_LIBRARY_DIR: $(Agent.WorkFolder)
 
 - job: test_ESP32
   dependsOn: Build_Upload_ESP32
