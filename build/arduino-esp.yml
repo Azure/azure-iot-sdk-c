@@ -13,6 +13,7 @@ jobs:
       WIFI_SSID: $(WIFI_SSID)
       WIFI_PWD:  $(WIFI_PWD)
       ARDUINO_LIBRARY_DIR: $(Agent.BuildDirectory)/libraries/
+      NEWTIN: $(NEWTIN)
       
 - job: Build_Upload_ESP8266
   dependsOn: Pull_Sync_SDK
