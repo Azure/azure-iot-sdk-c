@@ -3,7 +3,7 @@ git submodule update --init --recursive
 
 rsync -avz --existing ./ sdk/
 
-cd build_all
+cd azure-iot-pal-arduino/build_all
 
 python3 make_sdk.py -o $ARDUINO_LIBRARY_DIR -d esp32
 
