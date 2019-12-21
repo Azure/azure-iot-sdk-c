@@ -7,7 +7,7 @@ jobs:
   steps:
   - script: |
       . build_all/arduino/setup_arduino_libraries.sh
-      echo $NEWTIN | sudo -S cp $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/ $ARDUINO_LIBRARY_DIR/../
+      echo $NEWTIN | sudo -S cp -r $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/ $ARDUINO_LIBRARY_DIR/../
     displayName: 'setup libraries'
     env:
       IOTHUB_CONNECTION_DEVICE_STRING: $(MXCHIP_NIGHTLY_DEVICE_STRING)
