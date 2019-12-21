@@ -7,6 +7,7 @@ jobs:
   steps:
   - script: |
       . build_all/arduino/setup_arduino_libraries.sh
+      echo $NEWTIN | sudo -S cp $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/ $ARDUINO_LIBRARY_DIR/../
     displayName: 'setup libraries'
     env:
       IOTHUB_CONNECTION_DEVICE_STRING: $(MXCHIP_NIGHTLY_DEVICE_STRING)
@@ -21,9 +22,9 @@ jobs:
     name: $(MXCHIPAGENTPOOL)
   steps:
   - script: |
+      cd $(Agent.WorkFolder)/iothub_ll_telemetry_sample
       ls
-      cd $(Agent.WorkFolder)/libraries/AzureIoTHub/examples/iothub_ll_telemetry_sample/
-      arduino --upload --board esp8266:esp8266:huzzah --port $(ESP8266_PORT) --pref sketchbook.path=$ARDUINO_LIBRARY_DIR, libraries=$ARDUINO_LIBRARY_DIR/libraries --verbose-build telemetry_sample.c.ino 
+      arduino --upload --board esp8266:esp8266:huzzah --port $(ESP8266_PORT) --pref sketchbook.path=$ARDUINO_LIBRARY_DIR --pref libraries=$ARDUINO_LIBRARY_DIR/libraries --verbose-build telemetry_sample.c.ino 
       # should fail job if build/upload fails
     env:
       ARDUNIO_LIBRARY_DIR: $(Agent.WorkFolder)
