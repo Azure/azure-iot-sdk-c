@@ -22,6 +22,7 @@ jobs:
     name: $(MXCHIPAGENTPOOL)
   steps:
   - script: |
+      ls
       cd $(Agent.WorkFolder)/iothub_ll_telemetry_sample
       ls
       arduino --upload --board esp8266:esp8266:huzzah --port $(ESP8266_PORT) --pref sketchbook.path=$ARDUINO_LIBRARY_DIR --pref libraries=$ARDUINO_LIBRARY_DIR/libraries --verbose-build telemetry_sample.c.ino 
