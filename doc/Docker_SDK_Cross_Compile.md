@@ -64,8 +64,9 @@ RUN tar -xvf OpenWrt-Toolchain-ramips-for-mipsel_24kec+dsp-gcc-4.8-linaro_uClibc
 
 # Download the Azure IoT SDK for C
 RUN git clone https://github.com/azure/azure-iot-sdk-c.git
-RUN cd azure-iot-sdk-c
+WORKDIR azure-iot-sdk-c
 RUN git submodule update --init
+WORKDIR ..
 
 # Download OpenSSL source and expand it
 RUN wget https://www.openssl.org/source/openssl-1.0.2o.tar.gz
