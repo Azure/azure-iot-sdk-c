@@ -25,7 +25,7 @@ jobs:
       ls
       cd $(Agent.WorkFolder)/iothub_ll_telemetry_sample
       ls
-      arduino --upload --board esp8266:esp8266:huzzah --port $(ESP8266_PORT) --verbose-build telemetry_sample.c.ino iot_configs.h sample_init.h
+      arduino --upload --board esp8266:esp8266:huzzah --port $(ESP8266_PORT) --verbose-build telemetry_sample.c.ino 
       # should fail job if build/upload fails
     env:
       ARDUNIO_LIBRARY_DIR: $(Agent.WorkFolder)
