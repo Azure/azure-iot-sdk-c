@@ -25,6 +25,9 @@ jobs:
       cd $(Agent.WorkFolder)
       echo "work folder"
       ls
+      cd libraries
+      echo "lib folders"
+      ls
       cd $(Agent.WorkFolder)/telemetry_sample.c
       echo "telem folder"
       ls
