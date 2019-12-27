@@ -22,7 +22,11 @@ jobs:
     name: $(MXCHIPAGENTPOOL)
   steps:
   - script: |
+      cd $(Agent.WorkFolder)
+      echo "work folder"
+      ls
       cd $(Agent.WorkFolder)/telemetry_sample.c
+      echo "telem folder"
       ls
       arduino --upload --board esp8266:esp8266:huzzah --pref sketchbook.path=$ARDUINO_LIBRARY_DIR --port $(ESP8266_PORT) --verbose-build telemetry_sample.c.ino 
       # should fail job if build/upload fails
