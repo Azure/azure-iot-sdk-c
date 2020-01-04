@@ -7,7 +7,10 @@ jobs:
   steps:
   - script: |
       . build_all/arduino/setup_arduino_libraries.sh
+      #copy example and platform.local.txts to their correct locations
       echo $NEWTIN | sudo -S cp -r $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/iothub_ll_telemetry_sample $ARDUINO_LIBRARY_DIR/../
+      echo $NEWTIN | sudo -S cp $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/iothub_ll_telemetry_sample/platform.local.esp8266.txt ~/.arduino15/packages/esp8266/hardware/esp8266/2.5.2/platform.local.txt
+      echo $NEWTIN | sudo -S cp $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/iothub_ll_telemetry_sample/platform.local.esp32.txt ~/.arduino15/packages/esp32/hardware/esp32/1.0.2/platform.local.txt
     displayName: 'setup libraries'
     env:
       IOTHUB_CONNECTION_DEVICE_STRING: $(MXCHIP_NIGHTLY_DEVICE_STRING)
@@ -71,8 +74,8 @@ jobs:
   steps:
   - script: |
       ls
-      cd $(Agent.WorkFolder)/libraries/AzureIoTHub/examples/iothub_ll_telemetry_sample/
-      arduino --upload --board esp32:esp32:esp32 --port $(ESP32_PORT) --pref sketchbook.path=$ARDUINO_LIBRARY_DIR --verbose-build telemetry_sample.c.ino 
+      cd $(Agent.WorkFolder)/iothub_ll_telemetry_sample/
+      arduino --upload --board esp32:esp32:esp32 --port $(ESP32_PORT) --pref sketchbook.path=../ --verbose-build iothub_ll_telemetry_sample.ino 
       # should fail job if build/upload fails
     env:
       ARDUNIO_LIBRARY_DIR: $(Agent.WorkFolder)
