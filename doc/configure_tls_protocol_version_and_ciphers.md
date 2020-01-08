@@ -1,7 +1,8 @@
-# How to configure the Azure IoT C SDK TLS platforms to disable TLS 1.0 and TLS 1.1
+# Configure TLS Protocol Version and Ciphers
 
+## How to configure the Azure IoT C SDK TLS platforms to disable TLS 1.0 and TLS 1.1
 
-## SChannel (Microsoft Windows)
+### SChannel (Microsoft Windows)
 
 To use exclusively TLS 1.2 in Microsoft Windows using SChannel, disable the support for TLS 1.0 and 1.1.
 
@@ -14,7 +15,7 @@ To disable support in SChannel for TLS 1.1, follow this [documentation](https://
 For more information on TLS configuration please see the [following documentation](https://docs.microsoft.com/en-us/dotnet/framework/network-programming/tls). 
 
 
-## OpenSSL
+### OpenSSL
 
 The latest Azure IoT C SDK uses [TLS 1.2 by default with OpenSSL](https://github.com/Azure/azure-c-shared-utility/blob/48f7a556865731f0e96c47eb5e9537361f24647c/adapters/tlsio_openssl.c#L1167).
 
@@ -23,7 +24,7 @@ The SDK creates the SSL context using the method related to the TLS version sele
 According to the [OpenSSL documentation](https://www.openssl.org/docs/man1.0.2/man3/SSL_CTX_new.html) the method selected causes OpenSSL to use only the TLS version associated with that method.  
 
 
-## WolfSSL
+### WolfSSL
 
 To use only TLS 1.2 or higher, WolfSSL library MUST be built without using “--enable-oldtls”.
 
@@ -33,12 +34,12 @@ In its adapter layer, Azure IoT C SDK does not directly set the TLS version that
 The result is that the wolfSSL library will use its default TLS version. 
 
 
-## Apple iOS
+### Apple iOS
 
 TLS 1.2+ should already be the default for the latest versions of Apple iOS. 
 
 
-## mbedTLS
+### mbedTLS
 
 mbedTLS can be configured to use only higher versions of TLS. 
 That is achieved by calling  [mbedtls_ssl_conf_min_version](https://os.mbed.com/teams/sandbox/code/mbedtls/docs/bef26f687287/ssl_8h.html).
@@ -46,7 +47,7 @@ That is achieved by calling  [mbedtls_ssl_conf_min_version](https://os.mbed.com/
 In its adapter layer, Azure IoT C SDK already [sets the minimum TLS version that mbedTLS should use](https://github.com/Azure/azure-c-shared-utility/blob/48f7a556865731f0e96c47eb5e9537361f24647c/adapters/tlsio_mbedtls.c#L481) to TLS 1.2.
 
 
-## BearSSL/esp8266 Arduino
+### BearSSL/esp8266 Arduino
 
 TLS version can be set on BearSSL by using [br_ssl_engine_set_versions](https://www.bearssl.org/gitweb/?p=BearSSL;a=blob;f=inc/bearssl_ssl.h;h=fee7b3c496086b96b5435674c130af2e740b1b88;hb=5f045c759957fdff8c85716e6af99e10901fdac0#l1114).
 
@@ -54,15 +55,15 @@ Currently the Azure IoT C SDK does not directly set the minimum version of TLS t
 
 
 
-# How to configure ciphers in the Azure IoT C SDK supported TLS platforms
+## How to configure ciphers in the Azure IoT C SDK supported TLS platforms
 
 
-## SChannel (Microsoft Windows)
+### SChannel (Microsoft Windows)
 
 To configure additional ciphers for SChannel please follow this [documentation](https://docs.microsoft.com/en-us/windows-server/identity/ad-fs/operations/manage-ssl-protocols-in-ad-fs#enabling-or-disabling-additional-cipher-suites).
 
 
-## OpenSSL
+### OpenSSL
 
 The OpenSSL API function [SSL_CTX_set_cipher_list](https://www.openssl.org/docs/man1.0.2/man3/SSL_CTX_set_cipher_list.html) can be used to set the list of ciphers used by the OpenSSL library.  
 
@@ -110,26 +111,26 @@ To take advantage of that functionality please use:
   IoTHubModuleClient_SetOption(iotHubClientHandle, OPTION_OPENSSL_CIPHER_SUITE, ciphers);
   ```
 
-## WolfSSL
+### WolfSSL
 
 Please check the [WolfSSL documentation](https://www.wolfssl.com/docs/wolfssl-manual/ch2/) to build the WolfSSL library to support the desired ciphers.
 
 In its adapter layer, Azure IoT C SDK does not directly set the ciphers that wolfSSL should use.
 
 
-## Apple iOS
+### Apple iOS
 
 Please follow the same guidelines above for using OpenSSL.
 
 
-## mbedTLS
+### mbedTLS
 
 This [mbedTLS documentation](https://os.mbed.com/teams/sandbox/code/mbedtls/docs/bef26f687287/ssl_8h_source.html#l00477) provides details of how to set supported ciphers.
 
 Any additional calls to mbedTLS API should be done in the Azure IoT C SDK mbedTLS adapter code ([tlsio_mbedtls.c, on tlsio_mbedtls.c after mbedtls_ssl_config_init](https://github.com/Azure/azure-c-shared-utility/blob/48f7a556865731f0e96c47eb5e9537361f24647c/adapters/tlsio_mbedtls.c#L482)). 
 
 
-## BearSSL/esp8266 Arduino
+### BearSSL/esp8266 Arduino
 
 Set the cipher suite while defining profile at initialization (see "Profiles" in the [BearSSL documentation](https://www.bearssl.org/api1.html)) or use [setCiphers](https://arduino-esp8266.readthedocs.io/en/latest/esp8266wifi/bearssl-client-secure-class.html). 
 
