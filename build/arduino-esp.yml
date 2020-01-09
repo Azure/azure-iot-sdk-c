@@ -9,8 +9,8 @@ jobs:
       . build_all/arduino/setup_arduino_libraries.sh
       #copy example and platform.local.txts to their correct locations
       echo $NEWTIN | sudo -S cp -r $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/iothub_ll_telemetry_sample $ARDUINO_LIBRARY_DIR/../
-      #echo $NEWTIN | sudo -S cp $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/iothub_ll_telemetry_sample/platform.local.esp8266.txt ~/.arduino15/packages/esp8266/hardware/esp8266/2.5.2/platform.local.txt
-      #echo $NEWTIN | sudo -S cp $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/iothub_ll_telemetry_sample/platform.local.esp32.txt ~/.arduino15/packages/esp32/hardware/esp32/1.0.2/platform.local.txt
+      echo $NEWTIN | sudo -S cp $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/iothub_ll_telemetry_sample/platform.local.esp8266.txt ~/.arduino15/packages/esp8266/hardware/esp8266/2.6.3/platform.local.txt
+      echo $NEWTIN | sudo -S cp $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/iothub_ll_telemetry_sample/platform.local.esp32.txt ~/.arduino15/packages/esp32/hardware/esp32/1.0.4/platform.local.txt
     displayName: 'setup libraries'
     env:
       IOTHUB_CONNECTION_DEVICE_STRING: $(MXCHIP_NIGHTLY_DEVICE_STRING)
