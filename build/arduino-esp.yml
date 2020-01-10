@@ -72,19 +72,19 @@ stages:
   dependsOn: []
   jobs:   
     - job: Pull_Sync_SDK
-    steps:
-    - script: |
-        . build_all/arduino/setup_arduino_libraries.sh
-        #copy example and platform.local.txts to their correct locations
-        echo $NEWTIN | sudo -S cp -r $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/iothub_ll_telemetry_sample $ARDUINO_LIBRARY_DIR/../
-        echo $NEWTIN | sudo -S cp $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/iothub_ll_telemetry_sample/platform.local.esp32.txt ~/.arduino15/packages/esp32/hardware/esp32/1.0.2/platform.local.txt
-      displayName: 'setup libraries'
-      env:
-        IOTHUB_CONNECTION_DEVICE_STRING: $(MXCHIP_NIGHTLY_DEVICE_STRING)
-        WIFI_SSID: $(WIFI_SSID)
-        WIFI_PWD:  $(WIFI_PWD)
-        ARDUINO_LIBRARY_DIR: $(Agent.WorkFolder)/libraries/
-        NEWTIN: $(NEWTIN)
+      steps:
+      - script: |
+          . build_all/arduino/setup_arduino_libraries.sh
+          #copy example and platform.local.txts to their correct locations
+          echo $NEWTIN | sudo -S cp -r $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/iothub_ll_telemetry_sample $ARDUINO_LIBRARY_DIR/../
+          echo $NEWTIN | sudo -S cp $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/iothub_ll_telemetry_sample/platform.local.esp32.txt ~/.arduino15/packages/esp32/hardware/esp32/1.0.2/platform.local.txt
+       displayName: 'setup libraries'
+       env:
+          IOTHUB_CONNECTION_DEVICE_STRING: $(MXCHIP_NIGHTLY_DEVICE_STRING)
+          WIFI_SSID: $(WIFI_SSID)
+          WIFI_PWD:  $(WIFI_PWD)
+          ARDUINO_LIBRARY_DIR: $(Agent.WorkFolder)/libraries/
+          NEWTIN: $(NEWTIN)
 
   - job: Build_Upload_ESP32
     pool:
