@@ -78,6 +78,7 @@ jobs:
       cd $(Agent.WorkFolder)/iothub_ll_telemetry_sample/
       arduino --upload --board esp32:esp32:esp32 --port /dev/ttyUSB1 --pref sketchbook.path=../ --verbose-build iothub_ll_telemetry_sample.ino 
       # should fail job if build/upload fails
+    displayName: 'build and upload'
     env:
       ARDUNIO_LIBRARY_DIR: $(Agent.WorkFolder)
 
