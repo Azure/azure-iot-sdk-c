@@ -89,6 +89,7 @@ stages:
     - job: Build_Upload_ESP32
       pool:
         name: devicelab-03
+      dependsOn: Pull_Sync_SDK
       steps:
       - script: |
           ls
