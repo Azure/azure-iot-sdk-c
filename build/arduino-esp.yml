@@ -86,42 +86,42 @@ stages:
           ARDUINO_LIBRARY_DIR: $(Agent.WorkFolder)/libraries/
           NEWTIN: $(NEWTIN)
 
-  - job: Build_Upload_ESP32
-    pool:
-      name: devicelab-03
-    steps:
-    - script: |
-        ls
-        cd $(Agent.WorkFolder)/iothub_ll_telemetry_sample/
-        arduino --upload --board esp32:esp32:esp32 --port /dev/ttyUSB1 --pref sketchbook.path=../ --verbose-build iothub_ll_telemetry_sample.ino 
-        # should fail job if build/upload fails
-      env:
-        ARDUNIO_LIBRARY_DIR: $(Agent.WorkFolder)
+    - job: Build_Upload_ESP32
+      pool:
+        name: devicelab-03
+      steps:
+      - script: |
+          ls
+          cd $(Agent.WorkFolder)/iothub_ll_telemetry_sample/
+          arduino --upload --board esp32:esp32:esp32 --port /dev/ttyUSB1 --pref sketchbook.path=../ --verbose-build iothub_ll_telemetry_sample.ino 
+          # should fail job if build/upload fails
+        env:
+          ARDUNIO_LIBRARY_DIR: $(Agent.WorkFolder)
 
-  - job: test_ESP32
-    dependsOn: Build_Upload_ESP32
-    condition: succeeded()
-    pool:
-      name: devicelab-03
-    steps:
-    - script: |
-        ls
-        cd $(Build.SourcesDirectory)/testtools/UART_interface/
-        echo -e "exit\r\n\r\n\r\n" | cat > input.txt
-        python3 serial_connect.py -i input.txt -o output.txt -b 1000000 -p /dev/ttyUSB1 -d esp32 -s
-        rm input.txt
-      displayName: 'run_test'
-
-    - script: |
-        # Check that this is the right source directory
-        ls
-        cp $(Build.SourcesDirectory)/testtools/UART_interface/output.txt $(Build.ArtifactStagingDirectory)
-      displayName: "Copy Files into Artifact repo"
-
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish Artifacts: log'
-      inputs:
-        pathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        artifactName: 'log'
-        publishLocation: 'Container'
+    - job: test_ESP32
+      dependsOn: Build_Upload_ESP32
       condition: succeeded()
+      pool:
+        name: devicelab-03
+      steps:
+      - script: |
+          ls
+          cd $(Build.SourcesDirectory)/testtools/UART_interface/
+          echo -e "exit\r\n\r\n\r\n" | cat > input.txt
+          python3 serial_connect.py -i input.txt -o output.txt -b 1000000 -p /dev/ttyUSB1 -d esp32 -s
+          rm input.txt
+        displayName: 'run_test'
+
+      - script: |
+          # Check that this is the right source directory
+          ls
+          cp $(Build.SourcesDirectory)/testtools/UART_interface/output.txt $(Build.ArtifactStagingDirectory)
+        displayName: "Copy Files into Artifact repo"
+
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Artifacts: log'
+        inputs:
+          pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+          artifactName: 'log'
+          publishLocation: 'Container'
+        condition: succeeded()
