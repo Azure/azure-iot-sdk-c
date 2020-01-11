@@ -67,11 +67,10 @@ class esp_uart_interface(uart_interface):
                 temp_written = ser.write(buf[:128])
                 buf = buf[temp_written:]
                 bytes_written += temp_written
-                # print("bytes written: %d" %bytes_written)
                 time.sleep(wait)
                 if (time.time() - timeout > serial_settings.serial_comm_timeout):
                     break
-            # print("final written: %d" %bytes_written)
+
             return bytes_written
         else:
             try:
@@ -86,8 +85,6 @@ class esp_uart_interface(uart_interface):
     def serial_read(self, ser, message, file, first_read=False):
 
         # Special per opt handling:
-        # if "send_telemetry" in message or "set_az_iothub" in message:
-        #     time.sleep(.15)
         if "exit" in message and first_read:
             time.sleep(serial_settings.wait_for_flash)
             output = ser.in_waiting
