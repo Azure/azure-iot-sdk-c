@@ -9,7 +9,7 @@ rsync -avz --existing ./ sdk/
 
 cd build_all
 
-python3 make_sdk.py -o $ARDUINO_LIBRARY_DIR -d esp32
+python3 make_sdk.py -o $ARDUINO_LIBRARY_DIR
 
 # input WIFI_SSID, WIFI_PWD, and IOTHUB_CONNECTION_DEVICE_STRING into iot_config.h
 
