@@ -21,7 +21,7 @@ def device_setup():
     pass
 
 def check_sdk_errors(line):
-    if "Error" in line or "Failure" in line or "error" in line or "Failed" in line or "failure" in line:
+    if "rror" in line or "ailed" in line or "ailure" in line:
         azure_test_firmware_errors.SDK_ERRORS += 1
 
 def check_firmware_errors(line):
