@@ -22,8 +22,11 @@ def device_setup():
 
 def check_sdk_errors(line):
     local_line = line.lower()
-    if "error" in line or "fail" in line:
-        azure_test_firmware_errors.SDK_ERRORS += 1
+    if "error" in local_line or "fail" in local_line:
+        if "epoch time failed!" in local_line: # don't count NTP retries.
+            pass
+        else:
+            azure_test_firmware_errors.SDK_ERRORS += 1
 
 def check_firmware_errors(line):
     if azure_test_firmware_errors.iot_init_failure in line:
