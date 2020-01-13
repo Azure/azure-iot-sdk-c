@@ -38,6 +38,7 @@ def check_firmware_errors(line):
 class esp_uart_interface(uart_interface):
 
     message_callbacks = 0
+    messages_sent = 5
 
     def check_sample_errors(self, line):
         if "Confirm Callback" in line:
@@ -154,6 +155,6 @@ class esp_uart_interface(uart_interface):
                     output = self.serial_read(ser, line, output_file_obj)
 
                 # forward failed callbacks to SDK_ERRORS
-                azure_test_firmware_errors.SDK_ERRORS += 5 - self.message_callbacks
+                azure_test_firmware_errors.SDK_ERRORS += self.messages_sent - self.message_callbacks
 
                 output_file_obj.close()
