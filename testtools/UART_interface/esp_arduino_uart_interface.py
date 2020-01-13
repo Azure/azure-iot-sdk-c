@@ -29,10 +29,6 @@ def check_firmware_errors(line):
         print("Failed to connect to saved IoT Hub!")
         azure_test_firmware_errors.SDK_ERRORS += 1
 
-    elif azure_test_firmware_errors.sensor_init_failure in line:
-        print("Failed to init mxchip sensor")
-        azure_test_firmware_errors.SDK_ERRORS += 1
-
     elif azure_test_firmware_errors.wifi_failure in line:
         print("Failed to connect to saved WiFi network.")
         azure_test_firmware_errors.SDK_ERRORS += 1
