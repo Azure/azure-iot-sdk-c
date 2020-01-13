@@ -128,37 +128,36 @@ class esp_uart_interface(uart_interface):
         if input_file:
             # set wait between read/write
             wait = (serial_settings.bits_to_cache/serial_settings.baud_rate)
-            with open(input_file) as fp:
+            with open(input_file) as input_file_obj:
                 # initialize input/output_file
-                line = fp.readline()
-                f = open(output_file, 'w+') # Output file
+                line = input_file_obj.readline()
+                output_file_obj = open(output_file, 'w+') # Output file
                 while line:
-                    # time.sleep(.1)
                     # Print only instruction, not secret content
                     if line.split():
                         print("Sending %s" %line.split()[0])
 
                     # Attempt to write to serial port
-                    if not self.serial_write(ser, line, f):
+                    if not self.serial_write(ser, line, output_file_obj):
                         print("Failed to write to serial port, please diagnose connection.")
-                        f.close()
+                        output_file_obj.close()
                         break
                     time.sleep(1)
 
                     # Attempt to read serial port
-                    output = self.serial_read(ser, line, f, first_read=True)
+                    output = self.serial_read(ser, line, output_file_obj, first_read=True)
 
                     while(output):
                         time.sleep(wait)
-                        output = self.serial_read(ser, line, f)
-                    line = fp.readline()
+                        output = self.serial_read(ser, line, output_file_obj)
+                    line = input_file_obj.readline()
 
                 # read any trailing output, save to file
                 while (ser.in_waiting):
                     time.sleep(.2)
-                    output = self.serial_read(ser, line, f)
+                    output = self.serial_read(ser, line, output_file_obj)
 
                 # forward failed callbacks to SDK_ERRORS
                 azure_test_firmware_errors.SDK_ERRORS += 5 - self.message_callbacks
 
-                f.close()
+                output_file_obj.close()
