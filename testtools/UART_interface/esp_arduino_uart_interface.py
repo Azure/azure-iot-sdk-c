@@ -115,7 +115,7 @@ class esp_uart_interface(uart_interface):
                 ser.open()
                 self.serial_read(ser, message, file, first_read=True)
             except:
-                return False
+                return None
 
     # Note: the buffer size on the mxchip appears to be 128 Bytes.
     def write_read(self, ser, input_file, output_file):
