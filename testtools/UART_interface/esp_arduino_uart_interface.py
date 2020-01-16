@@ -79,7 +79,7 @@ class esp_uart_interface(uart_interface):
                 ser.open()
                 self.serial_write(ser, message, file)
             except:
-                return False
+                return 0
 
     # Read from serial line with connection monitoring
     # If there is a sudden disconnect, program should report line in input script reached, and close files.
