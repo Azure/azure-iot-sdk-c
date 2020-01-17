@@ -223,7 +223,7 @@ int main()
 
         // This option sets the registration ID it overrides the registration ID that is 
         // set within the HSM so be cautious if setting this value
-        //Prov_Device_SetOption(prov_device_handle, PROV_REGISTRATION_ID, "[REGISTRATION ID]");
+        //Prov_Device_LL_SetOption(handle, PROV_REGISTRATION_ID, "[REGISTRATION ID]");
 
         if (Prov_Device_LL_Register_Device(handle, register_device_callback, &user_ctx, registration_status_callback, &user_ctx) != PROV_DEVICE_RESULT_OK)
         {
