@@ -47,7 +47,7 @@ jobs:
       ls
       cd $(Build.SourcesDirectory)/testtools/UART_interface/
       . input.sh
-      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p "/dev/ttyACM1" -m $(MXCHIP_TO_FLASH)
+      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(MXCHIP_PORT) -m $(MXCHIP_TO_FLASH)
       rm input.txt
     env:
       # Most up to date SERIAL_TASKs output can be learned by passing 'help' into input.txt,
