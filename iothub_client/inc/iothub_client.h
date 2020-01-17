@@ -4,6 +4,7 @@
 /** @file iothub_client.h
 *    @brief Extends the IoTHubCLient_LL module with additional features.
 *
+*    @note  DEPRECATED. New users use iothub_device_client.h for IoTHubClient APIs.
 *    @details IoTHubClient is a module that extends the IoTHubCLient_LL
 *             module with 2 features:
 *                - scheduling the work for the IoTHubCLient from a
