@@ -30,6 +30,9 @@ static int ScheduleWork_Thread(void* threadArgument)
 {
     PROV_DEVICE_INSTANCE* prov_device_instance = (PROV_DEVICE_INSTANCE*)threadArgument;
     uint16_t sleeptime_in_ms = DO_WORK_FREQ_DEFAULT;
+
+    srand((unsigned int)get_time(NULL));
+
     while (1)
     {
         if (Lock(prov_device_instance->LockHandle) == LOCK_OK)
@@ -269,5 +272,35 @@ const char* Prov_Device_GetVersionString(void)
 {
     /* Codes_SRS_PROV_DEVICE_CLIENT_12_024: [ The function shall call the LL layer Prov_Device_LL_GetVersionString and return with the result. ] */
     return Prov_Device_LL_GetVersionString();
+}
+
+PROV_DEVICE_RESULT Prov_Device_Set_Provisioning_Payload(PROV_DEVICE_HANDLE handle, const char* json)
+{
+    PROV_DEVICE_RESULT result;
+    if (handle == NULL)
+    {
+        LogError("Invalid parameter specified handle: %p", handle);
+        result = PROV_DEVICE_RESULT_INVALID_ARG;
+    }
+    else
+    {
+        result = Prov_Device_LL_Set_Provisioning_Payload(handle->ProvDeviceLLHandle, json);
+    }
+    return result;
+}
+
+const char* Prov_Device_Get_Provisioning_Payload(PROV_DEVICE_HANDLE handle)
+{
+    const char* result;
+    if (handle == NULL)
+    {
+        LogError("Invalid parameter specified handle: %p", handle);
+        result = NULL;
+    }
+    else
+    {
+        result = Prov_Device_LL_Get_Provisioning_Payload(handle->ProvDeviceLLHandle);
+    }
+    return result;
 }
 

@@ -57,11 +57,11 @@ void real_free(void* ptr)
 
 #include "internal/iothubtransport_amqp_twin_messenger.h"
 
-MU_DEFINE_ENUM_STRINGS(AMQP_MESSENGER_SEND_STATUS, AMQP_MESSENGER_SEND_STATUS_VALUES);
-MU_DEFINE_ENUM_STRINGS(AMQP_MESSENGER_SEND_RESULT, AMQP_MESSENGER_SEND_RESULT_VALUES);
-MU_DEFINE_ENUM_STRINGS(AMQP_MESSENGER_REASON, AMQP_MESSENGER_REASON_VALUES);
-MU_DEFINE_ENUM_STRINGS(AMQP_MESSENGER_DISPOSITION_RESULT, AMQP_MESSENGER_DISPOSITION_RESULT_VALUES);
-MU_DEFINE_ENUM_STRINGS(AMQP_MESSENGER_STATE, AMQP_MESSENGER_STATE_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(AMQP_MESSENGER_SEND_STATUS, AMQP_MESSENGER_SEND_STATUS_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(AMQP_MESSENGER_SEND_RESULT, AMQP_MESSENGER_SEND_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(AMQP_MESSENGER_REASON, AMQP_MESSENGER_REASON_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(AMQP_MESSENGER_DISPOSITION_RESULT, AMQP_MESSENGER_DISPOSITION_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(AMQP_MESSENGER_STATE, AMQP_MESSENGER_STATE_VALUES);
 
 typedef enum TWIN_OPERATION_TYPE_TAG
 {
@@ -89,12 +89,8 @@ MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
-    char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
-    ASSERT_FAIL(temp_str);
+    ASSERT_FAIL("umock_c reported error :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
 }
-
-
 
 #define UNIQUE_ID_BUFFER_SIZE                                37
 #define TEST_UNIQUE_ID                                       "A1234DE234A1234DE234A1234DE234A1234DEA1234DE234A1234DE234A1234DE234A1234DEA1234DE234A1234DE234A1234DE234A1234DE"
@@ -130,7 +126,6 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 #define TWIN_RESOURCE_DESIRED                                "/notifications/twin/properties/desired"
 #define TWIN_RESOURCE_REPORTED                               "/properties/reported"
 
-#define CLIENT_VERSION_PROPERTY_NAME                         "com.microsoft:client-version"
 #define TWIN_CORRELATION_ID_PROPERTY_NAME                    "com.microsoft:channel-correlation-id"
 #define TWIN_API_VERSION_PROPERTY_NAME                       "com.microsoft:api-version"
 #define TWIN_API_VERSION_NUMBER                              "2016-11-14"
@@ -153,7 +148,6 @@ static time_t g_initial_time_plus_90_secs;
 static time_t g_initial_time_plus_300_secs;
 
 static CONSTBUFFER TEST_CONSTBUFFER;
-
 
 // ---------- General Helpers ---------- //
 
@@ -194,7 +188,6 @@ int STRING_sprintf(STRING_HANDLE handle, const char* format, ...)
 }
 #endif
 
-
 static int saved_malloc_returns_count = 0;
 static void* saved_malloc_returns[20];
 
@@ -222,13 +215,20 @@ static void TEST_free(void* ptr)
     }
 }
 
+static const char* test_get_product_info(void* ctx)
+{
+    (void)ctx;
+    return TEST_CLIENT_VERSION_STR;
+}
+
 static AMQP_MESSENGER_CONFIG TEST_amqp_messenger_create_config;
 static AMQP_MESSENGER_HANDLE TEST_amqp_messenger_create_return;
 static AMQP_MESSENGER_HANDLE TEST_amqp_messenger_create(const AMQP_MESSENGER_CONFIG* messenger_config)
 {
     TEST_amqp_messenger_create_config.device_id = (char*)messenger_config->device_id;
     TEST_amqp_messenger_create_config.iothub_host_fqdn = messenger_config->iothub_host_fqdn;
-    TEST_amqp_messenger_create_config.client_version = messenger_config->client_version;
+    TEST_amqp_messenger_create_config.prod_info_cb = test_get_product_info;
+    TEST_amqp_messenger_create_config.prod_info_ctx = NULL;
 
     TEST_amqp_messenger_create_config.send_link.target_suffix = messenger_config->send_link.target_suffix;
     TEST_amqp_messenger_create_config.send_link.attach_properties = messenger_config->send_link.attach_properties;
@@ -267,6 +267,10 @@ extern "C"
     void real_CONSTBUFFER_IncRef(CONSTBUFFER_HANDLE constbufferHandle);
     const CONSTBUFFER* real_CONSTBUFFER_GetContent(CONSTBUFFER_HANDLE constbufferHandle);
     void real_CONSTBUFFER_DecRef(CONSTBUFFER_HANDLE constbufferHandle);
+
+    CONSTBUFFER_HANDLE real_CONSTBUFFER_CreateWithMoveMemory(unsigned char* source, size_t size);
+    CONSTBUFFER_HANDLE real_CONSTBUFFER_CreateWithCustomFree(const unsigned char* source, size_t size, CONSTBUFFER_CUSTOM_FREE_FUNC customFreeFunc, void* customFreeFuncContext);
+    CONSTBUFFER_HANDLE real_CONSTBUFFER_CreateFromOffsetAndSize(CONSTBUFFER_HANDLE handle, size_t offset, size_t size);
 
 #ifdef __cplusplus
 }
@@ -408,21 +412,20 @@ static void set_generate_unique_id_expected_calls()
 static void set_generate_twin_correlation_id_expected_calls()
 {
     set_generate_unique_id_expected_calls();
-    //STRICT_EXPECTED_CALL(strlen(IGNORED_NUM_ARG));
-    //STRICT_EXPECTED_CALL(strlen(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
     // sprintf
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 }
 
 static void set_create_link_attach_properties_expected_calls(TWIN_MESSENGER_CONFIG* config)
 {
+    (void)config;
     STRICT_EXPECTED_CALL(Map_Create(NULL)).SetReturn(TEST_ATTACH_PROPERTIES);
     set_generate_twin_correlation_id_expected_calls();
-    STRICT_EXPECTED_CALL(Map_Add(TEST_ATTACH_PROPERTIES, CLIENT_VERSION_PROPERTY_NAME, config->client_version));
+    STRICT_EXPECTED_CALL(Map_Add(TEST_ATTACH_PROPERTIES, CLIENT_VERSION_PROPERTY_NAME, TEST_CLIENT_VERSION_STR));
     STRICT_EXPECTED_CALL(Map_Add(TEST_ATTACH_PROPERTIES, TWIN_CORRELATION_ID_PROPERTY_NAME, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Map_Add(TEST_ATTACH_PROPERTIES, TWIN_API_VERSION_PROPERTY_NAME, TWIN_API_VERSION_NUMBER));
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 }
 
 static void set_destroy_link_attach_properties_expected_calls()
@@ -433,8 +436,6 @@ static void set_destroy_link_attach_properties_expected_calls()
 static void set_expected_calls_for_twin_messenger_create(TWIN_MESSENGER_CONFIG* config)
 {
     STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, config->client_version))
-        .CopyOutArgumentBuffer(1, &config->client_version, sizeof(config->client_version));
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, config->device_id))
         .CopyOutArgumentBuffer(1, &config->device_id, sizeof(config->device_id));
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, config->iothub_host_fqdn))
@@ -461,6 +462,7 @@ static void set_twin_messenger_report_state_async_expected_calls(CONSTBUFFER_HAN
 
 static void set_twin_messenger_start_expected_calls()
 {
+    STRICT_EXPECTED_CALL(amqp_messenger_set_option(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(amqp_messenger_start(IGNORED_PTR_ARG, TEST_SESSION_HANDLE));
 }
 
@@ -651,7 +653,8 @@ static void set_twin_messenger_do_work_expected_calls(DOWORK_TEST_PROFILE* dwtp)
 static TWIN_MESSENGER_CONFIG g_twin_msgr_config;
 static TWIN_MESSENGER_CONFIG* get_twin_messenger_config()
 {
-    g_twin_msgr_config.client_version = TEST_CLIENT_VERSION_STR;
+    g_twin_msgr_config.prod_info_cb = test_get_product_info;
+    g_twin_msgr_config.prod_info_ctx = NULL;
     g_twin_msgr_config.device_id = TEST_DEVICE_ID;
     g_twin_msgr_config.iothub_host_fqdn = TEST_IOTHUB_HOST_FQDN;
     g_twin_msgr_config.on_state_changed_callback = TEST_on_state_changed_callback;
@@ -769,12 +772,18 @@ static void register_global_mock_aliases()
 
 static void register_global_mock_returns()
 {
+    REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, TEST_malloc);
+    REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, TEST_free);
+
     // amqp_messenger
     REGISTER_GLOBAL_MOCK_RETURN(amqp_messenger_create, TEST_AMQP_MESSENGER_HANDLE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqp_messenger_create, NULL);
 
     REGISTER_GLOBAL_MOCK_RETURN(amqp_messenger_subscribe_for_messages, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqp_messenger_subscribe_for_messages, 1);
+
+    REGISTER_GLOBAL_MOCK_RETURN(amqp_messenger_set_option, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqp_messenger_set_option, 1);
 
     REGISTER_GLOBAL_MOCK_RETURN(amqp_messenger_start, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqp_messenger_start, 1);
@@ -1021,7 +1030,6 @@ TEST_FUNCTION(twin_msgr_create_success)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_ARE_EQUAL(char_ptr, TEST_DEVICE_ID, TEST_amqp_messenger_create_config.device_id);
     ASSERT_ARE_EQUAL(char_ptr, TEST_IOTHUB_HOST_FQDN, TEST_amqp_messenger_create_config.iothub_host_fqdn);
-    ASSERT_ARE_EQUAL(char_ptr, TEST_CLIENT_VERSION_STR, TEST_amqp_messenger_create_config.client_version);
     ASSERT_ARE_EQUAL(void_ptr, (void*)TEST_ATTACH_PROPERTIES, (void*)TEST_amqp_messenger_create_config.send_link.attach_properties);
     ASSERT_ARE_EQUAL(void_ptr, (void*)TEST_ATTACH_PROPERTIES, (void*)TEST_amqp_messenger_create_config.receive_link.attach_properties);
     ASSERT_ARE_EQUAL(char_ptr, DEFAULT_TWIN_SEND_LINK_SOURCE_NAME, (void*)TEST_amqp_messenger_create_config.send_link.target_suffix);
@@ -1055,23 +1063,17 @@ TEST_FUNCTION(twin_msgr_create_failure_checks)
     size_t i;
     for (i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
-        if (i == 10 || i == 14 || i == 17)
+        if (umock_c_negative_tests_can_call_fail(i))
         {
-            // These expected calls do not cause the API to fail.
-            continue;
+            // arrange
+            umock_c_negative_tests_reset();
+            umock_c_negative_tests_fail_call(i);
+
+            TWIN_MESSENGER_HANDLE handle = twin_messenger_create(config);
+
+            // assert
+            ASSERT_IS_NULL(handle, "On failed call %lu", (unsigned long)i);
         }
-
-        // arrange
-        char error_msg[64];
-
-        umock_c_negative_tests_reset();
-        umock_c_negative_tests_fail_call(i);
-
-        TWIN_MESSENGER_HANDLE handle = twin_messenger_create(config);
-
-        // assert
-        sprintf(error_msg, "On failed call %lu", (unsigned long)i);
-        ASSERT_IS_NULL(handle, error_msg);
     }
 
     // cleanup
@@ -1378,6 +1380,7 @@ TEST_FUNCTION(twin_msgr_start_success)
     twin_messenger_destroy(handle);
 }
 
+// Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_116: [amqp_messenger_set_option() shall be invoked passing the OPTION_PRODUCT_INFO and product info returned from the prod_info callback]
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_047: [If amqp_messenger_start() fails, twin_messenger_start() fail and return a non-zero value]
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_049: [If any failures occurr, `twin_msgr->state` shall be set to TWIN_MESSENGER_STATE_ERROR, and `twin_msgr->on_state_changed_callback` invoked if provided]
 TEST_FUNCTION(twin_msgr_start_failure_checks)
@@ -1392,17 +1395,30 @@ TEST_FUNCTION(twin_msgr_start_failure_checks)
     set_twin_messenger_start_expected_calls();
     umock_c_negative_tests_snapshot();
 
-    umock_c_negative_tests_reset();
-    umock_c_negative_tests_fail_call(0);
+    size_t count = umock_c_negative_tests_call_count();
 
     // act
-    int result = twin_messenger_start(handle, TEST_SESSION_HANDLE);
+    for (size_t index = 0; index < count; index++)
+    {
+        if (!umock_c_negative_tests_can_call_fail(index))
+        {
+            continue;
+        }
+
+        umock_c_negative_tests_reset();
+        umock_c_negative_tests_fail_call(index);
+
+        char tmp_msg[64];
+        sprintf(tmp_msg, "Failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
+        int result = twin_messenger_start(handle, TEST_SESSION_HANDLE);
+
+        // assert
+        ASSERT_ARE_NOT_EQUAL(int, 0, result, tmp_msg);
+    }
 
     // assert
-    ASSERT_ARE_NOT_EQUAL(int, 0, result);
     ASSERT_ARE_EQUAL(int, TWIN_MESSENGER_STATE_STARTING, TEST_on_state_changed_callback_previous_state);
     ASSERT_ARE_EQUAL(int, TWIN_MESSENGER_STATE_ERROR, TEST_on_state_changed_callback_new_state);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     // cleanup
     twin_messenger_destroy(handle);

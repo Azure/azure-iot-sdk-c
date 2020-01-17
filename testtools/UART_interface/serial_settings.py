@@ -1,0 +1,15 @@
+baud_rate = 115200
+port = "/dev/ttyACM1"
+input_file=None
+output_file='log.txt'
+wait_for_flash = 10
+bits_to_cache = 1600
+mxchip_file = "/media/newt/AZ31665"
+setup_string = "Setup complete"
+skip_setup = False
+mxchip_buf_pause = .06
+serial_comm_timeout = 2
+device_type = 'mxchip'
+test_timeout = None
+reset_device = False
+tests_run = False

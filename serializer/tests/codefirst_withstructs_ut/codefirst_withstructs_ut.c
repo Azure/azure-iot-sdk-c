@@ -238,6 +238,8 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_GLOBAL_MOCK_HOOK(Schema_GetModelDesiredPropertyCount, my_Schema_GetModelDesiredPropertyCount);
     REGISTER_GLOBAL_MOCK_HOOK(Schema_GetModelModelCount, my_Schema_GetModelModelCount);
 
+    REGISTER_GLOBAL_MOCK_RETURN(Schema_AddDeviceRef, SCHEMA_OK);
+
 }
 
 TEST_SUITE_CLEANUP(TestClassCleanup)
@@ -498,7 +500,7 @@ TEST_FUNCTION(InvokeAction_goToLocation_with_a_struct_and_a_double_fails)
     someLocationAndDouble[0].value.edmComplexType.fields = someLocationAndDouble_1;
 
     someLocationAndDouble[1].type = EDM_DOUBLE_TYPE;
-    someLocationAndDouble[1].value.edmDouble.value = EDM_DOUBLE_TYPE;
+    someLocationAndDouble[1].value.edmDouble.value = 5.0;
 
     STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
 
@@ -537,7 +539,7 @@ TEST_FUNCTION(InvokeAction_goToLocation_with_a_double_and_a_struct_fails)
     someLocationAndDouble[1].value.edmComplexType.fields = someLocationAndDouble_1;
 
     someLocationAndDouble[0].type = EDM_DOUBLE_TYPE;
-    someLocationAndDouble[0].value.edmDouble.value = EDM_DOUBLE_TYPE;
+    someLocationAndDouble[0].value.edmDouble.value = 5.0;
 
     STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("TruckType");
 

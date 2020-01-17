@@ -2,13 +2,13 @@ name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Re
 resources:
 - repo: self
   clean: true
-phases:
-- phase: longhaul_linux
+jobs:
+- job: longhaul_linux
+  timeoutInMinutes: 800
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
-  queue: 
+  pool: 
     name: 'aziotbld-lin01'
-    timeoutInMinutes: 1200
   displayName: 'longhaul_linux'
   steps:
   - script: |
@@ -36,10 +36,10 @@ phases:
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
     condition: always()
-- phase: longhaul_windows
-  queue:
+- job: longhaul_windows
+  timeoutInMinutes: 800
+  pool:
     name: 'aziotbld-win10'
-    timeoutInMinutes: 1200
   steps:
   - script: |
       call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"

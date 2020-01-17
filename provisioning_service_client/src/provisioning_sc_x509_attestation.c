@@ -14,7 +14,7 @@
 #include "prov_service_client/provisioning_sc_shared_helpers.h"
 #include "parson.h"
 
-MU_DEFINE_ENUM_STRINGS(X509_CERTIFICATE_TYPE, X509_CERTIFICATE_TYPE_VALUES)
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(X509_CERTIFICATE_TYPE, X509_CERTIFICATE_TYPE_VALUES)
 
 typedef struct X509_CERTIFICATE_INFO_TAG
 {
@@ -369,7 +369,7 @@ static JSON_Value* x509CertificateWithInfo_toJson(const X509_CERTIFICATE_WITH_IN
     }
     else if (x509_certinfo->info != NULL)
     {
-        if (json_serialize_and_set_struct(root_object, X509_CERTIFICATE_WITH_INFO_JSON_KEY_INFO, x509_certinfo->info, (TO_JSON_FUNCTION)x509CertificateInfo_toJson, REQUIRED) != 0)
+        if (json_serialize_and_set_struct(root_object, X509_CERTIFICATE_WITH_INFO_JSON_KEY_INFO, x509_certinfo->info, (TO_JSON_FUNCTION)x509CertificateInfo_toJson, true) != 0)
         {
             LogError("Failed to set '%s' in JSON string representation of X509 Certificate With Info", X509_CERTIFICATE_WITH_INFO_JSON_KEY_INFO);
             json_value_free(root_value);
@@ -412,7 +412,7 @@ static X509_CERTIFICATE_WITH_INFO* x509CertificateWithInfo_fromJson(JSON_Object*
             x509CertificateWithInfo_free(new_x509CertInfo);
             new_x509CertInfo = NULL;
         }
-        else if (json_deserialize_and_get_struct((void**)&(new_x509CertInfo->info), root_object, X509_CERTIFICATE_WITH_INFO_JSON_KEY_INFO, (FROM_JSON_FUNCTION)x509CertificateInfo_fromJson, REQUIRED) != 0)
+        else if (json_deserialize_and_get_struct((void**)&(new_x509CertInfo->info), root_object, X509_CERTIFICATE_WITH_INFO_JSON_KEY_INFO, (FROM_JSON_FUNCTION)x509CertificateInfo_fromJson, true) != 0)
         {
             LogError("Failed to set '%s' in X509 Certificate With Info", X509_CERTIFICATE_WITH_INFO_JSON_KEY_INFO);
             x509CertificateWithInfo_free(new_x509CertInfo);
@@ -523,13 +523,13 @@ static JSON_Value* x509Certificates_toJson(const X509_CERTIFICATES* x509_certs)
     //Set data
     else
     {
-        if (json_serialize_and_set_struct(root_object, X509_CERTIFICATES_JSON_KEY_PRIMARY, x509_certs->primary, (TO_JSON_FUNCTION)x509CertificateWithInfo_toJson, REQUIRED) != 0)
+        if (json_serialize_and_set_struct(root_object, X509_CERTIFICATES_JSON_KEY_PRIMARY, x509_certs->primary, (TO_JSON_FUNCTION)x509CertificateWithInfo_toJson, true) != 0)
         {
             LogError("Failed to set '%s' in JSON string representation of X509 Certificates", X509_CERTIFICATES_JSON_KEY_PRIMARY);
             json_value_free(root_value);
             root_value = NULL;
         }
-        else if (json_serialize_and_set_struct(root_object, X509_CERTIFICATES_JSON_KEY_SECONDARY, x509_certs->secondary, (TO_JSON_FUNCTION)x509CertificateWithInfo_toJson, OPTIONAL) != 0)
+        else if (json_serialize_and_set_struct(root_object, X509_CERTIFICATES_JSON_KEY_SECONDARY, x509_certs->secondary, (TO_JSON_FUNCTION)x509CertificateWithInfo_toJson, false) != 0)
         {
             LogError("Failed to set '%s' in JSON string representation of X509 Certificates", X509_CERTIFICATES_JSON_KEY_SECONDARY);
             json_value_free(root_value);
@@ -556,13 +556,13 @@ static X509_CERTIFICATES* x509Certificates_fromJson(JSON_Object* root_object)
     {
         memset(new_x509certs, 0, sizeof(X509_CERTIFICATES));
 
-        if (json_deserialize_and_get_struct((void**)&(new_x509certs->primary), root_object, X509_CERTIFICATES_JSON_KEY_PRIMARY, (FROM_JSON_FUNCTION)x509CertificateWithInfo_fromJson, REQUIRED) != 0)
+        if (json_deserialize_and_get_struct((void**)&(new_x509certs->primary), root_object, X509_CERTIFICATES_JSON_KEY_PRIMARY, (FROM_JSON_FUNCTION)x509CertificateWithInfo_fromJson, true) != 0)
         {
             LogError("Failed to set '%s' in X509 Certificates", X509_CERTIFICATES_JSON_KEY_PRIMARY);
             x509Certificates_free(new_x509certs);
             new_x509certs = NULL;
         }
-        else if (json_deserialize_and_get_struct((void**)&(new_x509certs->secondary), root_object, X509_CERTIFICATES_JSON_KEY_SECONDARY, (FROM_JSON_FUNCTION)x509CertificateWithInfo_fromJson, OPTIONAL) != 0)
+        else if (json_deserialize_and_get_struct((void**)&(new_x509certs->secondary), root_object, X509_CERTIFICATES_JSON_KEY_SECONDARY, (FROM_JSON_FUNCTION)x509CertificateWithInfo_fromJson, false) != 0)
         {
             LogError("Failed to set '%s' in X509 Certificates", X509_CERTIFICATES_JSON_KEY_SECONDARY);
             x509Certificates_free(new_x509certs);
@@ -628,7 +628,7 @@ JSON_Value* x509Attestation_toJson(const X509_ATTESTATION_HANDLE x509_att)
     {
         if (x509_att->type == X509_CERTIFICATE_TYPE_CLIENT)
         {
-            if (json_serialize_and_set_struct(root_object, X509_ATTESTATION_JSON_KEY_CLIENT_CERTS, x509_att->certificates.client_certificates, (TO_JSON_FUNCTION)x509Certificates_toJson, REQUIRED) != 0)
+            if (json_serialize_and_set_struct(root_object, X509_ATTESTATION_JSON_KEY_CLIENT_CERTS, x509_att->certificates.client_certificates, (TO_JSON_FUNCTION)x509Certificates_toJson, true) != 0)
             {
                 LogError("Failed to set '%s' in JSON string representation of X509 Attestation", X509_ATTESTATION_JSON_KEY_CLIENT_CERTS);
                 json_value_free(root_value);
@@ -637,7 +637,7 @@ JSON_Value* x509Attestation_toJson(const X509_ATTESTATION_HANDLE x509_att)
         }
         else if (x509_att->type == X509_CERTIFICATE_TYPE_SIGNING)
         {
-            if (json_serialize_and_set_struct(root_object, X509_ATTESTATION_JSON_KEY_SIGNING_CERTS, x509_att->certificates.signing_certificates, (TO_JSON_FUNCTION)x509Certificates_toJson, REQUIRED) != 0)
+            if (json_serialize_and_set_struct(root_object, X509_ATTESTATION_JSON_KEY_SIGNING_CERTS, x509_att->certificates.signing_certificates, (TO_JSON_FUNCTION)x509Certificates_toJson, true) != 0)
             {
                 LogError("Failed to set '%s' in JSON string representation of X509 Attestation", X509_ATTESTATION_JSON_KEY_SIGNING_CERTS);
                 json_value_free(root_value);
@@ -646,7 +646,7 @@ JSON_Value* x509Attestation_toJson(const X509_ATTESTATION_HANDLE x509_att)
         }
         else if (x509_att->type == X509_CERTIFICATE_TYPE_CA_REFERENCES)
         {
-            if (json_serialize_and_set_struct(root_object, X509_ATTESTATION_JSON_KEY_CA_REFERENCES, x509_att->certificates.ca_references, (TO_JSON_FUNCTION)x509CAReferences_toJson, REQUIRED) != 0)
+            if (json_serialize_and_set_struct(root_object, X509_ATTESTATION_JSON_KEY_CA_REFERENCES, x509_att->certificates.ca_references, (TO_JSON_FUNCTION)x509CAReferences_toJson, true) != 0)
             {
                 LogError("Failed to set '%s' in JSON string representation of X509 Attestation", X509_ATTESTATION_JSON_KEY_CA_REFERENCES);
                 json_value_free(root_value);
@@ -676,7 +676,7 @@ X509_ATTESTATION_HANDLE x509Attestation_fromJson(JSON_Object* root_object)
 
         if (json_object_has_value(root_object, X509_ATTESTATION_JSON_KEY_CLIENT_CERTS))
         {
-            if (json_deserialize_and_get_struct((void**)&(new_x509Att->certificates.client_certificates), root_object, X509_ATTESTATION_JSON_KEY_CLIENT_CERTS, (FROM_JSON_FUNCTION)x509Certificates_fromJson, REQUIRED) != 0)
+            if (json_deserialize_and_get_struct((void**)&(new_x509Att->certificates.client_certificates), root_object, X509_ATTESTATION_JSON_KEY_CLIENT_CERTS, (FROM_JSON_FUNCTION)x509Certificates_fromJson, true) != 0)
             {
                 LogError("Failed to set '%s' in X509 Attestation", X509_ATTESTATION_JSON_KEY_CLIENT_CERTS);
                 x509Attestation_destroy(new_x509Att);
@@ -689,7 +689,7 @@ X509_ATTESTATION_HANDLE x509Attestation_fromJson(JSON_Object* root_object)
         }
         else if (json_object_has_value(root_object, X509_ATTESTATION_JSON_KEY_SIGNING_CERTS))
         {
-            if (json_deserialize_and_get_struct((void**)&(new_x509Att->certificates.signing_certificates), root_object, X509_ATTESTATION_JSON_KEY_SIGNING_CERTS, (FROM_JSON_FUNCTION)x509Certificates_fromJson, REQUIRED) != 0)
+            if (json_deserialize_and_get_struct((void**)&(new_x509Att->certificates.signing_certificates), root_object, X509_ATTESTATION_JSON_KEY_SIGNING_CERTS, (FROM_JSON_FUNCTION)x509Certificates_fromJson, true) != 0)
             {
                 LogError("Failed to set '%s' in X509 Attestation", X509_ATTESTATION_JSON_KEY_SIGNING_CERTS);
                 x509Attestation_destroy(new_x509Att);
@@ -702,7 +702,7 @@ X509_ATTESTATION_HANDLE x509Attestation_fromJson(JSON_Object* root_object)
         }
         else if (json_object_has_value(root_object, X509_ATTESTATION_JSON_KEY_CA_REFERENCES))
         {
-            if (json_deserialize_and_get_struct((void**)&(new_x509Att->certificates.ca_references), root_object, X509_ATTESTATION_JSON_KEY_CA_REFERENCES, (FROM_JSON_FUNCTION)x509CAReferences_fromJson, REQUIRED) != 0)
+            if (json_deserialize_and_get_struct((void**)&(new_x509Att->certificates.ca_references), root_object, X509_ATTESTATION_JSON_KEY_CA_REFERENCES, (FROM_JSON_FUNCTION)x509CAReferences_fromJson, true) != 0)
             {
                 LogError("Failed to set '%s' in X509 Attestation", X509_ATTESTATION_JSON_KEY_CA_REFERENCES);
                 x509Attestation_destroy(new_x509Att);

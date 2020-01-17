@@ -27,6 +27,7 @@
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/strings.h"
 
 #include "azure_c_shared_utility/shared_util_options.h"
 
@@ -60,7 +61,7 @@ const char* AMQP_SEND_AUTHCID_FMT = "iothubowner@sas.root.%s";
 #define MAX_SHORT_VALUE             32767         /* maximum (signed) short value */
 #define INDEFINITE_TIME             ((time_t)-1)
 
-MU_DEFINE_ENUM_STRINGS(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
 
 typedef enum MESSAGE_SEND_STATE_TAG
 {
@@ -92,6 +93,8 @@ typedef struct IOTHUB_VALIDATION_INFO_TAG
     char* eventhubName;
     char* iotSharedSig;
     char* eventhubAccessKey;
+    char* logAnalyiticsWorkspaceId;
+    char* aad_tenant;
     volatile sig_atomic_t messageThreadExit;
     AMQP_CONN_INFO *amqp_connection;
     pfIoTHubMessageCallback onMessageReceivedCallback;

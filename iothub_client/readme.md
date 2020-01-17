@@ -42,19 +42,13 @@ If you are working with a device running a Linux distribution not supporting the
 The IoT Hub Device SDK is available as [CocoaPods](https://cocoapods.org/) for Mac and iOS device development.
 Details for how to use the CocoaPods are available [here](/iothub_client/samples/ios).
 
-<a name="nugetpackage"></a>
+<a name="vcpkgpackage"></a>
 
-### NuGet packages for Windows devices
+### Vcpkg packages for Windows devices
 
-When developing for Windows devices, you can leverage the NuGet packages manager in order to add new references to your projects.
-The Windows [samples in this repository][samples] show how to use the Microsoft.Azure.IoTHub.IoTHubClient NuGet package along with its dependencies in your C project.
-To install Microsoft Azure IoTHub IoTHubClient, run the following command in the [Package Manager Console](https://docs.nuget.org/docs/start-here/using-the-package-manager-console) in Visual Studio:
-
-   ```Package Manager Console
-   Install-Package Microsoft.Azure.IoTHub.IoTHubClient 
-   ```
-
-Once the package is added to your project, you simply can use it's APIs following the [samples][samples] provided in this repository and the [API reference documentation][c-api-reference].
+When developing for Windows devices, you can leverage the Vcpkg package manager in order to easily reference the Microsoft Azure IoTHub C SDK libraries in your projects.
+The Windows [samples in this repository][samples] show how to use the azure-iot-sdk-c Vcpkg package along with its dependencies in your C project.
+To install Microsoft Azure IoTHub vcpkg, follow the instructions at [Setup C SDK vcpkg for Windows development environment](/doc/setting_up_vcpkg.md#setup-c-sdk-vcpkg-for-windows-development-environment)
 
 <a name="mbed"></a>
 
@@ -124,7 +118,7 @@ In addition to the simple samples found in the current repository, you can find 
 [devbox-setup]: ../doc/devbox_setup.md
 [setup-iothub]: https://aka.ms/howtocreateazureiothub
 [c-sdk-intro]: https://azure.microsoft.com/documentation/articles/iot-hub-device-sdk-c-intro/
-[c-porting-guide]: ../doc/porting_guide.md
+[c-porting-guide]: https://github.com/Azure/azure-c-shared-utility/blob/master/devdoc/porting_guide.md
 [c-cross-compile]: ../doc/SDK_cross_compile_example.md
 [c-api-reference]: https://azure.github.io/azure-iot-sdk-c
 [apt-get-instructions]: ../doc/ubuntu_apt-get_sample_setup.md

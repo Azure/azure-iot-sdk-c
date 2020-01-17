@@ -220,7 +220,7 @@ if %MAKE_NUGET_PKG% == yes (
         if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
         if %build-platform% neq arm (
-            ctest -T test --no-compress-output -C "debug" -V -j 8
+            ctest -T test --no-compress-output -C "debug" -V -j 16
             if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
         )
     )
@@ -282,3 +282,4 @@ if "%~4" neq "" set build-platform=%~4
 msbuild /m %build-target% "/p:Configuration=%build-config%;Platform=%build-platform%" %2
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 goto :eof
+

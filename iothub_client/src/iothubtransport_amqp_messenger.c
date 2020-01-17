@@ -16,12 +16,13 @@
 #include "internal/message_queue.h"
 #include "internal/iothub_client_retry_control.h"
 #include "internal/iothubtransport_amqp_messenger.h"
+#include "iothub_client_options.h"
 
-MU_DEFINE_ENUM_STRINGS(AMQP_MESSENGER_SEND_STATUS, AMQP_MESSENGER_SEND_STATUS_VALUES);
-MU_DEFINE_ENUM_STRINGS(AMQP_MESSENGER_SEND_RESULT, AMQP_MESSENGER_SEND_RESULT_VALUES);
-MU_DEFINE_ENUM_STRINGS(AMQP_MESSENGER_REASON, AMQP_MESSENGER_REASON_VALUES);
-MU_DEFINE_ENUM_STRINGS(AMQP_MESSENGER_DISPOSITION_RESULT, AMQP_MESSENGER_DISPOSITION_RESULT_VALUES);
-MU_DEFINE_ENUM_STRINGS(AMQP_MESSENGER_STATE, AMQP_MESSENGER_STATE_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(AMQP_MESSENGER_SEND_STATUS, AMQP_MESSENGER_SEND_STATUS_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(AMQP_MESSENGER_SEND_RESULT, AMQP_MESSENGER_SEND_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(AMQP_MESSENGER_REASON, AMQP_MESSENGER_REASON_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(AMQP_MESSENGER_DISPOSITION_RESULT, AMQP_MESSENGER_DISPOSITION_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(AMQP_MESSENGER_STATE, AMQP_MESSENGER_STATE_VALUES);
 
 
 #define RESULT_OK 0
@@ -113,14 +114,14 @@ static bool is_valid_configuration(const AMQP_MESSENGER_CONFIG* config)
         LogError("Invalid configuration (NULL)");
         result = false;
     }
-    else if (config->client_version == NULL ||
+    else if (config->prod_info_cb == NULL ||
         config->device_id == NULL ||
         config->iothub_host_fqdn == NULL ||
         config->receive_link.source_suffix == NULL ||
         config->send_link.target_suffix == NULL)
     {
-        LogError("Invalid configuration (client_version=%p, device_id=%p, iothub_host_fqdn=%p, receive_link (source_suffix=%p), send_link (target_suffix=%p))",
-            config->client_version, config->device_id, config->iothub_host_fqdn,
+        LogError("Invalid configuration (prod_info_cb=%p, device_id=%p, iothub_host_fqdn=%p, receive_link (source_suffix=%p), send_link (target_suffix=%p))",
+            config->prod_info_cb, config->device_id, config->iothub_host_fqdn,
             config->receive_link.source_suffix, config->send_link.target_suffix);
         result = false;
     }
@@ -157,11 +158,6 @@ static void destroy_configuration(AMQP_MESSENGER_CONFIG* config)
 {
     if (config != NULL)
     {
-        if (config->client_version != NULL)
-        {
-            free((void*)config->client_version);
-        }
-
         if (config->device_id != NULL)
         {
             free((void*)config->device_id);
@@ -231,13 +227,7 @@ static AMQP_MESSENGER_CONFIG* clone_configuration(const AMQP_MESSENGER_CONFIG* c
     {
         memset(result, 0, sizeof(AMQP_MESSENGER_CONFIG));
 
-        if (mallocAndStrcpy_s(&result->client_version, config->client_version) != 0)
-        {
-            LogError("Failed copying device_id");
-            destroy_configuration(result);
-            result = NULL;
-        }
-        else if (mallocAndStrcpy_s(&result->device_id, config->device_id) != 0)
+        if (mallocAndStrcpy_s(&result->device_id, config->device_id) != 0)
         {
             LogError("Failed copying device_id");
             destroy_configuration(result);
@@ -269,6 +259,8 @@ static AMQP_MESSENGER_CONFIG* clone_configuration(const AMQP_MESSENGER_CONFIG* c
         }
         else
         {
+            result->prod_info_cb = config->prod_info_cb;
+            result->prod_info_ctx = config->prod_info_ctx;
             result->on_state_changed_callback = config->on_state_changed_callback;
             result->on_state_changed_context = config->on_state_changed_context;
             result->on_subscription_changed_callback = config->on_subscription_changed_callback;
@@ -1636,6 +1628,26 @@ int amqp_messenger_set_option(AMQP_MESSENGER_HANDLE messenger_handle, const char
             {
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_131: [If no errors occur, amqp_messenger_set_option shall return 0]
                 result = RESULT_OK;
+            }
+        }
+        else if(strcmp(OPTION_PRODUCT_INFO, name) == 0)
+        {
+            if (Map_AddOrUpdate(instance->config->send_link.attach_properties, CLIENT_VERSION_PROPERTY_NAME, value) == MAP_OK)
+            {
+                if (Map_AddOrUpdate(instance->config->receive_link.attach_properties, CLIENT_VERSION_PROPERTY_NAME, value) == MAP_OK)
+                {
+                    result = RESULT_OK;
+                }
+                else
+                {
+                    LogError("Failed setting option %s for receive link", CLIENT_VERSION_PROPERTY_NAME);
+                    result = MU_FAILURE;
+                }
+            }
+            else
+            {
+                LogError("Failed setting option %s for send link", CLIENT_VERSION_PROPERTY_NAME);
+                result = MU_FAILURE;
             }
         }
         else

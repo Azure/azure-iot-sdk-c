@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-// CAVEAT: This sample is to demonstrate azure IoT client concepts only and is not a guide design principles or style
-// Checking of return codes and error values shall be omitted for brevity.  Please practice sound engineering practices
-// when writing production code.
-
+/*
+CAUTION: Checking of return codes and error values shall be omitted for brevity in this sample. 
+This sample is to demonstrate azure IoT client concepts only and is not a guide design principles or style.
+Please practice sound engineering practices when writing production code.
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,11 +18,19 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/shared_util_options.h"
+#include "azure_c_shared_utility/tickcounter.h"
 
-/* This sample uses the convenience APIs of iothub_client for example purposes. */
+/* 
+This sample uses the multithreaded APIs of iothub_client for example purposes. 
+The difference between multithreaded and singlethreaded (_ll_) API?
+Multithreaded creates a separate thread to perform DoWork calls, which are necessary 
+for the device client library to do anything. The benefit of using the 
+multithreaded API is that the calls to DoWork are abstracted away from your code. 
+*/
+
 
 // The protocol you wish to use should be uncommented
-//
+// 
 #define SAMPLE_MQTT
 //#define SAMPLE_MQTT_OVER_WEBSOCKETS
 //#define SAMPLE_AMQP
@@ -179,7 +188,7 @@ static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS result, I
 static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
     (void)userContextCallback;
-    // When a message is sent this callback will get envoked
+    // When a message is sent this callback will get invoked
     g_message_count_send_confirmations++;
     (void)printf("Confirmation callback received for message %lu with result %s\r\n", (unsigned long)g_message_count_send_confirmations, MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
 }
@@ -226,10 +235,24 @@ int main(void)
     device_handle = IoTHubDeviceClient_CreateFromConnectionString(connectionString, protocol);
     if (device_handle == NULL)
     {
-        (void)printf("Failure createing Iothub device.  Hint: Check you connection string.\r\n");
+        (void)printf("Failure creating Iothub device.  Hint: Check you connection string.\r\n");
     }
     else
     {
+        if (proxy_host)
+        {
+            HTTP_PROXY_OPTIONS http_proxy_options = { 0 };
+            http_proxy_options.host_address = proxy_host;
+            http_proxy_options.port = proxy_port;
+            http_proxy_options.username = proxy_username;
+            http_proxy_options.password = proxy_password;
+
+            if (IoTHubDeviceClient_SetOption(device_handle, OPTION_HTTP_PROXY, &http_proxy_options) != IOTHUB_CLIENT_OK)
+            {
+                (void)printf("failure to set proxy\n");
+            }
+        }		
+
         // Setting message callback to get C2D messages
         (void)IoTHubDeviceClient_SetMessageCallback(device_handle, receive_msg_callback, NULL);
         // Setting method callback to handle a SetTelemetryInterval method to control
@@ -238,11 +261,22 @@ int main(void)
         // Setting connection status callback to get indication of connection to iothub
         (void)IoTHubDeviceClient_SetConnectionStatusCallback(device_handle, connection_status_callback, NULL);
 
-        // Set any option that are neccessary.
+        // Set any option that are necessary.
         // For available options please see the iothub_sdk_options.md documentation
 
-        //bool traceOn = true;
-        //(void)IoTHubDeviceClient_SetOption(iothub_handle, OPTION_LOG_TRACE, &traceOn);
+        // Setting Log Tracing. 
+        // Log tracing is supported in MQTT and AMQP. Not HTTP.
+#ifndef SAMPLE_HTTP
+        bool traceOn = true;
+        (void)IoTHubDeviceClient_SetOption(device_handle, OPTION_LOG_TRACE, &traceOn);
+#endif
+
+        // Setting the frequency of DoWork calls by the underlying process thread.
+        // The value ms_delay is a delay between DoWork calls, in milliseconds. 
+        // ms_delay can only be between 1 and 100 milliseconds. 
+        // Without the SetOption, the delay defaults to 1 ms. 
+        tickcounter_ms_t ms_delay = 10;
+        (void)IoTHubDeviceClient_SetOption(device_handle, OPTION_DO_WORK_FREQUENCY_IN_MS, &ms_delay);
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
         // Setting the Trusted Certificate.  This is only necessary on system with without
@@ -257,20 +291,6 @@ int main(void)
         //bool urlEncodeOn = true;
         //(void)IoTHubDeviceClient_SetOption(device_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
 #endif
-
-        if (proxy_host)
-        {
-            HTTP_PROXY_OPTIONS http_proxy_options = { 0 };
-            http_proxy_options.host_address = proxy_host;
-            http_proxy_options.port = proxy_port;
-            http_proxy_options.username = proxy_username;
-            http_proxy_options.password = proxy_password;
-
-            if (IoTHubDeviceClient_SetOption(device_handle, OPTION_HTTP_PROXY, &http_proxy_options) != IOTHUB_CLIENT_OK)
-            {
-                (void)printf("failure to set proxy\n");
-            }
-        }		
 
         while(g_continueRunning)
         {

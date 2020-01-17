@@ -25,6 +25,7 @@
 #include "internal/iothub_transport_ll_private.h"
 #include "internal/iothubtransport_mqtt_common.h"
 #include "internal/iothubtransport.h"
+#include "internal/iothub_internal_consts.h"
 
 #include "azure_umqtt_c/mqtt_client.h"
 
@@ -55,6 +56,7 @@
 #define MAX_DISCONNECT_VALUE                50
 
 #define ON_DEMAND_GET_TWIN_REQUEST_TIMEOUT_SECS    60
+#define TWIN_REPORT_UPDATE_TIMEOUT_SECS           (60*5)
 
 static const char TOPIC_DEVICE_TWIN_PREFIX[] = "$iothub/twin";
 static const char TOPIC_DEVICE_METHOD_PREFIX[] = "$iothub/methods";
@@ -70,8 +72,6 @@ static const char* TOPIC_DEVICE_DEVICE_MODULE = "devices/%s/modules/%s/messages/
 static const char* TOPIC_INPUT_QUEUE_NAME = "devices/%s/modules/%s/#";
 
 static const char* TOPIC_DEVICE_METHOD_SUBSCRIBE = "$iothub/methods/POST/#";
-
-static const char* IOTHUB_API_VERSION = "2017-11-08-preview";
 
 static const char* PROPERTY_SEPARATOR = "&";
 static const char* REPORTED_PROPERTIES_TOPIC = "$iothub/twin/PATCH/properties/reported/?$rid=%"PRIu16;
@@ -101,7 +101,7 @@ static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtime
 #define SUBSCRIBE_INPUT_QUEUE_TOPIC             0x0010
 #define SUBSCRIBE_TOPIC_COUNT                   5
 
-MU_DEFINE_ENUM_STRINGS(MQTT_CLIENT_EVENT_ERROR, MQTT_CLIENT_EVENT_ERROR_VALUES)
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(MQTT_CLIENT_EVENT_ERROR, MQTT_CLIENT_EVENT_ERROR_VALUES)
 
 typedef struct SYSTEM_PROPERTY_INFO_TAG
 {
@@ -169,6 +169,8 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     STRING_HANDLE module_id;
     STRING_HANDLE devicesAndModulesPath;
     int portNum;
+    // conn_attempted indicates whether a connection has *ever* been attempted on the lifetime
+    // of this handle.  Even if a given xio transport is added/removed, this always stays true.
     bool conn_attempted;
 
     MQTT_GET_IO_TRANSPORT get_io_transport;
@@ -240,10 +242,9 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
 
 typedef struct MQTT_DEVICE_TWIN_ITEM_TAG
 {
-    tickcounter_ms_t msgEnqueueTime;
+    tickcounter_ms_t msgCreationTime;
     tickcounter_ms_t msgPublishTime;
     size_t retryCount;
-    IOTHUB_IDENTITY_TYPE iothub_type;
     uint16_t packet_id;
     uint32_t iothub_msg_id;
     IOTHUB_DEVICE_TWIN* device_twin_data;
@@ -289,6 +290,13 @@ static void free_proxy_data(MQTTTRANSPORT_HANDLE_DATA* mqtt_transport_instance)
     }
 }
 
+// Destroys xio transport associated with MQTT handle and resets appropriate state
+static void DestroyXioTransport(PMQTTTRANSPORT_HANDLE_DATA transport_data)
+{
+    xio_destroy(transport_data->xioTransport);
+    transport_data->xioTransport = NULL;
+}
+
 static void set_saved_tls_options(PMQTTTRANSPORT_HANDLE_DATA transport, OPTIONHANDLER_HANDLE new_options)
 {
     if (transport->saved_tls_options != NULL)
@@ -327,6 +335,8 @@ static void free_transport_handle_data(MQTTTRANSPORT_HANDLE_DATA* transport_data
     STRING_delete(transport_data->topic_NotifyState);
     STRING_delete(transport_data->topic_DeviceMethods);
     STRING_delete(transport_data->topic_InputQueue);
+
+    DestroyXioTransport(transport_data);
 
     free(transport_data);
 }
@@ -675,10 +685,10 @@ static int addSystemPropertyToTopicString(STRING_HANDLE topic_string, size_t ind
 
 static int addSystemPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_message_handle, STRING_HANDLE topic_string, size_t* index_ptr, bool urlencode)
 {
-    (void)urlencode;
     int result = 0;
     size_t index = *index_ptr;
 
+    bool is_security_msg = IoTHubMessage_IsSecurityMessage(iothub_message_handle);
     /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_052: [ IoTHubTransport_MQTT_Common_DoWork shall check for the CorrelationId property and if found add the value as a system property in the format of $.cid=<id> ] */
     const char* correlation_id = IoTHubMessage_GetCorrelationId(iothub_message_handle);
     if (correlation_id != NULL)
@@ -712,8 +722,25 @@ static int addSystemPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_messag
         const char* content_encoding = IoTHubMessage_GetContentEncodingSystemProperty(iothub_message_handle);
         if (content_encoding != NULL)
         {
-            result = addSystemPropertyToTopicString(topic_string, index, CONTENT_ENCODING_PROPERTY, content_encoding, urlencode);
+            // Security message require content encoding
+            result = addSystemPropertyToTopicString(topic_string, index, CONTENT_ENCODING_PROPERTY, content_encoding, is_security_msg ? true : urlencode);
             index++;
+        }
+    }
+    if (result == 0)
+    {
+        if (is_security_msg)
+        {
+            // The Security interface Id value must be encoded
+            if (addSystemPropertyToTopicString(topic_string, index++, SECURITY_INTERFACE_ID_MQTT, SECURITY_INTERFACE_ID_VALUE, true) != 0)
+            {
+                LogError("Failed setting Security interface id");
+                result = MU_FAILURE;
+            }
+            else
+            {
+                result = 0;
+            }
         }
     }
     *index_ptr = index;
@@ -921,26 +948,28 @@ static void destroy_device_twin_get_message(MQTT_DEVICE_TWIN_ITEM* msg_entry)
     free(msg_entry);
 }
 
-static MQTT_DEVICE_TWIN_ITEM* create_device_twin_get_message(MQTTTRANSPORT_HANDLE_DATA* transport_data)
+static MQTT_DEVICE_TWIN_ITEM* create_device_twin_message(MQTTTRANSPORT_HANDLE_DATA* transport_data, DEVICE_TWIN_MSG_TYPE device_twin_msg_type, uint32_t iothub_msg_id)
 {
     MQTT_DEVICE_TWIN_ITEM* result;
+    tickcounter_ms_t current_time;
 
-    if ((result = (MQTT_DEVICE_TWIN_ITEM*)malloc(sizeof(MQTT_DEVICE_TWIN_ITEM))) == NULL)
+    if (tickcounter_get_current_ms(transport_data->msgTickCounter, &current_time) != 0)
+    {
+        LogError("Failed retrieving tickcounter info");
+        result = NULL;
+    }
+    else if ((result = (MQTT_DEVICE_TWIN_ITEM*)malloc(sizeof(MQTT_DEVICE_TWIN_ITEM))) == NULL)
     {
         LogError("Failed allocating device twin data.");
+        result = NULL;
     }
     else
     {
+        memset(result, 0, sizeof(*result));
+        result->msgCreationTime = current_time;
         result->packet_id = get_next_packet_id(transport_data);
-        result->iothub_msg_id = 0;
-        result->device_twin_msg_type = RETRIEVE_PROPERTIES;
-        result->retryCount = 0;
-        result->msgPublishTime = 0;
-        result->msgEnqueueTime = 0;
-        result->iothub_type = IOTHUB_TYPE_DEVICE_TWIN;
-        result->device_twin_data = NULL;
-        result->userCallback = NULL;
-        result->userContext = NULL;
+        result->iothub_msg_id = iothub_msg_id;
+        result->device_twin_msg_type = device_twin_msg_type;
     }
 
     return result;
@@ -1009,67 +1038,59 @@ static void sendPendingGetTwinRequests(PMQTTTRANSPORT_HANDLE_DATA transportData)
     }
 }
 
-static void removeExpiredPendingGetTwinRequests(PMQTTTRANSPORT_HANDLE_DATA transport_data)
+
+static void removeExpiredTwinRequestsFromList(PMQTTTRANSPORT_HANDLE_DATA transport_data, tickcounter_ms_t current_ms, DLIST_ENTRY* twin_list)
 {
-    tickcounter_ms_t current_ms;
-
-    if (tickcounter_get_current_ms(transport_data->msgTickCounter, &current_ms) == 0)
+    PDLIST_ENTRY list_item = twin_list->Flink;
+    
+    while (list_item != twin_list)
     {
-        PDLIST_ENTRY listItem = transport_data->pending_get_twin_queue.Flink;
+        DLIST_ENTRY next_list_item;
+        next_list_item.Flink = list_item->Flink;
+        MQTT_DEVICE_TWIN_ITEM* msg_entry = containingRecord(list_item, MQTT_DEVICE_TWIN_ITEM, entry);
+        bool item_timed_out = false;
 
-        while (listItem != &transport_data->pending_get_twin_queue)
+        if ((msg_entry->device_twin_msg_type == RETRIEVE_PROPERTIES) &&
+            (((current_ms - msg_entry->msgCreationTime) / 1000) >= ON_DEMAND_GET_TWIN_REQUEST_TIMEOUT_SECS))
         {
-            DLIST_ENTRY nextListItem;
-            nextListItem.Flink = listItem->Flink;
-            MQTT_DEVICE_TWIN_ITEM* msg_entry = containingRecord(listItem, MQTT_DEVICE_TWIN_ITEM, entry);
-
-            if (((current_ms - msg_entry->msgEnqueueTime) / 1000) >= ON_DEMAND_GET_TWIN_REQUEST_TIMEOUT_SECS)
+            item_timed_out = true;
+            if (msg_entry->userCallback != NULL)
             {
-                (void)DList_RemoveEntryList(listItem);
                 msg_entry->userCallback(DEVICE_TWIN_UPDATE_COMPLETE, NULL, 0, msg_entry->userContext);
-                destroy_device_twin_get_message(msg_entry);
             }
-
-            listItem = nextListItem.Flink;
         }
+        else if ((msg_entry->device_twin_msg_type == REPORTED_STATE) &&
+                 (((current_ms - msg_entry->msgCreationTime) / 1000) >= TWIN_REPORT_UPDATE_TIMEOUT_SECS))
+        {
+            item_timed_out = true;
+            transport_data->transport_callbacks.twin_rpt_state_complete_cb(msg_entry->iothub_msg_id, STATUS_CODE_TIMEOUT_VALUE, transport_data->transport_ctx);
+        }
+
+        if (item_timed_out)
+        {
+            (void)DList_RemoveEntryList(list_item);
+            destroy_device_twin_get_message(msg_entry);
+        }
+
+        list_item = next_list_item.Flink;
     }
+
 }
 
-static void removeExpiredGetTwinRequestsPendingAck(PMQTTTRANSPORT_HANDLE_DATA transport_data)
+static void removeExpiredTwinRequests(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
     tickcounter_ms_t current_ms;
 
     if (tickcounter_get_current_ms(transport_data->msgTickCounter, &current_ms) == 0)
     {
-        PDLIST_ENTRY listItem = transport_data->ack_waiting_queue.Flink;
-
-        while (listItem != &transport_data->ack_waiting_queue)
-        {
-            DLIST_ENTRY nextListItem;
-            nextListItem.Flink = listItem->Flink;
-            MQTT_DEVICE_TWIN_ITEM* msg_entry = containingRecord(listItem, MQTT_DEVICE_TWIN_ITEM, entry);
-
-            // Check if it is a on-demand get-twin request.
-            if (msg_entry->device_twin_msg_type == RETRIEVE_PROPERTIES && msg_entry->userCallback != NULL)
-            {
-                if (((current_ms - msg_entry->msgEnqueueTime) / 1000) >= ON_DEMAND_GET_TWIN_REQUEST_TIMEOUT_SECS)
-                {
-                    (void)DList_RemoveEntryList(listItem);
-                    msg_entry->userCallback(DEVICE_TWIN_UPDATE_COMPLETE, NULL, 0, msg_entry->userContext);
-                    destroy_device_twin_get_message(msg_entry);
-                }
-            }
-
-            listItem = nextListItem.Flink;
-        }
+        removeExpiredTwinRequestsFromList(transport_data, current_ms, &transport_data->pending_get_twin_queue);
+        removeExpiredTwinRequestsFromList(transport_data, current_ms, &transport_data->ack_waiting_queue);
     }
 }
 
 static int publish_device_twin_message(MQTTTRANSPORT_HANDLE_DATA* transport_data, IOTHUB_DEVICE_TWIN* device_twin_info, MQTT_DEVICE_TWIN_ITEM* mqtt_info)
 {
     int result;
-    mqtt_info->packet_id = get_next_packet_id(transport_data);
-    mqtt_info->device_twin_msg_type = REPORTED_STATE;
 
     STRING_HANDLE msgTopic = STRING_construct_sprintf(REPORTED_PROPERTIES_TOPIC, mqtt_info->packet_id);
     if (msgTopic == NULL)
@@ -1719,7 +1740,7 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
                         }
                         else if (connack->returnCode == CONN_REFUSED_NOT_AUTHORIZED)
                         {
-                            transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_DEVICE_DISABLED, transport_data->transport_ctx);
+                            transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL, transport_data->transport_ctx);
                         }
                         else if (connack->returnCode == CONN_REFUSED_UNACCEPTABLE_VERSION)
                         {
@@ -1795,9 +1816,7 @@ static void ResetConnectionIfNecessary(PMQTTTRANSPORT_HANDLE_DATA transport_data
     {
         OPTIONHANDLER_HANDLE options = xio_retrieveoptions(transport_data->xioTransport);
         set_saved_tls_options(transport_data, options);
-
-        xio_destroy(transport_data->xioTransport);
-        transport_data->xioTransport = NULL;
+        DestroyXioTransport(transport_data);
     }
 }
 
@@ -1832,8 +1851,7 @@ static void DisconnectFromClient(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 ThreadAPI_Sleep(50);
             } while ((disconnect_ctr < MAX_DISCONNECT_VALUE) && (transport_data->disconnect_recv_flag == 0));
         }
-        xio_destroy(transport_data->xioTransport);
-        transport_data->xioTransport = NULL;
+        DestroyXioTransport(transport_data);
 
         transport_data->device_twin_get_sent = false;
         transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_NOT_CONNECTED;
@@ -1862,11 +1880,13 @@ static void mqtt_error_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_ERR
             case MQTT_CLIENT_NO_PING_RESPONSE:
             {
                 LogError("Mqtt Ping Response was not encountered.  Reconnecting device...");
+                transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_PING_RESPONSE, transport_data->transport_ctx);
                 break;
             }
             case MQTT_CLIENT_PARSE_ERROR:
             case MQTT_CLIENT_MEMORY_ERROR:
             case MQTT_CLIENT_UNKNOWN_ERROR:
+            default:
             {
                 LogError("INTERNAL ERROR: unexpected error value received %s", MU_ENUM_TO_STRING(MQTT_CLIENT_EVENT_ERROR, error));
                 break;
@@ -2299,7 +2319,7 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
         if (transport_data->mqttClientStatus == MQTT_CLIENT_STATUS_NOT_CONNECTED && transport_data->isRecoverableError)
         {
             // Note: in case retry_control_should_retry fails, the reconnection shall be attempted anyway (defaulting to policy IOTHUB_CLIENT_RETRY_IMMEDIATE).
-            if (retry_control_should_retry(transport_data->retry_control_handle, &retry_action) != 0 || retry_action == RETRY_ACTION_RETRY_NOW)
+            if (!transport_data->conn_attempted || retry_control_should_retry(transport_data->retry_control_handle, &retry_action) != 0 || retry_action == RETRY_ACTION_RETRY_NOW)
             {
                 if (tickcounter_get_current_ms(transport_data->msgTickCounter, &transport_data->connectTick) != 0)
                 {
@@ -2322,7 +2342,7 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                         result = 0;
                     }
                 }
-            }   
+            }
             else if (retry_action == RETRY_ACTION_STOP_RETRYING)
             {
                 // Set callback if retry expired
@@ -2790,13 +2810,13 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_GetTwinAsync(IOTHUB_DEVICE_HAND
         PMQTTTRANSPORT_HANDLE_DATA transport_data = (PMQTTTRANSPORT_HANDLE_DATA)handle;
         MQTT_DEVICE_TWIN_ITEM* mqtt_info;
 
-        if ((mqtt_info = create_device_twin_get_message(transport_data)) == NULL)
+        if ((mqtt_info = create_device_twin_message(transport_data, RETRIEVE_PROPERTIES, 0)) == NULL)
         {
             LogError("Failed creating the device twin get request message");
             // Codes_SRS_IOTHUB_MQTT_TRANSPORT_09_003: [ If any failure occurs, IoTHubTransport_MQTT_Common_GetTwinAsync shall return IOTHUB_CLIENT_ERROR ]
             result = IOTHUB_CLIENT_ERROR;
         }
-        else if (tickcounter_get_current_ms(transport_data->msgTickCounter, &mqtt_info->msgEnqueueTime) != 0)
+        else if (tickcounter_get_current_ms(transport_data->msgTickCounter, &mqtt_info->msgCreationTime) != 0)
         {
             LogError("Failed setting the get twin request enqueue time");
             destroy_device_twin_get_message(mqtt_info);
@@ -3017,7 +3037,7 @@ IOTHUB_PROCESS_ITEM_RESULT IoTHubTransport_MQTT_Common_ProcessItem(TRANSPORT_LL_
             // Ensure the reported property suback has been received
             if (item_type == IOTHUB_TYPE_DEVICE_TWIN && transport_data->twin_resp_sub_recv)
             {
-                MQTT_DEVICE_TWIN_ITEM* mqtt_info = (MQTT_DEVICE_TWIN_ITEM*)malloc(sizeof(MQTT_DEVICE_TWIN_ITEM));
+                MQTT_DEVICE_TWIN_ITEM* mqtt_info = create_device_twin_message(transport_data, REPORTED_STATE, iothub_item->device_twin->item_id);
                 if (mqtt_info == NULL)
                 {
                     /* Codes_SRS_IOTHUBCLIENT_LL_07_004: [ If any errors are encountered IoTHubTransport_MQTT_Common_ProcessItem shall return IOTHUB_PROCESS_ERROR. ]*/
@@ -3026,13 +3046,6 @@ IOTHUB_PROCESS_ITEM_RESULT IoTHubTransport_MQTT_Common_ProcessItem(TRANSPORT_LL_
                 else
                 {
                     /*Codes_SRS_IOTHUBCLIENT_LL_07_003: [ IoTHubTransport_MQTT_Common_ProcessItem shall publish a message to the mqtt protocol with the message topic for the message type.]*/
-                    mqtt_info->iothub_type = item_type;
-                    mqtt_info->iothub_msg_id = iothub_item->device_twin->item_id;
-                    mqtt_info->retryCount = 0;
-                    mqtt_info->userCallback = NULL;
-                    mqtt_info->userContext = NULL;
-                    mqtt_info->msgEnqueueTime = 0;
-
                     /* Codes_SRS_IOTHUBCLIENT_LL_07_005: [ If successful IoTHubTransport_MQTT_Common_ProcessItem shall add mqtt info structure acknowledgement queue. ] */
                     DList_InsertTailList(&transport_data->ack_waiting_queue, &mqtt_info->entry);
 
@@ -3091,7 +3104,7 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle)
                     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_055: [ IoTHubTransport_MQTT_Common_DoWork shall send a device twin get property message upon successfully retrieving a SUBACK on device twin topics. ] */
                     MQTT_DEVICE_TWIN_ITEM* mqtt_info;
 
-                    if ((mqtt_info = create_device_twin_get_message(transport_data)) == NULL)
+                    if ((mqtt_info = create_device_twin_message(transport_data, RETRIEVE_PROPERTIES, 0)) == NULL)
                     {
                         LogError("Failure: could not create message for twin get command");
                     }
@@ -3166,8 +3179,7 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle)
 
         // Check the ack messages timeouts
         process_queued_ack_messages(transport_data);
-        removeExpiredPendingGetTwinRequests(transport_data);
-        removeExpiredGetTwinRequestsPendingAck(transport_data);
+        removeExpiredTwinRequests(transport_data);
     }
 }
 
@@ -3177,24 +3189,24 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_GetSendStatus(TRANSPORT_LL_HAND
 
     if (handle == NULL || iotHubClientStatus == NULL)
     {
-        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_023: [IoTHubTransport_MQTT_Common_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter.] */
-        LogError("invalid arument.");
-        result = IOTHUB_CLIENT_INVALID_ARG;
+    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_023: [IoTHubTransport_MQTT_Common_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter.] */
+    LogError("invalid arument.");
+    result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
     {
-        MQTTTRANSPORT_HANDLE_DATA* handleData = (MQTTTRANSPORT_HANDLE_DATA*)handle;
-        if (!DList_IsListEmpty(handleData->waitingToSend) || !DList_IsListEmpty(&(handleData->telemetry_waitingForAck)))
-        {
-            /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_025: [IoTHubTransport_MQTT_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_BUSY if there are currently event items to be sent or being sent.] */
-            *iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_BUSY;
-        }
-        else
-        {
-            /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_024: [IoTHubTransport_MQTT_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_IDLE if there are currently no event items to be sent or being sent.] */
-            *iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_IDLE;
-        }
-        result = IOTHUB_CLIENT_OK;
+    MQTTTRANSPORT_HANDLE_DATA* handleData = (MQTTTRANSPORT_HANDLE_DATA*)handle;
+    if (!DList_IsListEmpty(handleData->waitingToSend) || !DList_IsListEmpty(&(handleData->telemetry_waitingForAck)))
+    {
+        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_025: [IoTHubTransport_MQTT_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_BUSY if there are currently event items to be sent or being sent.] */
+        *iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_BUSY;
+    }
+    else
+    {
+        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_024: [IoTHubTransport_MQTT_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_IDLE if there are currently no event items to be sent or being sent.] */
+        *iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_IDLE;
+    }
+    result = IOTHUB_CLIENT_OK;
     }
     return result;
 }
@@ -3272,6 +3284,18 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SetOption(TRANSPORT_LL_HANDLE h
         {
             LogError("x509privatekey specified, but authentication method is not x509");
             result = IOTHUB_CLIENT_INVALID_ARG;
+        }
+        else if (strcmp(OPTION_RETRY_INTERVAL_SEC, option) == 0)
+        {
+            if (retry_control_set_option(transport_data->retry_control_handle, RETRY_CONTROL_OPTION_INITIAL_WAIT_TIME_IN_SECS, value) != 0)
+            {
+                LogError("Failure setting retry interval option");
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else
+            {
+                result = IOTHUB_CLIENT_OK;
+            }
         }
         else if (strcmp(OPTION_HTTP_PROXY, option) == 0)
         {
@@ -3590,5 +3614,23 @@ int IoTHubTransport_MQTT_SetCallbackContext(TRANSPORT_LL_HANDLE handle, void* ct
         transport_data->transport_ctx = ctx;
         result = 0;
     }
+    return result;
+}
+
+int IoTHubTransport_MQTT_GetSupportedPlatformInfo(TRANSPORT_LL_HANDLE handle, PLATFORM_INFO_OPTION* info)
+{
+    int result;
+
+    if (handle == NULL || info == NULL)
+    {
+        LogError("Invalid parameter specified (handle: %p, info: %p)", handle, info);
+        result = MU_FAILURE;
+    }
+    else
+    {
+        *info = PLATFORM_INFO_OPTION_RETRIEVE_SQM;
+        result = 0;
+    }
+
     return result;
 }

@@ -28,6 +28,7 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     add_definitions(-DMACOSX)
 endif()
 
+
 include (CTest)
 
 if (MSVC)
@@ -53,8 +54,6 @@ set(hsm_type_custom OFF CACHE BOOL "hsm type of custom used with the Provisionin
 set(hsm_custom_lib "" CACHE STRING "Full path to custom HSM repo library")
 set(run_sfc_tests OFF CACHE BOOL "setup the Service Fault tests")
 
-set(use_wolfssl)
-
 # the following variables are project-wide and can be used with cmake-gui
 option(use_amqp "set use_amqp to ON if amqp is to be used, set to OFF to not use amqp" ON)
 option(use_http "set use_http to ON if http is to be used, set to OFF to not use http" ON)
@@ -63,9 +62,6 @@ option(run_e2e_tests "set run_e2e_tests to ON to run e2e tests (default is OFF)"
 option(run_unittests "set run_unittests to ON to run unittests (default is OFF)" OFF)
 option(run_longhaul_tests "set run_longhaul_tests to ON to run longhaul tests (default is OFF)[if possible, they are always build]" OFF)
 option(skip_samples "set skip_samples to ON to skip building samples (default is OFF)[if possible, they are always build]" OFF)
-option(compileOption_C "passes a string to the command line of the C compiler" OFF)
-option(compileOption_CXX "passes a string to the command line of the C++ compiler" OFF)
-option(linkerOption "passes a string to the shared and exe linker options of the C compiler" OFF)
 option(build_service_client "controls whether the iothub_service_client is built or not" ON)
 option(build_provisioning_service_client "controls whether the provisioning_service_client is built or not" ON)
 option(build_python "builds the Python native iothub_client module" OFF)
@@ -77,6 +73,13 @@ option(use_prov_client "Enable provisioning client" OFF)
 option(use_tpm_simulator "tpm simulator type of hsm used with the provisioning client" OFF)
 option(use_edge_modules "Enable support for running modules against Azure IoT Edge" OFF)
 option(use_custom_heap "use externally defined heap functions instead of the malloc family" OFF)
+option(use_baltimore_cert "set use_baltimore_cert to ON if the Baltimore cert is to be used, set to OFF to not use it" OFF)
+option(use_microsoftazure_de_cert "set use_microsoftazure_de_cert to ON if the MicrosoftAzure DE cert is to be used, set to OFF to not use it" OFF)
+option(use_portal_azure_cn_cert "set use_portal_azure_cn_cert to ON if the Portal Azure CN cert is to be used, set to OFF to not use it" OFF)
+
+set(compileOption_C "" CACHE STRING "passes a string to the command line of the C compiler")
+set(compileOption_CXX "" CACHE STRING "passes a string to the command line of the C++ compiler")
+set(linkerOption "" CACHE STRING "passes a string to the shared and exe linker options of the C compiler")
 
 set(use_prov_client_core OFF)
 
@@ -98,12 +101,28 @@ if (WIN32 OR MACOSX)
 else()
     option(use_openssl "set use_openssl to ON to use OpenSSL." ON)
 endif()
+option(use_mbedtls "set use_mbedtls to ON to use mbedtls." OFF)
+option(use_bearssl "set use_bearssl to ON to use bearssl." OFF)
+option(use_wolfssl "set use_bearssl to ON to use bearssl." OFF)
 
 # openssl samples on Windows need to have a trusted cert set
-if ((WIN32 AND "${use_openssl}") OR "${use_wolfssl}")
+if ((WIN32 AND ${use_openssl}) OR ${use_wolfssl} OR ${use_mbedtls} OR ${use_bearssl})
     option(use_sample_trusted_cert "Set flag in samples to use SDK's built-in CA as TrustedCerts" ON)
 else()
     option(use_sample_trusted_cert "Set flag in samples to use SDK's built-in CA as TrustedCerts" OFF)
+endif()
+
+# Enable specific certs
+if (${use_baltimore_cert})
+    add_definitions(-DUSE_BALTIMORE_CERT)
+endif()
+
+if (${use_microsoftazure_de_cert})
+    add_definitions(-DUSE_MICROSOFTAZURE_DE_CERT)
+endif()
+
+if (${use_portal_azure_cn_cert})
+    add_definitions(-DUSE_PORTAL_AZURE_CN_CERT)
 endif()
 
 # Enable IoT SDK to act as a module for Edge
@@ -118,11 +137,13 @@ endif()
 # Set Provisioning Information.  This will also setup appropriate HSM
 if (${use_prov_client})
     set(use_prov_client_core ON)
-
     if ("${hsm_custom_lib}" STREQUAL "")
-        set(hsm_type_x509 ON)
-        set(hsm_type_sastoken ON)
-        set(hsm_type_symm_key ON)
+        if ((NOT ${hsm_type_x509}) AND (NOT ${hsm_type_sastoken}) AND (NOT ${hsm_type_symm_key}))
+            # If the cmake option did not explicitly configure an hsm type, then enable them all.
+            set(hsm_type_x509 ON)
+            set(hsm_type_sastoken ON)
+            set(hsm_type_symm_key ON)
+        endif()
     else()
         set(hsm_type_custom ON)
     endif()
@@ -181,15 +202,15 @@ if (LINUX)
 endif()
 
 # if any compiler has a command line switch called "OFF" then it will need special care
-if (NOT "${compileOption_C}" STREQUAL "OFF")
+if (NOT "${compileOption_C}" STREQUAL "")
     set(CMAKE_C_FLAGS "${compileOption_C} ${CMAKE_C_FLAGS}")
 endif()
 
-if (NOT "${compileOption_CXX}" STREQUAL "OFF")
+if (NOT "${compileOption_CXX}" STREQUAL "")
     set(CMAKE_CXX_FLAGS "${compileOption_CXX} ${CMAKE_CXX_FLAGS}")
 endif()
 
-if (NOT "${linkerOption}" STREQUAL "OFF")
+if (NOT "${linkerOption}" STREQUAL "")
     message("linkerOption: ${CMAKE_SHARED_LINKER_FLAGS}")
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${linkerOption}")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${linkerOption}")
@@ -205,6 +226,7 @@ set(original_skip_samples ${skip_samples})
 set(run_e2e_tests OFF)
 set(run_unittests OFF)
 set(skip_samples ON)
+set(use_cppunittest ON)
 
 if (NOT ${use_installed_dependencies})
     if (NOT TARGET azure_macro_utils_c AND EXISTS "${CMAKE_CURRENT_LIST_DIR}/deps/azure-macro-utils-c/CMakeLists.txt")
@@ -342,7 +364,7 @@ if (${use_prov_client_core})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_PROV_MODULE")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_PROV_MODULE")
 
-    if (${build_provisioning_service_client} AND ${use_prov_client})
+    if ((${build_provisioning_service_client} AND ${use_prov_client}) OR ${run_e2e_tests})
         add_subdirectory(provisioning_service_client)
     endif()
 
@@ -353,7 +375,7 @@ if (${build_service_client})
     add_subdirectory(iothub_service_client)
 endif()
 
-if (${run_e2e_tests} OR ${run_longhaul_tests} OR ${nuget_e2e_tests} OR ${run_sfc_tests})
+if (${run_e2e_tests} OR ${run_longhaul_tests} OR ${nuget_e2e_tests} OR ${run_sfc_tests} OR ${run_unittests})
     add_subdirectory(testtools)
 endif()
 

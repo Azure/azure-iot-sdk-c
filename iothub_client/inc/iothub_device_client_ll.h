@@ -124,7 +124,10 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     *
     *           @b NOTE: The application behavior is undefined if the user calls
     *           the ::IoTHubDeviceClient_LL_Destroy function from within any callback.
-    *
+    * @remarks
+    *           The IOTHUB_MESSAGE_HANDLE instance provided as argument is copied by the function,
+    *           so this argument can be destroyed by the calling application right after IoTHubDeviceClient_LL_SendEventAsync returns.
+    *           The copy of @c eventMessageHandle is later destroyed by the iothub client when the message is effectively sent, if a failure sending it occurs, or if the client is destroyed.
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_SendEventAsync, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_MESSAGE_HANDLE, eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, eventConfirmationCallback, void*, userContextCallback);
@@ -272,12 +275,13 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     *                - @b CURLOPT_VERBOSE - only available for HTTP protocol and only
     *                  when CURL is used. It has the same meaning as CURL's option with the same
     *                  name. @p value is pointer to a long.
-    *              - @b keepalive - available for MQTT protocol.  Integer value that sets the
-    *                interval in seconds when pings are sent to the server.
-    *              - @b logtrace - available for MQTT protocol.  Boolean value that turns on and
-    *                off the diagnostic logging.
-    *              - @b sas_token_lifetime - available for MQTT & AMQP protocol.  size_t value that that determines the
-    *                sas token timeout length.
+    *                - @b keepalive - available for MQTT protocol.  Integer value that sets the
+    *                  interval in seconds when pings are sent to the server.
+    *                - @b logtrace - available for MQTT protocol.  Boolean value that turns on and
+    *                  off the diagnostic logging.
+    *                - @b sas_token_lifetime - available for MQTT & AMQP protocol.  size_t value that that determines the
+    *                  sas token timeout length.
+    *                - @b OPTION_TRUSTED_CERT - Azure Server certificate used to validate TLS connection to iothub.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */

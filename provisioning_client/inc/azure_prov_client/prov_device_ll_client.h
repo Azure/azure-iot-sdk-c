@@ -30,7 +30,7 @@ typedef struct PROV_INSTANCE_INFO_TAG* PROV_DEVICE_LL_HANDLE;
     PROV_DEVICE_RESULT_UNAUTHORIZED,        \
     PROV_DEVICE_RESULT_DISABLED
 
-MU_DEFINE_ENUM(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
+MU_DEFINE_ENUM_WITHOUT_INVALID(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
 
 #define PROV_DEVICE_REG_STATUS_VALUES      \
     PROV_DEVICE_REG_STATUS_CONNECTED,      \
@@ -40,7 +40,7 @@ MU_DEFINE_ENUM(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
     PROV_DEVICE_REG_STATUS_ERROR,          \
     PROV_DEVICE_REG_HUB_NOT_SPECIFIED
 
-MU_DEFINE_ENUM(PROV_DEVICE_REG_STATUS, PROV_DEVICE_REG_STATUS_VALUES);
+MU_DEFINE_ENUM_WITHOUT_INVALID(PROV_DEVICE_REG_STATUS, PROV_DEVICE_REG_STATUS_VALUES);
 
 static const char* const PROV_REGISTRATION_ID = "registration_id";
 static const char* const PROV_OPTION_LOG_TRACE = "logtrace";
@@ -110,6 +110,25 @@ MOCKABLE_FUNCTION(, PROV_DEVICE_RESULT, Prov_Device_LL_SetOption, PROV_DEVICE_LL
 */
 MOCKABLE_FUNCTION(, const char*, Prov_Device_LL_GetVersionString);
 
+
+/**
+* @brief    Sets the Provisioning Data that is sent to the Provisioning service
+*
+* @param    handle          The handle created by a call to the create function.
+* @param    json            The data field that is sent to the service.  Setting json to NULL will unset the value previously set
+*
+* @return PROV_DEVICE_RESULT_OK upon success or an error code upon failure
+*/
+MOCKABLE_FUNCTION(, PROV_DEVICE_RESULT, Prov_Device_LL_Set_Provisioning_Payload, PROV_DEVICE_LL_HANDLE, handle, const char*, json);
+
+/**
+* @brief    Retrieves the Provisioning Data that is sent from the Provisioning service
+*
+* @param    handle          The handle created by a call to the create function.
+*
+* @return The data that was specified by the service
+*/
+MOCKABLE_FUNCTION(, const char*, Prov_Device_LL_Get_Provisioning_Payload, PROV_DEVICE_LL_HANDLE, handle);
 
 #ifdef __cplusplus
 }

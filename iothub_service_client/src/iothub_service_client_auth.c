@@ -29,8 +29,8 @@ static void free_service_client_auth(IOTHUB_SERVICE_CLIENT_AUTH* authInfo)
     free(authInfo);
 }
 
-MU_DEFINE_ENUM_STRINGS(IOTHUB_DEVICE_STATUS, IOTHUB_DEVICE_STATUS_VALUES);
-MU_DEFINE_ENUM_STRINGS(IOTHUB_DEVICE_CONNECTION_STATE, IOTHUB_DEVICE_CONNECTION_STATE_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_DEVICE_STATUS, IOTHUB_DEVICE_STATUS_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_DEVICE_CONNECTION_STATE, IOTHUB_DEVICE_CONNECTION_STATE_VALUES);
 
 static IOTHUB_SERVICE_CLIENT_AUTH_HANDLE create_from_connection_string(const char* connectionString, bool useSharedAccessSignature)
 {
@@ -211,9 +211,9 @@ static IOTHUB_SERVICE_CLIENT_AUTH_HANDLE create_from_connection_string(const cha
                     /*Codes_SRS_IOTHUBSERVICECLIENT_12_041: [** IoTHubServiceClientAuth_CreateFromSharedAccessSignature shall allocate memory and copy sharedAccessSignature to result->sharedAccessKey by prefixing it with "sas=". **] */
                     else if (useSharedAccessSignature &&
                         (sharedAccess != NULL) &&
-                        ((shared_access = STRING_construct(IOTHUBSASPREFIX)) != NULL) &&
-                        (STRING_concat(shared_access, sharedAccess) != 0) &&
-                        (mallocAndStrcpy_s(&result->sharedAccessKey, STRING_c_str(shared_access)) != 0))
+                        (((shared_access = STRING_construct(IOTHUBSASPREFIX)) == NULL) ||
+                        (STRING_concat(shared_access, sharedAccess) != 0) ||
+                        (mallocAndStrcpy_s(&result->sharedAccessKey, STRING_c_str(shared_access)) != 0)))
                     {
                         /*Codes_SRS_IOTHUBSERVICECLIENT_12_029: [** If the mallocAndStrcpy_s fails, IoTHubServiceClientAuth_CreateFromSharedAccessSignature shall do clean up and return NULL. **] */
                         LogError("mallocAndStrcpy_s failed for sharedAccessSignature");

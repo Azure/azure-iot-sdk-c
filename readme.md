@@ -13,7 +13,7 @@ This repository contains the following:
   * Linux: [Device SDK on apt-get](./iothub_client/readme.md#aptgetpackage)
   * mbed:                                      [Device SDK library on MBED](./iothub_client/readme.md#mbed)
   * Arduino:                                   [Device SDK library in the Arduino IDE](./iothub_client/readme.md#arduino)
-  * Windows:                                   [Device SDK on NuGet](./iothub_client/readme.md#nugetpackage)
+  * Windows:                                   [Device SDK on Vcpkg](./doc/setting_up_vcpkg.md#setup-c-sdk-vcpkg-for-windows-development-environment)
   * iOS:                                       [Device SDK on CocoaPod](https://cocoapods.org/pods/AzureIoTHubClient)
 
 ## Samples
@@ -224,6 +224,7 @@ Below is a table showing the mapping of the LTS branches to the packages release
 
 | Package | Github Branch | LTS Status | LTS Start Date | Maintenance End Date | Removed Date |
 | :-----------: | :-----------: | :--------: | :------------: | :------------------: | :----------: |
+| Vcpkg: 2019-07-01.1<br/> Xenial: 0.2.0.0-21xenial<br/> Trusty: 0.2.0-21trusty<br/> Bionic: 0.2.0.0-14bionic<br/>    | lts_07_2019   | Active     | 2019-07-01     | 2020-07-01           | 2020-07-01   |
 | Vcpkg: 1.2.14-1<br/> Xenial: 0.2.0.0-16xenial<br/> Trusty: 0.2.0-16trusty<br/> Bionic: 0.2.0.0-9bionic<br/>    | lts_01_2019   | Active     | 2019-01-31     | 2020-01-31           | 2020-01-31   |
 | Nuget: 1.2.10<br/> Xenial: 0.2.0.0-12xenial<br/> Trusty: 0.2.0-12trusty<br/> Bionic: 0.2.0.0-5bionic<br/>    | lts_10_2018   | Active     | 2018-10-03     | 2019-10-03           | 2019-10-03   |
 

@@ -1,18 +1,23 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+schedules:
+- cron: "0 0 * * *"
+  displayName: Daily midnight build
+  branches:
+    include:
+    - master
+
 variables:
   ClientLibrary.Repo: $(Build.Repository.Uri)
   ClientLibrary.Commit: $(Build.SourceBranch)
   ClientLibrary.FrameworkRoot: $(Build.SourcesDirectory)
-
 
 jobs:
 - job: Cross_Compile
   pool:
     vmImage: ubuntu-16.04
   steps:
-  
   - task: UsePythonVersion@0
     inputs:
       versionSpec: '3.x'
@@ -28,28 +33,55 @@ jobs:
       if ($NormalizedRepo -like 'https://github.com/*') {
         $NormalizedRepo=$NormalizedRepo.Substring('https://github.com/'.length)
       }
+      $IsPr = "no"
+      $CommitToPass = $env:Commit
+      if ("$env:SYSTEM_PULLREQUEST_TARGETBRANCH" -ne "") {
+        $CommitToPass = $env:SYSTEM_PULLREQUEST_TARGETBRANCH
+        $IsPr = "yes"
+      }
       Write-Host "##vso[task.setvariable variable=normalizedRepo]${NormalizedRepo}"
+      Write-Host "##vso[task.setvariable variable=IsPr]${IsPr}"
+      Write-Host "##vso[task.setvariable variable=CommitToPass]${CommitToPass}"
       Write-Host "normalizedRepo=${NormalizedRepo}"
-    displayName: Removing github.com from repo name if necessary
+      Write-Host "IsPr=${IsPr}"
+      Write-Host "CommitToPass=${CommitToPass}"
+      Write-Host "$env:SYSTEM_PULLREQUEST_TARGETBRANCH"
+    displayName: Custom task execution logic
     env:
+      Commit: $(ClientLibrary.Commit)
       Repo: $(ClientLibrary.Repo)
     ignoreLASTEXITCODE: false
     errorActionPreference: Stop
     failOnStderr: true
-  
+
   - script: |
-      python3 $(ClientLibrary.FrameworkRoot)/jenkins/raspberrypi/pyscripts/build_docker_image.py --repo ${NormalizedRepo}  --commit $(ClientLibrary.Commit) 
+      cd $(Build.SourcesDirectory) &&
+      echo "saving patch from ${CommitToPass} to HEAD" &&
+      git diff -p origin/${CommitToPass} > ${AGENT_BUILDDIRECTORY}/patchfile &&
+      mkdir -p $(Build.ArtifactStagingDirectory)/raspi-c &&
+      cp ${AGENT_BUILDDIRECTORY}/patchfile $(Build.ArtifactStagingDirectory)/raspi-c &&
+      mv ${AGENT_BUILDDIRECTORY}/patchfile ${CLIENTLIBRARY_FRAMEWORKROOT}/jenkins/raspberrypi
+    displayName: "pack local language repo"
+    condition: and(
+      succeeded(),
+      eq(variables['IsPr'],'yes'))
+    env:
+      CommitToPass: $(CommitToPass)
+
+  - script: |
+      python3 $(ClientLibrary.FrameworkRoot)/jenkins/raspberrypi/pyscripts/build_docker_image.py --repo ${NormalizedRepo}  --commit $(CommitToPass)
     displayName: "build raspi-c docker image"
     condition: succeeded()
-    env: 
-      IOTHUB_E2E_REPO_ADDRESS: $(IOTHUB-E2E-REPO-ADDRESS)
-      IOTHUB_E2E_REPO_USER: $(IOTHUB-E2E-REPO-USER)
-      IOTHUB_E2E_REPO_PASSWORD: $(IOTHUB-E2E-REPO-PASSWORD)
+    env:
+      AZURECR_REPO_ADDRESS: $(IOTHUB-E2E-REPO-ADDRESS)
+      AZURECR_REPO_USER: $(IOTHUB-E2E-REPO-USER)
+      AZURECR_REPO_PASSWORD: $(IOTHUB-E2E-REPO-PASSWORD)
       NormalizedRepo: $(NormalizedRepo)
+      CommitToPass: $(CommitToPass)
 
   - task: ExtractFiles@1
     inputs:
-      archiveFilePatterns: '*.tar' 
+      archiveFilePatterns: '*.tar'
       destinationFolder: '$(Build.SourcesDirectory)/source_artifacts'
 
   - script: |
@@ -58,7 +90,7 @@ jobs:
     displayName: "list Build.SourcesDirectory"
 
   - script: |
-      cp -r $(Build.SourcesDirectory)/source_artifacts $(Build.ArtifactStagingDirectory)
+      find $(Build.SourcesDirectory)/source_artifacts/ -type f | grep -i e2e_exe$ | xargs -i cp {} $(Build.ArtifactStagingDirectory)
     displayName: "Copy Files Manually"
 
   - task: PublishBuildArtifacts@1
@@ -69,40 +101,206 @@ jobs:
       publishLocation: 'Container'
     condition: succeeded()
 
-- job: 'Run_Raspi_E2E_Tests'
-  pool: horton-raspi-c
-  steps:
-  - checkout: none
-  
+- job: 'Run_AMQP_DT_E2E_Test'
+  dependsOn: Cross_Compile
+  condition: succeeded()
+  pool: 
+    name: devicelab-02
+  steps:  
   - task: DownloadBuildArtifacts@0
     displayName: 'Download Build Artifacts'
     inputs:
       artifactName: drop
       itemPattern: 'drop/**/*e2e_exe'
 
-  - bash: |
-      chmod -R 777 drop
-      sudo setcap cap_net_raw,cap_net_admin+ep drop/source_artifacts/cmake/iothub_client/tests/iothubclient_mqtt_e2e/iothubclient_mqtt_e2e_exe
-      cp drop/source_artifacts/cmake/iothub_client/tests/iothubclient_mqtt_e2e/iothubclient_mqtt_e2e_exe drop/source_artifacts/cmake/iothub_client/tests/iothubclient_mqtt_e2e/iothubclient_mqtt_e2e_but_better
-      drop/source_artifacts/cmake/iothub_client/tests/iothubclient_mqtt_e2e/iothubclient_mqtt_e2e_but_better
-    workingDirectory: '$(System.ArtifactsDirectory)'
-    displayName: 'Execute Test'
-    # env:
-    #   IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
-    #   IOTHUB_DEVICE_ID: $(IOTHUB-DEVICE-ID)
-    #   IOTHUB_DEVICE_KEY: $(IOTHUB-DEVICE-KEY)
-    #   IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
-    #   IOTHUB_EVENTHUB_LISTEN_NAME: $(IOTHUB-EVENTHUB-LISTEN-NAME)
-    #   IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
-    #   IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
-    #   IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-PRIVATE-KEY-BASE64)
-    #   IOTHUB_EVENTHUB_CONSUMER_GROUP: $(IOTHUB-EVENTHUB-CONSUMER-GROUP)
-    #   IOTHUB_PARTITION_COUNT: 16
+  - script: |
+      cd $(Build.SourcesDirectory)/testtools/UART_interface/
+      ls
+      . rpi_e2e_env_setup.sh
+      python3 serial_connect.py -i setup.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -s
+      rm setup.txt
+    displayName: 'Setup Environment Variables'
+    env:
+      RASPI_USER: $(RASPI_USER)
+      RASPI_PWD: $(RASPI_PWD)
+      RASPI_PORT: $(RASPI_PORT)
+      IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
+      IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
+      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+      IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
+      IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
+      IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
+      IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
+      IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+      IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
+      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+      PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
 
-  - task: PublishTestResults@2
-    displayName: 'Publish Test Results "**/results-junit.xml"'
-    inputs:
-      testResultsFiles: "**/results-junit.xml"
-      testRunTitle: 'raspberry pi'
+  - script: |
+      cd $(Build.ArtifactStagingDirectory)
+      ls
+      echo $(NEWTIN) | sudo -S chmod -R 777 drop
+      echo $(NEWTIN) | sudo -S setcap cap_net_raw,cap_net_admin+ep drop/$RASPI_TEST_FILE
+      cp drop/$RASPI_TEST_FILE $(Build.SourcesDirectory)/testtools/UART_interface/
+      cd $(Build.SourcesDirectory)/testtools/UART_interface/
+      ls
+      . rpi_input.sh
+      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -t 620
+      rm input.txt
+      unset RASPI_TEST_FILE
+    displayName: 'Execute Test'
+    env:
+      RASPI_USER: $(RASPI_USER)
+      RASPI_PWD: $(RASPI_PWD)
+      RASPI_PORT: $(RASPI_PORT)
+      RASPI_TEST_FILE: iothubclient_amqp_dt_e2e_exe
+      RASPI_SERIAL_TASK: $(RASPI_SERIAL_TASK)
+      RESET_RASPI: $(RESET_RASPI)
+
+- job: 'Run_MQTT_DT_E2E_Test'
+  dependsOn: Run_AMQP_DT_E2E_Test
+  condition: ne('True', variables['ADDITIONAL_TEST'])
+  pool: 
+    name: devicelab-02
+  steps:  
+  - script: |
+      cd $(Build.ArtifactStagingDirectory)
+      ls
+      echo $(NEWTIN) | sudo -S chmod -R 777 drop
+      echo $(NEWTIN) | sudo -S setcap cap_net_raw,cap_net_admin+ep drop/$RASPI_TEST_FILE
+      cp drop/$RASPI_TEST_FILE $(Build.SourcesDirectory)/testtools/UART_interface/
+      cd $(Build.SourcesDirectory)/testtools/UART_interface/
+      ls
+      . rpi_input.sh
+      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -t 620
+      rm input.txt
+      unset RASPI_TEST_FILE
+    displayName: 'Execute Test'
+    env:
+      RASPI_USER: $(RASPI_USER)
+      RASPI_PWD: $(RASPI_PWD)
+      RASPI_PORT: $(RASPI_PORT)
+      RASPI_TEST_FILE: iothubclient_mqtt_dt_e2e_exe
+      RASPI_SERIAL_TASK: $(RASPI_SERIAL_TASK)
+      RESET_RASPI: $(RESET_RASPI)
+
+- job: 'Run_AMQP_DM_E2E_Test'
+  dependsOn: Run_MQTT_DT_E2E_Test
+  condition: ne('True', variables['ADDITIONAL_TEST'])
+  pool: 
+    name: devicelab-02
+  steps:  
+  - script: |
+      cd $(Build.ArtifactStagingDirectory)
+      ls
+      echo $(NEWTIN) | sudo -S chmod -R 777 drop
+      echo $(NEWTIN) | sudo -S setcap cap_net_raw,cap_net_admin+ep drop/$RASPI_TEST_FILE
+      cp drop/$RASPI_TEST_FILE $(Build.SourcesDirectory)/testtools/UART_interface/
+      cd $(Build.SourcesDirectory)/testtools/UART_interface/
+      ls
+      . rpi_input.sh
+      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -t 620 
+      rm input.txt
+      unset RASPI_TEST_FILE
+    displayName: 'Execute Test'
+    env:
+      RASPI_USER: $(RASPI_USER)
+      RASPI_PWD: $(RASPI_PWD)
+      RASPI_PORT: $(RASPI_PORT)
+      RASPI_TEST_FILE: iothubclient_amqp_device_method_e2e_exe
+      RASPI_SERIAL_TASK: $(RASPI_SERIAL_TASK)
+      RESET_RASPI: $(RESET_RASPI)
+
+- job: 'Run_MQTT_DM_E2E_Test'
+  dependsOn: Run_AMQP_DM_E2E_Test
+  condition: ne('True', variables['ADDITIONAL_TEST'])
+  pool: 
+    name: devicelab-02
+  steps:  
+  - script: |
+      cd $(Build.ArtifactStagingDirectory)
+      ls
+      echo $(NEWTIN) | sudo -S chmod -R 777 drop
+      echo $(NEWTIN) | sudo -S setcap cap_net_raw,cap_net_admin+ep drop/$RASPI_TEST_FILE
+      cp drop/$RASPI_TEST_FILE $(Build.SourcesDirectory)/testtools/UART_interface/
+      cd $(Build.SourcesDirectory)/testtools/UART_interface/
+      ls
+      . rpi_input.sh
+      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -t 620 $(RESET_RASPI)
+      rm input.txt
+      unset RASPI_TEST_FILE
+    displayName: 'Execute Test'
+    env:
+      RASPI_USER: $(RASPI_USER)
+      RASPI_PWD: $(RASPI_PWD)
+      RASPI_PORT: $(RASPI_PORT)
+      RASPI_TEST_FILE: iothubclient_mqtt_device_method_e2e_exe
+      RASPI_SERIAL_TASK: $(RASPI_SERIAL_TASK)
+      RESET_RASPI: $(RESET_RASPI)
+
+- job: 'Run_EXTRA_Test'
   dependsOn: Cross_Compile
-  condition: succeeded()
+  # Disabling extra task for now until feedback on use of Library Variables in conditional statements
+  condition: in('True', 'False')
+  pool: 
+    name: devicelab-02
+  steps:
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: drop
+      itemPattern: 'drop/**/*e2e_exe'
+
+  - script: |
+      cd $(Build.SourcesDirectory)/testtools/UART_interface/
+      ls
+      . rpi_e2e_env_setup.sh
+      python3 serial_connect.py -i setup.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -s
+      rm setup.txt
+    displayName: 'Setup Environment Variables'
+    env:
+      RASPI_USER: $(RASPI_USER)
+      RASPI_PWD: $(RASPI_PWD)
+      RASPI_PORT: $(RASPI_PORT)
+      IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
+      IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
+      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+      IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
+      IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
+      IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
+      IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
+      IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+      IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
+      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+      PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+
+  - script: |
+      cd $(Build.ArtifactStagingDirectory)
+      ls
+      echo $(NEWTIN) | sudo -S chmod -R 777 drop
+      echo $(NEWTIN) | sudo -S setcap cap_net_raw,cap_net_admin+ep drop/$RASPI_TEST_FILE
+      cp drop/$RASPI_TEST_FILE $(Build.SourcesDirectory)/testtools/UART_interface/
+      cd $(Build.SourcesDirectory)/testtools/UART_interface/
+      ls
+      . rpi_input.sh
+      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -t 620 $(RESET_RASPI)
+      rm input.txt
+      unset RASPI_TEST_FILE
+    displayName: 'Execute Test'
+    env:
+      RASPI_USER: $(RASPI_USER)
+      RASPI_PWD: $(RASPI_PWD)
+      RASPI_PORT: $(RASPI_PORT)
+      RASPI_TEST_FILE: $(RASPI_TEST_FILE)
+      RASPI_SERIAL_TASK: $(RASPI_SERIAL_TASK)
+      RESET_RASPI: $(RESET_RASPI)
