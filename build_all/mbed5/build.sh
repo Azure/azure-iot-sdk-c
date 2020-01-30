@@ -8,7 +8,7 @@ git submodule update --init --recursive
 rsync -avz --existing ./ mbed-iot-devkit-sdk/components/azure-iot-sdk-c/
 
 sudo npm install -g iotz
-sudo iotz update
+# sudo iotz update
 
 #sudo git checkout -- mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/provisioning_client/adapters/hsm_client_riot.c
 #sudo git checkout -- mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/provisioning_client/deps/RIoT/Reference/DICE/DiceSha256.c
