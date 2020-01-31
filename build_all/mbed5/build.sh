@@ -17,6 +17,7 @@ sudo npm install -g iotz
 #sudo git checkout -- mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/provisioning_client/deps/RIoT/Reference/RIoT/Core/RIoTCrypt/RiotSha256.c
 
 sudo iotz init mbed
+more iotz.json
 sudo iotz compile
 
 cd ..
