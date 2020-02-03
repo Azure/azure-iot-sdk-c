@@ -1,17 +1,4 @@
-
-call npm init -y
-call npm install typescript
-call npm install chai
-call npm install mocha
-call npm install @types/mocha
-call npm install @types/node
-call npm install yargs
-call npm install azure-iot-common
-call npm install azure-iothub
-call npm install @azure/ms-rest-js
-call npm install terminate
-call npm install @azure/event-hubs@^2.1.1
-call npm install azure-iot-digitaltwins-service@pnp-preview
+call npm install
 call dir
 
 call node_modules\.bin\tsc.cmd dt_e2e_test.ts iothub_test_core.ts
