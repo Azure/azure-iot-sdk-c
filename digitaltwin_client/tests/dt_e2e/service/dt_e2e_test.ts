@@ -12,9 +12,9 @@ var assert = require('chai').assert;
 import {
     IotHubGatewayServiceAPIs20190701Preview as DigitalTwinServiceClient,
     IotHubGatewayServiceAPIs20190701PreviewModels as Models
-} from './digitaltwin_service_sdk/iotHubGatewayServiceAPIs20190701Preview';
+} from 'azure-iot-digitaltwins-service/dist/pl/iotHubGatewayServiceAPIs20190701Preview';
 
-import { IoTHubTokenCredentials } from './digitaltwin_service_sdk/iothub_token_credentials'
+import { IoTHubTokenCredentials } from 'azure-iot-digitaltwins-service/dist/auth/iothub_token_credentials'
 import { EventHubClient, EventPosition } from '@azure/event-hubs';
 
 // testDeviceInfo contains the settings for our test device on the IoTHub.
@@ -91,7 +91,7 @@ function GetDigitalTwinServiceClient():DigitalTwinServiceClient {
       baseUri: "https://" + iothubTestCore.getHubnameFromConnectionString(testHubConnectionString)
     }
     
-    const client = new DigitalTwinServiceClient("2019-07-01-preview", creds, opts)
+    const client = new DigitalTwinServiceClient(creds, opts)
     return client
 }
 
@@ -222,7 +222,7 @@ function runTestCommand(testData:CommandTestData, numberInvocationAttempts:numbe
 function verifyPropertySet(done, interfaceToCheck:string, propertyNameToCheck:string, expectedValue:string, numberInvocationAttempts:number) {
     const client:DigitalTwinServiceClient = GetDigitalTwinServiceClient()
   
-    client.digitalTwin.getAllInterfaces(testDeviceInfo.deviceId, function(error, interfaceInfo) {
+    client.digitalTwin.getInterfaces(testDeviceInfo.deviceId, function(error, interfaceInfo) {
         if (error) {
             // An error is not immediately fatal, as there maybe delays between test querying and the device/IoTHub having time 
             // to store the request.  Use a simple polling mechanism.
@@ -274,7 +274,7 @@ function updateProperties(done) {
         }
     }
 
-    client.digitalTwin.updateMultipleInterfaces(testDeviceInfo.deviceId, interfacesPatchInfo, function processUpdate(error, result) {
+    client.digitalTwin.updateInterfaces(testDeviceInfo.deviceId, interfacesPatchInfo, function processUpdate(error, result) {
         if (error) {
             console.error("ERROR:" + error)
             done(error)
@@ -293,7 +293,7 @@ function updateProperties(done) {
 function veryAllInterfacesAreRegistered(done) {
     const client:DigitalTwinServiceClient = GetDigitalTwinServiceClient()
 
-    client.digitalTwin.getAllInterfaces(testDeviceInfo.deviceId, function(error, interfaceInfo) {
+    client.digitalTwin.getInterfaces(testDeviceInfo.deviceId, function(error, interfaceInfo) {
         if (error) {
             console.error("Get digital twin interfaces failed")
             done(error)

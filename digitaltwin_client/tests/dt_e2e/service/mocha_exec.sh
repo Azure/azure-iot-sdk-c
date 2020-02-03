@@ -10,7 +10,8 @@ npm install azure-iot-common
 npm install azure-iothub
 npm install @azure/ms-rest-js 
 npm install terminate
-npm install @azure/event-hubs
+npm install @azure/event-hubs@^2.1.1
+npm install azure-iot-digitaltwins-service@pnp-preview
 
 node_modules\.bin\tsc.cmd dt_e2e_test.ts iothub_test_core.ts
 
