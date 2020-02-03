@@ -1,0 +1,27 @@
+{
+  "name": "service",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@azure/event-hubs": "^2.1.1",
+    "@azure/ms-rest-js": "^2.0.5",
+    "@types/mocha": "^7.0.1",
+    "@types/node": "^13.7.0",
+    "azure-iot-common": "^1.12.0-preview.2",
+    "azure-iot-digitaltwins-service": "^1.0.0-preview.2",
+    "azure-iothub": "^1.11.2",
+    "chai": "^4.2.0",
+    "mocha": "^6.2.2",
+    "terminate": "^2.1.2",
+    "typescript": "^3.7.5",
+    "yargs": "^15.1.0"
+  },
+  "devDependencies": {},
+  "description": ""
+}
