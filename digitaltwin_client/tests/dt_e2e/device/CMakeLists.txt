@@ -14,6 +14,7 @@ set(${theseTestsName}_test_files
     dt_e2e_properties.c
     dt_e2e_util.c
     main.c
+    ../../../../certs/certs.c
 )
 
 set(${theseTestsName}_test_h_files
@@ -22,6 +23,11 @@ set(${theseTestsName}_test_h_files
     dt_e2e_telemetry.h
     dt_e2e_util.h
 )
+
+if(${use_sample_trusted_cert})
+    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
+    include_directories(../../../../certs)
+endif()
 
 include_directories(. ${SHARED_UTIL_INC_FOLDER} ${IOTHUB_CLIENT_INC_FOLDER} ${DIGITALTWIN_CLIENT_INC_FOLDER} ${IOTHUB_TEST_INC_FOLDER})
 
