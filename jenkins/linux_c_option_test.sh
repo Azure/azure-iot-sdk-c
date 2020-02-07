@@ -59,7 +59,7 @@ declare -a arr=(
     "-Drun_e2e_tests=ON -Duse_baltimore_cert=ON"
     "-Duse_prov_client:BOOL=ON -Dhsm_type_symm_key:BOOL=ON"
     "-Duse_prov_client:BOOL=ON -Dhsm_type_x509:BOOL=ON"
-    "-Duse_prov_client:BOOL=ON -hsm_type_sastoken:BOOL=ON"
+    "-Duse_prov_client:BOOL=ON -Dhsm_type_sastoken:BOOL=ON"
 )
 
 for item in "${arr[@]}"
@@ -69,7 +69,7 @@ do
     pushd $build_folder
 
     echo "executing cmake/make with options <<$item>>"
-    cmake $build_root "$item"
+    cmake $build_root $item
 
     make --jobs=$MAKE_CORES
 done
