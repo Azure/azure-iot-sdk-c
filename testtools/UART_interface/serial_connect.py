@@ -9,12 +9,14 @@ try:
     import testtools.UART_interface.serial_commands_dict as commands_dict
     import testtools.UART_interface.rpi_uart_interface
     import testtools.UART_interface.mxchip_uart_interface
+    import testtools.UART_interface.esp_arduino_uart_interface
 except:
     import azure_test_firmware_errors
     import serial_settings
     import serial_commands_dict as commands_dict
     import rpi_uart_interface
     import mxchip_uart_interface
+    import esp_arduino_uart_interface
 
 # Note: commands on MXCHIP have line endings with \r AND \n
 # Notes: This is designed to be used as a command line script with args (for automation purposes) to communicate over serial to a Microsoft mxchip device.
@@ -184,8 +186,10 @@ def run():
 
     if 'rpi' in serial_settings.device_type or 'raspi' in serial_settings.device_type:
         uart = rpi_uart_interface.rpi_uart_interface()
-    else:
+    elif 'mxchip' in serial_settings.device_type:
         uart = mxchip_uart_interface.mxchip_uart_interface()
+    elif 'esp32' in serial_settings.device_type or 'esp8266' in serial_settings.device_type:
+        uart = esp_arduino_uart_interface.esp_uart_interface()
 
 
     uart.write_read(ser, serial_settings.input_file, serial_settings.output_file)
