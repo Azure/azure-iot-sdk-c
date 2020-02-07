@@ -92,8 +92,6 @@ static TEST_MUTEX_HANDLE g_testByTest;
 
 TEST_DEFINE_ENUM_TYPE(SERIALIZER_RESULT, SERIALIZER_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE(CODEFIRST_RESULT, CODEFIRST_RESULT_VALUES);
-TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
-IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 
 MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
@@ -232,7 +230,7 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         (void)umocktypes_charptr_register_types();
         (void)umocktypes_stdint_register_types();
 
-        REGISTER_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT);
+        REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_RESULT, int);
 
         REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_LL_HANDLE, void*);
@@ -808,7 +806,7 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
 
         ///assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, r);
+        ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, r);
 
         ///clean
         IoTHubDeviceTwin_DestroybasicModel_WithData15(model);
@@ -845,7 +843,7 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
                 IOTHUB_CLIENT_RESULT r = IoTHubDeviceTwin_SendReportedState_Impl(model, reportedStateCallback, (void*)1);
 
                 ///assert
-                ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, r);
+                ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_ERROR, r);
             }
         }
 
@@ -870,7 +868,7 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         IOTHUB_CLIENT_RESULT r = IoTHubDeviceTwin_SendReportedState_Impl(model, reportedStateCallback, (void*)1);
 
         ///assert
-        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, r);
+        ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_ERROR, r);
 
 
         ///clean
@@ -911,7 +909,7 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
 
         ///assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, r);
+        ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, r);
 
         ///clean
         IoTHubDeviceTwin_LL_DestroybasicModel_WithData15(model);
@@ -948,7 +946,7 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
                 IOTHUB_CLIENT_RESULT r = IoTHubDeviceTwin_SendReportedState_Impl(model, reportedStateCallback, (void*)1);
 
                 ///assert
-                ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, r);
+                ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_ERROR, r);
             }
         }
 
@@ -973,7 +971,7 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         IOTHUB_CLIENT_RESULT r = IoTHubDeviceTwin_SendReportedState_Impl(model, reportedStateCallback, (void*)1);
 
         ///assert
-        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, r);
+        ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_ERROR, r);
 
 
         ///clean

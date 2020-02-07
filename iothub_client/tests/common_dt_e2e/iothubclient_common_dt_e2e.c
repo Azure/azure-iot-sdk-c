@@ -35,9 +35,6 @@
 #define MAX_CLOUD_TRAVEL_TIME  120.0    /* 2 minutes */
 #define BUFFER_SIZE            37
 
-TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
-TEST_DEFINE_ENUM_TYPE(DEVICE_TWIN_UPDATE_STATE, DEVICE_TWIN_UPDATE_STATE_VALUES);
-
 typedef struct DEVICE_REPORTED_DATA_TAG
 {
     char *string_property;
@@ -205,7 +202,7 @@ static void setoption_on_device_or_module(const char * optionName, const void * 
         result = IoTHubDeviceClient_SetOption(iothub_deviceclient_handle, optionName, optionData);
     }
 
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, errorMessage);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, errorMessage);
 }
 
 static void dt_e2e_create_client_handle(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
@@ -270,7 +267,7 @@ static void sendreportedstate_on_device_or_module(const char* buffer, DEVICE_REP
         result = IoTHubDeviceClient_SendReportedState(iothub_deviceclient_handle, (unsigned char *) buffer, bufferLen, reportedStateCallback, device);
     }
 
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "IoTHub(Device|Module)Client_SendReportedState failed");
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "IoTHub(Device|Module)Client_SendReportedState failed");
 }
 
 static void setdevicetwincallback_on_device_or_module(IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK twinCallback, DEVICE_DESIRED_DATA *device)
@@ -286,7 +283,7 @@ static void setdevicetwincallback_on_device_or_module(IOTHUB_CLIENT_DEVICE_TWIN_
         result = IoTHubDeviceClient_SetDeviceTwinCallback(iothub_deviceclient_handle, twinCallback, device);
     }
 
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "IoTHub(Device|Module)Client_SetDeviceTwinCallback failed");
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "IoTHub(Device|Module)Client_SetDeviceTwinCallback failed");
 }
 
 static void sendeventasync_on_device_or_module(IOTHUB_MESSAGE_HANDLE msgHandle)
@@ -302,7 +299,7 @@ static void sendeventasync_on_device_or_module(IOTHUB_MESSAGE_HANDLE msgHandle)
         result = IoTHubDeviceClient_SendEventAsync(iothub_deviceclient_handle, msgHandle, NULL, NULL);
     }
 
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "SendEventAsync failed");
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "SendEventAsync failed");
 }
 
 

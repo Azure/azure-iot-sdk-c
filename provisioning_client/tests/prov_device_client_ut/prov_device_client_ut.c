@@ -128,9 +128,6 @@ static const char* TEST_CONST_CHAR_PTR = "test_string";
 
 static void* TEST_USER_CONTEXT = (void*)0x1598;
 
-TEST_DEFINE_ENUM_TYPE(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
-IMPLEMENT_UMOCK_C_ENUM_TYPE(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
-
 typedef struct TEST_PROV_DEVICE_INSTANCE_TAG
 {
     PROV_DEVICE_LL_HANDLE ProvDeviceLLHandle;
@@ -485,7 +482,7 @@ TEST_FUNCTION(Prov_Device_Register_Device_handle_NULL_fail)
     PROV_DEVICE_RESULT prov_device_result = Prov_Device_Register_Device(NULL, TEST_PROV_DEVICE_CLIENT_REGISTER_DEVICE_CALLBACK, TEST_USER_CONTEXT, TEST_PROV_DEVICE_CLIENT_REGISTER_STATUS_CALLBACK, TEST_USER_CONTEXT);
 
     //assert
-    ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_INVALID_ARG, prov_device_result);
+    ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_INVALID_ARG, prov_device_result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -501,7 +498,7 @@ TEST_FUNCTION(Prov_Device_Register_Device_callback_NULL_fail)
     PROV_DEVICE_RESULT prov_device_result = Prov_Device_Register_Device(TEST_PROV_DEVICE_HANDLE, NULL, TEST_USER_CONTEXT, TEST_PROV_DEVICE_CLIENT_REGISTER_STATUS_CALLBACK, TEST_USER_CONTEXT);
 
     //assert
-    ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_INVALID_ARG, prov_device_result);
+    ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_INVALID_ARG, prov_device_result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -531,7 +528,7 @@ TEST_FUNCTION(Prov_Device_Register_Device_success)
     PROV_DEVICE_RESULT prov_device_result = Prov_Device_Register_Device(prov_device_handle, TEST_PROV_DEVICE_CLIENT_REGISTER_DEVICE_CALLBACK, TEST_USER_CONTEXT, TEST_PROV_DEVICE_CLIENT_REGISTER_STATUS_CALLBACK, TEST_USER_CONTEXT);
 
     //assert
-    ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_device_result);
+    ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_OK, prov_device_result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -582,7 +579,7 @@ TEST_FUNCTION(Prov_Device_Register_Device_fail)
         PROV_DEVICE_RESULT result = Prov_Device_Register_Device(prov_device_handle, TEST_PROV_DEVICE_CLIENT_REGISTER_DEVICE_CALLBACK, TEST_USER_CONTEXT, TEST_PROV_DEVICE_CLIENT_REGISTER_STATUS_CALLBACK, TEST_USER_CONTEXT);
 
         // assert
-        ASSERT_ARE_NOT_EQUAL(PROV_DEVICE_RESULT, result, PROV_DEVICE_RESULT_OK, tmp_msg);
+        ASSERT_ARE_NOT_EQUAL(int, result, PROV_DEVICE_RESULT_OK, tmp_msg);
     }
 
     //cleanup
@@ -601,7 +598,7 @@ TEST_FUNCTION(Prov_Device_SetOption_handle_NULL_fail)
     PROV_DEVICE_RESULT prov_device_result = Prov_Device_SetOption(NULL, OPTION_HTTP_PROXY, &TEST_HTTP_PROXY_OPTIONS);
 
     //assert
-    ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_INVALID_ARG, prov_device_result);
+    ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_INVALID_ARG, prov_device_result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -617,7 +614,7 @@ TEST_FUNCTION(Prov_Device_SetOption_option_name_NULL_fail)
     PROV_DEVICE_RESULT prov_result = Prov_Device_SetOption(TEST_PROV_DEVICE_HANDLE, NULL, &TEST_HTTP_PROXY_OPTIONS);
 
     //assert
-    ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_INVALID_ARG, prov_result);
+    ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_INVALID_ARG, prov_result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -633,7 +630,7 @@ TEST_FUNCTION(Prov_Device_SetOption_value_NULL_fail)
     PROV_DEVICE_RESULT prov_result = Prov_Device_SetOption(TEST_PROV_DEVICE_HANDLE, OPTION_HTTP_PROXY, NULL);
 
     //assert
-    ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_INVALID_ARG, prov_result);
+    ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_INVALID_ARG, prov_result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -659,7 +656,7 @@ TEST_FUNCTION(Prov_Device_SetOption_success)
     PROV_DEVICE_RESULT prov_result = Prov_Device_SetOption(prov_device_handle, OPTION_HTTP_PROXY, &TEST_HTTP_PROXY_OPTIONS);
 
     //assert
-    ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result);
+    ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_OK, prov_result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup

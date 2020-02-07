@@ -4298,7 +4298,7 @@ TEST_FUNCTION(IoTHubTransportHttp_SendMessageDisposition_with_NULL_handle_fails)
     IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_SendMessageDisposition(NULL, IOTHUBMESSAGE_ACCEPTED);
 
     ///assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_ERROR, result);
     mocks.AssertActualAndExpectedCalls();
 }
 
@@ -4339,7 +4339,7 @@ TEST_FUNCTION(IoTHubTransportHttp_SendMessageDisposition_with_NULL_handle_data_f
     IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_SendMessageDisposition(NULL, IOTHUBMESSAGE_ACCEPTED);
 
     ///assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_ERROR, result);
     mocks.AssertActualAndExpectedCalls();
 }
 
@@ -4358,7 +4358,7 @@ TEST_FUNCTION(IoTHubTransportHttp_SendMessageDisposition_with_NULL_message_data_
     IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_SendMessageDisposition(test_message, IOTHUBMESSAGE_ACCEPTED);
 
     ///assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_ERROR, result);
     mocks.AssertActualAndExpectedCalls();
 }
 
@@ -4379,7 +4379,7 @@ TEST_FUNCTION(IoTHubTransportHttp_SendMessageDisposition_with_NULL_context_data_
     IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_SendMessageDisposition(test_message, IOTHUBMESSAGE_ACCEPTED);
 
     ///assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_ERROR, result);
     mocks.AssertActualAndExpectedCalls();
 }
 
@@ -4403,7 +4403,7 @@ TEST_FUNCTION(IoTHubTransportHttp_SendMessageDisposition_with_NULL_TRANSPORT_dat
     IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_SendMessageDisposition(test_message, IOTHUBMESSAGE_ACCEPTED);
 
     ///assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_ERROR, result);
     mocks.AssertActualAndExpectedCalls();
 }
 
@@ -4427,7 +4427,7 @@ TEST_FUNCTION(IoTHubTransportHttp_SendMessageDisposition_with_NULL_device_data_f
     IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_SendMessageDisposition(test_message, IOTHUBMESSAGE_ACCEPTED);
 
     ///assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_ERROR, result);
     mocks.AssertActualAndExpectedCalls();
 }
 
@@ -11288,7 +11288,7 @@ TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_InvalidHandleArgument_fail)
     IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_GetSendStatus(NULL, &status);
 
     // assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_INVALID_ARG);
+    ASSERT_ARE_EQUAL(int, result, IOTHUB_CLIENT_INVALID_ARG);
 
     mocks.AssertActualAndExpectedCalls();
 
@@ -11310,7 +11310,7 @@ TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_InvalidStatusArgument_fail)
     IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_GetSendStatus(devHandle, NULL);
 
     // assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_INVALID_ARG);
+    ASSERT_ARE_EQUAL(int, result, IOTHUB_CLIENT_INVALID_ARG);
 
     mocks.AssertActualAndExpectedCalls();
 
@@ -11341,8 +11341,8 @@ TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_empty_waitingToSend_and_empty_ev
     IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_GetSendStatus(devHandle, &status);
 
     // assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_OK);
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_STATUS, status, IOTHUB_CLIENT_SEND_STATUS_IDLE);
+    ASSERT_ARE_EQUAL(int, result, IOTHUB_CLIENT_OK);
+    ASSERT_ARE_EQUAL(int, status, IOTHUB_CLIENT_SEND_STATUS_IDLE);
 
     mocks.AssertActualAndExpectedCalls();
 
@@ -11377,8 +11377,8 @@ TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_waitingToSend_not_empty_success)
     IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_GetSendStatus(devHandle, &status);
 
     // assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_OK);
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_STATUS, status, IOTHUB_CLIENT_SEND_STATUS_BUSY);
+    ASSERT_ARE_EQUAL(int, result, IOTHUB_CLIENT_OK);
+    ASSERT_ARE_EQUAL(int, status, IOTHUB_CLIENT_SEND_STATUS_BUSY);
 
     mocks.AssertActualAndExpectedCalls();
 
@@ -11413,7 +11413,7 @@ TEST_FUNCTION(IoTHubTransportHttp_GetSendStatus_deviceData_is_not_found_fails)
     IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_GetSendStatus(devHandle, &status);
 
     // assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_INVALID_ARG);
+    ASSERT_ARE_EQUAL(int, result, IOTHUB_CLIENT_INVALID_ARG);
 
     mocks.AssertActualAndExpectedCalls();
 
@@ -12104,7 +12104,7 @@ TEST_FUNCTION(IoTHubTransportHttp_SetOption_with_NULL_handle_fails)
     auto result = IoTHubTransportHttp_SetOption(NULL, "someOption", "someValue");
 
     ///assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_INVALID_ARG, result);
 
     ///cleanup
 }
@@ -12121,7 +12121,7 @@ TEST_FUNCTION(IoTHubTransportHttp_SetOption_with_NULL_optionName_fails)
     auto result = IoTHubTransportHttp_SetOption(handle, NULL, "someValue");
 
     ///assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_INVALID_ARG, result);
     mocks.AssertActualAndExpectedCalls();
 
     ///cleanup
@@ -12140,7 +12140,7 @@ TEST_FUNCTION(IoTHubTransportHttp_SetOption_with_NULL_value_fails)
     auto result = IoTHubTransportHttp_SetOption(handle, "someOption", NULL);
 
     ///assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_INVALID_ARG, result);
     mocks.AssertActualAndExpectedCalls();
 
     ///cleanup
@@ -12162,7 +12162,7 @@ TEST_FUNCTION(IoTHubTransportHttp_SetOption_succeeds_when_HTTPAPIEX_succeeds)
     auto result = IoTHubTransportHttp_SetOption(handle, "someOption", (void*)42);
 
     ///assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
     mocks.AssertActualAndExpectedCalls();
 
     ///cleanup
@@ -12185,7 +12185,7 @@ TEST_FUNCTION(IoTHubTransportHttp_SetOption_fails_when_HTTPAPIEX_returns_HTTPAPI
     auto result = IoTHubTransportHttp_SetOption(handle, "someOption", (void*)42);
 
     ///assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_INVALID_ARG, result);
     mocks.AssertActualAndExpectedCalls();
 
     ///cleanup
@@ -12208,7 +12208,7 @@ TEST_FUNCTION(IoTHubTransportHttp_SetOption_fails_when_HTTPAPIEX_returns_HTTPAPI
     auto result = IoTHubTransportHttp_SetOption(handle, "someOption", (void*)42);
 
     ///assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_ERROR, result);
     mocks.AssertActualAndExpectedCalls();
 
     ///cleanup
@@ -12231,7 +12231,7 @@ TEST_FUNCTION(IoTHubTransportHttp_SetOption_fails_when_HTTPAPIEX_returns_any_oth
     auto result = IoTHubTransportHttp_SetOption(handle, "someOption", (void*)42);
 
     ///assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_ERROR, result);
     mocks.AssertActualAndExpectedCalls();
 
     ///cleanup

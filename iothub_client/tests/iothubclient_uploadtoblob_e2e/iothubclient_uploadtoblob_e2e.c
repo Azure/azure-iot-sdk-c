@@ -50,11 +50,6 @@ static LOCK_HANDLE updateBlobTestLock;
 #define IOTHUB_UPLOADTOBLOB_TIMEOUT_SEC 120
 #define TEST_MAX_SIMULTANEOUS_UPLOADS 5
 
-
-TEST_DEFINE_ENUM_TYPE(UPLOADTOBLOB_CALLBACK_STATUS, IOTHUB_CLIENT_FILE_UPLOAD_RESULT_VALUES);
-
-TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
-
 #define UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE "hello_world.txt"
 #define UPLOADTOBLOB_E2E_TEST_MULTI_BLOCK_DESTINATION_FILE "hello_world_multiblock.txt"
 #define UPLOADTOBLOB_E2E_TEST_DATA (const unsigned char*)"e2e_UPLOADTOBLOB_CALLBACK test data"
@@ -126,7 +121,7 @@ void uploadToBlobCallback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT fileUploadResult, voi
         LogInfo("uploadToBlobCallback(%s), userContextCallback(%p)", MU_ENUM_TO_STRING(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, fileUploadResult), userContextCallback);
 
         UPLOADTOBLOB_CALLBACK_STATUS* callbackStatus = (UPLOADTOBLOB_CALLBACK_STATUS*)userContextCallback;
-        ASSERT_ARE_EQUAL(UPLOADTOBLOB_CALLBACK_STATUS, *callbackStatus, UPLOADTOBLOB_CALLBACK_PENDING);
+        ASSERT_ARE_EQUAL(int, *callbackStatus, UPLOADTOBLOB_CALLBACK_PENDING);
 
         if (fileUploadResult == FILE_UPLOAD_OK)
         {
@@ -211,20 +206,20 @@ void e2e_uploadtoblob_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACC
     if (accountAuthMethod == IOTHUB_ACCOUNT_AUTH_X509)
     {
         result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_CERT, deviceToUse->certificate);
-        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
+        ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "Could not set the device x509 certificate");
         result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication);
-        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
+        ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "Could not set the device x509 privateKey");
     }
 
 #if defined(__APPLE__) || defined(AZIOT_LINUX)
     bool curl_verbose = true;
     result = IoTHubClient_SetOption(iotHubClientHandle, OPTION_CURL_VERBOSE, &curl_verbose);
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set curl_verbose opt");
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "Could not set curl_verbose opt");
 #endif
 	
     UPLOADTOBLOB_CALLBACK_STATUS uploadToBlobStatus = UPLOADTOBLOB_CALLBACK_PENDING;
     result = IoTHubClient_UploadToBlobAsync(iotHubClientHandle, UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE, UPLOADTOBLOB_E2E_TEST_DATA, strlen((const char*)UPLOADTOBLOB_E2E_TEST_DATA), uploadToBlobCallback, &uploadToBlobStatus);
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
 
     poll_for_upload_completion(&uploadToBlobStatus);
     check_upload_result(uploadToBlobStatus);
@@ -239,7 +234,7 @@ IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT uploadToBlobGetDataEx(IOTHUB_CLIENT_FI
     LogInfo("uploadToBlobCallback(%s), call number(%d)", MU_ENUM_TO_STRING(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, result), uploadBlobNumber);
 
     UPLOADTOBLOB_CALLBACK_STATUS* callbackStatus = (UPLOADTOBLOB_CALLBACK_STATUS*)context;
-    ASSERT_ARE_EQUAL(UPLOADTOBLOB_CALLBACK_STATUS, *callbackStatus, UPLOADTOBLOB_CALLBACK_PENDING);
+    ASSERT_ARE_EQUAL(int, *callbackStatus, UPLOADTOBLOB_CALLBACK_PENDING);
     ASSERT_ARE_EQUAL(int, (int)FILE_UPLOAD_OK, (int)result);
 
     static char* uploadData0 = "AAA-";
@@ -330,7 +325,7 @@ void e2e_uploadtoblob_multiblock_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     {
         result = IoTHubClient_UploadMultipleBlocksToBlobAsync(iotHubClientHandle, UPLOADTOBLOB_E2E_TEST_MULTI_BLOCK_DESTINATION_FILE, uploadToBlobGetData, &uploadToBlobStatus);
     }
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
 
     poll_for_upload_completion(&uploadToBlobStatus);
     check_upload_result(uploadToBlobStatus);
@@ -356,7 +351,7 @@ void e2e_uploadtoblob_test_multiple_simultaneous_uploads(IOTHUB_CLIENT_TRANSPORT
         const char* uploadFileName = uploadFileNameList[i];
         uploadToBlobStatus[i] = UPLOADTOBLOB_CALLBACK_PENDING;
         result = IoTHubClient_UploadToBlobAsync(iotHubClientHandle, uploadFileName, UPLOADTOBLOB_E2E_TEST_DATA, strlen(uploadFileName), uploadToBlobCallback, &uploadToBlobStatus[i]);
-        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
+        ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
     }
 
     time_t beginOperation = time(NULL);

@@ -101,9 +101,6 @@ extern "C" {
 }
 #endif
 
-TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
-IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
-
 #define TEST_DEVICE_ID "theidofTheDevice"
 #define TEST_DEVICE_KEY "theKeyoftheDevice"
 #define TEST_IOTHUBNAME "theNameoftheIotHub"
@@ -577,7 +574,7 @@ TEST_FUNCTION(IoTHubTransport_StartWorkerThread_handle_NULL_fail)
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_StartWorkerThread(NULL, TEST_IOTHUB_CLIENT_CORE_HANDLE1, clientDoWork);
 
     //assert
-    ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_OK);
+    ASSERT_ARE_NOT_EQUAL(int, result, IOTHUB_CLIENT_OK);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -594,7 +591,7 @@ TEST_FUNCTION(IoTHubTransport_StartWorkerThread_core_handle_NULL_fail)
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_StartWorkerThread(handle, NULL, clientDoWork);
 
     //assert
-    ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_OK);
+    ASSERT_ARE_NOT_EQUAL(int, result, IOTHUB_CLIENT_OK);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -618,7 +615,7 @@ TEST_FUNCTION(IoTHubTransport_StartWorkerThread_success)
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_StartWorkerThread(handle, TEST_IOTHUB_CLIENT_CORE_HANDLE1, clientDoWork);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_OK);
+    ASSERT_ARE_EQUAL(int, result, IOTHUB_CLIENT_OK);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -642,7 +639,7 @@ TEST_FUNCTION(IoTHubTransport_StartWorkerThread_client_call_twice_success)
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_StartWorkerThread(handle, TEST_IOTHUB_CLIENT_CORE_HANDLE1, clientDoWork);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_OK);
+    ASSERT_ARE_EQUAL(int, result, IOTHUB_CLIENT_OK);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -667,7 +664,7 @@ TEST_FUNCTION(IoTHubTransport_StartWorkerThread_client_call_new_client_success)
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_StartWorkerThread(handle, TEST_IOTHUB_CLIENT_CORE_HANDLE2, clientDoWork);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_OK);
+    ASSERT_ARE_EQUAL(int, result, IOTHUB_CLIENT_OK);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup

@@ -187,9 +187,6 @@ static IOTHUB_CLIENT_RESULT my_IoTHubClient_LL_SendReportedState(IOTHUB_CLIENT_L
     return IOTHUB_CLIENT_OK;
 }
 
-TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
-IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
-
 BEGIN_TEST_SUITE(serializer_dt_int)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
@@ -670,7 +667,7 @@ BEGIN_TEST_SUITE(serializer_dt_int)
         IOTHUB_CLIENT_RESULT r = IoTHubDeviceTwin_SendReportedStatebasicModel_WithData15(modelWithData, sendReportedStateCallback, (void*)0x44);
 
         ///assert
-        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, r);
+        ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, r);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         /*compare 2 jsons*/
         JSON_Value* expectedJson = json_parse_string(expectedOutputJsonAsString);
@@ -711,7 +708,7 @@ BEGIN_TEST_SUITE(serializer_dt_int)
         IOTHUB_CLIENT_RESULT r = IoTHubDeviceTwin_LL_SendReportedStatebasicModel_WithData15(modelWithData, sendReportedStateCallback, (void*)0x44);
 
         ///assert
-        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, r);
+        ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, r);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         /*compare 2 jsons*/
         JSON_Value* expectedJson = json_parse_string(expectedOutputJsonAsString);

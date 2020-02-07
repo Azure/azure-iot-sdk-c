@@ -86,12 +86,6 @@ static const char* TEST_PROPERTY_VALUE = "property_value";
 static IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA TEST_DIAGNOSTIC_DATA = { "12345678",  "1506054179"};
 static IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA TEST_DIAGNOSTIC_DATA2 = { "87654321", "1506054179.100" };
 
-TEST_DEFINE_ENUM_TYPE(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
-IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
-
-TEST_DEFINE_ENUM_TYPE(IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_CONTENT_TYPE_VALUES);
-IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_CONTENT_TYPE_VALUES);
-
 MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
@@ -148,7 +142,7 @@ static void set_string_NULL_handle_fails_impl(PFN_MESSAGE_SET_STRING pfnSetMessa
     IOTHUB_MESSAGE_RESULT result = pfnSetMessageString(NULL, test_value);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_INVALID_ARG, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -164,7 +158,7 @@ static void set_string_NULL_string_fails_impl(PFN_MESSAGE_SET_STRING pfnSetMessa
     IOTHUB_MESSAGE_RESULT result = pfnSetMessageString(h, NULL);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_INVALID_ARG, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -185,7 +179,7 @@ static void set_string_succeeds_impl(PFN_MESSAGE_SET_STRING pfnSetMessageString,
     IOTHUB_MESSAGE_RESULT result = pfnSetMessageString(h, test_value);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -206,7 +200,7 @@ static void set_string_string_already_allocated_succeeds_impl(PFN_MESSAGE_SET_ST
     result = pfnSetMessageString(h, test_value);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -237,7 +231,7 @@ static void get_string_succeeds_impl(PFN_MESSAGE_SET_STRING pfnSetMessageString,
     // arrange
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromString(TEST_STRING_VALUE);
     IOTHUB_MESSAGE_RESULT msgResult = pfnSetMessageString(h, test_value);
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, msgResult);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_OK, msgResult);
     umock_c_reset_all_calls();
 
     //act
@@ -351,7 +345,7 @@ TEST_FUNCTION(IoTHubMessage_CreateFromByteArray_happy_path)
 
     //assert
     ASSERT_IS_NOT_NULL(h);
-    ASSERT_ARE_EQUAL(IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_BYTEARRAY, IoTHubMessage_GetContentType(h) );
+    ASSERT_ARE_EQUAL(int, IOTHUBMESSAGE_BYTEARRAY, IoTHubMessage_GetContentType(h) );
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -461,7 +455,7 @@ TEST_FUNCTION(IoTHubMessage_CreateFromString_happy_path)
 
     //assert
     ASSERT_IS_NOT_NULL(h);
-    ASSERT_ARE_EQUAL(IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_STRING, IoTHubMessage_GetContentType(h));
+    ASSERT_ARE_EQUAL(int, IOTHUBMESSAGE_STRING, IoTHubMessage_GetContentType(h));
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -657,7 +651,7 @@ TEST_FUNCTION(IoTHubMessage_GetByteArray_happy_path)
     IOTHUB_MESSAGE_RESULT r = IoTHubMessage_GetByteArray(h, &byteArray, &size);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, r);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_OK, r);
     ASSERT_ARE_EQUAL(uint8_t, c[0], byteArray[0]);
     ASSERT_ARE_EQUAL(size_t, 1, size);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -677,7 +671,7 @@ TEST_FUNCTION(IoTHubMessage_GetByteArray_with_NULL_handle_fails)
     IOTHUB_MESSAGE_RESULT r = IoTHubMessage_GetByteArray(NULL, &byteArray, &size);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, r);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_INVALID_ARG, r);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -695,7 +689,7 @@ TEST_FUNCTION(IoTHubMessage_GetByteArray_with_NULL_byteArray_fails)
     IOTHUB_MESSAGE_RESULT r = IoTHubMessage_GetByteArray(h, NULL, &size);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, r);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_INVALID_ARG, r);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     ///cleanup
@@ -715,7 +709,7 @@ TEST_FUNCTION(IoTHubMessage_GetByteArray_with_STRING_fails)
     IOTHUB_MESSAGE_RESULT r = IoTHubMessage_GetByteArray(h, &byteArray, &size);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, r);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_INVALID_ARG, r);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     ///cleanup
@@ -905,7 +899,7 @@ TEST_FUNCTION(IoTHubMessage_GetContentType_with_NULL_handle_fails)
     IOTHUBMESSAGE_CONTENT_TYPE r = IoTHubMessage_GetContentType(NULL);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_UNKNOWN, r);
+    ASSERT_ARE_EQUAL(int, IOTHUBMESSAGE_UNKNOWN, r);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -974,7 +968,7 @@ TEST_FUNCTION(IoTHubMessage_SetMessageId_NULL_handle_Fails)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetMessageId(NULL, TEST_MESSAGE_ID);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_INVALID_ARG, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -991,7 +985,7 @@ TEST_FUNCTION(IoTHubMessage_SetMessageId_NULL_MessageId_Fails)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetMessageId(h, NULL);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_INVALID_ARG, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1011,7 +1005,7 @@ TEST_FUNCTION(IoTHubMessage_SetMessageId_SUCCEED)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetMessageId(h, TEST_MESSAGE_ID);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1033,7 +1027,7 @@ TEST_FUNCTION(IoTHubMessage_SetMessageId_MessageId_Not_NULL_SUCCEED)
     result = IoTHubMessage_SetMessageId(h, TEST_MESSAGE_ID2);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1079,7 +1073,7 @@ TEST_FUNCTION(IoTHubMessage_GetMessageId_SUCCEED)
     // arrange
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromString(TEST_STRING_VALUE);
     (void)IoTHubMessage_SetMessageId(h, TEST_MESSAGE_ID);
-    //ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, msgResult);
+    //ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_OK, msgResult);
     umock_c_reset_all_calls();
 
     //act
@@ -1156,7 +1150,7 @@ TEST_FUNCTION(IoTHubMessage_SetCorrelationId_NULL_CorrelationId_Fails)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetCorrelationId(h, NULL);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_INVALID_ARG, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1176,7 +1170,7 @@ TEST_FUNCTION(IoTHubMessage_SetCorrelationId_SUCCEED)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetCorrelationId(h, TEST_MESSAGE_ID);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1198,7 +1192,7 @@ TEST_FUNCTION(IoTHubMessage_SetCorrelationId_CorrelationId_Not_NULL_SUCCEED)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetCorrelationId(h, TEST_MESSAGE_ID2);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1218,7 +1212,7 @@ TEST_FUNCTION(IoTHubMessage_SetContentTypeSystemProperty_SUCCEED)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentTypeSystemProperty(h, TEST_CONTENT_TYPE);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1240,7 +1234,7 @@ TEST_FUNCTION(IoTHubMessage_SetContentTypeSystemProperty_Not_NULL_SUCCEED)
     result = IoTHubMessage_SetContentTypeSystemProperty(h, TEST_CONTENT_TYPE);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1257,7 +1251,7 @@ TEST_FUNCTION(IoTHubMessage_SetContentTypeSystemProperty_NULL_handle_Fails)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentTypeSystemProperty(NULL, TEST_CONTENT_TYPE);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_INVALID_ARG, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1275,7 +1269,7 @@ TEST_FUNCTION(IoTHubMessage_SetContentTypeSystemProperty_NULL_contentType_Fails)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentTypeSystemProperty(h, NULL);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_INVALID_ARG, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1308,7 +1302,7 @@ TEST_FUNCTION(IoTHubMessage_SetContentTypeSystemProperty_Fails)
         IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentTypeSystemProperty(h, TEST_CONTENT_TYPE);
 
         //assert
-        ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_ERROR, result, tmp_msg);
+        ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_ERROR, result, tmp_msg);
     }
 
     //cleanup
@@ -1329,7 +1323,7 @@ TEST_FUNCTION(IoTHubMessage_SetContentEncodingSystemProperty_SUCCEED)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentEncodingSystemProperty(h, TEST_CONTENT_ENCODING);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1351,7 +1345,7 @@ TEST_FUNCTION(IoTHubMessage_SetContentEncodingSystemProperty_Not_NULL_SUCCEED)
     result = IoTHubMessage_SetContentEncodingSystemProperty(h, TEST_CONTENT_ENCODING);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1368,7 +1362,7 @@ TEST_FUNCTION(IoTHubMessage_SetContentEncodingSystemProperty_NULL_handle_Fails)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentEncodingSystemProperty(NULL, TEST_CONTENT_ENCODING);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_INVALID_ARG, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1386,7 +1380,7 @@ TEST_FUNCTION(IoTHubMessage_SetContentEncodingSystemProperty_NULL_contentType_Fa
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentEncodingSystemProperty(h, NULL);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_INVALID_ARG, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1419,7 +1413,7 @@ TEST_FUNCTION(IoTHubMessage_SetContentEncodingSystemProperty_Fails)
         IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetContentEncodingSystemProperty(h, TEST_CONTENT_ENCODING);
 
         //assert
-        ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_ERROR, result, tmp_msg);
+        ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_ERROR, result, tmp_msg);
     }
 
     //cleanup
@@ -1610,7 +1604,7 @@ TEST_FUNCTION(IoTHubMessage_SetDiagnosticPropertyData_NULL_handle_Fails)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetDiagnosticPropertyData(NULL, &TEST_DIAGNOSTIC_DATA);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_INVALID_ARG, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1628,7 +1622,7 @@ TEST_FUNCTION(IoTHubMessage_SetDiagnosticPropertyData_NULL_DiagnosticData_Fails)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetDiagnosticPropertyData(h, NULL);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_INVALID_ARG, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1654,7 +1648,7 @@ TEST_FUNCTION(IoTHubMessage_SetDiagnosticPropertyData_DiagnosticData_Not_NULL_SU
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetDiagnosticPropertyData(h, &TEST_DIAGNOSTIC_DATA2);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1689,7 +1683,7 @@ TEST_FUNCTION(IoTHubMessage_SetDiagnosticPropertyData_Fails)
         IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetDiagnosticPropertyData(h, &TEST_DIAGNOSTIC_DATA);
 
         //assert
-        ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_ERROR, result, tmp_msg);
+        ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_ERROR, result, tmp_msg);
     }
 
     //cleanup
@@ -1712,7 +1706,7 @@ TEST_FUNCTION(IoTHubMessage_SetDiagnosticPropertyData_SUCCEED)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetDiagnosticPropertyData(h, &TEST_DIAGNOSTIC_DATA);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1727,7 +1721,7 @@ TEST_FUNCTION(IoTHubMessage_SetProperty_handle_NULL_Fail)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetProperty(NULL, TEST_PROPERTY_KEY, TEST_PROPERTY_VALUE);
 
     //assert
-    ASSERT_ARE_NOT_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_NOT_EQUAL(int, IOTHUB_MESSAGE_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1743,7 +1737,7 @@ TEST_FUNCTION(IoTHubMessage_SetProperty_key_NULL_Fail)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetProperty(h, NULL, TEST_PROPERTY_VALUE);
 
     //assert
-    ASSERT_ARE_NOT_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_NOT_EQUAL(int, IOTHUB_MESSAGE_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1760,7 +1754,7 @@ TEST_FUNCTION(IoTHubMessage_SetProperty_value_NULL_Fail)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetProperty(h, TEST_PROPERTY_KEY, NULL);
 
     //assert
-    ASSERT_ARE_NOT_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_NOT_EQUAL(int, IOTHUB_MESSAGE_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1779,7 +1773,7 @@ TEST_FUNCTION(IoTHubMessage_SetProperty_Fail)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetProperty(h, TEST_PROPERTY_KEY, TEST_PROPERTY_VALUE);
 
     //assert
-    ASSERT_ARE_NOT_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_NOT_EQUAL(int, IOTHUB_MESSAGE_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1798,7 +1792,7 @@ TEST_FUNCTION(IoTHubMessage_SetProperty_Succeed)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetProperty(h, TEST_PROPERTY_KEY, TEST_PROPERTY_VALUE);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGE_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup

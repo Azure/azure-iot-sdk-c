@@ -365,14 +365,8 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE (HTTP_HEADERS_RESULT, HTTP_HEADERS_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE       (HTTPAPI_REQUEST_TYPE, HTTPAPI_REQUEST_TYPE_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE (HTTPAPI_REQUEST_TYPE, HTTPAPI_REQUEST_TYPE_VALUES);
 
-TEST_DEFINE_ENUM_TYPE       (IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
-IMPLEMENT_UMOCK_C_ENUM_TYPE (IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
-
 TEST_DEFINE_ENUM_TYPE       (BLOB_RESULT, BLOB_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE (BLOB_RESULT, BLOB_RESULT_VALUES);
-
-TEST_DEFINE_ENUM_TYPE       (IOTHUB_CLIENT_FILE_UPLOAD_RESULT, IOTHUB_CLIENT_FILE_UPLOAD_RESULT_VALUES);
-IMPLEMENT_UMOCK_C_ENUM_TYPE (IOTHUB_CLIENT_FILE_UPLOAD_RESULT, IOTHUB_CLIENT_FILE_UPLOAD_RESULT_VALUES);
 
 TEST_DEFINE_ENUM_TYPE       (IOTHUB_CREDENTIAL_TYPE, IOTHUB_CREDENTIAL_TYPE_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE (IOTHUB_CREDENTIAL_TYPE, IOTHUB_CREDENTIAL_TYPE_VALUES);
@@ -972,7 +966,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Impl_handle_NULL_fails)
     IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_Impl(NULL, TEST_DESTINATION_FILENAME, TEST_SOURCE, TEST_SOURCE_LENGTH);
 
     //assert
-    ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_NOT_EQUAL(int, IOTHUB_CLIENT_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -988,7 +982,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Impl_source_NULL_fails)
     IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_Impl(h, TEST_DESTINATION_FILENAME, NULL, TEST_SOURCE_LENGTH);
 
     //assert
-    ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_NOT_EQUAL(int, IOTHUB_CLIENT_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1013,7 +1007,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Impl_with_proxy_succeeds)
 
     //assert
     (void)result;
-    //ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    //ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1033,7 +1027,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Impl_succeeds)
     IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_Impl(h, TEST_DESTINATION_FILENAME, TEST_SOURCE, TEST_SOURCE_LENGTH);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1053,7 +1047,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Impl_device_key_succeeds)
     IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_Impl(h, TEST_DESTINATION_FILENAME, TEST_SOURCE, TEST_SOURCE_LENGTH);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1074,7 +1068,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Impl_x509_succeeds)
     IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_Impl(h, TEST_DESTINATION_FILENAME, TEST_SOURCE, TEST_SOURCE_LENGTH);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1094,7 +1088,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Impl_device_auth_succeeds)
     IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_Impl(h, TEST_DESTINATION_FILENAME, TEST_SOURCE, TEST_SOURCE_LENGTH);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1125,7 +1119,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Impl_fails)
             IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_Impl(h, TEST_DESTINATION_FILENAME, TEST_SOURCE, TEST_SOURCE_LENGTH);
 
             //assert
-            ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "IoTHubClient_LL_UploadToBlob_Impl failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
+            ASSERT_ARE_NOT_EQUAL(int, IOTHUB_CLIENT_OK, result, "IoTHubClient_LL_UploadToBlob_Impl failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
         }
     }
 
@@ -1159,7 +1153,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Impl_dev_key_fails)
             IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_Impl(h, TEST_DESTINATION_FILENAME, TEST_SOURCE, TEST_SOURCE_LENGTH);
 
             //assert
-            ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "IoTHubClient_LL_UploadToBlob_Impl failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
+            ASSERT_ARE_NOT_EQUAL(int, IOTHUB_CLIENT_OK, result, "IoTHubClient_LL_UploadToBlob_Impl failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
         }
     }
 
@@ -1193,7 +1187,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Impl_dev_auth_fails)
             IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_Impl(h, TEST_DESTINATION_FILENAME, TEST_SOURCE, TEST_SOURCE_LENGTH);
 
             //assert
-            ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "IoTHubClient_LL_UploadToBlob_Impl failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
+            ASSERT_ARE_NOT_EQUAL(int, IOTHUB_CLIENT_OK, result, "IoTHubClient_LL_UploadToBlob_Impl failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
         }
     }
 
@@ -1214,7 +1208,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Impl_blob_aborted_succeeds)
     IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_Impl(h, TEST_DESTINATION_FILENAME, TEST_SOURCE, TEST_SOURCE_LENGTH);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1233,7 +1227,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Impl_blob_error_fails)
     IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_Impl(h, TEST_DESTINATION_FILENAME, TEST_SOURCE, TEST_SOURCE_LENGTH);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_ERROR, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1252,7 +1246,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_Impl_null_response_succeeds)
     IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_Impl(h, TEST_DESTINATION_FILENAME, TEST_SOURCE, TEST_SOURCE_LENGTH);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1269,7 +1263,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_handle_NULL_fails)
     IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_SetOption(NULL, OPTION_CURL_VERBOSE, &curlVerbosity);
 
     //assert
-    ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_NOT_EQUAL(int, IOTHUB_CLIENT_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1286,7 +1280,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_verbose_succeeds)
     IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_SetOption(h, OPTION_CURL_VERBOSE, &curlVerbosity);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1306,7 +1300,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_x509_cert_succeeds)
     IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_SetOption(h, OPTION_X509_CERT, TEST_CERT);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1328,7 +1322,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_x509_cert_twice_succeeds)
     result = IoTHubClient_LL_UploadToBlob_SetOption(h, OPTION_X509_CERT, TEST_CERT);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1348,7 +1342,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_x509_key_succeeds)
     IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_SetOption(h, OPTION_X509_PRIVATE_KEY, TEST_PRIVATE);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1368,7 +1362,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_x509_trusted_cert_succeeds)
     IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_SetOption(h, OPTION_TRUSTED_CERT, TEST_CERT);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1385,7 +1379,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_unknown_fails)
     IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_SetOption(h, "unknown", TEST_CERT);
 
     //assert
-    ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_NOT_EQUAL(int, IOTHUB_CLIENT_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1405,7 +1399,7 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_x509_timeout_succeeds)
     IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_SetOption(h, OPTION_BLOB_UPLOAD_TIMEOUT_SECS, &timeout);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup

@@ -46,12 +46,6 @@ MOCKABLE_FUNCTION(, void, deinitialize_hsm_system);
 static const char* TEST_SYMM_KEY = "Test_symm_key";
 static const char* TEST_REG_NAME = "Test_registration_name";
 
-TEST_DEFINE_ENUM_TYPE(SECURE_DEVICE_TYPE, SECURE_DEVICE_TYPE_VALUES);
-IMPLEMENT_UMOCK_C_ENUM_TYPE(SECURE_DEVICE_TYPE, SECURE_DEVICE_TYPE_VALUES);
-
-TEST_DEFINE_ENUM_TYPE(IOTHUB_SECURITY_TYPE, IOTHUB_SECURITY_TYPE_VALUES);
-IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_SECURITY_TYPE, IOTHUB_SECURITY_TYPE_VALUES);
-
 static int my_mallocAndStrcpy_s(char** destination, const char* source)
 {
     (void)source;
@@ -86,8 +80,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     result = umocktypes_charptr_register_types();
     ASSERT_ARE_EQUAL(int, 0, result);
 
-    REGISTER_TYPE(IOTHUB_SECURITY_TYPE, IOTHUB_SECURITY_TYPE);
-    REGISTER_TYPE(SECURE_DEVICE_TYPE, SECURE_DEVICE_TYPE);
+    REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_SECURITY_TYPE, int);
+    REGISTER_UMOCK_ALIAS_TYPE(SECURE_DEVICE_TYPE, int);
 
     //REGISTER_UMOCK_ALIAS_TYPE(BUFFER_HANDLE, void*);
 
@@ -236,7 +230,7 @@ TEST_FUNCTION(prov_dev_security_get_type_tpm_succees)
     SECURE_DEVICE_TYPE result = prov_dev_security_get_type();
 
     //assert
-    ASSERT_ARE_EQUAL(SECURE_DEVICE_TYPE, SECURE_DEVICE_TYPE_TPM, result);
+    ASSERT_ARE_EQUAL(int, SECURE_DEVICE_TYPE_TPM, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -322,7 +316,7 @@ TEST_FUNCTION(prov_dev_security_get_type_x509_success)
     SECURE_DEVICE_TYPE result = prov_dev_security_get_type();
 
     //assert
-    ASSERT_ARE_EQUAL(SECURE_DEVICE_TYPE, SECURE_DEVICE_TYPE_X509, result);
+    ASSERT_ARE_EQUAL(int, SECURE_DEVICE_TYPE_X509, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -547,7 +541,7 @@ TEST_FUNCTION(prov_dev_security_get_type_http_edge_success)
     SECURE_DEVICE_TYPE result = prov_dev_security_get_type();
 
     //assert
-    ASSERT_ARE_EQUAL(SECURE_DEVICE_TYPE, SECURE_DEVICE_TYPE_HTTP_EDGE, result);
+    ASSERT_ARE_EQUAL(int, SECURE_DEVICE_TYPE_HTTP_EDGE, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup

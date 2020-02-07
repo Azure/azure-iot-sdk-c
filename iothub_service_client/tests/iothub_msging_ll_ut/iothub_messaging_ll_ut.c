@@ -51,9 +51,6 @@ MOCKABLE_FUNCTION(, void, json_value_free, JSON_Value *, value);
 
 #include "iothub_messaging_ll.h"
 
-TEST_DEFINE_ENUM_TYPE(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_RESULT_VALUES);
-IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_RESULT_VALUES);
-
 #define ENABLE_MOCKS
 #include "umock_c/umock_c_prod.h"
 MOCKABLE_FUNCTION(, void, TEST_FUNC_IOTHUB_OPEN_COMPLETE_CALLBACK, void*, context);
@@ -425,7 +422,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         result = umocktypes_stdint_register_types();
         ASSERT_ARE_EQUAL(int, 0, result);
 
-        REGISTER_TYPE(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_RESULT);
+        REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_MESSAGING_RESULT, int);
 
         REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(AMQP_VALUE, void*);
@@ -1500,7 +1497,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
                 result = IoTHubMessaging_LL_Send(iothub_messaging_handle, TEST_CONST_CHAR_PTR, TEST_IOTHUB_MESSAGE_HANDLE, TEST_IOTHUB_SEND_COMPLETE_CALLBACK, TEST_VOID_PTR);
 
                 //assert
-                ASSERT_ARE_NOT_EQUAL(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_OK, result);
+                ASSERT_ARE_NOT_EQUAL(int, IOTHUB_MESSAGING_OK, result);
             }
 
         }
@@ -1595,7 +1592,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_SetFeedbackMessageCallback(NULL, TEST_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK, TEST_VOID_PTR);
 
         //assert
-        ASSERT_ARE_EQUAL(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_INVALID_ARG, result);
     }
 
     /*Tests_SRS_IOTHUBMESSAGING_12_043: [ IoTHubMessaging_LL_SetCallbacks shall save the given feedbackMessageReceivedCallback to use them in local callbacks ] */
@@ -1613,7 +1610,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         //assert
         //ASSERT_IS_TRUE(TEST_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK == TEST_IOTHUB_MESSAGING_DATA.callback_data->feedbackMessageCallback);
         //ASSERT_ARE_EQUAL(void_ptr, TEST_IOTHUB_MESSAGING_DATA.callback_data->feedbackUserContext, TEST_VOID_PTR);
-        ASSERT_ARE_EQUAL(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_OK, result);
+        ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_OK, result);
 
         //cleanup
         IoTHubMessaging_LL_Close(iothub_messaging_handle);

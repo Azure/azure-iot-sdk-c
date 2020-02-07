@@ -132,7 +132,7 @@ void create_tpm_enrollment_device(const char* prov_conn_string, bool use_tracing
     }
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
-    ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_sc_set_certificate(prov_sc_handle, certificates), "Failure setting Trusted Cert option");
+    ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_OK, prov_sc_set_certificate(prov_sc_handle, certificates), "Failure setting Trusted Cert option");
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
     PROV_AUTH_HANDLE auth_handle = prov_auth_create();
@@ -179,7 +179,7 @@ void create_symm_key_enrollment_device(const char* prov_conn_string, bool use_tr
     }
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
-    ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_sc_set_certificate(prov_sc_handle, certificates), "Failure setting Trusted Cert option");
+    ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_OK, prov_sc_set_certificate(prov_sc_handle, certificates), "Failure setting Trusted Cert option");
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
     // Update enrollment
@@ -200,7 +200,7 @@ void create_x509_enrollment_device(const char* prov_conn_string, bool use_tracin
     }
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
-    ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_sc_set_certificate(prov_sc_handle, certificates), "Failure setting Trusted Cert option");
+    ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_OK, prov_sc_set_certificate(prov_sc_handle, certificates), "Failure setting Trusted Cert option");
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
     PROV_AUTH_HANDLE auth_handle = prov_auth_create();
@@ -261,12 +261,12 @@ void send_dps_test_registration(const char* global_uri, const char* scope_id, PR
     Prov_Device_LL_SetOption(handle, PROV_OPTION_LOG_TRACE, &use_tracing);
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
-    ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, Prov_Device_LL_SetOption(handle, OPTION_TRUSTED_CERT, certificates), "Failure setting Trusted Cert option");
+    ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_OK, Prov_Device_LL_SetOption(handle, OPTION_TRUSTED_CERT, certificates), "Failure setting Trusted Cert option");
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
     // act
     PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &prov_info, dps_registation_status, &prov_info);
-    ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
+    ASSERT_ARE_EQUAL(int, PROV_DEVICE_RESULT_OK, prov_result, "Failure calling Prov_Device_LL_Register_Device");
 
     wait_for_dps_result(handle, &prov_info);
 
