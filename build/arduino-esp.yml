@@ -16,6 +16,7 @@ jobs:
       WIFI_SSID: $(WIFI_SSID)
       WIFI_PWD:  $(WIFI_PWD)
       ARDUINO_LIBRARY_DIR: $(Agent.WorkFolder)/libraries/
+      SDK_BRANCH_NAME: $(Build.SourceBranchName)
       NEWTIN: $(NEWTIN)
       
   - script: |
