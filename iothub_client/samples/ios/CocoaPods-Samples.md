@@ -30,10 +30,10 @@ it does, the CocoaPods may not install properly.
 
 Edit the Podfile in a text editor and ensure that the pods are specified with these versions or later:
 
-`'AzureIoTHubClient', '=1.3.6-nightly-a'`
-`'AzureIoTUtility', '=1.1.12d'`
-`'AzureIoTuMqtt', '=1.1.12d'`
-`'AzureIoTuAmqp', '=1.2.12d'`
+`'AzureIoTHubClient', '=1.3.8a'`
+`'AzureIoTUtility', '=1.3.8a'`
+`'AzureIoTuMqtt', '=1.3.8a'`
+`'AzureIoTuAmqp', '=1.3.8a'`
 
 #### 3. Install the CocoaPods
 
