@@ -13,6 +13,7 @@ rsync -avz --existing ./ sdk/
 cd sdk
 echo "in sdk now"
 ls
+git fetch
 git checkout $SDK_BRANCH_NAME
 git submodule update --init --recursive
 cd ../build_all
