@@ -12,10 +12,10 @@ rsync -avz --existing ./ sdk/
 cd sdk
 echo "in sdk now"
 ls
-git fetch origin
-git checkout origin/$SDK_BRANCH_NAME
+git checkout $SDK_BRANCH_NAME
 git submodule update --init --recursive
 cd ../build_all
+git submodule status
 
 python3 make_sdk.py -o $ARDUINO_LIBRARY_DIR
 
