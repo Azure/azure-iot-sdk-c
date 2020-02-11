@@ -7,6 +7,7 @@ jobs:
   steps:
   - script: |
       . build_all/arduino/setup_arduino_libraries.sh
+      . build_all/arduino/update_sdk_submodule.sh
       #copy example and platform.local.txts to their correct locations
       echo $NEWTIN | sudo -S cp -r $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/iothub_ll_telemetry_sample $ARDUINO_LIBRARY_DIR/../
       echo $NEWTIN | sudo -S cp $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/iothub_ll_telemetry_sample/esp8266/platform.local.txt ~/.arduino15/packages/esp8266/hardware/esp8266/2.5.2/
