@@ -3,6 +3,7 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 # check out pipeline branch
 
+cd sdk
 echo "in sdk now"
 ls
 git pull origin master
