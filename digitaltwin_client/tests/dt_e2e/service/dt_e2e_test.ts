@@ -20,7 +20,7 @@ import { EventHubClient, EventPosition } from '@azure/event-hubs';
 // testDeviceInfo contains the settings for our test device on the IoTHub.
 var testDeviceInfo:any = null
 // Time, in ms, for test framework to sleep after the process is created and before continuing next tests.
-const sleepAfterProcessCreation = 5000
+const sleepAfterProcessCreation = 10000
 
 // InterfaceIds for interfaces implemented automatically by SDK
 const sdkInformationInterfaceId = "urn:azureiot:Client:SDKInformation:1"
