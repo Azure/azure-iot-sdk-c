@@ -7,7 +7,7 @@ jobs:
   steps:
   - script: |
       . build_all/arduino/setup_arduino_libraries.sh
-      cd $(Build.SourcesDirectory)\azure-iot-pal-arduino\sdk
+      cd $(Build.SourcesDirectory)/azure-iot-pal-arduino/sdk/
       git pull origin master
       git checkout $SDK_BRANCH_NAME
       #copy example and platform.local.txts to their correct locations
