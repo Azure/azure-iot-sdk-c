@@ -56,19 +56,21 @@ function executeTestProcess(test_process:string, cmd_args:string, resultCallback
 //
 function terminateTestProcessIfNecessary(done) {
     if (test_exe != null) {
-        terminate(test_exe.pid, function(err, result) {
-            if (err) {
-                // Terminating the test process is a best effort action.  Its failure will not
-                // cause an otherwise successful test run to be marked as failing.
-                console.warn(`Unable to terminate test process ID=<${test_exe.pid}>`)
-                done()
-            }
-            else {
-                console.log(`Successfully terminated process`)
-                done()
-            }
-        })
+        console.log(`Killing the test process.`);
+        let err = test_exe.kill();
+        if (err) {
+            // Terminating the test process is a best effort action.  Its failure will not
+            // cause an otherwise successful test run to be marked as failing.
+            console.warn(`Unable to terminate test process ID=<${test_exe.pid}>`)
+        }
+        else {
+            console.log(`Successfully terminated process`)
+        }
     }
+    else {
+        console.log('test_exe is NULL in the terminateTestProcessIfNecessary');
+    }
+    done();
 }
 
 //

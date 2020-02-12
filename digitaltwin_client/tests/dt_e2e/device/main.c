@@ -16,6 +16,7 @@
 #include <iothubtransportmqtt.h>
 #include <azure_c_shared_utility/threadapi.h>
 #include <azure_c_shared_utility/xlogging.h>
+#include <azure_c_shared_utility/shared_util_options.h>
 
 //
 // Header files for interacting with DigitalTwin layer.
@@ -31,6 +32,10 @@
 #include "dt_e2e_commands.h"
 #include "dt_e2e_telemetry.h"
 #include "dt_e2e_properties.h"
+
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+#include "certs.h"
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 //
 // Indexies to help manage interfaces
@@ -254,6 +259,13 @@ int main(int argc, char** argv)
         LogError("Could not allocate IoTHub Device handle");
         result = MU_FAILURE;
     }
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+    else if ((result = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_TRUSTED_CERT, certificates)) != IOTHUB_CLIENT_OK)
+    {
+        LogError("Failed to set option %s, error=%d", OPTION_TRUSTED_CERT, (DIGITALTWIN_CLIENT_RESULT)result);
+        result = MU_FAILURE;
+    }
+#endif
     else if ((result = (int)DigitalTwin_DeviceClient_CreateFromDeviceHandle(deviceHandle, &dtDeviceClientHandle)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("DigitalTwin_DeviceClient_CreateFromDeviceHandle failed, error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, (DIGITALTWIN_CLIENT_RESULT)result));

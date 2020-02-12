@@ -14,6 +14,7 @@ set(${theseTestsName}_test_files
     dt_e2e_properties.c
     dt_e2e_util.c
     main.c
+    ../../../../certs/certs.c
 )
 
 set(${theseTestsName}_test_h_files
@@ -22,6 +23,11 @@ set(${theseTestsName}_test_h_files
     dt_e2e_telemetry.h
     dt_e2e_util.h
 )
+
+if(${use_sample_trusted_cert})
+    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
+    include_directories(../../../../certs)
+endif()
 
 include_directories(. ${SHARED_UTIL_INC_FOLDER} ${IOTHUB_CLIENT_INC_FOLDER} ${DIGITALTWIN_CLIENT_INC_FOLDER} ${IOTHUB_TEST_INC_FOLDER})
 
@@ -50,27 +56,27 @@ if(WIN32)
            linkMqttLibrary(${theseTestsName}_exe)
    endif()
 
-#else()
- #   if(UNIX) #LINUX OR APPLE
-  #      find_package(PkgConfig REQUIRED)
-   #     pkg_search_module(UUID REQUIRED uuid)
-    #    link_directories(${UUID_LIBRARY_DIRS})
-#    endif()
+else()
+    if(UNIX) #LINUX OR APPLE
+        find_package(PkgConfig REQUIRED)
+        pkg_search_module(UUID REQUIRED uuid)
+        link_directories(${UUID_LIBRARY_DIRS})
+    endif()
 
- #   if(APPLE)
-  #      target_link_libraries(${theseTestsName}_exe -L${UUID_LIBRARY_DIRS} pthread ${UUID_LIBRARIES})
-  #  elseif(LINUX)
-   #     target_link_libraries(${theseTestsName}_exe pthread ${UUID_LIBRARIES})
-   # endif()
+    if(APPLE)
+        target_link_libraries(${theseTestsName}_exe -L${UUID_LIBRARY_DIRS} pthread ${UUID_LIBRARIES})
+    elseif(LINUX)
+        target_link_libraries(${theseTestsName}_exe pthread ${UUID_LIBRARIES})
+    endif()
 
-#   if(TARGET ${theseTestsName}_exe)
- #          target_link_libraries(${theseTestsName}_exe
-  #         	iothub_client
-#		digitaltwin_client
- #          	iothub_service_client
-  #          	aziotsharedutil
-   #        )
-    #       linkSharedUtil(${theseTestsName}_exe)
-	#   linkMqttLibrary(${theseTestsName}_exe)
-#   endif()
+    if(TARGET ${theseTestsName}_exe)
+        target_link_libraries(${theseTestsName}_exe
+           	iothub_client
+		digitaltwin_client
+           	iothub_service_client
+            	aziotsharedutil
+           )
+           linkSharedUtil(${theseTestsName}_exe)
+	   linkMqttLibrary(${theseTestsName}_exe)
+   endif()
 endif()

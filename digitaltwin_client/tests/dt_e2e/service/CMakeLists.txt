@@ -23,6 +23,6 @@ IF(UNIX)
 	# node npm module install now happens in test script itself, to reduce complexity of build for those who don't want to run this e2e
 	add_test(NAME "iothubclient_dt_e2e" 
          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-		 COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}\\mocha_exec.sh)
+	 COMMAND bash ${CMAKE_CURRENT_BINARY_DIR}/mocha_exec.sh)
 ENDIF(UNIX)
 	
