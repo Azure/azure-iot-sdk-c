@@ -12,6 +12,10 @@
         {
             "placeholder": "cloanta",
             "_justification": "Testing password cloanta"
-        }
+        },
+        {
+            "placeholder": "passw0rd",
+            "_justification": "Defualt testing password for PFX"
+        }       
     ]
 }
