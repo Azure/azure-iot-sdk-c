@@ -7,8 +7,8 @@ git clone https://github.com/Azure/azure-iot-pal-arduino.git
 
 cd azure-iot-pal-arduino
 git submodule update --init --recursive
-cp -r $SOURCES_DIR sdk
-git submodule status
+echo "I am copying sources now"
+echo $NEWTIN | sudo -S cp -r $SOURCES_DIR sdk
 # rsync -avz --existing ./ sdk/
 
 cd build_all
