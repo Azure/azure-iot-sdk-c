@@ -232,7 +232,7 @@ static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsi
     Car* oldCar = (Car*)userContextCallback;
     Car* newCar = parseFromJson((const char*)payLoad, update_state);
 
-    if(NULL == newCar)
+    if (NULL == newCar)
     {
         printf("ERROR: parseFromJson returned NULL\r\n");
     }
@@ -282,8 +282,9 @@ static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsi
                 oldCar->settings.location.longitude = newCar->settings.location.longitude;
             }
         }
+        
+        free(newCar);
     }
-    free(newCar);
 }
 
 static void reportedStateCallback(int status_code, void* userContextCallback)
