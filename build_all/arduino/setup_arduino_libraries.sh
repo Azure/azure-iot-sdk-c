@@ -5,9 +5,9 @@ echo $NEWTIN | sudo -S rm -r azure-iot-pal-arduino
 git clone https://github.com/Azure/azure-iot-pal-arduino.git 
 
 cd azure-iot-pal-arduino
-git config -f .gitmodules submodule.$SDK_BRANCH_NAME.branch $SDK_BRANCH_NAME
 git submodule update --init --recursive
-rsync -avz --existing ./ sdk/
+git config -f .gitmodules submodule.$SDK_BRANCH_NAME.branch $SDK_BRANCH_NAME
+# rsync -avz --existing ./ sdk/
 
 cd sdk
 echo "in sdk now"
