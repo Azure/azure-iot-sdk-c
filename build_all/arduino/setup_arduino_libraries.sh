@@ -1,22 +1,17 @@
 #!/bin/bash
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
+cd $STAGING_DIR
 echo $NEWTIN | sudo -S rm -r azure-iot-pal-arduino
 git clone https://github.com/Azure/azure-iot-pal-arduino.git 
 
 cd azure-iot-pal-arduino
 git submodule update --init --recursive
-git config -f .gitmodules submodule.$SDK_BRANCH_NAME.branch $SDK_BRANCH_NAME
+cp -r $SOURCES_DIR sdk
+git submodule status
 # rsync -avz --existing ./ sdk/
 
-cd sdk
-echo "in sdk now"
-ls
-git pull
-# git checkout $SDK_BRANCH_NAME
-# git submodule update --init --recursive
-cd ../build_all
-git submodule status
+cd build_all
 
 python3 make_sdk.py -o $ARDUINO_LIBRARY_DIR
 
