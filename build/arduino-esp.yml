@@ -7,9 +7,6 @@ jobs:
   steps:
   - script: |
       . build_all/arduino/setup_arduino_libraries.sh
-      # cd $(Build.SourcesDirectory)/azure-iot-pal-arduino/sdk/
-      # git pull origin master
-      # git checkout $SDK_BRANCH_NAME
       #copy example and platform.local.txts to their correct locations
       echo $NEWTIN | sudo -S cp -r $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/iothub_ll_telemetry_sample $ARDUINO_LIBRARY_DIR/../
       echo $NEWTIN | sudo -S cp $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/iothub_ll_telemetry_sample/esp8266/platform.local.txt ~/.arduino15/packages/esp8266/hardware/esp8266/2.5.2/
@@ -18,8 +15,9 @@ jobs:
       IOTHUB_CONNECTION_DEVICE_STRING: $(MXCHIP_NIGHTLY_DEVICE_STRING)
       WIFI_SSID: $(WIFI_SSID)
       WIFI_PWD:  $(WIFI_PWD)
+      SOURCES_DIR: $(Build.SourcesDirectory)
+      STAGING_DIR: $(Pipeline.Workspace)
       ARDUINO_LIBRARY_DIR: $(Agent.WorkFolder)/libraries/
-      SDK_BRANCH_NAME: $(Build.SourceBranchName)
       NEWTIN: $(NEWTIN)
       
   - script: |
