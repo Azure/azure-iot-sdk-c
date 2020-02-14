@@ -6,7 +6,7 @@ echo $NEWTIN | sudo -S rm -r azure-iot-pal-arduino
 git clone https://github.com/Azure/azure-iot-pal-arduino.git 
 
 cd azure-iot-pal-arduino
-echo "I am copying sources now"
+echo "copying sdk sources path to pal layer now"
 echo $NEWTIN | sudo -S cp -r $SOURCES_DIR/. sdk/
 
 cd build_all
