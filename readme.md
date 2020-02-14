@@ -222,11 +222,10 @@ LTS branches are named lts_*mm*_*yyyy*, where *mm* and *yyyy* are the month and 
 
 Below is a table showing the mapping of the LTS branches to the packages released
 
-| Package | Github Branch | LTS Status | LTS Start Date | Maintenance End Date | Removed Date |
+| Package | Github Branch | LTS Status | LTS Start Date | Maintenance End Date | Removal Date |
 | :-----------: | :-----------: | :--------: | :------------: | :------------------: | :----------: |
+| Vcpkg: 2020-02-07.1<br/> Xenial: 0.2.0.0-26xenial<br/> Trusty: 0.2.0-26trusty<br/> Bionic: 0.2.0.0-19bionic<br/>    | lts_02_2020   | Active     | 2020-02-04     | 2021-02-04           | 2021-02-04   |
 | Vcpkg: 2019-07-01.1<br/> Xenial: 0.2.0.0-21xenial<br/> Trusty: 0.2.0-21trusty<br/> Bionic: 0.2.0.0-14bionic<br/>    | lts_07_2019   | Active     | 2019-07-01     | 2020-07-01           | 2020-07-01   |
-| Vcpkg: 1.2.14-1<br/> Xenial: 0.2.0.0-16xenial<br/> Trusty: 0.2.0-16trusty<br/> Bionic: 0.2.0.0-9bionic<br/>    | lts_01_2019   | Active     | 2019-01-31     | 2020-01-31           | 2020-01-31   |
-| Nuget: 1.2.10<br/> Xenial: 0.2.0.0-12xenial<br/> Trusty: 0.2.0-12trusty<br/> Bionic: 0.2.0.0-5bionic<br/>    | lts_10_2018   | Active     | 2018-10-03     | 2019-10-03           | 2019-10-03   |
 
 * <sup>1</sup> All scheduled dates are subject to change by the Azure IoT SDK team.
 
