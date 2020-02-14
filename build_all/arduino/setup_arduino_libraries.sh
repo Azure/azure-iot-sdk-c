@@ -1,14 +1,13 @@
 #!/bin/bash
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
+cd $STAGING_DIR
 echo $NEWTIN | sudo -S rm -r azure-iot-pal-arduino
 git clone https://github.com/Azure/azure-iot-pal-arduino.git 
 
 cd azure-iot-pal-arduino
-
-git submodule update --init --recursive
-
-rsync -avz --existing ./ sdk/
+echo "copying sdk sources path to pal layer now"
+echo $NEWTIN | sudo -S cp -r $SOURCES_DIR/. sdk/
 
 cd build_all
 

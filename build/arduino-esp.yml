@@ -6,6 +6,7 @@ jobs:
       name: devicelab-03
   steps:
   - script: |
+      git submodule update --init --recursive
       . build_all/arduino/setup_arduino_libraries.sh
       #copy example and platform.local.txts to their correct locations
       echo $NEWTIN | sudo -S cp -r $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/iothub_ll_telemetry_sample $ARDUINO_LIBRARY_DIR/../
@@ -15,6 +16,8 @@ jobs:
       IOTHUB_CONNECTION_DEVICE_STRING: $(MXCHIP_NIGHTLY_DEVICE_STRING)
       WIFI_SSID: $(WIFI_SSID)
       WIFI_PWD:  $(WIFI_PWD)
+      SOURCES_DIR: $(Build.SourcesDirectory)
+      STAGING_DIR: $(Pipeline.Workspace)
       ARDUINO_LIBRARY_DIR: $(Agent.WorkFolder)/libraries/
       NEWTIN: $(NEWTIN)
       
@@ -40,6 +43,7 @@ jobs:
       echo -e "exit\r\n\r\n\r\n" | cat > input.txt
       python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(ESP8266_PORT) -d esp8266 -s
       rm input.txt
+    failOnStderr: true
     displayName: 'run_test'
 
   - script: |
@@ -61,6 +65,7 @@ jobs:
     name: devicelab-03
   steps:
   - script: |
+      git submodule update --init --recursive
       . build_all/arduino/setup_arduino_libraries.sh
       #copy example and platform.local.txts to their correct locations
       echo $NEWTIN | sudo -S cp -r $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/iothub_ll_telemetry_sample $ARDUINO_LIBRARY_DIR/../
@@ -70,6 +75,8 @@ jobs:
       IOTHUB_CONNECTION_DEVICE_STRING: $(MXCHIP_NIGHTLY_DEVICE_STRING)
       WIFI_SSID: $(WIFI_SSID)
       WIFI_PWD:  $(WIFI_PWD)
+      SOURCES_DIR: $(Build.SourcesDirectory)
+      STAGING_DIR: $(Pipeline.Workspace)
       ARDUINO_LIBRARY_DIR: $(Agent.WorkFolder)/libraries/
       NEWTIN: $(NEWTIN)
 
@@ -88,6 +95,7 @@ jobs:
       echo -e "exit\r\n\r\n\r\n" | cat > input.txt
       python3 serial_connect.py -i input.txt -o output.txt -b 1000000 -p $(ESP32_PORT) -d esp32 -s
       rm input.txt
+    failOnStderr: true
     displayName: 'run_test'
 
   - script: |
