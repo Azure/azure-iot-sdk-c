@@ -85,7 +85,7 @@ On Azure IoT Hub, navigate to the IoT Devices section, or launch Azure IoT Explo
 
 #### IoT Leaf Device
 
-* Run `New-CACertsDevice mydevice` to create the new device certificate.
+* Run `New-CACertsDevice mydevice -signingCertSubject 'CN=Azure IoT CA TestOnly Intermediate 3 CA'` to create the new device certificate.
 
 You will need to enter a password for the certificate twice.  This will create files mydevice* that contain the public key, private key, and PFX of this certificate.
 
