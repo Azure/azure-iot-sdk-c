@@ -524,12 +524,18 @@ static int parse_device_twin_topic_info(const char* resp_topic, bool* patch_msg,
                 else if (token_count == 3)
                 {
                     *status_code = (int)atol(STRING_c_str(token_value));
+                    *patch_msg = false;
                     if (STRING_TOKENIZER_get_next_token(token_handle, token_value, "/?$rid=") == 0)
                     {
                         *request_id = (size_t)atol(STRING_c_str(token_value));
+                        result = 0;
                     }
-                    *patch_msg = false;
-                    result = 0;
+                    else
+                    {
+                        LogError("Could not parse request_id.");
+                        *request_id = 0;
+                        result = MU_FAILURE;
+                    }
                     break;
                 }
                 token_count++;
