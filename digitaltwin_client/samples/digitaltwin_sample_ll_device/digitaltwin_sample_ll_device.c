@@ -524,7 +524,7 @@ int main(int argc, char *argv[])
     // of this handle (including destroying it) to the DigitalTwin layer, analogous to a .release()
     // in some C++ helpers.  DO NOT USE deviceLLHandle after this point.  Note this behavior
     // will change once DPS integration becomes available later.
-    else if ((result = DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle(deviceLLHandle, &digitaltwinDeviceClientLLHandle)) != DIGITALTWIN_CLIENT_OK)
+    else if ((result = DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle(deviceLLHandle, &digitaltwinDeviceClientLLHandle, DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_ID)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle failed, error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
     }

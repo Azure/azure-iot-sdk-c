@@ -52,7 +52,7 @@ typedef struct DIGITALTWIN_DEVICE_CLIENT_LL* DIGITALTWIN_DEVICE_CLIENT_LL_HANDLE
 
   @see      DigitalTwin_DeviceClient_CreateFromDeviceHandle
 */
-MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle, IOTHUB_DEVICE_CLIENT_LL_HANDLE, deviceHandle, DIGITALTWIN_DEVICE_CLIENT_LL_HANDLE*, dtDeviceLLClientHandle);
+MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle, IOTHUB_DEVICE_CLIENT_LL_HANDLE, deviceHandle, DIGITALTWIN_DEVICE_CLIENT_LL_HANDLE*, dtDeviceLLClientHandle, const char*, deviceCapabilityModel);
 
 
 /**
