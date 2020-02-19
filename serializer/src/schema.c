@@ -387,33 +387,40 @@ SCHEMA_HANDLE Schema_Create(const char* schemaNamespace, void* metadata)
             result = NULL;
             LogError("(Error code:%s)", MU_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
         }
-        else if ((result = (SCHEMA_HANDLE_DATA*)malloc(sizeof(SCHEMA_HANDLE_DATA))) == NULL)
-        {
-            /* Codes_SRS_SCHEMA_99_003:[On failure, NULL shall be returned.] */
-            LogError("(Error code:%s)", MU_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
-        }
-        else if (mallocAndStrcpy_s((char**)&result->Namespace, schemaNamespace) != 0)
-        {
-            /* Codes_SRS_SCHEMA_99_003:[On failure, NULL shall be returned.] */
-            free(result);
-            result = NULL;
-            LogError("(Error code:%s)", MU_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
-        }
-        else if (VECTOR_push_back(g_schemas, &result, 1) != 0)
-        {
-            free((void*)result->Namespace);
-            free(result);
-            result = NULL;
-            LogError("(Error code:%s)", MU_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
-        }
         else
         {
-            /* Codes_SRS_SCHEMA_99_002:[On success a non-NULL handle to the newly created schema shall be returned.] */
-            result->ModelTypes = NULL;
-            result->ModelTypeCount = 0;
-            result->StructTypes = NULL;
-            result->StructTypeCount = 0;
-            result->metadata = metadata;
+            if ((result = (SCHEMA_HANDLE_DATA*)malloc(sizeof(SCHEMA_HANDLE_DATA))) == NULL)
+            {
+                /* Codes_SRS_SCHEMA_99_003:[On failure, NULL shall be returned.] */
+                LogError("(Error code:%s)", MU_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
+            }
+            else
+            {
+                (void)memset(result, 0, sizeof(SCHEMA_HANDLE_DATA));
+                if (mallocAndStrcpy_s((char**)&result->Namespace, schemaNamespace) != 0)
+                {
+                    /* Codes_SRS_SCHEMA_99_003:[On failure, NULL shall be returned.] */
+                    free(result);
+                    result = NULL;
+                    LogError("(Error code:%s)", MU_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
+                }
+                else if (VECTOR_push_back(g_schemas, &result, 1) != 0)
+                {
+                    free((void*)result->Namespace);
+                    free(result);
+                    result = NULL;
+                    LogError("(Error code:%s)", MU_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
+                }
+                else
+                {
+                    /* Codes_SRS_SCHEMA_99_002:[On success a non-NULL handle to the newly created schema shall be returned.] */
+                    result->ModelTypes = NULL;
+                    result->ModelTypeCount = 0;
+                    result->StructTypes = NULL;
+                    result->StructTypeCount = 0;
+                    result->metadata = metadata;
+                }
+            }
         }
     }
 
@@ -650,54 +657,45 @@ SCHEMA_MODEL_TYPE_HANDLE Schema_CreateModelType(SCHEMA_HANDLE schemaHandle, cons
                     result = NULL;
                     LogError("(Error code:%s)", MU_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
                 }
-                else if (mallocAndStrcpy_s((char**)&modelType->Name, modelName) != 0)
-                {
-                    /* Codes_SRS_SCHEMA_99_009:[On failure, Schema_CreateModelType shall return NULL.] */
-                    result = NULL;
-                    free(modelType);
-                    LogError("(Error code:%s)", MU_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
-                }
                 else
                 {
-                    modelType->models = VECTOR_create(sizeof(MODEL_IN_MODEL));
-                    if (modelType->models == NULL)
+                    (void)memset(modelType, 0, sizeof(SCHEMA_MODEL_TYPE_HANDLE_DATA));
+                    if (mallocAndStrcpy_s((char**)&modelType->Name, modelName) != 0)
                     {
                         /* Codes_SRS_SCHEMA_99_009:[On failure, Schema_CreateModelType shall return NULL.] */
-                        LogError("unable to VECTOR_create");
-                        free((void*)modelType->Name);
-                        free((void*)modelType);
                         result = NULL;
+                        free(modelType);
+                        LogError("(Error code:%s)", MU_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
                     }
                     else
                     {
-                        if ((modelType->reportedProperties = VECTOR_create(sizeof(SCHEMA_REPORTED_PROPERTY_HANDLE))) == NULL)
+                        modelType->models = VECTOR_create(sizeof(MODEL_IN_MODEL));
+                        if (modelType->models == NULL)
                         {
                             /* Codes_SRS_SCHEMA_99_009:[On failure, Schema_CreateModelType shall return NULL.] */
-                            LogError("failed to VECTOR_create (reported properties)");
-                            VECTOR_destroy(modelType->models);
+                            LogError("unable to VECTOR_create");
                             free((void*)modelType->Name);
                             free((void*)modelType);
                             result = NULL;
-
                         }
                         else
                         {
-                            /* Codes_SRS_SCHEMA_99_009:[On failure, Schema_CreateModelType shall return NULL.] */
-                            if ((modelType->desiredProperties = VECTOR_create(sizeof(SCHEMA_DESIRED_PROPERTY_HANDLE))) == NULL)
+                            if ((modelType->reportedProperties = VECTOR_create(sizeof(SCHEMA_REPORTED_PROPERTY_HANDLE))) == NULL)
                             {
-                                LogError("failure in VECTOR_create (desired properties)");
-                                VECTOR_destroy(modelType->reportedProperties);
+                                /* Codes_SRS_SCHEMA_99_009:[On failure, Schema_CreateModelType shall return NULL.] */
+                                LogError("failed to VECTOR_create (reported properties)");
                                 VECTOR_destroy(modelType->models);
                                 free((void*)modelType->Name);
                                 free((void*)modelType);
                                 result = NULL;
+
                             }
                             else
                             {
-                                if ((modelType->methods = VECTOR_create(sizeof(SCHEMA_METHOD_HANDLE))) == NULL)
+                                /* Codes_SRS_SCHEMA_99_009:[On failure, Schema_CreateModelType shall return NULL.] */
+                                if ((modelType->desiredProperties = VECTOR_create(sizeof(SCHEMA_DESIRED_PROPERTY_HANDLE))) == NULL)
                                 {
                                     LogError("failure in VECTOR_create (desired properties)");
-                                    VECTOR_destroy(modelType->desiredProperties);
                                     VECTOR_destroy(modelType->reportedProperties);
                                     VECTOR_destroy(modelType->models);
                                     free((void*)modelType->Name);
@@ -706,17 +704,30 @@ SCHEMA_MODEL_TYPE_HANDLE Schema_CreateModelType(SCHEMA_HANDLE schemaHandle, cons
                                 }
                                 else
                                 {
-                                    modelType->PropertyCount = 0;
-                                    modelType->Properties = NULL;
-                                    modelType->ActionCount = 0;
-                                    modelType->Actions = NULL;
-                                    modelType->SchemaHandle = schemaHandle;
-                                    modelType->DeviceCount = 0;
+                                    if ((modelType->methods = VECTOR_create(sizeof(SCHEMA_METHOD_HANDLE))) == NULL)
+                                    {
+                                        LogError("failure in VECTOR_create (desired properties)");
+                                        VECTOR_destroy(modelType->desiredProperties);
+                                        VECTOR_destroy(modelType->reportedProperties);
+                                        VECTOR_destroy(modelType->models);
+                                        free((void*)modelType->Name);
+                                        free((void*)modelType);
+                                        result = NULL;
+                                    }
+                                    else
+                                    {
+                                        modelType->PropertyCount = 0;
+                                        modelType->Properties = NULL;
+                                        modelType->ActionCount = 0;
+                                        modelType->Actions = NULL;
+                                        modelType->SchemaHandle = schemaHandle;
+                                        modelType->DeviceCount = 0;
 
-                                    schema->ModelTypes[schema->ModelTypeCount] = modelType;
-                                    schema->ModelTypeCount++;
-                                    /* Codes_SRS_SCHEMA_99_008:[On success, a non-NULL handle shall be returned.] */
-                                    result = (SCHEMA_MODEL_TYPE_HANDLE)modelType;
+                                        schema->ModelTypes[schema->ModelTypeCount] = modelType;
+                                        schema->ModelTypeCount++;
+                                        /* Codes_SRS_SCHEMA_99_008:[On success, a non-NULL handle shall be returned.] */
+                                        result = (SCHEMA_MODEL_TYPE_HANDLE)modelType;
+                                    }
                                 }
                             }
                         }
@@ -905,6 +916,7 @@ SCHEMA_ACTION_HANDLE Schema_CreateModelAction(SCHEMA_MODEL_TYPE_HANDLE modelType
                 }
                 else
                 {
+                    (void)memset(newAction, 0, sizeof(SCHEMA_ACTION_HANDLE_DATA));
                     if (mallocAndStrcpy_s((char**)&newAction->ActionName, actionName) != 0)
                     {
                         /* Codes_SRS_SCHEMA_99_106: [On any other error, Schema_CreateModelAction shall return NULL.]*/
@@ -1809,23 +1821,27 @@ SCHEMA_STRUCT_TYPE_HANDLE Schema_CreateStructType(SCHEMA_HANDLE schemaHandle, co
                     result = NULL;
                     LogError("(Error code:%s)", MU_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
                 }
-                else if (mallocAndStrcpy_s((char**)&structType->Name, typeName) != 0)
-                {
-                    /* Codes_SRS_SCHEMA_99_066:[On any other error, Schema_CreateStructType shall return NULL.] */
-                    result = NULL;
-                    free(structType);
-                    LogError("(Error code:%s)", MU_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
-                }
                 else
                 {
-                    /* Codes_SRS_SCHEMA_99_057:[Schema_CreateStructType shall create a new struct type and return a handle to it.] */
-                    schema->StructTypes[schema->StructTypeCount] = structType;
-                    schema->StructTypeCount++;
-                    structType->PropertyCount = 0;
-                    structType->Properties = NULL;
+                    (void)memset(structType, 0, sizeof(SCHEMA_STRUCT_TYPE_HANDLE_DATA));
+                    if (mallocAndStrcpy_s((char**)&structType->Name, typeName) != 0)
+                    {
+                        /* Codes_SRS_SCHEMA_99_066:[On any other error, Schema_CreateStructType shall return NULL.] */
+                        result = NULL;
+                        free(structType);
+                        LogError("(Error code:%s)", MU_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
+                    }
+                    else
+                    {
+                        /* Codes_SRS_SCHEMA_99_057:[Schema_CreateStructType shall create a new struct type and return a handle to it.] */
+                        schema->StructTypes[schema->StructTypeCount] = structType;
+                        schema->StructTypeCount++;
+                        structType->PropertyCount = 0;
+                        structType->Properties = NULL;
 
-                    /* Codes_SRS_SCHEMA_99_058:[On success, a non-NULL handle shall be returned.] */
-                    result = (SCHEMA_STRUCT_TYPE_HANDLE)structType;
+                        /* Codes_SRS_SCHEMA_99_058:[On success, a non-NULL handle shall be returned.] */
+                        result = (SCHEMA_STRUCT_TYPE_HANDLE)structType;
+                    }
                 }
 
                 /* If possible, reduce the memory of over allocation */
@@ -2775,6 +2791,7 @@ SCHEMA_RESULT Schema_AddModelDesiredProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeH
             }
             else
             {
+                (void)memset(desiredProperty, 0, sizeof(SCHEMA_DESIRED_PROPERTY_HANDLE_DATA));
                 if (mallocAndStrcpy_s((char**)&desiredProperty->desiredPropertyName, desiredPropertyName) != 0)
                 {
                     /*Codes_SRS_SCHEMA_02_028: [ If any failure occurs then Schema_AddModelDesiredProperty shall fail and return SCHEMA_ERROR. ]*/

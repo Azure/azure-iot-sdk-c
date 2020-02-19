@@ -66,6 +66,7 @@ static int DecodeValueFromNode(SCHEMA_HANDLE schemaHandle, AGENT_DATA_TYPE* agen
                 }
                 else
                 {
+                    (void)memset(memberValues, 0, (sizeof(AGENT_DATA_TYPE)* propertyCount));
                     const char** memberNames = (const char**)malloc(sizeof(const char*)* propertyCount);
                     if (memberNames == NULL)
                     {
@@ -236,6 +237,7 @@ static EXECUTE_COMMAND_RESULT DecodeAndExecuteModelAction(COMMAND_DECODER_HANDLE
                 }
                 else
                 {
+                    (void)memset(arguments, 0, (sizeof(AGENT_DATA_TYPE)* argCount));
                     size_t i;
                     size_t j;
                     result = EXECUTE_COMMAND_ERROR;
@@ -342,6 +344,7 @@ static METHODRETURN_HANDLE DecodeAndExecuteModelMethod(COMMAND_DECODER_HANDLE_DA
                 }
                 else
                 {
+                    (void)memset(arguments, 0, (sizeof(AGENT_DATA_TYPE)* argCount));
                     size_t i;
                     size_t j;
                     result = NULL;

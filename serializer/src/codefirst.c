@@ -903,6 +903,7 @@ void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLECTED_DAT
         /* Codes_SRS_CODEFIRST_99_082: [ CodeFirst_CreateDevice shall pass to Device_Create the function CodeFirst_InvokeAction, action callback argument and the CodeFirst_InvokeMethod ] */
         else
         {
+            (void)memset(deviceHeader, 0, sizeof(DEVICE_HEADER_DATA));
             if ((deviceHeader->data = malloc(dataSize)) == NULL)
             {
                 free(deviceHeader);

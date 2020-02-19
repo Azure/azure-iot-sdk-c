@@ -2733,6 +2733,7 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(AGENT_DATA_T
                                 }
                                 else
                                 {
+                                    (void)memset(dest->value.edmComplexType.fields[i].value, 0, sizeof(AGENT_DATA_TYPE));
                                     if (Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(dest->value.edmComplexType.fields[i].value, src->value.edmComplexType.fields[i].value) != AGENT_DATA_TYPES_OK)
                                     {
                                         result = AGENT_DATA_TYPES_ERROR;
@@ -2787,6 +2788,7 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_MemberPointers(AGENT_DATA_TY
         }
         else
         {
+            (void)memset(values, 0, (nMembers* sizeof(AGENT_DATA_TYPE)));
             size_t i;
             for (i = 0; i < nMembers; i++)
             {
@@ -2916,6 +2918,7 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_Members(AGENT_DATA_TYPE* age
                     }
                     else
                     {
+                        (void)memset(agentData->value.edmComplexType.fields[i].value, 0, sizeof(AGENT_DATA_TYPE));
                         /*copy the values*/
                         if (Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(agentData->value.edmComplexType.fields[i].value, &(memberValues[i])) != AGENT_DATA_TYPES_OK)
                         {

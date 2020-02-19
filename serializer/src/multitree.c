@@ -46,6 +46,7 @@ MULTITREE_HANDLE MultiTree_Create(MULTITREE_CLONE_FUNCTION cloneFunction, MULTIT
         result = (MULTITREE_HANDLE_DATA*)malloc(sizeof(MULTITREE_HANDLE_DATA));
         if (result != NULL)
         {
+            (void)memset(result, 0, sizeof(MULTITREE_HANDLE_DATA));
             result->name = NULL;
             result->value = NULL;
             result->cloneFunction = cloneFunction;
@@ -134,6 +135,7 @@ static CREATELEAF_RESULT createLeaf(MULTITREE_HANDLE_DATA* node, const char*name
         }
         else
         {
+            (void)memset(newNode, 0, sizeof(MULTITREE_HANDLE_DATA));
             newNode->nChildren = 0;
             newNode->children = NULL;
             if (mallocAndStrcpy_s(&(newNode->name), name) != 0)

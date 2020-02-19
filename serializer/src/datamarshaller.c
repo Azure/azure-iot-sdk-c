@@ -54,6 +54,7 @@ DATA_MARSHALLER_HANDLE DataMarshaller_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandl
     }
     else
     {
+        (void)memset(result, 0, sizeof(DATA_MARSHALLER_HANDLE_DATA));
         /*everything ok*/
         /*Codes_SRS_DATA_MARSHALLER_99_018:[ DataMarshaller_Create shall create a new DataMarshaller instance and on success it shall return a non NULL handle.]*/
         result->ModelHandle = modelHandle;

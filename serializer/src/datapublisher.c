@@ -112,6 +112,7 @@ TRANSACTION_HANDLE DataPublisher_StartTransaction(DATA_PUBLISHER_HANDLE dataPubl
         }
         else
         {
+            (void)memset(transaction, 0, sizeof(TRANSACTION_HANDLE_DATA));
             transaction->ValueCount = 0;
             transaction->Values = NULL;
             transaction->DataPublisherInstance = (DATA_PUBLISHER_HANDLE_DATA*)dataPublisherHandle;
@@ -155,55 +156,10 @@ DATA_PUBLISHER_RESULT DataPublisher_PublishTransacted(TRANSACTION_HANDLE transac
             result = DATA_PUBLISHER_SCHEMA_FAILED;
             LOG_DATA_PUBLISHER_ERROR;
         }
-        else if ((propertyValue = (AGENT_DATA_TYPE*)malloc(sizeof(AGENT_DATA_TYPE))) == NULL)
-        {
-            free(propertyPathCopy);
-
-            /* Codes_SRS_DATA_PUBLISHER_99_020:[ For any errors not explicitly mentioned here the DataPublisher APIs shall return DATA_PUBLISHER_ERROR.] */
-            result = DATA_PUBLISHER_ERROR;
-            LOG_DATA_PUBLISHER_ERROR;
-        }
-        else if (Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(propertyValue, data) != AGENT_DATA_TYPES_OK)
-        {
-            free(propertyPathCopy);
-            free(propertyValue);
-
-            /* Codes_SRS_DATA_PUBLISHER_99_028:[ If creating the copy fails then DATA_PUBLISHER_AGENT_DATA_TYPES_ERROR shall be returned.] */
-            result = DATA_PUBLISHER_AGENT_DATA_TYPES_ERROR;
-            LOG_DATA_PUBLISHER_ERROR;
-        }
         else
-        {
-            size_t i;
-            DATA_MARSHALLER_VALUE* propertySlot = NULL;
-
-            /* Codes_SRS_DATA_PUBLISHER_99_019:[ If the same property is associated twice with a transaction, then the last value shall be kept associated with the transaction.] */
-            for (i = 0; i < transaction->ValueCount; i++)
+        {       
+            if ((propertyValue = (AGENT_DATA_TYPE*)malloc(sizeof(AGENT_DATA_TYPE))) == NULL)
             {
-                if (strcmp(transaction->Values[i].PropertyPath, propertyPath) == 0)
-                {
-                    propertySlot = &transaction->Values[i];
-                    break;
-                }
-            }
-
-            if (propertySlot == NULL)
-            {
-                DATA_MARSHALLER_VALUE* newValues = (DATA_MARSHALLER_VALUE*)realloc(transaction->Values, sizeof(DATA_MARSHALLER_VALUE)* (transaction->ValueCount + 1));
-                if (newValues != NULL)
-                {
-                    transaction->Values = newValues;
-                    propertySlot = &transaction->Values[transaction->ValueCount];
-                    propertySlot->Value = NULL;
-                    propertySlot->PropertyPath = NULL;
-                    transaction->ValueCount++;
-                }
-            }
-
-            if (propertySlot == NULL)
-            {
-                Destroy_AGENT_DATA_TYPE((AGENT_DATA_TYPE*)propertyValue);
-                free(propertyValue);
                 free(propertyPathCopy);
 
                 /* Codes_SRS_DATA_PUBLISHER_99_020:[ For any errors not explicitly mentioned here the DataPublisher APIs shall return DATA_PUBLISHER_ERROR.] */
@@ -212,22 +168,74 @@ DATA_PUBLISHER_RESULT DataPublisher_PublishTransacted(TRANSACTION_HANDLE transac
             }
             else
             {
-                if (propertySlot->Value != NULL)
+                (void)memset(propertyValue, 0, sizeof(AGENT_DATA_TYPE));
+                if (Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(propertyValue, data) != AGENT_DATA_TYPES_OK)
                 {
-                    Destroy_AGENT_DATA_TYPE((AGENT_DATA_TYPE*)propertySlot->Value);
-                    free((AGENT_DATA_TYPE*)propertySlot->Value);
+                    free(propertyPathCopy);
+                    free(propertyValue);
+
+                    /* Codes_SRS_DATA_PUBLISHER_99_028:[ If creating the copy fails then DATA_PUBLISHER_AGENT_DATA_TYPES_ERROR shall be returned.] */
+                    result = DATA_PUBLISHER_AGENT_DATA_TYPES_ERROR;
+                    LOG_DATA_PUBLISHER_ERROR;
                 }
-                if (propertySlot->PropertyPath != NULL)
+                else
                 {
-                    char* existingValue = (char*)propertySlot->PropertyPath;
-                    free(existingValue);
+                    size_t i;
+                    DATA_MARSHALLER_VALUE* propertySlot = NULL;
+
+                    /* Codes_SRS_DATA_PUBLISHER_99_019:[ If the same property is associated twice with a transaction, then the last value shall be kept associated with the transaction.] */
+                    for (i = 0; i < transaction->ValueCount; i++)
+                    {
+                        if (strcmp(transaction->Values[i].PropertyPath, propertyPath) == 0)
+                        {
+                            propertySlot = &transaction->Values[i];
+                            break;
+                        }
+                    }
+
+                    if (propertySlot == NULL)
+                    {
+                        DATA_MARSHALLER_VALUE* newValues = (DATA_MARSHALLER_VALUE*)realloc(transaction->Values, sizeof(DATA_MARSHALLER_VALUE)* (transaction->ValueCount + 1));
+                        if (newValues != NULL)
+                        {
+                            transaction->Values = newValues;
+                            propertySlot = &transaction->Values[transaction->ValueCount];
+                            propertySlot->Value = NULL;
+                            propertySlot->PropertyPath = NULL;
+                            transaction->ValueCount++;
+                        }
+                    }
+
+                    if (propertySlot == NULL)
+                    {
+                        Destroy_AGENT_DATA_TYPE((AGENT_DATA_TYPE*)propertyValue);
+                        free(propertyValue);
+                        free(propertyPathCopy);
+
+                        /* Codes_SRS_DATA_PUBLISHER_99_020:[ For any errors not explicitly mentioned here the DataPublisher APIs shall return DATA_PUBLISHER_ERROR.] */
+                        result = DATA_PUBLISHER_ERROR;
+                        LOG_DATA_PUBLISHER_ERROR;
+                    }
+                    else
+                    {
+                        if (propertySlot->Value != NULL)
+                        {
+                            Destroy_AGENT_DATA_TYPE((AGENT_DATA_TYPE*)propertySlot->Value);
+                            free((AGENT_DATA_TYPE*)propertySlot->Value);
+                        }
+                        if (propertySlot->PropertyPath != NULL)
+                        {
+                            char* existingValue = (char*)propertySlot->PropertyPath;
+                            free(existingValue);
+                        }
+
+                        /* Codes_SRS_DATA_PUBLISHER_99_016:[ When DataPublisher_PublishTransacted is invoked, DataPublisher shall associate the data with the transaction identified by the transactionHandle argument and return DATA_PUBLISHER_OK. No data shall be dispatched at the time of the call.] */
+                        propertySlot->PropertyPath = propertyPathCopy;
+                        propertySlot->Value = propertyValue;
+
+                        result = DATA_PUBLISHER_OK;
+                    }
                 }
-
-                /* Codes_SRS_DATA_PUBLISHER_99_016:[ When DataPublisher_PublishTransacted is invoked, DataPublisher shall associate the data with the transaction identified by the transactionHandle argument and return DATA_PUBLISHER_OK. No data shall be dispatched at the time of the call.] */
-                propertySlot->PropertyPath = propertyPathCopy;
-                propertySlot->Value = propertyValue;
-
-                result = DATA_PUBLISHER_OK;
             }
         }
     }
@@ -415,6 +423,7 @@ DATA_PUBLISHER_RESULT DataPublisher_PublishTransacted_ReportedProperty(REPORTED_
                 }
                 else
                 {
+                    (void)memset(clone, 0, sizeof(AGENT_DATA_TYPE));
                     if (Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(clone, data) != AGENT_DATA_TYPES_OK)
                     {
                         /*Codes_SRS_DATA_PUBLISHER_02_016: [ If any error occurs then DataPublisher_PublishTransacted_ReportedProperty shall fail and return DATA_PUBLISHER_ERROR. ]*/
@@ -462,6 +471,7 @@ DATA_PUBLISHER_RESULT DataPublisher_PublishTransacted_ReportedProperty(REPORTED_
                         }
                         else
                         {
+                            (void)memset((AGENT_DATA_TYPE*)newValue->Value, 0, sizeof(AGENT_DATA_TYPE));
                             if (Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE((AGENT_DATA_TYPE*)newValue->Value, data) != AGENT_DATA_TYPES_OK)
                             {
                                 /*Codes_SRS_DATA_PUBLISHER_02_016: [ If any error occurs then DataPublisher_PublishTransacted_ReportedProperty shall fail and return DATA_PUBLISHER_ERROR. ]*/
