@@ -98,7 +98,7 @@ static void DeviceClientDestroy(void* iothubClientHandle)
     IoTHubDeviceClient_Destroy((IOTHUB_DEVICE_CLIENT_HANDLE)iothubClientHandle);
 }
 
-DIGITALTWIN_CLIENT_RESULT DigitalTwin_DeviceClient_CreateFromDeviceHandle(IOTHUB_DEVICE_CLIENT_HANDLE deviceHandle, DIGITALTWIN_DEVICE_CLIENT_HANDLE* dtDeviceClientHandle)
+DIGITALTWIN_CLIENT_RESULT DigitalTwin_DeviceClient_CreateFromDeviceHandle(IOTHUB_DEVICE_CLIENT_HANDLE deviceHandle, DIGITALTWIN_DEVICE_CLIENT_HANDLE* dtDeviceClientHandle, const char* deviceCapabilityModel)
 {
     DIGITALTWIN_CLIENT_RESULT result;
     IOTHUB_CLIENT_RESULT iothubClientResult;
@@ -113,6 +113,11 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_DeviceClient_CreateFromDeviceHandle(IOTHUB
     {
         LogError("Failed to set option %s, error=%d", OPTION_AUTO_URL_ENCODE_DECODE, iothubClientResult);
         LogError("NOTE: This error typically occurs when trying to use a non-supported DigitalTwin protocol.  You MUST use MQTT or MQTT_WS.  AMQP(_WS) and HTTP are not supported");
+        result = DIGITALTWIN_CLIENT_ERROR;
+    }
+    else if ((iothubClientResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_DT_MODEL_ID, deviceCapabilityModel)) != IOTHUB_CLIENT_OK)
+    {
+        LogError("Failed to set option %s, error=%d", OPTION_DT_MODEL_ID, iothubClientResult);
         result = DIGITALTWIN_CLIENT_ERROR;
     }
     else 

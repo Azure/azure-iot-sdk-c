@@ -91,6 +91,8 @@ static const char* CONNECTION_MODULE_ID_PROPERTY = "cmid";
 
 static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtimeutc";
 
+static const char DT_MODEL_ID_TOKEN[] = "digital-twin-model-id";
+
 #define TOLOWER(c) (((c>='A') && (c<='Z'))?c-'A'+'a':c)
 
 #define UNSUBSCRIBE_FROM_TOPIC                  0x0000
@@ -236,7 +238,7 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     int http_proxy_port;
     char* http_proxy_username;
     char* http_proxy_password;
-    bool isProductInfoSet;
+    bool isOptionalParameterSet;
     int disconnect_recv_flag;
 } MQTTTRANSPORT_HANDLE_DATA, *PMQTTTRANSPORT_HANDLE_DATA;
 
@@ -2217,7 +2219,7 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 
     if (result == 0)
     {
-        if (!transport_data->isProductInfoSet)
+        if (!transport_data->isOptionalParameterSet)
         {
             // This requires the iothubClientHandle, which sadly the MQTT transport only gets on DoWork, so this code still needs to remain here.
             // The correct place for this would be in the Create method, but we don't get the client handle there.
@@ -2247,7 +2249,19 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 }
                 else
                 {
-                    transport_data->isProductInfoSet = true;
+                    STRING_HANDLE param;
+                    const char* dt_model_id = transport_data->transport_callbacks.dt_model_id_cb(transport_data->transport_ctx);
+                    if (dt_model_id != NULL)
+                    {
+                        param = STRING_construct_sprintf("&%s=%s", DT_MODEL_ID_TOKEN, STRING_c_str(URL_EncodeString(dt_model_id)));
+
+                        if (STRING_concat_with_STRING(transport_data->configPassedThroughUsername, param) != 0)
+                        {
+                            LogError("Failed to set DT Model Id");
+                        }
+                    }
+
+                    transport_data->isOptionalParameterSet = true;
                 }
 
                 STRING_delete(clone);
@@ -2582,7 +2596,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                         state->topic_DeviceMethods = NULL;
                         state->topic_InputQueue = NULL;
                         state->log_trace = state->raw_trace = false;
-                        state->isProductInfoSet = false;
+                        state->isOptionalParameterSet = false;
                         state->auto_url_encode_decode = false;
                         state->conn_attempted = false;
                     }

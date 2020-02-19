@@ -266,7 +266,7 @@ int main(int argc, char** argv)
         result = MU_FAILURE;
     }
 #endif
-    else if ((result = (int)DigitalTwin_DeviceClient_CreateFromDeviceHandle(deviceHandle, &dtDeviceClientHandle)) != DIGITALTWIN_CLIENT_OK)
+    else if ((result = (int)DigitalTwin_DeviceClient_CreateFromDeviceHandle(deviceHandle, &dtDeviceClientHandle, DIGITALTWIN_E2E_DEVICE_CAPABILITY_MODEL_URI)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("DigitalTwin_DeviceClient_CreateFromDeviceHandle failed, error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, (DIGITALTWIN_CLIENT_RESULT)result));
     }    

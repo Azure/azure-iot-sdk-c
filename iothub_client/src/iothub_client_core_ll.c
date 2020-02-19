@@ -128,6 +128,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG
     STRING_HANDLE product_info;
     IOTHUB_DIAGNOSTIC_SETTING_DATA diagnostic_setting;
     SINGLYLINKEDLIST_HANDLE event_callbacks;  // List of IOTHUB_EVENT_CALLBACK's
+    STRING_HANDLE dt_model_id;
 }IOTHUB_CLIENT_CORE_LL_HANDLE_DATA;
 
 static const char HOSTNAME_TOKEN[] = "HostName";
@@ -140,7 +141,6 @@ static const char PROTOCOL_GATEWAY_HOST_TOKEN[] = "GatewayHostName";
 static const char MODULE_ID_TOKEN[] = "ModuleId";
 static const char PROVISIONING_TOKEN[] = "UseProvisioning";
 static const char PROVISIONING_ACCEPTABLE_VALUE[] = "true";
-
 
 #ifdef USE_EDGE_MODULES
 /*The following section should be moved to iothub_module_client_ll.c during impending refactor*/
@@ -615,6 +615,22 @@ static const char* IoTHubClientCore_LL_GetProductInfo(void* ctx)
     return result;
 }
 
+static const char* IoTHubClientCore_LL_GetDTModelId(void* ctx)
+{
+    const char* result;
+    if (ctx == NULL)
+    {
+        result = NULL;
+        LogError("invalid argument ctx %p", ctx);
+    }
+    else
+    {
+        IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* iothub_data = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)ctx;
+        result = STRING_c_str(iothub_data->dt_model_id);
+    }
+    return result;
+}
+
 static bool IoTHubClientCore_LL_MessageCallbackFromInput(MESSAGE_CALLBACK_INFO* messageData, void* ctx)
 {
     bool result;
@@ -828,6 +844,7 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
             transport_cb.msg_input_cb = IoTHubClientCore_LL_MessageCallbackFromInput;
             transport_cb.msg_cb = IoTHubClientCore_LL_MessageCallback;
             transport_cb.method_complete_cb = IoTHubClientCore_LL_DeviceMethodComplete;
+            transport_cb.dt_model_id_cb = IoTHubClientCore_LL_GetDTModelId;
 
             if (client_config != NULL)
             {
@@ -2319,6 +2336,24 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetOption(IOTHUB_CLIENT_CORE_LL_HANDLE 
                 result = IOTHUB_CLIENT_OK;
             }
         }
+        else if (strcmp(optionName, OPTION_DT_MODEL_ID) == 0)
+        {
+            if (handleData->dt_model_id != NULL)
+            {
+                STRING_delete(handleData->dt_model_id);
+                handleData->dt_model_id = NULL;
+            }
+
+            if ((handleData->dt_model_id = STRING_construct((const char*)value)) == NULL)
+            {
+                LogError("STRING_c_str failed");
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else
+            {
+                result = IOTHUB_CLIENT_OK;
+            }
+        }
         else
         {
             // This section is unusual for SetOption calls because it attempts to pass unhandled options
@@ -2974,6 +3009,7 @@ int IoTHubClientCore_LL_GetTransportCallbacks(TRANSPORT_CALLBACKS_INFO* transpor
         transport_cb->msg_input_cb = IoTHubClientCore_LL_MessageCallbackFromInput;
         transport_cb->msg_cb = IoTHubClientCore_LL_MessageCallback;
         transport_cb->method_complete_cb = IoTHubClientCore_LL_DeviceMethodComplete;
+        transport_cb->dt_model_id_cb = IoTHubClientCore_LL_GetDTModelId;
         result = 0;
     }
     return result;

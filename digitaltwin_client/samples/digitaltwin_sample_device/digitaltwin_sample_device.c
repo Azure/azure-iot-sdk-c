@@ -217,7 +217,7 @@ int main(int argc, char *argv[])
     // The call to DigitalTwin_DeviceClient_CreateFromDeviceHandle() transfers ownership
     // of this handle (including destroying it) to the DigitalTwin layer, analogous to a .release()
     // in some C++ helpers.  DO NOT USE deviceHandle after this point.
-    else if ((result = DigitalTwin_DeviceClient_CreateFromDeviceHandle(deviceHandle, &dtDeviceClientHandle)) != DIGITALTWIN_CLIENT_OK)
+    else if ((result = DigitalTwin_DeviceClient_CreateFromDeviceHandle(deviceHandle, &dtDeviceClientHandle, DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_ID)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("DigitalTwin_DeviceClient_CreateFromDeviceHandle failed, error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
     }

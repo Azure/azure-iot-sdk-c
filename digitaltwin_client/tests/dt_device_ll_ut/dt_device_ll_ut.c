@@ -101,6 +101,7 @@ TEST_FUNCTION_CLEANUP(TestMethodCleanup)
 static void set_expected_calls_for_DT_DeviceClient_LL_CreateFromDeviceHandle()
 {
     STRICT_EXPECTED_CALL(IoTHubDeviceClient_LL_SetOption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubDeviceClient_LL_SetOption(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(DT_ClientCoreCreate(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 }
 
@@ -115,7 +116,7 @@ TEST_FUNCTION(DigitalTwin_DeviceClient_LL_LL_CreateFromDeviceHandle_ok)
     set_expected_calls_for_DT_DeviceClient_LL_CreateFromDeviceHandle();
 
     //act
-    result = DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle(testIotHubDeviceLLHandle, &h);
+    result = DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle(testIotHubDeviceLLHandle, &h, testDTDeviceCapabilityModel);
 
     //assert
     ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result);
@@ -133,7 +134,7 @@ TEST_FUNCTION(DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle_NULL_iothub_han
     DIGITALTWIN_CLIENT_RESULT result;
 
     //act
-    result = DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle(NULL, &h);
+    result = DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle(NULL, &h, testDTDeviceCapabilityModel);
 
     //assert
     ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG, result);
@@ -146,7 +147,7 @@ TEST_FUNCTION(DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle_NULL_dt_handle_
     DIGITALTWIN_CLIENT_RESULT result;
 
     //act
-    result = DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle(testIotHubDeviceLLHandle, NULL);
+    result = DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle(testIotHubDeviceLLHandle, NULL, testDTDeviceCapabilityModel);
 
     //assert
     ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG, result);
@@ -174,7 +175,7 @@ TEST_FUNCTION(DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle_fail)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
 
-        result = DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle(testIotHubDeviceLLHandle, &h);
+        result = DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle(testIotHubDeviceLLHandle, &h, testDTDeviceCapabilityModel);
         
         //assert
         ASSERT_ARE_NOT_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result, message);
@@ -191,7 +192,7 @@ static DIGITALTWIN_DEVICE_CLIENT_LL_HANDLE allocate_DIGITALTWIN_DEVICE_CLIENT_LL
     DIGITALTWIN_CLIENT_RESULT result;
     DIGITALTWIN_DEVICE_CLIENT_LL_HANDLE h = NULL;
 
-    result = DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle(testIotHubDeviceLLHandle, &h);
+    result = DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle(testIotHubDeviceLLHandle, &h, testDTDeviceCapabilityModel);
 
     ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result);
     ASSERT_IS_NOT_NULL(h);
