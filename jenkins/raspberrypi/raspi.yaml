@@ -163,8 +163,8 @@ jobs:
       RESET_RASPI: $(RESET_RASPI)
 
 - job: 'Run_MQTT_DT_E2E_Test'
-  dependsOn: Run_AMQP_DT_E2E_Test
-  condition: ne('True', variables['ADDITIONAL_TEST'])
+  dependsOn: Cross_Compile
+  condition: succeeded() #ne('True', variables['ADDITIONAL_TEST'])
   pool: 
     name: devicelab-02
   steps:  
@@ -190,8 +190,8 @@ jobs:
       RESET_RASPI: $(RESET_RASPI)
 
 - job: 'Run_AMQP_DM_E2E_Test'
-  dependsOn: Run_MQTT_DT_E2E_Test
-  condition: ne('True', variables['ADDITIONAL_TEST'])
+  dependsOn: Cross_Compile
+  condition: succeeded() #ne('True', variables['ADDITIONAL_TEST'])
   pool: 
     name: devicelab-02
   steps:  
@@ -217,8 +217,8 @@ jobs:
       RESET_RASPI: $(RESET_RASPI)
 
 - job: 'Run_MQTT_DM_E2E_Test'
-  dependsOn: Run_AMQP_DM_E2E_Test
-  condition: ne('True', variables['ADDITIONAL_TEST'])
+  dependsOn: Cross_Compile
+  condition: succeeded() #ne('True', variables['ADDITIONAL_TEST'])
   pool: 
     name: devicelab-02
   steps:  
