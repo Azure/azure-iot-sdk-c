@@ -150,7 +150,7 @@ jobs:
       cd $(Build.SourcesDirectory)/testtools/UART_interface/
       ls
       . rpi_input.sh
-      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -t 620
+      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -t 620 $(RESET_RASPI)
       rm input.txt
       unset RASPI_TEST_FILE
     displayName: 'Execute Test'
@@ -164,7 +164,7 @@ jobs:
 
 - job: 'Run_MQTT_DT_E2E_Test'
   dependsOn: Cross_Compile
-  condition: succeeded() #ne('True', variables['ADDITIONAL_TEST'])
+  condition: succeeded()
   pool: 
     name: devicelab-02
   steps:  
@@ -211,7 +211,7 @@ jobs:
       cd $(Build.SourcesDirectory)/testtools/UART_interface/
       ls
       . rpi_input.sh
-      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -t 620
+      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -t 620 $(RESET_RASPI)
       rm input.txt
       unset RASPI_TEST_FILE
     displayName: 'Execute Test'
@@ -225,7 +225,7 @@ jobs:
 
 - job: 'Run_AMQP_DM_E2E_Test'
   dependsOn: Cross_Compile
-  condition: succeeded() #ne('True', variables['ADDITIONAL_TEST'])
+  condition: succeeded()
   pool: 
     name: devicelab-02
   steps:  
@@ -272,7 +272,7 @@ jobs:
       cd $(Build.SourcesDirectory)/testtools/UART_interface/
       ls
       . rpi_input.sh
-      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -t 620 
+      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -t 620 $(RESET_RASPI)
       rm input.txt
       unset RASPI_TEST_FILE
     displayName: 'Execute Test'
@@ -286,7 +286,7 @@ jobs:
 
 - job: 'Run_MQTT_DM_E2E_Test'
   dependsOn: Cross_Compile
-  condition: succeeded() #ne('True', variables['ADDITIONAL_TEST'])
+  condition: succeeded()
   pool: 
     name: devicelab-02
   steps:  
