@@ -150,7 +150,7 @@ jobs:
       cd $(Build.SourcesDirectory)/testtools/UART_interface/
       ls
       . rpi_input.sh
-      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -t 620 $(RESET_RASPI)
+      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -t 720 $(RESET_RASPI)
       rm input.txt
       unset RASPI_TEST_FILE
     displayName: 'Execute Test'
