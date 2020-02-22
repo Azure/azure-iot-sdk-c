@@ -3,7 +3,7 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 cd $STAGING_DIR
 echo $NEWTIN | sudo -S rm -r azure-iot-pal-arduino
-git clone https://github.com/Azure/azure-iot-pal-arduino.git 
+git clone -b update-sample-tree https://github.com/Azure/azure-iot-pal-arduino.git 
 
 cd azure-iot-pal-arduino
 echo "copying sdk sources path to pal layer now"
