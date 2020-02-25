@@ -169,7 +169,7 @@ class rpi_uart_interface(uart_interface):
                 if serial_settings.test_timeout:
                     print("Test input end. Waiting for results. Time Elapsed: ", (time.time() - session_start))
                     while((time.time() - session_start) < serial_settings.test_timeout):
-                        time.sleep(.2)
+                        time.sleep(.1)
                         output = ser.readline(ser.in_waiting)
                         output = output.decode(encoding='utf-8', errors='ignore')
                         check_test_failures(output)
