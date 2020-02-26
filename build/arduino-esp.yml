@@ -78,8 +78,12 @@ jobs:
       NEWTIN: $(NEWTIN)
 
   - script: |
+      cd $(Agent.WorkFolder)
+      echo "work folder"
       ls
-      cd $(Agent.WorkFolder)/esp32/iothub_ll_telemetry_sample/
+      cd $(Agent.WorkFolder)/esp8266/iothub_ll_telemetry_sample
+      echo "telem folder"
+      ls
       arduino --upload --board esp32:esp32:esp32 --port $(ESP32_PORT) --pref sketchbook.path=../../ --verbose-build iothub_ll_telemetry_sample.ino 
       # should fail job if build/upload fails
     displayName: 'build and upload'
