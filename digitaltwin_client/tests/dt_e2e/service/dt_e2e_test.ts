@@ -463,7 +463,10 @@ describe("DigitalTwin Properties E2E tests", function() {
         verifyPropertySet(done, testPropertyInterfaceName, "ProcessUpdatedProperty1", `ValueOfPropertyBeingSet_1`, 0)
     })
 
-    it("Verify all interfaces registered", function(done) {
-        veryAllInterfacesAreRegistered(done)
-    })
+    // Disable test requires updates from node service client sdk and the test code to support changes for Refresh.
+    // Should verify capability model id instead of interfaces.  The interfaces info will be in the capability model definition.
+
+    //it("Verify all interfaces registered", function(done) {
+    //    veryAllInterfacesAreRegistered(done)
+    //})
 })

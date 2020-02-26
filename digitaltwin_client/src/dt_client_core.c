@@ -667,92 +667,27 @@ static DT_SEND_TELEMETRY_CALLBACK_CONTEXT* CreateDTSendTelemetryCallbackContext(
 }
 
 
-// RegisterDTInterfaces_Callback is called when we receive acknowledgement from the service that the message we sent registering the interfaces was received.
-static void RegisterDTInterfaces_Callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
+static void InvokeBindingOnDemand(DT_CLIENT_CORE* dtClientCore)
 {
-    LogInfo("DigitalTwin Client Core: Processing register DigitalTwin interfaces callback.  confirmationResult=%s", MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT,result));
+    DIGITALTWIN_CLIENT_RESULT dtReportedInterfacesStatus = DIGITALTWIN_CLIENT_OK;
 
-    if (userContextCallback == NULL)
+    // We start listening for incoming commands and properties after binding is invoked.
+    // If either of these fail, we will report an error to the application.
+    LogInfo("DigitalTwin Client Core: Interfaces successfully registered.  Register for device method and twin callbacks if needed");
+
+    if (InvokeBindingSetDeviceMethodCallbackIfNeeded(dtClientCore, DTDeviceMethod_Callback) != 0)
     {
-        LogError("userContextCallback=%p.  Cannot process callback", userContextCallback);
+        LogError("Cannot bind to device method callbacks");
+        dtReportedInterfacesStatus = DIGITALTWIN_CLIENT_ERROR;
     }
-    else
+    else if (InvokeBindingSetDeviceTwinCallbackIfNeeded(dtClientCore, DeviceTwinDT_Callback) != 0)
     {
-        DT_SEND_TELEMETRY_CALLBACK_CONTEXT* dtSendTelemetryCallbackContext = (DT_SEND_TELEMETRY_CALLBACK_CONTEXT*)userContextCallback;
-        DT_CLIENT_CORE* dtClientCore = dtSendTelemetryCallbackContext->dtClientCore;
-
-        if (BeginClientCoreCallbackProcessing(dtClientCore) != 0)
-        {
-            LogError("Skipping callback processing");
-        }
-        else
-        {
-            DIGITALTWIN_CLIENT_RESULT dtReportedInterfacesStatus = (result == IOTHUB_CLIENT_CONFIRMATION_OK) ? DIGITALTWIN_CLIENT_OK : DIGITALTWIN_CLIENT_ERROR;
-            
-            if (dtReportedInterfacesStatus == DIGITALTWIN_CLIENT_OK)
-            {
-                // Only after we've registered our interfaces should we start listening for incoming commands and properties.
-                // If either of these fail, we will report an error to the application.
-                LogInfo("DigitalTwin Client Core: Interfaces successfully registered.  Register for device method and twin callbacks if needed");
-
-                if (InvokeBindingSetDeviceMethodCallbackIfNeeded(dtClientCore, DTDeviceMethod_Callback) != 0)
-                {
-                    LogError("Cannot bind to device method callbacks");
-                    dtReportedInterfacesStatus = DIGITALTWIN_CLIENT_ERROR;
-                }
-                else if (InvokeBindingSetDeviceTwinCallbackIfNeeded(dtClientCore, DeviceTwinDT_Callback) != 0)
-                {
-                    LogError("Cannot bind to device twin callbacks");
-                    dtReportedInterfacesStatus = DIGITALTWIN_CLIENT_ERROR;
-                }
-            }
-
-            // Mark internal state as complete and signal to application the status of the DigitalTwin registration request.
-            SetRegistrationCompleteInvokeCallbacks(dtClientCore, dtReportedInterfacesStatus);
-
-            EndClientCoreCallbackProcessing(dtClientCore);
-        }
-
-        free(dtSendTelemetryCallbackContext);
+        LogError("Cannot bind to device twin callbacks");
+        dtReportedInterfacesStatus = DIGITALTWIN_CLIENT_ERROR;
     }
 
-}
-
-
-// SendInterfacesToRegisterMessage creates a telemetry message that will register the specified interfaces with the service.
-static DIGITALTWIN_CLIENT_RESULT SendInterfacesToRegisterMessage(DT_CLIENT_CORE* dtClientCore, const char* deviceCapabilityModel)
-{
-    DIGITALTWIN_CLIENT_RESULT result;
-    DT_SEND_TELEMETRY_CALLBACK_CONTEXT* dtSendTelemetryCallbackContext = NULL;
-    IOTHUB_MESSAGE_HANDLE telemetryRegisterMessage = NULL;
-
-    if ((result = DT_InterfaceList_CreateRegistrationMessage(dtClientCore->dtInterfaceListHandle, deviceCapabilityModel, &telemetryRegisterMessage)) != DIGITALTWIN_CLIENT_OK)
-    {
-        LogError("DT_InterfaceList_CreateRegistrationMessage failed");
-    }
-    else if ((dtSendTelemetryCallbackContext = CreateDTSendTelemetryCallbackContext(dtClientCore, NULL, NULL)) == NULL)
-    {
-        LogError("Unable to create callback context");
-        result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
-    }
-    else if (InvokeBindingSendEventAsync(dtClientCore, telemetryRegisterMessage, RegisterDTInterfaces_Callback, dtSendTelemetryCallbackContext) != 0)
-    {
-        LogError("InvokeBindingSendEventAsync failed");
-        result = DIGITALTWIN_CLIENT_ERROR;
-    }
-    else
-    {
-        LogInfo("Successfully queued registration message");
-        result = DIGITALTWIN_CLIENT_OK;
-    }
-
-    if (result != DIGITALTWIN_CLIENT_OK)
-    {
-        free(dtSendTelemetryCallbackContext);
-    }
-
-    IoTHubMessage_Destroy(telemetryRegisterMessage);
-    return result;
+    // Mark internal state as complete and signal to application the status of the DigitalTwin registration request.
+    SetRegistrationCompleteInvokeCallbacks(dtClientCore, dtReportedInterfacesStatus);
 }
 
 // VerifyComponentsUnique makes sure that the componentName of each handle is unique.  E.g. one connection cannot have
@@ -810,20 +745,15 @@ static DIGITALTWIN_CLIENT_RESULT VerifyComponentsUnique(DIGITALTWIN_INTERFACE_CL
 
 // DT_ClientCoreRegisterInterfacesAsync updates the list of interfaces we're supporting and begins 
 // protocol update of server.
-DIGITALTWIN_CLIENT_RESULT DT_ClientCoreRegisterInterfacesAsync(DT_CLIENT_CORE_HANDLE dtClientCoreHandle, const char* deviceCapabilityModel, DIGITALTWIN_INTERFACE_CLIENT_HANDLE* dtInterfaces, unsigned int numDTInterfaces, DIGITALTWIN_INTERFACE_REGISTERED_CALLBACK dtInterfaceRegisteredCallback, void* userContextCallback)
+DIGITALTWIN_CLIENT_RESULT DT_ClientCoreRegisterInterfacesAsync(DT_CLIENT_CORE_HANDLE dtClientCoreHandle, DIGITALTWIN_INTERFACE_CLIENT_HANDLE* dtInterfaces, unsigned int numDTInterfaces, DIGITALTWIN_INTERFACE_REGISTERED_CALLBACK dtInterfaceRegisteredCallback, void* userContextCallback)
 {
     DIGITALTWIN_CLIENT_RESULT result;
     DT_CLIENT_CORE* dtClientCore = (DT_CLIENT_CORE*)dtClientCoreHandle;
     bool lockHeld = false;
 
-    if ((dtClientCoreHandle == NULL) || (deviceCapabilityModel == NULL))
+    if (dtClientCoreHandle == NULL)
     {
-        LogError("Invalid parameter(s). dtClientCoreHandle=%p, deviceCapabilityModel=%p", dtClientCoreHandle, deviceCapabilityModel);
-        result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
-    }
-    else if (DT_InterfaceClient_CheckNameValid(deviceCapabilityModel, true) != 0)
-    {
-        LogError("Invalid deviceCapabilityModel %s", deviceCapabilityModel);
+        LogError("Invalid parameter(s). dtClientCoreHandle=%p", dtClientCoreHandle);
         result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
     }
     else if ((result = VerifyComponentsUnique(dtInterfaces, numDTInterfaces)) != DIGITALTWIN_CLIENT_OK)
@@ -849,21 +779,23 @@ DIGITALTWIN_CLIENT_RESULT DT_ClientCoreRegisterInterfacesAsync(DT_CLIENT_CORE_HA
     {
         LogError("DT_InterfaceList_BindInterfaces failed, result = %d", result);
     }
-    else if ((result = SendInterfacesToRegisterMessage(dtClientCore, deviceCapabilityModel)) != DIGITALTWIN_CLIENT_OK)
-    {
-        LogError("SendInterfacesToRegisterMessage failed");
-    }
     else
     {
         dtClientCore->registerInterfacesCallbackContext.dtInterfaceRegisteredCallback = dtInterfaceRegisteredCallback;
         dtClientCore->registerInterfacesCallbackContext.userContextCallback = userContextCallback;
-    
+
         // Once we're processing an interface update, no other caller initiated operations on this device client can occur.
         dtClientCore->registrationStatus = DT_CLIENT_REGISTRATION_STATUS_REGISTERING;
         result = DIGITALTWIN_CLIENT_OK;
     }
 
     (void)InvokeBindingUnlock(dtClientCore, &lockHeld);
+
+    if (result == DIGITALTWIN_CLIENT_OK)
+    {
+        InvokeBindingOnDemand(dtClientCore);
+    }
+
     return result;
 }
 

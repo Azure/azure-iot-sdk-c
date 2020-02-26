@@ -98,15 +98,15 @@ static void DeviceClientDestroy(void* iothubClientHandle)
     IoTHubDeviceClient_Destroy((IOTHUB_DEVICE_CLIENT_HANDLE)iothubClientHandle);
 }
 
-DIGITALTWIN_CLIENT_RESULT DigitalTwin_DeviceClient_CreateFromDeviceHandle(IOTHUB_DEVICE_CLIENT_HANDLE deviceHandle, DIGITALTWIN_DEVICE_CLIENT_HANDLE* dtDeviceClientHandle, const char* deviceCapabilityModel)
+DIGITALTWIN_CLIENT_RESULT DigitalTwin_DeviceClient_CreateFromDeviceHandle(IOTHUB_DEVICE_CLIENT_HANDLE deviceHandle, const char* deviceCapabilityModel, DIGITALTWIN_DEVICE_CLIENT_HANDLE* dtDeviceClientHandle)
 {
     DIGITALTWIN_CLIENT_RESULT result;
     IOTHUB_CLIENT_RESULT iothubClientResult;
     bool urlEncodeOn = true;
 
-    if ((deviceHandle == NULL) || (dtDeviceClientHandle == NULL))
+    if ((deviceHandle == NULL) || (deviceCapabilityModel == NULL) || (dtDeviceClientHandle == NULL) )
     {
-        LogError("DeviceHandle=%p, dtDeviceClientHandle=%p", deviceHandle, dtDeviceClientHandle);
+        LogError("DeviceHandle=%p, deviceCapabilityModel=%p, dtDeviceClientHandle=%p", deviceHandle, deviceCapabilityModel, dtDeviceClientHandle);
         result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
     }
     else if ((iothubClientResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn)) != IOTHUB_CLIENT_OK)
@@ -153,9 +153,9 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_DeviceClient_CreateFromDeviceHandle(IOTHUB
     return result;
 }
 
-DIGITALTWIN_CLIENT_RESULT DigitalTwin_DeviceClient_RegisterInterfacesAsync(DIGITALTWIN_DEVICE_CLIENT_HANDLE dtDeviceClientHandle, const char* deviceCapabilityModel, DIGITALTWIN_INTERFACE_CLIENT_HANDLE* dtInterfaces, unsigned int numDTInterfaces, DIGITALTWIN_INTERFACE_REGISTERED_CALLBACK dtInterfaceRegisteredCallback, void* userContextCallback)
+DIGITALTWIN_CLIENT_RESULT DigitalTwin_DeviceClient_RegisterInterfacesAsync(DIGITALTWIN_DEVICE_CLIENT_HANDLE dtDeviceClientHandle, DIGITALTWIN_INTERFACE_CLIENT_HANDLE* dtInterfaces, unsigned int numDTInterfaces, DIGITALTWIN_INTERFACE_REGISTERED_CALLBACK dtInterfaceRegisteredCallback, void* userContextCallback)
 {
-    return DT_ClientCoreRegisterInterfacesAsync((DT_CLIENT_CORE_HANDLE)dtDeviceClientHandle, deviceCapabilityModel, dtInterfaces, numDTInterfaces, dtInterfaceRegisteredCallback, userContextCallback);
+    return DT_ClientCoreRegisterInterfacesAsync((DT_CLIENT_CORE_HANDLE)dtDeviceClientHandle, dtInterfaces, numDTInterfaces, dtInterfaceRegisteredCallback, userContextCallback);
 }
 
 void DigitalTwin_DeviceClient_Destroy(DIGITALTWIN_DEVICE_CLIENT_HANDLE dtDeviceClientHandle)

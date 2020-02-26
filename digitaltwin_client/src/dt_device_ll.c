@@ -97,15 +97,15 @@ static void DeviceClient_LL_DoWork(void* iothubClientHandle)
     IoTHubDeviceClient_LL_DoWork((IOTHUB_DEVICE_CLIENT_LL_HANDLE)iothubClientHandle);
 }
 
-DIGITALTWIN_CLIENT_RESULT DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceLLHandle, DIGITALTWIN_DEVICE_CLIENT_LL_HANDLE* dtDeviceLLClientHandle, const char* deviceCapabilityModel)
+DIGITALTWIN_CLIENT_RESULT DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceLLHandle, const char* deviceCapabilityModel, DIGITALTWIN_DEVICE_CLIENT_LL_HANDLE* dtDeviceLLClientHandle)
 {
     DIGITALTWIN_CLIENT_RESULT result;
     IOTHUB_CLIENT_RESULT iothubClientResult;
     bool urlEncodeOn = true;
 
-    if ((deviceLLHandle == NULL) || (dtDeviceLLClientHandle == NULL))
+    if ((deviceLLHandle == NULL) || (deviceCapabilityModel == NULL) || (dtDeviceLLClientHandle == NULL))
     {
-        LogError("deviceLLHandle=%p, dtDeviceLLClientHandle=%p", deviceLLHandle, dtDeviceLLClientHandle);
+        LogError("deviceLLHandle=%p, deviceCapabilityModel=%p, dtDeviceLLClientHandle=%p", deviceLLHandle, deviceCapabilityModel, dtDeviceLLClientHandle);
         result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
     }
     else if ((iothubClientResult = IoTHubDeviceClient_LL_SetOption(deviceLLHandle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn)) != IOTHUB_CLIENT_OK)
@@ -152,9 +152,9 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle(IOT
     return result;
 }
 
-DIGITALTWIN_CLIENT_RESULT DigitalTwin_DeviceClient_LL_RegisterInterfacesAsync(DIGITALTWIN_DEVICE_CLIENT_LL_HANDLE dtDeviceClientHandle, const char* deviceCapabilityModel, DIGITALTWIN_INTERFACE_CLIENT_HANDLE* dtInterfaces, unsigned int numDTInterfaces, DIGITALTWIN_INTERFACE_REGISTERED_CALLBACK dtInterfaceRegisteredCallback, void* userContextCallback)
+DIGITALTWIN_CLIENT_RESULT DigitalTwin_DeviceClient_LL_RegisterInterfacesAsync(DIGITALTWIN_DEVICE_CLIENT_LL_HANDLE dtDeviceClientHandle,DIGITALTWIN_INTERFACE_CLIENT_HANDLE* dtInterfaces, unsigned int numDTInterfaces, DIGITALTWIN_INTERFACE_REGISTERED_CALLBACK dtInterfaceRegisteredCallback, void* userContextCallback)
 {
-    return DT_ClientCoreRegisterInterfacesAsync((DT_CLIENT_CORE_HANDLE)dtDeviceClientHandle, deviceCapabilityModel, dtInterfaces, numDTInterfaces, dtInterfaceRegisteredCallback, userContextCallback);
+    return DT_ClientCoreRegisterInterfacesAsync((DT_CLIENT_CORE_HANDLE)dtDeviceClientHandle, dtInterfaces, numDTInterfaces, dtInterfaceRegisteredCallback, userContextCallback);
 }
 
 void DigitalTwin_DeviceClient_LL_DoWork(DIGITALTWIN_DEVICE_CLIENT_LL_HANDLE dtDeviceClientHandle)
