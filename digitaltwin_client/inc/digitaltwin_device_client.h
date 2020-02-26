@@ -51,11 +51,11 @@ typedef void* DIGITALTWIN_DEVICE_CLIENT_HANDLE;
   @param    deviceHandle[in]            An IOTHUB_DEVICE_CLIENT_HANDLE that has been already created and bound to a specific connection string (or transport, or DPS handle, or whatever
                                         mechanism is preferred).  See remarks about its lifetime management.
   @param    dtDeviceClientHandle[out]   A <c>DIGITALTWIN_DEVICE_CLIENT_HANDLE</c> to be used by the application.
-  @param    deviceCapabilityModel[in]   The device's Device Capability Model (DCM) identifier. 
+  @param    deviceCapabilityModel[in]   The Device Capability Model (DCM) identifier. 
 
   @returns  A DIGITALTWIN_CLIENT_RESULT.
 */
-MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_DeviceClient_CreateFromDeviceHandle, IOTHUB_DEVICE_CLIENT_HANDLE, deviceHandle, DIGITALTWIN_DEVICE_CLIENT_HANDLE*, dtDeviceClientHandle, const char*, deviceCapabilityModel);
+MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_DeviceClient_CreateFromDeviceHandle, IOTHUB_DEVICE_CLIENT_HANDLE, deviceHandle, const char*, deviceCapabilityModel, DIGITALTWIN_DEVICE_CLIENT_HANDLE*, dtDeviceClientHandle);
 
 
 /**
@@ -76,7 +76,7 @@ MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_DeviceClient_CreateFr
  
   @returns  A DIGITALTWIN_CLIENT_RESULT.
 */
-MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_DeviceClient_RegisterInterfacesAsync, DIGITALTWIN_DEVICE_CLIENT_HANDLE, dtDeviceClientHandle, const char*, deviceCapabilityModel, DIGITALTWIN_INTERFACE_CLIENT_HANDLE*, dtInterfaces, unsigned int, numDTInterfaces, DIGITALTWIN_INTERFACE_REGISTERED_CALLBACK, dtInterfaceRegisteredCallback, void*, userContextCallback);
+MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_DeviceClient_RegisterInterfacesAsync, DIGITALTWIN_DEVICE_CLIENT_HANDLE, dtDeviceClientHandle, DIGITALTWIN_INTERFACE_CLIENT_HANDLE*, dtInterfaces, unsigned int, numDTInterfaces, DIGITALTWIN_INTERFACE_REGISTERED_CALLBACK, dtInterfaceRegisteredCallback, void*, userContextCallback);
 
 /**
   @brief    Destroys resources associated with a <c>DIGITALTWIN_DEVICE_CLIENT_HANDLE</c>.

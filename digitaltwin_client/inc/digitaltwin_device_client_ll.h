@@ -52,7 +52,7 @@ typedef struct DIGITALTWIN_DEVICE_CLIENT_LL* DIGITALTWIN_DEVICE_CLIENT_LL_HANDLE
 
   @see      DigitalTwin_DeviceClient_CreateFromDeviceHandle
 */
-MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle, IOTHUB_DEVICE_CLIENT_LL_HANDLE, deviceHandle, DIGITALTWIN_DEVICE_CLIENT_LL_HANDLE*, dtDeviceLLClientHandle, const char*, deviceCapabilityModel);
+MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle, IOTHUB_DEVICE_CLIENT_LL_HANDLE, deviceHandle, const char*, deviceCapabilityModel, DIGITALTWIN_DEVICE_CLIENT_LL_HANDLE*, dtDeviceLLClientHandle);
 
 
 /**
@@ -63,7 +63,7 @@ MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_DeviceClient_LL_Creat
 
   @see DigitalTwin_DeviceClient_RegisterInterfacesAsync
 */
-MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_DeviceClient_LL_RegisterInterfacesAsync, DIGITALTWIN_DEVICE_CLIENT_LL_HANDLE, dtDeviceClientHandle, const char*, deviceCapabilityModel, DIGITALTWIN_INTERFACE_CLIENT_HANDLE*, dtInterfaces, unsigned int, numDTInterfaces, DIGITALTWIN_INTERFACE_REGISTERED_CALLBACK, dtInterfaceRegisteredCallback, void*, userContextCallback);
+MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_DeviceClient_LL_RegisterInterfacesAsync, DIGITALTWIN_DEVICE_CLIENT_LL_HANDLE, dtDeviceClientHandle, DIGITALTWIN_INTERFACE_CLIENT_HANDLE*, dtInterfaces, unsigned int, numDTInterfaces, DIGITALTWIN_INTERFACE_REGISTERED_CALLBACK, dtInterfaceRegisteredCallback, void*, userContextCallback);
 
 /**
   @brief    Invokes worker actions on <c>DIGITALTWIN_DEVICE_CLIENT_LL_HANDLE</c>

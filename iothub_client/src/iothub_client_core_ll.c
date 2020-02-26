@@ -2340,11 +2340,10 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetOption(IOTHUB_CLIENT_CORE_LL_HANDLE 
         {
             if (handleData->dt_model_id != NULL)
             {
-                STRING_delete(handleData->dt_model_id);
-                handleData->dt_model_id = NULL;
-            }
-
-            if ((handleData->dt_model_id = STRING_construct((const char*)value)) == NULL)
+                LogError("Failed setting the Device Capability Model ID");
+                result = IOTHUB_CLIENT_ERROR;
+            } 
+            else if ((handleData->dt_model_id = STRING_construct((const char*)value)) == NULL)
             {
                 LogError("STRING_c_str failed");
                 result = IOTHUB_CLIENT_ERROR;

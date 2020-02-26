@@ -72,7 +72,7 @@ static const int digitalTwinSampleDevice_sendTelemetryFrequency = 20;
 //
 
 // TODO: Fill in DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_ID. E.g. 
-#define DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_ID "urn:YOUR_COMPANY_NAME_HERE:sample_device:1"
+#define DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_ID "urn:MyCompanyName:sample_device:1"
 
 //
 // END TODO section
@@ -115,7 +115,7 @@ static DIGITALTWIN_CLIENT_RESULT DigitalTwinSampleDevice_RegisterDigitalTwinInte
     DIGITALTWIN_CLIENT_RESULT result;
 
     // Give DigitalTwin interfaces to register.  DigitalTwin_DeviceClient_RegisterInterfacesAsync returns immediately
-    if ((result = DigitalTwin_DeviceClient_RegisterInterfacesAsync(dtDeviceClientHandle, DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_ID, interfaceClientHandles, numInterfaceClientHandles, DigitalTwinSampleDevice_InterfacesRegistered, &appDigitalTwinRegistrationStatus)) != DIGITALTWIN_CLIENT_OK)
+    if ((result = DigitalTwin_DeviceClient_RegisterInterfacesAsync(dtDeviceClientHandle, interfaceClientHandles, numInterfaceClientHandles, DigitalTwinSampleDevice_InterfacesRegistered, &appDigitalTwinRegistrationStatus)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("DigitalTwin_DeviceClient_RegisterInterfacesAsync failed, error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
     }
@@ -217,7 +217,7 @@ int main(int argc, char *argv[])
     // The call to DigitalTwin_DeviceClient_CreateFromDeviceHandle() transfers ownership
     // of this handle (including destroying it) to the DigitalTwin layer, analogous to a .release()
     // in some C++ helpers.  DO NOT USE deviceHandle after this point.
-    else if ((result = DigitalTwin_DeviceClient_CreateFromDeviceHandle(deviceHandle, &dtDeviceClientHandle, DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_ID)) != DIGITALTWIN_CLIENT_OK)
+    else if ((result = DigitalTwin_DeviceClient_CreateFromDeviceHandle(deviceHandle, DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_ID, &dtDeviceClientHandle)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("DigitalTwin_DeviceClient_CreateFromDeviceHandle failed, error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
     }

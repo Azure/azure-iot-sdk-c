@@ -238,7 +238,7 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     int http_proxy_port;
     char* http_proxy_username;
     char* http_proxy_password;
-    bool isOptionalParameterSet;
+    bool isOptionalConnectParameterSet;
     int disconnect_recv_flag;
 } MQTTTRANSPORT_HANDLE_DATA, *PMQTTTRANSPORT_HANDLE_DATA;
 
@@ -2176,6 +2176,49 @@ static STRING_HANDLE buildClientId(const char* device_id, const char* module_id)
     }
 }
 
+static void append_optional_connect_parameters(PMQTTTRANSPORT_HANDLE_DATA transport_data)
+{
+    if (!transport_data->isOptionalConnectParameterSet)
+    {
+        // This requires the iothubClientHandle, which sadly the MQTT transport only gets on DoWork, so this code still needs to remain here.
+        // The correct place for this would be in the Create method, but we don't get the client handle there.
+        // Also, when device multiplexing is used, the customer creates the transport directly and explicitly, when the client is still not created.
+        // This will be a major hurdle when we add device multiplexing to MQTT transport.
+
+        STRING_HANDLE clone;
+        STRING_HANDLE param;
+        const char* dt_model_id;
+        const char* product_info = transport_data->transport_callbacks.prod_info_cb(transport_data->transport_ctx);
+
+        if ((clone = (product_info == NULL) ? STRING_construct_sprintf("%s%%2F%s", CLIENT_DEVICE_TYPE_PREFIX, IOTHUB_SDK_VERSION) : URL_EncodeString(product_info)) == NULL)
+        {
+            LogError("Failed obtaining the product info");
+        }
+        else if (STRING_concat_with_STRING(transport_data->configPassedThroughUsername, clone) != 0)
+        {
+            LogError("Failed concatenating the product info");
+        }           
+        else if ((dt_model_id = transport_data->transport_callbacks.dt_model_id_cb(transport_data->transport_ctx)) == NULL)
+        {
+            LogInfo("Not setting device capability model id");
+        }
+        else if ((param = STRING_construct_sprintf("&%s=%s", DT_MODEL_ID_TOKEN, STRING_c_str(URL_EncodeString(dt_model_id)))) == NULL)
+        {
+            LogError("Cannot build device capability model id string");
+        }
+        else if (STRING_concat_with_STRING(transport_data->configPassedThroughUsername, param) != 0)
+        {
+            LogError("Failed to set device capability model id parameter in connect");
+        }
+        else
+        {
+            transport_data->isOptionalConnectParameterSet = true;
+            STRING_delete(clone);
+            STRING_delete(param);
+        }
+    }
+}
+
 static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
     int result;
@@ -2219,54 +2262,7 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 
     if (result == 0)
     {
-        if (!transport_data->isOptionalParameterSet)
-        {
-            // This requires the iothubClientHandle, which sadly the MQTT transport only gets on DoWork, so this code still needs to remain here.
-            // The correct place for this would be in the Create method, but we don't get the client handle there.
-            // Also, when device multiplexing is used, the customer creates the transport directly and explicitly, when the client is still not created.
-            // This will be a major hurdle when we add device multiplexing to MQTT transport.
-
-            STRING_HANDLE clone;
-            const char* product_info = transport_data->transport_callbacks.prod_info_cb(transport_data->transport_ctx);
-            if (product_info == NULL)
-            {
-                clone = STRING_construct_sprintf("%s%%2F%s", CLIENT_DEVICE_TYPE_PREFIX, IOTHUB_SDK_VERSION);
-            }
-            else
-            {
-                clone = URL_EncodeString(product_info);
-            }
-
-            if (clone == NULL)
-            {
-                LogError("Failed obtaining the product info");
-            }
-            else
-            {
-                if (STRING_concat_with_STRING(transport_data->configPassedThroughUsername, clone) != 0)
-                {
-                    LogError("Failed concatenating the product info");
-                }
-                else
-                {
-                    STRING_HANDLE param;
-                    const char* dt_model_id = transport_data->transport_callbacks.dt_model_id_cb(transport_data->transport_ctx);
-                    if (dt_model_id != NULL)
-                    {
-                        param = STRING_construct_sprintf("&%s=%s", DT_MODEL_ID_TOKEN, STRING_c_str(URL_EncodeString(dt_model_id)));
-
-                        if (STRING_concat_with_STRING(transport_data->configPassedThroughUsername, param) != 0)
-                        {
-                            LogError("Failed to set DT Model Id");
-                        }
-                    }
-
-                    transport_data->isOptionalParameterSet = true;
-                }
-
-                STRING_delete(clone);
-            }
-        }
+        append_optional_connect_parameters(transport_data);
 
         STRING_HANDLE clientId;
 
@@ -2596,7 +2592,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                         state->topic_DeviceMethods = NULL;
                         state->topic_InputQueue = NULL;
                         state->log_trace = state->raw_trace = false;
-                        state->isOptionalParameterSet = false;
+                        state->isOptionalConnectParameterSet = false;
                         state->auto_url_encode_decode = false;
                         state->conn_attempted = false;
                     }

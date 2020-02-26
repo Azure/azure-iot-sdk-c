@@ -179,6 +179,7 @@ static TEST_MUTEX_HANDLE test_serialize_mutex;
 bool g_fail_string_construct_sprintf;
 bool g_fail_platform_get_platform_info;
 bool g_fail_string_concat_with_string;
+bool g_fail_string_construct;
 
 static const char* TEST_STRING_VALUE = "Test string value";
 
@@ -362,7 +363,16 @@ static STRING_HANDLE my_STRING_new(void)
 static STRING_HANDLE my_STRING_construct(const char* psz)
 {
     (void)psz;
-    return (STRING_HANDLE)my_gballoc_malloc(1);
+    STRING_HANDLE result;
+    if (g_fail_string_construct)
+    {
+        result = (STRING_HANDLE)NULL;
+    }
+    else
+    {
+        result = (STRING_HANDLE)my_gballoc_malloc(1);
+    }
+    return result;
 }
 
 STRING_HANDLE STRING_construct_sprintf(const char* psz, ...)
@@ -960,6 +970,7 @@ TEST_FUNCTION_INITIALIZE(method_init)
     g_fail_string_construct_sprintf = false;
     g_fail_platform_get_platform_info = false;
     g_fail_string_concat_with_string = false;
+    g_fail_string_construct = false;
 
     g_transport_cb_ctx = NULL;
     memset(&g_transport_cb_info, 0, sizeof(TRANSPORT_CALLBACKS_INFO));
@@ -5529,8 +5540,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_dt_model_id_succeeds)
     //arrange
     IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
 
     //act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SetOption(h, OPTION_DT_MODEL_ID, "urn:YOUR_COMPANY_NAME_HERE:sample_device:1");
@@ -5543,17 +5553,36 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_dt_model_id_succeeds)
     IoTHubClientCore_LL_Destroy(h);
 }
 
-TEST_FUNCTION(IoTHubClientCore_LL_SetOption_dt_model_id_fails)
+TEST_FUNCTION(IoTHubClientCore_LL_SetOption_dt_model_id_string_construct_fails)
 {
     //arrange
     IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
 
     //act
-    g_fail_string_construct_sprintf = true;
+    g_fail_string_construct = true;
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SetOption(h, OPTION_DT_MODEL_ID, "urn:YOUR_COMPANY_NAME_HERE:sample_device:1");
+
+    //assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubClientCore_LL_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubClientCore_LL_SetOption_dt_model_id_twice_fails)
+{
+    //arrange
+    IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SetOption(h, OPTION_DT_MODEL_ID, "urn:YOUR_COMPANY_NAME_HERE:sample_device:1");
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+
+    //act
+    result = IoTHubClientCore_LL_SetOption(h, OPTION_DT_MODEL_ID, "urn:YOUR_COMPANY_NAME_HERE:sample_device:2");
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);

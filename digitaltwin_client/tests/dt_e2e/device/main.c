@@ -101,7 +101,7 @@ static DIGITALTWIN_CLIENT_RESULT DT_E2E_RegisterDigitalTwinInterfacesAndWait(DIG
     DIGITALTWIN_CLIENT_RESULT result;
 
     // Give DigitalTwin interfaces to register.  DigitalTwin_DeviceClient_RegisterInterfacesAsync returns immediately
-    if ((result = DigitalTwin_DeviceClient_RegisterInterfacesAsync(dtDeviceClientHandle, DIGITALTWIN_E2E_DEVICE_CAPABILITY_MODEL_URI, interfaceClientHandles, numInterfaceClientHandles, DT_E2E_InterfacesRegisteredCallback, &appDigitalTwinRegistrationStatus)) != DIGITALTWIN_CLIENT_OK)
+    if ((result = DigitalTwin_DeviceClient_RegisterInterfacesAsync(dtDeviceClientHandle, interfaceClientHandles, numInterfaceClientHandles, DT_E2E_InterfacesRegisteredCallback, &appDigitalTwinRegistrationStatus)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("DigitalTwin_DeviceClient_RegisterInterfacesAsync failed, error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
     }
@@ -266,7 +266,7 @@ int main(int argc, char** argv)
         result = MU_FAILURE;
     }
 #endif
-    else if ((result = (int)DigitalTwin_DeviceClient_CreateFromDeviceHandle(deviceHandle, &dtDeviceClientHandle, DIGITALTWIN_E2E_DEVICE_CAPABILITY_MODEL_URI)) != DIGITALTWIN_CLIENT_OK)
+    else if ((result = (int)DigitalTwin_DeviceClient_CreateFromDeviceHandle(deviceHandle, DIGITALTWIN_E2E_DEVICE_CAPABILITY_MODEL_URI, &dtDeviceClientHandle)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("DigitalTwin_DeviceClient_CreateFromDeviceHandle failed, error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, (DIGITALTWIN_CLIENT_RESULT)result));
     }    
