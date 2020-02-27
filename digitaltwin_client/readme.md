@@ -27,7 +27,7 @@ Reference guidance for the API's is available in the [public headers](./inc) the
 
 ## Visual Studio Code Integration
 
-Visual Studio Code has a plugin to make authoring Digital Twin clients using the C SDK easier.  It includes the ability to automatically generate C device code based on interface definitions.  See [here](https://docs.microsoft.com/en-us/azure/iot-pnp/howto-use-iot-device-workbench) for more information.
+Visual Studio Code has a plugin to make authoring Digital Twin clients using the C SDK easier.  It includes the ability to automatically generate C device code based on interface definitions.  See [here](https://docs.microsoft.com/en-us/azure/iot-pnp/howto-develop-with-vs-vscode) for more information.
 
 ## If something is broken
 
