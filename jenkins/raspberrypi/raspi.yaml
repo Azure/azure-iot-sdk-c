@@ -150,7 +150,7 @@ jobs:
       cd $(Build.SourcesDirectory)/testtools/UART_interface/
       ls
       . rpi_input.sh
-      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -t 620 $(RESET_RASPI)
+      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -t 620 $(RESET_RASPI) -s
       rm input.txt
       unset RASPI_TEST_FILE
       
@@ -159,13 +159,13 @@ jobs:
       RASPI_USER: $(RASPI_USER)
       RASPI_PWD: $(RASPI_PWD)
       RASPI_PORT: $(RASPI_PORT)
-      RASPI_TEST_FILE: iothubclient_amqp_dt_e2e_exe > amqp_result.txt
+      RASPI_TEST_FILE: iothubclient_amqp_dt_e2e_exe
       RASPI_SERIAL_TASK: $(RASPI_SERIAL_TASK)
       RESET_RASPI: $(RESET_RASPI)
 
 - job: 'Run_MQTT_DT_E2E_Test'
   dependsOn: Cross_Compile
-  condition: succeeded()
+  condition: in('True', 'False') #succeeded()
   pool: 
     name: devicelab-02
   steps:  
@@ -226,7 +226,7 @@ jobs:
 
 - job: 'Run_AMQP_DM_E2E_Test'
   dependsOn: Cross_Compile
-  condition: succeeded()
+  condition: in('True', 'False') #succeeded()
   pool: 
     name: devicelab-02
   steps:  
@@ -287,7 +287,7 @@ jobs:
 
 - job: 'Run_MQTT_DM_E2E_Test'
   dependsOn: Cross_Compile
-  condition: succeeded()
+  condition: in('True', 'False') #succeeded()
   pool: 
     name: devicelab-02
   steps:  
