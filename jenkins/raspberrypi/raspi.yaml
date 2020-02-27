@@ -165,7 +165,7 @@ jobs:
 
 - job: 'Run_MQTT_DT_E2E_Test'
   dependsOn: Cross_Compile
-  condition: in('True', 'False') #succeeded()
+  condition: succeeded()
   pool: 
     name: devicelab-02
   steps:  
@@ -226,7 +226,7 @@ jobs:
 
 - job: 'Run_AMQP_DM_E2E_Test'
   dependsOn: Cross_Compile
-  condition: in('True', 'False') #succeeded()
+  condition: succeeded()
   pool: 
     name: devicelab-02
   steps:  
@@ -287,7 +287,7 @@ jobs:
 
 - job: 'Run_MQTT_DM_E2E_Test'
   dependsOn: Cross_Compile
-  condition: in('True', 'False') #succeeded()
+  condition: succeeded()
   pool: 
     name: devicelab-02
   steps:  
