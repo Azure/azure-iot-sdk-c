@@ -124,9 +124,9 @@ DIGITALTWIN_CLIENT_RESULT DT_InterfaceList_BindInterfaces(DIGITALTWIN_INTERFACE_
 
 // DT_InterfaceList_UnbindInterfaces is used to tell registered interfaces that clientCore no longer
 // needs reference to them.  For DT_ClientCoreDestroy, this is straightforward.
-// If DT_ClientCoreRegisterInterfacesAsync() is called multiple times, we first need to mark the interfaces
+// If DT_ClientCoreRegisterInterfaces() is called multiple times, we first need to mark the interfaces
 // as not in a registered state.  The same DIGITALTWIN_INTERFACE_CLIENT_HANDLE may be safely passed into multiple
-// calls to DT_ClientCoreRegisterInterfacesAsync; in that case this will just momentarily UnRegister the
+// calls to DT_ClientCoreRegisterInterfaces; in that case this will just momentarily UnRegister the
 // interface until the next stage re-registers it.  If the interface client isn't being re-registered, however,
 // this step is required to effectively DeleteReference on the handle so it can be destroyed.
 void DT_InterfaceList_UnbindInterfaces(DIGITALTWIN_INTERFACE_LIST_HANDLE dtInterfaceListHandle)
@@ -163,7 +163,7 @@ void DT_InterfaceList_RegistrationCompleteCallback(DIGITALTWIN_INTERFACE_LIST_HA
 }
 
 // Validates that the dtInterfaceClientHandle is still in list of registered interface handles.  It's possible,
-// for example, that (A) a request to send telemetry and it was posted, (B) the caller re-ran DT_ClientCoreRegisterInterfacesAsync() without the 
+// for example, that (A) a request to send telemetry and it was posted, (B) the caller re-ran DT_ClientCoreRegisterInterfaces() without the 
 // given interface, and (C) the response callback for given interface arrives on core layer.  In this case we need to swallow the message.
 static bool IsInterfaceHandleValid(DT_INTERFACE_LIST* dtInterfaceList, DIGITALTWIN_INTERFACE_CLIENT_HANDLE dtInterfaceClientHandle)
 {

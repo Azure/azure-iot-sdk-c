@@ -26,19 +26,10 @@ typedef enum DT_CLIENT_REGISTRATION_STATUS_TAG
     // DT_CLIENT_REGISTRATION_STATUS_IDLE means that no DigitalTwin interfaces are registered nor in the state of being registered.
     // We're in this state after DigitalTwin registration, and if registration fails (since we can recover from a fail).
     DT_CLIENT_REGISTRATION_STATUS_IDLE,
-    // DT_CLIENT_REGISTRATION_STATUS_REGISTERING indicates that DigitalTwin is in middle of registering its interfaces.
-    // Other DigitalTwin operations - including trying to register interfaces again - don't happen in this state.
-    DT_CLIENT_REGISTRATION_STATUS_REGISTERING,
     // DT_CLIENT_REGISTRATION_STATUS_REGISTERED signals that DigitalTwin interfaces have been successfully registered
     // with the service and that we're ready for DigitalTwin operations.
     DT_CLIENT_REGISTRATION_STATUS_REGISTERED
 } DT_CLIENT_REGISTRATION_STATUS;
-
-typedef struct DT_REGISTER_INTERFACES_CALLBACK_CONTEXT_TAG
-{
-    DIGITALTWIN_INTERFACE_REGISTERED_CALLBACK dtInterfaceRegisteredCallback;
-    void* userContextCallback;
-} DT_REGISTER_INTERFACES_CALLBACK_CONTEXT;
 
 // DT_CLIENT_CORE is the underlying representation of objects exposed up to the caller
 // such as DIGITALTWIN_DEVICE_CLIENT_HANDLE, DIGITALTWIN_DEVICE_CLIENT_LL_HANDLE, etc.
@@ -52,7 +43,6 @@ typedef struct DT_CLIENT_CORE_TAG
     SINGLYLINKEDLIST_HANDLE reportedPropertyList; // List of DT_REPORTED_PROPERTY_CALLBACK_CONTEXT's
     bool registeredForDeviceMethodCallbacks;
     bool registeredForDeviceTwinCallbacks;
-    DT_REGISTER_INTERFACES_CALLBACK_CONTEXT registerInterfacesCallbackContext;
     DIGITALTWIN_INTERFACE_LIST_HANDLE dtInterfaceListHandle;
 } DT_CLIENT_CORE;
 
@@ -223,7 +213,7 @@ static int InvokeBindingSetDeviceTwinCallbackIfNeeded(DT_CLIENT_CORE* dtClientCo
 // BeginClientCoreCallbackProcessing is invoked as the first step when DT_CLIENT_CORE receives
 // a callback from the IoTHub_* layer.  If client is shutting down it will immediately
 // exit out of the callback.  Otherwise mark our state as processing callback, as the
-// primary state change API's (DT_ClientCoreRegisterInterfacesAsync and DT_ClientCoreDestroy) respect this.
+// primary state change API's (DT_ClientCoreRegisterInterfaces and DT_ClientCoreDestroy) respect this.
 static int BeginClientCoreCallbackProcessing(DT_CLIENT_CORE* dtClientCore)
 {
     int result;
@@ -506,23 +496,7 @@ DT_CLIENT_CORE_HANDLE DT_ClientCoreCreate(DT_IOTHUB_BINDING* iotHubBinding, DT_L
 // themselves of the status of the registration.
 static void SetRegistrationCompleteInvokeCallbacks(DT_CLIENT_CORE* dtClientCore, DIGITALTWIN_CLIENT_RESULT dtInterfaceStatus)
 {
-    if (dtInterfaceStatus == DIGITALTWIN_CLIENT_OK)
-    {
-        // On success, we're ready to process additional DigitalTwin operations.
-        dtClientCore->registrationStatus = DT_CLIENT_REGISTRATION_STATUS_REGISTERED; 
-    }
-    else
-    {
-        // Failure is not permanent - the caller can attempt to re-register interfaces.
-        dtClientCore->registrationStatus = DT_CLIENT_REGISTRATION_STATUS_IDLE;
-    }
-
     DT_InterfaceList_RegistrationCompleteCallback(dtClientCore->dtInterfaceListHandle, dtInterfaceStatus);
-
-    if (dtClientCore->registerInterfacesCallbackContext.dtInterfaceRegisteredCallback != NULL)
-    {
-        dtClientCore->registerInterfacesCallbackContext.dtInterfaceRegisteredCallback(dtInterfaceStatus, dtClientCore->registerInterfacesCallbackContext.userContextCallback);
-    }
 }
 
 // Invokes appropriate IoTHub*_SendReportedState function for given handle type.
@@ -666,30 +640,6 @@ static DT_SEND_TELEMETRY_CALLBACK_CONTEXT* CreateDTSendTelemetryCallbackContext(
     return dtSendTelemetryCallbackContext;
 }
 
-
-static void InvokeBindingOnDemand(DT_CLIENT_CORE* dtClientCore)
-{
-    DIGITALTWIN_CLIENT_RESULT dtReportedInterfacesStatus = DIGITALTWIN_CLIENT_OK;
-
-    // We start listening for incoming commands and properties after binding is invoked.
-    // If either of these fail, we will report an error to the application.
-    LogInfo("DigitalTwin Client Core: Interfaces successfully registered.  Register for device method and twin callbacks if needed");
-
-    if (InvokeBindingSetDeviceMethodCallbackIfNeeded(dtClientCore, DTDeviceMethod_Callback) != 0)
-    {
-        LogError("Cannot bind to device method callbacks");
-        dtReportedInterfacesStatus = DIGITALTWIN_CLIENT_ERROR;
-    }
-    else if (InvokeBindingSetDeviceTwinCallbackIfNeeded(dtClientCore, DeviceTwinDT_Callback) != 0)
-    {
-        LogError("Cannot bind to device twin callbacks");
-        dtReportedInterfacesStatus = DIGITALTWIN_CLIENT_ERROR;
-    }
-
-    // Mark internal state as complete and signal to application the status of the DigitalTwin registration request.
-    SetRegistrationCompleteInvokeCallbacks(dtClientCore, dtReportedInterfacesStatus);
-}
-
 // VerifyComponentsUnique makes sure that the componentName of each handle is unique.  E.g. one connection cannot have
 // two components both named "frontCamera".  We check here, instead of solely relying on server policy, because if this fails on server
 // side for MQTT then the connection may be dropped and it will be hard for application developer to debug.
@@ -743,9 +693,9 @@ static DIGITALTWIN_CLIENT_RESULT VerifyComponentsUnique(DIGITALTWIN_INTERFACE_CL
     return result;
 }
 
-// DT_ClientCoreRegisterInterfacesAsync updates the list of interfaces we're supporting and begins 
+// DT_ClientCoreRegisterInterfaces updates the list of interfaces we're supporting and begins 
 // protocol update of server.
-DIGITALTWIN_CLIENT_RESULT DT_ClientCoreRegisterInterfacesAsync(DT_CLIENT_CORE_HANDLE dtClientCoreHandle, DIGITALTWIN_INTERFACE_CLIENT_HANDLE* dtInterfaces, unsigned int numDTInterfaces, DIGITALTWIN_INTERFACE_REGISTERED_CALLBACK dtInterfaceRegisteredCallback, void* userContextCallback)
+DIGITALTWIN_CLIENT_RESULT DT_ClientCoreRegisterInterfaces(DT_CLIENT_CORE_HANDLE dtClientCoreHandle, DIGITALTWIN_INTERFACE_CLIENT_HANDLE* dtInterfaces, unsigned int numDTInterfaces)
 {
     DIGITALTWIN_CLIENT_RESULT result;
     DT_CLIENT_CORE* dtClientCore = (DT_CLIENT_CORE*)dtClientCoreHandle;
@@ -765,11 +715,6 @@ DIGITALTWIN_CLIENT_RESULT DT_ClientCoreRegisterInterfacesAsync(DT_CLIENT_CORE_HA
         LogError("Lock failed");
         result = DIGITALTWIN_CLIENT_ERROR;
     }
-    else if (dtClientCore->registrationStatus == DT_CLIENT_REGISTRATION_STATUS_REGISTERING)
-    {
-        LogError("Cannot register because status is %d but must be idle", dtClientCore->registrationStatus);
-        result = DIGITALTWIN_CLIENT_ERROR_REGISTRATION_PENDING;
-    }
     else if (dtClientCore->registrationStatus == DT_CLIENT_REGISTRATION_STATUS_REGISTERED)
     {
         LogError("Cannot register because interface is already registered");
@@ -779,13 +724,22 @@ DIGITALTWIN_CLIENT_RESULT DT_ClientCoreRegisterInterfacesAsync(DT_CLIENT_CORE_HA
     {
         LogError("DT_InterfaceList_BindInterfaces failed, result = %d", result);
     }
+    else if ((result = InvokeBindingSetDeviceMethodCallbackIfNeeded(dtClientCore, DTDeviceMethod_Callback)) != 0)
+    {
+        // We start listening for incoming commands and properties after binding is invoked.
+        // If either of these fail, we will report an error to the application.
+        LogError("InvokeBindingSetDeviceMethodCallbackIfNeeded failed, result = %d", result);
+        result = DIGITALTWIN_CLIENT_ERROR;
+    }
+    else if ((result = InvokeBindingSetDeviceTwinCallbackIfNeeded(dtClientCore, DeviceTwinDT_Callback)) != 0)
+    {
+        LogError("InvokeBindingSetDeviceTwinCallbackIfNeeded failed, result = %d", result);
+        result = DIGITALTWIN_CLIENT_ERROR;
+    }
     else
     {
-        dtClientCore->registerInterfacesCallbackContext.dtInterfaceRegisteredCallback = dtInterfaceRegisteredCallback;
-        dtClientCore->registerInterfacesCallbackContext.userContextCallback = userContextCallback;
-
         // Once we're processing an interface update, no other caller initiated operations on this device client can occur.
-        dtClientCore->registrationStatus = DT_CLIENT_REGISTRATION_STATUS_REGISTERING;
+        dtClientCore->registrationStatus = DT_CLIENT_REGISTRATION_STATUS_REGISTERED;
         result = DIGITALTWIN_CLIENT_OK;
     }
 
@@ -793,7 +747,8 @@ DIGITALTWIN_CLIENT_RESULT DT_ClientCoreRegisterInterfacesAsync(DT_CLIENT_CORE_HA
 
     if (result == DIGITALTWIN_CLIENT_OK)
     {
-        InvokeBindingOnDemand(dtClientCore);
+        // Mark internal state as complete and signal to interfaces the status of the DigitalTwin registration request.
+        SetRegistrationCompleteInvokeCallbacks(dtClientCore, result);
     }
 
     return result;

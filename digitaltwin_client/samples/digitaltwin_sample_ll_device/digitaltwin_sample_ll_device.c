@@ -133,80 +133,6 @@ static const int digitalTwinSampleDevice_ll_mainPollingInterval = 100;
 // Everytime the main loop wakes up, on the digitalTwinSampleDevice_ll_sendTelemetryFrequency(th) pass will send a telemetry message 
 static const int digitalTwinSampleDevice_ll_sendTelemetryFrequency = 200;
 
-
-// State of DigitalTwin registration process.  We cannot proceed with DigitalTwin until we get into the state APP_DIGITALTWIN_REGISTRATION_SUCCEEDED.
-typedef enum APP_DIGITALTWIN_REGISTRATION_STATUS_TAG
-{
-    APP_DIGITALTWIN_REGISTRATION_PENDING,
-    APP_DIGITALTWIN_REGISTRATION_SUCCEEDED,
-    APP_DIGITALTWIN_REGISTRATION_FAILED
-} APP_DIGITALTWIN_REGISTRATION_STATUS;
-
-//
-// DigitalTwinSampleDevice_InterfacesRegistered is invoked when the interfaces have been registered or failed.
-// The userContextCallback pointer is set to whether we succeeded or failed and checked by thread blocking
-// for registration to complete.
-static void DigitalTwinSampleDevice_LL_InterfacesRegisteredCallback(DIGITALTWIN_CLIENT_RESULT dtInterfaceStatus, void *userContextCallback)
-{
-    APP_DIGITALTWIN_REGISTRATION_STATUS* registrationStatus = (APP_DIGITALTWIN_REGISTRATION_STATUS*)userContextCallback;
-
-    if (dtInterfaceStatus == DIGITALTWIN_CLIENT_OK)
-    {
-        LogInfo("Interface registration callback invoked, interfaces have been successfully registered");
-        *registrationStatus = APP_DIGITALTWIN_REGISTRATION_SUCCEEDED;
-    }
-    else
-    {
-        LogError("Interface registration callback invoked with an error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT,dtInterfaceStatus));
-        *registrationStatus = APP_DIGITALTWIN_REGISTRATION_FAILED;
-    }
-}
-
-APP_DIGITALTWIN_REGISTRATION_STATUS appDigitalTwinRegistrationStatus = APP_DIGITALTWIN_REGISTRATION_PENDING;
-
-// Invokes DigitalTwin_DeviceClient_LL_RegisterInterfacesAsync, which indicates to Azure IoT which DigitalTwin interfaces this device supports.
-// The DigitalTwin Handle *is not valid* until this operation has completed (as indicated by the callback DigitalTwinSampleDevice_RegisterDigitalTwinInterfacesAndWait being invoked).
-static DIGITALTWIN_CLIENT_RESULT DigitalTwinSampleDevice_LL_RegisterDigitalTwinInterfacesAndWait(DIGITALTWIN_DEVICE_CLIENT_LL_HANDLE digitaltwinDeviceClientLLHandle, DIGITALTWIN_INTERFACE_CLIENT_HANDLE* interfaceClientHandles, int numInterfaceClientHandles)
-{
-    DIGITALTWIN_CLIENT_RESULT result;
-
-    // Give DigitalTwin interfaces to register.  DigitalTwin_DeviceClient_RegisterInterfacesAsync returns immediately
-    if ((result = DigitalTwin_DeviceClient_LL_RegisterInterfacesAsync(digitaltwinDeviceClientLLHandle, interfaceClientHandles, numInterfaceClientHandles, DigitalTwinSampleDevice_LL_InterfacesRegisteredCallback, &appDigitalTwinRegistrationStatus)) != DIGITALTWIN_CLIENT_OK)
-    {
-        LogError("DigitalTwin_DeviceClient_LL_RegisterInterfacesAsync failed, error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
-    }
-    else
-    {
-        // After registration, we do a simple polling algorithm to check for whether
-        // the callback DigitalTwinSampleDevice_InterfacesRegistered has changed appDigitalTwinRegistrationStatus.  Since we can't
-        // do any other DigitalTwin operations at this point, we have to block here.
-        for (int i = 0; (i < digitalTwinSampleDevice_ll_registerInterfaceMaxPolls) && (appDigitalTwinRegistrationStatus == APP_DIGITALTWIN_REGISTRATION_PENDING); i++)
-        {
-            DigitalTwin_DeviceClient_LL_DoWork(digitaltwinDeviceClientLLHandle);
-            ThreadAPI_Sleep(digitalTwinSampleDevice_ll_registerInterfacePollSleep);
-        }
-
-        if (appDigitalTwinRegistrationStatus == APP_DIGITALTWIN_REGISTRATION_SUCCEEDED)
-        {
-            LogInfo("DigitalTwin interfaces successfully registered");
-            result = DIGITALTWIN_CLIENT_OK;
-        }
-        else if (appDigitalTwinRegistrationStatus == APP_DIGITALTWIN_REGISTRATION_PENDING)
-        {
-            LogError("Timed out attempting to register DigitalTwin interfaces");
-            result = DIGITALTWIN_CLIENT_ERROR;
-        }
-        else
-        {
-            LogError("Error registering DigitalTwin interfaces");
-            result = DIGITALTWIN_CLIENT_ERROR;
-        }
-    }
-
-    return result;
-}
-
-
 char* digitaltwinSample_provisioning_IoTHubUri;
 char* digitaltwinSample_provisioning_DeviceId;
 
@@ -297,7 +223,7 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE DigitalTwinSampleDevice_LL_InitializeIotHu
         {
             LogInfo("DPS successfully registered.  Continuing on to creation of IoTHub device client handle.");
         }
-        else if (appDpsRegistrationStatus == APP_DIGITALTWIN_REGISTRATION_PENDING)
+        else if (appDpsRegistrationStatus == APP_DPS_REGISTRATION_PENDING)
         {
             LogError("Timed out attempting to register DPS device");
         }
@@ -530,7 +456,7 @@ int main(int argc, char *argv[])
     }
     // Invoke to the DeviceInfo interface - implemented in a separate library - to create DIGITALTWIN_INTERFACE_CLIENT_HANDLE.
     // NOTE: Other than creation and destruction, NO operations may occur on any DIGITALTWIN_INTERFACE_CLIENT_HANDLE
-    // until after we've completed its registration (see DigitalTwinSampleDevice_LL_RegisterDigitalTwinInterfacesAndWait).
+    // until after we've completed its registration.
     else if ((interfaceClientHandles[DIGITALTWIN_SAMPLE_DEVICE_INFO_INDEX] = DigitalTwinSampleDeviceInfo_CreateInterface()) == NULL)
     {
         LogError("DigitalTwinSampleDeviceInfo_CreateInterface failed");
@@ -559,9 +485,9 @@ int main(int argc, char *argv[])
 #endif
     // Register the interface we've created with Azure IoT.  This call will block until interfaces
     // are successfully registered, we get a failure from server, or we timeout.
-    else if (DigitalTwinSampleDevice_LL_RegisterDigitalTwinInterfacesAndWait(digitaltwinDeviceClientLLHandle, interfaceClientHandles, DIGITALTWIN_SAMPLE_DEVICE_NUM_INTERFACES) != DIGITALTWIN_CLIENT_OK)
+    else if (DigitalTwin_DeviceClient_LL_RegisterInterfaces(digitaltwinDeviceClientLLHandle, interfaceClientHandles, DIGITALTWIN_SAMPLE_DEVICE_NUM_INTERFACES) != DIGITALTWIN_CLIENT_OK)
     {
-        LogError("DigitalTwinSampleDevice_LL_RegisterDigitalTwinInterfacesAndWait failed");
+        LogError("DigitalTwin_DeviceClient_LL_RegisterInterfaces failed");
     }
     else
     {

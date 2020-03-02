@@ -2176,8 +2176,10 @@ static STRING_HANDLE buildClientId(const char* device_id, const char* module_id)
     }
 }
 
-static void append_optional_connect_parameters(PMQTTTRANSPORT_HANDLE_DATA transport_data)
+static int append_optional_connect_parameters(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
+    int result;
+
     if (!transport_data->isOptionalConnectParameterSet)
     {
         // This requires the iothubClientHandle, which sadly the MQTT transport only gets on DoWork, so this code still needs to remain here.
@@ -2185,38 +2187,62 @@ static void append_optional_connect_parameters(PMQTTTRANSPORT_HANDLE_DATA transp
         // Also, when device multiplexing is used, the customer creates the transport directly and explicitly, when the client is still not created.
         // This will be a major hurdle when we add device multiplexing to MQTT transport.
 
-        STRING_HANDLE clone;
-        STRING_HANDLE param;
+        STRING_HANDLE clone = NULL;
+        STRING_HANDLE param = NULL;
+        STRING_HANDLE urlEncodedModelId = NULL;
         const char* dt_model_id;
         const char* product_info = transport_data->transport_callbacks.prod_info_cb(transport_data->transport_ctx);
 
         if ((clone = (product_info == NULL) ? STRING_construct_sprintf("%s%%2F%s", CLIENT_DEVICE_TYPE_PREFIX, IOTHUB_SDK_VERSION) : URL_EncodeString(product_info)) == NULL)
         {
             LogError("Failed obtaining the product info");
+            result = 0;
         }
         else if (STRING_concat_with_STRING(transport_data->configPassedThroughUsername, clone) != 0)
         {
             LogError("Failed concatenating the product info");
+            result = 0;
         }           
-        else if ((dt_model_id = transport_data->transport_callbacks.dt_model_id_cb(transport_data->transport_ctx)) == NULL)
+        else if ((dt_model_id = transport_data->transport_callbacks.dt_model_id_cb(transport_data->transport_ctx)) != NULL)
         {
-            LogInfo("Not setting device capability model id");
-        }
-        else if ((param = STRING_construct_sprintf("&%s=%s", DT_MODEL_ID_TOKEN, STRING_c_str(URL_EncodeString(dt_model_id)))) == NULL)
-        {
-            LogError("Cannot build device capability model id string");
-        }
-        else if (STRING_concat_with_STRING(transport_data->configPassedThroughUsername, param) != 0)
-        {
-            LogError("Failed to set device capability model id parameter in connect");
+            if ((urlEncodedModelId = URL_EncodeString(dt_model_id)) == NULL)
+            {
+                LogError("Failed to URL encode the device capability model id string");
+                result = MU_FAILURE;
+            }
+            else if ((param = STRING_construct_sprintf("&%s=%s", DT_MODEL_ID_TOKEN, STRING_c_str(urlEncodedModelId))) == NULL)
+            {
+                LogError("Cannot build device capability model id string");
+                result = MU_FAILURE;
+            }
+            else if (STRING_concat_with_STRING(transport_data->configPassedThroughUsername, param) != 0)
+            {
+                LogError("Failed to set device capability model id parameter in connect");
+                result = MU_FAILURE;
+            }
+            else
+            {
+                result = 0;
+            }
         }
         else
         {
-            transport_data->isOptionalConnectParameterSet = true;
-            STRING_delete(clone);
-            STRING_delete(param);
+            result = 0;
         }
+
+        // setting optional connect parameter is only allowed once in the lifetime of the device client.
+        transport_data->isOptionalConnectParameterSet = true;
+
+        STRING_delete(clone);
+        STRING_delete(param);
+        STRING_delete(urlEncodedModelId);
     }
+    else
+    {
+        result = 0;
+    }
+
+    return result;
 }
 
 static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
@@ -2262,12 +2288,13 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 
     if (result == 0)
     {
-        append_optional_connect_parameters(transport_data);
-
         STRING_HANDLE clientId;
-
-        clientId = buildClientId(STRING_c_str(transport_data->device_id), STRING_c_str(transport_data->module_id));
-        if (NULL == clientId)
+        if (append_optional_connect_parameters(transport_data) != 0)
+        {
+            LogError("Failed to add optional connect parameters.");
+            result = MU_FAILURE;
+        }
+        else if ((clientId = buildClientId(STRING_c_str(transport_data->device_id), STRING_c_str(transport_data->module_id))) == NULL)
         {
             LogError("Unable to allocate clientId");
             result = MU_FAILURE;
@@ -2313,7 +2340,6 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             }
             STRING_delete(clientId);
         }
-
     }
     return result;
 }
@@ -2540,7 +2566,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                 }
                 else
                 {
-                    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_008: [If the upperConfig contains a valid protocolGatewayHostName value the this shall be used for the hostname, otherwise the hostname shall be constructed using the iothubname and iothubSuffix.] */
+                    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_008: [If the upperConfig contains a valid protocolGatewayHostName value this shall be used for the hostname, otherwise the hostname shall be constructed using the iothubname and iothubSuffix.] */
                     if (upperConfig->protocolGatewayHostName == NULL)
                     {
                         state->hostAddress = STRING_construct_sprintf("%s.%s", upperConfig->iotHubName, upperConfig->iotHubSuffix);

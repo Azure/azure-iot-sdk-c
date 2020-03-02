@@ -10,7 +10,7 @@
   @remarks The Digital Twin DeviceClient LL is used to connect Digital Twin interfaces to an IoTHub device corresponding to them.
 
   @warning API's in this header are *NOT* thread safe.  See <c>DIGITALTWIN_DEVICE_CLIENT_LL</c> for more information.  It is critically
-           important you understand the differences between the this lower-layer (LL) and convenience API's (<c>digitaltwin_device_client.h</c>) as this
+           important you understand the differences between the lower-layer (LL) and convenience API's (<c>digitaltwin_device_client.h</c>) as this
            your decision will have large implications on the threading model and resource consumption of your application.
 */
 
@@ -58,12 +58,12 @@ MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_DeviceClient_LL_Creat
 /**
   @brief    Registers the specified <c>DIGITALTWIN_INTERFACE_CLIENT_HANDLE</c>'s with the Digital Twin Service.
 
-  @remarks  <c>DigitalTwin_DeviceClient_LL_RegisterInterfacesAsync</c> behaves nearly identically to <c>DigitalTwin_DeviceClient_RegisterInterfacesAsync</c>, with the exception
+  @remarks  <c>DigitalTwin_DeviceClient_LL_RegisterInterfaces</c> behaves nearly identically to <c>DigitalTwin_DeviceClient_RegisterInterfaces</c>, with the exception
             that a different handle type is used.
 
-  @see DigitalTwin_DeviceClient_RegisterInterfacesAsync
+  @see DigitalTwin_DeviceClient_RegisterInterfaces
 */
-MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_DeviceClient_LL_RegisterInterfacesAsync, DIGITALTWIN_DEVICE_CLIENT_LL_HANDLE, dtDeviceClientHandle, DIGITALTWIN_INTERFACE_CLIENT_HANDLE*, dtInterfaces, unsigned int, numDTInterfaces, DIGITALTWIN_INTERFACE_REGISTERED_CALLBACK, dtInterfaceRegisteredCallback, void*, userContextCallback);
+MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_DeviceClient_LL_RegisterInterfaces, DIGITALTWIN_DEVICE_CLIENT_LL_HANDLE, dtDeviceClientHandle, DIGITALTWIN_INTERFACE_CLIENT_HANDLE*, dtInterfaces, unsigned int, numDTInterfaces);
 
 /**
   @brief    Invokes worker actions on <c>DIGITALTWIN_DEVICE_CLIENT_LL_HANDLE</c>

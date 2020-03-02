@@ -248,7 +248,7 @@ MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_InterfaceClient_Creat
 
   @param[in] dtInterfaceClientHandle    Handle for the interface client.
   @param[in] dtPropertyUpdatedCallback  Function pointer to invoke the callback on when commands for this interface arrive. 
-  @param[in] propertyCallbackContext    (Optional) Context pointer passed to dtInterfaceRegisteredCallback function on property update callback.
+  @param[in] propertyCallbackContext    (Optional) Context pointer passed to dtPropertyUpdatedCallback function on property update callback.
 
   @returns  A DIGITALTWIN_CLIENT_RESULT.
 */
@@ -261,8 +261,8 @@ MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_InterfaceClient_SetPr
            This *must* be called prior to the <c>DIGITALTWIN_INTERFACE_CLIENT_HANDLE</c> being registered and may only be called once for the lifetime of the <c>DIGITALTWIN_INTERFACE_CLIENT_HANDLE</c>.
 
   @param[in] dtInterfaceClientHandle            Handle for the interface client.
-  @param[in] dtPropertyUpdatedCallback          Function pointer to invoke the callback on when commands for this interface arrive. 
-  @param[in] commandCallbackContext             (Optional) Context pointer passed to dtInterfaceRegisteredCallback function on command callback.
+  @param[in] dtCommandExecuteCallback           Function pointer to invoke the callback on when commands for this interface arrive. 
+  @param[in] commandCallbackContext             (Optional) Context pointer passed to dtCommandExecuteCallback function on command callback.
 
   @returns  A DIGITALTWIN_CLIENT_RESULT.
 */
@@ -309,7 +309,7 @@ MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_InterfaceClient_SendT
            accepted in the thermostat example or simple the value of the manufacturer for DeviceInformation.  The only difference is that the configurable property
            must fill in the <c>dtResponse</c> parameter so the server knows additional status/server version/etc. of the property.
 
-  @remarks <c>DigitalTwin_InterfaceClient_ReportPropertyAsync</c> may be invoked at any time after the interface has been successfully registered per the (<c>DIGITALTWIN_INTERFACE_REGISTERED_CALLBACK</c>) and before
+  @remarks <c>DigitalTwin_InterfaceClient_ReportPropertyAsync</c> may be invoked at any time after the interface has been successfully registered and before
            the interface handle is destroyed.  It may be invoked on a callback - in particular on the application's <c>DIGITALTWIN_PROPERTY_UPDATE_CALLBACK</c> - though it does not have to be.             
 
   @remarks The call returns immediately and the puts the data to send on a pending queue that the SDK manages.  The application is notified of success or failure of the send by passing in a callback <c>dtReportedPropertyCallback</c>.

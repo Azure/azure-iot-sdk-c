@@ -61,7 +61,7 @@ MOCKABLE_FUNCTION(, DT_CLIENT_CORE_HANDLE, DT_ClientCoreCreate, DT_IOTHUB_BINDIN
 MOCKABLE_FUNCTION(, void, DT_ClientCoreDestroy, DT_CLIENT_CORE_HANDLE, dtClientCoreHandle);
 MOCKABLE_FUNCTION(, void, DT_ClientCoreDoWork, DT_CLIENT_CORE_HANDLE, dtClientCoreHandle);
 
-MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DT_ClientCoreRegisterInterfacesAsync, DT_CLIENT_CORE_HANDLE, dtClientCoreHandle, DIGITALTWIN_INTERFACE_CLIENT_HANDLE*, dtInterfaces , unsigned int, numDTInterfaces, DIGITALTWIN_INTERFACE_REGISTERED_CALLBACK, dtInterfaceRegisteredCallback, void*, userContextCallback);
+MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DT_ClientCoreRegisterInterfaces, DT_CLIENT_CORE_HANDLE, dtClientCoreHandle, DIGITALTWIN_INTERFACE_CLIENT_HANDLE*, dtInterfaces , unsigned int, numDTInterfaces);
 MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DT_ClientCoreSendTelemetryAsync, DT_CLIENT_CORE_HANDLE, dtClientCoreHandle, DIGITALTWIN_INTERFACE_CLIENT_HANDLE, dtInterfaceClientHandle, IOTHUB_MESSAGE_HANDLE, telemetryMessageHandle, void*, userContextCallback);
 MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DT_ClientCoreReportPropertyStatusAsync, DT_CLIENT_CORE_HANDLE, dtClientCoreHandle, DIGITALTWIN_INTERFACE_CLIENT_HANDLE, dtInterfaceClientHandle, const unsigned char*, dataToSend, size_t, dataToSendLen, void*, userContextCallback);
 

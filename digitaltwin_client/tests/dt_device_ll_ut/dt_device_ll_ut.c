@@ -81,8 +81,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(DT_ClientCoreCreate, test_DT_ClientCoreCreate);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(DT_ClientCoreCreate, NULL);
     REGISTER_GLOBAL_MOCK_HOOK(DT_ClientCoreDestroy, test_DT_ClientCoreDestroy);
-    REGISTER_GLOBAL_MOCK_RETURN(DT_ClientCoreRegisterInterfacesAsync, DIGITALTWIN_CLIENT_OK);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(DT_ClientCoreRegisterInterfacesAsync, DIGITALTWIN_CLIENT_ERROR);
+    REGISTER_GLOBAL_MOCK_RETURN(DT_ClientCoreRegisterInterfaces, DIGITALTWIN_CLIENT_OK);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(DT_ClientCoreRegisterInterfaces, DIGITALTWIN_CLIENT_ERROR);
 
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubDeviceClient_LL_SetOption, IOTHUB_CLIENT_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubDeviceClient_LL_SetOption, IOTHUB_CLIENT_ERROR);
@@ -222,7 +222,7 @@ TEST_FUNCTION(DigitalTwin_DeviceClient_LL_Destroy_ok)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// DigitalTwin_DeviceClient_LL_RegisterInterfacesAsync
+// DigitalTwin_DeviceClient_LL_RegisterInterfaces
 ///////////////////////////////////////////////////////////////////////////////
 static void dtTestDeviceRegisterInterfaceCallback(DIGITALTWIN_CLIENT_RESULT dtInterfaceStatus, void* userContextCallback)
 {
@@ -232,10 +232,10 @@ static void dtTestDeviceRegisterInterfaceCallback(DIGITALTWIN_CLIENT_RESULT dtIn
 
 static void set_expected_calls_for_DT_DeviceClient_LL_RegisterInterfacesAsync()
 {
-    STRICT_EXPECTED_CALL(DT_ClientCoreRegisterInterfacesAsync(IGNORED_PTR_ARG, testDTInterfacesToRegister, testDTInterfacesToRegisterLen, dtTestDeviceRegisterInterfaceCallback, dtTestDeviceRegisterInterfaceCallbackContext));
+    STRICT_EXPECTED_CALL(DT_ClientCoreRegisterInterfaces(IGNORED_PTR_ARG, testDTInterfacesToRegister, testDTInterfacesToRegisterLen));
 }
 
-TEST_FUNCTION(DigitalTwin_DeviceClient_LL_RegisterInterfacesAsync_ok)
+TEST_FUNCTION(DigitalTwin_DeviceClient_LL_RegisterInterfaces_ok)
 {
     // arrange
     DIGITALTWIN_DEVICE_CLIENT_LL_HANDLE h = allocate_DIGITALTWIN_DEVICE_CLIENT_LL_HANDLE_for_test();
@@ -243,7 +243,7 @@ TEST_FUNCTION(DigitalTwin_DeviceClient_LL_RegisterInterfacesAsync_ok)
 
     //act
     set_expected_calls_for_DT_DeviceClient_LL_RegisterInterfacesAsync();
-    result = DigitalTwin_DeviceClient_LL_RegisterInterfacesAsync(h, testDTInterfacesToRegister, testDTInterfacesToRegisterLen, dtTestDeviceRegisterInterfaceCallback, dtTestDeviceRegisterInterfaceCallbackContext);
+    result = DigitalTwin_DeviceClient_LL_RegisterInterfaces(h, testDTInterfacesToRegister, testDTInterfacesToRegisterLen);
 
     //assert
     ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, result, DIGITALTWIN_CLIENT_OK);
@@ -253,7 +253,7 @@ TEST_FUNCTION(DigitalTwin_DeviceClient_LL_RegisterInterfacesAsync_ok)
     DigitalTwin_DeviceClient_LL_Destroy(h);
 }
 
-TEST_FUNCTION(DigitalTwin_DeviceClient_LL_RegisterInterfacesAsync_fail)
+TEST_FUNCTION(DigitalTwin_DeviceClient_LL_RegisterInterfaces_fail)
 {
     // arrange
     int negativeTestsInitResult = umock_c_negative_tests_init();
@@ -272,10 +272,10 @@ TEST_FUNCTION(DigitalTwin_DeviceClient_LL_RegisterInterfacesAsync_fail)
         umock_c_negative_tests_fail_call(i);
 
         //act
-        result = DigitalTwin_DeviceClient_LL_RegisterInterfacesAsync(h, testDTInterfacesToRegister, testDTInterfacesToRegisterLen, dtTestDeviceRegisterInterfaceCallback, dtTestDeviceRegisterInterfaceCallbackContext);
+        result = DigitalTwin_DeviceClient_LL_RegisterInterfaces(h, testDTInterfacesToRegister, testDTInterfacesToRegisterLen);
         
         //assert
-        ASSERT_ARE_NOT_EQUAL(DIGITALTWIN_CLIENT_RESULT, result, DIGITALTWIN_CLIENT_OK, "DigitalTwin_DeviceClient_LL_RegisterInterfacesAsync failure in test %lu", (unsigned long)i);
+        ASSERT_ARE_NOT_EQUAL(DIGITALTWIN_CLIENT_RESULT, result, DIGITALTWIN_CLIENT_OK, "DigitalTwin_DeviceClient_LL_RegisterInterfaces failure in test %lu", (unsigned long)i);
     }
 
     //cleanup

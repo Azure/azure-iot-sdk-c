@@ -2134,6 +2134,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_Destroys_the_underlying_transport_succeeds)
 #endif
 
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     //act
@@ -2170,8 +2171,8 @@ TEST_FUNCTION(IoTHubClientCore_LL_Destroys_unregisters_but_does_not_destroy_tran
 #endif
 
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-
 
     //act
     IoTHubClientCore_LL_Destroy(handle);
@@ -2286,6 +2287,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_Destroy_after_sendEvent_succeeds)
     STRICT_EXPECTED_CALL(IoTHubClient_EdgeHandle_Destroy(IGNORED_PTR_ARG));
 #endif
 
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
