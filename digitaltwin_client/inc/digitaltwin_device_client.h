@@ -61,22 +61,19 @@ MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_DeviceClient_CreateFr
 /**
   @brief    Registers the specified DIGITALTWIN_INTERFACE_CLIENT_HANDLE's with the DigitalTwin Service.
  
-  @remarks  <c>DigitalTwin_DeviceClient_RegisterInterfacesAsync</c> registers specified dtInterfaces with the Digital Twin Service.  This registration occurrs
-            asychronously.  While registration is in progress, the <c>DIGITALTWIN_INTERFACE_CLIENT_HANDLE</c>'s that are being registered are NOT valid for sending telemetry on
-            nor will they be able to receive commands.
+  @remarks  <c>DigitalTwin_DeviceClient_RegisterInterfaces</c> registers specified dtInterfaces with the Digital Twin Service.
 
-  @remarks  <c>DigitalTwin_DeviceClient_RegisterInterfacesAsync</c> may not be called multiple times for the same <c>DIGITALTWIN_DEVICE_CLIENT_HANDLE</c>.  If a given Digital Twin device
+  @remarks  <c>DigitalTwin_DeviceClient_RegisterInterfaces</c> may not be called multiple times for the same <c>DIGITALTWIN_DEVICE_CLIENT_HANDLE</c>.  If a given Digital Twin device
             needs to have its handles re-registered, it needs to <c>DigitalTwin_DeviceClient_Destroy</c> the existing <c>DIGITALTWIN_DEVICE_CLIENT</c> and create a new one.
 
   @param    dtDeviceClientHandle[in]            A <c>DIGITALTWIN_DEVICE_CLIENT_HANDLE</c> created by <c>DigitalTwin_DeviceClient_CreateFromDeviceHandle</c>.
   @param    dtInterfaces[in]                    An array of length numDTInterfaces of <c>DIGITALTWIN_INTERFACE_CLIENT_HANDLE</c>'s to register with the service.
   @param    numDTInterfaces[in]                 The number of items in the dtInterfaces array.
-  @param    dtInterfaceRegisteredCallback[in]   User specified callback that will be invoked on registration completion or failure.  Callers should not begin sending Digital Twin telemetry until this callback is invoked.
   @param    userContextCallback[in]             User context that is provided to the callback.
  
   @returns  A DIGITALTWIN_CLIENT_RESULT.
 */
-MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_DeviceClient_RegisterInterfacesAsync, DIGITALTWIN_DEVICE_CLIENT_HANDLE, dtDeviceClientHandle, DIGITALTWIN_INTERFACE_CLIENT_HANDLE*, dtInterfaces, unsigned int, numDTInterfaces, DIGITALTWIN_INTERFACE_REGISTERED_CALLBACK, dtInterfaceRegisteredCallback, void*, userContextCallback);
+MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_DeviceClient_RegisterInterfaces, DIGITALTWIN_DEVICE_CLIENT_HANDLE, dtDeviceClientHandle, DIGITALTWIN_INTERFACE_CLIENT_HANDLE*, dtInterfaces, unsigned int, numDTInterfaces);
 
 /**
   @brief    Destroys resources associated with a <c>DIGITALTWIN_DEVICE_CLIENT_HANDLE</c>.
@@ -90,7 +87,7 @@ MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_DeviceClient_Register
 
   @remarks  After <c>DigitalTwin_DeviceClient_Destroy</c> returns, there will be no further callbacks on any threads associated with any Digital Twin interfaces.
 
-  @remarks  Using <c>dtDeviceClientHandle</c> after the this call may result in an application crash.
+  @remarks  Using <c>dtDeviceClientHandle</c> after this call may result in an application crash.
 
   @returns  N/A.
 *

@@ -1,11 +1,11 @@
 LIBRARY digitaltwin_client_dll
 EXPORTS
     DigitalTwin_DeviceClient_CreateFromDeviceHandle
-    DigitalTwin_DeviceClient_RegisterInterfacesAsync
+    DigitalTwin_DeviceClient_RegisterInterfaces
     DigitalTwin_DeviceClient_Destroy
     
     DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle
-    DigitalTwin_DeviceClient_LL_RegisterInterfacesAsync
+    DigitalTwin_DeviceClient_LL_RegisterInterfaces
     DigitalTwin_DeviceClient_LL_DoWork
     DigitalTwin_DeviceClient_LL_Destroy
     

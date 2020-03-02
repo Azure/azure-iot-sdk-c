@@ -1764,6 +1764,7 @@ void IoTHubClientCore_LL_Destroy(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle
         IoTHubClient_EdgeHandle_Destroy(handleData->methodHandle);
 #endif
         STRING_delete(handleData->product_info);
+        STRING_delete(handleData->dt_model_id);
         free(handleData);
     }
 }
@@ -2340,7 +2341,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetOption(IOTHUB_CLIENT_CORE_LL_HANDLE 
         {
             if (handleData->dt_model_id != NULL)
             {
-                LogError("Failed setting the Device Capability Model ID");
+                LogError("DT Model Id already specified.");
                 result = IOTHUB_CLIENT_ERROR;
             } 
             else if ((handleData->dt_model_id = STRING_construct((const char*)value)) == NULL)

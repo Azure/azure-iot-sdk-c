@@ -152,9 +152,9 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle(IOT
     return result;
 }
 
-DIGITALTWIN_CLIENT_RESULT DigitalTwin_DeviceClient_LL_RegisterInterfacesAsync(DIGITALTWIN_DEVICE_CLIENT_LL_HANDLE dtDeviceClientHandle,DIGITALTWIN_INTERFACE_CLIENT_HANDLE* dtInterfaces, unsigned int numDTInterfaces, DIGITALTWIN_INTERFACE_REGISTERED_CALLBACK dtInterfaceRegisteredCallback, void* userContextCallback)
+DIGITALTWIN_CLIENT_RESULT DigitalTwin_DeviceClient_LL_RegisterInterfaces(DIGITALTWIN_DEVICE_CLIENT_LL_HANDLE dtDeviceClientHandle,DIGITALTWIN_INTERFACE_CLIENT_HANDLE* dtInterfaces, unsigned int numDTInterfaces)
 {
-    return DT_ClientCoreRegisterInterfacesAsync((DT_CLIENT_CORE_HANDLE)dtDeviceClientHandle, dtInterfaces, numDTInterfaces, dtInterfaceRegisteredCallback, userContextCallback);
+    return DT_ClientCoreRegisterInterfaces((DT_CLIENT_CORE_HANDLE)dtDeviceClientHandle, dtInterfaces, numDTInterfaces);
 }
 
 void DigitalTwin_DeviceClient_LL_DoWork(DIGITALTWIN_DEVICE_CLIENT_LL_HANDLE dtDeviceClientHandle)

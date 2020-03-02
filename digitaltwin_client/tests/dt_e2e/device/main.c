@@ -50,16 +50,6 @@
 //
 #define DIGITALTWIN_E2E_DEVICE_CAPABILITY_MODEL_URI "urn:azureiot:testinterfaces:cdevicesdk:DCM:1"
 
-// State of DigitalTwin registration process.  We cannot proceed with DigitalTwin until we get into the state APP_DIGITALTWIN_REGISTRATION_SUCCEEDED.
-typedef enum APP_DIGITALTWIN_REGISTRATION_STATUS_TAG
-{
-    APP_DIGITALTWIN_REGISTRATION_PENDING,
-    APP_DIGITALTWIN_REGISTRATION_SUCCEEDED,
-    APP_DIGITALTWIN_REGISTRATION_FAILED
-} APP_DIGITALTWIN_REGISTRATION_STATUS;
-
-APP_DIGITALTWIN_REGISTRATION_STATUS appDigitalTwinRegistrationStatus = APP_DIGITALTWIN_REGISTRATION_PENDING;
-
 // Amount to sleep between querying state from the register interface loop
 static const int digitalTwin_E2E_registerInterfacePollSleep = 1000;
 
@@ -70,70 +60,6 @@ static const int digitalTwin_E2E_registerInterfaceMaxPolls = 60;
 
 // digitalTwin_E2E_PollSleep sets time (1 second for now) between checking for whether test should stop execution.
 static const int digitalTwin_E2E_PollSleep = 1000;
-
-//
-// DT_E2E_InterfacesRegisteredCallback is invoked when the interfaces have been registered or failed.
-// The userContextCallback pointer is set to whether we succeeded or failed and checked by thread blocking
-// for registration to complete.
-//
-static void DT_E2E_InterfacesRegisteredCallback(DIGITALTWIN_CLIENT_RESULT dtInterfaceStatus, void *userContextCallback)
-{
-    APP_DIGITALTWIN_REGISTRATION_STATUS* status = (APP_DIGITALTWIN_REGISTRATION_STATUS*)userContextCallback;
-
-    if (dtInterfaceStatus == DIGITALTWIN_CLIENT_OK)
-    {
-        LogInfo("Interface registration callback invoked, interfaces have been successfully registered");
-        *status = APP_DIGITALTWIN_REGISTRATION_SUCCEEDED;
-    }
-    else
-    {
-        LogError("Interface registration callback invoked with an error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT,dtInterfaceStatus));
-        *status = APP_DIGITALTWIN_REGISTRATION_FAILED;
-    }
-}
-
-//
-// DT_E2E_RegisterDigitalTwinInterfacesAndWait invokes DigitalTwin_DeviceClient_RegisterInterfacesAsync, which indicates to Azure IoT which DigitalTwin interfaces this device supports.
-// The DigitalTwin Handle *is not valid* until this operation has completed (as indicated by the callback DT_E2E_InterfacesRegisteredCallback being invoked).
-//
-static DIGITALTWIN_CLIENT_RESULT DT_E2E_RegisterDigitalTwinInterfacesAndWait(DIGITALTWIN_DEVICE_CLIENT_HANDLE dtDeviceClientHandle, DIGITALTWIN_INTERFACE_CLIENT_HANDLE* interfaceClientHandles, int numInterfaceClientHandles)
-{
-    DIGITALTWIN_CLIENT_RESULT result;
-
-    // Give DigitalTwin interfaces to register.  DigitalTwin_DeviceClient_RegisterInterfacesAsync returns immediately
-    if ((result = DigitalTwin_DeviceClient_RegisterInterfacesAsync(dtDeviceClientHandle, interfaceClientHandles, numInterfaceClientHandles, DT_E2E_InterfacesRegisteredCallback, &appDigitalTwinRegistrationStatus)) != DIGITALTWIN_CLIENT_OK)
-    {
-        LogError("DigitalTwin_DeviceClient_RegisterInterfacesAsync failed, error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
-    }
-    else
-    {
-        // After registration, we do a simple polling algorithm to check for whether
-        // the callback DT_E2E_InterfacesRegisteredCallback has changed appDigitalTwinRegistrationStatus.  Since we can't 
-        // do any other DigitalTwin operations at this point, we have to block here.
-        for (int i = 0; (i < digitalTwin_E2E_registerInterfaceMaxPolls) && (appDigitalTwinRegistrationStatus == APP_DIGITALTWIN_REGISTRATION_PENDING); i++)
-        {
-            ThreadAPI_Sleep(digitalTwin_E2E_registerInterfacePollSleep);
-        }
-
-        if (appDigitalTwinRegistrationStatus == APP_DIGITALTWIN_REGISTRATION_SUCCEEDED)
-        {
-            LogInfo("DigitalTwin interfaces successfully registered");
-            result = DIGITALTWIN_CLIENT_OK;
-        }
-        else if (appDigitalTwinRegistrationStatus == APP_DIGITALTWIN_REGISTRATION_PENDING)
-        {
-            LogError("Timed out attempting to register DigitalTwin interfaces");
-            result = DIGITALTWIN_CLIENT_ERROR;
-        }
-        else
-        {    
-            LogError("Error registering DigitalTwin interfaces");
-            result = DIGITALTWIN_CLIENT_ERROR;
-        }
-    }
-
-    return result;
-}
 
 //
 // DT_E2E_InitializeIotHubDeviceHandle initializes underlying IoTHub client, creates a device handle with the specified connection string,
@@ -241,7 +167,7 @@ int main(int argc, char** argv)
     const char* deviceConnectionString;
 
     // Turn off buffering on output.  Sometimes too much is buffered at stdout/stderr level between
-    // the this executable's CRT and the Node.JS integration into stdout/stderr.  We want the
+    // this executable's CRT and the Node.JS integration into stdout/stderr.  We want the
     // logs coming out as they arrive.
     setvbuf(stdout, NULL, _IONBF, 0);
     setvbuf(stderr, NULL, _IONBF, 0);
@@ -275,9 +201,9 @@ int main(int argc, char** argv)
         LogError("Could not allocate IoTHub Device handle");
         result = MU_FAILURE;
     }
-    else if (DT_E2E_RegisterDigitalTwinInterfacesAndWait(dtDeviceClientHandle, interfaceClientHandles, DIGITALTWIN_E2E_DEVICE_MAX_INTERFACES) != DIGITALTWIN_CLIENT_OK)
+    else if (DigitalTwin_DeviceClient_RegisterInterfaces(dtDeviceClientHandle, interfaceClientHandles, DIGITALTWIN_E2E_DEVICE_MAX_INTERFACES) != DIGITALTWIN_CLIENT_OK)
     {
-        LogError("DT_E2E_RegisterDigitalTwinInterfacesAndWait failed");
+        LogError("DigitalTwin_DeviceClient_RegisterInterfaces failed");
         result = MU_FAILURE;
     }
     else
