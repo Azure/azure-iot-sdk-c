@@ -4,5 +4,6 @@ git \
 python-software-properties \
 build-essential \
 pkg-config
-sudo curl -sL https://deb.nodesource.com/setup_6.x | bash -
+sudo curl -sL https://deb.nodesource.com/setup_12.x | bash -
 sudo apt-get install -y nodejs
+node --version
