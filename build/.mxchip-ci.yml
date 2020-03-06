@@ -6,7 +6,7 @@ jobs:
     vmImage: ubuntu-18.04
   steps:
   - script: |
-      . build_all/mbed5/setup.sh
+      . build_all/mbed5/setup.sh                
     displayName: 'setup'
 
   - script: |
