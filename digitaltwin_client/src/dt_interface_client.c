@@ -34,7 +34,7 @@ static const char commandSeparator = '*';
 static const char* DT_PROPERTY_UPDATE_JSON_VERSON = "$version";
 // Using MQTT property directly because we don't support AMQP presently and cannot support HTTP.
 static const char DT_INTERFACE_ID_PROPERTY[] = "$.ifid";
-static const char DT_INTERFACE_NAME_PROPERTY[] = "$.ifname";
+static const char DT_SUBJECT_PROPERTY[] = "$.sub";
 static const char DT_MESSAGE_SCHEMA_PROPERTY[] = "$.schema";
 static const char DT_JSON_MESSAGE_CONTENT_TYPE[] = "application/json";
 static const char DT_JSON_MESSAGE_CONTENT_ENCODING[] = "utf-8";
@@ -933,9 +933,9 @@ DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_CreateTelemetryMessage(const char* 
             LogError("Cannot set property %s, error = %d", DT_INTERFACE_ID_PROPERTY, iothubMessageResult);
             result = DIGITALTWIN_CLIENT_ERROR;
         }
-        else if ((iothubMessageResult = IoTHubMessage_SetProperty(*telemetryMessageHandle, DT_INTERFACE_NAME_PROPERTY, componentName)) != IOTHUB_MESSAGE_OK)
+        else if ((iothubMessageResult = IoTHubMessage_SetProperty(*telemetryMessageHandle, DT_SUBJECT_PROPERTY, componentName)) != IOTHUB_MESSAGE_OK)
         {
-            LogError("Cannot set property %s, error = %d", DT_INTERFACE_NAME_PROPERTY, iothubMessageResult);
+            LogError("Cannot set property %s, error = %d", DT_SUBJECT_PROPERTY, iothubMessageResult);
             result = DIGITALTWIN_CLIENT_ERROR;
         }        
         else if ((telemetryName != NULL) && ((iothubMessageResult = IoTHubMessage_SetProperty(*telemetryMessageHandle, DT_MESSAGE_SCHEMA_PROPERTY, telemetryName)) != IOTHUB_MESSAGE_OK))

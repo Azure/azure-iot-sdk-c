@@ -327,7 +327,7 @@ function runTestCommandAndCheckMessageAtEventHub(testData:CommandTestData, numbe
     };
     const onEventHubMessage = (receivedMsg) => {
         if((receivedMsg.annotations['iothub-connection-device-id'] === testDeviceInfo.deviceId) &&
-        (receivedMsg.annotations['iothub-interface-name'] === testData.interfaceName)){
+        (receivedMsg.annotations['dt-subject'] === testData.interfaceName)){
             console.log('received a message from the test device: ');
             console.log(JSON.stringify(receivedMsg.body));
             if (receivedMsg.body && receivedMsg.body === testData.payload) {
