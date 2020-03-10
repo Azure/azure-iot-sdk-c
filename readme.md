@@ -88,15 +88,15 @@ This repository contains [provisioning client SDK](./provisioning_client) for th
 | X.509 Enrollment Group      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | This SDK supports connecting your device to the Device Provisioning Service via [enrollment group](https://docs.microsoft.com/azure/iot-dps/concepts-service#enrollment) using [X.509 root certificate](https://docs.microsoft.com/azure/iot-dps/concepts-security#root-certificate).                                                                                                                                                                                         |
 
 ### Provisioniong Service SDK
-This repository contains [provisioning service client SDK](./provisioning/service/) for the Device Provisioning Service to [programmatically enroll devices](https://docs.microsoft.com/en-us/azure/iot-dps/how-to-manage-enrollments-sdks).
+This repository contains [provisioning service client SDK](./provisioning_service_client/) for the Device Provisioning Service to [programmatically enroll devices](https://docs.microsoft.com/en-us/azure/iot-dps/how-to-manage-enrollments-sdks).
 
 | Feature                                            | Support            | Description                                                                                                                                                                                                                                            |
 |----------------------------------------------------|--------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| CRUD Operation with TPM Individual Enrollment      | :heavy_check_mark: | Programmatically manage device enrollment using TPM with the service SDK.  Please visit the [samples folder](./provisioning_service_client/) to learn more about this feature. |
-| Bulk CRUD Operation with TPM Individual Enrollment | :heavy_check_mark: | Programmatically bulk manage device enrollment using TPM with the service SDK.  Please visit the [samples folder](./provisioning_service_client/) to learn more about this feature. |
-| CRUD Operation with X.509 Individual Enrollment    | :heavy_check_mark: | Programmatically manage device enrollment using X.509 individual enrollment with the service SDK.  Please visit the [samples folder](./provisioning/service/samples/) to learn more about this feature. |
-| CRUD Operation with X.509 Group Enrollment         | :heavy_check_mark: | Programmatically manage device enrollment using X.509 group enrollment with the service SDK.  Please visit the [samples folder](./provisioning_service_client/) to learn more about this feature. |
-| Query enrollments                                  | :heavy_check_mark: | Programmatically query registration states with the service SDK.  Please visit the [samples folder](./provisioning_service_client/) to learn more about this feature.                                                                            |
+| CRUD Operation with TPM Individual Enrollment      | :heavy_check_mark: | Programmatically manage device enrollment using TPM with the service SDK.  Please visit the [samples folder](./provisioning_service_client/samples/) to learn more about this feature. |
+| Bulk CRUD Operation with TPM Individual Enrollment | :heavy_check_mark: | Programmatically bulk manage device enrollment using TPM with the service SDK.  Please visit the [samples folder](./provisioning_service_client/samples/) to learn more about this feature. |
+| CRUD Operation with X.509 Individual Enrollment    | :heavy_check_mark: | Programmatically manage device enrollment using X.509 individual enrollment with the service SDK.  Please visit the [samples folder](./provisioning_service_client/samples/) to learn more about this feature. |
+| CRUD Operation with X.509 Group Enrollment         | :heavy_check_mark: | Programmatically manage device enrollment using X.509 group enrollment with the service SDK.  Please visit the [samples folder](./provisioning_service_client/samples/) to learn more about this feature. |
+| Query enrollments                                  | :heavy_check_mark: | Programmatically query registration states with the service SDK.  Please visit the [samples folder](./provisioning_service_client/samples/) to learn more about this feature.                                                                            |
 
 ## OS Platforms and Hardware Compatibility
 
@@ -222,11 +222,10 @@ LTS branches are named lts_*mm*_*yyyy*, where *mm* and *yyyy* are the month and 
 
 Below is a table showing the mapping of the LTS branches to the packages released
 
-| Package | Github Branch | LTS Status | LTS Start Date | Maintenance End Date | Removed Date |
+| Package | Github Branch | LTS Status | LTS Start Date | Maintenance End Date | Removal Date |
 | :-----------: | :-----------: | :--------: | :------------: | :------------------: | :----------: |
+| Vcpkg: 2020-02-07.1<br/> Xenial: 0.2.0.0-26xenial<br/> Trusty: 0.2.0-26trusty<br/> Bionic: 0.2.0.0-19bionic<br/>    | lts_02_2020   | Active     | 2020-02-04     | 2021-02-04           | 2021-02-04   |
 | Vcpkg: 2019-07-01.1<br/> Xenial: 0.2.0.0-21xenial<br/> Trusty: 0.2.0-21trusty<br/> Bionic: 0.2.0.0-14bionic<br/>    | lts_07_2019   | Active     | 2019-07-01     | 2020-07-01           | 2020-07-01   |
-| Vcpkg: 1.2.14-1<br/> Xenial: 0.2.0.0-16xenial<br/> Trusty: 0.2.0-16trusty<br/> Bionic: 0.2.0.0-9bionic<br/>    | lts_01_2019   | Active     | 2019-01-31     | 2020-01-31           | 2020-01-31   |
-| Nuget: 1.2.10<br/> Xenial: 0.2.0.0-12xenial<br/> Trusty: 0.2.0-12trusty<br/> Bionic: 0.2.0.0-5bionic<br/>    | lts_10_2018   | Active     | 2018-10-03     | 2019-10-03           | 2019-10-03   |
 
 * <sup>1</sup> All scheduled dates are subject to change by the Azure IoT SDK team.
 

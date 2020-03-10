@@ -10,9 +10,7 @@
 #include "azure_c_shared_utility/strings.h"
 #include "parson.h"
 
-#define METHODRETURN_C
 #include "methodreturn.h"
-#undef METHODRETURN_C
 
 typedef struct METHODRETURN_HANDLE_DATA_TAG
 {

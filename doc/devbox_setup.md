@@ -387,7 +387,7 @@ make
 ```
 
 [visual-studio]: https://www.visualstudio.com/downloads/
-[device-explorer]: https://github.com/Azure/azure-iot-sdks/tree/master/tools/DeviceExplorer
+[azure-iot-explorer]: https://github.com/Azure/azure-iot-explorer
 [toradex-CE8-sdk]:http://docs.toradex.com/102578
 [application-builder]:http://www.microsoft.com/download/details.aspx?id=38819
 [azure-shared-c-utility]:https://github.com/Azure/azure-c-shared-utility
