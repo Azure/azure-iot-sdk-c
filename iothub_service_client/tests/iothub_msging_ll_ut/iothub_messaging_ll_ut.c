@@ -411,13 +411,13 @@ static AMQP_VALUE TEST_AMQP_MAP = ((AMQP_VALUE)0x6258);
 static MAP_HANDLE TEST_MAP_HANDLE = (MAP_HANDLE)0x103;
 static IOTHUB_MESSAGE_HANDLE TEST_IOTHUB_MESSAGE_HANDLE = (IOTHUB_MESSAGE_HANDLE)0x4242;
 
-char* umock_stringify_BINARY_DATA(const BINARY_DATA* value)
-{
-    char* result = (char*)my_gballoc_malloc(1);
-    (void)value;
-    result[0] = '\0';
-    return result;
-}
+//char* umock_stringify_BINARY_DATA(const BINARY_DATA* value)
+//{
+//    char* result = (char*)my_gballoc_malloc(1);
+//    (void)value;
+//    result[0] = '\0';
+//    return result;
+//}
 
 //int umock_are_equal_BINARY_DATA(const BINARY_DATA* left, const BINARY_DATA* right)
 //{
@@ -461,6 +461,20 @@ char* umock_stringify_BINARY_DATA(const BINARY_DATA* value)
 //    return result;
 //}
 
+//void umock_free_BINARY_DATA(BINARY_DATA* value)
+//{
+//    my_gballoc_free((void*)value->bytes);
+//    value->bytes = NULL;
+//    value->length = 0;
+//}
+
+char* umock_stringify_BINARY_DATA()
+{
+    char* result = (char*)my_gballoc_malloc(1);
+    result[0] = '\0';
+    return result;
+}
+
 int umock_are_equal_BINARY_DATA()
 {
     //force fall through to success bypassing access violation
@@ -475,11 +489,9 @@ int umock_copy_BINARY_DATA()
     return result;
 }
 
-void umock_free_BINARY_DATA(BINARY_DATA* value)
+void umock_free_BINARY_DATA()
 {
-    my_gballoc_free((void*)value->bytes);
-    value->bytes = NULL;
-    value->length = 0;
+    //do nothing
 }
 
 BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
