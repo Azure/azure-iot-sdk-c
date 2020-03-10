@@ -774,8 +774,6 @@ static void report_status_connection_callback_for_multiplexed_devices(const void
     AMQP_TRANSPORT_DEVICE_INSTANCE* registered_device = (AMQP_TRANSPORT_DEVICE_INSTANCE*)item;
     MUX_CONN_STATUS_CB_ARGS* conn_status_args = (MUX_CONN_STATUS_CB_ARGS*)action_context; 
 
-    printf("MUX_CONN_STATUS_CB_ARGS %p, %d, %d\r\n", conn_status_args, conn_status_args->status, conn_status_args->reason);
-
     *continue_processing = true;
 
     registered_device->transport_instance->transport_callbacks.connection_status_cb(conn_status_args->status, conn_status_args->reason, registered_device->transport_ctx);
@@ -796,8 +794,6 @@ static void on_amqp_connection_state_changed(const void* context, AMQP_CONNECTIO
             MUX_CONN_STATUS_CB_ARGS args;
             args.status = IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED; 
             args.reason = IOTHUB_CLIENT_CONNECTION_NO_NETWORK;
-
-            printf("MUX_CONN_STATUS_CB_ARGS %p, %d, %d\r\n", &args, args.status, args.reason);
 
             LogError("Transport received an ERROR from the amqp_connection (state changed %s -> %s); it will be flagged for connection retry.", MU_ENUM_TO_STRING(AMQP_CONNECTION_STATE, previous_state), MU_ENUM_TO_STRING(AMQP_CONNECTION_STATE, new_state));
             
