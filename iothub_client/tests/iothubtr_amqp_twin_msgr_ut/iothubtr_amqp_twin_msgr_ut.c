@@ -133,6 +133,7 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 #define TEST_ATTACH_PROPERTIES                               (MAP_HANDLE)0x4444
 #define UNIQUE_ID_BUFFER_SIZE                                37
 
+
 static const char* TWIN_OPERATION_PATCH = "PATCH";
 static const char* TWIN_OPERATION_GET = "GET";
 static const char* TWIN_OPERATION_PUT = "PUT";
@@ -713,6 +714,62 @@ static TWIN_MESSENGER_HANDLE create_and_start_twin_messenger(TWIN_MESSENGER_CONF
     return handle;
 }
 
+char* umock_stringify_BINARY_DATA(const BINARY_DATA* value)
+{
+    char* result = (char*)TEST_malloc(1);
+    (void)value;
+    result[0] = '\0';
+    return result;
+}
+
+int umock_are_equal_BINARY_DATA(const BINARY_DATA* left, const BINARY_DATA* right)
+{
+    int result;
+
+    if (left->length != right->length)
+    {
+        result = 0;
+    }
+    else
+    {
+        if (memcmp(left->bytes, right->bytes, left->length) == 0)
+        {
+            result = 1;
+        }
+        else
+        {
+            result = 0;
+        }
+    }
+
+    return result;
+}
+
+int umock_copy_BINARY_DATA(BINARY_DATA* destination, const BINARY_DATA* source)
+{
+    int result;
+
+    destination->bytes = (const unsigned char*)TEST_malloc(source->length);
+    if (destination->bytes == NULL)
+    {
+        result = -1;
+    }
+    else
+    {
+        (void)memcpy((void*)destination->bytes, source->bytes, source->length);
+        destination->length = source->length;
+        result = 0;
+    }
+
+    return result;
+}
+
+void umock_free_BINARY_DATA(BINARY_DATA* value)
+{
+    TEST_free((void*)value->bytes);
+    value->bytes = NULL;
+    value->length = 0;
+}
 
 // ---------- Mock Helpers ---------- //
 
@@ -746,8 +803,7 @@ static void register_global_mock_aliases()
     REGISTER_UMOCK_ALIAS_TYPE(AMQP_VALUE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(message_annotations, void*);
     REGISTER_UMOCK_ALIAS_TYPE(PROPERTIES_HANDLE, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(BINARY_DATA, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(receiver_settle_mode, int);
+    REGISTER_UMOCK_ALIAS_TYPE(receiver_settle_mode, unsigned char);
     REGISTER_UMOCK_ALIAS_TYPE(SINGLYLINKEDLIST_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(LIST_ITEM_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(LIST_MATCH_FUNCTION, void*);
@@ -881,6 +937,11 @@ static void register_global_mock_returns()
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(get_time, INDEFINITE_TIME);
 }
 
+static void register_mock_value_types()
+{
+    REGISTER_UMOCK_VALUE_TYPE(BINARY_DATA);
+}
+
 static void reset_test_data()
 {
     g_STRING_sprintf_call_count = 0;
@@ -933,6 +994,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     register_global_mock_aliases();
     register_global_mock_hooks();
     register_global_mock_returns();
+    register_mock_value_types();
 
     g_initial_time = time(NULL);
     g_initial_time_plus_30_secs = add_seconds(g_initial_time, 30);

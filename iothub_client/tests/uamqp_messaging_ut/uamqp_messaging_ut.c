@@ -516,6 +516,120 @@ static void reset_test_data()
     memset(saved_malloc_returns, 0, sizeof(saved_malloc_returns));
 }
 
+char* umock_stringify_BINARY_DATA(const BINARY_DATA* value)
+{
+    char* result = (char*)TEST_malloc(1);
+    (void)value;
+    result[0] = '\0';
+    return result;
+}
+
+int umock_are_equal_BINARY_DATA(const BINARY_DATA* left, const BINARY_DATA* right)
+{
+    int result;
+
+    if (left->length != right->length)
+    {
+        result = 0;
+    }
+    else
+    {
+        if (memcmp(left->bytes, right->bytes, left->length) == 0)
+        {
+            result = 1;
+        }
+        else
+        {
+            result = 0;
+        }
+    }
+
+    return result;
+}
+
+int umock_copy_BINARY_DATA(BINARY_DATA* destination, const BINARY_DATA* source)
+{
+    int result;
+
+    destination->bytes = (const unsigned char*)TEST_malloc(source->length);
+    if (destination->bytes == NULL)
+    {
+        result = -1;
+    }
+    else
+    {
+        (void)memcpy((void*)destination->bytes, source->bytes, source->length);
+        destination->length = source->length;
+        result = 0;
+    }
+
+    return result;
+}
+
+void umock_free_BINARY_DATA(BINARY_DATA* value)
+{
+    TEST_free((void*)value->bytes);
+    value->bytes = NULL;
+    value->length = 0;
+}
+
+char* umock_stringify_data(const data* value)
+{
+    char* result = (char*)TEST_malloc(1);
+    (void)value;
+    result[0] = '\0';
+    return result;
+}
+
+int umock_are_equal_data(const data* left, const data* right)
+{
+    int result;
+
+    if (left->length != right->length)
+    {
+        result = 0;
+    }
+    else
+    {
+        if (memcmp(left->bytes, right->bytes, left->length) == 0)
+        {
+            result = 1;
+        }
+        else
+        {
+            result = 0;
+        }
+    }
+
+    return result;
+}
+
+int umock_copy_data(data* destination, const data* source)
+{
+    int result;
+
+    destination->bytes = (const unsigned char*)TEST_malloc(source->length);
+    if (destination->bytes == NULL)
+    {
+        result = -1;
+    }
+    else
+    {
+        (void)memcpy((void*)destination->bytes, source->bytes, source->length);
+        destination->length = source->length;
+        result = 0;
+    }
+
+    return result;
+}
+
+void umock_free_data(data* value)
+{
+    TEST_free((void*)value->bytes);
+    value->bytes = NULL;
+    value->length = 0;
+}
+
 BEGIN_TEST_SUITE(uamqp_messaging_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
@@ -534,17 +648,18 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_MESSAGE_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUBMESSAGE_CONTENT_TYPE, int);
-    REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_MESSAGE_RESULT, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_MESSAGE_RESULT, int);
     REGISTER_UMOCK_ALIAS_TYPE(MESSAGE_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(PROPERTIES_HANDLE, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(BINARY_DATA, void*); /*????*/
     REGISTER_UMOCK_ALIAS_TYPE(MAP_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(AMQP_VALUE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(MAP_RESULT, int);
     REGISTER_UMOCK_ALIAS_TYPE(AMQP_TYPE, int);
     REGISTER_UMOCK_ALIAS_TYPE(AMQPVALUE_ENCODER_OUTPUT, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(data, void*);
     REGISTER_UMOCK_ALIAS_TYPE(message_annotations, void*);
+
+    REGISTER_UMOCK_VALUE_TYPE(BINARY_DATA);
+    REGISTER_UMOCK_VALUE_TYPE(data);
 
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, TEST_malloc);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
