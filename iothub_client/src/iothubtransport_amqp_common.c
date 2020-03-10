@@ -763,6 +763,24 @@ static int get_new_underlying_io_transport(AMQP_TRANSPORT_INSTANCE* transport_in
 
 // ---------- AMQP connection establishment/tear-down, connectry retry ---------- //
 
+typedef struct MUX_CONN_STATUS_CB_ARGS_STRUCT 
+{
+    IOTHUB_CLIENT_CONNECTION_STATUS status;
+    IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason;
+} MUX_CONN_STATUS_CB_ARGS;
+
+static void report_status_connection_callback_for_multiplexed_devices(const void* item, const void* action_context, bool* continue_processing)
+{
+    AMQP_TRANSPORT_DEVICE_INSTANCE* registered_device = (AMQP_TRANSPORT_DEVICE_INSTANCE*)item;
+    MUX_CONN_STATUS_CB_ARGS* conn_status_args = (MUX_CONN_STATUS_CB_ARGS*)action_context; 
+
+    printf("MUX_CONN_STATUS_CB_ARGS %p, %d, %d\r\n", conn_status_args, conn_status_args->status, conn_status_args->reason);
+
+    *continue_processing = true;
+
+    registered_device->transport_instance->transport_callbacks.connection_status_cb(conn_status_args->status, conn_status_args->reason, registered_device->transport_ctx);
+}
+
 static void on_amqp_connection_state_changed(const void* context, AMQP_CONNECTION_STATE previous_state, AMQP_CONNECTION_STATE new_state)
 {
     if (context != NULL && new_state != previous_state)
@@ -775,8 +793,19 @@ static void on_amqp_connection_state_changed(const void* context, AMQP_CONNECTIO
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_060: [If `new_state` is AMQP_CONNECTION_STATE_ERROR, the connection shall be flagged as faulty (so the connection retry logic can be triggered)]
         if (new_state == AMQP_CONNECTION_STATE_ERROR)
         {
+            MUX_CONN_STATUS_CB_ARGS args;
+            args.status = IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED; 
+            args.reason = IOTHUB_CLIENT_CONNECTION_NO_NETWORK;
+
+            printf("MUX_CONN_STATUS_CB_ARGS %p, %d, %d\r\n", &args, args.status, args.reason);
+
             LogError("Transport received an ERROR from the amqp_connection (state changed %s -> %s); it will be flagged for connection retry.", MU_ENUM_TO_STRING(AMQP_CONNECTION_STATE, previous_state), MU_ENUM_TO_STRING(AMQP_CONNECTION_STATE, new_state));
-            transport_instance->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_NETWORK, transport_instance->transport_ctx);
+            
+            (void)singlylinkedlist_foreach(
+                transport_instance->registered_devices, 
+                report_status_connection_callback_for_multiplexed_devices, 
+                &args);
+
             update_state(transport_instance, AMQP_TRANSPORT_STATE_RECONNECTION_REQUIRED);
         }
         else if (new_state == AMQP_CONNECTION_STATE_OPENED)
