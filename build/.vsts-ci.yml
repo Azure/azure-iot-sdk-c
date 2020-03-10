@@ -1,6 +1,7 @@
 name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
 variables:
   runCodesignValidationInjection: false
+  skipComponentGovernanceDetection: true
 resources:
 - repo: self
   clean: true
