@@ -1,4 +1,7 @@
 name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+variables:
+  runCodesignValidationInjection: false
+  skipComponentGovernanceDetection: true
 
 schedules:
 - cron: "0 0 * * *"
