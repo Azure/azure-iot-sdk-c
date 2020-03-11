@@ -411,63 +411,6 @@ static AMQP_VALUE TEST_AMQP_MAP = ((AMQP_VALUE)0x6258);
 static MAP_HANDLE TEST_MAP_HANDLE = (MAP_HANDLE)0x103;
 static IOTHUB_MESSAGE_HANDLE TEST_IOTHUB_MESSAGE_HANDLE = (IOTHUB_MESSAGE_HANDLE)0x4242;
 
-//char* umock_stringify_BINARY_DATA(const BINARY_DATA* value)
-//{
-//    char* result = (char*)my_gballoc_malloc(1);
-//    (void)value;
-//    result[0] = '\0';
-//    return result;
-//}
-
-//int umock_are_equal_BINARY_DATA(const BINARY_DATA* left, const BINARY_DATA* right)
-//{
-//    int result;
-//
-//    if (left->length != right->length)
-//    {
-//        result = 0;
-//    }
-//    else
-//    {
-//        if (memcmp(left->bytes, right->bytes, left->length) == 0)
-//        {
-//            result = 1;
-//        }
-//        else
-//        {
-//            result = 0;
-//        }
-//    }
-//
-//    return result;
-//}
-//
-//int umock_copy_BINARY_DATA(BINARY_DATA* destination, const BINARY_DATA* source)
-//{
-//    int result;
-//
-//    destination->bytes = (const unsigned char*)my_gballoc_malloc(source->length);
-//    if (destination->bytes == NULL)
-//    {
-//        result = -1;
-//    }
-//    else
-//    {
-//        (void)memcpy((void*)destination->bytes, source->bytes, source->length);
-//        destination->length = source->length;
-//        result = 0;
-//    }
-//
-//    return result;
-//}
-
-//void umock_free_BINARY_DATA(BINARY_DATA* value)
-//{
-//    my_gballoc_free((void*)value->bytes);
-//    value->bytes = NULL;
-//    value->length = 0;
-//}
-
 char* umock_stringify_BINARY_DATA()
 {
     char* result = (char*)my_gballoc_malloc(1);

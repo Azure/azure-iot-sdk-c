@@ -1665,10 +1665,9 @@ static TELEMETRY_MESSENGER_HANDLE create_and_start_messenger2(TELEMETRY_MESSENGE
     return handle;
 }
 
-char* umock_stringify_BINARY_DATA(const BINARY_DATA* value)
+char* umock_stringify_BINARY_DATA()
 {
     char* result = (char*)TEST_malloc(1);
-    (void)value;
     result[0] = '\0';
     return result;
 }
@@ -1687,11 +1686,9 @@ int umock_copy_BINARY_DATA()
     return result;
 }
 
-void umock_free_BINARY_DATA(BINARY_DATA* value)
+void umock_free_BINARY_DATA()
 {
-    TEST_free((void*)value->bytes);
-    value->bytes = NULL;
-    value->length = 0;
+    //do nothing
 }
 
 char* umock_stringify_TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO(const TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO* value)
