@@ -1,5 +1,9 @@
 name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
 
+variables:
+  runCodesignValidationInjection: false
+  skipComponentGovernanceDetection: true
+
 jobs:
 - job: Cross_Compile
   pool:
