@@ -458,9 +458,8 @@ static TEST_MUTEX_HANDLE g_testByTest;
 
 char* umock_stringify_BINARY_DATA(const BINARY_DATA* value)
 {
-    char* result = (char*)my_gballoc_malloc(1);
     (void)value;
-    result[0] = '\0';
+    char* result = "BINARY_DATA";
     return result;
 }
 
@@ -509,8 +508,6 @@ int umock_copy_BINARY_DATA(BINARY_DATA* destination, const BINARY_DATA* source)
 void umock_free_BINARY_DATA(BINARY_DATA* value)
 {
     my_gballoc_free((void*)value->bytes);
-    value->bytes = NULL;
-    value->length = 0;
 }
 
 BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)

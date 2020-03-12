@@ -1665,37 +1665,42 @@ static TELEMETRY_MESSENGER_HANDLE create_and_start_messenger2(TELEMETRY_MESSENGE
     return handle;
 }
 
-char* umock_stringify_BINARY_DATA()
+// ---------- Binary Data Structure Shell functions ---------- //
+char* umock_stringify_BINARY_DATA(const BINARY_DATA* value)
 {
-    char* result = (char*)TEST_malloc(1);
-    result[0] = '\0';
+    (void)value;
+    char* result = "BINARY_DATA";
     return result;
 }
 
-int umock_are_equal_BINARY_DATA()
+int umock_are_equal_BINARY_DATA(const BINARY_DATA* left, const BINARY_DATA* right)
 {
     //force fall through to success bypassing access violation
+    (void)left;
+    (void)right;
     int result = 1;
     return result;
 }
 
-int umock_copy_BINARY_DATA()
+int umock_copy_BINARY_DATA(BINARY_DATA* destination, const BINARY_DATA* source)
 {
     //force fall through to success bypassing access violation
+    (void)destination;
+    (void)source;
     int result = 0;
     return result;
 }
 
-void umock_free_BINARY_DATA()
+void umock_free_BINARY_DATA(BINARY_DATA* value)
 {
     //do nothing
+    (void)value;
 }
 
 char* umock_stringify_TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO(const TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO* value)
 {
-    char* result = (char*)TEST_malloc(1);
     (void)value;
-    result[0] = '\0';
+    char* result = "TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO";
     return result;
 }
 
@@ -1707,9 +1712,13 @@ int umock_are_equal_TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO(const TELEMETRY
     {
         result = 0;
     }
+    else if ((left == NULL) && (right == NULL))
+    {
+        result = 1;
+    }
     else
     {
-        if ((left->source != right->source) || (left->message_id != right->message_id))
+        if ((strcmp(left->source, right->source) != 0) || (left->message_id != right->message_id))
         {
             result = 0;
         }
@@ -1732,26 +1741,16 @@ int umock_copy_TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO(TELEMETRY_MESSENGER_
     }
     else
     {
-        destination->source = (char*)TEST_malloc(sizeof(source->source));
-        if (destination->source == NULL)
+        if (source->source == NULL)
         {
-            // failed to malloc
-            result = -1;
-            TEST_free(destination->source);
+            destination->source = NULL;
         }
         else
         {
-            if (source->source == NULL)
-            {
-                result = -1;
-            }
-            else
-            {
-                destination->message_id = source->message_id;
-                destination->source = source->source;
-                result = 0;
-            }
+            (void)strcpy(destination->source, source->source);
         }
+        destination->message_id = source->message_id;
+        result = 0;
     }
 
     return result;
@@ -1759,9 +1758,8 @@ int umock_copy_TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO(TELEMETRY_MESSENGER_
 
 void umock_free_TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO(TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO* value)
 {
-    TEST_free(value);
-    value->source = NULL;
-    value->message_id = 0;
+    //do nothing
+    (void)value;
 }
 
 BEGIN_TEST_SUITE(iothubtr_amqp_tel_msgr_ut)

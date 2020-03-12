@@ -961,9 +961,8 @@ static AMQP_MESSENGER_HANDLE create_and_start_messenger2(AMQP_MESSENGER_CONFIG* 
 
 char* umock_stringify_AMQP_MESSENGER_MESSAGE_DISPOSITION_INFO(const AMQP_MESSENGER_MESSAGE_DISPOSITION_INFO* value)
 {
-    char* result = (char*)TEST_malloc(1);
     (void)value;
-    result[0] = '\0';
+    char* result = "AMQP_MESSENGER_MESSAGE_DISPOSITION_INFO";
     return result;
 }
 
@@ -975,9 +974,13 @@ int umock_are_equal_AMQP_MESSENGER_MESSAGE_DISPOSITION_INFO(const AMQP_MESSENGER
     {
         result = 0;
     }
+    else if ((left == NULL) && (right == NULL))
+    {
+        result = 1;
+    }
     else
     {
-        if ((left->source != right->source) || (left->message_id != right->message_id))
+        if ((strcmp(left->source, right->source) != 0) || (left->message_id != right->message_id))
         {
             result = 0;
         }
@@ -1000,26 +1003,16 @@ int umock_copy_AMQP_MESSENGER_MESSAGE_DISPOSITION_INFO(AMQP_MESSENGER_MESSAGE_DI
     }
     else
     {
-        destination->source = (char*)TEST_malloc(sizeof(source->source));
-        if (destination->source == NULL)
+        if (source->source == NULL)
         {
-            // failed to malloc
-            result = -1;
-            TEST_free(destination->source);
+            destination->source = NULL;
         }
         else
         {
-            if (source->source == NULL)
-            {
-                result = -1;
-            }
-            else
-            {
-                destination->message_id = source->message_id;
-                destination->source = source->source;
-                result = 0;
-            }
+            (void)strcpy(destination->source, source->source);
         }
+        destination->message_id = source->message_id;
+        result = 0;
     }
 
     return result;
@@ -1027,9 +1020,8 @@ int umock_copy_AMQP_MESSENGER_MESSAGE_DISPOSITION_INFO(AMQP_MESSENGER_MESSAGE_DI
 
 void umock_free_AMQP_MESSENGER_MESSAGE_DISPOSITION_INFO(AMQP_MESSENGER_MESSAGE_DISPOSITION_INFO* value)
 {
-    TEST_free(value);
-    value->source = NULL;
-    value->message_id = 0;
+    //do nothing
+    (void)value;
 }
 
 static void register_global_mock_returns()

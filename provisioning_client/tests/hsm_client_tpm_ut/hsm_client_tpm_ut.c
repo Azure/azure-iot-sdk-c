@@ -129,9 +129,8 @@ static TEST_MUTEX_HANDLE g_testByTest;
 
 char* umock_stringify_TPMA_SESSION(const TPMA_SESSION* value)
 {
-    char* result = (char*)my_gballoc_malloc(1);
     (void)value;
-    result[0] = '\0';
+    char* result = "TPMA_SESSION";
     return result;
 }
 
@@ -143,15 +142,21 @@ int umock_are_equal_TPMA_SESSION(const TPMA_SESSION* left, const TPMA_SESSION* r
     {
         result = 0;
     }
+    else if ((left == NULL) && (right == NULL))
+    {
+        result = 1;
+    }
     else
     {
-        if (left == right)
+        if ((right->continueSession != left->continueSession) || (right->auditExclusive != left->auditExclusive) ||
+            (right->auditReset != left->auditReset) || (right->Reserved_at_bit_3 != left->Reserved_at_bit_3) ||
+            (right->decrypt != left->decrypt) || (right->encrypt != left->encrypt) || (right->audit != left->audit))
         {
-            result = 1;
+            result = 0;
         }
         else
         {
-            result = 0;
+            result = 1;
         }
     }
 
@@ -183,14 +188,8 @@ int umock_copy_TPMA_SESSION(TPMA_SESSION* destination, const TPMA_SESSION* sourc
 
 void umock_free_TPMA_SESSION(TPMA_SESSION* value)
 {
-    // reset values
-    value->continueSession = 0;
-    value->auditExclusive = 0;
-    value->auditReset = 0;
-    value->Reserved_at_bit_3 = 0;
-    value->decrypt = 0;
-    value->encrypt = 0;
-    value->audit = 0;
+    //do nothing
+    (void)value;
 }
 
 BEGIN_TEST_SUITE(hsm_client_tpm_ut)

@@ -516,56 +516,68 @@ static void reset_test_data()
     memset(saved_malloc_returns, 0, sizeof(saved_malloc_returns));
 }
 
-char* umock_stringify_BINARY_DATA()
+// ---------- Binary Data Structure Shell functions ---------- //
+char* umock_stringify_BINARY_DATA(const BINARY_DATA* value)
 {
-    char* result = (char*)TEST_malloc(1);
-    result[0] = '\0';
+    (void)value;
+    char* result = "BINARY_DATA";
     return result;
 }
 
-int umock_are_equal_BINARY_DATA()
+int umock_are_equal_BINARY_DATA(const BINARY_DATA* left, const BINARY_DATA* right)
 {
     //force fall through to success bypassing access violation
+    (void)left;
+    (void)right;
     int result = 1;
     return result;
 }
 
-int umock_copy_BINARY_DATA()
+int umock_copy_BINARY_DATA(BINARY_DATA* destination, const BINARY_DATA* source)
 {
     //force fall through to success bypassing access violation
+    (void)destination;
+    (void)source;
     int result = 0;
     return result;
 }
 
-void umock_free_BINARY_DATA()
+void umock_free_BINARY_DATA(BINARY_DATA* value)
 {
     //do nothing
+    (void)value;
 }
 
-char* umock_stringify_data()
+// ---------- amqp_binary data Structure Shell functions ---------- //
+char* umock_stringify_data(const data* value)
 {
-    char* result = (char*)TEST_malloc(1);
-    result[0] = '\0';
+    (void)value;
+    char* result = "amqp_binary";
     return result;
 }
 
-int umock_are_equal_data()
+int umock_are_equal_data(const data* left, const data* right)
 {
     //force fall through to success bypassing access violation
+    (void)left;
+    (void)right;
     int result = 1;
     return result;
 }
 
-int umock_copy_data()
+int umock_copy_data(data* destination, const data* source)
 {
     //force fall through to success bypassing access violation
+    (void)destination;
+    (void)source;
     int result = 0;
     return result;
 }
 
-void umock_free_data()
+void umock_free_data(data* value)
 {
     //do nothing
+    (void)value;
 }
 
 BEGIN_TEST_SUITE(uamqp_messaging_ut)

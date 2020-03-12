@@ -714,30 +714,36 @@ static TWIN_MESSENGER_HANDLE create_and_start_twin_messenger(TWIN_MESSENGER_CONF
     return handle;
 }
 
-char* umock_stringify_BINARY_DATA()
+// ---------- Binary Data Structure Shell functions ---------- //
+char* umock_stringify_BINARY_DATA(const BINARY_DATA* value)
 {
-    char* result = (char*)TEST_malloc(1);
-    result[0] = '\0';
+    (void)value;
+    char* result = "BINARY_DATA";
     return result;
 }
 
-int umock_are_equal_BINARY_DATA()
+int umock_are_equal_BINARY_DATA(const BINARY_DATA* left, const BINARY_DATA* right)
 {
     //force fall through to success bypassing access violation
+    (void)left;
+    (void)right;
     int result = 1;
     return result;
 }
 
-int umock_copy_BINARY_DATA()
+int umock_copy_BINARY_DATA(BINARY_DATA* destination, const BINARY_DATA* source)
 {
     //force fall through to success bypassing access violation
+    (void)destination;
+    (void)source;
     int result = 0;
     return result;
 }
 
-void umock_free_BINARY_DATA()
+void umock_free_BINARY_DATA(BINARY_DATA* value)
 {
     //do nothing
+    (void)value;
 }
 
 // ---------- Mock Helpers ---------- //
