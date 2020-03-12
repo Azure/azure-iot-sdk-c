@@ -16,7 +16,7 @@ variables:
 jobs:
 - job: Cross_Compile
   pool:
-    vmImage: ubuntu-16.04
+    vmImage: ubuntu-18.04
   steps:
   - task: UsePythonVersion@0
     inputs:
