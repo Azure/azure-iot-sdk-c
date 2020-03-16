@@ -1665,11 +1665,107 @@ static TELEMETRY_MESSENGER_HANDLE create_and_start_messenger2(TELEMETRY_MESSENGE
     return handle;
 }
 
+// ---------- Binary Data Structure Shell functions ---------- //
+char* umock_stringify_BINARY_DATA(const BINARY_DATA* value)
+{
+    (void)value;
+    char* result = "BINARY_DATA";
+    return result;
+}
+
+int umock_are_equal_BINARY_DATA(const BINARY_DATA* left, const BINARY_DATA* right)
+{
+    //force fall through to success bypassing access violation
+    (void)left;
+    (void)right;
+    int result = 1;
+    return result;
+}
+
+int umock_copy_BINARY_DATA(BINARY_DATA* destination, const BINARY_DATA* source)
+{
+    //force fall through to success bypassing access violation
+    (void)destination;
+    (void)source;
+    int result = 0;
+    return result;
+}
+
+void umock_free_BINARY_DATA(BINARY_DATA* value)
+{
+    //do nothing
+    (void)value;
+}
+
+char* umock_stringify_TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO(const TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO* value)
+{
+    (void)value;
+    char* result = "TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO";
+    return result;
+}
+
+int umock_are_equal_TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO(const TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO* left, const TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO* right)
+{
+    int result;
+
+    if (((left == NULL) && (right != NULL)) || ((right == NULL) && (left != NULL)))
+    {
+        result = 0;
+    }
+    else if ((left == NULL) && (right == NULL))
+    {
+        result = 1;
+    }
+    else
+    {
+        if ((strcmp(left->source, right->source) != 0) || (left->message_id != right->message_id))
+        {
+            result = 0;
+        }
+        else
+        {
+            result = 1;
+        }
+    }
+
+    return result;
+}
+
+int umock_copy_TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO(TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO* destination, const TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO* source)
+{
+    int result;
+
+    if ((source == NULL) || (destination == NULL))
+    {
+        result = -1;
+    }
+    else
+    {
+        if (source->source == NULL)
+        {
+            destination->source = NULL;
+        }
+        else
+        {
+            (void)strcpy(destination->source, source->source);
+        }
+        destination->message_id = source->message_id;
+        result = 0;
+    }
+
+    return result;
+}
+
+void umock_free_TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO(TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO* value)
+{
+    //do nothing
+    (void)value;
+}
+
 BEGIN_TEST_SUITE(iothubtr_amqp_tel_msgr_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    size_t type_size;
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -1698,7 +1794,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_UMOCK_ALIAS_TYPE(ON_MESSAGE_SEND_COMPLETE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(ON_MESSAGE_RECEIVED, void*);
     REGISTER_UMOCK_ALIAS_TYPE(ON_MESSAGE_RECEIVER_STATE_CHANGED, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(receiver_settle_mode, int);
+    REGISTER_UMOCK_ALIAS_TYPE(receiver_settle_mode, unsigned char);
     REGISTER_UMOCK_ALIAS_TYPE(SINGLYLINKEDLIST_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(LIST_ITEM_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(LIST_MATCH_FUNCTION, void*);
@@ -1708,24 +1804,13 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_UMOCK_ALIAS_TYPE(pfCloneOption, void*);
     REGISTER_UMOCK_ALIAS_TYPE(pfDestroyOption, void*);
     REGISTER_UMOCK_ALIAS_TYPE(pfSetOption, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(time_t, int);
+    REGISTER_UMOCK_ALIAS_TYPE(time_t, long long);
     REGISTER_UMOCK_ALIAS_TYPE(delivery_number, int);
-    REGISTER_UMOCK_ALIAS_TYPE(TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(BINARY_DATA, void*);
     REGISTER_UMOCK_ALIAS_TYPE(LIST_ACTION_FUNCTION, void*);
-    type_size = sizeof(time_t);
-    if (type_size == sizeof(uint64_t))
-    {
-        REGISTER_UMOCK_ALIAS_TYPE(tickcounter_ms_t, uint64_t);
-    }
-    else if (type_size == sizeof(uint32_t))
-    {
-        REGISTER_UMOCK_ALIAS_TYPE(tickcounter_ms_t, uint32_t);
-    }
-    else
-    {
-        ASSERT_FAIL("Bad size_t size");
-    }
+    REGISTER_UMOCK_ALIAS_TYPE(tickcounter_ms_t, unsigned long long);
+
+    REGISTER_UMOCK_VALUE_TYPE(BINARY_DATA);
+    REGISTER_UMOCK_VALUE_TYPE(TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO);
 
     REGISTER_GLOBAL_MOCK_HOOK(malloc, TEST_malloc);
     REGISTER_GLOBAL_MOCK_HOOK(free, TEST_free);
