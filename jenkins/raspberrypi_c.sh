@@ -3,8 +3,7 @@
 # license. See LICENSE file in the project root for full license 
 # information.
 
-# Tested on RPi2 debian verion 7.8
-
+apt install sudo
 install_root="/home/jenkins" 
 build_root=$(cd "$(dirname "$0")/.." && pwd) 
 cd $build_root
