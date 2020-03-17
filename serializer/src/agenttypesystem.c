@@ -2724,7 +2724,7 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(AGENT_DATA_T
                             {
                                 /*field name copied success*/
                                 /*field value copy follows*/
-                                dest->value.edmComplexType.fields[i].value = (AGENT_DATA_TYPE*)malloc(sizeof(AGENT_DATA_TYPE));
+                                dest->value.edmComplexType.fields[i].value = (AGENT_DATA_TYPE*)calloc(1, sizeof(AGENT_DATA_TYPE));
                                 if (dest->value.edmComplexType.fields[i].value == NULL)
                                 {
                                     result = AGENT_DATA_TYPES_ERROR;
@@ -2779,7 +2779,7 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_MemberPointers(AGENT_DATA_TY
     }
     else
     {
-        AGENT_DATA_TYPE* values = (AGENT_DATA_TYPE*)malloc(nMembers* sizeof(AGENT_DATA_TYPE));
+        AGENT_DATA_TYPE* values = (AGENT_DATA_TYPE*)calloc(1, (nMembers* sizeof(AGENT_DATA_TYPE)));
         if (values == NULL)
         {
             result = AGENT_DATA_TYPES_ERROR;
@@ -2904,7 +2904,7 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_Members(AGENT_DATA_TYPE* age
                 {
                     /*field name was transferred successfully*/
                     /*copy the rest*/
-                    agentData->value.edmComplexType.fields[i].value = (AGENT_DATA_TYPE*)malloc(sizeof(AGENT_DATA_TYPE));
+                    agentData->value.edmComplexType.fields[i].value = (AGENT_DATA_TYPE*)calloc(1, sizeof(AGENT_DATA_TYPE));
                     if (agentData->value.edmComplexType.fields[i].value == NULL)
                     {
                         /*deallocate the name*/

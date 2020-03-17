@@ -46,7 +46,7 @@ DATA_MARSHALLER_HANDLE DataMarshaller_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandl
         result = NULL;
         LogError("(result = %s)", MU_ENUM_TO_STRING(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_INVALID_ARG));
     }
-    else if ((result = (DATA_MARSHALLER_HANDLE_DATA*)malloc(sizeof(DATA_MARSHALLER_HANDLE_DATA))) == NULL)
+    else if ((result = (DATA_MARSHALLER_HANDLE_DATA*)calloc(1, sizeof(DATA_MARSHALLER_HANDLE_DATA))) == NULL)
     {
         /* Codes_SRS_DATA_MARSHALLER_99_048:[On any other errors not explicitly specified, DataMarshaller_Create shall return NULL.] */
         result = NULL;
