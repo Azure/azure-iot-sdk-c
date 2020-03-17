@@ -59,7 +59,7 @@ SET(CMAKE_SYSTEM_NAME Linux) # this one is important
 SET(CMAKE_SYSTEM_VERSION 1) # this one not so much
 
 # this is the location of the amd64 toolchain targeting the Raspberry Pi
-SET(CMAKE_C_COMPILER ${RPI_ROOT}/../bin/arm-linux-gnueabihf-gcc)
+SET(CMAKE_C_COMPILER ${RPI_ROOT}/../bin/arm-linux-gnueabihf-gcc-4.8.3)
 
 # this is the file system root of the target
 SET(CMAKE_FIND_ROOT_PATH ${RPI_ROOT})
