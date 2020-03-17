@@ -15,8 +15,10 @@ sudo iotz update
 #sudo git checkout -- mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/provisioning_client/deps/RIoT/Reference/RIoT/Core/RIoTCrypt/RiotDerEnc.c
 #sudo git checkout -- mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/provisioning_client/deps/RIoT/Reference/RIoT/Core/RIoTCrypt/RiotEcc.c
 #sudo git checkout -- mbed-iot-devkit-sdk/cores/arduino/azure-iot-sdk-c/provisioning_client/deps/RIoT/Reference/RIoT/Core/RIoTCrypt/RiotSha256.c
-sudo iotz mbed deploy
 sudo iotz init mbed
+echo "after init mbed"
+sudo iotz mbed deploy
+echo "after mbed deploy"
 sudo iotz compile
 
 cd ..
