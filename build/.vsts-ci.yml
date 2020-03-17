@@ -68,7 +68,7 @@ jobs:
      whoami
      ls -lr
      pwd
-     sudo ./jenkins/raspberrypi_c.sh
+      ./jenkins/raspberrypi_c.sh
     displayName: 'build'
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
