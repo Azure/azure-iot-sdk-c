@@ -1,4 +1,6 @@
 name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+variables:
+  runCodesignValidationInjection: false
 resources:
 - repo: self
   clean: true
