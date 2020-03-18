@@ -59,7 +59,7 @@ jobs:
     condition: always()
 - job: raspberrypi
   variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/raspberrypi-c-buster"
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/raspberrypi-c"
   pool: aziotbld-lin01
   displayName: raspberrypi
   steps:
