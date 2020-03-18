@@ -1583,10 +1583,12 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         STRICT_EXPECTED_CALL(on_prov_register_device_callback(PROV_DEVICE_RESULT_TRANSPORT, NULL, NULL, NULL));
         STRICT_EXPECTED_CALL(prov_transport_close(IGNORED_PTR_ARG));
         setup_cleanup_prov_info_mocks();
+        STRICT_EXPECTED_CALL(prov_transport_dowork(IGNORED_PTR_ARG));
 
         //act
         g_registration_callback(PROV_DEVICE_TRANSPORT_RESULT_ERROR, NULL, NULL, NULL, g_registration_ctx);
         Prov_Device_LL_DoWork(handle);
+        Prov_Device_LL_DoWork(handle);  // Second DoWork should not call the callback again.
 
         //assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());

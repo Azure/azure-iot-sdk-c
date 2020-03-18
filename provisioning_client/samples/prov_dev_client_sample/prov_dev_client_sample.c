@@ -63,7 +63,7 @@ MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(PROV_DEVICE_REG_STATUS, PROV_DEVICE_REG_S
 static const char* global_prov_uri = "global.azure-devices-provisioning.net";
 static const char* id_scope = "[ID Scope]";
 
-static bool g_registration_complete = false;
+volatile static bool g_registration_complete = false;
 static bool g_use_proxy = false;
 static const char* PROXY_ADDRESS = "127.0.0.1";
 
