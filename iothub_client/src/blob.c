@@ -14,7 +14,9 @@
 #include "azure_c_shared_utility/azure_base64.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 
+#ifdef _WIN32
 #define snprintf_s _snprintf_s
+#endif
 
 BLOB_RESULT Blob_UploadBlock(
         HTTPAPIEX_HANDLE httpApiExHandle,
