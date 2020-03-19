@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdio.h>
+
 #include "azure_c_shared_utility/gballoc.h"
 #include "internal/blob.h"
 #include "internal/iothub_client_ll_uploadtoblob.h"
@@ -11,6 +13,8 @@
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/azure_base64.h"
 #include "azure_c_shared_utility/shared_util_options.h"
+
+#define snprintf_s _snprintf_s
 
 BLOB_RESULT Blob_UploadBlock(
         HTTPAPIEX_HANDLE httpApiExHandle,
@@ -35,8 +39,8 @@ BLOB_RESULT Blob_UploadBlock(
     }
     else
     {
-        char temp[7]; /*this will contain 000000... 049999*/
-        if (sprintf(temp, "%6u", (unsigned int)blockID) != 6) /*produces 000000... 049999*/
+        char temp[11]; /*[this will contain 000000... 049999] uint can have 10, but temp only cares about the first 6*/
+        if (snprintf_s(temp, 11, 6, "%6u", blockID) != 6) /*[produces 000000... 049999] first 6 the rest are truncated*/
         {
             /*Codes_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadMultipleBlocksFromSasUri shall fail and return BLOB_ERROR ]*/
             LogError("failed to sprintf");
