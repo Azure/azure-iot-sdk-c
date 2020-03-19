@@ -146,7 +146,7 @@ static IOTHUB_MESSAGE_HANDLE create_events(const EVENT_INSTANCE* event_info)
     temperature = minTemperature + (rand() % 10);
     humidity = minHumidity +  (rand() % 20);
 
-    (void)sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"%s\",\"windSpeed\":%.2f,\"temperature\":%.2f,\"humidity\":%.2f}", event_info->deviceId, avgWindSpeed + (rand() % 4 + 2.0), temperature, humidity);
+    (void)sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"%s\",\"windSpeed\":%.2f,\"temperature\":%.2f,\"humidity\":%.2f}", event_info->deviceId, avgWindSpeed + ((double)(rand() % 4) + 2.0), temperature, humidity);
     message_handle = IoTHubMessage_CreateFromString(msgText);
     //message_handle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText))) == NULL)
 
