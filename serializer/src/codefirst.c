@@ -560,7 +560,7 @@ EXECUTE_COMMAND_RESULT CodeFirst_InvokeAction(DEVICE_HANDLE deviceHandle, void* 
         result = EXECUTE_COMMAND_ERROR;
         LogError("parameterValues error %s ", MU_ENUM_TO_STRING(EXECUTE_COMMAND_RESULT, result));
     }
-    /*Codes_SRS_CODEFIRST_99_200:[ If devicHeader (callbackUserContext) is NULL then EXECUTE_COMMAND_ERROR shall be returned.]*/
+    /*Codes_SRS_CODEFIRST_99_200:[ If deviceHeader (callbackUserContext) is NULL then EXECUTE_COMMAND_ERROR shall be returned.]*/
     else if (deviceHeader == NULL)
     {
         result = EXECUTE_COMMAND_ERROR;
