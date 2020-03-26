@@ -22,12 +22,12 @@ This document describes how to prepare your development environment to use the *
 
 - Locate the tag name for the [latest release][latest-release] of the SDK.
 
-> Our release tag names are date values in `yyyy-mm-dd` format.
+> Our release tag names are date values in `lts_mm_yyyy` format.
 
 - Clone the latest release of SDK to your local machine using the tag name you found:
 
 ```Shell
-git clone -b <yyyy-mm-dd> https://github.com/Azure/azure-iot-sdk-c.git
+git clone -b <lts_mm_yyyy> https://github.com/Azure/azure-iot-sdk-c.git
 cd azure-iot-sdk-c
 git submodule update --init
 ```
