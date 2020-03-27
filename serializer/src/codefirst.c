@@ -560,6 +560,12 @@ EXECUTE_COMMAND_RESULT CodeFirst_InvokeAction(DEVICE_HANDLE deviceHandle, void* 
         result = EXECUTE_COMMAND_ERROR;
         LogError("parameterValues error %s ", MU_ENUM_TO_STRING(EXECUTE_COMMAND_RESULT, result));
     }
+    /*Codes_SRS_CODEFIRST_99_200:[ If deviceHeader (callbackUserContext) is NULL then EXECUTE_COMMAND_ERROR shall be returned.]*/
+    else if (deviceHeader == NULL)
+    {
+        result = EXECUTE_COMMAND_ERROR;
+        LogError("callback User Context error %s ", MU_ENUM_TO_STRING(EXECUTE_COMMAND_RESULT, result));
+    }
     else
     {
         const REFLECTED_SOMETHING* something;
@@ -629,6 +635,11 @@ METHODRETURN_HANDLE CodeFirst_InvokeMethod(DEVICE_HANDLE deviceHandle, void* cal
     {
         result = NULL;
         LogError("parameterValues error ");
+    }
+    else if (deviceHeader == NULL)
+    {
+        result = NULL;
+        LogError("callback User Context error ");
     }
     else
     {
