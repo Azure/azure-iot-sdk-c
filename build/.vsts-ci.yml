@@ -62,7 +62,7 @@ jobs:
 - job: raspberrypi
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/raspberrypi-c-buster:latest"
-  pool: Hosted Ubuntu 1804
+  pool: Hosted Ubuntu 1604
   displayName: raspberrypi
   steps:
   - script: |
