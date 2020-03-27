@@ -3797,6 +3797,30 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_retry_interval_succeed)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_retry_max_delay_succeed)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfigWithKeyAndSasToken(&config, TEST_DEVICE_ID, NULL, NULL, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, NULL);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(retry_control_set_option(IGNORED_PTR_ARG, RETRY_CONTROL_OPTION_MAX_DELAY_IN_SECS, IGNORED_PTR_ARG));
+
+    // act
+    int retry_interval = 10;
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SetOption(handle, OPTION_RETRY_MAX_DELAY_SECS, &retry_interval);
+
+    // assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetOption_retry_interval_fail)
 {
     // arrange

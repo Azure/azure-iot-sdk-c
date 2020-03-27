@@ -306,6 +306,7 @@ TEST_FUNCTION(Prov_Device_Create_succeeds)
 
 /* Tests_SRS_PROV_DEVICE_CLIENT_12_003: [ If the memory allocation failed the function shall return NULL. ] */
 /* Tests_SRS_PROV_DEVICE_CLIENT_12_005: [ If the Lock initialization failed the function shall clean up the all resources and return NULL. ] */
+/* Tests_SRS_PROV_DEVICE_CLIENT_12_025: [ If the Client initialization failed the function shall clean up the all resources and return NULL. ] */
 TEST_FUNCTION(Prov_Device_Create_fail)
 {
     //arrange
@@ -318,17 +319,10 @@ TEST_FUNCTION(Prov_Device_Create_fail)
 
     umock_c_negative_tests_snapshot();
 
-    size_t calls_cannot_fail[] = { 2 };
-
     //act
     size_t count = umock_c_negative_tests_call_count();
     for (size_t index = 0; index < count; index++)
     {
-        if (should_skip_index(index, calls_cannot_fail, sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0])) != 0)
-        {
-            continue;
-        }
-
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 

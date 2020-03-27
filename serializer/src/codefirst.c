@@ -893,7 +893,7 @@ void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLECTED_DAT
         /*Codes_SRS_CODEFIRST_02_037: [ CodeFirst_CreateDevice shall call CodeFirst_Init, passing NULL for overrideSchemaNamespace. ]*/
         (void)CodeFirst_Init_impl(NULL, false); /*lazy init*/
 
-        if ((deviceHeader = (DEVICE_HEADER_DATA*)malloc(sizeof(DEVICE_HEADER_DATA))) == NULL)
+        if ((deviceHeader = (DEVICE_HEADER_DATA*)calloc(1, sizeof(DEVICE_HEADER_DATA))) == NULL)
         {
             /* Codes_SRS_CODEFIRST_99_102:[On any other errors, Device_Create shall return NULL.] */
             result = NULL;
