@@ -48,7 +48,7 @@ static const char DT_JSON_COMMAND_REQUEST_ID[] = "commandRequest.requestId";
 static const char DT_JSON_COMMAND_REQUEST_PAYLOAD[] = "commandRequest.value";
 static const char DT_JSON_NULL[] = "null";
 
-static const char DT_PropertyWithResponseSchema[] =  "{\""  DT_INTERFACE_PREFIX "%s\": { \"%s\": { \"value\":  %.*s, \"sc\": %d, \"sd\": \"%s\", \"sv\": %d } } }";
+static const char DT_PropertyWithResponseSchema[] =  "{\""  DT_INTERFACE_PREFIX "%s\": { \"%s\": { \"value\":  %.*s, \"ac\": %d, \"ad\": \"%s\", \"av\": %d } } }";
 static const char DT_PropertyWithoutResponseSchema[] = "{\""  DT_INTERFACE_PREFIX "%s\": { \"%s\": { \"value\": %.*s } } }";
 static const char DT_AsyncResultSchema[] = "asyncResult";
 
