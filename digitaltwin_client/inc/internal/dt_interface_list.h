@@ -31,7 +31,6 @@ MOCKABLE_FUNCTION(, DT_COMMAND_PROCESSOR_RESULT, DT_InterfaceList_InvokeCommand,
 MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DT_InterfaceList_ProcessTwinCallbackForProperties, DIGITALTWIN_INTERFACE_LIST_HANDLE, dtInterfaceClientHandle, bool, fullTwin, const unsigned char*, payLoad, size_t, size);
 MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DT_InterfaceList_ProcessTelemetryCallback, DIGITALTWIN_INTERFACE_LIST_HANDLE, dtInterfaceListHandle, DIGITALTWIN_INTERFACE_CLIENT_HANDLE, dtInterfaceClientHandle, DIGITALTWIN_CLIENT_RESULT, dtSendTelemetryStatus, void*, userContextCallback);
 MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DT_InterfaceList_ProcessReportedPropertiesUpdateCallback, DIGITALTWIN_INTERFACE_LIST_HANDLE, dtInterfaceListHandle, DIGITALTWIN_INTERFACE_CLIENT_HANDLE, dtInterfaceClientHandle, DIGITALTWIN_CLIENT_RESULT, dtReportedStatus, void*, userContextCallback);
-MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DT_InterfaceList_CreateRegistrationMessage, DIGITALTWIN_INTERFACE_LIST_HANDLE, dtInterfaceListHandle, const char*, deviceCapabilityModel, IOTHUB_MESSAGE_HANDLE*, messageHandle);
 
 #ifdef __cplusplus
 }
