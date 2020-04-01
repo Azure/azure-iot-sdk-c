@@ -24,33 +24,17 @@
 #include <digitaltwin_device_client.h>
 #include <digitaltwin_interface_client.h>
 
-// #define ENABLE_MODEL_DEFINITION_INTERFACE to enable ModelDefinition interface.  Remove it if your DTDL definitions will be 
-// available on the cloud already (e.g. a private repository) to save space on constrained devices.
-#define ENABLE_MODEL_DEFINITION_INTERFACE
-
-#ifdef ENABLE_MODEL_DEFINITION_INTERFACE
-#include <digitaltwin_model_definition.h>
-#endif 
-
 //
 // Headers that implement the sample interfaces that this sample device registers
 //
 #include <../digitaltwin_sample_device_info/digitaltwin_sample_device_info.h>
 #include <../digitaltwin_sample_environmental_sensor/digitaltwin_sample_environmental_sensor.h>
 #include <../digitaltwin_sample_sdk_info/digitaltwin_sample_sdk_info.h>
-#include <../digitaltwin_sample_model_definition/digitaltwin_sample_model_definition.h>
 
-
-// Number of DigitalTwin Interfaces that this DigitalTwin Device supports.
-#ifdef ENABLE_MODEL_DEFINITION_INTERFACE
-#define DIGITALTWIN_SAMPLE_DEVICE_NUM_INTERFACES 4
-#else
 #define DIGITALTWIN_SAMPLE_DEVICE_NUM_INTERFACES 3
-#endif
 #define DIGITALTWIN_SAMPLE_DEVICE_INFO_INDEX 0
 #define DIGITALTWIN_SAMPLE_ENVIRONMENTAL_SENSOR_INDEX 1
 #define DIGITALTWIN_SAMPLE_SDK_INFO_INDEX 2
-#define DIGITALTWIN_SAMPLE_MODEL_DEFINITION_INDEX 3
 
 
 // Amount to sleep between querying state from the register interface loop
@@ -124,9 +108,6 @@ int main(int argc, char *argv[])
     IOTHUB_DEVICE_HANDLE deviceHandle = NULL; 
     DIGITALTWIN_DEVICE_CLIENT_HANDLE dtDeviceClientHandle = NULL;
     DIGITALTWIN_INTERFACE_CLIENT_HANDLE interfaceClientHandles[DIGITALTWIN_SAMPLE_DEVICE_NUM_INTERFACES];
-#ifdef ENABLE_MODEL_DEFINITION_INTERFACE
-    MODEL_DEFINITION_CLIENT_HANDLE modeldefClientHandle = NULL;
-#endif
 
     memset(&interfaceClientHandles, 0, sizeof(interfaceClientHandles));
 
@@ -167,18 +148,6 @@ int main(int argc, char *argv[])
     {
         LogError("DigitalTwinSampleEnvironmentalSensor_CreateInterface failed");
     }
-#ifdef ENABLE_MODEL_DEFINITION_INTERFACE
-    // Invoke to create Model Definition interface - implemented in a separate library - to create DIGITALTWIN_INTERFACE_CLIENT_HANDLE.
-    else if ((result = DigitalTwin_ModelDefinition_Create(&modeldefClientHandle, &(interfaceClientHandles[DIGITALTWIN_SAMPLE_MODEL_DEFINITION_INDEX]))) != DIGITALTWIN_CLIENT_OK)
-    {
-        LogError("DigitalTwin_ModelDefinition_Create failed");
-    }
-    // Add environmental sensor interface dtdl for model reference interface request callback
-    else if ((result = DigitalTwinSampleModelDefinition_ParseAndPublish(modeldefClientHandle)) != DIGITALTWIN_CLIENT_OK)
-    {
-        LogError("DigitalTwinSampleModelDefinition_ParseAndPublish failed");
-    }
-#endif
     // Register the interface we've created with Azure IoT.  This call will block until interfaces
     // are successfully registered, we get a failure from server, or we timeout.
     else if (DigitalTwin_DeviceClient_RegisterInterfaces(dtDeviceClientHandle, interfaceClientHandles, DIGITALTWIN_SAMPLE_DEVICE_NUM_INTERFACES) != DIGITALTWIN_CLIENT_OK)
@@ -221,14 +190,6 @@ int main(int argc, char *argv[])
     {
         DigitalTwinSampleSdkInfo_Close(interfaceClientHandles[DIGITALTWIN_SAMPLE_SDK_INFO_INDEX]);
     }
-
-#ifdef ENABLE_MODEL_DEFINITION_INTERFACE
-    if (modeldefClientHandle != NULL)
-    {
-        // Model definition object handles cleanup of interface DigitalTwin Interface Client object
-        DigitalTwin_ModelDefinition_Destroy(modeldefClientHandle);
-    }
-#endif
 
     if (dtDeviceClientHandle != NULL)
     {
