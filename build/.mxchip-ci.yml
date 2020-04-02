@@ -14,6 +14,9 @@ jobs:
     displayName: 'build'
     env:
       MXCHIP_REPO_SOURCE_BRANCH: $(MXCHIP_REPO_SOURCE_BRANCH)
+      MBED_CRED: $(MBED_CRED)
+      DEVKIT_CRED: $(DEVKIT_CRED)
+      AZ3166_CRED: $(AZ3166_CRED)
 
   - script: |
       # Check that this is the right source directory
