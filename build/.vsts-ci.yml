@@ -70,6 +70,7 @@ jobs:
      whoami
      ls -lr
      pwd
+     chmod +x jenkins/raspberrypi_c_buster.sh
       ./jenkins/raspberrypi_c_buster.sh
     displayName: 'build'
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
