@@ -44,7 +44,7 @@ ENV STAGING_DIR=${TOOLCHAIN_SYSROOT}
 
 ########## OPENSSL INSTALL ##########
 # Download OpenSSL source and expand it
-ENV OPENSSL_SOURCE=openssl-1.1.0j
+ENV OPENSSL_SOURCE=openssl-1.1.1f
 RUN wget https://www.openssl.org/source/${OPENSSL_SOURCE}.tar.gz
 RUN tar -xvf ${OPENSSL_SOURCE}.tar.gz
 
