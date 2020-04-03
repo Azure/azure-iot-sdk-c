@@ -61,7 +61,7 @@ jobs:
     condition: always()
 - job: raspberrypi
   variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/raspberrypi-c-buster:latest"
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/raspberrypi-c-buster:brown"
   pool: Hosted Ubuntu 1604
   displayName: raspberrypi
   steps:
@@ -70,7 +70,7 @@ jobs:
      whoami
      ls -lr
      pwd
-      ./jenkins/raspberrypi_c.sh
+      ./jenkins/raspberrypi_c_buster.sh
     displayName: 'build'
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
