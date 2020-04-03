@@ -3297,6 +3297,18 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SetOption(TRANSPORT_LL_HANDLE h
                 result = IOTHUB_CLIENT_OK;
             }
         }
+        else if (strcmp(OPTION_RETRY_MAX_DELAY_SECS, option) == 0)
+        {
+            if (retry_control_set_option(transport_data->retry_control_handle, RETRY_CONTROL_OPTION_MAX_DELAY_IN_SECS, value) != 0)
+            {
+                LogError("Failure setting retry max delay option");
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else
+            {
+                result = IOTHUB_CLIENT_OK;
+            }
+        }
         else if (strcmp(OPTION_HTTP_PROXY, option) == 0)
         {
             /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_001: [ If `option` is `proxy_data`, `value` shall be used as an `HTTP_PROXY_OPTIONS*`. ]*/

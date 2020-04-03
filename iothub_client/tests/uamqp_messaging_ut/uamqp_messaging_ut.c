@@ -516,6 +516,70 @@ static void reset_test_data()
     memset(saved_malloc_returns, 0, sizeof(saved_malloc_returns));
 }
 
+// ---------- Binary Data Structure Shell functions ---------- //
+char* umock_stringify_BINARY_DATA(const BINARY_DATA* value)
+{
+    (void)value;
+    char* result = "BINARY_DATA";
+    return result;
+}
+
+int umock_are_equal_BINARY_DATA(const BINARY_DATA* left, const BINARY_DATA* right)
+{
+    //force fall through to success bypassing access violation
+    (void)left;
+    (void)right;
+    int result = 1;
+    return result;
+}
+
+int umock_copy_BINARY_DATA(BINARY_DATA* destination, const BINARY_DATA* source)
+{
+    //force fall through to success bypassing access violation
+    (void)destination;
+    (void)source;
+    int result = 0;
+    return result;
+}
+
+void umock_free_BINARY_DATA(BINARY_DATA* value)
+{
+    //do nothing
+    (void)value;
+}
+
+// ---------- amqp_binary data Structure Shell functions ---------- //
+char* umock_stringify_data(const data* value)
+{
+    (void)value;
+    char* result = "amqp_binary";
+    return result;
+}
+
+int umock_are_equal_data(const data* left, const data* right)
+{
+    //force fall through to success bypassing access violation
+    (void)left;
+    (void)right;
+    int result = 1;
+    return result;
+}
+
+int umock_copy_data(data* destination, const data* source)
+{
+    //force fall through to success bypassing access violation
+    (void)destination;
+    (void)source;
+    int result = 0;
+    return result;
+}
+
+void umock_free_data(data* value)
+{
+    //do nothing
+    (void)value;
+}
+
 BEGIN_TEST_SUITE(uamqp_messaging_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
@@ -534,17 +598,18 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_MESSAGE_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUBMESSAGE_CONTENT_TYPE, int);
-    REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_MESSAGE_RESULT, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_MESSAGE_RESULT, int);
     REGISTER_UMOCK_ALIAS_TYPE(MESSAGE_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(PROPERTIES_HANDLE, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(BINARY_DATA, void*); /*????*/
     REGISTER_UMOCK_ALIAS_TYPE(MAP_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(AMQP_VALUE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(MAP_RESULT, int);
     REGISTER_UMOCK_ALIAS_TYPE(AMQP_TYPE, int);
     REGISTER_UMOCK_ALIAS_TYPE(AMQPVALUE_ENCODER_OUTPUT, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(data, void*);
     REGISTER_UMOCK_ALIAS_TYPE(message_annotations, void*);
+
+    REGISTER_UMOCK_VALUE_TYPE(BINARY_DATA);
+    REGISTER_UMOCK_VALUE_TYPE(data);
 
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, TEST_malloc);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);

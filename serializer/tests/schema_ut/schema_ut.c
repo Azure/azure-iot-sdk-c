@@ -16,6 +16,11 @@ static void* my_gballoc_malloc(size_t t)
     return malloc(t);
 }
 
+static void* my_gballoc_calloc(size_t m, size_t t)
+{
+    return calloc(m, t);
+}
+
 static void* my_gballoc_realloc(void* v, size_t t)
 {
     return realloc(v, t);
@@ -132,6 +137,8 @@ BEGIN_TEST_SUITE(Schema_ut)
 
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(gballoc_calloc, my_gballoc_calloc);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_calloc, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, my_gballoc_free);
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_realloc, my_gballoc_realloc);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_realloc, NULL);
@@ -445,8 +452,8 @@ BEGIN_TEST_SUITE(Schema_ut)
             .IgnoreArgument_ptr()
             .IgnoreArgument_size();
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
-            .IgnoreArgument_size();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+            .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, MODEL_NAME))
             .IgnoreArgument_destination();
@@ -4656,8 +4663,8 @@ BEGIN_TEST_SUITE(Schema_ut)
             .IgnoreArgument_handle()
             .IgnoreArgument_pred();
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
-            .IgnoreArgument_size();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+            .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, desiredPropertyName))
             .IgnoreArgument_destination();
