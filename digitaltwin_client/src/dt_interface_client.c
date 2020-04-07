@@ -32,7 +32,7 @@ static const size_t DT_InterfaceMaxLength = 256;
 
 static const char commandSeparator = '*';
 static const char* DT_PROPERTY_UPDATE_JSON_VERSON = "$version";
-// Using MQTT property directly because we don't support AMQP presently and cannot support HTTP.
+// Using MQTT property directly because we don't support AMQP or HTTP.
 static const char DT_SUBJECT_PROPERTY[] = "$.sub";
 static const char DT_MESSAGE_SCHEMA_PROPERTY[] = "$.schema";
 static const char DT_JSON_MESSAGE_CONTENT_TYPE[] = "application/json";
