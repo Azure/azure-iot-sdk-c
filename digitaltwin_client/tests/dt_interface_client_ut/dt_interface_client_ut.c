@@ -350,6 +350,61 @@ static const size_t updatePropertiesInvalidJsonLen= sizeof(updatePropertiesInval
 
 static const char dtTestExpectedSdkInfo[] = "{\"$iotin:urn_azureiot_Client_SDKInformation\":  { \"language\":{ \"value\":\"C\"},\"version\":{ \"value\":\"0.9.0\"},\"vendor\":{ \"value\":\"Microsoft\"}}}";
 
+static const char* DT_TEST_Valid_ComponentNames2[] = {
+    "component1", 
+    "c1", 
+    "c", 
+    "c_1", 
+    "c__2",
+    "considerably_longer_name_with_some_underscores"
+};
+
+static const size_t DT_TEST_Valid_ComponentNamesLen2 = sizeof(DT_TEST_Valid_ComponentNames2) / sizeof(DT_TEST_Valid_ComponentNames2[0]);
+    
+static const char* DT_TEST_Invalid_ComponentNames2[] = {
+    "1component1", 
+    "!abcdefg",
+    "@abcdefg",
+    "abc#a",
+    "_abcd",
+    "abcde_",
+    "abc:",
+    "abcd:efg",
+    ":abcd",
+    ";abcd",
+    ";",
+    ":",
+    "",
+};
+
+static const char* DT_TEST_Valid_DtmiInterfaces[] = {
+    "dtmi:abc;1",
+    "dtmi:a:b:c;1",
+    "dtmi:a:b:c;12345678",
+    "dtmi:longer__h:longer__3:another_segment1234;12345678",
+};
+
+static const size_t DT_TEST_DtmiInterfacesLen = sizeof(DT_TEST_Valid_DtmiInterfaces) / sizeof(DT_TEST_Valid_DtmiInterfaces[0]);
+    
+static const char* DT_TEST_Invalid_DtmiInterfaces[] = {
+    "missing-dtmi",
+    "dtmi:no-version-semicolon",
+    "dtmi:no-version-semicolon:with_extra_segment_1",
+    "dtmi:no-version-semicolon:with_extra_segment_1:segment-2",
+    "dtmi:version_starts_with_zero_only;0",
+    "dtmi:version_starts_with_zero_then_more;02",
+    "dtmi:version_too_long;1234567890",
+    "dtmi:illegal!CHAR1;1",
+    "dtmi:illegalCHAR1_#;1",
+    "dtmi:illegal_underscore_at_end_;1",
+    "dtmi:_illegal_underscore_at_beginning_;1"
+};
+
+static const size_t DT_TEST_Invalid_DtmiInterfacesLen = sizeof(DT_TEST_Invalid_DtmiInterfaces) / sizeof(DT_TEST_Invalid_DtmiInterfaces[0]);
+
+static const size_t DT_TEST_Invalid_ComponentNamesLen2 = sizeof(DT_TEST_Invalid_ComponentNames2) / sizeof(DT_TEST_Invalid_ComponentNames2[0]);
+
+
 // Valid interface Ids
 static const char* DT_TEST_Valid_InterfaceIds[] = {
     "urn:goodInterface:1",
@@ -1791,6 +1846,58 @@ TEST_FUNCTION(DigitalTwin_InterfaceClient_ReportPropertyAsync_fail)
     test_free_bound_interface_handle(h);
     umock_c_negative_tests_deinit();
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// DT_InterfaceClient_CheckNameValid2
+///////////////////////////////////////////////////////////////////////////////
+TEST_FUNCTION(DT_InterfaceClient_CheckName2Valid_ok)
+{
+    size_t i;
+
+    for (i = 0; i < DT_TEST_Valid_ComponentNamesLen2; i++)
+    {
+        const char* valueToCheck = DT_TEST_Valid_ComponentNames2[i];
+        ASSERT_ARE_EQUAL(int, 0, DT_InterfaceClient_CheckNameValid2(valueToCheck), "Value=%s failed but should have succeeded", valueToCheck);
+    }
+}
+
+TEST_FUNCTION(DT_InterfaceClient_CheckName2Invalid_fail)
+{
+    size_t i;
+
+    for (i = 0; i < DT_TEST_Invalid_ComponentNamesLen2; i++)
+    {
+        const char* valueToCheck = DT_TEST_Invalid_ComponentNames2[i];
+        ASSERT_ARE_NOT_EQUAL(int, 0, DT_InterfaceClient_CheckNameValid2(valueToCheck), "Value=%s succeeded but should have failed", valueToCheck);
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// DT_InterfaceClient_CheckDTMIValid
+///////////////////////////////////////////////////////////////////////////////
+TEST_FUNCTION(DT_InterfaceClient_CheckDTMIValid_ok)
+{
+    size_t i;
+
+    for (i = 0; i < DT_TEST_DtmiInterfacesLen; i++)
+    {
+        const char* valueToCheck = DT_TEST_Valid_DtmiInterfaces[i];
+        ASSERT_ARE_EQUAL(int, 0, DT_InterfaceClient_CheckDTMIValid(valueToCheck), "Value=%s failed but should have succeeded", valueToCheck);
+    }
+}
+
+TEST_FUNCTION(DT_InterfaceClient_CheckDTMIValidInvalid_fail)
+{
+    size_t i;
+
+    for (i = 0; i < DT_TEST_Invalid_DtmiInterfacesLen; i++)
+    {
+        const char* valueToCheck = DT_TEST_Invalid_DtmiInterfaces[i];
+        ASSERT_ARE_NOT_EQUAL(int, 0, DT_InterfaceClient_CheckDTMIValid(valueToCheck), "Value=%s succeeded but should have failed", valueToCheck);
+    }
+}
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // DT_InterfaceClient_CheckNameValid
