@@ -15,8 +15,11 @@ jobs:
     env:
       MXCHIP_REPO_SOURCE_BRANCH: $(MXCHIP_REPO_SOURCE_BRANCH)
       MBED_CRED: $(MBED_CRED)
+      MBED_USER: $(MBED_USER)
       DEVKIT_CRED: $(DEVKIT_CRED)
+      DEVKIT_USER: $(DEVKIT_USER)
       AZ3166_CRED: $(AZ3166_CRED)
+      AZ3166_USER: $(AZ3166_USER)
 
   - script: |
       # Check that this is the right source directory
