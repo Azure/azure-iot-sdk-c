@@ -16,7 +16,7 @@
 static void* DT_E2E_CommandContext = (void*)0x12344321;
 
 // Interface name for commands testing
-static const char DT_E2E_Properties_InterfaceId[] = "urn:azureiot:testinterfaces:cdevicesdk:commands:1";
+static const char DT_E2E_Properties_InterfaceId[] = "dtmi:azureiot:testinterfaces:cdevicesdk:commands;1";
 static const char DT_E2E_Properties_InterfaceName[] = "testCommands";
 
 // Command names that the service SDK invokes to invoke tests on this interface

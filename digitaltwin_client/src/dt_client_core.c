@@ -643,7 +643,7 @@ static DT_SEND_TELEMETRY_CALLBACK_CONTEXT* CreateDTSendTelemetryCallbackContext(
 // VerifyComponentsUnique makes sure that the componentName of each handle is unique.  E.g. one connection cannot have
 // two components both named "frontCamera".  We check here, instead of solely relying on server policy, because if this fails on server
 // side for MQTT then the connection may be dropped and it will be hard for application developer to debug.
-// Duplicate interfaces ARE allowed - e.g. app can have two "urn:contoso:camera:1" interfaces as long as the component names are different.
+// Duplicate interfaces ARE allowed - e.g. app can have two "dtmi:contoso:camera;1" interfaces as long as the component names are different.
 static DIGITALTWIN_CLIENT_RESULT VerifyComponentsUnique(DIGITALTWIN_INTERFACE_CLIENT_HANDLE* dtInterfaces, unsigned int numDTInterfaces)
 {
     DIGITALTWIN_CLIENT_RESULT result = DIGITALTWIN_CLIENT_ERROR;

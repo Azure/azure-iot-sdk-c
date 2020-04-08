@@ -12,7 +12,7 @@
 // Logic to tie test commands into DigitalTwin framework and the test's main()
 //*****************************************************************************
 // Interface name for properties testing
-static const char DT_E2E_Properties_InterfaceId[] = "urn:azureiot:testinterfaces:cdevicesdk:properties:1";
+static const char DT_E2E_Properties_InterfaceId[] = "dtmi:azureiot:testinterfaces:cdevicesdk:properties;1";
 static const char DT_E2E_Properties_InterfaceName[] = "testProperties";
 
 // Command names that the service SDK invokes to invoke tests on this interface

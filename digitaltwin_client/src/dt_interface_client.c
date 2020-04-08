@@ -609,16 +609,18 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_Create(const char* interfa
         LogError("Invalid parameter(s): interfaceId=%p, componentName=%p, dtInterfaceClient=%p", interfaceId, componentName, dtInterfaceClient);
         result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
     }
-    else if (DT_InterfaceClient_CheckNameValid(interfaceId, true) != 0)
+    /*else if (DT_InterfaceClient_CheckNameValid(interfaceId, true) != 0)
     {
         LogError("Invalid interfaceId %s", interfaceId);
         result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
     }
-    else if (DT_InterfaceClient_CheckNameValid(componentName, false) != 0)
+    */
+    /*else if (DT_InterfaceClient_CheckNameValid(componentName, false) != 0)
     {
         LogError("Invalid componentName %s", componentName);
         result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
     }
+    */
     else if ((dtNewHandle = calloc(1, sizeof(DT_INTERFACE_CLIENT))) == NULL)
     {
         LogError("Cannot allocate interface client");
