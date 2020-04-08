@@ -304,7 +304,6 @@ BEGIN_TEST_SUITE(iothubtransportamqp_methods_unittests)
 TEST_SUITE_INITIALIZE(suite_init)
 {
     int result;
-    size_t type_size;
 
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
@@ -326,19 +325,6 @@ TEST_SUITE_INITIALIZE(suite_init)
 
     REGISTER_UMOCK_VALUE_TYPE(uuid);
     REGISTER_UMOCK_VALUE_TYPE(BINARY_DATA);
-    type_size = sizeof(time_t);
-    if (type_size == sizeof(uint64_t))
-    {
-        REGISTER_UMOCK_ALIAS_TYPE(tickcounter_ms_t, uint64_t);
-    }
-    else if (type_size == sizeof(uint32_t))
-    {
-        REGISTER_UMOCK_ALIAS_TYPE(tickcounter_ms_t, uint32_t);
-    }
-    else
-    {
-        ASSERT_FAIL("Bad size_t size");
-    }
 
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, my_gballoc_free);
@@ -365,6 +351,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(ON_MESSAGE_SEND_COMPLETE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(fields, void*);
     REGISTER_UMOCK_ALIAS_TYPE(ASYNC_OPERATION_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(tickcounter_ms_t, unsigned long long);
 }
 
 TEST_SUITE_CLEANUP(suite_cleanup)

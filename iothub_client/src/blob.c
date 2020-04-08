@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+
 #include "azure_c_shared_utility/gballoc.h"
 #include "internal/blob.h"
 #include "internal/iothub_client_ll_uploadtoblob.h"
@@ -31,6 +32,11 @@ BLOB_RESULT Blob_UploadBlock(
         httpResponse == NULL)
     {
         LogError("invalid argument detected requestContent=%p blockIDList=%p relativePath=%p httpApiExHandle=%p httpStatus=%p httpResponse=%p", requestContent, blockIDList, relativePath, httpApiExHandle, httpStatus, httpResponse);
+        result = BLOB_ERROR;
+    }
+    else if (blockID > 49999) /*outside the expected range of 000000... 049999*/
+    {
+        LogError("block ID too large");
         result = BLOB_ERROR;
     }
     else

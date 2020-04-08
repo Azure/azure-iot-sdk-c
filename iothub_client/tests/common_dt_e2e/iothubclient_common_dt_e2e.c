@@ -758,6 +758,66 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     }
 }
 
+void dt_e2e_get_twin_async_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACCOUNT_AUTH_METHOD accountAuthMethod)
+{
+    // arrange
+    IOTHUB_PROVISIONED_DEVICE* deviceToUse;
+    if (accountAuthMethod == IOTHUB_ACCOUNT_AUTH_X509)
+    {
+        deviceToUse = IoTHubAccount_GetX509Device(g_iothubAcctInfo);
+    }
+    else
+    {
+        deviceToUse = IoTHubAccount_GetSASDevice(g_iothubAcctInfo);
+    }
+
+    DEVICE_DESIRED_DATA *device = device_desired_init();
+    ASSERT_IS_NOT_NULL(device, "failed to create the device client data");
+
+    dt_e2e_create_client_handle(deviceToUse, protocol);
+
+    if (deviceToUse->moduleConnectionString != NULL)
+    {
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IoTHubModuleClient_GetTwinAsync(iothub_moduleclient_handle, deviceTwinCallback, device), IOTHUB_CLIENT_OK);
+    }
+    else
+    {
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_GetTwinAsync(iothub_deviceclient_handle, deviceTwinCallback, device), IOTHUB_CLIENT_OK);
+    }
+
+    bool callbackReceived = false;
+    time_t beginOperation, nowTime;
+    beginOperation = time(NULL);
+    while (
+        (nowTime = time(NULL)),
+        (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) // time box
+        )
+    {
+        if (Lock(device->lock) != LOCK_OK)
+        {
+            ASSERT_FAIL("Lock failed");
+        }
+        else
+        {
+            if (device->receivedCallBack)
+            {
+                ASSERT_IS_NOT_NULL(device->cb_payload);
+                ASSERT_IS_TRUE(strlen(device->cb_payload) > 0);
+                callbackReceived = device->receivedCallBack;
+                Unlock(device->lock);
+                break;
+            }
+            Unlock(device->lock);
+        }
+        ThreadAPI_Sleep(1000);
+    }
+    ASSERT_IS_TRUE(callbackReceived, "Did not receive the GetTwinAsync call back");    
+
+    // cleanup
+    destroy_on_device_or_module();
+    device_desired_deinit(device);
+}
+
 void dt_e2e_send_reported_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACCOUNT_AUTH_METHOD accountAuthMethod)
 {
     // arrange
