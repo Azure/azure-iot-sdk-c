@@ -127,6 +127,71 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 
 static TEST_MUTEX_HANDLE g_testByTest;
 
+char* umock_stringify_TPMA_SESSION(const TPMA_SESSION* value)
+{
+    (void)value;
+    char* result = "TPMA_SESSION";
+    return result;
+}
+
+int umock_are_equal_TPMA_SESSION(const TPMA_SESSION* left, const TPMA_SESSION* right)
+{
+    int result;
+
+    if (((left == NULL) && (right != NULL)) || ((right == NULL) && (left != NULL)))
+    {
+        result = 0;
+    }
+    else if ((left == NULL) && (right == NULL))
+    {
+        result = 1;
+    }
+    else
+    {
+        if ((right->continueSession != left->continueSession) || (right->auditExclusive != left->auditExclusive) ||
+            (right->auditReset != left->auditReset) || (right->Reserved_at_bit_3 != left->Reserved_at_bit_3) ||
+            (right->decrypt != left->decrypt) || (right->encrypt != left->encrypt) || (right->audit != left->audit))
+        {
+            result = 0;
+        }
+        else
+        {
+            result = 1;
+        }
+    }
+
+    return result;
+}
+
+int umock_copy_TPMA_SESSION(TPMA_SESSION* destination, const TPMA_SESSION* source)
+{
+    int result;
+
+    if ((source == NULL) || (destination == NULL))
+    {
+        result = -1;
+    }
+    else
+    {
+        destination->continueSession = source->continueSession;
+        destination->auditExclusive = source->auditExclusive;
+        destination->auditReset = source->auditReset;
+        destination->Reserved_at_bit_3 = source->Reserved_at_bit_3;
+        destination->decrypt = source->decrypt;
+        destination->encrypt = source->encrypt;
+        destination->audit = source->audit;
+        result = 0;
+    }
+
+    return result;
+}
+
+void umock_free_TPMA_SESSION(TPMA_SESSION* value)
+{
+    //do nothing
+    (void)value;
+}
+
 BEGIN_TEST_SUITE(hsm_client_tpm_ut)
 
     TEST_SUITE_INITIALIZE(suite_init)
@@ -145,27 +210,25 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         result = umocktypes_bool_register_types();
         ASSERT_ARE_EQUAL(int, 0, result);
 
-        REGISTER_UMOCK_ALIAS_TYPE(XDA_HANDLE, void*);
+        REGISTER_UMOCK_VALUE_TYPE(TPMA_SESSION);
+
         REGISTER_UMOCK_ALIAS_TYPE(BUFFER_HANDLE, void*);
-        REGISTER_UMOCK_ALIAS_TYPE(TPM_HANDLE, void*);
-        REGISTER_UMOCK_ALIAS_TYPE(UINT, unsigned int);
+        REGISTER_UMOCK_ALIAS_TYPE(TPM_HANDLE, unsigned int);
         REGISTER_UMOCK_ALIAS_TYPE(UINT32, unsigned int);
         REGISTER_UMOCK_ALIAS_TYPE(BOOL, int);
         REGISTER_UMOCK_ALIAS_TYPE(TPM_PT, unsigned int);
 
         REGISTER_UMOCK_ALIAS_TYPE(HSM_CLIENT_HANDLE, void*);
-        REGISTER_UMOCK_ALIAS_TYPE(SECURE_DEVICE_TYPE, int);
         REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(OBJECT_ATTR, int);
-        REGISTER_UMOCK_ALIAS_TYPE(TPM_SE, int);
-        REGISTER_UMOCK_ALIAS_TYPE(TPMI_DH_OBJECT, void*);
-        REGISTER_UMOCK_ALIAS_TYPE(TPMI_ALG_HASH, void*);
-        REGISTER_UMOCK_ALIAS_TYPE(TPMA_SESSION, void*);
-        REGISTER_UMOCK_ALIAS_TYPE(TPMI_DH_ENTITY, void*);
-        REGISTER_UMOCK_ALIAS_TYPE(TPMI_DH_CONTEXT, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(TPM_SE, unsigned char);
+        REGISTER_UMOCK_ALIAS_TYPE(TPMI_DH_OBJECT, unsigned int);
+        REGISTER_UMOCK_ALIAS_TYPE(TPMI_ALG_HASH, unsigned short);
+        REGISTER_UMOCK_ALIAS_TYPE(TPMI_DH_ENTITY, unsigned int);
+        REGISTER_UMOCK_ALIAS_TYPE(TPMI_DH_CONTEXT, unsigned int);
         REGISTER_UMOCK_ALIAS_TYPE(INT32, int);
-        REGISTER_UMOCK_ALIAS_TYPE(TPMI_RH_PROVISION, void*);
-        REGISTER_UMOCK_ALIAS_TYPE(TPMI_DH_PERSISTENT, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(TPMI_RH_PROVISION, unsigned int);
+        REGISTER_UMOCK_ALIAS_TYPE(TPMI_DH_PERSISTENT, unsigned int);
 
         REGISTER_GLOBAL_MOCK_RETURN(TSS_CreatePwAuthSession, TPM_RC_SUCCESS);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(TSS_CreatePwAuthSession, TPM_RC_FAILURE);
