@@ -8,6 +8,8 @@ These instructions and samples assume basic familiarity with Digital Twin concep
 ### Building
 Instructions on how to build the Digital Twin Client SDK or else retrieve packages for it are available [here](./doc/building_sdk.md).  If you are familiar with building the IoTHub Device SDK, the instructions are almost identical.
 
+**Please use [public-preview](https://github.com/Azure/azure-iot-sdk-c/tree/public-preview) branch for your public preview development needs, unless you have been directed to be on public-preview-pnp for a specific purpose.  public-preview-pnp branch is our advance working branch which might contains breaking changes.**
+
 ### Exploring samples
 
 There are two separate but related samples directories.  **It may be easiest to just jump in here for a guided tour of Digital Twin.**
@@ -27,7 +29,7 @@ Reference guidance for the API's is available in the [public headers](./inc) the
 
 ## Visual Studio Code Integration
 
-Visual Studio Code has a plugin to make authoring Digital Twin clients using the C SDK easier.  It includes the ability to automatically generate C device code based on interface definitions.  See [here](https://docs.microsoft.com/en-us/azure/iot-pnp/howto-use-iot-device-workbench) for more information.
+Visual Studio Code has a plugin to make authoring Digital Twin clients using the C SDK easier.  It includes the ability to automatically generate C device code based on interface definitions.  See [here](https://docs.microsoft.com/en-us/azure/iot-pnp/howto-develop-with-vs-vscode) for more information.
 
 ## If something is broken
 
