@@ -32,8 +32,7 @@ static const size_t DT_InterfaceMaxLength = 256;
 
 static const char commandSeparator = '*';
 static const char* DT_PROPERTY_UPDATE_JSON_VERSON = "$version";
-// Using MQTT property directly because we don't support AMQP presently and cannot support HTTP.
-static const char DT_INTERFACE_ID_PROPERTY[] = "$.ifid";
+// Using MQTT property directly because we don't support AMQP or HTTP.
 static const char DT_SUBJECT_PROPERTY[] = "$.sub";
 static const char DT_MESSAGE_SCHEMA_PROPERTY[] = "$.schema";
 static const char DT_JSON_MESSAGE_CONTENT_TYPE[] = "application/json";
@@ -910,7 +909,7 @@ static DIGITALTWIN_CLIENT_RESULT CreateJsonForTelemetryMessage(const char* telem
 }
 
 // Allocates a properly setup IOTHUB_MESSAGE_HANDLE for processing onto IoTHub.
-DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_CreateTelemetryMessage(const char* interfaceId, const char* componentName, const char* telemetryName, const unsigned char* messageData, size_t messageDataLen, IOTHUB_MESSAGE_HANDLE* telemetryMessageHandle)
+DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_CreateTelemetryMessage(const char* componentName, const char* telemetryName, const unsigned char* messageData, size_t messageDataLen, IOTHUB_MESSAGE_HANDLE* telemetryMessageHandle)
 {
     DIGITALTWIN_CLIENT_RESULT result;
     IOTHUB_MESSAGE_RESULT iothubMessageResult;
@@ -927,11 +926,6 @@ DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_CreateTelemetryMessage(const char* 
         {
             LogError("Cannot allocate IoTHubMessage for telemetry");
             result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
-        }
-        else if ((interfaceId != NULL) && ((iothubMessageResult = IoTHubMessage_SetProperty(*telemetryMessageHandle, DT_INTERFACE_ID_PROPERTY, interfaceId)) != IOTHUB_MESSAGE_OK))
-        {
-            LogError("Cannot set property %s, error = %d", DT_INTERFACE_ID_PROPERTY, iothubMessageResult);
-            result = DIGITALTWIN_CLIENT_ERROR;
         }
         else if ((iothubMessageResult = IoTHubMessage_SetProperty(*telemetryMessageHandle, DT_SUBJECT_PROPERTY, componentName)) != IOTHUB_MESSAGE_OK)
         {
@@ -1032,7 +1026,7 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_SendTelemetryAsync(DIGITAL
     }
     else
     {
-        if ((result = DT_InterfaceClient_CreateTelemetryMessage(NULL, dtInterfaceClient->componentName, NULL, messageData, messageDataLen, &telemetryMessageHandle)) != DIGITALTWIN_CLIENT_OK)
+        if ((result = DT_InterfaceClient_CreateTelemetryMessage(dtInterfaceClient->componentName, NULL, messageData, messageDataLen, &telemetryMessageHandle)) != DIGITALTWIN_CLIENT_OK)
         {
             LogError("Cannot create send telemetry message, error = %d", result);
             result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
@@ -1616,12 +1610,12 @@ static DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_SetAsyncResponseProperties(I
     } 
     else if ((iothubMessageResult = IoTHubMessage_SetProperty(telemetryMessageHandle, DT_REQUEST_ID_PROPERTY, dtClientAsyncCommandUpdate->requestId)) != IOTHUB_MESSAGE_OK)
     {
-        LogError("Cannot set property %s, error = %d", DT_INTERFACE_ID_PROPERTY, iothubMessageResult);
+        LogError("Cannot set property %s, error = %d", DT_REQUEST_ID_PROPERTY, iothubMessageResult);
         result = DIGITALTWIN_CLIENT_ERROR;
     }
     else if ((iothubMessageResult = IoTHubMessage_SetProperty(telemetryMessageHandle, DT_COMMAND_NAME_PROPERTY, dtClientAsyncCommandUpdate->commandName)) != IOTHUB_MESSAGE_OK)
     {
-        LogError("Cannot set property %s, error = %d", DT_INTERFACE_ID_PROPERTY, iothubMessageResult);
+        LogError("Cannot set property %s, error = %d", DT_COMMAND_NAME_PROPERTY, iothubMessageResult);
         result = DIGITALTWIN_CLIENT_ERROR;
     }
     else
@@ -1661,7 +1655,7 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAs
     {
         LogError("CreateJsonForTelemetryMessage failed, error = %d", result);
     }
-    else if ((result = DT_InterfaceClient_CreateTelemetryMessage(NULL, dtInterfaceClient->componentName, DT_AsyncResultSchema, (const unsigned char*)STRING_c_str(jsonToSend), strlen(STRING_c_str(jsonToSend)), &telemetryMessageHandle)) != DIGITALTWIN_CLIENT_OK)
+    else if ((result = DT_InterfaceClient_CreateTelemetryMessage(dtInterfaceClient->componentName, DT_AsyncResultSchema, (const unsigned char*)STRING_c_str(jsonToSend), strlen(STRING_c_str(jsonToSend)), &telemetryMessageHandle)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("Cannot create send telemetry message, error = %d", result);
     }

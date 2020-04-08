@@ -93,38 +93,12 @@ MOCKABLE_FUNCTION(, void, testBindingThreadSleep, unsigned int, milliseconds);
 #include "../../../serializer/tests/serializer_dt_ut/real_crt_abstractions.h"
 #include "real_strings.h"
 
-
-#define DT_MODEL_DISCOVERY_INTERFACE_ID "urn:azureiot:ModelDiscovery:ModelInformation:1"
-#define DT_MODEL_DISCOVERY_INTERFACE_NAME "urn_azureiot_ModelDiscovery_ModelInformation"
-
-#define DT_SDK_INFORMATION_INTERFACE_ID "urn:azureiot:Client:SDKInformation:1"
-
-
-#define DT_TEST_INTERFACE_ID_1 "urn:testOnly:testInterface1:1"
-#define DT_TEST_INTERFACE_ID_2 "urn:testOnly:testInterface2:5"
-#define DT_TEST_INTERFACE_ID_3 "urn:testOnly:testInterface3:1"
-
-#define DT_TEST_COMPONENT_NAME_1 "TestOnly_TestComponent1"
-#define DT_TEST_COMPONENT_NAME_2 "TestOnly_TestComponent2"
-#define DT_TEST_COMPONENT_NAME_3 "TestOnly_TestComponent3"
-
-#define DT_TEST_CAPABILITY_MODEL_ID "urn:testOnly:testDeviceCapabilityModel:1"
-static const char* dtTestInterfaceIds[] = {DT_TEST_INTERFACE_ID_1, DT_TEST_INTERFACE_ID_2, DT_TEST_INTERFACE_ID_3};
-static const char* dtTestComponentNames[] = {DT_TEST_COMPONENT_NAME_1, DT_TEST_COMPONENT_NAME_2, DT_TEST_COMPONENT_NAME_3};
-
 TEST_DEFINE_ENUM_TYPE(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_RESULT_VALUES);
 
 TEST_DEFINE_ENUM_TYPE(DT_COMMAND_PROCESSOR_RESULT, DT_COMMAND_PROCESSOR_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(DT_COMMAND_PROCESSOR_RESULT, DT_COMMAND_PROCESSOR_RESULT_VALUES);
 
-#define DT_TEST_MESSAGE_DATA_VALUE "MessageData"
-static const char* dtTestTelemetryName = "TestDTTelemetryName";
-static const unsigned char* dtTestMessageData = (const unsigned char*)DT_TEST_MESSAGE_DATA_VALUE;
-static const size_t dtTestMessageDataLen = sizeof(DT_TEST_MESSAGE_DATA_VALUE) - 1;
-static void* dtTestClientTelemetryConfirmationContext = (void*)0x1235;
-
-static void* testDTClientExecuteCallbackContext = (void*)0x1236;
 static const char dtTestCommandName[] = "TestCommandName";
 static const char dtTestCommandPayload[] = "Test payload for command invocation in list";
 static const int dtTestCommandPayloadLen = sizeof(dtTestCommandPayload) - 1;
@@ -140,29 +114,6 @@ static const int dtTestInvalidMethod = 1000;
 #define DT_TEST_INTERFACE_NOT_REGISTERED ((DIGITALTWIN_INTERFACE_CLIENT_HANDLE)0x1004)
 
 static DIGITALTWIN_INTERFACE_CLIENT_HANDLE dtTestInterfaceArray[] = { DT_TEST_INTERFACE_HANDLE1, DT_TEST_INTERFACE_HANDLE2, DT_TEST_INTERFACE_HANDLE3 };
-
-// DT_TEST_BUILD_JSON_TUPLE is used to build up the "name":"id" JSON string of the JSON in a registration message
-#define DT_TEST_BUILD_JSON_TUPLE(NAME, ID) "\"" NAME "\":\"" ID "\""
-
-#define DT_TEST_INTERFACE_MODEL_DISCOVERY_TUPLE DT_TEST_BUILD_JSON_TUPLE(DT_MODEL_DISCOVERY_INTERFACE_NAME, DT_MODEL_DISCOVERY_INTERFACE_ID)
-
-#define DT_TEST_INTERFACE_JSON_TUPLE_1 DT_TEST_BUILD_JSON_TUPLE(DT_TEST_COMPONENT_NAME_1, DT_TEST_INTERFACE_ID_1)
-#define DT_TEST_INTERFACE_JSON_TUPLE_2 DT_TEST_BUILD_JSON_TUPLE(DT_TEST_COMPONENT_NAME_2, DT_TEST_INTERFACE_ID_2)
-#define DT_TEST_INTERFACE_JSON_TUPLE_3 DT_TEST_BUILD_JSON_TUPLE(DT_TEST_COMPONENT_NAME_3, DT_TEST_INTERFACE_ID_3)
-
-#define DT_TEST_INTERFACE_REGISTER_START  "{\"modelInformation\":{\"capabilityModelId\":\"" DT_TEST_CAPABILITY_MODEL_ID "\",\"interfaces\":{" DT_TEST_INTERFACE_MODEL_DISCOVERY_TUPLE ","
-
-#define DT_TEST_JSON_COMMA ","
-#define DT_TEST_INTERFACE_REGISTER_END "}}}"
-
-static const char* testDTInterfaceListRegistartionBody1Interface = 
-DT_TEST_INTERFACE_REGISTER_START DT_TEST_INTERFACE_JSON_TUPLE_1 DT_TEST_INTERFACE_REGISTER_END;
-
-static const char* testDTInterfaceListRegistartionBody2Interfaces =
-DT_TEST_INTERFACE_REGISTER_START DT_TEST_INTERFACE_JSON_TUPLE_1 DT_TEST_JSON_COMMA DT_TEST_INTERFACE_JSON_TUPLE_2 DT_TEST_INTERFACE_REGISTER_END;
-
-static const char* testDTInterfaceListRegistartionBody3Interfaces =
-DT_TEST_INTERFACE_REGISTER_START DT_TEST_INTERFACE_JSON_TUPLE_1 DT_TEST_JSON_COMMA DT_TEST_INTERFACE_JSON_TUPLE_2 DT_TEST_JSON_COMMA DT_TEST_INTERFACE_JSON_TUPLE_3 DT_TEST_INTERFACE_REGISTER_END;
 
 static const IOTHUB_MESSAGE_HANDLE dtTestMessageHande = (IOTHUB_MESSAGE_HANDLE)0x1400;
 
@@ -194,12 +145,11 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 
 const char* test_dtInterfaceList_ExpectedMessageBody;
 
-DIGITALTWIN_CLIENT_RESULT impl_test_DT_InterfaceClient_CreateTelemetryMessage(const char* interfaceId, const char* componentName, const char* telemetryName, const unsigned char* messageData, size_t messageDataLen, IOTHUB_MESSAGE_HANDLE* telemetryMessageHandle)
+DIGITALTWIN_CLIENT_RESULT impl_test_DT_InterfaceClient_CreateTelemetryMessage(const char* componentName, const char* telemetryName, const unsigned char* messageData, size_t messageDataLen, IOTHUB_MESSAGE_HANDLE* telemetryMessageHandle)
 {
     // Verify that the JSON generated during message creation (and hence being passed to this function) is as expected
     //ASSERT_ARE_EQUAL(char_ptr, (const unsigned char*)test_dtInterfaceList_ExpectedMessageBody, messageData);
     (void)messageData;
-    (void)interfaceId;
     (void)componentName;
     (void)telemetryName;
     (void)messageDataLen;
@@ -855,124 +805,6 @@ TEST_FUNCTION(DT_InterfaceList_InvokeCommand_fail)
     DT_InterfaceList_Destroy(h);
     umock_c_negative_tests_deinit();
 }
-
-
-///////////////////////////////////////////////////////////////////////////////
-// DT_InterfaceList_CreateRegistrationMessage
-///////////////////////////////////////////////////////////////////////////////
-static void set_expected_calls_for_DT_InterfaceList_CreateRegistrationMessage(int numInterfacesToRegister)
-{
-    int i;
-
-    STRICT_EXPECTED_CALL(json_value_init_object());
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_object_dotset_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_value_init_object());
-    STRICT_EXPECTED_CALL(json_value_get_object(IGNORED_PTR_ARG));
-
-    STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-
-    for (i = 0; i < numInterfacesToRegister; i++)
-    {
-        STRICT_EXPECTED_CALL(DT_InterfaceClient_GetInterfaceId(IGNORED_PTR_ARG)).SetReturn(dtTestInterfaceIds[i]);
-        STRICT_EXPECTED_CALL(DT_InterfaceClient_GetComponentName(IGNORED_PTR_ARG)).SetReturn(dtTestComponentNames[i]);
-        STRICT_EXPECTED_CALL(json_object_set_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    }
-
-    STRICT_EXPECTED_CALL(json_object_dotset_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_serialize_to_string(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(DT_InterfaceClient_CreateTelemetryMessage(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG)).
-        CopyOutArgumentBuffer(6, &dtTestMessageHande, sizeof(dtTestMessageHande));
-    STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_PTR_ARG));
-}
-
-static void test_DT_InterfaceList_CreateRegistrationMessage(int numInterfacesToRegister, const char* expectedMessageBody)
-{
-    //arrange
-    DIGITALTWIN_INTERFACE_LIST_HANDLE h = create_DT_interface_list_and_bind(numInterfacesToRegister);
-    set_expected_calls_for_DT_InterfaceList_CreateRegistrationMessage(numInterfacesToRegister);
-    IOTHUB_MESSAGE_HANDLE messageHandle = NULL;
-    test_dtInterfaceList_ExpectedMessageBody = expectedMessageBody;
-    
-    //act
-    DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceList_CreateRegistrationMessage(h, DT_TEST_CAPABILITY_MODEL_ID, &messageHandle);
-
-    //assert
-    ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    ASSERT_IS_NOT_NULL(messageHandle);
-
-    //cleanup
-    DT_InterfaceList_Destroy(h);
-}
-
-TEST_FUNCTION(DT_InterfaceList_ProcessTwinCallbackForRegistration_one_interface_succeeds)
-{
-    test_DT_InterfaceList_CreateRegistrationMessage(1, testDTInterfaceListRegistartionBody1Interface);
-}
-
-TEST_FUNCTION(DT_InterfaceList_ProcessTwinCallbackForRegistration_two_interfaces_succeeds)
-{
-    test_DT_InterfaceList_CreateRegistrationMessage(2, testDTInterfaceListRegistartionBody2Interfaces);
-}
-
-TEST_FUNCTION(DT_InterfaceList_ProcessTwinCallbackForRegistration_three_interfaces_succeeds)
-{
-    test_DT_InterfaceList_CreateRegistrationMessage(3, testDTInterfaceListRegistartionBody3Interfaces);
-}
-
-TEST_FUNCTION(DT_InterfaceList_ProcessTwinCallbackForRegistration_NULL_list_handle_fails)
-{
-    //arrange
-    IOTHUB_MESSAGE_HANDLE messageHandle = NULL;
-    STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_PTR_ARG));
-    
-    //act
-    DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceList_CreateRegistrationMessage(NULL, DT_TEST_CAPABILITY_MODEL_ID, &messageHandle);
-
-    //assert
-    ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG, result);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    ASSERT_IS_NULL(messageHandle);
-}
-
-TEST_FUNCTION(DT_InterfaceList_ProcessTwinCallbackForRegistration_NULL_device_capability_model_fails)
-{
-    //arrange
-    DIGITALTWIN_INTERFACE_LIST_HANDLE h = create_DT_interface_list_and_bind(3);
-    IOTHUB_MESSAGE_HANDLE messageHandle = NULL;
-    STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_PTR_ARG));
-    
-    //act
-    DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceList_CreateRegistrationMessage(h, NULL, &messageHandle);
-
-    //assert
-    ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG, result);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    ASSERT_IS_NULL(messageHandle);
-
-    //cleanup
-    DT_InterfaceList_Destroy(h);
-}
-
-TEST_FUNCTION(DT_InterfaceList_ProcessTwinCallbackForRegistration_NULL_message_handle_fails)
-{
-    //arrange
-    DIGITALTWIN_INTERFACE_LIST_HANDLE h = create_DT_interface_list_and_bind(3);
-    STRICT_EXPECTED_CALL(json_free_serialized_string(IGNORED_PTR_ARG));
-    
-    //act
-    DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceList_CreateRegistrationMessage(h, DT_TEST_CAPABILITY_MODEL_ID, NULL);
-
-    //assert
-    ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG, result);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-    //cleanup
-    DT_InterfaceList_Destroy(h);
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // DT_InterfaceList_ProcessTwinCallbackForProperties

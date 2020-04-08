@@ -1345,13 +1345,9 @@ TEST_FUNCTION(DT_InterfaceClient_BindToClientHandle_fail)
 // DT_InterfaceClient_CreateTelemetryMessage
 ///////////////////////////////////////////////////////////////////////////////
 
-static void set_expected_calls_for_DT_InterfaceClient_CreateTelemetryMessage(bool includeInterfaceId, bool telemetryName)
+static void set_expected_calls_for_DT_InterfaceClient_CreateTelemetryMessage(bool telemetryName)
 {
     STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    if (includeInterfaceId)
-    {
-        STRICT_EXPECTED_CALL(IoTHubMessage_SetProperty(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    }
     STRICT_EXPECTED_CALL(IoTHubMessage_SetProperty(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     if (telemetryName)
     {
@@ -1361,49 +1357,13 @@ static void set_expected_calls_for_DT_InterfaceClient_CreateTelemetryMessage(boo
     STRICT_EXPECTED_CALL(IoTHubMessage_SetContentEncodingSystemProperty(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 }
 
-TEST_FUNCTION(DT_InterfaceClient_CreateTelemetryMessage_no_interfaceId_ok)
-{
-    //arrange
-    IOTHUB_MESSAGE_HANDLE messageHandle = NULL;
-    set_expected_calls_for_DT_InterfaceClient_CreateTelemetryMessage(false, true);
-
-    //act
-    DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceClient_CreateTelemetryMessage(NULL, DT_TEST_COMPONENT_NAME_1,  dtTestTelemetryName, (const unsigned char*)dtTestMessageData, dtTestMessageDataLen, &messageHandle);
-
-    //assert
-    ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    ASSERT_IS_NOT_NULL(messageHandle);
-
-    //cleanup
-    my_IoTHubMessage_Destroy(messageHandle);
-}
-
-TEST_FUNCTION(DT_InterfaceClient_CreateTelemetryMessage_with_interfaceId_ok)
-{
-    //arrange
-    IOTHUB_MESSAGE_HANDLE messageHandle = NULL;
-    set_expected_calls_for_DT_InterfaceClient_CreateTelemetryMessage(true, true);
-
-    //act
-    DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceClient_CreateTelemetryMessage(DT_TEST_INTERFACE_ID_1, DT_TEST_COMPONENT_NAME_1,  dtTestTelemetryName, (const unsigned char*)dtTestMessageData, dtTestMessageDataLen, &messageHandle);
-
-    //assert
-    ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    ASSERT_IS_NOT_NULL(messageHandle);
-
-    //cleanup
-    my_IoTHubMessage_Destroy(messageHandle);
-}
-
 TEST_FUNCTION(DT_InterfaceClient_CreateTelemetryMessage_NULL_ComponentName_fails)
 {
     //arrange
     IOTHUB_MESSAGE_HANDLE messageHandle = NULL;
     
     //act
-    DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceClient_CreateTelemetryMessage(DT_TEST_INTERFACE_ID_1, NULL, dtTestTelemetryName, (const unsigned char*)dtTestMessageData, dtTestMessageDataLen, &messageHandle);
+    DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceClient_CreateTelemetryMessage(NULL, dtTestTelemetryName, (const unsigned char*)dtTestMessageData, dtTestMessageDataLen, &messageHandle);
 
     //assert
     ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG, result);
@@ -1416,10 +1376,10 @@ TEST_FUNCTION(DT_InterfaceClient_CreateTelemetryMessage_NULL_telemetry_name_ok)
 {
     //arrange
     IOTHUB_MESSAGE_HANDLE messageHandle = NULL;
-    set_expected_calls_for_DT_InterfaceClient_CreateTelemetryMessage(true, false);
+    set_expected_calls_for_DT_InterfaceClient_CreateTelemetryMessage(false);
     
     //act
-    DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceClient_CreateTelemetryMessage(DT_TEST_INTERFACE_ID_1, DT_TEST_COMPONENT_NAME_1, NULL, (const unsigned char*)dtTestMessageData, dtTestMessageDataLen, &messageHandle);
+    DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceClient_CreateTelemetryMessage(DT_TEST_COMPONENT_NAME_1, NULL, (const unsigned char*)dtTestMessageData, dtTestMessageDataLen, &messageHandle);
 
     //assert
     ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result);
@@ -1436,7 +1396,7 @@ TEST_FUNCTION(DT_InterfaceClient_CreateTelemetryMessage_NULL_messageData_fails)
     IOTHUB_MESSAGE_HANDLE messageHandle = NULL;
     
     //act
-    DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceClient_CreateTelemetryMessage(DT_TEST_INTERFACE_ID_1, DT_TEST_COMPONENT_NAME_1, dtTestTelemetryName, NULL, 0, &messageHandle);
+    DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceClient_CreateTelemetryMessage(DT_TEST_COMPONENT_NAME_1, dtTestTelemetryName, NULL, 0, &messageHandle);
 
     //assert
     ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG, result);
@@ -1447,7 +1407,7 @@ TEST_FUNCTION(DT_InterfaceClient_CreateTelemetryMessage_NULL_messageData_fails)
 TEST_FUNCTION(DT_InterfaceClient_CreateTelemetryMessage_NULL_messageHandle_fails)
 {
     //act
-    DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceClient_CreateTelemetryMessage(DT_TEST_INTERFACE_ID_1, DT_TEST_COMPONENT_NAME_1, dtTestTelemetryName, (const unsigned char*)dtTestMessageData, dtTestMessageDataLen, NULL);
+    DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceClient_CreateTelemetryMessage(DT_TEST_COMPONENT_NAME_1, dtTestTelemetryName, (const unsigned char*)dtTestMessageData, dtTestMessageDataLen, NULL);
 
     //assert
     ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG, result);
@@ -1462,7 +1422,7 @@ TEST_FUNCTION(DT_InterfaceClient_CreateTelemetryMessage_fail)
     int negativeTestsInitResult = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
-    set_expected_calls_for_DT_InterfaceClient_CreateTelemetryMessage(true, true);
+    set_expected_calls_for_DT_InterfaceClient_CreateTelemetryMessage(true);
     umock_c_negative_tests_snapshot();
 
     size_t count = umock_c_negative_tests_call_count();
@@ -1474,7 +1434,7 @@ TEST_FUNCTION(DT_InterfaceClient_CreateTelemetryMessage_fail)
             umock_c_negative_tests_fail_call(i);
 
             //act
-            DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceClient_CreateTelemetryMessage(DT_TEST_INTERFACE_ID_1, DT_TEST_COMPONENT_NAME_1,  dtTestTelemetryName, (const unsigned char*)dtTestMessageData, dtTestMessageDataLen, &messageHandle);
+            DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceClient_CreateTelemetryMessage(DT_TEST_COMPONENT_NAME_1,  dtTestTelemetryName, (const unsigned char*)dtTestMessageData, dtTestMessageDataLen, &messageHandle);
 
             //assert
             ASSERT_ARE_NOT_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result, "Failure in test %lu", (unsigned long)i);
@@ -1494,7 +1454,7 @@ TEST_FUNCTION(DT_InterfaceClient_CreateTelemetryMessage_fail)
 static void set_expected_calls_for_DigitalTwin_InterfaceClient_SendTelemetryAsync()
 {
     set_expected_calls_for_IsInterfaceRegisteredWithCloud();
-    set_expected_calls_for_DT_InterfaceClient_CreateTelemetryMessage(false, false);
+    set_expected_calls_for_DT_InterfaceClient_CreateTelemetryMessage(false);
     STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(DT_ClientCoreSendTelemetryAsync(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
@@ -3076,7 +3036,7 @@ static void set_expected_calls_for_DigitalTwin_InterfaceClient_UpdateAsyncComman
     set_expected_calls_for_IsInterfaceRegisteredWithCloud();
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-    set_expected_calls_for_DT_InterfaceClient_CreateTelemetryMessage(false, true);
+    set_expected_calls_for_DT_InterfaceClient_CreateTelemetryMessage(true);
     STRICT_EXPECTED_CALL(IoTHubMessage_SetProperty(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_SetProperty(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_SetProperty(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
