@@ -19,6 +19,5 @@ add_unittest_directory(dt_device_ll_ut)
 add_unittest_directory(dt_interface_client_ut)
 add_unittest_directory(dt_interface_list_ut)
 add_unittest_directory(dt_version_ut)
-add_unittest_directory(dt_model_definition_ut)
 
 add_e2etest_directory(dt_e2e)

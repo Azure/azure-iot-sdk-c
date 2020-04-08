@@ -18,7 +18,6 @@ set(digitaltwin_client_c_files
     ./src/dt_device_ll.c
     ./src/dt_interface_client.c
     ./src/dt_interface_list.c
-  	./src/dt_model_definition.c
     ./src/dt_version.c
 )
 
@@ -28,7 +27,6 @@ set(digitaltwin_client_h_files
     ./inc/digitaltwin_device_client.h
     ./inc/digitaltwin_device_client_ll.h
     ./inc/digitaltwin_interface_client.h
-  	./inc/digitaltwin_model_definition.h
     ./inc/internal/dt_interface_private.h
     ./inc/internal/dt_interface_list.h
     ./inc/internal/dt_lock_thread_binding.h
@@ -134,9 +132,9 @@ if(${use_installed_dependencies})
     )
     install(FILES ${digitaltwin_client_h_install_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
 else()
-	install(FILES ${digitaltwin_client_h_install_files}
-		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
-	install(TARGETS ${install_staticlibs}
-		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+    install(FILES ${digitaltwin_client_h_install_files}
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
+    install(TARGETS ${install_staticlibs}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
