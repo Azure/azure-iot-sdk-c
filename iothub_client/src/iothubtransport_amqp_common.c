@@ -2028,6 +2028,18 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SetOption(TRANSPORT_LL_HANDLE h
                 result = IOTHUB_CLIENT_OK;
             }
         }
+        else if (strcmp(OPTION_RETRY_MAX_DELAY_SECS, option) == 0)
+        {
+            if (retry_control_set_option(transport_instance->connection_retry_control, RETRY_CONTROL_OPTION_MAX_DELAY_IN_SECS, value) != 0)
+            {
+                LogError("Failure setting retry max delay option");
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else
+            {
+                result = IOTHUB_CLIENT_OK;
+            }
+        }
         else if ((strcmp(OPTION_SERVICE_SIDE_KEEP_ALIVE_FREQ_SECS, option) == 0) || (strcmp(OPTION_C2D_KEEP_ALIVE_FREQ_SECS, option) == 0))
         {
             transport_instance->svc2cl_keep_alive_timeout_secs = *(size_t*)value;
