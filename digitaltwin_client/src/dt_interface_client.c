@@ -30,7 +30,8 @@ static const size_t DT_MaxVersionLength = 9;
 static const char DT_DtmiPrefix[] = "dtmi:";
 static const size_t DT_DtmiPrefixLen = sizeof(DT_DtmiPrefix) - 1;
 
-static const size_t DT_InterfaceMaxLength = 256;
+static const size_t DT_InterfaceNameMaxLength = 128;
+static const size_t DT_ComponentNameMaxLength = 64;
 
 static const char commandSeparator = '*';
 static const char* DT_PROPERTY_UPDATE_JSON_VERSON = "$version";
@@ -355,7 +356,17 @@ int DT_InterfaceClient_CheckComponentNameValid(const char* componentName)
     int result;
     const char* endPosition;
 
-    if (IsNameSegmentValid(componentName, DT_SEGMENT_TYPE_COMPONENT_NAME, &endPosition) == false)
+    if (componentName == NULL)
+    {
+        LogError("Component is NULL");
+        result = MU_FAILURE;
+    }
+    else if (strlen(componentName) > DT_ComponentNameMaxLength)
+    {
+        LogError("Component %s is too long, must be under %lu characters", componentName, (unsigned long)DT_ComponentNameMaxLength);
+        result = MU_FAILURE;
+    }
+    else if (IsNameSegmentValid(componentName, DT_SEGMENT_TYPE_COMPONENT_NAME, &endPosition) == false)
     {
         result = MU_FAILURE;
     }
@@ -408,7 +419,17 @@ int DT_InterfaceClient_CheckInterfaceIdValid(const char* interfaceName)
     int result;
     const char* current = interfaceName;
 
-    if (strncmp(DT_DtmiPrefix, current, DT_DtmiPrefixLen) != 0)
+    if (interfaceName == NULL)
+    {
+        LogError("Interface is NULL");
+        result = MU_FAILURE;
+    }
+    else if (strlen(intefaceName) > DT_InterfaceNameMaxLength)
+    {
+        LogError("Interface %s is too long, must be under %lu characters", componentName, (unsigned long)DT_InterfaceNameMaxLength);
+        result = MU_FAILURE;
+    }
+    else if (strncmp(DT_DtmiPrefix, current, DT_DtmiPrefixLen) != 0)
     {
         LogError("Interface %s does not start with prefix %s", interfaceName, DT_DtmiPrefix);
         result = MU_FAILURE;

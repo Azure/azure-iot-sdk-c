@@ -361,6 +361,7 @@ static const char* DT_TEST_Valid_ComponentNames[] = {
 static const size_t DT_TEST_Valid_ComponentNamesLen = sizeof(DT_TEST_Valid_ComponentNames) / sizeof(DT_TEST_Valid_ComponentNames[0]);
     
 static const char* DT_TEST_Invalid_ComponentNames[] = {
+    NULL,
     "",
     ";",
     ":",
@@ -391,6 +392,7 @@ static const char* DT_TEST_Valid_DtmiInterfaces[] = {
 static const size_t DT_TEST_DtmiInterfacesLen = sizeof(DT_TEST_Valid_DtmiInterfaces) / sizeof(DT_TEST_Valid_DtmiInterfaces[0]);
     
 static const char* DT_TEST_Invalid_DtmiInterfaces[] = {
+    NULL,
     "",
     ";",
     ":",
