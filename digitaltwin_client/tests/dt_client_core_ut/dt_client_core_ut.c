@@ -374,9 +374,6 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(DigitalTwin_InterfaceList_Create, NULL);
     REGISTER_GLOBAL_MOCK_HOOK(DT_InterfaceList_Destroy, impl_testDigitalTwin_InterfaceList_Destroy);    
 
-    REGISTER_GLOBAL_MOCK_RETURN(DT_InterfaceClient_CheckNameValid, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(DT_InterfaceClient_CheckNameValid, DIGITALTWIN_CLIENT_ERROR);
-
     REGISTER_GLOBAL_MOCK_RETURN(DT_InterfaceList_BindInterfaces, DIGITALTWIN_CLIENT_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(DT_InterfaceList_BindInterfaces, DIGITALTWIN_CLIENT_ERROR);
 

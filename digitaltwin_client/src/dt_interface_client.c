@@ -23,11 +23,13 @@
 // this is the amount of time to sleep between poll intervals.
 static const unsigned int pollTimeWaitForCallbacksMilliseconds = 10;
 
-static const char DT_InterfaceIdPrefix[] = "urn:";
-static const size_t DT_InterfaceIdPrefixLen = sizeof(DT_InterfaceIdPrefix) - 1;
-
 static const char DT_InterfaceIdUnderscore = '_';
-static const char DT_InterfaceIdSeparator = ':';
+static const char DT_Segment_Separator = ':';
+static const char DT_Version_Separator = ';';
+static const size_t DT_MaxVersionLength = 9;
+static const char DT_DtmiPrefix[] = "dtmi:";
+static const size_t DT_DtmiPrefixLen = sizeof(DT_DtmiPrefix) - 1;
+
 static const size_t DT_InterfaceMaxLength = 256;
 
 static const char commandSeparator = '*';
@@ -51,8 +53,6 @@ static const char DT_PropertyWithResponseSchema[] =  "{\""  DT_INTERFACE_PREFIX 
 static const char DT_PropertyWithoutResponseSchema[] = "{\""  DT_INTERFACE_PREFIX "%s\": { \"%s\": { \"value\": %.*s } } }";
 static const char DT_AsyncResultSchema[] = "asyncResult";
 
-static const char DT_Segment_Separator = ':';
-static const char DT_Version_Separator = ';';
 
 #define DT_MAX_STATUS_CODE_STRINGLEN    16
 
@@ -287,67 +287,9 @@ static bool DT_IsAlpha(char c)
             (c >= 'A' && c <= 'Z'));
 }
 
-// DT_InterfaceClient_CheckNameValid makes sure that the passed names (specifically on registration) is legal.
-// In general the SDK does NOT do policy checking like this, leaving it to the server.  We make an exception
-// in this case because an ill-formatted values on registration over MQTT will result in the
-// TCP connection being closed.  Because this can be so hard for developer to diagnose interface being
-// invalid versus network issues, we provide this check.
-int DT_InterfaceClient_CheckNameValid(const char* valueToCheck, bool isInterfaceId)
-{
-    int result = 0;
-    const char* current = valueToCheck;
-
-    if (valueToCheck == NULL)
-    {
-        LogError("Invalid parameter.  valueToCheck=%p", valueToCheck);
-        result = MU_FAILURE;
-    }
-    else if (strlen(valueToCheck) > DT_InterfaceMaxLength)
-    {
-        LogError("Name %s is too long, maximum length is %lu", valueToCheck, (unsigned long)DT_InterfaceMaxLength);
-        result = MU_FAILURE;
-    }
-    else if (isInterfaceId)
-    {
-        if (strncmp(DT_InterfaceIdPrefix, current, DT_InterfaceIdPrefixLen) != 0)
-        {
-            LogError("ID name must be prefixed with %s.  Actual value=%s", DT_InterfaceIdPrefix, valueToCheck);
-            result = MU_FAILURE;
-        }
-        else
-        {
-            current += DT_InterfaceIdPrefixLen;
-        }
-    }
-
-    if (result == 0)
-    {
-        while (*current != 0)
-        {
-            if (!ISDIGIT(*current) && !DT_IsAlpha(*current) && (*current != DT_InterfaceIdUnderscore))
-            {
-                if (isInterfaceId && (*current == DT_InterfaceIdSeparator))
-                {
-                    // DT_InterfaceIdSeparator is allowed only for id's.
-                    ;
-                }
-                else
-                {
-                    LogError("Character (char=%c,decimal=%d) in %s is illegal", *current, (int)*current, valueToCheck);
-                    result = MU_FAILURE;
-                    break;
-                }
-            }
-            current++;
-        }
-    }
-
-    return result;
-}
-
 // IsEndOfSegmentCharacter returns whether the current character is the end of a segment.
 // For component names, this will simply be a 0.  For interfaces, it will be a ';' or ':'.
-bool IsEndOfSegmentCharacter(char c, DT_SEGMENT_TYPE segmentType)
+static bool IsEndOfSegmentCharacter(char c, DT_SEGMENT_TYPE segmentType)
 {
     if (segmentType == DT_SEGMENT_TYPE_COMPONENT_NAME)
     {
@@ -362,7 +304,7 @@ bool IsEndOfSegmentCharacter(char c, DT_SEGMENT_TYPE segmentType)
 // IsNameSegmentValid checks whether either a component name or a segment of
 // an interface is legal DTMI.  Legal requires the segment to start with an alphabetical character,
 // be followed by alpha/numbers/_, but not end with a _.
-bool IsNameSegmentValid(const char* segmentName, DT_SEGMENT_TYPE segmentType, const char** endPosition)
+static bool IsNameSegmentValid(const char* segmentName, DT_SEGMENT_TYPE segmentType, const char** endPosition)
 {
     bool result;
     const char* current = segmentName;
@@ -408,7 +350,7 @@ bool IsNameSegmentValid(const char* segmentName, DT_SEGMENT_TYPE segmentType, co
     return result;
 }
 
-int DT_InterfaceClient_CheckNameValid2(const char* componentName)
+int DT_InterfaceClient_CheckComponentNameValid(const char* componentName)
 {
     int result;
     const char* endPosition;
@@ -425,12 +367,10 @@ int DT_InterfaceClient_CheckNameValid2(const char* componentName)
     return result;
 }
 
-static const size_t DT_MaxVersionLength = 9;
-
 // IsValidDtmiVersionValid checks whether the version field of an interface is valid.
 // The version must not be too long, must not start with a 0, and otherwise contain only
 // numerical characters
-bool IsValidDtmiVersionValid(const char* versionPortion)
+static bool IsValidDtmiVersionValid(const char* versionPortion)
 {
     bool result;
     if (strlen(versionPortion) > DT_MaxVersionLength)
@@ -463,10 +403,7 @@ bool IsValidDtmiVersionValid(const char* versionPortion)
     return result;
 }
 
-static const char DT_DtmiPrefix[] = "dtmi:";
-static const size_t DT_DtmiPrefixLen = sizeof(DT_DtmiPrefix) - 1;
-
-int DT_InterfaceClient_CheckDTMIValid(const char* interfaceName)
+int DT_InterfaceClient_CheckInterfaceIdValid(const char* interfaceName)
 {
     int result;
     const char* current = interfaceName;
@@ -609,18 +546,16 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_Create(const char* interfa
         LogError("Invalid parameter(s): interfaceId=%p, componentName=%p, dtInterfaceClient=%p", interfaceId, componentName, dtInterfaceClient);
         result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
     }
-    /*else if (DT_InterfaceClient_CheckNameValid(interfaceId, true) != 0)
+    else if (DT_InterfaceClient_CheckInterfaceIdValid(interfaceId) != 0)
     {
         LogError("Invalid interfaceId %s", interfaceId);
         result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
     }
-    */
-    /*else if (DT_InterfaceClient_CheckNameValid(componentName, false) != 0)
+    else if (DT_InterfaceClient_CheckComponentNameValid(componentName) != 0)
     {
         LogError("Invalid componentName %s", componentName);
         result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
     }
-    */
     else if ((dtNewHandle = calloc(1, sizeof(DT_INTERFACE_CLIENT))) == NULL)
     {
         LogError("Cannot allocate interface client");
