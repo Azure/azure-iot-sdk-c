@@ -424,9 +424,9 @@ int DT_InterfaceClient_CheckInterfaceIdValid(const char* interfaceName)
         LogError("Interface is NULL");
         result = MU_FAILURE;
     }
-    else if (strlen(intefaceName) > DT_InterfaceNameMaxLength)
+    else if (strlen(interfaceName) > DT_InterfaceNameMaxLength)
     {
-        LogError("Interface %s is too long, must be under %lu characters", componentName, (unsigned long)DT_InterfaceNameMaxLength);
+        LogError("Interface %s is too long, must be under %lu characters", interfaceName, (unsigned long)DT_InterfaceNameMaxLength);
         result = MU_FAILURE;
     }
     else if (strncmp(DT_DtmiPrefix, current, DT_DtmiPrefixLen) != 0)

@@ -356,7 +356,8 @@ static const char* DT_TEST_Valid_ComponentNames[] = {
     "c", 
     "c_1", 
     "c__2",
-    "considerably_longer_name_with_some_underscores"
+    "considerably_longer_NAME_with_SOME_more_chars_1234567890_a",
+    "component_name_as_long_as_is_valid_just_barely_________________a",
 };
 static const size_t DT_TEST_Valid_ComponentNamesLen = sizeof(DT_TEST_Valid_ComponentNames) / sizeof(DT_TEST_Valid_ComponentNames[0]);
     
@@ -379,7 +380,8 @@ static const char* DT_TEST_Invalid_ComponentNames[] = {
     ":illegal_character_included",
     ";illegal_character_included",
     "illegal:_character_included",
-    "illegal;_character_included"
+    "illegal;_character_included",
+    "component_name_too_long_as_is_valid_just_barely_________________a",
 };
 static const size_t DT_TEST_Invalid_ComponentNamesLen = sizeof(DT_TEST_Invalid_ComponentNames) / sizeof(DT_TEST_Invalid_ComponentNames[0]);
 
@@ -387,7 +389,9 @@ static const char* DT_TEST_Valid_DtmiInterfaces[] = {
     "dtmi:abc;1",
     "dtmi:a:b:c;1",
     "dtmi:a:b:c;12345678",
+    "dtmi:a:b:c:e:fg:h:i:j:klmno:p:q:r:s:t:u:v:w:x:y:z;1",
     "dtmi:longer__h:longer__3:another_segment1234;123456789",
+    "dtmi:very_long_string_not_too_long_just_barely______________________________________________________________________________a;1", 
 };
 static const size_t DT_TEST_DtmiInterfacesLen = sizeof(DT_TEST_Valid_DtmiInterfaces) / sizeof(DT_TEST_Valid_DtmiInterfaces[0]);
     
@@ -414,6 +418,7 @@ static const char* DT_TEST_Invalid_DtmiInterfaces[] = {
     "dtmi::;1",
     "dtmi:two_colons_in_a_row::;1",
     "dtmi:two_semicolons_in_a_row:;;1",
+    "dtmi:very_long_string_too_long________________________________________________________________________________________________;1",
     "Do people actually read unit tests?",
     "I mean, these lines are legit tests as they're not valid dtmi;1",
     "And it's not like they're taking up that much hard drive space.",
