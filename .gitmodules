@@ -15,7 +15,7 @@
 	url = https://github.com/Azure/azure-uhttp-c.git
 [submodule "provisioning_client/deps/RIoT"]
 	path = provisioning_client/deps/RIoT
-	url = https://github.com/jbobotek/RIoT.git
+	url = https://github.com/Microsoft/RIoT.git
 [submodule "provisioning_client/deps/utpm"]
 	path = provisioning_client/deps/utpm
 	url = https://github.com/Azure/azure-utpm-c.git
