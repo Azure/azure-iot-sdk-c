@@ -54,7 +54,6 @@ static const char DT_PropertyWithResponseSchema[] =  "{\""  DT_INTERFACE_PREFIX 
 static const char DT_PropertyWithoutResponseSchema[] = "{\""  DT_INTERFACE_PREFIX "%s\": { \"%s\": { \"value\": %.*s } } }";
 static const char DT_AsyncResultSchema[] = "asyncResult";
 
-
 #define DT_MAX_STATUS_CODE_STRINGLEN    16
 
 #define DT_INTERFACE_STATE_VALUES                   \
