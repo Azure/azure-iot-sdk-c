@@ -36,8 +36,7 @@
       "description": "Current temperature on the device",
       "displayName": "Temperature",
       "name": "temp",
-      "schema": "double",
-      "unit": "Units/Temperature/fahrenheit"
+      "schema": "double"
     },
     {
       "@type": [
@@ -47,8 +46,7 @@
       "description": "Current humidity on the device",
       "displayName": "Humidity",
       "name": "humid",
-      "schema": "double",
-      "unit": "Units/Humidity/percent"
+      "schema": "double"
     },
     {
       "@type": "Command",

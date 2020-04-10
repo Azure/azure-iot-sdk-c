@@ -1,14 +1,11 @@
 {
   "@id": "dtmi:YOUR_COMPANY_NAME_HERE:sample_device;1",
-  "@type": "CapabilityModel",
+  "@type": "Interface",
   "displayName": "My Sample Capability Model",
-  "implements": [
+  "contents": [
     {
-      "schema": "urn:azureiot:DeviceManagement:DeviceInformation:1",
-      "name": "deviceinfo"
-    },
-    {
-      "schema": "urn:YOUR_COMPANY_NAME_HERE:EnvironmentalSensor:1",
+      "@type": "Component",
+      "schema": "dtmi:YOUR_COMPANY_NAME_HERE:EnvironmentalSensor;1",
       "name": "sensor"
     }
   ],

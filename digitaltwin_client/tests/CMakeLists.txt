@@ -20,4 +20,5 @@ add_unittest_directory(dt_interface_client_ut)
 add_unittest_directory(dt_interface_list_ut)
 add_unittest_directory(dt_version_ut)
 
-add_e2etest_directory(dt_e2e)
+# TODO: https://github.com/Azure/azure-iot-sdk-c/issues/1503 tracks bringing back temporarily disabled tests.
+# add_e2etest_directory(dt_e2e)
