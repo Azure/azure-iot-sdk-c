@@ -1,5 +1,5 @@
 {
-  "@id": "urn:YOUR_COMPANY_NAME_HERE:sample_device:1",
+  "@id": "dtmi:YOUR_COMPANY_NAME_HERE:sample_device;1",
   "@type": "CapabilityModel",
   "displayName": "My Sample Capability Model",
   "implements": [
@@ -12,5 +12,5 @@
       "name": "sensor"
     }
   ],
-  "@context": "http://azureiot.com/v1/contexts/IoTModel.json"
+  "@context": "dtmi:dtdl:context;2"
 }

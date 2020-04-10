@@ -13,7 +13,7 @@
 //*****************************************************************************
 
 // Interface name for telemetry testing
-static const char DT_E2E_Telemetry_InterfaceId[] = "urn:azureiot:testinterfaces:cdevicesdk:telemetry:1";
+static const char DT_E2E_Telemetry_InterfaceId[] = "dtmi:azureiot:testinterfaces:cdevicesdk:telemetry;1";
 static const char DT_E2E_Telemetry_InterfaceName[] = "testTelemetry";
 
 // Command names that the service SDK invokes to invoke tests on this interface

@@ -23,8 +23,8 @@ var testDeviceInfo:any = null
 const sleepAfterProcessCreation = 10000
 
 // InterfaceIds for interfaces implemented automatically by SDK
-const sdkInformationInterfaceId = "urn:azureiot:Client:SDKInformation:1"
-const modelDiscoveryInterfaceId = "urn:azureiot:ModelDiscovery:ModelInformation:1"
+const sdkInformationInterfaceId = "dtmi:azureiot:Client:SDKInformation;1"
+const modelDiscoveryInterfaceId = "dtmi:azureiot:ModelDiscovery:ModelInformation;1"
 
 //
 // createTestDeviceAndTestProcess creates a device for test scenario and creates the test process that hosts the C SDK
@@ -136,7 +136,7 @@ class CommandTestData {
 //
 // CommandTestData_TestCommands is used for testing DigitalTwin commands
 //
-const testCommandInterfaceId = "urn:azureiot:testinterfaces:cdevicesdk:commands:1"
+const testCommandInterfaceId = "dtmi:azureiot:testinterfaces:cdevicesdk:commands;1"
 const testCommandInterfaceName = "testCommands"
 class CommandTestData_TestCommands extends CommandTestData {
 
@@ -148,7 +148,7 @@ class CommandTestData_TestCommands extends CommandTestData {
 //
 // CommandTestData_TestTelemetry is used for testing DigitalTwin telemetry
 //
-const testTelemetryInterfaceID = "urn:azureiot:testinterfaces:cdevicesdk:telemetry:1"
+const testTelemetryInterfaceID = "dtmi:azureiot:testinterfaces:cdevicesdk:telemetry;1"
 const testTelemetryInterfaceName = "testTelemetry"
 class CommandTestData_TestTelemetry extends CommandTestData {
     constructor(methodName:string, payload:string, expectedResponseStatusCode:number, expectedResponsePayload:string) {
@@ -159,7 +159,7 @@ class CommandTestData_TestTelemetry extends CommandTestData {
 //
 // CommandTestData_PropertyTelemetry i sused for testing DigitalTwin properties
 //
-const testPropertyInterfaceId = "urn:azureiot:testinterfaces:cdevicesdk:properties:1"
+const testPropertyInterfaceId = "dtmi:azureiot:testinterfaces:cdevicesdk:properties;1"
 const testPropertyInterfaceName = "testProperties"
 class CommandTestData_PropertyTelemetry extends CommandTestData {
     constructor(methodName:string, payload:string, expectedResponseStatusCode:number, expectedResponsePayload:string) {

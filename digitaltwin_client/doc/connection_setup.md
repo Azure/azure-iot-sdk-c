@@ -50,7 +50,7 @@ An example of DPS and Digital Twin interacting is available [here](../samples/di
 
 ## Registering Interfaces
 
-Once the `DIGITALTWIN_*_HANDLE` is created, the next step is to register interfaces.  Interface registration is the process by which interfaces that the device application has created are broadcast to the Digital Twin service.  This service in turn makes them available to service operators and applications.  For instance, your device application may register interfaces for "urn:fabrikam:com:lightbulb:3" and "urn:fabrikam:com:firmwareupdater:1" to alert the service it supports a light bulb and firmware update interfaces.
+Once the `DIGITALTWIN_*_HANDLE` is created, the next step is to register interfaces.  Interface registration is the process by which interfaces that the device application has created are broadcast to the Digital Twin service.  This service in turn makes them available to service operators and applications.  For instance, your device application may register interfaces for "dtmi:fabrikam:com:lightbulb;3" and "dtmi:fabrikam:com:firmwareupdater;1" to alert the service it supports a light bulb and firmware update interfaces.
 
 The device application registers interfaces via [`DigitalTwin_DeviceClient_RegisterInterfacesAsync`](../inc/digitaltwin_device_client.h) (or the \_LL\_ equivalent).  The device application can only begin Digital Twin operations - namely sending telemetry, reporting property updates, or receiving property updates and commands - after the interface registration process completes.
 

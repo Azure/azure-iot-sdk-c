@@ -12,10 +12,10 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 
 // DigitalTwin interface id SDK Information interface ID
-static const char DigitalTwinSampleSdkInfo_InterfaceId[] = "urn:azureiot:Client:SDKInformation:1";
+static const char DigitalTwinSampleSdkInfo_InterfaceId[] = "dtmi:azureiot:Client:SDKInformation;1";
 
 // DigitalTwin component name from service perspective.
-static const char DigitalTwinSampleSdkInfo_ComponentName[] = "urn_azureiot_Client_SDKInformation";
+static const char DigitalTwinSampleSdkInfo_ComponentName[] = "dtmi_azureiot_Client_SDKInformation";
 
 //
 //  Property names and data for DigitalTwin read-only properties for this interface.

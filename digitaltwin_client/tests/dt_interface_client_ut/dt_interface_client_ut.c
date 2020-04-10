@@ -279,7 +279,7 @@ static const char dtTestAsyncCommandResponseExpected3[] = "{\"payload\":" DT_TES
 #define DT_TEST_PROPERTY_2_PREVIOUSLY_REPORTED_CONTENT "{" DT_TEST_PROPERTY_2_PREVIOUSLY_REPORTED_CONTENT_NO_BRACES "}"
 #define DT_TEST_PROPERTY_3_PREVIOUSLY_REPORTED_CONTENT "{" DT_TEST_PROPERTY_3_PREVIOUSLY_REPORTED_CONTENT_NO_BRACES "}"
 
-#define DT_TEST_INTERFACE_ID_1 "urn:testonly:testinterface:1"
+#define DT_TEST_INTERFACE_ID_1 "dtmi:testonly:testinterface;1"
 #define DT_TEST_COMPONENT_NAME_1 "testonly_testinterface"
 
 
@@ -350,45 +350,81 @@ static const size_t updatePropertiesInvalidJsonLen= sizeof(updatePropertiesInval
 
 static const char dtTestExpectedSdkInfo[] = "{\"$iotin:urn_azureiot_Client_SDKInformation\":  { \"language\":{ \"value\":\"C\"},\"version\":{ \"value\":\"0.9.0\"},\"vendor\":{ \"value\":\"Microsoft\"}}}";
 
-// Valid interface Ids
-static const char* DT_TEST_Valid_InterfaceIds[] = {
-    "urn:goodInterface:1",
-    "urn:good:Interface:1",
-    "urn:good:Interface:Intf:1",
-    "urn:good:_Interface_:Intf:Intf2:1",
-    "urn:good_Name_012356789_aA_zZ:3",
-    "urn:good:abcdefghijklmnopqrstuvwxyz_:ABCDEFGHIJKLMNOPQRSTUVWXYZ_:0123456789",
-    "urn:maximum_length_0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000:1"
-};
-
-static const size_t DT_TEST_Valid_InterfaceIdsLen = sizeof(DT_TEST_Valid_InterfaceIds) / sizeof(DT_TEST_Valid_InterfaceIds[0]);
-
-// Valid interface names
 static const char* DT_TEST_Valid_ComponentNames[] = {
-    "goodName",
-    "good_Name",
-    "good_Name_Name2",
-    "good_Name_012356789_aA_zZ",
-    "good_abcdefghijklmnopqrstuvwxyz_ABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789",
-    "good_maximum_length_000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000_1"
+    "component1", 
+    "c1", 
+    "c", 
+    "c_1", 
+    "c__2",
+    "considerably_longer_NAME_with_SOME_more_chars_1234567890_a",
+    "component_name_as_long_as_is_valid_just_barely_________________a",
 };
-
 static const size_t DT_TEST_Valid_ComponentNamesLen = sizeof(DT_TEST_Valid_ComponentNames) / sizeof(DT_TEST_Valid_ComponentNames[0]);
-
-// Interface IDs that are missing the "urn:" of some flavor
-static const char* DT_TEST_MissingUrn_InterfaceIds[] = {
+    
+static const char* DT_TEST_Invalid_ComponentNames[] = {
+    NULL,
     "",
-    "u",
-    "ur",
-    "urn",
-    "someString"
+    ";",
+    ":",
+    "1cannot_start_with_non_alpha",
+    "!cannot_start_with_non_alpha",
+    "_cannot_start_with_non_alpha",
+    "cannot_end_with_underscore_",
+    "@illegal_character_included",
+    "illegal_character_included#a",
+    "illegal-character_included",
+    "illegal_character_included@a",
+    "illegal_character_included)",
+    "illegal_character_included:",
+    "illegal_character_included;",
+    ":illegal_character_included",
+    ";illegal_character_included",
+    "illegal:_character_included",
+    "illegal;_character_included",
+    "component_name_too_long_as_is_valid_just_barely_________________a",
 };
+static const size_t DT_TEST_Invalid_ComponentNamesLen = sizeof(DT_TEST_Invalid_ComponentNames) / sizeof(DT_TEST_Invalid_ComponentNames[0]);
 
-static const size_t DT_TEST_MissingUrn_InterfaceIdsLen = sizeof(DT_TEST_MissingUrn_InterfaceIds) / sizeof(DT_TEST_MissingUrn_InterfaceIds[0]);
-
-// Interfaces that are too long
-static const char DT_Test_InterfaceIdTooLong[]   = "urn:too_long_length_000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000:10";
-static const char DT_Test_ComponentNameTooLong[] = "urn:too_long_length_000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000_10";
+static const char* DT_TEST_Valid_DtmiInterfaces[] = {
+    "dtmi:abc;1",
+    "dtmi:a:b:c;1",
+    "dtmi:a:b:c;12345678",
+    "dtmi:a:b:c:e:fg:h:i:j:klmno:p:q:r:s:t:u:v:w:x:y:z;1",
+    "dtmi:longer__h:longer__3:another_segment1234;123456789",
+    "dtmi:very_long_string_not_too_long_just_barely______________________________________________________________________________a;1", 
+};
+static const size_t DT_TEST_DtmiInterfacesLen = sizeof(DT_TEST_Valid_DtmiInterfaces) / sizeof(DT_TEST_Valid_DtmiInterfaces[0]);
+    
+static const char* DT_TEST_Invalid_DtmiInterfaces[] = {
+    NULL,
+    "",
+    ";",
+    ":",
+    "missing-dtmi",
+    "dtmi:no-version-semicolon",
+    "dtmi:no-version-semicolon:with_extra_segment_1",
+    "dtmi:no-version-semicolon:with_extra_segment_1:segment-2",
+    "dtmi:version_starts_with_zero_only;0",
+    "dtmi:version_starts_with_zero_then_more;02",
+    "dtmi:version_too_long;1234567890",
+    "dtmi:version_not_a_number;a",
+    "dtmi:version_not_a_number;;",
+    "dtmi:version_not_a_number;!",
+    "dtmi:illegal!CHAR1;1",
+    "dtmi:illegalCHAR1_#;1",
+    "dtmi:illegal_underscore_at_end_;1",
+    "dtmi:_illegal_underscore_at_beginning;1",
+    "dtmi:;1",
+    "dtmi::;1",
+    "dtmi:two_colons_in_a_row::;1",
+    "dtmi:two_semicolons_in_a_row:;;1",
+    "dtmi:very_long_string_too_long________________________________________________________________________________________________;1",
+    "Do people actually read unit tests?",
+    "I mean, these lines are legit tests as they're not valid dtmi;1",
+    "And it's not like they're taking up that much hard drive space.",
+    "But, will anyone ever read them?",
+};
+static const size_t DT_TEST_Invalid_DtmiInterfacesLen = sizeof(DT_TEST_Invalid_DtmiInterfaces) / sizeof(DT_TEST_Invalid_DtmiInterfaces[0]);
 
 // If mocked command callback is invoked, whether or not it should set a response or else leave it as NULL
 static bool intefaceClient_CommandCallbackSetsData;
@@ -1793,108 +1829,56 @@ TEST_FUNCTION(DigitalTwin_InterfaceClient_ReportPropertyAsync_fail)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// DT_InterfaceClient_CheckNameValid
+// DT_InterfaceClient_CheckComponentNameValid
 ///////////////////////////////////////////////////////////////////////////////
-TEST_FUNCTION(DT_InterfaceClient_CheckNameValid_ok)
+TEST_FUNCTION(DT_InterfaceClient_CheckComponentNameValid_ok)
 {
     size_t i;
-    for (i = 0; i < DT_TEST_Valid_InterfaceIdsLen; i++)
-    {
-        const char* valueToCheck = DT_TEST_Valid_InterfaceIds[i];
-        ASSERT_ARE_EQUAL(int, 0, DT_InterfaceClient_CheckNameValid(valueToCheck, true), "Value=%s failed but should have succeeded", valueToCheck);
-    }
 
     for (i = 0; i < DT_TEST_Valid_ComponentNamesLen; i++)
     {
         const char* valueToCheck = DT_TEST_Valid_ComponentNames[i];
-        ASSERT_ARE_EQUAL(int, 0, DT_InterfaceClient_CheckNameValid(valueToCheck, false), "Value=%s failed but should have succeeded", valueToCheck);
+        ASSERT_ARE_EQUAL(int, 0, DT_InterfaceClient_CheckComponentNameValid(valueToCheck), "Value=%s failed but should have succeeded", valueToCheck);
     }
 }
 
-
-TEST_FUNCTION(DT_InterfaceClient_CheckNameValid_null_ValueToCheckName_fails)
-{
-    ASSERT_ARE_NOT_EQUAL(int, 0, DT_InterfaceClient_CheckNameValid(NULL, true));
-    ASSERT_ARE_NOT_EQUAL(int, 0, DT_InterfaceClient_CheckNameValid(NULL, false));
-}
-
-TEST_FUNCTION(DT_InterfaceClient_CheckNameValid_no_urn_in_interface_fails)
+TEST_FUNCTION(DT_InterfaceClient_CheckComponentNameValid_fail)
 {
     size_t i;
-    for (i = 0; i < DT_TEST_MissingUrn_InterfaceIdsLen; i++)
+
+    for (i = 0; i < DT_TEST_Invalid_ComponentNamesLen; i++)
     {
-        const char* valueToCheck = DT_TEST_MissingUrn_InterfaceIds[i];
-        ASSERT_ARE_NOT_EQUAL(int, 0, DT_InterfaceClient_CheckNameValid(valueToCheck, true), "Value=%s succeeded but should have failed", valueToCheck);
+        const char* valueToCheck = DT_TEST_Invalid_ComponentNames[i];
+        ASSERT_ARE_NOT_EQUAL(int, 0, DT_InterfaceClient_CheckComponentNameValid(valueToCheck), "Value=%s succeeded but should have failed", valueToCheck);
     }
 }
 
-TEST_FUNCTION(DT_InterfaceClient_CheckNameValid_invalid_character_in_interface_fails)
+///////////////////////////////////////////////////////////////////////////////
+// DT_InterfaceClient_CheckInterfaceIdValid
+///////////////////////////////////////////////////////////////////////////////
+TEST_FUNCTION(DT_InterfaceClient_CheckInterfaceIdValid_ok)
 {
-    int i;
-    char invalidName[128];
-    char* invalidNamePointer = invalidName + 5;
+    size_t i;
 
-    // Copy to local buffer since we can't overwrite const field
-    strcpy(invalidName, DT_TEST_Valid_InterfaceIds[0]);
-
-    // Iterate through each char, 1 to 0xff.  Put any invalid characters into the array in 5th location.
-    for (i = 1; i < 256; i++)
+    for (i = 0; i < DT_TEST_DtmiInterfacesLen; i++)
     {
-        char c = (char)i;
-        if (ISDIGIT(c) || (c == '_') || (c == ':'))
-        {
-            // Current character is legal, so skip
-            continue;
-        }
-        else if (i < 127 && isalpha(c))
-        {
-            // Current character is legal, so skip.  Note the i<127 check is because isalpha is only defined up to 127.
-            continue;
-        }
-        // Set invalid character to partway through the otherwise legit interface name.
-        *invalidNamePointer = c;
-        
-        ASSERT_ARE_NOT_EQUAL(int, 0, DT_InterfaceClient_CheckNameValid(invalidName, true), "Value=%s succeeded but should have failed, i=%d", invalidName, i);
+        const char* valueToCheck = DT_TEST_Valid_DtmiInterfaces[i];
+        ASSERT_ARE_EQUAL(int, 0, DT_InterfaceClient_CheckInterfaceIdValid(valueToCheck), "Value=%s failed but should have succeeded", valueToCheck);
     }
 }
 
-TEST_FUNCTION(DT_InterfaceClient_CheckNameValid_invalid_character_in_name_fails)
+TEST_FUNCTION(DT_InterfaceClient_CheckInterfaceIdValid_fail)
 {
-    int i;
-    char invalidName[128];
-    char* invalidNamePointer = invalidName + 5;
+    size_t i;
 
-    // Copy to local buffer since we can't overwrite const field
-    strcpy(invalidName, DT_TEST_Valid_ComponentNames[0]);
-
-    // Iterate through each char, 1 to 0xff.  Put any invalid characters into the array in 5th location.
-    for (i = 1; i < 256; i++)
+    for (i = 0; i < DT_TEST_Invalid_DtmiInterfacesLen; i++)
     {
-        char c = (char)i;
-        if (ISDIGIT(c) || (c == '_'))
-        {
-            // Current character is legal, so skip
-            continue;
-        }
-        else if (i < 127 && isalpha(c))
-        {
-            // Current character is legal, so skip.  Note the i<127 check is because isalpha is only defined up to 127.
-            continue;
-        }
-        // Set invalid character to partway through the otherwise legit interface name.
-        *invalidNamePointer = c;
-        
-        ASSERT_ARE_NOT_EQUAL(int, 0, DT_InterfaceClient_CheckNameValid(invalidName, false), "Value=%s succeeded but should have failed, i=%d", invalidName, i);
+        const char* valueToCheck = DT_TEST_Invalid_DtmiInterfaces[i];
+        ASSERT_ARE_NOT_EQUAL(int, 0, DT_InterfaceClient_CheckInterfaceIdValid(valueToCheck), "Value=%s succeeded but should have failed", valueToCheck);
     }
 }
 
-TEST_FUNCTION(DT_InterfaceClient_CheckNameValid_name_too_long_fails)
-{
-    // ASSERT
-    ASSERT_ARE_NOT_EQUAL(int, 0, DT_InterfaceClient_CheckNameValid(DT_Test_InterfaceIdTooLong, true), "Value=%s failed but should have succeeded", DT_Test_InterfaceIdTooLong);
-    ASSERT_ARE_NOT_EQUAL(int, 0, DT_InterfaceClient_CheckNameValid(DT_Test_ComponentNameTooLong, false), "Value=%s failed but should have succeeded", DT_Test_ComponentNameTooLong);
-}
-
+// TODO: Add max length checks!
 
 ///////////////////////////////////////////////////////////////////////////////
 // DT_InterfaceClient_GetComponentName

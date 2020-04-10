@@ -227,7 +227,7 @@ typedef void(*DIGITALTWIN_CLIENT_UPDATE_ASYNC_COMMAND_CALLBACK)(DIGITALTWIN_CLIE
   @remarks The first step in setting up an interface is to create the underlying handle for it, using <c>DIGITALTWIN_INTERFACE_CLIENT_HANDLE</c> returned in <c>dtInterfaceClientHandle</c>.
            This handle cannot be used until it is registered with the service.
 
-  @param[in]  interfaceId                       The interfaceId of interface to be registered.  For example, urn:contoso:com:EnvironmentalSensor:1.
+  @param[in]  interfaceId                       The interfaceId of interface to be registered.  For example, dtmi:contoso:com:EnvironmentalSensor;1.
   @param[in]  componentName                     The component name associated with this interface Id.  For example, environmentalSensor.
   @param[in]  dtInterfaceRegisteredCallback     (Optional) Function pointer to be invoked when the interface status (e.g. is registered or fails to register) changes.
   @param[in]  userInterfaceContext              (Optional) Context pointer passed to dtInterfaceRegisteredCallback function on interface changes.

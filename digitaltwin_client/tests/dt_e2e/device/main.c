@@ -48,7 +48,7 @@
 //
 // DCM for the E2E test 
 //
-#define DIGITALTWIN_E2E_DEVICE_CAPABILITY_MODEL_URI "urn:azureiot:testinterfaces:cdevicesdk:DCM:1"
+#define DIGITALTWIN_E2E_DEVICE_CAPABILITY_MODEL_URI "dtmi:azureiot:testinterfaces:cdevicesdk:DCM;1"
 
 // Amount to sleep between querying state from the register interface loop
 static const int digitalTwin_E2E_registerInterfacePollSleep = 1000;

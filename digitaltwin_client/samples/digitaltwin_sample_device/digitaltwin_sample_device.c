@@ -56,7 +56,7 @@ static const int digitalTwinSampleDevice_sendTelemetryFrequency = 20;
 //
 
 // TODO: Fill in DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_ID. E.g. 
-#define DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_ID "urn:YOUR_COMPANY_NAME_HERE:sample_device:1"
+#define DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_ID "dtmi:YOUR_COMPANY_NAME_HERE:sample_device;1"
 
 //
 // END TODO section
