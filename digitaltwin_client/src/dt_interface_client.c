@@ -293,7 +293,7 @@ static bool IsEndOfSegmentCharacter(char c, DT_SEGMENT_TYPE segmentType)
 {
     if (segmentType == DT_SEGMENT_TYPE_COMPONENT_NAME)
     {
-        return (c==0);
+        return (c == '\0');
     }
     else
     {
@@ -302,7 +302,7 @@ static bool IsEndOfSegmentCharacter(char c, DT_SEGMENT_TYPE segmentType)
 }
 
 // IsNameSegmentValid checks whether either a component name or a segment of
-// an interface is legal DTMI.  Legal requires the segment to start with an alphabetical character,
+// an interface is legal DTMI.  Syntax requires the segment to start with an alphabetical character,
 // be followed by alpha/numbers/_, but not end with a _.
 static bool IsNameSegmentValid(const char* segmentName, DT_SEGMENT_TYPE segmentType, const char** endPosition)
 {
@@ -357,12 +357,12 @@ int DT_InterfaceClient_CheckComponentNameValid(const char* componentName)
 
     if (componentName == NULL)
     {
-        LogError("Component is NULL");
+        LogError("componentName is NULL");
         result = MU_FAILURE;
     }
     else if (strlen(componentName) > DT_ComponentNameMaxLength)
     {
-        LogError("Component %s is too long, must be under %lu characters", componentName, (unsigned long)DT_ComponentNameMaxLength);
+        LogError("componentName %s is too long, must be under %lu characters", componentName, (unsigned long)DT_ComponentNameMaxLength);
         result = MU_FAILURE;
     }
     else if (IsNameSegmentValid(componentName, DT_SEGMENT_TYPE_COMPONENT_NAME, &endPosition) == false)
