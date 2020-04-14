@@ -76,7 +76,7 @@ MOCKABLE_FUNCTION(, const char*, Transport_GetOption_Product_Info_Callback, void
 MOCKABLE_FUNCTION(, void, Transport_Twin_ReportedStateComplete_Callback, uint32_t, item_id, int, status_code, void*, ctx);
 MOCKABLE_FUNCTION(, void, Transport_Twin_RetrievePropertyComplete_Callback, DEVICE_TWIN_UPDATE_STATE, update_state, const unsigned char*, payLoad, size_t, size, void*, ctx);
 MOCKABLE_FUNCTION(, int, Transport_DeviceMethod_Complete_Callback, const char*, method_name, const unsigned char*, payLoad, size_t, size, METHOD_HANDLE, response_id, void*, ctx);
-MOCKABLE_FUNCTION(, const char*, Transport_GetOption_DT_Model_Id_Callback, void*, ctx);
+MOCKABLE_FUNCTION(, const char*, Transport_GetOPTION_DT_ROOT_INTERFACE_ID_Callback, void*, ctx);
 
 #undef ENABLE_MOCKS
 
@@ -151,7 +151,7 @@ static const char* my_Transport_GetOption_Product_Info_Callback(void* ctx)
     return "product_info";
 }
 
-static const char* my_Transport_GetOption_DT_Model_Id_Callback(void* ctx)
+static const char* my_Transport_GetOPTION_DT_ROOT_INTERFACE_ID_Callback(void* ctx)
 {
     (void)ctx;
     return "http://testDeviceCapabilityModel/1.0.0";
@@ -717,7 +717,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     transport_cb_info.msg_input_cb = Transport_MessageCallbackFromInput;
     transport_cb_info.msg_cb = Transport_MessageCallback;
     transport_cb_info.method_complete_cb = Transport_DeviceMethod_Complete_Callback;
-    transport_cb_info.dt_model_id_cb = Transport_GetOption_DT_Model_Id_Callback;
+    transport_cb_info.dt_root_interface_id_cb = Transport_GetOPTION_DT_ROOT_INTERFACE_ID_Callback;
 
     g_cbuff.buffer = appMessage;
     g_cbuff.size = appMsgSize;
@@ -796,8 +796,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(URL_DecodeString, NULL);
     REGISTER_GLOBAL_MOCK_HOOK(Transport_GetOption_Product_Info_Callback, my_Transport_GetOption_Product_Info_Callback);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(Transport_GetOption_Product_Info_Callback, NULL);
-    REGISTER_GLOBAL_MOCK_HOOK(Transport_GetOption_DT_Model_Id_Callback, my_Transport_GetOption_DT_Model_Id_Callback);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Transport_GetOption_DT_Model_Id_Callback, NULL);
+    REGISTER_GLOBAL_MOCK_HOOK(Transport_GetOPTION_DT_ROOT_INTERFACE_ID_Callback, my_Transport_GetOPTION_DT_ROOT_INTERFACE_ID_Callback);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Transport_GetOPTION_DT_ROOT_INTERFACE_ID_Callback, NULL);
 
     REGISTER_GLOBAL_MOCK_RETURN(IoTHub_Transport_ValidateCallbacks, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHub_Transport_ValidateCallbacks, __LINE__);
@@ -1215,7 +1215,7 @@ static void setup_initialize_connection_mocks()
     STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Transport_GetOption_DT_Model_Id_Callback(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Transport_GetOPTION_DT_ROOT_INTERFACE_ID_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
     STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -3927,7 +3927,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_mqtt_client_connect_fail)
     STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Transport_GetOption_DT_Model_Id_Callback(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Transport_GetOPTION_DT_ROOT_INTERFACE_ID_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
     STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -4462,7 +4462,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_SAS_token_from_user_succeed)
     STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Transport_GetOption_DT_Model_Id_Callback(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Transport_GetOPTION_DT_ROOT_INTERFACE_ID_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
     STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -4567,7 +4567,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_x509_succeed)
     STRICT_EXPECTED_CALL(Transport_GetOption_Product_Info_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Transport_GetOption_DT_Model_Id_Callback(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Transport_GetOPTION_DT_ROOT_INTERFACE_ID_Callback(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
     STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));

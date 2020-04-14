@@ -51,11 +51,11 @@ typedef void* DIGITALTWIN_DEVICE_CLIENT_HANDLE;
   @param    deviceHandle[in]            An IOTHUB_DEVICE_CLIENT_HANDLE that has been already created and bound to a specific connection string (or transport, or DPS handle, or whatever
                                         mechanism is preferred).  See remarks about its lifetime management.
   @param    dtDeviceClientHandle[out]   A <c>DIGITALTWIN_DEVICE_CLIENT_HANDLE</c> to be used by the application.
-  @param    deviceCapabilityModel[in]   The Device Capability Model (DCM) identifier. 
+  @param    rootInterfaceId[in]         The interfaceId of the root interface of the device.  For example, dtmi:YOUR_COMPANY_NAME_HERE:sample_device;1.
 
   @returns  A DIGITALTWIN_CLIENT_RESULT.
 */
-MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_DeviceClient_CreateFromDeviceHandle, IOTHUB_DEVICE_CLIENT_HANDLE, deviceHandle, const char*, deviceCapabilityModel, DIGITALTWIN_DEVICE_CLIENT_HANDLE*, dtDeviceClientHandle);
+MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_DeviceClient_CreateFromDeviceHandle, IOTHUB_DEVICE_CLIENT_HANDLE, deviceHandle, const char*, rootInterfaceId, DIGITALTWIN_DEVICE_CLIENT_HANDLE*, dtDeviceClientHandle);
 
 
 /**

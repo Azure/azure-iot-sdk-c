@@ -1,7 +1,7 @@
 {
   "@id": "dtmi:YOUR_COMPANY_NAME_HERE:sample_device;1",
   "@type": "Interface",
-  "displayName": "My Sample Capability Model",
+  "displayName": "My Sample Root Interface",
   "contents": [
     {
       "@type": "Component",
