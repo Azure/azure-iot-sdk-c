@@ -91,7 +91,7 @@ static const char* CONNECTION_MODULE_ID_PROPERTY = "cmid";
 
 static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtimeutc";
 
-static const char DT_MODEL_ID_TOKEN[] = "digital-twin-model-id";
+static const char DT_ROOT_INTERFACE_ID_TOKEN[] = "digital-twin-model-id";
 
 #define TOLOWER(c) (((c>='A') && (c<='Z'))?c-'A'+'a':c)
 
@@ -2190,7 +2190,7 @@ static int append_optional_connect_parameters(PMQTTTRANSPORT_HANDLE_DATA transpo
         STRING_HANDLE clone = NULL;
         STRING_HANDLE param = NULL;
         STRING_HANDLE urlEncodedModelId = NULL;
-        const char* dt_model_id;
+        const char* dt_root_interface_id;
         const char* product_info = transport_data->transport_callbacks.prod_info_cb(transport_data->transport_ctx);
 
         if ((clone = (product_info == NULL) ? STRING_construct_sprintf("%s%%2F%s", CLIENT_DEVICE_TYPE_PREFIX, IOTHUB_SDK_VERSION) : URL_EncodeString(product_info)) == NULL)
@@ -2203,14 +2203,14 @@ static int append_optional_connect_parameters(PMQTTTRANSPORT_HANDLE_DATA transpo
             LogError("Failed concatenating the product info");
             result = 0;
         }           
-        else if ((dt_model_id = transport_data->transport_callbacks.dt_model_id_cb(transport_data->transport_ctx)) != NULL)
+        else if ((dt_root_interface_id = transport_data->transport_callbacks.dt_root_interface_id_cb(transport_data->transport_ctx)) != NULL)
         {
-            if ((urlEncodedModelId = URL_EncodeString(dt_model_id)) == NULL)
+            if ((urlEncodedModelId = URL_EncodeString(dt_root_interface_id)) == NULL)
             {
                 LogError("Failed to URL encode the device capability model id string");
                 result = MU_FAILURE;
             }
-            else if ((param = STRING_construct_sprintf("&%s=%s", DT_MODEL_ID_TOKEN, STRING_c_str(urlEncodedModelId))) == NULL)
+            else if ((param = STRING_construct_sprintf("&%s=%s", DT_ROOT_INTERFACE_ID_TOKEN, STRING_c_str(urlEncodedModelId))) == NULL)
             {
                 LogError("Cannot build device capability model id string");
                 result = MU_FAILURE;

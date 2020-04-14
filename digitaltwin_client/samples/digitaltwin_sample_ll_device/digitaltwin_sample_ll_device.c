@@ -43,8 +43,8 @@
 #include <../digitaltwin_sample_sdk_info/digitaltwin_sample_sdk_info.h>
 #include <../digitaltwin_sample_environmental_sensor/digitaltwin_sample_environmental_sensor.h>
 
-// TODO: Fill in DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_ID
-#define DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_ID "dtmi:YOUR_COMPANY_NAME_HERE:sample_device;1"
+// TODO: Fill in DIGITALTWIN_SAMPLE_ROOT_INTERFACE_ID
+#define DIGITALTWIN_SAMPLE_ROOT_INTERFACE_ID "dtmi:YOUR_COMPANY_NAME_HERE:sample_device;1"
 
 typedef enum DIGITALTWIN_SAMPLE_SECURITY_TYPE_TAG
 {
@@ -84,7 +84,7 @@ static const int digitalTwinSampleDevice_dpsRegistrationMaxPolls = 60;
 static const char* digitaltwinSample_CustomProvisioningData = "{"
                                                           "\"__iot:interfaces\":"
                                                           "{"
-                                                              "\"CapabilityModelId\": \"" DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_ID "\""
+                                                              "\"CapabilityModelId\": \"" DIGITALTWIN_SAMPLE_ROOT_INTERFACE_ID "\""
                                                           "}"
                                                       "}";
 
@@ -433,7 +433,7 @@ int main(int argc, char *argv[])
     // of this handle (including destroying it) to the DigitalTwin layer, analogous to a .release()
     // in some C++ helpers.  DO NOT USE deviceLLHandle after this point.  Note this behavior
     // will change once DPS integration becomes available later.
-    else if ((result = DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle(deviceLLHandle, DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_ID, &digitaltwinDeviceClientLLHandle)) != DIGITALTWIN_CLIENT_OK)
+    else if ((result = DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle(deviceLLHandle, DIGITALTWIN_SAMPLE_ROOT_INTERFACE_ID, &digitaltwinDeviceClientLLHandle)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle failed, error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
     }

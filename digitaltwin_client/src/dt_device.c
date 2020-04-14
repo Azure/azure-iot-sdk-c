@@ -98,15 +98,15 @@ static void DeviceClientDestroy(void* iothubClientHandle)
     IoTHubDeviceClient_Destroy((IOTHUB_DEVICE_CLIENT_HANDLE)iothubClientHandle);
 }
 
-DIGITALTWIN_CLIENT_RESULT DigitalTwin_DeviceClient_CreateFromDeviceHandle(IOTHUB_DEVICE_CLIENT_HANDLE deviceHandle, const char* deviceCapabilityModel, DIGITALTWIN_DEVICE_CLIENT_HANDLE* dtDeviceClientHandle)
+DIGITALTWIN_CLIENT_RESULT DigitalTwin_DeviceClient_CreateFromDeviceHandle(IOTHUB_DEVICE_CLIENT_HANDLE deviceHandle, const char* rootInterfaceId, DIGITALTWIN_DEVICE_CLIENT_HANDLE* dtDeviceClientHandle)
 {
     DIGITALTWIN_CLIENT_RESULT result;
     IOTHUB_CLIENT_RESULT iothubClientResult;
     bool urlEncodeOn = true;
 
-    if ((deviceHandle == NULL) || (deviceCapabilityModel == NULL) || (dtDeviceClientHandle == NULL) )
+    if ((deviceHandle == NULL) || (rootInterfaceId == NULL) || (dtDeviceClientHandle == NULL) )
     {
-        LogError("DeviceHandle=%p, deviceCapabilityModel=%p, dtDeviceClientHandle=%p", deviceHandle, deviceCapabilityModel, dtDeviceClientHandle);
+        LogError("DeviceHandle=%p, rootInterfaceId=%p, dtDeviceClientHandle=%p", deviceHandle, rootInterfaceId, dtDeviceClientHandle);
         result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
     }
     else if ((iothubClientResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn)) != IOTHUB_CLIENT_OK)
@@ -115,9 +115,9 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_DeviceClient_CreateFromDeviceHandle(IOTHUB
         LogError("NOTE: This error typically occurs when trying to use a non-supported DigitalTwin protocol.  You MUST use MQTT or MQTT_WS.  AMQP(_WS) and HTTP are not supported");
         result = DIGITALTWIN_CLIENT_ERROR;
     }
-    else if ((iothubClientResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_DT_MODEL_ID, deviceCapabilityModel)) != IOTHUB_CLIENT_OK)
+    else if ((iothubClientResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_DT_ROOT_INTERFACE_ID, rootInterfaceId)) != IOTHUB_CLIENT_OK)
     {
-        LogError("Failed to set option %s, error=%d", OPTION_DT_MODEL_ID, iothubClientResult);
+        LogError("Failed to set option %s, error=%d", OPTION_DT_ROOT_INTERFACE_ID, iothubClientResult);
         result = DIGITALTWIN_CLIENT_ERROR;
     }
     else 

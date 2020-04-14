@@ -55,8 +55,8 @@ static const int digitalTwinSampleDevice_sendTelemetryFrequency = 20;
 // TODO`s: Configure core settings of application for your Digital Twin
 //
 
-// TODO: Fill in DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_ID. E.g. 
-#define DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_ID "dtmi:YOUR_COMPANY_NAME_HERE:sample_device;1"
+// TODO: Fill in DIGITALTWIN_SAMPLE_ROOT_INTERFACE_ID. E.g. 
+#define DIGITALTWIN_SAMPLE_ROOT_INTERFACE_ID "dtmi:YOUR_COMPANY_NAME_HERE:sample_device;1"
 
 //
 // END TODO section
@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
     // The call to DigitalTwin_DeviceClient_CreateFromDeviceHandle() transfers ownership
     // of this handle (including destroying it) to the DigitalTwin layer, analogous to a .release()
     // in some C++ helpers.  DO NOT USE deviceHandle after this point.
-    else if ((result = DigitalTwin_DeviceClient_CreateFromDeviceHandle(deviceHandle, DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_ID, &dtDeviceClientHandle)) != DIGITALTWIN_CLIENT_OK)
+    else if ((result = DigitalTwin_DeviceClient_CreateFromDeviceHandle(deviceHandle, DIGITALTWIN_SAMPLE_ROOT_INTERFACE_ID, &dtDeviceClientHandle)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("DigitalTwin_DeviceClient_CreateFromDeviceHandle failed, error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
     }

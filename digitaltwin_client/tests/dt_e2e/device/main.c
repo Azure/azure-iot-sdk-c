@@ -48,7 +48,7 @@
 //
 // DCM for the E2E test 
 //
-#define DIGITALTWIN_E2E_DEVICE_CAPABILITY_MODEL_URI "dtmi:azureiot:testinterfaces:cdevicesdk:DCM;1"
+#define DIGITALTWIN_E2E_ROOT_INTERFACE_ID "dtmi:azureiot:testinterfaces:cdevicesdk:DCM;1"
 
 // Amount to sleep between querying state from the register interface loop
 static const int digitalTwin_E2E_registerInterfacePollSleep = 1000;
@@ -192,7 +192,7 @@ int main(int argc, char** argv)
         result = MU_FAILURE;
     }
 #endif
-    else if ((result = (int)DigitalTwin_DeviceClient_CreateFromDeviceHandle(deviceHandle, DIGITALTWIN_E2E_DEVICE_CAPABILITY_MODEL_URI, &dtDeviceClientHandle)) != DIGITALTWIN_CLIENT_OK)
+    else if ((result = (int)DigitalTwin_DeviceClient_CreateFromDeviceHandle(deviceHandle, DIGITALTWIN_E2E_ROOT_INTERFACE_ID, &dtDeviceClientHandle)) != DIGITALTWIN_CLIENT_OK)
     {
         LogError("DigitalTwin_DeviceClient_CreateFromDeviceHandle failed, error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, (DIGITALTWIN_CLIENT_RESULT)result));
     }    
