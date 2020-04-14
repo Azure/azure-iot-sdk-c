@@ -2189,7 +2189,7 @@ static int append_optional_connect_parameters(PMQTTTRANSPORT_HANDLE_DATA transpo
 
         STRING_HANDLE clone = NULL;
         STRING_HANDLE param = NULL;
-        STRING_HANDLE urlEncodedModelId = NULL;
+        STRING_HANDLE urlEncodedRootInterfaceId = NULL;
         const char* dt_root_interface_id;
         const char* product_info = transport_data->transport_callbacks.prod_info_cb(transport_data->transport_ctx);
 
@@ -2205,19 +2205,19 @@ static int append_optional_connect_parameters(PMQTTTRANSPORT_HANDLE_DATA transpo
         }           
         else if ((dt_root_interface_id = transport_data->transport_callbacks.dt_root_interface_id_cb(transport_data->transport_ctx)) != NULL)
         {
-            if ((urlEncodedModelId = URL_EncodeString(dt_root_interface_id)) == NULL)
+            if ((urlEncodedRootInterfaceId = URL_EncodeString(dt_root_interface_id)) == NULL)
             {
-                LogError("Failed to URL encode the device capability model id string");
+                LogError("Failed to URL encode the root interface id string");
                 result = MU_FAILURE;
             }
-            else if ((param = STRING_construct_sprintf("&%s=%s", DT_ROOT_INTERFACE_ID_TOKEN, STRING_c_str(urlEncodedModelId))) == NULL)
+            else if ((param = STRING_construct_sprintf("&%s=%s", DT_ROOT_INTERFACE_ID_TOKEN, STRING_c_str(urlEncodedRootInterfaceId))) == NULL)
             {
-                LogError("Cannot build device capability model id string");
+                LogError("Cannot build root interface id string");
                 result = MU_FAILURE;
             }
             else if (STRING_concat_with_STRING(transport_data->configPassedThroughUsername, param) != 0)
             {
-                LogError("Failed to set device capability model id parameter in connect");
+                LogError("Failed to set device capability root interface id parameter in connect");
                 result = MU_FAILURE;
             }
             else
@@ -2235,7 +2235,7 @@ static int append_optional_connect_parameters(PMQTTTRANSPORT_HANDLE_DATA transpo
 
         STRING_delete(clone);
         STRING_delete(param);
-        STRING_delete(urlEncodedModelId);
+        STRING_delete(urlEncodedRootInterfaceId);
     }
     else
     {

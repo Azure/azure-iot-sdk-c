@@ -615,7 +615,7 @@ static const char* IoTHubClientCore_LL_GetProductInfo(void* ctx)
     return result;
 }
 
-static const char* IoTHubClientCore_LL_GetDTModelId(void* ctx)
+static const char* IoTHubClientCore_LL_GetRootInterfaceId(void* ctx)
 {
     const char* result;
     if (ctx == NULL)
@@ -844,7 +844,7 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
             transport_cb.msg_input_cb = IoTHubClientCore_LL_MessageCallbackFromInput;
             transport_cb.msg_cb = IoTHubClientCore_LL_MessageCallback;
             transport_cb.method_complete_cb = IoTHubClientCore_LL_DeviceMethodComplete;
-            transport_cb.dt_root_interface_id_cb = IoTHubClientCore_LL_GetDTModelId;
+            transport_cb.dt_root_interface_id_cb = IoTHubClientCore_LL_GetRootInterfaceId;
 
             if (client_config != NULL)
             {
@@ -2341,7 +2341,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetOption(IOTHUB_CLIENT_CORE_LL_HANDLE 
         {
             if (handleData->dt_root_interface_id != NULL)
             {
-                LogError("DT Model Id already specified.");
+                LogError("DT Root Interface Id already specified.");
                 result = IOTHUB_CLIENT_ERROR;
             } 
             else if ((handleData->dt_root_interface_id = STRING_construct((const char*)value)) == NULL)
@@ -3009,7 +3009,7 @@ int IoTHubClientCore_LL_GetTransportCallbacks(TRANSPORT_CALLBACKS_INFO* transpor
         transport_cb->msg_input_cb = IoTHubClientCore_LL_MessageCallbackFromInput;
         transport_cb->msg_cb = IoTHubClientCore_LL_MessageCallback;
         transport_cb->method_complete_cb = IoTHubClientCore_LL_DeviceMethodComplete;
-        transport_cb->dt_root_interface_id_cb = IoTHubClientCore_LL_GetDTModelId;
+        transport_cb->dt_root_interface_id_cb = IoTHubClientCore_LL_GetRootInterfaceId;
         result = 0;
     }
     return result;
