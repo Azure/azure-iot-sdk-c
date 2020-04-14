@@ -6,7 +6,7 @@ To get setup to build applications that enable the Digital Twin for C:
 
 
 ```
- git clone -b public-preview --recursive https://github.com/Azure/azure-iot-sdk-c
+ git clone -b public-preview-pnp --recursive https://github.com/Azure/azure-iot-sdk-c
  cd azure-iot-sdk-c
  mkdir cmake
  cd cmake
