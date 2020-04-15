@@ -17,6 +17,6 @@ echo "SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)" >> toolchain.cmake
 ls -al
 
 # Build the SDK. This will use the OpenSSL, cURL and uuid binaries that we built before
-cmake -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake -Duse_prov_client:BOOL=OFF -DCMAKE_INSTALL_PREFIX=${TOOLCHAIN_PREFIX} -Drun_e2e_tests:BOOL=ON -Drun_unittests=:BOOL=ON ..
+cmake -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake -Duse_prov_client:BOOL=ON -DCMAKE_INSTALL_PREFIX=${TOOLCHAIN_PREFIX} -Drun_e2e_tests:BOOL=ON -Drun_unittests=:BOOL=ON ..
 make -j 2
 ls -al
