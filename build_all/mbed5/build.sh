@@ -13,9 +13,9 @@ git submodule update --init
 cd mbed-iot-devkit-sdk
 
 // update devkit-azure-iot-sdk-c and mbed-az3166-driver with credentials
+echo $NEWTIN | sudo -S sed -i 's&eric&'$DEVKIT_SDK_USER:$DEVKIT_SDK_CRED'&g' .gitmodules
 echo $NEWTIN | sudo -S sed -i 's&mseng@&'$DEVKIT_USER:$DEVKIT_CRED@'&g' .gitmodules
 echo $NEWTIN | sudo -S sed -i 's&placehold&'$AZ3166_USER:$AZ3166_CRED'&g' .gitmodules
-echo $NEWTIN | sudo -S sed -i 's&eric&'$DEVKIT_SDK_USER:$DEVKIT_SDK_CRED'&g' .gitmodules
 
 git submodule update --init --recursive
 cd ..
