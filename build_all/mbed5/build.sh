@@ -7,7 +7,7 @@ cd mxchip
 
 // update mbed-os and mbed-iot-devkit-sdk with credentials
 echo $NEWTIN | sudo -S sed -i 's&placehold&'$MBED_USER:$MBED_CRED'&g' .gitmodules
-echo $NEWTIN | sudo -S sed -i 's&eric&'$MBED-IOT-DEVKIT-SDK_USER:$MBED-IOT-DEVKIT-SDK_CRED'&g' .gitmodules
+echo $NEWTIN | sudo -S sed -i 's&eric&'$MBED_IOT_DEVKIT_SDK_USER:$MBED_IOT_DEVKIT_SDK_CRED'&g' .gitmodules
 
 git submodule update --init
 cd mbed-iot-devkit-sdk
@@ -15,7 +15,7 @@ cd mbed-iot-devkit-sdk
 // update devkit-azure-iot-sdk-c and mbed-az3166-driver with credentials
 echo $NEWTIN | sudo -S sed -i 's&mseng@&'$DEVKIT_USER:$DEVKIT_CRED@'&g' .gitmodules
 echo $NEWTIN | sudo -S sed -i 's&placehold&'$AZ3166_USER:$AZ3166_CRED'&g' .gitmodules
-echo $NEWTIN | sudo -S sed -i 's&eric&'$DEVKIT-SDK_USER:$DEVKIT-SDK_CRED'&g' .gitmodules
+echo $NEWTIN | sudo -S sed -i 's&eric&'$DEVKIT_SDK_USER:$DEVKIT_SDK_CRED'&g' .gitmodules
 
 git submodule update --init --recursive
 cd ..
