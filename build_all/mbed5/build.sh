@@ -2,7 +2,7 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 sudo rm -R -f mxchip
 
-git clone -b $MXCHIP_REPO_SOURCE_BRANCH https://$DEVKIT-MBEDOS5-GETSTARTED_USER:$DEVKIT-MBEDOS5-GETSTARTED_CRED@azure-iot-sdks.visualstudio.com/azure-iot-sdk-c-build/_git/devkit-mbedos5-getstarted mxchip
+git clone -b $MXCHIP_REPO_SOURCE_BRANCH https://$(DEVKIT-MBEDOS5-GETSTARTED_USER):$(DEVKIT-MBEDOS5-GETSTARTED_CRED)@azure-iot-sdks.visualstudio.com/azure-iot-sdk-c-build/_git/devkit-mbedos5-getstarted mxchip
 cd mxchip
 
 // update mbed-os and mbed-iot-devkit-sdk with credentials
