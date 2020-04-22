@@ -41,6 +41,7 @@ jobs:
       python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(ESP8266_PORT) -d esp8266 -s
       rm input.txt
     failOnStderr: true
+    condition: succeeded()
     displayName: 'run_test'
 
   - script: |
@@ -97,6 +98,7 @@ jobs:
       python3 serial_connect.py -i input.txt -o output.txt -b 1000000 -p $(ESP32_PORT) -d esp32 -s
       rm input.txt
     failOnStderr: true
+    condition: succeeded()
     displayName: 'run_test'
 
   - script: |
