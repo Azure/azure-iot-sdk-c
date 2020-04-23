@@ -159,6 +159,6 @@ class esp_uart_interface(uart_interface):
                     output = self.serial_read(ser, line, output_file_obj)
 
                 # forward failed callbacks to SDK_ERRORS
-                azure_test_firmware_errors.SDK_ERRORS += self.messages_sent - self.message_callbacks
+                azure_test_firmware_errors.SDK_ERRORS += 1 + self.messages_sent - self.message_callbacks
 
                 output_file_obj.close()
