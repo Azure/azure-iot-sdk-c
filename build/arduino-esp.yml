@@ -38,7 +38,8 @@ jobs:
       ls
       cd $(Build.SourcesDirectory)/testtools/UART_interface/
       echo -e "exit\r\n\r\n\r\n" | cat > input.txt
-      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(ESP8266_PORT) -d esp8266 -s
+      OUT='python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(ESP8266_PORT) -d esp8266 -s'
+      echo $OUT
       rm input.txt
     failOnStderr: true
     condition: succeeded()
