@@ -34,8 +34,8 @@ static void my_gballoc_free(void* ptr)
 
 #include "RIoT.h"
 #include "RiotCrypt.h"
-#include "RiotDerEnc.h"
-#include "RiotX509Bldr.h"
+#include "derenc.h"
+#include "x509bldr.h"
 #include "DiceSha256.h"
 
 #define ENABLE_MOCKS

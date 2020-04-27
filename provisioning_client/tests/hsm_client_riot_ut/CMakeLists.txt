@@ -7,9 +7,9 @@ cmake_minimum_required(VERSION 2.8.11)
 compileAsC11()
 set(theseTestsName hsm_client_riot_ut)
 
-include_directories(../../deps/RIoT/Emulator/DICE)
-include_directories(../../deps/RIoT/Emulator/RIoT)
-include_directories(../../deps/RIoT/Emulator/RIoT/RIoTCrypt/include)
+include_directories(../../deps/RIoT/Simulation/DICE)
+include_directories(../../deps/RIoT/Simulation/RIoT/Core)
+include_directories(../../deps/RIoT/Simulation/RIoT/Core/RIoTCrypt/include)
 
 set(${theseTestsName}_test_files
     ${theseTestsName}.c

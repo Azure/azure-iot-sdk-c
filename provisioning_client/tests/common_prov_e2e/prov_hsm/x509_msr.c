@@ -15,8 +15,8 @@
 
 #include "RIoT.h"
 #include "RiotCrypt.h"
-#include "RiotDerEnc.h"
-#include "RiotX509Bldr.h"
+#include "derenc.h"
+#include "x509bldr.h"
 #include "DiceSha256.h"
 
 typedef struct X509_CERT_INFO_TAG
@@ -72,6 +72,21 @@ static char g_device_name[64] = { 0 };
 
 static int g_digest_initialized = 0;
 
+#define BIGLEN 9
+
+typedef struct {
+    uint32_t data[BIGLEN];
+} bigval_t;
+
+typedef struct {
+    bigval_t x;
+    bigval_t y;
+    uint32_t infinity;
+} affine_point_t;
+
+typedef bigval_t ecc_privatekey;
+typedef affine_point_t ecc_publickey;
+
 static RIOT_X509_TBS_DATA X509_ALIAS_TBS_DATA = {
     { 0x0A, 0x0B, 0x0C, 0x0D, 0x0E }, HSM_SIGNER_NAME, "AZURE_TEST", "US",
     "170101000000Z", "370101000000Z", "", "MSR_TEST", "US" };
@@ -120,7 +135,7 @@ static int generate_root_ca_info(X509_CERT_INFO* x509_info, RIOT_ECC_SIGNATURE* 
     DERInitContext(&der_ctx, der_buffer, DER_MAX_TBS);
     DERInitContext(&der_pri_ctx, der_buffer, DER_MAX_TBS);
 
-    if (X509GetDeviceCertTBS(&der_ctx, &X509_ROOT_TBS_DATA, &x509_info->ca_root_pub) != 0)
+    if (X509GetDeviceCertTBS(&der_ctx, &X509_ROOT_TBS_DATA, &x509_info->ca_root_pub, NULL, NULL) != 0)
     {
         LogError("Failure: X509GetDeviceCertTBS");
         result = MU_FAILURE;
@@ -174,7 +189,7 @@ static int produce_device_cert(X509_CERT_INFO* x509_info, RIOT_ECC_SIGNATURE tbs
 
     // Build the TBS (to be signed) region of DeviceID Certificate
     DERInitContext(&der_ctx, der_buffer, DER_MAX_TBS);
-    if (X509GetDeviceCertTBS(&der_ctx, &X509_DEVICE_TBS_DATA, &x509_info->device_id_pub) != 0)
+    if (X509GetDeviceCertTBS(&der_ctx, &X509_DEVICE_TBS_DATA, &x509_info->device_id_pub, NULL, NULL) != 0)
     {
         LogError("Failure: X509GetDeviceCertTBS");
         result = MU_FAILURE;
