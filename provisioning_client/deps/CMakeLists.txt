@@ -18,7 +18,7 @@ else()
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/RiotCrypt.c
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/derenc.c
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/hkdf.c
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/x509Bldr.c
+            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/x509bldr.c
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/base64.c
 			./RIoT/Simulation/RIoT/Core/RIoTCrypt/bignum.c
 			./RIoT/Simulation/RIoT/Core/RIoTCrypt/ecp.c
@@ -39,7 +39,7 @@ else()
 			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/bignum.h
 			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/ecp.h
 			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/platform.h
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/x509Bldr.h
+            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/x509bldr.h
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/base64.h
         )
 
