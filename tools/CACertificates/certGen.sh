@@ -264,7 +264,7 @@ function generate_leaf_certificate()
 
     generate_device_certificate_common "${common_name}" "${device_prefix}" \
                                        "${certificate_dir}" "${ca_password}" \
-                                       "${openssl_config_file}" "server_cert" \
+                                       "${openssl_config_file}" "usr_cert" \
                                        "Leaf Device"
 }
 
