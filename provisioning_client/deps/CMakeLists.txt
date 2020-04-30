@@ -16,20 +16,12 @@ else()
         set(msr_riot_c_files
             ./RIoT/Simulation/DICE/DiceSha256.c
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/RiotCrypt.c
-			./RIoT/Simulation/RIoT/Core/RIoTCrypt/aes.c
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/base64.c
 			./RIoT/Simulation/RIoT/Core/RIoTCrypt/bignum.c
 			./RIoT/Simulation/RIoT/Core/RIoTCrypt/derenc.c
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/ecdh.c
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/ecdsa.c
-			./RIoT/Simulation/RIoT/Core/RIoTCrypt/ecp.c
-			./RIoT/Simulation/RIoT/Core/RIoTCrypt/ecp_curves.c
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/hkdf.c
-			./RIoT/Simulation/RIoT/Core/RIoTCrypt/hmac_drbg.c
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/md.c
 			./RIoT/Simulation/RIoT/Core/RIoTCrypt/platform_util.c
-			./RIoT/Simulation/RIoT/Core/RIoTCrypt/sha1.c
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/sha256.c
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/x509bldr.c
         )
 
@@ -41,27 +33,11 @@ else()
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/base64.h
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/derenc.h
 			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/x509bldr.h
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/aes.h
 			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/bignum.h
-			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/bn_mul.h
-			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/check_config.h
-			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/ecdh.h
-			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/ecdsa.h
-			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/ecp.h
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/ecp_internal.h
 			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/hkdf.h
-			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/hmac_drbg.h
 			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/md.h
-			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/md2.h
-			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/md4.h
-			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/md5.h
-			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/md_internal.h
 			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/platform.h
 			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/platform_util.h
-			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/ripemd160.h
-			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/sha1.h
-			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/sha256.h
-			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/sha512.h
         )
 
         include_directories(./RIoT/Simulation/DICE)
@@ -74,6 +50,7 @@ else()
 		configure_file("${DIR_ONE_ABOVE}/tools/RIoT_config/RIoT_config.h" 
 						"${CMAKE_CURRENT_SOURCE_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/config.h" COPYONLY
 		)
+
         if(MSVC)
             set_source_files_properties(./RIoT/Simulation/RIoT/RIoTCrypt/hkdf.c PROPERTIES COMPILE_FLAGS "/wd4100")
         endif()

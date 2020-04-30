@@ -32,11 +32,11 @@ static void my_gballoc_free(void* ptr)
 #include "umock_c/umock_c_negative_tests.h"
 #include "azure_macro_utils/macro_utils.h"
 
+#include "DiceSha256.h"
 #include "RIoT.h"
 #include "RiotCrypt.h"
 #include "derenc.h"
 #include "x509bldr.h"
-#include "DiceSha256.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
@@ -58,7 +58,7 @@ MOCKABLE_FUNCTION(, int, X509GetDEREcc, DERBuilderContext*, Context, RIOT_ECC_PU
 MOCKABLE_FUNCTION(, int, DERtoPEM, DERBuilderContext*, Context, uint32_t, Type, char*, PEM, uint32_t*, Length);
 
 MOCKABLE_FUNCTION(, int, X509GetDEREccPub, DERBuilderContext*, Context, RIOT_ECC_PUBLIC, Pub);
-MOCKABLE_FUNCTION(, int, X509GetDeviceCertTBS, DERBuilderContext*, Tbs, RIOT_X509_TBS_DATA *, TbsData, RIOT_ECC_PUBLIC*, DevIdKeyPub);
+MOCKABLE_FUNCTION(, int, X509GetDeviceCertTBS, DERBuilderContext*, Tbs, RIOT_X509_TBS_DATA *, TbsData, RIOT_ECC_PUBLIC*, DevIdKeyPub, uint8_t*, RootKeyPub, uint32_t, RootKeyPubLen);
 MOCKABLE_FUNCTION(, int, X509MakeDeviceCert, DERBuilderContext*, DeviceIDCert, RIOT_ECC_SIGNATURE*, TbsSig);
 MOCKABLE_FUNCTION(, int, X509GetAliasCertTBS, DERBuilderContext*, Tbs, RIOT_X509_TBS_DATA*, TbsData, RIOT_ECC_PUBLIC*, AliasKeyPub, RIOT_ECC_PUBLIC*, DevIdKeyPub, uint8_t*, Fwid, uint32_t, FwidLen);
 MOCKABLE_FUNCTION(, int, X509GetDERCsrTbs, DERBuilderContext*, Context, RIOT_X509_TBS_DATA*, TbsData, RIOT_ECC_PUBLIC*, DeviceIDPub);
@@ -75,15 +75,18 @@ static const char* TEST_CN_VALUE = "riot-device-cert";
 
 static int umocktypes_copy_RIOT_ECC_PRIVATE(RIOT_ECC_PRIVATE* dest, const RIOT_ECC_PRIVATE* src)
 {
-    int result;
-    if (src == NULL)
+    int result = 1;
+    if (src == NULL) 
     {
         dest = NULL;
         result = 0;
     }
     else
     {
-        memcpy(dest->data, src->data, sizeof(dest->data));
+        // copy the sign, total number of limbs, and address of first limb
+        dest->s = src->s;
+        dest->n = src->n;
+        dest->p = src->p;
         result = 0;
     }
     return result;
@@ -107,15 +110,18 @@ static char* umocktypes_stringify_RIOT_ECC_PRIVATE(const RIOT_ECC_PRIVATE* value
     }
     else
     {
-        int length = snprintf(NULL, 0, "{ %p }", value->data);
+        int length = snprintf(NULL, 0, "{ %d, %zd, %p }",
+            value->s, value->n, value->p);
         if (length < 0)
         {
             result = NULL;
         }
         else
         {
-            result = (char*)my_gballoc_malloc(length + 1);
-            (void)snprintf(result, length + 1, "{ %p }", value->data);
+            length++;
+            result = (char*)my_gballoc_malloc(length);
+            (void)snprintf(NULL, 0, "{ %d, %zd, %p }",
+                value->s, value->n, value->p);
         }
     }
     return result;
@@ -124,24 +130,28 @@ static char* umocktypes_stringify_RIOT_ECC_PRIVATE(const RIOT_ECC_PRIVATE* value
 static int umocktypes_are_equal_RIOT_ECC_PRIVATE(RIOT_ECC_PRIVATE* left, RIOT_ECC_PRIVATE* right)
 {
     int result;
-    if (left == right)
+    if ((right == NULL) && (left == NULL))
     {
         result = 1;
     }
-    else if ((left == NULL) || (right == NULL))
+    else if (((right == NULL) && (left != NULL)) || ((left == NULL) && (right != NULL)))
+    {
+        result = 0;
+    }
+    else if ((right->s != left->s) || (right->n != left->n) || (right->p != left->p))
     {
         result = 0;
     }
     else
     {
-        result = memcmp(left->data, right->data, sizeof(left->data));
+        result = 1;
     }
     return result;
 }
 
 static int umocktypes_copy_RIOT_ECC_PUBLIC(RIOT_ECC_PUBLIC* dest, const RIOT_ECC_PUBLIC* src)
 {
-    int result;
+    int result = 1;
     if (src == NULL)
     {
         dest = NULL;
@@ -149,9 +159,18 @@ static int umocktypes_copy_RIOT_ECC_PUBLIC(RIOT_ECC_PUBLIC* dest, const RIOT_ECC
     }
     else
     {
-        dest->infinity = src->infinity;
-        memcpy(dest->x.data, src->x.data, sizeof(dest->x.data) );
-        memcpy(dest->y.data, src->x.data, sizeof(dest->y.data));
+        // X point
+        dest->X.s = src->X.s;
+        dest->X.n = src->X.n;
+        dest->X.p = src->X.p;
+        // Y point
+        dest->Y.s = src->Y.s;
+        dest->Y.n = src->Y.n;
+        dest->Y.p = src->Y.p;
+        // Z point
+        dest->Z.s = src->Z.s;
+        dest->Z.n = src->Z.n;
+        dest->Z.p = src->Z.p;
         result = 0;
     }
     return result;
@@ -175,17 +194,24 @@ static char* umocktypes_stringify_RIOT_ECC_PUBLIC(const RIOT_ECC_PUBLIC* value)
     }
     else
     {
-        int length = snprintf(NULL, 0, "{ %p, %p, %d }",
-            value->x.data, value->y.data, (int)value->infinity);
+        int length = snprintf(NULL, 0, "{ %d, %zd, %p }",
+            value->X.s, value->X.n, value->X.p);
+        length += snprintf(NULL, 0, "{ %d, %zd, %p }",
+            value->Y.s, value->Y.n, value->Y.p);
+        length += snprintf(NULL, 0, "{ %d, %zd, %p }",
+            value->Z.s, value->Z.n, value->Z.p);
         if (length < 0)
         {
             result = NULL;
         }
         else
         {
-            result = (char*)my_gballoc_malloc(length + 1);
-            (void)snprintf(result, length + 1, "{ %p, %p, %d }",
-                value->x.data, value->y.data, (int)value->infinity);
+            length++;
+            result = (char*)my_gballoc_malloc(length);
+            (void)snprintf(NULL, 0, "{ %d, %zd, %p, %d, %zd, %p, %d, %zd, %p }",
+                value->X.s, value->X.n, value->X.p, 
+                value->Y.s, value->Y.n, value->Y.p, 
+                value->Z.s, value->Z.n, value->Z.p);
         }
     }
     return result;
@@ -194,17 +220,32 @@ static char* umocktypes_stringify_RIOT_ECC_PUBLIC(const RIOT_ECC_PUBLIC* value)
 static int umocktypes_are_equal_RIOT_ECC_PUBLIC(RIOT_ECC_PUBLIC* left, RIOT_ECC_PUBLIC* right)
 {
     int result;
-    if (left == right)
+    if ((right == NULL) && (left == NULL))
     {
         result = 1;
     }
-    else if ((left == NULL) || (right == NULL))
+    else if (((right == NULL) && (left != NULL)) || ((left == NULL) && (right != NULL)))
     {
+        result = 0;
+    }
+    else if ((right->X.s != left->X.s) || (right->X.n != left->X.n) || (right->X.p != left->X.p))
+    {
+        // X point
+        result = 0;
+    }
+    else if ((right->Y.s != left->Y.s) || (right->Y.n != left->Y.n) || (right->Y.p != left->Y.p))
+    {
+        // Y point
+        result = 0;
+    }
+    else if ((right->Z.s != left->Z.s) || (right->Z.n != left->Z.n) || (right->Z.p != left->Z.p))
+    {
+        // Z point
         result = 0;
     }
     else
     {
-        result = memcmp(left->x.data, right->x.data, sizeof(left->x.data));
+        result = 1;
     }
     return result;
 }
@@ -358,7 +399,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
     static void hsm_client_riot_create_leaf_cert_mock(void)
     {
         STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(X509MakeDeviceCert(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
@@ -395,7 +436,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         if (device_signed)
         {
             STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-            STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+            STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
             STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(X509MakeDeviceCert(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, CERT_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
@@ -405,7 +446,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
             STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
             STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
 
-            STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+            STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
             STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
 
             STRICT_EXPECTED_CALL(X509MakeRootCert(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -418,7 +459,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
 
 
         STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 24
-        STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(X509MakeDeviceCert(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, CERT_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));

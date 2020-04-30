@@ -11,11 +11,12 @@
 #include "hsm_client_riot.h"
 #include "hsm_client_data.h"
 
+#include "DiceSha256.h"
 #include "RIoT.h"
 #include "RiotCrypt.h"
 #include "derenc.h"
 #include "x509bldr.h"
-#include "DiceSha256.h"
+
 
 #define RIOT_SIGNER_NAME            "riot-signer-core"
 #define RIOT_COMMON_NAME            "riot-device-cert"
@@ -168,7 +169,7 @@ static int generate_root_ca_info(HSM_CLIENT_X509_INFO* riot_info, RIOT_ECC_SIGNA
     DERInitContext(&der_ctx, der_buffer, DER_MAX_TBS);
     DERInitContext(&der_pri_ctx, der_buffer, DER_MAX_TBS);
 
-    if (X509GetDeviceCertTBS(&der_ctx, &X509_ROOT_TBS_DATA, &riot_info->ca_root_pub, NULL, NULL) != 0)
+    if (X509GetDeviceCertTBS(&der_ctx, &X509_ROOT_TBS_DATA, &riot_info->ca_root_pub, 0, 0) != 0)
     {
         LogError("Failure: X509GetDeviceCertTBS");
         result = MU_FAILURE;
@@ -778,7 +779,7 @@ char* hsm_client_riot_create_leaf_cert(HSM_CLIENT_HANDLE handle, const char* com
         LEAF_CERT_TBS_DATA.SubjectCommon = common_name;
 
         DERInitContext(&leaf_ctx, leaf_buffer, DER_MAX_TBS);
-        if (X509GetDeviceCertTBS(&leaf_ctx, &LEAF_CERT_TBS_DATA, &leaf_id_pub, NULL, NULL) != 0)
+        if (X509GetDeviceCertTBS(&leaf_ctx, &LEAF_CERT_TBS_DATA, &leaf_id_pub, 0, 0) != 0)
         {
             /* Codes_SRS_HSM_CLIENT_RIOT_07_032: [ If hsm_client_riot_create_leaf_cert encounters an error it shall return NULL. ] */
             LogError("Failure: X509GetDeviceCertTBS");

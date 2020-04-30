@@ -13,11 +13,11 @@
 
 #include "x509_info.h"
 
+#include "DiceSha256.h"
 #include "RIoT.h"
 #include "RiotCrypt.h"
 #include "derenc.h"
 #include "x509bldr.h"
-#include "DiceSha256.h"
 
 typedef struct X509_CERT_INFO_TAG
 {
@@ -106,19 +106,17 @@ static RIOT_X509_TBS_DATA X509_ROOT_TBS_DATA = {
 // this "root" key represents the "trusted" CA for the developer-mode
 // server(s). Again, this is for development purposes only and (obviously)
 // provides no meaningful security whatsoever.
-static unsigned char eccRootPubBytes[sizeof(ecc_publickey)] = {
+static unsigned char eccRootPubBytes[sizeof(RIOT_ECC_PUBLIC)] = {
     0xeb, 0x9c, 0xfc, 0xc8, 0x49, 0x94, 0xd3, 0x50, 0xa7, 0x1f, 0x9d, 0xc5,
     0x09, 0x3d, 0xd2, 0xfe, 0xb9, 0x48, 0x97, 0xf4, 0x95, 0xa5, 0x5d, 0xec,
     0xc9, 0x0f, 0x52, 0xa1, 0x26, 0x5a, 0xab, 0x69, 0x00, 0x00, 0x00, 0x00,
     0x7d, 0xce, 0xb1, 0x62, 0x39, 0xf8, 0x3c, 0xd5, 0x9a, 0xad, 0x9e, 0x05,
     0xb1, 0x4f, 0x70, 0xa2, 0xfa, 0xd4, 0xfb, 0x04, 0xe5, 0x37, 0xd2, 0x63,
-    0x9a, 0x46, 0x9e, 0xfd, 0xb0, 0x5b, 0x1e, 0xdf, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00 };
+    0x9a, 0x46, 0x9e, 0xfd, 0xb0, 0x5b, 0x1e, 0xdf, 0x00, 0x00, 0x00, 0x00 };
 
-static unsigned char eccRootPrivBytes[sizeof(ecc_privatekey)] = {
+static unsigned char eccRootPrivBytes[sizeof(RIOT_ECC_PRIVATE)] = {
     0xe3, 0xe7, 0xc7, 0x13, 0x57, 0x3f, 0xd9, 0xc8, 0xb8, 0xe1, 0xea, 0xf4,
-    0x53, 0xf1, 0x56, 0x15, 0x02, 0xf0, 0x71, 0xc0, 0x53, 0x49, 0xc8, 0xda,
-    0xe6, 0x26, 0xa9, 0x0b, 0x17, 0x88, 0xe5, 0x70, 0x00, 0x00, 0x00, 0x00 };
+    0x53, 0xf1, 0x56, 0x15, 0x02, 0xf0, 0x71, 0xc0, 0x53, 0x49, 0xc8, 0xda };
 
 static int generate_root_ca_info(X509_CERT_INFO* x509_info, RIOT_ECC_SIGNATURE* tbs_sig)
 {
@@ -128,14 +126,14 @@ static int generate_root_ca_info(X509_CERT_INFO* x509_info, RIOT_ECC_SIGNATURE* 
     DERBuilderContext der_pri_ctx = { 0 };
     RIOT_STATUS status;
 
-    memcpy(&x509_info->ca_root_pub, eccRootPubBytes, sizeof(ecc_publickey));
-    memcpy(&x509_info->ca_root_priv, eccRootPrivBytes, sizeof(ecc_privatekey));
+    memcpy(&x509_info->ca_root_pub, eccRootPubBytes, sizeof(RIOT_ECC_PUBLIC));
+    memcpy(&x509_info->ca_root_priv, eccRootPrivBytes, sizeof(RIOT_ECC_PRIVATE));
 
     // Generating "root"-signed DeviceID certificate
     DERInitContext(&der_ctx, der_buffer, DER_MAX_TBS);
     DERInitContext(&der_pri_ctx, der_buffer, DER_MAX_TBS);
 
-    if (X509GetDeviceCertTBS(&der_ctx, &X509_ROOT_TBS_DATA, &x509_info->ca_root_pub, NULL, NULL) != 0)
+    if (X509GetDeviceCertTBS(&der_ctx, &X509_ROOT_TBS_DATA, &x509_info->ca_root_pub, 0, 0) != 0)
     {
         LogError("Failure: X509GetDeviceCertTBS");
         result = MU_FAILURE;
@@ -189,7 +187,7 @@ static int produce_device_cert(X509_CERT_INFO* x509_info, RIOT_ECC_SIGNATURE tbs
 
     // Build the TBS (to be signed) region of DeviceID Certificate
     DERInitContext(&der_ctx, der_buffer, DER_MAX_TBS);
-    if (X509GetDeviceCertTBS(&der_ctx, &X509_DEVICE_TBS_DATA, &x509_info->device_id_pub, NULL, NULL) != 0)
+    if (X509GetDeviceCertTBS(&der_ctx, &X509_DEVICE_TBS_DATA, &x509_info->device_id_pub, 0, 0) != 0)
     {
         LogError("Failure: X509GetDeviceCertTBS");
         result = MU_FAILURE;
