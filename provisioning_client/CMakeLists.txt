@@ -60,7 +60,7 @@ elseif (${use_prov_client})
         # Include the riot directories
         include_directories(./deps/RIoT/Simulation/DICE)
         include_directories(./deps/RIoT/Simulation/RIoT/Core)
-        include_directories(./deps/RIoT/Simulation/RIoT/RIoTCrypt/Core/include)
+        include_directories(./deps/RIoT/Simulation/RIoT/Core/RIoTCrypt/include)
 
         # For e2e test a custom HSM is needed
         add_subdirectory(./tests/common_prov_e2e/prov_hsm)
@@ -83,7 +83,7 @@ elseif (${use_prov_client})
             # Include the riot directories
 			include_directories(./deps/RIoT/Simulation/DICE)
 			include_directories(./deps/RIoT/Simulation/RIoT/Core)
-			include_directories(./deps/RIoT/Simulation/RIoT/RIoTCrypt/Core/include)
+			include_directories(./deps/RIoT/Simulation/RIoT/Core/RIoTCrypt/include)
 
             set(HSM_CLIENT_LIBRARY ${HSM_CLIENT_LIBRARY} msr_riot)
         endif()
