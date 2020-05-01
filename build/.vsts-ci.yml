@@ -403,6 +403,10 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'windowsx64'
     condition: succeededOrFailed()
+  
+  - task: ComponentGovernanceComponentDetection@0
+    displayName: "Component Detection"
+  
   - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
     displayName: 'cleanup'
     condition: always()
