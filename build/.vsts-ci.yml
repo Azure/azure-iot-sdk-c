@@ -56,9 +56,9 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'windowsx86'
     condition: succeededOrFailed()
-  - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
-    displayName: 'cleanup'
-    condition: always()
+  # - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
+  #   displayName: 'cleanup'
+  #   condition: always()
 - job: raspberrypi
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/raspberrypi-c-buster:brown"
@@ -73,7 +73,10 @@ jobs:
      chmod +x jenkins/raspberrypi_c_buster.sh
       ./jenkins/raspberrypi_c_buster.sh
     displayName: 'build'
-  - script: sudo rm -rf $(Agent.BuildDirectory)/*
+  - script: |
+      echo $(System.DefaultWorkingDirectory)
+      echo $(Agent.WorkFolder)
+    # sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
 - job: gcc44
   variables:
