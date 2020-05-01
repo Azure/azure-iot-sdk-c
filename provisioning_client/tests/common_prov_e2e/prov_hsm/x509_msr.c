@@ -13,11 +13,11 @@
 
 #include "x509_info.h"
 
-#include "DiceSha256.h"
 #include "RIoT.h"
 #include "RiotCrypt.h"
 #include "derenc.h"
 #include "x509bldr.h"
+#include "DiceSha256.h"
 
 typedef struct X509_CERT_INFO_TAG
 {

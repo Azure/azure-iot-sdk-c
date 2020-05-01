@@ -11,12 +11,11 @@
 #include "hsm_client_riot.h"
 #include "hsm_client_data.h"
 
-#include "DiceSha256.h"
 #include "RIoT.h"
 #include "RiotCrypt.h"
 #include "derenc.h"
 #include "x509bldr.h"
-
+#include "DiceSha256.h"
 
 #define RIOT_SIGNER_NAME            "riot-signer-core"
 #define RIOT_COMMON_NAME            "riot-device-cert"

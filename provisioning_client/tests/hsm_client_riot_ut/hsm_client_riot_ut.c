@@ -32,11 +32,11 @@ static void my_gballoc_free(void* ptr)
 #include "umock_c/umock_c_negative_tests.h"
 #include "azure_macro_utils/macro_utils.h"
 
-#include "DiceSha256.h"
 #include "RIoT.h"
 #include "RiotCrypt.h"
 #include "derenc.h"
 #include "x509bldr.h"
+#include "DiceSha256.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
