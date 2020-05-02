@@ -1,6 +1,7 @@
 name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
 variables:
   runCodesignValidationInjection: false
+  skipComponentGovernanceDetection: false
 resources:
 - repo: self
   clean: true
@@ -56,9 +57,9 @@ jobs:
       mergeTestResults: true
       testRunTitle: 'windowsx86'
     condition: succeededOrFailed()
-  # - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
-  #   displayName: 'cleanup'
-  #   condition: always()
+  - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
+    displayName: 'cleanup'
+    condition: always()
 - job: raspberrypi
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/raspberrypi-c-buster:brown"
@@ -76,7 +77,7 @@ jobs:
   - script: |
       echo $(System.DefaultWorkingDirectory)
       echo $(Agent.WorkFolder)
-    # sudo rm -rf $(Agent.BuildDirectory)/*
+      # sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
 - job: gcc44
   variables:
