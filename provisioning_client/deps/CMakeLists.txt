@@ -15,6 +15,7 @@ else()
     if(${hsm_type_x509})
         set(msr_riot_c_files
             ./RIoT/Simulation/DICE/DiceSha256.c
+            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/RiotCrypt.c
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/base64.c
 			./RIoT/Simulation/RIoT/Core/RIoTCrypt/derenc.c
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/hkdf.c
