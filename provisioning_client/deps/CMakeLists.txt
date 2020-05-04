@@ -32,7 +32,14 @@ else()
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/base64.h
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/derenc.h
 			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/x509bldr.h
+            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/aes.h
+            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/ecdh.h
+            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/ecdsa.h
+            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/ecp.h
 			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/bignum.h
+            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/hmac_drbg.h
+            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/sha1.h
+            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/sha256.h
 			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/hkdf.h
 			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/md.h
 			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/platform.h
