@@ -177,7 +177,7 @@ static int generate_root_ca_info(HSM_CLIENT_X509_INFO* riot_info, RIOT_ECC_SIGNA
     DERInitContext(&der_ctx, der_buffer, DER_MAX_TBS);
     DERInitContext(&der_pri_ctx, der_buffer, DER_MAX_TBS);
 
-    if (X509GetDeviceCertTBS(&der_ctx, &X509_ROOT_TBS_DATA, &riot_info->ca_root_pub, 0, 0) != 0)
+    if (X509GetDeviceCertTBS(&der_ctx, &X509_ROOT_TBS_DATA, &riot_info->ca_root_pub, eccRootPubBytes, sizeof(eccRootPubBytes)) != 0)
     {
         LogError("Failure: X509GetDeviceCertTBS");
         result = MU_FAILURE;
@@ -232,7 +232,7 @@ static int produce_device_cert(HSM_CLIENT_X509_INFO* riot_info, RIOT_ECC_SIGNATU
     {
         // Build the TBS (to be signed) region of DeviceID Certificate
         DERInitContext(&der_ctx, der_buffer, DER_MAX_TBS);
-        if (X509GetDeviceCertTBS(&der_ctx, &X509_DEVICE_TBS_DATA, &riot_info->device_id_pub, 0, 0) != 0)
+        if (X509GetDeviceCertTBS(&der_ctx, &X509_DEVICE_TBS_DATA, &riot_info->device_id_pub, eccRootPubBytes, sizeof(eccRootPubBytes)) != 0)
         {
             LogError("Failure: X509GetDeviceCertTBS");
             result = MU_FAILURE;
@@ -282,7 +282,7 @@ static int produce_device_cert(HSM_CLIENT_X509_INFO* riot_info, RIOT_ECC_SIGNATU
     {
         // Generating "root"-signed DeviceID certificate
         DERInitContext(&der_ctx, der_buffer, DER_MAX_TBS);
-        if (X509GetDeviceCertTBS(&der_ctx, &X509_DEVICE_TBS_DATA, &riot_info->device_id_pub, 0, 0) != 0)
+        if (X509GetDeviceCertTBS(&der_ctx, &X509_DEVICE_TBS_DATA, &riot_info->device_id_pub, eccRootPubBytes, sizeof(eccRootPubBytes)) != 0)
         {
             LogError("Failure: X509GetDeviceCertTBS");
             result = MU_FAILURE;
@@ -787,7 +787,7 @@ char* hsm_client_riot_create_leaf_cert(HSM_CLIENT_HANDLE handle, const char* com
         LEAF_CERT_TBS_DATA.SubjectCommon = common_name;
 
         DERInitContext(&leaf_ctx, leaf_buffer, DER_MAX_TBS);
-        if (X509GetDeviceCertTBS(&leaf_ctx, &LEAF_CERT_TBS_DATA, &leaf_id_pub, 0, 0) != 0)
+        if (X509GetDeviceCertTBS(&leaf_ctx, &LEAF_CERT_TBS_DATA, &leaf_id_pub, eccRootPubBytes, sizeof(eccRootPubBytes)) != 0)
         {
             /* Codes_SRS_HSM_CLIENT_RIOT_07_032: [ If hsm_client_riot_create_leaf_cert encounters an error it shall return NULL. ] */
             LogError("Failure: X509GetDeviceCertTBS");
