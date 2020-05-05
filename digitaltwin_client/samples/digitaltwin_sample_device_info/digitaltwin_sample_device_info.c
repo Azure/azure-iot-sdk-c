@@ -30,7 +30,7 @@ DIGITALTWIN_SAMPLE_DEVICEINFO_STATE digitaltwinSample_DeviceInfoState;
 
 // DigitalTwin interface name from service perspective.
 static const char digitaltwinSampleDeviceInfo_InterfaceId[] = "dtmi:azureiot:DeviceManagement:DeviceInformation;1";
-static const char digitaltwinSampleDeviceInfo_InterfaceName[] = "sampleDeviceInfo";
+static const char digitaltwinSampleDeviceInfo_InterfaceName[] = "Deviceinformation";
 
 // DigitalTwinSampleDeviceInfo_PropertyCallback is invoked when a property is updated (or failed) going to server.
 // In this sample, we route ALL property callbacks to this function and just have the userContextCallback set

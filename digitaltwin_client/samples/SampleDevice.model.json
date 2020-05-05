@@ -1,0 +1,23 @@
+{
+  "@id": "dtmi:my_company:com:sample_device;1",
+  "@type": "Interface",
+  "displayName": "My Sample Model",
+  "contents": [
+    {
+      "@type": "Component",
+      "schema": "dtmi:my_company:com:EnvironmentalSensor;1",
+      "name": "sensor"
+    },
+    {
+      "@type": "Component",
+      "schema": "dtmi:azureiot:DeviceManagement:DeviceInformation;1",
+      "name": "DeviceInformation"
+    },
+    {
+      "@type": "Component",
+      "schema": "dtmi:azureiot:Client:SDKInformation;1",
+      "name": "SDKInformation"
+    }
+  ],
+  "@context": "dtmi:dtdl:context;2"
+}
