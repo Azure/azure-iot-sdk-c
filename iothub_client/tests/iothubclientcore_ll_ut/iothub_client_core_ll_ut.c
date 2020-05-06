@@ -5536,7 +5536,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_product_info_fails_case1)
     IoTHubClientCore_LL_Destroy(h);
 }
 
-TEST_FUNCTION(IoTHubClientCore_LL_SetOPTION_DT_MODEL_ID_succeeds)
+TEST_FUNCTION(IoTHubClientCore_LL_SetOption_DT_MODEL_ID_succeeds)
 {
     //arrange
     IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
@@ -5554,7 +5554,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOPTION_DT_MODEL_ID_succeeds)
     IoTHubClientCore_LL_Destroy(h);
 }
 
-TEST_FUNCTION(IoTHubClientCore_LL_SetOPTION_DT_MODEL_ID_string_construct_fails)
+TEST_FUNCTION(IoTHubClientCore_LL_SetOption_DT_MODEL_ID_string_construct_fails)
 {
     //arrange
     IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
@@ -5573,7 +5573,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOPTION_DT_MODEL_ID_string_construct_fails)
     IoTHubClientCore_LL_Destroy(h);
 }
 
-TEST_FUNCTION(IoTHubClientCore_LL_SetOPTION_DT_MODEL_ID_twice_fails)
+TEST_FUNCTION(IoTHubClientCore_LL_SetOption_DT_MODEL_ID_twice_fails)
 {
     //arrange
     IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
