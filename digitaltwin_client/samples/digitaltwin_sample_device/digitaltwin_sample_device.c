@@ -168,7 +168,6 @@ int main(int argc, char *argv[])
                 // its OK to sleep for long durations on this thread.
                 (void)DigitalTwinSampleEnvironmentalSensor_SendTelemetryMessagesAsync(interfaceClientHandles[DIGITALTWIN_SAMPLE_ENVIRONMENTAL_SENSOR_INDEX]);
             }
-            (void)DigitalTwinSampleEnvironmentalSensor_ProcessDiagnosticIfNecessaryAsync(interfaceClientHandles[DIGITALTWIN_SAMPLE_ENVIRONMENTAL_SENSOR_INDEX]);
             numberOfIterations++;
 
             ThreadAPI_Sleep(digitalTwinSampleDevice_mainPollingInterval);

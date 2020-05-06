@@ -474,7 +474,6 @@ int main(int argc, char *argv[])
             {
                 (void)DigitalTwinSampleEnvironmentalSensor_SendTelemetryMessagesAsync(interfaceClientHandles[DIGITALTWIN_SAMPLE_ENVIRONMENTAL_SENSOR_INDEX]);
             }
-            (void)DigitalTwinSampleEnvironmentalSensor_ProcessDiagnosticIfNecessaryAsync(interfaceClientHandles[DIGITALTWIN_SAMPLE_ENVIRONMENTAL_SENSOR_INDEX]);
 
             // All DigitalTwin operations - both processing any pending telemetry to send, listening for incoming data, and invocation of DigitalTwin callbacks -
             // occur *ONLY* when DoWork() is invoked when using the _LL_ layer.  This lets the application require only one thread.  See the

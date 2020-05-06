@@ -81,12 +81,6 @@
       "name": "turnoff",
       "comment": "This Commands will turn-off the LED light on the device.",
       "commandType": "synchronous"
-    },
-    {
-      "@type": "Command",
-      "name": "rundiagnostics",
-      "comment": "This command initiates a diagnostics run.  This will take time and is implemented as an asynchronous command",
-      "commandType": "asynchronous"
     }
   ],
   "@context": "dtmi:dtdl:context;2"
