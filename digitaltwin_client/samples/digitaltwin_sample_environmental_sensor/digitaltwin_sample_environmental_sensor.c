@@ -60,8 +60,9 @@ static const char digitaltwinSample_EnvironmentalSensorCommandRunDiagnostics[] =
 static const int commandStatusProcessing = 102;
 static const int commandStatusSuccess = 200;
 static const int commandStatusPending = 202;
+static const int commandStatusNotPresent = 404;
 static const int commandStatusFailure = 500;
-static const int commandStatusNotPresent = 501;
+
 
 //
 // What we respond to various commands with.  Must be valid JSON.
@@ -506,7 +507,7 @@ void DigitalTwinSample_ProcessCommandUpdate(const DIGITALTWIN_CLIENT_COMMAND_REQ
     }
     else
     {
-        // If the command is not implemented by this interface, by convention we return a 501 error to server.
+        // If the command is not implemented by this interface, by convention we return a 404 error to server.
         LogError("ENVIRONMENTAL_SENSOR_INTERFACE: Command name <%s> is not associated with this interface", dtCommandRequest->commandName);
         (void)DigitalTwinSampleEnvironmentalSensor_SetCommandResponse(dtCommandResponse, digitaltwinSample_EnviromentalSensor_NotImplemented, commandStatusNotPresent);
     }

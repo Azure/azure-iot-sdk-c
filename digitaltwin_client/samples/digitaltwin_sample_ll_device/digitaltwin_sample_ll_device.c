@@ -44,7 +44,7 @@
 #include <../digitaltwin_sample_environmental_sensor/digitaltwin_sample_environmental_sensor.h>
 
 // TODO: Fill in DIGITALTWIN_SAMPLE_MODEL_ID
-#define DIGITALTWIN_SAMPLE_MODEL_ID "dtmi:my_company:sample_device;1"
+#define DIGITALTWIN_SAMPLE_MODEL_ID "dtmi:my_company:com:sample_device;1"
 
 typedef enum DIGITALTWIN_SAMPLE_SECURITY_TYPE_TAG
 {

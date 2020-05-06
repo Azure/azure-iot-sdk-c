@@ -29,8 +29,9 @@ typedef struct DT_CLIENT_CORE* DT_CLIENT_CORE_HANDLE;
 
 MU_DEFINE_ENUM(DT_COMMAND_PROCESSOR_RESULT, DT_COMMAND_PROCESSOR_RESULT_VALUES);
 
+#define DT_COMMAND_ERROR_NOT_IMPLEMENTED_CODE 404
 #define DT_COMMAND_ERROR_STATUS_CODE  500
-#define DT_COMMAND_ERROR_NOT_IMPLEMENTED_CODE 501
+
 
 MOCKABLE_FUNCTION(, int, DT_InterfaceClient_CheckComponentNameValid, const char*, componentName);
 MOCKABLE_FUNCTION(, int, DT_InterfaceClient_CheckInterfaceIdValid, const char*, interfaceName);
