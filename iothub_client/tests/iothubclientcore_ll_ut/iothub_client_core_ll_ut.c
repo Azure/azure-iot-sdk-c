@@ -120,7 +120,7 @@ MOCKABLE_FUNCTION(, const char*, Transport_GetOption_Product_Info_Callback, void
 MOCKABLE_FUNCTION(, void, Transport_Twin_ReportedStateComplete_Callback, uint32_t, item_id, int, status_code, void*, ctx);
 MOCKABLE_FUNCTION(, void, Transport_Twin_RetrievePropertyComplete_Callback, DEVICE_TWIN_UPDATE_STATE, update_state, const unsigned char*, payLoad, size_t, size, void*, ctx);
 MOCKABLE_FUNCTION(, int, Transport_DeviceMethod_Complete_Callback, const char*, method_name, const unsigned char*, payLoad, size_t, size, METHOD_HANDLE, response_id, void*, ctx);
-MOCKABLE_FUNCTION(, const char*, Transport_GetOPTION_DT_ROOT_INTERFACE_ID_Callback, void*, ctx);
+MOCKABLE_FUNCTION(, const char*, Transport_GetOPTION_DT_MODEL_ID_Callback, void*, ctx);
 
 static int bool_Compare(bool left, bool right)
 {
@@ -5536,7 +5536,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_product_info_fails_case1)
     IoTHubClientCore_LL_Destroy(h);
 }
 
-TEST_FUNCTION(IoTHubClientCore_LL_SetOPTION_DT_ROOT_INTERFACE_ID_succeeds)
+TEST_FUNCTION(IoTHubClientCore_LL_SetOption_DT_MODEL_ID_succeeds)
 {
     //arrange
     IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
@@ -5544,7 +5544,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOPTION_DT_ROOT_INTERFACE_ID_succeeds)
     STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
 
     //act
-    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SetOption(h, OPTION_DT_ROOT_INTERFACE_ID, "urn:YOUR_COMPANY_NAME_HERE:sample_device:1");
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SetOption(h, OPTION_DT_MODEL_ID, "urn:YOUR_COMPANY_NAME_HERE:sample_device:1");
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
@@ -5554,7 +5554,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOPTION_DT_ROOT_INTERFACE_ID_succeeds)
     IoTHubClientCore_LL_Destroy(h);
 }
 
-TEST_FUNCTION(IoTHubClientCore_LL_SetOPTION_DT_ROOT_INTERFACE_ID_string_construct_fails)
+TEST_FUNCTION(IoTHubClientCore_LL_SetOption_DT_MODEL_ID_string_construct_fails)
 {
     //arrange
     IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
@@ -5563,7 +5563,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOPTION_DT_ROOT_INTERFACE_ID_string_construc
 
     //act
     g_fail_string_construct = true;
-    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SetOption(h, OPTION_DT_ROOT_INTERFACE_ID, "urn:YOUR_COMPANY_NAME_HERE:sample_device:1");
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SetOption(h, OPTION_DT_MODEL_ID, "urn:YOUR_COMPANY_NAME_HERE:sample_device:1");
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
@@ -5573,17 +5573,17 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOPTION_DT_ROOT_INTERFACE_ID_string_construc
     IoTHubClientCore_LL_Destroy(h);
 }
 
-TEST_FUNCTION(IoTHubClientCore_LL_SetOPTION_DT_ROOT_INTERFACE_ID_twice_fails)
+TEST_FUNCTION(IoTHubClientCore_LL_SetOption_DT_MODEL_ID_twice_fails)
 {
     //arrange
     IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
     umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
-    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SetOption(h, OPTION_DT_ROOT_INTERFACE_ID, "urn:YOUR_COMPANY_NAME_HERE:sample_device:1");
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SetOption(h, OPTION_DT_MODEL_ID, "urn:YOUR_COMPANY_NAME_HERE:sample_device:1");
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
 
     //act
-    result = IoTHubClientCore_LL_SetOption(h, OPTION_DT_ROOT_INTERFACE_ID, "urn:YOUR_COMPANY_NAME_HERE:sample_device:2");
+    result = IoTHubClientCore_LL_SetOption(h, OPTION_DT_MODEL_ID, "urn:YOUR_COMPANY_NAME_HERE:sample_device:2");
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);

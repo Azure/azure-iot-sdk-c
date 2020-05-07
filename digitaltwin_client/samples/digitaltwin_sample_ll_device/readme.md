@@ -6,7 +6,7 @@ This sample in this directory is almost identical to [digitaltwin_sample_device]
 * This sample is designed to use the \_LL\_ layer, appropriate for single threaded applications and devices.
 
 To use this sample:
-* Modify in `digitaltwin_sample_ll_device.c` the `DIGITALTWIN_SAMPLE_ROOT_INTERFACE_ID` value to reference the DCM name you have setup, if you are using a different one.
+* Modify in `digitaltwin_sample_ll_device.c` the `DIGITALTWIN_SAMPLE_MODEL_ID` value to reference the DCM name you have setup, if you are using a different one.
 
 * Create a configuration file, per the instructions below.
 

@@ -1,5 +1,5 @@
 {
-  "@id": "dtmi:YOUR_COMPANY_NAME_HERE:EnvironmentalSensor;1",
+  "@id": "dtmi:my_company:com:EnvironmentalSensor;1",
   "@type": "Interface",
   "displayName": "Environmental Sensor",
   "description": "Provides functionality to report temperature, humidity. Provides telemetry, commands and read-write properties",
@@ -52,7 +52,6 @@
       "@type": "Command",
       "description": "This command will begin blinking the LED for given time interval.",
       "name": "blink",
-      "commandType": "synchronous",
       "request": {
         "name": "interval",
         "schema": "long"
@@ -74,19 +73,11 @@
       "@type": "Command",
       "name": "turnon",
       "comment": "This Commands will turn-on the LED light on the device.",
-      "commandType": "synchronous"
     },
     {
       "@type": "Command",
       "name": "turnoff",
       "comment": "This Commands will turn-off the LED light on the device.",
-      "commandType": "synchronous"
-    },
-    {
-      "@type": "Command",
-      "name": "rundiagnostics",
-      "comment": "This command initiates a diagnostics run.  This will take time and is implemented as an asynchronous command",
-      "commandType": "asynchronous"
     }
   ],
   "@context": "dtmi:dtdl:context;2"
