@@ -818,7 +818,7 @@ TEST_FUNCTION(DT_ClientCoreRegisterInterfaces_device_method_error_fails)
 
 TEST_FUNCTION(DT_ClientCoreRegisterInterfaces_device_method_not_processed_fails)
 {
-    testDT_command(DT_COMMAND_PROCESSOR_NOT_APPLICABLE, 500, 501, NULL, dtTestMethodNotPresentResponse);
+    testDT_command(DT_COMMAND_PROCESSOR_NOT_APPLICABLE, 500, 404, NULL, dtTestMethodNotPresentResponse);
 }
 
 /*
