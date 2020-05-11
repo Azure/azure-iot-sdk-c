@@ -1,11 +1,11 @@
 {
-  "@id": "dtmi:com:examples:SampleDevice;1",
+  "@id": "dtmi:com:example:SampleDevice;1",
   "@type": "Interface",
   "displayName": "My Sample Model",
   "contents": [
     {
       "@type": "Component",
-      "schema": "dtmi:com:examples:EnvironmentalSensorl;1",
+      "schema": "dtmi:com:example:EnvironmentalSensor;1",
       "name": "sensor"
     },
     {

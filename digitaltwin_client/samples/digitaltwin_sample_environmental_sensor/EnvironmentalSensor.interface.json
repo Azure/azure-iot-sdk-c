@@ -1,5 +1,5 @@
 {
-  "@id": "dtmi:com:examples:EnvironmentalSensorl;1",
+  "@id": "dtmi:com:example:EnvironmentalSensor;1",
   "@type": "Interface",
   "displayName": "Environmental Sensor",
   "description": "Provides functionality to report temperature, humidity. Provides telemetry, commands and read-write properties",
@@ -8,7 +8,7 @@
     {
       "@type": "Property",
       "displayName": "Device State",
-      "description": "The state of the device. Two states online/offline are available.",
+      "description": "The state of the device. Two states are available or not available.",
       "name": "state",
       "schema": "boolean"
     },
@@ -26,27 +26,29 @@
       "description": "The brightness level for the light on the device. Can be specified as 1 (high), 2 (medium), 3 (low)",
       "name": "brightness",
       "writable": true,
-      "schema": "long"
+      "schema": "integer"
     },
     {
       "@type": [
         "Telemetry",
-        "SemanticType/Temperature"
+        "Temperature"
       ],
       "description": "Current temperature on the device",
       "displayName": "Temperature",
       "name": "temp",
-      "schema": "double"
+      "schema": "double",
+      "unit": "degreeCelsius"
     },
     {
       "@type": [
         "Telemetry",
-        "SemanticType/Humidity"
+        "RelativeHumidity"
       ],
       "description": "Current humidity on the device",
       "displayName": "Humidity",
-      "name": "humid",
-      "schema": "double"
+      "name": "humidity",
+      "schema": "double",
+      "unit": "percent"
     },
     {
       "@type": "Command",
@@ -54,7 +56,7 @@
       "name": "blink",
       "request": {
         "name": "interval",
-        "schema": "long"
+        "schema": "integer"
       },
       "response": {
         "name": "blinkResponse",
@@ -71,13 +73,13 @@
     },
     {
       "@type": "Command",
-      "name": "turnon",
-      "comment": "This Command will turn-on the LED light on the device."
+      "name": "turnOn",
+      "comment": "This Command will turn on the LED light on the device."
     },
     {
       "@type": "Command",
-      "name": "turnoff",
-      "comment": "This Command will turn-off the LED light on the device."
+      "name": "turnOff",
+      "comment": "This Command will turn off the LED light on the device."
     }
   ],
   "@context": "dtmi:dtdl:context;2"
