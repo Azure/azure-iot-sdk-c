@@ -72,21 +72,6 @@ static char g_device_name[64] = { 0 };
 
 static int g_digest_initialized = 0;
 
-#define BIGLEN 9
-
-typedef struct {
-    uint32_t data[BIGLEN];
-} bigval_t;
-
-typedef struct {
-    bigval_t x;
-    bigval_t y;
-    uint32_t infinity;
-} affine_point_t;
-
-typedef bigval_t ecc_privatekey;
-typedef affine_point_t ecc_publickey;
-
 static RIOT_X509_TBS_DATA X509_ALIAS_TBS_DATA = {
     { 0x0A, 0x0B, 0x0C, 0x0D, 0x0E }, HSM_SIGNER_NAME, "AZURE_TEST", "US",
     "170101000000Z", "370101000000Z", "", "MSR_TEST", "US" };
@@ -135,8 +120,19 @@ static int generate_root_ca_info(X509_CERT_INFO* x509_info, RIOT_ECC_SIGNATURE* 
     DERBuilderContext der_pri_ctx = { 0 };
     RIOT_STATUS status;
 
-    memcpy(&x509_info->ca_root_pub, eccRootPubBytes, sizeof(RIOT_ECC_PUBLIC));
-    memcpy(&x509_info->ca_root_priv, eccRootPrivBytes, sizeof(RIOT_ECC_PRIVATE));
+    //memcpy(&x509_info->ca_root_pub, eccRootPubBytes, sizeof(RIOT_ECC_PUBLIC));
+    //memcpy(&x509_info->ca_root_priv, eccRootPrivBytes, sizeof(RIOT_ECC_PRIVATE));
+    //mbedtls_mpi_init(&x509_info->ca_root_pub.X);
+    //mbedtls_mpi_init(&x509_info->ca_root_pub.Y);
+    //mbedtls_mpi_init(&x509_info->ca_root_pub.Z);
+    //mbedtls_mpi_init(&x509_info->ca_root_priv);
+
+    if ((status = RiotCrypt_DeriveEccKey(&x509_info->ca_root_pub, &x509_info->ca_root_priv,
+        g_digest, RIOT_DIGEST_LENGTH, (const uint8_t*)RIOT_LABEL_ALIAS, lblSize(RIOT_LABEL_ALIAS))) != RIOT_SUCCESS)
+    {
+        LogError("Failure: RiotCrypt_DeriveEccKey returned invalid status %d.", status);
+        result = MU_FAILURE;
+    }
 
     // Generating "root"-signed DeviceID certificate
     DERInitContext(&der_ctx, der_buffer, DER_MAX_TBS);

@@ -76,6 +76,9 @@ else()
             add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
             add_definitions(-DWIN32)
         ENDIF(WIN32)
+		
+		#Set RIoT ECDH Curve
+		add_definitions(-DRIOTSECP256R1)
 
         add_library(msr_riot ${msr_riot_c_files} ${msr_riot_h_files})
         set(package_location "cmake")
