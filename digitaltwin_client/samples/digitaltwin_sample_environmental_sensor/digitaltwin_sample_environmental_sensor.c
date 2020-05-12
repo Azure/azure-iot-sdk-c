@@ -35,7 +35,7 @@ static const char DigitalTwinSampleEnvironmentalSensor_ComponentName[] = "sensor
 //  Telemetry names for this interface.
 //
 static const char* DigitalTwinSampleEnvironmentalSensor_TemperatureTelemetry = "temp";
-static const char* DigitalTwinSampleEnvironmentalSensor_HumidityTelemetry = "humid";
+static const char* DigitalTwinSampleEnvironmentalSensor_HumidityTelemetry = "humidity";
 
 
 //
@@ -50,8 +50,8 @@ static const int digitaltwinSample_DeviceStateDataLen = sizeof(digitaltwinSample
 //  Callback command names for this interface.
 //
 static const char digitaltwinSample_EnvironmentalSensorCommandBlink[] = "blink";
-static const char digitaltwinSample_EnvironmentalSensorCommandTurnOn[] =  "turnon";
-static const char digitaltwinSample_EnvironmentalSensorCommandTurnOff[] =  "turnoff";
+static const char digitaltwinSample_EnvironmentalSensorCommandTurnOn[] =  "turnOn";
+static const char digitaltwinSample_EnvironmentalSensorCommandTurnOff[] =  "turnOff";
 
 //
 // Command status codes
@@ -144,7 +144,7 @@ static void DigitalTwinSampleEnvironmentalSensor_BlinkCallback(const DIGITALTWIN
     (void)DigitalTwinSampleEnvironmentalSensor_SetCommandResponse(dtCommandResponse, digitaltwinSample_EnviromentalSensor_BlinkResponse, commandStatusSuccess);
 }
 
-// Implement the callback to process the command "turnon".
+// Implement the callback to process the command "turnOn".
 static void DigitalTwinSampleEnvironmentalSensor_TurnOnLightCallback(const DIGITALTWIN_CLIENT_COMMAND_REQUEST* dtCommandRequest, DIGITALTWIN_CLIENT_COMMAND_RESPONSE* dtCommandResponse, void* commandCallbackContext)
 {
     DIGITALTWIN_SAMPLE_ENVIRONMENTAL_SENSOR_STATE* sensorState = (DIGITALTWIN_SAMPLE_ENVIRONMENTAL_SENSOR_STATE*)commandCallbackContext;
@@ -156,7 +156,7 @@ static void DigitalTwinSampleEnvironmentalSensor_TurnOnLightCallback(const DIGIT
     (void)DigitalTwinSampleEnvironmentalSensor_SetCommandResponseEmptyBody(dtCommandResponse, commandStatusSuccess);
 }
 
-// Implement the callback to process the command "turnoff".
+// Implement the callback to process the command "turnOff".
 static void DigitalTwinSampleEnvironmentalSensor_TurnOffLightCallback(const DIGITALTWIN_CLIENT_COMMAND_REQUEST* dtCommandRequest, DIGITALTWIN_CLIENT_COMMAND_RESPONSE* dtCommandResponse, void* commandCallbackContext)
 {
     DIGITALTWIN_SAMPLE_ENVIRONMENTAL_SENSOR_STATE* sensorState = (DIGITALTWIN_SAMPLE_ENVIRONMENTAL_SENSOR_STATE*)commandCallbackContext;
