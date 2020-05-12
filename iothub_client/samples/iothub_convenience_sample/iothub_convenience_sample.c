@@ -279,7 +279,7 @@ int main(void)
         (void)IoTHubDeviceClient_SetOption(device_handle, OPTION_DO_WORK_FREQUENCY_IN_MS, &ms_delay);
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
-        // Setting the Trusted Certificate.  This is only necessary on system with without
+        // Setting the Trusted Certificate. This is only necessary on systems without
         // built in certificate stores.
         (void)IoTHubDeviceClient_SetOption(device_handle, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
