@@ -204,7 +204,7 @@ static DIGITALTWIN_CLIENT_RESULT DigitalTwinSampleDeviceInfo_ReportProcessorManu
     return result;
 }
 
-// Sends a reported property for Total Storage of this device (a long, in kilobytes)
+// Sends a reported property for Total Storage of this device (a double, in kilobytes)
 static const char digitaltwinSample_TotalStorageProperty[] = "totalStorage";
 
 static DIGITALTWIN_CLIENT_RESULT DigitalTwinSampleDeviceInfo_ReportTotalStorageAsync(DIGITALTWIN_INTERFACE_CLIENT_HANDLE interfaceHandle)
@@ -226,7 +226,7 @@ static DIGITALTWIN_CLIENT_RESULT DigitalTwinSampleDeviceInfo_ReportTotalStorageA
     return result;
 }
 
-// Sends a reported property for Total Memory of this device (a long, in kilobytes)
+// Sends a reported property for Total Memory of this device (a double, in kilobytes)
 static const char digitaltwinSample_TotalMemoryProperty[] = "totalMemory";
 
 static DIGITALTWIN_CLIENT_RESULT DigitalTwinSampleDeviceInfo_ReportTotalMemoryAsync(DIGITALTWIN_INTERFACE_CLIENT_HANDLE interfaceHandle)
