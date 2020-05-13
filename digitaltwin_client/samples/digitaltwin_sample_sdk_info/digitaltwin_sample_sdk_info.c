@@ -15,7 +15,7 @@
 static const char DigitalTwinSampleSdkInfo_InterfaceId[] = "dtmi:azure:Client:SDKInformation;1";
 
 // DigitalTwin component name from service perspective.
-static const char DigitalTwinSampleSdkInfo_ComponentName[] = "SDKInformation";
+static const char DigitalTwinSampleSdkInfo_ComponentName[] = "sdkInformation";
 
 //
 //  Property names and data for DigitalTwin read-only properties for this interface.
