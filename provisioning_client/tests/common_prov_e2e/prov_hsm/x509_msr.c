@@ -120,25 +120,54 @@ static int generate_root_ca_info(X509_CERT_INFO* x509_info, RIOT_ECC_SIGNATURE* 
     DERBuilderContext der_pri_ctx = { 0 };
     RIOT_STATUS status;
 
-    //memcpy(&x509_info->ca_root_pub, eccRootPubBytes, sizeof(RIOT_ECC_PUBLIC));
-    //memcpy(&x509_info->ca_root_priv, eccRootPrivBytes, sizeof(RIOT_ECC_PRIVATE));
-    //mbedtls_mpi_init(&x509_info->ca_root_pub.X);
-    //mbedtls_mpi_init(&x509_info->ca_root_pub.Y);
-    //mbedtls_mpi_init(&x509_info->ca_root_pub.Z);
-    //mbedtls_mpi_init(&x509_info->ca_root_priv);
-
-    if ((status = RiotCrypt_DeriveEccKey(&x509_info->ca_root_pub, &x509_info->ca_root_priv,
-        g_digest, RIOT_DIGEST_LENGTH, (const uint8_t*)RIOT_LABEL_ALIAS, lblSize(RIOT_LABEL_ALIAS))) != RIOT_SUCCESS)
-    {
-        LogError("Failure: RiotCrypt_DeriveEccKey returned invalid status %d.", status);
-        result = MU_FAILURE;
-    }
+    // The "root" signing key. This is intended for development purposes only.
+    // This key is used to sign the DeviceID certificate, the certificiate for
+    // this "root" key represents the "trusted" CA for the developer-mode
+    // server(s). Again, this is for development purposes only and (obviously)
+    // provides no meaningful security whatsoever.
+    //RIOT_COORDMAX = 32
+    uint8_t rootX[RIOT_COORDMAX] = {
+        0xeb, 0x9c, 0xfc, 0xc8, 0x49, 0x94, 0xd3, 0x50, 
+        0xa7, 0x1f, 0x9d, 0xc5, 0x09, 0x3d, 0xd2, 0xfe, 
+        0xb9, 0x48, 0x97, 0xf4, 0x95, 0xa5, 0x5d, 0xec,
+        0xc9, 0x0f, 0x52, 0xa1, 0x26, 0x5a, 0xab, 0x69
+    };
+    uint8_t rootY[RIOT_COORDMAX] = {
+        0xe3, 0xe7, 0xc7, 0x13, 0x57, 0x3f, 0xd9, 0xc8,
+        0x09, 0x3d, 0xd2, 0xfe, 0xb9, 0x48, 0x97, 0xf4,
+        0xc9, 0x0f, 0x52, 0xa1, 0x26, 0x5a, 0xab, 0x69,
+        0x7d, 0xce, 0xb1, 0x62, 0x39, 0xf8, 0x3c, 0xd5
+    };
+    uint8_t rootD[RIOT_COORDMAX] = {
+        0xF3, 0x0F, 0xfc, 0xc8, 0x49, 0x94, 0xd3, 0x50,
+        0x5D, 0x29, 0x39, 0xC1, 0x11, 0x7C, 0x31, 0xCB,
+        0x99, 0x19, 0xE6, 0x3E, 0xAE, 0x11, 0xF2, 0xE1,
+        0xDD, 0xC1, 0x19, 0x9D, 0x90, 0x7F, 0x04, 0x23
+    };
+    // Emulator-only: We need to populate the root key.
+    // Note the following memset's are unnecessary in this simulated
+    // environment but on a real device it is good to stay in the habit of
+    // clearing potentially sensitive data when it is no longer needed
+    mbedtls_mpi_read_binary(&x509_info->ca_root_pub.X, rootX, RIOT_COORDMAX);
+    memset(rootX, 0, sizeof(rootX));
+    mbedtls_mpi_read_binary(&x509_info->ca_root_pub.Y, rootY, RIOT_COORDMAX);
+    memset(rootY, 0, sizeof(rootY));
+    mbedtls_mpi_lset(&x509_info->ca_root_pub.Z, 1);
+    mbedtls_mpi_read_binary(&x509_info->ca_root_priv, rootD, RIOT_COORDMAX);
+    memset(rootD, 0, sizeof(rootD));
 
     // Generating "root"-signed DeviceID certificate
     DERInitContext(&der_ctx, der_buffer, DER_MAX_TBS);
     DERInitContext(&der_pri_ctx, der_buffer, DER_MAX_TBS);
 
-    if (X509GetDeviceCertTBS(&der_ctx, &X509_ROOT_TBS_DATA, &x509_info->ca_root_pub, eccRootPubBytes, sizeof(eccRootPubBytes)) != 0)
+    //if ((status = RiotCrypt_DeriveEccKey(&x509_info->ca_root_pub, &x509_info->ca_root_priv,
+    //    g_digest, RIOT_DIGEST_LENGTH, (const uint8_t*)RIOT_LABEL_ALIAS, lblSize(RIOT_LABEL_ALIAS))) != RIOT_SUCCESS)
+    //{
+    //    LogError("Failure: RiotCrypt_DeriveEccKey returned invalid status %d.", status);
+    //    result = MU_FAILURE;
+    //}
+
+    if (X509GetDeviceCertTBS(&der_ctx, &X509_ROOT_TBS_DATA, &x509_info->ca_root_pub, (uint8_t*)&x509_info->ca_root_pub, sizeof(x509_info->ca_root_pub)) != 0)
     {
         LogError("Failure: X509GetDeviceCertTBS");
         result = MU_FAILURE;
@@ -192,7 +221,7 @@ static int produce_device_cert(X509_CERT_INFO* x509_info, RIOT_ECC_SIGNATURE tbs
 
     // Build the TBS (to be signed) region of DeviceID Certificate
     DERInitContext(&der_ctx, der_buffer, DER_MAX_TBS);
-    if (X509GetDeviceCertTBS(&der_ctx, &X509_DEVICE_TBS_DATA, &x509_info->device_id_pub, eccRootPubBytes, sizeof(eccRootPubBytes)) != 0)
+    if (X509GetDeviceCertTBS(&der_ctx, &X509_DEVICE_TBS_DATA, &x509_info->device_id_pub, (uint8_t*)&x509_info->ca_root_pub, sizeof(x509_info->ca_root_pub)) != 0)
     {
         LogError("Failure: X509GetDeviceCertTBS");
         result = MU_FAILURE;
@@ -386,6 +415,9 @@ static int process_riot_key_info(X509_CERT_INFO* x509_info)
             {
                 result = 0;
             }
+            //free riot ecc signature mbedtls_mpi structs
+            mbedtls_mpi_free(&tbs_sig.r);
+            mbedtls_mpi_free(&tbs_sig.s);
         }
     }
     return result;
@@ -481,6 +513,15 @@ void x509_info_destroy(X509_INFO_HANDLE handle)
 {
     if (handle != NULL)
     {
+        mbedtls_ecp_point_free(&handle->ca_root_pub);
+        mbedtls_mpi_free(&handle->ca_root_priv);
+
+        mbedtls_ecp_point_free(&handle->device_id_pub);
+        mbedtls_mpi_free(&handle->device_id_priv);
+        
+        mbedtls_ecp_point_free(&handle->alias_key_pub);
+        mbedtls_mpi_free(&handle->alias_key_priv);
+
         free(handle);
     }
 }
