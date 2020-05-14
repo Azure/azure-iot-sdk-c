@@ -126,7 +126,7 @@ static int generate_root_ca_info(X509_CERT_INFO* x509_info, RIOT_ECC_SIGNATURE* 
     // server(s). Again, this is for development purposes only and (obviously)
     // provides no meaningful security whatsoever.
     //RIOT_COORDMAX = 32
-    uint8_t rootX[RIOT_COORDMAX] = {
+  /*  uint8_t rootX[RIOT_COORDMAX] = {
         0xeb, 0x9c, 0xfc, 0xc8, 0x49, 0x94, 0xd3, 0x50, 
         0xa7, 0x1f, 0x9d, 0xc5, 0x09, 0x3d, 0xd2, 0xfe, 
         0xb9, 0x48, 0x97, 0xf4, 0x95, 0xa5, 0x5d, 0xec,
@@ -154,18 +154,18 @@ static int generate_root_ca_info(X509_CERT_INFO* x509_info, RIOT_ECC_SIGNATURE* 
     memset(rootY, 0, sizeof(rootY));
     mbedtls_mpi_lset(&x509_info->ca_root_pub.Z, 1);
     mbedtls_mpi_read_binary(&x509_info->ca_root_priv, rootD, RIOT_COORDMAX);
-    memset(rootD, 0, sizeof(rootD));
+    memset(rootD, 0, sizeof(rootD)); */
 
     // Generating "root"-signed DeviceID certificate
     DERInitContext(&der_ctx, der_buffer, DER_MAX_TBS);
     DERInitContext(&der_pri_ctx, der_buffer, DER_MAX_TBS);
 
-    //if ((status = RiotCrypt_DeriveEccKey(&x509_info->ca_root_pub, &x509_info->ca_root_priv,
-    //    g_digest, RIOT_DIGEST_LENGTH, (const uint8_t*)RIOT_LABEL_ALIAS, lblSize(RIOT_LABEL_ALIAS))) != RIOT_SUCCESS)
-    //{
-    //    LogError("Failure: RiotCrypt_DeriveEccKey returned invalid status %d.", status);
-    //    result = MU_FAILURE;
-    //}
+    if ((status = RiotCrypt_DeriveEccKey(&x509_info->ca_root_pub, &x509_info->ca_root_priv,
+        g_digest, RIOT_DIGEST_LENGTH, (const uint8_t*)RIOT_LABEL_ALIAS, lblSize(RIOT_LABEL_ALIAS))) != RIOT_SUCCESS)
+    {
+        LogError("Failure: RiotCrypt_DeriveEccKey returned invalid status %d.", status);
+        result = MU_FAILURE;
+    }
 
     if (X509GetDeviceCertTBS(&der_ctx, &X509_ROOT_TBS_DATA, &x509_info->ca_root_pub, (uint8_t*)&x509_info->ca_root_pub, sizeof(x509_info->ca_root_pub)) != 0)
     {
