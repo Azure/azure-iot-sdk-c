@@ -96,7 +96,7 @@ static int generate_root_ca_info(X509_CERT_INFO* x509_info)
     DERBuilderContext der_ctx = { 0 };
     DERBuilderContext der_pri_ctx = { 0 };
     RIOT_STATUS status;
-    RIOT_ECC_SIGNATURE tbs_sig;
+    RIOT_ECC_SIGNATURE tbs_sig = { 0 };
 
     // Generating "root"-signed DeviceID certificate
     DERInitContext(&der_ctx, der_buffer, DER_MAX_TBS);
@@ -108,8 +108,7 @@ static int generate_root_ca_info(X509_CERT_INFO* x509_info)
         LogError("Failure: RiotCrypt_DeriveEccKey returned invalid status %d.", status);
         result = MU_FAILURE;
     }
-
-    if (X509GetDeviceCertTBS(&der_ctx, &X509_ROOT_TBS_DATA, &x509_info->ca_root_pub, (uint8_t*)&x509_info->ca_root_pub, sizeof(x509_info->ca_root_pub)) != 0)
+    else if (X509GetDeviceCertTBS(&der_ctx, &X509_ROOT_TBS_DATA, &x509_info->ca_root_pub, (uint8_t*)&x509_info->ca_root_pub, sizeof(x509_info->ca_root_pub)) != 0)
     {
         LogError("Failure: X509GetDeviceCertTBS");
         result = MU_FAILURE;
@@ -160,7 +159,7 @@ static int produce_device_cert(X509_CERT_INFO* x509_info)
     uint8_t der_buffer[DER_MAX_TBS] = { 0 };
     DERBuilderContext der_ctx = { 0 };
     RIOT_STATUS status;
-    RIOT_ECC_SIGNATURE tbs_sig;
+    RIOT_ECC_SIGNATURE tbs_sig = { 0 };
 
     // Build the TBS (to be signed) region of DeviceID Certificate
     DERInitContext(&der_ctx, der_buffer, DER_MAX_TBS);
@@ -320,7 +319,7 @@ static int process_riot_key_info(X509_CERT_INFO* x509_info)
         {
             DERBuilderContext cert_ctx = { 0 };
             uint8_t cert_buffer[DER_MAX_TBS] = { 0 };
-            RIOT_ECC_SIGNATURE tbs_sig;
+            RIOT_ECC_SIGNATURE tbs_sig = { 0 };
 
             // Build the TBS (to be signed) region of Alias Key Certificate
             DERInitContext(&cert_ctx, cert_buffer, DER_MAX_TBS);

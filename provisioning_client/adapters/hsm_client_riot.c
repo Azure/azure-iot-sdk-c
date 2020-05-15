@@ -86,32 +86,6 @@ static uint8_t g_CDI[DICE_DIGEST_LENGTH] = {
     0xE9, 0x79, 0xEE, 0xF1, 0x62, 0xF8, 0x64, 0xDA,
     0x50, 0x69, 0x4B, 0x3E, 0x5A, 0x1E, 0x3A, 0x6E };
 
-// The "root" signing key. This is intended for development purposes only.
-// This key is used to sign the DeviceID certificate, the certificiate for
-// this "root" key represents the "trusted" CA for the developer-mode
-// server(s). Again, this is for development purposes only and (obviously)
-// provides no meaningful security whatsoever.
-#ifdef MBEDTLS_HAVE_INT32
-    static unsigned char eccRootPubBytes[sizeof(RIOT_ECC_PUBLIC)] = {
-        0xeb, 0x9c, 0xfc, 0xc8, 0x49, 0x94, 0xd3, 0x50, 0xa7, 0x1f, 0x9d, 0xc5,
-        0x09, 0x3d, 0xd2, 0xfe, 0xb9, 0x48, 0x97, 0xf4, 0x95, 0xa5, 0x5d, 0xec,
-        0xc9, 0x0f, 0x52, 0xa1, 0x26, 0x5a, 0xab, 0x69, 0x00, 0x00, 0x00, 0x00 };
-
-    static unsigned char eccRootPrivBytes[sizeof(RIOT_ECC_PRIVATE)] = {
-        0xe3, 0xe7, 0xc7, 0x13, 0x57, 0x3f, 0xd9, 0xc8, 0xb8, 0xe1, 0xea, 0xf4 };
-#else
-    static unsigned char eccRootPubBytes[sizeof(RIOT_ECC_PUBLIC)] = {
-        0xeb, 0x9c, 0xfc, 0xc8, 0x49, 0x94, 0xd3, 0x50, 0xa7, 0x1f, 0x9d, 0xc5,
-        0x09, 0x3d, 0xd2, 0xfe, 0xb9, 0x48, 0x97, 0xf4, 0x95, 0xa5, 0x5d, 0xec,
-        0xc9, 0x0f, 0x52, 0xa1, 0x26, 0x5a, 0xab, 0x69, 0x00, 0x00, 0x00, 0x00,
-        0x7d, 0xce, 0xb1, 0x62, 0x39, 0xf8, 0x3c, 0xd5, 0x9a, 0xad, 0x9e, 0x05,
-        0xb1, 0x4f, 0x70, 0xa2, 0xfa, 0xd4, 0xfb, 0x04, 0xe5, 0x37, 0xd2, 0x63,
-        0x9a, 0x46, 0x9e, 0xfd, 0xb0, 0x5b, 0x1e, 0xdf, 0x00, 0x00, 0x00, 0x00 };
-
-    static unsigned char eccRootPrivBytes[sizeof(RIOT_ECC_PRIVATE)] = {
-        0xe3, 0xe7, 0xc7, 0x13, 0x57, 0x3f, 0xd9, 0xc8, 0xb8, 0xe1, 0xea, 0xf4,
-        0x53, 0xf1, 0x56, 0x15, 0x02, 0xf0, 0x71, 0xc0, 0x53, 0x49, 0xc8, 0xda };
-#endif
 typedef enum CERTIFICATE_SIGNING_TYPE_TAG
 {
     type_self_sign,
@@ -162,33 +136,39 @@ static const HSM_CLIENT_X509_INTERFACE x509_interface =
     hsm_client_riot_get_common_name
 };
 
-static int generate_root_ca_info(HSM_CLIENT_X509_INFO* riot_info, RIOT_ECC_SIGNATURE* tbs_sig)
+// Free the mbedtls_mpi members of the signature
+static void ecc_signature_destroy(RIOT_ECC_SIGNATURE* tbs_sig);
+
+static int generate_root_ca_info(HSM_CLIENT_X509_INFO* riot_info)
 {
     int result;
     uint8_t der_buffer[DER_MAX_TBS] = { 0 };
     DERBuilderContext der_ctx = { 0 };
     DERBuilderContext der_pri_ctx = { 0 };
     RIOT_STATUS status;
-
-    memcpy(&riot_info->ca_root_pub, eccRootPubBytes, sizeof(RIOT_ECC_PUBLIC));
-    memcpy(&riot_info->ca_root_priv, eccRootPrivBytes, sizeof(RIOT_ECC_PRIVATE));
+    RIOT_ECC_SIGNATURE tbs_sig = { 0 };
 
     // Generating "root"-signed DeviceID certificate
     DERInitContext(&der_ctx, der_buffer, DER_MAX_TBS);
     DERInitContext(&der_pri_ctx, der_buffer, DER_MAX_TBS);
-
-    if (X509GetDeviceCertTBS(&der_ctx, &X509_ROOT_TBS_DATA, &riot_info->ca_root_pub, eccRootPubBytes, sizeof(eccRootPubBytes)) != 0)
+    if ((status = RiotCrypt_DeriveEccKey(&riot_info->ca_root_pub, &riot_info->ca_root_priv,
+        g_digest, RIOT_DIGEST_LENGTH, (const uint8_t*)RIOT_LABEL_ALIAS, lblSize(RIOT_LABEL_ALIAS))) != RIOT_SUCCESS)
+    {
+        LogError("Failure: RiotCrypt_DeriveEccKey returned invalid status %d.", status);
+        result = MU_FAILURE;
+    }
+    else if (X509GetDeviceCertTBS(&der_ctx, &X509_ROOT_TBS_DATA, &riot_info->ca_root_pub, (uint8_t*)&riot_info->ca_root_pub, sizeof(riot_info->ca_root_pub)) != 0)
     {
         LogError("Failure: X509GetDeviceCertTBS");
         result = MU_FAILURE;
     }
     // Sign the DeviceID Certificate's TBS region
-    else if ((status = RiotCrypt_Sign(tbs_sig, der_ctx.Buffer, der_ctx.Position, &riot_info->ca_root_priv)) != RIOT_SUCCESS)
+    else if ((status = RiotCrypt_Sign(&tbs_sig, der_ctx.Buffer, der_ctx.Position, &riot_info->ca_root_priv)) != RIOT_SUCCESS)
     {
         LogError("Failure: RiotCrypt_Sign returned invalid status %d.", status);
         result = MU_FAILURE;
     }
-    else if (X509MakeRootCert(&der_ctx, tbs_sig) != 0)
+    else if (X509MakeRootCert(&der_ctx, &tbs_sig) != 0)
     {
         LogError("Failure: X509MakeRootCert");
         result = MU_FAILURE;
@@ -218,21 +198,23 @@ static int generate_root_ca_info(HSM_CLIENT_X509_INFO* riot_info, RIOT_ECC_SIGNA
             result = 0;
         }
     }
+    ecc_signature_destroy(&tbs_sig);
     return result;
 }
 
-static int produce_device_cert(HSM_CLIENT_X509_INFO* riot_info, RIOT_ECC_SIGNATURE tbs_sig, CERTIFICATE_SIGNING_TYPE signing_type)
+static int produce_device_cert(HSM_CLIENT_X509_INFO* riot_info, CERTIFICATE_SIGNING_TYPE signing_type)
 {
     int result;
     uint8_t der_buffer[DER_MAX_TBS] = { 0 };
     DERBuilderContext der_ctx = { 0 };
     RIOT_STATUS status;
+    RIOT_ECC_SIGNATURE tbs_sig = { 0 };
 
     if (signing_type == type_self_sign)
     {
         // Build the TBS (to be signed) region of DeviceID Certificate
         DERInitContext(&der_ctx, der_buffer, DER_MAX_TBS);
-        if (X509GetDeviceCertTBS(&der_ctx, &X509_DEVICE_TBS_DATA, &riot_info->device_id_pub, eccRootPubBytes, sizeof(eccRootPubBytes)) != 0)
+        if (X509GetDeviceCertTBS(&der_ctx, &X509_ROOT_TBS_DATA, &riot_info->ca_root_pub, (uint8_t*)&riot_info->ca_root_pub, sizeof(riot_info->ca_root_pub)) != 0)
         {
             LogError("Failure: X509GetDeviceCertTBS");
             result = MU_FAILURE;
@@ -282,13 +264,13 @@ static int produce_device_cert(HSM_CLIENT_X509_INFO* riot_info, RIOT_ECC_SIGNATU
     {
         // Generating "root"-signed DeviceID certificate
         DERInitContext(&der_ctx, der_buffer, DER_MAX_TBS);
-        if (X509GetDeviceCertTBS(&der_ctx, &X509_DEVICE_TBS_DATA, &riot_info->device_id_pub, eccRootPubBytes, sizeof(eccRootPubBytes)) != 0)
+        if (X509GetDeviceCertTBS(&der_ctx, &X509_DEVICE_TBS_DATA, &riot_info->device_id_pub, (uint8_t*)&riot_info->ca_root_pub, sizeof(riot_info->ca_root_pub)) != 0)
         {
             LogError("Failure: X509GetDeviceCertTBS");
             result = MU_FAILURE;
         }
         // Sign the DeviceID Certificate's TBS region
-        else if ((status = RiotCrypt_Sign(&tbs_sig, der_ctx.Buffer, der_ctx.Position, (RIOT_ECC_PRIVATE*)eccRootPrivBytes)) != RIOT_SUCCESS)
+        else if ((status = RiotCrypt_Sign(&tbs_sig, der_ctx.Buffer, der_ctx.Position, &riot_info->device_id_priv)) != RIOT_SUCCESS)
         {
             LogError("Failure: RiotCrypt_Sign returned invalid status %d.", status);
             result = MU_FAILURE;
@@ -317,6 +299,7 @@ static int produce_device_cert(HSM_CLIENT_X509_INFO* riot_info, RIOT_ECC_SIGNATU
             result = 0;
         }
     }
+    ecc_signature_destroy(&tbs_sig);
     return result;
 }
 
@@ -478,12 +461,12 @@ static int process_riot_key_info(HSM_CLIENT_X509_INFO* riot_info)
                 LogError("Failure: producing alias cert.");
                 result = MU_FAILURE;
             }
-            else if (generate_root_ca_info(riot_info, &tbs_sig) != 0)
+            else if (generate_root_ca_info(riot_info) != 0)
             {
                 LogError("Failure: producing root ca.");
                 result = MU_FAILURE;
             }
-            else if (produce_device_cert(riot_info, tbs_sig, type_root_signed) != 0)
+            else if (produce_device_cert(riot_info, type_root_signed) != 0)
             {
                 LogError("Failure: producing device certificate.");
                 result = MU_FAILURE;
@@ -497,6 +480,7 @@ static int process_riot_key_info(HSM_CLIENT_X509_INFO* riot_info)
             {
                 result = 0;
             }
+            ecc_signature_destroy(&tbs_sig);
         }
     }
     return result;
@@ -519,6 +503,12 @@ int hsm_client_x509_init(void)
 
 void hsm_client_x509_deinit(void)
 {
+}
+
+static void ecc_signature_destroy(RIOT_ECC_SIGNATURE* tbs_sig)
+{
+    mbedtls_mpi_free(&tbs_sig->r);
+    mbedtls_mpi_free(&tbs_sig->s);
 }
 
 const HSM_CLIENT_X509_INTERFACE* hsm_client_x509_interface(void)
@@ -558,6 +548,15 @@ void hsm_client_riot_destroy(HSM_CLIENT_HANDLE handle)
         /* Codes_SRS_HSM_CLIENT_RIOT_07_008: [ hsm_client_riot_destroy shall free the HSM_CLIENT_HANDLE instance. ] */
         free(x509_client->certificate_common_name);
         /* Codes_SRS_HSM_CLIENT_RIOT_07_009: [ hsm_client_riot_destroy shall free all resources allocated in this module. ] */
+        mbedtls_ecp_point_free(&x509_client->ca_root_pub);
+        mbedtls_mpi_free(&x509_client->ca_root_priv);
+
+        mbedtls_ecp_point_free(&x509_client->device_id_pub);
+        mbedtls_mpi_free(&x509_client->device_id_priv);
+
+        mbedtls_ecp_point_free(&x509_client->alias_key_pub);
+        mbedtls_mpi_free(&x509_client->alias_key_priv);
+
         free(x509_client);
     }
 }
@@ -787,7 +786,7 @@ char* hsm_client_riot_create_leaf_cert(HSM_CLIENT_HANDLE handle, const char* com
         LEAF_CERT_TBS_DATA.SubjectCommon = common_name;
 
         DERInitContext(&leaf_ctx, leaf_buffer, DER_MAX_TBS);
-        if (X509GetDeviceCertTBS(&leaf_ctx, &LEAF_CERT_TBS_DATA, &leaf_id_pub, eccRootPubBytes, sizeof(eccRootPubBytes)) != 0)
+        if (X509GetDeviceCertTBS(&leaf_ctx, &LEAF_CERT_TBS_DATA, &leaf_id_pub, (uint8_t*)&riot_info->ca_root_pub, sizeof(riot_info->ca_root_pub)) != 0)
         {
             /* Codes_SRS_HSM_CLIENT_RIOT_07_032: [ If hsm_client_riot_create_leaf_cert encounters an error it shall return NULL. ] */
             LogError("Failure: X509GetDeviceCertTBS");
@@ -823,6 +822,7 @@ char* hsm_client_riot_create_leaf_cert(HSM_CLIENT_HANDLE handle, const char* com
                 result = NULL;
             }
         }
+        ecc_signature_destroy(&tbs_sig);
     }
     return result;
 }

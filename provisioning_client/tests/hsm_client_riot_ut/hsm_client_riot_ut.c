@@ -63,6 +63,8 @@ MOCKABLE_FUNCTION(, int, X509MakeDeviceCert, DERBuilderContext*, DeviceIDCert, R
 MOCKABLE_FUNCTION(, int, X509GetAliasCertTBS, DERBuilderContext*, Tbs, RIOT_X509_TBS_DATA*, TbsData, RIOT_ECC_PUBLIC*, AliasKeyPub, RIOT_ECC_PUBLIC*, DevIdKeyPub, uint8_t*, Fwid, uint32_t, FwidLen);
 MOCKABLE_FUNCTION(, int, X509GetDERCsrTbs, DERBuilderContext*, Context, RIOT_X509_TBS_DATA*, TbsData, RIOT_ECC_PUBLIC*, DeviceIDPub);
 MOCKABLE_FUNCTION(, int, X509GetDERCsr, DERBuilderContext*, Context, RIOT_ECC_SIGNATURE*, Signature);
+MOCKABLE_FUNCTION(, void, mbedtls_mpi_free, mbedtls_mpi*, X);
+MOCKABLE_FUNCTION(, void, mbedtls_ecp_point_free, mbedtls_ecp_point*, pt);
 
 #undef ENABLE_MOCKS
 
@@ -291,6 +293,32 @@ static int my_DERtoPEM(DERBuilderContext* Context, uint32_t Type, char* PEM, uin
     return 0;
 }
 
+static void my_mbedtls_mpi_free(mbedtls_mpi* X)
+{
+    if (X == NULL)
+        return;
+
+    if (X->p != NULL)
+    {
+        memset(X->p, 0, X->n);
+        free(X->p);
+    }
+
+    X->s = 1;
+    X->n = 0;
+    X->p = NULL;
+}
+
+static void my_mbedtls_ecp_point_free(mbedtls_ecp_point* pt)
+{
+    if (pt == NULL)
+        return;
+
+    my_mbedtls_mpi_free(&(pt->X));
+    my_mbedtls_mpi_free(&(pt->Y));
+    my_mbedtls_mpi_free(&(pt->Z));
+}
+
 MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
@@ -351,6 +379,9 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         REGISTER_GLOBAL_MOCK_RETURN(X509GetDeviceCertTBS, 0);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(X509GetDeviceCertTBS, 1);
 
+        REGISTER_GLOBAL_MOCK_HOOK(mbedtls_mpi_free, my_mbedtls_mpi_free);
+        REGISTER_GLOBAL_MOCK_HOOK(mbedtls_ecp_point_free, my_mbedtls_ecp_point_free);
+
         REGISTER_GLOBAL_MOCK_HOOK(DiceSHA256, my_DiceSHA256);
         REGISTER_GLOBAL_MOCK_HOOK(DiceSHA256_2, my_DiceSHA256_2);
 
@@ -398,12 +429,15 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
 
     static void hsm_client_riot_create_leaf_cert_mock(void)
     {
-        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 0
         STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(X509MakeDeviceCert(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, CERT_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); //15
+        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, CERT_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+        // Skip the mbedtls_mpi_free calls (these are internal/non-exposed calls)
+        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG)); // 6
+        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG)); // 7
     }
 
     static void hsm_client_riot_create_mock(bool device_signed)
@@ -416,10 +450,10 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         STRICT_EXPECTED_CALL(RiotCrypt_DeriveEccKey(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(RiotCrypt_Hash2(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(RiotCrypt_DeriveEccKey(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 5
         STRICT_EXPECTED_CALL(X509GetDEREccPub(IGNORED_PTR_ARG, pub))
             .IgnoreArgument_Pub();
-        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, PUBLICKEY_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 7
+        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, PUBLICKEY_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
 
         STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 8
         STRICT_EXPECTED_CALL(X509GetDEREcc(IGNORED_PTR_ARG, pub, pri))
@@ -427,15 +461,15 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
             .IgnoreArgument_Priv();
         STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, ECC_PRIVATEKEY_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
 
-        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 11
         STRICT_EXPECTED_CALL(X509GetAliasCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(X509MakeAliasCert(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, CERT_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); //15
+        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, CERT_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
 
         if (device_signed)
         {
-            STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+            STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 16
             STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
             STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(X509MakeDeviceCert(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -445,6 +479,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         {
             STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
             STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+            STRICT_EXPECTED_CALL(RiotCrypt_DeriveEccKey(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
 
             STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
             STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
@@ -455,14 +490,20 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
                 .IgnoreArgument_Pub()
                 .IgnoreArgument_Priv();
             STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, ECC_PRIVATEKEY_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+            // Skip the mbedtls_mpi_free calls (these are internal/non-exposed calls)
+            STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG)); // 25
+            STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG)); // 26
         }
 
 
-        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 24
+        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 27
         STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(X509MakeDeviceCert(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, CERT_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+        // Skip the mbedtls_mpi_free calls (these are internal/non-exposed calls)
+        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG)); // 32
+        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG)); // 33
 
         /*/*STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(X509GetDEREcc(IGNORED_PTR_ARG, pub, pri))
@@ -471,6 +512,8 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, ECC_PRIVATEKEY_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));*/
 
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG)); // 35
+        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG)); // 36
     }
 
     /* Tests_SRS_SECURE_DEVICE_RIOT_07_001: [ On success hsm_client_riot_create shall allocate a new instance of the device auth interface. ] */
@@ -511,7 +554,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
 
         umock_c_negative_tests_snapshot();
 
-        size_t calls_cannot_fail[] = { 5, 8, 11, 16, 17, 24 };
+        size_t calls_cannot_fail[] = { 5, 8, 11, 16, 17, 25, 26, 27, 32, 33, 35, 36 };
 
         //act
         size_t count = umock_c_negative_tests_call_count();
@@ -551,6 +594,16 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+
+        STRICT_EXPECTED_CALL(mbedtls_ecp_point_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG));
+
+        STRICT_EXPECTED_CALL(mbedtls_ecp_point_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG));
+
+        STRICT_EXPECTED_CALL(mbedtls_ecp_point_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG));
+
         STRICT_EXPECTED_CALL(gballoc_free(sec_handle));
 
         //act
@@ -927,7 +980,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
 
         umock_c_negative_tests_snapshot();
 
-        size_t calls_cannot_fail[] = { 0 };
+        size_t calls_cannot_fail[] = { 0, 6, 7 };
 
         //act
         size_t count = umock_c_negative_tests_call_count();
