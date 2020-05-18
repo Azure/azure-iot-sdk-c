@@ -81,9 +81,9 @@ elseif (${use_prov_client})
                 ./adapters/hsm_client_riot.c)
 
             # Include the riot directories
-			include_directories(./deps/RIoT/Simulation/DICE)
-			include_directories(./deps/RIoT/Simulation/RIoT/Core)
-			include_directories(./deps/RIoT/Simulation/RIoT/Core/RIoTCrypt/include)
+            include_directories(./deps/RIoT/Simulation/DICE)
+            include_directories(./deps/RIoT/Simulation/RIoT/Core)
+            include_directories(./deps/RIoT/Simulation/RIoT/Core/RIoTCrypt/include)
 
             set(HSM_CLIENT_LIBRARY ${HSM_CLIENT_LIBRARY} msr_riot)
         endif()

@@ -19,7 +19,7 @@ else()
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/aes.c
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/base64.c
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/bignum.c
-			./RIoT/Simulation/RIoT/Core/RIoTCrypt/derenc.c
+            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/derenc.c
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/ecdh.c
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/ecdsa.c
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/ecp.c
@@ -27,7 +27,7 @@ else()
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/hkdf.c
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/hmac_drbg.c
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/md.c
-			./RIoT/Simulation/RIoT/Core/RIoTCrypt/platform_util.c
+            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/platform_util.c
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/sha1.c
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/sha256.c
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/x509bldr.c
@@ -40,31 +40,34 @@ else()
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/RiotCrypt.h
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/base64.h
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/derenc.h
-			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/x509bldr.h
+            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/x509bldr.h
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/aes.h
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/ecdh.h
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/ecdsa.h
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/ecp.h
-			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/bignum.h
-			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/hkdf.h
+            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/bignum.h
+            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/hkdf.h
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/hmac_drbg.h
-			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/md.h
-			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/platform.h
-			./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/platform_util.h
+            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/md.h
+            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/platform.h
+            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/platform_util.h
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/sha1.h
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/sha256.h
         )
 
-        include_directories(./RIoT/Simulation/DICE)
-        include_directories(./RIoT/Simulation/RIoT/Core)
-        include_directories(./RIoT/Simulation/RIoT/Core/RIoTCrypt/include)
-		include_directories(./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls)
-		
-		#RIoT custom mbedtls config file to #define RIOTBUILD
-		get_filename_component(DIR_ONE_ABOVE ../ ABSOLUTE)
-		configure_file("${DIR_ONE_ABOVE}/tools/RIoT_config/RIoT_config.h" 
-						"${CMAKE_CURRENT_SOURCE_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/config.h" COPYONLY
-		)
+        target_include_directories(msr_riot PUBLIC
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/DICE
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/include
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls
+        )
+
+        #RIoT custom mbedtls config file to #define RIOTBUILD
+        get_filename_component(DIR_ONE_ABOVE ../ ABSOLUTE)
+        configure_file("${DIR_ONE_ABOVE}/tools/RIoT_config/RIoT_config.h" 
+                       "${CMAKE_CURRENT_SOURCE_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/config.h"
+                        COPYONLY
+        )
 
         if(MSVC)
             set_source_files_properties(./RIoT/Simulation/RIoT/RIoTCrypt/hkdf.c PROPERTIES COMPILE_FLAGS "/wd4100")
@@ -72,13 +75,13 @@ else()
 
         IF(WIN32)
             #windows needs this define
-            add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-            add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
-            add_definitions(-DWIN32)
+            target_compile_definitions(msr_riot -D_CRT_SECURE_NO_WARNINGS)
+            target_compile_definitions(msr_riot -DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
+            target_compile_definitions(msr_riot -DWIN32)
         ENDIF(WIN32)
-		
-		#Set RIoT ECDH Curve
-		add_definitions(-DRIOTSECP256R1)
+
+        #Set RIoT ECDH Curve
+        target_compile_definitions(msr_riot -DRIOTSECP256R1)
 
         add_library(msr_riot ${msr_riot_c_files} ${msr_riot_h_files})
         set(package_location "cmake")

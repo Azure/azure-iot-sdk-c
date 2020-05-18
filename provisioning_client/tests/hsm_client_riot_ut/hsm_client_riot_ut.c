@@ -77,7 +77,7 @@ static const char* TEST_CN_VALUE = "riot-device-cert";
 
 static int umocktypes_copy_RIOT_ECC_PRIVATE(RIOT_ECC_PRIVATE* dest, const RIOT_ECC_PRIVATE* src)
 {
-    int result = 1;
+    int result;
     if (src == NULL) 
     {
         dest = NULL;
@@ -120,10 +120,14 @@ static char* umocktypes_stringify_RIOT_ECC_PRIVATE(const RIOT_ECC_PRIVATE* value
         }
         else
         {
+            //Add for NULL terminator
             length++;
             result = (char*)my_gballoc_malloc(length);
-            (void)snprintf(NULL, 0, "{ %d, %zd, %p }",
-                value->s, value->n, value->p);
+            if (result != NULL)
+            {
+                (void)snprintf(result, length, "{ %d, %zd, %p }",
+                    value->s, value->n, value->p);
+            }
         }
     }
     return result;
@@ -153,7 +157,7 @@ static int umocktypes_are_equal_RIOT_ECC_PRIVATE(RIOT_ECC_PRIVATE* left, RIOT_EC
 
 static int umocktypes_copy_RIOT_ECC_PUBLIC(RIOT_ECC_PUBLIC* dest, const RIOT_ECC_PUBLIC* src)
 {
-    int result = 1;
+    int result;
     if (src == NULL)
     {
         dest = NULL;
@@ -208,12 +212,16 @@ static char* umocktypes_stringify_RIOT_ECC_PUBLIC(const RIOT_ECC_PUBLIC* value)
         }
         else
         {
+            //Add for NULL terminator
             length++;
             result = (char*)my_gballoc_malloc(length);
-            (void)snprintf(NULL, 0, "{ %d, %zd, %p, %d, %zd, %p, %d, %zd, %p }",
-                value->X.s, value->X.n, value->X.p, 
-                value->Y.s, value->Y.n, value->Y.p, 
-                value->Z.s, value->Z.n, value->Z.p);
+            if (result != NULL)
+            {
+                (void)snprintf(result, length, "{ %d, %zd, %p, %d, %zd, %p, %d, %zd, %p }",
+                    value->X.s, value->X.n, value->X.p, 
+                    value->Y.s, value->Y.n, value->Y.p, 
+                    value->Z.s, value->Z.n, value->Z.p);
+            }
         }
     }
     return result;
@@ -296,7 +304,9 @@ static int my_DERtoPEM(DERBuilderContext* Context, uint32_t Type, char* PEM, uin
 static void my_mbedtls_mpi_free(mbedtls_mpi* X)
 {
     if (X == NULL)
+    {
         return;
+    }
 
     if (X->p != NULL)
     {
@@ -312,7 +322,9 @@ static void my_mbedtls_mpi_free(mbedtls_mpi* X)
 static void my_mbedtls_ecp_point_free(mbedtls_ecp_point* pt)
 {
     if (pt == NULL)
+    {
         return;
+    }
 
     my_mbedtls_mpi_free(&(pt->X));
     my_mbedtls_mpi_free(&(pt->Y));
