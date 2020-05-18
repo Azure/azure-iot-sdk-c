@@ -77,13 +77,17 @@ else()
 
         IF(WIN32)
             #windows needs this define
-            target_compile_definitions(msr_riot PUBLIC -D_CRT_SECURE_NO_WARNINGS)
-            target_compile_definitions(msr_riot PUBLIC -DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
-            target_compile_definitions(msr_riot PUBLIC -DWIN32)
+            target_compile_definitions(msr_riot 
+                PUBLIC 
+                    _CRT_SECURE_NO_WARNINGS
+                    GB_MEASURE_MEMORY_FOR_THIS
+                    GB_DEBUG_ALLOC
+                    WIN32
+            )
         ENDIF(WIN32)
 
         #Set RIoT ECDH Curve
-        target_compile_definitions(msr_riot PUBLIC -DRIOTSECP256R1)
+        target_compile_definitions(msr_riot PUBLIC RIOTSECP256R1)
 
         set(package_location "cmake")
         install(TARGETS msr_riot EXPORT msr_riotTargets
