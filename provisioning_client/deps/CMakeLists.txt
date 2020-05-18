@@ -55,13 +55,6 @@ else()
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/sha256.h
         )
 
-        target_include_directories(msr_riot PUBLIC
-            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/DICE
-            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core
-            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/include
-            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls
-        )
-
         #RIoT custom mbedtls config file to #define RIOTBUILD
         get_filename_component(DIR_ONE_ABOVE ../ ABSOLUTE)
         configure_file("${DIR_ONE_ABOVE}/tools/RIoT_config/RIoT_config.h" 
@@ -73,17 +66,25 @@ else()
             set_source_files_properties(./RIoT/Simulation/RIoT/RIoTCrypt/hkdf.c PROPERTIES COMPILE_FLAGS "/wd4100")
         endif()
 
+        add_library(msr_riot ${msr_riot_c_files} ${msr_riot_h_files})
+
+        target_include_directories(msr_riot PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/DICE>
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core>
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/include>
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls>
+        )
+
         IF(WIN32)
             #windows needs this define
-            target_compile_definitions(msr_riot -D_CRT_SECURE_NO_WARNINGS)
-            target_compile_definitions(msr_riot -DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
-            target_compile_definitions(msr_riot -DWIN32)
+            target_compile_definitions(msr_riot PUBLIC -D_CRT_SECURE_NO_WARNINGS)
+            target_compile_definitions(msr_riot PUBLIC -DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
+            target_compile_definitions(msr_riot PUBLIC -DWIN32)
         ENDIF(WIN32)
 
         #Set RIoT ECDH Curve
-        target_compile_definitions(msr_riot -DRIOTSECP256R1)
+        target_compile_definitions(msr_riot PUBLIC -DRIOTSECP256R1)
 
-        add_library(msr_riot ${msr_riot_c_files} ${msr_riot_h_files})
         set(package_location "cmake")
         install(TARGETS msr_riot EXPORT msr_riotTargets
             LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
