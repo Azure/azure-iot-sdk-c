@@ -200,12 +200,10 @@ static char* umocktypes_stringify_RIOT_ECC_PUBLIC(const RIOT_ECC_PUBLIC* value)
     }
     else
     {
-        int length = snprintf(NULL, 0, "{ %d, %zd, %p }",
-            value->X.s, value->X.n, value->X.p);
-        length += snprintf(NULL, 0, "{ %d, %zd, %p }",
-            value->Y.s, value->Y.n, value->Y.p);
-        length += snprintf(NULL, 0, "{ %d, %zd, %p }",
-            value->Z.s, value->Z.n, value->Z.p);
+        int length = snprintf(NULL, 0, "{ %d, %zd, %p, %d, %zd, %p, %d, %zd, %p }",
+                    value->X.s, value->X.n, value->X.p, 
+                    value->Y.s, value->Y.n, value->Y.p, 
+                    value->Z.s, value->Z.n, value->Z.p);
         if (length < 0)
         {
             result = NULL;
