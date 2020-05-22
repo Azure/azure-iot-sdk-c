@@ -137,7 +137,17 @@ static const HSM_CLIENT_X509_INTERFACE x509_interface =
 };
 
 // Free the mbedtls_mpi members of the signature
-static void ecc_signature_destroy(RIOT_ECC_SIGNATURE* tbs_sig);
+static void ecc_signature_destroy(RIOT_ECC_SIGNATURE* tbs_sig)
+{
+    mbedtls_mpi_free(&tbs_sig->r);
+    mbedtls_mpi_free(&tbs_sig->s);
+}
+
+static void x509_cert_free(RIOT_ECC_PUBLIC* pub, RIOT_ECC_PRIVATE* priv)
+{
+    mbedtls_ecp_point_free(pub);
+    mbedtls_mpi_free(priv);
+}
 
 static int generate_root_ca_info(HSM_CLIENT_X509_INFO* riot_info)
 {
@@ -505,12 +515,6 @@ void hsm_client_x509_deinit(void)
 {
 }
 
-static void ecc_signature_destroy(RIOT_ECC_SIGNATURE* tbs_sig)
-{
-    mbedtls_mpi_free(&tbs_sig->r);
-    mbedtls_mpi_free(&tbs_sig->s);
-}
-
 const HSM_CLIENT_X509_INTERFACE* hsm_client_x509_interface(void)
 {
     return &x509_interface;
@@ -548,14 +552,9 @@ void hsm_client_riot_destroy(HSM_CLIENT_HANDLE handle)
         /* Codes_SRS_HSM_CLIENT_RIOT_07_008: [ hsm_client_riot_destroy shall free the HSM_CLIENT_HANDLE instance. ] */
         free(x509_client->certificate_common_name);
         /* Codes_SRS_HSM_CLIENT_RIOT_07_009: [ hsm_client_riot_destroy shall free all resources allocated in this module. ] */
-        mbedtls_ecp_point_free(&x509_client->ca_root_pub);
-        mbedtls_mpi_free(&x509_client->ca_root_priv);
-
-        mbedtls_ecp_point_free(&x509_client->device_id_pub);
-        mbedtls_mpi_free(&x509_client->device_id_priv);
-
-        mbedtls_ecp_point_free(&x509_client->alias_key_pub);
-        mbedtls_mpi_free(&x509_client->alias_key_priv);
+        x509_cert_free(&x509_client->ca_root_pub, &x509_client->ca_root_priv);
+        x509_cert_free(&x509_client->device_id_pub, &x509_client->device_id_priv);
+        x509_cert_free(&x509_client->alias_key_pub, &x509_client->alias_key_priv);
 
         free(x509_client);
     }

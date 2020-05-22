@@ -73,7 +73,17 @@ static char g_device_name[64] = { 0 };
 static int g_digest_initialized = 0;
 
 // Free the mbedtls_mpi members of the signature
-static void ecc_signature_destroy(RIOT_ECC_SIGNATURE* tbs_sig);
+static void ecc_signature_destroy(RIOT_ECC_SIGNATURE* tbs_sig)
+{
+    mbedtls_mpi_free(&tbs_sig->r);
+    mbedtls_mpi_free(&tbs_sig->s);
+}
+
+static void x509_cert_free(RIOT_ECC_PUBLIC* pub, RIOT_ECC_PRIVATE* priv)
+{
+    mbedtls_ecp_point_free(pub);
+    mbedtls_mpi_free(priv);
+}
 
 static RIOT_X509_TBS_DATA X509_ALIAS_TBS_DATA = {
     { 0x0A, 0x0B, 0x0C, 0x0D, 0x0E }, HSM_SIGNER_NAME, "AZURE_TEST", "US",
@@ -454,23 +464,12 @@ void x509_info_destroy(X509_INFO_HANDLE handle)
 {
     if (handle != NULL)
     {
-        mbedtls_ecp_point_free(&handle->ca_root_pub);
-        mbedtls_mpi_free(&handle->ca_root_priv);
-
-        mbedtls_ecp_point_free(&handle->device_id_pub);
-        mbedtls_mpi_free(&handle->device_id_priv);
-        
-        mbedtls_ecp_point_free(&handle->alias_key_pub);
-        mbedtls_mpi_free(&handle->alias_key_priv);
+        x509_cert_free(&handle->ca_root_pub, &handle->ca_root_priv);
+        x509_cert_free(&handle->device_id_pub, &handle->device_id_priv);
+        x509_cert_free(&handle->alias_key_pub, &handle->alias_key_priv);
 
         free(handle);
     }
-}
-
-static void ecc_signature_destroy(RIOT_ECC_SIGNATURE* tbs_sig)
-{
-    mbedtls_mpi_free(&tbs_sig->r);
-    mbedtls_mpi_free(&tbs_sig->s);
 }
 
 const char* x509_info_get_cert(X509_INFO_HANDLE handle)
