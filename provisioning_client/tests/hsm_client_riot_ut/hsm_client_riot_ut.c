@@ -299,13 +299,22 @@ static int my_DERtoPEM(DERBuilderContext* Context, uint32_t Type, char* PEM, uin
     return 0;
 }
 
+MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+
+static void mbedtls_error_on_free()
+{
+    char temp_str[256];
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error attempting to double-free :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, 7));
+    ASSERT_FAIL(temp_str);
+}
+
 static void my_mbedtls_mpi_free(mbedtls_mpi* X)
 {
     if (X == NULL)
     {
+        mbedtls_error_on_free();
         return;
     }
-
     if (X->p != NULL)
     {
         memset(X->p, 0, X->n);
@@ -321,6 +330,7 @@ static void my_mbedtls_ecp_point_free(mbedtls_ecp_point* pt)
 {
     if (pt == NULL)
     {
+        mbedtls_error_on_free();
         return;
     }
 
@@ -328,8 +338,6 @@ static void my_mbedtls_ecp_point_free(mbedtls_ecp_point* pt)
     my_mbedtls_mpi_free(&(pt->Y));
     my_mbedtls_mpi_free(&(pt->Z));
 }
-
-MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
@@ -439,13 +447,14 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
 
     static void hsm_client_riot_create_leaf_cert_mock(void)
     {
+        // Expected calls preceeded by a commented number are members of calls_cannot_fail[] array
+        // These calls are skipped in negative/fail testing
         STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 0
         STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(X509MakeDeviceCert(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, CERT_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        // Skip the mbedtls_mpi_free calls (these are internal/non-exposed calls)
         STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG)); // 6
         STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG)); // 7
     }
@@ -455,6 +464,8 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         RIOT_ECC_PUBLIC pub = { 0 };
         RIOT_ECC_PRIVATE pri = { 0 };
 
+        // Expected calls preceeded by a commented number are members of calls_cannot_fail[] array
+        // These calls are skipped in negative/fail testing
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(RiotCrypt_Hash(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(RiotCrypt_DeriveEccKey(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
@@ -500,7 +511,6 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
                 .IgnoreArgument_Pub()
                 .IgnoreArgument_Priv();
             STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, ECC_PRIVATEKEY_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-            // Skip the mbedtls_mpi_free calls (these are internal/non-exposed calls)
             STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG)); // 25
             STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG)); // 26
         }
@@ -511,7 +521,6 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(X509MakeDeviceCert(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, CERT_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        // Skip the mbedtls_mpi_free calls (these are internal/non-exposed calls)
         STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG)); // 32
         STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG)); // 33
 
@@ -564,6 +573,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
 
         umock_c_negative_tests_snapshot();
 
+        // List of calls that we are not testing failures on: [ hsm_client_riot_create_mock ]
         size_t calls_cannot_fail[] = { 5, 8, 11, 16, 17, 25, 26, 27, 32, 33, 35, 36 };
 
         //act
@@ -990,6 +1000,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
 
         umock_c_negative_tests_snapshot();
 
+        // List of calls that we are not testing failures on: [ hsm_client_riot_create_leaf_cert_mock ]
         size_t calls_cannot_fail[] = { 0, 6, 7 };
 
         //act
