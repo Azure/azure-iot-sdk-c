@@ -55,13 +55,6 @@ else()
             ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/sha256.h
         )
 
-        #RIoT custom mbedtls config file to #define RIOTBUILD
-        get_filename_component(DIR_ONE_ABOVE ../ ABSOLUTE)
-        configure_file("${DIR_ONE_ABOVE}/tools/RIoT_config/RIoT_config.h" 
-                       "${CMAKE_CURRENT_SOURCE_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/config.h"
-                        COPYONLY
-        )
-
         if(MSVC)
             set_source_files_properties(./RIoT/Simulation/RIoT/RIoTCrypt/hkdf.c PROPERTIES COMPILE_FLAGS "/wd4100")
         endif()
@@ -86,8 +79,12 @@ else()
             )
         ENDIF(WIN32)
 
-        #Set RIoT ECDH Curve
-        target_compile_definitions(msr_riot PUBLIC RIOTSECP256R1)
+        #Set RIoT ECDH Curve & RIOTBUILD
+        target_compile_definitions(msr_riot
+            PUBLIC
+                RIOTBUILD
+                RIOTSECP256R1
+            )
 
         set(package_location "cmake")
         install(TARGETS msr_riot EXPORT msr_riotTargets

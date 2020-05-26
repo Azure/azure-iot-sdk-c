@@ -304,7 +304,7 @@ MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 static void mbedtls_error_on_free()
 {
     char temp_str[256];
-    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error attempting to double-free :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, 7));
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error attempting to double-free :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, UMOCK_C_NULL_ARGUMENT));
     ASSERT_FAIL(temp_str);
 }
 
