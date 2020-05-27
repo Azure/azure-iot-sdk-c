@@ -23,3 +23,10 @@ set(${theseTestsName}_h_files
 )
 
 build_c_test_artifacts(${theseTestsName} ON "tests/azure_prov_device_tests")
+
+#Set RIoT ECDH Curve & RIOTBUILD
+target_compile_definitions(${theseTestsName}_exe
+    PUBLIC
+        RIOTBUILD
+        RIOTSECP256R1
+    )
