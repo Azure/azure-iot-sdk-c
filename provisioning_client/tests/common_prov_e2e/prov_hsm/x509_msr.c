@@ -173,7 +173,7 @@ static int produce_device_cert(X509_CERT_INFO* x509_info)
 
     // Build the TBS (to be signed) region of DeviceID Certificate
     DERInitContext(&der_ctx, der_buffer, DER_MAX_TBS);
-    if (X509GetDeviceCertTBS(&der_ctx, &X509_DEVICE_TBS_DATA, &x509_info->device_id_pub, (uint8_t*)&x509_info->device_id_pub, sizeof(x509_info->device_id_pub)) != 0)
+    if (X509GetDeviceCertTBS(&der_ctx, &X509_DEVICE_TBS_DATA, &x509_info->device_id_pub, NULL, 0) != 0)
     {
         LogError("Failure: X509GetDeviceCertTBS");
         result = MU_FAILURE;
