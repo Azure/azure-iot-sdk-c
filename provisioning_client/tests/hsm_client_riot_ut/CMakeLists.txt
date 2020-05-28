@@ -30,3 +30,14 @@ target_compile_definitions(${theseTestsName}_exe
         RIOTBUILD
         RIOTSECP256R1
     )
+target_compile_definitions(${theseTestsName}_dll
+    PUBLIC
+        RIOTBUILD
+        RIOTSECP256R1
+    )
+target_compile_definitions(${theseTestsName}_testsonly_lib
+    PUBLIC
+        RIOTBUILD
+        RIOTSECP256R1
+    )
+    
