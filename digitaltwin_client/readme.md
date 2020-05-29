@@ -2,22 +2,21 @@
 
 This folder contains the headers, source, samples, and internal testing for the Digital Twin Client for the C SDK.
 
-These instructions and samples assume basic familiarity with Digital Twin concepts.  To learn more background information, see [here](https://aka.ms/iotpnpdocs).
+These instructions and samples assume basic familiarity with Digital Twin and Azure IoT Plug and Play concepts.  To learn more, please go [here](https://aka.ms/iotpnpdocs).
 
 ## Getting started
 ### Building
-Instructions on how to build the Digital Twin Client SDK or else retrieve packages for it are available [here](./doc/building_sdk.md).  If you are familiar with building the IoTHub Device SDK, the instructions are almost identical.
+Start by building the Digital Twin Client SDK; instructions are available [here](./doc/building_sdk.md).  Be sure to clone the repo near your system root to maintain a valid path length.
 
-**Please use [public-preview](https://github.com/Azure/azure-iot-sdk-c/tree/public-preview) branch for your public preview development needs, unless you have been directed to be on public-preview-pnp for a specific purpose.  public-preview-pnp branch is our advance working branch which might contains breaking changes.**
+**Please use [public-preview](https://github.com/Azure/azure-iot-sdk-c/tree/public-preview) branch unless you have been directed to be on public-preview-pnp.  public-preview-pnp branch is our advance working branch which might contain breaking changes.**
 
 ### Exploring samples
+There are two separate, but related, sample directories.
 
-There are two separate but related samples directories.  **It may be easiest to just jump in here for a guided tour of Digital Twin.**
+* For connecting to Iot Hub, you will want to use the [digitaltwin\_sample\_device directory](./samples/digitaltwin_sample_device). 
+* If you are connecting to IoT Central or using a device with limited resources, instead use the [digitaltwin\_sample\_ll_device directory](./samples/digitaltwin_sample_ll_device).
 
-* If you are connecting to IoT Central and/or a device with limited resources, checkout [this directory](./samples/digitaltwin_sample_ll_device).  It uses the Azure IoT C SDK in a more resource friendly way (albeit slightly more difficult to program against).  It also contains provisioning logic needed to connect to IoT Central.
-* The [convenience layer samples directory](./samples/digitaltwin_sample_device) contains Digital Twin samples demonstrating creation of interfaces and basic operation when going against IotHub.
-
-Both samples are further documented [here](./samples/readme.md).
+To get stared with either of these sample directories, follow the remaining instructions [here](./samples/readme.md).
 
 ## Documentation
 
