@@ -5,8 +5,8 @@ This directory contains samples demonstrating creating and using Digital Twin in
 ## Directory contents
 
 ### Executable Source Code
-* [digitaltwin\_sample\_device](./digitaltwin_sample_device) - The executable interacts with the Digital Twin interfaces of the neighboring libraries, demonstrating creation of interfaces and basic operation when using Iot Hub.
-* [digitaltwin\_sample\_ll_device](./digitaltwin_sample_ll_device) - The executable interacts with the Digital Twin interfaces of the neighboring libraries, demonstrating creation interfaces and basic operation.  It uses the lower level (\_LL\_) layer and enables the Device Provisioning Service (DPS) to connect to Iot Central. It is appropriate for devices with limited resources.
+* [digitaltwin\_sample\_device](./digitaltwin_sample_device) - This executable interacts with the Digital Twin interfaces of the neighboring libraries, demonstrating creation of interfaces and basic operation when using IoT Hub.
+* [digitaltwin\_sample\_ll_device](./digitaltwin_sample_ll_device) - This executable interacts with the Digital Twin interfaces of the neighboring libraries, demonstrating creation of interfaces and basic operation.  It uses the lower level (\_LL\_) layer and enables the Device Provisioning Service (DPS) to connect to IoT Central. It is appropriate for devices with limited resources.
 
 ### Libraries
 * [digitaltwin\_sample\_device_info](./digitaltwin_sample_device_info) - Library that implements a sample device info Digital Twin interface of helper functions.  This interface reports information about the device - such as OS version, amount of storage, etc.
@@ -26,13 +26,13 @@ Build the Digital Twin Client SDK, if not already completed.  Follow instruction
   ```
   This will build the `digitaltwin_sample_device` executable along with the aforementioned sample interfaces it uses.
 
-* Get the Connection String of the Iot Hub device you wish to DigitalTwin enable.  
+* Get the Connection String of the IoT Hub device you wish to enable for DigitalTwin.  
 
   This can be found via the [azure portal](https://portal.azure.com):  
-    1. Go to your IoT Hub
-    2. Under Explorers in the left pane, select IoT Devices
+    1. Go to your IoT Hub resource.
+    2. Under Explorers in the left pane, select IoT Devices.
     3. Under Device ID, select a device.  Else, add a new device and then select it.
-    4. Copy the Primary Connection String
+    4. Copy the Primary Connection String.
 
 * Run the sample.
 
