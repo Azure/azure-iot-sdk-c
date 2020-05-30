@@ -6,32 +6,36 @@ This directory contains samples demonstrating creating and using Digital Twin in
 
 ### Executable Source Code
 * [digitaltwin\_sample\_device](./digitaltwin_sample_device) - This executable interacts with the Digital Twin interfaces of the neighboring libraries, demonstrating creation of interfaces and basic operation when using IoT Hub.
-* [digitaltwin\_sample\_ll_device](./digitaltwin_sample_ll_device) - This executable interacts with the Digital Twin interfaces of the neighboring libraries, demonstrating creation of interfaces and basic operation.  It uses the lower level (\_LL\_) layer and enables the Device Provisioning Service (DPS) to connect to IoT Central. It is appropriate for devices with limited resources.
+* [digitaltwin\_sample\_ll_device](./digitaltwin_sample_ll_device) - This executable interacts with the Digital Twin interfaces of the neighboring libraries, demonstrating creation of interfaces and basic operation.  It uses the lower level (LL) layer and enables the Device Provisioning Service (DPS) to connect to IoT Central or IoT Hub. It is appropriate for devices with limited resources or single threaded applications and devices.
 
 ### Libraries
 * [digitaltwin\_sample\_device_info](./digitaltwin_sample_device_info) - Library that implements a sample device info Digital Twin interface of helper functions.  This interface reports information about the device - such as OS version, amount of storage, etc.
 * [digitaltwin\_sample\_environmental_sensor](./digitaltwin_sample_environmental_sensor) - Library that implements a sample environmental sensor Digital Twin interface of helper functions.  This interface demonstrates all concepts of implementing a Digital Twin model: commands (synchronous and asynchronous), properties, and telemetry.
 
 ## Getting started
-Build the Digital Twin Client SDK, if not already completed.  Follow instructions [here](../doc/building_sdk.md).
 
 ### digitaltwin\_sample\_device
 
-* Use cmake to build the [digitaltwin\_sample\_device](digitaltwin_sample_device) directory.
+* Build the Digital Twin Client SDK, if not already completed.  (See [here](../doc/building_sdk.md) for further information.)
 
-  From the azure-iot-c-sdk repository root:
+  From the azure-iot-sdk-c repository root:
   ```
   cd cmake
+  cmake .. -Duse_prov_client=ON -Dhsm_type_symm_key:BOOL=ON
+  ```
+
+* Use cmake to build the [digitaltwin\_sample\_device](digitaltwin_sample_device) directory.
+
+  ```
   cmake --build .
   ```
   This will build the `digitaltwin_sample_device` executable along with the aforementioned sample interfaces it uses.
 
-* Get the Connection String of the IoT Hub device you wish to enable for DigitalTwin.  
+* Get the Connection String of the IoT Hub device you wish to enable for Digital Twin:
 
-  This can be found via the [azure portal](https://portal.azure.com):  
-    1. Go to your IoT Hub resource.
-    2. Under Explorers in the left pane, select IoT Devices.
-    3. Under Device ID, select a device.  Else, add a new device and then select it.
+    1. Go to your IoT Hub resource via the [azure portal](https://portal.azure.com).
+    2. Under Explorers in the left pane, select IoT devices.
+    3. Under Device ID, select a device using Sas authentication.  If none, add a new device (with a symmetric key authentication type) and then select it.
     4. Copy the Primary Connection String.
 
 * Run the sample.
@@ -64,9 +68,42 @@ Build the Digital Twin Client SDK, if not already completed.  Follow instruction
 
 ### digitaltwin\_sample\_ll_device
 
-* Before building the sample, follow additional setup instructions at the [digitaltwin\_sample\_ll_device](./digitaltwin_sample_ll_device/readme.md) directory.
+* Configure the files.
 
-* Follow the same steps as above to build and run the sample, replacing `digitaltwin_sample_device` with `digitaltwin_sample_ll_device`.
+  Please go [here](./digitaltwin_sample_ll_device) to follow the configuration steps before building the SDK.
+
+* Rebuild the Digital Twin Client SDK.  This step needs to occur after configuring the json in the step above. (See [here](../doc/building_sdk.md) for further information.)
+
+  From the azure-iot-sdk-c repository root:
+  ```
+  cd cmake
+  cmake .. -Duse_prov_client=ON -Dhsm_type_symm_key:BOOL=ON
+  ```
+
+* Use cmake to build the [digitaltwin\_sample\_ll_device](digitaltwin_sample_ll_device) directory.
+
+  ```
+  cmake --build .
+  ```
+  This will build the `digitaltwin_sample_ll_device` executable along with the aforementioned sample interfaces it uses.
+  
+* Run the sample.
+
+  From the cmake directory:
+
+  **If using Windows:** 
+  ```
+  cd .\digitaltwin_client\samples\digitaltwin_sample_ll_device\Debug\
+
+  .\digitaltwin_sample_ll_device.exe ..\dpsSymmKey.json
+  ```
+
+  **If using Linux:**
+  ```
+  cd digitaltwin_client/samples/digitaltwin_sample_ll_device/
+  
+  ./digitaltwin_sample_ll_device dpsSymmKey.json
+  ```
 
 
 ## Further Explanation

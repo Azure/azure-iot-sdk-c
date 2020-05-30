@@ -1,23 +1,76 @@
-# Digital Twin C Client samples directory
+# Configuration Instructions
 
-This sample in this directory is almost identical to [digitaltwin_sample_device](../digitaltwin_sample_device), including using the identical Digital Twin interfaces.  The main differences are:
+Note: These configuration steps are part of a greater set of instructions found [here](../). 
 
-* This sample can connect using Device Provisioning Service (DPS), including to IoT Central.  The other sample [digitaltwin_sample_device](../digital_sample_device) currently cannot.
-* This sample is designed to use the \_LL\_ layer, appropriate for single threaded applications and devices.
+## Model ID
 
-To use this sample:
-* Modify in `digitaltwin_sample_ll_device.c` the `DIGITALTWIN_SAMPLE_MODEL_ID` value to reference the DCM name you have setup, if you are using a different one.
+### Get a device Model ID
 
-* Create a configuration file, per the instructions below.
+* If using IoT Hub:
+    1. Open the Azure IoT Explorer.  If you do not have it, please follow the download instructions [here](https://docs.microsoft.com/en-us/azure/iot-pnp/howto-install-iot-explorer).
+    2. Under Device ID, select a device using Sas authentication.  If none, add a new device (with a symmetric key authentication type) and then select it.
+    3. Under Digital Twin in the left pane, expand the menu and select Interface.
+    4. Copy the value for "@id" without quotes, e.g. `urn:azureiot:ModelDiscovery:DigitalTwin:1`
 
-## Configuration file setup
+* If using IoT Central:
+    1. Go to your IoT Central Application resource via the [azure portal](https://portal.azure.com) and navigate to its IoT Central Application URL.
+    2. Select Device templates in the left pane.
+    3. Select the template used for your device.  If none, add a new template.
+    4. Select View identity.
+    5. Copy the Identity, e.g. `urn:testazuresphere:AzureSphereSampleDevice_5vg:1`
 
-The sample takes a single command line argument, which is the name of a JSON file containing configuration.  The JSON file requires a field named "securityType" which indicates how the connection to IoTHub (optionally via DPS) is to be established.
+### Update Model ID in source file
+* From the azure-iot-sdk-c repository root:
 
-Samples of all types of connection are included in the [./sample_config](./sample_config) directory.  Choose the appropriate file type and fill in the [TODO] sections.  The security types / samples are:  
+  **Windows:**  
+  ```
+  cd .\digitaltwin_client\samples\digitaltwin_sample_ll_device
+  ```
+  **Linux:**
+  ```
+  cd digitaltwin_client/samples/digitaltwin_sample_ll_device
+  ```
 
-* **ConnectionString** indicates that the device connection string is specified in the "connectionString" JSON field.  This connects directly to IoTHub, not DPS.  A sample file is [here](./sample_config/connectionString.json).
-* **DPS_SymmetricKey** indicates the device is connecting to DPS, using a symmetric key as the authentication mechanism.  A sample file is [here](./sample_config/dpsSymmKey.json).
-* **DPS_X509** indicates the device is connecting to DPS, using X509 certificates.  A sample file is [here](./sample_config/dpsX509.json).  This may require additional setup, e.g. using the TPM simulator during initial development.
+* Open `digitaltwin_sample_ll_device.c` and replace the value for `DIGITALTWIN_SAMPLE_MODEL_ID` with the Model ID. 
+  
+  Example:
+  ```
+  #define DIGITALTWIN_SAMPLE_MODEL_ID "urn:azureiot:ModelDiscovery:DigitalTwin:1"
+  ```
 
-IoT Central requires DPS based connections.  You will need to setup either **DPS_SymmetricKey** or **DPS_X509** to connect.
+* Save the file. 
+
+## Symmetric key configuration
+
+The configuration file indicates how the DPS connection is to be established.  For this sample, we are using a DPS_SymmetricKey.
+
+* From the `digitaltwin_sample_ll_device` directory, open `dpsSymmKey.json`.
+
+* If using IoT Hub:
+
+  **IDScope**
+    1. Go to your DPS resource via the [azure portal](https://portal.azure.com).  For more information on setting up a DPS resource and linking your IoT Hub to it, go [here](https://docs.microsoft.com/en-us/azure/iot-dps/quick-setup-auto-provision.)
+    2. On the Overview page, copy the ID Scope value.
+    3. Replace the IDScope `[TODO]` in the json.
+
+  **deviceId**
+    1. Select Manage enrollments in the left pane and add individual enrollment.
+    2. Change Mechanism to Symmetric Key, fill in the blanks, and save.
+    3. Select Individual enrollments.
+    4. Select the Registration Id. Copy this from the top of the page.
+    5. Replace the deviceId `[TODO]` in the json.
+
+  **deviceKey**
+    1. Copy the Primary Key.
+    2. Replace the deviceKey `[TODO]` in the json. 
+    3. Save the file.
+
+* If using IoT Central:
+
+    1. In your IoT Central application, select Devices in the left pane.
+    2. Add a device using the template selected earlier.  Select the device.
+    3. Locate the Connect option in the upper right corner.  It looks like an 'X'.  Select it.
+    4. Copy from Device connection and replace for each `[TODO]` in the json: ID scope, Device ID, and Primary key.
+    5. Save the file.
+
+
