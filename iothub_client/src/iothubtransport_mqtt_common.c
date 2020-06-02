@@ -91,6 +91,10 @@ static const char* CONNECTION_MODULE_ID_PROPERTY = "cmid";
 
 static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtimeutc";
 
+static const char DT_MODEL_ID_TOKEN[] = "digital-twin-model-id";
+
+static const char DEFAULT_IOTHUB_PRODUCT_IDENTIFIER[] = CLIENT_DEVICE_TYPE_PREFIX "/" IOTHUB_SDK_VERSION;
+
 #define TOLOWER(c) (((c>='A') && (c<='Z'))?c-'A'+'a':c)
 
 #define UNSUBSCRIBE_FROM_TOPIC                  0x0000
@@ -236,7 +240,7 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     int http_proxy_port;
     char* http_proxy_username;
     char* http_proxy_password;
-    bool isProductInfoSet;
+    bool isConnectParamaterSet;
     int disconnect_recv_flag;
 } MQTTTRANSPORT_HANDLE_DATA, *PMQTTTRANSPORT_HANDLE_DATA;
 
@@ -418,6 +422,7 @@ static const char* retrieve_mqtt_return_codes(CONNECT_RETURN_CODE rtn_code)
 static int retrieve_device_method_rid_info(const char* resp_topic, STRING_HANDLE method_name, STRING_HANDLE request_id)
 {
     int result;
+
     STRING_TOKENIZER_HANDLE token_handle = STRING_TOKENIZER_create_from_char(resp_topic);
     if (token_handle == NULL)
     {
@@ -474,6 +479,7 @@ static int retrieve_device_method_rid_info(const char* resp_topic, STRING_HANDLE
         }
         STRING_TOKENIZER_destroy(token_handle);
     }
+
     return result;
 }
 
@@ -2172,6 +2178,80 @@ static STRING_HANDLE buildClientId(const char* device_id, const char* module_id)
     }
 }
 
+static int appendConnectParameters(PMQTTTRANSPORT_HANDLE_DATA transport_data)
+{
+    int result;
+
+    if (!transport_data->isConnectParamaterSet)
+    {
+        STRING_HANDLE versionAndClientType = NULL;
+        STRING_HANDLE modelIdParameter = NULL;
+        STRING_HANDLE urlEncodedModelId = NULL;
+        const char* dtModelId = transport_data->transport_callbacks.dt_get_model_id_cb(transport_data->transport_ctx);
+        // TODO: The preview API version in SDK is only scoped to scenarios that require the modelId to be set.
+        // https://github.com/Azure/azure-iot-sdk-c/issues/1547 tracks removing this once non-preview API versions support modelId.
+        const char* apiVersion = (dtModelId != NULL) ? IOTHUB_API_PREVIEW_VERSION : IOTHUB_API_VERSION;
+        const char* appSpecifiedProductInfo = transport_data->transport_callbacks.prod_info_cb(transport_data->transport_ctx);
+        STRING_HANDLE productInfoEncoded = NULL; 
+
+        if ((productInfoEncoded = URL_EncodeString((appSpecifiedProductInfo != NULL) ? appSpecifiedProductInfo : DEFAULT_IOTHUB_PRODUCT_IDENTIFIER)) == NULL)
+        {
+            LogError("Unable to UrlEncode productInfo");
+            result = MU_FAILURE;
+        }
+        else if ((versionAndClientType = STRING_construct_sprintf("?api-version=%s&DeviceClientType=%s", apiVersion, STRING_c_str(productInfoEncoded))) == NULL)
+        {
+            LogError("Failed constructing string");
+            result = 0;
+        }
+        else if (STRING_concat_with_STRING(transport_data->configPassedThroughUsername, versionAndClientType) != 0)
+        {
+            LogError("Failed concatenating the product info");
+            result = 0;
+        }           
+        else if (dtModelId != NULL)
+        {
+            if ((urlEncodedModelId = URL_EncodeString(dtModelId)) == NULL)
+            {
+                LogError("Failed to URL encode the modelID string");
+                result = MU_FAILURE;
+            }
+            else if ((modelIdParameter = STRING_construct_sprintf("&%s=%s", DT_MODEL_ID_TOKEN, STRING_c_str(urlEncodedModelId))) == NULL)
+            {
+                LogError("Cannot build modelID string");
+                result = MU_FAILURE;
+            }
+            else if (STRING_concat_with_STRING(transport_data->configPassedThroughUsername, modelIdParameter) != 0)
+            {
+                LogError("Failed to set modelID parameter in connect");
+                result = MU_FAILURE;
+            }
+            else
+            {
+                result = 0;
+            }
+        }
+        else
+        {
+            result = 0;
+        }
+
+        // setting optional connect parameter is only allowed once in the lifetime of the device client.
+        transport_data->isConnectParamaterSet = true;
+
+        STRING_delete(versionAndClientType);
+        STRING_delete(modelIdParameter);
+        STRING_delete(urlEncodedModelId);
+        STRING_delete(productInfoEncoded);
+    }
+    else
+    {
+        result = 0;
+    }
+
+    return result;
+}
+
 static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
     int result;
@@ -2215,47 +2295,13 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 
     if (result == 0)
     {
-        if (!transport_data->isProductInfoSet)
-        {
-            // This requires the iothubClientHandle, which sadly the MQTT transport only gets on DoWork, so this code still needs to remain here.
-            // The correct place for this would be in the Create method, but we don't get the client handle there.
-            // Also, when device multiplexing is used, the customer creates the transport directly and explicitly, when the client is still not created.
-            // This will be a major hurdle when we add device multiplexing to MQTT transport.
-
-            STRING_HANDLE clone;
-            const char* product_info = transport_data->transport_callbacks.prod_info_cb(transport_data->transport_ctx);
-            if (product_info == NULL)
-            {
-                clone = STRING_construct_sprintf("%s%%2F%s", CLIENT_DEVICE_TYPE_PREFIX, IOTHUB_SDK_VERSION);
-            }
-            else
-            {
-                clone = URL_EncodeString(product_info);
-            }
-
-            if (clone == NULL)
-            {
-                LogError("Failed obtaining the product info");
-            }
-            else
-            {
-                if (STRING_concat_with_STRING(transport_data->configPassedThroughUsername, clone) != 0)
-                {
-                    LogError("Failed concatenating the product info");
-                }
-                else
-                {
-                    transport_data->isProductInfoSet = true;
-                }
-
-                STRING_delete(clone);
-            }
-        }
-
         STRING_HANDLE clientId;
-
-        clientId = buildClientId(STRING_c_str(transport_data->device_id), STRING_c_str(transport_data->module_id));
-        if (NULL == clientId)
+        if (appendConnectParameters(transport_data) != 0)
+        {
+            LogError("Failed to add optional connect parameters.");
+            result = MU_FAILURE;
+        }
+        else if ((clientId = buildClientId(STRING_c_str(transport_data->device_id), STRING_c_str(transport_data->module_id))) == NULL)
         {
             LogError("Unable to allocate clientId");
             result = MU_FAILURE;
@@ -2301,7 +2347,6 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             }
             STRING_delete(clientId);
         }
-
     }
     return result;
 }
@@ -2436,11 +2481,11 @@ static STRING_HANDLE buildConfigForUsername(const IOTHUB_CLIENT_CONFIG* upperCon
 {
     if (moduleId == NULL)
     {
-        return STRING_construct_sprintf("%s.%s/%s/?api-version=%s&DeviceClientType=", upperConfig->iotHubName, upperConfig->iotHubSuffix, upperConfig->deviceId, IOTHUB_API_VERSION);
+        return STRING_construct_sprintf("%s.%s/%s/", upperConfig->iotHubName, upperConfig->iotHubSuffix, upperConfig->deviceId);
     }
     else
     {
-        return STRING_construct_sprintf("%s.%s/%s/%s/?api-version=%s&DeviceClientType=", upperConfig->iotHubName, upperConfig->iotHubSuffix, upperConfig->deviceId, moduleId, IOTHUB_API_VERSION);
+        return STRING_construct_sprintf("%s.%s/%s/%s/", upperConfig->iotHubName, upperConfig->iotHubSuffix, upperConfig->deviceId, moduleId);
     }
 }
 
@@ -2528,7 +2573,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                 }
                 else
                 {
-                    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_008: [If the upperConfig contains a valid protocolGatewayHostName value the this shall be used for the hostname, otherwise the hostname shall be constructed using the iothubname and iothubSuffix.] */
+                    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_008: [If the upperConfig contains a valid protocolGatewayHostName value this shall be used for the hostname, otherwise the hostname shall be constructed using the iothubname and iothubSuffix.] */
                     if (upperConfig->protocolGatewayHostName == NULL)
                     {
                         state->hostAddress = STRING_construct_sprintf("%s.%s", upperConfig->iotHubName, upperConfig->iotHubSuffix);
@@ -2580,7 +2625,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                         state->topic_DeviceMethods = NULL;
                         state->topic_InputQueue = NULL;
                         state->log_trace = state->raw_trace = false;
-                        state->isProductInfoSet = false;
+                        state->isConnectParamaterSet = false;
                         state->auto_url_encode_decode = false;
                         state->conn_attempted = false;
                     }
