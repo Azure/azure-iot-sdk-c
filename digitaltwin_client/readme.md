@@ -6,7 +6,7 @@ These instructions and samples assume basic familiarity with Digital Twin and Az
 
 ## Getting started
 ### Building
-Start by building the Digital Twin Client SDK -- instructions are available [here](./doc/building_sdk.md).  Please use these instructions as they include CMake flags specific to the samples.  On Windows, be sure to clone the repo near your system root to maintain a valid path length.
+Start by building the Digital Twin Client SDK -- instructions are available [here](./doc/building_sdk.md).  Please use these instructions as they include CMake flags specific to the samples.  On Windows, be sure to clone the repo near your root to maintain a valid path length.
 
 **Please use the [public-preview](https://github.com/Azure/azure-iot-sdk-c/tree/public-preview) branch unless you have been directed to be on `public-preview-pnp`.  The `public-preview-pnp` branch is our advance working branch which might contain breaking changes.**
 
