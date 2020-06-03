@@ -2187,10 +2187,10 @@ static int appendConnectParameters(PMQTTTRANSPORT_HANDLE_DATA transport_data)
         STRING_HANDLE versionAndClientType = NULL;
         STRING_HANDLE modelIdParameter = NULL;
         STRING_HANDLE urlEncodedModelId = NULL;
-        const char* dtModelId = transport_data->transport_callbacks.dt_get_model_id_cb(transport_data->transport_ctx);
+        const char* modelId = transport_data->transport_callbacks.get_model_id_cb(transport_data->transport_ctx);
         // TODO: The preview API version in SDK is only scoped to scenarios that require the modelId to be set.
         // https://github.com/Azure/azure-iot-sdk-c/issues/1547 tracks removing this once non-preview API versions support modelId.
-        const char* apiVersion = (dtModelId != NULL) ? IOTHUB_API_PREVIEW_VERSION : IOTHUB_API_VERSION;
+        const char* apiVersion = (modelId != NULL) ? IOTHUB_API_PREVIEW_VERSION : IOTHUB_API_VERSION;
         const char* appSpecifiedProductInfo = transport_data->transport_callbacks.prod_info_cb(transport_data->transport_ctx);
         STRING_HANDLE productInfoEncoded = NULL; 
 
@@ -2209,9 +2209,9 @@ static int appendConnectParameters(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             LogError("Failed concatenating the product info");
             result = 0;
         }           
-        else if (dtModelId != NULL)
+        else if (modelId != NULL)
         {
-            if ((urlEncodedModelId = URL_EncodeString(dtModelId)) == NULL)
+            if ((urlEncodedModelId = URL_EncodeString(modelId)) == NULL)
             {
                 LogError("Failed to URL encode the modelID string");
                 result = MU_FAILURE;
