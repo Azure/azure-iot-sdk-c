@@ -14,6 +14,5 @@ include_directories(. ${SHARED_UTIL_INC_FOLDER} ${IOTHUB_CLIENT_INC_FOLDER} ${DI
 add_executable(digitaltwin_sample_ll_device ${digitaltwin_sample_ll_device_c_files})
 
 file(COPY ${DIGITALTWIN_SAMPLE_ENVIRONMENTAL_SENSOR_INC_FOLDER}/EnvironmentalSensor.interface.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY ${CMAKE_CURRENT_LIST_DIR}/dpsSymmKey.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(digitaltwin_sample_ll_device parson iothub_client_mqtt_transport iothub_client_mqtt_ws_transport iothub_client digitaltwin_client digitaltwin_sample_device_info digitaltwin_sample_sdk_info digitaltwin_sample_environmental_sensor prov_device_client prov_mqtt_transport)

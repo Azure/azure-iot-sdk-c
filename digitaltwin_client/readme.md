@@ -6,15 +6,15 @@ These instructions and samples assume basic familiarity with Digital Twin and Az
 
 ## Getting started
 ### Building
-Start by building the Digital Twin Client SDK -- instructions are available [here](./doc/building_sdk.md).  Please use these instructions as they include cmake flags specific to the samples.  On Windows, be sure to clone the repo near your system root to maintain a valid path length.
+Start by building the Digital Twin Client SDK -- instructions are available [here](./doc/building_sdk.md).  Please use these instructions as they include CMake flags specific to the samples.  On Windows, be sure to clone the repo near your system root to maintain a valid path length.
 
 **Please use the [public-preview](https://github.com/Azure/azure-iot-sdk-c/tree/public-preview) branch unless you have been directed to be on `public-preview-pnp`.  The `public-preview-pnp` branch is our advance working branch which might contain breaking changes.**
 
 ### Exploring samples
 There are two separate, but related, sample directories.
 
-* For connecting to Iot Hub with a non-resource-constrained device, you will want to use the [digitaltwin\_sample\_device directory](./samples/digitaltwin_sample_device). 
-* If you are connecting to IoT Central or using a device with limited resources, instead use the [digitaltwin\_sample\_ll_device directory](./samples/digitaltwin_sample_ll_device).
+* For connecting to Azure IoT Hub with a non-resource-constrained device, you will want to use the [digitaltwin\_sample\_device directory](./samples/digitaltwin_sample_device). 
+* If you are connecting to Azure IoT Central or using a device with limited resources, instead use the [digitaltwin\_sample\_ll_device directory](./samples/digitaltwin_sample_ll_device).
 
 To get started with either of these sample directories, follow the remaining instructions [here](./samples/readme.md).
 
