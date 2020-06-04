@@ -2346,7 +2346,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetOption(IOTHUB_CLIENT_CORE_LL_HANDLE 
             } 
             else if ((handleData->model_id = STRING_construct((const char*)value)) == NULL)
             {
-                LogError("STRING_c_str failed");
+                LogError("STRING_construct failed");
                 result = IOTHUB_CLIENT_ERROR;
             }
             else
