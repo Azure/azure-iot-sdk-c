@@ -2,34 +2,30 @@
 
 This folder contains the headers, source, samples, and internal testing for the Digital Twin Client for the C SDK.
 
-These instructions and samples assume basic familiarity with Digital Twin concepts.  To learn more background information, see [here](https://aka.ms/iotpnpdocs).
+These instructions and samples assume basic familiarity with Digital Twin and Azure IoT Plug and Play concepts.  To learn more, please go [here](https://aka.ms/iotpnpdocs).
 
 ## Getting started
 ### Building
-Instructions on how to build the Digital Twin Client SDK or else retrieve packages for it are available [here](./doc/building_sdk.md).  If you are familiar with building the IoTHub Device SDK, the instructions are almost identical.
+Start by building the Digital Twin Client SDK -- instructions are available [here](./doc/building_sdk.md).  Please use these instructions as they include CMake flags specific to the samples.  On Windows, be sure to clone the repo near your root to maintain a valid path length.
 
-**Please use [public-preview](https://github.com/Azure/azure-iot-sdk-c/tree/public-preview) branch for your public preview development needs, unless you have been directed to be on public-preview-pnp for a specific purpose.  public-preview-pnp branch is our advance working branch which might contains breaking changes.**
+**Please use the [public-preview](https://github.com/Azure/azure-iot-sdk-c/tree/public-preview) branch unless you have been directed to be on `public-preview-pnp`.  The `public-preview-pnp` branch is our advance working branch which might contain breaking changes.**
 
 ### Exploring samples
+There are two separate, but related, sample directories.
 
-There are two separate but related samples directories.  **It may be easiest to just jump in here for a guided tour of Digital Twin.**
+* For connecting to Azure IoT Hub with a non-resource-constrained device, you will want to use the [digitaltwin\_sample\_device directory](./samples/digitaltwin_sample_device). 
+* If you are connecting to Azure IoT Central or using a device with limited resources, instead use the [digitaltwin\_sample\_ll_device directory](./samples/digitaltwin_sample_ll_device).
 
-* If you are connecting to IoT Central and/or a device with limited resources, checkout [this directory](./samples/digitaltwin_sample_ll_device).  It uses the Azure IoT C SDK in a more resource friendly way (albeit slightly more difficult to program against).  It also contains provisioning logic needed to connect to IoT Central.
-* The [convenience layer samples directory](./samples/digitaltwin_sample_device) contains Digital Twin samples demonstrating creation of interfaces and basic operation when going against IotHub.
-
-Both samples are further documented [here](./samples/readme.md).
+To get started with either of these sample directories, follow the remaining instructions [here](./samples/readme.md).
 
 ## Documentation
 
 Conceptual documentation for the Digital Twin C SDK is available [here](./doc/readme.md).  
 
-**There are important decisions you need to make, especially related to your threading models and optimizing for resource constrained devices, that are covered in depth in these documents.  Even after succesfully running through the sample content, you should still understand this prior to productizing a Digital Twin device.**
-
 Reference guidance for the API's is available in the [public headers](./inc) themselves.
 
-## Visual Studio Code Integration
+**There are important decisions you need to make that are covered in depth in these documents.  This includes threading models and optimizing for resource constrained devices. Even after succesfully running through the sample content, you should still understand this material prior to productizing a Digital Twin device.**
 
-Visual Studio Code has a plugin to make authoring Digital Twin clients using the C SDK easier.  It includes the ability to automatically generate C device code based on interface definitions.  See [here](https://docs.microsoft.com/en-us/azure/iot-pnp/howto-develop-with-vs-vscode) for more information.
 
 ## If something is broken
 

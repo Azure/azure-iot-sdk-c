@@ -1,23 +1,56 @@
-# Digital Twin C Client samples directory
+# Configuration Instructions
 
-This sample in this directory is almost identical to [digitaltwin_sample_device](../digitaltwin_sample_device), including using the identical Digital Twin interfaces.  The main differences are:
+Note: These configuration steps are part of a greater set of instructions found [here](../). 
 
-* This sample can connect using Device Provisioning Service (DPS), including to IoT Central.  The other sample [digitaltwin_sample_device](../digital_sample_device) currently cannot.
-* This sample is designed to use the \_LL\_ layer, appropriate for single threaded applications and devices.
+***Please note, the device must use SAS authentication for this sample.***
 
-To use this sample:
-* Modify in `digitaltwin_sample_ll_device.c` the `DIGITALTWIN_SAMPLE_MODEL_ID` value to reference the DCM name you have setup, if you are using a different one.
+## Model ID
 
-* Create a configuration file, per the instructions below.
+### Get device Model ID
 
-## Configuration file setup
+* If using Azure IoT Hub, locate the Model ID of your device.   
+* If using Azure IoT Central, locate the Model ID of the template used for your device.
+* Copy this ID.
+  
+  The Model ID will be of a form similar to `dtmi:com:example:SampleDevice;1`. 
 
-The sample takes a single command line argument, which is the name of a JSON file containing configuration.  The JSON file requires a field named "securityType" which indicates how the connection to IoTHub (optionally via DPS) is to be established.
+ 
 
-Samples of all types of connection are included in the [./sample_config](./sample_config) directory.  Choose the appropriate file type and fill in the [TODO] sections.  The security types / samples are:  
+### Update Model ID in source file
+* From the azure-iot-sdk-c repository root:
 
-* **ConnectionString** indicates that the device connection string is specified in the "connectionString" JSON field.  This connects directly to IoTHub, not DPS.  A sample file is [here](./sample_config/connectionString.json).
-* **DPS_SymmetricKey** indicates the device is connecting to DPS, using a symmetric key as the authentication mechanism.  A sample file is [here](./sample_config/dpsSymmKey.json).
-* **DPS_X509** indicates the device is connecting to DPS, using X509 certificates.  A sample file is [here](./sample_config/dpsX509.json).  This may require additional setup, e.g. using the TPM simulator during initial development.
+  **Windows:**  
+  ```
+  cd .\digitaltwin_client\samples\digitaltwin_sample_ll_device
+  ```
+  **Linux:**
+  ```
+  cd digitaltwin_client/samples/digitaltwin_sample_ll_device
+  ```
 
-IoT Central requires DPS based connections.  You will need to setup either **DPS_SymmetricKey** or **DPS_X509** to connect.
+* Open `digitaltwin_sample_ll_device.c` and replace the value for `DIGITALTWIN_SAMPLE_MODEL_ID` with the Model ID. 
+  
+  Example:
+  ```c
+  #define DIGITALTWIN_SAMPLE_MODEL_ID "dtmi:com:example:SampleDevice;1"
+  ```
+* Save the file. 
+
+## Symmetric key configuration
+
+The configuration file indicates how the DPS connection is to be established.  For this sample, we are using a DPS_SymmetricKey.
+
+* From the `digitaltwin_sample_ll_device\sample_config` directory, open `dpsSymmKey.json`.  
+
+### Get and update configuration values
+
+There are three `[TODO]`s in this file that need to be replaced: IDScope, deviceId, and deviceKey.
+
+* If using Azure IoT Hub, you will find this information via your Azure IoT Hub Device Provisioning Service.
+
+* If using Azure IoT Central, you will find this information via that platform.
+
+* Copy the values found for IDScope, deviceId, and deviceKey, and replace the corresponding `[TODO]`s in the json.  
+
+* Save the file.
+
