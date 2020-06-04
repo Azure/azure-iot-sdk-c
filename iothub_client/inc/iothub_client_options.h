@@ -44,6 +44,11 @@ extern "C"
     static STATIC_VAR_UNUSED const char* OPTION_PRODUCT_INFO = "product_info";
 
     /*
+    * @brief    Specifies the Digital Twin Model Id of the connection. Only valid for use with MQTT Transport
+    */
+    static STATIC_VAR_UNUSED const char* OPTION_MODEL_ID = "model_id";
+
+    /*
     * @brief    Turns on automatic URL encoding of message properties + system properties. Only valid for use with MQTT Transport
     */
     static STATIC_VAR_UNUSED const char* OPTION_AUTO_URL_ENCODE_DECODE = "auto_url_encode_decode";

@@ -38,6 +38,7 @@ extern "C"
     typedef void (*pfTransport_Twin_ReportedStateComplete_Callback)(uint32_t item_id, int status_code, void* ctx);
     typedef void (*pfTransport_Twin_RetrievePropertyComplete_Callback)(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* ctx);
     typedef int (*pfTransport_DeviceMethod_Complete_Callback)(const char* method_name, const unsigned char* payLoad, size_t size, METHOD_HANDLE response_id, void* ctx);
+    typedef const char* (*pfTransport_GetOption_Model_Id_Callback)(void* ctx);
 
     /** @brief    This struct captures device configuration. */
     typedef struct IOTHUB_DEVICE_CONFIG_TAG
@@ -67,6 +68,7 @@ extern "C"
         pfTransport_Twin_ReportedStateComplete_Callback twin_rpt_state_complete_cb;
         pfTransport_Twin_RetrievePropertyComplete_Callback twin_retrieve_prop_complete_cb;
         pfTransport_DeviceMethod_Complete_Callback method_complete_cb;
+        pfTransport_GetOption_Model_Id_Callback get_model_id_cb;
     } TRANSPORT_CALLBACKS_INFO;
 
     typedef STRING_HANDLE (*pfIoTHubTransport_GetHostname)(TRANSPORT_LL_HANDLE handle);
