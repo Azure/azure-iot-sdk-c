@@ -9,8 +9,8 @@ This directory contains samples demonstrating creating and using Digital Twin in
 * [digitaltwin\_sample\_ll_device](./digitaltwin_sample_ll_device) - This directory builds the sample_ll executable. This executable interacts with the Digital Twin interfaces of the neighboring libraries.  It demonstrates creation of interfaces and basic operation when using Azure IoT Hub or Azure IoT Central.  It uses the lower level (LL) layer and enables the Azure IoT Hub Device Provisioning Service (DPS) if using Azure IoT Hub.  It is appropriate for devices with limited resources or single threaded applications and devices.
 
 ### Directories that build libraries
-* [digitaltwin\_sample\_device_info](./digitaltwin_sample_device_info) - This directory builds the sample device info library.  This is a Digital Twin interface of helper functions that report information about the device - such as OS version, amount of storage, etc.
-* [digitaltwin\_sample\_environmental_sensor](./digitaltwin_sample_environmental_sensor) - This directory builds the samples environmental sensor library.  This is a Digital Twin interface of helper functions that demonstrates all concepts of implementing a Digital Twin model: commands (synchronous and asynchronous), properties, and telemetry.
+* [digitaltwin\_sample\_device_info](./digitaltwin_sample_device_info) - This directory builds the sample device info library.  This is a Digital Twin interface that reports information about the device - such as OS version, amount of storage, etc.
+* [digitaltwin\_sample\_environmental_sensor](./digitaltwin_sample_environmental_sensor) - This directory builds the sample environmental sensor library.  This is a Digital Twin interface  that demonstrates all concepts of implementing a Digital Twin model: commands (synchronous and asynchronous), properties, and telemetry.
 
 ## Getting started
 
@@ -36,9 +36,7 @@ This directory contains samples demonstrating creating and using Digital Twin in
 
   ```
   cd .\digitaltwin_client\samples\digitaltwin_sample_device\Debug\
-  ```
-  Run the executable using your connection string, e.g.:
-  ```
+  
   .\digitaltwin_sample_device.exe "HostName=yourHub;DeviceId=yourDigitalTwinDeviceId;SharedAccessKey=secret"
   ```
 
@@ -46,9 +44,7 @@ This directory contains samples demonstrating creating and using Digital Twin in
 
   ```
   cd digitaltwin_client/samples/digitaltwin_sample_device
-  ```
-  Run the executable using your connection string, e.g.:
-  ```
+
   ./digitaltwin_sample_device "HostName=yourHub;DeviceId=yourDigitalTwinDeviceId;SharedAccessKey=secret"
   ```
 
@@ -84,7 +80,7 @@ This directory contains samples demonstrating creating and using Digital Twin in
   ```
   cd digitaltwin_client/samples/digitaltwin_sample_ll_device/
   
-  ./digitaltwin_sample_ll_device dpsSymmKey.json ../../../../../digitaltwin_client/samples/digitaltwin_sample_ll_device/sample_config/dpsSymmKey.json
+  ./digitaltwin_sample_ll_device ../../../../../digitaltwin_client/samples/digitaltwin_sample_ll_device/sample_config/dpsSymmKey.json
   ```
 
 

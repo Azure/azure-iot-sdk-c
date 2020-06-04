@@ -31,7 +31,7 @@ Note: These configuration steps are part of a greater set of instructions found 
 * Open `digitaltwin_sample_ll_device.c` and replace the value for `DIGITALTWIN_SAMPLE_MODEL_ID` with the Model ID. 
   
   Example:
-  ```
+  ```c
   #define DIGITALTWIN_SAMPLE_MODEL_ID "dtmi:com:example:SampleDevice;1"
   ```
 * Save the file. 

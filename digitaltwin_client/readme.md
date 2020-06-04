@@ -27,11 +27,6 @@ Reference guidance for the API's is available in the [public headers](./inc) the
 **There are important decisions you need to make that are covered in depth in these documents.  This includes threading models and optimizing for resource constrained devices. Even after succesfully running through the sample content, you should still understand this material prior to productizing a Digital Twin device.**
 
 
-
-## Visual Studio Code Integration
-
-Visual Studio Code has a plugin to make authoring Digital Twin clients using the C SDK easier.  This includes the ability to automatically generate C device code based on interface definitions.  See [here](https://docs.microsoft.com/en-us/azure/iot-pnp/howto-develop-with-vs-vscode) for more information.
-
 ## If something is broken
 
 If you hit an issue with the C SDK Digital Twin, please open a GitHub issue in https://github.com/Azure/azure-iot-sdk-c.
