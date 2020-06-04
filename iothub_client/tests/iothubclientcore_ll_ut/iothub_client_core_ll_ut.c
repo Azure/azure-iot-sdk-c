@@ -5544,7 +5544,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_model_id_succeeds)
     STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
 
     //act
-    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SetOption(h, OPTION_MODEL_ID, "dtmi:YOUR_COMPANY_NAME_HERE:sample_device:1");
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SetOption(h, OPTION_MODEL_ID, "dtmi:YOUR_COMPANY_NAME_HERE:sample_device;1");
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);

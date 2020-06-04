@@ -2479,7 +2479,8 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 }
 
 // At handle creation time, we don't have all the fields required for building up the user name (e.g. productID)
-// Build what we can (instead of making separate copies of the passed fields) for now.
+// We build up as much of the string as we can at this point because we do not store upperConfig after initialization.
+// In buildConfigForUsernameStep2IfNeeded, only immediately before we do CONNECT itself, do we complete building up this string.
 static STRING_HANDLE buildConfigForUsernameStep1(const IOTHUB_CLIENT_CONFIG* upperConfig, const char* moduleId)
 {
     if (moduleId == NULL)
