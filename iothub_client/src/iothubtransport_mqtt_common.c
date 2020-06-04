@@ -240,7 +240,7 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     int http_proxy_port;
     char* http_proxy_username;
     char* http_proxy_password;
-    bool isConnectParamaterSet;
+    bool isConnectUsernameSet;
     int disconnect_recv_flag;
 } MQTTTRANSPORT_HANDLE_DATA, *PMQTTTRANSPORT_HANDLE_DATA;
 
@@ -2178,11 +2178,11 @@ static STRING_HANDLE buildClientId(const char* device_id, const char* module_id)
     }
 }
 
-static int appendConnectParameters(PMQTTTRANSPORT_HANDLE_DATA transport_data)
+static int buildConfigForUsernameStep2IfNeeded(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
     int result;
 
-    if (!transport_data->isConnectParamaterSet)
+    if (!transport_data->isConnectUsernameSet)
     {
         STRING_HANDLE versionAndClientType = NULL;
         STRING_HANDLE modelIdParameter = NULL;
@@ -2236,8 +2236,8 @@ static int appendConnectParameters(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             result = 0;
         }
 
-        // setting optional connect parameter is only allowed once in the lifetime of the device client.
-        transport_data->isConnectParamaterSet = true;
+        // setting connect string is only allowed once in the lifetime of the device client.
+        transport_data->isConnectUsernameSet = true;
 
         STRING_delete(versionAndClientType);
         STRING_delete(modelIdParameter);
@@ -2296,7 +2296,7 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     if (result == 0)
     {
         STRING_HANDLE clientId;
-        if (appendConnectParameters(transport_data) != 0)
+        if (buildConfigForUsernameStep2IfNeeded(transport_data) != 0)
         {
             LogError("Failed to add optional connect parameters.");
             result = MU_FAILURE;
@@ -2477,7 +2477,9 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     return result;
 }
 
-static STRING_HANDLE buildConfigForUsername(const IOTHUB_CLIENT_CONFIG* upperConfig, const char* moduleId)
+// At handle creation time, we don't have all the fields required for building up the user name (e.g. productID)
+// Build what we can (instead of making separate copies the passed fields) for now.
+static STRING_HANDLE buildConfigForUsernameStep1(const IOTHUB_CLIENT_CONFIG* upperConfig, const char* moduleId)
 {
     if (moduleId == NULL)
     {
@@ -2589,7 +2591,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                         free_transport_handle_data(state);
                         state = NULL;
                     }
-                    else if ((state->configPassedThroughUsername = buildConfigForUsername(upperConfig, moduleId)) == NULL)
+                    else if ((state->configPassedThroughUsername = buildConfigForUsernameStep1(upperConfig, moduleId)) == NULL)
                     {
                         free_transport_handle_data(state);
                         state = NULL;
@@ -2625,7 +2627,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                         state->topic_DeviceMethods = NULL;
                         state->topic_InputQueue = NULL;
                         state->log_trace = state->raw_trace = false;
-                        state->isConnectParamaterSet = false;
+                        state->isConnectUsernameSet = false;
                         state->auto_url_encode_decode = false;
                         state->conn_attempted = false;
                     }
