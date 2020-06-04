@@ -2184,7 +2184,7 @@ static int buildConfigForUsernameStep2IfNeeded(PMQTTTRANSPORT_HANDLE_DATA transp
 
     if (!transport_data->isConnectUsernameSet)
     {
-        STRING_HANDLE versionAndClientType = NULL;
+        STRING_HANDLE userName = NULL;
         STRING_HANDLE modelIdParameter = NULL;
         STRING_HANDLE urlEncodedModelId = NULL;
         const char* modelId = transport_data->transport_callbacks.get_model_id_cb(transport_data->transport_ctx);
@@ -2199,16 +2199,11 @@ static int buildConfigForUsernameStep2IfNeeded(PMQTTTRANSPORT_HANDLE_DATA transp
             LogError("Unable to UrlEncode productInfo");
             result = MU_FAILURE;
         }
-        else if ((versionAndClientType = STRING_construct_sprintf("?api-version=%s&DeviceClientType=%s", apiVersion, STRING_c_str(productInfoEncoded))) == NULL)
+        else if ((userName = STRING_construct_sprintf("%s?api-version=%s&DeviceClientType=%s", STRING_c_str(transport_data->configPassedThroughUsername), apiVersion, STRING_c_str(productInfoEncoded))) == NULL)
         {
             LogError("Failed constructing string");
             result = 0;
         }
-        else if (STRING_concat_with_STRING(transport_data->configPassedThroughUsername, versionAndClientType) != 0)
-        {
-            LogError("Failed concatenating the product info");
-            result = 0;
-        }           
         else if (modelId != NULL)
         {
             if ((urlEncodedModelId = URL_EncodeString(modelId)) == NULL)
@@ -2221,7 +2216,7 @@ static int buildConfigForUsernameStep2IfNeeded(PMQTTTRANSPORT_HANDLE_DATA transp
                 LogError("Cannot build modelID string");
                 result = MU_FAILURE;
             }
-            else if (STRING_concat_with_STRING(transport_data->configPassedThroughUsername, modelIdParameter) != 0)
+            else if (STRING_concat_with_STRING(userName, modelIdParameter) != 0)
             {
                 LogError("Failed to set modelID parameter in connect");
                 result = MU_FAILURE;
@@ -2236,10 +2231,16 @@ static int buildConfigForUsernameStep2IfNeeded(PMQTTTRANSPORT_HANDLE_DATA transp
             result = 0;
         }
 
-        // setting connect string is only allowed once in the lifetime of the device client.
-        transport_data->isConnectUsernameSet = true;
+        if (result == 0)
+        {
+            STRING_delete(transport_data->configPassedThroughUsername);
+            transport_data->configPassedThroughUsername = userName;
+            userName = NULL;
+            // setting connect string is only allowed once in the lifetime of the device client.
+            transport_data->isConnectUsernameSet = true;
+        }
 
-        STRING_delete(versionAndClientType);
+        STRING_delete(userName);
         STRING_delete(modelIdParameter);
         STRING_delete(urlEncodedModelId);
         STRING_delete(productInfoEncoded);
@@ -2478,7 +2479,7 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 }
 
 // At handle creation time, we don't have all the fields required for building up the user name (e.g. productID)
-// Build what we can (instead of making separate copies the passed fields) for now.
+// Build what we can (instead of making separate copies of the passed fields) for now.
 static STRING_HANDLE buildConfigForUsernameStep1(const IOTHUB_CLIENT_CONFIG* upperConfig, const char* moduleId)
 {
     if (moduleId == NULL)
@@ -2575,7 +2576,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                 }
                 else
                 {
-                    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_008: [If the upperConfig contains a valid protocolGatewayHostName value this shall be used for the hostname, otherwise the hostname shall be constructed using the iothubname and iothubSuffix.] */
+                    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_008: [If the upperConfig contains a valid protocolGatewayHostName value this shall be used for the hostname, otherwise the hostname shall be constructed using the iothubName and iothubSuffix.] */
                     if (upperConfig->protocolGatewayHostName == NULL)
                     {
                         state->hostAddress = STRING_construct_sprintf("%s.%s", upperConfig->iotHubName, upperConfig->iotHubSuffix);

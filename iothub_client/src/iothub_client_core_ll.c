@@ -615,7 +615,7 @@ static const char* IoTHubClientCore_LL_GetProductInfo(void* ctx)
     return result;
 }
 
-static const char* IoTHubClientCore_LL_GetModelID(void* ctx)
+static const char* IoTHubClientCore_LL_GetModelId(void* ctx)
 {
     const char* result;
     if (ctx == NULL)
@@ -844,7 +844,7 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
             transport_cb.msg_input_cb = IoTHubClientCore_LL_MessageCallbackFromInput;
             transport_cb.msg_cb = IoTHubClientCore_LL_MessageCallback;
             transport_cb.method_complete_cb = IoTHubClientCore_LL_DeviceMethodComplete;
-            transport_cb.get_model_id_cb = IoTHubClientCore_LL_GetModelID;
+            transport_cb.get_model_id_cb = IoTHubClientCore_LL_GetModelId;
 
             if (client_config != NULL)
             {
@@ -3009,7 +3009,7 @@ int IoTHubClientCore_LL_GetTransportCallbacks(TRANSPORT_CALLBACKS_INFO* transpor
         transport_cb->msg_input_cb = IoTHubClientCore_LL_MessageCallbackFromInput;
         transport_cb->msg_cb = IoTHubClientCore_LL_MessageCallback;
         transport_cb->method_complete_cb = IoTHubClientCore_LL_DeviceMethodComplete;
-        transport_cb->get_model_id_cb = IoTHubClientCore_LL_GetModelID;
+        transport_cb->get_model_id_cb = IoTHubClientCore_LL_GetModelId;
         result = 0;
     }
     return result;
