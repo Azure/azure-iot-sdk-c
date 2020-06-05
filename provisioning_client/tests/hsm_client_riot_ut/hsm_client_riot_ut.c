@@ -63,6 +63,7 @@ MOCKABLE_FUNCTION(, int, X509MakeDeviceCert, DERBuilderContext*, DeviceIDCert, R
 MOCKABLE_FUNCTION(, int, X509GetAliasCertTBS, DERBuilderContext*, Tbs, RIOT_X509_TBS_DATA*, TbsData, RIOT_ECC_PUBLIC*, AliasKeyPub, RIOT_ECC_PUBLIC*, DevIdKeyPub, uint8_t*, Fwid, uint32_t, FwidLen);
 MOCKABLE_FUNCTION(, int, X509GetDERCsrTbs, DERBuilderContext*, Context, RIOT_X509_TBS_DATA*, TbsData, RIOT_ECC_PUBLIC*, DeviceIDPub);
 MOCKABLE_FUNCTION(, int, X509GetDERCsr, DERBuilderContext*, Context, RIOT_ECC_SIGNATURE*, Signature);
+MOCKABLE_FUNCTION(, int, X509GetRootCertTBS, DERBuilderContext*, Tbs, RIOT_X509_TBS_DATA*, TbsData, RIOT_ECC_PUBLIC*, DevIdKeyPub);
 MOCKABLE_FUNCTION(, void, mbedtls_mpi_free, mbedtls_mpi*, X);
 MOCKABLE_FUNCTION(, void, mbedtls_ecp_point_free, mbedtls_ecp_point*, pt);
 
@@ -396,6 +397,8 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(X509GetDERCsr, 1);
         REGISTER_GLOBAL_MOCK_RETURN(X509GetDeviceCertTBS, 0);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(X509GetDeviceCertTBS, 1);
+        REGISTER_GLOBAL_MOCK_RETURN(X509GetRootCertTBS, 0);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(X509GetRootCertTBS, 1);
 
         REGISTER_GLOBAL_MOCK_HOOK(mbedtls_mpi_free, my_mbedtls_mpi_free);
         REGISTER_GLOBAL_MOCK_HOOK(mbedtls_ecp_point_free, my_mbedtls_ecp_point_free);
@@ -450,7 +453,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         // Expected calls preceeded by a commented number are members of calls_cannot_fail[] array
         // These calls are skipped in negative/fail testing
         STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 0
-        STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(X509GetAliasCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(X509MakeDeviceCert(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
@@ -502,7 +505,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
             STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
             STRICT_EXPECTED_CALL(RiotCrypt_DeriveEccKey(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
 
-            STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+            STRICT_EXPECTED_CALL(X509GetRootCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
             STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
 
             STRICT_EXPECTED_CALL(X509MakeRootCert(IGNORED_PTR_ARG, IGNORED_PTR_ARG));

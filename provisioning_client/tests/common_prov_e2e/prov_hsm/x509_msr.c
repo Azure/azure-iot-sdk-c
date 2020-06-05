@@ -108,22 +108,27 @@ static int generate_root_ca_info(X509_CERT_INFO* x509_info)
     RIOT_STATUS status;
     RIOT_ECC_SIGNATURE tbs_sig = { 0 };
 
-    // Generating "root"-signed DeviceID certificate
+    // Build the TBS (to be signed) region of CA_Root Certificate
     DERInitContext(&der_ctx, der_buffer, DER_MAX_TBS);
     DERInitContext(&der_pri_ctx, der_buffer, DER_MAX_TBS);
 
+    // Deriving the "root" signing key. This is intended for development purposes only.
+    // This key is used to sign the DeviceID certificate, the certificiate for
+    // this "root" key represents the "trusted" CA for the developer-mode
+    // server(s). Again, this is for development purposes only and (obviously)
+    // provides no meaningful security whatsoever.
     if ((status = RiotCrypt_DeriveEccKey(&x509_info->ca_root_pub, &x509_info->ca_root_priv,
         g_digest, RIOT_DIGEST_LENGTH, (const uint8_t*)RIOT_LABEL_ALIAS, lblSize(RIOT_LABEL_ALIAS))) != RIOT_SUCCESS)
     {
         LogError("Failure: RiotCrypt_DeriveEccKey returned invalid status %d.", status);
         result = MU_FAILURE;
     }
-    else if (X509GetDeviceCertTBS(&der_ctx, &X509_ROOT_TBS_DATA, &x509_info->ca_root_pub, (uint8_t*)&x509_info->ca_root_pub, sizeof(x509_info->ca_root_pub)) != 0)
+    else if (X509GetRootCertTBS(&der_ctx, &X509_ROOT_TBS_DATA, &x509_info->ca_root_pub) != 0)
     {
-        LogError("Failure: X509GetDeviceCertTBS");
+        LogError("Failure: X509GetRootCertTBS");
         result = MU_FAILURE;
     }
-    // Sign the DeviceID Certificate's TBS region
+    // Sign the CA_Root Certificate's TBS region
     else if ((status = RiotCrypt_Sign(&tbs_sig, der_ctx.Buffer, der_ctx.Position, &x509_info->ca_root_priv)) != RIOT_SUCCESS)
     {
         LogError("Failure: RiotCrypt_Sign returned invalid status %d.", status);
@@ -173,7 +178,7 @@ static int produce_device_cert(X509_CERT_INFO* x509_info)
 
     // Build the TBS (to be signed) region of DeviceID Certificate
     DERInitContext(&der_ctx, der_buffer, DER_MAX_TBS);
-    if (X509GetDeviceCertTBS(&der_ctx, &X509_DEVICE_TBS_DATA, &x509_info->device_id_pub, NULL, 0) != 0)
+    if (X509GetDeviceCertTBS(&der_ctx, &X509_DEVICE_TBS_DATA, &x509_info->device_id_pub, (uint8_t*)&x509_info->ca_root_pub, sizeof(x509_info->ca_root_pub)) != 0)
     {
         LogError("Failure: X509GetDeviceCertTBS");
         result = MU_FAILURE;

@@ -158,21 +158,27 @@ static int generate_root_ca_info(HSM_CLIENT_X509_INFO* riot_info)
     RIOT_STATUS status;
     RIOT_ECC_SIGNATURE tbs_sig = { 0 };
 
-    // Generating "root"-signed DeviceID certificate
+    // Build the TBS (to be signed) region of CA_Root Certificate
     DERInitContext(&der_ctx, der_buffer, DER_MAX_TBS);
     DERInitContext(&der_pri_ctx, der_buffer, DER_MAX_TBS);
+
+    // Deriving the "root" signing key. This is intended for development purposes only.
+    // This key is used to sign the DeviceID certificate, the certificiate for
+    // this "root" key represents the "trusted" CA for the developer-mode
+    // server(s). Again, this is for development purposes only and (obviously)
+    // provides no meaningful security whatsoever.
     if ((status = RiotCrypt_DeriveEccKey(&riot_info->ca_root_pub, &riot_info->ca_root_priv,
         g_digest, RIOT_DIGEST_LENGTH, (const uint8_t*)RIOT_LABEL_ALIAS, lblSize(RIOT_LABEL_ALIAS))) != RIOT_SUCCESS)
     {
         LogError("Failure: RiotCrypt_DeriveEccKey returned invalid status %d.", status);
         result = MU_FAILURE;
     }
-    else if (X509GetDeviceCertTBS(&der_ctx, &X509_ROOT_TBS_DATA, &riot_info->ca_root_pub, (uint8_t*)&riot_info->ca_root_pub, sizeof(riot_info->ca_root_pub)) != 0)
+    else if (X509GetRootCertTBS(&der_ctx, &X509_ROOT_TBS_DATA, &riot_info->ca_root_pub) != 0)
     {
-        LogError("Failure: X509GetDeviceCertTBS");
+        LogError("Failure: X509GetRootCertTBS");
         result = MU_FAILURE;
     }
-    // Sign the DeviceID Certificate's TBS region
+    // Sign the CA_Root Certificate's TBS region
     else if ((status = RiotCrypt_Sign(&tbs_sig, der_ctx.Buffer, der_ctx.Position, &riot_info->ca_root_priv)) != RIOT_SUCCESS)
     {
         LogError("Failure: RiotCrypt_Sign returned invalid status %d.", status);
@@ -270,6 +276,7 @@ static int produce_device_cert(HSM_CLIENT_X509_INFO* riot_info, CERTIFICATE_SIGN
             result = 0;
         }
     }
+    // Root signed
     else
     {
         // Generating "root"-signed DeviceID certificate
@@ -280,7 +287,7 @@ static int produce_device_cert(HSM_CLIENT_X509_INFO* riot_info, CERTIFICATE_SIGN
             result = MU_FAILURE;
         }
         // Sign the DeviceID Certificate's TBS region
-        else if ((status = RiotCrypt_Sign(&tbs_sig, der_ctx.Buffer, der_ctx.Position, &riot_info->device_id_priv)) != RIOT_SUCCESS)
+        else if ((status = RiotCrypt_Sign(&tbs_sig, der_ctx.Buffer, der_ctx.Position, &riot_info->ca_root_priv)) != RIOT_SUCCESS)
         {
             LogError("Failure: RiotCrypt_Sign returned invalid status %d.", status);
             result = MU_FAILURE;
@@ -785,7 +792,7 @@ char* hsm_client_riot_create_leaf_cert(HSM_CLIENT_HANDLE handle, const char* com
         LEAF_CERT_TBS_DATA.SubjectCommon = common_name;
 
         DERInitContext(&leaf_ctx, leaf_buffer, DER_MAX_TBS);
-        if (X509GetDeviceCertTBS(&leaf_ctx, &LEAF_CERT_TBS_DATA, &leaf_id_pub, NULL, 0) != 0)
+        if (X509GetAliasCertTBS(&leaf_ctx, &LEAF_CERT_TBS_DATA, &leaf_id_pub, &riot_info->device_id_pub, firmware_id, RIOT_DIGEST_LENGTH) != 0)
         {
             /* Codes_SRS_HSM_CLIENT_RIOT_07_032: [ If hsm_client_riot_create_leaf_cert encounters an error it shall return NULL. ] */
             LogError("Failure: X509GetDeviceCertTBS");
