@@ -41,13 +41,10 @@ typedef struct DIGITALTWIN_CLIENT_COMMAND_REQUEST_TAG
     const unsigned char* requestData;
     /** @brief Length of the request specified in requestData */
     size_t requestDataLen;
-    /** @brief A server generated string passed as part of the command.  This is used when sending responses to asynchronous commands to act as a correlation Id and/or for diagnostics purposes. */
+    /** @brief A server generated string passed as part of the command.  The application may optionally use this as a correlationId.  */
     const char* requestId;
 }
 DIGITALTWIN_CLIENT_COMMAND_REQUEST;
-
-/** @brief Command status code set to indicate an asynchronous command has been accepted */
-#define DIGITALTWIN_ASYNC_STATUS_CODE_PENDING 202
 
 /** @brief Version 1 of the structure <c>DIGITALTWIN_CLIENT_COMMAND_RESPONSE</c> is being provided by the device application to the Digital Twin SDK. */
 #define DIGITALTWIN_CLIENT_COMMAND_RESPONSE_VERSION_1  1
@@ -57,8 +54,7 @@ typedef struct DIGITALTWIN_CLIENT_COMMAND_RESPONSE_TAG
 {
     /** @brief The version *of the structure* that the SDK is passing.  This is *NOT* related to the server version. Currently <c>DIGITALTWIN_CLIENT_COMMAND_RESPONSE_VERSION_1</c> but would be incremented if new fields are added.  */
     unsigned int version;
-    /** @brief  Status code to map back to the server.  Roughly maps to HTTP status codes.  To indicate that this command has been accepted but that the final response is pending, set this to <c>DIGITALTWIN_ASYNC_STATUS_CODE_PENDING</c> and 
-                use <c>DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAsync</c> API for updates. */
+    /** @brief  Status code to map back to the server.  Roughly maps to HTTP status codes. */
     int status;
     /** @brief  Response payload to send to server.  This *MUST* be allocated with <c>malloc()</c> by the application.  The Digital Twin SDK takes responsibility for calling <c>free()</c> on this value when the structure is returned. */
     /** @warning This data must be valid JSON.  See conceptual documentation on data_format.md for more information. */
@@ -110,28 +106,6 @@ typedef struct DIGITALTWIN_CLIENT_PROPERTY_RESPONSE
     /** @brief    Friendly description string of current status of update. */
     const char* statusDescription;
 } DIGITALTWIN_CLIENT_PROPERTY_RESPONSE;
-
-/** @brief Version 1 of the structure <c>DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE</c> is being provided by the device application to the Digital Twin SDK. */
-#define DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE_VERSION_1 1 
-
-/** @brief  Structure filled in by the device application when it is updating an asynchronous command's status in the call to <c>DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAsync</c>. */
-typedef struct DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE_TAG
-{
-    /** @brief  The version of this structure (not the server version).  Currently must be <c>DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE_VERSION_1</c>. */
-    unsigned int version;
-    /** @brief  The command from the server that initiated the request that we are updating.  This comes from the structure <c>DIGITALTWIN_CLIENT_COMMAND_REQUEST</c> passed to the device application's command callback handler.  */
-    const char* commandName;
-    /** @brief  The requestId from the server that initiated the request that we are updating.  This comes from the structure <c>DIGITALTWIN_CLIENT_COMMAND_REQUEST</c> passed to the device application's command callback handler.  */
-    const char* requestId;
-    /** @brief  Payload that the device should send to the service. */
-    /** @warning This data must be valid JSON.  See conceptual documentation on data_format.md for more information. */
-    const unsigned char* propertyData;
-    /** @brief Length of the property specified in propertyData */
-    size_t propertyDataLen;
-    /** @brief  Status code to map back to the server.  Roughly maps to HTTP status codes.*/
-    int statusCode;
-} DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE;
-
 
 /** 
   @brief Function signature for callback that is invoked by the Digital Twin SDK when a desired property is available from the service.
@@ -205,21 +179,6 @@ typedef void(*DIGITALTWIN_REPORTED_PROPERTY_UPDATED_CALLBACK)(DIGITALTWIN_CLIENT
   @return N/A
 */
 typedef void(*DIGITALTWIN_CLIENT_TELEMETRY_CONFIRMATION_CALLBACK)(DIGITALTWIN_CLIENT_RESULT dtTelemetryStatus, void* userContextCallback);
-
-/** 
-  @brief Function signature for the callback that is invoked by the Digital Twin SDK when updating command's status asynchronously succeeds or fails.
-
-  @remarks When a device application invokes <c>DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAsync</c>, it may optionally include a function pointer callback with this signature.
-
-  @remarks When the Digital Twin either successfully sends the command status update to the service or fails, it will invoke this callback.
-
-  @param[in] dtUpdateAsyncCommandStatus         Status of the update operation.
-  @param[in] userContextCallback                Context pointer that was specified in the parameter <c>userContextCallback</c> during the device application's <c>DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAsync</c> call.
-
-  @return N/A
-*/
-typedef void(*DIGITALTWIN_CLIENT_UPDATE_ASYNC_COMMAND_CALLBACK)(DIGITALTWIN_CLIENT_RESULT dtUpdateAsyncCommandStatus, void* userContextCallback);
-
 
 /** 
   @brief Creates a <c>DIGITALTWIN_INTERFACE_CLIENT_HANDLE</c>
@@ -333,28 +292,6 @@ MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_InterfaceClient_SendT
 */
 
 MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_InterfaceClient_ReportPropertyAsync, DIGITALTWIN_INTERFACE_CLIENT_HANDLE, dtInterfaceClientHandle, const char*, propertyName, const unsigned char*, propertyData, size_t, propertyDataLen, const DIGITALTWIN_CLIENT_PROPERTY_RESPONSE*, dtResponse, DIGITALTWIN_REPORTED_PROPERTY_UPDATED_CALLBACK, dtReportedPropertyCallback, void*, userContextCallback);
-
-/** 
-  @brief Sends an update of the status of a pending asynchronous command.
-
-  @remarks Devices must return quickly while processing command execution callbacks in their <c>DIGITALTWIN_COMMAND_EXECUTE_CALLBACK</c> callback.  Commands that
-           take longer to run - such as running a diagnostic - may be modeled as "asynchronous" commands in the Digital Twin Definition Language.
-
-  @remarks The device application invokes <c>DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAsync</c> to update the status of an asynchronous command.  This status
-           could indicate a success, a fatal failure, or else that the command is still running and provide some simple progress.
-
-  @remarks Values specified in the <c>DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE</c> - in particular the <c>commandName</c> that initiated the request and its <c>requestId</c> - are
-           specified in the initial command callback's passed in <c>DIGITALTWIN_CLIENT_COMMAND_REQUES</c>T.
-
-  @param[in] dtInterfaceClientHandle        Handle for the interface client.
-  @param[in] dtClientAsyncCommandUpdate     <c>DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE</c> containing updates about the status to send to the server.
-  @param[in] dtUpdateAsyncCommandCallback   (Optional) Function pointer to be invoked when the update is successfully delivered or fails.
-  @param[in] userContextCallback            (Optional) Context pointer passed to dtUpdateAsyncCommandCallback function when it is invoked.
-
-  @returns  A DIGITALTWIN_CLIENT_RESULT.
-*/
-
-MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAsync, DIGITALTWIN_INTERFACE_CLIENT_HANDLE, dtInterfaceClientHandle, const DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE*, dtClientAsyncCommandUpdate, DIGITALTWIN_CLIENT_UPDATE_ASYNC_COMMAND_CALLBACK, dtUpdateAsyncCommandCallback, void*, userContextCallback);
 
 /** 
   @brief Destroys interface handle

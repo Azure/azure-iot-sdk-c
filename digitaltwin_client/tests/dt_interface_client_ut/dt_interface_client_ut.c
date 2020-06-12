@@ -112,7 +112,6 @@ MOCKABLE_FUNCTION(, void, testDTClientTelemetryConfirmationCallback, DIGITALTWIN
 MOCKABLE_FUNCTION(, void, testDTClientReportedPropertyCallback, DIGITALTWIN_CLIENT_RESULT, dtReportedStatus, void*, userContextCallback);
 MOCKABLE_FUNCTION(, void, testDTClientCommandCallback, const DIGITALTWIN_CLIENT_COMMAND_REQUEST*, dtClientCommandContext, DIGITALTWIN_CLIENT_COMMAND_RESPONSE*, dtClientCommandResponseContext, void*, userInterfaceContext);
 MOCKABLE_FUNCTION(, void, testDTClientPropertyUpdate, const DIGITALTWIN_CLIENT_PROPERTY_UPDATE*, dtClientPropertyUpdate, void*, userInterfaceContext);
-MOCKABLE_FUNCTION(, void, testDTClientUpdateAsyncCallback, DIGITALTWIN_CLIENT_RESULT, dtUpdateAsyncCommandStatus, void*, userContextCallback);
 #undef ENABLE_MOCKS
 
 static void* testBindingIotHubBindingLockHandle = (void*)0x1221;
@@ -155,8 +154,6 @@ static void* testDTCommandCallbackContext = (void*)0x1237;
 static void* testDTPropertyCallbackContext = (void*)0x1238;
 
 #define DT_TEST_COMMAND_NAME   "DTTestCallbackCommand"
-
-static const char DT_TEST_ASYNC_UPDATING_COMMAND_NAME[] = "TestAsyncUpdatingCommand";
 
 typedef enum DT_TEST_EXPECTED_COMMAND_CALLBACK_TAG
 {
@@ -241,27 +238,6 @@ static char dtTestCommandResponse3[] = "Payload of response for command3";
 static const size_t dtTestCommandResponseLen3 = sizeof(dtTestCommandResponse3) - 1;
 static const int dtTestCommandResponseStatus3 = 3;
 static char dtTestJsonNull[] = "null";
-
-
-static const char dtTestAsyncCommandRequestId[] = DT_TEST_COMMAND_REQUEST_ID;
-
-#define DT_TEST_ASYNC_COMMAND_RESPONSE_1 "Payload of response for async command1"
-static char dtTestAsyncCommandResponse1[] = DT_TEST_ASYNC_COMMAND_RESPONSE_1;
-static const size_t dtTestAsyncCommandResponseLen1 = sizeof(dtTestAsyncCommandResponse1) - 1;
-static const int dtTestAsyncCommandResponseStatus1 = DIGITALTWIN_ASYNC_STATUS_CODE_PENDING;
-static const char dtTestAsyncCommandResponseExpected1[] = "{\"payload\":" DT_TEST_ASYNC_COMMAND_RESPONSE_1 "," "\"requestId\":" DT_TEST_COMMAND_REQUEST_ID "}";
-
-#define DT_TEST_ASYNC_COMMAND_RESPONSE_2 "Payload of response for async command2"
-static char dtTestAsyncCommandResponse2[] = DT_TEST_ASYNC_COMMAND_RESPONSE_2;
-static const size_t dtTestAsyncCommandResponseLen2 = sizeof(dtTestAsyncCommandResponse2) - 1;
-static const int dtTestAsyncCommandResponseStatus2 = 5;
-static const char dtTestAsyncCommandResponseExpected2[] = "{\"payload\":" DT_TEST_ASYNC_COMMAND_RESPONSE_2 "," "\"requestId\":" DT_TEST_COMMAND_REQUEST_ID "}";
-
-#define DT_TEST_ASYNC_COMMAND_RESPONSE_3 "Payload of response for async command3"
-static char dtTestAsyncCommandResponse3[] = DT_TEST_ASYNC_COMMAND_RESPONSE_3;
-static const size_t dtTestAsyncCommandResponseLen3 = sizeof(dtTestAsyncCommandResponse3) - 1;
-static const int dtTestAsyncCommandResponseStatus3 = DIGITALTWIN_ASYNC_STATUS_CODE_PENDING;
-static const char dtTestAsyncCommandResponseExpected3[] = "{\"payload\":" DT_TEST_ASYNC_COMMAND_RESPONSE_3 "," "\"requestId\":" DT_TEST_COMMAND_REQUEST_ID "}";
 
 #define DT_TEST_PROPERTY_1_CONTENT_NO_BRACES "\"DTTestProperty1\": { \"value\":  \"Prop1-Value\" }"
 #define DT_TEST_PROPERTY_2_CONTENT_NO_BRACES "\"DTTestProperty2\": { \"value\":  \"Prop2-Value\" }"
@@ -429,8 +405,6 @@ static const size_t DT_TEST_Invalid_DtmiInterfacesLen = sizeof(DT_TEST_Invalid_D
 // If mocked command callback is invoked, whether or not it should set a response or else leave it as NULL
 static bool intefaceClient_CommandCallbackSetsData;
 
-
-// What we expect DigitalTwin SDK to serialize to dtTestAsyncCommandExpectedResponseFromDT when doing async/pending results.
 static void dtTestVerifyCommandCallbackRequest(const DIGITALTWIN_CLIENT_COMMAND_REQUEST* dtClientCommandContext, const char* expectedCommandName, void* userInterfaceContext)
 {
     ASSERT_ARE_EQUAL(int, DIGITALTWIN_CLIENT_COMMAND_REQUEST_VERSION_1, dtClientCommandContext->version, "Client command version doesn't match");
@@ -524,7 +498,6 @@ static void testDTClientSendTelemetryCallback(DIGITALTWIN_CLIENT_RESULT dtTeleme
 
 static void* testDTClientSendTelemetryCallbackContext = (void*)0x1259;
 static void* dtClientReportedStatusCallbackContext = (void*)0x1260;
-static void* testDTClientUpdateAsyncCommandCallbackContext = (void*)0x1261;
 
 static IOTHUB_MESSAGE_HANDLE my_IoTHubMessage_CreateFromByteArray(const unsigned char* byteArray, size_t size)
 {
@@ -572,16 +545,6 @@ static STRING_HANDLE my_STRING_from_byte_array(const unsigned char* source, size
     (void)source;
     (void)size;
     return (STRING_HANDLE)my_gballoc_malloc(1);
-}
-
-static char* my_UUID_to_string(const UUID_T* uuid)
-{
-    (void)uuid;
-    char* result;
-    // We allocate for real because the SDK caller frees.  The UT itself checks that the request ID
-    // is put into the json envelope correctly so cannot just return random data here.
-    ASSERT_ARE_EQUAL(int, 0, real_mallocAndStrcpy_s(&result, dtTestAsyncCommandRequestId));
-    return result;
 }
 
 static const char dtTestPropertyDataToReport[] = "Data to report for UT";
@@ -693,8 +656,6 @@ TEST_SUITE_INITIALIZE(suite_init)
 
     REGISTER_GLOBAL_MOCK_RETURN(UUID_generate, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(UUID_generate, MU_FAILURE);
-    REGISTER_GLOBAL_MOCK_HOOK(UUID_to_string, my_UUID_to_string);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(UUID_to_string, NULL);
 
     REGISTER_GLOBAL_MOCK_HOOK(STRING_from_byte_array, my_STRING_from_byte_array);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_from_byte_array, NULL);
@@ -2740,14 +2701,8 @@ static void set_expected_calls_for_DT_InterfaceClient_InvokeCommandIfSupported_j
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
 }
 
-static void set_expected_calls_for_DT_InterfaceClient_InvokeCommandIfSupported_resource_deallocation(bool testingAsync)
+static void set_expected_calls_for_DT_InterfaceClient_InvokeCommandIfSupported_resource_deallocation()
 {
-    if (testingAsync)
-    {
-        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    }
-
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
 }
@@ -2762,7 +2717,7 @@ static void set_expected_calls_for_DT_InterfaceClient_InvokeCommandIfSupported(i
             set_expected_calls_for_BeginInterfaceCallbackProcessing();
             STRICT_EXPECTED_CALL(testDTClientCommandCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
             set_expected_calls_for_EndInterfaceCallbackProcessing();
-            set_expected_calls_for_DT_InterfaceClient_InvokeCommandIfSupported_resource_deallocation(false);
+            set_expected_calls_for_DT_InterfaceClient_InvokeCommandIfSupported_resource_deallocation();
         break;
 
         case DT_TEST_EXPECTED_COMMAND_SYNC_CALLBACK_RETURNS_NULL_RESPONSE:
@@ -2771,7 +2726,7 @@ static void set_expected_calls_for_DT_InterfaceClient_InvokeCommandIfSupported(i
             STRICT_EXPECTED_CALL(testDTClientCommandCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
             set_expected_calls_for_EndInterfaceCallbackProcessing();
-            set_expected_calls_for_DT_InterfaceClient_InvokeCommandIfSupported_resource_deallocation(false);
+            set_expected_calls_for_DT_InterfaceClient_InvokeCommandIfSupported_resource_deallocation();
         break;
 
         case DT_TEST_EXPECTED_INTERFACE_NO_MATCH:
@@ -3013,145 +2968,6 @@ TEST_FUNCTION(DT_InterfaceClient_InvokeCommandIfSupported_fail)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAsync
-///////////////////////////////////////////////////////////////////////////////
-static void set_expected_calls_for_DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAsync()
-{
-    set_expected_calls_for_IsInterfaceRegisteredWithCloud();
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-    set_expected_calls_for_DT_InterfaceClient_CreateTelemetryMessage(true);
-    STRICT_EXPECTED_CALL(IoTHubMessage_SetProperty(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_SetProperty(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_SetProperty(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(DT_ClientCoreSendTelemetryAsync(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-}
-
-// Helper to test various permutations of invalid DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE fields
-static void testDT_UpdateAsyncCommandStatus_AsyncUpdateStruct_invalid(const DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE* dtClientAsyncCommandUpdate)
-{
-    //arrange
-    DIGITALTWIN_INTERFACE_CLIENT_HANDLE h = test_allocate_and_register_DT_interface_with_callbacks_specifying_commands(testDTClientCommandCallback);
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-
-    //act
-    DIGITALTWIN_CLIENT_RESULT result = DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAsync(h, dtClientAsyncCommandUpdate, NULL, NULL);
-    
-    //assert
-    ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG, result);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-    //cleanup
-    test_free_bound_interface_handle(h);
-}
-
-static void testDT_SetAsyncUpdate(DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE* dtClientAsyncCommandUpdate)
-{
-    memset(dtClientAsyncCommandUpdate, 0, sizeof(*dtClientAsyncCommandUpdate));
-    dtClientAsyncCommandUpdate->version = DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE_VERSION_1;
-    dtClientAsyncCommandUpdate->commandName = DT_TEST_ASYNC_UPDATING_COMMAND_NAME;
-    dtClientAsyncCommandUpdate->requestId = dtTestAsyncCommandRequestId;
-    dtClientAsyncCommandUpdate->propertyData  = (unsigned char *)dtTestAsyncCommandResponse3;
-    dtClientAsyncCommandUpdate->propertyDataLen = dtTestAsyncCommandResponseLen3;
-    dtClientAsyncCommandUpdate->statusCode = DIGITALTWIN_ASYNC_STATUS_CODE_PENDING;
-}
-
-TEST_FUNCTION(DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAsync_ok)
-{
-    //arrange
-    DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE dtClientAsyncCommandUpdate;
-    testDT_SetAsyncUpdate(&dtClientAsyncCommandUpdate);
-
-    DIGITALTWIN_INTERFACE_CLIENT_HANDLE h = test_allocate_and_register_DT_interface_with_callbacks_specifying_commands(testDTClientCommandCallback);
-    set_expected_calls_for_DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAsync();
-
-    //act
-    DIGITALTWIN_CLIENT_RESULT result = DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAsync(h, &dtClientAsyncCommandUpdate, NULL, NULL);
-    
-    //assert
-    ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-    //cleanup
-    test_free_bound_interface_handle(h);
-    free(clientCore_SendTelemetryAsync_userContext);
-}
-
-TEST_FUNCTION(DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAsync_NULL_asyncUpdate)
-{
-    testDT_UpdateAsyncCommandStatus_AsyncUpdateStruct_invalid(NULL);
-}
-
-TEST_FUNCTION(DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAsync_invalid_version_fail)
-{
-    DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE dtClientAsyncCommandUpdate;
-    testDT_SetAsyncUpdate(&dtClientAsyncCommandUpdate);
-    dtClientAsyncCommandUpdate.version = 2;
-    testDT_UpdateAsyncCommandStatus_AsyncUpdateStruct_invalid(&dtClientAsyncCommandUpdate);
-}
-
-TEST_FUNCTION(DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAsync_NULL_command_fail)
-{
-    DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE dtClientAsyncCommandUpdate;
-    testDT_SetAsyncUpdate(&dtClientAsyncCommandUpdate);
-    dtClientAsyncCommandUpdate.commandName = NULL;
-    testDT_UpdateAsyncCommandStatus_AsyncUpdateStruct_invalid(&dtClientAsyncCommandUpdate);
-}
-
-TEST_FUNCTION(DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAsync_NULL_requestId_fail)
-{
-    DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE dtClientAsyncCommandUpdate;
-    testDT_SetAsyncUpdate(&dtClientAsyncCommandUpdate);
-    dtClientAsyncCommandUpdate.requestId = NULL;
-    testDT_UpdateAsyncCommandStatus_AsyncUpdateStruct_invalid(&dtClientAsyncCommandUpdate);
-}
-
-TEST_FUNCTION(DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAsync_NULL_propertyData_fail)
-{
-    DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE dtClientAsyncCommandUpdate;
-    testDT_SetAsyncUpdate(&dtClientAsyncCommandUpdate);
-    dtClientAsyncCommandUpdate.propertyData = NULL;
-    testDT_UpdateAsyncCommandStatus_AsyncUpdateStruct_invalid(&dtClientAsyncCommandUpdate);
-}
-
-TEST_FUNCTION(DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAsync_fail)
-{
-    // arrange
-    DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE dtClientAsyncCommandUpdate;
-    testDT_SetAsyncUpdate(&dtClientAsyncCommandUpdate);
-    DIGITALTWIN_INTERFACE_CLIENT_HANDLE h = test_allocate_and_register_DT_interface_with_callbacks_specifying_commands(testDTClientCommandCallback);
-
-    int negativeTestsInitResult = umock_c_negative_tests_init();
-    ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
-
-    set_expected_calls_for_DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAsync();
-    umock_c_negative_tests_snapshot();
-
-    size_t count = umock_c_negative_tests_call_count();
-    for (size_t i = 0; i < count; i++)
-    {
-        if (umock_c_negative_tests_can_call_fail(i))
-        {
-            umock_c_negative_tests_reset();
-            umock_c_negative_tests_fail_call(i);
-
-            DIGITALTWIN_CLIENT_RESULT result = DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAsync(h, &dtClientAsyncCommandUpdate, NULL, NULL);
-            
-            //assert
-            ASSERT_ARE_NOT_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result);
-        }
-    }
-
-    //cleanup
-    test_free_bound_interface_handle(h);
-    umock_c_negative_tests_deinit();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // DT_InterfaceClient_ProcessTelemetryCallback
 ///////////////////////////////////////////////////////////////////////////////
 static void set_expected_calls_for_DT_InterfaceClient_ProcessTelemetryCallback(DIGITALTWIN_CLIENT_RESULT expectedDTSendTelemetryStatus, void* expectedUserContextCallback)
@@ -3186,39 +3002,6 @@ static void test_DT_InterfaceClient_ProcessTelemetryCallback_for_telemetry_send(
     test_free_bound_interface_handle(h);
 }
 
-static void test_DT_InterfaceClient_ProcessTelemetryCallback_for_callback_after_updateasync_command(DIGITALTWIN_CLIENT_RESULT expectedAsyncCommandCallbackResult)
-{
-    //arrange
-    DIGITALTWIN_INTERFACE_CLIENT_HANDLE h = test_allocate_and_register_DT_interface_with_callbacks();
-
-    DIGITALTWIN_CLIENT_ASYNC_COMMAND_UPDATE dtClientAsyncCommandUpdate;
-    testDT_SetAsyncUpdate(&dtClientAsyncCommandUpdate);
-
-    // Need to initiate an update async command so that there's a context to callback onto.
-    set_expected_calls_for_DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAsync();
-
-    DIGITALTWIN_CLIENT_RESULT result = DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAsync(h, &dtClientAsyncCommandUpdate, testDTClientUpdateAsyncCallback, testDTClientUpdateAsyncCommandCallbackContext);
-
-    ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result);
-    ASSERT_IS_NOT_NULL(clientCore_SendTelemetryAsync_userContext, "User context not set during mocked client core sendTelemetry callback");
-    umock_c_reset_all_calls();
-
-    set_expected_calls_for_BeginInterfaceCallbackProcessing();
-    STRICT_EXPECTED_CALL(testDTClientUpdateAsyncCallback(expectedAsyncCommandCallbackResult, testDTClientUpdateAsyncCommandCallbackContext));
-    set_expected_calls_for_EndInterfaceCallbackProcessing();
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-
-    //act
-    result = DT_InterfaceClient_ProcessTelemetryCallback(h, expectedAsyncCommandCallbackResult, clientCore_SendTelemetryAsync_userContext);
-
-    //assert
-    ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-    //cleanup
-    test_free_bound_interface_handle(h);
-}
-
 
 TEST_FUNCTION(DT_InterfaceClient_ProcessTelemetryCallback_for_telemetry_send_ok)
 {
@@ -3228,16 +3011,6 @@ TEST_FUNCTION(DT_InterfaceClient_ProcessTelemetryCallback_for_telemetry_send_ok)
 TEST_FUNCTION(DT_InterfaceClient_ProcessTelemetryCallback_for_telemetry_send_caller_sets_error)
 {
     test_DT_InterfaceClient_ProcessTelemetryCallback_for_telemetry_send(DIGITALTWIN_CLIENT_ERROR);
-}
-
-TEST_FUNCTION(DT_InterfaceClient_ProcessTelemetryCallback_for_update_async_command_callback_ok)
-{
-    test_DT_InterfaceClient_ProcessTelemetryCallback_for_callback_after_updateasync_command(DIGITALTWIN_CLIENT_OK);
-}
-
-TEST_FUNCTION(DT_InterfaceClient_ProcessTelemetryCallback_for_update_async_command_callback_caller_sets_error)
-{
-    test_DT_InterfaceClient_ProcessTelemetryCallback_for_callback_after_updateasync_command(DIGITALTWIN_CLIENT_ERROR);
 }
 
 
