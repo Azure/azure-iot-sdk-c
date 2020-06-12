@@ -15,6 +15,7 @@
 #include "azure_uamqp_c/amqp_definitions_application_properties.h"
 
 #include "internal/iothubtransportamqp_methods.h"
+#include "internal/iothub_internal_consts.h"
 
 typedef enum SUBSCRIBE_STATE_TAG
 {
@@ -602,8 +603,8 @@ static int set_link_attach_properties(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iothub
                     }
                     else
                     {
-                        /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_151: [ A property value of type string that shall contain the `2016-11-14` shall be created by calling `amqpvalue_create_string`. ]*/
-                        AMQP_VALUE api_version_property_value = amqpvalue_create_string("2016-11-14");
+                        /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_151: [ A property value of type string that shall contain the `Current API version` shall be created by calling `amqpvalue_create_string`. ]*/
+                        AMQP_VALUE api_version_property_value = amqpvalue_create_string(IOTHUB_API_VERSION);
                         if (api_version_property_value == NULL)
                         {
                             /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_145: [ If any call for creating or setting the link attach properties fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/

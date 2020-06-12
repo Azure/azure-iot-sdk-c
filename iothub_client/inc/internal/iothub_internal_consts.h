@@ -9,7 +9,7 @@ extern "C"
 {
 #endif
 
-    static const char* IOTHUB_API_VERSION = "2017-11-08-preview";
+    static const char* IOTHUB_API_VERSION = "2019-10-01";
     // TODO: https://github.com/Azure/azure-iot-sdk-c/issues/1547 tracks removing this preview 
     // variable once the underlying logic is enabled on all IoTHubs.
     static const char* IOTHUB_API_PREVIEW_VERSION = "2020-05-31-preview";
