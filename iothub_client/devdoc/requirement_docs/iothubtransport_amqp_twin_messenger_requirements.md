@@ -110,7 +110,7 @@ azure_uamqp_c
 
 **SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_015: [**`amqp_msgr_config` shall have "twin/" as send link target suffix and receive link source suffix**]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_016: [**`amqp_msgr_config` shall have send and receive link attach properties set as "com.microsoft:client-version" = `twin_msgr->client_version`, "com.microsoft:channel-correlation-id" = `twin:<UUID>`, "com.microsoft:api-version" = "2016-11-14"**]**
+**SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_016: [**`amqp_msgr_config` shall have send and receive link attach properties set as "com.microsoft:client-version" = `twin_msgr->client_version`, "com.microsoft:channel-correlation-id" = `twin:<UUID>`, "com.microsoft:api-version" = "Current API version"**]**
 
 **SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_017: [**`amqp_msgr_config` shall be set with `on_amqp_messenger_state_changed_callback` and `on_amqp_messenger_subscription_changed_callback` callbacks**]**
 

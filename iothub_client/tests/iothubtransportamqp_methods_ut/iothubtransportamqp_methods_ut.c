@@ -66,6 +66,7 @@ extern "C"
 #undef ENABLE_MOCKS
 
 #include "internal/iothubtransportamqp_methods.h"
+#include "internal/iothub_internal_consts.h"
 
 static IOTHUBTRANSPORT_AMQP_METHOD_HANDLE g_method_handle;
 static int g_respond_result;
@@ -450,7 +451,7 @@ static void setup_subscribe_expected_calls(bool testing_modules)
     STRICT_EXPECTED_CALL(amqpvalue_set_map_value(LINK_ATTACH_PROPERTIES_MAP, CHANNEL_CORRELATION_ID_KEY, CHANNEL_CORRELATION_ID_VALUE));
     STRICT_EXPECTED_CALL(amqpvalue_create_symbol("com.microsoft:api-version"))
         .SetReturn(API_VERSION_KEY);
-    STRICT_EXPECTED_CALL(amqpvalue_create_string("2016-11-14"))
+    STRICT_EXPECTED_CALL(amqpvalue_create_string(IOTHUB_API_VERSION))
         .SetReturn(API_VERSION_VALUE);
     STRICT_EXPECTED_CALL(amqpvalue_set_map_value(LINK_ATTACH_PROPERTIES_MAP, API_VERSION_KEY, API_VERSION_VALUE));
     STRICT_EXPECTED_CALL(link_set_attach_properties(TEST_SENDER_LINK, LINK_ATTACH_PROPERTIES_MAP));
@@ -896,7 +897,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_destroy_frees_2_tracked_handles)
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_142: [ A property value of type string that shall contain the device id (and "/" + module id if module is present) shall be created by calling `amqpvalue_create_string`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_143: [ The `com.microsoft:channel-correlation-id` shall be added to the link attach properties by calling `amqpvalue_set_map_value`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_150: [ A property key which shall be a symbol named `com.microsoft:api-version` shall be created by calling `amqp_create_symbol`. ]*/
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_151: [ A property value of type string that shall contain the `2016-11-14` shall be created by calling `amqpvalue_create_string`. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_151: [ A property value of type string that shall contain the `Current API version` shall be created by calling `amqpvalue_create_string`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_152: [ The `com.microsoft:api-version` shall be added to the link attach properties by calling `amqpvalue_set_map_value`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_144: [ The link attach properties shall be set on the receiver and sender link by calling `link_set_attach_properties`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_146: [ The link attach properties and all associated values shall be freed by calling `amqpvalue_destroy` after setting the link attach properties. ]*/
@@ -952,7 +953,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_subscribe_creates_links_and_sender_and
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_142: [ A property value of type string that shall contain the device id (and "/" + module id if module is present) shall be created by calling `amqpvalue_create_string`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_143: [ The `com.microsoft:channel-correlation-id` shall be added to the link attach properties by calling `amqpvalue_set_map_value`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_150: [ A property key which shall be a symbol named `com.microsoft:api-version` shall be created by calling `amqp_create_symbol`. ]*/
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_151: [ A property value of type string that shall contain the `2016-11-14` shall be created by calling `amqpvalue_create_string`. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_151: [ A property value of type string that shall contain the `Current API version` shall be created by calling `amqpvalue_create_string`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_152: [ The `com.microsoft:api-version` shall be added to the link attach properties by calling `amqpvalue_set_map_value`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_144: [ The link attach properties shall be set on the receiver and sender link by calling `link_set_attach_properties`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_146: [ The link attach properties and all associated values shall be freed by calling `amqpvalue_destroy` after setting the link attach properties. ]*/
@@ -1289,7 +1290,7 @@ TEST_FUNCTION(when_a_failure_occurs_iothubtransportamqp_methods_subscribe_fails)
         .SetFailReturn(42);
     STRICT_EXPECTED_CALL(amqpvalue_create_symbol("com.microsoft:api-version"))
         .SetReturn(API_VERSION_KEY).SetFailReturn(NULL);
-    STRICT_EXPECTED_CALL(amqpvalue_create_string("2016-11-14"))
+    STRICT_EXPECTED_CALL(amqpvalue_create_string(IOTHUB_API_VERSION))
         .SetReturn(API_VERSION_VALUE).SetFailReturn(NULL);
     STRICT_EXPECTED_CALL(amqpvalue_set_map_value(LINK_ATTACH_PROPERTIES_MAP, API_VERSION_KEY, API_VERSION_VALUE))
         .SetFailReturn(42);
