@@ -12,9 +12,7 @@
 // Logic to tie test commands into DigitalTwin framework and the test's main()
 //*****************************************************************************
 
-// Interface name for telemetry testing
-static const char DT_E2E_Telemetry_InterfaceId[] = "dtmi:azureiot:testinterfaces:cdevicesdk:telemetry;1";
-static const char DT_E2E_Telemetry_InterfaceName[] = "testTelemetry";
+static const char DT_E2E_Telemetry_ComponentName[] = "testTelemetry";
 
 // Command names that the service SDK invokes to invoke tests on this interface
 static const char* DT_E2E_telemetry_commandNames[] = { 
@@ -65,9 +63,9 @@ DIGITALTWIN_INTERFACE_CLIENT_HANDLE DT_E2E_Telemetry_CreateInterface(void)
 
     memset(&DT_E2E_TelemetryTest_Context, 0, sizeof(DT_E2E_TelemetryTest_Context));
    
-    if ((result =  DigitalTwin_InterfaceClient_Create(DT_E2E_Telemetry_InterfaceId, DT_E2E_Telemetry_InterfaceName, NULL, &DT_E2E_TelemetryTest_Context, &interfaceHandle)) != DIGITALTWIN_CLIENT_OK)
+    if ((result =  DigitalTwin_InterfaceClient_Create(DT_E2E_Telemetry_ComponentName, NULL, &DT_E2E_TelemetryTest_Context, &interfaceHandle)) != DIGITALTWIN_CLIENT_OK)
     {
-        LogError("TEST_TELEMETRY_INTERFACE: Unable to allocate interface client handle for <%s>, error=<%d>", DT_E2E_Telemetry_InterfaceName, result);
+        LogError("TEST_TELEMETRY_INTERFACE: Unable to allocate interface client handle for <%s>, error=<%d>", DT_E2E_Telemetry_ComponentName, result);
         interfaceHandle = NULL;
     }
     else if ((result =  DigitalTwin_InterfaceClient_SetCommandsCallback(interfaceHandle, DT_E2E_TelemetryCommandCallbackProcess, &DT_E2E_TelemetryTest_Context)) != DIGITALTWIN_CLIENT_OK)
@@ -79,7 +77,7 @@ DIGITALTWIN_INTERFACE_CLIENT_HANDLE DT_E2E_Telemetry_CreateInterface(void)
     else
     {
         DT_E2E_TelemetryTest_Context.interfaceHandle = interfaceHandle;
-        LogInfo("TEST_TELEMETRY_INTERFACE: Created DIGITALTWIN_INTERFACE_CLIENT_HANDLE.  InterfaceName=<%s>, handle=<%p>", DT_E2E_Telemetry_InterfaceName, interfaceHandle);
+        LogInfo("TEST_TELEMETRY_INTERFACE: Created DIGITALTWIN_INTERFACE_CLIENT_HANDLE.  ComponentName=<%s>, handle=<%p>", DT_E2E_Telemetry_ComponentName, interfaceHandle);
     }
 
     return interfaceHandle;

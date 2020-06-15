@@ -113,12 +113,12 @@ static DIGITALTWIN_INTERFACE_CLIENT_HANDLE dtTestInterfaceArray[] = { DT_TEST_IN
 static const char* dtTestComponentNamesArray[] = { "Component1", "Component2", "Component3" };
 
 // The Dup* names below represent various permutations of how interface names can be duplicated in a given list.
-static const char* dtTestInterfaceNamesDup1[] = { "DuplicateName", "DuplicateName" };
-static const char* dtTestInterfaceNamesDup2[] = { "DuplicateName", "Unique1", "DuplicateName" };
-static const char* dtTestInterfaceNamesDup3[] = { "Unique1", "DuplicateName", "DuplicateName" };
-static const char* dtTestInterfaceNamesDup4[] = { "Unique1", "DuplicateName", "Unique2", "DuplicateName" };
-static const char* dtTestInterfaceNamesDup5[] = { "Unique1", "Unique2", "DuplicateName", "DuplicateName" };
-static const char* dtTestInterfaceNamesDup6[] = { "DuplicateName", "Unique1", "Unique2","DuplicateName" };
+static const char* dtTestComponentNamesDup1[] = { "DuplicateName", "DuplicateName" };
+static const char* dtTestComponentNamesDup2[] = { "DuplicateName", "Unique1", "DuplicateName" };
+static const char* dtTestComponentNamesDup3[] = { "Unique1", "DuplicateName", "DuplicateName" };
+static const char* dtTestComponentNamesDup4[] = { "Unique1", "DuplicateName", "Unique2", "DuplicateName" };
+static const char* dtTestComponentNamesDup5[] = { "Unique1", "Unique2", "DuplicateName", "DuplicateName" };
+static const char* dtTestComponentNamesDup6[] = { "DuplicateName", "Unique1", "Unique2","DuplicateName" };
 
 
 static const char* testDTTwinPayload = "testPayload";
@@ -815,15 +815,6 @@ TEST_FUNCTION(DT_ClientCoreRegisterInterfaces_device_method_not_processed_fails)
     testDT_command(DT_COMMAND_PROCESSOR_NOT_APPLICABLE, 500, 404, NULL, dtTestMethodNotPresentResponse);
 }
 
-/*
-static const char* dtTestInterfaceNamesDup1[] = { "DuplicateName", "DuplicateName" };
-static const char* dtTestInterfaceNamesDup2[] = { "DuplicateName", "Unique1", DuplicateName" };
-static const char* dtTestInterfaceNamesDup3[] = { "Unique1", "DuplicateName", "DuplicateName" };
-static const char* dtTestInterfaceNamesDup4[] = { "Unique1", "DuplicateName", "Unique2", DuplicateName" };
-static const char* dtTestInterfaceNamesDup5[] = { "Unique1", "Unique2", "DuplicateName", "DuplicateName" };
-static const char* dtTestInterfaceNamesDup6[] = { "DuplicateName", "Unique1", "Unique2","DuplicateName" };
-*/
-
 static void test_duplicate_interfaces(int numInterfaces, const char** componentNames)
 {
     //arrange
@@ -842,32 +833,32 @@ static void test_duplicate_interfaces(int numInterfaces, const char** componentN
 
 TEST_FUNCTION(DT_ClientCoreRegisterInterfaces_duplicate_interfaces_only_dups_fail)
 {
-    test_duplicate_interfaces(2, dtTestInterfaceNamesDup1);
+    test_duplicate_interfaces(2, dtTestComponentNamesDup1);
 }
 
 TEST_FUNCTION(DT_ClientCoreRegisterInterfaces_duplicate_interfaces_dups_separated_fail)
 {
-    test_duplicate_interfaces(3, dtTestInterfaceNamesDup2);
+    test_duplicate_interfaces(3, dtTestComponentNamesDup2);
 }
 
 TEST_FUNCTION(DT_ClientCoreRegisterInterfaces_duplicate_interfaces_dups_come_last_fail)
 {
-    test_duplicate_interfaces(3, dtTestInterfaceNamesDup3);
+    test_duplicate_interfaces(3, dtTestComponentNamesDup3);
 }
 
 TEST_FUNCTION(DT_ClientCoreRegisterInterfaces_duplicate_interfaces_dups_in_middle)
 {
-    test_duplicate_interfaces(4, dtTestInterfaceNamesDup4);
+    test_duplicate_interfaces(4, dtTestComponentNamesDup4);
 }
 
 TEST_FUNCTION(DT_ClientCoreRegisterInterfaces_duplicate_interfaces_dups_come_last_longer_list_fail)
 {
-    test_duplicate_interfaces(4, dtTestInterfaceNamesDup5);
+    test_duplicate_interfaces(4, dtTestComponentNamesDup5);
 }
 
 TEST_FUNCTION(DT_ClientCoreRegisterInterfaces_duplicate_interfaces_dups_separated_longer_list_fail)
 {
-    test_duplicate_interfaces(4, dtTestInterfaceNamesDup6);
+    test_duplicate_interfaces(4, dtTestComponentNamesDup6);
 }
 
 TEST_FUNCTION(DT_ClientCoreRegisterInterfaces_NULL_core_handle_fails)

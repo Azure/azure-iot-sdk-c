@@ -33,11 +33,9 @@ typedef enum DT_COMMAND_PROCESSOR_RESULT_TAG
 #define DT_COMMAND_ERROR_STATUS_CODE  500
 
 MOCKABLE_FUNCTION(, int, DT_InterfaceClient_CheckComponentNameValid, const char*, componentName);
-MOCKABLE_FUNCTION(, int, DT_InterfaceClient_CheckInterfaceIdValid, const char*, interfaceName);
+MOCKABLE_FUNCTION(, int, DT_InterfaceClient_CheckInterfaceIdValid, const char*, interfaceId);
 
 MOCKABLE_FUNCTION(, const char*, DT_InterfaceClient_GetComponentName, DIGITALTWIN_INTERFACE_CLIENT_HANDLE, dtInterfaceClientHandle);
-MOCKABLE_FUNCTION(, const char*, DT_InterfaceClient_GetInterfaceId, DIGITALTWIN_INTERFACE_CLIENT_HANDLE, dtInterfaceClientHandle);
-
 
 MOCKABLE_FUNCTION(, DIGITALTWIN_CLIENT_RESULT, DT_InterfaceClient_ProcessTwinCallback, DIGITALTWIN_INTERFACE_CLIENT_HANDLE, dtInterfaceClientHandle, bool, fullTwin, const unsigned char*, payLoad, size_t, size);
 MOCKABLE_FUNCTION(, DT_COMMAND_PROCESSOR_RESULT, DT_InterfaceClient_InvokeCommandIfSupported, DIGITALTWIN_INTERFACE_CLIENT_HANDLE, dtInterfaceClientHandle, const char*, method_name, const unsigned char*, payload, size_t, size, unsigned char**, response, size_t*, response_size, int*, responseCode);

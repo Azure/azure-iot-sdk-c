@@ -14,10 +14,7 @@
 // Logic to tie test commands into DigitalTwin framework and the test's main()
 //*****************************************************************************
 static void* DT_E2E_CommandContext = (void*)0x12344321;
-
-// Interface name for commands testing
-static const char DT_E2E_Properties_InterfaceId[] = "dtmi:azureiot:testinterfaces:cdevicesdk:commands;1";
-static const char DT_E2E_Properties_InterfaceName[] = "testCommands";
+static const char DT_E2E_Commands_ComponentName[] = "testCommands";
 
 // Command names that the service SDK invokes to invoke tests on this interface
 static const char* DT_E2E_command_commandNames[] = { 
@@ -64,9 +61,9 @@ DIGITALTWIN_INTERFACE_CLIENT_HANDLE DT_E2E_Commands_CreateInterface(void)
     DIGITALTWIN_INTERFACE_CLIENT_HANDLE interfaceHandle;
     DIGITALTWIN_CLIENT_RESULT result;
    
-    if ((result =  DigitalTwin_InterfaceClient_Create(DT_E2E_Properties_InterfaceId, DT_E2E_Properties_InterfaceName, NULL, DT_E2E_CommandContext, &interfaceHandle)) != DIGITALTWIN_CLIENT_OK)
+    if ((result =  DigitalTwin_InterfaceClient_Create(DT_E2E_Commands_ComponentName, NULL, DT_E2E_CommandContext, &interfaceHandle)) != DIGITALTWIN_CLIENT_OK)
     {
-        LogError("TEST_COMMANDS_INTERFACE: Unable to allocate interface client handle for <%s>, error=<%d>", DT_E2E_Properties_InterfaceName, result);
+        LogError("TEST_COMMANDS_INTERFACE: Unable to allocate interface client handle for <%s>, error=<%d>", DT_E2E_Commands_ComponentName, result);
         interfaceHandle = NULL;
     }
     else if ((result =  DigitalTwin_InterfaceClient_SetCommandsCallback(interfaceHandle, DT_E2E_CommandCallbackProcess, DT_E2E_CommandContext)) != DIGITALTWIN_CLIENT_OK)
@@ -77,7 +74,7 @@ DIGITALTWIN_INTERFACE_CLIENT_HANDLE DT_E2E_Commands_CreateInterface(void)
     }
     else
     {
-        LogInfo("TEST_COMMANDS_INTERFACE: Created DIGITALTWIN_INTERFACE_CLIENT_HANDLE.  InterfaceName=<%s>, handle=<%p>", DT_E2E_Properties_InterfaceName, interfaceHandle);
+        LogInfo("TEST_COMMANDS_INTERFACE: Created DIGITALTWIN_INTERFACE_CLIENT_HANDLE.  ComponentName=<%s>, handle=<%p>", DT_E2E_Commands_ComponentName, interfaceHandle);
     }
 
     return interfaceHandle;

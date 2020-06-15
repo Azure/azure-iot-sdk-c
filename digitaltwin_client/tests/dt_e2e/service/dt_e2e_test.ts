@@ -65,7 +65,7 @@ function deleteDeviceAndEndProcess(done) {
         const client:DigitalTwinServiceClient = GetDigitalTwinServiceClient()
     
         console.log(`Sending command to test EXE to gracefully shutdown`)
-        client.digitalTwin.invokeInterfaceCommand(testDeviceInfo.deviceId, testCommandInterfaceName, "TerminateTestRun", "",  function processCallback() {
+        client.digitalTwin.invokeInterfaceCommand(testDeviceInfo.deviceId, testCommandComponentName, "TerminateTestRun", "",  function processCallback() {
             // Don't bother checking error code here.  This graceful shutdown is a best effort, so as to avoid having to kill the process.
 
             iothubTestCore.deleteDevice(testHubConnectionString, testDeviceInfo.deviceId, function() {
@@ -121,15 +121,15 @@ class CommandTestData {
     expectedResponseStatusCode:number;
     expectedResponsePayload:string;
     interfaceId:string;
-    interfaceName:string
+    componentName:string
 
-    constructor(methodName:string, payload:string, expectedResponseStatusCode:number, expectedResponsePayload:string, interfaceId:string, interfaceName:string) {
+    constructor(methodName:string, payload:string, expectedResponseStatusCode:number, expectedResponsePayload:string, interfaceId:string, componentName:string) {
         this.methodName = methodName
         this.payload = JSON.parse(payload)
         this.expectedResponseStatusCode = expectedResponseStatusCode
         this.expectedResponsePayload = JSON.parse(expectedResponsePayload)
         this.interfaceId = interfaceId
-        this.interfaceName = interfaceName
+        this.componentName = componentName
     }
 }
 
@@ -137,11 +137,11 @@ class CommandTestData {
 // CommandTestData_TestCommands is used for testing DigitalTwin commands
 //
 const testCommandInterfaceId = "dtmi:azureiot:testinterfaces:cdevicesdk:commands;1"
-const testCommandInterfaceName = "testCommands"
+const testCommandComponentName = "testCommands"
 class CommandTestData_TestCommands extends CommandTestData {
 
     constructor(methodName:string, payload:string, expectedResponseStatusCode:number, expectedResponsePayload:string) {
-        super(methodName, payload, expectedResponseStatusCode, expectedResponsePayload, testCommandInterfaceId, testCommandInterfaceName)
+        super(methodName, payload, expectedResponseStatusCode, expectedResponsePayload, testCommandInterfaceId, testCommandComponentName)
     }
 }
 
@@ -149,10 +149,10 @@ class CommandTestData_TestCommands extends CommandTestData {
 // CommandTestData_TestTelemetry is used for testing DigitalTwin telemetry
 //
 const testTelemetryInterfaceID = "dtmi:azureiot:testinterfaces:cdevicesdk:telemetry;1"
-const testTelemetryInterfaceName = "testTelemetry"
+const testTelemetryComponentName = "testTelemetry"
 class CommandTestData_TestTelemetry extends CommandTestData {
     constructor(methodName:string, payload:string, expectedResponseStatusCode:number, expectedResponsePayload:string) {
-        super(methodName, payload, expectedResponseStatusCode, expectedResponsePayload, testTelemetryInterfaceID, testTelemetryInterfaceName)
+        super(methodName, payload, expectedResponseStatusCode, expectedResponsePayload, testTelemetryInterfaceID, testTelemetryComponentName)
     }
 }
 
@@ -160,10 +160,10 @@ class CommandTestData_TestTelemetry extends CommandTestData {
 // CommandTestData_PropertyTelemetry i sused for testing DigitalTwin properties
 //
 const testPropertyInterfaceId = "dtmi:azureiot:testinterfaces:cdevicesdk:properties;1"
-const testPropertyInterfaceName = "testProperties"
+const testPropertyComponentName = "testProperties"
 class CommandTestData_PropertyTelemetry extends CommandTestData {
     constructor(methodName:string, payload:string, expectedResponseStatusCode:number, expectedResponsePayload:string) {
-        super(methodName, payload, expectedResponseStatusCode, expectedResponsePayload, testPropertyInterfaceId, testPropertyInterfaceName)
+        super(methodName, payload, expectedResponseStatusCode, expectedResponsePayload, testPropertyInterfaceId, testPropertyComponentName)
     }
 }
 
@@ -181,7 +181,7 @@ const waitBetweenPollingAttempts = 2000
 function runTestCommand(testData:CommandTestData, numberInvocationAttempts:number, done) {
     const client:DigitalTwinServiceClient = GetDigitalTwinServiceClient()
     
-    client.digitalTwin.invokeInterfaceCommand(testDeviceInfo.deviceId, testData.interfaceName, testData.methodName, testData.payload, 
+    client.digitalTwin.invokeInterfaceCommand(testDeviceInfo.deviceId, testData.componentName, testData.methodName, testData.payload, 
     function processCallback(error, responsePayload, initialRequest, response) {
         if (error) {
             console.error("Invoking command failed, error = " + error)
@@ -327,7 +327,7 @@ function runTestCommandAndCheckMessageAtEventHub(testData:CommandTestData, numbe
     };
     const onEventHubMessage = (receivedMsg) => {
         if((receivedMsg.annotations['iothub-connection-device-id'] === testDeviceInfo.deviceId) &&
-        (receivedMsg.annotations['dt-subject'] === testData.interfaceName)){
+        (receivedMsg.annotations['dt-subject'] === testData.componentName)){
             console.log('received a message from the test device: ');
             console.log(JSON.stringify(receivedMsg.body));
             if (receivedMsg.body && receivedMsg.body === testData.payload) {
@@ -452,7 +452,7 @@ describe("DigitalTwin Properties E2E tests", function() {
     })
 
     it("Get Digital Twin Interfaces", function runVerifyPropExpected(done) {
-        verifyPropertySet(done, testPropertyInterfaceName, "SendProperty1_Name", `SendProperty1_Data`, 0)
+        verifyPropertySet(done, testPropertyComponentName, "SendProperty1_Name", `SendProperty1_Data`, 0)
     })
 
     it("Update properties #1", function runUpdateProperty(done) {
@@ -460,7 +460,7 @@ describe("DigitalTwin Properties E2E tests", function() {
     })
 
     it("Get Digital Twin Interfaces", function runVerifyPropExpected(done) {
-        verifyPropertySet(done, testPropertyInterfaceName, "ProcessUpdatedProperty1", `ValueOfPropertyBeingSet_1`, 0)
+        verifyPropertySet(done, testPropertyComponentName, "ProcessUpdatedProperty1", `ValueOfPropertyBeingSet_1`, 0)
     })
 
     // Disable test requires updates from node service client sdk and the test code to support changes for Refresh.

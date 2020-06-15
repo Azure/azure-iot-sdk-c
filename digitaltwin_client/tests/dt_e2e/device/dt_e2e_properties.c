@@ -11,9 +11,7 @@
 //*****************************************************************************
 // Logic to tie test commands into DigitalTwin framework and the test's main()
 //*****************************************************************************
-// Interface name for properties testing
-static const char DT_E2E_Properties_InterfaceId[] = "dtmi:azureiot:testinterfaces:cdevicesdk:properties;1";
-static const char DT_E2E_Properties_InterfaceName[] = "testProperties";
+static const char DT_E2E_Properties_ComponentName[] = "testProperties";
 
 // Command names that the service SDK invokes to invoke tests on this interface
 static const char* DT_E2E_properties_commandNames[] = { 
@@ -103,9 +101,9 @@ DIGITALTWIN_INTERFACE_CLIENT_HANDLE DT_E2E_Properties_CreateInterface(void)
 
     memset(&DT_E2E_PropertiesTest_Context, 0, sizeof(DT_E2E_PropertiesTest_Context));
    
-    if ((result =  DigitalTwin_InterfaceClient_Create(DT_E2E_Properties_InterfaceId, DT_E2E_Properties_InterfaceName, NULL, &DT_E2E_PropertiesTest_Context, &interfaceHandle)) != DIGITALTWIN_CLIENT_OK)
+    if ((result =  DigitalTwin_InterfaceClient_Create(DT_E2E_Properties_ComponentName, NULL, &DT_E2E_PropertiesTest_Context, &interfaceHandle)) != DIGITALTWIN_CLIENT_OK)
     {
-        LogError("TEST_PROPERTIES_INTERFACE: Unable to allocate interface client handle for <%s>, error=<%d>", DT_E2E_Properties_InterfaceName, result);
+        LogError("TEST_PROPERTIES_INTERFACE: Unable to allocate interface client handle for <%s>, error=<%d>", DT_E2E_Properties_ComponentName, result);
         interfaceHandle = NULL;
     }
     else if ((result =  DigitalTwin_InterfaceClient_SetCommandsCallback(interfaceHandle, DT_E2E_PropertiesCommandCallbackProcess, &DT_E2E_PropertiesTest_Context)) != DIGITALTWIN_CLIENT_OK)
@@ -123,7 +121,7 @@ DIGITALTWIN_INTERFACE_CLIENT_HANDLE DT_E2E_Properties_CreateInterface(void)
     else
     {
         DT_E2E_PropertiesTest_Context.interfaceHandle = interfaceHandle;
-        LogInfo("TEST_PROPERTIES_INTERFACE: Created DIGITALTWIN_INTERFACE_CLIENT_HANDLE.  InterfaceName=<%s>, handle=<%p>", DT_E2E_Properties_InterfaceName, interfaceHandle);
+        LogInfo("TEST_PROPERTIES_INTERFACE: Created DIGITALTWIN_INTERFACE_CLIENT_HANDLE.  ComponentName=<%s>, handle=<%p>", DT_E2E_Properties_ComponentName, interfaceHandle);
     }
 
     return interfaceHandle;

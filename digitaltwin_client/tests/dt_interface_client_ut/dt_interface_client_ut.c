@@ -249,11 +249,9 @@ static char dtTestJsonNull[] = "null";
 #define DT_TEST_PROPERTY_2_PREVIOUSLY_REPORTED_CONTENT "{" DT_TEST_PROPERTY_2_PREVIOUSLY_REPORTED_CONTENT_NO_BRACES "}"
 #define DT_TEST_PROPERTY_3_PREVIOUSLY_REPORTED_CONTENT "{" DT_TEST_PROPERTY_3_PREVIOUSLY_REPORTED_CONTENT_NO_BRACES "}"
 
-#define DT_TEST_INTERFACE_ID_1 "dtmi:testonly:testinterface;1"
 #define DT_TEST_COMPONENT_NAME_1 "testonly_testinterface"
 
 
-static const char* dtTestInterfaceId1 = DT_TEST_INTERFACE_ID_1;
 static const char* dtTestComponentName1 = DT_TEST_COMPONENT_NAME_1;
 
 #define DT_TEST_DESIRED_VERSION_JSON_NO_COMMA "\"$version\": 12"
@@ -757,7 +755,6 @@ static void set_expected_calls_for_DigitalTwin_InterfaceClient_Create()
 {
     STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 }
 
 TEST_FUNCTION(DigitalTwin_InterfaceClient_Create_ok)
@@ -768,7 +765,7 @@ TEST_FUNCTION(DigitalTwin_InterfaceClient_Create_ok)
     set_expected_calls_for_DigitalTwin_InterfaceClient_Create();
 
     //act
-    result = DigitalTwin_InterfaceClient_Create(dtTestInterfaceId1, dtTestComponentName1, NULL, NULL, &h);
+    result = DigitalTwin_InterfaceClient_Create(dtTestComponentName1, NULL, NULL, &h);
 
     //assert
     ASSERT_ARE_EQUAL(int, DIGITALTWIN_CLIENT_OK, result);
@@ -787,7 +784,7 @@ TEST_FUNCTION(DigitalTwin_InterfaceClient_Create_register_callback_ok)
     set_expected_calls_for_DigitalTwin_InterfaceClient_Create();
 
     //act
-    result = DigitalTwin_InterfaceClient_Create(dtTestInterfaceId1, dtTestComponentName1, testInterfaceRegisteredCallback, NULL, &h);
+    result = DigitalTwin_InterfaceClient_Create(dtTestComponentName1, testInterfaceRegisteredCallback, NULL, &h);
 
     //assert
     ASSERT_ARE_EQUAL(int, DIGITALTWIN_CLIENT_OK, result);
@@ -798,28 +795,13 @@ TEST_FUNCTION(DigitalTwin_InterfaceClient_Create_register_callback_ok)
     DigitalTwin_InterfaceClient_Destroy(h);
 }
 
-TEST_FUNCTION(DigitalTwin_InterfaceClient_Create_NULL_interface_id_fails)
+TEST_FUNCTION(DigitalTwin_InterfaceClient_Create_NULL_component_name_fails)
 {
     DIGITALTWIN_CLIENT_RESULT result;
     DIGITALTWIN_INTERFACE_CLIENT_HANDLE h = NULL;
 
     //act
-    result = DigitalTwin_InterfaceClient_Create(NULL, dtTestComponentName1, NULL, NULL, &h);
-
-    //assert
-    ASSERT_ARE_EQUAL(int, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG, result);
-    ASSERT_IS_NULL(h);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-}
-
-
-TEST_FUNCTION(DigitalTwin_InterfaceClient_Create_NULL_interface_name_fails)
-{
-    DIGITALTWIN_CLIENT_RESULT result;
-    DIGITALTWIN_INTERFACE_CLIENT_HANDLE h = NULL;
-
-    //act
-    result = DigitalTwin_InterfaceClient_Create(dtTestInterfaceId1, NULL, NULL, NULL, &h);
+    result = DigitalTwin_InterfaceClient_Create(NULL, NULL, NULL, &h);
 
     //assert
     ASSERT_ARE_EQUAL(int, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG, result);
@@ -833,7 +815,7 @@ TEST_FUNCTION(DigitalTwin_InterfaceClient_Create_NULL_handle_fails)
     DIGITALTWIN_INTERFACE_CLIENT_HANDLE h = NULL;
 
     //act
-    result = DigitalTwin_InterfaceClient_Create(dtTestInterfaceId1, dtTestComponentName1, NULL, NULL, NULL);
+    result = DigitalTwin_InterfaceClient_Create(dtTestComponentName1, NULL, NULL, NULL);
 
     //assert
     ASSERT_ARE_EQUAL(int, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG, result);
@@ -860,7 +842,7 @@ TEST_FUNCTION(DigitalTwin_InterfaceClient_Create_fail)
         umock_c_negative_tests_fail_call(i);
 
         //act
-        result = DigitalTwin_InterfaceClient_Create(dtTestInterfaceId1, dtTestComponentName1, testInterfaceRegisteredCallback, testDTInterfaceCallbackContext, &h);
+        result = DigitalTwin_InterfaceClient_Create(dtTestComponentName1, testInterfaceRegisteredCallback, testDTInterfaceCallbackContext, &h);
 
         //assert
         ASSERT_ARE_NOT_EQUAL(int, DIGITALTWIN_CLIENT_OK, result, "Failure in test %lu", (unsigned long)i);
@@ -878,7 +860,7 @@ static DIGITALTWIN_INTERFACE_CLIENT_HANDLE test_allocateDT_interface()
     DIGITALTWIN_CLIENT_RESULT result;
     DIGITALTWIN_INTERFACE_CLIENT_HANDLE h;
 
-    result = DigitalTwin_InterfaceClient_Create(dtTestInterfaceId1, dtTestComponentName1, testInterfaceRegisteredCallback, testDTInterfaceCallbackContext, &h);
+    result = DigitalTwin_InterfaceClient_Create(dtTestComponentName1, testInterfaceRegisteredCallback, testDTInterfaceCallbackContext, &h);
 
     ASSERT_ARE_EQUAL(int, DIGITALTWIN_CLIENT_OK, result);
     ASSERT_IS_NOT_NULL(h);
@@ -894,7 +876,7 @@ static DIGITALTWIN_INTERFACE_CLIENT_HANDLE test_allocateDT_interface_with_callba
     DIGITALTWIN_CLIENT_RESULT result;
     DIGITALTWIN_INTERFACE_CLIENT_HANDLE h;
 
-    result = DigitalTwin_InterfaceClient_Create(dtTestInterfaceId1, dtTestComponentName1, testInterfaceRegisteredCallback, testDTInterfaceCallbackContext, &h);
+    result = DigitalTwin_InterfaceClient_Create(dtTestComponentName1, testInterfaceRegisteredCallback, testDTInterfaceCallbackContext, &h);
 
     ASSERT_ARE_EQUAL(int, DIGITALTWIN_CLIENT_OK, result);
     ASSERT_IS_NOT_NULL(h);
@@ -1572,7 +1554,7 @@ static DIGITALTWIN_INTERFACE_CLIENT_HANDLE test_allocate_and_register_DT_interfa
     DIGITALTWIN_CLIENT_RESULT result;
     DIGITALTWIN_INTERFACE_CLIENT_HANDLE h;
 
-    result = DigitalTwin_InterfaceClient_Create(dtTestInterfaceId1, dtTestComponentName1, testInterfaceRegisteredCallback, testDTInterfaceCallbackContext, &h);
+    result = DigitalTwin_InterfaceClient_Create(dtTestComponentName1, testInterfaceRegisteredCallback, testDTInterfaceCallbackContext, &h);
 
     ASSERT_ARE_EQUAL(int, DIGITALTWIN_CLIENT_OK, result);
     ASSERT_IS_NOT_NULL(h);
@@ -1871,7 +1853,6 @@ static void set_expected_calls_for_free_DT_InterfaceClientCore()
     STRICT_EXPECTED_CALL(testBindingLockDeinit(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 }
 
 static void set_expected_calls_for_DigitalTwin_InterfaceClient_Destroy()
@@ -2132,38 +2113,6 @@ TEST_FUNCTION(DT_InterfaceClient_RegistrationCompleteCallback_fail)
     //cleanup
     test_free_bound_interface_handle(h);
     umock_c_negative_tests_deinit();
-}
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-// DT_InterfaceClient_GetInterfaceId
-///////////////////////////////////////////////////////////////////////////////
-TEST_FUNCTION(DT_InterfaceClient_GetInterfaceId_ok)
-{
-    //arrange
-    DIGITALTWIN_INTERFACE_CLIENT_HANDLE h = test_allocate_and_register_DT_interface_with_callbacks();
-
-    //act
-    const char* result = DT_InterfaceClient_GetInterfaceId(h);
-
-    //assert
-    ASSERT_ARE_EQUAL(char_ptr, DT_TEST_INTERFACE_ID_1, result); 
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-    //cleanup
-    test_free_bound_interface_handle(h);
-}
-
-
-TEST_FUNCTION(DT_InterfaceClient_GetInterfaceId_NULL_handle_returns_NULL)
-{
-    //act
-    const char* result = DT_InterfaceClient_GetInterfaceId(NULL);
-
-    //assert
-    ASSERT_ARE_EQUAL(char_ptr, NULL, result);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -241,9 +241,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(DT_InterfaceClient_ProcessTelemetryCallback, DIGITALTWIN_CLIENT_ERROR);
 
     REGISTER_GLOBAL_MOCK_HOOK(DT_InterfaceClient_CreateTelemetryMessage, impl_test_DT_InterfaceClient_CreateTelemetryMessage);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(DT_InterfaceClient_CreateTelemetryMessage, DIGITALTWIN_CLIENT_ERROR);
-    
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(DT_InterfaceClient_GetInterfaceId, NULL);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(DT_InterfaceClient_CreateTelemetryMessage, DIGITALTWIN_CLIENT_ERROR);  
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(DT_InterfaceClient_GetComponentName, NULL);
 
     REGISTER_STRING_GLOBAL_MOCK_HOOK;
