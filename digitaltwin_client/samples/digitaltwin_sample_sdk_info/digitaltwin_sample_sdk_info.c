@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-// Implements a sample DigitalTwin interface that reports the SDK information
+// Implements a sample DigitalTwin interface that reports the SDK information as defined 
+// by "dtmi:azure:Client:SDKInformation;1".
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
@@ -10,9 +12,6 @@
 #include "digitaltwin_sample_sdk_info.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
-
-// DigitalTwin interface id SDK Information interface ID
-static const char DigitalTwinSampleSdkInfo_InterfaceId[] = "dtmi:azure:Client:SDKInformation;1";
 
 // DigitalTwin component name from service perspective.
 static const char DigitalTwinSampleSdkInfo_ComponentName[] = "sdkInformation";
@@ -148,14 +147,14 @@ DIGITALTWIN_INTERFACE_CLIENT_HANDLE DigitalTwinSampleSdkInfo_CreateInterface(voi
 
     memset(&digitaltwinSample_SdkInfoState, 0, sizeof(digitaltwinSample_SdkInfoState));
     
-    if ((result =  DigitalTwin_InterfaceClient_Create(DigitalTwinSampleSdkInfo_InterfaceId, DigitalTwinSampleSdkInfo_ComponentName, DigitalTwinSampleSdkInfo_InterfaceRegisteredCallback, (void*)&digitaltwinSample_SdkInfoState, &interfaceHandle)) != DIGITALTWIN_CLIENT_OK)
+    if ((result =  DigitalTwin_InterfaceClient_Create(DigitalTwinSampleSdkInfo_ComponentName, DigitalTwinSampleSdkInfo_InterfaceRegisteredCallback, (void*)&digitaltwinSample_SdkInfoState, &interfaceHandle)) != DIGITALTWIN_CLIENT_OK)
     {
-        LogError("SDK_INFO: Unable to allocate interface client handle for interfaceId=<%s>, componentName=<%s>, error=<%d>", DigitalTwinSampleSdkInfo_InterfaceId, DigitalTwinSampleSdkInfo_ComponentName, result);
+        LogError("SDK_INFO: Unable to allocate interface client handle for componentName=<%s>, error=<%d>", DigitalTwinSampleSdkInfo_ComponentName, result);
         interfaceHandle = NULL;
     }
     else
     {
-        LogInfo("SDK_INFO: Created DIGITALTWIN_INTERFACE_CLIENT_HANDLE.  interfaceId=<%s>, componentName=<%s>, handle=<%p>", DigitalTwinSampleSdkInfo_InterfaceId, DigitalTwinSampleSdkInfo_ComponentName, interfaceHandle);
+        LogInfo("SDK_INFO: Created DIGITALTWIN_INTERFACE_CLIENT_HANDLE.  componentName=<%s>, handle=<%p>", DigitalTwinSampleSdkInfo_ComponentName, interfaceHandle);
         digitaltwinSample_SdkInfoState.interfaceClientHandle = interfaceHandle;
     }
 

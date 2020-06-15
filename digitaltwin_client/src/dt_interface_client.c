@@ -30,7 +30,7 @@ static const size_t DT_MaxVersionLength = 9;
 static const char DT_DtmiPrefix[] = "dtmi:";
 static const size_t DT_DtmiPrefixLen = sizeof(DT_DtmiPrefix) - 1;
 
-static const size_t DT_InterfaceNameMaxLength = 128;
+static const size_t DT_InterfaceIdMaxLength = 128;
 static const size_t DT_ComponentNameMaxLength = 64;
 
 static const char commandSeparator = '*';
@@ -72,7 +72,6 @@ typedef struct DT_INTERFACE_CLIENT_TAG
     void* userInterfaceContext;
     void* commandCallbackContext;
     void* propertyCallbackContext;
-    char* interfaceId;
     char* componentName;
     size_t componentNameLen;
     DIGITALTWIN_INTERFACE_REGISTERED_CALLBACK dtInterfaceRegisteredCallback;
@@ -195,7 +194,6 @@ static void InvokeBindingInterfaceSleep(DT_INTERFACE_CLIENT* dtInterfaceClient, 
 static void FreeDTInterface(DT_INTERFACE_CLIENT* dtInterfaceClient)
 {
     InvokeBindingInterfaceLockDeinitIfNeeded(dtInterfaceClient);
-    free(dtInterfaceClient->interfaceId);
     free(dtInterfaceClient->componentName);
     free(dtInterfaceClient);
 }
@@ -305,7 +303,7 @@ static bool IsNameSegmentValid(const char* segmentName, DT_SEGMENT_TYPE segmentT
             else if (*current == DT_InterfaceIdUnderscore)
             {
                 // Understores are legal, provided they are not the last character in
-                // componentName or segment of interfaceName.
+                // componentName or segment of interfaceId.
                 if (IsEndOfSegmentCharacter(*(current+1), segmentType) == true)
                 {
                     LogError("Name %s segment ends in a _", segmentName);
@@ -390,29 +388,29 @@ static bool IsValidDtmiVersionValid(const char* versionPortion)
     return result;
 }
 
-int DT_InterfaceClient_CheckInterfaceIdValid(const char* interfaceName)
+int DT_InterfaceClient_CheckInterfaceIdValid(const char* interfaceId)
 {
     int result;
-    const char* current = interfaceName;
+    const char* current = interfaceId;
 
-    if (interfaceName == NULL)
+    if (interfaceId == NULL)
     {
         LogError("Interface is NULL");
         result = MU_FAILURE;
     }
-    else if (strlen(interfaceName) > DT_InterfaceNameMaxLength)
+    else if (strlen(interfaceId) > DT_InterfaceIdMaxLength)
     {
-        LogError("Interface %s is too long, must be under %lu characters", interfaceName, (unsigned long)DT_InterfaceNameMaxLength);
+        LogError("Interface %s is too long, must be under %lu characters", interfaceId, (unsigned long)DT_InterfaceIdMaxLength);
         result = MU_FAILURE;
     }
     else if (strncmp(DT_DtmiPrefix, current, DT_DtmiPrefixLen) != 0)
     {
-        LogError("Interface %s does not start with prefix %s", interfaceName, DT_DtmiPrefix);
+        LogError("Interface %s does not start with prefix %s", interfaceId, DT_DtmiPrefix);
         result = MU_FAILURE;
     }
     else
     {
-        interfaceName += DT_DtmiPrefixLen;
+        interfaceId += DT_DtmiPrefixLen;
 
         while (1)
         {
@@ -442,25 +440,7 @@ int DT_InterfaceClient_CheckInterfaceIdValid(const char* interfaceName)
     return result;
 }
 
-// Retrieves a shallow copy of the interface ID for caller.
-const char* DT_InterfaceClient_GetInterfaceId(DIGITALTWIN_INTERFACE_CLIENT_HANDLE dtInterfaceClientHandle)
-{
-    const char* result;
-    DT_INTERFACE_CLIENT* dtInterfaceClient = (DT_INTERFACE_CLIENT*)dtInterfaceClientHandle;
-
-    if (dtInterfaceClientHandle == NULL)
-    {
-        LogError("Invalid interfaceClient handle passed");
-        result = NULL;
-    }
-    else
-    {
-        result = dtInterfaceClient->interfaceId;
-    }
-    return result;
-}
-
-// Retrieves a shallow copy of the interface name for caller.
+// Retrieves a shallow copy of the component name for caller.
 const char* DT_InterfaceClient_GetComponentName(DIGITALTWIN_INTERFACE_CLIENT_HANDLE dtInterfaceClientHandle)
 {
     const char* result;
@@ -533,19 +513,14 @@ static void SetInterfaceState(DT_INTERFACE_CLIENT* dtInterfaceClient, DT_INTERFA
 }
 
 // DigitalTwin_InterfaceClient_Create initializes a DIGITALTWIN_INTERFACE_CLIENT_HANDLE
-DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_Create(const char* interfaceId, const char* componentName, DIGITALTWIN_INTERFACE_REGISTERED_CALLBACK dtInterfaceRegisteredCallback, void* userInterfaceContext, DIGITALTWIN_INTERFACE_CLIENT_HANDLE* dtInterfaceClient)
+DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_Create(const char* componentName, DIGITALTWIN_INTERFACE_REGISTERED_CALLBACK dtInterfaceRegisteredCallback, void* userInterfaceContext, DIGITALTWIN_INTERFACE_CLIENT_HANDLE* dtInterfaceClient)
 {
     DIGITALTWIN_CLIENT_RESULT result;
     DT_INTERFACE_CLIENT* dtNewHandle;
         
-    if ((interfaceId == NULL) || (componentName == NULL) || (dtInterfaceClient == NULL))
+    if ((componentName == NULL) || (dtInterfaceClient == NULL))
     {
-        LogError("Invalid parameter(s): interfaceId=%p, componentName=%p, dtInterfaceClient=%p", interfaceId, componentName, dtInterfaceClient);
-        result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
-    }
-    else if (DT_InterfaceClient_CheckInterfaceIdValid(interfaceId) != 0)
-    {
-        LogError("Invalid interfaceId %s", interfaceId);
+        LogError("Invalid parameter(s): componentName=%p, dtInterfaceClient=%p", componentName, dtInterfaceClient);
         result = DIGITALTWIN_CLIENT_ERROR_INVALID_ARG;
     }
     else if (DT_InterfaceClient_CheckComponentNameValid(componentName) != 0)
@@ -556,12 +531,6 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_Create(const char* interfa
     else if ((dtNewHandle = calloc(1, sizeof(DT_INTERFACE_CLIENT))) == NULL)
     {
         LogError("Cannot allocate interface client");
-        result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
-    }
-    else if (mallocAndStrcpy_s(&dtNewHandle->interfaceId, interfaceId) != 0)
-    {
-        LogError("Cannot allocate componentName");
-        FreeDTInterface(dtNewHandle);
         result = DIGITALTWIN_CLIENT_ERROR_OUT_OF_MEMORY;
     }
     else if (mallocAndStrcpy_s(&dtNewHandle->componentName, componentName) != 0)

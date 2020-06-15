@@ -1,11 +1,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-// Implements a sample DigitalTwin interface that integrates with an environmental sensor (for reporting 
-// temperature and humidity over time).  It also has basic commands and properties it can process,
-// such as setting brightness of a light and blinking LEDs.  Because this sample is designed
-// to be run anywhere, all of the sameple data and command processing is expressed simply with 
-// random numbers and LogInfo() calls.
+// Implements a sample DigitalTwin interface as defined by "dtmi:com:example:EnvironmentalSensor;1"
+// This demonstrates the core Azure Digital Twin concepts of telemetry, commands, and properties.
+// Because this sample is designed to be run on any device, all of the sample data and command 
+// processing is expressed simply with random numbers and LogInfo() calls.
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,20 +15,14 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 
 //
-// TODO`s: Configure core settings of your Digital Twin sample interface
-//
+// TODO`s: Configure core settings of your Digital Twin sample interface.
+// The ComponentName should match what the model named the "dtmi:my_company:com:EnvironmentalSensor;1"
+// Many sample models use "sensor" as this name, so this sample uses this as the default.
 
-// TODO: Fill in DIGITALTWIN_SAMPLE_ENVIRONMENTAL_SENSOR_INTERFACE_ID. E.g. 
-#define DIGITALTWIN_SAMPLE_ENVIRONMENTAL_SENSOR_INTERFACE_ID "dtmi:my_company:com:EnvironmentalSensor;1"
+static const char DigitalTwinSampleEnvironmentalSensor_ComponentName[] = "sensor";
 
-//
 // END TODO section
 //
-
-
-// DigitalTwin interface name from service perspective.
-static const char DigitalTwinSampleEnvironmentalSensor_InterfaceId[] = DIGITALTWIN_SAMPLE_ENVIRONMENTAL_SENSOR_INTERFACE_ID;
-static const char DigitalTwinSampleEnvironmentalSensor_ComponentName[] = "sensor";
 
 //  
 //  Telemetry names for this interface.
@@ -405,7 +398,7 @@ static void DigitalTwinSampleEnvironmentalSensor_ProcessPropertyUpdate(const DIG
 
 //
 // DigitalTwinSampleEnvironmentalSensor_CreateInterface is the initial entry point into the DigitalTwin Sample Environmental Sensor interface.
-// It simply creates a DIGITALTWIN_INTERFACE_CLIENT_HANDLE that is mapped to the environmental sensor interface name.
+// It simply creates a DIGITALTWIN_INTERFACE_CLIENT_HANDLE that is mapped to the environmental sensor component.
 // This call is synchronous, as simply creating an interface only performs initial allocations.
 //
 // NOTE: The actual registration of this interface is left to the caller, which may register 
@@ -418,9 +411,9 @@ DIGITALTWIN_INTERFACE_CLIENT_HANDLE DigitalTwinSampleEnvironmentalSensor_CreateI
 
     memset(&digitaltwinSample_EnvironmentalSensorState, 0, sizeof(digitaltwinSample_EnvironmentalSensorState));
     
-    if ((result =  DigitalTwin_InterfaceClient_Create(DigitalTwinSampleEnvironmentalSensor_InterfaceId, DigitalTwinSampleEnvironmentalSensor_ComponentName, DigitalTwinSampleEnvironmentalSensor_InterfaceRegisteredCallback, (void*)&digitaltwinSample_EnvironmentalSensorState, &interfaceHandle)) != DIGITALTWIN_CLIENT_OK)
+    if ((result =  DigitalTwin_InterfaceClient_Create(DigitalTwinSampleEnvironmentalSensor_ComponentName, DigitalTwinSampleEnvironmentalSensor_InterfaceRegisteredCallback, (void*)&digitaltwinSample_EnvironmentalSensorState, &interfaceHandle)) != DIGITALTWIN_CLIENT_OK)
     {
-        LogError("ENVIRONMENTAL_SENSOR_INTERFACE: Unable to allocate interface client handle for interfaceId=<%s>, componentName=<%s>, error=<%d>", DigitalTwinSampleEnvironmentalSensor_InterfaceId, DigitalTwinSampleEnvironmentalSensor_ComponentName, result);
+        LogError("ENVIRONMENTAL_SENSOR_INTERFACE: Unable to allocate interface client handle for componentName=<%s>, error=<%d>", DigitalTwinSampleEnvironmentalSensor_ComponentName, result);
         interfaceHandle = NULL;
     }
     else if ((result = DigitalTwin_InterfaceClient_SetPropertiesUpdatedCallback(interfaceHandle, DigitalTwinSampleEnvironmentalSensor_ProcessPropertyUpdate, (void*)&digitaltwinSample_EnvironmentalSensorState)) != DIGITALTWIN_CLIENT_OK)
@@ -437,7 +430,7 @@ DIGITALTWIN_INTERFACE_CLIENT_HANDLE DigitalTwinSampleEnvironmentalSensor_CreateI
     }
     else
     {
-        LogInfo("ENVIRONMENTAL_SENSOR_INTERFACE: Created DIGITALTWIN_INTERFACE_CLIENT_HANDLE.  interfaceId=<%s>, componentName=<%s>, handle=<%p>", DigitalTwinSampleEnvironmentalSensor_InterfaceId, DigitalTwinSampleEnvironmentalSensor_ComponentName, interfaceHandle);
+        LogInfo("ENVIRONMENTAL_SENSOR_INTERFACE: Created DIGITALTWIN_INTERFACE_CLIENT_HANDLE.  componentName=<%s>, handle=<%p>", DigitalTwinSampleEnvironmentalSensor_ComponentName, interfaceHandle);
         digitaltwinSample_EnvironmentalSensorState.interfaceClientHandle = interfaceHandle;
     }
 

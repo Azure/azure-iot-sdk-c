@@ -668,7 +668,7 @@ static DIGITALTWIN_CLIENT_RESULT VerifyComponentsUnique(DIGITALTWIN_INTERFACE_CL
                 break;
             }
 
-            // Interface names are case sensitive, so compare they're not equal with strcmp
+            // Component names are case sensitive, so compare they're not equal with strcmp
             if (strcmp(componentName1, componentName2) == 0)
             {
                 LogError("The component name %s was repeated on element %d and %d", componentName1, i, j);

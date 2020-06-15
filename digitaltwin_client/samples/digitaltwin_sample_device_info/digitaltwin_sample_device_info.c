@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-// Implements a sample DeviceInfo DigitalTwin interface.  As the name implies, this interface returns
-// information about the device such as the OS version, amount of storage, etc.
-//
+// Implements a sample DeviceInfo DigitalTwin interface of dtmi:azure:DeviceManagement:DeviceInformation;1.
+// This interface returns information about the device such as the OS version, amount of storage, etc.
+
 // Except under extraordinary conditions (e.g. a firmware update or memory upgrade), this
 // information never changes during the lifetime of a device, and almost certainly does not
 // change over the lifecycle on a given DigitalTwin session.
@@ -28,9 +28,8 @@ typedef struct DIGITALTWIN_SAMPLE_DEVICEINFO_STATE_TAG
 DIGITALTWIN_SAMPLE_DEVICEINFO_STATE digitaltwinSample_DeviceInfoState;
 
 
-// DigitalTwin interface name from service perspective.
-static const char digitaltwinSampleDeviceInfo_InterfaceId[] = "dtmi:azure:DeviceManagement:DeviceInformation;1";
-static const char digitaltwinSampleDeviceInfo_InterfaceName[] = "deviceInformation";
+// DigitalTwin component name.
+static const char digitaltwinSampleDeviceInfo_ComponentName[] = "deviceInformation";
 
 // DigitalTwinSampleDeviceInfo_PropertyCallback is invoked when a property is updated (or failed) going to server.
 // In this sample, we route ALL property callbacks to this function and just have the userContextCallback set
@@ -302,7 +301,7 @@ static void DigitalTwinSampleDeviceInfo_InterfaceRegisteredCallback(DIGITALTWIN_
 
 //
 // DigitalTwinSampleDeviceInfo_CreateInterface is the initial entry point into the DigitalTwin Sample Device Info interface.
-// It simply creates a DIGITALTWIN_INTERFACE_CLIENT_HANDLE that is mapped to the DeviceInfo interface name.
+// It simply creates a DIGITALTWIN_INTERFACE_CLIENT_HANDLE that is mapped to the DeviceInfo component.
 // This call is synchronous, as simply creating an interface only performs initial allocations.
 //
 // NOTE: The actual registration of this interface is left to the caller, which may register 
@@ -315,15 +314,15 @@ DIGITALTWIN_INTERFACE_CLIENT_HANDLE DigitalTwinSampleDeviceInfo_CreateInterface(
 
     memset(&digitaltwinSample_DeviceInfoState, 0, sizeof(digitaltwinSample_DeviceInfoState));
 
-    if ((result = DigitalTwin_InterfaceClient_Create(digitaltwinSampleDeviceInfo_InterfaceId, digitaltwinSampleDeviceInfo_InterfaceName, DigitalTwinSampleDeviceInfo_InterfaceRegisteredCallback, &digitaltwinSample_DeviceInfoState, &interfaceHandle)) != DIGITALTWIN_CLIENT_OK)
+    if ((result = DigitalTwin_InterfaceClient_Create(digitaltwinSampleDeviceInfo_ComponentName, DigitalTwinSampleDeviceInfo_InterfaceRegisteredCallback, &digitaltwinSample_DeviceInfoState, &interfaceHandle)) != DIGITALTWIN_CLIENT_OK)
     {
-        LogError("DEVICE_INFO: Unable to allocate interface client handle for interfaceId=<%s>, interfaceName=<%s>, error=<%d>", digitaltwinSampleDeviceInfo_InterfaceId, digitaltwinSampleDeviceInfo_InterfaceName, result);
+        LogError("DEVICE_INFO: Unable to allocate interface client handle for componentName=<%s>, error=<%d>", digitaltwinSampleDeviceInfo_ComponentName, result);
         interfaceHandle = NULL;
     }
     else
     {
         digitaltwinSample_DeviceInfoState.interfaceClientHandle = interfaceHandle;
-        LogInfo("DEVICE_INFO: Created DIGITALTWIN_INTERFACE_CLIENT_HANDLE.  interfaceId=<%s>, interfaceName=<%s>, handle=<%p>", digitaltwinSampleDeviceInfo_InterfaceId, digitaltwinSampleDeviceInfo_InterfaceName, interfaceHandle);
+        LogInfo("DEVICE_INFO: Created DIGITALTWIN_INTERFACE_CLIENT_HANDLE.  componentName=<%s>, handle=<%p>", digitaltwinSampleDeviceInfo_ComponentName, interfaceHandle);
     }
 
     return interfaceHandle;
