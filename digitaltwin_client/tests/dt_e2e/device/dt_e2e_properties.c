@@ -105,18 +105,18 @@ DIGITALTWIN_INTERFACE_CLIENT_HANDLE DT_E2E_Properties_CreateInterface(void)
    
     if ((result =  DigitalTwin_InterfaceClient_Create(DT_E2E_Properties_InterfaceId, DT_E2E_Properties_InterfaceName, NULL, &DT_E2E_PropertiesTest_Context, &interfaceHandle)) != DIGITALTWIN_CLIENT_OK)
     {
-        LogError("TEST_PROPERTIES_INTERFACE: Unable to allocate interface client handle for <%s>, error=<%s>", DT_E2E_Properties_InterfaceName, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
+        LogError("TEST_PROPERTIES_INTERFACE: Unable to allocate interface client handle for <%s>, error=<%d>", DT_E2E_Properties_InterfaceName, result);
         interfaceHandle = NULL;
     }
     else if ((result =  DigitalTwin_InterfaceClient_SetCommandsCallback(interfaceHandle, DT_E2E_PropertiesCommandCallbackProcess, &DT_E2E_PropertiesTest_Context)) != DIGITALTWIN_CLIENT_OK)
     {
-        LogError("TEST_PROPERTIES_INTERFACE: DigitalTwin_InterfaceClient_SetCommandsCallbacks failed, error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
+        LogError("TEST_PROPERTIES_INTERFACE: DigitalTwin_InterfaceClient_SetCommandsCallbacks failed, error=<%d>", result);
         DigitalTwin_InterfaceClient_Destroy(interfaceHandle);
         interfaceHandle = NULL;
     }
     else if ((result = DigitalTwin_InterfaceClient_SetPropertiesUpdatedCallback(interfaceHandle, DT_E2E_ProcessUpdatedProperty, &DT_E2E_PropertiesTest_Context)) != DIGITALTWIN_CLIENT_OK)
     {
-        LogError("ENVIRONMENTAL_SENSOR_INTERFACE: DigitalTwin_InterfaceClient_SetPropertiesUpdatedCallbacks failed. error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
+        LogError("ENVIRONMENTAL_SENSOR_INTERFACE: DigitalTwin_InterfaceClient_SetPropertiesUpdatedCallbacks failed. error=<%d>", result);
         DigitalTwin_InterfaceClient_Destroy(interfaceHandle);
         interfaceHandle = NULL;
     }    
@@ -283,7 +283,7 @@ void DT_E2E_ProcessUpdatedProperty1(const DIGITALTWIN_CLIENT_PROPERTY_UPDATE* dt
                                                                  (const unsigned char *)DT_E2E_PROPERTY_VALUE_SET_1, strlen(DT_E2E_PROPERTY_VALUE_SET_1), &propertyResponse, NULL, NULL);
         if (result != DIGITALTWIN_CLIENT_OK)
         {
-            LogError("DigitalTwin_InterfaceClient_ReportPropertyAsync failed, error = <%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
+            LogError("DigitalTwin_InterfaceClient_ReportPropertyAsync failed, error = <%d>", result);
             DT_E2E_Util_Fatal_Error_Occurred();
         }
         else

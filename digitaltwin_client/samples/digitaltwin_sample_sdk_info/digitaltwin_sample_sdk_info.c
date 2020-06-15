@@ -52,7 +52,7 @@ static void DigitalTwinSampleSdkInfo_PropertyCallback(DIGITALTWIN_CLIENT_RESULT 
     }
     else
     {
-        LogError("SDK_INFO: Property callback property=<%s> fails, error=<%s>", (const char*)userContextCallback, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, dtReportedStatus));
+        LogError("SDK_INFO: Property callback property=<%s> fails, error=<%d>", (const char*)userContextCallback, dtReportedStatus);
     }
 }
 
@@ -71,7 +71,7 @@ static DIGITALTWIN_CLIENT_RESULT DigitalTwinSampleSdkInfo_ReportPropertyAsync(DI
 
     if (result != DIGITALTWIN_CLIENT_OK)
     {
-        LogError("SDK_INFO: Reporting property=<%s> failed, error=<%s>", propertyName, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
+        LogError("SDK_INFO: Reporting property=<%s> failed, error=<%d>", propertyName, result);
     }
     else
     {
@@ -128,7 +128,7 @@ static void DigitalTwinSampleSdkInfo_InterfaceRegisteredCallback(DIGITALTWIN_CLI
     }
     else 
     {
-        LogError("SDK_INFO: Interface received failed, status=<%s>.", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, dtInterfaceStatus));
+        LogError("SDK_INFO: Interface received failed, status=<%d>.", dtInterfaceStatus);
     }
 }
 
@@ -150,7 +150,7 @@ DIGITALTWIN_INTERFACE_CLIENT_HANDLE DigitalTwinSampleSdkInfo_CreateInterface(voi
     
     if ((result =  DigitalTwin_InterfaceClient_Create(DigitalTwinSampleSdkInfo_InterfaceId, DigitalTwinSampleSdkInfo_ComponentName, DigitalTwinSampleSdkInfo_InterfaceRegisteredCallback, (void*)&digitaltwinSample_SdkInfoState, &interfaceHandle)) != DIGITALTWIN_CLIENT_OK)
     {
-        LogError("SDK_INFO: Unable to allocate interface client handle for interfaceId=<%s>, componentName=<%s>, error=<%s>", DigitalTwinSampleSdkInfo_InterfaceId, DigitalTwinSampleSdkInfo_ComponentName, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
+        LogError("SDK_INFO: Unable to allocate interface client handle for interfaceId=<%s>, componentName=<%s>, error=<%d>", DigitalTwinSampleSdkInfo_InterfaceId, DigitalTwinSampleSdkInfo_ComponentName, result);
         interfaceHandle = NULL;
     }
     else

@@ -435,7 +435,7 @@ int main(int argc, char *argv[])
     // will change once DPS integration becomes available later.
     else if ((result = DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle(deviceLLHandle, DIGITALTWIN_SAMPLE_MODEL_ID, &digitaltwinDeviceClientLLHandle)) != DIGITALTWIN_CLIENT_OK)
     {
-        LogError("DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle failed, error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
+        LogError("DigitalTwin_DeviceClient_LL_CreateFromDeviceHandle failed, error=<%d>", result);
     }
     // Invoke to the DeviceInfo interface - implemented in a separate library - to create DIGITALTWIN_INTERFACE_CLIENT_HANDLE.
     // NOTE: Other than creation and destruction, NO operations may occur on any DIGITALTWIN_INTERFACE_CLIENT_HANDLE

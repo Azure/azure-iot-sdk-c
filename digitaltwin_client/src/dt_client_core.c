@@ -74,8 +74,6 @@ static const size_t methodInternalErrorLen = sizeof(methodInternalError) - 1;
 
 static const int httpBadRequestStatusCode = 400;
 
-MU_DEFINE_ENUM_STRINGS(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_RESULT_VALUES);
-
 // Converts codes from IoTHub* API's into corresponding DigitalTwin error codes.
 static DIGITALTWIN_CLIENT_RESULT GetDTSendStatusCodeFromIoTHubStatus(IOTHUB_CLIENT_CONFIRMATION_RESULT iothubResult)
 {
@@ -605,8 +603,8 @@ static void DeviceTwinDT_Callback(DEVICE_TWIN_UPDATE_STATE update_state, const u
     {
         DT_CLIENT_CORE* dtClientCore = (DT_CLIENT_CORE*)userContextCallback;
 
-        LogInfo("DigitalTwin Client Core: Device Twin callback called.  updateState=%s, payload=%p, size=%lu, userContextCallback=%p", 
-                    MU_ENUM_TO_STRING(DEVICE_TWIN_UPDATE_STATE,update_state), payLoad, (unsigned long)size, userContextCallback);
+        LogInfo("DigitalTwin Client Core: Device Twin callback called.  updateState=%d, payload=%p, size=%lu, userContextCallback=%p", 
+                    update_state, payLoad, (unsigned long)size, userContextCallback);
         
         if (BeginClientCoreCallbackProcessing(dtClientCore) != 0)
         {
