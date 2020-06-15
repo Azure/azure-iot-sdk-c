@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 // Implements a sample DeviceInfo DigitalTwin interface of dtmi:azure:DeviceManagement:DeviceInformation;1.
-// As the name implies, this interface returns information about the device such as the OS version, amount of storage, etc.
+// This interface returns information about the device such as the OS version, amount of storage, etc.
 
 // Except under extraordinary conditions (e.g. a firmware update or memory upgrade), this
 // information never changes during the lifetime of a device, and almost certainly does not

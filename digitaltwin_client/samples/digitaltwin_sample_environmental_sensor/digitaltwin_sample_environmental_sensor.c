@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-// Implements a sample DigitalTwin interface as defined by "dtmi:my_company:com:EnvironmentalSensor;1"
-// This demonstrates the core DigitalTwin concepts of telemetry, commands, and properties.
+// Implements a sample DigitalTwin interface as defined by "dtmi:com:example:EnvironmentalSensor;1"
+// This demonstrates the core Azure Digital Twin concepts of telemetry, commands, and properties.
 // Because this sample is designed to be run on any device, all of the sample data and command 
 // processing is expressed simply with random numbers and LogInfo() calls.
 
