@@ -67,12 +67,12 @@ DIGITALTWIN_INTERFACE_CLIENT_HANDLE DT_E2E_Telemetry_CreateInterface(void)
    
     if ((result =  DigitalTwin_InterfaceClient_Create(DT_E2E_Telemetry_InterfaceId, DT_E2E_Telemetry_InterfaceName, NULL, &DT_E2E_TelemetryTest_Context, &interfaceHandle)) != DIGITALTWIN_CLIENT_OK)
     {
-        LogError("TEST_TELEMETRY_INTERFACE: Unable to allocate interface client handle for <%s>, error=<%s>", DT_E2E_Telemetry_InterfaceName, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
+        LogError("TEST_TELEMETRY_INTERFACE: Unable to allocate interface client handle for <%s>, error=<%d>", DT_E2E_Telemetry_InterfaceName, result);
         interfaceHandle = NULL;
     }
     else if ((result =  DigitalTwin_InterfaceClient_SetCommandsCallback(interfaceHandle, DT_E2E_TelemetryCommandCallbackProcess, &DT_E2E_TelemetryTest_Context)) != DIGITALTWIN_CLIENT_OK)
     {
-        LogError("TEST_TELEMETRY_INTERFACE: DigitalTwin_InterfaceClient_SetCommandsCallbacks failed, error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
+        LogError("TEST_TELEMETRY_INTERFACE: DigitalTwin_InterfaceClient_SetCommandsCallbacks failed, error=<%d>", result);
         DigitalTwin_InterfaceClient_Destroy(interfaceHandle);
         interfaceHandle = NULL;
     }

@@ -50,16 +50,15 @@ static const char DT_JSON_NULL[] = "null";
 static const char DT_PropertyWithResponseSchema[] =  "{\""  DT_INTERFACE_PREFIX "%s\": { \"%s\": { \"value\":  %.*s, \"ac\": %d, \"ad\": \"%s\", \"av\": %d } } }";
 static const char DT_PropertyWithoutResponseSchema[] = "{\""  DT_INTERFACE_PREFIX "%s\": { \"%s\": { \"value\": %.*s } } }";
 
-#define DT_INTERFACE_STATE_VALUES                   \
-    DT_INTERFACE_STATE_UNINITIALIZED,               \
-    DT_INTERFACE_STATE_CREATED,                     \
-    DT_INTERFACE_STATE_BOUND_TO_CLIENT_HANDLE,      \
-    DT_INTERFACE_STATE_REGISTERED,                  \
-    DT_INTERFACE_STATE_UNBOUND_FROM_CLIENT_HANDLE,  \
-    DT_INTERFACE_STATE_PENDING_DESTROY              \
-
-MU_DEFINE_ENUM(DT_INTERFACE_STATE, DT_INTERFACE_STATE_VALUES);
-MU_DEFINE_ENUM_STRINGS(DT_INTERFACE_STATE, DT_INTERFACE_STATE_VALUES);
+typedef enum DT_INTERFACE_STATE_TAG
+{
+    DT_INTERFACE_STATE_UNINITIALIZED,
+    DT_INTERFACE_STATE_CREATED,
+    DT_INTERFACE_STATE_BOUND_TO_CLIENT_HANDLE,
+    DT_INTERFACE_STATE_REGISTERED,
+    DT_INTERFACE_STATE_UNBOUND_FROM_CLIENT_HANDLE,
+    DT_INTERFACE_STATE_PENDING_DESTROY
+} DT_INTERFACE_STATE;
 
 // DT_INTERFACE_CLIENT corresponds to an application level handle (e.g. DIGITALTWIN_INTERFACE_CLIENT_HANDLE).
 typedef struct DT_INTERFACE_CLIENT_TAG
@@ -98,8 +97,6 @@ typedef struct DT_INTERFACE_SEND_TELEMETRY_CALLBACK_CONTEXT_TAG
     DIGITALTWIN_CLIENT_TELEMETRY_CONFIRMATION_CALLBACK telemetryConfirmationCallback;
     void* userContextCallback;
 } DT_INTERFACE_SEND_TELEMETRY_CALLBACK_CONTEXT;
-
-MU_DEFINE_ENUM_STRINGS(DT_COMMAND_PROCESSOR_RESULT, DT_COMMAND_PROCESSOR_RESULT_VALUES);
 
 // Invokes Lock() (for convenience layer based handles) or else a no-op (for _LL_)
 static int InvokeBindingInterfaceLock(DT_INTERFACE_CLIENT* dtInterfaceClient, bool* lockHeld)
@@ -529,9 +526,9 @@ static bool IsDesiredInterfaceStateTransitionAllowed(DT_INTERFACE_CLIENT* dtInte
 
 static void SetInterfaceState(DT_INTERFACE_CLIENT* dtInterfaceClient, DT_INTERFACE_STATE desiredState)
 {
-    LogInfo("DigitalTwin Interface : Changing interface state on interface %s from %s to %s", dtInterfaceClient->componentName,
-                                                                                             MU_ENUM_TO_STRING(DT_INTERFACE_STATE, dtInterfaceClient->interfaceState), 
-                                                                                             MU_ENUM_TO_STRING(DT_INTERFACE_STATE, desiredState));
+    LogInfo("DigitalTwin Interface : Changing interface state on interface %s from %d to %d", dtInterfaceClient->componentName,
+                                                                                             dtInterfaceClient->interfaceState, 
+                                                                                             desiredState);
     dtInterfaceClient->interfaceState = desiredState;
 }
 
@@ -604,8 +601,8 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_SetPropertiesUpdatedCallba
     }
     else if (dtInterfaceClient->interfaceState != DT_INTERFACE_STATE_CREATED)
     {   
-        LogError("PropertyUpdateCallback cannot be set after an interface registration has begun.  Current interface state=%s", 
-                  MU_ENUM_TO_STRING(DT_INTERFACE_STATE, dtInterfaceClient->interfaceState));
+        LogError("PropertyUpdateCallback cannot be set after an interface registration has begun.  Current interface state=%d",
+                  dtInterfaceClient->interfaceState);
         result = DIGITALTWIN_CLIENT_ERROR_INTERFACE_ALREADY_REGISTERED;
     }
     else
@@ -636,8 +633,8 @@ DIGITALTWIN_CLIENT_RESULT DigitalTwin_InterfaceClient_SetCommandsCallback(DIGITA
     }
     else if (dtInterfaceClient->interfaceState != DT_INTERFACE_STATE_CREATED)
     {   
-        LogError("CommandCallback cannot be set after an interface registration has begun.  Current interface state=%s", 
-                  MU_ENUM_TO_STRING(DT_INTERFACE_STATE, dtInterfaceClient->interfaceState));
+        LogError("CommandCallback cannot be set after an interface registration has begun.  Current interface state=%d",
+                  dtInterfaceClient->interfaceState);
         result = DIGITALTWIN_CLIENT_ERROR_INTERFACE_ALREADY_REGISTERED;
     }
     else
@@ -787,8 +784,8 @@ void DT_InterfaceClient_RegistrationCompleteCallback(DIGITALTWIN_INTERFACE_CLIEN
     {
         if (dtInterfaceStatus != DIGITALTWIN_CLIENT_OK)
         {
-            LogError("Interface %s failed on registration with error %s.  Interface is NOT registered, remaining in state=%s", dtInterfaceClient->componentName,
-                      MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, dtInterfaceStatus), MU_ENUM_TO_STRING(DT_INTERFACE_STATE, dtInterfaceClient->interfaceState));
+            LogError("Interface %s failed on registration with error %d.  Interface is NOT registered, remaining in state=%d", dtInterfaceClient->componentName,
+                      dtInterfaceStatus, dtInterfaceClient->interfaceState);
         }
         else 
         {
@@ -1652,8 +1649,8 @@ void InvokeSendTelemetryCallback(DT_INTERFACE_CLIENT* dtInterfaceClient, DT_INTE
     else
     {
         (void)dtInterfaceClient; // When logging is disabled, dtInterfaceClient not used and otherwise causes a false positive on -Wunused-variable.
-        LogInfo("DigitalTwin Interface: Invoking telemetry confirmation callback for component name=%s, reportedStatus=%s, userContextCallback=%p", 
-                   dtInterfaceClient->componentName, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, dtSendTelemetryStatus), sendTelemetryCallbackContext->userContextCallback);
+        LogInfo("DigitalTwin Interface: Invoking telemetry confirmation callback for component name=%s, reportedStatus=%d, userContextCallback=%p", 
+                   dtInterfaceClient->componentName, dtSendTelemetryStatus, sendTelemetryCallbackContext->userContextCallback);
     
         sendTelemetryCallbackContext->telemetryConfirmationCallback(dtSendTelemetryStatus, sendTelemetryCallbackContext->userContextCallback);
     
@@ -1724,8 +1721,8 @@ DIGITALTWIN_CLIENT_RESULT DT_InterfaceClient_ProcessReportedPropertiesUpdateCall
         else
         {
             (void)dtInterfaceClient; // When logging is disabled, dtInterfaceClient not used and otherwise causes a false positive on -Wunused-variable.
-            LogInfo("DigitalTwin Interface: Invoking reported property update for component name=%s, reportedStatus=%s, userContextCallback=%p", 
-                        dtInterfaceClient->componentName, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, dtReportedStatus), dtReportedPropertyCallback->userContextCallback);
+            LogInfo("DigitalTwin Interface: Invoking reported property update for component name=%s, reportedStatus=%d, userContextCallback=%p", 
+                        dtInterfaceClient->componentName, dtReportedStatus, dtReportedPropertyCallback->userContextCallback);
             
             dtReportedPropertyCallback->dtReportedPropertyCallback(dtReportedStatus, dtReportedPropertyCallback->userContextCallback);
 

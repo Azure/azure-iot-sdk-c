@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
     // in some C++ helpers.  DO NOT USE deviceHandle after this point.
     else if ((result = DigitalTwin_DeviceClient_CreateFromDeviceHandle(deviceHandle, DIGITALTWIN_SAMPLE_MODEL_ID, &dtDeviceClientHandle)) != DIGITALTWIN_CLIENT_OK)
     {
-        LogError("DigitalTwin_DeviceClient_CreateFromDeviceHandle failed, error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
+        LogError("DigitalTwin_DeviceClient_CreateFromDeviceHandle failed, error=<%d>", result);
     }
     // Invoke to the DeviceInfo interface - implemented in a separate library - to create DIGITALTWIN_INTERFACE_CLIENT_HANDLE.
     // NOTE: Other than creation and destruction, NO operations may occur on any DIGITALTWIN_INTERFACE_CLIENT_HANDLE

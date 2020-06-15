@@ -27,9 +27,6 @@
 
 #include "digitaltwin_device_client.h"
 
-TEST_DEFINE_ENUM_TYPE(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_RESULT_VALUES);
-IMPLEMENT_UMOCK_C_ENUM_TYPE(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_RESULT_VALUES);
-
 #define DT_TEST_INTERFACE_HANDLE1 ((DIGITALTWIN_INTERFACE_CLIENT_HANDLE)0x1001)
 #define DT_TEST_INTERFACE_HANDLE2 ((DIGITALTWIN_INTERFACE_CLIENT_HANDLE)0x1002)
 #define DT_TEST_INTERFACE_HANDLE3 ((DIGITALTWIN_INTERFACE_CLIENT_HANDLE)0x1003)
@@ -118,7 +115,7 @@ TEST_FUNCTION(DigitalTwin_DeviceClient_CreateFromDeviceHandle_ok)
     result = DigitalTwin_DeviceClient_CreateFromDeviceHandle(testIotHubDeviceHandle, testDTModelId, &h);
 
     //assert
-    ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(int, DIGITALTWIN_CLIENT_OK, result);
     ASSERT_IS_NOT_NULL(h);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         
@@ -136,7 +133,7 @@ TEST_FUNCTION(DigitalTwin_DeviceClient_CreateFromDeviceHandle_NULL_iothub_handle
     result = DigitalTwin_DeviceClient_CreateFromDeviceHandle(NULL, testDTModelId, &h);
 
     //assert
-    ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(int, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG, result);
     ASSERT_IS_NULL(h);
 }
 
@@ -149,7 +146,7 @@ TEST_FUNCTION(DigitalTwin_DeviceClient_CreateFromDeviceHandle_NULL_dt_handle_fai
     result = DigitalTwin_DeviceClient_CreateFromDeviceHandle(testIotHubDeviceHandle, testDTModelId, NULL);
 
     //assert
-    ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(int, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG, result);
 }
 
 
@@ -177,7 +174,7 @@ TEST_FUNCTION(DigitalTwin_DeviceClient_CreateFromDeviceHandle_fail)
         result = DigitalTwin_DeviceClient_CreateFromDeviceHandle(testIotHubDeviceHandle, testDTModelId, &h);
         
         //assert
-        ASSERT_ARE_NOT_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result, message);
+        ASSERT_ARE_NOT_EQUAL(int, DIGITALTWIN_CLIENT_OK, result, message);
         ASSERT_IS_NULL(h, message);
     }
 
@@ -194,7 +191,7 @@ static DIGITALTWIN_DEVICE_CLIENT_HANDLE allocate_DIGITALTWIN_DEVICE_CLIENT_HANDL
     result = DigitalTwin_DeviceClient_CreateFromDeviceHandle(testIotHubDeviceHandle, testDTModelId, &h);
 
     ASSERT_IS_NOT_NULL(h);
-    ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(int, DIGITALTWIN_CLIENT_OK, result);
 
     umock_c_reset_all_calls();
     return h;
@@ -246,7 +243,7 @@ TEST_FUNCTION(DigitalTwin_DeviceClient_RegisterInterfaces_ok)
     result = DigitalTwin_DeviceClient_RegisterInterfaces(h, testDTInterfacesToRegister, testDTInterfacesToRegisterLen);
 
     //assert
-    ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, result, DIGITALTWIN_CLIENT_OK);
+    ASSERT_ARE_EQUAL(int, DIGITALTWIN_CLIENT_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         
     //cleanup
@@ -275,7 +272,7 @@ TEST_FUNCTION(DigitalTwin_DeviceClient_RegisterInterfaces_fail)
         result = DigitalTwin_DeviceClient_RegisterInterfaces(h, testDTInterfacesToRegister, testDTInterfacesToRegisterLen);
         
         //assert
-        ASSERT_ARE_NOT_EQUAL(DIGITALTWIN_CLIENT_RESULT, result, DIGITALTWIN_CLIENT_OK, "DigitalTwin_DeviceClient_RegisterInterfaces failure in test %lu", (unsigned long)i);
+        ASSERT_ARE_NOT_EQUAL(int, DIGITALTWIN_CLIENT_OK, result, "DigitalTwin_DeviceClient_RegisterInterfaces failure in test %lu", (unsigned long)i);
     }
 
     //cleanup

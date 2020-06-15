@@ -93,12 +93,6 @@ MOCKABLE_FUNCTION(, void, testBindingThreadSleep, unsigned int, milliseconds);
 #include "../../../serializer/tests/serializer_dt_ut/real_crt_abstractions.h"
 #include "real_strings.h"
 
-TEST_DEFINE_ENUM_TYPE(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_RESULT_VALUES);
-IMPLEMENT_UMOCK_C_ENUM_TYPE(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_RESULT_VALUES);
-
-TEST_DEFINE_ENUM_TYPE(DT_COMMAND_PROCESSOR_RESULT, DT_COMMAND_PROCESSOR_RESULT_VALUES);
-IMPLEMENT_UMOCK_C_ENUM_TYPE(DT_COMMAND_PROCESSOR_RESULT, DT_COMMAND_PROCESSOR_RESULT_VALUES);
-
 static const char dtTestCommandName[] = "TestCommandName";
 static const char dtTestCommandPayload[] = "Test payload for command invocation in list";
 static const int dtTestCommandPayloadLen = sizeof(dtTestCommandPayload) - 1;
@@ -356,7 +350,7 @@ static void test_register_interface_list(DIGITALTWIN_INTERFACE_CLIENT_HANDLE* dt
     DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceList_BindInterfaces(h, dtInterfaces, numInterfacesToRegister, NULL, NULL);
 
     //assert
-    ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, result, DIGITALTWIN_CLIENT_OK);
+    ASSERT_ARE_EQUAL(int, result, DIGITALTWIN_CLIENT_OK);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -405,7 +399,7 @@ TEST_FUNCTION(DT_InterfaceList_RegisterInterfaces_last_interface_register_fails)
     DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceList_BindInterfaces(h, dtTestInterfaceArray, 3, NULL, NULL);
 
     //assert
-    ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(int, DIGITALTWIN_CLIENT_ERROR, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -418,7 +412,7 @@ TEST_FUNCTION(DT_InterfaceList_RegisterInterfaces_NULL_list_handle_fails)
     DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceList_BindInterfaces(NULL, dtTestInterfaceArray, 1, NULL, NULL);
 
     //assert
-    ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, result, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG);
+    ASSERT_ARE_EQUAL(int, result, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());    
 }
 
@@ -445,7 +439,7 @@ TEST_FUNCTION(DT_InterfaceList_RegisterInterfaces_fail)
             DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceList_BindInterfaces(h, dtTestInterfaceArray, 2, NULL, NULL);
 
             //assert
-            ASSERT_ARE_NOT_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result, "Failure in test %lu", (unsigned long)i);
+            ASSERT_ARE_NOT_EQUAL(int, DIGITALTWIN_CLIENT_OK, result, "Failure in test %lu", (unsigned long)i);
         }
     }
 
@@ -459,7 +453,7 @@ static DIGITALTWIN_INTERFACE_LIST_HANDLE create_DT_interface_list_and_bind(int n
     DIGITALTWIN_INTERFACE_LIST_HANDLE h = create_DT_interface_list_for_test();
 
     DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceList_BindInterfaces(h, dtTestInterfaceArray, numInterfacesToRegister, NULL, NULL);
-    ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, result, DIGITALTWIN_CLIENT_OK);
+    ASSERT_ARE_EQUAL(int, result, DIGITALTWIN_CLIENT_OK);
 
     umock_c_reset_all_calls();
     return h;
@@ -684,7 +678,7 @@ static void test_DT_InterfaceList_InvokeCommand(int numInterfacesRegistered, int
     if (matchedInterfaceIndex <= numInterfacesRegistered)
     {
         // We should have found a match.  Make sure that we're getting correct data plumbed up
-        ASSERT_ARE_EQUAL(DT_COMMAND_PROCESSOR_RESULT, DT_COMMAND_PROCESSOR_PROCESSED, result);
+        ASSERT_ARE_EQUAL(int, DT_COMMAND_PROCESSOR_PROCESSED, result);
         ASSERT_ARE_EQUAL(size_t, testResponseLen, receivedResponseLen);
         ASSERT_ARE_EQUAL(int, testCallbackResult, receivedResult);
         ASSERT_ARE_EQUAL(char_ptr, testResponseData, receivedResponseData);
@@ -760,7 +754,7 @@ TEST_FUNCTION(DT_InterfaceList_InvokeCommand_NULL_handle_fails)
     DT_COMMAND_PROCESSOR_RESULT result = DT_InterfaceList_InvokeCommand(NULL, dtTestCommandName, (const unsigned char*)dtTestCommandPayload, dtTestCommandPayloadLen, &receivedResponseData, &receivedResponseLen, &receivedResult);
 
     //assert
-    ASSERT_ARE_EQUAL(DT_COMMAND_PROCESSOR_RESULT, DT_COMMAND_PROCESSOR_ERROR, result);
+    ASSERT_ARE_EQUAL(int, DT_COMMAND_PROCESSOR_ERROR, result);
     ASSERT_ARE_EQUAL(size_t, 0x1234, receivedResponseLen);
     ASSERT_ARE_EQUAL(int, 0x5678, receivedResult);
     ASSERT_ARE_EQUAL(char_ptr, NULL, receivedResponseData);
@@ -794,7 +788,7 @@ TEST_FUNCTION(DT_InterfaceList_InvokeCommand_fail)
             DT_COMMAND_PROCESSOR_RESULT result = DT_InterfaceList_InvokeCommand(h, dtTestCommandName, (const unsigned char*)dtTestCommandPayload, dtTestCommandPayloadLen, &receivedResponseData, &receivedResponseLen, &receivedResult);
 
             //assert
-            ASSERT_ARE_NOT_EQUAL(DT_COMMAND_PROCESSOR_RESULT, DT_COMMAND_PROCESSOR_PROCESSED, result, "Failure in test %lu", (unsigned long)i);
+            ASSERT_ARE_NOT_EQUAL(int, DT_COMMAND_PROCESSOR_PROCESSED, result, "Failure in test %lu", (unsigned long)i);
             ASSERT_ARE_EQUAL(size_t, 0x1234, receivedResponseLen);
             ASSERT_ARE_EQUAL(int, 0x5678, receivedResult);
             ASSERT_ARE_EQUAL(char_ptr, NULL, receivedResponseData);
@@ -827,7 +821,7 @@ static void test_DT_InterfaceList_ProcessTwinCallbackForProperties(int numInterf
     DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceList_ProcessTwinCallbackForProperties(h, true, (const unsigned char*)dtTestProcessTwinJson, dtTestProcessTwinJsonLen);
 
     //assert
-    ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(int, DIGITALTWIN_CLIENT_OK, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -860,7 +854,7 @@ TEST_FUNCTION(DT_InterfaceList_ProcessTwinCallback_NULL_handle_fails)
     DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceList_ProcessTwinCallbackForProperties(NULL, true, (const unsigned char*)dtTestProcessTwinJson, dtTestProcessTwinJsonLen);
 
     //assert
-    ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(int, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
@@ -887,7 +881,7 @@ TEST_FUNCTION(DT_InterfaceList_ProcessTwinCallback_fail)
             DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceList_ProcessTwinCallbackForProperties(h, true, (const unsigned char*)dtTestProcessTwinJson, dtTestProcessTwinJsonLen);
 
             //assert
-            ASSERT_ARE_NOT_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result, "Failure in test %lu", (unsigned long)i);
+            ASSERT_ARE_NOT_EQUAL(int, DIGITALTWIN_CLIENT_OK, result, "Failure in test %lu", (unsigned long)i);
         }
     }
 
@@ -918,7 +912,7 @@ static void test_DT_InterfaceList_ProcessTelemetryCallback(int numInterfaces, DI
     DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceList_ProcessTelemetryCallback(h, interfaceHandle, dtSendTelemetryStatus, userContext);
 
     //assert
-    ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, expectedResult, result);
+    ASSERT_ARE_EQUAL(int, expectedResult, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -966,7 +960,7 @@ TEST_FUNCTION(DT_InterfaceList_ProcessTelemetryCallback_NULL_list_handle)
     DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceList_ProcessTelemetryCallback(NULL, DT_TEST_INTERFACE_HANDLE2, DIGITALTWIN_CLIENT_OK, dtTestInvokeCommandUserContext);
 
     //assert
-    ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(int, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
@@ -993,7 +987,7 @@ TEST_FUNCTION(DT_InterfaceList_ProcessTelemetryCallback_fail)
             DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceList_ProcessTelemetryCallback(h, DT_TEST_INTERFACE_HANDLE1, DIGITALTWIN_CLIENT_OK, dtTestInvokeCommandUserContext);
 
             //assert
-            ASSERT_ARE_NOT_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result, "Failure in test %lu", (unsigned long)i);
+            ASSERT_ARE_NOT_EQUAL(int, DIGITALTWIN_CLIENT_OK, result, "Failure in test %lu", (unsigned long)i);
         }
     }
 
@@ -1023,7 +1017,7 @@ static void test_DT_InterfaceList_ProcessReportedPropertiesUpdateCallback(int nu
     DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceList_ProcessReportedPropertiesUpdateCallback(h, interfaceHandle, dtReportedStatus, userContext);
 
     //assert
-    ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, expectedResult, result);
+    ASSERT_ARE_EQUAL(int, expectedResult, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1071,7 +1065,7 @@ TEST_FUNCTION(DT_InterfaceList_ProcessReportedPropertiesUpdateCallback_NULL_hand
     DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceList_ProcessReportedPropertiesUpdateCallback(NULL, DT_TEST_INTERFACE_HANDLE1, DIGITALTWIN_CLIENT_OK, dtTestProcessReportedPropertiesUserContext);
 
     //assert
-    ASSERT_ARE_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(int, DIGITALTWIN_CLIENT_ERROR_INVALID_ARG, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
@@ -1098,7 +1092,7 @@ TEST_FUNCTION(DT_InterfaceList_ProcessReportedPropertiesUpdateCallback_fail)
             DIGITALTWIN_CLIENT_RESULT result = DT_InterfaceList_ProcessReportedPropertiesUpdateCallback(h, DT_TEST_INTERFACE_HANDLE1, DIGITALTWIN_CLIENT_OK, dtTestInvokeCommandUserContext);
 
             //assert
-            ASSERT_ARE_NOT_EQUAL(DIGITALTWIN_CLIENT_RESULT, DIGITALTWIN_CLIENT_OK, result, "Failure in test %lu", (unsigned long)i);
+            ASSERT_ARE_NOT_EQUAL(int, DIGITALTWIN_CLIENT_OK, result, "Failure in test %lu", (unsigned long)i);
         }
     }
 

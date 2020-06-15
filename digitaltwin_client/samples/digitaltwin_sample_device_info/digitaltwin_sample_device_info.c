@@ -43,7 +43,7 @@ static void DigitalTwinSampleDeviceInfo_PropertyCallback(DIGITALTWIN_CLIENT_RESU
     }
     else
     {
-        LogError("DEVICE_INFO: Property callback property=<%s> fails, error=<%s>",  (const char*)userContextCallback, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, dtReportedStatus));
+        LogError("DEVICE_INFO: Property callback property=<%s> fails, error=<%d>",  (const char*)userContextCallback, dtReportedStatus);
     }
 }
 
@@ -61,7 +61,7 @@ static DIGITALTWIN_CLIENT_RESULT DigitalTwinSampleDeviceInfo_ReportPropertyAsync
 
     if (result != DIGITALTWIN_CLIENT_OK)
     {
-        LogError("DEVICE_INFO: Reporting property=<%s> failed, error=<%s>", propertyName, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
+        LogError("DEVICE_INFO: Reporting property=<%s> failed, error=<%d>", propertyName, result);
     }
     else
     {
@@ -295,7 +295,7 @@ static void DigitalTwinSampleDeviceInfo_InterfaceRegisteredCallback(DIGITALTWIN_
     }
     else 
     {
-        LogError("DEVICE_INFO: Interface received failed, status=<%s>.", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, dtInterfaceStatus));
+        LogError("DEVICE_INFO: Interface received failed, status=<%d>.", dtInterfaceStatus);
     }
 }
 
@@ -317,7 +317,7 @@ DIGITALTWIN_INTERFACE_CLIENT_HANDLE DigitalTwinSampleDeviceInfo_CreateInterface(
 
     if ((result = DigitalTwin_InterfaceClient_Create(digitaltwinSampleDeviceInfo_InterfaceId, digitaltwinSampleDeviceInfo_InterfaceName, DigitalTwinSampleDeviceInfo_InterfaceRegisteredCallback, &digitaltwinSample_DeviceInfoState, &interfaceHandle)) != DIGITALTWIN_CLIENT_OK)
     {
-        LogError("DEVICE_INFO: Unable to allocate interface client handle for interfaceId=<%s>, interfaceName=<%s>, error=<%s>", digitaltwinSampleDeviceInfo_InterfaceId, digitaltwinSampleDeviceInfo_InterfaceName, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
+        LogError("DEVICE_INFO: Unable to allocate interface client handle for interfaceId=<%s>, interfaceName=<%s>, error=<%d>", digitaltwinSampleDeviceInfo_InterfaceId, digitaltwinSampleDeviceInfo_InterfaceName, result);
         interfaceHandle = NULL;
     }
     else

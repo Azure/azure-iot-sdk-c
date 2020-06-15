@@ -179,7 +179,7 @@ static void DigitalTwinSampleEnvironmentalSensor_PropertyCallback(DIGITALTWIN_CL
     }
     else
     {
-        LogError("ENVIRONMENTAL_SENSOR_INTERFACE: Updating property property=<%s> failed, error=<%s>", (const char*)userContextCallback, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, dtReportedStatus));
+        LogError("ENVIRONMENTAL_SENSOR_INTERFACE: Updating property property=<%s> failed, error=<%d>", (const char*)userContextCallback, dtReportedStatus);
     }
 }
 
@@ -228,7 +228,7 @@ static void DigitalTwinSampleEnvironmentalSensor_CustomerNameCallback(const DIGI
                                                              DigitalTwinSampleEnvironmentalSensor_PropertyCallback, (void*)digitaltwinSample_EnvironmentalSensorPropertyCustomerName);
     if (result != DIGITALTWIN_CLIENT_OK)
     {
-        LogError("ENVIRONMENTAL_SENSOR_INTERFACE: DigitalTwin_InterfaceClient_ReportPropertyAsync for CustomerName failed, error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
+        LogError("ENVIRONMENTAL_SENSOR_INTERFACE: DigitalTwin_InterfaceClient_ReportPropertyAsync for CustomerName failed, error=<%d>", result);
     }
     else
     {
@@ -300,7 +300,7 @@ static void DigitalTwinSampleEnvironmentalSensor_BrightnessCallback(const DIGITA
                                                              DigitalTwinSampleEnvironmentalSensor_PropertyCallback, (void*)digitaltwinSample_EnvironmentalSensorPropertyBrightness);
     if (result != DIGITALTWIN_CLIENT_OK)
     {
-        LogError("ENVIRONMENTAL_SENSOR_INTERFACE: DigitalTwin_InterfaceClient_ReportPropertyAsync for Brightness failed, error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
+        LogError("ENVIRONMENTAL_SENSOR_INTERFACE: DigitalTwin_InterfaceClient_ReportPropertyAsync for Brightness failed, error=<%d>", result);
     }
     else
     {
@@ -319,7 +319,7 @@ static DIGITALTWIN_CLIENT_RESULT DigitalTwinSampleEnvironmentalSensor_ReportDevi
 
     if (result != DIGITALTWIN_CLIENT_OK)
     {
-        LogError("ENVIRONMENTAL_SENSOR_INTERFACE: Reporting property=<%s> failed, error=<%s>", digitaltwinSample_DeviceStateProperty, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
+        LogError("ENVIRONMENTAL_SENSOR_INTERFACE: Reporting property=<%s> failed, error=<%d>", digitaltwinSample_DeviceStateProperty, result);
     }
     else
     {
@@ -349,7 +349,7 @@ static void DigitalTwinSampleEnvironmentalSensor_InterfaceRegisteredCallback(DIG
     }
     else 
     {
-        LogError("ENVIRONMENTAL_SENSOR_INTERFACE: Interface received failed, status=<%s>.", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, dtInterfaceStatus));
+        LogError("ENVIRONMENTAL_SENSOR_INTERFACE: Interface received failed, status=<%d>.", dtInterfaceStatus);
     }
 }
 
@@ -420,18 +420,18 @@ DIGITALTWIN_INTERFACE_CLIENT_HANDLE DigitalTwinSampleEnvironmentalSensor_CreateI
     
     if ((result =  DigitalTwin_InterfaceClient_Create(DigitalTwinSampleEnvironmentalSensor_InterfaceId, DigitalTwinSampleEnvironmentalSensor_ComponentName, DigitalTwinSampleEnvironmentalSensor_InterfaceRegisteredCallback, (void*)&digitaltwinSample_EnvironmentalSensorState, &interfaceHandle)) != DIGITALTWIN_CLIENT_OK)
     {
-        LogError("ENVIRONMENTAL_SENSOR_INTERFACE: Unable to allocate interface client handle for interfaceId=<%s>, componentName=<%s>, error=<%s>", DigitalTwinSampleEnvironmentalSensor_InterfaceId, DigitalTwinSampleEnvironmentalSensor_ComponentName, MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
+        LogError("ENVIRONMENTAL_SENSOR_INTERFACE: Unable to allocate interface client handle for interfaceId=<%s>, componentName=<%s>, error=<%d>", DigitalTwinSampleEnvironmentalSensor_InterfaceId, DigitalTwinSampleEnvironmentalSensor_ComponentName, result);
         interfaceHandle = NULL;
     }
     else if ((result = DigitalTwin_InterfaceClient_SetPropertiesUpdatedCallback(interfaceHandle, DigitalTwinSampleEnvironmentalSensor_ProcessPropertyUpdate, (void*)&digitaltwinSample_EnvironmentalSensorState)) != DIGITALTWIN_CLIENT_OK)
     {
-        LogError("ENVIRONMENTAL_SENSOR_INTERFACE: DigitalTwin_InterfaceClient_SetPropertiesUpdatedCallback failed. error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
+        LogError("ENVIRONMENTAL_SENSOR_INTERFACE: DigitalTwin_InterfaceClient_SetPropertiesUpdatedCallback failed. error=<%d>", result);
         DigitalTwinSampleEnvironmentalSensor_Close(interfaceHandle);
         interfaceHandle = NULL;
     }
     else if ((result = DigitalTwin_InterfaceClient_SetCommandsCallback(interfaceHandle, DigitalTwinSample_ProcessCommandUpdate, (void*)&digitaltwinSample_EnvironmentalSensorState)) != DIGITALTWIN_CLIENT_OK)
     {
-        LogError("ENVIRONMENTAL_SENSOR_INTERFACE: DigitalTwin_InterfaceClient_SetCommandsCallback failed. error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT, result));
+        LogError("ENVIRONMENTAL_SENSOR_INTERFACE: DigitalTwin_InterfaceClient_SetCommandsCallback failed. error=<%d>", result);
         DigitalTwinSampleEnvironmentalSensor_Close(interfaceHandle);
         interfaceHandle = NULL;
     }
@@ -460,7 +460,7 @@ static void DigitalTwinSampleEnvironmentalSensor_TelemetryCallback(DIGITALTWIN_C
     }
     else
     {
-        LogError("ENVIRONMENTAL_SENSOR_INTERFACE: DigitalTwin failed delivered telemetry message, error=<%s>", MU_ENUM_TO_STRING(DIGITALTWIN_CLIENT_RESULT,dtTelemetryStatus));
+        LogError("ENVIRONMENTAL_SENSOR_INTERFACE: DigitalTwin failed delivered telemetry message, error=<%d>", dtTelemetryStatus);
     }
 }
 
