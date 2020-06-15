@@ -10,7 +10,7 @@ This directory contains samples demonstrating creating and using Digital Twin in
 
 ### Directories that build libraries
 * [digitaltwin\_sample\_device_info](./digitaltwin_sample_device_info) - This directory builds the sample device info library.  This is a Digital Twin interface that reports information about the device - such as OS version, amount of storage, etc.
-* [digitaltwin\_sample\_environmental_sensor](./digitaltwin_sample_environmental_sensor) - This directory builds the sample environmental sensor library.  This is a Digital Twin interface  that demonstrates all concepts of implementing a Digital Twin model: commands (synchronous and asynchronous), properties, and telemetry.
+* [digitaltwin\_sample\_environmental_sensor](./digitaltwin_sample_environmental_sensor) - This directory builds the sample environmental sensor library.  This is a Digital Twin interface that demonstrates all concepts of implementing a Digital Twin model: commands, properties, and telemetry.
 
 ## Getting started
 

@@ -12,5 +12,4 @@ EXPORTS
     DigitalTwin_InterfaceClient_Create
     DigitalTwin_InterfaceClient_SendTelemetryAsync
     DigitalTwin_InterfaceClient_ReportPropertyAsync
-    DigitalTwin_InterfaceClient_UpdateAsyncCommandStatusAsync
     DigitalTwin_InterfaceClient_Destroy
