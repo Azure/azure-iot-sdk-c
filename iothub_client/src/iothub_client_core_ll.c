@@ -39,6 +39,8 @@
 
 #define LOG_ERROR_RESULT LogError("result = %s", MU_ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, result));
 #define INDEFINITE_TIME ((time_t)(-1))
+#define ERROR_CODE_BECAUSE_DESTROY 0
+
 
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, IOTHUB_CLIENT_FILE_UPLOAD_RESULT_VALUES);
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
@@ -1743,11 +1745,29 @@ void IoTHubClientCore_LL_Destroy(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle
         while ((unsend = DList_RemoveHeadList(&(handleData->iot_msg_queue))) != &(handleData->iot_msg_queue))
         {
             IOTHUB_DEVICE_TWIN* temp = containingRecord(unsend, IOTHUB_DEVICE_TWIN, entry);
+
+            // The Twin reported properties status codes are based on HTTP codes and provided by the service.
+            // Following design already implemented in the transport layer, the status code shall be artificially 
+            // returned as zero to indicate the report was not sent due to the client being destroyed.
+            if (temp->reported_state_callback != NULL)
+            {
+                temp->reported_state_callback(ERROR_CODE_BECAUSE_DESTROY, temp->context);
+            }  
+
             device_twin_data_destroy(temp);
         }
         while ((unsend = DList_RemoveHeadList(&(handleData->iot_ack_queue))) != &(handleData->iot_ack_queue))
         {
             IOTHUB_DEVICE_TWIN* temp = containingRecord(unsend, IOTHUB_DEVICE_TWIN, entry);
+
+            // The Twin reported properties status codes are based on HTTP codes and provided by the service.
+            // Following design already implemented in the transport layer, the status code shall be artificially 
+            // returned as zero to indicate the report was not sent due to the client being destroyed.
+            if (temp->reported_state_callback != NULL)
+            {
+                temp->reported_state_callback(ERROR_CODE_BECAUSE_DESTROY, temp->context);
+            }
+
             device_twin_data_destroy(temp);
         }
 
