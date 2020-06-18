@@ -4398,6 +4398,57 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendReportedState_succeeds)
     IoTHubClientCore_LL_Destroy(handle);
 }
 
+TEST_FUNCTION(IoTHubClientCore_LL_Destroy_with_pending_reported_state_succeeds)
+{
+    //arrange
+    IOTHUB_CLIENT_CORE_LL_HANDLE handle = IoTHubClientCore_LL_Create(&TEST_CONFIG);
+    umock_c_reset_all_calls();
+    setup_IoTHubClientCore_LL_sendreportedstate_mocks();
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SendReportedState(handle, TEST_REPORTED_STATE, TEST_REPORTED_SIZE, iothub_reported_state_callback, NULL);
+
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_Unregister(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_Destroy(IGNORED_PTR_ARG));
+
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG)); /*because there is one item in the list*/
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG)); /*because there is one item in the list*/
+
+    STRICT_EXPECTED_CALL(iothub_reported_state_callback(IGNORED_NUM_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(CONSTBUFFER_DecRef(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG)); /*because there is one item in the list*/
+    STRICT_EXPECTED_CALL(DList_RemoveHeadList(IGNORED_PTR_ARG)); /*because there is one item in the list*/
+
+    STRICT_EXPECTED_CALL(IoTHubClient_Auth_Destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_destroy(IGNORED_PTR_ARG));
+
+#ifndef DONT_USE_UPLOADTOBLOB
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_Destroy(IGNORED_PTR_ARG));
+#endif
+#ifdef USE_EDGE_MODULES
+    STRICT_EXPECTED_CALL(IoTHubClient_EdgeHandle_Destroy(IGNORED_PTR_ARG));
+#endif
+
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+
+    //act
+    IoTHubClientCore_LL_Destroy(handle);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    //act
+
+    //assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+}
+
 /* Tests_SRS_IoTHubClientCore_LL_10_012: [ IoTHubClientCore_LL_SendReportedState shall fail and return IOTHUB_CLIENT_INVALID_ARG if parameter iotHubClientHandle is NULL. ] */
 TEST_FUNCTION(IoTHubClientCore_LL_SendReportedState_NULL_fails)
 {
