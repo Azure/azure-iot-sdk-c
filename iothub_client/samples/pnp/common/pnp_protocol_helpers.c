@@ -3,6 +3,7 @@
 
 
 #include "pnp_protocol_helpers.h"
+#include "parson.h"
 
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/strings.h"
@@ -76,41 +77,105 @@ IOTHUB_MESSAGE_HANDLE PnPHelper_CreateTelemetryMessageHandle(const char* compone
     return messageHandle;
 }
 
-void PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payLoad, size_t size, PnPHelperPropertyCallbackFunction callbackFromApplication) 
+static void VisitPnPObject(const char* objectName, JSON_Value* value, PnPHelperPropertyCallbackFunction callbackFromApplication)
 {
-    (void)updateState;
-    (void)payLoad;
-    (void)size;
     (void)callbackFromApplication;
+    JSON_Object* object = json_value_get_object(value);
 
-/*
-    JsonObject obj = JsonParser(deviceTwin::desired);
+    JSON_Value* componentTypeMarker = json_object_get_value(object, "__t");
 
-    foreach (topLevel Json element in obj) {
-        // Parse each top-level json element
-        if (element."__t" == "c") 
+    const char* componentTypeStr = json_value_get_string(componentTypeMarker);
+
+    if ((componentTypeStr != NULL) && (strcmp(componentTypeStr, "c") == 0))
+    {
+        size_t numChildren = json_object_get_count(object);
+        for (size_t i = 0; i < numChildren; i++)
         {
-           // If it is a component, get the component name
-           copmonentName = elements-name;
-           // Components may have properties associated with them, so visit each and callback to passed function.
-           foreach (subElement in element) 
-           {
-              propertyName = subElement's-name;
+            const char* name = json_object_get_name(object, i);
+            JSON_Value* subValue = json_object_get_value_at(object, i);
 
-              // Invoke the application's callback 
-              callbackFromApplication(componentName, propertyName, propertyName.body);
-           }
+            if (strcmp(name, "__t") == 0)
+                continue;
+
+            const char* jsonStr = json_serialize_to_string(subValue);
+            printf("val=%s\n", jsonStr);
+
+            printf("componentName=%s,name=%s,val=%s\n", objectName, name, jsonStr);
+        }
+    }
+    else
+    {
+        printf("NOT a subcomponent.  Treating as a property.");
+        const char* jsonStr = json_serialize_to_string(value);
+        printf("val=%s\n", jsonStr);
+    }
+    
+}
+
+static void VisitPnPProperties(JSON_Object* desiredRoot, PnPHelperPropertyCallbackFunction callbackFromApplication)
+{
+    size_t numChildren = json_object_get_count(desiredRoot);
+
+    JSON_Value* versionValue = json_object_get_value(desiredRoot, "$version");
+    int version = (int)json_value_get_number(versionValue);
+    printf("Version=%d", version);
+
+    for (size_t i = 0; i < numChildren; i++)
+    {
+        const char* name = json_object_get_name(desiredRoot, i);
+        JSON_Value* value = json_object_get_value_at(desiredRoot, i);
+
+        if (strcmp(name,"$version") == 0)
+        {
+            // The version field is metadata and should be skipped in enumeration loop.
+            continue;
+        }
+
+        JSON_Value_Type jsonTye = json_type(value);
+
+        if (jsonTye == JSONObject)
+        {
+            VisitPnPObject(name, value, callbackFromApplication);
         }
         else
         {
-            // This top-level field isn't a component, so treat it as a property of the Model itself (aka root node)
-            componentName = NULL;
-            propertyName = elements-name;
-
-
-             callbackFromApplication(componentName, propertyName, propertyName.body);
+            const char* jsonStr = json_serialize_to_string(value);
+            printf("name=%s,val=%s\n", name, jsonStr);
         }
     }
-*/
+
+}
+
+int PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payLoad, size_t size, PnPHelperPropertyCallbackFunction callbackFromApplication) 
+{
+    char* jsonStr = (char*)malloc(size+1);
+    JSON_Value* rootValue = NULL;
+    JSON_Object* rootObject = NULL;
+    JSON_Object* desiredRoot = NULL;
+
+    memcpy(jsonStr, payLoad, size);
+    jsonStr[size] = 0;
+
+    (void)callbackFromApplication;
+
+    rootValue = json_parse_string(jsonStr);
+
+    rootObject = json_value_get_object(rootValue);
+
+    if (updateState == DEVICE_TWIN_UPDATE_COMPLETE)
+    {
+        desiredRoot = json_object_get_object(rootObject, "desired");
+    }
+    else
+    {
+        desiredRoot = rootObject;
+    }
+
+    VisitPnPProperties(desiredRoot, callbackFromApplication);
+
+    json_value_free(rootValue);
+    free(jsonStr);
+
+    return 0;
 }
 

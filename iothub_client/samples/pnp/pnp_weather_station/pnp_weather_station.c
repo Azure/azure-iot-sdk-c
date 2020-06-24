@@ -126,7 +126,8 @@ int main(void)
     }
     else
     {
-        TempSensor_SendCurrentTemperature(device_handle);
+        PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_PARTIAL, NULL, 0, NULL);
+        //TempSensor_SendCurrentTemperature(device_handle);
         while(g_continueRunning)
         {
             

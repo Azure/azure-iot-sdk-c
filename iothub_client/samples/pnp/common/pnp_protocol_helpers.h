@@ -19,7 +19,7 @@ void PnPHelper_ParseCommandName(const char* deviceMethodName, const char** compo
 
 IOTHUB_MESSAGE_HANDLE PnPHelper_CreateTelemetryMessageHandle(const char* componentName, const char* telemetryData);
 
-void PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payLoad, size_t size, PnPHelperPropertyCallbackFunction callbackFromApplication);
+int PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payLoad, size_t size, PnPHelperPropertyCallbackFunction callbackFromApplication);
 
 
 #endif /* PNP_PROTOCOL_HELPERS_H */
