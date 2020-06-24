@@ -149,24 +149,26 @@ static void x509_cert_free(RIOT_ECC_PUBLIC* pub, RIOT_ECC_PRIVATE* priv)
     mbedtls_mpi_free(priv);
 }
 
-static int generate_root_ca_info(HSM_CLIENT_X509_INFO* riot_info)
+static int generate_root_ca_info(HSM_CLIENT_X509_INFO* riot_info, RIOT_ECC_SIGNATURE* tbs_sig)
 {
     int result;
     uint8_t der_buffer[DER_MAX_TBS] = { 0 };
     DERBuilderContext der_ctx = { 0 };
     DERBuilderContext der_pri_ctx = { 0 };
     RIOT_STATUS status;
-    RIOT_ECC_SIGNATURE tbs_sig = { 0 };
 
     // Build the TBS (to be signed) region of CA_Root Certificate
     DERInitContext(&der_ctx, der_buffer, DER_MAX_TBS);
     DERInitContext(&der_pri_ctx, der_buffer, DER_MAX_TBS);
 
-    // Deriving the "root" signing key. This is intended for development purposes only.
+    // Deriving the "root" signing key. This is intended for development/simulation purposes only.
     // This key is used to sign the DeviceID certificate, the certificiate for
     // this "root" key represents the "trusted" CA for the developer-mode
-    // server(s). Again, this is for development purposes only and (obviously)
-    // provides no meaningful security whatsoever.
+    // server(s). Again, this is for development/simulation purposes only and (obviously)
+    // provides no meaningful security whatsoever, in a production environment this key
+    // is passed in via: get_root_cert & get_root_key.
+    // This key is derived this way to match the signing bit and total number of limbs
+    // as the derived device key and alias key.
     if ((status = RiotCrypt_DeriveEccKey(&riot_info->ca_root_pub, &riot_info->ca_root_priv,
         g_digest, RIOT_DIGEST_LENGTH, (const uint8_t*)RIOT_LABEL_ALIAS, lblSize(RIOT_LABEL_ALIAS))) != RIOT_SUCCESS)
     {
@@ -179,12 +181,12 @@ static int generate_root_ca_info(HSM_CLIENT_X509_INFO* riot_info)
         result = MU_FAILURE;
     }
     // Sign the CA_Root Certificate's TBS region
-    else if ((status = RiotCrypt_Sign(&tbs_sig, der_ctx.Buffer, der_ctx.Position, &riot_info->ca_root_priv)) != RIOT_SUCCESS)
+    else if ((status = RiotCrypt_Sign(tbs_sig, der_ctx.Buffer, der_ctx.Position, &riot_info->ca_root_priv)) != RIOT_SUCCESS)
     {
         LogError("Failure: RiotCrypt_Sign returned invalid status %d.", status);
         result = MU_FAILURE;
     }
-    else if (X509MakeRootCert(&der_ctx, &tbs_sig) != 0)
+    else if (X509MakeRootCert(&der_ctx, tbs_sig) != 0)
     {
         LogError("Failure: X509MakeRootCert");
         result = MU_FAILURE;
@@ -214,17 +216,15 @@ static int generate_root_ca_info(HSM_CLIENT_X509_INFO* riot_info)
             result = 0;
         }
     }
-    ecc_signature_destroy(&tbs_sig);
     return result;
 }
 
-static int produce_device_cert(HSM_CLIENT_X509_INFO* riot_info, CERTIFICATE_SIGNING_TYPE signing_type)
+static int produce_device_cert(HSM_CLIENT_X509_INFO* riot_info, RIOT_ECC_SIGNATURE* tbs_sig, CERTIFICATE_SIGNING_TYPE signing_type)
 {
     int result;
     uint8_t der_buffer[DER_MAX_TBS] = { 0 };
     DERBuilderContext der_ctx = { 0 };
     RIOT_STATUS status;
-    RIOT_ECC_SIGNATURE tbs_sig = { 0 };
 
     if (signing_type == type_self_sign)
     {
@@ -236,12 +236,12 @@ static int produce_device_cert(HSM_CLIENT_X509_INFO* riot_info, CERTIFICATE_SIGN
             result = MU_FAILURE;
         }
         // Sign the DeviceID Certificate's TBS region
-        else if ((status = RiotCrypt_Sign(&tbs_sig, der_ctx.Buffer, der_ctx.Position, &riot_info->device_id_priv)) != RIOT_SUCCESS)
+        else if ((status = RiotCrypt_Sign(tbs_sig, der_ctx.Buffer, der_ctx.Position, &riot_info->device_id_priv)) != RIOT_SUCCESS)
         {
             LogError("Failure: RiotCrypt_Sign returned invalid status %d.", status);
             result = MU_FAILURE;
         }
-        else if (X509MakeDeviceCert(&der_ctx, &tbs_sig) != 0)
+        else if (X509MakeDeviceCert(&der_ctx, tbs_sig) != 0)
         {
             LogError("Failure: X509MakeDeviceCert");
             result = MU_FAILURE;
@@ -260,13 +260,13 @@ static int produce_device_cert(HSM_CLIENT_X509_INFO* riot_info, CERTIFICATE_SIGN
             result = MU_FAILURE;
         }
         // Sign the Alias Key Certificate's TBS region
-        else if ((status = RiotCrypt_Sign(&tbs_sig, der_ctx.Buffer, der_ctx.Position, &riot_info->device_id_priv)) == RIOT_SUCCESS)
+        else if ((status = RiotCrypt_Sign(tbs_sig, der_ctx.Buffer, der_ctx.Position, &riot_info->device_id_priv)) == RIOT_SUCCESS)
         {
             LogError("Failure: RiotCrypt_Sign returned invalid status %d.", status);
             result = MU_FAILURE;
         }
         // Create CSR for DeviceID
-        else if (X509GetDERCsr(&der_ctx, &tbs_sig) != 0)
+        else if (X509GetDERCsr(&der_ctx, tbs_sig) != 0)
         {
             LogError("Failure: X509GetDERCsr");
             result = MU_FAILURE;
@@ -287,12 +287,12 @@ static int produce_device_cert(HSM_CLIENT_X509_INFO* riot_info, CERTIFICATE_SIGN
             result = MU_FAILURE;
         }
         // Sign the DeviceID Certificate's TBS region
-        else if ((status = RiotCrypt_Sign(&tbs_sig, der_ctx.Buffer, der_ctx.Position, &riot_info->ca_root_priv)) != RIOT_SUCCESS)
+        else if ((status = RiotCrypt_Sign(tbs_sig, der_ctx.Buffer, der_ctx.Position, &riot_info->ca_root_priv)) != RIOT_SUCCESS)
         {
             LogError("Failure: RiotCrypt_Sign returned invalid status %d.", status);
             result = MU_FAILURE;
         }
-        else if (X509MakeDeviceCert(&der_ctx, &tbs_sig) != 0)
+        else if (X509MakeDeviceCert(&der_ctx, tbs_sig) != 0)
         {
             LogError("Failure: X509MakeDeviceCert");
             result = MU_FAILURE;
@@ -316,7 +316,6 @@ static int produce_device_cert(HSM_CLIENT_X509_INFO* riot_info, CERTIFICATE_SIGN
             result = 0;
         }
     }
-    ecc_signature_destroy(&tbs_sig);
     return result;
 }
 
@@ -478,12 +477,12 @@ static int process_riot_key_info(HSM_CLIENT_X509_INFO* riot_info)
                 LogError("Failure: producing alias cert.");
                 result = MU_FAILURE;
             }
-            else if (generate_root_ca_info(riot_info) != 0)
+            else if (generate_root_ca_info(riot_info, &tbs_sig) != 0)
             {
                 LogError("Failure: producing root ca.");
                 result = MU_FAILURE;
             }
-            else if (produce_device_cert(riot_info, type_root_signed) != 0)
+            else if (produce_device_cert(riot_info, &tbs_sig, type_root_signed) != 0)
             {
                 LogError("Failure: producing device certificate.");
                 result = MU_FAILURE;
