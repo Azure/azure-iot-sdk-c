@@ -11,9 +11,12 @@
 // This is prototype for function that application writes to process property changes.
 typedef void (*PnPHelperPropertyCallbackFunction)(const char* componentName, const char* propertyName, const char* propertyValue, int version);
 
-char* PnPHelper_CreateReportedProperty(const char* componentName, const char* propertyName, const char* propertyValue);
-char* PnPHelper_CreateReportedPropertyWithStatus(const char* componentName, const char* propertyName, const char* propertyValue, int ackCode, int ackVersion);
-void PnPHelper_ParseCommandName(const char* deviceMethodName, char** componentName, char** commandName);
+STRING_HANDLE PnPHelper_CreateReportedProperty(const char* componentName, const char* propertyName, const char* propertyValue);
+
+STRING_HANDLE PnPHelper_CreateReportedPropertyWithStatus(const char* componentName, const char* propertyName, const char* propertyValue, int ackCode, const char* description, int ackVersion);
+
+void PnPHelper_ParseCommandName(const char* deviceMethodName, const char** componentName, size_t* componentNameLength, const char** commandName, size_t* commandNameLength);
+
 IOTHUB_MESSAGE_HANDLE PnPHelper_CreateTelemetryMessageHandle(const char* componentName, const char* telemetryData);
 
 void PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payLoad, size_t size, PnPHelperPropertyCallbackFunction callbackFromApplication);

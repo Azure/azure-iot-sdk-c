@@ -19,6 +19,7 @@ Please practice sound engineering practices when writing production code.
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/tickcounter.h"
+#include "azure_c_shared_utility/strings.h"
 
 
 #include "pnp_device_client_helpers.h"
@@ -54,11 +55,16 @@ static int DeviceMethodCallback(const char* method_name, const unsigned char* pa
     (void)response;
     (void)resp_size;
     (void)size;
+
     char *commandName;
     char *componentName;
+    size_t commandNameLength;
+    size_t componentNameLength;
+
+    int result = 200;
 
     // Parse the method_name into its PnP (optional) componentName and commandName.
-    PnPHelper_ParseCommandName(method_name, &componentName, &commandName);
+    PnPHelper_ParseCommandName(method_name, &componentName, &componentNameLength, &commandName, &commandNameLength);
 
     // Now that we've parsed the component/command, we route to appropriate handler
     if (componentName == NULL) {
@@ -71,12 +77,7 @@ static int DeviceMethodCallback(const char* method_name, const unsigned char* pa
 
     }
     //...
-}
-
-static int SendCurrentTemp(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle)
-{
-    IOTHUB_MESSAGE_HANDLE h = PnPHelper_CreateTelemetryMessageHandle("thermoStat", "23");
-    IoTHubDeviceClient_SendEventAsync(iotHubClientHandle, h, send_confirmation_callback, NULL);
+    return result;
 }
 
 // ApplicationPropertyCallback implements a visitor pattern, where each property in a received DeviceTwin 
@@ -88,9 +89,10 @@ static void ApplicationPropertyCallback(const char* componentName, const char* p
         if (strcmp(propertyName,"targetTemperature") == 0)
         {
             // Use the helper to get JSON we should end back
-            char* jsonToSend = PnPHelper_CreateReportedPropertyWithStatus("thermostat", "targetTemperature", propertyValue, 200, version);
+            STRING_HANDLE jsonToSend = PnPHelper_CreateReportedPropertyWithStatus("thermostat", "targetTemperature", propertyValue, 200, "", version);
+            const char* jsonToSendStr = STRING_c_str(jsonToSend);
             // Use DeviceClient to transmit the JSON
-            IoTHubDeviceClient_SendReportedState(deviceClient, jsonToSend, NULL, NULL);
+            IoTHubDeviceClient_SendReportedState(NULL/* TODO: deviceClient*/, (const unsigned char*)jsonToSendStr, strlen(jsonToSendStr), NULL, NULL);
         }
     }
 }
@@ -114,15 +116,8 @@ void TempSensor_SendCurrentTemperature(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientH
 
 int main(void)
 {
-    IOTHUB_MESSAGE_HANDLE message_handle;
-    int messagecount = 0;
-
-    printf("\r\nThis sample will send PnP messages and receieve updates.\r\nPress Ctrl+C to terminate the sample.\r\n\r\n");
-
     IOTHUB_DEVICE_CLIENT_HANDLE device_handle;
 
-    (void)printf("Creating IoTHub handle\r\n");
-    // Create the iothub handle here
     device_handle = InitializeIoTHubDeviceHandleForPnP(g_connectionString, g_ModelId, g_traceOn, DeviceMethodCallback, DeviceTwinCallback);
 
     if (device_handle == NULL)
