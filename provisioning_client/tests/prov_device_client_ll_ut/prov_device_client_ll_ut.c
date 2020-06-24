@@ -442,19 +442,14 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         REGISTER_TYPE(PROV_AUTH_RESULT, PROV_AUTH_RESULT);
         REGISTER_TYPE(TRANSPORT_HSM_TYPE, TRANSPORT_HSM_TYPE);
 
-        REGISTER_UMOCK_ALIAS_TYPE(XDA_HANDLE, void*);
-        REGISTER_UMOCK_ALIAS_TYPE(XIO_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(BUFFER_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(PROV_DEVICE_TRANSPORT_HANDLE, void*);
-        REGISTER_UMOCK_ALIAS_TYPE(JSON_Value, void*);
-        REGISTER_UMOCK_ALIAS_TYPE(JSON_Object, void*);
         REGISTER_UMOCK_ALIAS_TYPE(PROV_DEVICE_TRANSPORT_STATUS_CALLBACK, void*);
         REGISTER_UMOCK_ALIAS_TYPE(PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK, void*);
         REGISTER_UMOCK_ALIAS_TYPE(PROV_TRANSPORT_CHALLENGE_CALLBACK, void*);
         REGISTER_UMOCK_ALIAS_TYPE(TICK_COUNTER_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(PROV_AUTH_HANDLE, void*);
-        REGISTER_UMOCK_ALIAS_TYPE(SEC_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(PROV_TRANSPORT_JSON_PARSE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(PROV_TRANSPORT_CREATE_JSON_PAYLOAD, void*);
         REGISTER_UMOCK_ALIAS_TYPE(PROV_TRANSPORT_ERROR_CALLBACK, void*);
@@ -1588,10 +1583,12 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         STRICT_EXPECTED_CALL(on_prov_register_device_callback(PROV_DEVICE_RESULT_TRANSPORT, NULL, NULL, NULL));
         STRICT_EXPECTED_CALL(prov_transport_close(IGNORED_PTR_ARG));
         setup_cleanup_prov_info_mocks();
+        STRICT_EXPECTED_CALL(prov_transport_dowork(IGNORED_PTR_ARG));
 
         //act
         g_registration_callback(PROV_DEVICE_TRANSPORT_RESULT_ERROR, NULL, NULL, NULL, g_registration_ctx);
         Prov_Device_LL_DoWork(handle);
+        Prov_Device_LL_DoWork(handle);  // Second DoWork should not call the callback again.
 
         //assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());

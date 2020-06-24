@@ -45,7 +45,7 @@ class esp_uart_interface(uart_interface):
     messages_sent = 5
 
     def check_sample_errors(self, line):
-        if "Confirm Callback" in line:
+        if "Confirmation callback" in line:
             self.message_callbacks += 1
 
     # If there is a sudden disconnect, program should report line in input script reached, and close files.

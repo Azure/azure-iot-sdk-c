@@ -105,7 +105,7 @@ TRANSACTION_HANDLE DataPublisher_StartTransaction(DATA_PUBLISHER_HANDLE dataPubl
     else
     {
         /* Codes_SRS_DATA_PUBLISHER_99_007:[ A call to DataPublisher_StartTransaction shall start a new transaction.] */
-        transaction = (TRANSACTION_HANDLE_DATA*)malloc(sizeof(TRANSACTION_HANDLE_DATA));
+        transaction = (TRANSACTION_HANDLE_DATA*)calloc(1, sizeof(TRANSACTION_HANDLE_DATA));
         if (transaction == NULL)
         {
             LogError("Allocating transaction failed (Error code: %s)", MU_ENUM_TO_STRING(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_ERROR));
@@ -155,7 +155,7 @@ DATA_PUBLISHER_RESULT DataPublisher_PublishTransacted(TRANSACTION_HANDLE transac
             result = DATA_PUBLISHER_SCHEMA_FAILED;
             LOG_DATA_PUBLISHER_ERROR;
         }
-        else if ((propertyValue = (AGENT_DATA_TYPE*)malloc(sizeof(AGENT_DATA_TYPE))) == NULL)
+        else if ((propertyValue = (AGENT_DATA_TYPE*)calloc(1, sizeof(AGENT_DATA_TYPE))) == NULL)
         {
             free(propertyPathCopy);
 
@@ -406,7 +406,7 @@ DATA_PUBLISHER_RESULT DataPublisher_PublishTransacted_ReportedProperty(REPORTED_
             if(existingValue != NULL)
             {
                 /*Codes_SRS_DATA_PUBLISHER_02_014: [ If the same (by reportedPropertypath) reported property has already been added to the transaction, then DataPublisher_PublishTransacted_ReportedProperty shall overwrite the previous reported property. ]*/
-                AGENT_DATA_TYPE *clone = (AGENT_DATA_TYPE *)malloc(sizeof(AGENT_DATA_TYPE));
+                AGENT_DATA_TYPE *clone = (AGENT_DATA_TYPE *)calloc(1, sizeof(AGENT_DATA_TYPE));
                 if(clone == NULL)
                 {
                     /*Codes_SRS_DATA_PUBLISHER_02_016: [ If any error occurs then DataPublisher_PublishTransacted_ReportedProperty shall fail and return DATA_PUBLISHER_ERROR. ]*/
@@ -453,7 +453,7 @@ DATA_PUBLISHER_RESULT DataPublisher_PublishTransacted_ReportedProperty(REPORTED_
                     }
                     else
                     {
-                        if ((newValue->Value = (AGENT_DATA_TYPE*)malloc(sizeof(AGENT_DATA_TYPE))) == NULL)
+                        if ((newValue->Value = (AGENT_DATA_TYPE*)calloc(1, sizeof(AGENT_DATA_TYPE))) == NULL)
                         {
                             LogError("unable to malloc");
                             free((void*)newValue->PropertyPath);

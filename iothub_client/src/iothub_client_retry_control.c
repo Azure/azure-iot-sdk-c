@@ -10,8 +10,9 @@
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/xlogging.h"
 
-#define RESULT_OK           0
-#define INDEFINITE_TIME     ((time_t)-1)
+#define RESULT_OK                 0
+#define INDEFINITE_TIME           ((time_t)-1)
+#define DEFAULT_MAX_DELAY_IN_SECS 30
 
 typedef struct RETRY_CONTROL_INSTANCE_TAG
 {
@@ -20,6 +21,7 @@ typedef struct RETRY_CONTROL_INSTANCE_TAG
 
     unsigned int initial_wait_time_in_secs;
     unsigned int max_jitter_percent;
+    unsigned int max_delay_in_secs;
 
     unsigned int retry_count;
     time_t first_retry_time;
@@ -166,19 +168,40 @@ static unsigned int calculate_next_wait_time(RETRY_CONTROL_INSTANCE* retry_contr
     // Codes_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_030: [If `retry_control->policy` is IOTHUB_CLIENT_RETRY_LINEAR_BACKOFF, `calculate_next_wait_time` shall return (`retry_control->initial_wait_time_in_secs` * (`retry_control->retry_count`))]
     else if (retry_control->policy == IOTHUB_CLIENT_RETRY_LINEAR_BACKOFF)
     {
-        result = retry_control->initial_wait_time_in_secs * (retry_control->retry_count);
+        unsigned int base_delay = retry_control->initial_wait_time_in_secs * (retry_control->retry_count);
+
+        if (base_delay > retry_control->max_delay_in_secs) 
+        {
+            base_delay = retry_control->max_delay_in_secs;
+        }        
+        
+        result = base_delay;
     }
     // Codes_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_031: [If `retry_control->policy` is IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF, `calculate_next_wait_time` shall return (pow(2, `retry_control->retry_count` - 1) * `retry_control->initial_wait_time_in_secs`)]
     else if (retry_control->policy == IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF)
     {
-        result = (unsigned int)(pow(2, retry_control->retry_count - 1) * retry_control->initial_wait_time_in_secs);
+        double base_delay = pow(2, retry_control->retry_count - 1) * retry_control->initial_wait_time_in_secs;
+
+        if (base_delay > retry_control->max_delay_in_secs) 
+        {
+            base_delay = retry_control->max_delay_in_secs;
+        }
+
+        result = (unsigned int)base_delay;
     }
     // Codes_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_032: [If `retry_control->policy` is IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER, `calculate_next_wait_time` shall return ((pow(2, `retry_control->retry_count` - 1) * `retry_control->initial_wait_time_in_secs`) * (1 + (`retry_control->max_jitter_percent` / 100) * (rand() / RAND_MAX)))]
     else if (retry_control->policy == IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER)
     {
         double jitter_percent = (retry_control->max_jitter_percent / 100.0) * (rand() / ((double)RAND_MAX));
 
-        result = (unsigned int)(pow(2, retry_control->retry_count - 1) * retry_control->initial_wait_time_in_secs * (1 + jitter_percent));
+        double base_delay = pow(2, retry_control->retry_count - 1) * retry_control->initial_wait_time_in_secs;
+
+        if (base_delay > retry_control->max_delay_in_secs) 
+        {
+            base_delay = retry_control->max_delay_in_secs;
+        }
+
+        result =  (unsigned int)(base_delay * (1 + jitter_percent));
     }
     // Codes_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_033: [If `retry_control->policy` is IOTHUB_CLIENT_RETRY_RANDOM, `calculate_next_wait_time` shall return (`retry_control->initial_wait_time_in_secs` * (rand() / RAND_MAX))]
     else if (retry_control->policy == IOTHUB_CLIENT_RETRY_RANDOM)
@@ -297,6 +320,7 @@ RETRY_CONTROL_HANDLE retry_control_create(IOTHUB_CLIENT_RETRY_POLICY policy, uns
 
         // Codes_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_007: [`retry_control->max_jitter_percent` shall be set to 5]
         retry_control->max_jitter_percent = 5;
+        retry_control->max_delay_in_secs = DEFAULT_MAX_DELAY_IN_SECS;
 
         // Codes_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_008: [The remaining fields in `retry_control` shall be initialized according to retry_control_reset()]
         retry_control_reset(retry_control);
@@ -430,6 +454,12 @@ int retry_control_set_option(RETRY_CONTROL_HANDLE retry_control_handle, const ch
                 // Codes_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_044: [If no errors occur, retry_control_set_option shall return 0]
                 result = RESULT_OK;
             }
+        }
+        else if (strcmp(RETRY_CONTROL_OPTION_MAX_DELAY_IN_SECS, name) == 0)
+        {
+            retry_control->max_delay_in_secs = *((unsigned int*)value);
+
+            result = RESULT_OK;
         }
         else if (strcmp(RETRY_CONTROL_OPTION_SAVED_OPTIONS, name) == 0)
         {

@@ -130,7 +130,6 @@ static void my_deviceRegistrationState_destroy(DEVICE_REGISTRATION_STATE_HANDLE 
 
 static void register_global_mocks()
 {
-    REGISTER_UMOCK_ALIAS_TYPE(bool, unsigned int);
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, real_malloc);
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, real_free);
     REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, my_mallocAndStrcpy_s);

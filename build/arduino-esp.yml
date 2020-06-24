@@ -6,15 +6,18 @@ jobs:
       name: devicelab-03
   steps:
   - script: |
+      git submodule update --init --recursive
       . build_all/arduino/setup_arduino_libraries.sh
       #copy example and platform.local.txts to their correct locations
-      echo $NEWTIN | sudo -S cp -r $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/iothub_ll_telemetry_sample $ARDUINO_LIBRARY_DIR/../
-      echo $NEWTIN | sudo -S cp $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/iothub_ll_telemetry_sample/esp8266/platform.local.txt ~/.arduino15/packages/esp8266/hardware/esp8266/2.5.2/
+      echo $NEWTIN | sudo -S cp -r $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/. $ARDUINO_LIBRARY_DIR/../
+      echo $NEWTIN | sudo -S cp $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/esp8266/iothub_ll_telemetry_sample/platform.local.txt ~/.arduino15/packages/esp8266/hardware/esp8266/2.5.2/
     displayName: 'setup libraries'
     env:
       IOTHUB_CONNECTION_DEVICE_STRING: $(MXCHIP_NIGHTLY_DEVICE_STRING)
       WIFI_SSID: $(WIFI_SSID)
       WIFI_PWD:  $(WIFI_PWD)
+      SOURCES_DIR: $(Build.SourcesDirectory)
+      STAGING_DIR: $(Pipeline.Workspace)
       ARDUINO_LIBRARY_DIR: $(Agent.WorkFolder)/libraries/
       NEWTIN: $(NEWTIN)
       
@@ -22,13 +25,10 @@ jobs:
       cd $(Agent.WorkFolder)
       echo "work folder"
       ls
-      cd libraries/AzureIoTUtility/src
-      echo "util folder"
-      ls
-      cd $(Agent.WorkFolder)/iothub_ll_telemetry_sample
+      cd $(Agent.WorkFolder)/esp8266/iothub_ll_telemetry_sample
       echo "telem folder"
       ls
-      arduino --upload --board esp8266:esp8266:huzzah --pref sketchbook.path=../ --port $(ESP8266_PORT) --verbose-build iothub_ll_telemetry_sample.ino 
+      arduino --upload --board esp8266:esp8266:huzzah --pref sketchbook.path=../../ --port $(ESP8266_PORT) --verbose-build iothub_ll_telemetry_sample.ino 
       # should fail job if build/upload fails
     displayName: 'build and upload'
     env:
@@ -40,6 +40,7 @@ jobs:
       echo -e "exit\r\n\r\n\r\n" | cat > input.txt
       python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(ESP8266_PORT) -d esp8266 -s
       rm input.txt
+    failOnStderr: true
     displayName: 'run_test'
 
   - script: |
@@ -61,22 +62,29 @@ jobs:
     name: devicelab-03
   steps:
   - script: |
+      git submodule update --init --recursive
       . build_all/arduino/setup_arduino_libraries.sh
       #copy example and platform.local.txts to their correct locations
-      echo $NEWTIN | sudo -S cp -r $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/iothub_ll_telemetry_sample $ARDUINO_LIBRARY_DIR/../
-      echo $NEWTIN | sudo -S cp $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/iothub_ll_telemetry_sample/esp32/platform.local.txt ~/.arduino15/packages/esp32/hardware/esp32/1.0.2/
+      echo $NEWTIN | sudo -S cp -r $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/. $ARDUINO_LIBRARY_DIR/../
+      echo $NEWTIN | sudo -S cp $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/esp32/iothub_ll_telemetry_sample/platform.local.txt ~/.arduino15/packages/esp32/hardware/esp32/1.0.2/
     displayName: 'setup libraries'
     env:
       IOTHUB_CONNECTION_DEVICE_STRING: $(MXCHIP_NIGHTLY_DEVICE_STRING)
       WIFI_SSID: $(WIFI_SSID)
       WIFI_PWD:  $(WIFI_PWD)
+      SOURCES_DIR: $(Build.SourcesDirectory)
+      STAGING_DIR: $(Pipeline.Workspace)
       ARDUINO_LIBRARY_DIR: $(Agent.WorkFolder)/libraries/
       NEWTIN: $(NEWTIN)
 
   - script: |
+      cd $(Agent.WorkFolder)
+      echo "work folder"
       ls
-      cd $(Agent.WorkFolder)/iothub_ll_telemetry_sample/
-      arduino --upload --board esp32:esp32:esp32 --port $(ESP32_PORT) --pref sketchbook.path=../ --verbose-build iothub_ll_telemetry_sample.ino 
+      cd $(Agent.WorkFolder)/esp8266/iothub_ll_telemetry_sample
+      echo "telem folder"
+      ls
+      arduino --upload --board esp32:esp32:esp32 --port $(ESP32_PORT) --pref sketchbook.path=../../ --verbose-build iothub_ll_telemetry_sample.ino 
       # should fail job if build/upload fails
     displayName: 'build and upload'
     env:
@@ -88,6 +96,7 @@ jobs:
       echo -e "exit\r\n\r\n\r\n" | cat > input.txt
       python3 serial_connect.py -i input.txt -o output.txt -b 1000000 -p $(ESP32_PORT) -d esp32 -s
       rm input.txt
+    failOnStderr: true
     displayName: 'run_test'
 
   - script: |

@@ -1,4 +1,6 @@
 name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+variables:
+  runCodesignValidationInjection: false
 resources:
 - repo: self
   clean: true
@@ -14,7 +16,7 @@ jobs:
       python-software-properties \
       build-essential \
       pkg-config
-      sudo curl -sL https://deb.nodesource.com/setup_6.x | bash -
+      sudo curl -sL https://deb.nodesource.com/setup_10.x | bash -
       sudo apt-get install -y nodejs
     displayName: 'setup'
   - script: |
@@ -59,7 +61,7 @@ jobs:
     condition: always()
 - job: raspberrypi
   variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/raspberrypi-c"
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/raspberrypi-c-buster:brown"
   pool: Hosted Ubuntu 1604
   displayName: raspberrypi
   steps:
@@ -68,7 +70,8 @@ jobs:
      whoami
      ls -lr
      pwd
-     sudo ./jenkins/raspberrypi_c.sh
+     chmod +x jenkins/raspberrypi_c_buster.sh
+      ./jenkins/raspberrypi_c_buster.sh
     displayName: 'build'
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'

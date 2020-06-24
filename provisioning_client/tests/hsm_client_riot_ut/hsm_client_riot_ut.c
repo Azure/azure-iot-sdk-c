@@ -277,10 +277,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         result = umocktypes_stdint_register_types();
         ASSERT_ARE_EQUAL(int, 0, result);
 
-        REGISTER_UMOCK_ALIAS_TYPE(XDA_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(HSM_CLIENT_HANDLE, void*);
-        REGISTER_UMOCK_ALIAS_TYPE(SECURE_DEVICE_TYPE, int);
-        REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
         REGISTER_TYPE(RIOT_ECC_PUBLIC, RIOT_ECC_PUBLIC);
         REGISTER_TYPE(RIOT_ECC_PRIVATE, RIOT_ECC_PRIVATE);
 

@@ -176,10 +176,10 @@ typedef struct DEVICE_DESIRED_DATA_TAG
 } DEVICE_DESIRED_DATA;
 
 
-static const char *REPORTED_PAYLOAD_FORMAT = "{\"integer_property\": %d, \"string_property\": \"%s\"}";
+static const char *REPORTED_PAYLOAD_FORMAT = "{\"integer_property\": %d, \"string_property\": \"%s\", \"array\": [%d, \"%s\"] }";
 static char *malloc_and_fill_reported_payload(const char *string, int aint)
 {
-    size_t  length = snprintf(NULL, 0, REPORTED_PAYLOAD_FORMAT, aint, string);
+    size_t  length = snprintf(NULL, 0, REPORTED_PAYLOAD_FORMAT, aint, string, aint, string);
     char   *retValue = (char *) malloc(length + 1);
     if (retValue == NULL)
     {
@@ -187,7 +187,7 @@ static char *malloc_and_fill_reported_payload(const char *string, int aint)
     }
     else
     {
-        (void) sprintf(retValue, REPORTED_PAYLOAD_FORMAT, aint, string);
+        (void) sprintf(retValue, REPORTED_PAYLOAD_FORMAT, aint, string, aint, string);
     }
     return retValue;
 }
@@ -438,10 +438,13 @@ void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB
     }
 }
 
-static const char *COMPLETE_DESIRED_PAYLOAD_FORMAT = "{\"properties\":{\"desired\":{\"integer_property\": %d, \"string_property\": \"%s\"}}}";
+ 
+
+
+static const char *COMPLETE_DESIRED_PAYLOAD_FORMAT = "{\"properties\":{\"desired\":{\"integer_property\": %d, \"string_property\": \"%s\", \"array\": [%d, \"%s\"]}}}";
 static char *malloc_and_fill_desired_payload(const char *string, int aint)
 {
-    size_t  length = snprintf(NULL, 0, COMPLETE_DESIRED_PAYLOAD_FORMAT, aint, string);
+    size_t  length = snprintf(NULL, 0, COMPLETE_DESIRED_PAYLOAD_FORMAT, aint, string, aint, string);
     char   *retValue = (char *) malloc(length + 1);
     if (retValue == NULL)
     {
@@ -449,7 +452,7 @@ static char *malloc_and_fill_desired_payload(const char *string, int aint)
     }
     else
     {
-        (void) sprintf(retValue, COMPLETE_DESIRED_PAYLOAD_FORMAT, aint, string);
+        (void) sprintf(retValue, COMPLETE_DESIRED_PAYLOAD_FORMAT, aint, string, aint, string);
     }
     return retValue;
 }
@@ -666,6 +669,9 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     JSON_Value *root_value = NULL;
     const char *string_property = NULL;
     int integer_property = 0;
+    const char *string_property_from_array = NULL;
+    int integer_property_from_array = 0;
+
     time_t beginOperation, nowTime;
     beginOperation = time(NULL);
 
@@ -699,6 +705,8 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
                 if (root_value != NULL)
                 {
                     JSON_Object *root_object = json_value_get_object(root_value);
+                    JSON_Array *array;
+
                     if (root_object != NULL)
                     {
                         switch (device->update_state)
@@ -706,10 +714,19 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
                         case DEVICE_TWIN_UPDATE_COMPLETE:
                             string_property = json_object_dotget_string(root_object, "desired.string_property");
                             integer_property = (int)json_object_dotget_number(root_object, "desired.integer_property");
+                            array = json_object_dotget_array(root_object, "desired.array");
+                            ASSERT_IS_NOT_NULL(array, "Array not specified");
+                            integer_property_from_array = (int)json_array_get_number(array, 0);
+                            string_property_from_array = json_array_get_string(array, 1);
+
                             break;
                         case DEVICE_TWIN_UPDATE_PARTIAL:
                             string_property = json_object_get_string(root_object, "string_property");
                             integer_property = (int)json_object_get_number(root_object, "integer_property");
+                            array = json_object_get_array(root_object, "array");
+                            ASSERT_IS_NOT_NULL(array, "Array not specified");
+                            integer_property_from_array = (int)json_array_get_number(array, 0);
+                            string_property_from_array = json_array_get_string(array, 1);
                             break;
                         default: // invalid update state
                             ASSERT_FAIL("Invalid update_state reported");
@@ -744,6 +761,8 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
         ASSERT_IS_NOT_NULL(root_value, "json_parse_string failed");
         ASSERT_ARE_EQUAL(char_ptr, expected_desired_string, string_property, "string data retrieved differs from expected");
         ASSERT_ARE_EQUAL(int, expected_desired_integer, integer_property, "integer data retrieved differs from expected");
+        ASSERT_ARE_EQUAL(char_ptr, expected_desired_string, string_property_from_array, "string data (from array) retrieved differs from expected");
+        ASSERT_ARE_EQUAL(int, expected_desired_integer, integer_property_from_array, "integer data (from array) retrieved differs from expected");
 
         (void)Unlock(device->lock);
 
@@ -756,6 +775,66 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
         destroy_on_device_or_module();
         device_desired_deinit(device);
     }
+}
+
+void dt_e2e_get_twin_async_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACCOUNT_AUTH_METHOD accountAuthMethod)
+{
+    // arrange
+    IOTHUB_PROVISIONED_DEVICE* deviceToUse;
+    if (accountAuthMethod == IOTHUB_ACCOUNT_AUTH_X509)
+    {
+        deviceToUse = IoTHubAccount_GetX509Device(g_iothubAcctInfo);
+    }
+    else
+    {
+        deviceToUse = IoTHubAccount_GetSASDevice(g_iothubAcctInfo);
+    }
+
+    DEVICE_DESIRED_DATA *device = device_desired_init();
+    ASSERT_IS_NOT_NULL(device, "failed to create the device client data");
+
+    dt_e2e_create_client_handle(deviceToUse, protocol);
+
+    if (deviceToUse->moduleConnectionString != NULL)
+    {
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IoTHubModuleClient_GetTwinAsync(iothub_moduleclient_handle, deviceTwinCallback, device), IOTHUB_CLIENT_OK);
+    }
+    else
+    {
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_GetTwinAsync(iothub_deviceclient_handle, deviceTwinCallback, device), IOTHUB_CLIENT_OK);
+    }
+
+    bool callbackReceived = false;
+    time_t beginOperation, nowTime;
+    beginOperation = time(NULL);
+    while (
+        (nowTime = time(NULL)),
+        (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) // time box
+        )
+    {
+        if (Lock(device->lock) != LOCK_OK)
+        {
+            ASSERT_FAIL("Lock failed");
+        }
+        else
+        {
+            if (device->receivedCallBack)
+            {
+                ASSERT_IS_NOT_NULL(device->cb_payload);
+                ASSERT_IS_TRUE(strlen(device->cb_payload) > 0);
+                callbackReceived = device->receivedCallBack;
+                Unlock(device->lock);
+                break;
+            }
+            Unlock(device->lock);
+        }
+        ThreadAPI_Sleep(1000);
+    }
+    ASSERT_IS_TRUE(callbackReceived, "Did not receive the GetTwinAsync call back");    
+
+    // cleanup
+    destroy_on_device_or_module();
+    device_desired_deinit(device);
 }
 
 void dt_e2e_send_reported_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACCOUNT_AUTH_METHOD accountAuthMethod)

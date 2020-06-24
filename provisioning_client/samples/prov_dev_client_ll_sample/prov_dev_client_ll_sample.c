@@ -50,7 +50,7 @@
 #include "azure_prov_client/prov_transport_amqp_ws_client.h"
 #endif // SAMPLE_AMQP_OVER_WEBSOCKETS
 #ifdef SAMPLE_HTTP
-#include "iothubtransportmqtt.h"
+#include "iothubtransporthttp.h"
 #include "azure_prov_client/prov_transport_http_client.h"
 #endif // SAMPLE_HTTP
 
