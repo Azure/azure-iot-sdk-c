@@ -201,7 +201,7 @@ int main(void)
     IOTHUB_MESSAGE_HANDLE message_handle;
     float telemetry_temperature;
     float telemetry_humidity;
-    const char* telemetry_scale = "Celcius";
+    const char* telemetry_scale = "Celsius";
     char telemetry_msg_buffer[80];
 
     int messagecount = 0;
