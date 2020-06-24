@@ -1269,6 +1269,13 @@ void IoTHubClientCore_Destroy(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle)
                         queue_cb_info->iothub_callback.event_confirm_cb_info.eventConfirmationCallback(queue_cb_info->iothub_callback.event_confirm_cb_info.confirm_result, queue_cb_info->userContextCallback);
                     }
                 }
+                else if (queue_cb_info->type == CALLBACK_TYPE_REPORTED_STATE)
+                {
+                    if (queue_cb_info->iothub_callback.reported_state_cb_info.reportedStateCallback)
+                    {
+                        queue_cb_info->iothub_callback.reported_state_cb_info.reportedStateCallback(queue_cb_info->iothub_callback.reported_state_cb_info.status_code, queue_cb_info->userContextCallback);
+                    }
+                }
             }
         }
         VECTOR_destroy(iotHubClientInstance->saved_user_callback_list);
