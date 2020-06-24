@@ -20,14 +20,16 @@ Please practice sound engineering practices when writing production code.
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/tickcounter.h"
 
-#include "iothubtransportmqtt.h"
+
+#include "pnp_device_client_helpers.h"
+#include "pnp_protocol_helpers.h"
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 /* Paste in your device connection string  */
-static const char* connectionString = "[device connection string]";
+static const char* g_connectionString = "[device connection string]";
 
 static bool g_continueRunning = true;
 
@@ -38,17 +40,22 @@ static const char g_ModelId[] = "dtmi:com:example:TemperatureSensor;1";
 
 int g_interval = 10000;  // 10 sec send interval initially
 
-static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
+static void send_confirmation_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
     (void)userContextCallback;
-    (void)printf("Confirmation callback received for message %lu with result %s\r\n", MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
+    (void)printf("Confirmation callback received result %s\r\n", MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
 }
 
 // DeviceMethodCallback is invoked by IoT SDK when a device method arrives.
 static int DeviceMethodCallback(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* resp_size, void* userContextCallback)
 {
-    char *componentName;
+    (void)userContextCallback;
+    (void)payload;
+    (void)response;
+    (void)resp_size;
+    (void)size;
     char *commandName;
+    char *componentName;
 
     // Parse the method_name into its PnP (optional) componentName and commandName.
     PnPHelper_ParseCommandName(method_name, &componentName, &commandName);
@@ -68,7 +75,7 @@ static int DeviceMethodCallback(const char* method_name, const unsigned char* pa
 
 static int SendCurrentTemp(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle)
 {
-    IOTHUB_MESSAGE_HANDLE h = CreateTelemetryMessageHandle("thermoStat", "23");
+    IOTHUB_MESSAGE_HANDLE h = PnPHelper_CreateTelemetryMessageHandle("thermoStat", "23");
     IoTHubDeviceClient_SendEventAsync(iotHubClientHandle, h, send_confirmation_callback, NULL);
 }
 
@@ -76,8 +83,10 @@ static int SendCurrentTemp(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle)
 // causes this to be invoked.
 static void ApplicationPropertyCallback(const char* componentName, const char* propertyName, const char* propertyValue, int version)
 {
-    if (componentName == "thermostat") {
-        if (propertyName == "targetTemperature") {
+    if (strcmp(componentName,"thermostat") == 0) 
+    {
+        if (strcmp(propertyName,"targetTemperature") == 0)
+        {
             // Use the helper to get JSON we should end back
             char* jsonToSend = PnPHelper_CreateReportedPropertyWithStatus("thermostat", "targetTemperature", propertyValue, 200, version);
             // Use DeviceClient to transmit the JSON
@@ -89,12 +98,13 @@ static void ApplicationPropertyCallback(const char* componentName, const char* p
 // DeviceTwinCallback is invoked by IoT SDK when a twin - either full twin or a PATCH update - arrives.
 static void DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback)
 {
+    (void)userContextCallback;
     // We use a visitor pattern.  The helper visits each node in the passed in JSON and the helper calls back ApplicationPropertyCallback, once per 
     // property.
-    PnPHelper_ProcessTwinData(payload, ApplicationPropertyCallback);
+    PnPHelper_ProcessTwinData(update_state, payLoad, size, ApplicationPropertyCallback);
 }
 
-TempSensor_SendCurrentTemperature(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle) {
+void TempSensor_SendCurrentTemperature(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle) {
     IOTHUB_MESSAGE_HANDLE h = PnPHelper_CreateTelemetryMessageHandle("thermostat", "22");
     IoTHubDeviceClient_SendEventAsync(iotHubClientHandle, h, NULL, NULL);
     IoTHubMessage_Destroy(h);
@@ -113,7 +123,7 @@ int main(void)
 
     (void)printf("Creating IoTHub handle\r\n");
     // Create the iothub handle here
-    device_handle = InitializeIoTHubDeviceHandleForPnP(g_ModelId, g_traceOn, DeviceMethodCallback, DeviceTwinCallback);
+    device_handle = InitializeIoTHubDeviceHandleForPnP(g_connectionString, g_ModelId, g_traceOn, DeviceMethodCallback, DeviceTwinCallback);
 
     if (device_handle == NULL)
     {
@@ -121,7 +131,7 @@ int main(void)
     }
     else
     {
-        TempSensor_SendCurrentTemperature();
+        TempSensor_SendCurrentTemperature(device_handle);
         while(g_continueRunning)
         {
             

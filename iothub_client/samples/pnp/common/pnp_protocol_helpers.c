@@ -1,6 +1,5 @@
-
-// This is prototype for function that application writes to process property changes.
-typedef PropertyCallbackFunction(const char* componentName, const char* propertyName, const char* propertyValue);
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 
 
@@ -74,7 +73,7 @@ IOTHUB_MESSAGE_HANDLE PnPHelper_CreateTelemetryMessageHandle(const char* compone
     return messageHandle;
 }
 
-void PnPHelper_ProcessTwinData(const char* deviceTwin, PropertyCallbackFunction callbackFromApplication) 
+void PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const char* deviceTwin, PropertyCallbackFunction callbackFromApplication) 
 {
     JsonObject obj = JsonParser(deviceTwin::desired);
 
