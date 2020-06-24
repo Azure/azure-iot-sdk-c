@@ -127,7 +127,7 @@ int main(void)
     device_ll_handle = IoTHubDeviceClient_LL_CreateFromConnectionString(connectionString, protocol);
     if (device_ll_handle == NULL)
     {
-        (void)printf("Failure createing Iothub device.  Hint: Check you connection string.\r\n");
+        (void)printf("Failure creating IotHub device. Hint: Check your connection string.\r\n");
     }
     else
     {
