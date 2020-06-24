@@ -44,8 +44,8 @@ static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void
     (void)printf("Confirmation callback received for message %lu with result %s\r\n", MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
 }
 
-// device_method_callback is invoked by IoT SDK when a device method arrives.
-static int device_method_callback(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* resp_size, void* userContextCallback)
+// DeviceMethodCallback is invoked by IoT SDK when a device method arrives.
+static int DeviceMethodCallback(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* resp_size, void* userContextCallback)
 {
     char *componentName;
     char *commandName;
@@ -86,8 +86,8 @@ static void ApplicationPropertyCallback(const char* componentName, const char* p
     }
 }
 
-// deviceTwinCallback is invoked by IoT SDK when a twin - either full twin or a PATCH update - arrives.
-static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback)
+// DeviceTwinCallback is invoked by IoT SDK when a twin - either full twin or a PATCH update - arrives.
+static void DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback)
 {
     // We use a visitor pattern.  The helper visits each node in the passed in JSON and the helper calls back ApplicationPropertyCallback, once per 
     // property.
@@ -113,7 +113,7 @@ int main(void)
 
     (void)printf("Creating IoTHub handle\r\n");
     // Create the iothub handle here
-    device_handle = InitializeIoTHubDeviceHandleForPnP(g_ModelId, g_traceOn, device_method_callback, deviceTwinCallback);
+    device_handle = InitializeIoTHubDeviceHandleForPnP(g_ModelId, g_traceOn, DeviceMethodCallback, DeviceTwinCallback);
 
     if (device_handle == NULL)
     {

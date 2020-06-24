@@ -88,14 +88,9 @@ void PnPHelper_ProcessTwinData(const char* deviceTwin, PropertyCallbackFunction 
            foreach (subElement in element) 
            {
               propertyName = subElement's-name;
-              // The value of property can either be specified in "value" or else directly
-              if (propertyName.value != null)
-                propertyValue = propertyName.value.body;
-              else
-                propertyValue = propertyName.body;
 
               // Invoke the application's callback 
-              callbackFromApplication(componentName, propertyName, propertyValue);
+              callbackFromApplication(componentName, propertyName, propertyName.body);
            }
         }
         else
@@ -104,14 +99,9 @@ void PnPHelper_ProcessTwinData(const char* deviceTwin, PropertyCallbackFunction 
             componentName = NULL;
             propertyName = elements-name;
 
-            if (element.value != null)
-              propertyValue = element.value.body;
-            else
-              propertyValue = element.body;
 
-             callbackFromApplication(componentName, propertyName, propertyValue);
+             callbackFromApplication(componentName, propertyName, propertyName.body);
         }
     }
 }
-
 
