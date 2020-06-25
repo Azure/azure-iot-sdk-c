@@ -10,50 +10,85 @@
 #include "iothub_client_options.h"
 #include "iothubtransportmqtt.h"
 
-//#include "iothub_message.h"
-//#include "azure_c_shared_utility/crt_abstractions.h"
-//#include "azure_c_shared_utility/platform.h"
-//#include "azure_c_shared_utility/shared_util_options.h"
-//#include "azure_c_shared_utility/tickcounter.h"
+#include "azure_c_shared_utility/xlogging.h"
 
 IOTHUB_DEVICE_CLIENT_HANDLE InitializeIoTHubDeviceHandleForPnP(const char* connectionString, const char* modelId, bool enableTracing, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback)
 {
-    IOTHUB_DEVICE_CLIENT_HANDLE deviceHandle;
+    IOTHUB_DEVICE_CLIENT_HANDLE deviceHandle = NULL;
+    IOTHUB_CLIENT_RESULT iothubResult;
+    bool urlEncodeOn = true;
+    bool iothubInitFailed = false;
+    int iothubInitResult;
+    int result;
 
-    (void)IoTHub_Init();
-
-    deviceHandle = IoTHubDeviceClient_CreateFromConnectionString(connectionString, MQTT_Protocol);
-    if (deviceHandle == NULL)
+    if ((iothubInitResult = IoTHub_Init()) != 0)
     {
-        (void)printf("Failure creating Iothub device.  Hint: Check you connection string.\r\n");
+        iothubInitFailed = true;
+        LogError("Failure to initialize client.  Error=%d", iothubInitResult);
+        result = MU_FAILURE;
     }
+    else if ((deviceHandle = IoTHubDeviceClient_CreateFromConnectionString(connectionString, MQTT_Protocol)) == NULL)
+    {
+        LogError("Failure creating Iothub device.  Hint: Check you connection string");
+        result = MU_FAILURE;
+    }
+    // Sets verbosity level
+    else if ((iothubResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_LOG_TRACE, &enableTracing)) != IOTHUB_CLIENT_OK)
+    {
+        LogError("Unable to set logging option, error=%d", iothubResult);
+        result = MU_FAILURE;
+    }
+    // Sets the name of ModelId for this PnP device.
+    // This *MUST* be set before the client is connected to IoTHub.  The IoTHubDevice does not automatically create
+    // a connection when the handle is created, but will implicitly create one in order to subscribe for DeviceMethod and twin callbacks
+    // below.
+    else if ((iothubResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_MODEL_ID, modelId)) != IOTHUB_CLIENT_OK)
+    {
+        LogError("Unable to set the ModelID, error=%d", iothubResult);
+        result = MU_FAILURE;
+    }
+    // Sets the callback function that processes incoming device methods, which are the channel PnP Commands are transferred over
+    else if ((iothubResult = IoTHubDeviceClient_SetDeviceMethodCallback(deviceHandle, deviceMethodCallback, NULL)) != IOTHUB_CLIENT_OK)
+    {
+        LogError("Unable to set device method callback, error=%d", iothubResult);
+        result = MU_FAILURE;
+    }
+    // Sets the callback function that processes device twin changes from the hub, which is the channel that PnP Properties are 
+    // transferred over.  This will also automatically retrieve the full twin for the application on initial connection.
+    else if ((iothubResult = IoTHubDeviceClient_SetDeviceTwinCallback(deviceHandle, deviceTwinCallback, NULL)) != IOTHUB_CLIENT_OK)
+    {
+        LogError("Unable to set device twin callback, error=%d", iothubResult);
+        result = MU_FAILURE;
+    }
+    // Enabling auto url encode will have the underlying SDK perform URL encoding operations automatically for the application.
+    else if ((iothubResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn)) != IOTHUB_CLIENT_OK)
+    {
+        LogError("Unable to set auto Url encode option, error=%d", iothubResult);
+        result = MU_FAILURE;
+    }
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+    // Setting the Trusted Certificate.  This is only necessary on system with without
+    // built in certificate stores.
+    else if ((iothubResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_TRUSTED_CERT, certificates)) != IOTHUB_CLIENT_OK)
+    {
+        LogError("Unable to set auto Url encode option, error=%d", iothubResult);
+        result = MU_FAILURE;
+    }
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
     else
     {
-        // Sets the callback function that processes incoming device methods from the hub.
-        (void)IoTHubDeviceClient_SetDeviceMethodCallback(deviceHandle, deviceMethodCallback, NULL);
+        result = 0;
+    }
 
-        // Sets the callback function that processes incoming twin properties from the hub.  This will
-        // also automatically retrieve the full twin for the application.
-        (void)IoTHubDeviceClient_SetDeviceTwinCallback(deviceHandle, deviceTwinCallback, NULL);
+    if ((result != 0) && (deviceHandle != NULL))
+    {
+        IoTHubDeviceClient_Destroy(deviceHandle);
+        deviceHandle = NULL;
+    }
 
-        // Sets the name of ModelId for this PnP device.
-        (void)IoTHubDeviceClient_SetOption(deviceHandle, OPTION_MODEL_ID, modelId);
-
-        // Sets the level of verbosity of the logging
-        if (enableTracing == true)
-        {
-            (void)IoTHubDeviceClient_SetOption(deviceHandle, OPTION_LOG_TRACE, &enableTracing);
-        }
-
-        // Enabling auto url encode will have the underlying SDK perform URL encoding operations automatically for the application.
-        bool urlEncodeOn = true;
-        (void)IoTHubDeviceClient_SetOption(deviceHandle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
-
-#ifdef SET_TRUSTED_CERT_IN_SAMPLES
-        // Setting the Trusted Certificate.  This is only necessary on system with without
-        // built in certificate stores.
-        (void)IoTHubDeviceClient_SetOption(deviceHandle, OPTION_TRUSTED_CERT, certificates);
-#endif // SET_TRUSTED_CERT_IN_SAMPLES
+    if (iothubInitFailed == true)
+    {
+        IoTHub_Deinit();
     }
 
     return deviceHandle;

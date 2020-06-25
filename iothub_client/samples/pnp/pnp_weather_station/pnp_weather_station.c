@@ -15,11 +15,12 @@ Please practice sound engineering practices when writing production code.
 #include "iothub_client_options.h"
 #include "iothub_message.h"
 #include "azure_c_shared_utility/threadapi.h"
-#include "azure_c_shared_utility/crt_abstractions.h"
-#include "azure_c_shared_utility/platform.h"
-#include "azure_c_shared_utility/shared_util_options.h"
-#include "azure_c_shared_utility/tickcounter.h"
+//#include "azure_c_shared_utility/crt_abstractions.h"
+//#include "azure_c_shared_utility/platform.h"
+//#include "azure_c_shared_utility/shared_util_options.h"
+// #include "azure_c_shared_utility/tickcounter.h"
 #include "azure_c_shared_utility/strings.h"
+#include "azure_c_shared_utility/xlogging.h"
 
 
 #include "pnp_device_client_helpers.h"
@@ -29,10 +30,11 @@ Please practice sound engineering practices when writing production code.
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-/* Paste in your device connection string  */
+// Paste in your device connection string
 static const char* g_connectionString = "[device connection string]";
 
-static bool g_continueRunning = true;
+// Amount of time to sleep between sending telemetry to Hub, in milliseconds.  Set to 1 minutes.
+static unsigned int g_sleepBetweenTelemetrySends = 60 * 1000;
 
 // Whether tracing is enabled or not
 static bool g_traceOn = true;
@@ -106,38 +108,41 @@ static void DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsi
     PnPHelper_ProcessTwinData(update_state, payLoad, size, ApplicationPropertyCallback);
 }
 
-void TempSensor_SendCurrentTemperature(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle) {
+void TempSensor_SendCurrentTemperature(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle) 
+{
     IOTHUB_MESSAGE_HANDLE h = PnPHelper_CreateTelemetryMessageHandle("thermostat", "22");
     IoTHubDeviceClient_SendEventAsync(iotHubClientHandle, h, NULL, NULL);
     IoTHubMessage_Destroy(h);
 }
 
-
-
 int main(void)
 {
-    IOTHUB_DEVICE_CLIENT_HANDLE device_handle;
+    IOTHUB_DEVICE_CLIENT_HANDLE deviceHandle;
 
-    device_handle = InitializeIoTHubDeviceHandleForPnP(g_connectionString, g_ModelId, g_traceOn, DeviceMethodCallback, DeviceTwinCallback);
+    deviceHandle = InitializeIoTHubDeviceHandleForPnP(g_connectionString, g_ModelId, g_traceOn, DeviceMethodCallback, DeviceTwinCallback);
 
-    if (device_handle == NULL)
+    if (deviceHandle == NULL)
     {
-        (void)printf("Failure creating Iothub device.  Hint: Check you connection string.\r\n");
+        LogError("Failure creating Iothub device");
     }
     else
     {
-        PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_PARTIAL, NULL, 0, NULL);
-        //TempSensor_SendCurrentTemperature(device_handle);
-        while(g_continueRunning)
+        printf("Successfully created deviceClient handle.  Hit Control-C to exit program\n");
+        while (true)
         {
-            
+            // Wake up periodically to send telemetry.
+            // IOTHUB_DEVICE_CLIENT_HANDLE brings in the IoTHub device convenience layer, which means that the IoTHub SDK itself 
+            // spins a worker thread to perform all operations.
+            TempSensor_SendCurrentTemperature(deviceHandle);
+            ThreadAPI_Sleep(g_sleepBetweenTelemetrySends);
         }
 
         // Clean up the iothub sdk handle
-        IoTHubDeviceClient_Destroy(device_handle);
+        IoTHubDeviceClient_Destroy(deviceHandle);
+        // Free all the sdk subsystem
+        IoTHub_Deinit();        
     }
-    // Free all the sdk subsystem
-    IoTHub_Deinit();
+
 
     return 0;
 }
