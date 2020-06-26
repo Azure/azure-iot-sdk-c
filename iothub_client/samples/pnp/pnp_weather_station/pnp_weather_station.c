@@ -122,7 +122,7 @@ int main(void)
 {
     IOTHUB_DEVICE_CLIENT_HANDLE deviceHandle;
 
-    deviceHandle = PnPHelper_CreateDeviceClient(g_connectionString, g_ModelId, g_traceOn, TempControl_DeviceMethodCallback, TempControl_DeviceTwinCallback);
+    deviceHandle = PnPHelper_CreateDeviceClientHandle(g_connectionString, g_ModelId, g_traceOn, TempControl_DeviceMethodCallback, TempControl_DeviceTwinCallback);
 
     if (deviceHandle == NULL)
     {

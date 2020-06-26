@@ -12,13 +12,11 @@
 
 #include "azure_c_shared_utility/xlogging.h"
 
-//
-// PnPHelper_CreateDeviceClient creates a IOTHUB_DEVICE_CLIENT_HANDLE that will be ready to interact with PnP.
-// Most critically, it sets the OPTION_MODEL_ID option so that the device identifies as the appropriate PnP ModelId.
-// This helper also sets up various Device Method and Device Twin callbacks (to process PnP Commands and Properties, respectively)
-// as well as some other basic maintenence on the handle. 
-//
-IOTHUB_DEVICE_CLIENT_HANDLE PnPHelper_CreateDeviceClient(const char* connectionString, const char* modelId, bool enableTracing, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback)
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+#include "certs.h"
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
+
+IOTHUB_DEVICE_CLIENT_HANDLE PnPHelper_CreateDeviceClientHandle(const char* connectionString, const char* modelId, bool enableTracing, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback)
 {
     IOTHUB_DEVICE_CLIENT_HANDLE deviceHandle = NULL;
     IOTHUB_CLIENT_RESULT iothubResult;
