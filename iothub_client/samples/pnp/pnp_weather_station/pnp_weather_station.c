@@ -57,8 +57,8 @@ static int TempControl_DeviceMethodCallback(const char* method_name, const unsig
     (void)resp_size;
     (void)size;
 
-    char *commandName;
-    char *componentName;
+    const char *commandName;
+    const char *componentName;
     size_t commandNameLength;
     size_t componentNameLength;
 

@@ -99,7 +99,7 @@ void PnPHelper_ParseCommandName(const char* deviceMethodName, const char** compo
 IOTHUB_MESSAGE_HANDLE PnPHelper_CreateTelemetryMessageHandle(const char* componentName, const char* telemetryData) 
 {
     IOTHUB_MESSAGE_HANDLE messageHandle;
-    IOTHUB_CLIENT_RESULT iothubClientResult;
+    IOTHUB_MESSAGE_RESULT iothubMessageResult;
     int result;
     
     if ((messageHandle = IoTHubMessage_CreateFromString(telemetryData)) == NULL)
@@ -113,9 +113,9 @@ IOTHUB_MESSAGE_HANDLE PnPHelper_CreateTelemetryMessageHandle(const char* compone
         result = 0;
     }
     // If the component will be used, then specify this as a property of the message.
-    else if ((iothubClientResult = IoTHubMessage_SetProperty(messageHandle, PnP_TelemetryComponentProperty, componentName)) != IOTHUB_CLIENT_OK)
+    else if ((iothubMessageResult = IoTHubMessage_SetProperty(messageHandle, PnP_TelemetryComponentProperty, componentName)) != IOTHUB_MESSAGE_OK)
     {
-        LogError("IoTHubMessage_SetProperty failed, error=%d", iothubClientResult);
+        LogError("IoTHubMessage_SetProperty failed, error=%d", iothubMessageResult);
         result = MU_FAILURE;
     }
     else
