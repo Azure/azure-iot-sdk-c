@@ -1,21 +1,35 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
 #include "pnp_protocol_helpers.h"
 #include "parson.h"
 
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/strings.h"
 
+// Format used when building a response for a root property that does not contain metadata
 static const char PnP_PropertyWithoutResponseSchemaWithoutComponent[] = "{ \"%s\": %s }";
+// Format used when building a response for a component's property that does not contain metadata
 static const char PnP_PropertyWithoutResponseSchemaWithComponent[] = "{\"""%s\": { \"%s\": %s } }";
-
+// Format used when building a response for a root property that does contain metadata
 static const char PnP_PropertyWithResponseSchemaWithoutComponent[] =  "{ \"%s\": { \"value\":  %s, \"ac\": %d, \"ad\": \"%s\", \"av\": %d } } ";
+// Format used when building a response for a component's property that does contain metadata
 static const char PnP_PropertyWithResponseSchemaWithComponent[] =  "{\"""%s\": { \"%s\": { \"value\":  %s, \"ac\": %d, \"ad\": \"%s\", \"av\": %d } } }";
 
+// Character that separates a PnP component's from the specific command on the component.
+static const char PnP_CommandSeparator = '*';
 
-// Returns the JSON to report via a DeviceTwin, without specifying additional metadata such as ackCode or ackVersion
+// The version of the desired twin is represented by the $version metadata.
+static const char PnP_JsonPropertyVersion[] = "$version";
+
+// If a child element of PnP is a component, then there is an extra child { ... "__t":"c" ...} indicating this to our parser.
+static const char PnP_PropertyComponentJsonName[] = "__t";
+static const char PnP_PropertyComponentJsonValue[] = "c";
+
+// When sending PnP telemetry and using a component, we need to add a property to the message 
+// (PnP_TelemetryComponentPropertyName) indicating the component's name.
+static const char PnP_TelemetryComponentProperty[] = "$.sub";
+
 STRING_HANDLE PnPHelper_CreateReportedProperty(const char* componentName, const char* propertyName, const char* propertyValue)
 {
     STRING_HANDLE jsonToSend;
@@ -37,7 +51,6 @@ STRING_HANDLE PnPHelper_CreateReportedProperty(const char* componentName, const 
     return jsonToSend;
 }
 
-// Returns the JSON to report via a DeviceTwin,  specifying additional metadata such as ackCode or ackVersion
 STRING_HANDLE PnPHelper_CreateReportedPropertyWithStatus(const char* componentName, const char* propertyName, const char* propertyValue, int result, const char* description, int ackVersion)
 {
     STRING_HANDLE jsonToSend;
@@ -59,29 +72,30 @@ STRING_HANDLE PnPHelper_CreateReportedPropertyWithStatus(const char* componentNa
     return jsonToSend;    
 }
 
-// When deviceMethod receives an incoming request, parses out the (optional) componentName along with the command being targetted.
 void PnPHelper_ParseCommandName(const char* deviceMethodName, const char** componentName, size_t* componentNameLength, const char** pnpCommandName, size_t* pnpCommandNameLength)
 {
     const char* separator;
 
-    if ((separator = strstr(deviceMethodName, "*")) == NULL) 
+    if ((separator = strchr(deviceMethodName, PnP_CommandSeparator)) != NULL)
     {
-         *componentName = NULL;
-         *componentNameLength = 0;
-         *pnpCommandName = deviceMethodName;
-         *pnpCommandNameLength = strlen(deviceMethodName);
-    }
-    else 
-    {
+        // If a separator character wis present in the device method name, then a command on a subcomponent of 
+        // the model is being targeted.  (E.G. Thermostat1.Run).
         *componentName = deviceMethodName;
         *componentNameLength = separator - deviceMethodName;
         *pnpCommandName = separator + 1;
         *pnpCommandNameLength = strlen(*pnpCommandName);
     }
+    else 
+    {
+        // The separator character is optional.  If it is not present, it indicates a command of the root 
+        // component and not a subcomponent is being targeted.  (E.G. simply Run.)
+        *componentName = NULL;
+        *componentNameLength = 0;
+        *pnpCommandName = deviceMethodName;
+        *pnpCommandNameLength = strlen(deviceMethodName);
+    }
 }
 
-// PnPHelper_CreateTelemetryMessageHandle will create an IOTHUB_MESSAGE_HANDLE and return to the application, specifying
-// the componentName if set.
 IOTHUB_MESSAGE_HANDLE PnPHelper_CreateTelemetryMessageHandle(const char* componentName, const char* telemetryData) 
 {
     IOTHUB_MESSAGE_HANDLE messageHandle;
@@ -98,8 +112,8 @@ IOTHUB_MESSAGE_HANDLE PnPHelper_CreateTelemetryMessageHandle(const char* compone
         // If there is no component then there's nothing else to do.
         result = 0;
     }
-    // If the component will be used, then specify its property.
-    else if ((iothubClientResult = IoTHubMessage_SetProperty(messageHandle, "$.sub", componentName)) != IOTHUB_CLIENT_OK)
+    // If the component will be used, then specify this as a property of the message.
+    else if ((iothubClientResult = IoTHubMessage_SetProperty(messageHandle, PnP_TelemetryComponentProperty, componentName)) != IOTHUB_CLIENT_OK)
     {
         LogError("IoTHubMessage_SetProperty failed, error=%d", iothubClientResult);
         result = MU_FAILURE;
@@ -118,36 +132,45 @@ IOTHUB_MESSAGE_HANDLE PnPHelper_CreateTelemetryMessageHandle(const char* compone
     return messageHandle;
 }
 
+//
 // VisitDesiredChildObject is invoked for each child element of the desired twin if and only if the element is an object.
 // This function determines if the object corresponds to a component (which itself has children properties) or a
 // property of the root component that has happens to be an object.
-static void VisitDesiredChildObject(const char* objectName, JSON_Value* value, PnPHelperPropertyCallbackFunction callbackFromApplication)
+//
+static void VisitDesiredChildObject(const char* objectName, JSON_Value* value, PnPHelperPropertyCallbackFunction pnpPropertyCallback)
 {
-    (void)callbackFromApplication;
+    (void)pnpPropertyCallback;
     JSON_Object* object = json_value_get_object(value);
 
-    // PnP indicates that a JSON object is a component, not a property of the root component, but 
-    // adding a "__t"="c" field as one of its children.
-
-    // These APIs will "fail", by design, if there is no such marker (which indicates the object
-    // is owned by the root component).
-    JSON_Value* componentTypeMarker = json_object_get_value(object, "__t");
+    // Determine whether we're processing the twin for a component or not, based on whether the component metadata tag
+    // is a child element of the JSON or not.
+    JSON_Value* componentTypeMarker = json_object_get_value(object, PnP_PropertyComponentJsonName);
     const char* componentTypeStr = json_value_get_string(componentTypeMarker);
 
-    if ((componentTypeStr != NULL) && (strcmp(componentTypeStr, "c") == 0))
+    if ((componentTypeStr != NULL) && (strcmp(componentTypeStr, PnP_PropertyComponentJsonValue) == 0))
     {
-        // We are processing a component.  Visit each of its child elements, which correspond to its properties.
+        // We are processing a component.  Visit each of its child elements, which correspond to its properties, and invoke the 
+        // application's property callback.
         size_t numChildren = json_object_get_count(object);
         for (size_t i = 0; i < numChildren; i++)
         {
             const char* name = json_object_get_name(object, i);
-            JSON_Value* subValue = json_object_get_value_at(object, i);
+            JSON_Value* propertyValue = json_object_get_value_at(object, i);
 
-            // The "__t" marker is the metadata indicating this is a component.  Don't call back on this.
-            if (strcmp(name, "__t") == 0)
+            if ((name == NULL) || (propertyValue == NULL))
+            {
+                // This should never happen because we are simply accessing parson tree.  But do not pass NULL to application in case it does occur.
+                LogError("Unexpected error retrieving the property name and/or value of component %s at element %lu", objectName, (unsigned long)i);
                 continue;
+            }
 
-            const char* jsonStr = json_serialize_to_string(subValue);
+            // The PnP_PropertyComponentJsonName marker is the metadata indicating this is a component.  Don't call the application.
+            if (strcmp(name, PnP_PropertyComponentJsonName) == 0)
+            {
+                continue;
+            }
+
+            const char* jsonStr = json_serialize_to_string(propertyValue);
             printf("val=%s\n", jsonStr);
 
             printf("componentName=%s,name=%s,val=%s\n", objectName, name, jsonStr);
@@ -155,6 +178,8 @@ static void VisitDesiredChildObject(const char* objectName, JSON_Value* value, P
     }
     else
     {
+        // Because there is no component marker, it means that this JSON object is a property of the root component.
+        // Simply invoke the application's property callback directly.
         printf("NOT a subcomponent.  Treating as a property.");
         const char* jsonStr = json_serialize_to_string(value);
         printf("val=%s\n", jsonStr);
@@ -162,18 +187,20 @@ static void VisitDesiredChildObject(const char* objectName, JSON_Value* value, P
     
 }
 
-// VisitDesiredObject visits each JSON child element of the desired settings from the twin.
-static int VisitDesiredObject(JSON_Object* desiredObject, PnPHelperPropertyCallbackFunction callbackFromApplication)
+//
+// VisitDesiredObject visits each child JSON element of the desired device twin for ultimate callback into the application.
+//
+static bool VisitDesiredObject(JSON_Object* desiredObject, PnPHelperPropertyCallbackFunction pnpPropertyCallback)
 {
     JSON_Value* versionValue = NULL;
     size_t numChildren;
     int version;
-    int result;
+    bool result;
 
-    if ((versionValue = json_object_get_value(desiredObject, "$version")) == NULL)
+    if ((versionValue = json_object_get_value(desiredObject, PnP_JsonPropertyVersion)) == NULL)
     {
-        LogError("Cannot retrieve '$version' field for twin.");
-        result = MU_FAILURE;
+        LogError("Cannot retrieve '%s' field for twin.", PnP_JsonPropertyVersion);
+        result = false;
     }
     else
     {
@@ -181,6 +208,7 @@ static int VisitDesiredObject(JSON_Object* desiredObject, PnPHelperPropertyCallb
 
         numChildren = json_object_get_count(desiredObject);
 
+        // Visit each child JSON element of the desired device twin.
         for (size_t i = 0; i < numChildren; i++)
         {
             const char* name = json_object_get_name(desiredObject, i);
@@ -203,21 +231,21 @@ static int VisitDesiredObject(JSON_Object* desiredObject, PnPHelperPropertyCallb
             else
             {
                 // If the child element is an object, the processing becomes more complex.
-                VisitDesiredChildObject(name, value, callbackFromApplication);
+                VisitDesiredChildObject(name, value, pnpPropertyCallback);
             }
         }
 
-        result = 0;
+        result = true;
     }
 
     return result;
 }
 
-
-// We first must make a copy of the payLoad data.  This is a simple byte string and is not guaranteed to be a NULL terminated string from transport layer,
-// so in our copy we can NULL terminate.
-// TODO: https://github.com/Azure/azure-iot-sdk-c/issues/1195 tracks having the HubClient itself allocate an extra byte to save us this copy.
-char* CopyTwinPayloadToString(const unsigned char* payLoad, size_t size)
+//
+// CopyTwinPayloadToString takes the twin payload data, which arrives as a potentially non-NULL terminated string, and creates
+// a new copy of the data with a NULL terminator.  The JSON parser this sample uses, parson, only operates over NULL terminated strings.
+//
+static char* CopyTwinPayloadToString(const unsigned char* payLoad, size_t size)
 {
     char* jsonStr;
 
@@ -234,8 +262,10 @@ char* CopyTwinPayloadToString(const unsigned char* payLoad, size_t size)
     return jsonStr;
 }
 
+//
 // GetDesiredJson retrieves JSON_Object* in the JSON tree corresponding to the desired payload.
-JSON_Object* GetDesiredJson(DEVICE_TWIN_UPDATE_STATE updateState, JSON_Value* rootValue)
+//
+static JSON_Object* GetDesiredJson(DEVICE_TWIN_UPDATE_STATE updateState, JSON_Value* rootValue)
 {
     JSON_Object* rootObject = NULL;
     JSON_Object* desiredObject;
@@ -250,12 +280,13 @@ JSON_Object* GetDesiredJson(DEVICE_TWIN_UPDATE_STATE updateState, JSON_Value* ro
         if (updateState == DEVICE_TWIN_UPDATE_COMPLETE)
         {
             // For a complete update, the JSON from IoTHub will contain both "desired" and "reported" - the full twin.
-            // We only care about desired in this sample, so just retrieve it.
+            // We only care about "desired" in this sample, so just retrieve it.
             desiredObject = json_object_get_object(rootObject, "desired");
         }
         else
         {
-            // For a patch update, IoTHub only sends "desired" portion of twin and does explicitly put a "desired:" JSON envelope.
+            // For a patch update, IoTHub only sends "desired" portion of twin and does not explicitly put a "desired:" JSON envelope.
+            // So here we simply need the root of the JSON itself.
             desiredObject = rootObject;
         }
 
@@ -264,39 +295,37 @@ JSON_Object* GetDesiredJson(DEVICE_TWIN_UPDATE_STATE updateState, JSON_Value* ro
     return desiredObject;
 }
 
-
-int PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payLoad, size_t size, PnPHelperPropertyCallbackFunction callbackFromApplication) 
+bool PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payLoad, size_t size, PnPHelperPropertyCallbackFunction pnpPropertyCallback) 
 {
-
-    char* jsonStr;
+    char* jsonStr = NULL;
     JSON_Value* rootValue = NULL;
-    JSON_Object* desiredObject = NULL;
-    int result;
+    JSON_Object* desiredObject;
+    bool result;
 
     if ((jsonStr = CopyTwinPayloadToString(payLoad, size)) == NULL)
     {
         LogError("Unable to allocate %lu size buffer", (unsigned long)size);
-        result = MU_FAILURE;
+        result = false;
     }
     else if ((rootValue = json_parse_string(jsonStr)) == NULL)
     {
         LogError("Unable to parse twin JSON");
-        result = MU_FAILURE;
+        result = false;
     }
     else if ((desiredObject = GetDesiredJson(updateState, rootValue)) == NULL)
     {
         LogError("Cannot retrieve desired ");
-        result = MU_FAILURE;
+        result = false;
     }
     else
     {
-        // Visit each sub-element in the desired portion of the twin JSON and invoke callbackFromApplication as appropriate.
-        result = VisitDesiredObject(desiredObject, callbackFromApplication);
+        // Visit each sub-element in the desired portion of the twin JSON and invoke pnpPropertyCallback as appropriate.
+        result = VisitDesiredObject(desiredObject, pnpPropertyCallback);
     }
 
     json_value_free(rootValue);
     free(jsonStr);
 
-    return 0;
+    return result;
 }
 

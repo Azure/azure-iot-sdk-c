@@ -7,8 +7,6 @@
 #include "iothub.h"
 #include "iothub_device_client.h"
 
-IOTHUB_DEVICE_CLIENT_HANDLE InitializeIoTHubDeviceHandleForPnP(const char* connectionString, const char* modelId, bool enableTracing, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback);
-
+IOTHUB_DEVICE_CLIENT_HANDLE PnPHelper_CreateDeviceClient(const char* connectionString, const char* modelId, bool enableTracing, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback);
 
 #endif /* PNP_DEVICE_CLIENT_HELPERS_H */
-

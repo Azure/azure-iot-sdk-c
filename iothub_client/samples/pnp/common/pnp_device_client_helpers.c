@@ -12,7 +12,13 @@
 
 #include "azure_c_shared_utility/xlogging.h"
 
-IOTHUB_DEVICE_CLIENT_HANDLE InitializeIoTHubDeviceHandleForPnP(const char* connectionString, const char* modelId, bool enableTracing, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback)
+//
+// PnPHelper_CreateDeviceClient creates a IOTHUB_DEVICE_CLIENT_HANDLE that will be ready to interact with PnP.
+// Most critically, it sets the OPTION_MODEL_ID option so that the device identifies as the appropriate PnP ModelId.
+// This helper also sets up various Device Method and Device Twin callbacks (to process PnP Commands and Properties, respectively)
+// as well as some other basic maintenence on the handle. 
+//
+IOTHUB_DEVICE_CLIENT_HANDLE PnPHelper_CreateDeviceClient(const char* connectionString, const char* modelId, bool enableTracing, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback)
 {
     IOTHUB_DEVICE_CLIENT_HANDLE deviceHandle = NULL;
     IOTHUB_CLIENT_RESULT iothubResult;
@@ -21,12 +27,14 @@ IOTHUB_DEVICE_CLIENT_HANDLE InitializeIoTHubDeviceHandleForPnP(const char* conne
     int iothubInitResult;
     int result;
 
+    // Before invoking ANY IoTHub Device SDK functionality, IoTHub_Init must be invoked.
     if ((iothubInitResult = IoTHub_Init()) != 0)
     {
         iothubInitFailed = true;
         LogError("Failure to initialize client.  Error=%d", iothubInitResult);
         result = MU_FAILURE;
     }
+    // Create the deviceHandle itself.
     else if ((deviceHandle = IoTHubDeviceClient_CreateFromConnectionString(connectionString, MQTT_Protocol)) == NULL)
     {
         LogError("Failure creating Iothub device.  Hint: Check you connection string");
@@ -39,9 +47,8 @@ IOTHUB_DEVICE_CLIENT_HANDLE InitializeIoTHubDeviceHandleForPnP(const char* conne
         result = MU_FAILURE;
     }
     // Sets the name of ModelId for this PnP device.
-    // This *MUST* be set before the client is connected to IoTHub.  The IoTHubDevice does not automatically create
-    // a connection when the handle is created, but will implicitly create one in order to subscribe for DeviceMethod and twin callbacks
-    // below.
+    // This *MUST* be set before the client is connected to IoTHub.  The IoTHubDevice does not automatically create when the 
+    // handle is created, but will implicitly create one in order to subscribe for DeviceMethod and twin callbacks below.
     else if ((iothubResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_MODEL_ID, modelId)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to set the ModelID, error=%d", iothubResult);
@@ -67,8 +74,7 @@ IOTHUB_DEVICE_CLIENT_HANDLE InitializeIoTHubDeviceHandleForPnP(const char* conne
         result = MU_FAILURE;
     }
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
-    // Setting the Trusted Certificate.  This is only necessary on system with without
-    // built in certificate stores.
+    // Setting the Trusted Certificate.  This is only necessary on system with without built in certificate stores.
     else if ((iothubResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_TRUSTED_CERT, certificates)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to set auto Url encode option, error=%d", iothubResult);
