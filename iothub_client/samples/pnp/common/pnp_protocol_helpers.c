@@ -164,7 +164,7 @@ static void VisitDesiredChildObject(const char* objectName, JSON_Value* value, i
                 continue;
             }
 
-            // The PnP_PropertyComponentJsonName marker is the metadata indicating this is a component.  Don't call the application.
+            // The PnP_PropertyComponentJsonName marker is the metadata indicating this is a component.  Don't call the application's callback.
             if (strcmp(propertyName, PnP_PropertyComponentJsonName) == 0)
             {
                 continue;
@@ -194,7 +194,7 @@ static bool VisitDesiredObject(JSON_Object* desiredObject, PnPHelperPropertyCall
 
     if ((versionValue = json_object_get_value(desiredObject, PnP_JsonPropertyVersion)) == NULL)
     {
-        LogError("Cannot retrieve '%s' field for twin.", PnP_JsonPropertyVersion);
+        LogError("Cannot retrieve %s field for twin.", PnP_JsonPropertyVersion);
         result = false;
     }
     else
@@ -209,15 +209,14 @@ static bool VisitDesiredObject(JSON_Object* desiredObject, PnPHelperPropertyCall
             const char* name = json_object_get_name(desiredObject, i);
             JSON_Value* value = json_object_get_value_at(desiredObject, i);
 
-            if (strcmp(name,"$version") == 0)
+            if (strcmp(name, PnP_JsonPropertyVersion) == 0)
             {
                 // The version field is metadata and should be skipped in enumeration loop.
                 continue;
             }
 
-            JSON_Value_Type jsonTye = json_type(value);
-
-            if (jsonTye != JSONObject)
+            JSON_Value_Type jsonType = json_type(value);
+            if (jsonType != JSONObject)
             {
                 // If the child element is NOT an object, then it means that this is a property of the model's root component.
                 pnpPropertyCallback(NULL, name, value, version);
@@ -322,4 +321,3 @@ bool PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsig
 
     return result;
 }
-

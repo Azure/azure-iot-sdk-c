@@ -26,10 +26,6 @@
 #include "pnp_device_client_helpers.h"
 #include "pnp_protocol_helpers.h"
 
-#ifdef SET_TRUSTED_CERT_IN_SAMPLES
-#include "certs.h"
-#endif // SET_TRUSTED_CERT_IN_SAMPLES
-
 // Paste in your device connection string
 static const char* g_connectionString = "[device connection string]";
 
@@ -135,14 +131,29 @@ static void TempControl_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state
     (void)userContextCallback;
     // We use a visitor pattern.  The helper visits each node in the passed in JSON and the helper calls back TempControl_ApplicationPropertyCallback, once per 
     // property.
-    PnPHelper_ProcessTwinData(update_state, payLoad, size, TempControl_ApplicationPropertyCallback);
+    if (PnPHelper_ProcessTwinData(update_state, payLoad, size, TempControl_ApplicationPropertyCallback) == false)
+    {
+        // If we're unable to parse the JSON for any reason (typically because it is malformed or there is an out of memory)
+        // there is no actiol we can take beyond logging this happened.
+        LogError("Unable to process twin json.  Ignoring any desired property update requests");
+    }
 }
 
 // TempControl_SendCurrentTemperature sends a telemetry value indicating the current temperature
-void TempControl_SendCurrentTemperature(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle) 
+void TempControl_SendCurrentTemperature(void) 
 {
-    IOTHUB_MESSAGE_HANDLE h = PnPHelper_CreateTelemetryMessageHandle("thermostat", "22");
-    IoTHubDeviceClient_SendEventAsync(iotHubClientHandle, h, NULL, NULL);
+    IOTHUB_MESSAGE_HANDLE h = NULL;
+    IOTHUB_CLIENT_RESULT iothubResult;
+
+    if ((h = PnPHelper_CreateTelemetryMessageHandle("thermostat", "22")) == NULL)
+    {
+        LogError("Unable to create telemetry message");
+    }
+    else if ((iothubResult = IoTHubDeviceClient_SendEventAsync(g_deviceHandle, h, NULL, NULL)) != IOTHUB_CLIENT_OK)
+    {
+        LogError("Unable to send telemetry message, error=%d", iothubResult);
+    }
+
     IoTHubMessage_Destroy(h);
 }
 
@@ -157,12 +168,14 @@ int main(void)
     else
     {
         LogInfo("Successfully created deviceClient handle.  Hit Control-C to exit program\n");
+        // TODO: Add a sample invoking PnPHelper_CreateReportedProperty() with a simlpe "readonly" property.
+
         while (true)
         {
             // Wake up periodically to send telemetry.
             // IOTHUB_DEVICE_CLIENT_HANDLE brings in the IoTHub device convenience layer, which means that the IoTHub SDK itself 
             // spins a worker thread to perform all operations.
-            TempControl_SendCurrentTemperature(g_deviceHandle);
+            TempControl_SendCurrentTemperature();
             ThreadAPI_Sleep(g_sleepBetweenTelemetrySends);
         }
 
