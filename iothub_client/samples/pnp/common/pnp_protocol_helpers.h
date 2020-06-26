@@ -9,9 +9,10 @@
 
 #include "iothub_client_core_common.h"
 #include "iothub_message.h"
+#include "parson.h"
 
 // This is prototype that the application implements to receive a callback for each PnP property in a given Device Twin.
-typedef void (*PnPHelperPropertyCallbackFunction)(const char* componentName, const char* propertyName, const char* propertyValue, int version);
+typedef void (*PnPHelperPropertyCallbackFunction)(const char* componentName, const char* propertyName, JSON_Value* propertyValue, int version);
 
 //
 // PnPHelper_CreateReportedProperty returns JSON to report a property's value from the device.  This does NOT contain any metadata such as 

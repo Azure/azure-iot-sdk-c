@@ -36,17 +36,18 @@ static const char* g_connectionString = "[device connection string]";
 // Amount of time to sleep between sending telemetry to Hub, in milliseconds.  Set to 1 minute.
 static unsigned int g_sleepBetweenTelemetrySends = 60 * 1000;
 
-// Whether tracing is enabled or not
-static bool g_traceOn = true;
+// Whether tracing at the IoTHub client is enabled or not. 
+static bool g_hubClientTraceEnabled = false;
 
 // DTMI indicating this device's ModelId.
 static const char g_ModelId[] = "dtmi:com:example:TemperatureController;1";
 
-static void send_confirmation_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
-{
-    (void)userContextCallback;
-    (void)printf("Confirmation callback received result %s\r\n", MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
-}
+// This is a convention in this program *only* for a friendly way to print out the root component via logging
+static const char g_RootComponentName[] = "root component";
+
+// Global device handle.
+IOTHUB_DEVICE_CLIENT_HANDLE g_deviceHandle;
+
 
 // TempControl_DeviceMethodCallback is invoked by IoT SDK when a device method arrives.
 static int TempControl_DeviceMethodCallback(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* resp_size, void* userContextCallback)
@@ -67,38 +68,65 @@ static int TempControl_DeviceMethodCallback(const char* method_name, const unsig
     // Parse the method_name into its PnP (optional) componentName and commandName.
     PnPHelper_ParseCommandName(method_name, &componentName, &componentNameLength, &commandName, &commandNameLength);
 
-    // Now that we've parsed the component/command, we route to appropriate handler
-    if (componentName == NULL) 
+    if (componentName != NULL)
     {
-        // Process by no-telemetry logic(commandName)
+        LogInfo("Received PnP command for component=%.*s, command=%.*s", (int)componentNameLength, componentName, (int)commandNameLength, commandName);
     }
-    else if (strcmp(componentName, "thermostat")) 
+    else
     {
-        // look for 'commandName' and send to appropriate handler.
+        LogInfo("Received PnP command for root component, command=%.*s", (int)commandNameLength, commandName);
     }
-    else 
-    {
 
-    }
-    //...
     return result;
+}
+
+//
+// GetComponentNameForLogging is a helper that returns either the component name or a friendly name for a NULL componentName
+//
+static const char * GetComponentNameForLogging(const char *componentName)
+{
+    return (componentName == NULL) ? g_RootComponentName  : componentName;
 }
 
 // TempControl_ApplicationPropertyCallback implements a visitor pattern, where each property in a received DeviceTwin 
 // causes this to be invoked.
-static void TempControl_ApplicationPropertyCallback(const char* componentName, const char* propertyName, const char* propertyValue, int version)
+static void TempControl_ApplicationPropertyCallback(const char* componentName, const char* propertyName, JSON_Value* propertyValue, int version)
 {
-    if (strcmp(componentName,"thermostat") == 0) 
+    char* propertyValueStr = NULL;
+    STRING_HANDLE jsonToSend = NULL;
+    IOTHUB_CLIENT_RESULT iothubClientResult;
+
+    if ((propertyValueStr = json_serialize_to_string(propertyValue)) == NULL)
     {
-        if (strcmp(propertyName,"targetTemperature") == 0)
+        LogError("json_serialize_to_string failed.  Unable to process component %s, property %s further", GetComponentNameForLogging(componentName), propertyName);
+    }
+    else
+    {
+        LogInfo("Received property update for component=%s, propert=%s, desired value=%s, version=%d", GetComponentNameForLogging(componentName), propertyName, propertyValueStr, version);
+
+        // Now acknowledge the property has been received.  First build up the serialized buffer, using the helper to construct the formatted JSON.
+        if ((jsonToSend = PnPHelper_CreateReportedPropertyWithStatus(componentName, propertyName, propertyValueStr, 200, "", version)) == NULL)
         {
-            // Use the helper to get JSON we should end back
-            STRING_HANDLE jsonToSend = PnPHelper_CreateReportedPropertyWithStatus("thermostat", "targetTemperature", propertyValue, 200, "", version);
+            LogError("Unable to build reported property response");
+        }
+        else
+        {
             const char* jsonToSendStr = STRING_c_str(jsonToSend);
-            // Use DeviceClient to transmit the JSON
-            IoTHubDeviceClient_SendReportedState(NULL/* TODO: deviceClient*/, (const unsigned char*)jsonToSendStr, strlen(jsonToSendStr), NULL, NULL);
+            size_t jsonToSendStrLen = strlen(jsonToSendStr);
+
+            if ((iothubClientResult = IoTHubDeviceClient_SendReportedState(g_deviceHandle, (const unsigned char*)jsonToSendStr, jsonToSendStrLen, NULL, NULL)) != IOTHUB_CLIENT_OK)
+            {
+                LogError("Unable to send reported state.  Error=%d", iothubClientResult);
+            }
+            else
+            {
+                LogInfo("Sending acknowledgement of property to IoTHub");
+            }
         }
     }
+
+    STRING_delete(jsonToSend);
+    free(propertyValueStr);
 }
 
 // TempControl_DeviceTwinCallback is invoked by IoT SDK when a twin - either full twin or a PATCH update - arrives.
@@ -120,28 +148,26 @@ void TempControl_SendCurrentTemperature(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClient
 
 int main(void)
 {
-    IOTHUB_DEVICE_CLIENT_HANDLE deviceHandle;
+    g_deviceHandle = PnPHelper_CreateDeviceClientHandle(g_connectionString, g_ModelId, g_hubClientTraceEnabled, TempControl_DeviceMethodCallback, TempControl_DeviceTwinCallback);
 
-    deviceHandle = PnPHelper_CreateDeviceClientHandle(g_connectionString, g_ModelId, g_traceOn, TempControl_DeviceMethodCallback, TempControl_DeviceTwinCallback);
-
-    if (deviceHandle == NULL)
+    if (g_deviceHandle == NULL)
     {
         LogError("Failure creating Iothub device");
     }
     else
     {
-        printf("Successfully created deviceClient handle.  Hit Control-C to exit program\n");
+        LogInfo("Successfully created deviceClient handle.  Hit Control-C to exit program\n");
         while (true)
         {
             // Wake up periodically to send telemetry.
             // IOTHUB_DEVICE_CLIENT_HANDLE brings in the IoTHub device convenience layer, which means that the IoTHub SDK itself 
             // spins a worker thread to perform all operations.
-            TempControl_SendCurrentTemperature(deviceHandle);
+            TempControl_SendCurrentTemperature(g_deviceHandle);
             ThreadAPI_Sleep(g_sleepBetweenTelemetrySends);
         }
 
         // Clean up the iothub sdk handle
-        IoTHubDeviceClient_Destroy(deviceHandle);
+        IoTHubDeviceClient_Destroy(g_deviceHandle);
         // Free all the sdk subsystem
         IoTHub_Deinit();        
     }

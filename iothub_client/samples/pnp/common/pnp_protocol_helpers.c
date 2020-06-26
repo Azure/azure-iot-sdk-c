@@ -137,7 +137,7 @@ IOTHUB_MESSAGE_HANDLE PnPHelper_CreateTelemetryMessageHandle(const char* compone
 // This function determines if the object corresponds to a component (which itself has children properties) or a
 // property of the root component that has happens to be an object.
 //
-static void VisitDesiredChildObject(const char* objectName, JSON_Value* value, PnPHelperPropertyCallbackFunction pnpPropertyCallback)
+static void VisitDesiredChildObject(const char* objectName, JSON_Value* value, int version, PnPHelperPropertyCallbackFunction pnpPropertyCallback)
 {
     (void)pnpPropertyCallback;
     JSON_Object* object = json_value_get_object(value);
@@ -154,10 +154,10 @@ static void VisitDesiredChildObject(const char* objectName, JSON_Value* value, P
         size_t numChildren = json_object_get_count(object);
         for (size_t i = 0; i < numChildren; i++)
         {
-            const char* name = json_object_get_name(object, i);
+            const char* propertyName = json_object_get_name(object, i);
             JSON_Value* propertyValue = json_object_get_value_at(object, i);
 
-            if ((name == NULL) || (propertyValue == NULL))
+            if ((propertyName == NULL) || (propertyValue == NULL))
             {
                 // This should never happen because we are simply accessing parson tree.  But do not pass NULL to application in case it does occur.
                 LogError("Unexpected error retrieving the property name and/or value of component %s at element %lu", objectName, (unsigned long)i);
@@ -165,24 +165,19 @@ static void VisitDesiredChildObject(const char* objectName, JSON_Value* value, P
             }
 
             // The PnP_PropertyComponentJsonName marker is the metadata indicating this is a component.  Don't call the application.
-            if (strcmp(name, PnP_PropertyComponentJsonName) == 0)
+            if (strcmp(propertyName, PnP_PropertyComponentJsonName) == 0)
             {
                 continue;
             }
 
-            const char* jsonStr = json_serialize_to_string(propertyValue);
-            printf("val=%s\n", jsonStr);
-
-            printf("componentName=%s,name=%s,val=%s\n", objectName, name, jsonStr);
+            pnpPropertyCallback(objectName, propertyName, propertyValue, version);
         }
     }
     else
     {
         // Because there is no component marker, it means that this JSON object is a property of the root component.
         // Simply invoke the application's property callback directly.
-        printf("NOT a subcomponent.  Treating as a property.");
-        const char* jsonStr = json_serialize_to_string(value);
-        printf("val=%s\n", jsonStr);
+        pnpPropertyCallback(NULL, objectName, value, version);
     }
     
 }
@@ -225,13 +220,12 @@ static bool VisitDesiredObject(JSON_Object* desiredObject, PnPHelperPropertyCall
             if (jsonTye != JSONObject)
             {
                 // If the child element is NOT an object, then it means that this is a property of the model's root component.
-                const char* jsonStr = json_serialize_to_string(value);
-                printf("name=%s,val=%s\n", name, jsonStr);
+                pnpPropertyCallback(NULL, name, value, version);
             }
             else
             {
                 // If the child element is an object, the processing becomes more complex.
-                VisitDesiredChildObject(name, value, pnpPropertyCallback);
+                VisitDesiredChildObject(name, value, version, pnpPropertyCallback);
             }
         }
 
