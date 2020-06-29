@@ -20,7 +20,13 @@ jobs:
       DEVKIT_USER: $(DEVKIT_USER)
       AZ3166_CRED: $(AZ3166_CRED)
       AZ3166_USER: $(AZ3166_USER)
-
+      DEVKIT_MBEDOS5_GETSTARTED_USER: $(DEVKIT_MBEDOS5_GETSTARTED_USER)
+      DEVKIT_MBEDOS5_GETSTARTED_CRED: $(DEVKIT_MBEDOS5_GETSTARTED_CRED)
+      DEVKIT_SDK_USER: $(DEVKIT_SDK_USER)
+      DEVKIT_SDK_CRED: $(DEVKIT_SDK_CRED)
+      MBED_IOT_DEVKIT_SDK_USER: $(MBED_IOT_DEVKIT_SDK_USER)
+      MBED_IOT_DEVKIT_SDK_CRED: $(MBED_IOT_DEVKIT_SDK_CRED)
+      
   - script: |
       # Check that this is the right source directory
       ls
@@ -67,9 +73,10 @@ jobs:
       # set_dps_uds [args],
       # enable_secure [args],
       # send_telemetry [args]
-
       SERIAL_TASK: $(SERIAL_TASK)
       IOTHUB_CONNECTION_STRING: $(MXCHIP_NIGHTLY_DEVICE_STRING)
+      WIFI_SSID: $(WIFI_SSID)
+      WIFI_PWD: $(WIFI_PWD)
     displayName: 'run_test'
 
   - script: |
