@@ -66,6 +66,8 @@ MOCKABLE_FUNCTION(, int, X509GetDERCsr, DERBuilderContext*, Context, RIOT_ECC_SI
 MOCKABLE_FUNCTION(, int, X509GetRootCertTBS, DERBuilderContext*, Tbs, RIOT_X509_TBS_DATA*, TbsData, RIOT_ECC_PUBLIC*, DevIdKeyPub);
 MOCKABLE_FUNCTION(, void, mbedtls_mpi_free, mbedtls_mpi*, X);
 MOCKABLE_FUNCTION(, void, mbedtls_ecp_point_free, mbedtls_ecp_point*, pt);
+MOCKABLE_FUNCTION(, int, mbedtls_mpi_lset, mbedtls_mpi*, X, mbedtls_mpi_sint, z);
+MOCKABLE_FUNCTION(, int, mbedtls_mpi_read_binary, mbedtls_mpi*, X, const unsigned char*, buf, size_t, buflen);
 
 #undef ENABLE_MOCKS
 
@@ -366,6 +368,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         ASSERT_ARE_EQUAL(int, 0, result);
 
         REGISTER_UMOCK_ALIAS_TYPE(HSM_CLIENT_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(mbedtls_mpi_sint, int64_t);
         REGISTER_TYPE(RIOT_ECC_PUBLIC, RIOT_ECC_PUBLIC);
         REGISTER_TYPE(RIOT_ECC_PRIVATE, RIOT_ECC_PRIVATE);
 
@@ -503,7 +506,11 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         {
             STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 17
             STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 18
-            STRICT_EXPECTED_CALL(RiotCrypt_DeriveEccKey(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+            // Generate the CA_Root using the development key
+            STRICT_EXPECTED_CALL(mbedtls_mpi_read_binary(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 19
+            STRICT_EXPECTED_CALL(mbedtls_mpi_read_binary(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 20
+            STRICT_EXPECTED_CALL(mbedtls_mpi_lset(IGNORED_PTR_ARG, IGNORED_NUM_ARG));                         // 21
+            STRICT_EXPECTED_CALL(mbedtls_mpi_read_binary(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 22
 
             STRICT_EXPECTED_CALL(X509GetRootCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
             STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
@@ -516,22 +523,16 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
             STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, ECC_PRIVATEKEY_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         }
 
-
-        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 25
+        // Produce root-signed device cert
+        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 28
         STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(X509MakeDeviceCert(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, CERT_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
 
-        /*/*STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(X509GetDEREcc(IGNORED_PTR_ARG, pub, pri))
-            .IgnoreArgument_Pub()
-            .IgnoreArgument_Priv();
-        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, ECC_PRIVATEKEY_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));*/
-
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG)); // 31
-        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG)); // 32
+        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG)); // 34
+        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG)); // 35
     }
 
     /* Tests_SRS_SECURE_DEVICE_RIOT_07_001: [ On success hsm_client_riot_create shall allocate a new instance of the device auth interface. ] */
@@ -573,7 +574,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         umock_c_negative_tests_snapshot();
 
         // List of calls that we are not testing failures on: [ hsm_client_riot_create_mock ]
-        size_t calls_cannot_fail[] = { 5, 8, 11, 16, 17, 18, 25, 31, 32 };
+        size_t calls_cannot_fail[] = { 5, 8, 11, 16, 17, 18, 19, 20, 21, 22, 28, 34, 35 };
 
         //act
         size_t count = umock_c_negative_tests_call_count();

@@ -73,6 +73,10 @@ static RIOT_X509_TBS_DATA X509_ROOT_TBS_DATA = {
 #define DER_ECC_KEY_MAX     0x80
 #define DER_ECC_PUB_MAX     0x60
 
+#if !defined(RIOTSECP256R1)
+#error "Must define RIOTSECP256R1 - NIST 256 Curve is only supported"
+#endif
+
 static int g_digest_initialized = 0;
 static uint8_t g_digest[DICE_DIGEST_LENGTH] = { 0 };
 static unsigned char g_uds_seed[DICE_UDS_LENGTH] = {
@@ -149,6 +153,42 @@ static void x509_cert_free(RIOT_ECC_PUBLIC* pub, RIOT_ECC_PRIVATE* priv)
     mbedtls_mpi_free(priv);
 }
 
+// The "root" signing key. This is intended for DEVELOPMENT PURPOSES ONLY.
+// This key is used to sign the DeviceID certificate, the certificiate for
+// this "root" key represents the "trusted" CA for the developer-mode
+// server(s). Again, this is for DEVELOPMENT PURPOSES ONLY and (obviously)
+// provides no meaningful security whatsoever, NEVER use this in production.
+static void get_riot_root_dev_key(HSM_CLIENT_X509_INFO* x509_info)
+{
+    // CA_Root_Pub X coordinates random bits
+    uint8_t rootX[RIOT_COORDMAX] = {
+        0xeb, 0x9c, 0xfc, 0xc8, 0x49, 0x94, 0xd3, 0x50, 0xa7, 0x1f, 0x9d, 0xc5,
+        0x09, 0x3d, 0xd2, 0xfe, 0xb9, 0x48, 0x97, 0xf4, 0x95, 0xa5, 0x5d, 0xec,
+        0xc9, 0x0f, 0x52, 0xa1, 0x26, 0x5a, 0xab, 0x69 };
+    // CA_Root_Pub Y coordinates random bits
+    uint8_t rootY[RIOT_COORDMAX] = {
+        0x7d, 0xce, 0xb1, 0x62, 0x39, 0xf8, 0x3c, 0xd5, 0x9a, 0xad, 0x9e, 0x05,
+        0xb1, 0x4f, 0x70, 0xa2, 0xfa, 0xd4, 0xfb, 0x04, 0xe5, 0x37, 0xd2, 0x63,
+        0x9a, 0x46, 0x9e, 0xfd, 0xb0, 0x5b, 0x1e, 0xdf };
+    // CA_Root_Priv random bits
+    uint8_t rootD[RIOT_COORDMAX] = {
+        0xe3, 0xe7, 0xc7, 0x13, 0x57, 0x3f, 0xd9, 0xc8, 0xb8, 0xe1, 0xea, 0xf4,
+        0x53, 0xf1, 0x56, 0x15, 0x02, 0xf0, 0x71, 0xc0, 0x53, 0x49, 0xc8, 0xda,
+        0xe6, 0x26, 0xa9, 0x0b, 0x17, 0x88, 0xe5, 0x70 };
+
+    // Simulator only: We need to populate the root key.
+    // The following memset's are unnecessary in a simulated environment
+    // in the wild it's good to stay in habit of clearing potential 
+    // sensitive data.
+    mbedtls_mpi_read_binary(&x509_info->ca_root_pub.X, rootX, RIOT_COORDMAX);
+    memset(rootX, 0, sizeof(rootX));
+    mbedtls_mpi_read_binary(&x509_info->ca_root_pub.Y, rootY, RIOT_COORDMAX);
+    memset(rootY, 0, sizeof(rootY));
+    mbedtls_mpi_lset(&x509_info->ca_root_pub.Z, 1);
+    mbedtls_mpi_read_binary(&x509_info->ca_root_priv, rootD, RIOT_COORDMAX);
+    memset(rootD, 0, sizeof(rootD));
+}
+
 static int generate_root_ca_info(HSM_CLIENT_X509_INFO* riot_info, RIOT_ECC_SIGNATURE* tbs_sig)
 {
     int result;
@@ -161,21 +201,10 @@ static int generate_root_ca_info(HSM_CLIENT_X509_INFO* riot_info, RIOT_ECC_SIGNA
     DERInitContext(&der_ctx, der_buffer, DER_MAX_TBS);
     DERInitContext(&der_pri_ctx, der_buffer, DER_MAX_TBS);
 
-    // Deriving the "root" signing key. This is intended for development/simulation purposes only.
-    // This key is used to sign the DeviceID certificate, the certificiate for
-    // this "root" key represents the "trusted" CA for the developer-mode
-    // server(s). Again, this is for development/simulation purposes only and (obviously)
-    // provides no meaningful security whatsoever, in a production environment this key
-    // is passed in via: get_root_cert & get_root_key.
-    // This key is derived this way to match the signing bit and total number of limbs
-    // as the derived device key and alias key.
-    if ((status = RiotCrypt_DeriveEccKey(&riot_info->ca_root_pub, &riot_info->ca_root_priv,
-        g_digest, RIOT_DIGEST_LENGTH, (const uint8_t*)RIOT_LABEL_ALIAS, lblSize(RIOT_LABEL_ALIAS))) != RIOT_SUCCESS)
-    {
-        LogError("Failure: RiotCrypt_DeriveEccKey returned invalid status %d.", status);
-        result = MU_FAILURE;
-    }
-    else if (X509GetRootCertTBS(&der_ctx, &X509_ROOT_TBS_DATA, &riot_info->ca_root_pub) != 0)
+    // Generate the CA_Root using the development key
+    get_riot_root_dev_key(riot_info);
+
+    if (X509GetRootCertTBS(&der_ctx, &X509_ROOT_TBS_DATA, &riot_info->ca_root_pub) != 0)
     {
         LogError("Failure: X509GetRootCertTBS");
         result = MU_FAILURE;
