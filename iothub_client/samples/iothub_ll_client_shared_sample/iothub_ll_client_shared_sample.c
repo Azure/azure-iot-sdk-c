@@ -227,7 +227,7 @@ int main(void)
             //IoTHubDeviceClient_LL_SetOption(device_ll_handle1, OPTION_LOG_TRACE, &traceOn);
             //IoTHubDeviceClient_LL_SetOption(device_ll_handle2, OPTION_LOG_TRACE, &traceOn);
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
-            // Setting the Trusted Certificate.  This is only necessary on system without
+            // Setting the Trusted Certificate. This is only necessary on systems without
             // built in certificate stores.
             IoTHubDeviceClient_LL_SetOption(device_ll_handle1, OPTION_TRUSTED_CERT, certificates);
             IoTHubDeviceClient_LL_SetOption(device_ll_handle2, OPTION_TRUSTED_CERT, certificates);
