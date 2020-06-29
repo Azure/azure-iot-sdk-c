@@ -74,6 +74,13 @@ MOCKABLE_FUNCTION(, int, mbedtls_mpi_read_binary, mbedtls_mpi*, X, const unsigne
 #include "hsm_client_riot.h"
 #include "hsm_client_data.h"
 
+// Defines for mock aliasing mbedtls_mpi_lset
+#if defined(MBEDTLS_HAVE_INT32)
+#define MPI_SINT int32_t
+#elif defined(MBEDTLS_HAVE_INT64)
+#define MPI_SINT int64_t
+#endif
+
 static const char* TEST_STRING_VALUE = "Test_String_Value";
 static const char* TEST_CERTIFICATE_VALUE = "Test_String_ValueTest_String_Value";
 static const char* TEST_CN_VALUE = "riot-device-cert";
@@ -368,7 +375,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         ASSERT_ARE_EQUAL(int, 0, result);
 
         REGISTER_UMOCK_ALIAS_TYPE(HSM_CLIENT_HANDLE, void*);
-        REGISTER_UMOCK_ALIAS_TYPE(mbedtls_mpi_sint, int64_t);
+        REGISTER_UMOCK_ALIAS_TYPE(mbedtls_mpi_sint, MPI_SINT);
         REGISTER_TYPE(RIOT_ECC_PUBLIC, RIOT_ECC_PUBLIC);
         REGISTER_TYPE(RIOT_ECC_PRIVATE, RIOT_ECC_PRIVATE);
 
