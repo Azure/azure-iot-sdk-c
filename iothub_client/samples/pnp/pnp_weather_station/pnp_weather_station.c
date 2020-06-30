@@ -45,13 +45,15 @@ static const char g_RootComponentName[] = "root component";
 IOTHUB_DEVICE_CLIENT_HANDLE g_deviceHandle;
 
 
+//
 // TempControl_DeviceMethodCallback is invoked by IoT SDK when a device method arrives.
-static int TempControl_DeviceMethodCallback(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* resp_size, void* userContextCallback)
+//
+static int TempControl_DeviceMethodCallback(const char* methodName, const unsigned char* payload, size_t size, unsigned char** response, size_t* responseSize, void* userContextCallback)
 {
     (void)userContextCallback;
     (void)payload;
     (void)response;
-    (void)resp_size;
+    (void)responseSize;
     (void)size;
 
     const char *commandName;
@@ -61,8 +63,8 @@ static int TempControl_DeviceMethodCallback(const char* method_name, const unsig
 
     int result = 200;
 
-    // Parse the method_name into its PnP (optional) componentName and commandName.
-    PnPHelper_ParseCommandName(method_name, &componentName, &componentNameLength, &commandName, &commandNameLength);
+    // Parse the methodName into its PnP (optional) componentName and commandName.
+    PnPHelper_ParseCommandName(methodName, &componentName, &componentNameLength, &commandName, &commandNameLength);
 
     if (componentName != NULL)
     {
@@ -84,8 +86,9 @@ static const char * GetComponentNameForLogging(const char *componentName)
     return (componentName == NULL) ? g_RootComponentName  : componentName;
 }
 
-// TempControl_ApplicationPropertyCallback implements a visitor pattern, where each property in a received DeviceTwin 
-// causes this to be invoked.
+//
+// TempControl_ApplicationPropertyCallback is the callback function that the PnP helper layer invokes per property update.
+//
 static void TempControl_ApplicationPropertyCallback(const char* componentName, const char* propertyName, JSON_Value* propertyValue, int version)
 {
     char* propertyValueStr = NULL;
@@ -125,21 +128,26 @@ static void TempControl_ApplicationPropertyCallback(const char* componentName, c
     free(propertyValueStr);
 }
 
+//
 // TempControl_DeviceTwinCallback is invoked by IoT SDK when a twin - either full twin or a PATCH update - arrives.
-static void TempControl_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback)
+//
+static void TempControl_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payload, size_t size, void* userContextCallback)
 {
     (void)userContextCallback;
-    // We use a visitor pattern.  The helper visits each node in the passed in JSON and the helper calls back TempControl_ApplicationPropertyCallback, once per 
-    // property.
-    if (PnPHelper_ProcessTwinData(update_state, payLoad, size, TempControl_ApplicationPropertyCallback) == false)
+
+    // Invoke PnPHelper_ProcessTwinData to actualy process the data.  PnPHelper_ProcessTwinData uses a visitor pattern to parse
+    // the JSON and then visit each property, invoking TempControl_ApplicationPropertyCallback on each element.
+    if (PnPHelper_ProcessTwinData(updateState, payload, size, TempControl_ApplicationPropertyCallback) == false)
     {
-        // If we're unable to parse the JSON for any reason (typically because it is malformed or there is an out of memory)
-        // there is no actiol we can take beyond logging this happened.
+        // If we're unable to parse the JSON for any reason (typically because the JSON is malformed or we ran out of memory)
+        // there is no actiol we can take beyond logging.
         LogError("Unable to process twin json.  Ignoring any desired property update requests");
     }
 }
 
-// TempControl_SendCurrentTemperature sends a telemetry value indicating the current temperature
+//
+// TempControl_SendCurrentTemperature sends a PnP telemetry indicating the current temperature
+//
 void TempControl_SendCurrentTemperature(void) 
 {
     IOTHUB_MESSAGE_HANDLE h = NULL;
@@ -167,7 +175,7 @@ int main(void)
     }
     else
     {
-        LogInfo("Successfully created deviceClient handle.  Hit Control-C to exit program\n");
+        LogInfo("Successfully created device client handle.  Hit Control-C to exit program\n");
         // TODO: Add a sample invoking PnPHelper_CreateReportedProperty() with a simlpe "readonly" property.
 
         while (true)

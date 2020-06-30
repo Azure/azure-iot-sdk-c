@@ -20,7 +20,7 @@ IOTHUB_DEVICE_CLIENT_HANDLE PnPHelper_CreateDeviceClientHandle(const char* conne
 {
     IOTHUB_DEVICE_CLIENT_HANDLE deviceHandle = NULL;
     IOTHUB_CLIENT_RESULT iothubResult;
-    bool urlEncodeOn = true;
+    bool urlAutoEncodeDecode = true;
     bool iothubInitFailed = false;
     int iothubInitResult;
     int result;
@@ -45,8 +45,8 @@ IOTHUB_DEVICE_CLIENT_HANDLE PnPHelper_CreateDeviceClientHandle(const char* conne
         result = MU_FAILURE;
     }
     // Sets the name of ModelId for this PnP device.
-    // This *MUST* be set before the client is connected to IoTHub.  The IoTHubDevice does not automatically create when the 
-    // handle is created, but will implicitly create one in order to subscribe for DeviceMethod and twin callbacks below.
+    // This *MUST* be set before the client is connected to IoTHub.  We do not automatically connect when the 
+    // handle is created, but will implicitly connect to subscribe for device method and device twin callbacks below.
     else if ((iothubResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_MODEL_ID, modelId)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to set the ModelID, error=%d", iothubResult);
@@ -59,14 +59,14 @@ IOTHUB_DEVICE_CLIENT_HANDLE PnPHelper_CreateDeviceClientHandle(const char* conne
         result = MU_FAILURE;
     }
     // Sets the callback function that processes device twin changes from the hub, which is the channel that PnP Properties are 
-    // transferred over.  This will also automatically retrieve the full twin for the application on initial connection.
+    // transferred over.  This will also automatically retrieve the full twin for the application. 
     else if ((iothubResult = IoTHubDeviceClient_SetDeviceTwinCallback(deviceHandle, deviceTwinCallback, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to set device twin callback, error=%d", iothubResult);
         result = MU_FAILURE;
     }
-    // Enabling auto url encode will have the underlying SDK perform URL encoding operations automatically for the application.
-    else if ((iothubResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn)) != IOTHUB_CLIENT_OK)
+    // Enabling auto url encode will have the underlying SDK perform URL encoding operations automatically.
+    else if ((iothubResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_AUTO_URL_ENCODE_DECODE, &urlAutoEncodeDecode)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to set auto Url encode option, error=%d", iothubResult);
         result = MU_FAILURE;
@@ -90,7 +90,7 @@ IOTHUB_DEVICE_CLIENT_HANDLE PnPHelper_CreateDeviceClientHandle(const char* conne
         deviceHandle = NULL;
     }
 
-    if (iothubInitFailed == true)
+    if ((result != 0) &&  (iothubInitFailed == false))
     {
         IoTHub_Deinit();
     }

@@ -10,11 +10,11 @@
 // Format used when building a response for a root property that does not contain metadata
 static const char PnP_PropertyWithoutResponseSchemaWithoutComponent[] = "{ \"%s\": %s }";
 // Format used when building a response for a component's property that does not contain metadata
-static const char PnP_PropertyWithoutResponseSchemaWithComponent[] = "{\"""%s\": { \"%s\": %s } }";
+static const char PnP_PropertyWithoutResponseSchemaWithComponent[] = "{\"""%s\": { \"__t\":\"c\", \"%s\": %s } }";
 // Format used when building a response for a root property that does contain metadata
 static const char PnP_PropertyWithResponseSchemaWithoutComponent[] =  "{ \"%s\": { \"value\":  %s, \"ac\": %d, \"ad\": \"%s\", \"av\": %d } } ";
 // Format used when building a response for a component's property that does contain metadata
-static const char PnP_PropertyWithResponseSchemaWithComponent[] =  "{\"""%s\": { \"%s\": { \"value\":  %s, \"ac\": %d, \"ad\": \"%s\", \"av\": %d } } }";
+static const char PnP_PropertyWithResponseSchemaWithComponent[] =  "{\"""%s\": { \"__t\":\"c\", \"%s\": { \"value\":  %s, \"ac\": %d, \"ad\": \"%s\", \"av\": %d } } }";
 
 // Character that separates a PnP component's from the specific command on the component.
 static const char PnP_CommandSeparator = '*';
@@ -107,15 +107,10 @@ IOTHUB_MESSAGE_HANDLE PnPHelper_CreateTelemetryMessageHandle(const char* compone
         LogError("IoTHubMessage_CreateFromString failed");
         result = MU_FAILURE;
     }
-    else if (componentName == NULL)
-    {
-        // If there is no component then there's nothing else to do.
-        result = 0;
-    }
     // If the component will be used, then specify this as a property of the message.
-    else if ((iothubMessageResult = IoTHubMessage_SetProperty(messageHandle, PnP_TelemetryComponentProperty, componentName)) != IOTHUB_MESSAGE_OK)
+    else if ((componentName != NULL) && (iothubMessageResult = IoTHubMessage_SetProperty(messageHandle, PnP_TelemetryComponentProperty, componentName)) != IOTHUB_MESSAGE_OK)
     {
-        LogError("IoTHubMessage_SetProperty failed, error=%d", iothubMessageResult);
+        LogError("IoTHubMessage_SetProperty(%s) failed, error=%d", PnP_TelemetryComponentProperty, iothubMessageResult);
         result = MU_FAILURE;
     }
     else
@@ -143,7 +138,7 @@ static void VisitDesiredChildObject(const char* objectName, JSON_Value* value, i
     JSON_Object* object = json_value_get_object(value);
 
     // Determine whether we're processing the twin for a component or not, based on whether the component metadata tag
-    // is a child element of the JSON or not.
+    // is a child element of the JSON or not.  These calls will return NULL, by design, for non-components.
     JSON_Value* componentTypeMarker = json_object_get_value(object, PnP_PropertyComponentJsonName);
     const char* componentTypeStr = json_value_get_string(componentTypeMarker);
 
@@ -159,7 +154,7 @@ static void VisitDesiredChildObject(const char* objectName, JSON_Value* value, i
 
             if ((propertyName == NULL) || (propertyValue == NULL))
             {
-                // This should never happen because we are simply accessing parson tree.  But do not pass NULL to application in case it does occur.
+                // This should never happen because we are simply accessing parson tree.  Do not pass NULL to application in case it does occur.
                 LogError("Unexpected error retrieving the property name and/or value of component %s at element %lu", objectName, (unsigned long)i);
                 continue;
             }
@@ -179,7 +174,6 @@ static void VisitDesiredChildObject(const char* objectName, JSON_Value* value, i
         // Simply invoke the application's property callback directly.
         pnpPropertyCallback(NULL, objectName, value, version);
     }
-    
 }
 
 //
@@ -194,7 +188,7 @@ static bool VisitDesiredObject(JSON_Object* desiredObject, PnPHelperPropertyCall
 
     if ((versionValue = json_object_get_value(desiredObject, PnP_JsonPropertyVersion)) == NULL)
     {
-        LogError("Cannot retrieve %s field for twin.", PnP_JsonPropertyVersion);
+        LogError("Cannot retrieve %s field for twin", PnP_JsonPropertyVersion);
         result = false;
     }
     else
@@ -238,7 +232,7 @@ static bool VisitDesiredObject(JSON_Object* desiredObject, PnPHelperPropertyCall
 // CopyTwinPayloadToString takes the twin payload data, which arrives as a potentially non-NULL terminated string, and creates
 // a new copy of the data with a NULL terminator.  The JSON parser this sample uses, parson, only operates over NULL terminated strings.
 //
-static char* CopyTwinPayloadToString(const unsigned char* payLoad, size_t size)
+static char* CopyTwinPayloadToString(const unsigned char* payload, size_t size)
 {
     char* jsonStr;
 
@@ -248,7 +242,7 @@ static char* CopyTwinPayloadToString(const unsigned char* payLoad, size_t size)
     }
     else
     {
-        memcpy(jsonStr, payLoad, size);
+        memcpy(jsonStr, payload, size);
         jsonStr[size] = 0;
     }
 
@@ -288,16 +282,16 @@ static JSON_Object* GetDesiredJson(DEVICE_TWIN_UPDATE_STATE updateState, JSON_Va
     return desiredObject;
 }
 
-bool PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payLoad, size_t size, PnPHelperPropertyCallbackFunction pnpPropertyCallback) 
+bool PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payload, size_t size, PnPHelperPropertyCallbackFunction pnpPropertyCallback) 
 {
     char* jsonStr = NULL;
     JSON_Value* rootValue = NULL;
     JSON_Object* desiredObject;
     bool result;
 
-    if ((jsonStr = CopyTwinPayloadToString(payLoad, size)) == NULL)
+    if ((jsonStr = CopyTwinPayloadToString(payload, size)) == NULL)
     {
-        LogError("Unable to allocate %lu size buffer", (unsigned long)size);
+        LogError("Unable to allocate twin buffer");
         result = false;
     }
     else if ((rootValue = json_parse_string(jsonStr)) == NULL)
@@ -307,7 +301,7 @@ bool PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsig
     }
     else if ((desiredObject = GetDesiredJson(updateState, rootValue)) == NULL)
     {
-        LogError("Cannot retrieve desired ");
+        LogError("Cannot retrieve desired JSON object");
         result = false;
     }
     else

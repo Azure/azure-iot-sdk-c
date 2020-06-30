@@ -11,8 +11,10 @@
 #include "iothub_message.h"
 #include "parson.h"
 
-// This is prototype that the application implements to receive a callback for each PnP property in a given Device Twin.
+//
+// PnPHelperPropertyCallbackFunction is the prototype the application implements to receive a callback for each PnP property in a given Device Twin.
 typedef void (*PnPHelperPropertyCallbackFunction)(const char* componentName, const char* propertyName, JSON_Value* propertyValue, int version);
+//
 
 //
 // PnPHelper_CreateReportedProperty returns JSON to report a property's value from the device.  This does NOT contain any metadata such as 
@@ -52,6 +54,6 @@ IOTHUB_MESSAGE_HANDLE PnPHelper_CreateTelemetryMessageHandle(const char* compone
 // PnPHelper_ProcessTwinData will visit the children of the desired portion of the twin and invoke the device's pnpPropertyCallback
 // for each property that it visits.
 // 
-bool PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payLoad, size_t size, PnPHelperPropertyCallbackFunction pnpPropertyCallback);
+bool PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payload, size_t size, PnPHelperPropertyCallbackFunction pnpPropertyCallback);
 
 #endif /* PNP_PROTOCOL_HELPERS_H */
