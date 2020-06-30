@@ -151,7 +151,7 @@ int main()
         //bool traceOn = true;
         //Prov_Device_SetOption(prov_device_handle, PROV_OPTION_LOG_TRACE, &traceOn);
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
-        // Setting the Trusted Certificate.  This is only necessary on system with without
+        // Setting the Trusted Certificate. This is only necessary on systems without
         // built in certificate stores.
         Prov_Device_SetOption(prov_device_handle, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
