@@ -34,8 +34,8 @@ static void my_gballoc_free(void* ptr)
 
 #include "RIoT.h"
 #include "RiotCrypt.h"
-#include "RiotDerEnc.h"
-#include "RiotX509Bldr.h"
+#include "derenc.h"
+#include "x509bldr.h"
 #include "DiceSha256.h"
 
 #define ENABLE_MOCKS
@@ -58,16 +58,28 @@ MOCKABLE_FUNCTION(, int, X509GetDEREcc, DERBuilderContext*, Context, RIOT_ECC_PU
 MOCKABLE_FUNCTION(, int, DERtoPEM, DERBuilderContext*, Context, uint32_t, Type, char*, PEM, uint32_t*, Length);
 
 MOCKABLE_FUNCTION(, int, X509GetDEREccPub, DERBuilderContext*, Context, RIOT_ECC_PUBLIC, Pub);
-MOCKABLE_FUNCTION(, int, X509GetDeviceCertTBS, DERBuilderContext*, Tbs, RIOT_X509_TBS_DATA *, TbsData, RIOT_ECC_PUBLIC*, DevIdKeyPub);
+MOCKABLE_FUNCTION(, int, X509GetDeviceCertTBS, DERBuilderContext*, Tbs, RIOT_X509_TBS_DATA *, TbsData, RIOT_ECC_PUBLIC*, DevIdKeyPub, uint8_t*, RootKeyPub, uint32_t, RootKeyPubLen);
 MOCKABLE_FUNCTION(, int, X509MakeDeviceCert, DERBuilderContext*, DeviceIDCert, RIOT_ECC_SIGNATURE*, TbsSig);
 MOCKABLE_FUNCTION(, int, X509GetAliasCertTBS, DERBuilderContext*, Tbs, RIOT_X509_TBS_DATA*, TbsData, RIOT_ECC_PUBLIC*, AliasKeyPub, RIOT_ECC_PUBLIC*, DevIdKeyPub, uint8_t*, Fwid, uint32_t, FwidLen);
 MOCKABLE_FUNCTION(, int, X509GetDERCsrTbs, DERBuilderContext*, Context, RIOT_X509_TBS_DATA*, TbsData, RIOT_ECC_PUBLIC*, DeviceIDPub);
 MOCKABLE_FUNCTION(, int, X509GetDERCsr, DERBuilderContext*, Context, RIOT_ECC_SIGNATURE*, Signature);
+MOCKABLE_FUNCTION(, int, X509GetRootCertTBS, DERBuilderContext*, Tbs, RIOT_X509_TBS_DATA*, TbsData, RIOT_ECC_PUBLIC*, DevIdKeyPub);
+MOCKABLE_FUNCTION(, void, mbedtls_mpi_free, mbedtls_mpi*, X);
+MOCKABLE_FUNCTION(, void, mbedtls_ecp_point_free, mbedtls_ecp_point*, pt);
+MOCKABLE_FUNCTION(, int, mbedtls_mpi_lset, mbedtls_mpi*, X, mbedtls_mpi_sint, z);
+MOCKABLE_FUNCTION(, int, mbedtls_mpi_read_binary, mbedtls_mpi*, X, const unsigned char*, buf, size_t, buflen);
 
 #undef ENABLE_MOCKS
 
 #include "hsm_client_riot.h"
 #include "hsm_client_data.h"
+
+// Defines for mock aliasing mbedtls_mpi_lset
+#if defined(MBEDTLS_HAVE_INT32)
+#define MPI_SINT int32_t
+#elif defined(MBEDTLS_HAVE_INT64)
+#define MPI_SINT int64_t
+#endif
 
 static const char* TEST_STRING_VALUE = "Test_String_Value";
 static const char* TEST_CERTIFICATE_VALUE = "Test_String_ValueTest_String_Value";
@@ -76,14 +88,17 @@ static const char* TEST_CN_VALUE = "riot-device-cert";
 static int umocktypes_copy_RIOT_ECC_PRIVATE(RIOT_ECC_PRIVATE* dest, const RIOT_ECC_PRIVATE* src)
 {
     int result;
-    if (src == NULL)
+    if (src == NULL) 
     {
         dest = NULL;
         result = 0;
     }
     else
     {
-        memcpy(dest->data, src->data, sizeof(dest->data));
+        // copy the sign, total number of limbs, and address of first limb
+        dest->s = src->s;
+        dest->n = src->n;
+        dest->p = src->p;
         result = 0;
     }
     return result;
@@ -107,15 +122,22 @@ static char* umocktypes_stringify_RIOT_ECC_PRIVATE(const RIOT_ECC_PRIVATE* value
     }
     else
     {
-        int length = snprintf(NULL, 0, "{ %p }", value->data);
+        int length = snprintf(NULL, 0, "{ %d, %zd, %p }",
+            value->s, value->n, value->p);
         if (length < 0)
         {
             result = NULL;
         }
         else
         {
-            result = (char*)my_gballoc_malloc(length + 1);
-            (void)snprintf(result, length + 1, "{ %p }", value->data);
+            //Add for NULL terminator
+            length++;
+            result = (char*)my_gballoc_malloc(length);
+            if (result != NULL)
+            {
+                (void)snprintf(result, length, "{ %d, %zd, %p }",
+                    value->s, value->n, value->p);
+            }
         }
     }
     return result;
@@ -124,17 +146,21 @@ static char* umocktypes_stringify_RIOT_ECC_PRIVATE(const RIOT_ECC_PRIVATE* value
 static int umocktypes_are_equal_RIOT_ECC_PRIVATE(RIOT_ECC_PRIVATE* left, RIOT_ECC_PRIVATE* right)
 {
     int result;
-    if (left == right)
+    if ((right == NULL) && (left == NULL))
     {
         result = 1;
     }
-    else if ((left == NULL) || (right == NULL))
+    else if (((right == NULL) && (left != NULL)) || ((left == NULL) && (right != NULL)))
+    {
+        result = 0;
+    }
+    else if ((right->s != left->s) || (right->n != left->n) || (right->p != left->p))
     {
         result = 0;
     }
     else
     {
-        result = memcmp(left->data, right->data, sizeof(left->data));
+        result = 1;
     }
     return result;
 }
@@ -149,9 +175,18 @@ static int umocktypes_copy_RIOT_ECC_PUBLIC(RIOT_ECC_PUBLIC* dest, const RIOT_ECC
     }
     else
     {
-        dest->infinity = src->infinity;
-        memcpy(dest->x.data, src->x.data, sizeof(dest->x.data) );
-        memcpy(dest->y.data, src->x.data, sizeof(dest->y.data));
+        // X point
+        dest->X.s = src->X.s;
+        dest->X.n = src->X.n;
+        dest->X.p = src->X.p;
+        // Y point
+        dest->Y.s = src->Y.s;
+        dest->Y.n = src->Y.n;
+        dest->Y.p = src->Y.p;
+        // Z point
+        dest->Z.s = src->Z.s;
+        dest->Z.n = src->Z.n;
+        dest->Z.p = src->Z.p;
         result = 0;
     }
     return result;
@@ -175,17 +210,26 @@ static char* umocktypes_stringify_RIOT_ECC_PUBLIC(const RIOT_ECC_PUBLIC* value)
     }
     else
     {
-        int length = snprintf(NULL, 0, "{ %p, %p, %d }",
-            value->x.data, value->y.data, (int)value->infinity);
+        int length = snprintf(NULL, 0, "{ %d, %zd, %p, %d, %zd, %p, %d, %zd, %p }",
+                    value->X.s, value->X.n, value->X.p, 
+                    value->Y.s, value->Y.n, value->Y.p, 
+                    value->Z.s, value->Z.n, value->Z.p);
         if (length < 0)
         {
             result = NULL;
         }
         else
         {
-            result = (char*)my_gballoc_malloc(length + 1);
-            (void)snprintf(result, length + 1, "{ %p, %p, %d }",
-                value->x.data, value->y.data, (int)value->infinity);
+            //Add for NULL terminator
+            length++;
+            result = (char*)my_gballoc_malloc(length);
+            if (result != NULL)
+            {
+                (void)snprintf(result, length, "{ %d, %zd, %p, %d, %zd, %p, %d, %zd, %p }",
+                    value->X.s, value->X.n, value->X.p, 
+                    value->Y.s, value->Y.n, value->Y.p, 
+                    value->Z.s, value->Z.n, value->Z.p);
+            }
         }
     }
     return result;
@@ -194,17 +238,32 @@ static char* umocktypes_stringify_RIOT_ECC_PUBLIC(const RIOT_ECC_PUBLIC* value)
 static int umocktypes_are_equal_RIOT_ECC_PUBLIC(RIOT_ECC_PUBLIC* left, RIOT_ECC_PUBLIC* right)
 {
     int result;
-    if (left == right)
+    if ((right == NULL) && (left == NULL))
     {
         result = 1;
     }
-    else if ((left == NULL) || (right == NULL))
+    else if (((right == NULL) && (left != NULL)) || ((left == NULL) && (right != NULL)))
     {
+        result = 0;
+    }
+    else if ((right->X.s != left->X.s) || (right->X.n != left->X.n) || (right->X.p != left->X.p))
+    {
+        // X point
+        result = 0;
+    }
+    else if ((right->Y.s != left->Y.s) || (right->Y.n != left->Y.n) || (right->Y.p != left->Y.p))
+    {
+        // Y point
+        result = 0;
+    }
+    else if ((right->Z.s != left->Z.s) || (right->Z.n != left->Z.n) || (right->Z.p != left->Z.p))
+    {
+        // Z point
         result = 0;
     }
     else
     {
-        result = memcmp(left->x.data, right->x.data, sizeof(left->x.data));
+        result = 1;
     }
     return result;
 }
@@ -252,6 +311,44 @@ static int my_DERtoPEM(DERBuilderContext* Context, uint32_t Type, char* PEM, uin
 
 MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
+static void mbedtls_error_on_free()
+{
+    char temp_str[256];
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error attempting to double-free :%s", MU_ENUM_TO_STRING(UMOCK_C_ERROR_CODE, UMOCK_C_NULL_ARGUMENT));
+    ASSERT_FAIL(temp_str);
+}
+
+static void my_mbedtls_mpi_free(mbedtls_mpi* X)
+{
+    if (X == NULL)
+    {
+        mbedtls_error_on_free();
+        return;
+    }
+    if (X->p != NULL)
+    {
+        memset(X->p, 0, X->n);
+        free(X->p);
+    }
+
+    X->s = 1;
+    X->n = 0;
+    X->p = NULL;
+}
+
+static void my_mbedtls_ecp_point_free(mbedtls_ecp_point* pt)
+{
+    if (pt == NULL)
+    {
+        mbedtls_error_on_free();
+        return;
+    }
+
+    my_mbedtls_mpi_free(&(pt->X));
+    my_mbedtls_mpi_free(&(pt->Y));
+    my_mbedtls_mpi_free(&(pt->Z));
+}
+
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
     char temp_str[256];
@@ -278,6 +375,7 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         ASSERT_ARE_EQUAL(int, 0, result);
 
         REGISTER_UMOCK_ALIAS_TYPE(HSM_CLIENT_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(mbedtls_mpi_sint, MPI_SINT);
         REGISTER_TYPE(RIOT_ECC_PUBLIC, RIOT_ECC_PUBLIC);
         REGISTER_TYPE(RIOT_ECC_PRIVATE, RIOT_ECC_PRIVATE);
 
@@ -309,6 +407,11 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(X509GetDERCsr, 1);
         REGISTER_GLOBAL_MOCK_RETURN(X509GetDeviceCertTBS, 0);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(X509GetDeviceCertTBS, 1);
+        REGISTER_GLOBAL_MOCK_RETURN(X509GetRootCertTBS, 0);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(X509GetRootCertTBS, 1);
+
+        REGISTER_GLOBAL_MOCK_HOOK(mbedtls_mpi_free, my_mbedtls_mpi_free);
+        REGISTER_GLOBAL_MOCK_HOOK(mbedtls_ecp_point_free, my_mbedtls_ecp_point_free);
 
         REGISTER_GLOBAL_MOCK_HOOK(DiceSHA256, my_DiceSHA256);
         REGISTER_GLOBAL_MOCK_HOOK(DiceSHA256_2, my_DiceSHA256_2);
@@ -357,12 +460,16 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
 
     static void hsm_client_riot_create_leaf_cert_mock(void)
     {
-        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+        // Expected calls preceeded by a commented number are members of calls_cannot_fail[] array
+        // These calls are skipped in negative/fail testing
+        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 0
+        STRICT_EXPECTED_CALL(X509GetAliasCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(X509MakeDeviceCert(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, CERT_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); //15
+        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, CERT_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG)); // 6
+        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG)); // 7
     }
 
     static void hsm_client_riot_create_mock(bool device_signed)
@@ -370,15 +477,17 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         RIOT_ECC_PUBLIC pub = { 0 };
         RIOT_ECC_PRIVATE pri = { 0 };
 
+        // Expected calls preceeded by a commented number are members of calls_cannot_fail[] array
+        // These calls are skipped in negative/fail testing
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(RiotCrypt_Hash(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(RiotCrypt_DeriveEccKey(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(RiotCrypt_Hash2(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(RiotCrypt_DeriveEccKey(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 5
         STRICT_EXPECTED_CALL(X509GetDEREccPub(IGNORED_PTR_ARG, pub))
             .IgnoreArgument_Pub();
-        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, PUBLICKEY_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 7
+        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, PUBLICKEY_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
 
         STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 8
         STRICT_EXPECTED_CALL(X509GetDEREcc(IGNORED_PTR_ARG, pub, pri))
@@ -386,26 +495,31 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
             .IgnoreArgument_Priv();
         STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, ECC_PRIVATEKEY_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
 
-        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 11
         STRICT_EXPECTED_CALL(X509GetAliasCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(X509MakeAliasCert(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, CERT_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); //15
+        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, CERT_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
 
         if (device_signed)
         {
-            STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-            STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+            STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 16
+            STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
             STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(X509MakeDeviceCert(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, CERT_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         }
         else
         {
-            STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-            STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+            STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 17
+            STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 18
+            // Generate the CA_Root using the development key
+            STRICT_EXPECTED_CALL(mbedtls_mpi_read_binary(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 19
+            STRICT_EXPECTED_CALL(mbedtls_mpi_read_binary(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 20
+            STRICT_EXPECTED_CALL(mbedtls_mpi_lset(IGNORED_PTR_ARG, IGNORED_NUM_ARG));                         // 21
+            STRICT_EXPECTED_CALL(mbedtls_mpi_read_binary(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 22
 
-            STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+            STRICT_EXPECTED_CALL(X509GetRootCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
             STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
 
             STRICT_EXPECTED_CALL(X509MakeRootCert(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -416,20 +530,16 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
             STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, ECC_PRIVATEKEY_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         }
 
-
-        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 24
-        STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+        // Produce root-signed device cert
+        STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 28
+        STRICT_EXPECTED_CALL(X509GetDeviceCertTBS(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(RiotCrypt_Sign(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(X509MakeDeviceCert(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, CERT_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
 
-        /*/*STRICT_EXPECTED_CALL(DERInitContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(X509GetDEREcc(IGNORED_PTR_ARG, pub, pri))
-            .IgnoreArgument_Pub()
-            .IgnoreArgument_Priv();
-        STRICT_EXPECTED_CALL(DERtoPEM(IGNORED_PTR_ARG, ECC_PRIVATEKEY_TYPE, IGNORED_PTR_ARG, IGNORED_NUM_ARG));*/
-
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG)); // 34
+        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG)); // 35
     }
 
     /* Tests_SRS_SECURE_DEVICE_RIOT_07_001: [ On success hsm_client_riot_create shall allocate a new instance of the device auth interface. ] */
@@ -470,7 +580,8 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
 
         umock_c_negative_tests_snapshot();
 
-        size_t calls_cannot_fail[] = { 5, 8, 11, 16, 17, 24 };
+        // List of calls that we are not testing failures on: [ hsm_client_riot_create_mock ]
+        size_t calls_cannot_fail[] = { 5, 8, 11, 16, 17, 18, 19, 20, 21, 22, 28, 34, 35 };
 
         //act
         size_t count = umock_c_negative_tests_call_count();
@@ -510,6 +621,16 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+
+        STRICT_EXPECTED_CALL(mbedtls_ecp_point_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG));
+
+        STRICT_EXPECTED_CALL(mbedtls_ecp_point_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG));
+
+        STRICT_EXPECTED_CALL(mbedtls_ecp_point_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG));
+
         STRICT_EXPECTED_CALL(gballoc_free(sec_handle));
 
         //act
@@ -886,7 +1007,8 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
 
         umock_c_negative_tests_snapshot();
 
-        size_t calls_cannot_fail[] = { 0 };
+        // List of calls that we are not testing failures on: [ hsm_client_riot_create_leaf_cert_mock ]
+        size_t calls_cannot_fail[] = { 0, 6, 7 };
 
         //act
         size_t count = umock_c_negative_tests_call_count();
