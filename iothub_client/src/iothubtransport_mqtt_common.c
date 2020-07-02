@@ -91,7 +91,7 @@ static const char* CONNECTION_MODULE_ID_PROPERTY = "cmid";
 
 static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtimeutc";
 
-static const char DT_MODEL_ID_TOKEN[] = "digital-twin-model-id";
+static const char DT_MODEL_ID_TOKEN[] = "model-id";
 
 static const char DEFAULT_IOTHUB_PRODUCT_IDENTIFIER[] = CLIENT_DEVICE_TYPE_PREFIX "/" IOTHUB_SDK_VERSION;
 
