@@ -20,7 +20,6 @@
 #include "iothub_client_options.h"
 #include "iothub_message.h"
 #include "azure_c_shared_utility/threadapi.h"
-#include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/xlogging.h"
 
 #include "parson.h"
@@ -41,23 +40,15 @@ static const char g_ModelId[] = "dtmi:com:example:Thermostat;1";
 // Global device handle.
 IOTHUB_DEVICE_CLIENT_HANDLE g_deviceHandle;
 
-
-//
-// Thermostat_DeviceMethodCallback is invoked by IoT SDK when a device method arrives.
-//
-static int Thermostat_DeviceMethodCallback(const char* methodName, const unsigned char* payload, size_t size, unsigned char** response, size_t* responseSize, void* userContextCallback)
-{
-    (void)methodName;
-    (void)userContextCallback;
-    (void)payload;
-    (void)response;
-    (void)responseSize;
-    (void)size;
-
-    int result = 200;
-
-    return result;
-}
+// Name of command this component supports to get report information
+static const char g_GetMinMaxReport[] = "getMaxMinReport";
+// Name of json field to parse for "since".
+static const char g_SinceJsonCommandSetting[] = "commandRequest.value.since";
+// Return codes for device methods
+static int g_commandSuccess = 200;
+static int g_commandBadFormat = 400;
+static int g_commandNotFoundStatus = 404;
+static int g_commandInternalError = 500;
 
 //
 // CopyTwinPayloadToString takes the twin payload data, which arrives as a potentially non-NULL terminated string, and creates
@@ -78,6 +69,117 @@ static char* CopyTwinPayloadToString(const unsigned char* payload, size_t size)
     }
 
     return jsonStr;
+}
+
+//
+// BuildMaxMinCommandResponse builds the response to the command for getMaxMinReport
+//
+
+// snprintf format for building getMaxMinReport
+static const char g_minMaxCommandResponseFormat[] = "{ \"tempReport\": { \"maxTemp\": %.2f, \"minTemp\": %.2f, \"avgTemp\": %.2f, \"startTime\": \"%s\", \"endTime\": \"%s\"  }}";
+
+static bool BuildMaxMinCommandResponse(const char* sinceStr, unsigned char** response, size_t* responseSize)
+{
+    int responseBuilderSize;
+    unsigned char* responseBuilder = NULL;
+    bool result;
+
+    if ((responseBuilderSize = snprintf(NULL, 0, g_minMaxCommandResponseFormat, 5.0, 6.0, 7.0, sinceStr, sinceStr)) < 0)
+    {
+        LogError("snprintf to determine string length failed");
+        result = false;
+    }
+    else if ((responseBuilder = calloc(1, responseBuilderSize + 1)) == NULL)
+    {
+        LogError("Unable to allocate %lu bytes", (unsigned long)(responseBuilderSize + 1));
+        result = false;
+    }
+    else if ((responseBuilderSize = snprintf((char*)responseBuilder, responseBuilderSize + 1, g_minMaxCommandResponseFormat, 5.0, 6.0, 7.0, sinceStr, sinceStr)) < 0)
+    {
+        LogError("snprintf to output buffer failed");
+        result = false;
+    }
+    else
+    {
+        result = true;
+    }
+
+    if (result == true)
+    {
+        *response = responseBuilder;
+        *responseSize = (size_t)responseBuilderSize;
+        LogInfo("Response=<%s>", (const char*)responseBuilder);
+    }
+    else
+    {
+        free(responseBuilder);
+    }
+
+    return response;    
+}       
+
+
+//
+// Thermostat_DeviceMethodCallback is invoked by IoT SDK when a device method arrives.
+//
+static int Thermostat_DeviceMethodCallback(const char* methodName, const unsigned char* payload, size_t size, unsigned char** response, size_t* responseSize, void* userContextCallback)
+{
+    (void)userContextCallback;
+
+    char* jsonStr = NULL;
+    JSON_Value* rootValue = NULL;
+    JSON_Object* rootObject = NULL;
+    //const char* sinceStr;
+    int result;
+
+    LogInfo("Device method %s arrived", methodName);
+
+
+    *response = NULL;
+    *responseSize = 0;
+
+    if (strcmp(methodName, g_GetMinMaxReport) != 0)
+    {
+        LogError("Method name %s is not supported on this component", methodName);
+        result = g_commandNotFoundStatus;
+    }
+    else if ((jsonStr = CopyTwinPayloadToString(payload, size)) == NULL)
+    {
+        LogError("Unable to allocate twin buffer");
+        result = g_commandInternalError;
+    }
+    else if ((rootValue = json_parse_string(jsonStr)) == NULL)
+    {
+        LogError("Unable to parse twin JSON");
+        result = g_commandBadFormat;
+    }
+    else if ((rootObject = json_value_get_object(rootValue)) == NULL)
+    {
+        LogError("Unable to get root object of JSON");
+        result = g_commandInternalError;
+    }
+    /*else if ((sinceStr = json_object_dotget_string(rootObject, g_SinceJsonCommandSetting)) == NULL)
+    {
+        LogError("Cannot retrieve JSON field %s", g_SinceJsonCommandSetting);
+        result = g_commandBadFormat;
+    }
+    */
+    else if (BuildMaxMinCommandResponse("since--data", response, responseSize) == false)
+    {
+        LogError("Unable to build response");
+        result = g_commandInternalError;        
+    }
+    else
+    {
+        result = g_commandSuccess;
+    }
+
+    LogInfo("json=<%s>", json_serialize_to_string(rootValue));
+
+    free(jsonStr);
+    json_value_free(rootValue);
+
+    return result;
 }
 
 //
