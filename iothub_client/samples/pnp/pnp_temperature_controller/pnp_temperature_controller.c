@@ -33,7 +33,7 @@ static const char* g_connectionString = "[device connection string]";
 static unsigned int g_sleepBetweenTelemetrySends = 60 * 1000;
 
 // Whether tracing at the IoTHub client is enabled or not. 
-static bool g_hubClientTraceEnabled = false;
+static bool g_hubClientTraceEnabled = true;
 
 // DTMI indicating this device's ModelId.
 static const char g_ModelId[] = "dtmi:com:example:TemperatureController;1";
@@ -150,19 +150,19 @@ static void TempControl_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE updateState,
 //
 void TempControl_SendCurrentTemperature(void) 
 {
-    IOTHUB_MESSAGE_HANDLE h = NULL;
+    IOTHUB_MESSAGE_HANDLE messageHandle = NULL;
     IOTHUB_CLIENT_RESULT iothubResult;
 
-    if ((h = PnPHelper_CreateTelemetryMessageHandle("thermostat", "22")) == NULL)
+    if ((messageHandle = PnPHelper_CreateTelemetryMessageHandle("thermostat", "22")) == NULL)
     {
         LogError("Unable to create telemetry message");
     }
-    else if ((iothubResult = IoTHubDeviceClient_SendEventAsync(g_deviceHandle, h, NULL, NULL)) != IOTHUB_CLIENT_OK)
+    else if ((iothubResult = IoTHubDeviceClient_SendEventAsync(g_deviceHandle, messageHandle, NULL, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to send telemetry message, error=%d", iothubResult);
     }
 
-    IoTHubMessage_Destroy(h);
+    IoTHubMessage_Destroy(messageHandle);
 }
 
 int main(void)
