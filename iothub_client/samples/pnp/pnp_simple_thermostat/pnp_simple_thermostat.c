@@ -1,32 +1,34 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-// This sample implements a PnP based Temperature Control model.  It demonstrates a somewhat
-// complex model in that the model has properties, commands, and telemetry off of the root component
-// as well as subcomponents.  
+// This sample implements a PnP based thermostat.  This demonstrates a *relatively* simple PnP device
+// that does only acts as a thermostat and does not have additional components.  
+// Because this is a fairly straightforward model ot implement, PnP (de)serialization helper routines
+// used in more complex samples are not used here.
 
-// PnP is a serialization and deserialization convention built on top of IoTHub DeviceClient
-// primitives of telemetry, device methods, and device twins.  A sample helper, ../common/pnp_protocol_helpers.h,
-// is used here to perfom the needed (de)serialization.
-
-// TODO: Link to final GitHub URL of the DTDL once checked in.
+// The DigitalTwin Definition Language document describing the component implemented in this sample
+// is available at https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/Thermostat.json.
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+// Device Client and core utility related header files
 #include "iothub.h"
 #include "iothub_device_client.h"
-#include "iothub_client_options.h"
 #include "iothub_message.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/xlogging.h"
 
+// JSON parser 
 #include "parson.h"
+
+// pnp_device_client_helpers.h is part of the PnP sample code and helps in 
+// creation of the IOTHUB_DEVICE_CLIENT_HANDLE
 #include "pnp_device_client_helpers.h"
 
-// Paste in your device connection string
-static const char* g_connectionString = "[device connection string]";
+// Environment variable used to specify this application's connection string
+static const char g_ConnectionStringEnvironmentVariable[] = "IOTHUB_DEVICE_CONNECTION_STRING";
 
 // Amount of time to sleep between sending telemetry to Hub, in milliseconds.  Set to 1 minute.
 static unsigned int g_sleepBetweenTelemetrySends = 60 * 1000;
@@ -34,21 +36,41 @@ static unsigned int g_sleepBetweenTelemetrySends = 60 * 1000;
 // Whether tracing at the IoTHub client is enabled or not. 
 static bool g_hubClientTraceEnabled = true;
 
-// DTMI indicating this device's ModelId.
+// This device's PnP ModelId.
 static const char g_ModelId[] = "dtmi:com:example:Thermostat;1";
 
-// Global device handle.
-IOTHUB_DEVICE_CLIENT_HANDLE g_deviceHandle;
+// JSON fields from desired property to retrieve.
+static const char PnP_JsonPropertyVersion[] = "$version";
+static const char PnP_JsonTargetTemperature[] = "targetTemperature";
 
 // Name of command this component supports to get report information
 static const char g_GetMinMaxReport[] = "getMaxMinReport";
-// Name of json field to parse for "since".
-static const char g_SinceJsonCommandSetting[] = "commandRequest.value.since";
+// Name of json field to parse for "since". (Note the "since" is assumed as only field of the value)
+static const char g_SinceJsonCommandSetting[] = "commandRequest.value";
 // Return codes for device methods
 static int g_commandSuccess = 200;
 static int g_commandBadFormat = 400;
 static int g_commandNotFoundStatus = 404;
 static int g_commandInternalError = 500;
+
+// The default temperature to use before any is set.
+#define DEFAULT_TEMPERATURE_VALUE 30
+// Current temperature of the thermostat.
+static double g_currentTemperature = DEFAULT_TEMPERATURE_VALUE;
+// Minimum temperature thermostat has been at during current execution run.
+static double g_minTemperature = DEFAULT_TEMPERATURE_VALUE;
+// Maximum temperature thermostat has been at during current execution run.
+static double g_maxTemperature = DEFAULT_TEMPERATURE_VALUE;
+// Number of times temperature has been updated, counting the initial setting as 1.  Used to determine average temperature.
+static int g_numTemperatureUpdates = 1;
+// Total of all temperature updates during current exceution run.  Used to determine average temperature.
+static double g_allTemperatures = DEFAULT_TEMPERATURE_VALUE;
+
+// snprintf format for building getMaxMinReport
+static const char g_minMaxCommandResponseFormat[] = "{ \"maxTemp\": %.2f, \"minTemp\": %.2f, \"avgTemp\": %.2f, \"startTime\": \"%s\", \"endTime\": \"%s\" }";
+
+// Format string for sending temperature telemetry
+static const char g_TemperatureTelemetryBodyFormat[] = "{ \"temperature\":  %.02f }";
 
 //
 // CopyTwinPayloadToString takes the twin payload data, which arrives as a potentially non-NULL terminated string, and creates
@@ -60,7 +82,7 @@ static char* CopyTwinPayloadToString(const unsigned char* payload, size_t size)
 
     if ((jsonStr = (char*)malloc(size+1)) == NULL)
     {
-        LogError("Unable to allocate %lu size buffer", (unsigned long)size);
+        LogError("Unable to allocate %lu size buffer", (unsigned long)(size+1));
     }
     else
     {
@@ -74,19 +96,15 @@ static char* CopyTwinPayloadToString(const unsigned char* payload, size_t size)
 //
 // BuildMaxMinCommandResponse builds the response to the command for getMaxMinReport
 //
-
-// snprintf format for building getMaxMinReport
-static const char g_minMaxCommandResponseFormat[] = "{ \"tempReport\": { \"maxTemp\": %.2f, \"minTemp\": %.2f, \"avgTemp\": %.2f, \"startTime\": \"%s\", \"endTime\": \"%s\"  }}";
-
 static bool BuildMaxMinCommandResponse(const char* sinceStr, unsigned char** response, size_t* responseSize)
 {
     int responseBuilderSize;
     unsigned char* responseBuilder = NULL;
     bool result;
 
-    if ((responseBuilderSize = snprintf(NULL, 0, g_minMaxCommandResponseFormat, 5.0, 6.0, 7.0, sinceStr, sinceStr)) < 0)
+    if ((responseBuilderSize = snprintf(NULL, 0, g_minMaxCommandResponseFormat, g_minTemperature, g_maxTemperature, g_allTemperatures / g_numTemperatureUpdates, sinceStr, sinceStr)) < 0)
     {
-        LogError("snprintf to determine string length failed");
+        LogError("snprintf to determine string length for command response failed");
         result = false;
     }
     else if ((responseBuilder = calloc(1, responseBuilderSize + 1)) == NULL)
@@ -94,9 +112,9 @@ static bool BuildMaxMinCommandResponse(const char* sinceStr, unsigned char** res
         LogError("Unable to allocate %lu bytes", (unsigned long)(responseBuilderSize + 1));
         result = false;
     }
-    else if ((responseBuilderSize = snprintf((char*)responseBuilder, responseBuilderSize + 1, g_minMaxCommandResponseFormat, 5.0, 6.0, 7.0, sinceStr, sinceStr)) < 0)
+    else if ((responseBuilderSize = snprintf((char*)responseBuilder, responseBuilderSize + 1, g_minMaxCommandResponseFormat, g_minTemperature, g_maxTemperature, g_allTemperatures / g_numTemperatureUpdates, sinceStr, sinceStr)) < 0)
     {
-        LogError("snprintf to output buffer failed");
+        LogError("snprintf to output buffer for command response");
         result = false;
     }
     else
@@ -118,7 +136,6 @@ static bool BuildMaxMinCommandResponse(const char* sinceStr, unsigned char** res
     return response;    
 }       
 
-
 //
 // Thermostat_DeviceMethodCallback is invoked by IoT SDK when a device method arrives.
 //
@@ -129,11 +146,10 @@ static int Thermostat_DeviceMethodCallback(const char* methodName, const unsigne
     char* jsonStr = NULL;
     JSON_Value* rootValue = NULL;
     JSON_Object* rootObject = NULL;
-    //const char* sinceStr;
+    const char* sinceStr;
     int result;
 
     LogInfo("Device method %s arrived", methodName);
-
 
     *response = NULL;
     *responseSize = 0;
@@ -158,23 +174,21 @@ static int Thermostat_DeviceMethodCallback(const char* methodName, const unsigne
         LogError("Unable to get root object of JSON");
         result = g_commandInternalError;
     }
-    /*else if ((sinceStr = json_object_dotget_string(rootObject, g_SinceJsonCommandSetting)) == NULL)
+    else if ((sinceStr = json_object_dotget_string(rootObject, g_SinceJsonCommandSetting)) == NULL)
     {
         LogError("Cannot retrieve JSON field %s", g_SinceJsonCommandSetting);
         result = g_commandBadFormat;
     }
-    */
-    else if (BuildMaxMinCommandResponse("since--data", response, responseSize) == false)
+    else if (BuildMaxMinCommandResponse(sinceStr, response, responseSize) == false)
     {
         LogError("Unable to build response");
         result = g_commandInternalError;        
     }
     else
     {
+        LogInfo("Returning success from command request");
         result = g_commandSuccess;
     }
-
-    LogInfo("json=<%s>", json_serialize_to_string(rootValue));
 
     free(jsonStr);
     json_value_free(rootValue);
@@ -215,17 +229,55 @@ static JSON_Object* GetDesiredJson(DEVICE_TWIN_UPDATE_STATE updateState, JSON_Va
     return desiredObject;
 }
 
+//
+// UpdateTemperatureAndStatistics updates the temperature and min/max/average values
+//
+static void UpdateTemperatureAndStatistics(double desiredTemp, bool* maxTempUpdated)
+{
+    if (desiredTemp > g_maxTemperature)
+    {
+        g_maxTemperature = desiredTemp;
+        *maxTempUpdated = true;
+    }
+    else if (desiredTemp < g_minTemperature)
+    {
+        g_minTemperature = desiredTemp;
+    }
 
-static const char PnP_JsonPropertyVersion[] = "$version";
-static const char PnP_JsonTargetTemperature[] = "targetTemperature";
-static double g_currentTemperature = 30;
+    g_numTemperatureUpdates++;
+    g_allTemperatures += desiredTemp;
+
+    g_currentTemperature = desiredTemp;
+}
+
+//
+// SendMaxTemperatureSinceReboot reports a PnP property indicating the maximum temperature since the last reboot (simulated here by lifetime of executable)
+//
+static void SendMaxTemperatureSinceReboot(IOTHUB_DEVICE_CLIENT_HANDLE deviceClient)
+{
+    IOTHUB_CLIENT_RESULT iothubClientResult;
+    char maxTemperatureSinceRebootProperty[128];
+
+    if (snprintf(maxTemperatureSinceRebootProperty, sizeof(maxTemperatureSinceRebootProperty), "{\"maxTempSinceLastReboot\": %.2f }", g_maxTemperature) < 0)
+    {
+        LogError("snprintf building maxTemperature failed");
+    }
+    else if ((iothubClientResult = IoTHubDeviceClient_SendReportedState(deviceClient, (const unsigned char*)maxTemperatureSinceRebootProperty, strlen(maxTemperatureSinceRebootProperty), NULL, NULL)) != IOTHUB_CLIENT_OK)
+    {
+        LogError("Unable to send reported state.  Error=%d", iothubClientResult);
+    }
+    else
+    {
+        LogInfo("Sending maxTempSinceReboot property");
+    }    
+}
 
 //
 // Thermostat_DeviceTwinCallback is invoked by IoT SDK when a twin - either full twin or a PATCH update - arrives.
 //
 static void Thermostat_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payload, size_t size, void* userContextCallback)
 {
-    (void)userContextCallback;
+    IOTHUB_DEVICE_CLIENT_HANDLE deviceClient = (IOTHUB_DEVICE_CLIENT_HANDLE)userContextCallback;
 
     char* jsonStr = NULL;
     JSON_Value* rootValue = NULL;
@@ -262,33 +314,39 @@ static void Thermostat_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE updateState, 
         double targetTemperature = json_value_get_number(targetTemperatureValue);
 
         LogInfo("Received targetTemperature = %f", targetTemperature);
-        g_currentTemperature = targetTemperature;
+
+        bool maxTempUpdated = false;
+        UpdateTemperatureAndStatistics(targetTemperature, &maxTempUpdated);
+
+        if (maxTempUpdated)
+        {
+            SendMaxTemperatureSinceReboot(deviceClient);
+        }
     }
 
     json_value_free(rootValue);
     free(jsonStr);
 }
 
-
 //
 // Thermostat_SendCurrentTemperature sends a PnP telemetry indicating the current temperature
 //
-void Thermostat_SendCurrentTemperature(void) 
+void Thermostat_SendCurrentTemperature(IOTHUB_DEVICE_CLIENT_HANDLE deviceClient) 
 {
     IOTHUB_MESSAGE_HANDLE messageHandle = NULL;
     IOTHUB_CLIENT_RESULT iothubResult;
 
     char temperatureStringBuffer[32];
 
-    if (snprintf(temperatureStringBuffer, sizeof(temperatureStringBuffer), "%.02f", g_currentTemperature) < 0)
+    if (snprintf(temperatureStringBuffer, sizeof(temperatureStringBuffer), g_TemperatureTelemetryBodyFormat, g_currentTemperature) < 0)
     {
-        LogError("snprintf failed");
+        LogError("snprintf of current temperature telemetry failed");
     }
     else if ((messageHandle = IoTHubMessage_CreateFromString(temperatureStringBuffer)) == NULL)
     {
         LogError("IoTHubMessage_CreateFromString failed");
     }
-    else if ((iothubResult = IoTHubDeviceClient_SendEventAsync(g_deviceHandle, messageHandle, NULL, NULL)) != IOTHUB_CLIENT_OK)
+    else if ((iothubResult = IoTHubDeviceClient_SendEventAsync(deviceClient, messageHandle, NULL, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to send telemetry message, error=%d", iothubResult);
     }
@@ -298,28 +356,34 @@ void Thermostat_SendCurrentTemperature(void)
 
 int main(void)
 {
-    g_deviceHandle = PnPHelper_CreateDeviceClientHandle(g_connectionString, g_ModelId, g_hubClientTraceEnabled, Thermostat_DeviceMethodCallback, Thermostat_DeviceTwinCallback);
+    IOTHUB_DEVICE_CLIENT_HANDLE deviceClient = NULL;
+    const char* connectionString;
 
-    if (g_deviceHandle == NULL)
+    if ((connectionString = getenv(g_ConnectionStringEnvironmentVariable)) == NULL)
+    {
+        LogError("Cannot read environment variable %s", g_ConnectionStringEnvironmentVariable);
+    }
+    else if ((deviceClient = PnPHelper_CreateDeviceClientHandle(connectionString, g_ModelId, g_hubClientTraceEnabled, Thermostat_DeviceMethodCallback, Thermostat_DeviceTwinCallback)) == NULL)
     {
         LogError("Failure creating Iothub device");
     }
     else
     {
         LogInfo("Successfully created device client handle.  Hit Control-C to exit program\n");
-        // TODO: Add a sample showing simple property update
+
+        SendMaxTemperatureSinceReboot(deviceClient);
 
         while (true)
         {
             // Wake up periodically to send telemetry.
             // IOTHUB_DEVICE_CLIENT_HANDLE brings in the IoTHub device convenience layer, which means that the IoTHub SDK itself 
             // spins a worker thread to perform all operations.
-            Thermostat_SendCurrentTemperature();
+            Thermostat_SendCurrentTemperature(deviceClient);
             ThreadAPI_Sleep(g_sleepBetweenTelemetrySends);
         }
 
         // Clean up the iothub sdk handle
-        IoTHubDeviceClient_Destroy(g_deviceHandle);
+        IoTHubDeviceClient_Destroy(deviceClient);
         // Free all the sdk subsystem
         IoTHub_Deinit();        
     }
