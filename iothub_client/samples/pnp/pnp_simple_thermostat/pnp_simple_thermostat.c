@@ -3,24 +3,23 @@
 
 // This sample implements a PnP based thermostat.  This demonstrates a *relatively* simple PnP device
 // that does only acts as a thermostat and does not have additional components.  
-// Because this is a fairly straightforward model ot implement, PnP (de)serialization helper routines
-// used in more complex samples are not used here.
 
 // The DigitalTwin Definition Language document describing the component implemented in this sample
 // is available at https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/Thermostat.json.
 
+// Standard C header files
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-// Device Client and core utility related header files
+// IoTHub Device Client and IoT core utility related header files
 #include "iothub.h"
 #include "iothub_device_client.h"
 #include "iothub_message.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/xlogging.h"
 
-// JSON parser 
+// JSON parser library
 #include "parson.h"
 
 // pnp_device_client_helpers.h is part of the PnP sample code and helps in 
@@ -33,7 +32,7 @@ static const char g_ConnectionStringEnvironmentVariable[] = "IOTHUB_DEVICE_CONNE
 // Amount of time to sleep between sending telemetry to Hub, in milliseconds.  Set to 1 minute.
 static unsigned int g_sleepBetweenTelemetrySends = 60 * 1000;
 
-// Whether tracing at the IoTHub client is enabled or not. 
+// Whether verbose tracing at the IoTHub client is enabled or not.
 static bool g_hubClientTraceEnabled = true;
 
 // This device's PnP ModelId.
@@ -47,11 +46,11 @@ static const char PnP_JsonTargetTemperature[] = "targetTemperature";
 static const char g_GetMinMaxReport[] = "getMaxMinReport";
 // Name of json field to parse for "since". (Note the "since" is assumed as only field of the value)
 static const char g_SinceJsonCommandSetting[] = "commandRequest.value";
-// Return codes for device methods
-static int g_commandSuccess = 200;
-static int g_commandBadFormat = 400;
-static int g_commandNotFoundStatus = 404;
-static int g_commandInternalError = 500;
+// Return codes for device methods and desired property responses
+static int g_statusSuccess = 200;
+static int g_statusBadFormat = 400;
+static int g_statusNotFoundStatus = 404;
+static int g_statusInternalError = 500;
 
 // The default temperature to use before any is set.
 #define DEFAULT_TEMPERATURE_VALUE 30
@@ -71,6 +70,12 @@ static const char g_minMaxCommandResponseFormat[] = "{ \"maxTemp\": %.2f, \"minT
 
 // Format string for sending temperature telemetry
 static const char g_TemperatureTelemetryBodyFormat[] = "{ \"temperature\":  %.02f }";
+
+// Response description is an optional, human readable message including more information
+// about the setting of the temperature.  Because we accept all temperature requests, we 
+// always indicate a success.  An actual sensor could optionally return information about
+// a temperature being out of range or a mechanical issue on the device on error cases.
+static const char g_temperaturePropertyResponseDescription[] = "success";
 
 //
 // CopyTwinPayloadToString takes the twin payload data, which arrives as a potentially non-NULL terminated string, and creates
@@ -157,41 +162,42 @@ static int Thermostat_DeviceMethodCallback(const char* methodName, const unsigne
     if (strcmp(methodName, g_GetMinMaxReport) != 0)
     {
         LogError("Method name %s is not supported on this component", methodName);
-        result = g_commandNotFoundStatus;
+        result = g_statusNotFoundStatus;
     }
     else if ((jsonStr = CopyTwinPayloadToString(payload, size)) == NULL)
     {
         LogError("Unable to allocate twin buffer");
-        result = g_commandInternalError;
+        result = g_statusInternalError;
     }
     else if ((rootValue = json_parse_string(jsonStr)) == NULL)
     {
         LogError("Unable to parse twin JSON");
-        result = g_commandBadFormat;
+        result = g_statusBadFormat;
     }
     else if ((rootObject = json_value_get_object(rootValue)) == NULL)
     {
         LogError("Unable to get root object of JSON");
-        result = g_commandInternalError;
+        result = g_statusInternalError;
     }
+    // See caveats section in ../readme.md; we don't actually respect this sinceStr to keep the sample simple.
     else if ((sinceStr = json_object_dotget_string(rootObject, g_SinceJsonCommandSetting)) == NULL)
     {
         LogError("Cannot retrieve JSON field %s", g_SinceJsonCommandSetting);
-        result = g_commandBadFormat;
+        result = g_statusBadFormat;
     }
     else if (BuildMaxMinCommandResponse(sinceStr, response, responseSize) == false)
     {
         LogError("Unable to build response");
-        result = g_commandInternalError;        
+        result = g_statusInternalError;        
     }
     else
     {
         LogInfo("Returning success from command request");
-        result = g_commandSuccess;
+        result = g_statusSuccess;
     }
 
-    free(jsonStr);
     json_value_free(rootValue);
+    free(jsonStr);
 
     return result;
 }
@@ -223,7 +229,6 @@ static JSON_Object* GetDesiredJson(DEVICE_TWIN_UPDATE_STATE updateState, JSON_Va
             // So here we simply need the root of the JSON itself.
             desiredObject = rootObject;
         }
-
     }
 
     return desiredObject;
@@ -250,33 +255,66 @@ static void UpdateTemperatureAndStatistics(double desiredTemp, bool* maxTempUpda
     g_currentTemperature = desiredTemp;
 }
 
+// Format string to report the property maximum temperature since reboot.  This is a "read only" property from the
+// service solution's perspective, which means we don't need to include any sort of status codes.
+static const char g_maxTemperatureSinceRebootFormat[] = "{\"maxTempSinceLastReboot\": %.2f }";
+
+// Format string to indicate the device received an update request for the temperature.  Because this is a "writeable"
+// property from the service solution's perspective, we need to return a status code (HTTP status code style) and version
+// for the solution to correlate the request and its status.
+static const char g_targetTemperatureResponseFormat[] = "{\"targetTemperature\": { \"value\": %.2f, \"ac\":%d, \"av\":%d, \"ad\":\"%s\" }}";
+
+
+//
+// SendTargetTemperatureReport sends a PnP property indicating the device has received the desired targetted temperature
+//
+static void SendTargetTemperatureReport(IOTHUB_DEVICE_CLIENT_HANDLE deviceClient, double desiredTemp, int responseStatus, int version, const char* description)
+{
+    IOTHUB_CLIENT_RESULT iothubClientResult;
+    char targetTemperatureResponseProperty[256];
+
+    if (snprintf(targetTemperatureResponseProperty, sizeof(targetTemperatureResponseProperty), g_targetTemperatureResponseFormat, desiredTemp, responseStatus, version, description) < 0)
+    {
+        LogError("snprintf building targetTemperature response failed");
+    }
+    else if ((iothubClientResult = IoTHubDeviceClient_SendReportedState(deviceClient, (const unsigned char*)targetTemperatureResponseProperty, strlen(targetTemperatureResponseProperty), NULL, NULL)) != IOTHUB_CLIENT_OK)
+    {
+        LogError("Unable to send reported state for target temperature.  Error=%d", iothubClientResult);
+    }
+    else
+    {
+        LogInfo("Sending maxTempSinceReboot property");
+    }
+}
+
 //
 // SendMaxTemperatureSinceReboot reports a PnP property indicating the maximum temperature since the last reboot (simulated here by lifetime of executable)
 //
 static void SendMaxTemperatureSinceReboot(IOTHUB_DEVICE_CLIENT_HANDLE deviceClient)
 {
     IOTHUB_CLIENT_RESULT iothubClientResult;
-    char maxTemperatureSinceRebootProperty[128];
+    char maxTemperatureSinceRebootProperty[256];
 
-    if (snprintf(maxTemperatureSinceRebootProperty, sizeof(maxTemperatureSinceRebootProperty), "{\"maxTempSinceLastReboot\": %.2f }", g_maxTemperature) < 0)
+    if (snprintf(maxTemperatureSinceRebootProperty, sizeof(maxTemperatureSinceRebootProperty), g_maxTemperatureSinceRebootFormat, g_maxTemperature) < 0)
     {
         LogError("snprintf building maxTemperature failed");
     }
     else if ((iothubClientResult = IoTHubDeviceClient_SendReportedState(deviceClient, (const unsigned char*)maxTemperatureSinceRebootProperty, strlen(maxTemperatureSinceRebootProperty), NULL, NULL)) != IOTHUB_CLIENT_OK)
     {
-        LogError("Unable to send reported state.  Error=%d", iothubClientResult);
+        LogError("Unable to send reported state for maximum temperature.  Error=%d", iothubClientResult);
     }
     else
     {
         LogInfo("Sending maxTempSinceReboot property");
-    }    
+    }
 }
 
 //
-// Thermostat_DeviceTwinCallback is invoked by IoT SDK when a twin - either full twin or a PATCH update - arrives.
+// Thermostat_DeviceTwinCallback is invoked by the IoT SDK when a twin - either full twin or a PATCH update - arrives.
 //
 static void Thermostat_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payload, size_t size, void* userContextCallback)
 {
+    // The device handle associated with this request is passed as the context, since we will need to send reported events back.
     IOTHUB_DEVICE_CLIENT_HANDLE deviceClient = (IOTHUB_DEVICE_CLIENT_HANDLE)userContextCallback;
 
     char* jsonStr = NULL;
@@ -306,20 +344,31 @@ static void Thermostat_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE updateState, 
     {
         // The $version does need to be set in *any* legitimate twin desired document.  Its absence suggests 
         // something is fundamentally wrong with how we've received the twin and we should not proceed.
-        LogError("Cannot retrieve %s field for twin", PnP_JsonPropertyVersion);
+        LogError("Cannot retrieve field %s for twin", PnP_JsonPropertyVersion);
+    }
+    else if (json_value_get_type(versionValue) != JSONNumber)
+    {
+        // The $version must be a number (and in practice an int) A non-numerical value indicates 
+        // something is fundamentally wrong with how we've received the twin and we should not proceed.
+        LogError("JSON field %s is not a number but must be", PnP_JsonPropertyVersion);
     }
     else
     {
         //int version = (int)json_value_get_number(versionValue);
         double targetTemperature = json_value_get_number(targetTemperatureValue);
+        int version = (int)json_value_get_number(versionValue);
 
         LogInfo("Received targetTemperature = %f", targetTemperature);
 
         bool maxTempUpdated = false;
         UpdateTemperatureAndStatistics(targetTemperature, &maxTempUpdated);
 
+        // The device needs to let the service know that it has received the targetTemperature desired property.
+        SendTargetTemperatureReport(deviceClient, targetTemperature, g_statusSuccess, version, g_temperaturePropertyResponseDescription);
+
         if (maxTempUpdated)
         {
+            // If the Maximum temperature has been updated, we also report this as a property.
             SendMaxTemperatureSinceReboot(deviceClient);
         }
     }
