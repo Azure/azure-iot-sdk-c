@@ -21,14 +21,12 @@ IOTHUB_DEVICE_CLIENT_HANDLE PnPHelper_CreateDeviceClientHandle(const char* conne
     IOTHUB_DEVICE_CLIENT_HANDLE deviceHandle = NULL;
     IOTHUB_CLIENT_RESULT iothubResult;
     bool urlAutoEncodeDecode = true;
-    bool iothubInitFailed = false;
     int iothubInitResult;
     int result;
 
     // Before invoking ANY IoTHub Device SDK functionality, IoTHub_Init must be invoked.
     if ((iothubInitResult = IoTHub_Init()) != 0)
     {
-        iothubInitFailed = true;
         LogError("Failure to initialize client.  Error=%d", iothubInitResult);
         result = MU_FAILURE;
     }
@@ -52,7 +50,7 @@ IOTHUB_DEVICE_CLIENT_HANDLE PnPHelper_CreateDeviceClientHandle(const char* conne
         LogError("Unable to set the ModelID, error=%d", iothubResult);
         result = MU_FAILURE;
     }
-    // Sets the callback function that processes incoming device methods, which are the channel PnP Commands are transferred over
+    // Sets the callback function that processes incoming device methods, which is the channel PnP Commands are transferred over
     else if ((iothubResult = IoTHubDeviceClient_SetDeviceMethodCallback(deviceHandle, deviceMethodCallback, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to set device method callback, error=%d", iothubResult);
@@ -72,7 +70,7 @@ IOTHUB_DEVICE_CLIENT_HANDLE PnPHelper_CreateDeviceClientHandle(const char* conne
         result = MU_FAILURE;
     }
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
-    // Setting the Trusted Certificate.  This is only necessary on system with without built in certificate stores.
+    // Setting the Trusted Certificate.  This is only necessary on systems without built in certificate stores.
     else if ((iothubResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_TRUSTED_CERT, certificates)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to set auto Url encode option, error=%d", iothubResult);
@@ -90,7 +88,7 @@ IOTHUB_DEVICE_CLIENT_HANDLE PnPHelper_CreateDeviceClientHandle(const char* conne
         deviceHandle = NULL;
     }
 
-    if ((result != 0) &&  (iothubInitFailed == false))
+    if ((result != 0) &&  (iothubInitResult == 0))
     {
         IoTHub_Deinit();
     }

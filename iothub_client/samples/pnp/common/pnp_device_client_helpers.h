@@ -4,11 +4,10 @@
 #ifndef PNP_DEVICE_CLIENT_HELPERS_H
 #define PNP_DEVICE_CLIENT_HELPERS_H
 
-#include "iothub.h"
 #include "iothub_device_client.h"
 
 //
-// PnPHelper_CreateDeviceClientHandle creates a IOTHUB_DEVICE_CLIENT_HANDLE that will be ready to interact with PnP.
+// PnPHelper_CreateDeviceClientHandle creates an IOTHUB_DEVICE_CLIENT_HANDLE that will be ready to interact with PnP.
 // Beyond basic handle creation, it also sets the handle to the appropriate Model Id, sets up callback functions
 // for Device Method and Device Twin callbacks (to process PnP Commands and Properties, respectively)
 // as well as some other basic maintenence on the handle. 
