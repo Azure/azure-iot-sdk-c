@@ -12,7 +12,6 @@
 #include "pnp_thermostat_component.h"
 
 // Core IoT SDK utilities
-#include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/xlogging.h"
 
 
@@ -94,7 +93,7 @@ static bool BuildUtcTimeFromCurrentTime(char* utcTimeBuffer, size_t utcTimeBuffe
 }
 
 
-PNP_THERMOSTAT_COMPONENT_HANDLE PnP_Thermostat_CreateHandle(const char* componentName)
+PNP_THERMOSTAT_COMPONENT_HANDLE PnP_ThermostatComponent_CreateHandle(const char* componentName)
 {
     PNP_THERMOSTAT_COMPONENT* thermostatComponent;
 

@@ -7,9 +7,12 @@
 #ifndef PNP_PROTOCOL_HELPERS_H
 #define PNP_PROTOCOL_HELPERS_H
 
+#include "azure_c_shared_utility/strings.h"
 #include "iothub_client_core_common.h"
 #include "iothub_message.h"
 #include "parson.h"
+
+
 
 // 
 // Status codes for PnP, closely mapping to HTTP status.

@@ -457,7 +457,7 @@ int main(void)
     }
     else if ((deviceClient = PnPHelper_CreateDeviceClientHandle(connectionString, g_ModelId, g_hubClientTraceEnabled, Thermostat_DeviceMethodCallback, Thermostat_DeviceTwinCallback)) == NULL)
     {
-        LogError("Failure creating Iothub device");
+        LogError("Failure creating IotHub device client");
     }
     else
     {

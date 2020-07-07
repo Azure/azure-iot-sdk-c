@@ -26,6 +26,9 @@
 #include "pnp_device_client_helpers.h"
 #include "pnp_protocol_helpers.h"
 
+#include "pnp_thermostat_component.h"
+#include "pnp_deviceinfo_component.h"
+
 // Paste in your device connection string
 static const char* g_connectionString = "[device connection string]";
 
@@ -41,6 +44,16 @@ static const char g_ModelId[] = "dtmi:com:example:simplethermostat;1";
 // This is a convention in this program *only* for a friendly way to print out the root component via logging
 static const char g_RootComponentName[] = "root component";
 
+// PNP_THERMOSTAT_COMPONENT_HANDLE represent the thermostat components that are sub-components of the temperature controller.
+// Note that we do NOT have an analogous DeviceInfo component handle because the DeviceInfo is so straightforward we skipped that step.
+PNP_THERMOSTAT_COMPONENT_HANDLE g_thermostat1;
+PNP_THERMOSTAT_COMPONENT_HANDLE g_thermostat2;
+
+// Name of subcomponents that TemmperatureController implements.
+static const char g_thermostatComponent1Name[] = "thermostat1";
+static const char g_thermostatComponent2Name[] = "thermostat2";
+static const char g_deviceInfoComponentName[] = "deviceInformation";
+
 // Global device handle.
 IOTHUB_DEVICE_CLIENT_HANDLE g_deviceHandle;
 
@@ -51,14 +64,16 @@ static int TempControl_DeviceMethodCallback(const char* methodName, const unsign
 {
     (void)userContextCallback;
     (void)payload;
-    (void)response;
-    (void)responseSize;
     (void)size;
 
     const char *commandName;
     const char *componentName;
     size_t commandNameLength;
     size_t componentNameLength;
+
+    *response = NULL;
+    *responseSize = 0;
+
 
     int result = 200;
 
@@ -68,6 +83,21 @@ static int TempControl_DeviceMethodCallback(const char* methodName, const unsign
     if (componentName != NULL)
     {
         LogInfo("Received PnP command for component=%.*s, command=%.*s", (int)componentNameLength, componentName, (int)commandNameLength, commandName);
+        if (strcmp(componentName, g_thermostatComponent1Name) == 0)
+        {
+            // TODO : Parse out the JSON at this level.
+            result = PnP_ThermostatComponent_ProcessCommand(g_thermostat1, commandName, NULL, response, responseSize);
+        }
+        else if (strcmp(componentName, g_thermostatComponent2Name) == 0)
+        {
+            // TODO : Parse out the JSON at this level.
+            result = PnP_ThermostatComponent_ProcessCommand(g_thermostat2, commandName, NULL, response, responseSize);
+        }
+        else
+        {
+            LogError("PnP component %.*s is not supported by TemperatureController", (int)componentNameLength, componentName);
+            result = PNP_STATUS_NOT_FOUND;
+        }
     }
     else
     {
@@ -164,18 +194,29 @@ void TempControl_SendCurrentTemperature(void)
     IoTHubMessage_Destroy(messageHandle);
 }
 
+
 int main(void)
 {
     g_deviceHandle = PnPHelper_CreateDeviceClientHandle(g_connectionString, g_ModelId, g_hubClientTraceEnabled, TempControl_DeviceMethodCallback, TempControl_DeviceTwinCallback);
 
-    if (g_deviceHandle == NULL)
+    if ((g_thermostat1 = PnP_ThermostatComponent_CreateHandle(g_thermostatComponent1Name)) == NULL)
     {
-        LogError("Failure creating Iothub device");
+        LogError("Unable to create component handle for %s", g_thermostatComponent1Name);
+    }
+    else if ((g_thermostat2 = PnP_ThermostatComponent_CreateHandle(g_thermostatComponent2Name)) == NULL)
+    {
+        LogError("Unable to create component handle for %s", g_thermostatComponent2Name);
+    }
+    else if (g_deviceHandle == NULL)
+    {
+        LogError("Failure creating IotHub device client");
     }
     else
     {
         LogInfo("Successfully created device client handle.  Hit Control-C to exit program\n");
-        // TODO: Add a sample invoking PnPHelper_CreateReportedProperty() with a simlpe "readonly" property.
+
+        // Report DeviceInfo properties about this simulated device.
+        PnP_DeviceInfoComponent_ReportInfo(g_deviceHandle, g_deviceInfoComponentName);
 
         while (true)
         {
