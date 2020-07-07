@@ -29,8 +29,9 @@
 #include "pnp_thermostat_component.h"
 #include "pnp_deviceinfo_component.h"
 
-// Paste in your device connection string
-static const char* g_connectionString = "[device connection string]";
+// Environment variable used to specify this application's connection string
+static const char g_ConnectionStringEnvironmentVariable[] = "IOTHUB_DEVICE_CONNECTION_STRING";
+
 
 // Amount of time to sleep between sending telemetry to Hub, in milliseconds.  Set to 1 minute.
 static unsigned int g_sleepBetweenTelemetrySends = 60 * 1000;
@@ -46,16 +47,67 @@ static const char g_RootComponentName[] = "root component";
 
 // PNP_THERMOSTAT_COMPONENT_HANDLE represent the thermostat components that are sub-components of the temperature controller.
 // Note that we do NOT have an analogous DeviceInfo component handle because the DeviceInfo is so straightforward we skipped that step.
-PNP_THERMOSTAT_COMPONENT_HANDLE g_thermostat1;
-PNP_THERMOSTAT_COMPONENT_HANDLE g_thermostat2;
+PNP_THERMOSTAT_COMPONENT_HANDLE g_thermostatHandle1;
+PNP_THERMOSTAT_COMPONENT_HANDLE g_thermostatHandle2;
 
 // Name of subcomponents that TemmperatureController implements.
 static const char g_thermostatComponent1Name[] = "thermostat1";
+static const size_t g_thermostatComponent1Size = sizeof(g_thermostatComponent1Name) - 1;
 static const char g_thermostatComponent2Name[] = "thermostat2";
+static const size_t g_thermostatComponent2Size = sizeof(g_thermostatComponent2Name) - 1;
 static const char g_deviceInfoComponentName[] = "deviceInformation";
 
-// Global device handle.
-IOTHUB_DEVICE_CLIENT_HANDLE g_deviceHandle;
+// Command implemented by the TemperatureControl component itself
+static const char g_rebootCommand[] = "reboot";
+static const size_t g_rebootCommandSize = sizeof(g_rebootCommand) - 1;
+
+// Name of json field to parse for reboot's "delay". (Note the "delay" is the only field of the value, "delay" is not explicitly sent)
+static const char g_DelayJsonCommandSetting[] = "commandRequest.value";
+// An empty JSON body for responses
+static const char g_EmptyJson[] = "{}";
+static const size_t g_EmptyJsonSize = sizeof(g_EmptyJson) - 1;
+
+//
+// TempControl_InvokeRebootCommand processes the reboot command on the root interface
+//
+static int TempControl_InvokeRebootCommand(JSON_Object* rootObject, unsigned char** response, size_t* responseSize)
+{
+    int result;
+    JSON_Value* delayValue; 
+
+    if ((delayValue = json_object_dotget_value(rootObject, g_DelayJsonCommandSetting)) == NULL)
+    {
+        LogError("Payload not specified in command request");
+        result = PNP_STATUS_BAD_FORMAT;
+    }
+    else if (JSONNumber != json_value_get_type(delayValue))
+    {
+        LogError("Delay payload is not a number");
+        result = PNP_STATUS_BAD_FORMAT;
+    }
+    else
+    {
+        int delayInSeconds = (int)json_value_get_number(delayValue);
+        LogInfo("Temperature controller 'reboot' command invoked with delay=%d seconds", delayInSeconds);
+
+        // Even though the DTMI for TemperatureController does not specify a response body, the underlying IoTHub device method
+        // requires a valid JSON to be included in the response.  The SDK will not automatically
+        if ((*response = (unsigned char*)malloc(g_EmptyJsonSize)) == NULL)
+        {
+            LogError("Unable to allocate %lu bytes", (unsigned long)(g_EmptyJsonSize));
+            result = PNP_STATUS_INTERNAL_ERROR;
+        }
+        else
+        {
+            // We're using unsigned char**, so do not \0 terminate this string
+            memcpy(*response, g_EmptyJson, g_EmptyJsonSize);
+            *responseSize = g_EmptyJsonSize;
+            result = PNP_STATUS_SUCCESS;
+        }
+    }
+    
+    return result;
+}
 
 //
 // TempControl_DeviceMethodCallback is invoked by IoT SDK when a device method arrives.
@@ -63,8 +115,11 @@ IOTHUB_DEVICE_CLIENT_HANDLE g_deviceHandle;
 static int TempControl_DeviceMethodCallback(const char* methodName, const unsigned char* payload, size_t size, unsigned char** response, size_t* responseSize, void* userContextCallback)
 {
     (void)userContextCallback;
-    (void)payload;
-    (void)size;
+
+    char* jsonStr = NULL;
+    JSON_Value* rootValue = NULL;
+    JSON_Object* rootObject = NULL;
+    int result;
 
     const char *commandName;
     const char *componentName;
@@ -74,35 +129,59 @@ static int TempControl_DeviceMethodCallback(const char* methodName, const unsign
     *response = NULL;
     *responseSize = 0;
 
-
-    int result = 200;
-
     // Parse the methodName into its PnP (optional) componentName and commandName.
     PnPHelper_ParseCommandName(methodName, &componentName, &componentNameLength, &commandName, &commandNameLength);
 
-    if (componentName != NULL)
+    if ((jsonStr = PnPHelper_CopyPayloadToString(payload, size)) == NULL)
     {
-        LogInfo("Received PnP command for component=%.*s, command=%.*s", (int)componentNameLength, componentName, (int)commandNameLength, commandName);
-        if (strcmp(componentName, g_thermostatComponent1Name) == 0)
-        {
-            // TODO : Parse out the JSON at this level.
-            result = PnP_ThermostatComponent_ProcessCommand(g_thermostat1, commandName, NULL, response, responseSize);
-        }
-        else if (strcmp(componentName, g_thermostatComponent2Name) == 0)
-        {
-            // TODO : Parse out the JSON at this level.
-            result = PnP_ThermostatComponent_ProcessCommand(g_thermostat2, commandName, NULL, response, responseSize);
-        }
-        else
-        {
-            LogError("PnP component %.*s is not supported by TemperatureController", (int)componentNameLength, componentName);
-            result = PNP_STATUS_NOT_FOUND;
-        }
+        LogError("Unable to allocate twin buffer");
+        result = PNP_STATUS_INTERNAL_ERROR;
+    }
+    else if ((rootValue = json_parse_string(jsonStr)) == NULL)
+    {
+        LogError("Unable to parse twin JSON");
+        result = PNP_STATUS_BAD_FORMAT;
+    }
+    else if ((rootObject = json_value_get_object(rootValue)) == NULL)
+    {
+        LogError("Unable to get root object of JSON");
+        result = PNP_STATUS_INTERNAL_ERROR;
     }
     else
     {
-        LogInfo("Received PnP command for root component, command=%.*s", (int)commandNameLength, commandName);
+        if (componentName != NULL)
+        {
+            LogInfo("Received PnP command for component=%.*s, command=%.*s", (int)componentNameLength, componentName, (int)commandNameLength, commandName);
+            if (strncmp(componentName, g_thermostatComponent1Name, g_thermostatComponent1Size) == 0)
+            {
+                result = PnP_ThermostatComponent_ProcessCommand(g_thermostatHandle1, commandName, rootObject, response, responseSize);
+            }
+            else if (strncmp(componentName, g_thermostatComponent2Name, g_thermostatComponent2Size) == 0)
+            {
+                result = PnP_ThermostatComponent_ProcessCommand(g_thermostatHandle2, commandName, rootObject, response, responseSize);
+            }
+            else
+            {
+                LogError("PnP component %.*s is not supported by TemperatureController", (int)componentNameLength, componentName);
+                result = PNP_STATUS_NOT_FOUND;
+            }
+        }
+        else
+        {
+            if (strncmp(commandName, g_rebootCommand, g_rebootCommandSize) == 0)
+            {
+                result = TempControl_InvokeRebootCommand(rootObject, response, responseSize);
+            }
+            else
+            {
+                LogError("PnP command on root interface %.*s is not supported by TemperatureController", (int)commandNameLength, commandName);
+                result = PNP_STATUS_NOT_FOUND;
+            }
+        }
     }
+
+    json_value_free(rootValue);
+    free(jsonStr);
 
     return result;
 }
@@ -118,43 +197,31 @@ static const char * GetComponentNameForLogging(const char *componentName)
 //
 // TempControl_ApplicationPropertyCallback is the callback function that the PnP helper layer invokes per property update.
 //
-static void TempControl_ApplicationPropertyCallback(const char* componentName, const char* propertyName, JSON_Value* propertyValue, int version)
+static void TempControl_ApplicationPropertyCallback(const char* componentName, const char* propertyName, JSON_Value* propertyValue, int version, void* userContextCallback)
 {
-    char* propertyValueStr = NULL;
-    STRING_HANDLE jsonToSend = NULL;
-    IOTHUB_CLIENT_RESULT iothubClientResult;
+    // This sample uses the pnp_device_client_helpers.h/.c to create the IOTHUB_DEVICE_CLIENT_HANDLE as well as initialize callbacks.
+    // The convention the helper uses is that the IOTHUB_DEVICE_CLIENT_HANDLE is passed as the userContextCallback on the initial twin callback.
+    // The pnp_protocol_lehpers.h/.c pass this userContextCallback down to this visitor function.
+    IOTHUB_DEVICE_CLIENT_HANDLE deviceClient = (IOTHUB_DEVICE_CLIENT_HANDLE)userContextCallback;
 
-    if ((propertyValueStr = json_serialize_to_string(propertyValue)) == NULL)
+    if (componentName == NULL)
     {
-        LogError("json_serialize_to_string failed.  Unable to process component %s, property %s further", GetComponentNameForLogging(componentName), propertyName);
+        LogError("Property %s arrived for TemperatureControl component itself.  This does not support writeable properties on it directly (all properties are on subcomponents)", propertyName);
+    }
+    else if (strcmp(componentName, g_thermostatComponent1Name) == 0)
+    {
+        PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle1, deviceClient, propertyName, propertyValue, version);
+    }
+    else if (strcmp(componentName, g_thermostatComponent1Name) == 0)
+    {
+        PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle1, deviceClient, propertyName, propertyValue, version);
     }
     else
     {
-        LogInfo("Received property update for component=%s, propert=%s, desired value=%s, version=%d", GetComponentNameForLogging(componentName), propertyName, propertyValueStr, version);
-
-        // Now acknowledge the property has been received.  First build up the serialized buffer, using the helper to construct the formatted JSON.
-        if ((jsonToSend = PnPHelper_CreateReportedPropertyWithStatus(componentName, propertyName, propertyValueStr, 200, "", version)) == NULL)
-        {
-            LogError("Unable to build reported property response");
-        }
-        else
-        {
-            const char* jsonToSendStr = STRING_c_str(jsonToSend);
-            size_t jsonToSendStrLen = strlen(jsonToSendStr);
-
-            if ((iothubClientResult = IoTHubDeviceClient_SendReportedState(g_deviceHandle, (const unsigned char*)jsonToSendStr, jsonToSendStrLen, NULL, NULL)) != IOTHUB_CLIENT_OK)
-            {
-                LogError("Unable to send reported state.  Error=%d", iothubClientResult);
-            }
-            else
-            {
-                LogInfo("Sending acknowledgement of property to IoTHub");
-            }
-        }
+        // The PnP protocol does not define a mechanism to report errors such as this to IoTHub, so 
+        // the best we can do here is to log for diagnostics purposes.
+        LogError("Component %s is not implemented by the ThermostatController", componentName);
     }
-
-    STRING_delete(jsonToSend);
-    free(propertyValueStr);
 }
 
 //
@@ -162,11 +229,9 @@ static void TempControl_ApplicationPropertyCallback(const char* componentName, c
 //
 static void TempControl_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payload, size_t size, void* userContextCallback)
 {
-    (void)userContextCallback;
-
     // Invoke PnPHelper_ProcessTwinData to actualy process the data.  PnPHelper_ProcessTwinData uses a visitor pattern to parse
     // the JSON and then visit each property, invoking TempControl_ApplicationPropertyCallback on each element.
-    if (PnPHelper_ProcessTwinData(updateState, payload, size, TempControl_ApplicationPropertyCallback) == false)
+    if (PnPHelper_ProcessTwinData(updateState, payload, size, TempControl_ApplicationPropertyCallback, userContextCallback) == false)
     {
         // If we're unable to parse the JSON for any reason (typically because the JSON is malformed or we ran out of memory)
         // there is no actiol we can take beyond logging.
@@ -174,19 +239,35 @@ static void TempControl_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE updateState,
     }
 }
 
+// Minimum value we will return for working set, + some random number
+static const int g_WorkingSetMinimum = 1000;
+// Random number for working set will range between the g_WorkingSetMinimum and (g_WorkingSetMinimum+g_WorkingSetRandomModule)
+static const int g_WorkingSetRandomModule = 500;
+// Format string for sending a telemetry message with the working set.
+static const char g_WorkingSetTelemetryFormat[] = "{\"workingSet\":%d}";
+
 //
-// TempControl_SendCurrentTemperature sends a PnP telemetry indicating the current temperature
+// TempControl_SendWorkingSet sends a PnP telemetry indicating the current working set of the device, in 
+// the unit of kibibytes (https://en.wikipedia.org/wiki/Kibibyte).
+// This is a random value between g_WorkingSetMinimum and (g_WorkingSetMinimum+g_WorkingSetRandomModule).
 //
-void TempControl_SendCurrentTemperature(void) 
+void TempControl_SendWorkingSet(IOTHUB_DEVICE_CLIENT_HANDLE deviceClient) 
 {
     IOTHUB_MESSAGE_HANDLE messageHandle = NULL;
     IOTHUB_CLIENT_RESULT iothubResult;
+    char workingSetTelemetryPayload[64];
 
-    if ((messageHandle = PnPHelper_CreateTelemetryMessageHandle("thermostat", "22")) == NULL)
+    int workingSet = g_WorkingSetMinimum + (rand() % g_WorkingSetRandomModule);
+
+    if (snprintf(workingSetTelemetryPayload, sizeof(workingSetTelemetryPayload), g_WorkingSetTelemetryFormat, workingSet) < 0)
+    {
+        LogError("Unable to create a workingSet telemetry payload string");
+    }
+    else if ((messageHandle = PnPHelper_CreateTelemetryMessageHandle(NULL, workingSetTelemetryPayload)) == NULL)
     {
         LogError("Unable to create telemetry message");
     }
-    else if ((iothubResult = IoTHubDeviceClient_SendEventAsync(g_deviceHandle, messageHandle, NULL, NULL)) != IOTHUB_CLIENT_OK)
+    else if ((iothubResult = IoTHubDeviceClient_SendEventAsync(deviceClient, messageHandle, NULL, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to send telemetry message, error=%d", iothubResult);
     }
@@ -194,41 +275,86 @@ void TempControl_SendCurrentTemperature(void)
     IoTHubMessage_Destroy(messageHandle);
 }
 
+// Name of the serial number property as defined in this component's DTML
+static const char g_serialNumberPropertyName[] = "serialNumber";
+// Value of the serial number.  NOTE: This must be a legal JSON string which requires value to be in "..."
+static const char g_serialNumberPropertyValue[] = "\"serial-no-123-abc\"";
 
-int main(void)
+//
+// TempControl_ReportSerialNumberProperty sends the "serialNumber" property to IoTHub
+//
+static void TempControl_ReportSerialNumberProperty(IOTHUB_DEVICE_CLIENT_HANDLE deviceClient)
 {
-    g_deviceHandle = PnPHelper_CreateDeviceClientHandle(g_connectionString, g_ModelId, g_hubClientTraceEnabled, TempControl_DeviceMethodCallback, TempControl_DeviceTwinCallback);
+    IOTHUB_CLIENT_RESULT iothubClientResult;
+    STRING_HANDLE jsonToSend = NULL;
 
-    if ((g_thermostat1 = PnP_ThermostatComponent_CreateHandle(g_thermostatComponent1Name)) == NULL)
+    if ((jsonToSend = PnPHelper_CreateReportedProperty(NULL, g_serialNumberPropertyName, g_serialNumberPropertyValue)) == NULL)
     {
-        LogError("Unable to create component handle for %s", g_thermostatComponent1Name);
-    }
-    else if ((g_thermostat2 = PnP_ThermostatComponent_CreateHandle(g_thermostatComponent2Name)) == NULL)
-    {
-        LogError("Unable to create component handle for %s", g_thermostatComponent2Name);
-    }
-    else if (g_deviceHandle == NULL)
-    {
-        LogError("Failure creating IotHub device client");
+        LogError("Unable to build serial number property");
     }
     else
     {
-        LogInfo("Successfully created device client handle.  Hit Control-C to exit program\n");
+        const char* jsonToSendStr = STRING_c_str(jsonToSend);
+        size_t jsonToSendStrLen = strlen(jsonToSendStr);
 
+        if ((iothubClientResult = IoTHubDeviceClient_SendReportedState(deviceClient, (const unsigned char*)jsonToSendStr, jsonToSendStrLen, NULL, NULL)) != IOTHUB_CLIENT_OK)
+        {
+            LogError("Unable to send reported state.  Error=%d", iothubClientResult);
+        }
+        else
+        {
+            LogInfo("Sending serialNumber property to IoTHub");
+        }
+    }
+
+    STRING_delete(jsonToSend);
+}
+
+int main(void)
+{
+    IOTHUB_DEVICE_CLIENT_HANDLE deviceClient = NULL;
+    const char* connectionString;
+
+    // Invoke random numbers with the same seed instead of time based so that results are reproducible
+    srand(1);
+
+    if ((connectionString = getenv(g_ConnectionStringEnvironmentVariable)) == NULL)
+    {
+        LogError("Cannot read environment variable %s", g_ConnectionStringEnvironmentVariable);
+    }
+    else if ((deviceClient = PnPHelper_CreateDeviceClientHandle(connectionString, g_ModelId, g_hubClientTraceEnabled, TempControl_DeviceMethodCallback, TempControl_DeviceTwinCallback)) == NULL)
+    {
+        LogError("Failure creating IotHub device client");
+    }
+    else if ((g_thermostatHandle1 = PnP_ThermostatComponent_CreateHandle(g_thermostatComponent1Name)) == NULL)
+    {
+        LogError("Unable to create component handle for %s", g_thermostatComponent1Name);
+    }
+    else if ((g_thermostatHandle2 = PnP_ThermostatComponent_CreateHandle(g_thermostatComponent2Name)) == NULL)
+    {
+        LogError("Unable to create component handle for %s", g_thermostatComponent2Name);
+    }
+    else
+    {
+        LogInfo("Successfully created device client and thermostat component handle.  Hit Control-C to exit program\n");
+
+        TempControl_ReportSerialNumberProperty(deviceClient);
         // Report DeviceInfo properties about this simulated device.
-        PnP_DeviceInfoComponent_ReportInfo(g_deviceHandle, g_deviceInfoComponentName);
+        PnP_DeviceInfoComponent_ReportInfo(deviceClient, g_deviceInfoComponentName);
 
         while (true)
         {
             // Wake up periodically to send telemetry.
             // IOTHUB_DEVICE_CLIENT_HANDLE brings in the IoTHub device convenience layer, which means that the IoTHub SDK itself 
             // spins a worker thread to perform all operations.
-            TempControl_SendCurrentTemperature();
+            TempControl_SendWorkingSet(deviceClient);
+            PnP_ThermostatComponent_SendTelemetry(g_thermostatHandle1, deviceClient);
+            PnP_ThermostatComponent_SendTelemetry(g_thermostatHandle2, deviceClient);
             ThreadAPI_Sleep(g_sleepBetweenTelemetrySends);
         }
 
         // Clean up the iothub sdk handle
-        IoTHubDeviceClient_Destroy(g_deviceHandle);
+        IoTHubDeviceClient_Destroy(deviceClient);
         // Free all the sdk subsystem
         IoTHub_Deinit();        
     }

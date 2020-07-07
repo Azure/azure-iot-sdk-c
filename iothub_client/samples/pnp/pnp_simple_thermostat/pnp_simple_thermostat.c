@@ -45,7 +45,7 @@ static const char g_PnP_JsonTargetTemperature[] = "targetTemperature";
 
 // Name of command this component supports to get report information
 static const char g_GetMinMaxReport[] = "getMaxMinReport";
-// Name of json field to parse for "since". (Note the "since" is assumed as only field of the value)
+// Name of json field to parse for "since". (Note the "since" is the only field of the value, "since" is not explicitly sent)
 static const char g_SinceJsonCommandSetting[] = "commandRequest.value";
 // Return codes for device methods and desired property responses
 static int g_statusSuccess = 200;

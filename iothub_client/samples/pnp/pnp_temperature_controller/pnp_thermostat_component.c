@@ -292,7 +292,7 @@ static void SendMaxTemperatureSinceReboot(PNP_THERMOSTAT_COMPONENT* pnpThermosta
     }
     else if ((jsonToSend = PnPHelper_CreateReportedProperty(pnpThermostatComponent->componentName, g_maxTempSinceLastRebootPropertyName, maximumTemperatureAsString)) == NULL)
     {
-        LogError("Unable to build reported property response");
+        LogError("Unable to build max temp since last reboot property");
     }
     else
     {
@@ -305,7 +305,7 @@ static void SendMaxTemperatureSinceReboot(PNP_THERMOSTAT_COMPONENT* pnpThermosta
         }
         else
         {
-            LogInfo("Sending acknowledgement of property to IoTHub");
+            LogInfo("Sending maximumTemperatureSinceLastReboot property to IoTHub");
         }
     }
 

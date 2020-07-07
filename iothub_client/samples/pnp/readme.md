@@ -21,3 +21,5 @@ There is an additional helper directory, [common](./common), that is used by the
 * When the thermostat receives a desired temperature, it immediately makes that the actual temperature to keep the simulation code easier to follow.  In a real thermostat there would be delay between the desired temperature being set and the room reaching that state.
 
 * The command `getMaxMinReport` allows the application to specify statistics of the temperature since a given date.  To keep the sample simple, we ignore this field and instead return statistics from the entire lifecycle of the executable.
+
+* When temperature controller receives a delay for reboot, we log the delay but do not schedule a worker to run at delay seconds later.

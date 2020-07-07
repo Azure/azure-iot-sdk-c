@@ -132,9 +132,8 @@ IOTHUB_MESSAGE_HANDLE PnPHelper_CreateTelemetryMessageHandle(const char* compone
 // This function determines if the object corresponds to a component (which itself has children properties) or a
 // property of the root component that has happens to be an object.
 //
-static void VisitDesiredChildObject(const char* objectName, JSON_Value* value, int version, PnPHelperPropertyCallbackFunction pnpPropertyCallback)
+static void VisitDesiredChildObject(const char* objectName, JSON_Value* value, int version, PnPHelperPropertyCallbackFunction pnpPropertyCallback, void* userContextCallback)
 {
-    (void)pnpPropertyCallback;
     JSON_Object* object = json_value_get_object(value);
 
     // Determine whether we're processing the twin for a component or not, based on whether the component metadata tag
@@ -165,21 +164,21 @@ static void VisitDesiredChildObject(const char* objectName, JSON_Value* value, i
                 continue;
             }
 
-            pnpPropertyCallback(objectName, propertyName, propertyValue, version);
+            pnpPropertyCallback(objectName, propertyName, propertyValue, version, userContextCallback);
         }
     }
     else
     {
         // Because there is no component marker, it means that this JSON object is a property of the root component.
         // Simply invoke the application's property callback directly.
-        pnpPropertyCallback(NULL, objectName, value, version);
+        pnpPropertyCallback(NULL, objectName, value, version, userContextCallback);
     }
 }
 
 //
 // VisitDesiredObject visits each child JSON element of the desired device twin for ultimate callback into the application.
 //
-static bool VisitDesiredObject(JSON_Object* desiredObject, PnPHelperPropertyCallbackFunction pnpPropertyCallback)
+static bool VisitDesiredObject(JSON_Object* desiredObject, PnPHelperPropertyCallbackFunction pnpPropertyCallback, void* userContextCallback)
 {
     JSON_Value* versionValue = NULL;
     size_t numChildren;
@@ -213,12 +212,12 @@ static bool VisitDesiredObject(JSON_Object* desiredObject, PnPHelperPropertyCall
             if (jsonType != JSONObject)
             {
                 // If the child element is NOT an object, then it means that this is a property of the model's root component.
-                pnpPropertyCallback(NULL, name, value, version);
+                pnpPropertyCallback(NULL, name, value, version, userContextCallback);
             }
             else
             {
                 // If the child element is an object, the processing becomes more complex.
-                VisitDesiredChildObject(name, value, version, pnpPropertyCallback);
+                VisitDesiredChildObject(name, value, version, pnpPropertyCallback, userContextCallback);
             }
         }
 
@@ -278,7 +277,7 @@ static JSON_Object* GetDesiredJson(DEVICE_TWIN_UPDATE_STATE updateState, JSON_Va
     return desiredObject;
 }
 
-bool PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payload, size_t size, PnPHelperPropertyCallbackFunction pnpPropertyCallback) 
+bool PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payload, size_t size, PnPHelperPropertyCallbackFunction pnpPropertyCallback, void* userContextCallback)
 {
     char* jsonStr = NULL;
     JSON_Value* rootValue = NULL;
@@ -303,7 +302,7 @@ bool PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsig
     else
     {
         // Visit each sub-element in the desired portion of the twin JSON and invoke pnpPropertyCallback as appropriate.
-        result = VisitDesiredObject(desiredObject, pnpPropertyCallback);
+        result = VisitDesiredObject(desiredObject, pnpPropertyCallback, userContextCallback);
     }
 
     json_value_free(rootValue);
