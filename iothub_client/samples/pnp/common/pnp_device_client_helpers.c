@@ -13,6 +13,7 @@
 #include "azure_c_shared_utility/xlogging.h"
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
+#include "azure_c_shared_utility/shared_util_options.h"
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 

@@ -7,7 +7,6 @@ compileAsC99()
 
 set(pnp_simple_thermostat_c_files
     pnp_simple_thermostat.c
-	../common/pnp_device_client_helpers.c
 )
 
 IF(WIN32)
@@ -22,7 +21,7 @@ if(${use_sample_trusted_cert})
     set(pnp_simple_thermostat_c_files ${pnp_simple_thermostat_c_files} ${PROJECT_SOURCE_DIR}/certs/certs.c)
 endif()
 
-include_directories(. ../common)
+include_directories(. ${PROJECT_SOURCE_DIR}/deps/parson)
 
 add_executable(pnp_simple_thermostat ${pnp_simple_thermostat_c_files})
 

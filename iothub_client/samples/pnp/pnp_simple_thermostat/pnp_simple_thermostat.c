@@ -17,18 +17,20 @@
 #include "iothub.h"
 #include "iothub_device_client.h"
 #include "iothub_message.h"
+#include "iothub_client_options.h"
+#include "iothubtransportmqtt.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/xlogging.h"
+
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+#include "certs.h"
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 // JSON parser library
 #include "parson.h"
 
-// pnp_device_client_helpers.h is part of the PnP sample code and helps in 
-// creation of the IOTHUB_DEVICE_CLIENT_HANDLE
-#include "pnp_device_client_helpers.h"
-
 // Environment variable used to specify this application's connection string
-static const char g_ConnectionStringEnvironmentVariable[] = "IOTHUB_DEVICE_CONNECTION_STRING";
+static const char g_connectionStringEnvironmentVariable[] = "IOTHUB_DEVICE_CONNECTION_STRING";
 
 // Amount of time to sleep between sending telemetry to Hub, in milliseconds.  Set to 1 minute.
 static unsigned int g_sleepBetweenTelemetrySends = 60 * 1000;
@@ -37,16 +39,16 @@ static unsigned int g_sleepBetweenTelemetrySends = 60 * 1000;
 static bool g_hubClientTraceEnabled = true;
 
 // This device's PnP ModelId.
-static const char g_ModelId[] = "dtmi:com:example:Thermostat;1";
+static const char g_modelId[] = "dtmi:com:example:Thermostat;1";
 
 // JSON fields from desired property to retrieve.
-static const char g_PnP_JsonPropertyVersion[] = "$version";
-static const char g_PnP_JsonTargetTemperature[] = "targetTemperature";
+static const char g_JSONPropertyVersion[] = "$version";
+static const char g_JSONTargetTemperature[] = "targetTemperature";
 
 // Name of command this component supports to get report information
-static const char g_GetMinMaxReport[] = "getMaxMinReport";
-// Name of json field to parse for "since". (Note the "since" is the only field of the value, "since" is not explicitly sent)
-static const char g_SinceJsonCommandSetting[] = "commandRequest.value";
+static const char g_getMinMaxReport[] = "getMaxMinReport";
+// Name of json field to parse for "since". (Note the "since" is assumed as only field of the value)
+static const char g_sinceJsonCommandSetting[] = "commandRequest.value";
 // Return codes for device methods and desired property responses
 static int g_statusSuccess = 200;
 static int g_statusBadFormat = 400;
@@ -63,14 +65,14 @@ static double g_minTemperature = DEFAULT_TEMPERATURE_VALUE;
 static double g_maxTemperature = DEFAULT_TEMPERATURE_VALUE;
 // Number of times temperature has been updated, counting the initial setting as 1.  Used to determine average temperature.
 static int g_numTemperatureUpdates = 1;
-// Total of all temperature updates during current exceution run.  Used to determine average temperature.
+// Total of all temperature updates during current execution run.  Used to determine average temperature.
 static double g_allTemperatures = DEFAULT_TEMPERATURE_VALUE;
 
 // snprintf format for building getMaxMinReport
 static const char g_minMaxCommandResponseFormat[] = "{ \"maxTemp\": %.2f, \"minTemp\": %.2f, \"avgTemp\": %.2f, \"startTime\": \"%s\", \"endTime\": \"%s\" }";
 
 // Format string for sending temperature telemetry
-static const char g_TemperatureTelemetryBodyFormat[] = "{ \"temperature\":  %.02f }";
+static const char g_temperatureTelemetryBodyFormat[] = "{ \"temperature\":  %.02f }";
 
 // Format string to report the property maximum temperature since reboot.  This is a "read only" property from the
 // service solution's perspective, which means we don't need to include any sort of status codes.
@@ -207,7 +209,7 @@ static int Thermostat_DeviceMethodCallback(const char* methodName, const unsigne
     *response = NULL;
     *responseSize = 0;
 
-    if (strcmp(methodName, g_GetMinMaxReport) != 0)
+    if (strcmp(methodName, g_getMinMaxReport) != 0)
     {
         LogError("Method name %s is not supported on this component", methodName);
         result = g_statusNotFoundStatus;
@@ -229,9 +231,9 @@ static int Thermostat_DeviceMethodCallback(const char* methodName, const unsigne
     }
     // See caveats section in ../readme.md; we don't actually respect this sinceStr to keep the sample simple,
     // but want to demonstrate how to parse out in any case.
-    else if ((sinceStr = json_object_dotget_string(rootObject, g_SinceJsonCommandSetting)) == NULL)
+    else if ((sinceStr = json_object_dotget_string(rootObject, g_sinceJsonCommandSetting)) == NULL)
     {
-        LogError("Cannot retrieve JSON field %s", g_SinceJsonCommandSetting);
+        LogError("Cannot retrieve JSON field %s", g_sinceJsonCommandSetting);
         result = g_statusBadFormat;
     }
     else if (BuildMaxMinCommandResponse(response, responseSize) == false)
@@ -376,21 +378,21 @@ static void Thermostat_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE updateState, 
     {
         LogError("Cannot retrieve desired JSON object");
     }
-    else if ((targetTemperatureValue = json_object_get_value(desiredObject, g_PnP_JsonTargetTemperature)) == NULL)
+    else if ((targetTemperatureValue = json_object_get_value(desiredObject, g_JSONTargetTemperature)) == NULL)
     {
-        LogInfo("JSON property %s not specified.  This is NOT an error as the server doesn't need to set this, but there is no further action to take.", g_PnP_JsonTargetTemperature);
+        LogInfo("JSON property %s not specified.  This is NOT an error as the server doesn't need to set this, but there is no further action to take.", g_JSONTargetTemperature);
     }
-    else if ((versionValue = json_object_get_value(desiredObject, g_PnP_JsonPropertyVersion)) == NULL)
+    else if ((versionValue = json_object_get_value(desiredObject, g_JSONPropertyVersion)) == NULL)
     {
         // The $version does need to be set in *any* legitimate twin desired document.  Its absence suggests 
         // something is fundamentally wrong with how we've received the twin and we should not proceed.
-        LogError("Cannot retrieve field %s for twin.  The underlying IoTHub device twin protocol (NOT the service solution directly) should have specified this.", g_PnP_JsonPropertyVersion);
+        LogError("Cannot retrieve field %s for twin.  The underlying IoTHub device twin protocol (NOT the service solution directly) should have specified this.", g_JSONPropertyVersion);
     }
     else if (json_value_get_type(versionValue) != JSONNumber)
     {
         // The $version must be a number (and in practice an int) A non-numerical value indicates 
         // something is fundamentally wrong with how we've received the twin and we should not proceed.
-        LogError("JSON field %s is not a number but must be", g_PnP_JsonPropertyVersion);
+        LogError("JSON field %s is not a number but must be", g_JSONPropertyVersion);
     }
     else
     {
@@ -426,7 +428,7 @@ void Thermostat_SendCurrentTemperature(IOTHUB_DEVICE_CLIENT_HANDLE deviceClient)
 
     char temperatureStringBuffer[32];
 
-    if (snprintf(temperatureStringBuffer, sizeof(temperatureStringBuffer), g_TemperatureTelemetryBodyFormat, g_currentTemperature) < 0)
+    if (snprintf(temperatureStringBuffer, sizeof(temperatureStringBuffer), g_temperatureTelemetryBodyFormat, g_currentTemperature) < 0)
     {
         LogError("snprintf of current temperature telemetry failed");
     }
@@ -442,22 +444,107 @@ void Thermostat_SendCurrentTemperature(IOTHUB_DEVICE_CLIENT_HANDLE deviceClient)
     IoTHubMessage_Destroy(messageHandle);
 }
 
+//
+// CreateDeviceClientHandleForPnP creates a IOTHUB_DEVICE_CLIENT_HANDLE for this application, setting its
+// ModelId along with various callbacks.
+//
+static IOTHUB_DEVICE_CLIENT_HANDLE CreateDeviceClientHandleForPnP(const char* connectionString)
+{
+    IOTHUB_DEVICE_CLIENT_HANDLE deviceHandle = NULL;
+    IOTHUB_CLIENT_RESULT iothubResult;
+    bool urlAutoEncodeDecode = true;
+    int iothubInitResult;
+    int result;
+
+    // Before invoking ANY IoTHub Device SDK functionality, IoTHub_Init must be invoked.
+    if ((iothubInitResult = IoTHub_Init()) != 0)
+    {
+        LogError("Failure to initialize client.  Error=%d", iothubInitResult);
+        result = MU_FAILURE;
+    }
+    // Create the deviceHandle itself.
+    else if ((deviceHandle = IoTHubDeviceClient_CreateFromConnectionString(connectionString, MQTT_Protocol)) == NULL)
+    {
+        LogError("Failure creating Iothub device.  Hint: Check you connection string");
+        result = MU_FAILURE;
+    }
+    // Sets verbosity level
+    else if ((iothubResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_LOG_TRACE, &g_hubClientTraceEnabled)) != IOTHUB_CLIENT_OK)
+    {
+        LogError("Unable to set logging option, error=%d", iothubResult);
+        result = MU_FAILURE;
+    }
+    // Sets the name of ModelId for this PnP device.
+    // This *MUST* be set before the client is connected to IoTHub.  We do not automatically connect when the 
+    // handle is created, but will implicitly connect to subscribe for device method and device twin callbacks below.
+    else if ((iothubResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_MODEL_ID, g_modelId)) != IOTHUB_CLIENT_OK)
+    {
+        LogError("Unable to set the ModelID, error=%d", iothubResult);
+        result = MU_FAILURE;
+    }
+    // Sets the callback function that processes incoming device methods, which is the channel PnP Commands are transferred over
+    else if ((iothubResult = IoTHubDeviceClient_SetDeviceMethodCallback(deviceHandle, Thermostat_DeviceMethodCallback, NULL)) != IOTHUB_CLIENT_OK)
+    {
+        LogError("Unable to set device method callback, error=%d", iothubResult);
+        result = MU_FAILURE;
+    }
+    // Sets the callback function that processes device twin changes from the hub, which is the channel that PnP Properties are 
+    // transferred over.  This will also automatically retrieve the full twin for the application. 
+    else if ((iothubResult = IoTHubDeviceClient_SetDeviceTwinCallback(deviceHandle, Thermostat_DeviceTwinCallback, (void*)deviceHandle)) != IOTHUB_CLIENT_OK)
+    {
+        LogError("Unable to set device twin callback, error=%d", iothubResult);
+        result = MU_FAILURE;
+    }
+    // Enabling auto url encode will have the underlying SDK perform URL encoding operations automatically.
+    else if ((iothubResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_AUTO_URL_ENCODE_DECODE, &urlAutoEncodeDecode)) != IOTHUB_CLIENT_OK)
+    {
+        LogError("Unable to set auto Url encode option, error=%d", iothubResult);
+        result = MU_FAILURE;
+    }
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+    // Setting the Trusted Certificate.  This is only necessary on systems without built in certificate stores.
+    else if ((iothubResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_TRUSTED_CERT, certificates)) != IOTHUB_CLIENT_OK)
+    {
+        LogError("Unable to set auto Url encode option, error=%d", iothubResult);
+        result = MU_FAILURE;
+    }
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
+    else
+    {
+        result = 0;
+    }
+
+    if ((result != 0) && (deviceHandle != NULL))
+    {
+        IoTHubDeviceClient_Destroy(deviceHandle);
+        deviceHandle = NULL;
+    }
+
+    if ((result != 0) &&  (iothubInitResult == 0))
+    {
+        IoTHub_Deinit();
+    }
+
+    return deviceHandle;
+}
+
+
 int main(void)
 {
     IOTHUB_DEVICE_CLIENT_HANDLE deviceClient = NULL;
     const char* connectionString;
 
-    if ((connectionString = getenv(g_ConnectionStringEnvironmentVariable)) == NULL)
+    if ((connectionString = getenv(g_connectionStringEnvironmentVariable)) == NULL)
     {
-        LogError("Cannot read environment variable %s", g_ConnectionStringEnvironmentVariable);
+        LogError("Cannot read environment variable %s", g_connectionStringEnvironmentVariable);
     }
     else if (BuildUtcTimeFromCurrentTime(g_ProgramStartTime, sizeof(g_ProgramStartTime)) == false)
     {
         LogError("Unable to output the program start time");
     }
-    else if ((deviceClient = PnPHelper_CreateDeviceClientHandle(connectionString, g_ModelId, g_hubClientTraceEnabled, Thermostat_DeviceMethodCallback, Thermostat_DeviceTwinCallback)) == NULL)
+    else if ((deviceClient = CreateDeviceClientHandleForPnP(connectionString)) == NULL)
     {
-        LogError("Failure creating IotHub device client");
+        LogError("Failure creating Iothub device");
     }
     else
     {
