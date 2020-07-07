@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 // IoTHub Device Client and IoT core utility related header files
 #include "iothub.h"
@@ -71,6 +72,15 @@ static const char g_minMaxCommandResponseFormat[] = "{ \"maxTemp\": %.2f, \"minT
 // Format string for sending temperature telemetry
 static const char g_TemperatureTelemetryBodyFormat[] = "{ \"temperature\":  %.02f }";
 
+// Format string to report the property maximum temperature since reboot.  This is a "read only" property from the
+// service solution's perspective, which means we don't need to include any sort of status codes.
+static const char g_maxTemperatureSinceRebootFormat[] = "{\"maxTempSinceLastReboot\": %.2f }";
+
+// Format string to indicate the device received an update request for the temperature.  Because this is a "writeable"
+// property from the service solution's perspective, we need to return a status code (HTTP status code style) and version
+// for the solution to correlate the request and its status.
+static const char g_targetTemperatureResponseFormat[] = "{\"targetTemperature\": { \"value\": %.2f, \"ac\":%d, \"av\":%d, \"ad\":\"%s\" }}";
+
 // Response description is an optional, human readable message including more information
 // about the setting of the temperature.  Because we accept all temperature requests, we 
 // always indicate a success.  An actual sensor could optionally return information about
@@ -92,32 +102,70 @@ static char* CopyTwinPayloadToString(const unsigned char* payload, size_t size)
     else
     {
         memcpy(jsonStr, payload, size);
-        jsonStr[size] = 0;
+        jsonStr[size] = '\0';
     }
 
     return jsonStr;
 }
 
+// snprintf format to create an ISO8601 time.  This corresponds to the DTDL datetime schema item.
+static const char g_ISO8601Format[] = "%04d-%02d-%02dT%02d:%02d:%02dZ";
+// Start time of the program, stored in ISO8601 format string for UTC.
+char g_ProgramStartTime[128];
+
+//
+// BuildUtcTimeFromCurrentTime writes the current time, in ISO 8601 format, into the specified buffer
+//
+static bool BuildUtcTimeFromCurrentTime(char* utcTimeBuffer, size_t utcTimeBufferSize)
+{
+    bool result;
+    time_t currentTime;
+    struct tm * currentTimeTm;
+
+    time(&currentTime);
+    currentTimeTm = gmtime(&currentTime);
+
+    if (snprintf(utcTimeBuffer, utcTimeBufferSize, g_ISO8601Format, currentTimeTm->tm_year + 1900, currentTimeTm->tm_mon, currentTimeTm->tm_mday, 
+                  currentTimeTm->tm_hour, currentTimeTm->tm_min, currentTimeTm->tm_sec) < 0)
+    {
+        LogError("snprintf on UTC time failed");
+        result = false;
+    }
+    else
+    {
+        result = true;
+    }
+
+    return result;
+}
+
 //
 // BuildMaxMinCommandResponse builds the response to the command for getMaxMinReport
 //
-static bool BuildMaxMinCommandResponse(const char* sinceStr, unsigned char** response, size_t* responseSize)
+static bool BuildMaxMinCommandResponse(unsigned char** response, size_t* responseSize)
 {
-    int responseBuilderSize;
+    int responseBuilderSize = 0;
     unsigned char* responseBuilder = NULL;
     bool result;
+    char currentTime[128];
 
-    if ((responseBuilderSize = snprintf(NULL, 0, g_minMaxCommandResponseFormat, g_minTemperature, g_maxTemperature, g_allTemperatures / g_numTemperatureUpdates, sinceStr, sinceStr)) < 0)
+    if (BuildUtcTimeFromCurrentTime(currentTime, sizeof(currentTime)) == false)
+    {
+        LogError("Unable to output the current time");
+        result = false;
+    }
+    else if ((responseBuilderSize = snprintf(NULL, 0, g_minMaxCommandResponseFormat, g_minTemperature, g_maxTemperature, g_allTemperatures / g_numTemperatureUpdates, g_ProgramStartTime, currentTime)) < 0)
     {
         LogError("snprintf to determine string length for command response failed");
         result = false;
     }
+    // We MUST allocate the response buffer.  It is returned to the IoTHub SDK in the direct method callback and the SDK in turn sends this to the server.
     else if ((responseBuilder = calloc(1, responseBuilderSize + 1)) == NULL)
     {
         LogError("Unable to allocate %lu bytes", (unsigned long)(responseBuilderSize + 1));
         result = false;
     }
-    else if ((responseBuilderSize = snprintf((char*)responseBuilder, responseBuilderSize + 1, g_minMaxCommandResponseFormat, g_minTemperature, g_maxTemperature, g_allTemperatures / g_numTemperatureUpdates, sinceStr, sinceStr)) < 0)
+    else if ((responseBuilderSize = snprintf((char*)responseBuilder, responseBuilderSize + 1, g_minMaxCommandResponseFormat, g_minTemperature, g_maxTemperature, g_allTemperatures / g_numTemperatureUpdates, g_ProgramStartTime, currentTime)) < 0)
     {
         LogError("snprintf to output buffer for command response");
         result = false;
@@ -138,7 +186,7 @@ static bool BuildMaxMinCommandResponse(const char* sinceStr, unsigned char** res
         free(responseBuilder);
     }
 
-    return response;    
+    return result;
 }       
 
 //
@@ -179,13 +227,14 @@ static int Thermostat_DeviceMethodCallback(const char* methodName, const unsigne
         LogError("Unable to get root object of JSON");
         result = g_statusInternalError;
     }
-    // See caveats section in ../readme.md; we don't actually respect this sinceStr to keep the sample simple.
+    // See caveats section in ../readme.md; we don't actually respect this sinceStr to keep the sample simple,
+    // but want to demonstrate how to parse out in any case.
     else if ((sinceStr = json_object_dotget_string(rootObject, g_SinceJsonCommandSetting)) == NULL)
     {
         LogError("Cannot retrieve JSON field %s", g_SinceJsonCommandSetting);
         result = g_statusBadFormat;
     }
-    else if (BuildMaxMinCommandResponse(sinceStr, response, responseSize) == false)
+    else if (BuildMaxMinCommandResponse(response, responseSize) == false)
     {
         LogError("Unable to build response");
         result = g_statusInternalError;        
@@ -255,18 +304,8 @@ static void UpdateTemperatureAndStatistics(double desiredTemp, bool* maxTempUpda
     g_currentTemperature = desiredTemp;
 }
 
-// Format string to report the property maximum temperature since reboot.  This is a "read only" property from the
-// service solution's perspective, which means we don't need to include any sort of status codes.
-static const char g_maxTemperatureSinceRebootFormat[] = "{\"maxTempSinceLastReboot\": %.2f }";
-
-// Format string to indicate the device received an update request for the temperature.  Because this is a "writeable"
-// property from the service solution's perspective, we need to return a status code (HTTP status code style) and version
-// for the solution to correlate the request and its status.
-static const char g_targetTemperatureResponseFormat[] = "{\"targetTemperature\": { \"value\": %.2f, \"ac\":%d, \"av\":%d, \"ad\":\"%s\" }}";
-
-
 //
-// SendTargetTemperatureReport sends a PnP property indicating the device has received the desired targetted temperature
+// SendTargetTemperatureReport sends a PnP property indicating the device has received the desired targeted temperature
 //
 static void SendTargetTemperatureReport(IOTHUB_DEVICE_CLIENT_HANDLE deviceClient, double desiredTemp, int responseStatus, int version, const char* description)
 {
@@ -323,6 +362,8 @@ static void Thermostat_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE updateState, 
     JSON_Value* versionValue = NULL;
     JSON_Value* targetTemperatureValue = NULL;
 
+    LogInfo("DeviceTwin callback invoked");
+
     if ((jsonStr = CopyTwinPayloadToString(payload, size)) == NULL)
     {
         LogError("Unable to allocate twin buffer");
@@ -337,14 +378,13 @@ static void Thermostat_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE updateState, 
     }
     else if ((targetTemperatureValue = json_object_get_value(desiredObject, PnP_JsonTargetTemperature)) == NULL)
     {
-        // The target temperature not being set is NOT an error, but it does indicate we can't proceed any further.
-        ;
+        LogInfo("JSON property %s not specified.  This is NOT an error as the server doesn't need to set this, but there is no further action to take.", PnP_JsonTargetTemperature);
     }
     else if ((versionValue = json_object_get_value(desiredObject, PnP_JsonPropertyVersion)) == NULL)
     {
         // The $version does need to be set in *any* legitimate twin desired document.  Its absence suggests 
         // something is fundamentally wrong with how we've received the twin and we should not proceed.
-        LogError("Cannot retrieve field %s for twin", PnP_JsonPropertyVersion);
+        LogError("Cannot retrieve field %s for twin.  The underlying IoTHub device twin protocol (NOT the service solution directly) should have specified this.", PnP_JsonPropertyVersion);
     }
     else if (json_value_get_type(versionValue) != JSONNumber)
     {
@@ -354,7 +394,6 @@ static void Thermostat_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE updateState, 
     }
     else
     {
-        //int version = (int)json_value_get_number(versionValue);
         double targetTemperature = json_value_get_number(targetTemperatureValue);
         int version = (int)json_value_get_number(versionValue);
 
@@ -411,6 +450,10 @@ int main(void)
     if ((connectionString = getenv(g_ConnectionStringEnvironmentVariable)) == NULL)
     {
         LogError("Cannot read environment variable %s", g_ConnectionStringEnvironmentVariable);
+    }
+    else if (BuildUtcTimeFromCurrentTime(g_ProgramStartTime, sizeof(g_ProgramStartTime)) == false)
+    {
+        LogError("Unable to output the program start time");
     }
     else if ((deviceClient = PnPHelper_CreateDeviceClientHandle(connectionString, g_ModelId, g_hubClientTraceEnabled, Thermostat_DeviceMethodCallback, Thermostat_DeviceTwinCallback)) == NULL)
     {
