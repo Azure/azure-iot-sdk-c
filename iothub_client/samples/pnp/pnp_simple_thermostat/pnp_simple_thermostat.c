@@ -40,8 +40,8 @@ static bool g_hubClientTraceEnabled = true;
 static const char g_ModelId[] = "dtmi:com:example:Thermostat;1";
 
 // JSON fields from desired property to retrieve.
-static const char PnP_JsonPropertyVersion[] = "$version";
-static const char PnP_JsonTargetTemperature[] = "targetTemperature";
+static const char g_PnP_JsonPropertyVersion[] = "$version";
+static const char g_PnP_JsonTargetTemperature[] = "targetTemperature";
 
 // Name of command this component supports to get report information
 static const char g_GetMinMaxReport[] = "getMaxMinReport";
@@ -376,21 +376,21 @@ static void Thermostat_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE updateState, 
     {
         LogError("Cannot retrieve desired JSON object");
     }
-    else if ((targetTemperatureValue = json_object_get_value(desiredObject, PnP_JsonTargetTemperature)) == NULL)
+    else if ((targetTemperatureValue = json_object_get_value(desiredObject, g_PnP_JsonTargetTemperature)) == NULL)
     {
-        LogInfo("JSON property %s not specified.  This is NOT an error as the server doesn't need to set this, but there is no further action to take.", PnP_JsonTargetTemperature);
+        LogInfo("JSON property %s not specified.  This is NOT an error as the server doesn't need to set this, but there is no further action to take.", g_PnP_JsonTargetTemperature);
     }
-    else if ((versionValue = json_object_get_value(desiredObject, PnP_JsonPropertyVersion)) == NULL)
+    else if ((versionValue = json_object_get_value(desiredObject, g_PnP_JsonPropertyVersion)) == NULL)
     {
         // The $version does need to be set in *any* legitimate twin desired document.  Its absence suggests 
         // something is fundamentally wrong with how we've received the twin and we should not proceed.
-        LogError("Cannot retrieve field %s for twin.  The underlying IoTHub device twin protocol (NOT the service solution directly) should have specified this.", PnP_JsonPropertyVersion);
+        LogError("Cannot retrieve field %s for twin.  The underlying IoTHub device twin protocol (NOT the service solution directly) should have specified this.", g_PnP_JsonPropertyVersion);
     }
     else if (json_value_get_type(versionValue) != JSONNumber)
     {
         // The $version must be a number (and in practice an int) A non-numerical value indicates 
         // something is fundamentally wrong with how we've received the twin and we should not proceed.
-        LogError("JSON field %s is not a number but must be", PnP_JsonPropertyVersion);
+        LogError("JSON field %s is not a number but must be", g_PnP_JsonPropertyVersion);
     }
     else
     {

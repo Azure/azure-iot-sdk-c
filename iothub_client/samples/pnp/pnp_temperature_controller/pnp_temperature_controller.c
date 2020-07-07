@@ -44,7 +44,6 @@ static const char g_RootComponentName[] = "root component";
 // Global device handle.
 IOTHUB_DEVICE_CLIENT_HANDLE g_deviceHandle;
 
-
 //
 // TempControl_DeviceMethodCallback is invoked by IoT SDK when a device method arrives.
 //

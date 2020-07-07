@@ -11,6 +11,15 @@
 #include "iothub_message.h"
 #include "parson.h"
 
+// 
+// Status codes for PnP, closely mapping to HTTP status.
+//
+#define PNP_STATUS_SUCCESS 200
+#define PNP_STATUS_BAD_FORMAT 400
+#define PNP_STATUS_NOT_FOUND  404
+#define PNP_STATUS_INTERNAL_ERROR 500
+
+
 //
 // PnPHelperPropertyCallbackFunction is the prototype the application implements to receive a callback for each PnP property in a given Device Twin.
 typedef void (*PnPHelperPropertyCallbackFunction)(const char* componentName, const char* propertyName, JSON_Value* propertyValue, int version);
@@ -55,5 +64,12 @@ IOTHUB_MESSAGE_HANDLE PnPHelper_CreateTelemetryMessageHandle(const char* compone
 // for each property that it visits.
 // 
 bool PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payload, size_t size, PnPHelperPropertyCallbackFunction pnpPropertyCallback);
+
+//
+// PnPHelper_CopyTwinPayloadToString takes the payload data, which arrives as a potentially non-NULL terminated string, and creates
+// a new copy of the data with a NULL terminator.  The JSON parser this sample uses, parson, only operates over NULL terminated strings.
+//
+char* PnPHelper_CopyPayloadToString(const unsigned char* payload, size_t size);
+
 
 #endif /* PNP_PROTOCOL_HELPERS_H */

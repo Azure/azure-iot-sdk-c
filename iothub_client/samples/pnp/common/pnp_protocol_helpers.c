@@ -228,11 +228,7 @@ static bool VisitDesiredObject(JSON_Object* desiredObject, PnPHelperPropertyCall
     return result;
 }
 
-//
-// CopyTwinPayloadToString takes the twin payload data, which arrives as a potentially non-NULL terminated string, and creates
-// a new copy of the data with a NULL terminator.  The JSON parser this sample uses, parson, only operates over NULL terminated strings.
-//
-static char* CopyTwinPayloadToString(const unsigned char* payload, size_t size)
+char* PnPHelper_CopyPayloadToString(const unsigned char* payload, size_t size)
 {
     char* jsonStr;
 
@@ -289,7 +285,7 @@ bool PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsig
     JSON_Object* desiredObject;
     bool result;
 
-    if ((jsonStr = CopyTwinPayloadToString(payload, size)) == NULL)
+    if ((jsonStr = PnPHelper_CopyPayloadToString(payload, size)) == NULL)
     {
         LogError("Unable to allocate twin buffer");
         result = false;
