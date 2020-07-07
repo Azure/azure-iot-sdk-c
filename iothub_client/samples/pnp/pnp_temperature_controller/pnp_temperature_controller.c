@@ -40,7 +40,7 @@ static unsigned int g_sleepBetweenTelemetrySends = 60 * 1000;
 static bool g_hubClientTraceEnabled = true;
 
 // DTMI indicating this device's ModelId.
-static const char g_ModelId[] = "dtmi:com:example:simplethermostat;1";
+static const char g_ModelId[] = "dtmi:com:example:TemperatureController;1";
 
 // This is a convention in this program *only* for a friendly way to print out the root component via logging
 static const char g_RootComponentName[] = "root component";

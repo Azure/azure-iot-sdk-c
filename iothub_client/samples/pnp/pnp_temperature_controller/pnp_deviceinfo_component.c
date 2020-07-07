@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+// The DTDL for this interface is defined at https://repo.azureiotrepository.com/Models/dtmi:azure:DeviceManagement:DeviceInformation;1?api-version=2020-05-01-preview
+
 
 // Standard C header files
 #include <stdio.h>
@@ -19,25 +21,25 @@
 // NOTE: the properties must be legal JSON values.  This means that strings must be encoded, 
 // e.g. const char sample="\"value-to-send-in-quotes\"";
 
-#define PNP_ENCODE_STRING_FOR_JSON(str) "\"str\""
+#define PNP_ENCODE_STRING_FOR_JSON(str) "\"" str "\""
 
 static const char PnPDeviceInfo_SoftwareVersionPropertyName[] = "swVersion";
-static const char PnPDeviceInfo_SoftwareVersionPropertyValue[] = PNP_ENCODE_STRING_FOR_JSON(1.0.0.0);
+static const char PnPDeviceInfo_SoftwareVersionPropertyValue[] = PNP_ENCODE_STRING_FOR_JSON("1.0.0.0");
 
 static const char PnPDeviceInfo_ManufacturerPropertyName[] = "manufacturer";
-static const char PnPDeviceInfo_ManufacturerPropertyValue[] = PNP_ENCODE_STRING_FOR_JSON(Sample-Manufacturer);
+static const char PnPDeviceInfo_ManufacturerPropertyValue[] = PNP_ENCODE_STRING_FOR_JSON("Sample-Manufacturer");
 
 static const char PnPDeviceInfo_ModelPropertyName[] = "model";
-static const char PnPDeviceInfo_ModelPropertyValue[] = PNP_ENCODE_STRING_FOR_JSON(ample-Model-123);
+static const char PnPDeviceInfo_ModelPropertyValue[] = PNP_ENCODE_STRING_FOR_JSON("sample-Model-123");
 
 static const char PnPDeviceInfo_OsNamePropertyName[] = "osName";
-static const char PnPDeviceInfo_OsNamePropertyValue[] = PNP_ENCODE_STRING_FOR_JSON(sample-OperatingSystem-name);
+static const char PnPDeviceInfo_OsNamePropertyValue[] = PNP_ENCODE_STRING_FOR_JSON("sample-OperatingSystem-name");
 
 static const char PnPDeviceInfo_ProcessorArchitecturePropertyName[] = "processorArchitecture";
-static const char PnPDeviceInfo_ProcessorArchitecturePropertyValue[] = PNP_ENCODE_STRING_FOR_JSON(Contoso-Arch-64bit);
+static const char PnPDeviceInfo_ProcessorArchitecturePropertyValue[] = PNP_ENCODE_STRING_FOR_JSON("Contoso-Arch-64bit");
 
 static const char PnPDeviceInfo_ProcessorManufacturerPropertyName[] = "processorManufacturer";
-static const char PnPDeviceInfo_ProcessorManufacturerPropertyValue[] = PNP_ENCODE_STRING_FOR_JSON(Processor Manufacturer(TM));
+static const char PnPDeviceInfo_ProcessorManufacturerPropertyValue[] = PNP_ENCODE_STRING_FOR_JSON("Processor Manufacturer(TM)");
 
 // The storage and memory fields below are doubles and hence should NOT be escaped, as these are legal JSON values.
 static const char PnPDeviceInfo_TotalStoragePropertyName[] = "totalStorage";
