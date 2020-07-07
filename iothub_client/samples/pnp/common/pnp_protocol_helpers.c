@@ -72,7 +72,7 @@ STRING_HANDLE PnPHelper_CreateReportedPropertyWithStatus(const char* componentNa
     return jsonToSend;    
 }
 
-void PnPHelper_ParseCommandName(const char* deviceMethodName, const char** componentName, size_t* componentNameLength, const char** pnpCommandName, size_t* pnpCommandNameLength)
+void PnPHelper_ParseCommandName(const char* deviceMethodName, unsigned const char** componentName, size_t* componentNameSize, const char** pnpCommandName)
 {
     const char* separator;
 
@@ -80,19 +80,17 @@ void PnPHelper_ParseCommandName(const char* deviceMethodName, const char** compo
     {
         // If a separator character wis present in the device method name, then a command on a subcomponent of 
         // the model is being targeted.  (E.G. Thermostat1.Run).
-        *componentName = deviceMethodName;
-        *componentNameLength = separator - deviceMethodName;
+        *componentName = (unsigned const char*)deviceMethodName;
+        *componentNameSize = separator - deviceMethodName;
         *pnpCommandName = separator + 1;
-        *pnpCommandNameLength = strlen(*pnpCommandName);
     }
     else 
     {
         // The separator character is optional.  If it is not present, it indicates a command of the root 
         // component and not a subcomponent is being targeted.  (E.G. simply Run.)
         *componentName = NULL;
-        *componentNameLength = 0;
+        *componentNameSize = 0;
         *pnpCommandName = deviceMethodName;
-        *pnpCommandNameLength = strlen(deviceMethodName);
     }
 }
 

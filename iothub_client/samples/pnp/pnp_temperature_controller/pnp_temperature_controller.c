@@ -9,12 +9,14 @@
 // primitives of telemetry, device methods, and device twins.  A sample helper, ../common/pnp_protocol_helpers.h,
 // is used here to perfom the needed (de)serialization.
 
-// TODO: Link to final GitHub URL of the DTDL once checked in.
+// The DTDL for component is https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/TemperatureController.json
 
+// Standard C header files
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+// IoTHub Device Client and IoT core utility related header files
 #include "iothub.h"
 #include "iothub_device_client.h"
 #include "iothub_client_options.h"
@@ -23,15 +25,16 @@
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/xlogging.h"
 
+// PnP helper utilities.
 #include "pnp_device_client_helpers.h"
 #include "pnp_protocol_helpers.h"
 
+// Headers that provide implementation for subcomponents (the two thermostat components and DeviceInfo)
 #include "pnp_thermostat_component.h"
 #include "pnp_deviceinfo_component.h"
 
 // Environment variable used to specify this application's connection string
-static const char g_ConnectionStringEnvironmentVariable[] = "IOTHUB_DEVICE_CONNECTION_STRING";
-
+static const char g_connectionStringEnvironmentVariable[] = "IOTHUB_DEVICE_CONNECTION_STRING";
 
 // Amount of time to sleep between sending telemetry to Hub, in milliseconds.  Set to 1 minute.
 static unsigned int g_sleepBetweenTelemetrySends = 60 * 1000;
@@ -40,10 +43,7 @@ static unsigned int g_sleepBetweenTelemetrySends = 60 * 1000;
 static bool g_hubClientTraceEnabled = true;
 
 // DTMI indicating this device's ModelId.
-static const char g_ModelId[] = "dtmi:com:example:TemperatureController;1";
-
-// This is a convention in this program *only* for a friendly way to print out the root component via logging
-static const char g_RootComponentName[] = "root component";
+static const char g_modelId[] = "dtmi:com:example:TemperatureController;1";
 
 // PNP_THERMOSTAT_COMPONENT_HANDLE represent the thermostat components that are sub-components of the temperature controller.
 // Note that we do NOT have an analogous DeviceInfo component handle because the DeviceInfo is so straightforward we skipped that step.
@@ -59,13 +59,24 @@ static const char g_deviceInfoComponentName[] = "deviceInformation";
 
 // Command implemented by the TemperatureControl component itself
 static const char g_rebootCommand[] = "reboot";
-static const size_t g_rebootCommandSize = sizeof(g_rebootCommand) - 1;
 
 // Name of json field to parse for reboot's "delay". (Note the "delay" is the only field of the value, "delay" is not explicitly sent)
-static const char g_DelayJsonCommandSetting[] = "commandRequest.value";
+static const char g_JSONCommandSetting[] = "commandRequest.value";
 // An empty JSON body for responses
-static const char g_EmptyJson[] = "{}";
-static const size_t g_EmptyJsonSize = sizeof(g_EmptyJson) - 1;
+static const char g_emptyJson[] = "{}";
+static const size_t g_emptyJsonSize = sizeof(g_emptyJson) - 1;
+
+// Minimum value we will return for working set, + some random number
+static const int g_workingSetMinimum = 1000;
+// Random number for working set will range between the g_workingSetMinimum and (g_workingSetMinimum+g_workingSetRandomModule)
+static const int g_workingSetRandomModule = 500;
+// Format string for sending a telemetry message with the working set.
+static const char g_workingSetTelemetryFormat[] = "{\"workingSet\":%d}";
+
+// Name of the serial number property as defined in this component's DTML
+static const char g_serialNumberPropertyName[] = "serialNumber";
+// Value of the serial number.  NOTE: This must be a legal JSON string which requires value to be in "..."
+static const char g_serialNumberPropertyValue[] = "\"serial-no-123-abc\"";
 
 //
 // TempControl_InvokeRebootCommand processes the reboot command on the root interface
@@ -75,7 +86,7 @@ static int TempControl_InvokeRebootCommand(JSON_Object* rootObject, unsigned cha
     int result;
     JSON_Value* delayValue; 
 
-    if ((delayValue = json_object_dotget_value(rootObject, g_DelayJsonCommandSetting)) == NULL)
+    if ((delayValue = json_object_dotget_value(rootObject, g_JSONCommandSetting)) == NULL)
     {
         LogError("Payload not specified in command request");
         result = PNP_STATUS_BAD_FORMAT;
@@ -92,16 +103,16 @@ static int TempControl_InvokeRebootCommand(JSON_Object* rootObject, unsigned cha
 
         // Even though the DTMI for TemperatureController does not specify a response body, the underlying IoTHub device method
         // requires a valid JSON to be included in the response.  The SDK will not automatically
-        if ((*response = (unsigned char*)malloc(g_EmptyJsonSize)) == NULL)
+        if ((*response = (unsigned char*)malloc(g_emptyJsonSize)) == NULL)
         {
-            LogError("Unable to allocate %lu bytes", (unsigned long)(g_EmptyJsonSize));
+            LogError("Unable to allocate %lu bytes", (unsigned long)(g_emptyJsonSize));
             result = PNP_STATUS_INTERNAL_ERROR;
         }
         else
         {
             // We're using unsigned char**, so do not \0 terminate this string
-            memcpy(*response, g_EmptyJson, g_EmptyJsonSize);
-            *responseSize = g_EmptyJsonSize;
+            memcpy(*response, g_emptyJson, g_emptyJsonSize);
+            *responseSize = g_emptyJsonSize;
             result = PNP_STATUS_SUCCESS;
         }
     }
@@ -121,17 +132,18 @@ static int TempControl_DeviceMethodCallback(const char* methodName, const unsign
     JSON_Object* rootObject = NULL;
     int result;
 
-    const char *commandName;
-    const char *componentName;
-    size_t commandNameLength;
-    size_t componentNameLength;
+    unsigned const char *componentName;
+    size_t componentNameSize;
+
+    const char *pnpCommandName;
 
     *response = NULL;
     *responseSize = 0;
 
-    // Parse the methodName into its PnP (optional) componentName and commandName.
-    PnPHelper_ParseCommandName(methodName, &componentName, &componentNameLength, &commandName, &commandNameLength);
+    // Parse the methodName into its PnP (optional) componentName and pnpCommandName.
+    PnPHelper_ParseCommandName(methodName, &componentName, &componentNameSize, &pnpCommandName);
 
+    // Parse the JSON of the payload request.
     if ((jsonStr = PnPHelper_CopyPayloadToString(payload, size)) == NULL)
     {
         LogError("Unable to allocate twin buffer");
@@ -151,30 +163,31 @@ static int TempControl_DeviceMethodCallback(const char* methodName, const unsign
     {
         if (componentName != NULL)
         {
-            LogInfo("Received PnP command for component=%.*s, command=%.*s", (int)componentNameLength, componentName, (int)commandNameLength, commandName);
-            if (strncmp(componentName, g_thermostatComponent1Name, g_thermostatComponent1Size) == 0)
+            LogInfo("Received PnP command for component=%.*s, command=%s", (int)componentNameSize, componentName, pnpCommandName);
+            if (strncmp((const char*)componentName, g_thermostatComponent1Name, g_thermostatComponent1Size) == 0)
             {
-                result = PnP_ThermostatComponent_ProcessCommand(g_thermostatHandle1, commandName, rootObject, response, responseSize);
+                result = PnP_ThermostatComponent_ProcessCommand(g_thermostatHandle1, pnpCommandName, rootObject, response, responseSize);
             }
-            else if (strncmp(componentName, g_thermostatComponent2Name, g_thermostatComponent2Size) == 0)
+            else if (strncmp((const char*)componentName, g_thermostatComponent2Name, g_thermostatComponent2Size) == 0)
             {
-                result = PnP_ThermostatComponent_ProcessCommand(g_thermostatHandle2, commandName, rootObject, response, responseSize);
+                result = PnP_ThermostatComponent_ProcessCommand(g_thermostatHandle2, pnpCommandName, rootObject, response, responseSize);
             }
             else
             {
-                LogError("PnP component %.*s is not supported by TemperatureController", (int)componentNameLength, componentName);
+                LogError("PnP component %.*s is not supported by TemperatureController", (int)componentNameSize, componentName);
                 result = PNP_STATUS_NOT_FOUND;
             }
         }
         else
         {
-            if (strncmp(commandName, g_rebootCommand, g_rebootCommandSize) == 0)
+            LogInfo("Received PnP command for TemperatureController (root) component, command=%s", pnpCommandName);
+            if (strcmp(pnpCommandName, g_rebootCommand) == 0)
             {
                 result = TempControl_InvokeRebootCommand(rootObject, response, responseSize);
             }
             else
             {
-                LogError("PnP command on root interface %.*s is not supported by TemperatureController", (int)commandNameLength, commandName);
+                LogError("PnP command on root interface %s is not supported by TemperatureController", pnpCommandName);
                 result = PNP_STATUS_NOT_FOUND;
             }
         }
@@ -184,14 +197,6 @@ static int TempControl_DeviceMethodCallback(const char* methodName, const unsign
     free(jsonStr);
 
     return result;
-}
-
-//
-// GetComponentNameForLogging is a helper that returns either the component name or a friendly name for a NULL componentName
-//
-static const char * GetComponentNameForLogging(const char *componentName)
-{
-    return (componentName == NULL) ? g_RootComponentName  : componentName;
 }
 
 //
@@ -239,17 +244,10 @@ static void TempControl_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE updateState,
     }
 }
 
-// Minimum value we will return for working set, + some random number
-static const int g_WorkingSetMinimum = 1000;
-// Random number for working set will range between the g_WorkingSetMinimum and (g_WorkingSetMinimum+g_WorkingSetRandomModule)
-static const int g_WorkingSetRandomModule = 500;
-// Format string for sending a telemetry message with the working set.
-static const char g_WorkingSetTelemetryFormat[] = "{\"workingSet\":%d}";
-
 //
 // TempControl_SendWorkingSet sends a PnP telemetry indicating the current working set of the device, in 
 // the unit of kibibytes (https://en.wikipedia.org/wiki/Kibibyte).
-// This is a random value between g_WorkingSetMinimum and (g_WorkingSetMinimum+g_WorkingSetRandomModule).
+// This is a random value between g_workingSetMinimum and (g_workingSetMinimum+g_workingSetRandomModule).
 //
 void TempControl_SendWorkingSet(IOTHUB_DEVICE_CLIENT_HANDLE deviceClient) 
 {
@@ -257,9 +255,9 @@ void TempControl_SendWorkingSet(IOTHUB_DEVICE_CLIENT_HANDLE deviceClient)
     IOTHUB_CLIENT_RESULT iothubResult;
     char workingSetTelemetryPayload[64];
 
-    int workingSet = g_WorkingSetMinimum + (rand() % g_WorkingSetRandomModule);
+    int workingSet = g_workingSetMinimum + (rand() % g_workingSetRandomModule);
 
-    if (snprintf(workingSetTelemetryPayload, sizeof(workingSetTelemetryPayload), g_WorkingSetTelemetryFormat, workingSet) < 0)
+    if (snprintf(workingSetTelemetryPayload, sizeof(workingSetTelemetryPayload), g_workingSetTelemetryFormat, workingSet) < 0)
     {
         LogError("Unable to create a workingSet telemetry payload string");
     }
@@ -274,11 +272,6 @@ void TempControl_SendWorkingSet(IOTHUB_DEVICE_CLIENT_HANDLE deviceClient)
 
     IoTHubMessage_Destroy(messageHandle);
 }
-
-// Name of the serial number property as defined in this component's DTML
-static const char g_serialNumberPropertyName[] = "serialNumber";
-// Value of the serial number.  NOTE: This must be a legal JSON string which requires value to be in "..."
-static const char g_serialNumberPropertyValue[] = "\"serial-no-123-abc\"";
 
 //
 // TempControl_ReportSerialNumberProperty sends the "serialNumber" property to IoTHub
@@ -318,11 +311,11 @@ int main(void)
     // Invoke random numbers with the same seed instead of time based so that results are reproducible
     srand(1);
 
-    if ((connectionString = getenv(g_ConnectionStringEnvironmentVariable)) == NULL)
+    if ((connectionString = getenv(g_connectionStringEnvironmentVariable)) == NULL)
     {
-        LogError("Cannot read environment variable %s", g_ConnectionStringEnvironmentVariable);
+        LogError("Cannot read environment variable %s", g_connectionStringEnvironmentVariable);
     }
-    else if ((deviceClient = PnPHelper_CreateDeviceClientHandle(connectionString, g_ModelId, g_hubClientTraceEnabled, TempControl_DeviceMethodCallback, TempControl_DeviceTwinCallback)) == NULL)
+    else if ((deviceClient = PnPHelper_CreateDeviceClientHandle(connectionString, g_modelId, g_hubClientTraceEnabled, TempControl_DeviceMethodCallback, TempControl_DeviceTwinCallback)) == NULL)
     {
         LogError("Failure creating IotHub device client");
     }
@@ -352,6 +345,10 @@ int main(void)
             PnP_ThermostatComponent_SendTelemetry(g_thermostatHandle2, deviceClient);
             ThreadAPI_Sleep(g_sleepBetweenTelemetrySends);
         }
+
+        // Free the memory allocated to track simulated thermostat.
+        PnP_ThermostatComponent_Destroy(g_thermostatHandle2);
+        PnP_ThermostatComponent_Destroy(g_thermostatHandle1);
 
         // Clean up the iothub sdk handle
         IoTHubDeviceClient_Destroy(deviceClient);

@@ -51,7 +51,7 @@ STRING_HANDLE PnPHelper_CreateReportedPropertyWithStatus(const char* componentNa
 // PnPHelper_ParseCommandName is invoked by the application when an incoming device method arrives.  This function
 // parses the device method name into the targeted (optional) component and PnP specific command.
 //
-void PnPHelper_ParseCommandName(const char* deviceMethodName, const char** componentName, size_t* componentNameLength, const char** pnpCommandName, size_t* pnpCommandNameLength);
+void PnPHelper_ParseCommandName(const char* deviceMethodName, unsigned const char** componentName, size_t* componentNameSize, const char** pnpCommandName);
 
 //
 // PnPHelper_CreateTelemetryMessageHandle creates an IOTHUB_MESSAGE_HANDLE that contains tho contents of the telemetryData.

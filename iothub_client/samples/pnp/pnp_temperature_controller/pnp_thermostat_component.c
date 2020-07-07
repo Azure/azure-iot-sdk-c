@@ -33,7 +33,7 @@ static const char g_maxTempSinceLastRebootPropertyName[] = "maxTempSinceLastRebo
 // snprintf format to create an ISO8601 time.  This corresponds to the DTDL datetime schema item.
 static const char g_ISO8601Format[] = "%04d-%02d-%02dT%02d:%02d:%02dZ";
 // Start time of the program, stored in ISO8601 format string for UTC.
-char g_ProgramStartTime[128] = {0};
+char g_programStartTime[128] = {0};
 
 // snprintf format for building getMaxMinReport
 static const char g_minMaxCommandResponseFormat[] = "{ \"maxTemp\": %.2f, \"minTemp\": %.2f, \"avgTemp\": %.2f, \"startTime\": \"%s\", \"endTime\": \"%s\" }";
@@ -102,7 +102,7 @@ PNP_THERMOSTAT_COMPONENT_HANDLE PnP_ThermostatComponent_CreateHandle(const char*
         LogError("componentName %s is too long.  Maximum length is %d", componentName, PNP_MAXIMUM_COMPONENT_LENGTH);
         thermostatComponent = NULL;
     }
-    else if ((g_ProgramStartTime[0] == 0) && (BuildUtcTimeFromCurrentTime(g_ProgramStartTime, sizeof(g_ProgramStartTime)) == false))
+    else if ((g_programStartTime[0] == 0) && (BuildUtcTimeFromCurrentTime(g_programStartTime, sizeof(g_programStartTime)) == false))
     {
         LogError("Unable to store program start time");
         thermostatComponent = NULL;
@@ -148,7 +148,7 @@ static bool BuildMaxMinCommandResponse(PNP_THERMOSTAT_COMPONENT* pnpThermostatCo
         result = false;
     }
     else if ((responseBuilderSize = snprintf(NULL, 0, g_minMaxCommandResponseFormat, pnpThermostatComponent->minTemperature, pnpThermostatComponent->maxTemperature, 
-                                             pnpThermostatComponent->allTemperatures / pnpThermostatComponent->numTemperatureUpdates, g_ProgramStartTime, currentTime)) < 0)
+                                             pnpThermostatComponent->allTemperatures / pnpThermostatComponent->numTemperatureUpdates, g_programStartTime, currentTime)) < 0)
     {
         LogError("snprintf to determine string length for command response failed");
         result = false;
@@ -160,7 +160,7 @@ static bool BuildMaxMinCommandResponse(PNP_THERMOSTAT_COMPONENT* pnpThermostatCo
         result = false;
     }
     else if ((responseBuilderSize = snprintf((char*)responseBuilder, responseBuilderSize + 1, g_minMaxCommandResponseFormat, pnpThermostatComponent->minTemperature, pnpThermostatComponent->maxTemperature, 
-                                              pnpThermostatComponent->allTemperatures / pnpThermostatComponent->numTemperatureUpdates, g_ProgramStartTime, currentTime)) < 0)
+                                              pnpThermostatComponent->allTemperatures / pnpThermostatComponent->numTemperatureUpdates, g_programStartTime, currentTime)) < 0)
     {
         LogError("snprintf to output buffer for command response");
         result = false;
