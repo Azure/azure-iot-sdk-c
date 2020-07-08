@@ -52,14 +52,17 @@ IOTHUB_DEVICE_CLIENT_HANDLE PnPHelper_CreateDeviceClientHandle(const char* conne
         result = MU_FAILURE;
     }
     // Sets the callback function that processes incoming device methods, which is the channel PnP Commands are transferred over
-    else if ((iothubResult = IoTHubDeviceClient_SetDeviceMethodCallback(deviceHandle, deviceMethodCallback, NULL)) != IOTHUB_CLIENT_OK)
+    // deviceMethodCallback can be NULL, set by the application if it's model does not implement PNP commands.  In the NULL case,
+    // we will save some bandwidth and RAM by not subscribing needlessly.
+    else if ((deviceMethodCallback != NULL) && (iothubResult = IoTHubDeviceClient_SetDeviceMethodCallback(deviceHandle, deviceMethodCallback, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to set device method callback, error=%d", iothubResult);
         result = MU_FAILURE;
     }
     // Sets the callback function that processes device twin changes from the hub, which is the channel that PnP Properties are 
     // transferred over.  This will also automatically retrieve the full twin for the application. 
-    else if ((iothubResult = IoTHubDeviceClient_SetDeviceTwinCallback(deviceHandle, deviceTwinCallback, (void*)deviceHandle)) != IOTHUB_CLIENT_OK)
+    // Just like deviceMethodCallback, we only subscribe if the application specified deviceTwinCallback as non-NULL.
+    else if ((deviceTwinCallback != NULL) && (iothubResult = IoTHubDeviceClient_SetDeviceTwinCallback(deviceHandle, deviceTwinCallback, (void*)deviceHandle)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to set device twin callback, error=%d", iothubResult);
         result = MU_FAILURE;

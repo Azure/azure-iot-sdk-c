@@ -103,6 +103,7 @@ PNP_THERMOSTAT_COMPONENT_HANDLE PnP_ThermostatComponent_CreateHandle(const char*
         LogError("componentName %s is too long.  Maximum length is %d", componentName, PNP_MAXIMUM_COMPONENT_LENGTH);
         thermostatComponent = NULL;
     }
+    // On initial invocation, store the UTC time into g_programStartTime global.
     else if ((g_programStartTime[0] == 0) && (BuildUtcTimeFromCurrentTime(g_programStartTime, sizeof(g_programStartTime)) == false))
     {
         LogError("Unable to store program start time");

@@ -6,7 +6,11 @@ The samples in this directory demonstrate how to implement an Azure IoT Plug and
 
 The directory contains the following samples:
 
-* [pnp_simple_thermostat](./pnp_simple_thermostat) A simple thermostat that implements the model [dtmi:com:example:Thermostat;1](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/Thermostat.json).  This sample is considered simple because it only implements one component, the thermostat itself.
+* [pnp_simple_thermostat](./pnp_simple_thermostat) A simple that implements the model [dtmi:com:example:Thermostat;1](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/Thermostat.json).  This sample is considered simple because it only implements one component, the thermostat itself.  **You should begin with this sample.**
+
+* [pnp_temperature_controller](./pnp_temperature_controller) A temperature controller that implements the model [dtmi:com:example:TemperatureController;1](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/TemperatureController.json).  This is considerably more complex than the [pnp_simple_thermostat](./pnp_simple_thermostat) and demonstrates the use of subcomponents.  **You should move onto this sample only after fully understanding pnp_simple_thermostat.**
+
+* [common](./common) This directory contains helpers for serializing and de-serializing data for PnP and for creating the `IOTHUB_DEVICE_CLIENT_HANDLE` that acts as the transport.  `pnp_temperature_controller` makes extensive use of these helpers and demonstrates their use.  **The files in [common](./common) are written generically such that your PnP can use them with little or no modification, speeding up your devolpment.**
 
 ## Caveats
 
@@ -16,4 +20,4 @@ The directory contains the following samples:
 
 * The command `getMaxMinReport` allows the application to specify statistics of the temperature since a given date.  To keep the sample simple, we ignore this field and instead return statistics from the entire lifecycle of the executable.
 
-* When temperature controller receives a delay for reboot, we log the delay but do not schedule a worker to run at delay seconds later.
+* The temperature controller implements a command named `reboot` which takes a request payload indicating the delay in seconds.  The sample will log the value requested but will not take any action delay seconds later. 
