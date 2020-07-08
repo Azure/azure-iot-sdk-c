@@ -32,14 +32,14 @@
 // Environment variable used to specify this application's connection string
 static const char g_connectionStringEnvironmentVariable[] = "IOTHUB_DEVICE_CONNECTION_STRING";
 
-// Amount of time to sleep between sending telemetry to Hub, in milliseconds.  Set to 1 minute.
+// Amount of time to sleep between sending telemetry to IotHub, in milliseconds.  Set to 1 minute.
 static unsigned int g_sleepBetweenTelemetrySends = 60 * 1000;
 
 // Whether verbose tracing at the IoTHub client is enabled or not.
 static bool g_hubClientTraceEnabled = true;
 
 // This device's PnP ModelId.
-static const char g_modelId[] = "dtmi:com:example:Thermostat;1";
+static const char g_ThermostatModelId[] = "dtmi:com:example:Thermostat;1";
 
 // JSON fields from desired property to retrieve.
 static const char g_JSONPropertyVersion[] = "$version";
@@ -465,7 +465,7 @@ static IOTHUB_DEVICE_CLIENT_HANDLE CreateDeviceClientHandleForPnP(const char* co
     // Create the deviceHandle itself.
     else if ((deviceHandle = IoTHubDeviceClient_CreateFromConnectionString(connectionString, MQTT_Protocol)) == NULL)
     {
-        LogError("Failure creating Iothub device.  Hint: Check you connection string");
+        LogError("Failure creating IoTHub device.  Hint: Check you connection string");
         result = MU_FAILURE;
     }
     // Sets verbosity level
@@ -477,7 +477,7 @@ static IOTHUB_DEVICE_CLIENT_HANDLE CreateDeviceClientHandleForPnP(const char* co
     // Sets the name of ModelId for this PnP device.
     // This *MUST* be set before the client is connected to IoTHub.  We do not automatically connect when the 
     // handle is created, but will implicitly connect to subscribe for device method and device twin callbacks below.
-    else if ((iothubResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_MODEL_ID, g_modelId)) != IOTHUB_CLIENT_OK)
+    else if ((iothubResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_MODEL_ID, g_ThermostatModelId)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to set the ModelID, error=%d", iothubResult);
         result = MU_FAILURE;
@@ -488,7 +488,7 @@ static IOTHUB_DEVICE_CLIENT_HANDLE CreateDeviceClientHandleForPnP(const char* co
         LogError("Unable to set device method callback, error=%d", iothubResult);
         result = MU_FAILURE;
     }
-    // Sets the callback function that processes device twin changes from the hub, which is the channel that PnP Properties are 
+    // Sets the callback function that processes device twin changes from the IoTHub, which is the channel that PnP Properties are 
     // transferred over.  This will also automatically retrieve the full twin for the application. 
     else if ((iothubResult = IoTHubDeviceClient_SetDeviceTwinCallback(deviceHandle, Thermostat_DeviceTwinCallback, (void*)deviceHandle)) != IOTHUB_CLIENT_OK)
     {
@@ -544,7 +544,7 @@ int main(void)
     }
     else if ((deviceClient = CreateDeviceClientHandleForPnP(connectionString)) == NULL)
     {
-        LogError("Failure creating Iothub device");
+        LogError("Failed creating IotHub device");
     }
     else
     {
@@ -563,7 +563,7 @@ int main(void)
 
         // Clean up the iothub sdk handle
         IoTHubDeviceClient_Destroy(deviceClient);
-        // Free all the sdk subsystem
+        // Free all the IoT SDK subsystem
         IoTHub_Deinit();        
     }
 

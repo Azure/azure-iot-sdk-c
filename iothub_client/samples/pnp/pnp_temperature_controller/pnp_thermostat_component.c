@@ -280,9 +280,6 @@ static void SendTargetTemperatureReport(PNP_THERMOSTAT_COMPONENT* pnpThermostatC
     STRING_delete(jsonToSend);
 }
 
-//
-// SendMaxTemperatureSinceReboot reports a PnP property indicating the maximum temperature since the last reboot (simulated here by lifetime of executable)
-//
 void PnP_ThermostatComponent_SendMaxTemperatureSinceLastReboot_Property(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, IOTHUB_DEVICE_CLIENT_HANDLE deviceClient)
 {
     PNP_THERMOSTAT_COMPONENT* pnpThermostatComponent = (PNP_THERMOSTAT_COMPONENT*)pnpThermostatComponentHandle;
