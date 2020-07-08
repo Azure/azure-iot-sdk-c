@@ -63,9 +63,7 @@ static size_t g_numModeledComponents = sizeof(g_modeledComponents) / sizeof(g_mo
 // Command implemented by the TemperatureControl component itself
 static const char g_rebootCommand[] = "reboot";
 
-// Name of json field to parse for reboot's "delay". (Note the "delay" is the only field of the value, "delay" is not explicitly sent)
-static const char g_JSONCommandSetting[] = "commandRequest.value";
-// An empty JSON body for responses
+// An empty JSON body for PnP command responses
 static const char g_emptyJson[] = "{}";
 static const size_t g_emptyJsonSize = sizeof(g_emptyJson) - 1;
 
@@ -84,24 +82,18 @@ static const char g_serialNumberPropertyValue[] = "\"serial-no-123-abc\"";
 //
 // TempControl_InvokeRebootCommand processes the reboot command on the root interface
 //
-static int TempControl_InvokeRebootCommand(JSON_Object* rootObject, unsigned char** response, size_t* responseSize)
+static int TempControl_InvokeRebootCommand(JSON_Value* rootValue, unsigned char** response, size_t* responseSize)
 {
     int result;
-    JSON_Value* delayValue; 
 
-    if ((delayValue = json_object_dotget_value(rootObject, g_JSONCommandSetting)) == NULL)
-    {
-        LogError("Payload not specified in command request");
-        result = PNP_STATUS_BAD_FORMAT;
-    }
-    else if (JSONNumber != json_value_get_type(delayValue))
+    if (json_value_get_type(rootValue) != JSONNumber)
     {
         LogError("Delay payload is not a number");
         result = PNP_STATUS_BAD_FORMAT;
     }
     else
     {
-        int delayInSeconds = (int)json_value_get_number(delayValue);
+        int delayInSeconds = (int)json_value_get_number(rootValue);
         LogInfo("Temperature controller 'reboot' command invoked with delay=%d seconds", delayInSeconds);
 
         // Even though the DTMI for TemperatureController does not specify a response body, the underlying IoTHub device method
@@ -132,7 +124,6 @@ static int TempControl_DeviceMethodCallback(const char* methodName, const unsign
 
     char* jsonStr = NULL;
     JSON_Value* rootValue = NULL;
-    JSON_Object* rootObject = NULL;
     int result;
 
     unsigned const char *componentName;
@@ -157,11 +148,6 @@ static int TempControl_DeviceMethodCallback(const char* methodName, const unsign
         LogError("Unable to parse twin JSON");
         result = PNP_STATUS_BAD_FORMAT;
     }
-    else if ((rootObject = json_value_get_object(rootValue)) == NULL)
-    {
-        LogError("Unable to get root object of JSON");
-        result = PNP_STATUS_INTERNAL_ERROR;
-    }
     else
     {
         if (componentName != NULL)
@@ -169,11 +155,11 @@ static int TempControl_DeviceMethodCallback(const char* methodName, const unsign
             LogInfo("Received PnP command for component=%.*s, command=%s", (int)componentNameSize, componentName, pnpCommandName);
             if (strncmp((const char*)componentName, g_thermostatComponent1Name, g_thermostatComponent1Size) == 0)
             {
-                result = PnP_ThermostatComponent_ProcessCommand(g_thermostatHandle1, pnpCommandName, rootObject, response, responseSize);
+                result = PnP_ThermostatComponent_ProcessCommand(g_thermostatHandle1, pnpCommandName, rootValue, response, responseSize);
             }
             else if (strncmp((const char*)componentName, g_thermostatComponent2Name, g_thermostatComponent2Size) == 0)
             {
-                result = PnP_ThermostatComponent_ProcessCommand(g_thermostatHandle2, pnpCommandName, rootObject, response, responseSize);
+                result = PnP_ThermostatComponent_ProcessCommand(g_thermostatHandle2, pnpCommandName, rootValue, response, responseSize);
             }
             else
             {
@@ -186,7 +172,7 @@ static int TempControl_DeviceMethodCallback(const char* methodName, const unsign
             LogInfo("Received PnP command for TemperatureController (root) component, command=%s", pnpCommandName);
             if (strcmp(pnpCommandName, g_rebootCommand) == 0)
             {
-                result = TempControl_InvokeRebootCommand(rootObject, response, responseSize);
+                result = TempControl_InvokeRebootCommand(rootValue, response, responseSize);
             }
             else
             {
@@ -220,9 +206,9 @@ static void TempControl_ApplicationPropertyCallback(const char* componentName, c
     {
         PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle1, deviceClient, propertyName, propertyValue, version);
     }
-    else if (strcmp(componentName, g_thermostatComponent1Name) == 0)
+    else if (strcmp(componentName, g_thermostatComponent2Name) == 0)
     {
-        PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle1, deviceClient, propertyName, propertyValue, version);
+        PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle2, deviceClient, propertyName, propertyValue, version);
     }
     else
     {
@@ -337,6 +323,10 @@ int main(void)
         TempControl_ReportSerialNumberProperty(deviceClient);
         // Report DeviceInfo properties about this simulated device.
         PnP_DeviceInfoComponent_ReportInfo(deviceClient, g_deviceInfoComponentName);
+
+        // Send up reported property for both thermostat components
+        PnP_ThermostatComponent_SendMaxTemperatureSinceLastReboot_Property(g_thermostatHandle1, deviceClient);
+        PnP_ThermostatComponent_SendMaxTemperatureSinceLastReboot_Property(g_thermostatHandle2, deviceClient);
 
         while (true)
         {

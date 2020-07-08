@@ -23,8 +23,6 @@
 
 // Name of command this component supports to get report information
 static const char g_GetMinMaxReport[] = "getMaxMinReport";
-// Name of json field to parse for "since". (Note the "since" is assumed as only field of the value)
-static const char g_SinceJsonCommandSetting[] = "commandRequest.value";
 
 // Names of properties for desired/reporting
 static const char g_targetTemperaturePropertyName[] = "targetTemperature";
@@ -34,6 +32,9 @@ static const char g_maxTempSinceLastRebootPropertyName[] = "maxTempSinceLastRebo
 static const char g_ISO8601Format[] = "%04d-%02d-%02dT%02d:%02d:%02dZ";
 // Start time of the program, stored in ISO8601 format string for UTC.
 char g_programStartTime[128] = {0};
+
+// Format string for sending temperature telemetry
+static const char g_temperatureTelemetryBodyFormat[] = "{ \"temperature\":  %.02f }";
 
 // snprintf format for building getMaxMinReport
 static const char g_minMaxCommandResponseFormat[] = "{ \"maxTemp\": %.2f, \"minTemp\": %.2f, \"avgTemp\": %.2f, \"startTime\": \"%s\", \"endTime\": \"%s\" }";
@@ -184,8 +185,9 @@ static bool BuildMaxMinCommandResponse(PNP_THERMOSTAT_COMPONENT* pnpThermostatCo
     return result;
 }       
 
-int PnP_ThermostatComponent_ProcessCommand(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, const char *pnpCommandName, JSON_Object* commandJsonRootObject, unsigned char** response, size_t* responseSize)
+int PnP_ThermostatComponent_ProcessCommand(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, const char *pnpCommandName, JSON_Value* commandJsonValue, unsigned char** response, size_t* responseSize)
 {
+    PNP_THERMOSTAT_COMPONENT* pnpThermostatComponent = (PNP_THERMOSTAT_COMPONENT*)pnpThermostatComponentHandle;
     char* jsonStr = NULL;
     const char* sinceStr;
     int result;
@@ -200,19 +202,19 @@ int PnP_ThermostatComponent_ProcessCommand(PNP_THERMOSTAT_COMPONENT_HANDLE pnpTh
     }
     // See caveats section in ../readme.md; we don't actually respect this sinceStr to keep the sample simple,
     // but want to demonstrate how to parse out in any case.
-    else if ((sinceStr = json_object_dotget_string(commandJsonRootObject, g_SinceJsonCommandSetting)) == NULL)
+    else if ((sinceStr = json_value_get_string(commandJsonValue)) == NULL)
     {
-        LogError("Cannot retrieve JSON field %s", g_SinceJsonCommandSetting);
+        LogError("Cannot retrieve JSON string for command");
         result = PNP_STATUS_BAD_FORMAT;
     }
-    else if (BuildMaxMinCommandResponse((PNP_THERMOSTAT_COMPONENT*)pnpThermostatComponentHandle, response, responseSize) == false)
+    else if (BuildMaxMinCommandResponse(pnpThermostatComponent, response, responseSize) == false)
     {
         LogError("Unable to build response");
         result = PNP_STATUS_INTERNAL_ERROR;
     }
     else
     {
-        LogInfo("Returning success from command request");
+        LogInfo("Returning success from command request for component %s", pnpThermostatComponent->componentName);
         result = PNP_STATUS_SUCCESS;
     }
 
@@ -270,7 +272,7 @@ static void SendTargetTemperatureReport(PNP_THERMOSTAT_COMPONENT* pnpThermostatC
         }
         else
         {
-            LogInfo("Sending acknowledgement of property to IoTHub");
+            LogInfo("Sending acknowledgement of property to IoTHub for component %s", pnpThermostatComponent->componentName);
         }
     }
 
@@ -280,8 +282,9 @@ static void SendTargetTemperatureReport(PNP_THERMOSTAT_COMPONENT* pnpThermostatC
 //
 // SendMaxTemperatureSinceReboot reports a PnP property indicating the maximum temperature since the last reboot (simulated here by lifetime of executable)
 //
-static void SendMaxTemperatureSinceReboot(PNP_THERMOSTAT_COMPONENT* pnpThermostatComponent, IOTHUB_DEVICE_CLIENT_HANDLE deviceClient)
+void PnP_ThermostatComponent_SendMaxTemperatureSinceLastReboot_Property(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, IOTHUB_DEVICE_CLIENT_HANDLE deviceClient)
 {
+    PNP_THERMOSTAT_COMPONENT* pnpThermostatComponent = (PNP_THERMOSTAT_COMPONENT*)pnpThermostatComponentHandle;
     char maximumTemperatureAsString[32];
     IOTHUB_CLIENT_RESULT iothubClientResult;
     STRING_HANDLE jsonToSend = NULL;
@@ -305,7 +308,7 @@ static void SendMaxTemperatureSinceReboot(PNP_THERMOSTAT_COMPONENT* pnpThermosta
         }
         else
         {
-            LogInfo("Sending maximumTemperatureSinceLastReboot property to IoTHub");
+            LogInfo("Sending maximumTemperatureSinceLastReboot property to IoTHub for component %s", pnpThermostatComponent->componentName);
         }
     }
 
@@ -324,7 +327,7 @@ void PnP_ThermostatComponent_ProcessPropertyUpdate(PNP_THERMOSTAT_COMPONENT_HAND
     {
         double targetTemperature = json_value_get_number(propertyValue);
 
-        LogInfo("Received targetTemperature = %f", targetTemperature);
+        LogInfo("Received targetTemperature = %f for component = %s", targetTemperature, pnpThermostatComponent->componentName);
         
         bool maxTempUpdated = false;
         UpdateTemperatureAndStatistics(pnpThermostatComponent, targetTemperature, &maxTempUpdated);
@@ -335,7 +338,7 @@ void PnP_ThermostatComponent_ProcessPropertyUpdate(PNP_THERMOSTAT_COMPONENT_HAND
         if (maxTempUpdated)
         {
             // If the Maximum temperature has been updated, we also report this as a property.
-            SendMaxTemperatureSinceReboot(pnpThermostatComponent, deviceClient);
+            PnP_ThermostatComponent_SendMaxTemperatureSinceLastReboot_Property(pnpThermostatComponent, deviceClient);
         }
     }
 }
@@ -345,13 +348,14 @@ void PnP_ThermostatComponent_SendTelemetry(PNP_THERMOSTAT_COMPONENT_HANDLE pnpTh
     PNP_THERMOSTAT_COMPONENT* pnpThermostatComponent = (PNP_THERMOSTAT_COMPONENT*)pnpThermostatComponentHandle;
     IOTHUB_MESSAGE_HANDLE messageHandle = NULL;
     IOTHUB_CLIENT_RESULT iothubResult;
-    char currentTemperatureAsString[32];
 
-    if (snprintf(currentTemperatureAsString, sizeof(currentTemperatureAsString), "%.2f", pnpThermostatComponent->currentTemperature) < 0)
+    char temperatureStringBuffer[32];
+
+    if (snprintf(temperatureStringBuffer, sizeof(temperatureStringBuffer), g_temperatureTelemetryBodyFormat, pnpThermostatComponent->currentTemperature) < 0)
     {
-        LogError("Unable to create current temperature string for telemetry");
+        LogError("snprintf of current temperature telemetry failed");
     }
-    else if ((messageHandle = PnPHelper_CreateTelemetryMessageHandle(pnpThermostatComponent->componentName, currentTemperatureAsString)) == NULL)
+    else if ((messageHandle = PnPHelper_CreateTelemetryMessageHandle(pnpThermostatComponent->componentName, temperatureStringBuffer)) == NULL)
     {
         LogError("Unable to create telemetry message");
     }
