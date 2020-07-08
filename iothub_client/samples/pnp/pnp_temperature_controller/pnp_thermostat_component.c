@@ -28,16 +28,22 @@ static const char g_GetMinMaxReport[] = "getMaxMinReport";
 static const char g_targetTemperaturePropertyName[] = "targetTemperature";
 static const char g_maxTempSinceLastRebootPropertyName[] = "maxTempSinceLastReboot";
 
-// snprintf format to create an ISO8601 time.  This corresponds to the DTDL datetime schema item.
+// Format string to create an ISO8601 time.  This corresponds to the DTDL datetime schema item.
 static const char g_ISO8601Format[] = "%04d-%02d-%02dT%02d:%02d:%02dZ";
 // Start time of the program, stored in ISO8601 format string for UTC.
 char g_programStartTime[128] = {0};
 
 // Format string for sending temperature telemetry
-static const char g_temperatureTelemetryBodyFormat[] = "{ \"temperature\":  %.02f }";
+static const char g_temperatureTelemetryBodyFormat[] = "{\"temperature\":%.02f}";
 
-// snprintf format for building getMaxMinReport
-static const char g_minMaxCommandResponseFormat[] = "{ \"maxTemp\": %.2f, \"minTemp\": %.2f, \"avgTemp\": %.2f, \"startTime\": \"%s\", \"endTime\": \"%s\" }";
+// Format string for building getMaxMinReport response
+static const char g_minMaxCommandResponseFormat[] = "{\"maxTemp\":%.2f,\"minTemp\":%.2f,\"avgTemp\":%.2f,\"startTime\":\"%s\",\"endTime\":\"%s\"}";
+
+// Format string for sending maxTempSinceLastReboot property
+static const char g_maxTempSinceLastRebootPropertyFormat[] = "%.2f";
+// Format of the body when responding to a targetTemperature 
+static const char g_targetTemperaturePropertyResponseFormat[] = "%.2f";
+
 
 // Response description is an optional, human readable message including more information
 // about the setting of the temperature.  Because we accept all temperature requests, we 
@@ -245,15 +251,15 @@ static void UpdateTemperatureAndStatistics(PNP_THERMOSTAT_COMPONENT* pnpThermost
 }
 
 //
-// SendTargetTemperatureReport sends a PnP property indicating the device has received the desired targeted temperature
+// SendTargetTemperatureResponse sends a PnP property indicating the device has received the desired targeted temperature
 //
-static void SendTargetTemperatureReport(PNP_THERMOSTAT_COMPONENT* pnpThermostatComponent, IOTHUB_DEVICE_CLIENT_HANDLE deviceClient, int version)
+static void SendTargetTemperatureResponse(PNP_THERMOSTAT_COMPONENT* pnpThermostatComponent, IOTHUB_DEVICE_CLIENT_HANDLE deviceClient, int version)
 {
     char targetTemperatureAsString[32];
     IOTHUB_CLIENT_RESULT iothubClientResult;
     STRING_HANDLE jsonToSend = NULL;
 
-    if (snprintf(targetTemperatureAsString, sizeof(targetTemperatureAsString), "%.2f", pnpThermostatComponent->currentTemperature) < 0)
+    if (snprintf(targetTemperatureAsString, sizeof(targetTemperatureAsString), g_targetTemperaturePropertyResponseFormat, pnpThermostatComponent->currentTemperature) < 0)
     {
         LogError("Unable to create target temperature string for reporting result");
     }
@@ -280,14 +286,14 @@ static void SendTargetTemperatureReport(PNP_THERMOSTAT_COMPONENT* pnpThermostatC
     STRING_delete(jsonToSend);
 }
 
-void PnP_ThermostatComponent_SendMaxTemperatureSinceLastReboot_Property(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, IOTHUB_DEVICE_CLIENT_HANDLE deviceClient)
+void PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, IOTHUB_DEVICE_CLIENT_HANDLE deviceClient)
 {
     PNP_THERMOSTAT_COMPONENT* pnpThermostatComponent = (PNP_THERMOSTAT_COMPONENT*)pnpThermostatComponentHandle;
     char maximumTemperatureAsString[32];
     IOTHUB_CLIENT_RESULT iothubClientResult;
     STRING_HANDLE jsonToSend = NULL;
 
-    if (snprintf(maximumTemperatureAsString, sizeof(maximumTemperatureAsString), "%.2f", pnpThermostatComponent->maxTemperature) < 0)
+    if (snprintf(maximumTemperatureAsString, sizeof(maximumTemperatureAsString), g_maxTempSinceLastRebootPropertyFormat, pnpThermostatComponent->maxTemperature) < 0)
     {
         LogError("Unable to create maximum temperature string for reporting result");
     }
@@ -331,12 +337,12 @@ void PnP_ThermostatComponent_ProcessPropertyUpdate(PNP_THERMOSTAT_COMPONENT_HAND
         UpdateTemperatureAndStatistics(pnpThermostatComponent, targetTemperature, &maxTempUpdated);
 
         // The device needs to let the service know that it has received the targetTemperature desired property.
-        SendTargetTemperatureReport(pnpThermostatComponent, deviceClient, version);
+        SendTargetTemperatureResponse(pnpThermostatComponent, deviceClient, version);
         
         if (maxTempUpdated)
         {
             // If the Maximum temperature has been updated, we also report this as a property.
-            PnP_ThermostatComponent_SendMaxTemperatureSinceLastReboot_Property(pnpThermostatComponent, deviceClient);
+            PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(pnpThermostatComponent, deviceClient);
         }
     }
 }

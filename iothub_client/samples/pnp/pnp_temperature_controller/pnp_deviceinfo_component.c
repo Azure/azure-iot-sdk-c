@@ -77,7 +77,7 @@ static void SendReportedPropertyForDeviceInformation(IOTHUB_DEVICE_CLIENT_HANDLE
     STRING_delete(jsonToSend);
 }
 
-void PnP_DeviceInfoComponent_ReportInfo(IOTHUB_DEVICE_CLIENT_HANDLE deviceClient, const char* componentName)
+void PnP_DeviceInfoComponent_Report_All_Properties(IOTHUB_DEVICE_CLIENT_HANDLE deviceClient, const char* componentName)
 {
     // NOTE: It is possible to put multiple property updates into a single JSON and IoTHubDeviceClient_SendReportedState invocation.
     // This sample does not do so for clarity, though production devices should seriously consider such property update batching to

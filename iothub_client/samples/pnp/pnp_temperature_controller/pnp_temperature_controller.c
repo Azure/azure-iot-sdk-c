@@ -39,7 +39,7 @@ static unsigned int g_sleepBetweenTelemetrySends = 60 * 1000;
 static bool g_hubClientTraceEnabled = true;
 
 // DTMI indicating this device's ModelId.
-static const char g_modelId[] = "dtmi:com:example:TemperatureController;1";
+static const char g_thermostatModelId[] = "dtmi:com:example:TemperatureController;1";
 
 // PNP_THERMOSTAT_COMPONENT_HANDLE represent the thermostat components that are sub-components of the temperature controller.
 // Note that we do NOT have an analogous DeviceInfo component handle because there is only DeviceInfo subcomponent and its
@@ -259,9 +259,9 @@ void PnP_TempControlComponent_SendWorkingSet(IOTHUB_DEVICE_CLIENT_HANDLE deviceC
 }
 
 //
-// PnP_TempControlComponent_ReportSerialNumberProperty sends the "serialNumber" property to IoTHub
+// PnP_TempControlComponent_ReportSerialNumber_Property sends the "serialNumber" property to IoTHub
 //
-static void PnP_TempControlComponent_ReportSerialNumberProperty(IOTHUB_DEVICE_CLIENT_HANDLE deviceClient)
+static void PnP_TempControlComponent_ReportSerialNumber_Property(IOTHUB_DEVICE_CLIENT_HANDLE deviceClient)
 {
     IOTHUB_CLIENT_RESULT iothubClientResult;
     STRING_HANDLE jsonToSend = NULL;
@@ -297,7 +297,7 @@ int main(void)
     {
         LogError("Cannot read environment variable %s", g_connectionStringEnvironmentVariable);
     }
-    else if ((deviceClient = PnPHelper_CreateDeviceClientHandle(connectionString, g_modelId, g_hubClientTraceEnabled, PnP_TempControlComponent_DeviceMethodCallback, PnP_TempControlComponent_DeviceTwinCallback)) == NULL)
+    else if ((deviceClient = PnPHelper_CreateDeviceClientHandle(connectionString, g_thermostatModelId, g_hubClientTraceEnabled, PnP_TempControlComponent_DeviceMethodCallback, PnP_TempControlComponent_DeviceTwinCallback)) == NULL)
     {
         LogError("Failure creating IotHub device client");
     }
@@ -311,13 +311,13 @@ int main(void)
     }
     else
     {
-        LogInfo("Successfully created device client and thermostat component handle.  Hit Control-C to exit program\n");
+        LogInfo("Successfully created device client and thermostat component handles.  Hit Control-C to exit program\n");
 
-        // During startup, send many of the non-"writeable" properties.
-        PnP_TempControlComponent_ReportSerialNumberProperty(deviceClient);
-        PnP_DeviceInfoComponent_ReportInfo(deviceClient, g_deviceInfoComponentName);
-        PnP_ThermostatComponent_SendMaxTemperatureSinceLastReboot_Property(g_thermostatHandle1, deviceClient);
-        PnP_ThermostatComponent_SendMaxTemperatureSinceLastReboot_Property(g_thermostatHandle2, deviceClient);
+        // During startup, send the non-"writeable" properties.
+        PnP_TempControlComponent_ReportSerialNumber_Property(deviceClient);
+        PnP_DeviceInfoComponent_Report_All_Properties(deviceClient, g_deviceInfoComponentName);
+        PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(g_thermostatHandle1, deviceClient);
+        PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(g_thermostatHandle2, deviceClient);
 
         while (true)
         {

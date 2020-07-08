@@ -12,13 +12,13 @@
 #include "azure_c_shared_utility/strings.h"
 
 // Format used when building a response for a root property that does not contain metadata
-static const char g_propertyWithoutResponseSchemaWithoutComponent[] = "{ \"%s\": %s }";
+static const char g_propertyWithoutResponseSchemaWithoutComponent[] = "{\"%s\":%s}";
 // Format used when building a response for a component's property that does not contain metadata
-static const char g_propertyWithoutResponseSchemaWithComponent[] = "{\"""%s\": { \"__t\":\"c\", \"%s\": %s } }";
+static const char g_propertyWithoutResponseSchemaWithComponent[] = "{\"""%s\":{\"__t\":\"c\",\"%s\":%s}}";
 // Format used when building a response for a root property that does contain metadata
-static const char g_propertyWithResponseSchemaWithoutComponent[] =  "{ \"%s\": { \"value\":  %s, \"ac\": %d, \"ad\": \"%s\", \"av\": %d } } ";
+static const char g_propertyWithResponseSchemaWithoutComponent[] =  "{\"%s\":{\"value\":%s,\"ac\":%d,\"ad\":\"%s\",\"av\":%d}}";
 // Format used when building a response for a component's property that does contain metadata
-static const char g_propertyWithResponseSchemaWithComponent[] =  "{\"""%s\": { \"__t\":\"c\", \"%s\": { \"value\":  %s, \"ac\": %d, \"ad\": \"%s\", \"av\": %d } } }";
+static const char g_propertyWithResponseSchemaWithComponent[] =  "{\"""%s\":{\"__t\":\"c\",\"%s\":{\"value\":%s,\"ac\":%d,\"ad\":\"%s\",\"av\":%d}}}";
 
 // Character that separates a PnP component's from the specific command on the component.
 static const char g_commandSeparator = '*';
