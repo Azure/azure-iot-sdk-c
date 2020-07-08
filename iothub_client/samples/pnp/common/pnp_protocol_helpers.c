@@ -78,8 +78,8 @@ void PnPHelper_ParseCommandName(const char* deviceMethodName, unsigned const cha
 
     if ((separator = strchr(deviceMethodName, PnP_CommandSeparator)) != NULL)
     {
-        // If a separator character wis present in the device method name, then a command on a subcomponent of 
-        // the model is being targeted.  (E.G. Thermostat1.Run).
+        // If a separator character is present in the device method name, then a command on a subcomponent of 
+        // the model is being targeted (e.g. thermostat1*getMaxMinReport).
         *componentName = (unsigned const char*)deviceMethodName;
         *componentNameSize = separator - deviceMethodName;
         *pnpCommandName = separator + 1;
@@ -87,7 +87,7 @@ void PnPHelper_ParseCommandName(const char* deviceMethodName, unsigned const cha
     else 
     {
         // The separator character is optional.  If it is not present, it indicates a command of the root 
-        // component and not a subcomponent is being targeted.  (E.G. simply Run.)
+        // component and not a subcomponent is being targeted (e.g. "reboot").
         *componentName = NULL;
         *componentNameSize = 0;
         *pnpCommandName = deviceMethodName;
@@ -126,57 +126,64 @@ IOTHUB_MESSAGE_HANDLE PnPHelper_CreateTelemetryMessageHandle(const char* compone
 }
 
 //
-// VisitDesiredChildObject is invoked for each child element of the desired twin if and only if the element is an object.
-// This function determines if the object corresponds to a component (which itself has children properties) or a
-// property of the root component that has happens to be an object.
-//
-static void VisitDesiredChildObject(const char* objectName, JSON_Value* value, int version, PnPHelperPropertyCallbackFunction pnpPropertyCallback, void* userContextCallback)
+// VisitComponentProperties visits each sub element of the the given objectName in the desired JSON.  Each of these elements corresponds to
+// a property of this component which we will need to invoke the application's callback for.
+// 
+static void VisitComponentProperties(const char* objectName, JSON_Value* value, int version, PnPHelperPropertyCallbackFunction pnpPropertyCallback, void* userContextCallback)
 {
     JSON_Object* object = json_value_get_object(value);
 
-    // Determine whether we're processing the twin for a component or not, based on whether the component metadata tag
-    // is a child element of the JSON or not.  These calls will return NULL, by design, for non-components.
-    JSON_Value* componentTypeMarker = json_object_get_value(object, PnP_PropertyComponentJsonName);
-    const char* componentTypeStr = json_value_get_string(componentTypeMarker);
-
-    if ((componentTypeStr != NULL) && (strcmp(componentTypeStr, PnP_PropertyComponentJsonValue) == 0))
+    size_t numChildren = json_object_get_count(object);
+    for (size_t i = 0; i < numChildren; i++)
     {
-        // We are processing a component.  Visit each of its child elements, which correspond to its properties, and invoke the 
-        // application's property callback.
-        size_t numChildren = json_object_get_count(object);
-        for (size_t i = 0; i < numChildren; i++)
+        const char* propertyName = json_object_get_name(object, i);
+        JSON_Value* propertyValue = json_object_get_value_at(object, i);
+
+        if ((propertyName == NULL) || (propertyValue == NULL))
         {
-            const char* propertyName = json_object_get_name(object, i);
-            JSON_Value* propertyValue = json_object_get_value_at(object, i);
+            // This should never happen because we are simply accessing parson tree.  Do not pass NULL to application in case it does occur.
+            LogError("Unexpected error retrieving the property name and/or value of component %s at element %lu", objectName, (unsigned long)i);
+            continue;
+        }
 
-            if ((propertyName == NULL) || (propertyValue == NULL))
-            {
-                // This should never happen because we are simply accessing parson tree.  Do not pass NULL to application in case it does occur.
-                LogError("Unexpected error retrieving the property name and/or value of component %s at element %lu", objectName, (unsigned long)i);
-                continue;
-            }
+        // The PnP_PropertyComponentJsonName marker is the metadata indicating this is a component.  Don't call the application's callback.
+        // We cannot use this generally to determine whether the given JSON element is a component or not.  The device receives this
+        // metadata field when retrieving the full twin but will NOT get one during a property update patch.
+        if (strcmp(propertyName, PnP_PropertyComponentJsonName) == 0)
+        {
+            continue;
+        }
 
-            // The PnP_PropertyComponentJsonName marker is the metadata indicating this is a component.  Don't call the application's callback.
-            if (strcmp(propertyName, PnP_PropertyComponentJsonName) == 0)
-            {
-                continue;
-            }
+        pnpPropertyCallback(objectName, propertyName, propertyValue, version, userContextCallback);
+    }
 
-            pnpPropertyCallback(objectName, propertyName, propertyValue, version, userContextCallback);
+}
+
+//
+// IsJsonObjectAComponentInModel checks whether a given objectName (read from JSON during visiting it) corresponds to an element in componentsInModel.
+// We cannot otherwise tell whether in the desired JSON of say {"foo": {OBJECT}} whether "foo" is a component name and the OBJECT contains further properties
+// for this component, or whether "foo" is a top-level property of the root component.  
+//
+static bool IsJsonObjectAComponentInModel(const char* objectName, const char** componentsInModel, size_t numComponentsInModel)
+{
+    bool result = false;
+
+    for (size_t i = 0; i < numComponentsInModel; i++)
+    {
+        if (strcmp(objectName, componentsInModel[i]) == 0)
+        {
+            result = true;
+            break;
         }
     }
-    else
-    {
-        // Because there is no component marker, it means that this JSON object is a property of the root component.
-        // Simply invoke the application's property callback directly.
-        pnpPropertyCallback(NULL, objectName, value, version, userContextCallback);
-    }
+
+    return result;
 }
 
 //
 // VisitDesiredObject visits each child JSON element of the desired device twin for ultimate callback into the application.
 //
-static bool VisitDesiredObject(JSON_Object* desiredObject, PnPHelperPropertyCallbackFunction pnpPropertyCallback, void* userContextCallback)
+static bool VisitDesiredObject(JSON_Object* desiredObject, const char** componentsInModel, size_t numComponentsInModel, PnPHelperPropertyCallbackFunction pnpPropertyCallback, void* userContextCallback)
 {
     JSON_Value* versionValue = NULL;
     size_t numChildren;
@@ -206,16 +213,16 @@ static bool VisitDesiredObject(JSON_Object* desiredObject, PnPHelperPropertyCall
                 continue;
             }
 
-            JSON_Value_Type jsonType = json_type(value);
-            if (jsonType != JSONObject)
+            if ((json_type(value) == JSONObject) && IsJsonObjectAComponentInModel(name, componentsInModel, numComponentsInModel))
             {
-                // If the child element is NOT an object, then it means that this is a property of the model's root component.
-                pnpPropertyCallback(NULL, name, value, version, userContextCallback);
+                // If this current JSON is an element and the name is one of the componentsInModel that the application knows about,
+                // then this is a component that will need additional processing.
+                VisitComponentProperties(name, value, version, pnpPropertyCallback, userContextCallback);
             }
             else
             {
-                // If the child element is an object, the processing becomes more complex.
-                VisitDesiredChildObject(name, value, version, pnpPropertyCallback, userContextCallback);
+                // If the child element is NOT an object OR its not a model the application knows about, this is a property of the model's root component.
+                pnpPropertyCallback(NULL, name, value, version, userContextCallback);
             }
         }
 
@@ -225,22 +232,6 @@ static bool VisitDesiredObject(JSON_Object* desiredObject, PnPHelperPropertyCall
     return result;
 }
 
-char* PnPHelper_CopyPayloadToString(const unsigned char* payload, size_t size)
-{
-    char* jsonStr;
-
-    if ((jsonStr = (char*)malloc(size+1)) == NULL)
-    {
-        LogError("Unable to allocate %lu size buffer", (unsigned long)size);
-    }
-    else
-    {
-        memcpy(jsonStr, payload, size);
-        jsonStr[size] = 0;
-    }
-
-    return jsonStr;
-}
 
 //
 // GetDesiredJson retrieves JSON_Object* in the JSON tree corresponding to the desired payload.
@@ -269,13 +260,12 @@ static JSON_Object* GetDesiredJson(DEVICE_TWIN_UPDATE_STATE updateState, JSON_Va
             // So here we simply need the root of the JSON itself.
             desiredObject = rootObject;
         }
-
     }
 
     return desiredObject;
 }
 
-bool PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payload, size_t size, PnPHelperPropertyCallbackFunction pnpPropertyCallback, void* userContextCallback)
+bool PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payload, size_t size, const char** componentsInModel, size_t numComponentsInModel, PnPHelperPropertyCallbackFunction pnpPropertyCallback, void* userContextCallback)
 {
     char* jsonStr = NULL;
     JSON_Value* rootValue = NULL;
@@ -300,7 +290,7 @@ bool PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsig
     else
     {
         // Visit each sub-element in the desired portion of the twin JSON and invoke pnpPropertyCallback as appropriate.
-        result = VisitDesiredObject(desiredObject, pnpPropertyCallback, userContextCallback);
+        result = VisitDesiredObject(desiredObject, componentsInModel, numComponentsInModel, pnpPropertyCallback, userContextCallback);
     }
 
     json_value_free(rootValue);
@@ -308,3 +298,21 @@ bool PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsig
 
     return result;
 }
+
+char* PnPHelper_CopyPayloadToString(const unsigned char* payload, size_t size)
+{
+    char* jsonStr;
+
+    if ((jsonStr = (char*)malloc(size+1)) == NULL)
+    {
+        LogError("Unable to allocate %lu size buffer", (unsigned long)size);
+    }
+    else
+    {
+        memcpy(jsonStr, payload, size);
+        jsonStr[size] = 0;
+    }
+
+    return jsonStr;
+}
+

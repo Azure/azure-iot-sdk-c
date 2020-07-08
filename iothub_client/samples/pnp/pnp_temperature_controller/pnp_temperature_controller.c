@@ -57,6 +57,9 @@ static const char g_thermostatComponent2Name[] = "thermostat2";
 static const size_t g_thermostatComponent2Size = sizeof(g_thermostatComponent2Name) - 1;
 static const char g_deviceInfoComponentName[] = "deviceInformation";
 
+static const char* g_modeledComponents[] = {g_thermostatComponent1Name, g_thermostatComponent2Name};
+static size_t g_numModeledComponents = sizeof(g_modeledComponents) / sizeof(g_modeledComponents[0]);
+
 // Command implemented by the TemperatureControl component itself
 static const char g_rebootCommand[] = "reboot";
 
@@ -236,7 +239,7 @@ static void TempControl_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE updateState,
 {
     // Invoke PnPHelper_ProcessTwinData to actualy process the data.  PnPHelper_ProcessTwinData uses a visitor pattern to parse
     // the JSON and then visit each property, invoking TempControl_ApplicationPropertyCallback on each element.
-    if (PnPHelper_ProcessTwinData(updateState, payload, size, TempControl_ApplicationPropertyCallback, userContextCallback) == false)
+    if (PnPHelper_ProcessTwinData(updateState, payload, size, g_modeledComponents, g_numModeledComponents, TempControl_ApplicationPropertyCallback, userContextCallback) == false)
     {
         // If we're unable to parse the JSON for any reason (typically because the JSON is malformed or we ran out of memory)
         // there is no actiol we can take beyond logging.

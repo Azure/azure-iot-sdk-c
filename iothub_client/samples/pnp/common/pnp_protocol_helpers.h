@@ -49,7 +49,9 @@ STRING_HANDLE PnPHelper_CreateReportedPropertyWithStatus(const char* componentNa
 
 // 
 // PnPHelper_ParseCommandName is invoked by the application when an incoming device method arrives.  This function
-// parses the device method name into the targeted (optional) component and PnP specific command.
+// parses the device method name into the targeted (optional) component and PnP specific command.  Note that 
+// because we don't want to allocate separate buffers for componentName and pnpCommandName and we can't modify deviceMethodName in place,
+// we return the componentName as a non-NULL terminated character array with its length in componentNameSize.
 //
 void PnPHelper_ParseCommandName(const char* deviceMethodName, unsigned const char** componentName, size_t* componentNameSize, const char** pnpCommandName);
 
@@ -66,7 +68,7 @@ IOTHUB_MESSAGE_HANDLE PnPHelper_CreateTelemetryMessageHandle(const char* compone
 // PnPHelper_ProcessTwinData will visit the children of the desired portion of the twin and invoke the device's pnpPropertyCallback
 // for each property that it visits.
 // 
-bool PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payload, size_t size, PnPHelperPropertyCallbackFunction pnpPropertyCallback, void* userContextCallback);
+bool PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payload, size_t size, const char** componentsInModel, size_t numComponentsInModel, PnPHelperPropertyCallbackFunction pnpPropertyCallback, void* userContextCallback);
 
 //
 // PnPHelper_CopyTwinPayloadToString takes the payload data, which arrives as a potentially non-NULL terminated string, and creates
