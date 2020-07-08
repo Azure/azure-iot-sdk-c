@@ -91,10 +91,6 @@ static const char* CONNECTION_MODULE_ID_PROPERTY = "cmid";
 
 static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtimeutc";
 
-static const char DT_MODEL_ID_TOKEN[] = "digital-twin-model-id";
-
-static const char DEFAULT_IOTHUB_PRODUCT_IDENTIFIER[] = CLIENT_DEVICE_TYPE_PREFIX "/" IOTHUB_SDK_VERSION;
-
 #define TOLOWER(c) (((c>='A') && (c<='Z'))?c-'A'+'a':c)
 
 #define UNSUBSCRIBE_FROM_TOPIC                  0x0000
@@ -240,9 +236,9 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     int http_proxy_port;
     char* http_proxy_username;
     char* http_proxy_password;
-    bool isConnectUsernameSet;
+    bool isProductInfoSet;
     int disconnect_recv_flag;
-} MQTTTRANSPORT_HANDLE_DATA, *PMQTTTRANSPORT_HANDLE_DATA;
+} MQTTTRANSPORT_HANDLE_DATA, * PMQTTTRANSPORT_HANDLE_DATA;
 
 typedef struct MQTT_DEVICE_TWIN_ITEM_TAG
 {
@@ -266,7 +262,7 @@ typedef struct MQTT_MESSAGE_DETAILS_LIST_TAG
     void* context;
     uint16_t packet_id;
     DLIST_ENTRY entry;
-} MQTT_MESSAGE_DETAILS_LIST, *PMQTT_MESSAGE_DETAILS_LIST;
+} MQTT_MESSAGE_DETAILS_LIST, * PMQTT_MESSAGE_DETAILS_LIST;
 
 typedef struct DEVICE_METHOD_INFO_TAG
 {
@@ -400,21 +396,21 @@ static const char* retrieve_mqtt_return_codes(CONNECT_RETURN_CODE rtn_code)
 {
     switch (rtn_code)
     {
-        case CONNECTION_ACCEPTED:
-            return "Accepted";
-        case CONN_REFUSED_UNACCEPTABLE_VERSION:
-            return "Unacceptable Version";
-        case CONN_REFUSED_ID_REJECTED:
-            return "Id Rejected";
-        case CONN_REFUSED_SERVER_UNAVAIL:
-            return "Server Unavailable";
-        case CONN_REFUSED_BAD_USERNAME_PASSWORD:
-            return "Bad Username/Password";
-        case CONN_REFUSED_NOT_AUTHORIZED:
-            return "Not Authorized";
-        case CONN_REFUSED_UNKNOWN:
-        default:
-            return "Unknown";
+    case CONNECTION_ACCEPTED:
+        return "Accepted";
+    case CONN_REFUSED_UNACCEPTABLE_VERSION:
+        return "Unacceptable Version";
+    case CONN_REFUSED_ID_REJECTED:
+        return "Id Rejected";
+    case CONN_REFUSED_SERVER_UNAVAIL:
+        return "Server Unavailable";
+    case CONN_REFUSED_BAD_USERNAME_PASSWORD:
+        return "Bad Username/Password";
+    case CONN_REFUSED_NOT_AUTHORIZED:
+        return "Not Authorized";
+    case CONN_REFUSED_UNKNOWN:
+    default:
+        return "Unknown";
     }
 }
 #endif // NO_LOGGING
@@ -422,7 +418,6 @@ static const char* retrieve_mqtt_return_codes(CONNECT_RETURN_CODE rtn_code)
 static int retrieve_device_method_rid_info(const char* resp_topic, STRING_HANDLE method_name, STRING_HANDLE request_id)
 {
     int result;
-
     STRING_TOKENIZER_HANDLE token_handle = STRING_TOKENIZER_create_from_char(resp_topic);
     if (token_handle == NULL)
     {
@@ -479,7 +474,6 @@ static int retrieve_device_method_rid_info(const char* resp_topic, STRING_HANDLE
         }
         STRING_TOKENIZER_destroy(token_handle);
     }
-
     return result;
 }
 
@@ -1048,7 +1042,7 @@ static void sendPendingGetTwinRequests(PMQTTTRANSPORT_HANDLE_DATA transportData)
 static void removeExpiredTwinRequestsFromList(PMQTTTRANSPORT_HANDLE_DATA transport_data, tickcounter_ms_t current_ms, DLIST_ENTRY* twin_list)
 {
     PDLIST_ENTRY list_item = twin_list->Flink;
-    
+
     while (list_item != twin_list)
     {
         DLIST_ENTRY next_list_item;
@@ -1066,7 +1060,7 @@ static void removeExpiredTwinRequestsFromList(PMQTTTRANSPORT_HANDLE_DATA transpo
             }
         }
         else if ((msg_entry->device_twin_msg_type == REPORTED_STATE) &&
-                 (((current_ms - msg_entry->msgCreationTime) / 1000) >= TWIN_REPORT_UPDATE_TIMEOUT_SECS))
+            (((current_ms - msg_entry->msgCreationTime) / 1000) >= TWIN_REPORT_UPDATE_TIMEOUT_SECS))
         {
             item_timed_out = true;
             transport_data->transport_callbacks.twin_rpt_state_complete_cb(msg_entry->iothub_msg_id, STATUS_CODE_TIMEOUT_VALUE, transport_data->transport_ctx);
@@ -1688,127 +1682,127 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
 
         switch (actionResult)
         {
-            case MQTT_CLIENT_ON_PUBLISH_ACK:
-            case MQTT_CLIENT_ON_PUBLISH_COMP:
+        case MQTT_CLIENT_ON_PUBLISH_ACK:
+        case MQTT_CLIENT_ON_PUBLISH_COMP:
+        {
+            const PUBLISH_ACK* puback = (const PUBLISH_ACK*)msgInfo;
+            if (puback != NULL)
             {
-                const PUBLISH_ACK* puback = (const PUBLISH_ACK*)msgInfo;
-                if (puback != NULL)
+                PDLIST_ENTRY currentListEntry = transport_data->telemetry_waitingForAck.Flink;
+                while (currentListEntry != &transport_data->telemetry_waitingForAck)
                 {
-                    PDLIST_ENTRY currentListEntry = transport_data->telemetry_waitingForAck.Flink;
-                    while (currentListEntry != &transport_data->telemetry_waitingForAck)
-                    {
-                        MQTT_MESSAGE_DETAILS_LIST* mqttMsgEntry = containingRecord(currentListEntry, MQTT_MESSAGE_DETAILS_LIST, entry);
-                        DLIST_ENTRY saveListEntry;
-                        saveListEntry.Flink = currentListEntry->Flink;
+                    MQTT_MESSAGE_DETAILS_LIST* mqttMsgEntry = containingRecord(currentListEntry, MQTT_MESSAGE_DETAILS_LIST, entry);
+                    DLIST_ENTRY saveListEntry;
+                    saveListEntry.Flink = currentListEntry->Flink;
 
-                        if (puback->packetId == mqttMsgEntry->packet_id)
-                        {
-                            (void)DList_RemoveEntryList(currentListEntry); //First remove the item from Waiting for Ack List.
-                            sendMsgComplete(mqttMsgEntry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_OK);
-                            free(mqttMsgEntry);
-                        }
-                        currentListEntry = saveListEntry.Flink;
+                    if (puback->packetId == mqttMsgEntry->packet_id)
+                    {
+                        (void)DList_RemoveEntryList(currentListEntry); //First remove the item from Waiting for Ack List.
+                        sendMsgComplete(mqttMsgEntry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_OK);
+                        free(mqttMsgEntry);
                     }
+                    currentListEntry = saveListEntry.Flink;
+                }
+            }
+            else
+            {
+                LogError("Failure: MQTT_CLIENT_ON_PUBLISH_ACK publish_ack structure NULL.");
+            }
+            break;
+        }
+        case MQTT_CLIENT_ON_CONNACK:
+        {
+            const CONNECT_ACK* connack = (const CONNECT_ACK*)msgInfo;
+            if (connack != NULL)
+            {
+                if (connack->returnCode == CONNECTION_ACCEPTED)
+                {
+                    // The connect packet has been acked
+                    transport_data->currPacketState = CONNACK_TYPE;
+                    transport_data->isRecoverableError = true;
+                    transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_CONNECTED;
+
+                    // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_008: [ Upon successful connection the retry control shall be reset using retry_control_reset() ]
+                    retry_control_reset(transport_data->retry_control_handle);
+
+                    transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK, transport_data->transport_ctx);
                 }
                 else
                 {
-                    LogError("Failure: MQTT_CLIENT_ON_PUBLISH_ACK publish_ack structure NULL.");
-                }
-                break;
-            }
-            case MQTT_CLIENT_ON_CONNACK:
-            {
-                const CONNECT_ACK* connack = (const CONNECT_ACK*)msgInfo;
-                if (connack != NULL)
-                {
-                    if (connack->returnCode == CONNECTION_ACCEPTED)
+                    if (connack->returnCode == CONN_REFUSED_SERVER_UNAVAIL)
                     {
-                        // The connect packet has been acked
-                        transport_data->currPacketState = CONNACK_TYPE;
-                        transport_data->isRecoverableError = true;
-                        transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_CONNECTED;
+                        transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_DEVICE_DISABLED, transport_data->transport_ctx);
+                    }
+                    else if (connack->returnCode == CONN_REFUSED_BAD_USERNAME_PASSWORD || connack->returnCode == CONN_REFUSED_ID_REJECTED)
+                    {
+                        transport_data->isRecoverableError = false;
+                        transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL, transport_data->transport_ctx);
+                    }
+                    else if (connack->returnCode == CONN_REFUSED_NOT_AUTHORIZED)
+                    {
+                        transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL, transport_data->transport_ctx);
+                    }
+                    else if (connack->returnCode == CONN_REFUSED_UNACCEPTABLE_VERSION)
+                    {
+                        transport_data->isRecoverableError = false;
+                    }
+                    LogError("Connection Not Accepted: 0x%x: %s", connack->returnCode, retrieve_mqtt_return_codes(connack->returnCode));
+                    transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_PENDING_CLOSE;
+                    transport_data->currPacketState = PACKET_TYPE_ERROR;
+                }
+            }
+            else
+            {
+                LogError("MQTT_CLIENT_ON_CONNACK CONNACK parameter is NULL.");
+            }
+            break;
+        }
+        case MQTT_CLIENT_ON_SUBSCRIBE_ACK:
+        {
+            const SUBSCRIBE_ACK* suback = (const SUBSCRIBE_ACK*)msgInfo;
+            if (suback != NULL)
+            {
+                size_t index = 0;
+                for (index = 0; index < suback->qosCount; index++)
+                {
+                    if (suback->qosReturn[index] == DELIVER_FAILURE)
+                    {
+                        LogError("Subscribe delivery failure of subscribe %lu", (unsigned long)index);
+                    }
+                }
+                // The subscribed packet has been acked
+                transport_data->currPacketState = SUBACK_TYPE;
 
-                        // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_008: [ Upon successful connection the retry control shall be reset using retry_control_reset() ]
-                        retry_control_reset(transport_data->retry_control_handle);
-
-                        transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK, transport_data->transport_ctx);
-                    }
-                    else
-                    {
-                        if (connack->returnCode == CONN_REFUSED_SERVER_UNAVAIL)
-                        {
-                            transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_DEVICE_DISABLED, transport_data->transport_ctx);
-                        }
-                        else if (connack->returnCode == CONN_REFUSED_BAD_USERNAME_PASSWORD || connack->returnCode == CONN_REFUSED_ID_REJECTED)
-                        {
-                            transport_data->isRecoverableError = false;
-                            transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL, transport_data->transport_ctx);
-                        }
-                        else if (connack->returnCode == CONN_REFUSED_NOT_AUTHORIZED)
-                        {
-                            transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL, transport_data->transport_ctx);
-                        }
-                        else if (connack->returnCode == CONN_REFUSED_UNACCEPTABLE_VERSION)
-                        {
-                            transport_data->isRecoverableError = false;
-                        }
-                        LogError("Connection Not Accepted: 0x%x: %s", connack->returnCode, retrieve_mqtt_return_codes(connack->returnCode));
-                        transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_PENDING_CLOSE;
-                        transport_data->currPacketState = PACKET_TYPE_ERROR;
-                    }
-                }
-                else
+                // Is this a twin message
+                if (suback->packetId == transport_data->twin_resp_packet_id)
                 {
-                    LogError("MQTT_CLIENT_ON_CONNACK CONNACK parameter is NULL.");
+                    transport_data->twin_resp_sub_recv = true;
                 }
-                break;
             }
-            case MQTT_CLIENT_ON_SUBSCRIBE_ACK:
+            else
             {
-                const SUBSCRIBE_ACK* suback = (const SUBSCRIBE_ACK*)msgInfo;
-                if (suback != NULL)
-                {
-                    size_t index = 0;
-                    for (index = 0; index < suback->qosCount; index++)
-                    {
-                        if (suback->qosReturn[index] == DELIVER_FAILURE)
-                        {
-                            LogError("Subscribe delivery failure of subscribe %lu", (unsigned long)index);
-                        }
-                    }
-                    // The subscribed packet has been acked
-                    transport_data->currPacketState = SUBACK_TYPE;
-
-                    // Is this a twin message
-                    if (suback->packetId == transport_data->twin_resp_packet_id)
-                    {
-                        transport_data->twin_resp_sub_recv = true;
-                    }
-                }
-                else
-                {
-                    LogError("Failure: MQTT_CLIENT_ON_SUBSCRIBE_ACK SUBSCRIBE_ACK parameter is NULL.");
-                }
-                break;
+                LogError("Failure: MQTT_CLIENT_ON_SUBSCRIBE_ACK SUBSCRIBE_ACK parameter is NULL.");
             }
-            case MQTT_CLIENT_ON_PUBLISH_RECV:
-            case MQTT_CLIENT_ON_PUBLISH_REL:
-            {
-                // Currently not used
-                break;
-            }
-            case MQTT_CLIENT_ON_DISCONNECT:
-            {
-                // Close the client so we can reconnect again
-                transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_NOT_CONNECTED;
-                break;
-            }
-            case MQTT_CLIENT_ON_UNSUBSCRIBE_ACK:
-            case MQTT_CLIENT_ON_PING_RESPONSE:
-            default:
-            {
-                break;
-            }
+            break;
+        }
+        case MQTT_CLIENT_ON_PUBLISH_RECV:
+        case MQTT_CLIENT_ON_PUBLISH_REL:
+        {
+            // Currently not used
+            break;
+        }
+        case MQTT_CLIENT_ON_DISCONNECT:
+        {
+            // Close the client so we can reconnect again
+            transport_data->mqttClientStatus = MQTT_CLIENT_STATUS_NOT_CONNECTED;
+            break;
+        }
+        case MQTT_CLIENT_ON_UNSUBSCRIBE_ACK:
+        case MQTT_CLIENT_ON_PING_RESPONSE:
+        default:
+        {
+            break;
+        }
         }
     }
 }
@@ -1873,30 +1867,30 @@ static void mqtt_error_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_ERR
         PMQTTTRANSPORT_HANDLE_DATA transport_data = (PMQTTTRANSPORT_HANDLE_DATA)callbackCtx;
         switch (error)
         {
-            case MQTT_CLIENT_CONNECTION_ERROR:
-            {
-                transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_NETWORK, transport_data->transport_ctx);
-                break;
-            }
-            case MQTT_CLIENT_COMMUNICATION_ERROR:
-            {
-                transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, transport_data->transport_ctx);
-                break;
-            }
-            case MQTT_CLIENT_NO_PING_RESPONSE:
-            {
-                LogError("Mqtt Ping Response was not encountered.  Reconnecting device...");
-                transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_PING_RESPONSE, transport_data->transport_ctx);
-                break;
-            }
-            case MQTT_CLIENT_PARSE_ERROR:
-            case MQTT_CLIENT_MEMORY_ERROR:
-            case MQTT_CLIENT_UNKNOWN_ERROR:
-            default:
-            {
-                LogError("INTERNAL ERROR: unexpected error value received %s", MU_ENUM_TO_STRING(MQTT_CLIENT_EVENT_ERROR, error));
-                break;
-            }
+        case MQTT_CLIENT_CONNECTION_ERROR:
+        {
+            transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_NETWORK, transport_data->transport_ctx);
+            break;
+        }
+        case MQTT_CLIENT_COMMUNICATION_ERROR:
+        {
+            transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, transport_data->transport_ctx);
+            break;
+        }
+        case MQTT_CLIENT_NO_PING_RESPONSE:
+        {
+            LogError("Mqtt Ping Response was not encountered.  Reconnecting device...");
+            transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_PING_RESPONSE, transport_data->transport_ctx);
+            break;
+        }
+        case MQTT_CLIENT_PARSE_ERROR:
+        case MQTT_CLIENT_MEMORY_ERROR:
+        case MQTT_CLIENT_UNKNOWN_ERROR:
+        default:
+        {
+            LogError("INTERNAL ERROR: unexpected error value received %s", MU_ENUM_TO_STRING(MQTT_CLIENT_EVENT_ERROR, error));
+            break;
+        }
         }
         if (transport_data->mqttClientStatus != MQTT_CLIENT_STATUS_PENDING_CLOSE)
         {
@@ -2178,81 +2172,6 @@ static STRING_HANDLE buildClientId(const char* device_id, const char* module_id)
     }
 }
 
-static int buildConfigForUsernameStep2IfNeeded(PMQTTTRANSPORT_HANDLE_DATA transport_data)
-{
-    int result;
-
-    if (!transport_data->isConnectUsernameSet)
-    {
-        STRING_HANDLE userName = NULL;
-        STRING_HANDLE modelIdParameter = NULL;
-        STRING_HANDLE urlEncodedModelId = NULL;
-        const char* modelId = transport_data->transport_callbacks.get_model_id_cb(transport_data->transport_ctx);
-        // TODO: The preview API version in SDK is only scoped to scenarios that require the modelId to be set.
-        // https://github.com/Azure/azure-iot-sdk-c/issues/1547 tracks removing this once non-preview API versions support modelId.
-        const char* apiVersion = (modelId != NULL) ? IOTHUB_API_PREVIEW_VERSION : IOTHUB_API_VERSION;
-        const char* appSpecifiedProductInfo = transport_data->transport_callbacks.prod_info_cb(transport_data->transport_ctx);
-        STRING_HANDLE productInfoEncoded = NULL; 
-
-        if ((productInfoEncoded = URL_EncodeString((appSpecifiedProductInfo != NULL) ? appSpecifiedProductInfo : DEFAULT_IOTHUB_PRODUCT_IDENTIFIER)) == NULL)
-        {
-            LogError("Unable to UrlEncode productInfo");
-            result = MU_FAILURE;
-        }
-        else if ((userName = STRING_construct_sprintf("%s?api-version=%s&DeviceClientType=%s", STRING_c_str(transport_data->configPassedThroughUsername), apiVersion, STRING_c_str(productInfoEncoded))) == NULL)
-        {
-            LogError("Failed constructing string");
-            result = 0;
-        }
-        else if (modelId != NULL)
-        {
-            if ((urlEncodedModelId = URL_EncodeString(modelId)) == NULL)
-            {
-                LogError("Failed to URL encode the modelID string");
-                result = MU_FAILURE;
-            }
-            else if ((modelIdParameter = STRING_construct_sprintf("&%s=%s", DT_MODEL_ID_TOKEN, STRING_c_str(urlEncodedModelId))) == NULL)
-            {
-                LogError("Cannot build modelID string");
-                result = MU_FAILURE;
-            }
-            else if (STRING_concat_with_STRING(userName, modelIdParameter) != 0)
-            {
-                LogError("Failed to set modelID parameter in connect");
-                result = MU_FAILURE;
-            }
-            else
-            {
-                result = 0;
-            }
-        }
-        else
-        {
-            result = 0;
-        }
-
-        if (result == 0)
-        {
-            STRING_delete(transport_data->configPassedThroughUsername);
-            transport_data->configPassedThroughUsername = userName;
-            userName = NULL;
-            // setting connect string is only allowed once in the lifetime of the device client.
-            transport_data->isConnectUsernameSet = true;
-        }
-
-        STRING_delete(userName);
-        STRING_delete(modelIdParameter);
-        STRING_delete(urlEncodedModelId);
-        STRING_delete(productInfoEncoded);
-    }
-    else
-    {
-        result = 0;
-    }
-
-    return result;
-}
-
 static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
     int result;
@@ -2296,13 +2215,47 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 
     if (result == 0)
     {
-        STRING_HANDLE clientId;
-        if (buildConfigForUsernameStep2IfNeeded(transport_data) != 0)
+        if (!transport_data->isProductInfoSet)
         {
-            LogError("Failed to add optional connect parameters.");
-            result = MU_FAILURE;
+            // This requires the iothubClientHandle, which sadly the MQTT transport only gets on DoWork, so this code still needs to remain here.
+            // The correct place for this would be in the Create method, but we don't get the client handle there.
+            // Also, when device multiplexing is used, the customer creates the transport directly and explicitly, when the client is still not created.
+            // This will be a major hurdle when we add device multiplexing to MQTT transport.
+
+            STRING_HANDLE clone;
+            const char* product_info = transport_data->transport_callbacks.prod_info_cb(transport_data->transport_ctx);
+            if (product_info == NULL)
+            {
+                clone = STRING_construct_sprintf("%s%%2F%s", CLIENT_DEVICE_TYPE_PREFIX, IOTHUB_SDK_VERSION);
+            }
+            else
+            {
+                clone = URL_EncodeString(product_info);
+            }
+
+            if (clone == NULL)
+            {
+                LogError("Failed obtaining the product info");
+            }
+            else
+            {
+                if (STRING_concat_with_STRING(transport_data->configPassedThroughUsername, clone) != 0)
+                {
+                    LogError("Failed concatenating the product info");
+                }
+                else
+                {
+                    transport_data->isProductInfoSet = true;
+                }
+
+                STRING_delete(clone);
+            }
         }
-        else if ((clientId = buildClientId(STRING_c_str(transport_data->device_id), STRING_c_str(transport_data->module_id))) == NULL)
+
+        STRING_HANDLE clientId;
+
+        clientId = buildClientId(STRING_c_str(transport_data->device_id), STRING_c_str(transport_data->module_id));
+        if (NULL == clientId)
         {
             LogError("Unable to allocate clientId");
             result = MU_FAILURE;
@@ -2348,6 +2301,7 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             }
             STRING_delete(clientId);
         }
+
     }
     return result;
 }
@@ -2443,7 +2397,7 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 if (cred_type != IOTHUB_CREDENTIAL_TYPE_X509 && cred_type != IOTHUB_CREDENTIAL_TYPE_X509_ECC)
                 {
                     size_t sas_token_expiry = IoTHubClient_Auth_Get_SasToken_Expiry(transport_data->authorization_module);
-                    if ((current_time - transport_data->mqtt_connect_time) / 1000 > (sas_token_expiry*SAS_REFRESH_MULTIPLIER))
+                    if ((current_time - transport_data->mqtt_connect_time) / 1000 > (sas_token_expiry * SAS_REFRESH_MULTIPLIER))
                     {
                         /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_058: [ If the sas token has timed out IoTHubTransport_MQTT_Common_DoWork shall disconnect from the mqtt client and destroy the transport information and wait for reconnect. ] */
                         DisconnectFromClient(transport_data);
@@ -2478,18 +2432,15 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     return result;
 }
 
-// At handle creation time, we don't have all the fields required for building up the user name (e.g. productID)
-// We build up as much of the string as we can at this point because we do not store upperConfig after initialization.
-// In buildConfigForUsernameStep2IfNeeded, only immediately before we do CONNECT itself, do we complete building up this string.
-static STRING_HANDLE buildConfigForUsernameStep1(const IOTHUB_CLIENT_CONFIG* upperConfig, const char* moduleId)
+static STRING_HANDLE buildConfigForUsername(const IOTHUB_CLIENT_CONFIG* upperConfig, const char* moduleId)
 {
     if (moduleId == NULL)
     {
-        return STRING_construct_sprintf("%s.%s/%s/", upperConfig->iotHubName, upperConfig->iotHubSuffix, upperConfig->deviceId);
+        return STRING_construct_sprintf("%s.%s/%s/?api-version=%s&DeviceClientType=", upperConfig->iotHubName, upperConfig->iotHubSuffix, upperConfig->deviceId, IOTHUB_API_VERSION);
     }
     else
     {
-        return STRING_construct_sprintf("%s.%s/%s/%s/", upperConfig->iotHubName, upperConfig->iotHubSuffix, upperConfig->deviceId, moduleId);
+        return STRING_construct_sprintf("%s.%s/%s/%s/?api-version=%s&DeviceClientType=", upperConfig->iotHubName, upperConfig->iotHubSuffix, upperConfig->deviceId, moduleId, IOTHUB_API_VERSION);
     }
 }
 
@@ -2577,7 +2528,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                 }
                 else
                 {
-                    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_008: [If the upperConfig contains a valid protocolGatewayHostName value this shall be used for the hostname, otherwise the hostname shall be constructed using the iothubName and iothubSuffix.] */
+                    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_008: [If the upperConfig contains a valid protocolGatewayHostName value the this shall be used for the hostname, otherwise the hostname shall be constructed using the iothubname and iothubSuffix.] */
                     if (upperConfig->protocolGatewayHostName == NULL)
                     {
                         state->hostAddress = STRING_construct_sprintf("%s.%s", upperConfig->iotHubName, upperConfig->iotHubSuffix);
@@ -2593,7 +2544,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                         free_transport_handle_data(state);
                         state = NULL;
                     }
-                    else if ((state->configPassedThroughUsername = buildConfigForUsernameStep1(upperConfig, moduleId)) == NULL)
+                    else if ((state->configPassedThroughUsername = buildConfigForUsername(upperConfig, moduleId)) == NULL)
                     {
                         free_transport_handle_data(state);
                         state = NULL;
@@ -2629,7 +2580,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                         state->topic_DeviceMethods = NULL;
                         state->topic_InputQueue = NULL;
                         state->log_trace = state->raw_trace = false;
-                        state->isConnectUsernameSet = false;
+                        state->isProductInfoSet = false;
                         state->auto_url_encode_decode = false;
                         state->conn_attempted = false;
                     }
@@ -3220,7 +3171,10 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle)
                     currentListEntry = savedFromCurrentListEntry.Flink;
                 }
 
-                sendPendingGetTwinRequests(transport_data);
+                if (transport_data->twin_resp_sub_recv)
+                {
+                    sendPendingGetTwinRequests(transport_data);
+                }
             }
             /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_030: [IoTHubTransport_MQTT_Common_DoWork shall call mqtt_client_dowork everytime it is called if it is connected.] */
             mqtt_client_dowork(transport_data->mqttClient);
@@ -3232,30 +3186,30 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle)
     }
 }
 
-IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_GetSendStatus(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus)
+IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_GetSendStatus(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_STATUS* iotHubClientStatus)
 {
     IOTHUB_CLIENT_RESULT result;
 
     if (handle == NULL || iotHubClientStatus == NULL)
     {
-    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_023: [IoTHubTransport_MQTT_Common_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter.] */
-    LogError("invalid arument.");
-    result = IOTHUB_CLIENT_INVALID_ARG;
+        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_023: [IoTHubTransport_MQTT_Common_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter.] */
+        LogError("invalid arument.");
+        result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
     {
-    MQTTTRANSPORT_HANDLE_DATA* handleData = (MQTTTRANSPORT_HANDLE_DATA*)handle;
-    if (!DList_IsListEmpty(handleData->waitingToSend) || !DList_IsListEmpty(&(handleData->telemetry_waitingForAck)))
-    {
-        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_025: [IoTHubTransport_MQTT_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_BUSY if there are currently event items to be sent or being sent.] */
-        *iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_BUSY;
-    }
-    else
-    {
-        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_024: [IoTHubTransport_MQTT_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_IDLE if there are currently no event items to be sent or being sent.] */
-        *iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_IDLE;
-    }
-    result = IOTHUB_CLIENT_OK;
+        MQTTTRANSPORT_HANDLE_DATA* handleData = (MQTTTRANSPORT_HANDLE_DATA*)handle;
+        if (!DList_IsListEmpty(handleData->waitingToSend) || !DList_IsListEmpty(&(handleData->telemetry_waitingForAck)))
+        {
+            /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_025: [IoTHubTransport_MQTT_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_BUSY if there are currently event items to be sent or being sent.] */
+            *iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_BUSY;
+        }
+        else
+        {
+            /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_024: [IoTHubTransport_MQTT_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_IDLE if there are currently no event items to be sent or being sent.] */
+            *iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_IDLE;
+        }
+        result = IOTHUB_CLIENT_OK;
     }
     return result;
 }
