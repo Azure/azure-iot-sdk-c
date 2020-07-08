@@ -23,6 +23,7 @@
 #include "azure_c_shared_utility/xlogging.h"
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
+#include "azure_c_shared_utility/shared_util_options.h"
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
@@ -47,8 +48,6 @@ static const char g_JSONTargetTemperature[] = "targetTemperature";
 
 // Name of command this component supports to get report information
 static const char g_getMinMaxReport[] = "getMaxMinReport";
-// Name of json field to parse for "since". (Note the "since" is assumed as only field of the value)
-static const char g_sinceJsonCommandSetting[] = "commandRequest.value";
 // Return codes for device methods and desired property responses
 static int g_statusSuccess = 200;
 static int g_statusBadFormat = 400;
@@ -200,7 +199,6 @@ static int Thermostat_DeviceMethodCallback(const char* methodName, const unsigne
 
     char* jsonStr = NULL;
     JSON_Value* rootValue = NULL;
-    JSON_Object* rootObject = NULL;
     const char* sinceStr;
     int result;
 
@@ -224,16 +222,11 @@ static int Thermostat_DeviceMethodCallback(const char* methodName, const unsigne
         LogError("Unable to parse twin JSON");
         result = g_statusBadFormat;
     }
-    else if ((rootObject = json_value_get_object(rootValue)) == NULL)
-    {
-        LogError("Unable to get root object of JSON");
-        result = g_statusInternalError;
-    }
     // See caveats section in ../readme.md; we don't actually respect this sinceStr to keep the sample simple,
     // but want to demonstrate how to parse out in any case.
-    else if ((sinceStr = json_object_dotget_string(rootObject, g_sinceJsonCommandSetting)) == NULL)
+    else if ((sinceStr = json_value_get_string(rootValue)) == NULL)
     {
-        LogError("Cannot retrieve JSON field %s", g_sinceJsonCommandSetting);
+        LogError("Cannot retrieve since value");
         result = g_statusBadFormat;
     }
     else if (BuildMaxMinCommandResponse(response, responseSize) == false)
