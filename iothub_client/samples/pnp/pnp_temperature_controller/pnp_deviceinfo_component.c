@@ -66,7 +66,7 @@ static void SendReportedPropertyForDeviceInformation(IOTHUB_DEVICE_CLIENT_HANDLE
 
         if ((iothubClientResult = IoTHubDeviceClient_SendReportedState(deviceClient, (const unsigned char*)jsonToSendStr, jsonToSendStrLen, NULL, NULL)) != IOTHUB_CLIENT_OK)
         {
-            LogError("Unable to send reported state for property=%s.  Error=%d", propertyName, iothubClientResult);
+            LogError("Unable to send reported state for property=%s, error=%d", propertyName, iothubClientResult);
         }
         else
         {
@@ -91,4 +91,3 @@ void PnP_DeviceInfoComponent_Report_All_Properties(IOTHUB_DEVICE_CLIENT_HANDLE d
     SendReportedPropertyForDeviceInformation(deviceClient, componentName, PnPDeviceInfo_TotalStoragePropertyName, PnPDeviceInfo_TotalStoragePropertyValue);
     SendReportedPropertyForDeviceInformation(deviceClient, componentName, PnPDeviceInfo_TotalMemoryPropertyName, PnPDeviceInfo_TotalMemoryPropertyValue);
 }
-

@@ -159,7 +159,7 @@ static int PnP_TempControlComponent_DeviceMethodCallback(const char* methodName,
             }
             else
             {
-                LogError("PnP component %.*s is not supported by TemperatureController", (int)componentNameSize, componentName);
+                LogError("PnP component=%.*s is not supported by TemperatureController", (int)componentNameSize, componentName);
                 result = PNP_STATUS_NOT_FOUND;
             }
         }
@@ -172,7 +172,7 @@ static int PnP_TempControlComponent_DeviceMethodCallback(const char* methodName,
             }
             else
             {
-                LogError("PnP command on root interface %s is not supported by TemperatureController", pnpCommandName);
+                LogError("PnP command=s%s is not supported by TemperatureController", pnpCommandName);
                 result = PNP_STATUS_NOT_FOUND;
             }
         }
@@ -198,7 +198,7 @@ static void PnP_TempControlComponent_ApplicationPropertyCallback(const char* com
     {
         // The PnP protocol does not define a mechanism to report errors such as this to IoTHub, so 
         // the best we can do here is to log for diagnostics purposes.
-        LogError("Property %s arrived for TemperatureControl component itself.  This does not support writeable properties on it (all properties are on subcomponents)", propertyName);
+        LogError("Property=%s arrived for TemperatureControl component itself.  This does not support writeable properties on it (all properties are on subcomponents)", propertyName);
     }
     else if (strcmp(componentName, g_thermostatComponent1Name) == 0)
     {
@@ -210,7 +210,7 @@ static void PnP_TempControlComponent_ApplicationPropertyCallback(const char* com
     }
     else
     {
-        LogError("Component %s is not implemented by the ThermostatController", componentName);
+        LogError("Component=%s is not implemented by the TemperatureController", componentName);
     }
 }
 
@@ -277,7 +277,7 @@ static void PnP_TempControlComponent_ReportSerialNumber_Property(IOTHUB_DEVICE_C
 
         if ((iothubClientResult = IoTHubDeviceClient_SendReportedState(deviceClient, (const unsigned char*)jsonToSendStr, jsonToSendStrLen, NULL, NULL)) != IOTHUB_CLIENT_OK)
         {
-            LogError("Unable to send reported state.  Error=%d", iothubClientResult);
+            LogError("Unable to send reported state, error=%d", iothubClientResult);
         }
         else
         {
@@ -288,30 +288,67 @@ static void PnP_TempControlComponent_ReportSerialNumber_Property(IOTHUB_DEVICE_C
     STRING_delete(jsonToSend);
 }
 
-int main(void)
+
+//
+// CreateDeviceClientAndAllocateComponents allocates IOTHUB_DEVICE_CLIENT_HANDLE the application will use along with thermostat components
+// 
+static IOTHUB_DEVICE_CLIENT_HANDLE CreateDeviceClientAndAllocateComponents(void)
 {
     IOTHUB_DEVICE_CLIENT_HANDLE deviceClient = NULL;
     const char* connectionString;
+    bool result;
 
     if ((connectionString = getenv(g_connectionStringEnvironmentVariable)) == NULL)
     {
-        LogError("Cannot read environment variable %s", g_connectionStringEnvironmentVariable);
+        LogError("Cannot read environment variable=%s", g_connectionStringEnvironmentVariable);
+        result = false;
     }
     else if ((deviceClient = PnPHelper_CreateDeviceClientHandle(connectionString, g_thermostatModelId, g_hubClientTraceEnabled, PnP_TempControlComponent_DeviceMethodCallback, PnP_TempControlComponent_DeviceTwinCallback)) == NULL)
     {
         LogError("Failure creating IotHub device client");
+        result = false;
     }
     else if ((g_thermostatHandle1 = PnP_ThermostatComponent_CreateHandle(g_thermostatComponent1Name)) == NULL)
     {
         LogError("Unable to create component handle for %s", g_thermostatComponent1Name);
+        result = false;
     }
     else if ((g_thermostatHandle2 = PnP_ThermostatComponent_CreateHandle(g_thermostatComponent2Name)) == NULL)
     {
         LogError("Unable to create component handle for %s", g_thermostatComponent2Name);
+        result = false;
     }
     else
     {
-        LogInfo("Successfully created device client and thermostat component handles.  Hit Control-C to exit program\n");
+        result = true;
+    }
+
+    if (result == false)
+    {
+        PnP_ThermostatComponent_Destroy(g_thermostatHandle2);
+        PnP_ThermostatComponent_Destroy(g_thermostatHandle1);
+        if (deviceClient != NULL)
+        {
+            IoTHubDeviceClient_Destroy(deviceClient);
+            IoTHub_Deinit();
+            deviceClient = NULL;
+        }
+    }
+
+    return deviceClient;
+}
+
+int main(void)
+{
+    IOTHUB_DEVICE_CLIENT_HANDLE deviceClient = NULL;
+
+    if ((deviceClient = CreateDeviceClientAndAllocateComponents()) == NULL)
+    {
+        LogError("Failure creating IotHub device client");
+    }
+    else
+    {
+        LogInfo("Successfully created device client.  Hit Control-C to exit program\n");
 
         // During startup, send the non-"writeable" properties.
         PnP_TempControlComponent_ReportSerialNumber_Property(deviceClient);
@@ -342,4 +379,3 @@ int main(void)
 
     return 0;
 }
-

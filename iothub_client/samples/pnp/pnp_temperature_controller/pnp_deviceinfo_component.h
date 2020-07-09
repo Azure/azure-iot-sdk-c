@@ -18,4 +18,3 @@
 void PnP_DeviceInfoComponent_Report_All_Properties(IOTHUB_DEVICE_CLIENT_HANDLE deviceClient, const char* componentName);
 
 #endif
-

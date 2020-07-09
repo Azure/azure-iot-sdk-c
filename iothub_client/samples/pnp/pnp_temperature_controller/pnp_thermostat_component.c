@@ -14,14 +14,13 @@
 // Core IoT SDK utilities
 #include "azure_c_shared_utility/xlogging.h"
 
-
 // The PnP convention defines the maximum length of a component 
 #define PNP_MAXIMUM_COMPONENT_LENGTH 64
 
-// The default temperature to use before any is set.
+// The default temperature to use before any is set
 #define DEFAULT_TEMPERATURE_VALUE 30
 
-// Name of command this component supports to get report information
+// Name of command this component supports to retrieve a report about the component.
 static const char g_GetMinMaxReport[] = "getMaxMinReport";
 
 // Names of properties for desired/reporting
@@ -30,19 +29,17 @@ static const char g_maxTempSinceLastRebootPropertyName[] = "maxTempSinceLastRebo
 
 // Format string to create an ISO8601 time.  This corresponds to the DTDL datetime schema item.
 static const char g_ISO8601Format[] = "%04d-%02d-%02dT%02d:%02d:%02dZ";
-// Start time of the program, stored in ISO8601 format string for UTC.
-char g_programStartTime[128] = {0};
-
 // Format string for sending temperature telemetry
 static const char g_temperatureTelemetryBodyFormat[] = "{\"temperature\":%.02f}";
-
 // Format string for building getMaxMinReport response
 static const char g_minMaxCommandResponseFormat[] = "{\"maxTemp\":%.2f,\"minTemp\":%.2f,\"avgTemp\":%.2f,\"startTime\":\"%s\",\"endTime\":\"%s\"}";
-
 // Format string for sending maxTempSinceLastReboot property
 static const char g_maxTempSinceLastRebootPropertyFormat[] = "%.2f";
 // Format of the body when responding to a targetTemperature 
 static const char g_targetTemperaturePropertyResponseFormat[] = "%.2f";
+
+// Start time of the program, stored in ISO8601 format string for UTC
+char g_programStartTime[128] = {0};
 
 
 // Response description is an optional, human readable message including more information
@@ -53,22 +50,22 @@ static const char g_temperaturePropertyResponseDescription[] = "success";
 
 //
 // PNP_THERMOSTAT_COMPONENT simulates a thermostat component
-// (as in thermostat1 or thermostat2 in this sample).  We need separate data structures
+// (as in thermostat1 or thermostat2 in the TemperatureController model).  We need separate data structures
 // because the components can be independently controlled.
 //
 typedef struct PNP_THERMOSTAT_COMPONENT_TAG
 {
     // Name of this component
     char componentName[PNP_MAXIMUM_COMPONENT_LENGTH + 1];
-    // Current temperature of this thermostat component.
+    // Current temperature of this thermostat component
     double currentTemperature;
-    // Minimum temperature this thermostat has been at during current execution run of this thermostat component.
+    // Minimum temperature this thermostat has been at during current execution run of this thermostat component
     double minTemperature;
-    // Maximum temperature thermostat has been at during current execution run of this thermostat component.
+    // Maximum temperature thermostat has been at during current execution run of this thermostat component
     double maxTemperature;
-    // Number of times temperature has been updated, counting the initial setting as 1.  Used to determine average temperature of this thermostat component.
+    // Number of times temperature has been updated, counting the initial setting as 1.  Used to determine average temperature of this thermostat component
     int numTemperatureUpdates;
-    // Total of all temperature updates during current exceution run.  Used to determine average temperature of this thermostat component.
+    // Total of all temperature updates during current exceution run.  Used to determine average temperature of this thermostat component
     double allTemperatures;
 }
 PNP_THERMOSTAT_COMPONENT;
@@ -106,7 +103,7 @@ PNP_THERMOSTAT_COMPONENT_HANDLE PnP_ThermostatComponent_CreateHandle(const char*
 
     if (strlen(componentName) > PNP_MAXIMUM_COMPONENT_LENGTH)
     {
-        LogError("componentName %s is too long.  Maximum length is %d", componentName, PNP_MAXIMUM_COMPONENT_LENGTH);
+        LogError("componentName=%s is too long.  Maximum length is=%d", componentName, PNP_MAXIMUM_COMPONENT_LENGTH);
         thermostatComponent = NULL;
     }
     // On initial invocation, store the UTC time into g_programStartTime global.
@@ -182,7 +179,6 @@ static bool BuildMaxMinCommandResponse(PNP_THERMOSTAT_COMPONENT* pnpThermostatCo
     {
         *response = responseBuilder;
         *responseSize = (size_t)responseBuilderSize;
-        LogInfo("Response=<%s>", (const char*)responseBuilder);
     }
     else
     {
@@ -204,7 +200,7 @@ int PnP_ThermostatComponent_ProcessCommand(PNP_THERMOSTAT_COMPONENT_HANDLE pnpTh
 
     if (strcmp(pnpCommandName, g_GetMinMaxReport) != 0)
     {
-        LogError("Method name %s is not supported on this component", pnpCommandName);
+        LogError("PnP command=%s is not supported on thermostat component", pnpCommandName);
         result = PNP_STATUS_NOT_FOUND;
     }
     // See caveats section in ../readme.md; we don't actually respect this sinceStr to keep the sample simple,
@@ -216,17 +212,16 @@ int PnP_ThermostatComponent_ProcessCommand(PNP_THERMOSTAT_COMPONENT_HANDLE pnpTh
     }
     else if (BuildMaxMinCommandResponse(pnpThermostatComponent, response, responseSize) == false)
     {
-        LogError("Unable to build response");
+        LogError("Unable to build response for component=%s", pnpThermostatComponent->componentName);
         result = PNP_STATUS_INTERNAL_ERROR;
     }
     else
     {
-        LogInfo("Returning success from command request for component %s", pnpThermostatComponent->componentName);
+        LogInfo("Returning success from command request for component=%s", pnpThermostatComponent->componentName);
         result = PNP_STATUS_SUCCESS;
     }
 
     free(jsonStr);
-
     return result;
 }
 
@@ -275,11 +270,11 @@ static void SendTargetTemperatureResponse(PNP_THERMOSTAT_COMPONENT* pnpThermosta
 
         if ((iothubClientResult = IoTHubDeviceClient_SendReportedState(deviceClient, (const unsigned char*)jsonToSendStr, jsonToSendStrLen, NULL, NULL)) != IOTHUB_CLIENT_OK)
         {
-            LogError("Unable to send reported state.  Error=%d", iothubClientResult);
+            LogError("Unable to send reported state, error=%d", iothubClientResult);
         }
         else
         {
-            LogInfo("Sending acknowledgement of property to IoTHub for component %s", pnpThermostatComponent->componentName);
+            LogInfo("Sending acknowledgement of property to IoTHub for component=%s", pnpThermostatComponent->componentName);
         }
     }
 
@@ -295,7 +290,7 @@ void PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(PNP_THERMOS
 
     if (snprintf(maximumTemperatureAsString, sizeof(maximumTemperatureAsString), g_maxTempSinceLastRebootPropertyFormat, pnpThermostatComponent->maxTemperature) < 0)
     {
-        LogError("Unable to create maximum temperature string for reporting result");
+        LogError("Unable to create max temp since last reboot string for reporting result");
     }
     else if ((jsonToSend = PnPHelper_CreateReportedProperty(pnpThermostatComponent->componentName, g_maxTempSinceLastRebootPropertyName, maximumTemperatureAsString)) == NULL)
     {
@@ -308,11 +303,11 @@ void PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(PNP_THERMOS
 
         if ((iothubClientResult = IoTHubDeviceClient_SendReportedState(deviceClient, (const unsigned char*)jsonToSendStr, jsonToSendStrLen, NULL, NULL)) != IOTHUB_CLIENT_OK)
         {
-            LogError("Unable to send reported state.  Error=%d", iothubClientResult);
+            LogError("Unable to send reported state, error=%d", iothubClientResult);
         }
         else
         {
-            LogInfo("Sending maximumTemperatureSinceLastReboot property to IoTHub for component %s", pnpThermostatComponent->componentName);
+            LogInfo("Sending maximumTemperatureSinceLastReboot property to IoTHub for component=%s", pnpThermostatComponent->componentName);
         }
     }
 
@@ -325,13 +320,13 @@ void PnP_ThermostatComponent_ProcessPropertyUpdate(PNP_THERMOSTAT_COMPONENT_HAND
 
     if (strcmp(propertyName, g_targetTemperaturePropertyName) != 0)
     {
-        LogError("Property %s was requested to be changed but is not part of the thermostat interface definition", propertyName);
+        LogError("Property=%s was requested to be changed but is not part of the thermostat interface definition", propertyName);
     }
     else
     {
         double targetTemperature = json_value_get_number(propertyValue);
 
-        LogInfo("Received targetTemperature = %f for component = %s", targetTemperature, pnpThermostatComponent->componentName);
+        LogInfo("Received targetTemperature=%f for component=%s", targetTemperature, pnpThermostatComponent->componentName);
         
         bool maxTempUpdated = false;
         UpdateTemperatureAndStatistics(pnpThermostatComponent, targetTemperature, &maxTempUpdated);

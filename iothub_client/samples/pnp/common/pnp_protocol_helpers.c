@@ -114,7 +114,7 @@ IOTHUB_MESSAGE_HANDLE PnPHelper_CreateTelemetryMessageHandle(const char* compone
     // If the component will be used, then specify this as a property of the message.
     else if ((componentName != NULL) && (iothubMessageResult = IoTHubMessage_SetProperty(messageHandle, PnP_TelemetryComponentProperty, componentName)) != IOTHUB_MESSAGE_OK)
     {
-        LogError("IoTHubMessage_SetProperty %s failed, error=%d", PnP_TelemetryComponentProperty, iothubMessageResult);
+        LogError("IoTHubMessage_SetProperty=%s failed, error=%d", PnP_TelemetryComponentProperty, iothubMessageResult);
         result = false;
     }
     else
@@ -132,7 +132,7 @@ IOTHUB_MESSAGE_HANDLE PnPHelper_CreateTelemetryMessageHandle(const char* compone
 }
 
 //
-// VisitComponentProperties visits each sub element of the the given objectName in the desired JSON.  Each of these elements corresponds to
+// VisitComponentProperties visits each sub element of the the given objectName in the desired JSON.  Each of these sub elements corresponds to
 // a property of this component, which we'll invoke the application's pnpPropertyCallback to inform.
 // 
 static void VisitComponentProperties(const char* objectName, JSON_Value* value, int version, PnPHelperPropertyCallbackFunction pnpPropertyCallback, void* userContextCallback)
@@ -148,7 +148,7 @@ static void VisitComponentProperties(const char* objectName, JSON_Value* value, 
         if ((propertyName == NULL) || (propertyValue == NULL))
         {
             // This should never happen because we are simply accessing parson tree.  Do not pass NULL to application in case it does occur.
-            LogError("Unexpected error retrieving the property name and/or value of component %s at element %lu", objectName, (unsigned long)i);
+            LogError("Unexpected error retrieving the property name and/or value of component=%s at element at index=%lu", objectName, (unsigned long)i);
             continue;
         }
 
@@ -218,14 +218,14 @@ static bool VisitDesiredObject(JSON_Object* desiredObject, const char** componen
 
             if (strcmp(name, g_JSONPropertyVersion) == 0)
             {
-                // The version field is metadata and should be skipped in enumeration loop.
+                // The version field is metadata and should be ignored in this loop.
                 continue;
             }
 
             if ((json_type(value) == JSONObject) && IsJsonObjectAComponentInModel(name, componentsInModel, numComponentsInModel))
             {
-                // If this current JSON is an element and the name is one of the componentsInModel that the application knows about,
-                // then this is a component that will need additional processing.
+                // If this current JSON is an element AND the name is one of the componentsInModel that the application knows about,
+                // then this json element represenst a component.
                 VisitComponentProperties(name, value, version, pnpPropertyCallback, userContextCallback);
             }
             else
@@ -324,4 +324,3 @@ char* PnPHelper_CopyPayloadToString(const unsigned char* payload, size_t size)
 
     return jsonStr;
 }
-

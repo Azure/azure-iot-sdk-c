@@ -28,7 +28,7 @@ IOTHUB_DEVICE_CLIENT_HANDLE PnPHelper_CreateDeviceClientHandle(const char* conne
     // Before invoking ANY IoTHub Device SDK functionality, IoTHub_Init must be invoked.
     if ((iothubInitResult = IoTHub_Init()) != 0)
     {
-        LogError("Failure to initialize client.  Error=%d", iothubInitResult);
+        LogError("Failure to initialize client, error=%d", iothubInitResult);
         result = false;
     }
     // Create the deviceHandle itself.
@@ -96,4 +96,3 @@ IOTHUB_DEVICE_CLIENT_HANDLE PnPHelper_CreateDeviceClientHandle(const char* conne
 
     return deviceHandle;
 }
-
