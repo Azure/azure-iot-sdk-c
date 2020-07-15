@@ -226,7 +226,7 @@ static bool VisitDesiredObject(JSON_Object* desiredObject, const char** componen
             if ((json_type(value) == JSONObject) && IsJsonObjectAComponentInModel(name, componentsInModel, numComponentsInModel))
             {
                 // If this current JSON is an element AND the name is one of the componentsInModel that the application knows about,
-                // then this json element represenst a component.
+                // then this json element represents a component.
                 VisitComponentProperties(name, value, version, pnpPropertyCallback, userContextCallback);
             }
             else
