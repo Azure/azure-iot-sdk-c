@@ -44,7 +44,7 @@ STRING_HANDLE PnPHelper_CreateReportedProperty(const char* componentName, const 
 
 //
 // PnPHelper_CreateReportedProperty returns JSON to report a property's value from the device.  This contains metadata such as 
-// a result code or version.  It is used when responding to a desired property change request from the server, an in particular
+// a result code or version.  It is used when responding to a desired property change request from the server, and in particular
 // for properties marked with <"writable": true>.
 // For instance, after processing a thermostat's set point the application acknowledges that it has received the request and can indicate 
 // whether it will attempt to honor the requset or whether the request was unsuccessful.
