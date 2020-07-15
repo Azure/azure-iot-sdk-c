@@ -96,6 +96,7 @@ jobs:
       echo -e "exit\r\n\r\n\r\n" | cat > input.txt
       python3 serial_connect.py -i input.txt -o output.txt -b 1000000 -p $(X86_ESP32_PORT) -d esp32 -s
       rm input.txt
+      exit 1
     failOnStderr: true
     displayName: 'run_test'
 
