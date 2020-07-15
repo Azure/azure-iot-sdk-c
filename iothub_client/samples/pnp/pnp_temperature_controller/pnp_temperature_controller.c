@@ -224,7 +224,7 @@ static void PnP_TempControlComponent_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE
     if (PnPHelper_ProcessTwinData(updateState, payload, size, g_modeledComponents, g_numModeledComponents, PnP_TempControlComponent_ApplicationPropertyCallback, userContextCallback) == false)
     {
         // If we're unable to parse the JSON for any reason (typically because the JSON is malformed or we ran out of memory)
-        // there is no actiol we can take beyond logging.
+        // there is no action we can take beyond logging.
         LogError("Unable to process twin json.  Ignoring any desired property update requests");
     }
 }
