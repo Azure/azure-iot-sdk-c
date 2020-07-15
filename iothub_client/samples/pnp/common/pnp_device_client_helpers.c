@@ -58,7 +58,7 @@ IOTHUB_DEVICE_CLIENT_HANDLE PnPHelper_CreateDeviceClientHandle(const char* conne
         result = false;
     }
     // Optionally sets the callback function that processes device twin changes from the IoTHub, which is the channel that PnP Properties are 
-    // transferred over.  This will also automatically retrieve the full twin for the application. 
+    // transferred over.  This will also automatically retrieve the full twin for the application on startup. 
     else if ((deviceTwinCallback != NULL) && (iothubResult = IoTHubDeviceClient_SetDeviceTwinCallback(deviceHandle, deviceTwinCallback, (void*)deviceHandle)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to set device twin callback, error=%d", iothubResult);
