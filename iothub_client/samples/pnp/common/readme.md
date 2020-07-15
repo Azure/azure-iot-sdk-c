@@ -1,6 +1,6 @@
 # Common helper utilities for PnP Sample
 
-This directory contains sample code that your application should be able to take with little or no modification to speed implementing a PnP device application.
+This directory contains sample code that your application should be able to take with little or no modification to accelerate implementing a PnP device application.
 
 Probably the easiest way to understand how they work is to review the [pnp_temperature_controller](../pnp_temperature_controller) sample, which uses them extensively.
 
