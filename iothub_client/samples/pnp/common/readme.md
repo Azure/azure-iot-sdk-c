@@ -12,6 +12,6 @@ For reference the files are:
 
     The Azure IoTHub SDK defines additional types of handles - namely `IOTHUB_DEVICE_CLIENT_LL_HANDLE` (for a device using the \_LL\_ lower layer) and for modules the analogous `IOTHUB_MODULE_CLIENT_HANDLE` and `IOTHUB_MODULE_CLIENT_LL_HANDLE`.  The code in this file can easily be modified to use a different handle flavor for your code.
 
-* `pnp_protocol_helpers` header and .c file implement functions to help with serializing and de-serializing the PnP convention.  As an example of their usefulness, PnP properties are sent between the device and IoTHub using a specific JSON convention over the device twin.  Helpers in this function perform some of the tedious parsing and JSON string generation that your PnP application needs to do anyway.
+* `pnp_protocol_helpers` header and .c file implement functions to help with serializing and de-serializing the PnP convention.  As an example of their usefulness, PnP properties are sent between the device and IoTHub using a specific JSON convention over the device twin.  Helpers in this function perform some of the tedious parsing and JSON string generation that your PnP application would need to do.
 
     The helpers are agnostic to the underlying transport handle used.  If you use `IOTHUB_DEVICE_CLIENT_LL_HANDLE`, `IOTHUB_MODULE_CLIENT_HANDLE` or `IOTHUB_MODULE_CLIENT_LL_HANDLE` instead of the sample's `IOTHUB_DEVICE_CLIENT_HANDLE`, the `pnp_protocol_helpers` logic does not need to change.
