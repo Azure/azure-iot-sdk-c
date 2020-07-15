@@ -320,7 +320,7 @@ char* PnPHelper_CopyPayloadToString(const unsigned char* payload, size_t size)
     else
     {
         memcpy(jsonStr, payload, size);
-        jsonStr[size] = 0;
+        jsonStr[size] = '\0';
     }
 
     return jsonStr;
