@@ -55,7 +55,7 @@ static int g_statusNotFoundStatus = 404;
 static int g_statusInternalError = 500;
 
 // The default temperature to use before any is set.
-#define DEFAULT_TEMPERATURE_VALUE 30
+#define DEFAULT_TEMPERATURE_VALUE 22
 // Current temperature of the thermostat.
 static double g_currentTemperature = DEFAULT_TEMPERATURE_VALUE;
 // Minimum temperature thermostat has been at during current execution run.
@@ -88,6 +88,14 @@ static const char g_targetTemperatureResponseFormat[] = "{\"targetTemperature\":
 // a temperature being out of range or a mechanical issue on the device on error cases.
 static const char g_temperaturePropertyResponseDescription[] = "success";
 
+// Size of buffer to store ISO 8601 time.
+#define TIME_BUFFER_SIZE 128
+// Format string to create an ISO 8601 time.  This corresponds to the DTDL datetime schema item.
+static const char g_ISO8601Format[] = "%04d-%02d-%02dT%02d:%02d:%02dZ";
+// Start time of the program, stored in ISO 8601 format string for UTC.
+char g_ProgramStartTime[TIME_BUFFER_SIZE];
+
+
 //
 // CopyTwinPayloadToString takes the twin payload data, which arrives as a potentially non-NULL terminated string, and creates
 // a new copy of the data with a NULL terminator.  The JSON parser this sample uses, parson, only operates over NULL terminated strings.
@@ -109,11 +117,6 @@ static char* CopyTwinPayloadToString(const unsigned char* payload, size_t size)
     return jsonStr;
 }
 
-// snprintf format to create an ISO8601 time.  This corresponds to the DTDL datetime schema item.
-static const char g_ISO8601Format[] = "%04d-%02d-%02dT%02d:%02d:%02dZ";
-// Start time of the program, stored in ISO8601 format string for UTC.
-char g_ProgramStartTime[128];
-
 //
 // BuildUtcTimeFromCurrentTime writes the current time, in ISO 8601 format, into the specified buffer
 //
@@ -126,8 +129,7 @@ static bool BuildUtcTimeFromCurrentTime(char* utcTimeBuffer, size_t utcTimeBuffe
     time(&currentTime);
     currentTimeTm = gmtime(&currentTime);
 
-    if (snprintf(utcTimeBuffer, utcTimeBufferSize, g_ISO8601Format, currentTimeTm->tm_year + 1900, currentTimeTm->tm_mon, currentTimeTm->tm_mday, 
-                  currentTimeTm->tm_hour, currentTimeTm->tm_min, currentTimeTm->tm_sec) < 0)
+    if (strftime(utcTimeBuffer, utcTimeBufferSize, g_ISO8601Format, currentTimeTm) == 0)
     {
         LogError("snprintf on UTC time failed");
         result = false;
@@ -148,7 +150,7 @@ static bool BuildMaxMinCommandResponse(unsigned char** response, size_t* respons
     int responseBuilderSize = 0;
     unsigned char* responseBuilder = NULL;
     bool result;
-    char currentTime[128];
+    char currentTime[TIME_BUFFER_SIZE];
 
     if (BuildUtcTimeFromCurrentTime(currentTime, sizeof(currentTime)) == false)
     {
@@ -386,6 +388,10 @@ static void Thermostat_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE updateState, 
         // The $version must be a number (and in practice an int) A non-numerical value indicates 
         // something is fundamentally wrong with how we've received the twin and we should not proceed.
         LogError("JSON field %s is not a number but must be", g_JSONPropertyVersion);
+    }
+    else if (json_value_get_type(targetTemperatureValue) != JSONNumber)
+    {
+        LogError("JSON field %s is not a number but must be", g_JSONTargetTemperature);
     }
     else
     {

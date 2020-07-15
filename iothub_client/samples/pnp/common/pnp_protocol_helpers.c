@@ -152,8 +152,9 @@ static void VisitComponentProperties(const char* objectName, JSON_Value* value, 
             continue;
         }
 
-        // The g_JSONComponentMetadata marker is the metadata indicating this is a component the device gets on
-        // when its gets the full device twin.  Don't call the application's callback for metadata.
+        // When a component is received from a full twin, it will have a "__t" as one of the child elements.  This is metadata that indicates
+        // to solutions that the JSON object corresponds to a component and not a property of the root component.  Because this is 
+        // metadata and not part of this component's modeled properties, we ignore it when processing this loop.
         if (strcmp(propertyName, g_JSONComponentMetadata) == 0)
         {
             continue;

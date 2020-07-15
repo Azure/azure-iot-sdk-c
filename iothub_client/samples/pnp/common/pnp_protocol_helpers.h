@@ -24,6 +24,11 @@
 #define PNP_STATUS_INTERNAL_ERROR 500
 
 //
+// The PnP convention defines the maximum length of a component 
+//
+#define PNP_MAXIMUM_COMPONENT_LENGTH 64
+
+//
 // PnPHelperPropertyCallbackFunction defines the function prototype the application implements to receive a callback for each PnP property in a given Device Twin.
 // 
 typedef void (*PnPHelperPropertyCallbackFunction)(const char* componentName, const char* propertyName, JSON_Value* propertyValue, int version, void* userContextCallback);

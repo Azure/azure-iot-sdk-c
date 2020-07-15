@@ -15,6 +15,6 @@
 //
 // PnP_DeviceInfoComponent_Report_All_Properties sends properties corresponding to the DeviceInfo interface to the cloud.
 //
-void PnP_DeviceInfoComponent_Report_All_Properties(IOTHUB_DEVICE_CLIENT_HANDLE deviceClient, const char* componentName);
+void PnP_DeviceInfoComponent_Report_All_Properties(const char* componentName, IOTHUB_DEVICE_CLIENT_HANDLE deviceClient);
 
-#endif
+#endif /* PNP_DEVICEINFO_COMPONENT_H */

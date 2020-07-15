@@ -14,21 +14,21 @@
 // Core IoT SDK utilities
 #include "azure_c_shared_utility/xlogging.h"
 
-// The PnP convention defines the maximum length of a component 
-#define PNP_MAXIMUM_COMPONENT_LENGTH 64
-
 // The default temperature to use before any is set
-#define DEFAULT_TEMPERATURE_VALUE 30
+#define DEFAULT_TEMPERATURE_VALUE 22
+
+// Size of buffer to store ISO 8601 time.
+#define TIME_BUFFER_SIZE 128
 
 // Name of command this component supports to retrieve a report about the component.
-static const char g_GetMinMaxReport[] = "getMaxMinReport";
+static const char g_getMinMaxReport[] = "getMaxMinReport";
 
 // Names of properties for desired/reporting
 static const char g_targetTemperaturePropertyName[] = "targetTemperature";
 static const char g_maxTempSinceLastRebootPropertyName[] = "maxTempSinceLastReboot";
 
-// Format string to create an ISO8601 time.  This corresponds to the DTDL datetime schema item.
-static const char g_ISO8601Format[] = "%04d-%02d-%02dT%02d:%02d:%02dZ";
+// Format string to create an ISO 8601 time.  This corresponds to the DTDL datetime schema item.
+static const char g_ISO8601Format[] = "%Y-%m-%dT%H:%M:%SZ";
 // Format string for sending temperature telemetry
 static const char g_temperatureTelemetryBodyFormat[] = "{\"temperature\":%.02f}";
 // Format string for building getMaxMinReport response
@@ -38,8 +38,8 @@ static const char g_maxTempSinceLastRebootPropertyFormat[] = "%.2f";
 // Format of the body when responding to a targetTemperature 
 static const char g_targetTemperaturePropertyResponseFormat[] = "%.2f";
 
-// Start time of the program, stored in ISO8601 format string for UTC
-char g_programStartTime[128] = {0};
+// Start time of the program, stored in ISO 8601 format string for UTC
+char g_programStartTime[TIME_BUFFER_SIZE] = {0};
 
 
 // Response description is an optional, human readable message including more information
@@ -82,8 +82,7 @@ static bool BuildUtcTimeFromCurrentTime(char* utcTimeBuffer, size_t utcTimeBuffe
     time(&currentTime);
     currentTimeTm = gmtime(&currentTime);
 
-    if (snprintf(utcTimeBuffer, utcTimeBufferSize, g_ISO8601Format, currentTimeTm->tm_year + 1900, currentTimeTm->tm_mon, currentTimeTm->tm_mday, 
-                  currentTimeTm->tm_hour, currentTimeTm->tm_min, currentTimeTm->tm_sec) < 0)
+    if (strftime(utcTimeBuffer, utcTimeBufferSize, g_ISO8601Format, currentTimeTm) == 0)
     {
         LogError("snprintf on UTC time failed");
         result = false;
@@ -145,7 +144,7 @@ static bool BuildMaxMinCommandResponse(PNP_THERMOSTAT_COMPONENT* pnpThermostatCo
     int responseBuilderSize = 0;
     unsigned char* responseBuilder = NULL;
     bool result;
-    char currentTime[128];
+    char currentTime[TIME_BUFFER_SIZE];
 
     if (BuildUtcTimeFromCurrentTime(currentTime, sizeof(currentTime)) == false)
     {
@@ -191,14 +190,13 @@ static bool BuildMaxMinCommandResponse(PNP_THERMOSTAT_COMPONENT* pnpThermostatCo
 int PnP_ThermostatComponent_ProcessCommand(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, const char *pnpCommandName, JSON_Value* commandJsonValue, unsigned char** response, size_t* responseSize)
 {
     PNP_THERMOSTAT_COMPONENT* pnpThermostatComponent = (PNP_THERMOSTAT_COMPONENT*)pnpThermostatComponentHandle;
-    char* jsonStr = NULL;
     const char* sinceStr;
     int result;
 
     *response = NULL;
     *responseSize = 0;
 
-    if (strcmp(pnpCommandName, g_GetMinMaxReport) != 0)
+    if (strcmp(pnpCommandName, g_getMinMaxReport) != 0)
     {
         LogError("PnP command=%s is not supported on thermostat component", pnpCommandName);
         result = PNP_STATUS_NOT_FOUND;
@@ -221,7 +219,6 @@ int PnP_ThermostatComponent_ProcessCommand(PNP_THERMOSTAT_COMPONENT_HANDLE pnpTh
         result = PNP_STATUS_SUCCESS;
     }
 
-    free(jsonStr);
     return result;
 }
 
@@ -235,9 +232,15 @@ static void UpdateTemperatureAndStatistics(PNP_THERMOSTAT_COMPONENT* pnpThermost
         pnpThermostatComponent->maxTemperature = desiredTemp;
         *maxTempUpdated = true;
     }
-    else if (desiredTemp < pnpThermostatComponent->minTemperature)
+    else 
     {
-        pnpThermostatComponent->minTemperature = desiredTemp;
+        *maxTempUpdated = false;
+
+        if (desiredTemp < pnpThermostatComponent->minTemperature)
+        {
+            pnpThermostatComponent->minTemperature = desiredTemp;
+            *maxTempUpdated = false;
+        }
     }
 
     pnpThermostatComponent->numTemperatureUpdates++;
@@ -321,6 +324,10 @@ void PnP_ThermostatComponent_ProcessPropertyUpdate(PNP_THERMOSTAT_COMPONENT_HAND
     if (strcmp(propertyName, g_targetTemperaturePropertyName) != 0)
     {
         LogError("Property=%s was requested to be changed but is not part of the thermostat interface definition", propertyName);
+    }
+    else if (json_value_get_type(propertyValue) != JSONNumber)
+    {
+        LogError("JSON field %s is not a number", g_targetTemperaturePropertyName);
     }
     else
     {

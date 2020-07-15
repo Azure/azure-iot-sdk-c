@@ -3,13 +3,6 @@
 
 // The DTDL for this interface is defined at https://repo.azureiotrepository.com/Models/dtmi:azure:DeviceManagement:DeviceInformation;1?api-version=2020-05-01-preview
 
-
-// Standard C header files
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-
 // PnP helper routines
 #include "pnp_deviceinfo_component.h"
 #include "pnp_protocol_helpers.h"
@@ -20,7 +13,7 @@
 // Property names along with their simulated values.  
 // NOTE: the property values must be legal JSON values.  Strings specifically must be enclosed with an extra set of quotes to be legal json string values.
 // The property names in this sample do not hard-code the extra quotes because the underlying PnP helper adds this to names automatically.
-#define PNP_ENCODE_STRING_FOR_JSON(str) "\"" str "\""
+#define PNP_ENCODE_STRING_FOR_JSON(str) #str
 
 static const char PnPDeviceInfo_SoftwareVersionPropertyName[] = "swVersion";
 static const char PnPDeviceInfo_SoftwareVersionPropertyValue[] = PNP_ENCODE_STRING_FOR_JSON("1.0.0.0");
@@ -77,7 +70,7 @@ static void SendReportedPropertyForDeviceInformation(IOTHUB_DEVICE_CLIENT_HANDLE
     STRING_delete(jsonToSend);
 }
 
-void PnP_DeviceInfoComponent_Report_All_Properties(IOTHUB_DEVICE_CLIENT_HANDLE deviceClient, const char* componentName)
+void PnP_DeviceInfoComponent_Report_All_Properties(const char* componentName, IOTHUB_DEVICE_CLIENT_HANDLE deviceClient)
 {
     // NOTE: It is possible to put multiple property updates into a single JSON and IoTHubDeviceClient_SendReportedState invocation.
     // This sample does not do so for clarity, though production devices should seriously consider such property update batching to

@@ -55,7 +55,7 @@ static const size_t g_thermostatComponent2Size = sizeof(g_thermostatComponent2Na
 static const char g_deviceInfoComponentName[] = "deviceInformation";
 
 static const char* g_modeledComponents[] = {g_thermostatComponent1Name, g_thermostatComponent2Name, g_deviceInfoComponentName};
-static size_t g_numModeledComponents = sizeof(g_modeledComponents) / sizeof(g_modeledComponents[0]);
+static const size_t g_numModeledComponents = sizeof(g_modeledComponents) / sizeof(g_modeledComponents[0]);
 
 // Command implemented by the TemperatureControl component itself to implement reboot.
 static const char g_rebootCommand[] = "reboot";
@@ -352,7 +352,7 @@ int main(void)
 
         // During startup, send the non-"writeable" properties.
         PnP_TempControlComponent_ReportSerialNumber_Property(deviceClient);
-        PnP_DeviceInfoComponent_Report_All_Properties(deviceClient, g_deviceInfoComponentName);
+        PnP_DeviceInfoComponent_Report_All_Properties(g_deviceInfoComponentName, deviceClient);
         PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(g_thermostatHandle1, deviceClient);
         PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(g_thermostatHandle2, deviceClient);
 
@@ -374,7 +374,7 @@ int main(void)
         // Clean up the iothub sdk handle
         IoTHubDeviceClient_Destroy(deviceClient);
         // Free all the sdk subsystem
-        IoTHub_Deinit();        
+        IoTHub_Deinit();
     }
 
     return 0;
