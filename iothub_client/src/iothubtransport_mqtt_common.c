@@ -3220,7 +3220,10 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle)
                     currentListEntry = savedFromCurrentListEntry.Flink;
                 }
 
-                sendPendingGetTwinRequests(transport_data);
+                if (transport_data->twin_resp_sub_recv)
+                {
+                    sendPendingGetTwinRequests(transport_data);
+                }
             }
             /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_030: [IoTHubTransport_MQTT_Common_DoWork shall call mqtt_client_dowork everytime it is called if it is connected.] */
             mqtt_client_dowork(transport_data->mqttClient);
