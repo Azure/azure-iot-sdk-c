@@ -93,7 +93,7 @@ void PnPHelper_ParseCommandName(const char* deviceMethodName, unsigned const cha
     else 
     {
         // The separator character is optional.  If it is not present, it indicates a command of the root 
-        // component and not a subcomponent is being targeted (e.g. "reboot").
+        // component and not a subcomponent (e.g. "reboot").
         *componentName = NULL;
         *componentNameSize = 0;
         *pnpCommandName = deviceMethodName;
