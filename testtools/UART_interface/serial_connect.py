@@ -194,7 +194,7 @@ def run():
     ser.close()
 
     print("Num of Errors: %d" %azure_test_firmware_errors.SDK_ERRORS)
-    sys.exit(1)#azure_test_firmware_errors.SDK_ERRORS)
+    sys.exit(azure_test_firmware_errors.SDK_ERRORS)
 
 if __name__ == '__main__':
     parse_opts()
