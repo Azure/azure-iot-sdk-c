@@ -51,7 +51,7 @@ IOTHUB_DEVICE_CLIENT_HANDLE PnPHelper_CreateDeviceClientHandle(const char* conne
         LogError("Unable to set the ModelID, error=%d", iothubResult);
         result = false;
     }
-    // Optionally sets the callback function that processes incoming device methods, which is the channel PnP Commands are transferred over
+    // Optionally, set the callback function that processes incoming device methods, which is the channel PnP Commands are transferred over
     else if ((deviceMethodCallback != NULL) && (iothubResult = IoTHubDeviceClient_SetDeviceMethodCallback(deviceHandle, deviceMethodCallback, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to set device method callback, error=%d", iothubResult);
