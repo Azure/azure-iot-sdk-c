@@ -24,14 +24,14 @@ static const char g_propertyWithResponseSchemaWithComponent[] =  "{\"""%s\":{\"_
 static const char g_commandSeparator = '*';
 
 // The version of the desired twin is represented by the $version metadata.
-static const char g_JSONPropertyVersion[] = "$version";
+static const char g_IoTHubTwinDesiredVersion[] = "$version";
 
 // IoTHub adds a JSON field "__t":"c" into desired top-level JSON objects that represent components.  Without this marking, the object 
 // is treated as a property off the root component.
-static const char g_JSONComponentMetadata[] = "__t";
+static const char g_IoTHubTwinPnPComponentMarker[] = "__t";
 
 // Name of desired JSON field when retrieving a full twin.
-static const char g_JSONDesiredName[] = "desired";
+static const char g_IoTHubTwinDesiredObjectName[] = "desired";
 
 // Telemetry message property used to indicate the message's component.
 static const char PnP_TelemetryComponentProperty[] = "$.sub";
@@ -155,7 +155,7 @@ static void VisitComponentProperties(const char* objectName, JSON_Value* value, 
         // When a component is received from a full twin, it will have a "__t" as one of the child elements.  This is metadata that indicates
         // to solutions that the JSON object corresponds to a component and not a property of the root component.  Because this is 
         // metadata and not part of this component's modeled properties, we ignore it when processing this loop.
-        if (strcmp(propertyName, g_JSONComponentMetadata) == 0)
+        if (strcmp(propertyName, g_IoTHubTwinPnPComponentMarker) == 0)
         {
             continue;
         }
@@ -195,14 +195,14 @@ static bool VisitDesiredObject(JSON_Object* desiredObject, const char** componen
     int version;
     bool result;
 
-    if ((versionValue = json_object_get_value(desiredObject, g_JSONPropertyVersion)) == NULL)
+    if ((versionValue = json_object_get_value(desiredObject, g_IoTHubTwinDesiredVersion)) == NULL)
     {
-        LogError("Cannot retrieve %s field for twin", g_JSONPropertyVersion);
+        LogError("Cannot retrieve %s field for twin", g_IoTHubTwinDesiredVersion);
         result = false;
     }
     else if (json_value_get_type(versionValue) != JSONNumber)
     {
-        LogError("JSON field %s is not a number", g_JSONPropertyVersion);
+        LogError("JSON field %s is not a number", g_IoTHubTwinDesiredVersion);
         result = false;
     }
     else
@@ -217,7 +217,7 @@ static bool VisitDesiredObject(JSON_Object* desiredObject, const char** componen
             const char* name = json_object_get_name(desiredObject, i);
             JSON_Value* value = json_object_get_value_at(desiredObject, i);
 
-            if (strcmp(name, g_JSONPropertyVersion) == 0)
+            if (strcmp(name, g_IoTHubTwinDesiredVersion) == 0)
             {
                 // The version field is metadata and should be ignored in this loop.
                 continue;
@@ -262,7 +262,7 @@ static JSON_Object* GetDesiredJson(DEVICE_TWIN_UPDATE_STATE updateState, JSON_Va
         {
             // For a complete update, the JSON from IoTHub will contain both "desired" and "reported" - the full twin.
             // We only care about "desired" in this sample, so just retrieve it.
-            desiredObject = json_object_get_object(rootObject, g_JSONDesiredName);
+            desiredObject = json_object_get_object(rootObject, g_IoTHubTwinDesiredObjectName);
         }
         else
         {
@@ -312,10 +312,11 @@ bool PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsig
 char* PnPHelper_CopyPayloadToString(const unsigned char* payload, size_t size)
 {
     char* jsonStr;
+    size_t sizeToAllocate = size + 1;
 
-    if ((jsonStr = (char*)malloc(size + 1)) == NULL)
+    if ((jsonStr = (char*)malloc(sizeToAllocate)) == NULL)
     {
-        LogError("Unable to allocate %lu size buffer", (unsigned long)(size + 1));
+        LogError("Unable to allocate %lu size buffer", (unsigned long)(sizeToAllocate));
     }
     else
     {

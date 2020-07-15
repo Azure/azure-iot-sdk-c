@@ -25,7 +25,7 @@ if(${use_sample_trusted_cert})
     set(pnp_temperature_controller_c_files ${pnp_temperature_controller_c_files} ${PROJECT_SOURCE_DIR}/certs/certs.c)
 endif()
 
-include_directories(. ../common)
+include_directories(. ../common ${PROJECT_SOURCE_DIR}/deps/parson)
 
 add_executable(pnp_temperature_controller ${pnp_temperature_controller_c_files})
 

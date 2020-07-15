@@ -43,7 +43,7 @@ static bool g_hubClientTraceEnabled = true;
 static const char g_ThermostatModelId[] = "dtmi:com:example:Thermostat;1";
 
 // JSON fields from desired property to retrieve.
-static const char g_JSONPropertyVersion[] = "$version";
+static const char g_IoTHubTwinDesiredVersion[] = "$version";
 static const char g_JSONTargetTemperature[] = "targetTemperature";
 
 // Name of command this component supports to get report information
@@ -377,17 +377,17 @@ static void Thermostat_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE updateState, 
     {
         LogInfo("JSON property %s not specified.  This is NOT an error as the server doesn't need to set this, but there is no further action to take.", g_JSONTargetTemperature);
     }
-    else if ((versionValue = json_object_get_value(desiredObject, g_JSONPropertyVersion)) == NULL)
+    else if ((versionValue = json_object_get_value(desiredObject, g_IoTHubTwinDesiredVersion)) == NULL)
     {
         // The $version does need to be set in *any* legitimate twin desired document.  Its absence suggests 
         // something is fundamentally wrong with how we've received the twin and we should not proceed.
-        LogError("Cannot retrieve field %s for twin.  The underlying IoTHub device twin protocol (NOT the service solution directly) should have specified this.", g_JSONPropertyVersion);
+        LogError("Cannot retrieve field %s for twin.  The underlying IoTHub device twin protocol (NOT the service solution directly) should have specified this.", g_IoTHubTwinDesiredVersion);
     }
     else if (json_value_get_type(versionValue) != JSONNumber)
     {
         // The $version must be a number (and in practice an int) A non-numerical value indicates 
         // something is fundamentally wrong with how we've received the twin and we should not proceed.
-        LogError("JSON field %s is not a number but must be", g_JSONPropertyVersion);
+        LogError("JSON field %s is not a number but must be", g_IoTHubTwinDesiredVersion);
     }
     else if (json_value_get_type(targetTemperatureValue) != JSONNumber)
     {
@@ -464,7 +464,7 @@ static IOTHUB_DEVICE_CLIENT_HANDLE CreateDeviceClientHandleForPnP(const char* co
     // Create the deviceHandle itself.
     else if ((deviceHandle = IoTHubDeviceClient_CreateFromConnectionString(connectionString, MQTT_Protocol)) == NULL)
     {
-        LogError("Failure creating IoTHub device.  Hint: Check you connection string");
+        LogError("Failure creating IotHub client.  Hint: Check your connection string");
         result = false;
     }
     // Sets verbosity level
@@ -504,7 +504,7 @@ static IOTHUB_DEVICE_CLIENT_HANDLE CreateDeviceClientHandleForPnP(const char* co
     // Setting the Trusted Certificate.  This is only necessary on systems without built in certificate stores.
     else if ((iothubResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_TRUSTED_CERT, certificates)) != IOTHUB_CLIENT_OK)
     {
-        LogError("Unable to set auto Url encode option, error=%d", iothubResult);
+        LogError("Unable to set the trusted cert, error=%d", iothubResult);
         result = false;
     }
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
