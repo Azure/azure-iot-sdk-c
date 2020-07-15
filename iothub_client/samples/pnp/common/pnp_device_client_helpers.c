@@ -34,7 +34,7 @@ IOTHUB_DEVICE_CLIENT_HANDLE PnPHelper_CreateDeviceClientHandle(const char* conne
     // Create the deviceHandle itself.
     else if ((deviceHandle = IoTHubDeviceClient_CreateFromConnectionString(connectionString, MQTT_Protocol)) == NULL)
     {
-        LogError("Failure creating IotHub device.  Hint: Check you connection string");
+        LogError("Failure creating IotHub client.  Hint: Check your connection string");
         result = false;
     }
     // Sets verbosity level
