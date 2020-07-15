@@ -65,7 +65,7 @@ typedef struct PNP_THERMOSTAT_COMPONENT_TAG
     double maxTemperature;
     // Number of times temperature has been updated, counting the initial setting as 1.  Used to determine average temperature of this thermostat component
     int numTemperatureUpdates;
-    // Total of all temperature updates during current exceution run.  Used to determine average temperature of this thermostat component
+    // Total of all temperature updates during current execution run.  Used to determine average temperature of this thermostat component
     double allTemperatures;
 }
 PNP_THERMOSTAT_COMPONENT;
