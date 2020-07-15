@@ -391,7 +391,7 @@ static void Thermostat_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE updateState, 
     }
     else if (json_value_get_type(targetTemperatureValue) != JSONNumber)
     {
-        LogError("JSON field %s is not a number but must be", g_JSONTargetTemperature);
+        LogError("JSON field %s is not a number", g_JSONTargetTemperature);
     }
     else
     {
