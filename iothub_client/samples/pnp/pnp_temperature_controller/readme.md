@@ -6,7 +6,7 @@ The model consists of:
 
 * The `reboot` command, `serialNumber` property, and `workingSet` telemetry that the temperature controller implements on the root interface.
 
-* Two thermostat subcomponents, `thermostat1` and `thermostat2`.  (To get a sense of this sample's greater complexity compared to the simpler one, [pnp_simple_thermostat](../pnp_simple_thermostat) *only* implemented a single thermostat with no subcomponents.  The samplein this directory has two such thermostats in addition to everything else.)
+* Two thermostat subcomponents, `thermostat1` and `thermostat2`.  (To get a sense of this sample's greater complexity compared to the simpler one, [pnp_simple_thermostat](../pnp_simple_thermostat) *only* implemented a single thermostat with no subcomponents.  The sample in this directory has two such thermostats in addition to everything else.)
 
 * A `deviceInfo` component that reports properties about the device itself.
 
