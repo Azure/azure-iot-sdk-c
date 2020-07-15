@@ -20,7 +20,7 @@ static const char g_propertyWithResponseSchemaWithoutComponent[] =  "{\"%s\":{\"
 // Format used when building a response for a component's property that does contain metadata
 static const char g_propertyWithResponseSchemaWithComponent[] =  "{\"""%s\":{\"__t\":\"c\",\"%s\":{\"value\":%s,\"ac\":%d,\"ad\":\"%s\",\"av\":%d}}}";
 
-// Character that separates a PnP component's from the specific command on the component.
+// Character that separates a PnP component from the specific command on the component.
 static const char g_commandSeparator = '*';
 
 // The version of the desired twin is represented by the $version metadata.
