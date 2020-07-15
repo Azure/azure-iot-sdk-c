@@ -290,7 +290,7 @@ static void PnP_TempControlComponent_ReportSerialNumber_Property(IOTHUB_DEVICE_C
 
 
 //
-// CreateDeviceClientAndAllocateComponents allocates IOTHUB_DEVICE_CLIENT_HANDLE the application will use along with thermostat components
+// CreateDeviceClientAndAllocateComponents allocates the IOTHUB_DEVICE_CLIENT_HANDLE the application will use along with thermostat components
 // 
 static IOTHUB_DEVICE_CLIENT_HANDLE CreateDeviceClientAndAllocateComponents(void)
 {
