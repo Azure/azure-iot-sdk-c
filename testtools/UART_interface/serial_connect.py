@@ -195,8 +195,8 @@ def run():
 
     print("Num of Errors: %d" %azure_test_firmware_errors.SDK_ERRORS)
     # os.environ['SDK_ERRORS'] = str(azure_test_firmware_errors.SDK_ERRORS)
-    os.system("exit %d" %azure_test_firmware_errors.SDK_ERRORS)
-    # sys.exit(azure_test_firmware_errors.SDK_ERRORS)
+    # os.system("exit %d" %azure_test_firmware_errors.SDK_ERRORS)
+    sys.exit(azure_test_firmware_errors.SDK_ERRORS)
 
 if __name__ == '__main__':
     parse_opts()
