@@ -159,7 +159,7 @@ class esp_uart_interface(uart_interface):
 
                 # forward failed callbacks to SDK_ERRORS
                 azure_test_firmware_errors.SDK_ERRORS += 1 + self.messages_sent - self.message_callbacks
-                with open('exitcode.txt', 'wb') as fexit:
+                with open('exitcode.txt', 'w') as fexit:
                     fexit.write(azure_test_firmware_errors.SDK_ERRORS + '\n')
 
                 output_file_obj.close()
