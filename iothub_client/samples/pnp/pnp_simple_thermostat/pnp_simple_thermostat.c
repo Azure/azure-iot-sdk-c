@@ -91,7 +91,7 @@ static const char g_temperaturePropertyResponseDescription[] = "success";
 // Size of buffer to store ISO 8601 time.
 #define TIME_BUFFER_SIZE 128
 // Format string to create an ISO 8601 time.  This corresponds to the DTDL datetime schema item.
-static const char g_ISO8601Format[] = "%04d-%02d-%02dT%02d:%02d:%02dZ";
+static const char g_ISO8601Format[] = "%Y-%m-%dT%H:%M:%SZ";
 // Start time of the program, stored in ISO 8601 format string for UTC.
 char g_ProgramStartTime[TIME_BUFFER_SIZE];
 
