@@ -17,8 +17,8 @@ typedef enum PNP_CONNECTION_SECURITY_TYPE_TAG
 
 #ifdef USE_PROV_MODULE
 //
-// DPS functionality is only available if the cmake flag -Duse_prov_client=ON was
-// enabled when building the Azure IoT C SDK.
+// DPS functionality using symmetric keys is only available if the cmake 
+// flags <-Duse_prov_client=ON -Dhsm_type_symm_key=ON> are enabled when building the Azure IoT C SDK.
 //
 // PNP_DPS_SYMMETRIC_KEY specifies the values the authentication material needed
 // to authenticate when using DPS symmetric keys.

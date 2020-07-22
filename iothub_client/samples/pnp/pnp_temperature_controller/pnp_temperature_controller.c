@@ -46,7 +46,7 @@ static const char g_securityTypeDpsValue[] = "dps";
 static const char g_connectionStringEnvironmentVariable[] = "IOTHUB_DEVICE_CONNECTION_STRING";
 
 // Environment variable used to specify this application's DPS id scope
-static const char g_dpsIdScopeEnvironmentVariable[] = "IOTHUB_DEVICE_DPS_ID_SCOPE​";
+static const char g_dpsIdScopeEnvironmentVariable[] = "IOTHUB_DEVICE_DPS_ID_SCOPE";
 
 // Environment variable used to specify this application's DPS device id
 static const char g_dpsDeviceIdEnvironmentVariable[] = "IOTHUB_DEVICE_DPS_DEVICE_ID";
@@ -375,9 +375,11 @@ static bool GetConnectionStringFromEnvironment()
 static bool GetDpsFromEnvironment()
 {
 #ifndef USE_PROV_MODULE
+    // Explain to user misconfiguration.  The "run_e2e_tests" must be set to OFF because otherwise
+    // the e2e's test HSM layer and symmetric key logic will conflict.
     LogError("DPS based authentication was requested via environment variables, but DPS is not enabled.");
-    LogError("DPS is an optional component of the Azure IoT C SDK.  It is enabled at cmake time by");
-    LogError("passing <-Duse_prov_client=ON> to cmake's command line");
+    LogError("DPS is an optional component of the Azure IoT C SDK.  It is enabled with symmetric keys at cmake time by");
+    LogError("passing <-Duse_prov_client=ON -Dhsm_type_symm_key=ON -Drun_e2e_tests=OFF> to cmake's command line");
     return false;
 #else
     bool result;
@@ -443,6 +445,15 @@ static bool GetConnectionSettingsFromEnvironment()
     return result;    
 }
 
+//
+// FreeDpsConfiguration cleans up resources we needed to configure the IoT Hub connection if we got to it via DPS.
+//
+static void FreeDpsConfiguration(void)
+{
+    free(g_pnpDeviceConfiguration.u.dpsConfiguration.iothubUri);
+    free(g_pnpDeviceConfiguration.u.dpsConfiguration.deviceId);
+}
+
 #ifdef USE_PROV_MODULE
 
 //
@@ -459,7 +470,6 @@ static void provisioningRegisterCallback(PROV_DEVICE_RESULT registerResult, cons
     }
     else
     {
-        // TODO: Free up
         if ((mallocAndStrcpy_s(&g_pnpDeviceConfiguration.u.dpsConfiguration.iothubUri, iothubUri) != 0) ||
             (mallocAndStrcpy_s(&g_pnpDeviceConfiguration.u.dpsConfiguration.deviceId, deviceId) != 0))
         {
@@ -652,6 +662,10 @@ int main(void)
         // Free the memory allocated to track simulated thermostat.
         PnP_ThermostatComponent_Destroy(g_thermostatHandle2);
         PnP_ThermostatComponent_Destroy(g_thermostatHandle1);
+
+#ifndef USE_PROV_MODULE
+        FreeDpsConfiguration();
+#endif
 
         // Clean up the iothub sdk handle
         IoTHubDeviceClient_Destroy(deviceClient);

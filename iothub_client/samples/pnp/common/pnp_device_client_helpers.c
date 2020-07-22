@@ -43,8 +43,8 @@ static IOTHUB_DEVICE_CLIENT_HANDLE AllocateDeviceClientHandle(const PNP_DEVICE_C
         }
     }
 #ifdef USE_PROV_MODULE
-    // DPS functionality is only available if the cmake flag -Duse_prov_client=ON was
-    // enabled when building the Azure IoT C SDK.
+    // DPS functionality using symmetric keys is only available if the cmake 
+    // flags <-Duse_prov_client=ON -Dhsm_type_symm_key=ON> are enabled when building the Azure IoT C SDK.
     else
     {
         if (iothub_security_init(IOTHUB_SECURITY_TYPE_SYMMETRIC_KEY) != 0)
