@@ -18,13 +18,16 @@ IF(WIN32)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 ENDIF(WIN32)
 
+if(${use_prov_client})
+    set(pnp_temperature_controller_c_files ${pnp_temperature_controller_c_files} ../common/pnp_dps.c)
+endif()
+
 #Conditionally use the SDK trusted certs in the samples
 if(${use_sample_trusted_cert})
     add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
     include_directories(${PROJECT_SOURCE_DIR}/certs)
     set(pnp_temperature_controller_c_files ${pnp_temperature_controller_c_files} ${PROJECT_SOURCE_DIR}/certs/certs.c)
 endif()
-
 
 include_directories(. ../common ${PROJECT_SOURCE_DIR}/deps/parson)
 

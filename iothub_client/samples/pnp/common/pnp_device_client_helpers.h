@@ -35,8 +35,9 @@ typedef struct PNP_DPS_SYMMETRIC_KEY_TAG
 // DPS client at runtime (NOT pre-configured environmnent)
 typedef struct PNP_DPS_CONFIGURATION_TAG
 {
-    char* iothubUri;
+    char* idScope;
     char* deviceId;
+    char* deviceKey;
 } PNP_DPS_CONFIGURATION;
 
 #endif /* USE_PROV_MODULE */
@@ -72,8 +73,10 @@ typedef struct PNP_DEVICE_CONFIGURATION_TAG
 // as well as some other basic maintenence on the handle. 
 //
 // If the application's model does not implement PnP commands, the application should set deviceMethodCallback to NULL.
-// Anologously, if there are no desired PnP properties, deviceTwinCallback should be NULL.  Not subscribing for these
+// Analogously, if there are no desired PnP properties, deviceTwinCallback should be NULL.  Not subscribing for these
 // callbacks if they are not needed by the model will save bandwidth and RAM.
+//
+// NOTE: When using DPS based authentication, this function can *block* until DPS responds to the request or we timeout.
 //
 IOTHUB_DEVICE_CLIENT_HANDLE PnPHelper_CreateDeviceClientHandle(const PNP_DEVICE_CONFIGURATION* pnpDeviceConfiguration);
 //const char* connectionString, const char* modelId, bool enableTracing, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback);

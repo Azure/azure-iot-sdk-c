@@ -10,7 +10,12 @@
 #include "iothub_client_options.h"
 #include "iothubtransportmqtt.h"
 #include "pnp_device_client_helpers.h"
+#ifdef USE_PROV_MODULE
+#include "pnp_dps.h"
+#endif
 
+#include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/xlogging.h"
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
@@ -19,14 +24,6 @@
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
-
-#ifdef USE_PROV_MODULE
-// DPS related header files
-#include "azure_prov_client/iothub_security_factory.h"
-#include "azure_prov_client/prov_device_ll_client.h"
-#include "azure_prov_client/prov_transport_mqtt_client.h"
-#include "azure_prov_client/prov_security_factory.h"
-#endif // USE_PROV_MODULE
 
 //
 // AllocateDeviceClientHandle does the actual createHandle call, depending on the security type
@@ -47,13 +44,9 @@ static IOTHUB_DEVICE_CLIENT_HANDLE AllocateDeviceClientHandle(const PNP_DEVICE_C
     // flags <-Duse_prov_client=ON -Dhsm_type_symm_key=ON> are enabled when building the Azure IoT C SDK.
     else
     {
-        if (iothub_security_init(IOTHUB_SECURITY_TYPE_SYMMETRIC_KEY) != 0)
+        if ((deviceHandle = PnP_CreateDeviceClientHandle_ViaDps(pnpDeviceConfiguration)) == NULL)
         {
-            LogError("iothub_security_init failed");
-        }
-        else if ((deviceHandle = IoTHubDeviceClient_CreateFromDeviceAuth(pnpDeviceConfiguration->u.dpsConfiguration.iothubUri, pnpDeviceConfiguration->u.dpsConfiguration.deviceId, MQTT_Protocol)) == NULL)
-        {
-            LogError("IoTHubDeviceClient_CreateFromDeviceAuth failed");
+            LogError("Cannot retrieve IoT Hub connection information from DPS client");
         }
     }
 #endif /* USE_PROV_MODULE */
