@@ -38,7 +38,7 @@ MU_DEFINE_ENUM(IOTHUB_DEVICEMETHOD_REQUEST_MODE, IOTHUB_DEVICE_METHOD_REQUEST_MO
 #define  HTTP_HEADER_VAL_CONTENT_TYPE  "application/json; charset=utf-8"
 #define UID_LENGTH 37
 
-static const char* const URL_API_VERSION = "?api-version=2017-11-08-preview";
+static const char* const URL_API_VERSION = "?api-version=2019-10-01";
 static const char* const RELATIVE_PATH_FMT_DEVICEMETHOD = "/twins/%s/methods%s";
 static const char* const RELATIVE_PATH_FMT_DEVICEMETHOD_MODULE = "/twins/%s/modules/%s/methods%s";
 static const char* const RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD = "{\"methodName\":\"%s\",\"timeout\":%d,\"payload\":%s}";
