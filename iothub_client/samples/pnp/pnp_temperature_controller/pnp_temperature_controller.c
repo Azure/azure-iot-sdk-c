@@ -25,11 +25,17 @@
 #include "pnp_device_client_helpers.h"
 #include "pnp_protocol_helpers.h"
 
+#ifdef USE_PROV_MODULE
+// DPS related header files
+#include "azure_prov_client/iothub_security_factory.h"
+#include "azure_prov_client/prov_device_client.h"
+#include "azure_prov_client/prov_transport_mqtt_client.h"
+#include "azure_prov_client/prov_security_factory.h"
+#endif // USE_PROV_MODULE
+
 // Headers that provide implementation for subcomponents (the two thermostat components and DeviceInfo)
 #include "pnp_thermostat_component.h"
 #include "pnp_deviceinfo_component.h"
-
-
 
 // Environment variable used to specify how app connects to hub and the two possible values
 static const char g_securityTypeEnvironmentVariable[] = "IOTHUB_DEVICE_SECURITY_TYPE";
@@ -49,17 +55,41 @@ static const char g_dpsDeviceIdEnvironmentVariable[] = "IOTHUB_DEVICE_DPS_DEVICE
 static const char g_dpsDeviceKeyEnvironmentVariable[] = "IOTHUB_DEVICE_DPS_DEVICE_KEY";
 
 #ifdef USE_PROV_MODULE
+//
+// DPS specific configuration, only brought in if DPS is included as part of the SDK at cmake time
+//
+
+// Global provisioning endpoint for DPS
+static const char* g_dps_GlobalProvUri = "global.azure-devices-provisioning.net";
+
+// g_dps_ModelId_Payload is sent as a custom payload during DPS registration
+static const char* g_dps_ModelId_Payload = "{"
+                                             //"\"ModelId\":\"" TEMPERATURE_CONTROLLER_MODEL_ID "\""
+                                           "}";
+
 // Values of pre-configured DPS settings, read from environment
 PNP_DPS_SYMMETRIC_KEY g_dpsSymmetricKey;
+
+// State of DPS registration process.  We cannot proceed with PnP until we get into the state PNP_DPS_REGISTRATION_SUCCEEDED.
+typedef enum PNP_DPS_REGISTRATION_STATUS_TAG
+{
+    PNP_DPS_REGISTRATION_PENDING,
+    PNP_DPS_REGISTRATION_SUCCEEDED,
+    PNP_DPS_REGISTRATION_FAILED
+} PNP_DPS_REGISTRATION_STATUS;
+
+PNP_DPS_REGISTRATION_STATUS g_pnpDpsRegistrationStatus = PNP_DPS_REGISTRATION_PENDING;
+
+// Maximum amount of times we'll poll for DPS registration being ready.  Note that even though DPS works off of callbacks,
+// the main() loop itself blocks 
+static const int g_dpsRegistrationMaxPolls = 60;
+// Amount to sleep between querying state from DPS registration loop
+static const int g_dpsRegistrationPollSleep = 1000;
 #endif
 
 // Values of connection / security settings read from environment variables and/or DPS runtime
 PNP_DEVICE_CONFIGURATION g_pnpDeviceConfiguration;
-
-char* g_connectionString; 
-char* g_dpsIdScope;
-char* g_dpsDeviceId;
-char* g_dpsDeviceKey;
+char* g_connectionString;
 
 // Amount of time to sleep between sending telemetry to IotHub, in milliseconds.  Set to 1 minute.
 static unsigned int g_sleepBetweenTelemetrySends = 60 * 1000;
@@ -68,7 +98,7 @@ static unsigned int g_sleepBetweenTelemetrySends = 60 * 1000;
 static bool g_hubClientTraceEnabled = true;
 
 // DTMI indicating this device's ModelId.
-static const char g_thermostatModelId[] = "dtmi:com:example:TemperatureController;1";
+#define TEMPERATURE_CONTROLLER_MODEL_ID "dtmi:com:example:TemperatureController;1"
 
 // PNP_THERMOSTAT_COMPONENT_HANDLE represent the thermostat components that are sub-components of the temperature controller.
 // Note that we do NOT have an analogous DeviceInfo component handle because there is only DeviceInfo subcomponent and its
@@ -413,6 +443,123 @@ static bool GetConnectionSettingsFromEnvironment()
     return result;    
 }
 
+#ifdef USE_PROV_MODULE
+
+//
+// provisioningRegisterCallback is called back by the DPS client when the DPS server has either succeeded or failed our request.
+//
+static void provisioningRegisterCallback(PROV_DEVICE_RESULT registerResult, const char* iothubUri, const char* deviceId, void* userContext)
+{
+    PNP_DPS_REGISTRATION_STATUS* pnpDpsRegistrationStatus = (PNP_DPS_REGISTRATION_STATUS*)userContext;
+
+    if (registerResult != PROV_DEVICE_RESULT_OK)
+    {
+        LogError("DPS Provisioning callback called with error state %d", registerResult);
+        *pnpDpsRegistrationStatus = PNP_DPS_REGISTRATION_FAILED;
+    }
+    else
+    {
+        // TODO: Free up
+        if ((mallocAndStrcpy_s(&g_pnpDeviceConfiguration.u.dpsConfiguration.iothubUri, iothubUri) != 0) ||
+            (mallocAndStrcpy_s(&g_pnpDeviceConfiguration.u.dpsConfiguration.deviceId, deviceId) != 0))
+        {
+            LogError("Unable to copy provisioning information");
+            *pnpDpsRegistrationStatus = PNP_DPS_REGISTRATION_FAILED;
+        }
+        else
+        {
+            LogInfo("Provisioning callback indicates success.  iothubUri=%s, deviceId=%s", iothubUri, deviceId);
+            *pnpDpsRegistrationStatus = PNP_DPS_REGISTRATION_SUCCEEDED;
+        }
+    }
+}
+
+//
+// GetIoTHubFromDPS is a BLOCKING call that retrieves the IoT Hub connection information for this device
+// by first invoking the Device Provisioning Service (DPS) client.  The call will block until 
+// the DPS accepts or fails the request or until the timeout is reached.
+// 
+static bool GetIoTHubFromDPS()
+{
+    bool result;
+
+    PROV_DEVICE_RESULT provDeviceResult;
+    PROV_DEVICE_HANDLE provDeviceHandle = NULL;
+
+    LogInfo("Initiating DPS client to retrieve IoT Hub connection information");
+
+    if (IoTHub_Init() != 0) // TODO: Need to remove extra call to this from helper or else just move this whole thing there.
+    {
+        LogError("IoTHub_Init failed");
+        result = false;
+    }
+    else if ((prov_dev_set_symmetric_key_info(g_dpsSymmetricKey.deviceId, g_dpsSymmetricKey.deviceKey) != 0))
+    {
+        LogError("prov_dev_set_symmetric_key_info failed.");
+        result = false;
+    }
+    else if (prov_dev_security_init(SECURE_DEVICE_TYPE_SYMMETRIC_KEY) != 0)
+    {
+        LogError("prov_dev_security_init failed");
+        result = false;
+    }
+    else if ((provDeviceHandle = Prov_Device_Create(g_dps_GlobalProvUri, g_dpsSymmetricKey.idScope, Prov_Device_MQTT_Protocol)) == NULL)
+    {
+        LogError("failed calling Prov_Device_Create");
+        result = false;
+    }
+    else if ((provDeviceResult = Prov_Device_SetOption(provDeviceHandle, PROV_OPTION_LOG_TRACE, &g_pnpDeviceConfiguration.enableTracing)) != PROV_DEVICE_RESULT_OK)
+    {
+        LogError("Setting provisioning tracing on failed, error=%d", provDeviceResult);
+        result = false;
+    }
+    // This step indicates the ModelId of the device to DPS.  This allows the service to (optionally) perform custom operations,
+    // such as allocating a different IoT Hub to devices based on their ModelId.
+    else if ((provDeviceResult = Prov_Device_Set_Provisioning_Payload(provDeviceHandle, g_dps_ModelId_Payload)) != PROV_DEVICE_RESULT_OK)
+    {
+        LogError("Failed setting provisioning data, error=%d", provDeviceResult);
+        result = false;
+    }
+    else if ((provDeviceResult = Prov_Device_Register_Device(provDeviceHandle, provisioningRegisterCallback, &g_pnpDpsRegistrationStatus, NULL, NULL)) != PROV_DEVICE_RESULT_OK)
+    {
+        LogError("Prov_Device_Register_Device failed, error=%d", provDeviceResult);
+        result = false;
+    }
+    else
+    {
+        for (int i = 0; (i < g_dpsRegistrationMaxPolls) && (g_pnpDpsRegistrationStatus == PNP_DPS_REGISTRATION_PENDING); i++)
+        {
+            ThreadAPI_Sleep(g_dpsRegistrationPollSleep);
+        }
+
+        if (g_pnpDpsRegistrationStatus == PNP_DPS_REGISTRATION_SUCCEEDED)
+        {
+            LogInfo("DPS successfully registered.  Continuing on to creation of IoTHub device client handle.");
+            result = true;
+        }
+        else if (g_pnpDpsRegistrationStatus == PNP_DPS_REGISTRATION_PENDING)
+        {
+            LogError("Timed out attempting to register DPS device");
+            result = false;
+        }
+        else
+        {
+            LogError("Error registering device for DPS");
+            result = false;
+        }
+    }
+
+    // We do not need to leave this handle active, even if we are going on to register with IoT Hub.  So
+    // destroy it to free up resources.
+    if (provDeviceHandle != NULL)
+    {
+        Prov_Device_Destroy(provDeviceHandle);
+    }
+
+    return result;
+}
+#endif
+
 //
 // CreateDeviceClientAndAllocateComponents allocates the IOTHUB_DEVICE_CLIENT_HANDLE the application will use along with thermostat components
 // 
@@ -424,13 +571,20 @@ static IOTHUB_DEVICE_CLIENT_HANDLE CreateDeviceClientAndAllocateComponents(void)
     g_pnpDeviceConfiguration.deviceMethodCallback = PnP_TempControlComponent_DeviceMethodCallback;
     g_pnpDeviceConfiguration.deviceTwinCallback = PnP_TempControlComponent_DeviceTwinCallback;
     g_pnpDeviceConfiguration.enableTracing = g_hubClientTraceEnabled;
-    g_pnpDeviceConfiguration.modelId = g_thermostatModelId;
+    g_pnpDeviceConfiguration.modelId = TEMPERATURE_CONTROLLER_MODEL_ID;
 
     if (GetConnectionSettingsFromEnvironment() == false)
     {
         LogError("Cannot read required environment variable(s)");
         result = false;
     }
+#ifdef USE_PROV_MODULE
+    else if ((g_pnpDeviceConfiguration.securityType == PNP_CONNECTION_SECURITY_TYPE_DPS) && (GetIoTHubFromDPS() == false))
+    {
+        LogError("Cannot retrieve IoT Hub connection information from DPS client");
+        result = false;
+    }
+#endif
     else if ((deviceClient = PnPHelper_CreateDeviceClientHandle(&g_pnpDeviceConfiguration)) == NULL)
     {
         LogError("Failure creating IotHub device client");

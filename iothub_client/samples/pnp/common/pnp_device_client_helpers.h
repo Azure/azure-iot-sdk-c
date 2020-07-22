@@ -35,8 +35,8 @@ typedef struct PNP_DPS_SYMMETRIC_KEY_TAG
 // DPS client at runtime (NOT pre-configured environmnent)
 typedef struct PNP_DPS_CONFIGURATION_TAG
 {
-    const char* iothubUri;
-    const char* deviceId;
+    char* iothubUri;
+    char* deviceId;
 } PNP_DPS_CONFIGURATION;
 
 #endif /* USE_PROV_MODULE */
