@@ -81,6 +81,7 @@ static const char* DEVICE_METHOD_RESPONSE_TOPIC = "$iothub/methods/res/%d/?$rid=
 static const char* REQUEST_ID_PROPERTY = "?$rid=";
 
 static const char* MESSAGE_ID_PROPERTY = "mid";
+static const char* MESSAGE_CREATION_TIME_UTC = "ctime";
 static const char* CORRELATION_ID_PROPERTY = "cid";
 static const char* CONTENT_TYPE_PROPERTY = "ct";
 static const char* CONTENT_ENCODING_PROPERTY = "ce";
@@ -733,6 +734,17 @@ static int addSystemPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_messag
             index++;
         }
     }
+
+    if (result == 0)
+    {
+        const char* message_creation_time_utc = IoTHubMessage_GetMessageCreationTimeUtcSystemProperty(iothub_message_handle);
+        if (message_creation_time_utc != NULL)
+        {
+            result = addSystemPropertyToTopicString(topic_string, index, MESSAGE_CREATION_TIME_UTC, message_creation_time_utc, urlencode);
+            index++;
+        }
+    }
+
     if (result == 0)
     {
         if (is_security_msg)
@@ -1264,6 +1276,19 @@ static int setMqttMessagePropertyIfPossible(IOTHUB_MESSAGE_HANDLE IoTHubMessage,
 {
     // Not finding a system property to map to isn't an error.
     int result = 0;
+
+    if (nameLen > 5)
+    {
+        if (strcmp((const char*)&propName[nameLen - 5], MESSAGE_CREATION_TIME_UTC) == 0)
+        {
+            if (IoTHubMessage_SetMessageCreationTimeUtcSystemProperty(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
+            {
+                LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'CreationTimeUtc' property.");
+                result = MU_FAILURE;
+            }
+            return result;
+        }
+    }
 
     if (nameLen > 4)
     {

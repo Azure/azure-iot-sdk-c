@@ -120,6 +120,7 @@ EXPORTS
     IoTHubMessage_GetContentType
     IoTHubMessage_GetContentTypeSystemProperty
     IoTHubMessage_GetContentEncodingSystemProperty 
+    IoTHubMessage_GetMessageCreationTimeUtcSystemProperty
     IoTHubMessage_GetCorrelationId
     IoTHubMessage_GetDiagnosticPropertyData
     IoTHubMessage_GetMessageId
@@ -130,6 +131,7 @@ EXPORTS
     IoTHubMessage_SetConnectionModuleId
     IoTHubMessage_SetContentTypeSystemProperty
     IoTHubMessage_SetContentEncodingSystemProperty
+    IoTHubMessage_SetMessageCreationTimeUtcSystemProperty
     IoTHubMessage_SetCorrelationId
     IoTHubMessage_SetInputName
     IoTHubMessage_SetMessageId

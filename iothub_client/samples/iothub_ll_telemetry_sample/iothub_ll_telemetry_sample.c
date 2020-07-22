@@ -151,10 +151,14 @@ int main(void)
                 //message_handle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText)));
 
                 // Set Message property
-                /*(void)IoTHubMessage_SetMessageId(message_handle, "MSG_ID");
+                /*
+                (void)IoTHubMessage_SetMessageId(message_handle, "MSG_ID");
                 (void)IoTHubMessage_SetCorrelationId(message_handle, "CORE_ID");
                 (void)IoTHubMessage_SetContentTypeSystemProperty(message_handle, "application%2fjson");
-                (void)IoTHubMessage_SetContentEncodingSystemProperty(message_handle, "utf-8");*/
+                (void)IoTHubMessage_SetContentEncodingSystemProperty(message_handle, "utf-8");
+                (void)IoTHubMessage_SetMessageCreationTimeUtcSystemProperty(message_handle, "2020-07-01T01:00:00.346Z");
+                */
+
 
                 // Add custom properties to message
                 (void)IoTHubMessage_SetProperty(message_handle, "property_key", "property_value");

@@ -83,6 +83,8 @@ static const char* TEST_CONNECTION_MODULE_ID2 = "connectionmoduleid2";
 static const char* TEST_PROPERTY_KEY = "property_key";
 static const char* TEST_PROPERTY_VALUE = "property_value";
 
+static const char* TEST_MESSAGE_CREATION_TIME_UTC = "2020-07-01T01:00:00.000Z";
+
 static IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA TEST_DIAGNOSTIC_DATA = { "12345678",  "1506054179"};
 static IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA TEST_DIAGNOSTIC_DATA2 = { "87654321", "1506054179.100" };
 
@@ -2147,6 +2149,49 @@ TEST_FUNCTION(IoTHubMessage_IsSecurityMessage_false_Succeed)
     //cleanup
     IoTHubMessage_Destroy(h);
 }
+
+// [if any of the parameters are NULL then IoTHubMessage_SetMessageCreationTimeUtcSystemProperty shall return a IOTHUB_MESSAGE_INVALID_ARG value.]
+TEST_FUNCTION(IoTHubMessage_SetMessageCreationTimeUtcSystemProperty_NULL_handle_Fails)
+{
+    set_string_NULL_handle_fails_impl(IoTHubMessage_SetMessageCreationTimeUtcSystemProperty, TEST_MESSAGE_CREATION_TIME_UTC);
+}
+
+// [if any of the parameters are NULL then IoTHubMessage_SetMessageCreationTimeUtcSystemProperty shall return a IOTHUB_MESSAGE_INVALID_ARG value.]
+TEST_FUNCTION(IoTHubMessage_SetMessageCreationTimeUtcSystemProperty_NULL_CreationTimeUtc_Fails)
+{
+    set_string_NULL_string_fails_impl(IoTHubMessage_SetMessageCreationTimeUtcSystemProperty);
+}
+
+// [If the IOTHUB_MESSAGE_HANDLE CreationTimeUtc is not NULL, then the IOTHUB_MESSAGE_HANDLE CreationTimeUtc will be deallocated.]
+TEST_FUNCTION(IoTHubMessage_SetMessageCreationTimeUtcSystemProperty_CreationTimeUtc_Not_NULL_SUCCEED)
+{
+    set_string_string_already_allocated_succeeds_impl(IoTHubMessage_SetMessageCreationTimeUtcSystemProperty, TEST_MESSAGE_CREATION_TIME_UTC);
+}
+
+// [IoTHubMessage_SetMessageCreationTimeUtcSystemProperty finishes successfully it shall return IOTHUB_MESSAGE_OK.]
+TEST_FUNCTION(IoTHubMessage_SetMessageCreationTimeUtcSystemProperty_SUCCEED)
+{
+    set_string_succeeds_impl(IoTHubMessage_SetMessageCreationTimeUtcSystemProperty, TEST_MESSAGE_CREATION_TIME_UTC);
+}
+
+// [if the iotHubMessageHandle parameter is NULL then IoTHubMessage_GetMessageCreationTimeUtcSystemProperty shall return a NULL value.]
+TEST_FUNCTION(IoTHubMessage_GetMessageCreationTimeUtcSystemProperty_NULL_handle_Fails)
+{
+    get_string_NULL_handle_fails_impl(IoTHubMessage_GetMessageCreationTimeUtcSystemProperty);
+}
+
+// Tests_SRS_IOTHUBMESSAGE_31_047: [IoTHubMessage_GetMessageCreationTimeUtcSystemProperty shall return the CreationTimeUtc as a const char*.]
+TEST_FUNCTION(IoTHubMessage_GetMessageCreationTimeUtcSystemProperty_ConnectionModuleId_Not_Set_Fails)
+{
+    get_string_not_set_fails_impl(IoTHubMessage_GetMessageCreationTimeUtcSystemProperty);
+}
+
+// Tests_SRS_IOTHUBMESSAGE_31_047: [IoTHubMessage_GetMessageCreationTimeUtcSystemProperty shall return the CreationTimeUtc as a const char*.]
+TEST_FUNCTION(IoTHubMessage_GetMessageCreationTimeUtcSystemProperty_SUCCEED)
+{
+    get_string_succeeds_impl(IoTHubMessage_SetMessageCreationTimeUtcSystemProperty, IoTHubMessage_GetMessageCreationTimeUtcSystemProperty, TEST_MESSAGE_CREATION_TIME_UTC);
+}
+
 
 END_TEST_SUITE(iothubmessage_ut)
 
