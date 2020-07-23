@@ -22,7 +22,7 @@ typedef enum PNP_CONNECTION_SECURITY_TYPE_TAG
 typedef struct PNP_DPS_CONFIGURATION_TAG
 {
     char* idScope;
-    char* deviceId;
+    char* registrationId;
     char* deviceKey;
 } PNP_DPS_CONFIGURATION;
 #endif /* USE_PROV_MODULE */

@@ -25,14 +25,6 @@
 #include "pnp_device_client_helpers.h"
 #include "pnp_protocol_helpers.h"
 
-#ifdef USE_PROV_MODULE
-// DPS related header files
-#include "azure_prov_client/iothub_security_factory.h"
-#include "azure_prov_client/prov_device_client.h"
-#include "azure_prov_client/prov_transport_mqtt_client.h"
-#include "azure_prov_client/prov_security_factory.h"
-#endif // USE_PROV_MODULE
-
 // Headers that provide implementation for subcomponents (the two thermostat components and DeviceInfo)
 #include "pnp_thermostat_component.h"
 #include "pnp_deviceinfo_component.h"
@@ -49,14 +41,13 @@ static const char g_connectionStringEnvironmentVariable[] = "IOTHUB_DEVICE_CONNE
 static const char g_dpsIdScopeEnvironmentVariable[] = "IOTHUB_DEVICE_DPS_ID_SCOPE";
 
 // Environment variable used to specify this application's DPS device id
-static const char g_dpsDeviceIdEnvironmentVariable[] = "IOTHUB_DEVICE_DPS_DEVICE_ID";
+static const char g_dpsRegistrationIdEnvironmentVariable[] = "IOTHUB_DEVICE_DPS_REGISTRATION_ID";
 
 // Environment variable used to specify this application's DPS device key
 static const char g_dpsDeviceKeyEnvironmentVariable[] = "IOTHUB_DEVICE_DPS_DEVICE_KEY";
 
 // Values of connection / security settings read from environment variables and/or DPS runtime
 PNP_DEVICE_CONFIGURATION g_pnpDeviceConfiguration;
-char* g_connectionString;
 
 // Amount of time to sleep between sending telemetry to IotHub, in milliseconds.  Set to 1 minute.
 static unsigned int g_sleepBetweenTelemetrySends = 60 * 1000;
@@ -356,9 +347,9 @@ static bool GetDpsFromEnvironment()
         LogError("Cannot read environment variable=%s", g_dpsIdScopeEnvironmentVariable);
         result = false;
     }
-    else if ((g_pnpDeviceConfiguration.u.dpsConfiguration.deviceId = getenv(g_dpsDeviceIdEnvironmentVariable)) == NULL)
+    else if ((g_pnpDeviceConfiguration.u.dpsConfiguration.registrationId = getenv(g_dpsRegistrationIdEnvironmentVariable)) == NULL)
     {
-        LogError("Cannot read environment variable=%s", g_dpsDeviceIdEnvironmentVariable);
+        LogError("Cannot read environment variable=%s", g_dpsRegistrationIdEnvironmentVariable);
         result = false;
     }
     else if ((g_pnpDeviceConfiguration.u.dpsConfiguration.deviceKey = getenv(g_dpsDeviceKeyEnvironmentVariable)) == NULL)

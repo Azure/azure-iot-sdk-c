@@ -42,12 +42,9 @@ static IOTHUB_DEVICE_CLIENT_HANDLE AllocateDeviceClientHandle(const PNP_DEVICE_C
         }
     }
 #ifdef USE_PROV_MODULE
-    else
+    else if ((deviceHandle = PnP_CreateDeviceClientHandle_ViaDps(pnpDeviceConfiguration)) == NULL)
     {
-        if ((deviceHandle = PnP_CreateDeviceClientHandle_ViaDps(pnpDeviceConfiguration)) == NULL)
-        {
-            LogError("Cannot retrieve IoT Hub connection information from DPS client");
-        }
+        LogError("Cannot retrieve IoT Hub connection information from DPS client");
     }
 #endif /* USE_PROV_MODULE */
 

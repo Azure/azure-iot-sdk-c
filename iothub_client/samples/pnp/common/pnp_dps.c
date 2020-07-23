@@ -25,6 +25,7 @@
 
 // Global provisioning endpoint for DPS
 static const char* g_dps_GlobalProvUri = "global.azure-devices-provisioning.net";
+// Format of custom DPS payload sent when registering a PnP device.
 static const char g_dps_PayloadFormatForModelId[] = "{\"modelId\":\"%s\"}";
 
 // State of DPS registration process.  We cannot proceed with PnP until we get into the state PNP_DPS_REGISTRATION_SUCCEEDED.
@@ -53,12 +54,12 @@ static char* g_dpsDeviceId;
 //
 static void provisioningRegisterCallback(PROV_DEVICE_RESULT registerResult, const char* iothubUri, const char* deviceId, void* userContext)
 {
-    PNP_DPS_REGISTRATION_STATUS* pnpDpsRegistrationStatus = (PNP_DPS_REGISTRATION_STATUS*)userContext;
+    (void)userContext;
 
     if (registerResult != PROV_DEVICE_RESULT_OK)
     {
         LogError("DPS Provisioning callback called with error state %d", registerResult);
-        *pnpDpsRegistrationStatus = PNP_DPS_REGISTRATION_FAILED;
+        g_pnpDpsRegistrationStatus = PNP_DPS_REGISTRATION_FAILED;
     }
     else
     {
@@ -66,12 +67,12 @@ static void provisioningRegisterCallback(PROV_DEVICE_RESULT registerResult, cons
             (mallocAndStrcpy_s(&g_dpsDeviceId, deviceId) != 0))
         {
             LogError("Unable to copy provisioning information");
-            *pnpDpsRegistrationStatus = PNP_DPS_REGISTRATION_FAILED;
+            g_pnpDpsRegistrationStatus = PNP_DPS_REGISTRATION_FAILED;
         }
         else
         {
             LogInfo("Provisioning callback indicates success.  iothubUri=%s, deviceId=%s", iothubUri, deviceId);
-            *pnpDpsRegistrationStatus = PNP_DPS_REGISTRATION_SUCCEEDED;
+            g_pnpDpsRegistrationStatus = PNP_DPS_REGISTRATION_SUCCEEDED;
         }
     }
 }
@@ -92,7 +93,7 @@ IOTHUB_DEVICE_CLIENT_HANDLE PnP_CreateDeviceClientHandle_ViaDps(const PNP_DEVICE
         LogError("Cannot allocate DPS payload for modelId.");
         result = false;
     }
-    else if ((prov_dev_set_symmetric_key_info(pnpDeviceConfiguration->u.dpsConfiguration.deviceId, pnpDeviceConfiguration->u.dpsConfiguration.deviceKey) != 0))
+    else if ((prov_dev_set_symmetric_key_info(pnpDeviceConfiguration->u.dpsConfiguration.registrationId, pnpDeviceConfiguration->u.dpsConfiguration.deviceKey) != 0))
     {
         LogError("prov_dev_set_symmetric_key_info failed.");
         result = false;
@@ -119,7 +120,7 @@ IOTHUB_DEVICE_CLIENT_HANDLE PnP_CreateDeviceClientHandle_ViaDps(const PNP_DEVICE
         LogError("Failed setting provisioning data, error=%d", provDeviceResult);
         result = false;
     }
-    else if ((provDeviceResult = Prov_Device_Register_Device(provDeviceHandle, provisioningRegisterCallback, &g_pnpDpsRegistrationStatus, NULL, NULL)) != PROV_DEVICE_RESULT_OK)
+    else if ((provDeviceResult = Prov_Device_Register_Device(provDeviceHandle, provisioningRegisterCallback, NULL, NULL, NULL)) != PROV_DEVICE_RESULT_OK)
     {
         LogError("Prov_Device_Register_Device failed, error=%d", provDeviceResult);
         result = false;
