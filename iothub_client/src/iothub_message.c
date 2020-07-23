@@ -101,6 +101,7 @@ static void DestroyMessageData(IOTHUB_MESSAGE_HANDLE_DATA* handleData)
     free(handleData->inputName);
     free(handleData->connectionModuleId);
     free(handleData->connectionDeviceId);
+    free(handleData->creationTimeUtc);
     free(handleData);
 }
 

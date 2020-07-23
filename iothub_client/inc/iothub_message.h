@@ -359,7 +359,7 @@ MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetConnectionDeviceId, IOTHUB_MES
 * @brief   Sets the message creation time in UTC. CAUTION: SDK user should not call it directly, it is for internal use only.
 *
 * @param   iotHubMessageHandle Handle to the message.
-* @param   messageCreationTimeUtc Pointer to the message creation time
+* @param   messageCreationTimeUtc Pointer to the message creation time as null-terminated string
 *
 * @return  Returns IOTHUB_MESSAGE_OK if the messageCreationTimeUtc was set successfully
 *          or an error code otherwise.
