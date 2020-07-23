@@ -17,29 +17,14 @@ typedef enum PNP_CONNECTION_SECURITY_TYPE_TAG
 
 #ifdef USE_PROV_MODULE
 //
-// DPS functionality using symmetric keys is only available if the cmake 
-// flags <-Duse_prov_client=ON -Dhsm_type_symm_key=ON> are enabled when building the Azure IoT C SDK.
+// PNP_DPS_CONFIGURATION is used to configure the DPS device client
 //
-// PNP_DPS_SYMMETRIC_KEY specifies the values the authentication material needed
-// to authenticate when using DPS symmetric keys.
-// 
-typedef struct PNP_DPS_SYMMETRIC_KEY_TAG
-{
-    char* idScope;
-    char* deviceId;
-    char* deviceKey;
-} PNP_DPS_SYMMETRIC_KEY;
-
-//
-// PNP_DPS_CONFIGURATION is the configuration for the IoTHub retrieved by the
-// DPS client at runtime (NOT pre-configured environmnent)
 typedef struct PNP_DPS_CONFIGURATION_TAG
 {
     char* idScope;
     char* deviceId;
     char* deviceKey;
 } PNP_DPS_CONFIGURATION;
-
 #endif /* USE_PROV_MODULE */
 
 //
@@ -58,11 +43,13 @@ typedef struct PNP_DEVICE_CONFIGURATION_TAG
     } u;
     // ModelId of this PnP device
     const char* modelId;
-    // Whether more verbose tracing is enabled at IoT Hub DeviceClient layer
+    // Whether more verbose tracing is enabled for the IoT Hub client
     bool enableTracing;
-    // Callback for IoT Hub device methods, which is the mechanism PnP commands use
+    // Callback for IoT Hub device methods, which is the mechanism PnP commands use.  If PnP commands
+    // are not used, this should be NULL to conserve memory and bandwidth.
     IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback;
-    // Callback for IoT Hub device twin notifications, which is the mechanism PnP properties from service use
+    // Callback for IoT Hub device twin notifications, which is the mechanism PnP properties from service use.
+    // If PnP properties are not configured by the server, this should be NULL to conserve memory and bandwidth.
     IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback;
 } PNP_DEVICE_CONFIGURATION;
 
@@ -72,13 +59,8 @@ typedef struct PNP_DEVICE_CONFIGURATION_TAG
 // for Device Method and Device Twin callbacks (to process PnP Commands and Properties, respectively)
 // as well as some other basic maintenence on the handle. 
 //
-// If the application's model does not implement PnP commands, the application should set deviceMethodCallback to NULL.
-// Analogously, if there are no desired PnP properties, deviceTwinCallback should be NULL.  Not subscribing for these
-// callbacks if they are not needed by the model will save bandwidth and RAM.
-//
-// NOTE: When using DPS based authentication, this function can *block* until DPS responds to the request or we timeout.
+// NOTE: When using DPS based authentication, this function can *block* until DPS responds to the request or timeout.
 //
 IOTHUB_DEVICE_CLIENT_HANDLE PnPHelper_CreateDeviceClientHandle(const PNP_DEVICE_CONFIGURATION* pnpDeviceConfiguration);
-//const char* connectionString, const char* modelId, bool enableTracing, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback);
 
 #endif /* PNP_DEVICE_CLIENT_HELPERS_H */

@@ -23,10 +23,6 @@
 #include "azure_prov_client/prov_transport_mqtt_client.h"
 #include "azure_prov_client/prov_security_factory.h"
 
-//
-// DPS specific configuration, only brought in if DPS is included as part of the SDK at cmake time
-//
-
 // Global provisioning endpoint for DPS
 static const char* g_dps_GlobalProvUri = "global.azure-devices-provisioning.net";
 static const char g_dps_PayloadFormatForModelId[] = "{\"modelId\":\"%s\"}";
@@ -160,7 +156,6 @@ IOTHUB_DEVICE_CLIENT_HANDLE PnP_CreateDeviceClientHandle_ViaDps(const PNP_DEVICE
         Prov_Device_Destroy(provDeviceHandle);
     }
 
-
     if (result == true)
     {
         if (iothub_security_init(IOTHUB_SECURITY_TYPE_SYMMETRIC_KEY) != 0)
@@ -181,4 +176,3 @@ IOTHUB_DEVICE_CLIENT_HANDLE PnP_CreateDeviceClientHandle_ViaDps(const PNP_DEVICE
 
     return deviceHandle;
 }
-

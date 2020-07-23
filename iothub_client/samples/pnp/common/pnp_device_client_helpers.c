@@ -11,6 +11,8 @@
 #include "iothubtransportmqtt.h"
 #include "pnp_device_client_helpers.h"
 #ifdef USE_PROV_MODULE
+// DPS functionality using symmetric keys is only available if the cmake 
+// flags <-Duse_prov_client=ON -Dhsm_type_symm_key=ON> are enabled when building the Azure IoT C SDK.
 #include "pnp_dps.h"
 #endif
 
@@ -40,8 +42,6 @@ static IOTHUB_DEVICE_CLIENT_HANDLE AllocateDeviceClientHandle(const PNP_DEVICE_C
         }
     }
 #ifdef USE_PROV_MODULE
-    // DPS functionality using symmetric keys is only available if the cmake 
-    // flags <-Duse_prov_client=ON -Dhsm_type_symm_key=ON> are enabled when building the Azure IoT C SDK.
     else
     {
         if ((deviceHandle = PnP_CreateDeviceClientHandle_ViaDps(pnpDeviceConfiguration)) == NULL)
@@ -62,7 +62,7 @@ IOTHUB_DEVICE_CLIENT_HANDLE PnPHelper_CreateDeviceClientHandle(const PNP_DEVICE_
     int iothubInitResult;
     bool result;
 
-    // Before invoking ANY IoTHub Device SDK functionality, IoTHub_Init must be invoked.
+    // Before invoking ANY IoT Hub or DPS functionality, IoTHub_Init must be invoked.
     if ((iothubInitResult = IoTHub_Init()) != 0)
     {
         LogError("Failure to initialize client, error=%d", iothubInitResult);
@@ -73,7 +73,6 @@ IOTHUB_DEVICE_CLIENT_HANDLE PnPHelper_CreateDeviceClientHandle(const PNP_DEVICE_
         LogError("Unable to allocate deviceHandle");
         result = false;
     }
-
     // Sets verbosity level
     else if ((iothubResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_LOG_TRACE, &pnpDeviceConfiguration->enableTracing)) != IOTHUB_CLIENT_OK)
     {

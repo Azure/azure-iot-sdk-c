@@ -65,7 +65,7 @@ static unsigned int g_sleepBetweenTelemetrySends = 60 * 1000;
 static bool g_hubClientTraceEnabled = true;
 
 // DTMI indicating this device's ModelId.
-#define TEMPERATURE_CONTROLLER_MODEL_ID "dtmi:com:example:TemperatureController;1"
+static const char g_temperatureControllerModelId[] = "dtmi:com:example:TemperatureController;1";
 
 // PNP_THERMOSTAT_COMPONENT_HANDLE represent the thermostat components that are sub-components of the temperature controller.
 // Note that we do NOT have an analogous DeviceInfo component handle because there is only DeviceInfo subcomponent and its
@@ -423,7 +423,7 @@ static IOTHUB_DEVICE_CLIENT_HANDLE CreateDeviceClientAndAllocateComponents(void)
     g_pnpDeviceConfiguration.deviceMethodCallback = PnP_TempControlComponent_DeviceMethodCallback;
     g_pnpDeviceConfiguration.deviceTwinCallback = PnP_TempControlComponent_DeviceTwinCallback;
     g_pnpDeviceConfiguration.enableTracing = g_hubClientTraceEnabled;
-    g_pnpDeviceConfiguration.modelId = TEMPERATURE_CONTROLLER_MODEL_ID;
+    g_pnpDeviceConfiguration.modelId = g_temperatureControllerModelId;
 
     if (GetConnectionSettingsFromEnvironment() == false)
     {
