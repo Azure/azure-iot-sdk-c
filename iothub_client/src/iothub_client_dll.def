@@ -121,6 +121,7 @@ EXPORTS
     IoTHubMessage_GetContentTypeSystemProperty
     IoTHubMessage_GetContentEncodingSystemProperty 
     IoTHubMessage_GetMessageCreationTimeUtcSystemProperty
+    IoTHubMessage_GetMessageUserIdSystemProperty
     IoTHubMessage_GetCorrelationId
     IoTHubMessage_GetDiagnosticPropertyData
     IoTHubMessage_GetMessageId

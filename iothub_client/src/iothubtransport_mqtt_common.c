@@ -82,6 +82,7 @@ static const char* REQUEST_ID_PROPERTY = "?$rid=";
 
 static const char* MESSAGE_ID_PROPERTY = "mid";
 static const char* MESSAGE_CREATION_TIME_UTC = "ctime";
+static const char* MESSAGE_USER_ID = "uid";
 static const char* CORRELATION_ID_PROPERTY = "cid";
 static const char* CONTENT_TYPE_PROPERTY = "ct";
 static const char* CONTENT_ENCODING_PROPERTY = "ce";
@@ -1329,6 +1330,15 @@ static int setMqttMessagePropertyIfPossible(IOTHUB_MESSAGE_HANDLE IoTHubMessage,
             if (IoTHubMessage_SetCorrelationId(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
             {
                 LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'correlationId' property.");
+                result = MU_FAILURE;
+            }
+            return result;
+        }
+        else if (strcmp((const char*)&propName[nameLen - 3], MESSAGE_USER_ID) == 0)
+        {
+            if (IoTHubMessage_SetMessageUserIdSystemProperty(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
+            {
+                LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'userId' property.");
                 result = MU_FAILURE;
             }
             return result;

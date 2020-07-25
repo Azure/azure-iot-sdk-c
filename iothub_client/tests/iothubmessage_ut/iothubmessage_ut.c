@@ -84,6 +84,7 @@ static const char* TEST_PROPERTY_KEY = "property_key";
 static const char* TEST_PROPERTY_VALUE = "property_value";
 
 static const char* TEST_MESSAGE_CREATION_TIME_UTC = "2020-07-01T01:00:00.000Z";
+static const char* TEST_MESSAGE_USER_ID = "2d4e2570-e7c2-4651-b190-4607986e3b9f";
 
 static IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA TEST_DIAGNOSTIC_DATA = { "12345678",  "1506054179"};
 static IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA TEST_DIAGNOSTIC_DATA2 = { "87654321", "1506054179.100" };
@@ -2180,18 +2181,35 @@ TEST_FUNCTION(IoTHubMessage_GetMessageCreationTimeUtcSystemProperty_NULL_handle_
     get_string_NULL_handle_fails_impl(IoTHubMessage_GetMessageCreationTimeUtcSystemProperty);
 }
 
-// Tests_SRS_IOTHUBMESSAGE_31_047: [IoTHubMessage_GetMessageCreationTimeUtcSystemProperty shall return the CreationTimeUtc as a const char*.]
+// [IoTHubMessage_GetMessageCreationTimeUtcSystemProperty shall return the CreationTimeUtc as a const char*.]
 TEST_FUNCTION(IoTHubMessage_GetMessageCreationTimeUtcSystemProperty_ConnectionModuleId_Not_Set_Fails)
 {
     get_string_not_set_fails_impl(IoTHubMessage_GetMessageCreationTimeUtcSystemProperty);
 }
 
-// Tests_SRS_IOTHUBMESSAGE_31_047: [IoTHubMessage_GetMessageCreationTimeUtcSystemProperty shall return the CreationTimeUtc as a const char*.]
+// [IoTHubMessage_GetMessageCreationTimeUtcSystemProperty shall return the CreationTimeUtc as a const char*.]
 TEST_FUNCTION(IoTHubMessage_GetMessageCreationTimeUtcSystemProperty_SUCCEED)
 {
     get_string_succeeds_impl(IoTHubMessage_SetMessageCreationTimeUtcSystemProperty, IoTHubMessage_GetMessageCreationTimeUtcSystemProperty, TEST_MESSAGE_CREATION_TIME_UTC);
 }
 
+// [if the iotHubMessageHandle parameter is NULL then IoTHubMessage_GetMessageUserIdSystemProperty shall return a NULL value.]
+TEST_FUNCTION(IoTHubMessage_GetMessageUserIdSystemProperty_NULL_handle_Fails)
+{
+    get_string_NULL_handle_fails_impl(IoTHubMessage_GetMessageUserIdSystemProperty);
+}
+
+// [IoTHubMessage_GetMessageUserIdSystemProperty shall return the UserId as a const char*.]
+TEST_FUNCTION(IoTHubMessage_GetMessageUserIdProperty_ConnectionModuleId_Not_Set_Fails)
+{
+    get_string_not_set_fails_impl(IoTHubMessage_GetMessageUserIdSystemProperty);
+}
+
+// [IoTHubMessage_GetMessageUserIdSystemProperty shall return the user id as a const char*.]
+TEST_FUNCTION(IoTHubMessage_GetUserIdSystemProperty_SUCCEED)
+{
+    get_string_succeeds_impl(IoTHubMessage_SetMessageUserIdSystemProperty, IoTHubMessage_GetMessageUserIdSystemProperty, TEST_MESSAGE_USER_ID);
+}
 
 END_TEST_SUITE(iothubmessage_ut)
 
