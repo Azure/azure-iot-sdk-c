@@ -15,17 +15,17 @@ typedef enum PNP_CONNECTION_SECURITY_TYPE_TAG
     PNP_CONNECTION_SECURITY_TYPE_DPS
 } PNP_CONNECTION_SECURITY_TYPE;
 
-#ifdef USE_PROV_MODULE
+#ifdef USE_PROV_MODULE_FULL
 //
-// PNP_DPS_CONFIGURATION is used to configure the DPS device client
+// PNP_DPS_CONNECTION_AUTH is used to configure the DPS device client
 //
 typedef struct PNP_DPS_CONFIGURATION_TAG
 {
     char* idScope;
-    char* registrationId;
+    char* deviceId;
     char* deviceKey;
-} PNP_DPS_CONFIGURATION;
-#endif /* USE_PROV_MODULE */
+} PNP_DPS_CONNECTION_AUTH;
+#endif /* USE_PROV_MODULE_FULL */
 
 //
 // PNP_HELPER_DEVICE_CONFIGURATION is used to setup the IOTHUB_DEVICE_CLIENT_HANDLE
@@ -37,8 +37,8 @@ typedef struct PNP_DEVICE_CONFIGURATION_TAG
     // The connection string or DPS security information
     union {
         char* connectionString;
-#ifdef USE_PROV_MODULE
-        PNP_DPS_CONFIGURATION dpsConfiguration;
+#ifdef USE_PROV_MODULE_FULL
+        PNP_DPS_CONNECTION_AUTH dpsConnectionAuth;
 #endif
     } u;
     // ModelId of this PnP device

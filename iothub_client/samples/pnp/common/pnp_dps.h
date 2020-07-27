@@ -6,7 +6,7 @@
 
 #include "iothub_device_client.h"
 
-#ifndef USE_PROV_MODULE
+#ifndef USE_PROV_MODULE_FULL
 #error "Missing cmake flag for DPS"
 #endif
 

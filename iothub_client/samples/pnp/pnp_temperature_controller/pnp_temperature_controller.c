@@ -17,8 +17,8 @@
 #include "iothub_device_client.h"
 #include "iothub_client_options.h"
 #include "iothub_message.h"
-#include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/strings.h"
+#include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/xlogging.h"
 
 // PnP helper utilities.
@@ -41,7 +41,7 @@ static const char g_connectionStringEnvironmentVariable[] = "IOTHUB_DEVICE_CONNE
 static const char g_dpsIdScopeEnvironmentVariable[] = "IOTHUB_DEVICE_DPS_ID_SCOPE";
 
 // Environment variable used to specify this application's DPS device id
-static const char g_dpsRegistrationIdEnvironmentVariable[] = "IOTHUB_DEVICE_DPS_REGISTRATION_ID";
+static const char g_dpsDeviceIdEnvironmentVariable[] = "IOTHUB_DEVICE_DPS_DEVICE_ID";
 
 // Environment variable used to specify this application's DPS device key
 static const char g_dpsDeviceKeyEnvironmentVariable[] = "IOTHUB_DEVICE_DPS_DEVICE_KEY";
@@ -332,7 +332,7 @@ static bool GetConnectionStringFromEnvironment()
 //
 static bool GetDpsFromEnvironment()
 {
-#ifndef USE_PROV_MODULE
+#ifndef USE_PROV_MODULE_FULL
     // Explain to user misconfiguration.  The "run_e2e_tests" must be set to OFF because otherwise
     // the e2e's test HSM layer and symmetric key logic will conflict.
     LogError("DPS based authentication was requested via environment variables, but DPS is not enabled.");
@@ -342,17 +342,17 @@ static bool GetDpsFromEnvironment()
 #else
     bool result;
 
-    if ((g_pnpDeviceConfiguration.u.dpsConfiguration.idScope = getenv(g_dpsIdScopeEnvironmentVariable)) == NULL)
+    if ((g_pnpDeviceConfiguration.u.dpsConnectionAuth.idScope = getenv(g_dpsIdScopeEnvironmentVariable)) == NULL)
     {
         LogError("Cannot read environment variable=%s", g_dpsIdScopeEnvironmentVariable);
         result = false;
     }
-    else if ((g_pnpDeviceConfiguration.u.dpsConfiguration.registrationId = getenv(g_dpsRegistrationIdEnvironmentVariable)) == NULL)
+    else if ((g_pnpDeviceConfiguration.u.dpsConnectionAuth.deviceId = getenv(g_dpsDeviceIdEnvironmentVariable)) == NULL)
     {
-        LogError("Cannot read environment variable=%s", g_dpsRegistrationIdEnvironmentVariable);
+        LogError("Cannot read environment variable=%s", g_dpsDeviceIdEnvironmentVariable);
         result = false;
     }
-    else if ((g_pnpDeviceConfiguration.u.dpsConfiguration.deviceKey = getenv(g_dpsDeviceKeyEnvironmentVariable)) == NULL)
+    else if ((g_pnpDeviceConfiguration.u.dpsConnectionAuth.deviceKey = getenv(g_dpsDeviceKeyEnvironmentVariable)) == NULL)
     {
         LogError("Cannot read environment variable=%s", g_dpsDeviceKeyEnvironmentVariable);
         result = false;
@@ -363,7 +363,7 @@ static bool GetDpsFromEnvironment()
     }
 
     return result;
-#endif
+#endif // USE_PROV_MODULE_FULL
 }
 
 

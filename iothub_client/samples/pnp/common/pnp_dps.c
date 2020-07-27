@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#ifndef USE_PROV_MODULE
+#ifndef USE_PROV_MODULE_FULL
 #error "Missing cmake flag for DPS"
 #endif
 
@@ -13,8 +13,8 @@
 #include "iothubtransportmqtt.h"
 #include "pnp_device_client_helpers.h"
 
-#include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/strings.h"
+#include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/xlogging.h"
 
 // DPS related header files
@@ -31,12 +31,12 @@ static const char g_dps_PayloadFormatForModelId[] = "{\"modelId\":\"%s\"}";
 // State of DPS registration process.  We cannot proceed with PnP until we get into the state PNP_DPS_REGISTRATION_SUCCEEDED.
 typedef enum PNP_DPS_REGISTRATION_STATUS_TAG
 {
-    PNP_DPS_REGISTRATION_PENDING,
+    PNP_DPS_REGISTRATION_NOT_COMPLETE,
     PNP_DPS_REGISTRATION_SUCCEEDED,
     PNP_DPS_REGISTRATION_FAILED
 } PNP_DPS_REGISTRATION_STATUS;
 
-PNP_DPS_REGISTRATION_STATUS g_pnpDpsRegistrationStatus = PNP_DPS_REGISTRATION_PENDING;
+PNP_DPS_REGISTRATION_STATUS g_pnpDpsRegistrationStatus;
 
 // Maximum amount of times we'll poll for DPS registration being ready.  Note that even though DPS works off of callbacks,
 // the main() loop itself blocks 
@@ -87,13 +87,14 @@ IOTHUB_DEVICE_CLIENT_HANDLE PnP_CreateDeviceClientHandle_ViaDps(const PNP_DEVICE
     STRING_HANDLE modelIdPayload = NULL;
 
     LogInfo("Initiating DPS client to retrieve IoT Hub connection information");
+    g_pnpDpsRegistrationStatus = PNP_DPS_REGISTRATION_NOT_COMPLETE;
 
     if ((modelIdPayload = STRING_construct_sprintf(g_dps_PayloadFormatForModelId, pnpDeviceConfiguration->modelId)) == NULL)
     {
         LogError("Cannot allocate DPS payload for modelId.");
         result = false;
     }
-    else if ((prov_dev_set_symmetric_key_info(pnpDeviceConfiguration->u.dpsConfiguration.registrationId, pnpDeviceConfiguration->u.dpsConfiguration.deviceKey) != 0))
+    else if ((prov_dev_set_symmetric_key_info(pnpDeviceConfiguration->u.dpsConnectionAuth.deviceId, pnpDeviceConfiguration->u.dpsConnectionAuth.deviceKey) != 0))
     {
         LogError("prov_dev_set_symmetric_key_info failed.");
         result = false;
@@ -103,9 +104,9 @@ IOTHUB_DEVICE_CLIENT_HANDLE PnP_CreateDeviceClientHandle_ViaDps(const PNP_DEVICE
         LogError("prov_dev_security_init failed");
         result = false;
     }
-    else if ((provDeviceHandle = Prov_Device_Create(g_dps_GlobalProvUri, pnpDeviceConfiguration->u.dpsConfiguration.idScope, Prov_Device_MQTT_Protocol)) == NULL)
+    else if ((provDeviceHandle = Prov_Device_Create(g_dps_GlobalProvUri, pnpDeviceConfiguration->u.dpsConnectionAuth.idScope, Prov_Device_MQTT_Protocol)) == NULL)
     {
-        LogError("failed calling Prov_Device_Create");
+        LogError("Failed calling Prov_Device_Create");
         result = false;
     }
     else if ((provDeviceResult = Prov_Device_SetOption(provDeviceHandle, PROV_OPTION_LOG_TRACE, &pnpDeviceConfiguration->enableTracing)) != PROV_DEVICE_RESULT_OK)
@@ -127,7 +128,7 @@ IOTHUB_DEVICE_CLIENT_HANDLE PnP_CreateDeviceClientHandle_ViaDps(const PNP_DEVICE
     }
     else
     {
-        for (int i = 0; (i < g_dpsRegistrationMaxPolls) && (g_pnpDpsRegistrationStatus == PNP_DPS_REGISTRATION_PENDING); i++)
+        for (int i = 0; (i < g_dpsRegistrationMaxPolls) && (g_pnpDpsRegistrationStatus == PNP_DPS_REGISTRATION_NOT_COMPLETE); i++)
         {
             ThreadAPI_Sleep(g_dpsRegistrationPollSleep);
         }
@@ -137,7 +138,7 @@ IOTHUB_DEVICE_CLIENT_HANDLE PnP_CreateDeviceClientHandle_ViaDps(const PNP_DEVICE
             LogInfo("DPS successfully registered.  Continuing on to creation of IoTHub device client handle.");
             result = true;
         }
-        else if (g_pnpDpsRegistrationStatus == PNP_DPS_REGISTRATION_PENDING)
+        else if (g_pnpDpsRegistrationStatus == PNP_DPS_REGISTRATION_NOT_COMPLETE)
         {
             LogError("Timed out attempting to register DPS device");
             result = false;
