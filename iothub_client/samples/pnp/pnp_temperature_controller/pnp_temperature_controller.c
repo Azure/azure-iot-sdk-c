@@ -17,8 +17,8 @@
 #include "iothub_device_client.h"
 #include "iothub_client_options.h"
 #include "iothub_message.h"
-#include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/strings.h"
+#include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/xlogging.h"
 
 // PnP helper utilities.
@@ -29,8 +29,25 @@
 #include "pnp_thermostat_component.h"
 #include "pnp_deviceinfo_component.h"
 
+// Environment variable used to specify how app connects to hub and the two possible values
+static const char g_securityTypeEnvironmentVariable[] = "IOTHUB_DEVICE_SECURITY_TYPE";
+static const char g_securityTypeConnectionStringValue[] = "connectionString";
+static const char g_securityTypeDpsValue[] = "dps";
+
 // Environment variable used to specify this application's connection string
 static const char g_connectionStringEnvironmentVariable[] = "IOTHUB_DEVICE_CONNECTION_STRING";
+
+// Environment variable used to specify this application's DPS id scope
+static const char g_dpsIdScopeEnvironmentVariable[] = "IOTHUB_DEVICE_DPS_ID_SCOPE";
+
+// Environment variable used to specify this application's DPS device id
+static const char g_dpsDeviceIdEnvironmentVariable[] = "IOTHUB_DEVICE_DPS_DEVICE_ID";
+
+// Environment variable used to specify this application's DPS device key
+static const char g_dpsDeviceKeyEnvironmentVariable[] = "IOTHUB_DEVICE_DPS_DEVICE_KEY";
+
+// Values of connection / security settings read from environment variables and/or DPS runtime
+PNP_DEVICE_CONFIGURATION g_pnpDeviceConfiguration;
 
 // Amount of time to sleep between sending telemetry to IotHub, in milliseconds.  Set to 1 minute.
 static unsigned int g_sleepBetweenTelemetrySends = 60 * 1000;
@@ -39,7 +56,7 @@ static unsigned int g_sleepBetweenTelemetrySends = 60 * 1000;
 static bool g_hubClientTraceEnabled = true;
 
 // DTMI indicating this device's ModelId.
-static const char g_thermostatModelId[] = "dtmi:com:example:TemperatureController;1";
+static const char g_temperatureControllerModelId[] = "dtmi:com:example:TemperatureController;1";
 
 // PNP_THERMOSTAT_COMPONENT_HANDLE represent the thermostat components that are sub-components of the temperature controller.
 // Note that we do NOT have an analogous DeviceInfo component handle because there is only DeviceInfo subcomponent and its
@@ -290,20 +307,121 @@ static void PnP_TempControlComponent_ReportSerialNumber_Property(IOTHUB_DEVICE_C
 
 
 //
+// GetConnectionStringFromEnvironment retrieves the connection string based on environment variable
+//
+static bool GetConnectionStringFromEnvironment()
+{
+    bool result;
+
+    if ((g_pnpDeviceConfiguration.u.connectionString = getenv(g_connectionStringEnvironmentVariable)) == NULL)
+    {
+        LogError("Cannot read environment variable=%s", g_connectionStringEnvironmentVariable);
+        result = false;
+    }
+    else
+    {
+        result = true;    
+    }
+
+    return result;
+}
+
+//
+// GetDpsFromEnvironment retrieves DPS configuration for a symmetric key based connection
+// from environment variables
+//
+static bool GetDpsFromEnvironment()
+{
+#ifndef USE_PROV_MODULE_FULL
+    // Explain to user misconfiguration.  The "run_e2e_tests" must be set to OFF because otherwise
+    // the e2e's test HSM layer and symmetric key logic will conflict.
+    LogError("DPS based authentication was requested via environment variables, but DPS is not enabled.");
+    LogError("DPS is an optional component of the Azure IoT C SDK.  It is enabled with symmetric keys at cmake time by");
+    LogError("passing <-Duse_prov_client=ON -Dhsm_type_symm_key=ON -Drun_e2e_tests=OFF> to cmake's command line");
+    return false;
+#else
+    bool result;
+
+    if ((g_pnpDeviceConfiguration.u.dpsConnectionAuth.idScope = getenv(g_dpsIdScopeEnvironmentVariable)) == NULL)
+    {
+        LogError("Cannot read environment variable=%s", g_dpsIdScopeEnvironmentVariable);
+        result = false;
+    }
+    else if ((g_pnpDeviceConfiguration.u.dpsConnectionAuth.deviceId = getenv(g_dpsDeviceIdEnvironmentVariable)) == NULL)
+    {
+        LogError("Cannot read environment variable=%s", g_dpsDeviceIdEnvironmentVariable);
+        result = false;
+    }
+    else if ((g_pnpDeviceConfiguration.u.dpsConnectionAuth.deviceKey = getenv(g_dpsDeviceKeyEnvironmentVariable)) == NULL)
+    {
+        LogError("Cannot read environment variable=%s", g_dpsDeviceKeyEnvironmentVariable);
+        result = false;
+    }
+    else
+    {
+        result = true;    
+    }
+
+    return result;
+#endif // USE_PROV_MODULE_FULL
+}
+
+
+//
+// GetConfigurationFromEnvironment reads how to connect to the IoT Hub (using 
+// either a connection string or a DPS symmetric key) from the environment.
+//
+static bool GetConnectionSettingsFromEnvironment()
+{
+    const char* securityTypeString;
+    bool result;
+
+    if ((securityTypeString = getenv(g_securityTypeEnvironmentVariable)) == NULL)
+    {
+        LogError("Cannot read environment variable=%s", g_securityTypeEnvironmentVariable);
+        result = false;
+    }
+    else
+    {
+        if (strcmp(securityTypeString, g_securityTypeConnectionStringValue) == 0)
+        {
+            g_pnpDeviceConfiguration.securityType = PNP_CONNECTION_SECURITY_TYPE_CONNECTION_STRING;
+            result = GetConnectionStringFromEnvironment();
+        }
+        else if (strcmp(securityTypeString, g_securityTypeDpsValue) == 0)
+        {
+            g_pnpDeviceConfiguration.securityType = PNP_CONNECTION_SECURITY_TYPE_DPS;
+            result = GetDpsFromEnvironment();
+        }
+        else
+        {
+            LogError("Environment variable %s must be either %s or %s", g_securityTypeEnvironmentVariable, g_securityTypeConnectionStringValue, g_securityTypeDpsValue);
+            result = false;
+        }
+    }
+
+    return result;    
+}
+
+//
 // CreateDeviceClientAndAllocateComponents allocates the IOTHUB_DEVICE_CLIENT_HANDLE the application will use along with thermostat components
 // 
 static IOTHUB_DEVICE_CLIENT_HANDLE CreateDeviceClientAndAllocateComponents(void)
 {
     IOTHUB_DEVICE_CLIENT_HANDLE deviceClient = NULL;
-    const char* connectionString;
     bool result;
 
-    if ((connectionString = getenv(g_connectionStringEnvironmentVariable)) == NULL)
+    g_pnpDeviceConfiguration.deviceMethodCallback = PnP_TempControlComponent_DeviceMethodCallback;
+    g_pnpDeviceConfiguration.deviceTwinCallback = PnP_TempControlComponent_DeviceTwinCallback;
+    g_pnpDeviceConfiguration.enableTracing = g_hubClientTraceEnabled;
+    g_pnpDeviceConfiguration.modelId = g_temperatureControllerModelId;
+
+    if (GetConnectionSettingsFromEnvironment() == false)
     {
-        LogError("Cannot read environment variable=%s", g_connectionStringEnvironmentVariable);
+        LogError("Cannot read required environment variable(s)");
         result = false;
     }
-    else if ((deviceClient = PnPHelper_CreateDeviceClientHandle(connectionString, g_thermostatModelId, g_hubClientTraceEnabled, PnP_TempControlComponent_DeviceMethodCallback, PnP_TempControlComponent_DeviceTwinCallback)) == NULL)
+    else if ((deviceClient = PnPHelper_CreateDeviceClientHandle(&g_pnpDeviceConfiguration)) == NULL)
     {
         LogError("Failure creating IotHub device client");
         result = false;

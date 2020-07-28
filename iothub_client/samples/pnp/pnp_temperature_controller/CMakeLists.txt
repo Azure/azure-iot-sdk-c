@@ -18,6 +18,10 @@ IF(WIN32)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 ENDIF(WIN32)
 
+if(${use_prov_client})
+    set(pnp_temperature_controller_c_files ${pnp_temperature_controller_c_files} ../common/pnp_dps.c)
+endif()
+
 #Conditionally use the SDK trusted certs in the samples
 if(${use_sample_trusted_cert})
     add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
@@ -34,3 +38,8 @@ linkMqttLibrary(pnp_temperature_controller)
 add_definitions(-DUSE_MQTT)
 
 target_link_libraries(pnp_temperature_controller iothub_client)
+
+if(${use_prov_client})
+    target_link_libraries(pnp_temperature_controller prov_device_client prov_mqtt_transport)
+endif()
+
