@@ -3,16 +3,16 @@
 
 // The DTDL for this interface is defined at https://repo.azureiotrepository.com/Models/dtmi:azure:DeviceManagement:DeviceInformation;1?api-version=2020-05-01-preview
 
-// PnP helper routines
+// PnP routines
 #include "pnp_deviceinfo_component.h"
-#include "pnp_protocol_helpers.h"
+#include "pnp_protocol.h"
 
 // Core IoT SDK utilities
 #include "azure_c_shared_utility/xlogging.h"
 
 // Property names along with their simulated values.  
 // NOTE: the property values must be legal JSON values.  Strings specifically must be enclosed with an extra set of quotes to be legal json string values.
-// The property names in this sample do not hard-code the extra quotes because the underlying PnP helper adds this to names automatically.
+// The property names in this sample do not hard-code the extra quotes because the underlying PnP sample adds this to names automatically.
 #define PNP_ENCODE_STRING_FOR_JSON(str) #str
 
 static const char PnPDeviceInfo_SoftwareVersionPropertyName[] = "swVersion";
@@ -48,7 +48,7 @@ static void SendReportedPropertyForDeviceInformation(IOTHUB_DEVICE_CLIENT_HANDLE
     IOTHUB_CLIENT_RESULT iothubClientResult;
     STRING_HANDLE jsonToSend = NULL;
 
-    if ((jsonToSend = PnPHelper_CreateReportedProperty(componentName, propertyName, propertyValue)) == NULL)
+    if ((jsonToSend = PnP_CreateReportedProperty(componentName, propertyName, propertyValue)) == NULL)
     {
         LogError("Unable to build reported property response for propertyName=%s, propertyValue=%s", propertyName, propertyValue);
     }
@@ -74,7 +74,7 @@ void PnP_DeviceInfoComponent_Report_All_Properties(const char* componentName, IO
 {
     // NOTE: It is possible to put multiple property updates into a single JSON and IoTHubDeviceClient_SendReportedState invocation.
     // This sample does not do so for clarity, though production devices should seriously consider such property update batching to
-    // save bandwidth.  The underlying PnP_Helper routines currently do not accept an array.
+    // save bandwidth.  PnP_CreateReportedProperty does not currently accept arrays.
     SendReportedPropertyForDeviceInformation(deviceClient, componentName, PnPDeviceInfo_SoftwareVersionPropertyName, PnPDeviceInfo_SoftwareVersionPropertyValue);
     SendReportedPropertyForDeviceInformation(deviceClient, componentName, PnPDeviceInfo_ManufacturerPropertyName, PnPDeviceInfo_ManufacturerPropertyValue);
     SendReportedPropertyForDeviceInformation(deviceClient, componentName, PnPDeviceInfo_ModelPropertyName, PnPDeviceInfo_ModelPropertyValue);

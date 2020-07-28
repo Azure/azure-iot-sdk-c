@@ -7,8 +7,8 @@
 #include <string.h>
 #include <time.h>
 
-// PnP helper routines
-#include "pnp_protocol_helpers.h"
+// PnP routines
+#include "pnp_protocol.h"
 #include "pnp_thermostat_component.h"
 
 // Core IoT SDK utilities
@@ -261,7 +261,7 @@ static void SendTargetTemperatureResponse(PNP_THERMOSTAT_COMPONENT* pnpThermosta
     {
         LogError("Unable to create target temperature string for reporting result");
     }
-    else if ((jsonToSend = PnPHelper_CreateReportedPropertyWithStatus(pnpThermostatComponent->componentName, g_targetTemperaturePropertyName, targetTemperatureAsString, 
+    else if ((jsonToSend = PnP_CreateReportedPropertyWithStatus(pnpThermostatComponent->componentName, g_targetTemperaturePropertyName, targetTemperatureAsString, 
                                                                       PNP_STATUS_SUCCESS, g_temperaturePropertyResponseDescription, version)) == NULL)
     {
         LogError("Unable to build reported property response");
@@ -295,7 +295,7 @@ void PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(PNP_THERMOS
     {
         LogError("Unable to create max temp since last reboot string for reporting result");
     }
-    else if ((jsonToSend = PnPHelper_CreateReportedProperty(pnpThermostatComponent->componentName, g_maxTempSinceLastRebootPropertyName, maximumTemperatureAsString)) == NULL)
+    else if ((jsonToSend = PnP_CreateReportedProperty(pnpThermostatComponent->componentName, g_maxTempSinceLastRebootPropertyName, maximumTemperatureAsString)) == NULL)
     {
         LogError("Unable to build max temp since last reboot property");
     }
@@ -361,7 +361,7 @@ void PnP_ThermostatComponent_SendTelemetry(PNP_THERMOSTAT_COMPONENT_HANDLE pnpTh
     {
         LogError("snprintf of current temperature telemetry failed");
     }
-    else if ((messageHandle = PnPHelper_CreateTelemetryMessageHandle(pnpThermostatComponent->componentName, temperatureStringBuffer)) == NULL)
+    else if ((messageHandle = PnP_CreateTelemetryMessageHandle(pnpThermostatComponent->componentName, temperatureStringBuffer)) == NULL)
     {
         LogError("Unable to create telemetry message");
     }

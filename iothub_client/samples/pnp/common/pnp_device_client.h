@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#ifndef PNP_DEVICE_CLIENT_HELPERS_H
-#define PNP_DEVICE_CLIENT_HELPERS_H
+#ifndef PNP_DEVICE_CLIENT_H
+#define PNP_DEVICE_CLIENT_H
 
 #include "iothub_device_client.h"
 
@@ -28,7 +28,7 @@ typedef struct PNP_DPS_CONFIGURATION_TAG
 #endif /* USE_PROV_MODULE_FULL */
 
 //
-// PNP_HELPER_DEVICE_CONFIGURATION is used to setup the IOTHUB_DEVICE_CLIENT_HANDLE
+// PNP_DEVICE_CONFIGURATION is used to setup the IOTHUB_DEVICE_CLIENT_HANDLE
 //
 typedef struct PNP_DEVICE_CONFIGURATION_TAG
 {
@@ -54,13 +54,13 @@ typedef struct PNP_DEVICE_CONFIGURATION_TAG
 } PNP_DEVICE_CONFIGURATION;
 
 //
-// PnPHelper_CreateDeviceClientHandle creates an IOTHUB_DEVICE_CLIENT_HANDLE that will be ready to interact with PnP.
+// PnP_CreateDeviceClientHandle creates an IOTHUB_DEVICE_CLIENT_HANDLE that will be ready to interact with PnP.
 // Beyond basic handle creation, it also sets the handle to the appropriate ModelId, optionally sets up callback functions
 // for Device Method and Device Twin callbacks (to process PnP Commands and Properties, respectively)
 // as well as some other basic maintenence on the handle. 
 //
 // NOTE: When using DPS based authentication, this function can *block* until DPS responds to the request or timeout.
 //
-IOTHUB_DEVICE_CLIENT_HANDLE PnPHelper_CreateDeviceClientHandle(const PNP_DEVICE_CONFIGURATION* pnpDeviceConfiguration);
+IOTHUB_DEVICE_CLIENT_HANDLE PnP_CreateDeviceClientHandle(const PNP_DEVICE_CONFIGURATION* pnpDeviceConfiguration);
 
-#endif /* PNP_DEVICE_CLIENT_HELPERS_H */
+#endif /* PNP_DEVICE_CLIENT_H */
