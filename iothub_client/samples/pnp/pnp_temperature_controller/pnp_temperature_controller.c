@@ -32,7 +32,7 @@
 // Environment variable used to specify how app connects to hub and the two possible values
 static const char g_securityTypeEnvironmentVariable[] = "IOTHUB_DEVICE_SECURITY_TYPE";
 static const char g_securityTypeConnectionStringValue[] = "connectionString";
-static const char g_securityTypeDpsValue[] = "dps";
+static const char g_securityTypeDpsValue[] = "DPS";
 
 // Environment variable used to specify this application's connection string
 static const char g_connectionStringEnvironmentVariable[] = "IOTHUB_DEVICE_CONNECTION_STRING";
@@ -137,7 +137,7 @@ static void SetEmptyCommandResponse(unsigned char** response, size_t* responseSi
     }
     else
     {
-        memcpy(response, g_JSONEmpty, g_JSONEmptySize);
+        memcpy(*response, g_JSONEmpty, g_JSONEmptySize);
         *responseSize = g_JSONEmptySize;
         // We only overwrite the caller's result on error; otherwise leave as it was
     }

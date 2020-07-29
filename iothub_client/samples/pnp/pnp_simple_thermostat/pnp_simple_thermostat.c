@@ -210,7 +210,7 @@ static void SetEmptyCommandResponse(unsigned char** response, size_t* responseSi
     }
     else
     {
-        memcpy(response, g_JSONEmpty, g_JSONEmptySize);
+        memcpy(*response, g_JSONEmpty, g_JSONEmptySize);
         *responseSize = g_JSONEmptySize;
         // We only overwrite the caller's result on error; otherwise leave as it was
     }

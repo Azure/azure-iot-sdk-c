@@ -12,7 +12,7 @@
 #include "pnp_device_client_ll.h"
 #ifdef USE_PROV_MODULE_FULL
 // DPS functionality using symmetric keys is only available if the cmake 
-// flags <-Duse_prov_client=ON -Dhsm_type_symm_key=ON> are enabled when building the Azure IoT C SDK.
+// flags <-Duse_prov_client=ON -Dhsm_type_symm_key=ON -Drun_e2e_tests=OFF> are enabled when building the Azure IoT C SDK.
 #include "pnp_dps_ll.h"
 #endif
 
