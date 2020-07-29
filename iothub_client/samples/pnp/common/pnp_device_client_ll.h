@@ -4,7 +4,7 @@
 #ifndef PNP_DEVICE_CLIENT_LL_H
 #define PNP_DEVICE_CLIENT_LL_H
 
-#include "iothub_device_client.h"
+#include "iothub_device_client_ll.h"
 
 //
 // Whether we're using a connection string or DPS provisioning for device credentials
@@ -29,7 +29,7 @@ typedef struct PNP_DPS_CONFIGURATION_TAG
 #endif /* USE_PROV_MODULE_FULL */
 
 //
-// PNP_DEVICE_CONFIGURATION is used to setup the IOTHUB_DEVICE_CLIENT_HANDLE
+// PNP_DEVICE_CONFIGURATION is used to setup the IOTHUB_DEVICE_CLIENT_LL_HANDLE
 //
 typedef struct PNP_DEVICE_CONFIGURATION_TAG
 {
@@ -55,13 +55,13 @@ typedef struct PNP_DEVICE_CONFIGURATION_TAG
 } PNP_DEVICE_CONFIGURATION;
 
 //
-// PnP_CreateDeviceClientHandle creates an IOTHUB_DEVICE_CLIENT_HANDLE that will be ready to interact with PnP.
+// PnP_CreateDeviceClientLLHandle creates an IOTHUB_DEVICE_CLIENT_LL_HANDLE that will be ready to interact with PnP.
 // Beyond basic handle creation, it also sets the handle to the appropriate ModelId, optionally sets up callback functions
 // for Device Method and Device Twin callbacks (to process PnP Commands and Properties, respectively)
 // as well as some other basic maintenence on the handle. 
 //
 // NOTE: When using DPS based authentication, this function can *block* until DPS responds to the request or timeout.
 //
-IOTHUB_DEVICE_CLIENT_HANDLE PnP_CreateDeviceClientHandle(const PNP_DEVICE_CONFIGURATION* pnpDeviceConfiguration);
+IOTHUB_DEVICE_CLIENT_LL_HANDLE PnP_CreateDeviceClientLLHandle(const PNP_DEVICE_CONFIGURATION* pnpDeviceConfiguration);
 
 #endif /* PNP_DEVICE_CLIENT_LL_H */

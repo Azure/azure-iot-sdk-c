@@ -15,7 +15,7 @@
 
 // IoTHub Device Client and IoT core utility related header files
 #include "iothub.h"
-#include "iothub_device_client.h"
+#include "iothub_device_client_ll.h"
 #include "iothub_message.h"
 #include "iothub_client_options.h"
 #include "iothubtransportmqtt.h"
@@ -33,8 +33,12 @@
 // Environment variable used to specify this application's connection string
 static const char g_connectionStringEnvironmentVariable[] = "IOTHUB_DEVICE_CONNECTION_STRING";
 
-// Amount of time to sleep between sending telemetry to IotHub, in milliseconds.  Set to 1 minute.
-static unsigned int g_sleepBetweenTelemetrySends = 60 * 1000;
+// Amount of time to sleep between polling hub, in milliseconds.  Set to wake up every 100 milliseconds.
+static unsigned int g_sleepBetweenPolls = 100;
+
+// Every time the main loop wakes up, on the g_sendTelemetryFrequency(th) pass will send a telemetry message.
+// So we will send telemetry every (g_sendTelemetryFrequency * g_sleepBetweenPolls) milliseconds; 60 seconds as currently configured.
+static const int g_sendTelemetryFrequency = 600;
 
 // Whether verbose tracing at the IoTHub client is enabled or not.
 static bool g_hubClientTraceEnabled = true;
@@ -333,7 +337,7 @@ static void UpdateTemperatureAndStatistics(double desiredTemp, bool* maxTempUpda
 //
 // SendTargetTemperatureReport sends a PnP property indicating the device has received the desired targeted temperature
 //
-static void SendTargetTemperatureReport(IOTHUB_DEVICE_CLIENT_HANDLE deviceClient, double desiredTemp, int responseStatus, int version, const char* description)
+static void SendTargetTemperatureReport(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL, double desiredTemp, int responseStatus, int version, const char* description)
 {
     IOTHUB_CLIENT_RESULT iothubClientResult;
     char targetTemperatureResponseProperty[256];
@@ -342,7 +346,7 @@ static void SendTargetTemperatureReport(IOTHUB_DEVICE_CLIENT_HANDLE deviceClient
     {
         LogError("snprintf building targetTemperature response failed");
     }
-    else if ((iothubClientResult = IoTHubDeviceClient_SendReportedState(deviceClient, (const unsigned char*)targetTemperatureResponseProperty, strlen(targetTemperatureResponseProperty), NULL, NULL)) != IOTHUB_CLIENT_OK)
+    else if ((iothubClientResult = IoTHubDeviceClient_LL_SendReportedState(deviceClientLL, (const unsigned char*)targetTemperatureResponseProperty, strlen(targetTemperatureResponseProperty), NULL, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to send reported state for target temperature.  Error=%d", iothubClientResult);
     }
@@ -355,7 +359,7 @@ static void SendTargetTemperatureReport(IOTHUB_DEVICE_CLIENT_HANDLE deviceClient
 //
 // SendMaxTemperatureSinceReboot reports a PnP property indicating the maximum temperature since the last reboot (simulated here by lifetime of executable)
 //
-static void SendMaxTemperatureSinceReboot(IOTHUB_DEVICE_CLIENT_HANDLE deviceClient)
+static void SendMaxTemperatureSinceReboot(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL)
 {
     IOTHUB_CLIENT_RESULT iothubClientResult;
     char maxTemperatureSinceRebootProperty[256];
@@ -364,7 +368,7 @@ static void SendMaxTemperatureSinceReboot(IOTHUB_DEVICE_CLIENT_HANDLE deviceClie
     {
         LogError("snprintf building maxTemperature failed");
     }
-    else if ((iothubClientResult = IoTHubDeviceClient_SendReportedState(deviceClient, (const unsigned char*)maxTemperatureSinceRebootProperty, strlen(maxTemperatureSinceRebootProperty), NULL, NULL)) != IOTHUB_CLIENT_OK)
+    else if ((iothubClientResult = IoTHubDeviceClient_LL_SendReportedState(deviceClientLL, (const unsigned char*)maxTemperatureSinceRebootProperty, strlen(maxTemperatureSinceRebootProperty), NULL, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to send reported state for maximum temperature.  Error=%d", iothubClientResult);
     }
@@ -380,7 +384,7 @@ static void SendMaxTemperatureSinceReboot(IOTHUB_DEVICE_CLIENT_HANDLE deviceClie
 static void Thermostat_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payload, size_t size, void* userContextCallback)
 {
     // The device handle associated with this request is passed as the context, since we will need to send reported events back.
-    IOTHUB_DEVICE_CLIENT_HANDLE deviceClient = (IOTHUB_DEVICE_CLIENT_HANDLE)userContextCallback;
+    IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL = (IOTHUB_DEVICE_CLIENT_LL_HANDLE)userContextCallback;
 
     char* jsonStr = NULL;
     JSON_Value* rootValue = NULL;
@@ -433,12 +437,12 @@ static void Thermostat_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE updateState, 
         UpdateTemperatureAndStatistics(targetTemperature, &maxTempUpdated);
 
         // The device needs to let the service know that it has received the targetTemperature desired property.
-        SendTargetTemperatureReport(deviceClient, targetTemperature, g_statusSuccess, version, g_temperaturePropertyResponseDescription);
+        SendTargetTemperatureReport(deviceClientLL, targetTemperature, g_statusSuccess, version, g_temperaturePropertyResponseDescription);
 
         if (maxTempUpdated)
         {
             // If the Maximum temperature has been updated, we also report this as a property.
-            SendMaxTemperatureSinceReboot(deviceClient);
+            SendMaxTemperatureSinceReboot(deviceClientLL);
         }
     }
 
@@ -449,7 +453,7 @@ static void Thermostat_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE updateState, 
 //
 // Thermostat_SendCurrentTemperature sends a PnP telemetry indicating the current temperature
 //
-void Thermostat_SendCurrentTemperature(IOTHUB_DEVICE_CLIENT_HANDLE deviceClient) 
+void Thermostat_SendCurrentTemperature(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL) 
 {
     IOTHUB_MESSAGE_HANDLE messageHandle = NULL;
     IOTHUB_CLIENT_RESULT iothubResult;
@@ -464,7 +468,7 @@ void Thermostat_SendCurrentTemperature(IOTHUB_DEVICE_CLIENT_HANDLE deviceClient)
     {
         LogError("IoTHubMessage_CreateFromString failed");
     }
-    else if ((iothubResult = IoTHubDeviceClient_SendEventAsync(deviceClient, messageHandle, NULL, NULL)) != IOTHUB_CLIENT_OK)
+    else if ((iothubResult = IoTHubDeviceClient_LL_SendEventAsync(deviceClientLL, messageHandle, NULL, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to send telemetry message, error=%d", iothubResult);
     }
@@ -473,12 +477,12 @@ void Thermostat_SendCurrentTemperature(IOTHUB_DEVICE_CLIENT_HANDLE deviceClient)
 }
 
 //
-// CreateDeviceClientHandleForPnP creates a IOTHUB_DEVICE_CLIENT_HANDLE for this application, setting its
+// CreateDeviceClientHandleForPnP creates a IOTHUB_DEVICE_CLIENT_LL_HANDLE for this application, setting its
 // ModelId along with various callbacks.
 //
-static IOTHUB_DEVICE_CLIENT_HANDLE CreateDeviceClientHandleForPnP(const char* connectionString)
+static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateDeviceClientHandleForPnP(const char* connectionString)
 {
-    IOTHUB_DEVICE_CLIENT_HANDLE deviceHandle = NULL;
+    IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceHandle = NULL;
     IOTHUB_CLIENT_RESULT iothubResult;
     bool urlAutoEncodeDecode = true;
     int iothubInitResult;
@@ -491,13 +495,13 @@ static IOTHUB_DEVICE_CLIENT_HANDLE CreateDeviceClientHandleForPnP(const char* co
         result = false;
     }
     // Create the deviceHandle itself.
-    else if ((deviceHandle = IoTHubDeviceClient_CreateFromConnectionString(connectionString, MQTT_Protocol)) == NULL)
+    else if ((deviceHandle = IoTHubDeviceClient_LL_CreateFromConnectionString(connectionString, MQTT_Protocol)) == NULL)
     {
         LogError("Failure creating IotHub client.  Hint: Check your connection string");
         result = false;
     }
     // Sets verbosity level
-    else if ((iothubResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_LOG_TRACE, &g_hubClientTraceEnabled)) != IOTHUB_CLIENT_OK)
+    else if ((iothubResult = IoTHubDeviceClient_LL_SetOption(deviceHandle, OPTION_LOG_TRACE, &g_hubClientTraceEnabled)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to set logging option, error=%d", iothubResult);
         result = false;
@@ -505,33 +509,33 @@ static IOTHUB_DEVICE_CLIENT_HANDLE CreateDeviceClientHandleForPnP(const char* co
     // Sets the name of ModelId for this PnP device.
     // This *MUST* be set before the client is connected to IoTHub.  We do not automatically connect when the 
     // handle is created, but will implicitly connect to subscribe for device method and device twin callbacks below.
-    else if ((iothubResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_MODEL_ID, g_ThermostatModelId)) != IOTHUB_CLIENT_OK)
+    else if ((iothubResult = IoTHubDeviceClient_LL_SetOption(deviceHandle, OPTION_MODEL_ID, g_ThermostatModelId)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to set the ModelID, error=%d", iothubResult);
         result = false;
     }
     // Sets the callback function that processes incoming device methods, which is the channel PnP Commands are transferred over
-    else if ((iothubResult = IoTHubDeviceClient_SetDeviceMethodCallback(deviceHandle, Thermostat_DeviceMethodCallback, NULL)) != IOTHUB_CLIENT_OK)
+    else if ((iothubResult = IoTHubDeviceClient_LL_SetDeviceMethodCallback(deviceHandle, Thermostat_DeviceMethodCallback, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to set device method callback, error=%d", iothubResult);
         result = false;
     }
     // Sets the callback function that processes device twin changes from the IoTHub, which is the channel that PnP Properties are 
     // transferred over.  This will also automatically retrieve the full twin for the application. 
-    else if ((iothubResult = IoTHubDeviceClient_SetDeviceTwinCallback(deviceHandle, Thermostat_DeviceTwinCallback, (void*)deviceHandle)) != IOTHUB_CLIENT_OK)
+    else if ((iothubResult = IoTHubDeviceClient_LL_SetDeviceTwinCallback(deviceHandle, Thermostat_DeviceTwinCallback, (void*)deviceHandle)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to set device twin callback, error=%d", iothubResult);
         result = false;
     }
     // Enabling auto url encode will have the underlying SDK perform URL encoding operations automatically.
-    else if ((iothubResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_AUTO_URL_ENCODE_DECODE, &urlAutoEncodeDecode)) != IOTHUB_CLIENT_OK)
+    else if ((iothubResult = IoTHubDeviceClient_LL_SetOption(deviceHandle, OPTION_AUTO_URL_ENCODE_DECODE, &urlAutoEncodeDecode)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to set auto Url encode option, error=%d", iothubResult);
         result = false;
     }
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
     // Setting the Trusted Certificate.  This is only necessary on systems without built in certificate stores.
-    else if ((iothubResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_TRUSTED_CERT, certificates)) != IOTHUB_CLIENT_OK)
+    else if ((iothubResult = IoTHubDeviceClient_LL_SetOption(deviceHandle, OPTION_TRUSTED_CERT, certificates)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to set the trusted cert, error=%d", iothubResult);
         result = false;
@@ -544,7 +548,7 @@ static IOTHUB_DEVICE_CLIENT_HANDLE CreateDeviceClientHandleForPnP(const char* co
 
     if ((result == false) && (deviceHandle != NULL))
     {
-        IoTHubDeviceClient_Destroy(deviceHandle);
+        IoTHubDeviceClient_LL_Destroy(deviceHandle);
         deviceHandle = NULL;
     }
 
@@ -559,7 +563,7 @@ static IOTHUB_DEVICE_CLIENT_HANDLE CreateDeviceClientHandleForPnP(const char* co
 
 int main(void)
 {
-    IOTHUB_DEVICE_CLIENT_HANDLE deviceClient = NULL;
+    IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL = NULL;
     const char* connectionString;
 
     if ((connectionString = getenv(g_connectionStringEnvironmentVariable)) == NULL)
@@ -570,7 +574,7 @@ int main(void)
     {
         LogError("Unable to output the program start time");
     }
-    else if ((deviceClient = CreateDeviceClientHandleForPnP(connectionString)) == NULL)
+    else if ((deviceClientLL = CreateDeviceClientHandleForPnP(connectionString)) == NULL)
     {
         LogError("Failed creating IotHub device");
     }
@@ -578,19 +582,25 @@ int main(void)
     {
         LogInfo("Successfully created device client handle.  Hit Control-C to exit program\n");
 
-        SendMaxTemperatureSinceReboot(deviceClient);
+        int numberOfIterations = 0;
+        SendMaxTemperatureSinceReboot(deviceClientLL);
 
         while (true)
         {
-            // Wake up periodically to send telemetry.
-            // IOTHUB_DEVICE_CLIENT_HANDLE brings in the IoTHub device convenience layer, which means that the IoTHub SDK itself 
-            // spins a worker thread to perform all operations.
-            Thermostat_SendCurrentTemperature(deviceClient);
-            ThreadAPI_Sleep(g_sleepBetweenTelemetrySends);
+            // Wake up periodically to poll.  Even if we do not plan on sending telemetry, we still need to poll periodically in order to process
+            // incoming requests from the server and to do connection keep alives.
+            if ((numberOfIterations % g_sendTelemetryFrequency) == 0)
+            {
+                Thermostat_SendCurrentTemperature(deviceClientLL);
+            }
+
+            IoTHubDeviceClient_LL_DoWork(deviceClientLL);
+            ThreadAPI_Sleep(g_sleepBetweenPolls);
+            numberOfIterations++;
         }
 
         // Clean up the iothub sdk handle
-        IoTHubDeviceClient_Destroy(deviceClient);
+        IoTHubDeviceClient_LL_Destroy(deviceClientLL);
         // Free all the IoT SDK subsystem
         IoTHub_Deinit();        
     }
