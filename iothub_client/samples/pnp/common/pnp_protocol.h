@@ -29,9 +29,9 @@
 #define PNP_MAXIMUM_COMPONENT_LENGTH 64
 
 //
-// PnPPropertyCallbackFunction defines the function prototype the application implements to receive a callback for each PnP property in a given Device Twin.
+// PnP_PropertyCallbackFunction defines the function prototype the application implements to receive a callback for each PnP property in a given Device Twin.
 // 
-typedef void (*PnPPropertyCallbackFunction)(const char* componentName, const char* propertyName, JSON_Value* propertyValue, int version, void* userContextCallback);
+typedef void (*PnP_PropertyCallbackFunction)(const char* componentName, const char* propertyName, JSON_Value* propertyValue, int version, void* userContextCallback);
 
 //
 // PnP_CreateReportedProperty returns JSON to report a property's value from the device.  This does NOT contain any metadata such as 
@@ -74,7 +74,7 @@ IOTHUB_MESSAGE_HANDLE PnP_CreateTelemetryMessageHandle(const char* componentName
 // PnP_ProcessTwinData will visit the children of the desired portion of the twin and invoke the device's pnpPropertyCallback
 // function for each property that it visits.
 // 
-bool PnP_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payload, size_t size, const char** componentsInModel, size_t numComponentsInModel, PnPPropertyCallbackFunction pnpPropertyCallback, void* userContextCallback);
+bool PnP_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payload, size_t size, const char** componentsInModel, size_t numComponentsInModel, PnP_PropertyCallbackFunction pnpPropertyCallback, void* userContextCallback);
 
 //
 // PnP_CopyTwinPayloadToString takes the payload data, which arrives as a potentially non-NULL terminated string from the IoTHub SDK, and creates
