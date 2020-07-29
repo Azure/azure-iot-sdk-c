@@ -9,7 +9,7 @@
 #include "iothub_device_client.h"
 #include "iothub_client_options.h"
 #include "iothubtransportmqtt.h"
-#include "pnp_device_client_helpers.h"
+#include "pnp_device_client.h"
 #ifdef USE_PROV_MODULE_FULL
 // DPS functionality using symmetric keys is only available if the cmake 
 // flags <-Duse_prov_client=ON -Dhsm_type_symm_key=ON> are enabled when building the Azure IoT C SDK.
@@ -51,7 +51,7 @@ static IOTHUB_DEVICE_CLIENT_HANDLE AllocateDeviceClientHandle(const PNP_DEVICE_C
     return deviceHandle;
 }
 
-IOTHUB_DEVICE_CLIENT_HANDLE PnPHelper_CreateDeviceClientHandle(const PNP_DEVICE_CONFIGURATION* pnpDeviceConfiguration)
+IOTHUB_DEVICE_CLIENT_HANDLE PnP_CreateDeviceClientHandle(const PNP_DEVICE_CONFIGURATION* pnpDeviceConfiguration)
 {
     IOTHUB_DEVICE_CLIENT_HANDLE deviceHandle = NULL;
     IOTHUB_CLIENT_RESULT iothubResult;

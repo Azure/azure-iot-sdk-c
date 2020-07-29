@@ -21,9 +21,9 @@
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/xlogging.h"
 
-// PnP helper utilities.
-#include "pnp_device_client_helpers.h"
-#include "pnp_protocol_helpers.h"
+// PnP utilities.
+#include "pnp_device_client.h"
+#include "pnp_protocol.h"
 
 // Headers that provide implementation for subcomponents (the two thermostat components and DeviceInfo)
 #include "pnp_thermostat_component.h"
@@ -148,10 +148,10 @@ static int PnP_TempControlComponent_DeviceMethodCallback(const char* methodName,
     *responseSize = 0;
 
     // Parse the methodName into its PnP (optional) componentName and pnpCommandName.
-    PnPHelper_ParseCommandName(methodName, &componentName, &componentNameSize, &pnpCommandName);
+    PnP_ParseCommandName(methodName, &componentName, &componentNameSize, &pnpCommandName);
 
     // Parse the JSON of the payload request.
-    if ((jsonStr = PnPHelper_CopyPayloadToString(payload, size)) == NULL)
+    if ((jsonStr = PnP_CopyPayloadToString(payload, size)) == NULL)
     {
         LogError("Unable to allocate twin buffer");
         result = PNP_STATUS_INTERNAL_ERROR;
@@ -202,13 +202,13 @@ static int PnP_TempControlComponent_DeviceMethodCallback(const char* methodName,
 }
 
 //
-// PnP_TempControlComponent_ApplicationPropertyCallback is the callback function that the PnP helper layer invokes per property update.
+// PnP_TempControlComponent_ApplicationPropertyCallback is the callback function is invoked when PnP_ProcessTwinData() visits each property.
 //
 static void PnP_TempControlComponent_ApplicationPropertyCallback(const char* componentName, const char* propertyName, JSON_Value* propertyValue, int version, void* userContextCallback)
 {
-    // This sample uses the pnp_device_client_helpers.h/.c to create the IOTHUB_DEVICE_CLIENT_HANDLE as well as initialize callbacks.
-    // The convention the helper uses is that the IOTHUB_DEVICE_CLIENT_HANDLE is passed as the userContextCallback on the initial twin callback.
-    // The pnp_protocol_lehpers.h/.c pass this userContextCallback down to this visitor function.
+    // This sample uses the pnp_device_client.h/.c to create the IOTHUB_DEVICE_CLIENT_HANDLE as well as initialize callbacks.
+    // The convention used is that IOTHUB_DEVICE_CLIENT_HANDLE is passed as the userContextCallback on the initial twin callback.
+    // The pnp_protocol.h/.c pass this userContextCallback down to this visitor function.
     IOTHUB_DEVICE_CLIENT_HANDLE deviceClient = (IOTHUB_DEVICE_CLIENT_HANDLE)userContextCallback;
 
     if (componentName == NULL)
@@ -236,9 +236,9 @@ static void PnP_TempControlComponent_ApplicationPropertyCallback(const char* com
 //
 static void PnP_TempControlComponent_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payload, size_t size, void* userContextCallback)
 {
-    // Invoke PnPHelper_ProcessTwinData to actualy process the data.  PnPHelper_ProcessTwinData uses a visitor pattern to parse
+    // Invoke PnP_ProcessTwinData to actualy process the data.  PnP_ProcessTwinData uses a visitor pattern to parse
     // the JSON and then visit each property, invoking PnP_TempControlComponent_ApplicationPropertyCallback on each element.
-    if (PnPHelper_ProcessTwinData(updateState, payload, size, g_modeledComponents, g_numModeledComponents, PnP_TempControlComponent_ApplicationPropertyCallback, userContextCallback) == false)
+    if (PnP_ProcessTwinData(updateState, payload, size, g_modeledComponents, g_numModeledComponents, PnP_TempControlComponent_ApplicationPropertyCallback, userContextCallback) == false)
     {
         // If we're unable to parse the JSON for any reason (typically because the JSON is malformed or we ran out of memory)
         // there is no action we can take beyond logging.
@@ -263,7 +263,7 @@ void PnP_TempControlComponent_SendWorkingSet(IOTHUB_DEVICE_CLIENT_HANDLE deviceC
     {
         LogError("Unable to create a workingSet telemetry payload string");
     }
-    else if ((messageHandle = PnPHelper_CreateTelemetryMessageHandle(NULL, workingSetTelemetryPayload)) == NULL)
+    else if ((messageHandle = PnP_CreateTelemetryMessageHandle(NULL, workingSetTelemetryPayload)) == NULL)
     {
         LogError("Unable to create telemetry message");
     }
@@ -283,7 +283,7 @@ static void PnP_TempControlComponent_ReportSerialNumber_Property(IOTHUB_DEVICE_C
     IOTHUB_CLIENT_RESULT iothubClientResult;
     STRING_HANDLE jsonToSend = NULL;
 
-    if ((jsonToSend = PnPHelper_CreateReportedProperty(NULL, g_serialNumberPropertyName, g_serialNumberPropertyValue)) == NULL)
+    if ((jsonToSend = PnP_CreateReportedProperty(NULL, g_serialNumberPropertyName, g_serialNumberPropertyValue)) == NULL)
     {
         LogError("Unable to build serial number property");
     }
@@ -421,7 +421,7 @@ static IOTHUB_DEVICE_CLIENT_HANDLE CreateDeviceClientAndAllocateComponents(void)
         LogError("Cannot read required environment variable(s)");
         result = false;
     }
-    else if ((deviceClient = PnPHelper_CreateDeviceClientHandle(&g_pnpDeviceConfiguration)) == NULL)
+    else if ((deviceClient = PnP_CreateDeviceClientHandle(&g_pnpDeviceConfiguration)) == NULL)
     {
         LogError("Failure creating IotHub device client");
         result = false;

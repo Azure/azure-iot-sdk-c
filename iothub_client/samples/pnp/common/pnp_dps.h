@@ -14,7 +14,7 @@
 // PnP_CreateDeviceClientHandle_ViaDps is used to create a IOTHUB_DEVICE_CLIENT_HANDLE, invoking the DPS client
 // to retrieve the needed hub information.
 //
-// Applications should NOT invoke this function directly but instead should use PnPHelper_CreateDeviceClientHandle.
+// Applications should NOT invoke this function directly but instead should use PnP_CreateDeviceClientHandle.
 //
 IOTHUB_DEVICE_CLIENT_HANDLE PnP_CreateDeviceClientHandle_ViaDps(const PNP_DEVICE_CONFIGURATION* pnpDeviceConfiguration);
 

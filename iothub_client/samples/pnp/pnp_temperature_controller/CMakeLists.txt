@@ -9,8 +9,8 @@ set(pnp_temperature_controller_c_files
     pnp_temperature_controller.c
     pnp_thermostat_component.c
     pnp_deviceinfo_component.c
-    ../common/pnp_device_client_helpers.c
-    ../common/pnp_protocol_helpers.c
+    ../common/pnp_device_client.c
+    ../common/pnp_protocol.c
 )
 
 IF(WIN32)

@@ -8,7 +8,7 @@
 // thermostat2.  
 //
 // The code in this header/.c file is designed to be generic so that the calling application can call PnP_ThermostatComponent_CreateHandle
-// multiple times and then pass processing of a given component (thermostat1 or thermostat2) to the appropriate helper.
+// multiple times and then pass processing of a given component (thermostat1 or thermostat2) to the appropriate function.
 //
 
 #ifndef PNP_THERMOSTAT_CONTROLLER_H
