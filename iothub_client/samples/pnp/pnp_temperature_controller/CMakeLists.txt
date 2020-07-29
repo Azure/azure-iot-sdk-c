@@ -9,7 +9,7 @@ set(pnp_temperature_controller_c_files
     pnp_temperature_controller.c
     pnp_thermostat_component.c
     pnp_deviceinfo_component.c
-    ../common/pnp_device_client.c
+    ../common/pnp_device_client_ll.c
     ../common/pnp_protocol.c
 )
 
@@ -19,7 +19,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 if(${use_prov_client})
-    set(pnp_temperature_controller_c_files ${pnp_temperature_controller_c_files} ../common/pnp_dps.c)
+    set(pnp_temperature_controller_c_files ${pnp_temperature_controller_c_files} ../common/pnp_dps_ll.c)
 endif()
 
 #Conditionally use the SDK trusted certs in the samples

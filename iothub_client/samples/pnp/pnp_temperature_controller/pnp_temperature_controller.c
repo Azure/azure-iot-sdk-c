@@ -22,7 +22,7 @@
 #include "azure_c_shared_utility/xlogging.h"
 
 // PnP utilities.
-#include "pnp_device_client.h"
+#include "pnp_device_client_ll.h"
 #include "pnp_protocol.h"
 
 // Headers that provide implementation for subcomponents (the two thermostat components and DeviceInfo)
