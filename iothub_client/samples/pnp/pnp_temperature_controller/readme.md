@@ -26,7 +26,7 @@ The `pnp_temperature_controller` uses environment variables to retrieve configur
   * set IOTHUB_DEVICE_SECURITY_TYPE="connectionString"
   * set IOTHUB_DEVICE_CONNECTION_STRING="\<connection string of your device\>"
 
-* If you are using a DPS enrollment groups to authenticate:
+* If you are using a DPS enrollment group to authenticate:
   * set IOTHUB_DEVICE_SECURITY_TYPE="DPS"
   * set IOTHUB_DEVICE_DPS_ID_SCOPE="\<ID Scope of DPS instance\>"
   * set IOTHUB_DEVICE_DPS_DEVICE_ID="\<Device's ID\>"

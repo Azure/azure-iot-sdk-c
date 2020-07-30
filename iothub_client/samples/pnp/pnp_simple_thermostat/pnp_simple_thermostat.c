@@ -200,7 +200,6 @@ static bool BuildMaxMinCommandResponse(unsigned char** response, size_t* respons
 // SetEmptyCommandResponse sets the response to be an empty JSON.  IoT Hub needs
 // legal JSON, regardless of error status, so if command implementation did not set this do so here.
 //
-//
 static void SetEmptyCommandResponse(unsigned char** response, size_t* responseSize, int* result)
 {
     if ((*response = calloc(1, g_JSONEmptySize)) == NULL)
