@@ -9,15 +9,49 @@
 #include "iothub_device_client.h"
 #include "iothub_client_options.h"
 #include "iothubtransportmqtt.h"
+#include "pnp_device_client_ll.h"
+#ifdef USE_PROV_MODULE_FULL
+// DPS functionality using symmetric keys is only available if the cmake 
+// flags <-Duse_prov_client=ON -Dhsm_type_symm_key=ON -Drun_e2e_tests=OFF> are enabled when building the Azure IoT C SDK.
+#include "pnp_dps_ll.h"
+#endif
 
+#include "azure_c_shared_utility/strings.h"
+#include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/xlogging.h"
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
+// For devices that do not have (or want) an OS level trusted certificate store,
+// but instead bring in default trusted certificates from the Azure IoT C SDK.
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-IOTHUB_DEVICE_CLIENT_HANDLE PnPHelper_CreateDeviceClientHandle(const char* connectionString, const char* modelId, bool enableTracing, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback)
+//
+// AllocateDeviceClientHandle does the actual createHandle call, depending on the security type
+//
+static IOTHUB_DEVICE_CLIENT_HANDLE AllocateDeviceClientHandle(const PNP_DEVICE_CONFIGURATION* pnpDeviceConfiguration)
+{
+    IOTHUB_DEVICE_CLIENT_HANDLE deviceHandle = NULL;
+
+    if (pnpDeviceConfiguration->securityType == PNP_CONNECTION_SECURITY_TYPE_CONNECTION_STRING)
+    {
+        if ((deviceHandle = IoTHubDeviceClient_CreateFromConnectionString(pnpDeviceConfiguration->u.connectionString, MQTT_Protocol)) == NULL)
+        {
+            LogError("Failure creating IotHub client.  Hint: Check your connection string");
+        }
+    }
+#ifdef USE_PROV_MODULE_FULL
+    else if ((deviceHandle = PnP_CreateDeviceClientHandle_ViaDps(pnpDeviceConfiguration)) == NULL)
+    {
+        LogError("Cannot retrieve IoT Hub connection information from DPS client");
+    }
+#endif /* USE_PROV_MODULE_FULL */
+
+    return deviceHandle;
+}
+
+IOTHUB_DEVICE_CLIENT_HANDLE PnP_CreateDeviceClientHandle(const PNP_DEVICE_CONFIGURATION* pnpDeviceConfiguration)
 {
     IOTHUB_DEVICE_CLIENT_HANDLE deviceHandle = NULL;
     IOTHUB_CLIENT_RESULT iothubResult;
@@ -25,20 +59,19 @@ IOTHUB_DEVICE_CLIENT_HANDLE PnPHelper_CreateDeviceClientHandle(const char* conne
     int iothubInitResult;
     bool result;
 
-    // Before invoking ANY IoTHub Device SDK functionality, IoTHub_Init must be invoked.
+    // Before invoking ANY IoT Hub or DPS functionality, IoTHub_Init must be invoked.
     if ((iothubInitResult = IoTHub_Init()) != 0)
     {
         LogError("Failure to initialize client, error=%d", iothubInitResult);
         result = false;
     }
-    // Create the deviceHandle itself.
-    else if ((deviceHandle = IoTHubDeviceClient_CreateFromConnectionString(connectionString, MQTT_Protocol)) == NULL)
+    else if ((deviceHandle = AllocateDeviceClientHandle(pnpDeviceConfiguration)) == NULL)
     {
-        LogError("Failure creating IotHub client.  Hint: Check your connection string");
+        LogError("Unable to allocate deviceHandle");
         result = false;
     }
     // Sets verbosity level
-    else if ((iothubResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_LOG_TRACE, &enableTracing)) != IOTHUB_CLIENT_OK)
+    else if ((iothubResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_LOG_TRACE, &pnpDeviceConfiguration->enableTracing)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to set logging option, error=%d", iothubResult);
         result = false;
@@ -46,20 +79,20 @@ IOTHUB_DEVICE_CLIENT_HANDLE PnPHelper_CreateDeviceClientHandle(const char* conne
     // Sets the name of ModelId for this PnP device.
     // This *MUST* be set before the client is connected to IoTHub.  We do not automatically connect when the 
     // handle is created, but will implicitly connect to subscribe for device method and device twin callbacks below.
-    else if ((iothubResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_MODEL_ID, modelId)) != IOTHUB_CLIENT_OK)
+    else if ((iothubResult = IoTHubDeviceClient_SetOption(deviceHandle, OPTION_MODEL_ID, pnpDeviceConfiguration->modelId)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to set the ModelID, error=%d", iothubResult);
         result = false;
     }
     // Optionally, set the callback function that processes incoming device methods, which is the channel PnP Commands are transferred over
-    else if ((deviceMethodCallback != NULL) && (iothubResult = IoTHubDeviceClient_SetDeviceMethodCallback(deviceHandle, deviceMethodCallback, NULL)) != IOTHUB_CLIENT_OK)
+    else if ((pnpDeviceConfiguration->deviceMethodCallback != NULL) && (iothubResult = IoTHubDeviceClient_SetDeviceMethodCallback(deviceHandle, pnpDeviceConfiguration->deviceMethodCallback, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to set device method callback, error=%d", iothubResult);
         result = false;
     }
     // Optionall, set the callback function that processes device twin changes from the IoTHub, which is the channel that PnP Properties are 
     // transferred over.  This will also automatically retrieve the full twin for the application on startup. 
-    else if ((deviceTwinCallback != NULL) && (iothubResult = IoTHubDeviceClient_SetDeviceTwinCallback(deviceHandle, deviceTwinCallback, (void*)deviceHandle)) != IOTHUB_CLIENT_OK)
+    else if ((pnpDeviceConfiguration->deviceTwinCallback != NULL) && (iothubResult = IoTHubDeviceClient_SetDeviceTwinCallback(deviceHandle, pnpDeviceConfiguration->deviceTwinCallback, (void*)deviceHandle)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to set device twin callback, error=%d", iothubResult);
         result = false;

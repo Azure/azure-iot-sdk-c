@@ -22,9 +22,12 @@ set(${theseTestsName}_nuget_test_files
 
 set(${theseTestsName}_c_files
     ../../../certs/certs.c
+    ../../../deps/parson/parson.c
 )
 
 set(${theseTestsName}_h_files
+    ../../../certs/certs.h
+    ../../../deps/parson/parson.h
     ../common_ds_e2e/iothubclient_common_ds_e2e.h
 )
 

@@ -25,6 +25,8 @@ void real_free(void* ptr)
 }
 
 #include "testrunnerswitcher.h"
+#include "azure_c_shared_utility/optimize_size.h"
+#include "azure_macro_utils/macro_utils.h"
 #include "umock_c/umock_c.h"
 #include "umock_c/umock_c_negative_tests.h"
 #include "umock_c/umocktypes_charptr.h"
@@ -42,7 +44,6 @@ void real_free(void* ptr)
 #include "iothub_client_streaming.h"
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
@@ -109,7 +110,6 @@ BEGIN_TEST_SUITE(iothub_client_streaming_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -132,7 +132,6 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     umock_c_deinit();
 
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)

@@ -70,7 +70,6 @@ MU_DEFINE_ENUM_STRINGS(AMQP_STREAMING_CLIENT_STATE, AMQP_STREAMING_CLIENT_STATE_
 
 
 static TEST_MUTEX_HANDLE g_testByTest;
-static TEST_MUTEX_HANDLE g_dllByDll;
 
 MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
@@ -289,7 +288,7 @@ extern "C"
 #endif
 
 
-static void real_stream_c2d_request_destroy(DEVICE_STREAM_C2D_REQUEST* request)
+void real_stream_c2d_request_destroy(DEVICE_STREAM_C2D_REQUEST* request)
 {
     // Not destroying the inner fiels because they are mocked.
     real_free(request);
@@ -820,8 +819,7 @@ static void register_global_mock_aliases()
     REGISTER_UMOCK_ALIAS_TYPE(AMQP_VALUE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(message_annotations, void*);
     REGISTER_UMOCK_ALIAS_TYPE(PROPERTIES_HANDLE, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(BINARY_DATA, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(receiver_settle_mode, int);
+    REGISTER_UMOCK_ALIAS_TYPE(receiver_settle_mode, unsigned char);
     REGISTER_UMOCK_ALIAS_TYPE(SINGLYLINKEDLIST_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(LIST_ITEM_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(LIST_MATCH_FUNCTION, void*);
@@ -842,8 +840,6 @@ static void register_global_mock_aliases()
     REGISTER_UMOCK_ALIAS_TYPE(LIST_ACTION_FUNCTION, void*);
     REGISTER_UMOCK_ALIAS_TYPE(LIST_CONDITION_FUNCTION, void*);
     REGISTER_UMOCK_ALIAS_TYPE(TICK_COUNTER_HANDLE, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(uuid, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(UUID_T, void*);
     REGISTER_UMOCK_ALIAS_TYPE(AMQP_TYPE, int);
 }
 
@@ -1085,7 +1081,6 @@ BEGIN_TEST_SUITE(iothubtransport_amqp_streaming_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
-    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
     g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -1112,7 +1107,6 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     umock_c_deinit();
 
     TEST_MUTEX_DESTROY(g_testByTest);
-    TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
