@@ -327,7 +327,6 @@ static void PnP_TempControlComponent_ReportSerialNumber_Property(IOTHUB_DEVICE_C
     STRING_delete(jsonToSend);
 }
 
-
 //
 // GetConnectionStringFromEnvironment retrieves the connection string based on environment variable
 //
