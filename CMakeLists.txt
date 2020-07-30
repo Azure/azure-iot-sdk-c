@@ -28,6 +28,7 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     add_definitions(-DMACOSX)
 endif()
 
+
 include (CTest)
 
 if (MSVC)
@@ -53,8 +54,6 @@ set(hsm_type_custom OFF CACHE BOOL "hsm type of custom used with the Provisionin
 set(hsm_custom_lib "" CACHE STRING "Full path to custom HSM repo library")
 set(run_sfc_tests OFF CACHE BOOL "setup the Service Fault tests")
 
-set(use_wolfssl)
-
 # the following variables are project-wide and can be used with cmake-gui
 option(use_amqp "set use_amqp to ON if amqp is to be used, set to OFF to not use amqp" ON)
 option(use_http "set use_http to ON if http is to be used, set to OFF to not use http" ON)
@@ -74,6 +73,10 @@ option(use_prov_client "Enable provisioning client" OFF)
 option(use_tpm_simulator "tpm simulator type of hsm used with the provisioning client" OFF)
 option(use_edge_modules "Enable support for running modules against Azure IoT Edge" OFF)
 option(use_custom_heap "use externally defined heap functions instead of the malloc family" OFF)
+option(use_baltimore_cert "set use_baltimore_cert to ON if the Baltimore cert is to be used, set to OFF to not use it" OFF)
+option(use_microsoftazure_de_cert "set use_microsoftazure_de_cert to ON if the MicrosoftAzure DE cert is to be used, set to OFF to not use it" OFF)
+option(use_portal_azure_cn_cert "set use_portal_azure_cn_cert to ON if the Portal Azure CN cert is to be used, set to OFF to not use it" OFF)
+
 set(compileOption_C "" CACHE STRING "passes a string to the command line of the C compiler")
 set(compileOption_CXX "" CACHE STRING "passes a string to the command line of the C++ compiler")
 set(linkerOption "" CACHE STRING "passes a string to the shared and exe linker options of the C compiler")
@@ -99,14 +102,27 @@ else()
     option(use_openssl "set use_openssl to ON to use OpenSSL." ON)
 endif()
 option(use_mbedtls "set use_mbedtls to ON to use mbedtls." OFF)
+option(use_bearssl "set use_bearssl to ON to use bearssl." OFF)
+option(use_wolfssl "set use_bearssl to ON to use bearssl." OFF)
 
 # openssl samples on Windows need to have a trusted cert set
-if ((WIN32 AND "${use_openssl}") OR "${use_wolfssl}" OR "${use_mbedtls}" OR "${use_bearssl}")
-    option(use_sample_trusted_cert "Set flag in samples to use SDK's built-in CA as TrustedCerts" ON)
-elseif("${use_bearssl}")
+if ((WIN32 AND ${use_openssl}) OR ${use_wolfssl} OR ${use_mbedtls} OR ${use_bearssl})
     option(use_sample_trusted_cert "Set flag in samples to use SDK's built-in CA as TrustedCerts" ON)
 else()
     option(use_sample_trusted_cert "Set flag in samples to use SDK's built-in CA as TrustedCerts" OFF)
+endif()
+
+# Enable specific certs
+if (${use_baltimore_cert})
+    add_definitions(-DUSE_BALTIMORE_CERT)
+endif()
+
+if (${use_microsoftazure_de_cert})
+    add_definitions(-DUSE_MICROSOFTAZURE_DE_CERT)
+endif()
+
+if (${use_portal_azure_cn_cert})
+    add_definitions(-DUSE_PORTAL_AZURE_CN_CERT)
 endif()
 
 # Enable IoT SDK to act as a module for Edge
@@ -121,11 +137,15 @@ endif()
 # Set Provisioning Information.  This will also setup appropriate HSM
 if (${use_prov_client})
     set(use_prov_client_core ON)
-
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_PROV_MODULE_FULL")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_PROV_MODULE_FULL")
     if ("${hsm_custom_lib}" STREQUAL "")
-        set(hsm_type_x509 ON)
-        set(hsm_type_sastoken ON)
-        set(hsm_type_symm_key ON)
+        if ((NOT ${hsm_type_x509}) AND (NOT ${hsm_type_sastoken}) AND (NOT ${hsm_type_symm_key}))
+            # If the cmake option did not explicitly configure an hsm type, then enable them all.
+            set(hsm_type_x509 ON)
+            set(hsm_type_sastoken ON)
+            set(hsm_type_symm_key ON)
+        endif()
     else()
         set(hsm_type_custom ON)
     endif()
@@ -346,7 +366,7 @@ if (${use_prov_client_core})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_PROV_MODULE")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_PROV_MODULE")
 
-    if (${build_provisioning_service_client} AND ${use_prov_client})
+    if ((${build_provisioning_service_client} AND ${use_prov_client}) OR ${run_e2e_tests})
         add_subdirectory(provisioning_service_client)
     endif()
 

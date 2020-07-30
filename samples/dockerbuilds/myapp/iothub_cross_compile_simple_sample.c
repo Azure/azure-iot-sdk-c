@@ -50,7 +50,7 @@ int main(void)
     IOTHUB_MESSAGE_HANDLE message_handle;
     float telemetry_temperature;
     float telemetry_humidity;
-    const char* telemetry_scale = "Celcius";
+    const char* telemetry_scale = "Celsius";
     char telemetry_msg_buffer[80];
 
     int messagecount = 0;
@@ -67,12 +67,12 @@ int main(void)
     device_handle = IoTHubDeviceClient_CreateFromConnectionString(connectionString, protocol);
     if (device_handle == NULL)
     {
-        (void)printf("Failure creating Iothub device.  Hint: Check you connection string.\r\n");
+        (void)printf("Failure creating IotHub device. Hint: Check your connection string.\r\n");
     }
     else
     {
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
-        // Setting the Trusted Certificate.  This is only necessary on system with without
+        // Setting the Trusted Certificate. This is only necessary on systems without
         // built in certificate stores.
         (void)IoTHubDeviceClient_SetOption(device_handle, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES

@@ -10,9 +10,7 @@
 #include "azure_c_shared_utility/strings.h"
 #include "parson.h"
 
-#define METHODRETURN_C
 #include "methodreturn.h"
-#undef METHODRETURN_C
 
 typedef struct METHODRETURN_HANDLE_DATA_TAG
 {
@@ -54,7 +52,7 @@ METHODRETURN_HANDLE MethodReturn_Create(int statusCode, const char* jsonValue)
     }
     else
     {
-        result = (METHODRETURN_HANDLE_DATA*)malloc(sizeof(METHODRETURN_HANDLE_DATA));
+        result = (METHODRETURN_HANDLE_DATA*)calloc(1, sizeof(METHODRETURN_HANDLE_DATA));
         if (result == NULL)
         {
             /*Codes_SRS_METHODRETURN_02_002: [ If any failure is encountered then MethodReturn_Create shall return NULL ]*/

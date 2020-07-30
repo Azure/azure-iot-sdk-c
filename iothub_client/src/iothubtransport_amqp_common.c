@@ -1936,28 +1936,37 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_GetSendStatus(IOTHUB_DEVICE_HAN
         AMQP_TRANSPORT_DEVICE_INSTANCE* amqp_device_state = (AMQP_TRANSPORT_DEVICE_INSTANCE*)handle;
 
         DEVICE_SEND_STATUS device_send_status;
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_097: [IoTHubTransport_AMQP_Common_GetSendStatus shall invoke amqp_device_get_send_status()]
-        if (amqp_device_get_send_status(amqp_device_state->device_handle, &device_send_status) != RESULT_OK)
+
+        if (!DList_IsListEmpty(amqp_device_state->waiting_to_send))
         {
-            // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_098: [If amqp_device_get_send_status() fails, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_ERROR]
-            LogError("Failed retrieving the device send status (amqp_device_get_send_status failed)");
-            result = IOTHUB_CLIENT_ERROR;
+            *iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_BUSY;
+            result = IOTHUB_CLIENT_OK;
         }
         else
         {
-            // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_099: [If amqp_device_get_send_status() returns DEVICE_SEND_STATUS_BUSY, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_BUSY]
-            if (device_send_status == DEVICE_SEND_STATUS_BUSY)
+            // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_097: [IoTHubTransport_AMQP_Common_GetSendStatus shall invoke amqp_device_get_send_status()]
+            if (amqp_device_get_send_status(amqp_device_state->device_handle, &device_send_status) != RESULT_OK)
             {
-                *iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_BUSY;
+                // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_098: [If amqp_device_get_send_status() fails, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_ERROR]
+                LogError("Failed retrieving the device send status (amqp_device_get_send_status failed)");
+                result = IOTHUB_CLIENT_ERROR;
             }
-            // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_100: [If amqp_device_get_send_status() returns DEVICE_SEND_STATUS_IDLE, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_IDLE]
-            else // DEVICE_SEND_STATUS_IDLE
+            else
             {
-                *iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_IDLE;
-            }
+                // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_099: [If amqp_device_get_send_status() returns DEVICE_SEND_STATUS_BUSY, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_BUSY]
+                if (device_send_status == DEVICE_SEND_STATUS_BUSY)
+                {
+                    *iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_BUSY;
+                }
+                // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_100: [If amqp_device_get_send_status() returns DEVICE_SEND_STATUS_IDLE, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_IDLE]
+                else // DEVICE_SEND_STATUS_IDLE
+                {
+                    *iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_IDLE;
+                }
 
-            // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_109: [If no failures occur, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_OK]
-            result = IOTHUB_CLIENT_OK;
+                // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_109: [If no failures occur, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_OK]
+                result = IOTHUB_CLIENT_OK;
+            }
         }
     }
 
@@ -2012,6 +2021,18 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SetOption(TRANSPORT_LL_HANDLE h
             if (retry_control_set_option(transport_instance->connection_retry_control, RETRY_CONTROL_OPTION_INITIAL_WAIT_TIME_IN_SECS, value) != 0)
             {
                 LogError("Failure setting retry interval option");
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else
+            {
+                result = IOTHUB_CLIENT_OK;
+            }
+        }
+        else if (strcmp(OPTION_RETRY_MAX_DELAY_SECS, option) == 0)
+        {
+            if (retry_control_set_option(transport_instance->connection_retry_control, RETRY_CONTROL_OPTION_MAX_DELAY_IN_SECS, value) != 0)
+            {
+                LogError("Failure setting retry max delay option");
                 result = IOTHUB_CLIENT_ERROR;
             }
             else
