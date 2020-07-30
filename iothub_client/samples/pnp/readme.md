@@ -12,6 +12,24 @@ The directory contains the following samples:
 
 * [common](./common) This directory contains functions for serializing and de-serializing data for PnP and for creating the `IOTHUB_DEVICE_CLIENT_HANDLE` that acts as the transport.  `pnp_temperature_controller` makes extensive use of these functions and demonstrates their use.  **The files in [common](./common) are written generically such that your PnP device application should be able to use them with little or no modification, speeding up your development.**
 
+## Configuring the sample
+
+Both samples uses environment variables to retrieve configuration.  
+
+* If you are using a connection string to authenticate:
+  * set IOTHUB_DEVICE_SECURITY_TYPE="connectionString"
+  * set IOTHUB_DEVICE_CONNECTION_STRING="\<connection string of your device\>"
+
+* If you are using a DPS enrollment group to authenticate:
+  * set IOTHUB_DEVICE_SECURITY_TYPE="DPS"
+  * set IOTHUB_DEVICE_DPS_ID_SCOPE="\<ID Scope of DPS instance\>"
+  * set IOTHUB_DEVICE_DPS_DEVICE_ID="\<Device's ID\>"
+  * set IOTHUB_DEVICE_DPS_DEVICE_KEY="\<Device's security key \>"
+  * *OPTIONAL*, if you do not wish to use the default endpoint "global.azure-devices-provisioning.net"
+    * set IOTHUB_DEVICE_DPS_ENDPOINT="\<DPS endpoint\>"
+
+* If you are running on a device that does not have environment variables, hardcode the values in the .c file itself.
+
 ## Enabling Device Provisioning Service client (DPS)
 
 To enable DPS with symmetric keys (which is what this sample uses when DPS is configured), use the cmake flags `-Duse_prov_client=ON -Dhsm_type_symm_key=ON -Drun_e2e_tests=OFF `

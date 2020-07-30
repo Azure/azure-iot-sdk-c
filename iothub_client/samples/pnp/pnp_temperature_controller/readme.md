@@ -18,20 +18,3 @@ Note that the individual components are in separate .c and .h files for easier c
 
 * [pnp_thermostat_component.c](./pnp_thermostat_component.c) implements a thermostat component.  The temperature controller can have multiple components of the same type.  The components `thermostat1` and `thermostat2` both implement `dtmi:com:example:Thermostat;1` in the temperature controller model.
 
-## Configuring the sample
-
-The `pnp_temperature_controller` uses environment variables to retrieve configuration.  
-
-* If you are using a connection string to authenticate:
-  * set IOTHUB_DEVICE_SECURITY_TYPE="connectionString"
-  * set IOTHUB_DEVICE_CONNECTION_STRING="\<connection string of your device\>"
-
-* If you are using a DPS enrollment group to authenticate:
-  * set IOTHUB_DEVICE_SECURITY_TYPE="DPS"
-  * set IOTHUB_DEVICE_DPS_ID_SCOPE="\<ID Scope of DPS instance\>"
-  * set IOTHUB_DEVICE_DPS_DEVICE_ID="\<Device's ID\>"
-  * set IOTHUB_DEVICE_DPS_DEVICE_KEY="\<Device's security key \>"
-  * *OPTIONAL*, if you do not wish to use the default endpoint "global.azure-devices-provisioning.net"
-    * set IOTHUB_DEVICE_DPS_ENDPOINT="\<DPS endpoint\>"
-
-* If you are running on a device that does not have environment variables, hardcode the values in [pnp_temperature_controller.c](./pnp_temperature_controller.c).
