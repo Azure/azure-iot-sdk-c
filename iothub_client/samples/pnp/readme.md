@@ -12,6 +12,12 @@ The directory contains the following samples:
 
 * [common](./common) This directory contains functions for serializing and de-serializing data for PnP and for creating the `IOTHUB_DEVICE_CLIENT_HANDLE` that acts as the transport.  `pnp_temperature_controller` makes extensive use of these functions and demonstrates their use.  **The files in [common](./common) are written generically such that your PnP device application should be able to use them with little or no modification, speeding up your development.**
 
+## Enabling Device Provisioning Service client (DPS)
+
+To enable DPS with symmetric keys (which is what this sample uses when DPS is configured), use the cmake flags `-Duse_prov_client=ON -Dhsm_type_symm_key=ON -Drun_e2e_tests=OFF `
+
+If you are building connection string only authentication, these extra cmake flags are not required.
+
 ## Caveats
 
 * Azure IoT PnP is only supported for MQTT and MQTT over WebSockets for the Azure IoT C Device SDK.  Modifying these samples to use AMQP, AMQP over WebSockets, or HTTP protocols **will not work**.  The underlying IoTHub core only supports PnP constructs (specifically `OPTION_MODEL_ID`) over MQTT and MQTT over WebSockets.

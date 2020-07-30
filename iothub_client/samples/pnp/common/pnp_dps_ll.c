@@ -11,7 +11,7 @@
 
 #include "iothub_device_client.h"
 #include "iothubtransportmqtt.h"
-#include "pnp_device_client.h"
+#include "pnp_device_client_ll.h"
 
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/threadapi.h"
@@ -23,8 +23,6 @@
 #include "azure_prov_client/prov_transport_mqtt_client.h"
 #include "azure_prov_client/prov_security_factory.h"
 
-// Global provisioning endpoint for DPS
-static const char* g_dps_GlobalProvUri = "global.azure-devices-provisioning.net";
 // Format of custom DPS payload sent when registering a PnP device.
 static const char g_dps_PayloadFormatForModelId[] = "{\"modelId\":\"%s\"}";
 
@@ -104,7 +102,7 @@ IOTHUB_DEVICE_CLIENT_HANDLE PnP_CreateDeviceClientHandle_ViaDps(const PNP_DEVICE
         LogError("prov_dev_security_init failed");
         result = false;
     }
-    else if ((provDeviceHandle = Prov_Device_Create(g_dps_GlobalProvUri, pnpDeviceConfiguration->u.dpsConnectionAuth.idScope, Prov_Device_MQTT_Protocol)) == NULL)
+    else if ((provDeviceHandle = Prov_Device_Create(pnpDeviceConfiguration->u.dpsConnectionAuth.endpoint, pnpDeviceConfiguration->u.dpsConnectionAuth.idScope, Prov_Device_MQTT_Protocol)) == NULL)
     {
         LogError("Failed calling Prov_Device_Create");
         result = false;

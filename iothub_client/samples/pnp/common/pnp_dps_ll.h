@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#ifndef PNP_DPS_H
-#define PNP_DPS_H
+#ifndef PNP_DPS_LL_H
+#define PNP_DPS_LL_H
 
 #include "iothub_device_client.h"
 
@@ -18,4 +18,4 @@
 //
 IOTHUB_DEVICE_CLIENT_HANDLE PnP_CreateDeviceClientHandle_ViaDps(const PNP_DEVICE_CONFIGURATION* pnpDeviceConfiguration);
 
-#endif /* PNP_DPS_H */
+#endif /* PNP_DPS_LL_H */

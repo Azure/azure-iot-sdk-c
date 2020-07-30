@@ -135,7 +135,7 @@ IOTHUB_MESSAGE_HANDLE PnP_CreateTelemetryMessageHandle(const char* componentName
 // VisitComponentProperties visits each sub element of the the given objectName in the desired JSON.  Each of these sub elements corresponds to
 // a property of this component, which we'll invoke the application's pnpPropertyCallback to inform.
 // 
-static void VisitComponentProperties(const char* objectName, JSON_Value* value, int version, PnPPropertyCallbackFunction pnpPropertyCallback, void* userContextCallback)
+static void VisitComponentProperties(const char* objectName, JSON_Value* value, int version, PnP_PropertyCallbackFunction pnpPropertyCallback, void* userContextCallback)
 {
     JSON_Object* object = json_value_get_object(value);
     size_t numChildren = json_object_get_count(object);
@@ -188,7 +188,7 @@ static bool IsJsonObjectAComponentInModel(const char* objectName, const char** c
 //
 // VisitDesiredObject visits each child JSON element of the desired device twin.  As we parse each property out, we invoke the application's passed in pnpPropertyCallback.
 //
-static bool VisitDesiredObject(JSON_Object* desiredObject, const char** componentsInModel, size_t numComponentsInModel, PnPPropertyCallbackFunction pnpPropertyCallback, void* userContextCallback)
+static bool VisitDesiredObject(JSON_Object* desiredObject, const char** componentsInModel, size_t numComponentsInModel, PnP_PropertyCallbackFunction pnpPropertyCallback, void* userContextCallback)
 {
     JSON_Value* versionValue = NULL;
     size_t numChildren;
@@ -275,7 +275,7 @@ static JSON_Object* GetDesiredJson(DEVICE_TWIN_UPDATE_STATE updateState, JSON_Va
     return desiredObject;
 }
 
-bool PnP_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payload, size_t size, const char** componentsInModel, size_t numComponentsInModel, PnPPropertyCallbackFunction pnpPropertyCallback, void* userContextCallback)
+bool PnP_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payload, size_t size, const char** componentsInModel, size_t numComponentsInModel, PnP_PropertyCallbackFunction pnpPropertyCallback, void* userContextCallback)
 {
     char* jsonStr = NULL;
     JSON_Value* rootValue = NULL;

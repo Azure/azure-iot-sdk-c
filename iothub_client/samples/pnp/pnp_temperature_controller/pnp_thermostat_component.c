@@ -193,9 +193,6 @@ int PnP_ThermostatComponent_ProcessCommand(PNP_THERMOSTAT_COMPONENT_HANDLE pnpTh
     const char* sinceStr;
     int result;
 
-    *response = NULL;
-    *responseSize = 0;
-
     if (strcmp(pnpCommandName, g_getMinMaxReport) != 0)
     {
         LogError("PnP command=%s is not supported on thermostat component", pnpCommandName);

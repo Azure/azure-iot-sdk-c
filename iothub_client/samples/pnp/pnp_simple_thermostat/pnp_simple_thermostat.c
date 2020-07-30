@@ -54,6 +54,10 @@ static int g_statusBadFormat = 400;
 static int g_statusNotFoundStatus = 404;
 static int g_statusInternalError = 500;
 
+// An empty JSON body for PnP command responses
+static const char g_JSONEmpty[] = "{}";
+static const size_t g_JSONEmptySize = sizeof(g_JSONEmpty) - 1;
+
 // The default temperature to use before any is set.
 #define DEFAULT_TEMPERATURE_VALUE 22
 // Current temperature of the thermostat.
@@ -193,6 +197,25 @@ static bool BuildMaxMinCommandResponse(unsigned char** response, size_t* respons
 }       
 
 //
+// SetEmptyCommandResponse sets the response to be an empty JSON.  IoT Hub needs
+// legal JSON, regardless of error status, so if command implementation did not set this do so here.
+//
+static void SetEmptyCommandResponse(unsigned char** response, size_t* responseSize, int* result)
+{
+    if ((*response = calloc(1, g_JSONEmptySize)) == NULL)
+    {
+        LogError("Unable to allocate empty JSON response");
+        *result = g_statusInternalError;
+    }
+    else
+    {
+        memcpy(*response, g_JSONEmpty, g_JSONEmptySize);
+        *responseSize = g_JSONEmptySize;
+        // We only overwrite the caller's result on error; otherwise leave as it was
+    }
+}
+
+//
 // Thermostat_DeviceMethodCallback is invoked by IoT SDK when a device method arrives.
 //
 static int Thermostat_DeviceMethodCallback(const char* methodName, const unsigned char* payload, size_t size, unsigned char** response, size_t* responseSize, void* userContextCallback)
@@ -240,6 +263,11 @@ static int Thermostat_DeviceMethodCallback(const char* methodName, const unsigne
     {
         LogInfo("Returning success from command request");
         result = g_statusSuccess;
+    }
+
+    if (*response == NULL)
+    {
+        SetEmptyCommandResponse(response, responseSize, &result);
     }
 
     json_value_free(rootValue);

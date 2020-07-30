@@ -22,7 +22,7 @@
 #include "azure_c_shared_utility/xlogging.h"
 
 // PnP utilities.
-#include "pnp_device_client.h"
+#include "pnp_device_client_ll.h"
 #include "pnp_protocol.h"
 
 // Headers that provide implementation for subcomponents (the two thermostat components and DeviceInfo)
@@ -32,11 +32,15 @@
 // Environment variable used to specify how app connects to hub and the two possible values
 static const char g_securityTypeEnvironmentVariable[] = "IOTHUB_DEVICE_SECURITY_TYPE";
 static const char g_securityTypeConnectionStringValue[] = "connectionString";
-static const char g_securityTypeDpsValue[] = "dps";
+static const char g_securityTypeDpsValue[] = "DPS";
 
 // Environment variable used to specify this application's connection string
 static const char g_connectionStringEnvironmentVariable[] = "IOTHUB_DEVICE_CONNECTION_STRING";
 
+// Values of connection / security settings read from environment variables and/or DPS runtime
+PNP_DEVICE_CONFIGURATION g_pnpDeviceConfiguration;
+
+#ifdef USE_PROV_MODULE_FULL
 // Environment variable used to specify this application's DPS id scope
 static const char g_dpsIdScopeEnvironmentVariable[] = "IOTHUB_DEVICE_DPS_ID_SCOPE";
 
@@ -46,8 +50,12 @@ static const char g_dpsDeviceIdEnvironmentVariable[] = "IOTHUB_DEVICE_DPS_DEVICE
 // Environment variable used to specify this application's DPS device key
 static const char g_dpsDeviceKeyEnvironmentVariable[] = "IOTHUB_DEVICE_DPS_DEVICE_KEY";
 
-// Values of connection / security settings read from environment variables and/or DPS runtime
-PNP_DEVICE_CONFIGURATION g_pnpDeviceConfiguration;
+// Environment variable used to optionally specify this application's DPS id scope
+static const char g_dpsEndpointEnvironmentVariable[] = "IOTHUB_DEVICE_DPS_ENDPOINT";
+
+// Global provisioning endpoint for DPS if one is not specified via the environment
+static char g_dps_DefaultGlobalProvUri[] = "global.azure-devices-provisioning.net";
+#endif
 
 // Amount of time to sleep between sending telemetry to IotHub, in milliseconds.  Set to 1 minute.
 static unsigned int g_sleepBetweenTelemetrySends = 60 * 1000;
@@ -78,8 +86,8 @@ static const size_t g_numModeledComponents = sizeof(g_modeledComponents) / sizeo
 static const char g_rebootCommand[] = "reboot";
 
 // An empty JSON body for PnP command responses
-static const char g_emptyJson[] = "{}";
-static const size_t g_emptyJsonSize = sizeof(g_emptyJson) - 1;
+static const char g_JSONEmpty[] = "{}";
+static const size_t g_JSONEmptySize = sizeof(g_JSONEmpty) - 1;
 
 // Minimum value we will return for working set, + some random number
 static const int g_workingSetMinimum = 1000;
@@ -96,7 +104,7 @@ static const char g_serialNumberPropertyValue[] = "\"serial-no-123-abc\"";
 //
 // PnP_TempControlComponent_InvokeRebootCommand processes the reboot command on the root interface
 //
-static int PnP_TempControlComponent_InvokeRebootCommand(JSON_Value* rootValue, unsigned char** response, size_t* responseSize)
+static int PnP_TempControlComponent_InvokeRebootCommand(JSON_Value* rootValue)
 {
     int result;
 
@@ -110,24 +118,29 @@ static int PnP_TempControlComponent_InvokeRebootCommand(JSON_Value* rootValue, u
         // See caveats section in ../readme.md; we don't actually respect the delay value to keep the sample simple.
         int delayInSeconds = (int)json_value_get_number(rootValue);
         LogInfo("Temperature controller 'reboot' command invoked with delay=%d seconds", delayInSeconds);
-
-        // Even though the DTMI for TemperatureController does not specify a response body, the underlying IoTHub device method
-        // requires a valid JSON to be included in the response.  The SDK will not automatically create one for us if the application returns NULL.
-        if ((*response = (unsigned char*)malloc(g_emptyJsonSize)) == NULL)
-        {
-            LogError("Unable to allocate %lu bytes", (unsigned long)(g_emptyJsonSize));
-            result = PNP_STATUS_INTERNAL_ERROR;
-        }
-        else
-        {
-            // We're using unsigned char** that will be copied directly to the wire protocol, so do not \0 terminate this string
-            memcpy(*response, g_emptyJson, g_emptyJsonSize);
-            *responseSize = g_emptyJsonSize;
-            result = PNP_STATUS_SUCCESS;
-        }
+        result = PNP_STATUS_SUCCESS;
     }
     
     return result;
+}
+
+//
+// SetEmptyCommandResponse sets the response to be an empty JSON.  IoT Hub wants
+// legal JSON, regardless of error status, so if command implementation did not set this do so here.
+//
+static void SetEmptyCommandResponse(unsigned char** response, size_t* responseSize, int* result)
+{
+    if ((*response = calloc(1, g_JSONEmptySize)) == NULL)
+    {
+        LogError("Unable to allocate empty JSON response");
+        *result = PNP_STATUS_INTERNAL_ERROR;
+    }
+    else
+    {
+        memcpy(*response, g_JSONEmpty, g_JSONEmptySize);
+        *responseSize = g_JSONEmptySize;
+        // We only overwrite the caller's result on error; otherwise leave as it was
+    }
 }
 
 //
@@ -185,7 +198,7 @@ static int PnP_TempControlComponent_DeviceMethodCallback(const char* methodName,
             LogInfo("Received PnP command for TemperatureController component, command=%s", pnpCommandName);
             if (strcmp(pnpCommandName, g_rebootCommand) == 0)
             {
-                result = PnP_TempControlComponent_InvokeRebootCommand(rootValue, response, responseSize);
+                result = PnP_TempControlComponent_InvokeRebootCommand(rootValue);
             }
             else
             {
@@ -193,6 +206,11 @@ static int PnP_TempControlComponent_DeviceMethodCallback(const char* methodName,
                 result = PNP_STATUS_NOT_FOUND;
             }
         }
+    }
+
+    if (*response == NULL)
+    {
+        SetEmptyCommandResponse(response, responseSize, &result);
     }
 
     json_value_free(rootValue);
@@ -341,6 +359,12 @@ static bool GetDpsFromEnvironment()
     return false;
 #else
     bool result;
+
+    if ((g_pnpDeviceConfiguration.u.dpsConnectionAuth.endpoint = getenv(g_dpsEndpointEnvironmentVariable)) == NULL)
+    {
+        // We will fall back to standard endpoint if one is not specified
+        g_pnpDeviceConfiguration.u.dpsConnectionAuth.endpoint = g_dps_DefaultGlobalProvUri;
+    }
 
     if ((g_pnpDeviceConfiguration.u.dpsConnectionAuth.idScope = getenv(g_dpsIdScopeEnvironmentVariable)) == NULL)
     {

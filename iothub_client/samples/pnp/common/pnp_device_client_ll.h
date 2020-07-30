@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#ifndef PNP_DEVICE_CLIENT_H
-#define PNP_DEVICE_CLIENT_H
+#ifndef PNP_DEVICE_CLIENT_LL_H
+#define PNP_DEVICE_CLIENT_LL_H
 
 #include "iothub_device_client.h"
 
@@ -21,6 +21,7 @@ typedef enum PNP_CONNECTION_SECURITY_TYPE_TAG
 //
 typedef struct PNP_DPS_CONFIGURATION_TAG
 {
+    char* endpoint;
     char* idScope;
     char* deviceId;
     char* deviceKey;
@@ -63,4 +64,4 @@ typedef struct PNP_DEVICE_CONFIGURATION_TAG
 //
 IOTHUB_DEVICE_CLIENT_HANDLE PnP_CreateDeviceClientHandle(const PNP_DEVICE_CONFIGURATION* pnpDeviceConfiguration);
 
-#endif /* PNP_DEVICE_CLIENT_H */
+#endif /* PNP_DEVICE_CLIENT_LL_H */
