@@ -45,6 +45,7 @@ DPS_LL_SetOption(handle, OPTION_HTTP_PROXY, &http_proxy);
 | `"blob_upload_timeout_secs"`  | OPTION_BLOB_UPLOAD_TIMEOUT_SECS | size_t*            | Timeout in seconds of blob uploads
 | `"product_info"`                | OPTION_PRODUCT_INFO             | const char*        | User defined Product identifier sent to the IoThub service
 | `"TrustedCerts"`                | OPTION_TRUSTED_CERT             | const char*        | Azure Server certificate used to validate TLS connection to iothub
+| `"retry_interval_sec"`          | OPTION_RETRY_INTERVAL_SEC       |  int*              | Amount of seconds between retries when using the interval retry policy
 
 <a name="transport_option"></a>
 
@@ -84,6 +85,15 @@ DPS_LL_SetOption(handle, OPTION_HTTP_PROXY, &http_proxy);
 | `"Batching"`                 | OPTION_BATCHING                 | `bool`* value     | Turn on and off message batching
 | `"MinimumPollingTime"`       | OPTION_MIN_POLLING_TIME         | `unsigned int`* value     | Minimum time in seconds allowed between 2 consecutive GET issues to the service
 | `"timeout"`                  | OPTION_HTTP_TIMEOUT             | `long`* value     | When using curl the amount of time before the request times out, defaults to 242 seconds.
+
+### Advanced Compilation Options
+
+We recommend leaving the following settings at their defaults. Tuning them may allow optimizations for specific devices or scenarios but could also negatively impact RAM or EEPROM usage.
+The options are presented only as compilation flags and must be appended to the CMake `compileOption_C` setting:
+
+| Option Name                  | Option Define                                           | Description
+|------------------------------|---------------------------------------------------------|-------------------------------------------------------------
+| `"XIO Receive Buffer"`       | `-DcompileOption_C="-DXIO_RECEIVE_BUFFER_SIZE=<value>"` | Configure the internal XIO receive buffer.
 
 ## Additional notes
 

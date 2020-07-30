@@ -903,9 +903,9 @@ TEST_FUNCTION(Should_Retry_EXPONENTIAL_BACKOFF_WITH_JITTER_success)
     unsigned int option_value = 1;
     int set_option_result = retry_control_set_option(handle, RETRY_CONTROL_OPTION_MAX_JITTER_PERCENT, &option_value);
 
-    int expected_retry_times[] = { 0, 1, 2, 4, 8 };
+    int expected_retry_times[] = { 0, 1, 2, 4, 8, 16, 30, 30 };
 
-    run_and_verify_should_retry_times(handle, expected_retry_times, 5, 10);
+    run_and_verify_should_retry_times(handle, expected_retry_times, 8, 10);
 
     // assert
     ASSERT_ARE_EQUAL(int, 0, set_option_result);
@@ -925,9 +925,9 @@ TEST_FUNCTION(Should_Retry_EXPONENTIAL_BACKOFF_success)
     unsigned int option_value = 2;
     int set_option_result = retry_control_set_option(handle, RETRY_CONTROL_OPTION_INITIAL_WAIT_TIME_IN_SECS, &option_value);
 
-    int expected_retry_times[] = { 0, 2, 4, 8, 16 };
+    int expected_retry_times[] = { 0, 2, 4, 8, 16, 30, 30 };
 
-    run_and_verify_should_retry_times(handle, expected_retry_times, 5, max_retry_time_in_secs);
+    run_and_verify_should_retry_times(handle, expected_retry_times, 7, max_retry_time_in_secs);
 
     // assert
     ASSERT_ARE_EQUAL(int, 0, set_option_result);
@@ -943,11 +943,11 @@ TEST_FUNCTION(Should_Retry_INTERVAL_success)
     unsigned int max_retry_time_in_secs = 19;
     RETRY_CONTROL_HANDLE handle = create_retry_control(IOTHUB_CLIENT_RETRY_INTERVAL, max_retry_time_in_secs);
 
-    int expected_retry_times[] = { 0, 5, 10, 15, 20 };
+    int expected_retry_times[] = { 0, 5, 10, 15, 20, 25, 30, 30 };
 
     // act
     // assert
-    run_and_verify_should_retry_times(handle, expected_retry_times, 5, max_retry_time_in_secs);
+    run_and_verify_should_retry_times(handle, expected_retry_times, 8, max_retry_time_in_secs);
 
     // cleanup
     retry_control_destroy(handle);

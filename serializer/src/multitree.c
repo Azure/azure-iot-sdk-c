@@ -14,7 +14,7 @@
 /*assume a name cannot be longer than 100 characters*/
 #define INNER_NODE_NAME_SIZE 128
 
-MU_DEFINE_ENUM_STRINGS(MULTITREE_RESULT, MULTITREE_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(MULTITREE_RESULT, MULTITREE_RESULT_VALUES);
 
 typedef struct MULTITREE_HANDLE_DATA_TAG
 {
@@ -43,7 +43,7 @@ MULTITREE_HANDLE MultiTree_Create(MULTITREE_CLONE_FUNCTION cloneFunction, MULTIT
         /*Codes_SRS_MULTITREE_99_005:[ MultiTree_Create creates a new tree.]*/
         /*Codes_SRS_MULTITREE_99_006:[MultiTree_Create returns a non - NULL pointer if the tree has been successfully created.]*/
         /*Codes_SRS_MULTITREE_99_007:[MultiTree_Create returns NULL if the tree has not been successfully created.]*/
-        result = (MULTITREE_HANDLE_DATA*)malloc(sizeof(MULTITREE_HANDLE_DATA));
+        result = (MULTITREE_HANDLE_DATA*)calloc(1, sizeof(MULTITREE_HANDLE_DATA));
         if (result != NULL)
         {
             result->name = NULL;
@@ -126,7 +126,7 @@ static CREATELEAF_RESULT createLeaf(MULTITREE_HANDLE_DATA* node, const char*name
     }
     else
     {
-        MULTITREE_HANDLE_DATA* newNode = (MULTITREE_HANDLE_DATA*)malloc(sizeof(MULTITREE_HANDLE_DATA));
+        MULTITREE_HANDLE_DATA* newNode = (MULTITREE_HANDLE_DATA*)calloc(1, sizeof(MULTITREE_HANDLE_DATA));
         if (newNode == NULL)
         {
             result = CREATELEAF_ERROR;

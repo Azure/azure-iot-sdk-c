@@ -454,9 +454,6 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_TYPE(HTTPAPIEX_RESULT, HTTPAPIEX_RESULT);
     REGISTER_TYPE(HTTP_HEADERS_RESULT, HTTP_HEADERS_RESULT);
     REGISTER_TYPE(HTTPAPI_REQUEST_TYPE, HTTPAPI_REQUEST_TYPE);
-    REGISTER_UMOCK_ALIAS_TYPE(VECTOR_HANDLE, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(const VECTOR_HANDLE, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(PREDICATE_FUNCTION, void*);
     REGISTER_UMOCK_ALIAS_TYPE(BUFFER_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(HTTP_HEADERS_HANDLE, void*);
@@ -500,6 +497,9 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_GLOBAL_MOCK_HOOK(HTTPHeaders_Free, my_HTTPHeaders_Free);
     REGISTER_GLOBAL_MOCK_RETURN(HTTPHeaders_AddHeaderNameValuePair, HTTP_HEADERS_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPHeaders_AddHeaderNameValuePair, HTTP_HEADERS_ERROR);
+
+    REGISTER_GLOBAL_MOCK_RETURN(UniqueId_Generate, UNIQUEID_OK);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(UniqueId_Generate, UNIQUEID_ERROR);
 
     REGISTER_GLOBAL_MOCK_HOOK(HTTPAPIEX_Create, my_HTTPAPIEX_Create);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPAPIEX_Create, NULL);
@@ -893,7 +893,7 @@ static void set_expected_calls_for_sendHttpRequestDeviceConfiguration(const unsi
     EXPECTED_CALL(HTTPHeaders_Alloc());
     EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_AUTHORIZATION, TEST_HTTP_HEADER_VAL_AUTHORIZATION));
     EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    EXPECTED_CALL(UniqueId_Generate(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    EXPECTED_CALL(UniqueId_Generate(IGNORED_PTR_ARG, IGNORED_NUM_ARG)).CallCannotFail();
 
     EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_REQUEST_ID, TEST_HTTP_HEADER_VAL_REQUEST_ID));
     EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, TEST_HTTP_HEADER_KEY_USER_AGENT, IGNORED_PTR_ARG));
@@ -911,7 +911,7 @@ static void set_expected_calls_for_sendHttpRequestDeviceConfiguration(const unsi
         .IgnoreAllArguments();
     EXPECTED_CALL(HTTPAPIEX_Create(TEST_HOSTNAME));
 
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
 
     EXPECTED_CALL(HTTPAPIEX_SAS_ExecuteRequest(IGNORED_PTR_ARG, IGNORED_PTR_ARG, requestType, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments()
@@ -1744,39 +1744,26 @@ TEST_FUNCTION(IoTHubDeviceConfiguration_DeleteConfiguration_non_happy_path)
 
     umock_c_negative_tests_snapshot();
 
-    ///act
-    for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
+    size_t count = umock_c_negative_tests_call_count();
+    for (size_t index = 0; index < count; index++)
     {
-        ////arrange
-        umock_c_negative_tests_reset();
-        umock_c_negative_tests_fail_call(i);
-
-        ////act
-        if (
-            (i != 6) && /*UniqueId_Generate*/
-            (i != 11) && /*gballoc_free*/
-            (i != 14) && /*STRING_c_str*/
-            (i != 15) && /*HTTPAPIEX_SAS_Destroy*/
-            (i != 16) && /*STRING_delete*/
-            (i != 17) && /*HTTPAPIEX_Destroy*/
-            (i != 18) && /*HTTPAPIEX_SAS_Destroy*/
-            (i != 19) && /*HTTPHeaders_Free*/
-            (i != 20) && /*STRING_delete*/
-            (i != 21) && /*STRING_delete*/
-            (i != 22)    /*STRING_delete*/
-            )
+        //act
+        if (umock_c_negative_tests_can_call_fail(index))
         {
+            //arrange
+            umock_c_negative_tests_reset();
+            umock_c_negative_tests_fail_call(index);
+
             IOTHUB_DEVICE_CONFIGURATION_RESULT result = IoTHubDeviceConfiguration_DeleteConfiguration(handle, TEST_CONST_CHAR_PTR);
 
             ////assert
-            ASSERT_ARE_NOT_EQUAL(int, IOTHUB_DEVICE_CONFIGURATION_OK, result);
+            ASSERT_ARE_NOT_EQUAL(int, IOTHUB_DEVICE_CONFIGURATION_OK, result, "IoTHubDeviceConfiguration_DeleteConfiguration failure in test %zu/%zu", index, count);
         }
-        ///cleanup
     }
-    umock_c_negative_tests_deinit();
 
-    ///cleanup
+    //cleanup
     IoTHubDeviceConfiguration_Destroy(handle);
+    umock_c_negative_tests_deinit();
 }
 
 END_TEST_SUITE(iothub_deviceconfiguration_ut)

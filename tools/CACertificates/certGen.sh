@@ -1,3 +1,5 @@
+#!/bin/bash
+
 ## Copyright (c) Microsoft. All rights reserved.
 ## Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
@@ -262,7 +264,7 @@ function generate_leaf_certificate()
 
     generate_device_certificate_common "${common_name}" "${device_prefix}" \
                                        "${certificate_dir}" "${ca_password}" \
-                                       "${openssl_config_file}" "server_cert" \
+                                       "${openssl_config_file}" "usr_cert" \
                                        "Leaf Device"
 }
 
@@ -316,7 +318,7 @@ function initial_cert_generation()
 ###############################################################################
 function generate_verification_certificate()
 {
-    if [$# -ne 1]; then
+    if [ $# -ne 1 ]; then
         echo "Usage: <subjectName>"
         exit 1
     fi
@@ -333,7 +335,7 @@ function generate_verification_certificate()
 ###############################################################################
 function generate_device_certificate()
 {
-    if [$# -ne 1]; then
+    if [ $# -ne 1 ]; then
         echo "Usage: <subjectName>"
         exit 1
     fi
@@ -342,8 +344,8 @@ function generate_device_certificate()
     rm -f ./certs/new-device.key.pem
     rm -f ./certs/new-device-full-chain.cert.pem
     generate_leaf_certificate "${1}" "new-device" \
-                              ${intermediate_ca_dir} ${intermediate_ca_password} \
-                              ${openssl_intermediate_config_file}
+                              ${root_ca_dir} ${root_ca_password} \
+                              ${openssl_root_config_file}
 }
 
 ###############################################################################
@@ -352,7 +354,7 @@ function generate_device_certificate()
 function generate_edge_device_certificate()
 {
     local device_prefix="new-edge-device"
-    if [$# -ne 1]; then
+    if [ $# -ne 1 ]; then
         echo "Usage: <subjectName>"
         exit 1
     fi

@@ -16,18 +16,19 @@
 #include "internal/iothub_client_private.h"
 #include "internal/iothubtransport_amqp_messenger.h"
 #include "internal/iothubtransport_amqp_twin_messenger.h"
+#include "iothub_client_options.h"
+#include "internal/iothub_internal_consts.h"
 
-MU_DEFINE_ENUM_STRINGS(TWIN_MESSENGER_SEND_STATUS, TWIN_MESSENGER_SEND_STATUS_VALUES);
-MU_DEFINE_ENUM_STRINGS(TWIN_REPORT_STATE_RESULT, TWIN_REPORT_STATE_RESULT_VALUES);
-MU_DEFINE_ENUM_STRINGS(TWIN_REPORT_STATE_REASON, TWIN_REPORT_STATE_REASON_VALUES);
-MU_DEFINE_ENUM_STRINGS(TWIN_MESSENGER_STATE, TWIN_MESSENGER_STATE_VALUES);
-MU_DEFINE_ENUM_STRINGS(TWIN_UPDATE_TYPE, TWIN_UPDATE_TYPE_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(TWIN_MESSENGER_SEND_STATUS, TWIN_MESSENGER_SEND_STATUS_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(TWIN_REPORT_STATE_RESULT, TWIN_REPORT_STATE_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(TWIN_REPORT_STATE_REASON, TWIN_REPORT_STATE_REASON_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(TWIN_MESSENGER_STATE, TWIN_MESSENGER_STATE_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(TWIN_UPDATE_TYPE, TWIN_UPDATE_TYPE_VALUES);
 
 
 #define RESULT_OK 0
 #define INDEFINITE_TIME ((time_t)(-1))
 
-#define CLIENT_VERSION_PROPERTY_NAME                    "com.microsoft:client-version"
 #define UNIQUE_ID_BUFFER_SIZE                           37
 
 #define EMPTY_TWIN_BODY_DATA                            ((const unsigned char*)" ")
@@ -44,7 +45,6 @@ MU_DEFINE_ENUM_STRINGS(TWIN_UPDATE_TYPE, TWIN_UPDATE_TYPE_VALUES);
 #define TWIN_CORRELATION_ID_PROPERTY_NAME               "com.microsoft:channel-correlation-id"
 #define TWIN_API_VERSION_PROPERTY_NAME                  "com.microsoft:api-version"
 #define TWIN_CORRELATION_ID_PROPERTY_FORMAT             "twin:%s"
-#define TWIN_API_VERSION_NUMBER                         "2016-11-14"
 
 #define DEFAULT_MAX_TWIN_SUBSCRIPTION_ERROR_COUNT       3
 #define DEFAULT_TWIN_OPERATION_TIMEOUT_SECS             300.0
@@ -687,7 +687,7 @@ static MAP_HANDLE create_link_attach_properties(TWIN_MESSENGER_INSTANCE* twin_ms
                 destroy_link_attach_properties(result);
                 result = NULL;
             }
-            else if (Map_Add(result, TWIN_API_VERSION_PROPERTY_NAME, TWIN_API_VERSION_NUMBER) != MAP_OK)
+            else if (Map_Add(result, TWIN_API_VERSION_PROPERTY_NAME, IOTHUB_API_VERSION) != MAP_OK)
             {
                 LogError("Failed adding AMQP link property 'api-version' (%s)", twin_msgr->device_id);
                 destroy_link_attach_properties(result);
@@ -1776,7 +1776,7 @@ TWIN_MESSENGER_HANDLE twin_messenger_create(const TWIN_MESSENGER_CONFIG* messeng
                 // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_013: [`amqp_msgr_config->device_id` shall be set with `twin_msgr->device_id`]
                 // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_014: [`amqp_msgr_config->iothub_host_fqdn` shall be set with `twin_msgr->iothub_host_fqdn`]
                 // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_015: [`amqp_msgr_config` shall have "twin/" as send link target suffix and receive link source suffix]
-                // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_016: [`amqp_msgr_config` shall have send and receive link attach properties set as "com.microsoft:client-version" = `twin_msgr->client_version`, "com.microsoft:channel-correlation-id" = `twin:<UUID>`, "com.microsoft:api-version" = "2016-11-14"]
+                // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_016: [`amqp_msgr_config` shall have send and receive link attach properties set as "com.microsoft:client-version" = `twin_msgr->client_version`, "com.microsoft:channel-correlation-id" = `twin:<UUID>`, "com.microsoft:api-version" = "Current API version"]
                 // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_017: [`amqp_msgr_config` shall be set with `on_amqp_messenger_state_changed_callback` and `on_amqp_messenger_subscription_changed_callback` callbacks]
                 AMQP_MESSENGER_CONFIG amqp_msgr_config;
                 amqp_msgr_config.prod_info_cb = twin_msgr->prod_info_cb;
@@ -2063,19 +2063,30 @@ int twin_messenger_start(TWIN_MESSENGER_HANDLE twin_msgr_handle, SESSION_HANDLE 
         // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_048: [If no failures occurr, `twin_msgr->state` shall be set to TWIN_MESSENGER_STATE_STARTING, and `twin_msgr->on_state_changed_callback` invoked if provided]
         update_state(twin_msgr, TWIN_MESSENGER_STATE_STARTING);
 
-        // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_046: [amqp_messenger_start() shall be invoked passing `twin_msgr->amqp_msgr` and `session_handle`]
-        if (amqp_messenger_start(twin_msgr->amqp_msgr, session_handle) != 0)
+        // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_116: [amqp_messenger_set_option() shall be invoked passing the OPTION_PRODUCT_INFO and product info returned from the prod_info callback]
+        if(amqp_messenger_set_option(twin_msgr->amqp_msgr, (const char *)OPTION_PRODUCT_INFO, (void *)twin_msgr->prod_info_cb(twin_msgr->prod_info_ctx)) == 0)
         {
-            // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_047: [If amqp_messenger_start() fails, twin_messenger_start() fail and return a non-zero value]
-            LogError("Failed starting the AMQP messenger (%s)", twin_msgr->device_id);
-            // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_049: [If any failures occurr, `twin_msgr->state` shall be set to TWIN_MESSENGER_STATE_ERROR, and `twin_msgr->on_state_changed_callback` invoked if provided]
-            update_state(twin_msgr, TWIN_MESSENGER_STATE_ERROR);
-            result = MU_FAILURE;
+            // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_046: [amqp_messenger_start() shall be invoked passing `twin_msgr->amqp_msgr` and `session_handle`]
+            if (amqp_messenger_start(twin_msgr->amqp_msgr, session_handle) != 0)
+            {
+                // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_047: [If amqp_messenger_start() fails, twin_messenger_start() fail and return a non-zero value]
+                LogError("Failed starting the AMQP messenger (%s)", twin_msgr->device_id);
+                // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_049: [If any failures occurr, `twin_msgr->state` shall be set to TWIN_MESSENGER_STATE_ERROR, and `twin_msgr->on_state_changed_callback` invoked if provided]
+                update_state(twin_msgr, TWIN_MESSENGER_STATE_ERROR);
+                result = MU_FAILURE;
+            }
+            else
+            {
+                // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_050: [If no failures occurr, twin_messenger_start() shall return 0]
+                result = RESULT_OK;
+            }
         }
         else
         {
-            // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_050: [If no failures occurr, twin_messenger_start() shall return 0]
-            result = RESULT_OK;
+            LogError("Failed to set the product info option (%s)", twin_msgr->device_id);
+            // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_049: [If any failures occurr, `twin_msgr->state` shall be set to TWIN_MESSENGER_STATE_ERROR, and `twin_msgr->on_state_changed_callback` invoked if provided]
+            update_state(twin_msgr, TWIN_MESSENGER_STATE_ERROR);
+            result = MU_FAILURE;
         }
     }
 

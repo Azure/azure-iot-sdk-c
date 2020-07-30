@@ -19,6 +19,7 @@ extern "C"
 
 static STATIC_VAR_UNUSED const char* RETRY_CONTROL_OPTION_INITIAL_WAIT_TIME_IN_SECS = "initial_wait_time_in_secs";
 static STATIC_VAR_UNUSED const char* RETRY_CONTROL_OPTION_MAX_JITTER_PERCENT = "max_jitter_percent";
+static STATIC_VAR_UNUSED const char* RETRY_CONTROL_OPTION_MAX_DELAY_IN_SECS = "max_delay_in_secs";
 static STATIC_VAR_UNUSED const char* RETRY_CONTROL_OPTION_SAVED_OPTIONS = "retry_control_saved_options";
 
 typedef enum RETRY_ACTION_TAG

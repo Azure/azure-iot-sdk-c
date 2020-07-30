@@ -44,7 +44,7 @@ namespace BASEIMPLEMENTATION
 #include "strings.c"
 };
 
-MU_DEFINE_MICROMOCK_ENUM_TO_STRING(MULTITREE_RESULT, MULTITREE_RESULT_VALUES);
+DEFINE_MICROMOCK_ENUM_TO_STRING(MULTITREE_RESULT, MULTITREE_RESULT_VALUES);
 
 static int StringClone(void** destination, const void* source)
 {
@@ -148,6 +148,9 @@ char bufferTemp2[BUFFER_TEMP_SIZE];
 static size_t currentmalloc_call;
 static size_t whenShallmalloc_fail;
 
+static size_t currentcalloc_call;
+static size_t whenShallcalloc_fail;
+
 /*different STRING constructors*/
 static size_t currentSTRING_new_call;
 static size_t whenShallSTRING_new_fail;
@@ -188,6 +191,26 @@ public:
     else
     {
         result2 = BASEIMPLEMENTATION::gballoc_malloc(size);
+    }
+    MOCK_METHOD_END(void*, result2);
+
+    MOCK_STATIC_METHOD_2(, void*, gballoc_calloc, size_t, nmemb, size_t, size)
+        void* result2;
+    currentcalloc_call++;
+    if (whenShallcalloc_fail > 0)
+    {
+        if (currentcalloc_call == whenShallcalloc_fail)
+        {
+            result2 = (STRING_HANDLE)NULL;
+        }
+        else
+        {
+            result2 = BASEIMPLEMENTATION::gballoc_calloc(nmemb, size);
+        }
+    }
+    else
+    {
+        result2 = BASEIMPLEMENTATION::gballoc_calloc(nmemb, size);
     }
     MOCK_METHOD_END(void*, result2);
 
@@ -281,6 +304,7 @@ public:
 };
 
 DECLARE_GLOBAL_MOCK_METHOD_1(CMultiTreeMocks, , void*, gballoc_malloc, size_t, size);
+DECLARE_GLOBAL_MOCK_METHOD_2(CMultiTreeMocks, , void*, gballoc_calloc, size_t, nmemb, size_t, size);
 DECLARE_GLOBAL_MOCK_METHOD_2(CMultiTreeMocks, , void*, gballoc_realloc, void*, ptr, size_t, size);
 DECLARE_GLOBAL_MOCK_METHOD_1(CMultiTreeMocks, , void, gballoc_free, void*, ptr)
 
@@ -317,6 +341,9 @@ TEST_FUNCTION_INITIALIZE(init)
     currentmalloc_call = 0;
     whenShallmalloc_fail = 0;
 
+    currentcalloc_call = 0;
+    whenShallcalloc_fail = 0;
+
     currentSTRING_new_call = 0;
     whenShallSTRING_new_fail = 0;
 
@@ -333,8 +360,7 @@ TEST_FUNCTION_INITIALIZE(init)
     whenShallSTRING_empty_fail = 0;
 
     currentSTRING_concat_with_STRING_call = 0;
-    whenShallSTRING_concat_with_STRING_fail = 0; 
-
+    whenShallSTRING_concat_with_STRING_fail = 0;
 }
 
 TEST_FUNCTION_CLEANUP(clean)
@@ -360,8 +386,8 @@ TEST_FUNCTION(MultiTree_Create_succeeds)
 {
     ///arrange
     CMultiTreeMocks mocks;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(0))
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0))
+        .IgnoreAllArguments();
     STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
 
@@ -402,14 +428,14 @@ TEST_FUNCTION(MultiTree_Create_With_NULL_Free_Function_Fails)
 }
 
 /*SRS_MULTITREE_99_007:[ MultiTree_Create returns NULL if the tree has not been successfully created.]*/
-TEST_FUNCTION(MultiTree_Create_if_malloc_fails_then_it_fails)
+TEST_FUNCTION(MultiTree_Create_if_calloc_fails_then_it_fails)
 {
     ///arrange
     CMultiTreeMocks mocks;
 
-    whenShallmalloc_fail = 1;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(0))
-        .IgnoreArgument(1);
+    whenShallcalloc_fail = 1;
+    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0))
+        .IgnoreAllArguments();
     auto res = MultiTree_Create(StringClone, StringFree);
 
     ///assert
@@ -438,8 +464,8 @@ TEST_FUNCTION(MultiTree_AddLeaf_with_NULL_path_fails)
 {
     ///arrange
     CMultiTreeMocks mocks;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(0)) /*because MultiTree_Create*/
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because MultiTree_Create*/
+        .IgnoreAllArguments();
     STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*because MultiTree_Destroy*/
         .IgnoreArgument(1);
 
@@ -460,8 +486,8 @@ TEST_FUNCTION(MultiTree_AddLeaf_with_NULL_value_fails)
 {
     ///arrange
     CMultiTreeMocks mocks;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(0)) /*because MultiTree_Create*/
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because MultiTree_Create*/
+        .IgnoreAllArguments();
     STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*because MultiTree_Destroy*/
         .IgnoreArgument(1);
 
@@ -994,7 +1020,7 @@ TEST_FUNCTION(MultiTree_AddLeaf_with_alternate_names_succeeds)
     auto res5 = MultiTree_AddLeaf(treeHandle, CHILD312PATH_ALTERNATE, (void*)CHILD312VALUE);
     auto res6 = MultiTree_AddLeaf(treeHandle, CHILD313PATH_ALTERNATE, (void*)CHILD313VALUE);
     auto res7 = MultiTree_AddLeaf(treeHandle, CHILD314PATH_ALTERNATE, (void*)CHILD313VALUE);
-    
+
     ///assert
     ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_OK, res1);
     ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_OK, res2);
@@ -1003,7 +1029,7 @@ TEST_FUNCTION(MultiTree_AddLeaf_with_alternate_names_succeeds)
     ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_OK, res5);
     ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_OK, res6);
     ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_OK, res7);
-    
+
     //cleanup
     MultiTree_Destroy(treeHandle);
     mocks.ResetAllCalls();
@@ -1516,8 +1542,8 @@ TEST_FUNCTION(MultiTree_Destroy_with_an_empty_tree_calls_free_once)
 {
     ///arrange
     CMultiTreeMocks mocks;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(0))
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because MultiTree_Create*/
+        .IgnoreAllArguments();
     STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
     MULTITREE_HANDLE treeHandle = MultiTree_Create(StringClone, StringFree);
@@ -1541,7 +1567,7 @@ TEST_FUNCTION(MultiTree_Destroy_with_one_child_tree_calls_free_5_times)
     - children in root
     - root itself*/
     ///arrange
-    CMultiTreeMocks mocks; 
+    CMultiTreeMocks mocks;
 
     MULTITREE_HANDLE treeHandle = MultiTree_Create(StringClone, StringFree);
     (void)MultiTree_AddLeaf(treeHandle, "child", (void*)"value");
@@ -1629,8 +1655,8 @@ TEST_FUNCTION(MultiTree_AddChild_With_NULL_ChildName_Fails)
 {
     ///arrange
     CMultiTreeMocks mocks;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(0)) /*because MultiTree_Create*/
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because MultiTree_Create*/
+        .IgnoreAllArguments();
     STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*because MultiTree_Destroy*/
         .IgnoreArgument(1);
 
@@ -1652,8 +1678,8 @@ TEST_FUNCTION(MultiTree_AddChild_With_NULL_ChildHandle_Fails)
 {
     ///arrange
     CMultiTreeMocks mocks;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(0)) /*because MultiTree_Create*/
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because MultiTree_Create*/
+        .IgnoreAllArguments();
     STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*because MultiTree_Destroy*/
         .IgnoreArgument(1);
 
@@ -1675,12 +1701,12 @@ TEST_FUNCTION(MultiTree_AddChild_With_Correct_Arguments_Succeeds)
 {
     ///arrange
     CMultiTreeMocks mocks;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(0)) /*because MultiTree_Create*/
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because MultiTree_Create*/
+        .IgnoreAllArguments();
     STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*because MultiTree_Destroy*/
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(0)) /*because create the child*/
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because create the child*/
+        .IgnoreAllArguments();
     STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*because destroy the child*/
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(mocks, gballoc_realloc(NULL, sizeof(MULTITREE_HANDLE))); /*because insertion of child node in the array of children in the parent*/
@@ -1709,8 +1735,8 @@ TEST_FUNCTION(MultiTree_AddChild_With_Empty_ChildName_Fails)
 {
     ///arrange
     CMultiTreeMocks mocks;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(0)) /*because MultiTree_Create*/
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because MultiTree_Create*/
+        .IgnoreAllArguments();
     STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*because MultiTree_Destroy*/
         .IgnoreArgument(1);
 
@@ -1752,12 +1778,12 @@ TEST_FUNCTION(MultiTree_AddChild_With_2_Different_Child_Names_Succeeds)
 {
     ///arrange
     CMultiTreeMocks mocks;
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(0)) /*because MultiTree_Create*/
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because MultiTree_Create*/
+        .IgnoreAllArguments();
     STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*because MultiTree_Destroy*/
         .IgnoreArgument(1);
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(0)) /*because create the child 1 */
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because create the child 1 */
+        .IgnoreAllArguments();
     STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*because destroy the child 1 */
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(mocks, gballoc_realloc(NULL, sizeof(MULTITREE_HANDLE))); /*because insertion of child 1 node in the array of children in the parent*/
@@ -1765,8 +1791,8 @@ TEST_FUNCTION(MultiTree_AddChild_With_2_Different_Child_Names_Succeeds)
     STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*this is clone of "childName1" string*/
         .IgnoreArgument(1);
 
-    STRICT_EXPECTED_CALL(mocks, gballoc_malloc(0)) /*because create the child 2 */
-        .IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mocks, gballoc_calloc(1, 0)) /*because create the child 2 */
+        .IgnoreAllArguments();
     STRICT_EXPECTED_CALL(mocks, gballoc_free(IGNORED_PTR_ARG)) /*because destroy the child 2*/
         .IgnoreArgument(1);
     STRICT_EXPECTED_CALL(mocks, gballoc_realloc(IGNORED_PTR_ARG, 2 * sizeof(MULTITREE_HANDLE))) /*because insertion of child 2 node in the array of children in the parent*/
@@ -2332,7 +2358,7 @@ void VerifyMultiTreeExpectedAfterDeleteChild(MULTITREE_HANDLE treeHandle, const 
     ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_OK, result);
 
     ASSERT_ARE_EQUAL(int, 0, strcmp(firstChildName, STRING_c_str(global_bufferTemp)));
-    
+
     // Verify the 1st element of the tree matches secondChildName
     result = MultiTree_GetChild(treeHandle, 1, &childHandle);
     ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_OK, result);

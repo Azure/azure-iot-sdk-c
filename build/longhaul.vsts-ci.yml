@@ -1,14 +1,16 @@
 name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+variables:
+  runCodesignValidationInjection: false
 resources:
 - repo: self
   clean: true
 jobs:
 - job: longhaul_linux
+  timeoutInMinutes: 800
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
   pool: 
     name: 'aziotbld-lin01'
-    timeoutInMinutes: 1200
   displayName: 'longhaul_linux'
   steps:
   - script: |
@@ -37,9 +39,9 @@ jobs:
     displayName: 'cleanup'
     condition: always()
 - job: longhaul_windows
+  timeoutInMinutes: 800
   pool:
     name: 'aziotbld-win10'
-    timeoutInMinutes: 1200
   steps:
   - script: |
       call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"

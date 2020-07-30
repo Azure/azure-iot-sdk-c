@@ -11,13 +11,14 @@
 #include <stdexcept>
 #include "multitree.h"
 
+#include "azure_macro_utils/macro_utils.h"
+
 /*this is what we test*/
 #include "jsonencoder.h"
 
+DEFINE_MICROMOCK_ENUM_TO_STRING(JSON_ENCODER_RESULT, JSON_ENCODER_RESULT_VALUES);
 
-MU_DEFINE_MICROMOCK_ENUM_TO_STRING(JSON_ENCODER_RESULT, JSON_ENCODER_RESULT_VALUES);
-
-MU_DEFINE_MICROMOCK_ENUM_TO_STRING(JSON_ENCODER_TOSTRING_RESULT, JSON_ENCODER_TOSTRING_RESULT_VALUES);
+DEFINE_MICROMOCK_ENUM_TO_STRING(JSON_ENCODER_TOSTRING_RESULT, JSON_ENCODER_TOSTRING_RESULT_VALUES);
 
 /*These will be the data we shall use for tests.
 
@@ -81,18 +82,6 @@ MU_DEFINE_MICROMOCK_ENUM_TO_STRING(JSON_ENCODER_TOSTRING_RESULT, JSON_ENCODER_TO
 
 #ifdef _WIN32_WCE 
 #define snprintf _snprintf 
-#endif 
-
-#ifdef USE_CTEST 
-static int wchar_ptr_Compare(const wchar_t* left, const wchar_t* right)
-{
-    return (wcscmp(left, right) != 0);
-}
-
-void wchar_ptr_ToString(char* string, size_t bufferSize, const wchar_t* val)
-{
-    (void)snprintf(string, bufferSize, "%S", val);
-}
 #endif 
 
 //

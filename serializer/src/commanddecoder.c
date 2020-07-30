@@ -15,7 +15,7 @@
 #include "codefirst.h"
 #include "jsondecoder.h"
 
-MU_DEFINE_ENUM_STRINGS(COMMANDDECODER_RESULT, COMMANDDECODER_RESULT_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(COMMANDDECODER_RESULT, COMMANDDECODER_RESULT_VALUES);
 
 typedef struct COMMAND_DECODER_HANDLE_DATA_TAG
 {
@@ -57,7 +57,7 @@ static int DecodeValueFromNode(SCHEMA_HANDLE schemaHandle, AGENT_DATA_TYPE* agen
             }
             else
             {
-                AGENT_DATA_TYPE* memberValues = (AGENT_DATA_TYPE*)malloc(sizeof(AGENT_DATA_TYPE)* propertyCount);
+                AGENT_DATA_TYPE* memberValues = (AGENT_DATA_TYPE*)calloc(1, (sizeof(AGENT_DATA_TYPE)* propertyCount));
                 if (memberValues == NULL)
                 {
                     /* Codes_SRS_COMMAND_DECODER_99_021:[ If the parsing of the command fails for any other reason the command shall not be dispatched.] */
@@ -224,7 +224,7 @@ static EXECUTE_COMMAND_RESULT DecodeAndExecuteModelAction(COMMAND_DECODER_HANDLE
 
                 if (argCount > 0)
                 {
-                    arguments = (AGENT_DATA_TYPE*)malloc(sizeof(AGENT_DATA_TYPE)* argCount);
+                    arguments = (AGENT_DATA_TYPE*)calloc(1, (sizeof(AGENT_DATA_TYPE)* argCount));
                 }
 
                 if ((argCount > 0) &&
@@ -334,7 +334,7 @@ static METHODRETURN_HANDLE DecodeAndExecuteModelMethod(COMMAND_DECODER_HANDLE_DA
             else
             {
                 AGENT_DATA_TYPE* arguments;
-                arguments = (AGENT_DATA_TYPE*)malloc(sizeof(AGENT_DATA_TYPE)* argCount);
+                arguments = (AGENT_DATA_TYPE*)calloc(1, (sizeof(AGENT_DATA_TYPE)* argCount));
                 if (arguments == NULL)
                 {
                     LogError("Failed allocating arguments array");
@@ -795,7 +795,7 @@ void CommandDecoder_Destroy(COMMAND_DECODER_HANDLE commandDecoderHandle)
     }
 }
 
-MU_DEFINE_ENUM_STRINGS(AGENT_DATA_TYPE_TYPE, AGENT_DATA_TYPE_TYPE_VALUES);
+MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(AGENT_DATA_TYPE_TYPE, AGENT_DATA_TYPE_TYPE_VALUES);
 
 /*validates that the multitree (coming from a JSON) is actually a serialization of the model (complete or incomplete)*/
 /*if the serialization contains more than the model, then it fails.*/

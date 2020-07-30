@@ -44,7 +44,7 @@ ENV STAGING_DIR=${TOOLCHAIN_SYSROOT}
 
 ########## OPENSSL INSTALL ##########
 # Download OpenSSL source and expand it
-ENV OPENSSL_SOURCE=openssl-1.1.0j
+ENV OPENSSL_SOURCE=openssl-1.1.1f
 RUN wget https://www.openssl.org/source/${OPENSSL_SOURCE}.tar.gz
 RUN tar -xvf ${OPENSSL_SOURCE}.tar.gz
 
@@ -128,7 +128,7 @@ RUN git checkout $CLIENTLIBRARY_COMMIT_SHA
 COPY ./patchfile /
 # our base image might have some files checked out.  revert these.
 RUN git reset HEAD && git checkout && git clean  -df
-RUN if [-s /patchfile ]; then git apply --index /patchfile; fi
+RUN if [ -s /patchfile ]; then git apply --index /patchfile; fi
 
 RUN git submodule update --init
 

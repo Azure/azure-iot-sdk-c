@@ -959,6 +959,71 @@ static AMQP_MESSENGER_HANDLE create_and_start_messenger2(AMQP_MESSENGER_CONFIG* 
     return handle;
 }
 
+char* umock_stringify_AMQP_MESSENGER_MESSAGE_DISPOSITION_INFO(const AMQP_MESSENGER_MESSAGE_DISPOSITION_INFO* value)
+{
+    (void)value;
+    char* result = "AMQP_MESSENGER_MESSAGE_DISPOSITION_INFO";
+    return result;
+}
+
+int umock_are_equal_AMQP_MESSENGER_MESSAGE_DISPOSITION_INFO(const AMQP_MESSENGER_MESSAGE_DISPOSITION_INFO* left, const AMQP_MESSENGER_MESSAGE_DISPOSITION_INFO* right)
+{
+    int result;
+
+    if (((left == NULL) && (right != NULL)) || ((right == NULL) && (left != NULL)))
+    {
+        result = 0;
+    }
+    else if ((left == NULL) && (right == NULL))
+    {
+        result = 1;
+    }
+    else
+    {
+        if ((strcmp(left->source, right->source) != 0) || (left->message_id != right->message_id))
+        {
+            result = 0;
+        }
+        else
+        {
+            result = 1;
+        }
+    }
+
+    return result;
+}
+
+int umock_copy_AMQP_MESSENGER_MESSAGE_DISPOSITION_INFO(AMQP_MESSENGER_MESSAGE_DISPOSITION_INFO* destination, const AMQP_MESSENGER_MESSAGE_DISPOSITION_INFO* source)
+{
+    int result;
+
+    if ((source == NULL) || (destination == NULL))
+    {
+        result = -1;
+    }
+    else
+    {
+        if (source->source == NULL)
+        {
+            destination->source = NULL;
+        }
+        else
+        {
+            (void)strcpy(destination->source, source->source);
+        }
+        destination->message_id = source->message_id;
+        result = 0;
+    }
+
+    return result;
+}
+
+void umock_free_AMQP_MESSENGER_MESSAGE_DISPOSITION_INFO(AMQP_MESSENGER_MESSAGE_DISPOSITION_INFO* value)
+{
+    //do nothing
+    (void)value;
+}
+
 static void register_global_mock_returns()
 {
     REGISTER_GLOBAL_MOCK_RETURN(STRING_construct, TEST_STRING_HANDLE);
@@ -1100,20 +1165,24 @@ static void register_mock_aliases()
     REGISTER_UMOCK_ALIAS_TYPE(ON_MESSAGE_SEND_COMPLETE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(ON_MESSAGE_RECEIVED, void*);
     REGISTER_UMOCK_ALIAS_TYPE(ON_MESSAGE_RECEIVER_STATE_CHANGED, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(receiver_settle_mode, int);
+    REGISTER_UMOCK_ALIAS_TYPE(receiver_settle_mode, unsigned char);
     REGISTER_UMOCK_ALIAS_TYPE(AMQP_MESSENGER_SEND_STATUS, int);
     REGISTER_UMOCK_ALIAS_TYPE(OPTIONHANDLER_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(OPTIONHANDLER_RESULT, int);
     REGISTER_UMOCK_ALIAS_TYPE(pfCloneOption, void*);
     REGISTER_UMOCK_ALIAS_TYPE(pfDestroyOption, void*);
     REGISTER_UMOCK_ALIAS_TYPE(pfSetOption, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(time_t, int);
+    REGISTER_UMOCK_ALIAS_TYPE(time_t, long long);
     REGISTER_UMOCK_ALIAS_TYPE(delivery_number, int);
-    REGISTER_UMOCK_ALIAS_TYPE(AMQP_MESSENGER_MESSAGE_DISPOSITION_INFO, void*);
     REGISTER_UMOCK_ALIAS_TYPE(MESSAGE_QUEUE_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(MQ_MESSAGE_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(MESSAGE_PROCESSING_COMPLETED_CALLBACK, void*);
     REGISTER_UMOCK_ALIAS_TYPE(MAP_HANDLE, void*);
+}
+
+static void register_mock_value_types()
+{
+    REGISTER_UMOCK_VALUE_TYPE(AMQP_MESSENGER_MESSAGE_DISPOSITION_INFO);
 }
 
 static void reset_test_data()
@@ -1200,6 +1269,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     ASSERT_ARE_EQUAL(int, 0, result);
 
     register_mock_aliases();
+    register_mock_value_types();
     register_global_mock_hooks();
     register_global_mock_returns();
 

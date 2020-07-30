@@ -30,6 +30,9 @@ static int ScheduleWork_Thread(void* threadArgument)
 {
     PROV_DEVICE_INSTANCE* prov_device_instance = (PROV_DEVICE_INSTANCE*)threadArgument;
     uint16_t sleeptime_in_ms = DO_WORK_FREQ_DEFAULT;
+
+    srand((unsigned int)get_time(NULL));
+
     while (1)
     {
         if (Lock(prov_device_instance->LockHandle) == LOCK_OK)
@@ -115,10 +118,20 @@ PROV_DEVICE_HANDLE Prov_Device_Create(const char* uri, const char* id_scope, PRO
             {
                 /* Codes_SRS_PROV_DEVICE_CLIENT_12_006: [ The function shall call the LL layer Prov_Device_LL_Create function and return with it's result. ] */
                 result->ProvDeviceLLHandle = Prov_Device_LL_Create(uri, id_scope, protocol);
-                /* Codes_SRS_PROV_DEVICE_CLIENT_12_007: [ The function shall initialize the result datastructure. ] */
-                result->ThreadHandle = NULL;
-                result->StopThread = 0;
-                result->do_work_freq_ms = DO_WORK_FREQ_DEFAULT;
+                if (result->ProvDeviceLLHandle == NULL)
+                {
+                    /* Codes_SRS_PROV_DEVICE_CLIENT_12_025: [ If the Client initialization failed the function shall clean up the all resources and return NULL. ] */
+                    LogError("Prov_Device_LL_Create failed");
+                    free(result);
+                    result = NULL;
+                }
+                else
+                {
+                    /* Codes_SRS_PROV_DEVICE_CLIENT_12_007: [ The function shall initialize the result datastructure. ] */
+                    result->ThreadHandle = NULL;
+                    result->StopThread = 0;
+                    result->do_work_freq_ms = DO_WORK_FREQ_DEFAULT;
+                }
             }
         }
     }

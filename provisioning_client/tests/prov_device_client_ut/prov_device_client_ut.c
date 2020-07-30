@@ -29,6 +29,7 @@ static void my_gballoc_free(void* ptr)
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/lock.h"
+#include "azure_c_shared_utility/agenttime.h"
 #include "parson.h"
 #ifdef __cplusplus
 #include <csignal>
@@ -161,9 +162,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(LOCK_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(PROV_DEVICE_LL_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(PROV_DEVICE_TRANSPORT_PROVIDER, void*);
     REGISTER_UMOCK_ALIAS_TYPE(THREAD_HANDLE, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(HTTP_PROXY_OPTIONS, void*);
     REGISTER_UMOCK_ALIAS_TYPE(PROV_DEVICE_CLIENT_REGISTER_DEVICE_CALLBACK, void*);
     REGISTER_UMOCK_ALIAS_TYPE(PROV_DEVICE_CLIENT_REGISTER_STATUS_CALLBACK, void*);
     REGISTER_UMOCK_ALIAS_TYPE(THREAD_START_FUNC, void*);
@@ -307,6 +306,7 @@ TEST_FUNCTION(Prov_Device_Create_succeeds)
 
 /* Tests_SRS_PROV_DEVICE_CLIENT_12_003: [ If the memory allocation failed the function shall return NULL. ] */
 /* Tests_SRS_PROV_DEVICE_CLIENT_12_005: [ If the Lock initialization failed the function shall clean up the all resources and return NULL. ] */
+/* Tests_SRS_PROV_DEVICE_CLIENT_12_025: [ If the Client initialization failed the function shall clean up the all resources and return NULL. ] */
 TEST_FUNCTION(Prov_Device_Create_fail)
 {
     //arrange
@@ -319,17 +319,10 @@ TEST_FUNCTION(Prov_Device_Create_fail)
 
     umock_c_negative_tests_snapshot();
 
-    size_t calls_cannot_fail[] = { 2 };
-
     //act
     size_t count = umock_c_negative_tests_call_count();
     for (size_t index = 0; index < count; index++)
     {
-        if (should_skip_index(index, calls_cannot_fail, sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0])) != 0)
-        {
-            continue;
-        }
-
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 

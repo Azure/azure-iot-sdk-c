@@ -10,67 +10,33 @@
 #include <stdbool.h>
 #endif
 
-void* my_gballoc_malloc(size_t t)
+static void* my_gballoc_malloc(size_t t)
 {
     return malloc(t);
 }
 
-void* my_gballoc_realloc(void* ptr, size_t size)
+static void* my_gballoc_calloc(size_t m, size_t t)
+{
+    return calloc(m, t);
+}
+
+static void* my_gballoc_realloc(void* ptr, size_t size)
 {
     return realloc(ptr, size);
 }
 
-void my_gballoc_free(void * t)
+static void my_gballoc_free(void * t)
 {
     free(t);
 }
 
-/*want crt_abstractions to use real malloc*/
-#define GBALLOC_H
-#define mallocAndStrcpy_s real_mallocAndStrcpy_s
-#define unsignedIntToString real_unsignedIntToString
-#define size_tToString real_size_tToString
-#include "crt_abstractions.c"
-#undef mallocAndStrcpy_s
-#undef unsignedIntToString
-#undef size_tToString
-#undef GBALLOC_H
-#undef CRT_ABSTRACTIONS_H
-
 #include "umock_c/umock_c.h"
+#include "umock_c/umock_c_prod.h"
+
 #include "umock_c/umocktypes_charptr.h"
 #include "umock_c/umocktypes_bool.h"
 #include "umock_c/umocktypes_stdint.h"
 #include "umock_c/umock_c_negative_tests.h"
-
-/*not very nice source level preprocessor mocking... */
-#define GBALLOC_H
-#define VECTOR_create real_VECTOR_create
-#define VECTOR_destroy real_VECTOR_destroy
-#define VECTOR_push_back real_VECTOR_push_back
-#define VECTOR_erase real_VECTOR_erase
-#define VECTOR_clear real_VECTOR_clear
-#define VECTOR_element real_VECTOR_element
-#define VECTOR_front real_VECTOR_front
-#define VECTOR_back real_VECTOR_back
-#define VECTOR_find_if real_VECTOR_find_if
-#define VECTOR_size real_VECTOR_size
-#define VECTOR_move real_VECTOR_move
-#include "../src/vector.c"
-#undef VECTOR_create
-#undef VECTOR_destroy
-#undef VECTOR_push_back
-#undef VECTOR_erase
-#undef VECTOR_clear
-#undef VECTOR_element
-#undef VECTOR_front
-#undef VECTOR_back
-#undef VECTOR_find_if
-#undef VECTOR_size
-#undef VECTOR_move
-#undef VECTOR_H
-#undef GBALLOC_H
-#undef CRT_ABSTRACTIONS_H
 
 #include "testrunnerswitcher.h"
 #define ENABLE_MOCKS
@@ -169,6 +135,8 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
 
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(gballoc_calloc, my_gballoc_calloc);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_calloc, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_realloc, my_gballoc_realloc);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_realloc, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, my_gballoc_free);
@@ -389,8 +357,8 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         size_t destinationSize;
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
-            .IgnoreArgument_size();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+            .IgnoreAllArguments();
 
         // act
         TRANSACTION_HANDLE result = DataPublisher_StartTransaction(handle);
@@ -481,8 +449,8 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, PropertyPath))
             .IgnoreArgument_destination();
         STRICT_EXPECTED_CALL(Schema_ModelPropertyByPathExists(TEST_MODEL_HANDLE, PropertyPath));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
-            .IgnoreArgument_size();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+            .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_PTR_ARG, &data))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(gballoc_realloc(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
@@ -539,8 +507,8 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, PropertyPath))
             .IgnoreArgument_destination();
         STRICT_EXPECTED_CALL(Schema_ModelPropertyByPathExists(TEST_MODEL_HANDLE, PropertyPath));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
-            .IgnoreArgument_size();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+            .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_PTR_ARG, &data))
             .IgnoreArgument(1)
             .SetReturn(AGENT_DATA_TYPES_ERROR);
@@ -1219,7 +1187,8 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         STRICT_EXPECTED_CALL(gballoc_malloc(sizeof(DATA_MARSHALLER_VALUE)));
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, reportedPropertyPath))
             .IgnoreArgument_destination();
-        STRICT_EXPECTED_CALL(gballoc_malloc(sizeof(AGENT_DATA_TYPE)));
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, sizeof(AGENT_DATA_TYPE)))
+            .IgnoreArgument_nmemb();
         STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_PTR_ARG, ag))
             .IgnoreArgument_dest();
         STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1))
@@ -1318,7 +1287,8 @@ next_fail:;
         STRICT_EXPECTED_CALL(gballoc_malloc(sizeof(DATA_MARSHALLER_VALUE)));
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, reportedPropertyPath))
             .IgnoreArgument_destination();
-        STRICT_EXPECTED_CALL(gballoc_malloc(sizeof(AGENT_DATA_TYPE)));
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, sizeof(AGENT_DATA_TYPE)))
+            .IgnoreArgument_nmemb();
         STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_PTR_ARG, ag))
             .IgnoreArgument_dest();
         STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1))
@@ -1415,7 +1385,8 @@ next_fail:;
         STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, reportedPropertyPath))
             .IgnoreArgument_handle()
             .IgnoreArgument_pred();
-        STRICT_EXPECTED_CALL(gballoc_malloc(sizeof(AGENT_DATA_TYPE)));
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, sizeof(AGENT_DATA_TYPE)))
+            .IgnoreArgument_nmemb();
         STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_PTR_ARG, ag))
             .IgnoreArgument_dest();
         STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG))
