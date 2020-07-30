@@ -523,6 +523,9 @@ static bool GetConnectionStringFromEnvironment()
     }
     else
     {
+#ifdef USE_PROV_MODULE_FULL
+        g_pnpDeviceConfiguration.securityType = PNP_CONNECTION_SECURITY_TYPE_CONNECTION_STRING;
+#endif
         result = true;    
     }
 
@@ -568,6 +571,7 @@ static bool GetDpsFromEnvironment()
     }
     else
     {
+        g_pnpDeviceConfiguration.securityType = PNP_CONNECTION_SECURITY_TYPE_DPS;
         result = true;    
     }
 
@@ -594,12 +598,10 @@ static bool GetConnectionSettingsFromEnvironment()
     {
         if (strcmp(securityTypeString, g_securityTypeConnectionStringValue) == 0)
         {
-            g_pnpDeviceConfiguration.securityType = PNP_CONNECTION_SECURITY_TYPE_CONNECTION_STRING;
             result = GetConnectionStringFromEnvironment();
         }
         else if (strcmp(securityTypeString, g_securityTypeDpsValue) == 0)
         {
-            g_pnpDeviceConfiguration.securityType = PNP_CONNECTION_SECURITY_TYPE_DPS;
             result = GetDpsFromEnvironment();
         }
         else
@@ -622,6 +624,7 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateDevicelientHandle(void)
 #ifdef USE_PROV_MODULE_FULL
     if (g_pnpDeviceConfiguration.securityType == PNP_CONNECTION_SECURITY_TYPE_DPS)
     {
+        g_pnpDeviceConfiguration.modelId = g_ThermostatModelId;
         g_pnpDeviceConfiguration.enableTracing = g_hubClientTraceEnabled;
         return PnP_CreateDeviceClientLLHandle_ViaDps(&g_pnpDeviceConfiguration);
     }

@@ -341,6 +341,7 @@ static bool GetConnectionStringFromEnvironment()
     }
     else
     {
+        g_pnpDeviceConfiguration.securityType = PNP_CONNECTION_SECURITY_TYPE_CONNECTION_STRING;
         result = true;    
     }
 
@@ -386,6 +387,7 @@ static bool GetDpsFromEnvironment()
     }
     else
     {
+        g_pnpDeviceConfiguration.securityType = PNP_CONNECTION_SECURITY_TYPE_DPS;
         result = true;    
     }
 
@@ -412,12 +414,10 @@ static bool GetConnectionSettingsFromEnvironment()
     {
         if (strcmp(securityTypeString, g_securityTypeConnectionStringValue) == 0)
         {
-            g_pnpDeviceConfiguration.securityType = PNP_CONNECTION_SECURITY_TYPE_CONNECTION_STRING;
             result = GetConnectionStringFromEnvironment();
         }
         else if (strcmp(securityTypeString, g_securityTypeDpsValue) == 0)
         {
-            g_pnpDeviceConfiguration.securityType = PNP_CONNECTION_SECURITY_TYPE_DPS;
             result = GetDpsFromEnvironment();
         }
         else
