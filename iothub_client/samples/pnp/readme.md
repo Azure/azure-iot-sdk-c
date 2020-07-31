@@ -12,9 +12,9 @@ The directory contains the following samples:
 
 * [common](./common) This directory contains functions for serializing and de-serializing data for PnP and for creating the `IOTHUB_DEVICE_CLIENT_HANDLE` that acts as the transport.  `pnp_temperature_controller` makes extensive use of these functions and demonstrates their use.  **The files in [common](./common) are written generically such that your PnP device application should be able to use them with little or no modification, speeding up your development.**
 
-## Configuring the sample
+## Configuring the samples
 
-Both samples uses environment variables to retrieve configuration.  
+Both samples use environment variables to retrieve configuration.  
 
 * If you are using a connection string to authenticate:
   * set IOTHUB_DEVICE_SECURITY_TYPE="connectionString"
@@ -38,10 +38,10 @@ If you are building connection string only authentication, these extra cmake fla
 
 ## Caveats
 
-* Azure IoT Plug and Play is only supported for MQTT and MQTT over WebSockets for the Azure IoT C Device SDK.  Modifying these samples to use AMQP, AMQP over WebSockets, or HTTP protocols **will not work**.  The underlying IoTHub core only supports PnP constructs (specifically `OPTION_MODEL_ID`) over MQTT and MQTT over WebSockets.
+* Azure IoT Plug and Play is only supported for MQTT and MQTT over WebSockets for the Azure IoT C Device SDK.  Modifying these samples to use AMQP, AMQP over WebSockets, or HTTP protocols **will not work**.
 
 * When the thermostat receives a desired temperature, it immediately makes that the actual temperature to keep the simulation code easier to follow.  In a real thermostat there would be delay between the desired temperature being set and the room reaching that state.
 
 * The command `getMaxMinReport` allows the application to specify statistics of the temperature since a given date.  To keep the sample simple, we ignore this field and instead return statistics from the entire lifecycle of the executable.
 
-* The temperature controller implements a command named `reboot` which takes a request payload indicating the delay in seconds.  The sample will log the value requested but will not take any action delay seconds later. 
+* The temperature controller implements a command named `reboot` which takes a request payload indicating the delay in seconds.  The sample will log the value requested but will not take any further action.

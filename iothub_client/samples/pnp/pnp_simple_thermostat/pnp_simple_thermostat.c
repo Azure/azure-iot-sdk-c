@@ -31,7 +31,6 @@
 #include "pnp_dps_ll.h"
 #endif // USE_PROV_MODULE_FULL
 
-
 // JSON parser library
 #include "parson.h"
 
@@ -65,7 +64,6 @@ PNP_DEVICE_CONFIGURATION g_pnpDeviceConfiguration;
 
 // Connection string used to authenticate device when connection strings are used
 const char* g_pnpDeviceConnectionString;
-
 
 // Amount of time to sleep between polling hub, in milliseconds.  Set to wake up every 100 milliseconds.
 static unsigned int g_sleepBetweenPolls = 100;
@@ -136,7 +134,6 @@ static const char g_temperaturePropertyResponseDescription[] = "success";
 static const char g_ISO8601Format[] = "%Y-%m-%dT%H:%M:%SZ";
 // Start time of the program, stored in ISO 8601 format string for UTC.
 char g_ProgramStartTime[TIME_BUFFER_SIZE];
-
 
 //
 // CopyTwinPayloadToString takes the twin payload data, which arrives as a potentially non-NULL terminated string, and creates
@@ -614,7 +611,6 @@ static bool GetConnectionSettingsFromEnvironment()
     return result;    
 }
 
-
 //
 // CreateDevicelientHandle performs actual handle creation (but nothing more), depending
 // on whether connection strings or DPS is used.
@@ -718,7 +714,6 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateAndConfigureDeviceClientHandleForPnP
 
     return deviceHandle;
 }
-
 
 int main(void)
 {
