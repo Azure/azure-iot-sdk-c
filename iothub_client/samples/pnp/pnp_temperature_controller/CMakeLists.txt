@@ -40,6 +40,6 @@ add_definitions(-DUSE_MQTT)
 target_link_libraries(pnp_temperature_controller iothub_client)
 
 if(${use_prov_client})
-    target_link_libraries(pnp_temperature_controller prov_device_client prov_mqtt_transport)
+    target_link_libraries(pnp_temperature_controller prov_device_ll_client prov_mqtt_transport)
 endif()
 
