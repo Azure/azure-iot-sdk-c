@@ -24,6 +24,7 @@ rsync -avz --existing ./ mbed-iot-devkit-sdk/components/azure-iot-sdk-c/
 sudo apt install docker.io
 sudo npm install -g iotz
 sudo iotz update
+sudo sed -i 's/apt clean \ /apt clean \' /usr/lib/node_modules/iotz/extensions/mbed/index.js
 
 echo "just before init iotz mbed"
 sudo iotz init mbed  
