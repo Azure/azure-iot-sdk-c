@@ -31,7 +31,7 @@ jobs:
       # Check that this is the right source directory
       ls
       cp /home/vsts/.iotz/mbed.Dockerfile $(Build.ArtifactStagingDirectory)
-      cp mxchip/BUILD/AZ3166/GCC_ARM/mxchip.bin $(Build.ArtifactStagingDirectory)
+      # cp mxchip/BUILD/AZ3166/GCC_ARM/mxchip.bin $(Build.ArtifactStagingDirectory)
     displayName: "Copy Files into Artifact repo"
 
   - task: PublishBuildArtifacts@1
