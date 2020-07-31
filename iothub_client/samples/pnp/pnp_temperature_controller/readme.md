@@ -18,3 +18,6 @@ Note that the individual components are in separate .c and .h files for easier c
 
 * [pnp_thermostat_component.c](./pnp_thermostat_component.c) implements a thermostat component.  The temperature controller can have multiple components of the same type.  The components `thermostat1` and `thermostat2` both implement `dtmi:com:example:Thermostat;1` in the temperature controller model.
 
+## Configuring the sample
+
+See [../readme.md](../readme.md) for how to configure this sample.
