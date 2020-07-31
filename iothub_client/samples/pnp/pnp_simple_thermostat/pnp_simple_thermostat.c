@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-// This sample implements a PnP based thermostat.  This demonstrates a *relatively* simple PnP device
+// This sample implements an IoT Plug and Play based thermostat.  This demonstrates a *relatively* simple PnP device
 // that does only acts as a thermostat and does not have additional components.  
 
 // The DigitalTwin Definition Language document describing the component implemented in this sample
@@ -624,6 +624,9 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateDevicelientHandle(void)
 #ifdef USE_PROV_MODULE_FULL
     if (g_pnpDeviceConfiguration.securityType == PNP_CONNECTION_SECURITY_TYPE_DPS)
     {
+        // Pass the modelId to DPS here AND later on to IoT Hub (see SetOption on OPTION_MODEL_ID) when
+        // that connection is created.  We need to do both because DPS does not auto-populate the modelId
+        // it receives on DPS connection to the IoT Hub.
         g_pnpDeviceConfiguration.modelId = g_ThermostatModelId;
         g_pnpDeviceConfiguration.enableTracing = g_hubClientTraceEnabled;
         return PnP_CreateDeviceClientLLHandle_ViaDps(&g_pnpDeviceConfiguration);

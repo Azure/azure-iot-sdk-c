@@ -1,4 +1,4 @@
-# PnP Temperature Controller sample
+# Azure IoT Plug and Play Temperature Controller sample
 
 This directory contains a sample a temperature controller that implements the model [dtmi:com:example:TemperatureController;1](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/TemperatureController.json).
 

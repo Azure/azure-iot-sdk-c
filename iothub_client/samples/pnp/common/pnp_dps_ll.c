@@ -81,7 +81,7 @@ IOTHUB_DEVICE_CLIENT_LL_HANDLE PnP_CreateDeviceClientLLHandle_ViaDps(const PNP_D
     bool result;
 
     PROV_DEVICE_RESULT provDeviceResult;
-    PROV_DEVICE_LL_HANDLE provDeviceLLHandle = NULL;
+    PROV_DEVICE_LL_HANDLE provDeviceHandle = NULL;
     STRING_HANDLE modelIdPayload = NULL;
 
     LogInfo("Initiating DPS client to retrieve IoT Hub connection information");
@@ -102,24 +102,24 @@ IOTHUB_DEVICE_CLIENT_LL_HANDLE PnP_CreateDeviceClientLLHandle_ViaDps(const PNP_D
         LogError("prov_dev_security_init failed");
         result = false;
     }
-    else if ((provDeviceLLHandle = Prov_Device_LL_Create(pnpDeviceConfiguration->u.dpsConnectionAuth.endpoint, pnpDeviceConfiguration->u.dpsConnectionAuth.idScope, Prov_Device_MQTT_Protocol)) == NULL)
+    else if ((provDeviceHandle = Prov_Device_LL_Create(pnpDeviceConfiguration->u.dpsConnectionAuth.endpoint, pnpDeviceConfiguration->u.dpsConnectionAuth.idScope, Prov_Device_MQTT_Protocol)) == NULL)
     {
         LogError("Failed calling Prov_Device_LL_Create");
         result = false;
     }
-    else if ((provDeviceResult = Prov_Device_LL_SetOption(provDeviceLLHandle, PROV_OPTION_LOG_TRACE, &pnpDeviceConfiguration->enableTracing)) != PROV_DEVICE_RESULT_OK)
+    else if ((provDeviceResult = Prov_Device_LL_SetOption(provDeviceHandle, PROV_OPTION_LOG_TRACE, &pnpDeviceConfiguration->enableTracing)) != PROV_DEVICE_RESULT_OK)
     {
         LogError("Setting provisioning tracing on failed, error=%d", provDeviceResult);
         result = false;
     }
     // This step indicates the ModelId of the device to DPS.  This allows the service to (optionally) perform custom operations,
     // such as allocating a different IoT Hub to devices based on their ModelId.
-    else if ((provDeviceResult = Prov_Device_LL_Set_Provisioning_Payload(provDeviceLLHandle, STRING_c_str(modelIdPayload))) != PROV_DEVICE_RESULT_OK)
+    else if ((provDeviceResult = Prov_Device_LL_Set_Provisioning_Payload(provDeviceHandle, STRING_c_str(modelIdPayload))) != PROV_DEVICE_RESULT_OK)
     {
         LogError("Failed setting provisioning data, error=%d", provDeviceResult);
         result = false;
     }
-    else if ((provDeviceResult = Prov_Device_LL_Register_Device(provDeviceLLHandle, provisioningRegisterCallback, NULL, NULL, NULL)) != PROV_DEVICE_RESULT_OK)
+    else if ((provDeviceResult = Prov_Device_LL_Register_Device(provDeviceHandle, provisioningRegisterCallback, NULL, NULL, NULL)) != PROV_DEVICE_RESULT_OK)
     {
         LogError("Prov_Device_LL_Register_Device failed, error=%d", provDeviceResult);
         result = false;
@@ -128,7 +128,7 @@ IOTHUB_DEVICE_CLIENT_LL_HANDLE PnP_CreateDeviceClientLLHandle_ViaDps(const PNP_D
     {
         for (int i = 0; (i < g_dpsRegistrationMaxPolls) && (g_pnpDpsRegistrationStatus == PNP_DPS_REGISTRATION_NOT_COMPLETE); i++)
         {
-            Prov_Device_LL_DoWork(provDeviceLLHandle);
+            Prov_Device_LL_DoWork(provDeviceHandle);
             ThreadAPI_Sleep(g_dpsRegistrationPollSleep);
         }
 
@@ -152,9 +152,9 @@ IOTHUB_DEVICE_CLIENT_LL_HANDLE PnP_CreateDeviceClientLLHandle_ViaDps(const PNP_D
     // Destroy the provisioning handle here, instead of the typical convention of doing so at the end of the function.
     // We do so because this handle is no longer required and because on devices with limited amounts of memory
     // cannot keep this open and have a device handle (via IoTHubDeviceClient_LL_CreateFromDeviceAuth below) at the same time.
-    if (provDeviceLLHandle != NULL)
+    if (provDeviceHandle != NULL)
     {
-        Prov_Device_LL_Destroy(provDeviceLLHandle);
+        Prov_Device_LL_Destroy(provDeviceHandle);
     }
 
     if (result == true)

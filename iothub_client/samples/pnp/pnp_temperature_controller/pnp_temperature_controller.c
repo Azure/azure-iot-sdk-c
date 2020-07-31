@@ -231,7 +231,7 @@ static void PnP_TempControlComponent_ApplicationPropertyCallback(const char* com
     // This sample uses the pnp_device_client.h/.c to create the IOTHUB_DEVICE_CLIENT_LL_HANDLE as well as initialize callbacks.
     // The convention used is that IOTHUB_DEVICE_CLIENT_LL_HANDLE is passed as the userContextCallback on the initial twin callback.
     // The pnp_protocol.h/.c pass this userContextCallback down to this visitor function.
-    IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL = (IOTHUB_DEVICE_CLIENT_LL_HANDLE)userContextCallback;
+    IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient = (IOTHUB_DEVICE_CLIENT_LL_HANDLE)userContextCallback;
 
     if (componentName == NULL)
     {
@@ -241,11 +241,11 @@ static void PnP_TempControlComponent_ApplicationPropertyCallback(const char* com
     }
     else if (strcmp(componentName, g_thermostatComponent1Name) == 0)
     {
-        PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle1, deviceClientLL, propertyName, propertyValue, version);
+        PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle1, deviceClient, propertyName, propertyValue, version);
     }
     else if (strcmp(componentName, g_thermostatComponent2Name) == 0)
     {
-        PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle2, deviceClientLL, propertyName, propertyValue, version);
+        PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle2, deviceClient, propertyName, propertyValue, version);
     }
     else
     {
@@ -273,7 +273,7 @@ static void PnP_TempControlComponent_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE
 // the unit of kibibytes (https://en.wikipedia.org/wiki/Kibibyte).
 // This is a random value between g_workingSetMinimum and (g_workingSetMinimum+g_workingSetRandomModulo).
 //
-void PnP_TempControlComponent_SendWorkingSet(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL) 
+void PnP_TempControlComponent_SendWorkingSet(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient) 
 {
     IOTHUB_MESSAGE_HANDLE messageHandle = NULL;
     IOTHUB_CLIENT_RESULT iothubResult;
@@ -289,7 +289,7 @@ void PnP_TempControlComponent_SendWorkingSet(IOTHUB_DEVICE_CLIENT_LL_HANDLE devi
     {
         LogError("Unable to create telemetry message");
     }
-    else if ((iothubResult = IoTHubDeviceClient_LL_SendEventAsync(deviceClientLL, messageHandle, NULL, NULL)) != IOTHUB_CLIENT_OK)
+    else if ((iothubResult = IoTHubDeviceClient_LL_SendEventAsync(deviceClient, messageHandle, NULL, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to send telemetry message, error=%d", iothubResult);
     }
@@ -300,7 +300,7 @@ void PnP_TempControlComponent_SendWorkingSet(IOTHUB_DEVICE_CLIENT_LL_HANDLE devi
 //
 // PnP_TempControlComponent_ReportSerialNumber_Property sends the "serialNumber" property to IoTHub
 //
-static void PnP_TempControlComponent_ReportSerialNumber_Property(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL)
+static void PnP_TempControlComponent_ReportSerialNumber_Property(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient)
 {
     IOTHUB_CLIENT_RESULT iothubClientResult;
     STRING_HANDLE jsonToSend = NULL;
@@ -314,7 +314,7 @@ static void PnP_TempControlComponent_ReportSerialNumber_Property(IOTHUB_DEVICE_C
         const char* jsonToSendStr = STRING_c_str(jsonToSend);
         size_t jsonToSendStrLen = strlen(jsonToSendStr);
 
-        if ((iothubClientResult = IoTHubDeviceClient_LL_SendReportedState(deviceClientLL, (const unsigned char*)jsonToSendStr, jsonToSendStrLen, NULL, NULL)) != IOTHUB_CLIENT_OK)
+        if ((iothubClientResult = IoTHubDeviceClient_LL_SendReportedState(deviceClient, (const unsigned char*)jsonToSendStr, jsonToSendStrLen, NULL, NULL)) != IOTHUB_CLIENT_OK)
         {
             LogError("Unable to send reported state, error=%d", iothubClientResult);
         }
@@ -435,7 +435,7 @@ static bool GetConnectionSettingsFromEnvironment()
 // 
 static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateDeviceClientAndAllocateComponents(void)
 {
-    IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL = NULL;
+    IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient = NULL;
     bool result;
 
     g_pnpDeviceConfiguration.deviceMethodCallback = PnP_TempControlComponent_DeviceMethodCallback;
@@ -448,7 +448,7 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateDeviceClientAndAllocateComponents(vo
         LogError("Cannot read required environment variable(s)");
         result = false;
     }
-    else if ((deviceClientLL = PnP_CreateDeviceClientLLHandle(&g_pnpDeviceConfiguration)) == NULL)
+    else if ((deviceClient = PnP_CreateDeviceClientLLHandle(&g_pnpDeviceConfiguration)) == NULL)
     {
         LogError("Failure creating IotHub device client");
         result = false;
@@ -472,22 +472,22 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateDeviceClientAndAllocateComponents(vo
     {
         PnP_ThermostatComponent_Destroy(g_thermostatHandle2);
         PnP_ThermostatComponent_Destroy(g_thermostatHandle1);
-        if (deviceClientLL != NULL)
+        if (deviceClient != NULL)
         {
-            IoTHubDeviceClient_LL_Destroy(deviceClientLL);
+            IoTHubDeviceClient_LL_Destroy(deviceClient);
             IoTHub_Deinit();
-            deviceClientLL = NULL;
+            deviceClient = NULL;
         }
     }
 
-    return deviceClientLL;
+    return deviceClient;
 }
 
 int main(void)
 {
-    IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL = NULL;
+    IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient = NULL;
 
-    if ((deviceClientLL = CreateDeviceClientAndAllocateComponents()) == NULL)
+    if ((deviceClient = CreateDeviceClientAndAllocateComponents()) == NULL)
     {
         LogError("Failure creating IotHub device client");
     }
@@ -498,10 +498,10 @@ int main(void)
         int numberOfIterations = 0;
 
         // During startup, send the non-"writeable" properties.
-        PnP_TempControlComponent_ReportSerialNumber_Property(deviceClientLL);
-        PnP_DeviceInfoComponent_Report_All_Properties(g_deviceInfoComponentName, deviceClientLL);
-        PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(g_thermostatHandle1, deviceClientLL);
-        PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(g_thermostatHandle2, deviceClientLL);
+        PnP_TempControlComponent_ReportSerialNumber_Property(deviceClient);
+        PnP_DeviceInfoComponent_Report_All_Properties(g_deviceInfoComponentName, deviceClient);
+        PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(g_thermostatHandle1, deviceClient);
+        PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(g_thermostatHandle2, deviceClient);
 
         while (true)
         {
@@ -509,12 +509,12 @@ int main(void)
             // incoming requests from the server and to do connection keep alives.
             if ((numberOfIterations % g_sendTelemetryFrequency) == 0)
             {
-                PnP_TempControlComponent_SendWorkingSet(deviceClientLL);
-                PnP_ThermostatComponent_SendTelemetry(g_thermostatHandle1, deviceClientLL);
-                PnP_ThermostatComponent_SendTelemetry(g_thermostatHandle2, deviceClientLL);
+                PnP_TempControlComponent_SendWorkingSet(deviceClient);
+                PnP_ThermostatComponent_SendTelemetry(g_thermostatHandle1, deviceClient);
+                PnP_ThermostatComponent_SendTelemetry(g_thermostatHandle2, deviceClient);
             }
 
-            IoTHubDeviceClient_LL_DoWork(deviceClientLL);
+            IoTHubDeviceClient_LL_DoWork(deviceClient);
             ThreadAPI_Sleep(g_sleepBetweenPolls);
             numberOfIterations++;
         }
@@ -524,7 +524,7 @@ int main(void)
         PnP_ThermostatComponent_Destroy(g_thermostatHandle1);
 
         // Clean up the iothub sdk handle
-        IoTHubDeviceClient_LL_Destroy(deviceClientLL);
+        IoTHubDeviceClient_LL_Destroy(deviceClient);
         // Free all the sdk subsystem
         IoTHub_Deinit();
     }
