@@ -1,6 +1,5 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
 schedules:
 - cron: "0 0 * * *"
   displayName: Daily midnight build
@@ -16,7 +15,7 @@ variables:
 jobs:
 - job: Cross_Compile
   pool:
-    vmImage: ubuntu-16.04
+    vmImage: ubuntu-18.04
   steps:
   - task: UsePythonVersion@0
     inputs:
@@ -117,7 +116,7 @@ jobs:
       cd $(Build.SourcesDirectory)/testtools/UART_interface/
       ls
       . rpi_e2e_env_setup.sh
-      python3 serial_connect.py -i setup.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -s
+      python3 serial_connect.py -i setup.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi
       rm setup.txt
     displayName: 'Setup Environment Variables'
     env:
@@ -150,9 +149,10 @@ jobs:
       cd $(Build.SourcesDirectory)/testtools/UART_interface/
       ls
       . rpi_input.sh
-      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -t 620
+      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -t 620 $(RESET_RASPI) -s
       rm input.txt
       unset RASPI_TEST_FILE
+      
     displayName: 'Execute Test'
     env:
       RASPI_USER: $(RASPI_USER)
@@ -163,11 +163,45 @@ jobs:
       RESET_RASPI: $(RESET_RASPI)
 
 - job: 'Run_MQTT_DT_E2E_Test'
-  dependsOn: Run_AMQP_DT_E2E_Test
-  condition: ne('True', variables['ADDITIONAL_TEST'])
+  dependsOn: Cross_Compile
+  condition: succeeded()
   pool: 
     name: devicelab-02
   steps:  
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: drop
+      itemPattern: 'drop/**/*e2e_exe'
+
+  - script: |
+      cd $(Build.SourcesDirectory)/testtools/UART_interface/
+      ls
+      . rpi_e2e_env_setup.sh
+      python3 serial_connect.py -i setup.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi
+      rm setup.txt
+    displayName: 'Setup Environment Variables'
+    env:
+      RASPI_USER: $(RASPI_USER)
+      RASPI_PWD: $(RASPI_PWD)
+      RASPI_PORT: $(RASPI_PORT)
+      IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
+      IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
+      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+      IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
+      IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
+      IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
+      IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
+      IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+      IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
+      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+      PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+
   - script: |
       cd $(Build.ArtifactStagingDirectory)
       ls
@@ -177,7 +211,7 @@ jobs:
       cd $(Build.SourcesDirectory)/testtools/UART_interface/
       ls
       . rpi_input.sh
-      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -t 620
+      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -t 620 $(RESET_RASPI)
       rm input.txt
       unset RASPI_TEST_FILE
     displayName: 'Execute Test'
@@ -190,11 +224,45 @@ jobs:
       RESET_RASPI: $(RESET_RASPI)
 
 - job: 'Run_AMQP_DM_E2E_Test'
-  dependsOn: Run_MQTT_DT_E2E_Test
-  condition: ne('True', variables['ADDITIONAL_TEST'])
+  dependsOn: Cross_Compile
+  condition: succeeded()
   pool: 
     name: devicelab-02
   steps:  
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: drop
+      itemPattern: 'drop/**/*e2e_exe'
+
+  - script: |
+      cd $(Build.SourcesDirectory)/testtools/UART_interface/
+      ls
+      . rpi_e2e_env_setup.sh
+      python3 serial_connect.py -i setup.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi
+      rm setup.txt
+    displayName: 'Setup Environment Variables'
+    env:
+      RASPI_USER: $(RASPI_USER)
+      RASPI_PWD: $(RASPI_PWD)
+      RASPI_PORT: $(RASPI_PORT)
+      IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
+      IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
+      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+      IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
+      IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
+      IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
+      IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
+      IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+      IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
+      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+      PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+
   - script: |
       cd $(Build.ArtifactStagingDirectory)
       ls
@@ -204,7 +272,7 @@ jobs:
       cd $(Build.SourcesDirectory)/testtools/UART_interface/
       ls
       . rpi_input.sh
-      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -t 620 
+      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -t 720 $(RESET_RASPI)
       rm input.txt
       unset RASPI_TEST_FILE
     displayName: 'Execute Test'
@@ -217,11 +285,45 @@ jobs:
       RESET_RASPI: $(RESET_RASPI)
 
 - job: 'Run_MQTT_DM_E2E_Test'
-  dependsOn: Run_AMQP_DM_E2E_Test
-  condition: ne('True', variables['ADDITIONAL_TEST'])
+  dependsOn: Cross_Compile
+  condition: succeeded()
   pool: 
     name: devicelab-02
   steps:  
+  - task: DownloadBuildArtifacts@0
+    displayName: 'Download Build Artifacts'
+    inputs:
+      artifactName: drop
+      itemPattern: 'drop/**/*e2e_exe'
+
+  - script: |
+      cd $(Build.SourcesDirectory)/testtools/UART_interface/
+      ls
+      . rpi_e2e_env_setup.sh
+      python3 serial_connect.py -i setup.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi
+      rm setup.txt
+    displayName: 'Setup Environment Variables'
+    env:
+      RASPI_USER: $(RASPI_USER)
+      RASPI_PWD: $(RASPI_PWD)
+      RASPI_PORT: $(RASPI_PORT)
+      IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
+      IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
+      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+      IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
+      IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
+      IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
+      IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
+      IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+      IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
+      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+      PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+
   - script: |
       cd $(Build.ArtifactStagingDirectory)
       ls
@@ -260,7 +362,7 @@ jobs:
       cd $(Build.SourcesDirectory)/testtools/UART_interface/
       ls
       . rpi_e2e_env_setup.sh
-      python3 serial_connect.py -i setup.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi -s
+      python3 serial_connect.py -i setup.txt -o output.txt -b 115200 -p $(RASPI_PORT) -d rpi
       rm setup.txt
     displayName: 'Setup Environment Variables'
     env:

@@ -9,15 +9,17 @@ try:
     import testtools.UART_interface.serial_commands_dict as commands_dict
     import testtools.UART_interface.rpi_uart_interface
     import testtools.UART_interface.mxchip_uart_interface
+    import testtools.UART_interface.esp_arduino_uart_interface
 except:
     import azure_test_firmware_errors
     import serial_settings
     import serial_commands_dict as commands_dict
     import rpi_uart_interface
     import mxchip_uart_interface
+    import esp_arduino_uart_interface
 
-# Note: commands on MXCHIP have line endings with \r AND \n
-# Notes: This is designed to be used as a command line script with args (for automation purposes) to communicate over serial to a Microsoft mxchip device.
+# Note: This collection of scripts is designed to be used as a command line script with args (for automation purposes)
+# to communicate over serial to Azure IoT C SDK supported devices.
 
 uart = None
 
@@ -26,7 +28,6 @@ def usage():
     usage_txt = "serial_connect.py usage: \r\n"
     for commands in commands_dict.cmds:
         usage_txt += " - %s: " %commands + commands_dict.cmds[commands]['text'] + "\r\n"
-
     return usage_txt
 
 def parse_opts():
@@ -73,8 +74,7 @@ def check_firmware_errors(line):
         azure_test_firmware_errors.SDK_ERRORS += 1
 
 
-# If there is a sudden disconnect, program should report line in input script reached, and close files.
-# method to write to serial line with connection monitoring
+# Method to write to serial line with connection monitoring
 def serial_write(ser, message, file=None):
 
     # Check that the device is no longer sending bytes
@@ -176,16 +176,15 @@ def run():
             if len(output) > 4:
                 print(output)
 
+    if 'rpi' in serial_settings.device_type or 'raspi' in serial_settings.device_type:
         # for rpi, transfer pipeline/artifact files from agent to device
         # get filepath, walk it
         # for each file, send rz, then sz file to rpi port
-
-
-
-    if 'rpi' in serial_settings.device_type or 'raspi' in serial_settings.device_type:
         uart = rpi_uart_interface.rpi_uart_interface()
-    else:
+    elif 'mxchip' in serial_settings.device_type:
         uart = mxchip_uart_interface.mxchip_uart_interface()
+    elif 'esp32' in serial_settings.device_type or 'esp8266' in serial_settings.device_type:
+        uart = esp_arduino_uart_interface.esp_uart_interface()
 
 
     uart.write_read(ser, serial_settings.input_file, serial_settings.output_file)

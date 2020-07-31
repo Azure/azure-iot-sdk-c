@@ -456,6 +456,60 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 
 static TEST_MUTEX_HANDLE g_testByTest;
 
+char* umock_stringify_BINARY_DATA(const BINARY_DATA* value)
+{
+    (void)value;
+    char* result = "BINARY_DATA";
+    return result;
+}
+
+int umock_are_equal_BINARY_DATA(const BINARY_DATA* left, const BINARY_DATA* right)
+{
+    int result;
+
+    if (left->length != right->length)
+    {
+        result = 0;
+    }
+    else
+    {
+        if (memcmp(left->bytes, right->bytes, left->length) == 0)
+        {
+            result = 1;
+        }
+        else
+        {
+            result = 0;
+        }
+    }
+
+    return result;
+}
+
+int umock_copy_BINARY_DATA(BINARY_DATA* destination, const BINARY_DATA* source)
+{
+    int result;
+
+    destination->bytes = (const unsigned char*)my_gballoc_malloc(source->length);
+    if (destination->bytes == NULL)
+    {
+        result = -1;
+    }
+    else
+    {
+        (void)memcpy((void*)destination->bytes, source->bytes, source->length);
+        destination->length = source->length;
+        result = 0;
+    }
+
+    return result;
+}
+
+void umock_free_BINARY_DATA(BINARY_DATA* value)
+{
+    my_gballoc_free((void*)value->bytes);
+}
+
 BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
 
     TEST_SUITE_INITIALIZE(suite_init)
@@ -471,17 +525,18 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         REGISTER_TYPE(PROV_DEVICE_TRANSPORT_STATUS, PROV_DEVICE_TRANSPORT_STATUS);
         REGISTER_TYPE(TRANSPORT_HSM_TYPE, TRANSPORT_HSM_TYPE);
 
-        REGISTER_UMOCK_ALIAS_TYPE(BINARY_DATA, void*);
+        REGISTER_UMOCK_VALUE_TYPE(BINARY_DATA);
+
         REGISTER_UMOCK_ALIAS_TYPE(ON_MESSAGE_SEND_COMPLETE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(PROV_DEVICE_TRANSPORT_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(BUFFER_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK, void*);
         REGISTER_UMOCK_ALIAS_TYPE(PROV_DEVICE_TRANSPORT_STATUS_CALLBACK, void*);
         REGISTER_UMOCK_ALIAS_TYPE(PROV_TRANSPORT_CHALLENGE_CALLBACK, void*);
-        REGISTER_UMOCK_ALIAS_TYPE(DPS_AMQP_TRANSPORT_IO, void*);
-        REGISTER_UMOCK_ALIAS_TYPE(HTTP_CLIENT_REQUEST_TYPE, int);
         REGISTER_UMOCK_ALIAS_TYPE(MESSAGE_SENDER_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(MESSAGE_RECEIVER_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(MESSAGE_RECEIVER_STATE, int);
+        REGISTER_UMOCK_ALIAS_TYPE(MESSAGE_SENDER_STATE, int);
         REGISTER_UMOCK_ALIAS_TYPE(LINK_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(SASL_MECHANISM_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(SESSION_HANDLE, void*);
@@ -499,7 +554,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         REGISTER_UMOCK_ALIAS_TYPE(ON_MESSAGE_SENDER_STATE_CHANGED, void*);
         REGISTER_UMOCK_ALIAS_TYPE(MESSAGE_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
-        REGISTER_UMOCK_ALIAS_TYPE(tickcounter_ms_t, uint32_t);
+        REGISTER_UMOCK_ALIAS_TYPE(tickcounter_ms_t, unsigned long long);
 
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
@@ -1609,6 +1664,54 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
 
         //arrange
         STRICT_EXPECTED_CALL(connection_dowork(IGNORED_PTR_ARG));
+
+        //act
+        prov_transport_common_amqp_dowork(handle);
+
+        //assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_transport_common_amqp_close(handle);
+        prov_transport_common_amqp_destroy(handle);
+    }
+
+    TEST_FUNCTION(prov_transport_common_amqp_on_message_receiver_state_changed_callback_unexpected_state)
+    {
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io, on_transport_error, NULL);
+        (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
+        prov_transport_common_amqp_dowork(handle);
+        g_msg_sndr_state_changed(g_msg_sndr_state_changed_ctx, MESSAGE_SENDER_STATE_OPEN, MESSAGE_SENDER_STATE_OPENING);
+        g_msg_rcvr_state_changed(g_msg_rcvr_state_changed_ctx, (MESSAGE_RECEIVER_STATE)333333, MESSAGE_RECEIVER_STATE_OPENING);
+        umock_c_reset_all_calls();
+
+        //arrange
+        STRICT_EXPECTED_CALL(connection_dowork(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(on_transport_register_data_cb(PROV_DEVICE_TRANSPORT_RESULT_ERROR, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+        //act
+        prov_transport_common_amqp_dowork(handle);
+
+        //assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_transport_common_amqp_close(handle);
+        prov_transport_common_amqp_destroy(handle);
+    }
+
+    TEST_FUNCTION(prov_transport_common_amqp_on_message_sender_state_changed_callback_unexpected_state)
+    {
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io, on_transport_error, NULL);
+        (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
+        prov_transport_common_amqp_dowork(handle);
+        g_msg_sndr_state_changed(g_msg_sndr_state_changed_ctx, (MESSAGE_SENDER_STATE)333333, MESSAGE_SENDER_STATE_OPENING);
+        g_msg_rcvr_state_changed(g_msg_rcvr_state_changed_ctx, MESSAGE_RECEIVER_STATE_OPEN, MESSAGE_RECEIVER_STATE_OPENING);
+        umock_c_reset_all_calls();
+
+        //arrange
+        STRICT_EXPECTED_CALL(connection_dowork(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(on_transport_register_data_cb(PROV_DEVICE_TRANSPORT_RESULT_ERROR, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
         //act
         prov_transport_common_amqp_dowork(handle);

@@ -146,7 +146,7 @@ static IOTHUB_MESSAGE_HANDLE create_events(const EVENT_INSTANCE* event_info)
     temperature = minTemperature + (rand() % 10);
     humidity = minHumidity +  (rand() % 20);
 
-    (void)sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"%s\",\"windSpeed\":%.2f,\"temperature\":%.2f,\"humidity\":%.2f}", event_info->deviceId, avgWindSpeed + (double)(rand() % 4 + 2), temperature, humidity);
+    (void)sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"%s\",\"windSpeed\":%.2f,\"temperature\":%.2f,\"humidity\":%.2f}", event_info->deviceId, avgWindSpeed + ((double)(rand() % 4) + 2.0), temperature, humidity);
     message_handle = IoTHubMessage_CreateFromString(msgText);
     //message_handle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText))) == NULL)
 
@@ -227,7 +227,7 @@ int main(void)
             //IoTHubDeviceClient_LL_SetOption(device_ll_handle1, OPTION_LOG_TRACE, &traceOn);
             //IoTHubDeviceClient_LL_SetOption(device_ll_handle2, OPTION_LOG_TRACE, &traceOn);
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
-            // Setting the Trusted Certificate.  This is only necessary on system without
+            // Setting the Trusted Certificate. This is only necessary on systems without
             // built in certificate stores.
             IoTHubDeviceClient_LL_SetOption(device_ll_handle1, OPTION_TRUSTED_CERT, certificates);
             IoTHubDeviceClient_LL_SetOption(device_ll_handle2, OPTION_TRUSTED_CERT, certificates);

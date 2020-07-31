@@ -91,7 +91,10 @@ extern "C"
     *
     *            @b NOTE: The application behavior is undefined if the user calls
     *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
-    *
+    * @remarks
+    *            The IOTHUB_MESSAGE_HANDLE instance provided as argument is copied by the function,
+    *            so this argument can be destroyed by the calling application right after IoTHubModuleClient_LL_SendEventAsync returns.
+    *            The copy of @c eventMessageHandle is later destroyed by the iothub client when the message is effectively sent, if a failure sending it occurs, or if the client is destroyed.
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_LL_SendEventAsync, IOTHUB_MODULE_CLIENT_LL_HANDLE, iotHubModuleClientHandle, IOTHUB_MESSAGE_HANDLE, eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, eventConfirmationCallback, void*, userContextCallback);

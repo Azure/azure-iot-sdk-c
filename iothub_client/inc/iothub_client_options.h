@@ -19,6 +19,7 @@ extern "C"
     } IOTHUB_PROXY_OPTIONS;
 
     static STATIC_VAR_UNUSED const char* OPTION_RETRY_INTERVAL_SEC = "retry_interval_sec";
+    static STATIC_VAR_UNUSED const char* OPTION_RETRY_MAX_DELAY_SECS = "retry_max_delay_secs";
 
     static STATIC_VAR_UNUSED const char* OPTION_LOG_TRACE = "logtrace";
     static STATIC_VAR_UNUSED const char* OPTION_X509_CERT = "x509certificate";
@@ -41,6 +42,11 @@ extern "C"
     static STATIC_VAR_UNUSED const char* OPTION_MESSAGE_TIMEOUT = "messageTimeout";
     static STATIC_VAR_UNUSED const char* OPTION_BLOB_UPLOAD_TIMEOUT_SECS = "blob_upload_timeout_secs";
     static STATIC_VAR_UNUSED const char* OPTION_PRODUCT_INFO = "product_info";
+
+    /*
+    * @brief    Specifies the Digital Twin Model Id of the connection. Only valid for use with MQTT Transport
+    */
+    static STATIC_VAR_UNUSED const char* OPTION_MODEL_ID = "model_id";
 
     /*
     * @brief    Turns on automatic URL encoding of message properties + system properties. Only valid for use with MQTT Transport

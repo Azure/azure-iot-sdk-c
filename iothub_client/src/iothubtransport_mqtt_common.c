@@ -56,6 +56,7 @@
 #define MAX_DISCONNECT_VALUE                50
 
 #define ON_DEMAND_GET_TWIN_REQUEST_TIMEOUT_SECS    60
+#define TWIN_REPORT_UPDATE_TIMEOUT_SECS           (60*5)
 
 static const char TOPIC_DEVICE_TWIN_PREFIX[] = "$iothub/twin";
 static const char TOPIC_DEVICE_METHOD_PREFIX[] = "$iothub/methods";
@@ -91,6 +92,9 @@ static const char* CONNECTION_MODULE_ID_PROPERTY = "cmid";
 static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtimeutc";
 
 static const char* DISTRIBUTED_TRACING_PROPERTY = "tracestate";
+static const char DT_MODEL_ID_TOKEN[] = "model-id";
+
+static const char DEFAULT_IOTHUB_PRODUCT_IDENTIFIER[] = CLIENT_DEVICE_TYPE_PREFIX "/" IOTHUB_SDK_VERSION;
 
 #define TOLOWER(c) (((c>='A') && (c<='Z'))?c-'A'+'a':c)
 
@@ -237,16 +241,15 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     int http_proxy_port;
     char* http_proxy_username;
     char* http_proxy_password;
-    bool isProductInfoSet;
+    bool isConnectUsernameSet;
     int disconnect_recv_flag;
 } MQTTTRANSPORT_HANDLE_DATA, *PMQTTTRANSPORT_HANDLE_DATA;
 
 typedef struct MQTT_DEVICE_TWIN_ITEM_TAG
 {
-    tickcounter_ms_t msgEnqueueTime;
+    tickcounter_ms_t msgCreationTime;
     tickcounter_ms_t msgPublishTime;
     size_t retryCount;
-    IOTHUB_IDENTITY_TYPE iothub_type;
     uint16_t packet_id;
     uint32_t iothub_msg_id;
     IOTHUB_DEVICE_TWIN* device_twin_data;
@@ -420,6 +423,7 @@ static const char* retrieve_mqtt_return_codes(CONNECT_RETURN_CODE rtn_code)
 static int retrieve_device_method_rid_info(const char* resp_topic, STRING_HANDLE method_name, STRING_HANDLE request_id)
 {
     int result;
+
     STRING_TOKENIZER_HANDLE token_handle = STRING_TOKENIZER_create_from_char(resp_topic);
     if (token_handle == NULL)
     {
@@ -476,6 +480,7 @@ static int retrieve_device_method_rid_info(const char* resp_topic, STRING_HANDLE
         }
         STRING_TOKENIZER_destroy(token_handle);
     }
+
     return result;
 }
 
@@ -972,26 +977,28 @@ static void destroy_device_twin_get_message(MQTT_DEVICE_TWIN_ITEM* msg_entry)
     free(msg_entry);
 }
 
-static MQTT_DEVICE_TWIN_ITEM* create_device_twin_get_message(MQTTTRANSPORT_HANDLE_DATA* transport_data)
+static MQTT_DEVICE_TWIN_ITEM* create_device_twin_message(MQTTTRANSPORT_HANDLE_DATA* transport_data, DEVICE_TWIN_MSG_TYPE device_twin_msg_type, uint32_t iothub_msg_id)
 {
     MQTT_DEVICE_TWIN_ITEM* result;
+    tickcounter_ms_t current_time;
 
-    if ((result = (MQTT_DEVICE_TWIN_ITEM*)malloc(sizeof(MQTT_DEVICE_TWIN_ITEM))) == NULL)
+    if (tickcounter_get_current_ms(transport_data->msgTickCounter, &current_time) != 0)
+    {
+        LogError("Failed retrieving tickcounter info");
+        result = NULL;
+    }
+    else if ((result = (MQTT_DEVICE_TWIN_ITEM*)malloc(sizeof(MQTT_DEVICE_TWIN_ITEM))) == NULL)
     {
         LogError("Failed allocating device twin data.");
+        result = NULL;
     }
     else
     {
+        memset(result, 0, sizeof(*result));
+        result->msgCreationTime = current_time;
         result->packet_id = get_next_packet_id(transport_data);
-        result->iothub_msg_id = 0;
-        result->device_twin_msg_type = RETRIEVE_PROPERTIES;
-        result->retryCount = 0;
-        result->msgPublishTime = 0;
-        result->msgEnqueueTime = 0;
-        result->iothub_type = IOTHUB_TYPE_DEVICE_TWIN;
-        result->device_twin_data = NULL;
-        result->userCallback = NULL;
-        result->userContext = NULL;
+        result->iothub_msg_id = iothub_msg_id;
+        result->device_twin_msg_type = device_twin_msg_type;
     }
 
     return result;
@@ -1060,67 +1067,59 @@ static void sendPendingGetTwinRequests(PMQTTTRANSPORT_HANDLE_DATA transportData)
     }
 }
 
-static void removeExpiredPendingGetTwinRequests(PMQTTTRANSPORT_HANDLE_DATA transport_data)
+
+static void removeExpiredTwinRequestsFromList(PMQTTTRANSPORT_HANDLE_DATA transport_data, tickcounter_ms_t current_ms, DLIST_ENTRY* twin_list)
 {
-    tickcounter_ms_t current_ms;
-
-    if (tickcounter_get_current_ms(transport_data->msgTickCounter, &current_ms) == 0)
+    PDLIST_ENTRY list_item = twin_list->Flink;
+    
+    while (list_item != twin_list)
     {
-        PDLIST_ENTRY listItem = transport_data->pending_get_twin_queue.Flink;
+        DLIST_ENTRY next_list_item;
+        next_list_item.Flink = list_item->Flink;
+        MQTT_DEVICE_TWIN_ITEM* msg_entry = containingRecord(list_item, MQTT_DEVICE_TWIN_ITEM, entry);
+        bool item_timed_out = false;
 
-        while (listItem != &transport_data->pending_get_twin_queue)
+        if ((msg_entry->device_twin_msg_type == RETRIEVE_PROPERTIES) &&
+            (((current_ms - msg_entry->msgCreationTime) / 1000) >= ON_DEMAND_GET_TWIN_REQUEST_TIMEOUT_SECS))
         {
-            DLIST_ENTRY nextListItem;
-            nextListItem.Flink = listItem->Flink;
-            MQTT_DEVICE_TWIN_ITEM* msg_entry = containingRecord(listItem, MQTT_DEVICE_TWIN_ITEM, entry);
-
-            if (((current_ms - msg_entry->msgEnqueueTime) / 1000) >= ON_DEMAND_GET_TWIN_REQUEST_TIMEOUT_SECS)
+            item_timed_out = true;
+            if (msg_entry->userCallback != NULL)
             {
-                (void)DList_RemoveEntryList(listItem);
                 msg_entry->userCallback(DEVICE_TWIN_UPDATE_COMPLETE, NULL, 0, msg_entry->userContext);
-                destroy_device_twin_get_message(msg_entry);
             }
-
-            listItem = nextListItem.Flink;
         }
+        else if ((msg_entry->device_twin_msg_type == REPORTED_STATE) &&
+                 (((current_ms - msg_entry->msgCreationTime) / 1000) >= TWIN_REPORT_UPDATE_TIMEOUT_SECS))
+        {
+            item_timed_out = true;
+            transport_data->transport_callbacks.twin_rpt_state_complete_cb(msg_entry->iothub_msg_id, STATUS_CODE_TIMEOUT_VALUE, transport_data->transport_ctx);
+        }
+
+        if (item_timed_out)
+        {
+            (void)DList_RemoveEntryList(list_item);
+            destroy_device_twin_get_message(msg_entry);
+        }
+
+        list_item = next_list_item.Flink;
     }
+
 }
 
-static void removeExpiredGetTwinRequestsPendingAck(PMQTTTRANSPORT_HANDLE_DATA transport_data)
+static void removeExpiredTwinRequests(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
     tickcounter_ms_t current_ms;
 
     if (tickcounter_get_current_ms(transport_data->msgTickCounter, &current_ms) == 0)
     {
-        PDLIST_ENTRY listItem = transport_data->ack_waiting_queue.Flink;
-
-        while (listItem != &transport_data->ack_waiting_queue)
-        {
-            DLIST_ENTRY nextListItem;
-            nextListItem.Flink = listItem->Flink;
-            MQTT_DEVICE_TWIN_ITEM* msg_entry = containingRecord(listItem, MQTT_DEVICE_TWIN_ITEM, entry);
-
-            // Check if it is a on-demand get-twin request.
-            if (msg_entry->device_twin_msg_type == RETRIEVE_PROPERTIES && msg_entry->userCallback != NULL)
-            {
-                if (((current_ms - msg_entry->msgEnqueueTime) / 1000) >= ON_DEMAND_GET_TWIN_REQUEST_TIMEOUT_SECS)
-                {
-                    (void)DList_RemoveEntryList(listItem);
-                    msg_entry->userCallback(DEVICE_TWIN_UPDATE_COMPLETE, NULL, 0, msg_entry->userContext);
-                    destroy_device_twin_get_message(msg_entry);
-                }
-            }
-
-            listItem = nextListItem.Flink;
-        }
+        removeExpiredTwinRequestsFromList(transport_data, current_ms, &transport_data->pending_get_twin_queue);
+        removeExpiredTwinRequestsFromList(transport_data, current_ms, &transport_data->ack_waiting_queue);
     }
 }
 
 static int publish_device_twin_message(MQTTTRANSPORT_HANDLE_DATA* transport_data, IOTHUB_DEVICE_TWIN* device_twin_info, MQTT_DEVICE_TWIN_ITEM* mqtt_info)
 {
     int result;
-    mqtt_info->packet_id = get_next_packet_id(transport_data);
-    mqtt_info->device_twin_msg_type = REPORTED_STATE;
 
     STRING_HANDLE msgTopic = STRING_construct_sprintf(REPORTED_PROPERTIES_TOPIC, mqtt_info->packet_id);
     if (msgTopic == NULL)
@@ -2202,6 +2201,81 @@ static STRING_HANDLE buildClientId(const char* device_id, const char* module_id)
     }
 }
 
+static int buildConfigForUsernameStep2IfNeeded(PMQTTTRANSPORT_HANDLE_DATA transport_data)
+{
+    int result;
+
+    if (!transport_data->isConnectUsernameSet)
+    {
+        STRING_HANDLE userName = NULL;
+        STRING_HANDLE modelIdParameter = NULL;
+        STRING_HANDLE urlEncodedModelId = NULL;
+        const char* modelId = transport_data->transport_callbacks.get_model_id_cb(transport_data->transport_ctx);
+        // TODO: The preview API version in SDK is only scoped to scenarios that require the modelId to be set.
+        // https://github.com/Azure/azure-iot-sdk-c/issues/1547 tracks removing this once non-preview API versions support modelId.
+        const char* apiVersion = (modelId != NULL) ? IOTHUB_API_PREVIEW_VERSION : IOTHUB_API_VERSION;
+        const char* appSpecifiedProductInfo = transport_data->transport_callbacks.prod_info_cb(transport_data->transport_ctx);
+        STRING_HANDLE productInfoEncoded = NULL; 
+
+        if ((productInfoEncoded = URL_EncodeString((appSpecifiedProductInfo != NULL) ? appSpecifiedProductInfo : DEFAULT_IOTHUB_PRODUCT_IDENTIFIER)) == NULL)
+        {
+            LogError("Unable to UrlEncode productInfo");
+            result = MU_FAILURE;
+        }
+        else if ((userName = STRING_construct_sprintf("%s?api-version=%s&DeviceClientType=%s", STRING_c_str(transport_data->configPassedThroughUsername), apiVersion, STRING_c_str(productInfoEncoded))) == NULL)
+        {
+            LogError("Failed constructing string");
+            result = 0;
+        }
+        else if (modelId != NULL)
+        {
+            if ((urlEncodedModelId = URL_EncodeString(modelId)) == NULL)
+            {
+                LogError("Failed to URL encode the modelID string");
+                result = MU_FAILURE;
+            }
+            else if ((modelIdParameter = STRING_construct_sprintf("&%s=%s", DT_MODEL_ID_TOKEN, STRING_c_str(urlEncodedModelId))) == NULL)
+            {
+                LogError("Cannot build modelID string");
+                result = MU_FAILURE;
+            }
+            else if (STRING_concat_with_STRING(userName, modelIdParameter) != 0)
+            {
+                LogError("Failed to set modelID parameter in connect");
+                result = MU_FAILURE;
+            }
+            else
+            {
+                result = 0;
+            }
+        }
+        else
+        {
+            result = 0;
+        }
+
+        if (result == 0)
+        {
+            STRING_delete(transport_data->configPassedThroughUsername);
+            transport_data->configPassedThroughUsername = userName;
+            userName = NULL;
+            // setting connect string is only allowed once in the lifetime of the device client.
+            transport_data->isConnectUsernameSet = true;
+        }
+
+        STRING_delete(userName);
+        STRING_delete(modelIdParameter);
+        STRING_delete(urlEncodedModelId);
+        STRING_delete(productInfoEncoded);
+    }
+    else
+    {
+        result = 0;
+    }
+
+    return result;
+}
+
 static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
     int result;
@@ -2245,47 +2319,13 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 
     if (result == 0)
     {
-        if (!transport_data->isProductInfoSet)
-        {
-            // This requires the iothubClientHandle, which sadly the MQTT transport only gets on DoWork, so this code still needs to remain here.
-            // The correct place for this would be in the Create method, but we don't get the client handle there.
-            // Also, when device multiplexing is used, the customer creates the transport directly and explicitly, when the client is still not created.
-            // This will be a major hurdle when we add device multiplexing to MQTT transport.
-
-            STRING_HANDLE clone;
-            const char* product_info = transport_data->transport_callbacks.prod_info_cb(transport_data->transport_ctx);
-            if (product_info == NULL)
-            {
-                clone = STRING_construct_sprintf("%s%%2F%s", CLIENT_DEVICE_TYPE_PREFIX, IOTHUB_SDK_VERSION);
-            }
-            else
-            {
-                clone = URL_EncodeString(product_info);
-            }
-
-            if (clone == NULL)
-            {
-                LogError("Failed obtaining the product info");
-            }
-            else
-            {
-                if (STRING_concat_with_STRING(transport_data->configPassedThroughUsername, clone) != 0)
-                {
-                    LogError("Failed concatenating the product info");
-                }
-                else
-                {
-                    transport_data->isProductInfoSet = true;
-                }
-
-                STRING_delete(clone);
-            }
-        }
-
         STRING_HANDLE clientId;
-
-        clientId = buildClientId(STRING_c_str(transport_data->device_id), STRING_c_str(transport_data->module_id));
-        if (NULL == clientId)
+        if (buildConfigForUsernameStep2IfNeeded(transport_data) != 0)
+        {
+            LogError("Failed to add optional connect parameters.");
+            result = MU_FAILURE;
+        }
+        else if ((clientId = buildClientId(STRING_c_str(transport_data->device_id), STRING_c_str(transport_data->module_id))) == NULL)
         {
             LogError("Unable to allocate clientId");
             result = MU_FAILURE;
@@ -2331,7 +2371,6 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             }
             STRING_delete(clientId);
         }
-
     }
     return result;
 }
@@ -2462,15 +2501,18 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     return result;
 }
 
-static STRING_HANDLE buildConfigForUsername(const IOTHUB_CLIENT_CONFIG* upperConfig, const char* moduleId)
+// At handle creation time, we don't have all the fields required for building up the user name (e.g. productID)
+// We build up as much of the string as we can at this point because we do not store upperConfig after initialization.
+// In buildConfigForUsernameStep2IfNeeded, only immediately before we do CONNECT itself, do we complete building up this string.
+static STRING_HANDLE buildConfigForUsernameStep1(const IOTHUB_CLIENT_CONFIG* upperConfig, const char* moduleId)
 {
     if (moduleId == NULL)
     {
-        return STRING_construct_sprintf("%s.%s/%s/?api-version=%s&DeviceClientType=", upperConfig->iotHubName, upperConfig->iotHubSuffix, upperConfig->deviceId, IOTHUB_API_VERSION);
+        return STRING_construct_sprintf("%s.%s/%s/", upperConfig->iotHubName, upperConfig->iotHubSuffix, upperConfig->deviceId);
     }
     else
     {
-        return STRING_construct_sprintf("%s.%s/%s/%s/?api-version=%s&DeviceClientType=", upperConfig->iotHubName, upperConfig->iotHubSuffix, upperConfig->deviceId, moduleId, IOTHUB_API_VERSION);
+        return STRING_construct_sprintf("%s.%s/%s/%s/", upperConfig->iotHubName, upperConfig->iotHubSuffix, upperConfig->deviceId, moduleId);
     }
 }
 
@@ -2558,7 +2600,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                 }
                 else
                 {
-                    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_008: [If the upperConfig contains a valid protocolGatewayHostName value the this shall be used for the hostname, otherwise the hostname shall be constructed using the iothubname and iothubSuffix.] */
+                    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_008: [If the upperConfig contains a valid protocolGatewayHostName value this shall be used for the hostname, otherwise the hostname shall be constructed using the iothubName and iothubSuffix.] */
                     if (upperConfig->protocolGatewayHostName == NULL)
                     {
                         state->hostAddress = STRING_construct_sprintf("%s.%s", upperConfig->iotHubName, upperConfig->iotHubSuffix);
@@ -2574,7 +2616,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                         free_transport_handle_data(state);
                         state = NULL;
                     }
-                    else if ((state->configPassedThroughUsername = buildConfigForUsername(upperConfig, moduleId)) == NULL)
+                    else if ((state->configPassedThroughUsername = buildConfigForUsernameStep1(upperConfig, moduleId)) == NULL)
                     {
                         free_transport_handle_data(state);
                         state = NULL;
@@ -2610,7 +2652,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                         state->topic_DeviceMethods = NULL;
                         state->topic_InputQueue = NULL;
                         state->log_trace = state->raw_trace = false;
-                        state->isProductInfoSet = false;
+                        state->isConnectUsernameSet = false;
                         state->auto_url_encode_decode = false;
                         state->conn_attempted = false;
                     }
@@ -2840,13 +2882,13 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_GetTwinAsync(IOTHUB_DEVICE_HAND
         PMQTTTRANSPORT_HANDLE_DATA transport_data = (PMQTTTRANSPORT_HANDLE_DATA)handle;
         MQTT_DEVICE_TWIN_ITEM* mqtt_info;
 
-        if ((mqtt_info = create_device_twin_get_message(transport_data)) == NULL)
+        if ((mqtt_info = create_device_twin_message(transport_data, RETRIEVE_PROPERTIES, 0)) == NULL)
         {
             LogError("Failed creating the device twin get request message");
             // Codes_SRS_IOTHUB_MQTT_TRANSPORT_09_003: [ If any failure occurs, IoTHubTransport_MQTT_Common_GetTwinAsync shall return IOTHUB_CLIENT_ERROR ]
             result = IOTHUB_CLIENT_ERROR;
         }
-        else if (tickcounter_get_current_ms(transport_data->msgTickCounter, &mqtt_info->msgEnqueueTime) != 0)
+        else if (tickcounter_get_current_ms(transport_data->msgTickCounter, &mqtt_info->msgCreationTime) != 0)
         {
             LogError("Failed setting the get twin request enqueue time");
             destroy_device_twin_get_message(mqtt_info);
@@ -3067,7 +3109,7 @@ IOTHUB_PROCESS_ITEM_RESULT IoTHubTransport_MQTT_Common_ProcessItem(TRANSPORT_LL_
             // Ensure the reported property suback has been received
             if (item_type == IOTHUB_TYPE_DEVICE_TWIN && transport_data->twin_resp_sub_recv)
             {
-                MQTT_DEVICE_TWIN_ITEM* mqtt_info = (MQTT_DEVICE_TWIN_ITEM*)malloc(sizeof(MQTT_DEVICE_TWIN_ITEM));
+                MQTT_DEVICE_TWIN_ITEM* mqtt_info = create_device_twin_message(transport_data, REPORTED_STATE, iothub_item->device_twin->item_id);
                 if (mqtt_info == NULL)
                 {
                     /* Codes_SRS_IOTHUBCLIENT_LL_07_004: [ If any errors are encountered IoTHubTransport_MQTT_Common_ProcessItem shall return IOTHUB_PROCESS_ERROR. ]*/
@@ -3076,13 +3118,6 @@ IOTHUB_PROCESS_ITEM_RESULT IoTHubTransport_MQTT_Common_ProcessItem(TRANSPORT_LL_
                 else
                 {
                     /*Codes_SRS_IOTHUBCLIENT_LL_07_003: [ IoTHubTransport_MQTT_Common_ProcessItem shall publish a message to the mqtt protocol with the message topic for the message type.]*/
-                    mqtt_info->iothub_type = item_type;
-                    mqtt_info->iothub_msg_id = iothub_item->device_twin->item_id;
-                    mqtt_info->retryCount = 0;
-                    mqtt_info->userCallback = NULL;
-                    mqtt_info->userContext = NULL;
-                    mqtt_info->msgEnqueueTime = 0;
-
                     /* Codes_SRS_IOTHUBCLIENT_LL_07_005: [ If successful IoTHubTransport_MQTT_Common_ProcessItem shall add mqtt info structure acknowledgement queue. ] */
                     DList_InsertTailList(&transport_data->ack_waiting_queue, &mqtt_info->entry);
 
@@ -3141,7 +3176,7 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle)
                     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_055: [ IoTHubTransport_MQTT_Common_DoWork shall send a device twin get property message upon successfully retrieving a SUBACK on device twin topics. ] */
                     MQTT_DEVICE_TWIN_ITEM* mqtt_info;
 
-                    if ((mqtt_info = create_device_twin_get_message(transport_data)) == NULL)
+                    if ((mqtt_info = create_device_twin_message(transport_data, RETRIEVE_PROPERTIES, 0)) == NULL)
                     {
                         LogError("Failure: could not create message for twin get command");
                     }
@@ -3208,7 +3243,10 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle)
                     currentListEntry = savedFromCurrentListEntry.Flink;
                 }
 
-                sendPendingGetTwinRequests(transport_data);
+                if (transport_data->twin_resp_sub_recv)
+                {
+                    sendPendingGetTwinRequests(transport_data);
+                }
             }
             /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_030: [IoTHubTransport_MQTT_Common_DoWork shall call mqtt_client_dowork everytime it is called if it is connected.] */
             mqtt_client_dowork(transport_data->mqttClient);
@@ -3216,8 +3254,7 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle)
 
         // Check the ack messages timeouts
         process_queued_ack_messages(transport_data);
-        removeExpiredPendingGetTwinRequests(transport_data);
-        removeExpiredGetTwinRequestsPendingAck(transport_data);
+        removeExpiredTwinRequests(transport_data);
     }
 }
 
@@ -3328,6 +3365,18 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SetOption(TRANSPORT_LL_HANDLE h
             if (retry_control_set_option(transport_data->retry_control_handle, RETRY_CONTROL_OPTION_INITIAL_WAIT_TIME_IN_SECS, value) != 0)
             {
                 LogError("Failure setting retry interval option");
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else
+            {
+                result = IOTHUB_CLIENT_OK;
+            }
+        }
+        else if (strcmp(OPTION_RETRY_MAX_DELAY_SECS, option) == 0)
+        {
+            if (retry_control_set_option(transport_data->retry_control_handle, RETRY_CONTROL_OPTION_MAX_DELAY_IN_SECS, value) != 0)
+            {
+                LogError("Failure setting retry max delay option");
                 result = IOTHUB_CLIENT_ERROR;
             }
             else
