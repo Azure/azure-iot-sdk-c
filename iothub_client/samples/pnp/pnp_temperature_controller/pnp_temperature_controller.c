@@ -54,15 +54,15 @@ static const char g_dpsDeviceKeyEnvironmentVariable[] = "IOTHUB_DEVICE_DPS_DEVIC
 static const char g_dpsEndpointEnvironmentVariable[] = "IOTHUB_DEVICE_DPS_ENDPOINT";
 
 // Global provisioning endpoint for DPS if one is not specified via the environment
-static char g_dps_DefaultGlobalProvUri[] = "global.azure-devices-provisioning.net";
+static const char g_dps_DefaultGlobalProvUri[] = "global.azure-devices-provisioning.net";
 #endif
 
 // Amount of time to sleep between polling hub, in milliseconds.  Set to wake up every 100 milliseconds.
-static unsigned int g_sleepBetweenPolls = 100;
+static unsigned int g_sleepBetweenPollsMs = 100;
 
-// Every time the main loop wakes up, on the g_sendTelemetryFrequency(th) pass will send a telemetry message.
-// So we will send telemetry every (g_sendTelemetryFrequency * g_sleepBetweenPolls) milliseconds; 60 seconds as currently configured.
-static const int g_sendTelemetryFrequency = 600;
+// Every time the main loop wakes up, on the g_sendTelemetryPollInterval(th) pass will send a telemetry message.
+// So we will send telemetry every (g_sendTelemetryPollInterval * g_sleepBetweenPollsMs) milliseconds; 60 seconds as currently configured.
+static const int g_sendTelemetryPollInterval = 600;
 
 // Whether tracing at the IoTHub client is enabled or not. 
 static bool g_hubClientTraceEnabled = true;
@@ -507,7 +507,7 @@ int main(void)
         {
             // Wake up periodically to poll.  Even if we do not plan on sending telemetry, we still need to poll periodically in order to process
             // incoming requests from the server and to do connection keep alives.
-            if ((numberOfIterations % g_sendTelemetryFrequency) == 0)
+            if ((numberOfIterations % g_sendTelemetryPollInterval) == 0)
             {
                 PnP_TempControlComponent_SendWorkingSet(deviceClient);
                 PnP_ThermostatComponent_SendTelemetry(g_thermostatHandle1, deviceClient);
@@ -515,7 +515,7 @@ int main(void)
             }
 
             IoTHubDeviceClient_LL_DoWork(deviceClient);
-            ThreadAPI_Sleep(g_sleepBetweenPolls);
+            ThreadAPI_Sleep(g_sleepBetweenPollsMs);
             numberOfIterations++;
         }
 

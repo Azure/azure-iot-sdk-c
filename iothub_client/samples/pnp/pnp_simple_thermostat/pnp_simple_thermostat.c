@@ -56,7 +56,7 @@ static const char g_dpsDeviceKeyEnvironmentVariable[] = "IOTHUB_DEVICE_DPS_DEVIC
 static const char g_dpsEndpointEnvironmentVariable[] = "IOTHUB_DEVICE_DPS_ENDPOINT";
 
 // Global provisioning endpoint for DPS if one is not specified via the environment
-static char g_dps_DefaultGlobalProvUri[] = "global.azure-devices-provisioning.net";
+static const char g_dps_DefaultGlobalProvUri[] = "global.azure-devices-provisioning.net";
 
 // Values of connection / security settings read from environment variables and/or DPS runtime
 PNP_DEVICE_CONFIGURATION g_pnpDeviceConfiguration;
@@ -66,11 +66,11 @@ PNP_DEVICE_CONFIGURATION g_pnpDeviceConfiguration;
 const char* g_pnpDeviceConnectionString;
 
 // Amount of time to sleep between polling hub, in milliseconds.  Set to wake up every 100 milliseconds.
-static unsigned int g_sleepBetweenPolls = 100;
+static unsigned int g_sleepBetweenPollsMs = 100;
 
-// Every time the main loop wakes up, on the g_sendTelemetryFrequency(th) pass will send a telemetry message.
-// So we will send telemetry every (g_sendTelemetryFrequency * g_sleepBetweenPolls) milliseconds; 60 seconds as currently configured.
-static const int g_sendTelemetryFrequency = 600;
+// Every time the main loop wakes up, on the g_sendTelemetryPollInterval(th) pass will send a telemetry message.
+// So we will send telemetry every (g_sendTelemetryPollInterval * g_sleepBetweenPollsMs) milliseconds; 60 seconds as currently configured.
+static const int g_sendTelemetryPollInterval = 600;
 
 // Whether verbose tracing at the IoTHub client is enabled or not.
 static bool g_hubClientTraceEnabled = true;
@@ -612,10 +612,10 @@ static bool GetConnectionSettingsFromEnvironment()
 }
 
 //
-// CreateDevicelientHandle performs actual handle creation (but nothing more), depending
+// CreateDeviceClientLLHandle performs actual handle creation (but nothing more), depending
 // on whether connection strings or DPS is used.
 //
-static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateDevicelientHandle(void)
+static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateDeviceClientLLHandle(void)
 {
 #ifdef USE_PROV_MODULE_FULL
     if (g_pnpDeviceConfiguration.securityType == PNP_CONNECTION_SECURITY_TYPE_DPS)
@@ -650,7 +650,7 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateAndConfigureDeviceClientHandleForPnP
         result = false;
     }
     // Create the deviceHandle itself.
-    else if ((deviceHandle = CreateDevicelientHandle()) == NULL)
+    else if ((deviceHandle = CreateDeviceClientLLHandle()) == NULL)
     {
         LogError("Failure creating IotHub client.  Hint: Check your connection string or DPS configuration");
         result = false;
@@ -729,7 +729,7 @@ int main(void)
     }
     else if ((deviceClientLL = CreateAndConfigureDeviceClientHandleForPnP()) == NULL)
     {
-        LogError("Failed creating IotHub device");
+        LogError("Failed creating IotHub device client");
     }
     else
     {
@@ -742,13 +742,13 @@ int main(void)
         {
             // Wake up periodically to poll.  Even if we do not plan on sending telemetry, we still need to poll periodically in order to process
             // incoming requests from the server and to do connection keep alives.
-            if ((numberOfIterations % g_sendTelemetryFrequency) == 0)
+            if ((numberOfIterations % g_sendTelemetryPollInterval) == 0)
             {
                 Thermostat_SendCurrentTemperature(deviceClientLL);
             }
 
             IoTHubDeviceClient_LL_DoWork(deviceClientLL);
-            ThreadAPI_Sleep(g_sleepBetweenPolls);
+            ThreadAPI_Sleep(g_sleepBetweenPollsMs);
             numberOfIterations++;
         }
 
