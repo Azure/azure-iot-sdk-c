@@ -24,6 +24,7 @@ rsync -avz --existing ./ mbed-iot-devkit-sdk/components/azure-iot-sdk-c/
 
 sudo npm install -g iotz
 sudo iotz update
+ls /usr/lib/node_modules/
 sudo cp $SOURCES_DIRECTORY/iotz/extensions/mbed/index.js /usr/lib/node_modules/iotz/extensions/mbed/index.js
 
 echo "just before init iotz mbed"
