@@ -2,6 +2,7 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 sudo rm -R -f mxchip
 
+git clone -b patch-2 https://github.com/jbobotek/iotz.git iotz
 git clone -b $MXCHIP_REPO_SOURCE_BRANCH https://$DEVKIT_MBEDOS5_GETSTARTED_USER:$DEVKIT_MBEDOS5_GETSTARTED_CRED@azure-iot-sdks.visualstudio.com/azure-iot-sdk-c-build/_git/devkit-mbedos5-getstarted mxchip
 cd mxchip
 
@@ -23,7 +24,7 @@ rsync -avz --existing ./ mbed-iot-devkit-sdk/components/azure-iot-sdk-c/
 
 sudo npm install -g iotz
 sudo iotz update
-sudo sed -i 's/apt clean \ \n/apt clean \' /usr/lib/node_modules/iotz/extensions/mbed/index.js
+sudo cp $SOURCES_DIRECTORY/iotz/extensions/mbed/index.js /usr/lib/node_modules/iotz/extensions/mbed/index.js
 
 echo "just before init iotz mbed"
 sudo iotz init mbed  
