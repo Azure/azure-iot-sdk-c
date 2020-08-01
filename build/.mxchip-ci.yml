@@ -26,6 +26,7 @@ jobs:
       DEVKIT_SDK_CRED: $(DEVKIT_SDK_CRED)
       MBED_IOT_DEVKIT_SDK_USER: $(MBED_IOT_DEVKIT_SDK_USER)
       MBED_IOT_DEVKIT_SDK_CRED: $(MBED_IOT_DEVKIT_SDK_CRED)
+      SOURCES_DIRECTORY: $(Build.SourcesDirectory)
       
   - script: |
       # Check that this is the right source directory
