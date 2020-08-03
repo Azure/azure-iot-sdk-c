@@ -133,6 +133,7 @@ EXPORTS
     IoTHubMessage_SetContentTypeSystemProperty
     IoTHubMessage_SetContentEncodingSystemProperty
     IoTHubMessage_SetMessageCreationTimeUtcSystemProperty
+    IoTHubMessage_SetMessageUserIdSystemProperty
     IoTHubMessage_SetCorrelationId
     IoTHubMessage_SetInputName
     IoTHubMessage_SetMessageId
