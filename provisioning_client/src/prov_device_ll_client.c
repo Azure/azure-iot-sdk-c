@@ -1278,7 +1278,7 @@ PROV_DEVICE_RESULT Prov_Device_LL_SetOption(PROV_DEVICE_LL_HANDLE handle, const 
         {
             if (value == NULL)
             {
-                LogError("setting proxy options");
+                LogError("setting PROV_OPTION_TIMEOUT option");
                 result = PROV_DEVICE_RESULT_ERROR;
             }
             else
