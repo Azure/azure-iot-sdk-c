@@ -103,7 +103,7 @@ else()
 endif()
 option(use_mbedtls "set use_mbedtls to ON to use mbedtls." OFF)
 option(use_bearssl "set use_bearssl to ON to use bearssl." OFF)
-option(use_wolfssl "set use_bearssl to ON to use bearssl." OFF)
+option(use_wolfssl "set use_wolfssl to ON to use bearssl." OFF)
 
 # openssl samples on Windows need to have a trusted cert set
 if ((WIN32 AND ${use_openssl}) OR ${use_wolfssl} OR ${use_mbedtls} OR ${use_bearssl})
