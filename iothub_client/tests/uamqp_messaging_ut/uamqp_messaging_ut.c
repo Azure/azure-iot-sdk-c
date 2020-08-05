@@ -90,6 +90,8 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 #define TEST_AMQP_VALUE (AMQP_VALUE)0x104
 #define TEST_PROPERTIES_HANDLE (PROPERTIES_HANDLE)0x107
 #define TEST_CORRELATION_ID "Test Correlation Id"
+#define TEST_USER_CREATION_TIME "2020-07-01T01:00:00.346Z"
+#define TEST_USER_ID_VALUE "user-id"
 
 #define TEST_AMQP_ENCODING_SIZE 5
 
@@ -122,7 +124,7 @@ static int saved_amqpvalue_get_string_return = 0;
 static const char* TEST_CONTENT_TYPE = "text/plain";
 static const char* TEST_CONTENT_ENCODING = "utf8";
 static IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA TEST_DIAGNOSTIC_DATA = { "12345678",  "1506054179" };
-
+static const amqp_binary TEST_USER_ID = { TEST_USER_ID_VALUE, sizeof(TEST_USER_ID_VALUE) };
 
 static int test_properties_get_message_id(PROPERTIES_HANDLE properties, AMQP_VALUE* message_id_value)
 {
@@ -271,6 +273,11 @@ static void set_exp_calls_for_create_encoded_application_properties(size_t numbe
     size_t encoding_size = TEST_AMQP_ENCODING_SIZE;
 
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MESSAGE_HANDLE)); //16
+
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetMessageCreationTimeUtcSystemProperty(TEST_IOTHUB_MESSAGE_HANDLE))
+        .CallCannotFail();
+    STRICT_EXPECTED_CALL(Map_AddOrUpdate(TEST_MAP_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
     STRICT_EXPECTED_CALL(Map_GetInternals(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .CopyOutArgumentBuffer(2, &TEST_MAP_KEYS, sizeof(TEST_MAP_KEYS))
         .CopyOutArgumentBuffer(3, &TEST_MAP_VALUES, sizeof(TEST_MAP_VALUES))
@@ -362,7 +369,8 @@ static void set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(
     AMQP_TYPE correlation_id_type,
     bool has_properties,
     const char* content_type,
-    const char* content_encoding)
+    const char* content_encoding,
+    amqp_binary user_id)
 {
     static BINARY_DATA test_binary_data;
     test_binary_data.bytes = (const unsigned char*)&TEST_STRING;
@@ -446,6 +454,11 @@ static void set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(
     {
         STRICT_EXPECTED_CALL(amqpvalue_get_type(TEST_AMQP_VALUE)).SetReturn(AMQP_TYPE_NULL);
     }
+
+    STRICT_EXPECTED_CALL(properties_get_user_id(TEST_PROPERTIES_HANDLE, IGNORED_PTR_ARG))
+        .CopyOutArgumentBuffer(2, &user_id, sizeof(amqp_binary));
+
+    STRICT_EXPECTED_CALL(IoTHubMessage_SetMessageUserIdSystemProperty(TEST_IOTHUB_MESSAGE_HANDLE, IGNORED_PTR_ARG));
 
     STRICT_EXPECTED_CALL(properties_get_content_type(TEST_PROPERTIES_HANDLE, IGNORED_PTR_ARG))
         .CopyOutArgumentBuffer(2, &content_type, sizeof(content_type));
@@ -631,6 +644,11 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 
     REGISTER_GLOBAL_MOCK_RETURN(properties_set_message_id, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(properties_set_message_id, 1);
+
+    REGISTER_GLOBAL_MOCK_RETURN(properties_get_user_id, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(properties_get_user_id, 1);
+
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_GetMessageCreationTimeUtcSystemProperty, TEST_USER_CREATION_TIME);
 
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_GetCorrelationId, TEST_CORRELATION_ID);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_GetCorrelationId, NULL);
@@ -1092,7 +1110,7 @@ TEST_FUNCTION(message_create_IoTHubMessage_from_uamqp_message_success)
 {
     // arrange
     umock_c_reset_all_calls();
-    set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(1, true, AMQP_TYPE_STRING, true, AMQP_TYPE_STRING, true, TEST_CONTENT_TYPE, TEST_CONTENT_ENCODING);
+    set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(1, true, AMQP_TYPE_STRING, true, AMQP_TYPE_STRING, true, TEST_CONTENT_TYPE, TEST_CONTENT_ENCODING, TEST_USER_ID);
 
     // act
     IOTHUB_MESSAGE_HANDLE iothub_client_message = NULL;
@@ -1112,7 +1130,7 @@ TEST_FUNCTION(message_create_IoTHubMessage_from_uamqp_message_ULONG_message_id_c
 {
     // arrange
     umock_c_reset_all_calls();
-    set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(1, true, AMQP_TYPE_ULONG, true, AMQP_TYPE_ULONG, true, TEST_CONTENT_TYPE, TEST_CONTENT_ENCODING);
+    set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(1, true, AMQP_TYPE_ULONG, true, AMQP_TYPE_ULONG, true, TEST_CONTENT_TYPE, TEST_CONTENT_ENCODING, TEST_USER_ID);
 
     // act
     IOTHUB_MESSAGE_HANDLE iothub_client_message = NULL;
@@ -1132,7 +1150,7 @@ TEST_FUNCTION(message_create_IoTHubMessage_from_uamqp_message_UUID_message_id_co
 {
     // arrange
     umock_c_reset_all_calls();
-    set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(1, true, AMQP_TYPE_UUID, true, AMQP_TYPE_UUID, true, TEST_CONTENT_TYPE, TEST_CONTENT_ENCODING);
+    set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(1, true, AMQP_TYPE_UUID, true, AMQP_TYPE_UUID, true, TEST_CONTENT_TYPE, TEST_CONTENT_ENCODING, TEST_USER_ID);
 
     // act
     IOTHUB_MESSAGE_HANDLE iothub_client_message = NULL;
@@ -1151,7 +1169,7 @@ TEST_FUNCTION(message_create_IoTHubMessage_from_uamqp_message_no_message_id_succ
 {
     // arrange
     umock_c_reset_all_calls();
-    set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(1, false, AMQP_TYPE_STRING, true, AMQP_TYPE_STRING, true, TEST_CONTENT_TYPE, TEST_CONTENT_ENCODING);
+    set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(1, false, AMQP_TYPE_STRING, true, AMQP_TYPE_STRING, true, TEST_CONTENT_TYPE, TEST_CONTENT_ENCODING, TEST_USER_ID);
 
     // act
     IOTHUB_MESSAGE_HANDLE iothub_client_message = NULL;
@@ -1170,7 +1188,7 @@ TEST_FUNCTION(message_create_IoTHubMessage_from_uamqp_message_no_correlation_id_
 {
     // arrange
     umock_c_reset_all_calls();
-    set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(1, true, AMQP_TYPE_STRING, false, AMQP_TYPE_STRING, true, TEST_CONTENT_TYPE, TEST_CONTENT_ENCODING);
+    set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(1, true, AMQP_TYPE_STRING, false, AMQP_TYPE_STRING, true, TEST_CONTENT_TYPE, TEST_CONTENT_ENCODING, TEST_USER_ID);
 
     // act
     IOTHUB_MESSAGE_HANDLE iothub_client_message = NULL;
@@ -1189,7 +1207,7 @@ TEST_FUNCTION(message_create_IoTHubMessage_from_uamqp_message_no_app_properties_
 {
     // arrange
     umock_c_reset_all_calls();
-    set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(0, true, AMQP_TYPE_STRING, true, AMQP_TYPE_STRING, false, TEST_CONTENT_TYPE, TEST_CONTENT_ENCODING);
+    set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(0, true, AMQP_TYPE_STRING, true, AMQP_TYPE_STRING, false, TEST_CONTENT_TYPE, TEST_CONTENT_ENCODING, TEST_USER_ID);
 
     // act
     IOTHUB_MESSAGE_HANDLE iothub_client_message = NULL;
@@ -1208,7 +1226,7 @@ TEST_FUNCTION(message_create_IoTHubMessage_from_uamqp_message_no_content_type_su
 {
     // arrange
     umock_c_reset_all_calls();
-    set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(1, true, AMQP_TYPE_STRING, true, AMQP_TYPE_STRING, true, NULL, TEST_CONTENT_ENCODING);
+    set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(1, true, AMQP_TYPE_STRING, true, AMQP_TYPE_STRING, true, NULL, TEST_CONTENT_ENCODING, TEST_USER_ID);
 
     // act
     IOTHUB_MESSAGE_HANDLE iothub_client_message = NULL;
@@ -1227,7 +1245,7 @@ TEST_FUNCTION(message_create_IoTHubMessage_from_uamqp_message_no_content_encodin
 {
     // arrange
     umock_c_reset_all_calls();
-    set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(1, true, AMQP_TYPE_STRING, true, AMQP_TYPE_STRING, true, TEST_CONTENT_TYPE, NULL);
+    set_exp_calls_for_message_create_IoTHubMessage_from_uamqp_message(1, true, AMQP_TYPE_STRING, true, AMQP_TYPE_STRING, true, TEST_CONTENT_TYPE, NULL, TEST_USER_ID);
 
     // act
     IOTHUB_MESSAGE_HANDLE iothub_client_message = NULL;
