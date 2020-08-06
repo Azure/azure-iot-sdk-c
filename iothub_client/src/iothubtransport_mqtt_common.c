@@ -1209,9 +1209,12 @@ static bool isSystemProperty(const char* tokenData)
     bool result = false;
     size_t propCount = sizeof(sysPropList) / sizeof(sysPropList[0]);
     size_t index = 0;
+    size_t tokenDataLength = strlen(tokenData);
+
     for (index = 0; index < propCount; index++)
     {
-        if (memcmp(tokenData, sysPropList[index].propName, sysPropList[index].propLength) == 0)
+        if (tokenDataLength == sysPropList[index].propLength &&
+            memcmp(tokenData, sysPropList[index].propName, sysPropList[index].propLength) == 0)
         {
             result = true;
             break;
