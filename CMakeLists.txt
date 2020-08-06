@@ -137,6 +137,8 @@ endif()
 # Set Provisioning Information.  This will also setup appropriate HSM
 if (${use_prov_client})
     set(use_prov_client_core ON)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_PROV_MODULE_FULL")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_PROV_MODULE_FULL")
     if ("${hsm_custom_lib}" STREQUAL "")
         if ((NOT ${hsm_type_x509}) AND (NOT ${hsm_type_sastoken}) AND (NOT ${hsm_type_symm_key}))
             # If the cmake option did not explicitly configure an hsm type, then enable them all.

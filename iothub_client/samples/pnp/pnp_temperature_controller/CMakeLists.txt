@@ -9,14 +9,18 @@ set(pnp_temperature_controller_c_files
     pnp_temperature_controller.c
     pnp_thermostat_component.c
     pnp_deviceinfo_component.c
-    ../common/pnp_device_client_helpers.c
-    ../common/pnp_protocol_helpers.c
+    ../common/pnp_device_client_ll.c
+    ../common/pnp_protocol.c
 )
 
 IF(WIN32)
     #windows needs this define
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 ENDIF(WIN32)
+
+if(${use_prov_client})
+    set(pnp_temperature_controller_c_files ${pnp_temperature_controller_c_files} ../common/pnp_dps_ll.c)
+endif()
 
 #Conditionally use the SDK trusted certs in the samples
 if(${use_sample_trusted_cert})
@@ -34,3 +38,8 @@ linkMqttLibrary(pnp_temperature_controller)
 add_definitions(-DUSE_MQTT)
 
 target_link_libraries(pnp_temperature_controller iothub_client)
+
+if(${use_prov_client})
+    target_link_libraries(pnp_temperature_controller prov_device_ll_client prov_mqtt_transport)
+endif()
+

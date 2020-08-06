@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 // Header associated with this .c file
-#include "pnp_protocol_helpers.h"
+#include "pnp_protocol.h"
 
 // JSON parsing library
 #include "parson.h"
@@ -36,7 +36,7 @@ static const char g_IoTHubTwinDesiredObjectName[] = "desired";
 // Telemetry message property used to indicate the message's component.
 static const char PnP_TelemetryComponentProperty[] = "$.sub";
 
-STRING_HANDLE PnPHelper_CreateReportedProperty(const char* componentName, const char* propertyName, const char* propertyValue)
+STRING_HANDLE PnP_CreateReportedProperty(const char* componentName, const char* propertyName, const char* propertyValue)
 {
     STRING_HANDLE jsonToSend;
 
@@ -57,7 +57,7 @@ STRING_HANDLE PnPHelper_CreateReportedProperty(const char* componentName, const 
     return jsonToSend;
 }
 
-STRING_HANDLE PnPHelper_CreateReportedPropertyWithStatus(const char* componentName, const char* propertyName, const char* propertyValue, int result, const char* description, int ackVersion)
+STRING_HANDLE PnP_CreateReportedPropertyWithStatus(const char* componentName, const char* propertyName, const char* propertyValue, int result, const char* description, int ackVersion)
 {
     STRING_HANDLE jsonToSend;
 
@@ -78,7 +78,7 @@ STRING_HANDLE PnPHelper_CreateReportedPropertyWithStatus(const char* componentNa
     return jsonToSend;    
 }
 
-void PnPHelper_ParseCommandName(const char* deviceMethodName, unsigned const char** componentName, size_t* componentNameSize, const char** pnpCommandName)
+void PnP_ParseCommandName(const char* deviceMethodName, unsigned const char** componentName, size_t* componentNameSize, const char** pnpCommandName)
 {
     const char* separator;
 
@@ -100,7 +100,7 @@ void PnPHelper_ParseCommandName(const char* deviceMethodName, unsigned const cha
     }
 }
 
-IOTHUB_MESSAGE_HANDLE PnPHelper_CreateTelemetryMessageHandle(const char* componentName, const char* telemetryData) 
+IOTHUB_MESSAGE_HANDLE PnP_CreateTelemetryMessageHandle(const char* componentName, const char* telemetryData) 
 {
     IOTHUB_MESSAGE_HANDLE messageHandle;
     IOTHUB_MESSAGE_RESULT iothubMessageResult;
@@ -135,7 +135,7 @@ IOTHUB_MESSAGE_HANDLE PnPHelper_CreateTelemetryMessageHandle(const char* compone
 // VisitComponentProperties visits each sub element of the the given objectName in the desired JSON.  Each of these sub elements corresponds to
 // a property of this component, which we'll invoke the application's pnpPropertyCallback to inform.
 // 
-static void VisitComponentProperties(const char* objectName, JSON_Value* value, int version, PnPHelperPropertyCallbackFunction pnpPropertyCallback, void* userContextCallback)
+static void VisitComponentProperties(const char* objectName, JSON_Value* value, int version, PnP_PropertyCallbackFunction pnpPropertyCallback, void* userContextCallback)
 {
     JSON_Object* object = json_value_get_object(value);
     size_t numChildren = json_object_get_count(object);
@@ -188,7 +188,7 @@ static bool IsJsonObjectAComponentInModel(const char* objectName, const char** c
 //
 // VisitDesiredObject visits each child JSON element of the desired device twin.  As we parse each property out, we invoke the application's passed in pnpPropertyCallback.
 //
-static bool VisitDesiredObject(JSON_Object* desiredObject, const char** componentsInModel, size_t numComponentsInModel, PnPHelperPropertyCallbackFunction pnpPropertyCallback, void* userContextCallback)
+static bool VisitDesiredObject(JSON_Object* desiredObject, const char** componentsInModel, size_t numComponentsInModel, PnP_PropertyCallbackFunction pnpPropertyCallback, void* userContextCallback)
 {
     JSON_Value* versionValue = NULL;
     size_t numChildren;
@@ -275,14 +275,14 @@ static JSON_Object* GetDesiredJson(DEVICE_TWIN_UPDATE_STATE updateState, JSON_Va
     return desiredObject;
 }
 
-bool PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payload, size_t size, const char** componentsInModel, size_t numComponentsInModel, PnPHelperPropertyCallbackFunction pnpPropertyCallback, void* userContextCallback)
+bool PnP_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payload, size_t size, const char** componentsInModel, size_t numComponentsInModel, PnP_PropertyCallbackFunction pnpPropertyCallback, void* userContextCallback)
 {
     char* jsonStr = NULL;
     JSON_Value* rootValue = NULL;
     JSON_Object* desiredObject;
     bool result;
 
-    if ((jsonStr = PnPHelper_CopyPayloadToString(payload, size)) == NULL)
+    if ((jsonStr = PnP_CopyPayloadToString(payload, size)) == NULL)
     {
         LogError("Unable to allocate twin buffer");
         result = false;
@@ -309,7 +309,7 @@ bool PnPHelper_ProcessTwinData(DEVICE_TWIN_UPDATE_STATE updateState, const unsig
     return result;
 }
 
-char* PnPHelper_CopyPayloadToString(const unsigned char* payload, size_t size)
+char* PnP_CopyPayloadToString(const unsigned char* payload, size_t size)
 {
     char* jsonStr;
     size_t sizeToAllocate = size + 1;

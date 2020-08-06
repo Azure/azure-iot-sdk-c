@@ -136,7 +136,7 @@ int main(void)
         //you are URL Encoding inputs yourself.
         //ONLY valid for use with MQTT
         //bool urlEncodeOn = true;
-        //IoTHubDeviceClient_LL_SetOption(iothub_ll_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
+        //IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
 #endif
 
         // Setting connection status callback to get indication of connection to iothub
