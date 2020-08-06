@@ -251,7 +251,7 @@ MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetCorrelationId, IOTHUB_MESSAGE_
 * @param   iotHubMessageHandle Handle to the message.
 * @param   correlationId Pointer to the memory location of the messageId
 *
-* @return  Returns IOTHUB_MESSAGE_OK if the messageId was set successfully
+* @return  Returns IOTHUB_MESSAGE_OK if the CorrelationId was set successfully
 *          or an error code otherwise.
 */
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetCorrelationId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, correlationId);
@@ -294,7 +294,7 @@ MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetOutputName, IOTHUB_MESSAGE_HAN
 * @param   iotHubMessageHandle Handle to the message.
 * @param   outputName Pointer to the queue to output message to
 *
-* @return  Returns IOTHUB_MESSAGE_OK if the DiagnosticData was set successfully
+* @return  Returns IOTHUB_MESSAGE_OK if the outputName was set successfully
 *          or an error code otherwise.
 */
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetOutputName, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, outputName);
@@ -317,7 +317,7 @@ MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetInputName, IOTHUB_MESSAGE_HAND
 * @param   iotHubMessageHandle Handle to the message.
 * @param   inputName Pointer to the queue to input message to
 *
-* @return  Returns IOTHUB_MESSAGE_OK if the DiagnosticData was set successfully
+* @return  Returns IOTHUB_MESSAGE_OK if the inputName was set successfully
 *          or an error code otherwise.
 */
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetInputName, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, inputName);
@@ -339,11 +339,10 @@ MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetConnectionModuleId, IOTHUB_MES
 * @param   iotHubMessageHandle Handle to the message.
 * @param   connectionModuleId Pointer to the module ID of connector
 *
-* @return  Returns IOTHUB_MESSAGE_OK if the DiagnosticData was set successfully
+* @return  Returns IOTHUB_MESSAGE_OK if the connectionModuleId was set successfully
 *          or an error code otherwise.
 */
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetConnectionModuleId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, connectionModuleId);
-
 
 /**
 * @brief   Gets the connection device ID from the IOTHUB_MESSAGE_HANDLE. No new memory is allocated,
@@ -355,6 +354,49 @@ MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetConnectionModuleId, 
 * @return  A const char* pointing to the connection device Id.
 */
 MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetConnectionDeviceId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
+
+/**
+* @brief   Sets the message creation time in UTC. 
+*
+* @param   iotHubMessageHandle Handle to the message.
+* @param   messageCreationTimeUtc Pointer to the message creation time as null-terminated string
+*
+* @return  Returns IOTHUB_MESSAGE_OK if the messageCreationTimeUtc was set successfully
+*          or an error code otherwise.
+*/
+MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetMessageCreationTimeUtcSystemProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, messageCreationTimeUtc);
+
+/**
+* @brief   Gets the message creation time in UTC from the IOTHUB_MESSAGE_HANDLE. No new memory is allocated,
+*          the caller is not responsible for freeing the memory. The memory
+*          is valid until IoTHubMessage_Destroy is called on the message.
+*
+* @param   iotHubMessageHandle Handle to the message.
+*
+* @return  A const char* pointing to the message creation time in UTC.
+*/
+MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetMessageCreationTimeUtcSystemProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
+
+/**
+* @brief   Sets the message user id. CAUTION: SDK user should not call it directly, it is for internal use only.
+*
+* @param   iotHubMessageHandle Handle to the message.
+* @param   userId Pointer to the message user id as null-terminated string
+*
+* @return  Returns IOTHUB_MESSAGE_OK if the userId was set successfully or an error code otherwise.
+*/
+MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetMessageUserIdSystemProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, userId);
+
+/**
+* @brief   Gets the message user id from the IOTHUB_MESSAGE_HANDLE. No new memory is allocated,
+*          the caller is not responsible for freeing the memory. The memory
+*          is valid until IoTHubMessage_Destroy is called on the message.
+*
+* @param   iotHubMessageHandle Handle to the message.
+*
+* @return  A const char* pointing to the message user id.
+*/
+MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetMessageUserIdSystemProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 
 /**
 * @brief   Sets connection device Id. CAUTION: SDK user should not call it directly, it is for internal use only.

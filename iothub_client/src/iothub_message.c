@@ -33,6 +33,8 @@ typedef struct IOTHUB_MESSAGE_HANDLE_DATA_TAG
     char* connectionDeviceId;
     IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA_HANDLE diagnosticData;
     bool is_security_message;
+    char* creationTimeUtc;
+    char* userId;
 }IOTHUB_MESSAGE_HANDLE_DATA;
 
 static bool ContainsOnlyUsAscii(const char* asciiValue)
@@ -100,6 +102,8 @@ static void DestroyMessageData(IOTHUB_MESSAGE_HANDLE_DATA* handleData)
     free(handleData->inputName);
     free(handleData->connectionModuleId);
     free(handleData->connectionDeviceId);
+    free(handleData->creationTimeUtc);
+    free(handleData->userId);
     free(handleData);
 }
 
@@ -122,6 +126,54 @@ static int set_content_encoding(IOTHUB_MESSAGE_HANDLE_DATA* handleData, const ch
             free(handleData->contentEncoding);
         }
         handleData->contentEncoding = tmp_encoding;
+        result = 0;
+    }
+    return result;
+}
+
+static int set_message_creation_time(IOTHUB_MESSAGE_HANDLE_DATA* handleData, const char* messageCreationTimeUtc)
+{
+    int result;
+    char* tmp_message_creation_time;
+
+    if (handleData->creationTimeUtc != NULL)
+    {
+        free(handleData->creationTimeUtc);
+        handleData->creationTimeUtc = NULL;
+    }
+
+    if (mallocAndStrcpy_s(&tmp_message_creation_time, messageCreationTimeUtc) != 0)
+    {
+        LogError("Failed saving a copy of messageCreationTimeUtc");
+        result = MU_FAILURE;
+    }
+    else
+    {
+        handleData->creationTimeUtc = tmp_message_creation_time;
+        result = 0;
+    }
+    return result;
+}
+
+static int set_message_user_id(IOTHUB_MESSAGE_HANDLE_DATA* handleData, const char* userId)
+{
+    int result;
+    char* tmp_message_user_id;
+
+    if (handleData->userId != NULL)
+    {
+        free(handleData->userId);
+        handleData->userId = NULL;
+    }
+
+    if (mallocAndStrcpy_s(&tmp_message_user_id, userId) != 0)
+    {
+        LogError("Failed saving a copy of userId");
+        result = MU_FAILURE;
+    }
+    else
+    {
+        handleData->userId = tmp_message_user_id;
         result = 0;
     }
     return result;
@@ -345,6 +397,18 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
             else if (source->inputName != NULL && mallocAndStrcpy_s(&result->inputName, source->inputName) != 0)
             {
                 LogError("unable to copy inputName");
+                DestroyMessageData(result);
+                result = NULL;
+            }
+            else if (source->creationTimeUtc != NULL && mallocAndStrcpy_s(&result->creationTimeUtc, source->creationTimeUtc) != 0)
+            {
+                LogError("unable to copy creationTimeUtc");
+                DestroyMessageData(result);
+                result = NULL;
+            }
+            else if (source->userId != NULL && mallocAndStrcpy_s(&result->userId, source->userId) != 0)
+            {
+                LogError("unable to copy userId");
                 DestroyMessageData(result);
                 result = NULL;
             }
@@ -747,6 +811,90 @@ const char* IoTHubMessage_GetContentEncodingSystemProperty(IOTHUB_MESSAGE_HANDLE
 
         // Codes_SRS_IOTHUBMESSAGE_09_011: [IoTHubMessage_GetContentEncodingSystemProperty shall return the `contentEncoding` as a const char* ]
         result = (const char*)handleData->contentEncoding;
+    }
+
+    return result;
+}
+
+IOTHUB_MESSAGE_RESULT IoTHubMessage_SetMessageCreationTimeUtcSystemProperty(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const char* creationTimeUtc)
+{
+    IOTHUB_MESSAGE_RESULT result;
+
+    if (iotHubMessageHandle == NULL || creationTimeUtc == NULL)
+    {
+        LogError("Invalid argument (iotHubMessageHandle=%p, creationTimeUtc=%p)", iotHubMessageHandle, creationTimeUtc);
+        result = IOTHUB_MESSAGE_INVALID_ARG;
+    }
+    else
+    {
+        if (set_message_creation_time(iotHubMessageHandle, creationTimeUtc) != 0)
+        {
+            LogError("Failed saving a copy of creationTimeUtc");
+            result = IOTHUB_MESSAGE_ERROR;
+        }
+        else
+        {
+            result = IOTHUB_MESSAGE_OK;
+        }
+    }
+    return result;
+}
+
+const char* IoTHubMessage_GetMessageCreationTimeUtcSystemProperty(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
+{
+    const char* result;
+
+    if (iotHubMessageHandle == NULL)
+    {
+        LogError("Invalid argument (iotHubMessageHandle is NULL)");
+        result = NULL;
+    }
+    else
+    {
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
+        result = (const char*)handleData->creationTimeUtc;
+    }
+
+    return result;
+}
+
+IOTHUB_MESSAGE_RESULT IoTHubMessage_SetMessageUserIdSystemProperty(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const char* userId)
+{
+    IOTHUB_MESSAGE_RESULT result;
+
+    if (iotHubMessageHandle == NULL || userId == NULL)
+    {
+        LogError("Invalid argument (iotHubMessageHandle=%p, userId=%p)", iotHubMessageHandle, userId);
+        result = IOTHUB_MESSAGE_INVALID_ARG;
+    }
+    else
+    {
+        if (set_message_user_id(iotHubMessageHandle, userId) != 0)
+        {
+            LogError("Failed saving a copy of userId");
+            result = IOTHUB_MESSAGE_ERROR;
+        }
+        else
+        {
+            result = IOTHUB_MESSAGE_OK;
+        }
+    }
+    return result;
+}
+
+const char* IoTHubMessage_GetMessageUserIdSystemProperty(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
+{
+    const char* result;
+
+    if (iotHubMessageHandle == NULL)
+    {
+        LogError("Invalid argument (iotHubMessageHandle is NULL)");
+        result = NULL;
+    }
+    else
+    {
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
+        result = (const char*)handleData->userId;
     }
 
     return result;
