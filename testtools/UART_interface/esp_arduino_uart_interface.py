@@ -151,6 +151,8 @@ class esp_uart_interface(uart_interface):
                     while(output):
                         time.sleep(wait)
                         output = self.serial_read(ser, line, output_file_obj)
+                        if "done with sending" in output:
+                            serial_settings.tests_run = True
                     line = input_file_obj.readline()
 
                 if serial_settings.test_timeout:
