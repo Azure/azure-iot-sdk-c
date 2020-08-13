@@ -107,6 +107,10 @@ static int g_numTemperatureUpdates = 1;
 // Total of all temperature updates during current execution run.  Used to determine average temperature.
 static double g_allTemperatures = DEFAULT_TEMPERATURE_VALUE;
 
+// Minimum and maximum allowable temperatures to be set by service
+static double g_minTemperatureAllowed = 12;
+static double g_maxTemperatureAllowed = 30;
+
 // snprintf format for building getMaxMinReport
 static const char g_minMaxCommandResponseFormat[] = "{\"maxTemp\":%.2f,\"minTemp\":%.2f,\"avgTemp\":%.2f,\"startTime\":\"%s\",\"endTime\":\"%s\"}";
 
@@ -409,6 +413,26 @@ static void SendMaxTemperatureSinceReboot(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceC
 }
 
 //
+// IsTargetTemperatureAllowed checks whether the targetTemperature is in a range allowed by this device
+//
+static bool IsTargetTemperatureAllowed(double targetTemperature)
+{
+    bool result;
+    
+    if ((targetTemperature < g_minTemperatureAllowed) || (targetTemperature > g_maxTemperatureAllowed))
+    {
+        LogError("Target targetTemperature %f is outside of allowed policy (minAllowed=%f, maxAllowed=%f)", targetTemperature, g_minTemperatureAllowed, g_maxTemperatureAllowed);
+        result = false;
+    }
+    else
+    {
+        result = true;
+    }
+
+    return result;
+}
+
+//
 // Thermostat_DeviceTwinCallback is invoked by the IoT SDK when a twin - either full twin or a PATCH update - arrives.
 //
 static void Thermostat_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payload, size_t size, void* userContextCallback)
@@ -452,22 +476,38 @@ static void Thermostat_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE updateState, 
         // something is fundamentally wrong with how we've received the twin and we should not proceed.
         LogError("JSON field %s is not a number but must be", g_IoTHubTwinDesiredVersion);
     }
-    else if (json_value_get_type(targetTemperatureValue) != JSONNumber)
-    {
-        LogError("JSON field %s is not a number", g_JSONTargetTemperature);
-    }
     else
     {
+        // Not reaching this block indicates either that the targetTemperature was not requested to be updated (most common, not an error) or some sort of
+        // malformed JSON reached the device.  We do NOT respond in either of these cases.
+
+        // Once we are in this block, we know the JSON is well-formed and the targetTemperature is being updated.  We must acknowledge
+        // the server that we've received this request, regardless of whether we will actually apply the requested value.
         double targetTemperature = json_value_get_number(targetTemperatureValue);
-        int version = (int)json_value_get_number(versionValue);
-
-        LogInfo("Received targetTemperature = %f", targetTemperature);
-
         bool maxTempUpdated = false;
-        UpdateTemperatureAndStatistics(targetTemperature, &maxTempUpdated);
+        int version = (int)json_value_get_number(versionValue);
+        int status;
 
-        // The device needs to let the service know that it has received the targetTemperature desired property.
-        SendTargetTemperatureReport(deviceClientLL, targetTemperature, g_statusSuccess, version, g_temperaturePropertyResponseDescription);
+        if (json_value_get_type(targetTemperatureValue) != JSONNumber)
+        {
+            LogError("JSON field %s is not a number", g_JSONTargetTemperature);
+            status = g_statusBadFormat;
+        }
+        else if (IsTargetTemperatureAllowed(targetTemperature) == false)
+        {
+            LogInfo("Cannot apply target temperature %f as it is outside allowed range", targetTemperature);
+            status = g_statusBadFormat;
+        }
+        else
+        {
+            LogInfo("Received targetTemperature = %f", targetTemperature);
+            UpdateTemperatureAndStatistics(targetTemperature, &maxTempUpdated);
+            status = g_statusSuccess;
+        }
+
+        // The device needs to let the service know that it has received the targetTemperature desired property, regardless of success/failure.
+        // We always return the temperature the device is using (g_currentTemperature) regardless of whether this request status.
+        SendTargetTemperatureReport(deviceClientLL, g_currentTemperature, status, version, g_temperaturePropertyResponseDescription);
 
         if (maxTempUpdated)
         {

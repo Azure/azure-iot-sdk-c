@@ -20,6 +20,10 @@
 // Size of buffer to store ISO 8601 time.
 #define TIME_BUFFER_SIZE 128
 
+// Minimum and maximum allowable temperatures to be set by service
+static double g_minTemperatureAllowed = 12;
+static double g_maxTemperatureAllowed = 30;
+
 // Name of command this component supports to retrieve a report about the component.
 static const char g_getMinMaxReport[] = "getMaxMinReport";
 
@@ -248,7 +252,7 @@ static void UpdateTemperatureAndStatistics(PNP_THERMOSTAT_COMPONENT* pnpThermost
 //
 // SendTargetTemperatureResponse sends a PnP property indicating the device has received the desired targeted temperature
 //
-static void SendTargetTemperatureResponse(PNP_THERMOSTAT_COMPONENT* pnpThermostatComponent, IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL, int version)
+static void SendTargetTemperatureResponse(PNP_THERMOSTAT_COMPONENT* pnpThermostatComponent, IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL, int result, int version)
 {
     char targetTemperatureAsString[32];
     IOTHUB_CLIENT_RESULT iothubClientResult;
@@ -259,7 +263,7 @@ static void SendTargetTemperatureResponse(PNP_THERMOSTAT_COMPONENT* pnpThermosta
         LogError("Unable to create target temperature string for reporting result");
     }
     else if ((jsonToSend = PnP_CreateReportedPropertyWithStatus(pnpThermostatComponent->componentName, g_targetTemperaturePropertyName, targetTemperatureAsString, 
-                                                                      PNP_STATUS_SUCCESS, g_temperaturePropertyResponseDescription, version)) == NULL)
+                                                                      result, g_temperaturePropertyResponseDescription, version)) == NULL)
     {
         LogError("Unable to build reported property response");
     }
@@ -314,6 +318,26 @@ void PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(PNP_THERMOS
     STRING_delete(jsonToSend);
 }
 
+//
+// IsTargetTemperatureAllowed checks whether the targetTemperature is in a range allowed by this device
+//
+static bool IsTargetTemperatureAllowed(double targetTemperature)
+{
+    bool result;
+    
+    if ((targetTemperature < g_minTemperatureAllowed) || (targetTemperature > g_maxTemperatureAllowed))
+    {
+        LogError("Target targetTemperature %f is outside of allowed policy (minAllowed=%f, maxAllowed=%f)", targetTemperature, g_minTemperatureAllowed, g_maxTemperatureAllowed);
+        result = false;
+    }
+    else
+    {
+        result = true;
+    }
+
+    return result;
+}
+
 void PnP_ThermostatComponent_ProcessPropertyUpdate(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL, const char* propertyName, JSON_Value* propertyValue, int version)
 {
     PNP_THERMOSTAT_COMPONENT* pnpThermostatComponent = (PNP_THERMOSTAT_COMPONENT*)pnpThermostatComponentHandle;
@@ -322,21 +346,33 @@ void PnP_ThermostatComponent_ProcessPropertyUpdate(PNP_THERMOSTAT_COMPONENT_HAND
     {
         LogError("Property=%s was requested to be changed but is not part of the thermostat interface definition", propertyName);
     }
-    else if (json_value_get_type(propertyValue) != JSONNumber)
-    {
-        LogError("JSON field %s is not a number", g_targetTemperaturePropertyName);
-    }
     else
     {
+        // Once we are in this block, we know the JSON is well-formed and the targetTemperature is being updated.  We must acknowledge
+        // the server that we've received this request, regardless of whether we will actually apply the requested value.
         double targetTemperature = json_value_get_number(propertyValue);
-
-        LogInfo("Received targetTemperature=%f for component=%s", targetTemperature, pnpThermostatComponent->componentName);
-        
         bool maxTempUpdated = false;
-        UpdateTemperatureAndStatistics(pnpThermostatComponent, targetTemperature, &maxTempUpdated);
+        int status;
+
+        if (json_value_get_type(propertyValue) != JSONNumber)
+        {
+            LogError("JSON field %s is not a number", g_targetTemperaturePropertyName);
+            status = PNP_STATUS_BAD_FORMAT;
+        }
+        else if (IsTargetTemperatureAllowed(targetTemperature) == false)
+        {
+            LogInfo("Cannot apply target temperature %f as it is outside allowed range", targetTemperature);
+            status = PNP_STATUS_BAD_FORMAT;
+        }
+        else
+        {
+            LogInfo("Received targetTemperature = %f", targetTemperature);
+            UpdateTemperatureAndStatistics(pnpThermostatComponent, targetTemperature, &maxTempUpdated);
+            status = PNP_STATUS_SUCCESS;
+        }
 
         // The device needs to let the service know that it has received the targetTemperature desired property.
-        SendTargetTemperatureResponse(pnpThermostatComponent, deviceClientLL, version);
+        SendTargetTemperatureResponse(pnpThermostatComponent, deviceClientLL, status, version);
         
         if (maxTempUpdated)
         {
