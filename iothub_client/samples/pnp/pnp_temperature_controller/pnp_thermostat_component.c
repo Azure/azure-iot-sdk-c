@@ -46,11 +46,12 @@ static const char g_targetTemperaturePropertyResponseFormat[] = "%.2f";
 char g_programStartTime[TIME_BUFFER_SIZE] = {0};
 
 
-// Response description is an optional, human readable message including more information
-// about the setting of the temperature.  Because we accept all temperature requests, we 
-// always indicate a success.  An actual sensor could optionally return information about
-// a temperature being out of range or a mechanical issue on the device on error cases.
-static const char g_temperaturePropertyResponseDescription[] = "success";
+// Response description is an optional, human readable message including more information about the setting of the temperature.  
+// NOTE: Because these responses are optional, devices with RAM/ROM constraints or running over limited or metered
+// connections should omit these.
+static const char g_temperatureDescriptionSuccess[] = "success";
+static const char g_temperatureDescriptionMisformatted[] = "request misformatted";
+static const char g_temperatureDescriptionOutOfRange[] = "request out of allowed range";
 
 //
 // PNP_THERMOSTAT_COMPONENT simulates a thermostat component
@@ -252,7 +253,7 @@ static void UpdateTemperatureAndStatistics(PNP_THERMOSTAT_COMPONENT* pnpThermost
 //
 // SendTargetTemperatureResponse sends a PnP property indicating the device has received the desired targeted temperature
 //
-static void SendTargetTemperatureResponse(PNP_THERMOSTAT_COMPONENT* pnpThermostatComponent, IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL, int result, int version)
+static void SendTargetTemperatureResponse(PNP_THERMOSTAT_COMPONENT* pnpThermostatComponent, IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL, int result, const char* description, int version)
 {
     char targetTemperatureAsString[32];
     IOTHUB_CLIENT_RESULT iothubClientResult;
@@ -263,7 +264,7 @@ static void SendTargetTemperatureResponse(PNP_THERMOSTAT_COMPONENT* pnpThermosta
         LogError("Unable to create target temperature string for reporting result");
     }
     else if ((jsonToSend = PnP_CreateReportedPropertyWithStatus(pnpThermostatComponent->componentName, g_targetTemperaturePropertyName, targetTemperatureAsString, 
-                                                                      result, g_temperaturePropertyResponseDescription, version)) == NULL)
+                                                                      result, description, version)) == NULL)
     {
         LogError("Unable to build reported property response");
     }
@@ -353,26 +354,30 @@ void PnP_ThermostatComponent_ProcessPropertyUpdate(PNP_THERMOSTAT_COMPONENT_HAND
         double targetTemperature = json_value_get_number(propertyValue);
         bool maxTempUpdated = false;
         int status;
+        const char* description;
 
         if (json_value_get_type(propertyValue) != JSONNumber)
         {
             LogError("JSON field %s is not a number", g_targetTemperaturePropertyName);
             status = PNP_STATUS_BAD_FORMAT;
+            description = g_temperatureDescriptionMisformatted;
         }
         else if (IsTargetTemperatureAllowed(targetTemperature) == false)
         {
             LogInfo("Cannot apply target temperature %f as it is outside allowed range", targetTemperature);
             status = PNP_STATUS_BAD_FORMAT;
+            description = g_temperatureDescriptionOutOfRange;
         }
         else
         {
             LogInfo("Received targetTemperature = %f", targetTemperature);
             UpdateTemperatureAndStatistics(pnpThermostatComponent, targetTemperature, &maxTempUpdated);
             status = PNP_STATUS_SUCCESS;
+            description = g_temperatureDescriptionSuccess;
         }
 
         // The device needs to let the service know that it has received the targetTemperature desired property.
-        SendTargetTemperatureResponse(pnpThermostatComponent, deviceClientLL, status, version);
+        SendTargetTemperatureResponse(pnpThermostatComponent, deviceClientLL, status, description, version);
         
         if (maxTempUpdated)
         {

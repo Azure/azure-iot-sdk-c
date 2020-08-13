@@ -126,11 +126,12 @@ static const char g_maxTemperatureSinceRebootFormat[] = "{\"maxTempSinceLastRebo
 // for the solution to correlate the request and its status.
 static const char g_targetTemperatureResponseFormat[] = "{\"targetTemperature\":{\"value\":%.2f,\"ac\":%d,\"av\":%d,\"ad\":\"%s\"}}";
 
-// Response description is an optional, human readable message including more information
-// about the setting of the temperature.  Because we accept all temperature requests, we 
-// always indicate a success.  An actual sensor could optionally return information about
-// a temperature being out of range or a mechanical issue on the device on error cases.
-static const char g_temperaturePropertyResponseDescription[] = "success";
+// Response description is an optional, human readable message including more information about the setting of the temperature.  
+// NOTE: Because these responses are optional, devices with RAM/ROM constraints or running over limited or metered
+// connections should omit these.
+static const char g_temperatureDescriptionSuccess[] = "success";
+static const char g_temperatureDescriptionMisformatted[] = "request misformatted";
+static const char g_temperatureDescriptionOutOfRange[] = "request out of allowed range";
 
 // Size of buffer to store ISO 8601 time.
 #define TIME_BUFFER_SIZE 128
@@ -487,27 +488,31 @@ static void Thermostat_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE updateState, 
         bool maxTempUpdated = false;
         int version = (int)json_value_get_number(versionValue);
         int status;
+        const char* description;
 
         if (json_value_get_type(targetTemperatureValue) != JSONNumber)
         {
             LogError("JSON field %s is not a number", g_JSONTargetTemperature);
             status = g_statusBadFormat;
+            description = g_temperatureDescriptionMisformatted;
         }
         else if (IsTargetTemperatureAllowed(targetTemperature) == false)
         {
             LogInfo("Cannot apply target temperature %f as it is outside allowed range", targetTemperature);
             status = g_statusBadFormat;
+            description = g_temperatureDescriptionOutOfRange;
         }
         else
         {
             LogInfo("Received targetTemperature = %f", targetTemperature);
             UpdateTemperatureAndStatistics(targetTemperature, &maxTempUpdated);
             status = g_statusSuccess;
+            description = g_temperatureDescriptionSuccess;
         }
 
         // The device needs to let the service know that it has received the targetTemperature desired property, regardless of success/failure.
         // We always return the temperature the device is using (g_currentTemperature) regardless of whether this request status.
-        SendTargetTemperatureReport(deviceClientLL, g_currentTemperature, status, version, g_temperaturePropertyResponseDescription);
+        SendTargetTemperatureReport(deviceClientLL, g_currentTemperature, status, version, description);
 
         if (maxTempUpdated)
         {
