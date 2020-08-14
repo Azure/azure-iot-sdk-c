@@ -1,4 +1,4 @@
-# PnP Temperature Controller sample
+# Azure IoT Plug and Play Temperature Controller sample
 
 This directory contains a sample a temperature controller that implements the model [dtmi:com:example:TemperatureController;1](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/TemperatureController.json).
 
@@ -20,18 +20,4 @@ Note that the individual components are in separate .c and .h files for easier c
 
 ## Configuring the sample
 
-The `pnp_temperature_controller` uses environment variables to retrieve configuration.  
-
-* If you are using a connection string to authenticate:
-  * set IOTHUB_DEVICE_SECURITY_TYPE="connectionString"
-  * set IOTHUB_DEVICE_CONNECTION_STRING="\<connection string of your device\>"
-
-* If you are using a DPS enrollment group to authenticate:
-  * set IOTHUB_DEVICE_SECURITY_TYPE="DPS"
-  * set IOTHUB_DEVICE_DPS_ID_SCOPE="\<ID Scope of DPS instance\>"
-  * set IOTHUB_DEVICE_DPS_DEVICE_ID="\<Device's ID\>"
-  * set IOTHUB_DEVICE_DPS_DEVICE_KEY="\<Device's security key \>"
-  * *OPTIONAL*, if you do not wish to use the default endpoint "global.azure-devices-provisioning.net"
-    * set IOTHUB_DEVICE_DPS_ENDPOINT="\<DPS endpoint\>"
-
-* If you are running on a device that does not have environment variables, hardcode the values in [pnp_temperature_controller.c](./pnp_temperature_controller.c).
+See [../readme.md](../readme.md) for how to configure this sample.

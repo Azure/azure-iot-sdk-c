@@ -125,6 +125,7 @@ class esp_uart_interface(uart_interface):
             serial_settings.bits_to_cache = 1600
             serial_settings.baud_rate = 115200
 
+        session_start = time.time()
         if input_file:
             # set wait between read/write
             wait = (serial_settings.bits_to_cache/serial_settings.baud_rate)
@@ -150,12 +151,27 @@ class esp_uart_interface(uart_interface):
                     while(output):
                         time.sleep(wait)
                         output = self.serial_read(ser, line, output_file_obj)
+                        if "done with sending" in output:
+                            serial_settings.tests_run = True
                     line = input_file_obj.readline()
 
-                # read any trailing output, save to file
-                while (ser.in_waiting):
-                    time.sleep(.2)
-                    output = self.serial_read(ser, line, output_file_obj)
+                if serial_settings.test_timeout:
+                    print("Test input end. Waiting for results. Time Elapsed: ", (time.time() - session_start))
+                    while((time.time() - session_start) < serial_settings.test_timeout):
+                        time.sleep(.2)
+                        output = self.serial_read(ser, line, output_file_obj)
+                        check_sdk_errors(output)
+
+                        #for now we can assume one test suite is run
+                        if "done with sending" in output or serial_settings.tests_run:
+                            break
+                    print("Test iteration ended. Time Elapsed: ", (time.time() - session_start))
+                else:
+                    # read any trailing output, save to file
+                    while (ser.in_waiting):
+                        time.sleep(.2)
+                        output = self.serial_read(ser, line, output_file_obj)
+                        check_sdk_errors(output)
 
                 # forward failed callbacks to SDK_ERRORS
                 azure_test_firmware_errors.SDK_ERRORS += self.messages_sent - self.message_callbacks

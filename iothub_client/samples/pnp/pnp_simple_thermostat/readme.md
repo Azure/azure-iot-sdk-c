@@ -1,4 +1,4 @@
-# PnP Simple Thermostat sample
+# Azure IoT Plug and Play Simple Thermostat sample
 
 This directory contains a sample thermostat that implements the model [dtmi:com:example:Thermostat;1](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/Thermostat.json).  
 
@@ -6,8 +6,4 @@ This sample is relatively straightforward, only implementing telemetry, properti
 
 ## Configuring the sample
 
-The `pnp_simple_thermostat` uses environment variables to retrieve configuration.  
-
-* Set the environment variable `IOTHUB_DEVICE_CONNECTION_STRING` to a connection string of a device.  
-
-* To run the application on a system that does not have environment variables, you will need to hardcode the values in [pnp_simple_thermostat.c](./pnp_simple_thermostat.c).
+See [../readme.md](../readme.md) for how to configure this sample.
