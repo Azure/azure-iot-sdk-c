@@ -20,6 +20,10 @@ Please practice sound engineering practices when writing production code.
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/tickcounter.h"
 
+#ifdef ASC_ENABLED
+#include "azure_security.h"
+#endif // ASC_ENABLED
+
 /* 
 This sample uses the multithreaded APIs of iothub_client for example purposes. 
 The difference between multithreaded and singlethreaded (_ll_) API?
@@ -68,6 +72,35 @@ static const char* proxy_host = NULL;    // "Web proxy name here"
 static int proxy_port = 0;               // Proxy port
 static const char* proxy_username = NULL; // Proxy user name
 static const char* proxy_password = NULL; // Proxy password
+
+#ifdef ASC_ENABLED
+// TODO (ASC team): add proper description and documentation.
+static void send_security_message_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
+{
+    (void)userContextCallback;
+    (void)printf("Confirmation callback received for security message (result=%s)\r\n", MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
+}
+
+// TODO (ASC team): add proper description and documentation.
+static void send_device_security_info(IOTHUB_DEVICE_CLIENT_HANDLE device_handle)
+{
+    IOTHUB_MESSAGE_HANDLE security_message_handle = AzureSecurity_GetSecurityInfoMessage();
+
+    if (security_message_handle == NULL)
+    {
+        printf("Failed getting security message\r\n");
+    }
+    else
+    {
+        if (IoTHubDeviceClient_SendEventAsync(device_handle, security_message_handle, send_security_message_confirm_callback, NULL) != IOTHUB_CLIENT_OK)
+        {
+            printf("Failed sending security information message\r\n");
+        }
+
+        IoTHubMessage_Destroy(security_message_handle);
+    }
+}
+#endif // ASC_ENABLED
 
 static IOTHUBMESSAGE_DISPOSITION_RESULT receive_msg_callback(IOTHUB_MESSAGE_HANDLE message, void* user_context)
 {
@@ -251,7 +284,7 @@ int main(void)
             {
                 (void)printf("failure to set proxy\n");
             }
-        }		
+        }
 
         // Setting message callback to get C2D messages
         (void)IoTHubDeviceClient_SetMessageCallback(device_handle, receive_msg_callback, NULL);
@@ -291,6 +324,15 @@ int main(void)
         //bool urlEncodeOn = true;
         //(void)IoTHubDeviceClient_SetOption(device_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
 #endif
+
+#ifdef ASC_ENABLED
+        // TODO (ASC team): rewrite documentation below as needed
+        // Send security information (NEW!).
+        // By sending security information about your system your solution can benefit from... <add details>
+        // Please see more at <add link>
+        // Note: this feature is not required for communicating with the Azure IoT Hub.
+        send_device_security_info(device_handle);
+#endif // ASC_ENABLED
 
         while(g_continueRunning)
         {

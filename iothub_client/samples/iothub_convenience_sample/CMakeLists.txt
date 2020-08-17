@@ -16,6 +16,11 @@ IF(WIN32)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 ENDIF(WIN32)
 
+if (${enable_asc_on_samples})
+    add_definitions(-DASC_ENABLED)
+	include_directories(${AZURE_SECURITY_INC_FOLDER})
+endif()
+
 #Conditionally use the SDK trusted certs in the samples
 if(${use_sample_trusted_cert})
     add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
@@ -26,9 +31,14 @@ endif()
 include_directories(.)
 
 add_executable(iothub_convenience_sample ${iothub_c_files})
+
 if(${build_as_dynamic})
     target_link_libraries(iothub_convenience_sample iothub_client_dll)
 else()
+	if(${enable_asc_on_samples})
+		target_link_libraries(iothub_convenience_sample azure_security)
+	endif()
+
     target_link_libraries(iothub_convenience_sample iothub_client)
 
     if(${use_http})

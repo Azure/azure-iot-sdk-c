@@ -53,6 +53,7 @@ set(hsm_type_symm_key OFF CACHE BOOL "Symmetric key type of hsm used with the Pr
 set(hsm_type_custom OFF CACHE BOOL "hsm type of custom used with the Provisioning client")
 set(hsm_custom_lib "" CACHE STRING "Full path to custom HSM repo library")
 set(run_sfc_tests OFF CACHE BOOL "setup the Service Fault tests")
+set(enable_asc_on_samples ON CACHE BOOL "Enables Azure Security info on samples")
 
 # the following variables are project-wide and can be used with cmake-gui
 option(use_amqp "set use_amqp to ON if amqp is to be used, set to OFF to not use amqp" ON)
@@ -184,6 +185,7 @@ add_library(parson
     ./deps/parson/parson.c
     ./deps/parson/parson.h
 )
+
 if (MSVC)
     set_source_files_properties(../deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
 endif()
@@ -383,6 +385,17 @@ endif()
 
 add_subdirectory(iothub_client)
 add_subdirectory(serializer)
+
+if (NOT(LINUX))
+	if (${enable_asc_on_samples})
+		message(STATUS "Azure Security is only enabled on Linux systems")
+	endif()
+	set (enable_asc_on_samples OFF)
+endif()
+
+if (${enable_asc_on_samples})
+	add_subdirectory(deps/azure-security)
+endif()
 
 if (NOT ${skip_samples})
   add_subdirectory(samples/solutions)
