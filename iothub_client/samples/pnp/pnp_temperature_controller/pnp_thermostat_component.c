@@ -21,7 +21,7 @@
 #define TIME_BUFFER_SIZE 128
 
 // Name of command this component supports to retrieve a report about the component.
-static const char g_getMinMaxReport[] = "getMaxMinReport";
+static const char g_getMaxMinReport[] = "getMaxMinReport";
 
 // Names of properties for desired/reporting
 static const char g_targetTemperaturePropertyName[] = "targetTemperature";
@@ -32,7 +32,7 @@ static const char g_ISO8601Format[] = "%Y-%m-%dT%H:%M:%SZ";
 // Format string for sending temperature telemetry
 static const char g_temperatureTelemetryBodyFormat[] = "{\"temperature\":%.02f}";
 // Format string for building getMaxMinReport response
-static const char g_minMaxCommandResponseFormat[] = "{\"maxTemp\":%.2f,\"minTemp\":%.2f,\"avgTemp\":%.2f,\"startTime\":\"%s\",\"endTime\":\"%s\"}";
+static const char g_maxMinCommandResponseFormat[] = "{\"maxTemp\":%.2f,\"minTemp\":%.2f,\"avgTemp\":%.2f,\"startTime\":\"%s\",\"endTime\":\"%s\"}";
 // Format string for sending maxTempSinceLastReboot property
 static const char g_maxTempSinceLastRebootPropertyFormat[] = "%.2f";
 // Format of the body when responding to a targetTemperature 
@@ -151,7 +151,7 @@ static bool BuildMaxMinCommandResponse(PNP_THERMOSTAT_COMPONENT* pnpThermostatCo
         LogError("Unable to output the current time");
         result = false;
     }
-    else if ((responseBuilderSize = snprintf(NULL, 0, g_minMaxCommandResponseFormat, pnpThermostatComponent->minTemperature, pnpThermostatComponent->maxTemperature, 
+    else if ((responseBuilderSize = snprintf(NULL, 0, g_maxMinCommandResponseFormat, pnpThermostatComponent->maxTemperature, pnpThermostatComponent->minTemperature,
                                              pnpThermostatComponent->allTemperatures / pnpThermostatComponent->numTemperatureUpdates, g_programStartTime, currentTime)) < 0)
     {
         LogError("snprintf to determine string length for command response failed");
@@ -163,7 +163,7 @@ static bool BuildMaxMinCommandResponse(PNP_THERMOSTAT_COMPONENT* pnpThermostatCo
         LogError("Unable to allocate %lu bytes", (unsigned long)(responseBuilderSize + 1));
         result = false;
     }
-    else if ((responseBuilderSize = snprintf((char*)responseBuilder, responseBuilderSize + 1, g_minMaxCommandResponseFormat, pnpThermostatComponent->minTemperature, pnpThermostatComponent->maxTemperature, 
+    else if ((responseBuilderSize = snprintf((char*)responseBuilder, responseBuilderSize + 1, g_maxMinCommandResponseFormat, pnpThermostatComponent->maxTemperature, pnpThermostatComponent->minTemperature,
                                               pnpThermostatComponent->allTemperatures / pnpThermostatComponent->numTemperatureUpdates, g_programStartTime, currentTime)) < 0)
     {
         LogError("snprintf to output buffer for command response");
@@ -193,7 +193,7 @@ int PnP_ThermostatComponent_ProcessCommand(PNP_THERMOSTAT_COMPONENT_HANDLE pnpTh
     const char* sinceStr;
     int result;
 
-    if (strcmp(pnpCommandName, g_getMinMaxReport) != 0)
+    if (strcmp(pnpCommandName, g_getMaxMinReport) != 0)
     {
         LogError("PnP command=%s is not supported on thermostat component", pnpCommandName);
         result = PNP_STATUS_NOT_FOUND;

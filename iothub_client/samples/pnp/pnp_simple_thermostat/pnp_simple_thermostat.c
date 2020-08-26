@@ -83,7 +83,7 @@ static const char g_IoTHubTwinDesiredVersion[] = "$version";
 static const char g_JSONTargetTemperature[] = "targetTemperature";
 
 // Name of command this component supports to get report information
-static const char g_getMinMaxReport[] = "getMaxMinReport";
+static const char g_getMaxMinReport[] = "getMaxMinReport";
 // Return codes for device methods and desired property responses
 static int g_statusSuccess = 200;
 static int g_statusBadFormat = 400;
@@ -108,7 +108,7 @@ static int g_numTemperatureUpdates = 1;
 static double g_allTemperatures = DEFAULT_TEMPERATURE_VALUE;
 
 // snprintf format for building getMaxMinReport
-static const char g_minMaxCommandResponseFormat[] = "{\"maxTemp\":%.2f,\"minTemp\":%.2f,\"avgTemp\":%.2f,\"startTime\":\"%s\",\"endTime\":\"%s\"}";
+static const char g_maxMinCommandResponseFormat[] = "{\"maxTemp\":%.2f,\"minTemp\":%.2f,\"avgTemp\":%.2f,\"startTime\":\"%s\",\"endTime\":\"%s\"}";
 
 // Format string for sending temperature telemetry
 static const char g_temperatureTelemetryBodyFormat[] = "{\"temperature\":%.02f}";
@@ -196,7 +196,7 @@ static bool BuildMaxMinCommandResponse(unsigned char** response, size_t* respons
         LogError("Unable to output the current time");
         result = false;
     }
-    else if ((responseBuilderSize = snprintf(NULL, 0, g_minMaxCommandResponseFormat, g_minTemperature, g_maxTemperature, g_allTemperatures / g_numTemperatureUpdates, g_ProgramStartTime, currentTime)) < 0)
+    else if ((responseBuilderSize = snprintf(NULL, 0, g_maxMinCommandResponseFormat, g_maxTemperature, g_minTemperature, g_allTemperatures / g_numTemperatureUpdates, g_ProgramStartTime, currentTime)) < 0)
     {
         LogError("snprintf to determine string length for command response failed");
         result = false;
@@ -207,7 +207,7 @@ static bool BuildMaxMinCommandResponse(unsigned char** response, size_t* respons
         LogError("Unable to allocate %lu bytes", (unsigned long)(responseBuilderSize + 1));
         result = false;
     }
-    else if ((responseBuilderSize = snprintf((char*)responseBuilder, responseBuilderSize + 1, g_minMaxCommandResponseFormat, g_minTemperature, g_maxTemperature, g_allTemperatures / g_numTemperatureUpdates, g_ProgramStartTime, currentTime)) < 0)
+    else if ((responseBuilderSize = snprintf((char*)responseBuilder, responseBuilderSize + 1, g_maxMinCommandResponseFormat, g_maxTemperature, g_minTemperature, g_allTemperatures / g_numTemperatureUpdates, g_ProgramStartTime, currentTime)) < 0)
     {
         LogError("snprintf to output buffer for command response");
         result = false;
@@ -267,7 +267,7 @@ static int Thermostat_DeviceMethodCallback(const char* methodName, const unsigne
     *response = NULL;
     *responseSize = 0;
 
-    if (strcmp(methodName, g_getMinMaxReport) != 0)
+    if (strcmp(methodName, g_getMaxMinReport) != 0)
     {
         LogError("Method name %s is not supported on this component", methodName);
         result = g_statusNotFoundStatus;
