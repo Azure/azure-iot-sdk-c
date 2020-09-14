@@ -8,7 +8,9 @@ This repository contains the following:
 * **Azure IoT Hub Service C SDK** to interface with an Azure IoT Hub service instance from a server-side C application.
 * **Serializer Library for C** to help serialize and deserialize data on your device.
 
+## Table of Contents
 - [Azure IoT C SDKs and Libraries](#azure-iot-c-sdks-and-libraries)
+  - [Table of Contents](#table-of-contents)
   - [Packages and Libraries](#packages-and-libraries)
   - [Samples](#samples)
   - [Compile the SDK](#compile-the-sdk)
