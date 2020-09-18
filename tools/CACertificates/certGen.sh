@@ -331,7 +331,7 @@ function generate_verification_certificate()
 }
 
 ###############################################################################
-# Generates a certificate for a device, chained to the intermediate.
+# Generates a certificate for a device, chained directly to the root.
 ###############################################################################
 function generate_device_certificate()
 {
