@@ -82,8 +82,8 @@ static const char* TEST_CONNECTION_MODULE_ID = "connectionmoduleid";
 static const char* TEST_CONNECTION_MODULE_ID2 = "connectionmoduleid2";
 static const char* TEST_PROPERTY_KEY = "property_key";
 static const char* TEST_PROPERTY_VALUE = "property_value";
-static const char* TEST_NON_ASCII_PROPERTY_KEY = "\x01property_key"
-static const char* TEST_NON_ASCII_PROPERTY_VALUE = "\x01property_value"
+static const char* TEST_NON_ASCII_PROPERTY_KEY = "\x01property_key";
+static const char* TEST_NON_ASCII_PROPERTY_VALUE = "\x01property_value";
 
 static const char* TEST_MESSAGE_CREATION_TIME_UTC = "2020-07-01T01:00:00.000Z";
 static const char* TEST_MESSAGE_USER_ID = "2d4e2570-e7c2-4651-b190-4607986e3b9f";
