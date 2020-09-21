@@ -193,7 +193,7 @@ MOCKABLE_FUNCTION(, MAP_HANDLE, IoTHubMessage_Properties, IOTHUB_MESSAGE_HANDLE,
 *
 * @param   key name of the property to set using ASCII.  Note that when sending messages via the HTTP transport, this value must not contain spaces.
 *
-* @param   value of the property to set using ASCII
+* @param   value of the property to set using ASCII.
 *
 * @return  An @c IOTHUB_MESSAGE_RESULT value indicating the result of setting the property.
 */
