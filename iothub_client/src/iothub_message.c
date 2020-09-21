@@ -572,7 +572,12 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetProperty(IOTHUB_MESSAGE_HANDLE msg_handle
     }
     else
     {
-        if (Map_AddOrUpdate(msg_handle->properties, key, value) != MAP_OK)
+        if (Map_AddOrUpdate(msg_handle->properties, key, value) == MAP_FILTER_REJECT)
+        {
+            LogError("Failure validating property as ASCII");
+            result = IOTHUB_MESSAGE_INVALID_TYPE;
+        }
+        else if (Map_AddOrUpdate(msg_handle->properties, key, value) != MAP_OK)
         {
             LogError("Failure adding property to internal map");
             result = IOTHUB_MESSAGE_ERROR;
