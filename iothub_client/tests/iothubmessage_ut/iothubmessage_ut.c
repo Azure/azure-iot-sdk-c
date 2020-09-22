@@ -1776,7 +1776,7 @@ TEST_FUNCTION(IoTHubMessage_SetProperty_value_NULL_Fail)
     IoTHubMessage_Destroy(h);
 }
 
-TEST_FUNCTION(IoTHubMessage_SetProperty_Key_Non_Ascii_Fail)
+TEST_FUNCTION(IoTHubMessage_SetProperty_key_Non_Ascii_Fail)
 {
     //arrange
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
@@ -1785,7 +1785,7 @@ TEST_FUNCTION(IoTHubMessage_SetProperty_Key_Non_Ascii_Fail)
     STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(MAP_FILTER_REJECT);
 
     //act
-    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetProperty(h, TEST_PROPERTY_KEY, TEST_PROPERTY_VALUE);
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetProperty(h, TEST_NON_ASCII_PROPERTY_KEY, TEST_PROPERTY_VALUE);
 
     //assert
     ASSERT_ARE_NOT_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
@@ -1795,7 +1795,7 @@ TEST_FUNCTION(IoTHubMessage_SetProperty_Key_Non_Ascii_Fail)
     IoTHubMessage_Destroy(h);
 }
 
-TEST_FUNCTION(IoTHubMessage_SetProperty_Value_Non_Ascii_Fail)
+TEST_FUNCTION(IoTHubMessage_SetProperty_value_Non_Ascii_Fail)
 {
     //arrange
     IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
@@ -1804,7 +1804,7 @@ TEST_FUNCTION(IoTHubMessage_SetProperty_Value_Non_Ascii_Fail)
     STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(MAP_FILTER_REJECT);
 
     //act
-    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetProperty(h, TEST_PROPERTY_KEY, TEST_PROPERTY_VALUE);
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetProperty(h, TEST_PROPERTY_KEY, TEST_NON_ASCII_PROPERTY_VALUE);
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_TYPE, result);
