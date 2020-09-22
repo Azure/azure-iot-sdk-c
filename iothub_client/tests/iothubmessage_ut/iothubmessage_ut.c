@@ -1736,7 +1736,7 @@ TEST_FUNCTION(IoTHubMessage_SetProperty_handle_NULL_Fail)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetProperty(NULL, TEST_PROPERTY_KEY, TEST_PROPERTY_VALUE);
 
     //assert
-    ASSERT_ARE_NOT_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1752,7 +1752,7 @@ TEST_FUNCTION(IoTHubMessage_SetProperty_key_NULL_Fail)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetProperty(h, NULL, TEST_PROPERTY_VALUE);
 
     //assert
-    ASSERT_ARE_NOT_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1769,7 +1769,7 @@ TEST_FUNCTION(IoTHubMessage_SetProperty_value_NULL_Fail)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetProperty(h, TEST_PROPERTY_KEY, NULL);
 
     //assert
-    ASSERT_ARE_NOT_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1788,7 +1788,7 @@ TEST_FUNCTION(IoTHubMessage_SetProperty_key_Non_Ascii_Fail)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetProperty(h, TEST_NON_ASCII_PROPERTY_KEY, TEST_PROPERTY_VALUE);
 
     //assert
-    ASSERT_ARE_NOT_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_NOT_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_TYPE, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1826,7 +1826,7 @@ TEST_FUNCTION(IoTHubMessage_SetProperty_Fail)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetProperty(h, TEST_PROPERTY_KEY, TEST_PROPERTY_VALUE);
 
     //assert
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_TYPE, result);
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_ERROR, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
