@@ -191,9 +191,9 @@ MOCKABLE_FUNCTION(, MAP_HANDLE, IoTHubMessage_Properties, IOTHUB_MESSAGE_HANDLE,
 *
 * @param   iotHubMessageHandle Handle to the message.
 *
-* @param   key name of the property to set.  Note that when sending messages via the HTTP transport, this value must not contain spaces.
+* @param   key name of the property to set using valid ASCII characters.  Note that when sending messages via the HTTP transport, this value must not contain spaces.
 *
-* @param   value of the property to set.
+* @param   value of the property to set using valid ASCII characters.
 *
 * @return  An @c IOTHUB_MESSAGE_RESULT value indicating the result of setting the property.
 */
@@ -356,7 +356,7 @@ MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetConnectionModuleId, 
 MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetConnectionDeviceId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 
 /**
-* @brief   Sets the message creation time in UTC. 
+* @brief   Sets the message creation time in UTC.
 *
 * @param   iotHubMessageHandle Handle to the message.
 * @param   messageCreationTimeUtc Pointer to the message creation time as null-terminated string
