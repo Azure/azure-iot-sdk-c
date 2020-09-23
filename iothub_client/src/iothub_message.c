@@ -43,8 +43,8 @@ static bool ContainsOnlyUsAscii(const char* asciiValue)
     const char* iterator = asciiValue;
     while (iterator != NULL && *iterator != '\0')
     {
-        // Allow only printable ascii char
-        if (*iterator < ' ' || *iterator > '~')
+        // Allow only printable ascii char (excluding space ' ').
+        if (*iterator < '!' || *iterator > '~')
         {
             result = false;
             break;
@@ -54,7 +54,7 @@ static bool ContainsOnlyUsAscii(const char* asciiValue)
     return result;
 }
 
-/* Codes_SRS_IOTHUBMESSAGE_07_008: [ValidateAsciiCharactersFilter shall loop through the mapKey and mapValue strings to ensure that they only contain valid US-Ascii characters Ascii value 32 - 126.] */
+/* Codes_SRS_IOTHUBMESSAGE_07_008: [ValidateAsciiCharactersFilter shall loop through the mapKey and mapValue strings to ensure that they only contain valid US-Ascii characters Ascii value 33 - 126.] */
 static int ValidateAsciiCharactersFilter(const char* mapKey, const char* mapValue)
 {
     int result;
