@@ -5,13 +5,16 @@
 #	• uamqp
 #	• umqtt
 #	• deps/uhttp
-#	• provisioning_client/deps/uptm
+#	• provisioning_client/deps/utpm
 #
 # Getting Started
 #	1. The script you will run is written for PowerShell. Please enable scripts to run on your PowerShell
 #      instance with this command:
 #
 #	   Set-ExecutionPolicy -ExecutionPolicy Unrestricted
+# 2. To automatically create Pull Requests, this script uses the Github CLI found here:
+#        https://cli.github.com
+#    Please install it prior to running the script.
 #
 #	2. Clone the azure-iot-sdk-c repo and recursively include all submodules:
 #
@@ -243,6 +246,8 @@ else
             Write-Host "Failed pushing changes online for $SubmoduleDir"
             return $0
         }
+
+        gh pr create --title "Submodule Update"
     }
 }
 
