@@ -223,7 +223,7 @@ extern "C"
     *                  the parameter is <em>total request time</em>. When the HTTP protocol uses
     *                  winhttp, the meaning is the same as the @c dwSendTimeout and
     *                  @c dwReceiveTimeout parameters of the
-    *                  <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/aa384116(v=vs.85).aspx">
+    *                  <a href="https://msdn.microsoft.com/library/windows/desktop/aa384116(v=vs.85).aspx">
     *                  WinHttpSetTimeouts</a> API.
     *                - @b CURLOPT_LOW_SPEED_LIMIT - only available for HTTP protocol and only
     *                  when CURL is used. It has the same meaning as CURL's option with the same
