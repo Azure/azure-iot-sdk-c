@@ -248,6 +248,8 @@ else
             Write-Host "Failed pushing changes online for $SubmoduleDir"
             return $0
         }
+
+        gh pr create --title "Submodule Update" --body "Submodule Update"
     }
 }
 
