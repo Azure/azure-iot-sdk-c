@@ -181,6 +181,14 @@ function Update-Submodule() {
             Write-Host "Failed pushing changes online for $SubmoduleDir"
             return $0
         }
+
+        gh pr create --title "Submodule Update" --body "Submodule Update"
+
+        if ($LASTEXITCODE -NE 0)
+        {
+            Write-Host "Make sure you have the Github CLI installed"
+            return $0
+        }
     }
 
     cd $OriginalDir
@@ -247,7 +255,13 @@ else
             return $0
         }
 
-        gh pr create --title "Submodule Update"
+        gh pr create --title "Submodule Update" --body "Submodule Update"
+
+        if ($LASTEXITCODE -NE 0)
+        {
+            Write-Host "Make sure you have the Github CLI installed"
+            return $0
+        }
     }
 }
 
