@@ -182,7 +182,8 @@ function Update-Submodule() {
             return $0
         }
 
-        gh pr create --title "Submodule Update" --body "Submodule Update"
+        $newLink = gh pr create --title "Submodule Update" --body "Submodule Update"
+        $script:listOfLinks = $script:listOfLinks + "`n" + $newLink
 
         if ($LASTEXITCODE -NE 0)
         {
@@ -213,6 +214,8 @@ if ($UpdateSubmodulesFirst)
             return $false
         }
     }
+
+    Write-Host -ForegroundColor yellow "LINKS FOR ISSUED PR's`n" $script:listOfLinks -separator ''
 }
 else
 {
@@ -255,13 +258,15 @@ else
             return $0
         }
 
-        gh pr create --title "Submodule Update" --body "Submodule Update"
+        $cRepoLink = gh pr create --title "Submodule Update" --body "Submodule Update"
 
         if ($LASTEXITCODE -NE 0)
         {
             Write-Host "Make sure you have the Github CLI installed"
             return $0
         }
+
+        Write-Host -ForegroundColor yellow "LINK FOR ISSUED PR`n" $cRepoLink -separator ''
     }
 }
 
