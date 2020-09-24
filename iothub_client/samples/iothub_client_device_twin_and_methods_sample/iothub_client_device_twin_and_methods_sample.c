@@ -51,7 +51,7 @@
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 /* Paste in the your iothub device connection string  */
-static const char* connectionString = "[device connection string]";
+static const char* connectionString = "HostName=dawalton-hub.azure-devices.net;DeviceId=dane_cbor;SharedAccessKey=GRU+K9i6F8tE7dLYCtuQcu10u6umGO+aWGqQQhd9AAo=";
 
 #define DOWORK_LOOP_NUM     3
 
@@ -198,7 +198,7 @@ static int deviceMethodCallback(const char* method_name, const unsigned char* pa
 
     if (strcmp("getCarVIN", method_name) == 0)
     {
-        const char deviceMethodResponse[] = "{ \"Response\": \"1HGCM82633A004352\" }";
+        const char deviceMethodResponse[] = "{ \"Response\": \"1HGCM82633A004352\" } ";
         *response_size = sizeof(deviceMethodResponse)-1;
         *response = malloc(*response_size);
         (void)memcpy(*response, deviceMethodResponse, *response_size);
