@@ -37,28 +37,41 @@ typedef struct IOTHUB_MESSAGE_HANDLE_DATA_TAG
     char* userId;
 }IOTHUB_MESSAGE_HANDLE_DATA;
 
-static bool ContainsOnlyUsAscii(const char* asciiValue)
+static bool ContainsValidUsAscii(const char* asciiValue)
 {
     bool result = true;
-    const char* iterator = asciiValue;
-    while (iterator != NULL && *iterator != '\0')
+    const char* it = asciiValue;
+    while (it != NULL && *it != '\0')
     {
-        // Allow only printable ascii char (excluding space ' ').
-        if (*iterator < '!' || *iterator > '~')
+        // Allow only alphanumeric characters plus {'!', '#', '$', '%, '&', ''', '*', '+', '-', '.', '^', '_', '`', '|', '~'}
+        if ((*it == '!') ||
+            (*it >= '#' && *it <= '\'') ||
+            (*it >= '*' && *it <= '+') ||
+            (*it >= '-' && *it <= '.') ||
+            (*it >= '0' && *it <= '9') ||
+            (*it >= 'A' && *it <= 'Z') ||
+            (*it >= '^' && *it <= 'z') ||
+            (*it == '|') ||
+            (*it == '~'))
         {
-            result = false;
+            it++;
+            continue;
+        }
+        else
+        {
+            result = false; // Unaccepted value found.
             break;
         }
-        iterator++;
     }
+
     return result;
 }
 
-/* Codes_SRS_IOTHUBMESSAGE_07_008: [ValidateAsciiCharactersFilter shall loop through the mapKey and mapValue strings to ensure that they only contain valid US-Ascii characters Ascii value 33 - 126.] */
+/* Codes_SRS_IOTHUBMESSAGE_07_008: [ValidateAsciiCharactersFilter shall loop through the mapKey and mapValue strings to ensure that they only contain valid US-Ascii characters.*/
 static int ValidateAsciiCharactersFilter(const char* mapKey, const char* mapValue)
 {
     int result;
-    if (!ContainsOnlyUsAscii(mapKey) || !ContainsOnlyUsAscii(mapValue))
+    if (!ContainsValidUsAscii(mapKey) || !ContainsValidUsAscii(mapValue))
     {
         result = MU_FAILURE;
     }
