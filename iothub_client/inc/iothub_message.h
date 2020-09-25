@@ -191,11 +191,9 @@ MOCKABLE_FUNCTION(, MAP_HANDLE, IoTHubMessage_Properties, IOTHUB_MESSAGE_HANDLE,
 *
 * @param   iotHubMessageHandle Handle to the message.
 *
-* @param   key name of the property to set using allowed ASCII characters alphanumeric plus {'!', '#', '$', '%, '&', ''', '*', '+', '-', '.', '^', '_', '`', '|', '~'}['!', '~'].
-*          This value must not contain spaces.
+* @param   key name of the property to set.  Note that when sending messages via the HTTP transport, this value must not contain spaces.
 *
-* @param   value of the property to set  using allowed ASCII characters alphanumeric plus {'!', '#', '$', '%, '&', ''', '*', '+', '-', '.', '^', '_', '`', '|', '~'}['!', '~'].
-*          This value must not contain spaces.
+* @param   value of the property to set.
 *
 * @return  An @c IOTHUB_MESSAGE_RESULT value indicating the result of setting the property.
 */

@@ -63,8 +63,8 @@ const char* MSG_CONTENT_SPECIAL = "!*'();:@&=+$,/?#[]";
 const char* MSG_PROP_KEYS[MSG_PROP_COUNT] = { "Key1", "Key2", "Key3" };
 const char* MSG_PROP_VALS[MSG_PROP_COUNT] = { "Val1", "Val2", "Val3" };
 
-const char* MSG_PROP_KEYS_SPECIAL[MSG_PROP_COUNT] = { "&ey1", "K/y2", "Ke?3"};
-const char* MSG_PROP_VALS_SPECIAL[MSG_PROP_COUNT] = { "=al1", "V@l2", "Va%3" };
+const char* MSG_PROP_KEYS_SPECIAL[MSG_PROP_COUNT] = { "&ey1", "K*y2", "Ke?3"};
+const char* MSG_PROP_VALS_SPECIAL[MSG_PROP_COUNT] = { ".al1", "V@l2", "Va%3" };
 
 static size_t g_iotHubTestId = 0;
 IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo = NULL;
@@ -1036,7 +1036,7 @@ void e2e_send_security_event_test_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 
     // Free the message
     IoTHubMessage_Destroy(send_data->msgHandle);
- 
+
     // Send the messages to the ASC Event hub
     // Create an ASC Security Message
     LogInfo("Sending ASC message to endpoint");

@@ -43,25 +43,15 @@ static bool ContainsValidUsAscii(const char* asciiValue)
     const char* it = asciiValue;
     while (it != NULL && *it != '\0')
     {
-        // Allow only alphanumeric characters plus {'!', '#', '$', '%, '&', ''', '*', '+', '-', '.', '^', '_', '`', '|', '~'}
-        if ((*it == '!') ||
-            (*it >= '#' && *it <= '\'') ||
-            (*it >= '*' && *it <= '+') ||
-            (*it >= '-' && *it <= '.') ||
-            (*it >= '0' && *it <= '9') ||
-            (*it >= 'A' && *it <= 'Z') ||
-            (*it >= '^' && *it <= 'z') ||
-            (*it == '|') ||
-            (*it == '~'))
+        // Documentation: Allow only alphanumeric characters plus {'!', '#', '$', '%, '&', ''', '*', '+', '-', '.', '^', '_', '`', '|', '~'}
+        // This function originally allowed for ' ' through '~'. Of items not in documented list above, testing has only shown '/' and '=' to fail.
+        // Only updating code to not accept '/' and '=' per backwards compatability.
+        if ((*it < ' ') || (*it > '~') || (*it == '/') || (*it == '='))
         {
-            it++;
-            continue;
-        }
-        else
-        {
-            result = false; // Unaccepted value found.
+            result = false;
             break;
         }
+        it++;
     }
 
     return result;
