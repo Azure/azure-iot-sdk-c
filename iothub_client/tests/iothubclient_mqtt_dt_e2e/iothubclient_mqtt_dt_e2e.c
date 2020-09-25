@@ -18,6 +18,13 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     dt_e2e_deinit();
 }
 
+TEST_FUNCTION(IoTHub_MQTT_SendModelId_e2e_sas)
+{
+    dt_e2e_send_module_id_test(MQTT_Protocol, IOTHUB_ACCOUNT_AUTH_CONNSTRING, TEST_MODEL_ID_1);
+}
+
+#if 0
+
 //
 // MQTT tests.
 //
@@ -89,6 +96,8 @@ TEST_FUNCTION(IoTHub_MQTT_WS_GetTwinAsync_e2e_x509)
 }
 #endif
 #endif
+
+#endif // 0
 
 END_TEST_SUITE(iothubclient_mqtt_dt_e2e)
 

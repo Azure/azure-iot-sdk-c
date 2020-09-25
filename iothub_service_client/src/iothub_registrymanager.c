@@ -94,7 +94,7 @@ static const char* DEVICE_JSON_DEFAULT_VALUE_DISABLED = "disabled";
 static const char* DEVICE_JSON_DEFAULT_VALUE_CONNECTED = "Connected";
 static const char* DEVICE_JSON_DEFAULT_VALUE_TRUE = "true";
 
-static const char* URL_API_VERSION = "api-version=2019-10-01";
+static const char* URL_API_VERSION = "api-version=2020-09-30";
 
 static const char* RELATIVE_PATH_FMT_CRUD = "/devices/%s?%s";
 static const char* RELATIVE_PATH_MODULE_FMT_CRUD = "/devices/%s/modules/%s?%s";

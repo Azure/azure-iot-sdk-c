@@ -976,6 +976,19 @@ IOTHUB_PROVISIONED_DEVICE* IoTHubAccount_GetX509Device(IOTHUB_ACCOUNT_INFO_HANDL
     }
 }
 
+IOTHUB_PROVISIONED_DEVICE* IoTHubAccount_GetDevice(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle, IOTHUB_ACCOUNT_AUTH_METHOD accountAuthMethod)
+{
+    if (accountAuthMethod == IOTHUB_ACCOUNT_AUTH_X509)
+    {
+        return IoTHubAccount_GetX509Device(acctHandle);
+    }
+    else
+    {
+        return IoTHubAccount_GetSASDevice(acctHandle);
+    }
+}
+
+
 const char* IoTHubAccount_GetIoTHubConnString(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
 {
     if (acctHandle != NULL)
