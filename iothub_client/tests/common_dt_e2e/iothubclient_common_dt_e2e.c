@@ -862,6 +862,8 @@ void dt_e2e_send_module_id_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHU
     // cleanup
     json_value_free(rootValue);
     free(twinData);
+    IoTHubDeviceTwin_Destroy(serviceClientDeviceTwinHandle);
+    IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
     destroy_on_device_or_module();
     device_desired_deinit(deviceDesiredData);
 }

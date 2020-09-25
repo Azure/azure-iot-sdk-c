@@ -15,7 +15,6 @@
 #define TEST_MODEL_ID_3 "dtmi:azure:c-sdk:e2e-test;3"
 #define TEST_MODEL_ID_4 "dtmi:azure:c-sdk:e2e-test;4"
 
-
 extern void dt_e2e_init(bool testing_modules);
 extern void dt_e2e_deinit(void);
 extern void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACCOUNT_AUTH_METHOD accountAuthMethod);
