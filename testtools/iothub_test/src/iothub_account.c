@@ -982,9 +982,13 @@ IOTHUB_PROVISIONED_DEVICE* IoTHubAccount_GetDevice(IOTHUB_ACCOUNT_INFO_HANDLE ac
     {
         return IoTHubAccount_GetX509Device(acctHandle);
     }
-    else
+    else if (accountAuthMethod == IOTHUB_ACCOUNT_AUTH_CONNSTRING)
     {
         return IoTHubAccount_GetSASDevice(acctHandle);
+    }
+    else
+    {
+        return NULL;
     }
 }
 
