@@ -40,18 +40,16 @@ typedef struct IOTHUB_MESSAGE_HANDLE_DATA_TAG
 static bool ContainsValidUsAscii(const char* asciiValue)
 {
     bool result = true;
-    const char* it = asciiValue;
-    while (it != NULL && *it != '\0')
+    const char* iterator = asciiValue;
+    while (iterator != NULL && *iterator != '\0')
     {
-        // Documentation: Allow only alphanumeric characters plus {'!', '#', '$', '%, '&', ''', '*', '+', '-', '.', '^', '_', '`', '|', '~'}
-        // This function originally allowed for ' ' through '~'. Of items not in documented list above, testing has only shown '/' and '=' to fail.
-        // Only updating code to not accept '/' and '=' per backwards compatability.
-        if ((*it < ' ') || (*it > '~') || (*it == '/') || (*it == '='))
+        // Union of all allowed ASCII characters for the different protocols (HTTPS, MQTT, AMQP) is [dec 32, dec 126].
+        if (*iterator < ' ' || *iterator > '~')
         {
             result = false;
             break;
         }
-        it++;
+        iterator++;
     }
 
     return result;
