@@ -32,6 +32,7 @@ typedef struct IOTHUB_AUTHORIZATION_DATA_TAG
     char* module_id;
     size_t token_expiry_time_sec;
     IOTHUB_CREDENTIAL_TYPE cred_type;
+    IOTHUB_AUTHORIZATION_REQUEST_SAS_TOKEN_CALLBACK request_sas_token_callback;
 #ifdef USE_PROV_MODULE
     IOTHUB_SECURITY_HANDLE device_auth_handle;
 #endif
@@ -92,7 +93,31 @@ static IOTHUB_AUTHORIZATION_DATA* initialize_auth_client(const char* device_id, 
     return result;
 }
 
-IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_Create(const char* device_key, const char* device_id, const char* device_sas_token, const char *module_id)
+static void check_for_updated_sas_token(IOTHUB_AUTHORIZATION_HANDLE handle)
+{
+    if (handle->request_sas_token_callback != NULL)
+    {
+        // Fetch SAS token via callback
+        char* updated_sas_token = NULL;
+
+        handle->request_sas_token_callback(&updated_sas_token);
+
+        if (updated_sas_token != NULL)
+        {
+            if (handle->device_sas_token != NULL)
+            {
+                free(handle->device_sas_token);
+                handle->device_sas_token = NULL;
+            }
+            if (mallocAndStrcpy_s(&handle->device_sas_token, updated_sas_token) != 0)
+            {
+                LogError("failure allocating sas token");
+            }
+        }
+    }
+}
+
+IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_Create(const char* device_key, const char* device_id, const char* device_sas_token, const char *module_id, IOTHUB_AUTHORIZATION_REQUEST_SAS_TOKEN_CALLBACK request_sas_token_callback)
 {
     IOTHUB_AUTHORIZATION_DATA* result;
     bool is_key_valid;
@@ -145,10 +170,11 @@ IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_Create(const char* device_key, con
                 /* Codes_SRS_IoTHub_Authorization_07_003: [ IoTHubClient_Auth_Create shall set the credential type to IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY if the device_sas_token is NULL. ]*/
                 result->cred_type = IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY;
             }
-            else if (device_sas_token != NULL)
+            else if ((device_sas_token != NULL) || (request_sas_token_callback != NULL))
             {
                 /* Codes_SRS_IoTHub_Authorization_07_020: [ else IoTHubClient_Auth_Create shall set the credential type to IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN. ] */
                 result->cred_type = IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN;
+                result->request_sas_token_callback = request_sas_token_callback;
                 if (mallocAndStrcpy_s(&result->device_sas_token, device_sas_token) != 0)
                 {
                     /* Codes_SRS_IoTHub_Authorization_07_019: [ On error IoTHubClient_Auth_Create shall return NULL. ] */
@@ -441,6 +467,8 @@ char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const c
             /* Codes_SRS_IoTHub_Authorization_07_021: [If the device_sas_token is NOT NULL IoTHubClient_Auth_Get_SasToken shall return a copy of the device_sas_token. ] */
             if (handle->device_sas_token != NULL)
             {
+                check_for_updated_sas_token(handle);
+
                 if (mallocAndStrcpy_s(&result, handle->device_sas_token) != 0)
                 {
                     LogError("failure allocating sas token");
@@ -570,6 +598,8 @@ SAS_TOKEN_STATUS IoTHubClient_Auth_Is_SasToken_Valid(IOTHUB_AUTHORIZATION_HANDLE
     {
         if (handle->cred_type == IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN)
         {
+            check_for_updated_sas_token(handle);
+
             if (handle->device_sas_token == NULL)
             {
                 /* Codes_SRS_IoTHub_Authorization_07_017: [ If the sas_token is NULL IoTHubClient_Auth_Is_SasToken_Valid shall return false. ] */
@@ -606,6 +636,11 @@ SAS_TOKEN_STATUS IoTHubClient_Auth_Is_SasToken_Valid(IOTHUB_AUTHORIZATION_HANDLE
         }
     }
     return result;
+}
+
+bool IoTHubClient_Auth_Is_SasToken_Update_Supported(IOTHUB_AUTHORIZATION_HANDLE handle)
+{
+    return (handle->request_sas_token_callback != NULL);
 }
 
 #ifdef USE_EDGE_MODULES

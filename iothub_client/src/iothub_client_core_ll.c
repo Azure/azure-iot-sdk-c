@@ -812,11 +812,13 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
             const char* device_key;
             const char* device_id;
             const char* sas_token;
+            IOTHUB_AUTHORIZATION_REQUEST_SAS_TOKEN_CALLBACK requestSasTokenCallback = NULL;
             if (device_config == NULL)
             {
                 device_key = client_config->deviceKey;
                 device_id = client_config->deviceId;
                 sas_token = client_config->deviceSasToken;
+                requestSasTokenCallback = client_config->requestSasTokenCallback;
             }
             else
             {
@@ -826,7 +828,7 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
             }
 
             /* Codes_SRS_IOTHUBCLIENT_LL_07_029: [ IoTHubClientCore_LL_Create shall create the Auth module with the device_key, device_id, and/or deviceSasToken values ] */
-            if ((result->authorization_module = IoTHubClient_Auth_Create(device_key, device_id, sas_token, module_id)) == NULL)
+            if ((result->authorization_module = IoTHubClient_Auth_Create(device_key, device_id, sas_token, module_id, requestSasTokenCallback)) == NULL)
             {
                 LogError("Failed create authorization module");
                 free(result);

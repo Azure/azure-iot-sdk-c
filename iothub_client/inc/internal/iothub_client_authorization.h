@@ -18,6 +18,8 @@ extern "C" {
 
 typedef struct IOTHUB_AUTHORIZATION_DATA_TAG* IOTHUB_AUTHORIZATION_HANDLE;
 
+typedef void (*IOTHUB_AUTHORIZATION_REQUEST_SAS_TOKEN_CALLBACK)(char** sas_token);
+
 #define IOTHUB_CREDENTIAL_TYPE_VALUES       \
     IOTHUB_CREDENTIAL_TYPE_UNKNOWN,         \
     IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY,      \
@@ -36,7 +38,7 @@ MU_DEFINE_ENUM_WITHOUT_INVALID(IOTHUB_CREDENTIAL_TYPE, IOTHUB_CREDENTIAL_TYPE_VA
 
 MU_DEFINE_ENUM_WITHOUT_INVALID(SAS_TOKEN_STATUS, SAS_TOKEN_STATUS_VALUES);
 
-MOCKABLE_FUNCTION(, IOTHUB_AUTHORIZATION_HANDLE, IoTHubClient_Auth_Create, const char*, device_key, const char*, device_id, const char*, device_sas_token, const char *, module_id);
+MOCKABLE_FUNCTION(, IOTHUB_AUTHORIZATION_HANDLE, IoTHubClient_Auth_Create, const char*, device_key, const char*, device_id, const char*, device_sas_token, const char *, module_id, IOTHUB_AUTHORIZATION_REQUEST_SAS_TOKEN_CALLBACK, request_sas_token_callback);
 MOCKABLE_FUNCTION(, IOTHUB_AUTHORIZATION_HANDLE, IoTHubClient_Auth_CreateFromDeviceAuth, const char*, device_id, const char*, module_id);
 MOCKABLE_FUNCTION(, void, IoTHubClient_Auth_Destroy, IOTHUB_AUTHORIZATION_HANDLE, handle);
 MOCKABLE_FUNCTION(, IOTHUB_CREDENTIAL_TYPE, IoTHubClient_Auth_Set_x509_Type, IOTHUB_AUTHORIZATION_HANDLE, handle, bool, enable_x509);
@@ -47,6 +49,7 @@ MOCKABLE_FUNCTION(, const char*, IoTHubClient_Auth_Get_DeviceId, IOTHUB_AUTHORIZ
 MOCKABLE_FUNCTION(, const char*, IoTHubClient_Auth_Get_ModuleId, IOTHUB_AUTHORIZATION_HANDLE, handle);
 MOCKABLE_FUNCTION(, const char*, IoTHubClient_Auth_Get_DeviceKey, IOTHUB_AUTHORIZATION_HANDLE, handle);
 MOCKABLE_FUNCTION(, SAS_TOKEN_STATUS, IoTHubClient_Auth_Is_SasToken_Valid, IOTHUB_AUTHORIZATION_HANDLE, handle);
+MOCKABLE_FUNCTION(, bool, IoTHubClient_Auth_Is_SasToken_Update_Supported, IOTHUB_AUTHORIZATION_HANDLE, handle);
 MOCKABLE_FUNCTION(, int, IoTHubClient_Auth_Get_x509_info, IOTHUB_AUTHORIZATION_HANDLE, handle, char**, x509_cert, char**, x509_key);
 MOCKABLE_FUNCTION(, int, IoTHubClient_Auth_Set_SasToken_Expiry, IOTHUB_AUTHORIZATION_HANDLE, handle, size_t, expiry_time_seconds);
 MOCKABLE_FUNCTION(, size_t, IoTHubClient_Auth_Get_SasToken_Expiry, IOTHUB_AUTHORIZATION_HANDLE, handle);
