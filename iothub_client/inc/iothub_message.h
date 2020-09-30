@@ -356,7 +356,7 @@ MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetConnectionModuleId, 
 MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetConnectionDeviceId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 
 /**
-* @brief   Sets the message creation time in UTC. 
+* @brief   Sets the message creation time in UTC.
 *
 * @param   iotHubMessageHandle Handle to the message.
 * @param   messageCreationTimeUtc Pointer to the message creation time as null-terminated string
