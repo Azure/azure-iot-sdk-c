@@ -138,8 +138,8 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     * @param    iotHubClientHandle        The handle created by a call to the create function.
     * @param    iotHubClientStatus        The sending state is populated at the address pointed
     *                                     at by this parameter. The value will be set to
-    *                                     @c IOTHUBCLIENT_SENDSTATUS_IDLE if there is currently
-    *                                     no item to be sent and @c IOTHUBCLIENT_SENDSTATUS_BUSY
+    *                                     @c IOTHUB_CLIENT_SEND_STATUS_IDLE if there is currently
+    *                                     no item to be sent and @c IOTHUB_CLIENT_SEND_STATUS_BUSY
     *                                     if there are.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
