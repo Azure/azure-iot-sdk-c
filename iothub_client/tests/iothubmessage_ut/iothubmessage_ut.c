@@ -82,6 +82,8 @@ static const char* TEST_CONNECTION_MODULE_ID = "connectionmoduleid";
 static const char* TEST_CONNECTION_MODULE_ID2 = "connectionmoduleid2";
 static const char* TEST_PROPERTY_KEY = "property_key";
 static const char* TEST_PROPERTY_VALUE = "property_value";
+static const char* TEST_NON_ASCII_PROPERTY_KEY = "\x01property_key";
+static const char* TEST_NON_ASCII_PROPERTY_VALUE = "\x01property_value";
 
 static const char* TEST_MESSAGE_CREATION_TIME_UTC = "2020-07-01T01:00:00.000Z";
 static const char* TEST_MESSAGE_USER_ID = "2d4e2570-e7c2-4651-b190-4607986e3b9f";
@@ -1734,7 +1736,7 @@ TEST_FUNCTION(IoTHubMessage_SetProperty_handle_NULL_Fail)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetProperty(NULL, TEST_PROPERTY_KEY, TEST_PROPERTY_VALUE);
 
     //assert
-    ASSERT_ARE_NOT_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1750,7 +1752,7 @@ TEST_FUNCTION(IoTHubMessage_SetProperty_key_NULL_Fail)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetProperty(h, NULL, TEST_PROPERTY_VALUE);
 
     //assert
-    ASSERT_ARE_NOT_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1767,7 +1769,45 @@ TEST_FUNCTION(IoTHubMessage_SetProperty_value_NULL_Fail)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetProperty(h, TEST_PROPERTY_KEY, NULL);
 
     //assert
-    ASSERT_ARE_NOT_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_ARG, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubMessage_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubMessage_SetProperty_key_Non_Ascii_Fail)
+{
+    //arrange
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(MAP_FILTER_REJECT);
+
+    //act
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetProperty(h, TEST_NON_ASCII_PROPERTY_KEY, TEST_PROPERTY_VALUE);
+
+    //assert
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_TYPE, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubMessage_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubMessage_SetProperty_value_Non_Ascii_Fail)
+{
+    //arrange
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(MAP_FILTER_REJECT);
+
+    //act
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetProperty(h, TEST_PROPERTY_KEY, TEST_NON_ASCII_PROPERTY_VALUE);
+
+    //assert
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_INVALID_TYPE, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1786,7 +1826,7 @@ TEST_FUNCTION(IoTHubMessage_SetProperty_Fail)
     IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetProperty(h, TEST_PROPERTY_KEY, TEST_PROPERTY_VALUE);
 
     //assert
-    ASSERT_ARE_NOT_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, result);
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_ERROR, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -2216,5 +2256,3 @@ TEST_FUNCTION(IoTHubMessage_GetUserIdSystemProperty_SUCCEED)
 }
 
 END_TEST_SUITE(iothubmessage_ut)
-
-

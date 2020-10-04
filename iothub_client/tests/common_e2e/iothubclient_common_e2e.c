@@ -1036,7 +1036,7 @@ void e2e_send_security_event_test_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 
     // Free the message
     IoTHubMessage_Destroy(send_data->msgHandle);
- 
+
     // Send the messages to the ASC Event hub
     // Create an ASC Security Message
     LogInfo("Sending ASC message to endpoint");
