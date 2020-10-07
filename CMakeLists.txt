@@ -383,7 +383,6 @@ endif()
 
 add_subdirectory(iothub_client)
 add_subdirectory(serializer)
-add_subdirectory(digitaltwin_client)
 
 if (NOT ${skip_samples})
   add_subdirectory(samples/solutions)

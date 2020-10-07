@@ -5,7 +5,6 @@
 This repository contains the following:
 * **Azure IoT Hub Device C SDK** to connect devices running C code to Azure IoT Hub.
 * **Azure IoT Hub Device Provisioning Service Client SDK** for enrolling devices with [Azure IoT Device Provisioning Services](https://docs.microsoft.com/azure/iot-dps/) and managing enrollments lists.
-* **DigitalTwin Device SDK** to connect devices running C code to Azure IoT Hub and Azure IoT Central as a [Digital Twin](https://aka.ms/iotpnpglossary).
 * **Azure IoT Hub Service C SDK** to interface with an Azure IoT Hub service instance from a server-side C application.
 * **Serializer Library for C** to help serialize and deserialize data on your device.
 
@@ -21,7 +20,6 @@ This repository contains the following:
 ## Samples
   Here are a set of simple samples that will help you get started:
   * [Device SDK Samples](./iothub_client/samples/)
-  * [Digital Twin Device SDK Samples](./digitaltwin_client/samples/)
   * [Service SDK Samples](./iothub_service_client/samples/)
   * [Serializer Library Samples](./serializer/samples/)
 
@@ -29,7 +27,6 @@ This repository contains the following:
 
 When no package or library is available for your platform or if you want to modify the SDK code, or port the SDK to a new platform, then you can leverage the build environment provided in the repository.
   * [Device SDK](./iothub_client/readme.md#compile)
-  * [Digital Twin Device SDK](./digitaltwin_client/readme.md#digitalTwinInitialDevSetup)
   * [Service SDK](./iothub_service_client/readme.md#compile)
 
 ## SDK API Reference Documentation
@@ -66,9 +63,6 @@ To learn more about building Azure IoT Applications, you can visit the [Azure Io
 
 This SDK also contains options you can set and platform specific features.  You can find detail list in this [document](./doc/Iothub_sdk_options.md).
 
-
-### Digital Twin Device SDK
-The Digital Twin Device SDK is *only* supported over MQTT and MQTT-WS.  Additional information is available [here](./digitaltwin_client/readme.md).
 
 ### Service Client SDK
 :heavy_check_mark: feature available  :heavy_multiplication_x: feature planned but not supported  :heavy_minus_sign: no support planned

@@ -1,6 +1,6 @@
 # Run End to End Tests
 
-This document describes how to run the end to end tests, with exception of Digital Twin E2E tests.  Digital Twin E2E test setup is described [here](../digitaltwin_client/tests/dt_e2e/readme.md).
+This document describes how to run the end to end tests.
 
 - [Set up the test parameters](#testparams)
 - [Run end to end tests on a Windows development environment](#windows_client)
@@ -70,7 +70,6 @@ This document describes how to run the end to end tests, with exception of Digit
 <a name="windows_client"></a>
 ## Run end to end tests on a Windows development environment
 
-- Install Node 10 or later.
 - Start the Windows PowerShell in Administrator mode. Update execution policy by entering "set-executionpolicy unrestricted"
 - Navigate to azure-iot-sdk-c\cmake  
 - From cmake directory, run cmake with option to enable e2e testing: Cmake -Drun_e2e_tests=ON ..
