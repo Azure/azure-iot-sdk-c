@@ -20,7 +20,7 @@ except:
 
 # Note: This collection of scripts is designed to be used as a command line script with args (for automation purposes)
 # to communicate over serial to Azure IoT C SDK supported devices.
-
+# human music
 uart = None
 
 def usage():
