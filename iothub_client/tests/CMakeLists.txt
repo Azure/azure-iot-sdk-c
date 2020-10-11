@@ -124,6 +124,10 @@ endif()
     add_longhaul_test_directory(longhaul_amqp_device_twin_reported)
 endif()
 
+if(NOT ${use_schannel} AND NOT ${use_socketio})
+    add_unittest_directory(iothubclient_fuzz)
+endif()
+
 add_unittest_directory(version_ut)
 
 add_e2etest_directory(iothub_invalidcert_e2e)
