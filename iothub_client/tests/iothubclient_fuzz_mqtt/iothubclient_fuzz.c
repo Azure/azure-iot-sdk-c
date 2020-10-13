@@ -615,5 +615,4 @@ const IO_INTERFACE_DESCRIPTION* tlsio_openssl_interface_description(void)
 {
     return &tlsio_fuzz_interface_description;
 }
-tlsio_openssl_interface_description
 #endif
