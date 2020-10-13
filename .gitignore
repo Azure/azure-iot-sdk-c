@@ -206,5 +206,3 @@ build_all/windows/nuget.exe
 /cmake
 /build
 *.cert
-/.vs
-/iothub_client/samples/iothub_ll_telemetry_sample/windows/.vs/iothub_ll_telemetry_sample/v16
