@@ -125,7 +125,7 @@ endif()
 endif()
 
 if(NOT ${use_schannel} AND NOT ${use_socketio})
-    add_unittest_directory(iothubclient_fuzz)
+    add_unittest_directory(iothubclient_fuzz_mqtt)
 endif()
 
 add_unittest_directory(version_ut)
