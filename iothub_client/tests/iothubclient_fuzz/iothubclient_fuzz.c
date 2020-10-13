@@ -59,7 +59,7 @@ static size_t g_message_recv_count = 0;
 
 static unsigned char PINGRESP[] = { 0xd0, 0x00 };
 static unsigned char CONACK[] = { 0x20, 0x02, 0x00, 0x00 };
-static unsigned char PUBACK[] = { 0x40, 0x02, 0x00, 0x00 };
+static unsigned char PUBACK[] = { 0x40, 0x02, 0x00, 0x05 };
 static unsigned char SUBACK[] = { 0x90, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 static unsigned char C2D[] = { 0x32, 0x95, 0x01, 0x00, 0x84, 0x64, 0x65, 0x76, 0x69, 0x63, 0x65, 0x73, 0x2f, 0x73, 0x6e, 0x6f, 0x6f, 0x70, 0x79, 0x2f, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x2f, 0x64, 0x65, 0x76, 0x69, 0x63, 0x65, 0x62, 0x6f, 0x75, 0x6e, 0x64, 0x2f, 0x25, 0x32, 0x34, 0x2e, 0x6d, 0x69, 0x64, 0x3d, 0x39, 0x39, 0x32, 0x33, 0x64, 0x35, 0x65, 0x31, 0x2d, 0x32, 0x37, 0x35, 0x39, 0x2d, 0x34, 0x37,
                                0x30, 0x36, 0x2d, 0x39, 0x35, 0x37, 0x61, 0x2d, 0x38, 0x63, 0x38, 0x37, 0x32, 0x38, 0x64, 0x36, 0x63, 0x37, 0x65, 0x61, 0x26, 0x25, 0x32, 0x34, 0x2e, 0x74, 0x6f, 0x3d, 0x25, 0x32, 0x46, 0x64, 0x65, 0x76, 0x69, 0x63, 0x65, 0x73, 0x25, 0x32, 0x46, 0x73, 0x6e, 0x6f, 0x6f, 0x70, 0x79, 0x25, 0x32, 0x46, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x25, 0x32, 0x46, 0x64, 0x65, 0x76, 0x69,
@@ -69,6 +69,20 @@ static unsigned char TWIN_UPDATE[] = { 0x30, 0x4a, 0x00, 0x31, 0x24, 0x69, 0x6f,
 static unsigned char TWIN_GET[] = { 0x32, 0x5b, 0x00, 0x1c, 0x24, 0x69, 0x6f, 0x74, 0x68, 0x75, 0x62, 0x2f, 0x74, 0x77, 0x69, 0x6e, 0x2f, 0x72, 0x65, 0x73, 0x2f, 0x32, 0x30, 0x30, 0x2f, 0x3f, 0x24, 0x72, 0x69, 0x64, 0x3d, 0x39, 0x7b, 0x22, 0x64, 0x65, 0x73, 0x69, 0x72, 0x65, 0x64, 0x22, 0x3a, 0x7b, 0x22, 0x64, 0x64, 0x64, 0x64, 0x22, 0x3a, 0x34, 0x2c, 0x22, 0x24, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x22, 0x3a, 0x34, 0x7d, 0x2c, 0x22, 0x72, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x65, 0x64, 0x22, 0x3a, 0x7b, 0x22, 0x24, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x22, 0x3a, 0x31, 0x7d, 0x7d };
 static const char topic_twin_get[] = "$iothub/twin/GET";
 
+enum TestCase {
+    TESTCASE_NONE,
+    TESTCASE_CONACK,
+    TESTCASE_PUBACK,
+    TESTCASE_SUBACK,
+    TESTCASE_C2D,
+    TESTCASE_DEVICEMETHOD,
+    TESTCASE_TWINUPDATE,
+    TESTCASE_TWINGET
+};
+enum TestCase test_case = TESTCASE_NONE;
+char* test_filepath;
+unsigned char filebuffer[2048];
+size_t filebuffer_len;
 
 
 static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
@@ -100,6 +114,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT receive_msg_callback(IOTHUB_MESSAGE_HAND
     (void)user_context;
 
     g_message_recv_count++;
+    (void)printf("receive_msg_callback() count=%d\r\n", (int)g_message_recv_count);
     return IOTHUBMESSAGE_ACCEPTED;
 }
 
@@ -115,6 +130,8 @@ static int deviceMethodCallback(const char* method_name, const unsigned char* pa
     *response_size = strlen(method_status);
     *response = malloc(*response_size);
     (void)memcpy(*response, method_status, *response_size);
+    (void)printf("deviceMethodCallback() method_name=%s\r\n", method_name);
+
     return 200;
 }
 
@@ -124,14 +141,71 @@ static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsi
     (void)payLoad;
     (void)size;
     (void)userContextCallback;
+    (void)printf("deviceTwinCallback() update_state=%d\r\n", update_state);
 }
 
-int main(void)
+int main(int argc, const char* argv[])
 {
     IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;
     IOTHUB_MESSAGE_HANDLE message_handle;
     size_t messages_sent = 0;
     const char* telemetry_msg = "test_message";
+
+    if (argc == 3)
+    {
+        test_filepath = (char*)argv[2];
+        if (strcmp(argv[1], "CONACK") == 0)
+        {
+            test_case = TESTCASE_CONACK;
+        }
+        else if (strcmp(argv[1], "PUBACK") == 0)
+        {
+            test_case = TESTCASE_PUBACK;
+        }
+        else if (strcmp(argv[1], "SUBACK") == 0)
+        {
+            test_case = TESTCASE_SUBACK;
+        }
+        else if (strcmp(argv[1], "TWINGET") == 0)
+        {
+            test_case = TESTCASE_TWINGET;
+        }
+        else if (strcmp(argv[1], "C2D") == 0)
+        {
+            test_case = TESTCASE_C2D;
+        }
+        else if (strcmp(argv[1], "DEVICEMETHOD") == 0)
+        {
+            test_case = TESTCASE_DEVICEMETHOD;
+        }
+        else if (strcmp(argv[1], "TWINUPDATE") == 0)
+        {
+            test_case = TESTCASE_TWINUPDATE;
+        }
+
+        FILE* fp = fopen(test_filepath, "r");
+        filebuffer_len = fread(filebuffer, sizeof(filebuffer[0]), sizeof(filebuffer), fp);
+        fclose(fp);
+
+        if (filebuffer_len == sizeof(filebuffer))
+        {
+            (void)printf("ERROR: test file is to big\r\n");
+            return -1;
+        }
+    }
+    else if (argc > 1)
+    {
+        (void)printf("Usage:\r\n");
+        (void)printf("   iothubclient_fuzz CONACK <filepath>\r\n");
+        (void)printf("   iothubclient_fuzz PUBACK <filepath>\r\n");
+        (void)printf("   iothubclient_fuzz SUBACK <filepath>\r\n");
+        (void)printf("   iothubclient_fuzz C2D <filepath>\r\n");
+        (void)printf("   iothubclient_fuzz DEVICEMETHOD <filepath>\r\n");
+        (void)printf("   iothubclient_fuzz TWINUPDATE <filepath>\r\n");
+        (void)printf("   iothubclient_fuzz TWINGET <filepath>\r\n");
+        return 0;
+    }
+
 
     // Select the Protocol to use with the connection
 #ifdef SAMPLE_MQTT
@@ -194,26 +268,13 @@ int main(void)
         (void)IoTHubDeviceClient_LL_SetDeviceMethodCallback(device_ll_handle, deviceMethodCallback, NULL);
         (void)IoTHubDeviceClient_LL_SetDeviceTwinCallback(device_ll_handle, deviceTwinCallback, NULL);
 
-        do
+        int loop_count;
+        for (loop_count = 0; g_continueRunning && loop_count < 100; loop_count++)
         {
             if (messages_sent < MESSAGE_COUNT)
             {
                 // Construct the iothub message from a string or a byte array
                 message_handle = IoTHubMessage_CreateFromString(telemetry_msg);
-                //message_handle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText)));
-
-                // Set Message property
-                /*
-                (void)IoTHubMessage_SetMessageId(message_handle, "MSG_ID");
-                (void)IoTHubMessage_SetCorrelationId(message_handle, "CORE_ID");
-                (void)IoTHubMessage_SetContentTypeSystemProperty(message_handle, "application%2fjson");
-                (void)IoTHubMessage_SetContentEncodingSystemProperty(message_handle, "utf-8");
-                (void)IoTHubMessage_SetMessageCreationTimeUtcSystemProperty(message_handle, "2020-07-01T01:00:00.346Z");
-                */
-
-
-                // Add custom properties to message
-                (void)IoTHubMessage_SetProperty(message_handle, "property_key", "property_value");
 
                 (void)printf("Sending message %d to IoTHub\r\n", (int)(messages_sent + 1));
                 IoTHubDeviceClient_LL_SendEventAsync(device_ll_handle, message_handle, send_confirm_callback, NULL);
@@ -230,9 +291,8 @@ int main(void)
             }
 
             IoTHubDeviceClient_LL_DoWork(device_ll_handle);
-            ThreadAPI_Sleep(1);
-
-        } while (g_continueRunning);
+        } 
+        (void)printf("Exiting with IoTHubDeviceClient_LL_DoWork() count of: %d\r\n", loop_count);
 
         // Clean up the iothub sdk handle
         IoTHubDeviceClient_LL_Destroy(device_ll_handle);
@@ -240,6 +300,7 @@ int main(void)
     // Free all the sdk subsystem
     IoTHub_Deinit();
 
+    (void)printf("Test exit: SUCCESS\r\n");
     return 0;
 }
 
@@ -329,7 +390,14 @@ void mqtt_parse_packet(const unsigned char* buffer, size_t size)
     switch (mqtt_control_packet_type)
     {
         case 1: //CONNECT
-            received_queue_add(CONACK, sizeof(CONACK));
+            if (test_case == TESTCASE_CONACK)
+            {
+                received_queue_add(filebuffer, filebuffer_len);
+            }
+            else
+            { 
+                received_queue_add(CONACK, sizeof(CONACK));
+            }
             break;
 
         case 3: //PUBLISH
@@ -340,7 +408,16 @@ void mqtt_parse_packet(const unsigned char* buffer, size_t size)
             {
                 PUBACK[2] = buffer[idx + topic_len];      // packet id
                 PUBACK[3] = buffer[idx + topic_len + 1];
-                received_queue_add(PUBACK, sizeof(PUBACK));
+
+                if (test_case == TESTCASE_PUBACK &&
+                    PUBACK[2] == filebuffer[2] && PUBACK[3] == filebuffer[3])
+                {
+                    received_queue_add(filebuffer, filebuffer_len);
+                }
+                else
+                {
+                    received_queue_add(PUBACK, sizeof(PUBACK));
+                }
             }
 
             memset(topic_name, 0, sizeof(topic_name));
@@ -348,8 +425,15 @@ void mqtt_parse_packet(const unsigned char* buffer, size_t size)
 
             if (memcmp(topic_twin_get, topic_name, sizeof(topic_twin_get) - 1) == 0)
             {
-                TWIN_GET[31] = topic_name[strlen(topic_name)-1];
-                received_queue_add(TWIN_GET, sizeof(TWIN_GET));
+                if (test_case == TESTCASE_TWINGET)
+                {
+                    received_queue_add(filebuffer, filebuffer_len);
+                }
+                else
+                {
+                    TWIN_GET[31] = topic_name[strlen(topic_name) - 1];
+                    received_queue_add(TWIN_GET, sizeof(TWIN_GET));
+                }
             }
             break;
 
@@ -375,7 +459,16 @@ void mqtt_parse_packet(const unsigned char* buffer, size_t size)
                 SUBACK[4 + subscribe_topic_num] = 0x01;
                 subscribe_topic_num++;
             }
-            received_queue_add(SUBACK, 4 + (size_t)subscribe_topic_num);
+
+            if (test_case == TESTCASE_SUBACK &&
+                SUBACK[2] == filebuffer[2] && SUBACK[3] == filebuffer[3])
+            {
+                received_queue_add(filebuffer, filebuffer_len);
+            }
+            else
+            {
+                received_queue_add(SUBACK, 4 + (size_t)subscribe_topic_num);
+            }
             break;
 
         case 12: //PINGREQ
@@ -480,12 +573,26 @@ void tlsio_fuzz_dowork(CONCRETE_IO_HANDLE tls_io)
     }
 
     iteration++;
-    if (iteration % 20 == 0)
+    if (iteration == 20)
     {
-        //received_queue_add(C2D, sizeof(C2D));
-        received_queue_add(DEVICE_METHOD, sizeof(DEVICE_METHOD));
-        // TWIN_UPDATE
+        if (test_case == TESTCASE_DEVICEMETHOD)
+        {
+            //received_queue_add(DEVICE_METHOD, sizeof(DEVICE_METHOD));
+            received_queue_add(filebuffer, filebuffer_len);
+        }
+        else if (test_case == TESTCASE_C2D)
+        {
+            //received_queue_add(C2D, sizeof(C2D));
+            received_queue_add(filebuffer, filebuffer_len);     
+        }
+        else if (test_case == TESTCASE_TWINUPDATE)
+        {
+            //received_queue_add(TWIN_UPDATE, sizeof(TWIN_UPDATE));
+            received_queue_add(filebuffer, filebuffer_len);
+        }
     }
+
+
 }
 
 static const IO_INTERFACE_DESCRIPTION tlsio_fuzz_interface_description =
