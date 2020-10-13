@@ -1,9 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-// CAVEAT: This sample is to demonstrate azure IoT client concepts only and is not a guide design principles or style
-// Checking of return codes and error values shall be omitted for brevity.  Please practice sound engineering practices
-// when writing production code.
+// https://lcamtuf.coredump.cx/afl/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -118,7 +116,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT receive_msg_callback(IOTHUB_MESSAGE_HAND
     return IOTHUBMESSAGE_ACCEPTED;
 }
 
-static int deviceMethodCallback(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* response_size, void* userContextCallback)
+static int device_method_callback(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* response_size, void* userContextCallback)
 {
     (void)method_name;
     (void)payload;
@@ -130,7 +128,7 @@ static int deviceMethodCallback(const char* method_name, const unsigned char* pa
     *response_size = strlen(method_status);
     *response = malloc(*response_size);
     (void)memcpy(*response, method_status, *response_size);
-    (void)printf("deviceMethodCallback() method_name=%s\r\n", method_name);
+    (void)printf("device_method_callback() method_name=%s\r\n", method_name);
 
     return 200;
 }
@@ -265,7 +263,7 @@ int main(int argc, const char* argv[])
         (void)IoTHubDeviceClient_LL_SetConnectionStatusCallback(device_ll_handle, connection_status_callback, NULL);
         (void)IoTHubDeviceClient_LL_SetMessageCallback(device_ll_handle, receive_msg_callback, NULL);
         (void)IoTHubDeviceClient_LL_GetTwinAsync(device_ll_handle, deviceTwinCallback, NULL);
-        (void)IoTHubDeviceClient_LL_SetDeviceMethodCallback(device_ll_handle, deviceMethodCallback, NULL);
+        (void)IoTHubDeviceClient_LL_SetDeviceMethodCallback(device_ll_handle, device_method_callback, NULL);
         (void)IoTHubDeviceClient_LL_SetDeviceTwinCallback(device_ll_handle, deviceTwinCallback, NULL);
 
         int loop_count;
@@ -607,7 +605,9 @@ static const IO_INTERFACE_DESCRIPTION tlsio_fuzz_interface_description =
     tlsio_fuzz_setoption
 };
 
+#ifdef WIN32
 const IO_INTERFACE_DESCRIPTION* tlsio_schannel_get_interface_description(void)
 {
     return &tlsio_fuzz_interface_description;
 }
+#endif
