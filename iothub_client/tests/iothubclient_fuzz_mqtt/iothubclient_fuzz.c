@@ -401,7 +401,7 @@ void mqtt_parse_packet(const unsigned char* buffer, size_t size)
         case 3: //PUBLISH
             topic_len = ((size_t)buffer[idx] << 8) + ((size_t)buffer[idx + 1]);
             idx += 2;
-            qos = (buffer[1] >> 1) & 0x03;
+            qos = (buffer[0] >> 1) & 0x03;
             if (qos > 0)
             {
                 PUBACK[2] = buffer[idx + topic_len];      // packet id
