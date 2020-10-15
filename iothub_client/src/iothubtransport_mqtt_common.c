@@ -1893,6 +1893,12 @@ static void DisconnectFromClient(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 disconnect_ctr++;
                 ThreadAPI_Sleep(50);
             } while ((disconnect_ctr < MAX_DISCONNECT_VALUE) && (transport_data->disconnect_recv_flag == 0));
+
+            // Something went wrong sending the disconnect | Force a deinit of the mqtt client
+            if (disconnect_ctr >= MAX_DISCONNECT_VALUE)
+            {
+              mqtt_client_close_xio(transport_data->mqttClient);
+            }
         }
         DestroyXioTransport(transport_data);
 
