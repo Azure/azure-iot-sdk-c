@@ -513,14 +513,15 @@ static OPTIONHANDLER_HANDLE tlsio_fuzz_retrieveoptions(CONCRETE_IO_HANDLE handle
 CONCRETE_IO_HANDLE tlsio_fuzz_create(void* io_create_parameters)
 {
     (void)io_create_parameters;
-    CONCRETE_IO_HANDLE* result;
-    result = (CONCRETE_IO_HANDLE*)malloc(sizeof(CONCRETE_IO_HANDLE));
-    return result;
+    return (CONCRETE_IO_HANDLE*)malloc(sizeof(CONCRETE_IO_HANDLE));
 }
 
 void tlsio_fuzz_destroy(CONCRETE_IO_HANDLE tls_io)
 {
-    (void)tls_io;
+    if (tls_io)
+    {
+        free(tls_io);
+    }
 }
 
 int tlsio_fuzz_open(CONCRETE_IO_HANDLE tls_io, ON_IO_OPEN_COMPLETE on_io_open_complete, void* on_io_open_complete_context, ON_BYTES_RECEIVED on_bytes_received, 
