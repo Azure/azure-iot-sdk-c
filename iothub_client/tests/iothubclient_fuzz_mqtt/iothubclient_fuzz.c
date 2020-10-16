@@ -1,7 +1,27 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-// https://lcamtuf.coredump.cx/afl/
+// SDK fuzzing using afl-fuzz at https://lcamtuf.coredump.cx/afl/ using package https://packages.ubuntu.com/bionic/afl
+// more details at https://expresslogic.visualstudio.com/X-Ware/_wiki/wikis/X-Ware.wiki/8/Azure-RTOS-Fuzz-Testing
+
+// OS setup:
+//   sudo apt-get install afl
+//   echo core > / proc / sys / kernel / core_pattern
+//
+
+// source setup
+//   git clone  https://github.com/Azure/azure-iot-sdk-c.git
+//   cd azure-iot-sdk-c
+//   git submodule update --init
+
+// build
+//   mkdir cmake
+//   cd cmake
+//   AFL_HARDEN=1
+//   cmake -Duse_schannel=OFF -Duse_openssl=OFF -Duse_socketio=OFF -Dbuild_service_client=OFF -Dbuild_provisioning_service_client=OFF -Drun_unittests=ON -Dskip_samples=ON -Duse_wsio=OFF -Duse_http=OFF -Ddont_use_uploadtoblob=ON -Duse_wsio=OFF -DCMAKE_C_COMPILER=/usr/bin/afl-gcc -DcompileOption_C=-fsanitize=address ..
+//   cmake --build . --target iothubclient_fuzz_mqtt
+
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,9 +39,6 @@
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-/* This sample uses the _LL APIs of iothub_client for example purposes.
-Simply changing the using the convenience layer (functions not having _LL)
-and removing calls to _DoWork will yield the same results. */
 
 // The protocol you wish to use should be uncommented
 //
