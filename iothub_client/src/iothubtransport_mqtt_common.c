@@ -300,8 +300,8 @@ static void free_proxy_data(MQTTTRANSPORT_HANDLE_DATA* mqtt_transport_instance)
 static void DestroyXioTransport(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
     xio_destroy(transport_data->xioTransport);
+    mqtt_client_clear_xio(transport_data->mqttClient);
     transport_data->xioTransport = NULL;
-    mqtt_client_close_xio(transport_data->mqttClient);
 }
 
 static void set_saved_tls_options(PMQTTTRANSPORT_HANDLE_DATA transport, OPTIONHANDLER_HANDLE new_options)
