@@ -293,7 +293,6 @@ static BLOB_RESULT SendBlockIdList(HTTPAPIEX_HANDLE httpApiExHandle, const char*
     }
 
     return result;
-
 }
 
 
