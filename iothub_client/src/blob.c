@@ -305,15 +305,10 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIEN
     char* hostname = NULL;
     
     /*Codes_SRS_BLOB_02_001: [ If SASURI is NULL then Blob_UploadMultipleBlocksFromSasUri shall fail and return BLOB_INVALID_ARG. ]*/
-    if (SASURI == NULL)
-    {
-        LogError("parameter SASURI is NULL");
-        result = BLOB_INVALID_ARG;
-    }
     /*Codes_SRS_BLOB_02_002: [ If getDataCallbackEx is NULL then Blob_UploadMultipleBlocksFromSasUri shall fail and return BLOB_INVALID_ARG. ]*/
-    else if (getDataCallbackEx == NULL)
+    if ((SASURI == NULL) || (getDataCallbackEx == NULL))
     {
-        LogError("IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX getDataCallbackEx is NULL");
+        LogError("One or more required values is NULL, SASURI=%p, getDataCallbackEx=%p", SASURI, getDataCallbackEx);
         result = BLOB_INVALID_ARG;
     }
     /*Codes_SRS_BLOB_02_017: [ Blob_UploadMultipleBlocksFromSasUri shall copy from SASURI the hostname to a new const char* ]*/
@@ -377,7 +372,7 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIEN
                 }
                 else if ((result = InvokeUserCallbackAndSendBlobs(httpApiExHandle, relativePath, blockIDList, getDataCallbackEx, context, httpStatus, httpResponse)) != BLOB_OK)
                 {
-                   ; 
+                   LogError("Failed in invoking callback/sending blob step");
                 }
                 else if (*httpStatus < 300)
                 {
