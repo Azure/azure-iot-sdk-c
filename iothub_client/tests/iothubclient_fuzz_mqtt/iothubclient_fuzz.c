@@ -21,6 +21,12 @@
 //   cmake -Duse_schannel=OFF -Duse_openssl=OFF -Duse_socketio=OFF -Dbuild_service_client=OFF -Dbuild_provisioning_service_client=OFF -Drun_unittests=ON -Dskip_samples=ON -Duse_wsio=OFF -Duse_http=OFF -Ddont_use_uploadtoblob=ON -Duse_wsio=OFF -DCMAKE_C_COMPILER=/usr/bin/afl-gcc -DcompileOption_C=-fsanitize=address ..
 //   cmake --build . --target iothubclient_fuzz_mqtt
 
+// Run
+// cd ~/azure-iot-sdk-c/iothub_client/tests/iothubclient_fuzz_mqtt
+// mkdir ~/azure-iot-sdk-c/iothub_client/tests/iothubclient_fuzz_mqtt/findings_dir
+// afl-fuzz -m 230000000 -t 10000 -i temp -o findings_dir ~/azure-iot-sdk-c/cmake/iothub_client/tests/iothubclient_fuzz_mqtt/iothubclient_fuzz_mqtt CONACK @@
+
+
 
 
 #include <stdio.h>
@@ -71,6 +77,8 @@ static const char* connectionString = "HostName=fuzz-hub.azure-devices.net;Devic
 static bool g_continueRunning = true;
 static size_t g_message_count_send_confirmations = 0;
 static size_t g_message_recv_count = 0;
+
+static size_t conack_count = 0;
 
 static unsigned char PINGRESP[] = { 0xd0, 0x00 };
 static unsigned char CONACK[] = { 0x20, 0x02, 0x00, 0x00 };
@@ -361,15 +369,20 @@ void received_queue_add(const unsigned char* buffer, size_t size)
     }
 }
 
-void received_queue_remove(void)
+QUEUE_ITEM* received_queue_remove(void)
 {
+    QUEUE_ITEM* current = received_queue;
     if (received_queue != NULL)
     {
-        QUEUE_ITEM* removed = received_queue;
         received_queue = received_queue->next;
-        free((void*)removed->data);
-        free(removed);
     }
+    return current;
+}
+
+void received_queue_free(QUEUE_ITEM* removed)
+{
+    free((void*)removed->data);
+    free(removed);
 }
 
 size_t mqtt_parse_packet_length(const unsigned char* buffer, size_t* idx)
@@ -405,9 +418,10 @@ void mqtt_parse_packet(const unsigned char* buffer, size_t size)
     switch (mqtt_control_packet_type)
     {
         case 1: //CONNECT
-            if (test_case == TESTCASE_CONACK)
+            if (test_case == TESTCASE_CONACK && conack_count == 0)
             {
                 received_queue_add(filebuffer, filebuffer_len);
+                conack_count++;
             }
             else
             { 
@@ -584,8 +598,9 @@ void tlsio_fuzz_dowork(CONCRETE_IO_HANDLE tls_io)
 
     if (received_queue != NULL)
     {
-        on_bytes_received_callback(on_bytes_received_context_callback, received_queue->data, received_queue->size);
-        received_queue_remove();
+        QUEUE_ITEM* item = received_queue_remove();
+        on_bytes_received_callback(on_bytes_received_context_callback, item->data, item->size);
+        received_queue_free(item);
     }
 
     iteration++;
