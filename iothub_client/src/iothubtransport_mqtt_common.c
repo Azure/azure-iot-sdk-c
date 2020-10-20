@@ -318,6 +318,7 @@ static void free_transport_handle_data(MQTTTRANSPORT_HANDLE_DATA* transport_data
     if (transport_data->mqttClient != NULL)
     {
         mqtt_client_deinit(transport_data->mqttClient);
+        transport_data->mqttClient = NULL;
     }
 
     if (transport_data->retry_control_handle != NULL)
