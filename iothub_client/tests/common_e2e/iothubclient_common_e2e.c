@@ -1495,9 +1495,7 @@ static void recv_message_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLI
     ASSERT_IS_NOT_NULL(iotHubMessagingHandle, "Could not initialize IoTHubMessaging to send C2D messages to the device");
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
-    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_OK, IoTHubMessaging_SetTrustedCert(iotHubMessagingHandle, test_service_certs =;
-//Digicert Root CA
-
+    ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_OK, IoTHubMessaging_SetTrustedCert(iotHubMessagingHandle, test_service_certs));
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
     iotHubMessagingResult = IoTHubMessaging_Open(iotHubMessagingHandle, openCompleteCallback, (void*)"Context string for open");
