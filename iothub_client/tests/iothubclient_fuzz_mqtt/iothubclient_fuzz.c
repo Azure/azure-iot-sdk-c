@@ -1,32 +1,34 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+// Fuzzing documentation:
 // SDK fuzzing using afl-fuzz at https://lcamtuf.coredump.cx/afl/ using package https://packages.ubuntu.com/bionic/afl
 // more details at https://expresslogic.visualstudio.com/X-Ware/_wiki/wikis/X-Ware.wiki/8/Azure-RTOS-Fuzz-Testing
 
-// OS setup:
-//   sudo apt-get install afl
-//   echo core > / proc / sys / kernel / core_pattern
+// Linux OS setup:
+//   sudo apt install afl++
+//   sudo echo core > /proc/sys/kernel/core_pattern
 //
 
-// source setup
+// Source setup
 //   git clone  https://github.com/Azure/azure-iot-sdk-c.git
 //   cd azure-iot-sdk-c
 //   git submodule update --init
+//
 
-// build
+// Build
 //   mkdir cmake
 //   cd cmake
 //   AFL_HARDEN=1
 //   cmake -Duse_schannel=OFF -Duse_openssl=OFF -Duse_socketio=OFF -Dbuild_service_client=OFF -Dbuild_provisioning_service_client=OFF -Drun_unittests=ON -Dskip_samples=ON -Duse_wsio=OFF -Duse_http=OFF -Ddont_use_uploadtoblob=ON -Duse_wsio=OFF -DCMAKE_C_COMPILER=/usr/bin/afl-gcc -DcompileOption_C=-fsanitize=address ..
 //   cmake --build . --target iothubclient_fuzz_mqtt
+//
 
 // Run
 // cd ~/azure-iot-sdk-c/iothub_client/tests/iothubclient_fuzz_mqtt
 // mkdir ~/azure-iot-sdk-c/iothub_client/tests/iothubclient_fuzz_mqtt/findings_dir
 // afl-fuzz -m 230000000 -t 10000 -i temp -o findings_dir ~/azure-iot-sdk-c/cmake/iothub_client/tests/iothubclient_fuzz_mqtt/iothubclient_fuzz_mqtt CONACK @@
-
-
+//
 
 
 #include <stdio.h>
@@ -40,10 +42,6 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/xio.h"
-
-#ifdef SET_TRUSTED_CERT_IN_SAMPLES
-#include "certs.h"
-#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 
 // The protocol you wish to use should be uncommented
@@ -77,9 +75,9 @@ static const char* connectionString = "HostName=fuzz-hub.azure-devices.net;Devic
 static bool g_continueRunning = true;
 static size_t g_message_count_send_confirmations = 0;
 static size_t g_message_recv_count = 0;
-
 static size_t conack_count = 0;
 
+// MQTT PACKETS
 static unsigned char PINGRESP[] = { 0xd0, 0x00 };
 static unsigned char CONACK[] = { 0x20, 0x02, 0x00, 0x00 };
 static unsigned char PUBACK[] = { 0x40, 0x02, 0x00, 0x05 };
@@ -207,6 +205,11 @@ int main(int argc, const char* argv[])
         }
 
         FILE* fp = fopen(test_filepath, "r");
+        if (fp == NULL)
+        {
+            (void)printf("ERROR: Cant open file %s\r\n", test_filepath);
+            return -1;
+        }
         filebuffer_len = fread(filebuffer, sizeof(filebuffer[0]), sizeof(filebuffer), fp);
         fclose(fp);
 
@@ -269,12 +272,6 @@ int main(int argc, const char* argv[])
         bool traceOn = true;
         IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_LOG_TRACE, &traceOn);
 #endif
-
-#ifdef SET_TRUSTED_CERT_IN_SAMPLES
-        // Setting the Trusted Certificate. This is only necessary on systems without
-        // built in certificate stores.
-            IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_TRUSTED_CERT, certificates);
-#endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 #if defined SAMPLE_MQTT || defined SAMPLE_MQTT_WS
         //Setting the auto URL Encoder (recommended for MQTT). Please use this option unless
