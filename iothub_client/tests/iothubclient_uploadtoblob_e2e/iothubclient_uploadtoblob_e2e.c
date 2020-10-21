@@ -199,7 +199,7 @@ static void sleep_between_upload_blob_e2e_tests(void)
     //
     // On gate runs, we have many instances of this test executable running at the same time and we cannot orchestrate
     // them.  Most individual testcases take <1 second to run.  Without a sleep, this amount of traffic
-    // will end up going over throttling maximums and causing false positive test case failures.
+    // will end up going over throttling maximums and causing test case failures.
     //
     LogInfo("Invoking sleep for %d milliseconds after test case", TEST_SLEEP_BETWEEN_UPLOAD_TO_BLOB_E2E_TESTS_MS);
     ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_UPLOAD_TO_BLOB_E2E_TESTS_MS);
@@ -244,7 +244,7 @@ void e2e_uploadtoblob_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACC
     poll_for_upload_completion(&uploadToBlobStatus);
     check_upload_result(uploadToBlobStatus);
 
-    // We need to sleep in any event to avoid triggering IoT Hub upload trheshold limits in our E2E tests.  We need to do this
+    // We need to sleep in any event to avoid triggering IoT Hub upload threshold limits in our E2E tests.  We need to do this
     // before the client destroy - and not test runs themselves which would've been better - because of https://github.com/Azure/azure-iot-sdk-c/issues/1705.
     sleep_between_upload_blob_e2e_tests();
     IoTHubClient_Destroy(iotHubClientHandle);
