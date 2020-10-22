@@ -440,7 +440,7 @@ static IOTHUB_CLIENT_RESULT sendHttpRequestMethod(IOTHUB_CLIENT_EDGE_HANDLE modu
         }
         else
         {
-            if (statusCode == 200)
+            if (statusCode >= 200 && statusCode < 300)
             {
                 result = IOTHUB_CLIENT_OK;
             }
