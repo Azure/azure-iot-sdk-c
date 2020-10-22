@@ -301,6 +301,16 @@ static void reset_test_data()
     memset(&context, 0, sizeof(context));
 }
 
+static void set_expected_calls_for_Blob_UploadMultipleBlocksFromSasUri_cleanup()
+{
+    STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG)) /*this is the HTTPAPIEX handle*/
+        .IgnoreArgument_handle();
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))/*this is the XML string used for Put Block List operation*/
+        .IgnoreArgument_handle();
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*this is freeing the copy of hte hostname*/
+        .IgnoreArgument_ptr();
+}
+
 TEST_FUNCTION_INITIALIZE(Setup)
 {
     umock_c_reset_all_calls();
@@ -402,12 +412,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_succeeds_when_HTTP_status_code
             .IgnoreArgument_handle();
     }
 
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))/*this is the XML string used for Put Block List operation*/
-        .IgnoreArgument_handle();
-    STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG)) /*this is the HTTPAPIEX handle*/
-        .IgnoreArgument_handle();
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*this is freeing the copy of hte hostname*/
-        .IgnoreArgument_ptr();
+    set_expected_calls_for_Blob_UploadMultipleBlocksFromSasUri_cleanup();
 
     ///act
     BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri(TEST_VALID_SASURI_1, FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL);
@@ -480,12 +485,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_fails_when_HTTPAPIEX_ExecuteRe
             .IgnoreArgument_handle();
     }
 
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))/*this is the XML string used for Put Block List operation*/
-        .IgnoreArgument_handle();
-    STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG)) /*this is the HTTPAPIEX handle*/
-        .IgnoreArgument_handle();
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*this is freeing the copy of hte hostname*/
-        .IgnoreArgument_ptr();
+    set_expected_calls_for_Blob_UploadMultipleBlocksFromSasUri_cleanup();
 
     ///act
     BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri(TEST_VALID_SASURI_1, FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL);
@@ -516,14 +516,8 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_fails_when_BUFFER_create_fails
             STRICT_EXPECTED_CALL(BUFFER_create(&c, 1))
                 .SetReturn(NULL);
 
-            STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))/*this is the XML string used for Put Block List operation*/
-                 .IgnoreArgument_handle();
-
-            STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG))
-                .IgnoreArgument_handle();
         }
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
-            .IgnoreArgument_ptr();
+        set_expected_calls_for_Blob_UploadMultipleBlocksFromSasUri_cleanup();
     }
 
     ///act
@@ -550,9 +544,9 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_fails_when_HTTPAPIEX_Create_fa
         STRICT_EXPECTED_CALL(HTTPAPIEX_Create(TEST_HOSTNAME_1))
             .SetReturn(NULL)
             ;
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
-            .IgnoreArgument_ptr();
     }
+
+    set_expected_calls_for_Blob_UploadMultipleBlocksFromSasUri_cleanup();
 
     ///act
     BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri(TEST_VALID_SASURI_1, FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL);
@@ -577,6 +571,8 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_fails_when_malloc_fails)
         .SetReturn(NULL)
         ;
 
+    set_expected_calls_for_Blob_UploadMultipleBlocksFromSasUri_cleanup();
+
     ///act
     BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri(TEST_VALID_SASURI_1, FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL);
 
@@ -596,6 +592,8 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_SasUri_is_wrong_fails_1)
     context.source = &c;
     context.toUpload = context.size;
 
+    set_expected_calls_for_Blob_UploadMultipleBlocksFromSasUri_cleanup();
+
     ///act
     BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https:/h.h/doms", FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL); /*wrong format for protocol, notice it is actually http:\h.h\doms (missing a \ from http)*/
 
@@ -614,6 +612,8 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_SasUri_is_wrong_fails_2)
     context.size = 1;
     context.source = &c;
     context.toUpload = context.size;
+
+    set_expected_calls_for_Blob_UploadMultipleBlocksFromSasUri_cleanup();
 
     ///act
     BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h", FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL); /*there's no relative path here*/
@@ -750,12 +750,7 @@ static void Blob_UploadMultipleBlocksFromSasUri_various_sizes_happy_path_Impl(HT
             .IgnoreArgument_handle();
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)) /*this is destroying the relative path for Put Block List*/
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))/*this is the XML string used for Put Block List operation*/
-            .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG)) /*this is the HTTPAPIEX handle*/
-            .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*this is freeing the copy of hte hostname*/
-            .IgnoreArgument_ptr();
+        set_expected_calls_for_Blob_UploadMultipleBlocksFromSasUri_cleanup();
 
         ///act
         BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, proxyOptions);
@@ -932,12 +927,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_various_sizes_with_certificate
             .IgnoreArgument_handle();
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)) /*this is destroying the relative path for Put Block List*/
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))/*this is the XML string used for Put Block List operation*/
-            .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG)) /*this is the HTTPAPIEX handle*/
-            .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*this is freeing the copy of hte hostname*/
-            .IgnoreArgument_ptr();
+        set_expected_calls_for_Blob_UploadMultipleBlocksFromSasUri_cleanup();
 
         ///act
         BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, "a", NULL);
@@ -955,86 +945,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_various_sizes_with_certificate
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
 {
     size_t size = 64 * 1024 * 1024;
-
-    size_t calls_that_cannot_fail[] =
-    {
-        13   ,/*STRING_delete*/
-        26   ,/*STRING_delete*/
-        39   ,/*STRING_delete*/
-        52   ,/*STRING_delete*/
-        65   ,/*STRING_delete*/
-        78   ,/*STRING_delete*/
-        91   ,/*STRING_delete*/
-        104  ,/*STRING_delete*/
-        117  ,/*STRING_delete*/
-        130  ,/*STRING_delete*/
-        143  ,/*STRING_delete*/
-        156  ,/*STRING_delete*/
-        169  ,/*STRING_delete*/
-        182  ,/*STRING_delete*/
-        195  ,/*STRING_delete*/
-        208  ,/*STRING_delete*/
-        11   ,/*STRING_c_str*/
-        24   ,/*STRING_c_str*/
-        37   ,/*STRING_c_str*/
-        50   ,/*STRING_c_str*/
-        63   ,/*STRING_c_str*/
-        76   ,/*STRING_c_str*/
-        89   ,/*STRING_c_str*/
-        102  ,/*STRING_c_str*/
-        115  ,/*STRING_c_str*/
-        128  ,/*STRING_c_str*/
-        141  ,/*STRING_c_str*/
-        154  ,/*STRING_c_str*/
-        167  ,/*STRING_c_str*/
-        180  ,/*STRING_c_str*/
-        193  ,/*STRING_c_str*/
-        206  ,/*STRING_c_str*/
-        14   ,/*STRING_delete*/
-        27   ,/*STRING_delete*/
-        40   ,/*STRING_delete*/
-        53   ,/*STRING_delete*/
-        66   ,/*STRING_delete*/
-        79   ,/*STRING_delete*/
-        92   ,/*STRING_delete*/
-        105  ,/*STRING_delete*/
-        118  ,/*STRING_delete*/
-        131  ,/*STRING_delete*/
-        144  ,/*STRING_delete*/
-        157  ,/*STRING_delete*/
-        170  ,/*STRING_delete*/
-        183  ,/*STRING_delete*/
-        196  ,/*STRING_delete*/
-        209  ,/*STRING_delete*/
-        15   ,/*BUFFER_delete*/
-        28   ,/*BUFFER_delete*/
-        41   ,/*BUFFER_delete*/
-        54   ,/*BUFFER_delete*/
-        67   ,/*BUFFER_delete*/
-        80   ,/*BUFFER_delete*/
-        93   ,/*BUFFER_delete*/
-        106  ,/*BUFFER_delete*/
-        119  ,/*BUFFER_delete*/
-        132  ,/*BUFFER_delete*/
-        145  ,/*BUFFER_delete*/
-        158  ,/*BUFFER_delete*/
-        171  ,/*BUFFER_delete*/
-        184  ,/*BUFFER_delete*/
-        197  ,/*BUFFER_delete*/
-        210  ,/*BUFFER_delete*/
-
-
-        214, /*STRING_c_str*/
-        216, /*STRING_c_str*/
-        218, /*BUFFER_delete*/
-        219, /*STRING_delete*/
-        220, /*STRING_delete*/
-        221, /*HTTPAPIEX_Destroy*/
-        222, /*gballoc_free*/
-    };
-
     (void)umock_c_negative_tests_init();
-
 
     umock_c_reset_all_calls();
     ///arrange
@@ -1083,7 +994,8 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
             .IgnoreArgument_s2();
 
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the relative path as const char* */ /*11, 24, 27...*/
-            .IgnoreArgument_handle();
+            .IgnoreArgument_handle()
+            .CallCannotFail();
 
         STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(IGNORED_PTR_ARG, HTTPAPI_REQUEST_PUT, IGNORED_PTR_ARG, NULL, IGNORED_PTR_ARG, &httpResponse, NULL, testValidBufferHandle))
             .IgnoreArgument_handle()
@@ -1109,13 +1021,15 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
         .IgnoreArgument_handle();
 
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the XML as const char* so it can be passed to _ExecuteRequest*/
-        .IgnoreArgument_handle();
+        .IgnoreArgument_handle()
+        .CallCannotFail();
 
     STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG)) /*this is creating the XML body as BUFFER_HANDLE*/
         .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the relative path*/
-        .IgnoreArgument_handle();
+        .IgnoreArgument_handle()
+        .CallCannotFail();
 
     STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(
         IGNORED_PTR_ARG,
@@ -1137,27 +1051,15 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
         .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)) /*this is destroying the relative path for Put Block List*/
         .IgnoreArgument_handle();
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))/*this is the XML string used for Put Block List operation*/
-        .IgnoreArgument_handle();
-    STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG)) /*this is the HTTPAPIEX handle*/
-        .IgnoreArgument_handle();
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*this is freeing the copy of hte hostname*/
-        .IgnoreArgument_ptr();
+    set_expected_calls_for_Blob_UploadMultipleBlocksFromSasUri_cleanup();
 
     umock_c_negative_tests_snapshot();
 
     for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
-        size_t j;
         umock_c_negative_tests_reset();
 
-        for (j = 0;j<sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]);j++) /*not running the tests that cannot fail*/
-        {
-            if (calls_that_cannot_fail[j] == i)
-                break;
-        }
-
-        if (j == sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]))
+        if (umock_c_negative_tests_can_call_fail(i))
         {
 
             umock_c_negative_tests_fail_call(i);
@@ -1184,83 +1086,6 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_unhappy_paths)
 {
     size_t size = 64 * 1024 * 1024;
-
-    size_t calls_that_cannot_fail[] =
-    {
-        13  + 1 ,/*STRING_delete*/
-        26  + 1 ,/*STRING_delete*/
-        39  + 1 ,/*STRING_delete*/
-        52  + 1 ,/*STRING_delete*/
-        65  + 1 ,/*STRING_delete*/
-        78  + 1 ,/*STRING_delete*/
-        91  + 1 ,/*STRING_delete*/
-        104 + 1 ,/*STRING_delete*/
-        117 + 1 ,/*STRING_delete*/
-        130 + 1 ,/*STRING_delete*/
-        143 + 1 ,/*STRING_delete*/
-        156 + 1 ,/*STRING_delete*/
-        169 + 1 ,/*STRING_delete*/
-        182 + 1 ,/*STRING_delete*/
-        195 + 1 ,/*STRING_delete*/
-        208 + 1 ,/*STRING_delete*/
-        11  + 1 ,/*STRING_c_str*/
-        24  + 1 ,/*STRING_c_str*/
-        37  + 1 ,/*STRING_c_str*/
-        50  + 1 ,/*STRING_c_str*/
-        63  + 1 ,/*STRING_c_str*/
-        76  + 1 ,/*STRING_c_str*/
-        89  + 1 ,/*STRING_c_str*/
-        102 + 1 ,/*STRING_c_str*/
-        115 + 1 ,/*STRING_c_str*/
-        128 + 1 ,/*STRING_c_str*/
-        141 + 1 ,/*STRING_c_str*/
-        154 + 1 ,/*STRING_c_str*/
-        167 + 1 ,/*STRING_c_str*/
-        180 + 1 ,/*STRING_c_str*/
-        193 + 1 ,/*STRING_c_str*/
-        206 + 1 ,/*STRING_c_str*/
-        14  + 1 ,/*STRING_delete*/
-        27  + 1 ,/*STRING_delete*/
-        40  + 1 ,/*STRING_delete*/
-        53  + 1 ,/*STRING_delete*/
-        66  + 1 ,/*STRING_delete*/
-        79  + 1 ,/*STRING_delete*/
-        92  + 1 ,/*STRING_delete*/
-        105 + 1 ,/*STRING_delete*/
-        118 + 1 ,/*STRING_delete*/
-        131 + 1 ,/*STRING_delete*/
-        144 + 1 ,/*STRING_delete*/
-        157 + 1 ,/*STRING_delete*/
-        170 + 1 ,/*STRING_delete*/
-        183 + 1 ,/*STRING_delete*/
-        196 + 1 ,/*STRING_delete*/
-        209 + 1 ,/*STRING_delete*/
-        15  + 1 ,/*BUFFER_delete*/
-        28  + 1 ,/*BUFFER_delete*/
-        41  + 1 ,/*BUFFER_delete*/
-        54  + 1 ,/*BUFFER_delete*/
-        67  + 1 ,/*BUFFER_delete*/
-        80  + 1 ,/*BUFFER_delete*/
-        93  + 1 ,/*BUFFER_delete*/
-        106 + 1 ,/*BUFFER_delete*/
-        119 + 1 ,/*BUFFER_delete*/
-        132 + 1 ,/*BUFFER_delete*/
-        145 + 1 ,/*BUFFER_delete*/
-        158 + 1 ,/*BUFFER_delete*/
-        171 + 1 ,/*BUFFER_delete*/
-        184 + 1 ,/*BUFFER_delete*/
-        197 + 1 ,/*BUFFER_delete*/
-        210 + 1 ,/*BUFFER_delete*/
-
-
-        214+1, /*STRING_c_str*/
-        216+1, /*STRING_c_str*/
-        218+1, /*BUFFER_delete*/
-        219+1, /*STRING_delete*/
-        220+1, /*STRING_delete*/
-        221+1, /*HTTPAPIEX_Destroy*/
-        222+1, /*gballoc_free*/
-    };
 
     (void)umock_c_negative_tests_init();
 
@@ -1313,7 +1138,8 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_unhappy_
             .IgnoreArgument_s2();
 
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the relative path as const char* */ /*12, 25, 38...*/
-            .IgnoreArgument_handle();
+            .IgnoreArgument_handle()
+            .CallCannotFail();
 
         STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(IGNORED_PTR_ARG, HTTPAPI_REQUEST_PUT, IGNORED_PTR_ARG, NULL, IGNORED_PTR_ARG, &httpResponse, NULL, testValidBufferHandle))
             .IgnoreArgument_handle()
@@ -1339,13 +1165,15 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_unhappy_
         .IgnoreArgument_handle();
 
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the XML as const char* so it can be passed to _ExecuteRequest*/
-        .IgnoreArgument_handle();
+        .IgnoreArgument_handle()
+        .CallCannotFail();
 
     STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG)) /*this is creating the XML body as BUFFER_HANDLE*/
         .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)) /*this is getting the relative path*/
-        .IgnoreArgument_handle();
+        .IgnoreArgument_handle()
+        .CallCannotFail();
 
     STRICT_EXPECTED_CALL(HTTPAPIEX_ExecuteRequest(
         IGNORED_PTR_ARG,
@@ -1367,27 +1195,15 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_unhappy_
         .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG)) /*this is destroying the relative path for Put Block List*/
         .IgnoreArgument_handle();
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))/*this is the XML string used for Put Block List operation*/
-        .IgnoreArgument_handle();
-    STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG)) /*this is the HTTPAPIEX handle*/
-        .IgnoreArgument_handle();
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*this is freeing the copy of the hostname*/ /* 223 */
-        .IgnoreArgument_ptr();
+    set_expected_calls_for_Blob_UploadMultipleBlocksFromSasUri_cleanup();
 
     umock_c_negative_tests_snapshot();
 
     for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
-        size_t j;
         umock_c_negative_tests_reset();
 
-        for (j = 0;j<sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]);j++) /*not running the tests that cannot fail*/
-        {
-            if (calls_that_cannot_fail[j] == i)
-                break;
-        }
-
-        if (j == sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]))
+        if (umock_c_negative_tests_can_call_fail(i))
         {
 
             umock_c_negative_tests_fail_call(i);
@@ -1480,12 +1296,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_when_http_code_is_404_it_immediately_succeed
 
     /*this part is Put Block list*/ /*notice: no op because it failed before with 404*/
 
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))/*this is the XML string used for Put Block List operation*/
-        .IgnoreArgument_handle();
-    STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG)) /*this is the HTTPAPIEX handle*/
-        .IgnoreArgument_handle();
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG)) /*this is freeing the copy of hte hostname*/
-        .IgnoreArgument_ptr();
+    set_expected_calls_for_Blob_UploadMultipleBlocksFromSasUri_cleanup();
 
     ///act
     BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL);
