@@ -50,7 +50,7 @@
 #include "certs.h"
 #endif // SET_TRUSTED_CERT
 
-const char* test_service_certs =
+const char* test_service_cert =
 // Digicert Root CA used for Event Hub
 "-----BEGIN CERTIFICATE-----\r\n"
 "MIIDjjCCAnagAwIBAgIQAzrx5qcRqaC7KGSxHQn65TANBgkqhkiG9w0BAQsFADBh\r\n"
@@ -1155,7 +1155,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                 else
                 {
 #ifdef SET_TRUSTED_CERT
-                    xio_setoption(tls_io, OPTION_TRUSTED_CERT, test_service_certs);
+                    xio_setoption(tls_io, OPTION_TRUSTED_CERT, test_service_cert);
 #endif // SET_TRUSTED_CERT
 
                     /* create the SASL client IO using the TLS IO */
