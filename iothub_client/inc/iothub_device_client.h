@@ -138,6 +138,8 @@ extern "C"
     *                                     no item to be sent and @c IOTHUB_CLIENT_SEND_STATUS_BUSY
     *                                     if there are.
     *
+    * @remark    Does not return information related to uploads initiated by IoTHubDeviceClient_UploadToBlob or IoTHubDeviceClient_UploadMultipleBlocksToBlob.
+    *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_GetSendStatus, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_STATUS*, iotHubClientStatus);
@@ -172,6 +174,8 @@ extern "C"
     *           @b NOTE: The application behavior is undefined if the user calls
     *           the ::IoTHubDeviceClient_LL_Destroy function from within any callback.
     *
+    * @remark   Callback specified will not receive connection status change notifications for upload connections created with IoTHubDeviceClient_UploadToBlob or IoTHubDeviceClient_UploadMultipleBlocksToBlob.
+    *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_SetConnectionStatusCallback, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK, connectionStatusCallback, void*, userContextCallback);
@@ -188,6 +192,8 @@ extern "C"
     *
     *           @b NOTE: The application behavior is undefined if the user calls
     *           the ::IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *
+    * @remark   Uploads initiated by IoTHubDeviceClient_UploadToBlob or IoTHubDeviceClient_UploadMultipleBlocksToBlob do not have automatic retries and do not honor the retryPolicy settings.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -231,45 +237,8 @@ extern "C"
     * @param    optionName              Name of the option.
     * @param    value                   The value.
     *
-    *           The options that can be set via this API are:
-    *                - @b timeout - the maximum time in milliseconds a communication is
-    *                  allowed to use. @p value is a pointer to an @c unsigned @c int with
-    *                  the timeout value in milliseconds. This is only supported for the HTTP
-    *                  protocol as of now. When the HTTP protocol uses CURL, the meaning of
-    *                  the parameter is <em>total request time</em>. When the HTTP protocol uses
-    *                  winhttp, the meaning is the same as the @c dwSendTimeout and
-    *                  @c dwReceiveTimeout parameters of the
-    *                  <a href="https://msdn.microsoft.com/library/windows/desktop/aa384116(v=vs.85).aspx">
-    *                  WinHttpSetTimeouts</a> API.
-    *                - @b CURLOPT_LOW_SPEED_LIMIT - only available for HTTP protocol and only
-    *                  when CURL is used. It has the same meaning as CURL's option with the same
-    *                  name. @p value is pointer to a long.
-    *                - @b CURLOPT_LOW_SPEED_TIME - only available for HTTP protocol and only
-    *                  when CURL is used. It has the same meaning as CURL's option with the same
-    *                  name. @p value is pointer to a long.
-    *                - @b CURLOPT_FORBID_REUSE - only available for HTTP protocol and only
-    *                  when CURL is used. It has the same meaning as CURL's option with the same
-    *                  name. @p value is pointer to a long.
-    *                - @b CURLOPT_FRESH_CONNECT - only available for HTTP protocol and only
-    *                  when CURL is used. It has the same meaning as CURL's option with the same
-    *                  name. @p value is pointer to a long.
-    *                - @b CURLOPT_VERBOSE - only available for HTTP protocol and only
-    *                  when CURL is used. It has the same meaning as CURL's option with the same
-    *                  name. @p value is pointer to a long.
-    *                - @b messageTimeout - the maximum time in milliseconds until a message
-    *                 is timeouted. The time starts at IoTHubDeviceClient_SendEventAsync. By default,
-    *                 messages do not expire. @p is a pointer to a uint64_t
-    *                - @b svc2cl_keep_alive_timeout_secs - the AMQP service side keep alive interval in seconds.
-    *                 After the connection established the client requests the server to set the
-    *                 keep alive interval for given time.
-    *                 If it is not set then the default 240 sec applies.
-    *                 If it is set to zero the server will not send keep alive messages to the client.
-    *                - @b cl2svc_keep_alive_send_ratio - the AMQP client side keep alive interval in seconds.
-    *                 After the connection established the server requests the client to set the
-    *                 keep alive interval for given time.
-    *                 If it is not set then the default ratio of 1/2 is applied.
-    *                 The ratio has to be greater than 0.0 and equal to or less than 0.9
-
+    * @remarks  Documentation for configuration options is available at https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/Iothub_sdk_options.md.
+    * 
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_SetOption, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, const char*, optionName, const void*, value);
