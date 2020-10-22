@@ -81,6 +81,8 @@ static const char* DEVICE_METHOD_RESPONSE_TOPIC = "$iothub/methods/res/%d/?$rid=
 static const char* REQUEST_ID_PROPERTY = "?$rid=";
 
 static const char* MESSAGE_ID_PROPERTY = "mid";
+static const char* MESSAGE_CREATION_TIME_UTC = "ctime";
+static const char* MESSAGE_USER_ID = "uid";
 static const char* CORRELATION_ID_PROPERTY = "cid";
 static const char* CONTENT_TYPE_PROPERTY = "ct";
 static const char* CONTENT_ENCODING_PROPERTY = "ce";
@@ -733,6 +735,17 @@ static int addSystemPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_messag
             index++;
         }
     }
+
+    if (result == 0)
+    {
+        const char* message_creation_time_utc = IoTHubMessage_GetMessageCreationTimeUtcSystemProperty(iothub_message_handle);
+        if (message_creation_time_utc != NULL)
+        {
+            result = addSystemPropertyToTopicString(topic_string, index, MESSAGE_CREATION_TIME_UTC, message_creation_time_utc, urlencode);
+            index++;
+        }
+    }
+
     if (result == 0)
     {
         if (is_security_msg)
@@ -1190,15 +1203,17 @@ static int subscribeToNotifyStateIfNeeded(PMQTTTRANSPORT_HANDLE_DATA transport_d
     return result;
 }
 
-
 static bool isSystemProperty(const char* tokenData)
 {
     bool result = false;
     size_t propCount = sizeof(sysPropList) / sizeof(sysPropList[0]);
     size_t index = 0;
+    size_t tokenDataLength = strlen(tokenData);
+
     for (index = 0; index < propCount; index++)
     {
-        if (memcmp(tokenData, sysPropList[index].propName, sysPropList[index].propLength) == 0)
+        if (tokenDataLength >= sysPropList[index].propLength &&
+            memcmp(tokenData, sysPropList[index].propName, sysPropList[index].propLength) == 0)
         {
             result = true;
             break;
@@ -1265,6 +1280,19 @@ static int setMqttMessagePropertyIfPossible(IOTHUB_MESSAGE_HANDLE IoTHubMessage,
     // Not finding a system property to map to isn't an error.
     int result = 0;
 
+    if (nameLen > 5)
+    {
+        if (strcmp((const char*)&propName[nameLen - 5], MESSAGE_CREATION_TIME_UTC) == 0)
+        {
+            if (IoTHubMessage_SetMessageCreationTimeUtcSystemProperty(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
+            {
+                LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'CreationTimeUtc' property.");
+                result = MU_FAILURE;
+            }
+            return result;
+        }
+    }
+
     if (nameLen > 4)
     {
         if (strcmp((const char*)&propName[nameLen - 4], CONNECTION_DEVICE_ID) == 0)
@@ -1304,6 +1332,15 @@ static int setMqttMessagePropertyIfPossible(IOTHUB_MESSAGE_HANDLE IoTHubMessage,
             if (IoTHubMessage_SetCorrelationId(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
             {
                 LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'correlationId' property.");
+                result = MU_FAILURE;
+            }
+            return result;
+        }
+        else if (strcmp((const char*)&propName[nameLen - 3], MESSAGE_USER_ID) == 0)
+        {
+            if (IoTHubMessage_SetMessageUserIdSystemProperty(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
+            {
+                LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'userId' property.");
                 result = MU_FAILURE;
             }
             return result;
@@ -2190,7 +2227,7 @@ static int buildConfigForUsernameStep2IfNeeded(PMQTTTRANSPORT_HANDLE_DATA transp
         const char* modelId = transport_data->transport_callbacks.get_model_id_cb(transport_data->transport_ctx);
         // TODO: The preview API version in SDK is only scoped to scenarios that require the modelId to be set.
         // https://github.com/Azure/azure-iot-sdk-c/issues/1547 tracks removing this once non-preview API versions support modelId.
-        const char* apiVersion = (modelId != NULL) ? IOTHUB_API_PREVIEW_VERSION : IOTHUB_API_VERSION;
+        const char* apiVersion = IOTHUB_API_VERSION;
         const char* appSpecifiedProductInfo = transport_data->transport_callbacks.prod_info_cb(transport_data->transport_ctx);
         STRING_HANDLE productInfoEncoded = NULL; 
 

@@ -8,14 +8,14 @@
 // thermostat2.  
 //
 // The code in this header/.c file is designed to be generic so that the calling application can call PnP_ThermostatComponent_CreateHandle
-// multiple times and then pass processing of a given component (thermostat1 or thermostat2) to the appropriate helper.
+// multiple times and then pass processing of a given component (thermostat1 or thermostat2) to the appropriate function.
 //
 
 #ifndef PNP_THERMOSTAT_CONTROLLER_H
 #define PNP_THERMOSTAT_CONTROLLER_H
 
 #include "parson.h"
-#include "iothub_device_client.h"
+#include "iothub_device_client_ll.h"
 
 //
 // Handle representing a thermostat component.
@@ -43,17 +43,17 @@ int PnP_ThermostatComponent_ProcessCommand(PNP_THERMOSTAT_COMPONENT_HANDLE pnpTh
 // PnP_ThermostatComponent_ProcessPropertyUpdate processes an incoming property update and, if the property is in the thermostat's model, will
 // send a reported property acknowledging receipt of the property request from IoTHub.
 //
-void PnP_ThermostatComponent_ProcessPropertyUpdate(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, IOTHUB_DEVICE_CLIENT_HANDLE deviceClient, const char* propertyName, JSON_Value* propertyValue, int version);
+void PnP_ThermostatComponent_ProcessPropertyUpdate(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL, const char* propertyName, JSON_Value* propertyValue, int version);
 
 //
 // PnP_ThermostatComponent_SendTelemetry sends telemetry indicating the current temperature of the thermostat.
 //
-void PnP_ThermostatComponent_SendTelemetry(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, IOTHUB_DEVICE_CLIENT_HANDLE deviceClient);
+void PnP_ThermostatComponent_SendTelemetry(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL);
 
 //
 // PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property sends a property indicating maxTempSinceLastReboot.  Since 
 // this property is not "writeable" in the DTDL, the application can invoke this at startup.
 //
-void PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, IOTHUB_DEVICE_CLIENT_HANDLE deviceClient);
+void PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL);
 
 #endif /* PNP_THERMOSTAT_CONTROLLER_H */

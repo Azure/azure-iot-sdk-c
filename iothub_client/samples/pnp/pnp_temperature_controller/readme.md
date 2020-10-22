@@ -1,4 +1,4 @@
-# PnP Temperature Controller sample
+# Azure IoT Plug and Play Temperature Controller sample
 
 This directory contains a sample a temperature controller that implements the model [dtmi:com:example:TemperatureController;1](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/TemperatureController.json).
 
@@ -17,3 +17,7 @@ Note that the individual components are in separate .c and .h files for easier c
 * [pnp_deviceinfo_component.c](./pnp_deviceinfo_component.c) implements a simple, simulated DeviceInformation component whose DTDL is defined [here](https://repo.azureiotrepository.com/Models/dtmi:azure:DeviceManagement:DeviceInformation;1?api-version=2020-05-01-preview).  This component only does a one-time reporting of the device state on program initiation.
 
 * [pnp_thermostat_component.c](./pnp_thermostat_component.c) implements a thermostat component.  The temperature controller can have multiple components of the same type.  The components `thermostat1` and `thermostat2` both implement `dtmi:com:example:Thermostat;1` in the temperature controller model.
+
+## Configuring the sample
+
+See [../readme.md](../readme.md) for how to configure this sample.

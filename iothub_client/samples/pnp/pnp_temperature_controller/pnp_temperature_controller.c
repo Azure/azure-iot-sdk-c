@@ -14,32 +14,61 @@
 
 // IoTHub Device Client and IoT core utility related header files
 #include "iothub.h"
-#include "iothub_device_client.h"
+#include "iothub_device_client_ll.h"
 #include "iothub_client_options.h"
 #include "iothub_message.h"
-#include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/strings.h"
+#include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/xlogging.h"
 
-// PnP helper utilities.
-#include "pnp_device_client_helpers.h"
-#include "pnp_protocol_helpers.h"
+// PnP utilities.
+#include "pnp_device_client_ll.h"
+#include "pnp_protocol.h"
 
 // Headers that provide implementation for subcomponents (the two thermostat components and DeviceInfo)
 #include "pnp_thermostat_component.h"
 #include "pnp_deviceinfo_component.h"
 
+// Environment variable used to specify how app connects to hub and the two possible values
+static const char g_securityTypeEnvironmentVariable[] = "IOTHUB_DEVICE_SECURITY_TYPE";
+static const char g_securityTypeConnectionStringValue[] = "connectionString";
+static const char g_securityTypeDpsValue[] = "DPS";
+
 // Environment variable used to specify this application's connection string
 static const char g_connectionStringEnvironmentVariable[] = "IOTHUB_DEVICE_CONNECTION_STRING";
 
-// Amount of time to sleep between sending telemetry to IotHub, in milliseconds.  Set to 1 minute.
-static unsigned int g_sleepBetweenTelemetrySends = 60 * 1000;
+// Values of connection / security settings read from environment variables and/or DPS runtime
+PNP_DEVICE_CONFIGURATION g_pnpDeviceConfiguration;
+
+#ifdef USE_PROV_MODULE_FULL
+// Environment variable used to specify this application's DPS id scope
+static const char g_dpsIdScopeEnvironmentVariable[] = "IOTHUB_DEVICE_DPS_ID_SCOPE";
+
+// Environment variable used to specify this application's DPS device id
+static const char g_dpsDeviceIdEnvironmentVariable[] = "IOTHUB_DEVICE_DPS_DEVICE_ID";
+
+// Environment variable used to specify this application's DPS device key
+static const char g_dpsDeviceKeyEnvironmentVariable[] = "IOTHUB_DEVICE_DPS_DEVICE_KEY";
+
+// Environment variable used to optionally specify this application's DPS id scope
+static const char g_dpsEndpointEnvironmentVariable[] = "IOTHUB_DEVICE_DPS_ENDPOINT";
+
+// Global provisioning endpoint for DPS if one is not specified via the environment
+static const char g_dps_DefaultGlobalProvUri[] = "global.azure-devices-provisioning.net";
+#endif
+
+// Amount of time to sleep between polling hub, in milliseconds.  Set to wake up every 100 milliseconds.
+static unsigned int g_sleepBetweenPollsMs = 100;
+
+// Every time the main loop wakes up, on the g_sendTelemetryPollInterval(th) pass will send a telemetry message.
+// So we will send telemetry every (g_sendTelemetryPollInterval * g_sleepBetweenPollsMs) milliseconds; 60 seconds as currently configured.
+static const int g_sendTelemetryPollInterval = 600;
 
 // Whether tracing at the IoTHub client is enabled or not. 
 static bool g_hubClientTraceEnabled = true;
 
 // DTMI indicating this device's ModelId.
-static const char g_thermostatModelId[] = "dtmi:com:example:TemperatureController;1";
+static const char g_temperatureControllerModelId[] = "dtmi:com:example:TemperatureController;1";
 
 // PNP_THERMOSTAT_COMPONENT_HANDLE represent the thermostat components that are sub-components of the temperature controller.
 // Note that we do NOT have an analogous DeviceInfo component handle because there is only DeviceInfo subcomponent and its
@@ -61,8 +90,8 @@ static const size_t g_numModeledComponents = sizeof(g_modeledComponents) / sizeo
 static const char g_rebootCommand[] = "reboot";
 
 // An empty JSON body for PnP command responses
-static const char g_emptyJson[] = "{}";
-static const size_t g_emptyJsonSize = sizeof(g_emptyJson) - 1;
+static const char g_JSONEmpty[] = "{}";
+static const size_t g_JSONEmptySize = sizeof(g_JSONEmpty) - 1;
 
 // Minimum value we will return for working set, + some random number
 static const int g_workingSetMinimum = 1000;
@@ -79,7 +108,7 @@ static const char g_serialNumberPropertyValue[] = "\"serial-no-123-abc\"";
 //
 // PnP_TempControlComponent_InvokeRebootCommand processes the reboot command on the root interface
 //
-static int PnP_TempControlComponent_InvokeRebootCommand(JSON_Value* rootValue, unsigned char** response, size_t* responseSize)
+static int PnP_TempControlComponent_InvokeRebootCommand(JSON_Value* rootValue)
 {
     int result;
 
@@ -93,24 +122,29 @@ static int PnP_TempControlComponent_InvokeRebootCommand(JSON_Value* rootValue, u
         // See caveats section in ../readme.md; we don't actually respect the delay value to keep the sample simple.
         int delayInSeconds = (int)json_value_get_number(rootValue);
         LogInfo("Temperature controller 'reboot' command invoked with delay=%d seconds", delayInSeconds);
-
-        // Even though the DTMI for TemperatureController does not specify a response body, the underlying IoTHub device method
-        // requires a valid JSON to be included in the response.  The SDK will not automatically create one for us if the application returns NULL.
-        if ((*response = (unsigned char*)malloc(g_emptyJsonSize)) == NULL)
-        {
-            LogError("Unable to allocate %lu bytes", (unsigned long)(g_emptyJsonSize));
-            result = PNP_STATUS_INTERNAL_ERROR;
-        }
-        else
-        {
-            // We're using unsigned char** that will be copied directly to the wire protocol, so do not \0 terminate this string
-            memcpy(*response, g_emptyJson, g_emptyJsonSize);
-            *responseSize = g_emptyJsonSize;
-            result = PNP_STATUS_SUCCESS;
-        }
+        result = PNP_STATUS_SUCCESS;
     }
     
     return result;
+}
+
+//
+// SetEmptyCommandResponse sets the response to be an empty JSON.  IoT Hub wants
+// legal JSON, regardless of error status, so if command implementation did not set this do so here.
+//
+static void SetEmptyCommandResponse(unsigned char** response, size_t* responseSize, int* result)
+{
+    if ((*response = calloc(1, g_JSONEmptySize)) == NULL)
+    {
+        LogError("Unable to allocate empty JSON response");
+        *result = PNP_STATUS_INTERNAL_ERROR;
+    }
+    else
+    {
+        memcpy(*response, g_JSONEmpty, g_JSONEmptySize);
+        *responseSize = g_JSONEmptySize;
+        // We only overwrite the caller's result on error; otherwise leave as it was
+    }
 }
 
 //
@@ -131,10 +165,10 @@ static int PnP_TempControlComponent_DeviceMethodCallback(const char* methodName,
     *responseSize = 0;
 
     // Parse the methodName into its PnP (optional) componentName and pnpCommandName.
-    PnPHelper_ParseCommandName(methodName, &componentName, &componentNameSize, &pnpCommandName);
+    PnP_ParseCommandName(methodName, &componentName, &componentNameSize, &pnpCommandName);
 
     // Parse the JSON of the payload request.
-    if ((jsonStr = PnPHelper_CopyPayloadToString(payload, size)) == NULL)
+    if ((jsonStr = PnP_CopyPayloadToString(payload, size)) == NULL)
     {
         LogError("Unable to allocate twin buffer");
         result = PNP_STATUS_INTERNAL_ERROR;
@@ -168,7 +202,7 @@ static int PnP_TempControlComponent_DeviceMethodCallback(const char* methodName,
             LogInfo("Received PnP command for TemperatureController component, command=%s", pnpCommandName);
             if (strcmp(pnpCommandName, g_rebootCommand) == 0)
             {
-                result = PnP_TempControlComponent_InvokeRebootCommand(rootValue, response, responseSize);
+                result = PnP_TempControlComponent_InvokeRebootCommand(rootValue);
             }
             else
             {
@@ -178,6 +212,11 @@ static int PnP_TempControlComponent_DeviceMethodCallback(const char* methodName,
         }
     }
 
+    if (*response == NULL)
+    {
+        SetEmptyCommandResponse(response, responseSize, &result);
+    }
+
     json_value_free(rootValue);
     free(jsonStr);
 
@@ -185,14 +224,14 @@ static int PnP_TempControlComponent_DeviceMethodCallback(const char* methodName,
 }
 
 //
-// PnP_TempControlComponent_ApplicationPropertyCallback is the callback function that the PnP helper layer invokes per property update.
+// PnP_TempControlComponent_ApplicationPropertyCallback is the callback function is invoked when PnP_ProcessTwinData() visits each property.
 //
 static void PnP_TempControlComponent_ApplicationPropertyCallback(const char* componentName, const char* propertyName, JSON_Value* propertyValue, int version, void* userContextCallback)
 {
-    // This sample uses the pnp_device_client_helpers.h/.c to create the IOTHUB_DEVICE_CLIENT_HANDLE as well as initialize callbacks.
-    // The convention the helper uses is that the IOTHUB_DEVICE_CLIENT_HANDLE is passed as the userContextCallback on the initial twin callback.
-    // The pnp_protocol_lehpers.h/.c pass this userContextCallback down to this visitor function.
-    IOTHUB_DEVICE_CLIENT_HANDLE deviceClient = (IOTHUB_DEVICE_CLIENT_HANDLE)userContextCallback;
+    // This sample uses the pnp_device_client.h/.c to create the IOTHUB_DEVICE_CLIENT_LL_HANDLE as well as initialize callbacks.
+    // The convention used is that IOTHUB_DEVICE_CLIENT_LL_HANDLE is passed as the userContextCallback on the initial twin callback.
+    // The pnp_protocol.h/.c pass this userContextCallback down to this visitor function.
+    IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient = (IOTHUB_DEVICE_CLIENT_LL_HANDLE)userContextCallback;
 
     if (componentName == NULL)
     {
@@ -219,9 +258,9 @@ static void PnP_TempControlComponent_ApplicationPropertyCallback(const char* com
 //
 static void PnP_TempControlComponent_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payload, size_t size, void* userContextCallback)
 {
-    // Invoke PnPHelper_ProcessTwinData to actualy process the data.  PnPHelper_ProcessTwinData uses a visitor pattern to parse
+    // Invoke PnP_ProcessTwinData to actualy process the data.  PnP_ProcessTwinData uses a visitor pattern to parse
     // the JSON and then visit each property, invoking PnP_TempControlComponent_ApplicationPropertyCallback on each element.
-    if (PnPHelper_ProcessTwinData(updateState, payload, size, g_modeledComponents, g_numModeledComponents, PnP_TempControlComponent_ApplicationPropertyCallback, userContextCallback) == false)
+    if (PnP_ProcessTwinData(updateState, payload, size, g_modeledComponents, g_numModeledComponents, PnP_TempControlComponent_ApplicationPropertyCallback, userContextCallback) == false)
     {
         // If we're unable to parse the JSON for any reason (typically because the JSON is malformed or we ran out of memory)
         // there is no action we can take beyond logging.
@@ -234,7 +273,7 @@ static void PnP_TempControlComponent_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE
 // the unit of kibibytes (https://en.wikipedia.org/wiki/Kibibyte).
 // This is a random value between g_workingSetMinimum and (g_workingSetMinimum+g_workingSetRandomModulo).
 //
-void PnP_TempControlComponent_SendWorkingSet(IOTHUB_DEVICE_CLIENT_HANDLE deviceClient) 
+void PnP_TempControlComponent_SendWorkingSet(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient) 
 {
     IOTHUB_MESSAGE_HANDLE messageHandle = NULL;
     IOTHUB_CLIENT_RESULT iothubResult;
@@ -246,11 +285,11 @@ void PnP_TempControlComponent_SendWorkingSet(IOTHUB_DEVICE_CLIENT_HANDLE deviceC
     {
         LogError("Unable to create a workingSet telemetry payload string");
     }
-    else if ((messageHandle = PnPHelper_CreateTelemetryMessageHandle(NULL, workingSetTelemetryPayload)) == NULL)
+    else if ((messageHandle = PnP_CreateTelemetryMessageHandle(NULL, workingSetTelemetryPayload)) == NULL)
     {
         LogError("Unable to create telemetry message");
     }
-    else if ((iothubResult = IoTHubDeviceClient_SendEventAsync(deviceClient, messageHandle, NULL, NULL)) != IOTHUB_CLIENT_OK)
+    else if ((iothubResult = IoTHubDeviceClient_LL_SendEventAsync(deviceClient, messageHandle, NULL, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to send telemetry message, error=%d", iothubResult);
     }
@@ -261,12 +300,12 @@ void PnP_TempControlComponent_SendWorkingSet(IOTHUB_DEVICE_CLIENT_HANDLE deviceC
 //
 // PnP_TempControlComponent_ReportSerialNumber_Property sends the "serialNumber" property to IoTHub
 //
-static void PnP_TempControlComponent_ReportSerialNumber_Property(IOTHUB_DEVICE_CLIENT_HANDLE deviceClient)
+static void PnP_TempControlComponent_ReportSerialNumber_Property(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient)
 {
     IOTHUB_CLIENT_RESULT iothubClientResult;
     STRING_HANDLE jsonToSend = NULL;
 
-    if ((jsonToSend = PnPHelper_CreateReportedProperty(NULL, g_serialNumberPropertyName, g_serialNumberPropertyValue)) == NULL)
+    if ((jsonToSend = PnP_CreateReportedProperty(NULL, g_serialNumberPropertyName, g_serialNumberPropertyValue)) == NULL)
     {
         LogError("Unable to build serial number property");
     }
@@ -275,7 +314,7 @@ static void PnP_TempControlComponent_ReportSerialNumber_Property(IOTHUB_DEVICE_C
         const char* jsonToSendStr = STRING_c_str(jsonToSend);
         size_t jsonToSendStrLen = strlen(jsonToSendStr);
 
-        if ((iothubClientResult = IoTHubDeviceClient_SendReportedState(deviceClient, (const unsigned char*)jsonToSendStr, jsonToSendStrLen, NULL, NULL)) != IOTHUB_CLIENT_OK)
+        if ((iothubClientResult = IoTHubDeviceClient_LL_SendReportedState(deviceClient, (const unsigned char*)jsonToSendStr, jsonToSendStrLen, NULL, NULL)) != IOTHUB_CLIENT_OK)
         {
             LogError("Unable to send reported state, error=%d", iothubClientResult);
         }
@@ -288,22 +327,128 @@ static void PnP_TempControlComponent_ReportSerialNumber_Property(IOTHUB_DEVICE_C
     STRING_delete(jsonToSend);
 }
 
-
 //
-// CreateDeviceClientAndAllocateComponents allocates the IOTHUB_DEVICE_CLIENT_HANDLE the application will use along with thermostat components
-// 
-static IOTHUB_DEVICE_CLIENT_HANDLE CreateDeviceClientAndAllocateComponents(void)
+// GetConnectionStringFromEnvironment retrieves the connection string based on environment variable
+//
+static bool GetConnectionStringFromEnvironment()
 {
-    IOTHUB_DEVICE_CLIENT_HANDLE deviceClient = NULL;
-    const char* connectionString;
     bool result;
 
-    if ((connectionString = getenv(g_connectionStringEnvironmentVariable)) == NULL)
+    if ((g_pnpDeviceConfiguration.u.connectionString = getenv(g_connectionStringEnvironmentVariable)) == NULL)
     {
         LogError("Cannot read environment variable=%s", g_connectionStringEnvironmentVariable);
         result = false;
     }
-    else if ((deviceClient = PnPHelper_CreateDeviceClientHandle(connectionString, g_thermostatModelId, g_hubClientTraceEnabled, PnP_TempControlComponent_DeviceMethodCallback, PnP_TempControlComponent_DeviceTwinCallback)) == NULL)
+    else
+    {
+        g_pnpDeviceConfiguration.securityType = PNP_CONNECTION_SECURITY_TYPE_CONNECTION_STRING;
+        result = true;    
+    }
+
+    return result;
+}
+
+//
+// GetDpsFromEnvironment retrieves DPS configuration for a symmetric key based connection
+// from environment variables
+//
+static bool GetDpsFromEnvironment()
+{
+#ifndef USE_PROV_MODULE_FULL
+    // Explain to user misconfiguration.  The "run_e2e_tests" must be set to OFF because otherwise
+    // the e2e's test HSM layer and symmetric key logic will conflict.
+    LogError("DPS based authentication was requested via environment variables, but DPS is not enabled.");
+    LogError("DPS is an optional component of the Azure IoT C SDK.  It is enabled with symmetric keys at cmake time by");
+    LogError("passing <-Duse_prov_client=ON -Dhsm_type_symm_key=ON -Drun_e2e_tests=OFF> to cmake's command line");
+    return false;
+#else
+    bool result;
+
+    if ((g_pnpDeviceConfiguration.u.dpsConnectionAuth.endpoint = getenv(g_dpsEndpointEnvironmentVariable)) == NULL)
+    {
+        // We will fall back to standard endpoint if one is not specified
+        g_pnpDeviceConfiguration.u.dpsConnectionAuth.endpoint = g_dps_DefaultGlobalProvUri;
+    }
+
+    if ((g_pnpDeviceConfiguration.u.dpsConnectionAuth.idScope = getenv(g_dpsIdScopeEnvironmentVariable)) == NULL)
+    {
+        LogError("Cannot read environment variable=%s", g_dpsIdScopeEnvironmentVariable);
+        result = false;
+    }
+    else if ((g_pnpDeviceConfiguration.u.dpsConnectionAuth.deviceId = getenv(g_dpsDeviceIdEnvironmentVariable)) == NULL)
+    {
+        LogError("Cannot read environment variable=%s", g_dpsDeviceIdEnvironmentVariable);
+        result = false;
+    }
+    else if ((g_pnpDeviceConfiguration.u.dpsConnectionAuth.deviceKey = getenv(g_dpsDeviceKeyEnvironmentVariable)) == NULL)
+    {
+        LogError("Cannot read environment variable=%s", g_dpsDeviceKeyEnvironmentVariable);
+        result = false;
+    }
+    else
+    {
+        g_pnpDeviceConfiguration.securityType = PNP_CONNECTION_SECURITY_TYPE_DPS;
+        result = true;    
+    }
+
+    return result;
+#endif // USE_PROV_MODULE_FULL
+}
+
+
+//
+// GetConfigurationFromEnvironment reads how to connect to the IoT Hub (using 
+// either a connection string or a DPS symmetric key) from the environment.
+//
+static bool GetConnectionSettingsFromEnvironment()
+{
+    const char* securityTypeString;
+    bool result;
+
+    if ((securityTypeString = getenv(g_securityTypeEnvironmentVariable)) == NULL)
+    {
+        LogError("Cannot read environment variable=%s", g_securityTypeEnvironmentVariable);
+        result = false;
+    }
+    else
+    {
+        if (strcmp(securityTypeString, g_securityTypeConnectionStringValue) == 0)
+        {
+            result = GetConnectionStringFromEnvironment();
+        }
+        else if (strcmp(securityTypeString, g_securityTypeDpsValue) == 0)
+        {
+            result = GetDpsFromEnvironment();
+        }
+        else
+        {
+            LogError("Environment variable %s must be either %s or %s", g_securityTypeEnvironmentVariable, g_securityTypeConnectionStringValue, g_securityTypeDpsValue);
+            result = false;
+        }
+    }
+
+    return result;    
+}
+
+//
+// CreateDeviceClientAndAllocateComponents allocates the IOTHUB_DEVICE_CLIENT_LL_HANDLE the application will use along with thermostat components
+// 
+static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateDeviceClientAndAllocateComponents(void)
+{
+    IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient = NULL;
+    bool result;
+
+    g_pnpDeviceConfiguration.deviceMethodCallback = PnP_TempControlComponent_DeviceMethodCallback;
+    g_pnpDeviceConfiguration.deviceTwinCallback = PnP_TempControlComponent_DeviceTwinCallback;
+    g_pnpDeviceConfiguration.enableTracing = g_hubClientTraceEnabled;
+    g_pnpDeviceConfiguration.modelId = g_temperatureControllerModelId;
+
+    if (GetConnectionSettingsFromEnvironment() == false)
+    {
+        LogError("Cannot read required environment variable(s)");
+        result = false;
+    }
+    else if ((deviceClient = PnP_CreateDeviceClientLLHandle(&g_pnpDeviceConfiguration)) == NULL)
     {
         LogError("Failure creating IotHub device client");
         result = false;
@@ -329,7 +474,7 @@ static IOTHUB_DEVICE_CLIENT_HANDLE CreateDeviceClientAndAllocateComponents(void)
         PnP_ThermostatComponent_Destroy(g_thermostatHandle1);
         if (deviceClient != NULL)
         {
-            IoTHubDeviceClient_Destroy(deviceClient);
+            IoTHubDeviceClient_LL_Destroy(deviceClient);
             IoTHub_Deinit();
             deviceClient = NULL;
         }
@@ -340,7 +485,7 @@ static IOTHUB_DEVICE_CLIENT_HANDLE CreateDeviceClientAndAllocateComponents(void)
 
 int main(void)
 {
-    IOTHUB_DEVICE_CLIENT_HANDLE deviceClient = NULL;
+    IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient = NULL;
 
     if ((deviceClient = CreateDeviceClientAndAllocateComponents()) == NULL)
     {
@@ -350,6 +495,8 @@ int main(void)
     {
         LogInfo("Successfully created device client.  Hit Control-C to exit program\n");
 
+        int numberOfIterations = 0;
+
         // During startup, send the non-"writeable" properties.
         PnP_TempControlComponent_ReportSerialNumber_Property(deviceClient);
         PnP_DeviceInfoComponent_Report_All_Properties(g_deviceInfoComponentName, deviceClient);
@@ -358,13 +505,18 @@ int main(void)
 
         while (true)
         {
-            // Wake up periodically to send telemetry.
-            // IOTHUB_DEVICE_CLIENT_HANDLE brings in the IoTHub device convenience layer, which means that the IoTHub SDK itself 
-            // spins a worker thread to perform all operations.
-            PnP_TempControlComponent_SendWorkingSet(deviceClient);
-            PnP_ThermostatComponent_SendTelemetry(g_thermostatHandle1, deviceClient);
-            PnP_ThermostatComponent_SendTelemetry(g_thermostatHandle2, deviceClient);
-            ThreadAPI_Sleep(g_sleepBetweenTelemetrySends);
+            // Wake up periodically to poll.  Even if we do not plan on sending telemetry, we still need to poll periodically in order to process
+            // incoming requests from the server and to do connection keep alives.
+            if ((numberOfIterations % g_sendTelemetryPollInterval) == 0)
+            {
+                PnP_TempControlComponent_SendWorkingSet(deviceClient);
+                PnP_ThermostatComponent_SendTelemetry(g_thermostatHandle1, deviceClient);
+                PnP_ThermostatComponent_SendTelemetry(g_thermostatHandle2, deviceClient);
+            }
+
+            IoTHubDeviceClient_LL_DoWork(deviceClient);
+            ThreadAPI_Sleep(g_sleepBetweenPollsMs);
+            numberOfIterations++;
         }
 
         // Free the memory allocated to track simulated thermostat.
@@ -372,7 +524,7 @@ int main(void)
         PnP_ThermostatComponent_Destroy(g_thermostatHandle1);
 
         // Clean up the iothub sdk handle
-        IoTHubDeviceClient_Destroy(deviceClient);
+        IoTHubDeviceClient_LL_Destroy(deviceClient);
         // Free all the sdk subsystem
         IoTHub_Deinit();
     }

@@ -3,16 +3,16 @@
 
 // The DTDL for this interface is defined at https://repo.azureiotrepository.com/Models/dtmi:azure:DeviceManagement:DeviceInformation;1?api-version=2020-05-01-preview
 
-// PnP helper routines
+// PnP routines
 #include "pnp_deviceinfo_component.h"
-#include "pnp_protocol_helpers.h"
+#include "pnp_protocol.h"
 
 // Core IoT SDK utilities
 #include "azure_c_shared_utility/xlogging.h"
 
 // Property names along with their simulated values.  
 // NOTE: the property values must be legal JSON values.  Strings specifically must be enclosed with an extra set of quotes to be legal json string values.
-// The property names in this sample do not hard-code the extra quotes because the underlying PnP helper adds this to names automatically.
+// The property names in this sample do not hard-code the extra quotes because the underlying PnP sample adds this to names automatically.
 #define PNP_ENCODE_STRING_FOR_JSON(str) #str
 
 static const char PnPDeviceInfo_SoftwareVersionPropertyName[] = "swVersion";
@@ -43,12 +43,12 @@ static const char PnPDeviceInfo_TotalMemoryPropertyValue[] = "200";
 //
 // SendReportedPropertyForDeviceInformation sends a property as part of DeviceInfo component.
 //
-static void SendReportedPropertyForDeviceInformation(IOTHUB_DEVICE_CLIENT_HANDLE deviceClient, const char* componentName, const char* propertyName, const char* propertyValue)
+static void SendReportedPropertyForDeviceInformation(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL, const char* componentName, const char* propertyName, const char* propertyValue)
 {
     IOTHUB_CLIENT_RESULT iothubClientResult;
     STRING_HANDLE jsonToSend = NULL;
 
-    if ((jsonToSend = PnPHelper_CreateReportedProperty(componentName, propertyName, propertyValue)) == NULL)
+    if ((jsonToSend = PnP_CreateReportedProperty(componentName, propertyName, propertyValue)) == NULL)
     {
         LogError("Unable to build reported property response for propertyName=%s, propertyValue=%s", propertyName, propertyValue);
     }
@@ -57,7 +57,7 @@ static void SendReportedPropertyForDeviceInformation(IOTHUB_DEVICE_CLIENT_HANDLE
         const char* jsonToSendStr = STRING_c_str(jsonToSend);
         size_t jsonToSendStrLen = strlen(jsonToSendStr);
 
-        if ((iothubClientResult = IoTHubDeviceClient_SendReportedState(deviceClient, (const unsigned char*)jsonToSendStr, jsonToSendStrLen, NULL, NULL)) != IOTHUB_CLIENT_OK)
+        if ((iothubClientResult = IoTHubDeviceClient_LL_SendReportedState(deviceClientLL, (const unsigned char*)jsonToSendStr, jsonToSendStrLen, NULL, NULL)) != IOTHUB_CLIENT_OK)
         {
             LogError("Unable to send reported state for property=%s, error=%d", propertyName, iothubClientResult);
         }
@@ -70,17 +70,17 @@ static void SendReportedPropertyForDeviceInformation(IOTHUB_DEVICE_CLIENT_HANDLE
     STRING_delete(jsonToSend);
 }
 
-void PnP_DeviceInfoComponent_Report_All_Properties(const char* componentName, IOTHUB_DEVICE_CLIENT_HANDLE deviceClient)
+void PnP_DeviceInfoComponent_Report_All_Properties(const char* componentName, IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL)
 {
-    // NOTE: It is possible to put multiple property updates into a single JSON and IoTHubDeviceClient_SendReportedState invocation.
+    // NOTE: It is possible to put multiple property updates into a single JSON and IoTHubDeviceClient_LL_SendReportedState invocation.
     // This sample does not do so for clarity, though production devices should seriously consider such property update batching to
-    // save bandwidth.  The underlying PnP_Helper routines currently do not accept an array.
-    SendReportedPropertyForDeviceInformation(deviceClient, componentName, PnPDeviceInfo_SoftwareVersionPropertyName, PnPDeviceInfo_SoftwareVersionPropertyValue);
-    SendReportedPropertyForDeviceInformation(deviceClient, componentName, PnPDeviceInfo_ManufacturerPropertyName, PnPDeviceInfo_ManufacturerPropertyValue);
-    SendReportedPropertyForDeviceInformation(deviceClient, componentName, PnPDeviceInfo_ModelPropertyName, PnPDeviceInfo_ModelPropertyValue);
-    SendReportedPropertyForDeviceInformation(deviceClient, componentName, PnPDeviceInfo_OsNamePropertyName, PnPDeviceInfo_OsNamePropertyValue);
-    SendReportedPropertyForDeviceInformation(deviceClient, componentName, PnPDeviceInfo_ProcessorArchitecturePropertyName, PnPDeviceInfo_ProcessorArchitecturePropertyValue);
-    SendReportedPropertyForDeviceInformation(deviceClient, componentName, PnPDeviceInfo_ProcessorManufacturerPropertyName, PnPDeviceInfo_ProcessorManufacturerPropertyValue);
-    SendReportedPropertyForDeviceInformation(deviceClient, componentName, PnPDeviceInfo_TotalStoragePropertyName, PnPDeviceInfo_TotalStoragePropertyValue);
-    SendReportedPropertyForDeviceInformation(deviceClient, componentName, PnPDeviceInfo_TotalMemoryPropertyName, PnPDeviceInfo_TotalMemoryPropertyValue);
+    // save bandwidth.  PnP_CreateReportedProperty does not currently accept arrays.
+    SendReportedPropertyForDeviceInformation(deviceClientLL, componentName, PnPDeviceInfo_SoftwareVersionPropertyName, PnPDeviceInfo_SoftwareVersionPropertyValue);
+    SendReportedPropertyForDeviceInformation(deviceClientLL, componentName, PnPDeviceInfo_ManufacturerPropertyName, PnPDeviceInfo_ManufacturerPropertyValue);
+    SendReportedPropertyForDeviceInformation(deviceClientLL, componentName, PnPDeviceInfo_ModelPropertyName, PnPDeviceInfo_ModelPropertyValue);
+    SendReportedPropertyForDeviceInformation(deviceClientLL, componentName, PnPDeviceInfo_OsNamePropertyName, PnPDeviceInfo_OsNamePropertyValue);
+    SendReportedPropertyForDeviceInformation(deviceClientLL, componentName, PnPDeviceInfo_ProcessorArchitecturePropertyName, PnPDeviceInfo_ProcessorArchitecturePropertyValue);
+    SendReportedPropertyForDeviceInformation(deviceClientLL, componentName, PnPDeviceInfo_ProcessorManufacturerPropertyName, PnPDeviceInfo_ProcessorManufacturerPropertyValue);
+    SendReportedPropertyForDeviceInformation(deviceClientLL, componentName, PnPDeviceInfo_TotalStoragePropertyName, PnPDeviceInfo_TotalStoragePropertyValue);
+    SendReportedPropertyForDeviceInformation(deviceClientLL, componentName, PnPDeviceInfo_TotalMemoryPropertyName, PnPDeviceInfo_TotalMemoryPropertyValue);
 }
