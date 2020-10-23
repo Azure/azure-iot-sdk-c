@@ -54,11 +54,11 @@ You can use the options below for IoT Hub device client and for the Device Provi
 
 | Option Name                       | Option Define                   | Value Type         | Description
 |-----------------------------------|---------------------------------|--------------------|-------------------------------
-| `"TrustedCerts"`                | OPTION_TRUSTED_CERT              | const char*        | Azure Server certificate used to validate TLS connection to IoT Hub.  This is usually not requried on Operating systems that have built in certificates to trust, such as Windows or openssl that will trust the Azure Server certificate chain already.  This is typically required on embedded devices that do not automatically trust any certificates.
+| `"TrustedCerts"`                | OPTION_TRUSTED_CERT              | const char*        | Azure Server certificate used to validate TLS connection to IoT Hub.  This is usually not requried on operating systems that have built in certificates to trust, such as Windows and some Linux distributions.  A typical use case is on an embedded system which does not trust any certificates or when connecting to a gateway with self-signed certificates.  See [here][gateway-sample] for a gateway sample.
 | `"x509EccCertificate"` | OPTION_X509_ECC_CERT      | const char*        | Sets the ECC x509 certificate used for connection authentication
 | `"x509EccAliasKey"`    | OPTION_X509_ECC_KEY       | const char*        | Sets the private key for the ECC x509 certificate
 | `"proxy_data"`         | OPTION_HTTP_PROXY         | [HTTP_PROXY_OPTIONS*][shared-util-options-h]| Http proxy data object used for proxy connection to IoT Hub
-| `"tls_version"`         | OPTION_TLS_VERSION         | int*            | TLS version to use for openssl, 10 for version 1.0, 11 for version 1.1, 12 for version 1.2
+| `"tls_version"`         | OPTION_TLS_VERSION         | int*            | TLS version to use for openssl, 10 for version 1.0, 11 for version 1.1, 12 for version 1.2.  (**DEPRECATED**: TLS 1.0 and 1.1 are not secure and should not be used.  This option is included only for backward compatibility.)
 | `"x509certificate"`    | SU_OPTION_X509_CERT       | const char*        | Sets an RSA x509 certificate used for connection authentication.  (Also available from [iothub_client_options.h][iothub-client-options-h] as `OPTION_X509_CERT`.)
 | `"x509privatekey"`     | SU_OPTION_X509_PRIVATE_KEY   | const char*        | Sets the private key for the RSA x509 certificate.  Also available from [iothub_client_options.h][iothub-client-options-h] as `OPTION_X509_PRIVATE_KEY`.)
 
@@ -83,11 +83,11 @@ You may also use [common transport options](#general_options) options.
 | `"do_work_freq_ms"`    | OPTION_DO_WORK_FREQUENCY_IN_MS | unsigned int * | Specifies how frequently the worker thread spun by the convenience layer will wake up, in milliseconds.  The default is 1 millisecond.  The maximum allowable value is 100.  (Convenience layer APIs only)
 
 
-<a name="transport_options"></a>
+<a name="protocol_specific_options"></a>
 
-## Transport specific options
+## MQTT, AMQP, and HTTP Specific Protocol Options
 
-Some options are only supported by a given transport.  These are declared in [iothub_client_options.h][iothub-client-options-h].
+Some options are only supported by a given protocol (e.g. MQTT, AMQP, HTTP).  These are declared in [iothub_client_options.h][iothub-client-options-h].
 
 ### MQTT Specific Options
 
@@ -114,7 +114,7 @@ Some options are only supported by a given transport.  These are declared in [io
 | `"MinimumPollingTime"`       | OPTION_MIN_POLLING_TIME         | `unsigned int`* value     | Minimum time in seconds allowed between 2 consecutive GET issues to the service
 | `"timeout"`                  | OPTION_HTTP_TIMEOUT             | `long`* value     | When using curl the amount of time before the request times out, defaults to 242 seconds.
 
-<a name="provisioning_option></a>
+<a name="provisioning_option"></a>
 
 ## Device Provisioning Service (DPS) Client Options
 
@@ -174,3 +174,4 @@ IoTHubDeviceClient_LL_DoWork(iotHubClientHandle);
 [provisioning-device-ll-client-options-h]: https://github.com/Azure/azure-iot-sdk-c/blob/master/provisioning_client/inc/azure_prov_client/prov_device_ll_client.h
 [provisioning-device-client-options-h]: https://github.com/Azure/azure-iot-sdk-c/blob/master/provisioning_client/inc/azure_prov_client/prov_device_client.h
 [iot-pnp]: https://aka.ms/iotpnp
+[gateway-sample]: https://github.com/Azure/azure-iot-sdk-c/tree/master/iothub_client/samples/iotedge_downstream_device_sample
