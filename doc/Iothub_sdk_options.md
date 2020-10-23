@@ -1,6 +1,6 @@
 # IoT Hub C SDK Options
 
-This document describes how you can set options for the Azure IoT Hub and Device Provisioning Service (DPS) clients.
+This document describes how you can set options for the Azure IoT Hub and Device Provisioning Service (DPS) client connections.
 
 - [Setting Options Example](#set_option)
 - [General Transport Options](#general_options)
@@ -48,9 +48,9 @@ Prov_Device_LL_SetOption(handle, OPTION_HTTP_PROXY, &http_proxy);
 <a name="general_options"></a>
 
 ## Common transport options
-You can use the options below for IoT Hub device clients (for telemetry, device methods, and device twin) and for the device provisioning client.  These options are declared in [shared_util_options.h][shared-util-options-h].
+You can use the options below for IoT Hub device client and for the Device Provisioning Client.  These options are declared in [shared_util_options.h][shared-util-options-h].
 
-**NOTE: Uploading files to Azure (e.g. IoTHubDeviceClient_UploadToBlobAsync) does not support this complete set of options.**
+**NOTE: Uploading files to Azure (e.g. IoTHubDeviceClient_UploadToBlobAsync) does not support this complete set of options.  See [here](#upload-options) for more.**
 
 | Option Name                       | Option Define                   | Value Type         | Description
 |-----------------------------------|---------------------------------|--------------------|-------------------------------
@@ -64,12 +64,12 @@ You can use the options below for IoT Hub device clients (for telemetry, device 
 
 <a name="IotHub_options"></a>
 
-## Available Options for IoT Hub Device and Module client telemetry, device twins, and device methods
-You can use the options below for IoT Hub connections that use telemetry, device twins, and device methods.  You may also use [common transport options](#general_options) options.
+## IoT Hub Device and Module Client options
+You can use the options below for IoT Hub connections.  These options are declared in [iothub_client_options.h][iothub-client-options-h].  
 
-These options are declared in [iothub_client_options.h][iothub-client-options-h].
+You may also use [common transport options](#general_options) options.
 
-**NOTE: Uploading files to Azure (e.g. IoTHubDeviceClient_UploadToBlobAsync) does not support this complete set of options.**
+**NOTE: Uploading files to Azure (e.g. IoTHubDeviceClient_UploadToBlobAsync) does not support this complete set of options.  See [here](#upload-options) for more.**
 
 
 | Option Name                       | Option Define                   | Value Type         | Description
@@ -95,7 +95,7 @@ Some options are only supported by a given transport.  These are declared in [io
 |---------------------------|-------------------------------|--------------------|-------------------------------
 | `"auto_url_encode_decode"`| OPTION_AUTO_URL_ENCODE_DECODE | bool*              | Turn on and off automatic URL Encoding and Decoding.  **You are strongly encouraged to set this to true.**  If you do not do so and send a character that needs URL encoding to the server, it will result in hard to diagnose problems.  The SDK cannot auto-enable this feature because it needs to maintain backwards compatibility with applications already doing their own URL encoding.
 | `"keepalive"`             | OPTION_KEEP_ALIVE             | int*               | Length of time to send `Keep Alives` to service for D2C Messages
-| `"model_id"`              | OPTION_MODEL_ID               | const char*        | IoT Plug and Play model ID the device implements
+| `"model_id"`              | OPTION_MODEL_ID               | const char*        | [IoT Plug and Play][iot-pnp] model ID the device implements
 
 ### AMQP Specific Options
 
@@ -118,9 +118,9 @@ Some options are only supported by a given transport.  These are declared in [io
 
 ## Device Provisioning Service (DPS) Client Options
 
-You can use the options below to configure the DPS client.  You may also use [common transport options](#general_options).
+You can use the options below to configure the DPS client.  These are defined in [prov_device_ll_client.h][provisioning-device-ll-client-options-h] except for `PROV_OPTION_DO_WORK_FREQUENCY_IN_MS` which is defined in [prov_device_client.h][provisioning-device-client-options-h].
 
-These are defined in [prov_device_ll_client.h][provisioning-device-ll-client-options-h] except for `PROV_OPTION_DO_WORK_FREQUENCY_IN_MS` which is defined in [prov_device_client.h][provisioning-device-client-options-h].
+You may also use [common transport options](#general_options).
 
 | Option Name                  | Option Define                   | Value Type        | Description
 |------------------------------|---------------------------------|-------------------|-------------------------------
@@ -173,3 +173,4 @@ IoTHubDeviceClient_LL_DoWork(iotHubClientHandle);
 [shared-util-options-h]: https://github.com/Azure/azure-c-shared-utility/blob/master/inc/azure_c_shared_utility/shared_util_options.h
 [provisioning-device-ll-client-options-h]: https://github.com/Azure/azure-iot-sdk-c/blob/master/provisioning_client/inc/azure_prov_client/prov_device_ll_client.h
 [provisioning-device-client-options-h]: https://github.com/Azure/azure-iot-sdk-c/blob/master/provisioning_client/inc/azure_prov_client/prov_device_client.h
+[iot-pnp]: https://aka.ms/iotpnp
