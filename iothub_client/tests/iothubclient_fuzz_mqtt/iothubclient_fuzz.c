@@ -16,7 +16,8 @@
 //   git submodule update --init
 //
 
-// Build
+// Build Linux
+//   cd azure-iot-sdk-c
 //   mkdir cmake
 //   cd cmake
 //   AFL_HARDEN=1
@@ -27,7 +28,7 @@
 // Run
 // cd ~/azure-iot-sdk-c/iothub_client/tests/iothubclient_fuzz_mqtt
 // mkdir ~/azure-iot-sdk-c/iothub_client/tests/iothubclient_fuzz_mqtt/findings_dir
-// afl-fuzz -m 230000000 -t 10000 -i temp -o findings_dir ~/azure-iot-sdk-c/cmake/iothub_client/tests/iothubclient_fuzz_mqtt/iothubclient_fuzz_mqtt CONACK @@
+// afl-fuzz -m 230000000 -t 10000 -i conack -o findings_dir ~/azure-iot-sdk-c/cmake/iothub_client/tests/iothubclient_fuzz_mqtt/iothubclient_fuzz_mqtt CONACK @@
 //
 
 
