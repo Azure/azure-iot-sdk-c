@@ -125,9 +125,9 @@ You may also use [common transport options](#general_options).
 | Option Name                  | Option Define                   | Value Type        | Description
 |------------------------------|---------------------------------|-------------------|-------------------------------
 | `"logtrace"`              | PROV_OPTION_LOG_TRACE          | bool* value        | Turn on and off log tracing for the transport
-| `"registration_id"`       | PROV_REGISTRATION_ID         | `unsigned int`* value     | Registration ID to specify.
-| `"provisioning_timeout"`  | PROV_OPTION_TIMEOUT             | `long`* value     | How long to timeout DPS session.
-| `"do_work_freq_ms"`       | PROV_OPTION_DO_WORK_FREQUENCY_IN_MS | unsigned int * | Specifies how frequently the worker thread spun by the convenience layer will wake up, in milliseconds.  The default is 1 millisecond.  (Convenience layer APIs only)
+| `"registration_id"`       | PROV_REGISTRATION_ID         | `const char`* value     | The registration ID of the device.
+| `"provisioning_timeout"`  | PROV_OPTION_TIMEOUT             | `long`* value     | Maximum time to allow DPS to complete, in seconds.
+| `"do_work_freq_ms"`       | PROV_OPTION_DO_WORK_FREQUENCY_IN_MS | `unsigned int`* value | Specifies how frequently the worker thread spun by the convenience layer will wake up, in milliseconds.  The default is 1 millisecond.  (Convenience layer APIs only)
 
 <a name="upload-options"></a>
 
@@ -144,7 +144,7 @@ The following options are supported when performing file uploads.  They are decl
 | `"x509certificate"`          | OPTION_X509_CERT                | const char*       | Sets an RSA x509 certificate used for connection authentication
 | `"x509privatekey"`           | OPTION_X509_PRIVATE_KEY         | const char*       | Sets the private key for the RSA x509 certificate
 | `"TrustedCerts"`             | OPTION_TRUSTED_CERT             | const char*       | Azure Server certificate used to validate TLS connection to IoT Hub and Azure Storage
-| `"proxy_data"`               | OPTION_HTTP_PROXY               | [HTTP_PROXY_OPTIONS*][http-proxy-object]| Http proxy data object used for proxy connection to IoT Hub and Azure Storage
+| `"proxy_data"`               | OPTION_HTTP_PROXY               | [HTTP_PROXY_OPTIONS*][shared-util-options-h] | Http proxy data object used for proxy connection to IoT Hub and Azure Storage
 
 ## Batching and IoT Hub Client SDK
 
