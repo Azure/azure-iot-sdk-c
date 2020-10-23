@@ -55,12 +55,13 @@ You can use the options below for IoT Hub device client and for the Device Provi
 | Option Name                       | Option Define                   | Value Type         | Description
 |-----------------------------------|---------------------------------|--------------------|-------------------------------
 | `"TrustedCerts"`                | OPTION_TRUSTED_CERT              | const char*        | Azure Server certificate used to validate TLS connection to IoT Hub.  This is usually not requried on operating systems that have built in certificates to trust, such as Windows and some Linux distributions.  A typical use case is on an embedded system which does not trust any certificates or when connecting to a gateway with self-signed certificates.  See [here][gateway-sample] for a gateway sample.
+| `"x509certificate"`    | SU_OPTION_X509_CERT       | const char*        | Sets an RSA x509 certificate used for connection authentication.  (Also available from [iothub_client_options.h][iothub-client-options-h] as `OPTION_X509_CERT`.)
+| `"x509privatekey"`     | SU_OPTION_X509_PRIVATE_KEY   | const char*        | Sets the private key for the RSA x509 certificate.  Also available from [iothub_client_options.h][iothub-client-options-h] as `OPTION_X509_PRIVATE_KEY`.)
 | `"x509EccCertificate"` | OPTION_X509_ECC_CERT      | const char*        | Sets the ECC x509 certificate used for connection authentication
 | `"x509EccAliasKey"`    | OPTION_X509_ECC_KEY       | const char*        | Sets the private key for the ECC x509 certificate
 | `"proxy_data"`         | OPTION_HTTP_PROXY         | [HTTP_PROXY_OPTIONS*][shared-util-options-h]| Http proxy data object used for proxy connection to IoT Hub
 | `"tls_version"`         | OPTION_TLS_VERSION         | int*            | TLS version to use for openssl, 10 for version 1.0, 11 for version 1.1, 12 for version 1.2.  (**DEPRECATED**: TLS 1.0 and 1.1 are not secure and should not be used.  This option is included only for backward compatibility.)
-| `"x509certificate"`    | SU_OPTION_X509_CERT       | const char*        | Sets an RSA x509 certificate used for connection authentication.  (Also available from [iothub_client_options.h][iothub-client-options-h] as `OPTION_X509_CERT`.)
-| `"x509privatekey"`     | SU_OPTION_X509_PRIVATE_KEY   | const char*        | Sets the private key for the RSA x509 certificate.  Also available from [iothub_client_options.h][iothub-client-options-h] as `OPTION_X509_PRIVATE_KEY`.)
+
 
 <a name="IotHub_options"></a>
 
@@ -93,7 +94,7 @@ Some options are only supported by a given protocol (e.g. MQTT, AMQP, HTTP).  Th
 
 | Option Name               | Option Define                 | Value Type         | Description
 |---------------------------|-------------------------------|--------------------|-------------------------------
-| `"auto_url_encode_decode"`| OPTION_AUTO_URL_ENCODE_DECODE | bool*              | Turn on and off automatic URL Encoding and Decoding.  **You are strongly encouraged to set this to true.**  If you do not do so and send a character that needs URL encoding to the server, it will result in hard to diagnose problems.  The SDK cannot auto-enable this feature because it needs to maintain backwards compatibility with applications already doing their own URL encoding.
+| `"auto_url_encode_decode"`| OPTION_AUTO_URL_ENCODE_DECODE | bool*              | Turn on and off automatic URL Encoding and Decoding.  **You are strongly encouraged to set this to true.**  If you do not do so and send a property with a character that needs URL encoding to the server, it will result in hard to diagnose problems.  The SDK cannot auto-enable this feature because it needs to maintain backwards compatibility with applications already doing their own URL encoding.
 | `"keepalive"`             | OPTION_KEEP_ALIVE             | int*               | Length of time to send `Keep Alives` to service for D2C Messages
 | `"model_id"`              | OPTION_MODEL_ID               | const char*        | [IoT Plug and Play][iot-pnp] model ID the device implements
 
