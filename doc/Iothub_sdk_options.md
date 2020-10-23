@@ -17,13 +17,13 @@ You will use a different API to set options, depending on whether you are using 
 
 
 ```c
-// Convivence layer for device client
+// Convenience layer for device client
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_SetOption(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, const char* optionName, const void* value);
 
 // Lower layer for device client
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SetOption(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, const char* optionName, const void* value);
 
-// Convivence layer for module client
+// Convenience layer for module client
 IOTHUB_CLIENT_RESULT IoTHubModuleClient_SetOption(IOTHUB_MODULE_CLIENT_HANDLE iotHubModuleClientHandle, const char* optionName, const void* value);
 
 // Lower layer for module client
