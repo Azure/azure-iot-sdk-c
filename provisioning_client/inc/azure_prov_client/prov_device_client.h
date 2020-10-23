@@ -32,6 +32,8 @@ extern "C"
 {
 #endif
 
+static const char* const PROV_OPTION_DO_WORK_FREQUENCY_IN_MS = "do_work_freq_ms";
+
 MOCKABLE_FUNCTION(, PROV_DEVICE_HANDLE, Prov_Device_Create, const char*, uri, const char*, scope_id, PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION, protocol);
 MOCKABLE_FUNCTION(, void, Prov_Device_Destroy, PROV_DEVICE_HANDLE, prov_device_handle);
 MOCKABLE_FUNCTION(, PROV_DEVICE_RESULT, Prov_Device_Register_Device, PROV_DEVICE_HANDLE, prov_device_handle, PROV_DEVICE_CLIENT_REGISTER_DEVICE_CALLBACK, register_callback, void*, user_context, PROV_DEVICE_CLIENT_REGISTER_STATUS_CALLBACK, register_status_callback, void*, status_user_context);

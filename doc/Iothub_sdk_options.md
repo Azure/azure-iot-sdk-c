@@ -1,28 +1,36 @@
 # IoT Hub C SDK Options
 
-This document describes how to set the options available in the c sdk.
+This document describes how you can set options for the Azure IoT Hub and Device Provisioning Service (DPS) clients.
 
 - [Setting Options Example](#set_option)
+- [General Transport Options](#general_options)
 - [IoT Hub Client Options](#IotHub_options)
-- [Transport Specific Options](#transport_options)
+- [MQTT, AMQP, and HTTP Specific Protocol Options](#protocol_specific_options)
 - [Device Provisioning Service (DPS) Client Options](#provisioning_option)
 - [File Upload Options](#upload-options)
 
 <a name="set_option"></a>
 
-## Setting an Option
+## Example code for setting an option.
 
-Setting an option in the c-sdk is dependant on which api set you are using:
+You will use a different API to set options, depending on whether you are using a device or module identiy and whether you are using the convenience or lower layer APIs.
+
 
 ```c
-// Convience Layer
-IOTHUB_CLIENT_RESULT IoTHubDeviceClient_SetOption(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* optionName, const void* value)
+// Convience layer for device client
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_SetOption(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, const char* optionName, const void* value);
 
-// Single Thread API
-IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SetOption(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* optionName, const void* value)
+// Lower layer for device client
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SetOption(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, const char* optionName, const void* value);
+
+// Convience layer for module client
+IOTHUB_CLIENT_RESULT IoTHubModuleClient_SetOption(IOTHUB_MODULE_CLIENT_HANDLE iotHubModuleClientHandle, const char* optionName, const void* value);
+
+// Lower layer for module client
+IOTHUB_CLIENT_RESULT IoTHubModuleClient_LL_SetOption(IOTHUB_MODULE_CLIENT_LL_HANDLE iotHubModuleClientHandle, const char* optionName, const void* value);
 ```
 
-An example of using a set option:
+An example of setting an option:
 
 ```c
 // IoT Hub Device Client
@@ -37,15 +45,31 @@ http_proxy.port = PROXY_PORT;
 Prov_Device_LL_SetOption(handle, OPTION_HTTP_PROXY, &http_proxy);
 ```
 
-## Available Options for telemetry, device twins, and device methods
+<a name="general_options"></a>
 
+## Common transport options
+You can use the options below for IoT Hub device clients (for telemetry, device methods, and device twin) and for the device provisioning client.  These options are declared in [shared_util_options.h][shared-util-options-h].
+
+**NOTE: Uploading files to Azure (e.g. IoTHubDeviceClient_UploadToBlobAsync) does not support this complete set of options.**
+
+| Option Name                       | Option Define                   | Value Type         | Description
+|-----------------------------------|---------------------------------|--------------------|-------------------------------
+| `"TrustedCerts"`                | OPTION_TRUSTED_CERT              | const char*        | Azure Server certificate used to validate TLS connection to IoT Hub.  This is usually not requried on Operating systems that have built in certificates to trust, such as Windows or openssl that will trust the Azure Server certificate chain already.  This is typically required on embedded devices that do not automatically trust any certificates.
+| `"x509EccCertificate"` | OPTION_X509_ECC_CERT      | const char*        | Sets the ECC x509 certificate used for connection authentication
+| `"x509EccAliasKey"`    | OPTION_X509_ECC_KEY       | const char*        | Sets the private key for the ECC x509 certificate
+| `"proxy_data"`         | OPTION_HTTP_PROXY         | [HTTP_PROXY_OPTIONS*][shared-util-options-h]| Http proxy data object used for proxy connection to IoT Hub
+| `"tls_version"`         | OPTION_TLS_VERSION         | int*            | TLS version to use for openssl, 10 for version 1.0, 11 for version 1.1, 12 for version 1.2
+| `"x509certificate"`    | SU_OPTION_X509_CERT       | const char*        | Sets an RSA x509 certificate used for connection authentication.  (Also available from [iothub_client_options.h][iothub-client-options-h] as `OPTION_X509_CERT`.)
+| `"x509privatekey"`     | SU_OPTION_X509_PRIVATE_KEY   | const char*        | Sets the private key for the RSA x509 certificate.  Also available from [iothub_client_options.h][iothub-client-options-h] as `OPTION_X509_PRIVATE_KEY`.)
 
 <a name="IotHub_options"></a>
 
-## IoTHub_Client
-The options in this section are for IoT Hub connections that use telemetry, device twins, and device methods.  They are defined in multiple header files, though the application usage (see the sample above) is the same.
+## Available Options for IoT Hub Device and Module client telemetry, device twins, and device methods
+You can use the options below for IoT Hub connections that use telemetry, device twins, and device methods.  You may also use [common transport options](#general_options) options.
 
 These options are declared in [iothub_client_options.h][iothub-client-options-h].
+
+**NOTE: Uploading files to Azure (e.g. IoTHubDeviceClient_UploadToBlobAsync) does not support this complete set of options.**
 
 
 | Option Name                       | Option Define                   | Value Type         | Description
@@ -56,32 +80,21 @@ These options are declared in [iothub_client_options.h][iothub-client-options-h]
 | `"retry_interval_sec"`          | OPTION_RETRY_INTERVAL_SEC        |  unsigned int*              | Amount of seconds between retries when using the interval retry policy.  (Not supported for HTTP transport.)
 | `"retry_max_delay_secs"`        | OPTION_RETRY_MAX_DELAY_SECS      |  unsigned int*              | Maximum number of seconds a retry delay when using linear backoff, exponential backoff, or exponential backoff with jitter policy.  (Not supported for HTTP transport.)
 | `"sas_token_lifetime"` | OPTION_SAS_TOKEN_LIFETIME | size_t* value      | Length of time in seconds used for lifetime of sas token.
-| `"x509certificate"`    | OPTION_X509_CERT          | const char*        | Sets an RSA x509 certificate used for connection authentication
-| `"x509privatekey"`     | OPTION_X509_PRIVATE_KEY   | const char*        | Sets the private key for the RSA x509 certificate
-
- These options are declared in [shared_util_options.h][shared-util-options-h].
-
-| Option Name                       | Option Define                   | Value Type         | Description
-|-----------------------------------|---------------------------------|--------------------|-------------------------------
-| `"TrustedCerts"`                | OPTION_TRUSTED_CERT              | const char*        | Azure Server certificate used to validate TLS connection to IoT Hub
-| `"x509EccCertificate"` | OPTION_X509_ECC_CERT      | const char*        | Sets the ECC x509 certificate used for connection authentication
-| `"x509EccAliasKey"`    | OPTION_X509_ECC_KEY       | const char*        | Sets the private key for the ECC x509 certificate
-| `"proxy_data"`         | OPTION_HTTP_PROXY         | [HTTP_PROXY_OPTIONS*][shared-util-options-h]| Http proxy data object used for proxy connection to IoT Hub
-| `"tls_version"`         | OPTION_TLS_VERSION         | int*            | TLS version to use for openssl, 10 for version 1.0, 11 for version 1.1, 12 for version 1.2
+| `"do_work_freq_ms"`    | OPTION_DO_WORK_FREQUENCY_IN_MS | unsigned int * | Specifies how frequently the worker thread spun by the convenience layer will wake up, in milliseconds.  The default is 1 millisecond.  The maximum allowable value is 100.  (Convenience layer APIs only)
 
 
 <a name="transport_options"></a>
 
 ## Transport specific options
 
-Some options are only supported by a given transport.  These are always declared in [iothub_client_options.h][iothub-client-options-h].
+Some options are only supported by a given transport.  These are declared in [iothub_client_options.h][iothub-client-options-h].
 
 ### MQTT Specific Options
 
 | Option Name               | Option Define                 | Value Type         | Description
 |---------------------------|-------------------------------|--------------------|-------------------------------
+| `"auto_url_encode_decode"`| OPTION_AUTO_URL_ENCODE_DECODE | bool*              | Turn on and off automatic URL Encoding and Decoding.  **You are strongly encouraged to set this to true.**  If you do not do so and send a character that needs URL encoding to the server, it will result in hard to diagnose problems.  The SDK cannot auto-enable this feature because it needs to maintain backwards compatibility with applications already doing their own URL encoding.
 | `"keepalive"`             | OPTION_KEEP_ALIVE             | int*               | Length of time to send `Keep Alives` to service for D2C Messages
-| `"auto_url_encode_decode"`| OPTION_AUTO_URL_ENCODE_DECODE | bool*              | Turn on and off automatic URL Encoding and Decoding
 | `"model_id"`              | OPTION_MODEL_ID               | const char*        | IoT Plug and Play model ID the device implements
 
 ### AMQP Specific Options
@@ -105,27 +118,24 @@ Some options are only supported by a given transport.  These are always declared
 
 ## Device Provisioning Service (DPS) Client Options
 
-These options are supporting for the  DPS client.  They are defined in multiple header files, though the application usage (see the sample above) is the same.  
+You can use the options below to configure the DPS client.  You may also use [common transport options](#general_options).
 
-
-These options are defined in [prov_device_ll_client.h][provisioning-device-client-options-h].  Note that even when using the convenience layer DPS client (`PROV_DEVICE_HANDLE` instead of `PROV_DEVICE_LL_HANDLE`) the application should still retrieve options from prov_device_ll_client.h.
+These are defined in [prov_device_ll_client.h][provisioning-device-ll-client-options-h] except for `PROV_OPTION_DO_WORK_FREQUENCY_IN_MS` which is defined in [prov_device_client.h][provisioning-device-client-options-h].
 
 | Option Name                  | Option Define                   | Value Type        | Description
 |------------------------------|---------------------------------|-------------------|-------------------------------
-| `"logtrace"`           | PROV_OPTION_LOG_TRACE          | bool* value        | Turn on and off log tracing for the transport
-| `"registration_id"`       | PROV_REGISTRATION_ID         | `unsigned int`* value     | Minimum time in seconds allowed between 2 consecutive GET issues to the service
-| `"provisioning_timeout"`                  | PROV_OPTION_TIMEOUT             | `long`* value     | When using curl the amount of time before the request times out, defaults to 242 seconds.
-
-
-
+| `"logtrace"`              | PROV_OPTION_LOG_TRACE          | bool* value        | Turn on and off log tracing for the transport
+| `"registration_id"`       | PROV_REGISTRATION_ID         | `unsigned int`* value     | Registration ID to specify.
+| `"provisioning_timeout"`  | PROV_OPTION_TIMEOUT             | `long`* value     | How long to timeout DPS session.
+| `"do_work_freq_ms"`       | PROV_OPTION_DO_WORK_FREQUENCY_IN_MS | unsigned int * | Specifies how frequently the worker thread spun by the convenience layer will wake up, in milliseconds.  The default is 1 millisecond.  (Convenience layer APIs only)
 
 <a name="upload-options"></a>
 
 ## File Upload Options
 
-When uploading files to Azure, most of the options above are silently ignored.  This is even though `IoTHubDeviceClient_LL_UploadToBlob` and related APIs use the same IoT Hub handle as used for telemetry, device methods, and device twin.  The reason the options are different is because the underlying transport is implemented differently.
+When uploading files to Azure, most of the options described above are silently ignored.  This is even though `IoTHubDeviceClient_LL_UploadToBlob` and related APIs use the same IoT Hub handle as used for telemetry, device methods, and device twin.  The reason the options are different is because the underlying transport is implemented differently.
 
-The following options are supported when performing file uploads.  They are declared in [iothub_client_options.h][iothub-client-options-h].
+The following options are supported when performing file uploads.  They are declared in [iothub_client_options.h][iothub-client-options-h] and in [shared_util_options.h][shared-util-options-h].
 
 | Option Name                  | Option Define                   | Value Type        | Description
 |------------------------------|---------------------------------|-------------------|-------------------------------
@@ -142,7 +152,7 @@ Batching is the ability of a protocol to send multiple messages in one payload, 
 
 - AMQP uses batching always.
 
-- HTTP can optionally enable batching, using the "Batching" option referenced above.
+- HTTP can optionally enable batching, using the "Batching" option.
 
 - MQTT does not have a batching option.
 
@@ -161,4 +171,5 @@ IoTHubDeviceClient_LL_DoWork(iotHubClientHandle);
 
 [iothub-client-options-h]: https://github.com/Azure/azure-iot-sdk-c/blob/master/iothub_client/inc/iothub_client_options.h
 [shared-util-options-h]: https://github.com/Azure/azure-c-shared-utility/blob/master/inc/azure_c_shared_utility/shared_util_options.h
-[provisioning-device-client-options-h]: https://github.com/Azure/azure-iot-sdk-c/blob/master/provisioning_client/inc/azure_prov_client/prov_device_ll_client.h
+[provisioning-device-ll-client-options-h]: https://github.com/Azure/azure-iot-sdk-c/blob/master/provisioning_client/inc/azure_prov_client/prov_device_ll_client.h
+[provisioning-device-client-options-h]: https://github.com/Azure/azure-iot-sdk-c/blob/master/provisioning_client/inc/azure_prov_client/prov_device_client.h
