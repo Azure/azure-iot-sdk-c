@@ -16,36 +16,34 @@ Setting an option in the c-sdk is dependant on which api set you are using:
 
 ```c
 // Convience Layer
-IOTHUB_CLIENT_RESULT IoTHubClient_SetOption(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* optionName, const void* value)
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_SetOption(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* optionName, const void* value)
 
 // Single Thread API
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetOption(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* optionName, const void* value)
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SetOption(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* optionName, const void* value)
 ```
 
 An example of using a set option:
 
 ```c
+// IoT Hub Device Client
 bool trace_on = true;
-IoTHubClient_SetOption(sdk_handle, OPTION_LOG_TRACE, &trace_on);
+IoTHubDeviceClient_SetOption(sdk_handle, OPTION_LOG_TRACE, &trace_on);
 
+// Device Provisioning Service (DPS) Client
 HTTP_PROXY_OPTIONS http_proxy;
 memset(&http_proxy, 0, sizeof(HTTP_PROXY_OPTIONS));
 http_proxy.host_address = PROXY_ADDRESS;
 http_proxy.port = PROXY_PORT;
-DPS_LL_SetOption(handle, OPTION_HTTP_PROXY, &http_proxy);
+Prov_Device_LL_SetOption(handle, OPTION_HTTP_PROXY, &http_proxy);
 ```
 
 ## Available Options for telemetry, device twins, and device methods
-The options in this section are for IoT Hub connections that use telemetry, device twins, and device methods.  Most of these options are ignored when performing a file upload operation such as `IoTHubDeviceClient_LL_UploadToBlob`.  File upload options are considered [separately](#upload-options).
 
 
 <a name="IotHub_options"></a>
 
 ## IoTHub_Client
-
-### iothub_client_options.h
-
-The options for configuring the IoT Hub device client are defined in mulitple header files.  The usage pattern, as defined above, is the same in all cases.
+The options in this section are for IoT Hub connections that use telemetry, device twins, and device methods.  They are defined in multiple header files, though the application usage (see the sample above) is the same.
 
 These options are declared in [iothub_client_options.h][iothub-client-options-h].
 
@@ -107,8 +105,18 @@ Some options are only supported by a given transport.  These are always declared
 
 ## Device Provisioning Service (DPS) Client Options
 
-These options are supporting fort the  DPS client.
-declared in [prov_device_ll_client.h][provisioning-device-client-options-h].
+These options are supporting for the  DPS client.  They are defined in multiple header files, though the application usage (see the sample above) is the same.  
+
+
+These options are defined in [prov_device_ll_client.h][provisioning-device-client-options-h].  Note that even when using the convenience layer DPS client (`PROV_DEVICE_HANDLE` instead of `PROV_DEVICE_LL_HANDLE`) the application should still retrieve options from prov_device_ll_client.h.
+
+| Option Name                  | Option Define                   | Value Type        | Description
+|------------------------------|---------------------------------|-------------------|-------------------------------
+| `"logtrace"`           | PROV_OPTION_LOG_TRACE          | bool* value        | Turn on and off log tracing for the transport
+| `"registration_id"`       | PROV_REGISTRATION_ID         | `unsigned int`* value     | Minimum time in seconds allowed between 2 consecutive GET issues to the service
+| `"provisioning_timeout"`                  | PROV_OPTION_TIMEOUT             | `long`* value     | When using curl the amount of time before the request times out, defaults to 242 seconds.
+
+
 
 
 <a name="upload-options"></a>

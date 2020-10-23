@@ -4,9 +4,9 @@
 /** @file iothub_device_client.h
 *    @brief Extends the IoTHubCLient_LL module with additional features.
 *
-*    @details IoTHubClient is a module that extends the IoTHubCLient_LL
+*    @details IoTHubClient is a module that extends the IoTHubDeviceClient_LL
 *             module with 2 features:
-*                - scheduling the work for the IoTHubCLient from a
+*                - scheduling the work for the IoTHubDeviceClient from a
 *                  thread, so that the user does not need to create their
 *                  own thread
 *                - thread-safe APIs
@@ -290,7 +290,7 @@ extern "C"
     *                                    callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubClient_LL_Destroy function from within any callback.
+    *            the ::IoTHubDeviceClient_LL_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */

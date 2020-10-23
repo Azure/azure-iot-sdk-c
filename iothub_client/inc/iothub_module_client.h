@@ -2,11 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 /** @file iothub_module_client.h
-*    @brief Extends the IoTHubClient_LL module with additional features.
+*    @brief Extends the IoTHubModuleClient_LL module with additional features.
 *
-*    @details IoTHubClient is a module that extends the IoTHubClient_LL
+*    @details IoTHubModuleClient is a module that extends the IoTHubModuleClient_LL
 *             module with 2 features:
-*                - scheduling the work for the IoTHubClient from a
+*                - scheduling the work for the IoTHubModuleClient from a
 *                  thread, so that the user does not need to create their
 *                  own thread
 *                - thread-safe APIs
@@ -87,7 +87,7 @@ extern "C"
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SendEventAsync, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, IOTHUB_MESSAGE_HANDLE, eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, eventConfirmationCallback, void*, userContextCallback);
 
     /**
-    * @brief    This function returns the current sending status for IoTHubClient.
+    * @brief    This function returns the current sending status for IoTHubModuleClient.
     *
     * @param    iotHubModuleClientHandle  The handle created by a call to the create function.
     * @param    IoTHubClientStatus        The sending state is populated at the address pointed
@@ -270,7 +270,7 @@ extern "C"
     * @param    eventConfirmationCallback     The callback specified by the module for receiving
     *                                         confirmation of the delivery of the IoT Hub message.
     *                                         This callback can be expected to invoke the
-    *                                         ::IoTHubClient_SendEventAsync function for the
+    *                                         IoTHubModuleClient_SendEventAsync function for the
     *                                         same message in an attempt to retry sending a failing
     *                                         message. The user can specify a @c NULL value here to
     *                                         indicate that no callback is required.
@@ -278,7 +278,7 @@ extern "C"
     *                                         callback. This can be @c NULL.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the ::IoTHubClient_Destroy function from within any callback.
+    *           the IoTHubModuleClient_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -286,7 +286,7 @@ extern "C"
 
 
     /**
-    * @brief    This API sets callback for  method call that is directed to specified 'inputName' queue (e.g. messages from IoTHubClient_SendEventToOutputAsync)
+    * @brief    This API sets callback for  method call that is directed to specified 'inputName' queue (e.g. messages from IoTHubModuleClient_SendEventToOutputAsync)
     *
     * @param    iotHubModuleClientHandle      The handle created by a call to the create function.
     * @param    inputName                     The name of the queue to listen on for this moduleMethodCallback/userContextCallback.
