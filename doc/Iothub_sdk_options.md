@@ -11,7 +11,7 @@ This document describes how you can set options for the Azure IoT Hub and Device
 
 <a name="set_option"></a>
 
-## Example code for setting an option.
+## Example Code for Setting an Option
 
 You will use a different API to set options, depending on whether you are using a device or module identity and whether you are using the convenience or lower layer APIs.  The pattern is generally the same.
 
@@ -54,13 +54,13 @@ You can use the options below for the IoT Hub Device Client, the IoT Hub Module 
 
 | Option Name                       | Option Define                   | Value Type         | Description
 |-----------------------------------|---------------------------------|--------------------|-------------------------------
-| `"TrustedCerts"`                | OPTION_TRUSTED_CERT              | const char*        | Azure Server certificate used to validate TLS connection to IoT Hub.  This is usually not required on operating systems that have built in certificates to trust, such as Windows and some Linux distributions.  A typical use case is on an embedded system which does not trust any certificates or when connecting to a gateway whose certificates that are not otherwise trusted.  See [here][gateway-sample] for a gateway sample.
-| `"x509certificate"`    | SU_OPTION_X509_CERT       | const char*        | Sets an RSA x509 certificate used for connection authentication.  (Also available from [iothub_client_options.h][iothub-client-options-h] as `OPTION_X509_CERT`.)
-| `"x509privatekey"`     | SU_OPTION_X509_PRIVATE_KEY   | const char*        | Sets the private key for the RSA x509 certificate.  (Also available from [iothub_client_options.h][iothub-client-options-h] as `OPTION_X509_PRIVATE_KEY`.)
-| `"x509EccCertificate"` | OPTION_X509_ECC_CERT      | const char*        | Sets the ECC x509 certificate used for connection authentication
-| `"x509EccAliasKey"`    | OPTION_X509_ECC_KEY       | const char*        | Sets the private key for the ECC x509 certificate
-| `"proxy_data"`         | OPTION_HTTP_PROXY         | [HTTP_PROXY_OPTIONS*][shared-util-options-h]| Http proxy data object used for proxy connection to IoT Hub
-| `"tls_version"`         | OPTION_TLS_VERSION         | int*            | TLS version to use for openssl, 10 for version 1.0, 11 for version 1.1, 12 for version 1.2.  (**DEPRECATED**: TLS 1.0 and 1.1 are not secure and should not be used.  This option is included only for backward compatibility.)
+| `"TrustedCerts"`                  | OPTION_TRUSTED_CERT             | const char*        | Azure Server certificate used to validate TLS connection to IoT Hub.  This is usually not required on operating systems that have built in certificates to trust, such as Windows and some Linux distributions.  A typical use case is on an embedded system which does not trust any certificates or when connecting to a gateway whose certificates that are not otherwise trusted.  See [here][gateway-sample] for a gateway sample.
+| `"x509certificate"`               | SU_OPTION_X509_CERT             | const char*        | Sets an RSA x509 certificate used for connection authentication.  (Also available from [iothub_client_options.h][iothub-client-options-h] as `OPTION_X509_CERT`.)
+| `"x509privatekey"`                | SU_OPTION_X509_PRIVATE_KEY      | const char*        | Sets the private key for the RSA x509 certificate.  (Also available from [iothub_client_options.h][iothub-client-options-h] as `OPTION_X509_PRIVATE_KEY`.)
+| `"x509EccCertificate"`            | OPTION_X509_ECC_CERT            | const char*        | Sets the ECC x509 certificate used for connection authentication
+| `"x509EccAliasKey"`               | OPTION_X509_ECC_KEY             | const char*        | Sets the private key for the ECC x509 certificate
+| `"proxy_data"`                    | OPTION_HTTP_PROXY               | [HTTP_PROXY_OPTIONS*][shared-util-options-h]| Http proxy data object used for proxy connection to IoT Hub
+| `"tls_version"`                   | OPTION_TLS_VERSION              | int*               | TLS version to use for openssl, 10 for version 1.0, 11 for version 1.1, 12 for version 1.2.  (**DEPRECATED**: TLS 1.0 and 1.1 are not secure and should not be used.  This option is included only for backward compatibility.)
 
 
 <a name="IotHub_options"></a>
@@ -75,13 +75,13 @@ You may also use [common transport options](#general_options) options.
 
 | Option Name                       | Option Define                   | Value Type         | Description
 |-----------------------------------|---------------------------------|--------------------|-------------------------------
-| `"logtrace"`           | OPTION_LOG_TRACE          | bool* value        | Turn on and off log tracing for the transport
-| `"messageTimeout"`              | OPTION_MESSAGE_TIMEOUT           | tickcounter_ms_t*  | (DEPRECATED) Timeout used for message on the message queue
-| `"product_info"`                | OPTION_PRODUCT_INFO              | const char*        | User defined Product identifier sent to the IoT Hub service
-| `"retry_interval_sec"`          | OPTION_RETRY_INTERVAL_SEC        |  unsigned int*              | Number of seconds between retries when using the interval retry policy.  (Not supported for HTTP transport.)
-| `"retry_max_delay_secs"`        | OPTION_RETRY_MAX_DELAY_SECS      |  unsigned int*              | Maximum number of seconds a retry delay when using linear backoff, exponential backoff, or exponential backoff with jitter policy.  (Not supported for HTTP transport.)
-| `"sas_token_lifetime"` | OPTION_SAS_TOKEN_LIFETIME | size_t* value      | Length of time in seconds used for lifetime of SAS token.
-| `"do_work_freq_ms"`    | OPTION_DO_WORK_FREQUENCY_IN_MS | unsigned int * | Specifies how frequently the worker thread spun by the convenience layer will wake up, in milliseconds.  The default is 1 millisecond.  The maximum allowable value is 100.  (Convenience layer APIs only)
+| `"logtrace"`                      | OPTION_LOG_TRACE                | bool*              | Turn on and off log tracing for the transport
+| `"messageTimeout"`                | OPTION_MESSAGE_TIMEOUT          | tickcounter_ms_t*  | (DEPRECATED) Timeout used for message on the message queue
+| `"product_info"`                  | OPTION_PRODUCT_INFO             | const char*        | User defined Product identifier sent to the IoT Hub service
+| `"retry_interval_sec"`            | OPTION_RETRY_INTERVAL_SEC       | unsigned int*      | Number of seconds between retries when using the interval retry policy.  (Not supported for HTTP transport.)
+| `"retry_max_delay_secs"`          | OPTION_RETRY_MAX_DELAY_SECS     | unsigned int*      | Maximum number of seconds a retry delay when using linear backoff, exponential backoff, or exponential backoff with jitter policy.  (Not supported for HTTP transport.)
+| `"sas_token_lifetime"`            | OPTION_SAS_TOKEN_LIFETIME       | size_t*            | Length of time in seconds used for lifetime of SAS token.
+| `"do_work_freq_ms"`               | OPTION_DO_WORK_FREQUENCY_IN_MS  | unsigned int *     | Specifies how frequently the worker thread spun by the convenience layer will wake up, in milliseconds.  The default is 1 millisecond.  The maximum allowable value is 100.  (Convenience layer APIs only)
 
 
 <a name="protocol_specific_options"></a>
@@ -102,18 +102,18 @@ Some options are only supported by a given protocol (e.g. MQTT, AMQP, HTTP).  Th
 
 | Option Name                  | Option Define                   | Value Type        | Description
 |------------------------------|---------------------------------|-------------------|-------------------------------
-| `"cbs_request_timeout"`      | OPTION_CBS_REQUEST_TIMEOUT      | `size_t`* value   | Number of seconds to wait for a CBS request to complete
-| `"sas_token_refresh_time"`   | OPTION_SAS_TOKEN_REFRESH_TIME   | `size_t`* value   | Frequency in seconds that the SAS token is refreshed
-| `"event_send_timeout_secs"`  | OPTION_EVENT_SEND_TIMEOUT_SECS  | `size_t`* value   | Number of seconds to wait for telemetry message to complete
-| `"c2d_keep_alive_freq_secs"` | OPTION_C2D_KEEP_ALIVE_FREQ_SECS | `size_t`* value   | Informs service of maximum period the client waits for keep-alive message
+| `"cbs_request_timeout"`      | OPTION_CBS_REQUEST_TIMEOUT      | size_t*           | Number of seconds to wait for a CBS request to complete
+| `"sas_token_refresh_time"`   | OPTION_SAS_TOKEN_REFRESH_TIME   | size_t*           | Frequency in seconds that the SAS token is refreshed
+| `"event_send_timeout_secs"`  | OPTION_EVENT_SEND_TIMEOUT_SECS  | size_t*           | Number of seconds to wait for telemetry message to complete
+| `"c2d_keep_alive_freq_secs"` | OPTION_C2D_KEEP_ALIVE_FREQ_SECS | size_t*           | Informs service of maximum period the client waits for keep-alive message
 
 ### HTTP Specific Options
 
 | Option Name                  | Option Define                   | Value Type        | Description
 |------------------------------|---------------------------------|-------------------|-------------------------------
-| `"Batching"`                 | OPTION_BATCHING                 | `bool`* value     | Turn on and off message batching
-| `"MinimumPollingTime"`       | OPTION_MIN_POLLING_TIME         | `unsigned int`* value     | Minimum time in seconds allowed between 2 consecutive GET issues to the service
-| `"timeout"`                  | OPTION_HTTP_TIMEOUT             | `long`* value     | When using curl the amount of time before the request times out, defaults to 242 seconds.
+| `"Batching"`                 | OPTION_BATCHING                 | bool*             | Turn on and off message batching
+| `"MinimumPollingTime"`       | OPTION_MIN_POLLING_TIME         | unsigned int*     | Minimum time in seconds allowed between 2 consecutive GET issues to the service
+| `"timeout"`                  | OPTION_HTTP_TIMEOUT             | long*             | When using curl the amount of time before the request times out, defaults to 242 seconds.
 
 <a name="provisioning_option"></a>
 
@@ -125,23 +125,23 @@ You may also use [common transport options](#general_options).
 
 | Option Name                  | Option Define                   | Value Type        | Description
 |------------------------------|---------------------------------|-------------------|-------------------------------
-| `"logtrace"`              | PROV_OPTION_LOG_TRACE          | bool* value        | Turn on and off log tracing for the transport
-| `"registration_id"`       | PROV_REGISTRATION_ID         | `const char`* value     | The registration ID of the device.
-| `"provisioning_timeout"`  | PROV_OPTION_TIMEOUT             | `long`* value     | Maximum time to allow DPS to complete, in seconds.
-| `"do_work_freq_ms"`       | PROV_OPTION_DO_WORK_FREQUENCY_IN_MS | `unsigned int`* value | Specifies how frequently the worker thread spun by the convenience layer will wake up, in milliseconds.  The default is 1 millisecond.  (Convenience layer APIs only)
+| `"logtrace"`                 | PROV_OPTION_LOG_TRACE           | bool*             | Turn on and off log tracing for the transport
+| `"registration_id"`          | PROV_REGISTRATION_ID            | const char*       | The registration ID of the device.
+| `"provisioning_timeout"`     | PROV_OPTION_TIMEOUT             | long*             | Maximum time to allow DPS to complete, in seconds.
+| `"do_work_freq_ms"`          | PROV_OPTION_DO_WORK_FREQUENCY_IN_MS | unsigned int* | Specifies how frequently the worker thread spun by the convenience layer will wake up, in milliseconds.  The default is 1 millisecond.  (Convenience layer APIs only)
 
 <a name="upload-options"></a>
 
 ## File Upload Options
 
-When uploading files to Azure, most of the options described above are silently ignored.  This is even though `IoTHubDeviceClient_LL_UploadToBlob` and related APIs use the same IoT Hub handle as used for telemetry, device methods, and device twin.  The reason the options are different is because the underlying transport is implemented differently.
+When you upload  files to Azure with APIs like `IoTHubDeviceClient_LL_UploadToBlob`, most of the options described above are silently ignored.  This is even though these APIs use the same IoT Hub handle as used for telemetry, device methods, and device twin.  The reason the options are different is because the underlying transport is implemented differently for uploads.
 
 The following options are supported when performing file uploads.  They are declared in [iothub_client_options.h][iothub-client-options-h] and in [shared_util_options.h][shared-util-options-h].
 
 | Option Name                  | Option Define                   | Value Type        | Description
 |------------------------------|---------------------------------|-------------------|-------------------------------
 | `"blob_upload_timeout_secs"` | OPTION_BLOB_UPLOAD_TIMEOUT_SECS | size_t*           | Timeout in seconds of initial connection establishment to IoT Hub.  NOTE: This does not specify the end-to-end time of the upload, which is currently not configurable.
-| `"CURLOPT_VERBOSE"`          | OPTION_CURL_VERBOSE             | `bool`* value     | Turn on and off verbosity at curl level.  (Only available when using curl as underlying HTTP client.)
+| `"CURLOPT_VERBOSE"`          | OPTION_CURL_VERBOSE             | bool*             | Turn on and off verbosity at curl level.  (Only available when using curl as underlying HTTP client.)
 | `"x509certificate"`          | OPTION_X509_CERT                | const char*       | Sets an RSA x509 certificate used for connection authentication
 | `"x509privatekey"`           | OPTION_X509_PRIVATE_KEY         | const char*       | Sets the private key for the RSA x509 certificate
 | `"TrustedCerts"`             | OPTION_TRUSTED_CERT             | const char*       | Azure Server certificate used to validate TLS connection to IoT Hub and Azure Storage
