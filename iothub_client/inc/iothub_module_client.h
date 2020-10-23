@@ -4,8 +4,8 @@
 /** @file iothub_module_client.h
 *    @brief Extends the IoTHubModuleClient_LL module with additional features.
 *
-*    @details IoTHubModuleClient is a module that extends the IoTHubModuleClient_LL
-*             module with 2 features:
+*    @details IoTHubModuleClient extends the IoTHubModuleClient_LL
+*             with 2 features:
 *                - scheduling the work for the IoTHubModuleClient from a
 *                  thread, so that the user does not need to create their
 *                  own thread

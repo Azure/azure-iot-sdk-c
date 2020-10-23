@@ -5,7 +5,7 @@
 *    @brief     APIs that allow a user (usually a module) to communicate
 *             with an Azure IoTHub.
 *
-*    @details IoTHubModuleClient_LL is a module that allows a user (usually a
+*    @details IoTHubModuleClient_LL allows a user (usually a
 *             module) to communicate with an Azure IoTHub. It can send events
 *             and receive messages. At any given moment in time there can only
 *             be at most 1 message callback function.
