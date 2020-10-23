@@ -128,7 +128,7 @@ extern "C"
     *                                           callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the ::IoTHubModuleClient_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -145,7 +145,7 @@ extern "C"
     *                                            connection drops to IOT Hub.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the ::IoTHubModuleClient_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -161,7 +161,7 @@ extern "C"
     to IOT Hub.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the ::IoTHubModuleClient_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -286,7 +286,7 @@ extern "C"
 
 
     /**
-    * @brief    This API sets callback for  method call that is directed to specified 'inputName' queue (e.g. messages from IoTHubModuleClient_SendEventToOutputAsync)
+    * @brief    This API sets callback for method call that is directed to specified 'inputName' queue (e.g. messages from IoTHubModuleClient_SendEventToOutputAsync)
     *
     * @param    iotHubModuleClientHandle      The handle created by a call to the create function.
     * @param    inputName                     The name of the queue to listen on for this moduleMethodCallback/userContextCallback.

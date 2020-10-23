@@ -309,7 +309,7 @@ extern "C"
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_LL_SendEventToOutputAsync, IOTHUB_MODULE_CLIENT_LL_HANDLE, iotHubModuleClientHandle, IOTHUB_MESSAGE_HANDLE, eventMessageHandle, const char*, outputName, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, eventConfirmationCallback, void*, userContextCallback);
 
     /**
-    * @brief    This API sets callback for  method call that is directed to specified 'inputName' queue (e.g. messages from IoTHubModuleClient_SendEventToOutputAsync)
+    * @brief    This API sets callback for method call that is directed to specified 'inputName' queue (e.g. messages from IoTHubModuleClient_LL_SendEventToOutputAsync)
     *
     * @param    iotHubModuleClientHandle      The handle created by a call to the create function.
     * @param    inputName                     The name of the queue to listen on for this moduleMethodCallback/userContextCallback.

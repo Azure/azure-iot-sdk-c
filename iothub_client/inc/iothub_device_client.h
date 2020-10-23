@@ -172,7 +172,7 @@ extern "C"
     *                                           callback. This can be @c NULL.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the ::IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *           the ::IoTHubDeviceClient_Destroy function from within any callback.
     *
     * @remark   Callback specified will not receive connection status change notifications for upload connections created with IoTHubDeviceClient_UploadToBlob or IoTHubDeviceClient_UploadMultipleBlocksToBlob.
     *
@@ -191,7 +191,7 @@ extern "C"
     *                                           connection drops to IOT Hub.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the ::IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *           the ::IoTHubDeviceClient_Destroy function from within any callback.
     *
     * @remark   Uploads initiated by IoTHubDeviceClient_UploadToBlob or IoTHubDeviceClient_UploadMultipleBlocksToBlob do not have automatic retries and do not honor the retryPolicy settings.
     *
@@ -209,7 +209,7 @@ extern "C"
     *                                           to IOT Hub.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the ::IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *           the ::IoTHubDeviceClient_Destroy function from within any callback.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -290,7 +290,7 @@ extern "C"
     *                                    callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *            the ::IoTHubDeviceClient_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
