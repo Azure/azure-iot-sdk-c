@@ -2,9 +2,9 @@
 
 This document describes how you can set options for the Azure IoT Hub and Device Provisioning Service (DPS) client connections.
 
-- [Setting Options Example](#set_option)
-- [General Transport Options](#general_options)
-- [IoT Hub Client Options](#IotHub_options)
+- [Example Code for Setting an Option](#set_option)
+- [Common Transport Options](#general_options)
+- [IoT Hub Device and Module Client Options](#IotHub_options)
 - [MQTT, AMQP, and HTTP Specific Protocol Options](#protocol_specific_options)
 - [Device Provisioning Service (DPS) Client Options](#provisioning_option)
 - [File Upload Options](#upload-options)
@@ -13,17 +13,17 @@ This document describes how you can set options for the Azure IoT Hub and Device
 
 ## Example code for setting an option.
 
-You will use a different API to set options, depending on whether you are using a device or module identiy and whether you are using the convenience or lower layer APIs.
+You will use a different API to set options, depending on whether you are using a device or module identity and whether you are using the convenience or lower layer APIs.  The pattern is generally the same.
 
 
 ```c
-// Convience layer for device client
+// Convivence layer for device client
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_SetOption(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, const char* optionName, const void* value);
 
 // Lower layer for device client
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SetOption(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, const char* optionName, const void* value);
 
-// Convience layer for module client
+// Convivence layer for module client
 IOTHUB_CLIENT_RESULT IoTHubModuleClient_SetOption(IOTHUB_MODULE_CLIENT_HANDLE iotHubModuleClientHandle, const char* optionName, const void* value);
 
 // Lower layer for module client
@@ -47,16 +47,16 @@ Prov_Device_LL_SetOption(handle, OPTION_HTTP_PROXY, &http_proxy);
 
 <a name="general_options"></a>
 
-## Common transport options
-You can use the options below for IoT Hub device client and for the Device Provisioning Client.  These options are declared in [shared_util_options.h][shared-util-options-h].
+## Common Transport Options
+You can use the options below for the IoT Hub Device Client, the IoT Hub Module Client, and for the Device Provisioning Client.  These options are declared in [shared_util_options.h][shared-util-options-h].
 
 **NOTE: Uploading files to Azure (e.g. IoTHubDeviceClient_UploadToBlobAsync) does not support this complete set of options.  See [here](#upload-options) for more.**
 
 | Option Name                       | Option Define                   | Value Type         | Description
 |-----------------------------------|---------------------------------|--------------------|-------------------------------
-| `"TrustedCerts"`                | OPTION_TRUSTED_CERT              | const char*        | Azure Server certificate used to validate TLS connection to IoT Hub.  This is usually not requried on operating systems that have built in certificates to trust, such as Windows and some Linux distributions.  A typical use case is on an embedded system which does not trust any certificates or when connecting to a gateway with self-signed certificates.  See [here][gateway-sample] for a gateway sample.
+| `"TrustedCerts"`                | OPTION_TRUSTED_CERT              | const char*        | Azure Server certificate used to validate TLS connection to IoT Hub.  This is usually not required on operating systems that have built in certificates to trust, such as Windows and some Linux distributions.  A typical use case is on an embedded system which does not trust any certificates or when connecting to a gateway whose certificates that are not otherwise trusted.  See [here][gateway-sample] for a gateway sample.
 | `"x509certificate"`    | SU_OPTION_X509_CERT       | const char*        | Sets an RSA x509 certificate used for connection authentication.  (Also available from [iothub_client_options.h][iothub-client-options-h] as `OPTION_X509_CERT`.)
-| `"x509privatekey"`     | SU_OPTION_X509_PRIVATE_KEY   | const char*        | Sets the private key for the RSA x509 certificate.  Also available from [iothub_client_options.h][iothub-client-options-h] as `OPTION_X509_PRIVATE_KEY`.)
+| `"x509privatekey"`     | SU_OPTION_X509_PRIVATE_KEY   | const char*        | Sets the private key for the RSA x509 certificate.  (Also available from [iothub_client_options.h][iothub-client-options-h] as `OPTION_X509_PRIVATE_KEY`.)
 | `"x509EccCertificate"` | OPTION_X509_ECC_CERT      | const char*        | Sets the ECC x509 certificate used for connection authentication
 | `"x509EccAliasKey"`    | OPTION_X509_ECC_KEY       | const char*        | Sets the private key for the ECC x509 certificate
 | `"proxy_data"`         | OPTION_HTTP_PROXY         | [HTTP_PROXY_OPTIONS*][shared-util-options-h]| Http proxy data object used for proxy connection to IoT Hub
@@ -65,7 +65,7 @@ You can use the options below for IoT Hub device client and for the Device Provi
 
 <a name="IotHub_options"></a>
 
-## IoT Hub Device and Module Client options
+## IoT Hub Device and Module Client Options
 You can use the options below for IoT Hub connections.  These options are declared in [iothub_client_options.h][iothub-client-options-h].  
 
 You may also use [common transport options](#general_options) options.
@@ -78,9 +78,9 @@ You may also use [common transport options](#general_options) options.
 | `"logtrace"`           | OPTION_LOG_TRACE          | bool* value        | Turn on and off log tracing for the transport
 | `"messageTimeout"`              | OPTION_MESSAGE_TIMEOUT           | tickcounter_ms_t*  | (DEPRECATED) Timeout used for message on the message queue
 | `"product_info"`                | OPTION_PRODUCT_INFO              | const char*        | User defined Product identifier sent to the IoT Hub service
-| `"retry_interval_sec"`          | OPTION_RETRY_INTERVAL_SEC        |  unsigned int*              | Amount of seconds between retries when using the interval retry policy.  (Not supported for HTTP transport.)
+| `"retry_interval_sec"`          | OPTION_RETRY_INTERVAL_SEC        |  unsigned int*              | Number of seconds between retries when using the interval retry policy.  (Not supported for HTTP transport.)
 | `"retry_max_delay_secs"`        | OPTION_RETRY_MAX_DELAY_SECS      |  unsigned int*              | Maximum number of seconds a retry delay when using linear backoff, exponential backoff, or exponential backoff with jitter policy.  (Not supported for HTTP transport.)
-| `"sas_token_lifetime"` | OPTION_SAS_TOKEN_LIFETIME | size_t* value      | Length of time in seconds used for lifetime of sas token.
+| `"sas_token_lifetime"` | OPTION_SAS_TOKEN_LIFETIME | size_t* value      | Length of time in seconds used for lifetime of SAS token.
 | `"do_work_freq_ms"`    | OPTION_DO_WORK_FREQUENCY_IN_MS | unsigned int * | Specifies how frequently the worker thread spun by the convenience layer will wake up, in milliseconds.  The default is 1 millisecond.  The maximum allowable value is 100.  (Convenience layer APIs only)
 
 
@@ -96,15 +96,15 @@ Some options are only supported by a given protocol (e.g. MQTT, AMQP, HTTP).  Th
 |---------------------------|-------------------------------|--------------------|-------------------------------
 | `"auto_url_encode_decode"`| OPTION_AUTO_URL_ENCODE_DECODE | bool*              | Turn on and off automatic URL Encoding and Decoding.  **You are strongly encouraged to set this to true.**  If you do not do so and send a property with a character that needs URL encoding to the server, it will result in hard to diagnose problems.  The SDK cannot auto-enable this feature because it needs to maintain backwards compatibility with applications already doing their own URL encoding.
 | `"keepalive"`             | OPTION_KEEP_ALIVE             | int*               | Length of time to send `Keep Alives` to service for D2C Messages
-| `"model_id"`              | OPTION_MODEL_ID               | const char*        | [IoT Plug and Play][iot-pnp] model ID the device implements
+| `"model_id"`              | OPTION_MODEL_ID               | const char*        | [IoT Plug and Play][iot-pnp] model ID the device or module implements
 
 ### AMQP Specific Options
 
 | Option Name                  | Option Define                   | Value Type        | Description
 |------------------------------|---------------------------------|-------------------|-------------------------------
-| `"cbs_request_timeout"`      | OPTION_CBS_REQUEST_TIMEOUT      | `size_t`* value   | Amount of seconds to wait for a cbs request to complete
+| `"cbs_request_timeout"`      | OPTION_CBS_REQUEST_TIMEOUT      | `size_t`* value   | Number of seconds to wait for a CBS request to complete
 | `"sas_token_refresh_time"`   | OPTION_SAS_TOKEN_REFRESH_TIME   | `size_t`* value   | Frequency in seconds that the SAS token is refreshed
-| `"event_send_timeout_secs"`  | OPTION_EVENT_SEND_TIMEOUT_SECS  | `size_t`* value   | Amount of seconds to wait for telemetry message to complete
+| `"event_send_timeout_secs"`  | OPTION_EVENT_SEND_TIMEOUT_SECS  | `size_t`* value   | Number of seconds to wait for telemetry message to complete
 | `"c2d_keep_alive_freq_secs"` | OPTION_C2D_KEEP_ALIVE_FREQ_SECS | `size_t`* value   | Informs service of maximum period the client waits for keep-alive message
 
 ### HTTP Specific Options
@@ -141,7 +141,7 @@ The following options are supported when performing file uploads.  They are decl
 | Option Name                  | Option Define                   | Value Type        | Description
 |------------------------------|---------------------------------|-------------------|-------------------------------
 | `"blob_upload_timeout_secs"` | OPTION_BLOB_UPLOAD_TIMEOUT_SECS | size_t*           | Timeout in seconds of initial connection establishment to IoT Hub.  NOTE: This does not specify the end-to-end time of the upload, which is currently not configurable.
-| `"CURLOPT_VERBOSE"`          | OPTION_CURL_VERBOSE             | `bool`* value     | Turn on and off verbosity at curl level.  (For stacks using curl only.)
+| `"CURLOPT_VERBOSE"`          | OPTION_CURL_VERBOSE             | `bool`* value     | Turn on and off verbosity at curl level.  (Only available when using curl as underlying HTTP client.)
 | `"x509certificate"`          | OPTION_X509_CERT                | const char*       | Sets an RSA x509 certificate used for connection authentication
 | `"x509privatekey"`           | OPTION_X509_PRIVATE_KEY         | const char*       | Sets the private key for the RSA x509 certificate
 | `"TrustedCerts"`             | OPTION_TRUSTED_CERT             | const char*       | Azure Server certificate used to validate TLS connection to IoT Hub and Azure Storage
