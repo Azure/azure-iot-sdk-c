@@ -299,6 +299,7 @@ static void free_proxy_data(MQTTTRANSPORT_HANDLE_DATA* mqtt_transport_instance)
 // Destroys xio transport associated with MQTT handle and resets appropriate state
 static void DestroyXioTransport(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
+    mqtt_client_clear_xio(transport_data->mqttClient);
     xio_destroy(transport_data->xioTransport);
     transport_data->xioTransport = NULL;
 }
@@ -317,6 +318,7 @@ static void free_transport_handle_data(MQTTTRANSPORT_HANDLE_DATA* transport_data
     if (transport_data->mqttClient != NULL)
     {
         mqtt_client_deinit(transport_data->mqttClient);
+        transport_data->mqttClient = NULL;
     }
 
     if (transport_data->retry_control_handle != NULL)
