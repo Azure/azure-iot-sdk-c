@@ -50,7 +50,7 @@
 #include "azure_prov_client/prov_transport_amqp_ws_client.h"
 #endif // SAMPLE_AMQP_OVER_WEBSOCKETS
 #ifdef SAMPLE_HTTP
-#include "iothubtransportmqtt.h"
+#include "iothubtransporthttp.h"
 #include "azure_prov_client/prov_transport_http_client.h"
 #endif // SAMPLE_HTTP
 
@@ -216,7 +216,7 @@ int main()
 
         Prov_Device_LL_SetOption(handle, PROV_OPTION_LOG_TRACE, &traceOn);
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
-        // Setting the Trusted Certificate.  This is only necessary on system with without
+        // Setting the Trusted Certificate. This is only necessary on systems without
         // built in certificate stores.
         Prov_Device_LL_SetOption(handle, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
@@ -287,7 +287,7 @@ int main()
             IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_LOG_TRACE, &traceOn);
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
-            // Setting the Trusted Certificate.  This is only necessary on system with without
+            // Setting the Trusted Certificate. This is only necessary on systems without
             // built in certificate stores.
             IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES

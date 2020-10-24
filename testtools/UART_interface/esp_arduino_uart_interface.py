@@ -3,10 +3,6 @@ import sys
 import time
 try:
     from testtools.UART_interface.base_uart_interface import uart_interface
-except:
-    from base_uart_interface import uart_interface
-
-try:
     import testtools.UART_interface.azure_test_firmware_errors as azure_test_firmware_errors
     import testtools.UART_interface.serial_settings as serial_settings
     import testtools.UART_interface.serial_commands_dict as commands_dict
@@ -14,6 +10,7 @@ except:
     import azure_test_firmware_errors
     import serial_settings
     import serial_commands_dict as commands_dict
+    from base_uart_interface import uart_interface
 
 
 # ------- global usecase fcns -------
@@ -24,9 +21,12 @@ def check_sdk_errors(line):
     local_line = line.lower()
     if "error" in local_line or "fail" in local_line:
         if "epoch time failed!" in local_line: # don't count NTP retries.
-            pass
+            azure_test_firmware_errors.SDK_ERRORS += 0
         else:
             azure_test_firmware_errors.SDK_ERRORS += 1
+
+# missing test_failures method, may not need due to this being a sample,
+# not a series of tests
 
 def check_firmware_errors(line):
     if azure_test_firmware_errors.iot_init_failure in line:
@@ -45,7 +45,7 @@ class esp_uart_interface(uart_interface):
     messages_sent = 5
 
     def check_sample_errors(self, line):
-        if "Confirm Callback" in line:
+        if "Confirmation callback" in line:
             self.message_callbacks += 1
 
     # If there is a sudden disconnect, program should report line in input script reached, and close files.
@@ -117,7 +117,6 @@ class esp_uart_interface(uart_interface):
             except:
                 return None
 
-    # Note: the buffer size on the mxchip appears to be 128 Bytes.
     def write_read(self, ser, input_file, output_file):
         if 'esp32' in serial_settings.device_type:
             serial_settings.bits_to_cache = 800
@@ -126,6 +125,7 @@ class esp_uart_interface(uart_interface):
             serial_settings.bits_to_cache = 1600
             serial_settings.baud_rate = 115200
 
+        session_start = time.time()
         if input_file:
             # set wait between read/write
             wait = (serial_settings.bits_to_cache/serial_settings.baud_rate)
@@ -151,14 +151,31 @@ class esp_uart_interface(uart_interface):
                     while(output):
                         time.sleep(wait)
                         output = self.serial_read(ser, line, output_file_obj)
+                        if "done with sending" in output:
+                            serial_settings.tests_run = True
                     line = input_file_obj.readline()
 
-                # read any trailing output, save to file
-                while (ser.in_waiting):
-                    time.sleep(.2)
-                    output = self.serial_read(ser, line, output_file_obj)
+                if serial_settings.test_timeout:
+                    print("Test input end. Waiting for results. Time Elapsed: ", (time.time() - session_start))
+                    while((time.time() - session_start) < serial_settings.test_timeout):
+                        time.sleep(.2)
+                        output = self.serial_read(ser, line, output_file_obj)
+                        check_sdk_errors(output)
+
+                        #for now we can assume one test suite is run
+                        if "done with sending" in output or serial_settings.tests_run:
+                            break
+                    print("Test iteration ended. Time Elapsed: ", (time.time() - session_start))
+                else:
+                    # read any trailing output, save to file
+                    while (ser.in_waiting):
+                        time.sleep(.2)
+                        output = self.serial_read(ser, line, output_file_obj)
+                        check_sdk_errors(output)
 
                 # forward failed callbacks to SDK_ERRORS
                 azure_test_firmware_errors.SDK_ERRORS += self.messages_sent - self.message_callbacks
+                with open('exitcode.txt', 'w') as fexit:
+                    fexit.write('%d' %azure_test_firmware_errors.SDK_ERRORS)
 
                 output_file_obj.close()

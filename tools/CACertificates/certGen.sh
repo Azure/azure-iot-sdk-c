@@ -12,6 +12,11 @@
 # These certs are intended only to help demonstrate and prototype CA certs.
 ###############################################################################
 
+set -x # Set trace on
+set -o errexit # Exit if command failed
+set -o nounset # Exit if variable not set
+set -o pipefail # Exit if pipe failed
+
 root_ca_dir="."
 home_dir="."
 algorithm="genrsa"
@@ -264,7 +269,7 @@ function generate_leaf_certificate()
 
     generate_device_certificate_common "${common_name}" "${device_prefix}" \
                                        "${certificate_dir}" "${ca_password}" \
-                                       "${openssl_config_file}" "server_cert" \
+                                       "${openssl_config_file}" "usr_cert" \
                                        "Leaf Device"
 }
 
@@ -331,7 +336,7 @@ function generate_verification_certificate()
 }
 
 ###############################################################################
-# Generates a certificate for a device, chained to the intermediate.
+# Generates a certificate for a device, chained directly to the root.
 ###############################################################################
 function generate_device_certificate()
 {

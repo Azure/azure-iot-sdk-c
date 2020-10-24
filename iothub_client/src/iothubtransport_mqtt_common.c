@@ -81,6 +81,8 @@ static const char* DEVICE_METHOD_RESPONSE_TOPIC = "$iothub/methods/res/%d/?$rid=
 static const char* REQUEST_ID_PROPERTY = "?$rid=";
 
 static const char* MESSAGE_ID_PROPERTY = "mid";
+static const char* MESSAGE_CREATION_TIME_UTC = "ctime";
+static const char* MESSAGE_USER_ID = "uid";
 static const char* CORRELATION_ID_PROPERTY = "cid";
 static const char* CONTENT_TYPE_PROPERTY = "ct";
 static const char* CONTENT_ENCODING_PROPERTY = "ce";
@@ -90,6 +92,10 @@ static const char* CONNECTION_DEVICE_ID = "cdid";
 static const char* CONNECTION_MODULE_ID_PROPERTY = "cmid";
 
 static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtimeutc";
+
+static const char DT_MODEL_ID_TOKEN[] = "model-id";
+
+static const char DEFAULT_IOTHUB_PRODUCT_IDENTIFIER[] = CLIENT_DEVICE_TYPE_PREFIX "/" IOTHUB_SDK_VERSION;
 
 #define TOLOWER(c) (((c>='A') && (c<='Z'))?c-'A'+'a':c)
 
@@ -236,7 +242,7 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     int http_proxy_port;
     char* http_proxy_username;
     char* http_proxy_password;
-    bool isProductInfoSet;
+    bool isConnectUsernameSet;
     int disconnect_recv_flag;
 } MQTTTRANSPORT_HANDLE_DATA, *PMQTTTRANSPORT_HANDLE_DATA;
 
@@ -293,6 +299,7 @@ static void free_proxy_data(MQTTTRANSPORT_HANDLE_DATA* mqtt_transport_instance)
 // Destroys xio transport associated with MQTT handle and resets appropriate state
 static void DestroyXioTransport(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
+    mqtt_client_clear_xio(transport_data->mqttClient);
     xio_destroy(transport_data->xioTransport);
     transport_data->xioTransport = NULL;
 }
@@ -311,6 +318,7 @@ static void free_transport_handle_data(MQTTTRANSPORT_HANDLE_DATA* transport_data
     if (transport_data->mqttClient != NULL)
     {
         mqtt_client_deinit(transport_data->mqttClient);
+        transport_data->mqttClient = NULL;
     }
 
     if (transport_data->retry_control_handle != NULL)
@@ -418,6 +426,7 @@ static const char* retrieve_mqtt_return_codes(CONNECT_RETURN_CODE rtn_code)
 static int retrieve_device_method_rid_info(const char* resp_topic, STRING_HANDLE method_name, STRING_HANDLE request_id)
 {
     int result;
+
     STRING_TOKENIZER_HANDLE token_handle = STRING_TOKENIZER_create_from_char(resp_topic);
     if (token_handle == NULL)
     {
@@ -474,6 +483,7 @@ static int retrieve_device_method_rid_info(const char* resp_topic, STRING_HANDLE
         }
         STRING_TOKENIZER_destroy(token_handle);
     }
+
     return result;
 }
 
@@ -727,6 +737,17 @@ static int addSystemPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_messag
             index++;
         }
     }
+
+    if (result == 0)
+    {
+        const char* message_creation_time_utc = IoTHubMessage_GetMessageCreationTimeUtcSystemProperty(iothub_message_handle);
+        if (message_creation_time_utc != NULL)
+        {
+            result = addSystemPropertyToTopicString(topic_string, index, MESSAGE_CREATION_TIME_UTC, message_creation_time_utc, urlencode);
+            index++;
+        }
+    }
+
     if (result == 0)
     {
         if (is_security_msg)
@@ -1184,15 +1205,17 @@ static int subscribeToNotifyStateIfNeeded(PMQTTTRANSPORT_HANDLE_DATA transport_d
     return result;
 }
 
-
 static bool isSystemProperty(const char* tokenData)
 {
     bool result = false;
     size_t propCount = sizeof(sysPropList) / sizeof(sysPropList[0]);
     size_t index = 0;
+    size_t tokenDataLength = strlen(tokenData);
+
     for (index = 0; index < propCount; index++)
     {
-        if (memcmp(tokenData, sysPropList[index].propName, sysPropList[index].propLength) == 0)
+        if (tokenDataLength >= sysPropList[index].propLength &&
+            memcmp(tokenData, sysPropList[index].propName, sysPropList[index].propLength) == 0)
         {
             result = true;
             break;
@@ -1259,6 +1282,19 @@ static int setMqttMessagePropertyIfPossible(IOTHUB_MESSAGE_HANDLE IoTHubMessage,
     // Not finding a system property to map to isn't an error.
     int result = 0;
 
+    if (nameLen > 5)
+    {
+        if (strcmp((const char*)&propName[nameLen - 5], MESSAGE_CREATION_TIME_UTC) == 0)
+        {
+            if (IoTHubMessage_SetMessageCreationTimeUtcSystemProperty(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
+            {
+                LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'CreationTimeUtc' property.");
+                result = MU_FAILURE;
+            }
+            return result;
+        }
+    }
+
     if (nameLen > 4)
     {
         if (strcmp((const char*)&propName[nameLen - 4], CONNECTION_DEVICE_ID) == 0)
@@ -1298,6 +1334,15 @@ static int setMqttMessagePropertyIfPossible(IOTHUB_MESSAGE_HANDLE IoTHubMessage,
             if (IoTHubMessage_SetCorrelationId(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
             {
                 LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'correlationId' property.");
+                result = MU_FAILURE;
+            }
+            return result;
+        }
+        else if (strcmp((const char*)&propName[nameLen - 3], MESSAGE_USER_ID) == 0)
+        {
+            if (IoTHubMessage_SetMessageUserIdSystemProperty(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
+            {
+                LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'userId' property.");
                 result = MU_FAILURE;
             }
             return result;
@@ -2172,6 +2217,81 @@ static STRING_HANDLE buildClientId(const char* device_id, const char* module_id)
     }
 }
 
+static int buildConfigForUsernameStep2IfNeeded(PMQTTTRANSPORT_HANDLE_DATA transport_data)
+{
+    int result;
+
+    if (!transport_data->isConnectUsernameSet)
+    {
+        STRING_HANDLE userName = NULL;
+        STRING_HANDLE modelIdParameter = NULL;
+        STRING_HANDLE urlEncodedModelId = NULL;
+        const char* modelId = transport_data->transport_callbacks.get_model_id_cb(transport_data->transport_ctx);
+        // TODO: The preview API version in SDK is only scoped to scenarios that require the modelId to be set.
+        // https://github.com/Azure/azure-iot-sdk-c/issues/1547 tracks removing this once non-preview API versions support modelId.
+        const char* apiVersion = IOTHUB_API_VERSION;
+        const char* appSpecifiedProductInfo = transport_data->transport_callbacks.prod_info_cb(transport_data->transport_ctx);
+        STRING_HANDLE productInfoEncoded = NULL; 
+
+        if ((productInfoEncoded = URL_EncodeString((appSpecifiedProductInfo != NULL) ? appSpecifiedProductInfo : DEFAULT_IOTHUB_PRODUCT_IDENTIFIER)) == NULL)
+        {
+            LogError("Unable to UrlEncode productInfo");
+            result = MU_FAILURE;
+        }
+        else if ((userName = STRING_construct_sprintf("%s?api-version=%s&DeviceClientType=%s", STRING_c_str(transport_data->configPassedThroughUsername), apiVersion, STRING_c_str(productInfoEncoded))) == NULL)
+        {
+            LogError("Failed constructing string");
+            result = 0;
+        }
+        else if (modelId != NULL)
+        {
+            if ((urlEncodedModelId = URL_EncodeString(modelId)) == NULL)
+            {
+                LogError("Failed to URL encode the modelID string");
+                result = MU_FAILURE;
+            }
+            else if ((modelIdParameter = STRING_construct_sprintf("&%s=%s", DT_MODEL_ID_TOKEN, STRING_c_str(urlEncodedModelId))) == NULL)
+            {
+                LogError("Cannot build modelID string");
+                result = MU_FAILURE;
+            }
+            else if (STRING_concat_with_STRING(userName, modelIdParameter) != 0)
+            {
+                LogError("Failed to set modelID parameter in connect");
+                result = MU_FAILURE;
+            }
+            else
+            {
+                result = 0;
+            }
+        }
+        else
+        {
+            result = 0;
+        }
+
+        if (result == 0)
+        {
+            STRING_delete(transport_data->configPassedThroughUsername);
+            transport_data->configPassedThroughUsername = userName;
+            userName = NULL;
+            // setting connect string is only allowed once in the lifetime of the device client.
+            transport_data->isConnectUsernameSet = true;
+        }
+
+        STRING_delete(userName);
+        STRING_delete(modelIdParameter);
+        STRING_delete(urlEncodedModelId);
+        STRING_delete(productInfoEncoded);
+    }
+    else
+    {
+        result = 0;
+    }
+
+    return result;
+}
+
 static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
     int result;
@@ -2215,47 +2335,13 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 
     if (result == 0)
     {
-        if (!transport_data->isProductInfoSet)
-        {
-            // This requires the iothubClientHandle, which sadly the MQTT transport only gets on DoWork, so this code still needs to remain here.
-            // The correct place for this would be in the Create method, but we don't get the client handle there.
-            // Also, when device multiplexing is used, the customer creates the transport directly and explicitly, when the client is still not created.
-            // This will be a major hurdle when we add device multiplexing to MQTT transport.
-
-            STRING_HANDLE clone;
-            const char* product_info = transport_data->transport_callbacks.prod_info_cb(transport_data->transport_ctx);
-            if (product_info == NULL)
-            {
-                clone = STRING_construct_sprintf("%s%%2F%s", CLIENT_DEVICE_TYPE_PREFIX, IOTHUB_SDK_VERSION);
-            }
-            else
-            {
-                clone = URL_EncodeString(product_info);
-            }
-
-            if (clone == NULL)
-            {
-                LogError("Failed obtaining the product info");
-            }
-            else
-            {
-                if (STRING_concat_with_STRING(transport_data->configPassedThroughUsername, clone) != 0)
-                {
-                    LogError("Failed concatenating the product info");
-                }
-                else
-                {
-                    transport_data->isProductInfoSet = true;
-                }
-
-                STRING_delete(clone);
-            }
-        }
-
         STRING_HANDLE clientId;
-
-        clientId = buildClientId(STRING_c_str(transport_data->device_id), STRING_c_str(transport_data->module_id));
-        if (NULL == clientId)
+        if (buildConfigForUsernameStep2IfNeeded(transport_data) != 0)
+        {
+            LogError("Failed to add optional connect parameters.");
+            result = MU_FAILURE;
+        }
+        else if ((clientId = buildClientId(STRING_c_str(transport_data->device_id), STRING_c_str(transport_data->module_id))) == NULL)
         {
             LogError("Unable to allocate clientId");
             result = MU_FAILURE;
@@ -2301,7 +2387,6 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             }
             STRING_delete(clientId);
         }
-
     }
     return result;
 }
@@ -2432,15 +2517,18 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     return result;
 }
 
-static STRING_HANDLE buildConfigForUsername(const IOTHUB_CLIENT_CONFIG* upperConfig, const char* moduleId)
+// At handle creation time, we don't have all the fields required for building up the user name (e.g. productID)
+// We build up as much of the string as we can at this point because we do not store upperConfig after initialization.
+// In buildConfigForUsernameStep2IfNeeded, only immediately before we do CONNECT itself, do we complete building up this string.
+static STRING_HANDLE buildConfigForUsernameStep1(const IOTHUB_CLIENT_CONFIG* upperConfig, const char* moduleId)
 {
     if (moduleId == NULL)
     {
-        return STRING_construct_sprintf("%s.%s/%s/?api-version=%s&DeviceClientType=", upperConfig->iotHubName, upperConfig->iotHubSuffix, upperConfig->deviceId, IOTHUB_API_VERSION);
+        return STRING_construct_sprintf("%s.%s/%s/", upperConfig->iotHubName, upperConfig->iotHubSuffix, upperConfig->deviceId);
     }
     else
     {
-        return STRING_construct_sprintf("%s.%s/%s/%s/?api-version=%s&DeviceClientType=", upperConfig->iotHubName, upperConfig->iotHubSuffix, upperConfig->deviceId, moduleId, IOTHUB_API_VERSION);
+        return STRING_construct_sprintf("%s.%s/%s/%s/", upperConfig->iotHubName, upperConfig->iotHubSuffix, upperConfig->deviceId, moduleId);
     }
 }
 
@@ -2528,7 +2616,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                 }
                 else
                 {
-                    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_008: [If the upperConfig contains a valid protocolGatewayHostName value the this shall be used for the hostname, otherwise the hostname shall be constructed using the iothubname and iothubSuffix.] */
+                    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_008: [If the upperConfig contains a valid protocolGatewayHostName value this shall be used for the hostname, otherwise the hostname shall be constructed using the iothubName and iothubSuffix.] */
                     if (upperConfig->protocolGatewayHostName == NULL)
                     {
                         state->hostAddress = STRING_construct_sprintf("%s.%s", upperConfig->iotHubName, upperConfig->iotHubSuffix);
@@ -2544,7 +2632,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                         free_transport_handle_data(state);
                         state = NULL;
                     }
-                    else if ((state->configPassedThroughUsername = buildConfigForUsername(upperConfig, moduleId)) == NULL)
+                    else if ((state->configPassedThroughUsername = buildConfigForUsernameStep1(upperConfig, moduleId)) == NULL)
                     {
                         free_transport_handle_data(state);
                         state = NULL;
@@ -2580,7 +2668,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                         state->topic_DeviceMethods = NULL;
                         state->topic_InputQueue = NULL;
                         state->log_trace = state->raw_trace = false;
-                        state->isProductInfoSet = false;
+                        state->isConnectUsernameSet = false;
                         state->auto_url_encode_decode = false;
                         state->conn_attempted = false;
                     }
@@ -3171,7 +3259,10 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle)
                     currentListEntry = savedFromCurrentListEntry.Flink;
                 }
 
-                sendPendingGetTwinRequests(transport_data);
+                if (transport_data->twin_resp_sub_recv)
+                {
+                    sendPendingGetTwinRequests(transport_data);
+                }
             }
             /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_030: [IoTHubTransport_MQTT_Common_DoWork shall call mqtt_client_dowork everytime it is called if it is connected.] */
             mqtt_client_dowork(transport_data->mqttClient);
@@ -3290,6 +3381,18 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SetOption(TRANSPORT_LL_HANDLE h
             if (retry_control_set_option(transport_data->retry_control_handle, RETRY_CONTROL_OPTION_INITIAL_WAIT_TIME_IN_SECS, value) != 0)
             {
                 LogError("Failure setting retry interval option");
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else
+            {
+                result = IOTHUB_CLIENT_OK;
+            }
+        }
+        else if (strcmp(OPTION_RETRY_MAX_DELAY_SECS, option) == 0)
+        {
+            if (retry_control_set_option(transport_data->retry_control_handle, RETRY_CONTROL_OPTION_MAX_DELAY_IN_SECS, value) != 0)
+            {
+                LogError("Failure setting retry max delay option");
                 result = IOTHUB_CLIENT_ERROR;
             }
             else

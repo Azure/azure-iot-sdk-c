@@ -17,6 +17,7 @@
 #include "internal/iothubtransport_amqp_messenger.h"
 #include "internal/iothubtransport_amqp_twin_messenger.h"
 #include "iothub_client_options.h"
+#include "internal/iothub_internal_consts.h"
 
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(TWIN_MESSENGER_SEND_STATUS, TWIN_MESSENGER_SEND_STATUS_VALUES);
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(TWIN_REPORT_STATE_RESULT, TWIN_REPORT_STATE_RESULT_VALUES);
@@ -44,7 +45,6 @@ MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(TWIN_UPDATE_TYPE, TWIN_UPDATE_TYPE_VALUES
 #define TWIN_CORRELATION_ID_PROPERTY_NAME               "com.microsoft:channel-correlation-id"
 #define TWIN_API_VERSION_PROPERTY_NAME                  "com.microsoft:api-version"
 #define TWIN_CORRELATION_ID_PROPERTY_FORMAT             "twin:%s"
-#define TWIN_API_VERSION_NUMBER                         "2016-11-14"
 
 #define DEFAULT_MAX_TWIN_SUBSCRIPTION_ERROR_COUNT       3
 #define DEFAULT_TWIN_OPERATION_TIMEOUT_SECS             300.0
@@ -687,7 +687,7 @@ static MAP_HANDLE create_link_attach_properties(TWIN_MESSENGER_INSTANCE* twin_ms
                 destroy_link_attach_properties(result);
                 result = NULL;
             }
-            else if (Map_Add(result, TWIN_API_VERSION_PROPERTY_NAME, TWIN_API_VERSION_NUMBER) != MAP_OK)
+            else if (Map_Add(result, TWIN_API_VERSION_PROPERTY_NAME, IOTHUB_API_VERSION) != MAP_OK)
             {
                 LogError("Failed adding AMQP link property 'api-version' (%s)", twin_msgr->device_id);
                 destroy_link_attach_properties(result);
@@ -1776,7 +1776,7 @@ TWIN_MESSENGER_HANDLE twin_messenger_create(const TWIN_MESSENGER_CONFIG* messeng
                 // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_013: [`amqp_msgr_config->device_id` shall be set with `twin_msgr->device_id`]
                 // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_014: [`amqp_msgr_config->iothub_host_fqdn` shall be set with `twin_msgr->iothub_host_fqdn`]
                 // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_015: [`amqp_msgr_config` shall have "twin/" as send link target suffix and receive link source suffix]
-                // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_016: [`amqp_msgr_config` shall have send and receive link attach properties set as "com.microsoft:client-version" = `twin_msgr->client_version`, "com.microsoft:channel-correlation-id" = `twin:<UUID>`, "com.microsoft:api-version" = "2016-11-14"]
+                // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_016: [`amqp_msgr_config` shall have send and receive link attach properties set as "com.microsoft:client-version" = `twin_msgr->client_version`, "com.microsoft:channel-correlation-id" = `twin:<UUID>`, "com.microsoft:api-version" = "Current API version"]
                 // Codes_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_017: [`amqp_msgr_config` shall be set with `on_amqp_messenger_state_changed_callback` and `on_amqp_messenger_subscription_changed_callback` callbacks]
                 AMQP_MESSENGER_CONFIG amqp_msgr_config;
                 amqp_msgr_config.prod_info_cb = twin_msgr->prod_info_cb;

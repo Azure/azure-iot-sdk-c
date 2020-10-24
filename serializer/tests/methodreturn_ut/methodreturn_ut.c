@@ -16,6 +16,11 @@ static void* my_gballoc_malloc(size_t size)
     return malloc(size);
 }
 
+static void* my_gballoc_calloc(size_t nmemb, size_t size)
+{
+    return calloc(nmemb, size);
+}
+
 static void my_gballoc_free(void* s)
 {
     free(s);
@@ -109,6 +114,7 @@ TEST_SUITE_INITIALIZE(TestSuiteInitialize)
     REGISTER_GLOBAL_MOCK_HOOK(json_value_free, my_json_value_free);
 
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
+    REGISTER_GLOBAL_MOCK_HOOK(gballoc_calloc, my_gballoc_calloc);
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, my_gballoc_free);
     REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, my_mallocAndStrcpy_s);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, MU_FAILURE);
@@ -131,8 +137,8 @@ static void MethodReturn_Create_with_non_NULL_jsonValue_inert_path(const char* j
     STRICT_EXPECTED_CALL(json_parse_string(jsonValue));
     STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG))
         .IgnoreArgument_value();
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
-        .IgnoreArgument_size();
+    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+        .IgnoreAllArguments();
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, jsonValue))
         .IgnoreArgument_destination();
 }
@@ -194,8 +200,8 @@ TEST_FUNCTION(MethodReturn_Create_succeeds_with_non_NULL_jsonValue_unhappy_paths
 static void MethodReturn_Create_with_NULL_jsonValue_inert_path(const char* jsonValue)
 {
     (void)(jsonValue);
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
-        .IgnoreArgument_size();
+    STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+        .IgnoreAllArguments();
 }
 
 /*Tests_SRS_METHODRETURN_02_001: [ MethodReturn_Create shall create a non-NULL handle containing statusCode and a clone of jsonValue. ]*/

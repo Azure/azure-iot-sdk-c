@@ -570,6 +570,8 @@ static void iothub_ll_get_device_twin_async_callback(DEVICE_TWIN_UPDATE_STATE up
                 free(queue_cb_info.iothub_callback.dev_twin_cb_info.payLoad);
             }
         }
+
+        free(queue_context);
     }
     else
     {
@@ -1265,6 +1267,13 @@ void IoTHubClientCore_Destroy(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle)
                     if (queue_cb_info->iothub_callback.event_confirm_cb_info.eventConfirmationCallback)
                     {
                         queue_cb_info->iothub_callback.event_confirm_cb_info.eventConfirmationCallback(queue_cb_info->iothub_callback.event_confirm_cb_info.confirm_result, queue_cb_info->userContextCallback);
+                    }
+                }
+                else if (queue_cb_info->type == CALLBACK_TYPE_REPORTED_STATE)
+                {
+                    if (queue_cb_info->iothub_callback.reported_state_cb_info.reportedStateCallback)
+                    {
+                        queue_cb_info->iothub_callback.reported_state_cb_info.reportedStateCallback(queue_cb_info->iothub_callback.reported_state_cb_info.status_code, queue_cb_info->userContextCallback);
                     }
                 }
             }
