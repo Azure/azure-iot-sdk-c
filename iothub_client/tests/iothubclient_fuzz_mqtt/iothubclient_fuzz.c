@@ -26,9 +26,9 @@
 //
 
 // Run
-// cd ~/azure-iot-sdk-c/iothub_client/tests/iothubclient_fuzz_mqtt
-// mkdir ~/azure-iot-sdk-c/iothub_client/tests/iothubclient_fuzz_mqtt/findings_dir
-// afl-fuzz -m 230000000 -t 10000 -i conack -o findings_dir ~/azure-iot-sdk-c/cmake/iothub_client/tests/iothubclient_fuzz_mqtt/iothubclient_fuzz_mqtt CONACK @@
+//   cd ~/azure-iot-sdk-c/iothub_client/tests/iothubclient_fuzz_mqtt
+//   mkdir ~/azure-iot-sdk-c/iothub_client/tests/iothubclient_fuzz_mqtt/findings_dir
+//   afl-fuzz -m 230000000 -t 10000 -i conack -o findings_dir ~/azure-iot-sdk-c/cmake/iothub_client/tests/iothubclient_fuzz_mqtt/iothubclient_fuzz_mqtt CONACK @@
 //
 
 
@@ -574,6 +574,11 @@ int tlsio_fuzz_close(CONCRETE_IO_HANDLE tls_io, ON_IO_CLOSE_COMPLETE on_io_close
     (void)tls_io;
     (void)on_io_close_complete;
     (void)callback_context;
+    while (received_queue != NULL)
+    {
+        QUEUE_ITEM* item = received_queue_remove();
+        received_queue_free(item);
+    }
     return 0;
 }
 
