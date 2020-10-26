@@ -24,14 +24,14 @@ pushd $build_folder
 
 curl_path=/usr/local/Cellar/curl/7.61.0/lib
 if [ -d $curl_path ]; then
-    export DYLD_LIBRARY_PATH="$curl_path:$DYLD_LIBRARY_PATH"
+    # export DYLD_LIBRARY_PATH="$curl_path:$DYLD_LIBRARY_PATH"
 else
     echo "ERROR: Could not find curl in path $curl_path."
     echo "Make sure curl is installed through brew in such path, or update this script with the correct one."
     exit 1
 fi
 
-cmake .. -Drun_e2e_tests=ON -G Xcode
-cmake --build . -- --jobs=$CORES
+DYLD_LIBRARY_PATH="$curl_path:$DYLD_LIBRARY_PATH" cmake .. -Drun_e2e_tests=ON -G Xcode
+DYLD_LIBRARY_PATH="$curl_path:$DYLD_LIBRARY_PATH" cmake --build . -- --jobs=$CORES
 ctest -j $TEST_JOB_COUNT -C "debug" -VV --output-on-failure
 popd
