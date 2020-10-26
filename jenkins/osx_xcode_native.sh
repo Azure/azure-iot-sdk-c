@@ -24,7 +24,7 @@ pushd $build_folder
 
 curl_path=/usr/local/Cellar/curl/7.61.0/lib
 if [ -d $curl_path ]; then
-    if [ -z "$DYLD_LIBRARY_PATH" ]; then
+    if [ -v DYLD_LIBRARY_PATH ]; then
       export DYLD_LIBRARY_PATH="$curl_path:$DYLD_LIBRARY_PATH"
     else
       export DYLD_LIBRARY_PATH="$curl_path"
