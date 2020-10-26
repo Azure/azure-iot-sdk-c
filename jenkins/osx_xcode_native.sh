@@ -28,6 +28,7 @@ if [ -d $curl_path ]; then
       export DYLD_LIBRARY_PATH="$curl_path:$DYLD_LIBRARY_PATH"
     else
       export DYLD_LIBRARY_PATH="$curl_path"
+    fi
 else
     echo "ERROR: Could not find curl in path $curl_path."
     echo "Make sure curl is installed through brew in such path, or update this script with the correct one."
