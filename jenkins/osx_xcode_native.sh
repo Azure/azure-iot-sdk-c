@@ -24,6 +24,7 @@ pushd $build_folder
 
 curl_path=/usr/local/Cellar/curl/7.61.0/lib
 if [ -d $curl_path ]; then
+    echo "Curl is set correctly"
     # export DYLD_LIBRARY_PATH="$curl_path:$DYLD_LIBRARY_PATH"
 else
     echo "ERROR: Could not find curl in path $curl_path."
