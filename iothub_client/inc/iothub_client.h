@@ -5,7 +5,7 @@
 // NOTE: THIS HEADER IS DEPRECATED
 // 
 // Functions in this header will be maintained for backward compatability.
-// New applications should use iothub_device_client.h, however.
+// New applications should use iothub_device_client.h.
 // 
 //**********************************************************************
 
@@ -45,108 +45,108 @@ extern "C"
 #endif
 
     /**
-    * @warning IoTHubClient_CreateFromConnectionString is deprecated.  Use IoTHubDeviceClient_CreateFromConnectionString instead.
+    * @deprecated IoTHubClient_CreateFromConnectionString is deprecated.  Use IoTHubDeviceClient_CreateFromConnectionString instead.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_HANDLE, IoTHubClient_CreateFromConnectionString, const char*, connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol);
 
     /**
-    * @warning IoTHubClient_Create is deprecated.  Use IoTHubDeviceClient_Create instead.
+    * @deprecated IoTHubClient_Create is deprecated.  Use IoTHubDeviceClient_Create instead.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_HANDLE, IoTHubClient_Create, const IOTHUB_CLIENT_CONFIG*, config);
 
     /**
-    * @warning IoTHubClient_CreateWithTransport is deprecated.  Use IoTHubDeviceClient_CreateWithTransport instead.
+    * @deprecated IoTHubClient_CreateWithTransport is deprecated.  Use IoTHubDeviceClient_CreateWithTransport instead.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_HANDLE, IoTHubClient_CreateWithTransport, TRANSPORT_HANDLE, transportHandle, const IOTHUB_CLIENT_CONFIG*, config);
 
     /**
-    * @warning IoTHubClient_CreateFromDeviceAuth is deprecated.  Use IoTHubDeviceClient_CreateFromDeviceAuth instead.
+    * @deprecated IoTHubClient_CreateFromDeviceAuth is deprecated.  Use IoTHubDeviceClient_CreateFromDeviceAuth instead.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_HANDLE, IoTHubClient_CreateFromDeviceAuth, const char*, iothub_uri, const char*, device_id, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol);
 
     /**
-    * @warning IoTHubClient_Destroy is deprecated.  Use IoTHubDeviceClient_Destroy instead.
+    * @deprecated IoTHubClient_Destroy is deprecated.  Use IoTHubDeviceClient_Destroy instead.
     */
     MOCKABLE_FUNCTION(, void, IoTHubClient_Destroy, IOTHUB_CLIENT_HANDLE, iotHubClientHandle);
 
     /**
-    * @warning IoTHubClient_SendEventAsync is deprecated.  Use IoTHubDeviceClient_SendEventAsync instead.
+    * @deprecated IoTHubClient_SendEventAsync is deprecated.  Use IoTHubDeviceClient_SendEventAsync instead.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_SendEventAsync, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_MESSAGE_HANDLE, eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, eventConfirmationCallback, void*, userContextCallback);
 
     /**
-    * @warning IoTHubClient_GetSendStatus is deprecated.  Use IoTHubDeviceClient_GetSendStatus instead.
+    * @deprecated IoTHubClient_GetSendStatus is deprecated.  Use IoTHubDeviceClient_GetSendStatus instead.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_GetSendStatus, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_STATUS*, iotHubClientStatus);
 
     /**
-    * @warning IoTHubClient_SetMessageCallback is deprecated.  Use IoTHubDeviceClient_SetMessageCallback instead.
+    * @deprecated IoTHubClient_SetMessageCallback is deprecated.  Use IoTHubDeviceClient_SetMessageCallback instead.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_SetMessageCallback, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC, messageCallback, void*, userContextCallback);
 
     /**
-    * @warning IoTHubClient_SetConnectionStatusCallback is deprecated.  Use IoTHubDeviceClient_SetConnectionStatusCallback instead.
+    * @deprecated IoTHubClient_SetConnectionStatusCallback is deprecated.  Use IoTHubDeviceClient_SetConnectionStatusCallback instead.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_SetConnectionStatusCallback, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK, connectionStatusCallback, void*, userContextCallback);
 
     /**
-    * @warning IoTHubClient_SetRetryPolicy is deprecated.  Use IoTHubDeviceClient_SetRetryPolicy instead.
+    * @deprecated IoTHubClient_SetRetryPolicy is deprecated.  Use IoTHubDeviceClient_SetRetryPolicy instead.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_SetRetryPolicy, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY, retryPolicy, size_t, retryTimeoutLimitInSeconds);
 
     /**
-    * @warning IoTHubClient_GetRetryPolicy is deprecated.  Use IoTHubDeviceClient_GetRetryPolicy instead.
+    * @deprecated IoTHubClient_GetRetryPolicy is deprecated.  Use IoTHubDeviceClient_GetRetryPolicy instead.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_GetRetryPolicy, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY*, retryPolicy, size_t*, retryTimeoutLimitInSeconds);
 
     /**
-    * @warning IoTHubClient_GetLastMessageReceiveTime is deprecated.  Use IoTHubDeviceClient_GetLastMessageReceiveTime instead.
+    * @deprecated IoTHubClient_GetLastMessageReceiveTime is deprecated.  Use IoTHubDeviceClient_GetLastMessageReceiveTime instead.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_GetLastMessageReceiveTime, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, time_t*, lastMessageReceiveTime);
 
     /**
-    * @warning IoTHubClient_SetOption is deprecated.  Use IoTHubDeviceClient_SetOption instead.
+    * @deprecated IoTHubClient_SetOption is deprecated.  Use IoTHubDeviceClient_SetOption instead.
     */   
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_SetOption, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, const char*, optionName, const void*, value);
 
     /**
-    * @warning IoTHubClient_SetDeviceTwinCallback is deprecated.  Use IoTHubDeviceClient_SetDeviceTwinCallback instead.
+    * @deprecated IoTHubClient_SetDeviceTwinCallback is deprecated.  Use IoTHubDeviceClient_SetDeviceTwinCallback instead.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_SetDeviceTwinCallback, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, deviceTwinCallback, void*, userContextCallback);
 
     /**
-    * @warning IoTHubClient_SendReportedState is deprecated.  Use IoTHubDeviceClient_SendReportedState instead.
+    * @deprecated IoTHubClient_SendReportedState is deprecated.  Use IoTHubDeviceClient_SendReportedState instead.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_SendReportedState, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, const unsigned char*, reportedState, size_t, size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK, reportedStateCallback, void*, userContextCallback);
 
     /**
-    * @warning IoTHubClient_SetDeviceMethodCallback is deprecated.  Use IoTHubDeviceClient_SetDeviceMethodCallback instead.
+    * @deprecated IoTHubClient_SetDeviceMethodCallback is deprecated.  Use IoTHubDeviceClient_SetDeviceMethodCallback instead.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_SetDeviceMethodCallback, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC, deviceMethodCallback, void*, userContextCallback);
 
     /**
-    * @warning IoTHubClient_SetDeviceMethodCallback_Ex is deprecated.  Use IoTHubDeviceClient_SetDeviceMethodCallback instead.
+    * @deprecated IoTHubClient_SetDeviceMethodCallback_Ex is deprecated.  Use IoTHubDeviceClient_SetDeviceMethodCallback instead.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_SetDeviceMethodCallback_Ex, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK, inboundDeviceMethodCallback, void*, userContextCallback);
 
     /**
-    * @warning IoTHubClient_DeviceMethodResponse is deprecated.  Use IoTHubDeviceClient_SetDeviceMethodCallback instead.
+    * @deprecated IoTHubClient_DeviceMethodResponse is deprecated.  Use IoTHubDeviceClient_SetDeviceMethodCallback instead.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_DeviceMethodResponse, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, METHOD_HANDLE, methodId, const unsigned char*, response, size_t, response_size, int, statusCode);
 
 #ifndef DONT_USE_UPLOADTOBLOB
     /**
-    * @warning IoTHubClient_UploadToBlobAsync is deprecated.  Use IoTHubDeviceClient_UploadToBlobAsync instead.
+    * @deprecated IoTHubClient_UploadToBlobAsync is deprecated.  Use IoTHubDeviceClient_UploadToBlobAsync instead.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_UploadToBlobAsync, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, const char*, destinationFileName, const unsigned char*, source, size_t, size, IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK, iotHubClientFileUploadCallback, void*, context);
 
     /**
-    * @warning IoTHubClient_UploadMultipleBlocksToBlobAsync is deprecated.  Use IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync instead.
+    * @deprecated IoTHubClient_UploadMultipleBlocksToBlobAsync is deprecated.  Use IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync instead.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_UploadMultipleBlocksToBlobAsync, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, const char*, destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK, getDataCallback, void*, context);
 
     /**
-    * @warning IoTHubClient_UploadMultipleBlocksToBlobAsyncEx is deprecated.  Use IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync instead.
+    * @deprecated IoTHubClient_UploadMultipleBlocksToBlobAsyncEx is deprecated.  Use IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync instead.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_UploadMultipleBlocksToBlobAsyncEx, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, const char*, destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, getDataCallbackEx, void*, context);
 

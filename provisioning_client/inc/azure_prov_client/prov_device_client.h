@@ -25,6 +25,7 @@ typedef struct PROV_DEVICE_INSTANCE_TAG* PROV_DEVICE_HANDLE;
 #include "prov_device_ll_client.h"
 #include "umock_c/umock_c_prod.h"
 #include "azure_macro_utils/macro_utils.h"
+#include "azure_c_shared_utility/const_defines.h"
 #include "azure_prov_client/prov_transport.h"
 
 #ifdef __cplusplus
@@ -32,7 +33,7 @@ extern "C"
 {
 #endif
 
-static const char* const PROV_OPTION_DO_WORK_FREQUENCY_IN_MS = "do_work_freq_ms";
+static STATIC_VAR_UNUSED const char* const PROV_OPTION_DO_WORK_FREQUENCY_IN_MS = "do_work_freq_ms";
 
 MOCKABLE_FUNCTION(, PROV_DEVICE_HANDLE, Prov_Device_Create, const char*, uri, const char*, scope_id, PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION, protocol);
 MOCKABLE_FUNCTION(, void, Prov_Device_Destroy, PROV_DEVICE_HANDLE, prov_device_handle);
