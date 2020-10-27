@@ -35,7 +35,7 @@ static const char* connectionString = "[device connection string]";
 static const char* proxyHost = NULL;
 static int proxyPort = 0;
 
-#define HELLO_WORLD "Hello World from IoTHubClient_LL_UploadToBlob"
+#define HELLO_WORLD "Hello World from IoTHubDeviceClient_LL_UploadToBlob"
 
 int main(void)
 {

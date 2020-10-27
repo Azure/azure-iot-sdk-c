@@ -2,11 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 /** @file iothub_device_client.h
-*    @brief Extends the IoTHubCLient_LL module with additional features.
+*    @brief Extends the IoTHubCLient_LL with additional features.
 *
-*    @details IoTHubClient is a module that extends the IoTHubCLient_LL
-*             module with 2 features:
-*                - scheduling the work for the IoTHubCLient from a
+*    @details IoTHubDeviceClient extends the IoTHubDeviceClient_LL
+*             with 2 features:
+*                - scheduling the work for the IoTHubDeviceClient from a
 *                  thread, so that the user does not need to create their
 *                  own thread
 *                - thread-safe APIs
@@ -84,7 +84,7 @@ extern "C"
 
     /**
     * @brief    Creates a IoT Hub client for communication with an existing IoT
-    *           Hub using the device auth module.
+    *           Hub using the device auth.
     *
     * @param    iothub_uri      Pointer to an ioThub hostname received in the registration process
     * @param    device_id       Pointer to the device Id of the device
@@ -172,7 +172,7 @@ extern "C"
     *                                           callback. This can be @c NULL.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the ::IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *           the ::IoTHubDeviceClient_Destroy function from within any callback.
     *
     * @remark   Callback specified will not receive connection status change notifications for upload connections created with IoTHubDeviceClient_UploadToBlob or IoTHubDeviceClient_UploadMultipleBlocksToBlob.
     *
@@ -191,7 +191,7 @@ extern "C"
     *                                           connection drops to IOT Hub.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the ::IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *           the ::IoTHubDeviceClient_Destroy function from within any callback.
     *
     * @remark   Uploads initiated by IoTHubDeviceClient_UploadToBlob or IoTHubDeviceClient_UploadMultipleBlocksToBlob do not have automatic retries and do not honor the retryPolicy settings.
     *
@@ -209,7 +209,7 @@ extern "C"
     *                                           to IOT Hub.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the ::IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *           the ::IoTHubDeviceClient_Destroy function from within any callback.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -290,7 +290,7 @@ extern "C"
     *                                    callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubClient_LL_Destroy function from within any callback.
+    *            the ::IoTHubDeviceClient_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
