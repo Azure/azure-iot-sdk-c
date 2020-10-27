@@ -81,7 +81,7 @@ You may also use [common transport options](#general_options) options.
 | `"retry_interval_sec"`            | OPTION_RETRY_INTERVAL_SEC       | unsigned int*      | Number of seconds between retries when using the interval retry policy.  (Not supported for HTTP transport.)
 | `"retry_max_delay_secs"`          | OPTION_RETRY_MAX_DELAY_SECS     | unsigned int*      | Maximum number of seconds a retry delay when using linear backoff, exponential backoff, or exponential backoff with jitter policy.  (Not supported for HTTP transport.)
 | `"sas_token_lifetime"`            | OPTION_SAS_TOKEN_LIFETIME       | size_t*            | Length of time in seconds used for lifetime of SAS token.
-| `"do_work_freq_ms"`               | OPTION_DO_WORK_FREQUENCY_IN_MS  | unsigned int *     | Specifies how frequently the worker thread spun by the convenience layer will wake up, in milliseconds.  The default is 1 millisecond.  The maximum allowable value is 100.  (Convenience layer APIs only)
+| `"do_work_freq_ms"`               | OPTION_DO_WORK_FREQUENCY_IN_MS  | [tickcounter_ms_t *][tick-counter-header] | Specifies how frequently the worker thread spun by the convenience layer will wake up, in milliseconds.  The default is 1 millisecond.  The maximum allowable value is 100.  (Convenience layer APIs only)
 
 
 <a name="protocol_specific_options"></a>
@@ -128,7 +128,7 @@ You may also use [common transport options](#general_options).
 | `"logtrace"`                 | PROV_OPTION_LOG_TRACE           | bool*             | Turn on and off log tracing for the transport
 | `"registration_id"`          | PROV_REGISTRATION_ID            | const char*       | The registration ID of the device.
 | `"provisioning_timeout"`     | PROV_OPTION_TIMEOUT             | long*             | Maximum time to allow DPS to complete, in seconds.
-| `"do_work_freq_ms"`          | PROV_OPTION_DO_WORK_FREQUENCY_IN_MS | unsigned int* | Specifies how frequently the worker thread spun by the convenience layer will wake up, in milliseconds.  The default is 1 millisecond.  (Convenience layer APIs only)
+| `"do_work_freq_ms"`          | PROV_OPTION_DO_WORK_FREQUENCY_IN_MS | uint16_t * | Specifies how frequently the worker thread spun by the convenience layer will wake up, in milliseconds.  The default is 1 millisecond.  (Convenience layer APIs only)
 
 <a name="upload-options"></a>
 
@@ -176,3 +176,4 @@ IoTHubDeviceClient_LL_DoWork(iotHubClientHandle);
 [provisioning-device-client-options-h]: https://github.com/Azure/azure-iot-sdk-c/blob/master/provisioning_client/inc/azure_prov_client/prov_device_client.h
 [iot-pnp]: https://aka.ms/iotpnp
 [gateway-sample]: https://github.com/Azure/azure-iot-sdk-c/tree/master/iothub_client/samples/iotedge_downstream_device_sample
+[tick-counter-header]: https://github.com/Azure/azure-c-shared-utility/blob/master/inc/azure_c_shared_utility/tickcounter.h
