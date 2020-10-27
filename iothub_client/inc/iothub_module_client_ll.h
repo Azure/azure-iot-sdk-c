@@ -5,17 +5,17 @@
 *    @brief     APIs that allow a user (usually a module) to communicate
 *             with an Azure IoTHub.
 *
-*    @details IoTHubModuleClient_LL is a module that allows a user (usually a
+*    @details IoTHubModuleClient_LL allows a user (usually a
 *             module) to communicate with an Azure IoTHub. It can send events
 *             and receive messages. At any given moment in time there can only
 *             be at most 1 message callback function.
 *
 *             This API surface contains a set of APIs that allows the user to
-*             interact with the lower layer portion of the IoTHubClient. These APIs
+*             interact with the lower layer portion of the IoTHubModuleClient. These APIs
 *             contain @c _LL_ in their name, but retain the same functionality like the
 *             @c IoTHubModuleClient_... APIs, with one difference. If the @c _LL_ APIs are
 *             used then the user is responsible for scheduling when the actual work done
-*             by the IoTHubClient happens (when the data is sent/received on/from the wire).
+*             by the IoTHubModuleClient happens (when the data is sent/received on/from the network).
 *             This is useful for constrained devices where spinning a separate thread is
 *             often not desired.
 */
@@ -100,7 +100,7 @@ extern "C"
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_LL_SendEventAsync, IOTHUB_MODULE_CLIENT_LL_HANDLE, iotHubModuleClientHandle, IOTHUB_MESSAGE_HANDLE, eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, eventConfirmationCallback, void*, userContextCallback);
 
     /**
-    * @brief    This function returns the current sending status for IoTHubClient.
+    * @brief    This function returns the current sending status for IoTHubModuleClient.
     *
     * @param    iotHubModuleClientHandle  The handle created by a call to the create function.
     * @param    iotHubClientStatus        The sending state is populated at the address pointed
@@ -196,11 +196,11 @@ extern "C"
 
     /**
     * @brief    This function is meant to be called by the user when work
-    *             (sending/receiving) can be done by the IoTHubClient.
+    *             (sending/receiving) can be done by the IoTHubModuleClient.
     *
     * @param    iotHubModuleClientHandle    The handle created by a call to the create function.
     *
-    *            All IoTHubClient interactions (in regards to network traffic
+    *            All IoTHubModuleClient interactions (in regards to network traffic
     *            and/or user level callbacks) are the effect of calling this
     *            function and they take place synchronously inside _DoWork.
     */
@@ -294,7 +294,7 @@ extern "C"
     * @param    eventConfirmationCallback     The callback specified by the module for receiving
     *                                         confirmation of the delivery of the IoT Hub message.
     *                                         This callback can be expected to invoke the
-    *                                         ::IoTHubClient_LL_SendEventAsync function for the
+    *                                         IoTHubModuleClient_LL_SendEventAsync function for the
     *                                         same message in an attempt to retry sending a failing
     *                                         message. The user can specify a @c NULL value here to
     *                                         indicate that no callback is required.
@@ -302,14 +302,14 @@ extern "C"
     *                                         callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubClient_LL_Destroy function from within any callback.
+    *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_LL_SendEventToOutputAsync, IOTHUB_MODULE_CLIENT_LL_HANDLE, iotHubModuleClientHandle, IOTHUB_MESSAGE_HANDLE, eventMessageHandle, const char*, outputName, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, eventConfirmationCallback, void*, userContextCallback);
 
     /**
-    * @brief    This API sets callback for  method call that is directed to specified 'inputName' queue (e.g. messages from IoTHubClient_SendEventToOutputAsync)
+    * @brief    This API sets callback for method call that is directed to specified 'inputName' queue (e.g. messages from IoTHubModuleClient_LL_SendEventToOutputAsync)
     *
     * @param    iotHubModuleClientHandle      The handle created by a call to the create function.
     * @param    inputName                     The name of the queue to listen on for this moduleMethodCallback/userContextCallback.
