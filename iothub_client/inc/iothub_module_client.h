@@ -301,9 +301,9 @@ extern "C"
 #ifdef USE_EDGE_MODULES
     /**
     * @brief    This API creates a module handle based on environment variables set in the Edge runtime.
-    NOTE: It is *ONLY* valid when the code is running in a container initiated by Edge.
+    *           NOTE: It is *ONLY* valid when the code is running in a container initiated by Edge.
     *
-    * @param    protocol            Function pointer for protocol implementation
+    * @remarks  The `protocol` parameter MUST be set to MQTT_Protocol.  Using other values will cause undefined behavior.
     *
     * @return    A non-NULL @c IOTHUB_MODULE_CLIENT_HANDLE value that is used when
     *           invoking other functions for IoT Hub client and @c NULL on failure.
@@ -336,6 +336,8 @@ extern "C"
     * @param    methodName                      The name of the method
     * @param    methodPayload                   The method payload (in json format)
     * @param    timeout                         The time in seconds before a timeout occurs
+                                                @warning This parameter is ignored due to bug https://github.com/Azure/azure-iot-sdk-c/issues/1378.
+                                                         The timeout used will be the default for IoT Edge side.    
     * @param    responseStatus                  This pointer will be filled with the response status after invoking the module method
     * @param    responsePayload                 This pointer will be filled with the response payload
     * @param    responsePayloadSize             This pointer will be filled with the response payload size

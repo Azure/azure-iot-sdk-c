@@ -3,6 +3,7 @@
 This document describes how you can set options for the Azure IoT Hub and Device Provisioning Service (DPS) client connections.
 
 - [Example Code for Setting an Option](#set_option)
+- [When to Set Options](#when_to_set)
 - [Common Transport Options](#general_options)
 - [IoT Hub Device and Module Client Options](#IotHub_options)
 - [MQTT, AMQP, and HTTP Specific Protocol Options](#protocol_specific_options)
@@ -44,6 +45,12 @@ http_proxy.host_address = PROXY_ADDRESS;
 http_proxy.port = PROXY_PORT;
 Prov_Device_LL_SetOption(handle, OPTION_HTTP_PROXY, &http_proxy);
 ```
+
+<a name="when_to_set></a>
+## When to Set Options
+
+You should set the options you need right after creating your IoT Hub device or module handle.  Setting most options after the connection has been initiated will be silently ignored as many of them are used at connection initiation time itself.
+
 
 <a name="general_options"></a>
 

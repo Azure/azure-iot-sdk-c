@@ -17,6 +17,9 @@ const char* targetDevice = "[target-device-id]";  // This can also be queried at
 const char* targetModule = "[target-module-id]";
 const char* targetMethodName = "[method-name]";
 const char* targetMethodPayload = "[json-payload]"; // This must be a valid json value.  *If it is a string, it must be quoted* - e.g. targetMethodPayload = "\"[json-payload]\"";
+
+// NOTE: The timeout field is ignored due to bug https://github.com/Azure/azure-iot-sdk-c/issues/1378.  IoT Edge will enforce
+// its own timeouts instead of relying on the device specification.
 static unsigned int timeout = 60;
 
 static int moduleMethodInvokeCallbackCalled = 0;
@@ -41,7 +44,8 @@ int main(void)
     else
     {
         // Invoke 'targetMethodName' on module ''targetModule'.
-        IOTHUB_CLIENT_RESULT invokeAsyncResult = IoTHubModuleClient_ModuleMethodInvokeAsync(handle, targetDevice, targetModule, targetMethodName, targetMethodPayload, 1, ModuleMethodInvokeCallback, (void*)0x1234);
+        // See comments above about the timeout parameter being ignored.
+        IOTHUB_CLIENT_RESULT invokeAsyncResult = IoTHubModuleClient_ModuleMethodInvokeAsync(handle, targetDevice, targetModule, targetMethodName, targetMethodPayload, timeout, ModuleMethodInvokeCallback, (void*)0x1234);
         if (invokeAsyncResult == IOTHUB_CLIENT_OK)
         {
             // Because we're using the convenience layer, the callback happens asyncronously.  Wait here for it to complete.

@@ -190,7 +190,7 @@ static IOTHUB_MODULE_CLIENT_LL_HANDLE InitializeConnectionForFilter()
     {
         // Uncomment the following lines to enable verbose logging (e.g., for debugging).
         // bool traceOn = true;
-        // IoTHubModuleClient_LL_SetOption(iotHubModuleClientHandle, OPTION_LOG_TRACE, &trace);
+        // IoTHubModuleClient_LL_SetOption(iotHubModuleClientHandle, OPTION_LOG_TRACE, &traceOn);
     }
 
     return iotHubModuleClientHandle;

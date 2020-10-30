@@ -327,7 +327,9 @@ extern "C"
     * @brief    This API creates a module handle based on environment variables set in the Edge runtime.
     *           NOTE: It is *ONLY* valid when the code is running in a container initiated by Edge.
     *
-    * @param    protocol            Function pointer for protocol implementation
+    * @param    protocol            Function pointer for protocol implementation.  This *MUST* be MQTT_Protocol.
+    *
+    * @remarks  The `protocol` parameter MUST be set to MQTT_Protocol.  Using other values will cause undefined behavior.
     *
     * @return   A non-NULL @c IOTHUB_CLIENT_LL_HANDLE value that is used when
     *           invoking other functions for IoT Hub client and @c NULL on failure.
@@ -346,6 +348,9 @@ extern "C"
     * @param    responsePayload                 This pointer will be filled with the response payload
     * @param    responsePayloadSize             This pointer will be filled with the response payload size
     *
+    * @warning  Other _LL_ functions such as IoTHubModuleClient_LL_SendEventAsync queue work to be performed later and do not block.  IoTHubModuleClient_LL_DeviceMethodInvoke
+    *           will block however until the method invocation is completed or fails, which may take a while.
+    *
     * @return   IOTHUB_CLIENT_OK upon success, or an error code upon failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_LL_DeviceMethodInvoke, IOTHUB_MODULE_CLIENT_LL_HANDLE, iotHubModuleClientHandle, const char*, deviceId, const char*, methodName, const char*, methodPayload, unsigned int, timeout, int*, responseStatus, unsigned char**, responsePayload, size_t*, responsePayloadSize);
@@ -359,9 +364,15 @@ extern "C"
     * @param    methodName                      The name of the method
     * @param    methodPayload                   The method payload (in json format)
     * @param    timeout                         The time in seconds before a timeout occurs
+                                                @warning This parameter is ignored due to bug https://github.com/Azure/azure-iot-sdk-c/issues/1378.
+                                                         The timeout used will be the default for IoT Edge side.
     * @param    responseStatus                  This pointer will be filled with the response status after invoking the module method
     * @param    responsePayload                 This pointer will be filled with the response payload
     * @param    responsePayloadSize             This pointer will be filled with the response payload size
+    *
+    * @warning  Other _LL_ functions such as IoTHubModuleClient_LL_SendEventAsync queue work to be performed later and do not block.  IoTHubModuleClient_LL_ModuleMethodInvoke
+    *           will block however until the method invocation is completed or fails, which may take a while.
+    *
     *
     * @return   IOTHUB_CLIENT_OK upon success, or an error code upon failure.
     */
