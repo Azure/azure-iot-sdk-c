@@ -115,7 +115,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     * @param    eventConfirmationCallback       The callback specified by the device for receiving
     *                                           confirmation of the delivery of the IoT Hub message.
     *                                           This callback can be expected to invoke the
-    *                                           ::IoTHubDeviceClient_LL_SendEventAsync function for the
+    *                                           IoTHubDeviceClient_LL_SendEventAsync function for the
     *                                           same message in an attempt to retry sending a failing
     *                                           message. The user can specify a @c NULL value here to
     *                                           indicate that no callback is required.
@@ -123,7 +123,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     *                                           callback. This can be @c NULL.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the ::IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_LL_Destroy function from within any callback.
     * @remarks
     *           The IOTHUB_MESSAGE_HANDLE instance provided as argument is copied by the function,
     *           so this argument can be destroyed by the calling application right after IoTHubDeviceClient_LL_SendEventAsync returns.
@@ -159,7 +159,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     *                                           callback. This can be @c NULL.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the ::IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_LL_Destroy function from within any callback.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -176,7 +176,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     *                                           callback. This can be @c NULL.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the ::IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_LL_Destroy function from within any callback.
     *
     * @remark   Callback specified will not receive connection status change notifications for upload connections created with IoTHubDeviceClient_LL_UploadToBlob or IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob.
     *
@@ -195,7 +195,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     *                                           connection drops to IOT Hub.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the ::IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_LL_Destroy function from within any callback.
     *
     * @remark   Uploads initiated by IoTHubDeviceClient_LL_UploadToBlob or IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob do not have automatic retries and do not honor the retryPolicy settings.
     *
@@ -214,7 +214,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
                                                     to IOT Hub.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the ::IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_LL_Destroy function from within any callback.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -276,7 +276,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     *                                    callback. This can be @c NULL.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the ::IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_LL_Destroy function from within any callback.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -293,7 +293,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     *                                     callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *            the IoTHubDeviceClient_LL_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -308,7 +308,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
      * 									callback. This can be @c NULL.
      *
      *			@b NOTE: The application behavior is undefined if the user calls
-     *			the ::IoTHubClient_LL_Destroy function from within any callback.
+     *			the IoTHubClient_LL_Destroy function from within any callback.
      *
      * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
      */
