@@ -82,7 +82,7 @@ extern "C"
     * @param    eventConfirmationCallback        The callback specified by the module for receiving
     *                                            confirmation of the delivery of the IoT Hub message.
     *                                            This callback can be expected to invoke the
-    *                                            ::IoTHubModuleClient_LL_SendEventAsync function for the
+    *                                            IoTHubModuleClient_LL_SendEventAsync function for the
     *                                            same message in an attempt to retry sending a failing
     *                                            message. The user can specify a @c NULL value here to
     *                                            indicate that no callback is required.
@@ -90,7 +90,7 @@ extern "C"
     *                                            callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the IoTHubModuleClient_LL_Destroy function from within any callback.
     * @remarks
     *            The IOTHUB_MESSAGE_HANDLE instance provided as argument is copied by the function,
     *            so this argument can be destroyed by the calling application right after IoTHubModuleClient_LL_SendEventAsync returns.
@@ -124,7 +124,7 @@ extern "C"
     *                                         callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the IoTHubModuleClient_LL_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -141,7 +141,7 @@ extern "C"
     *                                         callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the IoTHubModuleClient_LL_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -158,7 +158,7 @@ extern "C"
     *                                         connection drops to IOT Hub.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the IoTHubModuleClient_LL_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -175,7 +175,7 @@ extern "C"
                                               to IOT Hub.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the IoTHubModuleClient_LL_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -235,7 +235,7 @@ extern "C"
     *                                     callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the IoTHubModuleClient_LL_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -252,7 +252,7 @@ extern "C"
     *                                    callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the IoTHubModuleClient_LL_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -267,7 +267,7 @@ extern "C"
      * 									    callback. This can be @c NULL.
      *
      *            @b NOTE: The application behavior is undefined if the user calls
-     *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
+     *            the IoTHubModuleClient_LL_Destroy function from within any callback.
      *
      * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
      */
@@ -302,7 +302,7 @@ extern "C"
     *                                         callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the IoTHubModuleClient_LL_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
