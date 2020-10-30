@@ -18,7 +18,7 @@ const char* targetModule = "[target-module-id]";
 const char* targetMethodName = "[method-name]";
 const char* targetMethodPayload = "[json-payload]"; // This must be a valid json value.  *If it is a string, it must be quoted* - e.g. targetMethodPayload = "\"[json-payload]\"";
 
-// NOTE: The timeout field is ignored due to bug https://github.com/Azure/azure-iot-sdk-c/issues/1378.  IoT Edge will enforce
+// NOTE: The timeout field is ignored.  See https://github.com/Azure/azure-iot-sdk-c/issues/1378.  IoT Edge will enforce
 // its own timeouts instead of relying on the device specification.
 static unsigned int timeout = 60;
 
@@ -34,8 +34,7 @@ static void ModuleMethodInvokeCallback(IOTHUB_CLIENT_RESULT result, int response
 
 int main(void)
 {
-    // When running on a container created by IoT Edge, we don't need a connection string.  Instead the SDK can derive
-    // its connection material - including security tokens - directly from the IoTHubModuleClient_CreateFromEnvironment call.
+    // Note: You must use MQTT_Protocol as the argument below.  Using other protocols will result in undefined behavior.
     IOTHUB_MODULE_CLIENT_HANDLE handle = IoTHubModuleClient_CreateFromEnvironment(MQTT_Protocol);
     if (handle == NULL)
     {
@@ -44,7 +43,7 @@ int main(void)
     else
     {
         // Invoke 'targetMethodName' on module ''targetModule'.
-        // See comments above about the timeout parameter being ignored.
+        // See comments above about the timeout parameter being ignored by IoTHubModuleClient_ModuleMethodInvokeAsync.
         IOTHUB_CLIENT_RESULT invokeAsyncResult = IoTHubModuleClient_ModuleMethodInvokeAsync(handle, targetDevice, targetModule, targetMethodName, targetMethodPayload, timeout, ModuleMethodInvokeCallback, (void*)0x1234);
         if (invokeAsyncResult == IOTHUB_CLIENT_OK)
         {

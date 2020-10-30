@@ -329,7 +329,7 @@ extern "C"
     *
     * @param    protocol            Function pointer for protocol implementation.  This *MUST* be MQTT_Protocol.
     *
-    * @remarks  The `protocol` parameter MUST be set to MQTT_Protocol.  Using other values will cause undefined behavior.
+    * @remarks  The protocol parameter MUST be set to MQTT_Protocol.  Using other values will cause undefined behavior.
     *
     * @return   A non-NULL @c IOTHUB_CLIENT_LL_HANDLE value that is used when
     *           invoking other functions for IoT Hub client and @c NULL on failure.
