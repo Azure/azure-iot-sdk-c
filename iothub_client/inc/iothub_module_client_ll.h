@@ -331,7 +331,7 @@ extern "C"
     *
     * @remarks  The protocol parameter MUST be set to MQTT_Protocol.  Using other values will cause undefined behavior.
     *
-    * @return   A non-NULL @c IOTHUB_CLIENT_LL_HANDLE value that is used when
+    * @return   A non-NULL @c IOTHUB_MODULE_CLIENT_LL_HANDLE value that is used when
     *           invoking other functions for IoT Hub client and @c NULL on failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_MODULE_CLIENT_LL_HANDLE, IoTHubModuleClient_LL_CreateFromEnvironment, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol);
@@ -343,7 +343,10 @@ extern "C"
     * @param    deviceId                        The device id of the device to invoke a method on
     * @param    methodName                      The name of the method
     * @param    methodPayload                   The method payload (in json format)
-    * @param    timeout                         The time in seconds before a timeout occurs
+    *
+    * @warning  The timeout parameter is ignored.  See https://github.com/Azure/azure-iot-sdk-c/issues/1378.
+    *           The timeout used will be the default for IoT Edge.
+    *
     * @param    responseStatus                  This pointer will be filled with the response status after invoking the device method
     * @param    responsePayload                 This pointer will be filled with the response payload
     * @param    responsePayloadSize             This pointer will be filled with the response payload size
@@ -364,8 +367,10 @@ extern "C"
     * @param    methodName                      The name of the method
     * @param    methodPayload                   The method payload (in json format)
     * @param    timeout                         The time in seconds before a timeout occurs
-                                                @warning The timeout parameter is ignored.  See https://github.com/Azure/azure-iot-sdk-c/issues/1378.
-                                                         The timeout used will be the default for IoT Edge side.
+    *
+    * @warning  The timeout parameter is ignored.  See https://github.com/Azure/azure-iot-sdk-c/issues/1378.
+    *           The timeout used will be the default for IoT Edge.
+    *
     * @param    responseStatus                  This pointer will be filled with the response status after invoking the module method
     * @param    responsePayload                 This pointer will be filled with the response payload
     * @param    responsePayloadSize             This pointer will be filled with the response payload size
