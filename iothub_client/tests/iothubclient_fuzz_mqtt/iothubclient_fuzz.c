@@ -29,8 +29,12 @@
 //   cd ~/azure-iot-sdk-c/iothub_client/tests/iothubclient_fuzz_mqtt
 //   mkdir ~/azure-iot-sdk-c/iothub_client/tests/iothubclient_fuzz_mqtt/findings_dir
 //   afl-fuzz -m 230000000 -t 10000 -i conack -o findings_dir ~/azure-iot-sdk-c/cmake/iothub_client/tests/iothubclient_fuzz_mqtt/iothubclient_fuzz_mqtt CONACK @@
-//
-
+//   afl-fuzz -m 230000000 -t 10000 -i suback -o findings_dir_suback ~/azure-iot-sdk-c/cmake/iothub_client/tests/iothubclient_fuzz_mqtt/iothubclient_fuzz_mqtt SUBACK @@
+//   afl-fuzz -m 230000000 -t 10000 -i twinget -o findings_dir_twinget ~/azure-iot-sdk-c/cmake/iothub_client/tests/iothubclient_fuzz_mqtt/iothubclient_fuzz_mqtt TWINGET @@
+//   afl-fuzz -m 230000000 -t 10000 -i puback -o findings_dir_puback ~/azure-iot-sdk-c/cmake/iothub_client/tests/iothubclient_fuzz_mqtt/iothubclient_fuzz_mqtt PUBACK @@
+//   afl-fuzz -m 230000000 -t 10000 -i c2d -o findings_dir_c2d ~/azure-iot-sdk-c/cmake/iothub_client/tests/iothubclient_fuzz_mqtt/iothubclient_fuzz_mqtt C2D @@
+//   afl-fuzz -m 230000000 -t 10000 -i devicemethod -o findings_dir_method ~/azure-iot-sdk-c/cmake/iothub_client/tests/iothubclient_fuzz_mqtt/iothubclient_fuzz_mqtt DEVICEMETHOD @@
+//   afl-fuzz -m 230000000 -t 10000 -i twinupdate -o findings_dir_twinupdate ~/azure-iot-sdk-c/cmake/iothub_client/tests/iothubclient_fuzz_mqtt/iothubclient_fuzz_mqtt TWINUPDATE @@
 
 #include <stdio.h>
 #include <stdlib.h>
