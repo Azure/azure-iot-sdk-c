@@ -150,3 +150,86 @@
    Helgrind:Race
    fun:get_time_ns
 }
+{
+   OpenSSL pkcs11 engine causes pthread issue.
+   Helgrind:Misc
+   obj:/usr/lib/x86_64-linux-gnu/valgrind/vgpreload_helgrind-amd64-linux.so
+   obj:/usr/lib/x86_64-linux-gnu/libp11-kit.so.0.3.0
+   fun:_dl_fini
+   fun:__run_exit_handlers
+   fun:exit
+   fun:(below main)
+}
+{
+   OpenSSL pkcs11 engine causes pthread issue.
+   Helgrind:Misc
+   obj:/usr/lib/x86_64-linux-gnu/valgrind/vgpreload_helgrind-amd64-linux.so
+   fun:_dl_fini
+   fun:__run_exit_handlers
+   fun:exit
+   fun:(below main)
+}
+{
+   OpenSSL pkcs11 engine causes pthread issue.
+   drd:MutexErr
+   fun:pthread_mutex_destroy
+   obj:/usr/lib/x86_64-linux-gnu/libp11-kit.so.0.3.0
+   fun:_dl_fini
+   fun:__run_exit_handlers
+   fun:exit
+   fun:(below main)
+}
+{
+   OpenSSL pkcs11 engine causes pthread issue.
+   drd:MutexErr
+   fun:pthread_mutex_destroy
+   fun:_dl_fini
+   fun:__run_exit_handlers
+   fun:exit
+   fun:(below main)
+}
+{
+   OpenSSL PKCS11 Engine configuration (caused by openssl.cnf)
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:ENGINE_new
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:__pthread_once_slow
+   fun:CRYPTO_THREAD_run_once
+   fun:OPENSSL_init_crypto
+   obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.6.0
+   obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.6.0
+   fun:HTTPAPI_Init
+   fun:HTTPAPIEX_Init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+{
+   OpenSSL PKCS11 Engine configuration (caused by openssl.cnf)
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:ENGINE_new
+   fun:ENGINE_by_id
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.6.0
+   obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.6.0
+   fun:HTTPAPI_Init
+   fun:HTTPAPIEX_Init
+   fun:platform_init
+   fun:IoTHub_Init
+   fun:TestSuiteInitialize
+   fun:RunTests
+   fun:main
+}
+
