@@ -71,6 +71,4 @@ TEST_FUNCTION(IoTHub_AMQP_WS_Module_GetFullDesired_e2e_x509)
 
 #endif // __APPLE__
 
-
-
 END_TEST_SUITE(iothubclient_amqp_mod_dt_e2e)
