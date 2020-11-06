@@ -36,7 +36,7 @@
 
 #define SASTOKEN_LIFETIME 3600
 
-static const char* const URL_API_VERSION = "?api-version=2018-06-27";
+static const char* const URL_API_VERSION = "?api-version=2020-09-30";
 static const char* const RELATIVE_PATH_FMT_MODULE_METHOD = "/twins/%s/modules/%s/methods%s";
 static const char* const RELATIVE_PATH_FMT_DEVICE_METHOD = "/twins/%s/methods%s";
 static const char* const PAYLOAD_FMT = "{\"methodName\":\"%s\",\"timeout\":%d,\"payload\":%s}";
@@ -440,7 +440,7 @@ static IOTHUB_CLIENT_RESULT sendHttpRequestMethod(IOTHUB_CLIENT_EDGE_HANDLE modu
         }
         else
         {
-            if (statusCode == 200)
+            if (statusCode >= 200 && statusCode < 300)
             {
                 result = IOTHUB_CLIENT_OK;
             }

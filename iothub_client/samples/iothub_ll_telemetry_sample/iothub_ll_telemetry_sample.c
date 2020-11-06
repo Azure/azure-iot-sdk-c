@@ -112,7 +112,7 @@ int main(void)
     device_ll_handle = IoTHubDeviceClient_LL_CreateFromConnectionString(connectionString, protocol);
     if (device_ll_handle == NULL)
     {
-        (void)printf("Failure createing Iothub device.  Hint: Check you connection string.\r\n");
+        (void)printf("Failure creating IotHub device. Hint: Check your connection string.\r\n");
     }
     else
     {
@@ -126,7 +126,7 @@ int main(void)
 #endif
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
-        // Setting the Trusted Certificate.  This is only necessary on system with without
+        // Setting the Trusted Certificate. This is only necessary on systems without
         // built in certificate stores.
             IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
@@ -136,7 +136,7 @@ int main(void)
         //you are URL Encoding inputs yourself.
         //ONLY valid for use with MQTT
         //bool urlEncodeOn = true;
-        //IoTHubDeviceClient_LL_SetOption(iothub_ll_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
+        //IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
 #endif
 
         // Setting connection status callback to get indication of connection to iothub
@@ -151,10 +151,14 @@ int main(void)
                 //message_handle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText)));
 
                 // Set Message property
-                /*(void)IoTHubMessage_SetMessageId(message_handle, "MSG_ID");
+                /*
+                (void)IoTHubMessage_SetMessageId(message_handle, "MSG_ID");
                 (void)IoTHubMessage_SetCorrelationId(message_handle, "CORE_ID");
                 (void)IoTHubMessage_SetContentTypeSystemProperty(message_handle, "application%2fjson");
-                (void)IoTHubMessage_SetContentEncodingSystemProperty(message_handle, "utf-8");*/
+                (void)IoTHubMessage_SetContentEncodingSystemProperty(message_handle, "utf-8");
+                (void)IoTHubMessage_SetMessageCreationTimeUtcSystemProperty(message_handle, "2020-07-01T01:00:00.346Z");
+                */
+
 
                 // Add custom properties to message
                 (void)IoTHubMessage_SetProperty(message_handle, "property_key", "property_value");

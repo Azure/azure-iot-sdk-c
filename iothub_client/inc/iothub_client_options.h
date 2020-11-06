@@ -27,6 +27,8 @@ extern "C"
     static STATIC_VAR_UNUSED const char* OPTION_KEEP_ALIVE = "keepalive";
     static STATIC_VAR_UNUSED const char* OPTION_CONNECTION_TIMEOUT = "connect_timeout";
 
+    /* None of the OPTION_PROXY_* options below are implemented.  Use OPTION_HTTP_PROXY 
+    from shared_util_options.h in https://github.com/Azure/azure-c-shared-utility/ repo instead */
     static STATIC_VAR_UNUSED const char* OPTION_PROXY_HOST = "proxy_address";
     static STATIC_VAR_UNUSED const char* OPTION_PROXY_USERNAME = "proxy_username";
     static STATIC_VAR_UNUSED const char* OPTION_PROXY_PASSWORD = "proxy_password";
@@ -42,6 +44,11 @@ extern "C"
     static STATIC_VAR_UNUSED const char* OPTION_MESSAGE_TIMEOUT = "messageTimeout";
     static STATIC_VAR_UNUSED const char* OPTION_BLOB_UPLOAD_TIMEOUT_SECS = "blob_upload_timeout_secs";
     static STATIC_VAR_UNUSED const char* OPTION_PRODUCT_INFO = "product_info";
+
+    /*
+    * @brief    Specifies the Digital Twin Model Id of the connection. Only valid for use with MQTT Transport
+    */
+    static STATIC_VAR_UNUSED const char* OPTION_MODEL_ID = "model_id";
 
     /*
     * @brief    Turns on automatic URL encoding of message properties + system properties. Only valid for use with MQTT Transport

@@ -25,6 +25,7 @@
 
 
 #define DO_WORK_FREQ_DEFAULT 1
+#define DO_WORK_MAXIMUM_ALLOWED_FREQUENCY 100
 
 struct IOTHUB_QUEUE_CONTEXT_TAG;
 
@@ -1269,6 +1270,13 @@ void IoTHubClientCore_Destroy(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle)
                         queue_cb_info->iothub_callback.event_confirm_cb_info.eventConfirmationCallback(queue_cb_info->iothub_callback.event_confirm_cb_info.confirm_result, queue_cb_info->userContextCallback);
                     }
                 }
+                else if (queue_cb_info->type == CALLBACK_TYPE_REPORTED_STATE)
+                {
+                    if (queue_cb_info->iothub_callback.reported_state_cb_info.reportedStateCallback)
+                    {
+                        queue_cb_info->iothub_callback.reported_state_cb_info.reportedStateCallback(queue_cb_info->iothub_callback.reported_state_cb_info.status_code, queue_cb_info->userContextCallback);
+                    }
+                }
             }
         }
         VECTOR_destroy(iotHubClientInstance->saved_user_callback_list);
@@ -1714,7 +1722,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetOption(IOTHUB_CLIENT_CORE_HANDLE iotHub
             if (strcmp(OPTION_DO_WORK_FREQUENCY_IN_MS, optionName) == 0)
             {
                 /* Codes_SRS_IOTHUBCLIENT_41_003: [ The value for `OPTION_DO_WORK_FREQUENCY_IN_MS` shall be limited to 100 to follow SDK best practices by not reducing the DoWork frequency below 10 Hz ]*/
-                if (0 < * (unsigned int *)value && * (unsigned int *)value <= 100)
+                if (0 < * (unsigned int *)value && * (unsigned int *)value <= DO_WORK_MAXIMUM_ALLOWED_FREQUENCY)
                 {
                     /* Codes_SRS_IOTHUBCLIENT_41_004: [ If `currentMessageTimeout` is not greater than `do_work_freq_ms`, `IotHubClientCore_SetOption` shall return `IOTHUB_CLIENT_INVALID_ARG` ]*/
                     /* Codes_SRS_IOTHUBCLIENT_41_007: [** If parameter `optionName` is `OPTION_DO_WORK_FREQUENCY_IN_MS` then `value` should be of type `tickcounter_ms_t *`. **]*/
@@ -1732,7 +1740,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetOption(IOTHUB_CLIENT_CORE_HANDLE iotHub
                 else
                 {
                     result = IOTHUB_CLIENT_INVALID_ARG;
-                    LogError("Invalid value: OPTION_DO_WORK_FREQUENCY_IN_MS cannot exceed 100 ms. If you wish to reduce the frequency further, consider using the LL layer.");
+                    LogError("Invalid value: OPTION_DO_WORK_FREQUENCY_IN_MS cannot exceed %d ms. If you wish to reduce the frequency further, consider using the LL layer.", DO_WORK_MAXIMUM_ALLOWED_FREQUENCY);
                 }
             }
             /* Codes_SRS_IOTHUBCLIENT_41_005: [ If parameter `optionName` is `OPTION_MESSAGE_TIMEOUT` then `IoTHubClientCore_SetOption` shall set `currentMessageTimeout` parameter of `IoTHubClientInstance` ]*/

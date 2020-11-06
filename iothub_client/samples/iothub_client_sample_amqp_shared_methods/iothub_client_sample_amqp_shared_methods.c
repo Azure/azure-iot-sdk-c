@@ -122,7 +122,7 @@ int main(void)
             //IoTHubDeviceClient_SetOption(device_handle1, OPTION_LOG_TRACE, &traceOn);
             //IoTHubDeviceClient_SetOption(device_handle2, OPTION_LOG_TRACE, &traceOn);
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
-            // Setting the Trusted Certificate.  This is only necessary on system without
+            // Setting the Trusted Certificate. This is only necessary on systems without
             // built in certificate stores.
             IoTHubDeviceClient_SetOption(device_handle1, OPTION_TRUSTED_CERT, certificates);
             IoTHubDeviceClient_SetOption(device_handle2, OPTION_TRUSTED_CERT, certificates);
@@ -131,15 +131,15 @@ int main(void)
             /* Here subscribe for C2D methods */
             if (IoTHubDeviceClient_SetDeviceMethodCallback(device_handle1, DeviceMethodCallback, (void*)deviceId1) != IOTHUB_CLIENT_OK)
             {
-                (void)printf("ERROR: IoTHubClient_SetDeviceMethodCallback for the first device..........FAILED!\r\n");
+                (void)printf("ERROR: IoTHubDeviceClient_SetDeviceMethodCallback for the first device..........FAILED!\r\n");
             }
             else if (IoTHubDeviceClient_SetDeviceMethodCallback(device_handle2, DeviceMethodCallback, (void*)deviceId2) != IOTHUB_CLIENT_OK)
             {
-                (void)printf("ERROR: IoTHubClient_SetDeviceMethodCallback for the second device..........FAILED!\r\n");
+                (void)printf("ERROR: IoTHubDeviceClient_SetDeviceMethodCallback for the second device..........FAILED!\r\n");
             }
             else
             {
-                (void)printf("IoTHubClient_SetMessageCallback...successful.\r\n");
+                (void)printf("IoTHubDeviceClient_SetMessageCallback...successful.\r\n");
                 (void)printf("Waiting for C2D methods ...\r\n");
 
                 (void)printf("Press enter to close application\r\n");

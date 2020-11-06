@@ -3,6 +3,12 @@
 
 #include "testrunnerswitcher.h"
 
+
+// Note: Even though iothub_client.h is deprecated, we are using it as basis of our tests and NOT the recommended
+// device_client.h.  In practice for most tests there's no difference (both APIs quickly pass through to core implementation).
+// However, the iothub_client.h has both an Ex and non-Ex version of IoTHubClient_UploadMultipleBlocksToBlobAsync.
+// The device_client did NOT bring this Ex/non split forward.
+// We must maintain back-compat with the non-Ex function, so we need to #include "iothub_client.h" as it is only way to access it.
 #include "iothub_client.h"
 #include "iothub_client_options.h"
 #include "iothub_message.h"
@@ -48,8 +54,8 @@ static int uploadBlobNumber;
 static LOCK_HANDLE updateBlobTestLock;
 
 #define IOTHUB_UPLOADTOBLOB_TIMEOUT_SEC 120
-#define TEST_MAX_SIMULTANEOUS_UPLOADS 5
-
+#define TEST_MAX_SIMULTANEOUS_UPLOADS 3
+#define TEST_SLEEP_BETWEEN_UPLOAD_TO_BLOB_E2E_TESTS_MS 3000
 
 TEST_DEFINE_ENUM_TYPE(UPLOADTOBLOB_CALLBACK_STATUS, IOTHUB_CLIENT_FILE_UPLOAD_RESULT_VALUES);
 
@@ -191,6 +197,21 @@ static void check_upload_result(UPLOADTOBLOB_CALLBACK_STATUS uploadToBlobStatus)
     }
 }
 
+static void sleep_between_upload_blob_e2e_tests(void)
+{
+    // We need a Sleep() between each E2E test.  Current (as of October, 2020) throttling
+    // rules limit an S1 hub to 1.67 upload initiations per second for the entire IoT Hub (not just per device).
+    // https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-quotas-throttling
+    //
+    // On gate runs, we have many instances of this test executable running at the same time and we cannot orchestrate
+    // them.  Most individual testcases take <1 second to run.  Without a sleep, this amount of traffic
+    // will end up going over throttling maximums and causing test case failures.
+    //
+    LogInfo("Invoking sleep for %d milliseconds after test case", TEST_SLEEP_BETWEEN_UPLOAD_TO_BLOB_E2E_TESTS_MS);
+    ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_UPLOAD_TO_BLOB_E2E_TESTS_MS);
+}
+
+
 void e2e_uploadtoblob_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACCOUNT_AUTH_METHOD accountAuthMethod)
 {
     IOTHUB_CLIENT_RESULT result;
@@ -228,7 +249,10 @@ void e2e_uploadtoblob_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACC
 
     poll_for_upload_completion(&uploadToBlobStatus);
     check_upload_result(uploadToBlobStatus);
-	ThreadAPI_Sleep(3000);
+
+    // We need to sleep in any event to avoid triggering IoT Hub upload threshold limits in our E2E tests.  We need to do this
+    // before the client destroy - and not test runs themselves which would've been better - because of https://github.com/Azure/azure-iot-sdk-c/issues/1705.
+    sleep_between_upload_blob_e2e_tests();
     IoTHubClient_Destroy(iotHubClientHandle);
 }
 
@@ -335,6 +359,7 @@ void e2e_uploadtoblob_multiblock_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     poll_for_upload_completion(&uploadToBlobStatus);
     check_upload_result(uploadToBlobStatus);
 
+    sleep_between_upload_blob_e2e_tests();
     IoTHubClient_Destroy(iotHubClientHandle);
 }
 
@@ -374,6 +399,7 @@ void e2e_uploadtoblob_test_multiple_simultaneous_uploads(IOTHUB_CLIENT_TRANSPORT
     time_t endOperation = time(NULL);
     ASSERT_ARE_EQUAL(bool, true, (difftime(endOperation, beginOperation) < IOTHUB_UPLOADTOBLOB_TIMEOUT_SEC * 2) ? true : false, "Multithreaded upload took longer than allowed");
 
+    sleep_between_upload_blob_e2e_tests();
     IoTHubClient_Destroy(iotHubClientHandle);
 }
 

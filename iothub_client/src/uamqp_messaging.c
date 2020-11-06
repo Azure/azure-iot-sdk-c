@@ -31,6 +31,7 @@
 #define AMQP_DIAGNOSTIC_ID_KEY "Diagnostic-Id"
 #define AMQP_DIAGNOSTIC_CONTEXT_KEY "Correlation-Context"
 #define AMQP_DIAGNOSTIC_CREATION_TIME_UTC_KEY "creationtimeutc"
+#define AMQP_IOTHUB_CREATION_TIME_UTC "iothub-creation-time-utc"
 
 static int encode_callback(void* context, const unsigned char* bytes, size_t length)
 {
@@ -90,7 +91,7 @@ static int set_message_correlation_id_if_needed(IOTHUB_MESSAGE_HANDLE messageHan
 
         if ((uamqp_correlation_id = amqpvalue_create_string(correlationId)) == NULL)
         {
-            LogError("Failed amqpvalue_create_string for message_id");
+            LogError("Failed amqpvalue_create_string for correlationId");
             result = MU_FAILURE;
         }
         else if (properties_set_correlation_id(uamqp_message_properties, uamqp_correlation_id) != 0)
@@ -309,18 +310,31 @@ static int override_fault_injection_properties_if_needed(MESSAGE_HANDLE message_
 static int create_application_properties_to_encode(MESSAGE_HANDLE message_batch_container, IOTHUB_MESSAGE_HANDLE messageHandle, AMQP_VALUE *application_properties, size_t *application_properties_length)
 {
     MAP_HANDLE properties_map;
-    const char* const* property_keys;
-    const char* const* property_values;
+    const char* const* property_keys = NULL;
+    const char* const* property_values = NULL;
+    const char* message_creation_time_utc;
     size_t property_count = 0;
     AMQP_VALUE uamqp_properties_map = NULL;
-    int result;
+    int result = RESULT_OK;
 
     if ((properties_map = IoTHubMessage_Properties(messageHandle)) == NULL)
     {
         LogError("Failed to get property map from IoTHub message.");
         result = MU_FAILURE;
     }
-    else if (Map_GetInternals(properties_map, &property_keys, &property_values, &property_count) != MAP_OK)
+
+    if (RESULT_OK == result &&
+        NULL != (message_creation_time_utc = IoTHubMessage_GetMessageCreationTimeUtcSystemProperty(messageHandle)))
+    {
+        if (Map_AddOrUpdate(properties_map, AMQP_IOTHUB_CREATION_TIME_UTC, message_creation_time_utc) != MAP_OK)
+        {
+            LogError("Failed to add/update application message property map.");
+            result = MU_FAILURE;
+        }
+    }
+
+    if (RESULT_OK == result &&
+        Map_GetInternals(properties_map, &property_keys, &property_values, &property_count) != MAP_OK)
     {
         LogError("Failed reading the incoming uAMQP message properties");
         result = MU_FAILURE;
@@ -388,10 +402,6 @@ static int create_application_properties_to_encode(MESSAGE_HANDLE message_batch_
                 }
             }
         }
-    }
-    else
-    {
-        result = RESULT_OK;
     }
 
     if (NULL != uamqp_properties_map)
@@ -521,6 +531,7 @@ static int create_diagnostic_message_annotations(IOTHUB_MESSAGE_HANDLE messageHa
     }
     return result;
 }
+
 static int create_security_message_annotations(IOTHUB_MESSAGE_HANDLE messageHandle, AMQP_VALUE* message_annotations_map)
 {
     int result = RESULT_OK;
@@ -984,6 +995,34 @@ static int readCorrelationIdFromuAQMPMessage(IOTHUB_MESSAGE_HANDLE iothub_messag
     return result;
 }
 
+static int readUserIdFromuAQMPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_handle, PROPERTIES_HANDLE uamqp_message_properties)
+{
+    int result;
+    amqp_binary uamqp_message_property;
+
+    if (properties_get_user_id(uamqp_message_properties, &uamqp_message_property) != 0 || uamqp_message_property.length == 0)
+    {
+        result = RESULT_OK;
+    }
+    else
+    {
+        char string_buffer[MESSAGE_ID_MAX_SIZE];
+        memset(string_buffer, 0, MESSAGE_ID_MAX_SIZE);
+        strncpy(string_buffer, uamqp_message_property.bytes, uamqp_message_property.length > (MESSAGE_ID_MAX_SIZE - 1) ? MESSAGE_ID_MAX_SIZE - 1 : uamqp_message_property.length);
+        if (IoTHubMessage_SetMessageUserIdSystemProperty(iothub_message_handle, string_buffer) != IOTHUB_MESSAGE_OK)
+        {
+            LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'user-id' property.");
+            result = MU_FAILURE;
+        }
+        else
+        {
+            result = RESULT_OK;
+        }
+    }
+
+    return result;
+}
+
 static int readPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_handle, MESSAGE_HANDLE uamqp_message)
 {
     int result;
@@ -1007,7 +1046,12 @@ static int readPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_h
         }
         else if (readCorrelationIdFromuAQMPMessage(iothub_message_handle, uamqp_message_properties) != RESULT_OK)
         {
-            LogError("Failed readPropertiesFromuAMQPMessage.");
+            LogError("Failed readCorrelationIdFromuAQMPMessage.");
+            result = MU_FAILURE;
+        }
+        else if (readUserIdFromuAQMPMessage(iothub_message_handle, uamqp_message_properties) != RESULT_OK)
+        {
+            LogError("Failed readUserIdFromuAQMPMessage.");
             result = MU_FAILURE;
         }
         else
