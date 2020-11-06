@@ -10,6 +10,7 @@
 #include "iothubclient_common_device_method_e2e.h"
 #include "testrunnerswitcher.h"
 #include "iothubtransportamqp.h"
+#include "iothubtransportamqp_websockets.h"
 #include "iothub_devicemethod.h"
 
 
@@ -59,6 +60,21 @@ BEGIN_TEST_SUITE(iothubclient_amqp_mod_dm_e2e)
     {
         device_method_e2e_method_call_with_embedded_single_quote_sas(AMQP_Protocol);
     }
+
+#ifndef __APPLE__
+    TEST_FUNCTION(IotHub_AMQP_Module_Method_Call_With_String_x509)
+    {
+        device_method_e2e_method_call_with_string_x509(AMQP_Protocol);
+    }
+
+#ifndef USE_WOLFSSL  // Wolf doesn't run web socket tests
+    TEST_FUNCTION(IotHub_AMQP_WebSockets_Module_Method_Call_With_String_x509)
+    {
+        device_method_e2e_method_call_with_string_x509(AMQP_Protocol_over_WebSocketsTls);
+    }
+#endif // USE_WOLFSSL
+#endif // __APPLE__
+
 
 END_TEST_SUITE(iothubclient_amqp_mod_dm_e2e)
 
