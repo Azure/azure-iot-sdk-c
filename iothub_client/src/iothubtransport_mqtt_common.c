@@ -1063,7 +1063,7 @@ static void sendPendingGetTwinRequests(PMQTTTRANSPORT_HANDLE_DATA transportData)
 static void removeExpiredTwinRequestsFromList(PMQTTTRANSPORT_HANDLE_DATA transport_data, tickcounter_ms_t current_ms, DLIST_ENTRY* twin_list)
 {
     PDLIST_ENTRY list_item = twin_list->Flink;
-    
+
     while (list_item != twin_list)
     {
         DLIST_ENTRY next_list_item;
@@ -2106,6 +2106,7 @@ static void process_queued_ack_messages(PMQTTTRANSPORT_HANDLE_DATA transport_dat
                 free(msg_detail_entry);
 
                 DisconnectFromClient(transport_data);
+                transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED, transport_data->transport_ctx);
             }
             else
             {
@@ -2231,7 +2232,7 @@ static int buildConfigForUsernameStep2IfNeeded(PMQTTTRANSPORT_HANDLE_DATA transp
         // https://github.com/Azure/azure-iot-sdk-c/issues/1547 tracks removing this once non-preview API versions support modelId.
         const char* apiVersion = IOTHUB_API_VERSION;
         const char* appSpecifiedProductInfo = transport_data->transport_callbacks.prod_info_cb(transport_data->transport_ctx);
-        STRING_HANDLE productInfoEncoded = NULL; 
+        STRING_HANDLE productInfoEncoded = NULL;
 
         if ((productInfoEncoded = URL_EncodeString((appSpecifiedProductInfo != NULL) ? appSpecifiedProductInfo : DEFAULT_IOTHUB_PRODUCT_IDENTIFIER)) == NULL)
         {
