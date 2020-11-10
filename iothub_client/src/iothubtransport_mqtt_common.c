@@ -534,12 +534,17 @@ static int parse_device_twin_topic_info(const char* resp_topic, bool* patch_msg,
                 else if (token_count == 3)
                 {
                     *status_code = (int)atol(STRING_c_str(token_value));
+                    *patch_msg = false;
                     if (STRING_TOKENIZER_get_next_token(token_handle, token_value, "/?$rid=") == 0)
                     {
                         *request_id = (size_t)atol(STRING_c_str(token_value));
+                        result = 0;
                     }
-                    *patch_msg = false;
-                    result = 0;
+                    else
+                    {
+                        LogError("Could not parse request_id.");
+                        result = MU_FAILURE;
+                    }
                     break;
                 }
                 token_count++;
@@ -1559,7 +1564,7 @@ static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE msgHandle, void* call
             IOTHUB_IDENTITY_TYPE type = retrieve_topic_type(topic_resp, STRING_c_str(transportData->topic_InputQueue));
             if (type == IOTHUB_TYPE_DEVICE_TWIN)
             {
-                size_t request_id;
+                size_t request_id = 0;
                 int status_code;
                 bool notification_msg;
                 if (parse_device_twin_topic_info(topic_resp, &notification_msg, &request_id, &status_code) != 0)
