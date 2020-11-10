@@ -313,7 +313,7 @@ IOTHUB_MODULE_CLIENT_LL_HANDLE IoTHubModuleClient_LL_CreateFromEnvironment(IOTHU
         }
         else if ((result->methodHandle = IoTHubClientCore_LL_GetEdgeHandle(result->coreHandle)) == NULL)
         {
-            LogError("Failed to set module method handle");
+            LogError("Failed to get module method handle");
             IoTHubModuleClient_LL_Destroy(result);
             result = NULL;
         }
