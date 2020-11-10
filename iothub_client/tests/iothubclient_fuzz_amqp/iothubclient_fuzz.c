@@ -70,7 +70,7 @@
 
 /* Paste in the your iothub connection string  */
 //static const char* connectionString = "HostName=fuzz-hub.azure-devices.net;DeviceId=fuzzdevice;SharedAccessKey=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX=";
-static const char* connectionString = "HostName=ericwol-hub.azure-devices.net;DeviceId=eeqq;SharedAccessSignature=SharedAccessSignature sr=ericwol-hub.azure-devices.net%2Fdevices%2Feeqq&sig=KCRWdPv0RZcVjvdkRwhSuaRZiXc92C75d3GGo3QWzTY%3D&se=1605002146";
+static const char* connectionString = "HostName=ericwol-hub.azure-devices.net;DeviceId=eeqq;SharedAccessSignature=SharedAccessSignature sr=ericwol-hub.azure-devices.net%2Fdevices%2Feeqq&sig=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX%3D&se=5605002146";
 
 
 #define MESSAGE_COUNT        5
@@ -235,7 +235,7 @@ int main(int argc, const char* argv[])
         (void)IoTHubDeviceClient_LL_SetDeviceTwinCallback(device_ll_handle, deviceTwinCallback, NULL);
 
         int loop_count;
-        for (loop_count = 0; g_continueRunning && loop_count < 100000; loop_count++)
+        for (loop_count = 0; g_continueRunning && loop_count < 300000; loop_count++)
         {
             if (messages_sent < MESSAGE_COUNT)
             {
@@ -429,22 +429,6 @@ int tlsio_fuzz_send(CONCRETE_IO_HANDLE tls_io, const void* buffer, size_t size, 
     (void)size;
     static int iteration = 0;
 
-    /*
-    (void)printf("\r\nPAYLOAD iteration=%d\r\n", iteration);
-    for (int i = 0; i < size; i++)
-    {
-        char c = ((char*)buffer)[i];
-        if (c >= 32 && c <= 126)
-        {
-            (void)printf("%c", ((char*)buffer)[i]);
-        }
-        else
-        {
-            (void)printf(".");
-        }
-    }
-    (void)printf("\r\n");
-    */
 
     unsigned char file_buffer[2048];
     if (iteration == 0)  // client SASL tunnel request
