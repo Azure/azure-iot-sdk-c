@@ -82,7 +82,7 @@ extern "C"
     * @param    eventConfirmationCallback        The callback specified by the module for receiving
     *                                            confirmation of the delivery of the IoT Hub message.
     *                                            This callback can be expected to invoke the
-    *                                            ::IoTHubModuleClient_LL_SendEventAsync function for the
+    *                                            IoTHubModuleClient_LL_SendEventAsync function for the
     *                                            same message in an attempt to retry sending a failing
     *                                            message. The user can specify a @c NULL value here to
     *                                            indicate that no callback is required.
@@ -90,7 +90,7 @@ extern "C"
     *                                            callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the IoTHubModuleClient_LL_Destroy function from within any callback.
     * @remarks
     *            The IOTHUB_MESSAGE_HANDLE instance provided as argument is copied by the function,
     *            so this argument can be destroyed by the calling application right after IoTHubModuleClient_LL_SendEventAsync returns.
@@ -124,7 +124,7 @@ extern "C"
     *                                         callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the IoTHubModuleClient_LL_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -141,7 +141,7 @@ extern "C"
     *                                         callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the IoTHubModuleClient_LL_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -158,7 +158,7 @@ extern "C"
     *                                         connection drops to IOT Hub.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the IoTHubModuleClient_LL_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -175,7 +175,7 @@ extern "C"
                                               to IOT Hub.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the IoTHubModuleClient_LL_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -235,7 +235,7 @@ extern "C"
     *                                     callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the IoTHubModuleClient_LL_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -252,7 +252,7 @@ extern "C"
     *                                    callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the IoTHubModuleClient_LL_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -267,7 +267,7 @@ extern "C"
      * 									    callback. This can be @c NULL.
      *
      *            @b NOTE: The application behavior is undefined if the user calls
-     *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
+     *            the IoTHubModuleClient_LL_Destroy function from within any callback.
      *
      * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
      */
@@ -302,7 +302,7 @@ extern "C"
     *                                         callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the IoTHubModuleClient_LL_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -327,30 +327,38 @@ extern "C"
     * @brief    This API creates a module handle based on environment variables set in the Edge runtime.
     *           NOTE: It is *ONLY* valid when the code is running in a container initiated by Edge.
     *
-    * @param    protocol            Function pointer for protocol implementation
+    * @param    protocol            Function pointer for protocol implementation.  This *MUST* be MQTT_Protocol.
     *
-    * @return   A non-NULL @c IOTHUB_CLIENT_LL_HANDLE value that is used when
+    * @remarks  The protocol parameter MUST be set to MQTT_Protocol.  Using other values will cause undefined behavior.
+    *
+    * @return   A non-NULL @c IOTHUB_MODULE_CLIENT_LL_HANDLE value that is used when
     *           invoking other functions for IoT Hub client and @c NULL on failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_MODULE_CLIENT_LL_HANDLE, IoTHubModuleClient_LL_CreateFromEnvironment, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol);
 
-    /*
+    /**
     * @brief    This API invokes a device method on a specified device
     *
     * @param    iotHubModuleClientHandle        The handle created by a call to a create function
     * @param    deviceId                        The device id of the device to invoke a method on
     * @param    methodName                      The name of the method
     * @param    methodPayload                   The method payload (in json format)
-    * @param    timeout                         The time in seconds before a timeout occurs
+    *
+    * @warning  The timeout parameter is ignored.  See https://github.com/Azure/azure-iot-sdk-c/issues/1378.
+    *           The timeout used will be the default for IoT Edge.
+    *
     * @param    responseStatus                  This pointer will be filled with the response status after invoking the device method
     * @param    responsePayload                 This pointer will be filled with the response payload
     * @param    responsePayloadSize             This pointer will be filled with the response payload size
+    *
+    * @warning  Other _LL_ functions such as IoTHubModuleClient_LL_SendEventAsync queue work to be performed later and do not block.  IoTHubModuleClient_LL_DeviceMethodInvoke
+    *           will block however until the method invocation is completed or fails, which may take a while.
     *
     * @return   IOTHUB_CLIENT_OK upon success, or an error code upon failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_LL_DeviceMethodInvoke, IOTHUB_MODULE_CLIENT_LL_HANDLE, iotHubModuleClientHandle, const char*, deviceId, const char*, methodName, const char*, methodPayload, unsigned int, timeout, int*, responseStatus, unsigned char**, responsePayload, size_t*, responsePayloadSize);
 
-    /*
+    /**
     * @brief    This API invokes a module method on a specified module
     *
     * @param    iotHubModuleClientHandle        The handle created by a call to a create function
@@ -359,9 +367,17 @@ extern "C"
     * @param    methodName                      The name of the method
     * @param    methodPayload                   The method payload (in json format)
     * @param    timeout                         The time in seconds before a timeout occurs
+    *
+    * @warning  The timeout parameter is ignored.  See https://github.com/Azure/azure-iot-sdk-c/issues/1378.
+    *           The timeout used will be the default for IoT Edge.
+    *
     * @param    responseStatus                  This pointer will be filled with the response status after invoking the module method
     * @param    responsePayload                 This pointer will be filled with the response payload
     * @param    responsePayloadSize             This pointer will be filled with the response payload size
+    *
+    * @warning  Other _LL_ functions such as IoTHubModuleClient_LL_SendEventAsync queue work to be performed later and do not block.  IoTHubModuleClient_LL_ModuleMethodInvoke
+    *           will block however until the method invocation is completed or fails, which may take a while.
+    *
     *
     * @return   IOTHUB_CLIENT_OK upon success, or an error code upon failure.
     */
