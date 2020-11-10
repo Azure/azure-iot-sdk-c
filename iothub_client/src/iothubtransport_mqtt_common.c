@@ -282,8 +282,14 @@ static int InternStrnicmp(const char* s1, const char* s2, size_t n)
 {
     int result;
 
-    if (s1 == NULL) result = -1;
-    else if (s2 == NULL) result = 1;
+    if (s1 == NULL)
+    {
+        result = -1;
+    }
+    else if (s2 == NULL)
+    {
+        result = 1;
+    }
     else
     {
         result = 0;
@@ -1677,7 +1683,7 @@ static void processTwinNotification(PMQTTTRANSPORT_HANDLE_DATA transportData, MQ
 //
 // processDeviceMethodNotification processes a device and module method invocations made by IoT Hub / IoT Edge.
 //
-void processDeviceMethodNotification(PMQTTTRANSPORT_HANDLE_DATA transportData, MQTT_MESSAGE_HANDLE msgHandle, const char* topic_resp)
+static void processDeviceMethodNotification(PMQTTTRANSPORT_HANDLE_DATA transportData, MQTT_MESSAGE_HANDLE msgHandle, const char* topic_resp)
 {
     STRING_HANDLE method_name = STRING_new();
     if (method_name == NULL)
@@ -1736,7 +1742,6 @@ static void processIncomingMessageNotification(PMQTTTRANSPORT_HANDLE_DATA transp
     {
         LogError("failure adding input name to property.");
     }
-    // Will need to update this when the service has messages that can be rejected
     else if (extractMqttProperties(IoTHubMessage, topic_resp, transportData->auto_url_encode_decode) != 0)
     {
         LogError("failure extracting mqtt properties.");
@@ -2897,7 +2902,7 @@ static void ProcessSubackDoWork(PMQTTTRANSPORT_HANDLE_DATA transport_data)
         }
         else
         {
-            LogError("Failure: sending device twin get property command.");
+            LogError("Failure: sending device twin get command.");
             destroyDeviceTwinGetMsg(mqtt_info);
         }
     }
@@ -3521,7 +3526,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_GetSendStatus(TRANSPORT_LL_HAND
     if (handle == NULL || iotHubClientStatus == NULL)
     {
         /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_023: [IoTHubTransport_MQTT_Common_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter.] */
-        LogError("invalid arument.");
+        LogError("invalid argument.");
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
