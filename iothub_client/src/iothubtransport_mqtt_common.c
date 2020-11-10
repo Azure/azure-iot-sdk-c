@@ -2106,7 +2106,11 @@ static void process_queued_ack_messages(PMQTTTRANSPORT_HANDLE_DATA transport_dat
                 free(msg_detail_entry);
 
                 DisconnectFromClient(transport_data);
-                transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED, transport_data->transport_ctx);
+                if (!transport_data->isRetryExpiredCallbackSet) // Only call once
+                {
+                    transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED, transport_data->transport_ctx);
+                    transport_data->isRetryExpiredCallbackSet = true; // Reset to false upon successful call to sendMqttConnectMsg in new connection
+                }
             }
             else
             {
