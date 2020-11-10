@@ -2,15 +2,13 @@
 
 This document describes how you can set options for the Azure IoT Hub and Device Provisioning Service (DPS) client connections.
 
-- [Example Code for Setting an Option](#set_option)
-- [When to Set Options](#when_to_set)
-- [Common Transport Options](#general_options)
-- [IoT Hub Device and Module Client Options](#IotHub_options)
-- [MQTT, AMQP, and HTTP Specific Protocol Options](#protocol_specific_options)
-- [Device Provisioning Service (DPS) Client Options](#provisioning_option)
-- [File Upload Options](#upload-options)
-
-<a name="set_option"></a>
+- [Example Code for Setting an Option](#Example-Code-for-Setting-an-Option)
+- [When to Set Options](#When-to-Set-Options)
+- [Common Transport Options](#Common-Transport-Options)
+- [IoT Hub Device and Module Client Options](#IoT-Hub-Device-and-Module-Client-Options)
+- [MQTT, AMQP, and HTTP Specific Protocol Options](#MQTT,-AMQP,-and-HTTP-Specific-Protocol-Options)
+- [Device Provisioning Service (DPS) Client Options](#Device-Provisioning-Service-(DPS)-Client-Options)
+- [File Upload Options](#File-Upload-Options)
 
 ## Example Code for Setting an Option
 
@@ -46,13 +44,10 @@ http_proxy.port = PROXY_PORT;
 Prov_Device_LL_SetOption(handle, OPTION_HTTP_PROXY, &http_proxy);
 ```
 
-<a name="when_to_set></a>
 ## When to Set Options
 
-You should set the options you need right after creating your IoT Hub device or module handle.  Setting most options after the connection has been initiated will be silently ignored as many of them are used at connection initiation time itself.
+You should set the options you need right after creating your IoT Hub device or module handle.  Setting most options after the connection has been initiated may be silently ignored or applied much later.  Many of these are used at connection initiation time itself.
 
-
-<a name="general_options"></a>
 
 ## Common Transport Options
 You can use the options below for the IoT Hub Device Client, the IoT Hub Module Client, and for the Device Provisioning Client.  These options are declared in [shared_util_options.h][shared-util-options-h].
@@ -69,8 +64,6 @@ You can use the options below for the IoT Hub Device Client, the IoT Hub Module 
 | `"proxy_data"`                    | OPTION_HTTP_PROXY               | [HTTP_PROXY_OPTIONS*][shared-util-options-h]| Http proxy data object used for proxy connection to IoT Hub
 | `"tls_version"`                   | OPTION_TLS_VERSION              | int*               | TLS version to use for openssl, 10 for version 1.0, 11 for version 1.1, 12 for version 1.2.  (**DEPRECATED**: TLS 1.0 and 1.1 are not secure and should not be used.  This option is included only for backward compatibility.)
 
-
-<a name="IotHub_options"></a>
 
 ## IoT Hub Device and Module Client Options
 You can use the options below for IoT Hub connections.  These options are declared in [iothub_client_options.h][iothub-client-options-h].  
@@ -90,8 +83,6 @@ You may also use [common transport options](#general_options) options.
 | `"sas_token_lifetime"`            | OPTION_SAS_TOKEN_LIFETIME       | size_t*            | Length of time in seconds used for lifetime of SAS token.
 | `"do_work_freq_ms"`               | OPTION_DO_WORK_FREQUENCY_IN_MS  | [tickcounter_ms_t *][tick-counter-header] | Specifies how frequently the worker thread spun by the convenience layer will wake up, in milliseconds.  The default is 1 millisecond.  The maximum allowable value is 100.  (Convenience layer APIs only)
 
-
-<a name="protocol_specific_options"></a>
 
 ## MQTT, AMQP, and HTTP Specific Protocol Options
 
@@ -122,8 +113,6 @@ Some options are only supported by a given protocol (e.g. MQTT, AMQP, HTTP).  Th
 | `"MinimumPollingTime"`       | OPTION_MIN_POLLING_TIME         | unsigned int*     | Minimum time in seconds allowed between 2 consecutive GET issues to the service
 | `"timeout"`                  | OPTION_HTTP_TIMEOUT             | long*             | When using curl the amount of time before the request times out, defaults to 242 seconds.
 
-<a name="provisioning_option"></a>
-
 ## Device Provisioning Service (DPS) Client Options
 
 You can use the options below to configure the DPS client.  These are defined in [prov_device_ll_client.h][provisioning-device-ll-client-options-h] except for `PROV_OPTION_DO_WORK_FREQUENCY_IN_MS` which is defined in [prov_device_client.h][provisioning-device-client-options-h].
@@ -136,8 +125,6 @@ You may also use [common transport options](#general_options).
 | `"registration_id"`          | PROV_REGISTRATION_ID            | const char*       | The registration ID of the device.
 | `"provisioning_timeout"`     | PROV_OPTION_TIMEOUT             | long*             | Maximum time to allow DPS to complete, in seconds.
 | `"do_work_freq_ms"`          | PROV_OPTION_DO_WORK_FREQUENCY_IN_MS | uint16_t * | Specifies how frequently the worker thread spun by the convenience layer will wake up, in milliseconds.  The default is 1 millisecond.  (Convenience layer APIs only)
-
-<a name="upload-options"></a>
 
 ## File Upload Options
 
