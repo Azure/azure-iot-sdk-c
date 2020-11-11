@@ -26,9 +26,9 @@
 //
 
 // Run
-//   cd ~/azure-iot-sdk-c/iothub_client/tests/iothubclient_fuzz_amqp
-//   mkdir ~/azure-iot-sdk-c/iothub_client/tests/iothubclient_fuzz_amqp/findings_dir
-//   afl-fuzz -m 230000000 -t 10000 -i packets -o findings_dir ~/azure-iot-sdk-c/cmake/iothub_client/tests/iothubclient_fuzz_amqp/iothubclient_fuzz_amqp @@
+//   cd ~/azure-iot-sdk-c/cmake/iothub_client/tests/iothubclient_fuzz_amqp
+//   mkdir ~/azure-iot-sdk-c/cmake/iothub_client/tests/iothubclient_fuzz_amqp/findings_dir
+//   afl-fuzz -m 230000000 -t 10000 -i ~/azure-iot-sdk-c/iothub_client/tests/iothubclient_fuzz_amqp/packets -o findings_dir ./iothubclient_fuzz_amqp @@
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -174,6 +174,7 @@ int main(int argc, const char* argv[])
         }
 
         fuzzpacket_id = fuzzpacket_buffer[0];
+        (void)printf("fuzzing with packet id: %d\r\n", fuzzpacket_id);
     }
     else if (argc > 1)
     {
