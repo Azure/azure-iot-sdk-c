@@ -32,6 +32,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <direct.h>
 
 #include "iothub.h"
 #include "iothub_device_client_ll.h"
@@ -67,11 +68,8 @@
     #include "iothubtransporthttp.h"
 #endif // SAMPLE_HTTP
 
-
 /* Paste in the your iothub connection string  */
-//static const char* connectionString = "HostName=fuzz-hub.azure-devices.net;DeviceId=fuzzdevice;SharedAccessKey=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX=";
 static const char* connectionString = "HostName=ericwol-hub.azure-devices.net;DeviceId=eeqq;SharedAccessSignature=SharedAccessSignature sr=ericwol-hub.azure-devices.net%2Fdevices%2Feeqq&sig=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX%3D&se=5605002146";
-
 
 #define MESSAGE_COUNT        5
 static bool g_continueRunning = true;
@@ -83,8 +81,9 @@ char twin_get_guid[41];
 char twin_update_guid[41];
 
 char* test_filepath;
-unsigned char filebuffer[2048];
-size_t filebuffer_len;
+unsigned char fuzzpacket_buffer[4096];
+size_t fuzzpacket_len;
+int fuzzpacket_id = -1;
 
 
 static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
@@ -153,29 +152,37 @@ int main(int argc, const char* argv[])
     size_t messages_sent = 0;
     const char* telemetry_msg = "test_message";
 
-    if (argc == 3)
+    if (argc == 2)
     {
         test_filepath = (char*)argv[1];
 
-        FILE* fp = fopen(test_filepath, "r");
+        FILE* fp = fopen(test_filepath, "rb");
         if (fp == NULL)
         {
             (void)printf("ERROR: Cant open file %s\r\n", test_filepath);
             return -1;
         }
-        filebuffer_len = fread(filebuffer, sizeof(filebuffer[0]), sizeof(filebuffer), fp);
+        fuzzpacket_len = fread(fuzzpacket_buffer, sizeof(fuzzpacket_buffer[0]), sizeof(fuzzpacket_buffer), fp);
         fclose(fp);
 
-        if (filebuffer_len == sizeof(filebuffer))
+        if (fuzzpacket_len == sizeof(fuzzpacket_buffer))
         {
             (void)printf("ERROR: test file is to big\r\n");
             return -1;
         }
+
+        if (fuzzpacket_buffer[0] != (fuzzpacket_buffer[1] ^ 0xff))
+        {
+            // packe ID got fuzzed, ok to return success
+            return 0;
+        }
+
+        fuzzpacket_id = fuzzpacket_buffer[0];
     }
     else if (argc > 1)
     {
         (void)printf("Usage:\r\n");
-        return 0;
+        return -1;
     }
 
 
@@ -407,10 +414,18 @@ int tlsio_fuzz_close(CONCRETE_IO_HANDLE tls_io, ON_IO_CLOSE_COMPLETE on_io_close
 
 size_t load_from_file(int i, unsigned char file_buffer[], size_t size)
 {
+    if (fuzzpacket_id == i)
+    {
+        // return the fuzz packes instead
+        memcpy(file_buffer, &fuzzpacket_buffer[2], fuzzpacket_len-2);
+        return fuzzpacket_len-2;
+    }
+
     size_t size_read = 0;
     char file_path[1024];
-    sprintf(file_path, "C:\\Repos\\azure-iot-sdk-c(dev)\\iothub_client\\tests\\iothubclient_fuzz_amqp\\packets\\%d.bin", i);
+    sprintf(file_path, "%d.bin", i);
     FILE* fp = fopen(file_path, "rb");
+
     if (fp != NULL)
     {
         unsigned char count;
@@ -419,6 +434,10 @@ size_t load_from_file(int i, unsigned char file_buffer[], size_t size)
         fread(&count_xor, 1, 1, fp);
         size_read = fread(file_buffer, 1, size, fp);
         fclose(fp);
+    }
+    else
+    {
+        exit(-1);
     }
     return size_read;
 }
@@ -429,180 +448,177 @@ int tlsio_fuzz_send(CONCRETE_IO_HANDLE tls_io, const void* buffer, size_t size, 
     (void)size;
     static int iteration = 0;
 
+    size_t size_read;
+    unsigned char file_buffer[4096];
 
-    unsigned char file_buffer[2048];
-    if (iteration == 0)  // client SASL tunnel request
+    switch (iteration)
     {
-        // server SASL tunnel response
-        size_t size_read = load_from_file(0, file_buffer, sizeof(file_buffer));
-        received_queue_add(file_buffer, size_read);
+        case 0: // client SASL tunnel request
+            // server SASL tunnel response
+            size_read = load_from_file(0, file_buffer, sizeof(file_buffer));
+            received_queue_add(file_buffer, size_read);
+            // server SASL Mechanisms
+            size_read = load_from_file(1, file_buffer, sizeof(file_buffer));
+            received_queue_add(file_buffer, size_read);
+            break;
 
-        // server SASL Mechanisms
-        size_read = load_from_file(1, file_buffer, sizeof(file_buffer));
-        received_queue_add(file_buffer, size_read);
-    }
-    else if (iteration == 1) // client SASL Init
-    {
-        // server SASL Challenge
-        size_t size_read = load_from_file(2, file_buffer, sizeof(file_buffer));
-        received_queue_add(file_buffer, size_read);
-    }
-    else if (iteration == 2) // client connection header
-    {
-        // server connection header
-        //<- Header (AMQP 0.1.0.0)
-        size_t size_read = load_from_file(3, file_buffer, sizeof(file_buffer));
-        received_queue_add(file_buffer, size_read);
-    }
-    else if (iteration == 3) // client performative Open
-    {
-        // server begin
-        //<- [OPEN]* {DeviceGateway_5ad507ef78724b7386c9c3309fb31014,localhost,65536,8191,240000,NULL,NULL,NULL,NULL,NULL}
-        size_t size_read = load_from_file(4, file_buffer, sizeof(file_buffer));
-        received_queue_add(file_buffer, size_read);
-    }
-    else if (iteration == 4) // send begin
-    {
-        //<- [BEGIN]* {0,1,5000,4294967295,262143,NULL,NULL,NULL}
-        size_t size_read = load_from_file(5, file_buffer, sizeof(file_buffer));
-        received_queue_add(file_buffer, size_read);
-    }
-    else if (iteration == 5)  // send attach $cbs-sender
-    {
-        //<- [ATTACH]* {$cbs-sender,0,true,0,0,* {$cbs,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},* {$cbs,NULL,NULL,NULL,NULL,NULL,NULL},NULL,NULL,NULL,1048576,NULL,NULL,NULL}
-        size_t size_read = load_from_file(6, file_buffer, sizeof(file_buffer));
-        received_queue_add(file_buffer, size_read);
-    }
-    else if (iteration == 6)  // send attach $cbs-receiver
-    {
-        //<- [ATTACH]* {$cbs-receiver,1,false,0,0,* {$cbs,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},* 
-        size_t size_read = load_from_file(8, file_buffer, sizeof(file_buffer));
-        received_queue_add(file_buffer, size_read);
-        //< -[FLOW] * {0, 5000, 1, 4294967295, 0, 0, 100, 0, NULL, false, NULL}
-        size_read = load_from_file(7, file_buffer, sizeof(file_buffer));
-        received_queue_add(file_buffer, size_read);
-    }
-    else if (iteration == 7) // send_flow
-    {
-        //<- [DISPOSITION]* {true,0,NULL,true,* {},NULL}
-        size_t size_read = load_from_file(9, file_buffer, sizeof(file_buffer));
-        received_queue_add(file_buffer, size_read);
-    }
-    else if (iteration == 8) // session_send_transfer
-    {
-        // send SAS token to hub
-        //<- [TRANSFER]* {1,0,<01 00 00 00>,0,NULL,false,NULL,NULL,NULL,NULL,false} 
-        size_t size_read = load_from_file(10, file_buffer, sizeof(file_buffer));
-        received_queue_add(file_buffer, size_read);
-    }
-    else if (iteration == 9) // send_disposition
-    {
-    }
-    else if (iteration == 10) // send_attach (events)
-    {
-        //<- [ATTACH]* {link-snd-eeqq-6322c15e-2c82-4a42-a57d-aa203cf1f4dc,2,true,0,NULL,* {link-snd-eeqq-6322c15e-2c82-4a42-a57d-aa203cf1f4dc-source,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},* {amqps://ericwol-hub.azure-devices.net/devices/eeqq/messages/events,NULL,NULL,NULL,NULL,NULL,NULL},NULL,NULL,NULL,1048576,NULL,NULL,{[com.microsoft:client-version:iothubclient/1.3.9 (native; WindowsProduct:0x00000004 6.2; x64; {F9FA04EF-2602-43AB-8505-A1EDE028ADD8})]}}
-        size_t size_read = load_from_file(11, file_buffer, sizeof(file_buffer));
-        memcpy(&file_buffer[0x1f], &((char*)buffer)[31], 41);
-        memcpy(&file_buffer[0x5f], &((char*)buffer)[31], 41);
-        received_queue_add(file_buffer, size_read);
+        case 1: // client SASL Init
+            // server SASL Challenge
+            size_read = load_from_file(2, file_buffer, sizeof(file_buffer));
+            received_queue_add(file_buffer, size_read);
+            break;
+
+        case 2: // client connection header
+            // server connection header
+            //<- Header (AMQP 0.1.0.0)
+            size_read = load_from_file(3, file_buffer, sizeof(file_buffer));
+            received_queue_add(file_buffer, size_read);
+            break;
+
+        case 3: // client performative Open
+            // server begin
+            //<- [OPEN]* {DeviceGateway_5ad507ef78724b7386c9c3309fb31014,localhost,65536,8191,240000,NULL,NULL,NULL,NULL,NULL}
+            size_read = load_from_file(4, file_buffer, sizeof(file_buffer));
+            received_queue_add(file_buffer, size_read);
+            break;
+
+        case 4: // send begin
+            //<- [BEGIN]* {0,1,5000,4294967295,262143,NULL,NULL,NULL}
+            size_read = load_from_file(5, file_buffer, sizeof(file_buffer));
+            received_queue_add(file_buffer, size_read);
+            break;
+
+        case 5: // send attach $cbs-sender
+            //<- [ATTACH]* {$cbs-sender,0,true,0,0,* {$cbs,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},* {$cbs,NULL,NULL,NULL,NULL,NULL,NULL},NULL,NULL,NULL,1048576,NULL,NULL,NULL}
+            size_read = load_from_file(6, file_buffer, sizeof(file_buffer));
+            received_queue_add(file_buffer, size_read);
+            break;
+
+        case 6: // send attach $cbs-receiver
+            //<- [ATTACH]* {$cbs-receiver,1,false,0,0,* {$cbs,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},* 
+            size_read = load_from_file(8, file_buffer, sizeof(file_buffer));
+            received_queue_add(file_buffer, size_read);
+            //< -[FLOW] * {0, 5000, 1, 4294967295, 0, 0, 100, 0, NULL, false, NULL}
+            size_read = load_from_file(7, file_buffer, sizeof(file_buffer));
+            received_queue_add(file_buffer, size_read);
+            break;
+
+        case 7: // send_flow
+            //<- [DISPOSITION]* {true,0,NULL,true,* {},NULL}
+            size_read = load_from_file(9, file_buffer, sizeof(file_buffer));
+            received_queue_add(file_buffer, size_read);
+            break;
+
+        case 8: // session_send_transfer
+            // send SAS token to hub
+            //<- [TRANSFER]* {1,0,<01 00 00 00>,0,NULL,false,NULL,NULL,NULL,NULL,false} 
+            size_read = load_from_file(10, file_buffer, sizeof(file_buffer));
+            received_queue_add(file_buffer, size_read);
+            break;
+
+        case 9: // send_disposition
+            break;
+
+        case 10: // send_attach (events)
+            //<- [ATTACH]* {link-snd-eeqq-6322c15e-2c82-4a42-a57d-aa203cf1f4dc,2,true,0,NULL,* {link-snd-eeqq-6322c15e-2c82-4a42-a57d-aa203cf1f4dc-source,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},* {amqps://ericwol-hub.azure-devices.net/devices/eeqq/messages/events,NULL,NULL,NULL,NULL,NULL,NULL},NULL,NULL,NULL,1048576,NULL,NULL,{[com.microsoft:client-version:iothubclient/1.3.9 (native; WindowsProduct:0x00000004 6.2; x64; {F9FA04EF-2602-43AB-8505-A1EDE028ADD8})]}}
+            size_read = load_from_file(11, file_buffer, sizeof(file_buffer));
+            memcpy(&file_buffer[0x1f], &((char*)buffer)[31], 41);
+            memcpy(&file_buffer[0x5f], &((char*)buffer)[31], 41);
+            received_queue_add(file_buffer, size_read);
+            //<- [FLOW]* {1,5000,2,4294967295,2,0,1000,0,NULL,false,NULL}
+            size_read = load_from_file(12, file_buffer, sizeof(file_buffer));
+            received_queue_add(file_buffer, size_read);
+            break;
+
+        case 11: // send_attach (twin)
+            //<- [ATTACH]* {link-snd-eeqq-54c3e766-02f0-4057-8c58-9299e97f1bf0,3,true,1,0,* {link-snd-eeqq-54c3e766-02f0-4057-8c58-9299e97f1bf0-source,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},* {amqps://ericwol-hub.azure-devices.net/devices/eeqq/twin,NULL,NULL,NULL,NULL,NULL,NULL},NULL,NULL,NULL,1048576,NULL,NULL,{[com.microsoft:client-version:iothubclient/1.3.9 (native; WindowsProduct:0x00000004 6.2; x64; {F9FA04EF-2602-43AB-8505-A1EDE028ADD8})],[com.microsoft:channel-correlation-id:twin:d90e52ce-a264-4d74-b236-cad0b08029a8],[com.microsoft:api-version:2019-10-01]}}
+            size_read = load_from_file(14, file_buffer, sizeof(file_buffer));
+            memcpy(&file_buffer[0x1f], &((char*)buffer)[31], 41);
+            memcpy(&file_buffer[0x60], &((char*)buffer)[31], 41);
+            memcpy(twin_get_guid, &((char*)buffer)[410], 36);
+            received_queue_add(file_buffer, size_read);
+            //<- [FLOW]* {1,5000,2,4294967295,3,0,1000,0,NULL,false,NULL}
+            size_read = load_from_file(15, file_buffer, sizeof(file_buffer));
+            received_queue_add(file_buffer, size_read);
+            break;
+
+        case 12: // send_attach (devicebound)
+            //<- [ATTACH]* {link-rcv-eeqq-5faca423-9286-4cfb-97ed-b7e6c4452fb3,4,false,NULL,1,* {amqps://ericwol-hub.azure-devices.net/devices/eeqq/messages/devicebound,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},* {link-rcv-eeqq-5faca423-9286-4cfb-97ed-b7e6c4452fb3-target,NULL,NULL,NULL,NULL,NULL,NULL},NULL,NULL,0,65536,NULL,NULL,{[com.microsoft:client-version:iothubclient/1.3.9 (native; WindowsProduct:0x00000004 6.2; x64; {F9FA04EF-2602-43AB-8505-A1EDE028ADD8})]}}
+            size_read = load_from_file(13, file_buffer, sizeof(file_buffer));
+            memcpy(&file_buffer[0x1f], &((char*)buffer)[31], 41);
+            memcpy(&file_buffer[0xb8], &((char*)buffer)[31], 41);
+            received_queue_add(file_buffer, size_read);
+            break;
+
+        case 13: // 
+            //<- [ATTACH]* {link-snd-eeqq-54c3e766-02f0-4057-8c58-9299e97f1bf0,3,true,1,0,* {link-snd-eeqq-54c3e766-02f0-4057-8c58-9299e97f1bf0-source,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},* {amqps://ericwol-hub.azure-devices.net/devices/eeqq/twin,NULL,NULL,NULL,NULL,NULL,NULL},NULL,NULL,NULL,1048576,NULL,NULL,{[com.microsoft:client-version:iothubclient/1.3.9 (native; WindowsProduct:0x00000004 6.2; x64; {F9FA04EF-2602-43AB-8505-A1EDE028ADD8})],[com.microsoft:channel-correlation-id:twin:d90e52ce-a264-4d74-b236-cad0b08029a8],[com.microsoft:api-version:2019-10-01]}}
+            size_read = load_from_file(16, file_buffer, sizeof(file_buffer));
+            memcpy(&file_buffer[0x1f], &((char*)buffer)[31], 41);
+            memcpy(&file_buffer[0x60], &((char*)buffer)[31], 41);
+            memcpy(twin_update_guid, &((char*)buffer)[410], 36);
+            received_queue_add(file_buffer, size_read);
+            break;
+
+        case 14: // session_send_transfer
+            //twin get
+            size_read = load_from_file(22, file_buffer, sizeof(file_buffer));
+            memcpy(&file_buffer[0x4d], &((char*)buffer)[0x3e], 36);
+            received_queue_add(file_buffer, size_read);
+            break;
+
+        case 15: // send_flow
+        case 16: // send_flow
+            break;
+
+        case 17: // session_send_transfer (twin get)
+            //twin get
+            size_read = load_from_file(23, file_buffer, sizeof(file_buffer));
+            memcpy(&file_buffer[0x4d], &((char*)buffer)[0x3e], 36);
+            received_queue_add(file_buffer, size_read);
+            break;
+
+        case 18: // session_send_disposition
+            //<- [DISPOSITION]* {true,1,NULL,true,* {},NULL}
+            size_read = load_from_file(17, file_buffer, sizeof(file_buffer));
+            received_queue_add(file_buffer, size_read);
+            break;
+
+        case 19: // send_attach (methods_responses_link)
+            //<- [ATTACH]* {methods_responses_link-eeqq,6,true,1,0,* {responses,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},* {amqps://ericwol-hub.azure-devices.net/devices/eeqq/methods/devicebound,NULL,NULL,NULL,NULL,NULL,NULL},NULL,NULL,NULL,1048576,NULL,NULL,{[com.microsoft:channel-correlation-id:eeqq],[com.microsoft:api-version:2019-10-01]}}
+            size_read = load_from_file(19, file_buffer, sizeof(file_buffer));
+            received_queue_add(file_buffer, size_read);
+            break;
+
+        case 20: // send_attach (methods_requests_link)
+            //<- [ATTACH]* {methods_requests_link-eeqq,7,false,1,0,* {amqps://ericwol-hub.azure-devices.net/devices/eeqq/methods/devicebound,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},* {requests,NULL,NULL,NULL,NULL,NULL,NULL},NULL,NULL,0,1048576,NULL,NULL,{[com.microsoft:channel-correlation-id:eeqq],[com.microsoft:api-version:2019-10-01]}}
+            size_read = load_from_file(21, file_buffer, sizeof(file_buffer));
+            received_queue_add(file_buffer, size_read);
+            break;
+
+        case 21: // session_send_transfer (telem)
+            size_read = load_from_file(26, file_buffer, sizeof(file_buffer));
+            received_queue_add(file_buffer, size_read);
+            break;
         
-        //<- [FLOW]* {1,5000,2,4294967295,2,0,1000,0,NULL,false,NULL}
-        size_read = load_from_file(12, file_buffer, sizeof(file_buffer));
-        received_queue_add(file_buffer, size_read);
+        case 22: // session_send_disposition
+            size_read = load_from_file(18, file_buffer, sizeof(file_buffer));
+            received_queue_add(file_buffer, size_read);
+            break;
+
+        case 23: // session_send_transfer (twin PUT)
+            size_read = load_from_file(25, file_buffer, sizeof(file_buffer));
+            memcpy(&file_buffer[0x4c], &((char*)buffer)[0x70], 36);
+            received_queue_add(file_buffer, size_read);
+            break;
+
+        case 24: // remaining packets
+            size_read = load_from_file(20, file_buffer, sizeof(file_buffer));
+            received_queue_add(file_buffer, size_read);
+            size_read = load_from_file(24, file_buffer, sizeof(file_buffer));
+            received_queue_add(file_buffer, size_read);
+            break;
     }
-    else if (iteration == 11) // send_attach (twin)
-    {
-        //<- [ATTACH]* {link-snd-eeqq-54c3e766-02f0-4057-8c58-9299e97f1bf0,3,true,1,0,* {link-snd-eeqq-54c3e766-02f0-4057-8c58-9299e97f1bf0-source,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},* {amqps://ericwol-hub.azure-devices.net/devices/eeqq/twin,NULL,NULL,NULL,NULL,NULL,NULL},NULL,NULL,NULL,1048576,NULL,NULL,{[com.microsoft:client-version:iothubclient/1.3.9 (native; WindowsProduct:0x00000004 6.2; x64; {F9FA04EF-2602-43AB-8505-A1EDE028ADD8})],[com.microsoft:channel-correlation-id:twin:d90e52ce-a264-4d74-b236-cad0b08029a8],[com.microsoft:api-version:2019-10-01]}}
-        size_t size_read = load_from_file(14, file_buffer, sizeof(file_buffer));
-        memcpy(&file_buffer[0x1f], &((char*)buffer)[31], 41);
-        memcpy(&file_buffer[0x60], &((char*)buffer)[31], 41);
-        memcpy(twin_get_guid, &((char*)buffer)[410], 36);
-        received_queue_add(file_buffer, size_read);
-        
-        //<- [FLOW]* {1,5000,2,4294967295,3,0,1000,0,NULL,false,NULL}
-        size_read = load_from_file(15, file_buffer, sizeof(file_buffer));
-        received_queue_add(file_buffer, size_read);
-    }
-    else if (iteration == 12) // send_attach (devicebound)
-    {
-        //<- [ATTACH]* {link-rcv-eeqq-5faca423-9286-4cfb-97ed-b7e6c4452fb3,4,false,NULL,1,* {amqps://ericwol-hub.azure-devices.net/devices/eeqq/messages/devicebound,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},* {link-rcv-eeqq-5faca423-9286-4cfb-97ed-b7e6c4452fb3-target,NULL,NULL,NULL,NULL,NULL,NULL},NULL,NULL,0,65536,NULL,NULL,{[com.microsoft:client-version:iothubclient/1.3.9 (native; WindowsProduct:0x00000004 6.2; x64; {F9FA04EF-2602-43AB-8505-A1EDE028ADD8})]}}
-        size_t size_read = load_from_file(13, file_buffer, sizeof(file_buffer));
-        memcpy(&file_buffer[0x1f], &((char*)buffer)[31], 41);
-        memcpy(&file_buffer[0xb8], &((char*)buffer)[31], 41);
-        received_queue_add(file_buffer, size_read);
-    }
-    else if (iteration == 13) // send_attach (twin)
-    {
-        //<- [ATTACH]* {link-snd-eeqq-54c3e766-02f0-4057-8c58-9299e97f1bf0,3,true,1,0,* {link-snd-eeqq-54c3e766-02f0-4057-8c58-9299e97f1bf0-source,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},* {amqps://ericwol-hub.azure-devices.net/devices/eeqq/twin,NULL,NULL,NULL,NULL,NULL,NULL},NULL,NULL,NULL,1048576,NULL,NULL,{[com.microsoft:client-version:iothubclient/1.3.9 (native; WindowsProduct:0x00000004 6.2; x64; {F9FA04EF-2602-43AB-8505-A1EDE028ADD8})],[com.microsoft:channel-correlation-id:twin:d90e52ce-a264-4d74-b236-cad0b08029a8],[com.microsoft:api-version:2019-10-01]}}
-        size_t size_read = load_from_file(16, file_buffer, sizeof(file_buffer));
-        memcpy(&file_buffer[0x1f], &((char*)buffer)[31], 41);
-        memcpy(&file_buffer[0x60], &((char*)buffer)[31], 41);
-        memcpy(twin_update_guid, &((char*)buffer)[410], 36);
-        received_queue_add(file_buffer, size_read);
-    }
-    else if (iteration == 14) // session_send_transfer
-    {
-        //twin get
-        size_t size_read = load_from_file(22, file_buffer, sizeof(file_buffer));
-        memcpy(&file_buffer[0x4d], &((char*)buffer)[0x3e], 36);
-        received_queue_add(file_buffer, size_read);
-    }
-    else if (iteration == 15) // send_flow
-    {
-        (void)printf("trace\r\n");
-    }
-    else if (iteration == 16) // send_flow
-    {
-        (void)printf("trace\r\n");
-    }
-    else if (iteration == 17) // session_send_transfer (twin get)
-    {
-        //twin get
-        size_t size_read = load_from_file(23, file_buffer, sizeof(file_buffer));
-        memcpy(&file_buffer[0x4d], &((char*)buffer)[0x3e], 36);
-        received_queue_add(file_buffer, size_read);
-    }
-    else if (iteration == 18) // session_send_disposition
-    {
-        //<- [DISPOSITION]* {true,1,NULL,true,* {},NULL}
-        size_t size_read = load_from_file(17, file_buffer, sizeof(file_buffer));
-        received_queue_add(file_buffer, size_read);
-    }
-    else if (iteration == 19) // send_attach (methods_responses_link)
-    {
-        //<- [ATTACH]* {methods_responses_link-eeqq,6,true,1,0,* {responses,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},* {amqps://ericwol-hub.azure-devices.net/devices/eeqq/methods/devicebound,NULL,NULL,NULL,NULL,NULL,NULL},NULL,NULL,NULL,1048576,NULL,NULL,{[com.microsoft:channel-correlation-id:eeqq],[com.microsoft:api-version:2019-10-01]}}
-        size_t size_read = load_from_file(19, file_buffer, sizeof(file_buffer));
-        received_queue_add(file_buffer, size_read);
-    }
-    else if (iteration == 20) // send_attach (methods_requests_link)
-    {
-        //<- [ATTACH]* {methods_requests_link-eeqq,7,false,1,0,* {amqps://ericwol-hub.azure-devices.net/devices/eeqq/methods/devicebound,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},* {requests,NULL,NULL,NULL,NULL,NULL,NULL},NULL,NULL,0,1048576,NULL,NULL,{[com.microsoft:channel-correlation-id:eeqq],[com.microsoft:api-version:2019-10-01]}}
-        size_t size_read = load_from_file(21, file_buffer, sizeof(file_buffer));
-        received_queue_add(file_buffer, size_read);
-    }
-    else if (iteration == 21) // session_send_transfer (telem)
-    {
-        size_t size_read = load_from_file(26, file_buffer, sizeof(file_buffer));
-        received_queue_add(file_buffer, size_read);
-    }
-    else if (iteration == 22) // session_send_disposition
-    {
-        size_t size_read = load_from_file(18, file_buffer, sizeof(file_buffer));
-        received_queue_add(file_buffer, size_read);
-    }
-    else if (iteration == 23) // session_send_transfer (twin PUT)
-    {
-        size_t size_read = load_from_file(25, file_buffer, sizeof(file_buffer));
-        memcpy(&file_buffer[0x4c], &((char*)buffer)[0x70], 36);
-        received_queue_add(file_buffer, size_read);
-    }
-    else if (iteration == 24) // 
-    {
-        size_t size_read = load_from_file(20, file_buffer, sizeof(file_buffer));
-        received_queue_add(file_buffer, size_read);
-        size_read = load_from_file(24, file_buffer, sizeof(file_buffer));
-        received_queue_add(file_buffer, size_read);
-    }
+
 
     iteration++;
     on_send_complete(callback_context, IO_SEND_OK);
@@ -621,25 +637,6 @@ void tlsio_fuzz_dowork(CONCRETE_IO_HANDLE tls_io)
         received_queue_free(item);
     }
     
-    
-    //if (iteration % 10000 == 0)
-    //{
-    //    char file_path[1024];
-    //    sprintf(file_path, "C:\\Repos\\azure-iot-sdk-c(dev)\\iothub_client\\tests\\iothubclient_fuzz_amqp\\packets\\%d.bin", (iteration / 10000) - 1);
-    //    FILE* fp = fopen(file_path, "r");
-    //    if (fp != NULL)
-    //    {
-    //        unsigned char count;
-    //        fread(&count, 1, 1, fp);
-    //        unsigned char count_xor = count ^ 255;
-    //        fread(&count_xor, 1, 1, fp);
-    //        unsigned char buffer[2048];
-    //        size_t size = fread(buffer, 1, sizeof(buffer), fp);
-    //        on_bytes_received_callback(on_bytes_received_context_callback, buffer, size);
-    //        fclose(fp);
-    //    }
-    //}
-
     iteration++;
 }
 
