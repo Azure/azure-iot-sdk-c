@@ -244,7 +244,7 @@ static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsi
             {
                 free(oldCar->changeOilReminder);
             }
-            
+
             if (oldCar->changeOilReminder == NULL)
             {
                 printf("Received a new changeOilReminder = %s\n", newCar->changeOilReminder);
@@ -282,7 +282,7 @@ static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsi
                 oldCar->settings.location.longitude = newCar->settings.location.longitude;
             }
         }
-        
+
         free(newCar);
     }
 }
@@ -331,7 +331,13 @@ static void iothub_client_device_twin_and_methods_sample_run(void)
             // Uncomment the following lines to enable verbose logging (e.g., for debugging).
             //bool traceOn = true;
             //(void)IoTHubDeviceClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &traceOn);
-
+#if defined SAMPLE_MQTT || defined SAMPLE_MQTT_OVER_WEBSOCKETS
+        //Setting the auto URL Encoder (recommended for MQTT). Please use this option unless
+        //you are URL Encoding inputs yourself.
+        //ONLY valid for use with MQTT
+        bool urlEncodeOn = true;
+        (void)IoTHubDeviceClient_SetOption(iotHubClientHandle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
+#endif
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
             // For mbed add the certificate information
             if (IoTHubDeviceClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
