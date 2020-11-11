@@ -428,9 +428,9 @@ size_t load_from_file(int i, unsigned char file_buffer[], size_t size)
     if (fp != NULL)
     {
         unsigned char count;
-        (void)fread(&count, 1, 1, fp);
+        size_read = fread(&count, 1, 1, fp);
         unsigned char count_xor = count ^ 255;
-        (void)fread(&count_xor, 1, 1, fp);
+        size_read = fread(&count_xor, 1, 1, fp);
         size_read = fread(file_buffer, 1, size, fp);
         fclose(fp);
     }
