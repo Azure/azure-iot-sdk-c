@@ -32,7 +32,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <direct.h>
 
 #include "iothub.h"
 #include "iothub_device_client_ll.h"
