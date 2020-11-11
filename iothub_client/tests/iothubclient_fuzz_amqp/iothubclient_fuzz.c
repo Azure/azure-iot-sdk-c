@@ -32,7 +32,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <direct.h>
 
 #include "iothub.h"
 #include "iothub_device_client_ll.h"
@@ -429,9 +428,9 @@ size_t load_from_file(int i, unsigned char file_buffer[], size_t size)
     if (fp != NULL)
     {
         unsigned char count;
-        fread(&count, 1, 1, fp);
+        (void)fread(&count, 1, 1, fp);
         unsigned char count_xor = count ^ 255;
-        fread(&count_xor, 1, 1, fp);
+        (void)fread(&count_xor, 1, 1, fp);
         size_read = fread(file_buffer, 1, size, fp);
         fclose(fp);
     }
