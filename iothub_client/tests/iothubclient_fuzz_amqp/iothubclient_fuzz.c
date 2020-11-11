@@ -76,8 +76,6 @@ static size_t g_message_count_send_confirmations = 0;
 static size_t g_message_recv_count = 0;
 static int g_packet_id_fuzz = -1;
 
-char twin_update_guid[41];
-
 char* test_filepath;
 unsigned char fuzzpacket_buffer[4096];
 size_t fuzzpacket_len;
@@ -552,7 +550,6 @@ int tlsio_fuzz_send(CONCRETE_IO_HANDLE tls_io, const void* buffer, size_t size, 
             size_read = load_from_file(16, file_buffer, sizeof(file_buffer));
             memcpy(&file_buffer[0x1f], &((char*)buffer)[31], 41);
             memcpy(&file_buffer[0x60], &((char*)buffer)[31], 41);
-            memcpy(twin_update_guid, &((char*)buffer)[410], 36);
             received_queue_add(file_buffer, size_read);
             break;
 
