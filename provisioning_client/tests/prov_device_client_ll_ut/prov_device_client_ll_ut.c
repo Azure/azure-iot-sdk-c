@@ -635,6 +635,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
     static void setup_Prov_Device_LL_DoWork_register_send_mocks()
     {
         STRICT_EXPECTED_CALL(prov_transport_dowork(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(prov_transport_register_device(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     }
@@ -1309,13 +1310,19 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
         g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
         Prov_Device_LL_DoWork(handle);
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_AUTHENTICATED, DEFAULT_RETRY_AFTER, g_status_ctx);
         umock_c_reset_all_calls();
 
+        size_t t1_ms = (size_t)(DEFAULT_RETRY_AFTER * 1.5 * 1000);  // Some random time after the first registration message.
+        size_t t2_ms = t1_ms + 300;                                 // Some random time after the first get-status message is sent.
+
         STRICT_EXPECTED_CALL(prov_transport_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .CopyOutArgumentBuffer_current_ms(&t1_ms, sizeof(t1_ms));
         STRICT_EXPECTED_CALL(prov_transport_get_operation_status(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .CopyOutArgumentBuffer_current_ms(&t2_ms, sizeof(t2_ms));
 
         //act
         Prov_Device_LL_DoWork(handle);
@@ -1337,8 +1344,11 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_AUTHENTICATED, DEFAULT_RETRY_AFTER, g_status_ctx);
         umock_c_reset_all_calls();
 
+        size_t t1_ms = (size_t)(DEFAULT_RETRY_AFTER * 1.5 * 1000);  // Some random time after the first registration message.
+
         STRICT_EXPECTED_CALL(prov_transport_dowork(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .CopyOutArgumentBuffer_current_ms(&t1_ms, sizeof(t1_ms));
         STRICT_EXPECTED_CALL(prov_transport_get_operation_status(IGNORED_PTR_ARG)).SetReturn(__LINE__);
         STRICT_EXPECTED_CALL(on_prov_register_device_callback(PROV_DEVICE_RESULT_TRANSPORT, NULL, NULL, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(prov_transport_close(IGNORED_PTR_ARG));
