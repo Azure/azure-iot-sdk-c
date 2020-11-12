@@ -414,6 +414,7 @@ size_t load_from_file(int i, unsigned char file_buffer[], size_t size)
     if (fuzzpacket_id == i)
     {
         // return the fuzz packes instead
+        (void)printf("using fuzzed packet id: %d\r\n", fuzzpacket_id);
         memcpy(file_buffer, &fuzzpacket_buffer[2], fuzzpacket_len-2);
         return fuzzpacket_len-2;
     }
