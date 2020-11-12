@@ -1,12 +1,19 @@
-## Certificates - Important to know
+## Certificates -  Important to know
 
-For sample purposes, C SDK samples leverage certificates on the `certs.c` file. When creating solutions based on the C SDK you should consider :
+The Azure IoT Hub certificates presented during TLS negotiation shall be always validated using the appropriate root CA certificate(s).
 
-1. For production environments, the IoT Hub certificate must be validated during the TLS handshake.
-2. We use the Baltimore root CA to validate IoT Hub and Device Provisioning Service (DPS) server certificate (for the regions that use this certificate)
-3. For other regions (and private cloud environments) the appropriate root CA shall be used
+The samples in this repository leverage the certificates in `certs.c` for the United States, Germany sovereign cloud and China sovereign cloud.
+
+For other regions (and private cloud environments), please use the appropriate root CA certificate.
+
+Always prefer using the local system's Trusted Root Certificate Authority store instead of hardcoding the certificates (i.e. using certs.c such as our samples require in certain combinations). 
+
+A couple of examples:
+
+- Windows: Schannel will automatically pick up CA certificates from the store managed using `certmgr.msc`.
+- Debian Linux: OpenSSL will automatically pick up CA certificates from the store installed using `apt install ca-certificates`. Adding a certificate to the store is described here: http://manpages.ubuntu.com/manpages/precise/man8/update-ca-certificates.8.html
+
 
 ## Additional Information
 
 For additional guidance and important information about certificates, please refer to [this blog post](https://techcommunity.microsoft.com/t5/internet-of-things/azure-iot-tls-changes-are-coming-and-why-you-should-care/ba-p/1658456) from the security team. 
-
