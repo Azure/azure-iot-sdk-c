@@ -30,6 +30,11 @@ function(addSupportedTransportsToTest whatExecutableIsBuilding)
     endif()
 endfunction()
 
+if(${use_wolfssl})
+    add_definitions(-DUSE_WOLFSSL)
+endif()
+
+
 #this is CMakeLists for iothub_client tests folder
 add_unittest_directory(iothub_ut)
 add_unittest_directory(iothub_client_authorization_ut)
