@@ -16,6 +16,10 @@ A more detailed document showing UI screen shots for CA Certificates and proof o
 
 A more detailed document explaining Edge and showing its use of certificates generated here is available from the [Edge gateway creation documentation].
 
+## Note about Edge Devices
+
+If you would like to use CA certificates with an Edge device, you must use the Device Provisioning Service. If you are to connect directly to the Azure IoT Hub from an Edge device, the supported methods of authentication are SAS and self-signed certificates. Leaf devices are the only devices currently supporting CA certificate authentication directly to IoT Hub.
+
 ## USE
 
 ## Step 1 - Initial Setup

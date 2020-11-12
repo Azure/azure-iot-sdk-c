@@ -15,8 +15,6 @@
 
 #define DO_WORK_FREQ_DEFAULT 1
 
-static const char* const OPTION_DO_WORK_FREQUENCY_IN_MS = "do_work_freq_ms";
-
 typedef struct PROV_DEVICE_INSTANCE_TAG
 {
     PROV_DEVICE_LL_HANDLE ProvDeviceLLHandle;
@@ -259,7 +257,7 @@ PROV_DEVICE_RESULT Prov_Device_SetOption(PROV_DEVICE_HANDLE prov_device_handle, 
         else 
         {
             /* Codes_SRS_PROV_DEVICE_CLIENT_41_001: [ If parameter `optionName` is `OPTION_DO_WORK_FREQUENCY_IN_MS` then `IoTHubClientCore_SetOption` shall set `do_work_freq_ms` parameter of `prov_device_instance` ] */
-            if (strcmp(OPTION_DO_WORK_FREQUENCY_IN_MS, optionName) == 0)
+            if (strcmp(PROV_OPTION_DO_WORK_FREQUENCY_IN_MS, optionName) == 0)
             {
                 prov_device_instance->do_work_freq_ms = *((uint16_t *)value);
                 result = PROV_DEVICE_RESULT_OK;  
