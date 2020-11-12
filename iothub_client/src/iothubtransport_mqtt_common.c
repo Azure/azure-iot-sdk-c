@@ -201,7 +201,7 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     bool isRegistered;
     MQTT_CLIENT_STATUS mqttClientStatus;
     bool isDestroyCalled;
-    bool isRetryExpiredCallbackSet;
+    bool isRetryExpiredCallbackCalled;
     bool device_twin_get_sent;
     bool twin_resp_sub_recv;
     bool isRecoverableError;
@@ -1105,7 +1105,7 @@ static void sendPendingGetTwinRequests(PMQTTTRANSPORT_HANDLE_DATA transportData)
 static void removeExpiredTwinRequestsFromList(PMQTTTRANSPORT_HANDLE_DATA transport_data, tickcounter_ms_t current_ms, DLIST_ENTRY* twin_list)
 {
     PDLIST_ENTRY list_item = twin_list->Flink;
-    
+
     while (list_item != twin_list)
     {
         DLIST_ENTRY next_list_item;
@@ -1987,6 +1987,8 @@ static void processDisconnectCallback(void* ctx)
 // DisconnectFromClient will tear down the existing MQTT connection, trying to gracefully send an MQTT DISCONNECT (with a timeout),
 // destroy the underlying xio for network communication, and update the transport_data state machine appropriately.
 //
+//NOTE: After a call to DisconnectFromClient, determine if appropriate to also call
+//      transport_data->transport_callbacks.connection_status_cb().
 static void DisconnectFromClient(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
     if (transport_data->currPacketState != DISCONNECT_TYPE)
@@ -2237,6 +2239,11 @@ static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport
                 free(msg_detail_entry);
 
                 DisconnectFromClient(transport_data);
+                if (!transport_data->isRetryExpiredCallbackCalled) // Only call once
+                {
+                    transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED, transport_data->transport_ctx);
+                    transport_data->isRetryExpiredCallbackCalled = true;
+                }
             }
             else
             {
@@ -2373,7 +2380,7 @@ static int buildConfigForUsernameStep2IfNeeded(PMQTTTRANSPORT_HANDLE_DATA transp
         // https://github.com/Azure/azure-iot-sdk-c/issues/1547 tracks removing this once non-preview API versions support modelId.
         const char* apiVersion = IOTHUB_API_VERSION;
         const char* appSpecifiedProductInfo = transport_data->transport_callbacks.prod_info_cb(transport_data->transport_ctx);
-        STRING_HANDLE productInfoEncoded = NULL; 
+        STRING_HANDLE productInfoEncoded = NULL;
 
         if ((productInfoEncoded = URL_EncodeString((appSpecifiedProductInfo != NULL) ? appSpecifiedProductInfo : DEFAULT_IOTHUB_PRODUCT_IDENTIFIER)) == NULL)
         {
@@ -2517,7 +2524,7 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 else
                 {
                     transport_data->currPacketState = CONNECT_TYPE;
-                    transport_data->isRetryExpiredCallbackSet = false;
+                    transport_data->isRetryExpiredCallbackCalled = false;
                     (void)tickcounter_get_current_ms(transport_data->msgTickCounter, &transport_data->mqtt_connect_time);
                     result = 0;
                 }
@@ -2584,10 +2591,10 @@ static int UpdateMqttConnectionStateIfNeeded(PMQTTTRANSPORT_HANDLE_DATA transpor
             else if (retry_action == RETRY_ACTION_STOP_RETRYING)
             {
                 // Set callback if retry expired
-                if (!transport_data->isRetryExpiredCallbackSet)
+                if (!transport_data->isRetryExpiredCallbackCalled)
                 {
                     transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED, transport_data->transport_ctx);
-                    transport_data->isRetryExpiredCallbackSet = true;
+                    transport_data->isRetryExpiredCallbackCalled = true;
                 }
                 result = MU_FAILURE;
             }
@@ -2855,7 +2862,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                         state->authorization_module = auth_module;
 
                         state->isDestroyCalled = false;
-                        state->isRetryExpiredCallbackSet = false;
+                        state->isRetryExpiredCallbackCalled = false;
                         state->isRegistered = false;
                         state->device_twin_get_sent = false;
                         state->xioTransport = NULL;
