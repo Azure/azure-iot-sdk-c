@@ -2335,7 +2335,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_from_disconnected_state)
     // The initial call to DoWork() is required to process the disconnection and move us into the disconnected state.
     IoTHubTransport_MQTT_Common_DoWork(handle);
 
-    // A future Dowork call is required to re-allocate the xio.  As part of this, make the mqtt_client_connect fail.  
+    // A future Dowork call is required to re-allocate the xio.  As part of this, make the mqtt_client_connect fail.
     // This has the effect of allocationg the xio but leaving us in a disconnected state.
 
     // Using the REGISTER_GLOBAL_MOCK_RETURN to force an error in a LONG list of calls there's not otherwise need
@@ -2347,7 +2347,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Destroy_from_disconnected_state)
     umock_c_reset_all_calls();
 
     set_expected_calls_for_IoTHubTransport_MQTT_Common_Destroy();
-   
+
     // act
     IoTHubTransport_MQTT_Common_Destroy(handle);
 
@@ -5232,6 +5232,8 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_message_timeout_succeeds)
     }
     STRICT_EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(xio_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED, transport_cb_ctx));
+
     // removeExpiredTwinRequests
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
@@ -5312,6 +5314,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_2_message_timeout_succeeds)
     }
     STRICT_EXPECTED_CALL(mqtt_client_clear_xio(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(xio_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED, transport_cb_ctx));
 
     STRICT_EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -6316,7 +6319,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_implicit_gettwin_timeout)
     suback.qosReturn = QosValue;
     g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_callbackCtx);
 
-    IoTHubTransport_MQTT_Common_DoWork(handle);    
+    IoTHubTransport_MQTT_Common_DoWork(handle);
 
     umock_c_reset_all_calls();
     set_expected_calls_for_DoWork_for_twin_timeouts();
