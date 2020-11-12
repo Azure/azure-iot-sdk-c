@@ -51,6 +51,10 @@ MOCKABLE_FUNCTION(, void,  IoTHubDeviceMethod_Destroy, IOTHUB_SERVICE_CLIENT_DEV
 * @param    methodPayload                   The message payload to send.
 * @param    response                        Output buffer for response payload.
 * @param    timeout                         Time before IoTHubDeviceMethod_InvokeModule times out.
+*
+* @warning  The timeout parameter is ignored.  See https://github.com/Azure/azure-iot-sdk-c/issues/1378.
+*           The timeout used will be the default for IoT Hub.
+*
 * @param    responseStatus                  Response status code from invocation
 * @param    responsePayload                 Output buffer for response payload.
 * @param    responsePayloadSize             String length of responsePayload.
@@ -66,6 +70,10 @@ MOCKABLE_FUNCTION(, IOTHUB_DEVICE_METHOD_RESULT, IoTHubDeviceMethod_Invoke, IOTH
 * @param    moduleId                        The module name (id) to call a method on.
 * @param    methodName                      The method name to call.
 * @param    methodPayload                   The message payload to send.
+*
+* @warning  The timeout parameter is ignored.  See https://github.com/Azure/azure-iot-sdk-c/issues/1378.
+*           The timeout used will be the default for IoT Hub.
+*
 * @param    timeout                         Time before IoTHubDeviceMethod_InvokeModule times out.
 * @param    responseStatus                  Response status code from invocation.
 * @param    responsePayload                 Output buffer for response payload.

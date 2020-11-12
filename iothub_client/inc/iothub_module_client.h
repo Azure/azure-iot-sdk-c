@@ -301,24 +301,29 @@ extern "C"
 #ifdef USE_EDGE_MODULES
     /**
     * @brief    This API creates a module handle based on environment variables set in the Edge runtime.
-    NOTE: It is *ONLY* valid when the code is running in a container initiated by Edge.
+    *           NOTE: It is *ONLY* valid when the code is running in a container initiated by Edge.
     *
-    * @param    protocol            Function pointer for protocol implementation
+    *
+    * @param    protocol            Function pointer for protocol implementation.  This *MUST* be MQTT_Protocol.
+    *
+    * @remarks  The protocol parameter MUST be set to MQTT_Protocol.  Using other values will cause undefined behavior.
     *
     * @return    A non-NULL @c IOTHUB_MODULE_CLIENT_HANDLE value that is used when
     *           invoking other functions for IoT Hub client and @c NULL on failure.
-
     */
     MOCKABLE_FUNCTION(, IOTHUB_MODULE_CLIENT_HANDLE, IoTHubModuleClient_CreateFromEnvironment, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol);
 
-    /*
+    /**
     * @brief    This API invokes a device method on a specified device
     *
     * @param    iotHubModuleClientHandle        The handle created by a call to a create function
     * @param    deviceId                        The device id of the device to invoke a method on
     * @param    methodName                      The name of the method
     * @param    methodPayload                   The method payload (in json format)
-    * @param    timeout                         The time in seconds before a timeout occurs
+    *
+    * @warning  The timeout parameter is ignored.  See https://github.com/Azure/azure-iot-sdk-c/issues/1378.
+    *           The timeout used will be the default for IoT Edge.
+    *
     * @param    responseStatus                  This pointer will be filled with the response status after invoking the device method
     * @param    responsePayload                 This pointer will be filled with the response payload
     * @param    responsePayloadSize             This pointer will be filled with the response payload size
@@ -327,7 +332,7 @@ extern "C"
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_DeviceMethodInvokeAsync, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, const char*, deviceId, const char*, methodName, const char*, methodPayload, unsigned int, timeout, IOTHUB_METHOD_INVOKE_CALLBACK, methodInvokeCallback, void*, context);
 
-    /*
+    /**
     * @brief    This API invokes a module method on a specified module
     *
     * @param    iotHubModuleClientHandle        The handle created by a call to a create function
@@ -336,6 +341,10 @@ extern "C"
     * @param    methodName                      The name of the method
     * @param    methodPayload                   The method payload (in json format)
     * @param    timeout                         The time in seconds before a timeout occurs
+    *
+    * @warning  The timeout parameter is ignored.  See https://github.com/Azure/azure-iot-sdk-c/issues/1378.
+    *           The timeout used will be the default for IoT Edge.
+    *
     * @param    responseStatus                  This pointer will be filled with the response status after invoking the module method
     * @param    responsePayload                 This pointer will be filled with the response payload
     * @param    responsePayloadSize             This pointer will be filled with the response payload size
