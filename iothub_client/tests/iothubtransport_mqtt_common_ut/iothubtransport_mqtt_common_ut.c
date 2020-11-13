@@ -3969,7 +3969,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_send_get_twin_succeed)
 
     QOS_VALUE QosValue[] = { DELIVER_AT_LEAST_ONCE };
     SUBSCRIBE_ACK suback;
-    suback.packetId = 1234;
+    suback.packetId = 0;
     suback.qosCount = 1;
     suback.qosReturn = QosValue;
 
