@@ -570,6 +570,8 @@ static void iothub_ll_get_device_twin_async_callback(DEVICE_TWIN_UPDATE_STATE up
                 free(queue_cb_info.iothub_callback.dev_twin_cb_info.payLoad);
             }
         }
+
+        free(queue_context);
     }
     else
     {
