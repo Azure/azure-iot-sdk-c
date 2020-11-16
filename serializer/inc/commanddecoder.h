@@ -7,7 +7,7 @@
 #include "multitree.h"
 #include "schema.h"
 #include "agenttypesystem.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 #include "methodreturn.h"
 
 #ifdef __cplusplus

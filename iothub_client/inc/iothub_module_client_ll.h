@@ -24,7 +24,7 @@
 #define IOTHUB_MODULE_CLIENT_LL_H
 
 #include <time.h>
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 #include "umock_c/umock_c_prod.h"
 
 #include "iothub_transport_ll.h"

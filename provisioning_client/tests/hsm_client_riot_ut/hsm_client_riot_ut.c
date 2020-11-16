@@ -30,7 +30,7 @@ static void my_gballoc_free(void* ptr)
 #include "umock_c/umocktypes_charptr.h"
 #include "umock_c/umocktypes_stdint.h"
 #include "umock_c/umock_c_negative_tests.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 
 #include "RIoT.h"
 #include "RiotCrypt.h"

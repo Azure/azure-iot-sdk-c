@@ -23,7 +23,7 @@ static void my_gballoc_free(void* ptr)
 #include "umock_c/umock_c.h"
 #include "umock_c/umocktypes_bool.h"
 #include "umock_c/umock_c_negative_tests.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 
 #define ENABLE_MOCKS
 #include "azure_prov_client/internal/prov_transport_mqtt_common.h"

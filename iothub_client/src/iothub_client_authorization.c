@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 #include "azure_c_shared_utility/gballoc.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 #include "umock_c/umock_c_prod.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/agenttime.h"

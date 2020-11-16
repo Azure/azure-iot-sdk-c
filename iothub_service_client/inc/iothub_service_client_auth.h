@@ -19,7 +19,7 @@
 #ifndef IOTHUB_SERVICE_CLIENT_AUTH_H
 #define IOTHUB_SERVICE_CLIENT_AUTH_H
 
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 #include "umock_c/umock_c_prod.h"
 
 #define IOTHUB_DEVICE_STATUS_VALUES       \
@@ -40,7 +40,7 @@ extern "C"
 #else
 #endif
 
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 
 /** @brief Structure to store IoTHub authentication information
 */

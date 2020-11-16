@@ -36,7 +36,7 @@ static int real_strcmp(const char* str1, const char* str2)
 
 #include "testrunnerswitcher.h"
 #include "azure_c_shared_utility/optimize_size.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 #include "umock_c/umock_c.h"
 #include "umock_c/umocktypes_charptr.h"
 #include "umock_c/umocktypes_stdint.h"

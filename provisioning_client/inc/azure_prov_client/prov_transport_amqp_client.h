@@ -14,7 +14,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 #include "umock_c/umock_c_prod.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 #include "azure_prov_client/prov_transport.h"
 
 MOCKABLE_FUNCTION(, const PROV_DEVICE_TRANSPORT_PROVIDER*, Prov_Device_AMQP_Protocol);

@@ -16,7 +16,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 #include "umock_c/umock_c_prod.h"
-#include "azure_macro_utils/macro_utils.h"
+#include "macro_utils/macro_utils.h"
 #include "provisioning_sc_models.h"
 #include "parson.h"
 
