@@ -45,4 +45,30 @@ TEST_FUNCTION(IoTHub_AMQP_WS_Module_GetFullDesired_e2e_sas)
 }
 #endif
 
+
+#ifndef __APPLE__
+TEST_FUNCTION(IoTHub_AMQP_Module_SendReported_e2e_x509)
+{
+    dt_e2e_send_reported_test(AMQP_Protocol, IOTHUB_ACCOUNT_AUTH_X509);
+}
+
+TEST_FUNCTION(IoTHub_AMQP_Module_GetFullDesired_e2e_x509)
+{
+    dt_e2e_get_complete_desired_test(AMQP_Protocol, IOTHUB_ACCOUNT_AUTH_X509);
+}
+
+#ifndef USE_WOLFSSL // Wolf doesn't run web socket tests
+TEST_FUNCTION(IoTHub_AMQP_WS_Module_SendReported_e2e_x509)
+{
+    dt_e2e_send_reported_test(AMQP_Protocol_over_WebSocketsTls, IOTHUB_ACCOUNT_AUTH_X509);
+}
+
+TEST_FUNCTION(IoTHub_AMQP_WS_Module_GetFullDesired_e2e_x509)
+{
+    dt_e2e_get_complete_desired_test(AMQP_Protocol_over_WebSocketsTls, IOTHUB_ACCOUNT_AUTH_X509);
+}
+#endif
+
+#endif // __APPLE__
+
 END_TEST_SUITE(iothubclient_amqp_mod_dt_e2e)

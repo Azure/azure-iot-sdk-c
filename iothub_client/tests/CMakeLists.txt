@@ -30,6 +30,11 @@ function(addSupportedTransportsToTest whatExecutableIsBuilding)
     endif()
 endfunction()
 
+if(${use_wolfssl})
+    add_definitions(-DUSE_WOLFSSL)
+endif()
+
+
 #this is CMakeLists for iothub_client tests folder
 add_unittest_directory(iothub_ut)
 add_unittest_directory(iothub_client_authorization_ut)
@@ -70,6 +75,7 @@ if(${use_mqtt})
 
     # e2e tests
     add_e2etest_directory(iothubclient_mqtt_e2e)
+    add_e2etest_directory(iothubclient_mqtt_mod_e2e)
     add_sfctest_directory(iothubclient_mqtt_e2e_sfc)
     add_e2etest_directory(iothubclient_mqtt_dt_e2e)
     add_sfctest_directory(iothubclient_mqtt_dt_e2e_sfc)
@@ -105,6 +111,7 @@ if(${use_amqp})
 
     # e2e tests
     add_e2etest_directory(iothubclient_amqp_e2e)
+    add_e2etest_directory(iothubclient_amqp_mod_e2e)
     add_e2etest_directory(iothubclient_amqp_dt_e2e)
     add_sfctest_directory(iothubclient_amqp_e2e_sfc)
     add_e2etest_directory(iothubclient_amqp_device_method_e2e)

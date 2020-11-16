@@ -64,5 +64,20 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_mod_dm_e2e)
     }
 #endif
 
+#ifndef __APPLE__
+    TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_String_x509)
+    {
+        device_method_e2e_method_call_with_string_x509(MQTT_Protocol);
+    }
+
+#ifndef USE_WOLFSSL  // Wolf doesn't run web socket tests
+    TEST_FUNCTION(IotHub_Mqtt_Ws_Method_Call_With_String_x509)
+    {
+        device_method_e2e_method_call_with_string_x509(MQTT_WebSocket_Protocol);
+    }
+#endif // USE_WOLFSSL
+#endif // __APPLE__
+
+
 END_TEST_SUITE(iothubclient_mqtt_mod_dm_e2e)
 
