@@ -65,7 +65,6 @@ static const char* TOPIC_GET_DESIRED_STATE = "$iothub/twin/res/#";
 static const char* TOPIC_NOTIFICATION_STATE = "$iothub/twin/PATCH/properties/desired/#";
 
 static const char* TOPIC_DEVICE_MSG = "devices/%s/messages/devicebound/#";
-static const char* TOPIC_DEVICE_MODULE_MSG = "devices/%s/modules/%s/messages/devicebound/#";
 static const char* TOPIC_DEVICE_DEVICE = "devices/%s/messages/events/";
 static const char* TOPIC_DEVICE_DEVICE_MODULE = "devices/%s/modules/%s/messages/events/";
 
@@ -576,28 +575,41 @@ static int parseDeviceTwinTopicInfo(const char* resp_topic, bool* patch_msg, siz
 // 
 // retrieveTopicType translates an MQTT topic PUBLISH'd to this device/module into what type (e.g. twin, method, etc.) it represents. 
 //
-static IOTHUB_IDENTITY_TYPE retrieveTopicType(const char* topic_resp, const char* input_queue)
+static int retrieveTopicType(PMQTTTRANSPORT_HANDLE_DATA transportData, const char* topic_resp, IOTHUB_IDENTITY_TYPE* type)
 {
-    IOTHUB_IDENTITY_TYPE type;
+    int result;
+
+    const char* input_queue_topic = STRING_c_str(transportData->topic_InputQueue);
+    const char* direct_method_topic = STRING_c_str(transportData->topic_MqttMessage);
+
     if (InternStrnicmp(topic_resp, TOPIC_DEVICE_TWIN_PREFIX, sizeof(TOPIC_DEVICE_TWIN_PREFIX) - 1) == 0)
     {
-        type = IOTHUB_TYPE_DEVICE_TWIN;
+        *type = IOTHUB_TYPE_DEVICE_TWIN;
+        result = 0;
     }
     else if (InternStrnicmp(topic_resp, TOPIC_DEVICE_METHOD_PREFIX, sizeof(TOPIC_DEVICE_METHOD_PREFIX) - 1) == 0)
     {
-        type = IOTHUB_TYPE_DEVICE_METHODS;
+        *type = IOTHUB_TYPE_DEVICE_METHODS;
+        result = 0;
     }
-    // input_queue contains additional "#" from subscribe, which we strip off on comparing incoming.
-    else if ((input_queue != NULL) && InternStrnicmp(topic_resp, input_queue, strlen(input_queue) - 1) == 0)
+    // input_queue_topic contains additional "#" from subscribe, which we strip off on comparing incoming.
+    else if ((input_queue_topic != NULL) && InternStrnicmp(topic_resp, input_queue_topic, strlen(input_queue_topic) - 1) == 0)
     {
-        type = IOTHUB_TYPE_EVENT_QUEUE;
+        *type = IOTHUB_TYPE_EVENT_QUEUE;
+        result = 0;
+    }
+    // direct_method_topic contains additional "#" from subscribe, which we strip off on comparing incoming.
+    else if ((direct_method_topic != NULL) && InternStrnicmp(topic_resp, direct_method_topic, strlen(direct_method_topic) - 1) == 0)
+    {
+        *type = IOTHUB_TYPE_TELEMETRY;
+        result = 0;
     }
     else
     {
-        type = IOTHUB_TYPE_TELEMETRY;
+        LogError("Topic %s does not match any client is subscribed to", topic_resp);
+        result = MU_FAILURE;        
     }
-    return type;
-
+    return result;
 }
 
 //
@@ -1793,17 +1805,21 @@ static void mqttNotificationCallback(MQTT_MESSAGE_HANDLE msgHandle, void* callba
     /* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_051: [ If msgHandle or callbackCtx is NULL, mqttNotificationCallback shall do nothing. ] */
     if (msgHandle != NULL && callbackCtx != NULL)
     {
+        PMQTTTRANSPORT_HANDLE_DATA transportData = (PMQTTTRANSPORT_HANDLE_DATA)callbackCtx;
+        IOTHUB_IDENTITY_TYPE type;
+
         /* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_052: [ mqttNotificationCallback shall extract the topic Name from the MQTT_MESSAGE_HANDLE. ] */
         const char* topic_resp = mqttmessage_getTopicName(msgHandle);
         if (topic_resp == NULL)
         {
             LogError("Failure: NULL topic name encountered");
         }
+        else if (retrieveTopicType(transportData, topic_resp, &type) != 0)
+        {
+            LogError("Received unexpected topic.  Ignoring remainder of request");
+        }
         else
         {
-            PMQTTTRANSPORT_HANDLE_DATA transportData = (PMQTTTRANSPORT_HANDLE_DATA)callbackCtx;
-
-            IOTHUB_IDENTITY_TYPE type = retrieveTopicType(topic_resp, STRING_c_str(transportData->topic_InputQueue));
             if (type == IOTHUB_TYPE_DEVICE_TWIN)
             {
                 processTwinNotification(transportData, msgHandle, topic_resp);
@@ -2723,18 +2739,11 @@ static STRING_HANDLE buildDevicesAndModulesPath(const IOTHUB_CLIENT_CONFIG* uppe
 }
 
 //
-// buildTopicMqttMsg builds the MQTT topic that is used for C2D messages sent to a device or module-to-module messages for a module running in IoT Edge
+// buildTopicMqttMsg builds the MQTT topic that is used for C2D messages
 //
-static STRING_HANDLE buildTopicMqttMsg(const char* device_id, const char* module_id)
+static STRING_HANDLE buildTopicMqttMsg(const char* device_id)
 {
-    if (module_id == NULL)
-    {
-        return STRING_construct_sprintf(TOPIC_DEVICE_MSG, device_id);
-    }
-    else
-    {
-        return STRING_construct_sprintf(TOPIC_DEVICE_MODULE_MSG, device_id, module_id);
-    }
+    return STRING_construct_sprintf(TOPIC_DEVICE_MSG, device_id);
 }
 
 //
@@ -3350,10 +3359,16 @@ int IoTHubTransport_MQTT_Common_Subscribe(TRANSPORT_LL_HANDLE handle)
         LogError("Invalid handle parameter. NULL.");
         result = MU_FAILURE;
     }
+    else if (transport_data->module_id != NULL)
+    {
+        // This very strongly points to an internal error.  This code path should never be reachable from the IoTHub module client API.
+        LogError("Cannot specify modules for C2D style messages, per IoT Hub protocol limitations.");
+        result = MU_FAILURE;
+    }
     else
     {
         /* Code_SRS_IOTHUB_MQTT_TRANSPORT_07_016: [IoTHubTransport_MQTT_Common_Subscribe shall set a flag to enable mqtt_client_subscribe to be called to subscribe to the Message Topic.] */
-        transport_data->topic_MqttMessage = buildTopicMqttMsg(STRING_c_str(transport_data->device_id), STRING_c_str(transport_data->module_id));
+        transport_data->topic_MqttMessage = buildTopicMqttMsg(STRING_c_str(transport_data->device_id));
         if (transport_data->topic_MqttMessage == NULL)
         {
             LogError("Failure constructing Message Topic");
