@@ -73,6 +73,7 @@ static const char* TOPIC_INPUT_QUEUE_NAME = "devices/%s/modules/%s/#";
 static const char* TOPIC_DEVICE_METHOD_SUBSCRIBE = "$iothub/methods/POST/#";
 
 static const char* PROPERTY_SEPARATOR = "&";
+static const char PROPERTY_EQUALS = '=';
 static const char* REPORTED_PROPERTIES_TOPIC = "$iothub/twin/PATCH/properties/reported/?$rid=%"PRIu16;
 static const char* GET_PROPERTIES_TOPIC = "$iothub/twin/GET/?$rid=%"PRIu16;
 static const char* DEVICE_METHOD_RESPONSE_TOPIC = "$iothub/methods/res/%d/?$rid=%s";
@@ -81,8 +82,10 @@ static const char* REQUEST_ID_PROPERTY = "?$rid=";
 
 static const char* MESSAGE_ID_PROPERTY = "mid";
 static const char* MESSAGE_CREATION_TIME_UTC = "ctime";
+static size_t MESSAGE_CREATION_TIME_UTC_LEN = sizeof(MESSAGE_CREATION_TIME_UTC) / sizeof(MESSAGE_CREATION_TIME_UTC[0]) - 1;
 static const char* MESSAGE_USER_ID = "uid";
 static const char* CORRELATION_ID_PROPERTY = "cid";
+static size_t CORRELATION_ID_PROPERTY_LEN = sizeof(CORRELATION_ID_PROPERTY) / sizeof(CORRELATION_ID_PROPERTY[0])- 1;
 static const char* CONTENT_TYPE_PROPERTY = "ct";
 static const char* CONTENT_ENCODING_PROPERTY = "ce";
 static const char* DIAGNOSTIC_ID_PROPERTY = "diagid";
@@ -114,21 +117,33 @@ typedef struct SYSTEM_PROPERTY_INFO_TAG
     size_t propLength;
 } SYSTEM_PROPERTY_INFO;
 
+
+// Encoding of a $ followed by ., which is how MQTT "system" properties are sent to us
+#define URL_ENCODED_PERCENT_SIGN_DOT "%24."
+const size_t URL_ENCODED_PERCENT_SIGN_DOT_LEN = sizeof(URL_ENCODED_PERCENT_SIGN_DOT) / sizeof(URL_ENCODED_PERCENT_SIGN_DOT[0]) - 1;
+
+// Helper to build up system properties, which MUST start with "$24." string
+#define DEFINE_MQTT_SYSTEM_PROPERTY(token)  URL_ENCODED_PERCENT_SIGN_DOT token
+
 static SYSTEM_PROPERTY_INFO sysPropList[] = {
-    { "%24.exp", 7 },
-    { "%24.mid", 7 },
-    { "%24.uid", 7 },
-    { "%24.to", 6 },
-    { "%24.cid", 7 },
-    { "%24.ct", 6 },
-    { "%24.ce", 6 },
-    { "devices/", 8 },
-    { "iothub-operation", 16 },
-    { "iothub-ack", 10 },
-    { "%24.on", 6 },
-    { "%24.cdid", 8 },
-    { "%24.cmid", 8 }
+    { DEFINE_MQTT_SYSTEM_PROPERTY("exp"), 7 },
+    { DEFINE_MQTT_SYSTEM_PROPERTY("mid"), 7 },
+    { DEFINE_MQTT_SYSTEM_PROPERTY("uid"), 7 },
+    { DEFINE_MQTT_SYSTEM_PROPERTY("to"), 6 },
+    { DEFINE_MQTT_SYSTEM_PROPERTY("cid"), 7 },
+    { DEFINE_MQTT_SYSTEM_PROPERTY("ct"), 6 },
+    { DEFINE_MQTT_SYSTEM_PROPERTY("ce"), 6 },
+    { DEFINE_MQTT_SYSTEM_PROPERTY("on"), 6 },
+    { DEFINE_MQTT_SYSTEM_PROPERTY("cdid"), 8 },
+    { DEFINE_MQTT_SYSTEM_PROPERTY("cmid"), 8 }
 };
+
+static SYSTEM_PROPERTY_INFO ignoredPropList[] = {
+   { "devices/", 8 },
+   { "iothub-operation", 16 },
+   { "iothub-ack", 10 },
+};
+
 
 static const int slashes_to_reach_input_name = 5;
 
@@ -1274,22 +1289,19 @@ static int subscribeToNotifyStateIfNeeded(PMQTTTRANSPORT_HANDLE_DATA transport_d
     return result;
 }
 
+
+// 
+// isInPropertyList returns whether tokenData is in the specified propertyList or not
 //
-// isSystemProperty returns whether a given property name in an MQTT TOPIC published to this device/module
-// is considered a "system".  MQTT does not have a protocol defined concept of system properties.  In this usage
-// it implies that the IOTHUB_MESSAGE_HANDLE has an API for direct manipulation of the property (e.g. IoTHubMessage_GetMessageId).
-//
-static bool isSystemProperty(const char* tokenData)
+static bool isInPropertyList(SYSTEM_PROPERTY_INFO *propertyList, size_t propertyListLength, const char* propertyNameAndValue, size_t propertyNameLength)
 {
     bool result = false;
-    size_t propCount = sizeof(sysPropList) / sizeof(sysPropList[0]);
     size_t index = 0;
-    size_t tokenDataLength = strlen(tokenData);
 
-    for (index = 0; index < propCount; index++)
+    for (index = 0; index < propertyListLength; index++)
     {
-        if (tokenDataLength >= sysPropList[index].propLength &&
-            memcmp(tokenData, sysPropList[index].propName, sysPropList[index].propLength) == 0)
+        if (propertyNameLength == propertyList[index].propLength &&
+            memcmp(propertyNameAndValue, propertyList[index].propName, propertyList[index].propLength) == 0)
         {
             result = true;
             break;
@@ -1299,11 +1311,30 @@ static bool isSystemProperty(const char* tokenData)
 }
 
 //
-// addInputNamePropertyToMsg translates the input name (embedded in the MQTT topic name) into the IoTHubMessage handle
+// isSystemProperty returns whether a given property name in an MQTT TOPIC published to this device/module
+// is considered a "system".  MQTT does not have a protocol defined concept of system properties.  In this usage
+// it implies that the IOTHUB_MESSAGE_HANDLE has an API for direct manipulation of the property (e.g. IoTHubMessage_GetMessageId).
+//
+static bool isSystemProperty(const char* propertyNameAndValue, size_t propertyNameLength)
+{
+    return isInPropertyList(sysPropList, sizeof(sysPropList) / sizeof(sysPropList[0]), propertyNameAndValue, propertyNameLength);
+}
+
+//
+// isInIgnoredList returns whether a property is in our to-ignore list.  Previous implementations had these properties
+// categorized as system but they were never passed to the application.  This maintains existing behavior.  // @JSPAITH -- consider whether this is good or not.
+//
+static bool isInIgnoredList(const char* propertyNameAndValue, size_t propertyNameLength)
+{
+    return isInPropertyList(ignoredPropList, sizeof(ignoredPropList) / sizeof(ignoredPropList[0]), propertyNameAndValue, propertyNameLength);
+}
+
+//
+// addInputNamePropertyToMsg translates the input name (embedded in the MQTT topic name) into the iotHubMessage handle
 // such that the application can call IoTHubMessage_GetInputName() to retrieve this.  This is only currently used 
 // in IoT Edge module to module message communication, so that this module receiving the message can know which module invoked in.
 //
-static int addInputNamePropertyToMsg(IOTHUB_MESSAGE_HANDLE IoTHubMessage, const char* topic_name)
+static int addInputNamePropertyToMsg(IOTHUB_MESSAGE_HANDLE iotHubMessage, const char* topic_name)
 {
     // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_061: [ If the message is sent to an input queue, `IoTHubTransport_MQTT_Common_DoWork` shall parse out to the input queue name and store it in the message with IoTHubMessage_SetInputName ]
     // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_062: [ If IoTHubTransport_MQTT_Common_DoWork receives a malformatted inputQueue, it shall fail ]
@@ -1331,7 +1362,7 @@ static int addInputNamePropertyToMsg(IOTHUB_MESSAGE_HANDLE IoTHubMessage, const 
                 number_tokens_read++;
                 if (number_tokens_read == (slashes_to_reach_input_name + 1))
                 {
-                    if ((IOTHUB_MESSAGE_OK != IoTHubMessage_SetInputName(IoTHubMessage, STRING_c_str(token_value))))
+                    if ((IOTHUB_MESSAGE_OK != IoTHubMessage_SetInputName(iotHubMessage, STRING_c_str(token_value))))
                     {
                         LogError("Failed adding input name to msg");
                         result = MU_FAILURE;
@@ -1361,20 +1392,39 @@ static int addInputNamePropertyToMsg(IOTHUB_MESSAGE_HANDLE IoTHubMessage, const 
 // setMqttMessagePropertyIfPossible attempts to translate a "system" property into the IOTHUB_MESSAGE_HANDLE that will be provided to the 
 // application's callback. 
 //
-static int setMqttMessagePropertyIfPossible(IOTHUB_MESSAGE_HANDLE IoTHubMessage, const char* propName, const char* propValue, size_t nameLen)
+static int setMqttMessagePropertyIfPossible(IOTHUB_MESSAGE_HANDLE iotHubMessage, const char* propertyName, size_t propertyNameLen, const char* propValue)
 {
-    // Not finding a system property to map to isn't an error.
     int result = 0;
+    const char* propertyNameToCheck = propertyName + URL_ENCODED_PERCENT_SIGN_DOT_LEN;
+    size_t propertyNameLenToCheck = propertyNameLen - URL_ENCODED_PERCENT_SIGN_DOT_LEN;
+
+    if ((propertyNameLenToCheck == MESSAGE_CREATION_TIME_UTC_LEN) &&
+        (strncmp(propertyNameToCheck, MESSAGE_CREATION_TIME_UTC, MESSAGE_CREATION_TIME_UTC_LEN) == 0))
+    {
+        if (IoTHubMessage_SetMessageCreationTimeUtcSystemProperty(iotHubMessage, propValue) != IOTHUB_MESSAGE_OK)
+        {
+            LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'CreationTimeUtc' property.");
+            result = MU_FAILURE;
+        }
+    }
+    else if ((propertyNameLenToCheck == CORRELATION_ID_PROPERTY_LEN) &&
+             (strncmp(propertyNameToCheck, CORRELATION_ID_PROPERTY, CORRELATION_ID_PROPERTY_LEN) == 0))
+    {
+        if (IoTHubMessage_SetCorrelationId(iotHubMessage, propValue) != IOTHUB_MESSAGE_OK)
+        {
+            LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'correlationId' property.");
+            result = MU_FAILURE;
+        }
+        return result;
+    }
+
+        
+#if 0
 
     if (nameLen > 5)
     {
         if (strcmp((const char*)&propName[nameLen - 5], MESSAGE_CREATION_TIME_UTC) == 0)
         {
-            if (IoTHubMessage_SetMessageCreationTimeUtcSystemProperty(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
-            {
-                LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'CreationTimeUtc' property.");
-                result = MU_FAILURE;
-            }
             return result;
         }
     }
@@ -1384,7 +1434,7 @@ static int setMqttMessagePropertyIfPossible(IOTHUB_MESSAGE_HANDLE IoTHubMessage,
         if (strcmp((const char*)&propName[nameLen - 4], CONNECTION_DEVICE_ID) == 0)
         {
             // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_063: [ If type is IOTHUB_TYPE_TELEMETRY and the system property `$.cdid` is defined, its value shall be set on the IOTHUB_MESSAGE_HANDLE's ConnectionDeviceId property ]
-            if (IoTHubMessage_SetConnectionDeviceId(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
+            if (IoTHubMessage_SetConnectionDeviceId(iotHubMessage, propValue) != IOTHUB_MESSAGE_OK)
             {
                 LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'messageId' property.");
                 result = MU_FAILURE;
@@ -1394,7 +1444,7 @@ static int setMqttMessagePropertyIfPossible(IOTHUB_MESSAGE_HANDLE IoTHubMessage,
         if (strcmp((const char*)&propName[nameLen - 4], CONNECTION_MODULE_ID_PROPERTY) == 0)
         {
             // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_064: [ If type is IOTHUB_TYPE_TELEMETRY and the system property `$.cmid` is defined, its value shall be set on the IOTHUB_MESSAGE_HANDLE's ConnectionModuleId property ]
-            if (IoTHubMessage_SetConnectionModuleId(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
+            if (IoTHubMessage_SetConnectionModuleId(iotHubMessage, propValue) != IOTHUB_MESSAGE_OK)
             {
                 LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'correlationId' property.");
                 result = MU_FAILURE;
@@ -1406,25 +1456,16 @@ static int setMqttMessagePropertyIfPossible(IOTHUB_MESSAGE_HANDLE IoTHubMessage,
     {
         if (strcmp((const char*)&propName[nameLen - 3], MESSAGE_ID_PROPERTY) == 0)
         {
-            if (IoTHubMessage_SetMessageId(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
+            if (IoTHubMessage_SetMessageId(iotHubMessage, propValue) != IOTHUB_MESSAGE_OK)
             {
                 LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'messageId' property.");
                 result = MU_FAILURE;
             }
             return result;
         }
-        else if (strcmp((const char*)&propName[nameLen - 3], CORRELATION_ID_PROPERTY) == 0)
-        {
-            if (IoTHubMessage_SetCorrelationId(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
-            {
-                LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'correlationId' property.");
-                result = MU_FAILURE;
-            }
-            return result;
-        }
         else if (strcmp((const char*)&propName[nameLen - 3], MESSAGE_USER_ID) == 0)
         {
-            if (IoTHubMessage_SetMessageUserIdSystemProperty(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
+            if (IoTHubMessage_SetMessageUserIdSystemProperty(iotHubMessage, propValue) != IOTHUB_MESSAGE_OK)
             {
                 LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'userId' property.");
                 result = MU_FAILURE;
@@ -1438,7 +1479,7 @@ static int setMqttMessagePropertyIfPossible(IOTHUB_MESSAGE_HANDLE IoTHubMessage,
         // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_012: [ If type is IOTHUB_TYPE_TELEMETRY and the system property `$.ct` is defined, its value shall be set on the IOTHUB_MESSAGE_HANDLE's ContentType property ]
         if (strcmp((const char*)&propName[nameLen - 2], CONTENT_TYPE_PROPERTY) == 0)
         {
-            if (IoTHubMessage_SetContentTypeSystemProperty(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
+            if (IoTHubMessage_SetContentTypeSystemProperty(iotHubMessage, propValue) != IOTHUB_MESSAGE_OK)
             {
                 LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'customContentType' property.");
                 result = MU_FAILURE;
@@ -1448,12 +1489,138 @@ static int setMqttMessagePropertyIfPossible(IOTHUB_MESSAGE_HANDLE IoTHubMessage,
         // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_013: [ If type is IOTHUB_TYPE_TELEMETRY and the system property `$.ce` is defined, its value shall be set on the IOTHUB_MESSAGE_HANDLE's ContentEncoding property ]
         else if (strcmp((const char*)&propName[nameLen - 2], CONTENT_ENCODING_PROPERTY) == 0)
         {
-            if (IoTHubMessage_SetContentEncodingSystemProperty(IoTHubMessage, propValue) != IOTHUB_MESSAGE_OK)
+            if (IoTHubMessage_SetContentEncodingSystemProperty(iotHubMessage, propValue) != IOTHUB_MESSAGE_OK)
             {
                 LogError("Failed to set IOTHUB_MESSAGE_HANDLE 'contentEncoding' property.");
                 result = MU_FAILURE;
             }
             return result;
+        }
+    }
+#endif
+
+    return result;
+}
+
+
+//
+// findMessagePropertyStart takes an MQTT topic PUBLISH'd as input and returns where message properties, if set, begin.
+//
+static const char* findMessagePropertyStart(PMQTTTRANSPORT_HANDLE_DATA transportData, const char* topic_name, IOTHUB_IDENTITY_TYPE type)
+{
+    const char *propertiesStart;
+    const char* input_queue_topic = STRING_c_str(transportData->topic_InputQueue);
+    const char* direct_method_topic = STRING_c_str(transportData->topic_MqttMessage);
+
+    if (type == IOTHUB_TYPE_EVENT_QUEUE)
+    {
+        // Substract one from queue length to reflect this having an extra # we subscribed to
+        propertiesStart = topic_name + (strlen(input_queue_topic) - 1);
+    }
+    else if (type == IOTHUB_TYPE_TELEMETRY)
+    {   
+        propertiesStart = topic_name + (strlen(direct_method_topic) - 1);
+    }
+    else
+    {
+        LogError("ERROR: type %d is not expected", type);
+        propertiesStart = NULL;
+    }
+
+    return propertiesStart;
+}
+
+//
+// AddApplicationProperty adds the custom key/value property name from the incoming MQTT PUBLISH to the iotHubMessage
+// we will ultimately deliver to the application on its callback.
+//
+static int AddApplicationPropertyToMessage(MAP_HANDLE propertyMap, const char* propertyNameAndValue, size_t propertyNameLength, const char* propertyValue, bool auto_url_encode_decode)
+{
+    int result = 0;
+
+    char* propertyNameCopy = NULL;
+
+    // We need to make a copy of propertyName at this point; we don't own the buffer it's part of
+    // so we can't just sneak a temporary '\0' in there.  We don't need to make a copy of propertyValue
+    // since its part of an otherwise null terminated string.
+    if ((propertyNameCopy = (char*)malloc(propertyNameLength + 1)) == NULL)
+    {
+        LogError("Failed allocating property information");
+        result = MU_FAILURE;
+    }
+    else
+    {
+        memcpy(propertyNameCopy, propertyNameAndValue, propertyNameLength);
+        propertyNameCopy[propertyNameLength] = '\0';
+    
+        if (auto_url_encode_decode)
+        {
+            STRING_HANDLE propName_decoded = URL_DecodeString(propertyNameCopy);
+            STRING_HANDLE propValue_decoded = URL_DecodeString(propertyValue);
+            if (propName_decoded == NULL || propValue_decoded == NULL)
+            {
+                LogError("Failed to URL decode property");
+                result = MU_FAILURE;
+            }
+            else if (Map_AddOrUpdate(propertyMap, STRING_c_str(propName_decoded), STRING_c_str(propValue_decoded)) != MAP_OK)
+            {
+                LogError("Map_AddOrUpdate failed.");
+                result = MU_FAILURE;
+            }
+            else
+            {
+                result = 0;
+            }
+            STRING_delete(propName_decoded);
+            STRING_delete(propValue_decoded);
+        }
+        else if (Map_AddOrUpdate(propertyMap, propertyNameCopy, propertyValue) != MAP_OK)
+        {
+            LogError("Map_AddOrUpdate failed.");
+            result = MU_FAILURE;
+        }
+    }
+
+    free(propertyNameCopy);
+
+    return result;
+}
+
+//
+// AddSystemPropertyToMessage adds a "system" property from the incoming MQTT PUBLISH to the iotHubMessage 
+// we will ultimately deliver to the application on its callback.
+//
+static int AddSystemPropertyToMessage(IOTHUB_MESSAGE_HANDLE iotHubMessage, const char* propertyNameAndValue, size_t propertyNameLength, const char* propertyValue,  bool auto_url_encode_decode)
+{
+    int result = 0;
+
+    // "System" properties can be potentially be mapped into iotHubMessage's well-known properties 
+    // (e.g. IoTHubMessage_GetCorrelationId and related).  Perform the Set side of this on the message now.
+    if (auto_url_encode_decode)
+    {
+        STRING_HANDLE propValue_decoded;
+        if ((propValue_decoded = URL_DecodeString(propertyValue)) == NULL)
+        {
+            LogError("Failed to URL decode property value");
+            result = MU_FAILURE;
+        }
+        else if (setMqttMessagePropertyIfPossible(iotHubMessage, propertyNameAndValue, propertyNameLength, STRING_c_str(propValue_decoded)) != 0)
+        {
+            LogError("Unable to set message property");
+            result = MU_FAILURE;
+        }
+        STRING_delete(propValue_decoded);
+    }
+    else
+    {
+        if (setMqttMessagePropertyIfPossible(iotHubMessage, propertyNameAndValue, propertyNameLength, propertyValue) != 0)
+        {
+            LogError("Unable to set message property");
+            result = MU_FAILURE;
+        }
+        else
+        {
+            result = 0;
         }
     }
 
@@ -1464,168 +1631,78 @@ static int setMqttMessagePropertyIfPossible(IOTHUB_MESSAGE_HANDLE IoTHubMessage,
 // extractMqttProperties parses the MQTT topic PUBLISH'd to this device/module, retrieves properties and fills out the 
 // IOTHUB_MESSAGE_HANDLE which will ultimately be delivered to the application callback.
 //
-static int extractMqttProperties(IOTHUB_MESSAGE_HANDLE IoTHubMessage, const char* topic_name, bool urldecode)
+static int extractMqttProperties(PMQTTTRANSPORT_HANDLE_DATA transportData, IOTHUB_MESSAGE_HANDLE iotHubMessage, const char* topic_name, IOTHUB_IDENTITY_TYPE type)
 {
     int result;
-    STRING_TOKENIZER_HANDLE token = STRING_TOKENIZER_create_from_char(topic_name);
-    if (token != NULL)
+
+    const char* propertiesStart;
+    STRING_TOKENIZER_HANDLE tokenizer = NULL;
+    STRING_HANDLE propertyToken = NULL;
+    MAP_HANDLE propertyMap;
+
+    if ((propertiesStart = findMessagePropertyStart(transportData, topic_name, type)) == NULL)
     {
-        MAP_HANDLE propertyMap = IoTHubMessage_Properties(IoTHubMessage);
-        if (propertyMap == NULL)
-        {
-            LogError("Failure to retrieve IoTHubMessage_properties.");
-            result = MU_FAILURE;
-        }
-        else
-        {
-            STRING_HANDLE output = STRING_new();
-            if (output == NULL)
-            {
-                LogError("Failure to allocate STRING_new.");
-                result = MU_FAILURE;
-            }
-            else
-            {
-                result = 0;
-
-                while (STRING_TOKENIZER_get_next_token(token, output, PROPERTY_SEPARATOR) == 0 && result == 0)
-                {
-                    const char* tokenData = STRING_c_str(output);
-                    size_t tokenLen = strlen(tokenData);
-                    if (tokenData == NULL || tokenLen == 0)
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        if (isSystemProperty(tokenData))
-                        {
-                            const char* iterator = tokenData;
-                            while (iterator != NULL && *iterator != '\0' && result == 0)
-                            {
-                                if (*iterator == '=')
-                                {
-                                    char* propName = NULL;
-                                    char* propValue = NULL;
-                                    size_t nameLen = iterator - tokenData;
-                                    size_t valLen = tokenLen - (nameLen + 1) + 1;
-
-                                    if ((propName = malloc(nameLen + 1)) == NULL || (propValue = malloc(valLen + 1)) == NULL)
-                                    {
-                                        LogError("Failed allocating property name (%p) and/or value (%p)", propName, propValue);
-                                        free(propName);
-                                        result = MU_FAILURE;
-                                    }
-                                    else
-                                    {
-                                        memcpy(propName, tokenData, nameLen);
-                                        propName[nameLen] = '\0';
-
-                                        memcpy(propValue, iterator + 1, valLen);
-                                        propValue[valLen] = '\0';
-
-                                        if (urldecode)
-                                        {
-                                            STRING_HANDLE propValue_decoded;
-                                            if ((propValue_decoded = URL_DecodeString(propValue)) == NULL)
-                                            {
-                                                LogError("Failed to URL decode property value");
-                                                result = MU_FAILURE;
-                                            }
-                                            else if (setMqttMessagePropertyIfPossible(IoTHubMessage, propName, STRING_c_str(propValue_decoded), nameLen) != 0)
-                                            {
-                                                LogError("Unable to set message property");
-                                                result = MU_FAILURE;
-                                            }
-                                            STRING_delete(propValue_decoded);
-                                        }
-                                        else
-                                        {
-                                            if (setMqttMessagePropertyIfPossible(IoTHubMessage, propName, propValue, nameLen) != 0)
-                                            {
-                                                LogError("Unable to set message property");
-                                                result = MU_FAILURE;
-                                            }
-                                        }
-                                        free(propName);
-                                        free(propValue);
-                                    }
-                                    break;
-                                }
-                                iterator++;
-                            }
-                        }
-                        else //User Properties
-                        {
-                            const char* iterator = tokenData;
-                            while (iterator != NULL && *iterator != '\0' && result == 0)
-                            {
-                                if (*iterator == '=')
-                                {
-                                    char* propName = NULL;
-                                    char* propValue = NULL;
-                                    size_t nameLen = iterator - tokenData;
-                                    size_t valLen = tokenLen - (nameLen + 1) + 1;
-
-                                    if ((propName = (char*)malloc(nameLen + 1)) == NULL || (propValue = (char*)malloc(valLen + 1)) == NULL)
-                                    {
-                                        free(propName);
-                                        LogError("Failed allocating property information");
-                                        result = MU_FAILURE;
-                                    }
-                                    else
-                                    {
-                                        memcpy(propName, tokenData, nameLen);
-                                        propName[nameLen] = '\0';
-
-                                        memcpy(propValue, iterator + 1, valLen);
-                                        propValue[valLen] = '\0';
-
-                                        if (urldecode)
-                                        {
-                                            STRING_HANDLE propName_decoded = URL_DecodeString(propName);
-                                            STRING_HANDLE propValue_decoded = URL_DecodeString(propValue);
-                                            if (propName_decoded == NULL || propValue_decoded == NULL)
-                                            {
-                                                LogError("Failed to URL decode property");
-                                                result = MU_FAILURE;
-                                            }
-                                            else if (Map_AddOrUpdate(propertyMap, STRING_c_str(propName_decoded), STRING_c_str(propValue_decoded)) != MAP_OK)
-                                            {
-                                                LogError("Map_AddOrUpdate failed.");
-                                                result = MU_FAILURE;
-                                            }
-                                            STRING_delete(propName_decoded);
-                                            STRING_delete(propValue_decoded);
-                                        }
-                                        else
-                                        {
-                                            if (Map_AddOrUpdate(propertyMap, propName, propValue) != MAP_OK)
-                                            {
-                                                LogError("Map_AddOrUpdate failed.");
-                                                result = MU_FAILURE;
-                                            }
-                                        }
-                                        free(propName);
-                                        free(propValue);
-                                    }
-                                    break;
-                                }
-                                iterator++;
-                            }
-                        }
-                    }
-                }
-                STRING_delete(output);
-            }
-        }
-        STRING_TOKENIZER_destroy(token);
+        LogError("Cannot find start of properties");
+        result = MU_FAILURE;
+    }
+    else if (*propertiesStart == 0)
+    {
+        // No properties were specified.  This is not an error.
+        result = 0;
+    }
+    else if ((tokenizer = STRING_TOKENIZER_create_from_char(propertiesStart)) == NULL)
+    {
+        LogError("failure allocating tokenizer");
+        result = MU_FAILURE;
+    }
+    else if ((propertyToken = STRING_new()) == NULL)
+    {
+        LogError("Failure to allocate STRING_new.");
+        result = MU_FAILURE;
+    }
+    else if ((propertyMap = IoTHubMessage_Properties(iotHubMessage)) == NULL)
+    {
+        LogError("Failure to retrieve IoTHubMessage_properties.");
+        result = MU_FAILURE;
     }
     else
     {
-        LogError("Unable to create Tokenizer object.");
-        result = MU_FAILURE;
+        result = 0;
+
+        while (STRING_TOKENIZER_get_next_token(tokenizer, propertyToken, PROPERTY_SEPARATOR) == 0 && result == 0)
+        {
+            const char* propertyNameAndValue = STRING_c_str(propertyToken);
+            const char* propertyValue;
+                
+            if (propertyNameAndValue == NULL || propertyNameAndValue == 0)
+            {
+                ;
+            }
+            else if (((propertyValue = strchr(propertyNameAndValue, PROPERTY_EQUALS)) == NULL) ||
+                      (*(propertyValue+1) == 0))
+            {
+                ;
+            }
+            else
+            {
+                size_t propertyNameLength = propertyValue - propertyNameAndValue;
+                propertyValue++;
+
+                if (isSystemProperty(propertyNameAndValue, propertyNameLength))
+                {
+                    result = AddSystemPropertyToMessage(iotHubMessage, propertyNameAndValue, propertyNameLength, propertyValue, transportData->auto_url_encode_decode);
+                }
+                else
+                {
+                    result = AddApplicationPropertyToMessage(propertyMap, propertyNameAndValue, propertyNameLength, propertyValue, transportData->auto_url_encode_decode);
+                }
+            }
+        }
     }
+
+    STRING_delete(propertyToken);
+    STRING_TOKENIZER_destroy(tokenizer);
+
     return result;
 }
 
@@ -1745,16 +1822,16 @@ static void processDeviceMethodNotification(PMQTTTRANSPORT_HANDLE_DATA transport
 static void processIncomingMessageNotification(PMQTTTRANSPORT_HANDLE_DATA transportData, MQTT_MESSAGE_HANDLE msgHandle, const char* topic_resp, IOTHUB_IDENTITY_TYPE type)
 {
     const APP_PAYLOAD* appPayload = mqttmessage_getApplicationMsg(msgHandle);
-    IOTHUB_MESSAGE_HANDLE IoTHubMessage = IoTHubMessage_CreateFromByteArray(appPayload->message, appPayload->length);
-    if (IoTHubMessage == NULL)
+    IOTHUB_MESSAGE_HANDLE iotHubMessage = IoTHubMessage_CreateFromByteArray(appPayload->message, appPayload->length);
+    if (iotHubMessage == NULL)
     {
         LogError("Failure: IotHub Message creation has failed.");
     }
-    else if ((type == IOTHUB_TYPE_EVENT_QUEUE) && (addInputNamePropertyToMsg(IoTHubMessage, topic_resp) != 0))
+    else if ((type == IOTHUB_TYPE_EVENT_QUEUE) && (addInputNamePropertyToMsg(iotHubMessage, topic_resp) != 0))
     {
         LogError("failure adding input name to property.");
     }
-    else if (extractMqttProperties(IoTHubMessage, topic_resp, transportData->auto_url_encode_decode) != 0)
+    else if (extractMqttProperties(transportData, iotHubMessage, topic_resp, type) != 0)
     {
         LogError("failure extracting mqtt properties.");
     }
@@ -1767,7 +1844,7 @@ static void processIncomingMessageNotification(PMQTTTRANSPORT_HANDLE_DATA transp
         }
         else
         {
-            messageData->messageHandle = IoTHubMessage;
+            messageData->messageHandle = iotHubMessage;
             messageData->transportContext = NULL;
 
             if (type == IOTHUB_TYPE_EVENT_QUEUE)
@@ -1777,7 +1854,7 @@ static void processIncomingMessageNotification(PMQTTTRANSPORT_HANDLE_DATA transp
                 {
                     LogError("IoTHubClientCore_LL_MessageCallbackreturned false");
 
-                    IoTHubMessage_Destroy(IoTHubMessage);
+                    IoTHubMessage_Destroy(iotHubMessage);
                     free(messageData);
                 }
             }
@@ -1787,7 +1864,7 @@ static void processIncomingMessageNotification(PMQTTTRANSPORT_HANDLE_DATA transp
                 if (!transportData->transport_callbacks.msg_cb(messageData, transportData->transport_ctx))
                 {
                     LogError("IoTHubClientCore_LL_MessageCallback returned false");
-                    IoTHubMessage_Destroy(IoTHubMessage);
+                    IoTHubMessage_Destroy(iotHubMessage);
                     free(messageData);
                 }
             }
