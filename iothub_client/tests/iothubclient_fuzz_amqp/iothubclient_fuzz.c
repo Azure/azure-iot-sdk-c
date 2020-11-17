@@ -415,8 +415,9 @@ size_t load_from_file(int i, unsigned char file_buffer[], size_t size)
     {
         // return the fuzz packes instead
         (void)printf("using fuzzed packet id: %d\r\n", fuzzpacket_id);
-        memcpy(file_buffer, &fuzzpacket_buffer[2], fuzzpacket_len-2);
-        return fuzzpacket_len-2;
+        size_t buf_max_len = (fuzzpacket_len > size ? size : fuzzpacket_len) - 2;
+        memcpy(file_buffer, &fuzzpacket_buffer[2], buf_max_len);
+        return buf_max_len;
     }
 
     size_t size_read = 0;
@@ -443,7 +444,6 @@ size_t load_from_file(int i, unsigned char file_buffer[], size_t size)
 int tlsio_fuzz_send(CONCRETE_IO_HANDLE tls_io, const void* buffer, size_t size, ON_SEND_COMPLETE on_send_complete, void* callback_context)
 {
     (void)tls_io;
-    (void)size;
     static int iteration = 0;
 
     size_t size_read;
@@ -520,7 +520,7 @@ int tlsio_fuzz_send(CONCRETE_IO_HANDLE tls_io, const void* buffer, size_t size, 
         case 10: // send_attach (events)
             //<- [ATTACH]* {link-snd-eeqq-6322c15e-2c82-4a42-a57d-aa203cf1f4dc,2,true,0,NULL,* {link-snd-eeqq-6322c15e-2c82-4a42-a57d-aa203cf1f4dc-source,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},* {amqps://ericwol-hub.azure-devices.net/devices/eeqq/messages/events,NULL,NULL,NULL,NULL,NULL,NULL},NULL,NULL,NULL,1048576,NULL,NULL,{[com.microsoft:client-version:iothubclient/1.3.9 (native; WindowsProduct:0x00000004 6.2; x64; {F9FA04EF-2602-43AB-8505-A1EDE028ADD8})]}}
             size_read = load_from_file(11, file_buffer, sizeof(file_buffer));
-            if (size_read > 0x5f + 41)
+            if (size_read > 0x5f + 41 && size > 31 + 41)
             {
                 memcpy(&file_buffer[0x1f], &((char*)buffer)[31], 41);
                 memcpy(&file_buffer[0x5f], &((char*)buffer)[31], 41);
@@ -534,7 +534,7 @@ int tlsio_fuzz_send(CONCRETE_IO_HANDLE tls_io, const void* buffer, size_t size, 
         case 11: // send_attach (twin)
             //<- [ATTACH]* {link-snd-eeqq-54c3e766-02f0-4057-8c58-9299e97f1bf0,3,true,1,0,* {link-snd-eeqq-54c3e766-02f0-4057-8c58-9299e97f1bf0-source,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},* {amqps://ericwol-hub.azure-devices.net/devices/eeqq/twin,NULL,NULL,NULL,NULL,NULL,NULL},NULL,NULL,NULL,1048576,NULL,NULL,{[com.microsoft:client-version:iothubclient/1.3.9 (native; WindowsProduct:0x00000004 6.2; x64; {F9FA04EF-2602-43AB-8505-A1EDE028ADD8})],[com.microsoft:channel-correlation-id:twin:d90e52ce-a264-4d74-b236-cad0b08029a8],[com.microsoft:api-version:2019-10-01]}}
             size_read = load_from_file(14, file_buffer, sizeof(file_buffer));
-            if (size_read > 0x60 + 41)
+            if (size_read > 0x60 + 41 && size > 31 + 41)
             {
                 memcpy(&file_buffer[0x1f], &((char*)buffer)[31], 41);
                 memcpy(&file_buffer[0x60], &((char*)buffer)[31], 41);
@@ -548,7 +548,7 @@ int tlsio_fuzz_send(CONCRETE_IO_HANDLE tls_io, const void* buffer, size_t size, 
         case 12: // send_attach (devicebound)
             //<- [ATTACH]* {link-rcv-eeqq-5faca423-9286-4cfb-97ed-b7e6c4452fb3,4,false,NULL,1,* {amqps://ericwol-hub.azure-devices.net/devices/eeqq/messages/devicebound,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},* {link-rcv-eeqq-5faca423-9286-4cfb-97ed-b7e6c4452fb3-target,NULL,NULL,NULL,NULL,NULL,NULL},NULL,NULL,0,65536,NULL,NULL,{[com.microsoft:client-version:iothubclient/1.3.9 (native; WindowsProduct:0x00000004 6.2; x64; {F9FA04EF-2602-43AB-8505-A1EDE028ADD8})]}}
             size_read = load_from_file(13, file_buffer, sizeof(file_buffer));
-            if (size_read > 0xb8 + 41)
+            if (size_read > 0xb8 + 41 && size > 31 + 41)
             {
                 memcpy(&file_buffer[0x1f], &((char*)buffer)[31], 41);
                 memcpy(&file_buffer[0xb8], &((char*)buffer)[31], 41);
@@ -559,7 +559,7 @@ int tlsio_fuzz_send(CONCRETE_IO_HANDLE tls_io, const void* buffer, size_t size, 
         case 13: // 
             //<- [ATTACH]* {link-snd-eeqq-54c3e766-02f0-4057-8c58-9299e97f1bf0,3,true,1,0,* {link-snd-eeqq-54c3e766-02f0-4057-8c58-9299e97f1bf0-source,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},* {amqps://ericwol-hub.azure-devices.net/devices/eeqq/twin,NULL,NULL,NULL,NULL,NULL,NULL},NULL,NULL,NULL,1048576,NULL,NULL,{[com.microsoft:client-version:iothubclient/1.3.9 (native; WindowsProduct:0x00000004 6.2; x64; {F9FA04EF-2602-43AB-8505-A1EDE028ADD8})],[com.microsoft:channel-correlation-id:twin:d90e52ce-a264-4d74-b236-cad0b08029a8],[com.microsoft:api-version:2019-10-01]}}
             size_read = load_from_file(16, file_buffer, sizeof(file_buffer));
-            if (size_read > 0x60 + 41)
+            if (size_read > 0x60 + 41 && size > 31 + 41)
             {
                 memcpy(&file_buffer[0x1f], &((char*)buffer)[31], 41);
                 memcpy(&file_buffer[0x60], &((char*)buffer)[31], 41);
@@ -570,7 +570,7 @@ int tlsio_fuzz_send(CONCRETE_IO_HANDLE tls_io, const void* buffer, size_t size, 
         case 14: // session_send_transfer
             //twin get
             size_read = load_from_file(22, file_buffer, sizeof(file_buffer));
-            if (size_read > 0x4d + 36)
+            if (size_read > 0x4d + 36 && size > 0x3e + 36)
             {
                 memcpy(&file_buffer[0x4d], &((char*)buffer)[0x3e], 36);
             }
@@ -584,7 +584,7 @@ int tlsio_fuzz_send(CONCRETE_IO_HANDLE tls_io, const void* buffer, size_t size, 
         case 17: // session_send_transfer (twin get)
             //twin get
             size_read = load_from_file(23, file_buffer, sizeof(file_buffer));
-            if (size_read > 0x4d + 36)
+            if (size_read > 0x4d + 36 && size > 0x3e + 36)
             {
                 memcpy(&file_buffer[0x4d], &((char*)buffer)[0x3e], 36);
             }
@@ -621,7 +621,7 @@ int tlsio_fuzz_send(CONCRETE_IO_HANDLE tls_io, const void* buffer, size_t size, 
 
         case 23: // session_send_transfer (twin PUT)
             size_read = load_from_file(25, file_buffer, sizeof(file_buffer));
-            if (size_read > 0x4c + 36)
+            if (size_read > 0x4c + 36 && size > 0x70 + 36)
             {
                 memcpy(&file_buffer[0x4c], &((char*)buffer)[0x70], 36);
             }
