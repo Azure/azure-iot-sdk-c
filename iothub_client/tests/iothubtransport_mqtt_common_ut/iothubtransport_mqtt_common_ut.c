@@ -8226,29 +8226,33 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_InputQueue_DoWork_fails)
 }
 
 
-static void setup_message_recv_extractMqttProperties(const char* topicName, bool connectedSystemProps)
+static void setup_message_recv_extractMqttProperties(const char* topicName, const char* inputQueueSubscribeName, const char* inputQueueName, bool connectedSystemProps)
 {
+    // findMessagePropertyStart
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).IgnoreArgument(1).SetReturn(inputQueueSubscribeName).CallCannotFail();
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).IgnoreArgument(1).SetReturn(inputQueueName).CallCannotFail();
+
+    // addInputNamePropertyToMsg
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_SetInputName(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(NULL)).IgnoreArgument_ptr();
+
     EXPECTED_CALL(STRING_TOKENIZER_create_from_char(topicName));
-    STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MSG_BYTEARRAY));
     STRICT_EXPECTED_CALL(STRING_new());
+    STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MSG_BYTEARRAY));
 
     if (connectedSystemProps)
     {
         // Parse out connected_device
         STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&"))
-            .IgnoreArgument(3);
+            .IgnoreArgument(3)
+            .SetReturn(0);
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .SetReturn("%24.cdid=connected_device").
             CallCannotFail();
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-
         STRICT_EXPECTED_CALL(IoTHubMessage_SetConnectionDeviceId(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-
-        STRICT_EXPECTED_CALL(gballoc_free(NULL)).IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(NULL)).IgnoreArgument_ptr();
 
         // Parse out connected_module
         STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&"))
@@ -8258,17 +8262,12 @@ static void setup_message_recv_extractMqttProperties(const char* topicName, bool
             .SetReturn("%24.cmid=connected_module/")
             .CallCannotFail();
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-
         STRICT_EXPECTED_CALL(IoTHubMessage_SetConnectionModuleId(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-
-        STRICT_EXPECTED_CALL(gballoc_free(NULL)).IgnoreArgument_ptr();
-        STRICT_EXPECTED_CALL(gballoc_free(NULL)).IgnoreArgument_ptr();
     }
 
     STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&"))
-        .IgnoreArgument(3);
+        .IgnoreArgument(3)
+        .SetReturn(0);
 
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
@@ -8279,21 +8278,16 @@ static void setup_message_recv_with_input_queue_mocks(const char* topicName, con
     // my_STRING_TOKENIZER_get_next_token
     STRICT_EXPECTED_CALL(mqttmessage_getTopicName(TEST_MQTT_MESSAGE_HANDLE)).SetReturn(topicName);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        .SetReturn("direct-thingy")
+        .CallCannotFail();
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .SetReturn(inputQueueSubscribeName)
         .CallCannotFail();
     STRICT_EXPECTED_CALL(mqttmessage_getApplicationMsg(TEST_MQTT_MESSAGE_HANDLE)).CallCannotFail();
     STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(appMessage, appMsgSize));
-    EXPECTED_CALL(STRING_TOKENIZER_create_from_char(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_new());
 
     // Retrieve the input queue name
-    setup_calls_for_next_token_with_slash(6);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).IgnoreArgument(1).SetReturn(inputQueueName).CallCannotFail();
-    STRICT_EXPECTED_CALL(IoTHubMessage_SetInputName(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
-
-    setup_message_recv_extractMqttProperties(topicName, connectedSystemProps);
+    setup_message_recv_extractMqttProperties(topicName, inputQueueSubscribeName, inputQueueName, connectedSystemProps);
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument_size();
