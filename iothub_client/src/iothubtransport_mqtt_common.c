@@ -95,6 +95,8 @@ static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtime
 
 static const char DT_MODEL_ID_TOKEN[] = "model-id";
 
+static const char TOPIC_SLASH = '/';
+
 static const char DEFAULT_IOTHUB_PRODUCT_IDENTIFIER[] = CLIENT_DEVICE_TYPE_PREFIX "/" IOTHUB_SDK_VERSION;
 
 #define TOLOWER(c) (((c>='A') && (c<='Z'))?c-'A'+'a':c)
@@ -1336,57 +1338,57 @@ static MQTT_PROPERTY_TYPE GetMqttPropertyType(const char* propertyNameAndValue, 
 // such that the application can call IoTHubMessage_GetInputName() to retrieve this.  This is only currently used 
 // in IoT Edge module to module message communication, so that this module receiving the message can know which module invoked in.
 //
-static int addInputNamePropertyToMsg(IOTHUB_MESSAGE_HANDLE iotHubMessage, const char* topic_name)
+// For IoT Edge module to module communication, the incoming topic will be of the form devices/{deviceId}/modules/{moduleId}/inputs/{inputName}.
+// When this function is called, the caller has already skipped past the topic_InputQueue.  In example, we would start at inputs/{inputName}.
+// On return, we indicate where properties (if specified) start for this message.
+//
+static const char* addInputNamePropertyToMsg(IOTHUB_MESSAGE_HANDLE iotHubMessage, const char* propertiesStart)
 {
-    // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_061: [ If the message is sent to an input queue, `IoTHubTransport_MQTT_Common_DoWork` shall parse out to the input queue name and store it in the message with IoTHubMessage_SetInputName ]
-    // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_062: [ If IoTHubTransport_MQTT_Common_DoWork receives a malformatted inputQueue, it shall fail ]
+    const char* result;
+    const char* inputNameStart;
+    const char* inputNameEnd;
+    char* inputNameCopy = NULL;
 
-    int result = MU_FAILURE;
-    int number_tokens_read = 0;
-
-    STRING_TOKENIZER_HANDLE token_handle = STRING_TOKENIZER_create_from_char(topic_name);
-    if (token_handle == NULL)
+    if (((inputNameStart = strchr(propertiesStart, TOPIC_SLASH)) == NULL) || (*(inputNameStart+1) == 0))
     {
-        LogError("STRING_TOKENIZER_create_from_char failed\n");
-        result = MU_FAILURE;
+        LogError("Cannot find '/' to mark beginning of input name");
+        result = NULL;
     }
     else
     {
-        STRING_HANDLE token_value;
-        if ((token_value = STRING_new()) == NULL)
+        inputNameStart++;
+        if (((inputNameEnd = strchr(inputNameStart, TOPIC_SLASH)) == NULL) || (*(inputNameEnd+1) == 0))
         {
-            LogError("Failed allocating token_value");
+            LogError("Cannot find '/' after input name");
+            result = NULL;
         }
-        else
+        else 
         {
-            while (STRING_TOKENIZER_get_next_token(token_handle, token_value, "/") == 0)
+            size_t inputNameLength = inputNameEnd - inputNameStart;
+            if ((inputNameCopy = malloc(inputNameLength + 1)) == NULL)
             {
-                number_tokens_read++;
-                if (number_tokens_read == (slashes_to_reach_input_name + 1))
+                LogError("Cannot allocate input name");
+                result = NULL;
+            }
+            else
+            {
+                memcpy(inputNameCopy, inputNameStart, inputNameLength);
+                inputNameCopy[inputNameLength] = 0;
+
+                if (IoTHubMessage_SetInputName(iotHubMessage, inputNameCopy) != IOTHUB_MESSAGE_OK)
                 {
-                    if ((IOTHUB_MESSAGE_OK != IoTHubMessage_SetInputName(iotHubMessage, STRING_c_str(token_value))))
-                    {
-                        LogError("Failed adding input name to msg");
-                        result = MU_FAILURE;
-                    }
-                    else
-                    {
-                        result = 0;
-                    }
-                    break;
+                    LogError("Failed adding input name to msg");
+                    result = NULL;
+                }
+                else
+                {
+                    result = inputNameEnd + 1;
                 }
             }
         }
-        STRING_delete(token_value);
-
-        if (number_tokens_read != (slashes_to_reach_input_name + 1))
-        {
-            LogError("Not enough '/' to contain input name.  Got %d, need at least %d", number_tokens_read, (slashes_to_reach_input_name + 1));
-            result = MU_FAILURE;
-        }
-        STRING_TOKENIZER_destroy(token_handle);
     }
 
+    free(inputNameCopy);
     return result;
 }
 
@@ -1603,7 +1605,6 @@ static int AddApplicationPropertyToMessage(MAP_HANDLE propertyMap, const char* p
     }
 
     free(propertyNameCopy);
-
     return result;
 }
 
@@ -1668,6 +1669,11 @@ static int extractMqttProperties(PMQTTTRANSPORT_HANDLE_DATA transportData, IOTHU
     {
         // No properties were specified.  This is not an error.
         result = 0;
+    }
+    else if ((type == IOTHUB_TYPE_EVENT_QUEUE) && ((propertiesStart = addInputNamePropertyToMsg(iotHubMessage, propertiesStart)) == NULL))
+    {
+        LogError("failure adding input name to property.");
+        result = MU_FAILURE;
     }
     else if ((tokenizer = STRING_TOKENIZER_create_from_char(propertiesStart)) == NULL)
     {
@@ -1855,10 +1861,6 @@ static void processIncomingMessageNotification(PMQTTTRANSPORT_HANDLE_DATA transp
     {
         LogError("Failure: IotHub Message creation has failed.");
     }
-    else if ((type == IOTHUB_TYPE_EVENT_QUEUE) && (addInputNamePropertyToMsg(iotHubMessage, topic_resp) != 0))
-    {
-        LogError("failure adding input name to property.");
-    }
     else if (extractMqttProperties(transportData, iotHubMessage, topic_resp, type) != 0)
     {
         LogError("failure extracting mqtt properties.");
@@ -1914,7 +1916,10 @@ static void mqttNotificationCallback(MQTT_MESSAGE_HANDLE msgHandle, void* callba
         IOTHUB_IDENTITY_TYPE type;
 
         /* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_052: [ mqttNotificationCallback shall extract the topic Name from the MQTT_MESSAGE_HANDLE. ] */
-        const char* topic_resp = mqttmessage_getTopicName(msgHandle);
+        //const char* topic_resp = mqttmessage_getTopicName(msgHandle);
+        const char* topic_resp = "devices/linux-edge-2/modules/filter/inputs/input1/temperatureAlert=false&temperatureAlert2=false&temperatureAlert3=false&%24.cdid=linux-edge-2&%24.cmid=sender&%24.cid=CORE_ID&%24.mid=MSG_ID";
+        transportData->topic_InputQueue = STRING_construct_sprintf(TOPIC_INPUT_QUEUE_NAME, "linux-edge-2", "filter");
+
         if (topic_resp == NULL)
         {
             LogError("Failure: NULL topic name encountered");
