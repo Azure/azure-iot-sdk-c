@@ -168,7 +168,7 @@ static const char* TEST_PROTOCOL_GATEWAY_HOSTNAME = NULL;
 static const char* TEST_PROTOCOL_GATEWAY_HOSTNAME_NON_NULL = "ssl://thisIsAGatewayHostName.net";
 static const char* TEST_VERY_LONG_DEVICE_ID = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
 static const char* TEST_MQTT_MESSAGE_TOPIC = "devices/jebrandoDevice/messages/devicebound/#";
-static const char* TEST_MQTT_MSG_TOPIC = "devices/jebrandoDevice/messages/devicebound/iothub-ack=Full&%24.to=%2Fdevices%2FjebrandoDevice%2Fmessages%2FdeviceBound&%24.cid&%24.uid";
+static const char* TEST_MQTT_MSG_TOPIC = "devices/jebrandoDevice/messages/devicebound/iothub-ack=Full&%24.to=%2Fdevices%2FjebrandoDevice%2Fmessages%2FdeviceBound&%24.cid=123&%24.uid=456";
 static const char* TEST_MQTT_MSG_TOPIC_W_1_PROP = "devices/jebrandoDevice/messages/devicebound/iothub-ack=Full&propName=PropValue&DeviceInfo=smokeTest&%24.to=%2Fdevices%2FjebrandoDevice%2Fmessages%2FdeviceBound&%24.cid&%24.uid";
 static const char* TEST_MQTT_MSG_TOPIC_GET_TWIN = "$iothub/twin/res/200/?$rid=2";
 static const char* TEST_MQTT_INPUT_QUEUE_SUBSCRIBE_NAME_1 = "devices/thisIsDeviceID/modules/thisIsModuleID/#";
@@ -231,7 +231,7 @@ static IOTHUB_CLIENT_CONFIG g_iothubClientConfig = { 0 };
 static DLIST_ENTRY g_waitingToSend;
 
 static tickcounter_ms_t g_current_ms;
-static size_t g_tokenizerIndex;
+static size_t g_tokenizerIndex; // BUGBUG - remove as much of this as possible once dust settles
 
 static CONSTBUFFER_HANDLE TEST_CONST_BUFFER_HANDLE = (CONSTBUFFER_HANDLE)0x2331;
 
@@ -1072,6 +1072,38 @@ static void setup_message_receive_initial_calls(const char* topicName)
     STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(appMessage, appMsgSize));
 }
 
+// Functions called for C2D and IoT Edge input queues when delivering the next layer above us.
+static void setup_message_deliver_to_next_layer()
+{
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+}
+
+// Calls invoked when adding an application custom property to a C2D or IoT Hub module to module message
+static void set_expected_calls_for_custom_message_property(bool auto_decode)
+{
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    if (auto_decode)
+    {
+        STRICT_EXPECTED_CALL(URL_DecodeString(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(URL_DecodeString(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
+    }
+
+    STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    if (auto_decode)
+    {
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    }
+
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+}
+
+
 static void setup_message_recv_with_properties_mocks(bool has_content_type, bool has_content_encoding, bool auto_decode)
 {
     setup_message_receive_initial_calls(TEST_MQTT_MSG_TOPIC_W_1_PROP);
@@ -1123,32 +1155,13 @@ static void setup_message_recv_with_properties_mocks(bool has_content_type, bool
         .SetReturn("propName=propValue")
         .CallCannotFail();
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    if (auto_decode)
-    {
-        STRICT_EXPECTED_CALL(URL_DecodeString(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(URL_DecodeString(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
-    }
-
-    STRICT_EXPECTED_CALL(Map_AddOrUpdate(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    if (auto_decode)
-    {
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    }
-
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    set_expected_calls_for_custom_message_property(auto_decode);
 
     STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(1);
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
     
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    setup_message_deliver_to_next_layer();
 }
 
 static void setup_connection_success_mocks()
@@ -1721,9 +1734,7 @@ static void setup_message_recv_msg_callback_mocks()
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
 
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    setup_message_deliver_to_next_layer();
 }
 
 static TRANSPORT_LL_HANDLE setup_iothub_mqtt_connection(IOTHUBTRANSPORT_CONFIG* config)
@@ -6385,22 +6396,14 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties_succee
     STRICT_EXPECTED_CALL(STRING_new());
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MSG_BYTEARRAY));
 
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&"));
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(0);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .SetReturn("iothub-ack=Full");
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&"));
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(1);
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    setup_message_deliver_to_next_layer();
 
     // act
     ASSERT_IS_NOT_NULL(g_fnMqttMsgRecv);
@@ -6433,21 +6436,52 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties_succee
     STRICT_EXPECTED_CALL(STRING_new());
     STRICT_EXPECTED_CALL(IoTHubMessage_Properties(TEST_IOTHUB_MSG_BYTEARRAY));
 
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&"));
+    // "%24.cid&%24.uid";
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(0);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .SetReturn("iothub-ack=Full");
+    // iothub-ack-full is a "system" property but not mapped to IOTHUB_MESSAGE_HANDLE so it is silently ignored
+
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(0);;
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        .SetReturn("propName=PropValue");
+
+    set_expected_calls_for_custom_message_property(true);
+
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(0);;
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        .SetReturn("DeviceInfo=smokeTest");
+
+    set_expected_calls_for_custom_message_property(true);
+
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(0);;
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        .SetReturn("%24.to=%2Fdevices%2FjebrandoDevice%2Fmessages%2FdeviceBound&");
+    // %24.to is also silently ignored
+
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(0);;
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        .SetReturn("%24.cid=123");
 
     STRICT_EXPECTED_CALL(URL_DecodeString(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(IoTHubMessage_SetCorrelationId(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(0);;
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        .SetReturn("%24.uid=456");
+
+    STRICT_EXPECTED_CALL(URL_DecodeString(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
+    STRICT_EXPECTED_CALL(IoTHubMessage_SetMessageUserIdSystemProperty(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
 
     STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(1);
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+
+    setup_message_deliver_to_next_layer();
 
     // act
     ASSERT_IS_NOT_NULL(g_fnMqttMsgRecv);
