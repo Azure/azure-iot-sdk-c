@@ -151,7 +151,7 @@ static SYSTEM_PROPERTY_INFO sysPropList[] = {
     { DEFINE_MQTT_SYSTEM_PROPERTY("mid"), MQTT_PROPERTY_TYPE_MESSAGE_ID},
     { DEFINE_MQTT_SYSTEM_PROPERTY("uid"), MQTT_PROPERTY_TYPE_MESSAGE_USER_ID },
     { DEFINE_MQTT_SYSTEM_PROPERTY("to"), MQTT_PROPERTY_TYPE_SILENTLY_IGNORE },
-    { DEFINE_MQTT_SYSTEM_PROPERTY("cid"),MQTT_PROPERTY_TYPE_CORRELATION_ID },
+    { DEFINE_MQTT_SYSTEM_PROPERTY("cid"), MQTT_PROPERTY_TYPE_CORRELATION_ID },
     { DEFINE_MQTT_SYSTEM_PROPERTY("ct"), MQTT_PROPERTY_TYPE_CONTENT_TYPE },
     { DEFINE_MQTT_SYSTEM_PROPERTY("ce"), MQTT_PROPERTY_TYPE_CONTENT_ENCODING },
     { DEFINE_MQTT_SYSTEM_PROPERTY("on"), MQTT_PROPERTY_TYPE_SILENTLY_IGNORE },
@@ -615,8 +615,8 @@ static int retrieveTopicType(PMQTTTRANSPORT_HANDLE_DATA transportData, const cha
 {
     int result;
 
-    const char* input_queue_topic = STRING_c_str(transportData->topic_InputQueue);
-    const char* direct_method_topic = STRING_c_str(transportData->topic_MqttMessage);
+    const char* mqtt_messsage_queue_topic;
+    const char* input_queue_topic;
 
     if (InternStrnicmp(topic_resp, TOPIC_DEVICE_TWIN_PREFIX, sizeof(TOPIC_DEVICE_TWIN_PREFIX) - 1) == 0)
     {
@@ -628,16 +628,16 @@ static int retrieveTopicType(PMQTTTRANSPORT_HANDLE_DATA transportData, const cha
         *type = IOTHUB_TYPE_DEVICE_METHODS;
         result = 0;
     }
-    // input_queue_topic contains additional "#" from subscribe, which we strip off on comparing incoming.
-    else if ((input_queue_topic != NULL) && InternStrnicmp(topic_resp, input_queue_topic, strlen(input_queue_topic) - 1) == 0)
-    {
-        *type = IOTHUB_TYPE_EVENT_QUEUE;
-        result = 0;
-    }
-    // direct_method_topic contains additional "#" from subscribe, which we strip off on comparing incoming.
-    else if ((direct_method_topic != NULL) && InternStrnicmp(topic_resp, direct_method_topic, strlen(direct_method_topic) - 1) == 0)
+    // mqtt_messsage_queue_topic contains additional "#" from subscribe, which we strip off on comparing incoming.
+    else if (((mqtt_messsage_queue_topic = STRING_c_str(transportData->topic_MqttMessage)) != NULL) && (InternStrnicmp(topic_resp, mqtt_messsage_queue_topic, strlen(mqtt_messsage_queue_topic) - 1) == 0))
     {
         *type = IOTHUB_TYPE_TELEMETRY;
+        result = 0;
+    }
+    // input_queue_topic contains additional "#" from subscribe, which we strip off on comparing incoming.
+    else if (((input_queue_topic = STRING_c_str(transportData->topic_InputQueue)) != NULL) && (InternStrnicmp(topic_resp, input_queue_topic, strlen(input_queue_topic) - 1) == 0))
+    {
+        *type = IOTHUB_TYPE_EVENT_QUEUE;
         result = 0;
     }
     else
@@ -1357,7 +1357,7 @@ static const char* addInputNamePropertyToMsg(IOTHUB_MESSAGE_HANDLE iotHubMessage
     else
     {
         inputNameStart++;
-        if (((inputNameEnd = strchr(inputNameStart, TOPIC_SLASH)) == NULL) || (*(inputNameEnd+1) == 0))
+        if ((inputNameEnd = strchr(inputNameStart, TOPIC_SLASH)) == NULL)
         {
             LogError("Cannot find '/' after input name");
             result = NULL;
@@ -1532,17 +1532,17 @@ static int AddSystemPropertyToMessage(IOTHUB_MESSAGE_HANDLE iotHubMessage, MQTT_
 static const char* findMessagePropertyStart(PMQTTTRANSPORT_HANDLE_DATA transportData, const char* topic_name, IOTHUB_IDENTITY_TYPE type)
 {
     const char *propertiesStart;
-    const char* input_queue_topic = STRING_c_str(transportData->topic_InputQueue);
-    const char* direct_method_topic = STRING_c_str(transportData->topic_MqttMessage);
 
     if (type == IOTHUB_TYPE_EVENT_QUEUE)
     {
+        const char* input_queue_topic = STRING_c_str(transportData->topic_InputQueue);
         // Substract one from queue length to reflect this having an extra # we subscribed to
         propertiesStart = topic_name + (strlen(input_queue_topic) - 1);
     }
     else if (type == IOTHUB_TYPE_TELEMETRY)
     {
-        propertiesStart = topic_name + (strlen(direct_method_topic) - 1);
+        const char* mqtt_messsage_queue_topic = STRING_c_str(transportData->topic_MqttMessage);
+        propertiesStart = topic_name + (strlen(mqtt_messsage_queue_topic) - 1);
     }
     else
     {
@@ -1736,7 +1736,6 @@ static int extractMqttProperties(PMQTTTRANSPORT_HANDLE_DATA transportData, IOTHU
 
     STRING_delete(propertyToken);
     STRING_TOKENIZER_destroy(tokenizer);
-
     return result;
 }
 
@@ -1916,10 +1915,7 @@ static void mqttNotificationCallback(MQTT_MESSAGE_HANDLE msgHandle, void* callba
         IOTHUB_IDENTITY_TYPE type;
 
         /* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_052: [ mqttNotificationCallback shall extract the topic Name from the MQTT_MESSAGE_HANDLE. ] */
-        //const char* topic_resp = mqttmessage_getTopicName(msgHandle);
-        const char* topic_resp = "devices/linux-edge-2/modules/filter/inputs/input1/temperatureAlert=false&temperatureAlert2=false&temperatureAlert3=false&%24.cdid=linux-edge-2&%24.cmid=sender&%24.cid=CORE_ID&%24.mid=MSG_ID";
-        transportData->topic_InputQueue = STRING_construct_sprintf(TOPIC_INPUT_QUEUE_NAME, "linux-edge-2", "filter");
-
+        const char* topic_resp = mqttmessage_getTopicName(msgHandle);
         if (topic_resp == NULL)
         {
             LogError("Failure: NULL topic name encountered");

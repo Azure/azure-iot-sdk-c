@@ -173,7 +173,7 @@ static const char* TEST_MQTT_MSG_TOPIC_W_1_PROP = "devices/jebrandoDevice/messag
 static const char* TEST_MQTT_MSG_TOPIC_GET_TWIN = "$iothub/twin/res/200/?$rid=2";
 static const char* TEST_MQTT_INPUT_QUEUE_SUBSCRIBE_NAME_1 = "devices/thisIsDeviceID/modules/thisIsModuleID/#";
 static const char* TEST_MQTT_INPUT_1 = "devices/thisIsDeviceID/modules/thisIsModuleID/inputs/input1/%24.cdid=connected_device&%24.cmid=connected_module/";
-static const char* TEST_MQTT_INPUT_NO_PROPERTIES = "devices/thisIsDeviceID/modules/thisIsModuleID/inputs/input1";
+static const char* TEST_MQTT_INPUT_NO_PROPERTIES = "devices/thisIsDeviceID/modules/thisIsModuleID/inputs/input1/";
 static const char* TEST_MQTT_INPUT_MISSING_INPUT_QUEUE_NAME = "devices/thisIsDeviceID/modules/thisIsModuleID/inputs";
 static const char* TEST_INPUT_QUEUE_1 = "input1";
 static const char* TEST_MQTT_DEV_TWIN_MSG_TOPIC = "$iothub/twin/$res/200/?$rid=2";
@@ -1064,10 +1064,18 @@ static void setup_IoTHubTransport_MQTT_Common_Create_mocks(bool use_gateway, con
 }
 
 // Initial calls when receiving a message
-static void setup_message_receive_initial_calls(const char* topicName)
+static void setup_message_receive_initial_calls(const char* topicName, bool isSubscribedToInputQueue)
 {
     STRICT_EXPECTED_CALL(mqttmessage_getTopicName(TEST_MQTT_MESSAGE_HANDLE)).SetReturn(topicName);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail().SetReturn(TEST_MQTT_MESSAGE_TOPIC);
+    if (isSubscribedToInputQueue)
+    {
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail().SetReturn(NULL);
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail().SetReturn(TEST_MQTT_INPUT_QUEUE_SUBSCRIBE_NAME_1);
+    }
+    else
+    {
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail().SetReturn(TEST_MQTT_MESSAGE_TOPIC);
+    }
     STRICT_EXPECTED_CALL(mqttmessage_getApplicationMsg(TEST_MQTT_MESSAGE_HANDLE)).CallCannotFail();
     STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(appMessage, appMsgSize));
 }
@@ -1106,7 +1114,7 @@ static void set_expected_calls_for_custom_message_property(bool auto_decode)
 
 static void setup_message_recv_with_properties_mocks(bool has_content_type, bool has_content_encoding, bool auto_decode)
 {
-    setup_message_receive_initial_calls(TEST_MQTT_MSG_TOPIC_W_1_PROP);
+    setup_message_receive_initial_calls(TEST_MQTT_MSG_TOPIC_W_1_PROP, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail().SetReturn(TEST_MQTT_MESSAGE_TOPIC);
     EXPECTED_CALL(STRING_TOKENIZER_create_from_char(TEST_MQTT_MSG_TOPIC_W_1_PROP));
     STRICT_EXPECTED_CALL(STRING_new());
@@ -1723,7 +1731,7 @@ static void setup_message_recv_callback_device_twin_mocks(const char* token_type
 
 static void setup_message_recv_msg_callback_mocks()
 {
-    setup_message_receive_initial_calls(TEST_MQTT_MSG_TOPIC);
+    setup_message_receive_initial_calls(TEST_MQTT_MSG_TOPIC, false);
 
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail().SetReturn(TEST_MQTT_MESSAGE_TOPIC);
     EXPECTED_CALL(STRING_TOKENIZER_create_from_char(TEST_MQTT_MSG_TOPIC));
@@ -6389,7 +6397,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties_succee
     IoTHubTransport_MQTT_Common_DoWork(handle);
     umock_c_reset_all_calls();
 
-    setup_message_receive_initial_calls(TEST_MQTT_MSG_TOPIC_W_1_PROP);
+    setup_message_receive_initial_calls(TEST_MQTT_MSG_TOPIC_W_1_PROP, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail().SetReturn(TEST_MQTT_MESSAGE_TOPIC);
 
     EXPECTED_CALL(STRING_TOKENIZER_create_from_char(TEST_MQTT_MSG_TOPIC_W_1_PROP));
@@ -6429,7 +6437,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties_succee
     IoTHubTransport_MQTT_Common_DoWork(handle);
     umock_c_reset_all_calls();
 
-    setup_message_receive_initial_calls(TEST_MQTT_MSG_TOPIC_W_1_PROP);
+    setup_message_receive_initial_calls(TEST_MQTT_MSG_TOPIC_W_1_PROP, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail().SetReturn(TEST_MQTT_MESSAGE_TOPIC);
 
     EXPECTED_CALL(STRING_TOKENIZER_create_from_char(TEST_MQTT_MSG_TOPIC_W_1_PROP));
@@ -8302,7 +8310,7 @@ static void setup_message_recv_with_input_queue_mocks(const char* topicName, con
     // my_STRING_TOKENIZER_get_next_token
     STRICT_EXPECTED_CALL(mqttmessage_getTopicName(TEST_MQTT_MESSAGE_HANDLE)).SetReturn(topicName);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
-        .SetReturn("direct-thingy")
+        .SetReturn(NULL)
         .CallCannotFail();
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .SetReturn(inputQueueSubscribeName)
@@ -8392,14 +8400,13 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_InputQueue_missing_qu
 
     g_tokenizerIndex = PARSE_SLASHES_FOR_INPUT_QUEUE_NO_SYSTEM_PROPS_INDEX_1;
 
-    setup_message_receive_initial_calls(TEST_MQTT_INPUT_QUEUE_SUBSCRIBE_NAME_1);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail().SetReturn(TEST_MQTT_MESSAGE_TOPIC);
+    setup_message_receive_initial_calls(TEST_MQTT_INPUT_MISSING_INPUT_QUEUE_NAME, true);
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail().SetReturn(TEST_MQTT_INPUT_MISSING_INPUT_QUEUE_NAME);
+    // Because the MQTT topic isn't formatted correctly and we detect this early, don't parse through it.
 
-    EXPECTED_CALL(STRING_TOKENIZER_create_from_char(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_new());
-
-    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
 
     // act
     ASSERT_IS_NOT_NULL(g_fnMqttMsgRecv);
