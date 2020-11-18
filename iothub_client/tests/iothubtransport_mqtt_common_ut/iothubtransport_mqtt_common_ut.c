@@ -1127,7 +1127,6 @@ static void setup_message_recv_with_properties_mocks(bool has_content_type, bool
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .SetReturn("%24.ct=application/json")
             .CallCannotFail();
-
         if (auto_decode)
         {
             STRICT_EXPECTED_CALL(URL_DecodeString(IGNORED_PTR_ARG));
@@ -5323,6 +5322,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_2_message_timeout_succeeds)
     //cleanup
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
+
 /* Test_SRS_IOTHUB_MQTT_TRANSPORT_07_055: [ IoTHubTransport_MQTT_Common_DoWork shall send a device twin get property message upon successfully retrieving a SUBACK on device twin topics. ] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_device_twin_resend_message_succeeds)
 {
