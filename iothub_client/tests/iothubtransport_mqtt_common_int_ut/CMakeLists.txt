@@ -13,6 +13,7 @@ ${theseTestsName}.c
 
 set(${theseTestsName}_c_files
 ../../src/iothubtransport_mqtt_common.c
+../../src/iothub_message.c
 real_doublylinkedlist.c
 )
 
