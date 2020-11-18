@@ -231,27 +231,13 @@ static IOTHUB_CLIENT_CONFIG g_iothubClientConfig = { 0 };
 static DLIST_ENTRY g_waitingToSend;
 
 static tickcounter_ms_t g_current_ms;
-static size_t g_tokenizerIndex; // BUGBUG - remove as much of this as possible once dust settles
+static size_t g_tokenizerIndex;
 
 static CONSTBUFFER_HANDLE TEST_CONST_BUFFER_HANDLE = (CONSTBUFFER_HANDLE)0x2331;
 
 // Use #define and not const because switch statement that consumes these assumes they're not const and won't compile.
-#define PARSE_SLASHES_FOR_INPUT_QUEUE_INDEX_0 (200)
-#define PARSE_SLASHES_FOR_INPUT_QUEUE_INDEX_1 (201)
-#define PARSE_SLASHES_FOR_INPUT_QUEUE_INDEX_2 (202)
-#define PARSE_SLASHES_FOR_INPUT_QUEUE_INDEX_3 (203)
-#define PARSE_SLASHES_FOR_INPUT_QUEUE_INDEX_4 (204)
 #define PARSE_SLASHES_FOR_INPUT_QUEUE_INDEX_5 (205)
 
-#define PARSE_SEPARATOR_TWO_PROPERTIES_0 (300)
-#define PARSE_SEPARATOR_TWO_PROPERTIES_1 (301)
-
-#define PARSE_SLASHES_FOR_INPUT_QUEUE_NO_SYSTEM_PROPS_INDEX_0 (400)
-#define PARSE_SLASHES_FOR_INPUT_QUEUE_NO_SYSTEM_PROPS_INDEX_1 (401)
-#define PARSE_SLASHES_FOR_INPUT_QUEUE_NO_SYSTEM_PROPS_INDEX_2 (402)
-#define PARSE_SLASHES_FOR_INPUT_QUEUE_NO_SYSTEM_PROPS_INDEX_3 (403)
-#define PARSE_SLASHES_FOR_INPUT_QUEUE_NO_SYSTEM_PROPS_INDEX_4 (404)
-#define PARSE_SLASHES_FOR_INPUT_QUEUE_NO_SYSTEM_PROPS_INDEX_5 (405)
 
 #define PARSE_SLASHES_FOR_INPUT_QUEUE_NO_TOKENS               (500)
 #define NUM_DOWORK_VALUE                1
@@ -514,35 +500,6 @@ int my_STRING_TOKENIZER_get_next_token(STRING_TOKENIZER_HANDLE t, STRING_HANDLE 
             break;
         case 12:
             text = "2";
-            break;
-        // When parsing a URL for "/foo/bar... /input/inputQueeName/" on happy path, succeed up to 6 times on parsing.
-        case PARSE_SLASHES_FOR_INPUT_QUEUE_INDEX_0:
-        case PARSE_SLASHES_FOR_INPUT_QUEUE_INDEX_1:
-        case PARSE_SLASHES_FOR_INPUT_QUEUE_INDEX_2:
-        case PARSE_SLASHES_FOR_INPUT_QUEUE_INDEX_3:
-        case PARSE_SLASHES_FOR_INPUT_QUEUE_INDEX_4:
-        case PARSE_SLASHES_FOR_INPUT_QUEUE_NO_SYSTEM_PROPS_INDEX_0:
-        case PARSE_SLASHES_FOR_INPUT_QUEUE_NO_SYSTEM_PROPS_INDEX_1:
-        case PARSE_SLASHES_FOR_INPUT_QUEUE_NO_SYSTEM_PROPS_INDEX_2:
-        case PARSE_SLASHES_FOR_INPUT_QUEUE_NO_SYSTEM_PROPS_INDEX_3:
-        case PARSE_SLASHES_FOR_INPUT_QUEUE_NO_SYSTEM_PROPS_INDEX_4:
-            text = "";
-            break;
-
-        case PARSE_SLASHES_FOR_INPUT_QUEUE_INDEX_5:
-            g_tokenizerIndex = PARSE_SEPARATOR_TWO_PROPERTIES_0;
-            text = "";
-            break;
-
-        case PARSE_SEPARATOR_TWO_PROPERTIES_0:
-        case PARSE_SEPARATOR_TWO_PROPERTIES_1:
-            text = "";
-            break;
-
-        // There are no system properties, so subsequent tokenizer calls (for &) should fail.
-        case PARSE_SLASHES_FOR_INPUT_QUEUE_NO_SYSTEM_PROPS_INDEX_5:
-            g_tokenizerIndex = PARSE_SLASHES_FOR_INPUT_QUEUE_NO_TOKENS;
-            text = "";
             break;
 
         case 7:
@@ -1123,7 +1080,7 @@ static void setup_message_recv_with_properties_mocks(bool has_content_type, bool
 
     if (has_content_type)
     {
-        STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&"));
+        STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(0);
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .SetReturn("%24.ct=application/json")
             .CallCannotFail();
@@ -1141,7 +1098,7 @@ static void setup_message_recv_with_properties_mocks(bool has_content_type, bool
 
     if (has_content_encoding)
     {
-        STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&"));
+        STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(0);
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .SetReturn("%24.ce=utf8")
             .CallCannotFail();
@@ -1157,7 +1114,7 @@ static void setup_message_recv_with_properties_mocks(bool has_content_type, bool
         }
     }
 
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&"));
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(0);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .SetReturn("propName=propValue")
         .CallCannotFail();
@@ -1641,7 +1598,7 @@ static void setup_calls_for_next_token_with_slash(int expectedTokens)
 {
     for (int i = 0; i < expectedTokens; i++)
     {
-        STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "/"));
+        STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "/")).SetReturn(0);
     }
 }
 
@@ -1655,7 +1612,7 @@ static void setup_message_recv_device_method_mocks()
     STRICT_EXPECTED_CALL(STRING_new());
     setup_calls_for_next_token_with_slash(4);
     STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "/"));
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "/")).SetReturn(0);
     STRICT_EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
         .SetReturn(7);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
@@ -1696,27 +1653,30 @@ static void setup_message_recv_callback_device_twin_mocks(const char* token_type
     STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument_output()
         .IgnoreArgument_delimiters()
-        .IgnoreArgument_t();
+        .IgnoreArgument_t()
+        .SetReturn(0);
     STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument_output()
         .IgnoreArgument_delimiters()
-        .IgnoreArgument_t();
+        .IgnoreArgument_t()
+        .SetReturn(0);
     STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument_output()
         .IgnoreArgument_delimiters()
-        .IgnoreArgument_t();
+        .IgnoreArgument_t()
+        .SetReturn(0);
 
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument_handle()
         .SetReturn(token_type)
         .CallCannotFail();
 
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(0);
 
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .SetReturn("200")
         .CallCannotFail();
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(0);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .SetReturn("4")
         .IgnoreArgument_handle()
@@ -6403,7 +6363,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties_succee
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, NULL);
 
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
-    g_tokenizerIndex = 6;
     IoTHubTransport_MQTT_Common_DoWork(handle);
     umock_c_reset_all_calls();
 
@@ -6443,7 +6402,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties_succee
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
     bool urlencode = true;
     IoTHubTransport_MQTT_Common_SetOption(handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlencode);
-    g_tokenizerIndex = 6;
     IoTHubTransport_MQTT_Common_DoWork(handle);
     umock_c_reset_all_calls();
 
@@ -6460,24 +6418,24 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties_succee
         .SetReturn("iothub-ack=Full");
     // iothub-ack-full is a "system" property but not mapped to IOTHUB_MESSAGE_HANDLE so it is silently ignored
 
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(0);;
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(0);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .SetReturn("propName=PropValue");
 
     set_expected_calls_for_custom_message_property(true);
 
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(0);;
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(0);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .SetReturn("DeviceInfo=smokeTest");
 
     set_expected_calls_for_custom_message_property(true);
 
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(0);;
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(0);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .SetReturn("%24.to=%2Fdevices%2FjebrandoDevice%2Fmessages%2FdeviceBound&");
     // %24.to is also silently ignored
 
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(0);;
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(0);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .SetReturn("%24.cid=123");
 
@@ -6486,7 +6444,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties_succee
     STRICT_EXPECTED_CALL(IoTHubMessage_SetCorrelationId(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
 
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(0);;
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(0);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .SetReturn("%24.uid=456");
 
@@ -6522,7 +6480,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_Properties_succeed)
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, NULL);
 
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
-    g_tokenizerIndex = 4;
     IoTHubTransport_MQTT_Common_DoWork(handle);
     umock_c_reset_all_calls();
 
@@ -6548,7 +6505,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_Properties_succeed_au
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
     bool urlencode = true;
     IoTHubTransport_MQTT_Common_SetOption(handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlencode);
-    g_tokenizerIndex = 4;
     IoTHubTransport_MQTT_Common_DoWork(handle);
     umock_c_reset_all_calls();
 
@@ -8298,7 +8254,8 @@ static void setup_message_recv_extractMqttProperties(const char* topicName, cons
 
         // Parse out connected_module
         STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&"))
-            .IgnoreArgument(3);
+            .IgnoreArgument(3)
+            .SetReturn(0);
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .SetReturn("%24.cmid=connected_module/")
@@ -8317,7 +8274,6 @@ static void setup_message_recv_extractMqttProperties(const char* topicName, cons
 
 static void setup_message_recv_with_input_queue_mocks(const char* topicName, const char* inputQueueSubscribeName, const char* inputQueueName, bool connectedSystemProps)
 {
-    // my_STRING_TOKENIZER_get_next_token
     STRICT_EXPECTED_CALL(mqttmessage_getTopicName(TEST_MQTT_MESSAGE_HANDLE)).SetReturn(topicName);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .SetReturn(NULL)
@@ -8354,7 +8310,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_InputQueue_succeed)
     IoTHubTransport_MQTT_Common_DoWork(handle);
     umock_c_reset_all_calls();
 
-    g_tokenizerIndex = PARSE_SLASHES_FOR_INPUT_QUEUE_INDEX_0;
     setup_message_recv_with_input_queue_mocks(TEST_MQTT_INPUT_1, TEST_MQTT_INPUT_QUEUE_SUBSCRIBE_NAME_1, TEST_INPUT_QUEUE_1, true);
 
     // act
@@ -8381,7 +8336,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_InputQueue_no_system_
     IoTHubTransport_MQTT_Common_DoWork(handle);
     umock_c_reset_all_calls();
 
-    g_tokenizerIndex = PARSE_SLASHES_FOR_INPUT_QUEUE_NO_SYSTEM_PROPS_INDEX_0;
     setup_message_recv_with_input_queue_mocks(TEST_MQTT_INPUT_NO_PROPERTIES, TEST_MQTT_INPUT_QUEUE_SUBSCRIBE_NAME_1, TEST_INPUT_QUEUE_1, false);
 
     // act
@@ -8407,8 +8361,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_InputQueue_missing_qu
 
     IoTHubTransport_MQTT_Common_DoWork(handle);
     umock_c_reset_all_calls();
-
-    g_tokenizerIndex = PARSE_SLASHES_FOR_INPUT_QUEUE_NO_SYSTEM_PROPS_INDEX_1;
 
     setup_message_receive_initial_calls(TEST_MQTT_INPUT_MISSING_INPUT_QUEUE_NAME, true);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail().SetReturn(TEST_MQTT_INPUT_MISSING_INPUT_QUEUE_NAME);
@@ -8455,8 +8407,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_with_InputQueue_fail)
         {
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
-            g_tokenizerIndex = PARSE_SLASHES_FOR_INPUT_QUEUE_INDEX_0;
-             g_fnMqttMsgRecv(TEST_MQTT_MESSAGE_HANDLE, g_callbackCtx);
+            g_fnMqttMsgRecv(TEST_MQTT_MESSAGE_HANDLE, g_callbackCtx);
         }
     }
 
