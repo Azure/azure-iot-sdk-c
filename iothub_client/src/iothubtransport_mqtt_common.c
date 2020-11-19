@@ -158,6 +158,7 @@ static SYSTEM_PROPERTY_INFO sysPropList[] = {
     { DEFINE_MQTT_SYSTEM_PROPERTY("cdid"), MQTT_PROPERTY_TYPE_CONNECTION_DEVICE_ID},
     { DEFINE_MQTT_SYSTEM_PROPERTY("cmid"), MQTT_PROPERTY_TYPE_CONNECTION_MODULE_ID },
     { DEFINE_MQTT_SYSTEM_PROPERTY("exp"), MQTT_PROPERTY_TYPE_SILENTLY_IGNORE },
+    { DEFINE_MQTT_SYSTEM_PROPERTY("ctime"), MQTT_PROPERTY_TYPE_CREATION_TIME},
     // even though they don't start with %24, previous versions of SDK parsed and ignored these.  Keep same behavior.
     { "devices/", MQTT_PROPERTY_TYPE_SILENTLY_IGNORE },
     { "iothub-operation", MQTT_PROPERTY_TYPE_SILENTLY_IGNORE },
