@@ -36,6 +36,7 @@
 #include "azure_c_shared_utility/tickcounter.h"
 
 #include "azure_c_shared_utility/doublylinkedlist.h"
+#include "azure_c_shared_utility/map.h"
 #include "iothub_message.h"
 
 #define ENABLE_MOCKS
@@ -155,6 +156,10 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_CONTENT_TY
 
 TEST_DEFINE_ENUM_TYPE(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
+
+TEST_DEFINE_ENUM_TYPE(MAP_RESULT, MAP_RESULT_VALUES)
+IMPLEMENT_UMOCK_C_ENUM_TYPE(MAP_RESULT, MAP_RESULT_VALUES);
+
 
 static TEST_MUTEX_HANDLE test_serialize_mutex;
 
@@ -447,7 +452,14 @@ static void SetupIothubTransportConfig(IOTHUBTRANSPORT_CONFIG* config, const cha
     config->auth_module_handle = TEST_IOTHUB_AUTHORIZATION_HANDLE;
 }
 
-typedef struct TEST_EXPECTED_MESSAGE_DATA_TAG
+typedef struct TEST_EXPECTED_APPLICATION_PROPERTIES_TAG
+{
+    const char** keys;
+    const char** values;
+    size_t keysLength;
+} TEST_EXPECTED_APPLICATION_PROPERTIES;
+
+typedef struct TEST_EXPECTED_MESSAGE_PROPERTIES_TAG
 {
     const char* contentType;
     const char* contentEncoding;
@@ -458,15 +470,17 @@ typedef struct TEST_EXPECTED_MESSAGE_DATA_TAG
     const char* connectionDeviceId;
     const char* messageCreationTime;
     const char* messageUserId;
-    // Note there is no test for IoTHubMessage_GetDiagnosticPropertyData, we don't parse this out of MQTT topic string.
-} TEST_EXPECTED_MESSAGE_DATA;
+    TEST_EXPECTED_APPLICATION_PROPERTIES* applicationProperties;
+} TEST_EXPECTED_MESSAGE_PROPERTIES;
 
 
 //
 // VerifyExpectedMessageReceived checks that the message we've received on mock callback matches the expected for this test case.
 //
-static void VerifyExpectedMessageReceived(const TEST_EXPECTED_MESSAGE_DATA* expectedMessageData)
+static void VerifyExpectedMessageReceived(const TEST_EXPECTED_MESSAGE_PROPERTIES* expectedMessageProperties)
 {
+    size_t i;
+
     ASSERT_IS_NOT_NULL(g_messageFromCallback);
 
     // Messages are always delivered as byte arrrays to applications.
@@ -479,36 +493,53 @@ static void VerifyExpectedMessageReceived(const TEST_EXPECTED_MESSAGE_DATA* expe
     ASSERT_ARE_EQUAL(int, 0, memcmp(TEST_APP_PAYLOAD.message, messageBody, TEST_APP_PAYLOAD.length));
 
     const char* contentType = IoTHubMessage_GetContentTypeSystemProperty(g_messageFromCallback);
-    ASSERT_ARE_EQUAL(char_ptr, expectedMessageData->contentType, contentType);
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->contentType, contentType);
 
     const char* contentEncoding = IoTHubMessage_GetContentEncodingSystemProperty(g_messageFromCallback);
-    ASSERT_ARE_EQUAL(char_ptr, expectedMessageData->contentEncoding, contentEncoding);
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->contentEncoding, contentEncoding);
 
     const char* messageId = IoTHubMessage_GetMessageId(g_messageFromCallback);
-    ASSERT_ARE_EQUAL(char_ptr, expectedMessageData->messageId, messageId);
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->messageId, messageId);
 
     const char* correlationId = IoTHubMessage_GetCorrelationId(g_messageFromCallback);
-    ASSERT_ARE_EQUAL(char_ptr, expectedMessageData->correlationId, correlationId);
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->correlationId, correlationId);
 
     const char* inputName = IoTHubMessage_GetInputName(g_messageFromCallback);
-    ASSERT_ARE_EQUAL(char_ptr, expectedMessageData->inputName, inputName);
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->inputName, inputName);
 
     const char* connectionModuleId = IoTHubMessage_GetConnectionModuleId(g_messageFromCallback);
-    ASSERT_ARE_EQUAL(char_ptr, expectedMessageData->connectionModuleId, connectionModuleId);
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->connectionModuleId, connectionModuleId);
 
     const char* connectionDeviceId = IoTHubMessage_GetConnectionDeviceId(g_messageFromCallback);
-    ASSERT_ARE_EQUAL(char_ptr, expectedMessageData->connectionDeviceId, connectionDeviceId);
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->connectionDeviceId, connectionDeviceId);
 
     const char* messageCreationTime = IoTHubMessage_GetMessageCreationTimeUtcSystemProperty(g_messageFromCallback);
-    ASSERT_ARE_EQUAL(char_ptr, expectedMessageData->messageCreationTime, messageCreationTime);
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->messageCreationTime, messageCreationTime);
 
     const char* messageUserId = IoTHubMessage_GetMessageUserIdSystemProperty(g_messageFromCallback);
-    ASSERT_ARE_EQUAL(char_ptr, expectedMessageData->messageUserId, messageUserId);
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->messageUserId, messageUserId);
 
     // These message properties can only be set by the device and then set to the MQTT server.  They are never
     // parsed on an MQTT PUBLISH to the device itself and hence in the IoTHubMessage layer they'll always be NULL.
     ASSERT_IS_NULL(IoTHubMessage_GetOutputName(g_messageFromCallback));
     ASSERT_IS_NULL(IoTHubMessage_GetDiagnosticPropertyData(g_messageFromCallback));
+
+    // Check application properties
+    MAP_HANDLE mapHandle = IoTHubMessage_Properties(g_messageFromCallback);
+    ASSERT_IS_NOT_NULL(mapHandle);
+
+    const char*const* actualKeys;
+    const char*const* actualValues;
+    size_t actualKeysLen;
+    size_t expectedKeyLen = (expectedMessageProperties->applicationProperties != NULL) ? expectedMessageProperties->applicationProperties->keysLength : 0;
+
+    ASSERT_ARE_EQUAL(MAP_RESULT, MAP_OK, Map_GetInternals(mapHandle, &actualKeys, &actualValues, &actualKeysLen));
+    ASSERT_ARE_EQUAL(int, expectedKeyLen, actualKeysLen);
+
+    for (i = 0; i < expectedKeyLen; i++)
+    {
+        ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->applicationProperties->values[i], IoTHubMessage_GetProperty(g_messageFromCallback, expectedMessageProperties->applicationProperties->keys[i]));
+    }
 }
 
 
@@ -516,7 +547,7 @@ static void VerifyExpectedMessageReceived(const TEST_EXPECTED_MESSAGE_DATA* expe
 // TestMessageProcessing invokes the MQTT PUBLISH to device callback code, which will (on success) will store
 // the parsed message into the test's g_messageFromCallback.  TestMesageProcessing then verifies message is expected.
 //
-static void TestMessageProcessing(const char* topicToTest, const TEST_EXPECTED_MESSAGE_DATA* expectedMessageData)
+static void TestMessageProcessing(const char* topicToTest, const TEST_EXPECTED_MESSAGE_PROPERTIES* expectedMessageProperties)
 {
     // There is not a direct mechanism for this test to call into the product code's callback.  Instead what we do is 
     // invoke into the public interface of mqtt_common layer and use our mock (my_mqtt_client_init) to store the callback pointer
@@ -536,13 +567,13 @@ static void TestMessageProcessing(const char* topicToTest, const TEST_EXPECTED_M
     // Invokes the product code's parsing callback, which we stored away earlier.
     g_fnMqttMsgRecv(TEST_MQTT_MESSAGE_HANDLE, g_callbackCtx);
 
-    if (expectedMessageData != NULL)
+    if (expectedMessageProperties != NULL)
     {
-        VerifyExpectedMessageReceived(expectedMessageData);
+        VerifyExpectedMessageReceived(expectedMessageProperties);
     }
     else
     {
-        ASSERT_IS_NULL(g_messageFromCallback, "message received from callback the product code should have failed");
+        ASSERT_IS_NULL(g_messageFromCallback, "message received from callback the product code should have failed.  topic=%s", topicToTest);
     }
 
     //cleanup
@@ -551,7 +582,7 @@ static void TestMessageProcessing(const char* topicToTest, const TEST_EXPECTED_M
     
 // This is effectively one of same test strings used in original iothubtransport_mqtt_common_ut.  
 static const char* TEST_MQTT_MSG_TOPIC = "devices/myDeviceId/messages/devicebound/iothub-ack=Full&%24.to=%2Fdevices%2FmyDeviceId%2Fmessages%2FdeviceBound&%24.cid=123&%24.uid=456";
-TEST_EXPECTED_MESSAGE_DATA test1 = { NULL, NULL, NULL, "123", NULL, NULL, NULL, NULL, "456"};
+TEST_EXPECTED_MESSAGE_PROPERTIES test1 = { NULL, NULL, NULL, "123", NULL, NULL, NULL, NULL, "456", NULL};
 
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties1_succeed)
 {
@@ -563,11 +594,11 @@ static const char* badMQTTTopics[] = {
     "",
     "ThisIsNotCloseToBeingALegalTopic",
     "/device/",
-    "devices/"
-    "devices/myDeviceId/messages"
-    "devices/myDeviceId/messages/deviceboun"
+    "devices/",
+    "devices/myDeviceId/messages",
+    "devices/myDeviceId/messages/deviceboun",
+    "/devices/myDeviceId/messages/devicebound"
 };
-
 static const size_t badMQTTTopicsLength = sizeof(badMQTTTopics) / sizeof(badMQTTTopics[0]);
 
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_bad_MQTT_topics_fail)
@@ -578,8 +609,63 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_bad_MQTT_topics_fail)
     }
 }
 
+// MQTT topics that are legal but do not contain properties.  The parser is fairly forgiving that once the MQTT TOPIC is matched,
+// if the properties are off we'll deliver the message to application
+static const char* emptyPropertyMQTTTopics[] = {
+    "devices/myDeviceId/messages/devicebound/",
+    "devices/myDeviceId/messages/devicebound/&",
+    "devices/myDeviceId/messages/devicebound/&&",
+    "devices/myDeviceId/messages/devicebound/&&&",
+    "devices/myDeviceId/messages/devicebound/=",
+    "devices/myDeviceId/messages/devicebound/fooBar",
+    "devices/myDeviceId/messages/devicebound/==",
+};
 
-    
+static const size_t emptyMQTTTopicsLength = sizeof(emptyPropertyMQTTTopics) / sizeof(emptyPropertyMQTTTopics[0]);  
+TEST_EXPECTED_MESSAGE_PROPERTIES noProperties = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_empty_properties_succeed)
+{
+    for (size_t i = 0; i < emptyMQTTTopicsLength; i++)
+    {
+        TestMessageProcessing(emptyPropertyMQTTTopics[i], &noProperties);
+    }
+}
+
+static const char* TEST_MQTT_MESSAGE_APP_PROPERTIES_1 = "devices/myDeviceId/messages/devicebound/customKey1=customValue1";
+const char* expectedKey1[] = {"customKey1"};
+const char* expectedValue1[] = {"customValue1"};
+TEST_EXPECTED_APPLICATION_PROPERTIES app1 = { expectedKey1, expectedValue1, 1};
+TEST_EXPECTED_MESSAGE_PROPERTIES expectedAppProperties1 = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &app1};
+
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_app_properties1_succeed)
+{
+    TestMessageProcessing(TEST_MQTT_MESSAGE_APP_PROPERTIES_1, &expectedAppProperties1);
+}
+
+
+static const char* TEST_MQTT_MESSAGE_APP_PROPERTIES_2 = "devices/myDeviceId/messages/devicebound/customKey1=customValue1&customKey2=customValue2";
+const char* expectedKey2[] = {"customKey1", "customKey2"};
+const char* expectedValue2[] = {"customValue1", "customValue2"};
+TEST_EXPECTED_APPLICATION_PROPERTIES app2 = { expectedKey2, expectedValue2, 2};
+TEST_EXPECTED_MESSAGE_PROPERTIES expectedAppProperties2 = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &app2};
+
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_app_properties2_succeed)
+{
+    TestMessageProcessing(TEST_MQTT_MESSAGE_APP_PROPERTIES_2, &expectedAppProperties2);
+}
+
+
+static const char* TEST_MQTT_MESSAGE_APP_PROPERTIES_3 = "devices/myDeviceId/messages/devicebound/customKey1=customValue1&customKey2=customValue2&customKey3=customValue3";
+const char* expectedKey3[] = {"customKey1", "customKey2", "customKey3"};
+const char* expectedValue3[] = {"customValue1", "customValue2", "customValue3"};
+TEST_EXPECTED_APPLICATION_PROPERTIES app3 = { expectedKey3, expectedValue3, 3};
+TEST_EXPECTED_MESSAGE_PROPERTIES expectedAppProperties3 = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &app3};
+
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_app_properties3_succeed)
+{
+    TestMessageProcessing(TEST_MQTT_MESSAGE_APP_PROPERTIES_3, &expectedAppProperties3);
+}
 
 
 
