@@ -27,6 +27,8 @@ extern "C"
     static STATIC_VAR_UNUSED const char* OPTION_KEEP_ALIVE = "keepalive";
     static STATIC_VAR_UNUSED const char* OPTION_CONNECTION_TIMEOUT = "connect_timeout";
 
+    /* None of the OPTION_PROXY_* options below are implemented.  Use OPTION_HTTP_PROXY 
+    from shared_util_options.h in https://github.com/Azure/azure-c-shared-utility/ repo instead */
     static STATIC_VAR_UNUSED const char* OPTION_PROXY_HOST = "proxy_address";
     static STATIC_VAR_UNUSED const char* OPTION_PROXY_USERNAME = "proxy_username";
     static STATIC_VAR_UNUSED const char* OPTION_PROXY_PASSWORD = "proxy_password";

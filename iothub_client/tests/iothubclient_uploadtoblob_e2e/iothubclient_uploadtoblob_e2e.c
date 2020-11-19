@@ -3,6 +3,12 @@
 
 #include "testrunnerswitcher.h"
 
+
+// Note: Even though iothub_client.h is deprecated, we are using it as basis of our tests and NOT the recommended
+// device_client.h.  In practice for most tests there's no difference (both APIs quickly pass through to core implementation).
+// However, the iothub_client.h has both an Ex and non-Ex version of IoTHubClient_UploadMultipleBlocksToBlobAsync.
+// The device_client did NOT bring this Ex/non split forward.
+// We must maintain back-compat with the non-Ex function, so we need to #include "iothub_client.h" as it is only way to access it.
 #include "iothub_client.h"
 #include "iothub_client_options.h"
 #include "iothub_message.h"

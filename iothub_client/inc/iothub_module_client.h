@@ -2,11 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 /** @file iothub_module_client.h
-*    @brief Extends the IoTHubClient_LL module with additional features.
+*    @brief Extends the IoTHubModuleClient_LL module with additional features.
 *
-*    @details IoTHubClient is a module that extends the IoTHubClient_LL
-*             module with 2 features:
-*                - scheduling the work for the IoTHubClient from a
+*    @details IoTHubModuleClient extends the IoTHubModuleClient_LL
+*             with 2 features:
+*                - scheduling the work for the IoTHubModuleClient from a
 *                  thread, so that the user does not need to create their
 *                  own thread
 *                - thread-safe APIs
@@ -87,7 +87,7 @@ extern "C"
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SendEventAsync, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, IOTHUB_MESSAGE_HANDLE, eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, eventConfirmationCallback, void*, userContextCallback);
 
     /**
-    * @brief    This function returns the current sending status for IoTHubClient.
+    * @brief    This function returns the current sending status for IoTHubModuleClient.
     *
     * @param    iotHubModuleClientHandle  The handle created by a call to the create function.
     * @param    IoTHubClientStatus        The sending state is populated at the address pointed
@@ -128,7 +128,7 @@ extern "C"
     *                                           callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the ::IoTHubModuleClient_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -145,7 +145,7 @@ extern "C"
     *                                            connection drops to IOT Hub.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the ::IoTHubModuleClient_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -161,7 +161,7 @@ extern "C"
     to IOT Hub.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the ::IoTHubModuleClient_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -270,7 +270,7 @@ extern "C"
     * @param    eventConfirmationCallback     The callback specified by the module for receiving
     *                                         confirmation of the delivery of the IoT Hub message.
     *                                         This callback can be expected to invoke the
-    *                                         ::IoTHubClient_SendEventAsync function for the
+    *                                         IoTHubModuleClient_SendEventAsync function for the
     *                                         same message in an attempt to retry sending a failing
     *                                         message. The user can specify a @c NULL value here to
     *                                         indicate that no callback is required.
@@ -278,7 +278,7 @@ extern "C"
     *                                         callback. This can be @c NULL.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the ::IoTHubClient_Destroy function from within any callback.
+    *           the IoTHubModuleClient_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -286,7 +286,7 @@ extern "C"
 
 
     /**
-    * @brief    This API sets callback for  method call that is directed to specified 'inputName' queue (e.g. messages from IoTHubClient_SendEventToOutputAsync)
+    * @brief    This API sets callback for method call that is directed to specified 'inputName' queue (e.g. messages from IoTHubModuleClient_SendEventToOutputAsync)
     *
     * @param    iotHubModuleClientHandle      The handle created by a call to the create function.
     * @param    inputName                     The name of the queue to listen on for this moduleMethodCallback/userContextCallback.
@@ -301,24 +301,29 @@ extern "C"
 #ifdef USE_EDGE_MODULES
     /**
     * @brief    This API creates a module handle based on environment variables set in the Edge runtime.
-    NOTE: It is *ONLY* valid when the code is running in a container initiated by Edge.
+    *           NOTE: It is *ONLY* valid when the code is running in a container initiated by Edge.
     *
-    * @param    protocol            Function pointer for protocol implementation
+    *
+    * @param    protocol            Function pointer for protocol implementation.  This *MUST* be MQTT_Protocol.
+    *
+    * @remarks  The protocol parameter MUST be set to MQTT_Protocol.  Using other values will cause undefined behavior.
     *
     * @return    A non-NULL @c IOTHUB_MODULE_CLIENT_HANDLE value that is used when
     *           invoking other functions for IoT Hub client and @c NULL on failure.
-
     */
     MOCKABLE_FUNCTION(, IOTHUB_MODULE_CLIENT_HANDLE, IoTHubModuleClient_CreateFromEnvironment, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol);
 
-    /*
+    /**
     * @brief    This API invokes a device method on a specified device
     *
     * @param    iotHubModuleClientHandle        The handle created by a call to a create function
     * @param    deviceId                        The device id of the device to invoke a method on
     * @param    methodName                      The name of the method
     * @param    methodPayload                   The method payload (in json format)
-    * @param    timeout                         The time in seconds before a timeout occurs
+    *
+    * @warning  The timeout parameter is ignored.  See https://github.com/Azure/azure-iot-sdk-c/issues/1378.
+    *           The timeout used will be the default for IoT Edge.
+    *
     * @param    responseStatus                  This pointer will be filled with the response status after invoking the device method
     * @param    responsePayload                 This pointer will be filled with the response payload
     * @param    responsePayloadSize             This pointer will be filled with the response payload size
@@ -327,7 +332,7 @@ extern "C"
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_DeviceMethodInvokeAsync, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, const char*, deviceId, const char*, methodName, const char*, methodPayload, unsigned int, timeout, IOTHUB_METHOD_INVOKE_CALLBACK, methodInvokeCallback, void*, context);
 
-    /*
+    /**
     * @brief    This API invokes a module method on a specified module
     *
     * @param    iotHubModuleClientHandle        The handle created by a call to a create function
@@ -336,6 +341,10 @@ extern "C"
     * @param    methodName                      The name of the method
     * @param    methodPayload                   The method payload (in json format)
     * @param    timeout                         The time in seconds before a timeout occurs
+    *
+    * @warning  The timeout parameter is ignored.  See https://github.com/Azure/azure-iot-sdk-c/issues/1378.
+    *           The timeout used will be the default for IoT Edge.
+    *
     * @param    responseStatus                  This pointer will be filled with the response status after invoking the module method
     * @param    responsePayload                 This pointer will be filled with the response payload
     * @param    responsePayloadSize             This pointer will be filled with the response payload size

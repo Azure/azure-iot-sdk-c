@@ -13,7 +13,7 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/lock.h"
 #include "iothub_client_options.h"
-#include "iothub_client.h"
+#include "iothub_device_client.h"
 #include "iothub_message.h"
 #include "iothub_service_client_auth.h"
 #include "iothub_messaging.h"
@@ -57,7 +57,7 @@ typedef struct IOTHUB_LONGHAUL_RESOURCES_TAG
     LOCK_HANDLE lock;
     IOTHUB_ACCOUNT_INFO_HANDLE iotHubAccountInfo;
     IOTHUB_CLIENT_STATISTICS_HANDLE iotHubClientStats;
-    IOTHUB_CLIENT_HANDLE iotHubClientHandle;
+    IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle;
     IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle;
     bool is_svc_cl_c2d_msgr_open;
     IOTHUB_MESSAGING_CLIENT_HANDLE iotHubSvcMsgHandle;
@@ -635,9 +635,9 @@ IOTHUB_ACCOUNT_INFO_HANDLE longhaul_get_account_info(IOTHUB_LONGHAUL_RESOURCES_H
     return result;
 }
 
-IOTHUB_CLIENT_HANDLE longhaul_get_iothub_client_handle(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
+IOTHUB_DEVICE_CLIENT_HANDLE longhaul_get_iothub_client_handle(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
 {
-    IOTHUB_CLIENT_HANDLE result;
+    IOTHUB_DEVICE_CLIENT_HANDLE result;
 
     if (handle == NULL)
     {
@@ -704,7 +704,7 @@ void longhaul_tests_deinit(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
 
         if (iotHubLonghaulRsrcs->iotHubClientHandle != NULL)
         {
-            IoTHubClient_Destroy(iotHubLonghaulRsrcs->iotHubClientHandle);
+            IoTHubDeviceClient_Destroy(iotHubLonghaulRsrcs->iotHubClientHandle);
         }
 
         if (iotHubLonghaulRsrcs->iotHubAccountInfo != NULL)
@@ -794,25 +794,25 @@ IOTHUB_LONGHAUL_RESOURCES_HANDLE longhaul_tests_init()
     return result;
 }
 
-IOTHUB_CLIENT_HANDLE longhaul_initialize_device_client(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+IOTHUB_DEVICE_CLIENT_HANDLE longhaul_initialize_device_client(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
-    IOTHUB_CLIENT_HANDLE result;
+    IOTHUB_DEVICE_CLIENT_HANDLE result;
 
     if (handle == NULL || deviceToUse == NULL)
     {
         LogError("Invalid argument (handle=%p, deviceToUse=%p)", handle, deviceToUse);
         result = NULL;
     }
-    else if ((result = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol)) == NULL)
+    else if ((result = IoTHubDeviceClient_CreateFromConnectionString(deviceToUse->connectionString, protocol)) == NULL)
     {
         LogError("Could not create IoTHubClient");
     }
     else if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509 &&
-        (IoTHubClient_SetOption(result, OPTION_X509_CERT, deviceToUse->certificate) != IOTHUB_CLIENT_OK ||
-            IoTHubClient_SetOption(result, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication) != IOTHUB_CLIENT_OK))
+        (IoTHubDeviceClient_SetOption(result, OPTION_X509_CERT, deviceToUse->certificate) != IOTHUB_CLIENT_OK ||
+            IoTHubDeviceClient_SetOption(result, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication) != IOTHUB_CLIENT_OK))
     {
         LogError("Could not set the device x509 certificate or privateKey");
-        IoTHubClient_Destroy(result);
+        IoTHubDeviceClient_Destroy(result);
         result = NULL;
     }
     else
@@ -823,29 +823,29 @@ IOTHUB_CLIENT_HANDLE longhaul_initialize_device_client(IOTHUB_LONGHAUL_RESOURCES
         iotHubLonghaulRsrcs->iotHubClientHandle = result;
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
-        (void)IoTHubClient_SetOption(result, OPTION_TRUSTED_CERT, certificates);
+        (void)IoTHubDeviceClient_SetOption(result, OPTION_TRUSTED_CERT, certificates);
 #endif
-        (void)IoTHubClient_SetOption(result, OPTION_LOG_TRACE, &trace);
-        (void)IoTHubClient_SetOption(result, OPTION_PRODUCT_INFO, "C-SDK-LongHaul");
+        (void)IoTHubDeviceClient_SetOption(result, OPTION_LOG_TRACE, &trace);
+        (void)IoTHubDeviceClient_SetOption(result, OPTION_PRODUCT_INFO, "C-SDK-LongHaul");
 
-        if (IoTHubClient_SetConnectionStatusCallback(result, connection_status_callback, handle) != IOTHUB_CLIENT_OK)
+        if (IoTHubDeviceClient_SetConnectionStatusCallback(result, connection_status_callback, handle) != IOTHUB_CLIENT_OK)
         {
             LogError("Failed setting the connection status callback");
-            IoTHubClient_Destroy(result);
+            IoTHubDeviceClient_Destroy(result);
             iotHubLonghaulRsrcs->iotHubClientHandle = NULL;
             result = NULL;
         }
-        else if (IoTHubClient_SetMessageCallback(result, on_c2d_message_received, handle) != IOTHUB_CLIENT_OK)
+        else if (IoTHubDeviceClient_SetMessageCallback(result, on_c2d_message_received, handle) != IOTHUB_CLIENT_OK)
         {
             LogError("Failed to set the cloud-to-device message callback");
-            IoTHubClient_Destroy(result);
+            IoTHubDeviceClient_Destroy(result);
             iotHubLonghaulRsrcs->iotHubClientHandle = NULL;
             result = NULL;
         }
-        else if (IoTHubClient_SetDeviceMethodCallback(result, on_device_method_received, handle) != IOTHUB_CLIENT_OK)
+        else if (IoTHubDeviceClient_SetDeviceMethodCallback(result, on_device_method_received, handle) != IOTHUB_CLIENT_OK)
         {
             LogError("Failed to set the device method callback");
-            IoTHubClient_Destroy(result);
+            IoTHubDeviceClient_Destroy(result);
             iotHubLonghaulRsrcs->iotHubClientHandle = NULL;
             result = NULL;
         }
@@ -1200,7 +1200,7 @@ static int send_telemetry(const void* context)
                 message_info->message_id = message_id;
                 message_info->iotHubLonghaul = longhaulResources;
 
-                if (IoTHubClient_SendEventAsync(longhaulResources->iotHubClientHandle, message, send_confirmation_callback, message_info) != IOTHUB_CLIENT_OK)
+                if (IoTHubDeviceClient_SendEventAsync(longhaulResources->iotHubClientHandle, message, send_confirmation_callback, message_info) != IOTHUB_CLIENT_OK)
                 {
                     LogError("Failed sending telemetry message");
                     free(message_info);
@@ -1589,7 +1589,7 @@ static int update_device_twin_reported_property(const void* context)
                 device_twin_info.update_id = update_id;
                 device_twin_info.time_queued = time(NULL);
 
-                if ((device_twin_info.update_result = IoTHubClient_SendReportedState(iotHubLonghaul->iotHubClientHandle, (const unsigned char*)message, strlen(message), on_twin_report_state_completed, send_context)) != IOTHUB_CLIENT_OK)
+                if ((device_twin_info.update_result = IoTHubDeviceClient_SendReportedState(iotHubLonghaul->iotHubClientHandle, (const unsigned char*)message, strlen(message), on_twin_report_state_completed, send_context)) != IOTHUB_CLIENT_OK)
                 {
                     LogError("Failed sending twin reported properties update");
                     free(send_context);
@@ -1920,7 +1920,7 @@ int longhaul_run_twin_desired_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE 
             LogError("IoTHubClient not initialized.");
             result = MU_FAILURE;
         }
-        else if (IoTHubClient_SetDeviceTwinCallback(iotHubLonghaul->iotHubClientHandle, on_device_twin_update_received, iotHubLonghaul) != IOTHUB_CLIENT_OK)
+        else if (IoTHubDeviceClient_SetDeviceTwinCallback(iotHubLonghaul->iotHubClientHandle, on_device_twin_update_received, iotHubLonghaul) != IOTHUB_CLIENT_OK)
         {
             LogError("Failed subscribing device client for twin desired properties updates");
             result = MU_FAILURE;

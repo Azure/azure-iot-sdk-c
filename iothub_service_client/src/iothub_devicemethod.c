@@ -41,6 +41,9 @@ MU_DEFINE_ENUM(IOTHUB_DEVICEMETHOD_REQUEST_MODE, IOTHUB_DEVICE_METHOD_REQUEST_MO
 static const char* const URL_API_VERSION = "?api-version=2020-09-30";
 static const char* const RELATIVE_PATH_FMT_DEVICEMETHOD = "/twins/%s/methods%s";
 static const char* const RELATIVE_PATH_FMT_DEVICEMETHOD_MODULE = "/twins/%s/modules/%s/methods%s";
+
+// Note: The timeout field specified in this JSON is not honored by IoT Hub.  See
+// https://github.com/Azure/azure-iot-sdk-c/issues/1378 for details.
 static const char* const RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD = "{\"methodName\":\"%s\",\"timeout\":%d,\"payload\":%s}";
 
 /** @brief Structure to store IoTHub authentication information

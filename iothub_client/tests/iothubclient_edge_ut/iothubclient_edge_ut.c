@@ -245,24 +245,6 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
     ASSERT_FAIL(temp_str);
 }
 
-static int should_skip_index(size_t current_index, const size_t skip_array[], size_t length)
-{
-    int result = 0;
-    if (skip_array != NULL)
-    {
-        for (size_t index = 0; index < length; index++)
-        {
-            if (current_index == skip_array[index])
-            {
-                result = __LINE__;
-                break;
-            }
-        }
-    }
-
-    return result;
-}
-
 static IOTHUB_CLIENT_EDGE_HANDLE create_module_client_method_handle()
 {
     IOTHUB_CLIENT_CONFIG config;
@@ -534,19 +516,15 @@ TEST_FUNCTION(IoTHubClient_EdgeHandle_Create_FAIL)
     umock_c_negative_tests_snapshot();
 
     //size_t calls_cannot_fail[] = { };
-    size_t num_cannot_fail = 0; //sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0]);
     size_t count = umock_c_negative_tests_call_count();
     size_t test_num = 0;
-    size_t test_max = count - num_cannot_fail;
 
     for (size_t index = 0; index < count; index++)
     {
-        if (should_skip_index(index, NULL, num_cannot_fail) != 0)
-            continue;
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "IoTHubClient_EdgeHandle_Create_FAIL failure in test %lu/%lu", (unsigned long)test_num, (unsigned long)test_max);
+        sprintf(tmp_msg, "IoTHubClient_EdgeHandle_Create_FAIL failure in test %lu/%lu", (unsigned long)test_num, (unsigned long)count);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);

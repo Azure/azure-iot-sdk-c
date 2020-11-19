@@ -33,7 +33,7 @@ static const char* connectionString = "[device connection string]";
 /*Optional string with http proxy host and integer for http proxy port (Linux only)         */
 static const char* proxyHost = NULL;
 static int proxyPort = 0;
-static const char* data_to_upload_format = "Hello World from IoTHubClient_LL_UploadToBlob block: %d\n";
+static const char* data_to_upload_format = "Hello World from IoTHubDeviceClient_LL_UploadToBlob block: %d\n";
 static char data_to_upload[128];
 static int block_count = 0;
 
