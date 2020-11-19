@@ -1516,7 +1516,7 @@ static int AddSystemPropertyToMessage(IOTHUB_MESSAGE_HANDLE iotHubMessage, MQTT_
 
         default:
         {
-            // This is an internal error in code as we should never have an unmapped property.
+            // This is an internal error in code as we should never have an unmapped property at this stage.
             LogError("Unknown property type = %d to add to message", propertyType);
             result = MU_FAILURE;
         }

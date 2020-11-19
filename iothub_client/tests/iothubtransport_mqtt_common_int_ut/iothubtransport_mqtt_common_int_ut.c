@@ -16,25 +16,10 @@
 #pragma warning(disable: 4054) /* MSC incorrectly fires this */
 #endif
 
-static void* my_gballoc_malloc(size_t size)
-{
-    return malloc(size);
-}
-
-static void my_gballoc_free(void* ptr)
-{
-    free(ptr);
-}
-
-void* my_gballoc_realloc(void* ptr, size_t size)
-{
-    return realloc(ptr, size);
-}
-
 #include "testrunnerswitcher.h"
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_macro_utils/macro_utils.h"
-#include "azure_c_shared_utility/shared_util_options.h"
+//#include "azure_c_shared_utility/shared_util_options.h"
 #include "umock_c/umock_c.h"
 #include "umock_c/umock_c_prod.h"
 #include "umock_c/umock_c_negative_tests.h"
@@ -42,29 +27,20 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 #include "umock_c/umocktypes_bool.h"
 #include "umock_c/umocktypes_stdint.h"
 
-
+// While these header files are not directly used by this .c itself and this feels like an over-include,
+// this is needed.  We need to include these before the ENABLE_MOCKS is defined because otherwise headers
+// in ENABLE_MOCKS block will include them and they will then be mocked themselves.  Which we don't
+// want as this test only uses mocks to setup callback and wants to use real c-utility otherwise.
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/sastoken.h"
-#include "azure_c_shared_utility/doublylinkedlist.h"
-#include "azure_c_shared_utility/gballoc.h"
-#include "azure_c_shared_utility/agenttime.h"
-#include "azure_c_shared_utility/threadapi.h"
-#include "azure_c_shared_utility/constbuffer.h"
-
-#include "azure_c_shared_utility/xio.h"
-#include "azure_c_shared_utility/tlsio.h"
-
 #include "azure_c_shared_utility/tickcounter.h"
-#include "azure_c_shared_utility/lock.h"
-#include "azure_c_shared_utility/string_tokenizer.h"
-#include "azure_c_shared_utility/urlencode.h"
-#include "azure_c_shared_utility/crt_abstractions.h"
 
+#include "azure_c_shared_utility/doublylinkedlist.h"
 #include "iothub_message.h"
-#include "iothub_client_options.h"
 
 #define ENABLE_MOCKS
 #include "azure_umqtt_c/mqtt_client.h"
+#include "azure_c_shared_utility/xio.h"
 #include "internal/iothub_client_private.h"
 #include "internal/iothub_client_retry_control.h"
 #include "internal/iothub_transport_ll_private.h"
@@ -84,28 +60,14 @@ MOCKABLE_FUNCTION(, const char*, Transport_GetOption_Model_Id_Callback, void*, c
 #include "internal/iothubtransport_mqtt_common.h"
 #include "azure_c_shared_utility/strings.h"
 
-
-static const char* my_Transport_GetOption_Product_Info_Callback(void* ctx)
-{
-    (void)ctx;
-    return "product_info";
-}
-
-static const char* my_Transport_GetOption_Model_Id_Callback(void* ctx)
-{
-    (void)ctx;
-    return "dtmi:testDeviceCapabilityModel;1";
-}
-
-static const char* TEST_DEVICE_ID = "jebrandoDevice";
+static const char* TEST_DEVICE_ID = "myDeviceId";
 static const char* TEST_MODULE_ID = "thisIsModuleID";
 static const char* TEST_DEVICE_KEY = "thisIsDeviceKey";
 static const char* TEST_IOTHUB_NAME = "thisIsIotHubName";
 static const char* TEST_IOTHUB_SUFFIX = "thisIsIotHubSuffix";
 static const char* TEST_PROTOCOL_GATEWAY_HOSTNAME = NULL;
-static const char* TEST_MQTT_MESSAGE_TOPIC = "devices/jebrandoDevice/messages/devicebound/#";
-static const char* TEST_MQTT_MSG_TOPIC = "devices/jebrandoDevice/messages/devicebound/iothub-ack=Full&%24.to=%2Fdevices%2FjebrandoDevice%2Fmessages%2FdeviceBound&%24.cid=123&%24.uid=456";
-static const char* TEST_MQTT_MSG_TOPIC_W_1_PROP = "devices/jebrandoDevice/messages/devicebound/iothub-ack=Full&propName=PropValue&DeviceInfo=smokeTest&%24.to=%2Fdevices%2FjebrandoDevice%2Fmessages%2FdeviceBound&%24.cid&%24.uid";
+static const char* TEST_MQTT_MESSAGE_TOPIC = "devices/myDeviceId/messages/devicebound/#";
+static const char* TEST_MQTT_MSG_TOPIC_W_1_PROP = "devices/myDeviceId/messages/devicebound/iothub-ack=Full&propName=PropValue&DeviceInfo=smokeTest&%24.to=%2Fdevices%2FmyDeviceId%2Fmessages%2FdeviceBound&%24.cid&%24.uid";
 static const char* TEST_MQTT_INPUT_QUEUE_SUBSCRIBE_NAME_1 = "devices/thisIsDeviceID/modules/thisIsModuleID/#";
 static const char* TEST_MQTT_INPUT_1 = "devices/thisIsDeviceID/modules/thisIsModuleID/inputs/input1/%24.cdid=connected_device&%24.cmid=connected_module/";
 static const char* TEST_MQTT_INPUT_NO_PROPERTIES = "devices/thisIsDeviceID/modules/thisIsModuleID/inputs/input1/";
@@ -130,14 +92,11 @@ static MQTT_TRANSPORT_PROXY_OPTIONS* expected_MQTT_TRANSPORT_PROXY_OPTIONS;
 
 static const TRANSPORT_LL_HANDLE TEST_TRANSPORT_HANDLE = (TRANSPORT_LL_HANDLE)0x4444;
 static const MQTT_CLIENT_HANDLE TEST_MQTT_CLIENT_HANDLE = (MQTT_CLIENT_HANDLE)0x1122;
-static const PDLIST_ENTRY TEST_PDLIST_ENTRY = (PDLIST_ENTRY)0x1123;
 static const MQTT_MESSAGE_HANDLE TEST_MQTT_MESSAGE_HANDLE = (MQTT_MESSAGE_HANDLE)0x1124;
 
 static const IOTHUB_CLIENT_TRANSPORT_PROVIDER TEST_PROTOCOL = (IOTHUB_CLIENT_TRANSPORT_PROVIDER)0x1127;
 
 static XIO_HANDLE TEST_XIO_HANDLE = (XIO_HANDLE)0x1126;
-
-static const STRING_TOKENIZER_HANDLE TEST_STRING_TOKENIZER_HANDLE = (STRING_TOKENIZER_HANDLE)0x1127;
 
 static const IOTHUB_AUTHORIZATION_HANDLE TEST_IOTHUB_AUTHORIZATION_HANDLE = (IOTHUB_AUTHORIZATION_HANDLE)0x1128;
 
@@ -191,10 +150,19 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CREDENTIAL_TYPE, IOTHUB_CREDENTIAL_TYPE_VALUE
 TEST_DEFINE_ENUM_TYPE(SAS_TOKEN_STATUS, SAS_TOKEN_STATUS_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(SAS_TOKEN_STATUS, SAS_TOKEN_STATUS_VALUES);
 
+TEST_DEFINE_ENUM_TYPE(IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_CONTENT_TYPE_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_CONTENT_TYPE_VALUES);
+
+TEST_DEFINE_ENUM_TYPE(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
+
 static TEST_MUTEX_HANDLE test_serialize_mutex;
 
 static DLIST_ENTRY g_waitingToSend;
 
+
+// Message delivered by mqtt_common layer to our mocked callback.
+static IOTHUB_MESSAGE_HANDLE g_messageFromCallback;
 
 
 //Callbacks for Testing
@@ -227,48 +195,9 @@ static char* my_IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handl
 
     char* result;
     size_t len = strlen(TEST_SAS_TOKEN);
-    result = (char*)my_gballoc_malloc(len+1);
+    result = (char*)malloc(len+1);
     strcpy(result, TEST_SAS_TOKEN);
     return result;
-}
-
-static IOTHUBMESSAGE_CONTENT_TYPE my_IoTHubMessage_GetContentType(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
-{
-    IOTHUBMESSAGE_CONTENT_TYPE result2;
-    if (iotHubMessageHandle == TEST_IOTHUB_MSG_BYTEARRAY)
-    {
-        result2 = IOTHUBMESSAGE_BYTEARRAY;
-    }
-    else if (iotHubMessageHandle == TEST_IOTHUB_MSG_STRING)
-    {
-        result2 = IOTHUBMESSAGE_STRING;
-    }
-    else
-    {
-        result2 = IOTHUBMESSAGE_UNKNOWN;
-    }
-    return result2;
-}
-
-static IOTHUB_MESSAGE_RESULT my_IoTHubMessage_GetByteArray(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const unsigned char** buffer, size_t* size)
-{
-    if (iotHubMessageHandle == TEST_IOTHUB_MSG_BYTEARRAY)
-    {
-        *buffer = appMessage;
-        *size = appMsgSize;
-    }
-    else
-    {
-        /*not expected really*/
-        *buffer = (const unsigned char*)"333";
-        *size = 3;
-    }
-    return IOTHUB_MESSAGE_OK;
-}
-
-static void my_IoTHubMessage_Destroy(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
-{
-    (void)iotHubMessageHandle;
 }
 
 static int my_Transport_DeviceMethod_Complete_Callback(const char* method_name, const unsigned char* payLoad, size_t size, METHOD_HANDLE response_id, void* ctx)
@@ -281,11 +210,15 @@ static int my_Transport_DeviceMethod_Complete_Callback(const char* method_name, 
     return 0;
 }
 
+
+// my_Transport_MessageCallback receives the message handle generated by the mqtt_common layer.  It stores it in a global for
+// the test case to check the value.
 static bool my_Transport_MessageCallback(MESSAGE_CALLBACK_INFO* message_data, void* ctx)
 {
     (void)ctx;
 
-    IoTHubMessage_Destroy(message_data->messageHandle);
+    // IoTHubMessage_Destroy(message_data->messageHandle);
+    g_messageFromCallback = message_data->messageHandle;
     free(message_data);
 
     return true;
@@ -298,7 +231,7 @@ static MQTT_CLIENT_HANDLE my_mqtt_client_init(ON_MQTT_MESSAGE_RECV_CALLBACK msgR
     g_callbackCtx = callbackCtx;
     g_fnMqttErrorCallback = errorCallback;
     g_errorcallbackCtx = errorcallbackCtx;
-    return (MQTT_CLIENT_HANDLE)my_gballoc_malloc(12);
+    return (MQTT_CLIENT_HANDLE)malloc(12);
 }
 
 static int my_mqtt_client_disconnect(MQTT_CLIENT_HANDLE handle, ON_MQTT_DISCONNECTED_CALLBACK callback, void* ctx)
@@ -311,26 +244,36 @@ static int my_mqtt_client_disconnect(MQTT_CLIENT_HANDLE handle, ON_MQTT_DISCONNE
 
 static void my_mqtt_client_deinit(MQTT_CLIENT_HANDLE handle)
 {
-    my_gballoc_free(handle);
+    free(handle);
 }
 
 static XIO_HANDLE my_xio_create(const IO_INTERFACE_DESCRIPTION* io_interface_description, const void* xio_create_parameters)
 {
     (void)io_interface_description;
     (void)xio_create_parameters;
-    return (XIO_HANDLE)my_gballoc_malloc(1);
+    return (XIO_HANDLE)malloc(1);
 }
 
 static void my_xio_destroy(XIO_HANDLE ioHandle)
 {
-    my_gballoc_free(ioHandle);
+    free(ioHandle);
 }
 
 static XIO_HANDLE get_IO_transport(const char* fully_qualified_name, const MQTT_TRANSPORT_PROXY_OPTIONS* mqtt_transport_proxy_options)
 {
     (void)fully_qualified_name;
     (void)mqtt_transport_proxy_options;
-    return (XIO_HANDLE)my_gballoc_malloc(1);
+    return (XIO_HANDLE)malloc(1);
+}
+
+// g_mqttTopicToTest is set in our mocked implementation to return MQTT topic that the product implementation
+// that parser MQTT PUBLISH's sent to the device should process.
+static const char* g_mqttTopicToTest;
+
+static const char* my_mqttmessage_getTopicName(MQTT_MESSAGE_HANDLE handle)
+{
+    (void)handle;
+    return g_mqttTopicToTest;
 }
 
 MU_DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
@@ -396,70 +339,36 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(DEVICE_TWIN_UPDATE_STATE, int);
     REGISTER_UMOCK_ALIAS_TYPE(RETRY_CONTROL_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(RETRY_ACTION, int);
-
-    REGISTER_GLOBAL_MOCK_HOOK(Transport_GetOption_Product_Info_Callback, my_Transport_GetOption_Product_Info_Callback);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Transport_GetOption_Product_Info_Callback, NULL);
-    REGISTER_GLOBAL_MOCK_HOOK(Transport_GetOption_Model_Id_Callback, my_Transport_GetOption_Model_Id_Callback);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Transport_GetOption_Model_Id_Callback, NULL);
+    
+    REGISTER_GLOBAL_MOCK_HOOK(xio_create, my_xio_create);
+    REGISTER_GLOBAL_MOCK_HOOK(xio_destroy, my_xio_destroy);
 
     REGISTER_GLOBAL_MOCK_RETURN(IoTHub_Transport_ValidateCallbacks, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHub_Transport_ValidateCallbacks, __LINE__);
-
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_DeviceKey, TEST_DEVICE_KEY);
-
     REGISTER_GLOBAL_MOCK_HOOK(Transport_MessageCallback, my_Transport_MessageCallback);
-
     REGISTER_GLOBAL_MOCK_HOOK(Transport_DeviceMethod_Complete_Callback, my_Transport_DeviceMethod_Complete_Callback);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Transport_DeviceMethod_Complete_Callback, MU_FAILURE);
-
     REGISTER_GLOBAL_MOCK_HOOK(mqtt_client_init, my_mqtt_client_init);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_init, NULL);
-
     REGISTER_GLOBAL_MOCK_RETURN(mqtt_client_connect, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_connect, MU_FAILURE);
 
     REGISTER_GLOBAL_MOCK_HOOK(mqtt_client_deinit, my_mqtt_client_deinit);
-
     REGISTER_GLOBAL_MOCK_HOOK(mqtt_client_disconnect, my_mqtt_client_disconnect);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_disconnect, MU_FAILURE);
-
     REGISTER_GLOBAL_MOCK_RETURN(mqtt_client_subscribe, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_subscribe, MU_FAILURE);
-
     REGISTER_GLOBAL_MOCK_RETURN(mqtt_client_unsubscribe, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_unsubscribe, MU_FAILURE);
-
     REGISTER_GLOBAL_MOCK_RETURN(mqtt_client_publish, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqtt_client_publish, MU_FAILURE);
 
     REGISTER_GLOBAL_MOCK_RETURN(mqttmessage_create, TEST_MQTT_MESSAGE_HANDLE);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqttmessage_create, NULL);
-
     REGISTER_GLOBAL_MOCK_RETURN(mqttmessage_create_in_place, TEST_MQTT_MESSAGE_HANDLE);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqttmessage_create_in_place, NULL);
-
     REGISTER_GLOBAL_MOCK_RETURN(mqttmessage_getApplicationMsg, &TEST_APP_PAYLOAD);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqttmessage_getApplicationMsg, NULL);
-
-    REGISTER_GLOBAL_MOCK_RETURN(mqttmessage_getTopicName, TEST_MQTT_MSG_TOPIC);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(mqttmessage_getTopicName, NULL);
+    REGISTER_GLOBAL_MOCK_HOOK(mqttmessage_getTopicName, my_mqttmessage_getTopicName);
 
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_Credential_Type, IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_Auth_Get_Credential_Type, IOTHUB_CREDENTIAL_TYPE_UNKNOWN);
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_Auth_Get_SasToken, my_IoTHubClient_Auth_Get_SasToken);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_Auth_Get_SasToken, NULL);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Is_SasToken_Valid, SAS_TOKEN_STATUS_VALID);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubClient_Auth_Is_SasToken_Valid, SAS_TOKEN_STATUS_FAILED);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_SasToken_Expiry, 3600);
 
     REGISTER_GLOBAL_MOCK_RETURN(retry_control_create, TEST_RETRY_CONTROL_HANDLE);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(retry_control_create, NULL);
-
     REGISTER_GLOBAL_MOCK_RETURN(retry_control_should_retry, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(retry_control_should_retry, 1);
-
     REGISTER_GLOBAL_MOCK_RETURN(retry_control_set_option, 0);
-    REGISTER_GLOBAL_MOCK_FAIL_RETURN(retry_control_set_option, 1);
 }
 
 TEST_SUITE_CLEANUP(suite_cleanup)
@@ -481,6 +390,13 @@ static void reset_test_data()
     expected_MQTT_TRANSPORT_PROXY_OPTIONS = NULL;
     g_disconnect_callback = NULL;
     g_disconnect_callback_ctx = NULL;
+
+
+    if (g_messageFromCallback != NULL)
+    {
+        IoTHubMessage_Destroy(g_messageFromCallback);
+        g_messageFromCallback = NULL;
+    }
 }
 
 TEST_FUNCTION_INITIALIZE(method_init)
@@ -531,9 +447,80 @@ static void SetupIothubTransportConfig(IOTHUBTRANSPORT_CONFIG* config, const cha
     config->auth_module_handle = TEST_IOTHUB_AUTHORIZATION_HANDLE;
 }
 
-TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties_succeed)
+typedef struct TEST_EXPECTED_MESSAGE_DATA_TAG
 {
-    // arrange
+    const char* contentType;
+    const char* contentEncoding;
+    const char* messageId;
+    const char* correlationId;
+    const char* inputName;
+    const char* connectionModuleId;
+    const char* connectionDeviceId;
+    const char* messageCreationTime;
+    const char* messageUserId;
+    // Note there is no test for IoTHubMessage_GetDiagnosticPropertyData, we don't parse this out of MQTT topic string.
+} TEST_EXPECTED_MESSAGE_DATA;
+
+
+//
+// VerifyExpectedMessageReceived checks that the message we've received on mock callback matches the expected for this test case.
+//
+static void VerifyExpectedMessageReceived(const TEST_EXPECTED_MESSAGE_DATA* expectedMessageData)
+{
+    ASSERT_IS_NOT_NULL(g_messageFromCallback);
+
+    // Messages are always delivered as byte arrrays to applications.
+    ASSERT_ARE_EQUAL(IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_BYTEARRAY, IoTHubMessage_GetContentType(g_messageFromCallback));
+
+    const unsigned char* messageBody;
+    size_t messageBodyLen;
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, IoTHubMessage_GetByteArray(g_messageFromCallback, &messageBody, &messageBodyLen));
+    ASSERT_ARE_EQUAL(int, TEST_APP_PAYLOAD.length, messageBodyLen);
+    ASSERT_ARE_EQUAL(int, 0, memcmp(TEST_APP_PAYLOAD.message, messageBody, TEST_APP_PAYLOAD.length));
+
+    const char* contentType = IoTHubMessage_GetContentTypeSystemProperty(g_messageFromCallback);
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageData->contentType, contentType);
+
+    const char* contentEncoding = IoTHubMessage_GetContentEncodingSystemProperty(g_messageFromCallback);
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageData->contentEncoding, contentEncoding);
+
+    const char* messageId = IoTHubMessage_GetMessageId(g_messageFromCallback);
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageData->messageId, messageId);
+
+    const char* correlationId = IoTHubMessage_GetCorrelationId(g_messageFromCallback);
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageData->correlationId, correlationId);
+
+    const char* inputName = IoTHubMessage_GetInputName(g_messageFromCallback);
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageData->inputName, inputName);
+
+    const char* connectionModuleId = IoTHubMessage_GetConnectionModuleId(g_messageFromCallback);
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageData->connectionModuleId, connectionModuleId);
+
+    const char* connectionDeviceId = IoTHubMessage_GetConnectionDeviceId(g_messageFromCallback);
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageData->connectionDeviceId, connectionDeviceId);
+
+    const char* messageCreationTime = IoTHubMessage_GetMessageCreationTimeUtcSystemProperty(g_messageFromCallback);
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageData->messageCreationTime, messageCreationTime);
+
+    const char* messageUserId = IoTHubMessage_GetMessageUserIdSystemProperty(g_messageFromCallback);
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageData->messageUserId, messageUserId);
+
+    // These message properties can only be set by the device and then set to the MQTT server.  They are never
+    // parsed on an MQTT PUBLISH to the device itself and hence in the IoTHubMessage layer they'll always be NULL.
+    ASSERT_IS_NULL(IoTHubMessage_GetOutputName(g_messageFromCallback));
+    ASSERT_IS_NULL(IoTHubMessage_GetDiagnosticPropertyData(g_messageFromCallback));
+}
+
+
+//
+// TestMessageProcessing invokes the MQTT PUBLISH to device callback code, which will (on success) will store
+// the parsed message into the test's g_messageFromCallback.  TestMesageProcessing then verifies message is expected.
+//
+static void TestMessageProcessing(const char* topicToTest, const TEST_EXPECTED_MESSAGE_DATA* expectedMessageData)
+{
+    // There is not a direct mechanism for this test to call into the product code's callback.  Instead what we do is 
+    // invoke into the public interface of mqtt_common layer and use our mock (my_mqtt_client_init) to store the callback pointer
+    // for later.
     IOTHUBTRANSPORT_CONFIG config ={ 0 };
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, NULL);
 
@@ -543,13 +530,57 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties_succee
     umock_c_reset_all_calls();
 
     ASSERT_IS_NOT_NULL(g_fnMqttMsgRecv);
+
+    // Saves the topic to test into a global that the mocked "get topic" implementation will return to product code.
+    g_mqttTopicToTest = topicToTest;
+    // Invokes the product code's parsing callback, which we stored away earlier.
     g_fnMqttMsgRecv(TEST_MQTT_MESSAGE_HANDLE, g_callbackCtx);
 
-    // assert
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    if (expectedMessageData != NULL)
+    {
+        VerifyExpectedMessageReceived(expectedMessageData);
+    }
+    else
+    {
+        ASSERT_IS_NULL(g_messageFromCallback, "message received from callback the product code should have failed");
+    }
 
     //cleanup
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
+    
+// This is effectively one of same test strings used in original iothubtransport_mqtt_common_ut.  
+static const char* TEST_MQTT_MSG_TOPIC = "devices/myDeviceId/messages/devicebound/iothub-ack=Full&%24.to=%2Fdevices%2FmyDeviceId%2Fmessages%2FdeviceBound&%24.cid=123&%24.uid=456";
+TEST_EXPECTED_MESSAGE_DATA test1 = { NULL, NULL, NULL, "123", NULL, NULL, NULL, NULL, "456"};
+
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties1_succeed)
+{
+    TestMessageProcessing(TEST_MQTT_MSG_TOPIC, &test1);
+}
+
+// MQTT topics that are not legal.
+static const char* badMQTTTopics[] = {
+    "",
+    "ThisIsNotCloseToBeingALegalTopic",
+    "/device/",
+    "devices/"
+    "devices/myDeviceId/messages"
+    "devices/myDeviceId/messages/deviceboun"
+};
+
+static const size_t badMQTTTopicsLength = sizeof(badMQTTTopics) / sizeof(badMQTTTopics[0]);
+
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_bad_MQTT_topics_fail)
+{
+    for (size_t i = 0; i < badMQTTTopicsLength; i++)
+    {
+        TestMessageProcessing(badMQTTTopics[i], NULL);
+    }
+}
+
+
+    
+
+
 
 END_TEST_SUITE(iothubtransport_mqtt_common_int_ut)
