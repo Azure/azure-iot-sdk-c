@@ -638,7 +638,9 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_message_id_succeeds)
     TestMessageProcessing(TEST_MQTT_MSG_ID_TOPIC, &messageId);
 }
 
+//
 // contentTypeValue
+//
 static const char* TEST_MQTT_CONTENT_TYPE_TOPIC = "devices/myDeviceId/messages/devicebound/%24.ct=" TEST_CONTENT_TYPE_VALUE;
 
 TEST_EXPECTED_MESSAGE_PROPERTIES contentType = { TEST_CONTENT_TYPE_VALUE, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
@@ -648,8 +650,54 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_contentType_succeeds)
     TestMessageProcessing(TEST_MQTT_CONTENT_TYPE_TOPIC, &contentType);
 }
 
+//
+// contentEncodingValue
+//
+static const char* TEST_MQTT_CONTENT_ENCODING_TOPIC = "devices/myDeviceId/messages/devicebound/%24.ce=" TEST_CONTENT_ENCODING_VALUE;
+
+TEST_EXPECTED_MESSAGE_PROPERTIES contentEncoding = { NULL, TEST_CONTENT_ENCODING_VALUE, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_contentEncoding_succeeds)
+{
+    TestMessageProcessing(TEST_MQTT_CONTENT_ENCODING_TOPIC, &contentEncoding);
+}
 
 
+//
+// connectionDeviceValue
+//
+static const char* TEST_MQTT_CONNECTION_DEVICE_ID_TOPIC = "devices/myDeviceId/messages/devicebound/%24.cdid=" TEST_CONNECTION_DEVICE_VALUE;
+
+TEST_EXPECTED_MESSAGE_PROPERTIES connectionDeviceId = { NULL, NULL, NULL, NULL, NULL, NULL, TEST_CONNECTION_DEVICE_VALUE, NULL, NULL, NULL };
+
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_ConnectionDeviceId_succeeds)
+{
+    TestMessageProcessing(TEST_MQTT_CONNECTION_DEVICE_ID_TOPIC, &connectionDeviceId);
+}
+
+//
+// connectionModuleValue
+//
+static const char* TEST_MQTT_CONNECTION_MODULE_ID_TOPIC = "devices/myDeviceId/messages/devicebound/%24.cmid=" TEST_CONNECTION_MODULE_VALUE;
+
+TEST_EXPECTED_MESSAGE_PROPERTIES connectionModuleId = { NULL, NULL, NULL, NULL, NULL, TEST_CONNECTION_MODULE_VALUE, NULL, NULL, NULL, NULL };
+
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_ConnectionModuleId_succeeds)
+{
+    TestMessageProcessing(TEST_MQTT_CONNECTION_MODULE_ID_TOPIC, &connectionModuleId);
+}
+
+//
+// creationTimeValue
+//
+static const char* TEST_MQTT_CONNECTION_CREATION_TIME_TOPIC = "devices/myDeviceId/messages/devicebound/%24.ctime=" TEST_CREATION_TIME_VALUE;
+
+TEST_EXPECTED_MESSAGE_PROPERTIES creationTime = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, TEST_CREATION_TIME_VALUE, NULL, NULL };
+
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_ConnectionCreationTime_succeeds)
+{
+    TestMessageProcessing(TEST_MQTT_CONNECTION_CREATION_TIME_TOPIC, &creationTime);
+}
 
 //
 // All system properties
@@ -769,6 +817,66 @@ TEST_EXPECTED_MESSAGE_PROPERTIES expectedAppProperties3 = { NULL, NULL, NULL, NU
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_app_properties3_succeed)
 {
     TestMessageProcessing(TEST_MQTT_MESSAGE_APP_PROPERTIES_3, &expectedAppProperties3);
+}
+
+//
+//  IoT Edge module to module processing tests
+//
+//
+
+
+
+
+//
+// TestInputQueueProcessing invokes the MQTT PUBLISH to device callback code, which will (on success) will store
+// the parsed message into the test's g_messageFromCallback.  TestMesageProcessing then verifies message is expected.
+//
+static void TestInputQueueProcessing(const char* topicToTest, const TEST_EXPECTED_MESSAGE_PROPERTIES* expectedMessageProperties)
+{
+    // There is not a direct mechanism for this test to call into the product code's callback.  Instead what we do is 
+    // invoke into the public interface of mqtt_common layer and use our mock (my_mqtt_client_init) to store the callback pointer
+    // for later.
+    IOTHUBTRANSPORT_CONFIG config ={ 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, TEST_MODULE_ID);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
+    (void)IoTHubTransport_MQTT_Common_Subscribe_InputQueue(handle);
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+    umock_c_reset_all_calls();
+
+    ASSERT_IS_NOT_NULL(g_fnMqttMsgRecv);
+
+    // Saves the topic to test into a global that the mocked "get topic" implementation will return to product code.
+    g_mqttTopicToTest = topicToTest;
+    // Invokes the product code's parsing callback, which we stored away earlier.
+    g_fnMqttMsgRecv(TEST_MQTT_MESSAGE_HANDLE, g_callbackCtx);
+
+    if (expectedMessageProperties != NULL)
+    {
+        VerifyExpectedMessageReceived(expectedMessageProperties);
+    }
+    else
+    {
+        ASSERT_IS_NULL(g_messageFromCallback, "message received from callback the product code should have failed.  topic=%s", topicToTest);
+    }
+
+    //cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+
+//
+// Tests a topic scraped from actual IoT Edge communication
+//
+const char* TEST_INPUT_FILTER_1 = "devices/myDeviceId/modules/thisIsModuleID/inputs/input1/temperatureAlert=false&temperatureAlert2=false&temperatureAlert3=false&%24.cdid=" TEST_CONNECTION_DEVICE_VALUE
+                                  "&%24.cmid=" TEST_CONNECTION_MODULE_VALUE "&%24.cid=" TEST_CORRELATION_PROPERTY "&%24.mid=" TEST_MSG_ID_VALUE;
+
+TEST_EXPECTED_MESSAGE_PROPERTIES testFilter1 = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &app2};
+
+
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_InputQueue_1_success)
+{
+    TestInputQueueProcessing(TEST_INPUT_FILTER_1, &testFilter1);
 }
 
 
