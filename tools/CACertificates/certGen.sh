@@ -353,6 +353,26 @@ function generate_device_certificate()
                               ${openssl_root_config_file}
 }
 
+
+###############################################################################
+# Generates a certificate for a device, chained to the intermediate.
+###############################################################################
+function generate_device_certificate_from_intermediate()
+{
+    if [ $# -ne 1 ]; then
+        echo "Usage: <subjectName>"
+        exit 1
+    fi
+
+    rm -f ./private/new-device.key.pem
+    rm -f ./certs/new-device.key.pem
+    rm -f ./certs/new-device-full-chain.cert.pem
+    generate_leaf_certificate "${1}" "new-device" \
+                              ${intermediate_ca_dir} ${intermediate_ca_password} \
+                              ${openssl_intermediate_config_file}
+}
+
+
 ###############################################################################
 # Generates a certificate for a Edge device, chained to the intermediate.
 ###############################################################################
@@ -386,14 +406,20 @@ elif [ "${1}" == "create_verification_certificate" ]; then
     generate_verification_certificate "${2}"
 elif [ "${1}" == "create_device_certificate" ]; then
     generate_device_certificate "${2}"
+elif [ "${1}" == "create_device_certificate_from_intermediate" ]; then
+    generate_device_certificate_from_intermediate "${2}"
 elif [ "${1}" == "create_edge_device_certificate" ]; then
     generate_edge_device_certificate "${2}"
 else
-    echo "Usage: create_root_and_intermediate                   # Creates a new root and intermediate certificates"
-    echo "       create_verification_certificate <subjectName>  # Creates a verification certificate, signed with <subjectName>"
-    echo "       create_device_certificate <subjectName>        # Creates a device certificate, signed with <subjectName>"
-    echo "       create_edge_device_certificate <subjectName>   # Creates an edge device certificate, signed with <subjectName>"
+    echo "Usage: create_root_and_intermediate                               # Creates a new root and intermediate certificates"
+    echo "       create_verification_certificate <subjectName>              # Creates a verification certificate, signed with <subjectName>"
+    echo "       create_device_certificate <subjectName>                    # Creates a device certificate signed by root with <subjectName>"
+    echo "       create_device_certificate_from_intermediate <subjectName>  # Creates a device certificate signed by intermediate with <subjectName>"
+    echo "       create_edge_device_certificate <subjectName>               # Creates an edge device certificate, signed with <subjectName>"
     exit 1
 fi
+
+
+
 
 warn_certs_not_for_production
