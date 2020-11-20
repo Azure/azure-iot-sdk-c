@@ -64,12 +64,6 @@ int main(void)
         // bool traceOn = true;
         // IoTHubModuleClient_LL_SetOption(iotHubModuleClientHandle, OPTION_LOG_TRACE, &traceOn);
 
-        //Setting the auto URL Encoder (recommended for MQTT). Please use this option unless
-        //you are URL Encoding responses yourself.
-        //ONLY valid for use with MQTT
-        bool urlEncodeOn = true;
-        (void)IoTHubDeviceClient_LL_SetOption(iotHubModuleClientHandle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
-
         size_t iterator = 0;
         double temperature = 0;
         double humidity = 0;

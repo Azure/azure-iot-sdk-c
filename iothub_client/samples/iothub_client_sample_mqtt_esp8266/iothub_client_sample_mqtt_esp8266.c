@@ -209,12 +209,6 @@ void iothub_client_sample_mqtt_esp8266_run(void)
 
 int main(void)
 {
-    //Setting the auto URL Decoder (recommended for MQTT). Please use this option unless
-    //you are URL Decoding responses yourself.
-    //ONLY valid for use with MQTT
-    bool urlDecodeOn = true;
-    (void)IoTHubDeviceClient_LL_SetOption(iotHubClientHandle, OPTION_AUTO_URL_ENCODE_DECODE, &urlDecodeOn);
-
     iothub_client_sample_mqtt_esp8266_run();
     return 0;
 }
