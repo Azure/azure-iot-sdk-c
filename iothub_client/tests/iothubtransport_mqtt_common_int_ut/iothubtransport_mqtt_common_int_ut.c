@@ -73,7 +73,7 @@ static const char* TEST_MQTT_INPUT_QUEUE_SUBSCRIBE_NAME_1 = "devices/thisIsDevic
 static const char* TEST_MQTT_INPUT_1 = "devices/thisIsDeviceID/modules/thisIsModuleID/inputs/input1/%24.cdid=connected_device&%24.cmid=connected_module/";
 static const char* TEST_MQTT_INPUT_NO_PROPERTIES = "devices/thisIsDeviceID/modules/thisIsModuleID/inputs/input1/";
 static const char* TEST_MQTT_INPUT_MISSING_INPUT_QUEUE_NAME = "devices/thisIsDeviceID/modules/thisIsModuleID/inputs";
-static const char* TEST_INPUT_QUEUE_1 = "input1";
+#define TEST_INPUT_QUEUE_1 "input1"
 
 static const char* TEST_SAS_TOKEN = "Test_SAS_Token_value";
 
@@ -221,11 +221,18 @@ static int my_Transport_DeviceMethod_Complete_Callback(const char* method_name, 
 static bool my_Transport_MessageCallback(MESSAGE_CALLBACK_INFO* message_data, void* ctx)
 {
     (void)ctx;
-
-    // IoTHubMessage_Destroy(message_data->messageHandle);
     g_messageFromCallback = message_data->messageHandle;
     free(message_data);
+    return true;
+}
 
+// my_Transport_MessageCallbackFromInput role in unit test is analogous to my_Transport_MessageCallback, except
+// it receives input queue callbacks.
+static bool my_Transport_MessageCallbackFromInput(MESSAGE_CALLBACK_INFO* message_data, void* ctx)
+{
+    (void)ctx;
+    g_messageFromCallback = message_data->messageHandle;
+    free(message_data);
     return true;
 }
 
@@ -352,6 +359,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_DeviceKey, TEST_DEVICE_KEY);
     REGISTER_GLOBAL_MOCK_HOOK(Transport_MessageCallback, my_Transport_MessageCallback);
     REGISTER_GLOBAL_MOCK_HOOK(Transport_DeviceMethod_Complete_Callback, my_Transport_DeviceMethod_Complete_Callback);
+    REGISTER_GLOBAL_MOCK_HOOK(Transport_MessageCallbackFromInput, my_Transport_MessageCallbackFromInput);
     REGISTER_GLOBAL_MOCK_HOOK(mqtt_client_init, my_mqtt_client_init);
     REGISTER_GLOBAL_MOCK_RETURN(mqtt_client_connect, 0);
 
@@ -496,28 +504,28 @@ static void VerifyExpectedMessageReceived(const TEST_EXPECTED_MESSAGE_PROPERTIES
     ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->contentType, contentType);
 
     const char* contentEncoding = IoTHubMessage_GetContentEncodingSystemProperty(g_messageFromCallback);
-    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->contentEncoding, contentEncoding);
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->contentEncoding, contentEncoding, "Content encodings don't match");
 
     const char* messageId = IoTHubMessage_GetMessageId(g_messageFromCallback);
-    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->messageId, messageId);
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->messageId, messageId, "Message ids don't match");
 
     const char* correlationId = IoTHubMessage_GetCorrelationId(g_messageFromCallback);
-    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->correlationId, correlationId);
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->correlationId, correlationId, "Correlation ids don't match");
 
     const char* inputName = IoTHubMessage_GetInputName(g_messageFromCallback);
-    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->inputName, inputName);
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->inputName, inputName, "Input names don't match");
 
     const char* connectionModuleId = IoTHubMessage_GetConnectionModuleId(g_messageFromCallback);
-    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->connectionModuleId, connectionModuleId);
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->connectionModuleId, connectionModuleId, "Connection module ids don't match");
 
     const char* connectionDeviceId = IoTHubMessage_GetConnectionDeviceId(g_messageFromCallback);
-    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->connectionDeviceId, connectionDeviceId);
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->connectionDeviceId, connectionDeviceId, "Connection device ids don't match");
 
     const char* messageCreationTime = IoTHubMessage_GetMessageCreationTimeUtcSystemProperty(g_messageFromCallback);
-    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->messageCreationTime, messageCreationTime);
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->messageCreationTime, messageCreationTime, "Message creation tims don't match");
 
     const char* messageUserId = IoTHubMessage_GetMessageUserIdSystemProperty(g_messageFromCallback);
-    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->messageUserId, messageUserId);
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->messageUserId, messageUserId, "Message user ids don't match");
 
     // These message properties can only be set by the device and then set to the MQTT server.  They are never
     // parsed on an MQTT PUBLISH to the device itself and hence in the IoTHubMessage layer they'll always be NULL.
@@ -534,11 +542,11 @@ static void VerifyExpectedMessageReceived(const TEST_EXPECTED_MESSAGE_PROPERTIES
     size_t expectedKeyLen = (expectedMessageProperties->applicationProperties != NULL) ? expectedMessageProperties->applicationProperties->keysLength : 0;
 
     ASSERT_ARE_EQUAL(MAP_RESULT, MAP_OK, Map_GetInternals(mapHandle, &actualKeys, &actualValues, &actualKeysLen));
-    ASSERT_ARE_EQUAL(int, expectedKeyLen, actualKeysLen);
+    ASSERT_ARE_EQUAL(int, expectedKeyLen, actualKeysLen, "Number of custom properties don't mach");
 
     for (i = 0; i < expectedKeyLen; i++)
     {
-        ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->applicationProperties->values[i], IoTHubMessage_GetProperty(g_messageFromCallback, expectedMessageProperties->applicationProperties->keys[i]));
+        ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->applicationProperties->values[i], IoTHubMessage_GetProperty(g_messageFromCallback, expectedMessageProperties->applicationProperties->keys[i]), "Properties don't match");
     }
 }
 
@@ -702,10 +710,12 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_ConnectionCreationTim
 //
 // All system properties
 //
-static const char* TEST_MQTT_MSG_ALL_SYSTEM_TOPIC = "devices/myDeviceId/messages/devicebound/%24.cid=" TEST_CORRELATION_PROPERTY "&%24.uid=" TEST_MSG_USER_ID_VALUE 
-                                                    "&%24.mid=" TEST_MSG_ID_VALUE "&%24.ct=" TEST_CONTENT_TYPE_VALUE
-                                                    "&%24.ce=" TEST_CONTENT_ENCODING_VALUE   "&%24.cdid="  TEST_CONNECTION_DEVICE_VALUE 
-                                                    "&%24.cmid=" TEST_CONNECTION_MODULE_VALUE "&%24.ctime=" TEST_CREATION_TIME_VALUE;
+#define TEST_ALL_SYSTEM_PROPERTIES "%24.cid=" TEST_CORRELATION_PROPERTY "&%24.uid=" TEST_MSG_USER_ID_VALUE \
+                                   "&%24.mid=" TEST_MSG_ID_VALUE "&%24.ct=" TEST_CONTENT_TYPE_VALUE \
+                                   "&%24.ce=" TEST_CONTENT_ENCODING_VALUE   "&%24.cdid="  TEST_CONNECTION_DEVICE_VALUE  \
+                                   "&%24.cmid=" TEST_CONNECTION_MODULE_VALUE "&%24.ctime=" TEST_CREATION_TIME_VALUE \
+
+static const char* TEST_MQTT_MSG_ALL_SYSTEM_TOPIC = "devices/myDeviceId/messages/devicebound/" TEST_ALL_SYSTEM_PROPERTIES;
 
 TEST_EXPECTED_MESSAGE_PROPERTIES allSystemPropertiesSet1 = { TEST_CONTENT_TYPE_VALUE, TEST_CONTENT_ENCODING_VALUE, TEST_MSG_ID_VALUE, TEST_CORRELATION_PROPERTY, NULL, TEST_CONNECTION_MODULE_VALUE, TEST_CONNECTION_DEVICE_VALUE, TEST_CREATION_TIME_VALUE, TEST_MSG_USER_ID_VALUE, NULL};
 
@@ -718,9 +728,10 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_all_set)
 // MQTT ignores certain values to maintain compat with previous versions of parser.  This tests these values and also makes sure values that
 // are similar to but not identical to are passed to application.
 //
-static const char* TEST_MQTT_IGNORED_TOPICS= "devices/myDeviceId/messages/devicebound/iothub-operation=valueToIgnore&iothub-ack=valueToIgnore"
-                                             "&%24.to=valueToIgnore&%24.on=valueToIgnore&%24.exp=valueToIgnore&devices/=valueToIgnore"
-                                             "&devices=valueToApp1&to=valueToApp2&exp=valueToApp3&on=valueToApp4";
+
+#define TEST_TOPICS_TO_IGNORE "iothub-operation=valueToIgnore&iothub-ack=valueToIgnore&%24.to=valueToIgnore&%24.on=valueToIgnore&%24.exp=valueToIgnore&devices/=valueToIgnore"
+#define TEST_TOPICS_TO_NOT_IGNORE "&devices=valueToApp1&to=valueToApp2&exp=valueToApp3&on=valueToApp4"
+static const char* TEST_MQTT_IGNORED_TOPICS= "devices/myDeviceId/messages/devicebound/" TEST_TOPICS_TO_IGNORE TEST_TOPICS_TO_NOT_IGNORE;
 
 const char* expectedNotIgnoredKeys[] = {"devices", "to", "exp", "on"};
 const char* expectedNotIgnoredValues[] = {"valueToApp1", "valueToApp2", "valueToApp3", "valueToApp4" };
@@ -746,8 +757,10 @@ static const char* mqttNoMatchTopic[] = {
     "devices/myDeviceId/messages",
     "devices/myDeviceId/messages/deviceboun",
     "/devices/myDeviceId/messages/devicebound",
+    // These are legal topics but as we're not subscribed to them they should be ignored.
     "$iothub/twin/twinData",
-    "iothub/methods/methodData"
+    "iothub/methods/methodData",
+    "devices/myDeviceId/modules/thisIsModuleID/inputs/" TEST_INPUT_QUEUE_1 "/"
 };
 static const size_t mqttNoMatchTopicLength = sizeof(mqttNoMatchTopic) / sizeof(mqttNoMatchTopic[0]);
 
@@ -825,8 +838,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_app_properties3_succeed)
 //
 
 
-
-
 //
 // TestInputQueueProcessing invokes the MQTT PUBLISH to device callback code, which will (on success) will store
 // the parsed message into the test's g_messageFromCallback.  TestMesageProcessing then verifies message is expected.
@@ -868,10 +879,14 @@ static void TestInputQueueProcessing(const char* topicToTest, const TEST_EXPECTE
 //
 // Tests a topic scraped from actual IoT Edge communication
 //
-const char* TEST_INPUT_FILTER_1 = "devices/myDeviceId/modules/thisIsModuleID/inputs/input1/temperatureAlert=false&temperatureAlert2=false&temperatureAlert3=false&%24.cdid=" TEST_CONNECTION_DEVICE_VALUE
+const char* TEST_INPUT_FILTER_1 = "devices/myDeviceId/modules/thisIsModuleID/inputs/" TEST_INPUT_QUEUE_1 "/temperatureAlert1=false1&temperatureAlert2=false2&temperatureAlert3=false3&%24.cdid=" TEST_CONNECTION_DEVICE_VALUE
                                   "&%24.cmid=" TEST_CONNECTION_MODULE_VALUE "&%24.cid=" TEST_CORRELATION_PROPERTY "&%24.mid=" TEST_MSG_ID_VALUE;
 
-TEST_EXPECTED_MESSAGE_PROPERTIES testFilter1 = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &app2};
+const char* inputFilterExpectedKey1[] = {"temperatureAlert1", "temperatureAlert2", "temperatureAlert3"};
+const char* inputFilterExpectedValue1[] = {"false1", "false2", "false3"};
+TEST_EXPECTED_APPLICATION_PROPERTIES inputFilterAppProperties = { inputFilterExpectedKey1, inputFilterExpectedValue1, 3};
+
+TEST_EXPECTED_MESSAGE_PROPERTIES testFilter1 = { NULL, NULL, TEST_MSG_ID_VALUE, TEST_CORRELATION_PROPERTY, TEST_INPUT_QUEUE_1, TEST_CONNECTION_MODULE_VALUE, TEST_CONNECTION_DEVICE_VALUE, NULL, NULL, &inputFilterAppProperties};
 
 
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_InputQueue_1_success)
@@ -879,6 +894,44 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_InputQueue_1_success)
     TestInputQueueProcessing(TEST_INPUT_FILTER_1, &testFilter1);
 }
 
+//
+// Tests topic with no properties
+//
+const char* TEST_INPUT_FILTER_NO_PROPERTIES = "devices/myDeviceId/modules/thisIsModuleID/inputs/" TEST_INPUT_QUEUE_1 "/";
+TEST_EXPECTED_MESSAGE_PROPERTIES inputFilterNoProperties = { NULL, NULL, NULL, NULL, TEST_INPUT_QUEUE_1, NULL, NULL, NULL, NULL, NULL};
 
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_InputQueue_no_properties_success)
+{
+    TestInputQueueProcessing(TEST_INPUT_FILTER_NO_PROPERTIES, &inputFilterNoProperties);
+}
+
+//
+// Input queue with ignored and not ignored topics
+//
+static const char* TEST_MQTT_INPUT_IGNORED_TOPICS= "devices/myDeviceId/modules/thisIsModuleID/inputs/" TEST_INPUT_QUEUE_1 "/" TEST_TOPICS_TO_IGNORE TEST_TOPICS_TO_NOT_IGNORE;
+
+TEST_EXPECTED_MESSAGE_PROPERTIES mostlyIgnoredFilterProperties = { NULL, NULL, NULL, NULL, TEST_INPUT_QUEUE_1, NULL, NULL, NULL, NULL, &expectedNotIgnored};
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_InputQueue_with_many_ignored_properties)
+{
+    TestInputQueueProcessing(TEST_MQTT_INPUT_IGNORED_TOPICS, &mostlyIgnoredFilterProperties);
+}
+
+//
+// Input queue with all system properties
+//
+
+#define TEST_ALL_SYSTEM_PROPERTIES "%24.cid=" TEST_CORRELATION_PROPERTY "&%24.uid=" TEST_MSG_USER_ID_VALUE \
+                                   "&%24.mid=" TEST_MSG_ID_VALUE "&%24.ct=" TEST_CONTENT_TYPE_VALUE \
+                                   "&%24.ce=" TEST_CONTENT_ENCODING_VALUE   "&%24.cdid="  TEST_CONNECTION_DEVICE_VALUE  \
+                                   "&%24.cmid=" TEST_CONNECTION_MODULE_VALUE "&%24.ctime=" TEST_CREATION_TIME_VALUE \
+
+static const char* TEST_MQTT_INPUT_ALL_SYSTEM_TOPIC = "devices/myDeviceId/modules/thisIsModuleID/inputs/" TEST_INPUT_QUEUE_1 "/" TEST_ALL_SYSTEM_PROPERTIES;
+
+TEST_EXPECTED_MESSAGE_PROPERTIES allInputSystemPropertiesSet1 = { TEST_CONTENT_TYPE_VALUE, TEST_CONTENT_ENCODING_VALUE, TEST_MSG_ID_VALUE, TEST_CORRELATION_PROPERTY, TEST_INPUT_QUEUE_1, TEST_CONNECTION_MODULE_VALUE, TEST_CONNECTION_DEVICE_VALUE, TEST_CREATION_TIME_VALUE, TEST_MSG_USER_ID_VALUE, NULL};
+
+TEST_FUNCTION(IoTHubTransport_MQTT_Input_MessageRecv_with_sys_all_set)
+{
+    TestInputQueueProcessing(TEST_MQTT_INPUT_ALL_SYSTEM_TOPIC, &allInputSystemPropertiesSet1);
+}
 
 END_TEST_SUITE(iothubtransport_mqtt_common_int_ut)
