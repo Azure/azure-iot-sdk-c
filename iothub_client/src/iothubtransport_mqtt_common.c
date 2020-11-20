@@ -1883,9 +1883,11 @@ static void processIncomingMessageNotification(PMQTTTRANSPORT_HANDLE_DATA transp
                 if (!transportData->transport_callbacks.msg_input_cb(messageData, transportData->transport_ctx))
                 {
                     LogError("IoTHubClientCore_LL_MessageCallbackreturned false");
-
-                    IoTHubMessage_Destroy(iotHubMessage);
                     free(messageData);
+                }
+                else
+                {
+                    iotHubMessage = NULL;
                 }
             }
             else
@@ -1894,11 +1896,21 @@ static void processIncomingMessageNotification(PMQTTTRANSPORT_HANDLE_DATA transp
                 if (!transportData->transport_callbacks.msg_cb(messageData, transportData->transport_ctx))
                 {
                     LogError("IoTHubClientCore_LL_MessageCallback returned false");
-                    IoTHubMessage_Destroy(iotHubMessage);
                     free(messageData);
+                }
+                else
+                {
+                    iotHubMessage = NULL;
                 }
             }
         }
+    }
+
+    if (iotHubMessage != NULL)
+    {
+        // iotHubMessage is set to NULL if it is successfully handed off to next layer, which will own freeing it.
+        // It being non-NULL indicates that this function still owns cleaning it up.
+        IoTHubMessage_Destroy(iotHubMessage);
     }
 }
 

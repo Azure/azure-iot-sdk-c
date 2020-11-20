@@ -390,6 +390,15 @@ TEST_SUITE_CLEANUP(suite_cleanup)
     TEST_MUTEX_DESTROY(test_serialize_mutex);
 }
 
+static void reset_data_from_callback()
+{
+    if (g_messageFromCallback != NULL)
+    {
+        IoTHubMessage_Destroy(g_messageFromCallback);
+        g_messageFromCallback = NULL;
+    }
+}
+
 static void reset_test_data()
 {
     g_fnMqttMsgRecv = NULL;
@@ -404,12 +413,7 @@ static void reset_test_data()
     g_disconnect_callback = NULL;
     g_disconnect_callback_ctx = NULL;
 
-
-    if (g_messageFromCallback != NULL)
-    {
-        IoTHubMessage_Destroy(g_messageFromCallback);
-        g_messageFromCallback = NULL;
-    }
+    reset_data_from_callback();
 }
 
 TEST_FUNCTION_INITIALIZE(method_init)
@@ -485,7 +489,7 @@ typedef struct TEST_EXPECTED_MESSAGE_PROPERTIES_TAG
 //
 // VerifyExpectedMessageReceived checks that the message we've received on mock callback matches the expected for this test case.
 //
-static void VerifyExpectedMessageReceived(const TEST_EXPECTED_MESSAGE_PROPERTIES* expectedMessageProperties)
+static void VerifyExpectedMessageReceived(const char* topicToTest, const TEST_EXPECTED_MESSAGE_PROPERTIES* expectedMessageProperties)
 {
     size_t i;
 
@@ -496,41 +500,41 @@ static void VerifyExpectedMessageReceived(const TEST_EXPECTED_MESSAGE_PROPERTIES
 
     const unsigned char* messageBody;
     size_t messageBodyLen;
-    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, IoTHubMessage_GetByteArray(g_messageFromCallback, &messageBody, &messageBodyLen));
-    ASSERT_ARE_EQUAL(int, TEST_APP_PAYLOAD.length, messageBodyLen);
-    ASSERT_ARE_EQUAL(int, 0, memcmp(TEST_APP_PAYLOAD.message, messageBody, TEST_APP_PAYLOAD.length));
+    ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, IoTHubMessage_GetByteArray(g_messageFromCallback, &messageBody, &messageBodyLen), "can't get byte array for topic %s", topicToTest);
+    ASSERT_ARE_EQUAL(int, TEST_APP_PAYLOAD.length, messageBodyLen, "payload lengths don't match for topic %s", topicToTest);
+    ASSERT_ARE_EQUAL(int, 0, memcmp(TEST_APP_PAYLOAD.message, messageBody, TEST_APP_PAYLOAD.length), "payloads don't match for topic %s", topicToTest);
 
     const char* contentType = IoTHubMessage_GetContentTypeSystemProperty(g_messageFromCallback);
-    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->contentType, contentType);
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->contentType, contentType, "Content types don't match for topic %s", topicToTest);
 
     const char* contentEncoding = IoTHubMessage_GetContentEncodingSystemProperty(g_messageFromCallback);
     ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->contentEncoding, contentEncoding, "Content encodings don't match");
 
     const char* messageId = IoTHubMessage_GetMessageId(g_messageFromCallback);
-    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->messageId, messageId, "Message ids don't match");
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->messageId, messageId, "Message ids don't match for topic %s", topicToTest);
 
     const char* correlationId = IoTHubMessage_GetCorrelationId(g_messageFromCallback);
-    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->correlationId, correlationId, "Correlation ids don't match");
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->correlationId, correlationId, "Correlation ids don't match for topic %s", topicToTest);
 
     const char* inputName = IoTHubMessage_GetInputName(g_messageFromCallback);
-    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->inputName, inputName, "Input names don't match");
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->inputName, inputName, "Input names don't match for topic %s", topicToTest);
 
     const char* connectionModuleId = IoTHubMessage_GetConnectionModuleId(g_messageFromCallback);
-    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->connectionModuleId, connectionModuleId, "Connection module ids don't match");
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->connectionModuleId, connectionModuleId, "Connection module ids don't match for topic %s", topicToTest);
 
     const char* connectionDeviceId = IoTHubMessage_GetConnectionDeviceId(g_messageFromCallback);
-    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->connectionDeviceId, connectionDeviceId, "Connection device ids don't match");
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->connectionDeviceId, connectionDeviceId, "Connection device ids don't match for topic %s", topicToTest);
 
     const char* messageCreationTime = IoTHubMessage_GetMessageCreationTimeUtcSystemProperty(g_messageFromCallback);
-    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->messageCreationTime, messageCreationTime, "Message creation tims don't match");
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->messageCreationTime, messageCreationTime, "Message creation tims don't match for topic %s", topicToTest);
 
     const char* messageUserId = IoTHubMessage_GetMessageUserIdSystemProperty(g_messageFromCallback);
-    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->messageUserId, messageUserId, "Message user ids don't match");
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->messageUserId, messageUserId, "Message user ids don't match for topic %s", topicToTest);
 
     // These message properties can only be set by the device and then set to the MQTT server.  They are never
     // parsed on an MQTT PUBLISH to the device itself and hence in the IoTHubMessage layer they'll always be NULL.
-    ASSERT_IS_NULL(IoTHubMessage_GetOutputName(g_messageFromCallback));
-    ASSERT_IS_NULL(IoTHubMessage_GetDiagnosticPropertyData(g_messageFromCallback));
+    ASSERT_IS_NULL(IoTHubMessage_GetOutputName(g_messageFromCallback), "GetOutputName should have returned NULL for topic %s", topicToTest);
+    ASSERT_IS_NULL(IoTHubMessage_GetDiagnosticPropertyData(g_messageFromCallback), "GetDiagnosticPropertyData should have returned NULL for topic %s", topicToTest);
 
     // Check application properties
     MAP_HANDLE mapHandle = IoTHubMessage_Properties(g_messageFromCallback);
@@ -542,11 +546,11 @@ static void VerifyExpectedMessageReceived(const TEST_EXPECTED_MESSAGE_PROPERTIES
     size_t expectedKeyLen = (expectedMessageProperties->applicationProperties != NULL) ? expectedMessageProperties->applicationProperties->keysLength : 0;
 
     ASSERT_ARE_EQUAL(MAP_RESULT, MAP_OK, Map_GetInternals(mapHandle, &actualKeys, &actualValues, &actualKeysLen));
-    ASSERT_ARE_EQUAL(int, expectedKeyLen, actualKeysLen, "Number of custom properties don't mach");
+    ASSERT_ARE_EQUAL(int, expectedKeyLen, actualKeysLen, "Number of custom properties don't match for topic %s", topicToTest);
 
     for (i = 0; i < expectedKeyLen; i++)
     {
-        ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->applicationProperties->values[i], IoTHubMessage_GetProperty(g_messageFromCallback, expectedMessageProperties->applicationProperties->keys[i]), "Properties don't match");
+        ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->applicationProperties->values[i], IoTHubMessage_GetProperty(g_messageFromCallback, expectedMessageProperties->applicationProperties->keys[i]), "Properties don't match for topic %s", topicToTest);
     }
 }
 
@@ -577,7 +581,7 @@ static void TestMessageProcessing(const char* topicToTest, const TEST_EXPECTED_M
 
     if (expectedMessageProperties != NULL)
     {
-        VerifyExpectedMessageReceived(expectedMessageProperties);
+        VerifyExpectedMessageReceived(topicToTest, expectedMessageProperties);
     }
     else
     {
@@ -744,8 +748,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_many_ignored_properti
     TestMessageProcessing(TEST_MQTT_IGNORED_TOPICS, &mostlyIgnoredProperties);
 }
 
-
-
 //
 // Tests MQTT topics that should not match C2D message processor.  Some are legal MQTT we'd expect from IoT Hub, others are not.
 //
@@ -783,7 +785,7 @@ static const char* emptyPropertyMQTTTopics[] = {
     "devices/myDeviceId/messages/devicebound/&&&",
     "devices/myDeviceId/messages/devicebound/=",
     "devices/myDeviceId/messages/devicebound/fooBar",
-    "devices/myDeviceId/messages/devicebound/==",
+    //"devices/myDeviceId/messages/devicebound/==",
 };
 
 static const size_t emptyMQTTTopicsLength = sizeof(emptyPropertyMQTTTopics) / sizeof(emptyPropertyMQTTTopics[0]);  
@@ -793,6 +795,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_empty_properties_succ
 {
     for (size_t i = 0; i < emptyMQTTTopicsLength; i++)
     {
+        reset_data_from_callback();
         TestMessageProcessing(emptyPropertyMQTTTopics[i], &noProperties);
     }
 }
@@ -864,7 +867,7 @@ static void TestInputQueueProcessing(const char* topicToTest, const TEST_EXPECTE
 
     if (expectedMessageProperties != NULL)
     {
-        VerifyExpectedMessageReceived(expectedMessageProperties);
+        VerifyExpectedMessageReceived(topicToTest, expectedMessageProperties);
     }
     else
     {
@@ -932,6 +935,61 @@ TEST_EXPECTED_MESSAGE_PROPERTIES allInputSystemPropertiesSet1 = { TEST_CONTENT_T
 TEST_FUNCTION(IoTHubTransport_MQTT_Input_MessageRecv_with_sys_all_set)
 {
     TestInputQueueProcessing(TEST_MQTT_INPUT_ALL_SYSTEM_TOPIC, &allInputSystemPropertiesSet1);
+}
+
+//
+// Tests MQTT topics that should not match input message processor.  Some are legal MQTT we'd expect from IoT Hub, others are not.
+//
+static const char* mqttNoMatchInputTopic[] = {
+    "",
+    "ThisIsNotCloseToBeingALegalTopic",
+    "/device/",
+    "devices/",
+    "devices/myDeviceId/modules",
+    "devices/myDeviceId/modules/thisIsModuleID/inputs",
+    "devices/myDeviceId/modules/thisIsModuleID/inputs/",
+    "devices/myDeviceId/modules/thisIsModuleID/inputs/inputWithNoTrailSlash",
+    "/devices/myDeviceId/messages/devicebound",
+    // These are legal topics but as we're not subscribed to them they should be ignored.
+    "devices/myDeviceId/messages/devicebound",
+    "$iothub/twin/twinData",
+    "iothub/methods/methodData",
+    "devices/myDeviceId/modules/thisIsModuleID/inputs/" TEST_INPUT_QUEUE_1 "/"
+};
+static const size_t mqttNoMatchInputTopicLength = sizeof(mqttNoMatchInputTopic) / sizeof(mqttNoMatchInputTopic[0]);
+
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_nomatch_MQTT_Input_topics_fail)
+{
+    for (size_t i = 0; i < mqttNoMatchTopicLength; i++)
+    {
+        TestInputQueueProcessing(mqttNoMatchInputTopic[i], NULL);
+    }
+}
+
+//
+// MQTT topics that are legal but do not contain properties.  The parser is fairly forgiving that once the MQTT TOPIC is matched,
+// if the properties are off we'll deliver the message to application
+//
+static const char* emptyPropertyMQTTInputTopics[] = {
+    "devices/myDeviceId/modules/thisIsModuleID/inputs/" TEST_INPUT_QUEUE_1 "/",
+    "devices/myDeviceId/modules/thisIsModuleID/inputs/" TEST_INPUT_QUEUE_1 "/&",
+    "devices/myDeviceId/modules/thisIsModuleID/inputs/" TEST_INPUT_QUEUE_1 "/&&",
+    "devices/myDeviceId/modules/thisIsModuleID/inputs/" TEST_INPUT_QUEUE_1 "/&&&",
+    "devices/myDeviceId/modules/thisIsModuleID/inputs/" TEST_INPUT_QUEUE_1 "/=",
+    "devices/myDeviceId/modules/thisIsModuleID/inputs/" TEST_INPUT_QUEUE_1 "/foobar"
+    //"devices/myDeviceId/modules/thisIsModuleID/inputs/" TEST_INPUT_QUEUE_1 "/=="
+};
+
+static const size_t emptyMQTTInputTopicsLength = sizeof(emptyPropertyMQTTInputTopics) / sizeof(emptyPropertyMQTTInputTopics[0]);  
+TEST_EXPECTED_MESSAGE_PROPERTIES noInputProperties = { NULL, NULL, NULL, NULL, TEST_INPUT_QUEUE_1, NULL, NULL, NULL, NULL, NULL};
+
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_Input_with_empty_properties_succeed)
+{
+    for (size_t i = 0; i < emptyMQTTInputTopicsLength; i++)
+    {
+        reset_data_from_callback();
+        TestInputQueueProcessing(emptyPropertyMQTTInputTopics[i], &noInputProperties);
+    }
 }
 
 END_TEST_SUITE(iothubtransport_mqtt_common_int_ut)
