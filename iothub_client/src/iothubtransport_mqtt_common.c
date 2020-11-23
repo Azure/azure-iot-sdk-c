@@ -74,28 +74,28 @@ static const char* TOPIC_DEVICE_METHOD_SUBSCRIBE = "$iothub/methods/POST/#";
 
 static const char* PROPERTY_SEPARATOR = "&";
 static const char PROPERTY_EQUALS = '=';
+static const char TOPIC_SLASH = '/';
 static const char* REPORTED_PROPERTIES_TOPIC = "$iothub/twin/PATCH/properties/reported/?$rid=%"PRIu16;
 static const char* GET_PROPERTIES_TOPIC = "$iothub/twin/GET/?$rid=%"PRIu16;
 static const char* DEVICE_METHOD_RESPONSE_TOPIC = "$iothub/methods/res/%d/?$rid=%s";
 
 static const char* REQUEST_ID_PROPERTY = "?$rid=";
 
-static const char* MESSAGE_ID_PROPERTY = "mid";
-static const char* MESSAGE_CREATION_TIME_UTC = "ctime";
-static const char* MESSAGE_USER_ID = "uid";
-static const char* CORRELATION_ID_PROPERTY = "cid";
-static const char* CONTENT_TYPE_PROPERTY = "ct";
-static const char* CONTENT_ENCODING_PROPERTY = "ce";
-static const char* DIAGNOSTIC_ID_PROPERTY = "diagid";
-static const char* DIAGNOSTIC_CONTEXT_PROPERTY = "diagctx";
-static const char* CONNECTION_DEVICE_ID = "cdid";
-static const char* CONNECTION_MODULE_ID_PROPERTY = "cmid";
+#define MESSAGE_ID_PROPERTY "mid"
+#define MESSAGE_CREATION_TIME_UTC "ctime"
+#define MESSAGE_USER_ID "uid"
+#define CORRELATION_ID_PROPERTY "cid"
+#define CONTENT_TYPE_PROPERTY "ct"
+#define CONTENT_ENCODING_PROPERTY "ce"
+#define DIAGNOSTIC_ID_PROPERTY "diagid"
+#define DIAGNOSTIC_CONTEXT_PROPERTY "diagctx"
+#define CONNECTION_DEVICE_ID "cdid"
+#define CONNECTION_MODULE_ID_PROPERTY "cmid"
 
 static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtimeutc";
 
 static const char DT_MODEL_ID_TOKEN[] = "model-id";
 
-static const char TOPIC_SLASH = '/';
 
 static const char DEFAULT_IOTHUB_PRODUCT_IDENTIFIER[] = CLIENT_DEVICE_TYPE_PREFIX "/" IOTHUB_SDK_VERSION;
 
@@ -148,17 +148,16 @@ const size_t URL_ENCODED_PERCENT_SIGN_DOT_LEN = sizeof(URL_ENCODED_PERCENT_SIGN_
 
 static SYSTEM_PROPERTY_INFO sysPropList[] = {
     { DEFINE_MQTT_SYSTEM_PROPERTY("exp"), MQTT_PROPERTY_TYPE_SILENTLY_IGNORE },
-    { DEFINE_MQTT_SYSTEM_PROPERTY("mid"), MQTT_PROPERTY_TYPE_MESSAGE_ID},
-    { DEFINE_MQTT_SYSTEM_PROPERTY("uid"), MQTT_PROPERTY_TYPE_MESSAGE_USER_ID },
+    { DEFINE_MQTT_SYSTEM_PROPERTY(MESSAGE_ID_PROPERTY), MQTT_PROPERTY_TYPE_MESSAGE_ID},
+    { DEFINE_MQTT_SYSTEM_PROPERTY(MESSAGE_USER_ID), MQTT_PROPERTY_TYPE_MESSAGE_USER_ID },
     { DEFINE_MQTT_SYSTEM_PROPERTY("to"), MQTT_PROPERTY_TYPE_SILENTLY_IGNORE },
-    { DEFINE_MQTT_SYSTEM_PROPERTY("cid"), MQTT_PROPERTY_TYPE_CORRELATION_ID },
-    { DEFINE_MQTT_SYSTEM_PROPERTY("ct"), MQTT_PROPERTY_TYPE_CONTENT_TYPE },
-    { DEFINE_MQTT_SYSTEM_PROPERTY("ce"), MQTT_PROPERTY_TYPE_CONTENT_ENCODING },
+    { DEFINE_MQTT_SYSTEM_PROPERTY(CORRELATION_ID_PROPERTY), MQTT_PROPERTY_TYPE_CORRELATION_ID },
+    { DEFINE_MQTT_SYSTEM_PROPERTY(CONTENT_TYPE_PROPERTY), MQTT_PROPERTY_TYPE_CONTENT_TYPE },
+    { DEFINE_MQTT_SYSTEM_PROPERTY(CONTENT_ENCODING_PROPERTY), MQTT_PROPERTY_TYPE_CONTENT_ENCODING },
     { DEFINE_MQTT_SYSTEM_PROPERTY("on"), MQTT_PROPERTY_TYPE_SILENTLY_IGNORE },
-    { DEFINE_MQTT_SYSTEM_PROPERTY("cdid"), MQTT_PROPERTY_TYPE_CONNECTION_DEVICE_ID},
-    { DEFINE_MQTT_SYSTEM_PROPERTY("cmid"), MQTT_PROPERTY_TYPE_CONNECTION_MODULE_ID },
-    { DEFINE_MQTT_SYSTEM_PROPERTY("exp"), MQTT_PROPERTY_TYPE_SILENTLY_IGNORE },
-    { DEFINE_MQTT_SYSTEM_PROPERTY("ctime"), MQTT_PROPERTY_TYPE_CREATION_TIME},
+    { DEFINE_MQTT_SYSTEM_PROPERTY(CONNECTION_DEVICE_ID), MQTT_PROPERTY_TYPE_CONNECTION_DEVICE_ID},
+    { DEFINE_MQTT_SYSTEM_PROPERTY(CONNECTION_MODULE_ID_PROPERTY), MQTT_PROPERTY_TYPE_CONNECTION_MODULE_ID },
+    { DEFINE_MQTT_SYSTEM_PROPERTY(MESSAGE_CREATION_TIME_UTC), MQTT_PROPERTY_TYPE_CREATION_TIME},
     // even though they don't start with %24, previous versions of SDK parsed and ignored these.  Keep same behavior.
     { "devices/", MQTT_PROPERTY_TYPE_SILENTLY_IGNORE },
     { "iothub-operation", MQTT_PROPERTY_TYPE_SILENTLY_IGNORE },
@@ -1312,9 +1311,8 @@ static int subscribeToNotifyStateIfNeeded(PMQTTTRANSPORT_HANDLE_DATA transport_d
 }
 
 //
-// isSystemProperty returns whether a given property name in an MQTT TOPIC published to this device/module
-// is considered a "system".  MQTT does not have a protocol defined concept of system properties.  In this usage
-// it implies that the IOTHUB_MESSAGE_HANDLE has an API for direct manipulation of the property (e.g. IoTHubMessage_GetMessageId).
+// GetMqttPropertyType compares a specific property in a topic to whetehr its one that we know about
+// (specifically whether IOTHUB_MESSAGE_HANDLE has an accessor for it).
 //
 static MQTT_PROPERTY_TYPE GetMqttPropertyType(const char* propertyNameAndValue, size_t propertyNameLength)
 {
@@ -1595,8 +1593,8 @@ static int AddApplicationPropertyToMessage(MAP_HANDLE propertyMap, const char* p
             {
                 result = 0;
             }
-            STRING_delete(propName_decoded);
             STRING_delete(propValue_decoded);
+            STRING_delete(propName_decoded);
         }
         else if (Map_AddOrUpdate(propertyMap, propertyNameCopy, propertyValue) != MAP_OK)
         {
@@ -1666,16 +1664,16 @@ static int extractMqttProperties(PMQTTTRANSPORT_HANDLE_DATA transportData, IOTHU
         LogError("Cannot find start of properties");
         result = MU_FAILURE;
     }
-    else if (*propertiesStart == 0)
-    {
-        // No properties were specified.  This is not an error.
-        result = 0;
-    }
     else if ((type == IOTHUB_TYPE_EVENT_QUEUE) && ((propertiesStart = addInputNamePropertyToMsg(iotHubMessage, propertiesStart)) == NULL))
     {
         LogError("failure adding input name to property.");
         result = MU_FAILURE;
     }
+    else if (*propertiesStart == 0)
+    {
+        // No properties were specified.  This is not an error.
+        result = 0;
+    }    
     else if ((tokenizer = STRING_TOKENIZER_create_from_char(propertiesStart)) == NULL)
     {
         LogError("failure allocating tokenizer");
