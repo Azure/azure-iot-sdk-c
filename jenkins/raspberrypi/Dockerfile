@@ -6,7 +6,7 @@
 
 
 # Start with the latest version of the Debian Docker container
-FROM debian:stretch
+FROM debian:buster
 
 # Fetch and install all outstanding updates
 RUN apt update && apt -y upgrade
@@ -92,7 +92,7 @@ WORKDIR /${WORK_ROOT}
 ARG CLIENTLIBRARY_REPO
 WORKDIR /sdk
 RUN git clone https://github.com/$CLIENTLIBRARY_REPO .
-RUN git submodule update --init
+RUN git submodule update --init --recursive
 
 RUN mkdir cmake
 WORKDIR /sdk/cmake
@@ -130,7 +130,7 @@ COPY ./patchfile /
 RUN git reset HEAD && git checkout && git clean  -df
 RUN if [ -s /patchfile ]; then git apply --index /patchfile; fi
 
-RUN git submodule update --init
+RUN git submodule update --init --recursive
 
 WORKDIR /sdk/cmake 
 RUN if [ -f "CMakeCache.txt" ]; then rm CMakeCache.txt; fi
@@ -140,6 +140,8 @@ RUN make -j 2
 # Finally a sanity check to make sure the files are there
 RUN ls -al ${TOOLCHAIN_PREFIX}/lib
 RUN ls -al ${TOOLCHAIN_PREFIX}/include
+# see if tests are being built
+RUN ls -al iothub_client\tests\iothubclient_amqp_dt_e2e\Debug
 
 RUN ls -la ./
 
