@@ -167,9 +167,9 @@ static const char* TEST_IOTHUB_SUFFIX = "thisIsIotHubSuffix";
 static const char* TEST_PROTOCOL_GATEWAY_HOSTNAME = NULL;
 static const char* TEST_PROTOCOL_GATEWAY_HOSTNAME_NON_NULL = "ssl://thisIsAGatewayHostName.net";
 static const char* TEST_VERY_LONG_DEVICE_ID = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
-static const char* TEST_MQTT_MESSAGE_TOPIC = "devices/jebrandoDevice/messages/devicebound/#";
-static const char* TEST_MQTT_MSG_TOPIC = "devices/jebrandoDevice/messages/devicebound/iothub-ack=Full&%24.to=%2Fdevices%2FjebrandoDevice%2Fmessages%2FdeviceBound&%24.cid=123&%24.uid=456";
-static const char* TEST_MQTT_MSG_TOPIC_W_1_PROP = "devices/jebrandoDevice/messages/devicebound/iothub-ack=Full&propName=PropValue&DeviceInfo=smokeTest&%24.to=%2Fdevices%2FjebrandoDevice%2Fmessages%2FdeviceBound&%24.cid&%24.uid";
+static const char* TEST_MQTT_MESSAGE_TOPIC = "devices/myDeviceId/messages/devicebound/#";
+static const char* TEST_MQTT_MSG_TOPIC = "devices/myDeviceId/messages/devicebound/iothub-ack=Full&%24.to=%2Fdevices%2FmyDeviceId%2Fmessages%2FdeviceBound&%24.cid=123&%24.uid=456";
+static const char* TEST_MQTT_MSG_TOPIC_W_1_PROP = "devices/myDeviceId/messages/devicebound/iothub-ack=Full&propName=PropValue&DeviceInfo=smokeTest&%24.to=%2Fdevices%2FmyDeviceId%2Fmessages%2FdeviceBound&%24.cid&%24.uid";
 static const char* TEST_MQTT_MSG_TOPIC_GET_TWIN = "$iothub/twin/res/200/?$rid=2";
 static const char* TEST_MQTT_INPUT_QUEUE_SUBSCRIBE_NAME_1 = "devices/thisIsDeviceID/modules/thisIsModuleID/#";
 static const char* TEST_MQTT_INPUT_1 = "devices/thisIsDeviceID/modules/thisIsModuleID/inputs/input1/%24.cdid=connected_device&%24.cmid=connected_module/";
@@ -422,8 +422,10 @@ static bool my_Transport_MessageCallback(MESSAGE_CALLBACK_INFO* message_data, vo
     }
     else
     {
-        IoTHubMessage_Destroy(message_data->messageHandle);
+        IOTHUB_MESSAGE_HANDLE h = message_data->messageHandle;
+        // We free in this order so that it matches what product code does and the expected calls will match up.
         free(message_data);
+        IoTHubMessage_Destroy(h);
         result = true;
     }
 
@@ -484,7 +486,7 @@ int my_STRING_TOKENIZER_get_next_token(STRING_TOKENIZER_HANDLE t, STRING_HANDLE 
             text = "propname2=value2";
             break;
         case 4:
-            text = "%24.to=%2Fdevices%2FjebrandoDevice%2Fmessages%2FdeviceBound&%24.cid";
+            text = "%24.to=%2Fdevices%2FmyDeviceId%2Fmessages%2FdeviceBound&%24.cid";
             break;
         case 5:
             text = "%24.cid";
@@ -1042,8 +1044,8 @@ static void setup_message_deliver_to_next_layer()
 {
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
 }
 
 // Calls invoked when adding an application custom property to a C2D or IoT Hub module to module message
@@ -6432,7 +6434,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties_succee
 
     STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(0);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
-        .SetReturn("%24.to=%2Fdevices%2FjebrandoDevice%2Fmessages%2FdeviceBound&");
+        .SetReturn("%24.to=%2Fdevices%2FmyDeviceId%2Fmessages%2FdeviceBound&");
     // %24.to is also silently ignored
 
     STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&")).SetReturn(0);
@@ -8291,8 +8293,8 @@ static void setup_message_recv_with_input_queue_mocks(const char* topicName, con
         .IgnoreArgument_size();
     STRICT_EXPECTED_CALL(Transport_MessageCallbackFromInput(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_iotHubMessageHandle();
     STRICT_EXPECTED_CALL(gballoc_free(NULL)).IgnoreArgument_ptr();
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_iotHubMessageHandle();
 }
 
 // Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_061: [ If the message is sent to an input queue, `IoTHubTransport_MQTT_Common_DoWork` shall parse out to the input queue name and store it in the message with IoTHubMessage_SetInputName ]
@@ -8336,7 +8338,20 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_InputQueue_no_system_
     IoTHubTransport_MQTT_Common_DoWork(handle);
     umock_c_reset_all_calls();
 
-    setup_message_recv_with_input_queue_mocks(TEST_MQTT_INPUT_NO_PROPERTIES, TEST_MQTT_INPUT_QUEUE_SUBSCRIBE_NAME_1, TEST_INPUT_QUEUE_1, false);
+    setup_message_receive_initial_calls(TEST_MQTT_INPUT_NO_PROPERTIES, true);
+    // We only have an input queue but no properties.  In this case far fewer calls will be invoked than typical case with properties.
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).IgnoreArgument(1).SetReturn(TEST_MQTT_INPUT_QUEUE_SUBSCRIBE_NAME_1).CallCannotFail();
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_SetInputName(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(NULL)).IgnoreArgument_ptr();
+
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
+
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(Transport_MessageCallbackFromInput(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
 
     // act
     ASSERT_IS_NOT_NULL(g_fnMqttMsgRecv);
@@ -8369,6 +8384,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_InputQueue_missing_qu
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
 
     // act
     ASSERT_IS_NOT_NULL(g_fnMqttMsgRecv);
