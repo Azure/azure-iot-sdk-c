@@ -55,6 +55,7 @@ static LOCK_HANDLE updateBlobTestLock;
 
 #define IOTHUB_UPLOADTOBLOB_TIMEOUT_SEC 120
 #define TEST_MAX_SIMULTANEOUS_UPLOADS 3
+#define TEST_JITTER_BETWEEN_UPLOAD_TO_BLOB_E2E_TESTS_MS 1500
 #define TEST_SLEEP_BETWEEN_UPLOAD_TO_BLOB_E2E_TESTS_MS 3000
 
 TEST_DEFINE_ENUM_TYPE(UPLOADTOBLOB_CALLBACK_STATUS, IOTHUB_CLIENT_FILE_UPLOAD_RESULT_VALUES);
@@ -101,6 +102,8 @@ void e2e_uploadblob_init()
 {
     updateBlobTestLock = Lock_Init();
     ASSERT_IS_NOT_NULL(updateBlobTestLock);
+
+    srand((unsigned int)time(NULL));
 
     int result = platform_init();
     ASSERT_ARE_EQUAL(int, 0, result, "Platform init failed");
@@ -205,10 +208,15 @@ static void sleep_between_upload_blob_e2e_tests(void)
     //
     // On gate runs, we have many instances of this test executable running at the same time and we cannot orchestrate
     // them.  Most individual testcases take <1 second to run.  Without a sleep, this amount of traffic
-    // will end up going over throttling maximums and causing test case failures.
+    // will end up going over throttling maximums and causing test case failures.  
+    // And because the tests run very quickly, we need additional jitter to keep different test executables from getting
+    // "in phase" on when they run.
     //
-    LogInfo("Invoking sleep for %d milliseconds after test case", TEST_SLEEP_BETWEEN_UPLOAD_TO_BLOB_E2E_TESTS_MS);
-    ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_UPLOAD_TO_BLOB_E2E_TESTS_MS);
+    unsigned int jitter = (rand() % TEST_JITTER_BETWEEN_UPLOAD_TO_BLOB_E2E_TESTS_MS);
+    unsigned int sleepTime = TEST_SLEEP_BETWEEN_UPLOAD_TO_BLOB_E2E_TESTS_MS + jitter;
+        
+    LogInfo("Invoking sleep for %d milliseconds after test case", sleepTime);
+    ThreadAPI_Sleep(sleepTime);
 }
 
 
