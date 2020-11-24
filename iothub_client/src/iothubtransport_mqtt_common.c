@@ -147,17 +147,18 @@ const size_t URL_ENCODED_PERCENT_SIGN_DOT_LEN = sizeof(URL_ENCODED_PERCENT_SIGN_
 #define DEFINE_MQTT_SYSTEM_PROPERTY(token)  URL_ENCODED_PERCENT_SIGN_DOT token
 
 static SYSTEM_PROPERTY_INFO sysPropList[] = {
-    { DEFINE_MQTT_SYSTEM_PROPERTY("exp"), MQTT_PROPERTY_TYPE_SILENTLY_IGNORE },
     { DEFINE_MQTT_SYSTEM_PROPERTY(MESSAGE_ID_PROPERTY), MQTT_PROPERTY_TYPE_MESSAGE_ID},
     { DEFINE_MQTT_SYSTEM_PROPERTY(MESSAGE_USER_ID), MQTT_PROPERTY_TYPE_MESSAGE_USER_ID },
-    { DEFINE_MQTT_SYSTEM_PROPERTY("to"), MQTT_PROPERTY_TYPE_SILENTLY_IGNORE },
     { DEFINE_MQTT_SYSTEM_PROPERTY(CORRELATION_ID_PROPERTY), MQTT_PROPERTY_TYPE_CORRELATION_ID },
     { DEFINE_MQTT_SYSTEM_PROPERTY(CONTENT_TYPE_PROPERTY), MQTT_PROPERTY_TYPE_CONTENT_TYPE },
     { DEFINE_MQTT_SYSTEM_PROPERTY(CONTENT_ENCODING_PROPERTY), MQTT_PROPERTY_TYPE_CONTENT_ENCODING },
-    { DEFINE_MQTT_SYSTEM_PROPERTY("on"), MQTT_PROPERTY_TYPE_SILENTLY_IGNORE },
     { DEFINE_MQTT_SYSTEM_PROPERTY(CONNECTION_DEVICE_ID), MQTT_PROPERTY_TYPE_CONNECTION_DEVICE_ID},
     { DEFINE_MQTT_SYSTEM_PROPERTY(CONNECTION_MODULE_ID_PROPERTY), MQTT_PROPERTY_TYPE_CONNECTION_MODULE_ID },
+    // "System" properties the SDK previously ignored and will continue to do so for compat.
     { DEFINE_MQTT_SYSTEM_PROPERTY(MESSAGE_CREATION_TIME_UTC), MQTT_PROPERTY_TYPE_CREATION_TIME},
+    { DEFINE_MQTT_SYSTEM_PROPERTY("on"), MQTT_PROPERTY_TYPE_SILENTLY_IGNORE },
+    { DEFINE_MQTT_SYSTEM_PROPERTY("exp"), MQTT_PROPERTY_TYPE_SILENTLY_IGNORE },
+    { DEFINE_MQTT_SYSTEM_PROPERTY("to"), MQTT_PROPERTY_TYPE_SILENTLY_IGNORE },
     // even though they don't start with %24, previous versions of SDK parsed and ignored these.  Keep same behavior.
     { "devices/", MQTT_PROPERTY_TYPE_SILENTLY_IGNORE },
     { "iothub-operation", MQTT_PROPERTY_TYPE_SILENTLY_IGNORE },
@@ -1671,7 +1672,7 @@ static int extractMqttProperties(PMQTTTRANSPORT_HANDLE_DATA transportData, IOTHU
     }
     else if (*propertiesStart == 0)
     {
-        // No properties were specified.  This is not an error.
+        // No properties were specified.  This is not an error.  We'll return success to caller but skip further processing.
         result = 0;
     }    
     else if ((tokenizer = STRING_TOKENIZER_create_from_char(propertiesStart)) == NULL)
@@ -1693,7 +1694,8 @@ static int extractMqttProperties(PMQTTTRANSPORT_HANDLE_DATA transportData, IOTHU
     {
         result = 0;
 
-        while (STRING_TOKENIZER_get_next_token(tokenizer, propertyToken, PROPERTY_SEPARATOR) == 0 && result == 0)
+        // Iterate through each "propertyKey1=propertyValue1" set, tokenizing off the '&' separating key/value pairs.
+        while ((STRING_TOKENIZER_get_next_token(tokenizer, propertyToken, PROPERTY_SEPARATOR) == 0) && result == 0)
         {
             const char* propertyNameAndValue = STRING_c_str(propertyToken);
             const char* propertyValue;
@@ -1711,6 +1713,9 @@ static int extractMqttProperties(PMQTTTRANSPORT_HANDLE_DATA transportData, IOTHU
             {
                 size_t propertyNameLength = propertyValue - propertyNameAndValue;
                 propertyValue++;
+
+                // After this point, propertyValue is a \0 terminated string (becaues the STRING_Tokenizer call above made it so)
+                // but propertyNameAndValue is NOT \0 terminated and requires its length passed with it.
 
                 MQTT_PROPERTY_TYPE propertyType = GetMqttPropertyType(propertyNameAndValue, propertyNameLength);
 
@@ -1854,7 +1859,9 @@ static void processDeviceMethodNotification(PMQTTTRANSPORT_HANDLE_DATA transport
 static void processIncomingMessageNotification(PMQTTTRANSPORT_HANDLE_DATA transportData, MQTT_MESSAGE_HANDLE msgHandle, const char* topic_resp, IOTHUB_IDENTITY_TYPE type)
 {
     const APP_PAYLOAD* appPayload = mqttmessage_getApplicationMsg(msgHandle);
+    MESSAGE_CALLBACK_INFO* messageData = NULL;
     IOTHUB_MESSAGE_HANDLE iotHubMessage = IoTHubMessage_CreateFromByteArray(appPayload->message, appPayload->length);
+
     if (iotHubMessage == NULL)
     {
         LogError("Failure: IotHub Message creation has failed.");
@@ -1865,7 +1872,7 @@ static void processIncomingMessageNotification(PMQTTTRANSPORT_HANDLE_DATA transp
     }
     else
     {
-        MESSAGE_CALLBACK_INFO* messageData = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
+        messageData = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
         if (messageData == NULL)
         {
             LogError("malloc failed");
@@ -1880,12 +1887,12 @@ static void processIncomingMessageNotification(PMQTTTRANSPORT_HANDLE_DATA transp
                 // Codes_SRS_IOTHUB_MQTT_TRANSPORT_31_065: [ If type is IOTHUB_TYPE_TELEMETRY and sent to an input queue, then on success `mqttNotificationCallback` shall call `IoTHubClient_LL_MessageCallback`. ]
                 if (!transportData->transport_callbacks.msg_input_cb(messageData, transportData->transport_ctx))
                 {
-                    LogError("IoTHubClientCore_LL_MessageCallbackreturned false");
-                    free(messageData);
+                    LogError("IoTHubClientCore_LL_MessageCallbackFromInput returned false");
                 }
                 else
                 {
                     iotHubMessage = NULL;
+                    messageData = NULL;
                 }
             }
             else
@@ -1894,20 +1901,26 @@ static void processIncomingMessageNotification(PMQTTTRANSPORT_HANDLE_DATA transp
                 if (!transportData->transport_callbacks.msg_cb(messageData, transportData->transport_ctx))
                 {
                     LogError("IoTHubClientCore_LL_MessageCallback returned false");
-                    free(messageData);
                 }
                 else
                 {
                     iotHubMessage = NULL;
+                    messageData = NULL;
                 }
             }
         }
     }
 
+    if (messageData != NULL)
+    {
+        // messageData is set to NULL if it is successfully handed off to next layer, which will own freeing it.
+        // It being non-NULL indicates that this function still owns cleaning it up.
+        free(messageData);
+    }
+
     if (iotHubMessage != NULL)
     {
-        // iotHubMessage is set to NULL if it is successfully handed off to next layer, which will own freeing it.
-        // It being non-NULL indicates that this function still owns cleaning it up.
+        // iotHubMessage, like messageData, is freed by calling layer if caller accepts it.  Otherwise clean it up here.
         IoTHubMessage_Destroy(iotHubMessage);
     }
 }
