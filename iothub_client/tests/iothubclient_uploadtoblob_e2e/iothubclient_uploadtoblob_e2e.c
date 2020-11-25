@@ -53,10 +53,17 @@ static int uploadBlobNumber;
 
 static LOCK_HANDLE updateBlobTestLock;
 
+// Even though g_uploadToBlobStatus is only used in scope of a function, there are test cases
+// where test function may exit prior to the SDK callback completing.  So the variable needs to be at global scope.
+UPLOADTOBLOB_CALLBACK_STATUS g_uploadToBlobStatus;
+
 #define IOTHUB_UPLOADTOBLOB_TIMEOUT_SEC 120
 #define TEST_MAX_SIMULTANEOUS_UPLOADS 3
 #define TEST_JITTER_BETWEEN_UPLOAD_TO_BLOB_E2E_TESTS_MS 1500
 #define TEST_SLEEP_BETWEEN_UPLOAD_TO_BLOB_E2E_TESTS_MS 5000
+
+#define TEST_JITTER_BETWEEN_MULTI_THREAD_UPLOAD_TO_BLOB_E2E_TESTS_MS 1500
+#define TEST_SLEEP_BETWEEN_MULTI_THREAD_UPLOAD_TO_BLOB_E2E_TESTS_MS 1000
 
 TEST_DEFINE_ENUM_TYPE(UPLOADTOBLOB_CALLBACK_STATUS, IOTHUB_CLIENT_FILE_UPLOAD_RESULT_VALUES);
 
@@ -69,10 +76,26 @@ TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 #define UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE1 "hello_world1.txt"
 #define UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE2 "hello_world2.txt"
 #define UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE3 "hello_world3.txt"
-#define UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE4 "hello_world4.txt"
-#define UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE5 "hello_world5.txt"
 
 #define UPLOADTOBLOB_E2E_TEST_MULTI_BLOCK_DESTINATION_FILE1 "hello_world_multiblock.txt"
+
+static char* uploadData0 = "AAA-";
+static char* uploadData1 = "BBBBB-";
+static char* uploadData2 = "CCCCCC-";
+
+static char* uploadDataMultiThread = "Upload data from multi-thread test";
+
+typedef struct TEST_UPLOAD_MULTITHREADED_CONTEXT_TAG
+{
+    int  threadNumber;
+    bool hasSentData;
+    UPLOADTOBLOB_CALLBACK_STATUS status;
+} TEST_UPLOAD_MULTITHREADED_CONTEXT;
+
+
+TEST_UPLOAD_MULTITHREADED_CONTEXT threadUploadMultithreadedContext[TEST_MAX_SIMULTANEOUS_UPLOADS];
+const char* uploadFileNameList[] = { UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE1, UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE2, UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE3 };
+
 
 static int bool_Compare(bool left, bool right)
 {
@@ -184,15 +207,15 @@ static void check_upload_result(UPLOADTOBLOB_CALLBACK_STATUS uploadToBlobStatus)
 {
     if (UPLOADTOBLOB_CALLBACK_FAILED == uploadToBlobStatus)
     {
-        ASSERT_FAIL("IoTHubClient_UploadToBlobAsync failed in callback");
+        ASSERT_FAIL("Upload failed in callback");
     }
     else if (UPLOADTOBLOB_CALLBACK_PENDING == uploadToBlobStatus)
     {
-        ASSERT_FAIL("IoTHubClient_UploadToBlobAsync timed out performing file upload");
+        ASSERT_FAIL("Upload timed out performing file upload");
     }
     else if (UPLOADTOBLOB_CALLBACK_SUCCEEDED == uploadToBlobStatus)
     {
-        LogInfo("IoTHubClient_UploadToBlobAsync succeeded");
+        LogInfo("Upload succeeded");
     }
     else
     {
@@ -219,6 +242,18 @@ static void sleep_between_upload_blob_e2e_tests(void)
     ThreadAPI_Sleep(sleepTime);
 }
 
+static void sleep_during_multi_thread_tests(void)
+{
+    // When running multiple upload threads simultaneously, we also run a risk of throttling.
+    // Furthermore since all threads will be (by design) running effectively simultaneously 
+    // we need some additional delays here, too.
+
+    unsigned int jitter = (rand() % TEST_JITTER_BETWEEN_UPLOAD_TO_BLOB_E2E_TESTS_MS);
+    unsigned int sleepTime = TEST_SLEEP_BETWEEN_UPLOAD_TO_BLOB_E2E_TESTS_MS + jitter;
+        
+    LogInfo("Invoking sleep for %d milliseconds for multi-thread instance", sleepTime);
+    ThreadAPI_Sleep(sleepTime);
+}
 
 void e2e_uploadtoblob_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACCOUNT_AUTH_METHOD accountAuthMethod)
 {
@@ -251,12 +286,12 @@ void e2e_uploadtoblob_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACC
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not set curl_verbose opt");
 #endif
 	
-    UPLOADTOBLOB_CALLBACK_STATUS uploadToBlobStatus = UPLOADTOBLOB_CALLBACK_PENDING;
-    result = IoTHubClient_UploadToBlobAsync(iotHubClientHandle, UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE, UPLOADTOBLOB_E2E_TEST_DATA, strlen((const char*)UPLOADTOBLOB_E2E_TEST_DATA), uploadToBlobCallback, &uploadToBlobStatus);
+    g_uploadToBlobStatus = UPLOADTOBLOB_CALLBACK_PENDING;
+    result = IoTHubClient_UploadToBlobAsync(iotHubClientHandle, UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE, UPLOADTOBLOB_E2E_TEST_DATA, strlen((const char*)UPLOADTOBLOB_E2E_TEST_DATA), uploadToBlobCallback, &g_uploadToBlobStatus);
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
 
-    poll_for_upload_completion(&uploadToBlobStatus);
-    check_upload_result(uploadToBlobStatus);
+    poll_for_upload_completion(&g_uploadToBlobStatus);
+    check_upload_result(g_uploadToBlobStatus);
 
     // We need to sleep in any event to avoid triggering IoT Hub upload threshold limits in our E2E tests.  We need to do this
     // before the client destroy - and not test runs themselves which would've been better - because of https://github.com/Azure/azure-iot-sdk-c/issues/1705.
@@ -264,19 +299,15 @@ void e2e_uploadtoblob_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACC
     IoTHubClient_Destroy(iotHubClientHandle);
 }
 
-
 IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT uploadToBlobGetDataEx(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
 {
     IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT callbackResult;
-    LogInfo("uploadToBlobCallback(%s), call number(%d)", MU_ENUM_TO_STRING(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, result), uploadBlobNumber);
 
     UPLOADTOBLOB_CALLBACK_STATUS* callbackStatus = (UPLOADTOBLOB_CALLBACK_STATUS*)context;
     ASSERT_ARE_EQUAL(UPLOADTOBLOB_CALLBACK_STATUS, *callbackStatus, UPLOADTOBLOB_CALLBACK_PENDING);
     ASSERT_ARE_EQUAL(int, (int)FILE_UPLOAD_OK, (int)result);
 
-    static char* uploadData0 = "AAA-";
-    static char* uploadData1 = "BBBBB-";
-    static char* uploadData2 = "CCCCCC-";
+    LogInfo("uploadToBlobCallback(%s), call number(%d)", MU_ENUM_TO_STRING(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, result), uploadBlobNumber);
 
     ASSERT_ARE_EQUAL(int, (int)LOCK_OK, (int)Lock(updateBlobTestLock));
 
@@ -352,23 +383,70 @@ void e2e_uploadtoblob_multiblock_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     ASSERT_IS_NOT_NULL(iotHubClientHandle, "Could not invoke IoTHubClient_CreateFromConnectionString");
 
     uploadToBlobCauseAbort = causeAbort;
-    UPLOADTOBLOB_CALLBACK_STATUS uploadToBlobStatus = UPLOADTOBLOB_CALLBACK_PENDING;
+    g_uploadToBlobStatus = UPLOADTOBLOB_CALLBACK_PENDING;
     uploadBlobNumber = 0;
     if (useExMethod)
     {
-        result = IoTHubClient_UploadMultipleBlocksToBlobAsyncEx(iotHubClientHandle, UPLOADTOBLOB_E2E_TEST_MULTI_BLOCK_DESTINATION_FILE, uploadToBlobGetDataEx, &uploadToBlobStatus);
+        result = IoTHubClient_UploadMultipleBlocksToBlobAsyncEx(iotHubClientHandle, UPLOADTOBLOB_E2E_TEST_MULTI_BLOCK_DESTINATION_FILE, uploadToBlobGetDataEx, &g_uploadToBlobStatus);
     }
     else
     {
-        result = IoTHubClient_UploadMultipleBlocksToBlobAsync(iotHubClientHandle, UPLOADTOBLOB_E2E_TEST_MULTI_BLOCK_DESTINATION_FILE, uploadToBlobGetData, &uploadToBlobStatus);
+        result = IoTHubClient_UploadMultipleBlocksToBlobAsync(iotHubClientHandle, UPLOADTOBLOB_E2E_TEST_MULTI_BLOCK_DESTINATION_FILE, uploadToBlobGetData, &g_uploadToBlobStatus);
     }
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
 
-    poll_for_upload_completion(&uploadToBlobStatus);
-    check_upload_result(uploadToBlobStatus);
+    poll_for_upload_completion(&g_uploadToBlobStatus);
+    check_upload_result(g_uploadToBlobStatus);
 
     sleep_between_upload_blob_e2e_tests();
     IoTHubClient_Destroy(iotHubClientHandle);
+}
+
+IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT TestUploadMultiThreadedCallback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
+{
+    ASSERT_ARE_EQUAL(int, (int)FILE_UPLOAD_OK, (int)result);
+
+    TEST_UPLOAD_MULTITHREADED_CONTEXT* multiThreadContext = (TEST_UPLOAD_MULTITHREADED_CONTEXT*)context;
+    ASSERT_IS_NOT_NULL(multiThreadContext);
+    ASSERT_ARE_EQUAL(UPLOADTOBLOB_CALLBACK_STATUS, multiThreadContext->status, UPLOADTOBLOB_CALLBACK_PENDING);
+
+    LogInfo("TestUploadMultiThreadedCallback(%s), thread number(%d)", MU_ENUM_TO_STRING(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, result), multiThreadContext->threadNumber);
+
+    ASSERT_ARE_EQUAL(int, (int)LOCK_OK, (int)Lock(updateBlobTestLock));
+
+    if (data == NULL)
+    {
+        // We're invoked for the final time when we're done uploading and with ultmitale result.
+        ASSERT_IS_NULL(size);
+        ASSERT_IS_TRUE(multiThreadContext->hasSentData, "Test thread %d should have sent data but has not", multiThreadContext->threadNumber);
+        multiThreadContext->status = UPLOADTOBLOB_CALLBACK_SUCCEEDED;
+    }
+    else
+    {
+        // At this point, the SDK is invoking this test callback to return data to it.  We only return data on our initial callback,
+        // on next callback we return a 0 length to indicate to SDK caller we're done.
+        if (multiThreadContext->hasSentData == true)
+        {
+            LogInfo("Thread %d indicating no additional data to send to caller", multiThreadContext->threadNumber);
+            *data = (unsigned char const *)"";
+            *size = 0;
+        }
+        else
+        {
+            LogInfo("Thread %d indicating data to send to caller", multiThreadContext->threadNumber);
+            *data = (unsigned char const *)uploadDataMultiThread;
+            *size = strlen((const char*)*data);
+            multiThreadContext->hasSentData = true;
+        }
+    }
+
+    (void)Unlock(updateBlobTestLock);
+
+    if (data != NULL)
+    {
+        sleep_during_multi_thread_tests();
+    }
+    return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK;
 }
 
 void e2e_uploadtoblob_test_multiple_simultaneous_uploads(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
@@ -380,16 +458,17 @@ void e2e_uploadtoblob_test_multiple_simultaneous_uploads(IOTHUB_CLIENT_TRANSPORT
     IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
     ASSERT_IS_NOT_NULL(iotHubClientHandle, "Could not invoke IoTHubClient_CreateFromConnectionString");
 
-    UPLOADTOBLOB_CALLBACK_STATUS uploadToBlobStatus[TEST_MAX_SIMULTANEOUS_UPLOADS];
-    const char* uploadFileNameList[] = { UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE1, UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE2, UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE3, UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE4, UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE5 };
-
     // Fire off TEST_MAX_SIMULTANEOUS_UPLOADS simultaneous upload requests.  These will fire in parallel.
     for (int i = 0; i < TEST_MAX_SIMULTANEOUS_UPLOADS; i++)
     {
         const char* uploadFileName = uploadFileNameList[i];
-        uploadToBlobStatus[i] = UPLOADTOBLOB_CALLBACK_PENDING;
-        result = IoTHubClient_UploadToBlobAsync(iotHubClientHandle, uploadFileName, UPLOADTOBLOB_E2E_TEST_DATA, strlen(uploadFileName), uploadToBlobCallback, &uploadToBlobStatus[i]);
-        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
+
+        threadUploadMultithreadedContext[i].hasSentData = false;
+        threadUploadMultithreadedContext[i].status = UPLOADTOBLOB_CALLBACK_PENDING;
+        threadUploadMultithreadedContext[i].threadNumber = i;
+
+        result = IoTHubClient_UploadMultipleBlocksToBlobAsyncEx(iotHubClientHandle, uploadFileName, TestUploadMultiThreadedCallback, &threadUploadMultithreadedContext[i]);
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "IoTHubClient_UploadMultipleBlocksToBlobAsyncEx failed");
     }
 
     time_t beginOperation = time(NULL);
@@ -397,9 +476,9 @@ void e2e_uploadtoblob_test_multiple_simultaneous_uploads(IOTHUB_CLIENT_TRANSPORT
     // Poll for completion, looping one at a time.
     for (int i = 0; i < TEST_MAX_SIMULTANEOUS_UPLOADS; i++)
     {
-        LogInfo("waiting for context for context(%p), file(%s)\n", &uploadToBlobStatus[i], uploadFileNameList[i]);
-        poll_for_upload_completion(&uploadToBlobStatus[i]);
-        check_upload_result(uploadToBlobStatus[i]);
+        LogInfo("waiting for context for thread(%d), file(%s)\n", i, uploadFileNameList[i]);
+        poll_for_upload_completion(&threadUploadMultithreadedContext[i].status);
+        check_upload_result(threadUploadMultithreadedContext[i].status);
     }
 
     // Even though we had multiple simultaneous threads, expect them to complete in reasonable time (*2 to allow
@@ -435,19 +514,14 @@ TEST_FUNCTION(IoTHub_MQTT_UploadToBlob_sas)
     e2e_uploadtoblob_test(MQTT_Protocol, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
 }
 
-TEST_FUNCTION(IoTHub_MQTT_WS_UploadToBlob_sas)
+TEST_FUNCTION(IoTHub_MQTT_UploadMultipleBlocksToBlob)
 {
-    e2e_uploadtoblob_test(MQTT_Protocol, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
+    e2e_uploadtoblob_multiblock_test(MQTT_Protocol, false, false);
 }
 
 TEST_FUNCTION(IoTHub_MQTT_UploadMultipleBlocksToBlobEx)
 {
     e2e_uploadtoblob_multiblock_test(MQTT_Protocol, true, false);
-}
-
-TEST_FUNCTION(IoTHub_MQTT_UploadMultipleBlocksToBlob)
-{
-    e2e_uploadtoblob_multiblock_test(MQTT_Protocol, false, false);
 }
 
 TEST_FUNCTION(IoTHub_MQTT_UploadMultipleBlocksToBlobExWithAbort)
@@ -456,11 +530,6 @@ TEST_FUNCTION(IoTHub_MQTT_UploadMultipleBlocksToBlobExWithAbort)
 }
 
 #ifndef __APPLE__
-TEST_FUNCTION(IoTHub_MQTT_UploadToBlob_x509)
-{
-    e2e_uploadtoblob_test(MQTT_Protocol, IOTHUB_ACCOUNT_AUTH_X509);
-}
-
 TEST_FUNCTION(IoTHub_MQTT_WS_UploadToBlob_x509)
 {
     e2e_uploadtoblob_test(MQTT_Protocol, IOTHUB_ACCOUNT_AUTH_X509);
@@ -476,18 +545,7 @@ TEST_FUNCTION(IoTHub_AMQP_UploadToBlob_sas)
      e2e_uploadtoblob_test(AMQP_Protocol, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
 }
 
-TEST_FUNCTION(IoTHub_AMQP_WS_UploadToBlob_sas)
-{
-     // Currently not working
-     e2e_uploadtoblob_test(AMQP_Protocol_over_WebSocketsTls, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
-}
-
 #ifndef __APPLE__
-TEST_FUNCTION(IoTHub_AMQP_UploadToBlob_x509)
-{
-    e2e_uploadtoblob_test(AMQP_Protocol, IOTHUB_ACCOUNT_AUTH_X509);
-}
-
 TEST_FUNCTION(IoTHub_AMQP_WS_UploadToBlob_x509)
 {
     e2e_uploadtoblob_test(AMQP_Protocol_over_WebSocketsTls, IOTHUB_ACCOUNT_AUTH_X509);
@@ -497,10 +555,6 @@ TEST_FUNCTION(IoTHub_AMQP_WS_UploadToBlob_x509)
 #endif // TEST_AMQP
 
 #ifdef TEST_HTTP
-TEST_FUNCTION(IoTHub_HTTP_UploadToBlob_sas)
-{
-    e2e_uploadtoblob_test(HTTP_Protocol, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
-}
 
 #ifndef __APPLE__
 TEST_FUNCTION(IoTHub_HTTP_UploadToBlob_x509)
@@ -508,7 +562,6 @@ TEST_FUNCTION(IoTHub_HTTP_UploadToBlob_x509)
     e2e_uploadtoblob_test(HTTP_Protocol, IOTHUB_ACCOUNT_AUTH_X509);
 }
 #endif // __APPLE__
-
 
 #endif // TEST_HTTP
 
