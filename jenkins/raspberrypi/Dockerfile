@@ -56,9 +56,7 @@ RUN make
 RUN make install
 WORKDIR /${WORK_ROOT}
 ENV OPENSSL_ROOT_DIR=/toolchain/gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabihf/usr/lib
-RUN ls /toolchain/gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabihf/usr/lib
-RUN ls /toolchain/gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabihf/usr/
-ENV OPENSSL_INCLUDE_DIR=/toolchain/gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabihf/usr/lib/openssl/inc
+ENV OPENSSL_INCLUDE_DIR=/toolchain/gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabihf/usr/include
 
 
 ########## CURL INSTALL ##########
