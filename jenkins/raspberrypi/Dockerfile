@@ -44,7 +44,7 @@ ENV STAGING_DIR=${TOOLCHAIN_SYSROOT}
 
 ########## OPENSSL INSTALL ##########
 # Download OpenSSL source and expand it
-ENV OPENSSL_SOURCE=openssl-1.1.1f
+ENV OPENSSL_SOURCE=openssl-1.1.1h
 RUN wget https://www.openssl.org/source/${OPENSSL_SOURCE}.tar.gz
 RUN tar -xvf ${OPENSSL_SOURCE}.tar.gz
 
@@ -55,6 +55,7 @@ RUN ./Configure linux-generic32 shared --prefix=${TOOLCHAIN_PREFIX} --openssldir
 RUN make
 RUN make install
 WORKDIR /${WORK_ROOT}
+ENV OPENSSL_ROOT_DIR=/toolchain/gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabihf/usr/lib
 
 
 ########## CURL INSTALL ##########
