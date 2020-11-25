@@ -38,7 +38,7 @@ make --jobs=$CORES --max-load=$LOADLIMIT
 
 #use doctored openssl
 export LD_LIBRARY_PATH=/usr/local/ssl/lib
-ctest -j $CORES --output-on-failure
+ctest -j $CORES --output-on-failure --schedule-random
 export LD_LIBRARY_PATH=
 
 popd
