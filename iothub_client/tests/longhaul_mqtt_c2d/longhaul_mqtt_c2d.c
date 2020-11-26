@@ -37,13 +37,18 @@ int main(void)
     }
     else
     {
-        if (longhaul_initialize_device_client(iotHubLonghaulRsrcsHandle, IoTHubAccount_GetSASDevice(longhaul_get_account_info(iotHubLonghaulRsrcsHandle)), MQTT_Protocol) == NULL)
+        IOTHUB_DEVICE_CLIENT_HANDLE device_client = longhaul_initialize_device_client(iotHubLonghaulRsrcsHandle, IoTHubAccount_GetSASDevice(longhaul_get_account_info(iotHubLonghaulRsrcsHandle)), MQTT_Protocol);
+        if (device_client == NULL)
         {
             LogError("Failed creating the device client");
             result = MU_FAILURE;
         }
         else
         {
+#ifdef AZIOT_LINUX
+            bool traceOn = true;
+            IoTHubDeviceClient_LL_SetOption(device_client, OPTION_LOG_TRACE, &traceOn);
+#endif //AZIOT_LINUX
             result = longhaul_run_c2d_tests(iotHubLonghaulRsrcsHandle, test_loop_wait_time_in_seconds, test_duration_in_seconds);
         }
 
