@@ -71,6 +71,8 @@ The API reference documentation for the C SDKs can be found [here][c-api-referen
 
 To find Azure IoT SDKs in other languages, please refer to the [azure-iot-sdks][azure-iot-sdks] repository.
 
+**Note on constrained devices**: The `Embedded C SDK` is an alternative for constrained devices which enables the BYO (bring your own) network approach: IoT developers have the freedom of choice to bring MQTT client, TLS and Socket of their choice to create a device solution. Find more information about the Embedded C SDK [here](https://github.com/Azure/azure-sdk-for-c/tree/master/sdk/docs/iot).
+
 ## Developing Azure IoT Applications
 
 To learn more about building Azure IoT Applications, you can visit the [Azure IoT Dev Center][iot-dev-center].
