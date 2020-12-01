@@ -118,7 +118,7 @@ These instructions have been tested on both the Raspberry Pi 2, 3 and 4.
 
 If you encounter the error _error adding symbols: DSO missing from command line_ try adding a reference to libdl with  _-cl -ldl_ added to your build script command line.
 
-For Raspberry Pi4 the following workaround is neccessary to properly link the samples with pthread.
+For Raspberry Pi 4 the following workaround is neccessary to properly link the samples with pthread.
 Run the following commands and [recompile the Azure IoT C SDK](#Building-the-SDK).
 
 ```bash
