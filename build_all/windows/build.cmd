@@ -220,7 +220,7 @@ if %MAKE_NUGET_PKG% == yes (
         if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
         if %build-platform% neq arm (
-            ctest -T test --no-compress-output -C "debug" -V -j 16
+            ctest -T test --no-compress-output -C "debug" -V -j 16 --schedule-random
             if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
         )
     )
