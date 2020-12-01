@@ -63,6 +63,8 @@ UPLOADTOBLOB_CALLBACK_STATUS g_uploadToBlobStatus;
 #define TEST_JITTER_BETWEEN_UPLOAD_TO_BLOB_E2E_TESTS_MS 1500
 #define TEST_SLEEP_BETWEEN_UPLOAD_TO_BLOB_E2E_TESTS_MS 7500
 
+#define TEST_SLEEP_BETWEEN_MULTIBLOCK_UPLOADS 2000
+
 TEST_DEFINE_ENUM_TYPE(UPLOADTOBLOB_CALLBACK_STATUS, IOTHUB_CLIENT_FILE_UPLOAD_RESULT_VALUES);
 
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
@@ -133,6 +135,7 @@ void e2e_uploadblob_deinit()
 
     Lock_Deinit(updateBlobTestLock);
 }
+
 
 // uploadToBlobCallback is invoked once upload succeeds or fails.  It updates context in either case so
 // main waiting thread knows we're done.
@@ -269,9 +272,6 @@ void e2e_uploadtoblob_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACC
     poll_for_upload_completion(&g_uploadToBlobStatus);
     check_upload_result(g_uploadToBlobStatus);
 
-    // We need to sleep in any event to avoid triggering IoT Hub upload threshold limits in our E2E tests.  We need to do this
-    // before the client destroy - and not test runs themselves which would've been better - because of https://github.com/Azure/azure-iot-sdk-c/issues/1705.
-    sleep_between_upload_blob_e2e_tests();
     IoTHubClient_Destroy(iotHubClientHandle);
 }
 
@@ -340,6 +340,9 @@ IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT uploadToBlobGetDataEx(IOTHUB_CLIENT_FI
     uploadBlobNumber++;
 
     (void)Unlock(updateBlobTestLock);
+
+    LogInfo("Sleeping %d seconds between upload calls", TEST_SLEEP_BETWEEN_MULTIBLOCK_UPLOADS);
+    ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_MULTIBLOCK_UPLOADS);
     return callbackResult;
 }
 
@@ -374,7 +377,6 @@ void e2e_uploadtoblob_multiblock_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     poll_for_upload_completion(&g_uploadToBlobStatus);
     check_upload_result(g_uploadToBlobStatus);
 
-    sleep_between_upload_blob_e2e_tests();
     IoTHubClient_Destroy(iotHubClientHandle);
 }
 
@@ -390,7 +392,15 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
     e2e_uploadblob_deinit();
 }
 
+TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
+{
+    // We need to sleep to avoid triggering IoT Hub upload threshold limits in our E2E tests.
+    sleep_between_upload_blob_e2e_tests();
+}
+
 #ifdef TEST_MQTT
+#if 0 
+// TODO: Re-enable.  See https://github.com/Azure/azure-iot-sdk-c/issues/1770
 TEST_FUNCTION(IoTHub_MQTT_UploadMultipleBlocksToBlobEx)
 {
     e2e_uploadtoblob_multiblock_test(MQTT_Protocol, true, false);
@@ -400,14 +410,12 @@ TEST_FUNCTION(IoTHub_MQTT_UploadMultipleBlocksToBlobExWithAbort)
 {
     e2e_uploadtoblob_multiblock_test(MQTT_Protocol, true, true);
 }
+#endif
 
-#ifndef __APPLE__
-TEST_FUNCTION(IoTHub_MQTT_WS_UploadToBlob_x509)
+TEST_FUNCTION(IoTHub_MQTT_UploadToBlob_x509)
 {
-    e2e_uploadtoblob_test(MQTT_WebSocket_Protocol, IOTHUB_ACCOUNT_AUTH_X509);
+    e2e_uploadtoblob_test(MQTT_Protocol, IOTHUB_ACCOUNT_AUTH_X509);
 }
-#endif // __APPLE__
-
 #endif // TEST_MQTT
 
 
