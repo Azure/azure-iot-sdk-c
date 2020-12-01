@@ -45,10 +45,6 @@ int main(void)
         }
         else
         {
-#ifdef AZIOT_LINUX
-            bool traceOn = true;
-            IoTHubDeviceClient_SetOption(device_client, OPTION_LOG_TRACE, &traceOn);
-#endif //AZIOT_LINUX
             result = longhaul_run_c2d_tests(iotHubLonghaulRsrcsHandle, test_loop_wait_time_in_seconds, test_duration_in_seconds);
         }
 
