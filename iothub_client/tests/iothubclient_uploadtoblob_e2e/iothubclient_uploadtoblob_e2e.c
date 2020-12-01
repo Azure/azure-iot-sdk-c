@@ -400,7 +400,9 @@ TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
 
 #ifdef TEST_MQTT
 #if 0 
-// TODO: Re-enable.  See https://github.com/Azure/azure-iot-sdk-c/issues/1770
+// TODO: Re-enable.  See https://github.com/Azure/azure-iot-sdk-c/issues/1770.
+// Once these are re-enabled, remove IoTHub_MQTT_UploadToBlob_ConnString as its duplicative.
+// It's needed for now to get Apple coverage however.
 TEST_FUNCTION(IoTHub_MQTT_UploadMultipleBlocksToBlobEx)
 {
     e2e_uploadtoblob_multiblock_test(MQTT_Protocol, true, false);
@@ -410,12 +412,18 @@ TEST_FUNCTION(IoTHub_MQTT_UploadMultipleBlocksToBlobExWithAbort)
 {
     e2e_uploadtoblob_multiblock_test(MQTT_Protocol, true, true);
 }
-#endif
 
 TEST_FUNCTION(IoTHub_MQTT_UploadToBlob_x509)
 {
     e2e_uploadtoblob_test(MQTT_Protocol, IOTHUB_ACCOUNT_AUTH_X509);
 }
+#else
+TEST_FUNCTION(IoTHub_MQTT_UploadToBlob_ConnString)
+{
+    e2e_uploadtoblob_test(MQTT_Protocol, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
+}
+#endif
+
 #endif // TEST_MQTT
 
 
