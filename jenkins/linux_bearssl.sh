@@ -19,4 +19,4 @@ cd cmake
 
 make --jobs=$CORES
 
-ctest -j $CORES --output-on-failure
+ctest -j $CORES --output-on-failure --schedule-random

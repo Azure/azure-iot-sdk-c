@@ -37,5 +37,5 @@ fi
 
 cmake .. -Drun_e2e_tests=ON -G Xcode
 cmake --build . -- --jobs=$CORES
-ctest -j $TEST_JOB_COUNT -C "debug" -VV --output-on-failure
+ctest -j $TEST_JOB_COUNT -C "debug" -VV --output-on-failure --schedule-random
 popd
