@@ -82,3 +82,8 @@ Network packets measure the number of bytes that are sent form the C-SDK with th
 
 - `Bytes Send` is the amount of data written by the c-sdk on the socket.
 - `Send Calls`/`Recv calls` are the number of types the c-sdk calls send or recv on the socket
+
+
+## Note on constrained devices
+
+The `Embedded C SDK` is an alternative for constrained devices which enables the BYO (bring your own) network approach: IoT developers have the freedom of choice to bring MQTT client, TLS and Socket of their choice to create a device solution. Find more information about the Embedded C SDK [here](https://github.com/Azure/azure-sdk-for-c/tree/master/sdk/docs/iot).
