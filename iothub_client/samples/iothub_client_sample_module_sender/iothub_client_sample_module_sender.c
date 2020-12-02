@@ -119,4 +119,3 @@ int main(void)
     IoTHub_Deinit();
     return 0;
 }
-
