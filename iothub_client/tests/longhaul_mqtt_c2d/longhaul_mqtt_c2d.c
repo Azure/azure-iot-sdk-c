@@ -49,6 +49,7 @@ int main(void)
             bool traceOn = true;
             IoTHubDeviceClient_SetOption(device_client, OPTION_LOG_TRACE, &traceOn);
 #endif //AZIOT_LINUX
+            ThreadAPI_Sleep(30 * 1000); // wait for the hub to see the device connection
             result = longhaul_run_c2d_tests(iotHubLonghaulRsrcsHandle, test_loop_wait_time_in_seconds, test_duration_in_seconds);
         }
 
