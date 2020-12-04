@@ -44,7 +44,7 @@ static const char* const RELATIVE_PATH_FMT_DEVICEMETHOD_MODULE = "/twins/%s/modu
 
 // Note: The timeout field specified in this JSON is not honored by IoT Hub.  See
 // https://github.com/Azure/azure-iot-sdk-c/issues/1378 for details.
-static const char* const RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD = "{\"methodName\":\"%s\",\"timeout\":%d,\"payload\":%s}";
+static const char* const RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD = "{\"methodName\":\"%s\",\"responseTimeoutInSeconds\":%d,\"connectTimeoutInSeconds\":60,\"payload\":%s}";
 
 /** @brief Structure to store IoTHub authentication information
 */

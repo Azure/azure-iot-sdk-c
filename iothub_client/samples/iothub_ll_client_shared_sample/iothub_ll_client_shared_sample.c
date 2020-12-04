@@ -27,9 +27,6 @@
 #ifdef SAMPLE_AMQP
 #include "iothubtransportamqp.h"
 #endif // SAMPLE_AMQP
-#ifdef SAMPLE_MQTT_OVER_WEBSOCKETS
-#include "iothubtransportmqtt_websockets.h"
-#endif // SAMPLE_MQTT_OVER_WEBSOCKETS
 #ifdef SAMPLE_AMQP_OVER_WEBSOCKETS
 #include "iothubtransportamqp_websockets.h"
 #endif // SAMPLE_AMQP_OVER_WEBSOCKETS
