@@ -50,7 +50,11 @@ static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT getDataCallback(IOTHUB_CLIENT_F
 
             if (block_count < 100)
             {
-                snprintf(data_to_upload, sizeof(data_to_upload), data_to_upload_format, block_count);
+                if (snprintf(data_to_upload, sizeof(data_to_upload), data_to_upload_format, block_count) < 0)
+                {
+                    return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_ABORT;
+                }
+
                 *data = (const unsigned char*)data_to_upload;
                 *size = strlen(data_to_upload);
                 block_count++;
