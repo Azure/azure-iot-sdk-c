@@ -32,6 +32,11 @@
 #define TWIN_REPORTED_BLOCK            "reported"
 #define DOT                            "."
 
+#define MIN_TEST_TOTAL_DURATION_SECS   600
+#define MIN_TEST_LOOP_DURATION_SECS    10
+
+static const char* IOTHUB_LONGHAUL_TOTAL_DURATION_SECS = "IOTHUB_LONGHAUL_TOTAL_DURATION_SECS";
+static const char* IOTHUB_LONGHAUL_LOOP_DURATION_SECS = "IOTHUB_LONGHAUL_LOOP_DURATION_SECS";
 
 #ifdef MBED_BUILD_TIMESTAMP
 #define SET_TRUSTED_CERT_IN_SAMPLES
@@ -66,6 +71,8 @@ typedef struct IOTHUB_LONGHAUL_RESOURCES_TAG
     IOTHUB_TEST_HANDLE iotHubTestHandle;
     IOTHUB_PROVISIONED_DEVICE* deviceInfo;
     unsigned int counter;
+    size_t test_duration_in_seconds;
+    size_t test_loop_duration_in_seconds;
 } IOTHUB_LONGHAUL_RESOURCES;
 
 typedef struct SEND_TELEMETRY_CONTEXT_TAG
@@ -614,6 +621,34 @@ static int run_on_loop(RUN_ON_LOOP_ACTION action, size_t iterationDurationInSeco
     return result;
 }
 
+static void set_test_execution_and_duration(IOTHUB_LONGHAUL_RESOURCES* longhaulResources)
+{
+    char* test_total_duration_string = getenv(IOTHUB_LONGHAUL_TOTAL_DURATION_SECS);
+    char* test_loop_duration_string = getenv(IOTHUB_LONGHAUL_LOOP_DURATION_SECS);
+
+    if (test_total_duration_string != NULL)
+    {
+        int time_secs = atoi(test_total_duration_string);
+
+        longhaulResources->test_duration_in_seconds = (time_secs >= MIN_TEST_TOTAL_DURATION_SECS ? (size_t)time_secs : MIN_TEST_TOTAL_DURATION_SECS);
+    }
+    else
+    {
+        longhaulResources->test_duration_in_seconds = MIN_TEST_TOTAL_DURATION_SECS;
+    }
+
+    if (test_loop_duration_string != NULL)
+    {
+        int time_secs = atoi(test_loop_duration_string);
+
+        longhaulResources->test_loop_duration_in_seconds = (time_secs >= MIN_TEST_LOOP_DURATION_SECS ? (size_t)time_secs : MIN_TEST_LOOP_DURATION_SECS);
+    }
+    else
+    {
+        longhaulResources->test_loop_duration_in_seconds = MIN_TEST_LOOP_DURATION_SECS;
+    }
+}
+
 
 // Public APIs
 
@@ -785,6 +820,7 @@ IOTHUB_LONGHAUL_RESOURCES_HANDLE longhaul_tests_init()
             }
             else
             {
+                set_test_execution_and_duration(result);
                 platform_init();
                 LogInfo("Longhaul Test ID: %s", result->test_id);
             }
@@ -1613,7 +1649,7 @@ static int update_device_twin_reported_property(const void* context)
     return result;
 }
 
-int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t iterationDurationInSeconds, size_t totalDurationInSeconds)
+int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
 {
     int result;
 
@@ -1643,9 +1679,9 @@ int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t
                 int loop_result;
                 IOTHUB_CLIENT_STATISTICS_HANDLE stats_handle;
 
-                loop_result = run_on_loop(send_telemetry, iterationDurationInSeconds, totalDurationInSeconds, iotHubLonghaulRsrcs);
+                loop_result = run_on_loop(send_telemetry, iotHubLonghaulRsrcs->test_loop_duration_in_seconds, iotHubLonghaulRsrcs->test_duration_in_seconds, iotHubLonghaulRsrcs);
 
-                ThreadAPI_Sleep((unsigned int)iterationDurationInSeconds * 1000 * 10); // Extra time for the last messages.
+                ThreadAPI_Sleep((unsigned int)iotHubLonghaulRsrcs->test_loop_duration_in_seconds * 1000 * 10); // Extra time for the last messages.
 
                 stats_handle = longhaul_get_statistics(iotHubLonghaulRsrcs);
 
@@ -1688,7 +1724,7 @@ int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t
     return result;
 }
 
-int longhaul_run_c2d_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t iterationDurationInSeconds, size_t totalDurationInSeconds)
+int longhaul_run_c2d_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
 {
     int result;
 
@@ -1721,9 +1757,9 @@ int longhaul_run_c2d_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t itera
             int loop_result;
             IOTHUB_CLIENT_STATISTICS_HANDLE stats_handle;
 
-            loop_result = run_on_loop(send_c2d, iterationDurationInSeconds, totalDurationInSeconds, iotHubLonghaul);
+            loop_result = run_on_loop(send_c2d, iotHubLonghaul->test_loop_duration_in_seconds, iotHubLonghaul->test_duration_in_seconds, iotHubLonghaul);
 
-            ThreadAPI_Sleep((unsigned int)iterationDurationInSeconds * 1000 * 10); // Extra time for the last messages.
+            ThreadAPI_Sleep((unsigned int)iotHubLonghaul->test_loop_duration_in_seconds * 1000 * 10); // Extra time for the last messages.
 
             stats_handle = longhaul_get_statistics(iotHubLonghaul);
 
@@ -1763,7 +1799,7 @@ int longhaul_run_c2d_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t itera
     return result;
 }
 
-int longhaul_run_device_methods_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t iterationDurationInSeconds, size_t totalDurationInSeconds)
+int longhaul_run_device_methods_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
 {
     int result;
 
@@ -1799,7 +1835,7 @@ int longhaul_run_device_methods_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, s
             // Wait for the service to ack the device subscription...
             ThreadAPI_Sleep(DEVICE_METHOD_SUB_WAIT_TIME_MS);
 
-            loop_result = run_on_loop(invoke_device_method, iterationDurationInSeconds, totalDurationInSeconds, iotHubLonghaul);
+            loop_result = run_on_loop(invoke_device_method, iotHubLonghaul->test_loop_duration_in_seconds, iotHubLonghaul->test_duration_in_seconds, iotHubLonghaul);
 
             stats_handle = longhaul_get_statistics(iotHubLonghaul);
 
@@ -1902,7 +1938,7 @@ static void on_device_twin_update_received(DEVICE_TWIN_UPDATE_STATE update_state
     }
 }
 
-int longhaul_run_twin_desired_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t iterationDurationInSeconds, size_t totalDurationInSeconds)
+int longhaul_run_twin_desired_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
 {
     int result;
 
@@ -1940,7 +1976,7 @@ int longhaul_run_twin_desired_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE 
             int loop_result;
             IOTHUB_CLIENT_STATISTICS_HANDLE stats_handle;
 
-            loop_result = run_on_loop(update_device_twin_desired_property, iterationDurationInSeconds, totalDurationInSeconds, iotHubLonghaul);
+            loop_result = run_on_loop(update_device_twin_desired_property, iotHubLonghaul->test_loop_duration_in_seconds, iotHubLonghaul->test_duration_in_seconds, iotHubLonghaul);
 
             stats_handle = longhaul_get_statistics(iotHubLonghaul);
 
@@ -1980,7 +2016,7 @@ int longhaul_run_twin_desired_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE 
     return result;
 }
 
-int longhaul_run_twin_reported_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t iterationDurationInSeconds, size_t totalDurationInSeconds)
+int longhaul_run_twin_reported_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
 {
     int result;
 
@@ -2013,10 +2049,10 @@ int longhaul_run_twin_reported_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE
             int loop_result;
             IOTHUB_CLIENT_STATISTICS_HANDLE stats_handle;
 
-            loop_result = run_on_loop(update_device_twin_reported_property, iterationDurationInSeconds, totalDurationInSeconds, iotHubLonghaul);
+            loop_result = run_on_loop(update_device_twin_reported_property, iotHubLonghaul->test_loop_duration_in_seconds, iotHubLonghaul->test_duration_in_seconds, iotHubLonghaul);
 
             // One last check...
-            ThreadAPI_Sleep((unsigned int)iterationDurationInSeconds * 1000);
+            ThreadAPI_Sleep((unsigned int)iotHubLonghaul->test_loop_duration_in_seconds * 1000);
             check_for_reported_properties_update_on_service_side(iotHubLonghaul);
 
             stats_handle = longhaul_get_statistics(iotHubLonghaul);
