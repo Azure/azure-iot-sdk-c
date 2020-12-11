@@ -1396,7 +1396,26 @@ static int invoke_device_method(const void* context)
                 MAX_DEVICE_METHOD_TRAVEL_TIME_SECS,
                 &responseStatus, &responsePayload, &responseSize)) != IOTHUB_DEVICE_METHOD_OK)
             {
-                LogError("Failed invoking device method");
+                if (responseStatus == 404)
+                {
+                    ThreadAPI_Sleep(1000 * 60); // wait for the SAS reconnect and try again
+
+                    // try again
+                    if ((device_method_info.method_result = IoTHubDeviceMethod_Invoke(
+                        iotHubLonghaul->iotHubSvcDevMethodHandle,
+                        iotHubLonghaul->deviceInfo->deviceId,
+                        LONGHAUL_DEVICE_METHOD_NAME,
+                        message,
+                        MAX_DEVICE_METHOD_TRAVEL_TIME_SECS,
+                        &responseStatus, &responsePayload, &responseSize)) != IOTHUB_DEVICE_METHOD_OK)
+                    {
+                        LogError("Failed invoking device method with status %d", responseStatus);
+                    }
+                }
+                else
+                {
+                    LogError("Failed invoking device method with status %d", responseStatus);
+                }
             }
 
             if (iothub_client_statistics_add_device_method_info(iotHubLonghaul->iotHubClientStats, DEVICE_METHOD_INVOKED, &device_method_info) != 0)
