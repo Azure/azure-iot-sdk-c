@@ -27,8 +27,6 @@ int main(void)
 {
     int result;
     IOTHUB_LONGHAUL_RESOURCES_HANDLE iotHubLonghaulRsrcsHandle;
-    size_t test_duration_in_seconds = 12 * 60 * 60;
-    size_t test_loop_wait_time_in_seconds = 60;
 
     if ((iotHubLonghaulRsrcsHandle = longhaul_tests_init()) == NULL)
     {
@@ -44,7 +42,7 @@ int main(void)
         }
         else
         {
-            result = longhaul_run_telemetry_tests(iotHubLonghaulRsrcsHandle, test_loop_wait_time_in_seconds, test_duration_in_seconds);
+            result = longhaul_run_telemetry_tests(iotHubLonghaulRsrcsHandle);
         }
 
         longhaul_tests_deinit(iotHubLonghaulRsrcsHandle);

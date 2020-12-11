@@ -1,6 +1,8 @@
 name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
 variables:
   runCodesignValidationInjection: false
+  iotHubLonghaulTotalDurationSecs: 43200
+  iotHubLonghaulLoopDurationSecs: 60
 resources:
 - repo: self
   clean: true
@@ -35,6 +37,8 @@ jobs:
       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+      IOTHUB_LONGHAUL_TOTAL_DURATION_SECS: $(iotHubLonghaulTotalDurationSecs)
+      IOTHUB_LONGHAUL_LOOP_DURATION_SECS: $(iotHubLonghaulLoopDurationSecs)
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
     condition: always()
@@ -62,6 +66,8 @@ jobs:
       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+      IOTHUB_LONGHAUL_TOTAL_DURATION_SECS: $(iotHubLonghaulTotalDurationSecs)
+      IOTHUB_LONGHAUL_LOOP_DURATION_SECS: $(iotHubLonghaulLoopDurationSecs)
   - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
     displayName: 'cleanup'
     condition: always() 
