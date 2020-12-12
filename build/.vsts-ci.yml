@@ -422,11 +422,11 @@ jobs:
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
     condition: always()
-- job: openssl-engine
+- job: openssl_engine
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/openssl-pkcs11"
   pool: Hosted Ubuntu 1604
-  displayName: 'openssl-engine'
+  displayName: 'OpenSSL with pkcs11 engine and SoftHSM'
   steps:
   - script: |
       sudo -E bash jenkins/linux_openssl_engine.sh
