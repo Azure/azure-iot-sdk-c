@@ -151,26 +151,7 @@
    fun:get_time_ns
 }
 {
-   OpenSSL pkcs11 engine causes pthread issue.
-   Helgrind:Misc
-   obj:/usr/lib/x86_64-linux-gnu/valgrind/vgpreload_helgrind-amd64-linux.so
-   obj:/usr/lib/x86_64-linux-gnu/libp11-kit.so.0.3.0
-   fun:_dl_fini
-   fun:__run_exit_handlers
-   fun:exit
-   fun:(below main)
-}
-{
-   OpenSSL pkcs11 engine causes pthread issue.
-   Helgrind:Misc
-   obj:/usr/lib/x86_64-linux-gnu/valgrind/vgpreload_helgrind-amd64-linux.so
-   fun:_dl_fini
-   fun:__run_exit_handlers
-   fun:exit
-   fun:(below main)
-}
-{
-   OpenSSL pkcs11 engine causes pthread issue.
+   OpenSSL/libp11-0.4.11
    drd:MutexErr
    fun:pthread_mutex_destroy
    obj:/usr/lib/x86_64-linux-gnu/libp11-kit.so.0.3.0
@@ -180,7 +161,7 @@
    fun:(below main)
 }
 {
-   OpenSSL pkcs11 engine causes pthread issue.
+   OpenSSL/libp11-0.4.11
    drd:MutexErr
    fun:pthread_mutex_destroy
    fun:_dl_fini
@@ -189,35 +170,26 @@
    fun:(below main)
 }
 {
-   OpenSSL PKCS11 Engine configuration (caused by openssl.cnf)
-   Memcheck:Leak
-   match-leak-kinds: definite
-   fun:malloc
-   fun:CRYPTO_zalloc
-   fun:ENGINE_new
-   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
-   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
-   fun:__pthread_once_slow
-   fun:CRYPTO_THREAD_run_once
-   fun:OPENSSL_init_crypto
-   obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.6.0
-   obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.6.0
-   fun:HTTPAPI_Init
-   fun:HTTPAPIEX_Init
-   fun:platform_init
-   fun:IoTHub_Init
-   fun:TestSuiteInitialize
-   fun:RunTests
-   fun:main
+   OpenSSL/libp11-0.4.11
+   Helgrind:Misc
+   obj:/usr/lib/x86_64-linux-gnu/valgrind/vgpreload_helgrind-amd64-linux.so
+   ...
+   fun:_dl_fini
+   fun:__run_exit_handlers
+   fun:exit
+   fun:(below main)
 }
 {
-   OpenSSL PKCS11 Engine configuration (caused by openssl.cnf)
+   cURL/OpenSSL/libp11-0.4.11
    Memcheck:Leak
    match-leak-kinds: definite
    fun:malloc
    fun:CRYPTO_zalloc
-   fun:ENGINE_new
-   fun:ENGINE_by_id
+   fun:EC_KEY_METHOD_new
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
    fun:ENGINE_by_id
    obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
    fun:CONF_modules_load
@@ -226,10 +198,62 @@
    obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.6.0
    fun:HTTPAPI_Init
    fun:HTTPAPIEX_Init
-   fun:platform_init
-   fun:IoTHub_Init
-   fun:TestSuiteInitialize
-   fun:RunTests
-   fun:main
+   ...
 }
-
+{
+   cURL/OpenSSL/libp11-0.4.11
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:RSA_meth_dup
+   obj:*
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_ctrl_cmd_string
+   fun:ENGINE_by_id
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:CONF_modules_load
+   fun:CONF_modules_load_file
+   obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.6.0
+   obj:/usr/lib/x86_64-linux-gnu/libcurl.so.4.6.0
+   fun:HTTPAPI_Init
+   fun:HTTPAPIEX_Init
+   ...
+}
+{
+   OpenSSL/libp11-0.4.11
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:EVP_PKEY_meth_new
+   obj:*
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:ENGINE_remove
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:OPENSSL_sk_pop_free
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   fun:OPENSSL_cleanup
+   fun:__run_exit_handlers
+   fun:exit
+   fun:(below main)
+}
+{
+   cURL/OpenSSL/libp11-0.4.11
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:CRYPTO_zalloc
+   fun:EVP_PKEY_meth_new
+   obj:*
+   fun:ENGINE_get_pkey_meth
+   obj:/usr/lib/x86_64-linux-gnu/libcrypto.so.1.1
+   ...
+   fun:curl_multi_perform
+   fun:curl_easy_perform
+   fun:HTTPAPI_ExecuteRequest
+   fun:HTTPAPIEX_ExecuteRequest
+   ...
+}

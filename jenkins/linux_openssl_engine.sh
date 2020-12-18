@@ -34,5 +34,3 @@ pkcs11-tool --module /usr/lib/softhsm/libsofthsm2.so -l -p 1234 --token test-tok
 
 # Run OpenSSL Engine tests
 ctest -j $((CORES * 4)) --output-on-failure
-
-
