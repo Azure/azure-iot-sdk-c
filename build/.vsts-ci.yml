@@ -116,7 +116,7 @@ jobs:
     condition: always()
 - job: OSX
   pool:
-    name: Hosted macOS
+    name: OSX
   steps:
   - script: |
       ./jenkins/osx_gcc_openssl.sh
