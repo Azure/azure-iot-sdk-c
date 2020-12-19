@@ -504,19 +504,35 @@ const char* x509privatekey =
 - "Engine" - only available when OpenSSL is used. It specifies the [OpenSSL built-in engine](https://www.openssl.org/docs/man1.1.1/man3/ENGINE_load_builtin_engines.html) to be loaded. value is a null terminated string that contains the engine name.
 - "x509PrivatekeyType" - only available when OpenSSL is used and OPENSSLOPT_ENGINE is configured. value is a pointer to a long. When set to 0x1, the private key is loaded from the OpenSSL Engine. The `x509privatekey` option represents the engine-specific certificate identifier.
 
-OpenSSL ENGINE Examples:
+### OpenSSL ENGINE Examples:
+
 ```c
-// Example using Azure IoT Identity, Key and Certificate Services
-const char* openssl_engine = "aziot_keys";
-const char* x509privatekey = "sr=eyJrZXlfaWQiOnsiS2V5UGFpciI6ImRldmljZS...zGwtvKYW6dlkjtPK2ljVqUjmC9gqvZTmw=""; // Replace with assigned key handle.
-const long x509privatekeytype = 1;
+// Example using Azure IoT Identity, Key and Certificate Services (https://azure.github.io/iot-identity-service/)
+
+const char* opensslEngine = "aziot_keys";
+static const OPTION_OPENSSL_KEY_TYPE x509_key_from_engine = KEY_TYPE_ENGINE;
+
+// Private KeyID obtained by querying Key Service. E.g.:
+//   curl --unix-socket /run/aziot/keyd.sock http://foo/keypair/device-id?api-version=2020-09-01
+const char* x509privatekey = "sr=eyJrZXlfaWQiOnsiS2V5UGFpciI6ImRldmljZS...zGwtvKYW6dlkjtPK2ljVqUjmC9gqvZTmw=";
+
+// Public certificate obtained by querying Certificate Service. E.g.:
+//   curl --unix-socket /run/aziot/certd.sock http://foo/certificates/device-id?api-version=2020-09-01
+const char* x509certificate = 
+"-----BEGIN CERTIFICATE-----\n"
+"MIIBJTCBywIUUennAV2WbZsckSIcMHLXuak/iCswCgYIKoZIzj0EAwIwFTETMBEG\n"
+// [...]
+"OkZcAK4VBLwYnoH+glXK6pWqDkXE0wIhAM0OFOTbVIuXOGDXaCKxFLIvMifo2RJZ\n"
+"b5pjgB2gaGGi\n"
+"-----END CERTIFICATE-----\n";
 ```
 
 ```c
-// Example using TPM TSS OpenSSL ENGINE
-const char* openssl_engine = "tpm2tss";
+// Example using TPM TSS OpenSSL ENGINE (https://github.com/tpm2-software/tpm2-tss-engine)
+const char* opensslEngine = "tpm2tss";
+static const OPTION_OPENSSL_KEY_TYPE x509_key_from_engine = KEY_TYPE_ENGINE;
 
-// When the TPM2TSS engine is used, the public certificate is loaded from a PEM string.
+// Certificate and key-file obtained using tpm2tss-genkey:
 const char* x509certificate =
 "-----BEGIN CERTIFICATE-----\n"
 "MIIBJTCBywIUUennAV2WbZsckSIcMHLXuak/iCswCgYIKoZIzj0EAwIwFTETMBEG\n"
@@ -526,13 +542,16 @@ const char* x509certificate =
 "-----END CERTIFICATE-----\n";
 
 // When the TPM2TSS engine is used, the key identifier is a path to a PEM-encoded TSS2 private key:
-const long x509privatekeytype = 1;
 const char* x509privatekey = "/home/restricted_user/tpm2ec.tss"
 ```
 
 ```c
-// Example using PKCS#11 OpenSSL ENGINE
+// Example using PKCS#11 OpenSSL ENGINE (https://github.com/OpenSC/libp11)
+// The OpenSSL ENGINE must be associated to a pkcs11 module within openssl.cnf.
 static const char* opensslEngine = "pkcs11";
+static const OPTION_OPENSSL_KEY_TYPE x509_key_from_engine = KEY_TYPE_ENGINE;
+
+// Certificate can be extracted from the PKCS#11 library using pkcs11-tool from OpenSC.
 static const char* x509certificate = 
 "-----BEGIN CERTIFICATE-----\n"
 "MIIBMTCB1wIUTu66kxJIBR5t5IkAwh7Lqm/AM+IwCgYIKoZIzj0EAwIwGzEZMBcG\n"
@@ -540,8 +559,8 @@ static const char* x509certificate =
 "DItkq1MHqzqExB1eTrMHQVY11w62\n"
 "-----END CERTIFICATE-----\n";
 
+// The private key contains the PKCS#11 URI.
 static const char* x509privatekey = "pkcs11:object=ec-privkey;type=private?pin-value=1234";
-static const OPTION_OPENSSL_KEY_TYPE x509keyengine = KEY_TYPE_ENGINE;
 ```
 
 ## IotHubClient\_LL\_... APIs
