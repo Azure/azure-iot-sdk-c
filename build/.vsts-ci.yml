@@ -424,7 +424,7 @@ jobs:
     condition: always()
 - job: openssl_engine
   variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/openssl-pkcs11"
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/openssl-pkcs11:1.0"
   pool: Hosted Ubuntu 1604
   displayName: 'OpenSSL with pkcs11 engine and SoftHSM'
   steps:
