@@ -61,6 +61,7 @@ option(use_mqtt "set use_mqtt to ON if mqtt is to be used, set to OFF to not use
 option(run_e2e_tests "set run_e2e_tests to ON to run e2e tests (default is OFF)" OFF)
 option(run_unittests "set run_unittests to ON to run unittests (default is OFF)" OFF)
 option(run_longhaul_tests "set run_longhaul_tests to ON to run longhaul tests (default is OFF)[if possible, they are always build]" OFF)
+option(run_e2e_openssl_engine_tests "set run_e2e_openssl_engine_tests to ON to run OpenSSL ENGINE tests (default is OFF)[if possible, they are always build]" OFF)
 option(skip_samples "set skip_samples to ON to skip building samples (default is OFF)[if possible, they are always build]" OFF)
 option(build_service_client "controls whether the iothub_service_client is built or not" ON)
 option(build_provisioning_service_client "controls whether the provisioning_service_client is built or not" ON)
