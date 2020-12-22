@@ -109,6 +109,12 @@ static void on_bytes_received(void* context, const unsigned char* buffer, size_t
 {
     (void)context;
 
+    if (buffer == NULL)
+    {
+        (void)printf("[ERROR] on_bytes_received invoked with NULL buffer (unexpected)\r\n");
+        exit(1);
+    }
+
     if (g_is_uws_client_ready)
     {
         size_t send_size;
@@ -218,7 +224,21 @@ static void on_ws_peer_closed(void* context, uint16_t* close_code, const unsigne
 {
     (void)context;
     (void)extra_data_length;
-    (void)printf("on_ws_peer_closed (Code: %d, Data: %.*s)\r\n", *close_code, (int)extra_data_length, extra_data);
+
+    (void)printf("on_ws_peer_closed (");
+
+    if (close_code != NULL)
+    {
+        (void)printf("Code: %d, ", *close_code);
+    }
+
+    if (extra_data != NULL)
+    {
+        (void)printf("Data: %.*s", (int)extra_data_length, extra_data);
+    }
+
+    (void)printf(")\r\n");
+
     g_continueRunning = false;
 }
 
