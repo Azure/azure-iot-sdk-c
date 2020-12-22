@@ -1603,4 +1603,191 @@ TEST_FUNCTION(do_work_in_progress_queue_timeout)
     message_queue_destroy(mq);
 }
 
+// Tests_SRS_MESSAGE_QUEUE_21_070: [The message_queue_move_all_back_to_pending shall add all in_progress message in front of the pending messages.]
+TEST_FUNCTION(message_queue_move_all_back_to_pending_with_in_progress_and_pending_succeed)
+{
+    // arrange
+    MESSAGE_QUEUE_HANDLE mq = create_message_queue(USE_DEFAULT_CONFIG);
+
+    add_messages(mq, 2, TEST_current_time);
+    crank_message_queue(mq, TEST_current_time, 1, 0, NULL);
+    add_messages(mq, 2, TEST_current_time);
+
+    umock_c_reset_all_calls();
+    for (int i = 0; i < 2; i++)
+    {
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        set_retry_sending_message_expected_calls();
+    }
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+    for (int i = 0; i < 4; i++)
+    {
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        set_retry_sending_message_expected_calls();
+    }
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+
+    // act
+    int result = message_queue_move_all_back_to_pending(mq);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, 0, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    message_queue_destroy(mq);
+}
+
+TEST_FUNCTION(message_queue_move_all_back_to_pending_with_only_in_progress_succeed)
+{
+    // arrange
+    MESSAGE_QUEUE_HANDLE mq = create_message_queue(USE_DEFAULT_CONFIG);
+
+    add_messages(mq, 2, TEST_current_time);
+    crank_message_queue(mq, TEST_current_time, 1, 0, NULL);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+    for (int i = 0; i < 2; i++)
+    {
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        set_retry_sending_message_expected_calls();
+    }
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+
+    // act
+    int result = message_queue_move_all_back_to_pending(mq);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, 0, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    message_queue_destroy(mq);
+}
+
+TEST_FUNCTION(message_queue_move_all_back_to_pending_with_only_pending_succeed)
+{
+    // arrange
+    MESSAGE_QUEUE_HANDLE mq = create_message_queue(USE_DEFAULT_CONFIG);
+
+    add_messages(mq, 2, TEST_current_time);
+
+    umock_c_reset_all_calls();
+    for (int i = 0; i < 2; i++)
+    {
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        set_retry_sending_message_expected_calls();
+    }
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+    for (int i = 0; i < 2; i++)
+    {
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        set_retry_sending_message_expected_calls();
+    }
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+
+    // act
+    int result = message_queue_move_all_back_to_pending(mq);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, 0, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    message_queue_destroy(mq);
+}
+
+// Tests_SRS_MESSAGE_QUEUE_21_071: [If the message_queue is NULL, the message_queue_move_all_back_to_pending shall return non-zero result.]
+TEST_FUNCTION(message_queue_move_all_back_to_pending_null_message_queue_failed)
+{
+    // arrange
+
+    // act
+    int result = message_queue_move_all_back_to_pending(NULL);
+
+    // assert
+    ASSERT_ARE_NOT_EQUAL(int, 0, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+}
+
+// Tests_SRS_MESSAGE_QUEUE_21_072: [If move pending messages failed, the message_queue_move_all_back_to_pending shall delete all elements in the queue and return non-zero.]
+TEST_FUNCTION(message_queue_move_all_back_to_pending_move_pending_failed)
+{
+    // arrange
+    MESSAGE_QUEUE_HANDLE mq = create_message_queue(USE_DEFAULT_CONFIG);
+
+    add_messages(mq, 2, TEST_current_time);
+    crank_message_queue(mq, TEST_current_time, 1, 0, NULL);
+    add_messages(mq, 2, TEST_current_time);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_remove(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(1);
+    for (int i = 0; i < 2; i++)
+    {
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        set_dequeue_message_and_fire_callback_expected_calls();
+    }
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+    for (int i = 0; i < 2; i++)
+    {
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        set_dequeue_message_and_fire_callback_expected_calls();
+    }
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+
+    // act
+    int result = message_queue_move_all_back_to_pending(mq);
+
+    // assert
+    ASSERT_ARE_NOT_EQUAL(int, 0, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    message_queue_destroy(mq);
+}
+
+// Tests_SRS_MESSAGE_QUEUE_21_073: [If move in_progress messages failed, the message_queue_move_all_back_to_pending shall delete all elements in the queue and return non-zero.]
+TEST_FUNCTION(message_queue_move_all_back_to_pending_move_in_progress_failed)
+{
+    // arrange
+    MESSAGE_QUEUE_HANDLE mq = create_message_queue(USE_DEFAULT_CONFIG);
+
+    add_messages(mq, 2, TEST_current_time);
+    crank_message_queue(mq, TEST_current_time, 1, 0, NULL);
+    add_messages(mq, 2, TEST_current_time);
+
+    umock_c_reset_all_calls();
+    for (int i = 0; i < 2; i++)
+    {
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        set_retry_sending_message_expected_calls();
+    }
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_remove(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(1);
+    for (int i = 0; i < 4; i++)
+    {
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+        set_dequeue_message_and_fire_callback_expected_calls();
+    }
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG));
+
+    // act
+    int result = message_queue_move_all_back_to_pending(mq);
+
+    // assert
+    ASSERT_ARE_NOT_EQUAL(int, 0, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    message_queue_destroy(mq);
+}
+
 END_TEST_SUITE(message_queue_ut)

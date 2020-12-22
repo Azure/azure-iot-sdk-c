@@ -24,6 +24,7 @@ vcpkg install azure-iot-sdk-c
 vcpkg export azure-iot-sdk-c --nuget
 
 # Open a C SDK sample (assuming repo was cloned as follows: git clone https://github.com/Azure/azure-iot-sdk-c.git azureiotsdk_sample)
+# (Building the SDK and samples can be found here https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/devbox_setup.md)
 pushd azureiotsdk_sample\iothub_client\samples\iothub_ll_c2d_sample\windows
 start iothub_ll_c2d_sample.sln
 <hit F5 to build and run>

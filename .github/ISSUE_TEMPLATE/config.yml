@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Azure IoT support and help options
+    url: https://aka.ms/IoTHelp
+    about: The main landing page for all Azure IoT support options.

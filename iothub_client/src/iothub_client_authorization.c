@@ -11,6 +11,8 @@
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/sastoken.h"
 #include "azure_c_shared_utility/shared_util_options.h"
+#include "azure_c_shared_utility/azure_base64.h"
+#include "azure_c_shared_utility/buffer_.h"
 
 #ifdef USE_PROV_MODULE
 #include "azure_prov_client/internal/iothub_auth_client.h"
@@ -93,10 +95,31 @@ static IOTHUB_AUTHORIZATION_DATA* initialize_auth_client(const char* device_id, 
 IOTHUB_AUTHORIZATION_HANDLE IoTHubClient_Auth_Create(const char* device_key, const char* device_id, const char* device_sas_token, const char *module_id)
 {
     IOTHUB_AUTHORIZATION_DATA* result;
-    /* Codes_SRS_IoTHub_Authorization_07_001: [if device_id is NULL IoTHubClient_Auth_Create, shall return NULL. ] */
-    if (device_id == NULL)
+    bool is_key_valid;
+
+    if (device_key == NULL)
     {
-        LogError("Invalid Parameter device_id: %p", device_id);
+        is_key_valid = true;
+    }
+    else
+    {
+        /* Codes_SRS_IoTHub_Authorization_21_021: [ If the provided key is not base64 encoded, IoTHubClient_Auth_Create shall return NULL. ] */
+        BUFFER_HANDLE key = Azure_Base64_Decode(device_key);
+        if (key != NULL)
+        {
+            is_key_valid = true;
+        }
+        else
+        {
+            is_key_valid = false;
+        }
+        BUFFER_delete(key);
+    }
+    
+    /* Codes_SRS_IoTHub_Authorization_07_001: [if device_id is NULL IoTHubClient_Auth_Create, shall return NULL. ] */
+    if ((device_id == NULL) || (!is_key_valid))
+    {
+        LogError("Invalid Parameter %s", ((device_id == NULL) ? "device_id: NULL" : "key"));
         result = NULL;
     }
     else

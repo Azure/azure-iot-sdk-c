@@ -30,6 +30,8 @@ static void my_gballoc_free(void* ptr)
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/sastoken.h"
 #include "azure_c_shared_utility/xio.h"
+#include "azure_c_shared_utility/buffer_.h"
+#include "azure_c_shared_utility/azure_base64.h"
 
 #ifdef USE_PROV_MODULE
 #include "azure_prov_client/internal/iothub_auth_client.h"
@@ -139,8 +141,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_AUTHORIZATION_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(time_t, long long);
     REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(XDA_HANDLE, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_SECURITY_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(BUFFER_HANDLE, void*);
 
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
@@ -155,13 +156,16 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_RETURN(get_time, TEST_TIME_VALUE);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(get_time, ((time_t)(-1)));
 
+    REGISTER_GLOBAL_MOCK_RETURNS(Azure_Base64_Decode, (BUFFER_HANDLE)0x1, NULL);
+
     REGISTER_GLOBAL_MOCK_RETURN(STRING_c_str, TEST_STRING_VALUE);
     REGISTER_GLOBAL_MOCK_HOOK(STRING_delete, my_STRING_delete);
     REGISTER_GLOBAL_MOCK_HOOK(STRING_construct, my_STRING_construct);
     REGISTER_GLOBAL_MOCK_RETURN(SASToken_Validate, true);
 
 #ifdef USE_PROV_MODULE
-    REGISTER_UMOCK_ALIAS_TYPE(DEVICE_AUTH_TYPE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(DEVICE_AUTH_TYPE, int);
+    REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_SECURITY_HANDLE, void*);
 
     REGISTER_GLOBAL_MOCK_HOOK(iothub_device_auth_create, my_iothub_device_auth_create);
     REGISTER_GLOBAL_MOCK_RETURN(iothub_device_auth_create, NULL);
@@ -210,6 +214,12 @@ static void setup_IoTHubClient_Auth_CreateFromDeviceAuth_mocks(bool module_id, D
 
 static void setup_IoTHubClient_Auth_Create_mocks(bool device_key, bool module_id)
 {
+    if (device_key)
+    {
+        STRICT_EXPECTED_CALL(Azure_Base64_Decode(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+    }
+
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, DEVICE_ID));
     if (module_id)
@@ -225,32 +235,20 @@ static void setup_IoTHubClient_Auth_Create_mocks(bool device_key, bool module_id
 static void setup_IoTHubClient_Auth_Get_ConnString_mocks()
 {
     STRICT_EXPECTED_CALL(get_time(NULL));
-    STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG)).CallCannotFail();
     STRICT_EXPECTED_CALL(SASToken_CreateString(IGNORED_PTR_ARG, SCOPE_NAME, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
 }
 
-static int should_skip_index(size_t current_index, const size_t skip_array[], size_t length)
-{
-    int result = 0;
-    for (size_t index = 0; index < length; index++)
-    {
-        if (current_index == skip_array[index])
-        {
-            result = __LINE__;
-            break;
-        }
-    }
-    return result;
-}
-
-/* Codes_SRS_IoTHub_Authorization_07_001: [if device_key or device_id is NULL IoTHubClient_Auth_Create, shall return NULL. ] */
+/* Tests_SRS_IoTHub_Authorization_07_001: [if device_key or device_id is NULL IoTHubClient_Auth_Create, shall return NULL. ] */
 TEST_FUNCTION(IoTHubClient_Auth_Create_id_NULL_succeed)
 {
     //arrange
     umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(Azure_Base64_Decode(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
 
     //act
     IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, NULL, NULL, NULL);
@@ -263,9 +261,9 @@ TEST_FUNCTION(IoTHubClient_Auth_Create_id_NULL_succeed)
     IoTHubClient_Auth_Destroy(handle);
 }
 
-/* Codes_SRS_IoTHub_Authorization_07_002: [IoTHubClient_Auth_Create shall allocate a IOTHUB_AUTHORIZATION_HANDLE that is needed for subsequent calls. ] */
-/* Codes_SRS_IoTHub_Authorization_07_003: [ IoTHubClient_Auth_Create shall set the credential type to IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY. ] */
-/* Codes_SRS_IoTHub_Authorization_07_004: [ If successful IoTHubClient_Auth_Create shall return a IOTHUB_AUTHORIZATION_HANDLE value. ] */
+/* Tests_SRS_IoTHub_Authorization_07_002: [IoTHubClient_Auth_Create shall allocate a IOTHUB_AUTHORIZATION_HANDLE that is needed for subsequent calls. ] */
+/* Tests_SRS_IoTHub_Authorization_07_003: [ IoTHubClient_Auth_Create shall set the credential type to IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY. ] */
+/* Tests_SRS_IoTHub_Authorization_07_004: [ If successful IoTHubClient_Auth_Create shall return a IOTHUB_AUTHORIZATION_HANDLE value. ] */
 TEST_FUNCTION(IoTHubClient_Auth_Create_succeed)
 {
     //arrange
@@ -304,9 +302,9 @@ TEST_FUNCTION(IoTHubClient_Auth_Create_unknown_status_succeed)
     IoTHubClient_Auth_Destroy(handle);
 }
 
-/* Codes_SRS_IoTHub_Authorization_07_002: [IoTHubClient_Auth_Create shall allocate a IOTHUB_AUTHORIZATION_HANDLE that is needed for subsequent calls. ] */
-/* Codes_SRS_IoTHub_Authorization_07_003: [ IoTHubClient_Auth_Create shall set the credential type to IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY. ] */
-/* Codes_SRS_IoTHub_Authorization_07_004: [ If successful IoTHubClient_Auth_Create shall return a IOTHUB_AUTHORIZATION_HANDLE value. ] */
+/* Tests_SRS_IoTHub_Authorization_07_002: [IoTHubClient_Auth_Create shall allocate a IOTHUB_AUTHORIZATION_HANDLE that is needed for subsequent calls. ] */
+/* Tests_SRS_IoTHub_Authorization_07_003: [ IoTHubClient_Auth_Create shall set the credential type to IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY. ] */
+/* Tests_SRS_IoTHub_Authorization_07_004: [ If successful IoTHubClient_Auth_Create shall return a IOTHUB_AUTHORIZATION_HANDLE value. ] */
 TEST_FUNCTION(IoTHubClient_Auth_Create_device_key_NULL_succeed)
 {
     //arrange
@@ -345,9 +343,9 @@ TEST_FUNCTION(IoTHubClient_Auth_Create_module_id_succeed)
 }
 
 
-/* Codes_SRS_IoTHub_Authorization_07_002: [IoTHubClient_Auth_Create shall allocate a IOTHUB_AUTHORIZATION_HANDLE that is needed for subsequent calls. ] */
-/* Codes_SRS_IoTHub_Authorization_07_004: [ If successful IoTHubClient_Auth_Create shall return a IOTHUB_AUTHORIZATION_HANDLE value. ] */
-/* Codes_SRS_IoTHub_Authorization_07_020: [ else IoTHubClient_Auth_Create shall set the credential type to IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN. ] */
+/* Tests_SRS_IoTHub_Authorization_07_002: [IoTHubClient_Auth_Create shall allocate a IOTHUB_AUTHORIZATION_HANDLE that is needed for subsequent calls. ] */
+/* Tests_SRS_IoTHub_Authorization_07_004: [ If successful IoTHubClient_Auth_Create shall return a IOTHUB_AUTHORIZATION_HANDLE value. ] */
+/* Tests_SRS_IoTHub_Authorization_07_020: [ else IoTHubClient_Auth_Create shall set the credential type to IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN. ] */
 TEST_FUNCTION(IoTHubClient_Auth_Create_with_sas_succeed)
 {
     //arrange
@@ -370,7 +368,8 @@ TEST_FUNCTION(IoTHubClient_Auth_Create_with_sas_succeed)
     IoTHubClient_Auth_Destroy(handle);
 }
 
-/* Codes_SRS_IoTHub_Authorization_07_019: [ On error IoTHubClient_Auth_Create shall return NULL. ] */
+/* Tests_SRS_IoTHub_Authorization_07_019: [ On error IoTHubClient_Auth_Create shall return NULL. ] */
+/* Tests_SRS_IoTHub_Authorization_21_021: [ If the provided key is not base64 encoded, IoTHubClient_Auth_Create shall return NULL. ] */
 TEST_FUNCTION(IoTHubClient_Auth_Create_fail)
 {
     //arrange
@@ -387,6 +386,11 @@ TEST_FUNCTION(IoTHubClient_Auth_Create_fail)
     size_t count = umock_c_negative_tests_call_count();
     for (size_t index = 0; index < count; index++)
     {
+        if (index == 1)
+        {
+            continue;
+        }
+
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
@@ -469,7 +473,7 @@ TEST_FUNCTION(IoTHubClient_Auth_CreateFromDeviceAuth_fail)
 }
 #endif
 
-/* Codes_SRS_IoTHub_Authorization_07_005: [ if handle is NULL IoTHubClient_Auth_Destroy shall do nothing. ] */
+/* Tests_SRS_IoTHub_Authorization_07_005: [ if handle is NULL IoTHubClient_Auth_Destroy shall do nothing. ] */
 TEST_FUNCTION(IoTHubClient_Auth_Destroy_handle_NULL_succeed)
 {
     //arrange
@@ -483,7 +487,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Destroy_handle_NULL_succeed)
     //cleanup
 }
 
-/* Codes_SRS_IoTHub_Authorization_07_006: [ IoTHubClient_Auth_Destroy shall free all resources associated with the IOTHUB_AUTHORIZATION_HANDLE handle. ] */
+/* Tests_SRS_IoTHub_Authorization_07_006: [ IoTHubClient_Auth_Destroy shall free all resources associated with the IOTHUB_AUTHORIZATION_HANDLE handle. ] */
 TEST_FUNCTION(IoTHubClient_Auth_Destroy_succeed)
 {
     //arrange
@@ -559,7 +563,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Set_x509_Type_no_x509_succeed)
 }
 
 
-/* Codes_SRS_IoTHub_Authorization_07_007: [ if handle is NULL IoTHub_Auth_Get_Credential_Type shall return IOTHUB_CREDENTIAL_TYPE_UNKNOWN. ] */
+/* Tests_SRS_IoTHub_Authorization_07_007: [ if handle is NULL IoTHub_Auth_Get_Credential_Type shall return IOTHUB_CREDENTIAL_TYPE_UNKNOWN. ] */
 TEST_FUNCTION(IoTHubClient_Auth_Get_Credential_Type_handle_NULL)
 {
     //arrange
@@ -574,7 +578,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_Credential_Type_handle_NULL)
     //cleanup
 }
 
-/* Codes_SRS_IoTHub_Authorization_07_008: [ IoTHub_Auth_Get_Credential_Type shall return the credential type that is set upon creation. ] */
+/* Tests_SRS_IoTHub_Authorization_07_008: [ IoTHub_Auth_Get_Credential_Type shall return the credential type that is set upon creation. ] */
 TEST_FUNCTION(IoTHubClient_Auth_Get_Credential_Type_succeed)
 {
     //arrange
@@ -741,7 +745,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_x509_info_cred_type_fails)
 #endif
 
 
-/* Codes_SRS_IoTHub_Authorization_07_009: [ if handle or scope are NULL, IoTHubClient_Auth_Get_ConnString shall return NULL. ] */
+/* Tests_SRS_IoTHub_Authorization_07_009: [ if handle or scope are NULL, IoTHubClient_Auth_Get_ConnString shall return NULL. ] */
 TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_handle_NULL)
 {
     //arrange
@@ -756,7 +760,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_handle_NULL)
     //cleanup
 }
 
-/* Codes_SRS_IoTHub_Authorization_07_009: [ if handle or scope are NULL, IoTHubClient_Auth_Get_ConnString shall return NULL. ] */
+/* Tests_SRS_IoTHub_Authorization_07_009: [ if handle or scope are NULL, IoTHubClient_Auth_Get_ConnString shall return NULL. ] */
 TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_scope_NULL_fail)
 {
     //arrange
@@ -775,9 +779,9 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_scope_NULL_fail)
 }
 
 #ifdef USE_PROV_MODULE
-/* Codes_SRS_IoTHub_Authorization_07_010: [ IoTHubClient_Auth_Get_ConnString shall construct the expiration time using the expire_time. ] */
-/* Codes_SRS_IoTHub_Authorization_07_011: [ IoTHubClient_Auth_Get_ConnString shall call SASToken_CreateString to construct the sas token. ] */
-/* Codes_SRS_IoTHub_Authorization_07_012: [ On success IoTHubClient_Auth_Get_ConnString shall allocate and return the sas token in a char*. ] */
+/* Tests_SRS_IoTHub_Authorization_07_010: [ IoTHubClient_Auth_Get_ConnString shall construct the expiration time using the expire_time. ] */
+/* Tests_SRS_IoTHub_Authorization_07_011: [ IoTHubClient_Auth_Get_ConnString shall call SASToken_CreateString to construct the sas token. ] */
+/* Tests_SRS_IoTHub_Authorization_07_012: [ On success IoTHubClient_Auth_Get_ConnString shall allocate and return the sas token in a char*. ] */
 TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_device_auth_succeed)
 {
     //arrange
@@ -845,7 +849,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_ModuleId_succeed)
 }
 
 
-/* Codes_SRS_IoTHub_Authorization_07_020: [ If any error is encountered IoTHubClient_Auth_Get_ConnString shall return NULL. ] */
+/* Tests_SRS_IoTHub_Authorization_07_020: [ If any error is encountered IoTHubClient_Auth_Get_ConnString shall return NULL. ] */
 TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_fail)
 {
     //arrange
@@ -859,32 +863,28 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_ConnString_fail)
 
     umock_c_negative_tests_snapshot();
 
-    size_t calls_cannot_fail[] = { 1, 3, 5 };
-
     //act
     size_t count = umock_c_negative_tests_call_count();
     for (size_t index = 0; index < count; index++)
     {
-        if (should_skip_index(index, calls_cannot_fail, sizeof(calls_cannot_fail)/sizeof(calls_cannot_fail[0])) != 0)
+        if (umock_c_negative_tests_can_call_fail(index))
         {
-            continue;
+            umock_c_negative_tests_reset();
+            umock_c_negative_tests_fail_call(index);
+
+            //act
+            char* conn_string = IoTHubClient_Auth_Get_SasToken(handle, SCOPE_NAME, TEST_EXPIRY_TIME, TEST_KEYNAME_VALUE);
+
+            //assert
+            ASSERT_IS_NULL(conn_string, "IoTHubClient_Auth_Get_ConnString failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
         }
-
-        umock_c_negative_tests_reset();
-        umock_c_negative_tests_fail_call(index);
-
-        //act
-        char* conn_string = IoTHubClient_Auth_Get_SasToken(handle, SCOPE_NAME, TEST_EXPIRY_TIME, TEST_KEYNAME_VALUE);
-
-        //assert
-        ASSERT_IS_NULL(conn_string, "IoTHubClient_Auth_Get_ConnString failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
     }
     //cleanup
     IoTHubClient_Auth_Destroy(handle);
     umock_c_negative_tests_deinit();
 }
 
-/* Codes_SRS_IoTHub_Authorization_07_013: [ if handle is NULL, IoTHubClient_Auth_Get_DeviceId shall return NULL. ] */
+/* Tests_SRS_IoTHub_Authorization_07_013: [ if handle is NULL, IoTHubClient_Auth_Get_DeviceId shall return NULL. ] */
 TEST_FUNCTION(IoTHubClient_Auth_Get_DeviceId_handle_NULL)
 {
     //arrange
@@ -899,7 +899,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_DeviceId_handle_NULL)
     //cleanup
 }
 
-/* Codes_SRS_IoTHub_Authorization_07_014: [ IoTHubClient_Auth_Get_DeviceId shall return the device_id specified upon creation. ] */
+/* Tests_SRS_IoTHub_Authorization_07_014: [ IoTHubClient_Auth_Get_DeviceId shall return the device_id specified upon creation. ] */
 TEST_FUNCTION(IoTHubClient_Auth_Get_DeviceId_succeed)
 {
     //arrange
@@ -918,7 +918,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_DeviceId_succeed)
     IoTHubClient_Auth_Destroy(handle);
 }
 
-/* Codes_SRS_IoTHub_Authorization_07_022: [ if handle is NULL, IoTHubClient_Auth_Get_DeviceKey shall return NULL. ] */
+/* Tests_SRS_IoTHub_Authorization_07_022: [ if handle is NULL, IoTHubClient_Auth_Get_DeviceKey shall return NULL. ] */
 TEST_FUNCTION(IoTHubClient_Auth_Get_DeviceKey_handle_NULL)
 {
     //arrange
@@ -933,7 +933,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_DeviceKey_handle_NULL)
     //cleanup
 }
 
-/* Codes_SRS_IoTHub_Authorization_07_023: [ IoTHubClient_Auth_Get_DeviceKey shall return the device_key specified upon creation. ] */
+/* Tests_SRS_IoTHub_Authorization_07_023: [ IoTHubClient_Auth_Get_DeviceKey shall return the device_key specified upon creation. ] */
 TEST_FUNCTION(IoTHubClient_Auth_Get_Devicekey_succeed)
 {
     //arrange
@@ -952,7 +952,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_Devicekey_succeed)
     IoTHubClient_Auth_Destroy(handle);
 }
 
-/* Codes_SRS_IoTHub_Authorization_07_015: [ if handle is NULL, IoTHubClient_Auth_Is_SasToken_Valid shall return false. ] */
+/* Tests_SRS_IoTHub_Authorization_07_015: [ if handle is NULL, IoTHubClient_Auth_Is_SasToken_Valid shall return false. ] */
 TEST_FUNCTION(IoTHubClient_Auth_Is_SasToken_Valid_handle_NULL_fail)
 {
     //arrange
@@ -967,7 +967,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Is_SasToken_Valid_handle_NULL_fail)
     //cleanup
 }
 
-/* Codes_SRS_IoTHub_Authorization_07_018: [ otherwise IoTHubClient_Auth_Is_SasToken_Valid shall return the value returned by SASToken_Validate. ] */
+/* Tests_SRS_IoTHub_Authorization_07_018: [ otherwise IoTHubClient_Auth_Is_SasToken_Valid shall return the value returned by SASToken_Validate. ] */
 TEST_FUNCTION(IoTHubClient_Auth_Is_SasToken_Valid_succeed)
 {
     //arrange
@@ -985,7 +985,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Is_SasToken_Valid_succeed)
     IoTHubClient_Auth_Destroy(handle);
 }
 
-/* Codes_SRS_IoTHub_Authorization_07_018: [ otherwise IoTHubClient_Auth_Is_SasToken_Valid shall return the value returned by SASToken_Validate. ] */
+/* Tests_SRS_IoTHub_Authorization_07_018: [ otherwise IoTHubClient_Auth_Is_SasToken_Valid shall return the value returned by SASToken_Validate. ] */
 TEST_FUNCTION(IoTHubClient_Auth_Is_SasToken_Valid_sas_token_succeed)
 {
     //arrange

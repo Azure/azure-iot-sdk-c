@@ -1,16 +1,13 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-/** @file iothub_client_core.h
-*    @brief Extends the IoTHubClientCore_LL module with additional features.
-*
-*    @details IoTHubClientCore is a module that extends the IoTHubClientCore_LL
-*             module with 2 features:
-*                - scheduling the work for the IoTHubCLient from a
-*                  thread, so that the user does not need to create their
-*                  own thread
-*                - thread-safe APIs
-*/
+//**********************************************************************
+// NOTE: THIS HEADER IS FOR INTERNAL USE ONLY
+// 
+// Applications should use iothub_device_client.h or iothub_module_client.h 
+// instead for the official API.
+// 
+//**********************************************************************
 
 #ifndef IOTHUB_CLIENT_CORE_H
 #define IOTHUB_CLIENT_CORE_H

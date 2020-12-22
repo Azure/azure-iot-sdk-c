@@ -10,7 +10,7 @@ This document describes how to run the end to end tests.
 ## Setup the test parameters
 
 - Open the file "iot_device_params.txt" located under the tools\iot_hub_e2e_tests_params folders in your local copy of the repository.
-- Populate the information required in this file by extracting it from the Azure portal & Device Explorer.
+- Populate the information required in this file by extracting it from the Azure portal.
     - Open the Azure IoT Hub you created in the Azure portal and navigate through "Shared Access Policies", and "iothubowner"
     
     - Locate one of the IoT Hub connection strings as shown in the figure below

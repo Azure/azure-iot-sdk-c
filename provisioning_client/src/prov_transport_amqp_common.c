@@ -195,6 +195,15 @@ static void on_message_sender_state_changed_callback(void* context, MESSAGE_SEND
                     amqp_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
                     amqp_info->amqp_state = AMQP_STATE_ERROR;
                     break;
+                default:
+                    LogError("on_message_sender_state_changed_callback received unexpected state %d", amqp_info->msg_recv_state);
+
+                    amqp_info->amqp_state = AMQP_STATE_ERROR;
+                    amqp_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
+                    if (amqp_info->status_cb != NULL)
+                    {
+                        amqp_info->status_cb(PROV_DEVICE_TRANSPORT_STATUS_ERROR, amqp_info->retry_after_value, amqp_info->status_ctx);
+                    }
             }
         }
     }
@@ -233,6 +242,15 @@ static void on_message_receiver_state_changed_callback(const void* user_ctx, MES
                 amqp_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
                 amqp_info->amqp_state = AMQP_STATE_ERROR;
                 break;
+            default:
+                LogError("on_message_receiver_state_changed_callback received unexpected state %d", amqp_info->msg_recv_state);
+
+                amqp_info->amqp_state = AMQP_STATE_ERROR;
+                amqp_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
+                if (amqp_info->status_cb != NULL)
+                {
+                    amqp_info->status_cb(PROV_DEVICE_TRANSPORT_STATUS_ERROR, amqp_info->retry_after_value, amqp_info->status_ctx);
+                }
             }
         }
     }

@@ -38,7 +38,6 @@
 #include "azure_c_shared_utility/wsio.h"
 #include "azure_c_shared_utility/platform.h"
 
-#include "parson.h"
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES

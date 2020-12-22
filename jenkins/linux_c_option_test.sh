@@ -1,10 +1,11 @@
 #!/bin/bash
-#set -o pipefail
-#
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-set -e
+set -x # Set trace on
+set -o errexit # Exit if command failed
+set -o nounset # Exit if variable not set
+set -o pipefail # Exit if pipe failed
 
 cat /etc/*release | grep VERSION*
 gcc --version
@@ -56,6 +57,10 @@ declare -a arr=(
     "-Drun_longhaul_tests=ON"
     "-Duse_prov_client=ON -Dhsm_custom_lib=$custom_hsm_lib"
     "-Drun_e2e_tests=ON -Drun_sfc_tests=ON -Duse_edge_modules=ON"
+    "-Drun_e2e_tests=ON -Duse_baltimore_cert=ON"
+    "-Duse_prov_client:BOOL=ON -Dhsm_type_symm_key:BOOL=ON"
+    "-Duse_prov_client:BOOL=ON -Dhsm_type_x509:BOOL=ON"
+    "-Duse_prov_client:BOOL=ON -Dhsm_type_sastoken:BOOL=ON"
 )
 
 for item in "${arr[@]}"
@@ -65,7 +70,7 @@ do
     pushd $build_folder
 
     echo "executing cmake/make with options <<$item>>"
-    cmake $build_root "$item"
+    cmake $build_root $item
 
     make --jobs=$MAKE_CORES
 done

@@ -85,7 +85,6 @@ BEGIN_TEST_SUITE(hsm_client_key_ut)
         ASSERT_ARE_EQUAL(int, 0, result);
 
         REGISTER_UMOCK_ALIAS_TYPE(HSM_CLIENT_HANDLE, void*);
-        REGISTER_UMOCK_ALIAS_TYPE(SECURE_DEVICE_TYPE, int);
 
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
