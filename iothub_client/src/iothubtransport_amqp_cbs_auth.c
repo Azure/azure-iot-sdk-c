@@ -29,7 +29,7 @@ typedef struct AUTHENTICATION_INSTANCE_TAG
     ON_AUTHENTICATION_ERROR_CALLBACK on_error_callback;
     void* on_error_callback_context;
 
-    time_t cbs_request_timeout_secs;
+    uint64_t cbs_request_timeout_secs;
 
     AUTHENTICATION_STATE state;
     CBS_HANDLE cbs_handle;
@@ -88,7 +88,7 @@ static int verify_cbs_put_token_timeout(AUTHENTICATION_INSTANCE* instance, bool*
             LogError("Failed verifying if cbs_put_token has timed out (get_time failed)");
         }
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_083: [authentication_do_work() shall check for authentication timeout comparing the current time since `instance->current_sas_token_put_time` to `instance->cbs_request_timeout_secs`]
-        else if ((time_t)get_difftime(current_time, instance->current_sas_token_put_time) >= instance->cbs_request_timeout_secs)
+        else if ((uint64_t)get_difftime(current_time, instance->current_sas_token_put_time) >= instance->cbs_request_timeout_secs)
         {
             *is_timed_out = true;
             result = RESULT_OK;

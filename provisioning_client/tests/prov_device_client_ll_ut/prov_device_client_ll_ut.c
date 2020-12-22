@@ -373,7 +373,7 @@ static STRING_HANDLE my_STRING_construct(const char* psz)
     return (STRING_HANDLE)my_gballoc_malloc(1);
 }
 
-static STRING_HANDLE my_SASToken_Create(STRING_HANDLE key, STRING_HANDLE scope, STRING_HANDLE keyName, size_t expiry)
+static STRING_HANDLE my_SASToken_Create(STRING_HANDLE key, STRING_HANDLE scope, STRING_HANDLE keyName, uint64_t expiry)
 {
     (void)key;
     (void)scope;
