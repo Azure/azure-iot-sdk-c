@@ -20,7 +20,7 @@ DEFINE_ENUM(IOTHUB_CREDENTIAL_TYPE, IOTHUB_CREDENTIAL_TYPE_VALUES);
 MOCKABLE_FUNCTION(, IOTHUB_AUTHORIZATION_HANDLE, IoTHubClient_Auth_Create, const char*, device_key, const char*, device_id, const char*, device_sas_token);
 MOCKABLE_FUNCTION(, void, IoTHubClient_Auth_Destroy, IOTHUB_AUTHORIZATION_HANDLE, handle);
 MOCKABLE_FUNCTION(, IOTHUB_CREDENTIAL_TYPE, IoTHubClient_Auth_Get_Credential_Type, IOTHUB_AUTHORIZATION_HANDLE, handle);
-MOCKABLE_FUNCTION(, char*, IoTHubClient_Auth_Get_SasToken, IOTHUB_AUTHORIZATION_HANDLE, handle, const char*, scope, size_t, expiry_time_relative_seconds);
+MOCKABLE_FUNCTION(, char*, IoTHubClient_Auth_Get_SasToken, IOTHUB_AUTHORIZATION_HANDLE, handle, const char*, scope, uint64_t, expiry_time_relative_seconds);
 MOCKABLE_FUNCTION(, const char*, IoTHubClient_Auth_Get_DeviceId, IOTHUB_AUTHORIZATION_HANDLE, handle);
 MOCKABLE_FUNCTION(, const char*, IoTHubClient_Auth_Get_ModuleId, IOTHUB_AUTHORIZATION_HANDLE, handle);
 MOCKABLE_FUNCTION(, bool, IoTHubClient_Auth_Is_SasToken_Valid, IOTHUB_AUTHORIZATION_HANDLE, handle);
@@ -69,7 +69,7 @@ extern IOTHUB_CREDENTIAL_TYPE IoTHub_Auth_Get_Credential_Type(IOTHUB_AUTHORIZATI
 ## IoTHubClient_Auth_Get_SasToken
 
 ```c
-extern char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const char* scope, size_t expiry_time_relative_seconds);
+extern char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const char* scope, uint64_t expiry_time_relative_seconds);
 ```
 
 **SRS_IoTHub_Authorization_07_009: [** if `handle` or `scope` are NULL, `IoTHubClient_Auth_Get_SasToken` shall return NULL. **]**
