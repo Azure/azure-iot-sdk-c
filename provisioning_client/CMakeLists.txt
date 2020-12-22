@@ -58,9 +58,9 @@ elseif (${use_prov_client})
         include_directories(${TPM_C_INC_FOLDER})
 
         # Include the riot directories
-        include_directories(./deps/RIoT/Emulator/DICE)
-        include_directories(./deps/RIoT/Emulator/RIoT)
-        include_directories(./deps/RIoT/Emulator/RIoT/RIoTCrypt/include)
+        include_directories(./deps/RIoT/Simulation/DICE)
+        include_directories(./deps/RIoT/Simulation/RIoT/Core)
+        include_directories(./deps/RIoT/Simulation/RIoT/Core/RIoTCrypt/include)
 
         # For e2e test a custom HSM is needed
         add_subdirectory(./tests/common_prov_e2e/prov_hsm)
@@ -81,9 +81,9 @@ elseif (${use_prov_client})
                 ./adapters/hsm_client_riot.c)
 
             # Include the riot directories
-            include_directories(./deps/RIoT/Emulator/DICE)
-            include_directories(./deps/RIoT/Emulator/RIoT)
-            include_directories(./deps/RIoT/Emulator/RIoT/RIoTCrypt/include)
+            include_directories(./deps/RIoT/Simulation/DICE)
+            include_directories(./deps/RIoT/Simulation/RIoT/Core)
+            include_directories(./deps/RIoT/Simulation/RIoT/Core/RIoTCrypt/include)
 
             set(HSM_CLIENT_LIBRARY ${HSM_CLIENT_LIBRARY} msr_riot)
         endif()
@@ -196,7 +196,7 @@ target_link_libraries(prov_auth_client hsm_security_client)
 set(provisioning_libs ${provisioning_libs} prov_auth_client)
 set(provisioning_headers ${provisioning_headers} ${AUTH_CLIENT_H_FILES})
 
-if(${use_prov_client})
+if(${use_prov_client} OR (${use_prov_client_core} AND ${run_e2e_tests}))
     add_library(prov_device_ll_client ${PROV_DEVICE_LL_CLIENT_SOURCE_C_FILES} ${PROV_DEVICE_LL_CLEINT_SOURCE_H_FILES})
     setSdkTargetBuildProperties(prov_device_ll_client)
     linkSharedUtil(prov_device_ll_client)

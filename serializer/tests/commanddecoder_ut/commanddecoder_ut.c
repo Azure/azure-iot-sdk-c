@@ -18,6 +18,11 @@ static void* my_gballoc_malloc(size_t t)
     return malloc(t);
 }
 
+static void* my_gballoc_calloc(size_t m, size_t t)
+{
+    return calloc(m, t);
+}
+
 static void my_gballoc_free(void * t)
 {
     free(t);
@@ -294,6 +299,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(gballoc_calloc, my_gballoc_calloc);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_calloc, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, my_gballoc_free);
 
         REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_MODEL_TYPE_HANDLE, void*);
@@ -970,8 +977,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1)
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments()
             .SetReturn(NULL);
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
@@ -1006,8 +1013,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         SetupCommand(quotedSetACStateName, setACStateName);
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments();
         SetupArgumentCalls(SetACStateActionHandle, 0, StateActionArgument, StateActionArgument_Name, StateActionArgument_Type);
         const char* stateValue = "true";
         STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "State", IGNORED_PTR_ARG))
@@ -1052,8 +1059,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         SetupCommand(quotedSetACStateName, setACStateName);
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentByIndex(SetACStateActionHandle, 0))
             .SetReturn((SCHEMA_ACTION_ARGUMENT_HANDLE)NULL);
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
@@ -1086,8 +1093,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         SetupCommand(quotedSetACStateName, setACStateName);
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentByIndex(SetACStateActionHandle, 0))
             .SetReturn(StateActionArgument);
         STRICT_EXPECTED_CALL(Schema_GetActionArgumentName(StateActionArgument))
@@ -1122,8 +1129,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         SetupCommand(quotedSetACStateName, setACStateName);
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentByIndex(SetACStateActionHandle, 0))
             .SetReturn(StateActionArgument);
         STRICT_EXPECTED_CALL(Schema_GetActionArgumentName(StateActionArgument))
@@ -1160,8 +1167,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         SetupCommand(quotedSetACStateName, setACStateName);
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments();
         SetupArgumentCalls(SetACStateActionHandle, 0, StateActionArgument, StateActionArgument_Name, StateActionArgument_Type);
         STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "State", IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(3, &TEST_ARG1_NODE, sizeof(TEST_ARG1_NODE))
@@ -1196,8 +1203,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         SetupCommand(quotedSetACStateName, setACStateName);
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments();
         SetupArgumentCalls(SetACStateActionHandle, 0, StateActionArgument, StateActionArgument_Name, StateActionArgument_Type);
         const char* stateValue = "true";
         STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "State", IGNORED_PTR_ARG))
@@ -1239,8 +1246,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         SetupCommand(quotedSetACStateName, setACStateName);
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments();
         SetupArgumentCalls(SetACStateActionHandle, 0, StateActionArgument, StateActionArgument_Name, StateActionArgument_Type);
         const char* stateValue = "true";
         STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "State", IGNORED_PTR_ARG))
@@ -1288,8 +1295,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t argCount = 2;
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments();
         SetupArgumentCalls(SetACStateActionHandle, 0, StateActionArgument, StateActionArgument_Name, StateActionArgument_Type);
 
         const char* stateValue = "true";
@@ -1354,8 +1361,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t argCount = 2;
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments();
 
         SetupArgumentCalls(SetACStateActionHandle, 0, StateActionArgument, StateActionArgument_Name, StateActionArgument_Type);
         const char* stateValue = "true";
@@ -1406,8 +1413,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t argCount = 2;
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments();
 
         SetupArgumentCalls(SetACStateActionHandle, 0, StateActionArgument, StateActionArgument_Name, StateActionArgument_Type);
         const char* stateValue = "true";
@@ -1460,8 +1467,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t argCount = 2;
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments();
 
 
         SetupArgumentCalls(SetACStateActionHandle, 0, StateActionArgument, StateActionArgument_Name, StateActionArgument_Type);
@@ -1518,8 +1525,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t argCount = 2;
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments();
 
 
         SetupArgumentCalls(SetACStateActionHandle, 0, StateActionArgument, StateActionArgument_Name, StateActionArgument_Type);
@@ -1574,8 +1581,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t argCount = 2;
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments();
 
         SetupArgumentCalls(SetACStateActionHandle, 0, StateActionArgument, StateActionArgument_Name, StateActionArgument_Type);
         const char* stateValue = "true";
@@ -1634,8 +1641,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t argCount = 2;
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetACStateActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments();
 
         SetupArgumentCalls(SetACStateActionHandle, 0, StateActionArgument, StateActionArgument_Name, StateActionArgument_Type);
         STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "State", IGNORED_PTR_ARG))
@@ -1699,8 +1706,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t argCount = 1;
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments();
 
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
@@ -1713,8 +1720,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t memberCount = 2;
         STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
+            .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member names of the struct*/
             .IgnoreArgument(1);
@@ -1799,8 +1806,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t argCount = 1;
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments();
 
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
@@ -1813,8 +1820,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t memberCount = 2;
         STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
+            .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member names of the struct*/
             .IgnoreArgument(1)
@@ -1854,8 +1861,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t argCount = 1;
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments();
 
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
@@ -1869,8 +1876,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount));
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
-            .IgnoreArgument(1)
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
+            .IgnoreAllArguments()
             .SetReturn(NULL);
 
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
@@ -1906,8 +1913,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t argCount = 1;
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments();
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
         STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_PTR_ARG))
@@ -1948,8 +1955,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t argCount = 1;
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments();
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
         STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_PTR_ARG))
@@ -1994,8 +2001,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t argCount = 1;
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments();
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
         STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_PTR_ARG))
@@ -2040,8 +2047,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t argCount = 1;
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments();
 
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
@@ -2054,8 +2061,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t memberCount = 1;
         STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
+            .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member names of the struct*/
             .IgnoreArgument(1);
 
@@ -2098,8 +2105,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t argCount = 1;
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments();
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
         STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_PTR_ARG))
@@ -2111,8 +2118,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t memberCount = 1;
         STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
+            .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member names of the struct*/
             .IgnoreArgument(1);
 
@@ -2159,8 +2166,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         SetupCommand(quotedSetACStateName, setACStateName);
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments();
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
         STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_PTR_ARG))
@@ -2172,8 +2179,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t memberCount = 1;
         STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
+            .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member names of the struct*/
             .IgnoreArgument(1);
 
@@ -2220,8 +2227,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t argCount = 1;
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments();
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
         STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_PTR_ARG))
@@ -2233,8 +2240,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t memberCount = 1;
         STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
+            .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member names of the struct*/
             .IgnoreArgument(1);
 
@@ -2285,8 +2292,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t argCount = 1;
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments();
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
         STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_PTR_ARG))
@@ -2298,8 +2305,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t memberCount = 1;
         STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
+            .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member names of the struct*/
             .IgnoreArgument(1);
 
@@ -2355,8 +2362,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t argCount = 1;
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments();
 
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
@@ -2369,8 +2376,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t memberCount = 1;
         STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
+            .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member names of the struct*/
             .IgnoreArgument(1);
 
@@ -2428,8 +2435,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t argCount = 1;
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments();
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
         STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_PTR_ARG))
@@ -2441,8 +2448,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t memberCount = 1;
         STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
+            .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member names of the struct*/
             .IgnoreArgument(1);
 
@@ -2504,8 +2511,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t argCount = 1;
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments();
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
         STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_PTR_ARG))
@@ -2517,8 +2524,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t memberCount = 2;
         STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
+            .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member names of the struct*/
             .IgnoreArgument(1);
 
@@ -2580,8 +2587,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t argCount = 1;
         STRICT_EXPECTED_CALL(Schema_GetModelActionArgumentCount(SetLocationActionHandle, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &argCount, sizeof(argCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating memory for the argument array*/
+            .IgnoreAllArguments();
 
         SetupArgumentCalls(SetACStateActionHandle, 0, LocationActionArgument, LocationActionArgument_Name, LocationActionArgument_Type);
         STRICT_EXPECTED_CALL(MultiTree_GetChildByName(TEST_COMMAND_ARGS_NODE, "Location", IGNORED_PTR_ARG))
@@ -2593,8 +2600,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         size_t memberCount = 1;
         STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_1_HANDLE, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
+            .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member names of the struct*/
             .IgnoreArgument(1);
 
@@ -2614,8 +2621,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         memberCount = 2;
         STRICT_EXPECTED_CALL(Schema_GetStructTypePropertyCount(TEST_STRUCT_2_HANDLE, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer(2, &memberCount, sizeof(memberCount));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
-            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is allocating the member values of the struct*/
+            .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is allocating the member names of the struct*/
             .IgnoreArgument(1);
 
@@ -3593,8 +3600,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             .IgnoreArgument_argumentCount()
             .CopyOutArgumentBuffer_argumentCount(one, sizeof(*one));
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is the array holding 1 x AGENT_DATA_TYPE */
-            .IgnoreArgument_size();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)) /*this is the array holding 1 x AGENT_DATA_TYPE */
+            .IgnoreAllArguments().IgnoreArgument_size();
 
         STRICT_EXPECTED_CALL(Schema_GetModelMethodArgumentByIndex(TEST_MODEL_METHOD_HANDLE, 0))
             .SetReturn(TEST_METHOD_ARGUMENT_HANDLE_0);
@@ -3726,7 +3733,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         STRICT_EXPECTED_CALL(Schema_GetModelMethodArgumentCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer_argumentCount(two, sizeof(*two));
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)).IgnoreAllArguments();
 
         { /*scope for processing every individual argument*/
             STRICT_EXPECTED_CALL(Schema_GetModelMethodArgumentByIndex(TEST_MODEL_METHOD_HANDLE, 0))
@@ -3874,7 +3881,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         STRICT_EXPECTED_CALL(Schema_GetModelMethodArgumentCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer_argumentCount(two, sizeof(*two));
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG)).IgnoreAllArguments();
 
         { /*scope for processing every individual argument*/
             STRICT_EXPECTED_CALL(Schema_GetModelMethodArgumentByIndex(TEST_MODEL_METHOD_HANDLE, 0))

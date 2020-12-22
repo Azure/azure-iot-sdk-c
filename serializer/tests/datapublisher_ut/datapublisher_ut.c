@@ -15,6 +15,11 @@ static void* my_gballoc_malloc(size_t t)
     return malloc(t);
 }
 
+static void* my_gballoc_calloc(size_t m, size_t t)
+{
+    return calloc(m, t);
+}
+
 static void* my_gballoc_realloc(void* ptr, size_t size)
 {
     return realloc(ptr, size);
@@ -130,6 +135,8 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
 
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(gballoc_calloc, my_gballoc_calloc);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_calloc, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_realloc, my_gballoc_realloc);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_realloc, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, my_gballoc_free);
@@ -350,8 +357,8 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         size_t destinationSize;
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
-            .IgnoreArgument_size();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+            .IgnoreAllArguments();
 
         // act
         TRANSACTION_HANDLE result = DataPublisher_StartTransaction(handle);
@@ -442,8 +449,8 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, PropertyPath))
             .IgnoreArgument_destination();
         STRICT_EXPECTED_CALL(Schema_ModelPropertyByPathExists(TEST_MODEL_HANDLE, PropertyPath));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
-            .IgnoreArgument_size();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+            .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_PTR_ARG, &data))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(gballoc_realloc(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
@@ -500,8 +507,8 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, PropertyPath))
             .IgnoreArgument_destination();
         STRICT_EXPECTED_CALL(Schema_ModelPropertyByPathExists(TEST_MODEL_HANDLE, PropertyPath));
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
-            .IgnoreArgument_size();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+            .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_PTR_ARG, &data))
             .IgnoreArgument(1)
             .SetReturn(AGENT_DATA_TYPES_ERROR);
@@ -1180,7 +1187,8 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         STRICT_EXPECTED_CALL(gballoc_malloc(sizeof(DATA_MARSHALLER_VALUE)));
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, reportedPropertyPath))
             .IgnoreArgument_destination();
-        STRICT_EXPECTED_CALL(gballoc_malloc(sizeof(AGENT_DATA_TYPE)));
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, sizeof(AGENT_DATA_TYPE)))
+            .IgnoreArgument_nmemb();
         STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_PTR_ARG, ag))
             .IgnoreArgument_dest();
         STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1))
@@ -1279,7 +1287,8 @@ next_fail:;
         STRICT_EXPECTED_CALL(gballoc_malloc(sizeof(DATA_MARSHALLER_VALUE)));
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, reportedPropertyPath))
             .IgnoreArgument_destination();
-        STRICT_EXPECTED_CALL(gballoc_malloc(sizeof(AGENT_DATA_TYPE)));
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, sizeof(AGENT_DATA_TYPE)))
+            .IgnoreArgument_nmemb();
         STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_PTR_ARG, ag))
             .IgnoreArgument_dest();
         STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1))
@@ -1376,7 +1385,8 @@ next_fail:;
         STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, reportedPropertyPath))
             .IgnoreArgument_handle()
             .IgnoreArgument_pred();
-        STRICT_EXPECTED_CALL(gballoc_malloc(sizeof(AGENT_DATA_TYPE)));
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, sizeof(AGENT_DATA_TYPE)))
+            .IgnoreArgument_nmemb();
         STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_PTR_ARG, ag))
             .IgnoreArgument_dest();
         STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG))

@@ -13,9 +13,11 @@
 #ifdef __cplusplus
 extern "C" {
 #include <cstdint>
+#include <cstdlib>
 #else
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 #endif /* __cplusplus */
 
     struct PROV_DEVICE_TRANSPORT_PROVIDER_TAG;
@@ -57,7 +59,7 @@ extern "C" {
         if (retry_after != NULL)
         {
             // Is the retry after a number
-            if (retry_after[0] >= 0x30 || retry_after[0] <= 0x39)
+            if (retry_after[0] >= 0x30 && retry_after[0] <= 0x39)
             {
                 result = atol(retry_after);
                 if (result < PROV_GET_THROTTLE_TIME || result > MAX_PROV_GET_THROTTLE_TIME)

@@ -182,6 +182,7 @@ static IOTHUB_MODULE_CLIENT_LL_HANDLE InitializeConnectionForFilter()
         (void)printf("Failed to initialize the platform.\r\n");
         iotHubModuleClientHandle = NULL;
     }
+    // Note: You must use MQTT_Protocol as the argument below.  Using other protocols will result in undefined behavior.
     else if ((iotHubModuleClientHandle = IoTHubModuleClient_LL_CreateFromEnvironment(MQTT_Protocol)) == NULL)
     {
         (void)printf("ERROR: IoTHubModuleClient_LL_CreateFromEnvironment failed\r\n");
@@ -190,7 +191,7 @@ static IOTHUB_MODULE_CLIENT_LL_HANDLE InitializeConnectionForFilter()
     {
         // Uncomment the following lines to enable verbose logging (e.g., for debugging).
         // bool traceOn = true;
-        // IoTHubModuleClient_LL_SetOption(iotHubModuleClientHandle, OPTION_LOG_TRACE, &trace);
+        // IoTHubModuleClient_LL_SetOption(iotHubModuleClientHandle, OPTION_LOG_TRACE, &traceOn);
     }
 
     return iotHubModuleClientHandle;

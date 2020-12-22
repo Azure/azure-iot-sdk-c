@@ -80,7 +80,11 @@ class rpi_uart_interface(uart_interface):
                     if "incomplete" in output:
                         serial_settings.tests_run = True
                         azure_test_firmware_errors.SDK_ERRORS += 1
-                        return False
+                        return 0
+                if "incomplete" in output:
+                    serial_settings.tests_run = True
+                    azure_test_firmware_errors.SDK_ERRORS += 1
+                    return 0
 
                 return temp_written
             # special handling for receiving a file, Note: input file should use rz <filepath> when a file from the RPi is desired
@@ -99,23 +103,11 @@ class rpi_uart_interface(uart_interface):
                 ser.open()
                 self.serial_write(ser, message, file)
             except:
-                return False
+                return 0
 
     # Read from serial line with connection monitoring
     # If there is a sudden disconnect, program should report line in input script reached, and close files.
     def serial_read(self, ser, message, file, first_read=False):
-
-        # # Special per opt handling:
-        # if "send_telemetry" in message or "set_az_iothub" in message:
-        #     time.sleep(.15)
-        # elif "exit" in message and first_read:
-        #     time.sleep(serial_settings.wait_for_flash)
-        #     output = ser.in_waiting
-        #     while output < 4:
-        #         time.sleep(1)
-        #         output = ser.in_waiting
-        #         print("%d bytes in waiting" % output)
-        # may want special opt handling for raspi commands
 
         if ser.readable():
             output = ser.readline(ser.in_waiting)
@@ -175,8 +167,9 @@ class rpi_uart_interface(uart_interface):
 
                 # read any trailing output, save to file
                 if serial_settings.test_timeout:
+                    print("Test input end. Waiting for results. Time Elapsed: ", (time.time() - session_start))
                     while((time.time() - session_start) < serial_settings.test_timeout):
-                        time.sleep(.2)
+                        time.sleep(0)
                         output = ser.readline(ser.in_waiting)
                         output = output.decode(encoding='utf-8', errors='ignore')
                         check_test_failures(output)
@@ -187,6 +180,7 @@ class rpi_uart_interface(uart_interface):
                         #for now we can assume one test suite is run
                         if " tests run" in output or serial_settings.tests_run:
                             break
+                    print("Test iteration ended. Time Elapsed: ", (time.time() - session_start))
 
                 else:
                     while (ser.in_waiting):

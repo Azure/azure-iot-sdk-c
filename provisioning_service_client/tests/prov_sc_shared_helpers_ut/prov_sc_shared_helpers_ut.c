@@ -117,7 +117,6 @@ static void free_struct_arr(void* arr[], size_t len)
 
 static void register_global_mocks()
 {
-    REGISTER_UMOCK_ALIAS_TYPE(bool, unsigned int);
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, real_malloc);
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, real_free);
 

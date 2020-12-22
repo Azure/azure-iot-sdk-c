@@ -1,14 +1,18 @@
 name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+variables:
+  runCodesignValidationInjection: false
+  iotHubLonghaulTotalDurationSecs: 43200
+  iotHubLonghaulLoopDurationSecs: 60
 resources:
 - repo: self
   clean: true
 jobs:
 - job: longhaul_linux
+  timeoutInMinutes: 800
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
   pool: 
     name: 'aziotbld-lin01'
-    timeoutInMinutes: 1200
   displayName: 'longhaul_linux'
   steps:
   - script: |
@@ -33,13 +37,15 @@ jobs:
       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+      IOTHUB_LONGHAUL_TOTAL_DURATION_SECS: $(iotHubLonghaulTotalDurationSecs)
+      IOTHUB_LONGHAUL_LOOP_DURATION_SECS: $(iotHubLonghaulLoopDurationSecs)
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
     condition: always()
 - job: longhaul_windows
+  timeoutInMinutes: 800
   pool:
     name: 'aziotbld-win10'
-    timeoutInMinutes: 1200
   steps:
   - script: |
       call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
@@ -60,6 +66,8 @@ jobs:
       IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
       DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+      IOTHUB_LONGHAUL_TOTAL_DURATION_SECS: $(iotHubLonghaulTotalDurationSecs)
+      IOTHUB_LONGHAUL_LOOP_DURATION_SECS: $(iotHubLonghaulLoopDurationSecs)
   - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
     displayName: 'cleanup'
     condition: always() 

@@ -15,8 +15,8 @@
 
 #include "RIoT.h"
 #include "RiotCrypt.h"
-#include "RiotDerEnc.h"
-#include "RiotX509Bldr.h"
+#include "derenc.h"
+#include "x509bldr.h"
 #include "DiceSha256.h"
 
 typedef struct X509_CERT_INFO_TAG
@@ -72,6 +72,23 @@ static char g_device_name[64] = { 0 };
 
 static int g_digest_initialized = 0;
 
+#if !defined(RIOTSECP256R1)
+#error "Must define RIOTSECP256R1 - NIST 256 Curve is only supported"
+#endif
+
+// Free the mbedtls_mpi members of the signature
+static void ecc_signature_destroy(RIOT_ECC_SIGNATURE* tbs_sig)
+{
+    mbedtls_mpi_free(&tbs_sig->r);
+    mbedtls_mpi_free(&tbs_sig->s);
+}
+
+static void x509_cert_free(RIOT_ECC_PUBLIC* pub, RIOT_ECC_PRIVATE* priv)
+{
+    mbedtls_ecp_point_free(pub);
+    mbedtls_mpi_free(priv);
+}
+
 static RIOT_X509_TBS_DATA X509_ALIAS_TBS_DATA = {
     { 0x0A, 0x0B, 0x0C, 0x0D, 0x0E }, HSM_SIGNER_NAME, "AZURE_TEST", "US",
     "170101000000Z", "370101000000Z", "", "MSR_TEST", "US" };
@@ -86,24 +103,41 @@ static RIOT_X509_TBS_DATA X509_ROOT_TBS_DATA = {
     { 0x1A, 0x2B, 0x3C, 0x4D, 0x5E }, HSM_CA_CERT_NAME, "AZURE_TEST", "US",
     "170101000000Z", "370101000000Z", HSM_CA_CERT_NAME, "AZURE_TEST", "US" };
 
-// The "root" signing key. This is intended for development purposes only.
+// The "root" signing key. This is intended for DEVELOPMENT PURPOSES ONLY.
 // This key is used to sign the DeviceID certificate, the certificiate for
 // this "root" key represents the "trusted" CA for the developer-mode
-// server(s). Again, this is for development purposes only and (obviously)
-// provides no meaningful security whatsoever.
-static unsigned char eccRootPubBytes[sizeof(ecc_publickey)] = {
-    0xeb, 0x9c, 0xfc, 0xc8, 0x49, 0x94, 0xd3, 0x50, 0xa7, 0x1f, 0x9d, 0xc5,
-    0x09, 0x3d, 0xd2, 0xfe, 0xb9, 0x48, 0x97, 0xf4, 0x95, 0xa5, 0x5d, 0xec,
-    0xc9, 0x0f, 0x52, 0xa1, 0x26, 0x5a, 0xab, 0x69, 0x00, 0x00, 0x00, 0x00,
-    0x7d, 0xce, 0xb1, 0x62, 0x39, 0xf8, 0x3c, 0xd5, 0x9a, 0xad, 0x9e, 0x05,
-    0xb1, 0x4f, 0x70, 0xa2, 0xfa, 0xd4, 0xfb, 0x04, 0xe5, 0x37, 0xd2, 0x63,
-    0x9a, 0x46, 0x9e, 0xfd, 0xb0, 0x5b, 0x1e, 0xdf, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00 };
+// server(s). Again, this is for DEVELOPMENT PURPOSES ONLY and (obviously)
+// provides no meaningful security whatsoever, NEVER use this in production.
+static void get_riot_root_dev_key(X509_CERT_INFO* x509_info) 
+{
+    // CA_Root_Pub X coordinates random bits
+    uint8_t rootX[RIOT_COORDMAX] = {
+        0xeb, 0x9c, 0xfc, 0xc8, 0x49, 0x94, 0xd3, 0x50, 0xa7, 0x1f, 0x9d, 0xc5,
+        0x09, 0x3d, 0xd2, 0xfe, 0xb9, 0x48, 0x97, 0xf4, 0x95, 0xa5, 0x5d, 0xec,
+        0xc9, 0x0f, 0x52, 0xa1, 0x26, 0x5a, 0xab, 0x69 };
+    // CA_Root_Pub Y coordinates random bits
+    uint8_t rootY[RIOT_COORDMAX] = {
+        0x7d, 0xce, 0xb1, 0x62, 0x39, 0xf8, 0x3c, 0xd5, 0x9a, 0xad, 0x9e, 0x05,
+        0xb1, 0x4f, 0x70, 0xa2, 0xfa, 0xd4, 0xfb, 0x04, 0xe5, 0x37, 0xd2, 0x63,
+        0x9a, 0x46, 0x9e, 0xfd, 0xb0, 0x5b, 0x1e, 0xdf };
+    // CA_Root_Priv random bits
+    uint8_t rootD[RIOT_COORDMAX] = {
+        0xe3, 0xe7, 0xc7, 0x13, 0x57, 0x3f, 0xd9, 0xc8, 0xb8, 0xe1, 0xea, 0xf4,
+        0x53, 0xf1, 0x56, 0x15, 0x02, 0xf0, 0x71, 0xc0, 0x53, 0x49, 0xc8, 0xda,
+        0xe6, 0x26, 0xa9, 0x0b, 0x17, 0x88, 0xe5, 0x70 };
 
-static unsigned char eccRootPrivBytes[sizeof(ecc_privatekey)] = {
-    0xe3, 0xe7, 0xc7, 0x13, 0x57, 0x3f, 0xd9, 0xc8, 0xb8, 0xe1, 0xea, 0xf4,
-    0x53, 0xf1, 0x56, 0x15, 0x02, 0xf0, 0x71, 0xc0, 0x53, 0x49, 0xc8, 0xda,
-    0xe6, 0x26, 0xa9, 0x0b, 0x17, 0x88, 0xe5, 0x70, 0x00, 0x00, 0x00, 0x00 };
+    // Simulator only: We need to populate the root key.
+    // The following memset's are unnecessary in a simulated environment
+    // in the wild it's good to stay in habit of clearing potential 
+    // sensitive data.
+    mbedtls_mpi_read_binary(&x509_info->ca_root_pub.X, rootX, RIOT_COORDMAX);
+    memset(rootX, 0, sizeof(rootX));
+    mbedtls_mpi_read_binary(&x509_info->ca_root_pub.Y, rootY, RIOT_COORDMAX);
+    memset(rootY, 0, sizeof(rootY));
+    mbedtls_mpi_lset(&x509_info->ca_root_pub.Z, 1);
+    mbedtls_mpi_read_binary(&x509_info->ca_root_priv, rootD, RIOT_COORDMAX);
+    memset(rootD, 0, sizeof(rootD));
+}
 
 static int generate_root_ca_info(X509_CERT_INFO* x509_info, RIOT_ECC_SIGNATURE* tbs_sig)
 {
@@ -113,19 +147,19 @@ static int generate_root_ca_info(X509_CERT_INFO* x509_info, RIOT_ECC_SIGNATURE* 
     DERBuilderContext der_pri_ctx = { 0 };
     RIOT_STATUS status;
 
-    memcpy(&x509_info->ca_root_pub, eccRootPubBytes, sizeof(ecc_publickey));
-    memcpy(&x509_info->ca_root_priv, eccRootPrivBytes, sizeof(ecc_privatekey));
-
-    // Generating "root"-signed DeviceID certificate
+    // Build the TBS (to be signed) region of CA_Root Certificate
     DERInitContext(&der_ctx, der_buffer, DER_MAX_TBS);
     DERInitContext(&der_pri_ctx, der_buffer, DER_MAX_TBS);
 
-    if (X509GetDeviceCertTBS(&der_ctx, &X509_ROOT_TBS_DATA, &x509_info->ca_root_pub) != 0)
+    // Generate the CA_Root using the development key
+    get_riot_root_dev_key(x509_info);
+
+    if (X509GetRootCertTBS(&der_ctx, &X509_ROOT_TBS_DATA, &x509_info->ca_root_pub) != 0)
     {
-        LogError("Failure: X509GetDeviceCertTBS");
+        LogError("Failure: X509GetRootCertTBS");
         result = MU_FAILURE;
     }
-    // Sign the DeviceID Certificate's TBS region
+    // Sign the CA_Root Certificate's TBS region
     else if ((status = RiotCrypt_Sign(tbs_sig, der_ctx.Buffer, der_ctx.Position, &x509_info->ca_root_priv)) != RIOT_SUCCESS)
     {
         LogError("Failure: RiotCrypt_Sign returned invalid status %d.", status);
@@ -164,28 +198,27 @@ static int generate_root_ca_info(X509_CERT_INFO* x509_info, RIOT_ECC_SIGNATURE* 
     return result;
 }
 
-static int produce_device_cert(X509_CERT_INFO* x509_info, RIOT_ECC_SIGNATURE tbs_sig)
+static int produce_device_cert(X509_CERT_INFO* x509_info, RIOT_ECC_SIGNATURE* tbs_sig)
 {
     int result;
     uint8_t der_buffer[DER_MAX_TBS] = { 0 };
     DERBuilderContext der_ctx = { 0 };
     RIOT_STATUS status;
 
-
     // Build the TBS (to be signed) region of DeviceID Certificate
     DERInitContext(&der_ctx, der_buffer, DER_MAX_TBS);
-    if (X509GetDeviceCertTBS(&der_ctx, &X509_DEVICE_TBS_DATA, &x509_info->device_id_pub) != 0)
+    if (X509GetDeviceCertTBS(&der_ctx, &X509_DEVICE_TBS_DATA, &x509_info->device_id_pub, (uint8_t*)&x509_info->ca_root_pub, sizeof(x509_info->ca_root_pub)) != 0)
     {
         LogError("Failure: X509GetDeviceCertTBS");
         result = MU_FAILURE;
     }
     // Sign the DeviceID Certificate's TBS region
-    else if ((status = RiotCrypt_Sign(&tbs_sig, der_ctx.Buffer, der_ctx.Position, &x509_info->device_id_priv)) != RIOT_SUCCESS)
+    else if ((status = RiotCrypt_Sign(tbs_sig, der_ctx.Buffer, der_ctx.Position, &x509_info->device_id_priv)) != RIOT_SUCCESS)
     {
         LogError("Failure: RiotCrypt_Sign returned invalid status %d.", status);
         result = MU_FAILURE;
     }
-    else if (X509MakeDeviceCert(&der_ctx, &tbs_sig) != 0)
+    else if (X509MakeDeviceCert(&der_ctx, tbs_sig) != 0)
     {
         LogError("Failure: X509MakeDeviceCert");
         result = MU_FAILURE;
@@ -359,7 +392,7 @@ static int process_riot_key_info(X509_CERT_INFO* x509_info)
                 LogError("Failure: producing root ca.");
                 result = MU_FAILURE;
             }
-            else if (produce_device_cert(x509_info, tbs_sig) != 0)
+            else if (produce_device_cert(x509_info, &tbs_sig) != 0)
             {
                 LogError("Failure: producing device certificate.");
                 result = MU_FAILURE;
@@ -368,6 +401,7 @@ static int process_riot_key_info(X509_CERT_INFO* x509_info)
             {
                 result = 0;
             }
+            ecc_signature_destroy(&tbs_sig);
         }
     }
     return result;
@@ -463,6 +497,10 @@ void x509_info_destroy(X509_INFO_HANDLE handle)
 {
     if (handle != NULL)
     {
+        x509_cert_free(&handle->ca_root_pub, &handle->ca_root_priv);
+        x509_cert_free(&handle->device_id_pub, &handle->device_id_priv);
+        x509_cert_free(&handle->alias_key_pub, &handle->alias_key_priv);
+
         free(handle);
     }
 }

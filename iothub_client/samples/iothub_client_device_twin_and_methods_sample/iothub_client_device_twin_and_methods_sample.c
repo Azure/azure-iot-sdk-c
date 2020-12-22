@@ -232,52 +232,59 @@ static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsi
     Car* oldCar = (Car*)userContextCallback;
     Car* newCar = parseFromJson((const char*)payLoad, update_state);
 
-    if (newCar->changeOilReminder != NULL)
+    if (NULL == newCar)
     {
-        if ((oldCar->changeOilReminder != NULL) && (strcmp(oldCar->changeOilReminder, newCar->changeOilReminder) != 0))
+        printf("ERROR: parseFromJson returned NULL\r\n");
+    }
+    else
+    {
+        if (newCar->changeOilReminder != NULL)
         {
-            free(oldCar->changeOilReminder);
-        }
-        
-        if (oldCar->changeOilReminder == NULL)
-        {
-            printf("Received a new changeOilReminder = %s\n", newCar->changeOilReminder);
-            if ( NULL != (oldCar->changeOilReminder = malloc(strlen(newCar->changeOilReminder) + 1)))
+            if ((oldCar->changeOilReminder != NULL) && (strcmp(oldCar->changeOilReminder, newCar->changeOilReminder) != 0))
             {
-                (void)strcpy(oldCar->changeOilReminder, newCar->changeOilReminder);
-                free(newCar->changeOilReminder);
+                free(oldCar->changeOilReminder);
+            }
+
+            if (oldCar->changeOilReminder == NULL)
+            {
+                printf("Received a new changeOilReminder = %s\n", newCar->changeOilReminder);
+                if ( NULL != (oldCar->changeOilReminder = malloc(strlen(newCar->changeOilReminder) + 1)))
+                {
+                    (void)strcpy(oldCar->changeOilReminder, newCar->changeOilReminder);
+                    free(newCar->changeOilReminder);
+                }
             }
         }
-    }
 
-    if (newCar->settings.desired_maxSpeed != 0)
-    {
-        if (newCar->settings.desired_maxSpeed != oldCar->settings.desired_maxSpeed)
+        if (newCar->settings.desired_maxSpeed != 0)
         {
-            printf("Received a new desired_maxSpeed = %" PRIu8 "\n", newCar->settings.desired_maxSpeed);
-            oldCar->settings.desired_maxSpeed = newCar->settings.desired_maxSpeed;
+            if (newCar->settings.desired_maxSpeed != oldCar->settings.desired_maxSpeed)
+            {
+                printf("Received a new desired_maxSpeed = %" PRIu8 "\n", newCar->settings.desired_maxSpeed);
+                oldCar->settings.desired_maxSpeed = newCar->settings.desired_maxSpeed;
+            }
         }
-    }
 
-    if (newCar->settings.location.latitude != 0)
-    {
-        if (newCar->settings.location.latitude != oldCar->settings.location.latitude)
+        if (newCar->settings.location.latitude != 0)
         {
-            printf("Received a new latitude = %f\n", newCar->settings.location.latitude);
-            oldCar->settings.location.latitude = newCar->settings.location.latitude;
+            if (newCar->settings.location.latitude != oldCar->settings.location.latitude)
+            {
+                printf("Received a new latitude = %f\n", newCar->settings.location.latitude);
+                oldCar->settings.location.latitude = newCar->settings.location.latitude;
+            }
         }
-    }
 
-    if (newCar->settings.location.longitude != 0)
-    {
-        if (newCar->settings.location.longitude != oldCar->settings.location.longitude)
+        if (newCar->settings.location.longitude != 0)
         {
-            printf("Received a new longitude = %f\n", newCar->settings.location.longitude);
-            oldCar->settings.location.longitude = newCar->settings.location.longitude;
+            if (newCar->settings.location.longitude != oldCar->settings.location.longitude)
+            {
+                printf("Received a new longitude = %f\n", newCar->settings.location.longitude);
+                oldCar->settings.location.longitude = newCar->settings.location.longitude;
+            }
         }
-    }
 
-    free(newCar);
+        free(newCar);
+    }
 }
 
 static void reportedStateCallback(int status_code, void* userContextCallback)
@@ -324,7 +331,13 @@ static void iothub_client_device_twin_and_methods_sample_run(void)
             // Uncomment the following lines to enable verbose logging (e.g., for debugging).
             //bool traceOn = true;
             //(void)IoTHubDeviceClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &traceOn);
-
+#if defined SAMPLE_MQTT || defined SAMPLE_MQTT_OVER_WEBSOCKETS
+        //Setting the auto URL Encoder (recommended for MQTT). Please use this option unless
+        //you are URL Encoding inputs yourself.
+        //ONLY valid for use with MQTT
+        bool urlEncodeOn = true;
+        (void)IoTHubDeviceClient_SetOption(iotHubClientHandle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
+#endif
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
             // For mbed add the certificate information
             if (IoTHubDeviceClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)

@@ -4,9 +4,22 @@
 /* This file contains certs needed to communicate with Azure (IoT) */
 
 #include "certs.h"
+/* Note: for devices with limited resources, only one cert should be loaded. 
+   #defines are used to reduce memory footprint of certificates.
+   For DE and CN regions, please build with -DUSE_MICROSOFTAZURE_DE_CERT or -DUSE_PORTAL_AZURE_CN_CERT, respectively, 
+   if you wish to load ONLY those certs.
+*/
+#if !defined(USE_BALTIMORE_CERT) && !defined(USE_MICROSOFTAZURE_DE_CERT) && !defined(USE_PORTAL_AZURE_CN_CERT)
+// For legacy, if no certificates were explicitly selected then include all of them
+#define USE_BALTIMORE_CERT
+#define USE_MICROSOFTAZURE_DE_CERT 
+#define USE_PORTAL_AZURE_CN_CERT
+#endif
 
 const char certificates[] =
-/* DigiCert Baltimore Root */
+#if defined(USE_BALTIMORE_CERT)
+/* DigiCert Baltimore Root --Used Globally--*/
+// This cert should be used when connecting to Azure IoT on the Azure Cloud available globally. When in doubt, use this cert.
 "-----BEGIN CERTIFICATE-----\r\n"
 "MIIDdzCCAl+gAwIBAgIEAgAAuTANBgkqhkiG9w0BAQUFADBaMQswCQYDVQQGEwJJ\r\n"
 "RTESMBAGA1UEChMJQmFsdGltb3JlMRMwEQYDVQQLEwpDeWJlclRydXN0MSIwIAYD\r\n"
@@ -28,7 +41,11 @@ const char certificates[] =
 "ksLi4xaNmjICq44Y3ekQEe5+NauQrz4wlHrQMz2nZQ/1/I6eYs9HRCwBXbsdtTLS\r\n"
 "R9I4LtD+gdwyah617jzV/OeBHRnDJELqYzmp\r\n"
 "-----END CERTIFICATE-----\r\n"
-/*DigiCert Global Root CA*/
+#endif /* BALTIMORE_CERT */
+
+#if defined(USE_PORTAL_AZURE_CN_CERT)
+/* DigiCert Global Root CA */
+// This cert should be used when connecting to Azure IoT on the https://portal.azure.cn Cloud address.
 "-----BEGIN CERTIFICATE-----\r\n"
 "MIIDrzCCApegAwIBAgIQCDvgVpBCRrGhdWrJWZHHSjANBgkqhkiG9w0BAQUFADBh\r\n"
 "MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3\r\n"
@@ -51,7 +68,11 @@ const char certificates[] =
 "YSEY1QSteDwsOoBrp+uvFRTp2InBuThs4pFsiv9kuXclVzDAGySj4dzp30d8tbQk\r\n"
 "CAUw7C29C79Fv1C5qfPrmAESrciIxpg0X40KPMbp1ZWVbd4=\r\n"
 "-----END CERTIFICATE-----\r\n"
-/*D-TRUST Root Class 3 CA 2 2009*/
+#endif /* PORTAL_AZURE_CN_CERT */
+
+#if defined(USE_MICROSOFTAZURE_DE_CERT)
+/* D-TRUST Root Class 3 CA 2 2009 */
+// This cert should be used when connecting to Azure IoT on the https://portal.microsoftazure.de Cloud address.
 "-----BEGIN CERTIFICATE-----\r\n"
 "MIIEMzCCAxugAwIBAgIDCYPzMA0GCSqGSIb3DQEBCwUAME0xCzAJBgNVBAYTAkRF\r\n"
 "MRUwEwYDVQQKDAxELVRydXN0IEdtYkgxJzAlBgNVBAMMHkQtVFJVU1QgUm9vdCBD\r\n"
@@ -77,4 +98,6 @@ const char certificates[] =
 "PIWmawomDeCTmGCufsYkl4phX5GOZpIJhzbNi5stPvZR1FDUWSi9g/LMKHtThm3Y\r\n"
 "Johw1+qRzT65ysCQblrGXnRl11z+o+I=\r\n"
 "-----END CERTIFICATE-----\r\n"
+#endif /* MICROSOFTAZURE_DE_CERT */
+
 ;

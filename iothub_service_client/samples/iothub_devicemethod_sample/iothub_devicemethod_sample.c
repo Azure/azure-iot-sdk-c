@@ -17,6 +17,9 @@ static const char* connectionString = "[device connection string]";
 static const char* deviceId = "";
 static const char* methodName = "[Method Name]";
 static const char* methodPayload = "[Method Payload]";
+
+// NOTE: The timeout field is ignored.  See https://github.com/Azure/azure-iot-sdk-c/issues/1378.  IoT Hub will enforce
+// its own timeouts instead of relying on the device specification.
 static unsigned int timeout = 60;
 
 int main(void)
@@ -43,6 +46,7 @@ int main(void)
             int responseStatus;
             unsigned char* responsePayload;
             size_t responsePayloadSize;
+            // See comments above about the timeout parameter being ignored by IoTHubDeviceMethod_Invoke.
             IOTHUB_DEVICE_METHOD_RESULT invokeResult = IoTHubDeviceMethod_Invoke(serviceClientDeviceMethodHandle, deviceId, methodName, methodPayload, timeout, &responseStatus, &responsePayload, &responsePayloadSize);
             if (invokeResult == IOTHUB_DEVICE_METHOD_OK)
             {

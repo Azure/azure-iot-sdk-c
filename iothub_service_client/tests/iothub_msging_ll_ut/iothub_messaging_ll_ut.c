@@ -6,6 +6,7 @@
 #else
 #include <stdlib.h>
 #include <stddef.h>
+#include <stdbool.h>
 #endif
 
 #include "testrunnerswitcher.h"
@@ -13,6 +14,7 @@
 #include "umock_c/umocktypes_charptr.h"
 #include "umock_c/umock_c_negative_tests.h"
 #include "umock_c/umocktypes_stdint.h"
+#include "umock_c/umocktypes_bool.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/strings.h"
@@ -409,12 +411,42 @@ static AMQP_VALUE TEST_AMQP_MAP = ((AMQP_VALUE)0x6258);
 static MAP_HANDLE TEST_MAP_HANDLE = (MAP_HANDLE)0x103;
 static IOTHUB_MESSAGE_HANDLE TEST_IOTHUB_MESSAGE_HANDLE = (IOTHUB_MESSAGE_HANDLE)0x4242;
 
+// ---------- Binary Data Structure Shell functions ---------- //
+char* umock_stringify_BINARY_DATA(const BINARY_DATA* value)
+{
+    (void)value;
+    char* result = "BINARY_DATA";
+    return result;
+}
+
+int umock_are_equal_BINARY_DATA(const BINARY_DATA* left, const BINARY_DATA* right)
+{
+    //force fall through to success bypassing access violation
+    (void)left;
+    (void)right;
+    int result = 1;
+    return result;
+}
+
+int umock_copy_BINARY_DATA(BINARY_DATA* destination, const BINARY_DATA* source)
+{
+    //force fall through to success bypassing access violation
+    (void)destination;
+    (void)source;
+    int result = 0;
+    return result;
+}
+
+void umock_free_BINARY_DATA(BINARY_DATA* value)
+{
+    //do nothing
+    (void)value;
+}
+
 BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
-        size_t type_size;
-
         g_testByTest = TEST_MUTEX_CREATE();
         ASSERT_IS_NOT_NULL(g_testByTest);
 
@@ -424,8 +456,11 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         ASSERT_ARE_EQUAL(int, 0, result);
         result = umocktypes_stdint_register_types();
         ASSERT_ARE_EQUAL(int, 0, result);
+        result = umocktypes_bool_register_types();
+        ASSERT_ARE_EQUAL(int, 0, result);
 
         REGISTER_TYPE(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_RESULT);
+        REGISTER_UMOCK_VALUE_TYPE(BINARY_DATA);
 
         REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(AMQP_VALUE, void*);
@@ -442,35 +477,20 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         REGISTER_UMOCK_ALIAS_TYPE(ON_MESSAGE_RECEIVER_STATE_CHANGED, void*);
         REGISTER_UMOCK_ALIAS_TYPE(ON_MESSAGE_RECEIVED, void*);
         REGISTER_UMOCK_ALIAS_TYPE(ON_NEW_ENDPOINT, void*);
-        REGISTER_UMOCK_ALIAS_TYPE(sender_settle_mode, int);
-        REGISTER_UMOCK_ALIAS_TYPE(role, int);
+        REGISTER_UMOCK_ALIAS_TYPE(sender_settle_mode, unsigned char);
+        REGISTER_UMOCK_ALIAS_TYPE(role, bool);
         REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_MESSAGE_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(MESSAGE_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(PROPERTIES_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(ON_MESSAGE_SEND_COMPLETE, void*);
-        REGISTER_UMOCK_ALIAS_TYPE(BINARY_DATA, void*);
         REGISTER_UMOCK_ALIAS_TYPE(SASL_MECHANISM_HANDLE, void*);
-        REGISTER_UMOCK_ALIAS_TYPE(JSON_Value, void*);
-        REGISTER_UMOCK_ALIAS_TYPE(JSON_Object, void*);
         REGISTER_UMOCK_ALIAS_TYPE(JSON_Status, int);
         REGISTER_UMOCK_ALIAS_TYPE(SINGLYLINKEDLIST_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(LIST_ITEM_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(MAP_RESULT, int);
         REGISTER_UMOCK_ALIAS_TYPE(MAP_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(receiver_settle_mode, uint8_t);
-        type_size = sizeof(time_t);
-        if (type_size == sizeof(uint64_t))
-        {
-            REGISTER_UMOCK_ALIAS_TYPE(tickcounter_ms_t, uint64_t);
-        }
-        else if (type_size == sizeof(uint32_t))
-        {
-            REGISTER_UMOCK_ALIAS_TYPE(tickcounter_ms_t, uint32_t);
-        }
-        else
-        {
-            ASSERT_FAIL("Bad size_t size");
-        }
+        REGISTER_UMOCK_ALIAS_TYPE(tickcounter_ms_t, unsigned long long);
 
         REGISTER_GLOBAL_MOCK_HOOK(STRING_construct, my_STRING_construct);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_construct, NULL);
