@@ -74,7 +74,6 @@ static const char* proxy_password = NULL; // Proxy password
 
 static bool g_continueRunning = true;
 static UWS_CLIENT_HANDLE g_uws_client_handle = NULL;
-static char stream_payload[128];
 
 
 static void on_ws_open_complete(void* context, WS_OPEN_RESULT ws_open_result)
@@ -88,14 +87,7 @@ static void on_ws_send_frame_complete(void* context, WS_SEND_FRAME_RESULT ws_sen
 {
     (void)context;
 
-    if (ws_send_frame_result == WS_SEND_FRAME_OK)
-    {
-        (void)printf("Sent stream data: %s\r\n", stream_payload);
-    }
-    else
-    {
-        (void)printf("Failed sending stream data (%s)\r\n", MU_ENUM_TO_STRING(WS_SEND_FRAME_RESULT, ws_send_frame_result));
-    }
+    (void)printf("on_ws_send_frame_complete called (%s)\r\n", MU_ENUM_TO_STRING(WS_SEND_FRAME_RESULT, ws_send_frame_result));
 
     g_continueRunning = false;
 }
@@ -105,19 +97,36 @@ static void on_ws_frame_received(void* context, unsigned char frame_type, const 
     (void)context;
     (void)size;
 
-    (void)memcpy(stream_payload, buffer, size);
-    stream_payload[size] = '\0';
+    if (buffer == NULL)
+    {
+        (void)printf("on_ws_frame_received received a NULL buffer\r\n");
+    }
+    else
+    {
+        (void)printf("Received stream data: %.*s\r\n", (int)size, buffer);
 
-    (void)printf("Received stream data: %s\r\n", stream_payload);
-
-    (void)uws_client_send_frame_async(g_uws_client_handle, frame_type, buffer, size, true, on_ws_send_frame_complete, NULL);
+        (void)uws_client_send_frame_async(g_uws_client_handle, frame_type, buffer, size, true, on_ws_send_frame_complete, NULL);   
+    }
 }
 
 static void on_ws_peer_closed(void* context, uint16_t* close_code, const unsigned char* extra_data, size_t extra_data_length)
 {
     (void)context;
     (void)extra_data_length;
-    (void)printf("on_ws_peer_closed\r\nCode: %d\r\nData: %s\r\n", *(int*)close_code, extra_data);
+
+    (void)printf("on_ws_peer_closed (");
+
+    if (close_code != NULL)
+    {
+        (void)printf("Code: %d, ", *close_code);
+    }
+
+    if (extra_data != NULL)
+    {
+        (void)printf("Data: %.*s", (int)extra_data_length, extra_data);
+    }
+
+    (void)printf(")\r\n");
 }
 
 static void on_ws_error(void* context, WS_ERROR error_code)
