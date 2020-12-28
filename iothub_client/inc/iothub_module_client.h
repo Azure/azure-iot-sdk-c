@@ -2,11 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 /** @file iothub_module_client.h
-*    @brief Extends the IoTHubClient_LL module with additional features.
+*    @brief Extends the IoTHubModuleClient_LL module with additional features.
 *
-*    @details IoTHubClient is a module that extends the IoTHubClient_LL
-*             module with 2 features:
-*                - scheduling the work for the IoTHubClient from a
+*    @details IoTHubModuleClient extends the IoTHubModuleClient_LL
+*             with 2 features:
+*                - scheduling the work for the IoTHubModuleClient from a
 *                  thread, so that the user does not need to create their
 *                  own thread
 *                - thread-safe APIs
@@ -87,13 +87,13 @@ extern "C"
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SendEventAsync, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, IOTHUB_MESSAGE_HANDLE, eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, eventConfirmationCallback, void*, userContextCallback);
 
     /**
-    * @brief    This function returns the current sending status for IoTHubClient.
+    * @brief    This function returns the current sending status for IoTHubModuleClient.
     *
     * @param    iotHubModuleClientHandle  The handle created by a call to the create function.
     * @param    IoTHubClientStatus        The sending state is populated at the address pointed
     *                                     at by this parameter. The value will be set to
-    *                                     @c IoTHubClient_SENDSTATUS_IDLE if there is currently
-    *                                     no item to be sent and @c IoTHubClient_SENDSTATUS_BUSY
+    *                                     @c IOTHUB_CLIENT_SEND_STATUS_IDLE if there is currently
+    *                                     no item to be sent and @c IOTHUB_CLIENT_SEND_STATUS_BUSY
     *                                     if there are.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
@@ -128,7 +128,7 @@ extern "C"
     *                                           callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the ::IoTHubModuleClient_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -145,7 +145,7 @@ extern "C"
     *                                            connection drops to IOT Hub.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the ::IoTHubModuleClient_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -161,7 +161,7 @@ extern "C"
     to IOT Hub.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the ::IoTHubModuleClient_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -189,46 +189,10 @@ extern "C"
     * @param    optionName                  Name of the option.
     * @param    value                       The value.
     *
-    *            The options that can be set via this API are:
-    *                - @b timeout - the maximum time in milliseconds a communication is
-    *                  allowed to use. @p value is a pointer to an @c unsigned @c int with
-    *                  the timeout value in milliseconds. This is only supported for the HTTP
-    *                  protocol as of now. When the HTTP protocol uses CURL, the meaning of
-    *                  the parameter is <em>total request time</em>. When the HTTP protocol uses
-    *                  winhttp, the meaning is the same as the @c dwSendTimeout and
-    *                  @c dwReceiveTimeout parameters of the
-    *                  <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/aa384116(v=vs.85).aspx">
-    *                  WinHttpSetTimeouts</a> API.
-    *                - @b CURLOPT_LOW_SPEED_LIMIT - only available for HTTP protocol and only
-    *                  when CURL is used. It has the same meaning as CURL's option with the same
-    *                  name. @p value is pointer to a long.
-    *                - @b CURLOPT_LOW_SPEED_TIME - only available for HTTP protocol and only
-    *                  when CURL is used. It has the same meaning as CURL's option with the same
-    *                  name. @p value is pointer to a long.
-    *                - @b CURLOPT_FORBID_REUSE - only available for HTTP protocol and only
-    *                  when CURL is used. It has the same meaning as CURL's option with the same
-    *                  name. @p value is pointer to a long.
-    *                - @b CURLOPT_FRESH_CONNECT - only available for HTTP protocol and only
-    *                  when CURL is used. It has the same meaning as CURL's option with the same
-    *                  name. @p value is pointer to a long.
-    *                - @b CURLOPT_VERBOSE - only available for HTTP protocol and only
-    *                  when CURL is used. It has the same meaning as CURL's option with the same
-    *                  name. @p value is pointer to a long.
-    *                - @b messageTimeout - the maximum time in milliseconds until a message
-    *                 is timeouted. The time starts at IoTHubModuleClient_SendEventAsync. By default,
-    *                 messages do not expire. @p is a pointer to a uint64_t
-    *                - @b svc2cl_keep_alive_timeout_secs - the AMQP service side keep alive interval in seconds.
-    *                 After the connection established the client requests the server to set the
-    *                 keep alive interval for given time.
-    *                 If it is not set then the default 240 sec applies.
-    *                 If it is set to zero the server will not send keep alive messages to the client.
-    *                - @b cl2svc_keep_alive_send_ratio - the AMQP client side keep alive interval in seconds.
-    *                 After the connection established the server requests the client to set the
-    *                 keep alive interval for given time.
-    *                 If it is not set then the default ratio of 1/2 is applied.
-    *                 The ratio has to be greater than 0.0 and equal to or less than 0.9
-
-    * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
+    * 
+    * @remarks  Documentation for configuration options is available at https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/Iothub_sdk_options.md.
+    *
+    * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SetOption, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, const char*, optionName, const void*, value);
 
@@ -306,7 +270,7 @@ extern "C"
     * @param    eventConfirmationCallback     The callback specified by the module for receiving
     *                                         confirmation of the delivery of the IoT Hub message.
     *                                         This callback can be expected to invoke the
-    *                                         ::IoTHubClient_SendEventAsync function for the
+    *                                         IoTHubModuleClient_SendEventAsync function for the
     *                                         same message in an attempt to retry sending a failing
     *                                         message. The user can specify a @c NULL value here to
     *                                         indicate that no callback is required.
@@ -314,7 +278,7 @@ extern "C"
     *                                         callback. This can be @c NULL.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the ::IoTHubClient_Destroy function from within any callback.
+    *           the IoTHubModuleClient_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -322,7 +286,7 @@ extern "C"
 
 
     /**
-    * @brief    This API sets callback for  method call that is directed to specified 'inputName' queue (e.g. messages from IoTHubClient_SendEventToOutputAsync)
+    * @brief    This API sets callback for method call that is directed to specified 'inputName' queue (e.g. messages from IoTHubModuleClient_SendEventToOutputAsync)
     *
     * @param    iotHubModuleClientHandle      The handle created by a call to the create function.
     * @param    inputName                     The name of the queue to listen on for this moduleMethodCallback/userContextCallback.
@@ -337,24 +301,29 @@ extern "C"
 #ifdef USE_EDGE_MODULES
     /**
     * @brief    This API creates a module handle based on environment variables set in the Edge runtime.
-    NOTE: It is *ONLY* valid when the code is running in a container initiated by Edge.
+    *           NOTE: It is *ONLY* valid when the code is running in a container initiated by Edge.
     *
-    * @param    protocol            Function pointer for protocol implementation
+    *
+    * @param    protocol            Function pointer for protocol implementation.  This *MUST* be MQTT_Protocol.
+    *
+    * @remarks  The protocol parameter MUST be set to MQTT_Protocol.  Using other values will cause undefined behavior.
     *
     * @return    A non-NULL @c IOTHUB_MODULE_CLIENT_HANDLE value that is used when
     *           invoking other functions for IoT Hub client and @c NULL on failure.
-
     */
     MOCKABLE_FUNCTION(, IOTHUB_MODULE_CLIENT_HANDLE, IoTHubModuleClient_CreateFromEnvironment, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol);
 
-    /*
+    /**
     * @brief    This API invokes a device method on a specified device
     *
     * @param    iotHubModuleClientHandle        The handle created by a call to a create function
     * @param    deviceId                        The device id of the device to invoke a method on
     * @param    methodName                      The name of the method
     * @param    methodPayload                   The method payload (in json format)
-    * @param    timeout                         The time in seconds before a timeout occurs
+    *
+    * @warning  The timeout parameter is ignored.  See https://github.com/Azure/azure-iot-sdk-c/issues/1378.
+    *           The timeout used will be the default for IoT Edge.
+    *
     * @param    responseStatus                  This pointer will be filled with the response status after invoking the device method
     * @param    responsePayload                 This pointer will be filled with the response payload
     * @param    responsePayloadSize             This pointer will be filled with the response payload size
@@ -363,7 +332,7 @@ extern "C"
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_DeviceMethodInvokeAsync, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, const char*, deviceId, const char*, methodName, const char*, methodPayload, unsigned int, timeout, IOTHUB_METHOD_INVOKE_CALLBACK, methodInvokeCallback, void*, context);
 
-    /*
+    /**
     * @brief    This API invokes a module method on a specified module
     *
     * @param    iotHubModuleClientHandle        The handle created by a call to a create function
@@ -372,6 +341,10 @@ extern "C"
     * @param    methodName                      The name of the method
     * @param    methodPayload                   The method payload (in json format)
     * @param    timeout                         The time in seconds before a timeout occurs
+    *
+    * @warning  The timeout parameter is ignored.  See https://github.com/Azure/azure-iot-sdk-c/issues/1378.
+    *           The timeout used will be the default for IoT Edge.
+    *
     * @param    responseStatus                  This pointer will be filled with the response status after invoking the module method
     * @param    responsePayload                 This pointer will be filled with the response payload
     * @param    responsePayloadSize             This pointer will be filled with the response payload size

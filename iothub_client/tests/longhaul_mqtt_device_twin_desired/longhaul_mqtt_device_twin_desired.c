@@ -9,7 +9,7 @@
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/shared_util_options.h"
-#include "iothub_client.h"
+#include "iothub_device_client.h"
 #include "iothub_client_options.h"
 #include "iothub_message.h"
 #include "iothubtransportmqtt.h"
@@ -27,8 +27,6 @@ int main(void)
 {
     int result;
     IOTHUB_LONGHAUL_RESOURCES_HANDLE iotHubLonghaulRsrcsHandle;
-    size_t test_duration_in_seconds = 12 * 60 * 60;
-    size_t test_loop_wait_time_in_seconds = 60;
 
     if ((iotHubLonghaulRsrcsHandle = longhaul_tests_init()) == NULL)
     {
@@ -44,7 +42,7 @@ int main(void)
         }
         else
         {
-            result = longhaul_run_twin_desired_properties_tests(iotHubLonghaulRsrcsHandle, test_loop_wait_time_in_seconds, test_duration_in_seconds);
+            result = longhaul_run_twin_desired_properties_tests(iotHubLonghaulRsrcsHandle);
         }
 
         longhaul_tests_deinit(iotHubLonghaulRsrcsHandle);

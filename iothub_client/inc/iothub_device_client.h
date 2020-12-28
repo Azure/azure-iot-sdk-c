@@ -2,11 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 /** @file iothub_device_client.h
-*    @brief Extends the IoTHubCLient_LL module with additional features.
+*    @brief Extends the IoTHubCLient_LL with additional features.
 *
-*    @details IoTHubClient is a module that extends the IoTHubCLient_LL
-*             module with 2 features:
-*                - scheduling the work for the IoTHubCLient from a
+*    @details IoTHubDeviceClient extends the IoTHubDeviceClient_LL
+*             with 2 features:
+*                - scheduling the work for the IoTHubDeviceClient from a
 *                  thread, so that the user does not need to create their
 *                  own thread
 *                - thread-safe APIs
@@ -84,7 +84,7 @@ extern "C"
 
     /**
     * @brief    Creates a IoT Hub client for communication with an existing IoT
-    *           Hub using the device auth module.
+    *           Hub using the device auth.
     *
     * @param    iothub_uri      Pointer to an ioThub hostname received in the registration process
     * @param    device_id       Pointer to the device Id of the device
@@ -111,7 +111,7 @@ extern "C"
     * @param    eventConfirmationCallback       The callback specified by the device for receiving
     *                                           confirmation of the delivery of the IoT Hub message.
     *                                           This callback can be expected to invoke the
-    *                                           ::IoTHubDeviceClient_SendEventAsync function for the
+    *                                           IoTHubDeviceClient_SendEventAsync function for the
     *                                           same message in an attempt to retry sending a failing
     *                                           message. The user can specify a @c NULL value here to
     *                                           indicate that no callback is required.
@@ -119,7 +119,7 @@ extern "C"
     *                                           callback. This can be @c NULL.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the ::IoTHubDeviceClient_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_Destroy function from within any callback.
     * @remarks
     *           The IOTHUB_MESSAGE_HANDLE instance provided as argument is copied by the function,
     *           so this argument can be destroyed by the calling application right after IoTHubDeviceClient_SendEventAsync returns.
@@ -134,9 +134,11 @@ extern "C"
     * @param    iotHubClientHandle        The handle created by a call to the create function.
     * @param    iotHubClientStatus        The sending state is populated at the address pointed
     *                                     at by this parameter. The value will be set to
-    *                                     @c IOTHUBCLIENT_SENDSTATUS_IDLE if there is currently
-    *                                     no item to be sent and @c IOTHUBCLIENT_SENDSTATUS_BUSY
+    *                                     @c IOTHUB_CLIENT_SEND_STATUS_IDLE if there is currently
+    *                                     no item to be sent and @c IOTHUB_CLIENT_SEND_STATUS_BUSY
     *                                     if there are.
+    *
+    * @remark    Does not return information related to uploads initiated by IoTHubDeviceClient_UploadToBlob or IoTHubDeviceClient_UploadMultipleBlocksToBlob.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -153,7 +155,7 @@ extern "C"
     *                                       callback. This can be @c NULL.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the ::IoTHubDeviceClient_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_Destroy function from within any callback.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -170,7 +172,9 @@ extern "C"
     *                                           callback. This can be @c NULL.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the ::IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_Destroy function from within any callback.
+    *
+    * @remark   Callback specified will not receive connection status change notifications for upload connections created with IoTHubDeviceClient_UploadToBlob or IoTHubDeviceClient_UploadMultipleBlocksToBlob.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -187,7 +191,9 @@ extern "C"
     *                                           connection drops to IOT Hub.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the ::IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_Destroy function from within any callback.
+    *
+    * @remark   Uploads initiated by IoTHubDeviceClient_UploadToBlob or IoTHubDeviceClient_UploadMultipleBlocksToBlob do not have automatic retries and do not honor the retryPolicy settings.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -203,7 +209,7 @@ extern "C"
     *                                           to IOT Hub.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the ::IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_Destroy function from within any callback.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -231,45 +237,8 @@ extern "C"
     * @param    optionName              Name of the option.
     * @param    value                   The value.
     *
-    *           The options that can be set via this API are:
-    *                - @b timeout - the maximum time in milliseconds a communication is
-    *                  allowed to use. @p value is a pointer to an @c unsigned @c int with
-    *                  the timeout value in milliseconds. This is only supported for the HTTP
-    *                  protocol as of now. When the HTTP protocol uses CURL, the meaning of
-    *                  the parameter is <em>total request time</em>. When the HTTP protocol uses
-    *                  winhttp, the meaning is the same as the @c dwSendTimeout and
-    *                  @c dwReceiveTimeout parameters of the
-    *                  <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/aa384116(v=vs.85).aspx">
-    *                  WinHttpSetTimeouts</a> API.
-    *                - @b CURLOPT_LOW_SPEED_LIMIT - only available for HTTP protocol and only
-    *                  when CURL is used. It has the same meaning as CURL's option with the same
-    *                  name. @p value is pointer to a long.
-    *                - @b CURLOPT_LOW_SPEED_TIME - only available for HTTP protocol and only
-    *                  when CURL is used. It has the same meaning as CURL's option with the same
-    *                  name. @p value is pointer to a long.
-    *                - @b CURLOPT_FORBID_REUSE - only available for HTTP protocol and only
-    *                  when CURL is used. It has the same meaning as CURL's option with the same
-    *                  name. @p value is pointer to a long.
-    *                - @b CURLOPT_FRESH_CONNECT - only available for HTTP protocol and only
-    *                  when CURL is used. It has the same meaning as CURL's option with the same
-    *                  name. @p value is pointer to a long.
-    *                - @b CURLOPT_VERBOSE - only available for HTTP protocol and only
-    *                  when CURL is used. It has the same meaning as CURL's option with the same
-    *                  name. @p value is pointer to a long.
-    *                - @b messageTimeout - the maximum time in milliseconds until a message
-    *                 is timeouted. The time starts at IoTHubDeviceClient_SendEventAsync. By default,
-    *                 messages do not expire. @p is a pointer to a uint64_t
-    *                - @b svc2cl_keep_alive_timeout_secs - the AMQP service side keep alive interval in seconds.
-    *                 After the connection established the client requests the server to set the
-    *                 keep alive interval for given time.
-    *                 If it is not set then the default 240 sec applies.
-    *                 If it is set to zero the server will not send keep alive messages to the client.
-    *                - @b cl2svc_keep_alive_send_ratio - the AMQP client side keep alive interval in seconds.
-    *                 After the connection established the server requests the client to set the
-    *                 keep alive interval for given time.
-    *                 If it is not set then the default ratio of 1/2 is applied.
-    *                 The ratio has to be greater than 0.0 and equal to or less than 0.9
-
+    * @remarks  Documentation for configuration options is available at https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/Iothub_sdk_options.md.
+    * 
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_SetOption, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, const char*, optionName, const void*, value);
@@ -288,7 +257,7 @@ extern "C"
     *                                       callback. This can be @c NULL.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the ::IoTHubDeviceClient_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_Destroy function from within any callback.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -305,7 +274,7 @@ extern "C"
     *                                       callback. This can be @c NULL.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the ::IoTHubDeviceClient_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_Destroy function from within any callback.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -321,7 +290,7 @@ extern "C"
     *                                    callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubClient_LL_Destroy function from within any callback.
+    *            the IoTHubDeviceClient_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */

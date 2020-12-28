@@ -10,11 +10,11 @@
 #ifndef PNP_DEVICEINFO_COMPONENT_H
 #define PNP_DEVICEINFO_COMPONENT_H
 
-#include "iothub_device_client.h"
+#include "iothub_device_client_ll.h"
 
 //
 // PnP_DeviceInfoComponent_Report_All_Properties sends properties corresponding to the DeviceInfo interface to the cloud.
 //
-void PnP_DeviceInfoComponent_Report_All_Properties(const char* componentName, IOTHUB_DEVICE_CLIENT_HANDLE deviceClient);
+void PnP_DeviceInfoComponent_Report_All_Properties(const char* componentName, IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL);
 
 #endif /* PNP_DEVICEINFO_COMPONENT_H */

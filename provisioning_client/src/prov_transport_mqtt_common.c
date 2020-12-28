@@ -319,7 +319,7 @@ static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE handle, void* user_ct
             size_t status_pos = strlen(MQTT_TOPIC_STATUS_PREFIX);
             if (memcmp(MQTT_TOPIC_STATUS_PREFIX, topic_resp, status_pos) == 0)
             {
-                // If the status code is > 429 then this is a transient error
+                // If the status code is >= 429 then this is a transient error
                 long status_code = atol(topic_resp + status_pos);
                 if (status_code >= PROV_STATUS_CODE_TRANSIENT_ERROR)
                 {

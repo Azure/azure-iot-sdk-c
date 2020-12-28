@@ -38,7 +38,7 @@ typedef void (*PnP_PropertyCallbackFunction)(const char* componentName, const ch
 // a result code or version.  It is used when sending properties that are NOT marked as <"writable": true> in the DTDL defining
 // the given property.
 //
-// The application itself needs to send this to Device Twin, using a function such as IoTHubDeviceClient_SendReportedState.
+// The application itself needs to send this to Device Twin, using a function such as IoTHubDeviceClient_LL_SendReportedState.
 //
 STRING_HANDLE PnP_CreateReportedProperty(const char* componentName, const char* propertyName, const char* propertyValue);
 
@@ -49,7 +49,7 @@ STRING_HANDLE PnP_CreateReportedProperty(const char* componentName, const char* 
 // For instance, after processing a thermostat's set point the application acknowledges that it has received the request and can indicate 
 // whether it will attempt to honor the requset or whether the request was unsuccessful.
 //
-// The application itself needs to send this to Device Twin, using a function such as IoTHubDeviceClient_SendReportedState.
+// The application itself needs to send this to Device Twin, using a function such as IoTHubDeviceClient_LL_SendReportedState.
 //
 STRING_HANDLE PnP_CreateReportedPropertyWithStatus(const char* componentName, const char* propertyName, const char* propertyValue, int result, const char* description, int ackVersion);
 
@@ -65,7 +65,7 @@ void PnP_ParseCommandName(const char* deviceMethodName, unsigned const char** co
 // PnP_CreateTelemetryMessageHandle creates an IOTHUB_MESSAGE_HANDLE that contains tho contents of the telemetryData.
 // If the optional componentName parameter is specified, the created message will have this as a property.
 //
-// The application itself needs to send this to IoTHub, using a function such as IoTHubDeviceClient_SendEventAsync.
+// The application itself needs to send this to IoTHub, using a function such as IoTHubDeviceClient_LL_SendEventAsync.
 //
 IOTHUB_MESSAGE_HANDLE PnP_CreateTelemetryMessageHandle(const char* componentName, const char* telemetryData);
 

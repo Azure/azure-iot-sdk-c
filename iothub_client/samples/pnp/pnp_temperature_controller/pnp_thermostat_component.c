@@ -21,7 +21,7 @@
 #define TIME_BUFFER_SIZE 128
 
 // Name of command this component supports to retrieve a report about the component.
-static const char g_getMinMaxReport[] = "getMaxMinReport";
+static const char g_getMaxMinReport[] = "getMaxMinReport";
 
 // Names of properties for desired/reporting
 static const char g_targetTemperaturePropertyName[] = "targetTemperature";
@@ -32,7 +32,7 @@ static const char g_ISO8601Format[] = "%Y-%m-%dT%H:%M:%SZ";
 // Format string for sending temperature telemetry
 static const char g_temperatureTelemetryBodyFormat[] = "{\"temperature\":%.02f}";
 // Format string for building getMaxMinReport response
-static const char g_minMaxCommandResponseFormat[] = "{\"maxTemp\":%.2f,\"minTemp\":%.2f,\"avgTemp\":%.2f,\"startTime\":\"%s\",\"endTime\":\"%s\"}";
+static const char g_maxMinCommandResponseFormat[] = "{\"maxTemp\":%.2f,\"minTemp\":%.2f,\"avgTemp\":%.2f,\"startTime\":\"%s\",\"endTime\":\"%s\"}";
 // Format string for sending maxTempSinceLastReboot property
 static const char g_maxTempSinceLastRebootPropertyFormat[] = "%.2f";
 // Format of the body when responding to a targetTemperature 
@@ -151,7 +151,7 @@ static bool BuildMaxMinCommandResponse(PNP_THERMOSTAT_COMPONENT* pnpThermostatCo
         LogError("Unable to output the current time");
         result = false;
     }
-    else if ((responseBuilderSize = snprintf(NULL, 0, g_minMaxCommandResponseFormat, pnpThermostatComponent->minTemperature, pnpThermostatComponent->maxTemperature, 
+    else if ((responseBuilderSize = snprintf(NULL, 0, g_maxMinCommandResponseFormat, pnpThermostatComponent->maxTemperature, pnpThermostatComponent->minTemperature,
                                              pnpThermostatComponent->allTemperatures / pnpThermostatComponent->numTemperatureUpdates, g_programStartTime, currentTime)) < 0)
     {
         LogError("snprintf to determine string length for command response failed");
@@ -163,7 +163,7 @@ static bool BuildMaxMinCommandResponse(PNP_THERMOSTAT_COMPONENT* pnpThermostatCo
         LogError("Unable to allocate %lu bytes", (unsigned long)(responseBuilderSize + 1));
         result = false;
     }
-    else if ((responseBuilderSize = snprintf((char*)responseBuilder, responseBuilderSize + 1, g_minMaxCommandResponseFormat, pnpThermostatComponent->minTemperature, pnpThermostatComponent->maxTemperature, 
+    else if ((responseBuilderSize = snprintf((char*)responseBuilder, responseBuilderSize + 1, g_maxMinCommandResponseFormat, pnpThermostatComponent->maxTemperature, pnpThermostatComponent->minTemperature,
                                               pnpThermostatComponent->allTemperatures / pnpThermostatComponent->numTemperatureUpdates, g_programStartTime, currentTime)) < 0)
     {
         LogError("snprintf to output buffer for command response");
@@ -193,7 +193,7 @@ int PnP_ThermostatComponent_ProcessCommand(PNP_THERMOSTAT_COMPONENT_HANDLE pnpTh
     const char* sinceStr;
     int result;
 
-    if (strcmp(pnpCommandName, g_getMinMaxReport) != 0)
+    if (strcmp(pnpCommandName, g_getMaxMinReport) != 0)
     {
         LogError("PnP command=%s is not supported on thermostat component", pnpCommandName);
         result = PNP_STATUS_NOT_FOUND;
@@ -248,7 +248,7 @@ static void UpdateTemperatureAndStatistics(PNP_THERMOSTAT_COMPONENT* pnpThermost
 //
 // SendTargetTemperatureResponse sends a PnP property indicating the device has received the desired targeted temperature
 //
-static void SendTargetTemperatureResponse(PNP_THERMOSTAT_COMPONENT* pnpThermostatComponent, IOTHUB_DEVICE_CLIENT_HANDLE deviceClient, int version)
+static void SendTargetTemperatureResponse(PNP_THERMOSTAT_COMPONENT* pnpThermostatComponent, IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL, int version)
 {
     char targetTemperatureAsString[32];
     IOTHUB_CLIENT_RESULT iothubClientResult;
@@ -268,7 +268,7 @@ static void SendTargetTemperatureResponse(PNP_THERMOSTAT_COMPONENT* pnpThermosta
         const char* jsonToSendStr = STRING_c_str(jsonToSend);
         size_t jsonToSendStrLen = strlen(jsonToSendStr);
 
-        if ((iothubClientResult = IoTHubDeviceClient_SendReportedState(deviceClient, (const unsigned char*)jsonToSendStr, jsonToSendStrLen, NULL, NULL)) != IOTHUB_CLIENT_OK)
+        if ((iothubClientResult = IoTHubDeviceClient_LL_SendReportedState(deviceClientLL, (const unsigned char*)jsonToSendStr, jsonToSendStrLen, NULL, NULL)) != IOTHUB_CLIENT_OK)
         {
             LogError("Unable to send reported state, error=%d", iothubClientResult);
         }
@@ -281,7 +281,7 @@ static void SendTargetTemperatureResponse(PNP_THERMOSTAT_COMPONENT* pnpThermosta
     STRING_delete(jsonToSend);
 }
 
-void PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, IOTHUB_DEVICE_CLIENT_HANDLE deviceClient)
+void PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL)
 {
     PNP_THERMOSTAT_COMPONENT* pnpThermostatComponent = (PNP_THERMOSTAT_COMPONENT*)pnpThermostatComponentHandle;
     char maximumTemperatureAsString[32];
@@ -301,7 +301,7 @@ void PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(PNP_THERMOS
         const char* jsonToSendStr = STRING_c_str(jsonToSend);
         size_t jsonToSendStrLen = strlen(jsonToSendStr);
 
-        if ((iothubClientResult = IoTHubDeviceClient_SendReportedState(deviceClient, (const unsigned char*)jsonToSendStr, jsonToSendStrLen, NULL, NULL)) != IOTHUB_CLIENT_OK)
+        if ((iothubClientResult = IoTHubDeviceClient_LL_SendReportedState(deviceClientLL, (const unsigned char*)jsonToSendStr, jsonToSendStrLen, NULL, NULL)) != IOTHUB_CLIENT_OK)
         {
             LogError("Unable to send reported state, error=%d", iothubClientResult);
         }
@@ -314,7 +314,7 @@ void PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(PNP_THERMOS
     STRING_delete(jsonToSend);
 }
 
-void PnP_ThermostatComponent_ProcessPropertyUpdate(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, IOTHUB_DEVICE_CLIENT_HANDLE deviceClient, const char* propertyName, JSON_Value* propertyValue, int version)
+void PnP_ThermostatComponent_ProcessPropertyUpdate(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL, const char* propertyName, JSON_Value* propertyValue, int version)
 {
     PNP_THERMOSTAT_COMPONENT* pnpThermostatComponent = (PNP_THERMOSTAT_COMPONENT*)pnpThermostatComponentHandle;
 
@@ -336,17 +336,17 @@ void PnP_ThermostatComponent_ProcessPropertyUpdate(PNP_THERMOSTAT_COMPONENT_HAND
         UpdateTemperatureAndStatistics(pnpThermostatComponent, targetTemperature, &maxTempUpdated);
 
         // The device needs to let the service know that it has received the targetTemperature desired property.
-        SendTargetTemperatureResponse(pnpThermostatComponent, deviceClient, version);
+        SendTargetTemperatureResponse(pnpThermostatComponent, deviceClientLL, version);
         
         if (maxTempUpdated)
         {
             // If the Maximum temperature has been updated, we also report this as a property.
-            PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(pnpThermostatComponent, deviceClient);
+            PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(pnpThermostatComponent, deviceClientLL);
         }
     }
 }
 
-void PnP_ThermostatComponent_SendTelemetry(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, IOTHUB_DEVICE_CLIENT_HANDLE deviceClient)
+void PnP_ThermostatComponent_SendTelemetry(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL)
 {
     PNP_THERMOSTAT_COMPONENT* pnpThermostatComponent = (PNP_THERMOSTAT_COMPONENT*)pnpThermostatComponentHandle;
     IOTHUB_MESSAGE_HANDLE messageHandle = NULL;
@@ -362,7 +362,7 @@ void PnP_ThermostatComponent_SendTelemetry(PNP_THERMOSTAT_COMPONENT_HANDLE pnpTh
     {
         LogError("Unable to create telemetry message");
     }
-    else if ((iothubResult = IoTHubDeviceClient_SendEventAsync(deviceClient, messageHandle, NULL, NULL)) != IOTHUB_CLIENT_OK)
+    else if ((iothubResult = IoTHubDeviceClient_LL_SendEventAsync(deviceClientLL, messageHandle, NULL, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to send telemetry message, error=%d", iothubResult);
     }

@@ -8,6 +8,41 @@ This repository contains the following:
 * **Azure IoT Hub Service C SDK** to interface with an Azure IoT Hub service instance from a server-side C application.
 * **Serializer Library for C** to help serialize and deserialize data on your device.
 
+## Table of Contents
+- [Azure IoT C SDKs and Libraries](#azure-iot-c-sdks-and-libraries)
+  - [Table of Contents](#table-of-contents)
+  - [Packages and Libraries](#packages-and-libraries)
+  - [Samples](#samples)
+  - [Compile the SDK](#compile-the-sdk)
+  - [SDK API Reference Documentation](#sdk-api-reference-documentation)
+  - [Other Azure IoT SDKs](#other-azure-iot-sdks)
+  - [Developing Azure IoT Applications](#developing-azure-iot-applications)
+  - [Key Features and Roadmap](#key-features-and-roadmap)
+    - [Device Client SDK](#device-client-sdk)
+    - [Service Client SDK](#service-client-sdk)
+    - [Provisioning client SDK](#provisioning-client-sdk)
+    - [Provisioniong Service SDK](#provisioniong-service-sdk)
+  - [OS Platforms and Hardware Compatibility](#os-platforms-and-hardware-compatibility)
+  - [Porting the Azure IoT Device Client SDK for C to New Devices](#porting-the-azure-iot-device-client-sdk-for-c-to-new-devices)
+  - [Contribution, Feedback and Issues](#contribution-feedback-and-issues)
+  - [Support](#support)
+  - [Read more](#read-more)
+  - [SDK Folder Structure](#sdk-folder-structure)
+    - [/c-utility, /uamqp, /umqtt, /parson](#c-utility-uamqp-umqtt-parson)
+    - [/blob](#blob)
+    - [/dps_client](#dps_client)
+    - [/certs](#certs)
+    - [/doc](#doc)
+    - [/build_all](#build_all)
+    - [/iothub_client](#iothub_client)
+    - [/serializer](#serializer)
+    - [/iothub_service_client](#iothub_service_client)
+    - [/testtools](#testtools)
+    - [/tools](#tools)
+- [Long Term Support](#long-term-support)
+  - [Schedule<sup>1</sup>](#schedulesup1sup)
+    - [Planned Release Schedule](#planned-release-schedule)
+
 ## Packages and Libraries
   The simplest way to get started with the Azure IoT SDKs is to use the following packages and libraries:
   * Linux: [Device SDK on apt-get](./iothub_client/readme.md#aptgetpackage)
@@ -35,6 +70,8 @@ The API reference documentation for the C SDKs can be found [here][c-api-referen
 ## Other Azure IoT SDKs
 
 To find Azure IoT SDKs in other languages, please refer to the [azure-iot-sdks][azure-iot-sdks] repository.
+
+**Note on constrained devices**: The `Embedded C SDK` is an alternative for constrained devices which enables the BYO (bring your own) network approach: IoT developers have the freedom of choice to bring an MQTT client, TLS and Socket of their choice to create a device solution. Find more information about the Embedded C SDK [here](https://github.com/Azure/azure-sdk-for-c/tree/master/sdk/docs/iot).
 
 ## Developing Azure IoT Applications
 
@@ -87,7 +124,7 @@ This repository contains [provisioning client SDK](./provisioning_client) for th
 | X.509 Individual Enrollment | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | This SDK supports connecting your device to the Device Provisioning Service via [individual enrollment](https://docs.microsoft.com/azure/iot-dps/concepts-service#enrollment) using [X.509 leaf certificate](https://docs.microsoft.com/azure/iot-dps/concepts-security#leaf-certificate).  This [quickstart](https://docs.microsoft.com/azure/iot-dps/quick-create-simulated-device-x509) reviews how to create a simulated device for individual enrollment with X.509. |
 | X.509 Enrollment Group      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | This SDK supports connecting your device to the Device Provisioning Service via [enrollment group](https://docs.microsoft.com/azure/iot-dps/concepts-service#enrollment) using [X.509 root certificate](https://docs.microsoft.com/azure/iot-dps/concepts-security#root-certificate).                                                                                                                                                                                         |
 
-### Provisioniong Service SDK
+### Provisioning Service SDK
 This repository contains [provisioning service client SDK](./provisioning_service_client/) for the Device Provisioning Service to [programmatically enroll devices](https://docs.microsoft.com/en-us/azure/iot-dps/how-to-manage-enrollments-sdks).
 
 | Feature                                            | Support            | Description                                                                                                                                                                                                                                            |
