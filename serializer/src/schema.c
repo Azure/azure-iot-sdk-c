@@ -387,7 +387,7 @@ SCHEMA_HANDLE Schema_Create(const char* schemaNamespace, void* metadata)
             result = NULL;
             LogError("(Error code:%s)", MU_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
         }
-        else if ((result = (SCHEMA_HANDLE_DATA*)malloc(sizeof(SCHEMA_HANDLE_DATA))) == NULL)
+        else if ((result = (SCHEMA_HANDLE_DATA*)calloc(1, sizeof(SCHEMA_HANDLE_DATA))) == NULL)
         {
             /* Codes_SRS_SCHEMA_99_003:[On failure, NULL shall be returned.] */
             LogError("(Error code:%s)", MU_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_ERROR));
@@ -643,7 +643,7 @@ SCHEMA_MODEL_TYPE_HANDLE Schema_CreateModelType(SCHEMA_HANDLE schemaHandle, cons
                 SCHEMA_MODEL_TYPE_HANDLE_DATA* modelType;
                 schema->ModelTypes = newModelTypes;
 
-                if ((modelType = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)malloc(sizeof(SCHEMA_MODEL_TYPE_HANDLE_DATA))) == NULL)
+                if ((modelType = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)calloc(1, sizeof(SCHEMA_MODEL_TYPE_HANDLE_DATA))) == NULL)
                 {
 
                     /* Codes_SRS_SCHEMA_99_009:[On failure, Schema_CreateModelType shall return NULL.] */
@@ -897,7 +897,7 @@ SCHEMA_ACTION_HANDLE Schema_CreateModelAction(SCHEMA_MODEL_TYPE_HANDLE modelType
                 modelType->Actions = newActions;
 
                 /* Codes_SRS_SCHEMA_99_103: [On success, Schema_CreateModelAction shall return a none-NULL SCHEMA_ACTION_HANDLE to the newly created action.] */
-                if ((newAction = (SCHEMA_ACTION_HANDLE_DATA*)malloc(sizeof(SCHEMA_ACTION_HANDLE_DATA))) == NULL)
+                if ((newAction = (SCHEMA_ACTION_HANDLE_DATA*)calloc(1, sizeof(SCHEMA_ACTION_HANDLE_DATA))) == NULL)
                 {
                     /* Codes_SRS_SCHEMA_99_106: [On any other error, Schema_CreateModelAction shall return NULL.]*/
                     result = NULL;
@@ -1803,7 +1803,7 @@ SCHEMA_STRUCT_TYPE_HANDLE Schema_CreateStructType(SCHEMA_HANDLE schemaHandle, co
             else
             {
                 schema->StructTypes = newStructTypes;
-                if ((structType = (SCHEMA_STRUCT_TYPE_HANDLE_DATA*)malloc(sizeof(SCHEMA_STRUCT_TYPE_HANDLE_DATA))) == NULL)
+                if ((structType = (SCHEMA_STRUCT_TYPE_HANDLE_DATA*)calloc(1, sizeof(SCHEMA_STRUCT_TYPE_HANDLE_DATA))) == NULL)
                 {
                     /* Codes_SRS_SCHEMA_99_066:[On any other error, Schema_CreateStructType shall return NULL.] */
                     result = NULL;
@@ -2766,7 +2766,7 @@ SCHEMA_RESULT Schema_AddModelDesiredProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeH
         }
         else
         {
-            SCHEMA_DESIRED_PROPERTY_HANDLE_DATA* desiredProperty = (SCHEMA_DESIRED_PROPERTY_HANDLE_DATA*)malloc(sizeof(SCHEMA_DESIRED_PROPERTY_HANDLE_DATA));
+            SCHEMA_DESIRED_PROPERTY_HANDLE_DATA* desiredProperty = (SCHEMA_DESIRED_PROPERTY_HANDLE_DATA*)calloc(1, sizeof(SCHEMA_DESIRED_PROPERTY_HANDLE_DATA));
             if (desiredProperty == NULL)
             {
                 /*Codes_SRS_SCHEMA_02_028: [ If any failure occurs then Schema_AddModelDesiredProperty shall fail and return SCHEMA_ERROR. ]*/

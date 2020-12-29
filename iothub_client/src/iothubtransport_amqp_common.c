@@ -52,6 +52,7 @@
 // DEFAULT_MAX_RETRY_TIME_IN_SECS = 0 means infinite retry.
 #define DEFAULT_MAX_RETRY_TIME_IN_SECS            0
 #define MAX_SERVICE_KEEP_ALIVE_RATIO              0.9
+#define DEFAULT_DEVICE_STOP_DELAY                 10
 
 // ---------- Data Definitions ---------- //
 
@@ -1286,18 +1287,17 @@ static int IoTHubTransport_AMQP_Common_Device_DoWork(AMQP_TRANSPORT_DEVICE_INSTA
         }
         else // i.e., DEVICE_STATE_ERROR_AUTH || DEVICE_STATE_ERROR_AUTH_TIMEOUT || DEVICE_STATE_ERROR_MSG
         {
-            LogError("Failed performing DoWork for device '%s' (device reported state %d; number of previous failures: %lu)",
-                STRING_c_str(registered_device->device_id), (int)registered_device->device_state, (unsigned long)registered_device->number_of_previous_failures);
-
             registered_device->number_of_previous_failures++;
 
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_046: [If the device has failed for MAX_NUMBER_OF_DEVICE_FAILURES in a row, it shall trigger a connection retry on the transport]
             if (registered_device->number_of_previous_failures >= MAX_NUMBER_OF_DEVICE_FAILURES)
             {
+                LogError("Failed performing DoWork for device '%s' (device reported state %d; number of previous failures: %lu)",
+                    STRING_c_str(registered_device->device_id), (int)registered_device->device_state, (unsigned long)registered_device->number_of_previous_failures);
                 result = MU_FAILURE;
             }
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_045: [If the registered device has a failure, it shall be stopped using amqp_device_stop()]
-            else if (amqp_device_stop(registered_device->device_handle) != RESULT_OK)
+            else if (amqp_device_delayed_stop(registered_device->device_handle, DEFAULT_DEVICE_STOP_DELAY) != RESULT_OK)
             {
                 LogError("Failed to stop reset device '%s' (amqp_device_stop failed)", STRING_c_str(registered_device->device_id));
                 result = MU_FAILURE;
@@ -1741,6 +1741,9 @@ void IoTHubTransport_AMQP_Common_DoWork(TRANSPORT_LL_HANDLE handle)
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_020: [If the amqp_connection is OPENED, the transport shall iterate through each registered device and perform a device-specific do_work on each]
                 else if (transport_instance->amqp_connection_state == AMQP_CONNECTION_STATE_OPENED)
                 {
+                    size_t number_of_devices = 0;
+                    size_t number_of_faulty_devices = 0;
+
                     while (list_item != NULL)
                     {
                         AMQP_TRANSPORT_DEVICE_INSTANCE* registered_device;
@@ -1749,24 +1752,29 @@ void IoTHubTransport_AMQP_Common_DoWork(TRANSPORT_LL_HANDLE handle)
                         {
                             LogError("Transport had an unexpected failure during DoWork (failed to fetch a registered_devices list item value)");
                         }
-                        else if (registered_device->number_of_send_event_complete_failures >= MAX_NUMBER_OF_DEVICE_FAILURES)
+                        else if (registered_device->number_of_send_event_complete_failures >= DEVICE_FAILURE_COUNT_RECONNECTION_THRESHOLD)
                         {
-                            LogError("Device '%s' reported a critical failure (events completed sending with failures); connection retry will be triggered.", STRING_c_str(registered_device->device_id));
-
-                            update_state(transport_instance, AMQP_TRANSPORT_STATE_RECONNECTION_REQUIRED);
+                            number_of_faulty_devices++;
                         }
                         else if (IoTHubTransport_AMQP_Common_Device_DoWork(registered_device) != RESULT_OK)
                         {
-                            // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_021: [If DoWork fails for the registered device for more than MAX_NUMBER_OF_DEVICE_FAILURES, connection retry shall be triggered]
-                            if (registered_device->number_of_previous_failures >= MAX_NUMBER_OF_DEVICE_FAILURES)
+                            // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_021: [If DoWork fails for the registered device for more than DEVICE_FAILURE_COUNT_RECONNECTION_THRESHOLD, connection retry shall be triggered]
+                            if (registered_device->number_of_previous_failures >= DEVICE_FAILURE_COUNT_RECONNECTION_THRESHOLD)
                             {
-                                LogError("Device '%s' reported a critical failure; connection retry will be triggered.", STRING_c_str(registered_device->device_id));
-
-                                update_state(transport_instance, AMQP_TRANSPORT_STATE_RECONNECTION_REQUIRED);
+                                number_of_faulty_devices++;
                             }
                         }
 
                         list_item = singlylinkedlist_get_next_item(list_item);
+                        number_of_devices++;
+                    }
+
+                    if (number_of_faulty_devices > 0 &&
+                        ((float)number_of_faulty_devices/(float)number_of_devices) >= DEVICE_MULTIPLEXING_FAULTY_DEVICE_RATIO_RECONNECTION_THRESHOLD)
+                    {
+                        LogError("Reconnection required. %zd of %zd registered devices are failing.", number_of_faulty_devices, number_of_devices);
+
+                        update_state(transport_instance, AMQP_TRANSPORT_STATE_RECONNECTION_REQUIRED);
                     }
                 }
             }
@@ -2081,28 +2089,37 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_GetSendStatus(IOTHUB_DEVICE_HAN
         AMQP_TRANSPORT_DEVICE_INSTANCE* amqp_device_state = (AMQP_TRANSPORT_DEVICE_INSTANCE*)handle;
 
         DEVICE_SEND_STATUS device_send_status;
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_097: [IoTHubTransport_AMQP_Common_GetSendStatus shall invoke amqp_device_get_send_status()]
-        if (amqp_device_get_send_status(amqp_device_state->device_handle, &device_send_status) != RESULT_OK)
+
+        if (!DList_IsListEmpty(amqp_device_state->waiting_to_send))
         {
-            // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_098: [If amqp_device_get_send_status() fails, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_ERROR]
-            LogError("Failed retrieving the device send status (amqp_device_get_send_status failed)");
-            result = IOTHUB_CLIENT_ERROR;
+            *iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_BUSY;
+            result = IOTHUB_CLIENT_OK;
         }
         else
         {
-            // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_099: [If amqp_device_get_send_status() returns DEVICE_SEND_STATUS_BUSY, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_BUSY]
-            if (device_send_status == DEVICE_SEND_STATUS_BUSY)
+            // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_097: [IoTHubTransport_AMQP_Common_GetSendStatus shall invoke amqp_device_get_send_status()]
+            if (amqp_device_get_send_status(amqp_device_state->device_handle, &device_send_status) != RESULT_OK)
             {
-                *iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_BUSY;
+                // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_098: [If amqp_device_get_send_status() fails, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_ERROR]
+                LogError("Failed retrieving the device send status (amqp_device_get_send_status failed)");
+                result = IOTHUB_CLIENT_ERROR;
             }
-            // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_100: [If amqp_device_get_send_status() returns DEVICE_SEND_STATUS_IDLE, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_IDLE]
-            else // DEVICE_SEND_STATUS_IDLE
+            else
             {
-                *iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_IDLE;
-            }
+                // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_099: [If amqp_device_get_send_status() returns DEVICE_SEND_STATUS_BUSY, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_BUSY]
+                if (device_send_status == DEVICE_SEND_STATUS_BUSY)
+                {
+                    *iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_BUSY;
+                }
+                // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_100: [If amqp_device_get_send_status() returns DEVICE_SEND_STATUS_IDLE, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_IDLE]
+                else // DEVICE_SEND_STATUS_IDLE
+                {
+                    *iotHubClientStatus = IOTHUB_CLIENT_SEND_STATUS_IDLE;
+                }
 
-            // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_109: [If no failures occur, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_OK]
-            result = IOTHUB_CLIENT_OK;
+                // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_109: [If no failures occur, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_OK]
+                result = IOTHUB_CLIENT_OK;
+            }
         }
     }
 
@@ -2157,6 +2174,18 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SetOption(TRANSPORT_LL_HANDLE h
             if (retry_control_set_option(transport_instance->connection_retry_control, RETRY_CONTROL_OPTION_INITIAL_WAIT_TIME_IN_SECS, value) != 0)
             {
                 LogError("Failure setting retry interval option");
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else
+            {
+                result = IOTHUB_CLIENT_OK;
+            }
+        }
+        else if (strcmp(OPTION_RETRY_MAX_DELAY_SECS, option) == 0)
+        {
+            if (retry_control_set_option(transport_instance->connection_retry_control, RETRY_CONTROL_OPTION_MAX_DELAY_IN_SECS, value) != 0)
+            {
+                LogError("Failure setting retry max delay option");
                 result = IOTHUB_CLIENT_ERROR;
             }
             else

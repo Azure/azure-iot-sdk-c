@@ -28,6 +28,20 @@ cmake -Duse_prov_client:BOOL=ON -Duse_tpm_simulator:BOOL=ON ..
 ./azure-iot-sdk-c/provisioning_client/deps/utpm/tools/tpm_simulator/Simulator.exe
 ```
 
+### TPM Resource Manager
+
+When running on Linux with a hardware TPM (or Hyper-V with virtualized TPMv2) a TPM resource manager should be used to broker access to the hardware and allow multi-threaded operation.
+
+__Important__: Multi-threaded or multi-process TPMv2 usage is supported only when using a TPM resource manager.
+
+See the following resources as well as the tpm2-abrmd manpage for details on how to properly secure the resource manager and access to the hardware TPM: https://tpm2-software.github.io/, https://github.com/tpm2-software/
+
+To install the TPM2 software stack and service on Ubuntu systems:
+
+```
+sudo apt install tpm2-abrmd libtss2-tcti-tabrmd-dev
+```
+
 ### DICE Simulator
 
 For x509 the Provisioning Device Client enables a DICE hardware simulator that emulators the DICE hardware operations.

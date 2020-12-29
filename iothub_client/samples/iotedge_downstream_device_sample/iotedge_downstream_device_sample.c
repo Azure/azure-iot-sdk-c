@@ -225,7 +225,7 @@ int main(void)
     device_handle = IoTHubDeviceClient_CreateFromConnectionString(connectionString, protocol);
     if (device_handle == NULL)
     {
-        (void)printf("Failure creating device client handle.  Hint: Check you connection string.\r\n");
+        (void)printf("Failure creating device client handle. Hint: Check your connection string.\r\n");
     }
     else
     {
@@ -250,8 +250,8 @@ int main(void)
         //Setting the auto URL Encoder (recommended for MQTT). Please use this option unless
         //you are URL Encoding inputs yourself.
         //ONLY valid for use with MQTT
-        //bool urlEncodeOn = true;
-        //(void)IoTHubDeviceClient_SetOption(device_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
+        bool urlEncodeOn = true;
+        (void)IoTHubDeviceClient_SetOption(device_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
 #endif
 
         for (size_t index = 0; index < MESSAGE_COUNT; index++)

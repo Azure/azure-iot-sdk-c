@@ -50,7 +50,7 @@ def check_firmware_errors(line):
 
 # ------- interface class -------
 class mxchip_uart_interface(uart_interface):
-
+    # Note: commands on MXCHIP have line endings with \r AND \n
     # If there is a sudden disconnect, program should report line in input script reached, and close files.
     # method to write to serial line with connection monitoring
     def serial_write(self, ser, message, file=None):

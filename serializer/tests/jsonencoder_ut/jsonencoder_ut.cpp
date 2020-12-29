@@ -84,18 +84,6 @@ DEFINE_MICROMOCK_ENUM_TO_STRING(JSON_ENCODER_TOSTRING_RESULT, JSON_ENCODER_TOSTR
 #define snprintf _snprintf 
 #endif 
 
-#ifdef USE_CTEST 
-static int wchar_ptr_Compare(const wchar_t* left, const wchar_t* right)
-{
-    return (wcscmp(left, right) != 0);
-}
-
-void wchar_ptr_ToString(char* string, size_t bufferSize, const wchar_t* val)
-{
-    (void)snprintf(string, bufferSize, "%S", val);
-}
-#endif 
-
 //
 // We do this namespace redirection so that we don't have to repeat the utility string and buffer code in the mocks!
 //

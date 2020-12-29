@@ -218,7 +218,10 @@ void getFirmwareUpdateValues(Chiller* chiller, const unsigned char* payload)
 		{
 			size_t size = strlen(data) + 1;
 			chiller->new_firmware_version = malloc(size);
-			(void)memcpy(chiller->new_firmware_version, data, size);
+			if (chiller->new_firmware_version != NULL)
+			{
+				(void)memcpy(chiller->new_firmware_version, data, size);
+			}
 		}
 	}
 
@@ -231,7 +234,10 @@ void getFirmwareUpdateValues(Chiller* chiller, const unsigned char* payload)
 		{
 			size_t size = strlen(data) + 1;
 			chiller->new_firmware_URI = malloc(size);
-			(void)memcpy(chiller->new_firmware_URI, data, size);
+			if (chiller->new_firmware_URI != NULL)
+			{
+				(void)memcpy(chiller->new_firmware_URI, data, size);
+			}
 		}
 	}
 
@@ -365,7 +371,7 @@ int main(void)
 	device_handle = IoTHubDeviceClient_CreateFromConnectionString(connectionString, MQTT_Protocol);
 	if (device_handle == NULL)
 	{
-		(void)printf("Failure creating Iothub device.  Hint: Check you connection string.\r\n");
+		(void)printf("Failure creating IotHub device. Hint: Check your connection string.\r\n");
 	}
 	else
 	{
@@ -379,58 +385,65 @@ int main(void)
 		chiller.type = "Chiller";
 		size_t size = strlen(initialFirmwareVersion) + 1;
 		chiller.firmware = malloc(size);
-		memcpy(chiller.firmware, initialFirmwareVersion, size);
-		chiller.firmwareUpdateStatus = IDLE;
-		chiller.location = "Building 44";
-		chiller.latitude = 47.638928;
-		chiller.longitude = -122.13476;
-		chiller.telemetry.temperatureSchema.messageSchema.name = "chiller-temperature;v1";
-		chiller.telemetry.temperatureSchema.messageSchema.format = "JSON";
-		chiller.telemetry.temperatureSchema.messageSchema.fields = "{\"temperature\":\"Double\",\"temperature_unit\":\"Text\"}";
-		chiller.telemetry.humiditySchema.messageSchema.name = "chiller-humidity;v1";
-		chiller.telemetry.humiditySchema.messageSchema.format = "JSON";
-		chiller.telemetry.humiditySchema.messageSchema.fields = "{\"humidity\":\"Double\",\"humidity_unit\":\"Text\"}";
-		chiller.telemetry.pressureSchema.messageSchema.name = "chiller-pressure;v1";
-		chiller.telemetry.pressureSchema.messageSchema.format = "JSON";
-		chiller.telemetry.pressureSchema.messageSchema.fields = "{\"pressure\":\"Double\",\"pressure_unit\":\"Text\"}";
-
-		sendChillerReportedProperties(&chiller);
-
-		(void)IoTHubDeviceClient_SetDeviceMethodCallback(device_handle, device_method_callback, &chiller);
-
-		while (1)
+		if (chiller.firmware == NULL)
 		{
-			temperature = minTemperature + ((rand() % 10) + 5);
-			pressure = minPressure + ((rand() % 10) + 5);
-			humidity = minHumidity + ((rand() % 20) + 5);
+			(void)printf("Chiller Firmware failed to allocate memory.\r\n");
+		}
+		else
+		{
+			memcpy(chiller.firmware, initialFirmwareVersion, size);
+			chiller.firmwareUpdateStatus = IDLE;
+			chiller.location = "Building 44";
+			chiller.latitude = 47.638928;
+			chiller.longitude = -122.13476;
+			chiller.telemetry.temperatureSchema.messageSchema.name = "chiller-temperature;v1";
+			chiller.telemetry.temperatureSchema.messageSchema.format = "JSON";
+			chiller.telemetry.temperatureSchema.messageSchema.fields = "{\"temperature\":\"Double\",\"temperature_unit\":\"Text\"}";
+			chiller.telemetry.humiditySchema.messageSchema.name = "chiller-humidity;v1";
+			chiller.telemetry.humiditySchema.messageSchema.format = "JSON";
+			chiller.telemetry.humiditySchema.messageSchema.fields = "{\"humidity\":\"Double\",\"humidity_unit\":\"Text\"}";
+			chiller.telemetry.pressureSchema.messageSchema.name = "chiller-pressure;v1";
+			chiller.telemetry.pressureSchema.messageSchema.format = "JSON";
+			chiller.telemetry.pressureSchema.messageSchema.fields = "{\"pressure\":\"Double\",\"pressure_unit\":\"Text\"}";
 
-			if (chiller.firmwareUpdateStatus == IDLE)
+			sendChillerReportedProperties(&chiller);
+
+			(void)IoTHubDeviceClient_SetDeviceMethodCallback(device_handle, device_method_callback, &chiller);
+
+			while (1)
 			{
-				(void)printf("Sending sensor value Temperature = %f %s,\r\n", temperature, "F");
-				(void)sprintf_s(msgText, sizeof(msgText), "{\"temperature\":%.2f,\"temperature_unit\":\"F\"}", temperature);
-				send_message(device_handle, msgText, chiller.telemetry.temperatureSchema.messageSchema.name);
+				temperature = minTemperature + ((rand() % 10) + 5);
+				pressure = minPressure + ((rand() % 10) + 5);
+				humidity = minHumidity + ((rand() % 20) + 5);
+
+				if (chiller.firmwareUpdateStatus == IDLE)
+				{
+					(void)printf("Sending sensor value Temperature = %f %s,\r\n", temperature, "F");
+					(void)sprintf_s(msgText, sizeof(msgText), "{\"temperature\":%.2f,\"temperature_unit\":\"F\"}", temperature);
+					send_message(device_handle, msgText, chiller.telemetry.temperatureSchema.messageSchema.name);
 
 
-				(void)printf("Sending sensor value Pressure = %f %s,\r\n", pressure, "psig");
-				(void)sprintf_s(msgText, sizeof(msgText), "{\"pressure\":%.2f,\"pressure_unit\":\"psig\"}", pressure);
-				send_message(device_handle, msgText, chiller.telemetry.pressureSchema.messageSchema.name);
+					(void)printf("Sending sensor value Pressure = %f %s,\r\n", pressure, "psig");
+					(void)sprintf_s(msgText, sizeof(msgText), "{\"pressure\":%.2f,\"pressure_unit\":\"psig\"}", pressure);
+					send_message(device_handle, msgText, chiller.telemetry.pressureSchema.messageSchema.name);
 
 
-				(void)printf("Sending sensor value Humidity = %f %s,\r\n", humidity, "%");
-				(void)sprintf_s(msgText, sizeof(msgText), "{\"humidity\":%.2f,\"humidity_unit\":\"%%\"}", humidity);
-				send_message(device_handle, msgText, chiller.telemetry.humiditySchema.messageSchema.name);
+					(void)printf("Sending sensor value Humidity = %f %s,\r\n", humidity, "%");
+					(void)sprintf_s(msgText, sizeof(msgText), "{\"humidity\":%.2f,\"humidity_unit\":\"%%\"}", humidity);
+					send_message(device_handle, msgText, chiller.telemetry.humiditySchema.messageSchema.name);
+				}
+
+				ThreadAPI_Sleep(5000);
 			}
 
-			ThreadAPI_Sleep(5000);
+			(void)printf("\r\nShutting down\r\n");
+
+			// Clean up the iothub sdk handle and free resources
+			IoTHubDeviceClient_Destroy(device_handle);
+			free(chiller.firmware);
+			free(chiller.new_firmware_URI);
+			free(chiller.new_firmware_version);
 		}
-
-		(void)printf("\r\nShutting down\r\n");
-
-		// Clean up the iothub sdk handle and free resources
-		IoTHubDeviceClient_Destroy(device_handle);
-		free(chiller.firmware);
-		free(chiller.new_firmware_URI);
-		free(chiller.new_firmware_version);
 	}
 	// Shutdown the sdk subsystem
 	IoTHub_Deinit();

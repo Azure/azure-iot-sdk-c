@@ -10,20 +10,6 @@ available as four Objective-C [CocoaPods](https://cocoapods.org/):
 Most applications will only need to specify the [AzureIoTHubClient](https://cocoapods.org/?q=AzureIoTHubClient)
 in their Podfile, and it will bring in the others as dependencies.
 
-#### Samples
-Samples in Swift for iOS are [here](/iothub_client/samples/ios). 
-
-#### Using Azure IoT CocoaPods with Objective-C 
-
-Using Objective-C libraries within another Objective-C app or library requires setting up header search paths 
-just like typical C libraries require.
-
-The header search path values you'll need to set for the Azure IoT CocoaPods are:</br>
-`${PODS_ROOT}/AzureIoTHubClient/inc/`</br>
-`${PODS_ROOT}/AzureIoTUtility/inc/`</br>
-`${PODS_ROOT}/AzureIoTuMqtt/inc/`</br>
-`${PODS_ROOT}/AzureIoTuAmqp/inc/`
-
 #### Using Azure IoT CocoaPods with Swift
 
 Swift apps and libraries can use Azure IoT CocoaPods with standard Swift imports:</br>
