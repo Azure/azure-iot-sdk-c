@@ -449,9 +449,9 @@ static IOTHUB_CLIENT_RESULT my_IoTHubClientCore_LL_SetStreamRequestCallback(IOTH
 }
 
 static DEVICE_STREAM_C2D_RESPONSE* on_stream_request_received_result;
-static DEVICE_STREAM_C2D_REQUEST* on_stream_request_received_saved_request;
+static const DEVICE_STREAM_C2D_REQUEST* on_stream_request_received_saved_request;
 static void* on_stream_request_received_saved_context;
-static DEVICE_STREAM_C2D_RESPONSE* on_stream_request_received(DEVICE_STREAM_C2D_REQUEST* request, void* context)
+static DEVICE_STREAM_C2D_RESPONSE* on_stream_request_received(const DEVICE_STREAM_C2D_REQUEST* request, void* context)
 {
     on_stream_request_received_saved_request = request;
     on_stream_request_received_saved_context = context;
@@ -525,7 +525,6 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, void*);
     REGISTER_UMOCK_ALIAS_TYPE(THREADAPI_RESULT, int);
-    REGISTER_UMOCK_ALIAS_TYPE(DEVICE_STREAM_D2C_RESPONSE_CALLBACK, void*);
     REGISTER_UMOCK_ALIAS_TYPE(DEVICE_STREAM_C2D_REQUEST_CALLBACK, void*);
     
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClientCore_LL_SetStreamRequestCallback, IOTHUB_CLIENT_OK);

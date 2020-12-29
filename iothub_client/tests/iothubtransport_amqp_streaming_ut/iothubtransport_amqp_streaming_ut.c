@@ -289,7 +289,7 @@ extern "C"
 #endif
 
 
-void real_stream_c2d_request_destroy(DEVICE_STREAM_C2D_REQUEST* request)
+void real_IoTHubClient_StreamC2DRequestDestroy(DEVICE_STREAM_C2D_REQUEST* request)
 {
     // Not destroying the inner fiels because they are mocked.
     real_free(request);
@@ -596,7 +596,7 @@ static void set_expected_calls_for_on_amqp_message_received_callback()
 
     set_expected_calls_for_create_stream_c2d_request_from_parsed_info();
 
-    STRICT_EXPECTED_CALL(stream_c2d_request_destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubClient_StreamC2DRequestDestroy(IGNORED_PTR_ARG));
 
     set_expected_calls_for_destroy_parsed_info();
 }
@@ -750,7 +750,7 @@ static AMQP_STREAMING_CLIENT_HANDLE create_start_and_crank_amqp_streaming_client
 static DEVICE_STREAM_C2D_REQUEST saved_stream_c2d_requests[10];
 static size_t saved_stream_c2d_requests_count;
 static DEVICE_STREAM_C2D_RESPONSE* on_device_stream_c2d_request_received_result;
-static DEVICE_STREAM_C2D_RESPONSE* on_device_stream_c2d_request_received(DEVICE_STREAM_C2D_REQUEST* request, void* context)
+static DEVICE_STREAM_C2D_RESPONSE* on_device_stream_c2d_request_received(const DEVICE_STREAM_C2D_REQUEST* request, void* context)
 {
     (void)context;
 
@@ -807,7 +807,7 @@ static void register_global_mock_hooks()
     REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_find, real_singlylinkedlist_find);
     REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_foreach, real_singlylinkedlist_foreach);
     REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_remove_if, real_singlylinkedlist_remove_if);
-    REGISTER_GLOBAL_MOCK_HOOK(stream_c2d_request_destroy, real_stream_c2d_request_destroy);
+    REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_StreamC2DRequestDestroy, real_IoTHubClient_StreamC2DRequestDestroy);
 }
 
 static void register_global_mock_aliases()
@@ -820,8 +820,6 @@ static void register_global_mock_aliases()
     REGISTER_UMOCK_ALIAS_TYPE(AMQP_VALUE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(message_annotations, void*);
     REGISTER_UMOCK_ALIAS_TYPE(PROPERTIES_HANDLE, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(BINARY_DATA, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(receiver_settle_mode, int);
     REGISTER_UMOCK_ALIAS_TYPE(SINGLYLINKEDLIST_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(LIST_ITEM_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(LIST_MATCH_FUNCTION, void*);
@@ -842,8 +840,6 @@ static void register_global_mock_aliases()
     REGISTER_UMOCK_ALIAS_TYPE(LIST_ACTION_FUNCTION, void*);
     REGISTER_UMOCK_ALIAS_TYPE(LIST_CONDITION_FUNCTION, void*);
     REGISTER_UMOCK_ALIAS_TYPE(TICK_COUNTER_HANDLE, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(uuid, void*);
-    REGISTER_UMOCK_ALIAS_TYPE(UUID_T, void*);
     REGISTER_UMOCK_ALIAS_TYPE(AMQP_TYPE, int);
 }
 

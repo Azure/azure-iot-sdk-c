@@ -1303,7 +1303,6 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(DList_AppendTailList, real_DList_AppendTailList);
     REGISTER_GLOBAL_MOCK_HOOK(DList_RemoveEntryList, real_DList_RemoveEntryList);
     REGISTER_GLOBAL_MOCK_HOOK(DList_RemoveHeadList, real_DList_RemoveHeadList);
-    REGISTER_UMOCK_ALIAS_TYPE(DEVICE_STREAM_D2C_RESPONSE_CALLBACK, void*);
     REGISTER_UMOCK_ALIAS_TYPE(DEVICE_STREAM_C2D_REQUEST_CALLBACK, void*);
 
     bigBufferOverflow = (unsigned char*)my_gballoc_malloc(TEST_BIG_BUFFER_1_OVERFLOW_SIZE);

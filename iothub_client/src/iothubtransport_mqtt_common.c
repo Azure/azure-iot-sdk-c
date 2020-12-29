@@ -1998,7 +1998,7 @@ static DEVICE_STREAM_C2D_REQUEST* parse_stream_c2d_request(MQTT_MESSAGE_HANDLE m
             &result->authorization_token) != 0)
         {
             LogError("Failed parsing the MQTT message into a stream request");
-            stream_c2d_request_destroy(result);
+            IoTHubClient_StreamC2DRequestDestroy(result);
             result = NULL;
         }
     }
@@ -2173,6 +2173,47 @@ static void processIncomingMessageNotification(PMQTTTRANSPORT_HANDLE_DATA transp
 }
 
 //
+// processDeviceStreamRequest processes incoming PUBLISH messages sent from Hub to this device.
+// This function is invoked by umqtt.  It performs further parsing based on topic 
+// and translates this call up to "iothub_client" layer for ultimate delivery to application callback.
+// Finally it sends back a response to the Device Streaming request, if provided by the upper layer.
+// 
+static void processDeviceStreamRequest(PMQTTTRANSPORT_HANDLE_DATA transportData, MQTT_MESSAGE_HANDLE msgHandle, const char* topic_resp)
+{
+    (void)topic_resp;
+
+	if (transportData->stream_request_callback != NULL)
+	{
+		DEVICE_STREAM_C2D_REQUEST* request;
+
+		// Codes_SRS_IOTHUB_MQTT_TRANSPORT_09_069: [ If type is IOTHUB_TYPE_DEVICE_STREAM_REQUEST, the mqtt message shall be parsed to a DEVICE_STREAM_C2D_REQUEST ]
+		if ((request = parse_stream_c2d_request(msgHandle)) == NULL)
+		{
+			LogError("Failed parsing Stream request from MQTT message");
+		}
+		else
+		{
+			// Codes_SRS_IOTHUB_MQTT_TRANSPORT_09_070: [ The DEVICE_STREAM_C2D_REQUEST instance shall be passed to the upper layer through the callback set using IoTHubTransport_MQTT_Common_SetStreamRequestCallback]
+			DEVICE_STREAM_C2D_RESPONSE* response = transportData->stream_request_callback(request, transportData->stream_request_context);
+
+			if (response != NULL)
+			{
+				// Codes_SRS_IOTHUB_MQTT_TRANSPORT_09_071: [ If a response is provided by the callback invokation, it shall be published to "$iothub/streams/res/`response_code`/?$rid=`response->request_id`" ]
+				// Codes_SRS_IOTHUB_MQTT_TRANSPORT_09_072: [ If `response->accept` is TRUE, `response_code` shall be set as "200", otherwise it shall be "400" ]
+				if (publish_device_stream_response(transportData, response) != 0)
+				{
+					LogError("Failed sending response for Stream request");
+				}
+
+				IoTHubClient_StreamC2DResponseDestroy(response);
+			}
+
+			IoTHubClient_StreamC2DRequestDestroy(request);
+		}
+	}
+}
+
+//
 // mqttNotificationCallback processes incoming PUBLISH messages sent from Hub (or IoT Edge) to this device.
 // This function is invoked by umqtt.  It determines what topic the PUBLISH was directed at (e.g. Device Twin, Method, etc.),
 // performs further parsing based on topic, and translates this call up to "iothub_client" layer for ultimate delivery to application callback.
@@ -2201,6 +2242,14 @@ static void mqttNotificationCallback(MQTT_MESSAGE_HANDLE msgHandle, void* callba
             {
                 processDeviceMethodNotification(transportData, msgHandle, topic_resp);
             }
+			else if (type == IOTHUB_TYPE_DEVICE_STREAM_REQUEST)
+			{
+				processDeviceStreamRequest(transportData, msgHandle, topic_resp);
+			}
+			else if (type == IOTHUB_TYPE_DEVICE_STREAM_RESPONSE)
+			{
+				LogError("Unexpected topic type (%d)", type);
+			}
             else
             {
                 processIncomingMessageNotification(transportData, msgHandle, topic_resp, type);

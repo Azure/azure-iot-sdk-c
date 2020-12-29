@@ -425,7 +425,7 @@ static void test_Impl_DT_PropertyUpdate(const DIGITALTWIN_CLIENT_PROPERTY_UPDATE
         ASSERT_ARE_EQUAL(int, 0, strcmp(expectedPropertyName, (char*)dtClientPropertyUpdate->propertyName),
                          "Expected property name <%s> does not match actual name <%s>", expectedPropertyName, (char*)dtClientPropertyUpdate->propertyDesired);
         ASSERT_ARE_EQUAL(size_t, strlen(expectedDesiredPropertyData), dtClientPropertyUpdate->propertyDesiredLen,
-                         "Expected desired property length <%d> does not match actual <%d>", strlen(expectedDesiredPropertyData), dtClientPropertyUpdate->propertyDesiredLen);
+                         "Expected desired property length <%zu> does not match actual <%zd>", strlen(expectedDesiredPropertyData), dtClientPropertyUpdate->propertyDesiredLen);
         ASSERT_ARE_EQUAL(int, 0, strncmp(expectedDesiredPropertyData, (char*)dtClientPropertyUpdate->propertyDesired, dtClientPropertyUpdate->propertyDesiredLen),
                          "Expected desired property data <%s> does not match actual <%.*s>", expectedPropertyName, (int)dtClientPropertyUpdate->propertyDesiredLen, (char*)dtClientPropertyUpdate->propertyDesired);
         ASSERT_ARE_EQUAL(void_ptr, testDTPropertyCallbackContext, userInterfaceContext, 
@@ -438,9 +438,9 @@ static void test_Impl_DT_PropertyUpdate(const DIGITALTWIN_CLIENT_PROPERTY_UPDATE
             const char* expectedReportedPropertyData = dtTestExpectedPropertyStatus.expectedReportedData[currentProperty];
             ASSERT_IS_NOT_NULL(dtClientPropertyUpdate->propertyReported, "Reported property is NULL");
             ASSERT_ARE_EQUAL(int, strlen(expectedReportedPropertyData), dtClientPropertyUpdate->propertyReportedLen,
-                             "Expected propertyReportedLen <%d> does not match actual <%d>", strlen(expectedReportedPropertyData), dtClientPropertyUpdate->propertyReportedLen);
+                             "Expected propertyReportedLen <%zd> does not match actual <%zd>", strlen(expectedReportedPropertyData), dtClientPropertyUpdate->propertyReportedLen);
             ASSERT_ARE_EQUAL(int, 0, strcmp(expectedReportedPropertyData, (char*)dtClientPropertyUpdate->propertyReported),
-                             "Expected propertyReported <%s> does not match expected <%.*s>", expectedReportedPropertyData, dtClientPropertyUpdate->propertyReportedLen, dtClientPropertyUpdate->propertyReported);
+                             "Expected propertyReported <%s> does not match expected <%.*s>", expectedReportedPropertyData, (int)dtClientPropertyUpdate->propertyReportedLen, dtClientPropertyUpdate->propertyReported);
         }
         else if (dtTestPropertyUpdateTest == DT_TEST_PROPERTY_UPDATE_TEST_NO_REPORTED_EXPECTED)
         {
