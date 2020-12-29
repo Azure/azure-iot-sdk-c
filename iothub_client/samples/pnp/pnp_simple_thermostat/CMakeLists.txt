@@ -14,6 +14,11 @@ IF(WIN32)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 ENDIF(WIN32)
 
+if(${use_prov_client})
+    set(pnp_simple_thermostat_c_files ${pnp_simple_thermostat_c_files} ../common/pnp_dps_ll.c)
+    include_directories(../common)
+endif()
+
 #Conditionally use the SDK trusted certs in the samples
 if(${use_sample_trusted_cert})
     add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
@@ -30,3 +35,7 @@ linkMqttLibrary(pnp_simple_thermostat)
 add_definitions(-DUSE_MQTT)
 
 target_link_libraries(pnp_simple_thermostat iothub_client)
+
+if(${use_prov_client})
+    target_link_libraries(pnp_simple_thermostat prov_device_ll_client prov_mqtt_transport)
+endif()
