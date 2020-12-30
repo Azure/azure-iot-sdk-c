@@ -12,7 +12,7 @@ FROM debian:buster
 RUN apt update && apt -y upgrade
 
 # Install wget git cmake xz-utils
-RUN apt install --fix-missing -y wget git build-essential cmake xz-utils ca-certificates pkg-config uuid-dev
+RUN apt install --fix-missing -y wget git build-essential cmake xz-utils ca-certificates pkg-config uuid-dev sudo
 
 ENV WORK_ROOT=/toolchain
 WORKDIR ${WORK_ROOT}
@@ -24,7 +24,7 @@ RUN wget https://releases.linaro.org/components/toolchain/binaries/7.4-2019.02/a
 RUN tar -xvf ${LINARO_SOURCE}.tar.xz
 
 # Set up environment variables for builds
-
+ENV LD_LIBRARY_PATH=${WORK_ROOT}/${LINARO_SOURCE}/arm-linux-gnueabihf/libc
 ENV TOOLCHAIN_ROOT=${WORK_ROOT}/${LINARO_SOURCE}
 ENV TOOLCHAIN_SYSROOT=${TOOLCHAIN_ROOT}
 ENV TOOLCHAIN_EXES=${TOOLCHAIN_SYSROOT}/bin
@@ -34,6 +34,7 @@ ENV TOOLCHAIN_PREFIX=${TOOLCHAIN_SYSROOT}/usr
 ENV AR=${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-ar
 ENV AS=${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-as
 ENV CC=${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-gcc
+ENV RANLIB=${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-ranlib
 ENV LD=${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-ld
 ENV NM=${TOOLCHAIN_EXES}/${TOOLCHAIN_NAME}-nm
 
@@ -41,10 +42,13 @@ ENV LDFLAGS="-L${TOOLCHAIN_SYSROOT}/usr/lib"
 ENV LIBS="-lssl -lcrypto -ldl -lpthread"
 ENV STAGING_DIR=${TOOLCHAIN_SYSROOT}
 
+ENV PATH=${WORK_ROOT}/${LINARO_SOURCE}/bin:${WORK_ROOT}/${LINARO_SOURCE}/usr/bin:${WORK_ROOT}/${LINARO_SOURCE}/arm-linux-gnueabihf/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 ########## OPENSSL INSTALL ##########
+# probably won't work, installing libssl-dev directly on the docker container. probably need to install libssl-dev for Debian arm64
+#RUN apt-get install libssl-dev
 # Download OpenSSL source and expand it
-ENV OPENSSL_SOURCE=openssl-1.1.1h
+ENV OPENSSL_SOURCE=openssl-1.1.1f
 RUN wget https://www.openssl.org/source/${OPENSSL_SOURCE}.tar.gz
 RUN tar -xvf ${OPENSSL_SOURCE}.tar.gz
 
@@ -52,12 +56,15 @@ RUN tar -xvf ${OPENSSL_SOURCE}.tar.gz
 
 WORKDIR /${WORK_ROOT}/${OPENSSL_SOURCE}
 RUN ./Configure linux-generic32 shared --prefix=${TOOLCHAIN_PREFIX} --openssldir=${TOOLCHAIN_PREFIX}
+RUN make depend
 RUN make
 RUN make install
+WORKDIR ${WORK_ROOT}
+ENV OPENSSL_ROOT_DIR=${TOOLCHAIN_PREFIX}
+#${WORK_ROOT}/${OPENSSL_SOURCE}
 WORKDIR /${WORK_ROOT}
-ENV OPENSSL_ROOT_DIR=/toolchain/gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabihf/usr/lib
+#ENV OPENSSL_ROOT_DIR=/toolchain/gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabihf/usr/lib
 ENV OPENSSL_INCLUDE_DIR=/toolchain/gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabihf/usr/include
-
 
 ########## CURL INSTALL ##########
 # Download cURL source and expand it
@@ -68,12 +75,15 @@ RUN tar -xvf ${CURL_SOURCE}.tar.gz
 # Build cURL
 # we need to set the path for openssl with --with-ssl=...
 WORKDIR /${WORK_ROOT}/${CURL_SOURCE}
-RUN ./configure --with-sysroot=${TOOLCHAIN_SYSROOT} --prefix=${TOOLCHAIN_PREFIX} --target=${TOOLCHAIN_NAME} --with-ssl=${TOOLCHAIN_PREFIX} --with-zlib --host=${TOOLCHAIN_NAME} --build=x86_64-linux-gnu
+RUN sudo ./configure --with-sysroot=${TOOLCHAIN_SYSROOT} --prefix=${TOOLCHAIN_PREFIX} --target=${TOOLCHAIN_NAME} --with-ssl=${TOOLCHAIN_PREFIX} --with-zlib --host=${TOOLCHAIN_NAME} --build=x86_64-linux-gnu
 
 RUN make
 RUN make install
-WORKDIR /${WORK_ROOT}
+ENV CURL_LIBRARY=${TOOLCHAIN_SYSROOT}/usr/lib
+ENV CURL_LIBRARIES=${TOOLCHAIN_SYSROOT}/usr/lib
+# RUN rm ${CURL_LIBRARY}/libcurl.so
 
+WORKDIR /${WORK_ROOT}
 
 ########## UTIL LINUX INSTALL ##########
 # Download the Linux utilities for libuuid and expand it
