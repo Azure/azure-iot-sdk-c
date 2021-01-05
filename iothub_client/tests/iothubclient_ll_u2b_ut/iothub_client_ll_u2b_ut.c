@@ -29,6 +29,7 @@ static void* my_gballoc_calloc(size_t nmemb, size_t size)
 #include "azure_macro_utils/macro_utils.h"
 #include "umock_c/umock_c.h"
 #include "umock_c/umocktypes_charptr.h"
+#include "umock_c/umocktypes_stdint.h"
 #include "umock_c/umock_c_negative_tests.h"
 #include "umock_c/umocktypes.h"
 #include "umock_c/umocktypes_c.h"
@@ -270,7 +271,7 @@ static int my_mallocAndStrcpy_s(char** destination, const char* source)
     return 0;
 }
 
-static char* my_IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const char* scope, size_t expiry_time_relative_seconds, const char* key_name)
+static char* my_IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const char* scope, uint64_t expiry_time_relative_seconds, const char* key_name)
 {
     (void)handle;
     (void)scope;
@@ -474,6 +475,9 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     ASSERT_IS_NOT_NULL(g_testByTest);
 
     umock_c_init(on_umock_c_error);
+
+    int result = umocktypes_stdint_register_types();
+    ASSERT_ARE_EQUAL(int, 0, result, "umocktypes_stdint_register_types");
 
     umocktypes_charptr_register_types();
 
