@@ -52,6 +52,7 @@ void real_free(void* ptr)
 #include "azure_uamqp_c/messaging.h"
 #include "internal/iothub_client_private.h"
 #include "internal/iothubtransport_amqp_messenger.h"
+#include "internal/iothub_internal_consts.h"
 
 #undef ENABLE_MOCKS
 
@@ -128,7 +129,6 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 
 #define TWIN_CORRELATION_ID_PROPERTY_NAME                    "com.microsoft:channel-correlation-id"
 #define TWIN_API_VERSION_PROPERTY_NAME                       "com.microsoft:api-version"
-#define TWIN_API_VERSION_NUMBER                              "2016-11-14"
 
 #define TEST_ATTACH_PROPERTIES                               (MAP_HANDLE)0x4444
 #define UNIQUE_ID_BUFFER_SIZE                                37
@@ -425,7 +425,7 @@ static void set_create_link_attach_properties_expected_calls(TWIN_MESSENGER_CONF
     set_generate_twin_correlation_id_expected_calls();
     STRICT_EXPECTED_CALL(Map_Add(TEST_ATTACH_PROPERTIES, CLIENT_VERSION_PROPERTY_NAME, TEST_CLIENT_VERSION_STR));
     STRICT_EXPECTED_CALL(Map_Add(TEST_ATTACH_PROPERTIES, TWIN_CORRELATION_ID_PROPERTY_NAME, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(Map_Add(TEST_ATTACH_PROPERTIES, TWIN_API_VERSION_PROPERTY_NAME, TWIN_API_VERSION_NUMBER));
+    STRICT_EXPECTED_CALL(Map_Add(TEST_ATTACH_PROPERTIES, TWIN_API_VERSION_PROPERTY_NAME, IOTHUB_API_VERSION));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 }
 
@@ -1048,7 +1048,7 @@ TEST_FUNCTION(twin_msgr_create_NULL_device_id)
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_013: [`amqp_msgr_config->device_id` shall be set with `twin_msgr->device_id`]
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_014: [`amqp_msgr_config->iothub_host_fqdn` shall be set with `twin_msgr->iothub_host_fqdn`]
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_015: [`amqp_msgr_config` shall have "twin/" as send link target suffix and receive link source suffix]
-// Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_016: [`amqp_msgr_config` shall have send and receive link attach properties set as "com.microsoft:client-version" = `twin_msgr->client_version`, "com.microsoft:channel-correlation-id" = `twin:<UUID>`, "com.microsoft:api-version" = "2016-11-14"]
+// Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_016: [`amqp_msgr_config` shall have send and receive link attach properties set as "com.microsoft:client-version" = `twin_msgr->client_version`, "com.microsoft:channel-correlation-id" = `twin:<UUID>`, "com.microsoft:api-version" = "Current API version"]
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_017: [`amqp_msgr_config` shall be set with `on_amqp_messenger_state_changed_callback` and `on_amqp_messenger_subscription_changed_callback` callbacks]
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_019: [`twin_msgr->amqp_msgr` shall subscribe for AMQP messages by calling amqp_messenger_subscribe_for_messages() passing `on_amqp_message_received`]
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_021: [If no failures occurr, twin_messenger_create() shall return a handle to `twin_msgr`]

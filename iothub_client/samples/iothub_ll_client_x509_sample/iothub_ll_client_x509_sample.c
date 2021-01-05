@@ -27,6 +27,9 @@ and removing calls to _DoWork will yield the same results. */
 //#define SAMPLE_AMQP_OVER_WEBSOCKETS
 //#define SAMPLE_HTTP
 
+// If using an OpenSSL ENGINE uncomment and modify the line below
+//#define SAMPLE_OPENSSL_ENGINE "pkcs11"
+
 #ifdef SAMPLE_MQTT
     #include "iothubtransportmqtt.h"
 #endif // SAMPLE_MQTT
@@ -74,6 +77,11 @@ static const char* x509privatekey =
 "SaqVID4EAUgUqFDw0UO6SKLT+HyFjOr5qdHkfAmRzwE/0RBN69g2qLDN3Km1Px/k""\n"
 "xyJyxc700uV1eKiCdRLRuCbUeecOSZreh8YRIQQXoG8uotO5IttdVRc=""\n"
 "-----END RSA PRIVATE KEY-----";
+
+#ifdef SAMPLE_OPENSSL_ENGINE
+static const char* opensslEngine = SAMPLE_OPENSSL_ENGINE;
+static const OPTION_OPENSSL_KEY_TYPE x509_key_from_engine = KEY_TYPE_ENGINE;
+#endif
 
 #define MESSAGE_COUNT        5
 static bool g_continueRunning = true;
@@ -127,7 +135,7 @@ int main(void)
     device_ll_handle = IoTHubDeviceClient_LL_CreateFromConnectionString(connectionString, protocol);
     if (device_ll_handle == NULL)
     {
-        (void)printf("Failure createing Iothub device.  Hint: Check you connection string.\r\n");
+        (void)printf("Failure creating IotHub device. Hint: Check your connection string.\r\n");
     }
     else
     {
@@ -136,14 +144,25 @@ int main(void)
         //bool traceOn = true;
         //IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_LOG_TRACE, &traceOn);
 
-        // Setting the Trusted Certificate.  This is only necessary on system with without
+        // Setting the Trusted Certificate. This is only necessary on systems without
         // built in certificate stores.
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
         IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
+#if defined SAMPLE_MQTT || defined SAMPLE_MQTT_OVER_WEBSOCKETS
+        //Setting the auto URL Encoder (recommended for MQTT). Please use this option unless
+        //you are URL Encoding inputs yourself.
+        //ONLY valid for use with MQTT
+        bool urlEncodeOn = true;
+        (void)IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
+#endif
         // Set the X509 certificates in the SDK
         if (
+#ifdef SAMPLE_OPENSSL_ENGINE
+            (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_OPENSSL_ENGINE, opensslEngine) != IOTHUB_CLIENT_OK) ||
+            (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_OPENSSL_PRIVATE_KEY_TYPE, &x509_key_from_engine) != IOTHUB_CLIENT_OK) ||
+#endif
             (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_X509_CERT, x509certificate) != IOTHUB_CLIENT_OK) ||
             (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_X509_PRIVATE_KEY, x509privatekey) != IOTHUB_CLIENT_OK)
             )

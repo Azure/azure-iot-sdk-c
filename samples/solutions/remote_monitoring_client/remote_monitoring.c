@@ -371,7 +371,7 @@ int main(void)
 	device_handle = IoTHubDeviceClient_CreateFromConnectionString(connectionString, MQTT_Protocol);
 	if (device_handle == NULL)
 	{
-		(void)printf("Failure creating Iothub device.  Hint: Check you connection string.\r\n");
+		(void)printf("Failure creating IotHub device. Hint: Check your connection string.\r\n");
 	}
 	else
 	{

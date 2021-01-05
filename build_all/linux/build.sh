@@ -167,10 +167,10 @@ then
   then
     #use doctored openssl
     export LD_LIBRARY_PATH=/usr/local/ssl/lib
-    ctest -j $TEST_CORES --output-on-failure
+    ctest -j $TEST_CORES --output-on-failure --schedule-random
     export LD_LIBRARY_PATH=
   else
-    ctest -j $TEST_CORES -C "Debug" --output-on-failure
+    ctest -j $TEST_CORES -C "Debug" --output-on-failure --schedule-random
   fi
 fi
 
