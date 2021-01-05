@@ -355,7 +355,7 @@ extern "C"
 }
 #endif
 
-static char* my_IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const char* scope, size_t expiry_time_relative_seconds, const char* keyname)
+static char* my_IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const char* scope, uint64_t expiry_time_relative_seconds, const char* keyname)
 {
     (void)handle;
     (void)scope;
@@ -566,7 +566,7 @@ static void my_STRING_TOKENIZER_destroy(STRING_TOKENIZER_HANDLE handle)
     my_gballoc_free(handle);
 }
 
-static STRING_HANDLE my_SASToken_Create(STRING_HANDLE key, STRING_HANDLE scope, STRING_HANDLE keyName, size_t expiry)
+static STRING_HANDLE my_SASToken_Create(STRING_HANDLE key, STRING_HANDLE scope, STRING_HANDLE keyName, uint64_t expiry)
 {
     (void)key;
     (void)scope;

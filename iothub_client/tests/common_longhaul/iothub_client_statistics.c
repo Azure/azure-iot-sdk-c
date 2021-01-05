@@ -798,7 +798,7 @@ int iothub_client_statistics_add_telemetry_info(IOTHUB_CLIENT_STATISTICS_HANDLE 
             }
             else if ((queued_info = (TELEMETRY_INFO*)malloc(sizeof(TELEMETRY_INFO))) == NULL)
             {
-                LogError("Failed clonning the TELEMETRY_INFO");
+                LogError("Failed cloning the TELEMETRY_INFO");
                 result = MU_FAILURE;
             }
             else if (singlylinkedlist_add(stats->telemetry_events, queued_info) == NULL)
@@ -929,7 +929,7 @@ int iothub_client_statistics_add_c2d_info(IOTHUB_CLIENT_STATISTICS_HANDLE handle
             }
             else if ((queued_info = (C2D_MESSAGE_INFO*)malloc(sizeof(C2D_MESSAGE_INFO))) == NULL)
             {
-                LogError("Failed clonning the C2D_MESSAGE_INFO");
+                LogError("Failed cloning the C2D_MESSAGE_INFO");
                 result = MU_FAILURE;
             }
             else if (singlylinkedlist_add(stats->c2d_messages, queued_info) == NULL)
@@ -1065,7 +1065,7 @@ int iothub_client_statistics_add_device_method_info(IOTHUB_CLIENT_STATISTICS_HAN
         {
             if ((queued_info = (DEVICE_METHOD_INFO*)malloc(sizeof(DEVICE_METHOD_INFO))) == NULL)
             {
-                LogError("Failed clonning the DEVICE_METHOD_INFO");
+                LogError("Failed cloning the DEVICE_METHOD_INFO");
             }
             else if (singlylinkedlist_add(stats->device_methods, queued_info) == NULL)
             {
@@ -1208,7 +1208,7 @@ int iothub_client_statistics_add_device_twin_desired_info(IOTHUB_CLIENT_STATISTI
             }
             else if ((queued_info = (DEVICE_TWIN_DESIRED_INFO*)malloc(sizeof(DEVICE_TWIN_DESIRED_INFO))) == NULL)
             {
-                LogError("Failed clonning the DEVICE_TWIN_DESIRED_INFO");
+                LogError("Failed cloning the DEVICE_TWIN_DESIRED_INFO");
                 result = MU_FAILURE;
             }
             else if (singlylinkedlist_add(stats->twin_desired_properties, queued_info) == NULL)
@@ -1330,7 +1330,7 @@ int iothub_client_statistics_add_device_twin_reported_info(IOTHUB_CLIENT_STATIST
             }
             else if ((queued_info = (DEVICE_TWIN_REPORTED_INFO*)malloc(sizeof(DEVICE_TWIN_REPORTED_INFO))) == NULL)
             {
-                LogError("Failed clonning the DEVICE_TWIN_REPORTED_INFO");
+                LogError("Failed cloning the DEVICE_TWIN_REPORTED_INFO");
                 result = MU_FAILURE;
             }
             else if (singlylinkedlist_add(stats->twin_reported_properties, queued_info) == NULL)

@@ -436,7 +436,7 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                                         }
                                         else
                                         {
-                                            size_t expiry = (size_t)(difftime(curr_time, 0) + 3600);
+                                            uint64_t expiry = (uint64_t)(difftime(curr_time, 0) + 3600);
                                             char* sas_token = IoTHubClient_Auth_Get_SasToken(upload_data->authorization_module, STRING_c_str(uri_resource), expiry, EMPTY_STRING);
                                             if (sas_token == NULL)
                                             {
