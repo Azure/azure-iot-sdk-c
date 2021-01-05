@@ -59,7 +59,7 @@ msbuild /m azure_iot_sdks.sln
 if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 if %build-platform% neq arm (
-    ctest -C "debug" -V
+    ctest -C "debug" -V --schedule-random
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 )
 

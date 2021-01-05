@@ -1,7 +1,7 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#this is CMakeLists.txt for samples. There's noithig here, except redirections to
+#this is CMakeLists.txt for samples. There's nothing here, except redirections to
 #individual protocol samples
 
 usePermissiveRulesForSdkSamplesAndTests()
@@ -50,4 +50,9 @@ endif()
 
 if(${use_amqp} AND ${use_mqtt})
     add_sample_directory(iothub_client_device_twin_and_methods_sample)
+endif()
+
+if(${use_mqtt})
+   # PnP only supports MQTT so only build the sample if MQTT is enabled.
+   add_subdirectory(pnp)
 endif()

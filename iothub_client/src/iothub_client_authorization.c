@@ -30,14 +30,14 @@ typedef struct IOTHUB_AUTHORIZATION_DATA_TAG
     char* device_key;
     char* device_id;
     char* module_id;
-    size_t token_expiry_time_sec;
+    uint64_t token_expiry_time_sec;
     IOTHUB_CREDENTIAL_TYPE cred_type;
 #ifdef USE_PROV_MODULE
     IOTHUB_SECURITY_HANDLE device_auth_handle;
 #endif
 } IOTHUB_AUTHORIZATION_DATA;
 
-static int get_seconds_since_epoch(size_t* seconds)
+static int get_seconds_since_epoch(uint64_t* seconds)
 {
     int result;
     time_t current_time;
@@ -48,7 +48,7 @@ static int get_seconds_since_epoch(size_t* seconds)
     }
     else
     {
-        *seconds = (size_t)get_difftime(current_time, (time_t)0);
+        *seconds = (uint64_t)get_difftime(current_time, (time_t)0);
         result = 0;
     }
     return result;
@@ -383,7 +383,7 @@ IOTHUB_CREDENTIAL_TYPE IoTHubClient_Auth_Get_Credential_Type(IOTHUB_AUTHORIZATIO
     return result;
 }
 
-char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const char* scope, size_t expiry_time_relative_seconds, const char* key_name)
+char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const char* scope, uint64_t expiry_time_relative_seconds, const char* key_name)
 {
     char* result;
     (void)expiry_time_relative_seconds;
@@ -399,7 +399,7 @@ char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const c
         {
 #ifdef USE_PROV_MODULE
             DEVICE_AUTH_CREDENTIAL_INFO dev_auth_cred;
-            size_t sec_since_epoch;
+            uint64_t sec_since_epoch;
 
             if (get_seconds_since_epoch(&sec_since_epoch) != 0)
             {
@@ -409,7 +409,7 @@ char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const c
             else
             {
                 memset(&dev_auth_cred, 0, sizeof(DEVICE_AUTH_CREDENTIAL_INFO));
-                size_t expiry_time = sec_since_epoch + handle->token_expiry_time_sec;
+                uint64_t expiry_time = sec_since_epoch + handle->token_expiry_time_sec;
                 dev_auth_cred.sas_info.expiry_seconds = expiry_time;
                 dev_auth_cred.sas_info.token_scope = scope;
                 dev_auth_cred.sas_info.key_name = key_name;
@@ -464,7 +464,7 @@ char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const c
             else
             {
                 STRING_HANDLE sas_token;
-                size_t sec_since_epoch;
+                uint64_t sec_since_epoch;
 
                 /* Codes_SRS_IoTHub_Authorization_07_010: [ IoTHubClient_Auth_Get_SasToken` shall construct the expiration time using the handle->token_expiry_time_sec added to epoch time. ] */
                 if (get_seconds_since_epoch(&sec_since_epoch) != 0)
@@ -476,7 +476,7 @@ char* IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const c
                 else
                 {
                     /* Codes_SRS_IoTHub_Authorization_07_011: [ IoTHubClient_Auth_Get_ConnString shall call SASToken_CreateString to construct the sas token. ] */
-                    size_t expiry_time = sec_since_epoch + handle->token_expiry_time_sec;
+                    uint64_t expiry_time = sec_since_epoch + handle->token_expiry_time_sec;
                     if ( (sas_token = SASToken_CreateString(handle->device_key, scope, key_name, expiry_time)) == NULL)
                     {
                         /* Codes_SRS_IoTHub_Authorization_07_020: [ If any error is encountered IoTHubClient_Auth_Get_ConnString shall return NULL. ] */
@@ -690,7 +690,7 @@ char* IoTHubClient_Auth_Get_TrustBundle(IOTHUB_AUTHORIZATION_HANDLE handle, cons
 }
 #endif
 
-int IoTHubClient_Auth_Set_SasToken_Expiry(IOTHUB_AUTHORIZATION_HANDLE handle, size_t expiry_time_seconds)
+int IoTHubClient_Auth_Set_SasToken_Expiry(IOTHUB_AUTHORIZATION_HANDLE handle, uint64_t expiry_time_seconds)
 {
     int result;
     if (handle == NULL)
@@ -712,9 +712,9 @@ int IoTHubClient_Auth_Set_SasToken_Expiry(IOTHUB_AUTHORIZATION_HANDLE handle, si
     return result;
 }
 
-size_t IoTHubClient_Auth_Get_SasToken_Expiry(IOTHUB_AUTHORIZATION_HANDLE handle)
+uint64_t IoTHubClient_Auth_Get_SasToken_Expiry(IOTHUB_AUTHORIZATION_HANDLE handle)
 {
-    size_t result;
+    uint64_t result;
     if (handle == NULL)
     {
         LogError("Invalid handle value handle: NULL");

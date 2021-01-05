@@ -53,6 +53,7 @@ int main(void)
         (void)printf("Failed to initialize the platform.\r\n");
         return 1;
     }
+    // Note: You must use MQTT_Protocol as the argument below.  Using other protocols will result in undefined behavior.
     else if ((iotHubModuleClientHandle = IoTHubModuleClient_LL_CreateFromEnvironment(MQTT_Protocol)) == NULL)
     {
         (void)printf("ERROR: iotHubModuleClientHandle is NULL!\r\n");
@@ -118,4 +119,3 @@ int main(void)
     IoTHub_Deinit();
     return 0;
 }
-

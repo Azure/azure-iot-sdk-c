@@ -4,6 +4,7 @@
 #define mallocAndStrcpy_s real_mallocAndStrcpy_s
 #define unsignedIntToString real_unsignedIntToString
 #define size_tToString real_size_tToString
+#define uint64_tToString real_uint64_tToString
 
 #define GBALLOC_H
 

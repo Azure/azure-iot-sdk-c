@@ -47,7 +47,11 @@ mkdir RPiTools
 cd RPiTools
 git clone https://github.com/raspberrypi/tools.git
 ```
-Unfortunately, this does not give us all the files that are required to build the project. At this point you will need to copy some files from a running Raspberry Pi to your host machine. Make sure you can access your Raspberry Pi via SSH (you can enable this using [raspi-config](https://www.raspberrypi.org/documentation/configuration/raspi-config.md) and select "9. Advanced Options". Further instructions are beyond the scope of this document). On your host's terminal enter
+Unfortunately, this does not give us all the files that are required to build the project. At this point you will need to copy some files from a running Raspberry Pi to your host machine. Make sure you can access your Raspberry Pi via SSH (you can enable this using [raspi-config](https://www.raspberrypi.org/documentation/configuration/raspi-config.md) and select "9. Advanced Options". Further instructions are beyond the scope of this document). 
+
+Make sure [these libraries](https://github.com/Azure/azure-iot-sdk-c/blob/LTS_07_2020_Ref01/build_all/linux/setup.sh#L12) are installed in the Raspberry Pi before proceeding.
+
+On your host's terminal enter:
 ```
 cd ~/RPiTools/tools/arm-bcm2708/\
 gcc-linaro-arm-linux-gnueabihf-raspbian-x64/arm-linux-gnueabihf
@@ -108,11 +112,19 @@ If you need to provide additional build flags for your cross compile to function
 See this page for a summary of available gcc flags: https://gcc.gnu.org/onlinedocs/gcc/Option-Summary.html.
 
 ### Notes
-These instructions have been tested on both the Raspberry Pi 2 and 3.
+These instructions have been tested on both the Raspberry Pi 2, 3 and 4.
 
 ### Known Issues and Circumventions
 
 If you encounter the error _error adding symbols: DSO missing from command line_ try adding a reference to libdl with  _-cl -ldl_ added to your build script command line.
+
+For Raspberry Pi 4 the following workaround is neccessary to properly link the samples with pthread.
+Run the following commands and [recompile the Azure IoT C SDK](#Building-the-SDK).
+
+```bash
+cd $RPI_ROOT/usr/lib/arm-linux-gnueabihf; 
+ln -s ../../../lib/arm-linux-gnueabihf/libpthread.so.0 libpthread.so
+```
 
 ## Summary
 

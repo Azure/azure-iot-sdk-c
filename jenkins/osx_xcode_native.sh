@@ -1,9 +1,11 @@
 #!/bin/bash
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
-#
 
-set -e
+set -x # Set trace on
+set -o errexit # Exit if command failed
+set -o nounset # Exit if variable not set
+set -o pipefail # Exit if pipe failed
 
 sw_vers
 xcodebuild -version
@@ -22,7 +24,11 @@ pushd $build_folder
 
 curl_path=/usr/local/Cellar/curl/7.61.0/lib
 if [ -d $curl_path ]; then
-    export DYLD_LIBRARY_PATH="$curl_path:$DYLD_LIBRARY_PATH"
+    if [ -v DYLD_LIBRARY_PATH ]; then
+      export DYLD_LIBRARY_PATH="$curl_path:$DYLD_LIBRARY_PATH"
+    else
+      export DYLD_LIBRARY_PATH="$curl_path"
+    fi
 else
     echo "ERROR: Could not find curl in path $curl_path."
     echo "Make sure curl is installed through brew in such path, or update this script with the correct one."
@@ -31,5 +37,5 @@ fi
 
 cmake .. -Drun_e2e_tests=ON -G Xcode
 cmake --build . -- --jobs=$CORES
-ctest -j $TEST_JOB_COUNT -C "debug" -VV --output-on-failure
+ctest -j $TEST_JOB_COUNT -C "debug" -VV --output-on-failure --schedule-random
 popd

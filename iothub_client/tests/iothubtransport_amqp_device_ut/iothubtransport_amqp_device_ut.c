@@ -101,6 +101,7 @@ static const char* DEVICE_OPTION_SAVED_MESSENGER_OPTIONS = "saved_device_messeng
 #define TEST_ON_DEVICE_EVENT_SEND_COMPLETE_CONTEXT        (void*)0x7724
 #define TEST_IOTHUB_MESSAGE_LIST                          (IOTHUB_MESSAGE_LIST*)0x7725
 #define TEST_AUTHORIZATION_HANDLE                         (IOTHUB_AUTHORIZATION_HANDLE)0x7726
+#define TEST_TICK_COUNTER_HANDLE                          (TICK_COUNTER_HANDLE)0x7727
 
 static time_t TEST_current_time;
 
@@ -405,6 +406,7 @@ static void register_umock_alias_types()
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_AUTHORIZATION_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(DEVICE_TWIN_UPDATE_RECEIVED_CALLBACK, void*);
     REGISTER_UMOCK_ALIAS_TYPE(pfTransport_GetOption_Product_Info_Callback, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(TICK_COUNTER_HANDLE, void*);
 }
 
 static void register_global_mock_hooks()
@@ -490,6 +492,9 @@ static void register_global_mock_returns()
 
     REGISTER_GLOBAL_MOCK_RETURN(twin_messenger_get_twin_async, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(twin_messenger_get_twin_async, 1);
+
+    REGISTER_GLOBAL_MOCK_RETURN(tickcounter_create, TEST_TICK_COUNTER_HANDLE);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(tickcounter_create, NULL);
 }
 
 // ---------- Expected Call Helpers ---------- //
@@ -538,6 +543,8 @@ static void set_expected_calls_for_device_create(AMQP_DEVICE_CONFIG *config, tim
     STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
 
     set_expected_calls_for_clone_device_config(config);
+
+    STRICT_EXPECTED_CALL(tickcounter_create());
 
     if (config->authentication_mode == DEVICE_AUTH_MODE_CBS)
     {
@@ -647,6 +654,8 @@ static void set_expected_calls_for_device_destroy(AMQP_DEVICE_HANDLE handle, AMQ
     {
         STRICT_EXPECTED_CALL(authentication_destroy(TEST_AUTHENTICATION_HANDLE));
     }
+
+    STRICT_EXPECTED_CALL(tickcounter_destroy(TEST_TICK_COUNTER_HANDLE));
 
     // destroy config
     STRICT_EXPECTED_CALL(free(config->iothub_host_fqdn));
@@ -3031,6 +3040,7 @@ TEST_FUNCTION(device_get_twin_async_callback_succeess)
     STRICT_EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(twin_messenger_get_twin_async(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     (void)amqp_device_get_twin_async(handle, on_device_get_twin_completed_callback, (void*)0x4567);
+
     STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
 
     ASSERT_IS_NOT_NULL(get_twin_callback);

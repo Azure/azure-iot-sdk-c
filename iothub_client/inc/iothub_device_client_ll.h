@@ -5,7 +5,7 @@
 *    @brief     APIs that allow a user (usually a device) to communicate
 *             with an Azure IoTHub.
 *
-*    @details IoTHubDeviceClient_LL is a module that allows a user (usually a
+*    @details IoTHubDeviceClient_LL allows a user (usually a
 *             device) to communicate with an Azure IoTHub. It can send events
 *             and receive messages. At any given moment in time there can only
 *             be at most 1 message callback function.
@@ -15,7 +15,7 @@
 *             contain @c _LL_ in their name, but retain the same functionality like the
 *             @c IoTHubDeviceClient_... APIs, with one difference. If the @c _LL_ APIs are
 *             used then the user is responsible for scheduling when the actual work done
-*             by the IoTHubClient happens (when the data is sent/received on/from the wire).
+*             by the IoTHubClient happens (when the data is sent/received on/from the network).
 *             This is useful for constrained devices where spinning a separate thread is
 *             often not desired.
 */
@@ -87,7 +87,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
 
      /**
      * @brief    Creates a IoT Hub client for communication with an existing IoT
-     *           Hub using the device auth module.
+     *           Hub using the device auth.
      *
      * @param    iothub_uri             Pointer to an ioThub hostname received in the registration process
      * @param    device_id              Pointer to the device Id of the device
@@ -115,7 +115,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     * @param    eventConfirmationCallback       The callback specified by the device for receiving
     *                                           confirmation of the delivery of the IoT Hub message.
     *                                           This callback can be expected to invoke the
-    *                                           ::IoTHubDeviceClient_LL_SendEventAsync function for the
+    *                                           IoTHubDeviceClient_LL_SendEventAsync function for the
     *                                           same message in an attempt to retry sending a failing
     *                                           message. The user can specify a @c NULL value here to
     *                                           indicate that no callback is required.
@@ -123,7 +123,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     *                                           callback. This can be @c NULL.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the ::IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_LL_Destroy function from within any callback.
     * @remarks
     *           The IOTHUB_MESSAGE_HANDLE instance provided as argument is copied by the function,
     *           so this argument can be destroyed by the calling application right after IoTHubDeviceClient_LL_SendEventAsync returns.
@@ -138,9 +138,11 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     * @param    iotHubClientHandle        The handle created by a call to the create function.
     * @param    iotHubClientStatus        The sending state is populated at the address pointed
     *                                     at by this parameter. The value will be set to
-    *                                     @c IOTHUBCLIENT_SENDSTATUS_IDLE if there is currently
-    *                                     no item to be sent and @c IOTHUBCLIENT_SENDSTATUS_BUSY
+    *                                     @c IOTHUB_CLIENT_SEND_STATUS_IDLE if there is currently
+    *                                     no item to be sent and @c IOTHUB_CLIENT_SEND_STATUS_BUSY
     *                                     if there are.
+    *
+    * @remark    Does not return information related to uploads initiated by IoTHubDeviceClient_LL_UploadToBlob or IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -157,7 +159,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     *                                           callback. This can be @c NULL.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the ::IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_LL_Destroy function from within any callback.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -174,7 +176,9 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     *                                           callback. This can be @c NULL.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the ::IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *
+    * @remark   Callback specified will not receive connection status change notifications for upload connections created with IoTHubDeviceClient_LL_UploadToBlob or IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -191,7 +195,9 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     *                                           connection drops to IOT Hub.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the ::IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *
+    * @remark   Uploads initiated by IoTHubDeviceClient_LL_UploadToBlob or IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob do not have automatic retries and do not honor the retryPolicy settings.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -208,7 +214,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
                                                     to IOT Hub.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the ::IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_LL_Destroy function from within any callback.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -228,7 +234,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_GetLastMessageReceiveTime, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle, time_t*, lastMessageReceiveTime);
 
     /**
-    * @brief    This function MUST be called by the user so work (sending/receiving data on the wire,
+    * @brief    This function MUST be called by the user so work (sending/receiving data on the network,
     *           computing and enforcing timeout controls, managing the connection to the IoT Hub) can
     *           be done by the IoTHubClient.
     *           The recommended call frequency is at least once every 100 milliseconds.
@@ -250,38 +256,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     * @param    optionName              Name of the option.
     * @param    value                   The value.
     *
-    *           The options that can be set via this API are:
-    *                - @b timeout - the maximum time in milliseconds a communication is
-    *                  allowed to use. @p value is a pointer to an @c unsigned @c int with
-    *                  the timeout value in milliseconds. This is only supported for the HTTP
-    *                  protocol as of now. When the HTTP protocol uses CURL, the meaning of
-    *                  the parameter is <em>total request time</em>. When the HTTP protocol uses
-    *                  winhttp, the meaning is the same as the @c dwSendTimeout and
-    *                  @c dwReceiveTimeout parameters of the
-    *                  <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/aa384116(v=vs.85).aspx">
-    *                  WinHttpSetTimeouts</a> API.
-    *                - @b CURLOPT_LOW_SPEED_LIMIT - only available for HTTP protocol and only
-    *                  when CURL is used. It has the same meaning as CURL's option with the same
-    *                  name. @p value is pointer to a long.
-    *                - @b CURLOPT_LOW_SPEED_TIME - only available for HTTP protocol and only
-    *                  when CURL is used. It has the same meaning as CURL's option with the same
-    *                  name. @p value is pointer to a long.
-    *                - @b CURLOPT_FORBID_REUSE - only available for HTTP protocol and only
-    *                  when CURL is used. It has the same meaning as CURL's option with the same
-    *                  name. @p value is pointer to a long.
-    *                - @b CURLOPT_FRESH_CONNECT - only available for HTTP protocol and only
-    *                  when CURL is used. It has the same meaning as CURL's option with the same
-    *                  name. @p value is pointer to a long.
-    *                - @b CURLOPT_VERBOSE - only available for HTTP protocol and only
-    *                  when CURL is used. It has the same meaning as CURL's option with the same
-    *                  name. @p value is pointer to a long.
-    *                - @b keepalive - available for MQTT protocol.  Integer value that sets the
-    *                  interval in seconds when pings are sent to the server.
-    *                - @b logtrace - available for MQTT protocol.  Boolean value that turns on and
-    *                  off the diagnostic logging.
-    *                - @b sas_token_lifetime - available for MQTT & AMQP protocol.  size_t value that that determines the
-    *                  sas token timeout length.
-    *                - @b OPTION_TRUSTED_CERT - Azure Server certificate used to validate TLS connection to iothub.
+    * @remarks  Documentation for configuration options is available at https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/Iothub_sdk_options.md.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -301,7 +276,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     *                                    callback. This can be @c NULL.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the ::IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_LL_Destroy function from within any callback.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -318,7 +293,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     *                                     callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the ::IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *            the IoTHubDeviceClient_LL_Destroy function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -333,7 +308,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
      * 									callback. This can be @c NULL.
      *
      *			@b NOTE: The application behavior is undefined if the user calls
-     *			the ::IoTHubClient_LL_Destroy function from within any callback.
+     *			the IoTHubClient_LL_Destroy function from within any callback.
      *
      * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
      */
@@ -373,6 +348,9 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     * @param    destinationFileName     name of the file.
     * @param    source                  pointer to the source for file content (can be NULL)
     * @param    size                    the size of the source in memory (if @p source is NULL then size needs to be 0).
+    * 
+    * @warning  Other _LL_ functions such as IoTHubDeviceClient_LL_SendEventAsync queue work to be performed later and do not block.  IoTHubDeviceClient_LL_UploadToBlob
+    *           will block however until the upload is completed or fails, which may take a while.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -386,6 +364,9 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
      * @param    destinationFileName     name of the file.
      * @param    getDataCallbackEx       A callback to be invoked to acquire the file chunks to be uploaded, as well as to indicate the status of the upload of the previous block.
      * @param    context                 Any data provided by the user to serve as context on getDataCallback.
+     *
+     * @warning  Other _LL_ functions such as IoTHubDeviceClient_LL_SendEventAsync queue work to be performed later and do not block.  IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob
+     *           will block however until the upload is completed or fails, which may take a while.
      *
      * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
      */

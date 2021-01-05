@@ -61,6 +61,7 @@ option(use_mqtt "set use_mqtt to ON if mqtt is to be used, set to OFF to not use
 option(run_e2e_tests "set run_e2e_tests to ON to run e2e tests (default is OFF)" OFF)
 option(run_unittests "set run_unittests to ON to run unittests (default is OFF)" OFF)
 option(run_longhaul_tests "set run_longhaul_tests to ON to run longhaul tests (default is OFF)[if possible, they are always build]" OFF)
+option(run_e2e_openssl_engine_tests "set run_e2e_openssl_engine_tests to ON to run OpenSSL ENGINE tests (default is OFF)[if possible, they are always build]" OFF)
 option(skip_samples "set skip_samples to ON to skip building samples (default is OFF)[if possible, they are always build]" OFF)
 option(build_service_client "controls whether the iothub_service_client is built or not" ON)
 option(build_provisioning_service_client "controls whether the provisioning_service_client is built or not" ON)
@@ -103,7 +104,7 @@ else()
 endif()
 option(use_mbedtls "set use_mbedtls to ON to use mbedtls." OFF)
 option(use_bearssl "set use_bearssl to ON to use bearssl." OFF)
-option(use_wolfssl "set use_bearssl to ON to use bearssl." OFF)
+option(use_wolfssl "set use_wolfssl to ON to use wolfssl." OFF)
 
 # openssl samples on Windows need to have a trusted cert set
 if ((WIN32 AND ${use_openssl}) OR ${use_wolfssl} OR ${use_mbedtls} OR ${use_bearssl})
@@ -137,6 +138,8 @@ endif()
 # Set Provisioning Information.  This will also setup appropriate HSM
 if (${use_prov_client})
     set(use_prov_client_core ON)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_PROV_MODULE_FULL")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_PROV_MODULE_FULL")
     if ("${hsm_custom_lib}" STREQUAL "")
         if ((NOT ${hsm_type_x509}) AND (NOT ${hsm_type_sastoken}) AND (NOT ${hsm_type_symm_key}))
             # If the cmake option did not explicitly configure an hsm type, then enable them all.
