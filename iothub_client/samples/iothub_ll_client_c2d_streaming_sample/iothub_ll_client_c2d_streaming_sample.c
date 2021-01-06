@@ -116,7 +116,7 @@ static void on_ws_error(void* context, WS_ERROR error_code)
     (void)printf("on_ws_error (%s)\r\n", MU_ENUM_TO_STRING(WS_ERROR, error_code));
 }
 
-static UWS_CLIENT_HANDLE create_websocket_client(DEVICE_STREAM_C2D_REQUEST* stream_request)
+static UWS_CLIENT_HANDLE create_websocket_client(const DEVICE_STREAM_C2D_REQUEST* stream_request)
 {
     UWS_CLIENT_HANDLE result;
 
@@ -166,7 +166,7 @@ static UWS_CLIENT_HANDLE create_websocket_client(DEVICE_STREAM_C2D_REQUEST* stre
     return result;
 }
 
-static DEVICE_STREAM_C2D_RESPONSE* streamRequestCallback(DEVICE_STREAM_C2D_REQUEST* stream_request, void* context)
+static DEVICE_STREAM_C2D_RESPONSE* streamRequestCallback(const DEVICE_STREAM_C2D_REQUEST* stream_request, void* context)
 {
     (void)context;
 
@@ -174,7 +174,7 @@ static DEVICE_STREAM_C2D_RESPONSE* streamRequestCallback(DEVICE_STREAM_C2D_REQUE
 
     g_uws_client_handle = create_websocket_client(stream_request);
 
-    return stream_c2d_response_create(stream_request, true);
+    return IoTHubClient_StreamC2DResponseCreate(stream_request, true);
 }
 
 int main(void)

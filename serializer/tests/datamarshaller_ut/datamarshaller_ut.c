@@ -14,6 +14,11 @@ static void* my_gballoc_malloc(size_t size)
     return malloc(size);
 }
 
+static void* my_gballoc_calloc(size_t nmemb, size_t size)
+{
+    return calloc(nmemb, size);
+}
+
 static void my_gballoc_free(void* s)
 {
     free(s);
@@ -245,6 +250,8 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
 
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(gballoc_calloc, my_gballoc_calloc);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_calloc, NULL);
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, my_gballoc_free);
     }
 
@@ -290,8 +297,8 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
     TEST_FUNCTION(DataMarshaller_Create_succeeds)
     {
         ///arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
-            .IgnoreArgument_size();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+            .IgnoreAllArguments();
 
         ///act
         DATA_MARSHALLER_HANDLE res = DataMarshaller_Create(TEST_MODEL_HANDLE, true);
@@ -310,10 +317,10 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
     TEST_FUNCTION(DataMarshaller_Create_Twice_Yields_2_Different_Handles)
     {
         ///arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
-            .IgnoreArgument_size();
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
-            .IgnoreArgument_size();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(gballoc_calloc(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+            .IgnoreAllArguments();
 
         ///act
         DATA_MARSHALLER_HANDLE handle1 = DataMarshaller_Create(TEST_MODEL_HANDLE, true);

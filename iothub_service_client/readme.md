@@ -8,7 +8,7 @@ We will continue to fix critical bugs such as crashes, data corruption, and secu
 
 Azure IoT Service SDK support is available in higher-level languages ([C#](https://github.com/Azure/azure-iot-sdk-csharp), [Java](https://github.com/Azure/azure-iot-sdk-java), [Node](https://github.com/Azure/azure-iot-sdk-node), [Python](https://github.com/Azure/azure-iot-sdk-python)).
 
-The rest of this repo - for instance the [device sdk](../iothub_client_device) for deploying code to devices - continues to be under active development.  This ending of new features only applies to code under this subfolder.
+The rest of this repo - for instance the [device sdk](../iothub_client) for deploying code to devices - continues to be under active development.  This ending of new features only applies to code under this subfolder.
 
 ## Folder Layout
 

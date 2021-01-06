@@ -15,8 +15,6 @@
 
 #define DO_WORK_FREQ_DEFAULT 1
 
-static const char* const OPTION_DO_WORK_FREQUENCY_IN_MS = "do_work_freq_ms";
-
 typedef struct PROV_DEVICE_INSTANCE_TAG
 {
     PROV_DEVICE_LL_HANDLE ProvDeviceLLHandle;
@@ -118,10 +116,20 @@ PROV_DEVICE_HANDLE Prov_Device_Create(const char* uri, const char* id_scope, PRO
             {
                 /* Codes_SRS_PROV_DEVICE_CLIENT_12_006: [ The function shall call the LL layer Prov_Device_LL_Create function and return with it's result. ] */
                 result->ProvDeviceLLHandle = Prov_Device_LL_Create(uri, id_scope, protocol);
-                /* Codes_SRS_PROV_DEVICE_CLIENT_12_007: [ The function shall initialize the result datastructure. ] */
-                result->ThreadHandle = NULL;
-                result->StopThread = 0;
-                result->do_work_freq_ms = DO_WORK_FREQ_DEFAULT;
+                if (result->ProvDeviceLLHandle == NULL)
+                {
+                    /* Codes_SRS_PROV_DEVICE_CLIENT_12_025: [ If the Client initialization failed the function shall clean up the all resources and return NULL. ] */
+                    LogError("Prov_Device_LL_Create failed");
+                    free(result);
+                    result = NULL;
+                }
+                else
+                {
+                    /* Codes_SRS_PROV_DEVICE_CLIENT_12_007: [ The function shall initialize the result datastructure. ] */
+                    result->ThreadHandle = NULL;
+                    result->StopThread = 0;
+                    result->do_work_freq_ms = DO_WORK_FREQ_DEFAULT;
+                }
             }
         }
     }
@@ -249,7 +257,7 @@ PROV_DEVICE_RESULT Prov_Device_SetOption(PROV_DEVICE_HANDLE prov_device_handle, 
         else 
         {
             /* Codes_SRS_PROV_DEVICE_CLIENT_41_001: [ If parameter `optionName` is `OPTION_DO_WORK_FREQUENCY_IN_MS` then `IoTHubClientCore_SetOption` shall set `do_work_freq_ms` parameter of `prov_device_instance` ] */
-            if (strcmp(OPTION_DO_WORK_FREQUENCY_IN_MS, optionName) == 0)
+            if (strcmp(PROV_OPTION_DO_WORK_FREQUENCY_IN_MS, optionName) == 0)
             {
                 prov_device_instance->do_work_freq_ms = *((uint16_t *)value);
                 result = PROV_DEVICE_RESULT_OK;  

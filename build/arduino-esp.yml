@@ -1,0 +1,118 @@
+name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+
+jobs:
+- job: test_esp8266
+  pool:
+      name: devicelab-03
+  steps:
+  - script: |
+      git submodule update --init --recursive
+      . build_all/arduino/setup_arduino_libraries.sh
+      #copy example and platform.local.txts to their correct locations
+      echo $NEWTIN | sudo -S cp -r $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/. $ARDUINO_LIBRARY_DIR/../
+      echo $NEWTIN | sudo -S cp $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/esp8266/iothub_ll_telemetry_sample/platform.local.txt ~/.arduino15/packages/esp8266/hardware/esp8266/2.5.2/
+    displayName: 'setup libraries'
+    env:
+      IOTHUB_CONNECTION_DEVICE_STRING: $(MXCHIP_NIGHTLY_DEVICE_STRING)
+      WIFI_SSID: $(WIFI_SSID)
+      WIFI_PWD:  $(WIFI_PWD)
+      SOURCES_DIR: $(Build.SourcesDirectory)
+      STAGING_DIR: $(Pipeline.Workspace)
+      ARDUINO_LIBRARY_DIR: $(Agent.WorkFolder)/libraries/
+      NEWTIN: $(NEWTIN)
+      
+  - script: |
+      cd $(Agent.WorkFolder)
+      echo "work folder"
+      ls
+      cd $(Agent.WorkFolder)/esp8266/iothub_ll_telemetry_sample
+      echo "telem folder"
+      ls
+      arduino --upload --board esp8266:esp8266:huzzah --pref sketchbook.path=../../ --port $(ESP8266_PORT) --verbose-build iothub_ll_telemetry_sample.ino 
+      # should fail job if build/upload fails
+    displayName: 'build and upload'
+    env:
+      ARDUNIO_LIBRARY_DIR: $(Agent.WorkFolder)
+
+  - script: |
+      ls
+      cd $(Build.SourcesDirectory)/testtools/UART_interface/
+      echo -e "exit\r\n\r\n\r\n" | cat > input.txt
+      python3 serial_connect.py -i input.txt -o output.txt -b 115200 -p $(ESP8266_PORT) -d esp8266 -s -t 30
+      rm input.txt
+      code=$(<exitcode.txt)
+      exit $code
+    failOnStderr: true
+    displayName: 'run_test'
+
+  - script: |
+      # Check that this is the right source directory
+      ls
+      cp $(Build.SourcesDirectory)/testtools/UART_interface/output.txt $(Build.ArtifactStagingDirectory)
+    displayName: "Copy Files into Artifact repo"
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifacts: log'
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: 'log'
+      publishLocation: 'Container'
+    condition: succeeded()
+
+- job: test_esp32
+  pool:
+    name: devicelab-03
+  steps:
+  - script: |
+      git submodule update --init --recursive
+      . build_all/arduino/setup_arduino_libraries.sh
+      #copy example and platform.local.txts to their correct locations
+      echo $NEWTIN | sudo -S cp -r $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/. $ARDUINO_LIBRARY_DIR/../
+      echo $NEWTIN | sudo -S cp $ARDUINO_LIBRARY_DIR/AzureIoTHub/examples/esp32/iothub_ll_telemetry_sample/platform.local.txt ~/.arduino15/packages/esp32/hardware/esp32/1.0.2/
+    displayName: 'setup libraries'
+    env:
+      IOTHUB_CONNECTION_DEVICE_STRING: $(MXCHIP_NIGHTLY_DEVICE_STRING)
+      WIFI_SSID: $(WIFI_SSID)
+      WIFI_PWD:  $(WIFI_PWD)
+      SOURCES_DIR: $(Build.SourcesDirectory)
+      STAGING_DIR: $(Pipeline.Workspace)
+      ARDUINO_LIBRARY_DIR: $(Agent.WorkFolder)/libraries/
+      NEWTIN: $(NEWTIN)
+
+  - script: |
+      cd $(Agent.WorkFolder)
+      echo "work folder"
+      ls
+      cd $(Agent.WorkFolder)/esp8266/iothub_ll_telemetry_sample
+      echo "telem folder"
+      ls
+      arduino --upload --board esp32:esp32:esp32 --port $(ESP32_PORT) --pref sketchbook.path=../../ --verbose-build iothub_ll_telemetry_sample.ino 
+      # should fail job if build/upload fails
+    displayName: 'build and upload'
+    env:
+      ARDUNIO_LIBRARY_DIR: $(Agent.WorkFolder)
+
+  - script: |
+      ls
+      cd $(Build.SourcesDirectory)/testtools/UART_interface/
+      echo -e "exit\r\n\r\n\r\n" | cat > input.txt
+      python3 serial_connect.py -i input.txt -o output.txt -b 1000000 -p $(ESP32_PORT) -d esp32 -s -t 30
+      rm input.txt
+      code=$(<exitcode.txt)
+      exit $code
+    failOnStderr: true
+    displayName: 'run_test'
+
+  - script: |
+      # Check that this is the right source directory
+      ls
+      cp $(Build.SourcesDirectory)/testtools/UART_interface/output.txt $(Build.ArtifactStagingDirectory)
+    displayName: "Copy Files into Artifact repo"
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifacts: log'
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: 'log'
+      publishLocation: 'Container'
+    condition: succeeded()

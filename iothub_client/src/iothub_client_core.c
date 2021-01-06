@@ -26,6 +26,7 @@
 
 
 #define DO_WORK_FREQ_DEFAULT 1
+#define DO_WORK_MAXIMUM_ALLOWED_FREQUENCY 100
 
 
 struct IOTHUB_QUEUE_CONTEXT_TAG;
@@ -582,6 +583,8 @@ static void iothub_ll_get_device_twin_async_callback(DEVICE_TWIN_UPDATE_STATE up
                 free(queue_cb_info.iothub_callback.dev_twin_cb_info.payLoad);
             }
         }
+
+        free(queue_context);
     }
     else
     {
@@ -778,12 +781,12 @@ static void dispatch_user_callbacks(IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientIns
                         LogError("Failed sending stream response");
                     }
 
-                    stream_c2d_response_destroy(response);
+                    IoTHubClient_StreamC2DResponseDestroy(response);
                 }
 
                 if (queued_cb->iothub_callback.dev_stream_cb_info.request)
                 {
-                    stream_c2d_request_destroy(queued_cb->iothub_callback.dev_stream_cb_info.request);
+                    IoTHubClient_StreamC2DRequestDestroy(queued_cb->iothub_callback.dev_stream_cb_info.request);
                 }
                 break;
             }
@@ -1303,11 +1306,18 @@ void IoTHubClientCore_Destroy(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle)
                         queue_cb_info->iothub_callback.event_confirm_cb_info.eventConfirmationCallback(queue_cb_info->iothub_callback.event_confirm_cb_info.confirm_result, queue_cb_info->userContextCallback);
                     }
                 }
+                else if (queue_cb_info->type == CALLBACK_TYPE_REPORTED_STATE)
+                {
+                    if (queue_cb_info->iothub_callback.reported_state_cb_info.reportedStateCallback)
+                    {
+                        queue_cb_info->iothub_callback.reported_state_cb_info.reportedStateCallback(queue_cb_info->iothub_callback.reported_state_cb_info.status_code, queue_cb_info->userContextCallback);
+                    }
+                }
                 else if (queue_cb_info->type == CALLBACK_TYPE_DEVICE_STREAM)
                 {
                     if (queue_cb_info->iothub_callback.dev_stream_cb_info.request != NULL)
                     {
-                        stream_c2d_request_destroy(queue_cb_info->iothub_callback.dev_stream_cb_info.request);
+                        IoTHubClient_StreamC2DRequestDestroy(queue_cb_info->iothub_callback.dev_stream_cb_info.request);
                     }
                 }
             }
@@ -1759,7 +1769,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetOption(IOTHUB_CLIENT_CORE_HANDLE iotHub
             if (strcmp(OPTION_DO_WORK_FREQUENCY_IN_MS, optionName) == 0)
             {
                 /* Codes_SRS_IOTHUBCLIENT_41_003: [ The value for `OPTION_DO_WORK_FREQUENCY_IN_MS` shall be limited to 100 to follow SDK best practices by not reducing the DoWork frequency below 10 Hz ]*/
-                if (0 < * (unsigned int *)value && * (unsigned int *)value <= 100)
+                if (0 < * (unsigned int *)value && * (unsigned int *)value <= DO_WORK_MAXIMUM_ALLOWED_FREQUENCY)
                 {
                     /* Codes_SRS_IOTHUBCLIENT_41_004: [ If `currentMessageTimeout` is not greater than `do_work_freq_ms`, `IotHubClientCore_SetOption` shall return `IOTHUB_CLIENT_INVALID_ARG` ]*/
                     /* Codes_SRS_IOTHUBCLIENT_41_007: [** If parameter `optionName` is `OPTION_DO_WORK_FREQUENCY_IN_MS` then `value` should be of type `tickcounter_ms_t *`. **]*/
@@ -1777,7 +1787,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetOption(IOTHUB_CLIENT_CORE_HANDLE iotHub
                 else
                 {
                     result = IOTHUB_CLIENT_INVALID_ARG;
-                    LogError("Invalid value: OPTION_DO_WORK_FREQUENCY_IN_MS cannot exceed 100 ms. If you wish to reduce the frequency further, consider using the LL layer.");
+                    LogError("Invalid value: OPTION_DO_WORK_FREQUENCY_IN_MS cannot exceed %d ms. If you wish to reduce the frequency further, consider using the LL layer.", DO_WORK_MAXIMUM_ALLOWED_FREQUENCY);
                 }
             }
             /* Codes_SRS_IOTHUBCLIENT_41_005: [ If parameter `optionName` is `OPTION_MESSAGE_TIMEOUT` then `IoTHubClientCore_SetOption` shall set `currentMessageTimeout` parameter of `IoTHubClientInstance` ]*/
@@ -2725,7 +2735,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_EnablePolicyConfiguration(IOTHUB_CLIENT_CO
     return result;
 }
 
-static DEVICE_STREAM_C2D_RESPONSE* iothub_ll_device_stream_request_callback(DEVICE_STREAM_C2D_REQUEST* request, void* context)
+static DEVICE_STREAM_C2D_RESPONSE* iothub_ll_device_stream_request_callback(const DEVICE_STREAM_C2D_REQUEST* request, void* context)
 {
     DEVICE_STREAM_C2D_RESPONSE* result;
 
@@ -2733,7 +2743,7 @@ static DEVICE_STREAM_C2D_RESPONSE* iothub_ll_device_stream_request_callback(DEVI
     if (context == NULL || request == NULL)
     {
         LogError("Invalid argument (context=%p, request=%p)", context, request);
-        result = request != NULL ? stream_c2d_response_create(request, false) : NULL;
+        result = request != NULL ? IoTHubClient_StreamC2DResponseCreate(request, false) : NULL;
     }
     else
     {
@@ -2743,20 +2753,20 @@ static DEVICE_STREAM_C2D_RESPONSE* iothub_ll_device_stream_request_callback(DEVI
         USER_CALLBACK_INFO queue_cb_info;
         queue_cb_info.type = CALLBACK_TYPE_DEVICE_STREAM;
         queue_cb_info.userContextCallback = queue_context->userContextCallback;
-        queue_cb_info.iothub_callback.dev_stream_cb_info.request = stream_c2d_request_clone(request);
+        queue_cb_info.iothub_callback.dev_stream_cb_info.request = IoTHubClient_StreamC2DRequestClone(request);
 
         if (queue_cb_info.iothub_callback.dev_stream_cb_info.request == NULL)
         {
             // Codes_SRS_IOTHUBCLIENT_09_019: [ If the stream request fails to be added to the callback list, the function shall fail and return a response rejecting the stream request. ]
             LogError("Failed to clone the device stream request");
-            result = stream_c2d_response_create(request, false);
+            result = IoTHubClient_StreamC2DResponseCreate(request, false);
         }
         else if (VECTOR_push_back(queue_context->iotHubClientHandle->saved_user_callback_list, &queue_cb_info, 1) != 0)
         {
             // Codes_SRS_IOTHUBCLIENT_09_019: [ If the stream request fails to be added to the callback list, the function shall fail and return a response rejecting the stream request. ]
             LogError("Failed to push the device stream callback into the vector");
-            result = stream_c2d_response_create(request, false);
-            stream_c2d_request_destroy(queue_cb_info.iothub_callback.dev_stream_cb_info.request);
+            result = IoTHubClient_StreamC2DResponseCreate(request, false);
+            IoTHubClient_StreamC2DRequestDestroy(queue_cb_info.iothub_callback.dev_stream_cb_info.request);
         }
         else
         {

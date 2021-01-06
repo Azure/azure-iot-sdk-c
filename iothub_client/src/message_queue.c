@@ -51,10 +51,20 @@ typedef struct MESSAGE_QUEUE_ITEM_TAG
 
 static bool find_item_by_message_ptr(LIST_ITEM_HANDLE list_item, const void* match_context)
 {
+    bool result;
     MESSAGE_QUEUE_ITEM* current_item = (MESSAGE_QUEUE_ITEM*)singlylinkedlist_item_get_value(list_item);
     MQ_MESSAGE_HANDLE* target_item = (MQ_MESSAGE_HANDLE*)match_context;
 
-    return (current_item->message == target_item);
+    if (current_item == NULL)
+    {
+        LogError("Failed finding item: current_item is NULL");
+        result = false;
+    }
+    else
+    {
+        result = (current_item->message == target_item);
+    }
+    return result;
 }
 
 static void fire_message_callback(MESSAGE_QUEUE_ITEM* mq_item, MESSAGE_QUEUE_RESULT result, void* reason)

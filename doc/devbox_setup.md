@@ -22,12 +22,12 @@ This document describes how to prepare your development environment to use the *
 
 - Locate the tag name for the [latest release][latest-release] of the SDK.
 
-> Our release tag names are date values in `yyyy-mm-dd` format.
+> Our release tag names are date values in `lts_mm_yyyy` format.
 
 - Clone the latest release of SDK to your local machine using the tag name you found:
 
 ```Shell
-git clone -b <yyyy-mm-dd> https://github.com/Azure/azure-iot-sdk-c.git
+git clone -b <lts_mm_yyyy> https://github.com/Azure/azure-iot-sdk-c.git
 cd azure-iot-sdk-c
 git submodule update --init
 ```
@@ -175,12 +175,12 @@ This section describes how to set up a development environment for the C SDK on 
   > To upgrade see "Upgrade CURL on Mac OS" steps below.
   
 - Locate the tag name for the [latest release][latest-release] of the SDK.
-  > Our release tag names are date values in `yyyy-mm-dd` format.
+  > Our release tag names are date values in `lts_mm_yyyy` format.
 
 - Clone the latest release of SDK to your local machine using the tag name you found:
 
   ```Shell
-  git clone -b <yyyy-mm-dd> https://github.com/Azure/azure-iot-sdk-c.git
+  git clone -b <lts_mm_yyyy> https://github.com/Azure/azure-iot-sdk-c.git
   cd azure-iot-sdk-c
   git submodule update --init
   ```
@@ -248,12 +248,12 @@ We've tested the device SDK for C on macOS High Sierra, with XCode version 9.2.
   > To upgrade see "Upgrade CURL on Mac OS" steps below.
   
 - Locate the tag name for the [latest release][latest-release] of the SDK.
-  > Our release tag names are date values in `yyyy-mm-dd` format.
+  > Our release tag names are date values in `lts_mm_yyyy` format.
 
 - Clone the latest release of SDK to your local machine using the tag name you found:
 
   ```Shell
-  git clone -b <yyyy-mm-dd> https://github.com/Azure/azure-iot-sdk-c.git
+  git clone -b <lts_mm_yyyy> https://github.com/Azure/azure-iot-sdk-c.git
   cd azure-iot-sdk-c
   git submodule update --init
   ```

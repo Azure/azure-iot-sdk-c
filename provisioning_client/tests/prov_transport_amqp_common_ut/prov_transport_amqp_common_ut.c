@@ -456,6 +456,60 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 
 static TEST_MUTEX_HANDLE g_testByTest;
 
+char* umock_stringify_BINARY_DATA(const BINARY_DATA* value)
+{
+    (void)value;
+    char* result = "BINARY_DATA";
+    return result;
+}
+
+int umock_are_equal_BINARY_DATA(const BINARY_DATA* left, const BINARY_DATA* right)
+{
+    int result;
+
+    if (left->length != right->length)
+    {
+        result = 0;
+    }
+    else
+    {
+        if (memcmp(left->bytes, right->bytes, left->length) == 0)
+        {
+            result = 1;
+        }
+        else
+        {
+            result = 0;
+        }
+    }
+
+    return result;
+}
+
+int umock_copy_BINARY_DATA(BINARY_DATA* destination, const BINARY_DATA* source)
+{
+    int result;
+
+    destination->bytes = (const unsigned char*)my_gballoc_malloc(source->length);
+    if (destination->bytes == NULL)
+    {
+        result = -1;
+    }
+    else
+    {
+        (void)memcpy((void*)destination->bytes, source->bytes, source->length);
+        destination->length = source->length;
+        result = 0;
+    }
+
+    return result;
+}
+
+void umock_free_BINARY_DATA(BINARY_DATA* value)
+{
+    my_gballoc_free((void*)value->bytes);
+}
+
 BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
 
     TEST_SUITE_INITIALIZE(suite_init)
@@ -471,15 +525,14 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         REGISTER_TYPE(PROV_DEVICE_TRANSPORT_STATUS, PROV_DEVICE_TRANSPORT_STATUS);
         REGISTER_TYPE(TRANSPORT_HSM_TYPE, TRANSPORT_HSM_TYPE);
 
-        REGISTER_UMOCK_ALIAS_TYPE(BINARY_DATA, void*);
+        REGISTER_UMOCK_VALUE_TYPE(BINARY_DATA);
+
         REGISTER_UMOCK_ALIAS_TYPE(ON_MESSAGE_SEND_COMPLETE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(PROV_DEVICE_TRANSPORT_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(BUFFER_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK, void*);
         REGISTER_UMOCK_ALIAS_TYPE(PROV_DEVICE_TRANSPORT_STATUS_CALLBACK, void*);
         REGISTER_UMOCK_ALIAS_TYPE(PROV_TRANSPORT_CHALLENGE_CALLBACK, void*);
-        REGISTER_UMOCK_ALIAS_TYPE(DPS_AMQP_TRANSPORT_IO, void*);
-        REGISTER_UMOCK_ALIAS_TYPE(HTTP_CLIENT_REQUEST_TYPE, int);
         REGISTER_UMOCK_ALIAS_TYPE(MESSAGE_SENDER_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(MESSAGE_RECEIVER_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(MESSAGE_RECEIVER_STATE, int);
@@ -501,7 +554,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         REGISTER_UMOCK_ALIAS_TYPE(ON_MESSAGE_SENDER_STATE_CHANGED, void*);
         REGISTER_UMOCK_ALIAS_TYPE(MESSAGE_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
-        REGISTER_UMOCK_ALIAS_TYPE(tickcounter_ms_t, uint32_t);
+        REGISTER_UMOCK_ALIAS_TYPE(tickcounter_ms_t, unsigned long long);
 
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);

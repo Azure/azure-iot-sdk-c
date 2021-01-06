@@ -126,7 +126,7 @@ int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE io
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_150: [** A property key which shall be a symbol named `com.microsoft:api-version` shall be created by calling `amqp_create_symbol`. **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_151: [** A property value of type string that shall contain the `2016-11-14` shall be created by calling `amqpvalue_create_string`. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_151: [** A property value of type string that shall contain the `Current API version` shall be created by calling `amqpvalue_create_string`. **]**
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_152: [** The `com.microsoft:api-version` shall be added to the link attach properties by calling `amqpvalue_set_map_value`. **]**
 

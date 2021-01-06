@@ -11,4 +11,4 @@ set -e
 # 4. call SERIAL_TASK, typically send_telemetry
 # 5. call version, to log versions of software on device
 
-echo -e "help\r\nset_az_iothub $IOTHUB_CONNECTION_STRING\r\nexit\r\n$SERIAL_TASK\r\n\r\nversion" | cat > input.txt
+echo -e "help\r\nset_wifissid $WIFI_SSID\r\nset_wifipwd $WIFI_PWD\r\nset_az_iothub $IOTHUB_CONNECTION_STRING\r\nexit\r\n$SERIAL_TASK\r\n\r\nversion" | cat > input.txt

@@ -1017,10 +1017,14 @@ static void invoke_callback(const void* item, const void* action_context, bool* 
 
     if (NULL != caller_info->on_event_send_complete_callback)
     {
+#if defined(_MSC_VER) /* pragma warning is only available on Microsoft C compilers */
 #pragma warning(push)
 #pragma warning(disable:4305) // Allow typecasting to smaller type on 64 bit systems, since we control ultimate caller.
+#endif
         TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT messenger_send_result = (TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT)action_context;
+#if defined(_MSC_VER) /* pragma warning is only available on Microsoft C compilers */
 #pragma warning(pop)
+#endif
         caller_info->on_event_send_complete_callback(caller_info->message, messenger_send_result, caller_info->context);
     }
     *continue_processing = true;

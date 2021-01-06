@@ -1,9 +1,11 @@
 #!/bin/bash
-# Copyright (c) Microsoft. All rights reserved. Licensed under the MIT 
-# license. See LICENSE file in the project root for full license 
-# information.
+# Copyright (c) Microsoft. All rights reserved.
+# Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-# Tested on RPi2 debian verion 7.8
+set -x # Set trace on
+set -o errexit # Exit if command failed
+set -o nounset # Exit if variable not set
+set -o pipefail # Exit if pipe failed
 
 install_root="/home/jenkins" 
 build_root=$(cd "$(dirname "$0")/.." && pwd) 
@@ -45,7 +47,7 @@ fi
 # ----------------------------------------------------------------------------- 
 # -- Set environment variable
 # -----------------------------------------------------------------------------
-cd $install_root/RPiTools/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/arm-linux-gnueabihf 
+cd $install_root/RPiTools/tools/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/arm-linux-gnueabihf 
 export RPI_ROOT=$(pwd)
 
 # ----------------------------------------------------------------------------- 
@@ -59,12 +61,12 @@ INCLUDE(CMakeForceCompiler)
 
 SET(CMAKE_SYSTEM_NAME Linux) # this one is important 
 SET(CMAKE_SYSTEM_VERSION 1) # this one not so much
-
+SET(CMAKE_SYSROOT ${RPI_ROOT}/sysroot) # This is how it finds our cross compiled libs (openssl, curl, utilslinux)
 # this is the location of the amd64 toolchain targeting the Raspberry Pi
-SET(CMAKE_C_COMPILER ${RPI_ROOT}/../bin/arm-linux-gnueabihf-gcc)
+SET(CMAKE_C_COMPILER /home/jenkins/RPiTools/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc)
 
 # this is the file system root of the target
-SET(CMAKE_FIND_ROOT_PATH ${RPI_ROOT})
+SET(CMAKE_FIND_ROOT_PATH ${RPI_ROOT}/sysroot)
 
 # search for programs in the build host directories
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
@@ -86,5 +88,5 @@ sed -i 's/\[device connection string\]/'$IOTHUB_DEVICE_CONN_STR'/g' iothub_clien
 # -----------------------------------------------------------------------------
 echo ---------- Building the SDK by executing build.sh script ---------- 
 cd $build_root/build_all/linux 
-./build.sh --toolchain-file toolchain-rpi.cmake -cl --sysroot=$RPI_ROOT 
+./build.sh --toolchain-file toolchain-rpi.cmake -cl --sysroot=$RPI_ROOT/sysroot
 [ $? -eq 0 ] || exit $?

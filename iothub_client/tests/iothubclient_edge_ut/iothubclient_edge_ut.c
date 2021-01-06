@@ -174,6 +174,7 @@ static void my_HTTPAPIEX_Destroy(HTTPAPIEX_HANDLE handle)
     real_free(handle);
 }
 
+static int my_HTTPAPIEX_ExecuteRequest_statusCode = 200;
 static HTTPAPIEX_RESULT my_HTTPAPIEX_ExecuteRequest(HTTPAPIEX_HANDLE handle, HTTPAPI_REQUEST_TYPE requestType, const char* relativePath,
     HTTP_HEADERS_HANDLE requestHttpHeadersHandle, BUFFER_HANDLE requestContent, unsigned int* statusCode,
     HTTP_HEADERS_HANDLE responseHttpHeadersHandle, BUFFER_HANDLE responseContent)
@@ -183,7 +184,7 @@ static HTTPAPIEX_RESULT my_HTTPAPIEX_ExecuteRequest(HTTPAPIEX_HANDLE handle, HTT
     (void)relativePath;
     (void)requestHttpHeadersHandle;
     (void)requestContent;
-    *statusCode = 200;
+    *statusCode = my_HTTPAPIEX_ExecuteRequest_statusCode;
     (void)responseHttpHeadersHandle;
     (void)responseContent;
 
@@ -221,7 +222,7 @@ static char* my_json_serialize_to_string(const JSON_Value* value)
     return newstr;
 }
 
-static char* my_IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const char* scope, size_t expiry_time_relative_seconds, const char* key_name)
+static char* my_IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const char* scope, uint64_t expiry_time_relative_seconds, const char* key_name)
 {
     (void)handle;
     (void)expiry_time_relative_seconds;
@@ -244,24 +245,6 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
     ASSERT_FAIL(temp_str);
 }
 
-static int should_skip_index(size_t current_index, const size_t skip_array[], size_t length)
-{
-    int result = 0;
-    if (skip_array != NULL)
-    {
-        for (size_t index = 0; index < length; index++)
-        {
-            if (current_index == skip_array[index])
-            {
-                result = __LINE__;
-                break;
-            }
-        }
-    }
-
-    return result;
-}
-
 static IOTHUB_CLIENT_EDGE_HANDLE create_module_client_method_handle()
 {
     IOTHUB_CLIENT_CONFIG config;
@@ -280,8 +263,10 @@ static void createMethodPayloadExpectedCalls()
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));   //cannot fail
 }
 
-static void sendHttpRequestMethodExpectedCalls()
+static void sendHttpRequestMethodExpectedCallsWithStatusCode(int statusCode)
 {
+    my_HTTPAPIEX_ExecuteRequest_statusCode = statusCode;
+
     STRICT_EXPECTED_CALL(environment_get_variable(IGNORED_PTR_ARG)).CallCannotFail();
     STRICT_EXPECTED_CALL(HTTPHeaders_Alloc());
     STRICT_EXPECTED_CALL(HTTPHeaders_AddHeaderNameValuePair(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -311,6 +296,11 @@ static void sendHttpRequestMethodExpectedCalls()
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));       //cannot fail
     STRICT_EXPECTED_CALL(HTTPAPIEX_Destroy(IGNORED_PTR_ARG));   //cannot fail
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));        //cannot fail
+}
+
+static void sendHttpRequestMethodExpectedCalls()
+{
+    sendHttpRequestMethodExpectedCallsWithStatusCode(200);
 }
 
 static void parseResponseJsonExpectedCalls()
@@ -526,19 +516,15 @@ TEST_FUNCTION(IoTHubClient_EdgeHandle_Create_FAIL)
     umock_c_negative_tests_snapshot();
 
     //size_t calls_cannot_fail[] = { };
-    size_t num_cannot_fail = 0; //sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0]);
     size_t count = umock_c_negative_tests_call_count();
     size_t test_num = 0;
-    size_t test_max = count - num_cannot_fail;
 
     for (size_t index = 0; index < count; index++)
     {
-        if (should_skip_index(index, NULL, num_cannot_fail) != 0)
-            continue;
         test_num++;
 
         char tmp_msg[128];
-        sprintf(tmp_msg, "IoTHubClient_EdgeHandle_Create_FAIL failure in test %lu/%lu", (unsigned long)test_num, (unsigned long)test_max);
+        sprintf(tmp_msg, "IoTHubClient_EdgeHandle_Create_FAIL failure in test %lu/%lu", (unsigned long)test_num, (unsigned long)count);
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
@@ -753,6 +739,39 @@ TEST_FUNCTION(IoTHubClient_Edge_DeviceMethodInvoke_SUCCESS)
 
     //cleanup
     free(responsePayload);
+    IoTHubClient_EdgeHandle_Destroy(handle);
+}
+
+TEST_FUNCTION(IoTHubClient_Edge_DeviceMethodInvoke_2xx_SUCCESS)
+{
+    //arrange
+    IOTHUB_CLIENT_EDGE_HANDLE handle = create_module_client_method_handle();
+    int responseStatus;
+    unsigned char* responsePayload;
+    size_t responsePayloadSize;
+
+    for (int statusCode = 200; statusCode < 300; statusCode++)
+    {
+        umock_c_reset_all_calls();
+
+        createMethodPayloadExpectedCalls();
+        STRICT_EXPECTED_CALL(BUFFER_new());
+        sendHttpRequestMethodExpectedCallsWithStatusCode(statusCode);
+        parseResponseJsonExpectedCalls();
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));   //cannot fail
+        STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));   //cannot fail
+
+        //act
+        IOTHUB_CLIENT_RESULT result = IoTHubClient_Edge_DeviceMethodInvoke(handle, TEST_DEVICE_ID2, TEST_METHOD_NAME, TEST_METHOD_PAYLOAD, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
+
+        //assert
+        ASSERT_IS_TRUE(result == IOTHUB_CLIENT_OK);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        free(responsePayload);
+    }
+
+    //cleanup
     IoTHubClient_EdgeHandle_Destroy(handle);
 }
 

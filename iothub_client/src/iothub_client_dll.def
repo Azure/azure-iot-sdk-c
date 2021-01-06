@@ -124,6 +124,8 @@ EXPORTS
     IoTHubMessage_GetContentType
     IoTHubMessage_GetContentTypeSystemProperty
     IoTHubMessage_GetContentEncodingSystemProperty 
+    IoTHubMessage_GetMessageCreationTimeUtcSystemProperty
+    IoTHubMessage_GetMessageUserIdSystemProperty
     IoTHubMessage_GetCorrelationId
     IoTHubMessage_GetDiagnosticPropertyData
     IoTHubMessage_GetDistributedTracingSystemProperty
@@ -135,6 +137,8 @@ EXPORTS
     IoTHubMessage_SetConnectionModuleId
     IoTHubMessage_SetContentTypeSystemProperty
     IoTHubMessage_SetContentEncodingSystemProperty
+    IoTHubMessage_SetMessageCreationTimeUtcSystemProperty
+    IoTHubMessage_SetMessageUserIdSystemProperty
     IoTHubMessage_SetCorrelationId
     IoTHubMessage_SetInputName
     IoTHubMessage_SetMessageId
@@ -156,7 +160,7 @@ EXPORTS
     TRANSPORT_TYPEStrings
     DEVICE_TWIN_UPDATE_STATEStrings
 
-    stream_c2d_response_create
-    stream_c2d_request_clone
-    stream_c2d_response_destroy
-    stream_c2d_request_destroy
+    IoTHubClient_StreamC2DResponseCreate
+    IoTHubClient_StreamC2DRequestClone
+    IoTHubClient_StreamC2DResponseDestroy
+    IoTHubClient_StreamC2DRequestDestroy

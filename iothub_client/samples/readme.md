@@ -24,6 +24,9 @@ This folder contains simple samples showing how to use the various features of t
 * Uploading blob to Azure:
   * **iothub_client_sample_upload_to_blob**: Uploads a blob to Azure through IoT Hub
 
+* IoT Plug and Play
+  * **pnp**: Samples demonstrating IoT Plug and Play device functionality
+
 ## How to compile and run the samples
 
 Prior to running the samples, you will need to have an [instance of Azure IoT Hub][lnk-setup-iot-hub]  available and a [device Identity created][lnk-manage-iot-hub] in the hub.
