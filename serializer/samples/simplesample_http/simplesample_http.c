@@ -225,7 +225,7 @@ void simplesample_http_run(void)
                                 {
                                     MAP_HANDLE propMap = IoTHubMessage_Properties(messageHandle);
                                     (void)sprintf_s(propText, sizeof(propText), myWeather->Temperature > 28 ? "true" : "false");
-                                    if (Map_AddOrUpdate(propMap, "temperatureAlert", propText) != MAP_OK)
+                                    if (propMap == NULL || Map_AddOrUpdate(propMap, "temperatureAlert", propText) != MAP_OK)
                                     {
                                         printf("ERROR: Map_AddOrUpdate Failed!\r\n");
                                     }

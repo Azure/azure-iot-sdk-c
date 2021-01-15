@@ -356,9 +356,17 @@ static bool is_device_registered_ex(SINGLYLINKEDLIST_HANDLE registered_devices, 
 // @returns     true if the device is already in the list, false otherwise.
 static bool is_device_registered(AMQP_TRANSPORT_DEVICE_INSTANCE* amqp_device_instance)
 {
-    LIST_ITEM_HANDLE list_item;
-    const char* device_id = STRING_c_str(amqp_device_instance->device_id);
-    return is_device_registered_ex(amqp_device_instance->transport_instance->registered_devices, device_id, &list_item);
+    if (amqp_device_instance == NULL)
+    {
+        LogError("AMQP_TRANSPORT_DEVICE_INSTANCE is NULL");
+        return false;
+    }
+    else
+    {
+        LIST_ITEM_HANDLE list_item;
+        const char* device_id = STRING_c_str(amqp_device_instance->device_id);
+        return is_device_registered_ex(amqp_device_instance->transport_instance->registered_devices, device_id, &list_item);
+    }
 }
 
 static size_t get_number_of_registered_devices(AMQP_TRANSPORT_INSTANCE* transport)

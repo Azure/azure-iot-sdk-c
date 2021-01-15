@@ -1633,7 +1633,11 @@ static void processTwinNotification(PMQTTTRANSPORT_HANDLE_DATA transportData, MQ
     else
     {
         const APP_PAYLOAD* payload = mqttmessage_getApplicationMsg(msgHandle);
-        if (notification_msg)
+        if (payload == NULL)
+        {
+            LogError("Failure: invalid payload");
+        }
+        else if (notification_msg)
         {
             transportData->transport_callbacks.twin_retrieve_prop_complete_cb(DEVICE_TWIN_UPDATE_PARTIAL, payload->message, payload->length, transportData->transport_ctx);
         }
@@ -1715,7 +1719,8 @@ static void processDeviceMethodNotification(PMQTTTRANSPORT_HANDLE_DATA transport
             {
                 /* CodesSRS_IOTHUB_MQTT_TRANSPORT_07_053: [ If type is IOTHUB_TYPE_DEVICE_METHODS, then on success mqttNotificationCallback shall call IoTHubClientCore_LL_DeviceMethodComplete. ] */
                 const APP_PAYLOAD* payload = mqttmessage_getApplicationMsg(msgHandle);
-                if (transportData->transport_callbacks.method_complete_cb(STRING_c_str(method_name), payload->message, payload->length, (void*)dev_method_info, transportData->transport_ctx) != 0)
+                if (payload == NULL || 
+                    transportData->transport_callbacks.method_complete_cb(STRING_c_str(method_name), payload->message, payload->length, (void*)dev_method_info, transportData->transport_ctx) != 0)
                 {
                     LogError("Failure: IoTHubClientCore_LL_DeviceMethodComplete");
                     STRING_delete(dev_method_info->request_id);
@@ -1732,9 +1737,13 @@ static void processDeviceMethodNotification(PMQTTTRANSPORT_HANDLE_DATA transport
 //
 static void processIncomingMessageNotification(PMQTTTRANSPORT_HANDLE_DATA transportData, MQTT_MESSAGE_HANDLE msgHandle, const char* topic_resp, IOTHUB_IDENTITY_TYPE type)
 {
+    IOTHUB_MESSAGE_HANDLE IoTHubMessage;
     const APP_PAYLOAD* appPayload = mqttmessage_getApplicationMsg(msgHandle);
-    IOTHUB_MESSAGE_HANDLE IoTHubMessage = IoTHubMessage_CreateFromByteArray(appPayload->message, appPayload->length);
-    if (IoTHubMessage == NULL)
+    if (appPayload == NULL)
+    {
+        LogError("Failure: invalid appPayload.");
+    }
+    else if ((IoTHubMessage = IoTHubMessage_CreateFromByteArray(appPayload->message, appPayload->length)) == NULL)
     {
         LogError("Failure: IotHub Message creation has failed.");
     }
