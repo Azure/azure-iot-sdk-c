@@ -37,13 +37,13 @@ typedef struct IOTHUB_MESSAGE_HANDLE_DATA_TAG
     char* userId;
 }IOTHUB_MESSAGE_HANDLE_DATA;
 
-static bool ContainsOnlyUsAscii(const char* asciiValue)
+static bool ContainsValidUsAscii(const char* asciiValue)
 {
     bool result = true;
     const char* iterator = asciiValue;
     while (iterator != NULL && *iterator != '\0')
     {
-        // Allow only printable ascii char
+        // Union of all allowed ASCII characters for the different protocols (HTTPS, MQTT, AMQP) is [dec 32, dec 126].
         if (*iterator < ' ' || *iterator > '~')
         {
             result = false;
@@ -51,14 +51,15 @@ static bool ContainsOnlyUsAscii(const char* asciiValue)
         }
         iterator++;
     }
+
     return result;
 }
 
-/* Codes_SRS_IOTHUBMESSAGE_07_008: [ValidateAsciiCharactersFilter shall loop through the mapKey and mapValue strings to ensure that they only contain valid US-Ascii characters Ascii value 32 - 126.] */
+/* Codes_SRS_IOTHUBMESSAGE_07_008: [ValidateAsciiCharactersFilter shall loop through the mapKey and mapValue strings to ensure that they only contain valid US-Ascii characters.*/
 static int ValidateAsciiCharactersFilter(const char* mapKey, const char* mapValue)
 {
     int result;
-    if (!ContainsOnlyUsAscii(mapKey) || !ContainsOnlyUsAscii(mapValue))
+    if (!ContainsValidUsAscii(mapKey) || !ContainsValidUsAscii(mapValue))
     {
         result = MU_FAILURE;
     }
@@ -572,7 +573,13 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetProperty(IOTHUB_MESSAGE_HANDLE msg_handle
     }
     else
     {
-        if (Map_AddOrUpdate(msg_handle->properties, key, value) != MAP_OK)
+        MAP_RESULT map_result = Map_AddOrUpdate(msg_handle->properties, key, value);
+        if (map_result == MAP_FILTER_REJECT)
+        {
+            LogError("Failure validating property as ASCII");
+            result = IOTHUB_MESSAGE_INVALID_TYPE;
+        }
+        else if (map_result != MAP_OK)
         {
             LogError("Failure adding property to internal map");
             result = IOTHUB_MESSAGE_ERROR;

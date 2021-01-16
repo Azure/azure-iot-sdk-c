@@ -1,9 +1,11 @@
 #!/bin/bash
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
-#
 
-set -e
+set -x # Set trace on
+set -o errexit # Exit if command failed
+set -o nounset # Exit if variable not set
+set -o pipefail # Exit if pipe failed
 
 sw_vers
 gcc --version
@@ -21,5 +23,5 @@ mkdir -p $build_folder
 pushd $build_folder
 cmake .. -DOPENSSL_ROOT_DIR:PATH=/usr/local/opt/openssl -Duse_openssl:bool=ON -Drun_unittests:bool=ON
 cmake --build . -- --jobs=$CORES
-ctest -j 8 -C "debug" -VV --output-on-failure
+ctest -j 8 -C "debug" -VV --output-on-failure --schedule-random
 popd

@@ -985,20 +985,6 @@ TEST_FUNCTION_CLEANUP(TestMethodCleanup)
     TEST_MUTEX_RELEASE(test_serialize_mutex);
 }
 
-static int should_skip_index(size_t current_index, const size_t skip_array[], size_t length)
-{
-    int result = 0;
-    for (size_t index = 0; index < length; index++)
-    {
-        if (current_index == skip_array[index])
-        {
-            result = MU_FAILURE;
-            break;
-        }
-    }
-    return result;
-}
-
 static void setup_IoTHubClientCore_LL_create_mocks(bool use_device_config, bool is_edge_module)
 {
     STRICT_EXPECTED_CALL(get_time(IGNORED_NUM_ARG)).CallCannotFail();
@@ -1887,26 +1873,22 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_fail)
     umock_c_negative_tests_snapshot();
 
     // act
-    size_t calls_cannot_fail[] = { 1, 2, 6, 9, 12, 13, 14, 17, 18 };
-
     size_t count = umock_c_negative_tests_call_count();
     for (size_t index = 0; index < count; index++)
     {
-        if (should_skip_index(index, calls_cannot_fail, sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0])) != 0)
+        if (umock_c_negative_tests_can_call_fail(index))
         {
-            continue;
+            umock_c_negative_tests_reset();
+            umock_c_negative_tests_fail_call(index);
+
+            char tmp_msg[64];
+            sprintf(tmp_msg, "IoTHubClientCore_LL_CreateWithTransport failure in test %zu/%zu", index, count);
+
+            IOTHUB_CLIENT_CORE_LL_HANDLE result = IoTHubClientCore_LL_CreateWithTransport(&TEST_DEVICE_CONFIG);
+
+            //assert
+            ASSERT_ARE_EQUAL(void_ptr, NULL, result, tmp_msg);
         }
-
-        umock_c_negative_tests_reset();
-        umock_c_negative_tests_fail_call(index);
-
-        char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubClientCore_LL_CreateWithTransport failure in test %zu/%zu", index, count);
-
-        IOTHUB_CLIENT_CORE_LL_HANDLE result = IoTHubClientCore_LL_CreateWithTransport(&TEST_DEVICE_CONFIG);
-
-        //assert
-        ASSERT_ARE_EQUAL(void_ptr, NULL, result, tmp_msg);
     }
 
     // cleanup
@@ -2314,25 +2296,22 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendEventAsync_fails)
     umock_c_negative_tests_snapshot();
 
     // act
-    size_t calls_cannot_fail[] = { 4 };
     size_t count = umock_c_negative_tests_call_count();
     for (size_t index = 0; index < count; index++)
     {
-        if (should_skip_index(index, calls_cannot_fail, sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0])) != 0)
+        if (umock_c_negative_tests_can_call_fail(index))
         {
-            continue;
+            umock_c_negative_tests_reset();
+            umock_c_negative_tests_fail_call(index);
+
+            char tmp_msg[64];
+            sprintf(tmp_msg, "IoTHubClientCore_LL_Create failure in test %zu/%zu", index, count);
+
+            IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SendEventAsync(handle, TEST_MESSAGE_HANDLE, test_event_confirmation_callback, (void*)1);
+
+            //assert
+            ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
         }
-
-        umock_c_negative_tests_reset();
-        umock_c_negative_tests_fail_call(index);
-
-        char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubClientCore_LL_Create failure in test %zu/%zu", index, count);
-
-        IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SendEventAsync(handle, TEST_MESSAGE_HANDLE, test_event_confirmation_callback, (void*)1);
-
-        //assert
-        ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
     }
 
     //cleanup
@@ -4515,26 +4494,23 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendReportedState_fail)
 
     umock_c_negative_tests_snapshot();
 
-    size_t calls_cannot_fail[] = { 3 };
-
     size_t count = umock_c_negative_tests_call_count();
     for (size_t index = 0; index < count; index++)
     {
-        if (should_skip_index(index, calls_cannot_fail, sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0])) != 0)
+        if (umock_c_negative_tests_can_call_fail(index))
         {
-            continue;
+            umock_c_negative_tests_reset();
+            umock_c_negative_tests_fail_call(index);
+
+            char tmp_msg[128];
+            sprintf(tmp_msg, "IoTHubClientCore_LL_SendReportedState failure in test %zu/%zu", index, count);
+
+            //act
+            IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SendReportedState(handle, TEST_REPORTED_STATE, TEST_REPORTED_SIZE, iothub_reported_state_callback, NULL);
+
+            //assert
+            ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, tmp_msg);
         }
-        umock_c_negative_tests_reset();
-        umock_c_negative_tests_fail_call(index);
-
-        char tmp_msg[128];
-        sprintf(tmp_msg, "IoTHubClientCore_LL_SendReportedState failure in test %zu/%zu", index, count);
-
-        //act
-        IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SendReportedState(handle, TEST_REPORTED_STATE, TEST_REPORTED_SIZE, iothub_reported_state_callback, NULL);
-
-        //assert
-        ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, tmp_msg);
     }
 
     //cleanup
@@ -5790,25 +5766,22 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendEventToOutputAsync_fails)
     umock_c_negative_tests_snapshot();
 
     // act
-    size_t calls_cannot_fail[] = { 5 /*DList_InsertTailList*/ };
     size_t count = umock_c_negative_tests_call_count();
     for (size_t index = 0; index < count; index++)
     {
-        if (should_skip_index(index, calls_cannot_fail, sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0])) != 0)
+        if (umock_c_negative_tests_can_call_fail(index))
         {
-            continue;
+            umock_c_negative_tests_reset();
+            umock_c_negative_tests_fail_call(index);
+
+            char tmp_msg[64];
+            sprintf(tmp_msg, "IoTHubClientCore_LL_Create failure in test %zu/%zu", index, count);
+
+            IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SendEventToOutputAsync(handle, TEST_MESSAGE_HANDLE, TEST_OUTPUT_NAME, test_event_confirmation_callback, (void*)1);
+
+            //assert
+            ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
         }
-
-        umock_c_negative_tests_reset();
-        umock_c_negative_tests_fail_call(index);
-
-        char tmp_msg[64];
-        sprintf(tmp_msg, "IoTHubClientCore_LL_Create failure in test %zu/%zu", index, count);
-
-        IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SendEventToOutputAsync(handle, TEST_MESSAGE_HANDLE, TEST_OUTPUT_NAME, test_event_confirmation_callback, (void*)1);
-
-        //assert
-        ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
     }
 
     //cleanup
@@ -6106,7 +6079,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallback_one_item_fail)
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
     STRICT_EXPECTED_CALL(singlylinkedlist_create());
-    STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_find(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CallCannotFail();
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
 
     umock_c_negative_tests_snapshot();
@@ -6114,22 +6087,20 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallback_one_item_fail)
     size_t count = umock_c_negative_tests_call_count();
     for (size_t index = 0; index < count; index++)
     {
-        if  (index == 1) // singlylinkedlist_find
+        if (umock_c_negative_tests_can_call_fail(index))
         {
-            continue;
+            umock_c_negative_tests_reset();
+            umock_c_negative_tests_fail_call(index);
+
+            char tmp_msg[128];
+            sprintf(tmp_msg, "IoTHubClientCore_LL_SetInputMessageCallback failure in test %zu/%zu", index, count);
+
+            ///act
+            IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SetInputMessageCallback(handle, TEST_INPUT_NAME, messageCallback, (void*)1);
+
+            ///assert
+            ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, tmp_msg);
         }
-
-        umock_c_negative_tests_reset();
-        umock_c_negative_tests_fail_call(index);
-
-        char tmp_msg[128];
-        sprintf(tmp_msg, "IoTHubClientCore_LL_SetInputMessageCallback failure in test %zu/%zu", index, count);
-
-        ///act
-        IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SetInputMessageCallback(handle, TEST_INPUT_NAME, messageCallback, (void*)1);
-
-        ///assert
-        ASSERT_ARE_NOT_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, tmp_msg);
     }
 
     //
@@ -6605,36 +6576,28 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_match_fail)
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_INPUT_NAME);
 
     STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(get_time(NULL));
-    STRICT_EXPECTED_CALL(messageCallback(testMessage->messageHandle, (void*)20));
-    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SendMessageDisposition(testMessage, IOTHUBMESSAGE_ACCEPTED));
+    STRICT_EXPECTED_CALL(get_time(NULL)).CallCannotFail();
+    STRICT_EXPECTED_CALL(messageCallback(testMessage->messageHandle, (void*)20)).CallCannotFail();
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SendMessageDisposition(testMessage, IOTHUBMESSAGE_ACCEPTED)).CallCannotFail();
 
     umock_c_negative_tests_snapshot();
 
-    //act
-    size_t calls_cannot_fail[] = {
-        5,  // get_time
-        6,  // messageCallback
-        7   // FAKE_IoTHubTransport_SendMessageDisposition
-    };
     size_t count = umock_c_negative_tests_call_count();
     for (size_t index = 0; index < count; index++)
     {
-        if (should_skip_index(index, calls_cannot_fail, sizeof(calls_cannot_fail) / sizeof(calls_cannot_fail[0])) != 0)
+        if (umock_c_negative_tests_can_call_fail(index))
         {
-            continue;
+            umock_c_negative_tests_reset();
+            umock_c_negative_tests_fail_call(index);
+
+            char tmp_msg[128];
+            sprintf(tmp_msg, "IoTHubClientCore_LL_MessageCallbackFromInput failure in test %zu/%zu", index, count);
+
+            bool result = g_transport_cb_info.msg_input_cb(testMessage, handle);
+
+            //assert
+            ASSERT_ARE_EQUAL(bool, false, result, tmp_msg);
         }
-
-        umock_c_negative_tests_reset();
-        umock_c_negative_tests_fail_call(index);
-
-        char tmp_msg[128];
-        sprintf(tmp_msg, "IoTHubClientCore_LL_MessageCallbackFromInput failure in test %zu/%zu", index, count);
-
-        bool result = g_transport_cb_info.msg_input_cb(testMessage, handle);
-
-        //assert
-        ASSERT_ARE_EQUAL(bool, false, result, tmp_msg);
     }
 
     //cleanup

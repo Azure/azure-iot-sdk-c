@@ -33,7 +33,8 @@ static const char* connectionString = "[device connection string]";
 /*Optional string with http proxy host and integer for http proxy port (Linux only)         */
 static const char* proxyHost = NULL;
 static int proxyPort = 0;
-static const char* data_to_upload = "Hello World from IoTHubClient_LL_UploadToBlob\n";
+static const char* data_to_upload_format = "Hello World from IoTHubDeviceClient_LL_UploadToBlob block: %d\n";
+static char data_to_upload[128];
 static int block_count = 0;
 
 static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT getDataCallback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
@@ -44,9 +45,17 @@ static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT getDataCallback(IOTHUB_CLIENT_F
         if (data != NULL && size != NULL)
         {
             // "block_count" is used to simulate reading chunks from a larger data content, like a large file.
+            // Note that the IoT SDK caller does NOT free(*data), as a typical use case the buffer returned 
+            // to the IoT layer may be part of a larger buffer that this callback is chunking up for network sends.
 
             if (block_count < 100)
             {
+                int len = snprintf(data_to_upload, sizeof(data_to_upload), data_to_upload_format, block_count);
+                if (len < 0 || len >= sizeof(data_to_upload))
+                {
+                    return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_ABORT;
+                }
+
                 *data = (const unsigned char*)data_to_upload;
                 *size = strlen(data_to_upload);
                 block_count++;

@@ -84,7 +84,7 @@ jobs:
       destinationFolder: '$(Build.SourcesDirectory)/source_artifacts'
 
   - script: |
-      cd $(Build.SourcesDirectory)
+      cd $(Build.SourcesDirectory)/source_artifacts/
       ls -al
     displayName: "list Build.SourcesDirectory"
 
