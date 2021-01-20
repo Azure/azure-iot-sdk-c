@@ -4,9 +4,6 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(azure_iot_sdks)
 
-#Eddy
-message("*********** Eddy: azure_iot_sdks **************")
-
 include("${CMAKE_CURRENT_LIST_DIR}/configs/azure_iot_sdksFunctions.cmake")
 
 getIoTSDKVersion()

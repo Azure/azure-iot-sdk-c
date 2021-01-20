@@ -24,7 +24,6 @@
 #include "azure_prov_client/prov_security_factory.h"
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
-//Eddy
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "certs.h"
 #endif
