@@ -23,11 +23,11 @@
 #include "azure_prov_client/prov_transport_mqtt_client.h"
 #include "azure_prov_client/prov_security_factory.h"
 
-#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+
 //Eddy
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "certs.h"
-#endif
+
 
 // Format of custom DPS payload sent when registering a PnP device.
 static const char g_dps_PayloadFormatForModelId[] = "{\"modelId\":\"%s\"}";
@@ -98,46 +98,59 @@ IOTHUB_DEVICE_CLIENT_LL_HANDLE PnP_CreateDeviceClientLLHandle_ViaDps(const PNP_D
         LogError("Cannot allocate DPS payload for modelId.");
         result = false;
     }
-    else if ((prov_dev_set_symmetric_key_info(pnpDeviceConfiguration->u.dpsConnectionAuth.deviceId, pnpDeviceConfiguration->u.dpsConnectionAuth.deviceKey) != 0))
+    LogInfo("STRING_construct_sprintf ... done");
+
+    if ((prov_dev_set_symmetric_key_info(pnpDeviceConfiguration->u.dpsConnectionAuth.deviceId, pnpDeviceConfiguration->u.dpsConnectionAuth.deviceKey) != 0))
     {
         LogError("prov_dev_set_symmetric_key_info failed.");
         result = false;
     }
-    else if (prov_dev_security_init(SECURE_DEVICE_TYPE_SYMMETRIC_KEY) != 0)
+    LogInfo("prov_dev_set_symmetric_key_info ... done");
+    
+    if (prov_dev_security_init(SECURE_DEVICE_TYPE_SYMMETRIC_KEY) != 0)
     {
         LogError("prov_dev_security_init failed");
         result = false;
     }
-    else if ((provDeviceHandle = Prov_Device_LL_Create(pnpDeviceConfiguration->u.dpsConnectionAuth.endpoint, pnpDeviceConfiguration->u.dpsConnectionAuth.idScope, Prov_Device_MQTT_Protocol)) == NULL)
+    LogInfo("prov_dev_security_init ... done");
+
+
+    if ((provDeviceHandle = Prov_Device_LL_Create(pnpDeviceConfiguration->u.dpsConnectionAuth.endpoint, pnpDeviceConfiguration->u.dpsConnectionAuth.idScope, Prov_Device_MQTT_Protocol)) == NULL)
     {
         LogError("Failed calling Prov_Device_LL_Create");
         result = false;
     }
-    else if ((provDeviceResult = Prov_Device_LL_SetOption(provDeviceHandle, PROV_OPTION_LOG_TRACE, &pnpDeviceConfiguration->enableTracing)) != PROV_DEVICE_RESULT_OK)
+    LogInfo("Prov_Device_LL_Create ... done");
+    
+    
+    if ((provDeviceResult = Prov_Device_LL_SetOption(provDeviceHandle, PROV_OPTION_LOG_TRACE, &pnpDeviceConfiguration->enableTracing)) != PROV_DEVICE_RESULT_OK)
     {
         LogError("Setting provisioning tracing on failed, error=%d", provDeviceResult);
         result = false;
     }
-
-#ifdef SET_TRUSTED_CERT_IN_SAMPLES
-    //Eddy
+    LogInfo("Prov_Device_LL_SetOption ... done");
+    
     // Setting the Trusted Certificate. This is only necessary on systems without
     // built in certificate stores.
-    else if ((provDeviceResult = Prov_Device_LL_SetOption(provDeviceHandle, OPTION_TRUSTED_CERT, certificates)) != PROV_DEVICE_RESULT_OK)
+    if ((provDeviceResult = Prov_Device_LL_SetOption(provDeviceHandle, OPTION_TRUSTED_CERT, certificates)) != PROV_DEVICE_RESULT_OK)
     {    
         LogError("Setting provisioning tracing on failed, error=%d", provDeviceResult);
         result = false;
-    }
-#endif
+    } 
+    LogInfo("Prov_Device_LL_SetOption > OPTION_TRUSTED_CERT ... done");
+
 
     // This step indicates the ModelId of the device to DPS.  This allows the service to (optionally) perform custom operations,
     // such as allocating a different IoT Hub to devices based on their ModelId.
-    else if ((provDeviceResult = Prov_Device_LL_Set_Provisioning_Payload(provDeviceHandle, STRING_c_str(modelIdPayload))) != PROV_DEVICE_RESULT_OK)
+    if ((provDeviceResult = Prov_Device_LL_Set_Provisioning_Payload(provDeviceHandle, STRING_c_str(modelIdPayload))) != PROV_DEVICE_RESULT_OK)
     {
         LogError("Failed setting provisioning data, error=%d", provDeviceResult);
         result = false;
     }
-    else if ((provDeviceResult = Prov_Device_LL_Register_Device(provDeviceHandle, provisioningRegisterCallback, NULL, NULL, NULL)) != PROV_DEVICE_RESULT_OK)
+    LogInfo("Prov_Device_LL_Set_Provisioning_Payload ... done");
+    
+    
+    if ((provDeviceResult = Prov_Device_LL_Register_Device(provDeviceHandle, provisioningRegisterCallback, NULL, NULL, NULL)) != PROV_DEVICE_RESULT_OK)
     {
         LogError("Prov_Device_LL_Register_Device failed, error=%d", provDeviceResult);
         result = false;

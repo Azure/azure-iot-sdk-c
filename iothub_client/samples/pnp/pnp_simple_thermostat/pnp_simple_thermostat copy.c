@@ -650,63 +650,40 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateAndConfigureDeviceClientHandleForPnP
         result = false;
     }
     // Create the deviceHandle itself.
-
-    LogInfo("IoTHub_Init .. done");
-
-//    else if ((deviceHandle = CreateDeviceClientLLHandle()) == NULL)
-    if ((deviceHandle = CreateDeviceClientLLHandle()) == NULL)
+    else if ((deviceHandle = CreateDeviceClientLLHandle()) == NULL)
     {
         LogError("Failure creating IotHub client.  Hint: Check your connection string or DPS configuration");
         result = false;
     }
-    LogInfo("CreateDeviceClientLLHandle .. done");
-
-
     // Sets verbosity level
-//    else if ((iothubResult = IoTHubDeviceClient_LL_SetOption(deviceHandle, OPTION_LOG_TRACE, &g_hubClientTraceEnabled)) != IOTHUB_CLIENT_OK)
-    if ((iothubResult = IoTHubDeviceClient_LL_SetOption(deviceHandle, OPTION_LOG_TRACE, &g_hubClientTraceEnabled)) != IOTHUB_CLIENT_OK)
+    else if ((iothubResult = IoTHubDeviceClient_LL_SetOption(deviceHandle, OPTION_LOG_TRACE, &g_hubClientTraceEnabled)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to set logging option, error=%d", iothubResult);
         result = false;
     }
-    LogInfo("IoTHubDeviceClient_LL_SetOption > OPTION_LOG_TRACE .. done");
-
     // Sets the name of ModelId for this PnP device.
     // This *MUST* be set before the client is connected to IoTHub.  We do not automatically connect when the 
     // handle is created, but will implicitly connect to subscribe for device method and device twin callbacks below.
-//    else if ((iothubResult = IoTHubDeviceClient_LL_SetOption(deviceHandle, OPTION_MODEL_ID, g_ThermostatModelId)) != IOTHUB_CLIENT_OK)
-    if ((iothubResult = IoTHubDeviceClient_LL_SetOption(deviceHandle, OPTION_MODEL_ID, g_ThermostatModelId)) != IOTHUB_CLIENT_OK)
+    else if ((iothubResult = IoTHubDeviceClient_LL_SetOption(deviceHandle, OPTION_MODEL_ID, g_ThermostatModelId)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to set the ModelID, error=%d", iothubResult);
         result = false;
     }
-    LogInfo("IoTHubDeviceClient_LL_SetOption > OPTION_MODEL_ID .. done");
-
-
     // Sets the callback function that processes incoming device methods, which is the channel PnP Commands are transferred over
-//    else if ((iothubResult = IoTHubDeviceClient_LL_SetDeviceMethodCallback(deviceHandle, Thermostat_DeviceMethodCallback, NULL)) != IOTHUB_CLIENT_OK)
-    if ((iothubResult = IoTHubDeviceClient_LL_SetDeviceMethodCallback(deviceHandle, Thermostat_DeviceMethodCallback, NULL)) != IOTHUB_CLIENT_OK)
+    else if ((iothubResult = IoTHubDeviceClient_LL_SetDeviceMethodCallback(deviceHandle, Thermostat_DeviceMethodCallback, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to set device method callback, error=%d", iothubResult);
         result = false;
     }
-    LogInfo("IoTHubDeviceClient_LL_SetDeviceMethodCallback .. done");
-
-
     // Sets the callback function that processes device twin changes from the IoTHub, which is the channel that PnP Properties are 
     // transferred over.  This will also automatically retrieve the full twin for the application. 
-//    else if ((iothubResult = IoTHubDeviceClient_LL_SetDeviceTwinCallback(deviceHandle, Thermostat_DeviceTwinCallback, (void*)deviceHandle)) != IOTHUB_CLIENT_OK)
-    if ((iothubResult = IoTHubDeviceClient_LL_SetDeviceTwinCallback(deviceHandle, Thermostat_DeviceTwinCallback, (void*)deviceHandle)) != IOTHUB_CLIENT_OK)
+    else if ((iothubResult = IoTHubDeviceClient_LL_SetDeviceTwinCallback(deviceHandle, Thermostat_DeviceTwinCallback, (void*)deviceHandle)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to set device twin callback, error=%d", iothubResult);
         result = false;
     }
-    LogInfo("IoTHubDeviceClient_LL_SetDeviceTwinCallback .. done");
-
-
     // Enabling auto url encode will have the underlying SDK perform URL encoding operations automatically.
-//    else if ((iothubResult = IoTHubDeviceClient_LL_SetOption(deviceHandle, OPTION_AUTO_URL_ENCODE_DECODE, &urlAutoEncodeDecode)) != IOTHUB_CLIENT_OK)
-    if ((iothubResult = IoTHubDeviceClient_LL_SetOption(deviceHandle, OPTION_AUTO_URL_ENCODE_DECODE, &urlAutoEncodeDecode)) != IOTHUB_CLIENT_OK)
+    else if ((iothubResult = IoTHubDeviceClient_LL_SetOption(deviceHandle, OPTION_AUTO_URL_ENCODE_DECODE, &urlAutoEncodeDecode)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to set auto Url encode option, error=%d", iothubResult);
         result = false;
@@ -714,7 +691,7 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateAndConfigureDeviceClientHandleForPnP
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
     // Setting the Trusted Certificate.  This is only necessary on systems without built in certificate stores.
     else if ((iothubResult = IoTHubDeviceClient_LL_SetOption(deviceHandle, OPTION_TRUSTED_CERT, certificates)) != IOTHUB_CLIENT_OK)
-//    if ((iothubResult = IoTHubDeviceClient_LL_SetOption(deviceHandle, OPTION_TRUSTED_CERT, certificates)) != IOTHUB_CLIENT_OK)
+    if ((iothubResult = IoTHubDeviceClient_LL_SetOption(deviceHandle, OPTION_TRUSTED_CERT, certificates)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to set the trusted cert, error=%d", iothubResult);
         result = false;
@@ -741,13 +718,6 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateAndConfigureDeviceClientHandleForPnP
 
 int main(void)
 {
-    printf("***** pnp_simple_thermostat *****\n");
-
-    putenv("IOTHUB_DEVICE_SECURITY_TYPE=DPS");
-    putenv("IOTHUB_DEVICE_DPS_ID_SCOPE=0ne001CC319");
-    putenv("IOTHUB_DEVICE_DPS_DEVICE_ID=eddytest01");
-    putenv("IOTHUB_DEVICE_DPS_DEVICE_KEY=VlOmDa/itPEFuT9Hw9df72y8gyD6qrUR1LwZP2MWw5s=");
-
     IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL = NULL;
 
     if (GetConnectionSettingsFromEnvironment() == false)
