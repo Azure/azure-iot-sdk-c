@@ -6,6 +6,7 @@
 #include "certs.h"
 /* Note: for devices with limited resources, only one cert should be loaded.
    #defines are used to reduce memory footprint of certificates.
+   To use ECC with IoT Hub Gateway V2, use -DUSE_DIGICERT_G3_CERT.
    For DE and CN regions, please build with -DUSE_MICROSOFTAZURE_DE_CERT or -DUSE_PORTAL_AZURE_CN_CERT, respectively,
    if you wish to load ONLY those certs.
 */
@@ -46,7 +47,7 @@ const char certificates[] =
 #endif /* BALTIMORE_CERT */
 
 #if defined(USE_DIGICERT_G3_CERT)
-// DigiCert Global Root G3 - Used for ECC in IoT Hub Gateway v2
+// DigiCert Global Root G3 - Used for ECC certs in IoT Hub Gateway v2
 "-----BEGIN CERTIFICATE-----\r\n"
 "MIICPzCCAcWgAwIBAgIQBVVWvPJepDU1w6QP1atFcjAKBggqhkjOPQQDAzBhMQsw\r\n"
 "CQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3d3cu\r\n"
