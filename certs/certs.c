@@ -63,7 +63,7 @@ const char certificates[] =
 "oAIwOWZbwmSNuJ5Q3KjVSaLtx9zRSX8XAbjIho9OjIgrqJqpisXRAL34VOKa5Vt8\r\n"
 "sycX\r\n"
 "-----END CERTIFICATE-----\r\n"
-#endif
+#endif /* DIGICERT_G3_CERT */
 
 #if defined(USE_PORTAL_AZURE_CN_CERT)
 /* DigiCert Global Root CA */
