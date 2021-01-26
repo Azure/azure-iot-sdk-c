@@ -330,7 +330,7 @@ static void on_get_twin_completed(TWIN_UPDATE_TYPE update_type, const char* payl
     (void)update_type;
 
     DEVICE_GET_TWIN_CONTEXT* twin_ctx = (DEVICE_GET_TWIN_CONTEXT*)context;
-    if (payload == NULL || twin_ctx == NULL)
+    if (twin_ctx == NULL)
     {
         LogError("Invalid argument (context=%p, payload=%p)", context, payload);
     }
