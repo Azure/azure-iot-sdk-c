@@ -327,14 +327,18 @@ static void on_get_twin_completed(TWIN_UPDATE_TYPE update_type, const char* payl
 {
     (void)update_type;
 
-    if (payload == NULL || context == NULL)
+    DEVICE_GET_TWIN_CONTEXT* twin_ctx = (DEVICE_GET_TWIN_CONTEXT*)context;
+    if (payload == NULL || twin_ctx == NULL)
     {
         LogError("Invalid argument (context=%p, payload=%p)", context, payload);
+
+        if (twin_ctx)
+        {
+            free(twin_ctx);
+        }
     }
     else
     {
-        DEVICE_GET_TWIN_CONTEXT* twin_ctx = (DEVICE_GET_TWIN_CONTEXT*)context;
-
         // get-twin-async always returns a complete twin json.
         twin_ctx->on_get_twin_completed_callback(DEVICE_TWIN_UPDATE_TYPE_COMPLETE, (const unsigned char*)payload, size, twin_ctx->context);
 
