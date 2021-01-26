@@ -162,13 +162,17 @@ static D2C_EVENT_SEND_RESULT get_d2c_event_send_result_from(TELEMETRY_MESSENGER_
 
 static void on_event_send_complete_messenger_callback(IOTHUB_MESSAGE_LIST* iothub_message, TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT ev_send_comp_result, void* context)
 {
-    if (iothub_message == NULL || context == NULL)
+    DEVICE_SEND_EVENT_TASK* send_task = (DEVICE_SEND_EVENT_TASK*)context;
+    if (iothub_message == NULL || send_task == NULL)
     {
-        LogError("on_event_send_complete_messenger_callback was invoked, but either iothub_message (%p) or context (%p) are NULL", iothub_message, context);
+        LogError("on_event_send_complete_messenger_callback was invoked, but either iothub_message (%p) or context (%p) are NULL", iothub_message, send_task);
+        if (send_task)
+        {
+            free(send_task);
+        }
     }
     else
     {
-        DEVICE_SEND_EVENT_TASK* send_task = (DEVICE_SEND_EVENT_TASK*)context;
 
         // Codes_SRS_DEVICE_09_059: [If `ev_send_comp_result` is TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_OK, D2C_EVENT_SEND_COMPLETE_RESULT_OK shall be reported as `event_send_complete`]
         // Codes_SRS_DEVICE_09_060: [If `ev_send_comp_result` is TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE, D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE shall be reported as `event_send_complete`]
@@ -327,14 +331,18 @@ static void on_get_twin_completed(TWIN_UPDATE_TYPE update_type, const char* payl
 {
     (void)update_type;
 
-    if (payload == NULL || context == NULL)
+    DEVICE_GET_TWIN_CONTEXT* twin_ctx = (DEVICE_GET_TWIN_CONTEXT*)context;
+    if (payload == NULL || twin_ctx == NULL)
     {
         LogError("Invalid argument (context=%p, payload=%p)", context, payload);
+
+        if (twin_ctx)
+        {
+            free(twin_ctx);
+        }
     }
     else
     {
-        DEVICE_GET_TWIN_CONTEXT* twin_ctx = (DEVICE_GET_TWIN_CONTEXT*)context;
-
         // get-twin-async always returns a complete twin json.
         twin_ctx->on_get_twin_completed_callback(DEVICE_TWIN_UPDATE_TYPE_COMPLETE, (const unsigned char*)payload, size, twin_ctx->context);
 
