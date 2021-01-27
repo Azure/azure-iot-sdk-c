@@ -153,7 +153,10 @@ static void DestroyMethod(SCHEMA_METHOD_HANDLE methodHandle)
     for (size_t j = 0; j < nArguments; j++)
     {
         SCHEMA_METHOD_ARGUMENT_HANDLE* methodArgumentHandle = VECTOR_element(methodHandle->methodArguments, j);
-        DestroyMethodArgument(*methodArgumentHandle);
+        if (methodArgumentHandle != NULL)
+        {
+            DestroyMethodArgument(*methodArgumentHandle);
+        }
     }
     free(methodHandle->methodName);
     VECTOR_destroy(methodHandle->methodArguments);
@@ -167,7 +170,10 @@ static void DestroyMethods(SCHEMA_MODEL_TYPE_HANDLE modelHandle)
     for (size_t j = 0; j < nMethods; j++)
     {
         SCHEMA_METHOD_HANDLE* methodHandle = VECTOR_element(modelHandle->methods, j);
-        DestroyMethod(*methodHandle);
+        if (methodHandle != NULL)
+        {
+            DestroyMethod(*methodHandle);
+        }
     }
     VECTOR_destroy(modelHandle->methods);
 }
@@ -217,7 +223,10 @@ static void DestroyModel(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle)
     for (i = 0; i < VECTOR_size(modelType->models); i++)
     {
         MODEL_IN_MODEL* temp = (MODEL_IN_MODEL*)VECTOR_element(modelType->models, i);
-        free((void*)temp->propertyName);
+        if (temp != NULL)
+        {
+            free((void*)temp->propertyName);
+        }
     }
 
     nReportedProperties = VECTOR_size(modelType->reportedProperties);
@@ -2593,7 +2602,8 @@ bool Schema_ModelPropertyByPathExists(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, 
             for (i = 0; i < modelCount; i++)
             {
                 MODEL_IN_MODEL* childModel = (MODEL_IN_MODEL*)VECTOR_element(modelType->models, i);
-                if ((strncmp(childModel->propertyName, propertyPath, endPos - propertyPath) == 0) &&
+                if (childModel != NULL &&
+                    (strncmp(childModel->propertyName, propertyPath, endPos - propertyPath) == 0) &&
                     (strlen(childModel->propertyName) == (size_t)(endPos - propertyPath)))
                 {
                     /* found */
@@ -2685,7 +2695,8 @@ bool Schema_ModelReportedPropertyByPathExists(SCHEMA_MODEL_TYPE_HANDLE modelType
             for (i = 0; i < modelCount; i++)
             {
                 MODEL_IN_MODEL* childModel = (MODEL_IN_MODEL*)VECTOR_element(modelType->models, i);
-                if ((strncmp(childModel->propertyName, reportedPropertyPath, endPos - reportedPropertyPath) == 0) &&
+                if (childModel != NULL &&
+                    (strncmp(childModel->propertyName, reportedPropertyPath, endPos - reportedPropertyPath) == 0) &&
                     (strlen(childModel->propertyName) == (size_t)(endPos - reportedPropertyPath)))
                 {
                     /* found */
@@ -2949,7 +2960,8 @@ bool Schema_ModelDesiredPropertyByPathExists(SCHEMA_MODEL_TYPE_HANDLE modelTypeH
             for (i = 0; i < modelCount; i++)
             {
                 MODEL_IN_MODEL* childModel = (MODEL_IN_MODEL*)VECTOR_element(modelType->models, i);
-                if ((strncmp(childModel->propertyName, desiredPropertyPath, endPos - desiredPropertyPath) == 0) &&
+                if (childModel != NULL &&
+                    (strncmp(childModel->propertyName, desiredPropertyPath, endPos - desiredPropertyPath) == 0) &&
                     (strlen(childModel->propertyName) == (size_t)(endPos - desiredPropertyPath)))
                 {
                     /* found */

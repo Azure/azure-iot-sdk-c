@@ -237,7 +237,7 @@ static void garbageCollectorImpl(IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientInstan
         LIST_ITEM_HANDLE old_item = item;
         item = singlylinkedlist_get_next_item(item);
 
-        if (Lock(threadInfo->lockGarbage) != LOCK_OK)
+        if (threadInfo == NULL || Lock(threadInfo->lockGarbage) != LOCK_OK)
         {
             LogError("unable to Lock");
         }
