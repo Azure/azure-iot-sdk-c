@@ -4,21 +4,24 @@
 /* This file contains certs needed to communicate with Azure (IoT) */
 
 #include "certs.h"
-/* Note: for devices with limited resources, only one cert should be loaded. 
+/* Note: for devices with limited resources, only one cert should be loaded.
    #defines are used to reduce memory footprint of certificates.
-   For DE and CN regions, please build with -DUSE_MICROSOFTAZURE_DE_CERT or -DUSE_PORTAL_AZURE_CN_CERT, respectively, 
+   To use ECC with IoT Hub Gateway V2, please build with -DUSE_DIGICERT_G3_CERT.
+   For DE and CN regions, please build with -DUSE_MICROSOFTAZURE_DE_CERT or -DUSE_PORTAL_AZURE_CN_CERT, respectively,
    if you wish to load ONLY those certs.
 */
-#if !defined(USE_BALTIMORE_CERT) && !defined(USE_MICROSOFTAZURE_DE_CERT) && !defined(USE_PORTAL_AZURE_CN_CERT)
+#if !defined(USE_BALTIMORE_CERT) && !defined(USE_DIGICERT_G3_CERT) && \
+    !defined(USE_MICROSOFTAZURE_DE_CERT) && !defined(USE_PORTAL_AZURE_CN_CERT)
 // For legacy, if no certificates were explicitly selected then include all of them
 #define USE_BALTIMORE_CERT
-#define USE_MICROSOFTAZURE_DE_CERT 
+#define USE_DIGICERT_G3_CERT
+#define USE_MICROSOFTAZURE_DE_CERT
 #define USE_PORTAL_AZURE_CN_CERT
 #endif
 
 const char certificates[] =
 #if defined(USE_BALTIMORE_CERT)
-/* DigiCert Baltimore Root --Used Globally--*/
+/* Baltimore CyberTrust Root --Used Globally--*/
 // This cert should be used when connecting to Azure IoT on the Azure Cloud available globally. When in doubt, use this cert.
 "-----BEGIN CERTIFICATE-----\r\n"
 "MIIDdzCCAl+gAwIBAgIEAgAAuTANBgkqhkiG9w0BAQUFADBaMQswCQYDVQQGEwJJ\r\n"
@@ -42,6 +45,25 @@ const char certificates[] =
 "R9I4LtD+gdwyah617jzV/OeBHRnDJELqYzmp\r\n"
 "-----END CERTIFICATE-----\r\n"
 #endif /* BALTIMORE_CERT */
+
+#if defined(USE_DIGICERT_G3_CERT)
+// DigiCert Global Root G3 - Used for ECC certs in IoT Hub Gateway v2
+"-----BEGIN CERTIFICATE-----\r\n"
+"MIICPzCCAcWgAwIBAgIQBVVWvPJepDU1w6QP1atFcjAKBggqhkjOPQQDAzBhMQsw\r\n"
+"CQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3d3cu\r\n"
+"ZGlnaWNlcnQuY29tMSAwHgYDVQQDExdEaWdpQ2VydCBHbG9iYWwgUm9vdCBHMzAe\r\n"
+"Fw0xMzA4MDExMjAwMDBaFw0zODAxMTUxMjAwMDBaMGExCzAJBgNVBAYTAlVTMRUw\r\n"
+"EwYDVQQKEwxEaWdpQ2VydCBJbmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5jb20x\r\n"
+"IDAeBgNVBAMTF0RpZ2lDZXJ0IEdsb2JhbCBSb290IEczMHYwEAYHKoZIzj0CAQYF\r\n"
+"K4EEACIDYgAE3afZu4q4C/sLfyHS8L6+c/MzXRq8NOrexpu80JX28MzQC7phW1FG\r\n"
+"fp4tn+6OYwwX7Adw9c+ELkCDnOg/QW07rdOkFFk2eJ0DQ+4QE2xy3q6Ip6FrtUPO\r\n"
+"Z9wj/wMco+I+o0IwQDAPBgNVHRMBAf8EBTADAQH/MA4GA1UdDwEB/wQEAwIBhjAd\r\n"
+"BgNVHQ4EFgQUs9tIpPmhxdiuNkHMEWNpYim8S8YwCgYIKoZIzj0EAwMDaAAwZQIx\r\n"
+"AK288mw/EkrRLTnDCgmXc/SINoyIJ7vmiI1Qhadj+Z4y3maTD/HMsQmP3Wyr+mt/\r\n"
+"oAIwOWZbwmSNuJ5Q3KjVSaLtx9zRSX8XAbjIho9OjIgrqJqpisXRAL34VOKa5Vt8\r\n"
+"sycX\r\n"
+"-----END CERTIFICATE-----\r\n"
+#endif /* DIGICERT_G3_CERT */
 
 #if defined(USE_PORTAL_AZURE_CN_CERT)
 /* DigiCert Global Root CA */
