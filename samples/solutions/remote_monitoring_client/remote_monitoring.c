@@ -91,7 +91,7 @@ typedef struct CHILLER_TAG
 /*  Converts the Chiller object into a JSON blob with reported properties ready to be sent across the wire as a twin. */
 static char* serializeToJson(Chiller* chiller)
 {
-	char* result = "{}";
+	char* result = NULL;
 
 	JSON_Value* root_value = json_value_init_object();
 	if (root_value != NULL)
@@ -159,8 +159,11 @@ static void sendChillerReportedProperties(Chiller* chiller)
 	if (chiller != NULL && device_handle != NULL)
 	{
 		char* reportedProperties = serializeToJson(chiller);
-		(void)IoTHubDeviceClient_SendReportedState(device_handle, (const unsigned char*)reportedProperties, strlen(reportedProperties), reported_state_callback, NULL);
-		free(reportedProperties);
+		if (reportedProperties)
+		{
+			(void)IoTHubDeviceClient_SendReportedState(device_handle, (const unsigned char*)reportedProperties, strlen(reportedProperties), reported_state_callback, NULL);
+			free(reportedProperties);
+		}
 	}
 }
 
