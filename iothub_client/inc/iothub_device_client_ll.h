@@ -450,6 +450,33 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_SendReportedProperties(
                             void* userContextCallback);
 
 
+//
+//  Applications receiving PnP commands write to this function signature.
+//  This looks almost just like the existing device method callback, with the exception that the SDK will parse out
+//  the component name (if present) and save app from deserializing it.
+//
+typedef int(*IOTHUB_CLIENT_PNP_COMMAND_CALLBACK_ASYNC)(
+                const char* componentName,
+                const char* commandName,
+                const unsigned char* payload, 
+                size_t size, 
+                unsigned char** response, 
+                size_t* response_size, 
+                void* userContextCallback);
+
+// 
+//  Applications call this function (a) so SDK subscribes to IoT Hub's device method callback 
+//  and (b) to indicate callback function.
+//
+//  Note that all callbacks for all components go to pnpCommandCallback.  If the device supports mulitple
+//  components, then the application needs to 
+//
+//
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_SetCommandCallback(
+                         IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
+                         IOTHUB_CLIENT_PNP_COMMAND_CALLBACK_ASYNC pnpCommandCallback, 
+                         void* userContextCallback);
+
 
 #ifdef __cplusplus
 }

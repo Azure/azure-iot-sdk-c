@@ -165,4 +165,14 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_SendReportedProperties(
     return 0;
 }
 
-
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_SetCommandCallback(
+                         IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
+                         IOTHUB_CLIENT_PNP_COMMAND_CALLBACK_ASYNC pnpCommandCallback, 
+                         void* userContextCallback)
+{
+    (void)iotHubClientHandle;
+    (void)pnpCommandCallback;
+    (void)userContextCallback;
+    return 0;
+}
+                         

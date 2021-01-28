@@ -48,7 +48,7 @@ typedef struct PNP_DEVICE_CONFIGURATION_TAG
     bool enableTracing;
     // Callback for IoT Hub device methods, which is the mechanism PnP commands use.  If PnP commands
     // are not used, this should be NULL to conserve memory and bandwidth.
-    IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback;
+    // IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback;
     // Callback for IoT Hub device twin notifications, which is the mechanism PnP properties from service use.
     // If PnP properties are not configured by the server, this should be NULL to conserve memory and bandwidth.
     IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback;

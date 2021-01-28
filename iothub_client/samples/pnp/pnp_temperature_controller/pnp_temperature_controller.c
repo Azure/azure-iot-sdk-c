@@ -150,22 +150,23 @@ static void SetEmptyCommandResponse(unsigned char** response, size_t* responseSi
 //
 // PnP_TempControlComponent_DeviceMethodCallback is invoked by IoT SDK when a device method arrives.
 //
-static int PnP_TempControlComponent_DeviceMethodCallback(const char* methodName, const unsigned char* payload, size_t size, unsigned char** response, size_t* responseSize, void* userContextCallback)
+// OLD static int PnP_TempControlComponent_DeviceMethodCallback(const char* methodName, const unsigned char* payload, size_t size, unsigned char** response, size_t* responseSize, void* userContextCallback)
+static int PnP_TempControlComponent_CommandCallback(const char* componentName, const char* commandName, const unsigned char* payload, size_t size, unsigned char** response, size_t* responseSize, void* userContextCallback)
 {
     (void)userContextCallback;
 
     char* jsonStr = NULL;
     JSON_Value* rootValue = NULL;
     int result;
-    unsigned const char *componentName;
-    size_t componentNameSize;
-    const char *pnpCommandName;
+    // unsigned const char *componentName;
+    // size_t componentNameSize;
+    // const char *pnpCommandName;
 
     *response = NULL;
     *responseSize = 0;
 
     // Parse the methodName into its PnP (optional) componentName and pnpCommandName.
-    PnP_ParseCommandName(methodName, &componentName, &componentNameSize, &pnpCommandName);
+    // OLD code - PnP_ParseCommandName(methodName, &componentName, &componentNameSize, &pnpCommandName);
 
     // Parse the JSON of the payload request.
     if ((jsonStr = PnP_CopyPayloadToString(payload, size)) == NULL)
@@ -182,31 +183,33 @@ static int PnP_TempControlComponent_DeviceMethodCallback(const char* methodName,
     {
         if (componentName != NULL)
         {
-            LogInfo("Received PnP command for component=%.*s, command=%s", (int)componentNameSize, componentName, pnpCommandName);
-            if (strncmp((const char*)componentName, g_thermostatComponent1Name, g_thermostatComponent1Size) == 0)
+            LogInfo("Received PnP command for component=%s, command=%s", componentName, commandName);
+            // OLD - str wasnt't terminated before but now it is so code is a bit easier to read.  C specific.
+            // if (strcmp((const char*)componentName, g_thermostatComponent1Name, g_thermostatComponent1Size) == 0)
+            if (strcmp(componentName, g_thermostatComponent1Name) == 0)
             {
-                result = PnP_ThermostatComponent_ProcessCommand(g_thermostatHandle1, pnpCommandName, rootValue, response, responseSize);
+                result = PnP_ThermostatComponent_ProcessCommand(g_thermostatHandle1, commandName, rootValue, response, responseSize);
             }
-            else if (strncmp((const char*)componentName, g_thermostatComponent2Name, g_thermostatComponent2Size) == 0)
+            else if (strcmp(componentName, g_thermostatComponent2Name) == 0)
             {
-                result = PnP_ThermostatComponent_ProcessCommand(g_thermostatHandle2, pnpCommandName, rootValue, response, responseSize);
+                result = PnP_ThermostatComponent_ProcessCommand(g_thermostatHandle2, commandName, rootValue, response, responseSize);
             }
             else
             {
-                LogError("PnP component=%.*s is not supported by TemperatureController", (int)componentNameSize, componentName);
+                LogError("PnP component=%s is not supported by TemperatureController", componentName);
                 result = PNP_STATUS_NOT_FOUND;
             }
         }
         else
         {
-            LogInfo("Received PnP command for TemperatureController component, command=%s", pnpCommandName);
-            if (strcmp(pnpCommandName, g_rebootCommand) == 0)
+            LogInfo("Received PnP command for TemperatureController component, command=%s", commandName);
+            if (strcmp(commandName, g_rebootCommand) == 0)
             {
                 result = PnP_TempControlComponent_InvokeRebootCommand(rootValue);
             }
             else
             {
-                LogError("PnP command=s%s is not supported by TemperatureController", pnpCommandName);
+                LogError("PnP command=s%s is not supported by TemperatureController", commandName);
                 result = PNP_STATUS_NOT_FOUND;
             }
         }
@@ -321,6 +324,19 @@ void PnP_TempControlComponent_SendWorkingSet(IOTHUB_DEVICE_CLIENT_LL_HANDLE devi
 static void PnP_TempControlComponent_ReportSerialNumber_Property(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient)
 {
     IOTHUB_CLIENT_RESULT iothubClientResult;
+
+    // New code
+    IOTHUB_PNP_REPORTED_PROPERTY reportedProperty = { 0 };
+    reportedProperty.version = 1;
+    reportedProperty.propertyName = g_serialNumberPropertyName;
+    reportedProperty.propertyValue = g_serialNumberPropertyValue;
+
+    if ((iothubClientResult = IoTHubDeviceClient_LL_PnP_SendReportedProperties(deviceClient, &reportedProperty, 1, NULL, NULL)) != IOTHUB_CLIENT_OK)
+    {
+        LogError("Unable to send reported state, error=%d", iothubClientResult);
+    }
+
+    /* old code
     STRING_HANDLE jsonToSend = NULL;
 
     if ((jsonToSend = PnP_CreateReportedProperty(NULL, g_serialNumberPropertyName, g_serialNumberPropertyValue)) == NULL)
@@ -343,6 +359,7 @@ static void PnP_TempControlComponent_ReportSerialNumber_Property(IOTHUB_DEVICE_C
     }
 
     STRING_delete(jsonToSend);
+    */
 }
 
 //
@@ -454,9 +471,10 @@ static bool GetConnectionSettingsFromEnvironment()
 static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateDeviceClientAndAllocateComponents(void)
 {
     IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient = NULL;
+    IOTHUB_CLIENT_RESULT clientResult;
     bool result;
 
-    g_pnpDeviceConfiguration.deviceMethodCallback = PnP_TempControlComponent_DeviceMethodCallback;
+    //g_pnpDeviceConfiguration.deviceMethodCallback = PnP_TempControlComponent_DeviceMethodCallback;
     g_pnpDeviceConfiguration.deviceTwinCallback = PnP_TempControlComponent_DeviceTwinCallback;
     g_pnpDeviceConfiguration.enableTracing = g_hubClientTraceEnabled;
     g_pnpDeviceConfiguration.modelId = g_temperatureControllerModelId;
@@ -469,6 +487,13 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateDeviceClientAndAllocateComponents(vo
     else if ((deviceClient = PnP_CreateDeviceClientLLHandle(&g_pnpDeviceConfiguration)) == NULL)
     {
         LogError("Failure creating IotHub device client");
+        result = false;
+    }
+    // Note that while this seems to be new code, the PnP_CreateDeviceClientLLHandle was hard to make generic (customers would've had)
+    // to copy/paste.  So this clearer intent should be a net positive.
+    else if ((clientResult = IoTHubDeviceClient_LL_PnP_SetCommandCallback(deviceClient, PnP_TempControlComponent_CommandCallback, NULL)) != IOTHUB_CLIENT_OK)
+    {
+        LogError("IoTHubDeviceClient_LL_PnP_SetCommandCallback failed, result=%d", clientResult);
         result = false;
     }
     else if ((g_thermostatHandle1 = PnP_ThermostatComponent_CreateHandle(g_thermostatComponent1Name)) == NULL)

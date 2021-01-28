@@ -85,11 +85,14 @@ IOTHUB_DEVICE_CLIENT_LL_HANDLE PnP_CreateDeviceClientLLHandle(const PNP_DEVICE_C
         result = false;
     }
     // Optionally, set the callback function that processes incoming device methods, which is the channel PnP Commands are transferred over
+    /* 
+    OLD CODE
     else if ((pnpDeviceConfiguration->deviceMethodCallback != NULL) && (iothubResult = IoTHubDeviceClient_LL_SetDeviceMethodCallback(deviceHandle, pnpDeviceConfiguration->deviceMethodCallback, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to set device method callback, error=%d", iothubResult);
         result = false;
     }
+    */
     // Optionall, set the callback function that processes device twin changes from the IoTHub, which is the channel that PnP Properties are 
     // transferred over.  This will also automatically retrieve the full twin for the application on startup. 
     else if ((pnpDeviceConfiguration->deviceTwinCallback != NULL) && (iothubResult = IoTHubDeviceClient_LL_SetDeviceTwinCallback(deviceHandle, pnpDeviceConfiguration->deviceTwinCallback, (void*)deviceHandle)) != IOTHUB_CLIENT_OK)
