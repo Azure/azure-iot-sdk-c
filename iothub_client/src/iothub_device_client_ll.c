@@ -133,3 +133,36 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob(IOTHUB_DEV
 }
 
 #endif
+
+
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_SendTelemetry(
+                        IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
+                        IOTHUB_MESSAGE_HANDLE telemetryMessageHandle,
+                        const IOTHUB_PNP_TELEMETRY_ATTRIBUTES* telemetryAttributes, 
+                        IOTHUB_CLIENT_PNP_TELEMETRY_CALLBACK pnpTelemetryConfirmationCallback,
+                        void* userContextCallback)
+{
+    (void)iotHubClientHandle;
+    (void)telemetryMessageHandle;
+    (void)telemetryAttributes;
+    (void)pnpTelemetryConfirmationCallback;
+    (void)userContextCallback;
+    return 0;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_SendReportedProperties(
+                            IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
+                            const IOTHUB_PNP_REPORTED_PROPERTY* reportedProperties,
+                            unsigned int numReportedProperties,
+                            IOTHUB_PNP_REPORTED_STATE_CALLBACK pnpReportedStateCallback,
+                            void* userContextCallback)
+{
+    (void)iotHubClientHandle;
+    (void)reportedProperties;
+    (void)numReportedProperties;
+    (void)pnpReportedStateCallback;
+    (void)userContextCallback;
+    return 0;
+}
+
+

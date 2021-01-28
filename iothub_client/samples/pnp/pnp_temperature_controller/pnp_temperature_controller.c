@@ -279,12 +279,29 @@ void PnP_TempControlComponent_SendWorkingSet(IOTHUB_DEVICE_CLIENT_LL_HANDLE devi
     IOTHUB_CLIENT_RESULT iothubResult;
     char workingSetTelemetryPayload[64];
 
+    IOTHUB_PNP_TELEMETRY_ATTRIBUTES telemetryAttributes;
+    telemetryAttributes.version = 1;
+    telemetryAttributes.componentName = NULL;
+    telemetryAttributes.telemetryContentEncoding = "utf8";
+    telemetryAttributes.telemetryContentType = "application/json";
+
     int workingSet = g_workingSetMinimum + (rand() % g_workingSetRandomModulo);
 
     if (snprintf(workingSetTelemetryPayload, sizeof(workingSetTelemetryPayload), g_workingSetTelemetryFormat, workingSet) < 0)
     {
         LogError("Unable to create a workingSet telemetry payload string");
     }
+    /* Start new code ...*/
+    else if ((messageHandle = IoTHubMessage_CreateFromString(workingSetTelemetryPayload)) == NULL)
+    {
+        LogError("IoTHubMessage_CreateFromString failed");
+    }
+    else if ((iothubResult = IoTHubDeviceClient_LL_PnP_SendTelemetry(deviceClient, messageHandle, &telemetryAttributes, NULL, NULL)) != IOTHUB_CLIENT_OK)
+    {
+        LogError("Unable to send telemetry message, error=%d", iothubResult);
+    }
+    /* end new code... */
+    /* ORIGINAL CODE
     else if ((messageHandle = PnP_CreateTelemetryMessageHandle(NULL, workingSetTelemetryPayload)) == NULL)
     {
         LogError("Unable to create telemetry message");
@@ -293,6 +310,7 @@ void PnP_TempControlComponent_SendWorkingSet(IOTHUB_DEVICE_CLIENT_LL_HANDLE devi
     {
         LogError("Unable to send telemetry message, error=%d", iothubResult);
     }
+    */
 
     IoTHubMessage_Destroy(messageHandle);
 }

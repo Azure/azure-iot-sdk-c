@@ -352,12 +352,28 @@ void PnP_ThermostatComponent_SendTelemetry(PNP_THERMOSTAT_COMPONENT_HANDLE pnpTh
     IOTHUB_MESSAGE_HANDLE messageHandle = NULL;
     IOTHUB_CLIENT_RESULT iothubResult;
 
+    IOTHUB_PNP_TELEMETRY_ATTRIBUTES telemetryAttributes;
+    telemetryAttributes.version = 1;
+    telemetryAttributes.componentName = pnpThermostatComponent->componentName;
+    telemetryAttributes.telemetryContentEncoding = "utf8";
+    telemetryAttributes.telemetryContentType = "application/json";
+
     char temperatureStringBuffer[32];
 
     if (snprintf(temperatureStringBuffer, sizeof(temperatureStringBuffer), g_temperatureTelemetryBodyFormat, pnpThermostatComponent->currentTemperature) < 0)
     {
         LogError("snprintf of current temperature telemetry failed");
     }
+    /* new code ... */
+    else if ((messageHandle = IoTHubMessage_CreateFromString(temperatureStringBuffer)) == NULL)
+    {
+        LogError("IoTHubMessage_CreateFromString failed");
+    }
+    else if ((iothubResult = IoTHubDeviceClient_LL_PnP_SendTelemetry(deviceClientLL, messageHandle, &telemetryAttributes, NULL, NULL)) != IOTHUB_CLIENT_OK)
+    {
+        LogError("Unable to send telemetry message, error=%d", iothubResult);
+    }
+    /* old code 
     else if ((messageHandle = PnP_CreateTelemetryMessageHandle(pnpThermostatComponent->componentName, temperatureStringBuffer)) == NULL)
     {
         LogError("Unable to create telemetry message");
@@ -366,6 +382,7 @@ void PnP_ThermostatComponent_SendTelemetry(PNP_THERMOSTAT_COMPONENT_HANDLE pnpTh
     {
         LogError("Unable to send telemetry message, error=%d", iothubResult);
     }
+    */
 
     IoTHubMessage_Destroy(messageHandle);
 }

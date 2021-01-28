@@ -374,6 +374,83 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
 
 #endif /*DONT_USE_UPLOADTOBLOB*/
 
+//*********************************************************************************
+// NEW PNP API SPIKE
+//*********************************************************************************
+
+
+// IOTHUB_PNP_TELEMETRY_ATTRIBUTES is used to set metadata when sending PnP.
+typedef struct IOTHUB_PNP_TELEMETRY_ATTRIBUTES_TAG {
+    /* C Specific for structure versioning.  Other SDKs don't need this. */
+    int version; 
+    /* Optional name of component.  NULL for default component in model. */
+    const char* componentName;
+    /* Content type.  Can be NULL with no default, but putting it here encourages apps to set this. */
+    const char* telemetryContentType;
+    /* Content encoding.  Can be NULL with no default, but putting it here encourages apps to set this. */
+    const char* telemetryContentEncoding;
+} IOTHUB_PNP_TELEMETRY_ATTRIBUTES;
+
+// IOTHUB_CLIENT_PNP_TELEMETRY_CALLBACK is an optional callback application may implement to receive
+// indication of telemetry success|failure.
+typedef void(*IOTHUB_CLIENT_PNP_TELEMETRY_CALLBACK)(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback);
+
+//
+//  Sending PnP telemetry API
+//
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_SendTelemetry(
+                        IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
+                        IOTHUB_MESSAGE_HANDLE telemetryMessageHandle,
+                        const IOTHUB_PNP_TELEMETRY_ATTRIBUTES* telemetryAttributes, 
+                        IOTHUB_CLIENT_PNP_TELEMETRY_CALLBACK pnpTelemetryConfirmationCallback,
+                        void* userContextCallback);
+
+//
+// IOTHUB_PNP_PROPERTY_STATUS indicates the status of a desired property when device responds
+//
+typedef struct IOTHUB_PNP_PROPERTY_STATUS_TAG {
+    int version; /* another C thingy */
+    int result;
+    const char* description;
+    int ackVersion;
+} IOTHUB_PNP_PROPERTY_STATUS;
+
+//
+// IOTHUB_PNP_REPORTED_PROPERTY is a structure to contain a reported property, which SDK will serialize.
+//
+typedef struct {
+    /* C construct only; not needed in languages created after 203 B.C */
+    int version;
+    /* Optional name of component.  NULL indicates root component */
+    const char* componentName;
+    /* Name of property. */
+    const char* propertyName;
+    /* Value of the property. */
+    const char* propertyValue;
+    // Remaining struct is optional, for sending back status.  If set the result and ackVersion *MUST* be meaningful though 
+    // description may be NULL.
+    IOTHUB_PNP_PROPERTY_STATUS* status;
+} IOTHUB_PNP_REPORTED_PROPERTY;
+
+// Optional callback application may implement to receive notification when property has been updated.
+typedef void(*IOTHUB_PNP_REPORTED_STATE_CALLBACK)(int status_code, void* userContextCallback);
+
+//
+// IoTHubDeviceClient_PnP_SendReportedProperties sends properties.  
+//
+// NOTE: Unlike the existing sample implementation, this DOES allow batching of multiple 
+// reported properties in a single call.  Batching is critical for components like DeviceInfo
+// that have ALL properties known up front and want to be less chatty over the network.
+//
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_SendReportedProperties(
+                            IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
+                            const IOTHUB_PNP_REPORTED_PROPERTY* reportedProperties,
+                            unsigned int numReportedProperties,
+                            IOTHUB_PNP_REPORTED_STATE_CALLBACK pnpReportedStateCallback,
+                            void* userContextCallback);
+
+
+
 #ifdef __cplusplus
 }
 #endif

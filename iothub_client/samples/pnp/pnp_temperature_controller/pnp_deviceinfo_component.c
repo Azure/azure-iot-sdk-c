@@ -43,6 +43,7 @@ static const char PnPDeviceInfo_TotalMemoryPropertyValue[] = "200";
 //
 // SendReportedPropertyForDeviceInformation sends a property as part of DeviceInfo component.
 //
+/* old code for sending an individual property.
 static void SendReportedPropertyForDeviceInformation(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL, const char* componentName, const char* propertyName, const char* propertyValue)
 {
     IOTHUB_CLIENT_RESULT iothubClientResult;
@@ -69,9 +70,22 @@ static void SendReportedPropertyForDeviceInformation(IOTHUB_DEVICE_CLIENT_LL_HAN
 
     STRING_delete(jsonToSend);
 }
+*/
+
+void InitReportedProperty(IOTHUB_PNP_REPORTED_PROPERTY *reportedProperty, const char* componentName, const char* propertyName, const char* propertyValue)
+{
+    memset(reportedProperty, 0, sizeof(*reportedProperty));
+    reportedProperty->version = 1;
+    reportedProperty->componentName = componentName;
+    reportedProperty->propertyName = propertyName;
+    reportedProperty->propertyValue = propertyValue;
+    reportedProperty->status = NULL;
+}
+
 
 void PnP_DeviceInfoComponent_Report_All_Properties(const char* componentName, IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL)
 {
+    /* old code, this is NOT batched
     // NOTE: It is possible to put multiple property updates into a single JSON and IoTHubDeviceClient_LL_SendReportedState invocation.
     // This sample does not do so for clarity, though production devices should seriously consider such property update batching to
     // save bandwidth.  PnP_CreateReportedProperty does not currently accept arrays.
@@ -83,4 +97,33 @@ void PnP_DeviceInfoComponent_Report_All_Properties(const char* componentName, IO
     SendReportedPropertyForDeviceInformation(deviceClientLL, componentName, PnPDeviceInfo_ProcessorManufacturerPropertyName, PnPDeviceInfo_ProcessorManufacturerPropertyValue);
     SendReportedPropertyForDeviceInformation(deviceClientLL, componentName, PnPDeviceInfo_TotalStoragePropertyName, PnPDeviceInfo_TotalStoragePropertyValue);
     SendReportedPropertyForDeviceInformation(deviceClientLL, componentName, PnPDeviceInfo_TotalMemoryPropertyName, PnPDeviceInfo_TotalMemoryPropertyValue);
+    */
+
+    // Note that even though this is more lines of code, mostly because of C being unpleasent, this is a good change from original because we get batching out of it.
+    IOTHUB_PNP_REPORTED_PROPERTY softwareVersion;
+    IOTHUB_PNP_REPORTED_PROPERTY manufacturerName;
+    IOTHUB_PNP_REPORTED_PROPERTY modelName;
+    IOTHUB_PNP_REPORTED_PROPERTY osName;
+    IOTHUB_PNP_REPORTED_PROPERTY processorArchitecture;
+    IOTHUB_PNP_REPORTED_PROPERTY processorManufacturer;
+    IOTHUB_PNP_REPORTED_PROPERTY totalStorage;
+    IOTHUB_PNP_REPORTED_PROPERTY totalMemory;
+
+    IOTHUB_PNP_REPORTED_PROPERTY *reportedProperties= { softwareVersion, manufacturerName, modelName, osName, processorArchitecture, processorManufacturer, totalStorage, totalMemory };
+    const int numReportedProperties = sizeof(reportedProperties) / sizeof(reportedProperties[0]);
+    
+    // This extra InitReportedProperty is because C won't let us initialize struct in a reasonable way.  Other SDKs won't need second step.
+    InitReportedProperty(&softwareVersion, componentName, PnPDeviceInfo_SoftwareVersionPropertyName, PnPDeviceInfo_SoftwareVersionPropertyValue);
+    InitReportedProperty(&manufacturerName, componentName, PnPDeviceInfo_ManufacturerPropertyName, PnPDeviceInfo_ManufacturerPropertyValue);
+    InitReportedProperty(&modelName, componentName, PnPDeviceInfo_ModelPropertyName, PnPDeviceInfo_ModelPropertyValue);
+    InitReportedProperty(&osName, componentName, PnPDeviceInfo_OsNamePropertyName, PnPDeviceInfo_OsNamePropertyValue);
+    InitReportedProperty(&processorArchitecture, componentName, PnPDeviceInfo_ProcessorArchitecturePropertyName, PnPDeviceInfo_ProcessorArchitecturePropertyValue);
+    InitReportedProperty(&processorManufacturer, componentName, PnPDeviceInfo_SoftwareVersionPropertyName, PnPDeviceInfo_SoftwareVersionPropertyValue);
+    InitReportedProperty(&totalStorage, componentName, PnPDeviceInfo_TotalStoragePropertyName, PnPDeviceInfo_TotalStoragePropertyValue);
+    InitReportedProperty(&totalMemory, componentName, PnPDeviceInfo_TotalMemoryPropertyName, PnPDeviceInfo_TotalMemoryPropertyValue);
+
+    IoTHubDeviceClient_LL_PnP_SendReportedProperties(deviceClientLL, reportedProperties, numReportedProperties, NULL, NULL);
+    
 }
+
+
