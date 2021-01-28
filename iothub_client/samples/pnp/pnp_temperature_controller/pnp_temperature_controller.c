@@ -23,7 +23,7 @@
 
 // PnP utilities.
 #include "pnp_device_client_ll.h"
-#include "pnp_protocol.h"
+// OLD code - moved into API #include "pnp_protocol.h"
 
 // Headers that provide implementation for subcomponents (the two thermostat components and DeviceInfo)
 #include "pnp_thermostat_component.h"
@@ -115,14 +115,14 @@ static int PnP_TempControlComponent_InvokeRebootCommand(JSON_Value* rootValue)
     if (json_value_get_type(rootValue) != JSONNumber)
     {
         LogError("Delay payload is not a number");
-        result = PNP_STATUS_BAD_FORMAT;
+        result = 400;
     }
     else
     {
         // See caveats section in ../readme.md; we don't actually respect the delay value to keep the sample simple.
         int delayInSeconds = (int)json_value_get_number(rootValue);
         LogInfo("Temperature controller 'reboot' command invoked with delay=%d seconds", delayInSeconds);
-        result = PNP_STATUS_SUCCESS;
+        result = 200;
     }
     
     return result;
@@ -137,7 +137,7 @@ static void SetEmptyCommandResponse(unsigned char** response, size_t* responseSi
     if ((*response = calloc(1, g_JSONEmptySize)) == NULL)
     {
         LogError("Unable to allocate empty JSON response");
-        *result = PNP_STATUS_INTERNAL_ERROR;
+        *result = 500;
     }
     else
     {
@@ -146,6 +146,28 @@ static void SetEmptyCommandResponse(unsigned char** response, size_t* responseSi
         // We only overwrite the caller's result on error; otherwise leave as it was
     }
 }
+
+
+// Note this was previously part of helper lib, named PnP_CopyPayloadToString.  
+// Don't think this makes sense in API though so would be in app code.
+static char* CopyPayloadToString(const unsigned char* payload, size_t size)
+{
+    char* jsonStr;
+    size_t sizeToAllocate = size + 1;
+
+    if ((jsonStr = (char*)malloc(sizeToAllocate)) == NULL)
+    {
+        LogError("Unable to allocate %lu size buffer", (unsigned long)(sizeToAllocate));
+    }
+    else
+    {
+        memcpy(jsonStr, payload, size);
+        jsonStr[size] = '\0';
+    }
+
+    return jsonStr;
+}
+
 
 //
 // PnP_TempControlComponent_DeviceMethodCallback is invoked by IoT SDK when a device method arrives.
@@ -169,15 +191,15 @@ static int PnP_TempControlComponent_CommandCallback(const char* componentName, c
     // OLD code - PnP_ParseCommandName(methodName, &componentName, &componentNameSize, &pnpCommandName);
 
     // Parse the JSON of the payload request.
-    if ((jsonStr = PnP_CopyPayloadToString(payload, size)) == NULL)
+    if ((jsonStr = CopyPayloadToString(payload, size)) == NULL)
     {
         LogError("Unable to allocate twin buffer");
-        result = PNP_STATUS_INTERNAL_ERROR;
+        result = 500;
     }
     else if ((rootValue = json_parse_string(jsonStr)) == NULL)
     {
         LogError("Unable to parse twin JSON");
-        result = PNP_STATUS_INTERNAL_ERROR;
+        result = 500;
     }
     else
     {
@@ -197,7 +219,7 @@ static int PnP_TempControlComponent_CommandCallback(const char* componentName, c
             else
             {
                 LogError("PnP component=%s is not supported by TemperatureController", componentName);
-                result = PNP_STATUS_NOT_FOUND;
+                result = 404;
             }
         }
         else
@@ -210,7 +232,7 @@ static int PnP_TempControlComponent_CommandCallback(const char* componentName, c
             else
             {
                 LogError("PnP command=s%s is not supported by TemperatureController", commandName);
-                result = PNP_STATUS_NOT_FOUND;
+                result = 404;
             }
         }
     }
@@ -225,6 +247,9 @@ static int PnP_TempControlComponent_CommandCallback(const char* componentName, c
 
     return result;
 }
+
+
+/* OLD - this is the original mechanism of taking updated properties
 
 //
 // PnP_TempControlComponent_ApplicationPropertyCallback is the callback function is invoked when PnP_ProcessTwinData() visits each property.
@@ -256,6 +281,7 @@ static void PnP_TempControlComponent_ApplicationPropertyCallback(const char* com
     }
 }
 
+
 //
 // PnP_TempControlComponent_DeviceTwinCallback is invoked by IoT SDK when a twin - either full twin or a PATCH update - arrives.
 //
@@ -270,6 +296,52 @@ static void PnP_TempControlComponent_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE
         LogError("Unable to process twin json.  Ignoring any desired property update requests");
     }
 }
+*/
+
+
+
+// New code.  PnP_TempControlComponent_UpdatedPropertyCallback receives updated properties
+// and NOT the raw device twin.
+int PnP_TempControlComponent_UpdatedPropertyCallback(
+    const IOTHUB_CLIENT_PNP_UPDATED_PROPERTY** updatedProperties, 
+    size_t numProperties,
+    int properytVersion, /* this is the $version field */
+    void* userContextCallback)
+{
+    IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient = (IOTHUB_DEVICE_CLIENT_LL_HANDLE)userContextCallback;
+
+    for (size_t i = 0; i < numProperties; i++) 
+    {
+        const IOTHUB_CLIENT_PNP_UPDATED_PROPERTY* updatedProperty = updatedProperties[i];
+
+        if (updatedProperty->propertyType == IOTHUB_CLIENT_PNP_UPDATED_PROPERTY_TYPE_REPORTED)
+        {
+            // We don't process previously reported properties, so ignore.  There is a potential optimization
+            // however where if a desired property is the same value and version of a reported, then 
+            // it wouldn't be necessary to call IoTHubDeviceClient_LL_PnP_SendReportedProperties for it
+            continue;
+        }
+
+        if (updatedProperty->componentName == NULL) 
+        {   
+            LogError("Property=%s arrived for TemperatureControl component itself.  This does not support writeable properties on it (all properties are on subcomponents)", updatedProperty->componentName);
+        }
+        else if (strcmp(updatedProperty->componentName, g_thermostatComponent1Name) == 0)
+        {
+            PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle1, deviceClient, updatedProperty->propertyName, updatedProperty->propertyValue, properytVersion);
+        }
+        else if (strcmp(updatedProperty->componentName, g_thermostatComponent2Name) == 0)
+        {
+            PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle2, deviceClient, updatedProperty->propertyName, updatedProperty->propertyValue, properytVersion);
+        }
+        else
+        {
+            LogError("Component=%s is not implemented by the TemperatureController", updatedProperty->componentName);
+        }
+    }
+    return 0;
+}
+
 
 //
 // PnP_TempControlComponent_SendWorkingSet sends a PnP telemetry indicating the current working set of the device, in 
@@ -326,7 +398,7 @@ static void PnP_TempControlComponent_ReportSerialNumber_Property(IOTHUB_DEVICE_C
     IOTHUB_CLIENT_RESULT iothubClientResult;
 
     // New code
-    IOTHUB_PNP_REPORTED_PROPERTY reportedProperty = { 0 };
+    IOTHUB_CLIENT_PNP_REPORTED_PROPERTY reportedProperty = { 0 };
     reportedProperty.version = 1;
     reportedProperty.propertyName = g_serialNumberPropertyName;
     reportedProperty.propertyValue = g_serialNumberPropertyValue;
@@ -475,7 +547,7 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateDeviceClientAndAllocateComponents(vo
     bool result;
 
     //g_pnpDeviceConfiguration.deviceMethodCallback = PnP_TempControlComponent_DeviceMethodCallback;
-    g_pnpDeviceConfiguration.deviceTwinCallback = PnP_TempControlComponent_DeviceTwinCallback;
+    //g_pnpDeviceConfiguration.deviceTwinCallback = PnP_TempControlComponent_DeviceTwinCallback;
     g_pnpDeviceConfiguration.enableTracing = g_hubClientTraceEnabled;
     g_pnpDeviceConfiguration.modelId = g_temperatureControllerModelId;
 
@@ -489,13 +561,18 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateDeviceClientAndAllocateComponents(vo
         LogError("Failure creating IotHub device client");
         result = false;
     }
-    // Note that while this seems to be new code, the PnP_CreateDeviceClientLLHandle was hard to make generic (customers would've had)
-    // to copy/paste.  So this clearer intent should be a net positive.
+    // Start new code (before this had been delegated to PnP_CreateDeviceClientLLHandle but it's clearer to show here.  So this is a wash for LOC
     else if ((clientResult = IoTHubDeviceClient_LL_PnP_SetCommandCallback(deviceClient, PnP_TempControlComponent_CommandCallback, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("IoTHubDeviceClient_LL_PnP_SetCommandCallback failed, result=%d", clientResult);
         result = false;
     }
+    else if ((clientResult = IoTHubDeviceClient_PnP_SetPropertyCallback(deviceClient, PnP_TempControlComponent_UpdatedPropertyCallback, g_modeledComponents, g_numModeledComponents, (void*)deviceClient)) != IOTHUB_CLIENT_OK)
+    {
+        LogError("IoTHubDeviceClient_PnP_SetPropertyCallback failed, result=%d", clientResult);
+        result = false;
+    }
+    // end new (or rather re-arranged) code block.
     else if ((g_thermostatHandle1 = PnP_ThermostatComponent_CreateHandle(g_thermostatComponent1Name)) == NULL)
     {
         LogError("Unable to create component handle for %s", g_thermostatComponent1Name);

@@ -152,7 +152,7 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_SendTelemetry(
 
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_SendReportedProperties(
                             IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
-                            const IOTHUB_PNP_REPORTED_PROPERTY* reportedProperties,
+                            const IOTHUB_CLIENT_PNP_REPORTED_PROPERTY* reportedProperties,
                             unsigned int numReportedProperties,
                             IOTHUB_PNP_REPORTED_STATE_CALLBACK pnpReportedStateCallback,
                             void* userContextCallback)
@@ -175,4 +175,18 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_SetCommandCallback(
     (void)userContextCallback;
     return 0;
 }
-                         
+
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_PnP_SetPropertyCallback(
+    IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle,
+    IOTHUB_CLIENT_PNP_PROPERTY_UPDATE_CALLBACK propertyUpdateCallback,
+    const char** pnpComponents,
+    size_t numPnPComponents,
+    void* userContextCallback)
+{
+    (void)iotHubClientHandle;
+    (void)propertyUpdateCallback;
+    (void)pnpComponents;
+    (void)numPnPComponents;
+    (void)userContextCallback;
+    return 0;
+}

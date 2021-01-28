@@ -92,7 +92,6 @@ IOTHUB_DEVICE_CLIENT_LL_HANDLE PnP_CreateDeviceClientLLHandle(const PNP_DEVICE_C
         LogError("Unable to set device method callback, error=%d", iothubResult);
         result = false;
     }
-    */
     // Optionall, set the callback function that processes device twin changes from the IoTHub, which is the channel that PnP Properties are 
     // transferred over.  This will also automatically retrieve the full twin for the application on startup. 
     else if ((pnpDeviceConfiguration->deviceTwinCallback != NULL) && (iothubResult = IoTHubDeviceClient_LL_SetDeviceTwinCallback(deviceHandle, pnpDeviceConfiguration->deviceTwinCallback, (void*)deviceHandle)) != IOTHUB_CLIENT_OK)
@@ -100,6 +99,7 @@ IOTHUB_DEVICE_CLIENT_LL_HANDLE PnP_CreateDeviceClientLLHandle(const PNP_DEVICE_C
         LogError("Unable to set device twin callback, error=%d", iothubResult);
         result = false;
     }
+    */
     // Enabling auto url encode will have the underlying SDK perform URL encoding operations automatically.
     else if ((iothubResult = IoTHubDeviceClient_LL_SetOption(deviceHandle, OPTION_AUTO_URL_ENCODE_DECODE, &urlAutoEncodeDecode)) != IOTHUB_CLIENT_OK)
     {

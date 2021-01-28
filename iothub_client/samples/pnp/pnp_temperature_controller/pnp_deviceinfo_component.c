@@ -5,7 +5,7 @@
 
 // PnP routines
 #include "pnp_deviceinfo_component.h"
-#include "pnp_protocol.h"
+// OLD code - moved into API #include "pnp_protocol.h"
 
 // Core IoT SDK utilities
 #include "azure_c_shared_utility/xlogging.h"
@@ -72,7 +72,7 @@ static void SendReportedPropertyForDeviceInformation(IOTHUB_DEVICE_CLIENT_LL_HAN
 }
 */
 
-void InitReportedProperty(IOTHUB_PNP_REPORTED_PROPERTY *reportedProperty, const char* componentName, const char* propertyName, const char* propertyValue)
+void InitReportedProperty(IOTHUB_CLIENT_PNP_REPORTED_PROPERTY *reportedProperty, const char* componentName, const char* propertyName, const char* propertyValue)
 {
     memset(reportedProperty, 0, sizeof(*reportedProperty));
     reportedProperty->version = 1;
@@ -99,7 +99,7 @@ void PnP_DeviceInfoComponent_Report_All_Properties(const char* componentName, IO
     SendReportedPropertyForDeviceInformation(deviceClientLL, componentName, PnPDeviceInfo_TotalMemoryPropertyName, PnPDeviceInfo_TotalMemoryPropertyValue);
     */
 
-    IOTHUB_PNP_REPORTED_PROPERTY reportedProperties[8];
+    IOTHUB_CLIENT_PNP_REPORTED_PROPERTY reportedProperties[8];
     const int numReportedProperties = 8;
 
     // This extra InitReportedProperty is because C won't let us initialize struct in a reasonable way.  Other SDKs won't need second step.

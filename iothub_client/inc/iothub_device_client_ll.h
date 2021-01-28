@@ -406,17 +406,17 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_SendTelemetry(
                         void* userContextCallback);
 
 //
-// IOTHUB_PNP_PROPERTY_STATUS indicates the status of a desired property when device responds
+// IOTHUB_CLIENT_PNP_PROPERTY_STATUS indicates the status of a desired property when device responds
 //
-typedef struct IOTHUB_PNP_PROPERTY_STATUS_TAG {
+typedef struct IOTHUB_CLIENT_PNP_PROPERTY_STATUS_TAG {
     int version; /* another C thingy */
     int result;
     const char* description;
     int ackVersion;
-} IOTHUB_PNP_PROPERTY_STATUS;
+} IOTHUB_CLIENT_PNP_PROPERTY_STATUS;
 
 //
-// IOTHUB_PNP_REPORTED_PROPERTY is a structure to contain a reported property, which SDK will serialize.
+// IOTHUB_CLIENT_PNP_REPORTED_PROPERTY is a structure to contain a reported property, which SDK will serialize.
 //
 typedef struct {
     /* C construct only; not needed in languages created after 203 B.C */
@@ -429,8 +429,8 @@ typedef struct {
     const char* propertyValue;
     // Remaining struct is optional, for sending back status.  If set the result and ackVersion *MUST* be meaningful though 
     // description may be NULL.
-    IOTHUB_PNP_PROPERTY_STATUS* status;
-} IOTHUB_PNP_REPORTED_PROPERTY;
+    IOTHUB_CLIENT_PNP_PROPERTY_STATUS* status;
+} IOTHUB_CLIENT_PNP_REPORTED_PROPERTY;
 
 // Optional callback application may implement to receive notification when property has been updated.
 typedef void(*IOTHUB_PNP_REPORTED_STATE_CALLBACK)(int status_code, void* userContextCallback);
@@ -444,7 +444,7 @@ typedef void(*IOTHUB_PNP_REPORTED_STATE_CALLBACK)(int status_code, void* userCon
 //
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_SendReportedProperties(
                             IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
-                            const IOTHUB_PNP_REPORTED_PROPERTY* reportedProperties,
+                            const IOTHUB_CLIENT_PNP_REPORTED_PROPERTY* reportedProperties,
                             unsigned int numReportedProperties,
                             IOTHUB_PNP_REPORTED_STATE_CALLBACK pnpReportedStateCallback,
                             void* userContextCallback);
@@ -477,6 +477,57 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_SetCommandCallback(
                          IOTHUB_CLIENT_PNP_COMMAND_CALLBACK_ASYNC pnpCommandCallback, 
                          void* userContextCallback);
 
+
+// 
+// Indicates whether an updated property is a desired or reported property.
+// 
+typedef enum IOTHUB_UPDATED_PROPERTY_TYPE_TAG 
+{ 
+    IOTHUB_CLIENT_PNP_UPDATED_PROPERTY_TYPE_REPORTED,
+    IOTHUB_CLIENT_PNP_UPDATED_PROPERTY_TYPE_DESIRED
+} IOTHUB_CLIENT_PNP_UPDATED_PROPERTY_TYPE;
+
+//
+// An updated property
+//
+typedef struct {
+    int version;
+    // Whether this is coming from the "desired" properties or "reported" property of the Twin.  Needs some wordsmithing love.
+    IOTHUB_CLIENT_PNP_UPDATED_PROPERTY_TYPE propertyType;
+    /* name of the component */
+    const char* componentName;
+    /* Name of the property */
+    const char* propertyName;
+    /* value of the property being configured */
+    const char* propertyValue;
+} IOTHUB_CLIENT_PNP_UPDATED_PROPERTY; /* this is a bad name; see concern about DesiredProperty|PreviouslyReportedProperty business */
+
+
+//
+// Callback application implements to receive a property update.  
+//
+// Note that unlike the initial samples and even pre-summer refresh API, *all*  the properties 
+// are parsed out and provided in a single callback.  (Previously we had a callback per individual property.)
+// Even on C providing everything at once shouldn't be that much of a memory burden, and it's easier for an application 
+// to be able to handle everything in one shot.
+//
+typedef int(*IOTHUB_CLIENT_PNP_PROPERTY_UPDATE_CALLBACK)(
+    const IOTHUB_CLIENT_PNP_UPDATED_PROPERTY** updatedProperties, 
+    size_t numProperties,
+    int properytVersion, /* this is the $version field */
+    void* userContextCallback);
+
+// 
+// Application calls IoTHubDeviceClient_PnP_SetPropertyCallback (a) for device to get the twin (C only, long story, other
+// SDKs should be a separate API call) and to SUBSCRIBE to updated patches.
+// 
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_PnP_SetPropertyCallback(
+    IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle,
+    IOTHUB_CLIENT_PNP_PROPERTY_UPDATE_CALLBACK propertyUpdateCallback,
+    const char** pnpComponents,
+    size_t numPnPComponents,
+    void* userContextCallback);
+    
 
 #ifdef __cplusplus
 }
