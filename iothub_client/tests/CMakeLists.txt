@@ -131,7 +131,7 @@ endif()
     add_longhaul_test_directory(longhaul_amqp_device_twin_reported)
 endif()
 
-if(NOT MACOSX AND NOT ${use_schannel} AND NOT ${use_socketio})
+if(NOT DEFINED MACOSX AND NOT ${use_schannel} AND NOT ${use_socketio})
     add_unittest_directory(iothubclient_fuzz_mqtt)
     add_unittest_directory(iothubclient_fuzz_amqp)
 endif()
