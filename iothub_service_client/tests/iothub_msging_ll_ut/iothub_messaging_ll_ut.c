@@ -245,7 +245,7 @@ static int my_message_get_body_amqp_data_in_place(MESSAGE_HANDLE message, size_t
     return 0;
 }
 
-static STRING_HANDLE my_SASToken_Create(STRING_HANDLE key, STRING_HANDLE scope, STRING_HANDLE keyName, size_t expiry)
+static STRING_HANDLE my_SASToken_Create(STRING_HANDLE key, STRING_HANDLE scope, STRING_HANDLE keyName, uint64_t expiry)
 {
     (void)key;
     (void)scope;
@@ -1249,7 +1249,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
     /*Tests_SRS_IOTHUBMESSAGING_12_036: [ IoTHubMessaging_LL_Send shall create a uAMQP message by calling message_create ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_037: [ IoTHubMessaging_LL_Send shall set the uAMQP message body to the given message content by calling message_add_body_amqp_data ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_038: [ IoTHubMessaging_LL_Send shall set the uAMQP message properties to the given message properties by calling message_set_properties ] */
-    /*Tests_SRS_IOTHUBMESSAGING_12_039: [ IoTHubMessaging_LL_Send shall call uAMQP messagesender_send with the created message with IoTHubMessaging_LL_SendComplete callback by which IoTHubMessaging is notified of completition of send ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_039: [ IoTHubMessaging_LL_Send shall call uAMQP messagesender_send with the created message with IoTHubMessaging_LL_SendComplete callback by which IoTHubMessaging is notified of completion of send ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_041: [ If all uAMQP call return 0 then IoTHubMessaging_LL_Send shall return IOTHUB_MESSAGING_OK  ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_079: [** The uAMQP message properties shall be retrieved using message_get_properties ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_080 : [** If UAMQP message properties were not present then a new properties container shall be created using properties_create ] */

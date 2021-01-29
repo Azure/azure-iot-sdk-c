@@ -2,7 +2,10 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-set -e
+set -x # Set trace on
+set -o errexit # Exit if command failed
+set -o nounset # Exit if variable not set
+set -o pipefail # Exit if pipe failed
 
 # Print version
 cat /etc/*release | grep VERSION*
@@ -35,7 +38,7 @@ make --jobs=$CORES --max-load=$LOADLIMIT
 
 #use doctored openssl
 export LD_LIBRARY_PATH=/usr/local/ssl/lib
-ctest -j $CORES --output-on-failure
+ctest -j $CORES --output-on-failure --schedule-random
 export LD_LIBRARY_PATH=
 
 popd

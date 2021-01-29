@@ -7,6 +7,7 @@
 #define mallocAndStrcpy_s       real_mallocAndStrcpy_s
 #define unsignedIntToString     real_unsignedIntToString
 #define size_tToString          real_size_tToString
+#define uint64_tToString          uint64_size_tToString
 
 #undef CRT_ABSTRACTIONS_H
 #include "azure_c_shared_utility/crt_abstractions.h"
@@ -15,6 +16,7 @@
 #undef mallocAndStrcpy_s
 #undef unsignedIntToString
 #undef size_tToString
+#undef uint64_tToString
 #endif
 
 #undef CRT_ABSTRACTIONS_H

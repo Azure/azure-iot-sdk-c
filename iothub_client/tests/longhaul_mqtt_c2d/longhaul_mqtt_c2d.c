@@ -9,7 +9,7 @@
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/shared_util_options.h"
-#include "iothub_client.h"
+#include "iothub_device_client.h"
 #include "iothub_client_options.h"
 #include "iothub_message.h"
 #include "iothubtransportmqtt.h"
@@ -27,8 +27,6 @@ int main(void)
 {
     int result;
     IOTHUB_LONGHAUL_RESOURCES_HANDLE iotHubLonghaulRsrcsHandle;
-    size_t test_duration_in_seconds = 12 * 60 * 60;
-    size_t test_loop_wait_time_in_seconds = 60;
 
     if ((iotHubLonghaulRsrcsHandle = longhaul_tests_init()) == NULL)
     {
@@ -37,14 +35,21 @@ int main(void)
     }
     else
     {
-        if (longhaul_initialize_device_client(iotHubLonghaulRsrcsHandle, IoTHubAccount_GetSASDevice(longhaul_get_account_info(iotHubLonghaulRsrcsHandle)), MQTT_Protocol) == NULL)
+        IOTHUB_DEVICE_CLIENT_HANDLE device_client = longhaul_initialize_device_client(iotHubLonghaulRsrcsHandle, IoTHubAccount_GetSASDevice(longhaul_get_account_info(iotHubLonghaulRsrcsHandle)), MQTT_Protocol);
+        if (device_client == NULL)
         {
             LogError("Failed creating the device client");
             result = MU_FAILURE;
         }
         else
         {
-            result = longhaul_run_c2d_tests(iotHubLonghaulRsrcsHandle, test_loop_wait_time_in_seconds, test_duration_in_seconds);
+#ifdef AZIOT_LINUX
+            bool traceOn = true;
+            IoTHubDeviceClient_SetOption(device_client, OPTION_LOG_TRACE, &traceOn);
+#endif //AZIOT_LINUX
+
+            ThreadAPI_Sleep(30 * 1000); // wait for the hub to see the device connection
+            result = longhaul_run_c2d_tests(iotHubLonghaulRsrcsHandle);
         }
 
         longhaul_tests_deinit(iotHubLonghaulRsrcsHandle);

@@ -29,7 +29,7 @@ typedef struct AUTHENTICATION_INSTANCE_TAG
     ON_AUTHENTICATION_ERROR_CALLBACK on_error_callback;
     void* on_error_callback_context;
 
-    size_t cbs_request_timeout_secs;
+    uint64_t cbs_request_timeout_secs;
 
     AUTHENTICATION_STATE state;
     CBS_HANDLE cbs_handle;
@@ -88,7 +88,7 @@ static int verify_cbs_put_token_timeout(AUTHENTICATION_INSTANCE* instance, bool*
             LogError("Failed verifying if cbs_put_token has timed out (get_time failed)");
         }
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_083: [authentication_do_work() shall check for authentication timeout comparing the current time since `instance->current_sas_token_put_time` to `instance->cbs_request_timeout_secs`]
-        else if ((uint32_t)get_difftime(current_time, instance->current_sas_token_put_time) >= instance->cbs_request_timeout_secs)
+        else if ((uint64_t)get_difftime(current_time, instance->current_sas_token_put_time) >= instance->cbs_request_timeout_secs)
         {
             *is_timed_out = true;
             result = RESULT_OK;
@@ -106,7 +106,7 @@ static int verify_cbs_put_token_timeout(AUTHENTICATION_INSTANCE* instance, bool*
 static int verify_sas_token_refresh_timeout(AUTHENTICATION_INSTANCE* instance, bool* is_timed_out)
 {
     int result;
-    size_t sas_token_expiry;
+    uint64_t sas_token_expiry;
 
     if (instance->current_sas_token_put_time == INDEFINITE_TIME)
     {
@@ -126,7 +126,7 @@ static int verify_sas_token_refresh_timeout(AUTHENTICATION_INSTANCE* instance, b
             result = MU_FAILURE;
             LogError("Failed verifying if SAS token refresh timed out (get_time failed)");
         }
-        else if ((uint32_t)get_difftime(current_time, instance->current_sas_token_put_time) >= (sas_token_expiry*SAS_REFRESH_MULTIPLIER))
+        else if ((uint64_t)get_difftime(current_time, instance->current_sas_token_put_time) >= (sas_token_expiry*SAS_REFRESH_MULTIPLIER))
         {
             *is_timed_out = true;
             result = RESULT_OK;
@@ -203,39 +203,47 @@ static int put_SAS_token_to_cbs(AUTHENTICATION_INSTANCE* instance, STRING_HANDLE
 {
     int result;
 
-    // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_043: [authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to TRUE]
-    // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_057: [authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to TRUE]
-    // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_075: [authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to TRUE]
-    instance->is_cbs_put_token_in_progress = true;
-
-    // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_046: [The SAS token provided shall be sent to CBS using cbs_put_token(), using `servicebus.windows.net:sastoken` as token type, `devices_and_modules_path` as audience and passing on_cbs_put_token_complete_callback]
-    // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_058: [The SAS token shall be sent to CBS using cbs_put_token(), using `servicebus.windows.net:sastoken` as token type, `devices_and_modules_path` as audience and passing on_cbs_put_token_complete_callback]
-    // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_076: [The SAS token shall be sent to CBS using cbs_put_token(), using `servicebus.windows.net:sastoken` as token type, `devices_and_modules_path` as audience and passing on_cbs_put_token_complete_callback]
-    const char* cbs_audience_c_str = STRING_c_str(cbs_audience);
-    if (cbs_put_token_async(instance->cbs_handle, SAS_TOKEN_TYPE, cbs_audience_c_str, sas_token, on_cbs_put_token_complete_callback, instance) != RESULT_OK)
+    if (instance == NULL)
     {
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_048: [If cbs_put_token() failed, authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to FALSE, destroy `devices_and_modules_path` and return]
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_060: [If cbs_put_token() fails, `instance->is_cbs_put_token_in_progress` shall be set to FALSE]
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_078: [If cbs_put_token() fails, `instance->is_cbs_put_token_in_progress` shall be set to FALSE]
-        instance->is_cbs_put_token_in_progress = false;
         result = MU_FAILURE;
-        LogError("Failed putting SAS token to CBS for device '%s' (cbs_put_token failed)", instance->device_id);
+        LogError("Invalid AUTHENTICATION_INSTANCE");
     }
     else
     {
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_047: [If cbs_put_token() succeeds, authentication_do_work() shall set `instance->current_sas_token_put_time` with current time]
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_059: [If cbs_put_token() succeeds, authentication_do_work() shall set `instance->current_sas_token_put_time` with current time]
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_077: [If cbs_put_token() succeeds, authentication_do_work() shall set `instance->current_sas_token_put_time` with the current time]
-        time_t current_time;
+        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_043: [authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to TRUE]
+        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_057: [authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to TRUE]
+        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_075: [authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to TRUE]
+        instance->is_cbs_put_token_in_progress = true;
 
-        if ((current_time = get_time(NULL)) == INDEFINITE_TIME)
+        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_046: [The SAS token provided shall be sent to CBS using cbs_put_token(), using `servicebus.windows.net:sastoken` as token type, `devices_and_modules_path` as audience and passing on_cbs_put_token_complete_callback]
+        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_058: [The SAS token shall be sent to CBS using cbs_put_token(), using `servicebus.windows.net:sastoken` as token type, `devices_and_modules_path` as audience and passing on_cbs_put_token_complete_callback]
+        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_076: [The SAS token shall be sent to CBS using cbs_put_token(), using `servicebus.windows.net:sastoken` as token type, `devices_and_modules_path` as audience and passing on_cbs_put_token_complete_callback]
+        const char* cbs_audience_c_str = STRING_c_str(cbs_audience);
+        if (cbs_put_token_async(instance->cbs_handle, SAS_TOKEN_TYPE, cbs_audience_c_str, sas_token, on_cbs_put_token_complete_callback, instance) != RESULT_OK)
         {
-            LogError("Failed setting current_sas_token_put_time for device '%s' (get_time() failed)", instance->device_id);
+            // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_048: [If cbs_put_token() failed, authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to FALSE, destroy `devices_and_modules_path` and return]
+            // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_060: [If cbs_put_token() fails, `instance->is_cbs_put_token_in_progress` shall be set to FALSE]
+            // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_078: [If cbs_put_token() fails, `instance->is_cbs_put_token_in_progress` shall be set to FALSE]
+            instance->is_cbs_put_token_in_progress = false;
+            result = MU_FAILURE;
+            LogError("Failed putting SAS token to CBS for device '%s' (cbs_put_token failed)", instance->device_id);
         }
+        else
+        {
+            // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_047: [If cbs_put_token() succeeds, authentication_do_work() shall set `instance->current_sas_token_put_time` with current time]
+            // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_059: [If cbs_put_token() succeeds, authentication_do_work() shall set `instance->current_sas_token_put_time` with current time]
+            // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_077: [If cbs_put_token() succeeds, authentication_do_work() shall set `instance->current_sas_token_put_time` with the current time]
+            time_t current_time;
 
-        instance->current_sas_token_put_time = current_time; // If it failed, fear not. `current_sas_token_put_time` shall be checked for INDEFINITE_TIME wherever it is used.
+            if ((current_time = get_time(NULL)) == INDEFINITE_TIME)
+            {
+                LogError("Failed setting current_sas_token_put_time for device '%s' (get_time() failed)", instance->device_id);
+            }
 
-        result = RESULT_OK;
+            instance->current_sas_token_put_time = current_time; // If it failed, fear not. `current_sas_token_put_time` shall be checked for INDEFINITE_TIME wherever it is used.
+
+            result = RESULT_OK;
+        }
     }
 
     return result;

@@ -294,11 +294,21 @@ static bool set_message_properties(IOTHUB_MESSAGE_LIST* message, size_t* msg_siz
     bool result = true;
 
     /*Codes_SRS_TRANSPORTMULTITHTTP_17_078: [Every message property "property":"value" shall be added to the HTTP headers as an individual header "iothub-app-property":"value".] */
-    MAP_HANDLE map = IoTHubMessage_Properties(message->messageHandle);
+    MAP_HANDLE map;
     const char*const* keys;
     const char*const* values;
     size_t count;
-    if (Map_GetInternals(map, &keys, &values, &count) != MAP_OK)
+    if (message == NULL)
+    {
+        LogError("IOTHUB_MESSAGE_LIST is invalid");
+        result = false;
+    }
+    else if ((map = IoTHubMessage_Properties(message->messageHandle)) == NULL)
+    {
+        LogError("MAP_HANDLE is invalid");
+        result = false;
+    }
+    else if (Map_GetInternals(map, &keys, &values, &count) != MAP_OK)
     {
         /*Codes_SRS_TRANSPORTMULTITHTTP_17_079: [If any HTTP header operation fails, _DoWork shall advance to the next action.] */
         LogError("unable to Map_GetInternals");

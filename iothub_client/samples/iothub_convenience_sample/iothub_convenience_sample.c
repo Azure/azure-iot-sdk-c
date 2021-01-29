@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 /*
-CAUTION: Checking of return codes and error values shall be omitted for brevity in this sample. 
+CAUTION: Checking of return codes and error values shall be omitted for brevity in this sample.
 This sample is to demonstrate azure IoT client concepts only and is not a guide design principles or style.
 Please practice sound engineering practices when writing production code.
 */
@@ -20,17 +20,17 @@ Please practice sound engineering practices when writing production code.
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/tickcounter.h"
 
-/* 
-This sample uses the multithreaded APIs of iothub_client for example purposes. 
+/*
+This sample uses the multithreaded APIs of iothub_client for example purposes.
 The difference between multithreaded and singlethreaded (_ll_) API?
-Multithreaded creates a separate thread to perform DoWork calls, which are necessary 
-for the device client library to do anything. The benefit of using the 
-multithreaded API is that the calls to DoWork are abstracted away from your code. 
+Multithreaded creates a separate thread to perform DoWork calls, which are necessary
+for the device client library to do anything. The benefit of using the
+multithreaded API is that the calls to DoWork are abstracted away from your code.
 */
 
 
 // The protocol you wish to use should be uncommented
-// 
+//
 #define SAMPLE_MQTT
 //#define SAMPLE_MQTT_OVER_WEBSOCKETS
 //#define SAMPLE_AMQP
@@ -165,7 +165,7 @@ static int device_method_callback(const char* method_name, const unsigned char* 
     {
         memcpy(*response, RESPONSE_STRING, *resp_size);
     }
-    
+
     return status;
 }
 
@@ -251,7 +251,7 @@ int main(void)
             {
                 (void)printf("failure to set proxy\n");
             }
-        }		
+        }
 
         // Setting message callback to get C2D messages
         (void)IoTHubDeviceClient_SetMessageCallback(device_handle, receive_msg_callback, NULL);
@@ -264,7 +264,7 @@ int main(void)
         // Set any option that are necessary.
         // For available options please see the iothub_sdk_options.md documentation
 
-        // Setting Log Tracing. 
+        // Setting Log Tracing.
         // Log tracing is supported in MQTT and AMQP. Not HTTP.
 #ifndef SAMPLE_HTTP
         bool traceOn = true;
@@ -272,9 +272,9 @@ int main(void)
 #endif
 
         // Setting the frequency of DoWork calls by the underlying process thread.
-        // The value ms_delay is a delay between DoWork calls, in milliseconds. 
-        // ms_delay can only be between 1 and 100 milliseconds. 
-        // Without the SetOption, the delay defaults to 1 ms. 
+        // The value ms_delay is a delay between DoWork calls, in milliseconds.
+        // ms_delay can only be between 1 and 100 milliseconds.
+        // Without the SetOption, the delay defaults to 1 ms.
         tickcounter_ms_t ms_delay = 10;
         (void)IoTHubDeviceClient_SetOption(device_handle, OPTION_DO_WORK_FREQUENCY_IN_MS, &ms_delay);
 
@@ -288,8 +288,8 @@ int main(void)
         //Setting the auto URL Encoder (recommended for MQTT). Please use this option unless
         //you are URL Encoding inputs yourself.
         //ONLY valid for use with MQTT
-        //bool urlEncodeOn = true;
-        //(void)IoTHubDeviceClient_SetOption(device_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
+        bool urlEncodeOn = true;
+        (void)IoTHubDeviceClient_SetOption(device_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
 #endif
 
         while(g_continueRunning)
@@ -298,7 +298,7 @@ int main(void)
             telemetry_temperature = 20.0f + ((float)rand() / RAND_MAX) * 15.0f;
             telemetry_humidity = 60.0f + ((float)rand() / RAND_MAX) * 20.0f;
 
-            sprintf(telemetry_msg_buffer, "{\"temperature\":%.3f,\"humidity\":%.3f,\"scale\":\"%s\"}", 
+            sprintf(telemetry_msg_buffer, "{\"temperature\":%.3f,\"humidity\":%.3f,\"scale\":\"%s\"}",
                 telemetry_temperature, telemetry_humidity, telemetry_scale);
 
             message_handle = IoTHubMessage_CreateFromString(telemetry_msg_buffer);

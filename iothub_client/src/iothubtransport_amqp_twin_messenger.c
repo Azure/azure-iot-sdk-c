@@ -419,13 +419,13 @@ static TWIN_OPERATION_CONTEXT* create_twin_operation_context(TWIN_MESSENGER_INST
 static bool find_twin_operation_by_correlation_id(LIST_ITEM_HANDLE list_item, const void* match_context)
 {
     TWIN_OPERATION_CONTEXT* twin_op_ctx = (TWIN_OPERATION_CONTEXT*)singlylinkedlist_item_get_value(list_item);
-    return (strcmp(twin_op_ctx->correlation_id, (const char*)match_context) == 0);
+    return (twin_op_ctx == NULL) ? false : (strcmp(twin_op_ctx->correlation_id, (const char*)match_context) == 0);
 }
 
 static bool find_twin_operation_by_type(LIST_ITEM_HANDLE list_item, const void* match_context)
 {
     TWIN_OPERATION_CONTEXT* twin_op_ctx = (TWIN_OPERATION_CONTEXT*)singlylinkedlist_item_get_value(list_item);
-    return (twin_op_ctx->type == *(TWIN_OPERATION_TYPE*)match_context);
+    return (twin_op_ctx == NULL) ? false : (twin_op_ctx->type == *(TWIN_OPERATION_TYPE*)match_context);
 }
 
 static void destroy_twin_operation_context(TWIN_OPERATION_CONTEXT* op_ctx)
@@ -1620,7 +1620,7 @@ static void on_amqp_messenger_state_changed_callback(void* context, AMQP_MESSENG
             }
             // Else, it shall wait for the moment the AMQP msgr is subscribed.
         }
-        else if (twin_msgr->state == TWIN_MESSENGER_STATE_STOPPING && new_state == TWIN_MESSENGER_STATE_STOPPED)
+        else if (twin_msgr->state == TWIN_MESSENGER_STATE_STOPPING && new_state == AMQP_MESSENGER_STATE_STOPPED)
         {
             if (!twin_msgr->amqp_msgr_is_subscribed)
             {

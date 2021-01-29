@@ -92,9 +92,9 @@ typedef struct PROV_INSTANCE_INFO_TAG
 
     TICK_COUNTER_HANDLE tick_counter;
 
-    tickcounter_ms_t status_throttle;
+    tickcounter_ms_t last_send_time_ms;
     tickcounter_ms_t timeout_value;
-    uint32_t retry_after_value;
+    size_t retry_after_ms;
 
     uint8_t prov_timeout;
 
@@ -783,7 +783,7 @@ static void on_transport_status(PROV_DEVICE_TRANSPORT_STATUS transport_status, u
     {
         PROV_INSTANCE_INFO* prov_info = (PROV_INSTANCE_INFO*)user_ctx;
 
-        prov_info->retry_after_value = retry_interval;
+        prov_info->retry_after_ms = (size_t)retry_interval * 1000; // retry_interval is in seconds.
 
         switch (transport_status)
         {
@@ -879,7 +879,7 @@ PROV_DEVICE_LL_HANDLE Prov_Device_LL_Create(const char* uri, const char* id_scop
 
             /* Codes_SRS_PROV_CLIENT_07_028: [ CLIENT_STATE_READY is the initial state after the object is created which will send a uhttp_client_open call to the http endpoint. ] */
             result->prov_state = CLIENT_STATE_READY;
-            result->retry_after_value = PROV_GET_THROTTLE_TIME;
+            result->retry_after_ms = PROV_GET_THROTTLE_TIME * 1000;
             result->prov_transport_protocol = protocol();
             result->error_reason = PROV_DEVICE_RESULT_OK;
 
@@ -930,8 +930,8 @@ PROV_DEVICE_LL_HANDLE Prov_Device_LL_Create(const char* uri, const char* id_scop
                 else
                 {
                     // Ensure that we are passed the throttling time and send on the first send
-                    (void)tickcounter_get_current_ms(result->tick_counter, &result->status_throttle);
-                    result->status_throttle += (result->retry_after_value * 1000);
+                    (void)tickcounter_get_current_ms(result->tick_counter, &result->last_send_time_ms);
+                    result->last_send_time_ms += result->retry_after_ms;
                 }
             }
         }
@@ -1118,29 +1118,11 @@ void Prov_Device_LL_DoWork(PROV_DEVICE_LL_HANDLE handle)
         }
         if (prov_info->is_connected || prov_info->prov_state == CLIENT_STATE_ERROR)
         {
+            tickcounter_ms_t current_time = 0;
+
             switch (prov_info->prov_state)
             {
                 case CLIENT_STATE_REGISTER_SEND:
-                    /* Codes_SRS_PROV_CLIENT_07_013: [ CLIENT_STATE_REGISTER_SEND which shall construct an initial call to the service with endorsement information ] */
-                    if (prov_info->prov_transport_protocol->prov_transport_register(prov_info->transport_handle, prov_transport_process_json_reply, prov_transport_create_json_payload, prov_info) != 0)
-                    {
-                        LogError("Failure registering device");
-                        if (prov_info->error_reason == PROV_DEVICE_RESULT_OK)
-                        {
-                            prov_info->error_reason = PROV_DEVICE_RESULT_TRANSPORT;
-                        }
-                        prov_info->prov_state = CLIENT_STATE_ERROR;
-                    }
-                    else
-                    {
-                        (void)tickcounter_get_current_ms(prov_info->tick_counter, &prov_info->timeout_value);
-                        prov_info->prov_state = CLIENT_STATE_REGISTER_SENT;
-                    }
-                    break;
-
-                case CLIENT_STATE_STATUS_SEND:
-                {
-                    tickcounter_ms_t current_time = 0;
                     if (tickcounter_get_current_ms(prov_info->tick_counter, &current_time) != 0)
                     {
                         LogError("Failure getting the current time");
@@ -1149,7 +1131,39 @@ void Prov_Device_LL_DoWork(PROV_DEVICE_LL_HANDLE handle)
                     }
                     else
                     {
-                        if ((current_time - prov_info->status_throttle) / 1000 > prov_info->retry_after_value)
+                        if ((current_time - prov_info->last_send_time_ms) > prov_info->retry_after_ms)
+                        {
+                            /* Codes_SRS_PROV_CLIENT_07_013: [ CLIENT_STATE_REGISTER_SEND which shall construct an initial call to the service with endorsement information ] */
+                            if (prov_info->prov_transport_protocol->prov_transport_register(prov_info->transport_handle, prov_transport_process_json_reply, prov_transport_create_json_payload, prov_info) != 0)
+                            {
+                                LogError("Failure registering device");
+                                if (prov_info->error_reason == PROV_DEVICE_RESULT_OK)
+                                {
+                                    prov_info->error_reason = PROV_DEVICE_RESULT_TRANSPORT;
+                                }
+                                prov_info->prov_state = CLIENT_STATE_ERROR;
+                            }
+                            else
+                            {
+                                (void)tickcounter_get_current_ms(prov_info->tick_counter, &prov_info->timeout_value);
+                                prov_info->prov_state = CLIENT_STATE_REGISTER_SENT;
+                            }
+                            prov_info->last_send_time_ms = current_time;
+                        }
+                    }
+                    break;
+
+                case CLIENT_STATE_STATUS_SEND:
+                {
+                    if (tickcounter_get_current_ms(prov_info->tick_counter, &current_time) != 0)
+                    {
+                        LogError("Failure getting the current time");
+                        prov_info->error_reason = PROV_DEVICE_RESULT_ERROR;
+                        prov_info->prov_state = CLIENT_STATE_ERROR;
+                    }
+                    else
+                    {
+                        if ((current_time - prov_info->last_send_time_ms) > prov_info->retry_after_ms)
                         {
                             /* Codes_SRS_PROV_CLIENT_07_026: [ Upon receiving the reply of the CLIENT_STATE_URL_REQ_SEND message from  iothub_client shall process the the reply of the CLIENT_STATE_URL_REQ_SEND state ] */
                             if (prov_info->prov_transport_protocol->prov_transport_get_op_status(prov_info->transport_handle) != 0)
@@ -1171,7 +1185,7 @@ void Prov_Device_LL_DoWork(PROV_DEVICE_LL_HANDLE handle)
                                     prov_info->prov_state = CLIENT_STATE_ERROR;
                                 }
                             }
-                            prov_info->status_throttle = current_time;
+                            prov_info->last_send_time_ms = current_time;
                         }
                     }
                     break;
@@ -1182,7 +1196,6 @@ void Prov_Device_LL_DoWork(PROV_DEVICE_LL_HANDLE handle)
                 {
                     if (prov_info->prov_timeout > 0)
                     {
-                        tickcounter_ms_t current_time = 0;
                         (void)tickcounter_get_current_ms(prov_info->tick_counter, &current_time);
                         if ((current_time - prov_info->timeout_value) / 1000 > prov_info->prov_timeout)
                         {

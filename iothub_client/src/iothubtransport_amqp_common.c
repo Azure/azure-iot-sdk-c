@@ -51,6 +51,7 @@
 // DEFAULT_MAX_RETRY_TIME_IN_SECS = 0 means infinite retry.
 #define DEFAULT_MAX_RETRY_TIME_IN_SECS            0
 #define MAX_SERVICE_KEEP_ALIVE_RATIO              0.9
+#define DEFAULT_DEVICE_STOP_DELAY                 10
 
 // ---------- Data Definitions ---------- //
 
@@ -355,9 +356,17 @@ static bool is_device_registered_ex(SINGLYLINKEDLIST_HANDLE registered_devices, 
 // @returns     true if the device is already in the list, false otherwise.
 static bool is_device_registered(AMQP_TRANSPORT_DEVICE_INSTANCE* amqp_device_instance)
 {
-    LIST_ITEM_HANDLE list_item;
-    const char* device_id = STRING_c_str(amqp_device_instance->device_id);
-    return is_device_registered_ex(amqp_device_instance->transport_instance->registered_devices, device_id, &list_item);
+    if (amqp_device_instance == NULL)
+    {
+        LogError("AMQP_TRANSPORT_DEVICE_INSTANCE is NULL");
+        return false;
+    }
+    else
+    {
+        LIST_ITEM_HANDLE list_item;
+        const char* device_id = STRING_c_str(amqp_device_instance->device_id);
+        return is_device_registered_ex(amqp_device_instance->transport_instance->registered_devices, device_id, &list_item);
+    }
 }
 
 static size_t get_number_of_registered_devices(AMQP_TRANSPORT_INSTANCE* transport)
@@ -1146,18 +1155,17 @@ static int IoTHubTransport_AMQP_Common_Device_DoWork(AMQP_TRANSPORT_DEVICE_INSTA
         }
         else // i.e., DEVICE_STATE_ERROR_AUTH || DEVICE_STATE_ERROR_AUTH_TIMEOUT || DEVICE_STATE_ERROR_MSG
         {
-            LogError("Failed performing DoWork for device '%s' (device reported state %d; number of previous failures: %lu)",
-                STRING_c_str(registered_device->device_id), (int)registered_device->device_state, (unsigned long)registered_device->number_of_previous_failures);
-
             registered_device->number_of_previous_failures++;
 
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_046: [If the device has failed for MAX_NUMBER_OF_DEVICE_FAILURES in a row, it shall trigger a connection retry on the transport]
             if (registered_device->number_of_previous_failures >= MAX_NUMBER_OF_DEVICE_FAILURES)
             {
+                LogError("Failed performing DoWork for device '%s' (device reported state %d; number of previous failures: %lu)",
+                    STRING_c_str(registered_device->device_id), (int)registered_device->device_state, (unsigned long)registered_device->number_of_previous_failures);
                 result = MU_FAILURE;
             }
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_045: [If the registered device has a failure, it shall be stopped using amqp_device_stop()]
-            else if (amqp_device_stop(registered_device->device_handle) != RESULT_OK)
+            else if (amqp_device_delayed_stop(registered_device->device_handle, DEFAULT_DEVICE_STOP_DELAY) != RESULT_OK)
             {
                 LogError("Failed to stop reset device '%s' (amqp_device_stop failed)", STRING_c_str(registered_device->device_id));
                 result = MU_FAILURE;
@@ -1596,6 +1604,9 @@ void IoTHubTransport_AMQP_Common_DoWork(TRANSPORT_LL_HANDLE handle)
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_020: [If the amqp_connection is OPENED, the transport shall iterate through each registered device and perform a device-specific do_work on each]
                 else if (transport_instance->amqp_connection_state == AMQP_CONNECTION_STATE_OPENED)
                 {
+                    size_t number_of_devices = 0;
+                    size_t number_of_faulty_devices = 0;
+
                     while (list_item != NULL)
                     {
                         AMQP_TRANSPORT_DEVICE_INSTANCE* registered_device;
@@ -1604,24 +1615,29 @@ void IoTHubTransport_AMQP_Common_DoWork(TRANSPORT_LL_HANDLE handle)
                         {
                             LogError("Transport had an unexpected failure during DoWork (failed to fetch a registered_devices list item value)");
                         }
-                        else if (registered_device->number_of_send_event_complete_failures >= MAX_NUMBER_OF_DEVICE_FAILURES)
+                        else if (registered_device->number_of_send_event_complete_failures >= DEVICE_FAILURE_COUNT_RECONNECTION_THRESHOLD)
                         {
-                            LogError("Device '%s' reported a critical failure (events completed sending with failures); connection retry will be triggered.", STRING_c_str(registered_device->device_id));
-
-                            update_state(transport_instance, AMQP_TRANSPORT_STATE_RECONNECTION_REQUIRED);
+                            number_of_faulty_devices++;
                         }
                         else if (IoTHubTransport_AMQP_Common_Device_DoWork(registered_device) != RESULT_OK)
                         {
-                            // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_021: [If DoWork fails for the registered device for more than MAX_NUMBER_OF_DEVICE_FAILURES, connection retry shall be triggered]
-                            if (registered_device->number_of_previous_failures >= MAX_NUMBER_OF_DEVICE_FAILURES)
+                            // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_021: [If DoWork fails for the registered device for more than DEVICE_FAILURE_COUNT_RECONNECTION_THRESHOLD, connection retry shall be triggered]
+                            if (registered_device->number_of_previous_failures >= DEVICE_FAILURE_COUNT_RECONNECTION_THRESHOLD)
                             {
-                                LogError("Device '%s' reported a critical failure; connection retry will be triggered.", STRING_c_str(registered_device->device_id));
-
-                                update_state(transport_instance, AMQP_TRANSPORT_STATE_RECONNECTION_REQUIRED);
+                                number_of_faulty_devices++;
                             }
                         }
 
                         list_item = singlylinkedlist_get_next_item(list_item);
+                        number_of_devices++;
+                    }
+
+                    if (number_of_faulty_devices > 0 &&
+                        ((float)number_of_faulty_devices/(float)number_of_devices) >= DEVICE_MULTIPLEXING_FAULTY_DEVICE_RATIO_RECONNECTION_THRESHOLD)
+                    {
+                        LogError("Reconnection required. %zd of %zd registered devices are failing.", number_of_faulty_devices, number_of_devices);
+
+                        update_state(transport_instance, AMQP_TRANSPORT_STATE_RECONNECTION_REQUIRED);
                     }
                 }
             }
