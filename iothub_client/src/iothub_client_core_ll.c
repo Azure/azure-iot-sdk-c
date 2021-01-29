@@ -422,42 +422,42 @@ static bool invoke_message_callback(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleDat
 
     switch (handleData->messageCallback.type)
     {
-        case CALLBACK_TYPE_NONE:
-        {
-            /*Codes_SRS_IOTHUBCLIENT_LL_02_032: [If the client is not subscribed to receive messages then IoTHubClient_LL_MessageCallback shall return false.] */
-            LogError("Invalid workflow - not currently set up to accept messages");
-            result = false;
-            break;
-        }
-        case CALLBACK_TYPE_SYNC:
-        {
-            /*Codes_SRS_IOTHUBCLIENT_LL_02_030: [If messageCallbackType is LEGACY then IoTHubClient_LL_MessageCallback shall invoke the last callback function (the parameter messageCallback to IoTHubClient_LL_SetMessageCallback) passing the message and the passed userContextCallback.]*/
-            IOTHUBMESSAGE_DISPOSITION_RESULT cb_result = handleData->messageCallback.callbackSync(messageData->messageHandle, handleData->messageCallback.userContextCallback);
+    case CALLBACK_TYPE_NONE:
+    {
+        /*Codes_SRS_IOTHUBCLIENT_LL_02_032: [If the client is not subscribed to receive messages then IoTHubClient_LL_MessageCallback shall return false.] */
+        LogError("Invalid workflow - not currently set up to accept messages");
+        result = false;
+        break;
+    }
+    case CALLBACK_TYPE_SYNC:
+    {
+        /*Codes_SRS_IOTHUBCLIENT_LL_02_030: [If messageCallbackType is LEGACY then IoTHubClient_LL_MessageCallback shall invoke the last callback function (the parameter messageCallback to IoTHubClient_LL_SetMessageCallback) passing the message and the passed userContextCallback.]*/
+        IOTHUBMESSAGE_DISPOSITION_RESULT cb_result = handleData->messageCallback.callbackSync(messageData->messageHandle, handleData->messageCallback.userContextCallback);
 
-            /*Codes_SRS_IOTHUBCLIENT_LL_10_007: [If messageCallbackType is LEGACY then IoTHubClient_LL_MessageCallback shall send the message disposition as returned by the client to the underlying layer.] */
-            if (handleData->IoTHubTransport_SendMessageDisposition(messageData, cb_result) != IOTHUB_CLIENT_OK)
-            {
-                LogError("IoTHubTransport_SendMessageDisposition failed");
-            }
-            result = true;
-            break;
-        }
-        case CALLBACK_TYPE_ASYNC:
+        /*Codes_SRS_IOTHUBCLIENT_LL_10_007: [If messageCallbackType is LEGACY then IoTHubClient_LL_MessageCallback shall send the message disposition as returned by the client to the underlying layer.] */
+        if (handleData->IoTHubTransport_SendMessageDisposition(messageData, cb_result) != IOTHUB_CLIENT_OK)
         {
-            /* Codes_SRS_IOTHUBCLIENT_LL_10_009: [If messageCallbackType is ASYNC then IoTHubClient_LL_MessageCallback shall return what messageCallbacEx returns.] */
-            result = handleData->messageCallback.callbackAsync(messageData, handleData->messageCallback.userContextCallback);
-            if (!result)
-            {
-                LogError("messageCallbackEx failed");
-            }
-            break;
+            LogError("IoTHubTransport_SendMessageDisposition failed");
         }
-        default:
+        result = true;
+        break;
+    }
+    case CALLBACK_TYPE_ASYNC:
+    {
+        /* Codes_SRS_IOTHUBCLIENT_LL_10_009: [If messageCallbackType is ASYNC then IoTHubClient_LL_MessageCallback shall return what messageCallbacEx returns.] */
+        result = handleData->messageCallback.callbackAsync(messageData, handleData->messageCallback.userContextCallback);
+        if (!result)
         {
-            LogError("Invalid state");
-            result = false;
-            break;
+            LogError("messageCallbackEx failed");
         }
+        break;
+    }
+    default:
+    {
+        LogError("Invalid state");
+        result = false;
+        break;
+    }
     }
 
     return result;
@@ -748,33 +748,33 @@ static int IoTHubClientCore_LL_DeviceMethodComplete(const char* method_name, con
         IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)ctx;
         switch (handleData->methodCallback.type)
         {
-            case CALLBACK_TYPE_SYNC:
+        case CALLBACK_TYPE_SYNC:
+        {
+            unsigned char* payload_resp = NULL;
+            size_t response_size = 0;
+            result = handleData->methodCallback.callbackSync(method_name, payLoad, size, &payload_resp, &response_size, handleData->methodCallback.userContextCallback);
+            /* Codes_SRS_IOTHUBCLIENT_LL_07_020: [ deviceMethodCallback shall build the BUFFER_HANDLE with the response payload from the IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC callback. ] */
+            if (payload_resp != NULL && response_size > 0)
             {
-                unsigned char* payload_resp = NULL;
-                size_t response_size = 0;
-                result = handleData->methodCallback.callbackSync(method_name, payLoad, size, &payload_resp, &response_size, handleData->methodCallback.userContextCallback);
-                /* Codes_SRS_IOTHUBCLIENT_LL_07_020: [ deviceMethodCallback shall build the BUFFER_HANDLE with the response payload from the IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC callback. ] */
-                if (payload_resp != NULL && response_size > 0)
-                {
-                    result = handleData->IoTHubTransport_DeviceMethod_Response(handleData->deviceHandle, response_id, payload_resp, response_size, result);
-                }
-                else
-                {
-                    result = MU_FAILURE;
-                }
-                if (payload_resp != NULL)
-                {
-                    free(payload_resp);
-                }
-                break;
+                result = handleData->IoTHubTransport_DeviceMethod_Response(handleData->deviceHandle, response_id, payload_resp, response_size, result);
             }
-            case CALLBACK_TYPE_ASYNC:
-                result = handleData->methodCallback.callbackAsync(method_name, payLoad, size, response_id, handleData->methodCallback.userContextCallback);
-                break;
-            default:
-                /* Codes_SRS_IOTHUBCLIENT_LL_07_019: [ If deviceMethodCallback is NULL IoTHubClientCore_LL_DeviceMethodComplete shall return 404. ] */
-                result = 0;
-                break;
+            else
+            {
+                result = MU_FAILURE;
+            }
+            if (payload_resp != NULL)
+            {
+                free(payload_resp);
+            }
+            break;
+        }
+        case CALLBACK_TYPE_ASYNC:
+            result = handleData->methodCallback.callbackAsync(method_name, payLoad, size, response_id, handleData->methodCallback.userContextCallback);
+            break;
+        default:
+            /* Codes_SRS_IOTHUBCLIENT_LL_07_019: [ If deviceMethodCallback is NULL IoTHubClientCore_LL_DeviceMethodComplete shall return 404. ] */
+            result = 0;
+            break;
         }
     }
     return result;
@@ -1161,10 +1161,9 @@ static void on_get_device_twin_completed(DEVICE_TWIN_UPDATE_STATE update_state, 
     else
     {
         GET_TWIN_CONTEXT* getTwinCtx = (GET_TWIN_CONTEXT*)userContextCallback;
-        if (payLoad)
-        {
-            getTwinCtx->callback(update_state, payLoad, size, getTwinCtx->context);
-        }
+
+        getTwinCtx->callback(update_state, payLoad, size, getTwinCtx->context);
+
         free(getTwinCtx);
     }
 }
@@ -1753,7 +1752,7 @@ void IoTHubClientCore_LL_Destroy(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle
             if (temp->reported_state_callback != NULL)
             {
                 temp->reported_state_callback(ERROR_CODE_BECAUSE_DESTROY, temp->context);
-            }  
+            }
 
             device_twin_data_destroy(temp);
         }
@@ -2365,7 +2364,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetOption(IOTHUB_CLIENT_CORE_LL_HANDLE 
             {
                 LogError("DT ModelId already specified.");
                 result = IOTHUB_CLIENT_ERROR;
-            } 
+            }
             else if ((handleData->model_id = STRING_construct((const char*)value)) == NULL)
             {
                 LogError("STRING_construct failed");

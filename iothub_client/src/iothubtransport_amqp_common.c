@@ -600,7 +600,7 @@ static void on_device_twin_update_received_callback(DEVICE_TWIN_UPDATE_TYPE upda
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_138: [If `update_type` is DEVICE_TWIN_UPDATE_TYPE_PARTIAL IoTHubClientCore_LL_RetrievePropertyComplete shall be invoked passing `context` as handle, `DEVICE_TWIN_UPDATE_PARTIAL`, `payload` and `size`.]
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_139: [If `update_type` is DEVICE_TWIN_UPDATE_TYPE_COMPLETE IoTHubClientCore_LL_RetrievePropertyComplete shall be invoked passing `context` as handle, `DEVICE_TWIN_UPDATE_COMPLETE`, `payload` and `size`.]
         registered_device->transport_instance->transport_callbacks.twin_retrieve_prop_complete_cb((update_type == DEVICE_TWIN_UPDATE_TYPE_COMPLETE ? DEVICE_TWIN_UPDATE_COMPLETE : DEVICE_TWIN_UPDATE_PARTIAL),
-                message, length, registered_device->transport_instance->transport_ctx);
+            message, length, registered_device->transport_instance->transport_ctx);
     }
 }
 
@@ -609,7 +609,7 @@ static void on_device_get_twin_completed_callback(DEVICE_TWIN_UPDATE_TYPE update
     (void)update_type;
 
     // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_158: [ If `message` or `context` are NULL, the callback shall do nothing and return. ]
-    if (context == NULL)
+    if (message == NULL || context == NULL)
     {
         LogError("Invalid argument (message=%p, context=%p)", message, context);
     }
@@ -999,23 +999,23 @@ static IOTHUB_CLIENT_CONFIRMATION_RESULT get_iothub_client_confirmation_result_f
 
     switch (result)
     {
-        case D2C_EVENT_SEND_COMPLETE_RESULT_OK:
-            iothub_send_result = IOTHUB_CLIENT_CONFIRMATION_OK;
-            break;
-        case D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE:
-        case D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING:
-            iothub_send_result = IOTHUB_CLIENT_CONFIRMATION_ERROR;
-            break;
-        case D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_TIMEOUT:
-            iothub_send_result = IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT;
-            break;
-        case D2C_EVENT_SEND_COMPLETE_RESULT_DEVICE_DESTROYED:
-            iothub_send_result = IOTHUB_CLIENT_CONFIRMATION_BECAUSE_DESTROY;
-            break;
-        case D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_UNKNOWN:
-        default:
-            iothub_send_result = IOTHUB_CLIENT_CONFIRMATION_ERROR;
-            break;
+    case D2C_EVENT_SEND_COMPLETE_RESULT_OK:
+        iothub_send_result = IOTHUB_CLIENT_CONFIRMATION_OK;
+        break;
+    case D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE:
+    case D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING:
+        iothub_send_result = IOTHUB_CLIENT_CONFIRMATION_ERROR;
+        break;
+    case D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_TIMEOUT:
+        iothub_send_result = IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT;
+        break;
+    case D2C_EVENT_SEND_COMPLETE_RESULT_DEVICE_DESTROYED:
+        iothub_send_result = IOTHUB_CLIENT_CONFIRMATION_BECAUSE_DESTROY;
+        break;
+    case D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_UNKNOWN:
+    default:
+        iothub_send_result = IOTHUB_CLIENT_CONFIRMATION_ERROR;
+        break;
     }
 
     return iothub_send_result;
@@ -1131,7 +1131,7 @@ static int IoTHubTransport_AMQP_Common_Device_DoWork(AMQP_TRANSPORT_DEVICE_INSTA
             }
         }
         else if (registered_device->device_state == DEVICE_STATE_STARTING ||
-                 registered_device->device_state == DEVICE_STATE_STOPPING)
+            registered_device->device_state == DEVICE_STATE_STOPPING)
         {
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_043: [If the device handle is in state DEVICE_STATE_STARTING or DEVICE_STATE_STOPPING, it shall be checked for state change timeout]
             bool is_timed_out;
@@ -2406,11 +2406,6 @@ void IoTHubTransport_AMQP_Common_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
             }
             else
             {
-                // bug:8781049
-                // stop the device and reset the pending messages before destorying the device instance
-                (void)amqp_device_stop(registered_device->device_handle);
-                prepare_for_connection_retry(registered_device->transport_instance);
-
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_012: [IoTHubTransport_AMQP_Common_Unregister shall destroy the C2D methods handler by calling iothubtransportamqp_methods_destroy]
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_083: [IoTHubTransport_AMQP_Common_Unregister shall free all the memory allocated for the `device_instance`]
                 internal_destroy_amqp_device_instance(registered_device);

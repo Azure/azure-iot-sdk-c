@@ -141,25 +141,25 @@ static D2C_EVENT_SEND_RESULT get_d2c_event_send_result_from(TELEMETRY_MESSENGER_
 
     switch (result)
     {
-        case TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_OK:
-            d2c_esr = D2C_EVENT_SEND_COMPLETE_RESULT_OK;
-            break;
-        case TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE:
-            d2c_esr = D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE;
-            break;
-        case TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING:
-            d2c_esr = D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING;
-            break;
-        case TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_TIMEOUT:
-            d2c_esr = D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_TIMEOUT;
-            break;
-        case TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_MESSENGER_DESTROYED:
-            d2c_esr = D2C_EVENT_SEND_COMPLETE_RESULT_DEVICE_DESTROYED;
-            break;
-        default:
-            // This is not expected. All states should be mapped.
-            d2c_esr = D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_UNKNOWN;
-            break;
+    case TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_OK:
+        d2c_esr = D2C_EVENT_SEND_COMPLETE_RESULT_OK;
+        break;
+    case TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE:
+        d2c_esr = D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE;
+        break;
+    case TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING:
+        d2c_esr = D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING;
+        break;
+    case TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_TIMEOUT:
+        d2c_esr = D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_TIMEOUT;
+        break;
+    case TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_MESSENGER_DESTROYED:
+        d2c_esr = D2C_EVENT_SEND_COMPLETE_RESULT_DEVICE_DESTROYED;
+        break;
+    default:
+        // This is not expected. All states should be mapped.
+        d2c_esr = D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_UNKNOWN;
+        break;
     };
 
     return d2c_esr;
@@ -167,13 +167,14 @@ static D2C_EVENT_SEND_RESULT get_d2c_event_send_result_from(TELEMETRY_MESSENGER_
 
 static void on_event_send_complete_messenger_callback(IOTHUB_MESSAGE_LIST* iothub_message, TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT ev_send_comp_result, void* context)
 {
-    DEVICE_SEND_EVENT_TASK* send_task = (DEVICE_SEND_EVENT_TASK*)context;
-    if (iothub_message == NULL || send_task == NULL)
+    if (iothub_message == NULL || context == NULL)
     {
-        LogError("on_event_send_complete_messenger_callback was invoked, but either iothub_message (%p) or context (%p) are NULL", iothub_message, send_task);
+        LogError("on_event_send_complete_messenger_callback was invoked, but either iothub_message (%p) or context (%p) are NULL", iothub_message, context);
     }
     else
     {
+        DEVICE_SEND_EVENT_TASK* send_task = (DEVICE_SEND_EVENT_TASK*)context;
+
         // Codes_SRS_DEVICE_09_059: [If `ev_send_comp_result` is TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_OK, D2C_EVENT_SEND_COMPLETE_RESULT_OK shall be reported as `event_send_complete`]
         // Codes_SRS_DEVICE_09_060: [If `ev_send_comp_result` is TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE, D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE shall be reported as `event_send_complete`]
         // Codes_SRS_DEVICE_09_061: [If `ev_send_comp_result` is TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING, D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING shall be reported as `event_send_complete`]
@@ -186,10 +187,7 @@ static void on_event_send_complete_messenger_callback(IOTHUB_MESSAGE_LIST* iothu
         {
             send_task->on_event_send_complete_callback(iothub_message, device_send_result, send_task->on_event_send_complete_context);
         }
-    }
 
-    if (send_task)
-    {
         // Codes_SRS_DEVICE_09_065: [The memory allocated for `send_task` shall be released]
         free(send_task);
     }
@@ -334,19 +332,17 @@ static void on_get_twin_completed(TWIN_UPDATE_TYPE update_type, const char* payl
 {
     (void)update_type;
 
-    DEVICE_GET_TWIN_CONTEXT* twin_ctx = (DEVICE_GET_TWIN_CONTEXT*)context;
-    if (twin_ctx == NULL)
+    if (payload == NULL || context == NULL)
     {
         LogError("Invalid argument (context=%p, payload=%p)", context, payload);
     }
     else
     {
+        DEVICE_GET_TWIN_CONTEXT* twin_ctx = (DEVICE_GET_TWIN_CONTEXT*)context;
+
         // get-twin-async always returns a complete twin json.
         twin_ctx->on_get_twin_completed_callback(DEVICE_TWIN_UPDATE_TYPE_COMPLETE, (const unsigned char*)payload, size, twin_ctx->context);
-    }
 
-    if (twin_ctx)
-    {
         free(twin_ctx);
     }
 }
@@ -415,22 +411,22 @@ static TELEMETRY_MESSENGER_DISPOSITION_RESULT get_messenger_message_disposition_
 
     switch (device_disposition_result)
     {
-        case DEVICE_MESSAGE_DISPOSITION_RESULT_NONE:
-            messenger_disposition_result = TELEMETRY_MESSENGER_DISPOSITION_RESULT_NONE;
-            break;
-        case DEVICE_MESSAGE_DISPOSITION_RESULT_ACCEPTED:
-            messenger_disposition_result = TELEMETRY_MESSENGER_DISPOSITION_RESULT_ACCEPTED;
-            break;
-        case DEVICE_MESSAGE_DISPOSITION_RESULT_REJECTED:
-            messenger_disposition_result = TELEMETRY_MESSENGER_DISPOSITION_RESULT_REJECTED;
-            break;
-        case DEVICE_MESSAGE_DISPOSITION_RESULT_RELEASED:
-            messenger_disposition_result = TELEMETRY_MESSENGER_DISPOSITION_RESULT_RELEASED;
-            break;
-        default:
-            LogError("Failed to get the corresponding TELEMETRY_MESSENGER_DISPOSITION_RESULT (%d is not supported)", device_disposition_result);
-            messenger_disposition_result = TELEMETRY_MESSENGER_DISPOSITION_RESULT_RELEASED;
-            break;
+    case DEVICE_MESSAGE_DISPOSITION_RESULT_NONE:
+        messenger_disposition_result = TELEMETRY_MESSENGER_DISPOSITION_RESULT_NONE;
+        break;
+    case DEVICE_MESSAGE_DISPOSITION_RESULT_ACCEPTED:
+        messenger_disposition_result = TELEMETRY_MESSENGER_DISPOSITION_RESULT_ACCEPTED;
+        break;
+    case DEVICE_MESSAGE_DISPOSITION_RESULT_REJECTED:
+        messenger_disposition_result = TELEMETRY_MESSENGER_DISPOSITION_RESULT_REJECTED;
+        break;
+    case DEVICE_MESSAGE_DISPOSITION_RESULT_RELEASED:
+        messenger_disposition_result = TELEMETRY_MESSENGER_DISPOSITION_RESULT_RELEASED;
+        break;
+    default:
+        LogError("Failed to get the corresponding TELEMETRY_MESSENGER_DISPOSITION_RESULT (%d is not supported)", device_disposition_result);
+        messenger_disposition_result = TELEMETRY_MESSENGER_DISPOSITION_RESULT_RELEASED;
+        break;
     }
 
     return messenger_disposition_result;
@@ -753,7 +749,7 @@ AMQP_DEVICE_HANDLE amqp_device_create(AMQP_DEVICE_CONFIG *config)
         }
         // Codes_SRS_DEVICE_09_006: [If `instance->authentication_mode` is DEVICE_AUTH_MODE_CBS, `instance->authentication_handle` shall be set using authentication_create()]
         else if (instance->config->authentication_mode == DEVICE_AUTH_MODE_CBS &&
-                 create_authentication_instance(instance) != RESULT_OK)
+            create_authentication_instance(instance) != RESULT_OK)
         {
             // Codes_SRS_DEVICE_09_007: [If the AUTHENTICATION_HANDLE fails to be created, amqp_device_create shall fail and return NULL]
             LogError("Failed creating the device instance for device '%s' (failed creating the authentication instance)", instance->config->device_id);
@@ -840,7 +836,7 @@ int amqp_device_start_async(AMQP_DEVICE_HANDLE handle, SESSION_HANDLE session_ha
             // Codes_SRS_DEVICE_09_021: [`session_handle` and `cbs_handle` shall be saved into the `instance`]
             instance->session_handle = session_handle;
             instance->cbs_handle = cbs_handle;
-	    instance->stop_delay_ms = 0;
+            instance->stop_delay_ms = 0;
 
             // Codes_SRS_DEVICE_09_022: [The device state shall be updated to DEVICE_STATE_STARTING, and state changed callback invoked]
             update_state(instance, DEVICE_STATE_STARTING);
@@ -924,7 +920,7 @@ int amqp_device_stop(AMQP_DEVICE_HANDLE handle)
         else
         {
             update_state(instance, DEVICE_STATE_STOPPING);
-            
+
             if (internal_device_stop(instance) != 0)
             {
                 LogError("Failed stopping device '%s' (immediate stop failed)", instance->config->device_id);
