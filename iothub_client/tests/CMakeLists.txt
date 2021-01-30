@@ -133,38 +133,46 @@ endif()
 
 message("ericwol trace")
 if (DEFINED ${use_schannel})
-    message("condition 1 use_schannel DEFINED")
+    message("condition 1 <brace>use_schannel<brace> DEFINED as: ${use_schannel}")
+endif()
+
+if (NOT DEFINED ${use_schannel})
+    message("condition 2 <brace>use_schannel<brace> NOT DEFINED")
 endif()
 
 if (NOT DEFINED use_schannel)
-    message("condition 2 use_schannel NOT DEFINED")
+    message("condition 3 use_schannel NOT DEFINED")
+endif()
+
+if (DEFINED use_schannel)
+    message("condition 4 use_schannel DEFINED as: use_schannel")
 endif()
 
 if (DEFINED ${use_socketio})
-    message("condition 3 use_socketio DEFINED")
+    message("condition 5 <brace>use_socketio<brace> DEFINED as: ${use_socketio}")
 endif()
 
 if (NOT DEFINED ${use_socketio})
-    message("condition 4 use_socketio NOT DEFINED")
+    message("condition 6 <brace>use_socketio<brace> NOT DEFINED")
 endif()
 
 if (NOT DEFINED ${MACOSX})
-    message("condition 5 ${MACOSX} NOT DEFINED")
+    message("condition 7 ${MACOSX} NOT DEFINED")
 endif()
 
 if (DEFINED ${MACOSX})
-    message("condition 6 ${MACOSX} DEFINED")
+    message("condition 8 ${MACOSX} DEFINED as: ${MACOSX}")
 endif()
 
 if (NOT DEFINED MACOSX)
-    message("condition 7 MACOSX NOT DEFINED")
+    message("condition 9 MACOSX NOT DEFINED")
 endif()
 
 if (DEFINED MACOSX)
-    message("condition 7 MACOSX DEFINED")
+    message("condition 10 MACOSX DEFINED as: MACOSX")
 endif()
 
-if (NOT DEFINED ${MACOSX})
+if (NOT DEFINED MACOSX)
   if (NOT ${use_schannel} AND NOT ${use_socketio})
     if (${use_mqtt})
       add_unittest_directory(iothubclient_fuzz_mqtt)
