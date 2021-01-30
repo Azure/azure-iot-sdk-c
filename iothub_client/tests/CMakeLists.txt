@@ -131,20 +131,37 @@ endif()
     add_longhaul_test_directory(longhaul_amqp_device_twin_reported)
 endif()
 
+message("ericwol trace")
 if (DEFINED ${use_schannel})
-    message("condition use_schannel DEFINED")
+    message("condition 1 use_schannel DEFINED")
+endif()
+
+if (NOT DEFINED use_schannel)
+    message("condition 2 use_schannel NOT DEFINED")
 endif()
 
 if (DEFINED ${use_socketio})
-    message("condition use_socketio DEFINED")
+    message("condition 3 use_socketio DEFINED")
+endif()
+
+if (NOT DEFINED ${use_socketio})
+    message("condition 4 use_socketio NOT DEFINED")
 endif()
 
 if (NOT DEFINED ${MACOSX})
-    message("condition ${MACOSX} NOT DEFINED")
+    message("condition 5 ${MACOSX} NOT DEFINED")
+endif()
+
+if (DEFINED ${MACOSX})
+    message("condition 6 ${MACOSX} DEFINED")
 endif()
 
 if (NOT DEFINED MACOSX)
-    message("condition MACOSX NOT DEFINED")
+    message("condition 7 MACOSX NOT DEFINED")
+endif()
+
+if (DEFINED MACOSX)
+    message("condition 7 MACOSX DEFINED")
 endif()
 
 if (NOT DEFINED ${MACOSX})
