@@ -143,7 +143,7 @@ if (NOT DEFINED ${MACOSX})
     message("condition MACOSX")
 endif()
 
-if (NOT DEFINED MACOSX AND NOT DEFINED ${use_schannel} AND NOT DEFINED ${use_socketio})
+if (NOT DEFINED ${MACOSX} AND NOT DEFINED ${use_schannel} AND NOT DEFINED ${use_socketio})
   if (NOT ${use_schannel} AND NOT ${use_socketio})
     if (${use_mqtt})
       add_unittest_directory(iothubclient_fuzz_mqtt)
