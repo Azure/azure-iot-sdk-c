@@ -85,7 +85,7 @@ int fuzzpacket_id = -1;
 static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
     (void)userContextCallback;
-    // When a message is sent this callback will get envoked
+    // When a message is sent this callback will get invoked
     g_message_count_send_confirmations++;
     (void)printf("Confirmation callback received for message %lu with result %s\r\n", (unsigned long)g_message_count_send_confirmations, MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
 }
@@ -169,7 +169,7 @@ int main(int argc, const char* argv[])
 
         if (fuzzpacket_buffer[0] != (fuzzpacket_buffer[1] ^ 0xff))
         {
-            // packe ID got fuzzed, ok to return success
+            // packte ID got fuzzed, ok to return success
             return 0;
         }
 
@@ -223,14 +223,6 @@ int main(int argc, const char* argv[])
         IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_LOG_TRACE, &traceOn);
 #endif
 
-#if defined SAMPLE_MQTT || defined SAMPLE_MQTT_WS
-        //Setting the auto URL Encoder (recommended for MQTT). Please use this option unless
-        //you are URL Encoding inputs yourself.
-        //ONLY valid for use with MQTT
-        //bool urlEncodeOn = true;
-        //IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
-#endif
-
         // Setting connection status callback to get indication of connection to iothub
         (void)IoTHubDeviceClient_LL_SetConnectionStatusCallback(device_ll_handle, connection_status_callback, NULL);
         (void)IoTHubDeviceClient_LL_SetMessageCallback(device_ll_handle, receive_msg_callback, NULL);
@@ -249,7 +241,7 @@ int main(int argc, const char* argv[])
                 (void)printf("Sending message %d to IoTHub\r\n", (int)(messages_sent + 1));
                 IoTHubDeviceClient_LL_SendEventAsync(device_ll_handle, message_handle, send_confirm_callback, NULL);
                 
-                // The message is copied to the sdk so the we can destroy it
+                // The message is copied to the sdk so then we can destroy it
                 IoTHubMessage_Destroy(message_handle);
 
                 messages_sent++;
@@ -295,7 +287,11 @@ void received_queue_add(const unsigned char* buffer, size_t size)
     QUEUE_ITEM* item = malloc(sizeof(QUEUE_ITEM));
     if (item == NULL) return;
     item->data = malloc(size);
-    if (item->data == NULL) return;
+    if (item->data == NULL)
+    {
+        free(item);
+        return;
+    }
     memcpy((void*)item->data, buffer, size);
     item->size = size;
     item->next = NULL;
@@ -413,7 +409,7 @@ size_t load_from_file(int i, unsigned char file_buffer[], size_t size)
 {
     if (fuzzpacket_id == i)
     {
-        // return the fuzz packes instead
+        // return the fuzz packets instead
         (void)printf("using fuzzed packet id: %d\r\n", fuzzpacket_id);
         size_t buf_max_len = (fuzzpacket_len > size ? size : fuzzpacket_len) - 2;
         memcpy(file_buffer, &fuzzpacket_buffer[2], buf_max_len);
@@ -493,7 +489,7 @@ int tlsio_fuzz_send(CONCRETE_IO_HANDLE tls_io, const void* buffer, size_t size, 
             break;
 
         case 6: // send attach $cbs-receiver
-            //<- [ATTACH]* {$cbs-receiver,1,false,0,0,* {$cbs,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},* 
+            //<- [ATTACH]* {$cbs-receiver,1,false,0,0,* {$cbs,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},*
             size_read = load_from_file(8, file_buffer, sizeof(file_buffer));
             received_queue_add(file_buffer, size_read);
             //< -[FLOW] * {0, 5000, 1, 4294967295, 0, 0, 100, 0, NULL, false, NULL}
@@ -509,7 +505,7 @@ int tlsio_fuzz_send(CONCRETE_IO_HANDLE tls_io, const void* buffer, size_t size, 
 
         case 8: // session_send_transfer
             // send SAS token to hub
-            //<- [TRANSFER]* {1,0,<01 00 00 00>,0,NULL,false,NULL,NULL,NULL,NULL,false} 
+            //<- [TRANSFER]* {1,0,<01 00 00 00>,0,NULL,false,NULL,NULL,NULL,NULL,false}
             size_read = load_from_file(10, file_buffer, sizeof(file_buffer));
             received_queue_add(file_buffer, size_read);
             break;
