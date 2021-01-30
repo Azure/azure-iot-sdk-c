@@ -131,63 +131,12 @@ endif()
     add_longhaul_test_directory(longhaul_amqp_device_twin_reported)
 endif()
 
-message("ericwol trace")
-if (DEFINED ${use_schannel})
-    message("condition 1 <brace>use_schannel<brace> DEFINED as: ${use_schannel}")
-endif()
-
-if (NOT DEFINED ${use_schannel})
-    message("condition 2 <brace>use_schannel<brace> NOT DEFINED")
-endif()
-
-if (NOT DEFINED use_schannel)
-    message("condition 3 use_schannel NOT DEFINED")
-endif()
-
-if (DEFINED use_schannel)
-    message("condition 4 use_schannel DEFINED as: ${use_schannel}")
-endif()
-
-if (DEFINED ${use_socketio})
-    message("condition 5 <brace>use_socketio<brace> DEFINED as: ${use_socketio}")
-endif()
-
-if (NOT DEFINED ${use_socketio})
-    message("condition 6 <brace>use_socketio<brace> NOT DEFINED")
-endif()
-
-if (DEFINED use_socketio)
-    message("condition 6.1 use_socketio DEFINED as: ${use_socketio}")
-endif()
-
-if (NOT DEFINED use_socketio)
-    message("condition 6.2 use_socketio NOT DEFINED")
-endif()
-
-if (NOT DEFINED ${MACOSX})
-    message("condition 7 ${MACOSX} NOT DEFINED")
-endif()
-
-if (DEFINED ${MACOSX})
-    message("condition 8 ${MACOSX} DEFINED as: ${MACOSX}")
-endif()
-
-if (NOT DEFINED MACOSX)
-    message("condition 9 MACOSX NOT DEFINED")
-endif()
-
-if (DEFINED MACOSX)
-    message("condition 10 MACOSX DEFINED as: MACOSX")
-endif()
-
 if (NOT DEFINED MACOSX AND DEFINED use_schannel AND DEFINED use_socketio)
   if (NOT ${use_schannel} AND NOT ${use_socketio})
     if (${use_mqtt})
-      message("adding iothubclient_fuzz_mqtt")
       add_unittest_directory(iothubclient_fuzz_mqtt)
     endif()
     if (${use_amqp})
-      message("adding iothubclient_fuzz_amqp")
       add_unittest_directory(iothubclient_fuzz_amqp)
     endif()
   endif()

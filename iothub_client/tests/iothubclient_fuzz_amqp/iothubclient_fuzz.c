@@ -240,7 +240,7 @@ int main(int argc, const char* argv[])
 
                 (void)printf("Sending message %d to IoTHub\r\n", (int)(messages_sent + 1));
                 IoTHubDeviceClient_LL_SendEventAsync(device_ll_handle, message_handle, send_confirm_callback, NULL);
-                
+
                 // The message is copied to the sdk so then we can destroy it
                 IoTHubMessage_Destroy(message_handle);
 
@@ -253,7 +253,7 @@ int main(int argc, const char* argv[])
             }
 
             IoTHubDeviceClient_LL_DoWork(device_ll_handle);
-        } 
+        }
         (void)printf("Exiting with IoTHubDeviceClient_LL_DoWork() count of: %d\r\n", loop_count);
 
         // Clean up the iothub sdk handle
@@ -376,7 +376,7 @@ void tlsio_fuzz_destroy(CONCRETE_IO_HANDLE tls_io)
     }
 }
 
-int tlsio_fuzz_open(CONCRETE_IO_HANDLE tls_io, ON_IO_OPEN_COMPLETE on_io_open_complete, void* on_io_open_complete_context, ON_BYTES_RECEIVED on_bytes_received, 
+int tlsio_fuzz_open(CONCRETE_IO_HANDLE tls_io, ON_IO_OPEN_COMPLETE on_io_open_complete, void* on_io_open_complete_context, ON_BYTES_RECEIVED on_bytes_received,
     void* on_bytes_received_context, ON_IO_ERROR on_io_error, void* on_io_error_context)
 {
     (void)tls_io;
@@ -552,7 +552,7 @@ int tlsio_fuzz_send(CONCRETE_IO_HANDLE tls_io, const void* buffer, size_t size, 
             received_queue_add(file_buffer, size_read);
             break;
 
-        case 13: // 
+        case 13: //
             //<- [ATTACH]* {link-snd-eeqq-54c3e766-02f0-4057-8c58-9299e97f1bf0,3,true,1,0,* {link-snd-eeqq-54c3e766-02f0-4057-8c58-9299e97f1bf0-source,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},* {amqps://ericwol-hub.azure-devices.net/devices/eeqq/twin,NULL,NULL,NULL,NULL,NULL,NULL},NULL,NULL,NULL,1048576,NULL,NULL,{[com.microsoft:client-version:iothubclient/1.3.9 (native; WindowsProduct:0x00000004 6.2; x64; {F9FA04EF-2602-43AB-8505-A1EDE028ADD8})],[com.microsoft:channel-correlation-id:twin:d90e52ce-a264-4d74-b236-cad0b08029a8],[com.microsoft:api-version:2019-10-01]}}
             size_read = load_from_file(16, file_buffer, sizeof(file_buffer));
             if (size_read > 0x60 + 41 && size > 31 + 41)
