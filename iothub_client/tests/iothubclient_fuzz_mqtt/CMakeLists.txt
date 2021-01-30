@@ -20,20 +20,8 @@ ENDIF(WIN32)
 
 include_directories(.)
 
-add_executable(iothubclient_fuzz_mqtt ${iothub_c_files})
-
-if(${use_http})
-    target_link_libraries(iothubclient_fuzz_mqtt iothub_client_http_transport)
-    add_definitions(-DUSE_HTTP)
-endif()
-
-if(${use_amqp})
-    target_link_libraries(iothubclient_fuzz_mqtt iothub_client_amqp_transport iothub_client_amqp_ws_transport)
-    linkUAMQP(iothubclient_fuzz_mqtt)
-    add_definitions(-DUSE_AMQP)
-endif()
-
 if(${use_mqtt})
+    add_executable(iothubclient_fuzz_mqtt ${iothub_c_files})
     target_link_libraries(iothubclient_fuzz_mqtt iothub_client_mqtt_transport iothub_client_mqtt_ws_transport)
     linkMqttLibrary(iothubclient_fuzz_mqtt)
     add_definitions(-DUSE_MQTT)

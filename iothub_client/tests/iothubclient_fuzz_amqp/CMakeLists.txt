@@ -20,14 +20,8 @@ ENDIF(WIN32)
 
 include_directories(.)
 
-add_executable(iothubclient_fuzz_amqp ${iothub_c_files})
-
-if(${use_http})
-    target_link_libraries(iothubclient_fuzz_amqp iothub_client_http_transport)
-    add_definitions(-DUSE_HTTP)
-endif()
-
 if(${use_amqp})
+    add_executable(iothubclient_fuzz_amqp ${iothub_c_files})
     target_link_libraries(iothubclient_fuzz_amqp iothub_client_amqp_transport iothub_client_amqp_ws_transport)
     linkUAMQP(iothubclient_fuzz_amqp)
     add_definitions(-DUSE_AMQP)
@@ -58,12 +52,6 @@ if(${use_amqp})
     file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/packets/24.bin DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/packets/25.bin DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/packets/26.bin DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-endif()
-
-if(${use_mqtt})
-    target_link_libraries(iothubclient_fuzz_amqp iothub_client_mqtt_transport iothub_client_mqtt_ws_transport)
-    linkMqttLibrary(iothubclient_fuzz_amqp)
-    add_definitions(-DUSE_MQTT)
 endif()
 
 target_link_libraries(iothubclient_fuzz_amqp iothub_client)
