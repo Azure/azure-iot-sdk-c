@@ -31,7 +31,7 @@ You should have the following items ready before beginning the process:
 
 ## Step 2: Build and Run the sample
 
-1.  Start a new instance of Visual Studio 2015. Open the **azure_iot_sdks.sln** solution in the **cmake_win32** folder in your home directory (usually C:\\\\users\\username\\).
+1.  Start a new instance of Visual Studio 2019. Open the **azure_iot_sdks.sln** solution in the **cmake_win32** folder in your home directory (usually C:\\\\users\\username\\).
 
 2.  In Visual Studio, in **Solution Explorer**, navigate to and open the following file:
 

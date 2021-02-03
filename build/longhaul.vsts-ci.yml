@@ -48,7 +48,7 @@ jobs:
     name: 'aziotbld-win10'
   steps:
   - script: |
-      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
+      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\Common7\Tools\VsDevCmd.bat"
       call jenkins\longhaul_c.cmd
     displayName: 'build'
     env:
