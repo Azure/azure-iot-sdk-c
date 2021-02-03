@@ -2,7 +2,7 @@
 @REM Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 @setlocal EnableExtensions EnableDelayedExpansion
-rem @echo off
+@echo off
 
 set current-path=%~dp0
 rem // remove trailing slash
@@ -192,7 +192,7 @@ if %MAKE_NUGET_PKG% == yes (
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 ) else (
     echo ***Running CMAKE for Win32***
-    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -Duse_edge_modules=%use_edge_modules%
+    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 15 2017" -A Win32 -Duse_edge_modules=%use_edge_modules%
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 )
 
