@@ -633,6 +633,17 @@ static const char* IoTHubClientCore_LL_GetModelId(void* ctx)
     return result;
 }
 
+static bool test_function(void *ctx)
+{
+    bool result;
+    if (ctx == NULL)
+    {
+        result = false;
+    }
+
+    return result;
+}
+
 static bool IoTHubClientCore_LL_MessageCallbackFromInput(MESSAGE_CALLBACK_INFO* messageData, void* ctx)
 {
     bool result;
@@ -702,7 +713,7 @@ static bool IoTHubClientCore_LL_MessageCallbackFromInput(MESSAGE_CALLBACK_INFO* 
                     {
                         LogError("IoTHubTransport_SendMessageDisposition failed");
                     }
-                    //result = true;
+                    result = true;
                 }
             }
         }
