@@ -702,7 +702,7 @@ static bool IoTHubClientCore_LL_MessageCallbackFromInput(MESSAGE_CALLBACK_INFO* 
                     {
                         LogError("IoTHubTransport_SendMessageDisposition failed");
                     }
-                    result = true;
+                    //result = true;
                 }
             }
         }
@@ -1747,12 +1747,12 @@ void IoTHubClientCore_LL_Destroy(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle
             IOTHUB_DEVICE_TWIN* temp = containingRecord(unsend, IOTHUB_DEVICE_TWIN, entry);
 
             // The Twin reported properties status codes are based on HTTP codes and provided by the service.
-            // Following design already implemented in the transport layer, the status code shall be artificially 
+            // Following design already implemented in the transport layer, the status code shall be artificially
             // returned as zero to indicate the report was not sent due to the client being destroyed.
             if (temp->reported_state_callback != NULL)
             {
                 temp->reported_state_callback(ERROR_CODE_BECAUSE_DESTROY, temp->context);
-            }  
+            }
 
             device_twin_data_destroy(temp);
         }
@@ -1761,7 +1761,7 @@ void IoTHubClientCore_LL_Destroy(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle
             IOTHUB_DEVICE_TWIN* temp = containingRecord(unsend, IOTHUB_DEVICE_TWIN, entry);
 
             // The Twin reported properties status codes are based on HTTP codes and provided by the service.
-            // Following design already implemented in the transport layer, the status code shall be artificially 
+            // Following design already implemented in the transport layer, the status code shall be artificially
             // returned as zero to indicate the report was not sent due to the client being destroyed.
             if (temp->reported_state_callback != NULL)
             {
@@ -2364,7 +2364,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetOption(IOTHUB_CLIENT_CORE_LL_HANDLE 
             {
                 LogError("DT ModelId already specified.");
                 result = IOTHUB_CLIENT_ERROR;
-            } 
+            }
             else if ((handleData->model_id = STRING_construct((const char*)value)) == NULL)
             {
                 LogError("STRING_construct failed");
@@ -3062,4 +3062,3 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_GenericMethodInvoke(IOTHUB_CLIENT_CORE_
 #endif
 
 /*end*/
-

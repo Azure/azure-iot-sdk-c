@@ -1,0 +1,134 @@
+[1mdiff --git a/CMakeLists.txt b/CMakeLists.txt[m
+[1mindex 11881bfd3..36441e884 100644[m
+[1m--- a/CMakeLists.txt[m
+[1m+++ b/CMakeLists.txt[m
+[36m@@ -201,7 +201,10 @@[m [mif (IN_OPENWRT)[m
+     INCLUDE_DIRECTORIES("$ENV{TOOLCHAIN_DIR}/usr/include" "$ENV{TARGET_LDFLAGS}" "$ENV{TARGET_CPPFLAGS}" "$ENV{TARGET_CFLAGS}")[m
+ endif()[m
+ [m
+[32m+[m[32mset(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wuninitialized")[m
+[32m+[m
+ if (LINUX)[m
+[32m+[m[32m    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wuninitialized")[m
+     if (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "Clang")[m
+         # now all static libraries use PIC flag for Python shared lib[m
+         set(CMAKE_C_FLAGS "-fPIC ${CMAKE_C_FLAGS}")[m
+[36m@@ -458,4 +461,3 @@[m [melse()[m
+         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}[m
+         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})[m
+ endif()[m
+[31m-[m
+[1mdiff --git a/c-utility b/c-utility[m
+[1m--- a/c-utility[m
+[1m+++ b/c-utility[m
+[36m@@ -1 +1 @@[m
+[31m-Subproject commit b38adefd7d0f94d4118a1dc80b285f571a6bb8e1[m
+[32m+[m[32mSubproject commit b38adefd7d0f94d4118a1dc80b285f571a6bb8e1-dirty[m
+[1mdiff --git a/iothub_client/samples/iothub_ll_telemetry_sample/iothub_ll_telemetry_sample.c b/iothub_client/samples/iothub_ll_telemetry_sample/iothub_ll_telemetry_sample.c[m
+[1mindex d5f6b5e9f..cea839c0b 100644[m
+[1m--- a/iothub_client/samples/iothub_ll_telemetry_sample/iothub_ll_telemetry_sample.c[m
+[1m+++ b/iothub_client/samples/iothub_ll_telemetry_sample/iothub_ll_telemetry_sample.c[m
+[36m@@ -26,11 +26,11 @@[m [mand removing calls to _DoWork will yield the same results. */[m
+ [m
+ // The protocol you wish to use should be uncommented[m
+ //[m
+[31m-#define SAMPLE_MQTT[m
+[32m+[m[32m//#define SAMPLE_MQTT[m
+ //#define SAMPLE_MQTT_OVER_WEBSOCKETS[m
+ //#define SAMPLE_AMQP[m
+ //#define SAMPLE_AMQP_OVER_WEBSOCKETS[m
+[31m-//#define SAMPLE_HTTP[m
+[32m+[m[32m#define SAMPLE_HTTP[m
+ [m
+ #ifdef SAMPLE_MQTT[m
+     #include "iothubtransportmqtt.h"[m
+[36m@@ -50,7 +50,8 @@[m [mand removing calls to _DoWork will yield the same results. */[m
+ [m
+ [m
+ /* Paste in the your iothub connection string  */[m
+[31m-static const char* connectionString = "[device connection string]";[m
+[32m+[m[32m//static const char* connectionString = "HostName=momuno-hub.azure-devices.net;DeviceId=sas-test-wolfssl-websocket-v1;SharedAccessKey=EFIFSdEEorjQH+QT2xsTz600ebZGUwIebwYP7NUhJnQ=";[m
+[32m+[m[32mstatic const char* connectionString = "HostName=momuno-V2-hub.azure-devices.net;DeviceId=sas-test-wolfssl-websocket;SharedAccessKey=m+DX8elHtsG3CWHPyeUyLeONpqYSA5SuPX/0SkPFQbs=";[m
+ #define MESSAGE_COUNT        5[m
+ static bool g_continueRunning = true;[m
+ static size_t g_message_count_send_confirmations = 0;[m
+[36m@@ -109,6 +110,7 @@[m [mint main(void)[m
+ [m
+     (void)printf("Creating IoTHub Device handle\r\n");[m
+     // Create the iothub handle here[m
+[32m+[m
+     device_ll_handle = IoTHubDeviceClient_LL_CreateFromConnectionString(connectionString, protocol);[m
+     if (device_ll_handle == NULL)[m
+     {[m
+[36m@@ -119,6 +121,20 @@[m [mint main(void)[m
+         // Set any option that are neccessary.[m
+         // For available options please see the iothub_sdk_options.md documentation[m
+ [m
+[32m+[m[32m        static const char* proxyHost = "127.0.0.1";[m
+[32m+[m[32m        static int proxyPort = 8888;[m
+[32m+[m
+[32m+[m[32m        HTTP_PROXY_OPTIONS http_proxy_options = { 0 };[m
+[32m+[m[32m        http_proxy_options.host_address = proxyHost;[m
+[32m+[m[32m        http_proxy_options.port = proxyPort;[m
+[32m+[m
+[32m+[m[32m        IOTHUB_CLIENT_RESULT setOptionResult = IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_HTTP_PROXY, &http_proxy_options);[m
+[32m+[m[32m        if (setOptionResult != IOTHUB_CLIENT_OK)[m
+[32m+[m[32m        {[m
+[32m+[m[32m            (void)printf("failure to set proxy IOTHUB_CLIENT_ERROR \n");[m
+[32m+[m[32m            return 0;[m
+[32m+[m[32m        }[m
+[32m+[m
+ #ifndef SAMPLE_HTTP[m
+         // Can not set this options in HTTP[m
+         bool traceOn = true;[m
+[1mdiff --git a/iothub_client/src/iothub_client_core_ll.c b/iothub_client/src/iothub_client_core_ll.c[m
+[1mindex 32a1e8ab0..def4709c0 100755[m
+[1m--- a/iothub_client/src/iothub_client_core_ll.c[m
+[1m+++ b/iothub_client/src/iothub_client_core_ll.c[m
+[36m@@ -702,7 +702,7 @@[m [mstatic bool IoTHubClientCore_LL_MessageCallbackFromInput(MESSAGE_CALLBACK_INFO*[m
+                     {[m
+                         LogError("IoTHubTransport_SendMessageDisposition failed");[m
+                     }[m
+[31m-                    result = true;[m
+[32m+[m[32m                    //result = true;[m
+                 }[m
+             }[m
+         }[m
+[36m@@ -1747,12 +1747,12 @@[m [mvoid IoTHubClientCore_LL_Destroy(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle[m
+             IOTHUB_DEVICE_TWIN* temp = containingRecord(unsend, IOTHUB_DEVICE_TWIN, entry);[m
+ [m
+             // The Twin reported properties status codes are based on HTTP codes and provided by the service.[m
+[31m-            // Following design already implemented in the transport layer, the status code shall be artificially [m
+[32m+[m[32m            // Following design already implemented in the transport layer, the status code shall be artificially[m
+             // returned as zero to indicate the report was not sent due to the client being destroyed.[m
+             if (temp->reported_state_callback != NULL)[m
+             {[m
+                 temp->reported_state_callback(ERROR_CODE_BECAUSE_DESTROY, temp->context);[m
+[31m-            }  [m
+[32m+[m[32m            }[m
+ [m
+             device_twin_data_destroy(temp);[m
+         }[m
+[36m@@ -1761,7 +1761,7 @@[m [mvoid IoTHubClientCore_LL_Destroy(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle[m
+             IOTHUB_DEVICE_TWIN* temp = containingRecord(unsend, IOTHUB_DEVICE_TWIN, entry);[m
+ [m
+             // The Twin reported properties status codes are based on HTTP codes and provided by the service.[m
+[31m-            // Following design already implemented in the transport layer, the status code shall be artificially [m
+[32m+[m[32m            // Following design already implemented in the transport layer, the status code shall be artificially[m
+             // returned as zero to indicate the report was not sent due to the client being destroyed.[m
+             if (temp->reported_state_callback != NULL)[m
+             {[m
+[36m@@ -2364,7 +2364,7 @@[m [mIOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetOption(IOTHUB_CLIENT_CORE_LL_HANDLE[m
+             {[m
+                 LogError("DT ModelId already specified.");[m
+                 result = IOTHUB_CLIENT_ERROR;[m
+[31m-            } [m
+[32m+[m[32m            }[m
+             else if ((handleData->model_id = STRING_construct((const char*)value)) == NULL)[m
+             {[m
+                 LogError("STRING_construct failed");[m
+[36m@@ -3062,4 +3062,3 @@[m [mIOTHUB_CLIENT_RESULT IoTHubClientCore_LL_GenericMethodInvoke(IOTHUB_CLIENT_CORE_[m
+ #endif[m
+ [m
+ /*end*/[m
+[31m-[m
