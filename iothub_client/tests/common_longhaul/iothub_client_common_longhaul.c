@@ -118,7 +118,7 @@ static int parse_message(const char* data, size_t size, char* test_id, unsigned 
 
     if ((root_value = json_parse_string(data)) == NULL)
     {
-        LogError("Failed parsing json string: %.*s", data == NULL ? 0 : size, data == NULL ? "<NULL>" : data);
+        LogError("Failed parsing json string: %.*s", data == NULL ? 0 : (int)size, data == NULL ? "<NULL>" : data);
         result = MU_FAILURE;
     }
     else
@@ -128,12 +128,12 @@ static int parse_message(const char* data, size_t size, char* test_id, unsigned 
 
         if ((root_object = json_value_get_object(root_value)) == NULL)
         {
-            LogError("Failed creating root json object: %.*s", size, data);
+            LogError("Failed creating root json object: %.*s", (int)size, data);
             result = MU_FAILURE;
         }
         else if ((test_id_ref = json_object_get_string(root_object, MESSAGE_TEST_ID_FIELD)) == NULL)
         {
-            LogError("Failed getting message test id: %.*s", size, data);
+            LogError("Failed getting message test id: %.*s", (int)size, data);
             result = MU_FAILURE;
         }
         else
@@ -1334,8 +1334,8 @@ static int send_c2d(const void* context)
                         LogError("Failed sending c2d message with error IOTHUB_MESSAGING_ERROR calling IoTHubMessaging_Open");
                         result = MU_FAILURE;
                         // close the current service handle
-                        IoTHubMessaging_Close(iotHubLonghaulRsrcs->iotHubSvcMsgHandle);
-                        IoTHubMessaging_Destroy(iotHubLonghaulRsrcs->iotHubSvcMsgHandle);
+                        IoTHubMessaging_Close(iotHubLonghaul->iotHubSvcMsgHandle);
+                        IoTHubMessaging_Destroy(iotHubLonghaul->iotHubSvcMsgHandle);
                         iotHubLonghaul->iotHubSvcMsgHandle = NULL;
                         
                         ThreadAPI_Sleep(1000 * 30); // wait before reconnecting (might be a networking issue)
@@ -1935,7 +1935,7 @@ static void on_device_twin_update_received(DEVICE_TWIN_UPDATE_STATE update_state
                 LogError("Failed parsing complete twin update data");
             }
             else if (update_state == DEVICE_TWIN_UPDATE_PARTIAL &&
-                parse_message(STRING_c_str(parse_string), tests_id, &message_id) != 0)
+                parse_message(STRING_c_str(parse_string), size, tests_id, &message_id) != 0)
             {
                 LogError("Failed parsing twin update data");
             }
