@@ -31,6 +31,7 @@ if(${use_http})
 endif()
 
 if(${use_mqtt})
+    add_sample_directory(iothub_client_device_twin_cbor_sample)
     if(LINUX)
         add_sample_directory(iothub_client_sample_mqtt_dm)
     endif()

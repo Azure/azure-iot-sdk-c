@@ -31,3 +31,6 @@
 [submodule "deps/azure-ctest"]
 	path = deps/azure-ctest
 	url = https://github.com/Azure/azure-ctest.git
+[submodule "deps/tinycbor"]
+	path = deps/tinycbor
+	url = https://github.com/danewalton/tinycbor.git
