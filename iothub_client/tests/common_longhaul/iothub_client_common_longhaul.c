@@ -461,6 +461,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT on_c2d_message_received(IOTHUB_MESSAGE_H
             }
             else
             {
+                LogError("on_c2d_message_received() failed");
                 result = IOTHUBMESSAGE_ABANDONED;
             }
 
@@ -534,6 +535,7 @@ static int on_device_method_received(const char* method_name, const unsigned cha
         }
         else
         {
+            LogError("on_device_method_received() failed");
             result = -1;
         }
         STRING_delete(parse_string);
@@ -933,6 +935,7 @@ static int on_message_received(void* context, const char* data, size_t size)
         }
         else
         {
+            LogError("on_message_received() failed");
             result = MU_FAILURE; // This is not the message we expected. Abandoning it.
         }
     }
