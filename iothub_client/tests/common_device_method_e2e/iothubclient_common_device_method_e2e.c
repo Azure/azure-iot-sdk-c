@@ -595,8 +595,8 @@ static void client_create_with_properies_and_send_d2c(IOTHUB_PROVISIONED_DEVICE*
     IOTHUB_MESSAGE_HANDLE msgHandle;
 
     char messageStr[512];
-    size_t len = snprintf(messageStr, sizeof(messageStr), "Happy little device message from device '%s'", deviceToUse->deviceId);
-    if (len < 0 || sizeof(messageStr) == 512)
+    int len = snprintf(messageStr, sizeof(messageStr), "Happy little device message from device '%s'", deviceToUse->deviceId);
+    if (len < 0 || len == sizeof(messageStr))
     {
         ASSERT_FAIL("messageStr is not large enough!");
         return;
