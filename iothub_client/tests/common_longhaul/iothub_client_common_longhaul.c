@@ -910,6 +910,7 @@ static int on_message_received(void* context, const char* data, size_t size)
         IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaul = (IOTHUB_LONGHAUL_RESOURCES*)context;
         unsigned int message_id;
         char tests_id[40];
+        tests_id[0] = '\0';
 
         if (parse_message(data, size, tests_id, &message_id) == 0 &&
             strcmp(tests_id, iotHubLonghaul->test_id) == 0)
@@ -935,7 +936,7 @@ static int on_message_received(void* context, const char* data, size_t size)
         }
         else
         {
-            LogError("on_message_received() failed");
+            LogError("on_message_received() failed (tests_id:%d, iotHubLonghaul->test_id:%d)", tests_id, iotHubLonghaul->test_id);
             result = MU_FAILURE; // This is not the message we expected. Abandoning it.
         }
     }
