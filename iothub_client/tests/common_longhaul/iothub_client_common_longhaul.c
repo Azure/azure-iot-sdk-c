@@ -936,7 +936,7 @@ static int on_message_received(void* context, const char* data, size_t size)
         }
         else
         {
-            LogError("on_message_received() failed (tests_id:%d, iotHubLonghaul->test_id:%d)", tests_id, iotHubLonghaul->test_id);
+            LogError("on_message_received() failed (tests_id:%s, iotHubLonghaul->test_id:%s)", tests_id, iotHubLonghaul->test_id);
             result = MU_FAILURE; // This is not the message we expected. Abandoning it.
         }
     }
