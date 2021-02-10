@@ -646,7 +646,7 @@ static int DumpApplicationPropertiesFromuAMQPMessage(MESSAGE_HANDLE uamqp_messag
             else
             {
                 uint32_t i;
-                for (i = 0; result == RESULT_OK && i < property_count; i++)
+                for (i = 0; result == 0 && i < property_count; i++)
                 {
                     AMQP_VALUE map_key_name = NULL;
                     AMQP_VALUE map_key_value = NULL;
