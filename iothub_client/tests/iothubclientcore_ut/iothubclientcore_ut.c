@@ -2729,7 +2729,7 @@ TEST_FUNCTION(IoTHubClientCore_SetDeviceMethodCallback_fail)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
-        char tmp_msg[64];
+        char tmp_msg[99];
         sprintf(tmp_msg, "IoTHubClientCore_SetDeviceMethodCallback failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
         IOTHUB_CLIENT_RESULT result = IoTHubClientCore_SetDeviceMethodCallback(iothub_handle, test_method_callback, NULL);
 

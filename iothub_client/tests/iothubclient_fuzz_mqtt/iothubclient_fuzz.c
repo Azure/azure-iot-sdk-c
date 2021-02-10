@@ -114,7 +114,7 @@ size_t filebuffer_len;
 static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
     (void)userContextCallback;
-    // When a message is sent this callback will get envoked
+    // When a message is sent this callback will get invoked
     g_message_count_send_confirmations++;
     (void)printf("Confirmation callback received for message %lu with result %s\r\n", (unsigned long)g_message_count_send_confirmations, MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
 }
@@ -220,7 +220,7 @@ int main(int argc, const char* argv[])
 
         if (filebuffer_len == sizeof(filebuffer))
         {
-            (void)printf("ERROR: test file is to big\r\n");
+            (void)printf("ERROR: test file is too big\r\n");
             return -1;
         }
     }
@@ -303,7 +303,7 @@ int main(int argc, const char* argv[])
 
                 (void)printf("Sending message %d to IoTHub\r\n", (int)(messages_sent + 1));
                 IoTHubDeviceClient_LL_SendEventAsync(device_ll_handle, message_handle, send_confirm_callback, NULL);
-                
+
                 // The message is copied to the sdk so the we can destroy it
                 IoTHubMessage_Destroy(message_handle);
 
@@ -316,7 +316,7 @@ int main(int argc, const char* argv[])
             }
 
             IoTHubDeviceClient_LL_DoWork(device_ll_handle);
-        } 
+        }
         (void)printf("Exiting with IoTHubDeviceClient_LL_DoWork() count of: %d\r\n", loop_count);
 
         // Clean up the iothub sdk handle
@@ -350,7 +350,11 @@ void received_queue_add(const unsigned char* buffer, size_t size)
     QUEUE_ITEM* item = malloc(sizeof(QUEUE_ITEM));
     if (item == NULL) return;
     item->data = malloc(size);
-    if (item->data == NULL) return;
+    if (item->data == NULL)
+    {
+        free(item);
+        return;
+    }
     memcpy((void*)item->data, buffer, size);
     item->size = size;
     item->next = NULL;
@@ -412,7 +416,6 @@ void mqtt_parse_packet(const unsigned char* buffer, size_t size)
 
     size_t idx = 0;
     unsigned char mqtt_control_packet_type = buffer[idx] >> 4;
-    //char mqtt_control_packet_type_flags = buffer[idx] & 0x0f;
     
     idx++;
     size_t packet_len = mqtt_parse_packet_length(buffer, &idx);
@@ -557,7 +560,7 @@ void tlsio_fuzz_destroy(CONCRETE_IO_HANDLE tls_io)
     }
 }
 
-int tlsio_fuzz_open(CONCRETE_IO_HANDLE tls_io, ON_IO_OPEN_COMPLETE on_io_open_complete, void* on_io_open_complete_context, ON_BYTES_RECEIVED on_bytes_received, 
+int tlsio_fuzz_open(CONCRETE_IO_HANDLE tls_io, ON_IO_OPEN_COMPLETE on_io_open_complete, void* on_io_open_complete_context, ON_BYTES_RECEIVED on_bytes_received,
     void* on_bytes_received_context, ON_IO_ERROR on_io_error, void* on_io_error_context)
 {
     (void)tls_io;
@@ -615,17 +618,14 @@ void tlsio_fuzz_dowork(CONCRETE_IO_HANDLE tls_io)
     {
         if (test_case == TESTCASE_DEVICEMETHOD)
         {
-            //received_queue_add(DEVICE_METHOD, sizeof(DEVICE_METHOD));
             received_queue_add(filebuffer, filebuffer_len);
         }
         else if (test_case == TESTCASE_C2D)
         {
-            //received_queue_add(C2D, sizeof(C2D));
             received_queue_add(filebuffer, filebuffer_len);     
         }
         else if (test_case == TESTCASE_TWINUPDATE)
         {
-            //received_queue_add(TWIN_UPDATE, sizeof(TWIN_UPDATE));
             received_queue_add(filebuffer, filebuffer_len);
         }
     }

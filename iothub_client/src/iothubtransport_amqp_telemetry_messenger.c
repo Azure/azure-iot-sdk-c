@@ -840,7 +840,7 @@ static void free_task(MESSENGER_SEND_EVENT_TASK* task)
 {
     LIST_ITEM_HANDLE list_node;
 
-    if (NULL != task->callback_list)
+    if (NULL != task && NULL != task->callback_list)
     {
         while ((list_node = singlylinkedlist_get_head_item(task->callback_list)) != NULL)
         {
@@ -885,7 +885,7 @@ static int copy_events_from_in_progress_to_waiting_list(TELEMETRY_MESSENGER_INST
 {
     int result;
     LIST_ITEM_HANDLE list_task_item;
-    LIST_ITEM_HANDLE list_task_item_next;
+    LIST_ITEM_HANDLE list_task_item_next = NULL;
 
     result = RESULT_OK;
     list_task_item = singlylinkedlist_get_head_item(instance->in_progress_list);
@@ -893,31 +893,34 @@ static int copy_events_from_in_progress_to_waiting_list(TELEMETRY_MESSENGER_INST
     while (list_task_item != NULL)
     {
         MESSENGER_SEND_EVENT_TASK* task = (MESSENGER_SEND_EVENT_TASK*)singlylinkedlist_item_get_value(list_task_item);
-
-        LIST_ITEM_HANDLE list_caller_item;
-
-        list_caller_item = singlylinkedlist_get_head_item(task->callback_list);
-
-        while (list_caller_item != NULL)
+        if (task != NULL)
         {
-            MESSENGER_SEND_EVENT_CALLER_INFORMATION* caller_information = (MESSENGER_SEND_EVENT_CALLER_INFORMATION*)singlylinkedlist_item_get_value(list_caller_item);
+            LIST_ITEM_HANDLE list_caller_item;
 
-            if (singlylinkedlist_add(to_list, caller_information) == NULL)
+            list_caller_item = singlylinkedlist_get_head_item(task->callback_list);
+
+            while (list_caller_item != NULL)
             {
-                LogError("Failed copying event to destination list (singlylinkedlist_add failed)");
-                result = MU_FAILURE;
-                break;
+                MESSENGER_SEND_EVENT_CALLER_INFORMATION* caller_information = (MESSENGER_SEND_EVENT_CALLER_INFORMATION*)singlylinkedlist_item_get_value(list_caller_item);
+
+                if (singlylinkedlist_add(to_list, caller_information) == NULL)
+                {
+                    LogError("Failed copying event to destination list (singlylinkedlist_add failed)");
+                    result = MU_FAILURE;
+                    break;
+                }
+
+                list_caller_item = singlylinkedlist_get_next_item(list_caller_item);
             }
 
-            list_caller_item = singlylinkedlist_get_next_item(list_caller_item);
+            list_task_item_next = singlylinkedlist_get_next_item(list_task_item);
+
+            singlylinkedlist_destroy(task->callback_list);
+            task->callback_list = NULL;
+
+            free_task(task);
         }
 
-        list_task_item_next = singlylinkedlist_get_next_item(list_task_item);
-
-        singlylinkedlist_destroy(task->callback_list);
-        task->callback_list = NULL;
-
-        free_task(task);
         singlylinkedlist_remove(instance->in_progress_list, list_task_item);
         list_task_item = list_task_item_next;
     }
@@ -1017,10 +1020,14 @@ static void invoke_callback(const void* item, const void* action_context, bool* 
 
     if (NULL != caller_info->on_event_send_complete_callback)
     {
+#if defined(_MSC_VER) /* pragma warning is only available on Microsoft C compilers */
 #pragma warning(push)
 #pragma warning(disable:4305) // Allow typecasting to smaller type on 64 bit systems, since we control ultimate caller.
+#endif
         TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT messenger_send_result = (TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT)action_context;
+#if defined(_MSC_VER) /* pragma warning is only available on Microsoft C compilers */
 #pragma warning(pop)
+#endif
         caller_info->on_event_send_complete_callback(caller_info->message, messenger_send_result, caller_info->context);
     }
     *continue_processing = true;
@@ -1328,7 +1335,7 @@ static int process_event_send_timeouts(TELEMETRY_MESSENGER_INSTANCE* instance)
         {
             MESSENGER_SEND_EVENT_TASK* task = (MESSENGER_SEND_EVENT_TASK*)singlylinkedlist_item_get_value(list_item);
 
-            if (task->is_timed_out == false)
+            if (task != NULL && task->is_timed_out == false)
             {
                 int is_timed_out;
 
@@ -1364,7 +1371,7 @@ static void remove_timed_out_events(TELEMETRY_MESSENGER_INSTANCE* instance)
     {
         MESSENGER_SEND_EVENT_TASK* task = (MESSENGER_SEND_EVENT_TASK*)singlylinkedlist_item_get_value(list_item);
 
-        if (task->is_timed_out == true)
+        if (task != NULL && task->is_timed_out == true)
         {
             remove_event_from_in_progress_list(task);
 

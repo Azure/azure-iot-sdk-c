@@ -13,7 +13,7 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/lock.h"
 #include "iothub_client_options.h"
-#include "iothub_client.h"
+#include "iothub_device_client.h"
 #include "iothub_message.h"
 #include "iothub_service_client_auth.h"
 #include "iothub_messaging.h"
@@ -32,6 +32,11 @@
 #define TWIN_REPORTED_BLOCK            "reported"
 #define DOT                            "."
 
+#define MIN_TEST_TOTAL_DURATION_SECS   600
+#define MIN_TEST_LOOP_DURATION_SECS    10
+
+static const char* IOTHUB_LONGHAUL_TOTAL_DURATION_SECS = "IOTHUB_LONGHAUL_TOTAL_DURATION_SECS";
+static const char* IOTHUB_LONGHAUL_LOOP_DURATION_SECS = "IOTHUB_LONGHAUL_LOOP_DURATION_SECS";
 
 #ifdef MBED_BUILD_TIMESTAMP
 #define SET_TRUSTED_CERT_IN_SAMPLES
@@ -57,7 +62,7 @@ typedef struct IOTHUB_LONGHAUL_RESOURCES_TAG
     LOCK_HANDLE lock;
     IOTHUB_ACCOUNT_INFO_HANDLE iotHubAccountInfo;
     IOTHUB_CLIENT_STATISTICS_HANDLE iotHubClientStats;
-    IOTHUB_CLIENT_HANDLE iotHubClientHandle;
+    IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle;
     IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle;
     bool is_svc_cl_c2d_msgr_open;
     IOTHUB_MESSAGING_CLIENT_HANDLE iotHubSvcMsgHandle;
@@ -66,6 +71,8 @@ typedef struct IOTHUB_LONGHAUL_RESOURCES_TAG
     IOTHUB_TEST_HANDLE iotHubTestHandle;
     IOTHUB_PROVISIONED_DEVICE* deviceInfo;
     unsigned int counter;
+    size_t test_duration_in_seconds;
+    size_t test_loop_duration_in_seconds;
 } IOTHUB_LONGHAUL_RESOURCES;
 
 typedef struct SEND_TELEMETRY_CONTEXT_TAG
@@ -104,14 +111,14 @@ static time_t add_seconds(time_t base_time, int seconds)
     return new_time;
 }
 
-static int parse_message(const char* data, char* test_id, unsigned int* message_id)
+static int parse_message(const char* data, size_t size, char* test_id, unsigned int* message_id)
 {
     int result;
     JSON_Value* root_value;
 
     if ((root_value = json_parse_string(data)) == NULL)
     {
-        LogError("Failed parsing json string: %s", data == NULL ? "<NULL>" : data);
+        LogError("Failed parsing json string: %.*s", data == NULL ? 0 : (int)size, data == NULL ? "<NULL>" : data);
         result = MU_FAILURE;
     }
     else
@@ -121,12 +128,12 @@ static int parse_message(const char* data, char* test_id, unsigned int* message_
 
         if ((root_object = json_value_get_object(root_value)) == NULL)
         {
-            LogError("Failed creating root json object: %s", data);
+            LogError("Failed creating root json object: %.*s", (int)size, data);
             result = MU_FAILURE;
         }
         else if ((test_id_ref = json_object_get_string(root_object, MESSAGE_TEST_ID_FIELD)) == NULL)
         {
-            LogError("Failed getting message test id: %s", data);
+            LogError("Failed getting message test id: %.*s", (int)size, data);
             result = MU_FAILURE;
         }
         else
@@ -433,7 +440,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT on_c2d_message_received(IOTHUB_MESSAGE_H
             unsigned int message_id;
             char tests_id[40];
 
-            if (parse_message(STRING_c_str(parse_string), tests_id, &message_id) == 0 &&
+            if (parse_message(STRING_c_str(parse_string), size, tests_id, &message_id) == 0 &&
                 strcmp(tests_id, iotHubLonghaul->test_id) == 0)
             {
                 C2D_MESSAGE_INFO info;
@@ -454,6 +461,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT on_c2d_message_received(IOTHUB_MESSAGE_H
             }
             else
             {
+                LogError("on_c2d_message_received() failed");
                 result = IOTHUBMESSAGE_ABANDONED;
             }
 
@@ -491,7 +499,7 @@ static int on_device_method_received(const char* method_name, const unsigned cha
         unsigned int method_id;
         char tests_id[40];
 
-        if (parse_message(STRING_c_str(parse_string), tests_id, &method_id) == 0 &&
+        if (parse_message(STRING_c_str(parse_string), size, tests_id, &method_id) == 0 &&
             strcmp(tests_id, iotHubLonghaul->test_id) == 0)
         {
             const char* default_response = "{ \"Response\": \"This is the response from the device\" }";
@@ -527,6 +535,7 @@ static int on_device_method_received(const char* method_name, const unsigned cha
         }
         else
         {
+            LogError("on_device_method_received() failed");
             result = -1;
         }
         STRING_delete(parse_string);
@@ -614,6 +623,34 @@ static int run_on_loop(RUN_ON_LOOP_ACTION action, size_t iterationDurationInSeco
     return result;
 }
 
+static void set_test_execution_and_duration(IOTHUB_LONGHAUL_RESOURCES* longhaulResources)
+{
+    char* test_total_duration_string = getenv(IOTHUB_LONGHAUL_TOTAL_DURATION_SECS);
+    char* test_loop_duration_string = getenv(IOTHUB_LONGHAUL_LOOP_DURATION_SECS);
+
+    if (test_total_duration_string != NULL)
+    {
+        int time_secs = atoi(test_total_duration_string);
+
+        longhaulResources->test_duration_in_seconds = (time_secs >= MIN_TEST_TOTAL_DURATION_SECS ? (size_t)time_secs : MIN_TEST_TOTAL_DURATION_SECS);
+    }
+    else
+    {
+        longhaulResources->test_duration_in_seconds = MIN_TEST_TOTAL_DURATION_SECS;
+    }
+
+    if (test_loop_duration_string != NULL)
+    {
+        int time_secs = atoi(test_loop_duration_string);
+
+        longhaulResources->test_loop_duration_in_seconds = (time_secs >= MIN_TEST_LOOP_DURATION_SECS ? (size_t)time_secs : MIN_TEST_LOOP_DURATION_SECS);
+    }
+    else
+    {
+        longhaulResources->test_loop_duration_in_seconds = MIN_TEST_LOOP_DURATION_SECS;
+    }
+}
+
 
 // Public APIs
 
@@ -635,9 +672,9 @@ IOTHUB_ACCOUNT_INFO_HANDLE longhaul_get_account_info(IOTHUB_LONGHAUL_RESOURCES_H
     return result;
 }
 
-IOTHUB_CLIENT_HANDLE longhaul_get_iothub_client_handle(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
+IOTHUB_DEVICE_CLIENT_HANDLE longhaul_get_iothub_client_handle(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
 {
-    IOTHUB_CLIENT_HANDLE result;
+    IOTHUB_DEVICE_CLIENT_HANDLE result;
 
     if (handle == NULL)
     {
@@ -704,7 +741,7 @@ void longhaul_tests_deinit(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
 
         if (iotHubLonghaulRsrcs->iotHubClientHandle != NULL)
         {
-            IoTHubClient_Destroy(iotHubLonghaulRsrcs->iotHubClientHandle);
+            IoTHubDeviceClient_Destroy(iotHubLonghaulRsrcs->iotHubClientHandle);
         }
 
         if (iotHubLonghaulRsrcs->iotHubAccountInfo != NULL)
@@ -785,6 +822,7 @@ IOTHUB_LONGHAUL_RESOURCES_HANDLE longhaul_tests_init()
             }
             else
             {
+                set_test_execution_and_duration(result);
                 platform_init();
                 LogInfo("Longhaul Test ID: %s", result->test_id);
             }
@@ -794,25 +832,25 @@ IOTHUB_LONGHAUL_RESOURCES_HANDLE longhaul_tests_init()
     return result;
 }
 
-IOTHUB_CLIENT_HANDLE longhaul_initialize_device_client(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+IOTHUB_DEVICE_CLIENT_HANDLE longhaul_initialize_device_client(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
-    IOTHUB_CLIENT_HANDLE result;
+    IOTHUB_DEVICE_CLIENT_HANDLE result;
 
     if (handle == NULL || deviceToUse == NULL)
     {
         LogError("Invalid argument (handle=%p, deviceToUse=%p)", handle, deviceToUse);
         result = NULL;
     }
-    else if ((result = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol)) == NULL)
+    else if ((result = IoTHubDeviceClient_CreateFromConnectionString(deviceToUse->connectionString, protocol)) == NULL)
     {
         LogError("Could not create IoTHubClient");
     }
     else if (deviceToUse->howToCreate == IOTHUB_ACCOUNT_AUTH_X509 &&
-        (IoTHubClient_SetOption(result, OPTION_X509_CERT, deviceToUse->certificate) != IOTHUB_CLIENT_OK ||
-            IoTHubClient_SetOption(result, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication) != IOTHUB_CLIENT_OK))
+        (IoTHubDeviceClient_SetOption(result, OPTION_X509_CERT, deviceToUse->certificate) != IOTHUB_CLIENT_OK ||
+            IoTHubDeviceClient_SetOption(result, OPTION_X509_PRIVATE_KEY, deviceToUse->primaryAuthentication) != IOTHUB_CLIENT_OK))
     {
         LogError("Could not set the device x509 certificate or privateKey");
-        IoTHubClient_Destroy(result);
+        IoTHubDeviceClient_Destroy(result);
         result = NULL;
     }
     else
@@ -823,29 +861,29 @@ IOTHUB_CLIENT_HANDLE longhaul_initialize_device_client(IOTHUB_LONGHAUL_RESOURCES
         iotHubLonghaulRsrcs->iotHubClientHandle = result;
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
-        (void)IoTHubClient_SetOption(result, OPTION_TRUSTED_CERT, certificates);
+        (void)IoTHubDeviceClient_SetOption(result, OPTION_TRUSTED_CERT, certificates);
 #endif
-        (void)IoTHubClient_SetOption(result, OPTION_LOG_TRACE, &trace);
-        (void)IoTHubClient_SetOption(result, OPTION_PRODUCT_INFO, "C-SDK-LongHaul");
+        (void)IoTHubDeviceClient_SetOption(result, OPTION_LOG_TRACE, &trace);
+        (void)IoTHubDeviceClient_SetOption(result, OPTION_PRODUCT_INFO, "C-SDK-LongHaul");
 
-        if (IoTHubClient_SetConnectionStatusCallback(result, connection_status_callback, handle) != IOTHUB_CLIENT_OK)
+        if (IoTHubDeviceClient_SetConnectionStatusCallback(result, connection_status_callback, handle) != IOTHUB_CLIENT_OK)
         {
             LogError("Failed setting the connection status callback");
-            IoTHubClient_Destroy(result);
+            IoTHubDeviceClient_Destroy(result);
             iotHubLonghaulRsrcs->iotHubClientHandle = NULL;
             result = NULL;
         }
-        else if (IoTHubClient_SetMessageCallback(result, on_c2d_message_received, handle) != IOTHUB_CLIENT_OK)
+        else if (IoTHubDeviceClient_SetMessageCallback(result, on_c2d_message_received, handle) != IOTHUB_CLIENT_OK)
         {
             LogError("Failed to set the cloud-to-device message callback");
-            IoTHubClient_Destroy(result);
+            IoTHubDeviceClient_Destroy(result);
             iotHubLonghaulRsrcs->iotHubClientHandle = NULL;
             result = NULL;
         }
-        else if (IoTHubClient_SetDeviceMethodCallback(result, on_device_method_received, handle) != IOTHUB_CLIENT_OK)
+        else if (IoTHubDeviceClient_SetDeviceMethodCallback(result, on_device_method_received, handle) != IOTHUB_CLIENT_OK)
         {
             LogError("Failed to set the device method callback");
-            IoTHubClient_Destroy(result);
+            IoTHubDeviceClient_Destroy(result);
             iotHubLonghaulRsrcs->iotHubClientHandle = NULL;
             result = NULL;
         }
@@ -872,8 +910,9 @@ static int on_message_received(void* context, const char* data, size_t size)
         IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaul = (IOTHUB_LONGHAUL_RESOURCES*)context;
         unsigned int message_id;
         char tests_id[40];
+        tests_id[0] = '\0';
 
-        if (parse_message(data, tests_id, &message_id) == 0 &&
+        if (parse_message(data, size, tests_id, &message_id) == 0 &&
             strcmp(tests_id, iotHubLonghaul->test_id) == 0)
         {
             TELEMETRY_INFO info;
@@ -897,6 +936,7 @@ static int on_message_received(void* context, const char* data, size_t size)
         }
         else
         {
+            LogError("on_message_received() failed (tests_id:%s, iotHubLonghaul->test_id:%s)", tests_id, iotHubLonghaul->test_id);
             result = MU_FAILURE; // This is not the message we expected. Abandoning it.
         }
     }
@@ -1200,7 +1240,7 @@ static int send_telemetry(const void* context)
                 message_info->message_id = message_id;
                 message_info->iotHubLonghaul = longhaulResources;
 
-                if (IoTHubClient_SendEventAsync(longhaulResources->iotHubClientHandle, message, send_confirmation_callback, message_info) != IOTHUB_CLIENT_OK)
+                if (IoTHubDeviceClient_SendEventAsync(longhaulResources->iotHubClientHandle, message, send_confirmation_callback, message_info) != IOTHUB_CLIENT_OK)
                 {
                     LogError("Failed sending telemetry message");
                     free(message_info);
@@ -1290,28 +1330,50 @@ static int send_c2d(const void* context)
                 send_context->message_id = message_id;
                 send_context->iotHubLonghaul = iotHubLonghaul;
 
-                if (IoTHubMessaging_SendAsync(iotHubLonghaul->iotHubSvcMsgHandle, iotHubLonghaul->deviceInfo->deviceId, message, on_c2d_message_sent, send_context) != IOTHUB_MESSAGING_OK)
+                for (int retryAttemps = 3; retryAttemps > 0; retryAttemps--)
                 {
-                    LogError("Failed sending c2d message");
-                    free(send_context);
-                    result = MU_FAILURE;
-                }
-                else
-                {
-                    result = 0;
-                }
-
-                {
-                    C2D_MESSAGE_INFO c2d_msg_info;
-                    c2d_msg_info.message_id = message_id;
-                    c2d_msg_info.time_queued = time(NULL);
-                    c2d_msg_info.send_result = result;
-
-                    if (iothub_client_statistics_add_c2d_info(iotHubLonghaul->iotHubClientStats, C2D_QUEUED, &c2d_msg_info) != 0)
+                    IOTHUB_MESSAGING_RESULT iotHubMessagingResult = IoTHubMessaging_SendAsync(iotHubLonghaul->iotHubSvcMsgHandle, iotHubLonghaul->deviceInfo->deviceId, message, on_c2d_message_sent, send_context);
+                    if (iotHubMessagingResult == IOTHUB_MESSAGING_ERROR)
                     {
-                        LogError("Failed adding c2d message statistics info (message_id=%d)", message_id);
+                        LogError("Failed sending c2d message with error IOTHUB_MESSAGING_ERROR calling IoTHubMessaging_Open");
                         result = MU_FAILURE;
+                        // close the current service handle
+                        IoTHubMessaging_Close(iotHubLonghaul->iotHubSvcMsgHandle);
+                        IoTHubMessaging_Destroy(iotHubLonghaul->iotHubSvcMsgHandle);
+                        iotHubLonghaul->iotHubSvcMsgHandle = NULL;
+                        
+                        ThreadAPI_Sleep(1000 * 30); // wait before reconnecting (might be a networking issue)
+
+                        // reopen the service handle
+                        if (longhaul_initialize_service_c2d_messaging_client(iotHubLonghaul) != NULL)
+                        {
+                            continue;
+                        }
                     }
+                    
+                    if (iotHubMessagingResult != IOTHUB_MESSAGING_OK)
+                    {
+                        LogError("Failed sending c2d message with error %d", iotHubMessagingResult);
+                        free(send_context);
+                        result = MU_FAILURE;
+                        break;
+                    }
+                    else
+                    {
+                        result = 0;
+                        break;
+                    }
+                }
+
+                C2D_MESSAGE_INFO c2d_msg_info;
+                c2d_msg_info.message_id = message_id;
+                c2d_msg_info.time_queued = time(NULL);
+                c2d_msg_info.send_result = result;
+
+                if (iothub_client_statistics_add_c2d_info(iotHubLonghaul->iotHubClientStats, C2D_QUEUED, &c2d_msg_info) != 0)
+                {
+                    LogError("Failed adding c2d message statistics info (message_id=%d)", message_id);
+                    result = MU_FAILURE;
                 }
             }
 
@@ -1352,15 +1414,27 @@ static int invoke_device_method(const void* context)
             device_method_info.method_id = method_id;
             device_method_info.time_invoked = time(NULL);
 
-            if ((device_method_info.method_result = IoTHubDeviceMethod_Invoke(
-                iotHubLonghaul->iotHubSvcDevMethodHandle,
-                iotHubLonghaul->deviceInfo->deviceId,
-                LONGHAUL_DEVICE_METHOD_NAME,
-                message,
-                MAX_DEVICE_METHOD_TRAVEL_TIME_SECS,
-                &responseStatus, &responsePayload, &responseSize)) != IOTHUB_DEVICE_METHOD_OK)
+            for (int i = 0; i < 2; i++)
             {
-                LogError("Failed invoking device method");
+                device_method_info.method_result = IoTHubDeviceMethod_Invoke(
+                    iotHubLonghaul->iotHubSvcDevMethodHandle,
+                    iotHubLonghaul->deviceInfo->deviceId,
+                    LONGHAUL_DEVICE_METHOD_NAME,
+                    message,
+                    MAX_DEVICE_METHOD_TRAVEL_TIME_SECS,
+                    &responseStatus, &responsePayload, &responseSize);
+
+                if (device_method_info.method_result == IOTHUB_DEVICE_METHOD_OK || responseStatus != 404)
+                {
+                    break;
+                }
+
+                ThreadAPI_Sleep(1000 * 60); // wait for the SAS reconnect and try again
+            }
+
+            if (device_method_info.method_result != IOTHUB_DEVICE_METHOD_OK)
+            {
+                LogError("Failed invoking device method with status %d", responseStatus);
             }
 
             if (iothub_client_statistics_add_device_method_info(iotHubLonghaul->iotHubClientStats, DEVICE_METHOD_INVOKED, &device_method_info) != 0)
@@ -1589,7 +1663,7 @@ static int update_device_twin_reported_property(const void* context)
                 device_twin_info.update_id = update_id;
                 device_twin_info.time_queued = time(NULL);
 
-                if ((device_twin_info.update_result = IoTHubClient_SendReportedState(iotHubLonghaul->iotHubClientHandle, (const unsigned char*)message, strlen(message), on_twin_report_state_completed, send_context)) != IOTHUB_CLIENT_OK)
+                if ((device_twin_info.update_result = IoTHubDeviceClient_SendReportedState(iotHubLonghaul->iotHubClientHandle, (const unsigned char*)message, strlen(message), on_twin_report_state_completed, send_context)) != IOTHUB_CLIENT_OK)
                 {
                     LogError("Failed sending twin reported properties update");
                     free(send_context);
@@ -1613,7 +1687,7 @@ static int update_device_twin_reported_property(const void* context)
     return result;
 }
 
-int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t iterationDurationInSeconds, size_t totalDurationInSeconds)
+int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
 {
     int result;
 
@@ -1643,9 +1717,9 @@ int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t
                 int loop_result;
                 IOTHUB_CLIENT_STATISTICS_HANDLE stats_handle;
 
-                loop_result = run_on_loop(send_telemetry, iterationDurationInSeconds, totalDurationInSeconds, iotHubLonghaulRsrcs);
+                loop_result = run_on_loop(send_telemetry, iotHubLonghaulRsrcs->test_loop_duration_in_seconds, iotHubLonghaulRsrcs->test_duration_in_seconds, iotHubLonghaulRsrcs);
 
-                ThreadAPI_Sleep((unsigned int)iterationDurationInSeconds * 1000 * 10); // Extra time for the last messages.
+                ThreadAPI_Sleep((unsigned int)iotHubLonghaulRsrcs->test_loop_duration_in_seconds * 1000 * 10); // Extra time for the last messages.
 
                 stats_handle = longhaul_get_statistics(iotHubLonghaulRsrcs);
 
@@ -1688,7 +1762,7 @@ int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t
     return result;
 }
 
-int longhaul_run_c2d_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t iterationDurationInSeconds, size_t totalDurationInSeconds)
+int longhaul_run_c2d_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
 {
     int result;
 
@@ -1721,9 +1795,9 @@ int longhaul_run_c2d_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t itera
             int loop_result;
             IOTHUB_CLIENT_STATISTICS_HANDLE stats_handle;
 
-            loop_result = run_on_loop(send_c2d, iterationDurationInSeconds, totalDurationInSeconds, iotHubLonghaul);
+            loop_result = run_on_loop(send_c2d, iotHubLonghaul->test_loop_duration_in_seconds, iotHubLonghaul->test_duration_in_seconds, iotHubLonghaul);
 
-            ThreadAPI_Sleep((unsigned int)iterationDurationInSeconds * 1000 * 10); // Extra time for the last messages.
+            ThreadAPI_Sleep((unsigned int)iotHubLonghaul->test_loop_duration_in_seconds * 1000 * 10); // Extra time for the last messages.
 
             stats_handle = longhaul_get_statistics(iotHubLonghaul);
 
@@ -1763,7 +1837,7 @@ int longhaul_run_c2d_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t itera
     return result;
 }
 
-int longhaul_run_device_methods_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t iterationDurationInSeconds, size_t totalDurationInSeconds)
+int longhaul_run_device_methods_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
 {
     int result;
 
@@ -1799,7 +1873,7 @@ int longhaul_run_device_methods_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, s
             // Wait for the service to ack the device subscription...
             ThreadAPI_Sleep(DEVICE_METHOD_SUB_WAIT_TIME_MS);
 
-            loop_result = run_on_loop(invoke_device_method, iterationDurationInSeconds, totalDurationInSeconds, iotHubLonghaul);
+            loop_result = run_on_loop(invoke_device_method, iotHubLonghaul->test_loop_duration_in_seconds, iotHubLonghaul->test_duration_in_seconds, iotHubLonghaul);
 
             stats_handle = longhaul_get_statistics(iotHubLonghaul);
 
@@ -1865,7 +1939,7 @@ static void on_device_twin_update_received(DEVICE_TWIN_UPDATE_STATE update_state
                 LogError("Failed parsing complete twin update data");
             }
             else if (update_state == DEVICE_TWIN_UPDATE_PARTIAL &&
-                parse_message(STRING_c_str(parse_string), tests_id, &message_id) != 0)
+                parse_message(STRING_c_str(parse_string), size, tests_id, &message_id) != 0)
             {
                 LogError("Failed parsing twin update data");
             }
@@ -1902,7 +1976,7 @@ static void on_device_twin_update_received(DEVICE_TWIN_UPDATE_STATE update_state
     }
 }
 
-int longhaul_run_twin_desired_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t iterationDurationInSeconds, size_t totalDurationInSeconds)
+int longhaul_run_twin_desired_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
 {
     int result;
 
@@ -1920,7 +1994,7 @@ int longhaul_run_twin_desired_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE 
             LogError("IoTHubClient not initialized.");
             result = MU_FAILURE;
         }
-        else if (IoTHubClient_SetDeviceTwinCallback(iotHubLonghaul->iotHubClientHandle, on_device_twin_update_received, iotHubLonghaul) != IOTHUB_CLIENT_OK)
+        else if (IoTHubDeviceClient_SetDeviceTwinCallback(iotHubLonghaul->iotHubClientHandle, on_device_twin_update_received, iotHubLonghaul) != IOTHUB_CLIENT_OK)
         {
             LogError("Failed subscribing device client for twin desired properties updates");
             result = MU_FAILURE;
@@ -1940,7 +2014,7 @@ int longhaul_run_twin_desired_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE 
             int loop_result;
             IOTHUB_CLIENT_STATISTICS_HANDLE stats_handle;
 
-            loop_result = run_on_loop(update_device_twin_desired_property, iterationDurationInSeconds, totalDurationInSeconds, iotHubLonghaul);
+            loop_result = run_on_loop(update_device_twin_desired_property, iotHubLonghaul->test_loop_duration_in_seconds, iotHubLonghaul->test_duration_in_seconds, iotHubLonghaul);
 
             stats_handle = longhaul_get_statistics(iotHubLonghaul);
 
@@ -1980,7 +2054,7 @@ int longhaul_run_twin_desired_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE 
     return result;
 }
 
-int longhaul_run_twin_reported_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle, size_t iterationDurationInSeconds, size_t totalDurationInSeconds)
+int longhaul_run_twin_reported_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
 {
     int result;
 
@@ -2013,10 +2087,10 @@ int longhaul_run_twin_reported_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE
             int loop_result;
             IOTHUB_CLIENT_STATISTICS_HANDLE stats_handle;
 
-            loop_result = run_on_loop(update_device_twin_reported_property, iterationDurationInSeconds, totalDurationInSeconds, iotHubLonghaul);
+            loop_result = run_on_loop(update_device_twin_reported_property, iotHubLonghaul->test_loop_duration_in_seconds, iotHubLonghaul->test_duration_in_seconds, iotHubLonghaul);
 
             // One last check...
-            ThreadAPI_Sleep((unsigned int)iterationDurationInSeconds * 1000);
+            ThreadAPI_Sleep((unsigned int)iotHubLonghaul->test_loop_duration_in_seconds * 1000);
             check_for_reported_properties_update_on_service_side(iotHubLonghaul);
 
             stats_handle = longhaul_get_statistics(iotHubLonghaul);

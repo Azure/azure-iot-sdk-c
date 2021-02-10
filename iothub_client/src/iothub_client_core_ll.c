@@ -2348,7 +2348,8 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetOption(IOTHUB_CLIENT_CORE_LL_HANDLE 
         // if this becomes necessary
         else if (strcmp(optionName, OPTION_SAS_TOKEN_REFRESH_TIME) == 0 || strcmp(optionName, OPTION_SAS_TOKEN_LIFETIME) == 0)
         {
-            if (IoTHubClient_Auth_Set_SasToken_Expiry(handleData->authorization_module, *(size_t*)value) != 0)
+            // API compat: while IoTHubClient_Auth_Set_SasToken_Expiry accepts uint64_t, we cannot change the public API.
+            if (IoTHubClient_Auth_Set_SasToken_Expiry(handleData->authorization_module, (uint64_t)(*(size_t*)value)) != 0)
             {
                 LogError("Failed setting the Token Expiry time");
                 result = IOTHUB_CLIENT_ERROR;

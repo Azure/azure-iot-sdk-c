@@ -21,7 +21,7 @@ This repository contains the following:
     - [Device Client SDK](#device-client-sdk)
     - [Service Client SDK](#service-client-sdk)
     - [Provisioning client SDK](#provisioning-client-sdk)
-    - [Provisioniong Service SDK](#provisioniong-service-sdk)
+    - [Provisioning Service SDK](#provisioning-service-sdk)
   - [OS Platforms and Hardware Compatibility](#os-platforms-and-hardware-compatibility)
   - [Porting the Azure IoT Device Client SDK for C to New Devices](#porting-the-azure-iot-device-client-sdk-for-c-to-new-devices)
   - [Contribution, Feedback and Issues](#contribution-feedback-and-issues)
@@ -71,6 +71,8 @@ The API reference documentation for the C SDKs can be found [here][c-api-referen
 
 To find Azure IoT SDKs in other languages, please refer to the [azure-iot-sdks][azure-iot-sdks] repository.
 
+**Note on constrained devices**: The `Embedded C SDK` is an alternative for constrained devices which enables the BYO (bring your own) network approach: IoT developers have the freedom of choice to bring an MQTT client, TLS and Socket of their choice to create a device solution. Find more information about the Embedded C SDK [here](https://github.com/Azure/azure-sdk-for-c/tree/master/sdk/docs/iot).
+
 ## Developing Azure IoT Applications
 
 To learn more about building Azure IoT Applications, you can visit the [Azure IoT Dev Center][iot-dev-center].
@@ -111,7 +113,7 @@ This SDK also contains options you can set and platform specific features.  You 
 | [File Upload](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-file-upload)                    | :heavy_multiplication_x:                | Set up your backend app to send file upload notification receiver.                                                                 |
 
 ### Provisioning client SDK
-This repository contains [provisioning client SDK](./provisioning_client) for the [Device Provisioning Service](https://docs.microsoft.com/azure/iot-dps/).  
+This repository contains [provisioning client SDK](./provisioning_client) for the [Device Provisioning Service](https://docs.microsoft.com/azure/iot-dps/).
 
 :heavy_check_mark: feature available  :heavy_multiplication_x: feature planned but not supported  :heavy_minus_sign: no support planned
 
@@ -122,7 +124,7 @@ This repository contains [provisioning client SDK](./provisioning_client) for th
 | X.509 Individual Enrollment | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | This SDK supports connecting your device to the Device Provisioning Service via [individual enrollment](https://docs.microsoft.com/azure/iot-dps/concepts-service#enrollment) using [X.509 leaf certificate](https://docs.microsoft.com/azure/iot-dps/concepts-security#leaf-certificate).  This [quickstart](https://docs.microsoft.com/azure/iot-dps/quick-create-simulated-device-x509) reviews how to create a simulated device for individual enrollment with X.509. |
 | X.509 Enrollment Group      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | This SDK supports connecting your device to the Device Provisioning Service via [enrollment group](https://docs.microsoft.com/azure/iot-dps/concepts-service#enrollment) using [X.509 root certificate](https://docs.microsoft.com/azure/iot-dps/concepts-security#root-certificate).                                                                                                                                                                                         |
 
-### Provisioniong Service SDK
+### Provisioning Service SDK
 This repository contains [provisioning service client SDK](./provisioning_service_client/) for the Device Provisioning Service to [programmatically enroll devices](https://docs.microsoft.com/en-us/azure/iot-dps/how-to-manage-enrollments-sdks).
 
 | Feature                                            | Support            | Description                                                                                                                                                                                                                                            |
@@ -144,7 +146,7 @@ The minimum requirements are for the device platform to support the following:
 - **Support SHA-256** (optional): necessary to generate the secure token for authenticating the device with the service. Different authentication methods are available and not all require SHA-256.
 - **Have a Real Time Clock or implement code to connect to an NTP server**: necessary for both establishing the TLS connection and generating the secure token for authentication.
 - **Having at least 64KB of RAM**: the memory footprint of the SDK depends on the SDK and protocol used as well as the platform targeted. The smallest footprint is achieved targeting microcontrollers.
-- **Having at least 4KB of RAM set for incoming SSL max content length buffer**: For some TLS libraries, this may be a configurable option and default may have been set as **4KB** for low memory footprint devices. During TLS handshake, IoT Hub service will send Server Hello which includes IoT Hub server side certificates as part of Server Hello payload. 
+- **Having at least 4KB of RAM set for incoming SSL max content length buffer**: For some TLS libraries, this may be a configurable option and default may have been set as **4KB** for low memory footprint devices. During TLS handshake, IoT Hub service will send Server Hello which includes IoT Hub server side certificates as part of Server Hello payload.
 During **renewal** of these IoT Hub server side certificates, check will be made on IoT Hub service side to prevent **Server Hello** exceeding 4KB limit so that existing devices which are set for 4KB limit continue to work as before after certificate renewals.
 
 Platform support details can be found in [this document](https://docs.microsoft.com/azure/iot-hub/iot-hub-device-sdk-platform-support).
@@ -259,6 +261,7 @@ Below is a table showing the mapping of the LTS branches to the packages release
 
 | Package | Github Branch | LTS Status | LTS Start Date | Maintenance End Date | Removal Date |
 | :-----------: | :-----------: | :--------: | :------------: | :------------------: | :----------: |
+| Vcpkg: 2021-01-21<br/> Xenial: 0.2.0.0-31xenial<br/> Bionic: 0.2.0.0-24bionic<br/>    | lts_01_2021   | Active     | 2021-01-21     | 2022-01-21           | 2022-01-21   |
 | Vcpkg: 2020-07-19<br/> Xenial: 0.2.0.0-27xenial<br/> Trusty: 0.2.0-27trusty<br/> Bionic: 0.2.0.0-20bionic<br/>    | lts_07_2020   | Active     | 2020-07-19     | 2021-07-19           | 2021-07-19   |
 | Vcpkg: 2020-02-07.1<br/> Xenial: 0.2.0.0-26xenial<br/> Trusty: 0.2.0-26trusty<br/> Bionic: 0.2.0.0-19bionic<br/>    | lts_02_2020   | Active     | 2020-02-04     | 2021-02-04           | 2021-02-04   |
 
@@ -270,7 +273,7 @@ Below is a table showing the mapping of the LTS branches to the packages release
 ---
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
-Microsoft collects performance and usage information which may be used to provide and improve Microsoft products and services and enhance your experience.  To learn more, review the [privacy statement](https://go.microsoft.com/fwlink/?LinkId=521839&clcid=0x409).  
+Microsoft collects performance and usage information which may be used to provide and improve Microsoft products and services and enhance your experience.  To learn more, review the [privacy statement](https://go.microsoft.com/fwlink/?LinkId=521839&clcid=0x409).
 
 [iot-dev-center]: http://azure.com/iotdev
 [iot-hub-documentation]: https://docs.microsoft.com/azure/iot-hub/

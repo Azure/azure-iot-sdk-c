@@ -27,9 +27,6 @@
 #ifdef SAMPLE_AMQP
 #include "iothubtransportamqp.h"
 #endif // SAMPLE_AMQP
-#ifdef SAMPLE_MQTT_OVER_WEBSOCKETS
-#include "iothubtransportmqtt_websockets.h"
-#endif // SAMPLE_MQTT_OVER_WEBSOCKETS
 #ifdef SAMPLE_AMQP_OVER_WEBSOCKETS
 #include "iothubtransportamqp_websockets.h"
 #endif // SAMPLE_AMQP_OVER_WEBSOCKETS
@@ -37,28 +34,42 @@
 #include "iothubtransporthttp.h"
 #endif // SAMPLE_HTTP
 
-static const char* hubName = "[IoT Hub Name]";
-static const char* hubSuffix = "[IoT Hub Suffix]";
-static const char* deviceId1 = "[device id 1]";
-static const char* deviceId2 = "[device id 2]";
-static const char* deviceKey1 = "[device key 1]";
-static const char* deviceKey2 = "[device key 2]";
+#define sizeofarray(x) (sizeof(x)/sizeof(x[0]))
 
-//static int callbackCounter;
+typedef struct DEVICE_CREDENTIAL_TAG
+{
+    const char* id;
+    const char* key;
+} DEVICE_CREDENTIAL;
+
+typedef struct DEVICE_STATE_TAG
+{
+    const DEVICE_CREDENTIAL* credential;
+    IOTHUB_DEVICE_CLIENT_LL_HANDLE client_handle;
+    size_t messages_received;
+} DEVICE_STATE;
+
+static const char* hubName = "<iot hub name>";
+static const char* hubSuffix = "azure-devices.net";
+
+static const DEVICE_CREDENTIAL g_deviceCredentials[] = {
+    { .id = "<device id 1>", .key = "<device key 1>" },
+    { .id = "<device id 2>", .key = "<device key 2>" }
+};
+
+#define NUMBER_OF_DEVICES sizeofarray(g_deviceCredentials)
+
+static DEVICE_STATE g_device_states[NUMBER_OF_DEVICES];
+
 static bool g_continueRunning;
 static char msgText[1024];
 static char propText[1024];
 #define MESSAGE_COUNT       5
 #define DOWORK_LOOP_NUM     3
 
-typedef struct EVENT_INSTANCE_TAG
-{
-    const char* deviceId;
-} EVENT_INSTANCE;
-
 static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback)
 {
-    int* counter = (int*)userContextCallback;
+    DEVICE_STATE* device_state = (DEVICE_STATE*)userContextCallback;
     const unsigned char* buffer = NULL;
     size_t size = 0;
     const char* messageId;
@@ -76,7 +87,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
     }
 
     // Increment the counter
-    *counter = (*counter) + 1;
+    device_state->messages_received++;
 
     // Message content
     IOTHUBMESSAGE_CONTENT_TYPE contentType = IoTHubMessage_GetContentType(message);
@@ -84,7 +95,8 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
     {
         if (IoTHubMessage_GetByteArray(message, &buffer, &size) == IOTHUB_MESSAGE_OK)
         {
-            (void)printf("Received Message [%d]\r\n Message ID: %s\r\n Correlation ID: %s\r\n BINARY Data: <<<%.*s>>> & Size=%d\r\n", *counter, messageId, correlationId, (int)size, buffer, (int)size);
+            (void)printf("Received Message [%s; %zu]\r\n Message ID: %s\r\n Correlation ID: %s\r\n BINARY Data: <<<%.*s>>> & Size=%d\r\n", 
+                device_state->credential->id, device_state->messages_received, messageId, correlationId, (int)size, buffer, (int)size);
         }
         else
         {
@@ -95,7 +107,8 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
     {
         if ((buffer = (const unsigned char*)IoTHubMessage_GetString(message)) != NULL && (size = strlen((const char*)buffer)) > 0)
         {
-            (void)printf("Received Message [%d]\r\n Message ID: %s\r\n Correlation ID: %s\r\n STRING Data: <<<%.*s>>> & Size=%d\r\n", *counter, messageId, correlationId, (int)size, buffer, (int)size);
+            (void)printf("Received Message [%s; %zu]\r\n Message ID: %s\r\n Correlation ID: %s\r\n STRING Data: <<<%.*s>>> & Size=%d\r\n", 
+                device_state->credential->id, device_state->messages_received, messageId, correlationId, (int)size, buffer, (int)size);
 
             // If we receive the work 'quit' then we stop running
         }
@@ -127,12 +140,12 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
 
 static void SendConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
-    EVENT_INSTANCE* event_info = (EVENT_INSTANCE*)userContextCallback;
-    (void)printf("Confirmation message received from device %s with result = %s\r\n", event_info->deviceId, MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
+    DEVICE_STATE* device_state = (DEVICE_STATE*)userContextCallback;
+    (void)printf("Confirmation message received from device %s with result = %s\r\n", device_state->credential->id, MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
     /* Some device specific action code goes here... */
 }
 
-static IOTHUB_MESSAGE_HANDLE create_events(const EVENT_INSTANCE* event_info)
+static IOTHUB_MESSAGE_HANDLE create_events(const DEVICE_STATE* device_state)
 {
     IOTHUB_MESSAGE_HANDLE message_handle;
 
@@ -146,9 +159,8 @@ static IOTHUB_MESSAGE_HANDLE create_events(const EVENT_INSTANCE* event_info)
     temperature = minTemperature + (rand() % 10);
     humidity = minHumidity +  (rand() % 20);
 
-    (void)sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"%s\",\"windSpeed\":%.2f,\"temperature\":%.2f,\"humidity\":%.2f}", event_info->deviceId, avgWindSpeed + ((double)(rand() % 4) + 2.0), temperature, humidity);
+    (void)sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":\"%s\",\"windSpeed\":%.2f,\"temperature\":%.2f,\"humidity\":%.2f}", device_state->credential->id, avgWindSpeed + ((double)(rand() % 4) + 2.0), temperature, humidity);
     message_handle = IoTHubMessage_CreateFromString(msgText);
-    //message_handle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText))) == NULL)
 
     (void)sprintf_s(propText, sizeof(propText), temperature > 28 ? "true" : "false");
     (void)IoTHubMessage_SetProperty(message_handle, "temperatureAlert", propText);
@@ -160,8 +172,13 @@ int main(void)
 {
     TRANSPORT_HANDLE transport_handle;
     IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;
-    IOTHUB_DEVICE_CLIENT_LL_HANDLE device_ll_handle1;
-    IOTHUB_DEVICE_CLIENT_LL_HANDLE device_ll_handle2;
+
+    for (int i = 0; i < NUMBER_OF_DEVICES; i++)
+    {
+        g_device_states[i].credential = &g_deviceCredentials[i];
+        g_device_states[i].client_handle = NULL;
+        g_device_states[i].messages_received = 0;
+    }
 
 #ifdef SAMPLE_AMQP
     protocol = AMQP_Protocol;
@@ -175,10 +192,6 @@ int main(void)
 
     g_continueRunning = true;
 
-    //callbackCounter = 0;
-    int receiveContext1 = 0;
-    int receiveContext2 = 0;
-
     (void)printf("Starting the IoTHub client shared sample.  Send `quit` message to either device to close...\r\n");
 
     // Used to initialize IoTHub SDK subsystem
@@ -190,105 +203,125 @@ int main(void)
     }
     else
     {
-        EVENT_INSTANCE device1_event;
-        EVENT_INSTANCE device2_event;
+        bool setup_ok = true;
 
-        device1_event.deviceId = deviceId1;
-
-        IOTHUB_CLIENT_DEVICE_CONFIG config1 = { 0 };
-        config1.deviceId = deviceId1;
-        config1.deviceKey = deviceKey1;
-        config1.deviceSasToken = NULL;
-        config1.protocol = protocol;
-        config1.transportHandle = IoTHubTransport_GetLLTransport(transport_handle);
-
-        device2_event.deviceId = deviceId2;
-
-        IOTHUB_CLIENT_DEVICE_CONFIG config2 = { 0 };
-        config2.deviceId = deviceId2;
-        config2.deviceKey = deviceKey2;
-        config2.deviceSasToken = NULL;
-        config2.protocol = protocol;
-        config2.transportHandle = IoTHubTransport_GetLLTransport(transport_handle);
-
-        if ((device_ll_handle1 = IoTHubDeviceClient_LL_CreateWithTransport(&config1)) == NULL)
+        for (int i = 0; i < NUMBER_OF_DEVICES && setup_ok; i++)
         {
-            (void)printf("ERROR: iotHubClientHandle1 is NULL!\r\n");
+            IOTHUB_CLIENT_DEVICE_CONFIG config = { 0 };
+            config.deviceId = g_device_states[i].credential->id;
+            config.deviceKey = g_device_states[i].credential->key;
+            config.deviceSasToken = NULL;
+            config.protocol = protocol;
+            config.transportHandle = IoTHubTransport_GetLLTransport(transport_handle);
+
+            if ((g_device_states[i].client_handle = IoTHubDeviceClient_LL_CreateWithTransport(&config)) == NULL)
+            {
+                (void)printf("ERROR: iotHubClientHandle is NULL (%s)!\r\n", config.deviceId);
+                setup_ok = false;
+            }
+            else
+            {            
+                bool traceOn = true;
+                
+    #ifdef SAMPLE_HTTP
+                unsigned int timeout = 241000;
+                // Because it can poll "after 9 seconds" polls will happen effectively // at ~10 seconds.
+                // Note that for scalabilty, the default value of minimumPollingTime
+                // is 25 minutes. For more information, see:
+                // https://azure.microsoft.com/documentation/articles/iot-hub-devguide/#messaging
+                unsigned int minimumPollingTime = 9;
+    #endif
+                
+                if (IoTHubDeviceClient_LL_SetOption(g_device_states[i].client_handle, OPTION_LOG_TRACE, &traceOn) != IOTHUB_CLIENT_OK)
+                {
+                    (void)printf("Failed setting log tracing (%s)!\r\n", config.deviceId);
+                    setup_ok = false;
+                }
+    #ifdef SET_TRUSTED_CERT_IN_SAMPLES
+                // Setting the Trusted Certificate. This is only necessary on systems without
+                // built in certificate stores.
+                else if (IoTHubDeviceClient_LL_SetOption(g_device_states[i].client_handle, OPTION_TRUSTED_CERT, certificates) != IOTHUB_CLIENT_OK)
+                {
+                    (void)printf("Failed setting log tracing (%s)!\r\n", config.deviceId);
+                    setup_ok = false;
+                }
+    #endif // SET_TRUSTED_CERT_IN_SAMPLES
+
+    #ifdef SAMPLE_HTTP
+                else if (IoTHubDeviceClient_LL_SetOption(g_device_states[i].client_handle, OPTION_MIN_POLLING_TIME, &minimumPollingTime) != IOTHUB_CLIENT_OK)
+                {
+                    (void)printf("Failed setting log tracing (%s)!\r\n", config.deviceId);
+                    setup_ok = false;
+                }
+                else if (IoTHubDeviceClient_LL_SetOption(g_device_states[i].client_handle, OPTION_HTTP_TIMEOUT, &timeout) != IOTHUB_CLIENT_OK)
+                {
+                    (void)printf("Failed setting log tracing (%s)!\r\n", config.deviceId);
+                    setup_ok = false;
+                }
+    #endif // SAMPLE_HTTP
+                /* Setting Message call back, so we can receive Commands. */
+                else if (IoTHubDeviceClient_LL_SetMessageCallback(g_device_states[i].client_handle, ReceiveMessageCallback, &g_device_states[i]) != IOTHUB_CLIENT_OK)
+                {
+                    (void)printf("Failed setting cloud-to-device message callback (%s)!\r\n", config.deviceId);
+                    setup_ok = false;
+                }
+            }
         }
-        else if ((device_ll_handle2 = IoTHubDeviceClient_LL_CreateWithTransport(&config2)) == NULL)
+
+        if (setup_ok)
         {
-            (void)printf("ERROR: iotHubClientHandle1 is NULL!\r\n");
-        }
-        else
-        {
-            // Set any option that are neccessary.
-            // For available options please see the iothub_sdk_options.md documentation
-            //bool traceOn = true;
-            //IoTHubDeviceClient_LL_SetOption(device_ll_handle1, OPTION_LOG_TRACE, &traceOn);
-            //IoTHubDeviceClient_LL_SetOption(device_ll_handle2, OPTION_LOG_TRACE, &traceOn);
-#ifdef SET_TRUSTED_CERT_IN_SAMPLES
-            // Setting the Trusted Certificate. This is only necessary on systems without
-            // built in certificate stores.
-            IoTHubDeviceClient_LL_SetOption(device_ll_handle1, OPTION_TRUSTED_CERT, certificates);
-            IoTHubDeviceClient_LL_SetOption(device_ll_handle2, OPTION_TRUSTED_CERT, certificates);
-#endif // SET_TRUSTED_CERT_IN_SAMPLES
-
-#ifdef SAMPLE_HTTP
-            unsigned int timeout = 241000;
-            // Because it can poll "after 9 seconds" polls will happen effectively // at ~10 seconds.
-            // Note that for scalabilty, the default value of minimumPollingTime
-            // is 25 minutes. For more information, see:
-            // https://azure.microsoft.com/documentation/articles/iot-hub-devguide/#messaging
-            unsigned int minimumPollingTime = 9;
-            IoTHubDeviceClient_LL_SetOption(device_ll_handle1, OPTION_MIN_POLLING_TIME, &minimumPollingTime);
-            IoTHubDeviceClient_LL_SetOption(device_ll_handle1, OPTION_HTTP_TIMEOUT, &timeout);
-            IoTHubDeviceClient_LL_SetOption(device_ll_handle2, OPTION_MIN_POLLING_TIME, &minimumPollingTime);
-            IoTHubDeviceClient_LL_SetOption(device_ll_handle2, OPTION_HTTP_TIMEOUT, &timeout);
-#endif // SAMPLE_HTTP
-
-            /* Setting Message call back, so we can receive Commands. */
-            (void)IoTHubDeviceClient_LL_SetMessageCallback(device_ll_handle1, ReceiveMessageCallback, &receiveContext1);
-            (void)IoTHubDeviceClient_LL_SetMessageCallback(device_ll_handle2, ReceiveMessageCallback, &receiveContext2);
-
             /* Now that we are ready to receive commands, let's send some messages */
             size_t messages_sent = 0;
+            size_t send_frequency_ms = 3000;
+            size_t sleep_ms = 100;
+            size_t counter = send_frequency_ms;
             IOTHUB_MESSAGE_HANDLE message_handle;
             do
             {
-                if (messages_sent < MESSAGE_COUNT)
+                if (counter >= send_frequency_ms && messages_sent < MESSAGE_COUNT)
                 {
-                    // Create the event hub message
-                    message_handle = create_events(&device1_event);
-                    (void)IoTHubDeviceClient_LL_SendEventAsync(device_ll_handle1, message_handle, SendConfirmationCallback, &device1_event);
-                    // The message is copied to the sdk so the we can destroy it
-                    IoTHubMessage_Destroy(message_handle);
-
-                    message_handle = create_events(&device2_event);
-                    (void)IoTHubDeviceClient_LL_SendEventAsync(device_ll_handle2, message_handle, SendConfirmationCallback, &device2_event);
-                    // The message is copied to the sdk so the we can destroy it
-                    IoTHubMessage_Destroy(message_handle);
+                    for (int i = 0; i < NUMBER_OF_DEVICES; i++)
+                    {
+                        // Create the event hub message
+                        message_handle = create_events(&g_device_states[i]);
+                        (void)IoTHubDeviceClient_LL_SendEventAsync(g_device_states[i].client_handle, message_handle, SendConfirmationCallback, &g_device_states[i]);
+                        // The message is copied to the sdk so the we can destroy it
+                        IoTHubMessage_Destroy(message_handle);
+                    }                    
 
                     messages_sent++;
+                    counter = 0;
                 }
 
-                IoTHubDeviceClient_LL_DoWork(device_ll_handle1);
-                IoTHubDeviceClient_LL_DoWork(device_ll_handle2);
-                ThreadAPI_Sleep(1);
+                for (int i = 0; i < NUMBER_OF_DEVICES; i++)
+                {
+                    IoTHubDeviceClient_LL_DoWork(g_device_states[i].client_handle);
+                }
+                ThreadAPI_Sleep((unsigned int)sleep_ms);
+                counter += sleep_ms;
+
+                g_continueRunning = !(messages_sent > MESSAGE_COUNT);
             } while (g_continueRunning);
 
-            (void)printf("client_amqp_shared_sample has gotten quit message, call DoWork %d more time to complete final sending...\r\n", DOWORK_LOOP_NUM);
+            (void)printf("client_amqp_shared_sample has received a quit message, call DoWork %d more time to complete final sending...\r\n", DOWORK_LOOP_NUM);
             for (size_t index = 0; index < DOWORK_LOOP_NUM; index++)
             {
-                IoTHubDeviceClient_LL_DoWork(device_ll_handle1);
-                IoTHubDeviceClient_LL_DoWork(device_ll_handle2);
+                for (int i = 0; i < NUMBER_OF_DEVICES; i++)
+                {
+                    IoTHubDeviceClient_LL_DoWork(g_device_states[i].client_handle);
+                }
                 ThreadAPI_Sleep(1);
             }
-
-            // Clean up the iothub sdk handle
-            IoTHubDeviceClient_LL_Destroy(device_ll_handle1);
-            IoTHubDeviceClient_LL_Destroy(device_ll_handle2);
         }
+
+        // Clean up the iothub sdk handle
+        for (int i = 0; i < NUMBER_OF_DEVICES; i++)
+        {
+            IoTHubDeviceClient_LL_Destroy(g_device_states[i].client_handle);
+        }
+
         IoTHubTransport_Destroy(transport_handle);
+
         // Free all the sdk subsystem
         IoTHub_Deinit();
     }

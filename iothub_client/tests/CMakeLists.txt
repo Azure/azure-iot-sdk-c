@@ -30,6 +30,11 @@ function(addSupportedTransportsToTest whatExecutableIsBuilding)
     endif()
 endfunction()
 
+if(${use_wolfssl})
+    add_definitions(-DUSE_WOLFSSL)
+endif()
+
+
 #this is CMakeLists for iothub_client tests folder
 add_unittest_directory(iothub_ut)
 add_unittest_directory(iothub_client_authorization_ut)
@@ -70,6 +75,7 @@ if(${use_mqtt})
 
     # e2e tests
     add_e2etest_directory(iothubclient_mqtt_e2e)
+    add_e2etest_directory(iothubclient_mqtt_mod_e2e)
     add_sfctest_directory(iothubclient_mqtt_e2e_sfc)
     add_e2etest_directory(iothubclient_mqtt_dt_e2e)
     add_sfctest_directory(iothubclient_mqtt_dt_e2e_sfc)
@@ -105,6 +111,7 @@ if(${use_amqp})
 
     # e2e tests
     add_e2etest_directory(iothubclient_amqp_e2e)
+    add_e2etest_directory(iothubclient_amqp_mod_e2e)
     add_e2etest_directory(iothubclient_amqp_dt_e2e)
     add_sfctest_directory(iothubclient_amqp_e2e_sfc)
     add_e2etest_directory(iothubclient_amqp_device_method_e2e)
@@ -124,11 +131,21 @@ endif()
     add_longhaul_test_directory(longhaul_amqp_device_twin_reported)
 endif()
 
-if(NOT ${use_schannel} AND NOT ${use_socketio})
-    add_unittest_directory(iothubclient_fuzz_mqtt)
-    add_unittest_directory(iothubclient_fuzz_amqp)
+if (NOT DEFINED MACOSX AND DEFINED use_schannel AND DEFINED use_socketio)
+  if (NOT ${use_schannel} AND NOT ${use_socketio})
+    if (${use_mqtt})
+      add_unittest_directory(iothubclient_fuzz_mqtt)
+    endif()
+    if (${use_amqp})
+      add_unittest_directory(iothubclient_fuzz_amqp)
+    endif()
+  endif()
 endif()
 
 add_unittest_directory(version_ut)
 
 add_e2etest_directory(iothub_invalidcert_e2e)
+
+if (${use_openssl} AND ${run_e2e_openssl_engine_tests})
+    add_e2etest_directory(iothubclient_openssl_engine_e2e)
+endif()

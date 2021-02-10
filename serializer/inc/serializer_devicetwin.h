@@ -68,7 +68,10 @@ static int deviceMethodCallback(const char* method_name, const unsigned char* pa
         /*Codes_SRS_SERIALIZERDEVICETWIN_02_022: [ deviceMethodCallback shall call EXECUTE_METHOD passing the userContextCallback, method_name and the null terminated string build before. ]*/
         METHODRETURN_HANDLE mr = EXECUTE_METHOD(userContextCallback, method_name, payloadZeroTerminated);
 
-        if (mr == NULL)
+        /*Codes_SRS_SERIALIZERDEVICETWIN_02_023: [ deviceMethodCallback shall get the MethodReturn_Data and shall copy the response JSON value into a new byte array. ]*/
+        const METHODRETURN_DATA* data = (mr == NULL) ? NULL : MethodReturn_GetReturn(mr);
+
+        if (mr == NULL || data == NULL)
         {
             LogError("failure in EXECUTE_METHOD");
             /*Codes_SRS_SERIALIZERDEVICETWIN_02_026: [ If any failure occurs in the above operations, then deviceMethodCallback shall fail, return 500, set *response to NULL and '*resp_size` to 0. ]*/
@@ -78,9 +81,6 @@ static int deviceMethodCallback(const char* method_name, const unsigned char* pa
         }
         else
         {
-            /*Codes_SRS_SERIALIZERDEVICETWIN_02_023: [ deviceMethodCallback shall get the MethodReturn_Data and shall copy the response JSON value into a new byte array. ]*/
-            const METHODRETURN_DATA* data = MethodReturn_GetReturn(mr);
-
             /*Codes_SRS_SERIALIZERDEVICETWIN_02_025: [ deviceMethodCallback returns the statusCode from the user. ]*/
             result = data->statusCode;
 

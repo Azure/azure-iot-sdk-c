@@ -574,10 +574,14 @@ EXECUTE_COMMAND_RESULT CodeFirst_InvokeAction(DEVICE_HANDLE deviceHandle, void* 
         size_t offset;
 
         modelName = Schema_GetModelName(deviceHeader->ModelHandle);
-
-        if (((childModel = FindModelInCodeFirstMetadata(deviceHeader->ReflectedData->reflectedData, modelName)) == NULL) ||
-            /* Codes_SRS_CODEFIRST_99_138:[The relativeActionPath argument shall be used by CodeFirst_InvokeAction to find the child model where the action is declared.] */
-            ((childModel = FindChildModelInCodeFirstMetadata(deviceHeader->ReflectedData->reflectedData, childModel, relativeActionPath, &offset)) == NULL))
+        if (modelName == NULL)
+        {
+            result = EXECUTE_COMMAND_ERROR;
+            LogError("modelName was not defined %s ", MU_ENUM_TO_STRING(EXECUTE_COMMAND_RESULT, result));
+        }
+        else if (((childModel = FindModelInCodeFirstMetadata(deviceHeader->ReflectedData->reflectedData, modelName)) == NULL) ||
+                /* Codes_SRS_CODEFIRST_99_138:[The relativeActionPath argument shall be used by CodeFirst_InvokeAction to find the child model where the action is declared.] */
+                ((childModel = FindChildModelInCodeFirstMetadata(deviceHeader->ReflectedData->reflectedData, childModel, relativeActionPath, &offset)) == NULL))
         {
             /*Codes_SRS_CODEFIRST_99_141:[If a child model specified in the relativeActionPath argument cannot be found by CodeFirst_InvokeAction, it shall return EXECUTE_COMMAND_ERROR.] */
             result = EXECUTE_COMMAND_ERROR;
@@ -650,8 +654,13 @@ METHODRETURN_HANDLE CodeFirst_InvokeMethod(DEVICE_HANDLE deviceHandle, void* cal
 
         modelName = Schema_GetModelName(deviceHeader->ModelHandle);
 
-        if (((childModel = FindModelInCodeFirstMetadata(deviceHeader->ReflectedData->reflectedData, modelName)) == NULL) ||
-            ((childModel = FindChildModelInCodeFirstMetadata(deviceHeader->ReflectedData->reflectedData, childModel, relativeMethodPath, &offset)) == NULL))
+        if (modelName == NULL)
+        {
+            result = NULL;
+            LogError("model name was not defined");
+        }
+        else if (((childModel = FindModelInCodeFirstMetadata(deviceHeader->ReflectedData->reflectedData, modelName)) == NULL) ||
+                ((childModel = FindChildModelInCodeFirstMetadata(deviceHeader->ReflectedData->reflectedData, childModel, relativeMethodPath, &offset)) == NULL))
         {
             result = NULL;
             LogError("method %s was not found", methodName);
@@ -1118,41 +1127,48 @@ static const REFLECTED_SOMETHING* FindReportedProperty(DEVICE_HEADER_DATA* devic
 /* Codes_SRS_CODEFIRST_99_131:[The properties shall be given to Device as one transaction, as if they were all passed as individual arguments to Code_First.] */
 static CODEFIRST_RESULT SendAllDeviceProperties(DEVICE_HEADER_DATA* deviceHeader, TRANSACTION_HANDLE transaction)
 {
-    const char* modelName = Schema_GetModelName(deviceHeader->ModelHandle);
-    const REFLECTED_SOMETHING* something;
-    unsigned char* deviceAddress = (unsigned char*)deviceHeader->data;
     CODEFIRST_RESULT result = CODEFIRST_OK;
-
-    for (something = deviceHeader->ReflectedData->reflectedData; something != NULL; something = something->next)
+    const char* modelName = Schema_GetModelName(deviceHeader->ModelHandle);
+    if (modelName == NULL)
     {
-        if ((something->type == REFLECTION_PROPERTY_TYPE) &&
-            (strcmp(something->what.property.modelName, modelName) == 0))
+        result = CODEFIRST_ERROR;
+    }
+    else
+    {
+        const REFLECTED_SOMETHING* something;
+        unsigned char* deviceAddress = (unsigned char*)deviceHeader->data;
+
+        for (something = deviceHeader->ReflectedData->reflectedData; something != NULL; something = something->next)
         {
-            AGENT_DATA_TYPE agentDataType;
+            if ((something->type == REFLECTION_PROPERTY_TYPE) &&
+                (strcmp(something->what.property.modelName, modelName) == 0))
+            {
+                AGENT_DATA_TYPE agentDataType;
 
-            /* Codes_SRS_CODEFIRST_99_097:[For each value marshalling to AGENT_DATA_TYPE shall be performed.] */
-            /* Codes_SRS_CODEFIRST_99_098:[The marshalling shall be done by calling the Create_AGENT_DATA_TYPE_from_Ptr function associated with the property.] */
-            if (something->what.property.Create_AGENT_DATA_TYPE_from_Ptr(deviceAddress + something->what.property.offset, &agentDataType) != AGENT_DATA_TYPES_OK)
-            {
-                /* Codes_SRS_CODEFIRST_99_099:[If Create_AGENT_DATA_TYPE_from_Ptr fails, CodeFirst_SendAsync shall return CODEFIRST_AGENT_DATA_TYPE_ERROR.] */
-                result = CODEFIRST_AGENT_DATA_TYPE_ERROR;
-                LOG_CODEFIRST_ERROR;
-                break;
-            }
-            else
-            {
-                /* Codes_SRS_CODEFIRST_99_092:[CodeFirst shall publish each value by using Device_PublishTransacted.] */
-                if (Device_PublishTransacted(transaction, something->what.property.name, &agentDataType) != DEVICE_OK)
+                /* Codes_SRS_CODEFIRST_99_097:[For each value marshalling to AGENT_DATA_TYPE shall be performed.] */
+                /* Codes_SRS_CODEFIRST_99_098:[The marshalling shall be done by calling the Create_AGENT_DATA_TYPE_from_Ptr function associated with the property.] */
+                if (something->what.property.Create_AGENT_DATA_TYPE_from_Ptr(deviceAddress + something->what.property.offset, &agentDataType) != AGENT_DATA_TYPES_OK)
                 {
-                    Destroy_AGENT_DATA_TYPE(&agentDataType);
-
-                    /* Codes_SRS_CODEFIRST_99_094:[If any Device API fail, CodeFirst_SendAsync shall return CODEFIRST_DEVICE_PUBLISH_FAILED.] */
-                    result = CODEFIRST_DEVICE_PUBLISH_FAILED;
+                    /* Codes_SRS_CODEFIRST_99_099:[If Create_AGENT_DATA_TYPE_from_Ptr fails, CodeFirst_SendAsync shall return CODEFIRST_AGENT_DATA_TYPE_ERROR.] */
+                    result = CODEFIRST_AGENT_DATA_TYPE_ERROR;
                     LOG_CODEFIRST_ERROR;
                     break;
                 }
+                else
+                {
+                    /* Codes_SRS_CODEFIRST_99_092:[CodeFirst shall publish each value by using Device_PublishTransacted.] */
+                    if (Device_PublishTransacted(transaction, something->what.property.name, &agentDataType) != DEVICE_OK)
+                    {
+                        Destroy_AGENT_DATA_TYPE(&agentDataType);
 
-                Destroy_AGENT_DATA_TYPE(&agentDataType);
+                        /* Codes_SRS_CODEFIRST_99_094:[If any Device API fail, CodeFirst_SendAsync shall return CODEFIRST_DEVICE_PUBLISH_FAILED.] */
+                        result = CODEFIRST_DEVICE_PUBLISH_FAILED;
+                        LOG_CODEFIRST_ERROR;
+                        break;
+                    }
+
+                    Destroy_AGENT_DATA_TYPE(&agentDataType);
+                }
             }
         }
     }
@@ -1162,35 +1178,41 @@ static CODEFIRST_RESULT SendAllDeviceProperties(DEVICE_HEADER_DATA* deviceHeader
 
 static CODEFIRST_RESULT SendAllDeviceReportedProperties(DEVICE_HEADER_DATA* deviceHeader, REPORTED_PROPERTIES_TRANSACTION_HANDLE transaction)
 {
-    const char* modelName = Schema_GetModelName(deviceHeader->ModelHandle);
-    const REFLECTED_SOMETHING* something;
-    unsigned char* deviceAddress = (unsigned char*)deviceHeader->data;
     CODEFIRST_RESULT result = CODEFIRST_OK;
-
-    for (something = deviceHeader->ReflectedData->reflectedData; something != NULL; something = something->next)
+    const char* modelName = Schema_GetModelName(deviceHeader->ModelHandle);
+    if (modelName == NULL)
     {
-        if ((something->type == REFLECTION_REPORTED_PROPERTY_TYPE) &&
-            (strcmp(something->what.reportedProperty.modelName, modelName) == 0))
+        result = CODEFIRST_ERROR;
+    }
+    else
+    {
+        const REFLECTED_SOMETHING* something;
+        unsigned char* deviceAddress = (unsigned char*)deviceHeader->data;
+        for (something = deviceHeader->ReflectedData->reflectedData; something != NULL; something = something->next)
         {
-            AGENT_DATA_TYPE agentDataType;
+            if ((something->type == REFLECTION_REPORTED_PROPERTY_TYPE) &&
+                (strcmp(something->what.reportedProperty.modelName, modelName) == 0))
+            {
+                AGENT_DATA_TYPE agentDataType;
 
-            if (something->what.reportedProperty.Create_AGENT_DATA_TYPE_from_Ptr(deviceAddress + something->what.reportedProperty.offset, &agentDataType) != AGENT_DATA_TYPES_OK)
-            {
-                result = CODEFIRST_AGENT_DATA_TYPE_ERROR;
-                LOG_CODEFIRST_ERROR;
-                break;
-            }
-            else
-            {
-                if (Device_PublishTransacted_ReportedProperty(transaction, something->what.reportedProperty.name, &agentDataType) != DEVICE_OK)
+                if (something->what.reportedProperty.Create_AGENT_DATA_TYPE_from_Ptr(deviceAddress + something->what.reportedProperty.offset, &agentDataType) != AGENT_DATA_TYPES_OK)
                 {
-                    Destroy_AGENT_DATA_TYPE(&agentDataType);
-                    result = CODEFIRST_DEVICE_PUBLISH_FAILED;
+                    result = CODEFIRST_AGENT_DATA_TYPE_ERROR;
                     LOG_CODEFIRST_ERROR;
                     break;
                 }
+                else
+                {
+                    if (Device_PublishTransacted_ReportedProperty(transaction, something->what.reportedProperty.name, &agentDataType) != DEVICE_OK)
+                    {
+                        Destroy_AGENT_DATA_TYPE(&agentDataType);
+                        result = CODEFIRST_DEVICE_PUBLISH_FAILED;
+                        LOG_CODEFIRST_ERROR;
+                        break;
+                    }
 
-                Destroy_AGENT_DATA_TYPE(&agentDataType);
+                    Destroy_AGENT_DATA_TYPE(&agentDataType);
+                }
             }
         }
     }

@@ -12,7 +12,7 @@ This document describes how to prepare your development environment to use the *
 
 ## Set up a Windows development environment
 
-- Install [Visual Studio 2019][visual-studio]. You can use the **Visual Studio Community** free download if you meet the licensing requirements.  (**Visual Studio 2015** and **Visual Studio 2017**  are also supported.)
+- Install [Visual Studio 2019][visual-studio]. You can use the **Visual Studio Community** free download if you meet the licensing requirements.  (**Visual Studio 2017** is also supported.)
 
 > Be sure to include Visual C++.
 
@@ -58,7 +58,7 @@ Build the sample project.
 
 In some cases, you may want to build the SDK locally for development and testing purposes. First, take the following steps to generate project files:
 
-- Open a "Developer Command Prompt for VS2015" or "Developer Command Prompt for VS2017".
+- Open a "Developer Command Prompt for VS2017" or "Developer Command Prompt for VS2019".
 
 - Run the following CMake commands from the root of the repository:
 
@@ -67,14 +67,12 @@ cd azure-iot-sdk-c
 mkdir cmake
 cd cmake
 # Either
-  cmake .. -G "Visual Studio 14 2015" ## For Visual Studio 2015
-# or
   cmake .. -G "Visual Studio 15 2017" ## For Visual Studio 2017
 # or
   cmake .. -G "Visual Studio 16 2019" -A Win32
 ```
 
-> This builds x86 libraries. To build for x64 for Visual Studio 2015, modify the cmake generator argument: `cmake .. -G "Visual Studio 14 2015 Win64"` or for Visual Studio 2017, `cmake .. -G "Visual Studio 15 2017 Win64"` or for Visual Studio 2019, `cmake .. -G "Visual Studio 16 2019 -A x64"`
+> This builds x86 libraries. To build for x64 for Visual Studio 2017, `cmake .. -G "Visual Studio 15 2017 Win64"` or for Visual Studio 2019, `cmake .. -G "Visual Studio 16 2019 -A x64"`
 
 When the project generation completes successfully, you should see a Visual Studio solution file (.sln) under the `cmake` folder. To build the SDK, do one of the following:
 
@@ -89,13 +87,13 @@ cmake --build . -- /m /p:Configuration=Release
 > There are many CMake configuration options available for building the SDK. For example, you can disable one of the available protocol stacks by adding an argument to the CMake project generation command:
 
 ```Shell
-cmake -G "Visual Studio 14 2015" -Duse_amqp=OFF .. // same with 2017 and 2019 generator (see above)
+cmake -G "Visual Studio 15 2017" -Duse_amqp=OFF .. // same with 2017 and 2019 generator (see above)
 ```
 
 > Also, you can build and run unit tests:
 
 ```Shell
-cmake -G "Visual Studio 14 2015" -Drun_unittests=ON ..  // same with 2017 and 2019 generator (see above) 
+cmake -G "Visual Studio 15 2017" -Drun_unittests=ON ..  // same with 2017 and 2019 generator (see above) 
 cmake --build . -- /m /p:Configuration=Debug
 ctest -C "debug" -V
 ```

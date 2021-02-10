@@ -61,6 +61,7 @@ option(use_mqtt "set use_mqtt to ON if mqtt is to be used, set to OFF to not use
 option(run_e2e_tests "set run_e2e_tests to ON to run e2e tests (default is OFF)" OFF)
 option(run_unittests "set run_unittests to ON to run unittests (default is OFF)" OFF)
 option(run_longhaul_tests "set run_longhaul_tests to ON to run longhaul tests (default is OFF)[if possible, they are always build]" OFF)
+option(run_e2e_openssl_engine_tests "set run_e2e_openssl_engine_tests to ON to run OpenSSL ENGINE tests (default is OFF)[if possible, they are always build]" OFF)
 option(skip_samples "set skip_samples to ON to skip building samples (default is OFF)[if possible, they are always build]" OFF)
 option(build_service_client "controls whether the iothub_service_client is built or not" ON)
 option(build_provisioning_service_client "controls whether the provisioning_service_client is built or not" ON)
@@ -74,6 +75,7 @@ option(use_tpm_simulator "tpm simulator type of hsm used with the provisioning c
 option(use_edge_modules "Enable support for running modules against Azure IoT Edge" OFF)
 option(use_custom_heap "use externally defined heap functions instead of the malloc family" OFF)
 option(use_baltimore_cert "set use_baltimore_cert to ON if the Baltimore cert is to be used, set to OFF to not use it" OFF)
+option(use_digicert_g3_cert "set use_digicert_g3_cert to ON if the DigiCert G3 cert is to be used, set to OFF to not use it" OFF)
 option(use_microsoftazure_de_cert "set use_microsoftazure_de_cert to ON if the MicrosoftAzure DE cert is to be used, set to OFF to not use it" OFF)
 option(use_portal_azure_cn_cert "set use_portal_azure_cn_cert to ON if the Portal Azure CN cert is to be used, set to OFF to not use it" OFF)
 
@@ -115,6 +117,10 @@ endif()
 # Enable specific certs
 if (${use_baltimore_cert})
     add_definitions(-DUSE_BALTIMORE_CERT)
+endif()
+
+if (${use_digicert_g3_cert})
+    add_definitions(-DUSE_DIGICERT_G3_CERT)
 endif()
 
 if (${use_microsoftazure_de_cert})

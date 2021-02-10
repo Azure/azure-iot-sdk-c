@@ -91,33 +91,37 @@ typedef struct CHILLER_TAG
 /*  Converts the Chiller object into a JSON blob with reported properties ready to be sent across the wire as a twin. */
 static char* serializeToJson(Chiller* chiller)
 {
-	char* result;
+	char* result = NULL;
 
 	JSON_Value* root_value = json_value_init_object();
-	JSON_Object* root_object = json_value_get_object(root_value);
+	if (root_value != NULL)
+	{
+		JSON_Object* root_object = json_value_get_object(root_value);
+		if (root_object != NULL)
+		{
+			// Only reported properties:
+			(void)json_object_set_string(root_object, "Protocol", chiller->protocol);
+			(void)json_object_set_string(root_object, "SupportedMethods", chiller->supportedMethods);
+			(void)json_object_set_string(root_object, "Type", chiller->type);
+			(void)json_object_set_string(root_object, "Firmware", chiller->firmware);
+			(void)json_object_set_string(root_object, "FirmwareUpdateStatus", MU_ENUM_TO_STRING(FIRMWARE_UPDATE_STATUS, chiller->firmwareUpdateStatus));
+			(void)json_object_set_string(root_object, "Location", chiller->location);
+			(void)json_object_set_number(root_object, "Latitude", chiller->latitude);
+			(void)json_object_set_number(root_object, "Longitude", chiller->longitude);
+			(void)json_object_dotset_string(root_object, "Telemetry.TemperatureSchema.MessageSchema.Name", chiller->telemetry.temperatureSchema.messageSchema.name);
+			(void)json_object_dotset_string(root_object, "Telemetry.TemperatureSchema.MessageSchema.Format", chiller->telemetry.temperatureSchema.messageSchema.format);
+			(void)json_object_dotset_string(root_object, "Telemetry.TemperatureSchema.MessageSchema.Fields", chiller->telemetry.temperatureSchema.messageSchema.fields);
+			(void)json_object_dotset_string(root_object, "Telemetry.HumiditySchema.MessageSchema.Name", chiller->telemetry.humiditySchema.messageSchema.name);
+			(void)json_object_dotset_string(root_object, "Telemetry.HumiditySchema.MessageSchema.Format", chiller->telemetry.humiditySchema.messageSchema.format);
+			(void)json_object_dotset_string(root_object, "Telemetry.HumiditySchema.MessageSchema.Fields", chiller->telemetry.humiditySchema.messageSchema.fields);
+			(void)json_object_dotset_string(root_object, "Telemetry.PressureSchema.MessageSchema.Name", chiller->telemetry.pressureSchema.messageSchema.name);
+			(void)json_object_dotset_string(root_object, "Telemetry.PressureSchema.MessageSchema.Format", chiller->telemetry.pressureSchema.messageSchema.format);
+			(void)json_object_dotset_string(root_object, "Telemetry.PressureSchema.MessageSchema.Fields", chiller->telemetry.pressureSchema.messageSchema.fields);
+		}
+		result = json_serialize_to_string(root_value);
 
-	// Only reported properties:
-	(void)json_object_set_string(root_object, "Protocol", chiller->protocol);
-	(void)json_object_set_string(root_object, "SupportedMethods", chiller->supportedMethods);
-	(void)json_object_set_string(root_object, "Type", chiller->type);
-	(void)json_object_set_string(root_object, "Firmware", chiller->firmware);
-	(void)json_object_set_string(root_object, "FirmwareUpdateStatus", MU_ENUM_TO_STRING(FIRMWARE_UPDATE_STATUS, chiller->firmwareUpdateStatus));
-	(void)json_object_set_string(root_object, "Location", chiller->location);
-	(void)json_object_set_number(root_object, "Latitude", chiller->latitude);
-	(void)json_object_set_number(root_object, "Longitude", chiller->longitude);
-	(void)json_object_dotset_string(root_object, "Telemetry.TemperatureSchema.MessageSchema.Name", chiller->telemetry.temperatureSchema.messageSchema.name);
-	(void)json_object_dotset_string(root_object, "Telemetry.TemperatureSchema.MessageSchema.Format", chiller->telemetry.temperatureSchema.messageSchema.format);
-	(void)json_object_dotset_string(root_object, "Telemetry.TemperatureSchema.MessageSchema.Fields", chiller->telemetry.temperatureSchema.messageSchema.fields);
-	(void)json_object_dotset_string(root_object, "Telemetry.HumiditySchema.MessageSchema.Name", chiller->telemetry.humiditySchema.messageSchema.name);
-	(void)json_object_dotset_string(root_object, "Telemetry.HumiditySchema.MessageSchema.Format", chiller->telemetry.humiditySchema.messageSchema.format);
-	(void)json_object_dotset_string(root_object, "Telemetry.HumiditySchema.MessageSchema.Fields", chiller->telemetry.humiditySchema.messageSchema.fields);
-	(void)json_object_dotset_string(root_object, "Telemetry.PressureSchema.MessageSchema.Name", chiller->telemetry.pressureSchema.messageSchema.name);
-	(void)json_object_dotset_string(root_object, "Telemetry.PressureSchema.MessageSchema.Format", chiller->telemetry.pressureSchema.messageSchema.format);
-	(void)json_object_dotset_string(root_object, "Telemetry.PressureSchema.MessageSchema.Fields", chiller->telemetry.pressureSchema.messageSchema.fields);
-
-	result = json_serialize_to_string(root_value);
-
-	json_value_free(root_value);
+		json_value_free(root_value);
+	}
 
 	return result;
 }
@@ -152,11 +156,14 @@ static void reported_state_callback(int status_code, void* userContextCallback)
 
 static void sendChillerReportedProperties(Chiller* chiller)
 {
-	if (device_handle != NULL)
+	if (chiller != NULL && device_handle != NULL)
 	{
 		char* reportedProperties = serializeToJson(chiller);
-		(void)IoTHubDeviceClient_SendReportedState(device_handle, (const unsigned char*)reportedProperties, strlen(reportedProperties), reported_state_callback, NULL);
-		free(reportedProperties);
+		if (reportedProperties)
+		{
+			(void)IoTHubDeviceClient_SendReportedState(device_handle, (const unsigned char*)reportedProperties, strlen(reportedProperties), reported_state_callback, NULL);
+			free(reportedProperties);
+		}
 	}
 }
 
@@ -201,49 +208,51 @@ static int do_firmware_update(void *param)
 
 void getFirmwareUpdateValues(Chiller* chiller, const unsigned char* payload)
 {
-	free(chiller->new_firmware_version);
-	free(chiller->new_firmware_URI);
-	chiller->new_firmware_URI = NULL;
-	chiller->new_firmware_version = NULL;
-
-	JSON_Value* root_value = json_parse_string((char *)payload);
-	JSON_Object* root_object = json_value_get_object(root_value);
-
-	JSON_Value* newFirmwareVersion = json_object_get_value(root_object, "Firmware");
-
-	if (newFirmwareVersion != NULL)
+	if (chiller != NULL)
 	{
-		const char* data = json_value_get_string(newFirmwareVersion);
-		if (data != NULL)
+		free(chiller->new_firmware_version);
+		free(chiller->new_firmware_URI);
+		chiller->new_firmware_URI = NULL;
+		chiller->new_firmware_version = NULL;
+
+		JSON_Value* root_value = json_parse_string((char*)payload);
+		JSON_Object* root_object = json_value_get_object(root_value);
+
+		JSON_Value* newFirmwareVersion = json_object_get_value(root_object, "Firmware");
+
+		if (newFirmwareVersion != NULL)
 		{
-			size_t size = strlen(data) + 1;
-			chiller->new_firmware_version = malloc(size);
-			if (chiller->new_firmware_version != NULL)
+			const char* data = json_value_get_string(newFirmwareVersion);
+			if (data != NULL)
 			{
-				(void)memcpy(chiller->new_firmware_version, data, size);
+				size_t size = strlen(data) + 1;
+				chiller->new_firmware_version = malloc(size);
+				if (chiller->new_firmware_version != NULL)
+				{
+					(void)memcpy(chiller->new_firmware_version, data, size);
+				}
 			}
 		}
-	}
 
-	JSON_Value* newFirmwareURI = json_object_get_value(root_object, "FirmwareUri");
+		JSON_Value* newFirmwareURI = json_object_get_value(root_object, "FirmwareUri");
 
-	if (newFirmwareURI != NULL)
-	{
-		const char* data = json_value_get_string(newFirmwareURI);
-		if (data != NULL)
+		if (newFirmwareURI != NULL)
 		{
-			size_t size = strlen(data) + 1;
-			chiller->new_firmware_URI = malloc(size);
-			if (chiller->new_firmware_URI != NULL)
+			const char* data = json_value_get_string(newFirmwareURI);
+			if (data != NULL)
 			{
-				(void)memcpy(chiller->new_firmware_URI, data, size);
+				size_t size = strlen(data) + 1;
+				chiller->new_firmware_URI = malloc(size);
+				if (chiller->new_firmware_URI != NULL)
+				{
+					(void)memcpy(chiller->new_firmware_URI, data, size);
+				}
 			}
 		}
+
+		// Free resources
+		json_value_free(root_value);
 	}
-
-	// Free resources
-	json_value_free(root_value);
-
 }
 
 // <devicemethodcallback>
@@ -318,35 +327,37 @@ static int device_method_callback(const char* method_name, const unsigned char* 
 static void send_message(IOTHUB_DEVICE_CLIENT_HANDLE handle, char* message, char* schema)
 {
 	IOTHUB_MESSAGE_HANDLE message_handle = IoTHubMessage_CreateFromString(message);
+	if (message_handle != NULL)
+	{
+		// Set system properties
+		(void)IoTHubMessage_SetMessageId(message_handle, "MSG_ID");
+		(void)IoTHubMessage_SetCorrelationId(message_handle, "CORE_ID");
+		(void)IoTHubMessage_SetContentTypeSystemProperty(message_handle, "application%2fjson");
+		(void)IoTHubMessage_SetContentEncodingSystemProperty(message_handle, "utf-8");
 
-	// Set system properties
-	(void)IoTHubMessage_SetMessageId(message_handle, "MSG_ID");
-	(void)IoTHubMessage_SetCorrelationId(message_handle, "CORE_ID");
-	(void)IoTHubMessage_SetContentTypeSystemProperty(message_handle, "application%2fjson");
-	(void)IoTHubMessage_SetContentEncodingSystemProperty(message_handle, "utf-8");
+		// Set application properties
+		MAP_HANDLE propMap = IoTHubMessage_Properties(message_handle);
+		(void)Map_AddOrUpdate(propMap, "$$MessageSchema", schema);
+		(void)Map_AddOrUpdate(propMap, "$$ContentType", "JSON");
 
-	// Set application properties
-	MAP_HANDLE propMap = IoTHubMessage_Properties(message_handle);
-	(void)Map_AddOrUpdate(propMap, "$$MessageSchema", schema);
-	(void)Map_AddOrUpdate(propMap, "$$ContentType", "JSON");
-
-	time_t now = time(0);
-	struct tm* timeinfo;
+		time_t now = time(0);
+		struct tm* timeinfo;
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable: 4996) /* Suppress warning about possible unsafe function in Visual Studio */
 #endif
-	timeinfo = gmtime(&now);
+		timeinfo = gmtime(&now);
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
-	char timebuff[50];
-	strftime(timebuff, 50, "%Y-%m-%dT%H:%M:%SZ", timeinfo);
-	(void)Map_AddOrUpdate(propMap, "$$CreationTimeUtc", timebuff);
+		char timebuff[50];
+		strftime(timebuff, 50, "%Y-%m-%dT%H:%M:%SZ", timeinfo);
+		(void)Map_AddOrUpdate(propMap, "$$CreationTimeUtc", timebuff);
 
-	IoTHubDeviceClient_SendEventAsync(handle, message_handle, send_confirm_callback, NULL);
+		IoTHubDeviceClient_SendEventAsync(handle, message_handle, send_confirm_callback, NULL);
 
-	IoTHubMessage_Destroy(message_handle);
+		IoTHubMessage_Destroy(message_handle);
+	}
 }
 // </sendmessage>
 
