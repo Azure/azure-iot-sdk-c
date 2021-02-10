@@ -613,10 +613,94 @@ static char* CreateSendAuthCid(IOTHUB_VALIDATION_INFO* devhubValInfo)
     return result;
 }
 
+static int DumpApplicationPropertiesFromuAMQPMessage(MESSAGE_HANDLE uamqp_message)
+{
+    int result;
+    AMQP_VALUE uamqp_app_properties = NULL;
+    AMQP_VALUE uamqp_app_properties_ipdv = NULL;
+    uint32_t property_count = 0;
+
+    if ((result = message_get_application_properties(uamqp_message, &uamqp_app_properties)) != 0)
+    {
+        LogError("Failed reading the incoming uAMQP message properties (return code %d).", result);
+        result = MU_FAILURE;
+    }
+    else
+    {
+        if (uamqp_app_properties == NULL)
+        {
+            result = 0;
+        }
+        else
+        {
+            if ((uamqp_app_properties_ipdv = amqpvalue_get_inplace_described_value(uamqp_app_properties)) == NULL)
+            {
+                LogError("Failed getting the map of uAMQP message application properties (return code %d).", result);
+                result = MU_FAILURE;
+            }
+            else if ((result = amqpvalue_get_map_pair_count(uamqp_app_properties_ipdv, &property_count)) != 0)
+            {
+                LogError("Failed reading the number of values in the uAMQP property map (return code %d).", result);
+                result = MU_FAILURE;
+            }
+            else
+            {
+                uint32_t i;
+                for (i = 0; result == RESULT_OK && i < property_count; i++)
+                {
+                    AMQP_VALUE map_key_name = NULL;
+                    AMQP_VALUE map_key_value = NULL;
+                    const char* key_name;
+                    const char* key_value;
+
+                    if ((result = amqpvalue_get_map_key_value_pair(uamqp_app_properties_ipdv, i, &map_key_name, &map_key_value)) != 0)
+                    {
+                        LogError("Failed reading the key/value pair from the uAMQP property map (return code %d).", result);
+                        result = MU_FAILURE;
+                    }
+
+                    else if ((result = amqpvalue_get_string(map_key_name, &key_name)) != 0)
+                    {
+                        LogError("Failed parsing the uAMQP property name (return code %d).", result);
+                        result = MU_FAILURE;
+                    }
+                    else if ((result = amqpvalue_get_string(map_key_value, &key_value)) != 0)
+                    {
+                        LogError("Failed parsing the uAMQP property value (return code %d).", result);
+                        result = MU_FAILURE;
+                    }
+                    else
+                    {
+                        LogError("longhaul message property (%d) name:%s, value:%s", i, key_name, key_value);
+                    }
+
+
+                    if (map_key_name != NULL)
+                    {
+                        amqpvalue_destroy(map_key_name);
+                    }
+
+                    if (map_key_value != NULL)
+                    {
+                        amqpvalue_destroy(map_key_value);
+                    }
+                }
+            }
+
+            // Codes_SRS_UAMQP_MESSAGING_09_046: [message_create_IoTHubMessage_from_uamqp_message() shall destroy the uAMQP message property (obtained with message_get_application_properties) by calling amqpvalue_destroy().]
+            amqpvalue_destroy(uamqp_app_properties);
+        }
+    }
+
+    return result;
+}
+
 static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE message)
 {
     MESSAGE_RECEIVER_CONTEXT* msg_received_context = (MESSAGE_RECEIVER_CONTEXT*)context;
     BINARY_DATA binary_data;
+
+    DumpApplicationPropertiesFromuAMQPMessage(message);
 
     if (message_get_body_amqp_data_in_place(message, 0, &binary_data) == 0)
     {
