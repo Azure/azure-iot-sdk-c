@@ -153,7 +153,7 @@ This section describes how to set up a development environment for the C SDK on 
   ```
   NOTE: If you are planning to use HTTP with wolfSSL, you must configure curl before installation.
   1. Download the latest [curl](https://github.com/curl/curl/releases).
-  2. See curl [documentation](https://curl.se/docs/install.html) to select the wolfSSL option for configuration.  Install.
+  2. See curl [documentation](https://curl.se/docs/install.html) to use the wolfSSL option for configuration.  Install.
 
 - Verify that CMake is at least version **2.8.12**:
 
