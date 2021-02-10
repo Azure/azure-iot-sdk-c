@@ -151,16 +151,9 @@ This section describes how to set up a development environment for the C SDK on 
   sudo apt-get update
   sudo apt-get install -y git cmake build-essential curl libcurl4-openssl-dev libssl-dev uuid-dev
   ```
-  NOTE: If you are planning to use HTTP with wolfSSL, you must instead configure curl before installation.
+  NOTE: If you are planning to use HTTP with wolfSSL, you must configure curl before installation.
   1. Download the latest [curl](https://github.com/curl/curl/releases).
-  2. After extracting, enter the directory and run the following commands:
-
-      ```
-      ./buildconf
-      ./configure --with-wolfssl=/usr/local
-      make
-      sudo make install
-      ```
+  2. See curl [documentation](https://curl.se/docs/install.html) to select the wolfSSL option for configuration.  Install.
 
 - Verify that CMake is at least version **2.8.12**:
 
