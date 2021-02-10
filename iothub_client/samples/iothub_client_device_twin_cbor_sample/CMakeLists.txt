@@ -9,14 +9,24 @@ endif()
 
 compileAsC99()
 
+include(ExternalProject)
+
 add_executable(iothub_client_device_twin_cbor_sample 
     iothub_client_device_twin_cbor_sample.c
     cbor_helper.c
 )
 
+ExternalProject_Add(cjson
+    GIT_REPOSITORY https://github.com/DaveGamble/cJSON.git
+    CMAKE_ARGS -DBUILD_SHARED_AND_STATIC_LIBS=ON
+)
+
 find_library(CJSON_LIB
-    NAMES
+    NAME
         libcjson.a
+    HINTS
+        "/usr/lib"
+        "/usr/local/lib"
 )
 
 target_link_libraries(iothub_client_device_twin_cbor_sample
