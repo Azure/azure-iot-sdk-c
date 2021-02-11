@@ -104,7 +104,7 @@ By default the C-SDK will have web sockets enabled for AMQP and MQTT.  The sampl
 
 ### Build a sample using a specific server root certificate
 
-By default all samples are built to handle a variety of server root certificates. If you would like to decrease the size of the sample, select the appropriate root cert by following the instructions [here](https://github.com/Azure/azure-iot-sdk-c/certs).
+By default all samples are built to handle a variety of server root CA certificates during TLS negotiation. If you would like to decrease the size of the sample, select the appropriate root certificate option during the cmake step. Follow the instructions [here](https://github.com/Azure/azure-iot-sdk-c/certs).
 
 > Note: Any samples you build will not work until you configure them with a valid IoT Hub device connection string. For more information, see the [samples section](#samplecode) below.
 
@@ -232,7 +232,7 @@ By default the C-SDK will have web sockets enabled for AMQP and MQTT.  The sampl
 
 ### Build a sample using a specific server root certificate
 
-By default all samples are built to handle a variety of server root certificates. If you would like to decrease the size of the sample, select the appropriate root cert by following the instructions [here](https://github.com/Azure/azure-iot-sdk-c/certs).
+By default all samples are built to handle a variety of server root CA certificates during TLS negotiation. If you would like to decrease the size of the sample, select the appropriate root certificate option during the cmake step. Follow the instructions [here](https://github.com/Azure/azure-iot-sdk-c/certs).
 
 > Note: Any samples you build will not work until you configure them with a valid IoT Hub device connection string. For more information, see the [samples section](#samplecode) below.
 
@@ -355,7 +355,7 @@ By default the C-SDK will have web sockets enabled for AMQP and MQTT.  The sampl
 
 ### Build a sample using a specific server root certificate
 
-By default all samples are built to handle a variety of server root certificates. If you would like to decrease the size of the sample, select the appropriate root cert by following the instructions [here](https://github.com/Azure/azure-iot-sdk-c/certs).
+By default all samples are built to handle a variety of server root CA certificates during TLS negotiation. If you would like to decrease the size of the sample, select the appropriate root certificate option during the cmake step. Follow the instructions [here](https://github.com/Azure/azure-iot-sdk-c/certs).
 
 > Note: Any samples you build will not work until you configure them with a valid IoT Hub device connection string. For more information, see the [samples section](#samplecode) below.
 
