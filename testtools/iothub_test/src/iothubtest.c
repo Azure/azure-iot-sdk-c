@@ -629,6 +629,7 @@ static int DumpApplicationPropertiesFromuAMQPMessage(MESSAGE_HANDLE uamqp_messag
     {
         if (uamqp_app_properties == NULL)
         {
+            LogError("No AMQP message properties");
             result = 0;
         }
         else
@@ -650,15 +651,14 @@ static int DumpApplicationPropertiesFromuAMQPMessage(MESSAGE_HANDLE uamqp_messag
                 {
                     AMQP_VALUE map_key_name = NULL;
                     AMQP_VALUE map_key_value = NULL;
-                    const char* key_name;
-                    const char* key_value;
+                    const char* key_name = "undefined";
+                    const char* key_value = "undefined";
 
                     if ((result = amqpvalue_get_map_key_value_pair(uamqp_app_properties_ipdv, i, &map_key_name, &map_key_value)) != 0)
                     {
                         LogError("Failed reading the key/value pair from the uAMQP property map (return code %d).", result);
                         result = MU_FAILURE;
                     }
-
                     else if ((result = amqpvalue_get_string(map_key_name, &key_name)) != 0)
                     {
                         LogError("Failed parsing the uAMQP property name (return code %d).", result);
@@ -669,10 +669,8 @@ static int DumpApplicationPropertiesFromuAMQPMessage(MESSAGE_HANDLE uamqp_messag
                         LogError("Failed parsing the uAMQP property value (return code %d).", result);
                         result = MU_FAILURE;
                     }
-                    else
-                    {
-                        LogError("longhaul message property (%d) name:%s, value:%s", i, key_name, key_value);
-                    }
+
+                    LogError("longhaul app property (%d) name:%s, value:%s", i, key_name, key_value);
 
 
                     if (map_key_name != NULL)
@@ -687,9 +685,35 @@ static int DumpApplicationPropertiesFromuAMQPMessage(MESSAGE_HANDLE uamqp_messag
                 }
             }
 
-            // Codes_SRS_UAMQP_MESSAGING_09_046: [message_create_IoTHubMessage_from_uamqp_message() shall destroy the uAMQP message property (obtained with message_get_application_properties) by calling amqpvalue_destroy().]
             amqpvalue_destroy(uamqp_app_properties);
         }
+    }
+
+    PROPERTIES_HANDLE properties;
+    if (message_get_properties(uamqp_message, &properties) == 0)
+    {
+        amqp_binary user_id_value;
+        if (properties_get_user_id(properties, &user_id_value) == 0)
+        {
+            char string_buffer[1024];
+            memset(string_buffer, 0, 1024);
+            strncpy(string_buffer, user_id_value.bytes, user_id_value.length > (sizeof(string_buffer) - 1) ? sizeof(string_buffer) - 1 : user_id_value.length);
+            LogError("longhaul message property user_id value:%s", string_buffer);
+        }
+
+        //const char** subject_value;
+        //if (properties_get_subject(properties, &subject_value) == 0)
+        //{
+        //}
+
+        //AMQP_VALUE* to_value
+        //if (properties_get_to(properties, &to_value) == 0)
+        //{
+        //}
+
+        //int properties_get_reply_to(PROPERTIES_HANDLE properties, AMQP_VALUE * reply_to_value)
+        //int properties_get_group_id(PROPERTIES_HANDLE properties, const char** group_id_value)
+        //int properties_get_group_sequence(PROPERTIES_HANDLE properties, sequence_no * group_sequence_value)
     }
 
     return result;
