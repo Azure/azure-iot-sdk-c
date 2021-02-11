@@ -11,7 +11,7 @@ cmake .. -Duse_baltimore_cert          // To use Baltimore CyberTrust Root (RSA 
 cmake .. -Duse_digicert_g3_cert        // To use DigiCert Global Root G3 (ECC based Root cert).
                                        // Only supported with IoT Hub Gateway V2.
 
-cmake .. -Duse_microsoftazure_de_cert  // To use D-TRUST Root Class 3 CA 2 2009
+cmake .. -Duse_microsoftazure_de_cert  // To use D-TRUST Root Class 3 CA 2 2009 (RSA based Root cert).
                                        // Root cert for Germany region.
 
 cmake .. -Duse_portal_azure_cn_cert    // To use DigiCert Global Root CA (RSA based Root cert).
