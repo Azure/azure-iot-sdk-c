@@ -613,118 +613,39 @@ static char* CreateSendAuthCid(IOTHUB_VALIDATION_INFO* devhubValInfo)
     return result;
 }
 
-static int DumpApplicationPropertiesFromuAMQPMessage(MESSAGE_HANDLE uamqp_message)
+static AMQP_VALUE GetMessageDeviceId(MESSAGE_HANDLE uamqp_message)
 {
-    int result;
-    AMQP_VALUE uamqp_app_properties = NULL;
-    AMQP_VALUE uamqp_app_properties_ipdv = NULL;
-    uint32_t property_count = 0;
-
-    if ((result = message_get_application_properties(uamqp_message, &uamqp_app_properties)) != 0)
+    AMQP_VALUE device_id = NULL;
+    AMQP_VALUE uamqp_message_annotations = NULL;
+    if (message_get_message_annotations(uamqp_message, &uamqp_message_annotations) != 0)
     {
-        LogError("Failed reading the incoming uAMQP message properties (return code %d).", result);
-        result = MU_FAILURE;
+        LogError("Failed reading the incoming uAMQP message annotations.");
     }
     else
     {
-        if (uamqp_app_properties == NULL)
+        if (uamqp_message_annotations == NULL)
         {
-            LogError("No AMQP message properties");
-            result = 0;
+            LogError("No AMQP message annotations");
         }
         else
         {
-            if ((uamqp_app_properties_ipdv = amqpvalue_get_inplace_described_value(uamqp_app_properties)) == NULL)
+            AMQP_VALUE property_key = amqpvalue_create_symbol("iothub-connection-device-id");
+            if (property_key != NULL)
             {
-                LogError("Failed getting the map of uAMQP message application properties (return code %d).", result);
-                result = MU_FAILURE;
+                device_id = amqpvalue_get_map_value(uamqp_message_annotations, property_key);
+                amqpvalue_destroy(property_key);
             }
-            else if ((result = amqpvalue_get_map_pair_count(uamqp_app_properties_ipdv, &property_count)) != 0)
-            {
-                LogError("Failed reading the number of values in the uAMQP property map (return code %d).", result);
-                result = MU_FAILURE;
-            }
-            else
-            {
-                uint32_t i;
-                for (i = 0; result == 0 && i < property_count; i++)
-                {
-                    AMQP_VALUE map_key_name = NULL;
-                    AMQP_VALUE map_key_value = NULL;
-                    const char* key_name = "undefined";
-                    const char* key_value = "undefined";
-
-                    if ((result = amqpvalue_get_map_key_value_pair(uamqp_app_properties_ipdv, i, &map_key_name, &map_key_value)) != 0)
-                    {
-                        LogError("Failed reading the key/value pair from the uAMQP property map (return code %d).", result);
-                        result = MU_FAILURE;
-                    }
-                    else if ((result = amqpvalue_get_string(map_key_name, &key_name)) != 0)
-                    {
-                        LogError("Failed parsing the uAMQP property name (return code %d).", result);
-                        result = MU_FAILURE;
-                    }
-                    else if ((result = amqpvalue_get_string(map_key_value, &key_value)) != 0)
-                    {
-                        LogError("Failed parsing the uAMQP property value (return code %d).", result);
-                        result = MU_FAILURE;
-                    }
-
-                    LogError("longhaul app property (%d) name:%s, value:%s", i, key_name, key_value);
-
-
-                    if (map_key_name != NULL)
-                    {
-                        amqpvalue_destroy(map_key_name);
-                    }
-
-                    if (map_key_value != NULL)
-                    {
-                        amqpvalue_destroy(map_key_value);
-                    }
-                }
-            }
-
-            amqpvalue_destroy(uamqp_app_properties);
+            amqpvalue_destroy(uamqp_message_annotations);
         }
     }
 
-    PROPERTIES_HANDLE properties;
-    if (message_get_properties(uamqp_message, &properties) == 0)
-    {
-        amqp_binary user_id_value;
-        if (properties_get_user_id(properties, &user_id_value) == 0)
-        {
-            char string_buffer[1024];
-            memset(string_buffer, 0, 1024);
-            strncpy(string_buffer, user_id_value.bytes, user_id_value.length > (sizeof(string_buffer) - 1) ? sizeof(string_buffer) - 1 : user_id_value.length);
-            LogError("longhaul message property user_id value:%s", string_buffer);
-        }
-
-        //const char** subject_value;
-        //if (properties_get_subject(properties, &subject_value) == 0)
-        //{
-        //}
-
-        //AMQP_VALUE* to_value
-        //if (properties_get_to(properties, &to_value) == 0)
-        //{
-        //}
-
-        //int properties_get_reply_to(PROPERTIES_HANDLE properties, AMQP_VALUE * reply_to_value)
-        //int properties_get_group_id(PROPERTIES_HANDLE properties, const char** group_id_value)
-        //int properties_get_group_sequence(PROPERTIES_HANDLE properties, sequence_no * group_sequence_value)
-    }
-
-    return result;
+    return device_id;
 }
 
 static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE message)
 {
     MESSAGE_RECEIVER_CONTEXT* msg_received_context = (MESSAGE_RECEIVER_CONTEXT*)context;
     BINARY_DATA binary_data;
-
-    DumpApplicationPropertiesFromuAMQPMessage(message);
 
     if (message_get_body_amqp_data_in_place(message, 0, &binary_data) == 0)
     {
@@ -762,13 +683,32 @@ static AMQP_VALUE on_message_received_new(const void* context, MESSAGE_HANDLE me
         }
         else
         {
-            if (devhubValInfo->onMessageReceivedCallback(devhubValInfo->onMessageReceivedContext, (const char*)binary_data.bytes, binary_data.length) == 0)
+            const char* deviceid = NULL;
+            AMQP_VALUE device_id = GetMessageDeviceId(message);
+            if (device_id != NULL)
             {
-                result = messaging_delivery_accepted();
+                amqpvalue_get_string(device_id, &deviceid);
+            }
+
+            if (deviceid == NULL || stricmp(devhubValInfo->deviceId, deviceid) == 0)
+            {
+                if (devhubValInfo->onMessageReceivedCallback(devhubValInfo->onMessageReceivedContext, (const char*)binary_data.bytes, binary_data.length) == 0)
+                {
+                    result = messaging_delivery_accepted();
+                }
+                else
+                {
+                    result = messaging_delivery_released();
+                }
             }
             else
             {
                 result = messaging_delivery_released();
+            }
+
+            if (device_id != NULL)
+            {
+                amqpvalue_destroy(device_id);
             }
         }
     }
