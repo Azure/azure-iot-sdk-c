@@ -2,11 +2,22 @@
 
 The Azure IoT Hub certificates presented during TLS negotiation shall be always validated using the appropriate root CA certificate(s).
 
-The samples in this repository leverage the certificates in `certs.c` for the United States, Germany sovereign cloud and China sovereign cloud.
+The samples in this repository leverage the certificates in `certs.c` for the United States, Germany sovereign cloud and China sovereign cloud. Additionally, we provide the root certificate for use with ECC (enabled in IoT Hub Gateway V2). By default, all certs are included in the build. To select a specific cert, use one of th efollowing options during the cmake step of your [environment setup](https://github.com/Azure/azure-iot-sdk-c/doc/devbox_setup.md).
+
+```
+cmake .. -Duse_baltimore_cert         // Baltimore CyberTrust Root. Standard.
+cmake .. -Duse_digicert_g3_cert       // To use ECC with IoT Hub Gateway V2.
+cmake .. -Duse_microsoftazure_de_cert // Germany region.
+cmake .. -Duse_portal_azure_cn_cert   // China region.
+```
 
 For other regions (and private cloud environments), please use the appropriate root CA certificate.
 
-Always prefer using the local system's Trusted Root Certificate Authority store instead of hardcoding the certificates (i.e. using certs.c such as our samples require in certain combinations). 
+
+
+
+
+IMPORTANT: Always prefer using the local system's Trusted Root Certificate Authority store instead of hardcoding the certificates (i.e. using certs.c such as our samples require in certain combinations).
 
 A couple of examples:
 
@@ -16,4 +27,4 @@ A couple of examples:
 
 ## Additional Information
 
-For additional guidance and important information about certificates, please refer to [this blog post](https://techcommunity.microsoft.com/t5/internet-of-things/azure-iot-tls-changes-are-coming-and-why-you-should-care/ba-p/1658456) from the security team. 
+For additional guidance and important information about certificates, please refer to [this blog post](https://techcommunity.microsoft.com/t5/internet-of-things/azure-iot-tls-changes-are-coming-and-why-you-should-care/ba-p/1658456) from the security team.

@@ -34,11 +34,11 @@ git submodule update --init
 
 >If you are using a release before 2019-04-15 then you will need to use the `--recursive` argument to instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
 
-### Build sample application using vcpkg to build the SDK 
+### Build sample application using vcpkg to build the SDK
 
 The sample applications build with the help of C SDK libraries and headers built with vcpkg (a C++ package manager who facilitate building C and C++ libraries). To install the C SDK libraries and headers, follow these steps [Setup C SDK vcpkg for Windows development environment](https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/setting_up_vcpkg.md#setup-c-sdk-vcpkg-for-windows-development-environment).
 
-note: vcpkg creates a directory with all the headers and .lib files on your machine, if you are using Visual Studio (from 2015) the command 'vcpkg integrate install' let Visual Studio knows where are the headers and lib. If you're using other IDE just add the vcpkg directories to your compiler as usual. 
+note: vcpkg creates a directory with all the headers and .lib files on your machine, if you are using Visual Studio (from 2015) the command 'vcpkg integrate install' let Visual Studio knows where are the headers and lib. If you're using other IDE just add the vcpkg directories to your compiler as usual.
 
 To quickly build one of our sample applications, open the corresponding [solution file][sln-file] (.sln) in Visual Studio.
   For example, to build the **telemetry message sample**, open **iothub_client\samples\iothub_ll_telemetry_sample\windows\iothub_ll_telemetry_sample.sln**.
@@ -52,7 +52,7 @@ static const char* connectionString = "[device connection string]";
 ...and replace `[device connection string]` with a valid device connection string for a device registered with your IoT Hub. For more information, see the [samples section](#samplecode) below.
 
 Build the sample project.
- 
+
 
 ### Build the C SDK with CMake on Windows
 
@@ -93,7 +93,7 @@ cmake -G "Visual Studio 15 2017" -Duse_amqp=OFF .. // same with 2017 and 2019 ge
 > Also, you can build and run unit tests:
 
 ```Shell
-cmake -G "Visual Studio 15 2017" -Drun_unittests=ON ..  // same with 2017 and 2019 generator (see above) 
+cmake -G "Visual Studio 15 2017" -Drun_unittests=ON ..  // same with 2017 and 2019 generator (see above)
 cmake --build . -- /m /p:Configuration=Debug
 ctest -C "debug" -V
 ```
@@ -102,11 +102,17 @@ ctest -C "debug" -V
 
 By default the C-SDK will have web sockets enabled for AMQP and MQTT.  The sample **iothub_client\samples\iothub_ll_telemetry_sample** lets you specify the `protocol` variable.
 
+### Build a sample using a specific server root certificate
+
+By default all samples are built to handle a variety of server root certificates. If you would like to decrease the size of the sample, select the appropriate root cert by following the instructions [here](https://github.com/Azure/azure-iot-sdk-c/certs).
+
+> Note: Any samples you build will not work until you configure them with a valid IoT Hub device connection string. For more information, see the [samples section](#samplecode) below.
+
 ### Using OpenSSL in the SDK
 
 For TLS operations, by default the C-SDK uses Schannel on Windows Platforms.  You can use OpenSSL instead on Windows if you desire.  **NOTE:  this configuration presently receives only basic manual testing and does not have gated e2e tests.**
 
-**IMPORTANT SECURITY NOTE WHEN USING OPENSSL ON WINDOWS**  
+**IMPORTANT SECURITY NOTE WHEN USING OPENSSL ON WINDOWS**
 You are responsible for updating your OpenSSL dependencies as security fixes for it become available.  Schannel on Windows is a system component automatically serviced by Windows Update.  OpenSSL on Linux is updated by Linux packaging mechanisms, such as apt-get on Debian based distributions.  Shipping the C-SDK on Windows using OpenSSL means you are responsible for getting updated versions of it to your devices.
 
 [OpenSSL] binaries that the C-SDK depends on are **ssleay32** and **libeay32**. To enable OpenSSL to be used on Windows, you need to
@@ -151,6 +157,9 @@ This section describes how to set up a development environment for the C SDK on 
   sudo apt-get update
   sudo apt-get install -y git cmake build-essential curl libcurl4-openssl-dev libssl-dev uuid-dev
   ```
+  NOTE: If you are planning to use HTTP with wolfSSL, you must configure curl before installation.
+  1. Download the latest [curl](https://github.com/curl/curl/releases).
+  2. See curl [documentation](https://curl.se/docs/install.html) to use the wolfSSL option for configuration.  Install.
 
 - Verify that CMake is at least version **2.8.12**:
 
@@ -171,7 +180,7 @@ This section describes how to set up a development environment for the C SDK on 
 - Patch CURL to the latest version available.
   > The minimum version of curl required is 7.56, as recent previous versions [presented critical failures](https://github.com/Azure/azure-iot-sdk-c/issues/308).
   > To upgrade see "Upgrade CURL on Mac OS" steps below.
-  
+
 - Locate the tag name for the [latest release][latest-release] of the SDK.
   > Our release tag names are date values in `lts_mm_yyyy` format.
 
@@ -217,13 +226,21 @@ cmake --build .
 ctest -C "debug" -V
 ```
 
-> Note: Any samples you built will not work until you configure them with a valid IoT Hub device connection string. For more information, see the [samples section](#samplecode) below.
+### Build a sample that uses different protocols, including over WebSockets
+
+By default the C-SDK will have web sockets enabled for AMQP and MQTT.  The sample **iothub_client\samples\iothub_ll_telemetry_sample** lets you specify the `protocol` variable.
+
+### Build a sample using a specific server root certificate
+
+By default all samples are built to handle a variety of server root certificates. If you would like to decrease the size of the sample, select the appropriate root cert by following the instructions [here](https://github.com/Azure/azure-iot-sdk-c/certs).
+
+> Note: Any samples you build will not work until you configure them with a valid IoT Hub device connection string. For more information, see the [samples section](#samplecode) below.
 
 <a name="macos"></a>
 
 ## Set up a macOS (Mac OS X) development environment
 
-This section describes how to set up a development environment for the C SDK on [macOS]. [CMake] will 
+This section describes how to set up a development environment for the C SDK on [macOS]. [CMake] will
 create an XCode project containing the various SDK libraries and samples.
 
 We've tested the device SDK for C on macOS High Sierra, with XCode version 9.2.
@@ -244,7 +261,7 @@ We've tested the device SDK for C on macOS High Sierra, with XCode version 9.2.
 - Patch CURL to the latest version available.
   > The minimum version of curl required is 7.56, as recent previous versions [presented critical failures](https://github.com/Azure/azure-iot-sdk-c/issues/308).
   > To upgrade see "Upgrade CURL on Mac OS" steps below.
-  
+
 - Locate the tag name for the [latest release][latest-release] of the SDK.
   > Our release tag names are date values in `lts_mm_yyyy` format.
 
@@ -289,18 +306,16 @@ export DYLD_LIBRARY_PATH="/usr/local/Cellar/curl/7.58.0/lib:$DYLD_LIBRARY_PATH"
 ```
 
 Make sure the path above matches the one saved on step 1.
-  
+
 ### Build the C SDK
 
 If you upgraded CURL, make sure to set DYLD_LIBRARY_PATH each time you open a new shell.
-The next command assumes curl was saved on the path below mentioned ("keg install"). 
+The next command assumes curl was saved on the path below mentioned ("keg install").
 Make sure you use the path as informed by `brew` when curl was upgraded.
 
 ```
 export DYLD_LIBRARY_PATH="/usr/local/Cellar/curl/7.58.0/lib:$DYLD_LIBRARY_PATH"
-``` 
-
-Note: Any samples you built will not work until you configure them with a valid IoT Hub device connection string. For more information, see the [samples section](#samplecode) below.
+```
 
 Next you can either build the C SDK with CMake directly, or you can use CMake to generate an XCode project.
 
@@ -334,6 +349,16 @@ Also, you can build and run unit tests:
   > ctest -C "debug" -V
   > ```
 
+### Build a sample that uses different protocols, including over WebSockets
+
+By default the C-SDK will have web sockets enabled for AMQP and MQTT.  The sample **iothub_client\samples\iothub_ll_telemetry_sample** lets you specify the `protocol` variable.
+
+### Build a sample using a specific server root certificate
+
+By default all samples are built to handle a variety of server root certificates. If you would like to decrease the size of the sample, select the appropriate root cert by following the instructions [here](https://github.com/Azure/azure-iot-sdk-c/certs).
+
+> Note: Any samples you build will not work until you configure them with a valid IoT Hub device connection string. For more information, see the [samples section](#samplecode) below.
+
 #### Generate an XCode Project
 
 To generate the XCode project:
@@ -346,8 +371,8 @@ cmake -G Xcode ..
 ```
 All of the CMake options described above will work for XCode generation as well.
 
-When project generation completes you will see an XCode project file (.xcodeproj) under 
-the `cmake` folder. To build the SDK, open **cmake\azure_iot_sdks.xcodeproj** in XCode and 
+When project generation completes you will see an XCode project file (.xcodeproj) under
+the `cmake` folder. To build the SDK, open **cmake\azure_iot_sdks.xcodeproj** in XCode and
 use XCode's build and run features.
 
 **Note:** Until Mac updates the Curl library to version to 7.58 or greater it will also be necessary
