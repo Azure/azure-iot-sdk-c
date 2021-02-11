@@ -690,7 +690,7 @@ static AMQP_VALUE on_message_received_new(const void* context, MESSAGE_HANDLE me
                 amqpvalue_get_string(device_id, &deviceid);
             }
 
-            if (deviceid == NULL || _stricmp(devhubValInfo->deviceId, deviceid) == 0)
+            if (deviceid == NULL || strcmp(devhubValInfo->deviceId, deviceid) == 0)
             {
                 if (devhubValInfo->onMessageReceivedCallback(devhubValInfo->onMessageReceivedContext, (const char*)binary_data.bytes, binary_data.length) == 0)
                 {
