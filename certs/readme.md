@@ -20,7 +20,7 @@ cmake .. -Duse_portal_azure_cn_cert    // To use DigiCert Global Root CA (RSA ba
 
 For other regions (and private cloud environments), please use the appropriate root CA certificate.
 
-IMPORTANT: Always prefer using the local system's Trusted Root Certificate Authority store instead of hardcoding the certificates (i.e. using certs.c such as our samples require in certain combinations).
+IMPORTANT: Always prefer using the local system's Trusted Root Certificate Authority store instead of hardcoding the certificates (i.e. using certs.c which our samples require in certain combinations).
 
 A couple of examples:
 
