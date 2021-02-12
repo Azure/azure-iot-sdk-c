@@ -102,6 +102,12 @@ ctest -C "debug" -V
 
 By default the C-SDK will have web sockets enabled for AMQP and MQTT.  The sample **iothub_client\samples\iothub_ll_telemetry_sample** lets you specify the `protocol` variable.
 
+### Build a sample using a specific server root certificate
+
+By default all samples are built to handle a variety of server root CA certificates during TLS negotiation. If you would like to decrease the size of the sample, select the appropriate root certificate option during the cmake step. Follow the instructions [here](https://github.com/Azure/azure-iot-sdk-c/certs).
+
+> Note: Any samples you build will not work until you configure them with a valid IoT Hub device connection string. For more information, see the [samples section](#samplecode) below.
+
 ### Using OpenSSL in the SDK
 
 For TLS operations, by default the C-SDK uses Schannel on Windows Platforms.  You can use OpenSSL instead on Windows if you desire.  **NOTE:  this configuration presently receives only basic manual testing and does not have gated e2e tests.**
@@ -220,7 +226,15 @@ cmake --build .
 ctest -C "debug" -V
 ```
 
-> Note: Any samples you built will not work until you configure them with a valid IoT Hub device connection string. For more information, see the [samples section](#samplecode) below.
+### Build a sample that uses different protocols, including over WebSockets
+
+By default the C-SDK will have web sockets enabled for AMQP and MQTT.  The sample **iothub_client\samples\iothub_ll_telemetry_sample** lets you specify the `protocol` variable.
+
+### Build a sample using a specific server root certificate
+
+By default all samples are built to handle a variety of server root CA certificates during TLS negotiation. If you would like to decrease the size of the sample, select the appropriate root certificate option during the cmake step. Follow the instructions [here](https://github.com/Azure/azure-iot-sdk-c/certs).
+
+> Note: Any samples you build will not work until you configure them with a valid IoT Hub device connection string. For more information, see the [samples section](#samplecode) below.
 
 <a name="macos"></a>
 
@@ -303,8 +317,6 @@ Make sure you use the path as informed by `brew` when curl was upgraded.
 export DYLD_LIBRARY_PATH="/usr/local/Cellar/curl/7.58.0/lib:$DYLD_LIBRARY_PATH"
 ```
 
-Note: Any samples you built will not work until you configure them with a valid IoT Hub device connection string. For more information, see the [samples section](#samplecode) below.
-
 Next you can either build the C SDK with CMake directly, or you can use CMake to generate an XCode project.
 
 #### Building the C SDK with CMake directly
@@ -336,6 +348,16 @@ Also, you can build and run unit tests:
   > cmake --build .
   > ctest -C "debug" -V
   > ```
+
+### Build a sample that uses different protocols, including over WebSockets
+
+By default the C-SDK will have web sockets enabled for AMQP and MQTT.  The sample **iothub_client\samples\iothub_ll_telemetry_sample** lets you specify the `protocol` variable.
+
+### Build a sample using a specific server root certificate
+
+By default all samples are built to handle a variety of server root CA certificates during TLS negotiation. If you would like to decrease the size of the sample, select the appropriate root certificate option during the cmake step. Follow the instructions [here](https://github.com/Azure/azure-iot-sdk-c/certs).
+
+> Note: Any samples you build will not work until you configure them with a valid IoT Hub device connection string. For more information, see the [samples section](#samplecode) below.
 
 #### Generate an XCode Project
 
