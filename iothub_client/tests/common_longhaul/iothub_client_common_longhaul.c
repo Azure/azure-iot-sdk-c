@@ -936,7 +936,7 @@ static int on_message_received(void* context, const char* data, size_t size)
         }
         else
         {
-            LogError("on_message_received() failed (tests_id:%s, iotHubLonghaul->test_id:%s)", tests_id, iotHubLonghaul->test_id);
+            LogError("on_message_received() failed (deviceId:%s)", iotHubLonghaul->deviceInfo->deviceId);
             result = MU_FAILURE; // This is not the message we expected. Abandoning it.
         }
     }
@@ -1335,7 +1335,7 @@ static int send_c2d(const void* context)
                     IOTHUB_MESSAGING_RESULT iotHubMessagingResult = IoTHubMessaging_SendAsync(iotHubLonghaul->iotHubSvcMsgHandle, iotHubLonghaul->deviceInfo->deviceId, message, on_c2d_message_sent, send_context);
                     if (iotHubMessagingResult == IOTHUB_MESSAGING_ERROR)
                     {
-                        LogError("Failed sending c2d message with error IOTHUB_MESSAGING_ERROR calling IoTHubMessaging_Open");
+                        LogInfo("Failed sending c2d message with error IOTHUB_MESSAGING_ERROR calling IoTHubMessaging_Open");
                         result = MU_FAILURE;
                         // close the current service handle
                         IoTHubMessaging_Close(iotHubLonghaul->iotHubSvcMsgHandle);
