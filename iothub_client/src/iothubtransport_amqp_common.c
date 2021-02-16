@@ -2408,8 +2408,8 @@ void IoTHubTransport_AMQP_Common_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
             {
                 // bug:8781049
                 // stop the device and reset the pending messages before destorying the device instance
-                //(void)amqp_device_stop(registered_device->device_handle);
-                //prepare_for_connection_retry(registered_device->transport_instance);
+                (void)amqp_device_stop(registered_device->device_handle);
+                prepare_for_connection_retry(registered_device->transport_instance);
 
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_012: [IoTHubTransport_AMQP_Common_Unregister shall destroy the C2D methods handler by calling iothubtransportamqp_methods_destroy]
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_083: [IoTHubTransport_AMQP_Common_Unregister shall free all the memory allocated for the `device_instance`]
