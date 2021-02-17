@@ -37,8 +37,7 @@ intermediate_ca_prefix="azure-iot-test-only.intermediate"
 function makeCNsubject()
 {
     local result="/CN=${1}"
-    case $OSTYPE in
-        msys|win32) result="/${result}"
+    case $OSTYPE in win32) result="/${result}"
     esac
     echo "$result"
 }
@@ -323,7 +322,7 @@ function initial_cert_generation()
 function generate_verification_certificate()
 {
     if [ -z $1 ]; then
-        echo "Usage: <subjectName>"
+        echo "Usage: create_verification_certificate <subjectName>"
         exit 1
     fi
 
@@ -340,7 +339,7 @@ function generate_verification_certificate()
 function generate_device_certificate()
 {
     if [ -z $1 ]; then
-        echo "Usage: <subjectName>"
+        echo "Usage: create_device_certificate <subjectName>"
         exit 1
     fi
 
@@ -359,7 +358,7 @@ function generate_device_certificate()
 function generate_device_certificate_from_intermediate()
 {
     if [ -z $1 ]; then
-        echo "Usage: <subjectName>"
+        echo "Usage: create_device_certificate_from_intermediate <subjectName>"
         exit 1
     fi
 
@@ -379,7 +378,7 @@ function generate_edge_device_certificate()
 {
     local device_prefix="new-edge-device"
     if [ -z $1 ]; then
-        echo "Usage: <subjectName>"
+        echo "Usage: create_edge_device_certificate <subjectName>"
         exit 1
     fi
     rm -f ./private/new-edge-device.key.pem
