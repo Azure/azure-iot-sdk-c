@@ -14,7 +14,6 @@
 
 set -x # Set trace on
 set -o errexit # Exit if command failed
-set -o nounset # Exit if variable not set
 set -o pipefail # Exit if pipe failed
 
 root_ca_dir="."
@@ -323,7 +322,7 @@ function initial_cert_generation()
 ###############################################################################
 function generate_verification_certificate()
 {
-    if [ $# -ne 1 ]; then
+    if [ -z $1 ]; then
         echo "Usage: <subjectName>"
         exit 1
     fi
@@ -340,7 +339,7 @@ function generate_verification_certificate()
 ###############################################################################
 function generate_device_certificate()
 {
-    if [ $# -ne 1 ]; then
+    if [ -z $1 ]; then
         echo "Usage: <subjectName>"
         exit 1
     fi
@@ -359,7 +358,7 @@ function generate_device_certificate()
 ###############################################################################
 function generate_device_certificate_from_intermediate()
 {
-    if [ $# -ne 1 ]; then
+    if [ -z $1 ]; then
         echo "Usage: <subjectName>"
         exit 1
     fi
@@ -379,7 +378,7 @@ function generate_device_certificate_from_intermediate()
 function generate_edge_device_certificate()
 {
     local device_prefix="new-edge-device"
-    if [ $# -ne 1 ]; then
+    if [ -z $1 ]; then
         echo "Usage: <subjectName>"
         exit 1
     fi
@@ -400,6 +399,7 @@ function generate_edge_device_certificate()
                                        "v3_intermediate_ca" "Edge Device"
 }
 
+set +x
 if [ "${1}" == "create_root_and_intermediate" ]; then
     initial_cert_generation
 elif [ "${1}" == "create_verification_certificate" ]; then
