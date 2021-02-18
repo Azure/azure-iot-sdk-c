@@ -395,25 +395,19 @@ typedef struct IOTHUB_PNP_TELEMETRY_ATTRIBUTES_TAG {
 // indication of telemetry success|failure.
 typedef void(*IOTHUB_CLIENT_PNP_TELEMETRY_CALLBACK)(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback);
 
+
+IOTHUB_MESSAGE_HANDLE IoTHubMessage_PnP_CreateFromByteArray(const unsigned char* byteArray, size_t size, const IOTHUB_PNP_TELEMETRY_ATTRIBUTES *pnpTelemetryAttributes);
+
+IOTHUB_MESSAGE_HANDLE IoTHubMessage_PnP_CreateFromString(const char* source, const IOTHUB_PNP_TELEMETRY_ATTRIBUTES *pnpTelemetryAttributes);
+
 //
 //  Sending PnP telemetry API
 //
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_SendTelemetry(
                         IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
                         IOTHUB_MESSAGE_HANDLE telemetryMessageHandle,
-                        const IOTHUB_PNP_TELEMETRY_ATTRIBUTES* telemetryAttributes, 
                         IOTHUB_CLIENT_PNP_TELEMETRY_CALLBACK pnpTelemetryConfirmationCallback,
                         void* userContextCallback);
-
-//
-// IOTHUB_CLIENT_PNP_PROPERTY_STATUS indicates the status of a desired property when device responds
-//
-typedef struct IOTHUB_CLIENT_PNP_PROPERTY_STATUS_TAG {
-    int version; /* another C thingy */
-    int result;
-    const char* description;
-    int ackVersion;
-} IOTHUB_CLIENT_PNP_PROPERTY_STATUS;
 
 //
 // IOTHUB_CLIENT_PNP_REPORTED_PROPERTY is a structure to contain a reported property, which SDK will serialize.
@@ -427,10 +421,19 @@ typedef struct {
     const char* propertyName;
     /* Value of the property. */
     const char* propertyValue;
-    // Remaining struct is optional, for sending back status.  If set the result and ackVersion *MUST* be meaningful though 
-    // description may be NULL.
-    IOTHUB_CLIENT_PNP_PROPERTY_STATUS* status;
 } IOTHUB_CLIENT_PNP_REPORTED_PROPERTY;
+
+// IOTHUB_CLIENT_PNP_REPORTED_PROPERTY_SERIALIZED is a serialized version of IOTHUB_CLIENT_PNP_REPORTED_PROPERTY data
+typedef struct {
+    int version;
+    unsigned char* data;
+    size_t dataLength;
+}
+IOTHUB_CLIENT_PNP_REPORTED_PROPERTY_SERIALIZED;
+
+IOTHUB_CLIENT_RESULT IoTHub_PnP_JSON_Serialize_ReportedProperties(const IOTHUB_CLIENT_PNP_REPORTED_PROPERTY* reportedProperties, unsigned int numReportedProperties, IOTHUB_CLIENT_PNP_REPORTED_PROPERTY_SERIALIZED *reportedPropertySerialized);
+
+void IoTHub_PnP_JSON_Free_SerializedProperties(IOTHUB_CLIENT_PNP_REPORTED_PROPERTY_SERIALIZED *reportedPropertySerialized);
 
 // Optional callback application may implement to receive notification when property has been updated.
 typedef void(*IOTHUB_PNP_REPORTED_STATE_CALLBACK)(int status_code, void* userContextCallback);
@@ -444,9 +447,46 @@ typedef void(*IOTHUB_PNP_REPORTED_STATE_CALLBACK)(int status_code, void* userCon
 //
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_SendReportedProperties(
                             IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
-                            const IOTHUB_CLIENT_PNP_REPORTED_PROPERTY* reportedProperties,
-                            unsigned int numReportedProperties,
+                            const IOTHUB_CLIENT_PNP_REPORTED_PROPERTY_SERIALIZED *reportedPropertySerialized,
                             IOTHUB_PNP_REPORTED_STATE_CALLBACK pnpReportedStateCallback,
+                            void* userContextCallback);
+
+
+//
+// IOTHUB_CLIENT_PNP_RESPONSE_PROPERTY is a structure to contain a property responding to a service request, which SDK will serialize.
+//
+typedef struct {
+    /* C construct only; not needed in languages created after 203 B.C */
+    int version;
+    /* Optional name of component.  NULL indicates root component */
+    const char* componentName;
+    /* Name of property. */
+    const char* propertyName;
+    /* Value of the property. */
+    const char* propertyValue;
+
+    /* property status */
+    int result;
+    const char* description;
+    int ackVersion;
+} IOTHUB_CLIENT_PNP_RESPONSE_PROPERTY;
+
+typedef struct {
+    int version;
+    unsigned char* data;
+    size_t dataLength;
+}
+IOTHUB_CLIENT_PNP_RESPONSE_PROPERTY_SERIALIZED;
+
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_JSON_Serialize_ResponseProperties(const IOTHUB_CLIENT_PNP_RESPONSE_PROPERTY* responseProperties, unsigned int numResponseProperties, IOTHUB_CLIENT_PNP_RESPONSE_PROPERTY_SERIALIZED *responsePropertySerialized);
+
+// Optional callback application may implement to receive notification when property has been responded to.
+typedef void(*IOTHUB_PNP_RESPONSE_STATE_CALLBACK)(int status_code, void* userContextCallback);
+
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_SendResponseProperties(
+                            IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
+                            const IOTHUB_CLIENT_PNP_RESPONSE_PROPERTY_SERIALIZED *responsePropertySerialized,
+                            IOTHUB_PNP_RESPONSE_STATE_CALLBACK pnpResponseStateCallback,
                             void* userContextCallback);
 
 
@@ -503,6 +543,14 @@ typedef struct {
 } IOTHUB_CLIENT_PNP_UPDATED_PROPERTY; /* this is a bad name; see concern about DesiredProperty|PreviouslyReportedProperty business */
 
 
+typedef struct 
+{
+    int version;
+    unsigned char* data;
+    size_t dataLength;
+} IOTHUB_CLIENT_PNP_UPDATED_PROPERTY_SERIALIZED;
+
+
 //
 // Callback application implements to receive a property update.  
 //
@@ -512,10 +560,11 @@ typedef struct {
 // to be able to handle everything in one shot.
 //
 typedef int(*IOTHUB_CLIENT_PNP_PROPERTY_UPDATE_CALLBACK)(
-    const IOTHUB_CLIENT_PNP_UPDATED_PROPERTY** updatedProperties, 
-    size_t numProperties,
+    const IOTHUB_CLIENT_PNP_UPDATED_PROPERTY_SERIALIZED *updatedPropertySerialized,
     int properytVersion, /* this is the $version field */
     void* userContextCallback);
+
+IOTHUB_CLIENT_RESULT IoTHubClient_PnP_Deserialize_UpdatedProperty(const IOTHUB_CLIENT_PNP_UPDATED_PROPERTY_SERIALIZED *updatedPropertySerialized, const char** pnpComponents, size_t numPnPComponents, IOTHUB_CLIENT_PNP_UPDATED_PROPERTY** pnpPropertyUpdated, size_t* numPropertiesUpdated);
 
 // 
 // Application calls IoTHubDeviceClient_PnP_SetPropertyCallback (a) for device to get the twin (C only, long story, other
@@ -524,8 +573,6 @@ typedef int(*IOTHUB_CLIENT_PNP_PROPERTY_UPDATE_CALLBACK)(
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_PnP_SetPropertyCallback(
     IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle,
     IOTHUB_CLIENT_PNP_PROPERTY_UPDATE_CALLBACK propertyUpdateCallback,
-    const char** pnpComponents,
-    size_t numPnPComponents,
     void* userContextCallback);
     
 

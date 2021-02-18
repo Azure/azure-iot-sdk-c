@@ -79,7 +79,6 @@ void InitReportedProperty(IOTHUB_CLIENT_PNP_REPORTED_PROPERTY *reportedProperty,
     reportedProperty->componentName = componentName;
     reportedProperty->propertyName = propertyName;
     reportedProperty->propertyValue = propertyValue;
-    reportedProperty->status = NULL;
 }
 
 
@@ -112,9 +111,12 @@ void PnP_DeviceInfoComponent_Report_All_Properties(const char* componentName, IO
     InitReportedProperty(&reportedProperties[6], componentName, PnPDeviceInfo_TotalStoragePropertyName, PnPDeviceInfo_TotalStoragePropertyValue);
     InitReportedProperty(&reportedProperties[7], componentName, PnPDeviceInfo_TotalMemoryPropertyName, PnPDeviceInfo_TotalMemoryPropertyValue);
 
+    IOTHUB_CLIENT_PNP_REPORTED_PROPERTY_SERIALIZED reportedPropertySerialized;
+
+    IoTHub_PnP_JSON_Serialize_ReportedProperties(reportedProperties, numReportedProperties, &reportedPropertySerialized);
+
     // Unlike original sample, everything gets batched on a single send.
-    IoTHubDeviceClient_LL_PnP_SendReportedProperties(deviceClientLL, reportedProperties, numReportedProperties, NULL, NULL);
-    
+    IoTHubDeviceClient_LL_PnP_SendReportedProperties(deviceClientLL, &reportedPropertySerialized, NULL, NULL);
 }
 
 
