@@ -1700,6 +1700,8 @@ int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
     {
         IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaulRsrcs = (IOTHUB_LONGHAUL_RESOURCES*)handle;
 
+        ThreadAPI_Sleep(30 * 1000); // Extra time for the hub to create the device
+
         if (iotHubLonghaulRsrcs->iotHubClientHandle == NULL || iotHubLonghaulRsrcs->deviceInfo == NULL)
         {
             LogError("IoTHubClient not initialized.");
@@ -1774,6 +1776,8 @@ int longhaul_run_c2d_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
     else
     {
         IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaul = (IOTHUB_LONGHAUL_RESOURCES*)handle;
+
+        ThreadAPI_Sleep(30 * 1000); // Extra time for the hub to create the device
 
         if (iotHubLonghaul->iotHubClientHandle == NULL || iotHubLonghaul->deviceInfo == NULL)
         {
@@ -1989,6 +1993,8 @@ int longhaul_run_twin_desired_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE 
     {
         IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaul = (IOTHUB_LONGHAUL_RESOURCES*)handle;
 
+        ThreadAPI_Sleep(30 * 1000); // Extra time for the hub to create the device
+
         if (iotHubLonghaul->iotHubClientHandle == NULL || iotHubLonghaul->deviceInfo == NULL)
         {
             LogError("IoTHubClient not initialized.");
@@ -2066,6 +2072,8 @@ int longhaul_run_twin_reported_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE
     else
     {
         IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaul = (IOTHUB_LONGHAUL_RESOURCES*)handle;
+
+        ThreadAPI_Sleep(30 * 1000); // Extra time for the hub to create the device
 
         if (iotHubLonghaul->iotHubClientHandle == NULL || iotHubLonghaul->deviceInfo == NULL)
         {
