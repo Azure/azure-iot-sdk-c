@@ -1930,7 +1930,7 @@ static void on_device_twin_update_received(DEVICE_TWIN_UPDATE_STATE update_state
         IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaul = (IOTHUB_LONGHAUL_RESOURCES*)userContextCallback;
         unsigned int message_id = 0;
         char tests_id[40];
-        int version;
+        int version = -1;
 
         if ((parse_string = STRING_from_byte_array(payLoad, size)) == NULL)
         {
@@ -1941,11 +1941,10 @@ static void on_device_twin_update_received(DEVICE_TWIN_UPDATE_STATE update_state
             if (update_state == DEVICE_TWIN_UPDATE_COMPLETE &&
                 parse_twin_desired_properties(STRING_c_str(parse_string), tests_id, &message_id, &version) != 0)
             {
-                LogError("Failed parsing complete twin update data");
-            }
-            else if (version == 1)
-            {
-                LogInfo("Twin data is version 1 ignoring");
+                if (version > 1)
+                {
+                    LogError("Failed parsing complete twin update data");
+                }
             }
             else if (update_state == DEVICE_TWIN_UPDATE_PARTIAL &&
                 parse_message(STRING_c_str(parse_string), size, tests_id, &message_id) != 0)
