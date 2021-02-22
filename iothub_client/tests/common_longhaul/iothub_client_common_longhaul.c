@@ -172,15 +172,26 @@ static int parse_twin_desired_properties(const char* data, char* test_id, unsign
             LogError("Failed creating root json object %s", data);
             result = MU_FAILURE;
         }
+        else if ((*version = (int)json_object_dotget_number(root_object, TWIN_DESIRED_BLOCK DOT TWIN_FIELD_VERSION)) < 0)
+        {
+            LogError("Failed getting desired properties version (%d)", *message_id);
+            result = MU_FAILURE;
+        }
         else if ((test_id_ref = json_object_dotget_string(root_object, TWIN_DESIRED_BLOCK DOT MESSAGE_TEST_ID_FIELD)) == NULL)
         {
-            LogError("Failed getting message test id %s", data);
-            result = MU_FAILURE;
+            if (*version > 1)
+            {
+                LogError("Failed getting message test id %s", data);
+                result = MU_FAILURE;
+            }
+            else
+            {
+                result = 0;
+            }
         }
         else
         {
             double raw_message_id = json_object_dotget_number(root_object, TWIN_DESIRED_BLOCK DOT MESSAGE_ID_FIELD);
-
             if (raw_message_id < 0)
             {
                 LogError("Unexpected message id (%f)", raw_message_id);
@@ -189,19 +200,9 @@ static int parse_twin_desired_properties(const char* data, char* test_id, unsign
             else
             {
                 *message_id = (unsigned int)raw_message_id;
-
-                if ((*version = (int)json_object_dotget_number(root_object, TWIN_DESIRED_BLOCK DOT TWIN_FIELD_VERSION)) < 0)
-                {
-                    LogError("Failed getting desired properties version (%d)", *message_id);
-                    result = MU_FAILURE;
-                }
-                else
-                {
-                    (void)memcpy(test_id, test_id_ref, 36);
-                    test_id[36] = '\0';
-
-                    result = 0;
-                }
+                (void)memcpy(test_id, test_id_ref, 36);
+                test_id[36] = '\0';
+                result = 0; 
             }
         }
 
@@ -1941,6 +1942,10 @@ static void on_device_twin_update_received(DEVICE_TWIN_UPDATE_STATE update_state
                 parse_twin_desired_properties(STRING_c_str(parse_string), tests_id, &message_id, &version) != 0)
             {
                 LogError("Failed parsing complete twin update data");
+            }
+            else if (version == 1)
+            {
+                LogInfo("Twin data is version 1 ignoring");
             }
             else if (update_state == DEVICE_TWIN_UPDATE_PARTIAL &&
                 parse_message(STRING_c_str(parse_string), size, tests_id, &message_id) != 0)
