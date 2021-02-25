@@ -260,7 +260,7 @@ static void SendTargetTemperatureResponse(PNP_THERMOSTAT_COMPONENT* pnpThermosta
     }
     else
     {
-        IOTHUB_CLIENT_PNP_RESPONSE_PROPERTY temperatureProperty;
+        IOTHUB_PNP_RESPONSE_PROPERTY temperatureProperty;
         memset(&temperatureProperty, 0, sizeof(temperatureProperty));
         temperatureProperty.version = 1;
         temperatureProperty.version = 1;
@@ -270,9 +270,9 @@ static void SendTargetTemperatureResponse(PNP_THERMOSTAT_COMPONENT* pnpThermosta
         temperatureProperty.propertyName = g_targetTemperaturePropertyName;
         temperatureProperty.propertyValue = targetTemperatureAsString;
 
-        IOTHUB_CLIENT_PNP_RESPONSE_PROPERTY_SERIALIZED propertySerialized;
+        IOTHUB_PNP_DATA_SERIALIZED propertySerialized;
 
-        if ((iothubClientResult = IoTHubDeviceClient_LL_PnP_JSON_Serialize_ResponseProperties(&temperatureProperty, 1, &propertySerialized)) != IOTHUB_CLIENT_OK)
+        if ((iothubClientResult = IoTHub_PnP_Serialize_ResponseProperties(&temperatureProperty, 1, &propertySerialized)) != IOTHUB_CLIENT_OK)
         {
             LogError("Unable to serialize updated property, error=%d", iothubClientResult);
         }
@@ -323,16 +323,16 @@ void PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(PNP_THERMOS
     }
     else
     {
-        IOTHUB_CLIENT_PNP_REPORTED_PROPERTY maxTempProperty;
+        IOTHUB_PNP_REPORTED_PROPERTY maxTempProperty;
         memset(&maxTempProperty, 0, sizeof(maxTempProperty));
         maxTempProperty.version = 1;
         maxTempProperty.componentName = pnpThermostatComponent->componentName;
         maxTempProperty.propertyName = g_maxTempSinceLastRebootPropertyName;
         maxTempProperty.propertyValue = maximumTemperatureAsString;
 
-        IOTHUB_CLIENT_PNP_REPORTED_PROPERTY_SERIALIZED reportedPropertySerialized;
+        IOTHUB_PNP_DATA_SERIALIZED reportedPropertySerialized;
 
-        if ((iothubClientResult = IoTHub_PnP_JSON_Serialize_ReportedProperties(&maxTempProperty, 1, &reportedPropertySerialized)) != IOTHUB_CLIENT_OK)
+        if ((iothubClientResult = IoTHub_PnP_Serialize_ReportedProperties(&maxTempProperty, 1, &reportedPropertySerialized)) != IOTHUB_CLIENT_OK)
         {
             LogError("Unable to serialize reported state, error=%d", iothubClientResult);
         }

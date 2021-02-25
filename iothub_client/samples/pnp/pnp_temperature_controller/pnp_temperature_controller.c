@@ -303,21 +303,21 @@ static void PnP_TempControlComponent_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE
 // New code.  PnP_TempControlComponent_UpdatedPropertyCallback receives updated properties
 // and NOT the raw device twin.
 int PnP_TempControlComponent_UpdatedPropertyCallback(
-    const IOTHUB_CLIENT_PNP_UPDATED_PROPERTY_SERIALIZED *updatedPropertySerialized,
+    const IOTHUB_PNP_DATA_SERIALIZED *updatedPropertySerialized,
     int properytVersion, /* this is the $version field */
     void* userContextCallback)
 {
     IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient = (IOTHUB_DEVICE_CLIENT_LL_HANDLE)userContextCallback;
-    IOTHUB_CLIENT_PNP_UPDATED_PROPERTY* updatedProperties;
+    IOTHUB_PNP_UPDATED_PROPERTY* updatedProperties;
     size_t numProperties;
 
-    IoTHubClient_PnP_Deserialize_UpdatedProperty(updatedPropertySerialized, g_modeledComponents, g_numModeledComponents, &updatedProperties, &numProperties);
+    IoTHub_PnP_Deserialize_UpdatedProperty(updatedPropertySerialized, g_modeledComponents, g_numModeledComponents, &updatedProperties, &numProperties);
 
     for (size_t i = 0; i < numProperties; i++) 
     {
-        const IOTHUB_CLIENT_PNP_UPDATED_PROPERTY* updatedProperty = &updatedProperties[i];
+        const IOTHUB_PNP_UPDATED_PROPERTY* updatedProperty = &updatedProperties[i];
 
-        if (updatedProperty->propertyType == IOTHUB_CLIENT_PNP_UPDATED_PROPERTY_TYPE_REPORTED)
+        if (updatedProperty->propertyType == IOTHUB_PNP_UPDATED_PROPERTY_TYPE_REPORTED)
         {
             // We don't process previously reported properties, so ignore.  There is a potential optimization
             // however where if a desired property is the same value and version of a reported, then 
@@ -401,14 +401,14 @@ static void PnP_TempControlComponent_ReportSerialNumber_Property(IOTHUB_DEVICE_C
     IOTHUB_CLIENT_RESULT iothubClientResult;
 
     // New code
-    IOTHUB_CLIENT_PNP_REPORTED_PROPERTY reportedProperty = { 0 };
-    IOTHUB_CLIENT_PNP_REPORTED_PROPERTY_SERIALIZED propertySerialized;
+    IOTHUB_PNP_REPORTED_PROPERTY reportedProperty = { 0 };
+    IOTHUB_PNP_DATA_SERIALIZED propertySerialized;
 
     reportedProperty.version = 1;
     reportedProperty.propertyName = g_serialNumberPropertyName;
     reportedProperty.propertyValue = g_serialNumberPropertyValue;
 
-    if ((iothubClientResult = IoTHub_PnP_JSON_Serialize_ReportedProperties(&reportedProperty, 1, &propertySerialized)) != IOTHUB_CLIENT_OK)
+    if ((iothubClientResult = IoTHub_PnP_Serialize_ReportedProperties(&reportedProperty, 1, &propertySerialized)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to serialize reported state, error=%d", iothubClientResult);
     }

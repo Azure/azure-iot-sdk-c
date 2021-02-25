@@ -72,7 +72,7 @@ static void SendReportedPropertyForDeviceInformation(IOTHUB_DEVICE_CLIENT_LL_HAN
 }
 */
 
-void InitReportedProperty(IOTHUB_CLIENT_PNP_REPORTED_PROPERTY *reportedProperty, const char* componentName, const char* propertyName, const char* propertyValue)
+void InitReportedProperty(IOTHUB_PNP_REPORTED_PROPERTY *reportedProperty, const char* componentName, const char* propertyName, const char* propertyValue)
 {
     memset(reportedProperty, 0, sizeof(*reportedProperty));
     reportedProperty->version = 1;
@@ -98,7 +98,7 @@ void PnP_DeviceInfoComponent_Report_All_Properties(const char* componentName, IO
     SendReportedPropertyForDeviceInformation(deviceClientLL, componentName, PnPDeviceInfo_TotalMemoryPropertyName, PnPDeviceInfo_TotalMemoryPropertyValue);
     */
 
-    IOTHUB_CLIENT_PNP_REPORTED_PROPERTY reportedProperties[8];
+    IOTHUB_PNP_REPORTED_PROPERTY reportedProperties[8];
     const int numReportedProperties = 8;
 
     // This extra InitReportedProperty is because C won't let us initialize struct in a reasonable way.  Other SDKs won't need second step.
@@ -111,9 +111,9 @@ void PnP_DeviceInfoComponent_Report_All_Properties(const char* componentName, IO
     InitReportedProperty(&reportedProperties[6], componentName, PnPDeviceInfo_TotalStoragePropertyName, PnPDeviceInfo_TotalStoragePropertyValue);
     InitReportedProperty(&reportedProperties[7], componentName, PnPDeviceInfo_TotalMemoryPropertyName, PnPDeviceInfo_TotalMemoryPropertyValue);
 
-    IOTHUB_CLIENT_PNP_REPORTED_PROPERTY_SERIALIZED reportedPropertySerialized;
+    IOTHUB_PNP_DATA_SERIALIZED reportedPropertySerialized;
 
-    IoTHub_PnP_JSON_Serialize_ReportedProperties(reportedProperties, numReportedProperties, &reportedPropertySerialized);
+    IoTHub_PnP_Serialize_ReportedProperties(reportedProperties, numReportedProperties, &reportedPropertySerialized);
 
     // Unlike original sample, everything gets batched on a single send.
     IoTHubDeviceClient_LL_PnP_SendReportedProperties(deviceClientLL, &reportedPropertySerialized, NULL, NULL);

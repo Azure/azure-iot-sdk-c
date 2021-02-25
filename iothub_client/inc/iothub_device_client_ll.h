@@ -31,6 +31,7 @@
 
 #include "iothub_transport_ll.h"
 #include "iothub_client_core_ll.h"
+#include "iothub_pnp.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -378,27 +379,9 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
 // NEW PNP API SPIKE
 //*********************************************************************************
 
-
-// IOTHUB_PNP_TELEMETRY_ATTRIBUTES is used to set metadata when sending PnP.
-typedef struct IOTHUB_PNP_TELEMETRY_ATTRIBUTES_TAG {
-    /* C Specific for structure versioning.  Other SDKs don't need this. */
-    int version; 
-    /* Optional name of component.  NULL for default component in model. */
-    const char* componentName;
-    /* Content type.  Can be NULL with no default, but putting it here encourages apps to set this. */
-    const char* telemetryContentType;
-    /* Content encoding.  Can be NULL with no default, but putting it here encourages apps to set this. */
-    const char* telemetryContentEncoding;
-} IOTHUB_PNP_TELEMETRY_ATTRIBUTES;
-
 // IOTHUB_CLIENT_PNP_TELEMETRY_CALLBACK is an optional callback application may implement to receive
 // indication of telemetry success|failure.
 typedef void(*IOTHUB_CLIENT_PNP_TELEMETRY_CALLBACK)(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback);
-
-
-IOTHUB_MESSAGE_HANDLE IoTHubMessage_PnP_CreateFromByteArray(const unsigned char* byteArray, size_t size, const IOTHUB_PNP_TELEMETRY_ATTRIBUTES *pnpTelemetryAttributes);
-
-IOTHUB_MESSAGE_HANDLE IoTHubMessage_PnP_CreateFromString(const char* source, const IOTHUB_PNP_TELEMETRY_ATTRIBUTES *pnpTelemetryAttributes);
 
 //
 //  Sending PnP telemetry API
@@ -408,32 +391,6 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_SendTelemetry(
                         IOTHUB_MESSAGE_HANDLE telemetryMessageHandle,
                         IOTHUB_CLIENT_PNP_TELEMETRY_CALLBACK pnpTelemetryConfirmationCallback,
                         void* userContextCallback);
-
-//
-// IOTHUB_CLIENT_PNP_REPORTED_PROPERTY is a structure to contain a reported property, which SDK will serialize.
-//
-typedef struct {
-    /* C construct only; not needed in languages created after 203 B.C */
-    int version;
-    /* Optional name of component.  NULL indicates root component */
-    const char* componentName;
-    /* Name of property. */
-    const char* propertyName;
-    /* Value of the property. */
-    const char* propertyValue;
-} IOTHUB_CLIENT_PNP_REPORTED_PROPERTY;
-
-// IOTHUB_CLIENT_PNP_REPORTED_PROPERTY_SERIALIZED is a serialized version of IOTHUB_CLIENT_PNP_REPORTED_PROPERTY data
-typedef struct {
-    int version;
-    unsigned char* data;
-    size_t dataLength;
-}
-IOTHUB_CLIENT_PNP_REPORTED_PROPERTY_SERIALIZED;
-
-IOTHUB_CLIENT_RESULT IoTHub_PnP_JSON_Serialize_ReportedProperties(const IOTHUB_CLIENT_PNP_REPORTED_PROPERTY* reportedProperties, unsigned int numReportedProperties, IOTHUB_CLIENT_PNP_REPORTED_PROPERTY_SERIALIZED *reportedPropertySerialized);
-
-void IoTHub_PnP_JSON_Free_SerializedProperties(IOTHUB_CLIENT_PNP_REPORTED_PROPERTY_SERIALIZED *reportedPropertySerialized);
 
 // Optional callback application may implement to receive notification when property has been updated.
 typedef void(*IOTHUB_PNP_REPORTED_STATE_CALLBACK)(int status_code, void* userContextCallback);
@@ -447,45 +404,17 @@ typedef void(*IOTHUB_PNP_REPORTED_STATE_CALLBACK)(int status_code, void* userCon
 //
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_SendReportedProperties(
                             IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
-                            const IOTHUB_CLIENT_PNP_REPORTED_PROPERTY_SERIALIZED *reportedPropertySerialized,
+                            const IOTHUB_PNP_DATA_SERIALIZED *reportedPropertySerialized,
                             IOTHUB_PNP_REPORTED_STATE_CALLBACK pnpReportedStateCallback,
                             void* userContextCallback);
 
-
-//
-// IOTHUB_CLIENT_PNP_RESPONSE_PROPERTY is a structure to contain a property responding to a service request, which SDK will serialize.
-//
-typedef struct {
-    /* C construct only; not needed in languages created after 203 B.C */
-    int version;
-    /* Optional name of component.  NULL indicates root component */
-    const char* componentName;
-    /* Name of property. */
-    const char* propertyName;
-    /* Value of the property. */
-    const char* propertyValue;
-
-    /* property status */
-    int result;
-    const char* description;
-    int ackVersion;
-} IOTHUB_CLIENT_PNP_RESPONSE_PROPERTY;
-
-typedef struct {
-    int version;
-    unsigned char* data;
-    size_t dataLength;
-}
-IOTHUB_CLIENT_PNP_RESPONSE_PROPERTY_SERIALIZED;
-
-IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_JSON_Serialize_ResponseProperties(const IOTHUB_CLIENT_PNP_RESPONSE_PROPERTY* responseProperties, unsigned int numResponseProperties, IOTHUB_CLIENT_PNP_RESPONSE_PROPERTY_SERIALIZED *responsePropertySerialized);
 
 // Optional callback application may implement to receive notification when property has been responded to.
 typedef void(*IOTHUB_PNP_RESPONSE_STATE_CALLBACK)(int status_code, void* userContextCallback);
 
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_SendResponseProperties(
                             IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
-                            const IOTHUB_CLIENT_PNP_RESPONSE_PROPERTY_SERIALIZED *responsePropertySerialized,
+                            const IOTHUB_PNP_DATA_SERIALIZED *responsePropertySerialized,
                             IOTHUB_PNP_RESPONSE_STATE_CALLBACK pnpResponseStateCallback,
                             void* userContextCallback);
 
@@ -518,39 +447,6 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_SetCommandCallback(
                          void* userContextCallback);
 
 
-// 
-// Indicates whether an updated property is a desired or reported property.
-// 
-typedef enum IOTHUB_UPDATED_PROPERTY_TYPE_TAG 
-{ 
-    IOTHUB_CLIENT_PNP_UPDATED_PROPERTY_TYPE_REPORTED,
-    IOTHUB_CLIENT_PNP_UPDATED_PROPERTY_TYPE_DESIRED
-} IOTHUB_CLIENT_PNP_UPDATED_PROPERTY_TYPE;
-
-//
-// An updated property
-//
-typedef struct {
-    int version;
-    // Whether this is coming from the "desired" properties or "reported" property of the Twin.  Needs some wordsmithing love.
-    IOTHUB_CLIENT_PNP_UPDATED_PROPERTY_TYPE propertyType;
-    /* name of the component */
-    const char* componentName;
-    /* Name of the property */
-    const char* propertyName;
-    /* value of the property being configured */
-    const char* propertyValue;
-} IOTHUB_CLIENT_PNP_UPDATED_PROPERTY; /* this is a bad name; see concern about DesiredProperty|PreviouslyReportedProperty business */
-
-
-typedef struct 
-{
-    int version;
-    unsigned char* data;
-    size_t dataLength;
-} IOTHUB_CLIENT_PNP_UPDATED_PROPERTY_SERIALIZED;
-
-
 //
 // Callback application implements to receive a property update.  
 //
@@ -560,11 +456,8 @@ typedef struct
 // to be able to handle everything in one shot.
 //
 typedef int(*IOTHUB_CLIENT_PNP_PROPERTY_UPDATE_CALLBACK)(
-    const IOTHUB_CLIENT_PNP_UPDATED_PROPERTY_SERIALIZED *updatedPropertySerialized,
-    int properytVersion, /* this is the $version field */
+    const IOTHUB_PNP_DATA_SERIALIZED *updatedPropertySerialized,
     void* userContextCallback);
-
-IOTHUB_CLIENT_RESULT IoTHubClient_PnP_Deserialize_UpdatedProperty(const IOTHUB_CLIENT_PNP_UPDATED_PROPERTY_SERIALIZED *updatedPropertySerialized, const char** pnpComponents, size_t numPnPComponents, IOTHUB_CLIENT_PNP_UPDATED_PROPERTY** pnpPropertyUpdated, size_t* numPropertiesUpdated);
 
 // 
 // Application calls IoTHubDeviceClient_PnP_SetPropertyCallback (a) for device to get the twin (C only, long story, other

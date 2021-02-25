@@ -51,6 +51,19 @@ typedef struct IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA_TAG
     char* diagnosticCreationTimeUtc;
 }IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA, *IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA_HANDLE;
 
+// IOTHUB_PNP_TELEMETRY_ATTRIBUTES is used to set metadata when sending PnP.
+typedef struct IOTHUB_PNP_TELEMETRY_ATTRIBUTES_TAG 
+{
+    /* Structure versioning field, not related to any versioning to IoT Hub itself */
+    int version; 
+    /* Optional name of component.  NULL for default component in model. */
+    const char* componentName;
+    /* Content type.  Can be NULL with no default, but putting it here encourages apps to set this. */
+    const char* telemetryContentType;
+    /* Content encoding.  Can be NULL with no default, but putting it here encourages apps to set this. */
+    const char* telemetryContentEncoding;
+} IOTHUB_PNP_TELEMETRY_ATTRIBUTES;
+
 static const char DIAG_CREATION_TIME_UTC_PROPERTY_NAME[] = "diag_creation_time_utc";
 
 /**
@@ -432,6 +445,10 @@ MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetAsSecurityMessage, I
 * @return  Returns true if the Message is a security message false otherwise.
 */
 MOCKABLE_FUNCTION(, bool, IoTHubMessage_IsSecurityMessage, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
+
+IOTHUB_MESSAGE_HANDLE IoTHubMessage_PnP_CreateFromByteArray(const unsigned char* byteArray, size_t size, const IOTHUB_PNP_TELEMETRY_ATTRIBUTES *pnpTelemetryAttributes);
+
+IOTHUB_MESSAGE_HANDLE IoTHubMessage_PnP_CreateFromString(const char* source, const IOTHUB_PNP_TELEMETRY_ATTRIBUTES *pnpTelemetryAttributes);
 
 /**
 * @brief   Frees all resources associated with the given message handle.

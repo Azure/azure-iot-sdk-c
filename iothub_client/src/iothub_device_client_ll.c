@@ -148,62 +148,22 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_SendTelemetry(
     return 0;
 }
 
-IOTHUB_CLIENT_RESULT IoTHub_PnP_JSON_Serialize_ReportedProperties(const IOTHUB_CLIENT_PNP_REPORTED_PROPERTY* reportedProperties, unsigned int numReportedProperties, IOTHUB_CLIENT_PNP_REPORTED_PROPERTY_SERIALIZED *reportedPropertySerialized)
-{
-    (void)reportedProperties;
-    (void)numReportedProperties;
-    (void)reportedPropertySerialized;
-    return 0;
-}
-
-IOTHUB_MESSAGE_HANDLE IoTHubMessage_PnP_CreateFromByteArray(const unsigned char* byteArray, size_t size, const IOTHUB_PNP_TELEMETRY_ATTRIBUTES *pnpTelemetryAttributes)
-{
-    (void)pnpTelemetryAttributes;
-    return IoTHubMessage_CreateFromByteArray(byteArray, size);
-}
-
-IOTHUB_MESSAGE_HANDLE IoTHubMessage_PnP_CreateFromString(const char* source, const IOTHUB_PNP_TELEMETRY_ATTRIBUTES *pnpTelemetryAttributes)
-{
-    (void)pnpTelemetryAttributes;
-    return IoTHubMessage_CreateFromString(source);
-}
-
-
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_SendReportedProperties(
                             IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
-                            const IOTHUB_CLIENT_PNP_REPORTED_PROPERTY_SERIALIZED *reportedPropertySerialized,
+                            const IOTHUB_PNP_DATA_SERIALIZED *reportedPropertySerialized,
                             IOTHUB_PNP_REPORTED_STATE_CALLBACK pnpReportedStateCallback,
                             void* userContextCallback)
 {
-    (void)iotHubClientHandle;
-    (void)reportedPropertySerialized;
-    (void)pnpReportedStateCallback;
-    (void)userContextCallback;
-    return 0;
-}
-
-IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_JSON_Serialize_ResponseProperties(
-    const IOTHUB_CLIENT_PNP_RESPONSE_PROPERTY* responseProperties, 
-    unsigned int numResponseProperties, 
-    IOTHUB_CLIENT_PNP_RESPONSE_PROPERTY_SERIALIZED *responsePropertySerialized)
-{
-    (void)responseProperties;
-    (void)numResponseProperties;
-    (void)responsePropertySerialized;
-    return 0;
+    return IoTHubDeviceClient_LL_SendReportedState(iotHubClientHandle, reportedPropertySerialized->data, reportedPropertySerialized->dataLength, (IOTHUB_CLIENT_REPORTED_STATE_CALLBACK)pnpReportedStateCallback, userContextCallback);
 }
 
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_SendResponseProperties(
                             IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
-                            const IOTHUB_CLIENT_PNP_RESPONSE_PROPERTY_SERIALIZED *responsePropertySerialized,
+                            const IOTHUB_PNP_DATA_SERIALIZED *responsePropertySerialized,
                             IOTHUB_PNP_RESPONSE_STATE_CALLBACK pnpResponseStateCallback,
                             void* userContextCallback)
 {
-    (void)iotHubClientHandle;
-    (void)responsePropertySerialized;
-    (void)pnpResponseStateCallback;
-    (void)userContextCallback;
-    return 0;
+    return IoTHubDeviceClient_LL_SendReportedState(iotHubClientHandle, reportedPropertySerialized->data, reportedPropertySerialized->dataLength, (IOTHUB_CLIENT_REPORTED_STATE_CALLBACK)pnpReportedStateCallback, userContextCallback);
 }
 
 
@@ -215,21 +175,6 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_SetCommandCallback(
     (void)iotHubClientHandle;
     (void)pnpCommandCallback;
     (void)userContextCallback;
-    return 0;
-}
-
-IOTHUB_CLIENT_RESULT IoTHubClient_PnP_Deserialize_UpdatedProperty(
-                            const IOTHUB_CLIENT_PNP_UPDATED_PROPERTY_SERIALIZED *updatedPropertySerialized, 
-                            const char** pnpComponents, 
-                            size_t numPnPComponents, 
-                            IOTHUB_CLIENT_PNP_UPDATED_PROPERTY** pnpPropertyUpdated,
-                            size_t* numPropertiesUpdated)
-{
-    (void)updatedPropertySerialized;
-    (void)pnpComponents;
-    (void)numPnPComponents;
-    (void)pnpPropertyUpdated;
-    (void)numPropertiesUpdated;
     return 0;
 }
 
