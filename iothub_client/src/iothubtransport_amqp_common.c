@@ -896,7 +896,7 @@ static void prepare_device_for_connection_retry(AMQP_TRANSPORT_DEVICE_INSTANCE* 
     registered_device->number_of_send_event_complete_failures = 0;
 }
 
-static void prepare_for_connection_retry(AMQP_TRANSPORT_INSTANCE* transport_instance)
+void prepare_for_connection_retry(AMQP_TRANSPORT_INSTANCE* transport_instance)
 {
     LogInfo("Preparing transport for re-connection");
 

@@ -615,6 +615,36 @@ static void set_expected_calls_for_Unregister(IOTHUB_DEVICE_HANDLE iothub_device
     EXPECTED_CALL(free(IGNORED_PTR_ARG));
 }
 
+static void set_expected_calls_for_Unregister_with_device_stop(IOTHUB_DEVICE_HANDLE iothub_device_handle)
+{
+    STRICT_EXPECTED_CALL(STRING_c_str(TEST_DEVICE_ID_STRING_HANDLE))
+        .SetReturn(TEST_DEVICE_ID_CHAR_PTR);
+
+    STRICT_EXPECTED_CALL(singlylinkedlist_find(TEST_REGISTERED_DEVICES_LIST, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreArgument(2)
+        .IgnoreArgument(3)
+        .SetReturn((LIST_ITEM_HANDLE)iothub_device_handle);
+
+    STRICT_EXPECTED_CALL(singlylinkedlist_remove(TEST_REGISTERED_DEVICES_LIST, IGNORED_PTR_ARG))
+        .IgnoreArgument(2);
+
+    STRICT_EXPECTED_CALL(amqp_device_stop(TEST_DEVICE_HANDLE));
+
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn((LIST_ITEM_HANDLE)NULL);
+
+    STRICT_EXPECTED_CALL(amqp_connection_destroy(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    STRICT_EXPECTED_CALL(iothubtransportamqp_methods_destroy(TEST_IOTHUBTRANSPORTAMQP_METHODS));
+
+    STRICT_EXPECTED_CALL(amqp_device_destroy(TEST_DEVICE_HANDLE));
+
+    STRICT_EXPECTED_CALL(STRING_delete(TEST_DEVICE_ID_STRING_HANDLE));
+    EXPECTED_CALL(free(IGNORED_PTR_ARG));
+}
+
 static void set_expected_calls_for_establish_amqp_connection()
 {
     STRICT_EXPECTED_CALL(STRING_c_str(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE))
@@ -764,7 +794,7 @@ static void set_expected_calls_for_Destroy(int number_of_registered_devices, IOT
     {
         EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
         EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG));
-        set_expected_calls_for_Unregister(registered_devices[i]);
+        set_expected_calls_for_Unregister_with_device_stop(registered_devices[i]);
     }
 
     STRICT_EXPECTED_CALL(singlylinkedlist_destroy(TEST_REGISTERED_DEVICES_LIST));
@@ -1432,7 +1462,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_Unregister_destroys_the_methods_handle
     (void)IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod(device_handle);
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_Unregister(device_handle);
+    set_expected_calls_for_Unregister_with_device_stop(device_handle);
 
     // act
     IoTHubTransport_AMQP_Common_Unregister(device_handle);
@@ -2122,12 +2152,49 @@ TEST_FUNCTION(Destroy_success)
     TRANSPORT_LL_HANDLE handle = create_transport();
     IOTHUB_DEVICE_CONFIG* device_config = create_device_config(TEST_DEVICE_ID_CHAR_PTR, true);
 
-    IOTHUB_DEVICE_HANDLE registered_devices[1];
-    registered_devices[0] = register_device(handle, device_config, &TEST_waitingToSend, true);
+    IOTHUB_DEVICE_HANDLE iothub_device_handle = register_device(handle, device_config, &TEST_waitingToSend, true);
 
     crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, false);
 
-    set_expected_calls_for_Destroy(1, registered_devices);
+
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_REGISTERED_DEVICES_LIST));
+    EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
+    EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG));
+
+    STRICT_EXPECTED_CALL(STRING_c_str(TEST_DEVICE_ID_STRING_HANDLE))
+        .SetReturn(TEST_DEVICE_ID_CHAR_PTR);
+
+    STRICT_EXPECTED_CALL(singlylinkedlist_find(TEST_REGISTERED_DEVICES_LIST, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreArgument(2)
+        .IgnoreArgument(3)
+        .SetReturn((LIST_ITEM_HANDLE)iothub_device_handle);
+
+    STRICT_EXPECTED_CALL(singlylinkedlist_remove(TEST_REGISTERED_DEVICES_LIST, IGNORED_PTR_ARG))
+        .IgnoreArgument(2);
+
+    STRICT_EXPECTED_CALL(amqp_device_stop(TEST_DEVICE_HANDLE));
+
+    STRICT_EXPECTED_CALL(xio_retrieveoptions(TEST_UNDERLYING_IO_TRANSPORT))
+        .SetReturn(TEST_OPTIONHANDLER_HANDLE);
+
+    STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn((LIST_ITEM_HANDLE)NULL);
+
+    STRICT_EXPECTED_CALL(amqp_connection_destroy(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    STRICT_EXPECTED_CALL(xio_destroy(TEST_UNDERLYING_IO_TRANSPORT));
+    STRICT_EXPECTED_CALL(iothubtransportamqp_methods_destroy(TEST_IOTHUBTRANSPORTAMQP_METHODS));
+    STRICT_EXPECTED_CALL(amqp_device_destroy(TEST_DEVICE_HANDLE));
+    STRICT_EXPECTED_CALL(STRING_delete(TEST_DEVICE_ID_STRING_HANDLE));
+    EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(singlylinkedlist_destroy(TEST_REGISTERED_DEVICES_LIST));
+    STRICT_EXPECTED_CALL(OptionHandler_Destroy(TEST_OPTIONHANDLER_HANDLE));
+    STRICT_EXPECTED_CALL(retry_control_destroy(TEST_RETRY_CONTROL_HANDLE));
+    STRICT_EXPECTED_CALL(STRING_delete(TEST_IOTHUB_HOST_FQDN_STRING_HANDLE));
+    EXPECTED_CALL(free(IGNORED_PTR_ARG));
+
 
     // act
     IoTHubTransport_AMQP_Common_Destroy(handle);
@@ -3929,7 +3996,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_Destroy_frees_proxy_options)
     EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG));
     EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG));
 
-    set_expected_calls_for_Unregister(device_handle);
+    set_expected_calls_for_Unregister_with_device_stop(device_handle);
 
     STRICT_EXPECTED_CALL(singlylinkedlist_destroy(TEST_REGISTERED_DEVICES_LIST));
     STRICT_EXPECTED_CALL(retry_control_destroy(TEST_RETRY_CONTROL_HANDLE));
@@ -4001,7 +4068,7 @@ TEST_FUNCTION(Unregister_succeeds)
     IOTHUB_DEVICE_HANDLE device_handle = register_device(handle, device_config, &TEST_waitingToSend, true);
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_Unregister(device_handle);
+    set_expected_calls_for_Unregister_with_device_stop(device_handle);
 
     // act
     IoTHubTransport_AMQP_Common_Unregister(device_handle);
