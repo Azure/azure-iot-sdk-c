@@ -2144,7 +2144,7 @@ static void SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
         if ((transport_data->topic_InputQueue != NULL) && (SUBSCRIBE_INPUT_QUEUE_TOPIC & transport_data->topics_ToSubscribe))
         {
             subscribe[subscribe_count].subscribeTopic = STRING_c_str(transport_data->topic_InputQueue);
-            subscribe[subscribe_count].qosReturn = DELIVER_AT_MOST_ONCE;
+            subscribe[subscribe_count].qosReturn = DELIVER_AT_LEAST_ONCE;
             topic_subscription |= SUBSCRIBE_INPUT_QUEUE_TOPIC;
             subscribe_count++;
         }
