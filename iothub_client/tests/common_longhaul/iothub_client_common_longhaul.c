@@ -1421,12 +1421,7 @@ static int invoke_device_method(const void* context)
                     MAX_DEVICE_METHOD_TRAVEL_TIME_SECS,
                     &responseStatus, &responsePayload, &responseSize);
 
-                if (device_method_info.method_result != IOTHUB_DEVICE_METHOD_OK)
-                {
-                    LogInfo("Device method failed. method_result: %d, responseStatus:%d, iteration:%d", device_method_info.method_result, responseStatus, i);
-                }
-
-                if (device_method_info.method_result == IOTHUB_DEVICE_METHOD_OK || responseStatus != 404)
+                if (device_method_info.method_result == IOTHUB_DEVICE_METHOD_OK)
                 {
                     break;
                 }
