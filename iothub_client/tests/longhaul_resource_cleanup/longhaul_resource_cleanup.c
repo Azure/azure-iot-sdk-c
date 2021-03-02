@@ -23,8 +23,8 @@
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-const int five_days = (60 * 60 * 24) * 5;
-const int year_2020 = 1577865600;
+const int FIVE_DAYS = (60 * 60 * 24) * 5;
+const int YEAR_2020 = 1577865600;
 static const char SAS_DEVICE_PREFIX_FMT[] = "csdk_e2eDevice_sas_j_please_delete_";
 static const char X509_DEVICE_PREFIX_FMT[] = "csdk_e2eDevice_x509_j_please_delete_";
 
@@ -81,7 +81,7 @@ void deviceItemEnum(const void* item, const void* action_context, bool* continue
                 tm.tm_mday = atoi(&lastUpdated[8]);
                 time_t deviceTime = mktime(&tm);
                 time_t now = time(0);
-                if (deviceTime > year_2020 && (now - deviceTime > five_days))
+                if (deviceTime > YEAR_2020 && (now - deviceTime > FIVE_DAYS))
                 {
                     LogInfo("Deleting device %s, %d days old", device->deviceId, (int)(now - deviceTime) / (60 * 60 * 24));
                     IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_DeleteDevice(context->registryManagerHandle, device->deviceId);
