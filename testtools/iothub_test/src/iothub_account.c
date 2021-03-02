@@ -120,16 +120,18 @@ static int generateDeviceName(const char* prefix, char** deviceName)
     }
     else
     {
+        // append the test name (process name) to the device ID 
         char* processName = "unknown";
 #if defined(_WIN32)
         char winPath[_MAX_PATH] = {0};
-        strncpy(winPath, strrchr(__argv[0], '\\') + 1, sizeof(winPath));
+        char* filename = strrchr(__argv[0], '\\');
+        strncpy(winPath, filename ? filename + 1 : __argv[0], sizeof(winPath));
         winPath[_MAX_PATH-1] = 0;
         *strrchr(winPath, '.') = 0;
         processName = winPath;
 #else defined(_GNU_SOURCE)
-        //extern char* program_invocation_name;
-        processName = strrchr(program_invocation_name, '/') + 1;
+        extern char* program_invocation_short_name;
+        processName = program_invocation_short_name;
 #endif
 
         size_t len = strlen(prefix) + DEVICE_GUID_SIZE + strlen(processName);
