@@ -122,8 +122,13 @@ static int generateDeviceName(const char* prefix, char** deviceName)
     {
         char* processName = "unknown";
 #if defined(_WIN32)
-        processName = strrchr(__argv[0], '\\') + 1;
-#else 
+        char winPath[_MAX_PATH] = {0};
+        strncpy(winPath, strrchr(__argv[0], '\\') + 1, sizeof(winPath));
+        winPath[_MAX_PATH-1] = 0;
+        *strrchr(winPath, '.') = 0;
+        processName = winPath;
+#else defined(_GNU_SOURCE)
+        //extern char* program_invocation_name;
         processName = strrchr(program_invocation_name, '/') + 1;
 #endif
 
