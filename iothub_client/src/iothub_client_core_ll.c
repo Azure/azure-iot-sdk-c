@@ -2329,7 +2329,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetOption(IOTHUB_CLIENT_CORE_LL_HANDLE 
                 result = IOTHUB_CLIENT_OK;
             }
         }
-        else if ((strcmp(optionName, OPTION_BLOB_UPLOAD_TIMEOUT_SECS) == 0) || (strcmp(optionName, OPTION_CURL_VERBOSE) == 0))
+        else if ((strcmp(optionName, OPTION_BLOB_UPLOAD_TIMEOUT_SECS) == 0) || (strcmp(optionName, OPTION_CURL_VERBOSE) == 0) || (strcmp(optionName, OPTION_CURL_INTERFACE) == 0))
         {
 #ifndef DONT_USE_UPLOADTOBLOB
             // This option just gets passed down into IoTHubClientCore_LL_UploadToBlob
