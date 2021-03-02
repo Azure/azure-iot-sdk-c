@@ -34,8 +34,8 @@
 #endif
 
 static const char* DEVICE_JSON_FMT = "{\"deviceId\":\"%s\",\"etag\":null,\"connectionState\":\"Disconnected\",\"status\":\"enabled\",\"statusReason\":null,\"connectionStateUpdatedTime\":\"0001-01-01T00:00:00\",\"statusUpdatedTime\":\"0001-01-01T00:00:00\",\"lastActivityTime\":\"0001-01-01T00:00:00\",\"authentication\":{\"symmetricKey\":{\"primaryKey\":null,\"secondaryKey\":null}}}";
-static const char* SAS_DEVICE_PREFIX_FMT = "csdk_e2eDevice_sas_j_please_delete_%s";
-static const char* X509_DEVICE_PREFIX_FMT = "csdk_e2eDevice_x509_j_please_delete_%s";
+static const char* SAS_DEVICE_PREFIX_FMT = "csdk_e2eDevice_sas_j_please_delete_%s_%s";
+static const char* X509_DEVICE_PREFIX_FMT = "csdk_e2eDevice_x509_j_please_delete_%s_%s";
 static const char* RELATIVE_PATH_FMT = "/devices/%s?%s";
 static const char* SHARED_ACCESS_KEY = "SharedAccessSignature sr=%s&sig=%s&se=%s&skn=%s";
 
@@ -120,7 +120,14 @@ static int generateDeviceName(const char* prefix, char** deviceName)
     }
     else
     {
-        size_t len = strlen(prefix) + DEVICE_GUID_SIZE;
+        char* processName = "unknown";
+#if defined(_WIN32)
+        processName = strrchr(__argv[0], '\\') + 1;
+#else 
+        processName = strrchr(program_invocation_name, '/') + 1;
+#endif
+
+        size_t len = strlen(prefix) + DEVICE_GUID_SIZE + strlen(processName);
         *deviceName = (char*)malloc(len + 1);
         if (*deviceName == NULL)
         {
@@ -129,7 +136,7 @@ static int generateDeviceName(const char* prefix, char** deviceName)
         }
         else
         {
-            if (sprintf_s(*deviceName, len + 1, prefix, deviceGuid) <= 0)
+            if (sprintf_s(*deviceName, len + 1, prefix, deviceGuid, processName) <= 0)
             {
                 LogError("Failure constructing device ID.\r\n");
                 free(*deviceName);
