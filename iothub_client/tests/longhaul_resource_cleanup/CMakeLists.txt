@@ -17,7 +17,5 @@ set(project_h_files
 
 build_c_test_longhaul_test(${PROJECT_NAME} ${project_c_files} ${project_h_files})
 
-target_link_libraries(${PROJECT_NAME})
-
 linkSharedUtil(${PROJECT_NAME})
 linkUAMQP(${PROJECT_NAME})

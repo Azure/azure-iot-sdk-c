@@ -118,7 +118,7 @@ int main(void)
     }
     else if ((account_info = longhaul_get_account_info(iotHubLonghaulRsrcsHandle)) == NULL)
     {
-        LogError("Failed retrieving accoung info");
+        LogError("Failed retrieving account info");
         result = MU_FAILURE;
     }
     else if ((connection_string = IoTHubAccount_GetIoTHubConnString(account_info)) == NULL)
