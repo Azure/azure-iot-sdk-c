@@ -34,13 +34,13 @@ git submodule update --init
 
 >If you are using a release before 2019-04-15 then you will need to use the `--recursive` argument to instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
 
-### Build sample application using vcpkg to build the SDK
+### Building sample applications using vcpkg to build the SDK
 
-The sample applications build with the help of C SDK libraries and headers built with vcpkg (a C++ package manager who facilitate building C and C++ libraries). To install the C SDK libraries and headers, follow these steps [Setup C SDK vcpkg for Windows development environment](https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/setting_up_vcpkg.md#setup-c-sdk-vcpkg-for-windows-development-environment).
+The sample applications can be build with the help of the C SDK libraries and headers built with vcpkg (vcpkg is a package manager that facilitates building C and C++ libraries). To install the vcpkg C SDK libraries and headers, follow these steps [Setup C SDK vcpkg for Windows development environment](https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/setting_up_vcpkg.md#setup-c-sdk-vcpkg-for-windows-development-environment).
 
-note: vcpkg creates a directory with all the headers and .lib files on your machine, if you are using Visual Studio (from 2015) the command 'vcpkg integrate install' let Visual Studio knows where are the headers and lib. If you're using other IDE just add the vcpkg directories to your compiler as usual.
+Note: vcpkg manager creates a directory with all the headers and generates the C SDK .lib files on your machine. If you are using Visual Studio (from 2017) the command 'vcpkg integrate install' lets Visual Studio knows where the vcpkg headers and lib directories are located. If you're using other IDEs, just add the vcpkg directories to your compiler/linker include paths.
 
-To quickly build one of our sample applications, open the corresponding [solution file][sln-file] (.sln) in Visual Studio.
+To quickly build one of the sample applications, open the corresponding Visual Studio [solution file][sln-file] (.sln) in Visual Studio.
   For example, to build the **telemetry message sample**, open **iothub_client\samples\iothub_ll_telemetry_sample\windows\iothub_ll_telemetry_sample.sln**.
 
 In the sample's main source file, find the line similar to this:
@@ -54,9 +54,9 @@ static const char* connectionString = "[device connection string]";
 Build the sample project.
 
 
-### Build the C SDK with CMake on Windows
+### Building the C SDK with CMake on Windows
 
-In some cases, you may want to build the SDK locally for development and testing purposes. First, take the following steps to generate project files:
+In some cases, you may want to build the SDK locally for development and testing purposes (without using vcpkg manager). First, take the following steps to generate project files:
 
 - Open a "Developer Command Prompt for VS2017" or "Developer Command Prompt for VS2019".
 
@@ -74,7 +74,7 @@ cd cmake
 
 > This builds x86 libraries. To build for x64 for Visual Studio 2017, `cmake .. -G "Visual Studio 15 2017 Win64"` or for Visual Studio 2019, `cmake .. -G "Visual Studio 16 2019 -A x64"`
 
-When the project generation completes successfully, you should see a Visual Studio solution file (.sln) under the `cmake` folder. To build the SDK, do one of the following:
+When the project generation completes successfully, you will see a Visual Studio solution file (.sln) under the `cmake` folder. To build the SDK, do one of the following:
 
 - Open **cmake\azure_iot_sdks.sln** in Visual Studio and build it, **OR**
 - Run the following command in the command prompt you used to generate the project files:
