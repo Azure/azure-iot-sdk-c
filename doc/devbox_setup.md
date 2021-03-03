@@ -38,7 +38,7 @@ git submodule update --init
 
 The sample applications can be build with the help of the C SDK libraries and headers built with vcpkg (vcpkg is a package manager that facilitates building C and C++ libraries). To install the vcpkg C SDK libraries and headers, follow these steps [Setup C SDK vcpkg for Windows development environment](https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/setting_up_vcpkg.md#setup-c-sdk-vcpkg-for-windows-development-environment).
 
-Note: vcpkg manager creates a directory with all the headers and generates the C SDK .lib files on your machine, if you are using Visual Studio (from 2017) the command 'vcpkg integrate install' lets Visual Studio knows where the vcpkg headers and lib directories are located. If you're using other IDEs, just add the vcpkg directories to your compiler/linker include paths.
+Note: vcpkg manager creates a directory with all the headers and generates the C SDK .lib files on your machine. If you are using Visual Studio (from 2017) the command 'vcpkg integrate install' lets Visual Studio knows where the vcpkg headers and lib directories are located. If you're using other IDEs, just add the vcpkg directories to your compiler/linker include paths.
 
 To quickly build one of the sample applications, open the corresponding Visual Studio [solution file][sln-file] (.sln) in Visual Studio.
   For example, to build the **telemetry message sample**, open **iothub_client\samples\iothub_ll_telemetry_sample\windows\iothub_ll_telemetry_sample.sln**.
