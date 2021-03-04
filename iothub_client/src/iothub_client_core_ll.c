@@ -2536,6 +2536,53 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_GetTwinAsync(IOTHUB_CLIENT_CORE_LL_HAND
 }
 
 
+static void ResetMethodCallbackData(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData)
+{
+    handleData->methodCallback.type = CALLBACK_TYPE_NONE;
+    handleData->methodCallback.callbackSync = NULL;
+    handleData->methodCallback.callbackAsync = NULL;
+    handleData->methodCallback.userContextCallback = NULL;
+}
+
+static bool VerifyMethodCallbackType(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData, CALLBACK_TYPE desiredCallbackType, bool unsubscribing)
+{
+    bool result;
+
+    if (unsubscribing)
+    {
+        // If we are unsubscribing,  method (Ex or the original non-Ex) performing the unsubscribe must be the same function that subscribed initially.
+        if (handleData->methodCallback.type == CALLBACK_TYPE_NONE)
+        {
+            /* Codes_SRS_IOTHUBCLIENT_LL_10_029: [ If deviceMethodCallback is NULL and the client is not subscribed to receive method calls, IoTHubClientCore_LL_SetDeviceMethodCallback shall fail and return IOTHUB_CLIENT_ERROR. ] */
+            LogError("not currently set to accept or process incoming messages.");
+            result = false;
+        }
+        else if (handleData->methodCallback.type != desiredCallbackType)
+        {
+            result = false;
+        }
+        else
+        {
+            result = true;
+        }
+    }
+    else
+    {
+        // If we are already subscribed and changing the callback method, the type of method (Ex or original non-Ex) must match what was used for the original subscribe.
+        if ((handleData->methodCallback.type != CALLBACK_TYPE_NONE) &&
+            (handleData->methodCallback.type != desiredCallbackType))
+        {
+            result = false;
+        }
+        else
+        {
+            result = true;
+        }
+    }
+
+    return result;
+}
+
 IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetDeviceMethodCallback(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback, void* userContextCallback)
 {
     IOTHUB_CLIENT_RESULT result;
@@ -2549,66 +2596,44 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetDeviceMethodCallback(IOTHUB_CLIENT_C
     else
     {
         IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)iotHubClientHandle;
-        if (deviceMethodCallback == NULL)
+        bool unsubscribing = (deviceMethodCallback == NULL);
+
+        if (VerifyMethodCallbackType(handleData, CALLBACK_TYPE_SYNC, unsubscribing) == false)
         {
-            if (handleData->methodCallback.type == CALLBACK_TYPE_NONE)
-            {
-                /* Codes_SRS_IOTHUBCLIENT_LL_10_029: [ If deviceMethodCallback is NULL and the client is not subscribed to receive method calls, IoTHubClientCore_LL_SetDeviceMethodCallback shall fail and return IOTHUB_CLIENT_ERROR. ] */
-                LogError("not currently set to accept or process incoming messages.");
-                result = IOTHUB_CLIENT_ERROR;
-            }
-            else if (handleData->methodCallback.type == CALLBACK_TYPE_ASYNC)
-            {
-                /* Codes_SRS_IOTHUBCLIENT_LL_10_028: [If the user has subscribed using IoTHubClientCore_LL_SetDeviceMethodCallback_Ex, IoTHubClientCore_LL_SetDeviceMethodCallback shall fail and return IOTHUB_CLIENT_ERROR. ] */
-                LogError("Invalid workflow sequence. Please unsubscribe using the IoTHubClientCore_LL_SetDeviceMethodCallback_Ex function.");
-                result = IOTHUB_CLIENT_ERROR;
-            }
-            else
-            {
-                /*Codes_SRS_IOTHUBCLIENT_LL_02_019: [If parameter messageCallback is NULL then IoTHubClientCore_LL_SetMessageCallback shall call the underlying layer's _Unsubscribe function and return IOTHUB_CLIENT_OK.] */
-                /*Codes_SRS_IOTHUBCLIENT_LL_12_018: [If deviceMethodCallback is NULL, then IoTHubClientCore_LL_SetDeviceMethodCallback shall call the underlying layer's IoTHubTransport_Unsubscribe_DeviceMethod function and return IOTHUB_CLIENT_OK. ] */
-                /*Codes_SRS_IOTHUBCLIENT_LL_12_022: [ Otherwise IoTHubClientCore_LL_SetDeviceMethodCallback shall succeed and return IOTHUB_CLIENT_OK. ]*/
-                handleData->IoTHubTransport_Unsubscribe_DeviceMethod(handleData->deviceHandle);
-                handleData->methodCallback.type = CALLBACK_TYPE_NONE;
-                handleData->methodCallback.callbackSync = NULL;
-                handleData->methodCallback.userContextCallback = NULL;
-                result = IOTHUB_CLIENT_OK;
-            }
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        else if (unsubscribing)
+        {
+            /*Codes_SRS_IOTHUBCLIENT_LL_02_019: [If parameter messageCallback is NULL then IoTHubClientCore_LL_SetMessageCallback shall call the underlying layer's _Unsubscribe function and return IOTHUB_CLIENT_OK.] */
+            /*Codes_SRS_IOTHUBCLIENT_LL_12_018: [If deviceMethodCallback is NULL, then IoTHubClientCore_LL_SetDeviceMethodCallback shall call the underlying layer's IoTHubTransport_Unsubscribe_DeviceMethod function and return IOTHUB_CLIENT_OK. ] */
+            /*Codes_SRS_IOTHUBCLIENT_LL_12_022: [ Otherwise IoTHubClientCore_LL_SetDeviceMethodCallback shall succeed and return IOTHUB_CLIENT_OK. ]*/
+            handleData->IoTHubTransport_Unsubscribe_DeviceMethod(handleData->deviceHandle);
+            ResetMethodCallbackData(handleData);
+            result = IOTHUB_CLIENT_OK;
         }
         else
         {
-            if (handleData->methodCallback.type == CALLBACK_TYPE_ASYNC)
+            /*Codes_SRS_IOTHUBCLIENT_LL_12_019: [ If deviceMethodCallback is not NULL, then IoTHubClientCore_LL_SetDeviceMethodCallback shall call the underlying layer's IoTHubTransport_Subscribe_DeviceMethod function. ]*/
+            if (handleData->IoTHubTransport_Subscribe_DeviceMethod(handleData->deviceHandle) == 0)
             {
-                /* Codes_SRS_IOTHUBCLIENT_LL_10_028: [If the user has subscribed using IoTHubClientCore_LL_SetDeviceMethodCallback_Ex, IoTHubClientCore_LL_SetDeviceMethodCallback shall fail and return IOTHUB_CLIENT_ERROR. ] */
-                LogError("Invalid workflow sequence. Please unsubscribe using the IoTHubClientCore_LL_SetDeviceMethodCallback_Ex function before subscribing with IoTHubClientCore_LL_SetDeviceMethodCallback.");
-                result = IOTHUB_CLIENT_ERROR;
+                /*Codes_SRS_IOTHUBCLIENT_LL_12_022: [ Otherwise IoTHubClientCore_LL_SetDeviceMethodCallback shall succeed and return IOTHUB_CLIENT_OK. ]*/
+                handleData->methodCallback.type = CALLBACK_TYPE_SYNC;
+                handleData->methodCallback.callbackSync = deviceMethodCallback;
+                handleData->methodCallback.callbackAsync = NULL;
+                handleData->methodCallback.userContextCallback = userContextCallback;
+                result = IOTHUB_CLIENT_OK;
             }
             else
             {
-                /*Codes_SRS_IOTHUBCLIENT_LL_12_019: [ If deviceMethodCallback is not NULL, then IoTHubClientCore_LL_SetDeviceMethodCallback shall call the underlying layer's IoTHubTransport_Subscribe_DeviceMethod function. ]*/
-                if (handleData->IoTHubTransport_Subscribe_DeviceMethod(handleData->deviceHandle) == 0)
-                {
-                    /*Codes_SRS_IOTHUBCLIENT_LL_12_022: [ Otherwise IoTHubClientCore_LL_SetDeviceMethodCallback shall succeed and return IOTHUB_CLIENT_OK. ]*/
-                    handleData->methodCallback.type = CALLBACK_TYPE_SYNC;
-                    handleData->methodCallback.callbackSync = deviceMethodCallback;
-                    handleData->methodCallback.callbackAsync = NULL;
-                    handleData->methodCallback.userContextCallback = userContextCallback;
-                    result = IOTHUB_CLIENT_OK;
-                }
-                else
-                {
-                    /*Codes_SRS_IOTHUBCLIENT_LL_12_020: [ If the underlying layer's IoTHubTransport_Subscribe_DeviceMethod function fails, then IoTHubClientCore_LL_SetDeviceMethodCallback shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-                    /*Codes_SRS_IOTHUBCLIENT_LL_12_021: [ If adding the information fails for any reason, IoTHubClientCore_LL_SetDeviceMethodCallback shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-                    LogError("IoTHubTransport_Subscribe_DeviceMethod failed");
-                    handleData->methodCallback.type = CALLBACK_TYPE_NONE;
-                    handleData->methodCallback.callbackAsync = NULL;
-                    handleData->methodCallback.callbackSync = NULL;
-                    handleData->methodCallback.userContextCallback = NULL;
-                    result = IOTHUB_CLIENT_ERROR;
-                }
+                /*Codes_SRS_IOTHUBCLIENT_LL_12_020: [ If the underlying layer's IoTHubTransport_Subscribe_DeviceMethod function fails, then IoTHubClientCore_LL_SetDeviceMethodCallback shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+                /*Codes_SRS_IOTHUBCLIENT_LL_12_021: [ If adding the information fails for any reason, IoTHubClientCore_LL_SetDeviceMethodCallback shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+                LogError("IoTHubTransport_Subscribe_DeviceMethod failed");
+                ResetMethodCallbackData(handleData);
+                result = IOTHUB_CLIENT_ERROR;
             }
         }
     }
+
     return result;
 }
 
@@ -2624,59 +2649,35 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(IOTHUB_CLIEN
     else
     {
         IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)iotHubClientHandle;
-        if (inboundDeviceMethodCallback == NULL)
+        bool unsubscribing = (inboundDeviceMethodCallback == NULL);
+
+        if (VerifyMethodCallbackType(handleData, CALLBACK_TYPE_ASYNC, unsubscribing) == false)
         {
-            if (handleData->methodCallback.type == CALLBACK_TYPE_NONE)
-            {
-                /* Codes_SRS_IOTHUBCLIENT_LL_10_030: [ If deviceMethodCallback is NULL and the client is not subscribed to receive method calls, IoTHubClientCore_LL_SetDeviceMethodCallback shall fail and return IOTHUB_CLIENT_ERROR. ] */
-                LogError("not currently set to accept or process incoming messages.");
-                result = IOTHUB_CLIENT_ERROR;
-            }
-            else if (handleData->methodCallback.type == CALLBACK_TYPE_SYNC)
-            {
-                /* Codes_SRS_IOTHUBCLIENT_LL_10_031: [If the user has subscribed using IoTHubClientCore_LL_SetDeviceMethodCallback, IoTHubClientCore_LL_SetDeviceMethodCallback_Ex shall fail and return IOTHUB_CLIENT_ERROR. ] */
-                LogError("Invalid workflow sequence. Please unsubscribe using the IoTHubClientCore_LL_SetDeviceMethodCallback function.");
-                result = IOTHUB_CLIENT_ERROR;
-            }
-            else
-            {
-                /* Codes_SRS_IOTHUBCLIENT_LL_07_022: [ If inboundDeviceMethodCallback is NULL then IoTHubClientCore_LL_SetDeviceMethodCallback_Ex shall call the underlying layer's IoTHubTransport_Unsubscribe_DeviceMethod function and return IOTHUB_CLIENT_OK.] */
-                handleData->IoTHubTransport_Unsubscribe_DeviceMethod(handleData->deviceHandle);
-                handleData->methodCallback.type = CALLBACK_TYPE_NONE;
-                handleData->methodCallback.callbackAsync = NULL;
-                handleData->methodCallback.userContextCallback = NULL;
-                result = IOTHUB_CLIENT_OK;
-            }
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        else if (unsubscribing)
+        {
+            /* Codes_SRS_IOTHUBCLIENT_LL_07_022: [ If inboundDeviceMethodCallback is NULL then IoTHubClientCore_LL_SetDeviceMethodCallback_Ex shall call the underlying layer's IoTHubTransport_Unsubscribe_DeviceMethod function and return IOTHUB_CLIENT_OK.] */
+            handleData->IoTHubTransport_Unsubscribe_DeviceMethod(handleData->deviceHandle);
+            ResetMethodCallbackData(handleData);
+            result = IOTHUB_CLIENT_OK;
         }
         else
         {
-            if (handleData->methodCallback.type == CALLBACK_TYPE_SYNC)
+            if (handleData->IoTHubTransport_Subscribe_DeviceMethod(handleData->deviceHandle) == 0)
             {
-                /* Codes_SRS_IOTHUBCLIENT_LL_10_031: [If the user has subscribed using IoTHubClientCore_LL_SetDeviceMethodCallback, IoTHubClientCore_LL_SetDeviceMethodCallback_Ex shall fail and return IOTHUB_CLIENT_ERROR. ] */
-                LogError("Invalid workflow sequence. Please unsubscribe using the IoTHubClientCore_LL_SetDeviceMethodCallback function before subscribing with IoTHubClientCore_LL_SetDeviceMethodCallback_Ex.");
-                result = IOTHUB_CLIENT_ERROR;
+                handleData->methodCallback.type = CALLBACK_TYPE_ASYNC;
+                handleData->methodCallback.callbackAsync = inboundDeviceMethodCallback;
+                handleData->methodCallback.callbackSync = NULL;
+                handleData->methodCallback.userContextCallback = userContextCallback;
+                result = IOTHUB_CLIENT_OK;
             }
             else
             {
-                /* Codes_SRS_IOTHUBCLIENT_LL_07_023: [ If inboundDeviceMethodCallback is non-NULL then IoTHubClientCore_LL_SetDeviceMethodCallback_Ex shall call the underlying layer's IoTHubTransport_Subscribe_DeviceMethod function.]*/
-                if (handleData->IoTHubTransport_Subscribe_DeviceMethod(handleData->deviceHandle) == 0)
-                {
-                    handleData->methodCallback.type = CALLBACK_TYPE_ASYNC;
-                    handleData->methodCallback.callbackAsync = inboundDeviceMethodCallback;
-                    handleData->methodCallback.callbackSync = NULL;
-                    handleData->methodCallback.userContextCallback = userContextCallback;
-                    result = IOTHUB_CLIENT_OK;
-                }
-                else
-                {
-                    /* Codes_SRS_IOTHUBCLIENT_LL_07_025: [ If any error is encountered then IoTHubClientCore_LL_SetDeviceMethodCallback_Ex shall return IOTHUB_CLIENT_ERROR.] */
-                    LogError("IoTHubTransport_Subscribe_DeviceMethod failed");
-                    handleData->methodCallback.type = CALLBACK_TYPE_NONE;
-                    handleData->methodCallback.callbackAsync = NULL;
-                    handleData->methodCallback.callbackSync = NULL;
-                    handleData->methodCallback.userContextCallback = NULL;
-                    result = IOTHUB_CLIENT_ERROR;
-                }
+                /* Codes_SRS_IOTHUBCLIENT_LL_07_025: [ If any error is encountered then IoTHubClientCore_LL_SetDeviceMethodCallback_Ex shall return IOTHUB_CLIENT_ERROR.] */
+                LogError("IoTHubTransport_Subscribe_DeviceMethod failed");
+                ResetMethodCallbackData(handleData);
+                result = IOTHUB_CLIENT_ERROR;
             }
         }
     }
