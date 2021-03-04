@@ -2545,9 +2545,9 @@ static void ResetMethodCallbackData(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleDat
     handleData->methodCallback.userContextCallback = NULL;
 }
 
-static bool VerifyMethodCallbackType(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData, CALLBACK_TYPE desiredCallbackType, bool unsubscribing)
+static IOTHUB_CLIENT_RESULT VerifyMethodCallbackType(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData, CALLBACK_TYPE desiredCallbackType, bool unsubscribing)
 {
-    bool result;
+    IOTHUB_CLIENT_RESULT result;
 
     if (unsubscribing)
     {
@@ -2556,15 +2556,16 @@ static bool VerifyMethodCallbackType(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleDa
         {
             /* Codes_SRS_IOTHUBCLIENT_LL_10_029: [ If deviceMethodCallback is NULL and the client is not subscribed to receive method calls, IoTHubClientCore_LL_SetDeviceMethodCallback shall fail and return IOTHUB_CLIENT_ERROR. ] */
             LogError("not currently set to accept or process incoming messages.");
-            result = false;
+            result = IOTHUB_CLIENT_ERROR;
         }
         else if (handleData->methodCallback.type != desiredCallbackType)
         {
-            result = false;
+            LogError("Need to unsubscribe with same type of device method function (original or _Ex()");
+            result = IOTHUB_CLIENT_ERROR;
         }
         else
         {
-            result = true;
+            result = IOTHUB_CLIENT_OK;
         }
     }
     else
@@ -2573,11 +2574,12 @@ static bool VerifyMethodCallbackType(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleDa
         if ((handleData->methodCallback.type != CALLBACK_TYPE_NONE) &&
             (handleData->methodCallback.type != desiredCallbackType))
         {
-            result = false;
+            LogError("Need to change callback function with same type of device method function (original or _Ex()");
+            result = IOTHUB_CLIENT_ERROR;
         }
         else
         {
-            result = true;
+            result = IOTHUB_CLIENT_OK;
         }
     }
 
@@ -2599,9 +2601,9 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetDeviceMethodCallback(IOTHUB_CLIENT_C
         IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)iotHubClientHandle;
         bool unsubscribing = (deviceMethodCallback == NULL);
 
-        if (VerifyMethodCallbackType(handleData, CALLBACK_TYPE_SYNC, unsubscribing) == false)
+        if ((result = VerifyMethodCallbackType(handleData, CALLBACK_TYPE_SYNC, unsubscribing)) != IOTHUB_CLIENT_OK)
         {
-            result = IOTHUB_CLIENT_ERROR;
+            ;
         }
         else if (unsubscribing)
         {
@@ -2620,7 +2622,6 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetDeviceMethodCallback(IOTHUB_CLIENT_C
                 /*Codes_SRS_IOTHUBCLIENT_LL_12_022: [ Otherwise IoTHubClientCore_LL_SetDeviceMethodCallback shall succeed and return IOTHUB_CLIENT_OK. ]*/
                 handleData->methodCallback.type = CALLBACK_TYPE_SYNC;
                 handleData->methodCallback.callbackSync = deviceMethodCallback;
-                handleData->methodCallback.callbackAsync = NULL;
                 handleData->methodCallback.userContextCallback = userContextCallback;
                 result = IOTHUB_CLIENT_OK;
             }
@@ -2652,9 +2653,9 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(IOTHUB_CLIEN
         IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)iotHubClientHandle;
         bool unsubscribing = (inboundDeviceMethodCallback == NULL);
 
-        if (VerifyMethodCallbackType(handleData, CALLBACK_TYPE_ASYNC, unsubscribing) == false)
+        if ((result = VerifyMethodCallbackType(handleData, CALLBACK_TYPE_ASYNC, unsubscribing)) != IOTHUB_CLIENT_OK)
         {
-            result = IOTHUB_CLIENT_ERROR;
+            ;
         }
         else if (unsubscribing)
         {
@@ -2669,7 +2670,6 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(IOTHUB_CLIEN
             {
                 handleData->methodCallback.type = CALLBACK_TYPE_ASYNC;
                 handleData->methodCallback.callbackAsync = inboundDeviceMethodCallback;
-                handleData->methodCallback.callbackSync = NULL;
                 handleData->methodCallback.userContextCallback = userContextCallback;
                 result = IOTHUB_CLIENT_OK;
             }
