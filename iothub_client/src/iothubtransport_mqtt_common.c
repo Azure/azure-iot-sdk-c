@@ -573,8 +573,8 @@ static int parseDeviceTwinTopicInfo(const char* resp_topic, bool* patch_msg, siz
     return result;
 }
 
-// 
-// retrieveTopicType translates an MQTT topic PUBLISH'd to this device/module into what type (e.g. twin, method, etc.) it represents. 
+//
+// retrieveTopicType translates an MQTT topic PUBLISH'd to this device/module into what type (e.g. twin, method, etc.) it represents.
 //
 static IOTHUB_IDENTITY_TYPE retrieveTopicType(const char* topic_resp, const char* input_queue)
 {
@@ -782,10 +782,10 @@ static int addSystemPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_messag
     return result;
 }
 
-// 
+//
 // addDiagnosticPropertiesTouMqttMessage appends diagnostic data (as specified by IoTHubMessage_SetDiagnosticPropertyData) onto
 // the MQTT topic topic_string.
-// 
+//
 static int addDiagnosticPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_message_handle, STRING_HANDLE topic_string, size_t* index_ptr)
 {
     int result = 0;
@@ -1142,7 +1142,7 @@ static void removeExpiredTwinRequestsFromList(PMQTTTRANSPORT_HANDLE_DATA transpo
 
 //
 // removeExpiredTwinRequests removes any requests that have timed out, regardless of how the request invoked.
-// 
+//
 static void removeExpiredTwinRequests(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
     tickcounter_ms_t current_ms;
@@ -1154,7 +1154,7 @@ static void removeExpiredTwinRequests(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     }
 }
 
-// 
+//
 // publishDeviceTwinMsg invokes umqtt to PUBLISH a request for the twin.
 //
 static int publishDeviceTwinMsg(MQTTTRANSPORT_HANDLE_DATA* transport_data, IOTHUB_DEVICE_TWIN* device_twin_info, MQTT_DEVICE_TWIN_ITEM* mqtt_info)
@@ -1213,7 +1213,7 @@ static int publishDeviceTwinMsg(MQTTTRANSPORT_HANDLE_DATA* transport_data, IOTHU
 
 //
 // changeStateToSubscribeIfAllowed attempts to transition the state machine to subscribe, if our
-// current state will allow it.  
+// current state will allow it.
 // This function does NOT immediately send the SUBSCRIBE however, instead setting things up
 // so the next time DoWork is invoked then the SUBSCRIBE will happen.
 //
@@ -1288,7 +1288,7 @@ static bool isSystemProperty(const char* tokenData)
 
 //
 // addInputNamePropertyToMsg translates the input name (embedded in the MQTT topic name) into the IoTHubMessage handle
-// such that the application can call IoTHubMessage_GetInputName() to retrieve this.  This is only currently used 
+// such that the application can call IoTHubMessage_GetInputName() to retrieve this.  This is only currently used
 // in IoT Edge module to module message communication, so that this module receiving the message can know which module invoked in.
 //
 static int addInputNamePropertyToMsg(IOTHUB_MESSAGE_HANDLE IoTHubMessage, const char* topic_name)
@@ -1346,8 +1346,8 @@ static int addInputNamePropertyToMsg(IOTHUB_MESSAGE_HANDLE IoTHubMessage, const 
 }
 
 //
-// setMqttMessagePropertyIfPossible attempts to translate a "system" property into the IOTHUB_MESSAGE_HANDLE that will be provided to the 
-// application's callback. 
+// setMqttMessagePropertyIfPossible attempts to translate a "system" property into the IOTHUB_MESSAGE_HANDLE that will be provided to the
+// application's callback.
 //
 static int setMqttMessagePropertyIfPossible(IOTHUB_MESSAGE_HANDLE IoTHubMessage, const char* propName, const char* propValue, size_t nameLen)
 {
@@ -1449,7 +1449,7 @@ static int setMqttMessagePropertyIfPossible(IOTHUB_MESSAGE_HANDLE IoTHubMessage,
 }
 
 //
-// extractMqttProperties parses the MQTT topic PUBLISH'd to this device/module, retrieves properties and fills out the 
+// extractMqttProperties parses the MQTT topic PUBLISH'd to this device/module, retrieves properties and fills out the
 // IOTHUB_MESSAGE_HANDLE which will ultimately be delivered to the application callback.
 //
 static int extractMqttProperties(IOTHUB_MESSAGE_HANDLE IoTHubMessage, const char* topic_name, bool urldecode)
@@ -1719,7 +1719,7 @@ static void processDeviceMethodNotification(PMQTTTRANSPORT_HANDLE_DATA transport
             {
                 /* CodesSRS_IOTHUB_MQTT_TRANSPORT_07_053: [ If type is IOTHUB_TYPE_DEVICE_METHODS, then on success mqttNotificationCallback shall call IoTHubClientCore_LL_DeviceMethodComplete. ] */
                 const APP_PAYLOAD* payload = mqttmessage_getApplicationMsg(msgHandle);
-                if (payload == NULL || 
+                if (payload == NULL ||
                     transportData->transport_callbacks.method_complete_cb(STRING_c_str(method_name), payload->message, payload->length, (void*)dev_method_info, transportData->transport_ctx) != 0)
                 {
                     LogError("Failure: IoTHubClientCore_LL_DeviceMethodComplete");
@@ -1732,7 +1732,7 @@ static void processDeviceMethodNotification(PMQTTTRANSPORT_HANDLE_DATA transport
     }
 }
 
-// 
+//
 // processIncomingMessageNotification processes both C2D messages and messages sent from one IoT Edge module into this module
 //
 static void processIncomingMessageNotification(PMQTTTRANSPORT_HANDLE_DATA transportData, MQTT_MESSAGE_HANDLE msgHandle, const char* topic_resp, IOTHUB_IDENTITY_TYPE type)
@@ -1796,7 +1796,7 @@ static void processIncomingMessageNotification(PMQTTTRANSPORT_HANDLE_DATA transp
 // mqttNotificationCallback processes incoming PUBLISH messages sent from Hub (or IoT Edge) to this device.
 // This function is invoked by umqtt.  It determines what topic the PUBLISH was directed at (e.g. Device Twin, Method, etc.),
 // performs further parsing based on topic, and translates this call up to "iothub_client" layer for ultimate delivery to application callback.
-// 
+//
 static void mqttNotificationCallback(MQTT_MESSAGE_HANDLE msgHandle, void* callbackCtx)
 {
     /* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_051: [ If msgHandle or callbackCtx is NULL, mqttNotificationCallback shall do nothing. ] */
@@ -1980,9 +1980,9 @@ static void ResetConnectionIfNecessary(PMQTTTRANSPORT_HANDLE_DATA transport_data
     }
 }
 
-// 
+//
 // processDisconnectCallback is a callback invoked by umqtt to signal that the disconnection has completed.
-// 
+//
 static void processDisconnectCallback(void* ctx)
 {
     if (ctx != NULL)
@@ -2101,7 +2101,7 @@ static void processErrorCallback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_ER
 }
 
 //
-// SubscribeToMqttProtocol determines which topics we should SUBSCRIBE to, based on existing state, and then 
+// SubscribeToMqttProtocol determines which topics we should SUBSCRIBE to, based on existing state, and then
 // invokes the underlying umqtt layer to send the SUBSCRIBE across the network.
 //
 static void SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
@@ -2221,11 +2221,11 @@ static bool RetrieveMessagePayload(IOTHUB_MESSAGE_HANDLE messageHandle, const un
 }
 
 //
-// ProcessPendingTelemetryMessages examines each telemetry message the device/module has sent that hasn't yet been PUBACK'd.  
+// ProcessPendingTelemetryMessages examines each telemetry message the device/module has sent that hasn't yet been PUBACK'd.
 // For each message, it might:
 // * Ignore it, if its timeout has not yet been reached.
 // * Attempt to retry PUBLISH the message, if has remaining retries left.
-// * Stop attempting to send the message.  This will result in tearing down the underlying MQTT/TCP connection because it indicates 
+// * Stop attempting to send the message.  This will result in tearing down the underlying MQTT/TCP connection because it indicates
 //   something is wrong.
 //
 static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport_data)
@@ -2289,7 +2289,7 @@ static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport
 }
 
 //
-// CreateTransportProviderIfNecessary will create the underlying xioTransport (which handles networking I/O) and 
+// CreateTransportProviderIfNecessary will create the underlying xioTransport (which handles networking I/O) and
 // set its options, assuming the xioTransport does not already exist.
 //
 static int CreateTransportProviderIfNecessary(PMQTTTRANSPORT_HANDLE_DATA transport_data)
@@ -2399,7 +2399,7 @@ static int buildConfigForUsernameStep2IfNeeded(PMQTTTRANSPORT_HANDLE_DATA transp
         else if ((userName = STRING_construct_sprintf("%s?api-version=%s&DeviceClientType=%s", STRING_c_str(transport_data->configPassedThroughUsername), apiVersion, STRING_c_str(productInfoEncoded))) == NULL)
         {
             LogError("Failed constructing string");
-            result = 0;
+            result = MU_FAILURE;
         }
         else if (modelId != NULL)
         {
@@ -2555,7 +2555,7 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 
 //
 // UpdateMqttConnectionStateIfNeeded is used for updating MQTT's underlying connection status during a DoWork loop.
-// Among this function's responsibilities: 
+// Among this function's responsibilities:
 // * Attempt to establish an MQTT connection if one has not been already.
 // * Retries failed connection, if in the correct state.
 // * Processes deferred disconnect requests
@@ -2897,7 +2897,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
 
 //
 // ProcessSubackDoWork processes state transitions responding to a SUBACK packet.
-// This does NOT occur once we receive the SUBACK packet immediately; instead the work is 
+// This does NOT occur once we receive the SUBACK packet immediately; instead the work is
 // deferred to the DoWork loop.
 //
 static void ProcessSubackDoWork(PMQTTTRANSPORT_HANDLE_DATA transport_data)

@@ -1411,7 +1411,7 @@ static int invoke_device_method(const void* context)
             device_method_info.method_id = method_id;
             device_method_info.time_invoked = time(NULL);
 
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 3; i++)
             {
                 device_method_info.method_result = IoTHubDeviceMethod_Invoke(
                     iotHubLonghaul->iotHubSvcDevMethodHandle,
@@ -1421,7 +1421,7 @@ static int invoke_device_method(const void* context)
                     MAX_DEVICE_METHOD_TRAVEL_TIME_SECS,
                     &responseStatus, &responsePayload, &responseSize);
 
-                if (device_method_info.method_result == IOTHUB_DEVICE_METHOD_OK || responseStatus != 404)
+                if (device_method_info.method_result == IOTHUB_DEVICE_METHOD_OK)
                 {
                     break;
                 }
