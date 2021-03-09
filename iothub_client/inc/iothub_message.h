@@ -446,9 +446,14 @@ MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetAsSecurityMessage, I
 */
 MOCKABLE_FUNCTION(, bool, IoTHubMessage_IsSecurityMessage, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 
-IOTHUB_MESSAGE_HANDLE IoTHubMessage_PnP_CreateFromByteArray(const unsigned char* byteArray, size_t size, const IOTHUB_PNP_TELEMETRY_ATTRIBUTES *pnpTelemetryAttributes);
+IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateTelemetry_FromByteArray(
+    const unsigned char* byteArray, 
+    size_t size, 
+    const IOTHUB_PNP_TELEMETRY_ATTRIBUTES *pnpTelemetryAttributes);
 
-IOTHUB_MESSAGE_HANDLE IoTHubMessage_PnP_CreateFromString(const char* source, const IOTHUB_PNP_TELEMETRY_ATTRIBUTES *pnpTelemetryAttributes);
+IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateTelemetry_FromString(
+    const char* source, 
+    const IOTHUB_PNP_TELEMETRY_ATTRIBUTES *pnpTelemetryAttributes);
 
 /**
 * @brief   Frees all resources associated with the given message handle.

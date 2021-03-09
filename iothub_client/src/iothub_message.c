@@ -1225,13 +1225,13 @@ bool IoTHubMessage_IsSecurityMessage(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
     return result;
 }
 
-IOTHUB_MESSAGE_HANDLE IoTHubMessage_PnP_CreateFromByteArray(const unsigned char* byteArray, size_t size, const IOTHUB_PNP_TELEMETRY_ATTRIBUTES *pnpTelemetryAttributes)
+IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateTelemetry_FromByteArray(const unsigned char* byteArray, size_t size, const IOTHUB_PNP_TELEMETRY_ATTRIBUTES *pnpTelemetryAttributes)
 {
     (void)pnpTelemetryAttributes;
     return IoTHubMessage_CreateFromByteArray(byteArray, size);
 }
 
-IOTHUB_MESSAGE_HANDLE IoTHubMessage_PnP_CreateFromString(const char* source, const IOTHUB_PNP_TELEMETRY_ATTRIBUTES *pnpTelemetryAttributes)
+IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateTelemetry_FromString(const char* source, const IOTHUB_PNP_TELEMETRY_ATTRIBUTES *pnpTelemetryAttributes)
 {
     (void)pnpTelemetryAttributes;
     return IoTHubMessage_CreateFromString(source);

@@ -138,7 +138,7 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob(IOTHUB_DEV
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendTelemetry(
                         IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
                         IOTHUB_MESSAGE_HANDLE telemetryMessageHandle,
-                        IOTHUB_CLIENT_PNP_TELEMETRY_CALLBACK telemetryConfirmationCallback,
+                        IOTHUB_CLIENT_TELEMETRY_CALLBACK telemetryConfirmationCallback,
                         void* userContextCallback)
 {
     return IoTHubClientCore_LL_SendEventAsync((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, telemetryMessageHandle, (IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK)telemetryConfirmationCallback, userContextCallback);
@@ -158,7 +158,7 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_RespondToWriteableProperties(
                             IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
                             const unsigned char* properties,
                             size_t propertiesLength,
-                            IOTHUB_PNP_RESPONSE_STATE_CALLBACK pnpResponseStateCallback,
+                            IOTHUB_PROPERTY_ACKNOWLEDGED_CALLBACK propertyAcknowledgedCallback,
                             void* userContextCallback)
 {
     return IoTHubClientCore_LL_SendReportedState((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, properties, propertiesLength, (IOTHUB_CLIENT_REPORTED_STATE_CALLBACK)propertyAcknowledgedCallback, userContextCallback);
@@ -178,7 +178,7 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SubscribeForCommands(
     return 0;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubDeviceClient_GetAndSubscribeToProperties(
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_GetAndSubscribeToProperties(
     IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle,
     IOTHUB_CLIENT_WRITEABLE_PROPERTY_CALLBACK propertyUpdateCallback,
     void* userContextCallback)

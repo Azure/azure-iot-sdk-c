@@ -17,6 +17,7 @@
 #include "iothub_device_client_ll.h"
 #include "iothub_client_options.h"
 #include "iothub_message.h"
+#include "iothub_properties.h"
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/xlogging.h"
@@ -300,24 +301,24 @@ static void PnP_TempControlComponent_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE
 
 
 
-// New code.  PnP_TempControlComponent_UpdatedPropertyCallback receives updated properties
-// and NOT the raw device twin.
 int PnP_TempControlComponent_UpdatedPropertyCallback(
-    const IOTHUB_PNP_DATA_SERIALIZED *updatedPropertySerialized,
-    int properytVersion, /* this is the $version field */
+    IOTHUB_WRITEABLE_PROPERTY_PAYLOAD_TYPE payloadType, 
+    const unsigned char* payLoad,
+    size_t size,
     void* userContextCallback)
 {
     IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient = (IOTHUB_DEVICE_CLIENT_LL_HANDLE)userContextCallback;
-    IOTHUB_PNP_UPDATED_PROPERTY* updatedProperties;
+    IOTHUB_WRITEABLE_PROPERTY* writeableProperties;
     size_t numProperties;
+    int propertiesVersion;
 
-    IoTHub_PnP_Deserialize_UpdatedProperty(updatedPropertySerialized, g_modeledComponents, g_numModeledComponents, &updatedProperties, &numProperties);
+    IoTHub_Deserialize_WriteableProperty(payloadType, payLoad, size, g_modeledComponents, g_numModeledComponents, &writeableProperties, &numProperties, &propertiesVersion);
 
     for (size_t i = 0; i < numProperties; i++) 
     {
-        const IOTHUB_PNP_UPDATED_PROPERTY* updatedProperty = &updatedProperties[i];
+        const IOTHUB_WRITEABLE_PROPERTY* writeableProperty = &writeableProperties[i];
 
-        if (updatedProperty->propertyType == IOTHUB_PNP_UPDATED_PROPERTY_TYPE_REPORTED)
+        if (writeableProperty->propertyType == IOTHUB_WRITEABLE_PROPERTY_TYPE_REPORTED_FROM_DEVICE)
         {
             // We don't process previously reported properties, so ignore.  There is a potential optimization
             // however where if a desired property is the same value and version of a reported, then 
@@ -325,23 +326,25 @@ int PnP_TempControlComponent_UpdatedPropertyCallback(
             continue;
         }
 
-        if (updatedProperty->componentName == NULL) 
+        if (writeableProperty->componentName == NULL) 
         {   
-            LogError("Property=%s arrived for TemperatureControl component itself.  This does not support writeable properties on it (all properties are on subcomponents)", updatedProperty->componentName);
+            LogError("Property=%s arrived for TemperatureControl component itself.  This does not support writeable properties on it (all properties are on subcomponents)", writeableProperty->componentName);
         }
-        else if (strcmp(updatedProperty->componentName, g_thermostatComponent1Name) == 0)
+        else if (strcmp(writeableProperty->componentName, g_thermostatComponent1Name) == 0)
         {
-            PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle1, deviceClient, updatedProperty->propertyName, updatedProperty->propertyValue, properytVersion);
+            PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle1, deviceClient, writeableProperty->propertyName, writeableProperty->propertyValue, propertiesVersion);
         }
-        else if (strcmp(updatedProperty->componentName, g_thermostatComponent2Name) == 0)
+        else if (strcmp(writeableProperty->componentName, g_thermostatComponent2Name) == 0)
         {
-            PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle2, deviceClient, updatedProperty->propertyName, updatedProperty->propertyValue, properytVersion);
+            PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle2, deviceClient, writeableProperty->propertyName, writeableProperty->propertyValue, propertiesVersion);
         }
         else
         {
-            LogError("Component=%s is not implemented by the TemperatureController", updatedProperty->componentName);
+            LogError("Component=%s is not implemented by the TemperatureController", writeableProperty->componentName);
         }
     }
+
+    // TODO: Add API and sample of its invocation freeing up writeableProperties.
     return 0;
 }
 
@@ -370,11 +373,11 @@ void PnP_TempControlComponent_SendWorkingSet(IOTHUB_DEVICE_CLIENT_LL_HANDLE devi
         LogError("Unable to create a workingSet telemetry payload string");
     }
     /* Start new code ...*/
-    else if ((messageHandle = IoTHubMessage_PnP_CreateFromString(workingSetTelemetryPayload, &telemetryAttributes)) == NULL)
+    else if ((messageHandle = IoTHubMessage_CreateTelemetry_FromString(workingSetTelemetryPayload, &telemetryAttributes)) == NULL)
     {
         LogError("IoTHubMessage_CreateFromString failed");
     }
-    else if ((iothubResult = IoTHubDeviceClient_LL_PnP_SendTelemetry(deviceClient, messageHandle, NULL, NULL)) != IOTHUB_CLIENT_OK)
+    else if ((iothubResult = IoTHubDeviceClient_LL_SendTelemetry(deviceClient, messageHandle, NULL, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to send telemetry message, error=%d", iothubResult);
     }
@@ -401,18 +404,18 @@ static void PnP_TempControlComponent_ReportSerialNumber_Property(IOTHUB_DEVICE_C
     IOTHUB_CLIENT_RESULT iothubClientResult;
 
     // New code
-    IOTHUB_PNP_REPORTED_PROPERTY reportedProperty = { 0 };
-    IOTHUB_PNP_DATA_SERIALIZED propertySerialized;
+    IOTHUB_PROPERTY property = { 0 };
+    unsigned char* serializedProperties;
+    size_t serializedPropertiesLength;
 
-    reportedProperty.version = 1;
-    reportedProperty.propertyName = g_serialNumberPropertyName;
-    reportedProperty.propertyValue = g_serialNumberPropertyValue;
+    property.name = g_serialNumberPropertyName;
+    property.value = g_serialNumberPropertyValue;
 
-    if ((iothubClientResult = IoTHub_PnP_Serialize_ReportedProperties(&reportedProperty, 1, &propertySerialized)) != IOTHUB_CLIENT_OK)
+    if ((iothubClientResult = IoTHub_Serialize_Properties(&property, 1, NULL, &serializedProperties, &serializedPropertiesLength)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to serialize reported state, error=%d", iothubClientResult);
     }
-    else if ((iothubClientResult = IoTHubDeviceClient_LL_PnP_SendReportedProperties(deviceClient, &propertySerialized, NULL, NULL)) != IOTHUB_CLIENT_OK)
+    else if ((iothubClientResult = IoTHubDeviceClient_LL_SendProperties(deviceClient, serializedProperties, serializedPropertiesLength, NULL, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to send reported state, error=%d", iothubClientResult);
     }
@@ -571,12 +574,12 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateDeviceClientAndAllocateComponents(vo
         result = false;
     }
     // Start new code (before this had been delegated to PnP_CreateDeviceClientLLHandle but it's clearer to show here.  So this is a wash for LOC
-    else if ((clientResult = IoTHubDeviceClient_LL_PnP_SetCommandCallback(deviceClient, PnP_TempControlComponent_CommandCallback, NULL)) != IOTHUB_CLIENT_OK)
+    else if ((clientResult = IoTHubDeviceClient_LL_SubscribeForCommands(deviceClient, PnP_TempControlComponent_CommandCallback, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("IoTHubDeviceClient_LL_PnP_SetCommandCallback failed, result=%d", clientResult);
         result = false;
     }
-    else if ((clientResult = IoTHubDeviceClient_PnP_SetPropertyCallback(deviceClient, PnP_TempControlComponent_UpdatedPropertyCallback, (void*)deviceClient)) != IOTHUB_CLIENT_OK)
+    else if ((clientResult = IoTHubDeviceClient_LL_GetAndSubscribeToProperties(deviceClient, PnP_TempControlComponent_UpdatedPropertyCallback, (void*)deviceClient)) != IOTHUB_CLIENT_OK)
     {
         LogError("IoTHubDeviceClient_PnP_SetPropertyCallback failed, result=%d", clientResult);
         result = false;

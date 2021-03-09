@@ -19,7 +19,7 @@ typedef struct {
 // 
 typedef enum IOTHUB_WRITABLE_PROPERTY_TYPE_TAG 
 { 
-    IOTHUB_WRITEABLE_PROPERTY_TYPE_REPORTED_FROM_DEVICE
+    IOTHUB_WRITEABLE_PROPERTY_TYPE_REPORTED_FROM_DEVICE,
     IOTHUB_WRITEABLE_PROPERTY_TYPE_WRITEABLE
 } IOTHUB_WRITEABLE_PROPERTY_TYPE;
 
@@ -57,14 +57,29 @@ typedef struct {
     int ackVersion;
 } IOTHUB_WRITEABLE_PROPERTY_RESPONSE;
 
+IOTHUB_CLIENT_RESULT IoTHub_Serialize_Properties(
+    const IOTHUB_PROPERTY* properties, 
+    size_t numProperties, 
+    const char* componentName, 
+    unsigned char** serializedProperties, 
+    size_t* serializedPropertiesLength);
 
-IOTHUB_CLIENT_RESULT IoTHub_Serialize_Properties(const IOTHUB_PROPERTY* properties, size_t numProperties, const char* componentName, unsigned char** serializedProperties, size_t* serializedPropertiesLength);
-
-
-IOTHUB_CLIENT_RESULT IoTHub_Serialize_ResponseToWriteableProperties(const IOTHUB_WRITEABLE_PROPERTY_RESPONSE* properties, size_t numProperties, const char* componentName, unsigned char** serializedProperties, size_t* serializedPropertiesLength);
-
+IOTHUB_CLIENT_RESULT IoTHub_Serialize_ResponseToWriteableProperties(
+    const IOTHUB_WRITEABLE_PROPERTY_RESPONSE* properties, 
+    size_t numProperties, 
+    const char* componentName, 
+    unsigned char** serializedProperties, 
+    size_t* serializedPropertiesLength);
 
 // This is taking A LOT of parameters.  maybe time to move some into a common struct?
-IOTHUB_CLIENT_RESULT IoTHub_Deserialize_WriteableProperty(IOTHUB_WRITEABLE_PROPERTY_PAYLOAD_TYPE payloadType, const unsigned char** serializedProperties, size_t* serializedPropertiesLength, const char** componentName, size_t numComponents, IOTHUB_WRITEABLE_PROPERTY** writeProperties, size_t* numWriteableProperties, int* propertiesVersion);
+IOTHUB_CLIENT_RESULT IoTHub_Deserialize_WriteableProperty(
+    IOTHUB_WRITEABLE_PROPERTY_PAYLOAD_TYPE payloadType, 
+    const unsigned char* serializedProperties, 
+    size_t serializedPropertiesLength, 
+    const char** componentName, 
+    size_t numComponents, 
+    IOTHUB_WRITEABLE_PROPERTY** writeProperties, 
+    size_t* numWriteableProperties, 
+    int* propertiesVersion);
 
 #endif /* IOTHUB_PROPERTIES_H */

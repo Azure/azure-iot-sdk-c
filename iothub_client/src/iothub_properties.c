@@ -71,8 +71,8 @@ IOTHUB_CLIENT_RESULT IoTHub_Serialize_ResponseToWriteableProperties(
 
 IOTHUB_CLIENT_RESULT IoTHub_Deserialize_WriteableProperty(
     IOTHUB_WRITEABLE_PROPERTY_PAYLOAD_TYPE payloadType,
-    const unsigned char** serializedProperties,
-    size_t* serializedPropertiesLength,
+    const unsigned char* serializedProperties,
+    size_t serializedPropertiesLength,
     const char** componentName,
     size_t numComponents,
     IOTHUB_WRITEABLE_PROPERTY** writeProperties,

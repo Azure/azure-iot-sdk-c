@@ -234,6 +234,12 @@ extern "C"
         const char* deviceSasToken;
     } IOTHUB_CLIENT_DEVICE_CONFIG;
 
+    typedef enum  {
+        IOTHUB_WRITEABLE_PROPERTY_PAYLOAD_COMPLETE,
+        IOTHUB_WRITEABLE_PROPERTY_PAYLOAD_PARTIAL
+    } IOTHUB_WRITEABLE_PROPERTY_PAYLOAD_TYPE;
+
+
 #ifdef __cplusplus
 }
 #endif

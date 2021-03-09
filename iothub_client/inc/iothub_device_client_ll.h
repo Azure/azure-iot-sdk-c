@@ -408,16 +408,12 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendProperties(
                             IOTHUB_PROPERTY_ACKNOWLEDGED_CALLBACK propertyAcknowledgedCallback,
                             void* userContextCallback);
 
-
-
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_RespondToWriteableProperties(
                             IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
                             const unsigned char* properties,
                             size_t propertiesLength,
                             IOTHUB_PROPERTY_ACKNOWLEDGED_CALLBACK propertyAcknowledgedCallback,
                             void* userContextCallback);
-
-
 //
 //  Applications receiving commands write to this function signature.
 //
@@ -440,11 +436,6 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SubscribeForCommands(
                          IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC commandCallback, 
                          void* userContextCallback);
 
-typedef enum  {
-    IOTHUB_WRITEABLE_PROPERTY_PAYLOAD_COMPLETE,
-    IOTHUB_WRITEABLE_PROPERTY_PAYLOAD_PARTIAL
-} IOTHUB_WRITEABLE_PROPERTY_PAYLOAD_TYPE;
-
 //
 // Callback application implements to receive a property update.  
 //
@@ -454,9 +445,8 @@ typedef int(*IOTHUB_CLIENT_WRITEABLE_PROPERTY_CALLBACK)(
     size_t size,
     void* userContextCallback);
 
-
 // 
-IOTHUB_CLIENT_RESULT IoTHubDeviceClient_GetAndSubscribeToProperties(
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_GetAndSubscribeToProperties(
     IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle,
     IOTHUB_CLIENT_WRITEABLE_PROPERTY_CALLBACK propertyUpdateCallback,
     void* userContextCallback);
