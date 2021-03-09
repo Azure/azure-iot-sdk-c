@@ -1197,8 +1197,6 @@ int iothub_client_statistics_add_device_twin_desired_info(IOTHUB_CLIENT_STATISTI
         DEVICE_TWIN_DESIRED_INFO* queued_info;
         LIST_ITEM_HANDLE list_item = singlylinkedlist_find(stats->twin_desired_properties, find_device_twin_info_by_id, info);
 
-        LogInfo("type=%s, id=%lu)", MU_ENUM_TO_STRING(DEVICE_TWIN_EVENT_TYPE, type), (unsigned long)info->update_id);
-
         if (list_item == NULL)
         {
             if (type != DEVICE_TWIN_UPDATE_SENT)

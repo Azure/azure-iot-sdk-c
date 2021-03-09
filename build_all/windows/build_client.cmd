@@ -107,11 +107,11 @@ pushd %USERPROFILE%\%cmake-output%
 
 if %build-platform% == Win32 (
 	echo ***Running CMAKE for Win32***
-	cmake %build-root% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Dbuild_python:STRING=%CMAKE_build_python% -Dno_logging:BOOL=%CMAKE_no_logging% -Duse_prov_client:BOOL=%prov_auth% -Duse_tpm_simulator:BOOL=%prov_use_tpm_simulator% -Duse_edge_modules=%use_edge_modules%
+	cmake %build-root% -G "Visual Studio 15 2017" -A Win32 -Drun_unittests:BOOL=%CMAKE_run_unittests% -Dbuild_python:STRING=%CMAKE_build_python% -Dno_logging:BOOL=%CMAKE_no_logging% -Duse_prov_client:BOOL=%prov_auth% -Duse_tpm_simulator:BOOL=%prov_use_tpm_simulator% -Duse_edge_modules=%use_edge_modules%
 	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 ) else (
 	echo ***Running CMAKE for Win64***
-	cmake %build-root% -G "Visual Studio 14 Win64" -Drun_unittests:BOOL=%CMAKE_run_unittests% -Dbuild_python:STRING=%CMAKE_build_python% -Dno_logging:BOOL=%CMAKE_no_logging% -Duse_prov_client:BOOL=%prov_auth% -Duse_tpm_simulator:BOOL=%prov_use_tpm_simulator%  -Duse_edge_modules=%use_edge_modules%
+	cmake %build-root% -G "Visual Studio 15 2017" -A x64 -Drun_unittests:BOOL=%CMAKE_run_unittests% -Dbuild_python:STRING=%CMAKE_build_python% -Dno_logging:BOOL=%CMAKE_no_logging% -Duse_prov_client:BOOL=%prov_auth% -Duse_tpm_simulator:BOOL=%prov_use_tpm_simulator%  -Duse_edge_modules=%use_edge_modules%
 	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 )
 

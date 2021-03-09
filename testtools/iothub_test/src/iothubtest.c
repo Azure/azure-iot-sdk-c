@@ -613,6 +613,35 @@ static char* CreateSendAuthCid(IOTHUB_VALIDATION_INFO* devhubValInfo)
     return result;
 }
 
+static AMQP_VALUE GetMessageDeviceId(MESSAGE_HANDLE uamqp_message)
+{
+    AMQP_VALUE device_id = NULL;
+    AMQP_VALUE uamqp_message_annotations = NULL;
+    if (message_get_message_annotations(uamqp_message, &uamqp_message_annotations) != 0)
+    {
+        LogError("Failed reading the incoming uAMQP message annotations.");
+    }
+    else
+    {
+        if (uamqp_message_annotations == NULL)
+        {
+            LogError("No AMQP message annotations");
+        }
+        else
+        {
+            AMQP_VALUE property_key = amqpvalue_create_symbol("iothub-connection-device-id");
+            if (property_key != NULL)
+            {
+                device_id = amqpvalue_get_map_value(uamqp_message_annotations, property_key);
+                amqpvalue_destroy(property_key);
+            }
+            amqpvalue_destroy(uamqp_message_annotations);
+        }
+    }
+
+    return device_id;
+}
+
 static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE message)
 {
     MESSAGE_RECEIVER_CONTEXT* msg_received_context = (MESSAGE_RECEIVER_CONTEXT*)context;
@@ -654,13 +683,32 @@ static AMQP_VALUE on_message_received_new(const void* context, MESSAGE_HANDLE me
         }
         else
         {
-            if (devhubValInfo->onMessageReceivedCallback(devhubValInfo->onMessageReceivedContext, (const char*)binary_data.bytes, binary_data.length) == 0)
+            const char* deviceid = NULL;
+            AMQP_VALUE device_id = GetMessageDeviceId(message);
+            if (device_id != NULL)
             {
-                result = messaging_delivery_accepted();
+                amqpvalue_get_string(device_id, &deviceid);
+            }
+
+            if (deviceid == NULL || strcmp(devhubValInfo->deviceId, deviceid) == 0)
+            {
+                if (devhubValInfo->onMessageReceivedCallback(devhubValInfo->onMessageReceivedContext, (const char*)binary_data.bytes, binary_data.length) == 0)
+                {
+                    result = messaging_delivery_accepted();
+                }
+                else
+                {
+                    result = messaging_delivery_released();
+                }
             }
             else
             {
                 result = messaging_delivery_released();
+            }
+
+            if (device_id != NULL)
+            {
+                amqpvalue_destroy(device_id);
             }
         }
     }

@@ -984,14 +984,14 @@ static void on_message_processing_completed_callback(MQ_MESSAGE_HANDLE message, 
             msg_ctx->messenger->send_error_count++;
         }
 
-        if (msg_ctx->on_send_complete_callback != NULL)
-        {
-            msg_ctx->on_send_complete_callback(messenger_send_result, messenger_send_reason, msg_ctx->user_context);
-        }
-
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_027: [If `message` has not been destroyed, it shall be destroyed using message_destroy()]
         if (!msg_ctx->is_destroyed)
         {
+            if (msg_ctx->on_send_complete_callback != NULL)
+            {
+                msg_ctx->on_send_complete_callback(messenger_send_result, messenger_send_reason, msg_ctx->user_context);
+            }
+
             message_destroy((MESSAGE_HANDLE)message);
         }
 

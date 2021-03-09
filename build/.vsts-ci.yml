@@ -28,7 +28,7 @@ jobs:
     name: 'aziotbld-win03'
   steps:
   - script: |
-      call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
+      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
       call jenkins\windows_c.cmd
     displayName: 'build'
     env:
@@ -92,7 +92,7 @@ jobs:
     name: 'aziotbld-win03'
   steps:
   - script: |
-      call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
+      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
       call jenkins\windows_c_build_as_dynamic.cmd
     displayName: 'build'
     env:
@@ -331,7 +331,7 @@ jobs:
   displayName: 'windowsx64'
   steps:
   - script: |
-      call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
+      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
       call jenkins\windows_c.cmd --platform x64
     displayName: 'build'
     env:
