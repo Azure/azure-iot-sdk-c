@@ -22,7 +22,7 @@ set(iothub_client_c_files
     ./src/iothub_message.c
     ./src/iothub_module_client.c
     ./src/iothub_module_client_ll.c
-	./src/iothub_pnp.c
+    ./src/iothub_properties.c
     ./src/iothubtransport.c
     ./src/version.c
 )
@@ -43,7 +43,7 @@ set(iothub_client_h_files
     ./inc/iothub_device_client_ll.h
     ./inc/iothub_module_client.h
     ./inc/iothub_module_client_ll.h
-	./inc/iothub_pnp.h	
+    ./inc/iothub_properties.h	
     ./inc/iothub_transport_ll.h
     ./inc/iothub_message.h
     ./inc/internal/iothubtransport.h

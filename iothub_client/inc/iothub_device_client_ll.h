@@ -31,7 +31,6 @@
 
 #include "iothub_transport_ll.h"
 #include "iothub_client_core_ll.h"
-#include "iothub_pnp.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -376,55 +375,53 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
 #endif /*DONT_USE_UPLOADTOBLOB*/
 
 //*********************************************************************************
-// NEW PNP API SPIKE
+// NEW API SPIKE
 //*********************************************************************************
 
-// IOTHUB_CLIENT_PNP_TELEMETRY_CALLBACK is an optional callback application may implement to receive
+// IOTHUB_CLIENT_TELEMETRY_CALLBACK is an optional callback application may implement to receive
 // indication of telemetry success|failure.
-typedef void(*IOTHUB_CLIENT_PNP_TELEMETRY_CALLBACK)(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback);
+typedef void(*IOTHUB_CLIENT_TELEMETRY_CALLBACK)(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback);
 
 //
-//  Sending PnP telemetry API
+//  Sending telemetry API
 //
-IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_SendTelemetry(
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendTelemetry(
                         IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
                         IOTHUB_MESSAGE_HANDLE telemetryMessageHandle,
-                        IOTHUB_CLIENT_PNP_TELEMETRY_CALLBACK pnpTelemetryConfirmationCallback,
+                        IOTHUB_CLIENT_TELEMETRY_CALLBACK telemetryConfirmationCallback,
                         void* userContextCallback);
 
-// Optional callback application may implement to receive notification when property has been updated.
-typedef void(*IOTHUB_PNP_REPORTED_STATE_CALLBACK)(int status_code, void* userContextCallback);
+// Optional callback application may implement to receive notification when property sent from device has been acknowledged by IoT Hub.
+typedef void(*IOTHUB_PROPERTY_ACKNOWLEDGED_CALLBACK)(int status_code, void* userContextCallback);
 
 //
-// IoTHubDeviceClient_PnP_SendReportedProperties sends properties.  
+// IoTHubDeviceClient_SendReportedProperties sends one or more properties.
 //
 // NOTE: Unlike the existing sample implementation, this DOES allow batching of multiple 
 // reported properties in a single call.  Batching is critical for components like DeviceInfo
 // that have ALL properties known up front and want to be less chatty over the network.
 //
-IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_SendReportedProperties(
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendProperties(
                             IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
-                            const IOTHUB_PNP_DATA_SERIALIZED *reportedPropertySerialized,
-                            IOTHUB_PNP_REPORTED_STATE_CALLBACK pnpReportedStateCallback,
+                            const unsigned char* properties,
+                            size_t propertiesLength,
+                            IOTHUB_PROPERTY_ACKNOWLEDGED_CALLBACK propertyAcknowledgedCallback,
                             void* userContextCallback);
 
 
-// Optional callback application may implement to receive notification when property has been responded to.
-typedef void(*IOTHUB_PNP_RESPONSE_STATE_CALLBACK)(int status_code, void* userContextCallback);
 
-IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_SendResponseProperties(
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_RespondToWriteableProperties(
                             IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
-                            const IOTHUB_PNP_DATA_SERIALIZED *responsePropertySerialized,
-                            IOTHUB_PNP_RESPONSE_STATE_CALLBACK pnpResponseStateCallback,
+                            const unsigned char* properties,
+                            size_t propertiesLength,
+                            IOTHUB_PROPERTY_ACKNOWLEDGED_CALLBACK propertyAcknowledgedCallback,
                             void* userContextCallback);
 
 
 //
-//  Applications receiving PnP commands write to this function signature.
-//  This looks almost just like the existing device method callback, with the exception that the SDK will parse out
-//  the component name (if present) and save app from deserializing it.
+//  Applications receiving commands write to this function signature.
 //
-typedef int(*IOTHUB_CLIENT_PNP_COMMAND_CALLBACK_ASYNC)(
+typedef int(*IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC)(
                 const char* componentName,
                 const char* commandName,
                 const unsigned char* payload, 
@@ -437,38 +434,33 @@ typedef int(*IOTHUB_CLIENT_PNP_COMMAND_CALLBACK_ASYNC)(
 //  Applications call this function (a) so SDK subscribes to IoT Hub's device method callback 
 //  and (b) to indicate callback function.
 //
-//  Note that all callbacks for all components go to pnpCommandCallback.  If the device supports mulitple
-//  components, then the application needs to 
 //
-//
-IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_PnP_SetCommandCallback(
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SubscribeForCommands(
                          IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
-                         IOTHUB_CLIENT_PNP_COMMAND_CALLBACK_ASYNC pnpCommandCallback, 
+                         IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC commandCallback, 
                          void* userContextCallback);
 
+typedef enum  {
+    IOTHUB_WRITEABLE_PROPERTY_PAYLOAD_COMPLETE,
+    IOTHUB_WRITEABLE_PROPERTY_PAYLOAD_PARTIAL
+} IOTHUB_WRITEABLE_PROPERTY_PAYLOAD_TYPE;
 
 //
 // Callback application implements to receive a property update.  
 //
-// Note that unlike the initial samples and even pre-summer refresh API, *all*  the properties 
-// are parsed out and provided in a single callback.  (Previously we had a callback per individual property.)
-// Even on C providing everything at once shouldn't be that much of a memory burden, and it's easier for an application 
-// to be able to handle everything in one shot.
-//
-typedef int(*IOTHUB_CLIENT_PNP_PROPERTY_UPDATE_CALLBACK)(
-    const IOTHUB_PNP_DATA_SERIALIZED *updatedPropertySerialized,
+typedef int(*IOTHUB_CLIENT_WRITEABLE_PROPERTY_CALLBACK)(
+    IOTHUB_WRITEABLE_PROPERTY_PAYLOAD_TYPE payloadType, 
+    const unsigned char* payLoad,
+    size_t size,
     void* userContextCallback);
 
+
 // 
-// Application calls IoTHubDeviceClient_PnP_SetPropertyCallback (a) for device to get the twin (C only, long story, other
-// SDKs should be a separate API call) and to SUBSCRIBE to updated patches.
-// 
-IOTHUB_CLIENT_RESULT IoTHubDeviceClient_PnP_SetPropertyCallback(
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_GetAndSubscribeToProperties(
     IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle,
-    IOTHUB_CLIENT_PNP_PROPERTY_UPDATE_CALLBACK propertyUpdateCallback,
+    IOTHUB_CLIENT_WRITEABLE_PROPERTY_CALLBACK propertyUpdateCallback,
     void* userContextCallback);
     
-
 #ifdef __cplusplus
 }
 #endif
