@@ -652,6 +652,7 @@ static void set_expected_calls_for_device_destroy(AMQP_DEVICE_HANDLE handle, AMQ
 
     if (config->authentication_mode == DEVICE_AUTH_MODE_CBS && auth_state != AUTHENTICATION_STATE_STOPPED)
     {
+        STRICT_EXPECTED_CALL(cbs_close(TEST_CBS_HANDLE));
         STRICT_EXPECTED_CALL(authentication_destroy(TEST_AUTHENTICATION_HANDLE));
     }
 
