@@ -318,7 +318,7 @@ int PnP_TempControlComponent_UpdatedPropertyCallback(
     {
         const IOTHUB_WRITEABLE_PROPERTY* writeableProperty = &writeableProperties[i];
 
-        if (writeableProperty->propertyType == IOTHUB_WRITEABLE_PROPERTY_TYPE_REPORTED_FROM_DEVICE)
+        if (writeableProperty->propertyType == IOTHUB_PROPERTY_TYPE_REPORTED_FROM_DEVICE)
         {
             // We don't process previously reported properties, so ignore.  There is a potential optimization
             // however where if a desired property is the same value and version of a reported, then 

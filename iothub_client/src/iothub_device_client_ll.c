@@ -180,9 +180,9 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SubscribeForCommands(
 
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_GetAndSubscribeToProperties(
     IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle,
-    IOTHUB_CLIENT_WRITEABLE_PROPERTY_CALLBACK propertyUpdateCallback,
+    IOTHUB_CLIENT_WRITEABLE_PROPERTY_CALLBACK writeablePropertyCallback,
     void* userContextCallback)
 {
-    return IoTHubClientCore_LL_SetDeviceTwinCallback((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, (IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)propertyUpdateCallback, userContextCallback);
+    return IoTHubClientCore_LL_SetDeviceTwinCallback((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, (IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)writeablePropertyCallback, userContextCallback);
 }
 
