@@ -378,10 +378,13 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
 // NEW API SPIKE
 //*********************************************************************************
 
-// IOTHUB_CLIENT_TELEMETRY_CALLBACK is an optional callback application may implement to receive
-// indication of telemetry success|failure.
+/**
+* @brief    Function callback application implements to receive notifications whet IoT Hub has received telemetry
+*
+* @param    result                Result of operation sending to IoT Hub.
+* @param    userContextCallback   Optional user specified context set in call to IoTHubDeviceClient_LL_SendTelemetry.
+*/
 typedef void(*IOTHUB_CLIENT_TELEMETRY_CALLBACK)(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback);
-
 
 /**
 * @brief    Asynchronous call to send the telemetry message specified by @p telemetryMessageHandle.
@@ -410,8 +413,16 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendTelemetry(
                         IOTHUB_CLIENT_TELEMETRY_CALLBACK telemetryConfirmationCallback,
                         void* userContextCallback);
 
-// Optional callback application may implement to receive notification when property sent from device has been acknowledged by IoT Hub.
-typedef void(*IOTHUB_PROPERTY_ACKNOWLEDGED_CALLBACK)(int status_code, void* userContextCallback);
+/**
+* @brief    Function callback application implements to receive acknowledegments of properties sent from the deviec to IoT Hub.  
+*
+* @param    statusCode            Status code IoT Hub returns when receiving a property or writeable property response from the device.  This corresponds to HTTP status codes.
+* @param    userContextCallback   Optional user specified context set in call to IoTHubDeviceClient_LL_SendProperties or IoTHubDeviceClient_LL_RespondToWriteableProperties.
+* 
+* @remarks
+*           This is the function callback for properties sent by both IoTHubDeviceClient_LL_SendProperties and IoTHubDeviceClient_LL_RespondToWriteableProperties.
+*/
+typedef void(*IOTHUB_PROPERTY_ACKNOWLEDGED_CALLBACK)(int statusCode, void* userContextCallback);
 
 
 /**
@@ -432,14 +443,14 @@ typedef void(*IOTHUB_PROPERTY_ACKNOWLEDGED_CALLBACK)(int status_code, void* user
 * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendProperties(
-                            IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
-                            const unsigned char* properties,
-                            size_t propertiesLength,
-                            IOTHUB_PROPERTY_ACKNOWLEDGED_CALLBACK propertyAcknowledgedCallback,
-                            void* userContextCallback);
+                         IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
+                         const unsigned char* properties,
+                         size_t propertiesLength,
+                         IOTHUB_PROPERTY_ACKNOWLEDGED_CALLBACK propertyAcknowledgedCallback,
+                         void* userContextCallback);
 
 /**
-* @brief    Responds to a writeable property request from the hub.
+* @brief    Responds to a writeable property request from IoT Hub.
 *
 * @param    iotHubClientHandle            The handle created by a call to the create function.
 * @param    properties                    Serialized property data to be sent to IoT Hub.  You can either 
@@ -456,14 +467,29 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendProperties(
 * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_RespondToWriteableProperties(
-                            IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
-                            const unsigned char* properties,
-                            size_t propertiesLength,
-                            IOTHUB_PROPERTY_ACKNOWLEDGED_CALLBACK propertyAcknowledgedCallback,
-                            void* userContextCallback);
-//
-//  Applications receiving commands write to this function signature.
-//
+                        IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
+                        const unsigned char* properties,
+                        size_t propertiesLength,
+                        IOTHUB_PROPERTY_ACKNOWLEDGED_CALLBACK propertyAcknowledgedCallback,
+                        void* userContextCallback);
+
+/**
+* @brief    Function callback application implements to process an incoming command from IoT Hub
+*
+* @param    componentName               Name of the component associated with this request.  If this is targeting the root component, this will be NULL.
+* @param    commandName                 Name of the command associateed with this request.
+* @param    payload                     Raw payload of the request.  This is NOT guaranteed to be a \0 terminated string.
+* @param    size                        Number of bytes of payload.
+* @param    response                    Response generated by the callback that will be sent to IoT Hub.  This must be allocated using malloc().  The SDK 
+*                                       takes ownership of the buffer and will free() it when done.
+* @param    response_size               Number of bytes application is returning in response.
+* @param    userContextCallback         User context pointer set in initial call to IoTHubDeviceClient_LL_SubscribeForCommands.
+*
+*            @b NOTE: The application behavior is undefined if the user calls
+*            the IoTHubDeviceClient_LL_Destroy function from within any callback.
+*
+* @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
+*/
 typedef int(*IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC)(
                 const char* componentName,
                 const char* commandName,
@@ -484,27 +510,32 @@ typedef int(*IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC)(
 * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SubscribeForCommands(
-                         IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
-                         IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC commandCallback, 
-                         void* userContextCallback);
+                        IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
+                        IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC commandCallback, 
+                        void* userContextCallback);
 
-//
-// Callback application implements to receive a writeable property notification. 
-// You can either manually deserialize the payload from the service or use IoTHub_Deserialize_WriteableProperty
-// to deserialize the payload into easier to manipulate structs.
-//
-typedef int(*IOTHUB_CLIENT_WRITEABLE_PROPERTY_CALLBACK)(
-    IOTHUB_WRITEABLE_PROPERTY_PAYLOAD_TYPE payloadType, 
-    const unsigned char* payLoad,
-    size_t size,
-    void* userContextCallback);
 
 /**
-* @brief   Retrieves all properties from IoT Hub and listens for property change notifications.
+* @brief    Function callback application implements to incoming writeable property update
+*
+* @param    payloadType          Whether the payload contains ALL properties from IoT Hub or only the ones that have just been updated.
+* @param    payload              Raw payload of the request.  This is NOT guaranteed to be a \0 terminated string.
+* @param    size                 Number of bytes of payload.
+* @param    userContextCallback  User context pointer set in initial call to IoTHubDeviceClient_LL_GetAndSubscribeToProperties.
+*/
+typedef int(*IOTHUB_CLIENT_WRITEABLE_PROPERTY_CALLBACK)(
+                 IOTHUB_WRITEABLE_PROPERTY_PAYLOAD_TYPE payloadType, 
+                 const unsigned char* payload,
+                 size_t size,
+                 void* userContextCallback);
+
+/**
+* @brief   Retrieves all properties from IoT Hub and listens for updates to writeable properties.
 *
 * @param   iotHubClientHandle        The handle created by a call to the create function.
 * @param   propertyUpdateCallback    Callback both on initial retrieval of properties stored on IoT Hub
-                                     and subsequent service initiated modifications of properties.
+                                     and subsequent service initiated modifications of writeable properties.
+                                     The API IoTHub_Deserialize_WriteableProperty can help deserialize the raw payload stream.
 * @param   userContextCallback       Optional user specified context that will be provided to the
 *                                    callback.
 *
@@ -514,9 +545,9 @@ typedef int(*IOTHUB_CLIENT_WRITEABLE_PROPERTY_CALLBACK)(
 * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_GetAndSubscribeToProperties(
-    IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle,
-    IOTHUB_CLIENT_WRITEABLE_PROPERTY_CALLBACK writeablePropertyCallback,
-    void* userContextCallback);
+                        IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle,
+                        IOTHUB_CLIENT_WRITEABLE_PROPERTY_CALLBACK writeablePropertyCallback,
+                        void* userContextCallback);
     
 #ifdef __cplusplus
 }

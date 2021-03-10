@@ -411,7 +411,7 @@ void PnP_ThermostatComponent_SendTelemetry(PNP_THERMOSTAT_COMPONENT_HANDLE pnpTh
     IOTHUB_MESSAGE_HANDLE messageHandle = NULL;
     IOTHUB_CLIENT_RESULT iothubResult;
 
-    IOTHUB_PNP_TELEMETRY_ATTRIBUTES telemetryAttributes;
+    IOTHUB_TELEMETRY_ATTRIBUTES telemetryAttributes;
     telemetryAttributes.version = 1;
     telemetryAttributes.componentName = pnpThermostatComponent->componentName;
     telemetryAttributes.telemetryContentEncoding = "utf8";

@@ -90,7 +90,7 @@ IOTHUB_CLIENT_RESULT IoTHub_Deserialize_WriteableProperty(
     version = (int)json_value_get_number(versionValue); 
 
     // Simple visitor that goes around tree and counts # of properties needed for the writeProperties struct and allocs
-    GetNumberPropertiesAndAlloc(pnpComponents, numPnPComponents, writeProperties, numWriteableProperties);
+    GetNumberPropertiesAndAlloc(componentsNames, numComponents, writeProperties, numWriteableProperties);
 
     // Note that we need to do same thing if the reported is present.
     numChildren = json_object_get_count(desiredObject);

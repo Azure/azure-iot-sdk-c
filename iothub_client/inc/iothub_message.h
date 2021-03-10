@@ -51,18 +51,20 @@ typedef struct IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA_TAG
     char* diagnosticCreationTimeUtc;
 }IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA, *IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA_HANDLE;
 
-// IOTHUB_PNP_TELEMETRY_ATTRIBUTES is used to set metadata when sending PnP.
-typedef struct IOTHUB_PNP_TELEMETRY_ATTRIBUTES_TAG 
+#define IOTHUB_TELEMETRY_ATTRIBUTES_VERSION 1
+
+/** @brief    This struct defines properties commonly used when sending telemetry. */
+typedef struct IOTHUB_TELEMETRY_ATTRIBUTES_TAG 
 {
-    /* Structure versioning field, not related to any versioning to IoT Hub itself */
+    /** @brief    Structure version.  Currently must be IOTHUB_TELEMETRY_ATTRIBUTES_VERSION. */
     int version; 
-    /* Optional name of component.  NULL for default component in model. */
+    /** @brief    Optional component name that message corresponds to. */
     const char* componentName;
-    /* Content type.  Can be NULL with no default, but putting it here encourages apps to set this. */
+    /** @brief    Optional content type of message. */
     const char* telemetryContentType;
-    /* Content encoding.  Can be NULL with no default, but putting it here encourages apps to set this. */
+    /** @brief    Optional encoding type of message. */
     const char* telemetryContentEncoding;
-} IOTHUB_PNP_TELEMETRY_ATTRIBUTES;
+} IOTHUB_TELEMETRY_ATTRIBUTES;
 
 static const char DIAG_CREATION_TIME_UTC_PROPERTY_NAME[] = "diag_creation_time_utc";
 
@@ -446,14 +448,35 @@ MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetAsSecurityMessage, I
 */
 MOCKABLE_FUNCTION(, bool, IoTHubMessage_IsSecurityMessage, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 
+/**
+* @brief   Creates a new IoT Hub telemetry message from a byte array. The type of the
+*          message will be set to @c IOTHUBMESSAGE_BYTEARRAY.
+*
+* @param   byteArray            The byte array from which the message is to be created.
+* @param   size                 The size of the byte array.
+* @param   telemetryAttributes  Optional structure containing additional telemetry related metadata to associate with the message.
+*
+* @return  A valid @c IOTHUB_MESSAGE_HANDLE if the message was successfully
+*          created or @c NULL in case an error occurs.
+*/
 IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateTelemetry_FromByteArray(
     const unsigned char* byteArray, 
     size_t size, 
-    const IOTHUB_PNP_TELEMETRY_ATTRIBUTES *pnpTelemetryAttributes);
+    const IOTHUB_TELEMETRY_ATTRIBUTES *telemetryAttributes);
 
+/**
+* @brief   Creates a new IoT Hub telemetry message from a string. The type of the
+*          message will be set to @c IOTHUBMESSAGE_STRING.
+*
+* @param   source               The null terminated string from which the message is to be created.
+* @param   telemetryAttributes  Optional structure containing additional telemetry related metadata to associate with the message.
+*
+* @return  A valid @c IOTHUB_MESSAGE_HANDLE if the message was successfully
+*          created or @c NULL in case an error occurs.
+*/
 IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateTelemetry_FromString(
     const char* source, 
-    const IOTHUB_PNP_TELEMETRY_ATTRIBUTES *pnpTelemetryAttributes);
+    const IOTHUB_TELEMETRY_ATTRIBUTES *telemetryAttributes);
 
 /**
 * @brief   Frees all resources associated with the given message handle.

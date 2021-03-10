@@ -360,7 +360,7 @@ void PnP_TempControlComponent_SendWorkingSet(IOTHUB_DEVICE_CLIENT_LL_HANDLE devi
     IOTHUB_CLIENT_RESULT iothubResult;
     char workingSetTelemetryPayload[64];
 
-    IOTHUB_PNP_TELEMETRY_ATTRIBUTES telemetryAttributes;
+    IOTHUB_TELEMETRY_ATTRIBUTES telemetryAttributes;
     telemetryAttributes.version = 1;
     telemetryAttributes.componentName = NULL;
     telemetryAttributes.telemetryContentEncoding = "utf8";
