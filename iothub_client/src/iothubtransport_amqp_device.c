@@ -564,12 +564,6 @@ static void internal_destroy_device(AMQP_DEVICE_INSTANCE* instance)
             twin_messenger_destroy(instance->twin_messenger_handle);
         }
 
-        // close the cbs before destroying the authentication handle 
-        if (instance->cbs_handle != NULL)
-        {
-            cbs_close(instance->cbs_handle);
-        }
-
         if (instance->authentication_handle != NULL)
         {
             authentication_destroy(instance->authentication_handle);

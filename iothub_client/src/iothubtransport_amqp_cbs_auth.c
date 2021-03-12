@@ -463,6 +463,12 @@ int authentication_stop(AUTHENTICATION_HANDLE authentication_handle)
         }
         else
         {
+            // stop pending the cbs operations using this authentication handle 
+            if (instance->state == AUTHENTICATION_STATE_STARTING && instance->cbs_handle != NULL)
+            {
+                cbs_stop(instance->cbs_handle, authentication_handle);
+            }
+
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_033: [`instance->cbs_handle` shall be set to NULL]
             instance->cbs_handle = NULL;
 
