@@ -1991,7 +1991,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_GetTwinAsync(IOTHUB_CLIENT_CORE_HANDLE iot
     return result;
 }
 
-static void FreeDeviceMethodContextIfNeeded(IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientInstance)
+static void freeDeviceMethodContext(IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientInstance)
 {
     if (iotHubClientInstance->method_user_context)
     {
@@ -2000,7 +2000,7 @@ static void FreeDeviceMethodContextIfNeeded(IOTHUB_CLIENT_CORE_INSTANCE* iotHubC
     }
 }
 
-static IOTHUB_CLIENT_RESULT AllocateQueueContextForMethodCallback(IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientInstance, void* userContextCallback)
+static IOTHUB_CLIENT_RESULT allocateQueueContextForMethodCallback(IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientInstance, void* userContextCallback)
 {
     IOTHUB_CLIENT_RESULT result;
 
@@ -2047,14 +2047,14 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetDeviceMethodCallback(IOTHUB_CLIENT_CORE
     }
     else
     {
-        FreeDeviceMethodContextIfNeeded(iotHubClientInstance);
+        freeDeviceMethodContext(iotHubClientInstance);
         if (deviceMethodCallback == NULL)
         {
             result = IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(iotHubClientInstance->IoTHubClientLLHandle, NULL, NULL);
         }
         else
         {
-            if ((result = AllocateQueueContextForMethodCallback(iotHubClientInstance, userContextCallback)) != IOTHUB_CLIENT_OK)
+            if ((result = allocateQueueContextForMethodCallback(iotHubClientInstance, userContextCallback)) != IOTHUB_CLIENT_OK)
             {
                 ;
             }
@@ -2063,7 +2063,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetDeviceMethodCallback(IOTHUB_CLIENT_CORE
             else if ((result = IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(iotHubClientInstance->IoTHubClientLLHandle, iothub_ll_device_method_callback, iotHubClientInstance->method_user_context)) != IOTHUB_CLIENT_OK)
             {
                 LogError("IoTHubClientCore_LL_SetDeviceMethodCallback_Ex failed");
-                FreeDeviceMethodContextIfNeeded(iotHubClientInstance);
+                freeDeviceMethodContext(iotHubClientInstance);
             }
             else
             {
@@ -2102,7 +2102,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetDeviceMethodCallback_Ex(IOTHUB_CLIENT_C
     }
     else
     {
-        FreeDeviceMethodContextIfNeeded(iotHubClientInstance);
+        freeDeviceMethodContext(iotHubClientInstance);
         if (inboundDeviceMethodCallback == NULL)
         {
             /* Codes_SRS_IOTHUBCLIENT_07_008: [ If inboundDeviceMethodCallback is NULL, IoTHubClient_SetDeviceMethodCallback_Ex shall call IoTHubClientCore_LL_SetDeviceMethodCallback_Ex, passing NULL for the iothub_ll_inbound_device_method_callback. ] */
@@ -2110,7 +2110,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetDeviceMethodCallback_Ex(IOTHUB_CLIENT_C
         }
         else
         {
-            if ((result = AllocateQueueContextForMethodCallback(iotHubClientInstance, userContextCallback)) != IOTHUB_CLIENT_OK)
+            if ((result = allocateQueueContextForMethodCallback(iotHubClientInstance, userContextCallback)) != IOTHUB_CLIENT_OK)
             {
                 ;
             }
@@ -2119,7 +2119,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetDeviceMethodCallback_Ex(IOTHUB_CLIENT_C
             else if ((result = IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(iotHubClientInstance->IoTHubClientLLHandle, iothub_ll_inbound_device_method_callback, iotHubClientInstance->method_user_context)) != IOTHUB_CLIENT_OK)
             {
                 LogError("IoTHubClientCore_LL_SetDeviceMethodCallback_Ex failed");
-                FreeDeviceMethodContextIfNeeded(iotHubClientInstance);
+                freeDeviceMethodContext(iotHubClientInstance);
             }
             else
             {

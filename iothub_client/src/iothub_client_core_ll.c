@@ -2603,7 +2603,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetDeviceMethodCallback(IOTHUB_CLIENT_C
 
         if ((result = VerifyMethodCallbackType(handleData, CALLBACK_TYPE_SYNC, unsubscribing)) != IOTHUB_CLIENT_OK)
         {
-            ;
+            LogInfo("Incorrect callback type");
         }
         else if (unsubscribing)
         {
@@ -2655,7 +2655,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(IOTHUB_CLIEN
 
         if ((result = VerifyMethodCallbackType(handleData, CALLBACK_TYPE_ASYNC, unsubscribing)) != IOTHUB_CLIENT_OK)
         {
-            ;
+            LogInfo("Incorrect callback type");
         }
         else if (unsubscribing)
         {
