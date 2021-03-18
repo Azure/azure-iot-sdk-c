@@ -1409,7 +1409,6 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                                     }
                                     amqpvalue_destroy(source);
                                 }
-                                amqpvalue_destroy(described_filter_value);
                                 amqpvalue_destroy(filter_set);
                             }
                         }
