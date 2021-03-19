@@ -425,7 +425,8 @@ jobs:
 - job: openssl_engine
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/openssl-pkcs11"
-  pool: Hosted Ubuntu 1604
+  pool:
+    vmImage: 'ubuntu-20.04'
   displayName: 'OpenSSL with pkcs11 engine and SoftHSM'
   steps:
   - script: |
