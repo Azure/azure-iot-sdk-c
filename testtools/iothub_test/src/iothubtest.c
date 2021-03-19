@@ -932,7 +932,7 @@ static void on_message_receiver_state_changed(const void* context, MESSAGE_RECEI
     {
         IOTHUB_VALIDATION_INFO* devhubValInfo = (IOTHUB_VALIDATION_INFO*) context;
         devhubValInfo->isEventListenerConnected = false;
-        LogInfo("message receiver state: MESSAGE_RECEIVER_STATE_ERROR");
+        LogInfo("Message receiver state: MESSAGE_RECEIVER_STATE_ERROR");
     }
 }
 
