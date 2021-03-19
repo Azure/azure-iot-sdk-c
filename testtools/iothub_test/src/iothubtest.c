@@ -782,12 +782,14 @@ static int asyncWorkFunction(void* context)
 
         if (devhubValInfo->isEventListenerConnected == false)
         {
+            LogInfo("Event listener disconnected, reconnecting...");
             destroyAmqpConnection(devhubValInfo->amqp_connection);
             devhubValInfo->amqp_connection = NULL;
             ThreadAPI_Sleep(1000 * 5);
             devhubValInfo->amqp_connection = createAmqpConnection(devhubValInfo, devhubValInfo->partitionCount, time(NULL) - 180);
             if (devhubValInfo->amqp_connection != NULL)
             {
+                LogInfo("Event listener AMQP connected");
                 devhubValInfo->isEventListenerConnected = true;
             }
         }
@@ -930,6 +932,7 @@ static void on_message_receiver_state_changed(const void* context, MESSAGE_RECEI
     {
         IOTHUB_VALIDATION_INFO* devhubValInfo = (IOTHUB_VALIDATION_INFO*) context;
         devhubValInfo->isEventListenerConnected = false;
+        LogInfo("Message receiver state: MESSAGE_RECEIVER_STATE_ERROR");
     }
 }
 
