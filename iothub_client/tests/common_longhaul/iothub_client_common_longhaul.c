@@ -1423,6 +1423,7 @@ static int invoke_device_method(const void* context)
 
                 if (device_method_info.method_result == IOTHUB_DEVICE_METHOD_OK)
                 {
+                    free(responsePayload);
                     break;
                 }
 
@@ -1616,6 +1617,7 @@ static void check_for_reported_properties_update_on_service_side(IOTHUB_LONGHAUL
                 }
             }
         }
+        free(twin);
     }
 }
 
