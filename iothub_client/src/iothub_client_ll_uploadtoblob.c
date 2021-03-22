@@ -81,9 +81,9 @@ typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA_TAG
     
     char* certificates;
     HTTP_PROXY_OPTIONS http_proxy_options;
-    const char* curl_interface;
     UPOADTOBLOB_CURL_VERBOSITY curl_verbosity_level;
     size_t blob_upload_timeout_secs;
+    const char* curl_interface;
 }IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA;
 
 typedef struct BLOB_UPLOAD_CONTEXT_TAG
@@ -1171,11 +1171,11 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
             upload_data->blob_upload_timeout_secs = *(size_t*)value;
             result = IOTHUB_CLIENT_OK;
         }
-        else if (strcmp(optionName, OPTION_CURL_INTERFACE) == 0)
+        else if (strcmp(optionName, OPTION_NETWORK_INTERFACE_UPLOAD_TO_BLOB) == 0)
         {
             if (value == NULL)
             {
-                LogError("NULL is a not a valid value for curl_interface");
+                LogError("NULL is not a valid value for curl_interface option");
                 result = IOTHUB_CLIENT_INVALID_ARG;
             }
             else

@@ -301,7 +301,7 @@ static BLOB_RESULT SendBlockIdList(HTTPAPIEX_HANDLE httpApiExHandle, const char*
 }
 
 
-BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX getDataCallbackEx, void* context, unsigned int* httpStatus, BUFFER_HANDLE httpResponse, const char* certificates, HTTP_PROXY_OPTIONS *proxyOptions, const char* curl_interface)
+BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX getDataCallbackEx, void* context, unsigned int* httpStatus, BUFFER_HANDLE httpResponse, const char* certificates, HTTP_PROXY_OPTIONS *proxyOptions, const char* networkInterface)
 {
     BLOB_RESULT result;
     const char* hostnameBegin;
@@ -368,7 +368,7 @@ BLOB_RESULT Blob_UploadMultipleBlocksFromSasUri(const char* SASURI, IOTHUB_CLIEN
                     LogError("failure in setting proxy options");
                     result = BLOB_ERROR;
                 }
-                else if (curl_interface != NULL && HTTPAPIEX_SetOption(httpApiExHandle, OPTION_CURL_INTERFACE, curl_interface) == HTTPAPIEX_ERROR)
+                else if ((networkInterface != NULL) && HTTPAPIEX_SetOption(httpApiExHandle, OPTION_CURL_INTERFACE, networkInterface) == HTTPAPIEX_ERROR)
                 {
                     LogError("failure in setting network interface");
                     result = BLOB_ERROR;
