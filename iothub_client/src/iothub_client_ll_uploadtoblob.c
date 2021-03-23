@@ -83,7 +83,7 @@ typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA_TAG
     HTTP_PROXY_OPTIONS http_proxy_options;
     UPOADTOBLOB_CURL_VERBOSITY curl_verbosity_level;
     size_t blob_upload_timeout_secs;
-    const char* curl_interface;
+    const char* networkInterface;
 }IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA;
 
 typedef struct BLOB_UPLOAD_CONTEXT_TAG
@@ -700,9 +700,9 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
                 (void)HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_CURL_VERBOSE, &curl_verbose);
             }
 
-            if (upload_data->curl_interface != NULL)
+            if (upload_data->networkInterface != NULL)
             {
-                (void)HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_CURL_INTERFACE, upload_data->curl_interface);
+                (void)HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_CURL_INTERFACE, upload_data->networkInterface);
             }
             /*transmit the x509certificate and x509privatekey*/
             /*Codes_SRS_IOTHUBCLIENT_LL_02_106: [ - x509certificate and x509privatekey saved options shall be passed on the HTTPAPIEX_SetOption ]*/
@@ -791,7 +791,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
                                     else
                                     {
                                         /*Codes_SRS_IOTHUBCLIENT_LL_02_083: [ IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall call Blob_UploadFromSasUri and capture the HTTP return code and HTTP body. ]*/
-                                        BLOB_RESULT uploadMultipleBlocksResult = Blob_UploadMultipleBlocksFromSasUri(STRING_c_str(sasUri), getDataCallbackEx, context, &httpResponse, responseToIoTHub, upload_data->certificates, &(upload_data->http_proxy_options), upload_data->curl_interface);
+                                        BLOB_RESULT uploadMultipleBlocksResult = Blob_UploadMultipleBlocksFromSasUri(STRING_c_str(sasUri), getDataCallbackEx, context, &httpResponse, responseToIoTHub, upload_data->certificates, &(upload_data->http_proxy_options), upload_data->networkInterface);
                                         if (uploadMultipleBlocksResult == BLOB_ABORTED)
                                         {
                                             /*Codes_SRS_IOTHUBCLIENT_LL_99_008: [ If step 2 is aborted by the client, then the HTTP message body shall look like:  ]*/
@@ -991,9 +991,9 @@ void IoTHubClient_LL_UploadToBlob_Destroy(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h
         {
             free((char *)upload_data->http_proxy_options.password);
         }
-        if (upload_data->curl_interface != NULL)
+        if (upload_data->networkInterface != NULL)
         {
-            free((char*)upload_data->curl_interface);
+            free((char*)upload_data->networkInterface);
         }
         free(upload_data);
     }
@@ -1175,7 +1175,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
         {
             if (value == NULL)
             {
-                LogError("NULL is not a valid value for curl_interface option");
+                LogError("NULL is not a valid value for networkInterface option");
                 result = IOTHUB_CLIENT_INVALID_ARG;
             }
             else
@@ -1188,11 +1188,11 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
                 }
                 else
                 {
-                    if (upload_data->curl_interface != NULL)
+                    if (upload_data->networkInterface != NULL)
                     {
-                        free((char*)upload_data->curl_interface);
+                        free((char*)upload_data->networkInterface);
                     }
-                    upload_data->curl_interface = tempCopy;
+                    upload_data->networkInterface = tempCopy;
                     result = IOTHUB_CLIENT_OK;
                 }
             }
