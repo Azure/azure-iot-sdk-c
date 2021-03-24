@@ -46,6 +46,7 @@ extern "C"
 
     /*
     * @brief    Set the interface name to use as outgoing network interface for upload to blob.
+    * NOTE: Not all HTTP clients support this option. It is currently only supported when using cURL.
     */
     static STATIC_VAR_UNUSED const char* const OPTION_NETWORK_INTERFACE_UPLOAD_TO_BLOB = "network_interface_upload_to_blob";
     static STATIC_VAR_UNUSED const char* OPTION_PRODUCT_INFO = "product_info";

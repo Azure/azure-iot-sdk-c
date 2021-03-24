@@ -700,10 +700,6 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
                 (void)HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_CURL_VERBOSE, &curl_verbose);
             }
 
-            if (upload_data->networkInterface != NULL)
-            {
-                (void)HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_CURL_INTERFACE, upload_data->networkInterface);
-            }
             /*transmit the x509certificate and x509privatekey*/
             /*Codes_SRS_IOTHUBCLIENT_LL_02_106: [ - x509certificate and x509privatekey saved options shall be passed on the HTTPAPIEX_SetOption ]*/
             if ((upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_X509 || upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_X509_ECC) &&
