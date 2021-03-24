@@ -1423,6 +1423,7 @@ static int invoke_device_method(const void* context)
 
                 if (device_method_info.method_result == IOTHUB_DEVICE_METHOD_OK)
                 {
+                    free(responsePayload);
                     break;
                 }
 
@@ -1616,6 +1617,7 @@ static void check_for_reported_properties_update_on_service_side(IOTHUB_LONGHAUL
                 }
             }
         }
+        free(twin);
     }
 }
 
@@ -1715,14 +1717,15 @@ int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
                 IOTHUB_CLIENT_STATISTICS_HANDLE stats_handle;
 
                 ThreadAPI_Sleep(30 * 1000); // Extra time for the hub to create the device
-
                 loop_result = run_on_loop(send_telemetry, iotHubLonghaulRsrcs->test_loop_duration_in_seconds, iotHubLonghaulRsrcs->test_duration_in_seconds, iotHubLonghaulRsrcs);
 
                 ThreadAPI_Sleep((unsigned int)iotHubLonghaulRsrcs->test_loop_duration_in_seconds * 1000 * 10); // Extra time for the last messages.
 
                 stats_handle = longhaul_get_statistics(iotHubLonghaulRsrcs);
 
-                LogInfo("Longhaul telemetry stats: %s", iothub_client_statistics_to_json(stats_handle));
+                char* statistics = iothub_client_statistics_to_json(stats_handle);
+                LogInfo("Longhaul telemetry stats: %s", statistics);
+                free(statistics);
 
                 if (loop_result != 0)
                 {
@@ -1802,7 +1805,9 @@ int longhaul_run_c2d_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
 
             stats_handle = longhaul_get_statistics(iotHubLonghaul);
 
-            LogInfo("Longhaul Cloud-to-Device stats: %s", iothub_client_statistics_to_json(stats_handle));
+            char* statistics = iothub_client_statistics_to_json(stats_handle);
+            LogInfo("Longhaul Cloud-to-Device stats: %s", statistics);
+            free(statistics);
 
             if (loop_result != 0)
             {
@@ -1878,7 +1883,9 @@ int longhaul_run_device_methods_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
 
             stats_handle = longhaul_get_statistics(iotHubLonghaul);
 
-            LogInfo("Longhaul Device Methods stats: %s", iothub_client_statistics_to_json(stats_handle));
+            char* statistics = iothub_client_statistics_to_json(stats_handle);
+            LogInfo("Longhaul Device Methods stats: %s", statistics);
+            free(statistics);
 
             if (loop_result != 0)
             {
@@ -2024,7 +2031,9 @@ int longhaul_run_twin_desired_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE 
 
             stats_handle = longhaul_get_statistics(iotHubLonghaul);
 
-            LogInfo("Longhaul Device Twin Desired Properties stats: %s", iothub_client_statistics_to_json(stats_handle));
+            char* statistics = iothub_client_statistics_to_json(stats_handle);
+            LogInfo("Longhaul Device Twin Desired Properties stats: %s", statistics);
+            free(statistics);
 
             if (loop_result != 0)
             {
@@ -2103,7 +2112,9 @@ int longhaul_run_twin_reported_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE
 
             stats_handle = longhaul_get_statistics(iotHubLonghaul);
 
-            LogInfo("Longhaul Device Twin Reported Properties stats: %s", iothub_client_statistics_to_json(stats_handle));
+            char* statistics = iothub_client_statistics_to_json(stats_handle);
+            LogInfo("Longhaul Device Twin Reported Properties stats: %s", statistics);
+            free(statistics);
 
             if (loop_result != 0)
             {
