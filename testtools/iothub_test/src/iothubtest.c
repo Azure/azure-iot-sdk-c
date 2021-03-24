@@ -108,6 +108,7 @@ const char* AMQP_SEND_AUTHCID_FMT = "iothubowner@sas.root.%s";
 #define MAX_DRAIN_TIME              1000.0
 #define MAX_SHORT_VALUE             32767         /* maximum (signed) short value */
 #define INDEFINITE_TIME             ((time_t)-1)
+#define CONNECTION_2_MIN_TIMEOUT    (2 * 60 * 1000) 
 
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
 
@@ -930,7 +931,7 @@ static void on_connection_state_changed(void* context, CONNECTION_STATE new_conn
     IOTHUB_VALIDATION_INFO* devhubValInfo = (IOTHUB_VALIDATION_INFO*)context;
     if (devhubValInfo->isEventListenerConnected && 
         (new_connection_state == CONNECTION_STATE_END || new_connection_state == CONNECTION_STATE_ERROR) &&
-        (previous_connection_state == CONNECTION_STATE_OPENED /*|| previous_connection_state == CONNECTION_STATE_DISCARDING*/))
+        (previous_connection_state == CONNECTION_STATE_OPENED))
     {
         devhubValInfo->isEventListenerConnected = false;
         LogInfo("AMQP connection state: CONNECTION_STATE_END");
@@ -1024,7 +1025,7 @@ static AMQP_CONN_INFO* createAmqpConnection(IOTHUB_VALIDATION_INFO* devhubValInf
                         destroyAmqpConnection(result);
                         result = NULL;
                     }
-                    else if (connection_set_idle_timeout(result->connection, 2 * 60 * 1000)) // 2 minutes
+                    else if (connection_set_idle_timeout(result->connection, CONNECTION_2_MIN_TIMEOUT)) 
                     {
                         LogError("Failed setting the idle timeout.");
                         destroyAmqpConnection(result);
