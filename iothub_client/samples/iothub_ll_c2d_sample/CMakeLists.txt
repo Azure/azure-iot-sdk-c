@@ -7,45 +7,49 @@ endif()
 
 compileAsC99()
 
-set(iothub_c_files
+# Sample executable
+set(iothub_ll_c2d_sample_c_files
     iothub_ll_c2d_sample.c
-    ${PROJECT_SOURCE_DIR}/certs/certs.c
 )
 
-IF(WIN32)
-    #windows needs this define
-    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-ENDIF(WIN32)
-
-include_directories(${PROJECT_SOURCE_DIR}/certs)
-
-#Conditionally use the SDK trusted certs in the samples
 if(${use_sample_trusted_cert})
     add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
+
+    set(iothub_client_device_twin_and_methods_sample_c_files
+        ${iothub_client_device_twin_and_methods_sample_c_files}
+        ${PROJECT_SOURCE_DIR}/certs/certs.c
+    )
     include_directories(${PROJECT_SOURCE_DIR}/certs)
-    set(iothub_c_files ${iothub_c_files} ${PROJECT_SOURCE_DIR}/certs/certs.c)
 endif()
 
-include_directories(.)
+add_executable(iothub_ll_c2d_sample
+    ${iothub_ll_c2d_sample_c_files}
+)
 
-add_executable(iothub_ll_c2d_sample ${iothub_c_files})
+target_link_libraries(iothub_ll_c2d_sample
+    aziotsharedutil
+    iothub_client
+)
 
-if(${use_http})
-    target_link_libraries(iothub_ll_c2d_sample iothub_client_http_transport)
-    add_definitions(-DUSE_HTTP)
-endif()
-
-if(${use_amqp})
-    target_link_libraries(iothub_ll_c2d_sample iothub_client_amqp_transport iothub_client_amqp_ws_transport)
-    linkUAMQP(iothub_ll_c2d_sample)
-    add_definitions(-DUSE_AMQP)
-endif()
-
+# MQTT Library
 if(${use_mqtt})
-    target_link_libraries(iothub_ll_c2d_sample iothub_client_mqtt_transport iothub_client_mqtt_ws_transport)
-    linkMqttLibrary(iothub_ll_c2d_sample)
-    add_definitions(-DUSE_MQTT)
+    target_link_libraries(iothub_ll_c2d_sample
+        iothub_client_mqtt_transport
+        iothub_client_mqtt_ws_transport
+    )
 endif()
 
-target_link_libraries(iothub_ll_c2d_sample iothub_client)
+# AMQP Library
+if(${use_amqp})
+    target_link_libraries(iothub_ll_c2d_sample
+        iothub_client_amqp_transport
+        iothub_client_amqp_ws_transport
+    )
+endif()
 
+# HTTP Library
+if(${use_http})
+    target_link_libraries(iothub_ll_c2d_sample
+        iothub_client_http_transport
+    )
+endif()

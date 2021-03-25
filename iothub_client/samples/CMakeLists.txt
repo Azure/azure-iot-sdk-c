@@ -6,11 +6,13 @@
 
 usePermissiveRulesForSdkSamplesAndTests()
 
+add_subdirectory(iothub_client_device_twin_and_methods_sample)
 add_subdirectory(iothub_convenience_sample)
 add_subdirectory(iothub_ll_c2d_sample)
 add_subdirectory(iothub_ll_client_x509_sample)
 add_subdirectory(iothub_ll_telemetry_sample)
 add_subdirectory(iotedge_downstream_device_sample)
+
 
 if(${use_mqtt})
     add_subdirectory(pnp)
@@ -20,11 +22,13 @@ if(${use_mqtt})
     if(${use_edge_modules})
         add_subdirectory(iothub_client_sample_module_sender)
         add_subdirectory(iothub_client_sample_module_filter)
+        add_subdirectory(iothub_client_sample_module_method_invoke)
     endif()
 endif()
 
 if(${use_amqp})
     add_subdirectory(iothub_client_sample_amqp_shared_methods)
+    add_subdirectory(iothub_ll_client_sample_amqp_shared)
 endif()
 
 if(${use_http})
@@ -32,15 +36,8 @@ if(${use_http})
         add_subdirectory(iothub_client_sample_upload_to_blob)
         add_subdirectory(iothub_client_sample_upload_to_blob_mb)
     endif()
-    if (${use_edge_modules})
-        add_subdirectory(iothub_client_sample_module_method_invoke)
-    endif()
-endif()
-
-if(${use_amqp} OR ${use_mqtt})
-    add_subdirectory(iothub_client_device_twin_and_methods_sample)
 endif()
 
 if(${use_amqp} OR ${use_http})
-add_subdirectory(iothub_ll_client_shared_sample)
+    add_subdirectory(iothub_ll_client_shared_sample)
 endif()

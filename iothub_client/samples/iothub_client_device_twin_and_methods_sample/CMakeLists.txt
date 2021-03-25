@@ -1,40 +1,30 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-if(NOT ${use_mqtt} AND NOT ${use_amqp})
-    message(FATAL_ERROR "iothub_client_device_twin_and_methods_sample being generated without amqp or mqtt support")
+if(NOT ${use_mqtt} AND NOT ${use_amqp} AND NOT ${use_http})
+    message(FATAL_ERROR "iothub_client_device_twin_and_methods_sample being generated without protocol support")
 endif()
 
 compileAsC99()
-
-# Compiler Defintions
-if(${use_sample_trusted_cert})
-    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
-endif()
 
 # Sample executable
 set(iothub_client_device_twin_and_methods_sample_c_files
     iothub_client_device_twin_and_methods_sample.c
 )
-set(iothub_client_device_twin_and_methods_sample_h_files
-)
 
 if(${use_sample_trusted_cert})
+    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
+
     set(iothub_client_device_twin_and_methods_sample_c_files
         ${iothub_client_device_twin_and_methods_sample_c_files}
         ${PROJECT_SOURCE_DIR}/certs/certs.c
     )
+    include_directories(${PROJECT_SOURCE_DIR}/certs)
 endif()
 
 add_executable(iothub_client_device_twin_and_methods_sample
     ${iothub_client_device_twin_and_methods_sample_c_files}
-    ${iothub_client_device_twin_and_methods_sample_h_files}
 )
-
-include_directories(.)
-if(${use_sample_trusted_cert})
-    include_directories(${PROJECT_SOURCE_DIR}/certs)
-endif()
 
 target_link_libraries(iothub_client_device_twin_and_methods_sample
     aziotsharedutil
@@ -57,6 +47,13 @@ if(${use_amqp})
     )
 endif()
 
+# HTTP Library
+if(${use_http})
+    target_link_libraries(iothub_client_device_twin_and_methods_sample
+        iothub_client_http_transport
+    )
+endif()
+
 # Parson Library
 if(TARGET NOT ${parson})
     add_library(parson
@@ -69,5 +66,5 @@ if (MSVC)
     set_source_files_properties(../deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
 endif()
 
-target_link_libraries(iothub_client_device_twin_and_methods_sample parson)
 include_directories(${PROJECT_SOURCE_DIR}/deps/parson)
+target_link_libraries(iothub_client_device_twin_and_methods_sample parson)

@@ -11,15 +11,10 @@ compileAsC99()
 set(iotedge_downstream_c_files
     iotedge_downstream_device_sample.c
 )
-set(iotedge_downstream_h_files
-)
 
 add_executable(iotedge_downstream_device_sample
     ${iotedge_downstream_c_files}
-    ${iotedge_downstream_h_files}
 )
-
-include_directories(.)
 
 target_link_libraries(iotedge_downstream_device_sample
     aziotsharedutil
