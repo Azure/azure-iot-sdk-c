@@ -42,7 +42,7 @@ if(LINUX)
         ${iothub_client_sample_mqtt_dm_h_files}
     )
 
-    set(AZUREIOT_INC_FOLDER "pi_device" ${SERIALIZER_INC_FOLDER} "." "/usr/include/azureiot" "/usr/include/azureiot/inc")
+    set(AZUREIOT_INC_FOLDER "pi_device" "../../../serializer/inc" "." "/usr/include/azureiot" "/usr/include/azureiot/inc")
     include_directories(${AZUREIOT_INC_FOLDER})
 
     target_link_libraries(iothub_client_sample_mqtt_dm
