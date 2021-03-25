@@ -163,14 +163,16 @@ then
   # Only for testing E2E behaviour !!! 
   TEST_CORES=16
 
+  export IOTHUB_LONGHAUL_TOTAL_DURATION_SECS=600
+
   if [[ $run_valgrind == 1 ]] ;
   then
     #use doctored openssl
     export LD_LIBRARY_PATH=/usr/local/ssl/lib
-    ctest -j $TEST_CORES --output-on-failure --schedule-random
+    ctest -j $TEST_CORES -V --output-on-failure --schedule-random
     export LD_LIBRARY_PATH=
   else
-    ctest -j $TEST_CORES -C "Debug" --output-on-failure --schedule-random
+    ctest -j $TEST_CORES -V -C "Debug" --output-on-failure --schedule-random
   fi
 fi
 
