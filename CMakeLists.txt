@@ -118,15 +118,19 @@ endif()
 if (${use_baltimore_cert})
     add_definitions(-DUSE_BALTIMORE_CERT)
 endif()
+
 if (${use_digicert_g3_cert})
     add_definitions(-DUSE_DIGICERT_G3_CERT)
 endif()
+
 if (${use_microsoftazure_de_cert})
     add_definitions(-DUSE_MICROSOFTAZURE_DE_CERT)
 endif()
+
 if (${use_portal_azure_cn_cert})
     add_definitions(-DUSE_PORTAL_AZURE_CN_CERT)
 endif()
+
 if(${use_sample_trusted_cert})
     add_subdirectory(certs)
 endif()
@@ -454,4 +458,10 @@ if (${use_installed_dependencies})
         DESTINATION
             ${package_location}
     )
+else()
+    install(FILES ${parson_h_install_files}
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
+    install(TARGETS ${parson_install_libs}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
