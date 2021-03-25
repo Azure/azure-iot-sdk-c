@@ -40,16 +40,16 @@ endif()
 if(NOT ${dont_use_uploadtoblob} OR ${use_edge_modules})
     if(TARGET NOT ${parson})
         add_library(parson
-            ./deps/parson/parson.c
-            ./deps/parson/parson.h
+            ${PROJECT_SOURCE_DIR}/deps/parson/parson.c
+            ${PROJECT_SOURCE_DIR}/deps/parson/parson.h
         )
     endif()
 
     if (MSVC)
-        set_source_files_properties(../deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
+        set_source_files_properties(${PROJECT_SOURCE_DIR}/deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
     endif()
     if(${use_installed_dependencies})
-        set(parson_h_install_files ./deps/parson/parson.h)
+        set(parson_h_install_files ${PROJECT_SOURCE_DIR}/deps/parson/parson.h)
         set(parson_install_libs parson)
     endif()
 endif()

@@ -10,6 +10,27 @@ endif()
 
 compileAsC99()
 
+#
+# Parson Library
+#
+if(TARGET NOT ${parson})
+    add_library(parson
+        ${PROJECT_SOURCE_DIR}/deps/parson/parson.c
+        ${PROJECT_SOURCE_DIR}/deps/parson/parson.h
+    )
+endif()
+
+if (MSVC)
+    set_source_files_properties(../deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
+endif()
+if(${use_installed_dependencies})
+    set(parson_h_install_files ./deps/parson/parson.h)
+    set(parson_install_libs parson)
+endif()
+
+#
+# Iothub_service_client Library
+#
 set(iothub_service_client_c_files
     ./src/iothub_deviceconfiguration.c
     ./src/iothub_devicemethod.c
@@ -41,7 +62,7 @@ include_directories(${UAMQP_INCLUDES})
 
 set(IOTHUB_SERVICE_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "This is the include folder for iothub_service_client" FORCE)
 
-include_directories(${CMAKE_CURRENT_LIST_DIR}/../deps/parson ${IOTHUB_SERVICE_CLIENT_INC_FOLDER} ${CMAKE_CURRENT_LIST_DIR}/../iothub_client/inc)
+include_directories(${PROJECT_SOURCE_DIR}/deps/parson ${IOTHUB_SERVICE_CLIENT_INC_FOLDER} ${CMAKE_CURRENT_LIST_DIR}/../iothub_client/inc)
 
 IF(WIN32)
     #windows needs this define
@@ -116,6 +137,14 @@ if(${use_installed_dependencies})
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
     )
     install(FILES ${iothub_service_client_h_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
+
+    install(FILES ${parson_h_install_files}
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
+    )
+    install(TARGETS ${parson_install_libs} EXPORT azure_iot_sdksTargets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    )
 else()
     install(FILES ${iothub_service_client_h_files}
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/iothub_service_client)

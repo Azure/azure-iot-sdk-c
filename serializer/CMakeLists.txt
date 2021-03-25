@@ -17,6 +17,28 @@ endif()
 
 compileAsC99()
 
+#
+# Parson Library
+#
+if(TARGET NOT ${parson})
+    add_library(parson
+        ${PROJECT_SOURCE_DIR}/deps/parson/parson.c
+        ${PROJECT_SOURCE_DIR}/deps/parson/parson.h
+    )
+endif()
+
+if (MSVC)
+    set_source_files_properties(${PROJECT_SOURCE_DIR}/deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
+endif()
+if(${use_installed_dependencies})
+    set(parson_h_install_files ${PROJECT_SOURCE_DIR}/deps/parson/parson.h)
+    set(parson_install_libs parson)
+endif()
+
+
+#
+# Serializer Library
+#
 set(serializer_c_files
     ./src/agenttypesystem.c
     ./src/codefirst.c
@@ -58,7 +80,7 @@ set(serializer_h_files
 #the following "set" statement exports across the project a global variable called SHARED_UTIL_INC_FOLDER that expands to whatever needs to included when using COMMON library
 set(SERIALIZER_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using serializer lib" FORCE)
 
-include_directories(../deps/parson)
+include_directories(${PROJECT_SOURCE_DIR}/deps/parson)
 include_directories(${SERIALIZER_INC_FOLDER} ${SHARED_UTIL_INC_FOLDER})
 include_directories(${AZURE_C_SHARED_UTILITY_INCLUDES})
 
@@ -133,6 +155,14 @@ if(${use_installed_dependencies})
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
     )
     install(FILES ${serializer_h_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
+
+    install(FILES ${parson_h_install_files}
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
+    )
+    install(TARGETS ${parson_install_libs} EXPORT azure_iot_sdksTargets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    )
 else()
     install(FILES ${serializer_h_files}
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)

@@ -8,6 +8,28 @@ compileAsC99()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_PROV_MODULE")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_PROV_MODULE")
 
+#
+# Parson Library
+#
+if(TARGET NOT ${parson})
+    add_library(parson
+        ${PROJECT_SOURCE_DIR}/deps/parson/parson.c
+        ${PROJECT_SOURCE_DIR}/deps/parson/parson.h
+    )
+endif()
+
+if (MSVC)
+    set_source_files_properties(${PROJECT_SOURCE_DIR}/deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
+endif()
+if(${use_installed_dependencies})
+    set(parson_h_install_files ${PROJECT_SOURCE_DIR}/deps/parson/parson.h)
+    set(parson_install_libs parson)
+endif()
+
+
+#
+# Provisioning_client Library
+#
 add_subdirectory(./deps)
 
 set(provisioning_libs)
@@ -115,9 +137,9 @@ elseif (${use_prov_client})
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHSM_TYPE_SYMM_KEY")
             set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHSM_TYPE_SYMM_KEY")
 
-            set(HSM_CLIENT_H_FILES ${HSM_CLIENT_H_FILES} 
+            set(HSM_CLIENT_H_FILES ${HSM_CLIENT_H_FILES}
                 ./adapters/hsm_client_key.h)
-            set(HSM_CLIENT_C_FILES ${HSM_CLIENT_C_FILES} 
+            set(HSM_CLIENT_C_FILES ${HSM_CLIENT_C_FILES}
                 ./adapters/hsm_client_key.c)
         endif()
     endif ()
@@ -163,7 +185,7 @@ set(DEV_AUTH_MODULES_CLIENT_INC_FOLDER "${CMAKE_CURRENT_LIST_DIR}/inc" "${CMAKE_
 
 include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
 include_directories(${SHARED_UTIL_INC_FOLDER})
-include_directories(${CMAKE_CURRENT_LIST_DIR}/../deps/parson)
+include_directories(${PROJECT_SOURCE_DIR}/deps/parson)
 include_directories(${UHTTP_C_INC_FOLDER})
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
 include_directories(${CMAKE_CURRENT_LIST_DIR}/adapters)
@@ -366,6 +388,14 @@ if(${use_installed_dependencies})
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
     )
     install(FILES ${provisioning_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot/azure_prov_client)
+
+    install(FILES ${parson_h_install_files}
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
+    )
+    install(TARGETS ${parson_install_libs} EXPORT azure_iot_sdksTargets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    )
 
     include(CMakePackageConfigHelpers)
 
