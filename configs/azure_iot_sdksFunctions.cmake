@@ -4,8 +4,8 @@
 function(getIoTSDKVersion)
     # First find the applicable line in the file
     file (STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/iothub_client/inc/iothub_client_version.h" iotsdkverstr
-        REGEX "^[\t ]*#[\t ]*define[\t ]*IOTHUB_SDK_VERSION[\t ]*\"([0-9]+)[\\.]([0-9]+)[\\.]([0-9]+)\"")
-
+        REGEX "^[\t ]*#[\t ]*define[\t ]*IOTHUB_SDK_VERSION[\t ]*\"([0-9]+)[\\.]([0-9]+)[\\.]([0-9]+)\"") 
+        
     if (!MATCHES)
         message(FATAL_ERROR "Unable to find version in ${CMAKE_SOURCE_DIR}/iothub_client/inc/iothub_client_version.h")
     else(!MATCHES)
@@ -29,7 +29,7 @@ function(getProvSDKVersion)
     # First find the applicable line in the file   \inc\azure_prov_client
     file (STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/provisioning_client/inc/azure_prov_client/prov_client_const.h" provsdkverstr
         REGEX "^[\t ]*#[\t ]*define[\t ]*PROV_DEVICE_CLIENT_VERSION[\t ]*\"([0-9]+)[\\.]([0-9]+)[\\.]([0-9]+)\"")
-
+        
     if (!MATCHES)
         message(FATAL_ERROR "Unable to find version in ${CMAKE_SOURCE_DIR}/provisioning_client/inc/azure_prov_client/prov_client_const.h")
     else(!MATCHES)
@@ -51,7 +51,7 @@ endfunction(getProvSDKVersion)
 
 function(linkUAMQP whatExecutableIsBuilding)
     include_directories(${UAMQP_INC_FOLDER})
-
+    
     if(WIN32)
         #windows needs this define
         add_definitions(-D_CRT_SECURE_NO_WARNINGS)
@@ -61,7 +61,7 @@ function(linkUAMQP whatExecutableIsBuilding)
 
         if(${use_openssl})
             target_link_libraries(${whatExecutableIsBuilding} $ENV{OpenSSLDir}/lib/ssleay32.lib $ENV{OpenSSLDir}/lib/libeay32.lib)
-
+        
             file(COPY $ENV{OpenSSLDir}/bin/libeay32.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
             file(COPY $ENV{OpenSSLDir}/bin/ssleay32.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
 
