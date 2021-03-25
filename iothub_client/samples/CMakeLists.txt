@@ -1,9 +1,6 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#this is CMakeLists.txt for samples. There's nothing here, except redirections to
-#individual protocol samples
-
 usePermissiveRulesForSdkSamplesAndTests()
 
 add_subdirectory(iothub_client_device_twin_and_methods_sample)
@@ -12,7 +9,6 @@ add_subdirectory(iothub_ll_c2d_sample)
 add_subdirectory(iothub_ll_client_x509_sample)
 add_subdirectory(iothub_ll_telemetry_sample)
 add_subdirectory(iotedge_downstream_device_sample)
-
 
 if(${use_mqtt})
     add_subdirectory(pnp)

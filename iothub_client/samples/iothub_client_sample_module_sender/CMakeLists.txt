@@ -19,5 +19,9 @@ add_executable(iothub_client_sample_module_sender
 target_link_libraries(iothub_client_sample_module_sender
     aziotsharedutil
     iothub_client
+)
+
+# MQTT Library
+target_link_libraries(iothub_client_device_twin_and_methods_sample
     iothub_client_mqtt_transport
 )

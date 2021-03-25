@@ -25,16 +25,6 @@ if(${use_prov_client})
     )
 endif()
 
-if(${use_sample_trusted_cert})
-    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
-
-    set(iothub_client_device_twin_and_methods_sample_c_files
-        ${iothub_client_device_twin_and_methods_sample_c_files}
-        ${PROJECT_SOURCE_DIR}/certs/certs.c
-    )
-    include_directories(${PROJECT_SOURCE_DIR}/certs)
-endif()
-
 add_executable(pnp_temperature_controller
     ${pnp_temperature_controller_c_files}
 )
@@ -44,10 +34,22 @@ include_directories(${PNP_COMMON_DIR})
 target_link_libraries(pnp_temperature_controller
     aziotsharedutil
     iothub_client
+)
+
+# Certs Library
+if(${use_sample_trusted_cert})
+    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
+    include_directories(${PROJECT_SOURCE_DIR}/certs)
+    target_link_libraries(pnp_temperature_controller certs)
+endif()
+
+# MQTT Library
+target_link_libraries(pnp_temperature_controller
     iothub_client_mqtt_transport
     iothub_client_mqtt_ws_transport
 )
 
+# Provisioning Client Library
 if(${use_prov_client})
     target_link_libraries(pnp_temperature_controller
         prov_device_ll_client
@@ -56,16 +58,5 @@ if(${use_prov_client})
 endif()
 
 # Parson Library
-if(TARGET NOT ${parson})
-    add_library(parson
-        ./deps/parson/parson.c
-        ./deps/parson/parson.h
-    )
-endif()
-
-if (MSVC)
-    set_source_files_properties(../deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
-endif()
-
 include_directories(${PROJECT_SOURCE_DIR}/deps/parson)
 target_link_libraries(pnp_temperature_controller parson)

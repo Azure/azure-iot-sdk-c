@@ -35,27 +35,6 @@ if(WIN32)
 endif()
 
 #
-# Parson Library
-#
-if(NOT ${dont_use_uploadtoblob} OR ${use_edge_modules})
-    if(TARGET NOT ${parson})
-        add_library(parson
-            ${PROJECT_SOURCE_DIR}/deps/parson/parson.c
-            ${PROJECT_SOURCE_DIR}/deps/parson/parson.h
-        )
-    endif()
-
-    if (MSVC)
-        set_source_files_properties(${PROJECT_SOURCE_DIR}/deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
-    endif()
-    if(${use_installed_dependencies})
-        set(parson_h_install_files ${PROJECT_SOURCE_DIR}/deps/parson/parson.h)
-        set(parson_install_libs parson)
-    endif()
-endif()
-
-
-#
 # MQTT Library
 #
 if(${use_mqtt})
@@ -505,12 +484,13 @@ if(${use_installed_dependencies})
         RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/../bin
     )
 
-    install(FILES ${parson_h_install_files}
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
-    )
-    install(TARGETS ${parson_install_libs} EXPORT azure_iot_sdksTargets
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    )
-
+    if(NOT ${dont_use_uploadtoblob} OR ${use_edge_modules})
+        install(FILES ${parson_h_install_files}
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
+        )
+        install(TARGETS ${parson_install_libs} EXPORT azure_iot_sdksTargets
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        )
+    endif()
 endif()

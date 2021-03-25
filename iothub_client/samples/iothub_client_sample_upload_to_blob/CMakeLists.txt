@@ -12,16 +12,6 @@ set(iothub_client_sample_upload_to_blob_c_files
     iothub_client_sample_upload_to_blob.c
 )
 
-if(${use_sample_trusted_cert})
-    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
-
-    set(iothub_client_device_twin_and_methods_sample_c_files
-        ${iothub_client_device_twin_and_methods_sample_c_files}
-        ${PROJECT_SOURCE_DIR}/certs/certs.c
-    )
-    include_directories(${PROJECT_SOURCE_DIR}/certs)
-endif()
-
 add_executable(iothub_client_sample_upload_to_blob
     ${iothub_client_sample_upload_to_blob_c_files}
 )
@@ -29,5 +19,16 @@ add_executable(iothub_client_sample_upload_to_blob
 target_link_libraries(iothub_client_sample_upload_to_blob
     aziotsharedutil
     iothub_client
+)
+
+# Certs Library
+if(${use_sample_trusted_cert})
+    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
+    include_directories(${PROJECT_SOURCE_DIR}/certs)
+    target_link_libraries(iothub_client_sample_upload_to_blob certs)
+endif()
+
+# HTTP Library
+target_link_libraries(iothub_client_sample_upload_to_blob
     iothub_client_http_transport
 )
