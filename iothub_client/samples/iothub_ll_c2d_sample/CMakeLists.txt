@@ -7,7 +7,7 @@ endif()
 
 compileAsC99()
 
-# Sample executable
+# Sample Executable
 set(iothub_ll_c2d_sample_c_files
     iothub_ll_c2d_sample.c
 )

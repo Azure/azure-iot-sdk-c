@@ -2,14 +2,14 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 if(NOT ${use_mqtt})
-    message(FATAL_ERROR "pnp_temperatur_controller being generated without mqtt support")
+    message(FATAL_ERROR "pnp_temperatur_controller being generated without MQTT support")
 endif()
 
 compileAsC99()
 
 set(PNP_COMMON_DIR ${CMAKE_CURRENT_LIST_DIR}/../common)
 
-# Sample executable
+# Sample Executable
 set(pnp_temperature_controller_c_files
     pnp_temperature_controller.c
     pnp_thermostat_component.c

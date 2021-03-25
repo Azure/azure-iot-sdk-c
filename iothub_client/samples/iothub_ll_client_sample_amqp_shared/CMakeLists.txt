@@ -2,12 +2,12 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 if(NOT ${use_amqp})
-    message(FATAL_ERROR "iothub_ll_client_sample_amqp_shared being generated without uamqp support")
+    message(FATAL_ERROR "iothub_ll_client_sample_amqp_shared being generated without AMQP support")
 endif()
 
 compileAsC99()
 
-# Sample executable
+# Sample Executable
 set(iothub_ll_client_sample_amqp_shared_c_files
     iothub_ll_client_sample_amqp_shared.c
 )

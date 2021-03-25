@@ -2,12 +2,12 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 if(NOT ${use_mqtt})
-    message(FATAL_ERROR "iothub_client_sample_module_sender being generated without mqtt support")
+    message(FATAL_ERROR "iothub_client_sample_module_sender being generated without MQTT support")
 endif()
 
 compileAsC99()
 
-# Sample executable
+# Sample Executable
 set(iothub_client_sample_module_sender_c_files
     iothub_client_sample_module_sender.c
 )
@@ -22,6 +22,6 @@ target_link_libraries(iothub_client_sample_module_sender
 )
 
 # MQTT Library
-target_link_libraries(iothub_client_device_twin_and_methods_sample
+target_link_libraries(iothub_client_sample_module_sender
     iothub_client_mqtt_transport
 )

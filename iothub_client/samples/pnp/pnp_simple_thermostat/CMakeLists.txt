@@ -2,7 +2,7 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 if(NOT ${use_mqtt})
-    message(FATAL_ERROR "pnp_simple_thermostat being generated without mqtt support")
+    message(FATAL_ERROR "pnp_simple_thermostat being generated without MQTT support")
 endif()
 
 compileAsC99()

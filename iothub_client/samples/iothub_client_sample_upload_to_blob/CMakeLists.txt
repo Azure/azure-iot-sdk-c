@@ -7,7 +7,7 @@ endif()
 
 compileAsC99()
 
-# Sample executable
+# Sample Executable
 set(iothub_client_sample_upload_to_blob_c_files
     iothub_client_sample_upload_to_blob.c
 )

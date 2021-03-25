@@ -6,7 +6,11 @@ cmake_minimum_required(VERSION 2.8.11)
 project(iothub_client_sample_firmware_update)
 
 if(NOT ${use_mqtt})
-    message(FATAL_ERROR "iothub_client_sample_mqtt_dm being generated without mqtt support")
+    message(FATAL_ERROR "iothub_client_sample_mqtt_dm being generated without MQTT support")
+endif()
+
+if(NOT LINUX)
+    message(FATAL_ERROR "iothub_client_sample_mqtt_dm only supported on LINUX platform")
 endif()
 
 macro(compileAsC99)
@@ -27,28 +31,34 @@ compileAsC99()
 
 Option(edison "set edison to ON to build the DM edison sample" OFF)
 
-if(LINUX)
-    # Sample executable
-    set(iothub_client_sample_mqtt_dm_c_files
-        iothub_client_sample_mqtt_dm.c
-        pi_device/pi.c
-    )
-    set(iothub_client_sample_mqtt_dm_h_files
-        iothub_client_sample_mqtt_dm.h
-    )
+# Sample Executable
+set(iothub_client_sample_mqtt_dm_c_files
+    iothub_client_sample_mqtt_dm.c
+    pi_device/pi.c
+)
+set(iothub_client_sample_mqtt_dm_h_files
+    iothub_client_sample_mqtt_dm.h
+)
 
-    add_executable(iothub_client_sample_mqtt_dm
-        ${iothub_client_sample_mqtt_dm_c_files}
-        ${iothub_client_sample_mqtt_dm_h_files}
-    )
+add_executable(iothub_client_sample_mqtt_dm
+    ${iothub_client_sample_mqtt_dm_c_files}
+    ${iothub_client_sample_mqtt_dm_h_files}
+)
 
-    set(AZUREIOT_INC_FOLDER "pi_device" "../../../serializer/inc" "." "/usr/include/azureiot" "/usr/include/azureiot/inc")
-    include_directories(${AZUREIOT_INC_FOLDER})
+set(AZUREIOT_INC_FOLDER "pi_device" "../../../serializer/inc" "." "/usr/include/azureiot" "/usr/include/azureiot/inc")
+include_directories(${AZUREIOT_INC_FOLDER})
 
-    target_link_libraries(iothub_client_sample_mqtt_dm
-        aziotsharedutil
-        iothub_client
-        iothub_client_mqtt_transport
-        serializer
-    )
-endif()
+target_link_libraries(iothub_client_sample_mqtt_dm
+    aziotsharedutil
+    iothub_client
+)
+
+# MQTT Library
+target_link_libraries(iothub_client_sample_mqtt_dm
+    iothub_client_mqtt_transport
+)
+
+# Serializer Library
+target_link_libraries(iothub_client_sample_mqtt_dm
+    serializer
+)

@@ -7,7 +7,7 @@ if(NOT ${use_amqp} AND NOT ${use_http})
     message(FATAL_ERROR "iothub_ll_client_shared_sample being generated without AMQP or HTTP support")
 endif()
 
-# Sample executable
+# Sample Executable
 set(iothub_ll_client_shared_sample_c_files
     iothub_ll_client_shared_sample.c
 )

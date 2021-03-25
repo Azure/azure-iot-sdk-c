@@ -7,7 +7,7 @@ endif()
 
 compileAsC99()
 
-# Sample executable
+# Sample Executable
 set(iotedge_downstream_c_files
     iotedge_downstream_device_sample.c
 )
