@@ -23,7 +23,7 @@ endif()
 
 include_directories(.)
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
-include_directories((${PROJECT_SOURCE_DIR}/deps/parson))
+include_directories(${PROJECT_SOURCE_DIR}/deps/parson)
 
 add_executable(remote_monitoring_client ${remote_monitoring_c_files})
 
@@ -35,3 +35,4 @@ target_link_libraries(remote_monitoring_client iothub_client_mqtt_transport)
 linkMqttLibrary(remote_monitoring_client)
 add_definitions(-DUSE_MQTT)
 
+target_link_libraries(remote_monitoring_client parson)
