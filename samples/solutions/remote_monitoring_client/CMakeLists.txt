@@ -5,21 +5,6 @@
 
 compileAsC99()
 
-#
-# Parson Library
-#
-if(TARGET NOT ${parson})
-    add_library(parson
-        ${PROJECT_SOURCE_DIR}/deps/parson/parson.c
-        ${PROJECT_SOURCE_DIR}/deps/parson/parson.h
-    )
-endif()
-
-if (MSVC)
-    set_source_files_properties(${PROJECT_SOURCE_DIR}/deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
-endif()
-
-
 set(remote_monitoring_c_files
     remote_monitoring.c
 )
@@ -49,3 +34,4 @@ linkSharedUtil(remote_monitoring_client)
 target_link_libraries(remote_monitoring_client iothub_client_mqtt_transport)
 linkMqttLibrary(remote_monitoring_client)
 add_definitions(-DUSE_MQTT)
+

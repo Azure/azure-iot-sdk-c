@@ -10,24 +10,6 @@ endif()
 
 compileAsC99()
 
-#
-# Parson Library
-#
-if(TARGET NOT ${parson})
-    add_library(parson
-        ${PROJECT_SOURCE_DIR}/deps/parson/parson.c
-        ${PROJECT_SOURCE_DIR}/deps/parson/parson.h
-    )
-endif()
-
-if (MSVC)
-    set_source_files_properties(${PROJECT_SOURCE_DIR}/deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
-endif()
-
-
-#
-# Provisioning_service_client Library
-#
 set(provisioning_service_client_c_files
     ./src/provisioning_sc_attestation_mechanism.c
     ./src/provisioning_sc_bulk_operation.c
@@ -61,7 +43,7 @@ set(provisioning_service_client_h_files
 
 include_directories(${SHARED_UTIL_INC_FOLDER})
 include_directories(${UHTTP_C_INC_FOLDER})
-include_directories(${PROJECT_SOURCE_DIR}/deps/parson)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/../deps/parson)
 
 set(PROVISIONING_SERVICE_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "This is the include folder for provisioning_service_client" FORCE)
 
