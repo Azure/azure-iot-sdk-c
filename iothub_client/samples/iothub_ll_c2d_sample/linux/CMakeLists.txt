@@ -17,6 +17,13 @@ set(iothub_c_files
     ../../../../certs/certs.c
 )
 
+add_definitions(-DUSE_HTTP)
+add_definitions(-DUSE_AMQP)
+add_definitions(-DUSE_MQTT)
+
+add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
+include_directories("../../../../certs")
+
 add_executable(iothub_ll_c2d_sample ${iothub_c_files})
 
 target_link_libraries(iothub_ll_c2d_sample
