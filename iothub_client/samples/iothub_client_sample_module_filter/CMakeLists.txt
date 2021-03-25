@@ -1,60 +1,43 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#this is CMakeLists.txt for iothub_client_sample_module_filter
+if(NOT ${use_mqtt})
+    message(FATAL_ERROR "iotedge_downstream_device_sample being generated without protocol support")
+endif()
 
 compileAsC99()
 
-set(iothub_client_sample_module_filter
-iothub_client_sample_module_filter.c
+# Compiler Defintions
+if(${use_sample_trusted_cert})
+    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
+endif()
+
+# Sample executable
+set(iothub_client_sample_module_filter_c_files
+    iothub_client_sample_module_filter.c
+)
+set(iothub_client_sample_module_filter_h_files
 )
 
-IF(WIN32)
-    #windows needs this define
-    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-    add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
-ENDIF(WIN32)
-
-#Conditionally use the SDK trusted certs in the samples
-if(${set_trusted_cert_in_samples})
-    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
-	include_directories(${PROJECT_SOURCE_DIR}/certs)
-	set(samples_cert_file ${PROJECT_SOURCE_DIR}/certs/certs.c)
+if(${use_sample_trusted_cert})
+    set(iothub_client_sample_module_filter_c_files
+        ${iothub_client_sample_module_filter_c_files}
+        ${PROJECT_SOURCE_DIR}/certs/certs.c
+    )
 endif()
+
+add_executable(iothub_client_sample_module_filter
+    ${iothub_client_sample_module_filter_c_files}
+    ${iothub_client_sample_module_filter_h_files}
+)
 
 include_directories(.)
-
-add_executable(iothub_client_sample_module_filter ${iothub_client_sample_module_filter} ${samples_cert_file})
-
-if(${use_http})
-    target_link_libraries(iothub_client_sample_module_filter
-        iothub_client_http_transport
-    )
-    linkSharedUtil(iothub_client_sample_module_filter)
-    linkHttp(iothub_client_sample_module_filter)
-    add_definitions(-DUSE_HTTP)
-endif()
-
-if(${use_amqp})
-    target_link_libraries(iothub_client_sample_module_filter
-    #iothubclient is here only because locking... in gballoc no less.
-        iothub_client_amqp_transport
-    )
-    linkUAMQP(iothub_client_sample_module_filter)
-    add_definitions(-DUSE_AMQP)
-endif()
-
-if(${use_mqtt})
-    target_link_libraries(iothub_client_sample_module_filter
-        iothub_client_mqtt_transport
-    )
-    linkMqttLibrary(iothub_client_sample_module_filter)
-    add_definitions(-DUSE_MQTT)
+if(${set_trusted_cert_in_samples})
+	include_directories(${PROJECT_SOURCE_DIR}/certs)
 endif()
 
 target_link_libraries(iothub_client_sample_module_filter
-#iothubclient is here only because locking... in gballoc no less.
+    aziotsharedutil
     iothub_client
+    iothub_client_mqtt_transport
 )
-
-

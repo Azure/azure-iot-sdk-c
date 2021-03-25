@@ -7,37 +7,44 @@ endif()
 
 compileAsC99()
 
+# Sample executable
 set(iotedge_downstream_c_files
     iotedge_downstream_device_sample.c
 )
+set(iotedge_downstream_h_files
+)
 
-IF(WIN32)
-    #windows needs this define
-    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-ENDIF(WIN32)
+add_executable(iotedge_downstream_device_sample
+    ${iotedge_downstream_c_files}
+    ${iotedge_downstream_h_files}
+)
 
 include_directories(.)
 
-add_executable(iotedge_downstream_device_sample ${iotedge_downstream_c_files})
-if(${build_as_dynamic})
-    target_link_libraries(iotedge_downstream_device_sample iothub_client_dll)
-else()
-    target_link_libraries(iotedge_downstream_device_sample iothub_client)
+target_link_libraries(iotedge_downstream_device_sample
+    aziotsharedutil
+    iothub_client
+)
 
-    if(${use_http})
-        target_link_libraries(iotedge_downstream_device_sample iothub_client_http_transport)
-        add_definitions(-DUSE_HTTP)
-    endif()
+# MQTT Library
+if(${use_mqtt})
+    target_link_libraries(iotedge_downstream_device_sample
+        iothub_client_mqtt_transport
+        iothub_client_mqtt_ws_transport
+    )
+endif()
 
-    if(${use_amqp})
-        target_link_libraries(iotedge_downstream_device_sample iothub_client_amqp_transport iothub_client_amqp_ws_transport)
-        linkUAMQP(iotedge_downstream_device_sample)
-        add_definitions(-DUSE_AMQP)
-    endif()
+# AMQP Library
+if(${use_amqp})
+    target_link_libraries(iotedge_downstream_device_sample
+        iothub_client_amqp_transport
+        iothub_client_amqp_ws_transport
+    )
+endif()
 
-    if(${use_mqtt})
-        target_link_libraries(iotedge_downstream_device_sample iothub_client_mqtt_transport iothub_client_mqtt_ws_transport)
-        linkMqttLibrary(iotedge_downstream_device_sample)
-        add_definitions(-DUSE_MQTT)
-    endif()
+# HTTP Library
+if(${use_http})
+    target_link_libraries(iotedge_downstream_device_sample
+        iothub_client_http_transport
+    )
 endif()

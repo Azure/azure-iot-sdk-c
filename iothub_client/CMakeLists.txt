@@ -37,21 +37,22 @@ endif()
 #
 # Parson Library
 #
-if(TARGET NOT ${parson})
-    add_library(parson
-        ./deps/parson/parson.c
-        ./deps/parson/parson.h
-    )
-endif()
+if(NOT ${dont_use_uploadtoblob} OR ${use_edge_modules})
+    if(TARGET NOT ${parson})
+        add_library(parson
+            ./deps/parson/parson.c
+            ./deps/parson/parson.h
+        )
+    endif()
 
-if (MSVC)
-    set_source_files_properties(../deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
+    if (MSVC)
+        set_source_files_properties(../deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
+    endif()
+    if(${use_installed_dependencies})
+        set(parson_h_install_files ./deps/parson/parson.h)
+        set(parson_install_libs parson)
+    endif()
 endif()
-if(${use_installed_dependencies})
-    set(parson_h_install_files ./deps/parson/parson.h)
-    set(parson_install_libs parson)
-endif()
-
 
 
 #
