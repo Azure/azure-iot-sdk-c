@@ -102,14 +102,14 @@ if(${use_mqtt})
         iothub_client_mqtt_ws_transport
     )
 
-    if(${build_as_dynamic})
-        set(iothub_client_transport_source_files ${iothub_client_transport_source_files}
-            ${iothub_client_mqtt_transport_c_files}
-            ${iothub_client_mqtt_transport_h_files}
-            ${iothub_client_mqtt_ws_transport_c_files}
-            ${iothub_client_mqtt_ws_transport_h_files}
-        )
-    endif()
+ #   if(${build_as_dynamic})
+ #       set(iothub_client_transport_source_files ${iothub_client_transport_source_files}
+ #           ${iothub_client_mqtt_transport_c_files}
+ #           ${iothub_client_mqtt_transport_h_files}
+ #           ${iothub_client_mqtt_ws_transport_c_files}
+ #           ${iothub_client_mqtt_ws_transport_h_files}
+ #       )
+ #   endif()
 
     set(IOTHUB_CLIENT_MQTT_TRANSPORT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client_mqtt_transport lib" FORCE)
     include_directories(${MQTT_INC_FOLDER})
@@ -199,14 +199,14 @@ if(${use_amqp})
         iothub_client_amqp_ws_transport
     )
 
-    if(${build_as_dynamic})
-        set(iothub_client_transport_source_files ${iothub_client_transport_source_files}
-            ${iothub_client_amqp_transport_c_files}
-            ${iothub_client_amqp_transport_h_files}
-            ${iothub_client_amqp_ws_transport_c_files}
-            ${iothub_client_amqp_ws_transport_h_files}
-        )
-    endif()
+#    if(${build_as_dynamic})
+#        set(iothub_client_transport_source_files ${iothub_client_transport_source_files}
+#            ${iothub_client_amqp_transport_c_files}
+#            ${iothub_client_amqp_transport_h_files}
+#            ${iothub_client_amqp_ws_transport_c_files}
+#            ${iothub_client_amqp_ws_transport_h_files}
+#        )
+#    endif()
 
     set(IOTHUB_CLIENT_AMQP_TRANSPORT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client_amqp_transport lib" FORCE)
     include_directories(${UAMQP_INC_FOLDER})
@@ -252,12 +252,12 @@ if(${use_http})
         iothub_client_http_transport
     )
 
-    if(${build_as_dynamic})
-        set(iothub_client_transport_source_files ${iothub_client_transport_source_files}
-            ${iothub_client_http_transport_c_files}
-            ${iothub_client_http_transport_h_files}
-        )
-    endif()
+#    if(${build_as_dynamic})
+#        set(iothub_client_transport_source_files ${iothub_client_transport_source_files}
+#            ${iothub_client_http_transport_c_files}
+#            ${iothub_client_http_transport_h_files}
+#        )
+#    endif()
 
     set(IOTHUB_CLIENT_HTTP_TRANSPORT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client_http_transport lib" FORCE)
     include_directories(${IOTHUB_CLIENT_HTTP_TRANSPORT_INC_FOLDER})
@@ -383,12 +383,11 @@ if (${build_as_dynamic})
         ${iothub_client_c_files}
         ${iothub_client_h_files}
         ${iothub_def_file}
-        ${iothub_client_transport_source_files}
     )
 
     setSdkTargetBuildProperties(iothub_client_dll)
 
-    #target_link_libraries(iothub_client_dll ${iothub_client_transport_static_libs})
+    target_link_libraries(iothub_client_dll ${iothub_client_transport_static_libs})
     if(NOT ${dont_use_uploadtoblob} OR ${use_edge_modules})
         target_link_libraries(iothub_client_dll parson)
     endif()
