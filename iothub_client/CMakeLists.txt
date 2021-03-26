@@ -352,18 +352,6 @@ if(${use_prov_client_core})
 endif()
 
 if (${build_as_dynamic})
-    set_target_properties(iothub_client_dll PROPERTIES
-        ARCHIVE_OUTPUT_NAME "iothub_client_dll_import"
-        ENABLE_EXPORTS YES
-        VERSION ${IOT_SDK_VERSION}
-        SOVERSION ${IOT_SDK_VERION_MAJOR}
-        BUILD_WITH_INSTALL_RPATH TRUE
-    )
-
-    if(NOT WIN32)
-        set_target_properties(iothub_client_dll PROPERTIES OUTPUT_NAME "iothub_client")
-    endif()
-
     set(iothub_def_file ./src/iothub_client_dll.def)
     if(${use_mqtt})
         set(iothub_def_file ${iothub_def_file}
@@ -417,6 +405,18 @@ if (${build_as_dynamic})
     #set(iothub_client_transport_static_libs ${iothub_client_transport_static_libs}
     #    iothub_client_dll
     #)
+
+    set_target_properties(iothub_client_dll PROPERTIES
+        ARCHIVE_OUTPUT_NAME "iothub_client_dll_import"
+        ENABLE_EXPORTS YES
+        VERSION ${IOT_SDK_VERSION}
+        SOVERSION ${IOT_SDK_VERION_MAJOR}
+        BUILD_WITH_INSTALL_RPATH TRUE
+    )
+
+    if(NOT WIN32)
+        set_target_properties(iothub_client_dll PROPERTIES OUTPUT_NAME "iothub_client")
+    endif()
 endif()
 
 set(IOTHUB_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client lib" FORCE)
