@@ -10,13 +10,15 @@ endif()
 
 compileAsC99()
 
-set(iothub_client_libs)
+set(iothub_client_transport_static_libs)
+if(${build_as_dynamic})
+    set(iothub_client_transport_source_files)
+endif()
 if(${use_installed_dependencies})
     set(iothub_client_h_install_files)
 endif()
-if(${build_as_dynamic})
-    set(iothub_transport_source_files)
-endif()
+
+
 #
 # Compiler Defintions
 #
@@ -70,6 +72,13 @@ if(${use_mqtt})
         ./inc/iothubtransportmqtt_websockets.h
     )
 
+    if(${use_installed_dependencies})
+        set(iothub_client_h_install_files ${iothub_client_h_install_files}
+            ${iothub_client_mqtt_transport_h_files}
+            ${iothub_client_mqtt_ws_transport_h_files}
+        )
+    endif()
+
     add_library(iothub_client_mqtt_transport
         ${iothub_client_mqtt_transport_c_files}
         ${iothub_client_mqtt_transport_h_files}
@@ -80,15 +89,6 @@ if(${use_mqtt})
         ${iothub_client_mqtt_ws_transport_h_files}
     )
 
-    if(${build_as_dynamic})
-        set(iothub_transport_source_files ${iothub_transport_source_files}
-            ${iothub_client_mqtt_transport_c_files}
-            ${iothub_client_mqtt_transport_h_files}
-            ${iothub_client_mqtt_ws_transport_c_files}
-            ${iothub_client_mqtt_ws_transport_h_files}
-        )
-    endif()
-
     setSdkTargetBuildProperties(iothub_client_mqtt_transport)
     setSdkTargetBuildProperties(iothub_client_mqtt_ws_transport)
 
@@ -97,24 +97,24 @@ if(${use_mqtt})
     target_link_libraries(iothub_client_mqtt_ws_transport aziotsharedutil)
     target_link_libraries(iothub_client_mqtt_ws_transport umqtt)
 
-    set(iothub_client_libs
-        ${iothub_client_libs}
+    set(iothub_client_transport_static_libs ${iothub_client_transport_static_libs}
         iothub_client_mqtt_transport
         iothub_client_mqtt_ws_transport
     )
+
+    if(${build_as_dynamic})
+        set(iothub_client_transport_source_files ${iothub_client_transport_source_files}
+            ${iothub_client_mqtt_transport_c_files}
+            ${iothub_client_mqtt_transport_h_files}
+            ${iothub_client_mqtt_ws_transport_c_files}
+            ${iothub_client_mqtt_ws_transport_h_files}
+        )
+    endif()
 
     set(IOTHUB_CLIENT_MQTT_TRANSPORT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client_mqtt_transport lib" FORCE)
     include_directories(${MQTT_INC_FOLDER})
     include_directories(${UMQTT_INCLUDES})
     include_directories(${IOTHUB_CLIENT_MQTT_TRANSPORT_INC_FOLDER})
-
-    if(${use_installed_dependencies})
-        set(iothub_client_h_install_files
-            ${iothub_client_h_install_files}
-            ${iothub_client_mqtt_transport_h_files}
-            ${iothub_client_mqtt_ws_transport_h_files}
-        )
-    endif()
 endif()
 
 #
@@ -137,13 +137,11 @@ if(${use_amqp})
         ./src/uamqp_messaging.c
     )
 
-    set(iothub_client_amqp_transport_c_files
-        ${iothub_client_amqp_transport_common_c_files}
+    set(iothub_client_amqp_transport_c_files ${iothub_client_amqp_transport_common_c_files}
         ./src/iothubtransportamqp.c
     )
 
-    set(iothub_client_amqp_ws_transport_c_files
-        ${iothub_client_amqp_transport_common_c_files}
+    set(iothub_client_amqp_ws_transport_c_files ${iothub_client_amqp_transport_common_c_files}
         ./src/iothubtransportamqp_websockets.c
     )
 
@@ -163,15 +161,20 @@ if(${use_amqp})
         ./inc/internal/uamqp_messaging.h
     )
 
-    set(iothub_client_amqp_transport_h_files
-        ${iothub_client_amqp_transport_common_h_files}
+    set(iothub_client_amqp_transport_h_files ${iothub_client_amqp_transport_common_h_files}
         ./inc/iothubtransportamqp.h
     )
 
-    set(iothub_client_amqp_ws_transport_h_files
-        ${iothub_client_amqp_transport_common_h_files}
+    set(iothub_client_amqp_ws_transport_h_files ${iothub_client_amqp_transport_common_h_files}
         ./inc/iothubtransportamqp_websockets.h
     )
+
+    if(${use_installed_dependencies})
+        set(iothub_client_h_install_files ${iothub_client_h_install_files}
+            ${iothub_client_amqp_transport_h_files}
+            ${iothub_client_amqp_ws_transport_h_files}
+        )
+    endif()
 
     add_library(iothub_client_amqp_transport
         ${iothub_client_amqp_transport_c_files}
@@ -183,15 +186,6 @@ if(${use_amqp})
         ${iothub_client_amqp_ws_transport_h_files}
     )
 
-    if(${build_as_dynamic})
-        set(iothub_transport_source ${iothub_transport_source}
-            ${iothub_client_amqp_transport_c_files}
-            ${iothub_client_amqp_transport_h_files}
-            ${iothub_client_amqp_ws_transport_c_files}
-            ${iothub_client_amqp_ws_transport_h_files}
-        )
-    endif()
-
     setSdkTargetBuildProperties(iothub_client_amqp_transport)
     setSdkTargetBuildProperties(iothub_client_amqp_ws_transport)
 
@@ -200,24 +194,24 @@ if(${use_amqp})
     target_link_libraries(iothub_client_amqp_ws_transport aziotsharedutil)
     target_link_libraries(iothub_client_amqp_ws_transport uamqp)
 
-    set(iothub_client_libs
-        ${iothub_client_libs}
+    set(iothub_client_transport_static_libs ${iothub_client_transport_static_libs}
         iothub_client_amqp_transport
         iothub_client_amqp_ws_transport
     )
+
+    if(${build_as_dynamic})
+        set(iothub_client_transport_source_files ${iothub_client_transport_source_files}
+            ${iothub_client_amqp_transport_c_files}
+            ${iothub_client_amqp_transport_h_files}
+            ${iothub_client_amqp_ws_transport_c_files}
+            ${iothub_client_amqp_ws_transport_h_files}
+        )
+    endif()
 
     set(IOTHUB_CLIENT_AMQP_TRANSPORT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client_amqp_transport lib" FORCE)
     include_directories(${UAMQP_INC_FOLDER})
     include_directories(${UAMQP_INCLUDES})
     include_directories(${IOTHUB_CLIENT_AMQP_TRANSPORT_INC_FOLDER})
-
-    if(${use_installed_dependencies})
-        set(iothub_client_h_install_files
-            ${iothub_client_h_install_files}
-            ${iothub_client_amqp_transport_h_files}
-            ${iothub_client_amqp_ws_transport_h_files}
-        )
-    endif()
 endif()
 
 #
@@ -239,36 +233,34 @@ if(${use_http})
         ./inc/iothub_transport_ll.h
     )
 
+    if(${use_installed_dependencies})
+        set(iothub_client_h_install_files ${iothub_client_h_install_files}
+            ${iothub_client_http_transport_h_files}
+        )
+    endif()
+
     add_library(iothub_client_http_transport
         ${iothub_client_http_transport_c_files}
         ${iothub_client_http_transport_h_files}
     )
 
+    setSdkTargetBuildProperties(iothub_client_http_transport)
+
+    target_link_libraries(iothub_client_http_transport aziotsharedutil)
+
+    set(iothub_client_transport_static_libs ${iothub_client_transport_static_libs}
+        iothub_client_http_transport
+    )
+
     if(${build_as_dynamic})
-        set(iothub_transport_source ${iothub_transport_source}
+        set(iothub_client_transport_source_files ${iothub_client_transport_source_files}
             ${iothub_client_http_transport_c_files}
             ${iothub_client_http_transport_h_files}
         )
     endif()
 
-    setSdkTargetBuildProperties(iothub_client_http_transport)
-
-    target_link_libraries(iothub_client_http_transport aziotsharedutil)
-
-    set(iothub_client_libs
-        ${iothub_client_libs}
-        iothub_client_http_transport
-    )
-
     set(IOTHUB_CLIENT_HTTP_TRANSPORT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client_http_transport lib" FORCE)
     include_directories(${IOTHUB_CLIENT_HTTP_TRANSPORT_INC_FOLDER})
-
-    if(${use_installed_dependencies})
-        set(iothub_client_h_install_files
-            ${iothub_client_h_install_files}
-            ${iothub_client_http_transport_h_files}
-        )
-    endif()
 endif()
 
 
@@ -313,33 +305,34 @@ set(iothub_client_h_files
 )
 
 if(NOT ${dont_use_uploadtoblob})
-    set(iothub_client_c_files
-        ${iothub_client_c_files}
+    set(iothub_client_c_files ${iothub_client_c_files}
         ./src/blob.c
         ./src/iothub_client_ll_uploadtoblob.c
     )
-    set(iothub_client_h_files
-        ${iothub_client_h_files}
+    set(iothub_client_h_files ${iothub_client_h_files}
         ./inc/internal/blob.h
         ./inc/internal/iothub_client_ll_uploadtoblob.h
     )
 endif()
 
 if(${use_edge_modules})
-    set(iothub_client_c_files
-        ${iothub_client_c_files}
+    set(iothub_client_c_files ${iothub_client_c_files}
         ./src/iothub_client_edge.c
     )
-    set (iothub_client_h_files
-        ${iothub_client_h_files}
+    set (iothub_client_h_files ${iothub_client_h_files}
         ./inc/internal/iothub_client_edge.h
     )
 endif()
 
 if(${use_prov_client_core}) # for backwards compatability
-    set(iothub_client_h_files
-        ${iothub_client_h_files}
+    set(iothub_client_h_files ${iothub_client_h_files}
         ./inc/internal/iothub_client_hsm_ll.h
+    )
+endif()
+
+if(${use_installed_dependencies})
+    set(iothub_client_h_install_files
+        ${iothub_client_h_files}
     )
 endif()
 
@@ -350,32 +343,13 @@ add_library(iothub_client
 
 setSdkTargetBuildProperties(iothub_client)
 
-target_link_libraries(iothub_client ${iothub_client_libs})
-if(${use_prov_client_core})
-    target_link_libraries(iothub_client hsm_security_client prov_auth_client)
-endif()
+target_link_libraries(iothub_client ${iothub_client_transport_static_libs})
 if(NOT ${dont_use_uploadtoblob} OR ${use_edge_modules})
     target_link_libraries(iothub_client parson)
 endif()
-
-set(IOTHUB_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client lib" FORCE)
-include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
-include_directories(${AZURE_C_SHARED_UTILITY_INCLUDES})
-include_directories(${SHARED_UTIL_INC_FOLDER})
-include_directories(${IOTHUB_CLIENT_INC_FOLDER})
-if(NOT ${dont_use_uploadtoblob} OR ${use_edge_modules})
-    include_directories(${PROJECT_SOURCE_DIR}/deps/parson)
+if(${use_prov_client_core})
+    target_link_libraries(iothub_client hsm_security_client prov_auth_client)
 endif()
-if(WINCE)
-    include_directories(${SHARED_UTIL_INC_FOLDER}/azure_c_shared_utility/windowsce) #windowsce SDK doesn't have stdbool.h
-endif()
-
-if(${use_installed_dependencies})
-    set(iothub_client_h_install_files
-        ${iothub_client_h_files}
-    )
-endif()
-
 
 if (${build_as_dynamic})
     set_target_properties(iothub_client_dll PROPERTIES
@@ -392,31 +366,41 @@ if (${build_as_dynamic})
 
     set(iothub_def_file ./src/iothub_client_dll.def)
     if(${use_mqtt})
-        set(iothub_def_file ${iothub_def_file} ./src/iothub_transport_mqtt.def)
+        set(iothub_def_file ${iothub_def_file}
+            ./src/iothub_transport_mqtt.def
+        )
     endif()
     if(${use_amqp})
-        set(iothub_def_file ${iothub_def_file} ./src/iothub_transport_amqp.def)
+        set(iothub_def_file ${iothub_def_file}
+            ./src/iothub_transport_amqp.def
+        )
     endif()
     if(${use_http})
-        set(iothub_def_file ${iothub_def_file} ./src/iothub_transport_http.def)
+        set(iothub_def_file ${iothub_def_file}
+            ./src/iothub_transport_http.def
+        )
     endif()
     if(NOT ${dont_use_uploadtoblob})
-        set(iothub_def_file ${iothub_def_file} ./src/upload_to_blob.def)
+        set(iothub_def_file ${iothub_def_file}
+            ./src/upload_to_blob.def
+        )
     endif()
     if (${use_edge_modules})
-        set(iothub_def_file ${iothub_def_file} ./src/iothub_edge_modules.def)
+        set(iothub_def_file ${iothub_def_file}
+            ./src/iothub_edge_modules.def
+        )
     endif()
 
     add_library(iothub_client_dll SHARED
         ${iothub_client_c_files}
         ${iothub_client_h_files}
         ${iothub_def_file}
-        ${iothub_transport_source_files}
+        ${iothub_client_transport_source_files}
     )
 
     setSdkTargetBuildProperties(iothub_client_dll)
 
-    target_link_libraries(iothub_client_dll ${iothub_client_libs})
+    #target_link_libraries(iothub_client_dll ${iothub_client_transport_static_libs})
     if(NOT ${dont_use_uploadtoblob} OR ${use_edge_modules})
         target_link_libraries(iothub_client_dll parson)
     endif()
@@ -430,12 +414,22 @@ if (${build_as_dynamic})
         )
     endif()
 
-    set(iothub_client_libs
-        ${iothub_client_libs}
-        iothub_client_dll
-    )
+    #set(iothub_client_transport_static_libs ${iothub_client_transport_static_libs}
+    #    iothub_client_dll
+    #)
 endif()
 
+set(IOTHUB_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client lib" FORCE)
+include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
+include_directories(${AZURE_C_SHARED_UTILITY_INCLUDES})
+include_directories(${SHARED_UTIL_INC_FOLDER})
+include_directories(${IOTHUB_CLIENT_INC_FOLDER})
+if(NOT ${dont_use_uploadtoblob} OR ${use_edge_modules})
+    include_directories(${PROJECT_SOURCE_DIR}/deps/parson)
+endif()
+if(WINCE)
+    include_directories(${SHARED_UTIL_INC_FOLDER}/azure_c_shared_utility/windowsce) #windowsce SDK doesn't have stdbool.h
+endif()
 
 #
 # Samples
@@ -478,7 +472,7 @@ if(${use_installed_dependencies})
 
     install(FILES ${iothub_client_h_install_files}
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
-    install(TARGETS ${iothub_client_libs} EXPORT azure_iot_sdksTargets
+    install(TARGETS ${iothub_client_transport_static_libs} EXPORT azure_iot_sdksTargets
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/../bin
@@ -491,6 +485,7 @@ if(${use_installed_dependencies})
         install(TARGETS ${parson_install_libs} EXPORT azure_iot_sdksTargets
             LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
         )
     endif()
 endif()
