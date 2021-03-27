@@ -696,36 +696,42 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG*
                 if (iothub_account_info->connString == NULL)
                 {
                     LogError("Failure retrieving IoT Hub connection string from the environment.\r\n");
+                    free(iothub_account_info->sasDevices);
                     free(iothub_account_info);
                     iothub_account_info = NULL;
                 }
                 else if (iothub_account_info->eventhubConnString == NULL)
                 {
                     LogError("Failure retrieving Event Hub connection string from the environment.\r\n");
+                    free(iothub_account_info->sasDevices);
                     free(iothub_account_info);
                     iothub_account_info = NULL;
                 }
                 else if (base64_cert == NULL)
                 {
                     LogError("Failure retrieving x509 certificate from the environment.\r\n");
+                    free(iothub_account_info->sasDevices);
                     free(iothub_account_info);
                     iothub_account_info = NULL;
                 }
                 else if (base64_key == NULL)
                 {
                     LogError("Failure retrieving x509 private key from the environment.\r\n");
+                    free(iothub_account_info->sasDevices);
                     free(iothub_account_info);
                     iothub_account_info = NULL;
                 }
                 else if (tempThumb == NULL)
                 {
                     LogError("Failure retrieving x509 certificate thumbprint from the environment.\r\n");
+                    free(iothub_account_info->sasDevices);
                     free(iothub_account_info);
                     iothub_account_info = NULL;
                 }
                 else if ((iothub_account_info->x509Certificate = convert_base64_to_string(base64_cert)) == NULL)
                 {
                     LogError("Failure allocating x509 certificate from the environment.\r\n");
+                    free(iothub_account_info->sasDevices);
                     free(iothub_account_info);
                     iothub_account_info = NULL;
                 }
@@ -733,6 +739,7 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG*
                 {
                     LogError("Failure allocating x509 key from the environment.\r\n");
                     free(iothub_account_info->x509Certificate);
+                    free(iothub_account_info->sasDevices);
                     free(iothub_account_info);
                     iothub_account_info = NULL;
                 }
@@ -741,6 +748,7 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG*
                     LogError("Failure allocating x509 thumb print from the environment.\r\n");
                     free(iothub_account_info->x509Certificate);
                     free(iothub_account_info->x509PrivateKey);
+                    free(iothub_account_info->sasDevices);
                     free(iothub_account_info);
                     iothub_account_info = NULL;
                 }
@@ -749,6 +757,7 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG*
                     if (retrieveConnStringInfo(iothub_account_info) != 0)
                     {
                         LogError("retrieveConnStringInfo failed.\r\n");
+                        free(iothub_account_info->sasDevices);
                         free(iothub_account_info);
                         iothub_account_info = NULL;
                     }
@@ -758,6 +767,7 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG*
                         if (iothub_account_info->iothub_service_client_auth_handle == NULL)
                         {
                             LogError("IoTHubServiceClientAuth_CreateFromConnectionString failed\r\n");
+                            free(iothub_account_info->sasDevices);
                             free(iothub_account_info);
                             iothub_account_info = NULL;
                         }
@@ -767,6 +777,7 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG*
                             if (iothub_account_info->iothub_messaging_handle == NULL)
                             {
                                 LogError("IoTHubMessaging_LL_Create failed\r\n");
+                                free(iothub_account_info->sasDevices);
                                 IoTHubAccount_deinit(iothub_account_info);
                                 iothub_account_info = NULL;
                             }
