@@ -17,29 +17,5 @@ add_executable(iotedge_downstream_device_sample
 )
 
 target_link_libraries(iotedge_downstream_device_sample
-    aziotsharedutil
     iothub_client
 )
-
-# MQTT Library
-if(${use_mqtt})
-    target_link_libraries(iotedge_downstream_device_sample
-        iothub_client_mqtt_transport
-        iothub_client_mqtt_ws_transport
-    )
-endif()
-
-# AMQP Library
-if(${use_amqp})
-    target_link_libraries(iotedge_downstream_device_sample
-        iothub_client_amqp_transport
-        iothub_client_amqp_ws_transport
-    )
-endif()
-
-# HTTP Library
-if(${use_http})
-    target_link_libraries(iotedge_downstream_device_sample
-        iothub_client_http_transport
-    )
-endif()

@@ -17,7 +17,6 @@ add_executable(iothub_ll_client_sample_amqp_shared
 )
 
 target_link_libraries(iothub_ll_client_sample_amqp_shared
-    aziotsharedutil
     iothub_client
 )
 
@@ -27,8 +26,3 @@ if(${use_sample_trusted_cert})
     include_directories(${PROJECT_SOURCE_DIR}/certs)
     target_link_libraries(iothub_ll_client_sample_amqp_shared certs)
 endif()
-
-# AMQP Library
-target_link_libraries(iothub_ll_client_sample_amqp_shared
-    iothub_client_amqp_transport
-)

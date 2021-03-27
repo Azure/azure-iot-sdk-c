@@ -25,7 +25,6 @@ add_executable(pnp_simple_thermostat
 )
 
 target_link_libraries(pnp_simple_thermostat
-    aziotsharedutil
     iothub_client
 )
 
@@ -36,16 +35,10 @@ if(${use_sample_trusted_cert})
     target_link_libraries(pnp_simple_thermostat certs)
 endif()
 
-# MQTT Library
-target_link_libraries(pnp_simple_thermostat
-    iothub_client_mqtt_transport
-    iothub_client_mqtt_ws_transport
-)
-
 # Provisioning Client Library
 if(${use_prov_client})
     target_link_libraries(pnp_simple_thermostat
-        prov_device_ll_client
+        prov_device_client
         prov_mqtt_transport
     )
 endif()

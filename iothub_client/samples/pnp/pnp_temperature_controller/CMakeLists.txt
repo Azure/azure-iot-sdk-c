@@ -32,7 +32,6 @@ add_executable(pnp_temperature_controller
 include_directories(${PNP_COMMON_DIR})
 
 target_link_libraries(pnp_temperature_controller
-    aziotsharedutil
     iothub_client
 )
 
@@ -43,16 +42,10 @@ if(${use_sample_trusted_cert})
     target_link_libraries(pnp_temperature_controller certs)
 endif()
 
-# MQTT Library
-target_link_libraries(pnp_temperature_controller
-    iothub_client_mqtt_transport
-    iothub_client_mqtt_ws_transport
-)
-
 # Provisioning Client Library
 if(${use_prov_client})
     target_link_libraries(pnp_temperature_controller
-        prov_device_ll_client
+        prov_device_client
         prov_mqtt_transport
     )
 endif()

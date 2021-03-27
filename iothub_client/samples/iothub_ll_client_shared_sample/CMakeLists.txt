@@ -17,7 +17,6 @@ add_executable(iothub_ll_client_shared_sample
 )
 
 target_link_libraries(iothub_ll_client_shared_sample
-    aziotsharedutil
     iothub_client
 )
 
@@ -26,19 +25,4 @@ if(${use_sample_trusted_cert})
     add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
     include_directories(${PROJECT_SOURCE_DIR}/certs)
     target_link_libraries(iothub_ll_client_shared_sample certs)
-endif()
-
-# AMQP Library
-if(${use_amqp})
-    target_link_libraries(iothub_ll_client_shared_sample
-        iothub_client_amqp_transport
-        iothub_client_amqp_ws_transport
-    )
-endif()
-
-# HTTP Library
-if(${use_http})
-    target_link_libraries(iothub_ll_client_shared_sample
-        iothub_client_http_transport
-    )
 endif()

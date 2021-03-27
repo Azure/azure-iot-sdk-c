@@ -17,11 +17,5 @@ add_executable(iothub_client_sample_module_method_invoke
 )
 
 target_link_libraries(iothub_client_sample_module_method_invoke
-    aziotsharedutil
     iothub_client
-)
-
-# MQTT Library
-target_link_libraries(iothub_client_sample_module_method_invoke
-    iothub_client_mqtt_transport
 )

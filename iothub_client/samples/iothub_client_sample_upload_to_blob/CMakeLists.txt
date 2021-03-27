@@ -17,7 +17,6 @@ add_executable(iothub_client_sample_upload_to_blob
 )
 
 target_link_libraries(iothub_client_sample_upload_to_blob
-    aziotsharedutil
     iothub_client
 )
 
@@ -27,8 +26,3 @@ if(${use_sample_trusted_cert})
     include_directories(${PROJECT_SOURCE_DIR}/certs)
     target_link_libraries(iothub_client_sample_upload_to_blob certs)
 endif()
-
-# HTTP Library
-target_link_libraries(iothub_client_sample_upload_to_blob
-    iothub_client_http_transport
-)

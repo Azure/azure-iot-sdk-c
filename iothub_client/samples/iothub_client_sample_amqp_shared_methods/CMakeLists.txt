@@ -12,27 +12,17 @@ set(iothub_client_sample_amqp_shared_methods_c_files
     iothub_client_sample_amqp_shared_methods.c
 )
 
-if(${use_sample_trusted_cert})
-    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
-
-    set(iothub_client_sample_amqp_shared_methods_c_files
-        ${iothub_client_sample_amqp_shared_methods_c_files}
-        ${PROJECT_SOURCE_DIR}/certs/certs.c
-    )
-    include_directories(${PROJECT_SOURCE_DIR}/certs)
-endif()
-
 add_executable(iothub_client_sample_amqp_shared_methods
     ${iothub_client_sample_amqp_shared_methods_c_files}
 )
 
 target_link_libraries(iothub_client_sample_amqp_shared_methods
-    aziotsharedutil
     iothub_client
 )
 
-# AMQP Library
-target_link_libraries(iothub_client_sample_amqp_shared_methods
-    iothub_client_amqp_transport
-    iothub_client_amqp_ws_transport
-)
+# Certs Library
+if(${use_sample_trusted_cert})
+    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
+    include_directories(${PROJECT_SOURCE_DIR}/certs)
+    target_link_libraries(iothub_client_sample_amqp_shared_methods certs)
+endif()

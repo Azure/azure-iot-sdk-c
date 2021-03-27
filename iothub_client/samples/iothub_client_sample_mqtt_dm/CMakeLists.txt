@@ -49,13 +49,7 @@ set(AZUREIOT_INC_FOLDER "pi_device" "../../../serializer/inc" "." "/usr/include/
 include_directories(${AZUREIOT_INC_FOLDER})
 
 target_link_libraries(iothub_client_sample_mqtt_dm
-    aziotsharedutil
     iothub_client
-)
-
-# MQTT Library
-target_link_libraries(iothub_client_sample_mqtt_dm
-    iothub_client_mqtt_transport
 )
 
 # Serializer Library
