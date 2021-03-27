@@ -364,7 +364,7 @@ if (${build_as_dynamic})
 
     setSdkTargetBuildProperties(iothub_client_dll)
 
-    target_link_libraries(iothub_client_dll aziotsharedutil ${iothub_client_transport_static_libs})
+    target_link_libraries(iothub_client_dll ${iothub_client_transport_static_libs})
     if(NOT ${dont_use_uploadtoblob} OR ${use_edge_modules})
         target_link_libraries(iothub_client_dll parson)
     endif()
@@ -400,6 +400,7 @@ include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
 include_directories(${AZURE_C_SHARED_UTILITY_INCLUDES})
 include_directories(${SHARED_UTIL_INC_FOLDER})
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
+
 if(NOT ${dont_use_uploadtoblob} OR ${use_edge_modules})
     include_directories(${PROJECT_SOURCE_DIR}/deps/parson)
 endif()
