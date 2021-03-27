@@ -316,7 +316,7 @@ add_library(iothub_client
 
 setSdkTargetBuildProperties(iothub_client)
 
-target_link_libraries(iothub_client aziotsharedutil ${iothub_client_transport_static_libs})
+target_link_libraries(iothub_client ${iothub_client_transport_static_libs})
 if(NOT ${dont_use_uploadtoblob} OR ${use_edge_modules})
     target_link_libraries(iothub_client parson)
 endif()
