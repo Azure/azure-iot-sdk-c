@@ -1723,7 +1723,7 @@ int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
 
                 if (Lock(iotHubLonghaulRsrcs->lock) != LOCK_OK)
                 {
-                    LogError("Failed locking (%s)", iotHubLonghaul->test_id);
+                    LogError("Failed locking (%s)", iotHubLonghaulRsrcs->test_id);
                     result = MU_FAILURE;
                 }
                 else
@@ -1767,7 +1767,7 @@ int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
 
                     if (Unlock(iotHubLonghaulRsrcs->lock) != LOCK_OK)
                     {
-                        LogError("Failed unlocking (%s)", iotHubLonghaul->test_id);
+                        LogError("Failed unlocking (%s)", iotHubLonghaulRsrcs->test_id);
                     }
                 }
             }
@@ -1818,7 +1818,7 @@ int longhaul_run_c2d_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
 
             if (Lock(iotHubLonghaulRsrcs->lock) != LOCK_OK)
             {
-                LogError("Failed locking (%s)", iotHubLonghaul->test_id);
+                LogError("Failed locking (%s)", iotHubLonghaulRsrcs->test_id);
                 result = MU_FAILURE;
             }
             else
@@ -1860,7 +1860,7 @@ int longhaul_run_c2d_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
 
                 if (Unlock(iotHubLonghaulRsrcs->lock) != LOCK_OK)
                 {
-                    LogError("Failed unlocking (%s)", iotHubLonghaul->test_id);
+                    LogError("Failed unlocking (%s)", iotHubLonghaulRsrcs->test_id);
                 }
             }
         }
@@ -1909,7 +1909,7 @@ int longhaul_run_device_methods_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
 
             if (Lock(iotHubLonghaulRsrcs->lock) != LOCK_OK)
             {
-                LogError("Failed locking (%s)", iotHubLonghaul->test_id);
+                LogError("Failed locking (%s)", iotHubLonghaulRsrcs->test_id);
                 result = MU_FAILURE;
             }
             else
@@ -1951,7 +1951,7 @@ int longhaul_run_device_methods_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
 
                 if (Unlock(iotHubLonghaulRsrcs->lock) != LOCK_OK)
                 {
-                    LogError("Failed unlocking (%s)", iotHubLonghaul->test_id);
+                    LogError("Failed unlocking (%s)", iotHubLonghaulRsrcs->test_id);
                 }
             }
         }
@@ -2070,7 +2070,7 @@ int longhaul_run_twin_desired_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE 
 
             if (Lock(iotHubLonghaulRsrcs->lock) != LOCK_OK)
             {
-                LogError("Failed locking (%s)", iotHubLonghaul->test_id);
+                LogError("Failed locking (%s)", iotHubLonghaulRsrcs->test_id);
                 result = MU_FAILURE;
             }
             else
@@ -2112,7 +2112,7 @@ int longhaul_run_twin_desired_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE 
 
                 if (Unlock(iotHubLonghaulRsrcs->lock) != LOCK_OK)
                 {
-                    LogError("Failed unlocking (%s)", iotHubLonghaul->test_id);
+                    LogError("Failed unlocking (%s)", iotHubLonghaulRsrcs->test_id);
                 }
             }
         }
@@ -2164,7 +2164,7 @@ int longhaul_run_twin_reported_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE
 
             if (Lock(iotHubLonghaulRsrcs->lock) != LOCK_OK)
             {
-                LogError("Failed locking (%s)", iotHubLonghaul->test_id);
+                LogError("Failed locking (%s)", iotHubLonghaulRsrcs->test_id);
                 result = MU_FAILURE;
             }
             else
@@ -2208,7 +2208,7 @@ int longhaul_run_twin_reported_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE
 
                 if (Unlock(iotHubLonghaulRsrcs->lock) != LOCK_OK)
                 {
-                    LogError("Failed unlocking (%s)", iotHubLonghaul->test_id);
+                    LogError("Failed unlocking (%s)", iotHubLonghaulRsrcs->test_id);
                 }
             }
         }
