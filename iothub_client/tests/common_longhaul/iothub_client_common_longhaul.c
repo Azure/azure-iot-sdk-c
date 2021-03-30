@@ -1299,7 +1299,7 @@ static void on_c2d_message_sent(void* context, IOTHUB_MESSAGING_RESULT messaging
 
         if (Lock(send_context->iotHubLonghaul->lock) != LOCK_OK)
         {
-            LogError("Failed locking (%s)", iotHubLonghaul->test_id);
+            LogError("Failed locking (%s)", send_context->iotHubLonghaul->test_id);
             result = MU_FAILURE;
         }
         else
@@ -1311,7 +1311,7 @@ static void on_c2d_message_sent(void* context, IOTHUB_MESSAGING_RESULT messaging
 
             if (Unlock(send_context->iotHubLonghaul->lock) != LOCK_OK)
             {
-                LogError("Failed unlocking (%s)", iotHubLonghaul->test_id);
+                LogError("Failed unlocking (%s)", send_context->iotHubLonghaul->test_id);
             }
         }
 
