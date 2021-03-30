@@ -1839,13 +1839,13 @@ int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
                             }
                         }
                     }
-
-                    (void)longhaul_stop_listening_for_telemetry_messages(iotHubLonghaulRsrcs);
-
+                    
                     if (Unlock(iotHubLonghaulRsrcs->lock) != LOCK_OK)
                     {
                         LogError("Failed unlocking (%s)", iotHubLonghaulRsrcs->test_id);
                     }
+
+                    (void)longhaul_stop_listening_for_telemetry_messages(iotHubLonghaulRsrcs);
                 }
             }
         }
