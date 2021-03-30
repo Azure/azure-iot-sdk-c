@@ -934,14 +934,27 @@ static int on_message_received(void* context, const char* data, size_t size)
                 LogError("Failed setting the receive time for message %lu", (unsigned long)info.message_id);
             }
 
-            if (iothub_client_statistics_add_telemetry_info(iotHubLonghaul->iotHubClientStats, TELEMETRY_RECEIVED, &info) != 0)
+            if (Lock(iotHubLonghaul->lock) != LOCK_OK)
             {
-                LogError("Failed adding receive info for message %lu", (unsigned long)info.message_id);
+                LogError("Failed locking (%s)", iotHubLonghaul->test_id);
                 result = MU_FAILURE;
             }
             else
             {
-                result = 0;
+                if (iothub_client_statistics_add_telemetry_info(iotHubLonghaul->iotHubClientStats, TELEMETRY_RECEIVED, &info) != 0)
+                {
+                    LogError("Failed adding receive info for message %lu", (unsigned long)info.message_id);
+                    result = MU_FAILURE;
+                }
+                else
+                {
+                    result = 0;
+                }
+
+                if (Unlock(iotHubLonghaul->lock) != LOCK_OK)
+                {
+                    LogError("Failed unlocking (%s)", iotHubLonghaul->test_id);
+                }
             }
         }
         else
@@ -1182,13 +1195,26 @@ static void send_confirmation_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result,
         telemetry_info.send_callback_result = result;
         telemetry_info.time_sent = time(NULL);
 
-        if (telemetry_info.time_sent == INDEFINITE_TIME)
+        if (Lock(message_info->iotHubLonghaul->lock) != LOCK_OK)
         {
-            LogError("Failed setting the time telemetry was sent");
+            LogError("Failed locking (%s)", message_info->iotHubLonghaul->test_id);
+            result = MU_FAILURE;
         }
-        else if (iothub_client_statistics_add_telemetry_info(message_info->iotHubLonghaul->iotHubClientStats, TELEMETRY_SENT, &telemetry_info) != 0)
+        else
         {
-            LogError("Failed adding telemetry statistics info (message_id=%d)", message_info->message_id);
+            if (telemetry_info.time_sent == INDEFINITE_TIME)
+            {
+                LogError("Failed setting the time telemetry was sent");
+            }
+            else if (iothub_client_statistics_add_telemetry_info(message_info->iotHubLonghaul->iotHubClientStats, TELEMETRY_SENT, &telemetry_info) != 0)
+            {
+                LogError("Failed adding telemetry statistics info (message_id=%d)", message_info->message_id);
+            }
+
+            if (Unlock(message_info->iotHubLonghaul->lock) != LOCK_OK)
+            {
+                LogError("Failed unlocking (%s)", message_info->iotHubLonghaul->test_id);
+            }
         }
 
         free(message_info);
@@ -1263,10 +1289,23 @@ static int send_telemetry(const void* context)
 
                 telemetry_info.send_result = result;
 
-                if (iothub_client_statistics_add_telemetry_info(longhaulResources->iotHubClientStats, TELEMETRY_QUEUED, &telemetry_info) != 0)
+                if (Lock(longhaulResources->lock) != LOCK_OK)
                 {
-                    LogError("Failed adding telemetry statistics info (message_id=%d)", message_id);
+                    LogError("Failed locking (%s)", longhaulResources->test_id);
                     result = MU_FAILURE;
+                }
+                else
+                {
+                    if (iothub_client_statistics_add_telemetry_info(longhaulResources->iotHubClientStats, TELEMETRY_QUEUED, &telemetry_info) != 0)
+                    {
+                        LogError("Failed adding telemetry statistics info (message_id=%d)", message_id);
+                        result = MU_FAILURE;
+                    }
+
+                    if (Unlock(longhaulResources->lock) != LOCK_OK)
+                    {
+                        LogError("Failed unlocking (%s)", longhaulResources->test_id);
+                    }
                 }
             }
 
