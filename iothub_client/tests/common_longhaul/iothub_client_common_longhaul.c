@@ -1300,7 +1300,6 @@ static void on_c2d_message_sent(void* context, IOTHUB_MESSAGING_RESULT messaging
         if (Lock(send_context->iotHubLonghaul->lock) != LOCK_OK)
         {
             LogError("Failed locking (%s)", send_context->iotHubLonghaul->test_id);
-            result = MU_FAILURE;
         }
         else
         {
