@@ -1297,9 +1297,22 @@ static void on_c2d_message_sent(void* context, IOTHUB_MESSAGING_RESULT messaging
             LogError("Failed setting the send time for message %lu", (unsigned long)info.message_id);
         }
 
-        if (iothub_client_statistics_add_c2d_info(send_context->iotHubLonghaul->iotHubClientStats, C2D_SENT, &info) != 0)
+        if (Lock(send_context->iotHubLonghaul->lock) != LOCK_OK)
         {
-            LogError("Failed adding send info for c2d message %lu", (unsigned long)info.message_id);
+            LogError("Failed locking (%s)", iotHubLonghaul->test_id);
+            result = MU_FAILURE;
+        }
+        else
+        {
+            if (iothub_client_statistics_add_c2d_info(send_context->iotHubLonghaul->iotHubClientStats, C2D_SENT, &info) != 0)
+            {
+                LogError("Failed adding send info for c2d message %lu", (unsigned long)info.message_id);
+            }
+
+            if (Unlock(send_context->iotHubLonghaul->lock) != LOCK_OK)
+            {
+                LogError("Failed unlocking (%s)", iotHubLonghaul->test_id);
+            }
         }
 
         free(send_context);
@@ -1380,10 +1393,23 @@ static int send_c2d(const void* context)
                 c2d_msg_info.time_queued = time(NULL);
                 c2d_msg_info.send_result = result;
 
-                if (iothub_client_statistics_add_c2d_info(iotHubLonghaul->iotHubClientStats, C2D_QUEUED, &c2d_msg_info) != 0)
+                if (Lock(iotHubLonghaul->lock) != LOCK_OK)
                 {
-                    LogError("Failed adding c2d message statistics info (message_id=%d)", message_id);
+                    LogError("Failed locking (%s)", iotHubLonghaul->test_id);
                     result = MU_FAILURE;
+                }
+                else
+                {
+                    if (iothub_client_statistics_add_c2d_info(iotHubLonghaul->iotHubClientStats, C2D_QUEUED, &c2d_msg_info) != 0)
+                    {
+                        LogError("Failed adding c2d message statistics info (message_id=%d)", message_id);
+                        result = MU_FAILURE;
+                    }
+
+                    if (Unlock(iotHubLonghaul->lock) != LOCK_OK)
+                    {
+                        LogError("Failed unlocking (%s)", iotHubLonghaul->test_id);
+                    }
                 }
             }
 
