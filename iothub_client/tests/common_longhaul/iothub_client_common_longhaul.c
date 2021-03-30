@@ -1721,42 +1721,55 @@ int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
 
                 ThreadAPI_Sleep((unsigned int)iotHubLonghaulRsrcs->test_loop_duration_in_seconds * 1000 * 10); // Extra time for the last messages.
 
-                stats_handle = longhaul_get_statistics(iotHubLonghaulRsrcs);
-
-                char* statistics = iothub_client_statistics_to_json(stats_handle);
-                LogInfo("Longhaul telemetry stats: %s", statistics);
-                free(statistics);
-
-                if (loop_result != 0)
+                if (Lock(iotHubLonghaul->lock) != LOCK_OK)
                 {
+                    LogError("Failed locking (%s)", iotHubLonghaul->test_id);
                     result = MU_FAILURE;
                 }
                 else
                 {
-                    IOTHUB_CLIENT_STATISTICS_TELEMETRY_SUMMARY summary;
+                    stats_handle = longhaul_get_statistics(iotHubLonghaulRsrcs);
 
-                    if (iothub_client_statistics_get_telemetry_summary(stats_handle, &summary) != 0)
+                    char* statistics = iothub_client_statistics_to_json(stats_handle);
+                    LogInfo("Longhaul telemetry stats: %s", statistics);
+                    free(statistics);
+
+                    if (loop_result != 0)
                     {
-                        LogError("Failed gettting statistics summary");
                         result = MU_FAILURE;
                     }
                     else
                     {
-                        LogInfo("Summary: Messages sent=%lu, received=%lu; travel time: min=%f secs, max=%f secs",
-                            (unsigned long)summary.messages_sent, (unsigned long)summary.messages_received, summary.min_travel_time_secs, summary.max_travel_time_secs);
+                        IOTHUB_CLIENT_STATISTICS_TELEMETRY_SUMMARY summary;
 
-                        if (summary.messages_sent == 0 || summary.messages_received != summary.messages_sent || summary.max_travel_time_secs > MAX_TELEMETRY_TRAVEL_TIME_SECS)
+                        if (iothub_client_statistics_get_telemetry_summary(stats_handle, &summary) != 0)
                         {
+                            LogError("Failed gettting statistics summary");
                             result = MU_FAILURE;
                         }
                         else
                         {
-                            result = 0;
+                            LogInfo("Summary: Messages sent=%lu, received=%lu; travel time: min=%f secs, max=%f secs",
+                                (unsigned long)summary.messages_sent, (unsigned long)summary.messages_received, summary.min_travel_time_secs, summary.max_travel_time_secs);
+
+                            if (summary.messages_sent == 0 || summary.messages_received != summary.messages_sent || summary.max_travel_time_secs > MAX_TELEMETRY_TRAVEL_TIME_SECS)
+                            {
+                                result = MU_FAILURE;
+                            }
+                            else
+                            {
+                                result = 0;
+                            }
                         }
                     }
-                }
 
-                (void)longhaul_stop_listening_for_telemetry_messages(iotHubLonghaulRsrcs);
+                    (void)longhaul_stop_listening_for_telemetry_messages(iotHubLonghaulRsrcs);
+
+                    if (Unlock(iotHubLonghaul->lock) != LOCK_OK)
+                    {
+                        LogError("Failed unlocking (%s)", iotHubLonghaul->test_id);
+                    }
+                }
             }
         }
     }
@@ -1803,38 +1816,51 @@ int longhaul_run_c2d_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
 
             ThreadAPI_Sleep((unsigned int)iotHubLonghaul->test_loop_duration_in_seconds * 1000 * 10); // Extra time for the last messages.
 
-            stats_handle = longhaul_get_statistics(iotHubLonghaul);
-
-            char* statistics = iothub_client_statistics_to_json(stats_handle);
-            LogInfo("Longhaul Cloud-to-Device stats: %s", statistics);
-            free(statistics);
-
-            if (loop_result != 0)
+            if (Lock(iotHubLonghaul->lock) != LOCK_OK)
             {
+                LogError("Failed locking (%s)", iotHubLonghaul->test_id);
                 result = MU_FAILURE;
             }
             else
             {
-                IOTHUB_CLIENT_STATISTICS_C2D_SUMMARY summary;
+                stats_handle = longhaul_get_statistics(iotHubLonghaul);
 
-                if (iothub_client_statistics_get_c2d_summary(stats_handle, &summary) != 0)
+                char* statistics = iothub_client_statistics_to_json(stats_handle);
+                LogInfo("Longhaul Cloud-to-Device stats: %s", statistics);
+                free(statistics);
+
+                if (loop_result != 0)
                 {
-                    LogError("Failed gettting statistics summary");
                     result = MU_FAILURE;
                 }
                 else
                 {
-                    LogInfo("Summary: Messages sent=%lu, received=%lu; travel time: min=%f secs, max=%f secs",
-                        (unsigned long)summary.messages_sent, (unsigned long)summary.messages_received, summary.min_travel_time_secs, summary.max_travel_time_secs);
+                    IOTHUB_CLIENT_STATISTICS_C2D_SUMMARY summary;
 
-                    if (summary.messages_sent == 0 || summary.messages_received != summary.messages_sent || summary.max_travel_time_secs > MAX_C2D_TRAVEL_TIME_SECS)
+                    if (iothub_client_statistics_get_c2d_summary(stats_handle, &summary) != 0)
                     {
+                        LogError("Failed gettting statistics summary");
                         result = MU_FAILURE;
                     }
                     else
                     {
-                        result = 0;
+                        LogInfo("Summary: Messages sent=%lu, received=%lu; travel time: min=%f secs, max=%f secs",
+                            (unsigned long)summary.messages_sent, (unsigned long)summary.messages_received, summary.min_travel_time_secs, summary.max_travel_time_secs);
+
+                        if (summary.messages_sent == 0 || summary.messages_received != summary.messages_sent || summary.max_travel_time_secs > MAX_C2D_TRAVEL_TIME_SECS)
+                        {
+                            result = MU_FAILURE;
+                        }
+                        else
+                        {
+                            result = 0;
+                        }
                     }
+                }
+
+                if (Unlock(iotHubLonghaul->lock) != LOCK_OK)
+                {
+                    LogError("Failed unlocking (%s)", iotHubLonghaul->test_id);
                 }
             }
         }
@@ -1881,38 +1907,51 @@ int longhaul_run_device_methods_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
 
             loop_result = run_on_loop(invoke_device_method, iotHubLonghaul->test_loop_duration_in_seconds, iotHubLonghaul->test_duration_in_seconds, iotHubLonghaul);
 
-            stats_handle = longhaul_get_statistics(iotHubLonghaul);
-
-            char* statistics = iothub_client_statistics_to_json(stats_handle);
-            LogInfo("Longhaul Device Methods stats: %s", statistics);
-            free(statistics);
-
-            if (loop_result != 0)
+            if (Lock(iotHubLonghaul->lock) != LOCK_OK)
             {
+                LogError("Failed locking (%s)", iotHubLonghaul->test_id);
                 result = MU_FAILURE;
             }
             else
             {
-                IOTHUB_CLIENT_STATISTICS_DEVICE_METHOD_SUMMARY summary;
+                stats_handle = longhaul_get_statistics(iotHubLonghaul);
 
-                if (iothub_client_statistics_get_device_method_summary(stats_handle, &summary) != 0)
+                char* statistics = iothub_client_statistics_to_json(stats_handle);
+                LogInfo("Longhaul Device Methods stats: %s", statistics);
+                free(statistics);
+
+                if (loop_result != 0)
                 {
-                    LogError("Failed gettting statistics summary");
                     result = MU_FAILURE;
                 }
                 else
                 {
-                    LogInfo("Summary: Methods invoked=%lu, received=%lu; travel time: min=%f secs, max=%f secs",
-                        (unsigned long)summary.methods_invoked, (unsigned long)summary.methods_received, summary.min_travel_time_secs, summary.max_travel_time_secs);
-
-                    if (summary.methods_invoked == 0 || summary.methods_received != summary.methods_invoked || summary.max_travel_time_secs > MAX_DEVICE_METHOD_TRAVEL_TIME_SECS)
+                    IOTHUB_CLIENT_STATISTICS_DEVICE_METHOD_SUMMARY summary;
+                    
+                    if (iothub_client_statistics_get_device_method_summary(stats_handle, &summary) != 0)
                     {
+                        LogError("Failed gettting statistics summary");
                         result = MU_FAILURE;
                     }
                     else
                     {
-                        result = 0;
+                        LogInfo("Summary: Methods invoked=%lu, received=%lu; travel time: min=%f secs, max=%f secs",
+                            (unsigned long)summary.methods_invoked, (unsigned long)summary.methods_received, summary.min_travel_time_secs, summary.max_travel_time_secs);
+
+                        if (summary.methods_invoked == 0 || summary.methods_received != summary.methods_invoked || summary.max_travel_time_secs > MAX_DEVICE_METHOD_TRAVEL_TIME_SECS)
+                        {
+                            result = MU_FAILURE;
+                        }
+                        else
+                        {
+                            result = 0;
+                        }
                     }
+                }
+
+                if (Unlock(iotHubLonghaul->lock) != LOCK_OK)
+                {
+                    LogError("Failed unlocking (%s)", iotHubLonghaul->test_id);
                 }
             }
         }
@@ -2029,38 +2068,51 @@ int longhaul_run_twin_desired_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE 
 
             loop_result = run_on_loop(update_device_twin_desired_property, iotHubLonghaul->test_loop_duration_in_seconds, iotHubLonghaul->test_duration_in_seconds, iotHubLonghaul);
 
-            stats_handle = longhaul_get_statistics(iotHubLonghaul);
-
-            char* statistics = iothub_client_statistics_to_json(stats_handle);
-            LogInfo("Longhaul Device Twin Desired Properties stats: %s", statistics);
-            free(statistics);
-
-            if (loop_result != 0)
+            if (Lock(iotHubLonghaul->lock) != LOCK_OK)
             {
+                LogError("Failed locking (%s)", iotHubLonghaul->test_id);
                 result = MU_FAILURE;
             }
             else
             {
-                IOTHUB_CLIENT_STATISTICS_DEVICE_TWIN_SUMMARY summary;
+                stats_handle = longhaul_get_statistics(iotHubLonghaul);
 
-                if (iothub_client_statistics_get_device_twin_desired_summary(stats_handle, &summary) != 0)
+                char* statistics = iothub_client_statistics_to_json(stats_handle);
+                LogInfo("Longhaul Device Twin Desired Properties stats: %s", statistics);
+                free(statistics);
+
+                if (loop_result != 0)
                 {
-                    LogError("Failed gettting statistics summary");
                     result = MU_FAILURE;
                 }
                 else
                 {
-                    LogInfo("Summary: Updates sent=%lu, received=%lu; travel time: min=%f secs, max=%f secs",
-                        (unsigned long)summary.updates_sent, (unsigned long)summary.updates_received, summary.min_travel_time_secs, summary.max_travel_time_secs);
+                    IOTHUB_CLIENT_STATISTICS_DEVICE_TWIN_SUMMARY summary;
 
-                    if (summary.updates_sent == 0 || summary.updates_received != summary.updates_sent || summary.max_travel_time_secs > MAX_TWIN_DESIRED_PROP_TRAVEL_TIME_SECS)
+                    if (iothub_client_statistics_get_device_twin_desired_summary(stats_handle, &summary) != 0)
                     {
+                        LogError("Failed gettting statistics summary");
                         result = MU_FAILURE;
                     }
                     else
                     {
-                        result = 0;
+                        LogInfo("Summary: Updates sent=%lu, received=%lu; travel time: min=%f secs, max=%f secs",
+                            (unsigned long)summary.updates_sent, (unsigned long)summary.updates_received, summary.min_travel_time_secs, summary.max_travel_time_secs);
+
+                        if (summary.updates_sent == 0 || summary.updates_received != summary.updates_sent || summary.max_travel_time_secs > MAX_TWIN_DESIRED_PROP_TRAVEL_TIME_SECS)
+                        {
+                            result = MU_FAILURE;
+                        }
+                        else
+                        {
+                            result = 0;
+                        }
                     }
+                }
+
+                if (Unlock(iotHubLonghaul->lock) != LOCK_OK)
+                {
+                    LogError("Failed unlocking (%s)", iotHubLonghaul->test_id);
                 }
             }
         }
@@ -2110,38 +2162,53 @@ int longhaul_run_twin_reported_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE
             ThreadAPI_Sleep((unsigned int)iotHubLonghaul->test_loop_duration_in_seconds * 1000);
             check_for_reported_properties_update_on_service_side(iotHubLonghaul);
 
-            stats_handle = longhaul_get_statistics(iotHubLonghaul);
-
-            char* statistics = iothub_client_statistics_to_json(stats_handle);
-            LogInfo("Longhaul Device Twin Reported Properties stats: %s", statistics);
-            free(statistics);
-
-            if (loop_result != 0)
+            if (Lock(iotHubLonghaul->lock) != LOCK_OK)
             {
+                LogError("Failed locking (%s)", iotHubLonghaul->test_id);
                 result = MU_FAILURE;
             }
             else
             {
-                IOTHUB_CLIENT_STATISTICS_DEVICE_TWIN_SUMMARY summary;
+                stats_handle = longhaul_get_statistics(iotHubLonghaul);
 
-                if (iothub_client_statistics_get_device_twin_reported_summary(stats_handle, &summary) != 0)
+                char* statistics = iothub_client_statistics_to_json(stats_handle);
+                LogInfo("Longhaul Device Twin Reported Properties stats: %s", statistics);
+                free(statistics);
+
+                if (loop_result != 0)
                 {
-                    LogError("Failed gettting statistics summary");
                     result = MU_FAILURE;
                 }
                 else
                 {
-                    LogInfo("Summary: Updates sent=%lu, received=%lu; travel time: min=%f secs, max=%f secs",
-                        (unsigned long)summary.updates_sent, (unsigned long)summary.updates_received, summary.min_travel_time_secs, summary.max_travel_time_secs);
+                    IOTHUB_CLIENT_STATISTICS_DEVICE_TWIN_SUMMARY summary;
 
-                    if (summary.updates_sent == 0 || summary.updates_received != summary.updates_sent || summary.max_travel_time_secs > MAX_TWIN_REPORTED_PROP_TRAVEL_TIME_SECS)
+                    if (iothub_client_statistics_get_device_twin_reported_summary(stats_handle, &summary) != 0)
                     {
+                        LogError("Failed gettting statistics summary");
                         result = MU_FAILURE;
                     }
                     else
                     {
-                        result = 0;
+                        LogInfo("Summary: Updates sent=%lu, received=%lu; travel time: min=%f secs, max=%f secs",
+                            (unsigned long)summary.updates_sent, (unsigned long)summary.updates_received, summary.min_travel_time_secs, summary.max_travel_time_secs);
+
+                        if (summary.updates_sent == 0 || summary.updates_received != summary.updates_sent || summary.max_travel_time_secs > MAX_TWIN_REPORTED_PROP_TRAVEL_TIME_SECS)
+                        {
+                            result = MU_FAILURE;
+                        }
+                        else
+                        {
+                            result = 0;
+                        }
+
+
                     }
+                }
+
+                if (Unlock(iotHubLonghaul->lock) != LOCK_OK)
+                {
+                    LogError("Failed unlocking (%s)", iotHubLonghaul->test_id);
                 }
             }
         }
