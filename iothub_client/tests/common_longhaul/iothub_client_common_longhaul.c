@@ -449,9 +449,22 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT on_c2d_message_received(IOTHUB_MESSAGE_H
                     LogError("Failed setting the receive time for c2d message %lu", (unsigned long)info.message_id);
                 }
 
-                if (iothub_client_statistics_add_c2d_info(iotHubLonghaul->iotHubClientStats, C2D_RECEIVED, &info) != 0)
+                if (Lock(iotHubLonghaulRsrcs->lock) != LOCK_OK)
                 {
-                    LogError("Failed adding receive info for c2d message %lu", (unsigned long)info.message_id);
+                    LogError("Failed locking (%s)", iotHubLonghaulRsrcs->test_id);
+                    result = MU_FAILURE;
+                }
+                else
+                {
+                    if (iothub_client_statistics_add_c2d_info(iotHubLonghaul->iotHubClientStats, C2D_RECEIVED, &info) != 0)
+                    {
+                        LogError("Failed adding receive info for c2d message %lu", (unsigned long)info.message_id);
+                    }
+
+                    if (Unlock(iotHubLonghaulRsrcs->lock) != LOCK_OK)
+                    {
+                        LogError("Failed unlocking (%s)", iotHubLonghaulRsrcs->test_id);
+                    }
                 }
 
                 result = IOTHUBMESSAGE_ACCEPTED;
