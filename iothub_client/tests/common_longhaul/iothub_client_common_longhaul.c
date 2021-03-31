@@ -1031,6 +1031,41 @@ int longhaul_start_listening_for_telemetry_messages(IOTHUB_LONGHAUL_RESOURCES_HA
     return result;
 }
 
+int longhaul_stop_listening_for_telemetry_messages(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
+{
+    int result;
+
+    if (handle == NULL)
+    {
+        LogError("Invalid argument (handle is NULL)");
+        result = MU_FAILURE;
+    }
+    else
+    {
+        IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaul = (IOTHUB_LONGHAUL_RESOURCES*)handle;
+
+        if (iotHubLonghaul->iotHubTestHandle == NULL)
+        {
+            LogError("IoTHubTest not initialized");
+            result = MU_FAILURE;
+        }
+        else
+        {
+            if (IoTHubTest_ListenForEventAsync(iotHubLonghaul->iotHubTestHandle, 0, INDEFINITE_TIME, NULL, NULL) != IOTHUB_TEST_CLIENT_OK)
+            {
+                LogError("Failed stopping listening for device to cloud messages");
+            }
+
+            IoTHubTest_Deinit(iotHubLonghaul->iotHubTestHandle);
+            iotHubLonghaul->iotHubTestHandle = NULL;
+
+            result = 0;
+        }
+    }
+
+    return result;
+}
+
 static IOTHUB_SERVICE_CLIENT_AUTH_HANDLE longhaul_initialize_service_client(IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaul)
 {
     if (iotHubLonghaul->iotHubServiceClientHandle == NULL)
@@ -1841,7 +1876,9 @@ int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
                             }
                         }
                     }
-                    
+ 
+                    (void)longhaul_stop_listening_for_telemetry_messages(iotHubLonghaulRsrcs);
+
                     if (Unlock(iotHubLonghaulRsrcs->lock) != LOCK_OK)
                     {
                         LogError("Failed unlocking (%s)", iotHubLonghaulRsrcs->test_id);
