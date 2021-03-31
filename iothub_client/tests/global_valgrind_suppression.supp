@@ -304,8 +304,10 @@
 {
     Longhaul Test - Thread has unprotected access
     Helgrind:Race
-    fun:IoTHubTest_ListenForEventAsync
-    fun:longhaul_stop_listening_for_telemetry_messages
-    fun:longhaul_run_telemetry_tests 
-    fun:main
+    fun:asyncWorkFunction
+    fun:ThreadWrapper
+    ...
+    fun:start_thread  
+    fun:clone
+    ...
 }
