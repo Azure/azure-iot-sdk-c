@@ -1648,7 +1648,6 @@ static void on_twin_report_state_completed(int status_code, void* userContextCal
         if (Lock(send_context->iotHubLonghaul->lock) != LOCK_OK)
         {
             LogError("Failed locking (%s)", send_context->iotHubLonghaul->test_id);
-            result = MU_FAILURE;
         }
         else
         {
