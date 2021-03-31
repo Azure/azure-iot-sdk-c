@@ -1703,7 +1703,6 @@ static void check_for_reported_properties_update_on_service_side(IOTHUB_LONGHAUL
                 if (Lock(iotHubLonghaul->lock) != LOCK_OK)
                 {
                     LogError("Failed locking (%s)", iotHubLonghaul->test_id);
-                    result = MU_FAILURE;
                 }
                 else
                 {
