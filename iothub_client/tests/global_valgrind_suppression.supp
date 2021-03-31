@@ -301,13 +301,3 @@
    fun:RunTests
    fun:main
 }
-{
-    Longhaul Test - Thread has unprotected access
-    Helgrind:Race
-    fun:asyncWorkFunction
-    fun:ThreadWrapper
-    ...
-    fun:start_thread  
-    fun:clone
-    ...
-}

@@ -1051,11 +1051,6 @@ int longhaul_stop_listening_for_telemetry_messages(IOTHUB_LONGHAUL_RESOURCES_HAN
         }
         else
         {
-            if (IoTHubTest_ListenForEventAsync(iotHubLonghaul->iotHubTestHandle, 0, INDEFINITE_TIME, NULL, NULL) != IOTHUB_TEST_CLIENT_OK)
-            {
-                LogError("Failed stopping listening for device to cloud messages");
-            }
-
             IoTHubTest_Deinit(iotHubLonghaul->iotHubTestHandle);
             iotHubLonghaul->iotHubTestHandle = NULL;
 
@@ -1833,7 +1828,7 @@ int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
                 ThreadAPI_Sleep(30 * 1000); // Extra time for the hub to create the device
                 loop_result = run_on_loop(send_telemetry, iotHubLonghaulRsrcs->test_loop_duration_in_seconds, iotHubLonghaulRsrcs->test_duration_in_seconds, iotHubLonghaulRsrcs);
 
-                ThreadAPI_Sleep((unsigned int)iotHubLonghaulRsrcs->test_loop_duration_in_seconds * 1000 * 10); // Extra time for the last messages.
+                ThreadAPI_Sleep((unsigned int)iotHubLonghaulRsrcs->test_loop_duration_in_seconds * 1000 * 20); // Extra time for the last messages.
 
                 if (Lock(iotHubLonghaulRsrcs->lock) != LOCK_OK)
                 {
