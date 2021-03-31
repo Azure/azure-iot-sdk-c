@@ -1820,23 +1820,13 @@ int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
         }
         else
         {
-            if (Lock(iotHubLonghaulRsrcs->lock) != LOCK_OK)
-            {
-                LogError("Failed locking (%s)", iotHubLonghaulRsrcs->test_id);
-                result = MU_FAILURE;
-            }
-            else if (longhaul_start_listening_for_telemetry_messages(handle, iotHubLonghaulRsrcs->deviceInfo) != 0)
+            if (longhaul_start_listening_for_telemetry_messages(handle, iotHubLonghaulRsrcs->deviceInfo) != 0)
             {
                 LogError("Failed listening for telemetry messages");
                 result = MU_FAILURE;
             }
             else
             {
-                if (Unlock(iotHubLonghaulRsrcs->lock) != LOCK_OK)
-                {
-                    LogError("Failed unlocking (%s)", iotHubLonghaulRsrcs->test_id);
-                }
-
                 int loop_result;
                 IOTHUB_CLIENT_STATISTICS_HANDLE stats_handle;
 
