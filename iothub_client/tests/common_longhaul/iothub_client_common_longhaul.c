@@ -1645,9 +1645,9 @@ static void on_twin_report_state_completed(int status_code, void* userContextCal
         device_twin_info.time_sent = time(NULL);
         device_twin_info.send_status_code = status_code;
 
-        if (Lock(message_info->iotHubLonghaul->lock) != LOCK_OK)
+        if (Lock(send_context->iotHubLonghaul->lock) != LOCK_OK)
         {
-            LogError("Failed locking (%s)", message_info->iotHubLonghaul->test_id);
+            LogError("Failed locking (%s)", send_context->iotHubLonghaul->test_id);
             result = MU_FAILURE;
         }
         else
@@ -1657,9 +1657,9 @@ static void on_twin_report_state_completed(int status_code, void* userContextCal
                 LogError("Failed adding device twin reported properties statistics info (update_id=%d)", send_context->update_id);
             }
 
-            if (Unlock(message_info->iotHubLonghaul->lock) != LOCK_OK)
+            if (Unlock(send_context->iotHubLonghaul->lock) != LOCK_OK)
             {
-                LogError("Failed unlocking (%s)", message_info->iotHubLonghaul->test_id);
+                LogError("Failed unlocking (%s)", send_context->iotHubLonghaul->test_id);
             }
         }
 
@@ -1701,9 +1701,9 @@ static void check_for_reported_properties_update_on_service_side(IOTHUB_LONGHAUL
                     LogError("Failed setting the receive time for twin update %lu", (unsigned long)info.update_id);
                 }
 
-                if (Lock(message_info->iotHubLonghaul->lock) != LOCK_OK)
+                if (Lock(iotHubLonghaul->lock) != LOCK_OK)
                 {
-                    LogError("Failed locking (%s)", message_info->iotHubLonghaul->test_id);
+                    LogError("Failed locking (%s)", iotHubLonghaul->test_id);
                     result = MU_FAILURE;
                 }
                 else
@@ -1713,9 +1713,9 @@ static void check_for_reported_properties_update_on_service_side(IOTHUB_LONGHAUL
                         LogError("Failed adding receive info for twin update %lu", (unsigned long)info.update_id);
                     }
 
-                    if (Unlock(message_info->iotHubLonghaul->lock) != LOCK_OK)
+                    if (Unlock(iotHubLonghaul->lock) != LOCK_OK)
                     {
-                        LogError("Failed unlocking (%s)", message_info->iotHubLonghaul->test_id);
+                        LogError("Failed unlocking (%s)", iotHubLonghaul->test_id);
                     }
                 }
             }
@@ -1771,9 +1771,9 @@ static int update_device_twin_reported_property(const void* context)
                     free(send_context);
                 }
 
-                if (Lock(message_info->iotHubLonghaul->lock) != LOCK_OK)
+                if (Lock(iotHubLonghaul->lock) != LOCK_OK)
                 {
-                    LogError("Failed locking (%s)", message_info->iotHubLonghaul->test_id);
+                    LogError("Failed locking (%s)", iotHubLonghaul->test_id);
                     result = MU_FAILURE;
                 }
                 else
@@ -1788,9 +1788,9 @@ static int update_device_twin_reported_property(const void* context)
                         result = 0;
                     }
 
-                    if (Unlock(message_info->iotHubLonghaul->lock) != LOCK_OK)
+                    if (Unlock(iotHubLonghaul->lock) != LOCK_OK)
                     {
-                        LogError("Failed unlocking (%s)", message_info->iotHubLonghaul->test_id);
+                        LogError("Failed unlocking (%s)", iotHubLonghaul->test_id);
                     }
                 }
 
