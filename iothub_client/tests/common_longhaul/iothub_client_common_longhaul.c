@@ -1829,14 +1829,14 @@ int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
             {
                 LogError("Failed listening for telemetry messages");
                 result = MU_FAILURE;
-
+            }
+            else
+            {
                 if (Unlock(iotHubLonghaulRsrcs->lock) != LOCK_OK)
                 {
                     LogError("Failed unlocking (%s)", iotHubLonghaulRsrcs->test_id);
                 }
-            }
-            else
-            {
+
                 int loop_result;
                 IOTHUB_CLIENT_STATISTICS_HANDLE stats_handle;
 
