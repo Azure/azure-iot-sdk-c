@@ -757,6 +757,8 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG*
                     if (retrieveConnStringInfo(iothub_account_info) != 0)
                     {
                         LogError("retrieveConnStringInfo failed.\r\n");
+                        free(iothub_account_info->x509Certificate);
+                        free(iothub_account_info->x509PrivateKey);
                         free(iothub_account_info->sasDevices);
                         free(iothub_account_info);
                         iothub_account_info = NULL;
@@ -767,6 +769,8 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG*
                         if (iothub_account_info->iothub_service_client_auth_handle == NULL)
                         {
                             LogError("IoTHubServiceClientAuth_CreateFromConnectionString failed\r\n");
+                            free(iothub_account_info->x509Certificate);
+                            free(iothub_account_info->x509PrivateKey);
                             free(iothub_account_info->sasDevices);
                             free(iothub_account_info);
                             iothub_account_info = NULL;
@@ -777,7 +781,6 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG*
                             if (iothub_account_info->iothub_messaging_handle == NULL)
                             {
                                 LogError("IoTHubMessaging_LL_Create failed\r\n");
-                                free(iothub_account_info->sasDevices);
                                 IoTHubAccount_deinit(iothub_account_info);
                                 iothub_account_info = NULL;
                             }

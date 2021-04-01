@@ -1201,7 +1201,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEventAsync(IOTHUB_TEST_HANDLE devh
             }
 
             devhubValInfo->onMessageReceivedCallback = NULL;
-            devhubValInfo->onMessageReceivedContext = NULL;            
+            devhubValInfo->onMessageReceivedContext = NULL;
 
             result = IOTHUB_TEST_CLIENT_OK;
         }
