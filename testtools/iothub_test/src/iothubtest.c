@@ -30,6 +30,7 @@
 #include "azure_c_shared_utility/strings.h"
 
 #include "azure_c_shared_utility/shared_util_options.h"
+#include "azure_c_shared_utility/lock.h"
 
 #include "azure_c_shared_utility/threadapi.h"
 #include "iothubtest.h"
@@ -152,6 +153,7 @@ typedef struct IOTHUB_VALIDATION_INFO_TAG
     bool keepThreadAlive;
     bool isEventListenerConnected;
     size_t partitionCount;
+    LOCK_HANDLE lock;
 } IOTHUB_VALIDATION_INFO;
 
 typedef struct MESSAGE_RECEIVER_CONTEXT_TAG
@@ -774,24 +776,43 @@ static int asyncWorkFunction(void* context)
 {
     IOTHUB_VALIDATION_INFO* devhubValInfo = (IOTHUB_VALIDATION_INFO*)context;
 
-    while (devhubValInfo->keepThreadAlive)
+    bool keepThreadAlive = true;
+    while (keepThreadAlive)
     {
-        if (devhubValInfo->amqp_connection != NULL)
+        CONNECTION_HANDLE connection = NULL;
+        bool isEventListenerConnected = true;
+        if (Lock(devhubValInfo->lock) == LOCK_OK)
         {
-            connection_dowork(devhubValInfo->amqp_connection->connection);
+            keepThreadAlive = devhubValInfo->keepThreadAlive;
+            isEventListenerConnected = devhubValInfo->isEventListenerConnected;
+            if (devhubValInfo->amqp_connection)
+            {
+                connection = devhubValInfo->amqp_connection->connection;
+            }
+            Unlock(devhubValInfo->lock);
+        }
+        
+        if (connection != NULL)
+        {
+            connection_dowork(connection);
         }
 
-        if (devhubValInfo->isEventListenerConnected == false)
+        if (isEventListenerConnected == false)
         {
-            LogInfo("Event listener disconnected, reconnecting...");
-            destroyAmqpConnection(devhubValInfo->amqp_connection);
-            devhubValInfo->amqp_connection = NULL;
-            ThreadAPI_Sleep(1000 * 5);
-            devhubValInfo->amqp_connection = createAmqpConnection(devhubValInfo, devhubValInfo->partitionCount, time(NULL) - 180);
-            if (devhubValInfo->amqp_connection != NULL)
+            if (Lock(devhubValInfo->lock) == LOCK_OK)
             {
-                LogInfo("Event listener AMQP connected");
-                devhubValInfo->isEventListenerConnected = true;
+                LogInfo("Event listener disconnected, reconnecting...");
+                destroyAmqpConnection(devhubValInfo->amqp_connection);
+                devhubValInfo->amqp_connection = NULL;
+                ThreadAPI_Sleep(1000 * 5);
+                devhubValInfo->amqp_connection = createAmqpConnection(devhubValInfo, devhubValInfo->partitionCount, time(NULL) - 180);
+                if (devhubValInfo->amqp_connection != NULL)
+                {
+                    LogInfo("Event listener AMQP connected");
+                    devhubValInfo->isEventListenerConnected = true;
+                }
+
+                Unlock(devhubValInfo->lock);
             }
         }
 
@@ -1139,12 +1160,28 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEventAsync(IOTHUB_TEST_HANDLE devh
 
         if (msgCallback == NULL)
         {
-            devhubValInfo->keepThreadAlive = false;
+            THREAD_HANDLE asyncWorkThread = NULL;
+            if (Lock(devhubValInfo->lock) != LOCK_OK)
+            {
+                LogError("Failed lock");
+                devhubValInfo->keepThreadAlive = false;
+                asyncWorkThread = devhubValInfo->asyncWorkThread;
+            }
+            else
+            {
+                devhubValInfo->keepThreadAlive = false;
+                asyncWorkThread = devhubValInfo->asyncWorkThread;
 
-            if (devhubValInfo->asyncWorkThread != NULL)
+                if (Unlock(devhubValInfo->lock) != LOCK_OK)
+                {
+                    LogError("Failed unlocking");
+                }
+            }
+
+            if (asyncWorkThread != NULL)
             {
                 int threadFunctionResult;
-                if (ThreadAPI_Join(devhubValInfo->asyncWorkThread, &threadFunctionResult) != THREADAPI_OK)
+                if (ThreadAPI_Join(asyncWorkThread, &threadFunctionResult) != THREADAPI_OK)
                 {
                     LogError("Failed to join thread");
                 }
@@ -1158,8 +1195,13 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEventAsync(IOTHUB_TEST_HANDLE devh
                 devhubValInfo->amqp_connection = NULL;
             }
 
+            if (devhubValInfo->lock != NULL)
+            {
+                Lock_Deinit(devhubValInfo->lock);
+            }
+
             devhubValInfo->onMessageReceivedCallback = NULL;
-            devhubValInfo->onMessageReceivedContext = NULL;
+            devhubValInfo->onMessageReceivedContext = NULL;            
 
             result = IOTHUB_TEST_CLIENT_OK;
         }
@@ -1168,6 +1210,11 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEventAsync(IOTHUB_TEST_HANDLE devh
             if (devhubValInfo->amqp_connection != NULL)
             {
                 LogError("Already listening for messages");
+                result = IOTHUB_TEST_CLIENT_ERROR;
+            }
+            else if ((devhubValInfo->lock = Lock_Init()) == NULL)
+            {
+                LogError("Failed creating lock");
                 result = IOTHUB_TEST_CLIENT_ERROR;
             }
             else if ((devhubValInfo->amqp_connection = createAmqpConnection(devhubValInfo, partitionCount, receiveTimeRangeStart)) == NULL)
