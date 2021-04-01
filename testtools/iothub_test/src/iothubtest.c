@@ -780,9 +780,15 @@ static int asyncWorkFunction(void* context)
     while (keepThreadAlive)
     {
         CONNECTION_HANDLE connection = NULL;
-        if (devhubValInfo->amqp_connection != NULL && Lock(devhubValInfo->lock) == LOCK_OK)
+        bool isEventListenerConnected = true;
+        if (Lock(devhubValInfo->lock) == LOCK_OK)
         {
-            connection = devhubValInfo->amqp_connection->connection;
+            keepThreadAlive = devhubValInfo->keepThreadAlive;
+            isEventListenerConnected = devhubValInfo->isEventListenerConnected;
+            if (devhubValInfo->amqp_connection)
+            {
+                connection = devhubValInfo->amqp_connection->connection;
+            }
             Unlock(devhubValInfo->lock);
         }
         
@@ -791,14 +797,9 @@ static int asyncWorkFunction(void* context)
             connection_dowork(connection);
         }
 
-        if (Lock(devhubValInfo->lock) != LOCK_OK)
+        if (isEventListenerConnected == false)
         {
-            LogError("Failed locking");
-        }
-        else
-        {
-            keepThreadAlive = devhubValInfo->keepThreadAlive;
-            if (devhubValInfo->isEventListenerConnected == false)
+            if (Lock(devhubValInfo->lock) == LOCK_OK)
             {
                 LogInfo("Event listener disconnected, reconnecting...");
                 destroyAmqpConnection(devhubValInfo->amqp_connection);
@@ -810,11 +811,8 @@ static int asyncWorkFunction(void* context)
                     LogInfo("Event listener AMQP connected");
                     devhubValInfo->isEventListenerConnected = true;
                 }
-            }
 
-            if (Unlock(devhubValInfo->lock) != LOCK_OK)
-            {
-                LogError("Failed unlocking");
+                Unlock(devhubValInfo->lock);
             }
         }
 
