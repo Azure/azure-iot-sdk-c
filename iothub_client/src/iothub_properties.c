@@ -51,8 +51,8 @@ IOTHUB_CLIENT_RESULT IoTHub_Serialize_Properties(
 }
 
 
-IOTHUB_CLIENT_RESULT IoTHub_Serialize_ResponseToWriteableProperties(
-    const IOTHUB_WRITEABLE_PROPERTY_RESPONSE* properties,
+IOTHUB_CLIENT_RESULT IoTHub_Serialize_ResponseProperties(
+    const IOTHUB_PROPERTY_RESPONSE* properties,
     size_t numProperties,
     const char* componentName,
     unsigned char** serializedProperties,
@@ -69,14 +69,14 @@ IOTHUB_CLIENT_RESULT IoTHub_Serialize_ResponseToWriteableProperties(
     return 0;
 }
 
-IOTHUB_CLIENT_RESULT IoTHub_Deserialize_WriteableProperty(
-    IOTHUB_WRITEABLE_PROPERTY_PAYLOAD_TYPE payloadType,
+IOTHUB_CLIENT_RESULT IoTHub_Deserialize_Properties(
+    IOTHUB_PROPERTY_PAYLOAD_TYPE payloadType,
     const unsigned char* serializedProperties,
     size_t serializedPropertiesLength,
     const char** componentsName,
     size_t numComponents,
-    IOTHUB_WRITEABLE_PROPERTY** writeableProperties,
-    size_t* numWriteableProperties,
+    IOTHUB_PROPERTY_DESERIALIZED** properties,
+    size_t* numProperties,
     int* propertiesVersion)
 {
 /*
@@ -117,8 +117,8 @@ IOTHUB_CLIENT_RESULT IoTHub_Deserialize_WriteableProperty(
     (void)serializedPropertiesLength;
     (void)componentsName;
     (void)numComponents;
-    (void)writeableProperties;
-    (void)numWriteableProperties;
+    (void)properties;
+    (void)numProperties;
     (void)propertiesVersion;
     return 0;
 }

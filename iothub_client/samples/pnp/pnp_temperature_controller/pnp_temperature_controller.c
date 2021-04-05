@@ -302,23 +302,23 @@ static void PnP_TempControlComponent_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE
 
 
 int PnP_TempControlComponent_UpdatedPropertyCallback(
-    IOTHUB_WRITEABLE_PROPERTY_PAYLOAD_TYPE payloadType, 
+    IOTHUB_PROPERTY_PAYLOAD_TYPE payloadType, 
     const unsigned char* payLoad,
     size_t size,
     void* userContextCallback)
 {
     IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient = (IOTHUB_DEVICE_CLIENT_LL_HANDLE)userContextCallback;
-    IOTHUB_WRITEABLE_PROPERTY* writeableProperties;
+    IOTHUB_PROPERTY_DESERIALIZED* properties;
     size_t numProperties;
     int propertiesVersion;
 
-    IoTHub_Deserialize_WriteableProperty(payloadType, payLoad, size, g_modeledComponents, g_numModeledComponents, &writeableProperties, &numProperties, &propertiesVersion);
+    IoTHub_Deserialize_Properties(payloadType, payLoad, size, g_modeledComponents, g_numModeledComponents, &properties, &numProperties, &propertiesVersion);
 
     for (size_t i = 0; i < numProperties; i++) 
     {
-        const IOTHUB_WRITEABLE_PROPERTY* writeableProperty = &writeableProperties[i];
+        const IOTHUB_PROPERTY_DESERIALIZED* property = &properties[i];
 
-        if (writeableProperty->propertyType == IOTHUB_PROPERTY_TYPE_REPORTED_FROM_DEVICE)
+        if (property->propertyType == IOTHUB_PROPERTY_TYPE_REPORTED_FROM_DEVICE)
         {
             // We don't process previously reported properties, so ignore.  There is a potential optimization
             // however where if a desired property is the same value and version of a reported, then 
@@ -326,25 +326,25 @@ int PnP_TempControlComponent_UpdatedPropertyCallback(
             continue;
         }
 
-        if (writeableProperty->componentName == NULL) 
+        if (property->componentName == NULL) 
         {   
-            LogError("Property=%s arrived for TemperatureControl component itself.  This does not support writeable properties on it (all properties are on subcomponents)", writeableProperty->componentName);
+            LogError("Property=%s arrived for TemperatureControl component itself.  This does not support properties on it (all properties are on subcomponents)", property->componentName);
         }
-        else if (strcmp(writeableProperty->componentName, g_thermostatComponent1Name) == 0)
+        else if (strcmp(property->componentName, g_thermostatComponent1Name) == 0)
         {
-            PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle1, deviceClient, writeableProperty->propertyName, writeableProperty->propertyValue, propertiesVersion);
+            PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle1, deviceClient, property->propertyName, property->propertyValue, propertiesVersion);
         }
-        else if (strcmp(writeableProperty->componentName, g_thermostatComponent2Name) == 0)
+        else if (strcmp(property->componentName, g_thermostatComponent2Name) == 0)
         {
-            PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle2, deviceClient, writeableProperty->propertyName, writeableProperty->propertyValue, propertiesVersion);
+            PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle2, deviceClient, property->propertyName, property->propertyValue, propertiesVersion);
         }
         else
         {
-            LogError("Component=%s is not implemented by the TemperatureController", writeableProperty->componentName);
+            LogError("Component=%s is not implemented by the TemperatureController", property->componentName);
         }
     }
 
-    // TODO: Add API and sample of its invocation freeing up writeableProperties.
+    // TODO: Add API and sample of its invocation freeing up properties.
     return 0;
 }
 
@@ -363,8 +363,8 @@ void PnP_TempControlComponent_SendWorkingSet(IOTHUB_DEVICE_CLIENT_LL_HANDLE devi
     IOTHUB_TELEMETRY_ATTRIBUTES telemetryAttributes;
     telemetryAttributes.version = 1;
     telemetryAttributes.componentName = NULL;
-    telemetryAttributes.telemetryContentEncoding = "utf8";
-    telemetryAttributes.telemetryContentType = "application/json";
+    telemetryAttributes.contentEncoding = "utf8";
+    telemetryAttributes.contentType = "application/json";
 
     int workingSet = g_workingSetMinimum + (rand() % g_workingSetRandomModulo);
 
@@ -579,7 +579,7 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateDeviceClientAndAllocateComponents(vo
         LogError("IoTHubDeviceClient_LL_PnP_SetCommandCallback failed, result=%d", clientResult);
         result = false;
     }
-    else if ((clientResult = IoTHubDeviceClient_LL_GetAndSubscribeToProperties(deviceClient, PnP_TempControlComponent_UpdatedPropertyCallback, (void*)deviceClient)) != IOTHUB_CLIENT_OK)
+    else if ((clientResult = IoTHubDeviceClient_LL_GetPropertiesAndSubscribeToUpdates(deviceClient, PnP_TempControlComponent_UpdatedPropertyCallback, (void*)deviceClient)) != IOTHUB_CLIENT_OK)
     {
         LogError("IoTHubDeviceClient_PnP_SetPropertyCallback failed, result=%d", clientResult);
         result = false;

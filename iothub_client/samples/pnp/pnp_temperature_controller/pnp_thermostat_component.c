@@ -261,7 +261,7 @@ static void SendTargetTemperatureResponse(PNP_THERMOSTAT_COMPONENT* pnpThermosta
     }
     else
     {
-        IOTHUB_WRITEABLE_PROPERTY_RESPONSE temperatureProperty;
+        IOTHUB_PROPERTY_RESPONSE temperatureProperty;
         memset(&temperatureProperty, 0, sizeof(temperatureProperty));
         temperatureProperty.version = 1;
         temperatureProperty.version = 1;
@@ -273,11 +273,11 @@ static void SendTargetTemperatureResponse(PNP_THERMOSTAT_COMPONENT* pnpThermosta
         unsigned char* propertySerialized;
         size_t propertySerializedLength;
 
-        if ((iothubClientResult = IoTHub_Serialize_ResponseToWriteableProperties(&temperatureProperty, 1, pnpThermostatComponent->componentName, &propertySerialized, &propertySerializedLength)) != IOTHUB_CLIENT_OK)
+        if ((iothubClientResult = IoTHub_Serialize_ResponseProperties(&temperatureProperty, 1, pnpThermostatComponent->componentName, &propertySerialized, &propertySerializedLength)) != IOTHUB_CLIENT_OK)
         {
             LogError("Unable to serialize updated property, error=%d", iothubClientResult);
         }
-        else if ((iothubClientResult = IoTHubDeviceClient_LL_RespondToWriteableProperties(deviceClientLL, propertySerialized, propertySerializedLength, NULL, NULL)) != IOTHUB_CLIENT_OK)
+        else if ((iothubClientResult = IoTHubDeviceClient_LL_SendProperties(deviceClientLL, propertySerialized, propertySerializedLength, NULL, NULL)) != IOTHUB_CLIENT_OK)
         {
             LogError("Unable to send updated property, error=%d", iothubClientResult);
         }
@@ -414,8 +414,8 @@ void PnP_ThermostatComponent_SendTelemetry(PNP_THERMOSTAT_COMPONENT_HANDLE pnpTh
     IOTHUB_TELEMETRY_ATTRIBUTES telemetryAttributes;
     telemetryAttributes.version = 1;
     telemetryAttributes.componentName = pnpThermostatComponent->componentName;
-    telemetryAttributes.telemetryContentEncoding = "utf8";
-    telemetryAttributes.telemetryContentType = "application/json";
+    telemetryAttributes.contentEncoding = "utf8";
+    telemetryAttributes.contentType = "application/json";
 
     char temperatureStringBuffer[32];
 

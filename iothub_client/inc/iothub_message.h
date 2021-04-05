@@ -61,9 +61,9 @@ typedef struct IOTHUB_TELEMETRY_ATTRIBUTES_TAG
     /** @brief    Optional component name that message corresponds to. */
     const char* componentName;
     /** @brief    Optional content type of message. */
-    const char* telemetryContentType;
+    const char* contentType;
     /** @brief    Optional encoding type of message. */
-    const char* telemetryContentEncoding;
+    const char* contentEncoding;
 } IOTHUB_TELEMETRY_ATTRIBUTES;
 
 static const char DIAG_CREATION_TIME_UTC_PROPERTY_NAME[] = "diag_creation_time_utc";
