@@ -277,7 +277,7 @@ static void SendTargetTemperatureResponse(PNP_THERMOSTAT_COMPONENT* pnpThermosta
         {
             LogError("Unable to serialize updated property, error=%d", iothubClientResult);
         }
-        else if ((iothubClientResult = IoTHubDeviceClient_LL_SendProperties(deviceClientLL, propertySerialized, propertySerializedLength, NULL, NULL)) != IOTHUB_CLIENT_OK)
+        else if ((iothubClientResult = IoTHubDeviceClient_LL_SendPropertiesAsync(deviceClientLL, propertySerialized, propertySerializedLength, NULL, NULL)) != IOTHUB_CLIENT_OK)
         {
             LogError("Unable to send updated property, error=%d", iothubClientResult);
         }
@@ -324,18 +324,18 @@ void PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(PNP_THERMOS
     }
     else
     {
-        IOTHUB_PROPERTY maxTempProperty;
+        IOTHUB_PROPERTY_REPORTED maxTempProperty;
         maxTempProperty.name = g_maxTempSinceLastRebootPropertyName;
         maxTempProperty.value = maximumTemperatureAsString;
 
         unsigned char* propertySerialized;
         size_t propertySerializedLength;
 
-        if ((iothubClientResult = IoTHub_Serialize_Properties(&maxTempProperty, 1, pnpThermostatComponent->componentName, &propertySerialized, &propertySerializedLength)) != IOTHUB_CLIENT_OK)
+        if ((iothubClientResult = IoTHub_Serialize_ReportedProperties(&maxTempProperty, 1, pnpThermostatComponent->componentName, &propertySerialized, &propertySerializedLength)) != IOTHUB_CLIENT_OK)
         {
             LogError("Unable to serialize reported state, error=%d", iothubClientResult);
         }
-        if ((iothubClientResult = IoTHubDeviceClient_LL_SendProperties(deviceClientLL, propertySerialized, propertySerializedLength,  NULL, NULL)) != IOTHUB_CLIENT_OK)
+        if ((iothubClientResult = IoTHubDeviceClient_LL_SendPropertiesAsync(deviceClientLL, propertySerialized, propertySerializedLength,  NULL, NULL)) != IOTHUB_CLIENT_OK)
         {
             LogError("Unable to send reported state, error=%d", iothubClientResult);
         }
@@ -428,7 +428,7 @@ void PnP_ThermostatComponent_SendTelemetry(PNP_THERMOSTAT_COMPONENT_HANDLE pnpTh
     {
         LogError("IoTHubMessage_PnP_CreateFromString failed");
     }
-    else if ((iothubResult = IoTHubDeviceClient_LL_SendTelemetry(deviceClientLL, messageHandle, NULL, NULL)) != IOTHUB_CLIENT_OK)
+    else if ((iothubResult = IoTHubDeviceClient_LL_SendTelemetryAsync(deviceClientLL, messageHandle, NULL, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to send telemetry message, error=%d", iothubResult);
     }

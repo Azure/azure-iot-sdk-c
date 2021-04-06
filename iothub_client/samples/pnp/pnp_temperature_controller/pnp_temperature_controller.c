@@ -304,7 +304,7 @@ static void PnP_TempControlComponent_DeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE
 int PnP_TempControlComponent_UpdatedPropertyCallback(
     IOTHUB_PROPERTY_PAYLOAD_TYPE payloadType, 
     const unsigned char* payLoad,
-    size_t size,
+    size_t payloadLength,
     void* userContextCallback)
 {
     IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient = (IOTHUB_DEVICE_CLIENT_LL_HANDLE)userContextCallback;
@@ -312,7 +312,7 @@ int PnP_TempControlComponent_UpdatedPropertyCallback(
     size_t numProperties;
     int propertiesVersion;
 
-    IoTHub_Deserialize_Properties(payloadType, payLoad, size, g_modeledComponents, g_numModeledComponents, &properties, &numProperties, &propertiesVersion);
+    IoTHub_Deserialize_Properties(payloadType, payLoad, payloadLength, g_modeledComponents, g_numModeledComponents, &properties, &numProperties, &propertiesVersion);
 
     for (size_t i = 0; i < numProperties; i++) 
     {
@@ -377,7 +377,7 @@ void PnP_TempControlComponent_SendWorkingSet(IOTHUB_DEVICE_CLIENT_LL_HANDLE devi
     {
         LogError("IoTHubMessage_CreateFromString failed");
     }
-    else if ((iothubResult = IoTHubDeviceClient_LL_SendTelemetry(deviceClient, messageHandle, NULL, NULL)) != IOTHUB_CLIENT_OK)
+    else if ((iothubResult = IoTHubDeviceClient_LL_SendTelemetryAsync(deviceClient, messageHandle, NULL, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to send telemetry message, error=%d", iothubResult);
     }
@@ -404,18 +404,18 @@ static void PnP_TempControlComponent_ReportSerialNumber_Property(IOTHUB_DEVICE_C
     IOTHUB_CLIENT_RESULT iothubClientResult;
 
     // New code
-    IOTHUB_PROPERTY property = { 0 };
+    IOTHUB_PROPERTY_REPORTED property = { 0 };
     unsigned char* serializedProperties;
     size_t serializedPropertiesLength;
 
     property.name = g_serialNumberPropertyName;
     property.value = g_serialNumberPropertyValue;
 
-    if ((iothubClientResult = IoTHub_Serialize_Properties(&property, 1, NULL, &serializedProperties, &serializedPropertiesLength)) != IOTHUB_CLIENT_OK)
+    if ((iothubClientResult = IoTHub_Serialize_ReportedProperties(&property, 1, NULL, &serializedProperties, &serializedPropertiesLength)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to serialize reported state, error=%d", iothubClientResult);
     }
-    else if ((iothubClientResult = IoTHubDeviceClient_LL_SendProperties(deviceClient, serializedProperties, serializedPropertiesLength, NULL, NULL)) != IOTHUB_CLIENT_OK)
+    else if ((iothubClientResult = IoTHubDeviceClient_LL_SendPropertiesAsync(deviceClient, serializedProperties, serializedPropertiesLength, NULL, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to send reported state, error=%d", iothubClientResult);
     }
@@ -579,7 +579,7 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateDeviceClientAndAllocateComponents(vo
         LogError("IoTHubDeviceClient_LL_PnP_SetCommandCallback failed, result=%d", clientResult);
         result = false;
     }
-    else if ((clientResult = IoTHubDeviceClient_LL_GetPropertiesAndSubscribeToUpdates(deviceClient, PnP_TempControlComponent_UpdatedPropertyCallback, (void*)deviceClient)) != IOTHUB_CLIENT_OK)
+    else if ((clientResult = IoTHubDeviceClient_LL_GetPropertiesAndSubscribeToUpdatesAsync(deviceClient, PnP_TempControlComponent_UpdatedPropertyCallback, (void*)deviceClient)) != IOTHUB_CLIENT_OK)
     {
         LogError("IoTHubDeviceClient_PnP_SetPropertyCallback failed, result=%d", clientResult);
         result = false;

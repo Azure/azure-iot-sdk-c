@@ -13,7 +13,7 @@ typedef struct {
     const char* name;
     /** @brief    The value of the property. */
     const char* value;
-} IOTHUB_PROPERTY;
+} IOTHUB_PROPERTY_REPORTED;
 
 /** @brief Enumeration that indicates whether a given property was reported from the device
            (and hence the device application sees what the last reported value IoT Hub has)
@@ -68,7 +68,7 @@ typedef struct {
 /**
 * @brief   Serializes properties into a format for sending to IoT Hub.
 *
-* @param   properties                  Pointer to IOTHUB_PROPERTY to be serialized
+* @param   properties                  Pointer to IOTHUB_PROPERTY_REPORTED to be serialized
 * @param   numProperties               Number of elements contained in @c properties.
 * @param   componentName               Optional component name these properties are part of.  May be NULL for default component.
 * @param   serializedProperties        Serialized output of @c properties for sending to IoT Hub.
@@ -77,8 +77,8 @@ typedef struct {
 *
 * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
-IOTHUB_CLIENT_RESULT IoTHub_Serialize_Properties(
-    const IOTHUB_PROPERTY* properties, 
+IOTHUB_CLIENT_RESULT IoTHub_Serialize_ReportedProperties(
+    const IOTHUB_PROPERTY_REPORTED* properties, 
     size_t numProperties, 
     const char* componentName, 
     unsigned char** serializedProperties, 
@@ -107,14 +107,14 @@ IOTHUB_CLIENT_RESULT IoTHub_Serialize_ResponseProperties(
     size_t* serializedPropertiesLength);
 
 /**
-* @brief   Converts payload from a property update into one or more IOTHUB_PROPERTY structs, which are easier to manipulate.
+* @brief   Converts payload from a property update into one or more IOTHUB_PROPERTY_DESERIALIZED structs, which are easier to manipulate.
 *
 * @param   payloadType                 Whether to parse the payload as a complete or partial update.
 * @param   payLoad                     Payload received from IoT Hub that requires deserialization.
 * @param   payLoadLength               Number of bytes in payload
 * @param   componentsName              Optional array containing components that are supported by this client.  Can be NULL if only one component is supported.
 * @param   numComponents               Number of components in the componentsName array.  Can be 0 if only one component is supported.
-* @param   properties                  Array of IOTHUB_PROPERTY representing a parsed version of payLoad.
+* @param   properties                  Array of IOTHUB_PROPERTY_DESERIALIZED representing a parsed version of payLoad.
 * @param   numProperties               Number of array elements in @c properties.
 * @param   propertiesVersion           Version of the properties that IoT Hub is monitoring.  This is required when responding to writeable 
 * 

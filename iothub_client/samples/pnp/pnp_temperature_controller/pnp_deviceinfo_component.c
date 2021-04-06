@@ -75,7 +75,7 @@ static void SendReportedPropertyForDeviceInformation(IOTHUB_DEVICE_CLIENT_LL_HAN
 }
 */
 
-void InitReportedProperty(IOTHUB_PROPERTY *property, const char* propertyName, const char* propertyValue)
+void InitReportedProperty(IOTHUB_PROPERTY_REPORTED *property, const char* propertyName, const char* propertyValue)
 {
     property->name = propertyName;
     property->value = propertyValue;
@@ -100,7 +100,7 @@ void PnP_DeviceInfoComponent_Report_All_Properties(const char* componentName, IO
 
     unsigned char* propertiesSerialized = NULL;
     size_t propertiesSerializedLength;
-    IOTHUB_PROPERTY properties[8];
+    IOTHUB_PROPERTY_REPORTED properties[8];
     const int numProperties = sizeof(properties) / sizeof(properties[0]);
 
     // This extra InitReportedProperty is because C won't let us initialize struct in a reasonable way.  Other SDKs won't need second step.
@@ -113,10 +113,10 @@ void PnP_DeviceInfoComponent_Report_All_Properties(const char* componentName, IO
     InitReportedProperty(&properties[6], PnPDeviceInfo_TotalStoragePropertyName, PnPDeviceInfo_TotalStoragePropertyValue);
     InitReportedProperty(&properties[7], PnPDeviceInfo_TotalMemoryPropertyName, PnPDeviceInfo_TotalMemoryPropertyValue);
 
-    IoTHub_Serialize_Properties(properties, numProperties, componentName, &propertiesSerialized, &propertiesSerializedLength);
+    IoTHub_Serialize_ReportedProperties(properties, numProperties, componentName, &propertiesSerialized, &propertiesSerializedLength);
 
     // Unlike original sample, everything gets batched on a single send.
-    IoTHubDeviceClient_LL_SendProperties(deviceClientLL, propertiesSerialized, propertiesSerializedLength, NULL, NULL);
+    IoTHubDeviceClient_LL_SendPropertiesAsync(deviceClientLL, propertiesSerialized, propertiesSerializedLength, NULL, NULL);
     free(propertiesSerialized);
 }
 

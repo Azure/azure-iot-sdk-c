@@ -135,7 +135,7 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob(IOTHUB_DEV
 #endif
 
 
-IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendTelemetry(
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendTelemetryAsync(
                         IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
                         IOTHUB_MESSAGE_HANDLE telemetryMessageHandle,
                         IOTHUB_CLIENT_TELEMETRY_CALLBACK telemetryConfirmationCallback,
@@ -144,7 +144,7 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendTelemetry(
     return IoTHubClientCore_LL_SendEventAsync((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, telemetryMessageHandle, (IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK)telemetryConfirmationCallback, userContextCallback);
 }
 
-IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendProperties(
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendPropertiesAsync(
                             IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
                             const unsigned char* properties,
                             size_t propertiesLength,
@@ -168,7 +168,7 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SubscribeForCommands(
     return 0;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_GetPropertiesAndSubscribeToUpdates(
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_GetPropertiesAndSubscribeToUpdatesAsync(
     IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle,
     IOTHUB_CLIENT_PROPERTIES_CALLBACK propertiesCallback,
     void* userContextCallback)
