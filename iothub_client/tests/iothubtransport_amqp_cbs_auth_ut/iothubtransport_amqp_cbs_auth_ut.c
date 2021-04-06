@@ -53,6 +53,7 @@ static int real_strcmp(const char* str1, const char* str2)
 
 #define ENABLE_MOCKS
 #include "iothub_transport_ll.h"
+#include "azure_uamqp_c/async_operation.h"
 #include "azure_uamqp_c/cbs.h"
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/gballoc.h"
@@ -108,6 +109,7 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 #define SAS_TOKEN_TYPE                                    "servicebus.windows.net:sastoken"
 #define TEST_OPTIONHANDLER_HANDLE                         (OPTIONHANDLER_HANDLE)0x4455
 #define TEST_AUTHORIZATION_MODULE_HANDLE                  (IOTHUB_AUTHORIZATION_HANDLE)0x4456
+#define TEST_PUT_TOKEN_RESULT                             (ASYNC_OPERATION_HANDLE)0x4457
 
 
 static AUTHENTICATION_CONFIG global_auth_config;
@@ -145,9 +147,9 @@ static const char* saved_cbs_put_token_audience;
 static const char* saved_cbs_put_token_token;
 static ON_CBS_OPERATION_COMPLETE saved_cbs_put_token_on_operation_complete;
 static void* saved_cbs_put_token_context;
-static int TEST_cbs_put_token_async_return;
+static ASYNC_OPERATION_HANDLE TEST_cbs_put_token_async_return = TEST_PUT_TOKEN_RESULT;
 
-static int TEST_cbs_put_token_async(CBS_HANDLE cbs, const char* type, const char* audience, const char* token, ON_CBS_OPERATION_COMPLETE on_operation_complete, void* context)
+static ASYNC_OPERATION_HANDLE TEST_cbs_put_token_async(CBS_HANDLE cbs, const char* type, const char* audience, const char* token, ON_CBS_OPERATION_COMPLETE on_operation_complete, void* context)
 {
     saved_cbs_put_token_cbs = cbs;
     saved_cbs_put_token_type = type;
@@ -497,7 +499,7 @@ static void reset_test_data()
     g_STRING_sprintf_fail_on_count = -1;
     saved_STRING_sprintf_handle = NULL;
 
-    TEST_cbs_put_token_async_return = 0;
+    TEST_cbs_put_token_async_return = TEST_PUT_TOKEN_RESULT;
     saved_cbs_put_token_cbs = NULL;
     saved_cbs_put_token_type = NULL;
     saved_cbs_put_token_audience = NULL;
@@ -1105,11 +1107,11 @@ TEST_FUNCTION(authentication_do_work_SAS_TOKEN_AUTHENTICATION_STATE_STARTING_fai
         }
         else if (i == 3)
         {
-            TEST_cbs_put_token_async_return = 1;
+            TEST_cbs_put_token_async_return = NULL;
         }
         else
         {
-            TEST_cbs_put_token_async_return = 0;
+            TEST_cbs_put_token_async_return = TEST_PUT_TOKEN_RESULT;
         }
 
         // arrange
@@ -1201,11 +1203,11 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_AUTHENTICATION_STATE_STARTING_f
         }
         else if (i == 7)
         {
-            TEST_cbs_put_token_async_return = 1;
+            TEST_cbs_put_token_async_return = NULL;
         }
         else
         {
-            TEST_cbs_put_token_async_return = 0;
+            TEST_cbs_put_token_async_return = TEST_PUT_TOKEN_RESULT;
         }
 
         // arrange
