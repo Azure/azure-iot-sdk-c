@@ -503,6 +503,7 @@ void authentication_destroy(AUTHENTICATION_HANDLE authentication_handle)
         if (instance->iothub_host_fqdn != NULL)
             STRING_delete(instance->iothub_host_fqdn);
 
+        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_109: [ authentication_destroy() shall cancel any pending CBS put token request ]
         if (instance->cbs_put_token_async_context != NULL)
         {
             async_operation_cancel(instance->cbs_put_token_async_context);

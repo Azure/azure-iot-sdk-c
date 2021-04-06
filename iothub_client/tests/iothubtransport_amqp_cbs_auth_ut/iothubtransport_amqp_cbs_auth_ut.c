@@ -869,6 +869,35 @@ TEST_FUNCTION(authentication_destroy_succeeds)
     // cleanup
 }
 
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_109: [ authentication_destroy() shall cancel any pending CBS put token request ]
+TEST_FUNCTION(authentication_destroy_with_pending_cbs_put_token_success)
+{
+    // arrange
+    AUTHENTICATION_CONFIG* config = get_auth_config(USE_DEVICE_SAS_TOKEN);
+    AUTHENTICATION_HANDLE handle = create_and_start_authentication(config, false);
+
+    time_t current_time = time(NULL);
+
+    AUTHENTICATION_DO_WORK_EXPECTED_STATE* exp_state = get_do_work_expected_state_struct();
+    exp_state->current_state = AUTHENTICATION_STATE_STARTING;
+
+    crank_authentication_do_work(config, handle, current_time, exp_state, IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY);
+    
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(async_operation_cancel(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+
+
+    // act
+    authentication_destroy(handle);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+}
+
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_036: [If authentication_handle is NULL, authentication_do_work() shall fail and return]
 TEST_FUNCTION(authentication_do_work_NULL_handle)
 {
