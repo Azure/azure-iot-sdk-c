@@ -409,13 +409,8 @@ void PnP_ThermostatComponent_SendTelemetry(PNP_THERMOSTAT_COMPONENT_HANDLE pnpTh
 {
     PNP_THERMOSTAT_COMPONENT* pnpThermostatComponent = (PNP_THERMOSTAT_COMPONENT*)pnpThermostatComponentHandle;
     IOTHUB_MESSAGE_HANDLE messageHandle = NULL;
+    IOTHUB_MESSAGE_RESULT messageResult;
     IOTHUB_CLIENT_RESULT iothubResult;
-
-    IOTHUB_TELEMETRY_ATTRIBUTES telemetryAttributes;
-    telemetryAttributes.version = 1;
-    telemetryAttributes.componentName = pnpThermostatComponent->componentName;
-    telemetryAttributes.contentEncoding = "utf8";
-    telemetryAttributes.contentType = "application/json";
 
     char temperatureStringBuffer[32];
 
@@ -424,9 +419,22 @@ void PnP_ThermostatComponent_SendTelemetry(PNP_THERMOSTAT_COMPONENT_HANDLE pnpTh
         LogError("snprintf of current temperature telemetry failed");
     }
     /* new code ... - let's discuss whether this or in the Message API itself is right spot for this ?? */
-    else if ((messageHandle = IoTHubMessage_CreateTelemetry_FromString(temperatureStringBuffer, &telemetryAttributes)) == NULL)
+    else if ((messageHandle = IoTHubMessage_CreateFromString(temperatureStringBuffer)) == NULL)
     {
         LogError("IoTHubMessage_PnP_CreateFromString failed");
+    }
+    else if ((messageResult = IoTHubMessage_SetContentTypeSystemProperty(messageHandle, "application/json")) != IOTHUB_MESSAGE_OK)
+    {
+        LogError("IoTHubMessage_SetContentTypeSystemProperty failed, error=%d", messageResult);
+    }
+    // TODO: Remove magic constants "application/json" & "utf8" from this
+    else if ((messageResult = IoTHubMessage_SetContentEncodingSystemProperty(messageHandle, "utf8")) != IOTHUB_MESSAGE_OK)
+    {
+        LogError("IoTHubMessage_SetContentEncodingSystemProperty failed, error=%d", messageResult);
+    }
+    else if ((messageResult = IoTHubMessage_SetComponentName(messageHandle, pnpThermostatComponent->componentName)) != IOTHUB_MESSAGE_OK)
+    {
+        LogError("IoTHubMessage_SetContentEncodingSystemProperty failed, error=%d", messageResult);
     }
     else if ((iothubResult = IoTHubDeviceClient_LL_SendTelemetryAsync(deviceClientLL, messageHandle, NULL, NULL)) != IOTHUB_CLIENT_OK)
     {

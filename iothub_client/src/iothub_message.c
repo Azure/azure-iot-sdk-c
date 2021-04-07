@@ -1225,17 +1225,19 @@ bool IoTHubMessage_IsSecurityMessage(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
     return result;
 }
 
-IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateTelemetry_FromByteArray(const unsigned char* byteArray, size_t size, const IOTHUB_TELEMETRY_ATTRIBUTES *telemetryAttributes)
+IOTHUB_MESSAGE_RESULT IoTHubMessage_SetComponentName(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const char* componentName)
 {
-    (void)telemetryAttributes;
-    return IoTHubMessage_CreateFromByteArray(byteArray, size);
+    (void)iotHubMessageHandle;
+    (void)componentName;
+    return 0;
 }
 
-IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateTelemetry_FromString(const char* source, const IOTHUB_TELEMETRY_ATTRIBUTES *telemetryAttributes)
+const char* IoTHubMessage_GetComponentName(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
 {
-    (void)telemetryAttributes;
-    return IoTHubMessage_CreateFromString(source);
+    (void)iotHubMessageHandle;
+    return NULL;
 }
+
 
 void IoTHubMessage_Destroy(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
 {

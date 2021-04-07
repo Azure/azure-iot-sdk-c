@@ -357,14 +357,9 @@ int PnP_TempControlComponent_UpdatedPropertyCallback(
 void PnP_TempControlComponent_SendWorkingSet(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient) 
 {
     IOTHUB_MESSAGE_HANDLE messageHandle = NULL;
+    IOTHUB_MESSAGE_RESULT messageResult;
     IOTHUB_CLIENT_RESULT iothubResult;
     char workingSetTelemetryPayload[64];
-
-    IOTHUB_TELEMETRY_ATTRIBUTES telemetryAttributes;
-    telemetryAttributes.version = 1;
-    telemetryAttributes.componentName = NULL;
-    telemetryAttributes.contentEncoding = "utf8";
-    telemetryAttributes.contentType = "application/json";
 
     int workingSet = g_workingSetMinimum + (rand() % g_workingSetRandomModulo);
 
@@ -373,9 +368,18 @@ void PnP_TempControlComponent_SendWorkingSet(IOTHUB_DEVICE_CLIENT_LL_HANDLE devi
         LogError("Unable to create a workingSet telemetry payload string");
     }
     /* Start new code ...*/
-    else if ((messageHandle = IoTHubMessage_CreateTelemetry_FromString(workingSetTelemetryPayload, &telemetryAttributes)) == NULL)
+    else if ((messageHandle = IoTHubMessage_CreateFromString(workingSetTelemetryPayload)) == NULL)
     {
         LogError("IoTHubMessage_CreateFromString failed");
+    }
+    else if ((messageResult = IoTHubMessage_SetContentTypeSystemProperty(messageHandle, "application/json")) != IOTHUB_MESSAGE_OK)
+    {
+        LogError("IoTHubMessage_SetContentTypeSystemProperty failed, error=%d", messageResult);
+    }
+    // TODO: Remove magic constants "application/json" & "utf8" from this
+    else if ((messageResult = IoTHubMessage_SetContentEncodingSystemProperty(messageHandle, "utf8")) != IOTHUB_MESSAGE_OK)
+    {
+        LogError("IoTHubMessage_SetContentEncodingSystemProperty failed, error=%d", messageResult);
     }
     else if ((iothubResult = IoTHubDeviceClient_LL_SendTelemetryAsync(deviceClient, messageHandle, NULL, NULL)) != IOTHUB_CLIENT_OK)
     {

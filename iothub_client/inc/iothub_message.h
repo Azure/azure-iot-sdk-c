@@ -51,21 +51,6 @@ typedef struct IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA_TAG
     char* diagnosticCreationTimeUtc;
 }IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA, *IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA_HANDLE;
 
-#define IOTHUB_TELEMETRY_ATTRIBUTES_VERSION 1
-
-/** @brief    This struct defines properties commonly used when sending telemetry. */
-typedef struct IOTHUB_TELEMETRY_ATTRIBUTES_TAG 
-{
-    /** @brief    Structure version.  Currently must be IOTHUB_TELEMETRY_ATTRIBUTES_VERSION. */
-    int version; 
-    /** @brief    Optional component name that message corresponds to. */
-    const char* componentName;
-    /** @brief    Optional content type of message. */
-    const char* contentType;
-    /** @brief    Optional encoding type of message. */
-    const char* contentEncoding;
-} IOTHUB_TELEMETRY_ATTRIBUTES;
-
 static const char DIAG_CREATION_TIME_UTC_PROPERTY_NAME[] = "diag_creation_time_utc";
 
 /**
@@ -449,34 +434,27 @@ MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetAsSecurityMessage, I
 MOCKABLE_FUNCTION(, bool, IoTHubMessage_IsSecurityMessage, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 
 /**
-* @brief   Creates a new IoT Hub telemetry message from a byte array. The type of the
-*          message will be set to @c IOTHUBMESSAGE_BYTEARRAY.
+* @brief   Sets component name of the message.
 *
-* @param   byteArray            The byte array from which the message is to be created.
-* @param   size                 The size of the byte array.
-* @param   telemetryAttributes  Optional structure containing additional telemetry related metadata to associate with the message.
+* @param   iotHubMessageHandle Handle to the message.
+* @param   componentName Pointer to the component name.
 *
-* @return  A valid @c IOTHUB_MESSAGE_HANDLE if the message was successfully
-*          created or @c NULL in case an error occurs.
+* @return  Returns IOTHUB_MESSAGE_OK if the componentName was set successfully
+*          or an error code otherwise.
 */
-IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateTelemetry_FromByteArray(
-    const unsigned char* byteArray, 
-    size_t size, 
-    const IOTHUB_TELEMETRY_ATTRIBUTES *telemetryAttributes);
+MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetComponentName, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, componentName);
 
 /**
-* @brief   Creates a new IoT Hub telemetry message from a string. The type of the
-*          message will be set to @c IOTHUBMESSAGE_STRING.
+* @brief   Gets the component name from the IOTHUB_MESSAGE_HANDLE. No new memory is allocated,
+*          the caller is not responsible for freeing the memory. The memory
+*          is valid until IoTHubMessage_Destroy is called on the message.
 *
-* @param   source               The null terminated string from which the message is to be created.
-* @param   telemetryAttributes  Optional structure containing additional telemetry related metadata to associate with the message.
+* @param   iotHubMessageHandle Handle to the message.
 *
-* @return  A valid @c IOTHUB_MESSAGE_HANDLE if the message was successfully
-*          created or @c NULL in case an error occurs.
+* @return  A const char* pointing to the component name.
 */
-IOTHUB_MESSAGE_HANDLE IoTHubMessage_CreateTelemetry_FromString(
-    const char* source, 
-    const IOTHUB_TELEMETRY_ATTRIBUTES *telemetryAttributes);
+MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetComponentName, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
+
 
 /**
 * @brief   Frees all resources associated with the given message handle.

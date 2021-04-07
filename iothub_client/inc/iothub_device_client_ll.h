@@ -466,7 +466,7 @@ typedef void(*IOTHUB_PROPERTY_ACKNOWLEDGED_CALLBACK)(int statusCode, void* userC
 * @param    iotHubClientHandle            The handle created by a call to the create function.
 * @param    properties                    Serialized property data to be sent to IoT Hub.  You can either 
 *                                         manually serialize this buffer or use the IoTHub_Serialize_ReportedProperties or IoTHub_Serialize_ResponseProperties to assist.
-* @param    propertiesLength              Number of bytes in the properties buffer, not including closing \0 (if it is set).
+* @param    propertiesLength              Number of bytes in the properties buffer.
 * @param    propertyAcknowledgedCallback  Optional callback specified by the application to be called with the
 *                                         result of the transaction.
 * @param    userContextCallback           Optional User specified context that will be provided to the
