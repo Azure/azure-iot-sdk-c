@@ -5,7 +5,7 @@
 #include "parson.h"
 
 IOTHUB_CLIENT_RESULT IoTHub_Serialize_ReportedProperties(
-    const IOTHUB_PROPERTY_REPORTED* properties,
+    const IOTHUB_REPORTED_PROPERTY* properties,
     size_t numProperties,
     const char* componentName,
     unsigned char** serializedProperties,
@@ -51,8 +51,8 @@ IOTHUB_CLIENT_RESULT IoTHub_Serialize_ReportedProperties(
 }
 
 
-IOTHUB_CLIENT_RESULT IoTHub_Serialize_ResponseProperties(
-    const IOTHUB_PROPERTY_RESPONSE* properties,
+IOTHUB_CLIENT_RESULT IoTHub_Serialize_WriteablePropertyResponse(
+    const IOTHUB_WRITEABLE_PROPERTY_RESPONSE* properties,
     size_t numProperties,
     const char* componentName,
     unsigned char** serializedProperties,
@@ -75,7 +75,7 @@ IOTHUB_CLIENT_RESULT IoTHub_Deserialize_Properties(
     size_t serializedPropertiesLength,
     const char** componentsName,
     size_t numComponents,
-    IOTHUB_PROPERTY_DESERIALIZED** properties,
+    IOTHUB_DESERIALIZED_PROPERTY** properties,
     size_t* numProperties,
     int* propertiesVersion)
 {

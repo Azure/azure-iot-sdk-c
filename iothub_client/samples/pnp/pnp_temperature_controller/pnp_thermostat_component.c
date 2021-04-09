@@ -261,7 +261,7 @@ static void SendTargetTemperatureResponse(PNP_THERMOSTAT_COMPONENT* pnpThermosta
     }
     else
     {
-        IOTHUB_PROPERTY_RESPONSE temperatureProperty;
+        IOTHUB_WRITEABLE_PROPERTY_RESPONSE temperatureProperty;
         memset(&temperatureProperty, 0, sizeof(temperatureProperty));
         temperatureProperty.version = 1;
         temperatureProperty.version = 1;
@@ -273,7 +273,7 @@ static void SendTargetTemperatureResponse(PNP_THERMOSTAT_COMPONENT* pnpThermosta
         unsigned char* propertySerialized;
         size_t propertySerializedLength;
 
-        if ((iothubClientResult = IoTHub_Serialize_ResponseProperties(&temperatureProperty, 1, pnpThermostatComponent->componentName, &propertySerialized, &propertySerializedLength)) != IOTHUB_CLIENT_OK)
+        if ((iothubClientResult = IoTHub_Serialize_WriteablePropertyResponse(&temperatureProperty, 1, pnpThermostatComponent->componentName, &propertySerialized, &propertySerializedLength)) != IOTHUB_CLIENT_OK)
         {
             LogError("Unable to serialize updated property, error=%d", iothubClientResult);
         }
@@ -324,7 +324,7 @@ void PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(PNP_THERMOS
     }
     else
     {
-        IOTHUB_PROPERTY_REPORTED maxTempProperty;
+        IOTHUB_REPORTED_PROPERTY maxTempProperty;
         maxTempProperty.name = g_maxTempSinceLastRebootPropertyName;
         maxTempProperty.value = maximumTemperatureAsString;
 

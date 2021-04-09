@@ -154,7 +154,7 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendPropertiesAsync(
     return IoTHubClientCore_LL_SendReportedState((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, properties, propertiesLength, (IOTHUB_CLIENT_REPORTED_STATE_CALLBACK)propertyAcknowledgedCallback, userContextCallback);
 }
 
-IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SubscribeForCommands(
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SubscribeToCommands(
                          IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
                          IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC commandCallback, 
                          void* userContextCallback)

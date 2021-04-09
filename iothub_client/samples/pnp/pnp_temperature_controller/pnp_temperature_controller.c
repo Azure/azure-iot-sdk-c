@@ -308,7 +308,7 @@ int PnP_TempControlComponent_UpdatedPropertyCallback(
     void* userContextCallback)
 {
     IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient = (IOTHUB_DEVICE_CLIENT_LL_HANDLE)userContextCallback;
-    IOTHUB_PROPERTY_DESERIALIZED* properties;
+    IOTHUB_DESERIALIZED_PROPERTY* properties;
     size_t numProperties;
     int propertiesVersion;
 
@@ -316,7 +316,7 @@ int PnP_TempControlComponent_UpdatedPropertyCallback(
 
     for (size_t i = 0; i < numProperties; i++) 
     {
-        const IOTHUB_PROPERTY_DESERIALIZED* property = &properties[i];
+        const IOTHUB_DESERIALIZED_PROPERTY* property = &properties[i];
 
         if (property->propertyType == IOTHUB_PROPERTY_TYPE_REPORTED_FROM_DEVICE)
         {
@@ -408,7 +408,7 @@ static void PnP_TempControlComponent_ReportSerialNumber_Property(IOTHUB_DEVICE_C
     IOTHUB_CLIENT_RESULT iothubClientResult;
 
     // New code
-    IOTHUB_PROPERTY_REPORTED property = { 0 };
+    IOTHUB_REPORTED_PROPERTY property = { 0 };
     unsigned char* serializedProperties;
     size_t serializedPropertiesLength;
 
@@ -578,7 +578,7 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateDeviceClientAndAllocateComponents(vo
         result = false;
     }
     // Start new code (before this had been delegated to PnP_CreateDeviceClientLLHandle but it's clearer to show here.  So this is a wash for LOC
-    else if ((clientResult = IoTHubDeviceClient_LL_SubscribeForCommands(deviceClient, PnP_TempControlComponent_CommandCallback, NULL)) != IOTHUB_CLIENT_OK)
+    else if ((clientResult = IoTHubDeviceClient_LL_SubscribeToCommands(deviceClient, PnP_TempControlComponent_CommandCallback, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("IoTHubDeviceClient_LL_PnP_SetCommandCallback failed, result=%d", clientResult);
         result = false;
