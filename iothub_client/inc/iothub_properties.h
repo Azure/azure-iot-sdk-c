@@ -1,17 +1,22 @@
-// Copyright (c) Microsoft. All rights reserved.
+    // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+
+/** @file iothub_properties.h
+*    @brief     APIs that serialize and deserialize properties to and from IoT Hub.
+*/
 
 #ifndef IOTHUB_PROPERTIES_H
 #define IOTHUB_PROPERTIES_H
 
 #include "iothub_client_core_common.h"
 
-#define IOTHUB_REPORTED_PROPERTY_VERSION 1
+/** @brief Current version of @p IOTHUB_REPORTED_PROPERTY structure.  */
+#define IOTHUB_REPORTED_PROPERTY_VERSION_1 1
 
 /** @brief    This struct defines properties reported from the device.  This corresponds to what DTDLv2 calls a "read-only property." */
 typedef struct IOTHUB_REPORTED_PROPERTY_TAG {
-    /** @brief   Version of the structure.  Currently must be IOTHUB_REPORTED_PROPERTY_VERSION. */
+    /** @brief   Version of the structure.  Currently must be IOTHUB_REPORTED_PROPERTY_VERSION_1. */
     int version;
     /** @brief    The name of the property. */
     const char* name;
@@ -19,11 +24,12 @@ typedef struct IOTHUB_REPORTED_PROPERTY_TAG {
     const char* value;
 } IOTHUB_REPORTED_PROPERTY;
 
+/** @brief Current version of @p IOTHUB_WRITEABLE_PROPERTY_RESPONSE structure.  */
 #define IOTHUB_WRITEABLE_PROPERTY_RESPONSE_VERSION_1 1
 
 /** @brief    This struct represents the response to a writeable property that the device will return.  
               This structure is filled out by the application and can be serialized into a payload for the network via IoTHub_Serialize_WriteablePropertyResponse. */
-typedef struct {
+typedef struct IOTHUB_WRITEABLE_PROPERTY_RESPONSE_TAG {
     /** @brief    Version of the structure.  Currently must be IOTHUB_WRITEABLE_PROPERTY_RESPONSE_VERSION_1.  */
     int version;
     /** @brief Name of the property. */
@@ -34,8 +40,7 @@ typedef struct {
     int result;
     /** @brief Optional friendly description of the operation.  May be NULL. */
     const char* description;
-    /** @brief Acknowledgement version.  This corresponds to the version of the writeable properties being responded to.  
-        If you use IoTHub_Deserialize_Properties to deserialize writeable properties, set the propertiesVersion it returns in this field  */
+    /** @brief Acknowledgement version.  This corresponds to the version of the writeable properties being responded to. */
     int ackVersion;
 } IOTHUB_WRITEABLE_PROPERTY_RESPONSE;
 
@@ -44,11 +49,14 @@ typedef struct {
            or whether this is a writeable property that the service is requesting configuration for.
 */
 typedef enum IOTHUB_PROPERTY_TYPE_TAG 
-{ 
+{
+    /** @brief Property was initially reported from the device. */
     IOTHUB_PROPERTY_TYPE_REPORTED_FROM_DEVICE,
+    /** @brief Property is writeable.  It is configured by service remotely. */
     IOTHUB_PROPERTY_TYPE_WRITEABLE
 } IOTHUB_PROPERTY_TYPE;
 
+/** @brief Current version of @p IOTHUB_DESERIALIZED_PROPERTY structure.  */
 #define IOTHUB_DESERIALIZED_PROPERTY_VERSION 1
 
 /** @brief    This struct represents a property from the service.  
@@ -133,7 +141,7 @@ IOTHUB_CLIENT_RESULT IoTHub_Serialize_WriteablePropertyResponse(
 * @param   numComponents               Number of components in the componentsName array.  Can be 0 if only one component is supported.
 * @param   properties                  Array of IOTHUB_DESERIALIZED_PROPERTY representing a parsed version of payLoad.
 * @param   numProperties               Number of array elements in @c properties.
-* @param   propertiesVersion           Version of the properties that IoT Hub is monitoring.  This is required when responding to writeable 
+* @param   propertiesVersion           Version of the properties that IoT Hub is monitoring.  This is required when responding to writeable properties.
 * 
 * @remarks   Applications typically will invoke this API when processing a writeable property update request (IOTHUB_CLIENT_PROPERTIES_CALLBACK)
 *            so they don't need to manually parse a payload.  The application should pass @c payloadType,  @c payLoad, and @c payLoadLength from

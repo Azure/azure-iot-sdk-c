@@ -387,15 +387,14 @@ typedef void(*IOTHUB_CLIENT_TELEMETRY_CALLBACK)(IOTHUB_CLIENT_CONFIRMATION_RESUL
 *
 * @param    iotHubClientHandle              The handle created by a call to the create function.
 * @param    telemetryMessageHandle          The handle to an IoT Hub message.
-                                            It is recommended to create this with either IoTHubMessage_CreateTelemetry_FromByteArray or 
-                                            IoTHubMessage_CreateTelemetry_FromString as these functions help to fill in the appropriate parameters.
-* @param    eventConfirmationCallback       Optional callback specified by the device for receiving
+* @param    telemetryConfirmationCallback   Optional callback specified by the device for receiving
 *                                           confirmation of the delivery of the telemetry.
 * @param    userContextCallback             Optional user specified context that will be provided to the callback.
 *
-*           @b NOTE: The application behavior is undefined if the user calls
-*           the IoTHubDeviceClient_LL_Destroy function from within any callback.
 * @remarks
+*           The application behavior is undefined if the user calls
+*           the IoTHubDeviceClient_LL_Destroy function from within any callback.
+*
 *           The IOTHUB_MESSAGE_HANDLE instance provided as argument is copied by the function,
 *           so this argument can be destroyed by the calling application right after IoTHubDeviceClient_LL_SendTelemetryAsync returns.
 *           The copy of @c telemetryMessageHandle is later destroyed by the iothub client when the message is effectively sent, if a failure sending it occurs, or if the client is destroyed.
@@ -420,7 +419,9 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendTelemetryAsync(
 * @param    responseSize                Number of bytes application is returning in response.
 * @param    userContextCallback         User context pointer set in initial call to IoTHubDeviceClient_LL_SubscribeToCommands.
 *
-*            @b NOTE: The application behavior is undefined if the user calls
+*
+* @remarks
+*            The application behavior is undefined if the user calls
 *            the IoTHubDeviceClient_LL_Destroy function from within any callback.
 *
 * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
@@ -472,7 +473,8 @@ typedef void(*IOTHUB_PROPERTY_ACKNOWLEDGED_CALLBACK)(int statusCode, void* userC
 * @param    userContextCallback           Optional User specified context that will be provided to the
 *                                         callback.
 *
-*            @b NOTE: The application behavior is undefined if the user calls
+* @remarks
+*            The application behavior is undefined if the user calls
 *            the IoTHubDeviceClient_LL_Destroy function from within any callback.
 *
 * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
@@ -507,7 +509,8 @@ typedef int(*IOTHUB_CLIENT_PROPERTIES_CALLBACK)(
 * @param   userContextCallback       Optional user specified context that will be provided to the
 *                                    callback.
 *
-*           @b NOTE: The application behavior is undefined if the user calls
+* @remarks
+*           The application behavior is undefined if the user calls
 *           the IoTHubDeviceClient_LL_Destroy function from within any callback.
 *
 * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
@@ -527,16 +530,17 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_GetPropertiesAsync(
                                      The API IoTHub_Deserialize_Properties can help deserialize the raw payload stream.
 * @param   userContextCallback       Optional user specified context that will be provided to the callback.
 *
-*           @b NOTE: The application behavior is undefined if the user calls
+* @remarks
+*            The application behavior is undefined if the user calls
 *           the IoTHubDeviceClient_LL_Destroy function from within any callback.
 *
 * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_GetPropertiesAndSubscribeToUpdatesAsync(
                         IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle,
-                        IOTHUB_CLIENT_PROPERTIES_CALLBACK writeablePropertyCallback,
+                        IOTHUB_CLIENT_PROPERTIES_CALLBACK propertyUpdateCallback,
                         void* userContextCallback);
-    
+
 #ifdef __cplusplus
 }
 #endif
