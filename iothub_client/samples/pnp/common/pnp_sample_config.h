@@ -1,10 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#ifndef PNP_DEVICE_CLIENT_LL_H
-#define PNP_DEVICE_CLIENT_LL_H
-
-#include "iothub_device_client_ll.h"
+#ifndef PNP_SAMPLE_CONFIG
+#define PNP_SAMPLE_CONFIG
 
 //
 // Whether we're using a connection string or DPS provisioning for device credentials
@@ -54,14 +52,4 @@ typedef struct PNP_DEVICE_CONFIGURATION_TAG
     // IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback;
 } PNP_DEVICE_CONFIGURATION;
 
-//
-// PnP_CreateDeviceClientLLHandle creates an IOTHUB_DEVICE_CLIENT_LL_HANDLE that will be ready to interact with PnP.
-// Beyond basic handle creation, it also sets the handle to the appropriate ModelId, optionally sets up callback functions
-// for Device Method and Device Twin callbacks (to process PnP Commands and Properties, respectively)
-// as well as some other basic maintenence on the handle. 
-//
-// NOTE: When using DPS based authentication, this function can *block* until DPS responds to the request or timeout.
-//
-IOTHUB_DEVICE_CLIENT_LL_HANDLE PnP_CreateDeviceClientLLHandle(const PNP_DEVICE_CONFIGURATION* pnpDeviceConfiguration);
-
-#endif /* PNP_DEVICE_CLIENT_LL_H */
+#endif /* PNP_SAMPLE_CONFIG */

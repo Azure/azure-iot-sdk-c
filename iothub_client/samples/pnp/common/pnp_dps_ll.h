@@ -5,7 +5,7 @@
 #define PNP_DPS_LL_H
 
 #include "iothub_device_client_ll.h"
-#include "pnp_device_client_ll.h"
+#include "pnp_sample_config.h"
 
 #ifndef USE_PROV_MODULE_FULL
 #error "Missing cmake flag for DPS"

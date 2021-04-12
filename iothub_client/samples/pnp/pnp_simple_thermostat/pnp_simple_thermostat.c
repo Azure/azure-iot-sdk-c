@@ -27,6 +27,8 @@
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
+#include "pnp_sample_config.h"
+
 #ifdef USE_PROV_MODULE_FULL
 #include "pnp_dps_ll.h"
 #endif // USE_PROV_MODULE_FULL

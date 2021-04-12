@@ -11,7 +11,7 @@
 
 #include "iothub_device_client_ll.h"
 #include "iothubtransportmqtt.h"
-#include "pnp_device_client_ll.h"
+#include "pnp_sample_config.h"
 
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/threadapi.h"
