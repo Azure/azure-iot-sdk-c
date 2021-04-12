@@ -1,4 +1,4 @@
-    // Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 
@@ -77,7 +77,7 @@ typedef struct IOTHUB_DESERIALIZED_PROPERTY_TAG {
 
 
 /**
-* @brief   Serializes properties into a format for sending to IoT Hub.
+* @brief   Serializes reported properties into a format for sending to IoT Hub.
 *
 * @param   properties                  Pointer to IOTHUB_REPORTED_PROPERTY to be serialized.
 * @param   numProperties               Number of elements contained in @c properties.
@@ -95,10 +95,10 @@ typedef struct IOTHUB_DESERIALIZED_PROPERTY_TAG {
 * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
 IOTHUB_CLIENT_RESULT IoTHub_Serialize_ReportedProperties(
-    const IOTHUB_REPORTED_PROPERTY* properties, 
-    size_t numProperties, 
-    const char* componentName, 
-    unsigned char** serializedProperties, 
+    const IOTHUB_REPORTED_PROPERTY* properties,
+    size_t numProperties,
+    const char* componentName,
+    unsigned char** serializedProperties,
     size_t* serializedPropertiesLength);
 
 /**
@@ -111,7 +111,7 @@ IOTHUB_CLIENT_RESULT IoTHub_Serialize_ReportedProperties(
                                        The application must release this memory using free().
 * @param   serializedPropertiesLength  Length of serializedProperties
 * 
-* @remarks  Applications typically will invoke this API when processing a property from service (IOTHUB_CLIENT_PROPERTIES_CALLBACK)
+* @remarks  Applications typically will invoke this API when processing a property from service (IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK)
             to indicate whether properties have been accepted or rejected by the device.  For example, if the service requested
 *           DesiredTemp=50, then the application could fill out the fields in an IOTHUB_WRITEABLE_PROPERTY_RESPONSE structure indicating whether
 *           the request can be processed or whether there was a failure.
@@ -125,10 +125,10 @@ IOTHUB_CLIENT_RESULT IoTHub_Serialize_ReportedProperties(
 * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
 IOTHUB_CLIENT_RESULT IoTHub_Serialize_WriteablePropertyResponse(
-    const IOTHUB_WRITEABLE_PROPERTY_RESPONSE* properties, 
-    size_t numProperties, 
-    const char* componentName, 
-    unsigned char** serializedProperties, 
+    const IOTHUB_WRITEABLE_PROPERTY_RESPONSE* properties,
+    size_t numProperties,
+    const char* componentName,
+    unsigned char** serializedProperties,
     size_t* serializedPropertiesLength);
 
 /**
@@ -143,9 +143,9 @@ IOTHUB_CLIENT_RESULT IoTHub_Serialize_WriteablePropertyResponse(
 * @param   numProperties               Number of array elements in @c properties.
 * @param   propertiesVersion           Version of the properties that IoT Hub is monitoring.  This is required when responding to writeable properties.
 * 
-* @remarks   Applications typically will invoke this API when processing a writeable property update request (IOTHUB_CLIENT_PROPERTIES_CALLBACK)
-*            so they don't need to manually parse a payload.  The application should pass @c payloadType,  @c payLoad, and @c payLoadLength from
-*            their callback implementation directly to this function.
+* @remarks   Applications typically will invoke this API when processing a writeable property update request (IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK)
+*            so they don't need to manually parse the payload.  The application should pass @c payloadType,  @c payLoad, and @c payLoadLength from
+*            their IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK callback implementation directly to this function.
 * 
 *            This API does not perform any network I/O.  It only translates the @c payload received from IoT Hub into 
 *            into the easier to manipulate @c IOTHUB_DESERIALIZED_PROPERTY.
@@ -153,13 +153,13 @@ IOTHUB_CLIENT_RESULT IoTHub_Serialize_WriteablePropertyResponse(
 * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
 IOTHUB_CLIENT_RESULT IoTHub_Deserialize_Properties(
-    IOTHUB_PROPERTY_PAYLOAD_TYPE payloadType, 
-    const unsigned char* payLoad, 
-    size_t payLoadLength, 
-    const char** componentsName, 
-    size_t numComponents, 
-    IOTHUB_DESERIALIZED_PROPERTY** properties, 
-    size_t* numProperties, 
+    IOTHUB_PROPERTY_PAYLOAD_TYPE payloadType,
+    const unsigned char* payLoad,
+    size_t payLoadLength,
+    const char** componentsName,
+    size_t numComponents,
+    IOTHUB_DESERIALIZED_PROPERTY** properties,
+    size_t* numProperties,
     int* propertiesVersion);
 
 #endif /* IOTHUB_PROPERTIES_H */
