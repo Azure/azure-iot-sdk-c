@@ -49,6 +49,8 @@ static const char* IOTHUB_LONGHAUL_LOOP_DURATION_SECS = "IOTHUB_LONGHAUL_LOOP_DU
 #define INDEFINITE_TIME                         ((time_t)-1)
 #define SERVICE_EVENT_WAIT_TIME_DELTA_SECONDS   120
 #define DEVICE_METHOD_SUB_WAIT_TIME_MS          (5 * 1000)
+#define NETWORK_RETRY_ATTEMPTS                  20
+#define NETWORK_RETRY_DELAY_MSEC                5 * 1000
 
 #define MAX_TELEMETRY_TRAVEL_TIME_SECS          300.0
 #define MAX_C2D_TRAVEL_TIME_SECS                300.0
@@ -1594,18 +1596,23 @@ static int update_device_twin_desired_property(const void* context)
                 device_twin_info.update_id = update_id;
                 device_twin_info.time_updated = time(NULL);
 
-                if ((update_response = IoTHubDeviceTwin_UpdateTwin(
-                    iotHubLonghaul->iotHubSvcDevTwinHandle,
-                    iotHubLonghaul->deviceInfo->deviceId,
-                    message)) == NULL)
+                for (int i = NETWORK_RETRY_ATTEMPTS; i > 0; i--)
                 {
-                    LogError("Failed sending twin desired properties update");
-                    device_twin_info.update_result = -1;
-                }
-                else
-                {
-                    device_twin_info.update_result = get_twin_desired_version(update_response);
-                    free(update_response);
+                    if ((update_response = IoTHubDeviceTwin_UpdateTwin(
+                        iotHubLonghaul->iotHubSvcDevTwinHandle,
+                        iotHubLonghaul->deviceInfo->deviceId,
+                        message)) == NULL)
+                    {
+                        LogError("Failed sending twin desired properties update");
+                        device_twin_info.update_result = -1;
+                    }
+                    else
+                    {
+                        device_twin_info.update_result = get_twin_desired_version(update_response);
+                        free(update_response);
+                        break;
+                    }
+                    ThreadAPI_Sleep(NETWORK_RETRY_DELAY_MSEC); 
                 }
 
                 if (iothub_client_statistics_add_device_twin_desired_info(iotHubLonghaul->iotHubClientStats, DEVICE_TWIN_UPDATE_SENT, &device_twin_info) != 0)
