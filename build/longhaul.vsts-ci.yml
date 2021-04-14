@@ -16,6 +16,7 @@ jobs:
   displayName: 'longhaul_linux'
   steps:
   - script: |
+      sudo rm -r -f cmake
       sudo chmod 755 jenkins/longhaul_c.sh
       sudo -E ./jenkins/longhaul_c.sh
     displayName: 'build'
