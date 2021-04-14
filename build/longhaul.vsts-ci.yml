@@ -16,11 +16,6 @@ jobs:
   displayName: 'longhaul_linux'
   steps:
   - script: |
-      sudo ls -l .
-      sudo ls -l cmake
-      sudo ls -l cmake/iotsdk_linux
-      sudo chmod --recursive ugo+rw cmake
-      sudo ls -l .
       sudo chmod 755 jenkins/longhaul_c.sh
       sudo -E ./jenkins/longhaul_c.sh
     displayName: 'build'
