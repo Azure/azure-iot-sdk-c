@@ -17,26 +17,6 @@ jobs:
   steps:
   - script: |
       sudo ls -l .
-      sudo rm -r -f cmake
-      sudo rm -r -f build
-      sudo rm -r -f build_all
-      sudo rm -r -f c-utility
-      sudo rm -r -f certs
-      sudo rm -r -f configs
-      sudo rm -r -f deps
-      sudo rm -r -f doc
-      sudo rm -r -f iothub_client
-      sudo rm -r -f iothub_service_client
-      sudo rm -r -f jenkins
-      sudo rm -r -f provisioning_client
-      sudo rm -r -f provisioning_service_client
-      sudo rm -r -f samples
-      sudo rm -r -f serializer
-      sudo rm -r -f testtools
-      sudo rm -r -f tools
-      sudo rm -r -f uamqp
-      sudo rm -r -f umqtt
-      sudo ls -l .
       sudo chmod 755 jenkins/longhaul_c.sh
       sudo -E ./jenkins/longhaul_c.sh
     displayName: 'build'
