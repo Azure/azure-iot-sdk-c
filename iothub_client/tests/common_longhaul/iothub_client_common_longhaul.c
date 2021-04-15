@@ -98,7 +98,7 @@ typedef struct SEND_TWIN_REPORTED_CONTEXT_TAG
 static time_t add_seconds(time_t base_time, int seconds)
 {
     time_t new_time;
-    struct tm *bd_new_time;
+    struct tm* bd_new_time;
 
     if ((bd_new_time = localtime(&base_time)) == NULL)
     {
@@ -200,7 +200,7 @@ static int parse_twin_desired_properties(const char* data, char* test_id, unsign
                 *message_id = (unsigned int)raw_message_id;
                 (void)memcpy(test_id, test_id_ref, 36);
                 test_id[36] = '\0';
-                result = 0; 
+                result = 0;
             }
         }
 
@@ -1404,7 +1404,7 @@ static int send_c2d(const void* context)
                         IoTHubMessaging_Close(iotHubLonghaul->iotHubSvcMsgHandle);
                         IoTHubMessaging_Destroy(iotHubLonghaul->iotHubSvcMsgHandle);
                         iotHubLonghaul->iotHubSvcMsgHandle = NULL;
-                        
+
                         ThreadAPI_Sleep(1000 * 30); // wait before reconnecting (might be a networking issue)
 
                         // reopen the service handle
@@ -1413,7 +1413,7 @@ static int send_c2d(const void* context)
                             continue;
                         }
                     }
-                    
+
                     if (iotHubMessagingResult != IOTHUB_MESSAGING_OK)
                     {
                         LogError("Failed sending c2d message with error %d", iotHubMessagingResult);
@@ -1612,7 +1612,7 @@ static int update_device_twin_desired_property(const void* context)
                         free(update_response);
                         break;
                     }
-                    ThreadAPI_Sleep(NETWORK_RETRY_DELAY_MSEC); 
+                    ThreadAPI_Sleep(NETWORK_RETRY_DELAY_MSEC);
                 }
 
                 if (iothub_client_statistics_add_device_twin_desired_info(iotHubLonghaul->iotHubClientStats, DEVICE_TWIN_UPDATE_SENT, &device_twin_info) != 0)
@@ -1883,7 +1883,7 @@ int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
                             }
                         }
                     }
- 
+
                     (void)longhaul_stop_listening_for_telemetry_messages(iotHubLonghaulRsrcs);
 
                     if (Unlock(iotHubLonghaulRsrcs->lock) != LOCK_OK)
@@ -2048,7 +2048,7 @@ int longhaul_run_device_methods_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
                 else
                 {
                     IOTHUB_CLIENT_STATISTICS_DEVICE_METHOD_SUMMARY summary;
-                    
+
                     if (iothub_client_statistics_get_device_method_summary(stats_handle, &summary) != 0)
                     {
                         LogError("Failed gettting statistics summary");
