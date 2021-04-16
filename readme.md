@@ -3,10 +3,10 @@
 [![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/c/integrate-into-repo-C)](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_build/latest?definitionId=85)
 
 
-The Azure IOT Hub Device SDK allows applications written in C99 (or later) or C++ to communicate easily with [Azure IoT Hub](https://azure.microsoft.com/en-us/services/iot-hub/) and to 
- [Azure IoT Device Provisioning](https://docs.microsoft.com/azure/iot-dps/).  This repo includes the source code for the libraries, setup instructions, and samples demonstrating use scenarios.
+The Azure IOT Hub Device SDK allows applications written in C99 (or later) or C++ to communicate easily with [Azure IoT Hub](https://azure.microsoft.com/en-us/services/iot-hub/), [Azure IoT Central][Azure-IoT-Central] and to 
+ [Azure IoT Device Provisioning][Azure-IoT-Device-Provisioning].  This repo includes the source code for the libraries, setup instructions, and samples demonstrating use scenarios.
 
-For constained devices - where memory is managed in kilobytes and not megabytes - there are even lighter weight SDK options available.  See [Other Azure IoT SDKs](#-other-azure-iot-sdks) for more.
+For constained devices - where memory is managed in kilobytes and not megabytes - there are even lighter weight SDK options available.  See [Other Azure IoT SDKs](#other-azure-iot-sdks) for more.
 
 
 ## Table of Contents
@@ -50,7 +50,7 @@ The API reference documentation for the C SDKs can be found [here][c-api-referen
 
 ## Other Azure IoT SDKs
 
-To find Azure IoT SDKs in other languages, please refer to the [about-iot-sdks][about-iot-sdks].
+To find Azure IoT SDKs in other languages, please refer to the [guidance here][about-iot-sdks].
 
 **Note on constrained devices**: The `Embedded C SDK` is an alternative for constrained devices which enables the BYO (bring your own) network approach: IoT developers have the freedom of choice to bring an MQTT client, TLS and Socket of their choice to create a device solution. Find more information about the Embedded C SDK [here](https://github.com/Azure/azure-sdk-for-c/tree/master/sdk/docs/iot).
 
@@ -80,7 +80,7 @@ IoT Hub supports multiple protocols for the device to use : MQTT, AMQP, and HTTP
 | Retry policies                                                                                                   | :heavy_check_mark:* | :heavy_check_mark:* | :heavy_check_mark:*      | :heavy_check_mark:*      | :heavy_multiplication_x: | Retry policy for unsuccessful device-to-cloud messages have two options: no try, exponential backoff with jitter (default).   *Custom retry policy is in progress.                                                                                                                                              |
 | Devices multiplexing over single connection                                                                      | :heavy_minus_sign:  | :heavy_minus_sign:  | :heavy_check_mark:       | :heavy_check_mark:       | :heavy_check_mark:       |                                                                                                                                                                                                                                                                                                                   |
 | Connection Pooling - Specifying number of connections                                                            | :heavy_minus_sign:  | :heavy_minus_sign:  | :heavy_multiplication_x: | :heavy_multiplication_x: | :heavy_multiplication_x: |                                                                                                                                                                                                                                                                                                                   |
-| Azure IoT Plug and Play Support                                                            | :heavy_multiplication_x:  | :heavy_multiplication_x:  | :heavy_minus_sign: | :heavy_minus_sign: | :heavy_minus_sign: |                                                                                                                                                                                                                                                                                                                   |
+| Azure IoT Plug and Play Support                                                            | :heavy_multiplication_x:  | :heavy_check_mark:  | :heavy_check_mark: | :heavy_minus_sign: | :heavy_minus_sign: Ability to build [Azure IoT Plug and Play devices][iot-plug-and-play].|                                                                                                                                                                                                                                                                                                                   |
 
 This SDK also contains options you can set and platform specific features.  You can find detail list in this [document](./doc/Iothub_sdk_options.md).
 
@@ -247,3 +247,6 @@ Microsoft collects performance and usage information which may be used to provid
 [c-cross-compile]: doc/SDK_cross_compile_example.md
 [c-api-reference]: https://docs.microsoft.com/azure/iot-hub/iot-c-sdk-ref/
 [about-iot-sdks]:https://docs.microsoft.com/en-us/azure/iot-develop/about-iot-sdks
+[Azure-IoT-Central]: https://docs.microsoft.com/en-us/azure/iot-central/
+[Azure-IoT-Device-Provisioning]: https://docs.microsoft.com/azure/iot-dps/
+[iot-plug-and-play]: https://docs.microsoft.com/en-us/azure/iot-pnp/overview-iot-plug-and-play
