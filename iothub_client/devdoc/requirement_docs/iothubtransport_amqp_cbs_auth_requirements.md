@@ -258,3 +258,5 @@ void authentication_destroy(AUTHENTICATION_HANDLE authentication_handle)
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_106: [**If authentication_handle is NULL, authentication_destroy() shall return**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_107: [**If `instance->state` is AUTHENTICATION_STATE_STARTING or AUTHENTICATION_STATE_STARTED, authentication_stop() shall be invoked and its result ignored**]**
 **SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_108: [**authentication_destroy() shall destroy all resouces used by this module **]**
+**SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_109: [**authentication_destroy() shall cancel any pending CBS put token request **]**
+

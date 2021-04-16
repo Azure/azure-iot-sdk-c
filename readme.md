@@ -45,7 +45,6 @@ This repository contains the following:
 
 ## Packages and Libraries
   The simplest way to get started with the Azure IoT SDKs is to use the following packages and libraries:
-  * Linux: [Device SDK on apt-get](./iothub_client/readme.md#aptgetpackage)
   * mbed:                                      [Device SDK library on MBED](./iothub_client/readme.md#mbed)
   * Arduino:                                   [Device SDK library in the Arduino IDE](./iothub_client/readme.md#arduino)
   * Windows:                                   [Device SDK on Vcpkg](./doc/setting_up_vcpkg.md#setup-c-sdk-vcpkg-for-windows-development-environment)
@@ -141,13 +140,10 @@ The IoT Hub device SDK for C can be used with a broad range of OS platforms and 
 
 The minimum requirements are for the device platform to support the following:
 
-- **Being capable of establishing an IP connection**: only IP-capable devices can communicate directly with Azure IoT Hub.
-- **Support TLS**: required to establish a secure communication channel with Azure IoT Hub.
+- **Support Azure IoT TLS over TCP/IP Requirements**: https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-tls-support
 - **Support SHA-256** (optional): necessary to generate the secure token for authenticating the device with the service. Different authentication methods are available and not all require SHA-256.
 - **Have a Real Time Clock or implement code to connect to an NTP server**: necessary for both establishing the TLS connection and generating the secure token for authentication.
 - **Having at least 64KB of RAM**: the memory footprint of the SDK depends on the SDK and protocol used as well as the platform targeted. The smallest footprint is achieved targeting microcontrollers.
-- **Having at least 4KB of RAM set for incoming SSL max content length buffer**: For some TLS libraries, this may be a configurable option and default may have been set as **4KB** for low memory footprint devices. During TLS handshake, IoT Hub service will send Server Hello which includes IoT Hub server side certificates as part of Server Hello payload.
-During **renewal** of these IoT Hub server side certificates, check will be made on IoT Hub service side to prevent **Server Hello** exceeding 4KB limit so that existing devices which are set for 4KB limit continue to work as before after certificate renewals.
 
 Platform support details can be found in [this document](https://docs.microsoft.com/azure/iot-hub/iot-hub-device-sdk-platform-support).
 You can find an exhaustive list of the OS platforms the various SDKs have been tested against in the [Azure Certified for IoT device catalog](https://catalog.azureiotsuite.com/). Note that you might still be able to use the SDKs on OS and hardware platforms that are not listed on this page: all the SDKs are open sourced and designed to be portable. If you have suggestions, feedback or issues to report, refer to the Contribution and Support sections below.
@@ -261,9 +257,9 @@ Below is a table showing the mapping of the LTS branches to the packages release
 
 | Package | Github Branch | LTS Status | LTS Start Date | Maintenance End Date | Removal Date |
 | :-----------: | :-----------: | :--------: | :------------: | :------------------: | :----------: |
-| Vcpkg: 2021-01-21<br/> Xenial: 0.2.0.0-31xenial<br/> Bionic: 0.2.0.0-24bionic<br/>    | lts_01_2021   | Active     | 2021-01-21     | 2022-01-21           | 2022-01-21   |
-| Vcpkg: 2020-07-19<br/> Xenial: 0.2.0.0-27xenial<br/> Trusty: 0.2.0-27trusty<br/> Bionic: 0.2.0.0-20bionic<br/>    | lts_07_2020   | Active     | 2020-07-19     | 2021-07-19           | 2021-07-19   |
-| Vcpkg: 2020-02-07.1<br/> Xenial: 0.2.0.0-26xenial<br/> Trusty: 0.2.0-26trusty<br/> Bionic: 0.2.0.0-19bionic<br/>    | lts_02_2020   | Active     | 2020-02-04     | 2021-02-04           | 2021-02-04   |
+| Vcpkg: 2021-01-21    | lts_01_2021   | Active     | 2021-01-21     | 2022-01-21           | 2022-01-21   |
+| Vcpkg: 2020-07-19    | lts_07_2020   | Active     | 2020-07-19     | 2021-07-19           | 2021-07-19   |
+| Vcpkg: 2020-02-07.1    | lts_02_2020   | Active     | 2020-02-04     | 2021-02-04           | 2021-02-04   |
 
 * <sup>1</sup> All scheduled dates are subject to change by the Azure IoT SDK team.
 
