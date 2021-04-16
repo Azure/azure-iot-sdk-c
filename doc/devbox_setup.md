@@ -5,7 +5,6 @@ This document describes how to prepare your development environment to use the *
 - [Set up a Windows development environment](#windows)
 - [Set up a Linux development environment](#linux)
 - [Set up a macOS (Mac OS X) development environment](#macos)
-- [Set up a Windows Embedded Compact 2013 development environment](#windowsce)
 - [Sample applications](#samplecode)
 
 <a name="windows"></a>
@@ -18,7 +17,7 @@ This document describes how to prepare your development environment to use the *
 
 - Install [git]. Confirm git is in your PATH by typing `git version` from a command prompt.
 
-- Install [CMake]. Make sure it is in your PATH by typing `cmake -version` from a command prompt. CMake will be used to create Visual Studio projects to build libraries and samples.
+- Install CMake, either by including it in your Visual Studio 2019 install or installing directly from [CMake.org][CMake]. Make sure it is in your PATH by typing `cmake -version` from a command prompt. CMake will be used to create Visual Studio projects to build libraries and samples.
 
 - Locate the tag name for the [latest release][latest-release] of the SDK.
 
@@ -32,11 +31,11 @@ cd azure-iot-sdk-c
 git submodule update --init
 ```
 
->If you are using a release before 2019-04-15 then you will need to use the `--recursive` argument to instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
+>If you are using a release before 2019-04-15 then you will need to use the `--recursive` argument.  Otherwise it is highly recommended NOT to use `--recursive` as this results in poor git performance.
 
 ### Building sample applications using vcpkg to build the SDK
 
-The sample applications can be build with the help of the C SDK libraries and headers built with vcpkg (vcpkg is a package manager that facilitates building C and C++ libraries). To install the vcpkg C SDK libraries and headers, follow these steps [Setup C SDK vcpkg for Windows development environment](https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/setting_up_vcpkg.md#setup-c-sdk-vcpkg-for-windows-development-environment).
+The sample applications can be build with the help of the C SDK libraries and headers built with vcpkg.  vcpkg is a package manager that facilitates building C and C++ libraries. To install the vcpkg C SDK libraries and headers, follow these steps [Setup C SDK vcpkg for Windows development environment](.doc/setting_up_vcpkg.md#setup-c-sdk-vcpkg-for-windows-development-environment).
 
 Note: vcpkg manager creates a directory with all the headers and generates the C SDK .lib files on your machine. If you are using Visual Studio (from 2017) the command 'vcpkg integrate install' lets Visual Studio knows where the vcpkg headers and lib directories are located. If you're using other IDEs, just add the vcpkg directories to your compiler/linker include paths.
 
@@ -45,7 +44,7 @@ To quickly build one of the sample applications, open the corresponding Visual S
 
 In the sample's main source file, find the line similar to this:
 
-```Shell
+```C
 static const char* connectionString = "[device connection string]";
 ```
 
@@ -56,7 +55,7 @@ Build the sample project.
 
 ### Building the C SDK with CMake on Windows
 
-In some cases, you may want to build the SDK locally for development and testing purposes (without using vcpkg manager). First, take the following steps to generate project files:
+In some cases, you may want to build the SDK locally for development and testing purposes (without using vcpkg). First, take the following steps to generate project files:
 
 - Open a "Developer Command Prompt for VS2017" or "Developer Command Prompt for VS2019".
 
@@ -100,7 +99,9 @@ ctest -C "debug" -V
 
 ### Build a sample that uses different protocols, including over WebSockets
 
-By default the C-SDK will have web sockets enabled for AMQP and MQTT.  The sample **iothub_client\samples\iothub_ll_telemetry_sample** lets you specify the `protocol` variable.
+By default the C-SDK will have web sockets enabled for AMQP and MQTT.  The sample **iothub_client\samples\iothub_ll_telemetry_sample** lets you specify the `protocol` variable.  
+
+Unless you have a reason otherwise, we recommend you use MQTT as your protocol.
 
 ### Build a sample using a specific server root certificate
 
@@ -167,19 +168,11 @@ This section describes how to set up a development environment for the C SDK on 
   cmake --version
   ```
 
-  > For information about how to upgrade your version of CMake to 3.x on Ubuntu 14.04, read [How to install CMake 3.2 on Ubuntu 14.04?](http://askubuntu.com/questions/610291/how-to-install-cmake-3-2-on-ubuntu-14-04).
-
 - Verify that gcc is at least version **4.4.7**:
 
   ```Shell
   gcc --version
   ```
-
-  > For information about how to upgrade your version of gcc on Ubuntu 14.04, read [How do I use the latest GCC 4.9 on Ubuntu 14.04?](http://askubuntu.com/questions/466651/how-do-i-use-the-latest-gcc-4-9-on-ubuntu-14-04).
-
-- Patch CURL to the latest version available.
-  > The minimum version of curl required is 7.56, as recent previous versions [presented critical failures](https://github.com/Azure/azure-iot-sdk-c/issues/308).
-  > To upgrade see "Upgrade CURL on Mac OS" steps below.
 
 - Locate the tag name for the [latest release][latest-release] of the SDK.
   > Our release tag names are date values in `lts_mm_yyyy` format.
@@ -192,7 +185,7 @@ This section describes how to set up a development environment for the C SDK on 
   git submodule update --init
   ```
 
-  > If you are using a release before 2019-04-15 then you will need to use the `--recursive` argument to instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
+  >If you are using a release before 2019-04-15 then you will need to use the `--recursive` argument.  Otherwise it is highly recommended NOT to use `--recursive` as this results in poor git performance.
 
 ### Build the C SDK on Linux
 
@@ -229,6 +222,8 @@ ctest -C "debug" -V
 ### Build a sample that uses different protocols, including over WebSockets
 
 By default the C-SDK will have web sockets enabled for AMQP and MQTT.  The sample **iothub_client\samples\iothub_ll_telemetry_sample** lets you specify the `protocol` variable.
+
+Unless you have a reason otherwise, we recommend you use MQTT as your protocol.
 
 ### Build a sample using a specific server root certificate
 
@@ -273,7 +268,7 @@ We've tested the device SDK for C on macOS High Sierra, with XCode version 9.2.
   git submodule update --init
   ```
 
-  > If you are using a release before 2019-04-15 then you will need to use the `--recursive` argument to instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
+  >If you are using a release before 2019-04-15 then you will need to use the `--recursive` argument.  Otherwise it is highly recommended NOT to use `--recursive` as this results in poor git performance.
 
 #### Upgrade CURL on Mac OS
 
@@ -353,6 +348,8 @@ Also, you can build and run unit tests:
 
 By default the C-SDK will have web sockets enabled for AMQP and MQTT.  The sample **iothub_client\samples\iothub_ll_telemetry_sample** lets you specify the `protocol` variable.
 
+Unless you have a reason otherwise, we recommend you use MQTT as your protocol.
+
 ### Build a sample using a specific server root certificate
 
 By default all samples are built to handle a variety of server root CA certificates during TLS negotiation. If you would like to decrease the size of the sample, select the appropriate root certificate option during the cmake step. Follow the instructions [here](https://github.com/Azure/azure-iot-sdk-c/certs).
@@ -389,9 +386,7 @@ The example above assumes curl 7.58 has been compiled and saved into `/usr/local
 
 This repository contains various C sample applications that illustrate how to use the Azure IoT device SDK for C:
 
--[Simple samples for the device SDK][simple_samples]
-
--[Samples using the serializer library][serializer_samples]
+-[Samples for the device SDK][device_samples]
 
 Once the SDK is building successfully you can run any of the available samples using the following (example given for a linux system):
 
@@ -431,8 +426,7 @@ make
 [XCode]:https://developer.apple.com/xcode/
 [Homebrew]:http://brew.sh/
 [clang]:https://clang.llvm.org/
-[simple_samples]: ../iothub_client/samples/
-[serializer_samples]: ../serializer/samples/
+[device_samples]: ../iothub_client/samples/
 [latest-release]:https://github.com/Azure/azure-iot-sdk-c/releases/latest
 [Windows 10 IoT Core]:https://docs.microsoft.com/en-us/windows/iot-core/develop-your-app/buildingappsforiotcore
 [vcpkg]:https://github.com/Microsoft/vcpkg
