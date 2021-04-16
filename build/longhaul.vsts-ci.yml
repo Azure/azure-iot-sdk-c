@@ -17,6 +17,9 @@ jobs:
   steps:
   - script: |
       sudo apt show valgrind
+      sudo apt update
+      sudo apt -y --allow-downgrades --allow-remove-essential --allow-change-held-packages upgrade valgrind
+      sudo apt show valgrind
       sudo chmod --recursive ugo+rw cmake
       sudo chmod 755 jenkins/longhaul_c.sh
       sudo -E ./jenkins/longhaul_c.sh
