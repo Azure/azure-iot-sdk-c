@@ -3,7 +3,7 @@
 [![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/c/integrate-into-repo-C)](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_build/latest?definitionId=85)
 
 
-The Azure IOT Hub Device SDK allows applications written in C99 (or later) or C++ to communicate easily with [Azure IoT Hub](https://azure.microsoft.com/en-us/services/iot-hub/), [Azure IoT Central][Azure-IoT-Central] and to 
+The Azure IOT Hub Device SDK allows applications written in C99 or later or C++ to communicate easily with [Azure IoT Hub](https://azure.microsoft.com/en-us/services/iot-hub/), [Azure IoT Central][Azure-IoT-Central] and to 
  [Azure IoT Device Provisioning][Azure-IoT-Device-Provisioning].  This repo includes the source code for the libraries, setup instructions, and samples demonstrating use scenarios.
 
 For constained devices - where memory is managed in kilobytes and not megabytes - there are even lighter weight SDK options available.  See [Other Azure IoT SDKs](#other-azure-iot-sdks) for more.
@@ -31,7 +31,7 @@ For constained devices - where memory is managed in kilobytes and not megabytes 
   - [Schedule<sup>1</sup>](#schedulesup1sup)
     - [Planned Release Schedule](#planned-release-schedule)
 
-## Getting the  SDK
+## Getting the SDK
   The simplest way to get started with the Azure IoT SDKs is to use the following packages and libraries:
   * mbed:                                      [Device SDK library on MBED](./iothub_client/readme.md#mbed)
   * Arduino:                                   [Device SDK library in the Arduino IDE](./iothub_client/readme.md#arduino)
@@ -80,7 +80,7 @@ IoT Hub supports multiple protocols for the device to connect with : MQTT, AMQP,
 | Retry policies                                                                                                   | :heavy_check_mark:* | :heavy_check_mark:* | :heavy_check_mark:*      | :heavy_check_mark:*      | :heavy_multiplication_x: | Retry policy for unsuccessful device-to-cloud messages have two options: no try, exponential backoff with jitter (default).   *Custom retry policy is in progress.                                                                                                                                              |
 | Devices multiplexing over single connection                                                                      | :heavy_minus_sign:  | :heavy_minus_sign:  | :heavy_check_mark:       | :heavy_check_mark:       | :heavy_check_mark:       |                                                                                                                                                                                                                                                                                                                   |
 | Connection Pooling - Specifying number of connections                                                            | :heavy_minus_sign:  | :heavy_minus_sign:  | :heavy_multiplication_x: | :heavy_multiplication_x: | :heavy_multiplication_x: |                                                                                                                                                                                                                                                                                                                   |
-| Azure IoT Plug and Play Support                                                            | :heavy_multiplication_x:  | :heavy_check_mark:  | :heavy_check_mark: | :heavy_minus_sign: | :heavy_minus_sign: |Ability to build [Azure IoT Plug and Play devices][iot-plug-and-play].|                                                                                                                                                                                                                                                                                                                   |
+| Azure IoT Plug and Play Support                                                            | :heavy_check_mark:  | :heavy_check_mark:  | :heavy_minus_sign: | :heavy_minus_sign: | :heavy_minus_sign: |Ability to build [Azure IoT Plug and Play devices][iot-plug-and-play].|                                                                                                                                                                                                                                                                                                                   |
 
 This SDK also contains options you can set and platform specific features.  You can find detail list in this [document](./doc/Iothub_sdk_options.md).
 
@@ -140,7 +140,6 @@ If you encounter any bugs, have suggestions for new features or if you would lik
 * [Azure IoT device SDK for C tutorial][c-sdk-intro]
 * [How to port the C libraries to other OS platforms](https://github.com/Azure/azure-c-shared-utility/blob/master/devdoc/porting_guide.md)
 * [Cross compilation example][c-cross-compile]
-* [C SDKs API reference][c-api-reference]
 
 ## SDK Folder Structure
 
