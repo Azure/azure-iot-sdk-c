@@ -62,7 +62,7 @@ To learn more about building Azure IoT Applications, you can visit the [Azure Io
 
 ### Device Client SDK
 
-IoT Hub supports multiple protocols for the device to use : MQTT, AMQP, and HTTPS.  MQTT and AMQP can optionally run over WebSockets.  The Device Client SDK allows the protocol to be chosen at connection creation time.
+IoT Hub supports multiple protocols for the device to connect with : MQTT, AMQP, and HTTPS.  MQTT and AMQP can optionally run over WebSockets.  The Device Client SDK allows the protocol to be chosen at connection creation time.
 
 **If you're not sure which protocol to use, you should use MQTT or MQTT-WS.**  MQTT requires considerably fewer resources than AMQP and supports considerably more IoT Hub functionality than HTTPS.  Neither AMQP nor HTTPS are guaranteed to have Device Client SDK implementations for new features going forward, such as Azure IoT Plug and Play.
 
@@ -80,7 +80,7 @@ IoT Hub supports multiple protocols for the device to use : MQTT, AMQP, and HTTP
 | Retry policies                                                                                                   | :heavy_check_mark:* | :heavy_check_mark:* | :heavy_check_mark:*      | :heavy_check_mark:*      | :heavy_multiplication_x: | Retry policy for unsuccessful device-to-cloud messages have two options: no try, exponential backoff with jitter (default).   *Custom retry policy is in progress.                                                                                                                                              |
 | Devices multiplexing over single connection                                                                      | :heavy_minus_sign:  | :heavy_minus_sign:  | :heavy_check_mark:       | :heavy_check_mark:       | :heavy_check_mark:       |                                                                                                                                                                                                                                                                                                                   |
 | Connection Pooling - Specifying number of connections                                                            | :heavy_minus_sign:  | :heavy_minus_sign:  | :heavy_multiplication_x: | :heavy_multiplication_x: | :heavy_multiplication_x: |                                                                                                                                                                                                                                                                                                                   |
-| Azure IoT Plug and Play Support                                                            | :heavy_multiplication_x:  | :heavy_check_mark:  | :heavy_check_mark: | :heavy_minus_sign: | :heavy_minus_sign: Ability to build [Azure IoT Plug and Play devices][iot-plug-and-play].|                                                                                                                                                                                                                                                                                                                   |
+| Azure IoT Plug and Play Support                                                            | :heavy_multiplication_x:  | :heavy_check_mark:  | :heavy_check_mark: | :heavy_minus_sign: | :heavy_minus_sign: |Ability to build [Azure IoT Plug and Play devices][iot-plug-and-play].|                                                                                                                                                                                                                                                                                                                   |
 
 This SDK also contains options you can set and platform specific features.  You can find detail list in this [document](./doc/Iothub_sdk_options.md).
 
@@ -130,7 +130,7 @@ If you encounter any bugs, have suggestions for new features or if you would lik
 * Have a feature request for SDKs? Please post it on [User Voice](https://feedback.azure.com/forums/321918-azure-iot) to help us prioritize.
 * Have a technical question? Ask on [Stack Overflow](https://stackoverflow.com/questions/tagged/azure-iot-hub) with tag "azure-iot-hub".
 * Need Support? Every customer with an active Azure subscription has access to [support](https://docs.microsoft.com/en-us/azure/azure-supportability/how-to-create-azure-support-request) with guaranteed response time.  Consider submitting a ticket and get assistance from Microsoft support team
-* Found a bug? Please help us fix it by thoroughly documenting it and filing an issue on GitHub ([C](https://github.com/Azure/azure-iot-sdk-c), [Java](https://github.com/Azure/azure-iot-sdk-java), [.NET](https://github.com/Azure/azure-iot-sdk-csharp), [Node.js](https://github.com/Azure/azure-iot-sdk-node), [Python](https://github.com/Azure/azure-iot-sdk-python)).
+* Found a bug? Please help us fix it by thoroughly documenting it and filing an issue on [our GitHub issues][c-github-issues].
 
 ## Read more
 
@@ -153,10 +153,6 @@ These are git submodules that contain code, such as adapters and protocol implem
 
 Build and checkin gate related folders.
 
-`/provisioning_client`
-
-This folder contains client library for device provisioning client.
-
 `/certs`
 
 Contains certificates needed to communicate with Azure IoT Hub.
@@ -175,6 +171,10 @@ Contains Azure IoT Hub client components that provide the raw messaging capabili
    * src: client libraries source files.
    * samples: contains simple samples.
    * tests: unit and end-to-end tests for source code.
+
+`/provisioning_client`
+
+This folder contains client library for device provisioning client.
 
 `/samples`
 
@@ -250,3 +250,4 @@ Microsoft collects performance and usage information which may be used to provid
 [Azure-IoT-Central]: https://docs.microsoft.com/en-us/azure/iot-central/
 [Azure-IoT-Device-Provisioning]: https://docs.microsoft.com/azure/iot-dps/
 [iot-plug-and-play]: https://docs.microsoft.com/en-us/azure/iot-pnp/overview-iot-plug-and-play
+[c-github-issues]: https://github.com/Azure/azure-iot-sdk-c/issues
