@@ -251,7 +251,7 @@ No new features will be picked up in an LTS branch.
 
 LTS branches are named lts_*mm*_*yyyy*, where *mm* and *yyyy* are the month and year when the branch was created. An example of such a branch is *lts_07_2017*.
 
-## Schedule<sup>1</sup>
+## Schedule
 
 Below is a table showing the mapping of the LTS branches to the packages released
 
