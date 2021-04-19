@@ -6,7 +6,7 @@
 The Azure IOT Hub Device SDK allows applications written in C99 or later or C++ to communicate easily with [Azure IoT Hub](https://azure.microsoft.com/en-us/services/iot-hub/), [Azure IoT Central][Azure-IoT-Central] and to 
  [Azure IoT Device Provisioning][Azure-IoT-Device-Provisioning].  This repo includes the source code for the libraries, setup instructions, and samples demonstrating use scenarios.
 
-For constained devices - where memory is managed in kilobytes and not megabytes - there are even lighter weight SDK options available.  See [Other Azure IoT SDKs](#other-azure-iot-sdks) for more.
+For constained devices - where memory is measured in kilobytes and not megabytes - there are even lighter weight SDK options available.  See [Other Azure IoT SDKs](#other-azure-iot-sdks) for more.
 
 
 ## Table of Contents
@@ -32,14 +32,13 @@ For constained devices - where memory is managed in kilobytes and not megabytes 
     - [Planned Release Schedule](#planned-release-schedule)
 
 ## Getting the SDK
-  The simplest way to get started with the Azure IoT SDKs is to use the following packages and libraries:
+  The simplest way to get started with the Azure IoT SDKs on supported platforms is to use the following packages and libraries:
   * mbed:                                      [Device SDK library on MBED](./iothub_client/readme.md#mbed)
   * Arduino:                                   [Device SDK library in the Arduino IDE](./iothub_client/readme.md#arduino)
   * Windows:                                   [Device SDK on Vcpkg](./doc/setting_up_vcpkg.md#setup-c-sdk-vcpkg-for-windows-development-environment)
   * iOS:                                       [Device SDK on CocoaPod](https://cocoapods.org/pods/AzureIoTHubClient)
 
-You can alternately clone and build the SDK directly.  Instructions can be found [here](./iothub_client/readme.md#compile).
-  
+For other platforms - including Linux - you need to clone and build the SDK directly.  You may also build it directly for the platforms above.  Instructions can be found [here](./iothub_client/readme.md#compile).
 
 ## Samples
 There are many samples available for the SDK.  More information can be found [here](./samples/readme.md).
@@ -80,7 +79,7 @@ IoT Hub supports multiple protocols for the device to connect with : MQTT, AMQP,
 | Retry policies                                                                                                   | :heavy_check_mark:* | :heavy_check_mark:* | :heavy_check_mark:*      | :heavy_check_mark:*      | :heavy_multiplication_x: | Retry policy for unsuccessful device-to-cloud messages have two options: no try, exponential backoff with jitter (default).   *Custom retry policy is in progress.                                                                                                                                              |
 | Devices multiplexing over single connection                                                                      | :heavy_minus_sign:  | :heavy_minus_sign:  | :heavy_check_mark:       | :heavy_check_mark:       | :heavy_check_mark:       |                                                                                                                                                                                                                                                                                                                   |
 | Connection Pooling - Specifying number of connections                                                            | :heavy_minus_sign:  | :heavy_minus_sign:  | :heavy_multiplication_x: | :heavy_multiplication_x: | :heavy_multiplication_x: |                                                                                                                                                                                                                                                                                                                   |
-| Azure IoT Plug and Play Support                                                            | :heavy_check_mark:  | :heavy_check_mark:  | :heavy_minus_sign: | :heavy_minus_sign: | :heavy_minus_sign: |Ability to build [Azure IoT Plug and Play devices][iot-plug-and-play].|                                                                                                                                                                                                                                                                                                                   |
+| [Azure IoT Plug and Play Support][iot-plug-and-play]                                                            | :heavy_check_mark:  | :heavy_check_mark:  | :heavy_minus_sign: | :heavy_minus_sign: | :heavy_minus_sign: |Ability to build Azure IoT Plug and Play devices.|                                                                                                                                                                                                                                                                                                                   |
 
 This SDK also contains options you can set and platform specific features.  You can find detail list in this [document](./doc/Iothub_sdk_options.md).
 

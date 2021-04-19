@@ -1,6 +1,6 @@
 # Prepare your development environment
 
-This document describes how to prepare your development environment to use the **Microsoft Azure IoT device SDK for C**. It describes preparing a development environment in Windows using Visual Studio and in Linux.
+This document describes how to prepare your development environment to use the **Microsoft Azure IoT device SDK for C**.
 
 - [Set up a Windows development environment](#windows)
 - [Set up a Linux development environment](#linux)
