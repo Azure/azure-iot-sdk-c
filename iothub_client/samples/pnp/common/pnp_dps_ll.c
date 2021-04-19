@@ -22,9 +22,8 @@
 #include "azure_prov_client/prov_device_client.h"
 #include "azure_prov_client/prov_transport_mqtt_client.h"
 #include "azure_prov_client/prov_security_factory.h"
+#include "azure_prov_client/prov_client_model.h"
 
-// Format of custom DPS payload sent when registering a PnP device.
-static const char g_dps_PayloadFormatForModelId[] = "{\"modelId\":\"%s\"}";
 
 // State of DPS registration process.  We cannot proceed with PnP until we get into the state PNP_DPS_REGISTRATION_SUCCEEDED.
 typedef enum PNP_DPS_REGISTRATION_STATUS_TAG
@@ -82,14 +81,14 @@ IOTHUB_DEVICE_CLIENT_LL_HANDLE PnP_CreateDeviceClientLLHandle_ViaDps(const PNP_D
 
     PROV_DEVICE_RESULT provDeviceResult;
     PROV_DEVICE_LL_HANDLE provDeviceHandle = NULL;
-    STRING_HANDLE modelIdPayload = NULL;
+    char* modelIdPayload = NULL;
 
     LogInfo("Initiating DPS client to retrieve IoT Hub connection information");
     g_pnpDpsRegistrationStatus = PNP_DPS_REGISTRATION_NOT_COMPLETE;
 
-    if ((modelIdPayload = STRING_construct_sprintf(g_dps_PayloadFormatForModelId, pnpDeviceConfiguration->modelId)) == NULL)
+    if ((provDeviceResult = Prov_Client_Create_ModelPayload(pnpDeviceConfiguration->modelId, &modelIdPayload)) != PROV_DEVICE_RESULT_OK)
     {
-        LogError("Cannot allocate DPS payload for modelId.");
+        LogError("Allocating custom DPS payload for modelId failed, error=%d.", provDeviceResult);
         result = false;
     }
     else if ((prov_dev_set_symmetric_key_info(pnpDeviceConfiguration->u.dpsConnectionAuth.deviceId, pnpDeviceConfiguration->u.dpsConnectionAuth.deviceKey) != 0))
@@ -112,9 +111,9 @@ IOTHUB_DEVICE_CLIENT_LL_HANDLE PnP_CreateDeviceClientLLHandle_ViaDps(const PNP_D
         LogError("Setting provisioning tracing on failed, error=%d", provDeviceResult);
         result = false;
     }
-    // This step indicates the ModelId of the device to DPS.  This allows the service to (optionally) perform custom operations,
+    // This step indicates the ModelId of the device to DPS.  This allows the service to perform custom operations,
     // such as allocating a different IoT Hub to devices based on their ModelId.
-    else if ((provDeviceResult = Prov_Device_LL_Set_Provisioning_Payload(provDeviceHandle, STRING_c_str(modelIdPayload))) != PROV_DEVICE_RESULT_OK)
+    else if ((provDeviceResult = Prov_Device_LL_Set_Provisioning_Payload(provDeviceHandle, modelIdPayload)) != PROV_DEVICE_RESULT_OK)
     {
         LogError("Failed setting provisioning data, error=%d", provDeviceResult);
         result = false;
@@ -173,7 +172,7 @@ IOTHUB_DEVICE_CLIENT_LL_HANDLE PnP_CreateDeviceClientLLHandle_ViaDps(const PNP_D
 
     free(g_dpsIothubUri);
     free(g_dpsDeviceId);
-    STRING_delete(modelIdPayload);
+    free(modelIdPayload);
 
     return deviceHandle;
 }

@@ -1402,3 +1402,19 @@ const char* Prov_Device_LL_Get_Provisioning_Payload(PROV_DEVICE_LL_HANDLE handle
     }
     return result;
 }
+
+
+// NOTE: This is living in this file for now, but ultimately needs to have a separate file & update CMake.
+// Will address prior to merging to main (so no GitHub tracking ID needed)
+
+// Format of custom DPS payload sent when registering a PnP device.
+static const char g_dps_PayloadFormatForModelId[] = "{\"modelId\":\"%s\"}";
+
+
+PROV_DEVICE_RESULT Prov_Client_Create_ModelPayload(const char* modelId, char** payload)
+{
+    (void)modelId;
+    (void)payload;
+    return PROV_DEVICE_RESULT_OK;
+}
+
