@@ -18,7 +18,7 @@
 #include "iothub_client_options.h"
 #include "iothubtransportmqtt.h"
 #include "iothub_message.h"
-#include "iothub_properties.h"
+#include "iothub_client_properties.h"
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/xlogging.h"
@@ -362,17 +362,17 @@ int PnP_TempControlComponent_UpdatedPropertyCallback(
     void* userContextCallback)
 {
     IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient = (IOTHUB_DEVICE_CLIENT_LL_HANDLE)userContextCallback;
-    IOTHUB_DESERIALIZED_PROPERTY* properties;
+    IOTHUB_CLIENT_DESERIALIZED_PROPERTY* properties;
     size_t numProperties;
     int propertiesVersion;
 
-    IoTHub_Deserialize_Properties(payloadType, payLoad, payloadLength, g_modeledComponents, g_numModeledComponents, &properties, &numProperties, &propertiesVersion);
+    IoTHubClient_Deserialize_Properties(payloadType, payLoad, payloadLength, g_modeledComponents, g_numModeledComponents, &properties, &numProperties, &propertiesVersion);
 
     for (size_t i = 0; i < numProperties; i++) 
     {
-        const IOTHUB_DESERIALIZED_PROPERTY* property = &properties[i];
+        const IOTHUB_CLIENT_DESERIALIZED_PROPERTY* property = &properties[i];
 
-        if (property->propertyType == IOTHUB_PROPERTY_TYPE_REPORTED_FROM_DEVICE)
+        if (property->propertyType == IOTHUB_CLIENT_PROPERTY_TYPE_REPORTED_FROM_DEVICE)
         {
             // We don't process previously reported properties, so ignore.  There is a potential optimization
             // however where if a desired property is the same value and version of a reported, then 
@@ -447,17 +447,17 @@ void PnP_TempControlComponent_SendWorkingSet(IOTHUB_DEVICE_CLIENT_LL_HANDLE devi
 static void PnP_TempControlComponent_ReportSerialNumber_Property(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient)
 {
     IOTHUB_CLIENT_RESULT iothubClientResult;
-    IOTHUB_REPORTED_PROPERTY property = { IOTHUB_REPORTED_PROPERTY_VERSION_1, g_serialNumberPropertyName, g_serialNumberPropertyValue };
+    IOTHUB_CLIENT_REPORTED_PROPERTY property = { IOTHUB_CLIENT_REPORTED_PROPERTY_VERSION_1, g_serialNumberPropertyName, g_serialNumberPropertyValue };
     unsigned char* serializedProperties = NULL;
     size_t serializedPropertiesLength;
 
     // The first step of reporting properties is to serialize it into an IoT Hub friendly format.  You can do this by either
-    // implementing the PnP convention for building up the correct JSON or more simply to use IoTHub_Serialize_ReportedProperties.
-    if ((iothubClientResult = IoTHub_Serialize_ReportedProperties(&property, 1, NULL, &serializedProperties, &serializedPropertiesLength)) != IOTHUB_CLIENT_OK)
+    // implementing the PnP convention for building up the correct JSON or more simply to use IoTHubClient_Serialize_ReportedProperties.
+    if ((iothubClientResult = IoTHubClient_Serialize_ReportedProperties(&property, 1, NULL, &serializedProperties, &serializedPropertiesLength)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to serialize reported state, error=%d", iothubClientResult);
     }
-    // The output of IoTHub_Serialize_ReportedProperties is sent to IoTHubDeviceClient_LL_SendPropertiesAsync to perform network I/O.
+    // The output of IoTHubClient_Serialize_ReportedProperties is sent to IoTHubDeviceClient_LL_SendPropertiesAsync to perform network I/O.
     else if ((iothubClientResult = IoTHubDeviceClient_LL_SendPropertiesAsync(deviceClient, serializedProperties, serializedPropertiesLength, NULL, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to send reported state, error=%d", iothubClientResult);

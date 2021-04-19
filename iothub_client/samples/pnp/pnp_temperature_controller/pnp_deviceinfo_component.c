@@ -5,7 +5,7 @@
 
 // PnP routines
 #include "pnp_deviceinfo_component.h"
-#include "iothub_properties.h"
+#include "iothub_client_properties.h"
 
 // Core IoT SDK utilities
 #include "azure_c_shared_utility/xlogging.h"
@@ -45,26 +45,26 @@ void PnP_DeviceInfoComponent_Report_All_Properties(const char* componentName, IO
     IOTHUB_CLIENT_RESULT iothubClientResult;
     unsigned char* propertiesSerialized = NULL;
     size_t propertiesSerializedLength;
-    IOTHUB_REPORTED_PROPERTY properties[8] =  {
-        {IOTHUB_REPORTED_PROPERTY_VERSION_1, PnPDeviceInfo_SoftwareVersionPropertyName, PnPDeviceInfo_SoftwareVersionPropertyValue},
-        {IOTHUB_REPORTED_PROPERTY_VERSION_1, PnPDeviceInfo_ManufacturerPropertyName, PnPDeviceInfo_ManufacturerPropertyValue},
-        {IOTHUB_REPORTED_PROPERTY_VERSION_1, PnPDeviceInfo_ModelPropertyName, PnPDeviceInfo_ModelPropertyValue},
-        {IOTHUB_REPORTED_PROPERTY_VERSION_1, PnPDeviceInfo_OsNamePropertyName, PnPDeviceInfo_OsNamePropertyValue},
-        {IOTHUB_REPORTED_PROPERTY_VERSION_1, PnPDeviceInfo_ProcessorArchitecturePropertyName, PnPDeviceInfo_ProcessorArchitecturePropertyValue},
-        {IOTHUB_REPORTED_PROPERTY_VERSION_1, PnPDeviceInfo_ProcessorManufacturerPropertyName, PnPDeviceInfo_ProcessorManufacturerPropertyValue},
-        {IOTHUB_REPORTED_PROPERTY_VERSION_1, PnPDeviceInfo_TotalStoragePropertyName, PnPDeviceInfo_TotalStoragePropertyValue},
-        {IOTHUB_REPORTED_PROPERTY_VERSION_1, PnPDeviceInfo_TotalMemoryPropertyName, PnPDeviceInfo_TotalMemoryPropertyValue}
+    IOTHUB_CLIENT_REPORTED_PROPERTY properties[8] =  {
+        {IOTHUB_CLIENT_REPORTED_PROPERTY_VERSION_1, PnPDeviceInfo_SoftwareVersionPropertyName, PnPDeviceInfo_SoftwareVersionPropertyValue},
+        {IOTHUB_CLIENT_REPORTED_PROPERTY_VERSION_1, PnPDeviceInfo_ManufacturerPropertyName, PnPDeviceInfo_ManufacturerPropertyValue},
+        {IOTHUB_CLIENT_REPORTED_PROPERTY_VERSION_1, PnPDeviceInfo_ModelPropertyName, PnPDeviceInfo_ModelPropertyValue},
+        {IOTHUB_CLIENT_REPORTED_PROPERTY_VERSION_1, PnPDeviceInfo_OsNamePropertyName, PnPDeviceInfo_OsNamePropertyValue},
+        {IOTHUB_CLIENT_REPORTED_PROPERTY_VERSION_1, PnPDeviceInfo_ProcessorArchitecturePropertyName, PnPDeviceInfo_ProcessorArchitecturePropertyValue},
+        {IOTHUB_CLIENT_REPORTED_PROPERTY_VERSION_1, PnPDeviceInfo_ProcessorManufacturerPropertyName, PnPDeviceInfo_ProcessorManufacturerPropertyValue},
+        {IOTHUB_CLIENT_REPORTED_PROPERTY_VERSION_1, PnPDeviceInfo_TotalStoragePropertyName, PnPDeviceInfo_TotalStoragePropertyValue},
+        {IOTHUB_CLIENT_REPORTED_PROPERTY_VERSION_1, PnPDeviceInfo_TotalMemoryPropertyName, PnPDeviceInfo_TotalMemoryPropertyValue}
     };
 
     const int numProperties = sizeof(properties) / sizeof(properties[0]);
 
     // The first step of reporting properties is to serialize it into an IoT Hub friendly format.  You can do this by either
-    // implementing the PnP convention for building up the correct JSON or more simply to use IoTHub_Serialize_ReportedProperties.
-    if ((iothubClientResult = IoTHub_Serialize_ReportedProperties(properties, numProperties, componentName, &propertiesSerialized, &propertiesSerializedLength)) != IOTHUB_CLIENT_OK)
+    // implementing the PnP convention for building up the correct JSON or more simply to use IoTHubClient_Serialize_ReportedProperties.
+    if ((iothubClientResult = IoTHubClient_Serialize_ReportedProperties(properties, numProperties, componentName, &propertiesSerialized, &propertiesSerializedLength)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to serialize reported state, error=%d", iothubClientResult);
     }
-    // The output of IoTHub_Serialize_ReportedProperties is sent to IoTHubDeviceClient_LL_SendPropertiesAsync to perform network I/O.
+    // The output of IoTHubClient_Serialize_ReportedProperties is sent to IoTHubDeviceClient_LL_SendPropertiesAsync to perform network I/O.
     else if ((iothubClientResult = IoTHubDeviceClient_LL_SendPropertiesAsync(deviceClientLL, propertiesSerialized, propertiesSerializedLength, NULL, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to send reported state, error=%d", iothubClientResult);

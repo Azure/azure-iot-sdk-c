@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include "iothub_properties.h"
+#include "iothub_client_properties.h"
 #include "parson.h"
 
-IOTHUB_CLIENT_RESULT IoTHub_Serialize_ReportedProperties(
-    const IOTHUB_REPORTED_PROPERTY* properties,
+IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_ReportedProperties(
+    const IOTHUB_CLIENT_REPORTED_PROPERTY* properties,
     size_t numProperties,
     const char* componentName,
     unsigned char** serializedProperties,
@@ -51,8 +51,8 @@ IOTHUB_CLIENT_RESULT IoTHub_Serialize_ReportedProperties(
 }
 
 
-IOTHUB_CLIENT_RESULT IoTHub_Serialize_WriteablePropertyResponse(
-    const IOTHUB_WRITEABLE_PROPERTY_RESPONSE* properties,
+IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_WriteablePropertyResponse(
+    const IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE* properties,
     size_t numProperties,
     const char* componentName,
     unsigned char** serializedProperties,
@@ -69,13 +69,13 @@ IOTHUB_CLIENT_RESULT IoTHub_Serialize_WriteablePropertyResponse(
     return 0;
 }
 
-IOTHUB_CLIENT_RESULT IoTHub_Deserialize_Properties(
+IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties(
     IOTHUB_PROPERTY_PAYLOAD_TYPE payloadType,
     const unsigned char* serializedProperties,
     size_t serializedPropertiesLength,
     const char** componentsName,
     size_t numComponents,
-    IOTHUB_DESERIALIZED_PROPERTY** properties,
+    IOTHUB_CLIENT_DESERIALIZED_PROPERTY** properties,
     size_t* numProperties,
     int* propertiesVersion)
 {

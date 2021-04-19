@@ -465,8 +465,8 @@ typedef void(*IOTHUB_PROPERTY_ACKNOWLEDGED_CALLBACK)(int statusCode, void* userC
 *
 * @param    iotHubClientHandle            The handle created by a call to the create function.
 * @param    properties                    Serialized property data to be sent to IoT Hub.  You can either 
-*                                         manually serialize this buffer or use the IoTHub_Serialize_ReportedProperties 
-*                                         or IoTHub_Serialize_WriteablePropertyResponse to assist.
+*                                         manually serialize this buffer or use the IoTHubClient_Serialize_ReportedProperties 
+*                                         or IoTHubClient_Serialize_WriteablePropertyResponse to assist.
 * @param    propertiesLength              Number of bytes in the properties buffer.
 * @param    propertyAcknowledgedCallback  Optional callback specified by the application to be called with the
 *                                         result of the transaction.
@@ -504,7 +504,7 @@ typedef int(*IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK)(
 *
 * @param   iotHubClientHandle        The handle created by a call to the create function.
 * @param   propertyCallback          Callback invoked when properties are retrieved.
-                                     The API IoTHub_Deserialize_Properties can help deserialize the raw payload stream.
+                                     The API IoTHubClient_Deserialize_Properties can help deserialize the raw payload stream.
 * @param   userContextCallback       Optional user specified context that will be provided to the
 *                                    callback.
 *
@@ -526,7 +526,7 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_GetPropertiesAsync(
 * @param   iotHubClientHandle        The handle created by a call to the create function.
 * @param   propertyUpdateCallback    Callback both on initial retrieval of properties stored on IoT Hub
                                      and subsequent service initiated modifications of writeable properties.
-                                     The API IoTHub_Deserialize_Properties can help deserialize the raw payload stream.
+                                     The API IoTHubClient_Deserialize_Properties can help deserialize the raw payload stream.
 * @param   userContextCallback       Optional user specified context that will be provided to the callback.
 *
 * @remarks
