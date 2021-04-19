@@ -31,7 +31,7 @@ cd azure-iot-sdk-c
 git submodule update --init
 ```
 
->If you are using a release before 2019-04-15 then you will need to use the `--recursive` argument.  Otherwise it is highly recommended NOT to use `--recursive` as this results in poor git performance.
+>If you are using a release before 2019-04-15 then you will need to use the `--recursive` argument for `git submodule`.  Otherwise it is highly recommended NOT to use `--recursive` as this results in poor git performance.
 
 ### Building sample applications using vcpkg to build the SDK
 
@@ -109,42 +109,7 @@ By default all samples are built to handle a variety of server root CA certifica
 
 > Note: Any samples you build will not work until you configure them with a valid IoT Hub device connection string. For more information, see the [samples section](#samplecode) below.
 
-### Using OpenSSL in the SDK
-
-For TLS operations, by default the C-SDK uses Schannel on Windows Platforms.  You can use OpenSSL instead on Windows if you desire.  **NOTE:  this configuration presently receives only basic manual testing and does not have gated e2e tests.**
-
-**IMPORTANT SECURITY NOTE WHEN USING OPENSSL ON WINDOWS**
-You are responsible for updating your OpenSSL dependencies as security fixes for it become available.  Schannel on Windows is a system component automatically serviced by Windows Update.  OpenSSL on Linux is updated by Linux packaging mechanisms, such as apt-get on Debian based distributions.  Shipping the C-SDK on Windows using OpenSSL means you are responsible for getting updated versions of it to your devices.
-
-[OpenSSL] binaries that the C-SDK depends on are **ssleay32** and **libeay32**. To enable OpenSSL to be used on Windows, you need to
-
-- Obtain OpenSSL binaries.  There are many ways to do this, but one of the easier ways is to:
-
-- Open the appropriate developer command prompt you plan on building the C-SDK from.
-
-- Install [vcpkg], a Microsoft tool that helps you manage C and C++ libraries.
-
-- Run `.\vcpkg install openssl` to obtain the required OpenSSL binaries.
-
-- Make note of the directory that OpenSSL has been installed to by vcpkg, e.g. `C:\vcpkgRoot\vcpkg\packages\openssl_x86-windows`.
-
-* Make the C-SDK link against these OpenSSL binaries instead of the default Schannel.
-  * Regardless of how you obtained OpenSSL binaries, set environment variables to point at its root directory.  *Be careful there are no leading spaces between the `=` and directory name as cmake's errors are not always obvious.*
-      ```Shell
-       set OpenSSLDir=C:\vcpkgRoot\vcpkg\packages\openssl_x86-windows
-       set OPENSSL_ROOT_DIR=C:\vcpkgRoot\vcpkg\packages\openssl_x86-windows
-       ```
-  * Build the SDK to include OpenSSL.  The key difference from the typical flow is the inclusion of the `-Duse_openssl:BOOL=ON` option when invoking cmake.
-
-     ```Shell
-     cd azure-iot-sdk-c
-     mkdir cmake
-     cd cmake
-     cmake -Duse_openssl:BOOL=ON ..
-     cmake --build . -- /m /p:Configuration=Release
-     ```
-
-Building samples and your application should be the same as using the default Schannel at this point.
+It is possible to use OpenSSL as your TLS stack instead of the default schannel when running on Windows, although this is *highly* discouraged.  See [this document](#windows-and-openssl) for more.
 
 <a name="linux"></a>
 
@@ -185,7 +150,7 @@ This section describes how to set up a development environment for the C SDK on 
   git submodule update --init
   ```
 
-  >If you are using a release before 2019-04-15 then you will need to use the `--recursive` argument.  Otherwise it is highly recommended NOT to use `--recursive` as this results in poor git performance.
+  >If you are using a release before 2019-04-15 then you will need to use the `--recursive` argument for `git submodule`.  Otherwise it is highly recommended NOT to use `--recursive` as this results in poor git performance.
 
 ### Build the C SDK on Linux
 
@@ -268,7 +233,7 @@ We've tested the device SDK for C on macOS High Sierra, with XCode version 9.2.
   git submodule update --init
   ```
 
-  >If you are using a release before 2019-04-15 then you will need to use the `--recursive` argument.  Otherwise it is highly recommended NOT to use `--recursive` as this results in poor git performance.
+  >If you are using a release before 2019-04-15 then you will need to use the `--recursive` argument for `git submodule`.  Otherwise it is highly recommended NOT to use `--recursive` as this results in poor git performance.
 
 #### Upgrade CURL on Mac OS
 
@@ -415,9 +380,6 @@ make
 [git]:http://www.git-scm.com
 [CMake]:https://cmake.org/
 [MSBuild]:https://msdn.microsoft.com/en-us/library/0k6kkbsd.aspx
-[OpenSSL]:https://www.openssl.org/
-[OpenSSL Github Repository]: https://github.com/openssl/openssl
-[OpenSSL Installation]:https://github.com/openssl/openssl/blob/master/INSTALL
 [Compilation and Installation]:https://wiki.openssl.org/index.php/Compilation_and_Installation#Windows
 [Ubuntu]:http://www.ubuntu.com/desktop
 [gcc]:https://gcc.gnu.org/
@@ -430,3 +392,4 @@ make
 [latest-release]:https://github.com/Azure/azure-iot-sdk-c/releases/latest
 [Windows 10 IoT Core]:https://docs.microsoft.com/en-us/windows/iot-core/develop-your-app/buildingappsforiotcore
 [vcpkg]:https://github.com/Microsoft/vcpkg
+[windows-and-openssl]:./windows_and_openssl.md
