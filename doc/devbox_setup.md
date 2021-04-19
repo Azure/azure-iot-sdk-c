@@ -109,7 +109,7 @@ By default all samples are built to handle a variety of server root CA certifica
 
 > Note: Any samples you build will not work until you configure them with a valid IoT Hub device connection string. For more information, see the [samples section](#samplecode) below.
 
-It is possible to use OpenSSL as your TLS stack instead of the default schannel when running on Windows, although this is *highly* discouraged.  See [this document][windows-and-openssl] for more.
+It is possible to use OpenSSL as your TLS stack instead of the default Schannel when running on Windows, although this is *highly* discouraged.  See [this document][windows-and-openssl] for more.
 
 <a name="linux"></a>
 

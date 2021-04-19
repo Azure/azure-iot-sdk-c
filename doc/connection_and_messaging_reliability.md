@@ -66,7 +66,7 @@ The design of the Azure IoT C SDK is composed of layers, each of them assigned s
 | Azure IoT C Low Level SDK | [iothub\_client\_ll](https://github.com/Azure/azure-iot-sdk-c/blob/master/iothub_client/inc/iothub_client_ll.h)     | Main surface of the Azure IoT device client API (single-threaded)                                                                                                                                                                                                                                        |
 | Protocol Transport        | [iothubtransport\*](https://github.com/Azure/azure-iot-sdk-c/tree/master/iothub_client/inc)                         | Provides an interface between the specific protocol API (e.g., [uamqp](https://github.com/Azure/azure-uamqp-c), [umqtt](https://github.com/Azure/azure-umqtt-c)) and the upper client SDK. It is responsible for part of the business logic, the message queueing and timeout control, options handling. |
 | Protocol API              | [uamqp](https://github.com/Azure/azure-uamqp-c), [umqtt](https://github.com/Azure/azure-umqtt-c) or native HTTP API | Implements the specific application protocol (either AMQP, MQTT or HTTP, respectivelly)                                                                                                                                                                                                                  |
-| TLS                       | [tlsio\_\*](https://github.com/Azure/azure-c-shared-utility/tree/master/adapters)                                   | Provides a wrapper over the specific TLS API (schannel, openssl, wolfssl, mbedtls), using the [xio](https://github.com/Azure/azure-c-shared-utility/blob/master/inc/azure_c_shared_utility/xio.h) interface that the device client SDK uses                                                              |
+| TLS                       | [tlsio\_\*](https://github.com/Azure/azure-c-shared-utility/tree/master/adapters)                                   | Provides a wrapper over the specific TLS API (Schannel, openssl, wolfssl, mbedtls), using the [xio](https://github.com/Azure/azure-c-shared-utility/blob/master/inc/azure_c_shared_utility/xio.h) interface that the device client SDK uses                                                              |
 | Socket                    | [socketio\_\*](https://github.com/Azure/azure-c-shared-utility/tree/master/adapters)                                | Provides a wrapper over the specific socket API ([win32, berkeley, mbed](https://github.com/Azure/azure-c-shared-utility/tree/master/adapters)), using the [xio](https://github.com/Azure/azure-c-shared-utility/blob/master/inc/azure_c_shared_utility/xio.h) interface that the device client SDK uses |
 
 When an Azure IoT device client instance is created, this is the typical\* sequence within the SDK:
@@ -77,7 +77,7 @@ When an Azure IoT device client instance is created, this is the typical\* seque
 
 3. The transport protocol then creates:
 
-    - A tlsio\_\* instance based on the system where it is running (by default schannel on Windows and openssl on Linux), and
+    - A tlsio\_\* instance based on the system where it is running (by default Schannel on Windows and openssl on Linux), and
 
     - An instance of the application protocol specific API (uamqp, [umqtt](https://github.com/Azure/azure-umqtt-c), httpapi), passing as argument the tlsio\_\* instance created above.
 

@@ -1,9 +1,9 @@
 # Using OpenSSL on IoT SDK on Windows
 
-This document is only relevant if you are using the IoT C-SDK on Windows and you wish to use OpenSSL instead of schannel for your TLS stack.
+This document is only relevant if you are using the IoT C-SDK on Windows and you wish to use OpenSSL instead of Schannel for your TLS stack.
 
 ## Using OpenSSL on Windows is highly discouraged
-By default you should use the SDK's default settings for Windows, which is to use schannel.  You should avoid OpenSSL on Windows for the C-SDK because:
+By default you should use the SDK's default settings for Windows, which is to use Schannel.  You should avoid OpenSSL on Windows for the C-SDK because:
 
 * OpenSSL/Windows combination for the SDK receives only basic testing and is not part of checkin gates.
 
