@@ -261,11 +261,6 @@ Below is a table showing the mapping of the LTS branches to the packages release
 | Vcpkg: 2020-07-19    | lts_07_2020   | Active     | 2020-07-19     | 2021-07-19           | 2021-07-19   |
 | Vcpkg: 2020-02-07.1    | lts_02_2020   | Active     | 2020-02-04     | 2021-02-04           | 2021-02-04   |
 
-* <sup>1</sup> All scheduled dates are subject to change by the Azure IoT SDK team.
-
-### Planned Release Schedule
-![](./lts_branches.png)
-
 ---
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
