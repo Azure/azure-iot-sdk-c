@@ -8,7 +8,7 @@ if(NOT ${use_mqtt})
     message(FATAL_ERROR "iothubtransport_mqtt_common_ut being generated without mqtt support")
 endif()
 
-compileAsC11()
+compileAsC99()
 set(theseTestsName iothubtransport_mqtt_common_ut)
 
 set(${theseTestsName}_test_files

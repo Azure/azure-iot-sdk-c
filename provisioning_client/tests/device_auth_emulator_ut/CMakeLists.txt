@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 2.8.11)
 
-compileAsC11()
+compileAsC99()
 set(theseTestsName device_auth_emulator_ut)
 
 set(${theseTestsName}_test_files

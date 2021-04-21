@@ -7,7 +7,7 @@ if(NOT ${use_mqtt})
     message(FATAL_ERROR "iothubclient_mqtt_dt_e2e being generated without MQTT support")
 endif()
 
-compileAsC11()
+compileAsC99()
 set(theseTestsName iothubclient_mqtt_dt_e2e)
 
 set(${theseTestsName}_test_files
