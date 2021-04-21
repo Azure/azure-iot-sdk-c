@@ -216,7 +216,7 @@ No new features will be picked up in an LTS branch.
 
 LTS branches are named lts_*mm*_*yyyy*, where *mm* and *yyyy* are the month and year when the branch was created. An example of such a branch is *lts_07_2017*.
 
-## Schedule<sup>1</sup>
+## Schedule
 
 Below is a table showing the mapping of the LTS branches to the packages released
 
@@ -225,11 +225,6 @@ Below is a table showing the mapping of the LTS branches to the packages release
 | Vcpkg: 2021-01-21    | lts_01_2021   | Active     | 2021-01-21     | 2022-01-21           | 2022-01-21   |
 | Vcpkg: 2020-07-19    | lts_07_2020   | Active     | 2020-07-19     | 2021-07-19           | 2021-07-19   |
 | Vcpkg: 2020-02-07.1    | lts_02_2020   | Active     | 2020-02-04     | 2021-02-04           | 2021-02-04   |
-
-* <sup>1</sup> All scheduled dates are subject to change by the Azure IoT SDK team.
-
-### Planned Release Schedule
-![](./lts_branches.png)
 
 ---
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
