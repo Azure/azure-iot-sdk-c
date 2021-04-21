@@ -19,7 +19,8 @@ set(project_h_files
     ${PROJECT_NAME}.h
 )
 
-build_c_test_longhaul_test(${PROJECT_NAME} ${project_c_files} ${project_h_files})
+file(COPY ../global_valgrind_suppression.supp DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+build_c_test_longhaul_test(${PROJECT_NAME} ${project_c_files} ${project_h_files} VALGRIND_SUPPRESSIONS_FILE global_valgrind_suppression.supp)
 
 target_link_libraries(${PROJECT_NAME} iothub_client_amqp_transport)
 
