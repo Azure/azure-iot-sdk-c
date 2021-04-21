@@ -458,7 +458,7 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SubscribeToCommands(
 * @remarks
 *           This is the function callback for properties sent by both IoTHubDeviceClient_LL_SendPropertiesAsync and IoTHubDeviceClient_LL_RespondToWriteableProperties.
 */
-typedef void(*IOTHUB_PROPERTY_ACKNOWLEDGED_CALLBACK)(int statusCode, void* userContextCallback);
+typedef void(*IOTHUB_CLIENT_PROPERTY_ACKNOWLEDGED_CALLBACK)(int statusCode, void* userContextCallback);
 
 /**
 * @brief    Sends properties to IoT Hub
@@ -482,7 +482,7 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendPropertiesAsync(
                          IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
                          const unsigned char* properties,
                          size_t propertiesLength,
-                         IOTHUB_PROPERTY_ACKNOWLEDGED_CALLBACK propertyAcknowledgedCallback,
+                         IOTHUB_CLIENT_PROPERTY_ACKNOWLEDGED_CALLBACK propertyAcknowledgedCallback,
                          void* userContextCallback);
 
 /**
@@ -494,7 +494,7 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendPropertiesAsync(
 * @param    userContextCallback  User context pointer set in initial call to IoTHubDeviceClient_LL_GetPropertiesAndSubscribeToUpdatesAsync.
 */
 typedef int(*IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK)(
-                 IOTHUB_PROPERTY_PAYLOAD_TYPE payloadType, 
+                 IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType, 
                  const unsigned char* payload,
                  size_t payloadLength,
                  void* userContextCallback);

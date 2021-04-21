@@ -148,7 +148,7 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendPropertiesAsync(
                             IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
                             const unsigned char* properties,
                             size_t propertiesLength,
-                            IOTHUB_PROPERTY_ACKNOWLEDGED_CALLBACK propertyAcknowledgedCallback,
+                            IOTHUB_CLIENT_PROPERTY_ACKNOWLEDGED_CALLBACK propertyAcknowledgedCallback,
                             void* userContextCallback)
 {
     return IoTHubClientCore_LL_SendReportedState((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, properties, propertiesLength, (IOTHUB_CLIENT_REPORTED_STATE_CALLBACK)propertyAcknowledgedCallback, userContextCallback);

@@ -153,7 +153,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_WriteablePropertyResponse(
 * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
 IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties(
-    IOTHUB_PROPERTY_PAYLOAD_TYPE payloadType,
+    IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType,
     const unsigned char* payLoad,
     size_t payLoadLength,
     const char** componentsName,

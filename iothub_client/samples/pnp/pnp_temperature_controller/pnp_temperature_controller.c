@@ -356,7 +356,7 @@ static int PnP_TempControlComponent_CommandCallback(const char* componentName, c
 }
 
 int PnP_TempControlComponent_UpdatedPropertyCallback(
-    IOTHUB_PROPERTY_PAYLOAD_TYPE payloadType, 
+    IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType, 
     const unsigned char* payLoad,
     size_t payloadLength,
     void* userContextCallback)

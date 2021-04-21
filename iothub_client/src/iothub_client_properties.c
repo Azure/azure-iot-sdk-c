@@ -70,7 +70,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_WriteablePropertyResponse(
 }
 
 IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties(
-    IOTHUB_PROPERTY_PAYLOAD_TYPE payloadType,
+    IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType,
     const unsigned char* serializedProperties,
     size_t serializedPropertiesLength,
     const char** componentsName,
