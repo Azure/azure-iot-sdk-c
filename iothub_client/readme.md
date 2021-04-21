@@ -22,19 +22,6 @@ For a list of tested configurations [click here][device-catalog].
 
 ## Prepackaged C SDK for Platform Specific Development
 
-
-<a name="aptgetpackage"></a>
-
-### apt-get packages for Linux devices
-
-To make it simpler to use the IoT Hub device SDK on Linux, we have created [apt-get packages][apt-get-packages] that are published on the Launchpad platform.
-
-At this point you can use the packages on Ubuntu 16.04 and 18.04 using the following CPU architectures: amd64, arm64, armhf and i386.
-
-[Here][apt-get-instructions] you can find a detailed guide on how to install the packages to develop your device application.
-
-If you are working with a device running a Linux distribution not supporting these packages, then you will need to compile the SDK following the instructions [below](#compile).
-
 <a name="cocoapods"></a>
 
 ### CocoaPods for Apple devices
@@ -121,6 +108,4 @@ In addition to the simple samples found in the current repository, you can find 
 [c-porting-guide]: https://github.com/Azure/azure-c-shared-utility/blob/master/devdoc/porting_guide.md
 [c-cross-compile]: ../doc/SDK_cross_compile_example.md
 [c-api-reference]: https://azure.github.io/azure-iot-sdk-c
-[apt-get-instructions]: ../doc/ubuntu_apt-get_sample_setup.md
-[apt-get-packages]: https://launchpad.net/~aziotsdklinux/+archive/ubuntu/ppa-azureiot
 [samples]: ./samples/
