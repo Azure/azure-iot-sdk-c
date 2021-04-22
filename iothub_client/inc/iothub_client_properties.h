@@ -150,6 +150,8 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_WriteablePropertyResponse(
 *            This API does not perform any network I/O.  It only translates the @c payload received from IoT Hub into 
 *            into the easier to manipulate @c IOTHUB_CLIENT_DESERIALIZED_PROPERTY.
 *
+*            This API allocates memory for @c properties.  Applications MUST call @c IoTHubClient_Deserialized_Properties_Destroy to free the data.
+*
 * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
 IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties(
@@ -161,5 +163,16 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties(
     IOTHUB_CLIENT_DESERIALIZED_PROPERTY** properties,
     size_t* numProperties,
     int* propertiesVersion);
+
+/**
+* @brief   Frees memory allocated by IoTHubClient_Deserialize_Properties.
+*
+* @param   properties                  Array of IOTHUB_CLIENT_DESERIALIZED_PROPERTY initially allocated by @c IoTHubClient_Deserialize_Properties.
+* @param   numProperties               Number of array elements in @c properties.
+* 
+*/
+void IoTHubClient_Deserialized_Properties_Destroy(
+    IOTHUB_CLIENT_DESERIALIZED_PROPERTY** properties,
+    size_t* numProperties);
 
 #endif /* IOTHUB_CLIENT_PROPERTIES_H */
