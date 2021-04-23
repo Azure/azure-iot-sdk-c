@@ -139,8 +139,8 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_WriteablePropertyResponse(
 * @param   payloadType                 Whether the received payload is the complete set of properties on the service or a more limited update.
 * @param   payLoad                     Payload received from IoT Hub that requires deserialization.
 * @param   payLoadLength               Number of bytes in payload.
-* @param   componentsName              Optional array containing components that are supported by this client.  Can be NULL if only one component is supported.
-* @param   numComponents               Number of components in the componentsName array.  Can be 0 if only one component is supported.
+* @param   componentsInModel           Optional array containing components that are supported by this client.  Can be NULL if only one component is supported.
+* @param   numComponentsInModel        Number of components in the componentsInModel array.  Can be 0 if only one component is supported.
 * @param   properties                  Array of IOTHUB_CLIENT_DESERIALIZED_PROPERTY representing a parsed version of payLoad.
 * @param   numProperties               Number of array elements in @c properties.
 * @param   propertiesVersion           Version of the properties that IoT Hub is monitoring.  This is required when responding to writeable properties.
@@ -160,8 +160,8 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties(
     IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType,
     const unsigned char* payLoad,
     size_t payLoadLength,
-    const char** componentsName,
-    size_t numComponents,
+    const char** componentsInModel,
+    size_t numComponentsInModel,
     IOTHUB_CLIENT_DESERIALIZED_PROPERTY** properties,
     size_t* numProperties,
     int* propertiesVersion);

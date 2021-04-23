@@ -1,46 +1,52 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/xlogging.h"
 
 #include "iothub_client_properties.h"
 #include "parson.h"
 
-static const char PROPERTY_FORMAT_COMPONENT_START[] = "{%s:_t:c";
-static const char PROPERTY_FORMAT_NAME_VALUE[] = "%s:%s";
-static const char PROPERTY_FORMAT_WRITEABLE_RESPONSE[] = "{\"%s\":{\"value\":%s,\"ac\":%d,\"av\":%d}}";
-static const char PROPERTY_FORMAT_WRITEABLE_RESPONSE_WITH_DESCRIPTION[] = "{\"%s\":{\"value\":%s,\"ac\":%d,\"av\":%d,\"ad\":\"%s\"}}";
+static const char PROPERTY_FORMAT_COMPONENT_START[] = "{%s:_t:c, ";
+static const char PROPERTY_FORMAT_NAME_VALUE[] = "%s:%s%s";
+static const char PROPERTY_FORMAT_WRITEABLE_RESPONSE[] = "{\"%s\":{\"value\":%s,\"ac\":%d,\"av\":%d}%s";
+static const char PROPERTY_FORMAT_WRITEABLE_RESPONSE_WITH_DESCRIPTION[] = "{\"%s\":{\"value\":%s,\"ac\":%d,\"av\":%d,\"ad\":\"%s\"}%s";
 
-static const char PROPERTY_FORMAT_OPEN_BRACE[] = "{";
-static const char PROPERTY_FORMAT_CLOSE_BRACE[] = "}";
+static const char PROPERTY_OPEN_BRACE[] = "{";
+static const char PROPERTY_CLOSE_BRACE[] = "}";
+static const char PROPERTY_COMMA[] = ",";
+static const char PROPERTY_EMPTY[] = "";
+
 
 static const char TWIN_DESIRED_OBJECT_NAME[] = "desired";
 static const char TWIN_REPORTED_OBJECT_NAME[] = "reported";
 static const char TWIN_VERSION[] = "$version";
 
 // IoTHub adds a JSON field "__t":"c" into desired top-level JSON objects that represent components.  Without this marking, the object 
-// is treated as a property off the root component.
+// is treated as a property of the root component.
 static const char TWIN_COMPONENT_MARKER[] = "__t";
 
+// When building a list of properties, whether to append a "," or nothing depends on whether more items are coming.
+static const char* CommaIfNeeded(bool lastItem)
+{
+    return lastItem ? PROPERTY_EMPTY : PROPERTY_COMMA;
+}
 
-
-// After builder functions have successfully invoked snprintf, update our traversal pointer and remaining lengths
+// After builder functions have successfully invoked snprintf, update our traversal pointer and remaining lengths.
 static void AdvanceCountersAfterWrite(size_t currentOutputBytes, char** currentWrite, size_t* requiredBytes, size_t* remainingBytes)
 {
     // The number of bytes to be required is always updated by number the snprintf wrote to.
     *requiredBytes += currentOutputBytes;
     if (*currentWrite != NULL)
     {
-        // if *currentWrite is NULL, then we leave it as NULL since the caller is doing its required buffer calculation.
+        // if *currentWrite is NULL, then we leave it as NULL since the caller is calculating the number of bytes needed.
         // Otherwise we need to update it for the next write.
         *currentWrite += currentOutputBytes;
         *remainingBytes -= currentOutputBytes;
     }
 }
 
-// Adds opening brace for JSON to be generated, either a simple "{" or more complex if componentName is specified
+// Adds opening brace for JSON to be generated, either a simple "{" or more complex format if componentName is specified.
 static size_t BuildOpeningBrace(const char* componentName, char* currentWrite, size_t remainingBytes)
 {
     size_t currentOutputBytes;
@@ -55,7 +61,7 @@ static size_t BuildOpeningBrace(const char* componentName, char* currentWrite, s
     }
     else
     {
-        if ((currentOutputBytes = snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_OPEN_BRACE)) < 0)
+        if ((currentOutputBytes = snprintf(currentWrite, remainingBytes, PROPERTY_OPEN_BRACE)) < 0)
         {
             LogError("Cannot build properites string");
             return (size_t)-1;
@@ -84,7 +90,9 @@ static size_t BuildReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPERTY* pro
 
     for (size_t i = 0; i < numProperties; i++)
     {
-        if ((currentOutputBytes += snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_NAME_VALUE, properties[i].name, properties[i].value)) < 0)
+        bool lastProperty = (i == (numProperties - 1));
+        if ((currentOutputBytes += snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_NAME_VALUE, 
+                                             properties[i].name, properties[i].value, CommaIfNeeded(lastProperty))) < 0)
         {
             LogError("Cannot build properites string");
             return (size_t)-1;
@@ -92,7 +100,7 @@ static size_t BuildReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPERTY* pro
         AdvanceCountersAfterWrite(currentOutputBytes, &currentWrite, &requiredBytes, &remainingBytes);
     }
 
-    if ((currentOutputBytes = snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_CLOSE_BRACE)) < 0)
+    if ((currentOutputBytes = snprintf(currentWrite, remainingBytes, PROPERTY_CLOSE_BRACE)) < 0)
     {
         LogError("Cannot build properites string");
         return (size_t)-1;
@@ -101,7 +109,6 @@ static size_t BuildReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPERTY* pro
  
     return requiredBytes;
 }
-
 
 // BuildWriteableResponseProperties is used to build up the actual serializedProperties string based 
 // on the writeable response properties.  If serializedProperties==NULL and serializedPropertiesLength=0, just like
@@ -122,9 +129,11 @@ static size_t BuildWriteableResponseProperties(const IOTHUB_CLIENT_WRITEABLE_PRO
 
     for (size_t i = 0; i < numProperties; i++)
     {
+        bool lastProperty = (i == (numProperties - 1));
         if (properties[i].description == NULL)
         {
-            if ((currentOutputBytes += snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_WRITEABLE_RESPONSE, properties[i].name, properties[i].value, properties[i].result, properties[i].ackVersion)) < 0)
+            if ((currentOutputBytes += snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_WRITEABLE_RESPONSE, properties[i].name, 
+                                                properties[i].value, properties[i].result, properties[i].ackVersion, CommaIfNeeded(lastProperty))) < 0)
             {
                 LogError("Cannot build properites string");
                 return (size_t)-1;
@@ -132,7 +141,8 @@ static size_t BuildWriteableResponseProperties(const IOTHUB_CLIENT_WRITEABLE_PRO
         }
         else
         {
-            if ((currentOutputBytes += snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_WRITEABLE_RESPONSE_WITH_DESCRIPTION, properties[i].name, properties[i].value, properties[i].result, properties[i].ackVersion, properties[i].description)) < 0)
+            if ((currentOutputBytes += snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_WRITEABLE_RESPONSE_WITH_DESCRIPTION, properties[i].name, 
+                                                properties[i].value, properties[i].result, properties[i].ackVersion, properties[i].description, CommaIfNeeded(lastProperty))) < 0)
             {
                 LogError("Cannot build properites string");
                 return (size_t)-1;
@@ -142,7 +152,7 @@ static size_t BuildWriteableResponseProperties(const IOTHUB_CLIENT_WRITEABLE_PRO
         AdvanceCountersAfterWrite(currentOutputBytes, &currentWrite, &requiredBytes, &remainingBytes);
     }
 
-    if ((currentOutputBytes = snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_CLOSE_BRACE)) < 0)
+    if ((currentOutputBytes = snprintf(currentWrite, remainingBytes, PROPERTY_CLOSE_BRACE)) < 0)
     {
         LogError("Cannot build properites string");
         return (size_t)-1;
@@ -196,7 +206,6 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_ReportedProperties(const IOTHUB_CLIE
     return result;
 }
 
-
 IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_WriteablePropertyResponse(
     const IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE* properties,
     size_t numProperties,
@@ -247,7 +256,6 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_WriteablePropertyResponse(
 
 }
 
-
 // The underlying twin payload received from the client SDK is not NULL terminated, but
 // parson requires this.  Make a temporary copy of string to NULL terminate.
 static char* CopyPayloadToString(const unsigned char* payload, size_t size)
@@ -268,6 +276,9 @@ static char* CopyPayloadToString(const unsigned char* payload, size_t size)
     return jsonStr;
 }
 
+// GetDesiredAndReportedTwinJson retrieves the desired and (if available) the reported sections of IoT Hub twin as JSON_Object's for later use.
+// When a full twin is sent, the JSON consists of {"desired":{...}, "reported":{...}}".  If we're processing an update patch, 
+// IoT Hub does not send us the "reported" and the "desired" is by convention taken to be the root of the JSON document received.
 static IOTHUB_CLIENT_RESULT GetDesiredAndReportedTwinJson(IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType, JSON_Value* rootValue, JSON_Object** desiredObject, JSON_Object** reportedObject)
 {
     IOTHUB_CLIENT_RESULT result;
@@ -282,9 +293,6 @@ static IOTHUB_CLIENT_RESULT GetDesiredAndReportedTwinJson(IOTHUB_CLIENT_PROPERTY
     {
         if (payloadType == IOTHUB_CLIENT_PROPERTY_PAYLOAD_COMPLETE)
         {
-            // For a complete update, the JSON from IoTHub will contain both "desired" and "reported" - the full twin.
-            // We only care about "desired" in this sample, so just retrieve it.
-
             // NULL values are NOT errors in this case.  TODO: Check about what empty twin looks like for comments here, but I still don't think this should be fatal.
             *desiredObject = json_object_get_object(rootObject, TWIN_DESIRED_OBJECT_NAME);
             *reportedObject = json_object_get_object(rootObject, TWIN_REPORTED_OBJECT_NAME);
@@ -302,11 +310,11 @@ static IOTHUB_CLIENT_RESULT GetDesiredAndReportedTwinJson(IOTHUB_CLIENT_PROPERTY
     return result;
 }
 
-// GetTwinVersion retrieves the $version field from JSON
+// GetTwinVersion retrieves the $version field from JSON document received from IoT Hub.  
+// The application needs this value when acknowledging writeable properties received from the service.
 static IOTHUB_CLIENT_RESULT GetTwinVersion(JSON_Object* desiredObject, int* propertiesVersion)
 {
     IOTHUB_CLIENT_RESULT result;
-
     JSON_Value* versionValue = NULL;
 
     if ((versionValue = json_object_get_value(desiredObject, TWIN_VERSION)) == NULL)
@@ -329,7 +337,8 @@ static IOTHUB_CLIENT_RESULT GetTwinVersion(JSON_Object* desiredObject, int* prop
 }
 
 // IsJsonObjectAComponentInModel checks whether the objectName, read from the top-level child of the desired device twin JSON, 
-// is in componentsInModel that the application passed into us.
+// is in componentsInModel that the application passed into us.  There is no way for the SDK to otherwise be able to 
+// tell a property from a sub-component, as the protocol does not guaranteed we will received a "__t" marker over the network.
 static bool IsJsonObjectAComponentInModel(const char* objectName, const char** componentsInModel, size_t numComponentsInModel)
 {
     bool result = false;
@@ -387,8 +396,8 @@ static IOTHUB_CLIENT_RESULT GetNumberPropertiesForComponent(JSON_Value* componen
     return result;
 }
 
-// GetNumberProperties examines the jsonObject to retrieve the number of properties.
-static IOTHUB_CLIENT_RESULT GetNumberProperties(const char** componentsName, size_t numComponents, JSON_Object* jsonObject, size_t *numProperties)
+// GetNumberOfProperties examines the jsonObject to retrieve the number of properties.
+static IOTHUB_CLIENT_RESULT GetNumberOfProperties(const char** componentsInModel, size_t numComponentsInModel, JSON_Object* jsonObject, size_t *numProperties)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
     size_t numChildren;
@@ -413,10 +422,10 @@ static IOTHUB_CLIENT_RESULT GetNumberProperties(const char** componentsName, siz
             // The version field is metadata and not user property data.  Skip.
             continue;
         }
-        else if ((json_type(value) == JSONObject) && IsJsonObjectAComponentInModel(name, componentsName, numComponents))
+        else if ((json_type(value) == JSONObject) && IsJsonObjectAComponentInModel(name, componentsInModel, numComponentsInModel))
         {
             // If this current JSON is an element AND the name is one of the componentsInModel that the application knows about,
-            // then this json element represents a component.
+            // then this JSON element represents a component.
             size_t numComponentProperties;
             if ((result = GetNumberPropertiesForComponent(value, &numComponentProperties)) != IOTHUB_CLIENT_OK)
             {
@@ -441,7 +450,6 @@ static IOTHUB_CLIENT_RESULT GetNumberProperties(const char** componentsName, siz
 
     return result;
 }
-
 
 static IOTHUB_CLIENT_RESULT FillPropertiesForComponent(IOTHUB_CLIENT_PROPERTY_TYPE propertyType, const char* componentName, JSON_Value* componentValue, IOTHUB_CLIENT_DESERIALIZED_PROPERTY* properties, size_t* numComponentProperties)
 {
@@ -499,8 +507,8 @@ static IOTHUB_CLIENT_RESULT FillPropertiesForComponent(IOTHUB_CLIENT_PROPERTY_TY
     return result;
 }
 
-
-static IOTHUB_CLIENT_RESULT FillProperties(IOTHUB_CLIENT_PROPERTY_TYPE propertyType, const char** componentsName, size_t numComponents, JSON_Object* jsonObject, IOTHUB_CLIENT_DESERIALIZED_PROPERTY* properties)
+// FillProperties retrieves properties that are children of jsonObject and puts them into properties, starting at the 0 index.
+static IOTHUB_CLIENT_RESULT FillProperties(IOTHUB_CLIENT_PROPERTY_TYPE propertyType, const char** componentsInModel, size_t numComponentsInModel, JSON_Object* jsonObject, IOTHUB_CLIENT_DESERIALIZED_PROPERTY* properties)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
 
@@ -525,7 +533,7 @@ static IOTHUB_CLIENT_RESULT FillProperties(IOTHUB_CLIENT_PROPERTY_TYPE propertyT
             // The version field is metadata and not user property data.  Skip.
             continue;
         }
-        else if ((json_type(value) == JSONObject) && IsJsonObjectAComponentInModel(name, componentsName, numComponents))
+        else if ((json_type(value) == JSONObject) && IsJsonObjectAComponentInModel(name, componentsInModel, numComponentsInModel))
         {
             size_t numComponentProperties = 0;
 
@@ -562,13 +570,12 @@ static IOTHUB_CLIENT_RESULT FillProperties(IOTHUB_CLIENT_PROPERTY_TYPE propertyT
     return result;
 }
 
-
 IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties(
     IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType,
     const unsigned char* serializedProperties,
     size_t serializedPropertiesLength,
-    const char** componentsName,
-    size_t numComponents,
+    const char** componentsInModel,
+    size_t numComponentsInModel,
     IOTHUB_CLIENT_DESERIALIZED_PROPERTY** properties,
     size_t* numProperties,
     int* propertiesVersion)
@@ -606,11 +613,11 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties(
     {
         LogError("Cannot retrieve properties version");
     }
-    else if ((result = GetNumberProperties(componentsName, numComponents, desiredObject, &numDesiredProperties)) != IOTHUB_CLIENT_OK)
+    else if ((result = GetNumberOfProperties(componentsInModel, numComponentsInModel, desiredObject, &numDesiredProperties)) != IOTHUB_CLIENT_OK)
     {
         LogError("Cannot determine number of desired properties");
     }
-    else if ((result = GetNumberProperties(componentsName, numComponents, reportedObject, &numReportedProperties)) != IOTHUB_CLIENT_OK)
+    else if ((result = GetNumberOfProperties(componentsInModel, numComponentsInModel, reportedObject, &numReportedProperties)) != IOTHUB_CLIENT_OK)
     {
         LogError("Cannot determine number of reported properties");
     }
@@ -619,11 +626,11 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties(
         LogError("Cannot allocate %ul properties", numDesiredProperties + numReportedProperties);
         result = IOTHUB_CLIENT_ERROR;
     }
-    else if ((result = FillProperties(IOTHUB_CLIENT_PROPERTY_TYPE_WRITEABLE, componentsName, numComponents, desiredObject, propertiesBuffer)) != IOTHUB_CLIENT_OK)
+    else if ((result = FillProperties(IOTHUB_CLIENT_PROPERTY_TYPE_WRITEABLE, componentsInModel, numComponentsInModel, desiredObject, propertiesBuffer)) != IOTHUB_CLIENT_OK)
     {
         LogError("Cannot determine number of desired properties");
     }
-    else if ((result = FillProperties(IOTHUB_CLIENT_PROPERTY_TYPE_REPORTED_FROM_DEVICE, componentsName, numComponents, reportedObject, propertiesBuffer + numDesiredProperties)) != IOTHUB_CLIENT_OK)
+    else if ((result = FillProperties(IOTHUB_CLIENT_PROPERTY_TYPE_REPORTED_FROM_DEVICE, componentsInModel, numComponentsInModel, reportedObject, propertiesBuffer + numDesiredProperties)) != IOTHUB_CLIENT_OK)
     {
         LogError("Cannot determine number of desired properties");
     }
@@ -655,4 +662,3 @@ void IoTHubClient_Deserialized_Properties_Destroy(
     (void)properties;
     (void)numProperties;
 }
-
