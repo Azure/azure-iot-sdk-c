@@ -433,6 +433,8 @@ MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetAsSecurityMessage, I
 */
 MOCKABLE_FUNCTION(, bool, IoTHubMessage_IsSecurityMessage, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 
+// REMOVE - THIS SHOULDN'T BE AVAILABLE TO APPLICATION 
+
 /**
 * @brief   Sets component name of the message.
 *

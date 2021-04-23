@@ -1,53 +1,119 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+
+#include "azure_c_shared_utility/gballoc.h"
+#include "azure_c_shared_utility/xlogging.h"
+
 #include "iothub_client_properties.h"
 #include "parson.h"
 
-IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_ReportedProperties(
-    const IOTHUB_CLIENT_REPORTED_PROPERTY* properties,
-    size_t numProperties,
-    const char* componentName,
-    unsigned char** serializedProperties,
-    size_t* serializedPropertiesLength)
+static const char PROPERTY_FORMAT_COMPONENT_START[] = "{%s:_t:c";
+static const char PROPERTY_FORMAT_NAME_VALUE[] = "%s:%s";
+static const char PROPERTY_FORMAT_OPEN_BRACE[] = "{";
+static const char PROPERTY_FORMAT_CLOSE_BRACE[] = "}";
+
+// BuildReportedProperties is used to build up the actual serializedProperties string based 
+// on the properties.  If serializedProperties==NULL and serializedPropertiesLength=0, just like
+// analogous snprintf it will just calculate the amount of space caller needs to allocate.
+static size_t BuildReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPERTY* properties, size_t numProperties, const char* componentName, unsigned char* serializedProperties, size_t serializedPropertiesLength)
 {
-/*
-    // First step is to calculate the length
     size_t requiredBytes = 0;
-    size_t additionalBytes;
-    
+    size_t currentOutputBytes;
+    size_t remainingBytes = serializedPropertiesLength;
+    char* currentWrite = (char*)serializedProperties;
+
     if (componentName != NULL)
     {
-        additionalBytes = sprintf(NULL, "{%s:_t:c", componentName);
-        requiredBytes += additionalBytes;
+        if ((currentOutputBytes = snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_COMPONENT_START, componentName)) < 0)
+        {
+            LogError("Cannot build properites string");
+            return (size_t)-1;
+        }
+
+    }
+    else
+    {
+        if ((currentOutputBytes = snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_OPEN_BRACE)) < 0)
+        {
+            LogError("Cannot build properites string");
+            return (size_t)-1;
+        }
+    }
+    requiredBytes += currentOutputBytes;
+    if (currentWrite != NULL)
+    {
+        currentWrite += currentOutputBytes;
+        remainingBytes -= currentOutputBytes;
     }
 
     for (size_t i = 0; i < numProperties; i++)
     {
-        additionalBytes += sprintf(NULL, "%s:%s", properties[i]->name, properties[i]->value);
-        if (i != (numProperties -1))
-            additionalBytes += 1; // for the ','
+        if ((currentOutputBytes += snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_NAME_VALUE, properties[i].name, properties[i].value)) < 0)
+        {
+            LogError("Cannot build properites string");
+            return (size_t)-1;
+        }
+        requiredBytes += currentOutputBytes;
+        if (currentWrite != NULL)
+        {
+            currentWrite += currentOutputBytes;
+            remainingBytes -= currentOutputBytes;
+        }
     }
 
-    if (componentName != NULL)
+    if ((currentOutputBytes = snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_CLOSE_BRACE)) < 0)
     {
-        additionalBytes = sprintf(NULL, "}", componentName); // or maybe just ++ if it's just 1 byte?
-        requiredBytes += additionalBytes;
+        LogError("Cannot build properites string");
+        return (size_t)-1;
     }
-    additionalBytes++; // for the closing '}'
+    requiredBytes += currentOutputBytes;
+ 
+    return requiredBytes;
+}
 
-    *serializedProperties = malloc(...);
-    *serializedPropertiesLength = bytes;
+IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_ReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPERTY* properties, size_t numProperties, const char* componentName, unsigned char** serializedProperties, size_t* serializedPropertiesLength)
+{
+    IOTHUB_CLIENT_RESULT result;
+    size_t requiredBytes = 0;
+    unsigned char* serializedPropertiesBuffer = NULL;
 
-    building the string is analogous.  Investigate a single function for both that just either takes a buffer or it doesn't?
-*/
+    if ((properties == NULL) || (numProperties == 0) || (serializedProperties == NULL) || (serializedPropertiesLength == 0))
+    {
+        LogError("Invalid argument");
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else if ((requiredBytes = BuildReportedProperties(properties, numProperties, componentName, NULL, 0)) < 0)
+    {
+        LogError("Cannot determine required length of reported properties buffer");
+        result = IOTHUB_CLIENT_ERROR;
+    }
+    else if ((serializedPropertiesBuffer = calloc(1, requiredBytes)) == NULL)
+    {
+        LogError("Cannot allocate %ul bytes", requiredBytes);
+        result = IOTHUB_CLIENT_ERROR;
+    }
+    else if (BuildReportedProperties(properties, numProperties, componentName, serializedPropertiesBuffer, requiredBytes) < 0)
+    {
+        LogError("Cannot write properties buffer");
+        result = IOTHUB_CLIENT_ERROR;
+    }
+    else
+    {
+        result = IOTHUB_CLIENT_OK;
+    }
 
-    (void)properties;
-    (void)numProperties; 
-    (void)componentName;
-    (void)serializedProperties;
-    (void)serializedPropertiesLength;
-    return 0;
+    if (result == IOTHUB_CLIENT_OK)
+    {
+        *serializedProperties = serializedPropertiesBuffer;
+        *serializedPropertiesLength = requiredBytes;
+    }
+    else if (serializedPropertiesBuffer != NULL)
+    {
+        free(serializedPropertiesBuffer);
+    }
+
+    return result;
 }
 
 

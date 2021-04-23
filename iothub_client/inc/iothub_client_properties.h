@@ -84,6 +84,7 @@ typedef struct IOTHUB_CLIENT_DESERIALIZED_PROPERTY_TAG {
 * @param   componentName               Optional component name these properties are part of.  May be NULL for default component.
 * @param   serializedProperties        Serialized output of @c properties for sending to IoT Hub.
                                        The application must release this memory using free().
+*                                      Note: This is NOT a \0 terminated string.
 * @param   serializedPropertiesLength  Length of serializedProperties.
 *
 * @remarks  Applications can also manually construct the payload based on the convention rules.  This API is an easier to use 
@@ -109,6 +110,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_ReportedProperties(
 * @param   componentName               Optional component name these properties are part of.  May be NULL for default component.
 * @param   serializedProperties        Serialized output of @c properties for sending to IoT Hub.
                                        The application must release this memory using free().
+*                                      Note: This is NOT a \0 terminated string.
 * @param   serializedPropertiesLength  Length of serializedProperties
 * 
 * @remarks  Applications typically will invoke this API when processing a property from service (IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK)
