@@ -33,15 +33,15 @@ typedef struct IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE_TAG {
     /** @brief    Version of the structure.  Currently must be IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE_VERSION_1.  */
     int version;
     /** @brief Name of the property. */
-    const char* propertyName;
+    const char* name;
     /** @brief Value of the property. */
-    const char* propertyValue;
+    const char* value;
     /** @brief Result of the requested operation.  This maps to an HTTP status code.  */
     int result;
-    /** @brief Optional friendly description of the operation.  May be NULL. */
-    const char* description;
     /** @brief Acknowledgement version.  This corresponds to the version of the writeable properties being responded to. */
     int ackVersion;
+    /** @brief Optional friendly description of the operation.  May be NULL. */
+    const char* description;
 } IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE;
 
 /** @brief Enumeration that indicates whether a given property from the service was originally reported from the device

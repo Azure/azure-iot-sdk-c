@@ -274,8 +274,8 @@ static void SendTargetTemperatureResponse(PNP_THERMOSTAT_COMPONENT* pnpThermosta
         temperatureProperty.ackVersion = version;
         // Result of request, which maps to HTTP status code.  For sample we'll always indicate success.
         temperatureProperty.result = 200;
-        temperatureProperty.propertyName = g_targetTemperaturePropertyName;
-        temperatureProperty.propertyValue = targetTemperatureAsString;
+        temperatureProperty.name = g_targetTemperaturePropertyName;
+        temperatureProperty.value = targetTemperatureAsString;
 
         unsigned char* propertySerialized;
         size_t propertySerializedLength;
