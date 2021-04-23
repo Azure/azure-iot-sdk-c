@@ -18,6 +18,11 @@ static const char PROPERTY_FORMAT_CLOSE_BRACE[] = "}";
 
 static const char TWIN_DESIRED_OBJECT_NAME[] = "desired";
 static const char TWIN_REPORTED_OBJECT_NAME[] = "reported";
+static const char TWIN_VERSION[] = "$version";
+
+// IoTHub adds a JSON field "__t":"c" into desired top-level JSON objects that represent components.  Without this marking, the object 
+// is treated as a property off the root component.
+static const char TWIN_COMPONENT_MARKER[] = "__t";
 
 
 
@@ -297,6 +302,267 @@ static IOTHUB_CLIENT_RESULT GetDesiredAndReportedTwinJson(IOTHUB_CLIENT_PROPERTY
     return result;
 }
 
+// GetTwinVersion retrieves the $version field from JSON
+static IOTHUB_CLIENT_RESULT GetTwinVersion(JSON_Object* desiredObject, int* propertiesVersion)
+{
+    IOTHUB_CLIENT_RESULT result;
+
+    JSON_Value* versionValue = NULL;
+
+    if ((versionValue = json_object_get_value(desiredObject, TWIN_VERSION)) == NULL)
+    {
+        LogError("Cannot retrieve %s field for twin", TWIN_VERSION);
+        result = IOTHUB_CLIENT_ERROR;
+    }
+    else if (json_value_get_type(versionValue) != JSONNumber)
+    {
+        LogError("JSON field %s is not a number", TWIN_VERSION);
+        result = IOTHUB_CLIENT_ERROR;
+    }
+    else
+    {
+        *propertiesVersion = (int)json_value_get_number(versionValue);
+        result = IOTHUB_CLIENT_OK;
+    }
+
+    return result;
+}
+
+// IsJsonObjectAComponentInModel checks whether the objectName, read from the top-level child of the desired device twin JSON, 
+// is in componentsInModel that the application passed into us.
+static bool IsJsonObjectAComponentInModel(const char* objectName, const char** componentsInModel, size_t numComponentsInModel)
+{
+    bool result = false;
+
+    for (size_t i = 0; i < numComponentsInModel; i++)
+    {
+        if (strcmp(objectName, componentsInModel[i]) == 0)
+        {
+            result = true;
+            break;
+        }
+    }
+
+    return result;
+}
+
+// GetNumberPropertiesForComponent determines how many properties a component has.
+static IOTHUB_CLIENT_RESULT GetNumberPropertiesForComponent(JSON_Value* componentValue, size_t *numComponentProperties)
+{
+    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
+    size_t i;
+
+    JSON_Object* componentObject = json_value_get_object(componentValue);
+    size_t numChildren = json_object_get_count(componentObject);
+    *numComponentProperties = 0;
+
+    for (i = 0; i < numChildren; i++)
+    {
+        const char* propertyName = json_object_get_name(componentObject, i);
+        JSON_Value* propertyValue = json_object_get_value_at(componentObject, i);
+
+        if ((propertyName == NULL) || (propertyValue == NULL))
+        {
+            LogError("Unexpected error retrieving the property name and/or value at element at index=%lu", (unsigned long)i);
+            result = IOTHUB_CLIENT_ERROR;
+            return result;
+        }
+
+        // When a component is received from a full twin, it will have a "__t" as one of the child elements.  This is metadata that indicates
+        // to solutions that the JSON object corresponds to a component and not a property of the root component.  Because this is 
+        // metadata and not part of this component's modeled properties, we ignore it when processing this loop.
+        if (strcmp(propertyName, TWIN_COMPONENT_MARKER) == 0)
+        {
+            continue;
+        }
+
+        *numComponentProperties = (*numComponentProperties) + 1;
+    }
+
+    if (i == numChildren)
+    {
+        result = IOTHUB_CLIENT_OK;
+    }
+
+    return result;
+}
+
+// GetNumberProperties examines the jsonObject to retrieve the number of properties.
+static IOTHUB_CLIENT_RESULT GetNumberProperties(const char** componentsName, size_t numComponents, JSON_Object* jsonObject, size_t *numProperties)
+{
+    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
+    size_t numChildren;
+    size_t currentPropertyCount = 0;
+    size_t i;
+
+    numChildren = json_object_get_count(jsonObject);
+
+    for (i = 0; i < numChildren; i++)
+    {
+        const char* name = json_object_get_name(jsonObject, i);
+        JSON_Value* value = json_object_get_value_at(jsonObject, i);
+
+        if ((name == NULL) || (value == NULL))
+        {
+            LogError("Unable to retrieve name and/or value from index %lu", i);
+            result = IOTHUB_CLIENT_ERROR;
+            break;
+        }
+        else if (strcmp(name, TWIN_VERSION) == 0)
+        {
+            // The version field is metadata and not user property data.  Skip.
+            continue;
+        }
+        else if ((json_type(value) == JSONObject) && IsJsonObjectAComponentInModel(name, componentsName, numComponents))
+        {
+            // If this current JSON is an element AND the name is one of the componentsInModel that the application knows about,
+            // then this json element represents a component.
+            size_t numComponentProperties;
+            if ((result = GetNumberPropertiesForComponent(value, &numComponentProperties)) != IOTHUB_CLIENT_OK)
+            {
+                LogError("Cannot get number of properties for component %s", name);
+                break;
+            }
+
+            currentPropertyCount += numComponentProperties;
+        }
+        else
+        {
+            // If the child element is NOT an object OR its not a model the application knows about, this is a property of the model's root component.
+            currentPropertyCount++;
+        }
+    }
+
+    if (numChildren == i)
+    {
+        result = IOTHUB_CLIENT_OK;
+        *numProperties = currentPropertyCount;
+    }
+
+    return result;
+}
+
+
+static IOTHUB_CLIENT_RESULT FillPropertiesForComponent(IOTHUB_CLIENT_PROPERTY_TYPE propertyType, const char* componentName, JSON_Value* componentValue, IOTHUB_CLIENT_DESERIALIZED_PROPERTY* properties, size_t* numComponentProperties)
+{
+    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
+    size_t i;
+
+    JSON_Object* componentObject = json_value_get_object(componentValue);
+    size_t numChildren = json_object_get_count(componentObject);
+    *numComponentProperties = 0;
+
+    for (i = 0; i < numChildren; i++)
+    {
+        const char* propertyName = json_object_get_name(componentObject, i);
+        JSON_Value* propertyValue = json_object_get_value_at(componentObject, i);
+
+        if ((propertyName == NULL) || (propertyValue == NULL))
+        {
+            LogError("Unexpected error retrieving the property name and/or value at element at index=%lu", (unsigned long)i);
+            result = IOTHUB_CLIENT_ERROR;
+            return result;
+        }
+
+        // When a component is received from a full twin, it will have a "__t" as one of the child elements.  This is metadata that indicates
+        // to solutions that the JSON object corresponds to a component and not a property of the root component.  Because this is 
+        // metadata and not part of this component's modeled properties, we ignore it when processing this loop.
+        if (strcmp(propertyName, TWIN_COMPONENT_MARKER) == 0)
+        {
+            continue;
+        }
+
+        const char* propertyStringJson;
+        
+        if ((propertyStringJson = json_string(propertyValue)) == NULL)
+        {
+            LogError("Unable to retrieve JSON string for property value");
+            result = IOTHUB_CLIENT_ERROR;
+            break;
+        }
+            
+        // If the child element is NOT an object OR its not a model the application knows about, this is a property of the model's root component.
+        properties[*numComponentProperties].version = IOTHUB_CLIENT_DESERIALIZED_PROPERTY_VERSION;
+        properties[*numComponentProperties].propertyType = propertyType;
+        properties[*numComponentProperties].componentName = componentName;
+        properties[*numComponentProperties].propertyName = propertyName;
+        properties[*numComponentProperties].propertyValue = propertyStringJson;
+
+        *numComponentProperties = (*numComponentProperties) + 1;
+    }
+
+    if (i == numChildren)
+    {
+        result = IOTHUB_CLIENT_OK;
+    }
+
+    return result;
+}
+
+
+static IOTHUB_CLIENT_RESULT FillProperties(IOTHUB_CLIENT_PROPERTY_TYPE propertyType, const char** componentsName, size_t numComponents, JSON_Object* jsonObject, IOTHUB_CLIENT_DESERIALIZED_PROPERTY* properties)
+{
+    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
+
+    size_t numChildren;
+    size_t currentProperty = 0;
+
+    numChildren = json_object_get_count(jsonObject);
+
+    for (size_t i = 0; i < numChildren; i++)
+    {
+        const char* name = json_object_get_name(jsonObject, i);
+        JSON_Value* value = json_object_get_value_at(jsonObject, i);
+
+        if ((name == NULL) || (value == NULL))
+        {
+            LogError("Unable to retrieve name and/or value from index %lu", i);
+            result = IOTHUB_CLIENT_ERROR;
+            break;
+        }
+        else if (strcmp(name, TWIN_VERSION) == 0)
+        {
+            // The version field is metadata and not user property data.  Skip.
+            continue;
+        }
+        else if ((json_type(value) == JSONObject) && IsJsonObjectAComponentInModel(name, componentsName, numComponents))
+        {
+            size_t numComponentProperties = 0;
+
+            if ((result = FillPropertiesForComponent(propertyType, name, value, properties + currentProperty, &numComponentProperties)) != IOTHUB_CLIENT_ERROR)
+            {
+                LogError("Cannot set properties for component %s", name);
+                break;
+            }
+            currentProperty += numComponentProperties;
+        }
+        else
+        {
+            const char* propertyStringJson;
+
+            if ((propertyStringJson = json_string(value)) == NULL)
+            {
+                LogError("Unable to retrieve JSON string for property value");
+                result = IOTHUB_CLIENT_ERROR;
+                break;
+            }
+                
+            // If the child element is NOT an object OR its not a model the application knows about, this is a property of the model's root component.
+            properties[currentProperty].version = IOTHUB_CLIENT_DESERIALIZED_PROPERTY_VERSION;
+            properties[currentProperty].propertyType = propertyType;
+            properties[currentProperty].componentName = NULL;
+            properties[currentProperty].propertyName = name;
+            properties[currentProperty].propertyValue = propertyStringJson;
+
+            currentProperty++;
+            
+        }
+    }
+
+    return result;
+}
+
+
 IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties(
     IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType,
     const unsigned char* serializedProperties,
@@ -314,8 +580,8 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties(
     JSON_Object* reportedObject;
 
     IOTHUB_CLIENT_DESERIALIZED_PROPERTY* propertiesBuffer = NULL;
-    size_t numDesiredProperties;
-    size_t numReportedProperties;
+    size_t numDesiredProperties = 0;
+    size_t numReportedProperties = 0;
 
     if ((serializedProperties == NULL) || (serializedPropertiesLength == 0) || (numProperties == 0) || (properties == NULL) || (numProperties == 0) || (propertiesVersion == 0))
     {
@@ -336,15 +602,15 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties(
     {
         LogError("Cannot retrieve desired and/or reported object from JSON");
     }
-    else if ((result = GetVersion(desiredObject, propertiesVersion)) != IOTHUB_CLIENT_OK)
+    else if ((result = GetTwinVersion(desiredObject, propertiesVersion)) != IOTHUB_CLIENT_OK)
     {
         LogError("Cannot retrieve properties version");
     }
-    else if ((result = GetNumberProperties(IOTHUB_CLIENT_PROPERTY_TYPE_WRITEABLE, componentsName, numComponents, desiredObject, &numDesiredProperties)) != IOTHUB_CLIENT_OK)
+    else if ((result = GetNumberProperties(componentsName, numComponents, desiredObject, &numDesiredProperties)) != IOTHUB_CLIENT_OK)
     {
         LogError("Cannot determine number of desired properties");
     }
-    else if ((result = GetNumberProperties(IOTHUB_CLIENT_PROPERTY_TYPE_REPORTED_FROM_DEVICE,  componentsName, numComponents, reportedObject, &numReportedProperties)) != IOTHUB_CLIENT_OK)
+    else if ((result = GetNumberProperties(componentsName, numComponents, reportedObject, &numReportedProperties)) != IOTHUB_CLIENT_OK)
     {
         LogError("Cannot determine number of reported properties");
     }
@@ -353,17 +619,27 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties(
         LogError("Cannot allocate %ul properties", numDesiredProperties + numReportedProperties);
         result = IOTHUB_CLIENT_ERROR;
     }
-    else if ((result = FillProperties(IOTHUB_CLIENT_PROPERTY_TYPE_WRITEABLE,  componentsName, numComponents, desiredObject, numDesiredProperties, propertiesBuffer)) != IOTHUB_CLIENT_OK)
+    else if ((result = FillProperties(IOTHUB_CLIENT_PROPERTY_TYPE_WRITEABLE, componentsName, numComponents, desiredObject, propertiesBuffer)) != IOTHUB_CLIENT_OK)
     {
         LogError("Cannot determine number of desired properties");
     }
-    else if ((result = FillProperties(IOTHUB_CLIENT_PROPERTY_TYPE_REPORTED_FROM_DEVICE,  componentsName, numComponents, reportedObject, numReportedProperties, propertiesBuffer + numDesiredProperties)) != IOTHUB_CLIENT_OK)
+    else if ((result = FillProperties(IOTHUB_CLIENT_PROPERTY_TYPE_REPORTED_FROM_DEVICE, componentsName, numComponents, reportedObject, propertiesBuffer + numDesiredProperties)) != IOTHUB_CLIENT_OK)
     {
         LogError("Cannot determine number of desired properties");
     }
     else
     {
         result = IOTHUB_CLIENT_OK;
+    }
+
+    if ((result != IOTHUB_CLIENT_OK) && (propertiesBuffer != NULL))
+    {
+        IoTHubClient_Deserialized_Properties_Destroy(propertiesBuffer, numDesiredProperties + numReportedProperties);
+    }
+    else
+    {
+        *properties = propertiesBuffer;
+        *numProperties = numDesiredProperties + numReportedProperties;
     }
     
     json_value_free(rootValue);
@@ -373,8 +649,8 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties(
 }
 
 void IoTHubClient_Deserialized_Properties_Destroy(
-    IOTHUB_CLIENT_DESERIALIZED_PROPERTY** properties,
-    size_t* numProperties)
+    IOTHUB_CLIENT_DESERIALIZED_PROPERTY* properties,
+    size_t numProperties)
 {
     (void)properties;
     (void)numProperties;

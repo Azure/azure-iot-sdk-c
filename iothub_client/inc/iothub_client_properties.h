@@ -174,7 +174,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties(
 * 
 */
 void IoTHubClient_Deserialized_Properties_Destroy(
-    IOTHUB_CLIENT_DESERIALIZED_PROPERTY** properties,
-    size_t* numProperties);
+    IOTHUB_CLIENT_DESERIALIZED_PROPERTY* properties,
+    size_t numProperties);
 
 #endif /* IOTHUB_CLIENT_PROPERTIES_H */
