@@ -952,7 +952,7 @@ static void on_connection_state_changed(void* context, CONNECTION_STATE new_conn
     IOTHUB_VALIDATION_INFO* devhubValInfo = (IOTHUB_VALIDATION_INFO*)context;
     if (devhubValInfo->isEventListenerConnected && 
         (new_connection_state == CONNECTION_STATE_END || new_connection_state == CONNECTION_STATE_ERROR) &&
-        (previous_connection_state == CONNECTION_STATE_OPENED))
+        (previous_connection_state <= CONNECTION_STATE_OPENED))
     {
         devhubValInfo->isEventListenerConnected = false;
         LogInfo("AMQP connection state: CONNECTION_STATE_END");
