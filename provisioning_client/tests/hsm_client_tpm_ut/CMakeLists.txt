@@ -4,7 +4,7 @@
 #this is CMakeLists.txt for device_auth_ut
 cmake_minimum_required(VERSION 2.8.11)
 
-compileAsC11()
+compileAsC99()
 set(theseTestsName hsm_client_tpm_ut)
 
 set(${theseTestsName}_test_files

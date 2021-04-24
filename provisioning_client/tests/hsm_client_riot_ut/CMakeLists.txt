@@ -4,7 +4,7 @@
 #this is CMakeLists.txt for device_auth_ut
 cmake_minimum_required(VERSION 2.8.11)
 
-compileAsC11()
+compileAsC99()
 set(theseTestsName hsm_client_riot_ut)
 
 include_directories(../../deps/RIoT/Simulation/DICE)
@@ -30,7 +30,7 @@ target_compile_definitions(${theseTestsName}_exe
         RIOTBUILD
         RIOTSECP256R1
     )
-if(WIN32)
+if(WIN32 AND use_cppunittest)
     target_compile_definitions(${theseTestsName}_dll
         PUBLIC
             RIOTBUILD

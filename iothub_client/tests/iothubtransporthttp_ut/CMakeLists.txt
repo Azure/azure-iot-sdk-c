@@ -8,7 +8,7 @@ if(NOT ${use_http})
     message(FATAL_ERROR "iothubtransporthttp_ut being generated without HTTP support")
 endif()
 
-compileAsC11()
+compileAsC99()
 
 set(theseTestsName iothubtransporthttp_ut)
 
