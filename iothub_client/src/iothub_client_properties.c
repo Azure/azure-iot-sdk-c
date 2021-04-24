@@ -7,8 +7,8 @@
 #include "iothub_client_properties.h"
 #include "parson.h"
 
-static const char PROPERTY_FORMAT_COMPONENT_START[] = "{%s:_t:c, ";
-static const char PROPERTY_FORMAT_NAME_VALUE[] = "%s:%s%s";
+static const char PROPERTY_FORMAT_COMPONENT_START[] = "{\"%s\":_t:c, ";
+static const char PROPERTY_FORMAT_NAME_VALUE[] = "\"%s\":%s%s";
 static const char PROPERTY_FORMAT_WRITEABLE_RESPONSE[] = "{\"%s\":{\"value\":%s,\"ac\":%d,\"av\":%d}%s";
 static const char PROPERTY_FORMAT_WRITEABLE_RESPONSE_WITH_DESCRIPTION[] = "{\"%s\":{\"value\":%s,\"ac\":%d,\"av\":%d,\"ad\":\"%s\"}%s";
 
@@ -132,6 +132,7 @@ static size_t BuildWriteableResponseProperties(const IOTHUB_CLIENT_WRITEABLE_PRO
         bool lastProperty = (i == (numProperties - 1));
         if (properties[i].description == NULL)
         {
+            // TODO: This shouldn't be +=, but simply =, or else we over-shoot.  (And in other places.)  Need to think of best way to represent this with existing variables ideally instead of more.
             if ((currentOutputBytes += snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_WRITEABLE_RESPONSE, properties[i].name, 
                                                 properties[i].value, properties[i].result, properties[i].ackVersion, CommaIfNeeded(lastProperty))) < 0)
             {
@@ -158,7 +159,7 @@ static size_t BuildWriteableResponseProperties(const IOTHUB_CLIENT_WRITEABLE_PRO
         return (size_t)-1;
     }
     AdvanceCountersAfterWrite(currentOutputBytes, &currentWrite, &requiredBytes, &remainingBytes);
- 
+
     return requiredBytes;
 }
 
