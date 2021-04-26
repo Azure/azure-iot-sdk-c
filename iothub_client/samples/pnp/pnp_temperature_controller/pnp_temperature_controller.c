@@ -362,43 +362,49 @@ int PnP_TempControlComponent_UpdatedPropertyCallback(
     void* userContextCallback)
 {
     IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient = (IOTHUB_DEVICE_CLIENT_LL_HANDLE)userContextCallback;
-    IOTHUB_CLIENT_DESERIALIZED_PROPERTY* properties;
+    IOTHUB_CLIENT_DESERIALIZED_PROPERTY* properties = NULL;
     size_t numProperties;
     int propertiesVersion;
+    IOTHUB_CLIENT_RESULT clientResult;
 
-    IoTHubClient_Deserialize_Properties(payloadType, payLoad, payloadLength, g_modeledComponents, g_numModeledComponents, &properties, &numProperties, &propertiesVersion);
-
-    for (size_t i = 0; i < numProperties; i++) 
+    if ((clientResult = IoTHubClient_Deserialize_Properties(payloadType, payLoad, payloadLength, g_modeledComponents, g_numModeledComponents, &properties, &numProperties, &propertiesVersion)) != IOTHUB_CLIENT_OK)
     {
-        const IOTHUB_CLIENT_DESERIALIZED_PROPERTY* property = &properties[i];
+        LogError("IoTHubClient_Deserialize_Properties failed, error=%d", clientResult);
+    }
+    else
+    {
+        for (size_t i = 0; i < numProperties; i++) 
+        {
+            const IOTHUB_CLIENT_DESERIALIZED_PROPERTY* property = &properties[i];
 
-        if (property->propertyType == IOTHUB_CLIENT_PROPERTY_TYPE_REPORTED_FROM_DEVICE)
-        {
-            // We don't process previously reported properties, so ignore.  There is a potential optimization
-            // however where if a desired property is the same value and version of a reported, then 
-            // it wouldn't be necessary to call IoTHubDeviceClient_LL_PnP_SendReportedProperties for it
-            continue;
-        }
+            if (property->propertyType == IOTHUB_CLIENT_PROPERTY_TYPE_REPORTED_FROM_DEVICE)
+            {
+                // We don't process previously reported properties, so ignore.  There is a potential optimization
+                // however where if a desired property is the same value and version of a reported, then 
+                // it wouldn't be necessary to call IoTHubDeviceClient_LL_PnP_SendReportedProperties for it
+                continue;
+            }
 
-        if (property->componentName == NULL) 
-        {   
-            LogError("Property=%s arrived for TemperatureControl component itself.  This does not support properties on it (all properties are on subcomponents)", property->componentName);
-        }
-        else if (strcmp(property->componentName, g_thermostatComponent1Name) == 0)
-        {
-            PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle1, deviceClient, property->propertyName, property->propertyValue, propertiesVersion);
-        }
-        else if (strcmp(property->componentName, g_thermostatComponent2Name) == 0)
-        {
-            PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle2, deviceClient, property->propertyName, property->propertyValue, propertiesVersion);
-        }
-        else
-        {
-            LogError("Component=%s is not implemented by the TemperatureController", property->componentName);
+            if (property->componentName == NULL) 
+            {   
+                LogError("Property=%s arrived for TemperatureControl component itself.  This does not support properties on it (all properties are on subcomponents)", property->componentName);
+            }
+            else if (strcmp(property->componentName, g_thermostatComponent1Name) == 0)
+            {
+                PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle1, deviceClient, property->propertyName, property->propertyValue, propertiesVersion);
+            }
+            else if (strcmp(property->componentName, g_thermostatComponent2Name) == 0)
+            {
+                PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle2, deviceClient, property->propertyName, property->propertyValue, propertiesVersion);
+            }
+            else
+            {
+                LogError("Component=%s is not implemented by the TemperatureController", property->componentName);
+            }
         }
     }
 
-    // TODO: Add API and sample of its invocation freeing up properties.
+    IoTHubClient_Deserialized_Properties_Destroy(properties, numProperties);
     return 0;
 }
 

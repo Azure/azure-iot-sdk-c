@@ -91,8 +91,8 @@ static size_t BuildReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPERTY* pro
     for (size_t i = 0; i < numProperties; i++)
     {
         bool lastProperty = (i == (numProperties - 1));
-        if ((currentOutputBytes += snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_NAME_VALUE, 
-                                             properties[i].name, properties[i].value, CommaIfNeeded(lastProperty))) < 0)
+        if ((currentOutputBytes = snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_NAME_VALUE, 
+                                            properties[i].name, properties[i].value, CommaIfNeeded(lastProperty))) < 0)
         {
             LogError("Cannot build properites string");
             return (size_t)-1;
@@ -107,7 +107,7 @@ static size_t BuildReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPERTY* pro
     }
     AdvanceCountersAfterWrite(currentOutputBytes, &currentWrite, &requiredBytes, &remainingBytes);
  
-    return requiredBytes;
+    return (requiredBytes + 1);
 }
 
 // BuildWriteableResponseProperties is used to build up the actual serializedProperties string based 
@@ -132,8 +132,7 @@ static size_t BuildWriteableResponseProperties(const IOTHUB_CLIENT_WRITEABLE_PRO
         bool lastProperty = (i == (numProperties - 1));
         if (properties[i].description == NULL)
         {
-            // TODO: This shouldn't be +=, but simply =, or else we over-shoot.  (And in other places.)  Need to think of best way to represent this with existing variables ideally instead of more.
-            if ((currentOutputBytes += snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_WRITEABLE_RESPONSE, properties[i].name, 
+            if ((currentOutputBytes = snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_WRITEABLE_RESPONSE, properties[i].name, 
                                                 properties[i].value, properties[i].result, properties[i].ackVersion, CommaIfNeeded(lastProperty))) < 0)
             {
                 LogError("Cannot build properites string");
@@ -142,7 +141,7 @@ static size_t BuildWriteableResponseProperties(const IOTHUB_CLIENT_WRITEABLE_PRO
         }
         else
         {
-            if ((currentOutputBytes += snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_WRITEABLE_RESPONSE_WITH_DESCRIPTION, properties[i].name, 
+            if ((currentOutputBytes = snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_WRITEABLE_RESPONSE_WITH_DESCRIPTION, properties[i].name, 
                                                 properties[i].value, properties[i].result, properties[i].ackVersion, properties[i].description, CommaIfNeeded(lastProperty))) < 0)
             {
                 LogError("Cannot build properites string");
@@ -515,10 +514,11 @@ static IOTHUB_CLIENT_RESULT FillProperties(IOTHUB_CLIENT_PROPERTY_TYPE propertyT
 
     size_t numChildren;
     size_t currentProperty = 0;
+    size_t i;
 
     numChildren = json_object_get_count(jsonObject);
 
-    for (size_t i = 0; i < numChildren; i++)
+    for (i = 0; i < numChildren; i++)
     {
         const char* name = json_object_get_name(jsonObject, i);
         JSON_Value* value = json_object_get_value_at(jsonObject, i);
@@ -568,6 +568,11 @@ static IOTHUB_CLIENT_RESULT FillProperties(IOTHUB_CLIENT_PROPERTY_TYPE propertyT
         }
     }
 
+    if (i == numChildren)
+    {
+        result = IOTHUB_CLIENT_OK;
+    }
+
     return result;
 }
 
@@ -588,8 +593,9 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties(
     JSON_Object* reportedObject;
 
     IOTHUB_CLIENT_DESERIALIZED_PROPERTY* propertiesBuffer = NULL;
-    size_t numDesiredProperties = 0;
-    size_t numReportedProperties = 0;
+    size_t totalProperties = 0;
+    size_t numDesiredProperties;
+    size_t numReportedProperties;
 
     if ((serializedProperties == NULL) || (serializedPropertiesLength == 0) || (numProperties == 0) || (properties == NULL) || (numProperties == 0) || (propertiesVersion == 0))
     {
@@ -622,9 +628,14 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties(
     {
         LogError("Cannot determine number of reported properties");
     }
-    else if ((propertiesBuffer = calloc(numDesiredProperties + numReportedProperties, sizeof(IOTHUB_CLIENT_DESERIALIZED_PROPERTY))) == NULL)
+    else if ((totalProperties = numDesiredProperties + numReportedProperties) == 0)
     {
-        LogError("Cannot allocate %ul properties", numDesiredProperties + numReportedProperties);
+        // No properties available is not an error but does mean we should stop further processing.
+        result = IOTHUB_CLIENT_OK;
+    }
+    else if ((propertiesBuffer = calloc(totalProperties, sizeof(IOTHUB_CLIENT_DESERIALIZED_PROPERTY))) == NULL)
+    {
+        LogError("Cannot allocate %ul properties", totalProperties);
         result = IOTHUB_CLIENT_ERROR;
     }
     else if ((result = FillProperties(IOTHUB_CLIENT_PROPERTY_TYPE_WRITEABLE, componentsInModel, numComponentsInModel, desiredObject, propertiesBuffer)) != IOTHUB_CLIENT_OK)
@@ -642,12 +653,12 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties(
 
     if ((result != IOTHUB_CLIENT_OK) && (propertiesBuffer != NULL))
     {
-        IoTHubClient_Deserialized_Properties_Destroy(propertiesBuffer, numDesiredProperties + numReportedProperties);
+        IoTHubClient_Deserialized_Properties_Destroy(propertiesBuffer, totalProperties);
     }
     else
     {
         *properties = propertiesBuffer;
-        *numProperties = numDesiredProperties + numReportedProperties;
+        *numProperties = totalProperties;
     }
     
     json_value_free(rootValue);
