@@ -12,6 +12,7 @@
 #include "parson.h"
 
 #define INDEFINITE_TIME ((time_t)-1)
+#define SPAN_3_MINUTES_IN_SECONDS (60 * 3)
 
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(TELEMETRY_EVENT_TYPE, TELEMETRY_EVENT_TYPE_VALUES)
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(C2D_EVENT_TYPE, C2D_EVENT_TYPE_VALUES)
@@ -1250,6 +1251,19 @@ int iothub_client_statistics_add_device_twin_desired_info(IOTHUB_CLIENT_STATISTI
     return result;
 }
 
+bool compare_message_time_to_connection_time(LIST_ITEM_HANDLE list_item, const void* match_context)
+{
+    CONNECTION_STATUS_INFO* connection_status = (CONNECTION_STATUS_INFO*)list_item;
+    time_t message_time = *((time_t*)match_context);
+    if ((connection_status->status == IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED || connection_status->reason == IOTHUB_CLIENT_CONNECTION_NO_NETWORK) &&
+        connection_status->time < message_time && 
+        connection_status->time > (message_time - SPAN_3_MINUTES_IN_SECONDS))
+    {
+        return true;
+    }
+    return false;
+}
+
 int iothub_client_statistics_get_device_twin_desired_summary(IOTHUB_CLIENT_STATISTICS_HANDLE handle, IOTHUB_CLIENT_STATISTICS_DEVICE_TWIN_SUMMARY* summary)
 {
     int result;
@@ -1292,6 +1306,16 @@ int iothub_client_statistics_get_device_twin_desired_summary(IOTHUB_CLIENT_STATI
                     }
 
                     summary->updates_received = summary->updates_received + 1;
+                }
+                else
+                {
+                    // check to see if the device was disconnected during this twin update
+                    // we will miss the update because we reconnected to hub
+                    if (singlylinkedlist_find(stats->connection_status_history, compare_message_time_to_connection_time, &device_twin_info->time_updated))
+                    {
+                        summary->updates_sent--;
+                        LogInfo("Removing twin desired update id (%u) because of network error", device_twin_info->update_id);
+                    }
                 }
             }
 
