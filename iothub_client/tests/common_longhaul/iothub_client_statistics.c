@@ -1314,7 +1314,7 @@ int iothub_client_statistics_get_device_twin_desired_summary(IOTHUB_CLIENT_STATI
                     if (singlylinkedlist_find(stats->connection_status_history, compare_message_time_to_connection_time, &device_twin_info->time_updated))
                     {
                         summary->updates_sent--;
-                        LogInfo("Removing twin desired update id (%u) because of network error", device_twin_info->update_id);
+                        LogInfo("Removing twin desired update id (%d) because of network error", (int)device_twin_info->update_id);
                     }
                 }
             }
