@@ -949,6 +949,8 @@ static AMQP_VALUE create_link_source(char* receive_address, filter_set filter_se
 
 static void on_connection_state_changed(void* context, CONNECTION_STATE new_connection_state, CONNECTION_STATE previous_connection_state)
 {
+    LogInfo("AMQP connection state changed. new_connection_state: %d, previous_connection_state %d", new_connection_state, previous_connection_state);
+
     IOTHUB_VALIDATION_INFO* devhubValInfo = (IOTHUB_VALIDATION_INFO*)context;
     if (devhubValInfo->isEventListenerConnected && 
         (new_connection_state == CONNECTION_STATE_END || new_connection_state == CONNECTION_STATE_ERROR) &&
