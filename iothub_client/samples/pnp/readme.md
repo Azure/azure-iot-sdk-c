@@ -15,7 +15,7 @@ urlFragment: azure-iot-pnp-device-samples-for-c
 These samples demonstrate how a device that follows the [IoT Plug and Play conventions](https://docs.microsoft.com/azure/iot-pnp/concepts-convention) interacts with IoT Hub or IoT Central, to:
 
 - Send telemetry.
-- Update read-only and read-write properties.
+- Update device twin properties.
 - Respond to command invocation.
 
 The samples demonstrate two scenarios:
