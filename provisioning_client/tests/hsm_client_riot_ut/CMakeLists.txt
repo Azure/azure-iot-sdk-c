@@ -30,7 +30,7 @@ target_compile_definitions(${theseTestsName}_exe
         RIOTBUILD
         RIOTSECP256R1
     )
-if(WIN32)
+if(WIN32 AND use_cppunittest)
     target_compile_definitions(${theseTestsName}_dll
         PUBLIC
             RIOTBUILD
