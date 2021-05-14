@@ -963,6 +963,7 @@ static void on_connection_state_changed(void* context, CONNECTION_STATE new_conn
             previous_connection_state == CONNECTION_STATE_OPEN_RCVD ||
             previous_connection_state == CONNECTION_STATE_OPEN_SENT ||
             previous_connection_state == CONNECTION_STATE_CLOSE_PIPE ||
+            previous_connection_state == CONNECTION_STATE_CLOSE_RCVD ||
             previous_connection_state == CONNECTION_STATE_OPENED))
     {
         devhubValInfo->isEventListenerConnected = false;
