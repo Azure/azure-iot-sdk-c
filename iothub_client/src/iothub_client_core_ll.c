@@ -435,7 +435,7 @@ static bool invoke_message_callback(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleDat
             IOTHUBMESSAGE_DISPOSITION_RESULT cb_result = handleData->messageCallback.callbackSync(messageData->messageHandle, handleData->messageCallback.userContextCallback);
 
             /*Codes_SRS_IOTHUBCLIENT_LL_10_007: [If messageCallbackType is LEGACY then IoTHubClient_LL_MessageCallback shall send the message disposition as returned by the client to the underlying layer.] */
-            if (handleData->IoTHubTransport_SendMessageDisposition(messageData, cb_result) != IOTHUB_CLIENT_OK)
+            if (handleData->IoTHubTransport_SendMessageDisposition(handleData->deviceHandle, messageData, cb_result) != IOTHUB_CLIENT_OK)
             {
                 LogError("IoTHubTransport_SendMessageDisposition failed");
             }
@@ -698,7 +698,7 @@ static bool IoTHubClientCore_LL_MessageCallbackFromInput(MESSAGE_CALLBACK_INFO* 
                     IOTHUBMESSAGE_DISPOSITION_RESULT cb_result = event_callback->callbackAsync(messageData->messageHandle, event_callback->userContextCallback);
 
                     // Codes_SRS_IOTHUBCLIENT_LL_31_140: [ `IoTHubClient_LL_MessageCallbackFromInput` shall send the message disposition as returned by the client to the underlying layer and return `true` if an input queue match is found.** ]
-                    if (handleData->IoTHubTransport_SendMessageDisposition(messageData, cb_result) != IOTHUB_CLIENT_OK)
+                    if (handleData->IoTHubTransport_SendMessageDisposition(handleData->deviceHandle, messageData, cb_result) != IOTHUB_CLIENT_OK)
                     {
                         LogError("IoTHubTransport_SendMessageDisposition failed");
                     }
@@ -2038,7 +2038,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SendMessageDisposition(IOTHUB_CLIENT_CO
     {
         IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)iotHubClientHandle;
         /*Codes_SRS_IOTHUBCLIENT_LL_10_027: [IoTHubClientCore_LL_SendMessageDisposition shall return the result from calling the underlying layer's _Send_Message_Disposition.]*/
-        result = handleData->IoTHubTransport_SendMessageDisposition(message_data, disposition);
+        result = handleData->IoTHubTransport_SendMessageDisposition(handleData->deviceHandle, message_data, disposition);
     }
     return result;
 }

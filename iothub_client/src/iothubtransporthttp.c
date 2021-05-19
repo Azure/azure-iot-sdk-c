@@ -2023,17 +2023,19 @@ static bool abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
     return result;
 }
 
-static IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SendMessageDisposition(MESSAGE_CALLBACK_INFO* message_data, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
+static IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SendMessageDisposition(IOTHUB_DEVICE_HANDLE handle, MESSAGE_CALLBACK_INFO* message_data, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
 {
+
     IOTHUB_CLIENT_RESULT result;
-    if (message_data == NULL)
+    if (handle == NULL || message_data == NULL)
     {
         /* Codes_SRS_TRANSPORTMULTITHTTP_10_001: [If messageData is NULL, IoTHubTransportHttp_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR.] */
-        LogError("invalid argument messageData is NULL");
+        LogError("invalid argument (handle=%p, message_data=%p)", handle, message_data);
         result = IOTHUB_CLIENT_ERROR;
     }
     else
     {
+        // TODO: use handle, remove tc->handleData
         if (message_data->messageHandle == NULL)
         {
             /* Codes_SRS_TRANSPORTMULTITHTTP_10_002: [If any of the messageData fields are NULL, IoTHubTransportHttp_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR.] */
@@ -2308,7 +2310,7 @@ static void DoMessages(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERD
                                                 /*Codes_SRS_TRANSPORTMULTITHTTP_17_096: [If IoTHubClientCore_LL_MessageCallback returns false then _DoWork shall "abandon" the message.] */
                                                 if (abandon)
                                                 {
-                                                    (void)IoTHubTransportHttp_SendMessageDisposition(messageData, IOTHUBMESSAGE_ABANDONED);
+                                                    (void)IoTHubTransportHttp_SendMessageDisposition(handleData, messageData, IOTHUBMESSAGE_ABANDONED);
                                                 }
                                             }
                                         }

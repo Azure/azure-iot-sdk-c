@@ -2492,13 +2492,13 @@ STRING_HANDLE IoTHubTransport_AMQP_Common_GetHostname(TRANSPORT_LL_HANDLE handle
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SendMessageDisposition(MESSAGE_CALLBACK_INFO* message_data, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
+IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SendMessageDisposition(IOTHUB_DEVICE_HANDLE handle, MESSAGE_CALLBACK_INFO* message_data, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
 {
     IOTHUB_CLIENT_RESULT result;
-    if (message_data == NULL)
+    if (message_data == NULL || handle == NULL)
     {
         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_001: [If messageData is NULL, IoTHubTransport_AMQP_Common_SendMessageDisposition shall fail and return IOTHUB_CLIENT_INVALID_ARG.] */
-        LogError("Failed sending message disposition (message_data is NULL)");
+        LogError("Failed sending message disposition (handle=%p, message_data=%p)", handle, message_data);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
