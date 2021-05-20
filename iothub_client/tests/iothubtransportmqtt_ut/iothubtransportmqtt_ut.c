@@ -852,11 +852,11 @@ TEST_FUNCTION(IoTHubTransport_MQTT_SendMessageDisposition_success)
 {
     // arrange
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_SendMessageDisposition(IGNORED_PTR_ARG, IOTHUBMESSAGE_ACCEPTED))
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_SendMessageDisposition(TEST_DEVICE_HANDLE, IGNORED_PTR_ARG, IOTHUBMESSAGE_ACCEPTED))
         .IgnoreAllArguments();
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransportMqtt_SendMessageDisposition(NULL, IOTHUBMESSAGE_ACCEPTED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransportMqtt_SendMessageDisposition(TEST_DEVICE_HANDLE, NULL, IOTHUBMESSAGE_ACCEPTED);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());

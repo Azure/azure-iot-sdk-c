@@ -3266,49 +3266,70 @@ TEST_FUNCTION(IoTHubTransportHttp_Unsubscribe_with_device_not_found_does_nothing
 TEST_FUNCTION(IoTHubTransportHttp_SendMessageDisposition_with_NULL_handle_fails)
 {
     //arrange
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle1 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
+
+    umock_c_reset_all_calls();
 
     //act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_SendMessageDisposition(NULL, IOTHUBMESSAGE_ACCEPTED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_SendMessageDisposition(devHandle1, NULL, IOTHUBMESSAGE_ACCEPTED);
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransportHttp_Destroy(handle);
 }
 
 //Tests_SRS_TRANSPORTMULTITHTTP_10_002: [If one or both of transportContext fields are NULL, IoTHubTransportHttp_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR.]
 TEST_FUNCTION(IoTHubTransportHttp_SendMessageDisposition_with_NULL_handle_data_fails)
 {
     //arrange
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle1 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
+
+    umock_c_reset_all_calls();
 
     //act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_SendMessageDisposition(NULL, IOTHUBMESSAGE_ACCEPTED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_SendMessageDisposition(devHandle1, NULL, IOTHUBMESSAGE_ACCEPTED);
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransportHttp_Destroy(handle);
 }
 
 //Tests_SRS_TRANSPORTMULTITHTTP_10_002: [If one or both of transportContext fields are NULL, IoTHubTransportHttp_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR.]
 TEST_FUNCTION(IoTHubTransportHttp_SendMessageDisposition_with_NULL_message_data_fails)
 {
     //arrange
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle1 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
     MESSAGE_CALLBACK_INFO* test_message = make_transport_context_data(NULL, NULL, NULL);
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     //act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_SendMessageDisposition(test_message, IOTHUBMESSAGE_ACCEPTED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_SendMessageDisposition(devHandle1, test_message, IOTHUBMESSAGE_ACCEPTED);
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransportHttp_Destroy(handle);
 }
 
 //Tests_SRS_TRANSPORTMULTITHTTP_10_002: [If one or both of transportContext fields are NULL, IoTHubTransportHttp_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR.]
 TEST_FUNCTION(IoTHubTransportHttp_SendMessageDisposition_with_NULL_context_data_fails)
 {
     //arrange
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle1 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
     MESSAGE_CALLBACK_INFO* test_message = make_transport_context_data((IOTHUB_MESSAGE_HANDLE)my_gballoc_malloc(1), NULL, NULL);
     umock_c_reset_all_calls();
 
@@ -3316,16 +3337,21 @@ TEST_FUNCTION(IoTHubTransportHttp_SendMessageDisposition_with_NULL_context_data_
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     //act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_SendMessageDisposition(test_message, IOTHUBMESSAGE_ACCEPTED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_SendMessageDisposition(devHandle1, test_message, IOTHUBMESSAGE_ACCEPTED);
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransportHttp_Destroy(handle);
 }
 
 TEST_FUNCTION(IoTHubTransportHttp_SendMessageDisposition_with_NULL_TRANSPORT_data_fails)
 {
     //arrange
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle1 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
     MESSAGE_CALLBACK_INFO* test_message = make_transport_context_data((IOTHUB_MESSAGE_HANDLE)my_gballoc_malloc(1), NULL, (void*)0x44);
     umock_c_reset_all_calls();
 
@@ -3335,16 +3361,21 @@ TEST_FUNCTION(IoTHubTransportHttp_SendMessageDisposition_with_NULL_TRANSPORT_dat
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     //act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_SendMessageDisposition(test_message, IOTHUBMESSAGE_ACCEPTED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_SendMessageDisposition(devHandle1, test_message, IOTHUBMESSAGE_ACCEPTED);
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransportHttp_Destroy(handle);
 }
 
 TEST_FUNCTION(IoTHubTransportHttp_SendMessageDisposition_with_NULL_device_data_fails)
 {
     //arrange
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
+    IOTHUB_DEVICE_HANDLE devHandle1 = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);
     MESSAGE_CALLBACK_INFO* test_message = make_transport_context_data((IOTHUB_MESSAGE_HANDLE)my_gballoc_malloc(1), (void*)0x44, NULL);
     umock_c_reset_all_calls();
 
@@ -3354,11 +3385,14 @@ TEST_FUNCTION(IoTHubTransportHttp_SendMessageDisposition_with_NULL_device_data_f
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     //act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_SendMessageDisposition(test_message, IOTHUBMESSAGE_ACCEPTED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransportHttp_SendMessageDisposition(devHandle1, test_message, IOTHUBMESSAGE_ACCEPTED);
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransportHttp_Destroy(handle);
 }
 
 //Tests_SRS_TRANSPORTMULTITHTTP_17_049: [ If handle is NULL, then IoTHubTransportHttp_DoWork shall do nothing. ]
@@ -14020,7 +14054,7 @@ TEST_FUNCTION(IoTHubTransportHttp_DoWork_SetCustomContentType_SetContentEncoding
     ASSERT_IS_NOT_NULL(my_IoTHubClientCore_LL_MessageCallback_messageData);
 
     //cleanup
-    IoTHubTransportHttp_SendMessageDisposition(my_IoTHubClientCore_LL_MessageCallback_messageData, IOTHUBMESSAGE_ACCEPTED);
+    IoTHubTransportHttp_SendMessageDisposition(devHandle, my_IoTHubClientCore_LL_MessageCallback_messageData, IOTHUBMESSAGE_ACCEPTED);
     IoTHubTransportHttp_Destroy(handle);
 }
 

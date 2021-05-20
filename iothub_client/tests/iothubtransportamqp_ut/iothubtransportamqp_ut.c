@@ -743,11 +743,11 @@ TEST_FUNCTION(AMQP_SendMessageDisposition)
     TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol();
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_SendMessageDisposition(IGNORED_PTR_ARG, IOTHUBMESSAGE_ACCEPTED))
+    STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_SendMessageDisposition(TEST_IOTHUB_DEVICE_HANDLE, IGNORED_PTR_ARG, IOTHUBMESSAGE_ACCEPTED))
         .IgnoreAllArguments();
 
     // act
-    IOTHUB_CLIENT_RESULT result = provider->IoTHubTransport_SendMessageDisposition(NULL, IOTHUBMESSAGE_ACCEPTED);
+    IOTHUB_CLIENT_RESULT result = provider->IoTHubTransport_SendMessageDisposition(TEST_IOTHUB_DEVICE_HANDLE, NULL, IOTHUBMESSAGE_ACCEPTED);
 
     // assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_OK);

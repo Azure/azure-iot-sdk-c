@@ -4571,13 +4571,25 @@ TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_retry_expired)
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_NULL_data_fails)
 {
     // arrange
+    TRANSPORT_LL_HANDLE handle = create_transport();
+
+    IOTHUB_DEVICE_CONFIG* device_config = create_device_config(TEST_DEVICE_ID_CHAR_PTR, true);
+
+    IOTHUB_DEVICE_HANDLE registered_devices[1];
+    registered_devices[0] = register_device(handle, device_config, &TEST_waitingToSend, true);
+
+    crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, false);
+    umock_c_reset_all_calls();
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(NULL, IOTHUBMESSAGE_ACCEPTED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(registered_devices[0], NULL, IOTHUBMESSAGE_ACCEPTED);
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    destroy_transport(handle, NULL, NULL);
 }
 
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_002: [If any of the messageData fields are NULL, IoTHubTransport_AMQP_Common_SendMessageDisposition shall fail and return IOTHUB_CLIENT_INVALID_ARG. ] */
@@ -4603,7 +4615,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_NULL_MESSAGE_fa
     STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(data, IOTHUBMESSAGE_ACCEPTED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(device_handle, data, IOTHUBMESSAGE_ACCEPTED);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -4634,7 +4646,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_NULL_CONTEXT_fa
     STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(data, IOTHUBMESSAGE_ACCEPTED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(device_handle, data, IOTHUBMESSAGE_ACCEPTED);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -4666,7 +4678,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_ACCEPTED_succee
     set_expected_calls_for_SendMessageDisposition(IOTHUBMESSAGE_ACCEPTED);
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(data, IOTHUBMESSAGE_ACCEPTED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(device_handle, data, IOTHUBMESSAGE_ACCEPTED);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -4705,7 +4717,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_ACCEPTED_fails)
     STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(data, IOTHUBMESSAGE_ACCEPTED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(device_handle, data, IOTHUBMESSAGE_ACCEPTED);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -4741,7 +4753,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_DEVICE_MESSAGE_
     STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(data, IOTHUBMESSAGE_ACCEPTED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(device_handle, data, IOTHUBMESSAGE_ACCEPTED);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -4771,7 +4783,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_ABANDONED_succe
     set_expected_calls_for_SendMessageDisposition(IOTHUBMESSAGE_ABANDONED);
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(data, IOTHUBMESSAGE_ABANDONED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(device_handle, data, IOTHUBMESSAGE_ABANDONED);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -4810,7 +4822,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_ABANDONED_fails
     STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(data, IOTHUBMESSAGE_ABANDONED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(device_handle, data, IOTHUBMESSAGE_ABANDONED);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -4840,7 +4852,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_REJECTED_succee
     set_expected_calls_for_SendMessageDisposition(IOTHUBMESSAGE_REJECTED);
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(data, IOTHUBMESSAGE_REJECTED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(device_handle, data, IOTHUBMESSAGE_REJECTED);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -4879,7 +4891,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_REJECTED_fails)
     STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(data, IOTHUBMESSAGE_REJECTED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(device_handle, data, IOTHUBMESSAGE_REJECTED);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
