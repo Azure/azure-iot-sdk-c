@@ -133,3 +133,9 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob(IOTHUB_DEV
 }
 
 #endif
+
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendMessageDisposition(IOTHUB_DEVICE_CLIENT_LL_HANDLE device_ll_handle, IOTHUB_MESSAGE_HANDLE message, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
+{
+    return IoTHubClientCore_LL_SendMessageDisposition(device_ll_handle, message, disposition);
+}
+

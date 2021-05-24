@@ -1821,3 +1821,37 @@ int amqp_device_get_twin_async(AMQP_DEVICE_HANDLE handle, DEVICE_TWIN_UPDATE_REC
 
     return result;
 }
+
+DEVICE_MESSAGE_DISPOSITION_INFO* clone_device_message_disposition_info(DEVICE_MESSAGE_DISPOSITION_INFO* disposition_info)
+{
+    DEVICE_MESSAGE_DISPOSITION_INFO* clone;
+
+    if ((clone = malloc(sizeof(DEVICE_MESSAGE_DISPOSITION_INFO))) == NULL)
+    {
+        LogError("Failed clonning DEVICE_MESSAGE_DISPOSITION_INFO");
+    }
+    else if (mallocAndStrcpy_s(&clone->source, disposition_info->source) != 0)
+    {
+        LogError("Failed clonning DEVICE_MESSAGE_DISPOSITION_INFO->source");
+        free(clone);
+        clone = NULL;
+    }
+    else
+    {
+        clone->message_id = disposition_info->message_id;
+    }
+
+    return clone;
+}
+
+void destroy_device_message_disposition_info(DEVICE_MESSAGE_DISPOSITION_INFO* disposition_info)
+{
+    if (disposition_info == NULL)
+    {
+        LogError("Argument is invalid (disposition_info is NULL)");
+    }
+    else
+    {
+        destroy_device_disposition_info(disposition_info);
+    }
+}

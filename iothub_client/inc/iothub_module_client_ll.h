@@ -385,6 +385,9 @@ extern "C"
 
 #endif /*USE_EDGE_MODULES*/
 
+    // TODO: document!
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_LL_SendMessageDisposition, IOTHUB_MODULE_CLIENT_LL_HANDLE, module_ll_handle, IOTHUB_MESSAGE_HANDLE, message, IOTHUBMESSAGE_DISPOSITION_RESULT, disposition);
+
 #ifdef __cplusplus
 }
 #endif

@@ -374,6 +374,9 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
 
 #endif /*DONT_USE_UPLOADTOBLOB*/
 
+     // TODO: document!
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_SendMessageDisposition, IOTHUB_DEVICE_CLIENT_LL_HANDLE, device_ll_handle, IOTHUB_MESSAGE_HANDLE, message, IOTHUBMESSAGE_DISPOSITION_RESULT, disposition);
+
 #ifdef __cplusplus
 }
 #endif
