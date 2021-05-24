@@ -947,9 +947,83 @@ static AMQP_VALUE create_link_source(char* receive_address, filter_set filter_se
     return result;
 }
 
+static const char* amqp_connection_state_to_string(CONNECTION_STATE connection_state)
+{
+    const char* connection_state_string;
+    switch (connection_state)
+    {
+    case CONNECTION_STATE_START:
+        connection_state_string = "CONNECTION_STATE_START";
+        break;
+
+    case CONNECTION_STATE_HDR_RCVD:
+        connection_state_string = "CONNECTION_STATE_HDR_RCVD";
+        break;
+
+    case CONNECTION_STATE_HDR_SENT:
+        connection_state_string = "CONNECTION_STATE_HDR_SENT";
+        break;
+
+    case CONNECTION_STATE_HDR_EXCH:
+        connection_state_string = "CONNECTION_STATE_HDR_EXCH";
+        break;
+
+    case CONNECTION_STATE_OPEN_PIPE:
+        connection_state_string = "CONNECTION_STATE_OPEN_PIPE";
+        break;
+            
+    case CONNECTION_STATE_OC_PIPE:
+        connection_state_string = "CONNECTION_STATE_OC_PIPE";
+        break;
+
+    case CONNECTION_STATE_OPEN_RCVD:
+        connection_state_string = "CONNECTION_STATE_OPEN_RCVD";
+        break;
+ 
+    case CONNECTION_STATE_OPEN_SENT:
+        connection_state_string = "CONNECTION_STATE_OPEN_SENT";
+        break;
+
+    case CONNECTION_STATE_CLOSE_PIPE:
+        connection_state_string = "CONNECTION_STATE_CLOSE_PIPE";
+        break;
+
+    case CONNECTION_STATE_OPENED:
+        connection_state_string = "CONNECTION_STATE_OPENED";
+        break;
+            
+    case CONNECTION_STATE_CLOSE_RCVD:
+        connection_state_string = "CONNECTION_STATE_CLOSE_RCVD";
+        break;
+            
+    case CONNECTION_STATE_CLOSE_SENT:
+        connection_state_string = "CONNECTION_STATE_CLOSE_SENT";
+        break;
+    
+    case CONNECTION_STATE_DISCARDING:
+        connection_state_string = "CONNECTION_STATE_DISCARDING";
+        break;
+
+    case CONNECTION_STATE_END:
+        connection_state_string = "CONNECTION_STATE_END";
+        break;
+            
+    case CONNECTION_STATE_ERROR:
+        connection_state_string = "CONNECTION_STATE_ERROR";
+        break;
+
+    default:
+        connection_state_string = "CONNECTION_STATE UNKNOWN!";
+        break;
+    }
+
+    return connection_state_string;
+}
+
 static void on_connection_state_changed(void* context, CONNECTION_STATE new_connection_state, CONNECTION_STATE previous_connection_state)
 {
-    LogInfo("AMQP connection state changed. new_connection_state: %d, previous_connection_state %d", new_connection_state, previous_connection_state);
+    LogInfo("AMQP connection state changed. new_connection_state: %s (%d), previous_connection_state %s (%d)", 
+        amqp_connection_state_to_string(new_connection_state), new_connection_state, amqp_connection_state_to_string(previous_connection_state), previous_connection_state);
 
     IOTHUB_VALIDATION_INFO* devhubValInfo = (IOTHUB_VALIDATION_INFO*)context;
     if (devhubValInfo->isEventListenerConnected && 
@@ -967,7 +1041,7 @@ static void on_connection_state_changed(void* context, CONNECTION_STATE new_conn
             previous_connection_state == CONNECTION_STATE_OPENED))
     {
         devhubValInfo->isEventListenerConnected = false;
-        LogInfo("AMQP connection state: CONNECTION_STATE_END");
+        LogInfo("AMQP connection state: %s, reconnecting...", amqp_connection_state_to_string(new_connection_state));
     }
 }
 

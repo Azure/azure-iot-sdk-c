@@ -1873,8 +1873,14 @@ int longhaul_run_telemetry_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
                             LogInfo("Summary: Messages sent=%lu, received=%lu; travel time: min=%f secs, max=%f secs",
                                 (unsigned long)summary.messages_sent, (unsigned long)summary.messages_received, summary.min_travel_time_secs, summary.max_travel_time_secs);
 
-                            if (summary.messages_sent == 0 || summary.messages_received != summary.messages_sent || summary.max_travel_time_secs > MAX_TELEMETRY_TRAVEL_TIME_SECS)
+                            if (summary.messages_sent == 0 || summary.messages_received != summary.messages_sent)
                             {
+                                LogInfo("Longhaul test failed due to mismatched message count!!");
+                                result = MU_FAILURE;
+                            }
+                            else if (summary.max_travel_time_secs > MAX_TELEMETRY_TRAVEL_TIME_SECS)
+                            {
+                                LogInfo("Longhaul test failed due to travel time!! %f > %f", summary.max_travel_time_secs, MAX_TELEMETRY_TRAVEL_TIME_SECS);
                                 result = MU_FAILURE;
                             }
                             else
