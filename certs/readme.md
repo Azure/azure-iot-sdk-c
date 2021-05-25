@@ -2,25 +2,28 @@
 
 The Azure IoT Hub certificates presented during TLS negotiation shall be always validated using the appropriate root CA certificate(s).
 
-The samples in this repository leverage the certificates in `certs.c` for the United States, Germany sovereign cloud and China sovereign cloud. Additionally, we provide the root certificate for use with ECC (enabled in IoT Hub Gateway V2). By default, all certs are included in the build. To select a specific cert, use one of the following options during the cmake step of your [environment setup](https://github.com/Azure/azure-iot-sdk-c/doc/devbox_setup.md).
+The samples in this repository leverage the certificates in `certs.c` for the Azure Cloud, Germany sovereign cloud and China sovereign cloud. By default, all certs are included in the build. To select a specific cert, use one of the following options during the cmake step of your [environment setup](https://github.com/Azure/azure-iot-sdk-c/doc/devbox_setup.md).
 
 ```
-cmake .. -Duse_baltimore_cert          // To use Baltimore CyberTrust Root (RSA based Root cert).
-                                       // Default Root Cert supported by IoT Hub.
+cmake .. -Duse_sample_trusted_cert                               // To trust all Azure Roots.
 
-cmake .. -Duse_digicert_g3_cert        // To use DigiCert Global Root G3 (ECC based Root cert).
-                                       // Only supported with IoT Hub Gateway V2.
+cmake .. -Duse_sample_trusted_cert -Duse_azure_cloud_rsa_cert    // To trust the Azure Cloud RSA Roots only.
 
-cmake .. -Duse_microsoftazure_de_cert  // To use D-TRUST Root Class 3 CA 2 2009 (RSA based Root cert).
-                                       // Root cert for Germany region.
+cmake .. -Duse_sample_trusted_cert -Duse_azure_cloud_ecc_cert    // To trust the Azure Cloud ECC Roots only.
 
-cmake .. -Duse_portal_azure_cn_cert    // To use DigiCert Global Root CA (RSA based Root cert).
-                                       // Root cert for China region.
+cmake .. -Duse_sample_trusted_cert -Duse_microsoftazure_de_cert  // To trust Azure Germany Cloud Root only.
+
+cmake .. -Duse_sample_trusted_cert -Duse_portal_azure_cn_cert    // To trust Azure China Cloud Root only.
 ```
 
 For other regions (and private cloud environments), please use the appropriate root CA certificate.
 
-IMPORTANT: Always prefer using the local system's Trusted Root Certificate Authority store instead of hardcoding the certificates (i.e. using certs.c which our samples require in certain combinations).
+__IMPORTANT:__
+
+1. The content of this repository is not guaranteed to be up to date or a complete list of CA certificates used across Azure Clouds or when using Azure Stack or Azure IoT Edge or Azure Protocol Gateway.
+1. Always prefer using the local system's Trusted Root Certificate Authority store instead of hardcoded certificates (i.e. using certs.c which our samples require in certain combinations).
+1. Azure Root certificates may change, with or without prior notice (if they expire or are revoked). It is important that devices are able to add or remove trust in root certificates.
+1. Support for at least 2 certificates is required to maintain device connectivity during CA certificate changes.
 
 A couple of examples:
 
