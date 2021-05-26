@@ -447,7 +447,6 @@ typedef int(*IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC)(
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SubscribeToCommands(
                         IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
                         IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC commandCallback, 
-                        // TODO: should get subscribe ack?  In this case the api would need to be IoTHubDeviceClient_LL_SubscribeToCommandsAsync
                         void* userContextCallback);
 
 /**
@@ -515,7 +514,6 @@ typedef int(*IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK)(
 *
 * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
-
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_GetPropertiesAsync(
                         IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
                         IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK propertyCallback, 

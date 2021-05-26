@@ -50,7 +50,7 @@ and removing calls to _DoWork will yield the same results. */
 
 
 /* Paste in the your iothub connection string  */
-static const char* connectionString = "[device connection string]";
+static const char* connectionString = "HostName=jspaith-iothub-test.azure-devices.net;DeviceId=myFirstDevice;SharedAccessKey=aaPtJv8egCl/49DPcDjj2u2RCwP0c4iA/nNk0iRhy5M=";
 #define MESSAGE_COUNT        5
 static bool g_continueRunning = true;
 static size_t g_message_count_send_confirmations = 0;

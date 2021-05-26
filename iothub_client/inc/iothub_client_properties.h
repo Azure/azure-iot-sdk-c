@@ -30,8 +30,6 @@ typedef struct IOTHUB_CLIENT_REPORTED_PROPERTY_TAG {
 /** @brief    This struct represents the response to a writeable property that the device will return.  
               This structure is filled out by the application and can be serialized into a payload for the network via IoTHubClient_Serialize_WriteablePropertyResponse. */
 typedef struct IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE_TAG {
-    /** @brief    Version of the structure.  Currently must be IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE_VERSION_1.  */
-    int version;
     /** @brief Name of the property. */
     const char* name;
     /** @brief Value of the property. */
@@ -44,6 +42,8 @@ typedef struct IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE_TAG {
     const char* description;
 } IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE;
 
+// Use constructor thingy
+
 /** @brief Enumeration that indicates whether a given property from the service was originally reported from the device
            (and hence the device application sees what the last reported value IoT Hub has)
            or whether this is a writeable property that the service is requesting configuration for.
@@ -55,6 +55,7 @@ typedef enum IOTHUB_PROPERTY_TYPE_TAG
     /** @brief Property is writeable.  It is configured by service remotely. */
     IOTHUB_CLIENT_PROPERTY_TYPE_WRITEABLE
 } IOTHUB_CLIENT_PROPERTY_TYPE;
+
 
 /** @brief Current version of @p IOTHUB_CLIENT_DESERIALIZED_PROPERTY structure.  */
 #define IOTHUB_CLIENT_DESERIALIZED_PROPERTY_VERSION 1
@@ -70,11 +71,15 @@ typedef struct IOTHUB_CLIENT_DESERIALIZED_PROPERTY_TAG {
     /** @brief Name of the component.  Optional; may be NULL for the root component. */
     const char* componentName;
     /** @brief Name of the property. */
-    const char* propertyName;
+    const char* name;
     /** @brief Value of the property. */
-    const char* propertyValue;
+    const char* value;
+    size_t valueLength;
 } IOTHUB_CLIENT_DESERIALIZED_PROPERTY;
 
+typedef struct {
+    // stream
+} REPORTED_PROPERTY_DATA;
 
 /**
 * @brief   Serializes reported properties into a format for sending to IoT Hub.
@@ -99,8 +104,10 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_ReportedProperties(
     const IOTHUB_CLIENT_REPORTED_PROPERTY* properties,
     size_t numProperties,
     const char* componentName,
-    unsigned char** serializedProperties,
-    size_t* serializedPropertiesLength);
+    [out] REPORTED_PROPERTY_DATA* reportedPropertyData);
+
+IoTHub_Prop_Destroy(REPORTED_PROPERTY_DATA);
+
 
 /**
 * @brief   Serializes the response to writeable properties into a format for sending to IoT Hub.  
@@ -130,41 +137,37 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_WriteablePropertyResponse(
     const IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE* properties,
     size_t numProperties,
     const char* componentName,
-    unsigned char** serializedProperties,
-    size_t* serializedPropertiesLength);
+    [out] WIREABEL_PROPERTY_DATA_CHANGE );
 
-/**
-* @brief   Converts the raw payload of properties received from the service into IOTHUB_CLIENT_DESERIALIZED_PROPERTY struct(s).
-*
-* @param   payloadType                 Whether the received payload is the complete set of properties on the service or a more limited update.
-* @param   payLoad                     Payload received from IoT Hub that requires deserialization.
-* @param   payLoadLength               Number of bytes in payload.
-* @param   componentsInModel           Optional array containing components that are supported by this client.  Can be NULL if only one component is supported.
-* @param   numComponentsInModel        Number of components in the componentsInModel array.  Can be 0 if only one component is supported.
-* @param   properties                  Array of IOTHUB_CLIENT_DESERIALIZED_PROPERTY representing a parsed version of payLoad.
-* @param   numProperties               Number of array elements in @c properties.
-* @param   propertiesVersion           Version of the properties that IoT Hub is monitoring.  This is required when responding to writeable properties.
-* 
-* @remarks   Applications typically will invoke this API when processing a writeable property update request (IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK)
-*            so they don't need to manually parse the payload.  The application should pass @c payloadType,  @c payLoad, and @c payLoadLength from
-*            their IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK callback implementation directly to this function.
-* 
-*            This API does not perform any network I/O.  It only translates the @c payload received from IoT Hub into 
-*            into the easier to manipulate @c IOTHUB_CLIENT_DESERIALIZED_PROPERTY.
-*
-*            This API allocates memory for @c properties.  Applications MUST call @c IoTHubClient_Deserialized_Properties_Destroy to free the data.
-*
-* @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
-*/
-IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties(
+IoTHub_WriteProp_DEstroy(WIREABEL_PROPERTY_DATA_CHANGE);
+
+typedef struct IOTHUB_CLIENT_PROPERTY_CONTEXT_TAG* IOTHUB_CLIENT_PROPERTY_CONTEXT_HANDLE;
+
+IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_CreateIterator(
     IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType,
     const unsigned char* payLoad,
     size_t payLoadLength,
     const char** componentsInModel,
     size_t numComponentsInModel,
-    IOTHUB_CLIENT_DESERIALIZED_PROPERTY** properties,
-    size_t* numProperties,
+    IOTHUB_CLIENT_PROPERTY_CONTEXT_HANDLE* propertyContextHandle, // TODO this should be called an iterator
     int* propertiesVersion);
+
+IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_GetNextComponent(
+    IOTHUB_CLIENT_PROPERTY_CONTEXT_HANDLE propertyContextHandle,
+    const char** componentName,
+    bool* componentSpecified);
+
+IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_GetNextProperty(
+    IOTHUB_CLIENT_PROPERTY_CONTEXT_HANDLE propertyContextHandle,
+    IOTHUB_CLIENT_DESERIALIZED_PROPERTY* property,
+    bool* propertySpecified);
+
+void IoTHubClient_Deserialize_Properties_DestroyProperty(
+    IOTHUB_CLIENT_DESERIALIZED_PROPERTY* property);
+
+void IoTHubClient_Deserialize_Properties_Destroy(
+    IOTHUB_CLIENT_PROPERTY_CONTEXT_HANDLE propertyContextHandle);
+
 
 /**
 * @brief   Frees memory allocated by IoTHubClient_Deserialize_Properties.

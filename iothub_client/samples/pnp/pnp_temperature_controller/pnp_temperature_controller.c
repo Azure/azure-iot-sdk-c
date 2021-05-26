@@ -362,11 +362,62 @@ int PnP_TempControlComponent_UpdatedPropertyCallback(
     void* userContextCallback)
 {
     IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient = (IOTHUB_DEVICE_CLIENT_LL_HANDLE)userContextCallback;
-    IOTHUB_CLIENT_DESERIALIZED_PROPERTY* properties = NULL;
-    size_t numProperties;
+    IOTHUB_CLIENT_DESERIALIZED_PROPERTY property;
+    IOTHUB_CLIENT_PROPERTY_CONTEXT_HANDLE propertyContext;
     int propertiesVersion;
     IOTHUB_CLIENT_RESULT clientResult;
 
+// OPTION2 - preferred
+    if ((clientResult = IoTHubClient_Deserialize_Properties_Begin(payloadType, payLoad, payloadLength, &propertyContext, &propertiesVersion)) != IOTHUB_CLIENT_OK)
+    {
+        LogError("IoTHubClient_Deserialize_Properties failed, error=%d", clientResult);
+    }
+    else
+    {
+        bool propertySpecified;
+        while ((clientResult = IoTHubClient_Deserialize_Properties_GetNextProperty(propertyContext, g_modeledComponents, g_numModeledComponents, &property, &propertySpecified)) == IOTHUB_CLIENT_OK)
+        {
+            if (propertySpecified == false)
+            {
+                break;
+            }
+
+            if (property.propertyType == IOTHUB_CLIENT_PROPERTY_TYPE_REPORTED_FROM_DEVICE)
+            {
+                // We don't process previously reported properties, so ignore.  There is a potential optimization
+                // however where if a desired property is the same value and version of a reported, then 
+                // it wouldn't be necessary to call IoTHubDeviceClient_LL_PnP_SendReportedProperties for it
+                continue;
+            }
+            
+            if (property.componentName == NULL) 
+            {   
+                LogError("Property=%s arrived for TemperatureControl component itself.  This does not support properties on it (all properties are on subcomponents)", property.componentName);
+            }
+            else if (strcmp(property.componentName, g_thermostatComponent1Name) == 0)
+            {
+                PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle1, deviceClient, property.propertyName, property.propertyValue, propertiesVersion);
+            }
+            else if (strcmp(property.componentName, g_thermostatComponent2Name) == 0)
+            {
+                PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle2, deviceClient, property.propertyName, property.propertyValue, propertiesVersion);
+            }
+            else
+            {
+                LogError("Component=%s is not implemented by the TemperatureController", property.componentName);
+            }
+            
+            IoTHubClient_Deserialize_Properties_FreeProperty(&property);
+        }
+    }
+
+    IoTHubClient_Deserialize_Properties_End(propertyContext);
+
+
+// END OPTION2
+
+// OPTION1 - not preferred
+/*
     if ((clientResult = IoTHubClient_Deserialize_Properties(payloadType, payLoad, payloadLength, g_modeledComponents, g_numModeledComponents, &properties, &numProperties, &propertiesVersion)) != IOTHUB_CLIENT_OK)
     {
         LogError("IoTHubClient_Deserialize_Properties failed, error=%d", clientResult);
@@ -405,6 +456,8 @@ int PnP_TempControlComponent_UpdatedPropertyCallback(
     }
 
     IoTHubClient_Deserialized_Properties_Destroy(properties, numProperties);
+*/
+// END OPTION1
     return 0;
 }
 
