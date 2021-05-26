@@ -10,6 +10,10 @@ may be found [here](./CocoaPods.md).
 * An IoT Hub and a connection string for a client device.
 * [Azure IoT Explorer](https://github.com/Azure/azure-iot-explorer) recommended.
 
+For x64 run `sudo gem install cocoapods`
+
+For Apple M1 run `arch -x86_64 sudo gem install cocoapods ffi`
+
 #### 1. Clone the Azure IoT iOS Sample
 
 Change to a location where you would like your samples, and run
@@ -31,6 +35,8 @@ it does, the CocoaPods may not install properly.
 Run this command:
 
 `pod install`
+
+For Apple M1 run `arch -x86_64 pod install`
 
 This will cause CocoaPods to read the `Podfile` and install the pods accordingly.
 
