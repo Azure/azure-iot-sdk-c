@@ -44,6 +44,7 @@ This will cause CocoaPods to read the `Podfile` and install the pods accordingly
 
 Double-click the `MQTT Client Sample.xcworkspace` workspace file (**not** the project file) to
 open XCode and select your build target device (iPhone 7 simulator works well).
+(Or in the terminal run `open MQTT Client Sample.xcworkspace`.)
 
 Make sure you open the workspace, and not the similarly-named (without the `WS` suffix) project.
 
