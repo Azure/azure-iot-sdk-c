@@ -179,5 +179,9 @@ void IoTHubClient_Deserialized_Properties_Destroy(
 
 void IoTHubClient_Deserialize_Properties_End(IOTHUB_CLIENT_PROPERTY_CONTEXT_HANDLE propertyContextHandle);
 
+void IoTHubClient_Deserialize_Properties_FreeProperty(
+    IOTHUB_CLIENT_DESERIALIZED_PROPERTY* property);
+
+
 
 #endif /* IOTHUB_CLIENT_PROPERTIES_H */
