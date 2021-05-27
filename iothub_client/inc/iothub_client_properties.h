@@ -30,6 +30,8 @@ typedef struct IOTHUB_CLIENT_REPORTED_PROPERTY_TAG {
 /** @brief    This struct represents the response to a writeable property that the device will return.  
               This structure is filled out by the application and can be serialized into a payload for the network via IoTHubClient_Serialize_WriteablePropertyResponse. */
 typedef struct IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE_TAG {
+    /** @brief   Version of the structure.  Currently must be IOTHUB_CLIENT_REPORTED_PROPERTY_VERSION_1. */
+    int version;
     /** @brief Name of the property. */
     const char* name;
     /** @brief Value of the property. */
@@ -77,9 +79,7 @@ typedef struct IOTHUB_CLIENT_DESERIALIZED_PROPERTY_TAG {
     size_t valueLength;
 } IOTHUB_CLIENT_DESERIALIZED_PROPERTY;
 
-typedef struct {
-    // stream
-} REPORTED_PROPERTY_DATA;
+
 
 /**
 * @brief   Serializes reported properties into a format for sending to IoT Hub.
@@ -101,13 +101,11 @@ typedef struct {
 * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
 IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_ReportedProperties(
-    const IOTHUB_CLIENT_REPORTED_PROPERTY* properties,
-    size_t numProperties,
-    const char* componentName,
-    [out] REPORTED_PROPERTY_DATA* reportedPropertyData);
-
-IoTHub_Prop_Destroy(REPORTED_PROPERTY_DATA);
-
+    const IOTHUB_CLIENT_REPORTED_PROPERTY* properties, 
+    size_t numProperties, 
+    const char* componentName, 
+    unsigned char** serializedProperties, 
+    size_t* serializedPropertiesLength); // TODO - transition to handle based.
 
 /**
 * @brief   Serializes the response to writeable properties into a format for sending to IoT Hub.  
@@ -137,9 +135,8 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_WriteablePropertyResponse(
     const IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE* properties,
     size_t numProperties,
     const char* componentName,
-    [out] WIREABEL_PROPERTY_DATA_CHANGE );
-
-IoTHub_WriteProp_DEstroy(WIREABEL_PROPERTY_DATA_CHANGE);
+    unsigned char** serializedProperties,
+    size_t* serializedPropertiesLength);
 
 typedef struct IOTHUB_CLIENT_PROPERTY_CONTEXT_TAG* IOTHUB_CLIENT_PROPERTY_CONTEXT_HANDLE;
 
@@ -179,5 +176,8 @@ void IoTHubClient_Deserialize_Properties_Destroy(
 void IoTHubClient_Deserialized_Properties_Destroy(
     IOTHUB_CLIENT_DESERIALIZED_PROPERTY* properties,
     size_t numProperties);
+
+void IoTHubClient_Deserialize_Properties_End(IOTHUB_CLIENT_PROPERTY_CONTEXT_HANDLE propertyContextHandle);
+
 
 #endif /* IOTHUB_CLIENT_PROPERTIES_H */

@@ -361,6 +361,7 @@ int PnP_TempControlComponent_UpdatedPropertyCallback(
     size_t payloadLength,
     void* userContextCallback)
 {
+#if 0
     IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient = (IOTHUB_DEVICE_CLIENT_LL_HANDLE)userContextCallback;
     IOTHUB_CLIENT_DESERIALIZED_PROPERTY property;
     IOTHUB_CLIENT_PROPERTY_CONTEXT_HANDLE propertyContext;
@@ -458,6 +459,7 @@ int PnP_TempControlComponent_UpdatedPropertyCallback(
     IoTHubClient_Deserialized_Properties_Destroy(properties, numProperties);
 */
 // END OPTION1
+#endif
     return 0;
 }
 

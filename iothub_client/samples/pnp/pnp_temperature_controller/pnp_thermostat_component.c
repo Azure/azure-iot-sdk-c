@@ -267,7 +267,7 @@ static void SendTargetTemperatureResponse(PNP_THERMOSTAT_COMPONENT* pnpThermosta
         IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE temperatureProperty;
         memset(&temperatureProperty, 0, sizeof(temperatureProperty));
         // Specify the structure version (not to be confused with the $version on IoT Hub) to protect back-compat in case the structure adds fields.
-        temperatureProperty.version = IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE_VERSION_1;
+        temperatureProperty.version = IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE_VERSION_1; // TODO: cleanup??
         // This represents the version of the request from IoT Hub.  It needs to be returned so service applications can determine
         // what current version of the writeable property the device is currently using, as the server may update the property even when the device
         // is offline.
