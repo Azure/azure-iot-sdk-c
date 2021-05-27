@@ -580,18 +580,14 @@ static IOTHUB_CLIENT_RESULT FillProperties(IOTHUB_CLIENT_PROPERTY_TYPE propertyT
 
 typedef enum COMPONENT_PARSE_STATE_TAG
 {
-    COMPONENT_PARSE_INIT,
     COMPONENT_PARSE_ROOT,
     COMPONENT_PARSE_SUB_COMPONENT,
-    COMPONENT_PARSE_COMPLETE
 } COMPONENT_PARSE_STATE;
 
 typedef enum PROPERTY_PARSE_STATE_TAG
 {
-    PROPERTY_PARSE_INIT,
     PROPERTY_PARSE_DESIRED,
-    PROPERTY_PARSE_REPORTED,
-    PROPERTY_PARSE_COMPLETE
+    PROPERTY_PARSE_REPORTED
 } PROPERTY_PARSE_STATE;
 
 typedef struct IOTHUB_CLIENT_PROPERTY_CONTEXT_TAG {
@@ -606,66 +602,10 @@ typedef struct IOTHUB_CLIENT_PROPERTY_CONTEXT_TAG {
     int currentPropertyIndex;
 } IOTHUB_CLIENT_PROPERTY_CONTEXT;
 
-    
-IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_CreateIterator(
-    IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType,
-    const unsigned char* payLoad,
-    size_t payLoadLength,
-    const char** componentsInModel,
-    size_t numComponentsInModel,
-    IOTHUB_CLIENT_PROPERTY_CONTEXT_HANDLE* propertyContextHandle,
-    int* propertiesVersion)
-{
-    IOTHUB_CLIENT_RESULT result;
-    char* jsonStr = NULL;
-
-    IOTHUB_CLIENT_PROPERTY_CONTEXT* propertyContext = calloc(1, sizeof(IOTHUB_CLIENT_PROPERTY_CONTEXT));
-
-    if ((payLoad == NULL) || (payLoadLength == 0) || (propertyContextHandle == NULL) || (propertiesVersion == 0))
-    {
-        LogError("Invalid argument");
-        result = IOTHUB_CLIENT_INVALID_ARG;
-    }
-    else
-    {
-        if ((jsonStr = CopyPayloadToString(payLoad, payLoadLength)) == NULL)
-        {
-            LogError("Unable to allocate twin buffer");
-            result = IOTHUB_CLIENT_ERROR;
-        }
-        else if ((propertyContext->rootValue = json_parse_string(jsonStr)) == NULL)
-        {
-            LogError("Unable to parse device twin JSON");
-            result = IOTHUB_CLIENT_ERROR;
-        }
-        else if ((result = GetDesiredAndReportedTwinJson(payloadType, propertyContext)) != IOTHUB_CLIENT_OK)
-        {
-            LogError("Cannot retrieve desired and/or reported object from JSON");
-        }
-        else if ((result = GetTwinVersion(propertyContext->desiredObject, propertiesVersion)) != IOTHUB_CLIENT_OK)
-        {
-            LogError("Cannot retrieve properties version");
-        }
-        else
-        {
-            // TODO: These need to be copied (unfortunately) per general contract of SDK.  OK for now for proof of concept.
-            propertyContext->componentsInModel = componentsInModel;
-            propertyContext->numComponentsInModel = numComponentsInModel;
-            propertyContext->componentParseState = COMPONENT_PARSE_INIT;
-            propertyContext->propertyParseState = PROPERTY_PARSE_INIT;
-            propertyContext->currentObject = NULL; // TODO: Figure out initial setting based on various combinitions of desired|reported, root|no-root.
-            *propertyContextHandle = propertyContext;
-            result = IOTHUB_CLIENT_OK;
-        }
-    }
-
-    return result;
-}
-
 
 // FindNonComponentProperties scans through either the root of desired or reported JSON_Object, looking to see
 // if there are any JSON children that are NOT mapped to component names.
-static bool FindNonComponentProperties(IOTHUB_CLIENT_PROPERTY_CONTEXT* propertyContext, bool fDesired)
+static bool FindNonComponentProperties(IOTHUB_CLIENT_PROPERTY_CONTEXT* propertyContext, bool fDesired) // TODO: fDesired?  Really - Hungarian?
 {
     JSON_Object* jsonObject = fDesired ? propertyContext->desiredObject : propertyContext->reportedObject;
     bool result;
@@ -698,50 +638,171 @@ static bool FindNonComponentProperties(IOTHUB_CLIENT_PROPERTY_CONTEXT* propertyC
     return false;
 }
 
-// TODO: cleanup naming since HasNonComponentProperties and CurrentComponentHasProperties should be symmetrical.
+// TODO: cleanup naming since HasNonComponentProperties and CurrentComponentHasProperties* should be symmetrical.
 
 static bool CurrentComponentHasDesiredProperties(IOTHUB_CLIENT_PROPERTY_CONTEXT* propertyContext)
 {
-    bool result;
-
-    if (propertyContext->componentParseState == COMPONENT_PARSE_ROOT)
-    {
-        result = FindNonComponentProperties(propertyContext, true);
-    }
-    else
-    {
-        const char* currentComponentName = propertyContext->componentsInModel[propertyContext->currentComponentIndex];
-        result = json_object_get_value(propertyContext->desiredObject, currentComponentName);
-    }
-
+    const char* currentComponentName = propertyContext->componentsInModel[propertyContext->currentComponentIndex];
+    bool result = json_object_get_value(propertyContext->desiredObject, currentComponentName);
     return result;
 }
 
 static bool CurrentComponentHasReportedProperties(IOTHUB_CLIENT_PROPERTY_CONTEXT* propertyContext)
 {
-    bool result;
+    const char* currentComponentName = propertyContext->componentsInModel[propertyContext->currentComponentIndex];
+    bool result = json_object_get_value(propertyContext->reportedObject, currentComponentName);
+    return result;
+}
 
-    if (propertyContext->componentParseState == COMPONENT_PARSE_ROOT)
+static void SetInitialComponentParseState(IOTHUB_CLIENT_PROPERTY_CONTEXT* propertyContext)
+{
+    if (FindNonComponentProperties(propertyContext, true))
     {
-        result = FindNonComponentProperties(propertyContext, false);
+        propertyContext->propertyParseState = PROPERTY_PARSE_DESIRED;
+        propertyContext->componentParseState = COMPONENT_PARSE_ROOT;
+    }
+    else if (FindNonComponentProperties(propertyContext, false))
+    {
+        propertyContext->propertyParseState = PROPERTY_PARSE_REPORTED;
+        propertyContext->componentParseState = COMPONENT_PARSE_ROOT;
     }
     else
     {
-        const char* currentComponentName = propertyContext->componentsInModel[propertyContext->currentComponentIndex];
-        result = json_object_get_value(propertyContext->reportedObject, currentComponentName);
+        propertyContext->componentParseState = COMPONENT_PARSE_SUB_COMPONENT;
+    }
+}
+
+static IOTHUB_CLIENT_PROPERTY_CONTEXT* AllocatePropertyContext(const char** componentsInModel, size_t numComponentsInModel)
+{
+    IOTHUB_CLIENT_PROPERTY_CONTEXT* propertyContext;
+    bool success = false;
+
+    if ((propertyContext == calloc(1, sizeof(IOTHUB_CLIENT_PROPERTY_CONTEXT))) == NULL)
+    {
+        LogError("Cannot allocate IOTHUB_CLIENT_PROPERTY_CONTEXT");
+    }
+    else if (numComponentsInModel == 0)
+    {
+        propertyContext->numComponentsInModel = 0;
+        success = true;
+    }
+    else
+    {
+        propertyContext->numComponentsInModel = numComponentsInModel;
+
+        if ((propertyContext->componentsInModel = calloc(sizeof(char*), numComponentsInModel)) == NULL)
+        {
+            LogError("Cannot allocate IOTHUB_CLIENT_PROPERTY_CONTEXT");
+        }
+        else
+        {
+            size_t i;
+            for (i = 0; i < numComponentsInModel; i++)
+            {
+                if (mallocAndStrcpy_s(&propertyContext->componentsInModel[i], componentsInModel[i]) != 0)
+                {
+                    LogError("Cannot allocate IOTHUB_CLIENT_PROPERTY_CONTEXT");
+                }
+            }
+
+            if (i == numComponentsInModel)
+            {
+                success = true;
+            }
+        }
+
     }
 
+    if (success == false)
+    {
+        IoTHubClient_Deserialize_Properties_End(propertyContext);
+        propertyContext = NULL;
+    }
+
+    return propertyContext;
+}
+
+static bool ValidateComponentList(const char** componentsInModel, size_t numComponentsInModel)
+{
+    bool result;
+
+    size_t i;
+    for (i = 0; i < numComponentsInModel; i++)
+    {
+        if (componentsInModel[i] == NULL)
+        {
+            LogError("componentsInModel at index %ul is NULL", i);
+            break;
+        }
+    }
+
+    result = (i == numComponentsInModel);
     return result;
 }
 
-// CurrentComponentHasProperties determines whether the current component we're visiting (by 
-// enumerated the application passed in propertyContext->componentsInModel list) has JSON
-// children in either desired or (if specified) reported JSON we're parsing.
-static bool CurrentComponentHasProperties(IOTHUB_CLIENT_PROPERTY_CONTEXT* propertyContext)
+IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_CreateIterator(
+    IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType,
+    const unsigned char* payLoad,
+    size_t payLoadLength,
+    const char** componentsInModel,
+    size_t numComponentsInModel,
+    IOTHUB_CLIENT_PROPERTY_CONTEXT_HANDLE* propertyContextHandle,
+    int* propertiesVersion)
 {
-    bool result =  CurrentComponentHasDesiredProperties(propertyContext) || CurrentComponentHasReportedProperties(propertyContext);
+    IOTHUB_CLIENT_RESULT result;
+    char* jsonStr = NULL;
+
+    IOTHUB_CLIENT_PROPERTY_CONTEXT* propertyContext = NULL;
+
+    if ((payLoad == NULL) || (payLoadLength == 0) || (propertyContextHandle == NULL) || (propertiesVersion == 0) || ValidateComponentList(componentsInModel, numComponentsInModel))
+    {
+        LogError("Invalid argument");
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else if ((propertyContext = AllocatePropertyContext(componentsInModel, numComponentsInModel)) == NULL)
+    {
+        LogError("Cannot allocate IOTHUB_CLIENT_PROPERTY_CONTEXT");
+        resuult = IOTHUB_CLIENT_ERROR;
+    }
+    else
+    {
+        if ((jsonStr = CopyPayloadToString(payLoad, payLoadLength)) == NULL)
+        {
+            LogError("Unable to allocate twin buffer");
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        else if ((propertyContext->rootValue = json_parse_string(jsonStr)) == NULL)
+        {
+            LogError("Unable to parse device twin JSON");
+            result = IOTHUB_CLIENT_ERROR;
+        }
+        else if ((result = GetDesiredAndReportedTwinJson(payloadType, propertyContext)) != IOTHUB_CLIENT_OK)
+        {
+            LogError("Cannot retrieve desired and/or reported object from JSON");
+        }
+        else if ((result = GetTwinVersion(propertyContext->desiredObject, propertiesVersion)) != IOTHUB_CLIENT_OK)
+        {
+            LogError("Cannot retrieve properties version");
+        }
+        else
+        {
+            SetInitialComponentParseState(propertyContext);
+            *propertyContextHandle = propertyContext;
+            result = IOTHUB_CLIENT_OK;
+        }
+    }
+
+    free(jsonStr);
+
+    if (result != IOTHUB_CLIENT_OK)
+    {
+        IoTHubClient_Deserialize_Properties_End(propertyContext);
+    }
+
+    
     return result;
 }
+
 
 IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_GetNextComponent(
     IOTHUB_CLIENT_PROPERTY_CONTEXT_HANDLE propertyContextHandle,
@@ -753,36 +814,11 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_GetNextComponent(
     IOTHUB_CLIENT_RESULT result;
     bool processRoot = false;
 
-    // HasNonComponentProperties will enumerate all properties under root (desired or desired|reported, depending)
-    // If it's 100% components, then don't bother returning back a *componentName=NULL to caller for 0 properties.
-
-    if (propertyContext->componentParseState == COMPONENT_PARSE_COMPLETE)
-    {
-        // It's not valid for caller to repeatedly call us after we've told it we're done.
-        return IOTHUB_CLIENT_INVALID_ARG;
-    }
-
-    if (propertyContext->componentParseState == COMPONENT_PARSE_INIT)
-    {
-        if (CurrentComponentHasDesiredProperties(propertyContext))
-        {
-            // If there are JSON properterties that are NOT mapped to a component, then we start with these
-            // and will use the root component as our starting spot.
-            propertyContext->componentParseState = COMPONENT_PARSE_ROOT;
-            *componentName = NULL;
-            return IOTHUB_CLIENT_OK;
-        }
-        else
-        {
-            // All the underlying JSON properties map to components, and not properties of the root components.
-            propertyContext->componentParseState = COMPONENT_PARSE_SUB_COMPONENT;
-        }
-    }
-
     if (property->componentParseState == COMPONENT_PARSE_ROOT)
     {
-        // After application has processed the root, transition to sub-component parsing.
-        propertyContext->componentParseState = COMPONENT_PARSE_SUB_COMPONENT;
+        *componentName = NULL;
+        *componentSpecified = true;
+        return IOTHUB_CLIENT_OK;
     }
 
     if (propertyContext->componentParseState == COMPONENT_PARSE_SUB_COMPONENT)
@@ -792,10 +828,19 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_GetNextComponent(
             // We're enumerating components now.  Only return a component if it has properties.  A given component
             // is not guaranteed to have properties, as they either may not have been set initially by service
             // or we may be processing a PATCH which did not update a given component's properties.
-            if (CurrentComponentHasProperties(propertyContext))
+            if (CurrentComponentHasDesiredProperties(propertyContext))
             {
                 // Reset property enumeration state for subsequent app calls to IoTHubClient_Deserialize_Properties_GetNextProperty
-                propertyContext->propertyParseState = PROPERTY_PARSE_INIT;
+                propertyContext->propertyParseState = PROPERTY_PARSE_DESIRED;
+                propertyContext->currentPropertyIndex = 0;
+                *componentName = propertyContext->componentsInModel[propertyContext->currentComponentIndex];
+                *componentSpecified = true;
+                return IOTHUB_CLIENT_OK;
+            }
+            else if (CurrentComponentHasReportedProperties(propertyContext))
+            {
+                // Reset property enumeration state for subsequent app calls to IoTHubClient_Deserialize_Properties_GetNextProperty
+                propertyContext->propertyParseState = PROPERTY_PARSE_REPORTED;
                 propertyContext->currentPropertyIndex = 0;
                 *componentName = propertyContext->componentsInModel[propertyContext->currentComponentIndex];
                 *componentSpecified = true;
@@ -805,7 +850,6 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_GetNextComponent(
     }
 
     // Both the root component and all subcomponents have been processed.
-    propertyContext->componentParseState = COMPONENT_PARSE_COMPLETE;
     *componentName = NULL;
     *componentSpecified = false;
 
@@ -813,51 +857,57 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_GetNextComponent(
 }
 
 
+static JSON_Object* GetNextPropertyToEnumerate(IOTHUB_CLIENT_PROPERTY_CONTEXT* propertyContext)
+{
+    JSON_Object* rootObject;
+
+    if (propertyContext->propertyParseState == PROPERTY_PARSE_DESIRED)
+    {
+        rootObject = (propertyContext->componentParseState == COMPONENT_PARSE_ROOT) : propertyContext->desiredObject : json_object_get_object(propertyContext->desiredObject, componentName);
+    }
+    else
+    {
+        rootObject = (propertyContext->componentParseState == COMPONENT_PARSE_ROOT) : propertyContext->reportedObject : json_object_get_object(propertyContext->desiredObject, componentName);
+    }
+
+    size_t numChildren = json_object_get_count(rootObject);
+
+    for (; propertyContext->currentPropertyIndex++; propertyContext->currentPropertyIndex < numChildren)
+    {
+        JSON_Object* propertyObject = json_object_get_object(rootObject, i);
+        const char* objectName = json_object_get_name(rootObject, i);
+        
+        if ((propertyContext->componentParseState == COMPONENT_PARSE_ROOT) && (IsJsonObjectAComponentInModel(objectName, propertyContext->componentsInModel, propertyContext->numComponentsInMode)))
+        {
+            continue;
+        }
+        else if (IsReservedKeyword(propertyContext, propertyObject))
+        {
+            continue;
+        }
+
+        return propertyObject;
+    }
+
+    return NULL;
+}
+
 IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_GetNextProperty(
     IOTHUB_CLIENT_PROPERTY_CONTEXT_HANDLE propertyContextHandle,
     IOTHUB_CLIENT_DESERIALIZED_PROPERTY* property,
     bool* propertySpecified)
 {
     IOTHUB_CLIENT_PROPERTY_CONTEXT* propertyContext = (IOTHUB_CLIENT_PROPERTY_CONTEXT*)propertyContextHandle;
+    IOTHUB_CLIENT_RESULT result;
 
     JSON_Object* currentObject;
-
-    if (propertyContext->propertyParseState == PROPERTY_PARSE_COMPLETE)
-    {
-        // It's not valid for caller to repeatedly call us after we've told it we're done.
-        return IOTHUB_CLIENT_INVALID_ARG;
-    }
-
-    if (propertyContext->propertyParseState == PROPERTY_PARSE_INIT)
-    {
-        if (CurrentComponentHasDesiredProperties(propertyContext))
-        {
-            propertyContext->propertyParseState = PROPERTY_PARSE_DESIRED;
-        }
-        else if (CurrentComponentHasReportedProperties(propertyContext))
-        {
-            propertyContext->propertyParseState = PROPERTY_PARSE_REPORTED;
-        }
-        else
-        {
-            // We shouldn't be able to get here since initial component enum guarantees at least one property.
-            return IOTHUB_CLIENT_ERROR;
-        }
-    }
 
     const char* componentName = (propertyContext->componentParseState == COMPONENT_PARSE_ROOT) ? NULL : propertyContext->componentsInModel[propertyContext->currentComponentIndex];
     JSON_Object* currentObject;
 
     if (propertyContext->propertyParseState == PROPERTY_PARSE_DESIRED)
     {
-        currentObject = (propertyContext->componentParseState == COMPONENT_PARSE_ROOT) : propertyContext->desiredObject : json_object_get_object(propertyContext->desiredObject, componentName);
-
-        if (propertyContext->componentParseState == COMPONENT_PARSE_ROOT)
-        {
-            // Skip over any subcomponents
-        }
-
-        if (json_object_get_count(currentObject) >= propertyContext->currentPropertyIndex)
+        if ((currentObject = GetNextPropertyToEnumerate(propertyContext)) == NULL)
         {
             propertyContext->currentPropertyIndex = 0;
             propertyContext->propertyParseState = PROPERTY_PARSE_REPORTED;
@@ -866,26 +916,31 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_GetNextProperty(
 
     if (propertyContext->propertyParseState = PROPERTY_PARSE_REPORTED)
     {
-        currentObject = (propertyContext->componentParseState == COMPONENT_PARSE_ROOT) : propertyContext->reportedObject : json_object_get_object(propertyContext->reportedObject, componentName);
-
-        if (propertyContext->componentParseState == COMPONENT_PARSE_ROOT)
+        if ((currentObject = GetNextPropertyToEnumerate(propertyContext)) == NULL)
         {
-            // Skip over any subcomponents
-        }
-
-        if (json_object_get_count(currentObject) >= propertyContext->currentPropertyIndex)
-        {
-            propertyContext->propertyParseState = PROPERTY_PARSE_COMPLETE;
-            *property = NULL;
-            *propertySpecified = false;
-            return IOTHUB_CLIENT_OK;
+            propertyContext->currentPropertyIndex = 0;
+            propertyContext->propertyParseState = PROPERTY_PARSE_REPORTED;
         }
     }
 
     // Fills in IOTHUB_CLIENT_DESERIALIZED_PROPERTY based on where we're at in the traversal.
-    FillProperties(currentObject, properties);
-    propertyContext->currentPropertyIndex++;
-    return IOTHUB_CLIENT_OK;
+    if (currentObject != NULL)
+    {
+        result = FillProperties(currentObject, properties);
+        propertyContext->currentPropertyIndex++;
+    }
+    else
+    {
+        *property = NULL;
+        *propertySpecified = false;
+        if (propertyContext->componentParseState == COMPONENT_PARSE_ROOT)
+        {
+            propertyContext->componentParseState = COMPONENT_PARSE_SUB_COMPONENT;
+        }
+        result = IOTHUB_CLIENT_OK;
+    }
+
+    return result;
 }
 
 void IoTHubClient_Deserialize_Properties_FreeProperty(
