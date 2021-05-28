@@ -336,92 +336,99 @@ static int get_retry_after_property(PROV_TRANSPORT_AMQP_INFO* amqp_info, MESSAGE
         LogError("Failure getting application property");
         result = MU_FAILURE;
     }
-    else if ((prop_desc = amqpvalue_get_inplace_described_value(app_prop)) == NULL)
+    else if (app_prop == NULL)
     {
-        LogError("Failure getting application property description");
-        application_properties_destroy(app_prop);
-        result = MU_FAILURE;
-    }
-    else if (amqpvalue_get_map_pair_count(prop_desc, &prop_count) != 0)
-    {
-        LogError("Failure getting application property count");
-        application_properties_destroy(app_prop);
-        result = MU_FAILURE;
+        result = 0;
     }
     else
     {
-        bool found_value = false;
-        result = MU_FAILURE;
-        for (uint32_t index = 0; index < prop_count; index++)
+        if ((prop_desc = amqpvalue_get_inplace_described_value(app_prop)) == NULL)
         {
-            AMQP_VALUE map_key_name = NULL;
-            AMQP_VALUE map_key_value = NULL;
-            const char *key_name;
+            LogError("Failure getting application property description");
+            application_properties_destroy(app_prop);
+            result = MU_FAILURE;
+        }
+        else if (amqpvalue_get_map_pair_count(prop_desc, &prop_count) != 0)
+        {
+            LogError("Failure getting application property count");
+            application_properties_destroy(app_prop);
+            result = MU_FAILURE;
+        }
+        else
+        {
+            bool found_value = false;
+            result = MU_FAILURE;
+            for (uint32_t index = 0; index < prop_count; index++)
+            {
+                AMQP_VALUE map_key_name = NULL;
+                AMQP_VALUE map_key_value = NULL;
+                const char* key_name;
 
-            if ((amqpvalue_get_map_key_value_pair(prop_desc, index, &map_key_name, &map_key_value)) != 0)
-            {
-                LogError("Failed reading the key/value pair from the uAMQP property map.");
-                result = MU_FAILURE;
-            }
-            else
-            {
-                if ((result = amqpvalue_get_string(map_key_name, &key_name)) != 0)
+                if ((amqpvalue_get_map_key_value_pair(prop_desc, index, &map_key_name, &map_key_value)) != 0)
                 {
-                    LogError("Failed parsing the uAMQP property name.");
+                    LogError("Failed reading the key/value pair from the uAMQP property map.");
                     result = MU_FAILURE;
                 }
-                else if (key_name != NULL && strcmp(key_name, RETRY_AFTER_KEY_VALUE) == 0)
+                else
                 {
-                    const char* key_value;
-                    int32_t val_int;
-
-                    // The AMQP type is either int or string, for more information
-                    // on this see prov_transport.h:parse_retry_after_value function.
-                    AMQP_TYPE type = amqpvalue_get_type(map_key_value);
-                    if (type == AMQP_TYPE_INT)
+                    if ((result = amqpvalue_get_string(map_key_name, &key_name)) != 0)
                     {
-                        if (amqpvalue_get_int(map_key_value, &val_int) != 0)
-                        {
-                            LogError("Failed parsing the uAMQP property value.");
-                            result = MU_FAILURE;
-                        }
-                        else
-                        {
-                            amqp_info->retry_after_value = (uint32_t)val_int;
-                            found_value = true;
-                            result = 0;
-                        }
-                    }
-                    else if (type == AMQP_TYPE_STRING)
-                    {
-                        if (amqpvalue_get_string(map_key_value, &key_value) != 0)
-                        {
-                            LogError("Failed parsing the uAMQP property value.");
-                            result = MU_FAILURE;
-                        }
-                        else
-                        {
-                            amqp_info->retry_after_value = parse_retry_after_value(key_value);
-                            found_value = true;
-                            result = 0;
-                        }
-                    }
-                    else
-                    {
-                        LogError("Failed parsing the uAMQP property value.");
+                        LogError("Failed parsing the uAMQP property name.");
                         result = MU_FAILURE;
                     }
+                    else if (key_name != NULL && strcmp(key_name, RETRY_AFTER_KEY_VALUE) == 0)
+                    {
+                        const char* key_value;
+                        int32_t val_int;
+
+                        // The AMQP type is either int or string, for more information
+                        // on this see prov_transport.h:parse_retry_after_value function.
+                        AMQP_TYPE type = amqpvalue_get_type(map_key_value);
+                        if (type == AMQP_TYPE_INT)
+                        {
+                            if (amqpvalue_get_int(map_key_value, &val_int) != 0)
+                            {
+                                LogError("Failed parsing the uAMQP property value.");
+                                result = MU_FAILURE;
+                            }
+                            else
+                            {
+                                amqp_info->retry_after_value = (uint32_t)val_int;
+                                found_value = true;
+                                result = 0;
+                            }
+                        }
+                        else if (type == AMQP_TYPE_STRING)
+                        {
+                            if (amqpvalue_get_string(map_key_value, &key_value) != 0)
+                            {
+                                LogError("Failed parsing the uAMQP property value.");
+                                result = MU_FAILURE;
+                            }
+                            else
+                            {
+                                amqp_info->retry_after_value = parse_retry_after_value(key_value);
+                                found_value = true;
+                                result = 0;
+                            }
+                        }
+                        else
+                        {
+                            LogError("Failed parsing the uAMQP property value.");
+                            result = MU_FAILURE;
+                        }
+                    }
+                    amqpvalue_destroy(map_key_value);
+                    amqpvalue_destroy(map_key_name);
                 }
-                amqpvalue_destroy(map_key_value);
-                amqpvalue_destroy(map_key_name);
+                if (found_value)
+                {
+                    // If the message retry-after only got through it once
+                    break;
+                }
             }
-            if (found_value)
-            {
-                // If the message retry-after only got through it once
-                break;
-            }
+            application_properties_destroy(app_prop);
         }
-        application_properties_destroy(app_prop);
     }
     return result;
 }
