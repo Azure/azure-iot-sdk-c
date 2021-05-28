@@ -1,8 +1,8 @@
-## Certificates -  Important to know
+## Sample Trusted Root Certificate Store
 
-The Azure IoT Hub certificates presented during TLS negotiation shall be always validated using the appropriate root CA certificate(s).
+The Azure IoT Hub certificates presented during TLS negotiation shall be always validated using the appropriate root CA certificate(s). The default TLS stacks used on Windows (SChannel), Linux (OpenSSL) and iOS (Secure Transport) will use Trusted Root Certificate Authority stores maintained by the respective operating system. 
 
-The samples in this repository leverage the certificates in `certs.c` for the Azure Cloud, Germany sovereign cloud and China sovereign cloud. By default, all certs are included in the samples' build. To select a specific cert, use one of the following options during the cmake step of your [environment setup](https://github.com/Azure/azure-iot-sdk-c/doc/devbox_setup.md).
+At the time of writing, mbedTLS, WolfSSL and BearSSL do not support operating system's certificate stores. By choosing any of these TLS stacks, the application developer becomes responsible with creating and maintaining a Trusted Root Certificate Store. When using any of these TLS stacks, the samples in this repository can be configured to leverage the sample certificate store in `certs.c`. By default, all certs are included in the samples' build. To reduce binary size, select certificates only for Azure clouds that the device connects to. Use one of the following options during the cmake step of your [environment setup](https://github.com/Azure/azure-iot-sdk-c/doc/devbox_setup.md).
 
 ```
 cmake .. -Duse_sample_trusted_cert                               // To trust all Azure Roots for samples.
@@ -32,4 +32,4 @@ A couple of examples:
 
 ## Additional Information
 
-For additional guidance and important information about certificates, please refer to [this blog post](https://techcommunity.microsoft.com/t5/internet-of-things/azure-iot-tls-changes-are-coming-and-why-you-should-care/ba-p/1658456) from the security team.
+For additional guidance and important information about certificates, please refer to [this blog post](https://techcommunity.microsoft.com/t5/internet-of-things/azure-iot-tls-critical-changes-are-almost-here-and-why-you/ba-p/2393169) from the security team.
