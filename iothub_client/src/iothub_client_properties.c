@@ -280,7 +280,20 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_WriteablePropertyResponse(
     }
 
     return result;
+}
 
+
+// We have an explicit destroy function for serialized properties, even though IoTHubClient_Serialize_ReportedProperties
+// and IoTHubClient_Serialize_WriteablePropertyResponse used malloc() and app could've just free() directly, because
+// * If SDK is setup to use a custom allocator (gballoc.h) then we use same malloc() / free() matching
+// * This gives us flexibility to use non-malloc based allocators in future
+// * Maintains symmetry with _Destroy() as mechanism to free resources SDK allocates.
+void IoTHubClient_Serialize_Properties_Destroy(unsigned char* serializedProperties)
+{
+    if (serializedProperties != NULL)
+    {
+        free(serializedProperties);
+    }
 }
 
 // The underlying twin payload received from the client SDK is not NULL terminated, but
@@ -514,8 +527,8 @@ static IOTHUB_CLIENT_PROPERTY_ITERATOR* AllocatepropertyIterator(const char** co
 
 static bool ValidateIteratorInputs(
     IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType,
-    const unsigned char* payLoad,
-    size_t payLoadLength,
+    const unsigned char* payload,
+    size_t payloadLength,
     const char** componentsInModel,
     size_t numComponentsInModel,
     IOTHUB_CLIENT_PROPERTY_ITERATOR_HANDLE* propertyIteratorHandle,
@@ -528,7 +541,7 @@ static bool ValidateIteratorInputs(
         LogError("Payload type %d is invalid", payloadType);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
-    else if ((payLoad == NULL) || (payLoadLength == 0) || (propertyIteratorHandle == NULL) || (propertiesVersion == 0))
+    else if ((payload == NULL) || (payloadLength == 0) || (propertyIteratorHandle == NULL) || (propertiesVersion == 0))
     {
         LogError("NULL arguments passed");
         result = IOTHUB_CLIENT_INVALID_ARG;
@@ -610,8 +623,8 @@ static IOTHUB_CLIENT_RESULT FillProperty(IOTHUB_CLIENT_PROPERTY_ITERATOR* proper
 
 IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_CreateIterator(
     IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType,
-    const unsigned char* payLoad,
-    size_t payLoadLength,
+    const unsigned char* payload,
+    size_t payloadLength,
     const char** componentsInModel,
     size_t numComponentsInModel,
     IOTHUB_CLIENT_PROPERTY_ITERATOR_HANDLE* propertyIteratorHandle,
@@ -622,7 +635,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_CreateIterator(
 
     IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIterator = NULL;
 
-    if ((result = ValidateIteratorInputs(payloadType, payLoad, payLoadLength, componentsInModel, numComponentsInModel, propertyIteratorHandle, propertiesVersion)) != IOTHUB_CLIENT_OK)
+    if ((result = ValidateIteratorInputs(payloadType, payload, payloadLength, componentsInModel, numComponentsInModel, propertyIteratorHandle, propertiesVersion)) != IOTHUB_CLIENT_OK)
     {
         LogError("Invalid argument");
     }
@@ -633,7 +646,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_CreateIterator(
     }
     else
     {
-        if ((jsonStr = CopyPayloadToString(payLoad, payLoadLength)) == NULL)
+        if ((jsonStr = CopyPayloadToString(payload, payloadLength)) == NULL)
         {
             LogError("Unable to allocate twin buffer");
             result = IOTHUB_CLIENT_ERROR;
@@ -850,4 +863,4 @@ void IoTHubClient_Deserialize_Properties_DestroyIterator(IOTHUB_CLIENT_PROPERTY_
 {
     (void)propertyIteratorHandle;
 }
-    
+

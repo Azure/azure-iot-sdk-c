@@ -488,7 +488,7 @@ static void PnP_TempControlComponent_ReportSerialNumber_Property(IOTHUB_DEVICE_C
         LogError("Unable to send reported state, error=%d", iothubClientResult);
     }
 
-    free(serializedProperties);
+    IoTHubClient_Serialize_Properties_Destroy(serializedProperties);
 }
 
 //
