@@ -7,7 +7,7 @@ The samples in this repository leverage the certificates in `certs.c` for the Az
 ```
 cmake .. -Duse_sample_trusted_cert                               // To trust all Azure Roots for samples.
 
-cmake .. -Duse_sample_trusted_cert -Duse_azure_cloud_rsa_cert    // To trust the Azure Cloud RSA Roots only.
+cmake .. -Duse_sample_trusted_cert -Duse_azure_cloud_rsa_cert    // To trust only the Azure Cloud RSA Roots for samples.
 
 cmake .. -Duse_sample_trusted_cert -Duse_azure_cloud_ecc_cert    // To trust the Azure Cloud ECC Roots only.
 
