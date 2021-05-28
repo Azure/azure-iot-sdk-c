@@ -21,8 +21,6 @@ typedef enum PROPERTY_PARSE_STATE_TAG
     PROPERTY_PARSE_REPORTED
 } PROPERTY_PARSE_STATE;
 
-typedef IOTHUB_CLIENT_PROPERTIES_SERIALIZED_TAG char*;
-
 typedef struct IOTHUB_CLIENT_PROPERTY_ITERATOR_TAG {
     char** componentsInModel;
     size_t numComponentsInModel;
@@ -103,12 +101,12 @@ static size_t BuildOpeningBrace(const char* componentName, char* currentWrite, s
 // BuildReportedProperties is used to build up the actual serializedProperties string based 
 // on the properties.  If serializedProperties==NULL and serializedPropertiesLength=0, just like
 // analogous snprintf it will just calculate the amount of space caller needs to allocate.
-static size_t BuildReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPERTY* properties, size_t numProperties, const char* componentName, char* serializedProperties, size_t serializedPropertiesLength)
+static size_t BuildReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPERTY* properties, size_t numProperties, const char* componentName, unsigned char* serializedProperties, size_t serializedPropertiesLength)
 {
     size_t requiredBytes = 0;
     size_t currentOutputBytes;
     size_t remainingBytes = serializedPropertiesLength;
-    char* currentWrite = serializedProperties;
+    char* currentWrite = (char*)serializedProperties;
 
     if ((currentOutputBytes = BuildOpeningBrace(componentName,  currentWrite, remainingBytes)) < 0)
     {
@@ -191,13 +189,13 @@ static size_t BuildWriteableResponseProperties(const IOTHUB_CLIENT_WRITEABLE_PRO
     return requiredBytes;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_ReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPERTY* properties, size_t numProperties, const char* componentName, IOTHUB_CLIENT_PROPERTIES_SERIALIZED_HANDLE* propertiesSerializedHandle)
+IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_ReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPERTY* properties, size_t numProperties, const char* componentName, unsigned char** serializedProperties, size_t* serializedPropertiesLength)
 {
     IOTHUB_CLIENT_RESULT result;
     size_t requiredBytes = 0;
-    char* propertiesSerialized = NULL;
+    unsigned char* serializedPropertiesBuffer = NULL;
 
-    if ((properties == NULL) || (properties->version != IOTHUB_CLIENT_REPORTED_PROPERTY_VERSION_1) || (numProperties == 0) || (propertiesSerializedHandle == NULL))
+    if ((properties == NULL) || (properties->version != IOTHUB_CLIENT_REPORTED_PROPERTY_VERSION_1) || (numProperties == 0) || (serializedProperties == NULL) || (serializedPropertiesLength == 0))
     {
         LogError("Invalid argument");
         result = IOTHUB_CLIENT_INVALID_ARG;
@@ -207,12 +205,12 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_ReportedProperties(const IOTHUB_CLIE
         LogError("Cannot determine required length of reported properties buffer");
         result = IOTHUB_CLIENT_ERROR;
     }
-    else if ((propertiesSerialized = calloc(1, requiredBytes)) == NULL)
+    else if ((serializedPropertiesBuffer = calloc(1, requiredBytes)) == NULL)
     {
         LogError("Cannot allocate %ul bytes", requiredBytes);
         result = IOTHUB_CLIENT_ERROR;
     }
-    else if (BuildReportedProperties(properties, numProperties, componentName, propertiesSerialized, requiredBytes) < 0)
+    else if (BuildReportedProperties(properties, numProperties, componentName, serializedPropertiesBuffer, requiredBytes) < 0)
     {
         LogError("Cannot write properties buffer");
         result = IOTHUB_CLIENT_ERROR;
@@ -224,11 +222,12 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_ReportedProperties(const IOTHUB_CLIE
 
     if (result == IOTHUB_CLIENT_OK)
     {
-        *propertiesSerializedHandle = propertiesSerialized;
+        *serializedProperties = serializedPropertiesBuffer;
+        *serializedPropertiesLength = requiredBytes;
     }
-    else if (propertiesSerialized != NULL)
+    else if (serializedPropertiesBuffer != NULL)
     {
-        free(propertiesSerialized);
+        free(serializedPropertiesBuffer);
     }
 
     return result;
@@ -238,11 +237,12 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_WriteablePropertyResponse(
     const IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE* properties,
     size_t numProperties,
     const char* componentName,
-    IOTHUB_CLIENT_PROPERTIES_SERIALIZED_HANDLE* propertiesSerializedHandle)
+    unsigned char** serializedProperties,
+    size_t* serializedPropertiesLength)
 {
     IOTHUB_CLIENT_RESULT result;
     size_t requiredBytes = 0;
-    char* propertiesSerialized = NULL;
+    unsigned char* serializedPropertiesBuffer = NULL;
 
     if ((properties == NULL) || (properties->version != IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE_VERSION_1) || (numProperties == 0) || (serializedProperties == NULL) || (serializedPropertiesLength == 0))
     {
@@ -254,12 +254,12 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_WriteablePropertyResponse(
         LogError("Cannot determine required length of reported properties buffer");
         result = IOTHUB_CLIENT_ERROR;
     }
-    else if ((propertiesSerialized = calloc(1, requiredBytes)) == NULL)
+    else if ((serializedPropertiesBuffer = calloc(1, requiredBytes)) == NULL)
     {
         LogError("Cannot allocate %ul bytes", requiredBytes);
         result = IOTHUB_CLIENT_ERROR;
     }
-    else if (BuildWriteableResponseProperties(properties, numProperties, componentName, propertiesSerialized, requiredBytes) < 0)
+    else if (BuildWriteableResponseProperties(properties, numProperties, componentName, serializedPropertiesBuffer, requiredBytes) < 0)
     {
         LogError("Cannot write properties buffer");
         result = IOTHUB_CLIENT_ERROR;
@@ -271,46 +271,17 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_WriteablePropertyResponse(
 
     if (result == IOTHUB_CLIENT_OK)
     {
-        *propertiesSerializedHandle = propertiesSerialized;
+        *serializedProperties = serializedPropertiesBuffer;
+        *serializedPropertiesLength = requiredBytes;
     }
-    else if (propertiesSerialized != NULL)
+    else if (serializedPropertiesBuffer != NULL)
     {
-        free(propertiesSerialized);
+        free(serializedPropertiesBuffer);
     }
 
     return result;
 
 }
-
-void IoTHubClient_Properties_Serialized_Destroy(IOTHUB_CLIENT_PROPERTIES_SERIALIZED_HANDLE propertiesSerializedHandle)
-{
-    if (propertiesSerializedHandle != NULL)
-    {
-        free(propertiesSerializedHandle);
-    }
-}
-
-unsigned const char* IoTHubClient_Serialize_GetRawData(IOTHUB_CLIENT_PROPERTIES_SERIALIZED_HANDLE propertiesSerializedHandle)
-{
-    return (unsigned const char*)propertiesSerializedHandle;
-}
-
-size_t IoTHubClient_Serialize_GetLength(IOTHUB_CLIENT_PROPERTIES_SERIALIZED_HANDLE propertiesSerializedHandle)
-{
-    size_t result;
-    
-    if (propertiesSerializedHandle == NULL)
-    {
-        result = 0;
-    }
-    else
-    {
-        result = strlen((const char*)propertiesSerializedHandle);
-    }
-
-    return result;
-}
-
 
 // The underlying twin payload received from the client SDK is not NULL terminated, but
 // parson requires this.  Make a temporary copy of string to NULL terminate.
