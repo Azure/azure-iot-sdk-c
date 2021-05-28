@@ -867,7 +867,7 @@ IOTHUB_DEVICE_CLIENT_HANDLE longhaul_initialize_device_client(IOTHUB_LONGHAUL_RE
     }
     else
     {
-        bool trace = false;
+        bool trace = true;
 
         IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaulRsrcs = (IOTHUB_LONGHAUL_RESOURCES*)handle;
         iotHubLonghaulRsrcs->iotHubClientHandle = result;
