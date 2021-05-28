@@ -9,7 +9,7 @@ cmake .. -Duse_sample_trusted_cert                               // To trust all
 
 cmake .. -Duse_sample_trusted_cert -Duse_azure_cloud_rsa_cert    // To trust only the Azure Cloud RSA Roots for samples.
 
-cmake .. -Duse_sample_trusted_cert -Duse_azure_cloud_ecc_cert    // To trust the Azure Cloud ECC Roots only.
+cmake .. -Duse_sample_trusted_cert -Duse_azure_cloud_ecc_cert    // To trust only the Azure Cloud ECC Roots for samples.
 
 cmake .. -Duse_sample_trusted_cert -Duse_microsoftazure_de_cert  // To trust Azure Germany Cloud Root only.
 
