@@ -31,9 +31,6 @@ static void my_gballoc_free(void* ptr)
 
 #include "iothub_transport_ll.h"
 
-#define IOTHUB_TRANSPORT_H
-#define IOTHUB_TRANSPORT_LL_H
-
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/lock.h"
@@ -46,9 +43,6 @@ static void my_gballoc_free(void* ptr)
 #include "internal/iothub_transport_ll_private.h"
 #include "internal/iothub_client_private.h"
 #undef ENABLE_MOCKS
-
-#undef IOTHUB_TRANSPORT_H
-#undef IOTHUB_TRANSPORT_LL_H
 
 #include "internal/iothubtransport.h"
 

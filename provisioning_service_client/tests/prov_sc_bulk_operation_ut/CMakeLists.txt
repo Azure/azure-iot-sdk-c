@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 2.8.11)
 
-compileAsC11()
+compileAsC99()
 
 set(theseTestsName prov_sc_bulk_operation_ut)
 

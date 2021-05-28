@@ -609,7 +609,7 @@ static void on_device_get_twin_completed_callback(DEVICE_TWIN_UPDATE_TYPE update
     (void)update_type;
 
     // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_158: [ If `message` or `context` are NULL, the callback shall do nothing and return. ]
-    if (message == NULL || context == NULL)
+    if (context == NULL)
     {
         LogError("Invalid argument (message=%p, context=%p)", message, context);
     }
@@ -896,7 +896,7 @@ static void prepare_device_for_connection_retry(AMQP_TRANSPORT_DEVICE_INSTANCE* 
     registered_device->number_of_send_event_complete_failures = 0;
 }
 
-static void prepare_for_connection_retry(AMQP_TRANSPORT_INSTANCE* transport_instance)
+void prepare_for_connection_retry(AMQP_TRANSPORT_INSTANCE* transport_instance)
 {
     LogInfo("Preparing transport for re-connection");
 

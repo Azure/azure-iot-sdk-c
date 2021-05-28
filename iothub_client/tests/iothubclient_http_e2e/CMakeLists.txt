@@ -7,7 +7,7 @@ if(NOT ${use_http})
    message(FATAL_ERROR "iothubclient_http_e2e being generated without HTTP support")
 endif()
 
-compileAsC11()
+compileAsC99()
 set(theseTestsName iothubclient_http_e2e)
 
 set(${theseTestsName}_test_files

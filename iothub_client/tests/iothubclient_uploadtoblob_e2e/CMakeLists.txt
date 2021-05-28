@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 2.8.11)
 
-compileAsC11()
+compileAsC99()
 set(theseTestsName iothubclient_uploadtoblob_e2e)
 
 set(${theseTestsName}_test_files

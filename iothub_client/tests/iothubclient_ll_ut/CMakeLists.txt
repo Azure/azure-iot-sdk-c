@@ -4,7 +4,7 @@
 #this is CMakeLists.txt for iothubclient_ll_ut
 cmake_minimum_required(VERSION 2.8.11)
 
-compileAsC11()
+compileAsC99()
 
 set(theseTestsName iothubclient_ll_ut)
 

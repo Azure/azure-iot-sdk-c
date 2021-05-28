@@ -94,15 +94,18 @@ static JSON_DECODER_RESULT ParseString(PARSER_STATE* parserState, char** stringB
             }
         }
 
-        if (*(parserState->json) != '"')
+        if (result == JSON_DECODER_OK)
         {
-            /* Codes_SRS_JSON_DECODER_99_007:[ If parsing the JSON fails due to the JSON string being malformed, JSONDecoder_JSON_To_MultiTree shall return JSON_DECODER_PARSE_ERROR.] */
-            result = JSON_DECODER_PARSE_ERROR;
-        }
-        else
-        {
-            parserState->json++;
-            result = JSON_DECODER_OK;
+            if (*(parserState->json) != '"')
+            {
+                /* Codes_SRS_JSON_DECODER_99_007:[ If parsing the JSON fails due to the JSON string being malformed, JSONDecoder_JSON_To_MultiTree shall return JSON_DECODER_PARSE_ERROR.] */
+                result = JSON_DECODER_PARSE_ERROR;
+            }
+            else
+            {
+                parserState->json++;
+                result = JSON_DECODER_OK;
+            }
         }
     }
 
