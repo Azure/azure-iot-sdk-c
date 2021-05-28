@@ -5,7 +5,7 @@ The Azure IoT Hub certificates presented during TLS negotiation shall be always 
 The samples in this repository leverage the certificates in `certs.c` for the Azure Cloud, Germany sovereign cloud and China sovereign cloud. By default, all certs are included in the samples' build. To select a specific cert, use one of the following options during the cmake step of your [environment setup](https://github.com/Azure/azure-iot-sdk-c/doc/devbox_setup.md).
 
 ```
-cmake .. -Duse_sample_trusted_cert                               // To trust all Azure Roots.
+cmake .. -Duse_sample_trusted_cert                               // To trust all Azure Roots for samples.
 
 cmake .. -Duse_sample_trusted_cert -Duse_azure_cloud_rsa_cert    // To trust the Azure Cloud RSA Roots only.
 
