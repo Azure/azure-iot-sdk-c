@@ -363,11 +363,11 @@ int PnP_TempControlComponent_UpdatedPropertyCallback(
 {
     IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient = (IOTHUB_DEVICE_CLIENT_LL_HANDLE)userContextCallback;
     IOTHUB_CLIENT_DESERIALIZED_PROPERTY property;
-    IOTHUB_CLIENT_PROPERTY_CONTEXT_HANDLE propertyContext;
+    IOTHUB_CLIENT_PROPERTY_ITERATOR_HANDLE propertyIterator;
     int propertiesVersion;
     IOTHUB_CLIENT_RESULT clientResult;
 
-    if ((clientResult = IoTHubClient_Deserialize_Properties_CreateIterator(payloadType, payLoad, payloadLength, g_modeledComponents, g_numModeledComponents, &propertyContext, &propertiesVersion)) != IOTHUB_CLIENT_OK)
+    if ((clientResult = IoTHubClient_Deserialize_Properties_CreateIterator(payloadType, payLoad, payloadLength, g_modeledComponents, g_numModeledComponents, &propertyIterator, &propertiesVersion)) != IOTHUB_CLIENT_OK)
     {
         LogError("IoTHubClient_Deserialize_Properties failed, error=%d", clientResult);
     }
@@ -376,7 +376,7 @@ int PnP_TempControlComponent_UpdatedPropertyCallback(
         bool componentSpecified;
         const char* componentName;
 
-        while ((clientResult = IoTHubClient_Deserialize_Properties_GetNextComponent(propertyContext, &componentName, &componentSpecified)) == IOTHUB_CLIENT_OK)
+        while ((clientResult = IoTHubClient_Deserialize_Properties_GetNextComponent(propertyIterator, &componentName, &componentSpecified)) == IOTHUB_CLIENT_OK)
         {   
             bool propertySpecified;
 
@@ -385,7 +385,7 @@ int PnP_TempControlComponent_UpdatedPropertyCallback(
                 break;
             }
 
-            while ((clientResult = IoTHubClient_Deserialize_Properties_GetNextProperty(propertyContext, &property, &propertySpecified)) == IOTHUB_CLIENT_OK)
+            while ((clientResult = IoTHubClient_Deserialize_Properties_GetNextProperty(propertyIterator, &property, &propertySpecified)) == IOTHUB_CLIENT_OK)
             {
                 if (propertySpecified == false)
                 {
@@ -406,23 +406,23 @@ int PnP_TempControlComponent_UpdatedPropertyCallback(
                 }
                 else if (strcmp(property.componentName, g_thermostatComponent1Name) == 0)
                 {
-                    PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle1, deviceClient, property.name, property.value, propertiesVersion);
+                    PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle1, deviceClient, property.name, property.value.str, propertiesVersion);
                 }
                 else if (strcmp(property.componentName, g_thermostatComponent2Name) == 0)
                 {
-                    PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle2, deviceClient, property.name, property.value, propertiesVersion);
+                    PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle2, deviceClient, property.name, property.value.str, propertiesVersion);
                 }
                 else
                 {
                     LogError("Component=%s is not implemented by the TemperatureController", property.componentName);
                 }
                 
-                IoTHubClient_Deserialize_Properties_FreeProperty(&property);
+                IoTHubClient_Deserialize_Properties_DestroyProperty(&property);
             }
         }
     }
 
-    IoTHubClient_Deserialize_Properties_End(propertyContext);
+    IoTHubClient_Deserialize_Properties_DestroyIterator(propertyIterator);
 
     return 0;
 }

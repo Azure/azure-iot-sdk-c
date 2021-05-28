@@ -239,7 +239,6 @@ extern "C"
         IOTHUB_CLIENT_PROPERTY_PAYLOAD_PARTIAL
     } IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE;
 
-
 #ifdef __cplusplus
 }
 #endif
