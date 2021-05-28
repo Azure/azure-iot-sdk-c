@@ -34,9 +34,9 @@ typedef struct IOTHUB_CLIENT_PROPERTY_ITERATOR_TAG {
     size_t currentPropertyIndex;
 } IOTHUB_CLIENT_PROPERTY_ITERATOR;
 
-static const char PROPERTY_FORMAT_COMPONENT_START[] = "{\"%s\":_t:c, ";
+static const char PROPERTY_FORMAT_COMPONENT_START[] = "{\"%s\":{\"__t\":\"c\", ";
 static const char PROPERTY_FORMAT_NAME_VALUE[] = "\"%s\":%s%s";
-static const char PROPERTY_FORMAT_WRITEABLE_RESPONSE[] = "{\"%s\":{\"value\":%s,\"ac\":%d,\"av\":%d}%s";
+static const char PROPERTY_FORMAT_WRITEABLE_RESPONSE[] = "\"%s\":{\"value\":%s,\"ac\":%d,\"av\":%d}%s";
 static const char PROPERTY_FORMAT_WRITEABLE_RESPONSE_WITH_DESCRIPTION[] = "{\"%s\":{\"value\":%s,\"ac\":%d,\"av\":%d,\"ad\":\"%s\"}%s";
 
 static const char PROPERTY_OPEN_BRACE[] = "{";
@@ -98,6 +98,25 @@ static size_t BuildOpeningBrace(const char* componentName, char* currentWrite, s
     return currentOutputBytes;
 }
 
+static size_t BuildClosingBrace(bool isComponent, char** currentWrite, size_t* requiredBytes, size_t* remainingBytes)
+{
+    size_t currentOutputBytes = 0;
+    size_t numberOfBraces = isComponent ? 2 : 1;
+
+    for (size_t i = 0; i < numberOfBraces; i++)
+    {
+        if ((currentOutputBytes += snprintf(*currentWrite, *remainingBytes, PROPERTY_CLOSE_BRACE)) < 0)
+        {
+            LogError("Cannot build properites string");
+            return (size_t)-1;
+        }
+        AdvanceCountersAfterWrite(currentOutputBytes, currentWrite, requiredBytes, remainingBytes);
+    }
+
+    return currentOutputBytes;
+}
+
+
 // BuildReportedProperties is used to build up the actual serializedProperties string based 
 // on the properties.  If serializedProperties==NULL and serializedPropertiesLength=0, just like
 // analogous snprintf it will just calculate the amount of space caller needs to allocate.
@@ -127,13 +146,12 @@ static size_t BuildReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPERTY* pro
         AdvanceCountersAfterWrite(currentOutputBytes, &currentWrite, &requiredBytes, &remainingBytes);
     }
 
-    if ((currentOutputBytes = snprintf(currentWrite, remainingBytes, PROPERTY_CLOSE_BRACE)) < 0)
+    if (BuildClosingBrace(componentName != NULL, &currentWrite, &requiredBytes, &remainingBytes) == -1)
     {
         LogError("Cannot build properites string");
         return (size_t)-1;
     }
-    AdvanceCountersAfterWrite(currentOutputBytes, &currentWrite, &requiredBytes, &remainingBytes);
- 
+
     return (requiredBytes + 1);
 }
 
@@ -179,12 +197,11 @@ static size_t BuildWriteableResponseProperties(const IOTHUB_CLIENT_WRITEABLE_PRO
         AdvanceCountersAfterWrite(currentOutputBytes, &currentWrite, &requiredBytes, &remainingBytes);
     }
 
-    if ((currentOutputBytes = snprintf(currentWrite, remainingBytes, PROPERTY_CLOSE_BRACE)) < 0)
+    if (BuildClosingBrace(componentName != NULL, &currentWrite, &requiredBytes, &remainingBytes) == -1)
     {
         LogError("Cannot build properites string");
         return (size_t)-1;
     }
-    AdvanceCountersAfterWrite(currentOutputBytes, &currentWrite, &requiredBytes, &remainingBytes);
 
     return requiredBytes;
 }
