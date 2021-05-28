@@ -20,7 +20,7 @@ For other regions (and private cloud environments), please use the appropriate r
 
 __IMPORTANT:__
 
-1. The content of this repository is not guaranteed to be up to date or a complete list of CA certificates used across Azure Clouds or when using Azure Stack or Azure IoT Edge or Azure Protocol Gateway.
+1. The content of this repository is not guaranteed to be up to date. It is also not guaranteed to be a complete list of CA certificates used across Azure Clouds or when using Azure Stack, Azure IoT Edge, or Azure Protocol Gateway.
 1. Always prefer using the local system's Trusted Root Certificate Authority store instead of hardcoded certificates (i.e. using certs.c which our samples require in certain combinations).
 1. Azure Root certificates may change, with or without prior notice (if they expire or are revoked). It is important that devices are able to add or remove trust in root certificates.
 1. Support for at least 2 certificates is required to maintain device connectivity during CA certificate changes.
