@@ -4,7 +4,7 @@
 #this is CMakeLists.txt for iothub_deviceconfiguration_ut
 cmake_minimum_required(VERSION 2.8.11)
 
-compileAsC11()
+compileAsC99()
 
 set(theseTestsName iothub_deviceconfiguration_ut)
 

@@ -464,47 +464,99 @@ int tlsio_fuzz_send(CONCRETE_IO_HANDLE tls_io, const void* buffer, size_t size, 
 
         case 2: // client connection header
             // server connection header
+            //-> Header (AMQP 0.1.0.0)
             //<- Header (AMQP 0.1.0.0)
             size_read = load_from_file(3, file_buffer, sizeof(file_buffer));
             received_queue_add(file_buffer, size_read);
             break;
 
-        case 3: // client performative Open
-            // server begin
+        case 3: // send Connection Open
+            //-> [OPEN]* {69fdf035-a758-4ec8-b7e1-3c949800d785,ericwol-hub.azure-devices.net,4294967295,65535,240000}
             //<- [OPEN]* {DeviceGateway_5ad507ef78724b7386c9c3309fb31014,localhost,65536,8191,240000,NULL,NULL,NULL,NULL,NULL}
+            //  container-id: DeviceGateway_5ad507ef78724b7386c9c3309fb31014
+            //  hostname: localhost
+            //  max-frame-size: 65536
+            //  channel-max: 8191
+            //  idle-time-out: 240000ms
             size_read = load_from_file(4, file_buffer, sizeof(file_buffer));
             received_queue_add(file_buffer, size_read);
             break;
 
-        case 4: // send begin
+        case 4: // send CONNECTION begin
+            //-> [BEGIN]* {NULL, 0, 4294967295, 100, 4294967295}
             //<- [BEGIN]* {0,1,5000,4294967295,262143,NULL,NULL,NULL}
+            //  remote-channel: 0
+            //  next-outgoing-id: 1
+            //  incoming-window: 5000
             size_read = load_from_file(5, file_buffer, sizeof(file_buffer));
             received_queue_add(file_buffer, size_read);
             break;
 
-        case 5: // send attach $cbs-sender
+        case 5: // send SESSION attach $cbs-sender
+            //-> [ATTACH]* {$cbs-sender,0,false,0,0,* {$cbs},* {$cbs},NULL,NULL,0,0}
             //<- [ATTACH]* {$cbs-sender,0,true,0,0,* {$cbs,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},* {$cbs,NULL,NULL,NULL,NULL,NULL,NULL},NULL,NULL,NULL,1048576,NULL,NULL,NULL}
+            //  name: $cbs-sender
+            //  handle: 0
+            //  role: true
+            //  snd-settle-mode: 0
+            //  rcv-settle-mode: 0
+            //  source: {$cbs,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL}
+            //  target: {$cbs,NULL,NULL,NULL,NULL,NULL,NULL}
+            //  unsettled: NULL
+            //  incomplete-unsettled: NULL
+            //  initial-delivery-count: NULL
+            //  max-message-size: 1048576
+            //  offered-capabilities: NULL
+            //  desired-capabilities: NULL
+            //  properties: NULL
             size_read = load_from_file(6, file_buffer, sizeof(file_buffer));
             received_queue_add(file_buffer, size_read);
             break;
 
-        case 6: // send attach $cbs-receiver
+        case 6: // send SESSION attach $cbs-receiver
+            //-> [ATTACH]* {$cbs-receiver,1,true,0,0,* {$cbs},* {$cbs},NULL,NULL,NULL,0}
             //<- [ATTACH]* {$cbs-receiver,1,false,0,0,* {$cbs,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},*
+            //  name: $cbs-receiver
+            //  handle: 1
+            //  role: false
+            //  snd-settle-mode: 0
+            //  rcv-settle-mode: 0
+            //  source: {$cbs,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL}
+            //  target: 
             size_read = load_from_file(8, file_buffer, sizeof(file_buffer));
             received_queue_add(file_buffer, size_read);
             //< -[FLOW] * {0, 5000, 1, 4294967295, 0, 0, 100, 0, NULL, false, NULL}
+            //  next-incoming-id: 0
+            //  incoming-window: 5000
+            //  next-outgoing-id: 1
+            //  outgoing-window: 4294967295
+            //  handle: 0
+            //  delivery-count: 0
+            //  link-credit: 100
+            //  available: 0
+            //  drain: NULL
+            //  echo: false
+            //  properties: NULL
             size_read = load_from_file(7, file_buffer, sizeof(file_buffer));
             received_queue_add(file_buffer, size_read);
             break;
 
         case 7: // send_flow
+            //-> [FLOW]* {1,4294967295,0,100,1,0,10000}
             //<- [DISPOSITION]* {true,0,NULL,true,* {},NULL}
+            //  role: true
+            //  first: 0
+            //  last: NULL
+            //  settled: true
+            //  state: {}
+            //  batchable: NULL
             size_read = load_from_file(9, file_buffer, sizeof(file_buffer));
             received_queue_add(file_buffer, size_read);
             break;
 
         case 8: // session_send_transfer
             // send SAS token to hub
+            //-> [TRANSFER]* {0,0,<01 00 00 00>,0,false,false}
             //<- [TRANSFER]* {1,0,<01 00 00 00>,0,NULL,false,NULL,NULL,NULL,NULL,false}
             size_read = load_from_file(10, file_buffer, sizeof(file_buffer));
             received_queue_add(file_buffer, size_read);

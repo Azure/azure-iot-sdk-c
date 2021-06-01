@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 2.8.11)
 
-compileAsC11()
+compileAsC99()
 set(theseTestsName prov_transport_amqp_ws_client_ut)
 
 set(${theseTestsName}_test_files
