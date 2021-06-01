@@ -155,17 +155,11 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendPropertiesAsync(
 }
 
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SubscribeToCommands(
-                         IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
-                         IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC commandCallback, 
+                         IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle,
+                         IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC commandCallback,
                          void* userContextCallback)
 {
-    // This is going to need a utility inside of ClientCore that is able to parse out the '.'.
-    // See https://github.com/Azure/azure-iot-sdk-c/tree/jspaith/device-method-refactor/ for an initial refactor to make adding this easier, we'll just need
-    // new functions (for LL and convenience) following pattern suggested in the branch above.
-    (void)iotHubClientHandle;
-    (void)commandCallback;
-    (void)userContextCallback;
-    return 0;
+    return IoTHubClientCore_LL_SubscribeToCommands((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, commandCallback, userContextCallback);
 }
 
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_GetPropertiesAndSubscribeToUpdatesAsync(
