@@ -71,6 +71,8 @@ MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT
 MU_DEFINE_ENUM(CALLBACK_TYPE, CALLBACK_TYPE_VALUES)
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(CALLBACK_TYPE, CALLBACK_TYPE_VALUES)
 
+static const char COMPONENT_DELIMETER = '*';
+
 typedef struct IOTHUB_METHOD_CALLBACK_DATA_TAG
 {
     CALLBACK_TYPE type;
@@ -740,8 +742,6 @@ static bool IoTHubClientCore_LL_MessageCallback(MESSAGE_CALLBACK_INFO* messageDa
     return result;
 }
 
-static const char COMPONENT_DELIMETER = '.';
-
 int IoTHubClientCore_LL_ParseCommandTopic(const char* method_name, char** component_name, const char** command_name)
 {
     int result;
@@ -762,8 +762,9 @@ int IoTHubClientCore_LL_ParseCommandTopic(const char* method_name, char** compon
     }
     else
     {
-        memcpy(component_name, method_name, component_name_length);
-        component_name[component_name_length] = 0;
+        memcpy(*component_name, method_name, component_name_length);
+        (*component_name)[component_name_length] = 0;
+        *command_name = componentSplit + 1;
         result = 0;
     }
 
@@ -786,7 +787,7 @@ static int invoke_command_callback(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData
     }
     else
     {
-        result = handleData->methodCallback.methodCallbackSync(method_name, payLoad, size, &payload_resp, &response_size, handleData->methodCallback.userContextCallback);
+        result = handleData->methodCallback.commandCallbackSync(component_name, command_name, payLoad, size, &payload_resp, &response_size, handleData->methodCallback.userContextCallback);
         /* Codes_SRS_IOTHUBCLIENT_LL_07_020: [ deviceMethodCallback shall build the BUFFER_HANDLE with the response payload from the IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC callback. ] */
         if (payload_resp != NULL && response_size > 0)
         {
