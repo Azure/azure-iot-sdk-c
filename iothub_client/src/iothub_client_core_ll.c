@@ -742,7 +742,7 @@ static bool IoTHubClientCore_LL_MessageCallback(MESSAGE_CALLBACK_INFO* messageDa
 
 static const char COMPONENT_DELIMETER = '.';
 
-static int parse_command_topic(const char* method_name, char** component_name, const char** command_name)
+int IoTHubClientCore_LL_ParseCommandTopic(const char* method_name, char** component_name, const char** command_name)
 {
     int result;
 
@@ -779,7 +779,7 @@ static int invoke_command_callback(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData
     const char* command_name = NULL;
     char* component_name = NULL;
 
-    if (parse_command_topic(method_name, &component_name, &command_name) != 0)
+    if (IoTHubClientCore_LL_ParseCommandTopic(method_name, &component_name, &command_name) != 0)
     {
         LogError("Cannot parse command/component name");
         result = MU_FAILURE;
