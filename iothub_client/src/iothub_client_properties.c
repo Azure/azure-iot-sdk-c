@@ -25,7 +25,6 @@ typedef struct IOTHUB_CLIENT_PROPERTY_ITERATOR_TAG {
     char** componentsInModel;
     size_t numComponentsInModel;
     JSON_Value* rootValue;
-    JSON_Object* rootObject;
     JSON_Object* desiredObject;
     JSON_Object* reportedObject;
     COMPONENT_PARSE_STATE componentParseState;
@@ -339,8 +338,9 @@ static char* CopyPayloadToString(const unsigned char* payload, size_t size)
 static IOTHUB_CLIENT_RESULT GetDesiredAndReportedTwinJson(IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType, IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIterator)
 {
     IOTHUB_CLIENT_RESULT result;
+    JSON_Object* rootObject;
 
-    if ((propertyIterator->rootObject = json_value_get_object(propertyIterator->rootValue)) == NULL)
+    if ((rootObject = json_value_get_object(propertyIterator->rootValue)) == NULL)
     {
         LogError("Unable to get root object of JSON");
         result = IOTHUB_CLIENT_ERROR;
@@ -349,15 +349,15 @@ static IOTHUB_CLIENT_RESULT GetDesiredAndReportedTwinJson(IOTHUB_CLIENT_PROPERTY
     {
         if (payloadType == IOTHUB_CLIENT_PROPERTY_PAYLOAD_COMPLETE)
         {
-            // NULL values are NOT errors in this case.  TODO: Check about what empty twin looks like for comments here, but I still don't think this should be fatal.
-            propertyIterator->desiredObject = json_object_get_object(propertyIterator->rootObject, TWIN_DESIRED_OBJECT_NAME);
-            propertyIterator->reportedObject = json_object_get_object(propertyIterator->rootObject, TWIN_REPORTED_OBJECT_NAME);
+            // NULL values are NOT errors, as the JSON may legitimately not have these fields.
+            propertyIterator->desiredObject = json_object_get_object(rootObject, TWIN_DESIRED_OBJECT_NAME);
+            propertyIterator->reportedObject = json_object_get_object(rootObject, TWIN_REPORTED_OBJECT_NAME);
         }
         else
         {
             // For a patch update, IoTHub does not explicitly put a "desired:" JSON envelope.  The "desired-ness" is implicit 
             // in this case, so here we simply need the root of the JSON itself.
-            propertyIterator->desiredObject = propertyIterator->rootObject;
+            propertyIterator->desiredObject = rootObject;
             propertyIterator->reportedObject = NULL;
         }
         result = IOTHUB_CLIENT_OK;
@@ -419,80 +419,7 @@ static bool IsJsonObjectAComponentInModel(IOTHUB_CLIENT_PROPERTY_ITERATOR* prope
     return result;
 }
 
-// FindNonComponentProperties scans through either the root of desired or reported JSON_Object, looking to see
-// if there are any JSON children that are NOT mapped to component names.
-static bool FindNonComponentProperties(IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIterator, bool searchDesired)
-{
-    JSON_Object* jsonObject = searchDesired ? propertyIterator->desiredObject : propertyIterator->reportedObject;
-    bool result;
-
-    if (jsonObject == NULL)
-    {
-        // Since there isn't a JSON object in first place, there can't be properties we'd be interested in.
-        result = false;
-    }
-    else
-    {
-        size_t numChildren = json_object_get_count(jsonObject);
-        size_t i;
-
-        for (i = 0; i < numChildren; i++)
-        {
-            const char* objectName = json_object_get_name(jsonObject, i);
-            if (objectName == NULL)
-            {
-                continue;
-            }
-
-            if (! IsJsonObjectAComponentInModel(propertyIterator, objectName))
-            {
-                break;
-            }
-        }
-
-        result = (i != numChildren);
-    }
-
-    return result;
-}
-
-// TODO: cleanup naming since HasNonComponentProperties and CurrentComponentHasProperties* should be symmetrical.
-
-static bool CurrentComponentHasDesiredProperties(IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIterator)
-{
-    const char* currentComponentName = propertyIterator->componentsInModel[propertyIterator->currentComponentIndex];
-    JSON_Value* jsonValue = json_object_get_value(propertyIterator->desiredObject, currentComponentName);
-    bool result = (jsonValue != NULL);
-    return result;
-}
-
-static bool CurrentComponentHasReportedProperties(IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIterator)
-{
-    const char* currentComponentName = propertyIterator->componentsInModel[propertyIterator->currentComponentIndex];
-    JSON_Value* jsonValue =  json_object_get_value(propertyIterator->reportedObject, currentComponentName);
-    bool result = (jsonValue != NULL);
-    return result;
-}
-
-static void SetInitialComponentParseState(IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIterator)
-{
-    if (FindNonComponentProperties(propertyIterator, true))
-    {
-        propertyIterator->propertyParseState = PROPERTY_PARSE_DESIRED;
-        propertyIterator->componentParseState = COMPONENT_PARSE_ROOT;
-    }
-    else if (FindNonComponentProperties(propertyIterator, false))
-    {
-        propertyIterator->propertyParseState = PROPERTY_PARSE_REPORTED;
-        propertyIterator->componentParseState = COMPONENT_PARSE_ROOT;
-    }
-    else
-    {
-        propertyIterator->componentParseState = COMPONENT_PARSE_SUB_COMPONENT;
-    }
-}
-
-static IOTHUB_CLIENT_PROPERTY_ITERATOR* AllocatepropertyIterator(const char** componentsInModel, size_t numComponentsInModel)
+static IOTHUB_CLIENT_PROPERTY_ITERATOR* AllocatePropertyIterator(const char** componentsInModel, size_t numComponentsInModel)
 {
     IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIterator;
     bool success = false;
@@ -595,24 +522,8 @@ static bool ValidateIteratorInputs(
     return result;
 }
 
-const char* GetCurrentComponentName(IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIterator)
-{
-    const char* componentName;
-
-    if (propertyIterator->componentParseState == COMPONENT_PARSE_ROOT)
-    {
-        componentName = NULL;
-    }
-    else
-    {
-        componentName = propertyIterator->componentsInModel[propertyIterator->currentComponentIndex];
-    }
-                                   
-    return componentName;
-}
-
 // FillProperty retrieves properties that are children of jsonObject and puts them into properties, starting at the 0 index.
-static IOTHUB_CLIENT_RESULT FillProperty(IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIterator, JSON_Value* propertyValue, const char* propertyName, IOTHUB_CLIENT_DESERIALIZED_PROPERTY* property)
+static IOTHUB_CLIENT_RESULT FillProperty(IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIterator, const char* componentName, JSON_Value* propertyValue, const char* propertyName, IOTHUB_CLIENT_DESERIALIZED_PROPERTY* property)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
     const char* propertyStringJson;
@@ -627,7 +538,7 @@ static IOTHUB_CLIENT_RESULT FillProperty(IOTHUB_CLIENT_PROPERTY_ITERATOR* proper
         property->version = IOTHUB_CLIENT_DESERIALIZED_PROPERTY_VERSION;
         property->propertyType = (propertyIterator->propertyParseState == PROPERTY_PARSE_DESIRED) ? 
                                  IOTHUB_CLIENT_PROPERTY_TYPE_WRITEABLE : IOTHUB_CLIENT_PROPERTY_TYPE_REPORTED_FROM_DEVICE;
-        property->componentName = GetCurrentComponentName(propertyIterator);
+        property->componentName = componentName;
         property->name = propertyName;
         property->valueType = IOTHUB_CLIENT_PROPERTY_VALUE_STRING;
         property->value.str = propertyStringJson;
@@ -637,6 +548,121 @@ static IOTHUB_CLIENT_RESULT FillProperty(IOTHUB_CLIENT_PROPERTY_ITERATOR* proper
 
     return result;
 }
+
+static bool IsReservedPropertyKeyword(const char* objectName)
+{
+    return ((objectName == NULL) || (strcmp(objectName, TWIN_VERSION) == 0));
+}
+
+static bool IsReservedComponentKeyword(const char* objectName)
+{
+    return ((objectName == NULL) || (strcmp(objectName, TWIN_COMPONENT_MARKER) == 0));
+}
+
+static bool GetNextComponentProperty(IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIterator, JSON_Object* containerObject, const char** propertyName, JSON_Value** propertyValue)
+{
+    JSON_Value* componentValue = json_object_get_value_at(containerObject, propertyIterator->currentPropertyIndex);
+    JSON_Object* componentObject = json_value_get_object(componentValue);
+
+    *propertyName = NULL;
+    *propertyValue = NULL;
+
+    if (componentObject == NULL)
+    {
+        // This isn't a JSON Object so nothing to traverse
+        ;
+    }
+    else
+    {
+        size_t numComponentChildren = json_object_get_count(componentObject);
+
+        while (propertyIterator->currentComponentIndex < numComponentChildren)
+        {
+            const char* objectName = json_object_get_name(componentObject, propertyIterator->currentComponentIndex);
+            
+            if (IsReservedComponentKeyword(objectName))
+            {
+                // This objectName corresponds to twin/property metadata that is not passed to application
+                propertyIterator->currentComponentIndex++;
+            }
+            else
+            {
+                *propertyName = objectName;
+                *propertyValue = json_object_get_value_at(componentObject, propertyIterator->currentComponentIndex);
+                propertyIterator->currentComponentIndex++;
+                break;
+            }
+        }
+    }
+
+    return (*propertyValue != NULL);
+}
+
+static bool GetNextPropertyToEnumerate(IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIterator, const char** componentName, const char** propertyName, JSON_Value** propertyValue)
+{
+    JSON_Object* containerObject;
+    *propertyName = NULL;
+    *propertyValue = NULL;
+
+    if (propertyIterator->propertyParseState == PROPERTY_PARSE_DESIRED)
+    {
+        containerObject = propertyIterator->desiredObject;
+    }
+    else
+    {
+        containerObject = propertyIterator->reportedObject;
+    }
+
+    size_t numChildren = json_object_get_count(containerObject);
+
+    while (propertyIterator->currentPropertyIndex < numChildren)
+    {
+        const char* objectName = json_object_get_name(containerObject, propertyIterator->currentPropertyIndex);
+
+        if (propertyIterator->componentParseState == COMPONENT_PARSE_SUB_COMPONENT)
+        {
+            // The propertyIterator->currentPropertyIndex corresponds to a subcomponent we're traversing.
+            if (GetNextComponentProperty(propertyIterator, containerObject, propertyName, propertyValue) == true)
+            {
+                // The component has additional properties to return to application.
+                *componentName = objectName;
+                break;
+            }
+            else
+            {
+                // We've parsed all the properties of this component.  Move onto the next top-level JSON element
+                propertyIterator->componentParseState = COMPONENT_PARSE_ROOT;
+                propertyIterator->currentPropertyIndex++;
+                propertyIterator->currentComponentIndex = 0;
+                continue;
+            }
+        }
+
+        if (IsJsonObjectAComponentInModel(propertyIterator, objectName))
+        {
+            // This top-level property is the name of a component.  
+            propertyIterator->componentParseState = COMPONENT_PARSE_SUB_COMPONENT;
+            continue;
+        }
+        else if (IsReservedPropertyKeyword(objectName))
+        {
+            // This objectName corresponds to twin/property metadata that is not passed to application
+            propertyIterator->currentPropertyIndex++;
+            continue;
+        }
+        else
+        {
+            *componentName = NULL;
+            *propertyName = objectName;
+            *propertyValue = json_object_get_value_at(containerObject, propertyIterator->currentPropertyIndex);
+            propertyIterator->currentPropertyIndex++;
+            break;
+        }
+    }
+
+    return (*propertyValue != NULL);
+}
+
 
 IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_CreateIterator(
     IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType,
@@ -656,7 +682,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_CreateIterator(
     {
         LogError("Invalid argument");
     }
-    else if ((propertyIterator = AllocatepropertyIterator(componentsInModel, numComponentsInModel)) == NULL)
+    else if ((propertyIterator = AllocatePropertyIterator(componentsInModel, numComponentsInModel)) == NULL)
     {
         LogError("Cannot allocate IOTHUB_CLIENT_PROPERTY_ITERATOR");
         result = IOTHUB_CLIENT_ERROR;
@@ -683,7 +709,8 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_CreateIterator(
         }
         else
         {
-            SetInitialComponentParseState(propertyIterator);
+            propertyIterator->propertyParseState = PROPERTY_PARSE_DESIRED;
+            propertyIterator->componentParseState = COMPONENT_PARSE_ROOT;
             *propertyIteratorHandle = propertyIterator;
             result = IOTHUB_CLIENT_OK;
         }
@@ -699,116 +726,6 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_CreateIterator(
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_GetNextComponent(
-    IOTHUB_CLIENT_PROPERTY_ITERATOR_HANDLE propertyIteratorHandle,
-    const char** componentName,
-    bool* componentSpecified)
-{
-    IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIterator = (IOTHUB_CLIENT_PROPERTY_ITERATOR*)propertyIteratorHandle;
-    bool componentFound;
-
-    if (propertyIterator->componentParseState == COMPONENT_PARSE_ROOT)
-    {
-        componentFound = true;
-    }
-    else
-    {
-        for (; propertyIterator->currentComponentIndex < propertyIterator->numComponentsInModel; propertyIterator->currentComponentIndex++)
-        {
-            // We're enumerating components now.  Only return a component if it has properties.  A given component
-            // is not guaranteed to have properties, as they either may not have been set initially by service
-            // or we may be processing a PATCH which did not update a given component's properties.
-            if (CurrentComponentHasDesiredProperties(propertyIterator))
-            {
-                // Reset property enumeration state for subsequent app calls to IoTHubClient_Deserialize_Properties_GetNextProperty
-                propertyIterator->propertyParseState = PROPERTY_PARSE_DESIRED;
-                propertyIterator->currentPropertyIndex = 0;
-                break;
-            }
-            else if (CurrentComponentHasReportedProperties(propertyIterator))
-            {
-                // Reset property enumeration state for subsequent app calls to IoTHubClient_Deserialize_Properties_GetNextProperty
-                propertyIterator->propertyParseState = PROPERTY_PARSE_REPORTED;
-                propertyIterator->currentPropertyIndex = 0;
-                break;
-            }
-        }
-        componentFound = propertyIterator->currentComponentIndex < propertyIterator->numComponentsInModel;
-    }
-
-    if (componentFound == true)
-    {
-        *componentName = GetCurrentComponentName(propertyIterator);
-        *componentSpecified = true;
-    }
-    else
-    {
-        *componentName = NULL;
-        *componentSpecified = false;
-    }
-
-    return IOTHUB_CLIENT_OK;
-}
-
-static bool IsReservedKeyword(IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIterator, const char* objectName)
-{
-    bool result;
-
-    if (propertyIterator->componentParseState == COMPONENT_PARSE_ROOT)
-    {
-        result = (strcmp(objectName, TWIN_VERSION) == 0);
-    }
-    else
-    {
-        result = (strcmp(objectName, TWIN_COMPONENT_MARKER) == 0);
-    }
-
-    return result;
-}
-
-static bool GetNextPropertyToEnumerate(IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIterator, const char** propertyName, JSON_Value** propertyValue)
-{
-    JSON_Object* containerObject;
-    *propertyName = NULL;
-    *propertyValue = NULL;
-
-    const char* componentName = GetCurrentComponentName(propertyIterator);
-
-    if (propertyIterator->propertyParseState == PROPERTY_PARSE_DESIRED)
-    {
-        containerObject = (propertyIterator->componentParseState == COMPONENT_PARSE_ROOT) ? 
-                          propertyIterator->desiredObject : json_object_get_object(propertyIterator->desiredObject, componentName);
-    }
-    else
-    {
-        containerObject = (propertyIterator->componentParseState == COMPONENT_PARSE_ROOT) ? 
-                          propertyIterator->reportedObject : json_object_get_object(propertyIterator->reportedObject, componentName);
-    }
-
-    size_t numChildren = json_object_get_count(containerObject);
-
-    for (; propertyIterator->currentPropertyIndex < numChildren; propertyIterator->currentPropertyIndex++)
-    {
-        const char* objectName = json_object_get_name(containerObject, propertyIterator->currentPropertyIndex);
-
-        if ((propertyIterator->componentParseState == COMPONENT_PARSE_ROOT) && (IsJsonObjectAComponentInModel(propertyIterator, objectName)))
-        {
-            continue;
-        }
-        else if (IsReservedKeyword(propertyIterator, objectName))
-        {
-            continue;
-        }
-
-        *propertyName = objectName;
-        *propertyValue = json_object_get_value(containerObject, objectName);
-        break;
-    }
-
-    return (*propertyValue != NULL);
-}
-
-
 IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_GetNextProperty(
     IOTHUB_CLIENT_PROPERTY_ITERATOR_HANDLE propertyIteratorHandle,
     IOTHUB_CLIENT_DESERIALIZED_PROPERTY* property,
@@ -819,10 +736,11 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_GetNextProperty(
 
     JSON_Value* propertyValue = NULL;
     const char* propertyName = NULL;
+    const char* componentName = NULL;
 
     if (propertyIterator->propertyParseState == PROPERTY_PARSE_DESIRED)
     {
-        if ((GetNextPropertyToEnumerate(propertyIterator, &propertyName, &propertyValue)) == false)
+        if ((GetNextPropertyToEnumerate(propertyIterator, &componentName, &propertyName, &propertyValue)) == false)
         {
             // If we can't find another desired object, then transition to start searching through reported.
             propertyIterator->currentPropertyIndex = 0;
@@ -832,13 +750,13 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_GetNextProperty(
 
     if (propertyIterator->propertyParseState == PROPERTY_PARSE_REPORTED)
     {
-        GetNextPropertyToEnumerate(propertyIterator, &propertyName, &propertyValue);
+        GetNextPropertyToEnumerate(propertyIterator, &componentName, &propertyName, &propertyValue);
     }
 
     if (propertyValue != NULL)
     {
         // Fills in IOTHUB_CLIENT_DESERIALIZED_PROPERTY based on where we're at in the traversal.
-        if ((result = FillProperty(propertyIterator, propertyValue, propertyName, property)) != IOTHUB_CLIENT_OK)
+        if ((result = FillProperty(propertyIterator, componentName, propertyValue, propertyName, property)) != IOTHUB_CLIENT_OK)
         {
             LogError("Cannot Fill Properties");
         }
@@ -846,21 +764,10 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_GetNextProperty(
         {
             *propertySpecified = true;
         }
-        
-        propertyIterator->currentPropertyIndex++;
     }
     else
     {
         *propertySpecified = false;
-        if (propertyIterator->componentParseState == COMPONENT_PARSE_ROOT)
-        {
-            // Once we've parsed through the root object, transition to subcomponents.
-            propertyIterator->componentParseState = COMPONENT_PARSE_SUB_COMPONENT;
-        }
-        else
-        {
-            propertyIterator->currentComponentIndex++;
-        }
         result = IOTHUB_CLIENT_OK;
     }
 
@@ -872,12 +779,24 @@ void IoTHubClient_Deserialize_Properties_DestroyProperty(
 {
     if (property != NULL)
     {
+        // The only field in IOTHUB_CLIENT_DESERIALIZED_PROPERTY that is allocated when filling
+        // the structure is the JSON representation.  The remaining fields are shallow copies pointing
+        // into the parsed JSON fields which are freed by IoTHubClient_Deserialize_Properties_DestroyIterator.
         json_free_serialized_string((char*)property->value.str);
     }
 }
 
 void IoTHubClient_Deserialize_Properties_DestroyIterator(IOTHUB_CLIENT_PROPERTY_ITERATOR_HANDLE propertyIteratorHandle)
 {
-    (void)propertyIteratorHandle;
+    if (propertyIteratorHandle != NULL)
+    {
+        IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIterator = (IOTHUB_CLIENT_PROPERTY_ITERATOR*)propertyIteratorHandle;
+        for (size_t i = 0; i < propertyIterator->numComponentsInModel; i++)
+        {
+            free(propertyIterator->componentsInModel[i]);
+        }
+        json_value_free(propertyIterator->rootValue);
+        free(propertyIterator);
+    }
 }
 

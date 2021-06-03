@@ -373,52 +373,41 @@ int PnP_TempControlComponent_UpdatedPropertyCallback(
     }
     else
     {
-        bool componentSpecified;
-        const char* componentName;
+        bool propertySpecified;
 
-        while ((clientResult = IoTHubClient_Deserialize_Properties_GetNextComponent(propertyIterator, &componentName, &componentSpecified)) == IOTHUB_CLIENT_OK)
-        {   
-            bool propertySpecified;
-
-            if (componentSpecified == false)
+        while ((clientResult = IoTHubClient_Deserialize_Properties_GetNextProperty(propertyIterator, &property, &propertySpecified)) == IOTHUB_CLIENT_OK)
+        {
+            if (propertySpecified == false)
             {
                 break;
             }
 
-            while ((clientResult = IoTHubClient_Deserialize_Properties_GetNextProperty(propertyIterator, &property, &propertySpecified)) == IOTHUB_CLIENT_OK)
+            if (property.propertyType == IOTHUB_CLIENT_PROPERTY_TYPE_REPORTED_FROM_DEVICE)
             {
-                if (propertySpecified == false)
-                {
-                    break;
-                }
-
-                if (property.propertyType == IOTHUB_CLIENT_PROPERTY_TYPE_REPORTED_FROM_DEVICE)
-                {
-                    // We don't process previously reported properties, so ignore.  There is a potential optimization
-                    // however where if a desired property is the same value and version of a reported, then 
-                    // it wouldn't be necessary to call IoTHubDeviceClient_LL_PnP_SendReportedProperties for it
-                    continue;
-                }
-                
-                if (property.componentName == NULL) 
-                {   
-                    LogError("Property=%s arrived for TemperatureControl component itself.  This does not support properties on it (all properties are on subcomponents)", property.componentName);
-                }
-                else if (strcmp(property.componentName, g_thermostatComponent1Name) == 0)
-                {
-                    PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle1, deviceClient, property.name, property.value.str, propertiesVersion);
-                }
-                else if (strcmp(property.componentName, g_thermostatComponent2Name) == 0)
-                {
-                    PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle2, deviceClient, property.name, property.value.str, propertiesVersion);
-                }
-                else
-                {
-                    LogError("Component=%s is not implemented by the TemperatureController", property.componentName);
-                }
-                
-                IoTHubClient_Deserialize_Properties_DestroyProperty(&property);
+                // We don't process previously reported properties, so ignore.  There is a potential optimization
+                // however where if a desired property is the same value and version of a reported, then 
+                // it wouldn't be necessary to call IoTHubDeviceClient_LL_PnP_SendReportedProperties for it
+                continue;
             }
+            
+            if (property.componentName == NULL) 
+            {   
+                LogError("Property=%s arrived for TemperatureControl component itself.  This does not support properties on it (all properties are on subcomponents)", property.componentName);
+            }
+            else if (strcmp(property.componentName, g_thermostatComponent1Name) == 0)
+            {
+                PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle1, deviceClient, property.name, property.value.str, propertiesVersion);
+            }
+            else if (strcmp(property.componentName, g_thermostatComponent2Name) == 0)
+            {
+                PnP_ThermostatComponent_ProcessPropertyUpdate(g_thermostatHandle2, deviceClient, property.name, property.value.str, propertiesVersion);
+            }
+            else
+            {
+                LogError("Component=%s is not implemented by the TemperatureController", property.componentName);
+            }
+            
+            IoTHubClient_Deserialize_Properties_DestroyProperty(&property);
         }
     }
 

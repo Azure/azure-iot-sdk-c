@@ -35,13 +35,10 @@
 *                   // Your application's IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK is eventually invoked.  
 *                   // The application then will setup the iterator based on the data from the network
 *                   IoTHubClient_Deserialize_Properties_CreateIterator(rawDataFromIoTHub, &iteratorHandle)
-*                   // Enumerate each component.
-*                   while (IoTHubClient_Deserialize_Properties_GetNextComponent(&iteratorHandle, &componentName)) {
-*                       // Enumerate each property that is in a component.  desiralizedProperty will be of type
-*                       // IOTHUB_CLIENT_DESERIALIZED_PROPERTY and is much easier to process than raw JSON 
-*                       while (IoTHubClient_Deserialize_Properties_GetNextProperty(&iteratorHandle, &deserializedProperty)) {
-*                           // Application processes deserializedProperty according to modeling rules
-*                       }
+*                   // Enumerate each property that is in a component.  desiralizedProperty will be of type
+*                   // IOTHUB_CLIENT_DESERIALIZED_PROPERTY and is much easier to process than raw JSON 
+*                   while (IoTHubClient_Deserialize_Properties_GetNextProperty(&iteratorHandle, &deserializedProperty)) {
+*                       // Application processes deserializedProperty according to modeling rules
 *                   }
 */
 
@@ -233,22 +230,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_CreateIterator(
     int* propertiesVersion);
 
 /**
-* @brief   Gets the next component while iterating through the properties.
-*
-* @param[in]   propertyIteratorHandle  Iteration handle returned by @p IoTHubClient_Deserialize_Properties_CreateIterator.
-* @param[out]  componentName           Returned name of the component that will be iterated over in subsquent calls to @p IoTHubClient_Deserialize_Properties_GetNextProperty.
-*                                      For properties of the root component of a model, this will be NULL.
-* @param[out]  componentSpecified      Returned value indicating whether a component was found.  If false, this indicates all components have been iterated over.
-*
-* @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
-*/
-IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_GetNextComponent(
-    IOTHUB_CLIENT_PROPERTY_ITERATOR_HANDLE propertyIteratorHandle,
-    const char** componentName,
-    bool* componentSpecified);
-
-/**
-* @brief   Gets the next property of a component while iterating through the properties.
+* @brief   Gets the next property during iteration.
 *
 * @param[in]   propertyIteratorHandle   Iteration handle returned by @p IoTHubClient_Deserialize_Properties_CreateIterator.
 * @param[out]  property                 @p IOTHUB_CLIENT_DESERIALIZED_PROPERTY containing a deserialized representation of the properties.
