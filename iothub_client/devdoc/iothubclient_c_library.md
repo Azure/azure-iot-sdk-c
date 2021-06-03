@@ -501,6 +501,13 @@ const char* x509privatekey =
 ```
 
 - "CypherSuite" - only available when OpenSSL is used. value is a pointer to a null terminated string that contains a list in the format specified by [SSL_set_cipher_list](https://www.openssl.org/docs/man1.1.1/man3/SSL_CTX_set_cipher_list.html).
+
+### IoT Hub using ECC chain Example:
+
+```c
+IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_OPENSSL_CIPHER_SUITE, "ECDH+ECDSA+HIGH");
+```
+
 - "Engine" - only available when OpenSSL is used. It specifies the [OpenSSL built-in engine](https://www.openssl.org/docs/man1.1.1/man3/ENGINE_load_builtin_engines.html) to be loaded. value is a null terminated string that contains the engine name.
 - "x509PrivatekeyType" - only available when OpenSSL is used and OPENSSLOPT_ENGINE is configured. value is a pointer to a long. When set to 0x1, the private key is loaded from the OpenSSL Engine. The `x509privatekey` option represents the engine-specific certificate identifier.
 
