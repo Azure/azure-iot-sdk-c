@@ -34,7 +34,7 @@ A couple of examples:
 
 For additional guidance and important information about certificates, please refer to [this blog post](https://techcommunity.microsoft.com/t5/internet-of-things/azure-iot-tls-critical-changes-are-almost-here-and-why-you/ba-p/2393169) from the security team.
 
-## IoT Hub ECC Root
+## IoT Hub ECC Server Certificate Chain
 
 To work with the new Azure Cloud ECC server certificate chain, the TLS stack must be configured to prevent RSA cipher-suites from being advertised as described [here](https://docs.microsoft.com/azure/iot-hub/iot-hub-tls-support#elliptic-curve-cryptography-ecc-server-tls-certificate-preview).
 
@@ -45,9 +45,9 @@ Use the following option to limit the advertised cipher-suites:
 IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_OPENSSL_CIPHER_SUITE, "ECDH+ECDSA+HIGH");
 ```
 
-### Using WolfSSL
+### Using wolfSSL
 
-Rebuild WolfSSL without RSA support by adding `--disable-rsa` to the `configure` step.
+Rebuild wolfSSL without RSA support by adding `--disable-rsa` to the `configure` step.
 
 ### Using mbedTLS
 

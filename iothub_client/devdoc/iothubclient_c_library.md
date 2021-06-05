@@ -500,11 +500,9 @@ const char* x509privatekey =
 "-----END RSA PRIVATE KEY-----\n";
 ```
 
-- "CypherSuite" - only available when OpenSSL is used. value is a pointer to a null terminated string that contains a list in the format specified by [SSL_set_cipher_list](https://www.openssl.org/docs/man1.1.1/man3/SSL_CTX_set_cipher_list.html).
-
-### IoT Hub using ECC chain Example:
-
+- "CipherSuite" - only available when OpenSSL is used. value is a pointer to a null terminated string that contains a list in the format specified by [SSL_set_cipher_list](https://www.openssl.org/docs/man1.1.1/man3/SSL_CTX_set_cipher_list.html). Example:
 ```c
+// IoT Hub using ECC server certificate chain:
 IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_OPENSSL_CIPHER_SUITE, "ECDH+ECDSA+HIGH");
 ```
 
