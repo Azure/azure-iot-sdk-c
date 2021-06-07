@@ -291,14 +291,9 @@ static int PnP_TempControlComponent_CommandCallback(const char* componentName, c
     char* jsonStr = NULL;
     JSON_Value* rootValue = NULL;
     int result;
-    // unsigned const char *componentName;
-    // size_t componentNameSize;
-    // const char *pnpCommandName;
 
     *response = NULL;
     *responseSize = 0;
-
-    // Parse the methodName into its PnP (optional) componentName and pnpCommandName.
 
     if ((jsonStr = CopyPayloadToString(payload, size)) == NULL)
     {
@@ -362,8 +357,8 @@ int PnP_TempControlComponent_UpdatedPropertyCallback(
     void* userContextCallback)
 {
     IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient = (IOTHUB_DEVICE_CLIENT_LL_HANDLE)userContextCallback;
-    IOTHUB_CLIENT_DESERIALIZED_PROPERTY property;
     IOTHUB_CLIENT_PROPERTY_ITERATOR_HANDLE propertyIterator;
+    IOTHUB_CLIENT_DESERIALIZED_PROPERTY property;
     int propertiesVersion;
     IOTHUB_CLIENT_RESULT clientResult;
 
@@ -374,6 +369,7 @@ int PnP_TempControlComponent_UpdatedPropertyCallback(
     else
     {
         bool propertySpecified;
+        property.version = IOTHUB_CLIENT_DESERIALIZED_PROPERTY_VERSION_1;
 
         while ((clientResult = IoTHubClient_Deserialize_Properties_GetNextProperty(propertyIterator, &property, &propertySpecified)) == IOTHUB_CLIENT_OK)
         {
@@ -384,9 +380,13 @@ int PnP_TempControlComponent_UpdatedPropertyCallback(
 
             if (property.propertyType == IOTHUB_CLIENT_PROPERTY_TYPE_REPORTED_FROM_DEVICE)
             {
-                // We don't process previously reported properties, so ignore.  There is a potential optimization
-                // however where if a desired property is the same value and version of a reported, then 
-                // it wouldn't be necessary to call IoTHubDeviceClient_LL_PnP_SendReportedProperties for it
+                // We are iterating over a property that the device has previously sent to IoT Hub; 
+                // this shows what IoT Hub has recorded the reported property as.
+                //
+                // There are scenarios where a device may use this, such as knowing whether the
+                // given property has changed on the device and needs to be re-reported.
+                //
+                // This sample doesn't do anything with this, so we'll continue on when we hit reported properties.
                 continue;
             }
             
@@ -412,7 +412,6 @@ int PnP_TempControlComponent_UpdatedPropertyCallback(
     }
 
     IoTHubClient_Deserialize_Properties_DestroyIterator(propertyIterator);
-
     return 0;
 }
 

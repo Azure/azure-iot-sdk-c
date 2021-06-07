@@ -535,7 +535,6 @@ static IOTHUB_CLIENT_RESULT FillProperty(IOTHUB_CLIENT_PROPERTY_ITERATOR* proper
     }
     else
     {
-        property->version = IOTHUB_CLIENT_DESERIALIZED_PROPERTY_VERSION;
         property->propertyType = (propertyIterator->propertyParseState == PROPERTY_PARSE_DESIRED) ? 
                                  IOTHUB_CLIENT_PROPERTY_TYPE_WRITEABLE : IOTHUB_CLIENT_PROPERTY_TYPE_REPORTED_FROM_DEVICE;
         property->componentName = componentName;
