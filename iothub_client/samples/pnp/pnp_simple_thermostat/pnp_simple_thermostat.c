@@ -119,7 +119,7 @@ static const char g_temperatureTelemetryBodyFormat[] = "{\"temperature\":%.02f}"
 // service solution's perspective, which means we don't need to include any sort of status codes.
 static const char g_maxTemperatureSinceRebootFormat[] = "{\"maxTempSinceLastReboot\":%.2f}";
 
-// Format string to indicate the device received an update request for the temperature.  Because this is a "writeable"
+// Format string to indicate the device received an update request for the temperature.  Because this is a "writable"
 // property from the service solution's perspective, we need to return a status code (HTTP status code style) and version
 // for the solution to correlate the request and its status.
 static const char g_targetTemperatureResponseFormat[] = "{\"targetTemperature\":{\"value\":%.2f,\"ac\":%d,\"av\":%d,\"ad\":\"%s\"}}";

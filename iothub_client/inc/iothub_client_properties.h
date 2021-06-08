@@ -62,12 +62,12 @@ typedef struct IOTHUB_CLIENT_REPORTED_PROPERTY_TAG {
     const char* value;
 } IOTHUB_CLIENT_REPORTED_PROPERTY;
 
-/** @brief Current version of @p IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE structure.  */
-#define IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE_VERSION_1 1
+/** @brief Current version of @p IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE structure.  */
+#define IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE_VERSION_1 1
 
-/** @brief    This struct represents the response to a writeable property that the device will return.  
-              This structure is filled out by the application and can be serialized into a payload for IoT Hub via @p IoTHubClient_Serialize_WriteablePropertyResponse. */
-typedef struct IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE_TAG {
+/** @brief    This struct represents the response to a writable property that the device will return.  
+              This structure is filled out by the application and can be serialized into a payload for IoT Hub via @p IoTHubClient_Serialize_WritablePropertyResponse. */
+typedef struct IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE_TAG {
     /** @brief   Version of the structure.  Currently must be IOTHUB_CLIENT_REPORTED_PROPERTY_VERSION_1. */
     int version;
     /** @brief Name of the property. */
@@ -76,23 +76,23 @@ typedef struct IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE_TAG {
     const char* value;
     /** @brief Result of the requested operation.  This maps to an HTTP status code.  */
     int result;
-    /** @brief Acknowledgement version.  This corresponds to the version of the writeable properties being responded to. */
+    /** @brief Acknowledgement version.  This corresponds to the version of the writable properties being responded to. */
     /** @details If using @p IoTHubClient_Deserialize_Properties_CreateIterator to deserialize initial property request from IoT Hub, just set this field to what was returned in @p propertiesVersion. */
     int ackVersion;
     /** @brief Optional friendly description of the operation.  May be NULL. */
     const char* description;
-} IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE;
+} IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE;
 
 /** @brief Enumeration that indicates whether a given property from the service was originally reported from the device
            (and hence the device application sees what the last reported value IoT Hub has)
-           or whether this is a writeable property that the service is requesting configuration for.
+           or whether this is a writable property that the service is requesting configuration for.
 */
 typedef enum IOTHUB_PROPERTY_TYPE_TAG 
 {
     /** @brief Property was initially reported from the device. */
     IOTHUB_CLIENT_PROPERTY_TYPE_REPORTED_FROM_DEVICE,
-    /** @brief Property is writeable.  It is configured by service remotely. */
-    IOTHUB_CLIENT_PROPERTY_TYPE_WRITEABLE
+    /** @brief Property is writable.  It is configured by service remotely. */
+    IOTHUB_CLIENT_PROPERTY_TYPE_WRITABLE
 } IOTHUB_CLIENT_PROPERTY_TYPE;
 
 /* @brief Enumeration that indicates whether the JSON value of a deserialized property 
@@ -163,9 +163,9 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_ReportedProperties(
     size_t* serializedPropertiesLength);
 
 /**
-* @brief   Serializes the response to writeable properties into a format for sending to IoT Hub.  
+* @brief   Serializes the response to writable properties into a format for sending to IoT Hub.  
 *
-* @param[in]   properties                 Pointer to IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE to be serialized.
+* @param[in]   properties                 Pointer to IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE to be serialized.
 * @param[in]   numProperties              Number of elements contained in @p properties.
 * @param[in]   componentName              Optional component name these properties are part of.  May be NULL for default component.
 * @param[out]  serializedProperties       Serialized output of @p properties for sending to IoT Hub.
@@ -175,26 +175,26 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_ReportedProperties(
 * 
 * @remarks  Applications typically will invoke this API when processing a property from service (IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK)
             to indicate whether properties have been accepted or rejected by the device.  For example, if the service requested
-*           DesiredTemp=50, then the application could fill out the fields in an IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE structure indicating whether
+*           DesiredTemp=50, then the application could fill out the fields in an IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE structure indicating whether
 *           the request can be processed or whether there was a failure.
 *
 *           Applications can also manually construct the payload based on the convention rules.  This API is an easier to use 
-*           alternative, so the application can use the more convenient IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE structure instead of raw serialization.
+*           alternative, so the application can use the more convenient IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE structure instead of raw serialization.
 *
-*           This API does not perform any network I/O.  It only translates IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE into a byte array.  Applications
+*           This API does not perform any network I/O.  It only translates IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE into a byte array.  Applications
 *           should use APIs such as IoTHubDeviceClient_LL_SendPropertiesAsync to send the serialized data.
 *
 * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
-IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_WriteablePropertyResponse(
-    const IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE* properties,
+IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_WritablePropertyResponse(
+    const IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE* properties,
     size_t numProperties,
     const char* componentName,
     unsigned char** serializedProperties,
     size_t* serializedPropertiesLength);
 
 /**
-* @brief   Frees serialized properties that were initially allocated with IoTHubClient_Serialize_ReportedProperties or IoTHubClient_Serialize_WriteablePropertyResponse.
+* @brief   Frees serialized properties that were initially allocated with IoTHubClient_Serialize_ReportedProperties or IoTHubClient_Serialize_WritablePropertyResponse.
 *
 * @param[in]  serializedProperties Properties to free.
 */
@@ -205,13 +205,13 @@ typedef struct IOTHUB_CLIENT_PROPERTY_ITERATOR_TAG* IOTHUB_CLIENT_PROPERTY_ITERA
 /**
 * @brief   Setup an iterator to enumerate through Plug and Play properties.
 *
-* @param[in]  payloadType              Whether the payload is a full set of properties or only a set of updated writeable properties.
+* @param[in]  payloadType              Whether the payload is a full set of properties or only a set of updated writable properties.
 * @param[in]  payload                  Payload containing properties from Azure IoT that is to be deserialized. 
 * @param[in]  payloadLength            Length of @p payload.
 * @param[in]  componentsInModel        Optional array of components that correspond to the DTDLv2 model.  Can be NULL for models that don't contain sub-components.
 * @param[in]  numComponentsInModel     Number of entries in @p componentsInModel.
 * @param[out] propertyIteratorHandle   Returned handle used for subsequent iteration calls.
-* @param[out] propertiesVersion        Returned version of the writeable properties.  This is used when acknowledging a write property update.
+* @param[out] propertiesVersion        Returned version of the writable properties.  This is used when acknowledging a write property update.
 * 
 * @remarks  Applications typically will invoke this API in their IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK implementation.  
 *           Many of the parameters this function takes should come directly from IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK itself.

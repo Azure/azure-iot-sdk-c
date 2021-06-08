@@ -263,13 +263,13 @@ static void SendTargetTemperatureResponse(PNP_THERMOSTAT_COMPONENT* pnpThermosta
     }
     else
     {
-        // IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE in this case specifies the response to a desired temperature.
-        IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE temperatureProperty;
+        // IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE in this case specifies the response to a desired temperature.
+        IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE temperatureProperty;
         memset(&temperatureProperty, 0, sizeof(temperatureProperty));
         // Specify the structure version (not to be confused with the $version on IoT Hub) to protect back-compat in case the structure adds fields.
-        temperatureProperty.version = IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE_VERSION_1; // TODO: cleanup??
+        temperatureProperty.version = IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE_VERSION_1; // TODO: cleanup??
         // This represents the version of the request from IoT Hub.  It needs to be returned so service applications can determine
-        // what current version of the writeable property the device is currently using, as the server may update the property even when the device
+        // what current version of the writable property the device is currently using, as the server may update the property even when the device
         // is offline.
         temperatureProperty.ackVersion = version;
         // Result of request, which maps to HTTP status code.  For sample we'll always indicate success.
@@ -281,12 +281,12 @@ static void SendTargetTemperatureResponse(PNP_THERMOSTAT_COMPONENT* pnpThermosta
         size_t propertySerializedLength;
 
         // The first step of reporting properties is to serialize it into an IoT Hub friendly format.  You can do this by either
-        // implementing the PnP convention for building up the correct JSON or more simply to use IoTHubClient_Serialize_WriteablePropertyResponse.
-        if ((iothubClientResult = IoTHubClient_Serialize_WriteablePropertyResponse(&temperatureProperty, 1, pnpThermostatComponent->componentName, &propertySerialized, &propertySerializedLength)) != IOTHUB_CLIENT_OK)
+        // implementing the PnP convention for building up the correct JSON or more simply to use IoTHubClient_Serialize_WritablePropertyResponse.
+        if ((iothubClientResult = IoTHubClient_Serialize_WritablePropertyResponse(&temperatureProperty, 1, pnpThermostatComponent->componentName, &propertySerialized, &propertySerializedLength)) != IOTHUB_CLIENT_OK)
         {
             LogError("Unable to serialize updated property, error=%d", iothubClientResult);
         }
-        // The output of IoTHubClient_Serialize_WriteablePropertyResponse is sent to IoTHubDeviceClient_LL_SendPropertiesAsync to perform network I/O.
+        // The output of IoTHubClient_Serialize_WritablePropertyResponse is sent to IoTHubDeviceClient_LL_SendPropertiesAsync to perform network I/O.
         else if ((iothubClientResult = IoTHubDeviceClient_LL_SendPropertiesAsync(deviceClientLL, propertySerialized, propertySerializedLength, NULL, NULL)) != IOTHUB_CLIENT_OK)
         {
             LogError("Unable to send updated property, error=%d", iothubClientResult);

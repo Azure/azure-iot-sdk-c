@@ -284,9 +284,12 @@ static char* CopyPayloadToString(const unsigned char* payload, size_t size)
 //
 // PnP_TempControlComponent_DeviceMethodCallback is invoked by IoT SDK when a device method arrives.
 //
-static int PnP_TempControlComponent_CommandCallback(const char* componentName, const char* commandName, const unsigned char* payload, size_t size, unsigned char** response, size_t* responseSize, void* userContextCallback)
+static int PnP_TempControlComponent_CommandCallback(const char* componentName, const char* commandName, const unsigned char* payload, size_t size, const char* payloadContentType, unsigned char** response, size_t* responseSize, void* userContextCallback)
 {
     (void)userContextCallback;
+    // payloadContentType is guaranteed to be "application/json".  Future versions of the IoT Hub SDK might enable additional
+    // values, but it will require explicit opt-in from the application.
+    (void)payloadContentType; 
 
     char* jsonStr = NULL;
     JSON_Value* rootValue = NULL;

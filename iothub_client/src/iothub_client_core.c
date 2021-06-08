@@ -27,6 +27,8 @@
 #define DO_WORK_FREQ_DEFAULT 1
 #define DO_WORK_MAXIMUM_ALLOWED_FREQUENCY 100
 
+#define COMMAND_PAYLOAD_TYPE_JSON "application/json"
+
 struct IOTHUB_QUEUE_CONTEXT_TAG;
 
 typedef struct IOTHUB_CLIENT_CORE_INSTANCE_TAG
@@ -627,7 +629,7 @@ static void invoke_application_command_callback(IOTHUB_CLIENT_CORE_HANDLE method
     }
     else
     {
-        int status = command_callback(component_name, command_name, payload, payload_len, &payload_resp, &response_size, queued_cb->userContextCallback);
+        int status = command_callback(component_name, command_name, payload, payload_len, COMMAND_PAYLOAD_TYPE_JSON, &payload_resp, &response_size, queued_cb->userContextCallback);
         
         if (payload_resp && (response_size > 0))
         {

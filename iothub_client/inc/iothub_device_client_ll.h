@@ -418,7 +418,7 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SubscribeToCommands(
 * @param[in]    iotHubClientHandle           The handle created by a call to the create function.
 * @param[in]    properties                   Serialized property data to be sent to IoT Hub.  This buffer can either be
 *                                            manually serialized created with IoTHubClient_Serialize_ReportedProperties 
-*                                            or IoTHubClient_Serialize_WriteablePropertyResponse.
+*                                            or IoTHubClient_Serialize_WritablePropertyResponse.
 * @param[in]    propertiesLength             Number of bytes in the properties buffer.
 * @param[in]    propertyAcknowledgedCallback Optional callback specified by the application to be called with the
 *                                            result of the transaction.
@@ -458,11 +458,11 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_GetPropertiesAsync(
                         void* userContextCallback);
 
 /**
-* @brief   Retrieves all properties from IoT Hub and listens for updates to writeable properties.
+* @brief   Retrieves all properties from IoT Hub and listens for updates to writable properties.
 *
 * @param[in]   iotHubClientHandle      The handle created by a call to the create function.
 * @param[in]   propertyUpdateCallback  Callback both on initial retrieval of properties stored on IoT Hub
-                                       and subsequent service initiated modifications of writeable properties.
+                                       and subsequent service initiated modifications of writable properties.
                                        The API IoTHubClient_Deserialize_Properties can help deserialize the raw payload stream.
 * @param[in]   userContextCallback     Optional user specified context that will be provided to the callback.
 *

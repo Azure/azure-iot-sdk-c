@@ -35,8 +35,8 @@ typedef struct IOTHUB_CLIENT_PROPERTY_ITERATOR_TAG {
 
 static const char PROPERTY_FORMAT_COMPONENT_START[] = "{\"%s\":{\"__t\":\"c\", ";
 static const char PROPERTY_FORMAT_NAME_VALUE[] = "\"%s\":%s%s";
-static const char PROPERTY_FORMAT_WRITEABLE_RESPONSE[] = "\"%s\":{\"value\":%s,\"ac\":%d,\"av\":%d}%s";
-static const char PROPERTY_FORMAT_WRITEABLE_RESPONSE_WITH_DESCRIPTION[] = "{\"%s\":{\"value\":%s,\"ac\":%d,\"av\":%d,\"ad\":\"%s\"}%s";
+static const char PROPERTY_FORMAT_WRITABLE_RESPONSE[] = "\"%s\":{\"value\":%s,\"ac\":%d,\"av\":%d}%s";
+static const char PROPERTY_FORMAT_WRITABLE_RESPONSE_WITH_DESCRIPTION[] = "{\"%s\":{\"value\":%s,\"ac\":%d,\"av\":%d,\"ad\":\"%s\"}%s";
 
 static const char PROPERTY_OPEN_BRACE[] = "{";
 static const char PROPERTY_CLOSE_BRACE[] = "}";
@@ -154,10 +154,10 @@ static size_t BuildReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPERTY* pro
     return (requiredBytes + 1);
 }
 
-// BuildWriteableResponseProperties is used to build up the actual serializedProperties string based 
-// on the writeable response properties.  If serializedProperties==NULL and serializedPropertiesLength=0, just like
+// BuildWritableResponseProperties is used to build up the actual serializedProperties string based 
+// on the writable response properties.  If serializedProperties==NULL and serializedPropertiesLength=0, just like
 // analogous snprintf it will just calculate the amount of space caller needs to allocate.
-static size_t BuildWriteableResponseProperties(const IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE* properties, size_t numProperties, const char* componentName, unsigned char* serializedProperties, size_t serializedPropertiesLength)
+static size_t BuildWritableResponseProperties(const IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE* properties, size_t numProperties, const char* componentName, unsigned char* serializedProperties, size_t serializedPropertiesLength)
 {
     size_t requiredBytes = 0;
     size_t currentOutputBytes;
@@ -176,7 +176,7 @@ static size_t BuildWriteableResponseProperties(const IOTHUB_CLIENT_WRITEABLE_PRO
         bool lastProperty = (i == (numProperties - 1));
         if (properties[i].description == NULL)
         {
-            if ((currentOutputBytes = snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_WRITEABLE_RESPONSE, properties[i].name, 
+            if ((currentOutputBytes = snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_WRITABLE_RESPONSE, properties[i].name, 
                                                 properties[i].value, properties[i].result, properties[i].ackVersion, CommaIfNeeded(lastProperty))) < 0)
             {
                 LogError("Cannot build properites string");
@@ -185,7 +185,7 @@ static size_t BuildWriteableResponseProperties(const IOTHUB_CLIENT_WRITEABLE_PRO
         }
         else
         {
-            if ((currentOutputBytes = snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_WRITEABLE_RESPONSE_WITH_DESCRIPTION, properties[i].name, 
+            if ((currentOutputBytes = snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_WRITABLE_RESPONSE_WITH_DESCRIPTION, properties[i].name, 
                                                 properties[i].value, properties[i].result, properties[i].ackVersion, properties[i].description, CommaIfNeeded(lastProperty))) < 0)
             {
                 LogError("Cannot build properites string");
@@ -249,8 +249,8 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_ReportedProperties(const IOTHUB_CLIE
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_WriteablePropertyResponse(
-    const IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE* properties,
+IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_WritablePropertyResponse(
+    const IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE* properties,
     size_t numProperties,
     const char* componentName,
     unsigned char** serializedProperties,
@@ -260,12 +260,12 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_WriteablePropertyResponse(
     size_t requiredBytes = 0;
     unsigned char* serializedPropertiesBuffer = NULL;
 
-    if ((properties == NULL) || (properties->version != IOTHUB_CLIENT_WRITEABLE_PROPERTY_RESPONSE_VERSION_1) || (numProperties == 0) || (serializedProperties == NULL) || (serializedPropertiesLength == 0))
+    if ((properties == NULL) || (properties->version != IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE_VERSION_1) || (numProperties == 0) || (serializedProperties == NULL) || (serializedPropertiesLength == 0))
     {
         LogError("Invalid argument");
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
-    else if ((requiredBytes = BuildWriteableResponseProperties(properties, numProperties, componentName, NULL, 0)) < 0)
+    else if ((requiredBytes = BuildWritableResponseProperties(properties, numProperties, componentName, NULL, 0)) < 0)
     {
         LogError("Cannot determine required length of reported properties buffer");
         result = IOTHUB_CLIENT_ERROR;
@@ -275,7 +275,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_WriteablePropertyResponse(
         LogError("Cannot allocate %ul bytes", requiredBytes);
         result = IOTHUB_CLIENT_ERROR;
     }
-    else if (BuildWriteableResponseProperties(properties, numProperties, componentName, serializedPropertiesBuffer, requiredBytes) < 0)
+    else if (BuildWritableResponseProperties(properties, numProperties, componentName, serializedPropertiesBuffer, requiredBytes) < 0)
     {
         LogError("Cannot write properties buffer");
         result = IOTHUB_CLIENT_ERROR;
@@ -300,7 +300,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_WriteablePropertyResponse(
 
 
 // We have an explicit destroy function for serialized properties, even though IoTHubClient_Serialize_ReportedProperties
-// and IoTHubClient_Serialize_WriteablePropertyResponse used malloc() and app could've just free() directly, because
+// and IoTHubClient_Serialize_WritablePropertyResponse used malloc() and app could've just free() directly, because
 // * If SDK is setup to use a custom allocator (gballoc.h) then we use same malloc() / free() matching
 // * This gives us flexibility to use non-malloc based allocators in future
 // * Maintains symmetry with _Destroy() as mechanism to free resources SDK allocates.
@@ -367,7 +367,7 @@ static IOTHUB_CLIENT_RESULT GetDesiredAndReportedTwinJson(IOTHUB_CLIENT_PROPERTY
 }
 
 // GetTwinVersion retrieves the $version field from JSON document received from IoT Hub.  
-// The application needs this value when acknowledging writeable properties received from the service.
+// The application needs this value when acknowledging writable properties received from the service.
 static IOTHUB_CLIENT_RESULT GetTwinVersion(JSON_Object* desiredObject, int* propertiesVersion)
 {
     IOTHUB_CLIENT_RESULT result;
@@ -536,7 +536,7 @@ static IOTHUB_CLIENT_RESULT FillProperty(IOTHUB_CLIENT_PROPERTY_ITERATOR* proper
     else
     {
         property->propertyType = (propertyIterator->propertyParseState == PROPERTY_PARSE_DESIRED) ? 
-                                 IOTHUB_CLIENT_PROPERTY_TYPE_WRITEABLE : IOTHUB_CLIENT_PROPERTY_TYPE_REPORTED_FROM_DEVICE;
+                                 IOTHUB_CLIENT_PROPERTY_TYPE_WRITABLE : IOTHUB_CLIENT_PROPERTY_TYPE_REPORTED_FROM_DEVICE;
         property->componentName = componentName;
         property->name = propertyName;
         property->valueType = IOTHUB_CLIENT_PROPERTY_VALUE_STRING;
