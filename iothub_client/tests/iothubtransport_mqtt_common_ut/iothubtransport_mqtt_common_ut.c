@@ -54,6 +54,7 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 
 #include "azure_umqtt_c/mqtt_client.h"
 
+#include "internal/iothub_message_private.h"
 #include "internal/iothub_client_private.h"
 #include "iothub_client_options.h"
 #include "internal/iothub_client_retry_control.h"
@@ -68,8 +69,8 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 
 #include "internal/iothub_transport_ll_private.h"
 
-MOCKABLE_FUNCTION(, bool, Transport_MessageCallbackFromInput, MESSAGE_CALLBACK_INFO*, messageData, void*, ctx);
-MOCKABLE_FUNCTION(, bool, Transport_MessageCallback, MESSAGE_CALLBACK_INFO*, messageData, void*, ctx);
+MOCKABLE_FUNCTION(, bool, Transport_MessageCallbackFromInput, IOTHUB_MESSAGE_HANDLE, message, void*, ctx);
+MOCKABLE_FUNCTION(, bool, Transport_MessageCallback, IOTHUB_MESSAGE_HANDLE, message, void*, ctx);
 MOCKABLE_FUNCTION(, void, Transport_ConnectionStatusCallBack, IOTHUB_CLIENT_CONNECTION_STATUS, status, IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason, void*, ctx);
 MOCKABLE_FUNCTION(, void, Transport_SendComplete_Callback, PDLIST_ENTRY, completed, IOTHUB_CLIENT_CONFIRMATION_RESULT, result, void*, ctx);
 MOCKABLE_FUNCTION(, const char*, Transport_GetOption_Product_Info_Callback, void*, ctx);
@@ -232,8 +233,6 @@ static DLIST_ENTRY g_waitingToSend;
 
 static tickcounter_ms_t g_current_ms;
 static size_t g_tokenizerIndex;
-
-static MESSAGE_CALLBACK_INFO* g_last_message_callback_info;
 
 static CONSTBUFFER_HANDLE TEST_CONST_BUFFER_HANDLE = (CONSTBUFFER_HANDLE)0x2331;
 
@@ -409,9 +408,26 @@ static IOTHUB_MESSAGE_RESULT my_IoTHubMessage_GetByteArray(IOTHUB_MESSAGE_HANDLE
     return IOTHUB_MESSAGE_OK;
 }
 
+static MESSAGE_DISPOSITION_CONTEXT_HANDLE g_messageDispositionContext;
+static MESSAGE_DISPOSITION_CONTEXT_DESTROY_FUNCTION g_messageDispositionDestroyFunction;
 static void my_IoTHubMessage_Destroy(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
 {
     (void)iotHubMessageHandle;
+
+    if (g_messageDispositionContext != NULL)
+    {
+        g_messageDispositionDestroyFunction(g_messageDispositionContext);
+        g_messageDispositionContext = NULL;
+        g_messageDispositionDestroyFunction = NULL;
+    }
+}
+
+static IOTHUB_MESSAGE_RESULT my_IoTHubMessage_SetDispositionContext(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, MESSAGE_DISPOSITION_CONTEXT_HANDLE dispositionContext, MESSAGE_DISPOSITION_CONTEXT_DESTROY_FUNCTION dispositionContextDestroyFunction)
+{
+    (void)iotHubMessageHandle;
+    g_messageDispositionContext = dispositionContext;
+    g_messageDispositionDestroyFunction = dispositionContextDestroyFunction;
+    return IOTHUB_MESSAGE_OK;
 }
 
 
@@ -757,6 +773,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(ON_MQTT_DISCONNECTED_CALLBACK, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUBMESSAGE_CONTENT_TYPE, int);
     REGISTER_UMOCK_ALIAS_TYPE(DEVICE_TWIN_UPDATE_STATE, int);
+    REGISTER_UMOCK_ALIAS_TYPE(MESSAGE_DISPOSITION_CONTEXT_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(MESSAGE_DISPOSITION_CONTEXT_DESTROY_FUNCTION, void*);
 
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
@@ -816,6 +834,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_GetOutputName, NULL);
 
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubMessage_Destroy, my_IoTHubMessage_Destroy);
+    REGISTER_GLOBAL_MOCK_HOOK(IoTHubMessage_SetDispositionContext, my_IoTHubMessage_SetDispositionContext);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_SetDispositionContext, IOTHUB_MESSAGE_ERROR);
 
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_Properties, TEST_MESSAGE_PROP_MAP);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_Properties, NULL);
@@ -967,8 +987,6 @@ static void reset_test_data()
     expected_MQTT_TRANSPORT_PROXY_OPTIONS = NULL;
     g_disconnect_callback = NULL;
     g_disconnect_callback_ctx = NULL;
-
-    g_last_message_callback_info = NULL;
 }
 
 TEST_FUNCTION_INITIALIZE(method_init)
@@ -1062,23 +1080,21 @@ static void setup_message_receive_initial_calls(const char* topicName)
     STRICT_EXPECTED_CALL(IoTHubMessage_CreateFromByteArray(appMessage, appMsgSize));
 }
 
-static void setup_create_message_callback_info()
+static void setup_set_message_disposition_context()
 {
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(mqttmessage_getPacketId(IGNORED_PTR_ARG))
         .CallCannotFail();
     STRICT_EXPECTED_CALL(mqttmessage_getQosType(IGNORED_PTR_ARG))
         .CallCannotFail();
+    STRICT_EXPECTED_CALL(IoTHubMessage_SetDispositionContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 }
 
-static void setup_destroy_message_callback_info()
-{
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-}
-
-static void setup_message_recv_with_properties_mocks(bool has_content_type, bool has_content_encoding, bool auto_decode, bool msgCbCtx)
+static void setup_message_recv_with_properties_mocks(
+    bool has_content_type, 
+    bool has_content_encoding, 
+    bool auto_decode, 
+    bool msgCbResult)
 {
     setup_message_receive_initial_calls(TEST_MQTT_MSG_TOPIC_W_1_PROP);
     EXPECTED_CALL(STRING_TOKENIZER_create_from_char(TEST_MQTT_MSG_TOPIC_W_1_PROP));
@@ -1161,15 +1177,14 @@ static void setup_message_recv_with_properties_mocks(bool has_content_type, bool
             .CallCannotFail();
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
-    setup_create_message_callback_info();
+    setup_set_message_disposition_context();
     STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .CaptureArgumentValue_messageData(&g_last_message_callback_info)
-        .SetReturn(msgCbCtx);
+        .SetReturn(msgCbResult);
     
-    if (!msgCbCtx)
+    if (!msgCbResult)
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
-        setup_destroy_message_callback_info();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     }
 }
 
@@ -1754,15 +1769,14 @@ static void setup_message_recv_msg_callback_mocks(bool msgCbResult)
     STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&"));
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
-    setup_create_message_callback_info();
+    setup_set_message_disposition_context();
     STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .CaptureArgumentValue_messageData(&g_last_message_callback_info)
         .SetReturn(msgCbResult);
 
     if (!msgCbResult)
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
-        setup_destroy_message_callback_info();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     }
 }
 
@@ -6173,10 +6187,8 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_succeed)
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    ASSERT_IS_NOT_NULL(g_last_message_callback_info);
 
     //cleanup
-    (void)IoTHubTransport_MQTT_Common_SendMessageDisposition(handle, g_last_message_callback_info, IOTHUBMESSAGE_ACCEPTED);
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
@@ -6431,9 +6443,8 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties_succee
     STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&"));
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
-    setup_create_message_callback_info();
+    setup_set_message_disposition_context();
     STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .CaptureArgumentValue_messageData(&g_last_message_callback_info)
         .SetReturn(true);
 
     // act
@@ -6442,10 +6453,9 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties_succee
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    ASSERT_IS_NOT_NULL(g_last_message_callback_info);
 
     //cleanup
-    (void)IoTHubTransport_MQTT_Common_SendMessageDisposition(handle, g_last_message_callback_info, IOTHUBMESSAGE_ACCEPTED);
+    g_messageDispositionDestroyFunction(g_messageDispositionContext);
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
@@ -6483,9 +6493,8 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties_succee
     STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&"));
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
-    setup_create_message_callback_info();
+    setup_set_message_disposition_context();
     STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .CaptureArgumentValue_messageData(&g_last_message_callback_info)
         .SetReturn(true);
 
     // act
@@ -6494,10 +6503,9 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_sys_Properties_succee
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    ASSERT_IS_NOT_NULL(g_last_message_callback_info);
 
     //cleanup
-    (void)IoTHubTransport_MQTT_Common_SendMessageDisposition(handle, g_last_message_callback_info, IOTHUBMESSAGE_ACCEPTED);
+    g_messageDispositionDestroyFunction(g_messageDispositionContext);
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
@@ -6523,10 +6531,9 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_Properties_succeed)
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    ASSERT_IS_NOT_NULL(g_last_message_callback_info);
 
     //cleanup
-    (void)IoTHubTransport_MQTT_Common_SendMessageDisposition(handle, g_last_message_callback_info, IOTHUBMESSAGE_ACCEPTED);
+    g_messageDispositionDestroyFunction(g_messageDispositionContext);
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
@@ -6549,10 +6556,9 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_no_Properties_no_ct_no_ce_
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    ASSERT_IS_NOT_NULL(g_last_message_callback_info);
 
     //cleanup
-    (void)IoTHubTransport_MQTT_Common_SendMessageDisposition(handle, g_last_message_callback_info, IOTHUBMESSAGE_ACCEPTED);
+    g_messageDispositionDestroyFunction(g_messageDispositionContext);
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
@@ -6575,7 +6581,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_no_Properties_no_ct_no_ce_
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    ASSERT_IS_NOT_NULL(g_last_message_callback_info);
 
     //cleanup
     IoTHubTransport_MQTT_Common_Destroy(handle);
@@ -6602,10 +6607,9 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_Properties_succeed_au
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    ASSERT_IS_NOT_NULL(g_last_message_callback_info);
 
     //cleanup
-    (void)IoTHubTransport_MQTT_Common_SendMessageDisposition(handle, g_last_message_callback_info, IOTHUBMESSAGE_ACCEPTED);
+    g_messageDispositionDestroyFunction(g_messageDispositionContext);
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
@@ -6634,11 +6638,18 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_Properties_fail)
     {
         if (umock_c_negative_tests_can_call_fail(index))
         {
+            g_messageDispositionContext = NULL;
+            g_messageDispositionDestroyFunction = NULL;
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
             g_tokenizerIndex = 6;
             g_fnMqttMsgRecv(TEST_MQTT_MESSAGE_HANDLE, g_callbackCtx);
+
+            if (g_messageDispositionContext != NULL)
+            {
+                g_messageDispositionDestroyFunction(g_messageDispositionContext);
+            }
         }
     }
 
@@ -6675,6 +6686,8 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_Properties_fail_autod
     {
         if (umock_c_negative_tests_can_call_fail(index)) 
         {
+            g_messageDispositionContext = NULL;
+            g_messageDispositionDestroyFunction = NULL;
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
@@ -6683,6 +6696,11 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_Properties_fail_autod
 
             g_tokenizerIndex = 6;
             g_fnMqttMsgRecv(TEST_MQTT_MESSAGE_HANDLE, g_callbackCtx);
+
+            if (g_messageDispositionContext != NULL)
+            {
+                g_messageDispositionDestroyFunction(g_messageDispositionContext);
+            }
         }
     }
 
@@ -8105,23 +8123,17 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SendMessageDisposition_Message_NULL_fa
     msgDispCtx->packet_id = 10;
     msgDispCtx->qos_value = DELIVER_AT_LEAST_ONCE;
 
-    MESSAGE_CALLBACK_INFO* md = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
-    md->messageHandle = NULL;
-    md->transportContext = (void*)msgDispCtx;
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(mqtt_client_send_ack(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG));
-    // No IoTHubMessage_Destroy.
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SendMessageDisposition(devHandle, md, IOTHUBMESSAGE_ACCEPTED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SendMessageDisposition(devHandle, NULL, IOTHUBMESSAGE_ACCEPTED);
 
     // assert
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
+    free(msgDispCtx);
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
@@ -8143,21 +8155,21 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SendMessageDisposition_succeeds)
     set_expected_call_for_get_cred_and_devicekey();
     IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransport_MQTT_Common_Register(handle, &TEST_DEVICE_1, config.waitingToSend);
 
-    TEST_MESSAGE_DISPOSITION_CONTEXT* msgDispCtx = malloc(sizeof(TEST_MESSAGE_DISPOSITION_CONTEXT));;
-    msgDispCtx->packet_id = 10;
-    msgDispCtx->qos_value = DELIVER_AT_LEAST_ONCE;
+    TEST_MESSAGE_DISPOSITION_CONTEXT msgDispCtx;
+    msgDispCtx.packet_id = 10;
+    msgDispCtx.qos_value = DELIVER_AT_LEAST_ONCE;
 
-    MESSAGE_CALLBACK_INFO* md = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
-    md->messageHandle = (IOTHUB_MESSAGE_HANDLE)0x42;
-    md->transportContext = (void*)msgDispCtx;
+    MESSAGE_DISPOSITION_CONTEXT_HANDLE msgDispCtxHandle = (MESSAGE_DISPOSITION_CONTEXT_HANDLE)&msgDispCtx;
+
     umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetDispositionContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .CopyOutArgumentBuffer_dispositionContext(&msgDispCtxHandle, sizeof(&msgDispCtxHandle));
     STRICT_EXPECTED_CALL(mqtt_client_send_ack(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SendMessageDisposition(devHandle, md, IOTHUBMESSAGE_ACCEPTED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_MQTT_Common_SendMessageDisposition(devHandle, (IOTHUB_MESSAGE_HANDLE)0x42, IOTHUBMESSAGE_ACCEPTED);
 
     // assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
@@ -8387,7 +8399,8 @@ static void setup_message_recv_extractMqttProperties(const char* topicName, bool
     {
         // Parse out connected_device
         STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&"))
-            .IgnoreArgument(3);
+            .IgnoreArgument(3)
+            .CallCannotFail();
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument(1)
             .SetReturn("%24.cdid=connected_device").
@@ -8425,7 +8438,12 @@ static void setup_message_recv_extractMqttProperties(const char* topicName, bool
     EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
 }
 
-static void setup_message_recv_with_input_queue_mocks(const char* topicName, const char* inputQueueSubscribeName, const char* inputQueueName, bool connectedSystemProps, bool msgCbCtx)
+static void setup_message_recv_with_input_queue_mocks(
+    const char* topicName, 
+    const char* inputQueueSubscribeName, 
+    const char* inputQueueName, 
+    bool connectedSystemProps, 
+    bool msgCbResult)
 {
     // my_STRING_TOKENIZER_get_next_token
     STRICT_EXPECTED_CALL(mqttmessage_getTopicName(TEST_MQTT_MESSAGE_HANDLE)).SetReturn(topicName);
@@ -8446,15 +8464,14 @@ static void setup_message_recv_with_input_queue_mocks(const char* topicName, con
 
     setup_message_recv_extractMqttProperties(topicName, connectedSystemProps);
 
-    setup_create_message_callback_info();
+    setup_set_message_disposition_context();
     STRICT_EXPECTED_CALL(Transport_MessageCallbackFromInput(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .CaptureArgumentValue_messageData(&g_last_message_callback_info)
-        .SetReturn(msgCbCtx);
+        .SetReturn(msgCbResult);
 
-    if (!msgCbCtx)
+    if (!msgCbResult)
     {
         STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
-        setup_destroy_message_callback_info();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     }
 }
 
@@ -8482,10 +8499,8 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_InputQueue_succeed)
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    ASSERT_IS_NOT_NULL(g_last_message_callback_info);
 
     //cleanup
-    (void)IoTHubTransport_MQTT_Common_SendMessageDisposition(handle, g_last_message_callback_info, IOTHUBMESSAGE_ACCEPTED);
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
@@ -8511,10 +8526,9 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_with_InputQueue_no_system_
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    ASSERT_IS_NOT_NULL(g_last_message_callback_info);
 
     //cleanup
-    (void)IoTHubTransport_MQTT_Common_SendMessageDisposition(handle, g_last_message_callback_info, IOTHUBMESSAGE_ACCEPTED);
+    g_messageDispositionDestroyFunction(g_messageDispositionContext);
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
@@ -8582,11 +8596,18 @@ TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_with_InputQueue_fail)
     {
         if (umock_c_negative_tests_can_call_fail(index))
         {
+            g_messageDispositionContext = NULL;
+            g_messageDispositionDestroyFunction = NULL;
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
             g_tokenizerIndex = PARSE_SLASHES_FOR_INPUT_QUEUE_INDEX_0;
             g_fnMqttMsgRecv(TEST_MQTT_MESSAGE_HANDLE, g_callbackCtx);
+
+            if (g_messageDispositionContext != NULL)
+            {
+                g_messageDispositionDestroyFunction(g_messageDispositionContext);
+            }
         }
     }
 

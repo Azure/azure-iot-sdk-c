@@ -3883,9 +3883,8 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_message_callback_LOCK_Fails)
     // arrange
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
     (void)IoTHubClientCore_SetMessageCallback(iothub_handle, test_message_confirmation_callback, NULL);
-    MESSAGE_CALLBACK_INFO* testMessage = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
-    testMessage->messageHandle = IoTHubMessage_CreateFromString("Hello World");
-    g_messageCallback_ex(testMessage, g_userContextCallback);
+    IOTHUB_MESSAGE_HANDLE messageHandle = IoTHubMessage_CreateFromString("Hello World");
+    g_messageCallback_ex(messageHandle, g_userContextCallback);
     umock_c_reset_all_calls();
 
     g_how_thread_loops = 1;
@@ -3905,8 +3904,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_message_callback_LOCK_Fails)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     // cleanup
-    IoTHubMessage_Destroy(testMessage->messageHandle);
-    free(testMessage);
+    IoTHubMessage_Destroy(messageHandle);
     IoTHubClientCore_Destroy(iothub_handle);
 }
 
@@ -3915,9 +3913,8 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_message_callback_SMD_Fails)
     // arrange
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
     (void)IoTHubClientCore_SetMessageCallback(iothub_handle, test_message_confirmation_callback, NULL);
-    MESSAGE_CALLBACK_INFO* testMessage = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
-    testMessage->messageHandle = IoTHubMessage_CreateFromString("Hello World");
-    g_messageCallback_ex(testMessage, g_userContextCallback);
+    IOTHUB_MESSAGE_HANDLE messageHandle = IoTHubMessage_CreateFromString("Hello World");
+    g_messageCallback_ex(messageHandle, g_userContextCallback);
     umock_c_reset_all_calls();
 
     g_how_thread_loops = 1;
@@ -3939,8 +3936,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_message_callback_SMD_Fails)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     // cleanup
-    IoTHubMessage_Destroy(testMessage->messageHandle);
-    free(testMessage);
+    IoTHubMessage_Destroy(messageHandle);
     IoTHubClientCore_Destroy(iothub_handle);
 }
 
@@ -3950,9 +3946,8 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_message_callback_succeed)
     // arrange
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
     (void)IoTHubClientCore_SetMessageCallback(iothub_handle, test_message_confirmation_callback, NULL);
-    MESSAGE_CALLBACK_INFO* testMessage = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
-    testMessage->messageHandle = IoTHubMessage_CreateFromString("Hello World");
-    g_messageCallback_ex(testMessage, g_userContextCallback);
+    IOTHUB_MESSAGE_HANDLE messageHandle = IoTHubMessage_CreateFromString("Hello World");
+    g_messageCallback_ex(messageHandle, g_userContextCallback);
     umock_c_reset_all_calls();
 
     g_how_thread_loops = 1;
@@ -3975,8 +3970,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_message_callback_succeed)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     // cleanup
-    IoTHubMessage_Destroy(testMessage->messageHandle);
-    free(testMessage);
+    IoTHubMessage_Destroy(messageHandle);
     IoTHubClientCore_Destroy(iothub_handle);
 }
 

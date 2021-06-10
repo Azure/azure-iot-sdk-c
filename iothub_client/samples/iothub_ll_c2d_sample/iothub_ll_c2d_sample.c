@@ -60,8 +60,6 @@ static size_t g_message_recv_count = 0;
 #ifdef USE_C2D_ASYNC_ACK
 static SINGLYLINKEDLIST_HANDLE g_cloudMessages;
 
-typedef bool (*LIST_CONDITION_FUNCTION)(const void* item, const void* match_context, bool* continue_processing);
-
 static bool ack_and_remove_message(const void* item, const void* match_context, bool* continue_processing)
 {
     IOTHUB_DEVICE_CLIENT_LL_HANDLE device_ll_handle = (IOTHUB_DEVICE_CLIENT_LL_HANDLE)match_context;
