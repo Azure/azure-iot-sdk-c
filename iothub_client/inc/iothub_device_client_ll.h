@@ -400,7 +400,7 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendTelemetryAsync(
                         void* userContextCallback);
 
 /**
-* @brief    Subscribes to command channel from IoT Hub.
+* @brief    Subscribes to incoming commands from IoT Hub.
 *
 * @param[in]  iotHubClientHandle                 The handle created by a call to the create function.
 * @param[in]  commandCallback                    The callback which will be called when a command request arrives.
@@ -436,7 +436,6 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendPropertiesAsync(
                          size_t propertiesLength,
                          IOTHUB_CLIENT_PROPERTY_ACKNOWLEDGED_CALLBACK propertyAcknowledgedCallback,
                          void* userContextCallback);
-
 /**
 * @brief   Retrieves all properties from IoT Hub.
 *
@@ -458,7 +457,7 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_GetPropertiesAsync(
                         void* userContextCallback);
 
 /**
-* @brief   Retrieves all properties from IoT Hub and listens for updates to writable properties.
+* @brief   Retrieves all properties from IoT Hub and also subscribes for updates to writable properties.
 *
 * @param[in]   iotHubClientHandle      The handle created by a call to the create function.
 * @param[in]   propertyUpdateCallback  Callback both on initial retrieval of properties stored on IoT Hub

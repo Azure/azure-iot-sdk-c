@@ -10,35 +10,41 @@
 *            Azure IoT Hub defines a set of conventions for serializing and deserializing DTDLv2 
 *            properties that can be sent between Azure IoT Hub and devices connected to the Hub.
 *
-*            The format is JSON based.  While it is possible to manually serialize and deserialize
-*            this payload following the convention documentation yourself, it is somewhat tedious.
+*            The format is JSON based.  It is possible to manually serialize and deserialize
+*            this payload following the documented convention.  These APIs make this process easier.  
+*            When serializing a property to be sent to IoT Hub, your application provides a C structure and 
+*            the API returns a byte stream to be sent.
 *
-*            These APIs make this process easier.  When serializing a property to be sent to IoT Hub,
-*            your application provides a C structure and the API returns a byte stream to be sent.
 *            When receiving properties form IoT Hub, the deserialization API converts a raw stream
 *            into easier to an easier to process C structure with the JSON parsed out.
 *
 *            These APIs do not invoke any network I/O.  To actually send and receive data, these APIs 
-*            will typically be pared with a corresponding IoT Hub device or module client.  
+*            will typically be paired with a corresponding IoT Hub device or module client.  
 *  
-*            Pseudocode to demonstrate the relationship for serializing properties and device and module clients:
+*            Pseudocode to demonstrate the relationship for serializing properties and device clients:
 *                   // Converts C structure into serialized stream.  
 *                   IoTHubClient_Serialize_ReportedProperties(yourApplicationsPropertiesInStruct, &serializedByteStream);
 *                   // Send the data
 *                   IoTHubDeviceClient_LL_SendPropertiesAsync(deviceHandle, serializedByteStream);
 *
-*            Pseudocode to demonstrate the relationship for deserializing properties and device and module clients:
+*            Pseudocode to demonstrate the relationship for deserializing properties and device clients:
 *                   // Request all device properties from IoT Hub
 *                   IoTHubDeviceClient_LL_GetPropertiesAsync(deviceHandle, &yourAppCallback);
 *                   // Time passes as request is processed...
 *                   // ...
 *                   // Your application's IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK is eventually invoked.  
-*                   // The application then will setup the iterator based on the data from the network
-*                   IoTHubClient_Deserialize_Properties_CreateIterator(rawDataFromIoTHub, &iteratorHandle)
-*                   // Enumerate each property that is in a component.  desiralizedProperty will be of type
-*                   // IOTHUB_CLIENT_DESERIALIZED_PROPERTY and is much easier to process than raw JSON 
-*                   while (IoTHubClient_Deserialize_Properties_GetNextProperty(&iteratorHandle, &deserializedProperty)) {
-*                       // Application processes deserializedProperty according to modeling rules
+*                   // Your application then will setup the iterator based on the data from the network, 
+*                   // where rawDataFromIoThub below corresponds to data your IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK receives.
+*
+*                   void yourAppCallback(rawDataFromIoThub, ...) // your IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK implementation
+*                   {
+*                     IoTHubClient_Deserialize_Properties_CreateIterator(rawDataFromIoTHub, &iteratorHandle)
+*
+*                     // Enumerate each property that is in a component.  desiralizedProperty will be of type
+*                     // IOTHUB_CLIENT_DESERIALIZED_PROPERTY and is much easier to process than raw JSON 
+*                     while (IoTHubClient_Deserialize_Properties_GetNextProperty(&iteratorHandle, &deserializedProperty)) {
+*                         // Application processes deserializedProperty according to modeling rules
+*                     }
 *                   }
 */
 
