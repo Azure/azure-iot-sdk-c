@@ -385,7 +385,15 @@ extern "C"
 
 #endif /*USE_EDGE_MODULES*/
 
-    // TODO: document!
+    /**
+    * @brief    This API sends an acknowledgement to Azure IoT Hub that a cloud-to-device message has been received.
+    *
+    * @param    module_ll_handle                The handle created by a call to a create function
+    * @param    message                         The cloud-to-device message received through the callback provided to IoTHubModuleClient_LL_SetMessageCallback or IoTHubModuleClient_LL_SetInputMessageCallback.
+    * @param    disposition                     Acknowledgement option for the message.
+    *
+    * @return   IOTHUB_CLIENT_OK upon success, or an error code upon failure.
+    */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_LL_SendMessageDisposition, IOTHUB_MODULE_CLIENT_LL_HANDLE, module_ll_handle, IOTHUB_MESSAGE_HANDLE, message, IOTHUBMESSAGE_DISPOSITION_RESULT, disposition);
 
 #ifdef __cplusplus

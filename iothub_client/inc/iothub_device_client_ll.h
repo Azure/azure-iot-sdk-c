@@ -374,7 +374,15 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
 
 #endif /*DONT_USE_UPLOADTOBLOB*/
 
-     // TODO: document!
+    /**
+    * @brief    This API sends an acknowledgement to Azure IoT Hub that a cloud-to-device message has been received.
+    *
+    * @param    device_ll_handle                The handle created by a call to a create function.
+    * @param    message                         The cloud-to-device message received through the callback provided to IoTHubDeviceClient_LL_SetMessageCallback.
+    * @param    disposition                     Acknowledgement option for the message.
+    *
+    * @return   IOTHUB_CLIENT_OK upon success, or an error code upon failure.
+    */
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_SendMessageDisposition, IOTHUB_DEVICE_CLIENT_LL_HANDLE, device_ll_handle, IOTHUB_MESSAGE_HANDLE, message, IOTHUBMESSAGE_DISPOSITION_RESULT, disposition);
 
 #ifdef __cplusplus
