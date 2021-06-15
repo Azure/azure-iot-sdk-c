@@ -6637,6 +6637,78 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallbackEx_with_NULL_inputName_
     IoTHubClientCore_LL_Destroy(handle);
 }
 
+TEST_FUNCTION(IoTHubClientCore_LL_SendMessageDisposition_succeeds)
+{
+    //arrange
+    IOTHUB_CLIENT_CORE_LL_HANDLE handle = IoTHubClientCore_LL_Create(&TEST_CONFIG);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SendMessageDisposition(IGNORED_PTR_ARG, TEST_MESSAGE_HANDLE, IOTHUBMESSAGE_ACCEPTED));
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SendMessageDisposition(handle, TEST_MESSAGE_HANDLE, IOTHUBMESSAGE_ACCEPTED);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+
+    //cleanup
+    IoTHubClientCore_LL_Destroy(handle);
+}
+
+TEST_FUNCTION(IoTHubClientCore_LL_SendMessageDisposition_negative_test_fails)
+{
+    //arrange
+    IOTHUB_CLIENT_CORE_LL_HANDLE handle = IoTHubClientCore_LL_Create(&TEST_CONFIG);
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SendMessageDisposition(IGNORED_PTR_ARG, TEST_MESSAGE_HANDLE, IOTHUBMESSAGE_ACCEPTED))
+        .SetReturn(IOTHUB_CLIENT_ERROR);
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SendMessageDisposition(handle, TEST_MESSAGE_HANDLE, IOTHUBMESSAGE_ACCEPTED);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+
+    //cleanup
+    IoTHubClientCore_LL_Destroy(handle);
+}
+
+TEST_FUNCTION(IoTHubClientCore_LL_SendMessageDisposition_NULL_message_fails)
+{
+    //arrange
+    IOTHUB_CLIENT_CORE_LL_HANDLE handle = IoTHubClientCore_LL_Create(&TEST_CONFIG);
+
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SendMessageDisposition(handle, NULL, IOTHUBMESSAGE_ACCEPTED);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+
+    //cleanup
+    IoTHubClientCore_LL_Destroy(handle);
+}
+
+TEST_FUNCTION(IoTHubClientCore_LL_SendMessageDisposition_NULL_client_fails)
+{
+    //arrange
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SendMessageDisposition(NULL, TEST_MESSAGE_HANDLE, IOTHUBMESSAGE_ACCEPTED);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+
+    //cleanup
+}
+
 #ifdef USE_EDGE_MODULES
 
 static void set_expected_calls_for_IoTHubClientCore_LL_CreateFromEnvironment_for_EdgeHsm()
