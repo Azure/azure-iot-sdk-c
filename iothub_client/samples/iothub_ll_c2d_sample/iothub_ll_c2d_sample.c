@@ -44,7 +44,7 @@
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 // Uncomment this define to use Asynchronous ACK of Cloud-to-Device messages.
-#define USE_C2D_ASYNC_ACK
+// #define USE_C2D_ASYNC_ACK
 
 #ifdef USE_C2D_ASYNC_ACK
 #include "azure_c_shared_utility/singlylinkedlist.h"

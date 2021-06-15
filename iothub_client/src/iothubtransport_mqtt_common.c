@@ -3925,7 +3925,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SendMessageDisposition(IOTHUB_D
             {
                 PMQTTTRANSPORT_HANDLE_DATA transport_data = (PMQTTTRANSPORT_HANDLE_DATA)handle;
 
-                if (mqtt_client_send_ack(transport_data->mqttClient, msgDispCtx->packet_id, msgDispCtx->qos_value) != 0)
+                if (mqtt_client_send_message_response(transport_data->mqttClient, msgDispCtx->packet_id, msgDispCtx->qos_value) != 0)
                 {
                     LogError("Failed sending ACK for MQTT message (packet_id=%u)", msgDispCtx->packet_id);
                     result = IOTHUB_CLIENT_ERROR;
