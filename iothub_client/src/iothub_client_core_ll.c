@@ -787,7 +787,8 @@ static int invoke_command_callback(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData
     }
     else
     {
-        result = handleData->methodCallback.commandCallbackSync(component_name, command_name, payLoad, size, &payload_resp, &response_size, handleData->methodCallback.userContextCallback);
+        // TODO: don't hardcode application/json like this.
+        result = handleData->methodCallback.commandCallbackSync(component_name, command_name, payLoad, size, "application/json", &payload_resp, &response_size, handleData->methodCallback.userContextCallback);
         /* Codes_SRS_IOTHUBCLIENT_LL_07_020: [ deviceMethodCallback shall build the BUFFER_HANDLE with the response payload from the IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC callback. ] */
         if (payload_resp != NULL && response_size > 0)
         {

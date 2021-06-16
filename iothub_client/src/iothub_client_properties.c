@@ -211,7 +211,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_ReportedProperties(const IOTHUB_CLIE
     size_t requiredBytes = 0;
     unsigned char* serializedPropertiesBuffer = NULL;
 
-    if ((properties == NULL) || (properties->version != IOTHUB_CLIENT_REPORTED_PROPERTY_VERSION_1) || (numProperties == 0) || (serializedProperties == NULL) || (serializedPropertiesLength == 0))
+    if ((properties == NULL) || (properties->structVersion != IOTHUB_CLIENT_REPORTED_PROPERTY_VERSION_1) || (numProperties == 0) || (serializedProperties == NULL) || (serializedPropertiesLength == 0))
     {
         LogError("Invalid argument");
         result = IOTHUB_CLIENT_INVALID_ARG;
@@ -260,7 +260,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_WritablePropertyResponse(
     size_t requiredBytes = 0;
     unsigned char* serializedPropertiesBuffer = NULL;
 
-    if ((properties == NULL) || (properties->version != IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE_VERSION_1) || (numProperties == 0) || (serializedProperties == NULL) || (serializedPropertiesLength == 0))
+    if ((properties == NULL) || (properties->structVersion != IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE_VERSION_1) || (numProperties == 0) || (serializedProperties == NULL) || (serializedPropertiesLength == 0))
     {
         LogError("Invalid argument");
         result = IOTHUB_CLIENT_INVALID_ARG;

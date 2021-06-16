@@ -1411,10 +1411,19 @@ const char* Prov_Device_LL_Get_Provisioning_Payload(PROV_DEVICE_LL_HANDLE handle
 static const char g_dps_PayloadFormatForModelId[] = "{\"modelId\":\"%s\"}";
 
 
-PROV_DEVICE_RESULT Prov_Client_Create_ModelPayload(const char* modelId, char** payload)
+PROV_DEVICE_RESULT Prov_Client_Create_ModelIdPayload(const char* modelId, char** payload)
 {
-    (void)modelId;
-    (void)payload;
+    PROV_DEVICE_RESULT result;
+    if ((modelId == NULL) || (payload == NULL))
+    {
+        result = PROV_DEVICE_RESULT_INVALID_ARG;
+    }
+    // TODO: Fill in remainder
     return PROV_DEVICE_RESULT_OK;
+}
+
+void Prov_Client_Free_ModelIdPayload(char* payload)
+{
+    free(payload);
 }
 

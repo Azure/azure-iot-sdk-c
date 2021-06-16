@@ -86,7 +86,7 @@ IOTHUB_DEVICE_CLIENT_LL_HANDLE PnP_CreateDeviceClientLLHandle_ViaDps(const PNP_D
     LogInfo("Initiating DPS client to retrieve IoT Hub connection information");
     g_pnpDpsRegistrationStatus = PNP_DPS_REGISTRATION_NOT_COMPLETE;
 
-    if ((provDeviceResult = Prov_Client_Create_ModelPayload(pnpDeviceConfiguration->modelId, &modelIdPayload)) != PROV_DEVICE_RESULT_OK)
+    if ((provDeviceResult = Prov_Client_Create_ModelIdPayload(pnpDeviceConfiguration->modelId, &modelIdPayload)) != PROV_DEVICE_RESULT_OK)
     {
         LogError("Allocating custom DPS payload for modelId failed, error=%d.", provDeviceResult);
         result = false;
@@ -172,7 +172,7 @@ IOTHUB_DEVICE_CLIENT_LL_HANDLE PnP_CreateDeviceClientLLHandle_ViaDps(const PNP_D
 
     free(g_dpsIothubUri);
     free(g_dpsDeviceId);
-    free(modelIdPayload);
+    Prov_Client_Free_ModelIdPayload(modelIdPayload);
 
     return deviceHandle;
 }

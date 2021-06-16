@@ -372,7 +372,7 @@ int PnP_TempControlComponent_UpdatedPropertyCallback(
     else
     {
         bool propertySpecified;
-        property.version = IOTHUB_CLIENT_DESERIALIZED_PROPERTY_VERSION_1;
+        property.structVersion = IOTHUB_CLIENT_DESERIALIZED_PROPERTY_VERSION_1;
 
         while ((clientResult = IoTHubClient_Deserialize_Properties_GetNextProperty(propertyIterator, &property, &propertySpecified)) == IOTHUB_CLIENT_OK)
         {
