@@ -347,7 +347,7 @@ static IOTHUB_CLIENT_RESULT GetDesiredAndReportedTwinJson(IOTHUB_CLIENT_PROPERTY
     }
     else
     {
-        if (payloadType == IOTHUB_CLIENT_PROPERTY_PAYLOAD_COMPLETE)
+        if (payloadType == IOTHUB_CLIENT_PROPERTY_PAYLOAD_ALL)
         {
             // NULL values are NOT errors, as the JSON may legitimately not have these fields.
             propertyIterator->desiredObject = json_object_get_object(rootObject, TWIN_DESIRED_OBJECT_NAME);
@@ -480,7 +480,7 @@ static bool ValidateIteratorInputs(
 {
     IOTHUB_CLIENT_RESULT result;
 
-    if ((payloadType != IOTHUB_CLIENT_PROPERTY_PAYLOAD_COMPLETE) && (payloadType != IOTHUB_CLIENT_PROPERTY_PAYLOAD_PARTIAL))
+    if ((payloadType != IOTHUB_CLIENT_PROPERTY_PAYLOAD_ALL) && (payloadType != IOTHUB_CLIENT_PROPERTY_PAYLOAD_UPDATES))
     {
         LogError("Payload type %d is invalid", payloadType);
         result = IOTHUB_CLIENT_INVALID_ARG;

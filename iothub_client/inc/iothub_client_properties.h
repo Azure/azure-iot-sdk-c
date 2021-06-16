@@ -64,7 +64,7 @@ typedef struct IOTHUB_CLIENT_REPORTED_PROPERTY_TAG {
     int structVersion;
     /** @brief    Name of the property. */
     const char* name;
-    /** @brief    Nalue of the property. */
+    /** @brief    Value of the property. */
     const char* value;
 } IOTHUB_CLIENT_REPORTED_PROPERTY;
 

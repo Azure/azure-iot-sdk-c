@@ -461,7 +461,7 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_GetPropertiesAsync(
 *
 * @param[in]   iotHubClientHandle      The handle created by a call to the create function.
 * @param[in]   propertyUpdateCallback  Callback both on initial retrieval of properties stored on IoT Hub
-                                       and subsequent service initiated modifications of writable properties.
+                                       and subsequent service-initiated modifications of writable properties.
                                        The API IoTHubClient_Deserialize_Properties can help deserialize the raw payload stream.
 * @param[in]   userContextCallback     Optional user specified context that will be provided to the callback.
 *

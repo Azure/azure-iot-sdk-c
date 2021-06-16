@@ -137,9 +137,13 @@ extern "C"
     */
     MU_DEFINE_ENUM_WITHOUT_INVALID(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, IOTHUB_CLIENT_CONNECTION_STATUS_REASON_VALUES);
 
+    /** @brief Enumeration passed to IoT Hub device and module client property 
+    *          update callbacks to indicate whether or not the complete set of properties has arrived
+    *          or just a partial set.
+    */
     typedef enum  {
-        IOTHUB_CLIENT_PROPERTY_PAYLOAD_COMPLETE,
-        IOTHUB_CLIENT_PROPERTY_PAYLOAD_PARTIAL
+        IOTHUB_CLIENT_PROPERTY_PAYLOAD_ALL,
+        IOTHUB_CLIENT_PROPERTY_PAYLOAD_UPDATES
     } IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE;
 
 
