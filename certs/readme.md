@@ -33,3 +33,34 @@ A couple of examples:
 ## Additional Information
 
 For additional guidance and important information about certificates, please refer to [this blog post](https://techcommunity.microsoft.com/t5/internet-of-things/azure-iot-tls-critical-changes-are-almost-here-and-why-you/ba-p/2393169) from the security team.
+
+## IoT Hub ECC Server Certificate Chain
+
+To work with the new Azure Cloud ECC server certificate chain, the TLS stack must be configured to prevent RSA cipher-suites from being advertised as described [here](https://docs.microsoft.com/azure/iot-hub/iot-hub-tls-support#elliptic-curve-cryptography-ecc-server-tls-certificate-preview).
+
+### Using OpenSSL
+
+Use the following option to limit the advertised cipher-suites:
+```C
+IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_OPENSSL_CIPHER_SUITE, "ECDH+ECDSA+HIGH");
+```
+
+### Using wolfSSL
+
+Rebuild wolfSSL without RSA support by adding `--disable-rsa` to the `configure` step.
+
+### Using mbedTLS
+
+Change `include/mbedtls/config.h` by commenting out all `_RSA_ENABLED` defines:
+```C
+MBEDTLS_KEY_EXCHANGE_RSA_ENABLED
+MBEDTLS_KEY_EXCHANGE_DHE_RSA_ENABLED
+MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED
+MBEDTLS_KEY_EXCHANGE_ECDH_RSA_ENABLED
+```
+
+Also, ensure you have the following two options enabled for ECC P-384 and SHA384 support:
+```C
+MBEDTLS_ECP_DP_SECP384R1_ENABLED
+MBEDTLS_SHA512_C
+```

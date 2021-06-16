@@ -13,7 +13,6 @@ For constained devices - where memory is measured in kilobytes and not megabytes
 - [Azure IoT C SDKs and Libraries](#azure-iot-c-sdks-and-libraries)
   - [Table of Contents](#table-of-contents)
   - [Getting the  SDK](#getting-the-sdk)
-  - [Compile the SDK](#compile-the-sdk)
   - [Samples](#samples)
   - [SDK API Reference Documentation](#sdk-api-reference-documentation)
   - [Other Azure IoT SDKs](#other-azure-iot-sdks)
