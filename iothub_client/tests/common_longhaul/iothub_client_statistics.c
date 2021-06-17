@@ -1450,6 +1450,16 @@ int iothub_client_statistics_get_device_twin_reported_summary(IOTHUB_CLIENT_STAT
 
                 summary->updates_received = summary->updates_received + 1;
             }
+            else
+            {
+                // check to see if the device was disconnected during this twin update
+                // we will miss the update because we reconnected to hub
+                if (singlylinkedlist_find(stats->connection_status_history, compare_message_time_to_connection_time, &device_twin_info->time_queued))
+                {
+                    summary->updates_sent--;
+                    LogInfo("Removing twin reported update id (%d) because of network error", (int)device_twin_info->update_id);
+                }
+            }
 
             list_item = singlylinkedlist_get_next_item(list_item);
         }
