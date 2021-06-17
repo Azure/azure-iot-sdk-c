@@ -455,7 +455,6 @@ MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetComponentName, IOTHU
 */
 MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetComponentName, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 
-
 /**
 * @brief   Frees all resources associated with the given message handle.
 *

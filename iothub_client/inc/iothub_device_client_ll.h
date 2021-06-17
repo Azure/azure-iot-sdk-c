@@ -383,8 +383,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
 *                                               confirmation of the delivery of the telemetry.
 * @param[in]    userContextCallback             Optional user specified context that will be provided to the callback.
 *
-* @remarks
-*           The application behavior is undefined if the user calls
+* @remarks  The application behavior is undefined if the user calls
 *           the IoTHubDeviceClient_LL_Destroy function from within any callback.
 *
 *           The IOTHUB_MESSAGE_HANDLE instance provided as argument is copied by the function,
@@ -402,9 +401,9 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendTelemetryAsync(
 /**
 * @brief    Subscribes to incoming commands from IoT Hub.
 *
-* @param[in]  iotHubClientHandle                 The handle created by a call to the create function.
-* @param[in]  commandCallback                    The callback which will be called when a command request arrives.
-* @param[in]  userContextCallback                Optional specified context that will be provided to the callback.
+* @param[in]  iotHubClientHandle        The handle created by a call to the create function.
+* @param[in]  commandCallback           The callback which will be called when a command request arrives.
+* @param[in]  userContextCallback       Optional specified context that will be provided to the callback.
 *
 * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
@@ -424,8 +423,7 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SubscribeToCommands(
 *                                            result of the transaction.
 * @param[in]    userContextCallback          Optional User specified context that will be provided to the callback.
 *
-* @remarks
-*            The application behavior is undefined if the user calls
+* @remarks   The application behavior is undefined if the user calls
 *            the IoTHubDeviceClient_LL_Destroy function from within any callback.
 *
 * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
@@ -441,12 +439,12 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendPropertiesAsync(
 *
 * @param[in]   iotHubClientHandle    The handle created by a call to the create function.
 * @param[in]   propertyCallback      Callback invoked when properties are retrieved.
-                                     The API IoTHubClient_Deserialize_Properties can help deserialize the raw payload stream.
+                                     The API IoTHubClient_Deserialize_Properties can help deserialize the raw 
+*                                    payload stream.
 * @param[in]   userContextCallback   Optional user specified context that will be provided to the
 *                                    callback.
 *
-* @remarks
-*           The application behavior is undefined if the user calls
+* @remarks  The application behavior is undefined if the user calls
 *           the IoTHubDeviceClient_LL_Destroy function from within any callback.
 *
 * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
@@ -462,11 +460,11 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_GetPropertiesAsync(
 * @param[in]   iotHubClientHandle      The handle created by a call to the create function.
 * @param[in]   propertyUpdateCallback  Callback both on initial retrieval of properties stored on IoT Hub
                                        and subsequent service-initiated modifications of writable properties.
-                                       The API IoTHubClient_Deserialize_Properties can help deserialize the raw payload stream.
+                                       The API IoTHubClient_Deserialize_Properties can help deserialize the raw 
+*                                      payload stream.
 * @param[in]   userContextCallback     Optional user specified context that will be provided to the callback.
 *
-* @remarks
-*           The application behavior is undefined if the user calls
+* @remarks  The application behavior is undefined if the user calls
 *           the IoTHubDeviceClient_LL_Destroy function from within any callback.
 *
 * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
