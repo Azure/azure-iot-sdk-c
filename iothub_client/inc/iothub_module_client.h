@@ -362,6 +362,13 @@ extern "C"
     * @param    message                         The cloud-to-device message received through the callback provided to IoTHubModuleClient_SetMessageCallback or IoTHubModuleClient_SetInputMessageCallback.
     * @param    disposition                     Acknowledgement option for the message.
     *
+    * @warning  This function is to be used only when IOTHUBMESSAGE_ASYNC_ACK is used in the callback for incoming Cloud-to-Device messages.
+    * @remarks
+    *           For Cloud-to-Device messages, the IOTHUB_MESSAGE_HANDLE instance is allocated by the Azure IoT C SDK
+    *           before it gets delivered to the user application, thus it has has the responsibility of destroying it.
+    *           For the Azure IoT C SDK to destroy the IOTHUB_MESSAGE_HANDLE instance (and free that memory allocation), 
+    *           IoTHubModuleClient_SendMessageDisposition must be called for each Cloud-to-Device message received
+    *           (when using IOTHUBMESSAGE_ASYNC_ACK). Not doing so will result in memory leaks.
     * @return   IOTHUB_CLIENT_OK upon success, or an error code upon failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SendMessageDisposition, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, IOTHUB_MESSAGE_HANDLE, message, IOTHUBMESSAGE_DISPOSITION_RESULT, disposition);

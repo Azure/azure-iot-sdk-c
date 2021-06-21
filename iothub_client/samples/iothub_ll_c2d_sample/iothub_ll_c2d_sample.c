@@ -76,8 +76,6 @@ static bool ack_and_remove_message(const void* item, const void* match_context, 
     if (IoTHubDeviceClient_LL_SendMessageDisposition(device_ll_handle, message, IOTHUBMESSAGE_ACCEPTED) != IOTHUB_CLIENT_OK)
     {
         (void)printf("ERROR: IoTHubDeviceClient_LL_SendMessageDisposition..........FAILED!\r\n");
-        // If (and only if) IoTHubDeviceClient_LL_SendMessageDisposition fails, the IOTHUB_MESSAGE_HANDLE must be explicitly destroyed.
-        IoTHubMessage_Destroy(message);
     }
 
     *continue_processing = true;
