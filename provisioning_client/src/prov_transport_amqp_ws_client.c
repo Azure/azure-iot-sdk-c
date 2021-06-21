@@ -54,7 +54,7 @@ static PROV_TRANSPORT_IO_INFO* amqp_transport_ws_io(const char* fqdn, SASL_MECHA
         {
             /* Codes_PROV_TRANSPORT_AMQP_WS_CLIENT_07_012: [ If proxy_info is not NULL, amqp_transport_ws_io shall construct a HTTP_PROXY_IO_CONFIG object and assign it to TLSIO_CONFIG underlying_io_parameters ] */
             proxy_config.hostname = tls_io_config.hostname;
-            proxy_config.port = proxy_info->port;
+            proxy_config.port = PROV_AMQP_WS_PORT_NUM;
             proxy_config.proxy_hostname = proxy_info->host_address;
             proxy_config.proxy_port = proxy_info->port;
             proxy_config.username = proxy_info->username;
