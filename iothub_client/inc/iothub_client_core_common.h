@@ -143,7 +143,7 @@ extern "C"
     */
     typedef enum  {
         IOTHUB_CLIENT_PROPERTY_PAYLOAD_ALL,
-        IOTHUB_CLIENT_PROPERTY_PAYLOAD_UPDATES
+        IOTHUB_CLIENT_PROPERTY_PAYLOAD_WRITABLE_UPDATES
     } IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE;
 
 
@@ -250,7 +250,7 @@ extern "C"
     * @param[in]    commandName           Name of the command associated with this request.
     * @param[in]    payload               Raw payload of the request.  This is NOT guaranteed to be a \0 terminated string.
     * @param[in]    size                  Number of bytes of @p payload.
-    * @param[in]    payloadContentType    Payload type of @p payload.  This currenly will ALWAYS be "application/json" and applications using the default
+    * @param[in]    payloadContentType    Payload type of @p payload.  This currently will ALWAYS be "application/json" and applications using the default
     *                                     options on the IoT Hub client can safely assume they will only receive JSON type.
     *                                     Future versions of the IoT Hub client may add options that allow alternate contentTypes to be sent via
     *                                     commands.  This will NOT be the default behavior but will require specific application opt-in.
@@ -262,7 +262,7 @@ extern "C"
     * @remarks   The application behavior is undefined if the user calls
     *            the IoTHubDeviceClient_LL_Destroy function from within any callback.
     *
-    * @return    Status code of the method to return to the service.  This maps to an HTTP style status code.
+    * @return    Status code of the command to return to the service.  This maps to an HTTP style status code.
     */
     typedef int(*IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC)(
                     const char* componentName,
@@ -299,7 +299,7 @@ extern "C"
     *
     * @param[in]   payloadType            Whether the payload contains all properties from IoT Hub or only the ones that have just been updated.
     * @param[in]   payload                Raw payload of the request.  This is NOT guaranteed to be a \0 terminated string.
-    * @param[in]   payloadLength          Number of bytes of payload.
+    * @param[in]   payloadLength          Number of bytes of @p payload.
     * @param[in]   userContextCallback    User context pointer set in initial call to retrieving the properties (for example, 
     *                                     IoTHubDeviceClient_LL_GetPropertiesAsync or IoTHubDeviceClient_LL_GetPropertiesAndSubscribeToUpdatesAsync).
     */
