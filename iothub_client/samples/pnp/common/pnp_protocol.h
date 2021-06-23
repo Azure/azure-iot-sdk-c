@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+// THIS FILE IS DEPRECATED.  SEE ./readme.md FOR MIGRATION INSTRUCTIONS.
+
 //
 // PnP is a convention built on top of existing IoTHub device transport primitives.
 // This header implements functions to aide applications in serializing and deserializing PnP data.

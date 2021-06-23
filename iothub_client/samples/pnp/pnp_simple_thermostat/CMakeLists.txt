@@ -15,7 +15,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 if(${use_prov_client})
-    set(pnp_simple_thermostat_c_files ${pnp_simple_thermostat_c_files} ../common/pnp_dps_ll.c)
+    set(pnp_simple_thermostat_c_files ${pnp_simple_thermostat_c_files} ../common/pnp_dps_ll.c ../common/pnp_sample_config.c)
     include_directories(../common)
 endif()
 
