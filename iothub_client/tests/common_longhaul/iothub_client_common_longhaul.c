@@ -1497,7 +1497,7 @@ static int invoke_device_method(const void* context)
                     iotHubLonghaul->deviceInfo->deviceId,
                     LONGHAUL_DEVICE_METHOD_NAME,
                     message,
-                    MAX_DEVICE_METHOD_TRAVEL_TIME_SECS,
+                    300,
                     &responseStatus, &responsePayload, &responseSize);
 
                 if (device_method_info.method_result == IOTHUB_DEVICE_METHOD_OK)
