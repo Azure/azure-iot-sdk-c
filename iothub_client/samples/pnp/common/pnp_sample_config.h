@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#ifndef PNP_SAMPLE_CONFIG
-#define PNP_SAMPLE_CONFIG
+#ifndef PNP_SAMPLE_CONFIG_H
+#define PNP_SAMPLE_CONFIG_H
 
 #include <stdbool.h>
 
@@ -19,7 +19,7 @@ typedef enum PNP_CONNECTION_SECURITY_TYPE_TAG
 //
 // PNP_DPS_CONNECTION_AUTH is used to configure the DPS device client
 //
-typedef struct PNP_DPS_CONFIGURATION_TAG
+typedef struct PNP_DPS_CONNECTION_AUTH_TAG
 {
     const char* endpoint;
     const char* idScope;
@@ -54,4 +54,4 @@ typedef struct PNP_DEVICE_CONFIGURATION_TAG
 //
 bool GetConnectionSettingsFromEnvironment(PNP_DEVICE_CONFIGURATION* pnpDeviceConfiguration);
 
-#endif /* PNP_SAMPLE_CONFIG */
+#endif /* PNP_SAMPLE_CONFIG_H */

@@ -4,7 +4,7 @@ This directory contains common code used by the samples in the [parent](..) dire
 
 ## Deprecation Notices
 
-Samples in an earlier version of the SDK used the files listed below.  **These files are deprecated.**  You should move to replacements as soon as practical.  They are left as part in place so as not to break existing users.
+Samples in an earlier version of the SDK used the files listed below.  **These files are deprecated.**  You should move to replacements as soon as practical.  They are left in place so as not to break existing users.
 
 * `pnp_protocol.*` Before Plug and Play support was officially added to the device client,  `pnp_protocol.*` had functions intended to help abstract application developers from tedious elements of Plug and Play device authoring.  
   Examples of the official API include all functions in `iothub_client_properties.h` as well as functions such as `IoTHubDeviceClient_LL_SendTelemetryAsync`, `IoTHubDeviceClient_LL_SubscribeToCommands`, `IoTHubDeviceClient_LL_SendPropertiesAsync`, `IoTHubDeviceClient_LL_GetPropertiesAsync`, and `IoTHubDeviceClient_LL_GetPropertiesAndSubscribeToUpdatesAsync`.

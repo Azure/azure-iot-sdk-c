@@ -544,7 +544,7 @@ void Thermostat_SendCurrentTemperature(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClie
 }
 
 //
-// CreateDeviceClientLLHandle does the creates the IOTHUB_DEVICE_CLIENT_LL_HANDLE based on environment configuration.
+// CreateDeviceClientLLHandle creates the IOTHUB_DEVICE_CLIENT_LL_HANDLE based on environment configuration.
 // If PNP_CONNECTION_SECURITY_TYPE_DPS is used, the call will block until DPS provisions the device.
 //
 static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateDeviceClientLLHandle(void)
