@@ -246,7 +246,7 @@ static void UpdateTemperatureAndStatistics(PNP_THERMOSTAT_COMPONENT* pnpThermost
 }
 
 //
-// SendTargetTemperatureResponse sends a PnP property indicating the device has received the desired targeted temperature
+// SendTargetTemperatureResponse sends a PnP property indicating the device has received and accepted the desired targeted temperature.
 //
 static void SendTargetTemperatureResponse(PNP_THERMOSTAT_COMPONENT* pnpThermostatComponent, IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClientLL, int version)
 {
