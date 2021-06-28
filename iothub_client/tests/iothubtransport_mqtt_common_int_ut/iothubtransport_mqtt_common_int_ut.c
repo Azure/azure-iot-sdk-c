@@ -385,12 +385,12 @@ extern "C"
 }
 #endif
 
-static char* my_IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const char* scope, size_t expiry_time_relative_seconds, const char* keyname)
+static char* my_IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const char* scope, uint64_t expiry_time_relative_seconds, const char* key_name)
 {
     (void)handle;
     (void)scope;
     (void)expiry_time_relative_seconds;
-    (void)keyname;
+    (void)key_name;
 
     char* result;
     size_t len = strlen(TEST_SAS_TOKEN);
