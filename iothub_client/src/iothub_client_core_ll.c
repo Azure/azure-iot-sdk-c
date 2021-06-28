@@ -62,9 +62,9 @@ MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT
     CALLBACK_TYPE_NONE,          \
     CALLBACK_TYPE_MESSAGE_SYNC,  \
     CALLBACK_TYPE_MESSAGE_ASYNC, \
-    CALLBACK_TYPE_METHOD_SYNC,   \
-    CALLBACK_TYPE_METHOD_ASYNC,  \
-    CALLBACK_TYPE_COMMAND_SYNC
+    CALLBACK_TYPE_METHOD,   \
+    CALLBACK_TYPE_INBOUND_METHOD,  \
+    CALLBACK_TYPE_COMMAND
 
 
 MU_DEFINE_ENUM(CALLBACK_TYPE, CALLBACK_TYPE_VALUES)
@@ -75,9 +75,9 @@ static const char COMPONENT_DELIMETER = '*';
 typedef struct IOTHUB_METHOD_CALLBACK_DATA_TAG
 {
     CALLBACK_TYPE type;
-    IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC methodCallbackSync;
-    IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK methodCallbackAsync;
-    IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC commandCallbackSync;
+    IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback;
+    IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK inboundDeviceMethodCallback;
+    IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC commandCallback;
     void* userContextCallback;
 }IOTHUB_METHOD_CALLBACK_DATA;
 
@@ -740,12 +740,12 @@ static bool IoTHubClientCore_LL_MessageCallback(MESSAGE_CALLBACK_INFO* messageDa
     return result;
 }
 
-// IoTHubClientCore_LL_ParseCommandTopic parses a legacy method into a parsed out command.  Commands are of the form:
+// IoTHubClientCore_LL_ParseMethodToCommand parses a legacy method into a parsed out command.  Commands are of the form:
 // * <component_name>*<command_name> // if a component_name is specified and delitimed via COMPONENT_DELIMETER
 // * <command_name> // If no COMPONENT_DELIMETER is specified.
-// We guarantee component_name is a null-terminated, when set, which means we need to make a copy of it
+// We guarantee component_name is null-terminated, when set, which means we need to make a copy of it
 // that the caller must free.  command_name is a pointer into an existing buffer that is NOT freed.
-int IoTHubClientCore_LL_ParseCommandTopic(const char* method_name, char** component_name, const char** command_name)
+int IoTHubClientCore_LL_ParseMethodToCommand(const char* method_name, char** component_name, const char** command_name)
 {
     int result;
 
@@ -777,7 +777,7 @@ int IoTHubClientCore_LL_ParseCommandTopic(const char* method_name, char** compon
     return result;
 }
 
-static int invoke_command_callback(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData, const char* method_name, const unsigned char* payLoad, size_t size, METHOD_HANDLE response_id)
+static int invoke_command_callback(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData, const char* method_name, const unsigned char* payload, size_t size, METHOD_HANDLE response_id)
 {
     int result; 
     unsigned char* payload_resp = NULL;
@@ -787,7 +787,7 @@ static int invoke_command_callback(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData
     char* component_name = NULL;
 
     // Parse the raw method_name into its constituent (optional) component_name and command_name parts.
-    if (IoTHubClientCore_LL_ParseCommandTopic(method_name, &component_name, &command_name) != 0)
+    if (IoTHubClientCore_LL_ParseMethodToCommand(method_name, &component_name, &command_name) != 0)
     {
         LogError("Cannot parse command/component name");
         result = MU_FAILURE;
@@ -795,7 +795,7 @@ static int invoke_command_callback(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData
     else
     {
         // Invoke the application's callback.
-        result = handleData->methodCallback.commandCallbackSync(component_name, command_name, payLoad, size, NULL, &payload_resp, &response_size, handleData->methodCallback.userContextCallback);
+        result = handleData->methodCallback.commandCallback(component_name, command_name, payload, size, NULL, &payload_resp, &response_size, handleData->methodCallback.userContextCallback);
         if (payload_resp != NULL && response_size > 0)
         {
             result = handleData->IoTHubTransport_DeviceMethod_Response(handleData->deviceHandle, response_id, payload_resp, response_size, result);
@@ -812,7 +812,6 @@ static int invoke_command_callback(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData
     return result;
 }
 
-
 static int IoTHubClientCore_LL_DeviceMethodComplete(const char* method_name, const unsigned char* payLoad, size_t size, METHOD_HANDLE response_id, void* ctx)
 {
     int result;
@@ -828,11 +827,11 @@ static int IoTHubClientCore_LL_DeviceMethodComplete(const char* method_name, con
         IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)ctx;
         switch (handleData->methodCallback.type)
         {
-            case CALLBACK_TYPE_METHOD_SYNC:
+            case CALLBACK_TYPE_METHOD:
             {
                 unsigned char* payload_resp = NULL;
                 size_t response_size = 0;
-                result = handleData->methodCallback.methodCallbackSync(method_name, payLoad, size, &payload_resp, &response_size, handleData->methodCallback.userContextCallback);
+                result = handleData->methodCallback.deviceMethodCallback(method_name, payLoad, size, &payload_resp, &response_size, handleData->methodCallback.userContextCallback);
                 /* Codes_SRS_IOTHUBCLIENT_LL_07_020: [ deviceMethodCallback shall build the BUFFER_HANDLE with the response payload from the IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC callback. ] */
                 if (payload_resp != NULL && response_size > 0)
                 {
@@ -848,11 +847,11 @@ static int IoTHubClientCore_LL_DeviceMethodComplete(const char* method_name, con
                 }
                 break;
             }
-            case CALLBACK_TYPE_COMMAND_SYNC:
+            case CALLBACK_TYPE_COMMAND:
                 result = invoke_command_callback(handleData, method_name, payLoad, size, response_id);
                 break;
-            case CALLBACK_TYPE_METHOD_ASYNC:
-                result = handleData->methodCallback.methodCallbackAsync(method_name, payLoad, size, response_id, handleData->methodCallback.userContextCallback);
+            case CALLBACK_TYPE_INBOUND_METHOD:
+                result = handleData->methodCallback.inboundDeviceMethodCallback(method_name, payLoad, size, response_id, handleData->methodCallback.userContextCallback);
                 break;
             default:
                 /* Codes_SRS_IOTHUBCLIENT_LL_07_019: [ If deviceMethodCallback is NULL IoTHubClientCore_LL_DeviceMethodComplete shall return 404. ] */
@@ -2623,9 +2622,9 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_GetTwinAsync(IOTHUB_CLIENT_CORE_LL_HAND
 static void ResetMethodCallbackData(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData)
 {
     handleData->methodCallback.type = CALLBACK_TYPE_NONE;
-    handleData->methodCallback.methodCallbackSync = NULL;
-    handleData->methodCallback.commandCallbackSync = NULL;
-    handleData->methodCallback.methodCallbackAsync = NULL;
+    handleData->methodCallback.deviceMethodCallback = NULL;
+    handleData->methodCallback.commandCallback = NULL;
+    handleData->methodCallback.inboundDeviceMethodCallback = NULL;
     handleData->methodCallback.userContextCallback = NULL;
 }
 
@@ -2685,7 +2684,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetDeviceMethodCallback(IOTHUB_CLIENT_C
         IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)iotHubClientHandle;
         bool unsubscribing = (deviceMethodCallback == NULL);
 
-        if ((result = VerifyMethodCallbackType(handleData, CALLBACK_TYPE_METHOD_SYNC, unsubscribing)) != IOTHUB_CLIENT_OK)
+        if ((result = VerifyMethodCallbackType(handleData, CALLBACK_TYPE_METHOD, unsubscribing)) != IOTHUB_CLIENT_OK)
         {
             LogInfo("Incorrect callback type");
         }
@@ -2704,8 +2703,8 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetDeviceMethodCallback(IOTHUB_CLIENT_C
             if (handleData->IoTHubTransport_Subscribe_DeviceMethod(handleData->deviceHandle) == 0)
             {
                 /*Codes_SRS_IOTHUBCLIENT_LL_12_022: [ Otherwise IoTHubClientCore_LL_SetDeviceMethodCallback shall succeed and return IOTHUB_CLIENT_OK. ]*/
-                handleData->methodCallback.type = CALLBACK_TYPE_METHOD_SYNC;
-                handleData->methodCallback.methodCallbackSync = deviceMethodCallback;
+                handleData->methodCallback.type = CALLBACK_TYPE_METHOD;
+                handleData->methodCallback.deviceMethodCallback = deviceMethodCallback;
                 handleData->methodCallback.userContextCallback = userContextCallback;
                 result = IOTHUB_CLIENT_OK;
             }
@@ -2737,7 +2736,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(IOTHUB_CLIEN
         IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)iotHubClientHandle;
         bool unsubscribing = (inboundDeviceMethodCallback == NULL);
 
-        if ((result = VerifyMethodCallbackType(handleData, CALLBACK_TYPE_METHOD_ASYNC, unsubscribing)) != IOTHUB_CLIENT_OK)
+        if ((result = VerifyMethodCallbackType(handleData, CALLBACK_TYPE_INBOUND_METHOD, unsubscribing)) != IOTHUB_CLIENT_OK)
         {
             LogInfo("Incorrect callback type");
         }
@@ -2752,8 +2751,8 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(IOTHUB_CLIEN
         {
             if (handleData->IoTHubTransport_Subscribe_DeviceMethod(handleData->deviceHandle) == 0)
             {
-                handleData->methodCallback.type = CALLBACK_TYPE_METHOD_ASYNC;
-                handleData->methodCallback.methodCallbackAsync = inboundDeviceMethodCallback;
+                handleData->methodCallback.type = CALLBACK_TYPE_INBOUND_METHOD;
+                handleData->methodCallback.inboundDeviceMethodCallback = inboundDeviceMethodCallback;
                 handleData->methodCallback.userContextCallback = userContextCallback;
                 result = IOTHUB_CLIENT_OK;
             }
@@ -2783,7 +2782,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SubscribeToCommands(IOTHUB_CLIENT_CORE_
         IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)iotHubClientHandle;
         bool unsubscribing = (commandCallback == NULL);
 
-        if ((result = VerifyMethodCallbackType(handleData, CALLBACK_TYPE_COMMAND_SYNC, unsubscribing)) != IOTHUB_CLIENT_OK)
+        if ((result = VerifyMethodCallbackType(handleData, CALLBACK_TYPE_COMMAND, unsubscribing)) != IOTHUB_CLIENT_OK)
         {
             LogInfo("Incorrect callback type");
         }
@@ -2797,8 +2796,8 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SubscribeToCommands(IOTHUB_CLIENT_CORE_
         {
             if (handleData->IoTHubTransport_Subscribe_DeviceMethod(handleData->deviceHandle) == 0)
             {
-                handleData->methodCallback.type = CALLBACK_TYPE_COMMAND_SYNC;
-                handleData->methodCallback.commandCallbackSync = commandCallback;
+                handleData->methodCallback.type = CALLBACK_TYPE_COMMAND;
+                handleData->methodCallback.commandCallback = commandCallback;
                 handleData->methodCallback.userContextCallback = userContextCallback;
                 result = IOTHUB_CLIENT_OK;
             }
