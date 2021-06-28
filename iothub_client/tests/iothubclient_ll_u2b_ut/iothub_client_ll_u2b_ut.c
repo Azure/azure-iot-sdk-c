@@ -29,6 +29,7 @@ static void* my_gballoc_calloc(size_t nmemb, size_t size)
 #include "azure_macro_utils/macro_utils.h"
 #include "umock_c/umock_c.h"
 #include "umock_c/umocktypes_charptr.h"
+#include "umock_c/umocktypes_stdint.h"
 #include "umock_c/umock_c_negative_tests.h"
 #include "umock_c/umocktypes.h"
 #include "umock_c/umocktypes_c.h"
@@ -69,7 +70,7 @@ MOCKABLE_FUNCTION(, JSON_Object*, json_value_get_object, const JSON_Value *, val
 #define TEST_STRING_HANDLE_DEVICE_SAS ((STRING_HANDLE)0x2)
 
 #define TEST_API_VERSION "?api-version=2016-11-14"
-#define TEST_IOTHUB_SDK_VERSION "1.3.9"
+#define TEST_IOTHUB_SDK_VERSION "1.6.0"
 
 static const char* const testUploadtrustedCertificates = "some certificates";
 static const char* const TEST_SAS_TOKEN = "test_sas_token";
@@ -270,7 +271,7 @@ static int my_mallocAndStrcpy_s(char** destination, const char* source)
     return 0;
 }
 
-static char* my_IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const char* scope, size_t expiry_time_relative_seconds, const char* key_name)
+static char* my_IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const char* scope, uint64_t expiry_time_relative_seconds, const char* key_name)
 {
     (void)handle;
     (void)scope;
@@ -474,6 +475,9 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     ASSERT_IS_NOT_NULL(g_testByTest);
 
     umock_c_init(on_umock_c_error);
+
+    int result = umocktypes_stdint_register_types();
+    ASSERT_ARE_EQUAL(int, 0, result, "umocktypes_stdint_register_types");
 
     umocktypes_charptr_register_types();
 
@@ -728,7 +732,7 @@ static void setup_Blob_UploadMultipleBlocksFromSasUri_mocks(IOTHUB_CREDENTIAL_TY
     if (BLOB_OK != blob_result)
     {
         status_code = 404;
-        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer_httpStatus(&status_code, sizeof(status_code))
             .SetReturn(blob_result);
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
@@ -742,7 +746,7 @@ static void setup_Blob_UploadMultipleBlocksFromSasUri_mocks(IOTHUB_CREDENTIAL_TY
     else
     {
         status_code = 200;
-        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Blob_UploadMultipleBlocksFromSasUri(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer_httpStatus(&status_code, sizeof(status_code)).CallCannotFail();
 
         if (null_buffer)
@@ -1303,6 +1307,27 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_x509_cert_succeeds)
 
     //act
     IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_SetOption(h, OPTION_X509_CERT, TEST_CERT);
+
+    //assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubClient_LL_UploadToBlob_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_Network_Interface)
+{
+    //arrange
+    setup_uploadtoblob_create_mocks(IOTHUB_CREDENTIAL_TYPE_X509);
+    IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h = IoTHubClient_LL_UploadToBlob_Create(&TEST_CONFIG_SAS, TEST_AUTH_HANDLE);
+    umock_c_reset_all_calls();
+
+
+    const char* networkInterface = "eth0";
+    STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, networkInterface));
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_UploadToBlob_SetOption(h, OPTION_NETWORK_INTERFACE_UPLOAD_TO_BLOB, networkInterface);
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);

@@ -139,8 +139,9 @@ static const char* TWIN_OPERATION_GET = "GET";
 static const char* TWIN_OPERATION_PUT = "PUT";
 static const char* TWIN_OPERATION_DELETE = "DELETE";
 
-static const unsigned char* TWIN_REPORTED_PROPERTIES = (const unsigned char*)"{ \"reportedStateProperty0\": \"reportedStateProperty0\", \"reportedStateProperty1\": \"reportedStateProperty1\" }";
-static int TWIN_REPORTED_PROPERTIES_LENGTH = 117;
+#define TWIN_REPORTED_PROPERTIES_VALUE "{ \"reportedStateProperty0\": \"reportedStateProperty0\", \"reportedStateProperty1\": \"reportedStateProperty1\" }"
+static const unsigned char* TWIN_REPORTED_PROPERTIES = (const unsigned char*)TWIN_REPORTED_PROPERTIES_VALUE;
+static const int TWIN_REPORTED_PROPERTIES_LENGTH = sizeof(TWIN_REPORTED_PROPERTIES_VALUE);
 
 static time_t g_initial_time;
 static time_t g_initial_time_plus_30_secs;

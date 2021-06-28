@@ -475,29 +475,97 @@ By default messages never expire. The meaning of the messageTimeout value is the
     - 0 = disable message timeout for all messages send by _SendAsync from now on
     - Any other number - consider that number as the timeout.
 - "x509certificate" - feeds a x509 certificate in PEM format to IoTHubClient to be used for 
-authentication. value is a pointer to a null terminated string that contains the certificate. Example:
+authentication. value is a pointer to a null terminated string that contains the certificate. Important: certain TLS stacks are sensitive to line terminators. Example:
 ```c
 const char* value =
-"-----BEGIN CERTIFICATE-----"
-"MIICpDCCAYwCCQCfIjBnPxs5TzANBgkqhkiG9w0BAQsFADAUMRIwEAYDVQQDDAls"
-"b2NhbGhvc3QwHhcNMTYwNjIyMjM0MzI3WhcNMTYwNjIzMjM0MzI3WjAUMRIwEAYD"
+"-----BEGIN CERTIFICATE-----\n"
+"MIICpDCCAYwCCQCfIjBnPxs5TzANBgkqhkiG9w0BAQsFADAUMRIwEAYDVQQDDAls\n"
+"b2NhbGhvc3QwHhcNMTYwNjIyMjM0MzI3WhcNMTYwNjIzMjM0MzI3WjAUMRIwEAYD\n"
 ...
-"+s88wBF907s1dcY45vsG0ldE3f7Y6anGF60nUwYao/fN/eb5FT5EHANVMmnK8zZ2"
-"tjWUt5TFnAveFoQWIoIbtzlTbOxUFwMrQFzFXOrZoDJmHNWc2u6FmVAkowoOSHiE"
-"dkyVdoGPCXc="
-"-----END CERTIFICATE-----";
+"+s88wBF907s1dcY45vsG0ldE3f7Y6anGF60nUwYao/fN/eb5FT5EHANVMmnK8zZ2\n"
+"tjWUt5TFnAveFoQWIoIbtzlTbOxUFwMrQFzFXOrZoDJmHNWc2u6FmVAkowoOSHiE\n"
+"dkyVdoGPCXc=\n"
+"-----END CERTIFICATE-----\n";
 ```
-- "x509privatekey" - feed a x509 private key in PEM format to IoTHubClient to be used for authentication. value is a pointer to a null terminated string that contains the key. Example:
+- "x509privatekey" - feed a x509 private key in PEM format to IoTHubClient to be used for authentication. value is a pointer to a null terminated string that contains the key. Important: certain TLS stacks are sensitive to line terminators. Example:
 ```c
-const char* privateKey = 
-"-----BEGIN RSA PRIVATE KEY-----"            
-"MIIEpQIBAAKCAQEA0zKK+Uu5I0nXq2V6+2gbdCsBXZ6j1uAgU/clsCohEAek1T8v"
-"qj2tR9Mz9iy9RtXPMHwzcQ7aXDaz7RbHdw7tYXqSw8iq0Mxq2s3p4mo6gd5vEOiN"
+const char* x509privatekey = 
+"-----BEGIN RSA PRIVATE KEY-----\n"            
+"MIIEpQIBAAKCAQEA0zKK+Uu5I0nXq2V6+2gbdCsBXZ6j1uAgU/clsCohEAek1T8v\n"
+"qj2tR9Mz9iy9RtXPMHwzcQ7aXDaz7RbHdw7tYXqSw8iq0Mxq2s3p4mo6gd5vEOiN\n"
 ...
-"EyePNmkCgYEAng+12qvs0de7OhkTjX9FLxluLWxfN2vbtQCWXslLCG+Es/ZzGlNF"
-"SaqVID4EAUgUqFDw0UO6SKLT+HyFjOr5qdHkfAmRzwE/0RBN69g2qLDN3Km1Px/k"
-"xyJyxc700uV1eKiCdRLRuCbUeecOSZreh8YRIQQXoG8uotO5IttdVRc="        
-"-----END RSA PRIVATE KEY-----";
+"EyePNmkCgYEAng+12qvs0de7OhkTjX9FLxluLWxfN2vbtQCWXslLCG+Es/ZzGlNF\n"
+"SaqVID4EAUgUqFDw0UO6SKLT+HyFjOr5qdHkfAmRzwE/0RBN69g2qLDN3Km1Px/k\n"
+"xyJyxc700uV1eKiCdRLRuCbUeecOSZreh8YRIQQXoG8uotO5IttdVRc=\n"        
+"-----END RSA PRIVATE KEY-----\n";
+```
+
+- "CipherSuite" - only available when OpenSSL is used. value is a pointer to a null terminated string that contains a list in the format specified by [SSL_set_cipher_list](https://www.openssl.org/docs/man1.1.1/man3/SSL_CTX_set_cipher_list.html). Example:
+```c
+// IoT Hub using ECC server certificate chain:
+IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_OPENSSL_CIPHER_SUITE, "ECDH+ECDSA+HIGH");
+```
+
+- "Engine" - only available when OpenSSL is used. It specifies the [OpenSSL built-in engine](https://www.openssl.org/docs/man1.1.1/man3/ENGINE_load_builtin_engines.html) to be loaded. value is a null terminated string that contains the engine name.
+- "x509PrivatekeyType" - only available when OpenSSL is used and OPENSSLOPT_ENGINE is configured. value is a pointer to a long. When set to 0x1, the private key is loaded from the OpenSSL Engine. The `x509privatekey` option represents the engine-specific certificate identifier.
+
+### OpenSSL ENGINE Examples:
+
+```c
+// Example using Azure IoT Identity, Key and Certificate Services (https://azure.github.io/iot-identity-service/)
+
+const char* opensslEngine = "aziot_keys";
+static const OPTION_OPENSSL_KEY_TYPE x509_key_from_engine = KEY_TYPE_ENGINE;
+
+// Private KeyID obtained by querying Key Service. E.g.:
+//   curl --unix-socket /run/aziot/keyd.sock http://foo/keypair/device-id?api-version=2020-09-01
+const char* x509privatekey = "sr=eyJrZXlfaWQiOnsiS2V5UGFpciI6ImRldmljZS...zGwtvKYW6dlkjtPK2ljVqUjmC9gqvZTmw=";
+
+// Public certificate obtained by querying Certificate Service. E.g.:
+//   curl --unix-socket /run/aziot/certd.sock http://foo/certificates/device-id?api-version=2020-09-01
+const char* x509certificate = 
+"-----BEGIN CERTIFICATE-----\n"
+"MIIBJTCBywIUUennAV2WbZsckSIcMHLXuak/iCswCgYIKoZIzj0EAwIwFTETMBEG\n"
+// [...]
+"OkZcAK4VBLwYnoH+glXK6pWqDkXE0wIhAM0OFOTbVIuXOGDXaCKxFLIvMifo2RJZ\n"
+"b5pjgB2gaGGi\n"
+"-----END CERTIFICATE-----\n";
+```
+
+```c
+// Example using TPM TSS OpenSSL ENGINE (https://github.com/tpm2-software/tpm2-tss-engine)
+const char* opensslEngine = "tpm2tss";
+static const OPTION_OPENSSL_KEY_TYPE x509_key_from_engine = KEY_TYPE_ENGINE;
+
+// Certificate and key-file obtained using tpm2tss-genkey:
+const char* x509certificate =
+"-----BEGIN CERTIFICATE-----\n"
+"MIIBJTCBywIUUennAV2WbZsckSIcMHLXuak/iCswCgYIKoZIzj0EAwIwFTETMBEG\n"
+// [...]
+"OkZcAK4VBLwYnoH+glXK6pWqDkXE0wIhAM0OFOTbVIuXOGDXaCKxFLIvMifo2RJZ\n"
+"b5pjgB2gaGGi\n"
+"-----END CERTIFICATE-----\n";
+
+// When the TPM2TSS engine is used, the key identifier is a path to a PEM-encoded TSS2 private key:
+const char* x509privatekey = "/home/restricted_user/tpm2ec.tss"
+```
+
+```c
+// Example using PKCS#11 OpenSSL ENGINE (https://github.com/OpenSC/libp11)
+// The OpenSSL ENGINE must be associated to a pkcs11 module within openssl.cnf.
+static const char* opensslEngine = "pkcs11";
+static const OPTION_OPENSSL_KEY_TYPE x509_key_from_engine = KEY_TYPE_ENGINE;
+
+// Certificate can be extracted from the PKCS#11 library using pkcs11-tool from OpenSC.
+static const char* x509certificate = 
+"-----BEGIN CERTIFICATE-----\n"
+"MIIBMTCB1wIUTu66kxJIBR5t5IkAwh7Lqm/AM+IwCgYIKoZIzj0EAwIwGzEZMBcG\n"
+// [...]
+"DItkq1MHqzqExB1eTrMHQVY11w62\n"
+"-----END CERTIFICATE-----\n";
+
+// The private key contains the PKCS#11 URI.
+static const char* x509privatekey = "pkcs11:object=ec-privkey;type=private?pin-value=1234";
 ```
 
 ## IotHubClient\_LL\_... APIs

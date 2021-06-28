@@ -426,6 +426,8 @@ BEGIN_TEST_SUITE(prov_transport_http_client_ut)
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(uhttp_client_set_trusted_cert, HTTP_CLIENT_ERROR);
         REGISTER_GLOBAL_MOCK_RETURN(uhttp_client_set_X509_cert, HTTP_CLIENT_OK);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(uhttp_client_set_X509_cert, HTTP_CLIENT_ERROR);
+        REGISTER_GLOBAL_MOCK_RETURN(uhttp_client_set_option, HTTP_CLIENT_OK);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(uhttp_client_set_option, HTTP_CLIENT_ERROR);
 
         REGISTER_GLOBAL_MOCK_HOOK(HTTPHeaders_Alloc, my_HTTPHeaders_Alloc);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPHeaders_Alloc, NULL);

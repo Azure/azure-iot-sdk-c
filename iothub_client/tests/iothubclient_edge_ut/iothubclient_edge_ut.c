@@ -222,7 +222,7 @@ static char* my_json_serialize_to_string(const JSON_Value* value)
     return newstr;
 }
 
-static char* my_IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const char* scope, size_t expiry_time_relative_seconds, const char* key_name)
+static char* my_IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const char* scope, uint64_t expiry_time_relative_seconds, const char* key_name)
 {
     (void)handle;
     (void)expiry_time_relative_seconds;

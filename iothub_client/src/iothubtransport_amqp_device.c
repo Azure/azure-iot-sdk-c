@@ -7,6 +7,7 @@
 #include "azure_c_shared_utility/agenttime.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/strings.h"
+#include "azure_c_shared_utility/tickcounter.h"
 #include "internal/iothubtransport_amqp_cbs_auth.h"
 #include "internal/iothubtransport_amqp_device.h"
 #include "internal/iothubtransport_amqp_telemetry_messenger.h"
@@ -56,6 +57,10 @@ typedef struct DEVICE_INSTANCE_TAG
     size_t twin_msgr_state_change_timeout_secs;
     DEVICE_TWIN_UPDATE_RECEIVED_CALLBACK on_device_twin_update_received_callback;
     void* on_device_twin_update_received_context;
+
+    TICK_COUNTER_HANDLE tick_counter_handle;
+    tickcounter_ms_t last_stop_request_time;
+    size_t stop_delay_ms;
 } AMQP_DEVICE_INSTANCE;
 
 typedef struct DEVICE_SEND_EVENT_TASK_TAG
@@ -162,14 +167,13 @@ static D2C_EVENT_SEND_RESULT get_d2c_event_send_result_from(TELEMETRY_MESSENGER_
 
 static void on_event_send_complete_messenger_callback(IOTHUB_MESSAGE_LIST* iothub_message, TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT ev_send_comp_result, void* context)
 {
-    if (iothub_message == NULL || context == NULL)
+    DEVICE_SEND_EVENT_TASK* send_task = (DEVICE_SEND_EVENT_TASK*)context;
+    if (iothub_message == NULL || send_task == NULL)
     {
-        LogError("on_event_send_complete_messenger_callback was invoked, but either iothub_message (%p) or context (%p) are NULL", iothub_message, context);
+        LogError("on_event_send_complete_messenger_callback was invoked, but either iothub_message (%p) or context (%p) are NULL", iothub_message, send_task);
     }
     else
     {
-        DEVICE_SEND_EVENT_TASK* send_task = (DEVICE_SEND_EVENT_TASK*)context;
-
         // Codes_SRS_DEVICE_09_059: [If `ev_send_comp_result` is TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_OK, D2C_EVENT_SEND_COMPLETE_RESULT_OK shall be reported as `event_send_complete`]
         // Codes_SRS_DEVICE_09_060: [If `ev_send_comp_result` is TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE, D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE shall be reported as `event_send_complete`]
         // Codes_SRS_DEVICE_09_061: [If `ev_send_comp_result` is TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING, D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING shall be reported as `event_send_complete`]
@@ -182,7 +186,10 @@ static void on_event_send_complete_messenger_callback(IOTHUB_MESSAGE_LIST* iothu
         {
             send_task->on_event_send_complete_callback(iothub_message, device_send_result, send_task->on_event_send_complete_context);
         }
+    }
 
+    if (send_task)
+    {
         // Codes_SRS_DEVICE_09_065: [The memory allocated for `send_task` shall be released]
         free(send_task);
     }
@@ -327,7 +334,7 @@ static void on_get_twin_completed(TWIN_UPDATE_TYPE update_type, const char* payl
 {
     (void)update_type;
 
-    if (payload == NULL || context == NULL)
+    if (context == NULL)
     {
         LogError("Invalid argument (context=%p, payload=%p)", context, payload);
     }
@@ -337,7 +344,6 @@ static void on_get_twin_completed(TWIN_UPDATE_TYPE update_type, const char* payl
 
         // get-twin-async always returns a complete twin json.
         twin_ctx->on_get_twin_completed_callback(DEVICE_TWIN_UPDATE_TYPE_COMPLETE, (const unsigned char*)payload, size, twin_ctx->context);
-
         free(twin_ctx);
     }
 }
@@ -563,6 +569,7 @@ static void internal_destroy_device(AMQP_DEVICE_INSTANCE* instance)
             authentication_destroy(instance->authentication_handle);
         }
 
+        tickcounter_destroy(instance->tick_counter_handle);
         destroy_device_config(instance->config);
         free(instance);
     }
@@ -736,6 +743,11 @@ AMQP_DEVICE_HANDLE amqp_device_create(AMQP_DEVICE_CONFIG *config)
             LogError("Failed creating the device instance for device '%s' (failed copying the configuration)", config->device_id);
             result = MU_FAILURE;
         }
+        else if ((instance->tick_counter_handle = tickcounter_create()) == NULL)
+        {
+            LogError("Failed creating the internal tick counter for device '%s'", instance->config->device_id);
+            result = MU_FAILURE;
+        }
         // Codes_SRS_DEVICE_09_006: [If `instance->authentication_mode` is DEVICE_AUTH_MODE_CBS, `instance->authentication_handle` shall be set using authentication_create()]
         else if (instance->config->authentication_mode == DEVICE_AUTH_MODE_CBS &&
                  create_authentication_instance(instance) != RESULT_OK)
@@ -770,6 +782,8 @@ AMQP_DEVICE_HANDLE amqp_device_create(AMQP_DEVICE_CONFIG *config)
             instance->msgr_state_change_timeout_secs = DEFAULT_MSGR_STATE_CHANGED_TIMEOUT_SECS;
             instance->twin_msgr_state_last_changed_time = INDEFINITE_TIME;
             instance->twin_msgr_state_change_timeout_secs = DEFAULT_MSGR_STATE_CHANGED_TIMEOUT_SECS;
+            instance->stop_delay_ms = 0;
+            instance->last_stop_request_time = 0;
 
             result = RESULT_OK;
         }
@@ -823,6 +837,7 @@ int amqp_device_start_async(AMQP_DEVICE_HANDLE handle, SESSION_HANDLE session_ha
             // Codes_SRS_DEVICE_09_021: [`session_handle` and `cbs_handle` shall be saved into the `instance`]
             instance->session_handle = session_handle;
             instance->cbs_handle = cbs_handle;
+	    instance->stop_delay_ms = 0;
 
             // Codes_SRS_DEVICE_09_022: [The device state shall be updated to DEVICE_STATE_STARTING, and state changed callback invoked]
             update_state(instance, DEVICE_STATE_STARTING);
@@ -830,6 +845,50 @@ int amqp_device_start_async(AMQP_DEVICE_HANDLE handle, SESSION_HANDLE session_ha
             // Codes_SRS_DEVICE_09_023: [If no failures occur, amqp_device_start_async shall return 0]
             result = RESULT_OK;
         }
+    }
+
+    return result;
+}
+
+static int internal_device_stop(AMQP_DEVICE_INSTANCE* instance)
+{
+    int result;
+
+    // Codes_SRS_DEVICE_09_027: [If `instance->messenger_handle` state is not TELEMETRY_MESSENGER_STATE_STOPPED, messenger_stop shall be invoked]
+    if (instance->msgr_state != TELEMETRY_MESSENGER_STATE_STOPPED &&
+        instance->msgr_state != TELEMETRY_MESSENGER_STATE_STOPPING &&
+        telemetry_messenger_stop(instance->messenger_handle) != RESULT_OK)
+    {
+        // Codes_SRS_DEVICE_09_028: [If messenger_stop fails, the `instance` state shall be updated to DEVICE_STATE_ERROR_MSG and the function shall return non-zero result]
+        LogError("Failed stopping device '%s' (telemetry_messenger_stop failed)", instance->config->device_id);
+        update_state(instance, DEVICE_STATE_ERROR_MSG);
+        result = MU_FAILURE;
+    }
+    // Codes_SRS_DEVICE_09_131: [If `instance->twin_messenger_handle` state is not TWIN_MESSENGER_STATE_STOPPED, twin_messenger_stop shall be invoked]
+    else if (instance->twin_msgr_state != TWIN_MESSENGER_STATE_STOPPED &&
+        instance->twin_msgr_state != TWIN_MESSENGER_STATE_STOPPING &&
+        twin_messenger_stop(instance->twin_messenger_handle) != RESULT_OK)
+    {
+        // Codes_SRS_DEVICE_09_132: [If twin_messenger_stop fails, the `instance` state shall be updated to DEVICE_STATE_ERROR_MSG and the function shall return non-zero result]
+        LogError("Failed stopping device '%s' (twin_messenger_stop failed)", instance->config->device_id);
+        update_state(instance, DEVICE_STATE_ERROR_MSG);
+        result = MU_FAILURE;
+    }
+    // Codes_SRS_DEVICE_09_029: [If CBS authentication is used, if `instance->authentication_handle` state is not AUTHENTICATION_STATE_STOPPED, authentication_stop shall be invoked]
+    else if (instance->config->authentication_mode == DEVICE_AUTH_MODE_CBS &&
+        instance->auth_state != AUTHENTICATION_STATE_STOPPED &&
+        authentication_stop(instance->authentication_handle) != RESULT_OK)
+    {
+        // Codes_SRS_DEVICE_09_030: [If authentication_stop fails, the `instance` state shall be updated to DEVICE_STATE_ERROR_AUTH and the function shall return non-zero result]
+        LogError("Failed stopping device '%s' (authentication_stop failed)", instance->config->device_id);
+        update_state(instance, DEVICE_STATE_ERROR_AUTH);
+        result = MU_FAILURE;
+    }
+    else
+    {
+        // Codes_SRS_DEVICE_09_031: [The device state shall be updated to DEVICE_STATE_STOPPED, and state changed callback invoked]
+        update_state(instance, DEVICE_STATE_STOPPED);
+        result = RESULT_OK;
     }
 
     return result;
@@ -854,54 +913,66 @@ int amqp_device_stop(AMQP_DEVICE_HANDLE handle)
         AMQP_DEVICE_INSTANCE* instance = (AMQP_DEVICE_INSTANCE*)handle;
 
         // Codes_SRS_DEVICE_09_025: [If the device state is already DEVICE_STATE_STOPPED or DEVICE_STATE_STOPPING, amqp_device_stop shall return a non-zero result]
-        if (instance->state == DEVICE_STATE_STOPPED || instance->state == DEVICE_STATE_STOPPING)
+        if (instance->state == DEVICE_STATE_STOPPED || (instance->state == DEVICE_STATE_STOPPING && instance->stop_delay_ms == 0))
         {
             LogError("Failed stopping device '%s' (device is already stopped or stopping)", instance->config->device_id);
             result = MU_FAILURE;
         }
         else
         {
-            // Codes_SRS_DEVICE_09_026: [The device state shall be updated to DEVICE_STATE_STOPPING, and state changed callback invoked]
             update_state(instance, DEVICE_STATE_STOPPING);
-
-            // Codes_SRS_DEVICE_09_027: [If `instance->messenger_handle` state is not TELEMETRY_MESSENGER_STATE_STOPPED, messenger_stop shall be invoked]
-            if (instance->msgr_state != TELEMETRY_MESSENGER_STATE_STOPPED &&
-                instance->msgr_state != TELEMETRY_MESSENGER_STATE_STOPPING &&
-                telemetry_messenger_stop(instance->messenger_handle) != RESULT_OK)
+            
+            if (internal_device_stop(instance) != 0)
             {
-                // Codes_SRS_DEVICE_09_028: [If messenger_stop fails, the `instance` state shall be updated to DEVICE_STATE_ERROR_MSG and the function shall return non-zero result]
-                LogError("Failed stopping device '%s' (telemetry_messenger_stop failed)", instance->config->device_id);
+                LogError("Failed stopping device '%s' (immediate stop failed)", instance->config->device_id);
                 result = MU_FAILURE;
-                update_state(instance, DEVICE_STATE_ERROR_MSG);
-            }
-            // Codes_SRS_DEVICE_09_131: [If `instance->twin_messenger_handle` state is not TWIN_MESSENGER_STATE_STOPPED, twin_messenger_stop shall be invoked]
-            else if (instance->twin_msgr_state != TWIN_MESSENGER_STATE_STOPPED &&
-                instance->twin_msgr_state != TWIN_MESSENGER_STATE_STOPPING &&
-                twin_messenger_stop(instance->twin_messenger_handle) != RESULT_OK)
-            {
-                // Codes_SRS_DEVICE_09_132: [If twin_messenger_stop fails, the `instance` state shall be updated to DEVICE_STATE_ERROR_MSG and the function shall return non-zero result]
-                LogError("Failed stopping device '%s' (twin_messenger_stop failed)", instance->config->device_id);
-                result = MU_FAILURE;
-                update_state(instance, DEVICE_STATE_ERROR_MSG);
-            }
-            // Codes_SRS_DEVICE_09_029: [If CBS authentication is used, if `instance->authentication_handle` state is not AUTHENTICATION_STATE_STOPPED, authentication_stop shall be invoked]
-            else if (instance->config->authentication_mode == DEVICE_AUTH_MODE_CBS &&
-                instance->auth_state != AUTHENTICATION_STATE_STOPPED &&
-                authentication_stop(instance->authentication_handle) != RESULT_OK)
-            {
-                // Codes_SRS_DEVICE_09_030: [If authentication_stop fails, the `instance` state shall be updated to DEVICE_STATE_ERROR_AUTH and the function shall return non-zero result]
-                LogError("Failed stopping device '%s' (authentication_stop failed)", instance->config->device_id);
-                result = MU_FAILURE;
-                update_state(instance, DEVICE_STATE_ERROR_AUTH);
             }
             else
             {
-                // Codes_SRS_DEVICE_09_031: [The device state shall be updated to DEVICE_STATE_STOPPED, and state changed callback invoked]
-                update_state(instance, DEVICE_STATE_STOPPED);
-
-                // Codes_SRS_DEVICE_09_032: [If no failures occur, amqp_device_stop shall return 0]
                 result = RESULT_OK;
             }
+        }
+    }
+
+    return result;
+}
+
+// @brief
+//     stops a device instance (stops messenger and authentication) synchronously.
+// @returns
+//     0 if the function succeeds, non-zero otherwise.
+int amqp_device_delayed_stop(AMQP_DEVICE_HANDLE handle, size_t delay_secs)
+{
+    int result;
+
+    // Codes_SRS_DEVICE_09_024: [If `handle` is NULL, amqp_device_stop shall return a non-zero result]
+    if (handle == NULL)
+    {
+        LogError("Failed stopping device (handle is NULL)");
+        result = MU_FAILURE;
+    }
+    else
+    {
+        AMQP_DEVICE_INSTANCE* instance = (AMQP_DEVICE_INSTANCE*)handle;
+
+        // Codes_SRS_DEVICE_09_025: [If the device state is already DEVICE_STATE_STOPPED or DEVICE_STATE_STOPPING, amqp_device_stop shall return a non-zero result]
+        if (instance->state == DEVICE_STATE_STOPPED || instance->state == DEVICE_STATE_STOPPING)
+        {
+            LogError("Failed stopping device '%s' (device is already stopped or stopping)", instance->config->device_id);
+            result = MU_FAILURE;
+        }
+        else if (tickcounter_get_current_ms(instance->tick_counter_handle, &instance->last_stop_request_time) != 0)
+        {
+            LogError("Failed stopping device '%s' (could not get tickcounter time)", instance->config->device_id);
+            result = MU_FAILURE;
+        }
+        else
+        {
+            // Codes_SRS_DEVICE_09_026: [The device state shall be updated to DEVICE_STATE_STOPPING, and state changed callback invoked]
+            update_state(instance, DEVICE_STATE_STOPPING);
+            instance->stop_delay_ms = delay_secs * 1000;
+            // Codes_SRS_DEVICE_09_032: [If no failures occur, amqp_device_stop shall return 0]
+            result = RESULT_OK;
         }
     }
 
@@ -920,7 +991,25 @@ void amqp_device_do_work(AMQP_DEVICE_HANDLE handle)
         // Cranking the state monster:
         AMQP_DEVICE_INSTANCE* instance = (AMQP_DEVICE_INSTANCE*)handle;
 
-        if (instance->state == DEVICE_STATE_STARTING)
+        if (instance->state == DEVICE_STATE_STOPPING)
+        {
+            tickcounter_ms_t current_time_ms;
+
+            if (tickcounter_get_current_ms(instance->tick_counter_handle, &current_time_ms) != 0)
+            {
+                LogError("Failed stopping device '%s' (could not get tickcounter time)", instance->config->device_id);
+                update_state(instance, DEVICE_STATE_ERROR_MSG);
+            }
+            else if ((current_time_ms - instance->last_stop_request_time) > instance->stop_delay_ms)
+            {
+                if (internal_device_stop(instance) != 0)
+                {
+                    LogError("Failed stopping device '%s'", instance->config->device_id);
+                    update_state(instance, DEVICE_STATE_ERROR_MSG);
+                }
+            }
+        }
+        else if (instance->state == DEVICE_STATE_STARTING)
         {
             // Codes_SRS_DEVICE_09_034: [If CBS authentication is used and authentication state is AUTHENTICATION_STATE_STOPPED, authentication_start shall be invoked]
             if (instance->config->authentication_mode == DEVICE_AUTH_MODE_CBS)

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-// This sample demonstarates how a downstream device connects to an Edge device. For more details
+// This sample demonstrates how a downstream device connects to an Edge device. For more details
 // pertaining to this scenario please see:
 // https://docs.microsoft.com/en-us/azure/iot-edge/how-to-create-transparent-gateway-linux OR
 // https://docs.microsoft.com/en-us/azure/iot-edge/how-to-create-transparent-gateway-windows
@@ -250,8 +250,8 @@ int main(void)
         //Setting the auto URL Encoder (recommended for MQTT). Please use this option unless
         //you are URL Encoding inputs yourself.
         //ONLY valid for use with MQTT
-        //bool urlEncodeOn = true;
-        //(void)IoTHubDeviceClient_SetOption(device_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
+        bool urlEncodeOn = true;
+        (void)IoTHubDeviceClient_SetOption(device_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
 #endif
 
         for (size_t index = 0; index < MESSAGE_COUNT; index++)

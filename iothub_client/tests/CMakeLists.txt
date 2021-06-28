@@ -130,8 +130,25 @@ endif()
     add_longhaul_test_directory(longhaul_amqp_device_methods)
     add_longhaul_test_directory(longhaul_amqp_device_twin_desired)
     add_longhaul_test_directory(longhaul_amqp_device_twin_reported)
+    add_longhaul_test_directory(longhaul_resource_cleanup)
+endif()
+
+
+if (NOT DEFINED MACOSX AND DEFINED use_schannel AND DEFINED use_socketio)
+  if (NOT ${use_schannel} AND NOT ${use_socketio})
+    if (${use_mqtt})
+      add_unittest_directory(iothubclient_fuzz_mqtt)
+    endif()
+    if (${use_amqp})
+      add_unittest_directory(iothubclient_fuzz_amqp)
+    endif()
+  endif()
 endif()
 
 add_unittest_directory(version_ut)
 
 add_e2etest_directory(iothub_invalidcert_e2e)
+
+if (${use_openssl} AND ${run_e2e_openssl_engine_tests})
+    add_e2etest_directory(iothubclient_openssl_engine_e2e)
+endif()

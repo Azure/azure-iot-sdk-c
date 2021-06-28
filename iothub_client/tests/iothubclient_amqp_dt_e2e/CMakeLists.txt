@@ -7,7 +7,7 @@ if(NOT ${use_amqp})
     message(FATAL_ERROR "iothubclient_amqp_dt_e2e being generated without amqp support")
 endif()
 
-compileAsC11()
+compileAsC99()
 set(theseTestsName iothubclient_amqp_dt_e2e)
 
 set(${theseTestsName}_test_files

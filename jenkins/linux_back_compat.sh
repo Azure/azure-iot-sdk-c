@@ -45,5 +45,5 @@ pushd $back_compat_build
 cmake $back_compat_root
 make --jobs=$CORES
 
-ctest -j $CORES --output-on-failure
+ctest -j $CORES --output-on-failure --schedule-random
 popd
