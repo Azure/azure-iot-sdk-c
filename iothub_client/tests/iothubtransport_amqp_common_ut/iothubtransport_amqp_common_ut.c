@@ -3990,7 +3990,7 @@ TEST_FUNCTION(on_message_received_succeeds)
     disposition_info.message_id = TEST_MESSAGE_ID;
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(clone_device_message_disposition_info(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(amqp_device_clone_message_disposition_info(IGNORED_PTR_ARG))
         .SetReturn(&disposition_info);
     STRICT_EXPECTED_CALL(IoTHubMessage_SetDispositionContext(IGNORED_PTR_ARG, (MESSAGE_DISPOSITION_CONTEXT_HANDLE)&disposition_info, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
@@ -4029,7 +4029,7 @@ TEST_FUNCTION(on_message_received_fails)
     disposition_info.message_id = TEST_MESSAGE_ID;
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(clone_device_message_disposition_info(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(amqp_device_clone_message_disposition_info(IGNORED_PTR_ARG))
         .SetReturn(&disposition_info);
     STRICT_EXPECTED_CALL(IoTHubMessage_SetDispositionContext(IGNORED_PTR_ARG, (MESSAGE_DISPOSITION_CONTEXT_HANDLE)&disposition_info, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))

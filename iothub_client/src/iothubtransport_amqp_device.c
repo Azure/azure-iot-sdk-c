@@ -1822,7 +1822,7 @@ int amqp_device_get_twin_async(AMQP_DEVICE_HANDLE handle, DEVICE_TWIN_UPDATE_REC
     return result;
 }
 
-DEVICE_MESSAGE_DISPOSITION_INFO* clone_device_message_disposition_info(DEVICE_MESSAGE_DISPOSITION_INFO* disposition_info)
+DEVICE_MESSAGE_DISPOSITION_INFO* amqp_device_clone_message_disposition_info(DEVICE_MESSAGE_DISPOSITION_INFO* disposition_info)
 {
     DEVICE_MESSAGE_DISPOSITION_INFO* clone;
 
@@ -1844,7 +1844,7 @@ DEVICE_MESSAGE_DISPOSITION_INFO* clone_device_message_disposition_info(DEVICE_ME
     return clone;
 }
 
-void destroy_device_message_disposition_info(DEVICE_MESSAGE_DISPOSITION_INFO* disposition_info)
+void amqp_device_destroy_message_disposition_info(DEVICE_MESSAGE_DISPOSITION_INFO* disposition_info)
 {
     if (disposition_info == NULL)
     {

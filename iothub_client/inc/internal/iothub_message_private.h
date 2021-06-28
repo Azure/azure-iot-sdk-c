@@ -28,11 +28,11 @@ typedef void(*MESSAGE_DISPOSITION_CONTEXT_DESTROY_FUNCTION)(MESSAGE_DISPOSITION_
 /**
 * @brief   Sets the context for the transport layer to send a DISPOSITION or ACK for a Cloud-to-Device message.
 *
-* @param   iotHubMessageHandle                The message to have the context set on.
+* @param   iotHubMessageHandle                The message on which to have the context set.
 * @param   dispositionContext                 The transport context for disposition.
 * @param   dispositionContextDestroyFunction  A function defined by the transport for destroying the context instance.
 *
-* @return  If any argument is NULL, returns a IOTHUBMESSAGE_INVALID_ARG, or IOTHUBMESSAGE_OK otherwise.
+* @return  An #IOTHUB_MESSAGE_RESULT with the result of the operation.
 */
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetDispositionContext, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, MESSAGE_DISPOSITION_CONTEXT_HANDLE, dispositionContext, MESSAGE_DISPOSITION_CONTEXT_DESTROY_FUNCTION, dispositionContextDestroyFunction);
 
@@ -42,7 +42,7 @@ MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetDispositionContext, 
 * @param   iotHubMessageHandle                The message to have the context set on.
 * @param   dispositionContext                 Variable to hold the transport context for disposition.
 *
-* @return  If any argument is NULL, returns a IOTHUBMESSAGE_INVALID_ARG, or IOTHUBMESSAGE_OK otherwise.
+* @return  An #IOTHUB_MESSAGE_RESULT with the result of the operation.
 */
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_GetDispositionContext, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, MESSAGE_DISPOSITION_CONTEXT_HANDLE*, dispositionContext);
 

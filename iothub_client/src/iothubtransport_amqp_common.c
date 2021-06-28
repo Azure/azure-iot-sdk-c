@@ -415,7 +415,7 @@ static DEVICE_MESSAGE_DISPOSITION_RESULT on_message_received(IOTHUB_MESSAGE_HAND
     DEVICE_MESSAGE_DISPOSITION_RESULT device_disposition_result;
     MESSAGE_DISPOSITION_CONTEXT* dispositionContext;
 
-    if ((dispositionContext = clone_device_message_disposition_info(disposition_info)) == NULL)
+    if ((dispositionContext = amqp_device_clone_message_disposition_info(disposition_info)) == NULL)
     {
         LogError("Failed processing message received (failed creating message disposition context)");
         IoTHubMessage_Destroy(message);
@@ -424,10 +424,10 @@ static DEVICE_MESSAGE_DISPOSITION_RESULT on_message_received(IOTHUB_MESSAGE_HAND
     else if (IoTHubMessage_SetDispositionContext(
         message, 
         (MESSAGE_DISPOSITION_CONTEXT_HANDLE)dispositionContext, 
-        (MESSAGE_DISPOSITION_CONTEXT_DESTROY_FUNCTION)destroy_device_message_disposition_info) != IOTHUB_MESSAGE_OK)
+        (MESSAGE_DISPOSITION_CONTEXT_DESTROY_FUNCTION)amqp_device_destroy_message_disposition_info) != IOTHUB_MESSAGE_OK)
     {
         LogError("Failed setting disposition context in IOTHUB_MESSAGE_HANDLE");
-        destroy_device_message_disposition_info(dispositionContext);
+        amqp_device_destroy_message_disposition_info(dispositionContext);
         IoTHubMessage_Destroy(message);
         device_disposition_result = DEVICE_MESSAGE_DISPOSITION_RESULT_RELEASED;
     }

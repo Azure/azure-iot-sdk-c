@@ -352,7 +352,7 @@ extern "C"
     /**
     * @brief    This API sends an acknowledgement to Azure IoT Hub that a cloud-to-device message has been received.
     *
-    * @param    device_ll_handle                The handle created by a call to a create function.
+    * @param    iotHubClientHandle              The handle created by a call to a create function.
     * @param    message                         The cloud-to-device message received through the callback provided to IoTHubDeviceClient_SetMessageCallback.
     * @param    disposition                     Acknowledgement option for the message.
     *
