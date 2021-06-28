@@ -305,7 +305,7 @@ static int get_retry_after_property(const char* topic_name, PROV_TRANSPORT_MQTT_
     return result;
 }
 
-static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE handle, void* user_ctx)
+static MQTT_CLIENT_ACK_OPTION mqtt_notification_callback(MQTT_MESSAGE_HANDLE handle, void* user_ctx)
 {
     if (user_ctx != NULL)
     {
@@ -383,6 +383,8 @@ static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE handle, void* user_ct
     {
         LogError("mqtt_notification_callback was invoked with a NULL context");
     }
+
+    return MQTT_CLIENT_ACK_SYNC;
 }
 
 static int send_mqtt_message(PROV_TRANSPORT_MQTT_INFO* mqtt_info, const char* msg_topic)

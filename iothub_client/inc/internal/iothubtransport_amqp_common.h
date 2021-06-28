@@ -41,7 +41,7 @@ MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubTransport_AMQP_Common_SetOption,
 MOCKABLE_FUNCTION(, IOTHUB_DEVICE_HANDLE, IoTHubTransport_AMQP_Common_Register, TRANSPORT_LL_HANDLE, handle, const IOTHUB_DEVICE_CONFIG*, device, PDLIST_ENTRY, waitingToSend);
 MOCKABLE_FUNCTION(, void, IoTHubTransport_AMQP_Common_Unregister, IOTHUB_DEVICE_HANDLE, deviceHandle);
 MOCKABLE_FUNCTION(, STRING_HANDLE, IoTHubTransport_AMQP_Common_GetHostname, TRANSPORT_LL_HANDLE, handle);
-MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubTransport_AMQP_Common_SendMessageDisposition, MESSAGE_CALLBACK_INFO*, message_data, IOTHUBMESSAGE_DISPOSITION_RESULT, disposition);
+MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubTransport_AMQP_Common_SendMessageDisposition, IOTHUB_DEVICE_HANDLE, handle, IOTHUB_MESSAGE_HANDLE, messageHandle, IOTHUBMESSAGE_DISPOSITION_RESULT, disposition);
 MOCKABLE_FUNCTION(, int, IoTHubTransport_AMQP_SetCallbackContext, TRANSPORT_LL_HANDLE, handle, void*, ctx);
 MOCKABLE_FUNCTION(, int, IoTHubTransport_AMQP_Common_GetSupportedPlatformInfo, TRANSPORT_LL_HANDLE, handle, PLATFORM_INFO_OPTION*, info);
 

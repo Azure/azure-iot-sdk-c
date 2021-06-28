@@ -15,14 +15,6 @@ typedef union IOTHUB_IDENTITY_INFO_TAG IOTHUB_IDENTITY_INFO;
 #include "internal/iothub_client_authorization.h"
 #include "iothub_message.h"
 
-struct MESSAGE_DISPOSITION_CONTEXT_TAG;
-typedef struct MESSAGE_DISPOSITION_CONTEXT_TAG* MESSAGE_DISPOSITION_CONTEXT_HANDLE;
-typedef struct MESSAGE_CALLBACK_INFO_TAG
-{
-    IOTHUB_MESSAGE_HANDLE messageHandle;
-    MESSAGE_DISPOSITION_CONTEXT_HANDLE transportContext;
-}MESSAGE_CALLBACK_INFO;
-
 #include "iothub_client_ll.h"
 
 #ifdef __cplusplus
@@ -30,8 +22,8 @@ extern "C"
 {
 #endif
 
-    typedef bool (*pfTransport_MessageCallbackFromInput)(MESSAGE_CALLBACK_INFO* messageData, void* ctx);
-    typedef bool (*pfTransport_MessageCallback)(MESSAGE_CALLBACK_INFO* messageData, void* ctx);
+    typedef bool (*pfTransport_MessageCallbackFromInput)(IOTHUB_MESSAGE_HANDLE message, void* ctx);
+    typedef bool (*pfTransport_MessageCallback)(IOTHUB_MESSAGE_HANDLE message, void* ctx);
     typedef void (*pfTransport_ConnectionStatusCallBack)(IOTHUB_CLIENT_CONNECTION_STATUS status, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void* ctx);
     typedef void (*pfTransport_SendComplete_Callback)(PDLIST_ENTRY completed, IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* ctx);
     typedef const char* (*pfTransport_GetOption_Product_Info_Callback)(void* ctx);
@@ -85,7 +77,7 @@ extern "C"
     typedef int (*pfIoTHubTransport_Subscribe_DeviceTwin)(IOTHUB_DEVICE_HANDLE handle);
     typedef void (*pfIoTHubTransport_Unsubscribe_DeviceTwin)(IOTHUB_DEVICE_HANDLE handle);
     typedef IOTHUB_CLIENT_RESULT(*pfIoTHubTransport_GetTwinAsync)(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK completionCallback, void* callbackContext);
-    typedef IOTHUB_CLIENT_RESULT(*pfIotHubTransport_SendMessageDisposition)(MESSAGE_CALLBACK_INFO* messageData, IOTHUBMESSAGE_DISPOSITION_RESULT disposition);
+    typedef IOTHUB_CLIENT_RESULT(*pfIotHubTransport_SendMessageDisposition)(IOTHUB_DEVICE_HANDLE handle, IOTHUB_MESSAGE_HANDLE message, IOTHUBMESSAGE_DISPOSITION_RESULT disposition);
     typedef IOTHUB_PROCESS_ITEM_RESULT(*pfIoTHubTransport_ProcessItem)(TRANSPORT_LL_HANDLE handle, IOTHUB_IDENTITY_TYPE item_type, IOTHUB_IDENTITY_INFO* iothub_item);
     typedef int(*pfIoTHubTransport_Subscribe_DeviceMethod)(IOTHUB_DEVICE_HANDLE handle);
     typedef void(*pfIoTHubTransport_Unsubscribe_DeviceMethod)(IOTHUB_DEVICE_HANDLE handle);

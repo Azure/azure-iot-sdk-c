@@ -44,6 +44,7 @@ set(iothub_client_h_files
     ./inc/iothub_module_client_ll.h
     ./inc/iothub_transport_ll.h
     ./inc/iothub_message.h
+    ./inc/internal/iothub_message_private.h
     ./inc/internal/iothubtransport.h
 )
 

@@ -129,3 +129,7 @@ IOTHUB_CLIENT_RESULT IoTHubModuleClient_ModuleMethodInvokeAsync(IOTHUB_MODULE_CL
 
 #endif /*USE_EDGE_MODULES*/
 
+IOTHUB_CLIENT_RESULT IoTHubModuleClient_SendMessageDisposition(IOTHUB_MODULE_CLIENT_HANDLE iotHubModuleHandle, IOTHUB_MESSAGE_HANDLE message, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
+{
+    return IoTHubClientCore_SendMessageDisposition((IOTHUB_CLIENT_CORE_HANDLE)iotHubModuleHandle, message, disposition);
+}

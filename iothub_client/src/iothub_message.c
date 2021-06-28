@@ -8,6 +8,7 @@
 #include "azure_c_shared_utility/buffer_.h"
 
 #include "iothub_message.h"
+#include "internal/iothub_message_private.h"
 
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_CONTENT_TYPE_VALUES);
@@ -35,6 +36,8 @@ typedef struct IOTHUB_MESSAGE_HANDLE_DATA_TAG
     bool is_security_message;
     char* creationTimeUtc;
     char* userId;
+    MESSAGE_DISPOSITION_CONTEXT_HANDLE dispositionContext;
+    MESSAGE_DISPOSITION_CONTEXT_DESTROY_FUNCTION dispositionContextDestroyFunction;
 }IOTHUB_MESSAGE_HANDLE_DATA;
 
 static bool ContainsValidUsAscii(const char* asciiValue)
@@ -105,6 +108,12 @@ static void DestroyMessageData(IOTHUB_MESSAGE_HANDLE_DATA* handleData)
     free(handleData->connectionDeviceId);
     free(handleData->creationTimeUtc);
     free(handleData->userId);
+
+    if (handleData->dispositionContext != NULL && handleData->dispositionContextDestroyFunction != NULL)
+    {
+        handleData->dispositionContextDestroyFunction(handleData->dispositionContext);
+    }
+
     free(handleData);
 }
 
@@ -1233,4 +1242,43 @@ void IoTHubMessage_Destroy(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
         /*Codes_SRS_IOTHUBMESSAGE_01_003: [IoTHubMessage_Destroy shall free all resources associated with iotHubMessageHandle.]  */
         DestroyMessageData((IOTHUB_MESSAGE_HANDLE_DATA*)iotHubMessageHandle);
     }
+}
+
+IOTHUB_MESSAGE_RESULT IoTHubMessage_SetDispositionContext(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, MESSAGE_DISPOSITION_CONTEXT_HANDLE dispositionContext, MESSAGE_DISPOSITION_CONTEXT_DESTROY_FUNCTION dispositionContextDestroyFunction)
+{
+    IOTHUB_MESSAGE_RESULT result;
+
+    if (iotHubMessageHandle == NULL || dispositionContext == NULL || dispositionContextDestroyFunction == NULL)
+    {
+        LogError("Invalid argument (iotHubMessageHandle=%p, dispositionContext=%p, dispositionContextDestroyFunction=%p)",
+            iotHubMessageHandle, dispositionContext, dispositionContextDestroyFunction);
+        result = IOTHUB_MESSAGE_INVALID_ARG;
+    }
+    else
+    {
+        iotHubMessageHandle->dispositionContext = dispositionContext;
+        iotHubMessageHandle->dispositionContextDestroyFunction = dispositionContextDestroyFunction;
+        result = IOTHUB_MESSAGE_OK;
+    }
+
+    return result;
+}
+
+IOTHUB_MESSAGE_RESULT IoTHubMessage_GetDispositionContext(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, MESSAGE_DISPOSITION_CONTEXT_HANDLE* dispositionContext)
+{
+    IOTHUB_MESSAGE_RESULT result;
+
+    if (iotHubMessageHandle == NULL || dispositionContext == NULL)
+    {
+        LogError("Invalid argument (iotHubMessageHandle=%p, dispositionContext=%p)",
+            iotHubMessageHandle, dispositionContext);
+        result = IOTHUB_MESSAGE_INVALID_ARG;
+    }
+    else
+    {
+        *dispositionContext = iotHubMessageHandle->dispositionContext;
+        result = IOTHUB_MESSAGE_OK;
+    }
+
+    return result;
 }
