@@ -20,6 +20,4 @@ real_doublylinkedlist.c
 set(${theseTestsName}_h_files
 )
 
-#linkSharedUtil(${theseTestsName})
-
 build_c_test_artifacts(${theseTestsName} OFF "tests/azure_iothub_client_tests" ADDITIONAL_LIBS aziotsharedutil)

@@ -439,7 +439,7 @@ static MQTT_CLIENT_HANDLE my_mqtt_client_init(ON_MQTT_MESSAGE_RECV_CALLBACK msgR
     g_callbackCtx = callbackCtx;
     g_fnMqttErrorCallback = errorCallback;
     g_errorcallbackCtx = errorcallbackCtx;
-    return (MQTT_CLIENT_HANDLE)my_gballoc_malloc(12);
+    return (MQTT_CLIENT_HANDLE)my_gballoc_malloc(sizeof(MQTT_CLIENT_HANDLE));
 }
 
 static int my_mqtt_client_disconnect(MQTT_CLIENT_HANDLE handle, ON_MQTT_DISCONNECTED_CALLBACK callback, void* ctx)
@@ -463,7 +463,7 @@ static void my_mqtt_client_dowork(MQTT_CLIENT_HANDLE handle)
 static STRING_TOKENIZER_HANDLE my_STRING_TOKENIZER_create_from_char(const char* input)
 {
     (void)input;
-    return (STRING_TOKENIZER_HANDLE)my_gballoc_malloc(1);
+    return (STRING_TOKENIZER_HANDLE)my_gballoc_malloc(sizeof(STRING_TOKENIZER_HANDLE));
 }
 
 int my_STRING_TOKENIZER_get_next_token(STRING_TOKENIZER_HANDLE t, STRING_HANDLE output, const char* delimiters)
@@ -531,7 +531,7 @@ static STRING_HANDLE my_SASToken_Create(STRING_HANDLE key, STRING_HANDLE scope, 
     (void)scope;
     (void)keyName;
     (void)expiry;
-    return (STRING_HANDLE)my_gballoc_malloc(1);
+    return (STRING_HANDLE)my_gballoc_malloc(sizeof(STRING_HANDLE));
 }
 
 static MAP_RESULT my_Map_GetInternals(MAP_HANDLE handle, const char*const** keys, const char*const** values, size_t* count)
@@ -547,7 +547,7 @@ static XIO_HANDLE my_xio_create(const IO_INTERFACE_DESCRIPTION* io_interface_des
 {
     (void)io_interface_description;
     (void)xio_create_parameters;
-    return (XIO_HANDLE)my_gballoc_malloc(1);
+    return (XIO_HANDLE)my_gballoc_malloc(sizeof(XIO_HANDLE));
 }
 
 static void my_xio_destroy(XIO_HANDLE ioHandle)
@@ -557,7 +557,7 @@ static void my_xio_destroy(XIO_HANDLE ioHandle)
 
 static TICK_COUNTER_HANDLE my_tickcounter_create(void)
 {
-    return (TICK_COUNTER_HANDLE)my_gballoc_malloc(1);
+    return (TICK_COUNTER_HANDLE)my_gballoc_malloc(sizeof(TICK_COUNTER_HANDLE));
 }
 
 static int my_tickcounter_get_current_ms(TICK_COUNTER_HANDLE tick_counter, tickcounter_ms_t * current_ms)
@@ -638,7 +638,7 @@ static XIO_HANDLE get_IO_transport(const char* fully_qualified_name, const MQTT_
             }
         }
     }
-    return (XIO_HANDLE)my_gballoc_malloc(1);
+    return (XIO_HANDLE)my_gballoc_malloc(sizeof(XIO_HANDLE));
 }
 
 static DEVICE_TWIN_UPDATE_STATE get_twin_update_state;

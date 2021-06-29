@@ -19,7 +19,6 @@
 #include "testrunnerswitcher.h"
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_macro_utils/macro_utils.h"
-//#include "azure_c_shared_utility/shared_util_options.h"
 #include "umock_c/umock_c.h"
 #include "umock_c/umock_c_prod.h"
 #include "umock_c/umock_c_negative_tests.h"
@@ -280,7 +279,6 @@ static const char* emptyPropertyMQTTTopics[] = {
     "devices/myDeviceId/messages/devicebound/&&&",
     "devices/myDeviceId/messages/devicebound/=",
     "devices/myDeviceId/messages/devicebound/fooBar",
-    //"devices/myDeviceId/messages/devicebound/==",
 };
 
 static const size_t emptyMQTTTopicsLength = sizeof(emptyPropertyMQTTTopics) / sizeof(emptyPropertyMQTTTopics[0]);  
@@ -302,13 +300,13 @@ TEST_EXPECTED_MESSAGE_PROPERTIES expectedAppProperties2 = { NULL, NULL, NULL, NU
 #define TEST_APP_PROPERTY_KEY2 "temperature%2FAlert2"
 #define TEST_APP_PROPERTY_KEY3 "temperature%2FAlert3"
 
-#define TEST_APP_PROPERTY_VALUE1 "false%251"
-#define TEST_APP_PROPERTY_VALUE2 "false%252"
+#define TEST_APP_PROPERTY_VALUE1 "false1%25"
+#define TEST_APP_PROPERTY_VALUE2 "false2%25"
 #define TEST_APP_PROPERTY_VALUE3 "false3%25"
 
 // MQTT Topic representation of 3 custom application key/value pairs above
 #define TEST_APP_PROPERTIES_MQTT_STRING TEST_APP_PROPERTY_KEY1 "=" TEST_APP_PROPERTY_VALUE1 "&" TEST_APP_PROPERTY_KEY2 "=" TEST_APP_PROPERTY_VALUE2 "&" \
-                                                                TEST_APP_PROPERTY_KEY3 "=" TEST_APP_PROPERTY_VALUE3
+                                                                   TEST_APP_PROPERTY_KEY3 "=" TEST_APP_PROPERTY_VALUE3
 
 static const char* TEST_MQTT_MESSAGE_APP_PROPERTIES_3 = "devices/myDeviceId/messages/devicebound/" TEST_APP_PROPERTIES_MQTT_STRING;
 
@@ -341,7 +339,6 @@ TEST_EXPECTED_MESSAGE_PROPERTIES mostlyIgnoredFilterProperties = { NULL, NULL, N
 static const char* TEST_MQTT_INPUT_ALL_SYSTEM_TOPIC = "devices/myDeviceId/modules/thisIsModuleID/inputs/" TEST_INPUT_QUEUE_1 "/" TEST_ALL_SYSTEM_PROPERTIES;
 
 TEST_EXPECTED_MESSAGE_PROPERTIES allInputSystemPropertiesSet1 = { TEST_CONTENT_TYPE_VALUE, TEST_CONTENT_ENCODING_VALUE, TEST_MSG_ID_VALUE, TEST_CORRELATION_PROPERTY, TEST_INPUT_QUEUE_1, TEST_CONNECTION_MODULE_VALUE, TEST_CONNECTION_DEVICE_VALUE, TEST_CREATION_TIME_VALUE, TEST_MSG_USER_ID_VALUE, NULL};
-
 
 static const char* mqttNoMatchInputTopic[] = {
     "",
@@ -376,14 +373,11 @@ TEST_EXPECTED_MESSAGE_PROPERTIES noInputProperties = { NULL, NULL, NULL, NULL, T
 const char* TEST_INPUT_FILTER_ALL_SYSTEM_MANY_APP_1 = "devices/myDeviceId/modules/thisIsModuleID/inputs/" TEST_INPUT_QUEUE_1 "/" TEST_APP_PROPERTIES_MQTT_STRING "&" TEST_ALL_SYSTEM_PROPERTIES;
 TEST_EXPECTED_MESSAGE_PROPERTIES allInputSystemPropertiesManyApplicationSet1 = { TEST_CONTENT_TYPE_VALUE, TEST_CONTENT_ENCODING_VALUE, TEST_MSG_ID_VALUE, TEST_CORRELATION_PROPERTY, TEST_INPUT_QUEUE_1, TEST_CONNECTION_MODULE_VALUE, TEST_CONNECTION_DEVICE_VALUE, TEST_CREATION_TIME_VALUE, TEST_MSG_USER_ID_VALUE, &app3};
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-#ifdef __cplusplus
-}
-#endif
+static const char* TEST_MQTT_TOPIC_DOUBLE_EQUAL_IN_PROPS = "devices/myDeviceId/messages/devicebound/==";
+char* expectedEmptyStringKey[] = {""};
+char* expectedEmptyStringValue[] = {"="};
+TEST_EXPECTED_APPLICATION_PROPERTIES emptyProps = { expectedEmptyStringKey, expectedEmptyStringValue, 1};
+TEST_EXPECTED_MESSAGE_PROPERTIES expectedEmptyStringProps = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &emptyProps};
 
 static char* my_IoTHubClient_Auth_Get_SasToken(IOTHUB_AUTHORIZATION_HANDLE handle, const char* scope, uint64_t expiry_time_relative_seconds, const char* key_name)
 {
@@ -437,7 +431,7 @@ static MQTT_CLIENT_HANDLE my_mqtt_client_init(ON_MQTT_MESSAGE_RECV_CALLBACK msgR
     g_callbackCtx = callbackCtx;
     g_fnMqttErrorCallback = errorCallback;
     g_errorcallbackCtx = errorcallbackCtx;
-    return (MQTT_CLIENT_HANDLE)malloc(12);
+    return (MQTT_CLIENT_HANDLE)malloc(sizeof(MQTT_CLIENT_HANDLE));
 }
 
 static int my_mqtt_client_disconnect(MQTT_CLIENT_HANDLE handle, ON_MQTT_DISCONNECTED_CALLBACK callback, void* ctx)
@@ -457,7 +451,7 @@ static XIO_HANDLE my_xio_create(const IO_INTERFACE_DESCRIPTION* io_interface_des
 {
     (void)io_interface_description;
     (void)xio_create_parameters;
-    return (XIO_HANDLE)malloc(1);
+    return (XIO_HANDLE)malloc(sizeof(XIO_HANDLE));
 }
 
 static void my_xio_destroy(XIO_HANDLE ioHandle)
@@ -469,7 +463,7 @@ static XIO_HANDLE get_IO_transport(const char* fully_qualified_name, const MQTT_
 {
     (void)fully_qualified_name;
     (void)mqtt_transport_proxy_options;
-    return (XIO_HANDLE)malloc(1);
+    return (XIO_HANDLE)malloc(sizeof(XIO_HANDLE));
 }
 
 // g_mqttTopicToTest is set in our mocked implementation to return MQTT topic that the product implementation
@@ -758,8 +752,6 @@ static void FreeUrlDecodedMessageProperties(TEST_EXPECTED_MESSAGE_PROPERTIES* ex
 //
 static void VerifyExpectedMessageReceived(const char* topicToTest, const TEST_EXPECTED_MESSAGE_PROPERTIES* expectedMessageProperties)
 {
-    size_t i;
-
     ASSERT_IS_NOT_NULL(g_messageFromCallback);
 
     // Messages are always delivered as byte arrrays to applications.
@@ -793,7 +785,7 @@ static void VerifyExpectedMessageReceived(const char* topicToTest, const TEST_EX
     ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->connectionDeviceId, connectionDeviceId, "Connection device ids don't match for topic %s", topicToTest);
 
     const char* messageCreationTime = IoTHubMessage_GetMessageCreationTimeUtcSystemProperty(g_messageFromCallback);
-    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->messageCreationTime, messageCreationTime, "Message creation tims don't match for topic %s", topicToTest);
+    ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->messageCreationTime, messageCreationTime, "Message creation times don't match for topic %s", topicToTest);
 
     const char* messageUserId = IoTHubMessage_GetMessageUserIdSystemProperty(g_messageFromCallback);
     ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->messageUserId, messageUserId, "Message user ids don't match for topic %s", topicToTest);
@@ -807,15 +799,15 @@ static void VerifyExpectedMessageReceived(const char* topicToTest, const TEST_EX
     MAP_HANDLE mapHandle = IoTHubMessage_Properties(g_messageFromCallback);
     ASSERT_IS_NOT_NULL(mapHandle);
 
-    const char*const* actualKeys;
-    const char*const* actualValues;
+    const char* const* actualKeys;
+    const char* const* actualValues;
     size_t actualKeysLen;
     size_t expectedKeyLen = (expectedMessageProperties->applicationProperties != NULL) ? expectedMessageProperties->applicationProperties->keysLength : 0;
 
     ASSERT_ARE_EQUAL(MAP_RESULT, MAP_OK, Map_GetInternals(mapHandle, &actualKeys, &actualValues, &actualKeysLen));
     ASSERT_ARE_EQUAL(int, expectedKeyLen, actualKeysLen, "Number of custom properties don't match for topic %s", topicToTest);
 
-    for (i = 0; i < expectedKeyLen; i++)
+    for (size_t i = 0; i < expectedKeyLen; i++)
     {
         ASSERT_ARE_EQUAL(char_ptr, expectedMessageProperties->applicationProperties->values[i], IoTHubMessage_GetProperty(g_messageFromCallback, expectedMessageProperties->applicationProperties->keys[i]), "Properties don't match for topic %s", topicToTest);
     }
@@ -823,8 +815,8 @@ static void VerifyExpectedMessageReceived(const char* topicToTest, const TEST_EX
 
 
 //
-// TestMessageProcessing invokes the MQTT PUBLISH to device callback code, which will (on success) will store
-// the parsed message into the test's g_messageFromCallback.  TestMesageProcessing then verifies message is expected.
+// TestMessageProcessing invokes the MQTT PUBLISH to device callback code, which will (on success) store
+// the parsed message into the test's g_messageFromCallback.  TestMessageProcessing then verifies message is expected.
 //
 static void TestMessageProcessing(const char* topicToTest, const TEST_EXPECTED_MESSAGE_PROPERTIES* expectedMessageProperties, bool autoUrlEncodeDecode)
 {
@@ -1029,6 +1021,11 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_app_properties3_auto_decod
     TestMessageProcessing(TEST_MQTT_MESSAGE_SYSTEM_MANY_APP, &allSystemManyAppPropertiesSetExpected, true);
 }
 
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_double_equals_in_props_succceed)
+{
+    TestMessageProcessing(TEST_MQTT_TOPIC_DOUBLE_EQUAL_IN_PROPS, &expectedEmptyStringProps, false);
+}
+
 //
 //  IoT Edge module to module processing tests
 //
@@ -1036,8 +1033,8 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_MessageRecv_app_properties3_auto_decod
 
 
 //
-// TestInputQueueProcessing invokes the MQTT PUBLISH to device callback code, which will (on success) will store
-// the parsed message into the test's g_messageFromCallback.  TestMesageProcessing then verifies message is expected.
+// TestInputQueueProcessing invokes the MQTT PUBLISH to device callback code, which will (on success) store
+// the parsed message into the test's g_messageFromCallback.  TestMessageProcessing then verifies message is expected.
 //
 static void TestInputQueueProcessing(const char* topicToTest, const TEST_EXPECTED_MESSAGE_PROPERTIES* expectedMessageProperties, bool autoUrlEncodeDecode)
 {
