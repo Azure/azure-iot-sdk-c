@@ -158,7 +158,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT receive_msg_callback(IOTHUB_MESSAGE_HAND
     printf("Message properties:\r\n  Message ID: %s\r\n  Correlation ID: %s\r\n  ContentType: %s\r\n  ContentEncoding: %s\r\n"
            "  messageCreationTimeUtc: %s\r\n  messageUserId: %s\r\n  %s: %s\r\n  %s: %s\r\n",
            messageId, correlationId, contentType, contentEncoding, messageCreationTimeUtc, messageUserId,
-           applicationCustomPropertyKey1, applicationCustomPropertyValue1 ,applicationCustomPropertyKey2, applicationCustomPropertyValue1);
+           applicationCustomPropertyKey1, applicationCustomPropertyValue1 ,applicationCustomPropertyKey2, applicationCustomPropertyValue2);
 
     return IOTHUBMESSAGE_ACCEPTED;
 }
