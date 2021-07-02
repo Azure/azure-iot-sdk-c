@@ -348,7 +348,7 @@ static void SendTargetTemperatureResponse(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceC
     desiredTemperatureResponse.value = desiredTemperatureString;
     desiredTemperatureResponse.description = description;
 
-    unsigned char* propertySerialized;
+    unsigned char* propertySerialized = NULL;
     size_t propertySerializedLength;
 
     // The first step of reporting properties is to serialize IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE into JSON for sending.

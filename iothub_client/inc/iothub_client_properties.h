@@ -52,6 +52,8 @@
 #ifndef IOTHUB_CLIENT_PROPERTIES_H
 #define IOTHUB_CLIENT_PROPERTIES_H
 
+#include "umock_c/umock_c_prod.h"
+
 #include <stddef.h>
 
 #include "iothub_client_core_common.h"
@@ -272,8 +274,8 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_GetVersion(
 * @param[out]  propertySpecified        Returned value indicating whether a property was found or not.  If false, this 
 *                                       indicates all components have been iterated over.
 *
-* @remarks  Applications must call @p IoTHubClient_Deserialize_Properties_DestroyProperty() to free the @p property returned 
-*           by this call.
+* @remarks  Applications must call @p IoTHubClient_Deserialize_Properties_DestroyProperty() to free the @p property returned by this call.
+*           The property structure becomes invalid in @p IoTHubClient_Deserialize_Properties_DestroyIterator once called.
 *
 * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
@@ -297,6 +299,9 @@ void IoTHubClient_Deserialize_Properties_DestroyProperty(
 *
 * @param   propertyIteratorHandle   IOTHUB_CLIENT_PROPERTY_ITERATOR_HANDLE initially allocated by @p 
 *                                   IoTHubClient_Deserialize_Properties_CreateIterator() to be freed.
+* @remarks After an application calls IoTHubClient_Deserialize_Properties_DestroyIterator, any previous 
+*          IOTHUB_CLIENT_DESERIALIZED_PROPERTY structures that were retrieved via
+*          IoTHubClient_Deserialize_Properties_GetNextProperty become invalid.
 * 
 */
 void IoTHubClient_Deserialize_Properties_DestroyIterator(
