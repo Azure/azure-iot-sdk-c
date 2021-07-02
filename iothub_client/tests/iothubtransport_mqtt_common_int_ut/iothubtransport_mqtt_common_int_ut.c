@@ -1,6 +1,15 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+// Note that most of the tests for the IoTHub core / MQTT layer are in ../iothubtransport_mqtt_common_ut.
+// These test all the scenarios of the MQTT layer, with a specific focus on the mockable framework
+// and that calls happen as expected, varous error cases are processed correctly, etc.  iothubtransport_mqtt_common_ut
+// tends to focus on verifying the code in isolated parts.
+// 
+// This tests a subset of MQTT with a stronger focus on integration of multiple parts of the SDK.  Mocking is 
+// much less heavily relied on in this test suite.  The focus instead is on more traditional test strategy of providing
+// input (frequently an MQTT TOPIC queue for the SDK to parse) and then comparing the output.
+
 #ifdef __cplusplus
 #include <cstdio>
 #include <cstdlib>

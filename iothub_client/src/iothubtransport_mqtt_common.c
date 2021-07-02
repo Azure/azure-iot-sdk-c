@@ -115,29 +115,29 @@ MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(MQTT_CLIENT_EVENT_ERROR, MQTT_CLIENT_EVEN
 
 // "System" property that a given MQTT property maps to, which can be used when building IOTHUB_MESSAGE_HANDLE that
 // we will pass into application callback.
-typedef enum MQTT_PROPERTY_TYPE_TAG
+typedef enum IOTHUB_SYSTEM_PROPERTY_TYPE_TAG
 {
     // Property that the application custom defined and will go into the propertyMap of IOTHUB_MESSAGE_HANDLE
-    MQTT_PROPERTY_TYPE_APPLICATION_CUSTOM,
+    IOTHUB_SYSTEM_PROPERTY_TYPE_APPLICATION_CUSTOM,
     // A "system" property we should silently ignore.  There are many %24.<property> that previous versions of the
     // SDK parsed out but did NOT add to the application custom list.  To maintain backward compat, and because
     // the %24 implies a system property, we will parse these out but otherwise ignore them.
-    MQTT_PROPERTY_TYPE_SILENTLY_IGNORE,
+    IOTHUB_SYSTEM_PROPERTY_TYPE_SILENTLY_IGNORE,
     // Properties from this point on map to system properties that have accessors in IOTHUB_MESSAGE_HANDLE
-    MQTT_PROPERTY_TYPE_MESSAGE_ID,
-    MQTT_PROPERTY_TYPE_CREATION_TIME,
-    MQTT_PROPERTY_TYPE_CONNECTION_DEVICE_ID,
-    MQTT_PROPERTY_TYPE_CONNECTION_MODULE_ID,
-    MQTT_PROPERTY_TYPE_CORRELATION_ID,
-    MQTT_PROPERTY_TYPE_MESSAGE_USER_ID,
-    MQTT_PROPERTY_TYPE_CONTENT_TYPE,
-    MQTT_PROPERTY_TYPE_CONTENT_ENCODING
-} MQTT_PROPERTY_TYPE;
+    IOTHUB_SYSTEM_PROPERTY_TYPE_MESSAGE_ID,
+    IOTHUB_SYSTEM_PROPERTY_TYPE_CREATION_TIME,
+    IOTHUB_SYSTEM_PROPERTY_TYPE_CONNECTION_DEVICE_ID,
+    IOTHUB_SYSTEM_PROPERTY_TYPE_CONNECTION_MODULE_ID,
+    IOTHUB_SYSTEM_PROPERTY_TYPE_CORRELATION_ID,
+    IOTHUB_SYSTEM_PROPERTY_TYPE_MESSAGE_USER_ID,
+    IOTHUB_SYSTEM_PROPERTY_TYPE_CONTENT_TYPE,
+    IOTHUB_SYSTEM_PROPERTY_TYPE_CONTENT_ENCODING
+} IOTHUB_SYSTEM_PROPERTY_TYPE;
 
 typedef struct SYSTEM_PROPERTY_INFO_TAG
 {
     const char* propName;
-    MQTT_PROPERTY_TYPE propertyType;
+    IOTHUB_SYSTEM_PROPERTY_TYPE propertyType;
 } SYSTEM_PROPERTY_INFO;
 
 
@@ -149,22 +149,22 @@ const size_t URL_ENCODED_PERCENT_SIGN_DOT_LEN = sizeof(URL_ENCODED_PERCENT_SIGN_
 #define DEFINE_MQTT_SYSTEM_PROPERTY(token)  URL_ENCODED_PERCENT_SIGN_DOT token
 
 static SYSTEM_PROPERTY_INFO sysPropList[] = {
-    { DEFINE_MQTT_SYSTEM_PROPERTY(SYS_PROP_MESSAGE_ID), MQTT_PROPERTY_TYPE_MESSAGE_ID},
-    { DEFINE_MQTT_SYSTEM_PROPERTY(SYS_PROP_USER_ID), MQTT_PROPERTY_TYPE_MESSAGE_USER_ID },
-    { DEFINE_MQTT_SYSTEM_PROPERTY(SYS_PROP_CORRELATION_ID), MQTT_PROPERTY_TYPE_CORRELATION_ID },
-    { DEFINE_MQTT_SYSTEM_PROPERTY(SYS_PROP_CONTENT_TYPE), MQTT_PROPERTY_TYPE_CONTENT_TYPE },
-    { DEFINE_MQTT_SYSTEM_PROPERTY(SYS_PROP_CONTENT_ENCODING), MQTT_PROPERTY_TYPE_CONTENT_ENCODING },
-    { DEFINE_MQTT_SYSTEM_PROPERTY(SYS_PROP_CONNECTION_DEVICE_ID), MQTT_PROPERTY_TYPE_CONNECTION_DEVICE_ID},
-    { DEFINE_MQTT_SYSTEM_PROPERTY(SYS_PROP_CONNECTION_MODULE_ID), MQTT_PROPERTY_TYPE_CONNECTION_MODULE_ID },
+    { DEFINE_MQTT_SYSTEM_PROPERTY(SYS_PROP_MESSAGE_ID), IOTHUB_SYSTEM_PROPERTY_TYPE_MESSAGE_ID},
+    { DEFINE_MQTT_SYSTEM_PROPERTY(SYS_PROP_USER_ID), IOTHUB_SYSTEM_PROPERTY_TYPE_MESSAGE_USER_ID },
+    { DEFINE_MQTT_SYSTEM_PROPERTY(SYS_PROP_CORRELATION_ID), IOTHUB_SYSTEM_PROPERTY_TYPE_CORRELATION_ID },
+    { DEFINE_MQTT_SYSTEM_PROPERTY(SYS_PROP_CONTENT_TYPE), IOTHUB_SYSTEM_PROPERTY_TYPE_CONTENT_TYPE },
+    { DEFINE_MQTT_SYSTEM_PROPERTY(SYS_PROP_CONTENT_ENCODING), IOTHUB_SYSTEM_PROPERTY_TYPE_CONTENT_ENCODING },
+    { DEFINE_MQTT_SYSTEM_PROPERTY(SYS_PROP_CONNECTION_DEVICE_ID), IOTHUB_SYSTEM_PROPERTY_TYPE_CONNECTION_DEVICE_ID},
+    { DEFINE_MQTT_SYSTEM_PROPERTY(SYS_PROP_CONNECTION_MODULE_ID), IOTHUB_SYSTEM_PROPERTY_TYPE_CONNECTION_MODULE_ID },
     // "System" properties the SDK previously ignored and will continue to do so for compat.
-    { DEFINE_MQTT_SYSTEM_PROPERTY(SYS_PROP_MESSAGE_CREATION_TIME_UTC), MQTT_PROPERTY_TYPE_CREATION_TIME},
-    { DEFINE_MQTT_SYSTEM_PROPERTY(SYS_PROP_ON), MQTT_PROPERTY_TYPE_SILENTLY_IGNORE },
-    { DEFINE_MQTT_SYSTEM_PROPERTY(SYS_PROP_EXP), MQTT_PROPERTY_TYPE_SILENTLY_IGNORE },
-    { DEFINE_MQTT_SYSTEM_PROPERTY(SYS_PROP_TO), MQTT_PROPERTY_TYPE_SILENTLY_IGNORE },
+    { DEFINE_MQTT_SYSTEM_PROPERTY(SYS_PROP_MESSAGE_CREATION_TIME_UTC), IOTHUB_SYSTEM_PROPERTY_TYPE_CREATION_TIME},
+    { DEFINE_MQTT_SYSTEM_PROPERTY(SYS_PROP_ON), IOTHUB_SYSTEM_PROPERTY_TYPE_SILENTLY_IGNORE },
+    { DEFINE_MQTT_SYSTEM_PROPERTY(SYS_PROP_EXP), IOTHUB_SYSTEM_PROPERTY_TYPE_SILENTLY_IGNORE },
+    { DEFINE_MQTT_SYSTEM_PROPERTY(SYS_PROP_TO), IOTHUB_SYSTEM_PROPERTY_TYPE_SILENTLY_IGNORE },
     // even though they don't start with %24, previous versions of SDK parsed and ignored these.  Keep same behavior.
-    { "devices/", MQTT_PROPERTY_TYPE_SILENTLY_IGNORE },
-    { "iothub-operation", MQTT_PROPERTY_TYPE_SILENTLY_IGNORE },
-    { "iothub-ack" , MQTT_PROPERTY_TYPE_SILENTLY_IGNORE }     
+    { "devices/", IOTHUB_SYSTEM_PROPERTY_TYPE_SILENTLY_IGNORE },
+    { "iothub-operation", IOTHUB_SYSTEM_PROPERTY_TYPE_SILENTLY_IGNORE },
+    { "iothub-ack" , IOTHUB_SYSTEM_PROPERTY_TYPE_SILENTLY_IGNORE }     
 };
 
 static const size_t sysPropListLength = sizeof(sysPropList) / sizeof(sysPropList[0]);
@@ -612,38 +612,38 @@ static int parseDeviceTwinTopicInfo(const char* resp_topic, bool* patch_msg, siz
 //
 // retrieveTopicType translates an MQTT topic PUBLISH'd to this device/module into what type (e.g. twin, method, etc.) it represents.
 //
-static int retrieveTopicType(PMQTTTRANSPORT_HANDLE_DATA transportData, const char* topic_resp, IOTHUB_IDENTITY_TYPE* type)
+static int retrieveTopicType(PMQTTTRANSPORT_HANDLE_DATA transportData, const char* topicName, IOTHUB_IDENTITY_TYPE* type)
 {
     int result;
 
     const char* mqtt_message_queue_topic;
     const char* input_queue_topic;
 
-    if (InternStrnicmp(topic_resp, TOPIC_DEVICE_TWIN_PREFIX, sizeof(TOPIC_DEVICE_TWIN_PREFIX) - 1) == 0)
+    if (InternStrnicmp(topicName, TOPIC_DEVICE_TWIN_PREFIX, sizeof(TOPIC_DEVICE_TWIN_PREFIX) - 1) == 0)
     {
         *type = IOTHUB_TYPE_DEVICE_TWIN;
         result = 0;
     }
-    else if (InternStrnicmp(topic_resp, TOPIC_DEVICE_METHOD_PREFIX, sizeof(TOPIC_DEVICE_METHOD_PREFIX) - 1) == 0)
+    else if (InternStrnicmp(topicName, TOPIC_DEVICE_METHOD_PREFIX, sizeof(TOPIC_DEVICE_METHOD_PREFIX) - 1) == 0)
     {
         *type = IOTHUB_TYPE_DEVICE_METHODS;
         result = 0;
     }
     // mqtt_message_queue_topic contains additional "#" from subscribe, which we strip off on comparing incoming.
-    else if (((mqtt_message_queue_topic = STRING_c_str(transportData->topic_MqttMessage)) != NULL) && (InternStrnicmp(topic_resp, mqtt_message_queue_topic, strlen(mqtt_message_queue_topic) - 1) == 0))
+    else if (((mqtt_message_queue_topic = STRING_c_str(transportData->topic_MqttMessage)) != NULL) && (InternStrnicmp(topicName, mqtt_message_queue_topic, strlen(mqtt_message_queue_topic) - 1) == 0))
     {
         *type = IOTHUB_TYPE_TELEMETRY;
         result = 0;
     }
     // input_queue_topic contains additional "#" from subscribe, which we strip off on comparing incoming.
-    else if (((input_queue_topic = STRING_c_str(transportData->topic_InputQueue)) != NULL) && (InternStrnicmp(topic_resp, input_queue_topic, strlen(input_queue_topic) - 1) == 0))
+    else if (((input_queue_topic = STRING_c_str(transportData->topic_InputQueue)) != NULL) && (InternStrnicmp(topicName, input_queue_topic, strlen(input_queue_topic) - 1) == 0))
     {
         *type = IOTHUB_TYPE_EVENT_QUEUE;
         result = 0;
     }
     else
     {
-        LogError("Topic %s does not match any client is subscribed to", topic_resp);
+        LogError("Topic %s does not match any client is subscribed to", topicName);
         result = MU_FAILURE;        
     }
     return result;
@@ -1315,9 +1315,9 @@ static int subscribeToNotifyStateIfNeeded(PMQTTTRANSPORT_HANDLE_DATA transport_d
 // GetMqttPropertyType compares a specific property in a topic to whether its one that we know about
 // (specifically whether IOTHUB_MESSAGE_HANDLE has an accessor for it).
 //
-static MQTT_PROPERTY_TYPE GetMqttPropertyType(const char* propertyNameAndValue, size_t propertyNameLength)
+static IOTHUB_SYSTEM_PROPERTY_TYPE GetMqttPropertyType(const char* propertyNameAndValue, size_t propertyNameLength)
 {
-    MQTT_PROPERTY_TYPE result = MQTT_PROPERTY_TYPE_APPLICATION_CUSTOM;
+    IOTHUB_SYSTEM_PROPERTY_TYPE result = IOTHUB_SYSTEM_PROPERTY_TYPE_APPLICATION_CUSTOM;
     size_t index = 0;
 
     for (index = 0; index < sysPropListLength; index++)
@@ -1393,16 +1393,16 @@ static const char* addInputNamePropertyToMsg(IOTHUB_MESSAGE_HANDLE iotHubMessage
 }
 
 //
-// AddSystemPropertyToMessageWithDecodeIfNeeded adds a "system" property from the incoming MQTT PUBLISH to the iotHubMessage 
+// addSystemPropertyToMessageWithDecodeIfNeeded adds a "system" property from the incoming MQTT PUBLISH to the iotHubMessage 
 // we will ultimately deliver to the application on its callback.
 //
-static int AddSystemPropertyToMessage(IOTHUB_MESSAGE_HANDLE iotHubMessage, MQTT_PROPERTY_TYPE propertyType, const char* propValue)
+static int addSystemPropertyToMessage(IOTHUB_MESSAGE_HANDLE iotHubMessage, IOTHUB_SYSTEM_PROPERTY_TYPE propertyType, const char* propValue)
 {
     int result;
 
     switch (propertyType)
     {
-        case MQTT_PROPERTY_TYPE_CREATION_TIME:
+        case IOTHUB_SYSTEM_PROPERTY_TYPE_CREATION_TIME:
         {
             if (IoTHubMessage_SetMessageCreationTimeUtcSystemProperty(iotHubMessage, propValue) != IOTHUB_MESSAGE_OK)
             {
@@ -1416,7 +1416,7 @@ static int AddSystemPropertyToMessage(IOTHUB_MESSAGE_HANDLE iotHubMessage, MQTT_
         }
         break;
 
-        case MQTT_PROPERTY_TYPE_CORRELATION_ID:
+        case IOTHUB_SYSTEM_PROPERTY_TYPE_CORRELATION_ID:
         {
             if (IoTHubMessage_SetCorrelationId(iotHubMessage, propValue) != IOTHUB_MESSAGE_OK)
             {
@@ -1430,7 +1430,7 @@ static int AddSystemPropertyToMessage(IOTHUB_MESSAGE_HANDLE iotHubMessage, MQTT_
         }
         break;
 
-        case MQTT_PROPERTY_TYPE_CONNECTION_DEVICE_ID:
+        case IOTHUB_SYSTEM_PROPERTY_TYPE_CONNECTION_DEVICE_ID:
         {
             if (IoTHubMessage_SetConnectionDeviceId(iotHubMessage, propValue) != IOTHUB_MESSAGE_OK)
             {
@@ -1444,7 +1444,7 @@ static int AddSystemPropertyToMessage(IOTHUB_MESSAGE_HANDLE iotHubMessage, MQTT_
         }
         break;
 
-        case MQTT_PROPERTY_TYPE_CONNECTION_MODULE_ID:
+        case IOTHUB_SYSTEM_PROPERTY_TYPE_CONNECTION_MODULE_ID:
         {
             if (IoTHubMessage_SetConnectionModuleId(iotHubMessage, propValue) != IOTHUB_MESSAGE_OK)
             {
@@ -1458,7 +1458,7 @@ static int AddSystemPropertyToMessage(IOTHUB_MESSAGE_HANDLE iotHubMessage, MQTT_
         }
         break;
 
-        case MQTT_PROPERTY_TYPE_MESSAGE_ID:
+        case IOTHUB_SYSTEM_PROPERTY_TYPE_MESSAGE_ID:
         {
             if (IoTHubMessage_SetMessageId(iotHubMessage, propValue) != IOTHUB_MESSAGE_OK)
             {
@@ -1472,7 +1472,7 @@ static int AddSystemPropertyToMessage(IOTHUB_MESSAGE_HANDLE iotHubMessage, MQTT_
         }
         break;
 
-        case  MQTT_PROPERTY_TYPE_MESSAGE_USER_ID:
+        case  IOTHUB_SYSTEM_PROPERTY_TYPE_MESSAGE_USER_ID:
         {
             if (IoTHubMessage_SetMessageUserIdSystemProperty(iotHubMessage, propValue) != IOTHUB_MESSAGE_OK)
             {
@@ -1486,7 +1486,7 @@ static int AddSystemPropertyToMessage(IOTHUB_MESSAGE_HANDLE iotHubMessage, MQTT_
         }
         break;
 
-        case MQTT_PROPERTY_TYPE_CONTENT_TYPE:
+        case IOTHUB_SYSTEM_PROPERTY_TYPE_CONTENT_TYPE:
         {
             if (IoTHubMessage_SetContentTypeSystemProperty(iotHubMessage, propValue) != IOTHUB_MESSAGE_OK)
             {
@@ -1500,7 +1500,7 @@ static int AddSystemPropertyToMessage(IOTHUB_MESSAGE_HANDLE iotHubMessage, MQTT_
         }
         break;
 
-        case MQTT_PROPERTY_TYPE_CONTENT_ENCODING:
+        case IOTHUB_SYSTEM_PROPERTY_TYPE_CONTENT_ENCODING:
         {
             if (IoTHubMessage_SetContentEncodingSystemProperty(iotHubMessage, propValue) != IOTHUB_MESSAGE_OK)
             {
@@ -1558,7 +1558,7 @@ static const char* findMessagePropertyStart(PMQTTTRANSPORT_HANDLE_DATA transport
 // AddApplicationProperty adds the custom key/value property name from the incoming MQTT PUBLISH to the iotHubMessage
 // we will ultimately deliver to the application on its callback.
 //
-static int AddApplicationPropertyToMessage(MAP_HANDLE propertyMap, const char* propertyNameAndValue, size_t propertyNameLength, const char* propertyValue, bool auto_url_encode_decode)
+static int addApplicationPropertyToMessage(MAP_HANDLE propertyMap, const char* propertyNameAndValue, size_t propertyNameLength, const char* propertyValue, bool auto_url_encode_decode)
 {
     int result = 0;
 
@@ -1610,10 +1610,10 @@ static int AddApplicationPropertyToMessage(MAP_HANDLE propertyMap, const char* p
 }
 
 //
-// AddSystemPropertyToMessageWithDecodeIfNeeded adds a "system" property from the incoming MQTT PUBLISH to the iotHubMessage 
+// addSystemPropertyToMessageWithDecodeIfNeeded adds a "system" property from the incoming MQTT PUBLISH to the iotHubMessage 
 // we will ultimately deliver to the application on its callback.  This function does the urlDecode, if needed, on the property value.
 //
-static int AddSystemPropertyToMessageWithDecodeIfNeeded(IOTHUB_MESSAGE_HANDLE iotHubMessage, MQTT_PROPERTY_TYPE propertyType, const char* propertyValue, bool auto_url_encode_decode)
+static int addSystemPropertyToMessageWithDecodeIfNeeded(IOTHUB_MESSAGE_HANDLE iotHubMessage, IOTHUB_SYSTEM_PROPERTY_TYPE propertyType, const char* propertyValue, bool auto_url_encode_decode)
 {
     int result = 0;
 
@@ -1625,7 +1625,7 @@ static int AddSystemPropertyToMessageWithDecodeIfNeeded(IOTHUB_MESSAGE_HANDLE io
             LogError("Failed to URL decode property value");
             result = MU_FAILURE;
         }
-        else if (AddSystemPropertyToMessage(iotHubMessage, propertyType, STRING_c_str(propValue_decoded)) != 0)
+        else if (addSystemPropertyToMessage(iotHubMessage, propertyType, STRING_c_str(propValue_decoded)) != 0)
         {
             LogError("Unable to set message property");
             result = MU_FAILURE;
@@ -1634,7 +1634,7 @@ static int AddSystemPropertyToMessageWithDecodeIfNeeded(IOTHUB_MESSAGE_HANDLE io
     }
     else
     {
-        if (AddSystemPropertyToMessage(iotHubMessage, propertyType, propertyValue) != 0)
+        if (addSystemPropertyToMessage(iotHubMessage, propertyType, propertyValue) != 0)
         {
             LogError("Unable to set message property");
             result = MU_FAILURE;
@@ -1718,22 +1718,22 @@ static int extractMqttProperties(PMQTTTRANSPORT_HANDLE_DATA transportData, IOTHU
                 // After this point, propertyValue is a \0 terminated string (because the STRING_Tokenizer call above made it so)
                 // but propertyNameAndValue is NOT \0 terminated and requires its length passed with it.
 
-                MQTT_PROPERTY_TYPE propertyType = GetMqttPropertyType(propertyNameAndValue, propertyNameLength);
+                IOTHUB_SYSTEM_PROPERTY_TYPE propertyType = GetMqttPropertyType(propertyNameAndValue, propertyNameLength);
 
-                if (propertyType == MQTT_PROPERTY_TYPE_SILENTLY_IGNORE)
+                if (propertyType == IOTHUB_SYSTEM_PROPERTY_TYPE_SILENTLY_IGNORE)
                 {
                     // To maintain behavior with previous versions of SDKs, "system" properties that we recognize but 
                     // do not have accessors in IOTHUB_MESSAGE_HANDLE will be silently ignored.  The alternative would be adding
                     // them to the application's custom properties, which isn't right as they're not application defined.
                     ;
                 }
-                else if (propertyType == MQTT_PROPERTY_TYPE_APPLICATION_CUSTOM)
+                else if (propertyType == IOTHUB_SYSTEM_PROPERTY_TYPE_APPLICATION_CUSTOM)
                 {
-                    result = AddApplicationPropertyToMessage(propertyMap, propertyNameAndValue, propertyNameLength, propertyValue, transportData->auto_url_encode_decode);
+                    result = addApplicationPropertyToMessage(propertyMap, propertyNameAndValue, propertyNameLength, propertyValue, transportData->auto_url_encode_decode);
                 }
                 else
                 {
-                    result = AddSystemPropertyToMessageWithDecodeIfNeeded(iotHubMessage, propertyType, propertyValue, transportData->auto_url_encode_decode);
+                    result = addSystemPropertyToMessageWithDecodeIfNeeded(iotHubMessage, propertyType, propertyValue, transportData->auto_url_encode_decode);
                 }
             }
         }
@@ -1747,13 +1747,13 @@ static int extractMqttProperties(PMQTTTRANSPORT_HANDLE_DATA transportData, IOTHU
 //
 // processTwinNotification processes device and module twin updates made by IoT Hub / IoT Edge.
 //
-static void processTwinNotification(PMQTTTRANSPORT_HANDLE_DATA transportData, MQTT_MESSAGE_HANDLE msgHandle, const char* topic_resp)
+static void processTwinNotification(PMQTTTRANSPORT_HANDLE_DATA transportData, MQTT_MESSAGE_HANDLE msgHandle, const char* topicName)
 {
     size_t request_id;
     int status_code;
     bool notification_msg;
 
-    if (parseDeviceTwinTopicInfo(topic_resp, &notification_msg, &request_id, &status_code) != 0)
+    if (parseDeviceTwinTopicInfo(topicName, &notification_msg, &request_id, &status_code) != 0)
     {
         LogError("Failure: parsing device topic info");
     }
@@ -1814,7 +1814,7 @@ static void processTwinNotification(PMQTTTRANSPORT_HANDLE_DATA transportData, MQ
 //
 // processDeviceMethodNotification processes a device and module method invocations made by IoT Hub / IoT Edge.
 //
-static void processDeviceMethodNotification(PMQTTTRANSPORT_HANDLE_DATA transportData, MQTT_MESSAGE_HANDLE msgHandle, const char* topic_resp)
+static void processDeviceMethodNotification(PMQTTTRANSPORT_HANDLE_DATA transportData, MQTT_MESSAGE_HANDLE msgHandle, const char* topicName)
 {
     STRING_HANDLE method_name = STRING_new();
     if (method_name == NULL)
@@ -1836,7 +1836,7 @@ static void processDeviceMethodNotification(PMQTTTRANSPORT_HANDLE_DATA transport
                 LogError("Failure constructing request_id string");
                 free(dev_method_info);
             }
-            else if (retrievDeviceMethodRidInfo(topic_resp, method_name, dev_method_info->request_id) != 0)
+            else if (retrievDeviceMethodRidInfo(topicName, method_name, dev_method_info->request_id) != 0)
             {
                 LogError("Failure: retrieve device topic info");
                 STRING_delete(dev_method_info->request_id);
@@ -1862,7 +1862,7 @@ static void processDeviceMethodNotification(PMQTTTRANSPORT_HANDLE_DATA transport
 //
 // processIncomingMessageNotification processes both C2D messages and messages sent from one IoT Edge module into this module
 //
-static void processIncomingMessageNotification(PMQTTTRANSPORT_HANDLE_DATA transportData, MQTT_MESSAGE_HANDLE msgHandle, const char* topic_resp, IOTHUB_IDENTITY_TYPE type)
+static void processIncomingMessageNotification(PMQTTTRANSPORT_HANDLE_DATA transportData, MQTT_MESSAGE_HANDLE msgHandle, const char* topicName, IOTHUB_IDENTITY_TYPE type)
 {
     IOTHUB_MESSAGE_HANDLE IoTHubMessage = NULL;
     const APP_PAYLOAD* appPayload = mqttmessage_getApplicationMsg(msgHandle);
@@ -1876,7 +1876,7 @@ static void processIncomingMessageNotification(PMQTTTRANSPORT_HANDLE_DATA transp
     {
         LogError("Failure: IotHub Message creation has failed.");
     }
-    else if (extractMqttProperties(transportData, IoTHubMessage, topic_resp, type) != 0)
+    else if (extractMqttProperties(transportData, IoTHubMessage, topicName, type) != 0)
     {
         LogError("failure extracting mqtt properties.");
     }
@@ -1951,12 +1951,12 @@ static void mqttNotificationCallback(MQTT_MESSAGE_HANDLE msgHandle, void* callba
         IOTHUB_IDENTITY_TYPE type;
 
         /* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_052: [ mqttNotificationCallback shall extract the topic Name from the MQTT_MESSAGE_HANDLE. ] */
-        const char* topic_resp = mqttmessage_getTopicName(msgHandle);
-        if (topic_resp == NULL)
+        const char* topicName = mqttmessage_getTopicName(msgHandle);
+        if (topicName == NULL)
         {
             LogError("Failure: NULL topic name encountered");
         }
-        else if (retrieveTopicType(transportData, topic_resp, &type) != 0)
+        else if (retrieveTopicType(transportData, topicName, &type) != 0)
         {
             LogError("Received unexpected topic.  Ignoring remainder of request");
         }
@@ -1964,15 +1964,15 @@ static void mqttNotificationCallback(MQTT_MESSAGE_HANDLE msgHandle, void* callba
         {
             if (type == IOTHUB_TYPE_DEVICE_TWIN)
             {
-                processTwinNotification(transportData, msgHandle, topic_resp);
+                processTwinNotification(transportData, msgHandle, topicName);
             }
             else if (type == IOTHUB_TYPE_DEVICE_METHODS)
             {
-                processDeviceMethodNotification(transportData, msgHandle, topic_resp);
+                processDeviceMethodNotification(transportData, msgHandle, topicName);
             }
             else
             {
-                processIncomingMessageNotification(transportData, msgHandle, topic_resp, type);
+                processIncomingMessageNotification(transportData, msgHandle, topicName, type);
             }
         }
     }
