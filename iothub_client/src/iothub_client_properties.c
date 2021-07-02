@@ -10,7 +10,7 @@
 typedef enum COMPONENT_PARSE_STATE_TAG
 {
     COMPONENT_PARSE_STATE_ROOT,
-    COMPONENT_PARSE_SUB_STATE_COMPONENT,
+    COMPONENT_PARSE_STATE_SUB_COMPONENT,
 } COMPONENT_PARSE_STATE;
 
 typedef enum PROPERTY_PARSE_STATE_TAG
@@ -676,7 +676,7 @@ static bool GetNextPropertyToEnumerate(IOTHUB_CLIENT_PROPERTY_ITERATOR* property
     {
         const char* objectName = json_object_get_name(containerObject, propertyIterator->currentPropertyIndex);
 
-        if (propertyIterator->componentParseState == COMPONENT_PARSE_SUB_STATE_COMPONENT)
+        if (propertyIterator->componentParseState == COMPONENT_PARSE_STATE_SUB_COMPONENT)
         {
             // The propertyIterator->currentPropertyIndex corresponds to a subcomponent we're traversing.
             if (GetNextComponentProperty(propertyIterator, containerObject, propertyName, propertyValue) == true)
@@ -698,7 +698,7 @@ static bool GetNextPropertyToEnumerate(IOTHUB_CLIENT_PROPERTY_ITERATOR* property
         if (IsJsonObjectAComponentInModel(propertyIterator, objectName))
         {
             // This top-level property is the name of a component.  
-            propertyIterator->componentParseState = COMPONENT_PARSE_SUB_STATE_COMPONENT;
+            propertyIterator->componentParseState = COMPONENT_PARSE_STATE_SUB_COMPONENT;
             continue;
         }
         else if (IsReservedPropertyKeyword(objectName))
