@@ -24,7 +24,7 @@
 #include "../../../certs/certs.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/shared_util_options.h"
-
+#include "azure_c_shared_utility/agenttime.h"
 
 #ifdef TEST_MQTT
 #include "iothubtransportmqtt.h"
@@ -65,6 +65,14 @@ UPLOADTOBLOB_CALLBACK_STATUS g_uploadToBlobStatus;
 
 #define TEST_SLEEP_BETWEEN_MULTIBLOCK_UPLOADS 2000
 
+#define TEST_SLEEP_BETWEEN_NEW_UPLOAD_THREAD 150
+#define TEST_SLEEP_BEFORE_EARLY_HANDLE_CLOSE 1000
+#define TEST_SLEEP_SLOW_WORKER_THREAD 5000
+
+#define TEST_MAXIMUM_TIME_FOR_DESTROY_ON_BLOCKED_THREADS_TO_COMPLETE_SECONDS 10
+
+#define INDEFINITE_TIME ((time_t)(-1))
+
 TEST_DEFINE_ENUM_TYPE(UPLOADTOBLOB_CALLBACK_STATUS, IOTHUB_CLIENT_FILE_UPLOAD_RESULT_VALUES);
 
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
@@ -79,11 +87,13 @@ TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 
 #define UPLOADTOBLOB_E2E_TEST_MULTI_BLOCK_DESTINATION_FILE1 "hello_world_multiblock.txt"
 
-static char* uploadData0 = "AAA-";
-static char* uploadData1 = "BBBBB-";
-static char* uploadData2 = "CCCCCC-";
+static char* uploadDataFromCallback = "AAA-";
 
 static char* uploadDataMultiThread = "Upload data from multi-thread test";
+
+bool testSlowThreadContext1;
+bool testSlowThreadContext2;
+bool testSlowThreadContext3;
 
 static int bool_Compare(bool left, bool right)
 {
@@ -109,7 +119,7 @@ static void _Bool_ToString(char* string, size_t bufferSize, _Bool val)
 }
 #endif
 
-void e2e_uploadblob_init()
+static void e2e_uploadblob_init()
 {
     setvbuf(stdout, NULL, _IONBF, 0);
     setvbuf(stderr, NULL, _IONBF, 0);
@@ -126,7 +136,7 @@ void e2e_uploadblob_init()
     platform_init();
 }
 
-void e2e_uploadblob_deinit()
+static void e2e_uploadblob_deinit()
 {
     IoTHubAccount_deinit(g_iothubAcctInfo);
     // Need a double deinit
@@ -139,7 +149,7 @@ void e2e_uploadblob_deinit()
 
 // uploadToBlobCallback is invoked once upload succeeds or fails.  It updates context in either case so
 // main waiting thread knows we're done.
-void uploadToBlobCallback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT fileUploadResult, void* userContextCallback)
+static void uploadToBlobCallback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT fileUploadResult, void* userContextCallback)
 {
     if (Lock(updateBlobTestLock) != LOCK_OK)
     {
@@ -164,7 +174,7 @@ void uploadToBlobCallback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT fileUploadResult, voi
     }
 }
 
-void poll_for_upload_completion(UPLOADTOBLOB_CALLBACK_STATUS *uploadToBlobStatus)
+static void poll_for_upload_completion(UPLOADTOBLOB_CALLBACK_STATUS *uploadToBlobStatus)
 {
     time_t nowTime;
     time_t beginOperation = time(NULL);
@@ -230,11 +240,11 @@ static void sleep_between_upload_blob_e2e_tests(void)
     unsigned int jitter = (rand() % TEST_JITTER_BETWEEN_UPLOAD_TO_BLOB_E2E_TESTS_MS);
     unsigned int sleepTime = TEST_SLEEP_BETWEEN_UPLOAD_TO_BLOB_E2E_TESTS_MS + jitter;
         
-    LogInfo("Invoking sleep for %d milliseconds after test case", sleepTime);
+    LogInfo("Invoking sleep for %d milliseconds before test case", sleepTime);
     ThreadAPI_Sleep(sleepTime);
 }
 
-void e2e_uploadtoblob_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACCOUNT_AUTH_METHOD accountAuthMethod)
+static void e2e_uploadtoblob_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACCOUNT_AUTH_METHOD accountAuthMethod)
 {
     IOTHUB_CLIENT_RESULT result;
     IOTHUB_PROVISIONED_DEVICE* deviceToUse;
@@ -275,7 +285,8 @@ void e2e_uploadtoblob_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ACC
     IoTHubClient_Destroy(iotHubClientHandle);
 }
 
-IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT uploadToBlobGetDataEx(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
+// Callback invoked by the SDK to retrieve data.
+static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT uploadToBlobGetDataEx(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
 {
     IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT callbackResult;
 
@@ -294,32 +305,24 @@ IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT uploadToBlobGetDataEx(IOTHUB_CLIENT_FI
         if (uploadToBlobCauseAbort == true)
         {
             // If we've aborted, expect to be called with final invocation sooner
-            ASSERT_ARE_EQUAL(bool, true, (uploadBlobNumber == 3) ? true : false);
+            ASSERT_ARE_EQUAL(bool, true, (uploadBlobNumber == 2) ? true : false);
         }
         else
         {
             // If we're not completing, expect to be called with final invocation after all blocks have been passed up.
-            ASSERT_ARE_EQUAL(bool, true, (uploadBlobNumber == 4) ? true : false);
+            ASSERT_ARE_EQUAL(bool, true, (uploadBlobNumber == 2) ? true : false);
         }
         *callbackStatus = UPLOADTOBLOB_CALLBACK_SUCCEEDED;
     }
     else
     {
         // We're invoked with a request for more data.
-        ASSERT_ARE_EQUAL(bool, true, (uploadBlobNumber <= 3) ? true : false);
+        ASSERT_ARE_EQUAL(bool, true, (uploadBlobNumber <= 2) ? true : false);
         if (uploadBlobNumber == 0)
         {
-            *data = (unsigned char const *)uploadData0;
+            *data = (unsigned char const *)uploadDataFromCallback;
         }
         else if (uploadBlobNumber == 1)
-        {
-            *data = (unsigned char const *)uploadData1;
-        }
-        else if (uploadBlobNumber == 2)
-        {
-            *data = (unsigned char const *)uploadData2;
-        }
-        else if (uploadBlobNumber == 3)
         {
             // This will cause us to return 0 size to caller, which means no more data to read.
             *data = (unsigned char const *)"";
@@ -329,7 +332,7 @@ IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT uploadToBlobGetDataEx(IOTHUB_CLIENT_FI
         *callbackStatus = UPLOADTOBLOB_CALLBACK_PENDING;
     }
 
-    if ((uploadToBlobCauseAbort == true) && (uploadBlobNumber == 2))
+    if ((uploadToBlobCauseAbort == true) && (uploadBlobNumber == 1))
     {
         callbackResult = IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_ABORT;
     }
@@ -341,18 +344,22 @@ IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT uploadToBlobGetDataEx(IOTHUB_CLIENT_FI
 
     (void)Unlock(updateBlobTestLock);
 
-    LogInfo("Sleeping %d seconds between upload calls", TEST_SLEEP_BETWEEN_MULTIBLOCK_UPLOADS);
-    ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_MULTIBLOCK_UPLOADS);
+    if (data != NULL)
+    {
+        // Sleep to not send too much data to server in gated runs.  When data==NULL we don't need this because this callback doesn't result in network I/O
+        LogInfo("Sleeping %d milliseconds between upload calls", TEST_SLEEP_BETWEEN_MULTIBLOCK_UPLOADS);
+        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_MULTIBLOCK_UPLOADS);
+    }
     return callbackResult;
 }
 
 // The non-Ex callback is identical to the Ex, except it is void instead of returning a value to caller.
-void uploadToBlobGetData(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
+static void uploadToBlobGetData(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
 {
     (void)uploadToBlobGetDataEx(result, data, size, context);
 }
 
-void e2e_uploadtoblob_multiblock_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, bool useExMethod, bool causeAbort)
+static void e2e_uploadtoblob_multiblock_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, bool useExMethod, bool causeAbort)
 {
     IOTHUB_CLIENT_RESULT result;
     IOTHUB_PROVISIONED_DEVICE* deviceToUse = IoTHubAccount_GetSASDevice(g_iothubAcctInfo);
@@ -380,6 +387,93 @@ void e2e_uploadtoblob_multiblock_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     IoTHubClient_Destroy(iotHubClientHandle);
 }
 
+// uploadToBlobTestEarlyClose is the callback passed to SDK that will retrieve uploadToBlob data.  For this test, however, we simply
+// will wait "too long" before returning and will happen after the test thread attempts to close the handle.
+static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT uploadToBlobTestEarlyClose(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
+{
+    if (data != NULL)
+    {
+        // When data is non-NULL, the SDK is requesting this callback to fill a buffer for it.
+        ASSERT_ARE_EQUAL(int, (int)FILE_UPLOAD_OK, (int)result);   
+        ASSERT_IS_NOT_NULL(size);
+        ASSERT_IS_NOT_NULL(context);
+
+        bool* slowThreadContext = context;
+        ASSERT_IS_FALSE(*slowThreadContext);
+
+        LogInfo("Slow worker thread created, context=%p.  It will sleep %d milliseconds before return", context, TEST_SLEEP_SLOW_WORKER_THREAD);
+        ThreadAPI_Sleep(TEST_SLEEP_SLOW_WORKER_THREAD);
+        LogInfo("Slow worker thread sleep finished, context=%p.  Returning to caller.", context);
+
+        // Set the context to indicate to test that we have actually executed this thread.
+        *slowThreadContext = true;
+
+        // It doesn't matter for the test what code we return, as the worker thread can continue to execute indefinitely as the Destroy() call will block.
+        // Since we're testing the SDK close here and not the Hub, just terminate the request.
+        return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_ABORT;
+    }
+    else
+    {
+        // When data is NULL, it indicates the final call of status.  No need to sleep here, just return to finish up test case.
+        return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK;
+    }
+}
+
+// e2e_uploadtoblob_close_handle_with_active_threads tests that if the application closes the IOTHUB_CLIENT_HANDLE while the threads
+// are still active, that we still will close the running threads.
+static void e2e_uploadtoblob_close_handle_with_active_threads(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+{
+    IOTHUB_CLIENT_RESULT result;
+    IOTHUB_PROVISIONED_DEVICE* deviceToUse = IoTHubAccount_GetSASDevice(g_iothubAcctInfo);
+    ASSERT_IS_NOT_NULL(deviceToUse);
+
+    IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
+    ASSERT_IS_NOT_NULL(iotHubClientHandle, "Could not invoke IoTHubClient_CreateFromConnectionString");
+
+    testSlowThreadContext1 = false;
+    testSlowThreadContext2 = false;
+    testSlowThreadContext3 = false;
+
+    result = IoTHubClient_UploadMultipleBlocksToBlobAsyncEx(iotHubClientHandle, UPLOADTOBLOB_E2E_TEST_MULTI_BLOCK_DESTINATION_FILE, uploadToBlobTestEarlyClose, &testSlowThreadContext1);
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
+    ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_NEW_UPLOAD_THREAD);
+    
+    result = IoTHubClient_UploadMultipleBlocksToBlobAsyncEx(iotHubClientHandle, UPLOADTOBLOB_E2E_TEST_MULTI_BLOCK_DESTINATION_FILE, uploadToBlobTestEarlyClose, &testSlowThreadContext2);
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
+    ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_NEW_UPLOAD_THREAD);
+    
+    result = IoTHubClient_UploadMultipleBlocksToBlobAsyncEx(iotHubClientHandle, UPLOADTOBLOB_E2E_TEST_MULTI_BLOCK_DESTINATION_FILE, uploadToBlobTestEarlyClose, &testSlowThreadContext3);
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
+
+    LogInfo("Sleeping %d milliseconds before calling IoTHubClient_Destroy", TEST_SLEEP_BEFORE_EARLY_HANDLE_CLOSE);
+    ThreadAPI_Sleep(TEST_SLEEP_BEFORE_EARLY_HANDLE_CLOSE);
+
+    LogInfo("Invoking call to IoTHubClient_Destroy before the worker threads have finished");
+
+    time_t timeWhenDestroyCalled;
+    time_t timeWhenDestroyComplete;
+
+    ASSERT_ARE_NOT_EQUAL(int, INDEFINITE_TIME, get_time(&timeWhenDestroyCalled));
+    
+    // Note that this will block for approximately TEST_SLEEP_SLOW_WORKER_THREAD milliseconds.
+    // The SDK cannot return from this call until all the worker threads have finished execution (or else there would be a crash when worker accessed handle).
+    // This test simply makes sure this there's no crashes in this and we eventually unblock from this.
+    IoTHubClient_Destroy(iotHubClientHandle);
+
+    ASSERT_ARE_NOT_EQUAL(int, INDEFINITE_TIME, get_time(&timeWhenDestroyComplete));
+
+    double timeBetweenStartAndComplete = get_difftime(timeWhenDestroyComplete, timeWhenDestroyCalled);
+    ASSERT_ARE_EQUAL(bool, true, timeBetweenStartAndComplete < TEST_MAXIMUM_TIME_FOR_DESTROY_ON_BLOCKED_THREADS_TO_COMPLETE_SECONDS, "It took %f seconds for IoTHubClient_Destroy to complete but maximum allowed is %d",
+                                 timeBetweenStartAndComplete, TEST_MAXIMUM_TIME_FOR_DESTROY_ON_BLOCKED_THREADS_TO_COMPLETE_SECONDS);
+
+    // Checking these contexts were set to true by the running thread verifies that the threads run and that they indeed have returned.
+    ASSERT_IS_TRUE(testSlowThreadContext1);
+    ASSERT_IS_TRUE(testSlowThreadContext2);
+    ASSERT_IS_TRUE(testSlowThreadContext3);
+
+    LogInfo("Returned from IoTHubClient_Destroy");
+}
+
 BEGIN_TEST_SUITE(iothubclient_uploadtoblob_e2e)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
@@ -399,33 +493,18 @@ TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
 }
 
 #ifdef TEST_MQTT
-#if 0 
-// TODO: Re-enable.  See https://github.com/Azure/azure-iot-sdk-c/issues/1770.
-// Once these are re-enabled, remove IoTHub_MQTT_UploadToBlob_ConnString as its duplicative.
-// It's needed for now to get Apple coverage however.
 TEST_FUNCTION(IoTHub_MQTT_UploadMultipleBlocksToBlobEx)
 {
     e2e_uploadtoblob_multiblock_test(MQTT_Protocol, true, false);
 }
 
-TEST_FUNCTION(IoTHub_MQTT_UploadMultipleBlocksToBlobExWithAbort)
+TEST_FUNCTION(IoTHub_MQTT_UploadCloseHandle_Before_WorkersComplete)
 {
-    e2e_uploadtoblob_multiblock_test(MQTT_Protocol, true, true);
+    e2e_uploadtoblob_close_handle_with_active_threads(MQTT_Protocol);
 }
 
-TEST_FUNCTION(IoTHub_MQTT_UploadToBlob_x509)
-{
-    e2e_uploadtoblob_test(MQTT_Protocol, IOTHUB_ACCOUNT_AUTH_X509);
-}
-#else
-TEST_FUNCTION(IoTHub_MQTT_UploadToBlob_ConnString)
-{
-    e2e_uploadtoblob_test(MQTT_Protocol, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
-}
-#endif
 
 #endif // TEST_MQTT
-
 
 END_TEST_SUITE(iothubclient_uploadtoblob_e2e)
 
