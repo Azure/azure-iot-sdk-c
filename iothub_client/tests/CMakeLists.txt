@@ -71,6 +71,7 @@ endif()
 if(${use_mqtt})
     add_unittest_directory(iothubtransportmqtt_ut)
     add_unittest_directory(iothubtransport_mqtt_common_ut)
+    add_unittest_directory(iothubtransport_mqtt_common_int_ut)
     add_unittest_directory(iothubtransportmqtt_ws_ut)
 
     # e2e tests
