@@ -328,7 +328,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_with_NULL_SasUri_fails)
     ///arrange
 
     ///act
-    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri(NULL, FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL);
+    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri(NULL, FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL, NULL);
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_INVALID_ARG, result);
@@ -343,7 +343,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_with_NULL_getDataCallBack_and_
     ///arrange
 
     ///act
-    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri(TEST_VALID_SASURI_1, NULL, &context, &httpResponse, testValidBufferHandle, NULL, NULL);
+    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri(TEST_VALID_SASURI_1, NULL, &context, &httpResponse, testValidBufferHandle, NULL, NULL, NULL);
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_INVALID_ARG, result);
@@ -369,10 +369,10 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_succeeds_when_HTTP_status_code
     STRICT_EXPECTED_CALL(STRING_construct("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BlockList>")); /*this is starting to build the XML used in Put Block List operation*/
 
     /*uploading blocks (Put Block)*/
-    for (size_t blockNumber = 0;blockNumber < (size - 1) / (4 * 1024 * 1024) + 1;blockNumber++)
+    for (size_t blockNumber = 0;blockNumber < (size - 1) / (100 * 1024 * 1024) + 1;blockNumber++)
     {
-        STRICT_EXPECTED_CALL(BUFFER_create(&c + blockNumber * 4 * 1024 * 1024,
-            (blockNumber != (size - 1) / (4 * 1024 * 1024)) ? 4 * 1024 * 1024 : (size - 1) % (4 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
+        STRICT_EXPECTED_CALL(BUFFER_create(&c + blockNumber * 100 * 1024 * 1024,
+            (blockNumber != (size - 1) / (100 * 1024 * 1024)) ? 100 * 1024 * 1024 : (size - 1) % (100 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
         )); /*this is the content to be uploaded by this call*/
 
         /*here some sprintf happens and that produces a string in the form: 000000...049999*/
@@ -415,7 +415,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_succeeds_when_HTTP_status_code
     set_expected_calls_for_Blob_UploadMultipleBlocksFromSasUri_cleanup();
 
     ///act
-    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri(TEST_VALID_SASURI_1, FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL);
+    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri(TEST_VALID_SASURI_1, FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL, NULL);
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_OK, result);
@@ -441,10 +441,10 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_fails_when_HTTPAPIEX_ExecuteRe
     STRICT_EXPECTED_CALL(STRING_construct("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BlockList>")); /*this is starting to build the XML used in Put Block List operation*/
 
     /*uploading blocks (Put Block)*/
-    for (size_t blockNumber = 0;blockNumber < (size - 1) / (4 * 1024 * 1024) + 1;blockNumber++)
+    for (size_t blockNumber = 0;blockNumber < (size - 1) / (100 * 1024 * 1024) + 1;blockNumber++)
     {
-        STRICT_EXPECTED_CALL(BUFFER_create(&c + blockNumber * 4 * 1024 * 1024,
-            (blockNumber != (size - 1) / (4 * 1024 * 1024)) ? 4 * 1024 * 1024 : (size - 1) % (4 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
+        STRICT_EXPECTED_CALL(BUFFER_create(&c + blockNumber * 100 * 1024 * 1024,
+            (blockNumber != (size - 1) / (100 * 1024 * 1024)) ? 100 * 1024 * 1024 : (size - 1) % (100 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
         )); /*this is the content to be uploaded by this call*/
 
         /*here some sprintf happens and that produces a string in the form: 000000...049999*/
@@ -488,7 +488,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_fails_when_HTTPAPIEX_ExecuteRe
     set_expected_calls_for_Blob_UploadMultipleBlocksFromSasUri_cleanup();
 
     ///act
-    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri(TEST_VALID_SASURI_1, FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL);
+    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri(TEST_VALID_SASURI_1, FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL, NULL);
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_HTTP_ERROR, result);
@@ -521,7 +521,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_fails_when_BUFFER_create_fails
     }
 
     ///act
-    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri(TEST_VALID_SASURI_1, FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL);
+    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri(TEST_VALID_SASURI_1, FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL, NULL);
 
     ///assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -549,7 +549,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_fails_when_HTTPAPIEX_Create_fa
     set_expected_calls_for_Blob_UploadMultipleBlocksFromSasUri_cleanup();
 
     ///act
-    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri(TEST_VALID_SASURI_1, FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL);
+    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri(TEST_VALID_SASURI_1, FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL, NULL);
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_ERROR, result);
@@ -574,7 +574,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_fails_when_malloc_fails)
     set_expected_calls_for_Blob_UploadMultipleBlocksFromSasUri_cleanup();
 
     ///act
-    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri(TEST_VALID_SASURI_1, FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL);
+    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri(TEST_VALID_SASURI_1, FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL, NULL);
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_ERROR, result);
@@ -595,7 +595,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_SasUri_is_wrong_fails_1)
     set_expected_calls_for_Blob_UploadMultipleBlocksFromSasUri_cleanup();
 
     ///act
-    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https:/h.h/doms", FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL); /*wrong format for protocol, notice it is actually http:\h.h\doms (missing a \ from http)*/
+    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https:/h.h/doms", FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL, NULL); /*wrong format for protocol, notice it is actually http:\h.h\doms (missing a \ from http)*/
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_INVALID_ARG, result);
@@ -616,7 +616,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_SasUri_is_wrong_fails_2)
     set_expected_calls_for_Blob_UploadMultipleBlocksFromSasUri_cleanup();
 
     ///act
-    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h", FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL); /*there's no relative path here*/
+    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h", FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL, NULL); /*there's no relative path here*/
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_INVALID_ARG, result);
@@ -625,24 +625,24 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_SasUri_is_wrong_fails_2)
     ///cleanup
 }
 
-static void Blob_UploadMultipleBlocksFromSasUri_various_sizes_happy_path_Impl(HTTP_PROXY_OPTIONS *proxyOptions)
+static void Blob_UploadMultipleBlocksFromSasUri_various_sizes_happy_path_Impl(HTTP_PROXY_OPTIONS *proxyOptions, const char * networkInterface)
 {
     /*the following sizes have been identified as "important to be tested*/
-    /*1B, 4MB-1, 4MB, 4MB+1, 64MB, 64MB+1, 68MB-1, 68MB, 68MB+1*/
+    /*1B, 100MB-1, 100MB, 100MB+1, 256MB, 256MB+1, 260MB-1, 260MB, 260MB+1*/
     size_t sizes[] = {
         1,
 
-        4 * 1024 * 1024 - 1,
-        4 * 1024 * 1024,
-        4 * 1024 * 1024 + 1,
+        100 * 1024 * 1024 - 1,
+        100 * 1024 * 1024,
+        100 * 1024 * 1024 + 1,
 
-        64 * 1024 * 1024 - 1,
-        64 * 1024 * 1024,
-        64 * 1024 * 1024 + 1,
+        256 * 1024 * 1024 - 1,
+        256 * 1024 * 1024,
+        256 * 1024 * 1024 + 1,
 
-        68 * 1024 * 1024 - 1,
-        68 * 1024 * 1024,
-        68 * 1024 * 1024 + 1,
+        260 * 1024 * 1024 - 1,
+        260 * 1024 * 1024,
+        260 * 1024 * 1024 + 1,
     };
 
     for (size_t iSize = 0; iSize < sizeof(sizes) / sizeof(sizes[0]);iSize++)
@@ -669,13 +669,18 @@ static void Blob_UploadMultipleBlocksFromSasUri_various_sizes_happy_path_Impl(HT
         {
             STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(IGNORED_PTR_ARG, OPTION_HTTP_PROXY, proxyOptions));
         }
+
+        if (networkInterface != NULL)
+        {
+            STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(IGNORED_PTR_ARG, OPTION_CURL_INTERFACE, networkInterface));
+        }
         STRICT_EXPECTED_CALL(STRING_construct("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BlockList>")); /*this is starting to build the XML used in Put Block List operation*/
 
         /*uploading blocks (Put Block)*/
-        for (size_t blockNumber = 0;blockNumber < (sizes[iSize] - 1) / (4 * 1024 * 1024) + 1;blockNumber++)
+        for (size_t blockNumber = 0;blockNumber < (sizes[iSize] - 1) / (100 * 1024 * 1024) + 1;blockNumber++)
         {
-            STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 4 * 1024 * 1024,
-                (blockNumber != (sizes[iSize] - 1) / (4 * 1024 * 1024)) ? 4 * 1024 * 1024 : (sizes[iSize] - 1) % (4 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
+            STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 100 * 1024 * 1024,
+                (blockNumber != (sizes[iSize] - 1) / (100 * 1024 * 1024)) ? 100 * 1024 * 1024 : (sizes[iSize] - 1) % (100 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
             )); /*this is the content to be uploaded by this call*/
 
             /*here some sprintf happens and that produces a string in the form: 000000...049999*/
@@ -753,7 +758,7 @@ static void Blob_UploadMultipleBlocksFromSasUri_various_sizes_happy_path_Impl(HT
         set_expected_calls_for_Blob_UploadMultipleBlocksFromSasUri_cleanup();
 
         ///act
-        BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, proxyOptions);
+        BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, proxyOptions, networkInterface);
 
         ///assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -778,7 +783,7 @@ static void Blob_UploadMultipleBlocksFromSasUri_various_sizes_happy_path_Impl(HT
 TEST_FUNCTION(Blob_UploadFromSasUri_with_proxy_happy_path)
 {
     HTTP_PROXY_OPTIONS proxyOptions = { "a", 8888, NULL, NULL };
-    Blob_UploadMultipleBlocksFromSasUri_various_sizes_happy_path_Impl(&proxyOptions);
+    Blob_UploadMultipleBlocksFromSasUri_various_sizes_happy_path_Impl(&proxyOptions, NULL);
 }
 
 
@@ -799,30 +804,36 @@ TEST_FUNCTION(Blob_UploadFromSasUri_with_proxy_happy_path)
 /*Tests_SRS_BLOB_02_032: [ Otherwise, Blob_UploadMultipleBlocksFromSasUri shall succeed and return BLOB_OK. ]*/
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_various_sizes_happy_path)
 {
-    Blob_UploadMultipleBlocksFromSasUri_various_sizes_happy_path_Impl(NULL);
+    Blob_UploadMultipleBlocksFromSasUri_various_sizes_happy_path_Impl(NULL, NULL);
 }
 
 
+/*Tests_SRS_BLOB_02_033: [ Set network interface for upload to blob ]*/
+TEST_FUNCTION(Blob_UploadFromSasUri_with_network_interface)
+{
+    const char* networkInterface = "eth0";
+    Blob_UploadMultipleBlocksFromSasUri_various_sizes_happy_path_Impl(NULL, networkInterface);
+}
 
 /*Tests_SRS_BLOB_02_037: [ If certificates is non-NULL then Blob_UploadMultipleBlocksFromSasUri shall pass certificates to HTTPAPI_EX_HANDLE by calling HTTPAPIEX_SetOption with the option name "TrustedCerts". ]*/
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_various_sizes_with_certificates_happy_path)
 {
     /*the following sizes have been identified as "important to be tested*/
-    /*1B, 4MB-1, 4MB, 4MB+1, 64MB, 64MB+1, 68MB-1, 68MB, 68MB+1*/
+    /*1B, 100MB-1, 100MB, 100MB+1, 256MB, 256MB+1, 260MB-1, 260MB, 260MB+1*/
     size_t sizes[] = {
         1,
 
-        4 * 1024 * 1024 - 1,
-        4 * 1024 * 1024,
-        4 * 1024 * 1024 + 1,
+        100 * 1024 * 1024 - 1,
+        100 * 1024 * 1024,
+        100 * 1024 * 1024 + 1,
 
-        64 * 1024 * 1024 - 1,
-        64 * 1024 * 1024,
-        64 * 1024 * 1024 + 1,
+        256 * 1024 * 1024 - 1,
+        256 * 1024 * 1024,
+        256 * 1024 * 1024 + 1,
 
-        68 * 1024 * 1024 - 1,
-        68 * 1024 * 1024,
-        68 * 1024 * 1024 + 1,
+        260 * 1024 * 1024 - 1,
+        260 * 1024 * 1024,
+        260 * 1024 * 1024 + 1,
     };
 
     for (size_t iSize = 0; iSize < sizeof(sizes) / sizeof(sizes[0]);iSize++)
@@ -849,10 +860,10 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_various_sizes_with_certificate
         STRICT_EXPECTED_CALL(STRING_construct("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BlockList>")); /*this is starting to build the XML used in Put Block List operation*/
 
                                                                                                              /*uploading blocks (Put Block)*/
-        for (size_t blockNumber = 0;blockNumber < (sizes[iSize] - 1) / (4 * 1024 * 1024) + 1;blockNumber++)
+        for (size_t blockNumber = 0;blockNumber < (sizes[iSize] - 1) / (100 * 1024 * 1024) + 1;blockNumber++)
         {
-            STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 4 * 1024 * 1024,
-                (blockNumber != (sizes[iSize] - 1) / (4 * 1024 * 1024)) ? 4 * 1024 * 1024 : (sizes[iSize] - 1) % (4 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
+            STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 100 * 1024 * 1024,
+                (blockNumber != (sizes[iSize] - 1) / (100 * 1024 * 1024)) ? 100 * 1024 * 1024 : (sizes[iSize] - 1) % (100 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
             )); /*this is the content to be uploaded by this call*/
 
             /*here some sprintf happens and that produces a string in the form: 000000...049999*/
@@ -930,7 +941,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_various_sizes_with_certificate
         set_expected_calls_for_Blob_UploadMultipleBlocksFromSasUri_cleanup();
 
         ///act
-        BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, "a", NULL);
+        BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, "a", NULL, NULL);
 
         ///assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -944,7 +955,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_various_sizes_with_certificate
 /*Tests_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadMultipleBlocksFromSasUri shall fail and return BLOB_ERROR ]*/
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
 {
-    size_t size = 64 * 1024 * 1024;
+    size_t size = 256 * 1024 * 1024;
     (void)umock_c_negative_tests_init();
 
     umock_c_reset_all_calls();
@@ -968,10 +979,10 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
     STRICT_EXPECTED_CALL(STRING_construct("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BlockList>")); /*this is starting to build the XML used in Put Block List operation*/
 
     /*uploading blocks (Put Block)*/
-    for (size_t blockNumber = 0;blockNumber < (size - 1) / (4 * 1024 * 1024) + 1;blockNumber++)
+    for (size_t blockNumber = 0;blockNumber < (size - 1) / (100 * 1024 * 1024) + 1;blockNumber++)
     {
-        STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 4 * 1024 * 1024,
-            (blockNumber != (size - 1) / (4 * 1024 * 1024)) ? 4 * 1024 * 1024 : (size - 1) % (4 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
+        STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 100 * 1024 * 1024,
+            (blockNumber != (size - 1) / (100 * 1024 * 1024)) ? 100 * 1024 * 1024 : (size - 1) % (100 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
         )); /*this is the content to be uploaded by this call*/
 
         /*here some sprintf happens and that produces a string in the form: 000000...049999*/
@@ -1068,7 +1079,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
 
             ///act
             context.toUpload = context.size; /* Reinit context */
-            BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL);
+            BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL, NULL);
 
             ///assert
             ASSERT_ARE_NOT_EQUAL(BLOB_RESULT, BLOB_OK, result, temp_str);
@@ -1083,9 +1094,9 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
 }
 
 /*Tests_SRS_BLOB_02_038: [ If HTTPAPIEX_SetOption fails then Blob_UploadMultipleBlocksFromSasUri shall fail and return BLOB_ERROR. ]*/
-TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_unhappy_paths)
+TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_and_network_interface_unhappy_paths)
 {
-    size_t size = 64 * 1024 * 1024;
+    size_t size = 256 * 1024 * 1024;
 
     (void)umock_c_negative_tests_init();
 
@@ -1109,13 +1120,14 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_unhappy_
 
     STRICT_EXPECTED_CALL(HTTPAPIEX_Create("h.h")); /*this is creating the httpapiex handle to storage (it is always the same host)*/
     STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(IGNORED_PTR_ARG, "TrustedCerts", IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(HTTPAPIEX_SetOption(IGNORED_PTR_ARG, OPTION_CURL_INTERFACE, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(STRING_construct("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BlockList>")); /*this is starting to build the XML used in Put Block List operation*/
 
                                                                                                          /*uploading blocks (Put Block)*/
-    for (size_t blockNumber = 0;blockNumber < (size - 1) / (4 * 1024 * 1024) + 1;blockNumber++)
+    for (size_t blockNumber = 0;blockNumber < (size - 1) / (100 * 1024 * 1024) + 1;blockNumber++)
     {
-        STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 4 * 1024 * 1024,
-            (blockNumber != (size - 1) / (4 * 1024 * 1024)) ? 4 * 1024 * 1024 : (size - 1) % (4 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
+        STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 100 * 1024 * 1024,
+            (blockNumber != (size - 1) / (100 * 1024 * 1024)) ? 100 * 1024 * 1024 : (size - 1) % (100 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
         )); /*this is the content to be uploaded by this call*/
 
         /*here some sprintf happens and that produces a string in the form: 000000...049999*/
@@ -1207,12 +1219,13 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_unhappy_
         {
 
             umock_c_negative_tests_fail_call(i);
+            const char* interfaceName = "eth0";
             char temp_str[128];
             sprintf(temp_str, "On failed call %lu", (unsigned long)i);
 
             ///act
             context.toUpload = context.size; /* Reinit context */
-            BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, "a", NULL);
+            BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, "a", NULL, interfaceName);
 
             ///assert
             ASSERT_ARE_NOT_EQUAL(BLOB_RESULT, BLOB_OK, result, temp_str);
@@ -1229,7 +1242,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_unhappy_
 /*Tests_SRS_BLOB_02_026: [ Otherwise, if HTTP response code is >=300 then Blob_UploadFromSasUri shall succeed and return BLOB_OK. ]*/
 TEST_FUNCTION(Blob_UploadFromSasUri_when_http_code_is_404_it_immediately_succeeds)
 {
-    size_t size = 64 * 1024 * 1024;
+    size_t size = 256 * 1024 * 1024;
 
     ///arrange
     unsigned char * content = (unsigned char*)gballoc_malloc(size);
@@ -1253,8 +1266,8 @@ TEST_FUNCTION(Blob_UploadFromSasUri_when_http_code_is_404_it_immediately_succeed
     /*uploading blocks (Put Block)*/ /*this simply fails first block*/
     size_t blockNumber = 0;
     {
-        STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 4 * 1024 * 1024,
-            (blockNumber != (size - 1) / (4 * 1024 * 1024)) ? 4 * 1024 * 1024 : (size - 1) % (4 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
+        STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 100 * 1024 * 1024,
+            (blockNumber != (size - 1) / (100 * 1024 * 1024)) ? 100 * 1024 * 1024 : (size - 1) % (100 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
         )); /*this is the content to be uploaded by this call*/
 
         /*here some sprintf happens and that produces a string in the form: 000000...049999*/
@@ -1299,7 +1312,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_when_http_code_is_404_it_immediately_succeed
     set_expected_calls_for_Blob_UploadMultipleBlocksFromSasUri_cleanup();
 
     ///act
-    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL);
+    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetData_Callback, &context, &httpResponse, testValidBufferHandle, NULL, NULL, NULL);
 
     ///assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -1322,7 +1335,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockSize_too_big_fails)
     fakeContext.abortOnBlockNumber = -1;
 
     ///act
-    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetFakeData_Callback, &fakeContext, &httpResponse, testValidBufferHandle, NULL, NULL);
+    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetFakeData_Callback, &fakeContext, &httpResponse, testValidBufferHandle, NULL, NULL, NULL);
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_INVALID_ARG, result);
@@ -1343,7 +1356,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockSize_is_4MB_succeeds
     fakeContext.abortOnBlockNumber = -1;
 
     ///act
-    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetFakeData_Callback, &fakeContext, &httpResponse, testValidBufferHandle, NULL, NULL);
+    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetFakeData_Callback, &fakeContext, &httpResponse, testValidBufferHandle, NULL, NULL, NULL);
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_OK, result);
@@ -1364,7 +1377,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockCount_is_maximum_suc
     fakeContext.abortOnBlockNumber = -1;
 
     ///act
-    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetFakeData_Callback, &fakeContext, &httpResponse, testValidBufferHandle, NULL, NULL);
+    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetFakeData_Callback, &fakeContext, &httpResponse, testValidBufferHandle, NULL, NULL, NULL);
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_OK, result);
@@ -1385,7 +1398,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockCount_is_one_over_ma
     fakeContext.abortOnBlockNumber = -1;
 
     ///act
-    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetFakeData_Callback, &fakeContext, &httpResponse, testValidBufferHandle, NULL, NULL);
+    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetFakeData_Callback, &fakeContext, &httpResponse, testValidBufferHandle, NULL, NULL, NULL);
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_INVALID_ARG, result);
@@ -1406,7 +1419,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_returns_BLOB_ABORTED_when_call
     fakeContext.abortOnBlockNumber = 0;
 
     ///act
-    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetFakeData_Callback, &fakeContext, &httpResponse, testValidBufferHandle, NULL, NULL);
+    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetFakeData_Callback, &fakeContext, &httpResponse, testValidBufferHandle, NULL, NULL, NULL);
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_ABORTED, result);
@@ -1427,7 +1440,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_returns_BLOB_ABORTED_when_call
     fakeContext.abortOnBlockNumber = 5;
 
     ///act
-    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetFakeData_Callback, &fakeContext, &httpResponse, testValidBufferHandle, NULL, NULL);
+    BLOB_RESULT result = Blob_UploadMultipleBlocksFromSasUri("https://h.h/something?a=b", FileUpload_GetFakeData_Callback, &fakeContext, &httpResponse, testValidBufferHandle, NULL, NULL, NULL);
 
     ///assert
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_ABORTED, result);

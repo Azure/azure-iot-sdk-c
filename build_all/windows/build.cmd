@@ -53,6 +53,7 @@ if "%1" equ "--run-e2e-tests" goto arg-run-e2e-tests
 if "%1" equ "--run-sfc-tests" goto arg-run-sfc-tests
 if "%1" equ "--run-longhaul-tests" goto arg-longhaul-tests
 if "%1" equ "--run-unittests" goto arg-run-unittests
+if "%1" equ "--use-cppunittests" goto arg-use-cpp-unittests
 if "%1" equ "--make_nuget" goto arg-build-nuget
 if "%1" equ "--cmake-root" goto arg-cmake-root
 if "%1" equ "--no-make" goto arg-no-make
@@ -96,6 +97,10 @@ goto args-continue
 
 :arg-run-unittests
 set CMAKE_run_unittests=ON
+goto args-continue
+
+:arg-use-cpp-unittests
+set CMAKE_use_cppunittests=ON
 goto args-continue
 
 :arg-build-nuget
@@ -155,7 +160,7 @@ pushd %cmake-root%\cmake\%CMAKE_DIR%
 
 if %MAKE_NUGET_PKG% == yes (
     echo ***Running CMAKE for Win32***
-    cmake %build-root% -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_prov_client:BOOL=%prov_auth% -Duse_edge_modules=%use_edge_modules%
+    cmake %build-root% -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Duse_cppunittest:BOOL=%CMAKE_use_cppunittests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 15 2017" -A Win32 -Duse_edge_modules=%use_edge_modules%
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
     popd
 
@@ -167,7 +172,7 @@ if %MAKE_NUGET_PKG% == yes (
     rem no error checking
 
     pushd %cmake-root%\cmake\iotsdk_x64
-    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 14 Win64" -Duse_edge_modules=%use_edge_modules%
+    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 15 2017" -A x64 -Duse_edge_modules=%use_edge_modules%
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
     popd
 
@@ -179,20 +184,20 @@ if %MAKE_NUGET_PKG% == yes (
     rem no error checking
 
     pushd %cmake-root%\cmake\iotsdk_arm
-    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 14 ARM" -Duse_edge_modules=%use_edge_modules%
+    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 15 2017" -A ARM -Duse_edge_modules=%use_edge_modules%
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 ) else if %build-platform% == x64 (
     echo ***Running CMAKE for Win64***
-    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 14 Win64" -Duse_edge_modules=%use_edge_modules%
+    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Duse_cppunittest:BOOL=%CMAKE_use_cppunittests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 15 2017" -A x64 -Duse_edge_modules=%use_edge_modules%
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 ) else if %build-platform% == arm (
     echo ***Running CMAKE for ARM***
-    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 14 ARM"  -Duse_edge_modules=%use_edge_modules%
+    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 15 2017" -A ARM  -Duse_edge_modules=%use_edge_modules%
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 ) else (
     echo ***Running CMAKE for Win32***
-    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -Duse_edge_modules=%use_edge_modules%
+    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 15 2017" -A Win32 -Duse_edge_modules=%use_edge_modules%
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 )
 

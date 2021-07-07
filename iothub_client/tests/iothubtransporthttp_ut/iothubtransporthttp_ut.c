@@ -3175,7 +3175,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Subscribe_with_list_find_fails)
     int result = IoTHubTransportHttp_Subscribe(devHandle);
 
     //assert
-    ASSERT_ARE_EQUAL(int, 0, result);
+    ASSERT_ARE_NOT_EQUAL(int, 0, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup

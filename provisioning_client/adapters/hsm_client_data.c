@@ -18,7 +18,7 @@
 #include "hsm_client_key.h"
 #endif
 
-int initialize_hsm_system()
+int initialize_hsm_system(void)
 {
     int result = 0;
 #if defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
@@ -47,7 +47,7 @@ int initialize_hsm_system()
     return result;
 }
 
-void deinitialize_hsm_system()
+void deinitialize_hsm_system(void)
 {
 #ifdef HSM_TYPE_HTTP_EDGE
     hsm_client_http_edge_deinit();

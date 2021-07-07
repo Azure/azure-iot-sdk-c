@@ -37,7 +37,7 @@ extern "C"
 #include <stddef.h>
 #endif
 
-    #define BLOCK_SIZE (4*1024*1024)
+    #define BLOCK_SIZE (100*1024*1024)
 
     typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE;
 
