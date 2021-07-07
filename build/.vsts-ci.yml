@@ -144,7 +144,7 @@ jobs:
 - job: clang
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/ubuntu-clang"
-  pool: aziotbld-lin01
+  pool: Hosted Ubuntu 1604
   displayName: 'clang'
   steps:
   - script: |
@@ -175,7 +175,7 @@ jobs:
 - job: ubuntu1604
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
-  pool: aziotbld-lin02
+  pool: Hosted Ubuntu 1604
   displayName: 'ubuntu1604'
   steps:
   - script: |
@@ -206,7 +206,7 @@ jobs:
 - job: debian
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/c-debian"
-  pool: aziotbld-lin02
+  pool: Hosted Ubuntu 1604
   displayName: 'debian'
   steps:
   - script: |
@@ -235,7 +235,7 @@ jobs:
 - job: linux_installed_deps
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
-  pool: aziotbld-lin02
+  pool: Hosted Ubuntu 1604
   displayName: 'linux_installed_deps'
   steps:
   - script: |
