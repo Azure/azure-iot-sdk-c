@@ -356,9 +356,17 @@ static bool is_device_registered_ex(SINGLYLINKEDLIST_HANDLE registered_devices, 
 // @returns     true if the device is already in the list, false otherwise.
 static bool is_device_registered(AMQP_TRANSPORT_DEVICE_INSTANCE* amqp_device_instance)
 {
-    LIST_ITEM_HANDLE list_item;
-    const char* device_id = STRING_c_str(amqp_device_instance->device_id);
-    return is_device_registered_ex(amqp_device_instance->transport_instance->registered_devices, device_id, &list_item);
+    if (amqp_device_instance == NULL)
+    {
+        LogError("AMQP_TRANSPORT_DEVICE_INSTANCE is NULL");
+        return false;
+    }
+    else
+    {
+        LIST_ITEM_HANDLE list_item;
+        const char* device_id = STRING_c_str(amqp_device_instance->device_id);
+        return is_device_registered_ex(amqp_device_instance->transport_instance->registered_devices, device_id, &list_item);
+    }
 }
 
 static size_t get_number_of_registered_devices(AMQP_TRANSPORT_INSTANCE* transport)
@@ -601,7 +609,7 @@ static void on_device_get_twin_completed_callback(DEVICE_TWIN_UPDATE_TYPE update
     (void)update_type;
 
     // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_158: [ If `message` or `context` are NULL, the callback shall do nothing and return. ]
-    if (message == NULL || context == NULL)
+    if (context == NULL)
     {
         LogError("Invalid argument (message=%p, context=%p)", message, context);
     }
@@ -888,7 +896,7 @@ static void prepare_device_for_connection_retry(AMQP_TRANSPORT_DEVICE_INSTANCE* 
     registered_device->number_of_send_event_complete_failures = 0;
 }
 
-static void prepare_for_connection_retry(AMQP_TRANSPORT_INSTANCE* transport_instance)
+void prepare_for_connection_retry(AMQP_TRANSPORT_INSTANCE* transport_instance)
 {
     LogInfo("Preparing transport for re-connection");
 

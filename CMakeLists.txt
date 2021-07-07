@@ -74,9 +74,6 @@ option(use_prov_client "Enable provisioning client" OFF)
 option(use_tpm_simulator "tpm simulator type of hsm used with the provisioning client" OFF)
 option(use_edge_modules "Enable support for running modules against Azure IoT Edge" OFF)
 option(use_custom_heap "use externally defined heap functions instead of the malloc family" OFF)
-option(use_baltimore_cert "set use_baltimore_cert to ON if the Baltimore cert is to be used, set to OFF to not use it" OFF)
-option(use_microsoftazure_de_cert "set use_microsoftazure_de_cert to ON if the MicrosoftAzure DE cert is to be used, set to OFF to not use it" OFF)
-option(use_portal_azure_cn_cert "set use_portal_azure_cn_cert to ON if the Portal Azure CN cert is to be used, set to OFF to not use it" OFF)
 
 set(compileOption_C "" CACHE STRING "passes a string to the command line of the C compiler")
 set(compileOption_CXX "" CACHE STRING "passes a string to the command line of the C++ compiler")
@@ -114,8 +111,17 @@ else()
 endif()
 
 # Enable specific certs
-if (${use_baltimore_cert})
-    add_definitions(-DUSE_BALTIMORE_CERT)
+option(use_azure_cloud_rsa_cert "set use_azure_cloud_rsa_cert to ON if the Azure Cloud RSA certs are to be used for samples, set to OFF to not use it" OFF)
+option(use_azure_cloud_ecc_cert "set use_azure_cloud_ecc_cert to ON if the Azure Cloud ECC certs are to be used for samples, set to OFF to not use it" OFF)
+option(use_microsoftazure_de_cert "set use_microsoftazure_de_cert to ON if the MicrosoftAzure DE cert is to be used for samples, set to OFF to not use it" OFF)
+option(use_portal_azure_cn_cert "set use_portal_azure_cn_cert to ON if the Portal Azure CN cert is to be used for samples, set to OFF to not use it" OFF)
+
+if (${use_azure_cloud_rsa_cert})
+    add_definitions(-DUSE_AZURE_CLOUD_RSA_CERT)
+endif()
+
+if (${use_azure_cloud_ecc_cert})
+    add_definitions(-DUSE_AZURE_CLOUD_ECC_CERT) 
 endif()
 
 if (${use_microsoftazure_de_cert})
@@ -229,15 +235,11 @@ set(original_skip_samples ${skip_samples})
 set(run_e2e_tests OFF)
 set(run_unittests OFF)
 set(skip_samples ON)
-set(use_cppunittest ON)
+set(use_cppunittest OFF)
 
 if (NOT ${use_installed_dependencies})
     if (NOT TARGET azure_macro_utils_c AND EXISTS "${CMAKE_CURRENT_LIST_DIR}/deps/azure-macro-utils-c/CMakeLists.txt")
         add_subdirectory(deps/azure-macro-utils-c)
-    endif()
-    if (NOT TARGET umock_c)
-        # Get the repo if it's not there
-        add_subdirectory(deps/umock-c)
     endif()
 
     if (${original_run_e2e_tests} OR ${original_run_unittests} OR ${run_sfc_tests})
@@ -250,6 +252,13 @@ if (NOT ${use_installed_dependencies})
         endif()
         enable_testing()
     endif()
+
+
+    if (NOT TARGET umock_c)
+        # Get the repo if it's not there
+        add_subdirectory(deps/umock-c)
+    endif()
+
 else()
     if (NOT azure_macro_utils_cFOUND)
         find_package(azure_macro_utils_c REQUIRED CONFIG)

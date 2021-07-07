@@ -91,8 +91,12 @@ static int retry_sending_message(MESSAGE_QUEUE_HANDLE message_queue, LIST_ITEM_H
     MESSAGE_QUEUE_ITEM* mq_item;
 
     mq_item = (MESSAGE_QUEUE_ITEM*)singlylinkedlist_item_get_value(list_item);
-
-    if (singlylinkedlist_remove(message_queue->in_progress, list_item))
+    if (message_queue == NULL)
+    {
+        LogError("message_queue is NULL");
+        result = MU_FAILURE;
+    }
+    else if (singlylinkedlist_remove(message_queue->in_progress, list_item))
     {
         LogError("Failed removing message from in-progress list");
         result = MU_FAILURE;

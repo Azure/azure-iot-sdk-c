@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 2.8.11)
 
-compileAsC11()
+compileAsC99()
 set(theseTestsName iothub_client_ll_u2b_ut )
 
 set(${theseTestsName}_test_files

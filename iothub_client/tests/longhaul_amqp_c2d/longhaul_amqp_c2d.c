@@ -3,6 +3,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef WIN32
+#include <crtdbg.h>
+#endif // WIN32
 
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/platform.h"
@@ -27,6 +30,9 @@ int main(void)
 {
     int result;
     IOTHUB_LONGHAUL_RESOURCES_HANDLE iotHubLonghaulRsrcsHandle;
+#ifdef WIN32
+    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif // WIN32
 
     if ((iotHubLonghaulRsrcsHandle = longhaul_tests_init()) == NULL)
     {
@@ -47,6 +53,14 @@ int main(void)
 
         longhaul_tests_deinit(iotHubLonghaulRsrcsHandle);
     }
+
+#ifdef WIN32
+    if (_CrtDumpMemoryLeaks())
+    {
+        LogError("Detected memory leaks.");
+        result = MU_FAILURE;
+    }
+#endif // WIN32
 
     return result;
 }

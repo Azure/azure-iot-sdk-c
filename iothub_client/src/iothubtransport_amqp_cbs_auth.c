@@ -8,6 +8,7 @@
 #include "azure_c_shared_utility/agenttime.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/sastoken.h"
+#include "azure_uamqp_c/async_operation.h"
 
 #define RESULT_OK                                 0
 #define INDEFINITE_TIME                           ((time_t)(-1))
@@ -42,6 +43,7 @@ typedef struct AUTHENTICATION_INSTANCE_TAG
     // Auth module used to generating handle authorization
     // with either SAS Token, x509 Certs, and Device SAS Token
     IOTHUB_AUTHORIZATION_HANDLE authorization_module;
+    ASYNC_OPERATION_HANDLE cbs_put_token_async_context;
 } AUTHENTICATION_INSTANCE;
 
 
@@ -169,6 +171,8 @@ static void on_cbs_put_token_complete_callback(void* context, CBS_OPERATION_RESU
 #endif
     AUTHENTICATION_INSTANCE* instance = (AUTHENTICATION_INSTANCE*)context;
 
+    instance->cbs_put_token_async_context = NULL;
+
     // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_095: [`instance->is_sas_token_refresh_in_progress` and `instance->is_cbs_put_token_in_progress` shall be set to FALSE]
     instance->is_cbs_put_token_in_progress = false;
 
@@ -203,39 +207,49 @@ static int put_SAS_token_to_cbs(AUTHENTICATION_INSTANCE* instance, STRING_HANDLE
 {
     int result;
 
-    // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_043: [authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to TRUE]
-    // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_057: [authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to TRUE]
-    // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_075: [authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to TRUE]
-    instance->is_cbs_put_token_in_progress = true;
-
-    // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_046: [The SAS token provided shall be sent to CBS using cbs_put_token(), using `servicebus.windows.net:sastoken` as token type, `devices_and_modules_path` as audience and passing on_cbs_put_token_complete_callback]
-    // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_058: [The SAS token shall be sent to CBS using cbs_put_token(), using `servicebus.windows.net:sastoken` as token type, `devices_and_modules_path` as audience and passing on_cbs_put_token_complete_callback]
-    // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_076: [The SAS token shall be sent to CBS using cbs_put_token(), using `servicebus.windows.net:sastoken` as token type, `devices_and_modules_path` as audience and passing on_cbs_put_token_complete_callback]
-    const char* cbs_audience_c_str = STRING_c_str(cbs_audience);
-    if (cbs_put_token_async(instance->cbs_handle, SAS_TOKEN_TYPE, cbs_audience_c_str, sas_token, on_cbs_put_token_complete_callback, instance) != RESULT_OK)
+    if (instance == NULL)
     {
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_048: [If cbs_put_token() failed, authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to FALSE, destroy `devices_and_modules_path` and return]
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_060: [If cbs_put_token() fails, `instance->is_cbs_put_token_in_progress` shall be set to FALSE]
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_078: [If cbs_put_token() fails, `instance->is_cbs_put_token_in_progress` shall be set to FALSE]
-        instance->is_cbs_put_token_in_progress = false;
         result = MU_FAILURE;
-        LogError("Failed putting SAS token to CBS for device '%s' (cbs_put_token failed)", instance->device_id);
+        LogError("Invalid AUTHENTICATION_INSTANCE");
     }
     else
     {
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_047: [If cbs_put_token() succeeds, authentication_do_work() shall set `instance->current_sas_token_put_time` with current time]
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_059: [If cbs_put_token() succeeds, authentication_do_work() shall set `instance->current_sas_token_put_time` with current time]
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_077: [If cbs_put_token() succeeds, authentication_do_work() shall set `instance->current_sas_token_put_time` with the current time]
-        time_t current_time;
+        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_043: [authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to TRUE]
+        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_057: [authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to TRUE]
+        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_075: [authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to TRUE]
+        instance->is_cbs_put_token_in_progress = true;
 
-        if ((current_time = get_time(NULL)) == INDEFINITE_TIME)
+        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_046: [The SAS token provided shall be sent to CBS using cbs_put_token(), using `servicebus.windows.net:sastoken` as token type, `devices_and_modules_path` as audience and passing on_cbs_put_token_complete_callback]
+        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_058: [The SAS token shall be sent to CBS using cbs_put_token(), using `servicebus.windows.net:sastoken` as token type, `devices_and_modules_path` as audience and passing on_cbs_put_token_complete_callback]
+        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_076: [The SAS token shall be sent to CBS using cbs_put_token(), using `servicebus.windows.net:sastoken` as token type, `devices_and_modules_path` as audience and passing on_cbs_put_token_complete_callback]
+        const char* cbs_audience_c_str = STRING_c_str(cbs_audience);
+
+        instance->cbs_put_token_async_context = cbs_put_token_async(instance->cbs_handle, SAS_TOKEN_TYPE, cbs_audience_c_str, sas_token, on_cbs_put_token_complete_callback, instance);
+        if (instance->cbs_put_token_async_context == NULL)
         {
-            LogError("Failed setting current_sas_token_put_time for device '%s' (get_time() failed)", instance->device_id);
+            // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_048: [If cbs_put_token() failed, authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to FALSE, destroy `devices_and_modules_path` and return]
+            // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_060: [If cbs_put_token() fails, `instance->is_cbs_put_token_in_progress` shall be set to FALSE]
+            // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_078: [If cbs_put_token() fails, `instance->is_cbs_put_token_in_progress` shall be set to FALSE]
+            instance->is_cbs_put_token_in_progress = false;
+            result = MU_FAILURE;
+            LogError("Failed putting SAS token to CBS for device '%s' (cbs_put_token failed)", instance->device_id);
         }
+        else
+        {
+            // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_047: [If cbs_put_token() succeeds, authentication_do_work() shall set `instance->current_sas_token_put_time` with current time]
+            // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_059: [If cbs_put_token() succeeds, authentication_do_work() shall set `instance->current_sas_token_put_time` with current time]
+            // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_077: [If cbs_put_token() succeeds, authentication_do_work() shall set `instance->current_sas_token_put_time` with the current time]
+            time_t current_time;
 
-        instance->current_sas_token_put_time = current_time; // If it failed, fear not. `current_sas_token_put_time` shall be checked for INDEFINITE_TIME wherever it is used.
+            if ((current_time = get_time(NULL)) == INDEFINITE_TIME)
+            {
+                LogError("Failed setting current_sas_token_put_time for device '%s' (get_time() failed)", instance->device_id);
+            }
 
-        result = RESULT_OK;
+            instance->current_sas_token_put_time = current_time; // If it failed, fear not. `current_sas_token_put_time` shall be checked for INDEFINITE_TIME wherever it is used.
+
+            result = RESULT_OK;
+        }
     }
 
     return result;
@@ -488,6 +502,12 @@ void authentication_destroy(AUTHENTICATION_HANDLE authentication_handle)
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_108: [authentication_destroy() shall destroy all resouces used by this module]
         if (instance->iothub_host_fqdn != NULL)
             STRING_delete(instance->iothub_host_fqdn);
+
+        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_109: [ authentication_destroy() shall cancel any pending CBS put token request ]
+        if (instance->cbs_put_token_async_context != NULL)
+        {
+            async_operation_cancel(instance->cbs_put_token_async_context);
+        }
 
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_108: [authentication_destroy() shall destroy all resouces used by this module]
         free(instance);

@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#ifndef LONGHAUL_AMQP_TELEMETRY_H
-#define LONGHAUL_AMQP_TELEMETRY_H
+#ifndef LONGHAUL_AMQP_DEVICE_METHODS_H
+#define LONGHAUL_AMQP_DEVICE_METHODS_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -14,4 +14,4 @@ extern "C" {
 }
 #endif
 
-#endif /* LONGHAUL_AMQP_TELEMETRY_H */
+#endif /* LONGHAUL_AMQP_DEVICE_METHODS_H */

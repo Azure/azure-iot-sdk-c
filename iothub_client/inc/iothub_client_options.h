@@ -43,6 +43,12 @@ extern "C"
     /* DEPRECATED:: OPTION_MESSAGE_TIMEOUT is DEPRECATED! Use OPTION_SERVICE_SIDE_KEEP_ALIVE_FREQ_SECS for AMQP; MQTT has no option available. OPTION_MESSAGE_TIMEOUT legacy variable will be kept for back-compat.  */
     static STATIC_VAR_UNUSED const char* OPTION_MESSAGE_TIMEOUT = "messageTimeout";
     static STATIC_VAR_UNUSED const char* OPTION_BLOB_UPLOAD_TIMEOUT_SECS = "blob_upload_timeout_secs";
+
+    /*
+    * @brief    Set the interface name to use as outgoing network interface for upload to blob.
+    * NOTE: Not all HTTP clients support this option. It is currently only supported when using cURL.
+    */
+    static STATIC_VAR_UNUSED const char* const OPTION_NETWORK_INTERFACE_UPLOAD_TO_BLOB = "network_interface_upload_to_blob";
     static STATIC_VAR_UNUSED const char* OPTION_PRODUCT_INFO = "product_info";
 
     /*

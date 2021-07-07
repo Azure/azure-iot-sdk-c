@@ -11,6 +11,6 @@ build_root=$(cd "$(dirname "$0")/.." && pwd)
 cd $build_root
 
 # -- C --
-./build_all/linux/build.sh --run-longhaul-tests "$@" #-x 
+./build_all/linux/build.sh --run-longhaul-tests --run_valgrind "$@" #-x 
 [ $? -eq 0 ] || exit $?
 
