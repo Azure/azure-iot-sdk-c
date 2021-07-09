@@ -201,6 +201,9 @@ if %MAKE_NUGET_PKG% == yes (
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 )
 
+set path
+tree "C:\Program Files (x86)\Microsoft Visual Studio\2017"
+
 if %MAKE_NUGET_PKG% == yes (
     if %make%==yes (
         echo ***Building all configurations***
