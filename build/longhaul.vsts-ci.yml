@@ -12,7 +12,7 @@ jobs:
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
   pool: 
-    name: 'aziotbld-lin01'
+    vmImage: 'ubuntu-20.04'
   displayName: 'longhaul_linux'
   steps:
   - script: |
