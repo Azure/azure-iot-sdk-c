@@ -204,7 +204,7 @@ if %MAKE_NUGET_PKG% == yes (
 echo ***checking msbuild***
 echo "%VS140COMNTOOLS%VsMSBuildCmd.bat"
 echo "%VS160COMNTOOLS%VsMSBuildCmd.bat"
-dir "%VS140COMNTOOLS%VsMSBuildCmd.bat"
+dir "%VS140COMNTOOLS%"
 
 IF EXIST "%VS140COMNTOOLS%VsMSBuildCmd.bat" echo found1
 
