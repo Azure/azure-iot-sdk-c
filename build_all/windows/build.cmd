@@ -201,7 +201,12 @@ if %MAKE_NUGET_PKG% == yes (
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 )
 
-set 
+where /q msbuild
+IF ERRORLEVEL 1 (
+echo ***setting VC paths***
+    IF EXIST %VS140COMNTOOLS%\VsMSBuildCmd.bat %VS140COMNTOOLS%\VsMSBuildCmd.bat
+    IF EXIST %VS160COMNTOOLS%\VsMSBuildCmd.bat %VS160COMNTOOLS%\VsMSBuildCmd.bat    
+)
 
 if %MAKE_NUGET_PKG% == yes (
     if %make%==yes (
