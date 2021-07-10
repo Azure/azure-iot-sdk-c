@@ -204,6 +204,10 @@ if %MAKE_NUGET_PKG% == yes (
 echo ***checking msbuild***
 echo "%VS140COMNTOOLS%VsMSBuildCmd.bat"
 echo "%VS160COMNTOOLS%VsMSBuildCmd.bat"
+dir "%VS140COMNTOOLS%VsMSBuildCmd.bat"
+
+IF EXIST "%VS140COMNTOOLS%VsMSBuildCmd.bat" echo found1
+
 where /q msbuild
 IF ERRORLEVEL 1 (
 echo ***setting VC paths***
