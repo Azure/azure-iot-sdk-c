@@ -499,20 +499,21 @@ static IOTHUB_CLIENT_PROPERTY_ITERATOR* AllocatePropertyIterator(const char** co
     {
         // Copy the component list into the iterator handle, since caller does not guarantee that the
         // list it passes to us will be valid for later reference.
-        propertyIterator->numComponentsInModel = numComponentsInModel;
-
         if ((propertyIterator->componentsInModel = (char**)calloc(numComponentsInModel, sizeof(char*))) == NULL)
         {
             LogError("Cannot allocate IOTHUB_CLIENT_PROPERTY_ITERATOR");
         }
         else
         {
+            propertyIterator->numComponentsInModel = numComponentsInModel;
+
             size_t i;
             for (i = 0; i < numComponentsInModel; i++)
             {
                 if (mallocAndStrcpy_s(&propertyIterator->componentsInModel[i], componentsInModel[i]) != 0)
                 {
                     LogError("Cannot allocate IOTHUB_CLIENT_PROPERTY_ITERATOR");
+                    break;
                 }
             }
 
@@ -563,7 +564,7 @@ static bool ValidateIteratorInputs(
         {
             if (componentsInModel[i] == NULL)
             {
-                LogError("componentsInModel at index %lu is NULL", i);
+                LogError("componentsInModel at index %lu is NULL", (unsigned long)i);
                 break;
             }
         }
@@ -762,7 +763,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_CreateIterator(
         }
         // Retrieve the twin version and cache with the propertyIterator.  We do this in the enumeration creation,
         // even though IoTHubClient_Deserialize_Properties_GetVersion theoretically could've parsed this on demand,
-        // because if this fails we wait to fail creation of the enumerator.  A twin without version info
+        // because if this fails we want to fail creation of the enumerator.  A twin without version info
         // is not valid and the application will not be able to properly acknowledge writable properties in this case.
         else if ((result = GetTwinVersion(propertyIterator)) != IOTHUB_CLIENT_OK)
         {
@@ -794,7 +795,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_GetVersion(
     IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIterator = (IOTHUB_CLIENT_PROPERTY_ITERATOR*)propertyIteratorHandle;
     IOTHUB_CLIENT_RESULT result;
 
-    if (propertyIteratorHandle == NULL)
+    if ((propertyIteratorHandle == NULL) || (propertiesVersion == NULL))
     {
         LogError("Invalid argument");
         result = IOTHUB_CLIENT_INVALID_ARG;
@@ -820,7 +821,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_GetNextProperty(
     const char* propertyName = NULL;
     const char* componentName = NULL;
 
-    if ((propertyIteratorHandle == NULL) || (property == NULL) || (propertySpecified == NULL))
+    if ((propertyIteratorHandle == NULL) || (property == NULL) || (propertySpecified == NULL) || (property->structVersion != IOTHUB_CLIENT_DESERIALIZED_PROPERTY_STRUCT_VERSION_1))
     {
         LogError("Invalid argument");
         result = IOTHUB_CLIENT_INVALID_ARG;
@@ -881,10 +882,13 @@ void IoTHubClient_Deserialize_Properties_DestroyIterator(IOTHUB_CLIENT_PROPERTY_
     if (propertyIteratorHandle != NULL)
     {
         IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIterator = (IOTHUB_CLIENT_PROPERTY_ITERATOR*)propertyIteratorHandle;
+
         for (size_t i = 0; i < propertyIterator->numComponentsInModel; i++)
         {
             free(propertyIterator->componentsInModel[i]);
         }
+        free(propertyIterator->componentsInModel);
+
         json_value_free(propertyIterator->rootValue);
         free(propertyIterator);
     }

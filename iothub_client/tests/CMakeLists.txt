@@ -57,6 +57,7 @@ add_unittest_directory(iothubclientcore_ut)
 add_unittest_directory(iothubdeviceclient_ut)
 add_unittest_directory(iothubmessage_ut)
 add_unittest_directory(iothubtransport_ut)
+add_unittest_directory(iothub_client_properties_ut)
 add_unittest_directory(iothub_client_retry_control_ut)
 add_unittest_directory(message_queue_ut)
 
