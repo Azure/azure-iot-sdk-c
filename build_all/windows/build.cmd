@@ -206,7 +206,7 @@ echo "%VS140COMNTOOLS%VsMSBuildCmd.bat"
 echo "%VS160COMNTOOLS%VsMSBuildCmd.bat"
 dir "%VS140COMNTOOLS%"
 
-dir /s "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC"
+dir /s "C:\Program Files (x86)\Microsoft Visual Studio 14.0"
 
 where /q msbuild
 IF ERRORLEVEL 1 (
