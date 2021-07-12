@@ -216,6 +216,15 @@ echo ***setting VC paths***
 )
 where msbuild
 
+
+echo ***env***
+set
+echo ***env***
+
+dir "%VS140COMNTOOLS%" /s
+
+
+
 if %MAKE_NUGET_PKG% == yes (
     if %make%==yes (
         echo ***Building all configurations***
