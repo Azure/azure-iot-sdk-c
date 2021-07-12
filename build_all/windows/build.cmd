@@ -202,21 +202,16 @@ if %MAKE_NUGET_PKG% == yes (
 )
 
 echo ***checking msbuild***
-echo "%VS140COMNTOOLS%VsMSBuildCmd.bat"
-echo "%VS160COMNTOOLS%VsMSBuildCmd.bat"
-dir "%VS140COMNTOOLS%"
+echo "%VS140COMNTOOLS%"
 
-dir /s "C:\Program Files (x86)\Microsoft Visual Studio 14.0"
+dir /s "%VS140COMNTOOLS%..\..\VC\bin\vcvars32.bat"
 
 where /q msbuild
 IF ERRORLEVEL 1 (
 echo ***setting VC paths***
-    IF EXIST "%VS140COMNTOOLS%VC\Auxiliary\Build\vcvars32.bat" call "%VS140COMNTOOLS%VC\Auxiliary\Build\vcvars32.bat"
-    IF EXIST "%VS160COMNTOOLS%VC\Auxiliary\Build\vcvars32.bat" call "%VS160COMNTOOLS%VC\Auxiliary\Build\vcvars32.bat"   
+    IF EXIST "%VS140COMNTOOLS%..\..\VC\bin\vcvars32.bat" call "%VS140COMNTOOLS%..\..\VC\bin\vcvars32.bat"  
 )
 where msbuild
-
-set "VCToolsInstallDir=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.13.26128\"
 
 echo ***env 2***
 set
