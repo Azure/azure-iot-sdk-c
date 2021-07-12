@@ -206,20 +206,21 @@ echo "%VS140COMNTOOLS%VsMSBuildCmd.bat"
 echo "%VS160COMNTOOLS%VsMSBuildCmd.bat"
 dir "%VS140COMNTOOLS%"
 
-IF EXIST "%VS140COMNTOOLS%vsvars32.bat" echo found1
+dir /s "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC"
 
 where /q msbuild
 IF ERRORLEVEL 1 (
 echo ***setting VC paths***
-    IF EXIST "%VS140COMNTOOLS%vsvars32.bat" call "%VS140COMNTOOLS%VC\Auxiliary\Build\vcvars32.bat"
-    IF EXIST "%VS160COMNTOOLS%VsMSBuildCmd.bat" call "%VS160COMNTOOLS%VC\Auxiliary\Build\vcvars32.bat"   
+    IF EXIST "%VS140COMNTOOLS%VC\Auxiliary\Build\vcvars32.bat" call "%VS140COMNTOOLS%VC\Auxiliary\Build\vcvars32.bat"
+    IF EXIST "%VS160COMNTOOLS%VC\Auxiliary\Build\vcvars32.bat" call "%VS160COMNTOOLS%VC\Auxiliary\Build\vcvars32.bat"   
 )
 where msbuild
 
+set "VCToolsInstallDir=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.13.26128\"
 
-echo ***env***
+echo ***env 2***
 set
-echo ***env***
+echo ***env 2***
 
 
 
