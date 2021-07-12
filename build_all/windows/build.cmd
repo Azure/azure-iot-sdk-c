@@ -211,8 +211,8 @@ IF EXIST "%VS140COMNTOOLS%vsvars32.bat" echo found1
 where /q msbuild
 IF ERRORLEVEL 1 (
 echo ***setting VC paths***
-    IF EXIST "%VS140COMNTOOLS%vsvars32.bat" call "%VS140COMNTOOLS%vsvars32.bat"
-    IF EXIST "%VS160COMNTOOLS%VsMSBuildCmd.bat" call "%VS160COMNTOOLS%VsMSBuildCmd.bat"    
+    IF EXIST "%VS140COMNTOOLS%vsvars32.bat" call "%VS140COMNTOOLS%VC\Auxiliary\Build\vcvars32.bat"
+    IF EXIST "%VS160COMNTOOLS%VsMSBuildCmd.bat" call "%VS160COMNTOOLS%VC\Auxiliary\Build\vcvars32.bat"   
 )
 where msbuild
 
@@ -220,8 +220,6 @@ where msbuild
 echo ***env***
 set
 echo ***env***
-
-dir "%VS140COMNTOOLS%" /s
 
 
 
