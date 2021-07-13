@@ -204,7 +204,7 @@ if %MAKE_NUGET_PKG% == yes (
 echo ***checking msbuild***
 echo "%VS140COMNTOOLS%"
 
-dir /s "c:\"
+dir /s c:\Microsoft.Cpp.Default.props
 
 where /q msbuild
 IF ERRORLEVEL 1 (
