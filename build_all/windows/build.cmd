@@ -204,7 +204,7 @@ if %MAKE_NUGET_PKG% == yes (
 echo ***checking msbuild***
 echo "%VS140COMNTOOLS%"
 
-dir /s "%VS140COMNTOOLS%..\.."
+dir /s "c:\"
 
 where /q msbuild
 IF ERRORLEVEL 1 (
@@ -219,7 +219,7 @@ echo ***env 2***
 set
 echo ***env 2***
 
-
+cmake --build .
 
 if %MAKE_NUGET_PKG% == yes (
     if %make%==yes (
