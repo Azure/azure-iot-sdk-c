@@ -213,7 +213,7 @@ echo ***setting VC paths***
 )
 where msbuild
 
-set "VCTargetsPath="
+set "VCTargetsPath=c:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\VC\VCTargets"
   
 echo ***env 2***
 set
