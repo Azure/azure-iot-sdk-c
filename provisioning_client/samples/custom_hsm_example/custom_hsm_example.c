@@ -40,25 +40,25 @@ typedef struct CUSTOM_HSM_SAMPLE_INFO_TAG
     const char* registration_name;
 } CUSTOM_HSM_SAMPLE_INFO;
 
-int hsm_client_x509_init()
+int hsm_client_x509_init(void)
 {
     return 0;
 }
 
-void hsm_client_x509_deinit()
+void hsm_client_x509_deinit(void)
 {
 }
 
-int hsm_client_tpm_init()
+int hsm_client_tpm_init(void)
 {
     return 0;
 }
 
-void hsm_client_tpm_deinit()
+void hsm_client_tpm_deinit(void)
 {
 }
 
-HSM_CLIENT_HANDLE custom_hsm_create()
+HSM_CLIENT_HANDLE custom_hsm_create(void)
 {
     HSM_CLIENT_HANDLE result;
     CUSTOM_HSM_SAMPLE_INFO* hsm_info = malloc(sizeof(CUSTOM_HSM_SAMPLE_INFO));
@@ -363,19 +363,19 @@ static const HSM_CLIENT_KEY_INTERFACE symm_key_interface =
     custom_hsm_get_registration_name
 };
 
-const HSM_CLIENT_TPM_INTERFACE* hsm_client_tpm_interface()
+const HSM_CLIENT_TPM_INTERFACE* hsm_client_tpm_interface(void)
 {
     // tpm interface pointer
     return &tpm_interface;
 }
 
-const HSM_CLIENT_X509_INTERFACE* hsm_client_x509_interface()
+const HSM_CLIENT_X509_INTERFACE* hsm_client_x509_interface(void)
 {
     // x509 interface pointer
     return &x509_interface;
 }
 
-const HSM_CLIENT_KEY_INTERFACE* hsm_client_key_interface()
+const HSM_CLIENT_KEY_INTERFACE* hsm_client_key_interface(void)
 {
     return &symm_key_interface;
 }

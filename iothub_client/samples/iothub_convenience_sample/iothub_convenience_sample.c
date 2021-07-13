@@ -114,11 +114,22 @@ static void acknowledge_cloud_messages(IOTHUB_DEVICE_CLIENT_HANDLE device_handle
 }
 #endif
 
+// names of optional custom properties that may be specified by the service to C2D messages
+const char* applicationCustomPropertyKey1 = "appCustomProperty1";
+const char* applicationCustomPropertyKey2 = "appCustomProperty2";
+
 static IOTHUBMESSAGE_DISPOSITION_RESULT receive_msg_callback(IOTHUB_MESSAGE_HANDLE message, void* user_context)
 {
     (void)user_context;
     const char* messageId;
     const char* correlationId;
+    const char* contentType;
+    const char* contentEncoding;
+    const char* messageCreationTimeUtc;
+    const char* messageUserId;
+
+    const char* applicationCustomPropertyValue1;
+    const char* applicationCustomPropertyValue2;
 
     // Message properties
     if ((messageId = IoTHubMessage_GetMessageId(message)) == NULL)
@@ -129,6 +140,36 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT receive_msg_callback(IOTHUB_MESSAGE_HAND
     if ((correlationId = IoTHubMessage_GetCorrelationId(message)) == NULL)
     {
         correlationId = "<unavailable>";
+    }
+
+    if ((contentType = IoTHubMessage_GetContentTypeSystemProperty(message)) == NULL)
+    {
+        contentType = "<unavailable>";
+    }
+
+    if ((contentEncoding = IoTHubMessage_GetContentEncodingSystemProperty(message)) == NULL)
+    {
+        contentEncoding = "<unavailable>";
+    }
+
+    if ((messageCreationTimeUtc = IoTHubMessage_GetMessageCreationTimeUtcSystemProperty(message)) == NULL)
+    {
+        messageCreationTimeUtc = "<unavailable>";
+    }
+
+    if ((messageUserId = IoTHubMessage_GetMessageUserIdSystemProperty(message)) == NULL)
+    {
+        messageUserId = "<unavailable>";
+    }
+
+    if ((applicationCustomPropertyValue1 = IoTHubMessage_GetProperty(message, applicationCustomPropertyKey1)) == NULL)
+    {
+        applicationCustomPropertyValue1 = "<unavailable>";
+    }
+
+    if ((applicationCustomPropertyValue2 = IoTHubMessage_GetProperty(message, applicationCustomPropertyKey2)) == NULL)
+    {
+        applicationCustomPropertyValue2 = "<unavailable>";
     }
 
     IOTHUBMESSAGE_CONTENT_TYPE content_type = IoTHubMessage_GetContentType(message);
@@ -143,7 +184,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT receive_msg_callback(IOTHUB_MESSAGE_HAND
         }
         else
         {
-            (void)printf("Received Binary message\r\nMessage ID: %s\r\n Correlation ID: %s\r\n Data: <<<%.*s>>> & Size=%d\r\n", messageId, correlationId, (int)buff_len, buff_msg, (int)buff_len);
+            (void)printf("Received Binary message.\r\n  Data: <<<%.*s>>> & Size=%d\r\n", (int)buff_len, buff_msg, (int)buff_len);
         }
     }
     else
@@ -155,9 +196,14 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT receive_msg_callback(IOTHUB_MESSAGE_HAND
         }
         else
         {
-            (void)printf("Received String Message\r\nMessage ID: %s\r\n Correlation ID: %s\r\n Data: <<<%s>>>\r\n", messageId, correlationId, string_msg);
+            (void)printf("Received String Message.\r\n  Data: <<<%s>>>\r\n", string_msg);
         }
     }
+
+    printf("Message properties:\r\n  Message ID: %s\r\n  Correlation ID: %s\r\n  ContentType: %s\r\n  ContentEncoding: %s\r\n"
+           "  messageCreationTimeUtc: %s\r\n  messageUserId: %s\r\n  %s: %s\r\n  %s: %s\r\n",
+           messageId, correlationId, contentType, contentEncoding, messageCreationTimeUtc, messageUserId,
+           applicationCustomPropertyKey1, applicationCustomPropertyValue1 ,applicationCustomPropertyKey2, applicationCustomPropertyValue2);
 
 #ifdef USE_C2D_ASYNC_ACK
     (void)Lock(g_cloudMessages_Lock);

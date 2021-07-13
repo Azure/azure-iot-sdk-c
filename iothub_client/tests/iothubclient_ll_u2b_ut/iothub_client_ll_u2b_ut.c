@@ -51,7 +51,7 @@ static void* my_gballoc_calloc(size_t nmemb, size_t size)
 
 #include "parson.h"
 
-#define BLOCK_SIZE (4*1024*1024)
+#define BLOCK_SIZE (100*1024*1024)
 
 MOCKABLE_FUNCTION(, JSON_Value*, json_parse_string, const char *, string);
 MOCKABLE_FUNCTION(, const char*, json_object_get_string, const JSON_Object *, object, const char *, name);
