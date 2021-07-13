@@ -204,7 +204,7 @@ if %MAKE_NUGET_PKG% == yes (
 echo ***checking msbuild***
 echo "%VS140COMNTOOLS%"
 
-dir /s "%VS140COMNTOOLS%..\..\VC\bin\vcvars32.bat"
+dir /s "%VS140COMNTOOLS%..\.."
 
 where /q msbuild
 IF ERRORLEVEL 1 (
@@ -213,6 +213,8 @@ echo ***setting VC paths***
 )
 where msbuild
 
+set "VCTargetsPath="
+  
 echo ***env 2***
 set
 echo ***env 2***
