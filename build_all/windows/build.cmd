@@ -221,7 +221,7 @@ echo dir VS140COMNTOOLS\..\..\VC\bin\vcvars32.bat
 dir "%VS140COMNTOOLS%..\..\VC\bin\vcvars32.bat"
 
 echo dir /s c:\VsMSBuildCmd.bat
-dir /s c:\VsMSBuildCmd.bat
+rem dir /s c:\VsMSBuildCmd.bat
 
 where /q msbuild
 IF ERRORLEVEL 1 (
