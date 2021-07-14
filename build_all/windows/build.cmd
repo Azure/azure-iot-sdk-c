@@ -208,11 +208,16 @@ echo ***env 1***
 echo ***checking msbuild***
 echo VS140COMNTOOLS= "%VS140COMNTOOLS%"
 
-dir "%VS140COMNTOOLS%VsMSBuildCmd.bat"
+echo VS140COMNTOOLS
+dir "%VS140COMNTOOLS%" 
 
+echo VS140COMNTOOLS\VsMSBuildCmd.bat
+dir "%VS140COMNTOOLS%\VsMSBuildCmd.bat"
+
+echo VS140COMNTOOLS\..\..\VC\bin\vcvars32.bat
 dir "%VS140COMNTOOLS%..\..\VC\bin\vcvars32.bat"
 
-call "%VS140COMNTOOLS%VsMSBuildCmd.bat"
+call "%VS140COMNTOOLS%\VsMSBuildCmd.bat"
 
 where /q msbuild
 IF ERRORLEVEL 1 (
@@ -222,7 +227,8 @@ echo ***setting VC paths***
 where msbuild
 
 set "VCTargetsPath=c:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\VC\VCTargets"
-  
+set "VCTargetsPath=c:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\v140"
+
 echo ***env 2***
 set
 echo ***env 2***
