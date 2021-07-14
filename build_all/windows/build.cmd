@@ -208,21 +208,25 @@ echo ***env 1***
 echo ***checking msbuild***
 echo VS140COMNTOOLS= "%VS140COMNTOOLS%"
 
-echo VS140COMNTOOLS
+echo dir VS140COMNTOOLS
 dir "%VS140COMNTOOLS%" 
 
-echo VS140COMNTOOLS\VsMSBuildCmd.bat
-dir "%VS140COMNTOOLS%\VsMSBuildCmd.bat"
+echo dir VS140COMNTOOLS\VsMSBuildCmd.bat
+dir "%VS140COMNTOOLS%VsMSBuildCmd.bat"
 
-echo VS140COMNTOOLS\..\..\VC\bin\vcvars32.bat
+echo dir VS140COMNTOOLS\..\..\VC\bin
+dir "%VS140COMNTOOLS%..\..\VC\bin"
+
+echo dir VS140COMNTOOLS\..\..\VC\bin\vcvars32.bat
 dir "%VS140COMNTOOLS%..\..\VC\bin\vcvars32.bat"
 
-call "%VS140COMNTOOLS%\VsMSBuildCmd.bat"
+
 
 where /q msbuild
 IF ERRORLEVEL 1 (
 echo ***setting VC paths***
-    IF EXIST "%VS140COMNTOOLS%..\..\VC\bin\vcvars32.bat" call "%VS140COMNTOOLS%..\..\VC\bin\vcvars32.bat"  
+call "%VS140COMNTOOLS%\VsMSBuildCmd.bat"  
+    rem IF EXIST "%VS140COMNTOOLS%..\..\VC\bin\vcvars32.bat" call "%VS140COMNTOOLS%..\..\VC\bin\vcvars32.bat"  
 )
 where msbuild
 
