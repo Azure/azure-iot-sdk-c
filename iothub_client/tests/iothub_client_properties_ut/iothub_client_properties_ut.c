@@ -123,7 +123,7 @@ static const int TEST_DEFAULT_PROPERTIES_VERSION = 119;
 // data for IoTHubClient_Deserialize_Properties_CreateIterator.
 //
 
-// BUILD_JSON_NAME_VALUE creates a JSON stylpe "name": value with required C escaping of all this.
+// BUILD_JSON_NAME_VALUE creates a JSON style "name": value with required C escaping of all this.
 #define BUILD_JSON_NAME_VALUE(n, v) "\""n"\":"v""
 
 // Helpers for building up name/value pairs inside components.
@@ -164,7 +164,7 @@ static const IOTHUB_CLIENT_REPORTED_PROPERTY TEST_REPORTED_PROP_NULL_VALUE = { I
 #define TEST_REPORTED_PROP1_2_JSON_COMPONENT1 TEST_COMPONENT_JSON_WITH_BRACE(TEST_COMPONENT_NAME_1, TEST_REPORTED_PROP1_2_JSON_NO_BRACE)
 #define TEST_REPORTED_PROP1_2_3_JSON_COMPONENT1 TEST_COMPONENT_JSON_WITH_BRACE(TEST_COMPONENT_NAME_1, TEST_REPORTED_PROP1_2_3_JSON_NO_BRACE)
 
-// Test reported properties to serialize durin calls to IoTHubClient_Serialize_WritablePropertyResponse (valid structures).
+// Test reported properties to serialize during calls to IoTHubClient_Serialize_WritablePropertyResponse (valid structures).
 static const IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE TEST_WRITABLE_PROP1 = { IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE_STRUCT_VERSION_1, TEST_PROP_NAME1, TEST_PROP_VALUE1, TEST_STATUS_CODE_1, TEST_ACK_CODE_1, NULL };
 static const IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE TEST_WRITABLE_PROP2 = { IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE_STRUCT_VERSION_1, TEST_PROP_NAME2, TEST_PROP_VALUE2, TEST_STATUS_CODE_2, TEST_ACK_CODE_2, TEST_DESCRIPTION_2 };
 static const IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE TEST_WRITABLE_PROP3 = { IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE_STRUCT_VERSION_1, TEST_PROP_NAME3, TEST_PROP_VALUE3, TEST_STATUS_CODE_3, TEST_ACK_CODE_3, TEST_DESCRIPTION_3 };
@@ -194,7 +194,7 @@ static const IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE TEST_WRITABLE_PROP_NULL_VA
 
 // Expected results deserialization tests.  The componentName is alway NULL in the test data below.  Tests that 
 // expect a component to be set will make a copy of the needed structure(s) and then set 
-// IOTHUB_CLIENT_DESERIALIZED_PROPERTY::componentName in sthe copied version.
+// IOTHUB_CLIENT_DESERIALIZED_PROPERTY::componentName in the copied version.
 static const IOTHUB_CLIENT_DESERIALIZED_PROPERTY TEST_EXPECTED_PROPERTY1 = {
     IOTHUB_CLIENT_DESERIALIZED_PROPERTY_STRUCT_VERSION_1,
     IOTHUB_CLIENT_PROPERTY_TYPE_WRITABLE,
@@ -350,10 +350,10 @@ static unsigned const char TEST_JSON_THREE_WRITABLE_REPORTED_IN_SEPARATE_COMPONE
 
 // Invalid JSON.  IoTHubClient_Deserialize_Properties_CreateIterator will fail trying to deserialize this.
 static unsigned const char TEST_INVALID_JSON[] = "}{-not-valid";
-// Legal JSON but no $Version.  IoTHubClient_Deserialize_Properties_CreateIterator will fail trying to deserialize this.
+// Legal JSON but no $version.  IoTHubClient_Deserialize_Properties_CreateIterator will fail trying to deserialize this.
 static unsigned const char TEST_JSON_NO_VERSION[] = "44";
-// Legal JSON including $version, but for an ALL json its missing the desired.  IoTHubClient_Deserialize_Properties_CreateIterator will succeed but IoTHubClient_Deserialize_Properties_GetNextProperty 
-// won't have anything to enumerate.
+// Legal JSON including $version, but for an "all properties" json its missing the desired.  IoTHubClient_Deserialize_Properties_CreateIterator 
+// will succeed but IoTHubClient_Deserialize_Properties_GetNextProperty won't have anything to enumerate.
 static unsigned const char TEST_JSON_NO_DESIRED[] = "{ " TEST_JSON_TWIN_VER_1 " }";
 
 BEGIN_TEST_SUITE(iothub_client_properties_ut)
@@ -1636,7 +1636,7 @@ TEST_FUNCTION(IoTHubClient_Deserialize_Properties_GetNextProperty_three_writable
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
     set_expected_calls_for_IoTHubClient_Deserialize_Properties_GetNextProperty_fail_tests();
-    // We take the initial snapshot to geth the count of tests, but then immediately de-init.  We don't follow
+    // We take the initial snapshot to get the count of tests, but then immediately de-init.  We don't follow
     // the standard convention of other _fail() tests here.  Because we do an iterator, it makes
     // changes to the state of the underlying reader.  So we create a new handle on each pass.
     umock_c_negative_tests_snapshot();
