@@ -201,10 +201,18 @@ if %MAKE_NUGET_PKG% == yes (
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 )
 
-echo ***checking msbuild***
-echo "%VS140COMNTOOLS%"
+echo ***env 1***
+set
+echo ***env 1***
 
-dir /s c:\Microsoft.Cpp.Default.props
+echo ***checking msbuild***
+echo VS140COMNTOOLS= "%VS140COMNTOOLS%"
+
+dir "%VS140COMNTOOLS%VsMSBuildCmd.bat"
+
+dir "%VS140COMNTOOLS%..\..\VC\bin\vcvars32.bat"
+
+call "%VS140COMNTOOLS%VsMSBuildCmd.bat"
 
 where /q msbuild
 IF ERRORLEVEL 1 (
@@ -219,7 +227,6 @@ echo ***env 2***
 set
 echo ***env 2***
 
-cmake --build .
 
 if %MAKE_NUGET_PKG% == yes (
     if %make%==yes (
