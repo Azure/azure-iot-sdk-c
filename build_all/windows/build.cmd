@@ -232,8 +232,8 @@ call "%VS140COMNTOOLS%vcvars32.bat"
 )
 where msbuild
 
-set "VCTargetsPath=c:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\VC\VCTargets"
-set "VCTargetsPath=c:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\v140"
+rem set "VCTargetsPath=c:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\VC\VCTargets"
+rem set "VCTargetsPath=c:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\v140"
 
 echo ***env 2***
 set
