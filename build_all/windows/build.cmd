@@ -227,8 +227,7 @@ where /q msbuild
 IF ERRORLEVEL 1 (
 echo ***setting VC paths***
 call "c:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsMSBuildCmd.bat"
-      
-    rem call "%VS140COMNTOOLS%vcvars32.bat"  
+call "%VS140COMNTOOLS%vcvars32.bat"  
     rem IF EXIST "%VS140COMNTOOLS%..\..\VC\bin\vcvars32.bat" call "%VS140COMNTOOLS%..\..\VC\bin\vcvars32.bat"  
 )
 where msbuild
