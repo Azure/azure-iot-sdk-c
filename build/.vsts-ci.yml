@@ -6,7 +6,7 @@ resources:
   clean: true
 jobs:
 - job: checksubmodule
-  c
+  pool:
     name: Hosted Ubuntu 1604
   steps:
   - script: |
