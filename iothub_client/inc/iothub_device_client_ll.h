@@ -375,18 +375,18 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
 #endif /*DONT_USE_UPLOADTOBLOB*/
 
     /**
-    * @brief    This API sends an acknowledgement to Azure IoT Hub that a cloud-to-device message has been received.
+    * @brief    This API sends an acknowledgement to Azure IoT Hub that a cloud-to-device message has been received and frees resources associated with the message.
     *
     * @param    device_ll_handle                The handle created by a call to a create function.
     * @param    message                         The cloud-to-device message received through the callback provided to IoTHubDeviceClient_LL_SetMessageCallback.
     * @param    disposition                     Acknowledgement option for the message.
     *
-    * @warning  This function is to be used only when IOTHUBMESSAGE_ASYNC_ACK is used in the callback for incoming Cloud-to-Device messages.
+    * @warning  This function is to be used only when IOTHUBMESSAGE_ASYNC_ACK is used in the callback for incoming cloud-to-device messages.
     * @remarks
-    *           For Cloud-to-Device messages, the IOTHUB_MESSAGE_HANDLE instance is allocated by the Azure IoT C SDK
-    *           before it gets delivered to the user application, thus it has has the responsibility of destroying it.
+    *           For cloud-to-device messages, the IOTHUB_MESSAGE_HANDLE instance is allocated by the Azure IoT C SDK
+    *           before it gets delivered to the user application, thus the SDK has the responsibility of destroying it.
     *           For the Azure IoT C SDK to destroy the IOTHUB_MESSAGE_HANDLE instance (and free that memory allocation), 
-    *           IoTHubDeviceClient_LL_SendMessageDisposition must be called for each Cloud-to-Device message received
+    *           IoTHubDeviceClient_LL_SendMessageDisposition must be called for each cloud-to-device message received
     *           (when using IOTHUBMESSAGE_ASYNC_ACK). Not doing so will result in memory leaks.
     * @return   IOTHUB_CLIENT_OK upon success, or an error code upon failure.
     */

@@ -640,15 +640,15 @@ static const char* IoTHubClientCore_LL_GetModelId(void* ctx)
 static bool IoTHubClientCore_LL_MessageCallbackFromInput(IOTHUB_MESSAGE_HANDLE messageHandle, void* ctx)
 {
     bool result;
-    IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)ctx;
+    IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* clientHandleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)ctx;
 
-    if ((handleData == NULL) || messageHandle == NULL)
+    if ((clientHandleData == NULL) || messageHandle == NULL)
     {
         // Codes_SRS_IOTHUBCLIENT_LL_31_137: [ If either parameter `handle` or `messageData` is `NULL` then `IoTHubClient_LL_MessageCallbackFromInput` shall return `false`.** ]
-        LogError("invalid argument: handle(%p), messageHandle(%p)", handleData, messageHandle);
+        LogError("invalid argument: handle(%p), messageHandle(%p)", clientHandleData, messageHandle);
         result = false;
     }
-    else if (handleData->event_callbacks == NULL)
+    else if (clientHandleData->event_callbacks == NULL)
     {
         LogError("Callback from input called but no input specific callbacks registered");
         result = false;
@@ -659,12 +659,12 @@ static bool IoTHubClientCore_LL_MessageCallbackFromInput(IOTHUB_MESSAGE_HANDLE m
 
         LIST_ITEM_HANDLE item_handle = NULL;
 
-        item_handle = singlylinkedlist_find(handleData->event_callbacks, is_event_equal_for_match, (const void*)inputName);
+        item_handle = singlylinkedlist_find(clientHandleData->event_callbacks, is_event_equal_for_match, (const void*)inputName);
 
         if (item_handle == NULL)
         {
             // Codes_SRS_IOTHUBCLIENT_LL_31_138: [ If there is no registered handler for the inputName from `IoTHubMessage_GetInputName`, then `IoTHubClient_LL_MessageCallbackFromInput` shall attempt invoke the default handler handler.** ]
-            item_handle = singlylinkedlist_find(handleData->event_callbacks, is_event_equal_for_match, NULL);
+            item_handle = singlylinkedlist_find(clientHandleData->event_callbacks, is_event_equal_for_match, NULL);
         }
 
         if (item_handle == NULL)
@@ -683,7 +683,7 @@ static bool IoTHubClientCore_LL_MessageCallbackFromInput(IOTHUB_MESSAGE_HANDLE m
             else
             {
                 // Codes_SRS_IOTHUBCLIENT_LL_09_004: [IoTHubClient_LL_GetLastMessageReceiveTime shall return lastMessageReceiveTime in localtime]
-                handleData->lastMessageReceiveTime = get_time(NULL);
+                clientHandleData->lastMessageReceiveTime = get_time(NULL);
 
                 if (event_callback->callbackAsyncEx != NULL)
                 {
@@ -696,7 +696,7 @@ static bool IoTHubClientCore_LL_MessageCallbackFromInput(IOTHUB_MESSAGE_HANDLE m
                     IOTHUBMESSAGE_DISPOSITION_RESULT cb_result = event_callback->callbackAsync(messageHandle, event_callback->userContextCallback);
 
                     // Codes_SRS_IOTHUBCLIENT_LL_31_140: [ `IoTHubClient_LL_MessageCallbackFromInput` shall send the message disposition as returned by the client to the underlying layer and return `true` if an input queue match is found.** ]
-                    if (handleData->IoTHubTransport_SendMessageDisposition(handleData->deviceHandle, messageHandle, cb_result) != IOTHUB_CLIENT_OK)
+                    if (clientHandleData->IoTHubTransport_SendMessageDisposition(clientHandleData->deviceHandle, messageHandle, cb_result) != IOTHUB_CLIENT_OK)
                     {
                         LogError("IoTHubTransport_SendMessageDisposition failed");
                     }
@@ -719,8 +719,8 @@ static bool IoTHubClientCore_LL_MessageCallback(IOTHUB_MESSAGE_HANDLE messageHan
     }
     else
     {
-        IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)ctx;
-        return invoke_message_callback(handleData, messageHandle);
+        IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* clientHandleData = (IOTHUB_CLIENT_CORE_LL_HANDLE_DATA*)ctx;
+        return invoke_message_callback(clientHandleData, messageHandle);
     }
     return result;
 }

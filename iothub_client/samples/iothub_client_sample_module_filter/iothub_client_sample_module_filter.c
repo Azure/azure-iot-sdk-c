@@ -14,13 +14,6 @@
 #include "iothubtransportmqtt.h"
 #include "iothub.h"
 
-// Uncomment this define to use Asynchronous ACK of Cloud-to-Device messages.
-#define USE_C2D_ASYNC_ACK
-
-#ifdef USE_C2D_ASYNC_ACK
-#include "azure_c_shared_utility/singlylinkedlist.h"
-#endif
-
 typedef struct FILTERED_MESSAGE_INSTANCE_TAG
 {
     IOTHUB_MESSAGE_HANDLE messageHandle;
@@ -104,40 +97,6 @@ static void PrintMessageInformation(IOTHUB_MESSAGE_HANDLE message)
         correlationId, inputQueueName, connectionModuleId, connectionDeviceId, tempAlertProperty);
 }
 
-#ifdef USE_C2D_ASYNC_ACK
-static SINGLYLINKEDLIST_HANDLE g_cloudMessages;
-
-static bool ack_and_remove_message(const void* item, const void* match_context, bool* continue_processing)
-{
-    IOTHUB_MODULE_CLIENT_LL_HANDLE module_ll_handle = (IOTHUB_MODULE_CLIENT_LL_HANDLE)match_context;
-    IOTHUB_MESSAGE_HANDLE message = (IOTHUB_MESSAGE_HANDLE)item;
-
-    const char* messageId;
-    if ((messageId = IoTHubMessage_GetMessageId(message)) == NULL)
-    {
-        messageId = "<unavailable>";
-    }
-
-    (void)printf("Sending ACK for cloud message (Message ID: %s)\r\n", messageId);
-
-    if (IoTHubModuleClient_LL_SendMessageDisposition(module_ll_handle, message, IOTHUBMESSAGE_ACCEPTED) != IOTHUB_CLIENT_OK)
-    {
-        (void)printf("ERROR: IoTHubModuleClient_LL_SendMessageDisposition..........FAILED!\r\n");
-        // If (and only if) IoTHubModuleClient_LL_SendMessageDisposition fails, the IOTHUB_MESSAGE_HANDLE must be explicitly destroyed.
-        IoTHubMessage_Destroy(message);
-    }
-
-    *continue_processing = true;
-
-    return true;
-}
-
-static void acknowledge_cloud_messages(IOTHUB_MODULE_CLIENT_LL_HANDLE module_ll_handle)
-{
-    (void)singlylinkedlist_remove_if(g_cloudMessages, ack_and_remove_message, module_ll_handle);
-}
-#endif
-
 // DefaultMessageCallback is invoked if a message arrives that does not map up to one of the queues
 // specified by IoTHubModuleClient_LL_SetInputMessageCallback.
 // In the context of this sample, such behavior is unexpected but not an error.
@@ -146,17 +105,16 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT DefaultMessageCallback(IOTHUB_MESSAGE_HA
     (void)userContextCallback;
     (void)printf("Message arrived sent to the default queue\r\n");
     PrintMessageInformation(message);
-
-#ifdef USE_C2D_ASYNC_ACK
-    (void)singlylinkedlist_add(g_cloudMessages, message);
-    return IOTHUBMESSAGE_ASYNC_ACK;
-#else
     return IOTHUBMESSAGE_ACCEPTED;
-#endif
 }
 
 // SendConfirmationCallbackFromFilter is invoked when the message that was forwarded on from 'InputQueue1FilterCallback'
 // pipeline function is confirmed.
+// The Azure IoT C SDK allows developers to acknowledge cloud-to-device messages
+// (either sending DISPOSITION if using AMQP, or PUBACK if using MQTT) outside the following callback, in a separate function call.
+// This would allow the user application to process the incoming message before acknowledging it to the Azure IoT Hub, since
+// the callback below is supposed to return as fast as possible to unblock I/O.
+// Please look for "IOTHUBMESSAGE_ASYNC_ACK" in iothub_ll_c2d_sample for more details.
 static void SendConfirmationCallbackFromFilter(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
     // The context corresponds to which message# we were at when we sent.
@@ -194,6 +152,11 @@ static FILTERED_MESSAGE_INSTANCE* CreateFilteredMessageInstance(IOTHUB_MESSAGE_H
 
 // InputQueue1FilterCallback implements a very primitive filtering mechanism.  It will send the 1st, 3rd, 5th, etc. messages
 // to the next step in the queue and will filter out the 2nd, 4th, 6th, etc. messages.
+// The Azure IoT C SDK allows developers to acknowledge cloud-to-device messages
+// (either sending DISPOSITION if using AMQP, or PUBACK if using MQTT) outside the following callback, in a separate function call.
+// This would allow the user application to process the incoming message before acknowledging it to the Azure IoT Hub, since
+// the callback below is supposed to return as fast as possible to unblock I/O.
+// Please look for "IOTHUBMESSAGE_ASYNC_ACK" in iothub_ll_c2d_sample for more details.
 static IOTHUBMESSAGE_DISPOSITION_RESULT InputQueue1FilterCallback(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback)
 {
     IOTHUBMESSAGE_DISPOSITION_RESULT result;
@@ -232,12 +195,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT InputQueue1FilterCallback(IOTHUB_MESSAGE
             }
             else
             {
-#ifdef USE_C2D_ASYNC_ACK
-                (void)singlylinkedlist_add(g_cloudMessages, message);
-                result = IOTHUBMESSAGE_ASYNC_ACK;
-#else
                 result = IOTHUBMESSAGE_ACCEPTED;
-#endif
             }
         }
     }
@@ -245,12 +203,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT InputQueue1FilterCallback(IOTHUB_MESSAGE
     {
         // No-op.  Swallow this message by not passing it onto the next stage in the pipeline.
         (void)printf("Not sending message (%lu) to the next stage in pipeline.\r\n", (unsigned long)messagesReceivedByInput1Queue);
-#ifdef USE_C2D_ASYNC_ACK
-        (void)singlylinkedlist_add(g_cloudMessages, message);
-        result = IOTHUBMESSAGE_ASYNC_ACK;
-#else
         result = IOTHUBMESSAGE_ACCEPTED;
-#endif
     }
 
     messagesReceivedByInput1Queue++;
@@ -314,10 +267,6 @@ static int SetupCallbacksForInputQueues(IOTHUB_MODULE_CLIENT_LL_HANDLE iotHubMod
 
 int main(void)
 {
-#ifdef USE_C2D_ASYNC_ACK
-    g_cloudMessages = singlylinkedlist_create();
-#endif
-
     IOTHUB_MODULE_CLIENT_LL_HANDLE iotHubModuleClientHandle;
 
     if ((iotHubModuleClientHandle = InitializeConnectionForFilter()) == NULL)
@@ -335,19 +284,11 @@ int main(void)
         while (true)
         {
             IoTHubModuleClient_LL_DoWork(iotHubModuleClientHandle);
-
-#ifdef USE_C2D_ASYNC_ACK
-            acknowledge_cloud_messages(iotHubModuleClientHandle);
-#endif
             ThreadAPI_Sleep(100);
         }
     }
 
     DeInitializeConnectionForFilter(iotHubModuleClientHandle);
-
-#ifdef USE_C2D_ASYNC_ACK
-    singlylinkedlist_destroy(g_cloudMessages);
-#endif
     return 0;
 }
 

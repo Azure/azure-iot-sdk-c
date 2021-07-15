@@ -57,14 +57,6 @@ multithreaded API is that the calls to DoWork are abstracted away from your code
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-// Uncomment this define to use Asynchronous ACK of Cloud-to-Device messages.
-#define USE_C2D_ASYNC_ACK
-
-#ifdef USE_C2D_ASYNC_ACK
-#include "azure_c_shared_utility/singlylinkedlist.h"
-#include "azure_c_shared_utility/lock.h"
-#endif
-
 /* Paste in your device connection string  */
 static const char* connectionString = "[device connection string]";
 
@@ -77,47 +69,15 @@ static int proxy_port = 0;               // Proxy port
 static const char* proxy_username = NULL; // Proxy user name
 static const char* proxy_password = NULL; // Proxy password
 
-#ifdef USE_C2D_ASYNC_ACK
-static SINGLYLINKEDLIST_HANDLE g_cloudMessages;
-static LOCK_HANDLE g_cloudMessages_Lock;
-
-static bool ack_and_remove_message(const void* item, const void* match_context, bool* continue_processing)
-{
-    IOTHUB_DEVICE_CLIENT_HANDLE device_handle = (IOTHUB_DEVICE_CLIENT_HANDLE)match_context;
-    IOTHUB_MESSAGE_HANDLE message = (IOTHUB_MESSAGE_HANDLE)item;
-
-    const char* messageId;
-    if ((messageId = IoTHubMessage_GetMessageId(message)) == NULL)
-    {
-        messageId = "<unavailable>";
-    }
-
-    (void)printf("Sending ACK for cloud message (Message ID: %s)\r\n", messageId);
-
-    if (IoTHubDeviceClient_SendMessageDisposition(device_handle, message, IOTHUBMESSAGE_ACCEPTED) != IOTHUB_CLIENT_OK)
-    {
-        (void)printf("ERROR: IoTHubDeviceClient_SendMessageDisposition..........FAILED!\r\n");
-        // If (and only if) IoTHubDeviceClient_SendMessageDisposition fails, the IOTHUB_MESSAGE_HANDLE must be explicitly destroyed.
-        IoTHubMessage_Destroy(message);
-    }
-
-    *continue_processing = true;
-
-    return true;
-}
-
-static void acknowledge_cloud_messages(IOTHUB_DEVICE_CLIENT_HANDLE device_handle)
-{
-    (void)Lock(g_cloudMessages_Lock);
-    (void)singlylinkedlist_remove_if(g_cloudMessages, ack_and_remove_message, device_handle);
-    (void)Unlock(g_cloudMessages_Lock);
-}
-#endif
-
 // names of optional custom properties that may be specified by the service to C2D messages
 const char* applicationCustomPropertyKey1 = "appCustomProperty1";
 const char* applicationCustomPropertyKey2 = "appCustomProperty2";
 
+// The Azure IoT C SDK allows developers to acknowledge cloud-to-device messages
+// (either sending DISPOSITION if using AMQP, or PUBACK if using MQTT) outside the following callback, in a separate function call.
+// This would allow the user application to process the incoming message before acknowledging it to the Azure IoT Hub, since
+// the callback below is supposed to return as fast as possible to unblock I/O.
+// Please look for "IOTHUBMESSAGE_ASYNC_ACK" in iothub_ll_c2d_sample for more details.
 static IOTHUBMESSAGE_DISPOSITION_RESULT receive_msg_callback(IOTHUB_MESSAGE_HANDLE message, void* user_context)
 {
     (void)user_context;
@@ -205,15 +165,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT receive_msg_callback(IOTHUB_MESSAGE_HAND
            messageId, correlationId, contentType, contentEncoding, messageCreationTimeUtc, messageUserId,
            applicationCustomPropertyKey1, applicationCustomPropertyValue1 ,applicationCustomPropertyKey2, applicationCustomPropertyValue2);
 
-#ifdef USE_C2D_ASYNC_ACK
-    (void)Lock(g_cloudMessages_Lock);
-    (void)singlylinkedlist_add(g_cloudMessages, message);
-    (void)Unlock(g_cloudMessages_Lock);
-
-    return IOTHUBMESSAGE_ASYNC_ACK;
-#else
     return IOTHUBMESSAGE_ACCEPTED;
-#endif
 }
 
 
@@ -305,10 +257,6 @@ int main(void)
     char telemetry_msg_buffer[80];
 
     int messagecount = 0;
-#ifdef USE_C2D_ASYNC_ACK
-    g_cloudMessages_Lock = Lock_Init();
-    g_cloudMessages = singlylinkedlist_create();
-#endif
 
     printf("\r\nThis sample will send messages continuously and accept C2D messages.\r\nPress Ctrl+C to terminate the sample.\r\n\r\n");
 
@@ -423,10 +371,6 @@ int main(void)
             IoTHubMessage_Destroy(message_handle);
             messagecount = messagecount + 1;
 
-#ifdef USE_C2D_ASYNC_ACK
-            acknowledge_cloud_messages(device_handle);
-#endif
-
             ThreadAPI_Sleep(g_interval);
         }
 
@@ -435,11 +379,6 @@ int main(void)
     }
     // Free all the sdk subsystem
     IoTHub_Deinit();
-
-#ifdef USE_C2D_ASYNC_ACK
-    singlylinkedlist_destroy(g_cloudMessages);
-    Lock_Deinit(g_cloudMessages_Lock);
-#endif
 
     return 0;
 }

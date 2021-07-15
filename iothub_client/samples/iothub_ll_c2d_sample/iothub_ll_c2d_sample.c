@@ -43,7 +43,7 @@
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-// Uncomment this define to use Asynchronous ACK of Cloud-to-Device messages.
+// Uncomment this define to use Asynchronous ACK of cloud-to-device messages.
 // #define USE_C2D_ASYNC_ACK
 
 #ifdef USE_C2D_ASYNC_ACK
@@ -155,9 +155,6 @@ int main(void)
 {
     IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;
     size_t messages_count = 0;
-#ifdef USE_C2D_ASYNC_ACK
-    g_cloudMessages = singlylinkedlist_create();
-#endif
 
     // Select the Protocol to use with the connection
 #ifdef SAMPLE_MQTT
@@ -175,6 +172,10 @@ int main(void)
 #ifdef SAMPLE_HTTP
         protocol = HTTP_Protocol;
 #endif // SAMPLE_HTTP
+
+#ifdef USE_C2D_ASYNC_ACK
+        g_cloudMessages = singlylinkedlist_create();
+#endif
 
     // Used to initialize IoTHub SDK subsystem
     (void)IoTHub_Init();

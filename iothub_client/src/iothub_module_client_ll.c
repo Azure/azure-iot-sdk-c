@@ -365,7 +365,7 @@ IOTHUB_CLIENT_RESULT IoTHubModuleClient_LL_SendMessageDisposition(IOTHUB_MODULE_
     }
     else
     {
-        LogError("Input parameter cannot be NULL");
+        LogError("iotHubModuleClientHandle cannot be NULL");
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     return result;

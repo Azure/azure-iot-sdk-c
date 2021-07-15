@@ -4034,10 +4034,13 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SendMessageDisposition(IOTHUB_D
         LogError("Invalid argument (handle=%p, messageHandle=%p", handle, messageHandle);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
+    else if (disposition == IOTHUBMESSAGE_ASYNC_ACK)
+    {
+        LogError("IOTHUBMESSAGE_ASYNC_ACK is not a valid disposition value for this function");
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
     else
     {
-        result = IOTHUB_CLIENT_OK;
-
         if (disposition == IOTHUBMESSAGE_ACCEPTED)
         {
             MESSAGE_DISPOSITION_CONTEXT* msgDispCtx = NULL;
@@ -4058,10 +4061,18 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SendMessageDisposition(IOTHUB_D
                     LogError("Failed sending ACK for MQTT message (packet_id=%u)", msgDispCtx->packet_id);
                     result = IOTHUB_CLIENT_ERROR;
                 }
+                else
+                {
+                    result = IOTHUB_CLIENT_OK;
+                }
             }
         }
+        else
+        {
+            result = IOTHUB_CLIENT_OK;
+        }
 
-        // This will destroy also the disposition context;
+        // This will also destroy the disposition context.
         IoTHubMessage_Destroy(messageHandle);
     }
 

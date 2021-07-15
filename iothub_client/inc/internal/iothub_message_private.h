@@ -26,7 +26,7 @@ typedef struct MESSAGE_DISPOSITION_CONTEXT_TAG* MESSAGE_DISPOSITION_CONTEXT_HAND
 typedef void(*MESSAGE_DISPOSITION_CONTEXT_DESTROY_FUNCTION)(MESSAGE_DISPOSITION_CONTEXT_HANDLE dispositionContext);
 
 /**
-* @brief   Sets the context for the transport layer to send a DISPOSITION or ACK for a Cloud-to-Device message.
+* @brief   Sets the context for the transport layer to send a DISPOSITION or ACK for a cloud-to-device message.
 *
 * @param   iotHubMessageHandle                The message on which to have the context set.
 * @param   dispositionContext                 The transport context for disposition.
@@ -37,7 +37,7 @@ typedef void(*MESSAGE_DISPOSITION_CONTEXT_DESTROY_FUNCTION)(MESSAGE_DISPOSITION_
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetDispositionContext, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, MESSAGE_DISPOSITION_CONTEXT_HANDLE, dispositionContext, MESSAGE_DISPOSITION_CONTEXT_DESTROY_FUNCTION, dispositionContextDestroyFunction);
 
 /**
-* @brief   Gets the context for the transport layer to send a DISPOSITION or ACK for a Cloud-to-Device message.
+* @brief   Gets the context for the transport layer to send a DISPOSITION or ACK for a cloud-to-device message.
 *
 * @param   iotHubMessageHandle                The message to have the context set on.
 * @param   dispositionContext                 Variable to hold the transport context for disposition.
