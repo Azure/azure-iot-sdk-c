@@ -201,43 +201,17 @@ if %MAKE_NUGET_PKG% == yes (
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 )
 
-echo ***env 1***
-set
-echo ***env 1***
 
 echo ***checking msbuild***
-echo VS140COMNTOOLS= "%VS140COMNTOOLS%"
-
-echo dir VS140COMNTOOLS
-dir "%VS140COMNTOOLS%" 
-
-echo dir VS140COMNTOOLS\VsMSBuildCmd.bat  not found
-dir "%VS140COMNTOOLS%VsMSBuildCmd.bat"
-
-echo dir VS140COMNTOOLS\..\..\VC\bin
-dir "%VS140COMNTOOLS%..\..\VC\bin"
-
-echo dir VS140COMNTOOLS\..\..\VC\bin\vcvars32.bat
-dir "%VS140COMNTOOLS%..\..\VC\bin\vcvars32.bat"
-
-echo dir /s c:\VsMSBuildCmd.bat
-rem dir /s c:\VsMSBuildCmd.bat
-
 where /q msbuild
 IF ERRORLEVEL 1 (
 echo ***setting VC paths***
-call "c:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsMSBuildCmd.bat"
-call "%VS140COMNTOOLS%vcvars32.bat"  
-    rem IF EXIST "%VS140COMNTOOLS%..\..\VC\bin\vcvars32.bat" call "%VS140COMNTOOLS%..\..\VC\bin\vcvars32.bat"  
+    IF EXIST "%VS140COMNTOOLS%vcvars32.bat" call "%VS140COMNTOOLS%vcvars32.bat"  
+set
+    IF EXIST "c:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsMSBuildCmd.bat" call "c:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsMSBuildCmd.bat"
 )
 where msbuild
 
-rem set "VCTargetsPath=c:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\VC\VCTargets"
-rem set "VCTargetsPath=c:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\v140"
-
-echo ***env 2***
-set
-echo ***env 2***
 
 
 if %MAKE_NUGET_PKG% == yes (
