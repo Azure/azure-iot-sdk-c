@@ -172,12 +172,12 @@ jobs:
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
     condition: always()
-- job: ubuntu1804
+- job: ubuntu2004
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
   pool:
-    vmImage: 'ubuntu-18.04'
-  displayName: 'ubuntu1804'
+    vmImage: 'ubuntu-20.04'
+  displayName: 'ubuntu-20.04'
   steps:
   - script: |
       export OPENSSL_ia32cap=0x00000000
