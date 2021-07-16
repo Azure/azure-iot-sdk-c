@@ -177,7 +177,7 @@ jobs:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
   pool:
     vmImage: 'ubuntu-18.04'
-  displayName: 'ubuntu1604'
+  displayName: 'ubuntu1804'
   steps:
   - script: |
       export OPENSSL_ia32cap=0x00000000
