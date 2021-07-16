@@ -14,7 +14,7 @@ if (POLICY CMP0042)
 endif()
 
 #
-#making a global variable to know if we are on linux, windows, or macosx.
+#making a global variable to know if we are on linux, windows, macosx or vxworks.
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set(WINDOWS TRUE)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -26,6 +26,8 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(MACOSX TRUE)
     add_definitions(-DMACOSX)
+elseif (CMAKE_SYSTEM_NAME STREQUAL "VxWorks")
+    set(VXWORKS TRUE)
 endif()
 
 
@@ -121,7 +123,7 @@ if (${use_azure_cloud_rsa_cert})
 endif()
 
 if (${use_azure_cloud_ecc_cert})
-    add_definitions(-DUSE_AZURE_CLOUD_ECC_CERT) 
+    add_definitions(-DUSE_AZURE_CLOUD_ECC_CERT)
 endif()
 
 if (${use_microsoftazure_de_cert})
