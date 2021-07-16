@@ -172,10 +172,13 @@ jobs:
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
     condition: always()
-- job: ubuntu1604
+- job: ubuntu1804
+    pool:
+       vmImage: 'ubuntu-18.04'
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
   pool: Hosted Ubuntu 1604
+  ubuntu-18.04
   displayName: 'ubuntu1604'
   steps:
   - script: |
