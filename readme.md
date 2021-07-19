@@ -40,7 +40,7 @@ hardcoded in their application or flashed onto your WiFi module in order to prev
 
 **Devices with only the Baltimore public certificate will lose the ability to connect to Azure IoT Hub and Device Provisioning Service in October 2022.**
 
-To prepare for this change, make sure your device's TLS stack has both of these public certificates configured.
+To prepare for this change, make sure your device's TLS stack has both of these public root of trust certificates configured.
 
 For a more in depth explanation as to why the IoT services are doing this, please see
 [this article](https://techcommunity.microsoft.com/t5/internet-of-things/azure-iot-tls-critical-changes-are-almost-here-and-why-you/ba-p/2393169).
