@@ -17,7 +17,7 @@ that will impact the SDK's ability to connect to these services. In October 2022
 transition period beforehand where your IoT devices must have both the Baltimore and Digicert public certificates 
 installed in their certificate store in order to prevent connectivity issues. 
 
-**Devices with only the Baltimore public certificate installed will lose the ability to connect to IoT hub and Device Provisioning Service in October 2022.**
+**Devices with only the Baltimore public certificate installed will lose the ability to connect to Azure IoT Hub and Device Provisioning Service in October 2022.**
 
 To prepare for this change, make sure your device's certificate store has both of these public certificates installed.
 
