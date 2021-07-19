@@ -11,7 +11,7 @@ For constained devices - where memory is measured in kilobytes and not megabytes
 ## Critical Upcoming Change Notice
 
 All Azure IoT SDK users are advised to be aware of upcoming TLS certificate changes for Azure IoT Hub and Device Provisioning Service 
-that will impact the SDK's ability to connect. In October 2022, both services will migrate from the current 
+that will impact the SDK's ability to connect to these services. In October 2022, both services will migrate from the current 
 [Baltimore CyberTrust CA Root](https://baltimore-cybertrust-root.chain-demos.digicert.com/info/index.html) to the 
 [DigiCert Global G2 CA root](https://global-root-g2.chain-demos.digicert.com/info/index.html). There will be a 
 transition period beforehand where your IoT devices must have both the Baltimore and Digicert public certificates 
