@@ -21,7 +21,7 @@ installed in their certificate store in order to prevent connectivity issues.
 
 To prepare for this change, make sure your device's certificate store has both of these public certificates installed.
 
-For a more in depth explanation as to why the service is doing this, please see
+For a more in depth explanation as to why the IoT services are doing this, please see
 [this article](https://techcommunity.microsoft.com/t5/internet-of-things/azure-iot-tls-critical-changes-are-almost-here-and-why-you/ba-p/2393169).
 
 ## Table of Contents
