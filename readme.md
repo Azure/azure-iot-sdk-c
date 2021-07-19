@@ -11,6 +11,7 @@ For constained devices - where memory is measured in kilobytes and not megabytes
 ## Table of Contents
 - [Azure IoT C SDKs and Libraries](#azure-iot-c-sdks-and-libraries)
   - [Table of Contents](#table-of-contents)
+  - [Critical Upcoming Change Notice](#critical-upcoming-change-notice)
   - [Getting the  SDK](#getting-the-sdk)
   - [Samples](#samples)
   - [SDK API Reference Documentation](#sdk-api-reference-documentation)
@@ -36,7 +37,7 @@ that will impact the SDK's ability to connect to these services. In October 2022
 [Baltimore CyberTrust CA Root](https://baltimore-cybertrust-root.chain-demos.digicert.com/info/index.html) to the 
 [DigiCert Global G2 CA root](https://global-root-g2.chain-demos.digicert.com/info/index.html). There will be a 
 transition period beforehand where your IoT devices must have both the Baltimore and Digicert public certificates 
-hardcoded in their application or flashed onto your WiFi module in order to prevent connectivity issues. 
+which may be hardcoded in their application or flashed onto your WiFi module in order to prevent connectivity issues. 
 
 **Devices with only the Baltimore public certificate will lose the ability to connect to Azure IoT Hub and Device Provisioning Service in October 2022.**
 
