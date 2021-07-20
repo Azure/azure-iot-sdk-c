@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <limits.h>
 
 // PnP routines
 #include "pnp_thermostat_component.h"
@@ -390,7 +391,7 @@ void PnP_ThermostatComponent_SendCurrentTemperature(PNP_THERMOSTAT_COMPONENT_HAN
     {
         LogError("snprintf of current temperature telemetry failed");
     }
-    // Create the message handle and specify its metadata
+    // Create the message handle and specify its metadata.
     else if ((messageHandle = IoTHubMessage_CreateFromString(temperatureStringBuffer)) == NULL)
     {
         LogError("IoTHubMessage_PnP_CreateFromString failed");

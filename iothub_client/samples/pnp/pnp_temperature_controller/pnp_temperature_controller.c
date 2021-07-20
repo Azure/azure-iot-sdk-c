@@ -23,9 +23,9 @@
 #include "iothubtransportmqtt.h"
 #include "iothub_message.h"
 #include "iothub_client_properties.h"
-#include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/xlogging.h"
+#include "iothubtransportmqtt.h"
 
 #include "pnp_status_values.h"
 
@@ -55,7 +55,7 @@ static unsigned int g_sleepBetweenPollsMs = 100;
 // So we will send telemetry every (g_sendTelemetryPollInterval * g_sleepBetweenPollsMs) milliseconds; 60 seconds as currently configured.
 static const int g_sendTelemetryPollInterval = 600;
 
-// Whether tracing at the IoTHub client is enabled or not. 
+// Whether tracing at the IoTHub client is enabled or not.
 static bool g_hubClientTraceEnabled = true;
 
 // DTMI indicating this device's model identifier.
@@ -103,28 +103,44 @@ static const char g_serialNumberPropertyValue[] = "\"serial-no-123-abc\"";
 PNP_DEVICE_CONFIGURATION g_pnpDeviceConfiguration;
 
 //
-// CreateDeviceClientLLHandle does the creates the IOTHUB_DEVICE_CLIENT_LL_HANDLE based on environment configuration.
-// If PNP_CONNECTION_SECURITY_TYPE_DPS is used, the call will block until DPS provisions the device.
+// CopyPayloadToString creates a null-terminated string from the payload buffer.
+// payload is not guaranteed to be null-terminated by the IoT Hub device SDK.
 //
-static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateDeviceClientLLHandle(void)
+static char* CopyPayloadToString(const unsigned char* payload, size_t size)
 {
-    IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient = NULL;
+    char* jsonStr;
+    size_t sizeToAllocate = size + 1;
 
-    if (g_pnpDeviceConfiguration.securityType == PNP_CONNECTION_SECURITY_TYPE_CONNECTION_STRING)
+    if ((jsonStr = (char*)malloc(sizeToAllocate)) == NULL)
     {
-        if ((deviceClient = IoTHubDeviceClient_LL_CreateFromConnectionString(g_pnpDeviceConfiguration.u.connectionString, MQTT_Protocol)) == NULL)
-        {
-            LogError("Failure creating IotHub client.  Hint: Check your connection string");
-        }
+        LogError("Unable to allocate %lu size buffer", (unsigned long)(sizeToAllocate));
     }
-#ifdef USE_PROV_MODULE_FULL
-    else if ((deviceClient = PnP_CreateDeviceClientLLHandle_ViaDps(&g_pnpDeviceConfiguration)) == NULL)
+    else
     {
-        LogError("Cannot retrieve IoT Hub connection information from DPS client");
+        memcpy(jsonStr, payload, size);
+        jsonStr[size] = '\0';
     }
-#endif /* USE_PROV_MODULE_FULL */
 
-    return deviceClient;
+    return jsonStr;
+}
+
+//
+// SetEmptyCommandResponse sets the response to be an empty JSON.  IoT Hub wants
+// legal JSON, regardless of error status, so if command implementation did not set this do so here.
+//
+static void SetEmptyCommandResponse(unsigned char** response, size_t* responseSize, int* result)
+{
+    if ((*response = calloc(1, g_JSONEmptySize)) == NULL)
+    {
+        LogError("Unable to allocate empty JSON response");
+        *result = PNP_STATUS_INTERNAL_ERROR;
+    }
+    else
+    {
+        memcpy(*response, g_JSONEmpty, g_JSONEmptySize);
+        *responseSize = g_JSONEmptySize;
+        // We only overwrite the caller's result on error; otherwise leave as it was
+    }
 }
 
 //
@@ -148,47 +164,6 @@ static int PnP_TempControlComponent_InvokeRebootCommand(JSON_Value* rootValue)
     }
     
     return result;
-}
-
-//
-// SetEmptyCommandResponse sets the response to be an empty JSON.  IoT Hub wants
-// legal JSON, regardless of error status, so if command implementation did not set this do so here.
-//
-static void SetEmptyCommandResponse(unsigned char** response, size_t* responseSize, int* result)
-{
-    if ((*response = calloc(1, g_JSONEmptySize)) == NULL)
-    {
-        LogError("Unable to allocate empty JSON response");
-        *result = PNP_STATUS_INTERNAL_ERROR;
-    }
-    else
-    {
-        memcpy(*response, g_JSONEmpty, g_JSONEmptySize);
-        *responseSize = g_JSONEmptySize;
-        // We only overwrite the caller's result on error; otherwise leave as it was
-    }
-}
-
-//
-// CopyPayloadToString creates a null-terminated string from the payload buffer.
-// payload is not guaranteed to be null-terminated by the IoT Hub device SDK.
-//
-static char* CopyPayloadToString(const unsigned char* payload, size_t size)
-{
-    char* jsonStr;
-    size_t sizeToAllocate = size + 1;
-
-    if ((jsonStr = (char*)malloc(sizeToAllocate)) == NULL)
-    {
-        LogError("Unable to allocate %lu size buffer", (unsigned long)(sizeToAllocate));
-    }
-    else
-    {
-        memcpy(jsonStr, payload, size);
-        jsonStr[size] = '\0';
-    }
-
-    return jsonStr;
 }
 
 //
@@ -266,7 +241,10 @@ static int PnP_TempControlComponent_CommandCallback(const char* componentName, c
     return result;
 }
 
-int PnP_TempControlComponent_UpdatedPropertyCallback(
+//
+// PnP_TempControlComponent_UpdatedPropertyCallback is invoked when properties arrive from the server.
+//
+static void PnP_TempControlComponent_UpdatedPropertyCallback(
     IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType, 
     const unsigned char* payload,
     size_t payloadLength,
@@ -311,7 +289,12 @@ int PnP_TempControlComponent_UpdatedPropertyCallback(
                 // This sample doesn't do anything with this, so we'll continue on when we hit reported properties.
                 continue;
             }
-            
+
+            // Process IOTHUB_CLIENT_PROPERTY_TYPE_WRITABLE propertyType, which means IoT Hub is configuring a property
+            // on this device.
+            //
+            // If we receive a component or property the model does not support, log the condition locally but do not report this
+            // back to IoT Hub.
             if (property.componentName == NULL) 
             {   
                 LogError("Property %s arrived for TemperatureControl component itself.  This does not support properties on it (all properties are on subcomponents)", property.componentName);
@@ -334,7 +317,6 @@ int PnP_TempControlComponent_UpdatedPropertyCallback(
     }
 
     IoTHubClient_Deserialize_Properties_DestroyIterator(propertyIterator);
-    return 0;
 }
 
 //
@@ -404,6 +386,31 @@ static void PnP_TempControlComponent_ReportSerialNumber_Property(IOTHUB_DEVICE_C
 }
 
 //
+// CreateDeviceClientLLHandle does the creates the IOTHUB_DEVICE_CLIENT_LL_HANDLE based on environment configuration.
+// If PNP_CONNECTION_SECURITY_TYPE_DPS is used, the call will block until DPS provisions the device.
+//
+static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateDeviceClientLLHandle(void)
+{
+    IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient = NULL;
+
+    if (g_pnpDeviceConfiguration.securityType == PNP_CONNECTION_SECURITY_TYPE_CONNECTION_STRING)
+    {
+        if ((deviceClient = IoTHubDeviceClient_LL_CreateFromConnectionString(g_pnpDeviceConfiguration.u.connectionString, MQTT_Protocol)) == NULL)
+        {
+            LogError("Failure creating IotHub client.  Hint: Check your connection string");
+        }
+    }
+#ifdef USE_PROV_MODULE_FULL
+    else if ((deviceClient = PnP_CreateDeviceClientLLHandle_ViaDps(&g_pnpDeviceConfiguration)) == NULL)
+    {
+        LogError("Cannot retrieve IoT Hub connection information from DPS client");
+    }
+#endif /* USE_PROV_MODULE_FULL */
+
+    return deviceClient;
+}
+
+//
 // CreateAndConfigureDeviceClientHandleForPnP creates a IOTHUB_DEVICE_CLIENT_LL_HANDLE for this application, setting its
 // ModelId along with various callbacks.
 //
@@ -418,7 +425,7 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateAndConfigureDeviceClientHandleForPnP
     // Before invoking any IoTHub Device SDK functionality, IoTHub_Init must be invoked.
     if ((iothubInitResult = IoTHub_Init()) != 0)
     {
-        LogError("Failure to initialize client.  Error=%d", iothubInitResult);
+        LogError("Failure to initialize client, error=%d", iothubInitResult);
         result = false;
     }
     // Create the deviceClient.
@@ -525,8 +532,8 @@ int main(void)
 {
     IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient = NULL;
 
-    g_pnpDeviceConfiguration.enableTracing = g_hubClientTraceEnabled;
     g_pnpDeviceConfiguration.modelId = g_temperatureControllerModelId;
+    g_pnpDeviceConfiguration.enableTracing = g_hubClientTraceEnabled;
 
     // First determine the IoT Hub / credentials / device to use.
     if (GetConnectionSettingsFromEnvironment(&g_pnpDeviceConfiguration) == false)
@@ -581,7 +588,7 @@ int main(void)
         PnP_ThermostatComponent_Destroy(g_thermostatHandle1);
         PnP_ThermostatComponent_Destroy(g_thermostatHandle2);
 
-        // Clean up the IoT Hub sdk handle.
+        // Clean up the IoT Hub SDK handle.
         IoTHubDeviceClient_LL_Destroy(deviceClient);
         // Free all IoT Hub subsystem.
         IoTHub_Deinit();

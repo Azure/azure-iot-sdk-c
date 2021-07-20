@@ -44,7 +44,7 @@ void PnP_DeviceInfoComponent_Report_All_Properties(const char* componentName, IO
     IOTHUB_CLIENT_RESULT iothubClientResult;
     unsigned char* propertiesSerialized = NULL;
     size_t propertiesSerializedLength;
-    IOTHUB_CLIENT_REPORTED_PROPERTY properties[8] =  {
+    IOTHUB_CLIENT_REPORTED_PROPERTY properties[] =  {
         {IOTHUB_CLIENT_REPORTED_PROPERTY_STRUCT_VERSION_1, PnPDeviceInfo_SoftwareVersionPropertyName, PnPDeviceInfo_SoftwareVersionPropertyValue},
         {IOTHUB_CLIENT_REPORTED_PROPERTY_STRUCT_VERSION_1, PnPDeviceInfo_ManufacturerPropertyName, PnPDeviceInfo_ManufacturerPropertyValue},
         {IOTHUB_CLIENT_REPORTED_PROPERTY_STRUCT_VERSION_1, PnPDeviceInfo_ModelPropertyName, PnPDeviceInfo_ModelPropertyValue},

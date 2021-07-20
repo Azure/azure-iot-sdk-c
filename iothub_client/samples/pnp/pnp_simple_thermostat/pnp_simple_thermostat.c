@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <limits.h>
 
 // JSON parser library.
 #include "parson.h"
@@ -19,9 +20,9 @@
 // IoT Hub device client and IoT core utility related header files.
 #include "iothub.h"
 #include "iothub_device_client_ll.h"
-#include "iothub_message.h"
 #include "iothub_client_options.h"
 #include "iothubtransportmqtt.h"
+#include "iothub_message.h"
 #include "iothub_client_properties.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/xlogging.h"
@@ -438,7 +439,7 @@ static void Thermostat_ProcessTargetTemperature(IOTHUB_DEVICE_CLIENT_LL_HANDLE d
 //
 // Thermostat_PropertiesCallback is invoked when properties arrive from the server.
 //
-static int Thermostat_PropertiesCallback(IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType,  const unsigned char* payload, size_t payloadLength, void* userContextCallback)
+static void Thermostat_PropertiesCallback(IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType,  const unsigned char* payload, size_t payloadLength, void* userContextCallback)
 {
     IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient = (IOTHUB_DEVICE_CLIENT_LL_HANDLE)userContextCallback;
     IOTHUB_CLIENT_PROPERTY_ITERATOR_HANDLE propertyIterator = NULL;
@@ -502,7 +503,6 @@ static int Thermostat_PropertiesCallback(IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE pay
     }
 
     IoTHubClient_Deserialize_Properties_DestroyIterator(propertyIterator);
-    return 0;
 }
 
 //
