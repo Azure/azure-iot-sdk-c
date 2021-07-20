@@ -1225,6 +1225,20 @@ bool IoTHubMessage_IsSecurityMessage(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
     return result;
 }
 
+IOTHUB_MESSAGE_RESULT IoTHubMessage_SetComponentName(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const char* componentName)
+{
+    (void)iotHubMessageHandle;
+    (void)componentName;
+    return 0;
+}
+
+const char* IoTHubMessage_GetComponentName(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
+{
+    (void)iotHubMessageHandle;
+    return NULL;
+}
+
+
 void IoTHubMessage_Destroy(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
 {
     /*Codes_SRS_IOTHUBMESSAGE_01_004: [If iotHubMessageHandle is NULL, IoTHubMessage_Destroy shall do nothing.] */
