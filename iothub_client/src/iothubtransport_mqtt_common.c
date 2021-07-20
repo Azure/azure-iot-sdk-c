@@ -90,6 +90,7 @@ static const char* DIAGNOSTIC_ID_PROPERTY = "diagid";
 static const char* DIAGNOSTIC_CONTEXT_PROPERTY = "diagctx";
 static const char* CONNECTION_DEVICE_ID = "cdid";
 static const char* CONNECTION_MODULE_ID_PROPERTY = "cmid";
+static const char* MESSAGE_COMPONENT_ID = "sub";
 
 static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtimeutc";
 
@@ -778,6 +779,17 @@ static int addSystemPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_messag
             }
         }
     }
+
+    if (result == 0)
+    {
+        const char* component_name = IoTHubMessage_GetComponentName(iothub_message_handle);
+        if (component_name != NULL)
+        {
+            result = addSystemPropertyToTopicString(topic_string, index, MESSAGE_COMPONENT_ID, component_name, urlencode);
+            index++;
+        }
+    }
+
     *index_ptr = index;
     return result;
 }
