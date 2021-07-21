@@ -745,32 +745,40 @@ static bool IoTHubClientCore_LL_MessageCallback(MESSAGE_CALLBACK_INFO* messageDa
 // * <command_name> // If no COMPONENT_DELIMETER is specified.
 // We guarantee component_name is null-terminated, when set, which means we need to make a copy of it
 // that the caller must free.  command_name is a pointer into an existing buffer that is NOT freed.
-int IoTHubClientCore_LL_ParseMethodToCommand(const char* method_name, char** component_name, const char** command_name)
+IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_ParseMethodToCommand(const char* method_name, char** component_name, const char** command_name)
 {
-    int result;
+    IOTHUB_CLIENT_RESULT result;
 
-    const char* componentSplit = strchr(method_name, COMPONENT_DELIMETER);
-
-    if (componentSplit == NULL)
+    if ((method_name == NULL) || (component_name == NULL) || (command_name == NULL))
     {
-        *component_name = NULL;
-        *command_name = method_name;
-        result = 0;
+        LogError("Invalid parameter for IoTHubClientCore_LL_ParseMethodToCommand");
+        result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
     {
-        size_t component_name_length = componentSplit - method_name;
-        if ((*component_name = malloc(component_name_length + 1)) == NULL)
+        const char* componentSplit = strchr(method_name, COMPONENT_DELIMETER);
+
+        if (componentSplit == NULL)
         {
-            LogError("Cannot allocate command name");
-            result = MU_FAILURE;
+            *component_name = NULL;
+            *command_name = method_name;
+            result = IOTHUB_CLIENT_OK;
         }
         else
         {
-            memcpy(*component_name, method_name, component_name_length);
-            (*component_name)[component_name_length] = 0;
-            *command_name = componentSplit + 1;
-            result = 0;
+            size_t component_name_length = componentSplit - method_name;
+            if ((*component_name = malloc(component_name_length + 1)) == NULL)
+            {
+                LogError("Cannot allocate command name");
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else
+            {
+                memcpy(*component_name, method_name, component_name_length);
+                (*component_name)[component_name_length] = 0;
+                *command_name = componentSplit + 1;
+                result = IOTHUB_CLIENT_OK;
+            }
         }
     }
 
@@ -787,7 +795,7 @@ static int invoke_command_callback(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData
     char* component_name = NULL;
 
     // Parse the raw method_name into its constituent (optional) component_name and command_name parts.
-    if (IoTHubClientCore_LL_ParseMethodToCommand(method_name, &component_name, &command_name) != 0)
+    if (IoTHubClientCore_LL_ParseMethodToCommand(method_name, &component_name, &command_name) != IOTHUB_CLIENT_OK)
     {
         LogError("Cannot parse command/component name");
         result = MU_FAILURE;
