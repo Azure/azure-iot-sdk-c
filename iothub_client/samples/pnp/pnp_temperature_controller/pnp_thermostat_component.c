@@ -318,7 +318,10 @@ void PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(PNP_THERMOS
     }
     else
     {
-        IOTHUB_CLIENT_REPORTED_PROPERTY maxTempProperty = { IOTHUB_CLIENT_REPORTED_PROPERTY_STRUCT_VERSION_1, g_maxTempSinceLastRebootPropertyName, maximumTemperatureAsString };
+        IOTHUB_CLIENT_REPORTED_PROPERTY maxTempProperty;
+        maxTempProperty.structVersion = IOTHUB_CLIENT_REPORTED_PROPERTY_STRUCT_VERSION_1;
+        maxTempProperty.name = g_maxTempSinceLastRebootPropertyName;
+        maxTempProperty.value =  maximumTemperatureAsString;
 
         unsigned char* propertySerialized = NULL;
         size_t propertySerializedLength;

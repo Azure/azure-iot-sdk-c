@@ -1260,7 +1260,6 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetComponentName(IOTHUB_MESSAGE_HANDLE iotHu
         }
     }
     return result;
-
 }
 
 const char* IoTHubMessage_GetComponentName(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
