@@ -265,7 +265,7 @@ extern "C"
     typedef int(*IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC)(
                     const char* componentName,
                     const char* commandName,
-                    const unsigned char* payload,              
+                    const unsigned char* payload,
                     size_t size,
                     const char* payloadContentType,
                     unsigned char** response,
