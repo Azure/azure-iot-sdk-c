@@ -349,6 +349,21 @@ extern "C"
 
 #endif /* DONT_USE_UPLOADTOBLOB */
 
+    /**
+    * @brief    Subscribe to incoming commands from IoT Hub.
+    *
+    * @param[in]  iotHubClientHandle        The handle created by a call to the create function.
+    * @param[in]  commandCallback           The callback which will be called when a command request arrives.
+    * @param[in]  userContextCallback       User specified context that will be provided to the
+    *                                       callback. This can be @c NULL.
+    *
+    * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
+    */
+    IOTHUB_CLIENT_RESULT IoTHubDeviceClient_SubscribeToCommands(
+                            IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, 
+                            IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC commandCallback, 
+                            void* userContextCallback);
+
 #ifdef __cplusplus
 }
 #endif

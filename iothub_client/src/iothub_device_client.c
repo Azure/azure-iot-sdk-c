@@ -109,5 +109,10 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync(IOTHUB_D
 {
     return IoTHubClientCore_UploadMultipleBlocksToBlobAsync((IOTHUB_CLIENT_CORE_HANDLE)iotHubClientHandle, destinationFileName, NULL, getDataCallbackEx, context);
 }
-
 #endif /*DONT_USE_UPLOADTOBLOB*/
+
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_SubscribeToCommands(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC commandCallback, void* userContextCallback)
+{
+    return IoTHubClientCore_SubscribeToCommands((IOTHUB_CLIENT_CORE_HANDLE)iotHubClientHandle, commandCallback, userContextCallback);
+}
+

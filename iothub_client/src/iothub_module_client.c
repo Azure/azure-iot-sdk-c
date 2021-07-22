@@ -129,3 +129,7 @@ IOTHUB_CLIENT_RESULT IoTHubModuleClient_ModuleMethodInvokeAsync(IOTHUB_MODULE_CL
 
 #endif /*USE_EDGE_MODULES*/
 
+IOTHUB_CLIENT_RESULT IoTHubModuleClient_SubscribeToCommands(IOTHUB_MODULE_CLIENT_HANDLE iotHubModuleClientHandle, IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC commandCallback, void* userContextCallback)
+{
+    return IoTHubClientCore_SubscribeToCommands((IOTHUB_CLIENT_CORE_HANDLE)iotHubModuleClientHandle, commandCallback, userContextCallback);
+}
