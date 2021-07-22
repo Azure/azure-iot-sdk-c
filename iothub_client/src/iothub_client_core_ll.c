@@ -645,7 +645,7 @@ static bool IoTHubClientCore_LL_MessageCallbackFromInput(IOTHUB_MESSAGE_HANDLE m
     if ((clientHandleData == NULL) || messageHandle == NULL)
     {
         // Codes_SRS_IOTHUBCLIENT_LL_31_137: [ If either parameter `handle` or `messageData` is `NULL` then `IoTHubClient_LL_MessageCallbackFromInput` shall return `false`.** ]
-        LogError("invalid argument: handle(%p), messageHandle(%p)", clientHandleData, messageHandle);
+        LogError("invalid argument: clientHandleData(%p), messageHandle(%p)", clientHandleData, messageHandle);
         result = false;
     }
     else if (clientHandleData->event_callbacks == NULL)
@@ -2024,6 +2024,11 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SendMessageDisposition(IOTHUB_CLIENT_CO
     {
         /*Codes_SRS_IOTHUBCLIENT_LL_10_026: [IoTHubClientCore_LL_SendMessageDisposition shall fail and return IOTHUB_CLIENT_INVALID_ARG if parameter iotHubClientHandle is NULL.]*/
         LogError("Invalid argument handle=%p, message_handle=%p", iotHubClientHandle, message_handle);
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else if (disposition == IOTHUBMESSAGE_ASYNC_ACK)
+    {
+        LogError("IOTHUBMESSAGE_ASYNC_ACK is not a valid disposition value for this function");
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else

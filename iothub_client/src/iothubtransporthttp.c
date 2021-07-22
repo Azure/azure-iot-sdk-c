@@ -2086,7 +2086,7 @@ static void DestroyMessageDispositionContext(MESSAGE_DISPOSITION_CONTEXT* dispos
 
 static MESSAGE_DISPOSITION_CONTEXT* CreateMessageDispositionContext(const char* etagValue)
 {
-    MESSAGE_DISPOSITION_CONTEXT* result = malloc(sizeof(MESSAGE_DISPOSITION_CONTEXT));
+    MESSAGE_DISPOSITION_CONTEXT* result = calloc(1, sizeof(MESSAGE_DISPOSITION_CONTEXT));
 
     if (result == NULL)
     {
@@ -2276,6 +2276,9 @@ static void DoMessages(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERD
 
                                         if (abandon)
                                         {
+                                            // If IoTHubMessage_SetDispositionContext succeeds above, it transitions ownership of 
+                                            // dispositionContext to the receivedMessage.
+                                            // IoTHubMessage_Destroy() below will handle freeing it.
                                             IoTHubMessage_Destroy(receivedMessage);
                                         }
                                     }

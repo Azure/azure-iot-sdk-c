@@ -1935,7 +1935,6 @@ static void processIncomingMessageNotification(PMQTTTRANSPORT_HANDLE_DATA transp
                     LogError("IoTHubClientCore_LL_MessageCallbackFromInput returned false");
                     // This will destroy the dispostion context;
                     IoTHubMessage_Destroy(IoTHubMessage);
-                    IoTHubMessage = NULL;
                 }
             }
             else
@@ -1947,7 +1946,6 @@ static void processIncomingMessageNotification(PMQTTTRANSPORT_HANDLE_DATA transp
                     LogError("IoTHubClientCore_LL_MessageCallback returned false");
                     // This will destroy the dispostion context;
                     IoTHubMessage_Destroy(IoTHubMessage);
-                    IoTHubMessage = NULL;
                 }
             }
         }
@@ -4032,11 +4030,6 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SendMessageDisposition(IOTHUB_D
     {
         /*Codes_SRS_IOTHUB_MQTT_TRANSPORT_10_001: [If messageData is NULL, IoTHubTransport_MQTT_Common_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR. ]*/
         LogError("Invalid argument (handle=%p, messageHandle=%p", handle, messageHandle);
-        result = IOTHUB_CLIENT_INVALID_ARG;
-    }
-    else if (disposition == IOTHUBMESSAGE_ASYNC_ACK)
-    {
-        LogError("IOTHUBMESSAGE_ASYNC_ACK is not a valid disposition value for this function");
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else

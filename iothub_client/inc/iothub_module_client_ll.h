@@ -386,7 +386,7 @@ extern "C"
 #endif /*USE_EDGE_MODULES*/
 
     /**
-    * @brief    This API sends an acknowledgement to Azure IoT Hub that a cloud-to-device message has been received.
+    * @brief    This API sends an acknowledgement to Azure IoT Hub that a cloud-to-device message has been received and frees resources associated with the message.
     *
     * @param    module_ll_handle                The handle created by a call to a create function.
     * @param    message                         The cloud-to-device message received through the callback provided to IoTHubModuleClient_LL_SetMessageCallback or IoTHubModuleClient_LL_SetInputMessageCallback.
@@ -394,11 +394,14 @@ extern "C"
     *
     * @warning  This function is to be used only when IOTHUBMESSAGE_ASYNC_ACK is used in the callback for incoming cloud-to-device messages.
     * @remarks
-    *           For cloud-to-device messages, the IOTHUB_MESSAGE_HANDLE instance is allocated by the Azure IoT C SDK
-    *           before it gets delivered to the user application, thus the SDK has the responsibility of destroying it.
-    *           For the Azure IoT C SDK to destroy the IOTHUB_MESSAGE_HANDLE instance (and free that memory allocation), 
-    *           IoTHubModuleClient_LL_SendMessageDisposition must be called for each cloud-to-device message received
-    *           (when using IOTHUBMESSAGE_ASYNC_ACK). Not doing so will result in memory leaks.
+    *           If your cloud-to-device message callback returned IOTHUBMESSAGE_ASYNC_ACK, it MUST call this API eventually.
+    *           Beyond sending acknowledgment to the service, this method also handles freeing message's memory.
+    *           Not calling this function will result in memory leaks.
+    *           Depending on the protocol used, this API will acknowledge cloud-to-device messages differently:
+    *           AMQP: A MESSAGE DISPOSITION is sent using the `disposition` option provided.
+    *           MQTT: A PUBACK is sent if `disposition` is `IOTHUBMESSAGE_ACCEPTED`. Passing any other option results in no PUBACK sent for the message.
+    *           HTTP: A HTTP request is sent using the `disposition` option provided.
+    *           
     * @return   IOTHUB_CLIENT_OK upon success, or an error code upon failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_LL_SendMessageDisposition, IOTHUB_MODULE_CLIENT_LL_HANDLE, module_ll_handle, IOTHUB_MESSAGE_HANDLE, message, IOTHUBMESSAGE_DISPOSITION_RESULT, disposition);

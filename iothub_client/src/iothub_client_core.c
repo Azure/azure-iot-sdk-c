@@ -2670,12 +2670,11 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SendMessageDisposition(IOTHUB_CLIENT_CORE_
             {
                 result = IoTHubClientCore_LL_SendMessageDisposition(iotHubClientInstance->IoTHubClientLLHandle, message, disposition);
 
-                /* Codes_SRS_IOTHUBCLIENT_01_025: [IoTHubClient_SendEventAsync shall be made thread-safe by using the lock created in IoTHubClient_Create.] */
                 (void)Unlock(iotHubClientInstance->LockHandle);
 
                 if (result != IOTHUB_CLIENT_OK)
                 {
-                    LogError("IoTHubClientCore_LL_SendMessageDisposition failed");
+                    LogError("IoTHubClientCore_LL_SendMessageDisposition failed (result=%d)", result);
                 }
             }
         }

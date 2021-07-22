@@ -1826,7 +1826,7 @@ DEVICE_MESSAGE_DISPOSITION_INFO* amqp_device_clone_message_disposition_info(DEVI
 {
     DEVICE_MESSAGE_DISPOSITION_INFO* clone;
 
-    if ((clone = malloc(sizeof(DEVICE_MESSAGE_DISPOSITION_INFO))) == NULL)
+    if ((clone = calloc(1, sizeof(DEVICE_MESSAGE_DISPOSITION_INFO))) == NULL)
     {
         LogError("Failed clonning DEVICE_MESSAGE_DISPOSITION_INFO");
     }
