@@ -412,7 +412,7 @@ static void SendMaxTemperatureSinceReboot(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceC
 static void Thermostat_ProcessTargetTemperature(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient, IOTHUB_CLIENT_DESERIALIZED_PROPERTY* property, int propertiesVersion)
 {
     char* next;
-    double targetTemperature = strtol(property->value.str, &next, 10);
+    double targetTemperature = strtod(property->value.str, &next);
     if ((property->value.str == next) || (targetTemperature == LONG_MAX) || (targetTemperature == LONG_MIN))
     {
         LogError("Property %s is not a valid integer", property->value.str);
