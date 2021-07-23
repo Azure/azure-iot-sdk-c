@@ -17,7 +17,6 @@
 #include "azure_prov_client/prov_device_client.h"
 #include "azure_prov_client/prov_transport_mqtt_client.h"
 #include "azure_prov_client/prov_security_factory.h"
-#include "azure_prov_client/prov_client_model.h"
 #include "iothub_device_client_ll.h"
 
 // DPS and IoT core utility header files.
@@ -48,6 +47,13 @@ static const int g_dpsRegistrationPollSleep = 1000;
 static char* g_dpsIothubUri;
 // DeviceId for this device as determined by the DPS client runtime.
 static char* g_dpsDeviceId;
+
+// Maximum size ModelId DPS payload can be in this sample.  This comes from
+// the DTDLv2 limits (see https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md#interface), where the 
+// maximum number of characters for an ID is 128.  We reserve extra space for the JSON envelope.
+#define PNP_DPS_REGISTRATION_MAX_PAYLOAD_SIZE (128 + 16)
+// snprintf style format for building the payload for Prov_Device_LL_Set_Provisioning_Payload() call.
+static const char PNP_DPS_REGISTRATION_FMT[] =  "{\"modelId\":\"%s\"}";
 
 //
 // provisioningRegisterCallback is called by the DPS client when the DPS server has either succeeded or failed the DPS
@@ -86,13 +92,18 @@ IOTHUB_DEVICE_CLIENT_LL_HANDLE PnP_CreateDeviceClientLLHandle_ViaDps(const PNP_D
 
     PROV_DEVICE_RESULT provDeviceResult;
     PROV_DEVICE_LL_HANDLE provDeviceClient = NULL;
-    char* modelIdPayload = NULL;
+    char modelIdPayload[PNP_DPS_REGISTRATION_MAX_PAYLOAD_SIZE];
 
     LogInfo("Initiating DPS client to retrieve IoT Hub connection information");
     g_pnpDpsRegistrationStatus = PNP_DPS_REGISTRATION_NOT_COMPLETE;
 
     // Initial DPS setup and handle creation.
-    if ((prov_dev_set_symmetric_key_info(pnpDeviceConfiguration->u.dpsConnectionAuth.deviceId, pnpDeviceConfiguration->u.dpsConnectionAuth.deviceKey) != 0))
+    if (snprintf(modelIdPayload, sizeof(modelIdPayload), PNP_DPS_REGISTRATION_FMT, pnpDeviceConfiguration->modelId) < 0)
+    {
+        LogError("building modelId payload unsuccessful");
+        result = false;
+    }
+    else if ((prov_dev_set_symmetric_key_info(pnpDeviceConfiguration->u.dpsConnectionAuth.deviceId, pnpDeviceConfiguration->u.dpsConnectionAuth.deviceKey) != 0))
     {
         LogError("prov_dev_set_symmetric_key_info failed.");
         result = false;
@@ -110,14 +121,6 @@ IOTHUB_DEVICE_CLIENT_LL_HANDLE PnP_CreateDeviceClientLLHandle_ViaDps(const PNP_D
     else if ((provDeviceResult = Prov_Device_LL_SetOption(provDeviceClient, PROV_OPTION_LOG_TRACE, &pnpDeviceConfiguration->enableTracing)) != PROV_DEVICE_RESULT_OK)
     {
         LogError("Setting provisioning tracing on failed, error=%d", provDeviceResult);
-        result = false;
-    }
-    // The next steps indicate the ModelId of the device to DPS.  This allows the service to perform custom operations,
-    // such as allocating a different IoT Hub to devices based on their ModelId.  
-    // When connecting to IoT Central with DPS, this step is required.
-    else if ((provDeviceResult = Prov_Client_Create_ModelIdPayload(pnpDeviceConfiguration->modelId, &modelIdPayload)) != PROV_DEVICE_RESULT_OK)
-    {
-        LogError("Allocating custom DPS payload for modelId failed, error=%d.", provDeviceResult);
         result = false;
     }
     else if ((provDeviceResult = Prov_Device_LL_Set_Provisioning_Payload(provDeviceClient, modelIdPayload)) != PROV_DEVICE_RESULT_OK)
@@ -186,7 +189,6 @@ IOTHUB_DEVICE_CLIENT_LL_HANDLE PnP_CreateDeviceClientLLHandle_ViaDps(const PNP_D
 
     free(g_dpsIothubUri);
     free(g_dpsDeviceId);
-    Prov_Client_Free_ModelIdPayload(modelIdPayload);
 
     return deviceClient;
 }
