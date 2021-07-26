@@ -4023,6 +4023,15 @@ STRING_HANDLE IoTHubTransport_MQTT_Common_GetHostname(TRANSPORT_LL_HANDLE handle
     return result;
 }
 
+// Azure IoT Hub (and Edge) support the following responses for devicebound messages:
+// ACCEPTED: message shall be dequeued by the hub and consider the delivery completed.
+// ABANDONED: message shall remain in the hub queue, and re-delivered upon client re-connection.
+// REJECTED: message shall be dequeued by the hub and not not re-delivered anymore.
+// The MQTT protocol by design only supports acknowledging the receipt of a message (through PUBACK).
+// To simulate the message responses above, this function behaves as follows:
+// ACCEPTED: a PUBACK is sent to the Hub/Edge.
+// ABANDONED: no response is sent to the Hub/Edge.
+// REJECTED: a PUBACK is sent to the Hub/Edge (same as for ACCEPTED).
 IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SendMessageDisposition(IOTHUB_DEVICE_HANDLE handle, IOTHUB_MESSAGE_HANDLE messageHandle, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
 {
     IOTHUB_CLIENT_RESULT result;
@@ -4034,7 +4043,7 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SendMessageDisposition(IOTHUB_D
     }
     else
     {
-        if (disposition == IOTHUBMESSAGE_ACCEPTED)
+        if (disposition == IOTHUBMESSAGE_ACCEPTED || disposition == IOTHUBMESSAGE_REJECTED)
         {
             MESSAGE_DISPOSITION_CONTEXT* msgDispCtx = NULL;
 

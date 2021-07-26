@@ -4529,6 +4529,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_NULL_data_fails
 
     crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, false);
     umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(registered_devices[0], NULL, IOTHUBMESSAGE_ACCEPTED);
@@ -4553,6 +4554,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_NULL_MESSAGE_fa
     ASSERT_IS_NOT_NULL(device_handle);
 
     umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
 
     // act
     IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(device_handle, NULL, IOTHUBMESSAGE_ACCEPTED);
