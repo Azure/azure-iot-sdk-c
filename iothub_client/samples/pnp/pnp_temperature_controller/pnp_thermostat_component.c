@@ -355,7 +355,7 @@ void PnP_ThermostatComponent_ProcessPropertyUpdate(PNP_THERMOSTAT_COMPONENT_HAND
     else
     {
         char* next;
-        double targetTemperature = strtol(propertyValue, &next, 10);
+        double targetTemperature = strtod(propertyValue, &next);
         if ((propertyValue == next) || (targetTemperature == LONG_MAX) || (targetTemperature == LONG_MIN))
         {
             LogError("Property %s is not a valid integer", propertyValue);
