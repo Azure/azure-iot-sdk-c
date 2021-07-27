@@ -84,6 +84,7 @@ typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA_TAG
     UPOADTOBLOB_CURL_VERBOSITY curl_verbosity_level;
     size_t blob_upload_timeout_secs;
     const char* networkInterface;
+    unsigned int tls_renegotiation;
 }IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA;
 
 typedef struct BLOB_UPLOAD_CONTEXT_TAG
@@ -261,6 +262,7 @@ IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE IoTHubClient_LL_UploadToBlob_Create(const I
         {
             memset(upload_data, 0, sizeof(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA));
 
+            upload_data->tls_renegotiation = 0;
             upload_data->authorization_module = auth_handle;
 
             size_t iotHubNameLength = strlen(config->iotHubName);
@@ -700,7 +702,12 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
                 (void)HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_CURL_VERBOSE, &curl_verbose);
             }
 
-            if ((upload_data->networkInterface) != NULL && (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_CURL_INTERFACE, upload_data->networkInterface) != HTTPAPIEX_OK))
+			if ((upload_data->tls_renegotiation == 1) && (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_SET_TLS_RENEGOTIATION, &upload_data->tls_renegotiation) != HTTPAPIEX_OK))
+			{
+                LogError("unable to HTTPAPIEX_SetOption for tls_renegotiation");
+                result = IOTHUB_CLIENT_ERROR;
+			}
+			else if ((upload_data->networkInterface) != NULL && (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_CURL_INTERFACE, upload_data->networkInterface) != HTTPAPIEX_OK))
             {
                 LogError("unable to set networkInteface!");
                 result = IOTHUB_CLIENT_ERROR;
@@ -1200,6 +1207,11 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
                     result = IOTHUB_CLIENT_OK;
                 }
             }
+        }
+        else if (strcmp(optionName, OPTION_SET_TLS_RENEGOTIATION) == 0)
+        {
+        	upload_data->tls_renegotiation = *(unsigned int*)value;
+        	result = IOTHUB_CLIENT_OK;
         }
         else
         {
