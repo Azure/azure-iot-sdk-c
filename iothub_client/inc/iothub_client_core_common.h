@@ -82,7 +82,8 @@ extern "C"
 #define IOTHUBMESSAGE_DISPOSITION_RESULT_VALUES \
     IOTHUBMESSAGE_ACCEPTED, \
     IOTHUBMESSAGE_REJECTED, \
-    IOTHUBMESSAGE_ABANDONED
+    IOTHUBMESSAGE_ABANDONED, \
+    IOTHUBMESSAGE_ASYNC_ACK
 
     /** @brief Enumeration returned by the callback which is invoked whenever the
     *           IoT Hub sends a message to the device.

@@ -88,6 +88,11 @@ IOTHUB_CLIENT_RESULT IoTHubModuleClient_SetInputMessageCallback(IOTHUB_MODULE_CL
     return IoTHubClientCore_SetInputMessageCallback((IOTHUB_CLIENT_CORE_HANDLE)iotHubModuleClientHandle, inputName, eventHandlerCallback, userContextCallback);
 }
 
+IOTHUB_CLIENT_RESULT IoTHubModuleClient_SendMessageDisposition(IOTHUB_MODULE_CLIENT_HANDLE iotHubModuleHandle, IOTHUB_MESSAGE_HANDLE message, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
+{
+    return IoTHubClientCore_SendMessageDisposition((IOTHUB_CLIENT_CORE_HANDLE)iotHubModuleHandle, message, disposition);
+}
+
 #ifdef USE_EDGE_MODULES
 
 IOTHUB_MODULE_CLIENT_HANDLE IoTHubModuleClient_CreateFromEnvironment(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
@@ -128,4 +133,3 @@ IOTHUB_CLIENT_RESULT IoTHubModuleClient_ModuleMethodInvokeAsync(IOTHUB_MODULE_CL
 }
 
 #endif /*USE_EDGE_MODULES*/
-
