@@ -141,11 +141,11 @@ extern "C"
     *          update callbacks to indicate whether or not the complete set of properties has arrived
     *          or just a partial set.
     */
-    typedef enum  {
-        IOTHUB_CLIENT_PROPERTY_PAYLOAD_ALL,
-        IOTHUB_CLIENT_PROPERTY_PAYLOAD_WRITABLE_UPDATES
-    } IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE;
+#define IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE_VALUES \
+    IOTHUB_CLIENT_PROPERTY_PAYLOAD_ALL, \
+    IOTHUB_CLIENT_PROPERTY_PAYLOAD_WRITABLE_UPDATES
 
+    MU_DEFINE_ENUM_WITHOUT_INVALID(IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE, IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE_VALUES);
 
 #define TRANSPORT_TYPE_VALUES \
     TRANSPORT_LL, /*LL comes from "LowLevel" */ \

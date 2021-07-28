@@ -393,11 +393,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
 *
 * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
-IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendTelemetryAsync(
-                        IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle,
-                        IOTHUB_MESSAGE_HANDLE telemetryMessageHandle,
-                        IOTHUB_CLIENT_TELEMETRY_CALLBACK telemetryConfirmationCallback,
-                        void* userContextCallback);
+MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_SendTelemetryAsync, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_MESSAGE_HANDLE, telemetryMessageHandle, IOTHUB_CLIENT_TELEMETRY_CALLBACK, telemetryConfirmationCallback, void*, userContextCallback);
 
 /**
 * @brief    Subscribe to incoming commands from IoT Hub.
@@ -409,10 +405,7 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendTelemetryAsync(
 *
 * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
-IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SubscribeToCommands(
-                        IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
-                        IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC commandCallback, 
-                        void* userContextCallback);
+MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_SubscribeToCommands, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC, commandCallback,  void*, userContextCallback);
 /**
 * @brief    Sends properties to IoT Hub
 *
@@ -431,12 +424,7 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SubscribeToCommands(
 *
 * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
-IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendPropertiesAsync(
-                         IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
-                         const unsigned char* properties,
-                         size_t propertiesLength,
-                         IOTHUB_CLIENT_PROPERTY_ACKNOWLEDGED_CALLBACK propertyAcknowledgedCallback,
-                         void* userContextCallback);
+MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_SendPropertiesAsync, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle,  const unsigned char*, properties, size_t, propertiesLength, IOTHUB_CLIENT_PROPERTY_ACKNOWLEDGED_CALLBACK, propertyAcknowledgedCallback, void*, userContextCallback);
 /**
 * @brief   Retrieves all properties from IoT Hub.
 *
@@ -452,10 +440,7 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendPropertiesAsync(
 *
 * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
-IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_GetPropertiesAsync(
-                        IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, 
-                        IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK propertyCallback, 
-                        void* userContextCallback);
+MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_GetPropertiesAsync, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle,  IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK, propertyCallback,  void*, userContextCallback);
 
 /**
 * @brief   Retrieves all properties from IoT Hub and also subscribes for updates to writable properties.
@@ -473,10 +458,7 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_GetPropertiesAsync(
 *
 * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
-IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_GetPropertiesAndSubscribeToUpdatesAsync(
-                        IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle,
-                        IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK propertyUpdateCallback,
-                        void* userContextCallback);
+MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_GetPropertiesAndSubscribeToUpdatesAsync, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK, propertyUpdateCallback, void*, userContextCallback);
 
 #ifdef __cplusplus
 }
