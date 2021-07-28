@@ -20,8 +20,6 @@ typedef enum PROPERTY_PARSE_STATE_TAG
 } PROPERTY_PARSE_STATE;
 
 typedef struct IOTHUB_CLIENT_PROPERTY_ITERATOR_TAG {
-    char** componentsInModel;
-    size_t numComponentsInModel;
     JSON_Value* rootValue;
     JSON_Object* desiredObject;
     JSON_Object* reportedObject;
@@ -48,7 +46,8 @@ static const char TWIN_REPORTED_OBJECT_NAME[] = "reported";
 static const char TWIN_VERSION[] = "$version";
 // IoTHub adds a JSON field "__t":"c" into desired top-level JSON objects that represent components.  Without this marking, the object 
 // is treated as a property of the root component.
-static const char TWIN_COMPONENT_MARKER[] = "__t";
+static const char TWIN_COMPONENT_MARKER_NAME[] = "__t";
+static const char TWIN_COMPONENT_MARKER_VALUE[] = "c";
 
 // When writing a list of properties, whether to append a "," or nothing depends on whether more items are coming.
 static const char* AddCommaIfNeeded(bool lastItem)
@@ -452,82 +451,20 @@ static IOTHUB_CLIENT_RESULT GetTwinVersion(IOTHUB_CLIENT_PROPERTY_ITERATOR* prop
     return result;
 }
 
-// IsJsonObjectAComponentInModel checks whether the objectName, read from the top-level child of the desired device twin JSON, 
-// is in componentsInModel that the application passed into us.  There is no way for the SDK to otherwise be able to 
-// tell a property from a sub-component, as the protocol does not guarantee we will receive a "__t" marker over the network
-// even if the underlying twin JSON on the service has this data.
-static bool IsJsonObjectAComponentInModel(IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIterator, const char* objectName)
+static bool IsJsonObjectAComponentInModel(IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIterator, JSON_Object* containerObject)
 {
-    bool result = false;
+    bool result;
 
-    if (objectName == NULL)
-    {
-        result = false;
-    }
-    else
-    {
-        size_t i;
-        for (i = 0; i < propertyIterator->numComponentsInModel; i++)
-        {
-            if (strcmp(objectName, propertyIterator->componentsInModel[i]) == 0)
-            {
-                break;
-            }
-        }
-        result = (i != propertyIterator->numComponentsInModel);
-    }
+    // First retrieve the JSON Object (assuming its an object) at the current place we're iterating.
+    JSON_Value* jsonValue = json_object_get_value_at(containerObject, propertyIterator->currentPropertyIndex);
+    JSON_Object* jsonObject = json_value_get_object(jsonValue);
+
+    // Examine it's object to see if the "__t:c" has been set.  If this isn't an object, the jsonObject will
+    // be NULL from call above but 
+    const char* componentMarkerValue = json_object_get_string(jsonObject, TWIN_COMPONENT_MARKER_NAME);
+    result = (componentMarkerValue != NULL) && (strcmp(componentMarkerValue, TWIN_COMPONENT_MARKER_VALUE) == 0);
 
     return result;
-}
-
-// AllocatePropertyIterator performs the initialization and allocation for a new property iterator.
-static IOTHUB_CLIENT_PROPERTY_ITERATOR* AllocatePropertyIterator(const char** componentsInModel, size_t numComponentsInModel)
-{
-    IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIterator;
-    bool success = false;
-
-    if ((propertyIterator = (IOTHUB_CLIENT_PROPERTY_ITERATOR*)calloc(1, sizeof(IOTHUB_CLIENT_PROPERTY_ITERATOR))) == NULL)
-    {
-        LogError("Cannot allocate IOTHUB_CLIENT_PROPERTY_ITERATOR");
-    }
-    else if (numComponentsInModel == 0)
-    {
-        propertyIterator->numComponentsInModel = 0;
-        success = true;
-    }
-    else
-    {
-        // Copy the component list into the iterator handle, since caller does not guarantee that the
-        // list it passes to us will be valid for later reference.
-        if ((propertyIterator->componentsInModel = (char**)calloc(numComponentsInModel, sizeof(char*))) == NULL)
-        {
-            LogError("Cannot allocate IOTHUB_CLIENT_PROPERTY_ITERATOR");
-        }
-        else
-        {
-            propertyIterator->numComponentsInModel = numComponentsInModel;
-
-            size_t i;
-            for (i = 0; i < numComponentsInModel; i++)
-            {
-                if (mallocAndStrcpy_s(&propertyIterator->componentsInModel[i], componentsInModel[i]) != 0)
-                {
-                    LogError("Cannot allocate IOTHUB_CLIENT_PROPERTY_ITERATOR");
-                    break;
-                }
-            }
-
-            success = (i == numComponentsInModel);
-        }
-    }
-
-    if (success == false)
-    {
-        IoTHubClient_Deserialize_Properties_DestroyIterator(propertyIterator);
-        propertyIterator = NULL;
-    }
-
-    return propertyIterator;
 }
 
 // ValidateIteratorInputs makes sure that the parameter list passed in IoTHubClient_Deserialize_Properties_CreateIterator is valid.
@@ -535,8 +472,6 @@ static bool ValidateIteratorInputs(
     IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType,
     const unsigned char* payload,
     size_t payloadLength,
-    const char** componentsInModel,
-    size_t numComponentsInModel,
     IOTHUB_CLIENT_PROPERTY_ITERATOR_HANDLE* propertyIteratorHandle)
 {
     IOTHUB_CLIENT_RESULT result;
@@ -551,25 +486,9 @@ static bool ValidateIteratorInputs(
         LogError("NULL arguments passed");
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
-    else if (((componentsInModel == NULL) && (numComponentsInModel > 0)) ||
-             ((componentsInModel != NULL) && (numComponentsInModel == 0)))
-    {
-        LogError("Invalid componentsInModel/numComponentsInModel combination");
-        result = IOTHUB_CLIENT_INVALID_ARG;
-    }
     else
     {
-        size_t i;
-        for (i = 0; i < numComponentsInModel; i++)
-        {
-            if (componentsInModel[i] == NULL)
-            {
-                LogError("componentsInModel at index %lu is NULL", (unsigned long)i);
-                break;
-            }
-        }
-
-        result = (i == numComponentsInModel) ? IOTHUB_CLIENT_OK : IOTHUB_CLIENT_INVALID_ARG;
+        result = IOTHUB_CLIENT_OK;
     }
 
     return result;
@@ -612,7 +531,7 @@ static bool IsReservedPropertyKeyword(const char* objectName)
 // IsReservedPropertyKeyword returns true if the given objectName is part of reserved PnP/Twin metadata for components, false otherwise.
 static bool IsReservedComponentKeyword(const char* objectName)
 {
-    return ((objectName == NULL) || (strcmp(objectName, TWIN_COMPONENT_MARKER) == 0));
+    return ((objectName == NULL) || (strcmp(objectName, TWIN_COMPONENT_MARKER_NAME) == 0));
 }
 
 // GetNextComponentProperty advances through a given component's properties, returning either the next to be enumerated or that there's nothing left to traverse.
@@ -696,7 +615,7 @@ static bool GetNextPropertyToEnumerate(IOTHUB_CLIENT_PROPERTY_ITERATOR* property
             }
         }
 
-        if (IsJsonObjectAComponentInModel(propertyIterator, objectName))
+        if (IsJsonObjectAComponentInModel(propertyIterator, containerObject))
         {
             // This top-level property is the name of a component.  
             propertyIterator->componentParseState = COMPONENT_PARSE_STATE_SUB_COMPONENT;
@@ -727,8 +646,6 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_CreateIterator(
     IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType,
     const unsigned char* payload,
     size_t payloadLength,
-    const char** componentsInModel,
-    size_t numComponentsInModel,
     IOTHUB_CLIENT_PROPERTY_ITERATOR_HANDLE* propertyIteratorHandle)
 {
     IOTHUB_CLIENT_RESULT result;
@@ -736,11 +653,11 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_CreateIterator(
 
     IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIterator = NULL;
 
-    if ((result = ValidateIteratorInputs(payloadType, payload, payloadLength, componentsInModel, numComponentsInModel, propertyIteratorHandle)) != IOTHUB_CLIENT_OK)
+    if ((result = ValidateIteratorInputs(payloadType, payload, payloadLength, propertyIteratorHandle)) != IOTHUB_CLIENT_OK)
     {
         LogError("Invalid argument");
     }
-    else if ((propertyIterator = AllocatePropertyIterator(componentsInModel, numComponentsInModel)) == NULL)
+    else if ((propertyIterator = (IOTHUB_CLIENT_PROPERTY_ITERATOR*)calloc(1, sizeof(IOTHUB_CLIENT_PROPERTY_ITERATOR))) == NULL)
     {
         LogError("Cannot allocate IOTHUB_CLIENT_PROPERTY_ITERATOR");
         result = IOTHUB_CLIENT_ERROR;
@@ -882,13 +799,6 @@ void IoTHubClient_Deserialize_Properties_DestroyIterator(IOTHUB_CLIENT_PROPERTY_
     if (propertyIteratorHandle != NULL)
     {
         IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIterator = (IOTHUB_CLIENT_PROPERTY_ITERATOR*)propertyIteratorHandle;
-
-        for (size_t i = 0; i < propertyIterator->numComponentsInModel; i++)
-        {
-            free(propertyIterator->componentsInModel[i]);
-        }
-        free(propertyIterator->componentsInModel);
-
         json_value_free(propertyIterator->rootValue);
         free(propertyIterator);
     }

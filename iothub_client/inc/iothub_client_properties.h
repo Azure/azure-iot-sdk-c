@@ -230,9 +230,6 @@ typedef struct IOTHUB_CLIENT_PROPERTY_ITERATOR_TAG* IOTHUB_CLIENT_PROPERTY_ITERA
 *                                      writable properties.
 * @param[in]  payload                  Payload containing properties from Azure IoT that is to be deserialized. 
 * @param[in]  payloadLength            Length of @p payload.
-* @param[in]  componentsInModel        Optional array of components that correspond to the DTDLv2 model.  Can be NULL 
-*                                      for models that don't contain sub-components.
-* @param[in]  numComponentsInModel     Number of entries in @p componentsInModel.
 * @param[out] propertyIteratorHandle   Returned handle used for subsequent iteration calls.
 * 
 * @remarks  Applications typically will invoke this API in their IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK 
@@ -248,8 +245,6 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_CreateIterator(
     IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType,
     const unsigned char* payload,
     size_t payloadLength,
-    const char** componentsInModel,
-    size_t numComponentsInModel,
     IOTHUB_CLIENT_PROPERTY_ITERATOR_HANDLE* propertyIteratorHandle);
 
 /**
