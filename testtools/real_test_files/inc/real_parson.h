@@ -59,7 +59,7 @@
 #undef json_object_get_object
 #undef json_object_get_count
 #undef json_object_get_name
-#undef real_json_object_get_value_at
+#undef json_object_get_value_at
 
 #endif
 

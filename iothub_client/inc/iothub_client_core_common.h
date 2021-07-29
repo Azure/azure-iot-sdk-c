@@ -257,10 +257,7 @@ extern "C"
     * @param[out]   responseSize          Number of bytes application is returning in response.  This should *not* include the terminating null.
     * @param[in]    userContextCallback   User context pointer set in initial call to IoTHubDeviceClient_LL_SubscribeToCommands.
     *
-    * @remarks   The application behavior is undefined if the user calls
-    *            the IoTHubDeviceClient_LL_Destroy function from within any callback.
-    *
-    * @return    Status code of the command to return to the service.  This maps to an HTTP style status code.
+    * @return       Status code of the command to return to the service.  This maps to an HTTP style status code.
     */
     typedef int(*IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC)(
                     const char* componentName,
@@ -277,7 +274,7 @@ extern "C"
     *
     * @param[in]    result                Result of operation sending to IoT Hub.
     * @param[in]    userContextCallback   Optional user specified context set in call that initiated the message send (for example, 
-    *                                     IoTHubDeviceClient_LL_SendTelemetryAsync.
+    *                                     IoTHubDeviceClient_LL_SendTelemetryAsync).
     */
     typedef void(*IOTHUB_CLIENT_TELEMETRY_CALLBACK)(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback);
     

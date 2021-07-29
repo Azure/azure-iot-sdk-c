@@ -415,7 +415,7 @@ extern "C"
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_GetPropertiesAsync, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle,  IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK, propertyCallback,  void*, userContextCallback);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_GetPropertiesAsync, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle,  IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK, propertyCallback, void*, userContextCallback);
     
     /**
     * @brief   Retrieves all properties from IoT Hub and also subscribes for updates to writable properties.

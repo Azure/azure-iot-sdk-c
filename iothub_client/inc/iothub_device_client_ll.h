@@ -377,12 +377,12 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
 /**
 * @brief    Asynchronous call to send the telemetry message specified by @p telemetryMessageHandle.
 *
-* @param[in]    iotHubClientHandle              The handle created by a call to the create function.
-* @param[in]    telemetryMessageHandle          The handle to an IoT Hub message.
-* @param[in]    telemetryConfirmationCallback   Optional callback specified by the device for receiving
-*                                               confirmation of the delivery of the telemetry.
-* @param[in]   userContextCallback              User specified context that will be provided to the
-*                                               callback. This can be @c NULL.
+* @param[in]  iotHubClientHandle             The handle created by a call to the create function.
+* @param[in]  telemetryMessageHandle         The handle to an IoT Hub message.
+* @param[in]  telemetryConfirmationCallback  Optional callback specified by the device for receiving
+*                                            confirmation of the delivery of the telemetry.
+* @param[in]  userContextCallback            User specified context that will be provided to the
+*                                            callback. This can be @c NULL.
 *
 * @remarks  The application behavior is undefined if the user calls
 *           the IoTHubDeviceClient_LL_Destroy function from within any callback.
@@ -440,7 +440,7 @@ MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_SendPropertiesAs
 *
 * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
-MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_GetPropertiesAsync, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle,  IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK, propertyCallback,  void*, userContextCallback);
+MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_GetPropertiesAsync, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle,  IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK, propertyCallback, void*, userContextCallback);
 
 /**
 * @brief   Retrieves all properties from IoT Hub and also subscribes for updates to writable properties.
