@@ -25,7 +25,7 @@ jobs:
     displayName: 'build'
 - job: windowsx86
   pool:
-    name: 1es-HostedPool
+    name: sdk-c--win-vs2017
   steps:
   - script: |
       call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
@@ -89,7 +89,7 @@ jobs:
     condition: always()
 - job: windowsdynamic
   pool:
-    name: 1es-HostedPool
+    name: sdk-c--win-vs2017
   steps:
   - script: |
       call "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat"
@@ -328,7 +328,7 @@ jobs:
     condition: always()
 - job: windowsx64
   pool:
-    name: 1es-HostedPool
+    name: sdk-c--win-vs2017
   displayName: 'windowsx64'
   steps:
   - script: |
