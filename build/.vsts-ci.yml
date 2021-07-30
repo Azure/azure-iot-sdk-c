@@ -176,7 +176,7 @@ jobs:
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
   pool:
-    vmImage: 'ubuntu-20.04'
+    name: 'sdk-c--ubuntu-18'
   displayName: 'ubuntu-20.04'
   steps:
   - script: |
