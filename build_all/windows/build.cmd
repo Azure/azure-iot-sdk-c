@@ -158,6 +158,15 @@ mkdir %cmake-root%\cmake\%CMAKE_DIR%
 rem no error checking
 pushd %cmake-root%\cmake\%CMAKE_DIR%
 
+echo ***looking for cmake***
+dir /s "%ProgramFiles(x86)%\cmake"
+
+echo ***looking for VsMSBuildCmd.bat***
+dir /s "%ProgramFiles(x86)%\VsMSBuildCmd.bat"
+
+echo ***looking for msbuild***
+dir /s "%ProgramFiles(x86)%\msbuild.exe"
+
 if %MAKE_NUGET_PKG% == yes (
     echo ***Running CMAKE for Win32***
     cmake %build-root% -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Duse_cppunittest:BOOL=%CMAKE_use_cppunittests% -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 15 2017" -A Win32 -Duse_edge_modules=%use_edge_modules%
