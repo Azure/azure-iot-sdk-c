@@ -159,7 +159,8 @@ rem no error checking
 pushd %cmake-root%\cmake\%CMAKE_DIR%
 
 echo ***looking for cmake***
-dir /s "%ProgramFiles(x86)%\cmake"
+dir /s "%ProgramFiles(x86)%\cmake.exe"
+dir /s "%ProgramFiles%\cmake.exe"
 
 echo ***looking for VsMSBuildCmd.bat***
 dir /s "%ProgramFiles(x86)%\VsMSBuildCmd.bat"
