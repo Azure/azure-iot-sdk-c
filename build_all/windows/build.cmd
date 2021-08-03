@@ -159,14 +159,14 @@ rem no error checking
 pushd %cmake-root%\cmake\%CMAKE_DIR%
 
 echo ***looking for cmake***
-dir /s "%ProgramFiles(x86)%\cmake.exe"
-dir /s "%ProgramFiles%\cmake.exe"
+rem dir /s "%ProgramFiles(x86)%\cmake.exe"
+rem dir /s "%ProgramFiles%\cmake.exe"
 
 echo ***looking for VsMSBuildCmd.bat***
-dir /s "%ProgramFiles(x86)%\VsMSBuildCmd.bat"
+rem dir /s "%ProgramFiles(x86)%\VsMSBuildCmd.bat"
 
 echo ***looking for msbuild***
-dir /s "%ProgramFiles(x86)%\msbuild.exe"
+rem dir /s "%ProgramFiles(x86)%\msbuild.exe"
 
 if %MAKE_NUGET_PKG% == yes (
     echo ***Running CMAKE for Win32***
