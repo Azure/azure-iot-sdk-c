@@ -267,7 +267,8 @@ jobs:
 - job: wolfssl
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/wolfssl-1804"
-  name: 'sdk-c--ubuntu-18'
+  pool:
+    name: 'sdk-c--ubuntu-18'
   displayName: 'wolfssl'
   steps:
   - script: |
