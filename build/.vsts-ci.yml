@@ -7,7 +7,7 @@ resources:
 jobs:
 - job: checksubmodule
   pool:
-    name: Hosted Ubuntu 1604
+    name: 'sdk-c--ubuntu-18'
   steps:
   - script: |
       sudo apt-get update && apt-get install -y \
@@ -62,7 +62,8 @@ jobs:
 - job: raspberrypi
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/raspberrypi-c-buster:brown"
-  pool: Hosted Ubuntu 1604
+  pool: 
+    name: 'sdk-c--ubuntu-18'
   displayName: raspberrypi
   steps:
   - script: |
@@ -78,7 +79,8 @@ jobs:
 - job: linuxoptions
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/vsts-linux-c-ubuntu"
-  pool: Hosted Ubuntu 1604
+  pool: 
+    name: 'sdk-c--ubuntu-18'
   displayName: 'linux-options'
   steps:
   - script: 'sudo ./jenkins/linux_c_option_test.sh'
@@ -89,7 +91,7 @@ jobs:
     condition: always()
 - job: windowsdynamic
   pool:
-    vmImage: 'vs2017-win2016'
+    name: 'sdk-c--win-vs2017'
   steps:
   - script: |
       call "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat"
@@ -144,7 +146,8 @@ jobs:
 - job: clang
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/ubuntu-clang"
-  pool: Hosted Ubuntu 1604
+  pool: 
+    name: 'sdk-c--ubuntu-18'
   displayName: 'clang'
   steps:
   - script: |
@@ -207,7 +210,8 @@ jobs:
 - job: debian
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/c-debian"
-  pool: Hosted Ubuntu 1604
+  pool: 
+    name: 'sdk-c--ubuntu-18'
   displayName: 'debian'
   steps:
   - script: |
@@ -236,7 +240,8 @@ jobs:
 - job: linux_installed_deps
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
-  pool: Hosted Ubuntu 1604
+  pool: 
+    name: 'sdk-c--ubuntu-18'
   displayName: 'linux_installed_deps'
   steps:
   - script: |
@@ -299,7 +304,8 @@ jobs:
 - job: bearssl
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/devops-c-bearssl"
-  pool: Hosted Ubuntu 1604
+  pool:
+    name: 'sdk-c--ubuntu-18'
   displayName: 'bearssl'
   steps:
   - script: |
@@ -398,7 +404,8 @@ jobs:
 - job: cares
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/c-ares"
-  pool: Hosted Ubuntu 1604
+  pool: 
+    name: 'sdk-c--ubuntu-18'
   displayName: 'cares'
   steps:
   - script: |
@@ -427,7 +434,8 @@ jobs:
 - job: openssl_engine
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/openssl-pkcs11"
-  pool: Hosted Ubuntu 1604
+  pool: 
+    name: 'sdk-c--ubuntu-18'
   displayName: 'OpenSSL with pkcs11 engine and SoftHSM'
   steps:
   - script: |
