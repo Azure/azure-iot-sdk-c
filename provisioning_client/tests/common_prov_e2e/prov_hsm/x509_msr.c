@@ -407,7 +407,7 @@ static int process_riot_key_info(X509_CERT_INFO* x509_info)
     return result;
 }
 
-static void generate_subject_name()
+static void generate_subject_name(void)
 {
     char device_guid[DEVICE_GUID_SIZE];
     if (UniqueId_Generate(device_guid, DEVICE_GUID_SIZE) != UNIQUEID_OK)
@@ -438,7 +438,7 @@ static void generate_subject_name()
     }
 }
 
-static void generate_keys()
+static void generate_keys(void)
 {
     if (g_digest_initialized == 0)
     {
@@ -461,13 +461,13 @@ static void generate_keys()
     }
 }
 
-void initialize_device()
+void initialize_device(void)
 {
     generate_keys();
     generate_subject_name();
 }
 
-X509_INFO_HANDLE x509_info_create()
+X509_INFO_HANDLE x509_info_create(void)
 {
     X509_CERT_INFO* result;
     /* Codes_SRS_HSM_CLIENT_TPM_07_002: [ On success hsm_client_tpm_create shall allocate a new instance of the secure device tpm interface. ] */

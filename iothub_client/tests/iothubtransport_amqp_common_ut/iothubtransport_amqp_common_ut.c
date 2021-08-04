@@ -112,11 +112,12 @@ extern "C"
 #include "internal/iothubtransportamqp_methods.h"
 #include "internal/iothubtransport_amqp_connection.h"
 #include "internal/iothubtransport_amqp_device.h"
+#include "internal/iothub_message_private.h"
 
 #include "internal/iothub_transport_ll_private.h"
 
-MOCKABLE_FUNCTION(, bool, Transport_MessageCallbackFromInput, MESSAGE_CALLBACK_INFO*, messageData, void*, ctx);
-MOCKABLE_FUNCTION(, bool, Transport_MessageCallback, MESSAGE_CALLBACK_INFO*, messageData, void*, ctx);
+MOCKABLE_FUNCTION(, bool, Transport_MessageCallbackFromInput, IOTHUB_MESSAGE_HANDLE, message, void*, ctx);
+MOCKABLE_FUNCTION(, bool, Transport_MessageCallback, IOTHUB_MESSAGE_HANDLE, message, void*, ctx);
 MOCKABLE_FUNCTION(, void, Transport_ConnectionStatusCallBack, IOTHUB_CLIENT_CONNECTION_STATUS, status, IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason, void*, ctx);
 MOCKABLE_FUNCTION(, void, Transport_SendComplete_Callback, PDLIST_ENTRY, completed, IOTHUB_CLIENT_CONFIRMATION_RESULT, result, void*, ctx);
 MOCKABLE_FUNCTION(, const char*, Transport_GetOption_Product_Info_Callback, void*, ctx);
@@ -348,9 +349,8 @@ static DEVICE_DATA g_device_state;
 
 typedef struct MESSAGE_DISPOSITION_CONTEXT_TAG
 {
-    DEVICE_DATA* device_state;
-    char* link_name;
-    uint32_t message_id;
+    unsigned long message_id;
+    char* source;
 } MESSAGE_DISPOSITION_CONTEXT;
 
 
@@ -495,32 +495,7 @@ static void set_expected_calls_for_is_device_registered_ex(IOTHUB_DEVICE_CONFIG*
         .SetReturn((LIST_ITEM_HANDLE)registered_device).CallCannotFail();
 }
 
-static MESSAGE_DISPOSITION_CONTEXT* TRANSPORT_CONTEXT_DATA_create2(IOTHUB_DEVICE_HANDLE device_handle)
-{
-    MESSAGE_DISPOSITION_CONTEXT* result = (MESSAGE_DISPOSITION_CONTEXT*)malloc(sizeof(MESSAGE_DISPOSITION_CONTEXT));
-    memset(result, 0, sizeof(MESSAGE_DISPOSITION_CONTEXT));
-    result->link_name = (char*)malloc(12);
-    sprintf(result->link_name, "my_link");
-    result->device_state = (DEVICE_DATA*)device_handle;
-    return result;
-}
-
-static void set_expected_calls_for_create_device_message_disposition_info()
-{
-    STRICT_EXPECTED_CALL(malloc(sizeof(DEVICE_MESSAGE_DISPOSITION_INFO)));
-
-    static char* source = TEST_MESSAGE_SOURCE_CHAR_PTR;
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .CopyOutArgumentBuffer_destination(&source, sizeof(char*));
-}
-
-static void set_expected_calls_for_destroy_device_message_disposition_info()
-{
-    EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    EXPECTED_CALL(free(IGNORED_PTR_ARG));
-}
-
-static void set_expected_calls_for_SendMessageDisposition(IOTHUBMESSAGE_DISPOSITION_RESULT iothc_disposition_result)
+static void set_expected_calls_for_SendMessageDisposition(IOTHUBMESSAGE_DISPOSITION_RESULT iothc_disposition_result, MESSAGE_DISPOSITION_CONTEXT* disposition_info)
 {
     DEVICE_MESSAGE_DISPOSITION_RESULT device_disposition_result;
 
@@ -541,17 +516,10 @@ static void set_expected_calls_for_SendMessageDisposition(IOTHUBMESSAGE_DISPOSIT
         device_disposition_result = DEVICE_MESSAGE_DISPOSITION_RESULT_NONE;
     }
 
-    set_expected_calls_for_create_device_message_disposition_info();
-    STRICT_EXPECTED_CALL(amqp_device_send_message_disposition(TEST_DEVICE_HANDLE, IGNORED_PTR_ARG, device_disposition_result))
-        .IgnoreArgument(2);
-
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG)).IgnoreArgument_iotHubMessageHandle();
-
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG)).IgnoreArgument_ptr();
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG)).IgnoreArgument_ptr();
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG)).IgnoreArgument_ptr();
-
-    set_expected_calls_for_destroy_device_message_disposition_info();
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetDispositionContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .CopyOutArgumentBuffer_dispositionContext(&disposition_info, sizeof(&disposition_info));
+    STRICT_EXPECTED_CALL(amqp_device_send_message_disposition(TEST_DEVICE_HANDLE, IGNORED_PTR_ARG, device_disposition_result));
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
 }
 
 // @param registered_device
@@ -907,21 +875,6 @@ static AMQP_DEVICE_HANDLE TEST_device_create(AMQP_DEVICE_CONFIG* config)
     return TEST_device_create_return;
 }
 
-static bool g_MessageCallback_return;
-static bool TEST_Transport_MessageCallback(MESSAGE_CALLBACK_INFO* messageData, void* ctx)
-{
-    (void)ctx;
-    if (g_MessageCallback_return)
-    {
-        if (messageData->transportContext != NULL)
-        {
-            free(messageData->transportContext->link_name);
-            free(messageData->transportContext);
-        }
-        free(messageData);
-    }
-    return g_MessageCallback_return;
-}
 
 // ---------- Test Helpers ---------- //
 static const TRANSPORT_PROVIDER* TEST_get_iothub_client_transport_provider(void)
@@ -1097,7 +1050,10 @@ static void register_umock_alias_types()
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_MESSAGE_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUBMESSAGE_CONTENT_TYPE, int);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUBMESSAGE_DISPOSITION_RESULT, int);
+    REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_MESSAGE_RESULT, int);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUBTRANSPORT_AMQP_METHOD_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(MESSAGE_DISPOSITION_CONTEXT_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(MESSAGE_DISPOSITION_CONTEXT_DESTROY_FUNCTION, void*);
     REGISTER_UMOCK_ALIAS_TYPE(LIST_ACTION_FUNCTION, void*);
     REGISTER_UMOCK_ALIAS_TYPE(LIST_MATCH_FUNCTION, void*);
     REGISTER_UMOCK_ALIAS_TYPE(MAP_HANDLE, void*);
@@ -1162,7 +1118,6 @@ static void register_global_mock_hooks()
     REGISTER_GLOBAL_MOCK_HOOK(amqp_device_create, TEST_device_create);
     REGISTER_GLOBAL_MOCK_HOOK(amqp_device_subscribe_message, TEST_device_subscribe_message);
 
-    REGISTER_GLOBAL_MOCK_HOOK(Transport_MessageCallback, TEST_Transport_MessageCallback);
     REGISTER_GLOBAL_MOCK_RETURN(Transport_GetOption_Product_Info_Callback, TEST_PRODUCT_INFO_CHAR_PTR);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(Transport_GetOption_Product_Info_Callback, NULL);
 
@@ -4035,14 +3990,11 @@ TEST_FUNCTION(on_message_received_succeeds)
     disposition_info.message_id = TEST_MESSAGE_ID;
 
     umock_c_reset_all_calls();
-    EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
-    EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    g_MessageCallback_return = true;
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(amqp_device_clone_message_disposition_info(IGNORED_PTR_ARG))
+        .SetReturn(&disposition_info);
+    STRICT_EXPECTED_CALL(IoTHubMessage_SetDispositionContext(IGNORED_PTR_ARG, (MESSAGE_DISPOSITION_CONTEXT_HANDLE)&disposition_info, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .SetReturn(true);
 
     // act
     DEVICE_MESSAGE_DISPOSITION_RESULT result = TEST_device_subscribe_message_saved_callback(
@@ -4077,15 +4029,12 @@ TEST_FUNCTION(on_message_received_fails)
     disposition_info.message_id = TEST_MESSAGE_ID;
 
     umock_c_reset_all_calls();
-    EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
-    EXPECTED_CALL(malloc(IGNORED_NUM_ARG));
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    g_MessageCallback_return = false;
-    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(TEST_IOTHUB_MESSAGE_HANDLE));
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(amqp_device_clone_message_disposition_info(IGNORED_PTR_ARG))
+        .SetReturn(&disposition_info);
+    STRICT_EXPECTED_CALL(IoTHubMessage_SetDispositionContext(IGNORED_PTR_ARG, (MESSAGE_DISPOSITION_CONTEXT_HANDLE)&disposition_info, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Transport_MessageCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .SetReturn(false);
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
 
     // act
     DEVICE_MESSAGE_DISPOSITION_RESULT result = TEST_device_subscribe_message_saved_callback(
@@ -4571,13 +4520,26 @@ TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_retry_expired)
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_NULL_data_fails)
 {
     // arrange
+    TRANSPORT_LL_HANDLE handle = create_transport();
+
+    IOTHUB_DEVICE_CONFIG* device_config = create_device_config(TEST_DEVICE_ID_CHAR_PTR, true);
+
+    IOTHUB_DEVICE_HANDLE registered_devices[1];
+    registered_devices[0] = register_device(handle, device_config, &TEST_waitingToSend, true);
+
+    crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, false);
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(NULL, IOTHUBMESSAGE_ACCEPTED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(registered_devices[0], NULL, IOTHUBMESSAGE_ACCEPTED);
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // cleanup
+    destroy_transport(handle, NULL, NULL);
 }
 
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_002: [If any of the messageData fields are NULL, IoTHubTransport_AMQP_Common_SendMessageDisposition shall fail and return IOTHUB_CLIENT_INVALID_ARG. ] */
@@ -4591,19 +4553,11 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_NULL_MESSAGE_fa
     IOTHUB_DEVICE_HANDLE device_handle = register_device(handle, device_config, &TEST_waitingToSend, true);
     ASSERT_IS_NOT_NULL(device_handle);
 
-    MESSAGE_CALLBACK_INFO* data = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
-    memset(data, 0, sizeof(MESSAGE_CALLBACK_INFO));
-    data->messageHandle = NULL;
-    data->transportContext = TRANSPORT_CONTEXT_DATA_create2(device_handle);
-
     umock_c_reset_all_calls();
-
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(data, IOTHUBMESSAGE_ACCEPTED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(device_handle, NULL, IOTHUBMESSAGE_ACCEPTED);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -4614,7 +4568,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_NULL_MESSAGE_fa
 }
 
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_002: [If any of the messageData fields are NULL, IoTHubTransport_AMQP_Common_SendMessageDisposition shall fail and return IOTHUB_CLIENT_INVALID_ARG. ] */
-TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_NULL_CONTEXT_fails)
+TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_NULL_disposition_fails)
 {
     // arrange
     initialize_test_variables();
@@ -4624,17 +4578,14 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_NULL_CONTEXT_fa
     IOTHUB_DEVICE_HANDLE device_handle = register_device(handle, device_config, &TEST_waitingToSend, true);
     ASSERT_IS_NOT_NULL(device_handle);
 
-    MESSAGE_CALLBACK_INFO* data = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
-    memset(data, 0, sizeof(MESSAGE_CALLBACK_INFO));
-    data->messageHandle = TEST_IOTHUB_MESSAGE_HANDLE;
-    data->transportContext = NULL;
-
     umock_c_reset_all_calls();
-
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetDispositionContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .SetReturn(IOTHUB_MESSAGE_INVALID_ARG);
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(data, IOTHUBMESSAGE_ACCEPTED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(device_handle, TEST_IOTHUB_MESSAGE_HANDLE, IOTHUBMESSAGE_ACCEPTED);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -4657,16 +4608,15 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_ACCEPTED_succee
     IOTHUB_DEVICE_HANDLE device_handle = register_device(handle, device_config, &TEST_waitingToSend, true);
     ASSERT_IS_NOT_NULL(device_handle);
 
-    MESSAGE_CALLBACK_INFO* data = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
-    memset(data, 0, sizeof(MESSAGE_CALLBACK_INFO));
-    data->messageHandle = TEST_IOTHUB_MESSAGE_HANDLE;
-    data->transportContext = TRANSPORT_CONTEXT_DATA_create2(device_handle);
+    MESSAGE_DISPOSITION_CONTEXT disposition_context;
+    disposition_context.message_id = 123;
+    disposition_context.source = "my_link";
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_SendMessageDisposition(IOTHUBMESSAGE_ACCEPTED);
+    set_expected_calls_for_SendMessageDisposition(IOTHUBMESSAGE_ACCEPTED, &disposition_context);
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(data, IOTHUBMESSAGE_ACCEPTED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(device_handle, TEST_IOTHUB_MESSAGE_HANDLE, IOTHUBMESSAGE_ACCEPTED);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -4687,25 +4637,22 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_ACCEPTED_fails)
     IOTHUB_DEVICE_HANDLE device_handle = register_device(handle, device_config, &TEST_waitingToSend, true);
     ASSERT_IS_NOT_NULL(device_handle);
 
-    MESSAGE_CALLBACK_INFO* data = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
-    memset(data, 0, sizeof(MESSAGE_CALLBACK_INFO));
-    data->messageHandle = TEST_IOTHUB_MESSAGE_HANDLE;
-    data->transportContext = TRANSPORT_CONTEXT_DATA_create2(device_handle);
+    MESSAGE_DISPOSITION_CONTEXT disposition_context;
+    disposition_context.message_id = 123;
+    disposition_context.source = "my_link";
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_create_device_message_disposition_info();
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetDispositionContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .CopyOutArgumentBuffer_dispositionContext(&disposition_context, sizeof(&disposition_context));
     STRICT_EXPECTED_CALL(amqp_device_send_message_disposition(TEST_DEVICE_HANDLE, IGNORED_PTR_ARG, DEVICE_MESSAGE_DISPOSITION_RESULT_ACCEPTED))
         .IgnoreArgument(2)
         .SetReturn(1);
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .SetReturn(TEST_DEVICE_ID_CHAR_PTR);
-    set_expected_calls_for_destroy_device_message_disposition_info();
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(data, IOTHUBMESSAGE_ACCEPTED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(device_handle, TEST_IOTHUB_MESSAGE_HANDLE, IOTHUBMESSAGE_ACCEPTED);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -4726,26 +4673,19 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_DEVICE_MESSAGE_
     IOTHUB_DEVICE_HANDLE device_handle = register_device(handle, device_config, &TEST_waitingToSend, true);
     ASSERT_IS_NOT_NULL(device_handle);
 
-    MESSAGE_CALLBACK_INFO* data = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
-    memset(data, 0, sizeof(MESSAGE_CALLBACK_INFO));
-    data->messageHandle = TEST_IOTHUB_MESSAGE_HANDLE;
-    data->transportContext = TRANSPORT_CONTEXT_DATA_create2(device_handle);
+    MESSAGE_DISPOSITION_CONTEXT* disposition_context = NULL;
 
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(malloc(sizeof(DEVICE_MESSAGE_DISPOSITION_INFO)))
-        .SetReturn(NULL);
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
-        .SetReturn(TEST_DEVICE_ID_CHAR_PTR);
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetDispositionContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .CopyOutArgumentBuffer_dispositionContext(&disposition_context, sizeof(&disposition_context));
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(data, IOTHUBMESSAGE_ACCEPTED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(device_handle, TEST_IOTHUB_MESSAGE_HANDLE, IOTHUBMESSAGE_ACCEPTED);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
 
     // cleanup
     destroy_transport(handle, device_handle, NULL);
@@ -4762,16 +4702,15 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_ABANDONED_succe
     IOTHUB_DEVICE_HANDLE device_handle = register_device(handle, device_config, &TEST_waitingToSend, true);
     ASSERT_IS_NOT_NULL(device_handle);
 
-    MESSAGE_CALLBACK_INFO* data = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
-    memset(data, 0, sizeof(MESSAGE_CALLBACK_INFO));
-    data->messageHandle = TEST_IOTHUB_MESSAGE_HANDLE;
-    data->transportContext = TRANSPORT_CONTEXT_DATA_create2(device_handle);
+    MESSAGE_DISPOSITION_CONTEXT disposition_context;
+    disposition_context.message_id = 123;
+    disposition_context.source = "my_link";
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_SendMessageDisposition(IOTHUBMESSAGE_ABANDONED);
+    set_expected_calls_for_SendMessageDisposition(IOTHUBMESSAGE_ABANDONED, &disposition_context);
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(data, IOTHUBMESSAGE_ABANDONED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(device_handle, TEST_IOTHUB_MESSAGE_HANDLE, IOTHUBMESSAGE_ABANDONED);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -4792,25 +4731,23 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_ABANDONED_fails
     IOTHUB_DEVICE_HANDLE device_handle = register_device(handle, device_config, &TEST_waitingToSend, true);
     ASSERT_IS_NOT_NULL(device_handle);
 
-    MESSAGE_CALLBACK_INFO* data = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
-    memset(data, 0, sizeof(MESSAGE_CALLBACK_INFO));
-    data->messageHandle = TEST_IOTHUB_MESSAGE_HANDLE;
-    data->transportContext = TRANSPORT_CONTEXT_DATA_create2(device_handle);
+    MESSAGE_DISPOSITION_CONTEXT disposition_context;
+    disposition_context.message_id = 123;
+    disposition_context.source = "my_link";
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_create_device_message_disposition_info();
+
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetDispositionContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .CopyOutArgumentBuffer_dispositionContext(&disposition_context, sizeof(&disposition_context));
     STRICT_EXPECTED_CALL(amqp_device_send_message_disposition(TEST_DEVICE_HANDLE, IGNORED_PTR_ARG, DEVICE_MESSAGE_DISPOSITION_RESULT_RELEASED))
         .IgnoreArgument(2)
         .SetReturn(1);
-    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .SetReturn(TEST_DEVICE_ID_CHAR_PTR);
-    set_expected_calls_for_destroy_device_message_disposition_info();
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(data, IOTHUBMESSAGE_ABANDONED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(device_handle, TEST_IOTHUB_MESSAGE_HANDLE, IOTHUBMESSAGE_ABANDONED);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -4831,16 +4768,15 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_REJECTED_succee
     IOTHUB_DEVICE_HANDLE device_handle = register_device(handle, device_config, &TEST_waitingToSend, true);
     ASSERT_IS_NOT_NULL(device_handle);
 
-    MESSAGE_CALLBACK_INFO* data = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
-    memset(data, 0, sizeof(MESSAGE_CALLBACK_INFO));
-    data->messageHandle = TEST_IOTHUB_MESSAGE_HANDLE;
-    data->transportContext = TRANSPORT_CONTEXT_DATA_create2(device_handle);
+    MESSAGE_DISPOSITION_CONTEXT disposition_context;
+    disposition_context.message_id = 123;
+    disposition_context.source = "my_link";
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_SendMessageDisposition(IOTHUBMESSAGE_REJECTED);
+    set_expected_calls_for_SendMessageDisposition(IOTHUBMESSAGE_REJECTED, &disposition_context);
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(data, IOTHUBMESSAGE_REJECTED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(device_handle, TEST_IOTHUB_MESSAGE_HANDLE, IOTHUBMESSAGE_REJECTED);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -4861,25 +4797,22 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_REJECTED_fails)
     IOTHUB_DEVICE_HANDLE device_handle = register_device(handle, device_config, &TEST_waitingToSend, true);
     ASSERT_IS_NOT_NULL(device_handle);
 
-    MESSAGE_CALLBACK_INFO* data = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
-    memset(data, 0, sizeof(MESSAGE_CALLBACK_INFO));
-    data->messageHandle = TEST_IOTHUB_MESSAGE_HANDLE;
-    data->transportContext = TRANSPORT_CONTEXT_DATA_create2(device_handle);
+    MESSAGE_DISPOSITION_CONTEXT disposition_context;
+    disposition_context.message_id = 123;
+    disposition_context.source = (char*)malloc(12);
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_create_device_message_disposition_info();
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetDispositionContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .CopyOutArgumentBuffer_dispositionContext(&disposition_context, sizeof(&disposition_context));
     STRICT_EXPECTED_CALL(amqp_device_send_message_disposition(TEST_DEVICE_HANDLE, IGNORED_PTR_ARG, DEVICE_MESSAGE_DISPOSITION_RESULT_REJECTED))
         .IgnoreArgument(2)
         .SetReturn(1);
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .SetReturn(TEST_DEVICE_ID_CHAR_PTR);
-    set_expected_calls_for_destroy_device_message_disposition_info();
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
-    STRICT_EXPECTED_CALL(free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(data, IOTHUBMESSAGE_REJECTED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_SendMessageDisposition(device_handle, TEST_IOTHUB_MESSAGE_HANDLE, IOTHUBMESSAGE_REJECTED);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());

@@ -13,7 +13,7 @@ extern "C" {
 
 typedef struct TPM_INFO_TAG* TPM_INFO_HANDLE;
 
-extern TPM_INFO_HANDLE tpm_msr_create();
+extern TPM_INFO_HANDLE tpm_msr_create(void);
 extern void tpm_msr_destroy(TPM_INFO_HANDLE handle);
 
 extern int tpm_msr_get_ek(TPM_INFO_HANDLE handle, unsigned char* data_pos, size_t* key_len);
