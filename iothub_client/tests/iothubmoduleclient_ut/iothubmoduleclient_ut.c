@@ -96,6 +96,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(IOTHUBMESSAGE_DISPOSITION_RESULT, int);
 
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClientCore_CreateFromConnectionString, TEST_IOTHUB_CLIENT_CORE_HANDLE);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClientCore_SendEventAsync, IOTHUB_CLIENT_OK);
@@ -332,5 +333,18 @@ TEST_FUNCTION(IoTHubModuleClient_SetInputMessageCallback_Test)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
+TEST_FUNCTION(IoTHubModuleClient_SendMessageDisposition_Test)
+{
+    //arrange
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(IoTHubClientCore_SendMessageDisposition(IGNORED_PTR_ARG, TEST_MESSAGE_HANDLE, IOTHUBMESSAGE_ACCEPTED));
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubModuleClient_SendMessageDisposition(TEST_IOTHUB_MODULE_CLIENT_HANDLE, TEST_MESSAGE_HANDLE, IOTHUBMESSAGE_ACCEPTED);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_IS_TRUE(IOTHUB_CLIENT_OK == result);
+}
 
 END_TEST_SUITE(iothubmoduleclient_ut)
