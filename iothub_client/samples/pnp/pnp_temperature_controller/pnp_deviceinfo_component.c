@@ -55,7 +55,7 @@ void PnP_DeviceInfoComponent_Report_All_Properties(const char* componentName, IO
         {IOTHUB_CLIENT_REPORTED_PROPERTY_STRUCT_VERSION_1, PnPDeviceInfo_TotalMemoryPropertyName, PnPDeviceInfo_TotalMemoryPropertyValue}
     };
 
-    const int numProperties = sizeof(properties) / sizeof(properties[0]);
+    const size_t numProperties = sizeof(properties) / sizeof(properties[0]);
 
     // The first step of reporting properties is to serialize IOTHUB_CLIENT_REPORTED_PROPERTY into JSON for sending.
     if ((iothubClientResult = IoTHubClient_Serialize_ReportedProperties(properties, numProperties, componentName, &propertiesSerialized, &propertiesSerializedLength)) != IOTHUB_CLIENT_OK)

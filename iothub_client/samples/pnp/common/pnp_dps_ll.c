@@ -53,7 +53,7 @@ static char* g_dpsDeviceId;
 // maximum number of characters for an ID is 128.  We reserve extra space for the JSON envelope.
 #define PNP_DPS_REGISTRATION_MAX_PAYLOAD_SIZE (128 + 16)
 // snprintf style format for building the payload for Prov_Device_LL_Set_Provisioning_Payload() call.
-static const char PNP_DPS_REGISTRATION_FMT[] =  "{\"modelId\":\"%s\"}";
+static const char PNP_DPS_REGISTRATION_FMT[] = "{\"modelId\":\"%s\"}";
 
 //
 // provisioningRegisterCallback is called by the DPS client when the DPS server has either succeeded or failed the DPS
@@ -98,12 +98,7 @@ IOTHUB_DEVICE_CLIENT_LL_HANDLE PnP_CreateDeviceClientLLHandle_ViaDps(const PNP_D
     g_pnpDpsRegistrationStatus = PNP_DPS_REGISTRATION_NOT_COMPLETE;
 
     // Initial DPS setup and handle creation.
-    if (snprintf(modelIdPayload, sizeof(modelIdPayload), PNP_DPS_REGISTRATION_FMT, pnpDeviceConfiguration->modelId) < 0)
-    {
-        LogError("building modelId payload unsuccessful");
-        result = false;
-    }
-    else if ((prov_dev_set_symmetric_key_info(pnpDeviceConfiguration->u.dpsConnectionAuth.deviceId, pnpDeviceConfiguration->u.dpsConnectionAuth.deviceKey) != 0))
+    if ((prov_dev_set_symmetric_key_info(pnpDeviceConfiguration->u.dpsConnectionAuth.deviceId, pnpDeviceConfiguration->u.dpsConnectionAuth.deviceKey) != 0))
     {
         LogError("prov_dev_set_symmetric_key_info failed.");
         result = false;
@@ -121,6 +116,11 @@ IOTHUB_DEVICE_CLIENT_LL_HANDLE PnP_CreateDeviceClientLLHandle_ViaDps(const PNP_D
     else if ((provDeviceResult = Prov_Device_LL_SetOption(provDeviceClient, PROV_OPTION_LOG_TRACE, &pnpDeviceConfiguration->enableTracing)) != PROV_DEVICE_RESULT_OK)
     {
         LogError("Setting provisioning tracing on failed, error=%d", provDeviceResult);
+        result = false;
+    }
+    else if (snprintf(modelIdPayload, sizeof(modelIdPayload), PNP_DPS_REGISTRATION_FMT, pnpDeviceConfiguration->modelId) < 0)
+    {
+        LogError("building modelId payload unsuccessful");
         result = false;
     }
     else if ((provDeviceResult = Prov_Device_LL_Set_Provisioning_Payload(provDeviceClient, modelIdPayload)) != PROV_DEVICE_RESULT_OK)
