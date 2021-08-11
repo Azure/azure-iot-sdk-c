@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <limits.h>
 
 // JSON parser library.
 #include "parson.h"
@@ -19,9 +20,9 @@
 // IoT Hub device client and IoT core utility related header files.
 #include "iothub.h"
 #include "iothub_device_client_ll.h"
-#include "iothub_message.h"
 #include "iothub_client_options.h"
 #include "iothubtransportmqtt.h"
+#include "iothub_message.h"
 #include "iothub_client_properties.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/xlogging.h"
@@ -66,7 +67,7 @@ static const char g_targetTemperaturePropertyName[] = "targetTemperature";
 static const char g_maxTempSinceLastRebootPropertyName[] = "maxTempSinceLastReboot";
 
 // Name of command this component supports to get report information
-static const char g_getMaxMinReport[] = "getMaxMinReport";
+static const char g_getMaxMinReportCommandName[] = "getMaxMinReport";
 
 // An empty JSON body for PnP command responses.
 static const char g_JSONEmpty[] = "{}";
@@ -261,7 +262,7 @@ static int Thermostat_CommandCallback(const char* componentName, const char* com
         LogError("This model only supports root components, but component %s was specified in command", componentName);
         result = PNP_STATUS_NOT_FOUND;
     }
-    else if (strcmp(commandName, g_getMaxMinReport) != 0)
+    else if (strcmp(commandName, g_getMaxMinReportCommandName) != 0)
     {
         LogError("Command name %s is not supported on this component", commandName);
         result = PNP_STATUS_NOT_FOUND;
@@ -411,7 +412,7 @@ static void SendMaxTemperatureSinceReboot(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceC
 static void Thermostat_ProcessTargetTemperature(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient, IOTHUB_CLIENT_DESERIALIZED_PROPERTY* property, int propertiesVersion)
 {
     char* next;
-    double targetTemperature = strtol(property->value.str, &next, 10);
+    double targetTemperature = strtod(property->value.str, &next);
     if ((property->value.str == next) || (targetTemperature == LONG_MAX) || (targetTemperature == LONG_MIN))
     {
         LogError("Property %s is not a valid integer", property->value.str);
@@ -438,7 +439,7 @@ static void Thermostat_ProcessTargetTemperature(IOTHUB_DEVICE_CLIENT_LL_HANDLE d
 //
 // Thermostat_PropertiesCallback is invoked when properties arrive from the server.
 //
-static int Thermostat_PropertiesCallback(IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType,  const unsigned char* payload, size_t payloadLength, void* userContextCallback)
+static void Thermostat_PropertiesCallback(IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType,  const unsigned char* payload, size_t payloadLength, void* userContextCallback)
 {
     IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient = (IOTHUB_DEVICE_CLIENT_LL_HANDLE)userContextCallback;
     IOTHUB_CLIENT_PROPERTY_ITERATOR_HANDLE propertyIterator = NULL;
@@ -502,7 +503,6 @@ static int Thermostat_PropertiesCallback(IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE pay
     }
 
     IoTHubClient_Deserialize_Properties_DestroyIterator(propertyIterator);
-    return 0;
 }
 
 //

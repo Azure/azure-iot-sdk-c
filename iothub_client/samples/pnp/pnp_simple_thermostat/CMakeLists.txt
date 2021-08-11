@@ -7,6 +7,7 @@ compileAsC99()
 
 set(pnp_simple_thermostat_c_files
     pnp_simple_thermostat.c
+    ../common/pnp_sample_config.c
 )
 
 IF(WIN32)
@@ -15,8 +16,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 if(${use_prov_client})
-    set(pnp_simple_thermostat_c_files ${pnp_simple_thermostat_c_files} ../common/pnp_dps_ll.c ../common/pnp_sample_config.c)
-    include_directories(../common)
+    set(pnp_simple_thermostat_c_files ${pnp_simple_thermostat_c_files} ../common/pnp_dps_ll.c)
 endif()
 
 #Conditionally use the SDK trusted certs in the samples
@@ -26,7 +26,7 @@ if(${use_sample_trusted_cert})
     set(pnp_simple_thermostat_c_files ${pnp_simple_thermostat_c_files} ${PROJECT_SOURCE_DIR}/certs/certs.c)
 endif()
 
-include_directories(. ${PROJECT_SOURCE_DIR}/deps/parson)
+include_directories(. ${PROJECT_SOURCE_DIR}/deps/parson ../common)
 
 add_executable(pnp_simple_thermostat ${pnp_simple_thermostat_c_files})
 
