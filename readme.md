@@ -3,7 +3,7 @@
 [![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/c/integrate-into-repo-C)](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_build/latest?definitionId=85)
 
 
-The Azure IOT Hub Device SDK allows applications written in C99 or later or C++ to communicate easily with [Azure IoT Hub](https://azure.microsoft.com/en-us/services/iot-hub/), [Azure IoT Central][Azure-IoT-Central] and to 
+The Azure IOT Hub Device SDK allows applications written in C99 or later or C++ to communicate easily with [Azure IoT Hub](https://azure.microsoft.com/en-us/services/iot-hub/), [Azure IoT Central][Azure-IoT-Central] and to
  [Azure IoT Device Provisioning][Azure-IoT-Device-Provisioning].  This repo includes the source code for the libraries, setup instructions, and samples demonstrating use scenarios.
 
 For constained devices - where memory is measured in kilobytes and not megabytes - there are even lighter weight SDK options available.  See [Other Azure IoT SDKs](#other-azure-iot-sdks) for more.
@@ -32,12 +32,12 @@ For constained devices - where memory is measured in kilobytes and not megabytes
 
 ## Critical Upcoming Change Notice
 
-All Azure IoT SDK users are advised to be aware of upcoming TLS certificate changes for Azure IoT Hub and Device Provisioning Service 
-that will impact the SDK's ability to connect to these services. In October 2022, both services will migrate from the current 
-[Baltimore CyberTrust CA Root](https://baltimore-cybertrust-root.chain-demos.digicert.com/info/index.html) to the 
-[DigiCert Global G2 CA root](https://global-root-g2.chain-demos.digicert.com/info/index.html). There will be a 
-transition period beforehand where your IoT devices must have both the Baltimore and Digicert public certificates 
-which may be hardcoded in their application or flashed onto your WiFi module in order to prevent connectivity issues. 
+All Azure IoT SDK users are advised to be aware of upcoming TLS certificate changes for Azure IoT Hub and Device Provisioning Service
+that will impact the SDK's ability to connect to these services. In October 2022, both services will migrate from the current
+[Baltimore CyberTrust CA Root](https://baltimore-cybertrust-root.chain-demos.digicert.com/info/index.html) to the
+[DigiCert Global G2 CA root](https://global-root-g2.chain-demos.digicert.com/info/index.html). There will be a
+transition period beforehand where your IoT devices must have both the Baltimore and Digicert public certificates
+which may be hardcoded in their application or flashed onto your WiFi module in order to prevent connectivity issues.
 
 **Devices with only the Baltimore public certificate will lose the ability to connect to Azure IoT Hub and Device Provisioning Service in October 2022.**
 
@@ -157,7 +157,7 @@ If you encounter any bugs, have suggestions for new features or if you would lik
 
 ## SDK Folder Structure
 
-`/c-utility, /deps, /umqtt, /uamqp` - 
+`/c-utility, /deps, /umqtt, /uamqp` -
 
 These are git submodules that contain code, such as adapters and protocol implementations, shared with other projects.
 
@@ -235,11 +235,10 @@ LTS branches are named lts_*mm*_*yyyy*, where *mm* and *yyyy* are the month and 
 
 Below is a table showing the mapping of the LTS branches to the packages released
 
-| Package | Github Branch | LTS Status | LTS Start Date | Maintenance End Date | Removal Date |
-| :-----------: | :-----------: | :--------: | :------------: | :------------------: | :----------: |
-| Vcpkg: 2021-01-21    | lts_01_2021   | Active     | 2021-01-21     | 2022-01-21           | 2022-01-21   |
-| Vcpkg: 2020-07-19    | lts_07_2020   | Active     | 2020-07-19     | 2021-07-19           | 2021-07-19   |
-| Vcpkg: 2020-02-07.1    | lts_02_2020   | Active     | 2020-02-04     | 2021-02-04           | 2021-02-04   |
+  | Package | Github Branch | LTS Tag | LTS Status | LTS Start Date | Maintenance End Date | Removal Date |
+  | :-----: | :-----------: | :-----: | :--------: | :------------: | :------------------: | :----------: |
+  | VcPkg: 2021-08-11 | lts_07_2021 | LTS_07_2021_Ref01 | Active | 2021-08-11 | 2022-08-11 | 2022-08-11 |
+  | Vcpkg: 2021-01-21 | lts_01_2021 | LTS_01_2021_Ref01 | Active | 2021-01-21 | 2022-01-21 | 2022-01-21 |
 
 ---
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
