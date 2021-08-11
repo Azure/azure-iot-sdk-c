@@ -429,7 +429,7 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
             }
             else if (source->componentName != NULL && mallocAndStrcpy_s(&result->componentName, source->componentName) != 0)
             {
-                LogError("unable to copy inputName");
+                LogError("unable to copy componentName");
                 DestroyMessageData(result);
                 result = NULL;
             }

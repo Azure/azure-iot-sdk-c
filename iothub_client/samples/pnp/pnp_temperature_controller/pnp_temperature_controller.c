@@ -55,7 +55,7 @@ static unsigned int g_sleepBetweenPollsMs = 100;
 // So we will send telemetry every (g_sendTelemetryPollInterval * g_sleepBetweenPollsMs) milliseconds; 60 seconds as currently configured.
 static const int g_sendTelemetryPollInterval = 600;
 
-// Whether tracing at the IoTHub client is enabled or not.
+// Whether tracing at the IoT Hub client is enabled or not.
 static bool g_hubClientTraceEnabled = true;
 
 // DTMI indicating this device's model identifier.
@@ -165,7 +165,8 @@ static int PnP_TempControlComponent_InvokeRebootCommand(JSON_Value* rootValue)
 //
 // PnP_TempControlComponent_CommandCallback is invoked by IoT SDK when a command arrives.
 //
-static int PnP_TempControlComponent_CommandCallback(const char* componentName, const char* commandName, const unsigned char* payload, size_t size, const char* payloadContentType, unsigned char** response, size_t* responseSize, void* userContextCallback)
+static int PnP_TempControlComponent_CommandCallback(const char* componentName, const char* commandName, const unsigned char* payload, size_t size, const char* payloadContentType,
+                                                    unsigned char** response, size_t* responseSize, void* userContextCallback)
 {
     (void)userContextCallback;
     // payloadContentType is guaranteed to be "application/json".  Future versions of the IoT Hub SDK might enable additional
@@ -382,7 +383,7 @@ static void PnP_TempControlComponent_ReportSerialNumber_Property(IOTHUB_DEVICE_C
 }
 
 //
-// CreateDeviceClientLLHandle does the creates the IOTHUB_DEVICE_CLIENT_LL_HANDLE based on environment configuration.
+// CreateDeviceClientLLHandle creates the IOTHUB_DEVICE_CLIENT_LL_HANDLE based on environment configuration.
 // If PNP_CONNECTION_SECURITY_TYPE_DPS is used, the call will block until DPS provisions the device.
 //
 static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateDeviceClientLLHandle(void)
@@ -393,7 +394,7 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateDeviceClientLLHandle(void)
     {
         if ((deviceClient = IoTHubDeviceClient_LL_CreateFromConnectionString(g_pnpDeviceConfiguration.u.connectionString, MQTT_Protocol)) == NULL)
         {
-            LogError("Failure creating IotHub client.  Hint: Check your connection string");
+            LogError("Failure creating Iot Hub client.  Hint: Check your connection string");
         }
     }
 #ifdef USE_PROV_MODULE_FULL
@@ -418,7 +419,7 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateAndConfigureDeviceClientHandleForPnP
     int iothubInitResult;
     bool result;
 
-    // Before invoking any IoTHub Device SDK functionality, IoTHub_Init must be invoked.
+    // Before invoking any IoT Hub Device SDK functionality, IoTHub_Init must be invoked.
     if ((iothubInitResult = IoTHub_Init()) != 0)
     {
         LogError("Failure to initialize client, error=%d", iothubInitResult);
@@ -427,7 +428,7 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateAndConfigureDeviceClientHandleForPnP
     // Create the deviceClient.
     else if ((deviceClient = CreateDeviceClientLLHandle()) == NULL)
     {
-        LogError("Failure creating IotHub client.  Hint: Check your connection string or DPS configuration");
+        LogError("Failure creating Iot Hub client.  Hint: Check your connection string or DPS configuration");
         result = false;
     }
     // Sets verbosity level.
@@ -479,11 +480,11 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE CreateAndConfigureDeviceClientHandleForPnP
     {
         IoTHubDeviceClient_LL_Destroy(deviceClient);
         deviceClient = NULL;
-    }
 
-    if ((result == false) &&  (iothubInitResult == 0))
-    {
-        IoTHub_Deinit();
+        if (iothubInitResult == 0)
+        {
+            IoTHub_Deinit();
+        }
     }
 
     return deviceClient;
@@ -546,7 +547,21 @@ int main(void)
     // for extended periods of time when using DPS.
     else if ((deviceClient = CreateAndConfigureDeviceClientHandleForPnP()) == NULL)
     {
-        LogError("Failure creating IotHub device client");
+        LogError("Cannot read required environment variable(s)");
+    }
+    // Creates the thermostat subcomponents defined by this model.  Since everything
+    // is simulated, this setup stage just creates simulated objects in memory.
+    else if (AllocateThermostatComponents() == false)
+    {
+        LogError("Failure allocating thermostat components");
+    }
+    // Create a handle to device client handle.  Note that this call may block
+    // for extended periods of time when using DPS.
+    else if ((deviceClient = CreateAndConfigureDeviceClientHandleForPnP()) == NULL)
+    {
+        LogError("Failure creating Iot Hub device client");
+        PnP_ThermostatComponent_Destroy(g_thermostatHandle1);
+        PnP_ThermostatComponent_Destroy(g_thermostatHandle2);
     }
     else
     {
@@ -577,7 +592,7 @@ int main(void)
         }
 
         // The remainder of the code is used for cleaning up our allocated resources. It won't be executed in this 
-        // sample (because the loop above is infinite and // is only broken out of by Control-C of the program), but 
+        // sample (because the loop above is infinite and is only broken out of by Control-C of the program), but 
         // it is included for reference.
 
         // Free the memory allocated to track simulated thermostat.

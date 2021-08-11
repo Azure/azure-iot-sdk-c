@@ -67,7 +67,7 @@ static const char g_targetTemperaturePropertyName[] = "targetTemperature";
 static const char g_maxTempSinceLastRebootPropertyName[] = "maxTempSinceLastReboot";
 
 // Name of command this component supports to get report information
-static const char g_getMaxMinReport[] = "getMaxMinReport";
+static const char g_getMaxMinReportCommandName[] = "getMaxMinReport";
 
 // An empty JSON body for PnP command responses.
 static const char g_JSONEmpty[] = "{}";
@@ -262,7 +262,7 @@ static int Thermostat_CommandCallback(const char* componentName, const char* com
         LogError("This model only supports root components, but component %s was specified in command", componentName);
         result = PNP_STATUS_NOT_FOUND;
     }
-    else if (strcmp(commandName, g_getMaxMinReport) != 0)
+    else if (strcmp(commandName, g_getMaxMinReportCommandName) != 0)
     {
         LogError("Command name %s is not supported on this component", commandName);
         result = PNP_STATUS_NOT_FOUND;

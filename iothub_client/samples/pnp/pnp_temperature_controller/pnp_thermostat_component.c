@@ -26,16 +26,15 @@
 // Size of buffer to store the maximum temp since reboot property.
 #define MAX_TEMPERATURE_SINCE_REBOOT_BUFFER_SIZE 32
 
-// Maximum component size.  The spec (https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md#component)
-// defines the maximum component length as 64 to which we need to reserve the null-terminator.
-#define MAX_COMPONENT_NAME_LENGTH (64 + 1)
+// Maximum component size.  This comes from the spec https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md#component.
+#define MAX_COMPONENT_NAME_LENGTH 64
 
 // Names of properties for desired/reporting.
 static const char g_targetTemperaturePropertyName[] = "targetTemperature";
 static const char g_maxTempSinceLastRebootPropertyName[] = "maxTempSinceLastReboot";
 
 // Name of command this component supports to retrieve a report about the component.
-static const char g_getMaxMinReport[] = "getMaxMinReport";
+static const char g_getMaxMinReportCommandName[] = "getMaxMinReport";
 
 // The default temperature to use before any is set
 #define DEFAULT_TEMPERATURE_VALUE 22
@@ -75,7 +74,7 @@ char g_programStartTime[TIME_BUFFER_SIZE] = {0};
 typedef struct PNP_THERMOSTAT_COMPONENT_TAG
 {
     // Name of this component
-    char componentName[MAX_COMPONENT_NAME_LENGTH];
+    char componentName[MAX_COMPONENT_NAME_LENGTH + 1];
     // Current temperature of this thermostat component
     double currentTemperature;
     // Minimum temperature this thermostat has been at during current execution run of this thermostat component
@@ -118,9 +117,9 @@ PNP_THERMOSTAT_COMPONENT_HANDLE PnP_ThermostatComponent_CreateHandle(const char*
 {
     PNP_THERMOSTAT_COMPONENT* thermostatComponent;
 
-    if (strlen(componentName) > 64)
+    if (strlen(componentName) > MAX_COMPONENT_NAME_LENGTH)
     {
-        LogError("componentName %s is too long.  Maximum length is %d", componentName, 64);
+        LogError("componentName %s is too long.  Maximum length is %d", componentName, MAX_COMPONENT_NAME_LENGTH);
         thermostatComponent = NULL;
     }
     // On initial invocation, store the UTC time into g_programStartTime global.
@@ -212,7 +211,7 @@ int PnP_ThermostatComponent_ProcessCommand(PNP_THERMOSTAT_COMPONENT_HANDLE pnpTh
     const char* sinceStr;
     int result;
 
-    if (strcmp(pnpCommandName, g_getMaxMinReport) != 0)
+    if (strcmp(pnpCommandName, g_getMaxMinReportCommandName) != 0)
     {
         LogError("Command %s is not supported on thermostat component", pnpCommandName);
         result = PNP_STATUS_NOT_FOUND;
