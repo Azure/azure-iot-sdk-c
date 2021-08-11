@@ -2258,7 +2258,7 @@ TEST_FUNCTION(IoTHubMessage_GetUserIdSystemProperty_SUCCEED)
     get_string_succeeds_impl(IoTHubMessage_SetMessageUserIdSystemProperty, IoTHubMessage_GetMessageUserIdSystemProperty, TEST_MESSAGE_USER_ID);
 } 
 
-static MESSAGE_DISPOSITION_CONTEXT_HANDLE TEST_dispositionContextDestroyFunction_handle;
+MESSAGE_DISPOSITION_CONTEXT_HANDLE TEST_dispositionContextDestroyFunction_handle;
 static void TEST_dispositionContextDestroyFunction(MESSAGE_DISPOSITION_CONTEXT_HANDLE dispositionContextHandle)
 {
     TEST_dispositionContextDestroyFunction_handle = dispositionContextHandle;
