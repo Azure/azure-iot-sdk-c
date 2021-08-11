@@ -342,7 +342,6 @@ TEST_FUNCTION(IoTHubModuleClient_SetInputMessageCallback_Test)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-
 TEST_FUNCTION(IoTHubModuleClient_SendTelemetryAsync_Test)
 {
     //arrange
@@ -355,7 +354,6 @@ TEST_FUNCTION(IoTHubModuleClient_SendTelemetryAsync_Test)
     ASSERT_IS_TRUE(result == IOTHUB_CLIENT_OK);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());  
 }
-
 
 TEST_FUNCTION(IoTHubModuleClient_SendPropertiesAsync_Test)
 {
@@ -409,7 +407,5 @@ TEST_FUNCTION(IoTHubModuleClient_GetPropertiesAndSubscribeToUpdatesAsync_Test)
     ASSERT_IS_TRUE(result == IOTHUB_CLIENT_OK);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
-
-
 
 END_TEST_SUITE(iothubmoduleclient_ut)

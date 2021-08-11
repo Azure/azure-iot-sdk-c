@@ -271,7 +271,7 @@ static int DeviceMethodWithUploadCallback(const char* method_name, const unsigne
 #endif
 
 // From IoT Hub / Service API perspective, there is no difference between a "legacy" device method and a command.
-// Callers of this function decide method or PnP convention via methodOrCommandName parameter, but API calls remain same
+// Callers of this function decide method or PnP convention via methodOrCommandName parameter, but API calls remain same.
 void test_invoke_device_method(const char* deviceId, const char* moduleId, const char* methodOrCommandName, const char *payload)
 {
     int responseStatus;

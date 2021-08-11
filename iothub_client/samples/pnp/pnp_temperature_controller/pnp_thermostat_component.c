@@ -357,7 +357,7 @@ void PnP_ThermostatComponent_ProcessPropertyUpdate(PNP_THERMOSTAT_COMPONENT_HAND
         double targetTemperature = strtod(propertyValue, &next);
         if ((propertyValue == next) || (targetTemperature == LONG_MAX) || (targetTemperature == LONG_MIN))
         {
-            LogError("Property %s is not a valid integer", propertyValue);
+            LogError("Property %s is not a valid number", propertyValue);
             SendTargetTemperatureResponse(pnpThermostatComponent, deviceClient, propertyValue, PNP_STATUS_BAD_FORMAT, version, g_temperaturePropertyResponseDescriptionNotInt);
         }
         else

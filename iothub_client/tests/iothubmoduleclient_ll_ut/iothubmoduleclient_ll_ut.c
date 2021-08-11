@@ -383,7 +383,6 @@ TEST_FUNCTION(IoTHubModuleClient_LL_SendEventToOutputAsync_Test)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-
 TEST_FUNCTION(IoTHubModuleClient_LL_SetInputMessageCallback_Test)
 {
     //arrange
@@ -409,7 +408,6 @@ TEST_FUNCTION(IoTHubModuleClient_LL_SendTelemetryAsync_Test)
     ASSERT_IS_TRUE(result == IOTHUB_CLIENT_OK);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());  
 }
-
 
 TEST_FUNCTION(IoTHubModuleClient_LL_SendPropertiesAsync_Test)
 {

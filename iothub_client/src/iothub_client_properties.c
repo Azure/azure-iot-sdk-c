@@ -459,8 +459,8 @@ static bool IsJsonObjectAComponentInModel(IOTHUB_CLIENT_PROPERTY_ITERATOR* prope
     JSON_Value* jsonValue = json_object_get_value_at(containerObject, propertyIterator->currentPropertyIndex);
     JSON_Object* jsonObject = json_value_get_object(jsonValue);
 
-    // Examine it's object to see if the "__t:c" has been set.  If this isn't an object, the jsonObject will
-    // be NULL from call above but 
+    // Examine it's object to see if the "__t:c" has been set.  If jsonObject isn't actually of type JSON_Object,
+    // parson will gracefully return NULL for a string lookup.
     const char* componentMarkerValue = json_object_get_string(jsonObject, TWIN_COMPONENT_MARKER_NAME);
     result = (componentMarkerValue != NULL) && (strcmp(componentMarkerValue, TWIN_COMPONENT_MARKER_VALUE) == 0);
 

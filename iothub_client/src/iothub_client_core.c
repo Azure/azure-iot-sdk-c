@@ -622,8 +622,8 @@ static void invoke_application_command_callback(IOTHUB_CLIENT_CORE_HANDLE method
     const char* command_name = NULL;
     char* component_name = NULL;
 
-    // Parse the raw method_name into its constituent (optional) component_name and command_name parts.
-    if (IoTHubClientCore_LL_ParseMethodToCommand(method_name, &component_name, &command_name) != 0)
+    // Parse the raw method_name into its constituent component_name and command_name parts.
+    if (IoTHubClientCore_LL_ParseMethodToCommand(method_name, &component_name, &command_name) != IOTHUB_CLIENT_OK)
     {
         LogError("Cannot parse command/component name");
     }

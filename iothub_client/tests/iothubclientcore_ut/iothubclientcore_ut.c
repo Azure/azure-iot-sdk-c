@@ -134,7 +134,6 @@ static int test_command_callback_Impl(const char* componentName, const char* com
     return 200;
 }
 
-
 static void my_FileUpload_GetData_Callback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
 {
     (void)data;
@@ -175,8 +174,6 @@ MOCKABLE_FUNCTION(, int, my_DeviceMethodCallback, const char*, method_name, cons
 MOCKABLE_FUNCTION(, int, test_command_callback, const char*, componentName, const char*, commandName, const unsigned char*, payload, size_t, size, const char*, payloadContentType, unsigned char**, response, size_t*, responseSize, void*, userContextCallback);
 MOCKABLE_FUNCTION(, void, test_method_invoke_callback, IOTHUB_CLIENT_RESULT, result, int, responseStatus, unsigned char*, responsePayload, size_t, responsePayloadSize, void*, userContextCallBack);
 
-
-
 #undef ENABLE_MOCKS
 
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_STATUS, IOTHUB_CLIENT_STATUS_VALUES);
@@ -214,10 +211,8 @@ static IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK g_inboundDeviceCallback;
 static IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC g_messageCallback;
 static IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC_EX g_messageCallback_ex;
 
-
 static size_t g_how_thread_loops = 0;
 static size_t g_thread_loop_count = 0;
-
 
 static const IOTHUB_CLIENT_TRANSPORT_PROVIDER TEST_TRANSPORT_PROVIDER = (IOTHUB_CLIENT_TRANSPORT_PROVIDER)0x1110;
 static IOTHUB_CLIENT_CORE_LL_HANDLE TEST_IOTHUB_CLIENT_CORE_LL_HANDLE = (IOTHUB_CLIENT_CORE_LL_HANDLE)0x1111;
@@ -2903,7 +2898,7 @@ TEST_FUNCTION(IoTHubClientCore_SetDeviceMethodCallback_Ex_remove_succeed)
     IoTHubClientCore_Destroy(iothub_handle);
 }
 
-TEST_FUNCTION(IoTHubClientCore_SubscribeToCommands_iothub_fail)
+TEST_FUNCTION(IoTHubClientCore_SubscribeToCommands_iothub_NULL_handle)
 {
     // arrange
 
@@ -4024,7 +4019,6 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_incoming_command_callback_BUFFER_
     IoTHubClientCore_Destroy(iothub_handle);
 }
 
-
 TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_incoming_command_callback_VECTOR_push_back_FAILS_fail)
 {
     IOTHUB_CLIENT_CORE_HANDLE iothub_handle = IoTHubClientCore_Create(TEST_CLIENT_CONFIG);
@@ -4147,10 +4141,6 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_repeated_incoming_command_callbac
     // cleanup
     IoTHubClientCore_Destroy(iothub_handle);
 }
-
-
-
-
 
 /* Test_SRS_IOTHUBCLIENT_07_002: [ IoTHubClientCore_SetDeviceTwinCallback shall allocate a IOTHUB_QUEUE_CONTEXT object to be sent to the IoTHubClientCore_LL_SetDeviceTwinCallback function as a user context. ] */
 TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_device_twin_succeed)

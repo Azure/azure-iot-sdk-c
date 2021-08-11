@@ -415,7 +415,7 @@ static void Thermostat_ProcessTargetTemperature(IOTHUB_DEVICE_CLIENT_LL_HANDLE d
     double targetTemperature = strtod(property->value.str, &next);
     if ((property->value.str == next) || (targetTemperature == LONG_MAX) || (targetTemperature == LONG_MIN))
     {
-        LogError("Property %s is not a valid integer", property->value.str);
+        LogError("Property %s is not a valid number", property->value.str);
         SendTargetTemperatureResponse(deviceClient, property->value.str, PNP_STATUS_BAD_FORMAT, propertiesVersion, g_temperaturePropertyResponseDescriptionNotInt);
     }
     else

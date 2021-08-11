@@ -381,6 +381,7 @@ extern "C"
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_SubscribeToCommands, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC, commandCallback,  void*, userContextCallback);
+
     /**
     * @brief    Sends properties to IoT Hub
     *
@@ -400,12 +401,13 @@ extern "C"
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_SendPropertiesAsync, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle,  const unsigned char*, properties, size_t, propertiesLength, IOTHUB_CLIENT_PROPERTY_ACKNOWLEDGED_CALLBACK, propertyAcknowledgedCallback, void*, userContextCallback);
+
     /**
     * @brief   Retrieves all properties from IoT Hub.
     *
     * @param[in]   iotHubClientHandle    The handle created by a call to the create function.
     * @param[in]   propertyCallback      Callback invoked when properties are retrieved.
-                                         The API IoTHubClient_Deserialize_Properties() can help deserialize the raw 
+    *                                    The API IoTHubClient_Deserialize_Properties() can help deserialize the raw 
     *                                    payload stream.
     * @param[in]   userContextCallback   User specified context that will be provided to the
     *                                    callback. This can be @c NULL.
@@ -422,8 +424,8 @@ extern "C"
     *
     * @param[in]   iotHubClientHandle      The handle created by a call to the create function.
     * @param[in]   propertyUpdateCallback  Callback both on initial retrieval of properties stored on IoT Hub
-                                           and subsequent service-initiated modifications of writable properties.
-                                           The API IoTHubClient_Deserialize_Properties() can help deserialize the raw 
+    *                                      and subsequent service-initiated modifications of writable properties.
+    *                                      The API IoTHubClient_Deserialize_Properties() can help deserialize the raw 
     *                                      payload stream.
     * @param[in]   userContextCallback     User specified context that will be provided to the
     *                                      callback. This can be @c NULL.

@@ -547,18 +547,6 @@ int main(void)
     // for extended periods of time when using DPS.
     else if ((deviceClient = CreateAndConfigureDeviceClientHandleForPnP()) == NULL)
     {
-        LogError("Cannot read required environment variable(s)");
-    }
-    // Creates the thermostat subcomponents defined by this model.  Since everything
-    // is simulated, this setup stage just creates simulated objects in memory.
-    else if (AllocateThermostatComponents() == false)
-    {
-        LogError("Failure allocating thermostat components");
-    }
-    // Create a handle to device client handle.  Note that this call may block
-    // for extended periods of time when using DPS.
-    else if ((deviceClient = CreateAndConfigureDeviceClientHandleForPnP()) == NULL)
-    {
         LogError("Failure creating Iot Hub device client");
         PnP_ThermostatComponent_Destroy(g_thermostatHandle1);
         PnP_ThermostatComponent_Destroy(g_thermostatHandle2);

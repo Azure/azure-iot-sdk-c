@@ -6806,7 +6806,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_ParseMethodToCommand_fail)
 
 }
 
-
 TEST_FUNCTION(IoTHubClientCore_LL_SubscribeToCommands_with_NULL_iotHubClientHandle_fails)
 {
     ///arrange
@@ -6965,7 +6964,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_CommandComplete_no_component_succeed)
     //cleanup
     IoTHubClientCore_LL_Destroy(h);
 }
-
 
 TEST_FUNCTION(IoTHubClientCore_LL_CommandComplete_with_component_succeed)
 {
