@@ -237,8 +237,8 @@ Below is a table showing the mapping of the LTS branches to the packages release
 
   | Package | Github Branch | LTS Tag | LTS Status | LTS Start Date | Maintenance End Date | Removal Date |
   | :-----: | :-----------: | :-----: | :--------: | :------------: | :------------------: | :----------: |
-  | VcPkg: 2021-08-11 | lts_07_2021 | LTS_07_2021_Ref01 | Active | 2021-08-11 | 2022-08-11 | 2022-08-11 |
-  | Vcpkg: 2021-01-21 | lts_01_2021 | LTS_01_2021_Ref01 | Active | 2021-01-21 | 2022-01-21 | 2022-01-21 | |
+  | vcpkg: 2021-08-11 | lts_07_2021 | LTS_07_2021_Ref01 | Active | 2021-08-11 | 2022-08-11 | 2022-08-11 |
+  | vcpkg: 2021-01-21 | lts_01_2021 | LTS_01_2021_Ref01 | Active | 2021-01-21 | 2022-01-21 | 2022-01-21 | |
 
 ---
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
