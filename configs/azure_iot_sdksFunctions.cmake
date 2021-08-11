@@ -170,3 +170,16 @@ function(setSdkTargetBuildProperties stbp_target)
         set_target_properties(${stbp_target} PROPERTIES XCODE_ATTRIBUTE_GCC_WARN_UNUSED_VARIABLE "YES")
     endif()
 endfunction()
+
+macro(generate_cppunittest_wrapper whatIsBuilding)
+    if (${use_cppunittest} AND WIN32)
+      file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${whatIsBuilding}.cxx "#include \"${CMAKE_CURRENT_SOURCE_DIR}/${whatIsBuilding}.c\"")
+      set(${whatIsBuilding}_test_files ${CMAKE_CURRENT_BINARY_DIR}/${whatIsBuilding}.cxx)
+      #CPP compiler on windows likes to complain about unused local function removed (C4505)
+      #C compiler doesn't like to complain about the same thing
+      set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4505")
+    else()
+set(${whatIsBuilding}_test_files ${whatIsBuilding}.c)
+    endif()
+endmacro(generate_cppunittest_wrapper)
+

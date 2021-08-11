@@ -2,7 +2,7 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #this is CMakeLists.txt for iothub_ll_client_sample_amqp_shared
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.10)
 
 if(WIN32)
     message(FATAL_ERROR "This CMake file is only support Linux builds!")

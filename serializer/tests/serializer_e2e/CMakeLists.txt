@@ -2,7 +2,7 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #this is CMakeLists.txt for serializer_e2e
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.10)
 
 if(NOT (${use_amqp} AND  ${use_http}) )
 	message(FATAL_ERROR "serializer_e2e being generated without amqp or http support")
@@ -11,9 +11,7 @@ endif()
 compileAsC99()
 set(theseTestsName serializer_e2e)
 
-set(${theseTestsName}_test_files
-    ${theseTestsName}.c
-)
+generate_cppunittest_wrapper(${theseTestsName})
 
 set(${theseTestsName}_nuget_c_files
     ${theseTestsName}.c
