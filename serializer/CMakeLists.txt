@@ -1,7 +1,7 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.5)
 #this is CMakeLists for serializer
 
 option(use_floats "if use_floats is used, serializer will use floats in its typesystem" ON)

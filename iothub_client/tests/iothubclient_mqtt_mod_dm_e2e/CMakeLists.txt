@@ -2,7 +2,7 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #this is CMakeLists.txt for iothubclient_mqtt_mod_dm_e2e
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.5)
 
 if(NOT (${use_mqtt}))
     message(FATAL_ERROR "iothubclient_mqtt_mod_dm_e2e being generated without MQTT support")
