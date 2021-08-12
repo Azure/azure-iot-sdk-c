@@ -2,7 +2,7 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #this is CMakeLists.txt for serializer_e2e
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.5)
 
 if(NOT (${use_amqp} AND  ${use_http}) )
 	message(FATAL_ERROR "serializer_e2e being generated without amqp or http support")

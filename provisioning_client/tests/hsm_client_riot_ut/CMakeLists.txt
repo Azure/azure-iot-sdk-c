@@ -39,5 +39,5 @@ if(WIN32 AND use_cppunittest)
             RIOTBUILD
             RIOTSECP256R1
     )
-ENDIF(WIN32 AND use_cppunittest)
+endif()
 
