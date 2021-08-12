@@ -8,7 +8,7 @@
 #ifndef IOTHUB_CLIENT_VERSION_H
 #define IOTHUB_CLIENT_VERSION_H
 
-#define IOTHUB_SDK_VERSION "1.6.0"
+#define IOTHUB_SDK_VERSION "1.8.0"
 
 #include "umock_c/umock_c_prod.h"
 
