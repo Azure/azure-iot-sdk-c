@@ -70,7 +70,7 @@ MOCKABLE_FUNCTION(, JSON_Object*, json_value_get_object, const JSON_Value *, val
 #define TEST_STRING_HANDLE_DEVICE_SAS ((STRING_HANDLE)0x2)
 
 #define TEST_API_VERSION "?api-version=2016-11-14"
-#define TEST_IOTHUB_SDK_VERSION "1.6.0"
+#define TEST_IOTHUB_SDK_VERSION "1.8.0"
 
 static const char* const testUploadtrustedCertificates = "some certificates";
 static const char* const TEST_SAS_TOKEN = "test_sas_token";
