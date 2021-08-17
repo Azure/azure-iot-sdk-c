@@ -9,7 +9,8 @@ jobs:
 - job: ubuntu1604
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
-  pool: aziotbld-lin02
+  pool: 
+    name: 'sdk-c--ubuntu-18'
   displayName: 'ubuntu1604'
   steps:
   - script: |
