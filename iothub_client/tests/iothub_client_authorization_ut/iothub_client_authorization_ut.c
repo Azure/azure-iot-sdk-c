@@ -2,9 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #ifdef __cplusplus
-#include <stdlib.h>
+#include <cstdlib>
+#include <cstdint>
 #else
 #include <stdlib.h>
+#include <stdint.h>
 #endif
 
 static void* my_gballoc_malloc(size_t size)
@@ -20,6 +22,7 @@ static void my_gballoc_free(void* ptr)
 #include "testrunnerswitcher.h"
 #include "umock_c/umock_c.h"
 #include "umock_c/umocktypes_charptr.h"
+#include "umock_c/umocktypes_stdint.h"
 #include "umock_c/umock_c_negative_tests.h"
 #include "azure_macro_utils/macro_utils.h"
 
@@ -51,7 +54,7 @@ static const char* TEST_STRING_VALUE = "Test_string_value";
 static const char* TEST_KEYNAME_VALUE = "Test_keyname_value";
 static const char* TEST_REG_CERT = "Test_certificate";
 static const char* TEST_REG_PK = "Test_private_key";
-static size_t TEST_EXPIRY_TIME = 1;
+static uint64_t TEST_EXPIRY_TIME = 1;
 
 #define TEST_TIME_VALUE                     (time_t)123456
 
@@ -72,7 +75,7 @@ static int my_mallocAndStrcpy_s(char** destination, const char* source)
     return 0;
 }
 
-static STRING_HANDLE my_SASToken_CreateString(const char* key, const char* scope, const char* keyName, size_t expiry)
+static STRING_HANDLE my_SASToken_CreateString(const char* key, const char* scope, const char* keyName, uint64_t expiry)
 {
     (void)key;
     (void)scope;
@@ -134,6 +137,9 @@ TEST_SUITE_INITIALIZE(suite_init)
     ASSERT_IS_NOT_NULL(g_testByTest);
 
     (void)umock_c_init(on_umock_c_error);
+
+    result = umocktypes_stdint_register_types();
+    ASSERT_ARE_EQUAL(int, 0, result, "umocktypes_stdint_register_types");
 
     result = umocktypes_charptr_register_types();
     ASSERT_ARE_EQUAL(int, 0, result);
@@ -1023,7 +1029,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Set_SasToken_Expiry_handle_NULL_fail)
 
 TEST_FUNCTION(IoTHubClient_Auth_Set_SasToken_Expiry_succeed)
 {
-    size_t expiry_time = 4800;
+    uint64_t expiry_time = 4800;
 
     //arrange
     IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(NULL, DEVICE_ID, TEST_SAS_TOKEN, NULL);
@@ -1034,7 +1040,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Set_SasToken_Expiry_succeed)
 
     //assert
     ASSERT_ARE_EQUAL(int, 0, result);
-    ASSERT_ARE_EQUAL(size_t, expiry_time, IoTHubClient_Auth_Get_SasToken_Expiry(handle), "Sas Token Expiry time not set correctly");
+    ASSERT_ARE_EQUAL(uint64_t, expiry_time, IoTHubClient_Auth_Get_SasToken_Expiry(handle), "Sas Token Expiry time not set correctly");
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1046,10 +1052,10 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_SasToken_Expiry_handle_NULL_fail)
     //arrange
 
     //act
-    size_t result = IoTHubClient_Auth_Get_SasToken_Expiry(NULL);
+    uint64_t result = IoTHubClient_Auth_Get_SasToken_Expiry(NULL);
 
     //assert
-    ASSERT_ARE_EQUAL(size_t, 0, result);
+    ASSERT_ARE_EQUAL(uint64_t, 0, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -1057,7 +1063,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_SasToken_Expiry_handle_NULL_fail)
 
 TEST_FUNCTION(IoTHubClient_Auth_Get_SasToken_Expiry_succeed)
 {
-    size_t expiry_time = 4800;
+    uint64_t expiry_time = 4800;
 
     //arrange
     IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(NULL, DEVICE_ID, TEST_SAS_TOKEN, NULL);
@@ -1065,10 +1071,10 @@ TEST_FUNCTION(IoTHubClient_Auth_Get_SasToken_Expiry_succeed)
     umock_c_reset_all_calls();
 
     //act
-    size_t result = IoTHubClient_Auth_Get_SasToken_Expiry(handle);
+    uint64_t result = IoTHubClient_Auth_Get_SasToken_Expiry(handle);
 
     //assert
-    ASSERT_ARE_EQUAL(size_t, expiry_time, result);
+    ASSERT_ARE_EQUAL(uint64_t, expiry_time, result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup

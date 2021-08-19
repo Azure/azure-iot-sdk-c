@@ -25,10 +25,10 @@ jobs:
     displayName: 'build'
 - job: windowsx86
   pool:
-    name: 'aziotbld-win03'
+    name: 'sdk-c--win-vs2017'
   steps:
   - script: |
-      call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
+      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
       call jenkins\windows_c.cmd
     displayName: 'build'
     env:
@@ -62,7 +62,8 @@ jobs:
 - job: raspberrypi
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/raspberrypi-c-buster:brown"
-  pool: Hosted Ubuntu 1604
+  pool: 
+    name: 'sdk-c--ubuntu-18'
   displayName: raspberrypi
   steps:
   - script: |
@@ -78,7 +79,8 @@ jobs:
 - job: linuxoptions
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/vsts-linux-c-ubuntu"
-  pool: Hosted Ubuntu 1604
+  pool: 
+    name: 'sdk-c--ubuntu-18'
   displayName: 'linux-options'
   steps:
   - script: 'sudo ./jenkins/linux_c_option_test.sh'
@@ -89,10 +91,10 @@ jobs:
     condition: always()
 - job: windowsdynamic
   pool:
-    name: 'aziotbld-win03'
+    name: 'sdk-c--win-vs2017'
   steps:
   - script: |
-      call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
+      call "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat"
       call jenkins\windows_c_build_as_dynamic.cmd
     displayName: 'build'
     env:
@@ -144,7 +146,8 @@ jobs:
 - job: clang
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/ubuntu-clang"
-  pool: aziotbld-lin01
+  pool: 
+    name: 'sdk-c--ubuntu-18'
   displayName: 'clang'
   steps:
   - script: |
@@ -172,10 +175,11 @@ jobs:
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'cleanup'
     condition: always()
-- job: ubuntu1604
+- job: ubuntu2004
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
-  pool: aziotbld-lin02
+  pool:
+    name: 'sdk-c--ubuntu-18'
   displayName: 'ubuntu1604'
   steps:
   - script: |
@@ -206,7 +210,8 @@ jobs:
 - job: debian
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/c-debian"
-  pool: aziotbld-lin02
+  pool: 
+    name: 'sdk-c--ubuntu-18'
   displayName: 'debian'
   steps:
   - script: |
@@ -235,7 +240,8 @@ jobs:
 - job: linux_installed_deps
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
-  pool: aziotbld-lin02
+  pool: 
+    name: 'sdk-c--ubuntu-18'
   displayName: 'linux_installed_deps'
   steps:
   - script: |
@@ -266,7 +272,8 @@ jobs:
 - job: wolfssl
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/wolfssl-1804"
-  pool: Hosted Ubuntu 1604
+  pool:
+    name: 'sdk-c--ubuntu-18'
   displayName: 'wolfssl'
   steps:
   - script: |
@@ -297,7 +304,8 @@ jobs:
 - job: bearssl
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/devops-c-bearssl"
-  pool: Hosted Ubuntu 1604
+  pool:
+    name: 'sdk-c--ubuntu-18'
   displayName: 'bearssl'
   steps:
   - script: |
@@ -327,11 +335,11 @@ jobs:
     condition: always()
 - job: windowsx64
   pool:
-    name: 'aziotbld-win03'
+    name: 'sdk-c--win-vs2017'
   displayName: 'windowsx64'
   steps:
   - script: |
-      call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools\VsDevCmd.bat"
+      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
       call jenkins\windows_c.cmd --platform x64
     displayName: 'build'
     env:
@@ -396,7 +404,8 @@ jobs:
 - job: cares
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/c-ares"
-  pool: Hosted Ubuntu 1604
+  pool: 
+    name: 'sdk-c--ubuntu-18'
   displayName: 'cares'
   steps:
   - script: |
@@ -425,7 +434,8 @@ jobs:
 - job: openssl_engine
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/openssl-pkcs11"
-  pool: Hosted Ubuntu 1604
+  pool: 
+    name: 'sdk-c--ubuntu-18'
   displayName: 'OpenSSL with pkcs11 engine and SoftHSM'
   steps:
   - script: |

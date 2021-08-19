@@ -1,14 +1,48 @@
-# Samples to demonstrate Azure IoT Plug and Play
+---
+page_type: sample
+description: "A set of C samples that show how a device that uses the IoT Plug and Play conventions interacts with either IoT Hub or IoT Central."
+languages:
+- c
+products:
+- azure-iot-hub
+- azure-iot-central
+- azure-iot-pnp
+urlFragment: azure-iot-pnp-device-samples-for-c
+---
 
-The samples in this directory demonstrate how to implement an Azure IoT Plug and Play device.  Azure IoT Plug and Play is documented [here](aka.ms/iotpnp).  The samples assume basic familiarity with PnP concepts, though not in depth knowledge of the PnP "convention".  The "convention" is a set of rules for serializing and de-serialing data that uses IoTHub primitives for transport which the samples themselves implement.
+# IoT Plug And Play device samples
+
+[![Documentation](../../../doc/media/docs-link-buttons/azure-documentation.svg)](https://docs.microsoft.com/azure/iot-develop/)
+
+These samples demonstrate how a device that follows the [IoT Plug and Play conventions](https://docs.microsoft.com/azure/iot-pnp/concepts-convention) interacts with IoT Hub or IoT Central, to:
+
+- Send telemetry.
+- Update device twin properties.
+- Respond to command invocation.
+
+The samples demonstrate two scenarios:
+
+- An IoT Plug and Play device that implements the [Thermostat](https://devicemodels.azure.com/dtmi/com/example/thermostat-1.json) model. This model has a single interface that defines telemetry, read-only and read-write properties, and commands.
+- An IoT Plug and Play device that implements the [Temperature controller](https://devicemodels.azure.com/dtmi/com/example/temperaturecontroller-1.json) model. This model uses multiple components:
+  - The top-level interface defines telemetry, read-only property and commands.
+  - The model includes two [Thermostat](https://devicemodels.azure.com/dtmi/com/example/thermostat-1.json) components, and a [device information](https://devicemodels.azure.com/dtmi/azure/devicemanagement/deviceinformation-1.json) component.
+
+## Quickstarts and tutorials
+
+To learn more about how to configure and run the Thermostat device sample with IoT Hub, see [Quickstart: Connect a sample IoT Plug and Play device application running on Linux or Windows to IoT Hub](https://docs.microsoft.com/azure/iot-pnp/quickstart-connect-device?pivots=programming-language-c).
+
+To learn more about how to configure and run the Temperature Controller device sample with:
+
+- IoT Hub, see [Tutorial: Connect an IoT Plug and Play multiple component device application running on Linux or Windows to IoT Hub](https://docs.microsoft.com/azure/iot-pnp/tutorial-multiple-components?pivots=programming-language-c)
+- IoT Central, see [Tutorial: Create and connect a client application to your Azure IoT Central application](https://docs.microsoft.com/azure/iot-central/core/tutorial-connect-device?pivots=programming-language-c)
 
 ## Directory structure
 
 The directory contains the following samples:
 
-* [pnp_simple_thermostat](./pnp_simple_thermostat) A simple thermostat that implements the model [dtmi:com:example:Thermostat;1](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/Thermostat.json).  This sample is considered simple because it only implements one component, the thermostat itself.  **You should begin with this sample.**
+* [pnp_simple_thermostat](./pnp_simple_thermostat) A simple thermostat that implements the model [dtmi:com:example:Thermostat;1](https://devicemodels.azure.com/dtmi/com/example/thermostat-1.json).  This sample is considered simple because it only implements one component, the thermostat itself.  **You should begin with this sample.**
 
-* [pnp_temperature_controller](./pnp_temperature_controller) A temperature controller that implements the model [dtmi:com:example:TemperatureController;1](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/TemperatureController.json).  This is considerably more complex than the [pnp_simple_thermostat](./pnp_simple_thermostat) and demonstrates the use of subcomponents.  **You should move onto this sample only after fully understanding pnp_simple_thermostat.**
+* [pnp_temperature_controller](./pnp_temperature_controller) A temperature controller that implements the model [dtmi:com:example:TemperatureController;1](https://devicemodels.azure.com/dtmi/com/example/temperaturecontroller-1.json).  This is considerably more complex than the [pnp_simple_thermostat](./pnp_simple_thermostat) and demonstrates the use of subcomponents.  **You should move onto this sample only after fully understanding pnp_simple_thermostat.**
 
 * [common](./common) This directory contains functions for serializing and de-serializing data for PnP and for creating the `IOTHUB_DEVICE_CLIENT_HANDLE` that acts as the transport.  `pnp_temperature_controller` makes extensive use of these functions and demonstrates their use.  **The files in [common](./common) are written generically such that your PnP device application should be able to use them with little or no modification, speeding up your development.**
 
@@ -45,3 +79,4 @@ If you are building connection string only authentication, these extra cmake fla
 * The command `getMaxMinReport` allows the application to specify statistics of the temperature since a given date.  To keep the sample simple, we ignore this field and instead return statistics from the entire lifecycle of the executable.
 
 * The temperature controller implements a command named `reboot` which takes a request payload indicating the delay in seconds.  The sample will log the value requested but will not take any further action.
+ 

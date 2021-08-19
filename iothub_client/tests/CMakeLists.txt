@@ -1,7 +1,7 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.5)
 
 if(${LINUX})
    add_definitions(-DAZIOT_LINUX)
@@ -73,6 +73,7 @@ endif()
 if(${use_mqtt})
     add_unittest_directory(iothubtransportmqtt_ut)
     add_unittest_directory(iothubtransport_mqtt_common_ut)
+    add_unittest_directory(iothubtransport_mqtt_common_int_ut)
     add_unittest_directory(iothubtransportmqtt_ws_ut)
 
     # e2e tests
@@ -138,6 +139,19 @@ endif()
     add_longhaul_test_directory(longhaul_amqp_device_methods)
     add_longhaul_test_directory(longhaul_amqp_device_twin_desired)
     add_longhaul_test_directory(longhaul_amqp_device_twin_reported)
+    add_longhaul_test_directory(longhaul_resource_cleanup)
+endif()
+
+
+if (NOT DEFINED MACOSX AND DEFINED use_schannel AND DEFINED use_socketio)
+  if (NOT ${use_schannel} AND NOT ${use_socketio})
+    if (${use_mqtt})
+      add_unittest_directory(iothubclient_fuzz_mqtt)
+    endif()
+    if (${use_amqp})
+      add_unittest_directory(iothubclient_fuzz_amqp)
+    endif()
+  endif()
 endif()
 
 add_unittest_directory(version_ut)

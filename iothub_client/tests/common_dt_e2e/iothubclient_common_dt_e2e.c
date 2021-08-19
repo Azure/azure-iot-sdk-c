@@ -541,12 +541,19 @@ static void device_desired_deinit(DEVICE_DESIRED_DATA *device)
     }
 }
 
-void client_create_with_properies_and_send_d2c(MAP_HANDLE mapHandle)
+void client_create_with_properies_and_send_d2c(IOTHUB_PROVISIONED_DEVICE* deviceToUse, MAP_HANDLE mapHandle)
 {
     IOTHUB_MESSAGE_HANDLE msgHandle;
 
-    const char* messageStr = "Happy little message";
-    msgHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)messageStr, strlen(messageStr));
+    char messageStr[512];
+    int len = snprintf(messageStr, sizeof(messageStr), "Happy little message from device '%s'", deviceToUse->deviceId);
+    if (len < 0 || len == sizeof(messageStr))
+    {
+        ASSERT_FAIL("messageStr is not large enough!");
+        return;
+    }
+
+    msgHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)messageStr, len);
     ASSERT_IS_NOT_NULL(msgHandle, "Could not create the D2C message to be sent");
 
     MAP_HANDLE msgMapHandle = IoTHubMessage_Properties(msgHandle);
@@ -932,7 +939,7 @@ void dt_e2e_send_reported_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRANSPORT_P
         ASSERT_FAIL("Map_AddOrUpdate failed for AzIoTHub_FaultOperationDelayInSecs!");
     }
     (void)printf("Send fault control message...\r\n");
-    client_create_with_properies_and_send_d2c(propMap);
+    client_create_with_properies_and_send_d2c(deviceToUse, propMap);
     Map_Destroy(propMap);
 
     ThreadAPI_Sleep(3000);
@@ -1045,7 +1052,7 @@ void dt_e2e_get_complete_desired_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRAN
         ASSERT_FAIL("Map_AddOrUpdate failed for AzIoTHub_FaultOperationDelayInSecs!");
     }
     (void)printf("Send fault control message...\r\n");
-    client_create_with_properies_and_send_d2c(propMap);
+    client_create_with_properies_and_send_d2c(deviceToUse, propMap);
     Map_Destroy(propMap);
 
     ThreadAPI_Sleep(3000);

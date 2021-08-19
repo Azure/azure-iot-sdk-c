@@ -167,14 +167,13 @@ static D2C_EVENT_SEND_RESULT get_d2c_event_send_result_from(TELEMETRY_MESSENGER_
 
 static void on_event_send_complete_messenger_callback(IOTHUB_MESSAGE_LIST* iothub_message, TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT ev_send_comp_result, void* context)
 {
-    if (iothub_message == NULL || context == NULL)
+    DEVICE_SEND_EVENT_TASK* send_task = (DEVICE_SEND_EVENT_TASK*)context;
+    if (iothub_message == NULL || send_task == NULL)
     {
-        LogError("on_event_send_complete_messenger_callback was invoked, but either iothub_message (%p) or context (%p) are NULL", iothub_message, context);
+        LogError("on_event_send_complete_messenger_callback was invoked, but either iothub_message (%p) or context (%p) are NULL", iothub_message, send_task);
     }
     else
     {
-        DEVICE_SEND_EVENT_TASK* send_task = (DEVICE_SEND_EVENT_TASK*)context;
-
         // Codes_SRS_DEVICE_09_059: [If `ev_send_comp_result` is TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_OK, D2C_EVENT_SEND_COMPLETE_RESULT_OK shall be reported as `event_send_complete`]
         // Codes_SRS_DEVICE_09_060: [If `ev_send_comp_result` is TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE, D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE shall be reported as `event_send_complete`]
         // Codes_SRS_DEVICE_09_061: [If `ev_send_comp_result` is TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING, D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING shall be reported as `event_send_complete`]
@@ -187,7 +186,10 @@ static void on_event_send_complete_messenger_callback(IOTHUB_MESSAGE_LIST* iothu
         {
             send_task->on_event_send_complete_callback(iothub_message, device_send_result, send_task->on_event_send_complete_context);
         }
+    }
 
+    if (send_task)
+    {
         // Codes_SRS_DEVICE_09_065: [The memory allocated for `send_task` shall be released]
         free(send_task);
     }
@@ -332,7 +334,7 @@ static void on_get_twin_completed(TWIN_UPDATE_TYPE update_type, const char* payl
 {
     (void)update_type;
 
-    if (payload == NULL || context == NULL)
+    if (context == NULL)
     {
         LogError("Invalid argument (context=%p, payload=%p)", context, payload);
     }
@@ -342,7 +344,6 @@ static void on_get_twin_completed(TWIN_UPDATE_TYPE update_type, const char* payl
 
         // get-twin-async always returns a complete twin json.
         twin_ctx->on_get_twin_completed_callback(DEVICE_TWIN_UPDATE_TYPE_COMPLETE, (const unsigned char*)payload, size, twin_ctx->context);
-
         free(twin_ctx);
     }
 }
@@ -1819,4 +1820,38 @@ int amqp_device_get_twin_async(AMQP_DEVICE_HANDLE handle, DEVICE_TWIN_UPDATE_REC
     }
 
     return result;
+}
+
+DEVICE_MESSAGE_DISPOSITION_INFO* amqp_device_clone_message_disposition_info(DEVICE_MESSAGE_DISPOSITION_INFO* disposition_info)
+{
+    DEVICE_MESSAGE_DISPOSITION_INFO* clone;
+
+    if ((clone = calloc(1, sizeof(DEVICE_MESSAGE_DISPOSITION_INFO))) == NULL)
+    {
+        LogError("Failed clonning DEVICE_MESSAGE_DISPOSITION_INFO");
+    }
+    else if (mallocAndStrcpy_s(&clone->source, disposition_info->source) != 0)
+    {
+        LogError("Failed clonning DEVICE_MESSAGE_DISPOSITION_INFO->source");
+        free(clone);
+        clone = NULL;
+    }
+    else
+    {
+        clone->message_id = disposition_info->message_id;
+    }
+
+    return clone;
+}
+
+void amqp_device_destroy_message_disposition_info(DEVICE_MESSAGE_DISPOSITION_INFO* disposition_info)
+{
+    if (disposition_info == NULL)
+    {
+        LogError("Argument is invalid (disposition_info is NULL)");
+    }
+    else
+    {
+        destroy_device_disposition_info(disposition_info);
+    }
 }

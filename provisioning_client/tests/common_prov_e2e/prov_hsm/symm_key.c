@@ -20,12 +20,12 @@ typedef struct SYMM_KEY_INFO_TAG
     char reg_id[128];
 } SYMM_KEY_INFO;
 
-void initialize_symm_key()
+void initialize_symm_key(void)
 {
     // Generate crypto key
 }
 
-SYMM_KEY_INFO_HANDLE symm_key_info_create()
+SYMM_KEY_INFO_HANDLE symm_key_info_create(void)
 {
     SYMM_KEY_INFO* result;
     /* Codes_SRS_HSM_CLIENT_TPM_07_002: [ On success hsm_client_tpm_create shall allocate a new instance of the secure device tpm interface. ] */
