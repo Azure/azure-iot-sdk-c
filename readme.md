@@ -247,7 +247,7 @@ Below is a table showing the mapping of the LTS branches to the packages release
 
 Below is a hypothetical example of versioning and tagging for the C SDK. `minor` versions are distinguished by color.
 
-![Release Node Drawing](/doc/media/ReleaseNodeDrawing.jpg)
+![Release Node Drawing](https://github.com/Azure/azure-iot-sdk-c/tree/master/doc/media/ReleaseNodeDrawing.jpg)
 
 - The main branch is at version 1.8.2.
 - February 23, 2020: A new feature is released on main. The version bumps to 1.9.0, is tagged `1.9.0`, and the release is tagged `2020-02-23`.
