@@ -4643,7 +4643,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_NULL_data_fails
     IOTHUB_DEVICE_HANDLE registered_devices[1];
     registered_devices[0] = register_device(handle, device_config, &TEST_waitingToSend, true);
 
-    crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, false);
+    crank_transport_ready_after_create(handle, &TEST_waitingToSend, 0, false, true, 1, TEST_current_time, false, false);
     umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
 

@@ -674,11 +674,11 @@ static int retrieveTopicType(PMQTTTRANSPORT_HANDLE_DATA transportData, const cha
         *type = IOTHUB_TYPE_EVENT_QUEUE;
         result = 0;
     }
-    else if (InternStrnicmp(topic_resp, TOPIC_DEVICE_STREAMS_POST, strlen(TOPIC_DEVICE_STREAMS_POST) - 1) == 0)
+    else if (InternStrnicmp(topicName, TOPIC_DEVICE_STREAMS_POST, strlen(TOPIC_DEVICE_STREAMS_POST) - 1) == 0)
     {
         type = IOTHUB_TYPE_DEVICE_STREAM_REQUEST;
     }
-    else if (InternStrnicmp(topic_resp, TOPIC_DEVICE_STREAMS_RESP, strlen(TOPIC_DEVICE_STREAMS_RESP) - 1) == 0)
+    else if (InternStrnicmp(topicName, TOPIC_DEVICE_STREAMS_RESP, strlen(TOPIC_DEVICE_STREAMS_RESP) - 1) == 0)
     {
         type = IOTHUB_TYPE_DEVICE_STREAM_RESPONSE;
     }
@@ -2395,7 +2395,7 @@ static MQTT_CLIENT_ACK_OPTION mqttNotificationCallback(MQTT_MESSAGE_HANDLE msgHa
             }
 			else if (type == IOTHUB_TYPE_DEVICE_STREAM_REQUEST)
 			{
-				processDeviceStreamRequest(transportData, msgHandle, topic_resp);
+				processDeviceStreamRequest(transportData, msgHandle, topicName);
 			}
 			else if (type == IOTHUB_TYPE_DEVICE_STREAM_RESPONSE)
 			{
