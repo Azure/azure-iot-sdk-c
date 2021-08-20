@@ -676,11 +676,11 @@ static int retrieveTopicType(PMQTTTRANSPORT_HANDLE_DATA transportData, const cha
     }
     else if (InternStrnicmp(topicName, TOPIC_DEVICE_STREAMS_POST, strlen(TOPIC_DEVICE_STREAMS_POST) - 1) == 0)
     {
-        type = IOTHUB_TYPE_DEVICE_STREAM_REQUEST;
+        *type = IOTHUB_TYPE_DEVICE_STREAM_REQUEST;
     }
     else if (InternStrnicmp(topicName, TOPIC_DEVICE_STREAMS_RESP, strlen(TOPIC_DEVICE_STREAMS_RESP) - 1) == 0)
     {
-        type = IOTHUB_TYPE_DEVICE_STREAM_RESPONSE;
+        *type = IOTHUB_TYPE_DEVICE_STREAM_RESPONSE;
     }
     else
     {
