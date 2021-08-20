@@ -26,9 +26,11 @@ For constained devices - where memory is measured in kilobytes and not megabytes
   - [Support](#support)
   - [Read more](#read-more)
   - [SDK Folder Structure](#sdk-folder-structure)
-- [Long Term Support](#long-term-support)
-  - [Schedule<sup>1</sup>](#schedulesup1sup)
-    - [Planned Release Schedule](#planned-release-schedule)
+- [Releases](#releases)
+  - [Features and security updates](#features-security-updates)
+  - [Long Term Support](#long-term-support)
+    - [LTS Schedule](#lts-schedule)
+  - [Release example](#release-example)
 
 ## Critical Upcoming Change Notice
 
@@ -218,32 +220,47 @@ Contains libraries that enable interactions with the Device Proviosining service
 Contains libraries that provide modeling and JSON serialization capabilities on top of the raw messaging library.
 
 
-# Long Term Support
+# Releases
 
-The project offers a Long Term Support (LTS) version to allow users that do not need the latest features to be shielded from unwanted changes.
+The C SDK offers releases for new features, security updates, and Long Term Support (LTS). General bug fixes will not receive a separate release. Versioning follows [semantic versioning](https://semver.org/), `x.y.z.` or `major.minor.patch`. Any time the version is updated, it will be tagged `x.y.z`.
 
-A new LTS version will be created every 6 months. The lifetime of an LTS branch is currently planned for one year. LTS branches receive all bug fixes that fall in one of these categories:
+## Features and security updates
 
-- security bugfixes
-- critical bugfixes
+New features and security updates will be released on the main branch. These releases will be tagged using the date formatted `yyyy-mm-dd`. A feature release will bump the `minor` version and reset the `patch` version to 0. A security update will bump the `patch` version only.
 
-No new features will be picked up in an LTS branch.
+## Long Term Support
 
-LTS branches are named lts_*mm*_*yyyy*, where *mm* and *yyyy* are the month and year when the branch was created. An example of such a branch is *lts_07_2017*.
+New LTS releases branch off of main every six months and will be tagged `LTS_<mm_yyyy>_Ref01`. A new LTS release will inherit the existing version from the main branch. LTS branches are named `lts_mm_yyyy` for the month and year the branch was created. The lifetime of an LTS branch is one year, afterwhich the branch is deleted.
 
-## Schedule
+An updated LTS release will occur when a security fix is ported from the main branch. These updated releases will be tagged in the same manor, except for a bumped Ref##, e.g. `LTS_<mm_yyyy>_Ref02`. The `patch` version will also be bumped. No new features and no general bug fixes will be ported to an LTS update.
 
-Below is a table showing the mapping of the LTS branches to the packages released
+### LTS schedule
+
+Below is a table showing the mapping of the LTS branches to the packages released.
 
   | Package | Github Branch | LTS Tag | LTS Status | LTS Start Date | Maintenance End Date | Removal Date |
   | :-----: | :-----------: | :-----: | :--------: | :------------: | :------------------: | :----------: |
-  | vcpkg: 2021-08-11 | lts_07_2021 | LTS_07_2021_Ref01 | Active | 2021-08-11 | 2022-08-11 | 2022-08-11 |
-  | vcpkg: 2021-01-21 | lts_01_2021 | LTS_01_2021_Ref01 | Active | 2021-01-21 | 2022-01-21 | 2022-01-21 | |
+  | vcpkg: 2021-08-18 | lts_07_2021 | LTS_07_2021_Ref01 | Active | 2021-08-11 | 2022-08-11 | 2022-08-11 |
+  | vcpkg: (unreleased) | lts_01_2021 | LTS_01_2021_Ref01 | Active | 2021-01-21 | 2022-01-21 | 2022-01-21 | |
 
 ---
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
 Microsoft collects performance and usage information which may be used to provide and improve Microsoft products and services and enhance your experience.  To learn more, review the [privacy statement](https://go.microsoft.com/fwlink/?LinkId=521839&clcid=0x409).
+
+## Release example
+
+Below is a hypothetical example of versioning and tagging for the C SDK. `minor` versions are distinguished by color.
+
+![Release Node Drawing](/doc/media/ReleaseNodeDrawing.jpg)
+
+- The main branch is at version 1.8.2.
+- February 23, 2020: A new feature is released on main. The version bumps to 1.9.0, is tagged `1.9.0`, and the release is tagged `2020-02-23`.
+- July 9, 2020: A new LTS release occurs. A new release branch `lts_07_2020` is created, the version remains 1.9.0, and the LTS release is tagged `LTS_07_2020_Ref01`. The main branch bumps to 1.10.0 and is tagged `1.10.0`.
+- August 2, 2020: A new feature is released on main: The main branch has already been bumped for an upcoming release so the version is unchanged. The release is tagged `2020-08-02`.
+- September 28, 2020: A security update is released: The version on main bumps to 1.10.1, is tagged `1.10.1`, and the release is tagged `2020-09-28`. The security update is ported to the lts branch `lts_07_2020` (and any other existing LTS branch). The lts branch version bumps to 1.9.1, is tagged `1.9.1`, and the updated LTS release is tagged `LTS_07_2020_Ref02`. Any submodules that were part of the security update will be tagged with `LTS_07_2020_Ref02`.
+- December 14, 2020: A new feature is released on main. The version bumps to 1.11.0, is tagged `1.11.0`, and the release is tagged `2020-12-14`.
+
 
 [iot-dev-center]: http://azure.com/iotdev
 [iot-hub-documentation]: https://docs.microsoft.com/azure/iot-hub/
