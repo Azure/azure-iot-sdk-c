@@ -243,11 +243,6 @@ Below is a table showing the mapping of the LTS branches to the packages release
   | vcpkg: 2021-08-18 | lts_07_2021 | LTS_07_2021_Ref01 | Active | 2021-08-11 | 2022-08-11 | 2022-08-11 |
   | vcpkg: (unreleased) | lts_01_2021 | LTS_01_2021_Ref01 | Active | 2021-01-21 | 2022-01-21 | 2022-01-21 | |
 
----
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
-
-Microsoft collects performance and usage information which may be used to provide and improve Microsoft products and services and enhance your experience.  To learn more, review the [privacy statement](https://go.microsoft.com/fwlink/?LinkId=521839&clcid=0x409).
-
 ## Release example
 
 Below is a hypothetical example of versioning and tagging for the C SDK. `minor` versions are distinguished by color.
@@ -261,6 +256,11 @@ Below is a hypothetical example of versioning and tagging for the C SDK. `minor`
 - September 28, 2020: A security update is released: The version on main bumps to 1.10.1, is tagged `1.10.1`, and the release is tagged `2020-09-28`. The security update is ported to the lts branch `lts_07_2020` (and any other existing LTS branch). The lts branch version bumps to 1.9.1, is tagged `1.9.1`, and the updated LTS release is tagged `LTS_07_2020_Ref02`. Any submodules that were part of the security update will be tagged with `LTS_07_2020_Ref02`.
 - December 14, 2020: A new feature is released on main. The version bumps to 1.11.0, is tagged `1.11.0`, and the release is tagged `2020-12-14`.
 
+---
+
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
+Microsoft collects performance and usage information which may be used to provide and improve Microsoft products and services and enhance your experience.  To learn more, review the [privacy statement](https://go.microsoft.com/fwlink/?LinkId=521839&clcid=0x409).
 
 [iot-dev-center]: http://azure.com/iotdev
 [iot-hub-documentation]: https://docs.microsoft.com/azure/iot-hub/
