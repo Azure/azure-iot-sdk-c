@@ -222,26 +222,26 @@ Contains libraries that provide modeling and JSON serialization capabilities on 
 
 # Releases
 
-The C SDK offers releases for new features, security updates, and Long Term Support (LTS). General bug fixes will not receive a separate release. Versioning follows [semantic versioning](https://semver.org/), `x.y.z.` or `major.minor.patch`. Any time the version is updated, it will be tagged `x.y.z`.
+The C SDK offers releases for new features, critical bug fixes, and Long Term Support (LTS). General bug fixes will not receive a separate release. Versioning follows [semantic versioning](https://semver.org/), `x.y.z.` or `major.minor.patch`. Any time the version is updated, it will be tagged `x.y.z`.
 
-## Features and security updates
+## New features and critical bug fixes
 
-New features and security updates will be released on the main branch. These releases will be tagged using the date formatted `yyyy-mm-dd`. A feature release will bump the `minor` version and reset the `patch` version to 0. A security update will bump the `patch` version only.
+New features and critical bug fixes (including security updates) will be released on the main branch. These releases will be tagged using the date formatted `yyyy-mm-dd`. A feature release will bump the `minor` version and reset the `patch` version to 0. A critical bug fix will bump the `patch` version only.
 
 ## Long Term Support
 
 New LTS releases branch off of main every six months and will be tagged `LTS_<mm_yyyy>_Ref01`. A new LTS release will inherit the existing version from the main branch. LTS branches are named `lts_mm_yyyy` for the month and year the branch was created. The lifetime of an LTS branch is one year, afterwhich the branch is deleted.
 
-An updated LTS release will occur when a security fix is ported from the main branch. These updated releases will be tagged in the same manor, except for a bumped Ref##, e.g. `LTS_<mm_yyyy>_Ref02`. The `patch` version will also be bumped. No new features and no general bug fixes will be ported to an LTS update.
+An updated LTS release will occur when a critical bug fix (including security updates) is ported from the main branch. These updated releases will be tagged in the same manor, except for a bumped Ref##, e.g. `LTS_<mm_yyyy>_Ref02`. The `patch` version will also be bumped. No new features and no general bug fixes will be ported to an LTS update.
 
 ### LTS schedule
 
 Below is a table showing the mapping of the LTS branches to the packages released.
 
-  | Package | Github Branch | LTS Tag | LTS Status | LTS Start Date | Maintenance End Date | Removal Date |
-  | :-----: | :-----------: | :-----: | :--------: | :------------: | :------------------: | :----------: |
-  | vcpkg: 2021-08-18 | lts_07_2021 | LTS_07_2021_Ref01 | Active | 2021-08-11 | 2022-08-11 | 2022-08-11 |
-  | vcpkg: (unreleased) | lts_01_2021 | LTS_01_2021_Ref01 | Active | 2021-01-21 | 2022-01-21 | 2022-01-21 | |
+  | Package | GitHub Branch | LTS Tag | LTS Start Date | Maintenance End Date |
+  | :-----: | :-----------: | :-----: | :------------: | :------------------: |
+  | vcpkg: 2021-08-18 | lts_07_2021 | LTS_07_2021_Ref01 | 2021-08-11 | 2022-08-11 |
+  | vcpkg: (unreleased) | lts_01_2021 | LTS_01_2021_Ref01 | 2021-01-21 | 2022-01-21 |
 
 ## Release example
 
