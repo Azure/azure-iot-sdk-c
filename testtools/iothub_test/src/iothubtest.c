@@ -1083,8 +1083,11 @@ static const char* amqp_connection_state_to_string(CONNECTION_STATE connection_s
 
 static void on_connection_state_changed(void* context, CONNECTION_STATE new_connection_state, CONNECTION_STATE previous_connection_state)
 {
-    LogInfo("AMQP connection state changed. new_connection_state: %s (%d), previous_connection_state %s (%d)", 
-        amqp_connection_state_to_string(new_connection_state), new_connection_state, amqp_connection_state_to_string(previous_connection_state), previous_connection_state);
+    if (new_connection_state != previous_connection_state)
+    {
+        LogInfo("AMQP connection state changed. new_connection_state: %s (%d), previous_connection_state %s (%d)", 
+            amqp_connection_state_to_string(new_connection_state), new_connection_state, amqp_connection_state_to_string(previous_connection_state), previous_connection_state);
+    }
 
     IOTHUB_VALIDATION_INFO* devhubValInfo = (IOTHUB_VALIDATION_INFO*)context;
     if (devhubValInfo->isEventListenerConnected && 

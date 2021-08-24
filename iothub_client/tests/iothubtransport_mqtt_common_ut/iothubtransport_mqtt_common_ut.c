@@ -8119,7 +8119,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SendMessageDisposition_Message_NULL_fa
     set_expected_call_for_get_cred_and_devicekey();
     IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransport_MQTT_Common_Register(handle, &TEST_DEVICE_1, config.waitingToSend);
 
-    TEST_MESSAGE_DISPOSITION_CONTEXT* msgDispCtx = malloc(sizeof(TEST_MESSAGE_DISPOSITION_CONTEXT));;
+    TEST_MESSAGE_DISPOSITION_CONTEXT* msgDispCtx = (TEST_MESSAGE_DISPOSITION_CONTEXT*) malloc(sizeof(TEST_MESSAGE_DISPOSITION_CONTEXT));;
     msgDispCtx->packet_id = 10;
     msgDispCtx->qos_value = DELIVER_AT_LEAST_ONCE;
 
@@ -8164,7 +8164,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_SendMessageDisposition_succeeds)
     umock_c_reset_all_calls();
     STRICT_EXPECTED_CALL(IoTHubMessage_GetDispositionContext(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .CopyOutArgumentBuffer_dispositionContext(&msgDispCtxHandle, sizeof(&msgDispCtxHandle));
-    STRICT_EXPECTED_CALL(mqtt_client_send_message_response(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(mqtt_client_send_message_response(IGNORED_PTR_ARG, IGNORED_NUM_ARG, DELIVER_AT_LEAST_ONCE));
     STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
