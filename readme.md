@@ -232,7 +232,7 @@ New features and critical bug fixes (including security updates) will be release
 
 New LTS releases branch off of main every six months and will be tagged `LTS_<mm_yyyy>_Ref01`. A new LTS release will inherit the existing version from the main branch. LTS branches are named `lts_mm_yyyy` for the month and year the branch was created. The lifetime of an LTS branch is one year, afterwhich the branch is deleted.
 
-An updated LTS release will occur when a critical bug fix (including security updates) is ported from the main branch. These updated releases will be tagged in the same manor, except for a bumped Ref##, e.g. `LTS_<mm_yyyy>_Ref02`. The `patch` version will also be bumped. No new features and no general bug fixes will be ported to an LTS update.
+An updated LTS release will occur when a critical bug fix (including security updates) is ported from the main branch. These updated releases will be tagged in the same manner except for a bumped Ref##, e.g. `LTS_<mm_yyyy>_Ref02`. The `patch` version will also be bumped. No new features and no general bug fixes will be ported to an LTS update.
 
 ### LTS schedule
 
