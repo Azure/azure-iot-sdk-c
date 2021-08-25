@@ -1086,6 +1086,7 @@ static void setup_message_recv_with_properties_mocks(
     bool auto_decode, 
     bool msgCbResult)
 {
+
     setup_message_receive_initial_calls(TEST_MQTT_MSG_TOPIC_W_1_PROP, false);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail().SetReturn(TEST_MQTT_MESSAGE_TOPIC);
     EXPECTED_CALL(STRING_TOKENIZER_create_from_char(TEST_MQTT_MSG_TOPIC_W_1_PROP));

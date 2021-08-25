@@ -102,6 +102,7 @@ static const char* REQUEST_ID_PROPERTY = "?$rid=";
 static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtimeutc";
 
 static const char* DISTRIBUTED_TRACING_PROPERTY = "tracestate";
+
 static const char DT_MODEL_ID_TOKEN[] = "model-id";
 static const char DEFAULT_IOTHUB_PRODUCT_IDENTIFIER[] = CLIENT_DEVICE_TYPE_PREFIX "/" IOTHUB_SDK_VERSION;
 

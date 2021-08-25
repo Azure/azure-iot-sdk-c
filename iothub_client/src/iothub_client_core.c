@@ -2682,6 +2682,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SendMessageDisposition(IOTHUB_CLIENT_CORE_
 
     return result;
 }
+
 IOTHUB_CLIENT_RESULT IoTHubClientCore_EnablePolicyConfiguration(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle, POLICY_CONFIGURATION_TYPE policyType, bool enablePolicyConfiguration)
 {
     IOTHUB_CLIENT_RESULT result;
