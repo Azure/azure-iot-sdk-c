@@ -27,6 +27,8 @@
 #include "azure_uamqp_c/message.h"
 #include "azure_uamqp_c/messaging.h"
 
+#include "iothub_message.h"
+#include "internal/iothub_message_private.h"
 #include "iothub_client_options.h"
 #include "internal/iothub_client_private.h"
 #include "internal/iothubtransportamqp_methods.h"
@@ -148,12 +150,7 @@ typedef struct AMQP_TRANSPORT_DEVICE_INSTANCE_TAG
     void* transport_ctx;
 } AMQP_TRANSPORT_DEVICE_INSTANCE;
 
-typedef struct MESSAGE_DISPOSITION_CONTEXT_TAG
-{
-    AMQP_TRANSPORT_DEVICE_INSTANCE* device_state;
-    char* link_name;
-    delivery_number message_id;
-} MESSAGE_DISPOSITION_CONTEXT;
+typedef DEVICE_MESSAGE_DISPOSITION_INFO MESSAGE_DISPOSITION_CONTEXT;
 
 typedef struct AMQP_TRANSPORT_DEVICE_TWIN_CONTEXT_TAG
 {
@@ -356,9 +353,17 @@ static bool is_device_registered_ex(SINGLYLINKEDLIST_HANDLE registered_devices, 
 // @returns     true if the device is already in the list, false otherwise.
 static bool is_device_registered(AMQP_TRANSPORT_DEVICE_INSTANCE* amqp_device_instance)
 {
-    LIST_ITEM_HANDLE list_item;
-    const char* device_id = STRING_c_str(amqp_device_instance->device_id);
-    return is_device_registered_ex(amqp_device_instance->transport_instance->registered_devices, device_id, &list_item);
+    if (amqp_device_instance == NULL)
+    {
+        LogError("AMQP_TRANSPORT_DEVICE_INSTANCE is NULL");
+        return false;
+    }
+    else
+    {
+        LIST_ITEM_HANDLE list_item;
+        const char* device_id = STRING_c_str(amqp_device_instance->device_id);
+        return is_device_registered_ex(amqp_device_instance->transport_instance->registered_devices, device_id, &list_item);
+    }
 }
 
 static size_t get_number_of_registered_devices(AMQP_TRANSPORT_INSTANCE* transport)
@@ -379,58 +384,6 @@ static size_t get_number_of_registered_devices(AMQP_TRANSPORT_INSTANCE* transpor
 
 // ---------- Callbacks ---------- //
 
-static MESSAGE_CALLBACK_INFO* MESSAGE_CALLBACK_INFO_Create(IOTHUB_MESSAGE_HANDLE message, DEVICE_MESSAGE_DISPOSITION_INFO* disposition_info, AMQP_TRANSPORT_DEVICE_INSTANCE* device_state)
-{
-    MESSAGE_CALLBACK_INFO* result;
-
-    if ((result = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO))) == NULL)
-    {
-        LogError("Failed creating MESSAGE_CALLBACK_INFO (malloc failed)");
-    }
-    else
-    {
-        memset(result, 0, sizeof(MESSAGE_CALLBACK_INFO));
-        MESSAGE_DISPOSITION_CONTEXT* tc;
-
-        if ((tc = (MESSAGE_DISPOSITION_CONTEXT*)malloc(sizeof(MESSAGE_DISPOSITION_CONTEXT))) == NULL)
-        {
-            LogError("Failed creating MESSAGE_DISPOSITION_CONTEXT (malloc failed)");
-            free(result);
-            result = NULL;
-        }
-        else
-        {
-            memset(tc, 0, sizeof(MESSAGE_DISPOSITION_CONTEXT));
-            if (mallocAndStrcpy_s(&(tc->link_name), disposition_info->source) == 0)
-            {
-                tc->device_state = device_state;
-                tc->message_id = (delivery_number)disposition_info->message_id;
-
-                result->messageHandle = message;
-                result->transportContext = tc;
-            }
-            else
-            {
-                LogError("Failed creating MESSAGE_CALLBACK_INFO (mallocAndStrcyp_s failed)");
-                free(tc);
-                free(result);
-                result = NULL;
-            }
-        }
-    }
-
-    return result;
-}
-
-static void MESSAGE_CALLBACK_INFO_Destroy(MESSAGE_CALLBACK_INFO* message_callback_info)
-{
-    if (message_callback_info->transportContext != NULL)
-    {
-        free(message_callback_info->transportContext->link_name);
-        free(message_callback_info->transportContext);
-    }
-    free(message_callback_info);
-}
 
 static DEVICE_MESSAGE_DISPOSITION_RESULT get_device_disposition_result_from(IOTHUBMESSAGE_DISPOSITION_RESULT iothubclient_disposition_result)
 {
@@ -459,24 +412,36 @@ static DEVICE_MESSAGE_DISPOSITION_RESULT get_device_disposition_result_from(IOTH
 
 static DEVICE_MESSAGE_DISPOSITION_RESULT on_message_received(IOTHUB_MESSAGE_HANDLE message, DEVICE_MESSAGE_DISPOSITION_INFO* disposition_info, void* context)
 {
-    AMQP_TRANSPORT_DEVICE_INSTANCE* amqp_device_instance = (AMQP_TRANSPORT_DEVICE_INSTANCE*)context;
     DEVICE_MESSAGE_DISPOSITION_RESULT device_disposition_result;
-    MESSAGE_CALLBACK_INFO* message_data;
+    MESSAGE_DISPOSITION_CONTEXT* dispositionContextClone;
 
-    if ((message_data = MESSAGE_CALLBACK_INFO_Create(message, disposition_info, amqp_device_instance)) == NULL)
+    if ((dispositionContextClone = amqp_device_clone_message_disposition_info(disposition_info)) == NULL)
     {
-        LogError("Failed processing message received (failed to assemble callback info)");
+        LogError("Failed processing message received (failed creating message disposition context)");
+        IoTHubMessage_Destroy(message);
+        device_disposition_result = DEVICE_MESSAGE_DISPOSITION_RESULT_RELEASED;
+    }
+    else if (IoTHubMessage_SetDispositionContext(
+        message, 
+        (MESSAGE_DISPOSITION_CONTEXT_HANDLE)dispositionContextClone, 
+        (MESSAGE_DISPOSITION_CONTEXT_DESTROY_FUNCTION)amqp_device_destroy_message_disposition_info) != IOTHUB_MESSAGE_OK)
+    {
+        LogError("Failed setting disposition context in IOTHUB_MESSAGE_HANDLE");
+        amqp_device_destroy_message_disposition_info(dispositionContextClone);
+        IoTHubMessage_Destroy(message);
         device_disposition_result = DEVICE_MESSAGE_DISPOSITION_RESULT_RELEASED;
     }
     else
     {
+        AMQP_TRANSPORT_DEVICE_INSTANCE* amqp_device_instance = (AMQP_TRANSPORT_DEVICE_INSTANCE*)context;
+
         // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_089: [IoTHubClientCore_LL_MessageCallback() shall be invoked passing the client and the incoming message handles as parameters]
-        if (amqp_device_instance->transport_callbacks.msg_cb(message_data, amqp_device_instance->transport_ctx) != true)
+        if (amqp_device_instance->transport_callbacks.msg_cb(message, amqp_device_instance->transport_ctx) != true)
         {
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_090: [If IoTHubClientCore_LL_MessageCallback() fails, on_message_received_callback shall return DEVICE_MESSAGE_DISPOSITION_RESULT_RELEASED]
             LogError("Failed processing message received (IoTHubClientCore_LL_MessageCallback failed)");
+            // This will destroy the disposition context as well.
             IoTHubMessage_Destroy(message);
-            MESSAGE_CALLBACK_INFO_Destroy(message_data);
             device_disposition_result = DEVICE_MESSAGE_DISPOSITION_RESULT_RELEASED;
         }
         else
@@ -601,7 +566,7 @@ static void on_device_get_twin_completed_callback(DEVICE_TWIN_UPDATE_TYPE update
     (void)update_type;
 
     // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_158: [ If `message` or `context` are NULL, the callback shall do nothing and return. ]
-    if (message == NULL || context == NULL)
+    if (context == NULL)
     {
         LogError("Invalid argument (message=%p, context=%p)", message, context);
     }
@@ -888,7 +853,7 @@ static void prepare_device_for_connection_retry(AMQP_TRANSPORT_DEVICE_INSTANCE* 
     registered_device->number_of_send_event_complete_failures = 0;
 }
 
-static void prepare_for_connection_retry(AMQP_TRANSPORT_INSTANCE* transport_instance)
+void prepare_for_connection_retry(AMQP_TRANSPORT_INSTANCE* transport_instance)
 {
     LogInfo("Preparing transport for re-connection");
 
@@ -1344,36 +1309,6 @@ static void internal_destroy_instance(AMQP_TRANSPORT_INSTANCE* instance)
 
         free(instance);
     }
-}
-
-// ---------- SendMessageDisposition helpers ---------- //
-
-static DEVICE_MESSAGE_DISPOSITION_INFO* create_device_message_disposition_info_from(MESSAGE_CALLBACK_INFO* message_data)
-{
-    DEVICE_MESSAGE_DISPOSITION_INFO* result;
-
-    if ((result = (DEVICE_MESSAGE_DISPOSITION_INFO*)malloc(sizeof(DEVICE_MESSAGE_DISPOSITION_INFO))) == NULL)
-    {
-        LogError("Failed creating DEVICE_MESSAGE_DISPOSITION_INFO (malloc failed)");
-    }
-    else if (mallocAndStrcpy_s(&result->source, message_data->transportContext->link_name) != RESULT_OK)
-    {
-        LogError("Failed creating DEVICE_MESSAGE_DISPOSITION_INFO (mallocAndStrcpy_s failed)");
-        free(result);
-        result = NULL;
-    }
-    else
-    {
-        result->message_id = message_data->transportContext->message_id;
-    }
-
-    return result;
-}
-
-static void destroy_device_message_disposition_info(DEVICE_MESSAGE_DISPOSITION_INFO* device_message_disposition_info)
-{
-    free(device_message_disposition_info->source);
-    free(device_message_disposition_info);
 }
 
 
@@ -2484,58 +2419,50 @@ STRING_HANDLE IoTHubTransport_AMQP_Common_GetHostname(TRANSPORT_LL_HANDLE handle
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SendMessageDisposition(MESSAGE_CALLBACK_INFO* message_data, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
+IOTHUB_CLIENT_RESULT IoTHubTransport_AMQP_Common_SendMessageDisposition(IOTHUB_DEVICE_HANDLE handle, IOTHUB_MESSAGE_HANDLE message_handle, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
 {
     IOTHUB_CLIENT_RESULT result;
-    if (message_data == NULL)
+    if (message_handle == NULL || handle == NULL)
     {
         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_001: [If messageData is NULL, IoTHubTransport_AMQP_Common_SendMessageDisposition shall fail and return IOTHUB_CLIENT_INVALID_ARG.] */
-        LogError("Failed sending message disposition (message_data is NULL)");
+        LogError("Failed sending message disposition (handle=%p, message_handle=%p)", handle, message_handle);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
     {
+        MESSAGE_DISPOSITION_CONTEXT_HANDLE device_message_disposition_info;
+
         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_002: [If any of the messageData fields are NULL, IoTHubTransport_AMQP_Common_SendMessageDisposition shall fail and return IOTHUB_CLIENT_INVALID_ARG.] */
-        if (message_data->messageHandle == NULL || message_data->transportContext == NULL)
+        // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_112: [A DEVICE_MESSAGE_DISPOSITION_INFO instance shall be created with a copy of the `link_name` and `message_id` contained in `message_data`]
+        if (IoTHubMessage_GetDispositionContext(message_handle, &device_message_disposition_info) != IOTHUB_MESSAGE_OK ||
+            device_message_disposition_info == NULL)
         {
-            LogError("Failed sending message disposition (message_data->messageHandle (%p) or message_data->transportContext (%p) are NULL)", message_data->messageHandle, message_data->transportContext);
+            // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_113: [If the DEVICE_MESSAGE_DISPOSITION_INFO fails to be created, `IoTHubTransport_AMQP_Common_SendMessageDisposition()` shall fail and return IOTHUB_CLIENT_ERROR]
+            LogError("Invalid message handle (no disposition context found)");
             result = IOTHUB_CLIENT_INVALID_ARG;
         }
         else
         {
-            DEVICE_MESSAGE_DISPOSITION_INFO* device_message_disposition_info;
+            AMQP_TRANSPORT_DEVICE_INSTANCE* amqp_device_instance = (AMQP_TRANSPORT_DEVICE_INSTANCE*)handle;
 
             /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_004: [IoTHubTransport_AMQP_Common_SendMessageDisposition shall convert the given IOTHUBMESSAGE_DISPOSITION_RESULT to the equivalent AMQP_VALUE and will return the result of calling messagereceiver_send_message_disposition. ] */
             DEVICE_MESSAGE_DISPOSITION_RESULT device_disposition_result = get_device_disposition_result_from(disposition);
 
-            // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_112: [A DEVICE_MESSAGE_DISPOSITION_INFO instance shall be created with a copy of the `link_name` and `message_id` contained in `message_data`]
-            if ((device_message_disposition_info = create_device_message_disposition_info_from(message_data)) == NULL)
+            /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_003: [IoTHubTransport_AMQP_Common_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR if the POST message fails, otherwise return IOTHUB_CLIENT_OK.] */
+            if (amqp_device_send_message_disposition(amqp_device_instance->device_handle, (DEVICE_MESSAGE_DISPOSITION_INFO*)device_message_disposition_info, device_disposition_result) != RESULT_OK)
             {
-                // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_113: [If the DEVICE_MESSAGE_DISPOSITION_INFO fails to be created, `IoTHubTransport_AMQP_Common_SendMessageDisposition()` shall fail and return IOTHUB_CLIENT_ERROR]
-                LogError("Device '%s' failed sending message disposition (failed creating DEVICE_MESSAGE_DISPOSITION_RESULT)", STRING_c_str(message_data->transportContext->device_state->device_id));
+                LogError("Device '%s' failed sending message disposition (amqp_device_send_message_disposition failed)", STRING_c_str(amqp_device_instance->device_id));
                 result = IOTHUB_CLIENT_ERROR;
             }
             else
             {
-                /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_003: [IoTHubTransport_AMQP_Common_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR if the POST message fails, otherwise return IOTHUB_CLIENT_OK.] */
-                if (amqp_device_send_message_disposition(message_data->transportContext->device_state->device_handle, device_message_disposition_info, device_disposition_result) != RESULT_OK)
-                {
-                    LogError("Device '%s' failed sending message disposition (amqp_device_send_message_disposition failed)", STRING_c_str(message_data->transportContext->device_state->device_id));
-                    result = IOTHUB_CLIENT_ERROR;
-                }
-                else
-                {
-                    IoTHubMessage_Destroy(message_data->messageHandle);
-                    result = IOTHUB_CLIENT_OK;
-                }
-
-                // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_114: [`IoTHubTransport_AMQP_Common_SendMessageDisposition()` shall destroy the DEVICE_MESSAGE_DISPOSITION_INFO instance]
-                destroy_device_message_disposition_info(device_message_disposition_info);
+                result = IOTHUB_CLIENT_OK;
             }
         }
-
-        MESSAGE_CALLBACK_INFO_Destroy(message_data);
     }
+
+    // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_114: [`IoTHubTransport_AMQP_Common_SendMessageDisposition()` shall destroy the DEVICE_MESSAGE_DISPOSITION_INFO instance]
+    IoTHubMessage_Destroy(message_handle);
 
     return result;
 }

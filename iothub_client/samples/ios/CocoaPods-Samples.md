@@ -10,6 +10,10 @@ may be found [here](./CocoaPods.md).
 * An IoT Hub and a connection string for a client device.
 * [Azure IoT Explorer](https://github.com/Azure/azure-iot-explorer) recommended.
 
+For x64 run `sudo gem install cocoapods`
+
+For Apple M1 run `arch -x86_64 sudo gem install cocoapods ffi`
+
 #### 1. Clone the Azure IoT iOS Sample
 
 Change to a location where you would like your samples, and run
@@ -32,12 +36,15 @@ Run this command:
 
 `pod install`
 
+For Apple M1 run `arch -x86_64 pod install`
+
 This will cause CocoaPods to read the `Podfile` and install the pods accordingly.
 
 #### 4. Open the XCode workspace
 
 Double-click the `MQTT Client Sample.xcworkspace` workspace file (**not** the project file) to
 open XCode and select your build target device (iPhone 7 simulator works well).
+(Or in the terminal run `open MQTT Client Sample.xcworkspace`.)
 
 Make sure you open the workspace, and not the similarly-named (without the `WS` suffix) project.
 

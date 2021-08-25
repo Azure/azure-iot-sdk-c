@@ -94,7 +94,7 @@ static void sendMessage(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const unsign
     {
         MAP_HANDLE propMap = IoTHubMessage_Properties(messageHandle);
         (void)sprintf_s(propText, sizeof(propText), myWeather->Temperature > 28 ? "true" : "false");
-        if (Map_AddOrUpdate(propMap, "temperatureAlert", propText) != MAP_OK)
+        if (propMap == NULL || Map_AddOrUpdate(propMap, "temperatureAlert", propText) != MAP_OK)
         {
             (void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");
         }

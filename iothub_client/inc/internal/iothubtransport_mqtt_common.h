@@ -43,7 +43,7 @@ MOCKABLE_FUNCTION(, TRANSPORT_LL_HANDLE, IoTHubTransport_MQTT_Common_Register, T
 MOCKABLE_FUNCTION(, void, IoTHubTransport_MQTT_Common_Unregister, TRANSPORT_LL_HANDLE, deviceHandle);
 MOCKABLE_FUNCTION(, int, IoTHubTransport_MQTT_Common_SetRetryPolicy, TRANSPORT_LL_HANDLE, handle, IOTHUB_CLIENT_RETRY_POLICY, retryPolicy, size_t, retryTimeoutLimitInSeconds);
 MOCKABLE_FUNCTION(, STRING_HANDLE, IoTHubTransport_MQTT_Common_GetHostname, TRANSPORT_LL_HANDLE, handle);
-MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubTransport_MQTT_Common_SendMessageDisposition, MESSAGE_CALLBACK_INFO*, message_data, IOTHUBMESSAGE_DISPOSITION_RESULT, disposition);
+MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubTransport_MQTT_Common_SendMessageDisposition, IOTHUB_DEVICE_HANDLE, handle, IOTHUB_MESSAGE_HANDLE, messageHandle, IOTHUBMESSAGE_DISPOSITION_RESULT, disposition);
 MOCKABLE_FUNCTION(, int, IoTHubTransport_MQTT_Common_Subscribe_InputQueue, TRANSPORT_LL_HANDLE, handle);
 MOCKABLE_FUNCTION(, void, IoTHubTransport_MQTT_Common_Unsubscribe_InputQueue, TRANSPORT_LL_HANDLE, handle);
 MOCKABLE_FUNCTION(, int, IoTHubTransport_MQTT_SetCallbackContext, TRANSPORT_LL_HANDLE, handle, void*, ctx);

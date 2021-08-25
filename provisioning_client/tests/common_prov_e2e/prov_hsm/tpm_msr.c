@@ -40,7 +40,7 @@ static TPMS_RSA_PARMS  RsaStorageParams = {
 0                                       // UINT32               exponent
 };
 
-static TPM2B_PUBLIC* GetEkTemplate ()
+static TPM2B_PUBLIC* GetEkTemplate (void)
 {
     static TPM2B_PUBLIC EkTemplate = { 0,   // size will be computed during marshaling
     {
@@ -62,7 +62,7 @@ static TPM2B_PUBLIC* GetEkTemplate ()
     return &EkTemplate;
 }
 
-static TPM2B_PUBLIC* GetSrkTemplate()
+static TPM2B_PUBLIC* GetSrkTemplate(void)
 {
     static TPM2B_PUBLIC SrkTemplate = { 0,  // size will be computed during marshaling
     {
@@ -268,7 +268,7 @@ static int initialize_tpm(TPM_INFO* tpm_info)
     return result;
 }
 
-TPM_INFO_HANDLE tpm_msr_create()
+TPM_INFO_HANDLE tpm_msr_create(void)
 {
     TPM_INFO* result;
     result = (TPM_INFO*)malloc(sizeof(TPM_INFO));

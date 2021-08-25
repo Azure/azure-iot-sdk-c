@@ -2,18 +2,16 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #this is CMakeLists.txt for iothubtransportmqtt_ut
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.5)
 
 if(NOT ${use_mqtt}) 
     message(FATAL_ERROR "iothubtransport_mqtt_common_ut being generated without mqtt support")
 endif()
 
-compileAsC11()
+compileAsC99()
 set(theseTestsName iothubtransport_mqtt_common_ut)
 
-set(${theseTestsName}_test_files
-${theseTestsName}.c
-)
+generate_cppunittest_wrapper(${theseTestsName})
 
 set(${theseTestsName}_c_files
     ../../src/iothubtransport_mqtt_common.c

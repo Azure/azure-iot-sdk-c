@@ -13,9 +13,9 @@ extern "C" {
 
     typedef struct SYMM_KEY_INFO_TAG* SYMM_KEY_INFO_HANDLE;
 
-    extern void initialize_symm_key();
+    extern void initialize_symm_key(void);
 
-    extern SYMM_KEY_INFO_HANDLE symm_key_info_create();
+    extern SYMM_KEY_INFO_HANDLE symm_key_info_create(void);
     extern void symm_key_info_destroy(SYMM_KEY_INFO_HANDLE handle);
     extern const char* symm_key_info_get_key(SYMM_KEY_INFO_HANDLE handle);
     extern const char* symm_key_info_get_reg_id(SYMM_KEY_INFO_HANDLE handle);

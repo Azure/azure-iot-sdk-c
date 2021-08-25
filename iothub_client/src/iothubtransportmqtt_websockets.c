@@ -56,6 +56,8 @@ static XIO_HANDLE getWebSocketsIOTransport(const char* fully_qualified_name, con
             /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_012: [ - `port` shall be set to 443. ]*/
             tls_io_config.port = 443;
 
+            tls_io_config.invoke_on_send_complete_callback_for_fragments = false;
+
             if (mqtt_transport_proxy_options != NULL)
             {
                 /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_01_015: [ - If `mqtt_transport_proxy_options` is not NULL, `underlying_io_interface` shall be set to the HTTP proxy IO interface description. ]*/
@@ -207,10 +209,10 @@ static int IoTHubTransportMqtt_WS_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOT
     return IoTHubTransport_MQTT_Common_SetRetryPolicy(handle, retryPolicy, retryTimeoutLimitinSeconds);
 }
 
-static IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_WS_SendMessageDisposition(MESSAGE_CALLBACK_INFO* message_data, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
+static IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_WS_SendMessageDisposition(IOTHUB_DEVICE_HANDLE handle, IOTHUB_MESSAGE_HANDLE messageHandle, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
 {
     /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_10_001: [IoTHubTransportMqtt_WS_SendMessageDisposition shall send the message disposition by calling into the IoTHubTransport_MQTT_Common_SendMessageDisposition()]*/
-    return IoTHubTransport_MQTT_Common_SendMessageDisposition(message_data, disposition);
+    return IoTHubTransport_MQTT_Common_SendMessageDisposition(handle, messageHandle, disposition);
 }
 
 static int IoTHubTransportMqtt_WS_Subscribe_InputQueue(IOTHUB_DEVICE_HANDLE handle)
