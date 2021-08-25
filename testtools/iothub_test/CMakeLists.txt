@@ -23,6 +23,7 @@ set(IOTHUB_TEST_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is
 
 include_directories(${IOTHUB_TEST_INC_FOLDER} ${SHARED_UTIL_INC_FOLDER} ${UAMQP_INC_FOLDER})
 include_directories(${CMAKE_CURRENT_LIST_DIR}/../../iothub_client/inc)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/../../iothub_service_client/inc)
 include_directories(${IOTHUB_SERVICE_CLIENT_INC_FOLDER})
 
 IF(WIN32)

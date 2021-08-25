@@ -140,6 +140,8 @@ The following options are supported when performing file uploads.  They are decl
 | `"x509privatekey"`           | OPTION_X509_PRIVATE_KEY         | const char*       | Sets the private key for the RSA x509 certificate
 | `"TrustedCerts"`             | OPTION_TRUSTED_CERT             | const char*       | Azure Server certificate used to validate TLS connection to IoT Hub and Azure Storage
 | `"proxy_data"`               | OPTION_HTTP_PROXY               | [HTTP_PROXY_OPTIONS*][shared-util-options-h] | Http proxy data object used for proxy connection to IoT Hub and Azure Storage
+| `"network_interface_upload_to_blob"`| OPTION_NETWORK_INTERFACE_UPLOAD_TO_BLOB | const char* | Set the interface name to use as outgoing network interface for upload to blob.
+NOTE: Not all HTTP clients support this option. It is currently only supported when using cURL.
 
 ## Batching and IoT Hub Client SDK
 

@@ -87,11 +87,15 @@ static void sendMessage(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const unsigned 
     {
         printf("unable to create a new IoTHubMessage\r\n");
     }
+    else if (myWeather == NULL)
+    {
+        printf("myWeather is invalid\r\n");
+    }
     else
     {
         MAP_HANDLE propMap = IoTHubMessage_Properties(messageHandle);
         (void)sprintf_s(propText, sizeof(propText), myWeather->Temperature > 28 ? "true" : "false");
-        if (Map_AddOrUpdate(propMap, "temperatureAlert", propText) != MAP_OK)
+        if (propMap == NULL || Map_AddOrUpdate(propMap, "temperatureAlert", propText) != MAP_OK)
         {
             (void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");
         }
@@ -166,16 +170,17 @@ void simplesample_amqp_run(void)
             float minTemperature = 20.0;
             float minHumidity = 60.0;
 
-            // Turn on Log
-            bool trace = true;
-            (void)IoTHubClient_SetOption(iotHubClientHandle, "logtrace", &trace);
-
             if (iotHubClientHandle == NULL)
             {
                 (void)printf("Failed on IoTHubClient_Create\r\n");
             }
             else
             {
+
+                // Turn on Log
+                bool trace = true;
+                (void)IoTHubClient_SetOption(iotHubClientHandle, "logtrace", &trace);
+
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
                 // For mbed add the certificate information
                 if (IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)

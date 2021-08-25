@@ -39,7 +39,7 @@ static const char* X509_DEVICE_PREFIX_FMT = "csdk_e2eDevice_x509_j_please_delete
 static const char* RELATIVE_PATH_FMT = "/devices/%s?%s";
 static const char* SHARED_ACCESS_KEY = "SharedAccessSignature sr=%s&sig=%s&se=%s&skn=%s";
 
-static const char *DEFAULT_CONSUMER_GROUP = "$Default";
+static const char* DEFAULT_CONSUMER_GROUP = "$Default";
 static const int DEFAULT_PARTITION_COUNT = 16;
 
 static const char* PRIMARY_KEY_FIELD = "\"primaryKey\":\"";
@@ -260,13 +260,13 @@ static int createSASConnectionString(IOTHUB_ACCOUNT_INFO* accountInfo, const cha
         LogError("Failed to allocate space for the SAS based connection string\r\n");
         result = MU_FAILURE;
     }
-    else if ((moduleId == NULL) && sprintf_s(conn, connectionStringLength,"%s%s%s%s%s%s", CONN_HOST_PART, accountInfo->hostname, CONN_DEVICE_PART, (char*)deviceId, CONN_KEY_PART, (char*)primaryAuthentication) <= 0)
+    else if ((moduleId == NULL) && sprintf_s(conn, connectionStringLength, "%s%s%s%s%s%s", CONN_HOST_PART, accountInfo->hostname, CONN_DEVICE_PART, (char*)deviceId, CONN_KEY_PART, (char*)primaryAuthentication) <= 0)
     {
         LogError("Failed to form the connection string for SAS based connection string.\r\n");
         free(conn);
         result = MU_FAILURE;
     }
-    else if ((moduleId != NULL) && sprintf_s(conn, connectionStringLength,"%s%s%s%s%s%s%s%s", CONN_HOST_PART, accountInfo->hostname, CONN_DEVICE_PART, (char*)deviceId, CONN_KEY_PART, (char*)primaryAuthentication, CONN_MODULE_PART, moduleId) <= 0)
+    else if ((moduleId != NULL) && sprintf_s(conn, connectionStringLength, "%s%s%s%s%s%s%s%s", CONN_HOST_PART, accountInfo->hostname, CONN_DEVICE_PART, (char*)deviceId, CONN_KEY_PART, (char*)primaryAuthentication, CONN_MODULE_PART, moduleId) <= 0)
     {
         LogError("Failed to form the connection string for SAS based connection string.\r\n");
         free(conn);
@@ -300,7 +300,7 @@ static int createX509ConnectionString(IOTHUB_ACCOUNT_INFO* accountInfo, char** c
         LogError("Failed to allocate space for the SAS based connection string\r\n");
         result = MU_FAILURE;
     }
-    else if (sprintf_s(conn, connectionStringLength, "%s%s%s%s%s", CONN_HOST_PART, accountInfo->hostname, CONN_DEVICE_PART, (char*)accountInfo->x509Device.deviceId, CONN_X509_PART) <=0) {
+    else if (sprintf_s(conn, connectionStringLength, "%s%s%s%s%s", CONN_HOST_PART, accountInfo->hostname, CONN_DEVICE_PART, (char*)accountInfo->x509Device.deviceId, CONN_X509_PART) <= 0) {
         LogError("Failed to form the connection string for x509 based connection string.\r\n");
         result = MU_FAILURE;
         free(conn);
@@ -319,7 +319,7 @@ static int provisionDevice(IOTHUB_ACCOUNT_INFO* accountInfo, IOTHUB_ACCOUNT_AUTH
     int result;
     char* deviceId = NULL;
 
-    if (generateDeviceName(method == IOTHUB_ACCOUNT_AUTH_CONNSTRING ?(SAS_DEVICE_PREFIX_FMT):(X509_DEVICE_PREFIX_FMT), &deviceId) != 0)
+    if (generateDeviceName(method == IOTHUB_ACCOUNT_AUTH_CONNSTRING ? (SAS_DEVICE_PREFIX_FMT) : (X509_DEVICE_PREFIX_FMT), &deviceId) != 0)
     {
         LogError("generateDeviceName failed\r\n");
         result = MU_FAILURE;
@@ -696,36 +696,42 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG*
                 if (iothub_account_info->connString == NULL)
                 {
                     LogError("Failure retrieving IoT Hub connection string from the environment.\r\n");
+                    free(iothub_account_info->sasDevices);
                     free(iothub_account_info);
                     iothub_account_info = NULL;
                 }
                 else if (iothub_account_info->eventhubConnString == NULL)
                 {
                     LogError("Failure retrieving Event Hub connection string from the environment.\r\n");
+                    free(iothub_account_info->sasDevices);
                     free(iothub_account_info);
                     iothub_account_info = NULL;
                 }
                 else if (base64_cert == NULL)
                 {
                     LogError("Failure retrieving x509 certificate from the environment.\r\n");
+                    free(iothub_account_info->sasDevices);
                     free(iothub_account_info);
                     iothub_account_info = NULL;
                 }
                 else if (base64_key == NULL)
                 {
                     LogError("Failure retrieving x509 private key from the environment.\r\n");
+                    free(iothub_account_info->sasDevices);
                     free(iothub_account_info);
                     iothub_account_info = NULL;
                 }
                 else if (tempThumb == NULL)
                 {
                     LogError("Failure retrieving x509 certificate thumbprint from the environment.\r\n");
+                    free(iothub_account_info->sasDevices);
                     free(iothub_account_info);
                     iothub_account_info = NULL;
                 }
                 else if ((iothub_account_info->x509Certificate = convert_base64_to_string(base64_cert)) == NULL)
                 {
                     LogError("Failure allocating x509 certificate from the environment.\r\n");
+                    free(iothub_account_info->sasDevices);
                     free(iothub_account_info);
                     iothub_account_info = NULL;
                 }
@@ -733,6 +739,7 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG*
                 {
                     LogError("Failure allocating x509 key from the environment.\r\n");
                     free(iothub_account_info->x509Certificate);
+                    free(iothub_account_info->sasDevices);
                     free(iothub_account_info);
                     iothub_account_info = NULL;
                 }
@@ -741,6 +748,7 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG*
                     LogError("Failure allocating x509 thumb print from the environment.\r\n");
                     free(iothub_account_info->x509Certificate);
                     free(iothub_account_info->x509PrivateKey);
+                    free(iothub_account_info->sasDevices);
                     free(iothub_account_info);
                     iothub_account_info = NULL;
                 }
@@ -749,6 +757,9 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG*
                     if (retrieveConnStringInfo(iothub_account_info) != 0)
                     {
                         LogError("retrieveConnStringInfo failed.\r\n");
+                        free(iothub_account_info->x509Certificate);
+                        free(iothub_account_info->x509PrivateKey);
+                        free(iothub_account_info->sasDevices);
                         free(iothub_account_info);
                         iothub_account_info = NULL;
                     }
@@ -758,6 +769,9 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG*
                         if (iothub_account_info->iothub_service_client_auth_handle == NULL)
                         {
                             LogError("IoTHubServiceClientAuth_CreateFromConnectionString failed\r\n");
+                            free(iothub_account_info->x509Certificate);
+                            free(iothub_account_info->x509PrivateKey);
+                            free(iothub_account_info->sasDevices);
                             free(iothub_account_info);
                             iothub_account_info = NULL;
                         }
@@ -1018,37 +1032,37 @@ const char* IoTHubAccount_GetSharedAccessSignature(IOTHUB_ACCOUNT_INFO_HANDLE ac
         }
         else
         {
-        time_t currentTime = time(NULL);
-        size_t expiry_time = (size_t)(currentTime + 3600);
+            time_t currentTime = time(NULL);
+            size_t expiry_time = (size_t)(currentTime + 3600);
 
-        STRING_HANDLE accessKey = STRING_construct(acctInfo->sharedAccessKey);
-        STRING_HANDLE iotName = STRING_construct(acctInfo->hostname);
-        STRING_HANDLE keyName = STRING_construct(acctInfo->keyName);
-        if (accessKey != NULL && iotName != NULL && keyName != NULL)
-        {
-            STRING_HANDLE sasHandle = SASToken_Create(accessKey, iotName, keyName, expiry_time);
-            if (sasHandle == NULL)
+            STRING_HANDLE accessKey = STRING_construct(acctInfo->sharedAccessKey);
+            STRING_HANDLE iotName = STRING_construct(acctInfo->hostname);
+            STRING_HANDLE keyName = STRING_construct(acctInfo->keyName);
+            if (accessKey != NULL && iotName != NULL && keyName != NULL)
             {
-
-                result = NULL;
-            }
-            else
-            {
-                if (mallocAndStrcpy_s(&acctInfo->sharedAccessToken, STRING_c_str(sasHandle)) != 0)
+                STRING_HANDLE sasHandle = SASToken_Create(accessKey, iotName, keyName, expiry_time);
+                if (sasHandle == NULL)
                 {
+
                     result = NULL;
                 }
                 else
                 {
-                    result = acctInfo->sharedAccessToken;
+                    if (mallocAndStrcpy_s(&acctInfo->sharedAccessToken, STRING_c_str(sasHandle)) != 0)
+                    {
+                        result = NULL;
+                    }
+                    else
+                    {
+                        result = acctInfo->sharedAccessToken;
+                    }
+                    STRING_delete(sasHandle);
                 }
-                STRING_delete(sasHandle);
             }
+            STRING_delete(accessKey);
+            STRING_delete(iotName);
+            STRING_delete(keyName);
         }
-        STRING_delete(accessKey);
-        STRING_delete(iotName);
-        STRING_delete(keyName);
-    }
     }
     else
     {
@@ -1059,7 +1073,7 @@ const char* IoTHubAccount_GetSharedAccessSignature(IOTHUB_ACCOUNT_INFO_HANDLE ac
 
 const char* IoTHubAccount_GetEventhubAccessKey(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
 {
-    const char *iothub_connection_string;
+    const char* iothub_connection_string;
     static char access_key[128];
 
     if ((iothub_connection_string = IoTHubAccount_GetIoTHubConnString(acctHandle)) != NULL)
@@ -1120,7 +1134,7 @@ const char* IoTHubAccount_GetEventhubConsumerGroup(IOTHUB_ACCOUNT_INFO_HANDLE ac
     return getMbedParameter("IOTHUB_EVENTHUB_CONSUMER_GROUP");
 #else
     static char consumerGroup[64];
-    char *envVarValue = getenv("IOTHUB_EVENTHUB_CONSUMER_GROUP");
+    char* envVarValue = getenv("IOTHUB_EVENTHUB_CONSUMER_GROUP");
     if (envVarValue != NULL)
     {
         strcpy(consumerGroup, envVarValue);
@@ -1144,7 +1158,7 @@ const size_t IoTHubAccount_GetIoTHubPartitionCount(IOTHUB_ACCOUNT_INFO_HANDLE ac
         sscanf(str_value, "%i", &value);
     }
 #else
-    char *envVarValue = getenv("IOTHUB_PARTITION_COUNT");
+    char* envVarValue = getenv("IOTHUB_PARTITION_COUNT");
     if (envVarValue != NULL)
     {
         value = atoi(envVarValue);

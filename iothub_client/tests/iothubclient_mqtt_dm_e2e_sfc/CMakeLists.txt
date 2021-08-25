@@ -2,13 +2,13 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #this is CMakeLists.txt for iothubclient_mqtt_dm_e2e_sfc
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.5)
 
 if(NOT (${use_mqtt}))
     message(FATAL_ERROR "iothubclient_mqtt_dm_e2e_sfc being generated without MQTT support")
 endif()
 
-compileAsC11()
+compileAsC99()
 set(theseTestsName iothubclient_mqtt_dm_e2e_sfc)
 
 set(${theseTestsName}_test_files

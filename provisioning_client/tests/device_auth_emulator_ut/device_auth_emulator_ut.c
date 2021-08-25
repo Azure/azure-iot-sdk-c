@@ -178,7 +178,7 @@ static void my_STRING_delete(STRING_HANDLE handle)
     my_gballoc_free(handle);
 }
 
-static STRING_HANDLE my_SASToken_Create(STRING_HANDLE key, STRING_HANDLE scope, STRING_HANDLE keyName, size_t expiry)
+static STRING_HANDLE my_SASToken_Create(STRING_HANDLE key, STRING_HANDLE scope, STRING_HANDLE keyName, uint64_t expiry)
 {
     (void)key, (void)scope, (void)keyName, (void)expiry;
     return (STRING_HANDLE)my_gballoc_malloc(1);

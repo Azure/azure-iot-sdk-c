@@ -12,6 +12,9 @@
 #include <stdbool.h>
 #endif
 
+#define MOCK_MEMORY_ADDRESS_START 0x11111111
+#define MOCK_MEMORY_ADDRESS_END 0x11111190
+
 static void* my_gballoc_malloc(size_t size)
 {
     return malloc(size);
@@ -19,7 +22,13 @@ static void* my_gballoc_malloc(size_t size)
 
 static void my_gballoc_free(void* ptr)
 {
-    free(ptr);
+    void* mock_range_start = (void*)MOCK_MEMORY_ADDRESS_START;
+    void* mock_range_end = (void*)MOCK_MEMORY_ADDRESS_END;
+
+    if (ptr < mock_range_start || ptr > mock_range_end)
+    {
+        free(ptr);
+    }
 }
 
 #include "testrunnerswitcher.h"
@@ -120,6 +129,7 @@ static const char* TEST_PASSWORD_VALUE = "password";
 static const char* TEST_JSON_REPLY = "{ json_reply }";
 static const char* TEST_XIO_OPTION_NAME = "test_option";
 static const char* TEST_CUSTOM_DATA = "custom data";
+static const AMQP_VALUE TEST_APP_PROPERTIES = (AMQP_VALUE)0x11111190;
 
 static ON_MESSAGE_RECEIVER_STATE_CHANGED g_msg_rcvr_state_changed;
 static void* g_msg_rcvr_state_changed_ctx;
@@ -710,25 +720,37 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         return result;
     }
 
-    static void setup_retry_after_mocks(AMQP_TYPE type)
+    static void setup_retry_after_mocks(bool no_app_properties, AMQP_TYPE type)
     {
-        uint32_t retry_after_count = 1;
-        const char* retry_after_string = "retry-after";
-        STRICT_EXPECTED_CALL(message_get_application_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_get_inplace_described_value(IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_get_map_pair_count(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_pair_count(&retry_after_count, sizeof(uint32_t));
-        STRICT_EXPECTED_CALL(amqpvalue_get_map_key_value_pair(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_string_value(&retry_after_string, sizeof(char*));
-        STRICT_EXPECTED_CALL(amqpvalue_get_type(IGNORED_PTR_ARG)).SetReturn(type).CallCannotFail();
-        if (type == AMQP_TYPE_INT)
+        if (no_app_properties)
         {
-            int32_t retry_after_value = 2;
-            STRICT_EXPECTED_CALL(amqpvalue_get_int(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_int_value(&retry_after_value, sizeof(int32_t));
+            STRICT_EXPECTED_CALL(message_get_application_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         }
         else
         {
-            char* retry_after_value = "2";
-            STRICT_EXPECTED_CALL(amqpvalue_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_string_value(&retry_after_value, sizeof(char*));
+            uint32_t retry_after_count = 1;
+            const char* retry_after_string = "retry-after";
+            STRICT_EXPECTED_CALL(message_get_application_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+                .CopyOutArgumentBuffer_application_properties(&TEST_APP_PROPERTIES, sizeof(TEST_APP_PROPERTIES));
+            STRICT_EXPECTED_CALL(amqpvalue_get_inplace_described_value(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(amqpvalue_get_map_pair_count(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_pair_count(&retry_after_count, sizeof(uint32_t));
+            STRICT_EXPECTED_CALL(amqpvalue_get_map_key_value_pair(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(amqpvalue_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_string_value(&retry_after_string, sizeof(char*));
+            STRICT_EXPECTED_CALL(amqpvalue_get_type(IGNORED_PTR_ARG)).SetReturn(type).CallCannotFail();
+            if (type == AMQP_TYPE_INT)
+            {
+                int32_t retry_after_value = 2;
+                STRICT_EXPECTED_CALL(amqpvalue_get_int(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_int_value(&retry_after_value, sizeof(int32_t));
+            }
+            else
+            {
+                char* retry_after_value = "2";
+                STRICT_EXPECTED_CALL(amqpvalue_get_string(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CopyOutArgumentBuffer_string_value(&retry_after_value, sizeof(char*));
+            }
+
+            STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_NUM_ARG));
+            STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_NUM_ARG));
+            STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_NUM_ARG));
         }
     }
 
@@ -743,15 +765,12 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
     }
 
-    static void setup_on_message_recv_callback_mocks(AMQP_TYPE type)
+    static void setup_on_message_recv_callback_mocks(bool no_app_properties, AMQP_TYPE type)
     {
         STRICT_EXPECTED_CALL(message_get_body_type(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(message_get_body_amqp_data_in_place(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        setup_retry_after_mocks(type);
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_NUM_ARG));
+        setup_retry_after_mocks(no_app_properties, type);
         STRICT_EXPECTED_CALL(messaging_delivery_accepted());
     }
 
@@ -1768,7 +1787,34 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        setup_on_message_recv_callback_mocks(AMQP_TYPE_INT);
+        setup_on_message_recv_callback_mocks(false, AMQP_TYPE_INT);
+
+        //act
+        result = g_on_msg_recv(msg_recv_callback_context, TEST_MESSAGE_HANDLE);
+
+        //assert
+        ASSERT_IS_NOT_NULL(result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        prov_transport_common_amqp_close(handle);
+        prov_transport_common_amqp_destroy(handle);
+    }
+
+    TEST_FUNCTION(prov_transport_common_amqp_dowork_register_recv_no_retry_after_property_succeed)
+    {
+        AMQP_VALUE result;
+        PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io, on_transport_error, NULL);
+        (void)prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
+        (void)prov_transport_common_amqp_register_device(handle, on_transport_json_parse, on_transport_create_json_payload, NULL);
+        prov_transport_common_amqp_dowork(handle);
+        g_msg_sndr_state_changed(g_msg_sndr_state_changed_ctx, MESSAGE_SENDER_STATE_OPEN, MESSAGE_SENDER_STATE_OPENING);
+        g_msg_rcvr_state_changed(g_msg_rcvr_state_changed_ctx, MESSAGE_RECEIVER_STATE_OPEN, MESSAGE_RECEIVER_STATE_OPENING);
+        prov_transport_common_amqp_dowork(handle);
+        umock_c_reset_all_calls();
+
+        //arrange
+        setup_on_message_recv_callback_mocks(true, AMQP_TYPE_INT);
 
         //act
         result = g_on_msg_recv(msg_recv_callback_context, TEST_MESSAGE_HANDLE);
@@ -1797,7 +1843,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         umock_c_reset_all_calls();
 
         //arrange
-        setup_on_message_recv_callback_mocks(AMQP_TYPE_STRING);
+        setup_on_message_recv_callback_mocks(false, AMQP_TYPE_STRING);
 
         //act
         result = g_on_msg_recv(msg_recv_callback_context, TEST_MESSAGE_HANDLE);

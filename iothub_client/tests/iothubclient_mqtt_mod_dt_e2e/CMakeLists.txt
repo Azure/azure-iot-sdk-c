@@ -1,13 +1,13 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.5)
 
 if(NOT ${use_mqtt})
     message(FATAL_ERROR "iothubclient_mqtt_mod_dt_e2e being generated without MQTT support")
 endif()
 
-compileAsC11()
+compileAsC99()
 set(theseTestsName iothubclient_mqtt_mod_dt_e2e)
 
 set(${theseTestsName}_test_files

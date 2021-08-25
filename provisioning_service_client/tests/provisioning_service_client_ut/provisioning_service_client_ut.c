@@ -24,6 +24,7 @@ static void real_free(void* ptr)
 #include "umock_c/umock_c.h"
 #include "umock_c/umocktypes_bool.h"
 #include "umock_c/umock_c_negative_tests.h"
+#include "umock_c/umocktypes_stdint.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
@@ -300,7 +301,7 @@ static void my_STRING_delete(STRING_HANDLE handle)
     real_free(handle);
 }
 
-static STRING_HANDLE my_SASToken_CreateString(const char* key, const char* scope, const char* keyName, size_t expiry) {
+static STRING_HANDLE my_SASToken_CreateString(const char* key, const char* scope, const char* keyName, uint64_t expiry) {
     (void)key;
     (void)scope;
     (void)keyName;
@@ -691,6 +692,9 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 
     umock_c_init(on_umock_c_error);
     umocktypes_bool_register_types();
+
+    int result = umocktypes_stdint_register_types();
+    ASSERT_ARE_EQUAL(int, 0, result, "umocktypes_stdint_register_types");
 
     register_global_mock_alias_types();
     register_global_mock_hooks();

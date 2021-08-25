@@ -13,7 +13,7 @@ extern "C" {
 
 typedef void* HSM_CLIENT_HANDLE;
 
-typedef HSM_CLIENT_HANDLE (*HSM_CLIENT_CREATE)();
+typedef HSM_CLIENT_HANDLE (*HSM_CLIENT_CREATE)(void);
 typedef void (*HSM_CLIENT_DESTROY)(HSM_CLIENT_HANDLE handle);
 
 // TPM
@@ -76,17 +76,17 @@ typedef struct HSM_CLIENT_KEY_INTERFACE_TAG
     HSM_CLIENT_SET_SYMMETRICAL_KEY_INFO hsm_client_set_symm_key_info;
 } HSM_CLIENT_KEY_INTERFACE;
 
-extern int initialize_hsm_system();
-extern void deinitialize_hsm_system();
+extern int initialize_hsm_system(void);
+extern void deinitialize_hsm_system(void);
 
-extern const HSM_CLIENT_TPM_INTERFACE* hsm_client_tpm_interface();
-extern const HSM_CLIENT_X509_INTERFACE* hsm_client_x509_interface();
-extern const HSM_CLIENT_KEY_INTERFACE* hsm_client_key_interface();
+extern const HSM_CLIENT_TPM_INTERFACE* hsm_client_tpm_interface(void);
+extern const HSM_CLIENT_X509_INTERFACE* hsm_client_x509_interface(void);
+extern const HSM_CLIENT_KEY_INTERFACE* hsm_client_key_interface(void);
 
-extern int hsm_client_x509_init();
-extern void hsm_client_x509_deinit();
-extern int hsm_client_tpm_init();
-extern void hsm_client_tpm_deinit();
+extern int hsm_client_x509_init(void);
+extern void hsm_client_x509_deinit(void);
+extern int hsm_client_tpm_init(void);
+extern void hsm_client_tpm_deinit(void);
 
 #ifdef HSM_TYPE_HTTP_EDGE
 extern int hsm_client_http_edge_init();
