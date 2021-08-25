@@ -1132,7 +1132,7 @@ static void change_dtracing_setting_and_test(IOTHUB_PROVISIONED_DEVICE* deviceTo
     
     // Send the Event from the client
     MAP_HANDLE propMap = Map_Create(NULL);
-    client_create_with_properies_and_send_d2c(propMap);
+    client_create_with_properies_and_send_d2c(deviceToUse, propMap);
     ThreadAPI_Sleep(3000);
     Map_Destroy(propMap);
 
