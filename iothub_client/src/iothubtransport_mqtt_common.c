@@ -100,6 +100,9 @@ static const char* REQUEST_ID_PROPERTY = "?$rid=";
 #define SYS_PROP_TO "to"
 
 static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtimeutc";
+
+static const char* DISTRIBUTED_TRACING_PROPERTY = "tracestate";
+
 static const char DT_MODEL_ID_TOKEN[] = "model-id";
 static const char DEFAULT_IOTHUB_PRODUCT_IDENTIFIER[] = CLIENT_DEVICE_TYPE_PREFIX "/" IOTHUB_SDK_VERSION;
 
@@ -770,6 +773,8 @@ static int addSystemPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_messag
     size_t index = *index_ptr;
 
     bool is_security_msg = IoTHubMessage_IsSecurityMessage(iothub_message_handle);
+    const char* tracestate = IoTHubMessage_GetDistributedTracingSystemProperty(iothub_message_handle);
+
     /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_052: [ IoTHubTransport_MQTT_Common_DoWork shall check for the CorrelationId property and if found add the value as a system property in the format of $.cid=<id> ] */
     const char* correlation_id = IoTHubMessage_GetCorrelationId(iothub_message_handle);
     if (correlation_id != NULL)
@@ -827,6 +832,24 @@ static int addSystemPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_messag
             if (addSystemPropertyToTopicString(topic_string, index++, SECURITY_INTERFACE_ID_MQTT, SECURITY_INTERFACE_ID_VALUE, true) != 0)
             {
                 LogError("Failed setting Security interface id");
+                result = MU_FAILURE;
+            }
+            else
+            {
+                result = 0;
+            }
+        }
+    }
+
+    // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_38_012: [ `IoTHubTransport_MQTT_Common_DoWork` shall check for the DistributedTracing property and if found add the `value` as a system property in the format of `$.tracestate=<value>` ]
+    if (result == 0)
+    {
+        if (tracestate != NULL)
+        {
+            // The distributed tracing tracestate value must be encoded
+            if (addSystemPropertyToTopicString(topic_string, index++, DISTRIBUTED_TRACING_PROPERTY, tracestate, true) != 0)
+            {
+                LogError("Failed setting distributed tracing tracestate");
                 result = MU_FAILURE;
             }
             else
@@ -936,6 +959,7 @@ static STRING_HANDLE addPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_me
         STRING_delete(result);
         result = NULL;
     }
+    //Deprecated
     else if (addDiagnosticPropertiesTouMqttMessage(iothub_message_handle, result, &index) != 0)
     {
         LogError("Failed adding Diagnostic Properties to uMQTT Message");

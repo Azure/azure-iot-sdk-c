@@ -10,13 +10,15 @@ set(theseTestsName iothubclient_diagnostic_ut)
 
 generate_cppunittest_wrapper(${theseTestsName})
 
-include_directories(${SHARED_UTIL_REAL_TEST_FOLDER})
+include_directories(${SHARED_UTIL_REAL_TEST_FOLDER} ${IOTHUB_TEST_REAL_INC_FOLDER})
 
 set(${theseTestsName}_c_files
     ../../src/iothub_client_diagnostic.c
+    ${IOTHUB_TEST_REAL_SRC_FOLDER}/real_parson.c
 )
 
 set(${theseTestsName}_h_files
+    ${IOTHUB_TEST_REAL_INC_FOLDER}/real_parson.h
 )
 
 build_c_test_artifacts(${theseTestsName} ON "tests/azure_iothub_client_tests")

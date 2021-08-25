@@ -32,8 +32,9 @@ typedef struct IOTHUB_MESSAGE_HANDLE_DATA_TAG
     char* inputName;
     char* connectionModuleId;
     char* connectionDeviceId;
-    IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA_HANDLE diagnosticData;
     bool is_security_message;
+    IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA_HANDLE diagnosticData; //Deprecated
+    char* distributedTracingTracestate;
     char* creationTimeUtc;
     char* userId;
     MESSAGE_DISPOSITION_CONTEXT_HANDLE dispositionContext;
@@ -102,6 +103,7 @@ static void DestroyMessageData(IOTHUB_MESSAGE_HANDLE_DATA* handleData)
     free(handleData->userDefinedContentType);
     free(handleData->contentEncoding);
     DestroyDiagnosticPropertyData(handleData->diagnosticData);
+    free(handleData->distributedTracingTracestate);
     free(handleData->outputName);
     free(handleData->inputName);
     free(handleData->connectionModuleId);
@@ -392,9 +394,10 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
                 DestroyMessageData(result);
                 result = NULL;
             }
+            //Deprecated
             else if (source->diagnosticData != NULL && (result->diagnosticData = CloneDiagnosticPropertyData(source->diagnosticData)) == NULL)
             {
-                LogError("unable to copy CloneDiagnosticPropertyData");
+                LogError("unable to CloneDiagnosticPropertyData");
                 DestroyMessageData(result);
                 result = NULL;
             }
@@ -424,13 +427,19 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
             }
             else if (source->connectionModuleId != NULL && mallocAndStrcpy_s(&result->connectionModuleId, source->connectionModuleId) != 0)
             {
-                LogError("unable to copy inputName");
+                LogError("unable to copy connectionModuleId");
                 DestroyMessageData(result);
                 result = NULL;
             }
             else if (source->connectionDeviceId != NULL && mallocAndStrcpy_s(&result->connectionDeviceId, source->connectionDeviceId) != 0)
             {
-                LogError("unable to copy inputName");
+                LogError("unable to copy connectionDeviceId");
+                DestroyMessageData(result);
+                result = NULL;
+            }
+            else if (source->distributedTracingTracestate != NULL && mallocAndStrcpy_s(&result->distributedTracingTracestate, source->distributedTracingTracestate) != 0)
+            {
+                LogError("unable to copy distributedTracingTracestate");
                 DestroyMessageData(result);
                 result = NULL;
             }
@@ -566,7 +575,7 @@ MAP_HANDLE IoTHubMessage_Properties(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
     else
     {
         /*Codes_SRS_IOTHUBMESSAGE_02_002: [Otherwise, for any non-NULL iotHubMessageHandle it shall return a non-NULL MAP_HANDLE.]*/
-        IOTHUB_MESSAGE_HANDLE_DATA* handleData = (IOTHUB_MESSAGE_HANDLE_DATA*)iotHubMessageHandle;
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
         result = handleData->properties;
     }
     return result;
@@ -738,7 +747,7 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetContentTypeSystemProperty(IOTHUB_MESSAGE_
     }
     else
     {
-        IOTHUB_MESSAGE_HANDLE_DATA* handleData = (IOTHUB_MESSAGE_HANDLE_DATA*)iotHubMessageHandle;
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
 
         // Codes_SRS_IOTHUBMESSAGE_09_002: [If the IOTHUB_MESSAGE_HANDLE `contentType` is not NULL it shall be deallocated.]
         if (handleData->userDefinedContentType != NULL)
@@ -916,6 +925,7 @@ const char* IoTHubMessage_GetMessageUserIdSystemProperty(IOTHUB_MESSAGE_HANDLE i
     return result;
 }
 
+//Deprecated
 const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* IoTHubMessage_GetDiagnosticPropertyData(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
 {
     const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* result;
@@ -933,6 +943,7 @@ const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* IoTHubMessage_GetDiagnosticProper
     return result;
 }
 
+//Deprecated
 IOTHUB_MESSAGE_RESULT IoTHubMessage_SetDiagnosticPropertyData(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA* diagnosticData)
 {
     IOTHUB_MESSAGE_RESULT result;
@@ -972,6 +983,61 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetDiagnosticPropertyData(IOTHUB_MESSAGE_HAN
     return result;
 }
 
+const char* IoTHubMessage_GetDistributedTracingSystemProperty(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
+{
+    const char* result;
+    // Codes_SRS_IOTHUBMESSAGE_38_001: [If any of the parameters are NULL then IoTHubMessage_GetDistributedTracingSystemProperty shall return a NULL value.]
+    if (iotHubMessageHandle == NULL)
+    {
+        LogError("Invalid argument (iotHubMessageHandle is NULL)");
+        result = NULL;
+    }
+    else
+    {
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
+
+        /* Codes_SRS_IOTHUBMESSAGE_38_002: [IoTHubMessage_GetDistributedTracingSystemProperty shall return the tracestate data as a const char*.] */
+        result = (const char*)handleData->distributedTracingTracestate;
+    }
+    return result;
+}
+
+IOTHUB_MESSAGE_RESULT IoTHubMessage_SetDistributedTracingSystemProperty(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const char* distributedTracingTracestate)
+{
+    IOTHUB_MESSAGE_RESULT result;
+
+    // Codes_SRS_IOTHUBMESSAGE_38_006: [If any of the parameters are NULL then IoTHubMessage_SetDistributedTracingSystemProperty shall return a IOTHUB_MESSAGE_INVALID_ARG value.]
+    if (iotHubMessageHandle == NULL || distributedTracingTracestate == NULL)
+    {
+        LogError("Invalid argument (iotHubMessageHandle=%p, distributedTracingTracestate=%s)", iotHubMessageHandle, MU_P_OR_NULL(distributedTracingTracestate));
+        result = IOTHUB_MESSAGE_INVALID_ARG;
+    }
+    else
+    {
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
+
+        // Codes_SRS_IOTHUBMESSAGE_38_007: [If the IOTHUB_MESSAGE_HANDLE `distributedTracingTracestate` is not NULL it shall be deallocated.]
+        if (handleData->distributedTracingTracestate != NULL)
+        {
+            free(handleData->distributedTracingTracestate);
+            handleData->distributedTracingTracestate = NULL;
+        }
+
+        if (mallocAndStrcpy_s(&handleData->distributedTracingTracestate, distributedTracingTracestate) != 0)
+        {
+            LogError("Failed saving a copy of distributedTracingTracestate");
+            // Codes_SRS_IOTHUBMESSAGE_38_008: [If the allocation or the copying of `distributedTracingTracestate` fails, then IoTHubMessage_SetDistributedTracingSystemProperty shall return IOTHUB_MESSAGE_ERROR.]
+            result = IOTHUB_MESSAGE_ERROR;
+        }
+        else
+        {
+            // Codes_SRS_IOTHUBMESSAGE_38_009: [If IoTHubMessage_SetDistributedTracingSystemProperty finishes successfully it shall return IOTHUB_MESSAGE_OK.]
+            result = IOTHUB_MESSAGE_OK;
+        }
+    }
+
+    return result;
+}
 
 const char* IoTHubMessage_GetOutputName(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
 {
@@ -1002,7 +1068,7 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetOutputName(IOTHUB_MESSAGE_HANDLE iotHubMe
     }
     else
     {
-        IOTHUB_MESSAGE_HANDLE_DATA* handleData = (IOTHUB_MESSAGE_HANDLE_DATA*)iotHubMessageHandle;
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
 
         // Codes_SRS_IOTHUBMESSAGE_31_037: [If the IOTHUB_MESSAGE_HANDLE OutputName is not NULL, then the IOTHUB_MESSAGE_HANDLE OutputName will be deallocated.]
         if (handleData->outputName != NULL)
@@ -1057,7 +1123,7 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetInputName(IOTHUB_MESSAGE_HANDLE iotHubMes
     }
     else
     {
-        IOTHUB_MESSAGE_HANDLE_DATA* handleData = (IOTHUB_MESSAGE_HANDLE_DATA*)iotHubMessageHandle;
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
 
         // Codes_SRS_IOTHUBMESSAGE_31_043: [If the IOTHUB_MESSAGE_HANDLE InputName is not NULL, then the IOTHUB_MESSAGE_HANDLE InputName will be deallocated.]
         if (handleData->inputName != NULL)
@@ -1113,7 +1179,7 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetConnectionModuleId(IOTHUB_MESSAGE_HANDLE 
     }
     else
     {
-        IOTHUB_MESSAGE_HANDLE_DATA* handleData = (IOTHUB_MESSAGE_HANDLE_DATA*)iotHubMessageHandle;
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
 
         // Codes_SRS_IOTHUBMESSAGE_31_049: [If the IOTHUB_MESSAGE_HANDLE ConnectionModuleId is not NULL, then the IOTHUB_MESSAGE_HANDLE ConnectionModuleId will be deallocated.]
         if (handleData->connectionModuleId != NULL)
@@ -1169,7 +1235,7 @@ IOTHUB_MESSAGE_RESULT IoTHubMessage_SetConnectionDeviceId(IOTHUB_MESSAGE_HANDLE 
     }
     else
     {
-        IOTHUB_MESSAGE_HANDLE_DATA* handleData = (IOTHUB_MESSAGE_HANDLE_DATA*)iotHubMessageHandle;
+        IOTHUB_MESSAGE_HANDLE_DATA* handleData = iotHubMessageHandle;
 
         // Codes_SRS_IOTHUBMESSAGE_31_055: [If the IOTHUB_MESSAGE_HANDLE ConnectionDeviceId is not NULL, then the IOTHUB_MESSAGE_HANDLE ConnectionDeviceId will be deallocated.]
         if (handleData->connectionDeviceId != NULL)
