@@ -160,3 +160,8 @@ EXPORTS
     IOTHUB_CLIENT_CONNECTION_STATUS_REASONStrings
     TRANSPORT_TYPEStrings
     DEVICE_TWIN_UPDATE_STATEStrings
+
+    IoTHubClient_StreamC2DResponseCreate
+    IoTHubClient_StreamC2DRequestClone
+    IoTHubClient_StreamC2DResponseDestroy
+    IoTHubClient_StreamC2DRequestDestroy

@@ -23,6 +23,7 @@
 #include "iothub_client_core_ll.h"
 #include "iothub_client_core.h"
 #include "iothub_device_client_ll.h"
+#include "iothub_client_streaming.h"
 
 #ifndef IOTHUB_DEVICE_CLIENT_INSTANCE_TYPE
 typedef IOTHUB_CLIENT_CORE_HANDLE IOTHUB_DEVICE_CLIENT_HANDLE;
@@ -368,6 +369,19 @@ extern "C"
     * @return   IOTHUB_CLIENT_OK upon success, or an error code upon failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_SendMessageDisposition, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_MESSAGE_HANDLE, message, IOTHUBMESSAGE_DISPOSITION_RESULT, disposition);
+
+    /**
+    * @brief    Subscribes/unsubscribes for cloud-to-device stream requests.
+    *
+    * @param    iotHubClientHandle      Handle to the device client instance.
+    *
+    * @param    streamRequestCallback   Callback to be invoked when a new stream request is received. To unsubscribe for incoming requests please provide NULL as its value.
+    *
+    * @param    context                 User-defined context to be provided to streamRequestCallback when it is invoked.
+    *
+    * @return   IOTHUB_CLIENT_OK if the subscription/unsubscription suceeds, or another value if any error occurs.
+    */
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_SetStreamRequestCallback, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, DEVICE_STREAM_C2D_REQUEST_CALLBACK, streamRequestCallback, void*, context);
 
 #ifdef __cplusplus
 }

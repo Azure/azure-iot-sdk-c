@@ -8,6 +8,7 @@
 #include "azure_c_shared_utility/platform.h"
 #include "internal/iothubtransport_mqtt_common.h"
 #include "azure_c_shared_utility/xlogging.h"
+#include "iothub_client_streaming.h"
 
 static XIO_HANDLE getIoTransportProvider(const char* fully_qualified_name, const MQTT_TRANSPORT_PROXY_OPTIONS* mqtt_transport_proxy_options)
 {
@@ -169,6 +170,18 @@ static void IotHubTransportMqtt_Unsubscribe_InputQueue(IOTHUB_DEVICE_HANDLE hand
     IoTHubTransport_MQTT_Common_Unsubscribe_InputQueue(handle);
 }
 
+static int IotHubTransportMqtt_SetStreamRequestCallback(IOTHUB_DEVICE_HANDLE handle, DEVICE_STREAM_C2D_REQUEST_CALLBACK streamRequestCallback, void* context)
+{
+    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_09_008: [ IotHubTransportMqtt_SetStreamRequestCallback shall call into the IoTHubTransport_MQTT_Common_SetStreamRequestCallback function. ] */
+    return IoTHubTransport_MQTT_Common_SetStreamRequestCallback(handle, streamRequestCallback, context);
+}
+
+static int IotHubTransportMqtt_SendStreamResponse(IOTHUB_DEVICE_HANDLE handle, DEVICE_STREAM_C2D_RESPONSE* response)
+{
+    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_09_009: [ IotHubTransportMqtt_SendStreamResponse shall call into the IoTHubTransport_MQTT_Common_SendStreamResponse function. ] */
+    return IoTHubTransport_MQTT_Common_SendStreamResponse(handle, response);
+}
+
 static int IotHubTransportMqtt_SetCallbackContext(TRANSPORT_LL_HANDLE handle, void* ctx)
 {
     return IoTHubTransport_MQTT_SetCallbackContext(handle, ctx);
@@ -197,6 +210,8 @@ static TRANSPORT_PROVIDER myfunc =
     IoTHubTransportMqtt_Subscribe,                  /*pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;*/
     IoTHubTransportMqtt_Unsubscribe,                /*pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;*/
     IoTHubTransportMqtt_DoWork,                     /*pfIoTHubTransport_DoWork IoTHubTransport_DoWork;*/
+    IotHubTransportMqtt_SetStreamRequestCallback,   /*pfIoTHubTransport_SetStreamRequestCallback IoTHubTransport_SetStreamRequestCallback;*/
+    IotHubTransportMqtt_SendStreamResponse,         /*pfIoTHubTransport_SendStreamResponse IoTHubTransport_SendStreamResponse;*/
     IoTHubTransportMqtt_SetRetryPolicy,             /*pfIoTHubTransport_DoWork IoTHubTransport_SetRetryPolicy;*/
     IoTHubTransportMqtt_GetSendStatus,              /*pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus;*/
     IotHubTransportMqtt_Subscribe_InputQueue,       /*pfIoTHubTransport_Subscribe_InputQueue IoTHubTransport_Subscribe_InputQueue; */

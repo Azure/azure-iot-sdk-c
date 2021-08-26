@@ -28,6 +28,8 @@ extern const TRANSPORT_PROVIDER* MQTT_Protocol(void);
     - IoTHubTransportMqtt_WS_Subscribe,  
     - IoTHubTransportMqtt_WS_Unsubscribe,  
     - IoTHubTransportMqtt_WS_DoWork,  
+    - IotHubTransportMqtt_WS_SetStreamRequestCallback,
+    - IotHubTransportMqtt_WS_SendStreamResponse,
     - IoTHubTransportMqtt_WS_SetRetryPolicy,
     - IoTHubTransportMqtt_WS_GetSendStatus,
     - IotHubTransportMqtt_WS_Subscribe_InputQueue,
@@ -192,6 +194,25 @@ void IoTHubTransportMqtt_WS_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_
 ```
 
 **SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_007: [** IoTHubTransportMqtt_WS_DoWork shall call into the IoTHubTransport_MQTT_Common_DoWork function. **]**
+
+
+### IotHubTransportMqtt_WS_SetStreamRequestCallback
+
+```c
+static int IotHubTransportMqtt_WS_SetStreamRequestCallback(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_INCOMING_STREAM_REQUEST_CALLBACK streamRequestCallback, void* context)
+```
+
+**SRS_IOTHUB_MQTT_TRANSPORT_09_010: [** IotHubTransportMqtt_WS_SetStreamRequestCallback shall call into the IoTHubTransport_MQTT_Common_SetStreamRequestCallback function. **]**
+
+
+### IotHubTransportMqtt_WS_SendStreamResponse
+
+```c
+static int IotHubTransportMqtt_WS_SendStreamResponse(IOTHUB_DEVICE_HANDLE handle, DEVICE_STREAM_C2D_RESPONSE* response);
+```
+
+**SRS_IOTHUB_MQTT_TRANSPORT_09_011: [** IotHubTransportMqtt_WS_SendStreamResponse shall call into the IoTHubTransport_MQTT_Common_SendStreamResponse function. **]**
+
 
 ### IoTHubTransportMqtt_WS_SetRetryPolicy
 

@@ -52,6 +52,12 @@ if(${use_amqp} AND ${use_mqtt})
     add_sample_directory(iothub_client_device_twin_and_methods_sample)
 endif()
 
+if(${use_amqp} OR ${use_mqtt})
+	add_sample_directory(iothub_client_c2d_streaming_proxy_sample)
+	add_sample_directory(iothub_client_c2d_streaming_sample)
+	add_sample_directory(iothub_ll_client_c2d_streaming_sample)
+endif()
+
 if(${use_mqtt})
    # PnP only supports MQTT so only build the sample if MQTT is enabled.
    add_subdirectory(pnp)

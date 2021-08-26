@@ -177,6 +177,18 @@ static void IotHubTransportAMQP_Unsubscribe_InputQueue(IOTHUB_DEVICE_HANDLE hand
     LogError("AMQP does not support input queues");
 }
 
+static int IoTHubTransportAMQP_SetStreamRequestCallback(IOTHUB_DEVICE_HANDLE handle, DEVICE_STREAM_C2D_REQUEST_CALLBACK streamRequestCallback, void* context)
+{
+    // Codes_SRS_IOTHUBTRANSPORTAMQP_09_021: [IoTHubTransportAMQP_SetStreamRequestCallback shall call into the IoTHubTransport_AMQP_Common_SetStreamRequestCallback()]
+    return IoTHubTransport_AMQP_Common_SetStreamRequestCallback(handle, streamRequestCallback, context);
+}
+
+static int IoTHubTransportAMQP_SendStreamResponse(IOTHUB_DEVICE_HANDLE handle, DEVICE_STREAM_C2D_RESPONSE* response)
+{
+    // Codes_SRS_IOTHUBTRANSPORTAMQP_09_022: [IoTHubTransportAMQP_SendStreamResponse shall call into the IoTHubTransport_AMQP_Common_SendStreamResponse()]
+    return IoTHubTransport_AMQP_Common_SendStreamResponse(handle, response);
+}
+
 static int IoTHubTransportAMQP_SetCallbackContext(TRANSPORT_LL_HANDLE handle, void* ctx)
 {
     return IoTHubTransport_AMQP_SetCallbackContext(handle, ctx);
@@ -205,6 +217,8 @@ static TRANSPORT_PROVIDER thisTransportProvider =
     IoTHubTransportAMQP_Subscribe,                  /*pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;*/
     IoTHubTransportAMQP_Unsubscribe,                /*pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;*/
     IoTHubTransportAMQP_DoWork,                     /*pfIoTHubTransport_DoWork IoTHubTransport_DoWork;*/
+    IoTHubTransportAMQP_SetStreamRequestCallback,   /*pfIoTHubTransport_SetStreamRequestCallback IoTHubTransport_SetStreamRequestCallback;*/
+    IoTHubTransportAMQP_SendStreamResponse,         /*pfIoTHubTransport_SendStreamResponse IoTHubTransport_SendStreamResponse;*/
     IoTHubTransportAMQP_SetRetryPolicy,             /*pfIoTHubTransport_DoWork IoTHubTransport_SetRetryPolicy;*/
     IoTHubTransportAMQP_GetSendStatus,              /*pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus;*/
     IotHubTransportAMQP_Subscribe_InputQueue,       /*pfIoTHubTransport_Subscribe_InputQueue IoTHubTransport_Subscribe_InputQueue; */

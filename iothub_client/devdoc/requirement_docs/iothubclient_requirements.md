@@ -47,6 +47,9 @@ extern IOTHUB_CLIENT_RESULT IoTHubClientCore_GetDeviceTwinAsync(IOTHUB_CLIENT_LL
 extern IOTHUB_CLIENT_RESULT IoTHubClient_SetDeviceMethodCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_METHOD_CALLBACK_ASYNC deviceMethodCallback, void* userContextCallback);
 unsigned char* payload, IOTHUB_CLIENT_IOTHUB_METHOD_EXECUTE_CALLBACK iotHubExecuteCallback, void* userContextCallback);
 extern IOTHUB_CLIENT_RESULT IoTHubClient_SetDeviceMethodCallback_Ex(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK inboundDeviceMethodCallback, void* userContextCallback);
+
+## Device Stream
+extern IOTHUB_CLIENT_RESULT IoTHubClientCore_SetStreamRequestCallback(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle, DEVICE_STREAM_C2D_REQUEST_CALLBACK streamRequestCallback, const void* context);
 ```
 
 ## IoTHubClient_GetVersionString
@@ -609,3 +612,39 @@ a value indicating whether to continue or abort the request.
 **SRS_IOTHUBCLIENT_99_078: [** The thread shall call `IoTHubClient_LL_UploadMultipleBlocksToBlob` or `IoTHubClient_LL_UploadMultipleBlocksToBlobEx` passing the information packed in the structure. **]**
 
 **SRS_IOTHUBCLIENT_99_077: [** If copying to the structure and spawning the thread succeeds, then `IoTHubClient_UploadMultipleBlocksToBlobAsync(Ex)` shall return `IOTHUB_CLIENT_OK`. **]**
+
+
+## IoTHubClientCore_SetStreamRequestCallback
+```c
+extern IOTHUB_CLIENT_RESULT IoTHubClientCore_SetStreamRequestCallback(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle, DEVICE_STREAM_C2D_REQUEST_CALLBACK streamRequestCallback, const void* context);
+```
+
+**SRS_IOTHUBCLIENT_09_001: [** If `iotHubClientHandle` is `NULL` the function shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. **]**
+
+**SRS_IOTHUBCLIENT_09_002: [** `IoTHubClientCore_SetStreamRequestCallback` shall start the worker thread if it was not previously started. **]**
+
+**SRS_IOTHUBCLIENT_09_003: [** If starting the thread fails, `IoTHubClientCore_SetStreamRequestCallback` shall return `IOTHUB_CLIENT_ERROR`. **]**
+
+**SRS_IOTHUBCLIENT_09_004: [** The function shall acquire the lock to make the following block thread-safe. **]**
+
+**SRS_IOTHUBCLIENT_09_005: [** If acquiring the lock fails, `IoTHubClientCore_SetStreamRequestCallback` shall return `IOTHUB_CLIENT_ERROR`. **]**
+
+**SRS_IOTHUBCLIENT_09_006: [** `IoTHubClientCore_SetStreamRequestCallback` shall call `IoTHubClient_LL_SetStreamRequestCallback`, passing the `iothub_ll_device_stream_request_callback` **]**
+
+**SRS_IOTHUBCLIENT_09_007: [** `IoTHubClientCore_SetStreamRequestCallback` shall return the result of `IoTHubClientCore_LL_SetStreamRequestCallback`. **]**
+
+**SRS_IOTHUBCLIENT_09_008: [** `IoTHubClientCore_SetStreamRequestCallback` shall release the thread lock. **]**
+
+
+### iothub_ll_device_stream_request_callback
+```c
+static DEVICE_STREAM_C2D_RESPONSE* iothub_ll_device_stream_request_callback(DEVICE_STREAM_C2D_REQUEST* request, const void* context);
+```
+
+**SRS_IOTHUBCLIENT_09_017: [** If `request` or `context` are `NULL` the function shall fail and return a response rejecting the stream request. **]**
+
+**SRS_IOTHUBCLIENT_09_018: [** The stream request and user context shall be added to the user callback list for async dispatching **]**
+
+**SRS_IOTHUBCLIENT_09_019: [** If the stream request fails to be added to the callback list, the function shall fail and return a response rejecting the stream request. **]**
+
+

@@ -43,6 +43,7 @@ extern IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_
 extern void IoTHubAccount_deinit(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 
 extern const char* IoTHubAccount_GetEventHubConnectionString(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
+extern const char* IoTHubAccount_GetIoTHubHostName(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 extern const char* IoTHubAccount_GetIoTHubName(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 extern const char* IoTHubAccount_GetIoTHubSuffix(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 extern IOTHUB_PROVISIONED_DEVICE* IoTHubAccount_GetSASDevice(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
@@ -51,6 +52,8 @@ extern IOTHUB_PROVISIONED_DEVICE* IoTHubAccount_GetX509Device(IOTHUB_ACCOUNT_INF
 extern IOTHUB_PROVISIONED_DEVICE* IoTHubAccount_GetDevice(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle, IOTHUB_ACCOUNT_AUTH_METHOD accountAuthMethod);
 extern const char* IoTHubAccount_GetEventhubListenName(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 extern const char* IoTHubAccount_GetIoTHubConnString(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
+extern const char* IoTHubAccount_GetSharedAccessKey(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
+extern const char* IoTHubAccount_GetSharedAccessKeyName(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 extern const char* IoTHubAccount_GetSharedAccessSignature(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 extern const char* IoTHubAccount_GetEventhubAccessKey(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 extern const size_t IoTHubAccount_GetIoTHubPartitionCount(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);

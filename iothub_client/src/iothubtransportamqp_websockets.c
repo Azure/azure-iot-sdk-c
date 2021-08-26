@@ -229,6 +229,18 @@ static void IotHubTransportAMQP_WS_Unsubscribe_InputQueue(IOTHUB_DEVICE_HANDLE h
     LogError("AMQP WS does not support input queues");
 }
 
+static int IoTHubTransportAMQP_WS_SetStreamRequestCallback(IOTHUB_DEVICE_HANDLE handle, DEVICE_STREAM_C2D_REQUEST_CALLBACK streamRequestCallback, void* context)
+{
+    // Codes_SRS_IOTHUBTRANSPORTAMQP_09_023: [IoTHubTransportAMQP_WS_SetStreamRequestCallback shall call into the IoTHubTransport_AMQP_Common_SetStreamRequestCallback()]
+    return IoTHubTransport_AMQP_Common_SetStreamRequestCallback(handle, streamRequestCallback, context);
+}
+
+static int IoTHubTransportAMQP_WS_SendStreamResponse(IOTHUB_DEVICE_HANDLE handle, DEVICE_STREAM_C2D_RESPONSE* response)
+{
+    // Codes_SRS_IOTHUBTRANSPORTAMQP_09_024: [IoTHubTransportAMQP_WS_SendStreamResponse shall call into the IoTHubTransport_AMQP_Common_SendStreamResponse()]
+    return IoTHubTransport_AMQP_Common_SendStreamResponse(handle, response);
+}
+
 static int IoTHubTransportAMQP_WS_SetCallbackContext(TRANSPORT_LL_HANDLE handle, void* ctx)
 {
     return IoTHubTransport_AMQP_SetCallbackContext(handle, ctx);
@@ -257,6 +269,8 @@ static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls =
     IoTHubTransportAMQP_WS_Subscribe,                                  /*pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;*/
     IoTHubTransportAMQP_WS_Unsubscribe,                                /*pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;*/
     IoTHubTransportAMQP_WS_DoWork,                                     /*pfIoTHubTransport_DoWork IoTHubTransport_DoWork;*/
+    IoTHubTransportAMQP_WS_SetStreamRequestCallback,                   /*pfIoTHubTransport_SetStreamRequestCallback IoTHubTransport_SetStreamRequestCallback;*/
+    IoTHubTransportAMQP_WS_SendStreamResponse,                         /*pfIoTHubTransport_SendStreamResponse IoTHubTransport_SendStreamResponse;*/
     IoTHubTransportAMQP_WS_SetRetryPolicy,                             /*pfIoTHubTransport_SetRetryLogic IoTHubTransport_SetRetryPolicy;*/
     IoTHubTransportAMQP_WS_GetSendStatus,                              /*pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus;*/
     IotHubTransportAMQP_WS_Subscribe_InputQueue,                       /*pfIoTHubTransport_Subscribe_InputQueue IoTHubTransport_Subscribe_InputQueue; */

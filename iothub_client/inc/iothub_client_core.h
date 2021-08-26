@@ -17,6 +17,7 @@
 #include "umock_c/umock_c_prod.h"
 
 #include "iothub_client_core_ll.h"
+#include "iothub_client_streaming.h"
 
 #ifndef IOTHUB_CLIENT_CORE_INSTANCE_TYPE
 typedef struct IOTHUB_CLIENT_CORE_INSTANCE_TAG* IOTHUB_CLIENT_CORE_HANDLE;
@@ -62,6 +63,7 @@ extern "C"
 #endif /* USE_EDGE_MODULES */
 
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClientCore_SendMessageDisposition, IOTHUB_CLIENT_CORE_HANDLE, iotHubClientHandle, IOTHUB_MESSAGE_HANDLE, message, IOTHUBMESSAGE_DISPOSITION_RESULT, disposition);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClientCore_SetStreamRequestCallback, IOTHUB_CLIENT_CORE_HANDLE, iotHubClientHandle, DEVICE_STREAM_C2D_REQUEST_CALLBACK, streamRequestCallback, void*, context);
 
 #ifdef __cplusplus
 }

@@ -32,6 +32,8 @@ MOCKABLE_FUNCTION(, STRING_HANDLE, IoTHubTransport_MQTT_Common_GetHostname, TRAN
 MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubTransport_MQTT_Common_SendMessageDisposition, MESSAGE_CALLBACK_INFO*, message_data, IOTHUBMESSAGE_DISPOSITION_RESULT, disposition);
 MOCKABLE_FUNCTION(, int, IoTHubTransport_MQTT_Common_Subscribe_InputQueue, IOTHUB_DEVICE_HANDLE, handle);
 MOCKABLE_FUNCTION(, void, IoTHubTransport_MQTT_Common_Unsubscribe_InputQueue, IOTHUB_DEVICE_HANDLE, handle);
+MOCKABLE_FUNCTION(, int, IoTHubTransport_MQTT_Common_SetStreamRequestCallback, IOTHUB_DEVICE_HANDLE, handle, DEVICE_STREAM_C2D_REQUEST_CALLBACK, streamRequestCallback, const void*, context);
+MOCKABLE_FUNCTION(, int, IoTHubTransport_MQTT_Common_SendStreamResponse, IOTHUB_DEVICE_HANDLE, handle, DEVICE_STREAM_C2D_RESPONSE*, response);
 ```
 
 ## IoTHubTransport_MQTT_Common_Create
@@ -383,6 +385,9 @@ int IoTHubTransport_MQTT_Common_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOTHU
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_25_045: [** If retry logic for specified parameters of retry policy and retryTimeoutLimitinSeconds is created successfully then IoTHubTransport_MQTT_Common_SetRetryPolicy shall return 0 **]**
 
+
+### IoTHubTransport_MQTT_Common_GetHostname
+
 ```c
 STRING_HANDLE IoTHubTransport_MQTT_Common_GetHostname(TRANSPORT_LL_HANDLE handle)
 ```
@@ -393,6 +398,9 @@ IoTHubTransport_MQTT_Common_GetHostname returns a STRING_HANDLE for the hostname
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_02_002: [** Otherwise `IoTHubTransport_MQTT_Common_GetHostname` shall return a non-NULL STRING_HANDLE containg the hostname. **]**
 
+
+### IoTHubTransport_MQTT_Common_DeviceMethod_Response
+
 ```c
 int IoTHubTransport_MQTT_Common_DeviceMethod_Response(IOTHUB_DEVICE_HANDLE handle, METHOD_ID methodId, const unsigned char* response, size_t resp_size, int status_response);
 ```
@@ -402,6 +410,9 @@ int IoTHubTransport_MQTT_Common_DeviceMethod_Response(IOTHUB_DEVICE_HANDLE handl
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_042: [** `IoTHubTransport_MQTT_Common_DeviceMethod_Response` shall publish an mqtt message for the device method response. **]**
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_051: [** If any error is encountered, `IoTHubTransport_MQTT_Common_DeviceMethod_Response` shall return a non-zero value. **]**
+
+
+### mqtt_notification_callback
 
 ```c
 static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE msgHandle, void* callbackCtx)
@@ -429,6 +440,20 @@ static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE msgHandle, void* call
 
 **SRS_IOTHUB_MQTT_TRANSPORT_31_065: [** If type is IOTHUB_TYPE_TELEMETRY and sent to an input queue, then on success `mqtt_notification_callback` shall call `IoTHubClient_LL_MessageCallbackFromInput`. **]**
 
+
+#### IOTHUB_TYPE_DEVICE_STREAM_REQUEST
+
+**SRS_IOTHUB_MQTT_TRANSPORT_09_069: [** If type is IOTHUB_TYPE_DEVICE_STREAM_REQUEST, the mqtt message shall be parsed to a DEVICE_STREAM_C2D_REQUEST **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_09_070: [** The DEVICE_STREAM_C2D_REQUEST instance shall be passed to the upper layer through the callback set using IoTHubTransport_MQTT_Common_SetStreamRequestCallback**]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_09_071: [** If a response is provided by the callback invokation, it shall be published to "$iothub/streams/res/`response_code`/?$rid=`response->request_id`" **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_09_072: [** If `response->accept` is TRUE, `response_code` shall be set as "200", otherwise it shall be "400" **]**
+
+
+### IoTHubTransport_MQTT_Common_SendMessageDisposition
+
 ```c
 IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SendMessageDisposition(MESSAGE_CALLBACK_INFO* messageData, IOTHUBMESSAGE_DISPOSITION_RESULT disposition);
 ```
@@ -438,3 +463,47 @@ IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SendMessageDisposition(MESSAGE_
 **SRS_IOTHUB_MQTT_TRANSPORT_10_002: [** If any of the `messageData` fields are `NULL`, `IoTHubTransport_MQTT_Common_SendMessageDisposition` shall fail and return `IOTHUB_CLIENT_ERROR`. **]**
 
 **SRS_IOTHUB_MQTT_TRANSPORT_10_00#: [** `IoTHubTransport_MQTT_Common_SendMessageDisposition` shall release the given data and return `IOTHUB_CLIENT_OK`. **]**
+
+
+### IoTHubTransport_MQTT_Common_SetStreamRequestCallback
+
+```c
+int IoTHubTransport_MQTT_Common_SetStreamRequestCallback(IOTHUB_DEVICE_HANDLE handle, DEVICE_STREAM_C2D_REQUEST_CALLBACK streamRequestCallback, const void* context);
+```
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_046: [** If `handle` is NULL, IoTHubTransport_MQTT_Common_SetStreamRequestCallback shall return a non-zero value (failure) **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_047: [** The transport shall subscribe for messages from topic $iothub/streams/POST/ **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_048: [** If topic subscription fails, the function shall return a non-zero value (failure) **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_049: [** If no errors occur, IoTHubTransport_MQTT_Common_SetStreamRequestCallback shall return zero (success) **]**
+
+
+### IoTHubTransport_MQTT_Common_SendStreamResponse
+
+```c
+int IoTHubTransport_MQTT_Common_SendStreamResponse(IOTHUB_DEVICE_HANDLE handle, DEVICE_STREAM_C2D_RESPONSE* response);
+```
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_050: [** If `handle` or `response` are NULL, IoTHubTransport_MQTT_Common_SendStreamResponse shall return a non-zero value **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_051: [** A mqtt message shall be created and `response->data` be set as its body **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_052: [** If the mqtt message fails to be created, IoTHubTransport_MQTT_Common_SendStreamResponse shall fail and return a non-zero value **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_053: [** The destination topic name shall be set to $iothub/streams/res/`result_code`/?$rid=`response->request_id` **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_054: [** If `response->accept` is TRUE, `response_code` shall be set as "200", otherwise it shall be "400" **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_055: [** If `response->content_type` is not NULL, "$ct=" shall be appended to the topic name followed by the url-encoded value of `response->content_type` **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_056: [** If `response->content_encoding` is not NULL, "$ce=" shall be appended to the topic name followed by the url-encoded value of `response->content_encoding` **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_057: [** The mqtt message shall be published to the destination topic **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_058: [** If publishing fails, the function shall fail and return a non-zero value **]**
+
+**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_09_059: [** If no errors occur, IoTHubTransport_MQTT_Common_SendStreamResponse shall return zero **]**
+
+

@@ -125,6 +125,10 @@ extern IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_GetDeviceTwinAsync(IOTHUB_CLIENT
 extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetDeviceMethodCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback, void* userContextCallback);
 extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetDeviceMethodCallback_Ex(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK inboundDeviceMethodCallback, void* userContextCallback);
 extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_DeviceMethodResponse(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, uint32_t methodId, unsigned char* response, size_t responeSize);
+
+## Device Stream
+extern IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetStreamRequestCallback(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, DEVICE_STREAM_C2D_REQUEST_CALLBACK streamRequestCallback, const void* context);
+extern IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SendStreamResponse(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, DEVICE_STREAM_C2D_RESPONSE* response);
 ```
 
 ## IoTHubClient_LL_CreateFromConnectionString
@@ -204,6 +208,7 @@ extern IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_Create(const IOTHUB_CLIENT_CONFIG
 
 **SRS_IOTHUBCLIENT_LL_07_029: [** `IoTHubClient_LL_Create` shall create the Auth module with the device_key, device_id, deviceSasToken, and/or module_id values **]**
 
+
 ## IoTHubClient_LL_CreateWithTransport
 
 ```c
@@ -232,9 +237,11 @@ extern  IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport(IOTHUB_CLIEN
 
 **SRS_IOTHUBCLIENT_LL_17_006: [** `IoTHubClient_LL_CreateWithTransport` shall call the transport _Register function with the `IOTHUB_DEVICE_CONFIG` populated structure and waitingToSend list. **]**
 
-**SRS_IOTHUBCLIENT_LL_17_007: [** If the _Register function fails, this function shall fail and return `NULL`. **]** 
+**SRS_IOTHUBCLIENT_LL_17_007: [** If the _Register function fails, this function shall fail and return `NULL`. **]** **SRS_IOTHUBCLIENT_LL_17_007: [** If the _Register function fails, this function shall fail and return `NULL`. **]** 
 
 **SRS_IOTHUBCLIENT_LL_25_125: [** `IoTHubClient_LL_CreateWithTransport` shall set the default retry policy as Exponential backoff with jitter and if succeed and return a `non-NULL` handle. **]**
+
+
 
 ## IoTHubClient_LL_Destroy
 
@@ -308,6 +315,8 @@ extern void IoTHubClient_LL_DoWork(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle);
 **SRS_IOTHUBCLIENT_LL_07_011: [** If 'IoTHubTransport_ProcessItem' returns IOTHUB_PROCESS_OK `IoTHubClient_LL_DoWork` shall add the `IOTHUB_QUEUE_DATA_ITEM` to the ack queue. **]**
 
 **SRS_IOTHUBCLIENT_LL_07_012: [** If 'IoTHubTransport_ProcessItem' returns any other value `IoTHubClient_LL_DoWork` shall destroy the `IOTHUB_QUEUE_DATA_ITEM` item. **]**
+
+
 
 ## IoTHubClient_LL_SendComplete
 
@@ -983,4 +992,32 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetInputMessageCallbackEx(IOTHUB_CLIENT_LL_
 This function uses the same logic as `IoTHubClient_LL_SetInputMessageCallback` but uses a context and length.  It is for internal use only.
 
 **SRS_IOTHUBCLIENT_LL_31_141: [** `IoTHubClient_LL_SetInputMessageCallbackEx` shall copy the data passed in extended context. **]**
+
+
+## IoTHubClientCore_LL_SetStreamRequestCallback
+```c
+extern IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetStreamRequestCallback(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, DEVICE_STREAM_C2D_REQUEST_CALLBACK streamRequestCallback, const void* context);
+```
+
+**SRS_IOTHUBCLIENT_LL_09_011: [** If `iotHubClientHandle` is NULL, `IoTHubClientCore_LL_SetStreamRequestCallback` shall return IOTHUB_CLIENT_INVALID_ARG. **]**
+
+**SRS_IOTHUBCLIENT_LL_09_012: [** The transport's `IoTHubTransport_SetStreamRequestCallback` shall be invoked passing `streamRequestCallback` and `context`. **]**
+
+**SRS_IOTHUBCLIENT_LL_09_013: [** If `IoTHubTransport_SetStreamRequestCallback` fails, `IoTHubClientCore_LL_SetStreamRequestCallback` shall return IOTHUB_CLIENT_ERROR. **]**
+
+**SRS_IOTHUBCLIENT_LL_09_014: [** If no failures occur `IoTHubClientCore_LL_SetStreamRequestCallback` shall return IOTHUB_CLIENT_OK. **]**
+
+
+## IoTHubClientCore_LL_SendStreamResponse
+```c
+extern IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SendStreamResponse(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle, DEVICE_STREAM_C2D_RESPONSE* response);
+```
+
+**SRS_IOTHUBCLIENT_LL_09_015: [** If `iotHubClientHandle` or `response` are NULL, `IoTHubClientCore_LL_SendStreamResponse` shall return IOTHUB_CLIENT_INVALID_ARG. **]**
+
+**SRS_IOTHUBCLIENT_LL_09_016: [** The transport's `IoTHubTransport_SendStreamResponse` shall be invoked passing `response`. **]**
+
+**SRS_IOTHUBCLIENT_LL_09_017: [** If `IoTHubTransport_SendStreamResponse` fails, `IoTHubClientCore_LL_SendStreamResponse` shall return IOTHUB_CLIENT_ERROR. **]**
+
+**SRS_IOTHUBCLIENT_LL_09_018: [** If no failures occur `IoTHubClientCore_LL_SendStreamResponse` shall return IOTHUB_CLIENT_OK. **]**
 
