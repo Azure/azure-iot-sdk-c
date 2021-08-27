@@ -151,7 +151,6 @@ IOTHUB_DEVICE_CLIENT_LL_HANDLE PnP_CreateDeviceClientLLHandle_ViaDps(const PNP_D
 
     // Destroy the provisioning handle here, instead of the typical convention of doing so at the end of the function.
     // We do so because this handle is no longer required and because on devices with limited amounts of memory
-    // cannot keep this open and have a device handle (via IoTHubDeviceClient_LL_CreateFromDeviceAuth below) at the same time.
     if (provDeviceHandle != NULL)
     {
         Prov_Device_LL_Destroy(provDeviceHandle);

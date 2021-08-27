@@ -118,6 +118,9 @@ static const char* REQUEST_ID_PROPERTY = "?$rid=";
 #define SYS_PROP_TO "to"
 
 static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtimeutc";
+
+static const char* DISTRIBUTED_TRACING_PROPERTY = "tracestate";
+
 static const char DT_MODEL_ID_TOKEN[] = "model-id";
 static const char DEFAULT_IOTHUB_PRODUCT_IDENTIFIER[] = CLIENT_DEVICE_TYPE_PREFIX "/" IOTHUB_SDK_VERSION;
 
@@ -805,6 +808,8 @@ static int addSystemPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_messag
     size_t index = *index_ptr;
 
     bool is_security_msg = IoTHubMessage_IsSecurityMessage(iothub_message_handle);
+    const char* tracestate = IoTHubMessage_GetDistributedTracingSystemProperty(iothub_message_handle);
+
     /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_052: [ IoTHubTransport_MQTT_Common_DoWork shall check for the CorrelationId property and if found add the value as a system property in the format of $.cid=<id> ] */
     const char* correlation_id = IoTHubMessage_GetCorrelationId(iothub_message_handle);
     if (correlation_id != NULL)
@@ -862,6 +867,24 @@ static int addSystemPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_messag
             if (addSystemPropertyToTopicString(topic_string, index++, SECURITY_INTERFACE_ID_MQTT, SECURITY_INTERFACE_ID_VALUE, true) != 0)
             {
                 LogError("Failed setting Security interface id");
+                result = MU_FAILURE;
+            }
+            else
+            {
+                result = 0;
+            }
+        }
+    }
+
+    // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_38_012: [ `IoTHubTransport_MQTT_Common_DoWork` shall check for the DistributedTracing property and if found add the `value` as a system property in the format of `$.tracestate=<value>` ]
+    if (result == 0)
+    {
+        if (tracestate != NULL)
+        {
+            // The distributed tracing tracestate value must be encoded
+            if (addSystemPropertyToTopicString(topic_string, index++, DISTRIBUTED_TRACING_PROPERTY, tracestate, true) != 0)
+            {
+                LogError("Failed setting distributed tracing tracestate");
                 result = MU_FAILURE;
             }
             else
@@ -971,6 +994,7 @@ static STRING_HANDLE addPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_me
         STRING_delete(result);
         result = NULL;
     }
+    //Deprecated
     else if (addDiagnosticPropertiesTouMqttMessage(iothub_message_handle, result, &index) != 0)
     {
         LogError("Failed adding Diagnostic Properties to uMQTT Message");
@@ -1483,7 +1507,7 @@ static const char* addInputNamePropertyToMsg(IOTHUB_MESSAGE_HANDLE iotHubMessage
 }
 
 //
-// addSystemPropertyToMessageWithDecodeIfNeeded adds a "system" property from the incoming MQTT PUBLISH to the iotHubMessage 
+// addSystemPropertyToMessage adds a "system" property from the incoming MQTT PUBLISH to the iotHubMessage 
 // we will ultimately deliver to the application on its callback.
 //
 static int addSystemPropertyToMessage(IOTHUB_MESSAGE_HANDLE iotHubMessage, IOTHUB_SYSTEM_PROPERTY_TYPE propertyType, const char* propValue)
@@ -1614,6 +1638,7 @@ static int addSystemPropertyToMessage(IOTHUB_MESSAGE_HANDLE iotHubMessage, IOTHU
 
     return result;
 }
+
 
 
 //
@@ -1832,6 +1857,206 @@ static int extractMqttProperties(PMQTTTRANSPORT_HANDLE_DATA transportData, IOTHU
     STRING_delete(propertyToken);
     STRING_TOKENIZER_destroy(tokenizer);
     return result;
+}
+
+//
+// processTwinNotification processes device and module twin updates made by IoT Hub / IoT Edge.
+//
+static void processTwinNotification(PMQTTTRANSPORT_HANDLE_DATA transportData, MQTT_MESSAGE_HANDLE msgHandle, const char* topicName)
+{
+    size_t request_id;
+    int status_code;
+    bool notification_msg;
+
+    if (parseDeviceTwinTopicInfo(topicName, &notification_msg, &request_id, &status_code) != 0)
+    {
+        LogError("Failure: parsing device topic info");
+    }
+    else
+    {
+        const APP_PAYLOAD* payload = mqttmessage_getApplicationMsg(msgHandle);
+        if (payload == NULL)
+        {
+            LogError("Failure: invalid payload");
+        }
+        else if (notification_msg)
+        {
+            transportData->transport_callbacks.twin_retrieve_prop_complete_cb(DEVICE_TWIN_UPDATE_PARTIAL, payload->message, payload->length, transportData->transport_ctx);
+        }
+        else
+        {
+            PDLIST_ENTRY dev_twin_item = transportData->ack_waiting_queue.Flink;
+            while (dev_twin_item != &transportData->ack_waiting_queue)
+            {
+                DLIST_ENTRY saveListEntry;
+                saveListEntry.Flink = dev_twin_item->Flink;
+                MQTT_DEVICE_TWIN_ITEM* msg_entry = containingRecord(dev_twin_item, MQTT_DEVICE_TWIN_ITEM, entry);
+                if (request_id == msg_entry->packet_id)
+                {
+                    (void)DList_RemoveEntryList(dev_twin_item);
+                    if (msg_entry->device_twin_msg_type == RETRIEVE_PROPERTIES)
+                    {
+                        if (msg_entry->userCallback == NULL)
+                        {
+                            /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_054: [ If type is IOTHUB_TYPE_DEVICE_TWIN, then on success if msg_type is RETRIEVE_PROPERTIES then mqttNotificationCallback shall call IoTHubClientCore_LL_RetrievePropertyComplete... ] */
+                            transportData->transport_callbacks.twin_retrieve_prop_complete_cb(DEVICE_TWIN_UPDATE_COMPLETE, payload->message, payload->length, transportData->transport_ctx);
+                            // Only after receiving device twin request should we start listening for patches.
+                            (void)subscribeToNotifyStateIfNeeded(transportData);
+                        }
+                        else
+                        {
+                            // This is a on-demand get twin request.
+                            msg_entry->userCallback(DEVICE_TWIN_UPDATE_COMPLETE, payload->message, payload->length, msg_entry->userContext);
+                        }
+                    }
+                    else
+                    {
+                        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_055: [ if device_twin_msg_type is not RETRIEVE_PROPERTIES then mqttNotificationCallback shall call IoTHubClientCore_LL_ReportedStateComplete ] */
+                        transportData->transport_callbacks.twin_rpt_state_complete_cb(msg_entry->iothub_msg_id, status_code, transportData->transport_ctx);
+                        // Only after receiving device twin request should we start listening for patches.
+                        (void)subscribeToNotifyStateIfNeeded(transportData);
+                    }
+
+                    destroyDeviceTwinGetMsg(msg_entry);
+                    break;
+                }
+                dev_twin_item = saveListEntry.Flink;
+            }
+        }
+    }
+}
+
+//
+// processDeviceMethodNotification processes a device and module method invocations made by IoT Hub / IoT Edge.
+//
+static void processDeviceMethodNotification(PMQTTTRANSPORT_HANDLE_DATA transportData, MQTT_MESSAGE_HANDLE msgHandle, const char* topicName)
+{
+    STRING_HANDLE method_name = STRING_new();
+    if (method_name == NULL)
+    {
+        LogError("Failure: allocating method_name string value");
+    }
+    else
+    {
+        DEVICE_METHOD_INFO* dev_method_info = malloc(sizeof(DEVICE_METHOD_INFO));
+        if (dev_method_info == NULL)
+        {
+            LogError("Failure: allocating DEVICE_METHOD_INFO object");
+        }
+        else
+        {
+            dev_method_info->request_id = STRING_new();
+            if (dev_method_info->request_id == NULL)
+            {
+                LogError("Failure constructing request_id string");
+                free(dev_method_info);
+            }
+            else if (retrievDeviceMethodRidInfo(topicName, method_name, dev_method_info->request_id) != 0)
+            {
+                LogError("Failure: retrieve device topic info");
+                STRING_delete(dev_method_info->request_id);
+                free(dev_method_info);
+            }
+            else
+            {
+                /* CodesSRS_IOTHUB_MQTT_TRANSPORT_07_053: [ If type is IOTHUB_TYPE_DEVICE_METHODS, then on success mqttNotificationCallback shall call IoTHubClientCore_LL_DeviceMethodComplete. ] */
+                const APP_PAYLOAD* payload = mqttmessage_getApplicationMsg(msgHandle);
+                if (payload == NULL ||
+                    transportData->transport_callbacks.method_complete_cb(STRING_c_str(method_name), payload->message, payload->length, (void*)dev_method_info, transportData->transport_ctx) != 0)
+                {
+                    LogError("Failure: IoTHubClientCore_LL_DeviceMethodComplete");
+                    STRING_delete(dev_method_info->request_id);
+                    free(dev_method_info);
+                }
+            }
+        }
+        STRING_delete(method_name);
+    }
+}
+
+static void destroyMessageDispositionContext(MESSAGE_DISPOSITION_CONTEXT* dispositionContext)
+{
+    free(dispositionContext);
+}
+
+static MESSAGE_DISPOSITION_CONTEXT* createMessageDispositionContext(MQTT_MESSAGE_HANDLE msgHandle)
+{
+    MESSAGE_DISPOSITION_CONTEXT* result = malloc(sizeof(MESSAGE_DISPOSITION_CONTEXT));
+
+    if (result == NULL)
+    {
+        LogError("Failed allocating MESSAGE_DISPOSITION_CONTEXT");
+    }
+    else
+    {
+        result->packet_id = mqttmessage_getPacketId(msgHandle);
+        result->qos_value = mqttmessage_getQosType(msgHandle);
+    }
+
+    return result;
+}
+
+//
+// processIncomingMessageNotification processes both C2D messages and messages sent from one IoT Edge module into this module
+//
+static void processIncomingMessageNotification(PMQTTTRANSPORT_HANDLE_DATA transportData, MQTT_MESSAGE_HANDLE msgHandle, const char* topicName, IOTHUB_IDENTITY_TYPE type)
+{
+    IOTHUB_MESSAGE_HANDLE IoTHubMessage = NULL;
+    const APP_PAYLOAD* appPayload = mqttmessage_getApplicationMsg(msgHandle);
+
+    if (appPayload == NULL)
+    {
+        LogError("Failure: invalid appPayload.");
+    }
+    else if ((IoTHubMessage = IoTHubMessage_CreateFromByteArray(appPayload->message, appPayload->length)) == NULL)
+    {
+        LogError("Failure: IotHub Message creation has failed.");
+    }
+    else if (extractMqttProperties(transportData, IoTHubMessage, topicName, type) != 0)
+    {
+        LogError("failure extracting mqtt properties.");
+        IoTHubMessage_Destroy(IoTHubMessage);
+    }
+    else
+    {
+        MESSAGE_DISPOSITION_CONTEXT* dispositionContext = createMessageDispositionContext(msgHandle);
+
+        if (dispositionContext == NULL)
+        {
+            LogError("failed creating message disposition context");
+            IoTHubMessage_Destroy(IoTHubMessage);
+        }
+        else if (IoTHubMessage_SetDispositionContext(IoTHubMessage, dispositionContext, destroyMessageDispositionContext) != IOTHUB_MESSAGE_OK)
+        {
+            LogError("Failed setting disposition context in IOTHUB_MESSAGE_HANDLE");
+            destroyMessageDispositionContext(dispositionContext);
+            IoTHubMessage_Destroy(IoTHubMessage);
+        }
+        else
+        {
+            if (type == IOTHUB_TYPE_EVENT_QUEUE)
+            {
+                // Codes_SRS_IOTHUB_MQTT_TRANSPORT_31_065: [ If type is IOTHUB_TYPE_TELEMETRY and sent to an input queue, then on success `mqttNotificationCallback` shall call `IoTHubClient_LL_MessageCallback`. ]
+                if (!transportData->transport_callbacks.msg_input_cb(IoTHubMessage, transportData->transport_ctx))
+                {
+                    LogError("IoTHubClientCore_LL_MessageCallbackFromInput returned false");
+                    // This will destroy the dispostion context;
+                    IoTHubMessage_Destroy(IoTHubMessage);
+                }
+            }
+            else
+            {
+                /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_056: [ If type is IOTHUB_TYPE_TELEMETRY, then on success mqttNotificationCallback shall call IoTHubClientCore_LL_MessageCallback. ] */
+                if (!transportData->transport_callbacks.msg_cb(IoTHubMessage, transportData->transport_ctx))
+                {
+                    // Cleanup of allocated memory happens at end of function as pointers are non-NULL.
+                    LogError("IoTHubClientCore_LL_MessageCallback returned false");
+                    // This will destroy the dispostion context;
+                    IoTHubMessage_Destroy(IoTHubMessage);
+                }
+            }
+        }
+    }
 }
 
 static MAP_HANDLE parseTopicLevelIntoProperties(const char* topicLevel)
@@ -2119,206 +2344,6 @@ static DEVICE_STREAM_C2D_REQUEST* parse_stream_c2d_request(MQTT_MESSAGE_HANDLE m
     }
 
     return result;
-}
-
-//
-// processTwinNotification processes device and module twin updates made by IoT Hub / IoT Edge.
-//
-static void processTwinNotification(PMQTTTRANSPORT_HANDLE_DATA transportData, MQTT_MESSAGE_HANDLE msgHandle, const char* topicName)
-{
-    size_t request_id;
-    int status_code;
-    bool notification_msg;
-
-    if (parseDeviceTwinTopicInfo(topicName, &notification_msg, &request_id, &status_code) != 0)
-    {
-        LogError("Failure: parsing device topic info");
-    }
-    else
-    {
-        const APP_PAYLOAD* payload = mqttmessage_getApplicationMsg(msgHandle);
-        if (payload == NULL)
-        {
-            LogError("Failure: invalid payload");
-        }
-        else if (notification_msg)
-        {
-            transportData->transport_callbacks.twin_retrieve_prop_complete_cb(DEVICE_TWIN_UPDATE_PARTIAL, payload->message, payload->length, transportData->transport_ctx);
-        }
-        else
-        {
-            PDLIST_ENTRY dev_twin_item = transportData->ack_waiting_queue.Flink;
-            while (dev_twin_item != &transportData->ack_waiting_queue)
-            {
-                DLIST_ENTRY saveListEntry;
-                saveListEntry.Flink = dev_twin_item->Flink;
-                MQTT_DEVICE_TWIN_ITEM* msg_entry = containingRecord(dev_twin_item, MQTT_DEVICE_TWIN_ITEM, entry);
-                if (request_id == msg_entry->packet_id)
-                {
-                    (void)DList_RemoveEntryList(dev_twin_item);
-                    if (msg_entry->device_twin_msg_type == RETRIEVE_PROPERTIES)
-                    {
-                        if (msg_entry->userCallback == NULL)
-                        {
-                            /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_054: [ If type is IOTHUB_TYPE_DEVICE_TWIN, then on success if msg_type is RETRIEVE_PROPERTIES then mqttNotificationCallback shall call IoTHubClientCore_LL_RetrievePropertyComplete... ] */
-                            transportData->transport_callbacks.twin_retrieve_prop_complete_cb(DEVICE_TWIN_UPDATE_COMPLETE, payload->message, payload->length, transportData->transport_ctx);
-                            // Only after receiving device twin request should we start listening for patches.
-                            (void)subscribeToNotifyStateIfNeeded(transportData);
-                        }
-                        else
-                        {
-                            // This is a on-demand get twin request.
-                            msg_entry->userCallback(DEVICE_TWIN_UPDATE_COMPLETE, payload->message, payload->length, msg_entry->userContext);
-                        }
-                    }
-                    else
-                    {
-                        /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_055: [ if device_twin_msg_type is not RETRIEVE_PROPERTIES then mqttNotificationCallback shall call IoTHubClientCore_LL_ReportedStateComplete ] */
-                        transportData->transport_callbacks.twin_rpt_state_complete_cb(msg_entry->iothub_msg_id, status_code, transportData->transport_ctx);
-                        // Only after receiving device twin request should we start listening for patches.
-                        (void)subscribeToNotifyStateIfNeeded(transportData);
-                    }
-
-                    destroyDeviceTwinGetMsg(msg_entry);
-                    break;
-                }
-                dev_twin_item = saveListEntry.Flink;
-            }
-        }
-    }
-}
-
-//
-// processDeviceMethodNotification processes a device and module method invocations made by IoT Hub / IoT Edge.
-//
-static void processDeviceMethodNotification(PMQTTTRANSPORT_HANDLE_DATA transportData, MQTT_MESSAGE_HANDLE msgHandle, const char* topicName)
-{
-    STRING_HANDLE method_name = STRING_new();
-    if (method_name == NULL)
-    {
-        LogError("Failure: allocating method_name string value");
-    }
-    else
-    {
-        DEVICE_METHOD_INFO* dev_method_info = malloc(sizeof(DEVICE_METHOD_INFO));
-        if (dev_method_info == NULL)
-        {
-            LogError("Failure: allocating DEVICE_METHOD_INFO object");
-        }
-        else
-        {
-            dev_method_info->request_id = STRING_new();
-            if (dev_method_info->request_id == NULL)
-            {
-                LogError("Failure constructing request_id string");
-                free(dev_method_info);
-            }
-            else if (retrievDeviceMethodRidInfo(topicName, method_name, dev_method_info->request_id) != 0)
-            {
-                LogError("Failure: retrieve device topic info");
-                STRING_delete(dev_method_info->request_id);
-                free(dev_method_info);
-            }
-            else
-            {
-                /* CodesSRS_IOTHUB_MQTT_TRANSPORT_07_053: [ If type is IOTHUB_TYPE_DEVICE_METHODS, then on success mqttNotificationCallback shall call IoTHubClientCore_LL_DeviceMethodComplete. ] */
-                const APP_PAYLOAD* payload = mqttmessage_getApplicationMsg(msgHandle);
-                if (payload == NULL ||
-                    transportData->transport_callbacks.method_complete_cb(STRING_c_str(method_name), payload->message, payload->length, (void*)dev_method_info, transportData->transport_ctx) != 0)
-                {
-                    LogError("Failure: IoTHubClientCore_LL_DeviceMethodComplete");
-                    STRING_delete(dev_method_info->request_id);
-                    free(dev_method_info);
-                }
-            }
-        }
-        STRING_delete(method_name);
-    }
-}
-
-static void destroyMessageDispositionContext(MESSAGE_DISPOSITION_CONTEXT* dispositionContext)
-{
-    free(dispositionContext);
-}
-
-static MESSAGE_DISPOSITION_CONTEXT* createMessageDispositionContext(MQTT_MESSAGE_HANDLE msgHandle)
-{
-    MESSAGE_DISPOSITION_CONTEXT* result = malloc(sizeof(MESSAGE_DISPOSITION_CONTEXT));
-
-    if (result == NULL)
-    {
-        LogError("Failed allocating MESSAGE_DISPOSITION_CONTEXT");
-    }
-    else
-    {
-        result->packet_id = mqttmessage_getPacketId(msgHandle);
-        result->qos_value = mqttmessage_getQosType(msgHandle);
-    }
-
-    return result;
-}
-
-//
-// processIncomingMessageNotification processes both C2D messages and messages sent from one IoT Edge module into this module
-//
-static void processIncomingMessageNotification(PMQTTTRANSPORT_HANDLE_DATA transportData, MQTT_MESSAGE_HANDLE msgHandle, const char* topicName, IOTHUB_IDENTITY_TYPE type)
-{
-    IOTHUB_MESSAGE_HANDLE IoTHubMessage = NULL;
-    const APP_PAYLOAD* appPayload = mqttmessage_getApplicationMsg(msgHandle);
-
-    if (appPayload == NULL)
-    {
-        LogError("Failure: invalid appPayload.");
-    }
-    else if ((IoTHubMessage = IoTHubMessage_CreateFromByteArray(appPayload->message, appPayload->length)) == NULL)
-    {
-        LogError("Failure: IotHub Message creation has failed.");
-    }
-    else if (extractMqttProperties(transportData, IoTHubMessage, topicName, type) != 0)
-    {
-        LogError("failure extracting mqtt properties.");
-        IoTHubMessage_Destroy(IoTHubMessage);
-    }
-    else
-    {
-        MESSAGE_DISPOSITION_CONTEXT* dispositionContext = createMessageDispositionContext(msgHandle);
-
-        if (dispositionContext == NULL)
-        {
-            LogError("failed creating message disposition context");
-            IoTHubMessage_Destroy(IoTHubMessage);
-        }
-        else if (IoTHubMessage_SetDispositionContext(IoTHubMessage, dispositionContext, destroyMessageDispositionContext) != IOTHUB_MESSAGE_OK)
-        {
-            LogError("Failed setting disposition context in IOTHUB_MESSAGE_HANDLE");
-            destroyMessageDispositionContext(dispositionContext);
-            IoTHubMessage_Destroy(IoTHubMessage);
-        }
-        else
-        {
-            if (type == IOTHUB_TYPE_EVENT_QUEUE)
-            {
-                // Codes_SRS_IOTHUB_MQTT_TRANSPORT_31_065: [ If type is IOTHUB_TYPE_TELEMETRY and sent to an input queue, then on success `mqttNotificationCallback` shall call `IoTHubClient_LL_MessageCallback`. ]
-                if (!transportData->transport_callbacks.msg_input_cb(IoTHubMessage, transportData->transport_ctx))
-                {
-                    LogError("IoTHubClientCore_LL_MessageCallbackFromInput returned false");
-                    // This will destroy the dispostion context;
-                    IoTHubMessage_Destroy(IoTHubMessage);
-                }
-            }
-            else
-            {
-                /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_056: [ If type is IOTHUB_TYPE_TELEMETRY, then on success mqttNotificationCallback shall call IoTHubClientCore_LL_MessageCallback. ] */
-                if (!transportData->transport_callbacks.msg_cb(IoTHubMessage, transportData->transport_ctx))
-                {
-                    // Cleanup of allocated memory happens at end of function as pointers are non-NULL.
-                    LogError("IoTHubClientCore_LL_MessageCallback returned false");
-                    // This will destroy the dispostion context;
-                    IoTHubMessage_Destroy(IoTHubMessage);
-                }
-            }
-        }
-    }
 }
 
 //

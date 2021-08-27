@@ -36,6 +36,11 @@ TEST_FUNCTION(IoTHub_MQTT_GetFullDesired_e2e_sas)
     dt_e2e_get_complete_desired_test(MQTT_Protocol, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
 }
 
+TEST_FUNCTION(IoTHub_MQTT_TestDTracing_e2e_sas)
+{
+    dt_e2e_test_dtracing(MQTT_Protocol, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
+}
+
 TEST_FUNCTION(IoTHub_MQTT_GetTwinAsync_e2e_sas)
 {
     dt_e2e_get_twin_async_test(MQTT_Protocol, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
@@ -55,6 +60,11 @@ TEST_FUNCTION(IoTHub_MQTT_SendReported_e2e_x509)
 TEST_FUNCTION(IoTHub_MQTT_GetFullDesired_e2e_x509)
 {
     dt_e2e_get_complete_desired_test(MQTT_Protocol, IOTHUB_ACCOUNT_AUTH_X509);
+}
+
+TEST_FUNCTION(IoTHub_MQTT_TestDTracing_e2e_x509)
+{
+    dt_e2e_test_dtracing(MQTT_Protocol, IOTHUB_ACCOUNT_AUTH_X509);
 }
 
 TEST_FUNCTION(IoTHub_MQTT_GetTwinAsync_e2e_x509)
@@ -82,6 +92,11 @@ TEST_FUNCTION(IoTHub_MQTT_WS_GetFullDesired_e2e_sas)
     dt_e2e_get_complete_desired_test(MQTT_WebSocket_Protocol, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
 }
 
+TEST_FUNCTION(IoTHub_MQTT_WS_TestDTracing_e2e_sas)
+{
+    dt_e2e_test_dtracing(MQTT_WebSocket_Protocol, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
+}
+
 TEST_FUNCTION(IoTHub_MQTT_WS_GetTwinAsync_e2e_sas)
 {
     dt_e2e_get_twin_async_test(MQTT_WebSocket_Protocol, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
@@ -100,6 +115,11 @@ TEST_FUNCTION(IoTHub_MQTT_WS_GetFullDesired_e2e_x509)
 TEST_FUNCTION(IoTHub_MQTT_WS_SendReported_e2e_x509)
 {
     dt_e2e_send_reported_test(MQTT_WebSocket_Protocol, IOTHUB_ACCOUNT_AUTH_X509);
+}
+
+TEST_FUNCTION(IoTHub_MQTT_WS_TestDTracing_e2e_x509)
+{
+    dt_e2e_test_dtracing(MQTT_WebSocket_Protocol, IOTHUB_ACCOUNT_AUTH_X509);
 }
 
 TEST_FUNCTION(IoTHub_MQTT_WS_GetTwinAsync_e2e_x509)

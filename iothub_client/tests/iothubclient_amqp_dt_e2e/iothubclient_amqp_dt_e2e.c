@@ -31,6 +31,11 @@ TEST_FUNCTION(IoTHub_AMQP_GetFullDesired_e2e_sas)
     dt_e2e_get_complete_desired_test(AMQP_Protocol, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
 }
 
+TEST_FUNCTION(IoTHub_AMQP_TestDTracing_e2e_sas)
+{
+    dt_e2e_test_dtracing(AMQP_Protocol, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
+}
+
 TEST_FUNCTION(IoTHub_AMQP_GetTwinAsync_e2e_sas)
 {
     dt_e2e_get_twin_async_test(AMQP_Protocol, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
@@ -45,6 +50,11 @@ TEST_FUNCTION(IoTHub_AMQP_SendReported_e2e_x509)
 TEST_FUNCTION(IoTHub_AMQP_GetFullDesired_e2e_x509)
 {
     dt_e2e_get_complete_desired_test(AMQP_Protocol, IOTHUB_ACCOUNT_AUTH_X509);
+}
+
+TEST_FUNCTION(IoTHub_AMQP_TestDTracing_e2e_x509)
+{
+    dt_e2e_test_dtracing(AMQP_Protocol, IOTHUB_ACCOUNT_AUTH_X509);
 }
 
 TEST_FUNCTION(IoTHub_AMQP_GetTwinAsync_e2e_x509)
@@ -66,6 +76,11 @@ TEST_FUNCTION(IoTHub_AMQP_WS_GetFullDesired_e2e_sas)
     dt_e2e_get_complete_desired_test(AMQP_Protocol_over_WebSocketsTls, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
 }
 
+TEST_FUNCTION(IoTHub_AMQP_WS_TestDTracing_e2e_sas)
+{
+    dt_e2e_test_dtracing(AMQP_Protocol_over_WebSocketsTls, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
+}
+
 TEST_FUNCTION(IoTHub_AMQP_WS_GetTwinAsync_e2e_sas)
 {
     dt_e2e_get_twin_async_test(AMQP_Protocol_over_WebSocketsTls, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
@@ -80,6 +95,11 @@ TEST_FUNCTION(IoTHub_AMQP_WS_SendReported_e2e_x509)
 TEST_FUNCTION(IoTHub_AMQP_WS_GetFullDesired_e2e_x509)
 {
     dt_e2e_get_complete_desired_test(AMQP_Protocol_over_WebSocketsTls, IOTHUB_ACCOUNT_AUTH_X509);
+}
+
+TEST_FUNCTION(IoTHub_AMQP_WS_TestDTracing_e2e_x509)
+{
+    dt_e2e_test_dtracing(AMQP_Protocol_over_WebSocketsTls, IOTHUB_ACCOUNT_AUTH_X509);
 }
 
 TEST_FUNCTION(IoTHub_AMQP_WS_GetTwinAsync_e2e_x509)
