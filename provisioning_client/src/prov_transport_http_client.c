@@ -1231,7 +1231,15 @@ static int prov_transport_http_set_option(PROV_DEVICE_TRANSPORT_HANDLE handle, c
         }
         else
         {
-            result = uhttp_client_set_option(http_info->http_client, option, value);
+            HTTP_CLIENT_RESULT http_result = uhttp_client_set_option(http_info->http_client, option, value);
+            if (http_result != HTTP_CLIENT_OK)
+            {
+                result = MU_FAILURE;
+            }
+            else
+            {
+                result = 0;
+            }
         }
     }
     return result;

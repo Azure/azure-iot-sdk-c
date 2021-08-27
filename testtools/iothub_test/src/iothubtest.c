@@ -30,6 +30,7 @@
 #include "azure_c_shared_utility/strings.h"
 
 #include "azure_c_shared_utility/shared_util_options.h"
+#include "azure_c_shared_utility/lock.h"
 
 #include "azure_c_shared_utility/threadapi.h"
 #include "iothubtest.h"
@@ -96,7 +97,68 @@ const char* test_service_cert =
 "Epn3o0WC4zxe9Z2etciefC7IpJ5OCBRLbf1wbWsaY71k5h+3zvDyny67G7fyUIhz\r\n"
 "ksLi4xaNmjICq44Y3ekQEe5+NauQrz4wlHrQMz2nZQ/1/I6eYs9HRCwBXbsdtTLS\r\n"
 "R9I4LtD+gdwyah617jzV/OeBHRnDJELqYzmp\r\n"
-"-----END CERTIFICATE-----\r\n";
+"-----END CERTIFICATE-----\r\n"
+
+/* DigiCert Global Root G2 */
+"-----BEGIN CERTIFICATE-----\r\n"
+"MIIDjjCCAnagAwIBAgIQAzrx5qcRqaC7KGSxHQn65TANBgkqhkiG9w0BAQsFADBh\r\n"
+"MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3\r\n"
+"d3cuZGlnaWNlcnQuY29tMSAwHgYDVQQDExdEaWdpQ2VydCBHbG9iYWwgUm9vdCBH\r\n"
+"MjAeFw0xMzA4MDExMjAwMDBaFw0zODAxMTUxMjAwMDBaMGExCzAJBgNVBAYTAlVT\r\n"
+"MRUwEwYDVQQKEwxEaWdpQ2VydCBJbmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5j\r\n"
+"b20xIDAeBgNVBAMTF0RpZ2lDZXJ0IEdsb2JhbCBSb290IEcyMIIBIjANBgkqhkiG\r\n"
+"9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuzfNNNx7a8myaJCtSnX/RrohCgiN9RlUyfuI\r\n"
+"2/Ou8jqJkTx65qsGGmvPrC3oXgkkRLpimn7Wo6h+4FR1IAWsULecYxpsMNzaHxmx\r\n"
+"1x7e/dfgy5SDN67sH0NO3Xss0r0upS/kqbitOtSZpLYl6ZtrAGCSYP9PIUkY92eQ\r\n"
+"q2EGnI/yuum06ZIya7XzV+hdG82MHauVBJVJ8zUtluNJbd134/tJS7SsVQepj5Wz\r\n"
+"tCO7TG1F8PapspUwtP1MVYwnSlcUfIKdzXOS0xZKBgyMUNGPHgm+F6HmIcr9g+UQ\r\n"
+"vIOlCsRnKPZzFBQ9RnbDhxSJITRNrw9FDKZJobq7nMWxM4MphQIDAQABo0IwQDAP\r\n"
+"BgNVHRMBAf8EBTADAQH/MA4GA1UdDwEB/wQEAwIBhjAdBgNVHQ4EFgQUTiJUIBiV\r\n"
+"5uNu5g/6+rkS7QYXjzkwDQYJKoZIhvcNAQELBQADggEBAGBnKJRvDkhj6zHd6mcY\r\n"
+"1Yl9PMWLSn/pvtsrF9+wX3N3KjITOYFnQoQj8kVnNeyIv/iPsGEMNKSuIEyExtv4\r\n"
+"NeF22d+mQrvHRAiGfzZ0JFrabA0UWTW98kndth/Jsw1HKj2ZL7tcu7XUIOGZX1NG\r\n"
+"Fdtom/DzMNU+MeKNhJ7jitralj41E6Vf8PlwUHBHQRFXGU7Aj64GxJUTFy8bJZ91\r\n"
+"8rGOmaFvE7FBcf6IKshPECBV1/MUReXgRPTqh5Uykw7+U0b6LJ3/iyK5S9kJRaTe\r\n"
+"pLiaWN0bfVKfjllDiIGknibVb63dDcY3fe0Dkhvld1927jyNxF1WW6LZZm6zNTfl\r\n"
+"MrY=\r\n"
+"-----END CERTIFICATE-----\r\n"
+
+/* Microsoft RSA Root Certificate Authority 2017 */
+"-----BEGIN CERTIFICATE-----\r\n"
+"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\r\n"
+"RA+GsCyRxj3qrg+E\r\n"
+"-----END CERTIFICATE-----\r\n"
+;
+
 
 const char* AMQP_RECV_ADDRESS_FMT = "%s/ConsumerGroups/%s/Partitions/%u";
 const char* AMQP_ADDRESS_PATH_FMT = "/devices/%s/messages/deviceBound";
@@ -108,6 +170,7 @@ const char* AMQP_SEND_AUTHCID_FMT = "iothubowner@sas.root.%s";
 #define MAX_DRAIN_TIME              1000.0
 #define MAX_SHORT_VALUE             32767         /* maximum (signed) short value */
 #define INDEFINITE_TIME             ((time_t)-1)
+#define CONNECTION_2_MIN_TIMEOUT    (2 * 60 * 1000) 
 
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
 
@@ -149,6 +212,9 @@ typedef struct IOTHUB_VALIDATION_INFO_TAG
     void* onMessageReceivedContext;
     THREAD_HANDLE asyncWorkThread;
     bool keepThreadAlive;
+    bool isEventListenerConnected;
+    size_t partitionCount;
+    LOCK_HANDLE lock;
 } IOTHUB_VALIDATION_INFO;
 
 typedef struct MESSAGE_RECEIVER_CONTEXT_TAG
@@ -157,6 +223,8 @@ typedef struct MESSAGE_RECEIVER_CONTEXT_TAG
     void* context;
     bool message_received;
 } MESSAGE_RECEIVER_CONTEXT;
+
+static AMQP_CONN_INFO* createAmqpConnection(IOTHUB_VALIDATION_INFO* devhubValInfo, size_t partitionCount, time_t receiveTimeRangeStart);
 
 unsigned int ConvertToUnsignedInt(const unsigned char data[], int position)
 {
@@ -613,6 +681,35 @@ static char* CreateSendAuthCid(IOTHUB_VALIDATION_INFO* devhubValInfo)
     return result;
 }
 
+static AMQP_VALUE GetMessageDeviceId(MESSAGE_HANDLE uamqp_message)
+{
+    AMQP_VALUE device_id = NULL;
+    AMQP_VALUE uamqp_message_annotations = NULL;
+    if (message_get_message_annotations(uamqp_message, &uamqp_message_annotations) != 0)
+    {
+        LogError("Failed reading the incoming uAMQP message annotations.");
+    }
+    else
+    {
+        if (uamqp_message_annotations == NULL)
+        {
+            LogError("No AMQP message annotations");
+        }
+        else
+        {
+            AMQP_VALUE property_key = amqpvalue_create_symbol("iothub-connection-device-id");
+            if (property_key != NULL)
+            {
+                device_id = amqpvalue_get_map_value(uamqp_message_annotations, property_key);
+                amqpvalue_destroy(property_key);
+            }
+            amqpvalue_destroy(uamqp_message_annotations);
+        }
+    }
+
+    return device_id;
+}
+
 static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE message)
 {
     MESSAGE_RECEIVER_CONTEXT* msg_received_context = (MESSAGE_RECEIVER_CONTEXT*)context;
@@ -638,7 +735,7 @@ static AMQP_VALUE on_message_received_new(const void* context, MESSAGE_HANDLE me
     AMQP_VALUE result;
 
     IOTHUB_VALIDATION_INFO* devhubValInfo = (IOTHUB_VALIDATION_INFO*)context;
-
+    
     if (devhubValInfo->onMessageReceivedCallback == NULL)
     {
         result = messaging_delivery_released();
@@ -654,13 +751,32 @@ static AMQP_VALUE on_message_received_new(const void* context, MESSAGE_HANDLE me
         }
         else
         {
-            if (devhubValInfo->onMessageReceivedCallback(devhubValInfo->onMessageReceivedContext, (const char*)binary_data.bytes, binary_data.length) == 0)
+            const char* deviceid = NULL;
+            AMQP_VALUE device_id = GetMessageDeviceId(message);
+            if (device_id != NULL)
             {
-                result = messaging_delivery_accepted();
+                amqpvalue_get_string(device_id, &deviceid);
+            }
+
+            if (deviceid == NULL || strcmp(devhubValInfo->deviceId, deviceid) == 0)
+            {
+                if (devhubValInfo->onMessageReceivedCallback(devhubValInfo->onMessageReceivedContext, (const char*)binary_data.bytes, binary_data.length) == 0)
+                {
+                    result = messaging_delivery_accepted();
+                }
+                else
+                {
+                    result = messaging_delivery_released();
+                }
             }
             else
             {
                 result = messaging_delivery_released();
+            }
+
+            if (device_id != NULL)
+            {
+                amqpvalue_destroy(device_id);
             }
         }
     }
@@ -670,46 +786,50 @@ static AMQP_VALUE on_message_received_new(const void* context, MESSAGE_HANDLE me
 
 static void destroyAmqpConnection(AMQP_CONN_INFO* amqp_connection)
 {
-    if (amqp_connection->message_receiver != NULL)
+    if (amqp_connection != NULL)
     {
-        messagereceiver_destroy(amqp_connection->message_receiver);
-        amqp_connection->message_receiver = NULL;
-    }
+        if (amqp_connection->message_receiver != NULL)
+        {
+            messagereceiver_destroy(amqp_connection->message_receiver);
+            amqp_connection->message_receiver = NULL;
+        }
 
-    if (amqp_connection->receive_link != NULL)
-    {
-        link_destroy(amqp_connection->receive_link);
-        amqp_connection->receive_link = NULL;
-    }
+        if (amqp_connection->receive_link != NULL)
+        {
+            link_destroy(amqp_connection->receive_link);
+            amqp_connection->receive_link = NULL;
+        }
 
-    if (amqp_connection->session != NULL)
-    {
-        session_destroy(amqp_connection->session);
-        amqp_connection->session = NULL;
-    }
+        if (amqp_connection->session != NULL)
+        {
+            session_destroy(amqp_connection->session);
+            amqp_connection->session = NULL;
+        }
 
-    if (amqp_connection->connection != NULL)
-    {
-        connection_destroy(amqp_connection->connection);
-        amqp_connection->connection = NULL;
-    }
+        if (amqp_connection->connection != NULL)
+        {
+            connection_destroy(amqp_connection->connection);
+            amqp_connection->connection = NULL;
+        }
 
-    if (amqp_connection->sasl_io != NULL)
-    {
-        xio_destroy(amqp_connection->sasl_io);
-        amqp_connection->sasl_io = NULL;
-    }
+        if (amqp_connection->sasl_io != NULL)
+        {
+            xio_destroy(amqp_connection->sasl_io);
+            amqp_connection->sasl_io = NULL;
+        }
 
-    if (amqp_connection->sasl_mechanism != NULL)
-    {
-        saslmechanism_destroy(amqp_connection->sasl_mechanism);
-        amqp_connection->sasl_mechanism = NULL;
-    }
+        if (amqp_connection->sasl_mechanism != NULL)
+        {
+            saslmechanism_destroy(amqp_connection->sasl_mechanism);
+            amqp_connection->sasl_mechanism = NULL;
+        }
 
-    if (amqp_connection->tls_io != NULL)
-    {
-        xio_destroy(amqp_connection->tls_io);
-        amqp_connection->tls_io = NULL;
+        if (amqp_connection->tls_io != NULL)
+        {
+            xio_destroy(amqp_connection->tls_io);
+            amqp_connection->tls_io = NULL;
+        }
+        free(amqp_connection);
     }
 }
 
@@ -717,12 +837,47 @@ static int asyncWorkFunction(void* context)
 {
     IOTHUB_VALIDATION_INFO* devhubValInfo = (IOTHUB_VALIDATION_INFO*)context;
 
-    while (devhubValInfo->keepThreadAlive)
+    bool keepThreadAlive = true;
+    while (keepThreadAlive)
     {
-        if (devhubValInfo->amqp_connection != NULL)
+        CONNECTION_HANDLE connection = NULL;
+        bool isEventListenerConnected = true;
+        if (Lock(devhubValInfo->lock) == LOCK_OK)
         {
-            connection_dowork(devhubValInfo->amqp_connection->connection);
+            keepThreadAlive = devhubValInfo->keepThreadAlive;
+            isEventListenerConnected = devhubValInfo->isEventListenerConnected;
+            if (devhubValInfo->amqp_connection)
+            {
+                connection = devhubValInfo->amqp_connection->connection;
+            }
+            Unlock(devhubValInfo->lock);
         }
+        
+        if (connection != NULL)
+        {
+            connection_dowork(connection);
+        }
+
+        if (isEventListenerConnected == false)
+        {
+            if (Lock(devhubValInfo->lock) == LOCK_OK)
+            {
+                LogInfo("Event listener disconnected, reconnecting...");
+                destroyAmqpConnection(devhubValInfo->amqp_connection);
+                devhubValInfo->amqp_connection = NULL;
+                ThreadAPI_Sleep(1000 * 5);
+                devhubValInfo->amqp_connection = createAmqpConnection(devhubValInfo, devhubValInfo->partitionCount, time(NULL) - 180);
+                if (devhubValInfo->amqp_connection != NULL)
+                {
+                    LogInfo("Event listener AMQP connected");
+                    devhubValInfo->isEventListenerConnected = true;
+                }
+
+                Unlock(devhubValInfo->lock);
+            }
+        }
+
+        ThreadAPI_Sleep(10);
     }
 
     return 0;
@@ -797,6 +952,7 @@ static filter_set create_link_source_filter(time_t receiveTimeRangeStart)
                         result = NULL;
                     }
 
+                    amqpvalue_destroy(described_filter_value);
                     amqpvalue_destroy(filter_key);
                 }
             }
@@ -852,6 +1008,107 @@ static AMQP_VALUE create_link_source(char* receive_address, filter_set filter_se
     return result;
 }
 
+static const char* amqp_connection_state_to_string(CONNECTION_STATE connection_state)
+{
+    const char* connection_state_string;
+    switch (connection_state)
+    {
+    case CONNECTION_STATE_START:
+        connection_state_string = "CONNECTION_STATE_START";
+        break;
+
+    case CONNECTION_STATE_HDR_RCVD:
+        connection_state_string = "CONNECTION_STATE_HDR_RCVD";
+        break;
+
+    case CONNECTION_STATE_HDR_SENT:
+        connection_state_string = "CONNECTION_STATE_HDR_SENT";
+        break;
+
+    case CONNECTION_STATE_HDR_EXCH:
+        connection_state_string = "CONNECTION_STATE_HDR_EXCH";
+        break;
+
+    case CONNECTION_STATE_OPEN_PIPE:
+        connection_state_string = "CONNECTION_STATE_OPEN_PIPE";
+        break;
+            
+    case CONNECTION_STATE_OC_PIPE:
+        connection_state_string = "CONNECTION_STATE_OC_PIPE";
+        break;
+
+    case CONNECTION_STATE_OPEN_RCVD:
+        connection_state_string = "CONNECTION_STATE_OPEN_RCVD";
+        break;
+ 
+    case CONNECTION_STATE_OPEN_SENT:
+        connection_state_string = "CONNECTION_STATE_OPEN_SENT";
+        break;
+
+    case CONNECTION_STATE_CLOSE_PIPE:
+        connection_state_string = "CONNECTION_STATE_CLOSE_PIPE";
+        break;
+
+    case CONNECTION_STATE_OPENED:
+        connection_state_string = "CONNECTION_STATE_OPENED";
+        break;
+            
+    case CONNECTION_STATE_CLOSE_RCVD:
+        connection_state_string = "CONNECTION_STATE_CLOSE_RCVD";
+        break;
+            
+    case CONNECTION_STATE_CLOSE_SENT:
+        connection_state_string = "CONNECTION_STATE_CLOSE_SENT";
+        break;
+    
+    case CONNECTION_STATE_DISCARDING:
+        connection_state_string = "CONNECTION_STATE_DISCARDING";
+        break;
+
+    case CONNECTION_STATE_END:
+        connection_state_string = "CONNECTION_STATE_END";
+        break;
+            
+    case CONNECTION_STATE_ERROR:
+        connection_state_string = "CONNECTION_STATE_ERROR";
+        break;
+
+    default:
+        connection_state_string = "CONNECTION_STATE UNKNOWN!";
+        break;
+    }
+
+    return connection_state_string;
+}
+
+static void on_connection_state_changed(void* context, CONNECTION_STATE new_connection_state, CONNECTION_STATE previous_connection_state)
+{
+    if (new_connection_state != previous_connection_state)
+    {
+        LogInfo("AMQP connection state changed. new_connection_state: %s (%d), previous_connection_state %s (%d)", 
+            amqp_connection_state_to_string(new_connection_state), new_connection_state, amqp_connection_state_to_string(previous_connection_state), previous_connection_state);
+    }
+
+    IOTHUB_VALIDATION_INFO* devhubValInfo = (IOTHUB_VALIDATION_INFO*)context;
+    if (devhubValInfo->isEventListenerConnected && 
+        (new_connection_state == CONNECTION_STATE_END || new_connection_state == CONNECTION_STATE_ERROR) &&
+        (previous_connection_state == CONNECTION_STATE_START ||
+            previous_connection_state == CONNECTION_STATE_HDR_RCVD ||
+            previous_connection_state == CONNECTION_STATE_HDR_SENT ||
+            previous_connection_state == CONNECTION_STATE_HDR_EXCH ||
+            previous_connection_state == CONNECTION_STATE_OPEN_PIPE ||
+            previous_connection_state == CONNECTION_STATE_OC_PIPE ||
+            previous_connection_state == CONNECTION_STATE_OPEN_RCVD ||
+            previous_connection_state == CONNECTION_STATE_OPEN_SENT ||
+            previous_connection_state == CONNECTION_STATE_CLOSE_PIPE ||
+            previous_connection_state == CONNECTION_STATE_CLOSE_RCVD ||
+            previous_connection_state == CONNECTION_STATE_OPENED))
+    {
+        devhubValInfo->isEventListenerConnected = false;
+        LogInfo("AMQP connection state: %s, reconnecting...", amqp_connection_state_to_string(new_connection_state));
+    }
+}
+
 static AMQP_CONN_INFO* createAmqpConnection(IOTHUB_VALIDATION_INFO* devhubValInfo, size_t partitionCount, time_t receiveTimeRangeStart)
 {
     AMQP_CONN_INFO* result;
@@ -899,25 +1156,25 @@ static AMQP_CONN_INFO* createAmqpConnection(IOTHUB_VALIDATION_INFO* devhubValInf
                 if ((sasl_plain_interface_description = saslplain_get_interface()) == NULL)
                 {
                     LogError("Failed getting saslplain_get_interface.");
-                    destroyAmqpConnection(devhubValInfo->amqp_connection);
+                    destroyAmqpConnection(result);
                     result = NULL;
                 }
                 else if ((result->sasl_mechanism = saslmechanism_create(sasl_plain_interface_description, &sasl_plain_config)) == NULL)
                 {
                     LogError("Failed creating sasl PLAN mechanism.");
-                    destroyAmqpConnection(devhubValInfo->amqp_connection);
+                    destroyAmqpConnection(result);
                     result = NULL;
                 }
                 else if ((tlsio_interface = platform_get_default_tlsio()) == NULL)
                 {
                     LogError("Failed getting default TLS IO interface.");
-                    destroyAmqpConnection(devhubValInfo->amqp_connection);
+                    destroyAmqpConnection(result);
                     result = NULL;
                 }
                 else if ((result->tls_io = xio_create(tlsio_interface, &tls_io_config)) == NULL)
                 {
                     LogError("Failed creating the TLS IO.");
-                    destroyAmqpConnection(devhubValInfo->amqp_connection);
+                    destroyAmqpConnection(result);
                     result = NULL;
                 }
                 else
@@ -929,27 +1186,33 @@ static AMQP_CONN_INFO* createAmqpConnection(IOTHUB_VALIDATION_INFO* devhubValInf
                     if ((result->sasl_io = xio_create(saslclientio_get_interface_description(), &sasl_io_config)) == NULL)
                     {
                         LogError("Failed creating the SASL IO.");
-                        destroyAmqpConnection(devhubValInfo->amqp_connection);
+                        destroyAmqpConnection(result);
                         result = NULL;
                     }
                     /* create the connection, session and link */
-                    else if ((result->connection = connection_create(result->sasl_io, eh_hostname, "e2etest_link", NULL, NULL)) == NULL)
+                    else if ((result->connection = connection_create2(result->sasl_io, eh_hostname, "e2etest_link", NULL, NULL, on_connection_state_changed, devhubValInfo, NULL, NULL)) == NULL)
                     {
                         LogError("Failed creating the connection.");
-                        destroyAmqpConnection(devhubValInfo->amqp_connection);
+                        destroyAmqpConnection(result);
+                        result = NULL;
+                    }
+                    else if (connection_set_idle_timeout(result->connection, CONNECTION_2_MIN_TIMEOUT)) 
+                    {
+                        LogError("Failed setting the idle timeout.");
+                        destroyAmqpConnection(result);
                         result = NULL;
                     }
                     else if ((result->session = session_create(result->connection, NULL, NULL)) == NULL)
                     {
                         LogError("Failed creating the session.");
-                        destroyAmqpConnection(devhubValInfo->amqp_connection);
+                        destroyAmqpConnection(result);
                         result = NULL;
                     }
                     else if (session_set_incoming_window(result->session, 100) != 0)
                     {
                         /* set incoming window to 100 for the session */
                         LogError("Failed setting the session incoming window.");
-                        destroyAmqpConnection(devhubValInfo->amqp_connection);
+                        destroyAmqpConnection(result);
                         result = NULL;
                     }
                     else
@@ -960,7 +1223,7 @@ static AMQP_CONN_INFO* createAmqpConnection(IOTHUB_VALIDATION_INFO* devhubValInf
                             if ((filter_set = create_link_source_filter(receiveTimeRangeStart)) == NULL)
                             {
                                 LogError("Failed creating filter set with enqueuedtimeutc filter.");
-                                destroyAmqpConnection(devhubValInfo->amqp_connection);
+                                destroyAmqpConnection(result);
                                 result = NULL;
                             }
                             else
@@ -970,7 +1233,7 @@ static AMQP_CONN_INFO* createAmqpConnection(IOTHUB_VALIDATION_INFO* devhubValInf
                                 if ((source = create_link_source(receive_address, filter_set)) == NULL)
                                 {
                                     LogError("Failed creating source for link.");
-                                    destroyAmqpConnection(devhubValInfo->amqp_connection);
+                                    destroyAmqpConnection(result);
                                     result = NULL;
                                 }
                                 else
@@ -980,7 +1243,7 @@ static AMQP_CONN_INFO* createAmqpConnection(IOTHUB_VALIDATION_INFO* devhubValInf
                                     if ((target = messaging_create_target(receive_address)) == NULL)
                                     {
                                         LogError("Failed creating target for link.");
-                                        destroyAmqpConnection(devhubValInfo->amqp_connection);
+                                        destroyAmqpConnection(result);
                                         result = NULL;
                                     }
                                     else
@@ -988,25 +1251,25 @@ static AMQP_CONN_INFO* createAmqpConnection(IOTHUB_VALIDATION_INFO* devhubValInf
                                         if ((result->receive_link = link_create(result->session, "receiver-link", role_receiver, source, target)) == NULL)
                                         {
                                             LogError("Failed creating link.");
-                                            destroyAmqpConnection(devhubValInfo->amqp_connection);
+                                            destroyAmqpConnection(result);
                                             result = NULL;
                                         }
                                         else if (link_set_rcv_settle_mode(result->receive_link, receiver_settle_mode_first) != 0)
                                         {
                                             LogError("Failed setting link receive settle mode.");
-                                            destroyAmqpConnection(devhubValInfo->amqp_connection);
+                                            destroyAmqpConnection(result);
                                             result = NULL;
                                         }
                                         else if ((result->message_receiver = messagereceiver_create(result->receive_link, NULL, NULL)) == NULL)
                                         {
                                             LogError("Failed creating message receiver.");
-                                            destroyAmqpConnection(devhubValInfo->amqp_connection);
+                                            destroyAmqpConnection(result);
                                             result = NULL;
                                         }
                                         else if (messagereceiver_open(result->message_receiver, on_message_received_new, devhubValInfo) != 0)
                                         {
                                             LogError("Failed opening message receiver.");
-                                            destroyAmqpConnection(devhubValInfo->amqp_connection);
+                                            destroyAmqpConnection(result);
                                             result = NULL;
                                         }
 
@@ -1047,12 +1310,28 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEventAsync(IOTHUB_TEST_HANDLE devh
 
         if (msgCallback == NULL)
         {
-            devhubValInfo->keepThreadAlive = false;
+            THREAD_HANDLE asyncWorkThread = NULL;
+            if (Lock(devhubValInfo->lock) != LOCK_OK)
+            {
+                LogError("Failed lock");
+                devhubValInfo->keepThreadAlive = false;
+                asyncWorkThread = devhubValInfo->asyncWorkThread;
+            }
+            else
+            {
+                devhubValInfo->keepThreadAlive = false;
+                asyncWorkThread = devhubValInfo->asyncWorkThread;
 
-            if (devhubValInfo->asyncWorkThread != NULL)
+                if (Unlock(devhubValInfo->lock) != LOCK_OK)
+                {
+                    LogError("Failed unlocking");
+                }
+            }
+
+            if (asyncWorkThread != NULL)
             {
                 int threadFunctionResult;
-                if (ThreadAPI_Join(devhubValInfo->asyncWorkThread, &threadFunctionResult) != THREADAPI_OK)
+                if (ThreadAPI_Join(asyncWorkThread, &threadFunctionResult) != THREADAPI_OK)
                 {
                     LogError("Failed to join thread");
                 }
@@ -1064,6 +1343,11 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEventAsync(IOTHUB_TEST_HANDLE devh
             {
                 destroyAmqpConnection(devhubValInfo->amqp_connection);
                 devhubValInfo->amqp_connection = NULL;
+            }
+
+            if (devhubValInfo->lock != NULL)
+            {
+                Lock_Deinit(devhubValInfo->lock);
             }
 
             devhubValInfo->onMessageReceivedCallback = NULL;
@@ -1078,6 +1362,11 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEventAsync(IOTHUB_TEST_HANDLE devh
                 LogError("Already listening for messages");
                 result = IOTHUB_TEST_CLIENT_ERROR;
             }
+            else if ((devhubValInfo->lock = Lock_Init()) == NULL)
+            {
+                LogError("Failed creating lock");
+                result = IOTHUB_TEST_CLIENT_ERROR;
+            }
             else if ((devhubValInfo->amqp_connection = createAmqpConnection(devhubValInfo, partitionCount, receiveTimeRangeStart)) == NULL)
             {
                 LogError("Failed creating amqp components to listen for messages");
@@ -1085,14 +1374,17 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEventAsync(IOTHUB_TEST_HANDLE devh
             }
             else
             {
+                devhubValInfo->isEventListenerConnected = true;
                 devhubValInfo->keepThreadAlive = true;
                 devhubValInfo->onMessageReceivedCallback = msgCallback;
                 devhubValInfo->onMessageReceivedContext = context;
+                devhubValInfo->partitionCount = partitionCount;
 
                 if (ThreadAPI_Create(&devhubValInfo->asyncWorkThread, asyncWorkFunction, devhubValInfo) != THREADAPI_OK)
                 {
                     LogError("Failed creating a thread for amqp DoWork");
                     devhubValInfo->keepThreadAlive = false;
+                    devhubValInfo->isEventListenerConnected = false;
                     destroyAmqpConnection(devhubValInfo->amqp_connection);
                     devhubValInfo->onMessageReceivedCallback = NULL;
                     devhubValInfo->onMessageReceivedContext = NULL;
@@ -1226,6 +1518,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                             AMQP_VALUE filter_value = amqpvalue_create_string(tempBuffer);
                             AMQP_VALUE described_filter_value = amqpvalue_create_described(descriptor, filter_value);
                             amqpvalue_set_map_value(filter_set, filter_key, described_filter_value);
+                            amqpvalue_destroy(described_filter_value);
                             amqpvalue_destroy(filter_key);
 
                             if (filter_set == NULL)
@@ -1324,7 +1617,6 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                                     }
                                     amqpvalue_destroy(source);
                                 }
-                                amqpvalue_destroy(described_filter_value);
                                 amqpvalue_destroy(filter_set);
                             }
                         }

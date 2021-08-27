@@ -56,10 +56,11 @@ MU_DEFINE_ENUM_WITHOUT_INVALID(BLOB_RESULT, BLOB_RESULT_VALUES)
 * @param  httpResponse      A BUFFER_HANDLE that receives the HTTP response from the server (available only when the return value is BLOB_OK)
 * @param  certificates      A null terminated string containing CA certificates to be used
 * @param    proxyOptions    A structure that contains optional web proxy information
+* @param  networkInterface    An optional null terminated string containing the network interface
 *
 * @return    A @c BLOB_RESULT. BLOB_OK means the blob has been uploaded successfully. Any other value indicates an error
 */
-MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadMultipleBlocksFromSasUri, const char*, SASURI, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, getDataCallbackEx, void*, context, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse, const char*, certificates, HTTP_PROXY_OPTIONS*, proxyOptions)
+MOCKABLE_FUNCTION(, BLOB_RESULT, Blob_UploadMultipleBlocksFromSasUri, const char*, SASURI, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, getDataCallbackEx, void*, context, unsigned int*, httpStatus, BUFFER_HANDLE, httpResponse, const char*, certificates, HTTP_PROXY_OPTIONS*, proxyOptions, const char*, networkInterface)
 
 /**
 * @brief  Synchronously uploads a byte array as a new block to blob storage

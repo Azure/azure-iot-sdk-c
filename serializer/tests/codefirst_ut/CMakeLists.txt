@@ -2,14 +2,12 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #this is CMakeLists.txt for codefirst_ut
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.5)
 
 compileAsC99()
 
 set(theseTestsName codefirst_ut)
-set(${theseTestsName}_test_files
-${theseTestsName}.c
-)
+generate_cppunittest_wrapper(${theseTestsName})
 
 include_directories(${SHARED_UTIL_REAL_TEST_FOLDER})
 

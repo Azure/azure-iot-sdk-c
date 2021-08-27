@@ -121,6 +121,11 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_DeviceMethodResponse(IOTHUB_DEVICE_CL
     return IoTHubClientCore_LL_DeviceMethodResponse((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, methodId, response, response_size, status_response);
 }
 
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendMessageDisposition(IOTHUB_DEVICE_CLIENT_LL_HANDLE device_ll_handle, IOTHUB_MESSAGE_HANDLE message, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
+{
+    return IoTHubClientCore_LL_SendMessageDisposition(device_ll_handle, message, disposition);
+}
+
 #ifndef DONT_USE_UPLOADTOBLOB
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_UploadToBlob(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, const char* destinationFileName, const unsigned char* source, size_t size)
 {
@@ -134,13 +139,12 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob(IOTHUB_DEV
 
 #endif
 
-IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_EnablePolicyConfiguration(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, POLICY_CONFIGURATION_TYPE policyType, bool enablePolicyConfiguration)
-{
-    return IoTHubClientCore_LL_EnablePolicyConfiguration((IOTHUB_DEVICE_CLIENT_LL_HANDLE)iotHubClientHandle, policyType, enablePolicyConfiguration);
-}
-
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SetStreamRequestCallback(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, DEVICE_STREAM_C2D_REQUEST_CALLBACK streamRequestCallback, void* context)
 {
     return IoTHubClientCore_LL_SetStreamRequestCallback((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, streamRequestCallback, context);
 }
 
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_EnablePolicyConfiguration(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, POLICY_CONFIGURATION_TYPE policyType, bool enablePolicyConfiguration)
+{
+    return IoTHubClientCore_LL_EnablePolicyConfiguration((IOTHUB_DEVICE_CLIENT_LL_HANDLE)iotHubClientHandle, policyType, enablePolicyConfiguration);
+}
