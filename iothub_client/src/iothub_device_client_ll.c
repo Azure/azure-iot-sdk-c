@@ -144,3 +144,7 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SetStreamRequestCallback(IOTHUB_DEVIC
     return IoTHubClientCore_LL_SetStreamRequestCallback((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, streamRequestCallback, context);
 }
 
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_EnablePolicyConfiguration(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, POLICY_CONFIGURATION_TYPE policyType, bool enablePolicyConfiguration)
+{
+    return IoTHubClientCore_LL_EnablePolicyConfiguration((IOTHUB_DEVICE_CLIENT_LL_HANDLE)iotHubClientHandle, policyType, enablePolicyConfiguration);
+}
