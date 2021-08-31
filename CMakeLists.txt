@@ -72,7 +72,7 @@ set(linkerOption "" CACHE STRING "passes a string to the shared and exe linker o
 
 set(use_prov_client_core OFF)
 
-if (${warnings_as_errors })
+if (${warnings_as_errors})
     if (MSVC)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /wd4232")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4 /wd4232")
