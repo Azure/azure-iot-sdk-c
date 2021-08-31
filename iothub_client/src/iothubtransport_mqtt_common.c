@@ -842,10 +842,10 @@ static int addSystemPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_messag
         const char* output_name = IoTHubMessage_GetOutputName(iothub_message_handle);
         if (output_name != NULL)
         {
-            // The Security interface Id value must be encoded
+            // Encode the output name if encoding is on
             if (addSystemPropertyToTopicString(topic_string, index++, SYS_PROP_ON, output_name, urlencode) != 0)
             {
-                LogError("Failed setting Security interface id");
+                LogError("Failed setting output name");
                 result = MU_FAILURE;
             }
             else
