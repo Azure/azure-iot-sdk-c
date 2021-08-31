@@ -64,7 +64,7 @@ option(use_tpm_simulator "tpm simulator type of hsm used with the provisioning c
 option(use_edge_modules "Enable support for running modules against Azure IoT Edge" OFF)
 option(use_custom_heap "use externally defined heap functions instead of the malloc family" OFF)
 option(use_cppunittest "set use_cppunittest to ON to build CppUnitTest tests on Windows (default is OFF)" OFF)
-option(enable_compiler_warnings_as_errors "enable strict compiler warnings-as-errors" ON)
+option(warnings_as_errors  "enable strict compiler warnings-as-errors" ON)
 
 set(compileOption_C "" CACHE STRING "passes a string to the command line of the C compiler")
 set(compileOption_CXX "" CACHE STRING "passes a string to the command line of the C++ compiler")
@@ -72,7 +72,7 @@ set(linkerOption "" CACHE STRING "passes a string to the shared and exe linker o
 
 set(use_prov_client_core OFF)
 
-if (${enable_compiler_warnings_as_errors})
+if (${warnings_as_errors })
     if (MSVC)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /wd4232")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4 /wd4232")
