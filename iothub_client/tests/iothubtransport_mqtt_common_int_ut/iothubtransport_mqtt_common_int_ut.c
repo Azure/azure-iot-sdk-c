@@ -702,13 +702,13 @@ static void CreateUrlDecodedMessageProperties(const TEST_EXPECTED_MESSAGE_PROPER
     {
         size_t numberOfApplicationProperties = expectedMessageProperties->applicationProperties->keysLength;
 
-        expectedUrlDecodedMessageProperties->applicationProperties = calloc(1, sizeof(*expectedUrlDecodedMessageProperties->applicationProperties));
+        expectedUrlDecodedMessageProperties->applicationProperties = (TEST_EXPECTED_APPLICATION_PROPERTIES*)calloc(1, sizeof(*expectedUrlDecodedMessageProperties->applicationProperties));
         ASSERT_IS_NOT_NULL(expectedUrlDecodedMessageProperties->applicationProperties);
 
         expectedUrlDecodedMessageProperties->applicationProperties->keysLength = numberOfApplicationProperties;
-        expectedUrlDecodedMessageProperties->applicationProperties->keys = calloc(1, sizeof(char *) * numberOfApplicationProperties);
+        expectedUrlDecodedMessageProperties->applicationProperties->keys = (char**)calloc(1, sizeof(char *) * numberOfApplicationProperties);
         ASSERT_IS_NOT_NULL(expectedUrlDecodedMessageProperties->applicationProperties->keys);
-        expectedUrlDecodedMessageProperties->applicationProperties->values = calloc(1, sizeof(char *) * numberOfApplicationProperties);
+        expectedUrlDecodedMessageProperties->applicationProperties->values = (char**)calloc(1, sizeof(char *) * numberOfApplicationProperties);
         ASSERT_IS_NOT_NULL(expectedUrlDecodedMessageProperties->applicationProperties->values);
 
         for (size_t i = 0; i < numberOfApplicationProperties; i++)

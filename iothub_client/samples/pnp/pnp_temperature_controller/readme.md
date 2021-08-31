@@ -1,5 +1,7 @@
 # Azure IoT Plug and Play Temperature Controller sample
 
+[![Documentation](../../../../doc/media/docs-link-buttons/azure-documentation.svg)](https://docs.microsoft.com/azure/iot-develop/)
+
 This directory contains a sample a temperature controller that implements the model [dtmi:com:example:TemperatureController;1](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/TemperatureController.json).
 
 The model consists of:

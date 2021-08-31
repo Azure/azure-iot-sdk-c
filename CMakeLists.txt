@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.5)
 project(azure_iot_sdks)
 
 include("${CMAKE_CURRENT_LIST_DIR}/configs/azure_iot_sdksFunctions.cmake")
@@ -30,17 +30,6 @@ endif()
 
 
 include (CTest)
-
-if (MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /wd4232")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4 /wd4232")
-    # Make warning as error
-    add_definitions(/WX)
-else()
-    # Make warning as error
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
-endif()
 
 IF(WIN32)
     # windows needs this define
@@ -74,12 +63,27 @@ option(use_prov_client "Enable provisioning client" OFF)
 option(use_tpm_simulator "tpm simulator type of hsm used with the provisioning client" OFF)
 option(use_edge_modules "Enable support for running modules against Azure IoT Edge" OFF)
 option(use_custom_heap "use externally defined heap functions instead of the malloc family" OFF)
+option(use_cppunittest "set use_cppunittest to ON to build CppUnitTest tests on Windows (default is OFF)" OFF)
+option(warnings_as_errors  "enable strict compiler warnings-as-errors" ON)
 
 set(compileOption_C "" CACHE STRING "passes a string to the command line of the C compiler")
 set(compileOption_CXX "" CACHE STRING "passes a string to the command line of the C++ compiler")
 set(linkerOption "" CACHE STRING "passes a string to the shared and exe linker options of the C compiler")
 
 set(use_prov_client_core OFF)
+
+if (${warnings_as_errors})
+    if (MSVC)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /wd4232")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4 /wd4232")
+        # Make warning as error
+        add_definitions(/WX)
+    else()
+        # Make warning as error
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
+    endif()
+endif()
 
 if(${use_custom_heap})
     add_definitions(-DGB_USE_CUSTOM_HEAP)
@@ -235,7 +239,6 @@ set(original_skip_samples ${skip_samples})
 set(run_e2e_tests OFF)
 set(run_unittests OFF)
 set(skip_samples ON)
-set(use_cppunittest OFF)
 
 if (NOT ${use_installed_dependencies})
     if (NOT TARGET azure_macro_utils_c AND EXISTS "${CMAKE_CURRENT_LIST_DIR}/deps/azure-macro-utils-c/CMakeLists.txt")
