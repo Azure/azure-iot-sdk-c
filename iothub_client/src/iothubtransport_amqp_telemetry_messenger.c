@@ -1024,7 +1024,14 @@ static void invoke_callback(const void* item, const void* action_context, bool* 
 #pragma warning(push)
 #pragma warning(disable:4305) // Allow typecasting to smaller type on 64 bit systems, since we control ultimate caller.
 #endif
+#if defined(__clang__) && defined(__APPLE__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wvoid-pointer-to-enum-cast"
+#endif
         TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT messenger_send_result = (TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT)action_context;
+#if defined(__clang__) && defined(__APPLE__)
+#pragma clang diagnostic pop
+#endif
 #if defined(_MSC_VER) /* pragma warning is only available on Microsoft C compilers */
 #pragma warning(pop)
 #endif
