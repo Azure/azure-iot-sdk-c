@@ -1020,8 +1020,8 @@ static void invoke_callback(const void* item, const void* action_context, bool* 
 
     if (NULL != caller_info->on_event_send_complete_callback)
     {
-        TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT messenger_send_result = (TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT)*action_context;
-        caller_info->on_event_send_complete_callback(caller_info->message, messenger_send_result, caller_info->context);
+        TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT* messenger_send_result = (TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT*)action_context;
+        caller_info->on_event_send_complete_callback(caller_info->message, *messenger_send_result, caller_info->context);
     }
     *continue_processing = true;
 }
