@@ -1935,7 +1935,7 @@ void telemetry_messenger_destroy(TELEMETRY_MESSENGER_HANDLE messenger_handle)
             if (task != NULL)
             {
                 TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT send_result = TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_TIMEOUT;
-                singlylinkedlist_foreach(task->callback_list, invoke_callback, (void*)send_result);
+                singlylinkedlist_foreach(task->callback_list, invoke_callback, (void*)&send_result);
                 free_task(task);
             }
         }
