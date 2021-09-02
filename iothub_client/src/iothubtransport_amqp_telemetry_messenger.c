@@ -1051,7 +1051,7 @@ static void internal_on_event_send_complete_callback(void* context, MESSAGE_SEND
                 }
 
                 // Initially typecast to a size_t to avoid 64 bit compiler warnings on casting of void* to larger type.
-                singlylinkedlist_foreach(task->callback_list, invoke_callback, (void*)&messenger_send_result));
+                singlylinkedlist_foreach(task->callback_list, invoke_callback, (void*)&messenger_send_result);
             }
             else
             {
