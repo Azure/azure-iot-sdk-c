@@ -239,6 +239,7 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
     bool isRegistered;
     MQTT_CLIENT_STATUS mqttClientStatus;
     bool isDestroyCalled;
+    bool isRetryExpiredCallbackCalled;
     bool device_twin_get_sent;
     bool twin_resp_sub_recv;
     bool isRecoverableError;
@@ -2694,6 +2695,7 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 else
                 {
                     transport_data->currPacketState = CONNECT_TYPE;
+                    transport_data->isRetryExpiredCallbackCalled = false;
                     (void)tickcounter_get_current_ms(transport_data->msgTickCounter, &transport_data->mqtt_connect_time);
                     result = 0;
                 }
@@ -2760,7 +2762,11 @@ static int UpdateMqttConnectionStateIfNeeded(PMQTTTRANSPORT_HANDLE_DATA transpor
             else if (retry_action == RETRY_ACTION_STOP_RETRYING)
             {
                 // send callback if retry expired
-                transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED, transport_data->transport_ctx);
+                if (!transport_data->isRetryExpiredCallbackCalled)
+                {
+                    transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED, transport_data->transport_ctx);
+                    transport_data->isRetryExpiredCallbackCalled = true;
+                }
                 result = MU_FAILURE;
             }
             else if (retry_action == RETRY_ACTION_RETRY_LATER)
@@ -3020,6 +3026,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                         state->authorization_module = auth_module;
 
                         state->isDestroyCalled = false;
+                        state->isRetryExpiredCallbackCalled = false;
                         state->isRegistered = false;
                         state->device_twin_get_sent = false;
                         state->xioTransport = NULL;
