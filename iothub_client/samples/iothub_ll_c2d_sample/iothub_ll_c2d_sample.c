@@ -50,6 +50,65 @@ static const char* connectionString = "[device connection string]";
 static bool g_continueRunning = true;
 static size_t g_message_recv_count = 0;
 
+// Uncomment this define to use Asynchronous ACK of cloud-to-device messages.
+// #define USE_C2D_ASYNC_ACK
+
+// Most applications should leave USE_C2D_ASYNC_ACK undefined.
+// The default sample behavior is easier for the application to manage and meets the vast majority of application scenarios.
+// The pattern sampled when USE_C2D_ASYNC_ACK is defined should be used when the application does
+// not want to immediately acknowledge receipt of the message to Azure IoT Hub during the callback. It wants
+// instead to defer the acknowledgement until a later time with a call to IoTHubDeviceClient_LL_SendMessageDisposition.
+#ifdef USE_C2D_ASYNC_ACK
+#include "azure_c_shared_utility/singlylinkedlist.h"
+
+static SINGLYLINKEDLIST_HANDLE g_cloudMessages;
+
+// `ack_and_remove_message` is a function that is executed by `singlylinkedlist_remove_if` for each list element.
+// In this implementation it is used to send a delayed acknowledgement of receipt to Azure IoT Hub for each message.
+static bool ack_and_remove_message(const void* item, const void* match_context, bool* continue_processing)
+{
+    IOTHUB_DEVICE_CLIENT_LL_HANDLE device_ll_handle = (IOTHUB_DEVICE_CLIENT_LL_HANDLE)match_context;
+    IOTHUB_MESSAGE_HANDLE message = (IOTHUB_MESSAGE_HANDLE)item;
+
+    const char* messageId;
+    if ((messageId = IoTHubMessage_GetMessageId(message)) == NULL)
+    {
+        messageId = "<unavailable>";
+    }
+
+    (void)printf("Sending ACK for cloud message (Message ID: %s)\r\n", messageId);
+
+    // If using AMQP protocol, this function results in sending a MESSAGE DISPOSITION (ACCEPTED) for the given cloud-to-device message.
+    // If using MQTT protocol, a PUBACK is sent for the cloud-to-device message (only) if `IOTHUBMESSAGE_ACCEPTED` is used.
+    // If using HTTP protocol no delayed acknowledgement is sent for the cloud-to-device message, as this protocol does not support that.
+    // Independent of the protocol used, this function MUST be called by the user application if using delayed acknowledgement of 
+    // cloud-to-device messages, as it will free the memory allocated for each of those messages received.
+    if (IoTHubDeviceClient_LL_SendMessageDisposition(device_ll_handle, message, IOTHUBMESSAGE_ACCEPTED) != IOTHUB_CLIENT_OK)
+    {
+        (void)printf("ERROR: IoTHubDeviceClient_LL_SendMessageDisposition..........FAILED!\r\n");
+    }
+
+    // Setting `continue_processing` to true informs `singlylinkedlist_remove_if` to continue iterating
+    // through all the remaining items in the `g_cloudMessages` list.
+    *continue_processing = true;
+
+    // Returning true informs `singlylinkedlist_remove_if` to effectively remove the current list node (`item`).
+    return true;
+}
+
+static void acknowledge_cloud_messages(IOTHUB_DEVICE_CLIENT_LL_HANDLE device_ll_handle)
+{
+    // The following function performs a conditional removal of items from a singly-linked list.
+    // It can be used to perform one or more actions (through `ack_and_remove_message`) over each list item before removing them.
+    // In this case, `ack_and_remove_message` sends an acknowledgement to Azure IoT Hub for each cloud-to-device message
+    // previously received and still stored in the `g_cloudMessages` list.
+    // This implementation also guarantees the cloud-to-device messages are acknowledged
+    // in the order they have been received by the Azure IoT Hub.
+    (void)singlylinkedlist_remove_if(g_cloudMessages, ack_and_remove_message, device_ll_handle);
+}
+#endif
+
+
 static IOTHUBMESSAGE_DISPOSITION_RESULT receive_msg_callback(IOTHUB_MESSAGE_HANDLE message, void* user_context)
 {
     (void)user_context;
@@ -103,7 +162,23 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT receive_msg_callback(IOTHUB_MESSAGE_HAND
     }
     g_message_recv_count++;
 
+#ifdef USE_C2D_ASYNC_ACK
+    // For a delayed acknowledgement of the cloud-to-device message, we must save the message first.
+    // The `g_cloudMessages` list is used to save incoming cloud-to-device messages.
+    // An user application would then process these messages according to the user application logic,
+    // and finally send an acknowledgement to the Azure IoT Hub for each by calling `IoTHubDeviceClient_LL_SendMessageDisposition`.
+    // When using convenience-layer or module clients of this SDK the respective `*_SendMessageDisposition` functions shall be used.
+    (void)singlylinkedlist_add(g_cloudMessages, message);
+
+    // Returning IOTHUBMESSAGE_ASYNC_ACK means that the SDK will NOT acknowledge receipt the
+    // C2D message to the service.  The application itself is responsible for this.  See ack_and_remove_message() in the sample
+    // to see how to do this.
+    return IOTHUBMESSAGE_ASYNC_ACK;
+#else
+    // Returning IOTHUBMESSAGE_ACCEPTED causes the SDK to acknowledge receipt of the message to
+    // the service.  The application does not need to take further action to ACK at this point.
     return IOTHUBMESSAGE_ACCEPTED;
+#endif
 }
 
 int main(void)
@@ -128,6 +203,10 @@ int main(void)
         protocol = HTTP_Protocol;
 #endif // SAMPLE_HTTP
 
+#ifdef USE_C2D_ASYNC_ACK
+        g_cloudMessages = singlylinkedlist_create();
+#endif
+
     // Used to initialize IoTHub SDK subsystem
     (void)IoTHub_Init();
 
@@ -145,8 +224,8 @@ int main(void)
     {
         // Set any option that are neccessary.
         // For available options please see the iothub_sdk_options.md documentation
-        //bool traceOn = true;
-        //IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_LOG_TRACE, &traceOn);
+        bool traceOn = true;
+        IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_LOG_TRACE, &traceOn);
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
         // Setting the Trusted Certificate. This is only necessary on systems without
         // built in certificate stores.
@@ -188,6 +267,13 @@ int main(void)
                 }
 
                 IoTHubDeviceClient_LL_DoWork(device_ll_handle);
+
+#ifdef USE_C2D_ASYNC_ACK
+                // If using delayed acknowledgement of cloud-to-device messages, this function serves as an example of
+                // how to do so for all the previously received messages still present in the list used by this sample.
+                acknowledge_cloud_messages(device_ll_handle);
+#endif
+
                 ThreadAPI_Sleep(10);
 
             } while (g_continueRunning);
@@ -198,6 +284,10 @@ int main(void)
     }
     // Free all the sdk subsystem
     IoTHub_Deinit();
+
+#ifdef USE_C2D_ASYNC_ACK
+    singlylinkedlist_destroy(g_cloudMessages);
+#endif
 
     printf("Press any key to continue");
     (void)getchar();
