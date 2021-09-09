@@ -1020,15 +1020,8 @@ static void invoke_callback(const void* item, const void* action_context, bool* 
 
     if (NULL != caller_info->on_event_send_complete_callback)
     {
-#if defined(_MSC_VER) /* pragma warning is only available on Microsoft C compilers */
-#pragma warning(push)
-#pragma warning(disable:4305) // Allow typecasting to smaller type on 64 bit systems, since we control ultimate caller.
-#endif
-        TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT messenger_send_result = (TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT)action_context;
-#if defined(_MSC_VER) /* pragma warning is only available on Microsoft C compilers */
-#pragma warning(pop)
-#endif
-        caller_info->on_event_send_complete_callback(caller_info->message, messenger_send_result, caller_info->context);
+        TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT* messenger_send_result = (TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT*)action_context;
+        caller_info->on_event_send_complete_callback(caller_info->message, *messenger_send_result, caller_info->context);
     }
     *continue_processing = true;
 }
@@ -1058,7 +1051,7 @@ static void internal_on_event_send_complete_callback(void* context, MESSAGE_SEND
                 }
 
                 // Initially typecast to a size_t to avoid 64 bit compiler warnings on casting of void* to larger type.
-                singlylinkedlist_foreach(task->callback_list, invoke_callback, (void*)((size_t)messenger_send_result));
+                singlylinkedlist_foreach(task->callback_list, invoke_callback, (void*)&messenger_send_result);
             }
             else
             {
@@ -1304,7 +1297,8 @@ static int send_pending_events(TELEMETRY_MESSENGER_INSTANCE* instance)
     // A non-NULL task indicates error, since otherwise send_batched_message_and_reset_state would've sent off messages and reset send_pending_events_state
     if (send_pending_events_state.task != NULL)
     {
-        singlylinkedlist_foreach(send_pending_events_state.task->callback_list, invoke_callback, (void*)TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING);
+        TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT send_result = TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING;
+        singlylinkedlist_foreach(send_pending_events_state.task->callback_list, invoke_callback, (void*)&send_result);
         remove_event_from_in_progress_list(send_pending_events_state.task);
         free_task(send_pending_events_state.task);
     }
@@ -1344,7 +1338,8 @@ static int process_event_send_timeouts(TELEMETRY_MESSENGER_INSTANCE* instance)
                     if (is_timed_out)
                     {
                         task->is_timed_out = true;
-                        singlylinkedlist_foreach(task->callback_list, invoke_callback, (void*)TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_TIMEOUT);
+                        TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT send_result = TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_TIMEOUT;
+                        singlylinkedlist_foreach(task->callback_list, invoke_callback, (void*)&send_result);
                     }
                 }
                 else
@@ -1939,7 +1934,8 @@ void telemetry_messenger_destroy(TELEMETRY_MESSENGER_HANDLE messenger_handle)
 
             if (task != NULL)
             {
-                singlylinkedlist_foreach(task->callback_list, invoke_callback, (void*)TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_MESSENGER_DESTROYED);
+                TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT send_result = TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_TIMEOUT;
+                singlylinkedlist_foreach(task->callback_list, invoke_callback, (void*)&send_result);
                 free_task(task);
             }
         }
