@@ -1,7 +1,7 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.5)
 
 set(shared_util_base_path ../../../../c-utility)
 set(mbed_project_base "iothub_ll_c2d_sample" CACHE STRING "The item being built")

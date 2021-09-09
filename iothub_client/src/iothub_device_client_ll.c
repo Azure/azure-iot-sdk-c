@@ -121,6 +121,11 @@ IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_DeviceMethodResponse(IOTHUB_DEVICE_CL
     return IoTHubClientCore_LL_DeviceMethodResponse((IOTHUB_CLIENT_CORE_LL_HANDLE)iotHubClientHandle, methodId, response, response_size, status_response);
 }
 
+IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendMessageDisposition(IOTHUB_DEVICE_CLIENT_LL_HANDLE device_ll_handle, IOTHUB_MESSAGE_HANDLE message, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
+{
+    return IoTHubClientCore_LL_SendMessageDisposition(device_ll_handle, message, disposition);
+}
+
 #ifndef DONT_USE_UPLOADTOBLOB
 IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_UploadToBlob(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, const char* destinationFileName, const unsigned char* source, size_t size)
 {
