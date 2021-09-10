@@ -29,7 +29,7 @@ For constained devices - where memory is measured in kilobytes and not megabytes
 - [Releases](#releases)
   - [Features and security updates](#features-security-updates)
   - [Long Term Support](#long-term-support)
-    - [LTS Schedule](#lts-schedule)
+    - [LTS schedule](#lts-schedule)
   - [Release example](#release-example)
 
 ## Critical Upcoming Change Notice
