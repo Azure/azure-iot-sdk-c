@@ -219,7 +219,6 @@ Contains libraries that enable interactions with the Device Proviosining service
 
 Contains libraries that provide modeling and JSON serialization capabilities on top of the raw messaging library.
 
-
 # Releases
 
 The C SDK offers releases for new features, critical bug fixes, and Long Term Support (LTS). General bug fixes will not receive a separate release. Versioning follows [semantic versioning](https://semver.org/), `x.y.z.` or `major.minor.patch`. Any time the version is updated, it will be tagged `x.y.z`.
@@ -230,7 +229,7 @@ New features and critical bug fixes (including security updates) will be release
 
 ## Long Term Support
 
-New LTS releases branch off of main every six months and will be tagged `LTS_<mm_yyyy>_Ref01`. A new LTS release will inherit the existing version from the main branch. LTS branches are named `lts_mm_yyyy` for the month and year the branch was created. The lifetime of an LTS branch is one year, afterwhich the branch is deleted.
+New LTS releases branch off of main every six months and will be tagged `LTS_<mm_yyyy>_Ref01`. A new LTS release will inherit the version from the main branch at the time of the release. LTS branches are named `lts_mm_yyyy` for the month and year the branch was created.
 
 An updated LTS release will occur when a critical bug fix (including security updates) is ported from the main branch. These updated releases will be tagged in the same manner except for a bumped Ref##, e.g. `LTS_<mm_yyyy>_Ref02`. The `patch` version will also be bumped. No new features and no general bug fixes will be ported to an LTS update.
 
@@ -240,7 +239,7 @@ Below is a table showing the mapping of the LTS branches to the packages release
 
   | Package | GitHub Branch | LTS Tag | LTS Start Date | Maintenance End Date |
   | :-----: | :-----------: | :-----: | :------------: | :------------------: |
-  | vcpkg: 2021-08-18 | lts_07_2021 | LTS_07_2021_Ref01 | 2021-08-11 | 2022-08-11 |
+  | vcpkg: 2021-09-09 | lts_07_2021 | LTS_07_2021_Ref01 | 2021-08-11 | 2022-08-11 |
   | vcpkg: (unreleased) | lts_01_2021 | LTS_01_2021_Ref01 | 2021-01-21 | 2022-01-21 |
 
 ## Release example
@@ -253,7 +252,7 @@ Below is a hypothetical example of versioning and tagging for the C SDK. `minor`
 - February 23, 2020: A new feature is released on main. The version bumps to 1.9.0, is tagged `1.9.0`, and the release is tagged `2020-02-23`.
 - July 9, 2020: A new LTS release occurs. A new release branch `lts_07_2020` is created, the version remains 1.9.0, and the LTS release is tagged `LTS_07_2020_Ref01`. The main branch bumps to 1.10.0 and is tagged `1.10.0`.
 - August 2, 2020: A new feature is released on main: The main branch has already been bumped for an upcoming release so the version is unchanged. The release is tagged `2020-08-02`.
-- September 28, 2020: A security update is released: The version on main bumps to 1.10.1, is tagged `1.10.1`, and the release is tagged `2020-09-28`. The security update is ported to the lts branch `lts_07_2020` (and any other existing LTS branch). The lts branch version bumps to 1.9.1, is tagged `1.9.1`, and the updated LTS release is tagged `LTS_07_2020_Ref02`. Any submodules that were part of the security update will be tagged with `LTS_07_2020_Ref02`.
+- September 28, 2020: A critical bug fix is released: The version on main bumps to 1.10.1, is tagged `1.10.1`, and the release is tagged `2020-09-28`. The critical bug fix is ported to the lts branch `lts_07_2020` (and any other existing LTS branch). The lts branch version bumps to 1.9.1, is tagged `1.9.1`, and the updated LTS release is tagged `LTS_07_2020_Ref02`. Any submodules that were part of the critical bug fix will be tagged with `LTS_07_2020_Ref02`.
 - December 14, 2020: A new feature is released on main. The version bumps to 1.11.0, is tagged `1.11.0`, and the release is tagged `2020-12-14`.
 
 ---
