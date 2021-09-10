@@ -35,7 +35,7 @@ git submodule update --init
 
 ### Building sample applications using vcpkg to build the SDK
 
-The sample applications can be build with the help of the C SDK libraries and headers built with vcpkg.  vcpkg is a package manager that facilitates building C and C++ libraries. To install the vcpkg C SDK libraries and headers, follow these steps [Setup C SDK vcpkg for Windows development environment](.doc/setting_up_vcpkg.md#setup-c-sdk-vcpkg-for-windows-development-environment).
+The sample applications can be build with the help of the C SDK libraries and headers built with vcpkg.  vcpkg is a package manager that facilitates building C and C++ libraries. To install the vcpkg C SDK libraries and headers, follow these steps [Setup C SDK vcpkg for Windows development environment](setting_up_vcpkg.md#setup-c-sdk-vcpkg-for-windows-development-environment).
 
 Note: vcpkg manager creates a directory with all the headers and generates the C SDK .lib files on your machine. If you are using Visual Studio (from 2017) the command 'vcpkg integrate install' lets Visual Studio knows where the vcpkg headers and lib directories are located. If you're using other IDEs, just add the vcpkg directories to your compiler/linker include paths.
 
