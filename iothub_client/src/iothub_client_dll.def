@@ -38,6 +38,7 @@ EXPORTS
     IoTHubDeviceClient_SendEventAsync
     IoTHubDeviceClient_GetSendStatus
     IoTHubDeviceClient_SetMessageCallback
+    IoTHubDeviceClient_SendMessageDisposition
     IoTHubDeviceClient_SetConnectionStatusCallback
     IoTHubDeviceClient_SetRetryPolicy
     IoTHubDeviceClient_GetRetryPolicy
@@ -55,6 +56,7 @@ EXPORTS
     IoTHubModuleClient_SendEventAsync
     IoTHubModuleClient_GetSendStatus
     IoTHubModuleClient_SetMessageCallback
+    IoTHubModuleClient_SendMessageDisposition
     IoTHubModuleClient_SetConnectionStatusCallback
     IoTHubModuleClient_SetRetryPolicy
     IoTHubModuleClient_GetRetryPolicy
@@ -81,6 +83,7 @@ EXPORTS
     IoTHubDeviceClient_LL_SendEventAsync
     IoTHubDeviceClient_LL_GetSendStatus
     IoTHubDeviceClient_LL_SetMessageCallback
+    IoTHubDeviceClient_LL_SendMessageDisposition
     IoTHubDeviceClient_LL_SetConnectionStatusCallback
     IoTHubDeviceClient_LL_SetRetryPolicy
     IoTHubDeviceClient_LL_GetRetryPolicy
@@ -99,6 +102,7 @@ EXPORTS
     IoTHubModuleClient_LL_SendEventAsync
     IoTHubModuleClient_LL_GetSendStatus
     IoTHubModuleClient_LL_SetMessageCallback
+    IoTHubModuleClient_LL_SendMessageDisposition
     IoTHubModuleClient_LL_SetConnectionStatusCallback
     IoTHubModuleClient_LL_SetRetryPolicy
     IoTHubModuleClient_LL_GetRetryPolicy
@@ -119,7 +123,8 @@ EXPORTS
     IoTHubMessage_GetString
     IoTHubMessage_GetContentType
     IoTHubMessage_GetContentTypeSystemProperty
-    IoTHubMessage_GetContentEncodingSystemProperty 
+    IoTHubMessage_GetContentEncodingSystemProperty
+    IoTHubMessage_GetDispositionContext 
     IoTHubMessage_GetMessageCreationTimeUtcSystemProperty
     IoTHubMessage_GetMessageUserIdSystemProperty
     IoTHubMessage_GetCorrelationId
@@ -132,6 +137,7 @@ EXPORTS
     IoTHubMessage_SetConnectionModuleId
     IoTHubMessage_SetContentTypeSystemProperty
     IoTHubMessage_SetContentEncodingSystemProperty
+    IoTHubMessage_SetDispositionContext
     IoTHubMessage_SetMessageCreationTimeUtcSystemProperty
     IoTHubMessage_SetMessageUserIdSystemProperty
     IoTHubMessage_SetCorrelationId

@@ -12,6 +12,8 @@ urlFragment: azure-iot-pnp-device-samples-for-c
 
 # IoT Plug And Play device samples
 
+[![Documentation](../../../doc/media/docs-link-buttons/azure-documentation.svg)](https://docs.microsoft.com/azure/iot-develop/)
+
 These samples demonstrate how to implement an [IoT Plug and Play](https://aka.ms/iotpnp) device to interact with IoT Hub or IoT Central.  This demonstrates how to:
 
 - Send telemetry.
