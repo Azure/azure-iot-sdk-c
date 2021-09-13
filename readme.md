@@ -28,8 +28,8 @@ For constained devices - where memory is measured in kilobytes and not megabytes
   - [SDK Folder Structure](#sdk-folder-structure)
 - [Releases](#releases)
   - [New Features and Critical Bug Fixes](#new-features-and-critical-bug-fixes)
-  - [Long Term Support](#long-term-support)
-    - [LTS Schedule (LTS)](#lts-schedule)
+  - [Long Term Support (LTS)](#long-term-support)
+    - [LTS Schedule](#lts-schedule)
   - [Release Example](#release-example)
 
 ## Critical Upcoming Change Notice
