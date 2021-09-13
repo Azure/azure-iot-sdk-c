@@ -2418,11 +2418,7 @@ static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport
                 free(msg_detail_entry);
 
                 DisconnectFromClient(transport_data);
-                if (!transport_data->isRetryExpiredCallbackCalled) // Only call once
-                {
-                    transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED, transport_data->transport_ctx);
-                    transport_data->isRetryExpiredCallbackCalled = true;
-                }
+                transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, transport_data->transport_ctx);
             }
             else
             {
@@ -2769,7 +2765,7 @@ static int UpdateMqttConnectionStateIfNeeded(PMQTTTRANSPORT_HANDLE_DATA transpor
             }
             else if (retry_action == RETRY_ACTION_STOP_RETRYING)
             {
-                // Set callback if retry expired
+                // send callback if retry expired
                 if (!transport_data->isRetryExpiredCallbackCalled)
                 {
                     transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED, transport_data->transport_ctx);
