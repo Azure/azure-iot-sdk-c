@@ -12,25 +12,25 @@ For constained devices - where memory is measured in kilobytes and not megabytes
 - [Azure IoT C SDKs and Libraries](#azure-iot-c-sdks-and-libraries)
   - [Table of Contents](#table-of-contents)
   - [Critical Upcoming Change Notice](#critical-upcoming-change-notice)
-  - [Getting the  SDK](#getting-the-sdk)
+  - [Getting the SDK](#getting-the-sdk)
   - [Samples](#samples)
   - [SDK API Reference Documentation](#sdk-api-reference-documentation)
   - [Other Azure IoT SDKs](#other-azure-iot-sdks)
   - [Developing Azure IoT Applications](#developing-azure-iot-applications)
   - [Key Features](#key-features)
     - [Device Client SDK](#device-client-sdk)
-    - [Provisioning client SDK](#provisioning-client-sdk)
+    - [Provisioning Client SDK](#provisioning-client-sdk)
   - [OS Platforms and Hardware Compatibility](#os-platforms-and-hardware-compatibility)
   - [Porting the Azure IoT Device Client SDK for C to New Devices](#porting-the-azure-iot-device-client-sdk-for-c-to-new-devices)
   - [Contribution, Feedback and Issues](#contribution-feedback-and-issues)
   - [Support](#support)
-  - [Read more](#read-more)
+  - [Read More](#read-more)
   - [SDK Folder Structure](#sdk-folder-structure)
 - [Releases](#releases)
-  - [New features and critical bug fixes](#new-features-and-critical-bug-fixes)
+  - [New Features and Critical Bug Fixes](#new-features-and-critical-bug-fixes)
   - [Long Term Support](#long-term-support)
-    - [LTS schedule](#lts-schedule)
-  - [Release example](#release-example)
+    - [LTS Schedule (LTS)](#lts-schedule)
+  - [Release Example](#release-example)
 
 ## Critical Upcoming Change Notice
 
@@ -87,11 +87,11 @@ IoT Hub supports multiple protocols for the device to connect with : MQTT, AMQP,
 | Features                                                                                                         | mqtt                | mqtt-ws             | amqp                     | amqp-ws                  | https                    | Description                                                                                                                                                                                                                                                                                                       |
 |------------------------------------------------------------------------------------------------------------------|---------------------|---------------------|--------------------------|--------------------------|--------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | [Authentication](https://docs.microsoft.com/azure/iot-hub/iot-hub-security-deployment)                     | :heavy_check_mark:  | :heavy_check_mark:* | :heavy_check_mark:       | :heavy_check_mark:*      | :heavy_check_mark:*      | Connect your device to IoT Hub securely with supported authentication, including private key, SASToken, X-509 Self Signed and Certificate Authority (CA) Signed.  *IoT Hub only supports X-509 CA Signed over AMQP and MQTT at the moment.                                                                        |
-| [Send device-to-cloud message](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-messages-d2c)     | :heavy_check_mark:* | :heavy_check_mark:* | :heavy_check_mark:*      | :heavy_check_mark:*      | :heavy_check_mark:*      | Send device-to-cloud messages (max 256KB) to IoT Hub with the option to add custom properties.  IoT Hub only supports batch send over AMQP and HTTPS only at the moment.  This SDK supports batch send over HTTP.  * Batch send over AMQP and AMQP-WS, and add system properties on D2C messages are in progress. |
-| [Receive cloud-to-device messages](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-messages-c2d) | :heavy_check_mark:* | :heavy_check_mark:* | :heavy_check_mark:       | :heavy_check_mark:       | :heavy_check_mark:       | Receive cloud-to-device messages and read associated custom and system properties from IoT Hub, with the option to complete/reject/abandon C2D messages.  *IoT Hub supports the option to complete/reject/abandon C2D messages over HTTPS and AMQP only at the moment.                                            |
+| [Send Device-to-Cloud Message](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-messages-d2c)     | :heavy_check_mark:* | :heavy_check_mark:* | :heavy_check_mark:*      | :heavy_check_mark:*      | :heavy_check_mark:*      | Send device-to-cloud messages (max 256KB) to IoT Hub with the option to add custom properties.  IoT Hub only supports batch send over AMQP and HTTPS only at the moment.  This SDK supports batch send over HTTP.  * Batch send over AMQP and AMQP-WS, and add system properties on D2C messages are in progress. |
+| [Receive Cloud-to-Device Messages](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-messages-c2d) | :heavy_check_mark:* | :heavy_check_mark:* | :heavy_check_mark:       | :heavy_check_mark:       | :heavy_check_mark:       | Receive cloud-to-device messages and read associated custom and system properties from IoT Hub, with the option to complete/reject/abandon C2D messages.  *IoT Hub supports the option to complete/reject/abandon C2D messages over HTTPS and AMQP only at the moment.                                            |
 | [Device Twins](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-device-twins)                     | :heavy_check_mark:* | :heavy_check_mark:* | :heavy_check_mark:*      | :heavy_check_mark:*      | :heavy_minus_sign:       | IoT Hub persists a device twin for each device that you connect to IoT Hub.  The device can perform operations like get twin tags, subscribe to desired properties.  *Send reported properties version and desired properties version are in progress.                                                            |
 | [Direct Methods](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-direct-methods)                 | :heavy_check_mark:  | :heavy_check_mark:  | :heavy_check_mark:       | :heavy_check_mark:       | :heavy_minus_sign:       | IoT Hub gives you the ability to invoke direct methods on devices from the cloud.  The SDK supports handler for method specific and generic operation.                                                                                                                                                            |
-| [Upload file to Blob](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-file-upload)               | :heavy_minus_sign:  | :heavy_minus_sign:  | :heavy_minus_sign:       | :heavy_minus_sign:       | :heavy_check_mark:       | A device can initiate a file upload and notifies IoT Hub when the upload is complete.   File upload requires HTTPS connection, but can be initiated from client using any protocol for other operations.                                                                                                          |
+| [Upload File to Blob](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-file-upload)               | :heavy_minus_sign:  | :heavy_minus_sign:  | :heavy_minus_sign:       | :heavy_minus_sign:       | :heavy_check_mark:       | A device can initiate a file upload and notifies IoT Hub when the upload is complete.   File upload requires HTTPS connection, but can be initiated from client using any protocol for other operations.                                                                                                          |
 | [Connection Status and Error reporting](https://docs.microsoft.com/rest/api/iothub/common-error-codes)     | :heavy_check_mark:* | :heavy_check_mark:* | :heavy_check_mark:*      | :heavy_check_mark:*      | :heavy_multiplication_x: | Error reporting for IoT Hub supported error code.  *This SDK supports error reporting on authentication and Device Not Found.                                                                                                                                                                                 |
 | Retry policies                                                                                                   | :heavy_check_mark:* | :heavy_check_mark:* | :heavy_check_mark:*      | :heavy_check_mark:*      | :heavy_multiplication_x: | Retry policy for unsuccessful device-to-cloud messages have two options: no try, exponential backoff with jitter (default).   *Custom retry policy is in progress.                                                                                                                                              |
 | Devices multiplexing over single connection                                                                      | :heavy_minus_sign:  | :heavy_minus_sign:  | :heavy_check_mark:       | :heavy_check_mark:       | :heavy_check_mark:       |                                                                                                                                                                                                                                                                                                                   |
@@ -102,7 +102,7 @@ This SDK also contains options you can set and platform specific features.  You 
 
 
 
-### Provisioning client SDK
+### Provisioning Client SDK
 This repository contains [provisioning client SDK](./provisioning_client) for the [Device Provisioning Service](https://docs.microsoft.com/azure/iot-dps/).
 
 :heavy_check_mark: feature available  :heavy_multiplication_x: feature planned but not supported  :heavy_minus_sign: no support planned
@@ -148,7 +148,7 @@ If you encounter any bugs, have suggestions for new features or if you would lik
 * Need Support? Every customer with an active Azure subscription has access to [support](https://docs.microsoft.com/en-us/azure/azure-supportability/how-to-create-azure-support-request) with guaranteed response time.  Consider submitting a ticket and get assistance from Microsoft support team
 * Found a bug? Please help us fix it by thoroughly documenting it and filing an issue on [our GitHub issues][c-github-issues].
 
-## Read more
+## Read More
 
 * [Azure IoT Hub documentation][iot-hub-documentation]
 * [Prepare your development environment to use the Azure IoT device SDK for C][devbox-setup]
@@ -204,7 +204,7 @@ Contains tools that are used in testing the libraries.
 Miscellaneous tools.
 
 
-### Deprecated folders
+### Deprecated Folders
 The following folders are deprecated.
 
 `/iothub_service_client`
@@ -221,19 +221,19 @@ Contains libraries that provide modeling and JSON serialization capabilities on 
 
 # Releases
 
-The C SDK offers releases for new features, critical bug fixes, and Long Term Support (LTS). General bug fixes will not receive a separate release. Versioning follows [semantic versioning](https://semver.org/), `x.y.z.` or `major.minor.patch`. Any time the version is updated, it will be tagged `x.y.z`.
+The C SDK offers releases for new features, critical bug fixes, and Long Term Support (LTS). General bug fixes will not receive a separate release, but are instead contained within the LTS release. Versioning follows [semantic versioning](https://semver.org/), `x.y.z.` or `major.minor.patch`. Any time the version is updated, it will be tagged `x.y.z`.
 
-## New features and critical bug fixes
+## New Features and Critical Bug Fixes
 
 New features and critical bug fixes (including security updates) will be released on the main branch. These releases will be tagged using the date formatted `yyyy-mm-dd`. A feature release will bump the `minor` version and reset the `patch` version to 0. A critical bug fix will bump the `patch` version only.
 
-## Long Term Support
+## Long Term Support (LTS)
 
 New LTS releases branch off of main every six months and will be tagged `LTS_<mm_yyyy>_Ref01`. A new LTS release will inherit the version from the main branch at the time of the release. LTS branches are named `lts_mm_yyyy` for the month and year the branch was created.
 
 An updated LTS release will occur when a critical bug fix (including security updates) is ported from the main branch. These updated releases will be tagged in the same manner except for a bumped Ref##, e.g. `LTS_<mm_yyyy>_Ref02`. The `patch` version will also be bumped. No new features and no general bug fixes will be ported to an LTS update.
 
-### LTS schedule
+### LTS Schedule
 
 Below is a table showing the mapping of the LTS branches to the packages released.
 
@@ -242,7 +242,7 @@ Below is a table showing the mapping of the LTS branches to the packages release
   | vcpkg: 2021-09-09 | lts_07_2021 | LTS_07_2021_Ref01 | 2021-08-11 | 2022-08-11 |
   | vcpkg: (unreleased) | lts_01_2021 | LTS_01_2021_Ref01 | 2021-01-21 | 2022-01-21 |
 
-## Release example
+## Release Example
 
 Below is a hypothetical example of versioning and tagging for the C SDK. `minor` versions are distinguished by color.
 
