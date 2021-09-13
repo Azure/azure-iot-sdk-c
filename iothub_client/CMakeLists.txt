@@ -1,7 +1,7 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.5)
 #this is CMakeLists for iothub_client
 
 if(POLICY CMP0042)
@@ -46,6 +46,7 @@ set(iothub_client_h_files
     ./inc/iothub_module_client_ll.h
     ./inc/iothub_transport_ll.h
     ./inc/iothub_message.h
+    ./inc/internal/iothub_message_private.h
     ./inc/internal/iothubtransport.h
 )
 

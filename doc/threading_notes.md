@@ -31,14 +31,14 @@ This is typically done in some sort of simple loop, e.g.
 
 Applications may also use the non \_LL\_ API set, which is also known as the "convenience layer."  
 
-Just like the \_LL\_ layer, IoTHub API's ending in Async queue work to be performed later and do not block waiting for the service accepting or rejecting the request.  The difference is that the convenience layer itself automatically takes care of sending the data.  In other words, there is no `DoWork`.  The convenience layer does this for you automatically by spinning a worker thread to implicitly `DoWork` for your application.  The conveneince layer also performs locking, allowing a given `IOTHUB_DEVICE_CLIENT_HANDLE` to be safely used by  different threads.
+Just like the \_LL\_ layer, IoTHub API's ending in Async queue work to be performed later and do not block waiting for the service accepting or rejecting the request.  The difference is that the convenience layer itself automatically takes care of sending the data.  In other words, there is no `DoWork`.  The convenience layer does this for you automatically by spinning a worker thread to implicitly `DoWork` for your application.  The convenience layer also performs locking, allowing a given `IOTHUB_DEVICE_CLIENT_HANDLE` to be safely used by  different threads.
 
 ## How to specify between the \_LL\_ and convenience layers
 
 * Applications using the \_LL\_ layer should `#include iothub_device_client_ll.h` and use its API's and `IOTHUB_DEVICE_CLIENT_LL_HANDLE`.
 * Applications using the convenience layer should `#include iothub_device_client.h` and use its API's and `IOTHUB_DEVICE_CLIENT_HANDLE`.
 
-The \_LL\_ | convenience layer paradimn is used in many places throughout the SDK.  The module client follows this pattern with `IOTHUB_MODULE_CLIENT_LL_HANDLE` and `IOTHUB_MODULE_CLIENT_HANDLE`.  The provisioning client also follows this pattern with `PROV_DEVICE_LL_HANDLE` and `PROV_DEVICE_HANDLE`.
+The \_LL\_ | convenience layer paradigm is used in many places throughout the SDK.  The module client follows this pattern with `IOTHUB_MODULE_CLIENT_LL_HANDLE` and `IOTHUB_MODULE_CLIENT_HANDLE`.  The provisioning client also follows this pattern with `PROV_DEVICE_LL_HANDLE` and `PROV_DEVICE_HANDLE`.
 
 ## Avoid long-running callbacks
 

@@ -52,11 +52,11 @@ static const char* IOTHUB_LONGHAUL_LOOP_DURATION_SECS = "IOTHUB_LONGHAUL_LOOP_DU
 #define NETWORK_RETRY_ATTEMPTS                  20
 #define NETWORK_RETRY_DELAY_MSEC                5 * 1000
 
-#define MAX_TELEMETRY_TRAVEL_TIME_SECS          300.0
-#define MAX_C2D_TRAVEL_TIME_SECS                300.0
-#define MAX_DEVICE_METHOD_TRAVEL_TIME_SECS      300
-#define MAX_TWIN_DESIRED_PROP_TRAVEL_TIME_SECS  300.0
-#define MAX_TWIN_REPORTED_PROP_TRAVEL_TIME_SECS 300.0
+#define MAX_TELEMETRY_TRAVEL_TIME_SECS          600.0
+#define MAX_C2D_TRAVEL_TIME_SECS                600.0
+#define MAX_DEVICE_METHOD_TRAVEL_TIME_SECS      600
+#define MAX_TWIN_DESIRED_PROP_TRAVEL_TIME_SECS  600.0
+#define MAX_TWIN_REPORTED_PROP_TRAVEL_TIME_SECS 600.0
 
 typedef struct IOTHUB_LONGHAUL_RESOURCES_TAG
 {
@@ -1497,7 +1497,7 @@ static int invoke_device_method(const void* context)
                     iotHubLonghaul->deviceInfo->deviceId,
                     LONGHAUL_DEVICE_METHOD_NAME,
                     message,
-                    MAX_DEVICE_METHOD_TRAVEL_TIME_SECS,
+                    300,
                     &responseStatus, &responsePayload, &responseSize);
 
                 if (device_method_info.method_result == IOTHUB_DEVICE_METHOD_OK)
@@ -1974,8 +1974,14 @@ int longhaul_run_c2d_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
                         LogInfo("Summary: Messages sent=%lu, received=%lu; travel time: min=%f secs, max=%f secs",
                             (unsigned long)summary.messages_sent, (unsigned long)summary.messages_received, summary.min_travel_time_secs, summary.max_travel_time_secs);
 
-                        if (summary.messages_sent == 0 || summary.messages_received != summary.messages_sent || summary.max_travel_time_secs > MAX_C2D_TRAVEL_TIME_SECS)
+                        if (summary.messages_sent == 0 || summary.messages_received != summary.messages_sent)
                         {
+                            LogInfo("Longhaul test failed due to mismatched message count!!");
+                            result = MU_FAILURE;
+                        }
+                        else if (summary.max_travel_time_secs > MAX_C2D_TRAVEL_TIME_SECS)
+                        {
+                            LogInfo("Longhaul test failed due to travel time!! %f > %f", summary.max_travel_time_secs, MAX_C2D_TRAVEL_TIME_SECS);
                             result = MU_FAILURE;
                         }
                         else
@@ -2065,8 +2071,14 @@ int longhaul_run_device_methods_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE handle)
                         LogInfo("Summary: Methods invoked=%lu, received=%lu; travel time: min=%f secs, max=%f secs",
                             (unsigned long)summary.methods_invoked, (unsigned long)summary.methods_received, summary.min_travel_time_secs, summary.max_travel_time_secs);
 
-                        if (summary.methods_invoked == 0 || summary.methods_received != summary.methods_invoked || summary.max_travel_time_secs > MAX_DEVICE_METHOD_TRAVEL_TIME_SECS)
+                        if (summary.methods_invoked == 0 || summary.methods_received != summary.methods_invoked)
                         {
+                            LogInfo("Longhaul test failed due to mismatched message count!!");
+                            result = MU_FAILURE;
+                        }
+                        else if (summary.max_travel_time_secs > MAX_DEVICE_METHOD_TRAVEL_TIME_SECS)
+                        {
+                            LogInfo("Longhaul test failed due to travel time!! %f > %d", summary.max_travel_time_secs, MAX_DEVICE_METHOD_TRAVEL_TIME_SECS);
                             result = MU_FAILURE;
                         }
                         else
@@ -2226,8 +2238,14 @@ int longhaul_run_twin_desired_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE 
                         LogInfo("Summary: Updates sent=%lu, received=%lu; travel time: min=%f secs, max=%f secs",
                             (unsigned long)summary.updates_sent, (unsigned long)summary.updates_received, summary.min_travel_time_secs, summary.max_travel_time_secs);
 
-                        if (summary.updates_sent == 0 || summary.updates_received != summary.updates_sent || summary.max_travel_time_secs > MAX_TWIN_DESIRED_PROP_TRAVEL_TIME_SECS)
+                        if (summary.updates_sent == 0 || summary.updates_received != summary.updates_sent)
                         {
+                            LogInfo("Longhaul test failed due to mismatched message count!!");
+                            result = MU_FAILURE;
+                        }
+                        else if (summary.max_travel_time_secs > MAX_TWIN_DESIRED_PROP_TRAVEL_TIME_SECS)
+                        {
+                            LogInfo("Longhaul test failed due to travel time!! %f > %f", summary.max_travel_time_secs, MAX_TWIN_DESIRED_PROP_TRAVEL_TIME_SECS);
                             result = MU_FAILURE;
                         }
                         else
@@ -2320,15 +2338,20 @@ int longhaul_run_twin_reported_properties_tests(IOTHUB_LONGHAUL_RESOURCES_HANDLE
                         LogInfo("Summary: Updates sent=%lu, received=%lu; travel time: min=%f secs, max=%f secs",
                             (unsigned long)summary.updates_sent, (unsigned long)summary.updates_received, summary.min_travel_time_secs, summary.max_travel_time_secs);
 
-                        if (summary.updates_sent == 0 || summary.updates_received != summary.updates_sent || summary.max_travel_time_secs > MAX_TWIN_REPORTED_PROP_TRAVEL_TIME_SECS)
+                        if (summary.updates_sent == 0 || summary.updates_received != summary.updates_sent)
                         {
+                            LogInfo("Longhaul test failed due to mismatched message count!!");
+                            result = MU_FAILURE;
+                        }
+                        else if (summary.max_travel_time_secs > MAX_TWIN_REPORTED_PROP_TRAVEL_TIME_SECS)
+                        {
+                            LogInfo("Longhaul test failed due to travel time!! %f > %f", summary.max_travel_time_secs, MAX_TWIN_REPORTED_PROP_TRAVEL_TIME_SECS);
                             result = MU_FAILURE;
                         }
                         else
                         {
                             result = 0;
                         }
-
 
                     }
                 }

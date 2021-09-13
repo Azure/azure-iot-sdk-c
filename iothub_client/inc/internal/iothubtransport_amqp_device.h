@@ -125,7 +125,8 @@ MOCKABLE_FUNCTION(, int, amqp_device_send_message_disposition, AMQP_DEVICE_HANDL
 MOCKABLE_FUNCTION(, int, amqp_device_set_retry_policy, AMQP_DEVICE_HANDLE, handle, IOTHUB_CLIENT_RETRY_POLICY, policy, size_t, retry_timeout_limit_in_seconds);
 MOCKABLE_FUNCTION(, int, amqp_device_set_option, AMQP_DEVICE_HANDLE, handle, const char*, name, void*, value);
 MOCKABLE_FUNCTION(, OPTIONHANDLER_HANDLE, amqp_device_retrieve_options, AMQP_DEVICE_HANDLE, handle);
-
+MOCKABLE_FUNCTION(, DEVICE_MESSAGE_DISPOSITION_INFO*, amqp_device_clone_message_disposition_info, DEVICE_MESSAGE_DISPOSITION_INFO*, disposition_info);
+MOCKABLE_FUNCTION(, void, amqp_device_destroy_message_disposition_info, DEVICE_MESSAGE_DISPOSITION_INFO*, disposition_info);
 
 #ifdef __cplusplus
 }

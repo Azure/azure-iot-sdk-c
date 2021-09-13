@@ -1,7 +1,7 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.5)
 
 if(${LINUX})
    add_definitions(-DAZIOT_LINUX)
@@ -72,6 +72,7 @@ endif()
 if(${use_mqtt})
     add_unittest_directory(iothubtransportmqtt_ut)
     add_unittest_directory(iothubtransport_mqtt_common_ut)
+    add_unittest_directory(iothubtransport_mqtt_common_int_ut)
     add_unittest_directory(iothubtransportmqtt_ws_ut)
 
     # e2e tests

@@ -369,10 +369,10 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_succeeds_when_HTTP_status_code
     STRICT_EXPECTED_CALL(STRING_construct("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BlockList>")); /*this is starting to build the XML used in Put Block List operation*/
 
     /*uploading blocks (Put Block)*/
-    for (size_t blockNumber = 0;blockNumber < (size - 1) / (4 * 1024 * 1024) + 1;blockNumber++)
+    for (size_t blockNumber = 0;blockNumber < (size - 1) / (100 * 1024 * 1024) + 1;blockNumber++)
     {
-        STRICT_EXPECTED_CALL(BUFFER_create(&c + blockNumber * 4 * 1024 * 1024,
-            (blockNumber != (size - 1) / (4 * 1024 * 1024)) ? 4 * 1024 * 1024 : (size - 1) % (4 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
+        STRICT_EXPECTED_CALL(BUFFER_create(&c + blockNumber * 100 * 1024 * 1024,
+            (blockNumber != (size - 1) / (100 * 1024 * 1024)) ? 100 * 1024 * 1024 : (size - 1) % (100 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
         )); /*this is the content to be uploaded by this call*/
 
         /*here some sprintf happens and that produces a string in the form: 000000...049999*/
@@ -441,10 +441,10 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_fails_when_HTTPAPIEX_ExecuteRe
     STRICT_EXPECTED_CALL(STRING_construct("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BlockList>")); /*this is starting to build the XML used in Put Block List operation*/
 
     /*uploading blocks (Put Block)*/
-    for (size_t blockNumber = 0;blockNumber < (size - 1) / (4 * 1024 * 1024) + 1;blockNumber++)
+    for (size_t blockNumber = 0;blockNumber < (size - 1) / (100 * 1024 * 1024) + 1;blockNumber++)
     {
-        STRICT_EXPECTED_CALL(BUFFER_create(&c + blockNumber * 4 * 1024 * 1024,
-            (blockNumber != (size - 1) / (4 * 1024 * 1024)) ? 4 * 1024 * 1024 : (size - 1) % (4 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
+        STRICT_EXPECTED_CALL(BUFFER_create(&c + blockNumber * 100 * 1024 * 1024,
+            (blockNumber != (size - 1) / (100 * 1024 * 1024)) ? 100 * 1024 * 1024 : (size - 1) % (100 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
         )); /*this is the content to be uploaded by this call*/
 
         /*here some sprintf happens and that produces a string in the form: 000000...049999*/
@@ -628,21 +628,21 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_SasUri_is_wrong_fails_2)
 static void Blob_UploadMultipleBlocksFromSasUri_various_sizes_happy_path_Impl(HTTP_PROXY_OPTIONS *proxyOptions, const char * networkInterface)
 {
     /*the following sizes have been identified as "important to be tested*/
-    /*1B, 4MB-1, 4MB, 4MB+1, 64MB, 64MB+1, 68MB-1, 68MB, 68MB+1*/
+    /*1B, 100MB-1, 100MB, 100MB+1, 256MB, 256MB+1, 260MB-1, 260MB, 260MB+1*/
     size_t sizes[] = {
         1,
 
-        4 * 1024 * 1024 - 1,
-        4 * 1024 * 1024,
-        4 * 1024 * 1024 + 1,
+        100 * 1024 * 1024 - 1,
+        100 * 1024 * 1024,
+        100 * 1024 * 1024 + 1,
 
-        64 * 1024 * 1024 - 1,
-        64 * 1024 * 1024,
-        64 * 1024 * 1024 + 1,
+        256 * 1024 * 1024 - 1,
+        256 * 1024 * 1024,
+        256 * 1024 * 1024 + 1,
 
-        68 * 1024 * 1024 - 1,
-        68 * 1024 * 1024,
-        68 * 1024 * 1024 + 1,
+        260 * 1024 * 1024 - 1,
+        260 * 1024 * 1024,
+        260 * 1024 * 1024 + 1,
     };
 
     for (size_t iSize = 0; iSize < sizeof(sizes) / sizeof(sizes[0]);iSize++)
@@ -677,10 +677,10 @@ static void Blob_UploadMultipleBlocksFromSasUri_various_sizes_happy_path_Impl(HT
         STRICT_EXPECTED_CALL(STRING_construct("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BlockList>")); /*this is starting to build the XML used in Put Block List operation*/
 
         /*uploading blocks (Put Block)*/
-        for (size_t blockNumber = 0;blockNumber < (sizes[iSize] - 1) / (4 * 1024 * 1024) + 1;blockNumber++)
+        for (size_t blockNumber = 0;blockNumber < (sizes[iSize] - 1) / (100 * 1024 * 1024) + 1;blockNumber++)
         {
-            STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 4 * 1024 * 1024,
-                (blockNumber != (sizes[iSize] - 1) / (4 * 1024 * 1024)) ? 4 * 1024 * 1024 : (sizes[iSize] - 1) % (4 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
+            STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 100 * 1024 * 1024,
+                (blockNumber != (sizes[iSize] - 1) / (100 * 1024 * 1024)) ? 100 * 1024 * 1024 : (sizes[iSize] - 1) % (100 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
             )); /*this is the content to be uploaded by this call*/
 
             /*here some sprintf happens and that produces a string in the form: 000000...049999*/
@@ -819,21 +819,21 @@ TEST_FUNCTION(Blob_UploadFromSasUri_with_network_interface)
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_various_sizes_with_certificates_happy_path)
 {
     /*the following sizes have been identified as "important to be tested*/
-    /*1B, 4MB-1, 4MB, 4MB+1, 64MB, 64MB+1, 68MB-1, 68MB, 68MB+1*/
+    /*1B, 100MB-1, 100MB, 100MB+1, 256MB, 256MB+1, 260MB-1, 260MB, 260MB+1*/
     size_t sizes[] = {
         1,
 
-        4 * 1024 * 1024 - 1,
-        4 * 1024 * 1024,
-        4 * 1024 * 1024 + 1,
+        100 * 1024 * 1024 - 1,
+        100 * 1024 * 1024,
+        100 * 1024 * 1024 + 1,
 
-        64 * 1024 * 1024 - 1,
-        64 * 1024 * 1024,
-        64 * 1024 * 1024 + 1,
+        256 * 1024 * 1024 - 1,
+        256 * 1024 * 1024,
+        256 * 1024 * 1024 + 1,
 
-        68 * 1024 * 1024 - 1,
-        68 * 1024 * 1024,
-        68 * 1024 * 1024 + 1,
+        260 * 1024 * 1024 - 1,
+        260 * 1024 * 1024,
+        260 * 1024 * 1024 + 1,
     };
 
     for (size_t iSize = 0; iSize < sizeof(sizes) / sizeof(sizes[0]);iSize++)
@@ -860,10 +860,10 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_various_sizes_with_certificate
         STRICT_EXPECTED_CALL(STRING_construct("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BlockList>")); /*this is starting to build the XML used in Put Block List operation*/
 
                                                                                                              /*uploading blocks (Put Block)*/
-        for (size_t blockNumber = 0;blockNumber < (sizes[iSize] - 1) / (4 * 1024 * 1024) + 1;blockNumber++)
+        for (size_t blockNumber = 0;blockNumber < (sizes[iSize] - 1) / (100 * 1024 * 1024) + 1;blockNumber++)
         {
-            STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 4 * 1024 * 1024,
-                (blockNumber != (sizes[iSize] - 1) / (4 * 1024 * 1024)) ? 4 * 1024 * 1024 : (sizes[iSize] - 1) % (4 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
+            STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 100 * 1024 * 1024,
+                (blockNumber != (sizes[iSize] - 1) / (100 * 1024 * 1024)) ? 100 * 1024 * 1024 : (sizes[iSize] - 1) % (100 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
             )); /*this is the content to be uploaded by this call*/
 
             /*here some sprintf happens and that produces a string in the form: 000000...049999*/
@@ -955,7 +955,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_various_sizes_with_certificate
 /*Tests_SRS_BLOB_02_033: [ If any previous operation that doesn't have an explicit failure description fails then Blob_UploadMultipleBlocksFromSasUri shall fail and return BLOB_ERROR ]*/
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
 {
-    size_t size = 64 * 1024 * 1024;
+    size_t size = 256 * 1024 * 1024;
     (void)umock_c_negative_tests_init();
 
     umock_c_reset_all_calls();
@@ -979,10 +979,10 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
     STRICT_EXPECTED_CALL(STRING_construct("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BlockList>")); /*this is starting to build the XML used in Put Block List operation*/
 
     /*uploading blocks (Put Block)*/
-    for (size_t blockNumber = 0;blockNumber < (size - 1) / (4 * 1024 * 1024) + 1;blockNumber++)
+    for (size_t blockNumber = 0;blockNumber < (size - 1) / (100 * 1024 * 1024) + 1;blockNumber++)
     {
-        STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 4 * 1024 * 1024,
-            (blockNumber != (size - 1) / (4 * 1024 * 1024)) ? 4 * 1024 * 1024 : (size - 1) % (4 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
+        STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 100 * 1024 * 1024,
+            (blockNumber != (size - 1) / (100 * 1024 * 1024)) ? 100 * 1024 * 1024 : (size - 1) % (100 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
         )); /*this is the content to be uploaded by this call*/
 
         /*here some sprintf happens and that produces a string in the form: 000000...049999*/
@@ -1096,7 +1096,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
 /*Tests_SRS_BLOB_02_038: [ If HTTPAPIEX_SetOption fails then Blob_UploadMultipleBlocksFromSasUri shall fail and return BLOB_ERROR. ]*/
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_and_network_interface_unhappy_paths)
 {
-    size_t size = 64 * 1024 * 1024;
+    size_t size = 256 * 1024 * 1024;
 
     (void)umock_c_negative_tests_init();
 
@@ -1124,10 +1124,10 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_and_netw
     STRICT_EXPECTED_CALL(STRING_construct("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BlockList>")); /*this is starting to build the XML used in Put Block List operation*/
 
                                                                                                          /*uploading blocks (Put Block)*/
-    for (size_t blockNumber = 0;blockNumber < (size - 1) / (4 * 1024 * 1024) + 1;blockNumber++)
+    for (size_t blockNumber = 0;blockNumber < (size - 1) / (100 * 1024 * 1024) + 1;blockNumber++)
     {
-        STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 4 * 1024 * 1024,
-            (blockNumber != (size - 1) / (4 * 1024 * 1024)) ? 4 * 1024 * 1024 : (size - 1) % (4 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
+        STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 100 * 1024 * 1024,
+            (blockNumber != (size - 1) / (100 * 1024 * 1024)) ? 100 * 1024 * 1024 : (size - 1) % (100 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
         )); /*this is the content to be uploaded by this call*/
 
         /*here some sprintf happens and that produces a string in the form: 000000...049999*/
@@ -1242,7 +1242,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_and_netw
 /*Tests_SRS_BLOB_02_026: [ Otherwise, if HTTP response code is >=300 then Blob_UploadFromSasUri shall succeed and return BLOB_OK. ]*/
 TEST_FUNCTION(Blob_UploadFromSasUri_when_http_code_is_404_it_immediately_succeeds)
 {
-    size_t size = 64 * 1024 * 1024;
+    size_t size = 256 * 1024 * 1024;
 
     ///arrange
     unsigned char * content = (unsigned char*)gballoc_malloc(size);
@@ -1266,8 +1266,8 @@ TEST_FUNCTION(Blob_UploadFromSasUri_when_http_code_is_404_it_immediately_succeed
     /*uploading blocks (Put Block)*/ /*this simply fails first block*/
     size_t blockNumber = 0;
     {
-        STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 4 * 1024 * 1024,
-            (blockNumber != (size - 1) / (4 * 1024 * 1024)) ? 4 * 1024 * 1024 : (size - 1) % (4 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
+        STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 100 * 1024 * 1024,
+            (blockNumber != (size - 1) / (100 * 1024 * 1024)) ? 100 * 1024 * 1024 : (size - 1) % (100 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
         )); /*this is the content to be uploaded by this call*/
 
         /*here some sprintf happens and that produces a string in the form: 000000...049999*/

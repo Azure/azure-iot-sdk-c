@@ -87,6 +87,8 @@ static IOTHUB_MODULE_CLIENT_HANDLE iothub_moduleclient_handle = NULL;
 TEST_DEFINE_ENUM_TYPE(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
+TEST_DEFINE_ENUM_TYPE(MAP_RESULT, MAP_RESULT_VALUES);
+TEST_DEFINE_ENUM_TYPE(LOCK_RESULT, LOCK_RESULT_VALUES);
 
 typedef struct EXPECTED_SEND_DATA_TAG
 {
@@ -167,27 +169,22 @@ static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS status, I
     LogInfo("connection_status_callback: status=<%d>, reason=<%s>", status, MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason));
 
     CONNECTION_STATUS_INFO* connection_status_info = (CONNECTION_STATUS_INFO*)userContextCallback;
-    if (Lock(connection_status_info->lock) != LOCK_OK)
+    ASSERT_ARE_EQUAL(LOCK_RESULT, LOCK_OK, Lock(connection_status_info->lock));
+    
+    if ((connection_status_info->currentStatus == IOTHUB_CLIENT_CONNECTION_AUTHENTICATED) &&
+        (status == IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED))
     {
-        ASSERT_FAIL("unable to lock");
+        connection_status_info->connFaultHappened = true;
     }
-    else
+    if ((connection_status_info->currentStatus == IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED) &&
+        (status == IOTHUB_CLIENT_CONNECTION_AUTHENTICATED))
     {
-        if ((connection_status_info->currentStatus == IOTHUB_CLIENT_CONNECTION_AUTHENTICATED) &&
-            (status == IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED))
-        {
-            connection_status_info->connFaultHappened = true;
-        }
-        if ((connection_status_info->currentStatus == IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED) &&
-            (status == IOTHUB_CLIENT_CONNECTION_AUTHENTICATED))
-        {
-            connection_status_info->connRestored = true;
-        }
-        connection_status_info->currentStatus = status;
-        connection_status_info->currentStatusReason = reason;
+        connection_status_info->connRestored = true;
+    }
+    connection_status_info->currentStatus = status;
+    connection_status_info->currentStatusReason = reason;
 
-        (void)Unlock(connection_status_info->lock);
-    }
+    (void)Unlock(connection_status_info->lock);
 }
 
 static void ReceiveConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
@@ -197,16 +194,10 @@ static void ReceiveConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result
     EXPECTED_SEND_DATA* expectedData = (EXPECTED_SEND_DATA*)userContextCallback;
     if (expectedData != NULL)
     {
-        if (Lock(expectedData->lock) != LOCK_OK)
-        {
-            ASSERT_FAIL("unable to lock");
-        }
-        else
-        {
-            expectedData->dataWasRecv = true;
-            expectedData->result = result;
-            (void)Unlock(expectedData->lock);
-        }
+        ASSERT_ARE_EQUAL(LOCK_RESULT, LOCK_OK, Lock(expectedData->lock));
+        expectedData->dataWasRecv = true;
+        expectedData->result = result;
+        (void)Unlock(expectedData->lock);
     }
 }
 
@@ -219,112 +210,77 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
     }
     else
     {
-        if (Lock(receiveUserContext->lock) != LOCK_OK)
+        ASSERT_ARE_EQUAL(LOCK_RESULT, LOCK_OK, Lock(receiveUserContext->lock));
+
+        const char* messageId;
+        const char* correlationId;
+        const unsigned char* content;
+        size_t contentSize;
+
+        messageId = IoTHubMessage_GetMessageId(messageHandle);
+        ASSERT_IS_NOT_NULL(messageId, "messageId not received");
+
+        if (g_e2e_test_options.use_special_chars && strcmp(messageId, MSG_ID_SPECIAL) != 0)
         {
-            ASSERT_FAIL("Unable to lock"); /*because the test must absolutely be terminated*/
+            ASSERT_FAIL("Message ID mismatch.");
+        }
+        else if (!g_e2e_test_options.use_special_chars && strcmp(messageId, MSG_ID) != 0)
+        {
+            ASSERT_FAIL("Message ID mismatch.");
+        }
+
+        correlationId = IoTHubMessage_GetCorrelationId(messageHandle);
+        ASSERT_IS_NOT_NULL(correlationId, "correlationId not received");
+
+        if (g_e2e_test_options.use_special_chars && strcmp(correlationId, MSG_CORRELATION_ID_SPECIAL) != 0)
+        {
+            ASSERT_FAIL("Message correlation ID mismatch.");
+        }
+        else if (!g_e2e_test_options.use_special_chars && strcmp(correlationId, MSG_CORRELATION_ID) != 0)
+        {
+            ASSERT_FAIL("Message correlation ID mismatch.");
+        }
+
+        IOTHUBMESSAGE_CONTENT_TYPE contentType = IoTHubMessage_GetContentType(messageHandle);
+        ASSERT_ARE_EQUAL(int, (int)IOTHUBMESSAGE_BYTEARRAY, (int)contentType, "Content types don't match");
+        ASSERT_ARE_EQUAL(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK, IoTHubMessage_GetByteArray(messageHandle, &content, &contentSize));
+
+        LogInfo("Received new message from IoT Hub :\nMessage-id: %s\nCorrelation-id: %s", messageId, correlationId);
+
+        receiveUserContext->wasFound = true;
+        MAP_HANDLE mapHandle = IoTHubMessage_Properties(messageHandle);
+        ASSERT_IS_NOT_NULL(mapHandle, "No message properties available");
+
+        const char*const* keys;
+        const char*const* values;
+        size_t propertyCount = 0;
+
+        ASSERT_ARE_EQUAL(MAP_RESULT, MAP_OK, Map_GetInternals(mapHandle, &keys, &values, &propertyCount));
+        ASSERT_ARE_EQUAL(int, MSG_PROP_COUNT, propertyCount);
+
+        LogInfo("Message Properties:");
+        const char** msg_prop_keys;
+        const char** msg_prop_vals;
+        if (g_e2e_test_options.use_special_chars)
+        {
+            msg_prop_keys = MSG_PROP_KEYS_SPECIAL;
+            msg_prop_vals = MSG_PROP_VALS_SPECIAL;
         }
         else
         {
-            const char* messageId;
-            const char* correlationId;
-            const unsigned char* content;
-            size_t contentSize;
-
-            if ((messageId = IoTHubMessage_GetMessageId(messageHandle)) == NULL)
-            {
-                messageId = "<null>";
-            }
-            else
-            {
-                if (g_e2e_test_options.use_special_chars && strcmp(messageId, MSG_ID_SPECIAL) != 0)
-                {
-                    ASSERT_FAIL("Message ID mismatch.");
-                }
-                else if (!g_e2e_test_options.use_special_chars && strcmp(messageId, MSG_ID) != 0)
-                {
-                    ASSERT_FAIL("Message ID mismatch.");
-                }
-            }
-
-            if ((correlationId = IoTHubMessage_GetCorrelationId(messageHandle)) == NULL)
-            {
-                correlationId = "<null>";
-            }
-            else
-            {
-                if (g_e2e_test_options.use_special_chars && strcmp(correlationId, MSG_CORRELATION_ID_SPECIAL) != 0)
-                {
-                    ASSERT_FAIL("Message correlation ID mismatch.");
-                }
-                else if (!g_e2e_test_options.use_special_chars && strcmp(correlationId, MSG_CORRELATION_ID) != 0)
-                {
-                    ASSERT_FAIL("Message correlation ID mismatch.");
-                }
-            }
-
-            IOTHUBMESSAGE_CONTENT_TYPE contentType = IoTHubMessage_GetContentType(messageHandle);
-            if (contentType != IOTHUBMESSAGE_BYTEARRAY)
-            {
-                ASSERT_FAIL("Message content type mismatch.");
-            }
-            else
-            {
-                if (IoTHubMessage_GetByteArray(messageHandle, &content, &contentSize) != IOTHUB_MESSAGE_OK)
-                {
-                    ASSERT_FAIL("Unable to get the content of the message.");
-                }
-                else
-                {
-                    LogInfo("Received new message from IoT Hub :\nMessage-id: %s\nCorrelation-id: %s", messageId, correlationId);
-                }
-
-                receiveUserContext->wasFound = true;
-                MAP_HANDLE mapHandle = IoTHubMessage_Properties(messageHandle);
-                if (mapHandle != NULL)
-                {
-                    const char*const* keys;
-                    const char*const* values;
-                    size_t propertyCount = 0;
-                    if (Map_GetInternals(mapHandle, &keys, &values, &propertyCount) == MAP_OK)
-                    {
-                        receiveUserContext->wasFound = true;
-                        if (propertyCount == MSG_PROP_COUNT)
-                        {
-                            LogInfo("Message Properties:");
-                            const char** msg_prop_keys;
-                            const char** msg_prop_vals;
-                            if (g_e2e_test_options.use_special_chars)
-                            {
-                                msg_prop_keys = MSG_PROP_KEYS_SPECIAL;
-                                msg_prop_vals = MSG_PROP_VALS_SPECIAL;
-                            }
-                            else
-                            {
-                                msg_prop_keys = MSG_PROP_KEYS;
-                                msg_prop_vals = MSG_PROP_VALS;
-                            }
-                            for (size_t index = 0; index < propertyCount; index++)
-                            {
-                                LogInfo("\tKey: %s Value: %s", keys[index], values[index]);
-                                if (strcmp(keys[index], msg_prop_keys[index]) != 0)
-                                {
-                                    receiveUserContext->wasFound = false;
-                                }
-                                if (strcmp(values[index], msg_prop_vals[index]) != 0)
-                                {
-                                    receiveUserContext->wasFound = false;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            receiveUserContext->wasFound = false;
-                        }
-                    }
-                }
-            }
-            Unlock(receiveUserContext->lock);
+            msg_prop_keys = MSG_PROP_KEYS;
+            msg_prop_vals = MSG_PROP_VALS;
         }
+
+        for (size_t index = 0; index < propertyCount; index++)
+        {
+            LogInfo("\tKey: %s Value: %s", keys[index], values[index]);
+            ASSERT_ARE_EQUAL(char_ptr, keys[index], msg_prop_keys[index], "Expected keys mismatch at index %lu", (unsigned long)index);
+            ASSERT_ARE_EQUAL(char_ptr, values[index], msg_prop_vals[index], "Expected values mismatch at index %lu", (unsigned long)index);
+        }
+
+        receiveUserContext->wasFound = true;           
+        Unlock(receiveUserContext->lock);
     }
     return IOTHUBMESSAGE_ACCEPTED;
 }
@@ -752,19 +708,13 @@ bool client_received_confirmation(D2C_MESSAGE_HANDLE d2cMessage, IOTHUB_CLIENT_C
     bool result = false;
     EXPECTED_SEND_DATA* sendData = (EXPECTED_SEND_DATA*)d2cMessage;
 
-    if (Lock(sendData->lock) != LOCK_OK)
+    ASSERT_ARE_EQUAL(LOCK_RESULT, LOCK_OK, Lock(sendData->lock));
+    result = sendData->dataWasRecv;
+    if (sendData->dataWasRecv == true)
     {
-        ASSERT_FAIL("unable to lock");
+        ASSERT_ARE_EQUAL(int, expectedClientResult, sendData->result, "Result from callback does not match expected");
     }
-    else
-    {
-        result = sendData->dataWasRecv;
-        if (sendData->dataWasRecv == true)
-        {
-            ASSERT_ARE_EQUAL(int, expectedClientResult, sendData->result, "Result from callback does not match expected");
-        }
-        (void)Unlock(sendData->lock);
-    }
+    (void)Unlock(sendData->lock);
 
     return result;
 }
@@ -816,15 +766,9 @@ bool client_status_fault_happened()
 {
     bool result = false;
 
-    if (Lock(g_connection_status_info.lock) != LOCK_OK)
-    {
-        ASSERT_FAIL("unable to lock");
-    }
-    else
-    {
-        result = g_connection_status_info.connFaultHappened;
-        (void)Unlock(g_connection_status_info.lock);
-    }
+    ASSERT_ARE_EQUAL(LOCK_RESULT, LOCK_OK, Lock(g_connection_status_info.lock));
+    result = g_connection_status_info.connFaultHappened;
+    (void)Unlock(g_connection_status_info.lock);
 
     return result;
 }
@@ -840,20 +784,14 @@ bool wait_for_client_authenticated(size_t wait_time)
         (difftime(nowTime, beginOperation) < wait_time) // time box
         )
     {
+        ASSERT_ARE_EQUAL(LOCK_RESULT, LOCK_OK, Lock(g_connection_status_info.lock));
 
-        if (Lock(g_connection_status_info.lock) != LOCK_OK)
-        {
-            ASSERT_FAIL("unable to lock");
-        }
-        else
-        {
-            result = (g_connection_status_info.currentStatus == IOTHUB_CLIENT_CONNECTION_AUTHENTICATED);
-            (void)Unlock(g_connection_status_info.lock);
+        result = (g_connection_status_info.currentStatus == IOTHUB_CLIENT_CONNECTION_AUTHENTICATED);
+        (void)Unlock(g_connection_status_info.lock);
 
-            if (result)
-            {
-                break;
-            }
+        if (result)
+        {
+            break;
         }
         ThreadAPI_Sleep(500);
     }
@@ -883,15 +821,9 @@ bool client_status_restored()
 {
     bool result = false;
 
-    if (Lock(g_connection_status_info.lock) != LOCK_OK)
-    {
-        ASSERT_FAIL("unable to lock");
-    }
-    else
-    {
-        result = g_connection_status_info.connRestored;
-        (void)Unlock(g_connection_status_info.lock);
-    }
+    ASSERT_ARE_EQUAL(LOCK_RESULT, LOCK_OK, Lock(g_connection_status_info.lock));
+    result = g_connection_status_info.connRestored;
+    (void)Unlock(g_connection_status_info.lock);
 
     return result;
 }
@@ -899,18 +831,12 @@ bool client_status_restored()
 // Resets global connection status at beginning of tests.
 void clear_connection_status_info_flags()
 {
-    if (Lock(g_connection_status_info.lock) != LOCK_OK)
-    {
-        ASSERT_FAIL("unable to lock");
-    }
-    else
-    {
-        g_connection_status_info.connFaultHappened = false;
-        g_connection_status_info.connRestored = false;
-        g_connection_status_info.currentStatus = IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED;
-        g_connection_status_info.currentStatusReason = IOTHUB_CLIENT_CONNECTION_NO_NETWORK;
-        (void)Unlock(g_connection_status_info.lock);
-    }
+    ASSERT_ARE_EQUAL(LOCK_RESULT, LOCK_OK, Lock(g_connection_status_info.lock));
+    g_connection_status_info.connFaultHappened = false;
+    g_connection_status_info.connRestored = false;
+    g_connection_status_info.currentStatus = IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED;
+    g_connection_status_info.currentStatusReason = IOTHUB_CLIENT_CONNECTION_NO_NETWORK;
+    (void)Unlock(g_connection_status_info.lock);
 }
 
 static void service_wait_for_security_d2c_event_arrival(IOTHUB_PROVISIONED_DEVICE* deviceToUse, D2C_MESSAGE_HANDLE d2cMessage, double max_wait_time)
@@ -1323,22 +1249,15 @@ EXPECTED_RECEIVE_DATA *service_create_c2d(const char *content)
     {
         if (g_e2e_test_options.use_special_chars)
         {
-            if (Map_AddOrUpdate(mapHandle, MSG_PROP_KEYS_SPECIAL[i], MSG_PROP_VALS_SPECIAL[i]) != MAP_OK)
-            {
-                LogError("ERROR: Map_AddOrUpdate failed for property %zu!", i);
-            }
+            ASSERT_ARE_EQUAL(MAP_RESULT, MAP_OK, Map_AddOrUpdate(mapHandle, MSG_PROP_KEYS_SPECIAL[i], MSG_PROP_VALS_SPECIAL[i]));
         }
         else
         {
-            if (Map_AddOrUpdate(mapHandle, MSG_PROP_KEYS[i], MSG_PROP_VALS[i]) != MAP_OK)
-            {
-                LogError("ERROR: Map_AddOrUpdate failed for property %zu!", i);
-            }
+            ASSERT_ARE_EQUAL(MAP_RESULT, MAP_OK, Map_AddOrUpdate(mapHandle, MSG_PROP_KEYS[i], MSG_PROP_VALS[i]));
         }
     }
 
     receiveUserContext->msgHandle = messageHandle;
-
     return receiveUserContext;
 }
 
@@ -1368,19 +1287,13 @@ void client_wait_for_c2d_event_arrival(EXPECTED_RECEIVE_DATA* receiveUserContext
         (nowTime = time(NULL)), (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) //time box
         )
     {
-        if (Lock(receiveUserContext->lock) != LOCK_OK)
+        ASSERT_ARE_EQUAL(LOCK_RESULT, LOCK_OK, Lock(receiveUserContext->lock));
+        if (receiveUserContext->wasFound)
         {
-            ASSERT_FAIL("unable to lock");
-        }
-        else
-        {
-            if (receiveUserContext->wasFound)
-            {
-                (void)Unlock(receiveUserContext->lock);
-                break;
-            }
             (void)Unlock(receiveUserContext->lock);
+            break;
         }
+        (void)Unlock(receiveUserContext->lock);
         ThreadAPI_Sleep(100);
     }
 
