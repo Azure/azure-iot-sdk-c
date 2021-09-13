@@ -27,7 +27,7 @@ For constained devices - where memory is measured in kilobytes and not megabytes
   - [Read more](#read-more)
   - [SDK Folder Structure](#sdk-folder-structure)
 - [Releases](#releases)
-  - [Features and security updates](#features-security-updates)
+  - [New features and critical bug fixes](#new-features-and-critical-bug-fixes)
   - [Long Term Support](#long-term-support)
     - [LTS schedule](#lts-schedule)
   - [Release example](#release-example)
