@@ -1078,7 +1078,7 @@ PROV_DEVICE_RESULT Prov_Device_LL_Register_Device(PROV_DEVICE_LL_HANDLE handle, 
 
             if (handle->prov_transport_protocol->prov_transport_open(handle->transport_handle, handle->registration_id, ek_value, srk_value, on_transport_registration_data, handle, on_transport_status, handle, prov_transport_challenge_callback, handle) != 0)
             {
-                LogError("Failure establishing  connection");
+                LogError("Failure establishing connection");
                 if (!handle->user_supplied_reg_id)
                 {
                     free(handle->registration_id);
@@ -1089,7 +1089,7 @@ PROV_DEVICE_RESULT Prov_Device_LL_Register_Device(PROV_DEVICE_LL_HANDLE handle, 
 
                 handle->register_status_cb = NULL;
                 handle->status_user_ctx = NULL;
-                result = PROV_DEVICE_RESULT_ERROR;
+                result = PROV_DEVICE_RESULT_TRANSPORT;
             }
             else
             {
