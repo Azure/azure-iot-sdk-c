@@ -6703,7 +6703,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_ParseMethodToCommand_NULL_method_name)
 {
     //arrange
     char* componentName = NULL;
-    char* commandName = NULL;
+    const char* commandName = NULL;
 
     //act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_ParseMethodToCommand(NULL, &componentName, &commandName);
@@ -6723,7 +6723,7 @@ static void set_expected_calls_for_IoTHubClientCore_LL_ParseMethodToCommand_when
 TEST_FUNCTION(IoTHubClientCore_LL_ParseMethodToCommand_NULL_component_name)
 {
     //arrange
-    char* commandName = NULL;
+    const char* commandName = NULL;
 
     //act
     IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_ParseMethodToCommand(TEST_METHOD_NAME, NULL, &commandName);
@@ -6751,7 +6751,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_ParseMethodToCommand_NULL_command_name)
 TEST_FUNCTION(IoTHubClientCore_LL_ParseMethodToCommand_no_component_specified)
 {
     //arrange
-    char* commandName = NULL;
+    const char* commandName = NULL;
     char* componentName = NULL;
 
     //act
@@ -6767,7 +6767,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_ParseMethodToCommand_no_component_specified)
 TEST_FUNCTION(IoTHubClientCore_LL_ParseMethodToCommand_component_specified)
 {
     //arrange
-    char* commandName = NULL;
+    const char* commandName = NULL;
     char* componentName = NULL;
 
     set_expected_calls_for_IoTHubClientCore_LL_ParseMethodToCommand_when_component_set();
@@ -6788,7 +6788,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_ParseMethodToCommand_component_specified)
 TEST_FUNCTION(IoTHubClientCore_LL_ParseMethodToCommand_fail)
 {
     //arrange
-    char* commandName = NULL;
+    const char* commandName = NULL;
     char* componentName = NULL;
     ASSERT_ARE_EQUAL(int, 0, umock_c_negative_tests_init());
 
