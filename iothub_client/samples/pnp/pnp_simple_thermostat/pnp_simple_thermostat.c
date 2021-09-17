@@ -383,7 +383,10 @@ static void SendMaxTemperatureSinceReboot(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceC
     }
     else
     {
-        IOTHUB_CLIENT_REPORTED_PROPERTY maxTempProperty = { IOTHUB_CLIENT_REPORTED_PROPERTY_STRUCT_VERSION_1, g_maxTempSinceLastRebootPropertyName, maximumTemperatureAsString };
+        IOTHUB_CLIENT_REPORTED_PROPERTY maxTempProperty;
+        maxTempProperty.structVersion = IOTHUB_CLIENT_REPORTED_PROPERTY_STRUCT_VERSION_1;
+        maxTempProperty.name = g_maxTempSinceLastRebootPropertyName;
+        maxTempProperty.value =  maximumTemperatureAsString;
 
         unsigned char* propertySerialized = NULL;
         size_t propertySerializedLength;
