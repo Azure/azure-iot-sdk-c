@@ -372,12 +372,12 @@ extern "C"
     /**
     * @brief    Asynchronous call to send the telemetry message specified by @p telemetryMessageHandle.
     *
-    * @param[in]    iotHubClientHandle              The handle created by a call to the create function.
-    * @param[in]    telemetryMessageHandle          The handle to an IoT Hub message.
-    * @param[in]    telemetryConfirmationCallback   Optional callback specified by the device for receiving
-    *                                               confirmation of the delivery of the telemetry.
-    * @param[in]   userContextCallback              User specified context that will be provided to the
-    *                                               callback. This can be @c NULL.
+    * @param[in]  iotHubClientHandle             The handle created by a call to the create function.
+    * @param[in]  telemetryMessageHandle         The handle to an IoT Hub message.
+    * @param[in]  telemetryConfirmationCallback  Optional callback specified by the device for receiving
+    *                                            confirmation of the delivery of the telemetry.
+    * @param[in]  userContextCallback            User specified context that will be provided to the
+    *                                            callback. This can be @c NULL.
     *
     * @remarks  The application behavior is undefined if the user calls
     *           the IoTHubDeviceClient_Destroy function from within any callback.
@@ -403,17 +403,17 @@ extern "C"
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_SubscribeToCommands, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC, commandCallback,  void*, userContextCallback);
 
     /**
-    * @brief    Sends properties to IoT Hub
+    * @brief    Sends properties to IoT Hub.
     *
-    * @param[in]    iotHubClientHandle           The handle created by a call to the create function.
-    * @param[in]    properties                   Serialized property data to be sent to IoT Hub.  This buffer can either be
-    *                                            manually serialized created with IoTHubClient_Serialize_ReportedProperties() 
-    *                                            or IoTHubClient_Serialize_WritablePropertyResponse().
-    * @param[in]    propertiesLength             Number of bytes in the properties buffer.
-    * @param[in]    propertyAcknowledgedCallback Optional callback specified by the application to be called with the
-    *                                            result of the transaction.
-    * @param[in]    userContextCallback          User specified context that will be provided to the
-    *                                            callback. This can be @c NULL.
+    * @param[in]  iotHubClientHandle            The handle created by a call to the create function.
+    * @param[in]  properties                    Serialized property data to be sent to IoT Hub.  This buffer can either be
+    *                                           manually serialized created with IoTHubClient_Serialize_ReportedProperties() 
+    *                                           or IoTHubClient_Serialize_WritablePropertyResponse().
+    * @param[in]  propertiesLength              Number of bytes in the properties buffer.
+    * @param[in]  propertyAcknowledgedCallback  Optional callback specified by the application to be called with the
+    *                                           result of the transaction.
+    * @param[in]  userContextCallback           User specified context that will be provided to the
+    *                                           callback. This can be @c NULL.
     *
     * @remarks   The application behavior is undefined if the user calls
     *            the IoTHubDeviceClient_Destroy function from within any callback.
@@ -425,12 +425,12 @@ extern "C"
     /**
     * @brief   Retrieves all properties from IoT Hub.
     *
-    * @param[in]   iotHubClientHandle    The handle created by a call to the create function.
-    * @param[in]   propertyCallback      Callback invoked when properties are retrieved.
-    *                                    The API IoTHubClient_Deserialize_Properties() can help deserialize the raw 
-    *                                    payload stream.
-    * @param[in]   userContextCallback   User specified context that will be provided to the
-    *                                    callback. This can be @c NULL.
+    * @param[in]  iotHubClientHandle    The handle created by a call to the create function.
+    * @param[in]  propertyCallback      Callback invoked when properties are retrieved.
+    *                                   The API IoTHubClient_Deserialize_Properties() can help deserialize the raw 
+    *                                   payload stream.
+    * @param[in]  userContextCallback   User specified context that will be provided to the
+    *                                   callback. This can be @c NULL.
     *
     * @remarks  The application behavior is undefined if the user calls
     *           the IoTHubDeviceClient_Destroy function from within any callback.
@@ -442,13 +442,13 @@ extern "C"
     /**
     * @brief   Retrieves all properties from IoT Hub and also subscribes for updates to writable properties.
     *
-    * @param[in]   iotHubClientHandle      The handle created by a call to the create function.
-    * @param[in]   propertyUpdateCallback  Callback both on initial retrieval of properties stored on IoT Hub
-    *                                      and subsequent service-initiated modifications of writable properties.
-    *                                      The API IoTHubClient_Deserialize_Properties() can help deserialize the raw 
-    *                                      payload stream.
-    * @param[in]   userContextCallback     User specified context that will be provided to the
-    *                                      callback. This can be @c NULL.
+    * @param[in]  iotHubClientHandle      The handle created by a call to the create function.
+    * @param[in]  propertyUpdateCallback  Callback both on initial retrieval of properties stored on IoT Hub
+    *                                     and subsequent service-initiated modifications of writable properties.
+    *                                     The API IoTHubClient_Deserialize_Properties() can help deserialize the raw 
+    *                                     payload stream.
+    * @param[in]  userContextCallback     User specified context that will be provided to the
+    *                                     callback. This can be @c NULL.
     *
     * @remarks  The application behavior is undefined if the user calls
     *           the IoTHubDeviceClient_Destroy function from within any callback.

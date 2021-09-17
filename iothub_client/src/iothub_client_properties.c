@@ -451,7 +451,9 @@ static IOTHUB_CLIENT_RESULT GetTwinVersion(IOTHUB_CLIENT_PROPERTY_ITERATOR* prop
     return result;
 }
 
-static bool IsJsonObjectAComponentInModel(IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIterator, JSON_Object* containerObject)
+// IsJsonObjectAComponent indicates whether the current containerObject we're visiting corresponds to
+// a PnP component (indicated by a "__t":"c" field as a containerObject child) or not.
+static bool IsJsonObjectAComponent(IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIterator, JSON_Object* containerObject)
 {
     bool result;
 
@@ -468,7 +470,7 @@ static bool IsJsonObjectAComponentInModel(IOTHUB_CLIENT_PROPERTY_ITERATOR* prope
 }
 
 // ValidateIteratorInputs makes sure that the parameter list passed in IoTHubClient_Deserialize_Properties_CreateIterator is valid.
-static bool ValidateIteratorInputs(
+static IOTHUB_CLIENT_RESULT ValidateIteratorInputs(
     IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType,
     const unsigned char* payload,
     size_t payloadLength,
@@ -615,7 +617,7 @@ static bool GetNextPropertyToEnumerate(IOTHUB_CLIENT_PROPERTY_ITERATOR* property
             }
         }
 
-        if (IsJsonObjectAComponentInModel(propertyIterator, containerObject))
+        if (IsJsonObjectAComponent(propertyIterator, containerObject))
         {
             // This top-level property is the name of a component.  
             propertyIterator->componentParseState = COMPONENT_PARSE_STATE_SUB_COMPONENT;

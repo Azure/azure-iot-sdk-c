@@ -409,7 +409,7 @@ extern "C"
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SubscribeToCommands, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC, commandCallback,  void*, userContextCallback);
 
     /**
-    * @brief      Sends properties to IoT Hub
+    * @brief      Sends properties to IoT Hub.
     *
     * @param[in]  iotHubModuleClientHandle     The handle created by a call to the create function.
     * @param[in]  properties                   Serialized property data to be sent to IoT Hub.  This buffer can either be

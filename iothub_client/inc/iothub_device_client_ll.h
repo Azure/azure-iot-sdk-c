@@ -428,7 +428,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_SubscribeToCommands, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC, commandCallback,  void*, userContextCallback);
  
     /**
-    * @brief      Sends properties to IoT Hub
+    * @brief      Sends properties to IoT Hub.
     *
     * @param[in]  iotHubClientHandle           The handle created by a call to the create function.
     * @param[in]  properties                   Serialized property data to be sent to IoT Hub.  This buffer can either be
