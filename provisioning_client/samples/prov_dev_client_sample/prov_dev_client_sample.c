@@ -23,11 +23,11 @@
 //
 // The protocol you wish to use should be uncommented
 //
-//#define SAMPLE_MQTT
+#define SAMPLE_MQTT
 //#define SAMPLE_MQTT_OVER_WEBSOCKETS
 //#define SAMPLE_AMQP
 //#define SAMPLE_AMQP_OVER_WEBSOCKETS
-#define SAMPLE_HTTP
+//#define SAMPLE_HTTP
 
 #ifdef SAMPLE_MQTT
 #include "iothubtransportmqtt.h"
@@ -61,7 +61,7 @@ MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VA
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(PROV_DEVICE_REG_STATUS, PROV_DEVICE_REG_STATUS_VALUES);
 
 static const char* global_prov_uri = "global.azure-devices-provisioning.net";
-static const char* id_scope = "0ne000CDA9E";
+static const char* id_scope = "[ID Scope]";
 
 volatile static bool g_registration_complete = false;
 static bool g_use_proxy = false;
@@ -95,15 +95,15 @@ int main()
 {
     SECURE_DEVICE_TYPE hsm_type;
     //hsm_type = SECURE_DEVICE_TYPE_TPM;
-    //hsm_type = SECURE_DEVICE_TYPE_X509;
-    hsm_type = SECURE_DEVICE_TYPE_SYMMETRIC_KEY;
+    hsm_type = SECURE_DEVICE_TYPE_X509;
+    //hsm_type = SECURE_DEVICE_TYPE_SYMMETRIC_KEY;
 
     // Used to initialize IoTHub SDK subsystem
     (void)IoTHub_Init();
     (void)prov_dev_security_init(hsm_type);
 
     // Set the symmetric key if using they auth type
-    prov_dev_set_symmetric_key_info("snoopy2", "9FnZaNa6YOeiBbdeZm0npbpEBBciUerFDe0VqgZMAbBRcUhvfMt+fNZc1trA793mlcr+NWnV+nFyXoO5LtP38A==");
+    //prov_dev_set_symmetric_key_info("<symm_registration_id>", "<symmetric_Key>");
 
     HTTP_PROXY_OPTIONS http_proxy;
     PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION prov_transport;
