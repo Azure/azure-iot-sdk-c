@@ -2,13 +2,19 @@
 
 This document describes how you can set options for the Azure IoT Hub and Device Provisioning Service (DPS) client connections.
 
-- [Example Code for Setting an Option](#Example-Code-for-Setting-an-Option)
-- [When to Set Options](#When-to-Set-Options)
-- [Common Transport Options](#Common-Transport-Options)
-- [IoT Hub Device and Module Client Options](#IoT-Hub-Device-and-Module-Client-Options)
-- [MQTT, AMQP, and HTTP Specific Protocol Options](#MQTT,-AMQP,-and-HTTP-Specific-Protocol-Options)
-- [Device Provisioning Service (DPS) Client Options](#Device-Provisioning-Service-(DPS)-Client-Options)
-- [File Upload Options](#File-Upload-Options)
+- [IoT Hub C SDK Options](#iot-hub-c-sdk-options)
+  - [Example Code for Setting an Option](#example-code-for-setting-an-option)
+  - [When to Set Options](#when-to-set-options)
+  - [Common Transport Options](#common-transport-options)
+  - [IoT Hub Device and Module Client Options](#iot-hub-device-and-module-client-options)
+  - [MQTT, AMQP, and HTTP Specific Protocol Options](#mqtt-amqp-and-http-specific-protocol-options)
+    - [MQTT Specific Options](#mqtt-specific-options)
+    - [AMQP Specific Options](#amqp-specific-options)
+    - [HTTP Specific Options](#http-specific-options)
+    - [Advanced Compilation Options](#advanced-compilation-options)
+  - [Device Provisioning Service (DPS) Client Options](#device-provisioning-service-dps-client-options)
+  - [File Upload Options](#file-upload-options)
+  - [Batching and IoT Hub Client SDK](#batching-and-iot-hub-client-sdk)
 
 ## Example Code for Setting an Option
 
@@ -112,6 +118,15 @@ Some options are only supported by a given protocol (e.g. MQTT, AMQP, HTTP).  Th
 | `"Batching"`                 | OPTION_BATCHING                 | bool*             | Turn on and off message batching
 | `"MinimumPollingTime"`       | OPTION_MIN_POLLING_TIME         | unsigned int*     | Minimum time in seconds allowed between 2 consecutive GET issues to the service
 | `"timeout"`                  | OPTION_HTTP_TIMEOUT             | long*             | When using curl the amount of time before the request times out, defaults to 242 seconds.
+
+### Advanced Compilation Options
+
+We recommend leaving the following settings at their defaults. Tuning them may allow optimizations for specific devices or scenarios but could also negatively impact RAM or EEPROM usage.
+The options are presented only as compilation flags and must be appended to the CMake `compileOption_C` setting:
+
+| Option Name                  | Option Define                                           | Description
+|------------------------------|---------------------------------------------------------|-------------------------------------------------------------
+| `"XIO Receive Buffer"`       | `-DcompileOption_C="-DXIO_RECEIVE_BUFFER_SIZE=<value>"` | Configure the internal XIO receive buffer.
 
 ## Device Provisioning Service (DPS) Client Options
 
