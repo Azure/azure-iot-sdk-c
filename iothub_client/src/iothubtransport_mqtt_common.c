@@ -835,6 +835,26 @@ static int addSystemPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_messag
             }
         }
     }
+
+    // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_060: [ `IoTHubTransport_MQTT_Common_DoWork` shall check for the OutputName property and if found add the value as a system property in the format of $.on=<value> ]
+    if (result == 0)
+    {
+        const char* output_name = IoTHubMessage_GetOutputName(iothub_message_handle);
+        if (output_name != NULL)
+        {
+            // Encode the output name if encoding is on
+            if (addSystemPropertyToTopicString(topic_string, index++, SYS_PROP_ON, output_name, urlencode) != 0)
+            {
+                LogError("Failed setting output name");
+                result = MU_FAILURE;
+            }
+            else
+            {
+                result = 0;
+            }
+        }
+    }
+
     *index_ptr = index;
     return result;
 }
@@ -941,22 +961,6 @@ static STRING_HANDLE addPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_me
         LogError("Failed adding Diagnostic Properties to uMQTT Message");
         STRING_delete(result);
         result = NULL;
-    }
-
-    // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_060: [ `IoTHubTransport_MQTT_Common_DoWork` shall check for the OutputName property and if found add the value as a system property in the format of $.on=<value> ]
-    if (result != NULL)
-    {
-        const char* output_name = IoTHubMessage_GetOutputName(iothub_message_handle);
-        if (output_name != NULL)
-        {
-            if (STRING_sprintf(result, "%s%%24.on=%s/", index == 0 ? "" : PROPERTY_SEPARATOR, output_name) != 0)
-            {
-                LogError("Failed setting output name.");
-                STRING_delete(result);
-                result = NULL;
-            }
-            index++;
-        }
     }
 
     return result;
@@ -2414,11 +2418,7 @@ static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport
                 free(msg_detail_entry);
 
                 DisconnectFromClient(transport_data);
-                if (!transport_data->isRetryExpiredCallbackCalled) // Only call once
-                {
-                    transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED, transport_data->transport_ctx);
-                    transport_data->isRetryExpiredCallbackCalled = true;
-                }
+                transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, transport_data->transport_ctx);
             }
             else
             {
@@ -2765,7 +2765,7 @@ static int UpdateMqttConnectionStateIfNeeded(PMQTTTRANSPORT_HANDLE_DATA transpor
             }
             else if (retry_action == RETRY_ACTION_STOP_RETRYING)
             {
-                // Set callback if retry expired
+                // send callback if retry expired
                 if (!transport_data->isRetryExpiredCallbackCalled)
                 {
                     transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED, transport_data->transport_ctx);
