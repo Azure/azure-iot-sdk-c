@@ -142,7 +142,7 @@ void prov_transport_common_mqtt_dowork(PROV_TRANSPORT_HANDLE handle)
 
 **PROV_TRANSPORT_MQTT_COMMON_07_050: [** When the `mqtt_state` is `MQTT_STATE_CONNECTED`, `prov_transport_common_mqtt_dowork` shall subscribe to the topic `$dps/registrations/res/#` **]**
 
-**PROV_TRANSPORT_MQTT_COMMON_07_052: [** Once the mqtt CONNACK is recieved `prov_transport_common_mqtt_dowork` shall set `mqtt_state` to `MQTT_STATE_CONNECTED` **]**
+**PROV_TRANSPORT_MQTT_COMMON_07_052: [** Once the mqtt CONNACK is received `prov_transport_common_mqtt_dowork` shall set `mqtt_state` to `MQTT_STATE_CONNECTED` **]**
 
 **PROV_TRANSPORT_MQTT_COMMON_07_053: [** When then `transport_state` is set to `TRANSPORT_CLIENT_STATE_REG_SEND`, `prov_transport_common_mqtt_dowork` shall send a `REGISTER_ME` message **]**
 

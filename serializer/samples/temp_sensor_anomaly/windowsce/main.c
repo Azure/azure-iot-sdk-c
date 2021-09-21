@@ -144,7 +144,7 @@ int main(void)
                 FrdmDevice* frdmDevice;
                 // Because it can poll "after 9 seconds" polls will happen
                 // effectively at ~10 seconds.
-                // Note that for scalabilty, the default value of minimumPollingTime
+                // Note that for scalability, the default value of minimumPollingTime
                 // is 25 minutes. For more information, see:
                 // https://azure.microsoft.com/documentation/articles/iot-hub-devguide/#messaging
                 unsigned int minimumPollingTime = 9;

@@ -167,7 +167,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT InputQueue1FilterCallback(IOTHUB_MESSAGE
 
     if ((messagesReceivedByInput1Queue % 2) == 0)
     {
-        // This message should be sent to next stop in the pipeline, namely "output1".  What happens at "outpu1" is determined
+        // This message should be sent to next stop in the pipeline, namely "output1".  What happens at "output1" is determined
         // by the configuration of the Edge routing table setup.
         FILTERED_MESSAGE_INSTANCE* filteredMessageInstance = CreateFilteredMessageInstance(message);
         if (NULL == filteredMessageInstance)

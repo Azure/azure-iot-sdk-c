@@ -212,7 +212,7 @@ static STRING_HANDLE IoTHubTransportAMQP_WS_GetHostname(TRANSPORT_LL_HANDLE hand
 
 static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_WS_SendMessageDisposition(IOTHUB_DEVICE_HANDLE handle, IOTHUB_MESSAGE_HANDLE message_handle, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
 {
-    // Codes_SRS_IoTHubTransportAMQP_WS_10_001[**IoTHubTransportAMQP_WS_SendMessageDisposition shall sned the message disposition by calling into the IoTHubTransport_AMQP_Common_SendMessageDisposition()]
+    // Codes_SRS_IoTHubTransportAMQP_WS_10_001[**IoTHubTransportAMQP_WS_SendMessageDisposition shall send the message disposition by calling into the IoTHubTransport_AMQP_Common_SendMessageDisposition()]
     return IoTHubTransport_AMQP_Common_SendMessageDisposition(handle, message_handle, disposition);
 }
 
@@ -253,7 +253,7 @@ static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls =
     IoTHubTransportAMQP_WS_Create,                                     /*pfIoTHubTransport_Create IoTHubTransport_Create;*/
     IoTHubTransportAMQP_WS_Destroy,                                    /*pfIoTHubTransport_Destroy IoTHubTransport_Destroy;*/
     IoTHubTransportAMQP_WS_Register,                                   /*pfIotHubTransport_Register IoTHubTransport_Register;*/
-    IoTHubTransportAMQP_WS_Unregister,                                 /*pfIotHubTransport_Unregister IoTHubTransport_Unegister;*/
+    IoTHubTransportAMQP_WS_Unregister,                                 /*pfIotHubTransport_Unregister IoTHubTransport_Unregister;*/
     IoTHubTransportAMQP_WS_Subscribe,                                  /*pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;*/
     IoTHubTransportAMQP_WS_Unsubscribe,                                /*pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;*/
     IoTHubTransportAMQP_WS_DoWork,                                     /*pfIoTHubTransport_DoWork IoTHubTransport_DoWork;*/

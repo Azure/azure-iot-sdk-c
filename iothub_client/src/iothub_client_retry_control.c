@@ -358,7 +358,7 @@ int retry_control_should_retry(RETRY_CONTROL_HANDLE retry_control_handle, RETRY_
     {
         RETRY_CONTROL_INSTANCE* retry_control = (RETRY_CONTROL_INSTANCE*)retry_control_handle;
 
-        // Codes_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_027: [If `retry_control->policy` is IOTHUB_CLIENT_RETRY_NONE, retry_action shall be set to RETRY_ACTION_STOP_RETRYING and return immediatelly with result 0]
+        // Codes_SRS_IOTHUB_CLIENT_RETRY_CONTROL_09_027: [If `retry_control->policy` is IOTHUB_CLIENT_RETRY_NONE, retry_action shall be set to RETRY_ACTION_STOP_RETRYING and return immediately with result 0]
         if (retry_control->policy == IOTHUB_CLIENT_RETRY_NONE)
         {
             *retry_action = RETRY_ACTION_STOP_RETRYING;

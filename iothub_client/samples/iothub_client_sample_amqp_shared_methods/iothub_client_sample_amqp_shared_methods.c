@@ -116,7 +116,7 @@ int main(void)
         }
         else
         {
-            // Set any option that are neccessary.
+            // Set any option that are necessary.
             // For available options please see the iothub_sdk_options.md documentation
             //bool traceOn = true;
             //IoTHubDeviceClient_SetOption(device_handle1, OPTION_LOG_TRACE, &traceOn);

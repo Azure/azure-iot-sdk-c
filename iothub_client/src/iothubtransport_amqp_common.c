@@ -893,7 +893,7 @@ void prepare_for_connection_retry(AMQP_TRANSPORT_INSTANCE* transport_instance)
 }
 
 
-// @brief    Verifies if the crendentials used by the device match the requirements and authentication mode currently supported by the transport.
+// @brief    Verifies if the credentials used by the device match the requirements and authentication mode currently supported by the transport.
 // @returns  true if credentials are good, false otherwise.
 static bool is_device_credential_acceptable(const IOTHUB_DEVICE_CONFIG* device_config, AMQP_TRANSPORT_AUTHENTICATION_MODE preferred_authentication_mode)
 {
@@ -2326,7 +2326,7 @@ void IoTHubTransport_AMQP_Common_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
         }
         else
         {
-            // Removing it first so the race hazzard is reduced between this function and DoWork. Best would be to use locks.
+            // Removing it first so the race hazard is reduced between this function and DoWork. Best would be to use locks.
             if (singlylinkedlist_remove(registered_device->transport_instance->registered_devices, list_item) != RESULT_OK)
             {
                 LogError("Failed to unregister device '%s' (singlylinkedlist_remove failed).", device_id);
@@ -2343,7 +2343,7 @@ void IoTHubTransport_AMQP_Common_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
 
 void IoTHubTransport_AMQP_Common_Destroy(TRANSPORT_LL_HANDLE handle)
 {
-    // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_013: [If `handle` is NULL, IoTHubTransport_AMQP_Common_Destroy shall return immediatelly]
+    // Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_013: [If `handle` is NULL, IoTHubTransport_AMQP_Common_Destroy shall return immediately]
     if (handle == NULL)
     {
         LogError("Failed to destroy AMQP transport instance (handle is NULL)");
