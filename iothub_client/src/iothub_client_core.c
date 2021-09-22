@@ -101,7 +101,7 @@ typedef struct HTTPWORKER_THREAD_INFO_TAG
     CALLBACK_TYPE_REPORTED_STATE,       \
     CALLBACK_TYPE_CONNECTION_STATUS,    \
     CALLBACK_TYPE_DEVICE_METHOD,        \
-    CALLBACK_TYPE_INBOUD_DEVICE_METHOD, \
+    CALLBACK_TYPE_INBOUND_DEVICE_METHOD, \
     CALLBACK_TYPE_MESSAGE,              \
     CALLBACK_TYPE_INPUTMESSAGE
 
@@ -409,7 +409,7 @@ static int iothub_ll_inbound_device_method_callback(const char* method_name, con
         IOTHUB_QUEUE_CONTEXT* queue_context = (IOTHUB_QUEUE_CONTEXT*)userContextCallback;
 
         USER_CALLBACK_INFO queue_cb_info;
-        queue_cb_info.type = CALLBACK_TYPE_INBOUD_DEVICE_METHOD;
+        queue_cb_info.type = CALLBACK_TYPE_INBOUND_DEVICE_METHOD;
 
         result = make_method_calback_queue_context(&queue_cb_info, method_name, payload, size, method_id, queue_context);
         if (result != 0)
@@ -700,7 +700,7 @@ static void dispatch_user_callbacks(IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientIns
                     }
                 }
                 break;
-            case CALLBACK_TYPE_INBOUD_DEVICE_METHOD:
+            case CALLBACK_TYPE_INBOUND_DEVICE_METHOD:
                 if (inbound_device_method_callback)
                 {
                     const char* method_name = STRING_c_str(queued_cb->iothub_callback.method_cb_info.method_name);
@@ -1257,7 +1257,7 @@ void IoTHubClientCore_Destroy(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle)
             USER_CALLBACK_INFO* queue_cb_info = (USER_CALLBACK_INFO*)VECTOR_element(iotHubClientInstance->saved_user_callback_list, index);
             if (queue_cb_info != NULL)
             {
-                if ((queue_cb_info->type == CALLBACK_TYPE_DEVICE_METHOD) || (queue_cb_info->type == CALLBACK_TYPE_INBOUD_DEVICE_METHOD))
+                if ((queue_cb_info->type == CALLBACK_TYPE_DEVICE_METHOD) || (queue_cb_info->type == CALLBACK_TYPE_INBOUND_DEVICE_METHOD))
                 {
                     STRING_delete(queue_cb_info->iothub_callback.method_cb_info.method_name);
                     BUFFER_delete(queue_cb_info->iothub_callback.method_cb_info.payload);
@@ -1608,7 +1608,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetRetryPolicy(IOTHUB_CLIENT_CORE_HANDLE i
             }
             else
             {
-                /* Codes_SRS_IOTHUBCLIENT_25_077: [ `IoTHubClient_SetRetryPolicy` shall call `IoTHubClientCore_LL_SetRetryPolicy`, while passing the `IoTHubClientCore_LL` handle created by `IoTHubClient_Create` and the parameters `retryPolicy` and `retryTimeoutLimitinSeconds`.]*/
+                /* Codes_SRS_IOTHUBCLIENT_25_077: [ `IoTHubClient_SetRetryPolicy` shall call `IoTHubClientCore_LL_SetRetryPolicy`, while passing the `IoTHubClientCore_LL` handle created by `IoTHubClient_Create` and the parameters `retryPolicy` and `retryTimeoutLimitInSeconds`.]*/
                 result = IoTHubClientCore_LL_SetRetryPolicy(iotHubClientInstance->IoTHubClientLLHandle, retryPolicy, retryTimeoutLimitInSeconds);
                 (void)Unlock(iotHubClientInstance->LockHandle);
             }
@@ -2338,7 +2338,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_UploadToBlobAsync(IOTHUB_CLIENT_CORE_HANDL
     IOTHUB_CLIENT_RESULT result;
     /*Codes_SRS_IOTHUBCLIENT_02_047: [ If iotHubClientHandle is NULL then IoTHubClient_UploadToBlobAsync shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
     /*Codes_SRS_IOTHUBCLIENT_02_048: [ If destinationFileName is NULL then IoTHubClient_UploadToBlobAsync shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
-    /*Codes_SRS_IOTHUBCLIENT_02_049: [ If source is NULL and size is greated than 0 then IoTHubClient_UploadToBlobAsync shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
+    /*Codes_SRS_IOTHUBCLIENT_02_049: [ If source is NULL and size is greater than 0 then IoTHubClient_UploadToBlobAsync shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
     if (
         (iotHubClientHandle == NULL) ||
         (destinationFileName == NULL) ||
@@ -2357,7 +2357,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_UploadToBlobAsync(IOTHUB_CLIENT_CORE_HANDL
     }
     else
     {
-        /*Codes_SRS_IOTHUBCLIENT_02_051: [IoTHubClient_UploadToBlobAsync shall copy the souce, size, iotHubClientFileUploadCallback, context into a structure.]*/
+        /*Codes_SRS_IOTHUBCLIENT_02_051: [IoTHubClient_UploadToBlobAsync shall copy the source, size, iotHubClientFileUploadCallback, context into a structure.]*/
         HTTPWORKER_THREAD_INFO *threadInfo = allocateUploadToBlob(destinationFileName, iotHubClientHandle, context);
         if (threadInfo == NULL)
         {

@@ -183,7 +183,7 @@ static void on_message_sender_state_changed_callback(void* context, MESSAGE_SEND
                 case MESSAGE_SENDER_STATE_OPEN:
                     if (amqp_info->msg_recv_state == MESSAGE_RECEIVER_STATE_OPEN)
                     {
-                        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_052: [ Once the uamqp reciever and sender link are connected the amqp_state shall be set to AMQP_STATE_CONNECTED ] */
+                        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_052: [ Once the uamqp receiver and sender link are connected the amqp_state shall be set to AMQP_STATE_CONNECTED ] */
                         amqp_info->amqp_state = AMQP_STATE_CONNECTED;
                         if (amqp_info->status_cb != NULL)
                         {
@@ -230,7 +230,7 @@ static void on_message_receiver_state_changed_callback(const void* user_ctx, MES
             case MESSAGE_RECEIVER_STATE_OPEN:
                 if (amqp_info->msg_send_state == MESSAGE_SENDER_STATE_OPEN)
                 {
-                    /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_052: [ Once the uamqp reciever and sender link are connected the amqp_state shall be set to AMQP_STATE_CONNECTED ] */
+                    /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_052: [ Once the uamqp receiver and sender link are connected the amqp_state shall be set to AMQP_STATE_CONNECTED ] */
                     amqp_info->amqp_state = AMQP_STATE_CONNECTED;
                     if (amqp_info->status_cb != NULL)
                     {
@@ -730,7 +730,7 @@ static int create_sender_link(PROV_TRANSPORT_AMQP_INFO* amqp_info)
     AMQP_VALUE msg_target;
     STRING_HANDLE event_address;
 
-    /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_050: [ The reciever and sender endpoints addresses shall be constructed in the following manner: amqps://[hostname]/[scope_id]/registrations/[registration_id] ] */
+    /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_050: [ The receiver and sender endpoints addresses shall be constructed in the following manner: amqps://[hostname]/[scope_id]/registrations/[registration_id] ] */
     if ((event_address = construct_link_address(amqp_info)) == NULL)
     {
         LogError("Failure constructing amqp link address");
@@ -807,7 +807,7 @@ static int create_receiver_link(PROV_TRANSPORT_AMQP_INFO* amqp_info)
     AMQP_VALUE msg_target;
     STRING_HANDLE event_address;
 
-    /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_050: [ The reciever and sender endpoints addresses shall be constructed in the following manner: amqps://[hostname]/[scope_id]/registrations/[registration_id] ] */
+    /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_050: [ The receiver and sender endpoints addresses shall be constructed in the following manner: amqps://[hostname]/[scope_id]/registrations/[registration_id] ] */
     if ((event_address = construct_link_address(amqp_info)) == NULL)
     {
         LogError("Failure constructing amqp link address");
@@ -886,7 +886,7 @@ static int create_transport_io_object(PROV_TRANSPORT_AMQP_INFO* amqp_info)
         SASL_MECHANISM_HANDLE* sasl_mechanism = NULL;
         PROV_TRANSPORT_IO_INFO* trans_info;
 
-        // Set the proxy options if neccessary
+        // Set the proxy options if necessary
         if (amqp_info->proxy_option.host_address != NULL)
         {
             transport_proxy = &amqp_info->proxy_option;

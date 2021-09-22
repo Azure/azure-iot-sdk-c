@@ -1223,7 +1223,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
     }
 
     /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_047: [ If the mqtt_state is MQTT_STATE_DISCONNECTED prov_transport_common_mqtt_dowork shall attempt to connect the mqtt connections. ] */
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_052: [ Once the mqtt CONNACK is recieved prov_transport_common_mqtt_dowork shall set mqtt_state to MQTT_STATE_CONNECTED ] */
+    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_052: [ Once the mqtt CONNACK is received prov_transport_common_mqtt_dowork shall set mqtt_state to MQTT_STATE_CONNECTED ] */
     TEST_FUNCTION(prov_transport_common_mqtt_dowork_subscribe_fail)
     {
         CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };

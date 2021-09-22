@@ -279,7 +279,7 @@ static void stop_worker_thread(TRANSPORT_HANDLE_DATA* transportData)
     if (Lock(transportData->lockHandle) != LOCK_OK)
     {
         // Need to setup a critical error function here to inform the user that an critical error
-        // has occured.
+        // has occurred.
         LogError("Unable to lock - will still attempt to end thread without thread safety");
         transportData->stopThread = 1;
     }

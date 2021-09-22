@@ -2860,7 +2860,7 @@ TEST_FUNCTION(on_messenger_message_received_callback_failure_checks)
 // Tests_SRS_DEVICE_09_113: [A TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance shall be created with a copy of the `source` and `message_id` contained in `disposition_info`]
 // Tests_SRS_DEVICE_09_115: [`telemetry_messenger_send_message_disposition()` shall be invoked passing the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance and the corresponding TELEMETRY_MESSENGER_DISPOSITION_RESULT]
 // Tests_SRS_DEVICE_09_117: [amqp_device_send_message_disposition() shall destroy the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance]
-// Tests_SRS_DEVICE_09_118: [If no failures occurr, amqp_device_send_message_disposition() shall return 0]
+// Tests_SRS_DEVICE_09_118: [If no failures occur, amqp_device_send_message_disposition() shall return 0]
 TEST_FUNCTION(device_send_message_disposition_succeess)
 {
     // arrange

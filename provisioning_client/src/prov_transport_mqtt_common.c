@@ -200,7 +200,7 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
                 {
                     if (connack->returnCode == CONNECTION_ACCEPTED)
                     {
-                        /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_052: [ Once the mqtt CONNACK is recieved prov_transport_common_mqtt_dowork shall set mqtt_state to MQTT_STATE_CONNECTED ] */
+                        /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_052: [ Once the mqtt CONNACK is received prov_transport_common_mqtt_dowork shall set mqtt_state to MQTT_STATE_CONNECTED ] */
                         mqtt_info->mqtt_state = MQTT_STATE_CONNECTED;
                     }
                     else

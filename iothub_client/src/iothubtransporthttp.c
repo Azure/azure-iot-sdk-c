@@ -2537,7 +2537,7 @@ static TRANSPORT_PROVIDER thisTransportProvider =
     IoTHubTransportHttp_Create,                     /*pfIoTHubTransport_Create IoTHubTransport_Create;*/
     IoTHubTransportHttp_Destroy,                    /*pfIoTHubTransport_Destroy IoTHubTransport_Destroy;*/
     IoTHubTransportHttp_Register,                   /*pfIotHubTransport_Register IoTHubTransport_Register;*/
-    IoTHubTransportHttp_Unregister,                 /*pfIotHubTransport_Unregister IoTHubTransport_Unegister;*/
+    IoTHubTransportHttp_Unregister,                 /*pfIotHubTransport_Unregister IoTHubTransport_Unregister;*/
     IoTHubTransportHttp_Subscribe,                  /*pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;*/
     IoTHubTransportHttp_Unsubscribe,                /*pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;*/
     IoTHubTransportHttp_DoWork,                     /*pfIoTHubTransport_DoWork IoTHubTransport_DoWork;*/

@@ -499,7 +499,7 @@ void authentication_destroy(AUTHENTICATION_HANDLE authentication_handle)
         {
             (void)authentication_stop(authentication_handle);
         }
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_108: [authentication_destroy() shall destroy all resouces used by this module]
+        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_108: [authentication_destroy() shall destroy all resources used by this module]
         if (instance->iothub_host_fqdn != NULL)
             STRING_delete(instance->iothub_host_fqdn);
 
@@ -509,7 +509,7 @@ void authentication_destroy(AUTHENTICATION_HANDLE authentication_handle)
             async_operation_cancel(instance->cbs_put_token_async_context);
         }
 
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_108: [authentication_destroy() shall destroy all resouces used by this module]
+        // Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_108: [authentication_destroy() shall destroy all resources used by this module]
         free(instance);
     }
 }

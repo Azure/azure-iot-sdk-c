@@ -908,7 +908,7 @@ static void on_send_complete_callback(void* context, MESSAGE_SEND_RESULT send_re
 
 static void on_process_message_callback(MESSAGE_QUEUE_HANDLE message_queue, MQ_MESSAGE_HANDLE message, PROCESS_MESSAGE_COMPLETED_CALLBACK on_process_message_completed_callback, void* context)
 {
-    // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_117: [If any argument is NULL, `on_process_message_callback` shall return immediatelly]
+    // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_117: [If any argument is NULL, `on_process_message_callback` shall return immediately]
     if (message_queue == NULL || message == NULL || on_process_message_completed_callback == NULL || context == NULL)
     {
         LogError("Invalid argument (message_queue=%p, message=%p, on_process_message_completed_callback=%p, context=%p)", message_queue, message, on_process_message_completed_callback, context);
@@ -1070,7 +1070,7 @@ int amqp_messenger_subscribe_for_messages(AMQP_MESSENGER_HANDLE messenger_handle
         instance->on_message_received_context = context;
         instance->receive_messages = true;
 
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_038: [If no failures occurr, amqp_messenger_subscribe_for_messages() shall return 0]
+        // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_038: [If no failures occur, amqp_messenger_subscribe_for_messages() shall return 0]
         result = RESULT_OK;
     }
 
@@ -1097,7 +1097,7 @@ int amqp_messenger_unsubscribe_for_messages(AMQP_MESSENGER_HANDLE messenger_hand
         instance->on_message_received_callback = NULL;
         instance->on_message_received_context = NULL;
 
-        // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_042: [If no failures occurr, amqp_messenger_unsubscribe_for_messages() shall return 0]
+        // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_042: [If no failures occur, amqp_messenger_unsubscribe_for_messages() shall return 0]
         result = RESULT_OK;
     }
 
@@ -1153,7 +1153,7 @@ int amqp_messenger_send_message_disposition(AMQP_MESSENGER_HANDLE messenger_hand
                 {
                     destroy_message_disposition_info(disposition_info);
 
-                    // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_050: [If no failures occurr, amqp_messenger_send_message_disposition() shall return 0]
+                    // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_050: [If no failures occur, amqp_messenger_send_message_disposition() shall return 0]
                     result = RESULT_OK;
                 }
 
@@ -1290,10 +1290,10 @@ int amqp_messenger_start(AMQP_MESSENGER_HANDLE messenger_handle, SESSION_HANDLE 
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_053: [`session_handle` shall be saved on `instance->session_handle`]
             instance->session_handle = session_handle;
 
-            // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_054: [If no failures occurr, `instance->state` shall be set to AMQP_MESSENGER_STATE_STARTING, and `instance->on_state_changed_callback` invoked if provided]
+            // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_054: [If no failures occur, `instance->state` shall be set to AMQP_MESSENGER_STATE_STARTING, and `instance->on_state_changed_callback` invoked if provided]
             update_messenger_state(instance, AMQP_MESSENGER_STATE_STARTING);
 
-            // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_055: [If no failures occurr, amqp_messenger_start() shall return 0]
+            // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_055: [If no failures occur, amqp_messenger_start() shall return 0]
             result = RESULT_OK;
         }
     }
@@ -1343,7 +1343,7 @@ int amqp_messenger_stop(AMQP_MESSENGER_HANDLE messenger_handle)
             {
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_062: [`instance->state` shall be set to AMQP_MESSENGER_STATE_STOPPED, and `instance->on_state_changed_callback` invoked if provided]
                 update_messenger_state(instance, AMQP_MESSENGER_STATE_STOPPED);
-                // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_063: [If no failures occurr, amqp_messenger_stop() shall return 0]
+                // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_063: [If no failures occur, amqp_messenger_stop() shall return 0]
                 result = RESULT_OK;
             }
         }
@@ -1585,7 +1585,7 @@ AMQP_MESSENGER_HANDLE amqp_messenger_create(const AMQP_MESSENGER_CONFIG* messeng
                     instance->max_send_error_count = DEFAULT_MAX_SEND_ERROR_COUNT;
                     instance->receive_messages = false;
 
-                    // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_009: [If no failures occurr, amqp_messenger_create() shall return a handle to `instance`]
+                    // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_009: [If no failures occur, amqp_messenger_create() shall return a handle to `instance`]
                     handle = (AMQP_MESSENGER_HANDLE)instance;
                 }
             }

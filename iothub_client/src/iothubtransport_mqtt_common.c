@@ -221,7 +221,7 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
 
     // The current mqtt iothub implementation requires that the hub name and the domain suffix be passed as the first of a series of segments
     // passed through the username portion of the connection frame.
-    // The second segment will contain the device id.  The two segments are delemited by a "/".
+    // The second segment will contain the device id.  The two segments are delimited by a "/".
     // The first segment can be a maximum 256 characters.
     // The second segment can be a maximum 128 characters.
     // With the / delimeter you have 384 chars (Plus a terminator of 0).
@@ -484,9 +484,9 @@ static const char* retrieveMqttReturnCodes(CONNECT_RETURN_CODE rtn_code)
 #endif // NO_LOGGING
 
 //
-// retrievDeviceMethodRidInfo parses an incoming MQTT topic for a device method and retrieves the request ID it specifies.
+// retrieveDeviceMethodRidInfo parses an incoming MQTT topic for a device method and retrieves the request ID it specifies.
 //
-static int retrievDeviceMethodRidInfo(const char* resp_topic, STRING_HANDLE method_name, STRING_HANDLE request_id)
+static int retrieveDeviceMethodRidInfo(const char* resp_topic, STRING_HANDLE method_name, STRING_HANDLE request_id)
 {
     int result;
 
@@ -1848,7 +1848,7 @@ static void processDeviceMethodNotification(PMQTTTRANSPORT_HANDLE_DATA transport
                 LogError("Failure constructing request_id string");
                 free(dev_method_info);
             }
-            else if (retrievDeviceMethodRidInfo(topicName, method_name, dev_method_info->request_id) != 0)
+            else if (retrieveDeviceMethodRidInfo(topicName, method_name, dev_method_info->request_id) != 0)
             {
                 LogError("Failure: retrieve device topic info");
                 STRING_delete(dev_method_info->request_id);

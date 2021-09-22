@@ -612,7 +612,7 @@ const char* IoTHubMessage_GetProperty(IOTHUB_MESSAGE_HANDLE msg_handle, const ch
     else
     {
         bool key_exists = false;
-        // The return value is not neccessary, just check the key_exist variable
+        // The return value is not necessary, just check the key_exist variable
         if ((Map_ContainsKey(msg_handle->properties, key, &key_exists) == MAP_OK) && key_exists)
         {
             result = Map_GetValueFromKey(msg_handle->properties, key);

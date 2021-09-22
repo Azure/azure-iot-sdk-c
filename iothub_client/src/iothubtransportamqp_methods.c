@@ -218,7 +218,7 @@ static void on_message_receiver_state_changed(const void* context, MESSAGE_RECEI
     }
     else
     {
-        /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_12_001: [ When `on_message_receiver_state_changed` is called with the `new_state` being `MESSAGE_RECEIVER_STATE_IDLE` and `previous_state` being `MESSAGE_RECEIVER_STATE_OPEN`and the sender link is already diconnected `on_message_receiver_state_changed` calls to `on_methods_unsubscribed`. ]*/
+        /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_12_001: [ When `on_message_receiver_state_changed` is called with the `new_state` being `MESSAGE_RECEIVER_STATE_IDLE` and `previous_state` being `MESSAGE_RECEIVER_STATE_OPEN`and the sender link is already disconnected `on_message_receiver_state_changed` calls to `on_methods_unsubscribed`. ]*/
         if ((new_state == MESSAGE_RECEIVER_STATE_IDLE) && (previous_state == MESSAGE_RECEIVER_STATE_OPEN))
         {
             amqp_methods_handle->receiver_link_disconnected = true;
@@ -240,7 +240,7 @@ static void on_message_sender_state_changed(void* context, MESSAGE_SENDER_STATE 
     }
     else
     {
-        /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_12_002: [ When `on_message_sender_state_changed` is called with the `new_state` being `MESSAGE_SENDER_STATE_IDLE` and `previous_state` being `MESSAGE_SENDER_STATE_OPEN`and the receiver link is already diconnected `on_message_sender_state_changed` calls to `on_methods_unsubscribed`. ]*/
+        /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_12_002: [ When `on_message_sender_state_changed` is called with the `new_state` being `MESSAGE_SENDER_STATE_IDLE` and `previous_state` being `MESSAGE_SENDER_STATE_OPEN`and the receiver link is already disconnected `on_message_sender_state_changed` calls to `on_methods_unsubscribed`. ]*/
         if ((new_state == MESSAGE_SENDER_STATE_IDLE) && (previous_state == MESSAGE_SENDER_STATE_OPEN))
         {
             amqp_methods_handle->sender_link_disconnected = true;

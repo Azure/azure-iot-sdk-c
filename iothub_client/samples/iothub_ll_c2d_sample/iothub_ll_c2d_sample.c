@@ -222,7 +222,7 @@ int main(void)
     }
     else
     {
-        // Set any option that are neccessary.
+        // Set any option that are necessary.
         // For available options please see the iothub_sdk_options.md documentation
         bool traceOn = true;
         IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_LOG_TRACE, &traceOn);
@@ -243,7 +243,7 @@ int main(void)
 #ifdef SAMPLE_HTTP
         unsigned int timeout = 241000;
         // Because it can poll "after 9 seconds" polls will happen effectively // at ~10 seconds.
-        // Note that for scalabilty, the default value of minimumPollingTime
+        // Note that for scalability, the default value of minimumPollingTime
         // is 25 minutes. For more information, see:
         // https://azure.microsoft.com/documentation/articles/iot-hub-devguide/#messaging
         unsigned int minimumPollingTime = 9;
