@@ -387,10 +387,10 @@ static int iothub_ll_device_method_callback(const char* method_name, const unsig
         queue_cb_info.type = CALLBACK_TYPE_DEVICE_METHOD;
 
         // A NULL payload was sent from the service. Use empty JSON to signal to the user no payload.
-        if(size == 0)
+        if (size == 0)
         {
           payload = (const unsigned char*) CLIENT_CORE_METHOD_EMPTY_PAYLOAD;
-          size = strlen(CLIENT_CORE_METHOD_EMPTY_PAYLOAD);
+          size = sizeof(CLIENT_CORE_METHOD_EMPTY_PAYLOAD) - 1;
         }
 
         result = make_method_calback_queue_context(&queue_cb_info, method_name, payload, size, method_id, queue_context);
