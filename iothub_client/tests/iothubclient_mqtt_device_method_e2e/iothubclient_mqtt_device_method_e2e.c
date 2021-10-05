@@ -82,7 +82,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_device_method_e2e)
 
     TEST_FUNCTION(IotHub_MQTT_Method_Call_With_NULL_Json_x509)
     {
-      device_method_e2e_method_call_with_NULL_json_x509(MQTT_PROTOCOL);
+      device_method_e2e_method_call_with_NULL_json_x509(MQTT_Protocol);
     }
 
     TEST_FUNCTION(IotHub_Mqtt_Method_Call_With_Empty_Json_Object_x509)
