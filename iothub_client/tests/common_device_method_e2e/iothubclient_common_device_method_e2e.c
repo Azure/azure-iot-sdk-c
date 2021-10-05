@@ -783,6 +783,11 @@ void device_method_e2e_method_call_with_empty_json_object_x509(IOTHUB_CLIENT_TRA
     test_device_method_with_string(IoTHubAccount_GetX509Device(g_iothubAcctInfo), protocol, "{}");
 }
 
+void device_method_e2e_method_call_with_NULL_json_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+{
+    test_device_method_with_string(IoTHubAccount_GetX509Device(g_iothubAcctInfo), protocol, "");
+}
+
 void device_method_e2e_method_call_with_null_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     test_device_method_with_string(IoTHubAccount_GetX509Device(g_iothubAcctInfo), protocol, "null");
