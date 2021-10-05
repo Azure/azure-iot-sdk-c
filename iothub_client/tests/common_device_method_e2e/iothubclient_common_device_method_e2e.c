@@ -411,6 +411,13 @@ static void setmethodcallback_on_device_or_module(const char* payload)
 {
     IOTHUB_CLIENT_RESULT result;
 
+    // If payload passed from the service is NULL, we give the user an empty JSON object payload
+    // https://github.com/Azure/azure-iot-sdk-c/pull/2097
+    if(payload == NULL)
+    {
+      payload = "{}";
+    }
+
     if (iothub_moduleclient_handle != NULL)
     {
         result = IoTHubModuleClient_SetModuleMethodCallback(iothub_moduleclient_handle, MethodCallback, (void*)payload);
@@ -785,7 +792,7 @@ void device_method_e2e_method_call_with_empty_json_object_x509(IOTHUB_CLIENT_TRA
 
 void device_method_e2e_method_call_with_NULL_json_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
-    test_device_method_with_string(IoTHubAccount_GetX509Device(g_iothubAcctInfo), protocol, "");
+    test_device_method_with_string(IoTHubAccount_GetX509Device(g_iothubAcctInfo), protocol, NULL);
 }
 
 void device_method_e2e_method_call_with_null_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
