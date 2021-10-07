@@ -1044,7 +1044,7 @@ static void internal_on_event_send_complete_callback(void* context, MESSAGE_SEND
                 {
                     messenger_send_result = TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_OK;
                 }
-                // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_31_190: [If a failure occured, `on_event_send_complete_callback` shall be invoked with result TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING for all callers associated with this task]
+                // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_31_190: [If a failure occurred, `on_event_send_complete_callback` shall be invoked with result TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING for all callers associated with this task]
                 else
                 {
                     messenger_send_result = TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING;
@@ -1467,7 +1467,7 @@ int telemetry_messenger_subscribe_for_messages(TELEMETRY_MESSENGER_HANDLE messen
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_021: [telemetry_messenger_subscribe_for_messages() shall set `instance->receive_messages` to true]
             instance->receive_messages = true;
 
-            // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_022: [If no failures occurr, telemetry_messenger_subscribe_for_messages() shall return 0]
+            // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_022: [If no failures occur, telemetry_messenger_subscribe_for_messages() shall return 0]
             result = RESULT_OK;
         }
     }
@@ -1506,7 +1506,7 @@ int telemetry_messenger_unsubscribe_for_messages(TELEMETRY_MESSENGER_HANDLE mess
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_027: [telemetry_messenger_unsubscribe_for_messages() shall set `instance->on_message_received_context` to NULL]
             instance->on_message_received_context = NULL;
 
-            // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_028: [If no failures occurr, telemetry_messenger_unsubscribe_for_messages() shall return 0]
+            // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_028: [If no failures occur, telemetry_messenger_unsubscribe_for_messages() shall return 0]
             result = RESULT_OK;
         }
     }
@@ -1561,7 +1561,7 @@ int telemetry_messenger_send_message_disposition(TELEMETRY_MESSENGER_HANDLE mess
                 }
                 else
                 {
-                    // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_185: [If no failures occurr, telemetry_messenger_send_message_disposition() shall return 0]
+                    // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_185: [If no failures occur, telemetry_messenger_send_message_disposition() shall return 0]
                     result = RESULT_OK;
                 }
 
@@ -1705,10 +1705,10 @@ int telemetry_messenger_start(TELEMETRY_MESSENGER_HANDLE messenger_handle, SESSI
             // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_032: [`session_handle` shall be saved on `instance->session_handle`]
             instance->session_handle = session_handle;
 
-            // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_115: [If no failures occurr, `instance->state` shall be set to TELEMETRY_MESSENGER_STATE_STARTING, and `instance->on_state_changed_callback` invoked if provided]
+            // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_115: [If no failures occur, `instance->state` shall be set to TELEMETRY_MESSENGER_STATE_STARTING, and `instance->on_state_changed_callback` invoked if provided]
             update_messenger_state(instance, TELEMETRY_MESSENGER_STATE_STARTING);
 
-            // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_056: [If no failures occurr, telemetry_messenger_start() shall return 0]
+            // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_056: [If no failures occur, telemetry_messenger_start() shall return 0]
             result = RESULT_OK;
         }
     }
@@ -2060,7 +2060,7 @@ TELEMETRY_MESSENGER_HANDLE telemetry_messenger_create(const TELEMETRY_MESSENGER_
                 instance->prod_info_cb = prod_info_cb;
                 instance->prod_info_ctx = prod_info_ctx;
 
-                // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_015: [If no failures occurr, telemetry_messenger_create() shall return a handle to `instance`]
+                // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_015: [If no failures occur, telemetry_messenger_create() shall return a handle to `instance`]
                 handle = (TELEMETRY_MESSENGER_HANDLE)instance;
             }
         }

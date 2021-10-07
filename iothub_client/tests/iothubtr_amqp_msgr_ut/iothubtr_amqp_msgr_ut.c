@@ -1362,7 +1362,7 @@ TEST_FUNCTION(amqp_messenger_create_config_NULL_iothub_host_fqdn)
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_003: [amqp_messenger_create() shall allocate memory for the messenger instance structure (aka `instance`)]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_005: [amqp_messenger_create() shall save a copy of `messenger_config` into `instance`]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_007: [`instance->send_queue` shall be set using message_queue_create(), passing `on_process_message_callback`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_009: [If no failures occurr, amqp_messenger_create() shall return a handle to `instance`]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_009: [If no failures occur, amqp_messenger_create() shall return a handle to `instance`]
 TEST_FUNCTION(amqp_messenger_create_success)
 {
     // arrange
@@ -1385,7 +1385,7 @@ TEST_FUNCTION(amqp_messenger_create_success)
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_003: [amqp_messenger_create() shall allocate memory for the messenger instance structure (aka `instance`)]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_005: [amqp_messenger_create() shall save a copy of `messenger_config` into `instance`]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_007: [`instance->send_queue` shall be set using message_queue_create(), passing `on_process_message_callback`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_009: [If no failures occurr, amqp_messenger_create() shall return a handle to `instance`]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_009: [If no failures occur, amqp_messenger_create() shall return a handle to `instance`]
 TEST_FUNCTION(amqp_messenger_create_with_module_success)
 {
     // arrange
@@ -1496,8 +1496,8 @@ TEST_FUNCTION(amqp_messenger_start_messenger_not_stopped)
 }
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_053: [`session_handle` shall be saved on `instance->session_handle`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_054: [If no failures occurr, `instance->state` shall be set to AMQP_MESSENGER_STATE_STARTING, and `instance->on_state_changed_callback` invoked if provided]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_055: [If no failures occurr, amqp_messenger_start() shall return 0]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_054: [If no failures occur, `instance->state` shall be set to AMQP_MESSENGER_STATE_STARTING, and `instance->on_state_changed_callback` invoked if provided]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_055: [If no failures occur, amqp_messenger_start() shall return 0]
 TEST_FUNCTION(amqp_messenger_start_succeeds)
 {
     // arrange
@@ -1635,7 +1635,7 @@ TEST_FUNCTION(amqp_messenger_stop_messenger_not_started)
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_059: [`instance->message_sender` and `instance->message_receiver` shall be destroyed along with all its links]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_060: [`instance->send_queue` items shall be rolled back using message_queue_move_all_back_to_pending()]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_062: [`instance->state` shall be set to AMQP_MESSENGER_STATE_STOPPED, and `instance->on_state_changed_callback` invoked if provided]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_063: [If no failures occurr, amqp_messenger_stop() shall return 0]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_063: [If no failures occur, amqp_messenger_stop() shall return 0]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_090: [`instance->message_sender` shall be destroyed using messagesender_destroy()]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_091: [`instance->sender_link` shall be destroyed using link_destroy()]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_113: [`instance->message_receiver` shall be closed using messagereceiver_close()]
@@ -2068,7 +2068,7 @@ TEST_FUNCTION(amqp_messenger_subscribe_for_messages_NULL_callback)
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_036: [`on_message_received_callback` and `context` shall be saved on `instance->on_message_received_callback`]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_037: [amqp_messenger_subscribe_for_messages() shall set `instance->receive_messages` to true]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_038: [If no failures occurr, amqp_messenger_subscribe_for_messages() shall return 0]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_038: [If no failures occur, amqp_messenger_subscribe_for_messages() shall return 0]
 TEST_FUNCTION(amqp_messenger_subscribe_for_messages_already_subscribed)
 {
     // arrange
@@ -2105,7 +2105,7 @@ TEST_FUNCTION(amqp_messenger_unsubscribe_for_messages_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_042: [If no failures occurr, amqp_messenger_unsubscribe_for_messages() shall return 0]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_042: [If no failures occur, amqp_messenger_unsubscribe_for_messages() shall return 0]
 TEST_FUNCTION(amqp_messenger_unsubscribe_for_messages_not_subscribed)
 {
     // arrange
@@ -2244,7 +2244,7 @@ static void amqp_messenger_unsubscribe_for_messages_success_impl(bool testing_mo
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_040: [`instance->receive_messages` shall be saved to false]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_041: [`instance->on_message_received_callback` and `instance->on_message_received_context` shall be set to NULL]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_042: [If no failures occurr, amqp_messenger_unsubscribe_for_messages() shall return 0]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_042: [If no failures occur, amqp_messenger_unsubscribe_for_messages() shall return 0]
 TEST_FUNCTION(amqp_messenger_unsubscribe_for_messages_success)
 {
     amqp_messenger_unsubscribe_for_messages_success_impl(false);
@@ -2252,7 +2252,7 @@ TEST_FUNCTION(amqp_messenger_unsubscribe_for_messages_success)
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_040: [`instance->receive_messages` shall be saved to false]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_041: [`instance->on_message_received_callback` and `instance->on_message_received_context` shall be set to NULL]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_042: [If no failures occurr, amqp_messenger_unsubscribe_for_messages() shall return 0]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_042: [If no failures occur, amqp_messenger_unsubscribe_for_messages() shall return 0]
 TEST_FUNCTION(amqp_messenger_unsubscribe_for_messages_with_module_success)
 {
     amqp_messenger_unsubscribe_for_messages_success_impl(true);
@@ -2608,7 +2608,7 @@ TEST_FUNCTION(amqp_messenger_send_message_disposition_NULL_source)
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_046: [An AMQP_VALUE disposition result shall be created corresponding to the `disposition_result` provided]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_047: [`messagereceiver_send_message_disposition()` shall be invoked passing `disposition_info->source`, `disposition_info->message_id` and the AMQP_VALUE disposition result]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_049: [amqp_messenger_send_message_disposition() shall destroy the AMQP_VALUE disposition result]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_050: [If no failures occurr, amqp_messenger_send_message_disposition() shall return 0]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_050: [If no failures occur, amqp_messenger_send_message_disposition() shall return 0]
 TEST_FUNCTION(amqp_messenger_send_message_disposition_ACCEPTED_succeeds)
 {
     // arrange
@@ -2637,7 +2637,7 @@ TEST_FUNCTION(amqp_messenger_send_message_disposition_ACCEPTED_succeeds)
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_046: [An AMQP_VALUE disposition result shall be created corresponding to the `disposition_result` provided]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_047: [`messagereceiver_send_message_disposition()` shall be invoked passing `disposition_info->source`, `disposition_info->message_id` and the AMQP_VALUE disposition result]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_049: [amqp_messenger_send_message_disposition() shall destroy the AMQP_VALUE disposition result]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_050: [If no failures occurr, amqp_messenger_send_message_disposition() shall return 0]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_050: [If no failures occur, amqp_messenger_send_message_disposition() shall return 0]
 TEST_FUNCTION(amqp_messenger_send_message_disposition_RELEASED_succeeds)
 {
     // arrange

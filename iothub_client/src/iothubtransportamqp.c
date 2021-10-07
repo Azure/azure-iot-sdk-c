@@ -201,7 +201,7 @@ static TRANSPORT_PROVIDER thisTransportProvider =
     IoTHubTransportAMQP_Create,                     /*pfIoTHubTransport_Create IoTHubTransport_Create;*/
     IoTHubTransportAMQP_Destroy,                    /*pfIoTHubTransport_Destroy IoTHubTransport_Destroy;*/
     IoTHubTransportAMQP_Register,                   /*pfIotHubTransport_Register IoTHubTransport_Register;*/
-    IoTHubTransportAMQP_Unregister,                 /*pfIotHubTransport_Unregister IoTHubTransport_Unegister;*/
+    IoTHubTransportAMQP_Unregister,                 /*pfIotHubTransport_Unregister IoTHubTransport_Unregister;*/
     IoTHubTransportAMQP_Subscribe,                  /*pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;*/
     IoTHubTransportAMQP_Unsubscribe,                /*pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;*/
     IoTHubTransportAMQP_DoWork,                     /*pfIoTHubTransport_DoWork IoTHubTransport_DoWork;*/

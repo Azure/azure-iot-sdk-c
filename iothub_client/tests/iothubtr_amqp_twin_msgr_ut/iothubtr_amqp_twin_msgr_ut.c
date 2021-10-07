@@ -1052,7 +1052,7 @@ TEST_FUNCTION(twin_msgr_create_NULL_device_id)
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_016: [`amqp_msgr_config` shall have send and receive link attach properties set as "com.microsoft:client-version" = `twin_msgr->client_version`, "com.microsoft:channel-correlation-id" = `twin:<UUID>`, "com.microsoft:api-version" = "Current API version"]
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_017: [`amqp_msgr_config` shall be set with `on_amqp_messenger_state_changed_callback` and `on_amqp_messenger_subscription_changed_callback` callbacks]
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_019: [`twin_msgr->amqp_msgr` shall subscribe for AMQP messages by calling amqp_messenger_subscribe_for_messages() passing `on_amqp_message_received`]
-// Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_021: [If no failures occurr, twin_messenger_create() shall return a handle to `twin_msgr`]
+// Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_021: [If no failures occur, twin_messenger_create() shall return a handle to `twin_msgr`]
 TEST_FUNCTION(twin_msgr_create_success)
 {
     // arrange
@@ -1394,8 +1394,8 @@ TEST_FUNCTION(twin_msgr_start_NULL_session_handle)
 }
 
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_046: [amqp_messenger_start() shall be invoked passing `twin_msgr->amqp_msgr` and `session_handle`]
-// Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_048: [If no failures occurr, `twin_msgr->state` shall be set to TWIN_MESSENGER_STATE_STARTING, and `twin_msgr->on_state_changed_callback` invoked if provided]
-// Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_050: [If no failures occurr, twin_messenger_start() shall return 0]
+// Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_048: [If no failures occur, `twin_msgr->state` shall be set to TWIN_MESSENGER_STATE_STARTING, and `twin_msgr->on_state_changed_callback` invoked if provided]
+// Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_050: [If no failures occur, twin_messenger_start() shall return 0]
 TEST_FUNCTION(twin_msgr_start_success)
 {
     // arrange
@@ -1420,7 +1420,7 @@ TEST_FUNCTION(twin_msgr_start_success)
 
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_116: [amqp_messenger_set_option() shall be invoked passing the OPTION_PRODUCT_INFO and product info returned from the prod_info callback]
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_047: [If amqp_messenger_start() fails, twin_messenger_start() fail and return a non-zero value]
-// Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_049: [If any failures occurr, `twin_msgr->state` shall be set to TWIN_MESSENGER_STATE_ERROR, and `twin_msgr->on_state_changed_callback` invoked if provided]
+// Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_049: [If any failures occur, `twin_msgr->state` shall be set to TWIN_MESSENGER_STATE_ERROR, and `twin_msgr->on_state_changed_callback` invoked if provided]
 TEST_FUNCTION(twin_msgr_start_failure_checks)
 {
     // arrange
@@ -1481,7 +1481,7 @@ TEST_FUNCTION(twin_msgr_stop_NULL_handle)
 
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_052: [amqp_messenger_stop() shall be invoked passing `twin_msgr->amqp_msgr`]
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_054: [`twin_msgr->state` shall be set to TWIN_MESSENGER_STATE_STOPPING, and `twin_msgr->on_state_changed_callback` invoked if provided]
-// Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_056: [If no failures occurr, twin_messenger_stop() shall return 0]
+// Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_056: [If no failures occur, twin_messenger_stop() shall return 0]
 TEST_FUNCTION(twin_msgr_stop_success)
 {
     // arrange
@@ -1549,7 +1549,7 @@ TEST_FUNCTION(twin_msgr_stop_resets_to_resubscribe)
 }
 
 // Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_053: [If amqp_messenger_stop() fails, twin_messenger_stop() fail and return a non-zero value]
-// Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_055: [If any failures occurr, `twin_msgr->state` shall be set to TWIN_MESSENGER_STATE_ERROR, and `twin_msgr->on_state_changed_callback` invoked if provided]
+// Tests_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_055: [If any failures occur, `twin_msgr->state` shall be set to TWIN_MESSENGER_STATE_ERROR, and `twin_msgr->on_state_changed_callback` invoked if provided]
 TEST_FUNCTION(twin_msgr_stop_failure_checks)
 {
     // arrange
@@ -1620,7 +1620,7 @@ TEST_FUNCTION(twin_msgr_retrieve_options_success)
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_110: [ `on_get_twin_completed_callback` and `context` shall be saved ]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_111: [ An AMQP message shall be created to request a GET twin ]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_112: [ The AMQP message shall be sent to the twin send link ]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_114: [If no failures occurr, twin_messenger_get_twin_async() shall return 0 ]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_114: [If no failures occur, twin_messenger_get_twin_async() shall return 0 ]
 TEST_FUNCTION(twin_messenger_get_twin_async_success)
 {
     // arrange
@@ -1684,7 +1684,7 @@ TEST_FUNCTION(twin_messenger_get_twin_async_NULL_callback)
     twin_messenger_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_113: [If any failures occurr, twin_messenger_get_twin_async() shall return a non-zero value ]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_TWIN_MESSENGER_09_113: [If any failures occur, twin_messenger_get_twin_async() shall return a non-zero value ]
 TEST_FUNCTION(twin_messenger_get_twin_async_failure_checks)
 {
     // arrange

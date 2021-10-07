@@ -137,7 +137,7 @@ azure_uamqp_c
 
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_008: [**If message_queue_create() fails, amqp_messenger_create() shall fail and return NULL**]**  
 
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_009: [**If no failures occurr, amqp_messenger_create() shall return a handle to `instance`**]**  
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_009: [**If no failures occur, amqp_messenger_create() shall return a handle to `instance`**]**  
 
 
 ### amqp_messenger_send_async
@@ -222,7 +222,7 @@ int amqp_messenger_get_send_status(AMQP_MESSENGER_HANDLE messenger_handle, AMQP_
 
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_037: [**amqp_messenger_subscribe_for_messages() shall set `instance->receive_messages` to true**]**  
 
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_038: [**If no failures occurr, amqp_messenger_subscribe_for_messages() shall return 0**]**  
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_038: [**If no failures occur, amqp_messenger_subscribe_for_messages() shall return 0**]**  
 
 
 ## amqp_messenger_unsubscribe_for_messages
@@ -237,7 +237,7 @@ int amqp_messenger_get_send_status(AMQP_MESSENGER_HANDLE messenger_handle, AMQP_
 
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_041: [**`instance->on_message_received_callback` and `instance->on_message_received_context` shall be set to NULL**]**  
 
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_042: [**If no failures occurr, amqp_messenger_unsubscribe_for_messages() shall return 0**]**  
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_042: [**If no failures occur, amqp_messenger_unsubscribe_for_messages() shall return 0**]**  
 
 
 ## amqp_messenger_send_message_disposition
@@ -259,7 +259,7 @@ extern int amqp_messenger_send_message_disposition(AMQP_MESSENGER_HANDLE messeng
 
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_049: [**amqp_messenger_send_message_disposition() shall destroy the AMQP_VALUE disposition result**]**  
 
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_050: [**If no failures occurr, amqp_messenger_send_message_disposition() shall return 0**]**  
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_050: [**If no failures occur, amqp_messenger_send_message_disposition() shall return 0**]**  
 
 
 
@@ -275,9 +275,9 @@ extern int amqp_messenger_send_message_disposition(AMQP_MESSENGER_HANDLE messeng
 
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_053: [**`session_handle` shall be saved on `instance->session_handle`**]**   
 
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_054: [**If no failures occurr, `instance->state` shall be set to AMQP_MESSENGER_STATE_STARTING, and `instance->on_state_changed_callback` invoked if provided**]**  
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_054: [**If no failures occur, `instance->state` shall be set to AMQP_MESSENGER_STATE_STARTING, and `instance->on_state_changed_callback` invoked if provided**]**  
 
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_055: [**If no failures occurr, amqp_messenger_start() shall return 0**]**  
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_055: [**If no failures occur, amqp_messenger_start() shall return 0**]**  
 
 
 ## amqp_messenger_stop
@@ -300,7 +300,7 @@ extern int amqp_messenger_send_message_disposition(AMQP_MESSENGER_HANDLE messeng
 
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_062: [**`instance->state` shall be set to AMQP_MESSENGER_STATE_STOPPED, and `instance->on_state_changed_callback` invoked if provided**]**  
 
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_063: [**If no failures occurr, amqp_messenger_stop() shall return 0**]**  
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_063: [**If no failures occur, amqp_messenger_stop() shall return 0**]**  
 
 
 ## amqp_messenger_do_work

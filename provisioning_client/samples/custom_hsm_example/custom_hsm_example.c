@@ -32,7 +32,7 @@ typedef struct CUSTOM_HSM_SAMPLE_INFO_TAG
     const char* certificate;
     const char* common_name;
     const char* key;
-    const unsigned char* endorsment_key;
+    const unsigned char* endorsement_key;
     size_t ek_length;
     const unsigned char* storage_root_key;
     size_t srk_len;
@@ -64,7 +64,7 @@ HSM_CLIENT_HANDLE custom_hsm_create(void)
     CUSTOM_HSM_SAMPLE_INFO* hsm_info = malloc(sizeof(CUSTOM_HSM_SAMPLE_INFO));
     if (hsm_info == NULL)
     {
-        (void)printf("Failued allocating hsm info\r\n");
+        (void)printf("Failed allocating hsm info\r\n");
         result = NULL;
     }
     else
@@ -73,7 +73,7 @@ HSM_CLIENT_HANDLE custom_hsm_create(void)
         hsm_info->certificate = CERTIFICATE;
         hsm_info->key = PRIVATE_KEY;
         hsm_info->common_name = COMMON_NAME;
-        hsm_info->endorsment_key = EK;
+        hsm_info->endorsement_key = EK;
         hsm_info->ek_length = EK_LEN;
         hsm_info->storage_root_key = SRK;
         hsm_info->srk_len = SRK_LEN;
@@ -197,7 +197,7 @@ int custom_hsm_get_endorsement_key(HSM_CLIENT_HANDLE handle, unsigned char** key
         }
         else
         {
-            memcpy(*key, hsm_info->endorsment_key, hsm_info->ek_length);
+            memcpy(*key, hsm_info->endorsement_key, hsm_info->ek_length);
             *key_len = hsm_info->ek_length;
             result = 0;
         }

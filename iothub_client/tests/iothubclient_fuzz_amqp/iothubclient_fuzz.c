@@ -214,7 +214,7 @@ int main(int argc, const char* argv[])
     }
     else
     {
-        // Set any option that are neccessary.
+        // Set any option that are necessary.
         // For available options please see the iothub_sdk_options.md documentation
 
 #ifndef SAMPLE_HTTP

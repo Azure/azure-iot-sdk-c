@@ -96,7 +96,7 @@ typedef struct EVENT_INSTANCE_TAG
 static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
     (void)userContextCallback;
-    // When a message is sent this callback will get envoked
+    // When a message is sent this callback will get invoked
     g_message_count_send_confirmations++;
     (void)printf("Confirmation callback received for message %zu with result %s\r\n", g_message_count_send_confirmations, MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
 }
@@ -139,7 +139,7 @@ int main(void)
     }
     else
     {
-        // Set any option that are neccessary.
+        // Set any option that are necessary.
         // For available options please see the iothub_sdk_options.md documentation
         //bool traceOn = true;
         //IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_LOG_TRACE, &traceOn);

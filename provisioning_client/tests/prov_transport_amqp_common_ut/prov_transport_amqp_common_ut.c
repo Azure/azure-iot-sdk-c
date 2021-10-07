@@ -1671,7 +1671,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
     }
 
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_051: [ Once connected prov_transport_common_amqp_dowork shall call uamqp connection dowork function ] */
-    /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_052: [ Once the uamqp reciever and sender link are connected the amqp_state shall be set to AMQP_STATE_CONNECTED ] */
+    /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_052: [ Once the uamqp receiver and sender link are connected the amqp_state shall be set to AMQP_STATE_CONNECTED ] */
     TEST_FUNCTION(prov_transport_common_amqp_dowork_idle_succeed)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io, on_transport_error, NULL);
@@ -1743,7 +1743,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         prov_transport_common_amqp_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_050: [ The reciever and sender endpoints addresses shall be constructed in the following manner: amqps://[hostname]/[scope_id]/registrations/[registration_id] ] */
+    /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_050: [ The receiver and sender endpoints addresses shall be constructed in the following manner: amqps://[hostname]/[scope_id]/registrations/[registration_id] ] */
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_053: [ When then transport_state is set to TRANSPORT_CLIENT_STATE_REG_SEND, prov_transport_common_amqp_dowork shall send a AMQP_REGISTER_ME message ] */
     TEST_FUNCTION(prov_transport_common_amqp_dowork_register_succeed)
     {
@@ -1771,7 +1771,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         prov_transport_common_amqp_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_050: [ The reciever and sender endpoints addresses shall be constructed in the following manner: amqps://[hostname]/[scope_id]/registrations/[registration_id] ] */
+    /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_050: [ The receiver and sender endpoints addresses shall be constructed in the following manner: amqps://[hostname]/[scope_id]/registrations/[registration_id] ] */
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_053: [ When then transport_state is set to TRANSPORT_CLIENT_STATE_REG_SEND, prov_transport_common_amqp_dowork shall send a AMQP_REGISTER_ME message ] */
     /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_054: [ Upon successful sending of a TRANSPORT_CLIENT_STATE_REG_SEND message, prov_transport_common_amqp_dowork shall set the transport_state to TRANSPORT_CLIENT_STATE_REG_SENT ] */
     TEST_FUNCTION(prov_transport_common_amqp_dowork_register_recv_succeed)
@@ -2011,7 +2011,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_052: [ Once the uamqp reciever and sender link are connected the amqp_state shall be set to AMQP_STATE_CONNECTED ] */
+    /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_052: [ Once the uamqp receiver and sender link are connected the amqp_state shall be set to AMQP_STATE_CONNECTED ] */
     TEST_FUNCTION(prov_transport_common_amqp_msg_recv_state_change_open_succeed)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io, on_transport_error, NULL);
@@ -2075,7 +2075,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
         prov_transport_common_amqp_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_052: [ Once the uamqp reciever and sender link are connected the amqp_state shall be set to AMQP_STATE_CONNECTED ] */
+    /* Tests_PROV_TRANSPORT_AMQP_COMMON_07_052: [ Once the uamqp receiver and sender link are connected the amqp_state shall be set to AMQP_STATE_CONNECTED ] */
     TEST_FUNCTION(prov_transport_common_amqp_msg_sender_state_change_open_succeed)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_amqp_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_TPM, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_transport_io, on_transport_error, NULL);

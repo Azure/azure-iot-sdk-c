@@ -613,7 +613,7 @@ static TRANSPORT_PROVIDER FAKE_transport_provider =
     FAKE_IoTHubTransport_Create,        /*pfIoTHubTransport_Create IoTHubTransport_Create;              */
     FAKE_IoTHubTransport_Destroy,       /*pfIoTHubTransport_Destroy IoTHubTransport_Destroy;            */
     FAKE_IoTHubTransport_Register,      /*pfIotHubTransport_Register IoTHubTransport_Register;          */
-    FAKE_IoTHubTransport_Unregister,    /*pfIotHubTransport_Unregister IoTHubTransport_Unegister;       */
+    FAKE_IoTHubTransport_Unregister,    /*pfIotHubTransport_Unregister IoTHubTransport_Unregister;       */
     FAKE_IoTHubTransport_Subscribe,     /*pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;        */
     FAKE_IoTHubTransport_Unsubscribe,   /*pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;    */
     FAKE_IoTHubTransport_DoWork,        /*pfIoTHubTransport_DoWork IoTHubTransport_DoWork;              */
@@ -4922,7 +4922,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_RetrievePropertyComplete_deviceTwincallback_NU
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_07_015: [ If the the update_state parameter is DEVICE_TWIN_UPDATE_PARTIAL and a DEVICE_TWIN_UPDATE_COMPLETE has not been previously recieved then IoTHubClientCore_LL_RetrievePropertyComplete shall do nothing.] */
+/* Tests_SRS_IoTHubClientCore_LL_07_015: [ If the the update_state parameter is DEVICE_TWIN_UPDATE_PARTIAL and a DEVICE_TWIN_UPDATE_COMPLETE has not been previously received then IoTHubClientCore_LL_RetrievePropertyComplete shall do nothing.] */
 TEST_FUNCTION(IoTHubClientCore_LL_RetrievePropertyComplete_update_partial_succeed)
 {
     //arrange

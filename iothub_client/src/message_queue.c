@@ -587,7 +587,7 @@ int message_queue_add(MESSAGE_QUEUE_HANDLE message_queue, MQ_MESSAGE_HANDLE mess
             else if (singlylinkedlist_add(message_queue->pending, (const void*)mq_item) == NULL)
             {
                 // Codes_SRS_MESSAGE_QUEUE_09_022: [`mq_item` fails to be added to `message_queue->pending`, message_queue_add shall fail and return non-zero]
-                LogError("failed enqueing message");
+                LogError("failed enqueuing message");
                 // Codes_SRS_MESSAGE_QUEUE_09_024: [If any failures occur, message_queue_add shall release all memory it has allocated]
                 free(mq_item);
                 result = MU_FAILURE;
