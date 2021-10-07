@@ -944,7 +944,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
                 PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
 
                 //assert
-                ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_TRANSPORT, prov_result, "Prov_Device_LL_Register_Device failure in test %zu/%zu", index, count);
+                ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, index < 3 ? PROV_DEVICE_RESULT_ERROR : PROV_DEVICE_RESULT_TRANSPORT, prov_result, "Prov_Device_LL_Register_Device failure in test %zu/%zu", index, count);
             }
         }
 
@@ -980,7 +980,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
                 PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
 
                 //assert
-                ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_TRANSPORT, prov_result, "Prov_Device_LL_Register_Device failure in test %zu/%zu", index, count);
+                ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, index < 6 ? PROV_DEVICE_RESULT_ERROR : PROV_DEVICE_RESULT_TRANSPORT, prov_result, "Prov_Device_LL_Register_Device failure in test %zu/%zu", index, count);
             }
         }
 
