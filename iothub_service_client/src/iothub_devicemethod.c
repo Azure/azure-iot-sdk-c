@@ -465,7 +465,7 @@ static IOTHUB_DEVICE_METHOD_RESULT IoTHubDeviceMethod_DeviceOrModuleInvoke(IOTHU
     IOTHUB_DEVICE_METHOD_RESULT result;
 
     /*Codes_SRS_IOTHUBDEVICEMETHOD_12_031: [ IoTHubDeviceMethod_Invoke(Module) shall verify the input parameters and if any of them (except the timeout) are NULL then return IOTHUB_DEVICE_METHOD_INVALID_ARG ]*/
-    if ((serviceClientDeviceMethodHandle == NULL) || (deviceId == NULL) || (methodName == NULL) || (methodPayload == NULL) || (responseStatus == NULL) || (responsePayload == NULL) || (responsePayloadSize == NULL))
+    if ((serviceClientDeviceMethodHandle == NULL) || (deviceId == NULL) || (methodName == NULL) || (responseStatus == NULL) || (responsePayload == NULL) || (responsePayloadSize == NULL))
     {
         LogError("Input parameter cannot be NULL");
         result = IOTHUB_DEVICE_METHOD_INVALID_ARG;
@@ -475,8 +475,13 @@ static IOTHUB_DEVICE_METHOD_RESULT IoTHubDeviceMethod_DeviceOrModuleInvoke(IOTHU
         BUFFER_HANDLE httpPayloadBuffer;
         BUFFER_HANDLE responseBuffer;
 
+        // NULL BUFFER_HANDLE if the payload is NULL.
+        if (methodPayload == NULL)
+        {
+            httpPayloadBuffer = NULL;
+        }
         /*Codes_SRS_IOTHUBDEVICEMETHOD_12_032: [ IoTHubDeviceMethod_Invoke(Module) shall create a BUFFER_HANDLE from methodName, timeout and methodPayload by calling BUFFER_create ]*/
-        if ((httpPayloadBuffer = createMethodPayloadJson(methodName, timeout, methodPayload)) == NULL)
+        else if ((httpPayloadBuffer = createMethodPayloadJson(methodName, timeout, methodPayload)) == NULL)
         {
             /*Codes_SRS_IOTHUBDEVICEMETHOD_12_033: [ If the creation fails, IoTHubDeviceMethod_Invoke(Module) shall return IOTHUB_DEVICE_METHOD_ERROR ]*/
             LogError("BUFFER creation failed for httpPayloadBuffer");
