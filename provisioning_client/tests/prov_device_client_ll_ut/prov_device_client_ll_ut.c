@@ -591,13 +591,15 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)).CallCannotFail();
     }
 
-    static void setup_Prov_Device_LL_Register_Device_mocks(bool tpm)
+    static size_t setup_Prov_Device_LL_Register_Device_mocks(bool tpm)
     {
+        size_t transport_error = 1;
         STRICT_EXPECTED_CALL(prov_auth_get_registration_id(IGNORED_PTR_ARG));
         if (tpm)
         {
             STRICT_EXPECTED_CALL(prov_auth_get_endorsement_key(IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(prov_auth_get_storage_key(IGNORED_PTR_ARG));
+            transport_error += 2;
         }
         else
         {
@@ -606,10 +608,12 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
             STRICT_EXPECTED_CALL(prov_transport_x509_cert(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
             STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+            transport_error += 5;
         }
         STRICT_EXPECTED_CALL(prov_transport_open(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+        return transport_error;
     }
 
     static void setup_cleanup_prov_info_mocks(void)
@@ -927,7 +931,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         int negativeTestsInitResult = umock_c_negative_tests_init();
         ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
-        setup_Prov_Device_LL_Register_Device_mocks(true);
+        size_t transport_error = setup_Prov_Device_LL_Register_Device_mocks(true);
 
         umock_c_negative_tests_snapshot();
 
@@ -944,7 +948,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
                 PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
 
                 //assert
-                ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, index < 3 ? PROV_DEVICE_RESULT_ERROR : PROV_DEVICE_RESULT_TRANSPORT, prov_result, "Prov_Device_LL_Register_Device failure in test %zu/%zu", index, count);
+                ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, index < transport_error ? PROV_DEVICE_RESULT_ERROR : PROV_DEVICE_RESULT_TRANSPORT, prov_result, "Prov_Device_LL_Register_Device failure in test %zu/%zu", index, count);
             }
         }
 
@@ -963,7 +967,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         int negativeTestsInitResult = umock_c_negative_tests_init();
         ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
-        setup_Prov_Device_LL_Register_Device_mocks(false);
+        size_t transport_error = setup_Prov_Device_LL_Register_Device_mocks(false);
 
         umock_c_negative_tests_snapshot();
 
@@ -980,7 +984,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
                 PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
 
                 //assert
-                ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, index < 6 ? PROV_DEVICE_RESULT_ERROR : PROV_DEVICE_RESULT_TRANSPORT, prov_result, "Prov_Device_LL_Register_Device failure in test %zu/%zu", index, count);
+                ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, index < transport_error ? PROV_DEVICE_RESULT_ERROR : PROV_DEVICE_RESULT_TRANSPORT, prov_result, "Prov_Device_LL_Register_Device failure in test %zu/%zu", index, count);
             }
         }
 
