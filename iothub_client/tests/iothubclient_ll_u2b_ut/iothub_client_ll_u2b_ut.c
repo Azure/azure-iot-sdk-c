@@ -436,7 +436,7 @@ static IOTHUB_AUTHORIZATION_HANDLE TEST_AUTH_HANDLE = (IOTHUB_AUTHORIZATION_HAND
 
 static void* uploadCallbackTestContext = (void*)0x12344321;
 
-// We can only test the fin
+// Mocks the final multiblock upload succeeding
 static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT TestUploadMultiBlockTestSucceeds(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
 {
     ASSERT_ARE_EQUAL(void_ptr, context, uploadCallbackTestContext);
@@ -446,6 +446,7 @@ static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT TestUploadMultiBlockTestSucceed
     return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK;
 }
 
+// Mocks the final multiblock upload failing
 static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT TestUploadMultiBlockTestFails(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
 {
     ASSERT_ARE_EQUAL(void_ptr, context, uploadCallbackTestContext);
