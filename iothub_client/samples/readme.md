@@ -8,22 +8,36 @@ This folder contains simple samples showing how to use the various features of t
 ## List of samples
 
 * Simple send and receive messages:
-  * **iothub_ll_telemetry_sample**: sends messages from a single device
-  * **iotedge_downstream_device_sample**: sends messages from a single device to an IoT Edge device
+  * **iothub_ll_telemetry_sample**: Sends messages from a device
+  * **iothub_ll_client_x509_sample** Sends messages from a device using X.509 based authentication
+  * **iotedge_downstream_device_sample**: Sends messages from a device to an IoT Edge device
 
-* Multiplexing send and receive of several devices over a single connection.  (Please see [documentation](../../doc/multiplexing_limitations.md) first, however, as there are limitations and alternatives.)
-  * **iothub_ll_client_shared_sample**: send and receive messages from 2 devices over a single AMQP or HTTP connection
-  * **iothub_client_sample_amqp_shared_methods**: receive device methods from 2 devices over a single AMQP connection
-
-* Device services samples (Device Twins, Methods, and Device Management):
-  * **iothub_client_device_twin_and_methods_sample**: Implements a simple Cloud to Device Direct Method and Device Twin sample
-  * **iothub_client_sample_mqtt_dm**: Shows the implementation of a firmware update of a device (Raspberry Pi 3).  *This sample is deprecated*.
-
-* Uploading blob to Azure:
-  * **iothub_client_sample_upload_to_blob**: Uploads a blob to Azure through IoT Hub
+* Device Twins, Methods, and Cloud-to-Device messages:
+  * **iothub_ll_c2d_sample**: Listens for incoming Cloud to Device messages 
+  * **iothub_client_device_twin_and_methods_sample**: Implements a simple Cloud to Device, Direct Method, and Device Twin sample
+  * **iothub_convenience_sample**: Implements a simple Cloud to Device, Direct Method, and Device Twin sample using hte convenience layer
 
 * IoT Plug and Play
   * **pnp**: Samples demonstrating IoT Plug and Play device functionality
+
+* Running inside an IoT Edge hosted container:
+  * **iothub_client_sample_module_filter**: Listens for messages from *iothub_client_sample_module_sender* sample and method calls from *iothub_client_sample_module_method_invoke*
+  * **iothub_client_sample_module_sender**: Sends messages to IoT Edge host, which can be routed to *iothub_client_sample_module_filter*
+  * **iothub_client_sample_module_method_invoke**: Invokes a method on a module, which can be routed to *iothub_client_sample_module_filter*
+  
+* Uploading blob to Azure:
+  * **iothub_client_sample_upload_to_blob**: Uploads a blob to Azure through IoT Hub
+  * **iothub_client_sample_upload_to_blob_mb**: Uploads a blob to Azure through IoT Hub using blocked based uploading
+
+* Multiplexing send and receive of several devices over a single connection.  (Please see [documentation](../../doc/multiplexing_limitations.md) about multiplexing limitations and alternatives.)
+  * **iothub_ll_client_shared_sample**: Send and receive messages from 2 devices over a single AMQP or HTTP connection
+  * **iothub_client_sample_amqp_shared_methods**: Receive device methods from 2 devices over a single AMQP connection
+
+* iOS
+  * **ios**: More information about using the SDK on iOS devices
+
+* Deprecated samples
+  * **iothub_client_sample_mqtt_dm**: Shows the implementation of a firmware update of a device (Raspberry Pi 3)
 
 ## How to compile and run the samples
 
