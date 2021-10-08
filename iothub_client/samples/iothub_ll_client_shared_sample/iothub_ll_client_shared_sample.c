@@ -8,7 +8,6 @@
 // NOTE: There are limitations and alternatives in this SDK's implementation of multiplexing.  See
 // ../../../doc/multiplexing_limitations.md for additional details.
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
