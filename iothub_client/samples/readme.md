@@ -15,7 +15,7 @@ This folder contains simple samples showing how to use the various features of t
 * Device Twins, Methods, and Cloud-to-Device messages:
   * **iothub_ll_c2d_sample**: Listens for incoming Cloud to Device messages 
   * **iothub_client_device_twin_and_methods_sample**: Implements a simple Cloud to Device, Direct Method, and Device Twin sample
-  * **iothub_convenience_sample**: Implements a simple Cloud to Device, Direct Method, and Device Twin sample using hte convenience layer
+  * **iothub_convenience_sample**: Implements a simple Cloud to Device, Direct Method, and Device Twin sample using the convenience layer
 
 * IoT Plug and Play
   * **pnp**: Samples demonstrating IoT Plug and Play device functionality
@@ -27,7 +27,7 @@ This folder contains simple samples showing how to use the various features of t
   
 * Uploading blob to Azure:
   * **iothub_client_sample_upload_to_blob**: Uploads a blob to Azure through IoT Hub
-  * **iothub_client_sample_upload_to_blob_mb**: Uploads a blob to Azure through IoT Hub using blocked based uploading
+  * **iothub_client_sample_upload_to_blob_mb**: Uploads a blob to Azure through IoT Hub using multiple blocks
 
 * Multiplexing send and receive of several devices over a single connection.  (Please see [documentation](../../doc/multiplexing_limitations.md) about multiplexing limitations and alternatives.)
   * **iothub_ll_client_shared_sample**: Send and receive messages from 2 devices over a single AMQP or HTTP connection
