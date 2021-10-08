@@ -481,14 +481,14 @@ static IOTHUB_DEVICE_METHOD_RESULT IoTHubDeviceMethod_DeviceOrModuleInvoke(IOTHU
             httpPayloadBuffer = NULL;
         }
         /*Codes_SRS_IOTHUBDEVICEMETHOD_12_032: [ IoTHubDeviceMethod_Invoke(Module) shall create a BUFFER_HANDLE from methodName, timeout and methodPayload by calling BUFFER_create ]*/
-        else if ((httpPayloadBuffer = createMethodPayloadJson(methodName, timeout, methodPayload)) == NULL)
+        else if (methodPayload != NULL && (httpPayloadBuffer = createMethodPayloadJson(methodName, timeout, methodPayload)) == NULL)
         {
             /*Codes_SRS_IOTHUBDEVICEMETHOD_12_033: [ If the creation fails, IoTHubDeviceMethod_Invoke(Module) shall return IOTHUB_DEVICE_METHOD_ERROR ]*/
             LogError("BUFFER creation failed for httpPayloadBuffer");
             result = IOTHUB_DEVICE_METHOD_ERROR;
         }
         /*Codes_SRS_IOTHUBDEVICEMETHOD_12_034: [ IoTHubDeviceMethod_Invoke(Module) shall allocate memory for response buffer by calling BUFFER_new ]*/
-        else if ((responseBuffer = BUFFER_new()) == NULL)
+        else if (methodPayload != NULL && (responseBuffer = BUFFER_new()) == NULL)
         {
             /*Codes_SRS_IOTHUBDEVICEMETHOD_12_035: [ If the allocation failed, IoTHubDeviceMethod_Invoke(Module) shall return IOTHUB_DEVICE_METHOD_ERROR ]*/
             LogError("BUFFER_new failed for responseBuffer");
