@@ -11,15 +11,13 @@ This folder contains simple samples showing how to use the various features of t
   * **iothub_ll_telemetry_sample**: sends messages from a single device
   * **iotedge_downstream_device_sample**: sends messages from a single device to an IoT Edge device
 
-* Multiplexing send and receive of several devices over a single connection (useful in Gateway scenarios where multiplexing might be needed):
-  * **iothub_client_sample_amqp_shared**: send and receive messages from 2 devices over a single AMQP connection
-  * **iothub_ll_client_sample_amqp_shared**: send and receive messages from 2 devices over a single AMQP connection using the lower level API set of the SDK
-  * **iothub_client_sample_amqp_websockets_shared**: send and receive messages from 2 devices over a single AMQP over Websockets connection
-  * **iothub_client_sample_http_shared**: send and receive messages from 2 devices over a single HTTP connection (multiplexing) (useful in Gateway scenarios)
+* Multiplexing send and receive of several devices over a single connection.  (Please see [documentation](../../doc/multiplexing_limitations.md) first, however, as there are limitations and alternatives.)
+  * **iothub_ll_client_shared_sample**: send and receive messages from 2 devices over a single AMQP or HTTP connection
+  * **iothub_client_sample_amqp_shared_methods**: receive device methods from 2 devices over a single AMQP connection
 
 * Device services samples (Device Twins, Methods, and Device Management):
   * **iothub_client_device_twin_and_methods_sample**: Implements a simple Cloud to Device Direct Method and Device Twin sample
-  * **iothub_client_sample_mqtt_dm**: Shows the implementation of a firmware update of a device (Raspberry Pi 3)
+  * **iothub_client_sample_mqtt_dm**: Shows the implementation of a firmware update of a device (Raspberry Pi 3).  *This sample is deprecated*.
 
 * Uploading blob to Azure:
   * **iothub_client_sample_upload_to_blob**: Uploads a blob to Azure through IoT Hub
