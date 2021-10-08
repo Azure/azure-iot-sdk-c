@@ -45,7 +45,7 @@ static const char* const JSON_NODE_RETURNED_DATA = "payload";
 static const char* const SAS_TOKEN_SCOPE_FMT = "%s/registrations/%s";
 
 static const char* const REGISTRATION_ID = "registrationId";
-static const char* const JSON_ENDORSMENT_KEY_NODE = "endorsementKey";
+static const char* const JSON_ENDORSEMENT_KEY_NODE = "endorsementKey";
 static const char* const JSON_STORAGE_ROOT_KEY_NODE = "storageRootKey";
 
 #define DPS_HUB_ERROR_NO_HUB        400208
@@ -348,7 +348,7 @@ static JSON_Value* construct_security_type_json(PROV_INSTANCE_INFO* prov_info, c
                     json_value_free(result);
                     result = NULL;
                 }
-                else if (json_object_set_string(tpm_object, JSON_ENDORSMENT_KEY_NODE, ek_value) != JSONSuccess)
+                else if (json_object_set_string(tpm_object, JSON_ENDORSEMENT_KEY_NODE, ek_value) != JSONSuccess)
                 {
                     LogError("failure setting endorsement key node");
                     json_value_free(tpm_node);
@@ -715,7 +715,7 @@ static void on_transport_registration_data(PROV_DEVICE_TRANSPORT_RESULT transpor
 {
     if (user_ctx == NULL)
     {
-        LogError("user context was unexpectantly NULL");
+        LogError("user context was unexpectedly NULL");
     }
     else
     {
@@ -777,7 +777,7 @@ static void on_transport_status(PROV_DEVICE_TRANSPORT_STATUS transport_status, u
 {
     if (user_ctx == NULL)
     {
-        LogError("user_ctx was unexpectatly NULL");
+        LogError("user_ctx was unexpectedly NULL");
     }
     else
     {
@@ -825,7 +825,7 @@ static void on_transport_status(PROV_DEVICE_TRANSPORT_STATUS transport_status, u
                 else
                 {
                     // Ideally this should not happen
-                    LogError("State Error: Transient Error occured in the %d state", (int)transport_status);
+                    LogError("State Error: Transient Error occurred in the %d state", (int)transport_status);
                 }
                 break;
             default:
@@ -1078,7 +1078,7 @@ PROV_DEVICE_RESULT Prov_Device_LL_Register_Device(PROV_DEVICE_LL_HANDLE handle, 
 
             if (handle->prov_transport_protocol->prov_transport_open(handle->transport_handle, handle->registration_id, ek_value, srk_value, on_transport_registration_data, handle, on_transport_status, handle, prov_transport_challenge_callback, handle) != 0)
             {
-                LogError("Failure establishing  connection");
+                LogError("Failure establishing connection");
                 if (!handle->user_supplied_reg_id)
                 {
                     free(handle->registration_id);
@@ -1089,7 +1089,7 @@ PROV_DEVICE_RESULT Prov_Device_LL_Register_Device(PROV_DEVICE_LL_HANDLE handle, 
 
                 handle->register_status_cb = NULL;
                 handle->status_user_ctx = NULL;
-                result = PROV_DEVICE_RESULT_ERROR;
+                result = PROV_DEVICE_RESULT_TRANSPORT;
             }
             else
             {

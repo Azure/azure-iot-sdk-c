@@ -200,7 +200,7 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
                 {
                     if (connack->returnCode == CONNECTION_ACCEPTED)
                     {
-                        /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_052: [ Once the mqtt CONNACK is recieved prov_transport_common_mqtt_dowork shall set mqtt_state to MQTT_STATE_CONNECTED ] */
+                        /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_052: [ Once the mqtt CONNACK is received prov_transport_common_mqtt_dowork shall set mqtt_state to MQTT_STATE_CONNECTED ] */
                         mqtt_info->mqtt_state = MQTT_STATE_CONNECTED;
                     }
                     else
@@ -305,7 +305,7 @@ static int get_retry_after_property(const char* topic_name, PROV_TRANSPORT_MQTT_
     return result;
 }
 
-static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE handle, void* user_ctx)
+static MQTT_CLIENT_ACK_OPTION mqtt_notification_callback(MQTT_MESSAGE_HANDLE handle, void* user_ctx)
 {
     if (user_ctx != NULL)
     {
@@ -383,6 +383,8 @@ static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE handle, void* user_ct
     {
         LogError("mqtt_notification_callback was invoked with a NULL context");
     }
+
+    return MQTT_CLIENT_ACK_SYNC;
 }
 
 static int send_mqtt_message(PROV_TRANSPORT_MQTT_INFO* mqtt_info, const char* msg_topic)

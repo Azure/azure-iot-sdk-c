@@ -162,11 +162,18 @@ int main()
 
         prov_device_result = Prov_Device_Register_Device(prov_device_handle, register_device_callback, NULL, registration_status_callback, NULL);
 
-        (void)printf("\r\nRegistering Device\r\n\r\n");
-        do
+        if (prov_device_result == PROV_DEVICE_RESULT_OK)
         {
-            ThreadAPI_Sleep(1000);
-        } while (!g_registration_complete);
+            (void)printf("\r\nRegistering Device\r\n\r\n");
+            do
+            {
+                ThreadAPI_Sleep(1000);
+            } while (!g_registration_complete);
+        }
+        else
+        {
+            (void)printf("\r\nRegistering failed with error: %d\r\n\r\n", prov_device_result);
+        }
 
         Prov_Device_Destroy(prov_device_handle);
     }

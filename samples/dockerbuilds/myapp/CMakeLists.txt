@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.5)
 project(myapp_project)
 
 # The demonstration uses C99 but it could just as easily be a C++ application

@@ -349,6 +349,26 @@ extern "C"
 
 #endif /* DONT_USE_UPLOADTOBLOB */
 
+    /**
+    * @brief    This API sends an acknowledgement to Azure IoT Hub that a cloud-to-device message has been received and frees resources associated with the message.
+    *
+    * @param    iotHubClientHandle              The handle created by a call to a create function.
+    * @param    message                         The cloud-to-device message received through the callback provided to IoTHubDeviceClient_SetMessageCallback.
+    * @param    disposition                     Acknowledgement option for the message.
+    *
+    * @warning  This function is to be used only when IOTHUBMESSAGE_ASYNC_ACK is used in the callback for incoming cloud-to-device messages.
+    * @remarks
+    *           If your cloud-to-device message callback returned IOTHUBMESSAGE_ASYNC_ACK, it MUST call this API eventually.
+    *           Beyond sending acknowledgment to the service, this method also handles freeing message's memory.
+    *           Not calling this function will result in memory leaks.
+    *           Depending on the protocol used, this API will acknowledge cloud-to-device messages differently:
+    *           AMQP: A MESSAGE DISPOSITION is sent using the `disposition` option provided.
+    *           MQTT: A PUBACK is sent if `disposition` is `IOTHUBMESSAGE_ACCEPTED`. Passing any other option results in no PUBACK sent for the message.
+    *           HTTP: A HTTP request is sent using the `disposition` option provided.
+    * @return   IOTHUB_CLIENT_OK upon success, or an error code upon failure.
+    */
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_SendMessageDisposition, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_MESSAGE_HANDLE, message, IOTHUBMESSAGE_DISPOSITION_RESULT, disposition);
+
 #ifdef __cplusplus
 }
 #endif

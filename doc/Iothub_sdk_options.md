@@ -2,13 +2,19 @@
 
 This document describes how you can set options for the Azure IoT Hub and Device Provisioning Service (DPS) client connections.
 
-- [Example Code for Setting an Option](#Example-Code-for-Setting-an-Option)
-- [When to Set Options](#When-to-Set-Options)
-- [Common Transport Options](#Common-Transport-Options)
-- [IoT Hub Device and Module Client Options](#IoT-Hub-Device-and-Module-Client-Options)
-- [MQTT, AMQP, and HTTP Specific Protocol Options](#MQTT,-AMQP,-and-HTTP-Specific-Protocol-Options)
-- [Device Provisioning Service (DPS) Client Options](#Device-Provisioning-Service-(DPS)-Client-Options)
-- [File Upload Options](#File-Upload-Options)
+- [IoT Hub C SDK Options](#iot-hub-c-sdk-options)
+  - [Example Code for Setting an Option](#example-code-for-setting-an-option)
+  - [When to Set Options](#when-to-set-options)
+  - [Common Transport Options](#common-transport-options)
+  - [IoT Hub Device and Module Client Options](#iot-hub-device-and-module-client-options)
+  - [MQTT, AMQP, and HTTP Specific Protocol Options](#mqtt-amqp-and-http-specific-protocol-options)
+    - [MQTT Specific Options](#mqtt-specific-options)
+    - [AMQP Specific Options](#amqp-specific-options)
+    - [HTTP Specific Options](#http-specific-options)
+  - [Device Provisioning Service (DPS) Client Options](#device-provisioning-service-dps-client-options)
+  - [File Upload Options](#file-upload-options)
+  - [Batching and IoT Hub Client SDK](#batching-and-iot-hub-client-sdk)
+  - [Advanced Compilation Options](#advanced-compilation-options)
 
 ## Example Code for Setting an Option
 
@@ -164,6 +170,15 @@ IoTHubDeviceClient_LL_SendEventAsync(iotHubClientHandle, msg2, ...);
 // Performs network I/O.  If batching is enabled, the SDK will batch msg1 and msg2
 IoTHubDeviceClient_LL_DoWork(iotHubClientHandle);
 ```
+
+## Advanced Compilation Options
+
+We recommend leaving the following settings at their defaults. Tuning them may allow optimizations for specific devices or scenarios but could also negatively impact RAM or EEPROM usage.
+The options are presented only as compilation flags and must be appended to the CMake `compileOption_C` setting:
+
+| Option Name                  | Option Define                                           | Description
+|------------------------------|---------------------------------------------------------|-------------------------------------------------------------
+| `"XIO Receive Buffer"`       | `-DcompileOption_C="-DXIO_RECEIVE_BUFFER_SIZE=<value>"` | Configure the internal XIO receive buffer.
 
 
 [iothub-client-options-h]: https://github.com/Azure/azure-iot-sdk-c/blob/master/iothub_client/inc/iothub_client_options.h

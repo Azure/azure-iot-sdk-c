@@ -26,9 +26,11 @@
 #include "internal/iothubtransport_mqtt_common.h"
 #include "internal/iothubtransport.h"
 #include "internal/iothub_internal_consts.h"
+#include "internal/iothub_message_private.h"
 
 #include "azure_umqtt_c/mqtt_client.h"
 
+#include "iothub_message.h"
 #include "iothub_client_options.h"
 #include "iothub_client_version.h"
 
@@ -219,7 +221,7 @@ typedef struct MQTTTRANSPORT_HANDLE_DATA_TAG
 
     // The current mqtt iothub implementation requires that the hub name and the domain suffix be passed as the first of a series of segments
     // passed through the username portion of the connection frame.
-    // The second segment will contain the device id.  The two segments are delemited by a "/".
+    // The second segment will contain the device id.  The two segments are delimited by a "/".
     // The first segment can be a maximum 256 characters.
     // The second segment can be a maximum 128 characters.
     // With the / delimeter you have 384 chars (Plus a terminator of 0).
@@ -310,6 +312,12 @@ typedef struct DEVICE_METHOD_INFO_TAG
 {
     STRING_HANDLE request_id;
 } DEVICE_METHOD_INFO;
+
+typedef struct MESSAGE_DISPOSITION_CONTEXT_TAG
+{
+    uint16_t packet_id;
+    QOS_VALUE qos_value;
+} MESSAGE_DISPOSITION_CONTEXT;
 
 //
 // InternStrnicmp implements strnicmp.  strnicmp isn't available on all platforms.
@@ -476,9 +484,9 @@ static const char* retrieveMqttReturnCodes(CONNECT_RETURN_CODE rtn_code)
 #endif // NO_LOGGING
 
 //
-// retrievDeviceMethodRidInfo parses an incoming MQTT topic for a device method and retrieves the request ID it specifies.
+// retrieveDeviceMethodRidInfo parses an incoming MQTT topic for a device method and retrieves the request ID it specifies.
 //
-static int retrievDeviceMethodRidInfo(const char* resp_topic, STRING_HANDLE method_name, STRING_HANDLE request_id)
+static int retrieveDeviceMethodRidInfo(const char* resp_topic, STRING_HANDLE method_name, STRING_HANDLE request_id)
 {
     int result;
 
@@ -827,6 +835,26 @@ static int addSystemPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_messag
             }
         }
     }
+
+    // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_060: [ `IoTHubTransport_MQTT_Common_DoWork` shall check for the OutputName property and if found add the value as a system property in the format of $.on=<value> ]
+    if (result == 0)
+    {
+        const char* output_name = IoTHubMessage_GetOutputName(iothub_message_handle);
+        if (output_name != NULL)
+        {
+            // Encode the output name if encoding is on
+            if (addSystemPropertyToTopicString(topic_string, index++, SYS_PROP_ON, output_name, urlencode) != 0)
+            {
+                LogError("Failed setting output name");
+                result = MU_FAILURE;
+            }
+            else
+            {
+                result = 0;
+            }
+        }
+    }
+
     *index_ptr = index;
     return result;
 }
@@ -933,22 +961,6 @@ static STRING_HANDLE addPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_me
         LogError("Failed adding Diagnostic Properties to uMQTT Message");
         STRING_delete(result);
         result = NULL;
-    }
-
-    // Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_31_060: [ `IoTHubTransport_MQTT_Common_DoWork` shall check for the OutputName property and if found add the value as a system property in the format of $.on=<value> ]
-    if (result != NULL)
-    {
-        const char* output_name = IoTHubMessage_GetOutputName(iothub_message_handle);
-        if (output_name != NULL)
-        {
-            if (STRING_sprintf(result, "%s%%24.on=%s/", index == 0 ? "" : PROPERTY_SEPARATOR, output_name) != 0)
-            {
-                LogError("Failed setting output name.");
-                STRING_delete(result);
-                result = NULL;
-            }
-            index++;
-        }
     }
 
     return result;
@@ -1836,7 +1848,7 @@ static void processDeviceMethodNotification(PMQTTTRANSPORT_HANDLE_DATA transport
                 LogError("Failure constructing request_id string");
                 free(dev_method_info);
             }
-            else if (retrievDeviceMethodRidInfo(topicName, method_name, dev_method_info->request_id) != 0)
+            else if (retrieveDeviceMethodRidInfo(topicName, method_name, dev_method_info->request_id) != 0)
             {
                 LogError("Failure: retrieve device topic info");
                 STRING_delete(dev_method_info->request_id);
@@ -1859,6 +1871,28 @@ static void processDeviceMethodNotification(PMQTTTRANSPORT_HANDLE_DATA transport
     }
 }
 
+static void destroyMessageDispositionContext(MESSAGE_DISPOSITION_CONTEXT* dispositionContext)
+{
+    free(dispositionContext);
+}
+
+static MESSAGE_DISPOSITION_CONTEXT* createMessageDispositionContext(MQTT_MESSAGE_HANDLE msgHandle)
+{
+    MESSAGE_DISPOSITION_CONTEXT* result = malloc(sizeof(MESSAGE_DISPOSITION_CONTEXT));
+
+    if (result == NULL)
+    {
+        LogError("Failed allocating MESSAGE_DISPOSITION_CONTEXT");
+    }
+    else
+    {
+        result->packet_id = mqttmessage_getPacketId(msgHandle);
+        result->qos_value = mqttmessage_getQosType(msgHandle);
+    }
+
+    return result;
+}
+
 //
 // processIncomingMessageNotification processes both C2D messages and messages sent from one IoT Edge module into this module
 //
@@ -1866,7 +1900,6 @@ static void processIncomingMessageNotification(PMQTTTRANSPORT_HANDLE_DATA transp
 {
     IOTHUB_MESSAGE_HANDLE IoTHubMessage = NULL;
     const APP_PAYLOAD* appPayload = mqttmessage_getApplicationMsg(msgHandle);
-    MESSAGE_CALLBACK_INFO* messageData = NULL;
 
     if (appPayload == NULL)
     {
@@ -1879,61 +1912,47 @@ static void processIncomingMessageNotification(PMQTTTRANSPORT_HANDLE_DATA transp
     else if (extractMqttProperties(transportData, IoTHubMessage, topicName, type) != 0)
     {
         LogError("failure extracting mqtt properties.");
+        IoTHubMessage_Destroy(IoTHubMessage);
     }
     else
     {
-        messageData = (MESSAGE_CALLBACK_INFO*)malloc(sizeof(MESSAGE_CALLBACK_INFO));
-        if (messageData == NULL)
+        MESSAGE_DISPOSITION_CONTEXT* dispositionContext = createMessageDispositionContext(msgHandle);
+
+        if (dispositionContext == NULL)
         {
-            LogError("malloc failed");
+            LogError("failed creating message disposition context");
+            IoTHubMessage_Destroy(IoTHubMessage);
+        }
+        else if (IoTHubMessage_SetDispositionContext(IoTHubMessage, dispositionContext, destroyMessageDispositionContext) != IOTHUB_MESSAGE_OK)
+        {
+            LogError("Failed setting disposition context in IOTHUB_MESSAGE_HANDLE");
+            destroyMessageDispositionContext(dispositionContext);
+            IoTHubMessage_Destroy(IoTHubMessage);
         }
         else
         {
-            messageData->messageHandle = IoTHubMessage;
-            messageData->transportContext = NULL;
-
             if (type == IOTHUB_TYPE_EVENT_QUEUE)
             {
                 // Codes_SRS_IOTHUB_MQTT_TRANSPORT_31_065: [ If type is IOTHUB_TYPE_TELEMETRY and sent to an input queue, then on success `mqttNotificationCallback` shall call `IoTHubClient_LL_MessageCallback`. ]
-                if (!transportData->transport_callbacks.msg_input_cb(messageData, transportData->transport_ctx))
+                if (!transportData->transport_callbacks.msg_input_cb(IoTHubMessage, transportData->transport_ctx))
                 {
-                    // Cleanup of allocated memory happens at end of function as pointers are non-NULL.
                     LogError("IoTHubClientCore_LL_MessageCallbackFromInput returned false");
-                }
-                else
-                {
-                    IoTHubMessage = NULL;
-                    messageData = NULL;
+                    // This will destroy the dispostion context;
+                    IoTHubMessage_Destroy(IoTHubMessage);
                 }
             }
             else
             {
                 /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_056: [ If type is IOTHUB_TYPE_TELEMETRY, then on success mqttNotificationCallback shall call IoTHubClientCore_LL_MessageCallback. ] */
-                if (!transportData->transport_callbacks.msg_cb(messageData, transportData->transport_ctx))
+                if (!transportData->transport_callbacks.msg_cb(IoTHubMessage, transportData->transport_ctx))
                 {
                     // Cleanup of allocated memory happens at end of function as pointers are non-NULL.
                     LogError("IoTHubClientCore_LL_MessageCallback returned false");
-                }
-                else
-                {
-                    IoTHubMessage = NULL;
-                    messageData = NULL;
+                    // This will destroy the dispostion context;
+                    IoTHubMessage_Destroy(IoTHubMessage);
                 }
             }
         }
-    }
-
-    if (messageData != NULL)
-    {
-        // messageData is set to NULL if it is successfully handed off to next layer, which will own freeing it.
-        // It being non-NULL indicates that this function still owns cleaning it up.
-        free(messageData);
-    }
-
-    if (IoTHubMessage != NULL)
-    {
-        // iotHubMessage, like messageData, is freed by calling layer if caller accepts it.  Otherwise clean it up here.
-        IoTHubMessage_Destroy(IoTHubMessage);
     }
 }
 
@@ -1942,7 +1961,7 @@ static void processIncomingMessageNotification(PMQTTTRANSPORT_HANDLE_DATA transp
 // This function is invoked by umqtt.  It determines what topic the PUBLISH was directed at (e.g. Device Twin, Method, etc.),
 // performs further parsing based on topic, and translates this call up to "iothub_client" layer for ultimate delivery to application callback.
 //
-static void mqttNotificationCallback(MQTT_MESSAGE_HANDLE msgHandle, void* callbackCtx)
+static MQTT_CLIENT_ACK_OPTION mqttNotificationCallback(MQTT_MESSAGE_HANDLE msgHandle, void* callbackCtx)
 {
     /* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_051: [ If msgHandle or callbackCtx is NULL, mqttNotificationCallback shall do nothing. ] */
     if (msgHandle != NULL && callbackCtx != NULL)
@@ -1976,6 +1995,8 @@ static void mqttNotificationCallback(MQTT_MESSAGE_HANDLE msgHandle, void* callba
             }
         }
     }
+
+    return MQTT_CLIENT_ACK_NONE;
 }
 
 //
@@ -2397,11 +2418,7 @@ static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport
                 free(msg_detail_entry);
 
                 DisconnectFromClient(transport_data);
-                if (!transport_data->isRetryExpiredCallbackCalled) // Only call once
-                {
-                    transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED, transport_data->transport_ctx);
-                    transport_data->isRetryExpiredCallbackCalled = true;
-                }
+                transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, transport_data->transport_ctx);
             }
             else
             {
@@ -2748,7 +2765,7 @@ static int UpdateMqttConnectionStateIfNeeded(PMQTTTRANSPORT_HANDLE_DATA transpor
             }
             else if (retry_action == RETRY_ACTION_STOP_RETRYING)
             {
-                // Set callback if retry expired
+                // send callback if retry expired
                 if (!transport_data->isRetryExpiredCallbackCalled)
                 {
                     transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED, transport_data->transport_ctx);
@@ -4006,32 +4023,61 @@ STRING_HANDLE IoTHubTransport_MQTT_Common_GetHostname(TRANSPORT_LL_HANDLE handle
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SendMessageDisposition(MESSAGE_CALLBACK_INFO* message_data, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
+// Azure IoT Hub (and Edge) support the following responses for devicebound messages:
+// ACCEPTED: message shall be dequeued by the hub and consider the delivery completed.
+// ABANDONED: message shall remain in the hub queue, and re-delivered upon client re-connection.
+// REJECTED: message shall be dequeued by the hub and not not re-delivered anymore.
+// The MQTT protocol by design only supports acknowledging the receipt of a message (through PUBACK).
+// To simulate the message responses above, this function behaves as follows:
+// ACCEPTED: a PUBACK is sent to the Hub/Edge.
+// ABANDONED: no response is sent to the Hub/Edge.
+// REJECTED: a PUBACK is sent to the Hub/Edge (same as for ACCEPTED).
+IOTHUB_CLIENT_RESULT IoTHubTransport_MQTT_Common_SendMessageDisposition(IOTHUB_DEVICE_HANDLE handle, IOTHUB_MESSAGE_HANDLE messageHandle, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
 {
-    (void)disposition;
-
     IOTHUB_CLIENT_RESULT result;
-    if (message_data)
+    if (handle == NULL || messageHandle == NULL)
     {
-        if (message_data->messageHandle)
-        {
-            IoTHubMessage_Destroy(message_data->messageHandle);
-            result = IOTHUB_CLIENT_OK;
-        }
-        else
-        {
-            /*Codes_SRS_IOTHUB_MQTT_TRANSPORT_10_002: [If any of the messageData fields are NULL, IoTHubTransport_MQTT_Common_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-            LogError("message handle is NULL");
-            result = IOTHUB_CLIENT_ERROR;
-        }
-        free(message_data);
+        /*Codes_SRS_IOTHUB_MQTT_TRANSPORT_10_001: [If messageData is NULL, IoTHubTransport_MQTT_Common_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR. ]*/
+        LogError("Invalid argument (handle=%p, messageHandle=%p", handle, messageHandle);
+        result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
     {
-        /*Codes_SRS_IOTHUB_MQTT_TRANSPORT_10_001: [If messageData is NULL, IoTHubTransport_MQTT_Common_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR. ]*/
-        LogError("message_data is NULL");
-        result = IOTHUB_CLIENT_ERROR;
+        if (disposition == IOTHUBMESSAGE_ACCEPTED || disposition == IOTHUBMESSAGE_REJECTED)
+        {
+            MESSAGE_DISPOSITION_CONTEXT* msgDispCtx = NULL;
+
+            if (IoTHubMessage_GetDispositionContext(messageHandle, &msgDispCtx) != IOTHUB_MESSAGE_OK ||
+                msgDispCtx == NULL)
+            {
+                /* Codes_SRS_TRANSPORTMULTITHTTP_10_002: [If any of the messageData fields are NULL, IoTHubTransportHttp_SendMessageDisposition shall fail and return IOTHUB_CLIENT_ERROR.] */
+                LogError("invalid message handle (no disposition context found)");
+                result = IOTHUB_CLIENT_ERROR;
+            }
+            else
+            {
+                PMQTTTRANSPORT_HANDLE_DATA transport_data = (PMQTTTRANSPORT_HANDLE_DATA)handle;
+
+                if (mqtt_client_send_message_response(transport_data->mqttClient, msgDispCtx->packet_id, msgDispCtx->qos_value) != 0)
+                {
+                    LogError("Failed sending ACK for MQTT message (packet_id=%u)", msgDispCtx->packet_id);
+                    result = IOTHUB_CLIENT_ERROR;
+                }
+                else
+                {
+                    result = IOTHUB_CLIENT_OK;
+                }
+            }
+        }
+        else
+        {
+            result = IOTHUB_CLIENT_OK;
+        }
+
+        // This will also destroy the disposition context.
+        IoTHubMessage_Destroy(messageHandle);
     }
+
     return result;
 }
 

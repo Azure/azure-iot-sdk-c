@@ -3,7 +3,7 @@
 
 Option(edison "set edison to ON to build the DM edison sample" OFF)
 
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.5)
 
 project(iothub_client_sample_firmware_update)
 

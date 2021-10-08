@@ -418,7 +418,7 @@ extern int amqp_device_send_message_disposition(DEVICE_HANDLE device_handle, DEV
 
 **SRS_DEVICE_09_117: [**amqp_device_send_message_disposition() shall destroy the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance**]**
 
-**SRS_DEVICE_09_118: [**If no failures occurr, amqp_device_send_message_disposition() shall return 0**]**
+**SRS_DEVICE_09_118: [**If no failures occur, amqp_device_send_message_disposition() shall return 0**]**
 
 
 ### amqp_device_set_retry_policy

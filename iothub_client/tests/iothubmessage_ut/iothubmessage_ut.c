@@ -37,6 +37,7 @@ static void my_gballoc_free(void* ptr)
 
 #undef ENABLE_MOCKS
 
+#include "internal/iothub_message_private.h"
 #include "iothub_message.h"
 #include "real_strings.h"
 
@@ -90,6 +91,8 @@ static const char* TEST_MESSAGE_USER_ID = "2d4e2570-e7c2-4651-b190-4607986e3b9f"
 
 static IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA TEST_DIAGNOSTIC_DATA = { "12345678",  "1506054179"};
 static IOTHUB_MESSAGE_DIAGNOSTIC_PROPERTY_DATA TEST_DIAGNOSTIC_DATA2 = { "87654321", "1506054179.100" };
+
+#define TEST_DISPOSITION_CONTEXT (MESSAGE_DISPOSITION_CONTEXT_HANDLE)0x5555
 
 TEST_DEFINE_ENUM_TYPE(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
@@ -2253,6 +2256,188 @@ TEST_FUNCTION(IoTHubMessage_GetMessageUserIdProperty_ConnectionModuleId_Not_Set_
 TEST_FUNCTION(IoTHubMessage_GetUserIdSystemProperty_SUCCEED)
 {
     get_string_succeeds_impl(IoTHubMessage_SetMessageUserIdSystemProperty, IoTHubMessage_GetMessageUserIdSystemProperty, TEST_MESSAGE_USER_ID);
+} 
+
+static MESSAGE_DISPOSITION_CONTEXT_HANDLE TEST_dispositionContextDestroyFunction_handle;
+static void TEST_dispositionContextDestroyFunction(MESSAGE_DISPOSITION_CONTEXT_HANDLE dispositionContextHandle)
+{
+    TEST_dispositionContextDestroyFunction_handle = dispositionContextHandle;
+}
+
+TEST_FUNCTION(IoTHubMessage_SetDispositionContext_Succeed)
+{
+    //arrange
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetDispositionContext(h, TEST_DISPOSITION_CONTEXT,  TEST_dispositionContextDestroyFunction);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_IS_TRUE(result == IOTHUB_MESSAGE_OK);
+
+    //cleanup
+    IoTHubMessage_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubMessage_Destroy_with_context_Succeed)
+{
+    //arrange
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
+    (void)IoTHubMessage_SetDispositionContext(h, TEST_DISPOSITION_CONTEXT,  TEST_dispositionContextDestroyFunction);
+    TEST_dispositionContextDestroyFunction_handle = NULL;
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(Map_Destroy(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(h));
+
+    //act
+    IoTHubMessage_Destroy(h);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_IS_TRUE(TEST_DISPOSITION_CONTEXT == TEST_dispositionContextDestroyFunction_handle);
+
+    //cleanup
+}
+
+TEST_FUNCTION(IoTHubMessage_SetDispositionContext_NULL_handle_fail)
+{
+    //arrange
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetDispositionContext(NULL, TEST_DISPOSITION_CONTEXT,  TEST_dispositionContextDestroyFunction);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_IS_TRUE(result == IOTHUB_MESSAGE_INVALID_ARG);
+
+    //cleanup
+}
+
+TEST_FUNCTION(IoTHubMessage_SetDispositionContext_NULL_context_fail)
+{
+    //arrange
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetDispositionContext(h, NULL,  TEST_dispositionContextDestroyFunction);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_IS_TRUE(result == IOTHUB_MESSAGE_INVALID_ARG);
+
+    //cleanup
+    IoTHubMessage_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubMessage_SetDispositionContext_NULL_destroy_function_fail)
+{
+    //arrange
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_SetDispositionContext(h, TEST_DISPOSITION_CONTEXT,  NULL);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_IS_TRUE(result == IOTHUB_MESSAGE_INVALID_ARG);
+
+    //cleanup
+    IoTHubMessage_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubMessage_GetDispositionContext_Succeed)
+{
+    //arrange
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
+    (void)IoTHubMessage_SetDispositionContext(h, TEST_DISPOSITION_CONTEXT,  TEST_dispositionContextDestroyFunction);
+    MESSAGE_DISPOSITION_CONTEXT_HANDLE dispositionContextHandle = NULL;
+    
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_GetDispositionContext(h, &dispositionContextHandle);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_IS_TRUE(dispositionContextHandle == TEST_DISPOSITION_CONTEXT);
+    ASSERT_IS_TRUE(result == IOTHUB_MESSAGE_OK);
+
+    //cleanup
+    IoTHubMessage_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubMessage_GetDispositionContext_Not_Set_Succeed)
+{
+    //arrange
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
+    MESSAGE_DISPOSITION_CONTEXT_HANDLE dispositionContextHandle = TEST_DISPOSITION_CONTEXT;
+    
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_GetDispositionContext(h, &dispositionContextHandle);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_IS_TRUE(dispositionContextHandle == NULL);
+    ASSERT_IS_TRUE(result == IOTHUB_MESSAGE_OK);
+
+    //cleanup
+    IoTHubMessage_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubMessage_GetDispositionContext_NULL_handle_Fails)
+{
+    //arrange
+    MESSAGE_DISPOSITION_CONTEXT_HANDLE dispositionContextHandle = NULL;
+    
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_GetDispositionContext(NULL, &dispositionContextHandle);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_IS_TRUE(result == IOTHUB_MESSAGE_INVALID_ARG);
+    ASSERT_IS_TRUE(dispositionContextHandle == NULL);
+
+    //cleanup
+}
+
+TEST_FUNCTION(IoTHubMessage_GetDispositionContext_NULL_context_Fails)
+{
+    //arrange
+    IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
+    
+    umock_c_reset_all_calls();
+
+    //act
+    IOTHUB_MESSAGE_RESULT result = IoTHubMessage_GetDispositionContext(h, NULL);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_IS_TRUE(result == IOTHUB_MESSAGE_INVALID_ARG);
+
+    //cleanup
+    IoTHubMessage_Destroy(h);
 }
 
 END_TEST_SUITE(iothubmessage_ut)

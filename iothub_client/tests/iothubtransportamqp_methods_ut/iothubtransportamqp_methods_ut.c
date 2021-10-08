@@ -2778,7 +2778,7 @@ TEST_FUNCTION(when_state_changes_from_OPENING_to_OPEN_for_the_message_receiver_n
     iothubtransportamqp_methods_destroy(amqp_methods_handle);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_12_001: [ When `on_message_receiver_state_changed` is called with the `new_state` being `MESSAGE_RECEIVER_STATE_IDLE` and `previous_state` being `MESSAGE_RECEIVER_STATE_OPEN`and the sender link is already diconnected `on_message_receiver_state_changed` calls to `on_methods_unsubscribed`. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_12_001: [ When `on_message_receiver_state_changed` is called with the `new_state` being `MESSAGE_RECEIVER_STATE_IDLE` and `previous_state` being `MESSAGE_RECEIVER_STATE_OPEN`and the sender link is already disconnected `on_message_receiver_state_changed` calls to `on_methods_unsubscribed`. ]*/
 TEST_FUNCTION(when_state_changes_from_OPEN_to_IDLE_for_the_message_receiver_and_message_sender_is_already_disconnected_than_on_methods_unsubscribed_called)
 {
     /// arrange
@@ -2870,7 +2870,7 @@ TEST_FUNCTION(when_state_changes_from_OPENING_to_OPEN_for_the_message_sender_no_
     iothubtransportamqp_methods_destroy(amqp_methods_handle);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_12_002: [ When `on_message_sender_state_changed` is called with the `new_state` being `MESSAGE_SENDER_STATE_IDLE` and `previous_state` being `MESSAGE_SENDER_STATE_OPEN`and the receiver link is already diconnected `on_message_sender_state_changed` calls to `on_methods_unsubscribed`. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_12_002: [ When `on_message_sender_state_changed` is called with the `new_state` being `MESSAGE_SENDER_STATE_IDLE` and `previous_state` being `MESSAGE_SENDER_STATE_OPEN`and the receiver link is already disconnected `on_message_sender_state_changed` calls to `on_methods_unsubscribed`. ]*/
 TEST_FUNCTION(when_state_changes_from_OPEN_to_IDLE_for_the_message_sender_and_message_receiver_is_already_disconnected_than_on_methods_unsubscribed_called)
 {
     /// arrange

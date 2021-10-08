@@ -1237,7 +1237,7 @@ void amqp_device_destroy(AMQP_DEVICE_HANDLE handle)
 
         // Codes_SRS_DEVICE_09_014: [`instance->messenger_handle shall be destroyed using telemetry_messenger_destroy()`]
         // Codes_SRS_DEVICE_09_015: [If created, `instance->authentication_handle` shall be destroyed using authentication_destroy()`]
-        // Codes_SRS_DEVICE_09_016: [The contents of `instance->config` shall be detroyed and then it shall be freed]
+        // Codes_SRS_DEVICE_09_016: [The contents of `instance->config` shall be destroyed and then it shall be freed]
         internal_destroy_device((AMQP_DEVICE_INSTANCE*)handle);
     }
 }
@@ -1442,7 +1442,7 @@ int amqp_device_send_message_disposition(AMQP_DEVICE_HANDLE device_handle, DEVIC
             }
             else
             {
-                // Codes_SRS_DEVICE_09_118: [If no failures occurr, amqp_device_send_message_disposition() shall return 0]
+                // Codes_SRS_DEVICE_09_118: [If no failures occur, amqp_device_send_message_disposition() shall return 0]
                 result = RESULT_OK;
             }
 
@@ -1483,7 +1483,7 @@ int amqp_device_set_option(AMQP_DEVICE_HANDLE handle, const char* name, void* va
     // Codes_SRS_DEVICE_09_082: [If `handle` or `name` or `value` are NULL, amqp_device_set_option shall return a non-zero result]
     if (handle == NULL || name == NULL || value == NULL)
     {
-        LogError("failed setting device option (one of the followin are NULL: _handle=%p, name=%p, value=%p)",
+        LogError("failed setting device option (one of the following are NULL: _handle=%p, name=%p, value=%p)",
             handle, name, value);
         result = MU_FAILURE;
     }
@@ -1820,4 +1820,38 @@ int amqp_device_get_twin_async(AMQP_DEVICE_HANDLE handle, DEVICE_TWIN_UPDATE_REC
     }
 
     return result;
+}
+
+DEVICE_MESSAGE_DISPOSITION_INFO* amqp_device_clone_message_disposition_info(DEVICE_MESSAGE_DISPOSITION_INFO* disposition_info)
+{
+    DEVICE_MESSAGE_DISPOSITION_INFO* clone;
+
+    if ((clone = calloc(1, sizeof(DEVICE_MESSAGE_DISPOSITION_INFO))) == NULL)
+    {
+        LogError("Failed cloning DEVICE_MESSAGE_DISPOSITION_INFO");
+    }
+    else if (mallocAndStrcpy_s(&clone->source, disposition_info->source) != 0)
+    {
+        LogError("Failed cloning DEVICE_MESSAGE_DISPOSITION_INFO->source");
+        free(clone);
+        clone = NULL;
+    }
+    else
+    {
+        clone->message_id = disposition_info->message_id;
+    }
+
+    return clone;
+}
+
+void amqp_device_destroy_message_disposition_info(DEVICE_MESSAGE_DISPOSITION_INFO* disposition_info)
+{
+    if (disposition_info == NULL)
+    {
+        LogError("Argument is invalid (disposition_info is NULL)");
+    }
+    else
+    {
+        destroy_device_disposition_info(disposition_info);
+    }
 }

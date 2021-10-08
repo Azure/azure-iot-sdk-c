@@ -73,6 +73,11 @@ static const char* proxy_password = NULL; // Proxy password
 const char* applicationCustomPropertyKey1 = "appCustomProperty1";
 const char* applicationCustomPropertyKey2 = "appCustomProperty2";
 
+// The Azure IoT C SDK allows developers to acknowledge cloud-to-device messages
+// (either sending DISPOSITION if using AMQP, or PUBACK if using MQTT) outside the following callback, in a separate function call.
+// This would allow the user application to process the incoming message before acknowledging it to the Azure IoT Hub, since
+// the callback below is supposed to return as fast as possible to unblock I/O.
+// Please look for "IOTHUBMESSAGE_ASYNC_ACK" in iothub_ll_c2d_sample for more details.
 static IOTHUBMESSAGE_DISPOSITION_RESULT receive_msg_callback(IOTHUB_MESSAGE_HANDLE message, void* user_context)
 {
     (void)user_context;

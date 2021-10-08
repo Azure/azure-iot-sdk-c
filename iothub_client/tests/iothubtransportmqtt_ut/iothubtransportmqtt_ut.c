@@ -313,6 +313,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(TRANSPORT_LL_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_RETRY_POLICY, int);
     REGISTER_UMOCK_ALIAS_TYPE(METHOD_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_MESSAGE_HANDLE, void*);
     REGISTER_TYPE(TLSIO_CONFIG*, TLSIO_CONFIG_ptr);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, void*);
 
@@ -852,11 +853,11 @@ TEST_FUNCTION(IoTHubTransport_MQTT_SendMessageDisposition_success)
 {
     // arrange
     umock_c_reset_all_calls();
-    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_SendMessageDisposition(IGNORED_PTR_ARG, IOTHUBMESSAGE_ACCEPTED))
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_SendMessageDisposition(TEST_DEVICE_HANDLE, IGNORED_PTR_ARG, IOTHUBMESSAGE_ACCEPTED))
         .IgnoreAllArguments();
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubTransportMqtt_SendMessageDisposition(NULL, IOTHUBMESSAGE_ACCEPTED);
+    IOTHUB_CLIENT_RESULT result = IoTHubTransportMqtt_SendMessageDisposition(TEST_DEVICE_HANDLE, NULL, IOTHUBMESSAGE_ACCEPTED);
 
     // assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());

@@ -227,7 +227,7 @@ static BLOB_RESULT InvokeUserCallbackAndSendBlobs(HTTPAPIEX_HANDLE httpApiExHand
     return result;
 }
 
-// SendBlockIdList to send an XML of uploaded blockIds to the server after the application's payload block(s) have been transfered.
+// SendBlockIdList to send an XML of uploaded blockIds to the server after the application's payload block(s) have been transferred.
 static BLOB_RESULT SendBlockIdList(HTTPAPIEX_HANDLE httpApiExHandle, const char* relativePath, STRING_HANDLE blockIDList, unsigned int* httpStatus, BUFFER_HANDLE httpResponse)
 {
     BLOB_RESULT result;

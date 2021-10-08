@@ -2077,7 +2077,7 @@ TEST_FUNCTION(telemetry_messenger_create_config_NULL_iothub_host_fqdn)
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_132: [`instance->in_progress_list` shall be set using singlylinkedlist_create()]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_013: [`messenger_config->on_state_changed_callback` shall be saved into `instance->on_state_changed_callback`]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_014: [`messenger_config->on_state_changed_context` shall be saved into `instance->on_state_changed_context`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_015: [If no failures occurr, telemetry_messenger_create() shall return a handle to `instance`]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_015: [If no failures occur, telemetry_messenger_create() shall return a handle to `instance`]
 static void telemetry_messenger_create_success_impl(bool testing_modules)
 {
     // arrange
@@ -2205,8 +2205,8 @@ TEST_FUNCTION(telemetry_messenger_start_messenger_not_stopped)
 }
 
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_032: [`session_handle` shall be saved on `instance->session_handle`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_115: [If no failures occurr, `instance->state` shall be set to TELEMETRY_MESSENGER_STATE_STARTING, and `instance->on_state_changed_callback` invoked if provided]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_056: [If no failures occurr, telemetry_messenger_start() shall return 0]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_115: [If no failures occur, `instance->state` shall be set to TELEMETRY_MESSENGER_STATE_STARTING, and `instance->on_state_changed_callback` invoked if provided]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_056: [If no failures occur, telemetry_messenger_start() shall return 0]
 TEST_FUNCTION(telemetry_messenger_start_succeeds)
 {
     // arrange
@@ -2848,7 +2848,7 @@ TEST_FUNCTION(telemetry_messenger_do_work_on_multiple_callbacks_OK)
     test_send_events_for_callbacks(MESSAGE_SEND_OK, &test_send_just_under_rollover_config);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_31_190: [If a failure occured, `on_event_send_complete_callback` shall be invoked with result TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING for all callers associated with this task]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_31_190: [If a failure occurred, `on_event_send_complete_callback` shall be invoked with result TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING for all callers associated with this task]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_128: [`task` shall be removed from `instance->in_progress_list`]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_130: [**`task` shall be destroyed()**]**
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_31_201: [Freeing a `task` will free callback items associated with it and free the data itself]
@@ -3011,7 +3011,7 @@ TEST_FUNCTION(telemetry_messenger_unsubscribe_for_messages_not_subscribed)
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_019: [`on_message_received_callback` shall be saved on `instance->on_message_received_callback`]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_020: [`context` shall be saved on `instance->on_message_received_context`]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_021: [telemetry_messenger_subscribe_for_messages() shall set `instance->receive_messages` to true]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_022: [If no failures occurr, telemetry_messenger_subscribe_for_messages() shall return 0]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_022: [If no failures occur, telemetry_messenger_subscribe_for_messages() shall return 0]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_121: [An IOTHUB_MESSAGE_HANDLE shall be obtained from MESSAGE_HANDLE using message_create_IoTHubMessage_from_uamqp_message()]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_123: [`instance->on_message_received_callback` shall be invoked passing the IOTHUB_MESSAGE_HANDLE]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_125: [If `instance->on_message_received_callback` returns TELEMETRY_MESSENGER_DISPOSITION_RESULT_ACCEPTED, on_message_received_internal_callback shall return the result of messaging_delivery_accepted()]
@@ -3141,7 +3141,7 @@ TEST_FUNCTION(messenger_on_message_received_internal_callback_create_TELEMETRY_M
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_025: [telemetry_messenger_unsubscribe_for_messages() shall set `instance->receive_messages` to false]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_026: [telemetry_messenger_unsubscribe_for_messages() shall set `instance->on_message_received_callback` to NULL]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_027: [telemetry_messenger_unsubscribe_for_messages() shall set `instance->on_message_received_context` to NULL]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_028: [If no failures occurr, telemetry_messenger_unsubscribe_for_messages() shall return 0]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_028: [If no failures occur, telemetry_messenger_unsubscribe_for_messages() shall return 0]
 TEST_FUNCTION(telemetry_messenger_unsubscribe_for_messages_success)
 {
     // arrange
@@ -3527,7 +3527,7 @@ TEST_FUNCTION(telemetry_messenger_send_message_disposition_NULL_source)
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_181: [An AMQP_VALUE disposition result shall be created corresponding to the `disposition_result` provided]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_182: [`messagereceiver_send_message_disposition()` shall be invoked passing `disposition_info->source`, `disposition_info->message_id` and the AMQP_VALUE disposition result]
 // Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_184: [telemetry_messenger_send_message_disposition() shall destroy the AMQP_VALUE disposition result]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_185: [If no failures occurr, telemetry_messenger_send_message_disposition() shall return 0]
+// Tests_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_185: [If no failures occur, telemetry_messenger_send_message_disposition() shall return 0]
 TEST_FUNCTION(telemetry_messenger_send_message_disposition_ACCEPTED_succeeds)
 {
     // arrange

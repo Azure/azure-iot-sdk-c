@@ -110,6 +110,11 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT DefaultMessageCallback(IOTHUB_MESSAGE_HA
 
 // SendConfirmationCallbackFromFilter is invoked when the message that was forwarded on from 'InputQueue1FilterCallback'
 // pipeline function is confirmed.
+// The Azure IoT C SDK allows developers to acknowledge cloud-to-device messages
+// (either sending DISPOSITION if using AMQP, or PUBACK if using MQTT) outside the following callback, in a separate function call.
+// This would allow the user application to process the incoming message before acknowledging it to the Azure IoT Hub, since
+// the callback below is supposed to return as fast as possible to unblock I/O.
+// Please look for "IOTHUBMESSAGE_ASYNC_ACK" in iothub_ll_c2d_sample for more details.
 static void SendConfirmationCallbackFromFilter(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
     // The context corresponds to which message# we were at when we sent.
@@ -147,6 +152,11 @@ static FILTERED_MESSAGE_INSTANCE* CreateFilteredMessageInstance(IOTHUB_MESSAGE_H
 
 // InputQueue1FilterCallback implements a very primitive filtering mechanism.  It will send the 1st, 3rd, 5th, etc. messages
 // to the next step in the queue and will filter out the 2nd, 4th, 6th, etc. messages.
+// The Azure IoT C SDK allows developers to acknowledge cloud-to-device messages
+// (either sending DISPOSITION if using AMQP, or PUBACK if using MQTT) outside the following callback, in a separate function call.
+// This would allow the user application to process the incoming message before acknowledging it to the Azure IoT Hub, since
+// the callback below is supposed to return as fast as possible to unblock I/O.
+// Please look for "IOTHUBMESSAGE_ASYNC_ACK" in iothub_ll_c2d_sample for more details.
 static IOTHUBMESSAGE_DISPOSITION_RESULT InputQueue1FilterCallback(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback)
 {
     IOTHUBMESSAGE_DISPOSITION_RESULT result;
@@ -157,7 +167,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT InputQueue1FilterCallback(IOTHUB_MESSAGE
 
     if ((messagesReceivedByInput1Queue % 2) == 0)
     {
-        // This message should be sent to next stop in the pipeline, namely "output1".  What happens at "outpu1" is determined
+        // This message should be sent to next stop in the pipeline, namely "output1".  What happens at "output1" is determined
         // by the configuration of the Edge routing table setup.
         FILTERED_MESSAGE_INSTANCE* filteredMessageInstance = CreateFilteredMessageInstance(message);
         if (NULL == filteredMessageInstance)

@@ -109,7 +109,7 @@ Summary: creates struct instance to store data, checks and stores copies of para
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_133: [**If singlylinkedlist_create() fails, telemetry_messenger_create() shall fail and return NULL**]**
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_013: [**`messenger_config->on_state_changed_callback` shall be saved into `instance->on_state_changed_callback`**]**
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_014: [**`messenger_config->on_state_changed_context` shall be saved into `instance->on_state_changed_context`**]**
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_015: [**If no failures occurr, telemetry_messenger_create() shall return a handle to `instance`**]**
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_015: [**If no failures occur, telemetry_messenger_create() shall return a handle to `instance`**]**
 
 
 ### telemetry_messenger_send_async
@@ -155,7 +155,7 @@ Summary: informs the messenger instance that a uAMQP messagereceiver shall be cr
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_019: [**`on_message_received_callback` shall be saved on `instance->on_message_received_callback`**]**
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_020: [**`context` shall be saved on `instance->on_message_received_context`**]**
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_021: [**telemetry_messenger_subscribe_for_messages() shall set `instance->receive_messages` to true**]**
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_022: [**If no failures occurr, telemetry_messenger_subscribe_for_messages() shall return 0**]**
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_022: [**If no failures occur, telemetry_messenger_subscribe_for_messages() shall return 0**]**
 
 
 ## telemetry_messenger_unsubscribe_for_messages
@@ -171,7 +171,7 @@ Summary: informs the messenger instance that an existing uAMQP messagereceiver s
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_025: [**telemetry_messenger_unsubscribe_for_messages() shall set `instance->receive_messages` to false**]**
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_026: [**telemetry_messenger_unsubscribe_for_messages() shall set `instance->on_message_received_callback` to NULL**]**
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_027: [**telemetry_messenger_unsubscribe_for_messages() shall set `instance->on_message_received_context` to NULL**]**
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_028: [**If no failures occurr, telemetry_messenger_unsubscribe_for_messages() shall return 0**]**
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_028: [**If no failures occur, telemetry_messenger_unsubscribe_for_messages() shall return 0**]**
 
 
 ## telemetry_messenger_send_message_disposition
@@ -193,7 +193,7 @@ extern int telemetry_messenger_send_message_disposition(TELEMETRY_MESSENGER_HAND
 
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_184: [**telemetry_messenger_send_message_disposition() shall destroy the AMQP_VALUE disposition result**]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_185: [**If no failures occurr, telemetry_messenger_send_message_disposition() shall return 0**]**
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_185: [**If no failures occur, telemetry_messenger_send_message_disposition() shall return 0**]**
 
 
 
@@ -207,8 +207,8 @@ extern int telemetry_messenger_send_message_disposition(TELEMETRY_MESSENGER_HAND
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_030: [**If `session_handle` is NULL, telemetry_messenger_start() shall fail and return MU_FAILURE**]**
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_031: [**If `instance->state` is not TELEMETRY_MESSENGER_STATE_STOPPED, telemetry_messenger_start() shall fail and return MU_FAILURE**]**
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_032: [**`session_handle` shall be saved on `instance->session_handle`**]**
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_115: [**If no failures occurr, `instance->state` shall be set to TELEMETRY_MESSENGER_STATE_STARTING, and `instance->on_state_changed_callback` invoked if provided**]**
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_056: [**If no failures occurr, telemetry_messenger_start() shall return 0**]**
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_115: [**If no failures occur, `instance->state` shall be set to TELEMETRY_MESSENGER_STATE_STARTING, and `instance->on_state_changed_callback` invoked if provided**]**
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_056: [**If no failures occur, telemetry_messenger_start() shall return 0**]**
 
 
 ## telemetry_messenger_stop
@@ -371,7 +371,7 @@ static AMQP_VALUE on_message_received_internal_callback(const void* context, MES
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_130: [**`task` shall be destroyed()**]**
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_31_201: [**Freeing a `task` will free callback items associated with it and free the data itself**]**
 **SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_31_189: [**If no failure occurs, `on_event_send_complete_callback` shall be invoked with result TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_OK for all callers associated with this task**]**
-**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_31_190: [**If a failure occured, `on_event_send_complete_callback` shall be invoked with result TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING for all callers associated with this task**]**
+**SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_31_190: [**If a failure occurred, `on_event_send_complete_callback` shall be invoked with result TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING for all callers associated with this task**]**
 
 
 

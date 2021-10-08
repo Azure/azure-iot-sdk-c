@@ -26,6 +26,7 @@
 
 #define DO_WORK_FREQ_DEFAULT 1
 #define DO_WORK_MAXIMUM_ALLOWED_FREQUENCY 100
+#define CLIENT_CORE_METHOD_EMPTY_PAYLOAD "{}"
 
 struct IOTHUB_QUEUE_CONTEXT_TAG;
 
@@ -101,7 +102,7 @@ typedef struct HTTPWORKER_THREAD_INFO_TAG
     CALLBACK_TYPE_REPORTED_STATE,       \
     CALLBACK_TYPE_CONNECTION_STATUS,    \
     CALLBACK_TYPE_DEVICE_METHOD,        \
-    CALLBACK_TYPE_INBOUD_DEVICE_METHOD, \
+    CALLBACK_TYPE_INBOUND_DEVICE_METHOD, \
     CALLBACK_TYPE_MESSAGE,              \
     CALLBACK_TYPE_INPUTMESSAGE
 
@@ -145,7 +146,7 @@ typedef struct METHOD_CALLBACK_INFO_TAG
 typedef struct INPUTMESSAGE_CALLBACK_INFO_TAG
 {
     IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC eventHandlerCallback;
-    MESSAGE_CALLBACK_INFO* message_cb_info;
+    IOTHUB_MESSAGE_HANDLE message_handle;
 } INPUTMESSAGE_CALLBACK_INFO;
 
 typedef struct USER_CALLBACK_INFO_TAG
@@ -159,7 +160,7 @@ typedef struct USER_CALLBACK_INFO_TAG
         REPORTED_STATE_CALLBACK_INFO reported_state_cb_info;
         CONNECTION_STATUS_CALLBACK_INFO connection_status_cb_info;
         METHOD_CALLBACK_INFO method_cb_info;
-        MESSAGE_CALLBACK_INFO* message_cb_info;
+        IOTHUB_MESSAGE_HANDLE message_handle;
         INPUTMESSAGE_CALLBACK_INFO inputmessage_cb_info;
     } iothub_callback;
 } USER_CALLBACK_INFO;
@@ -270,7 +271,7 @@ static void garbageCollectorImpl(IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientInstan
 }
 
 
-static bool iothub_ll_message_callback(MESSAGE_CALLBACK_INFO* messageData, void* userContextCallback)
+static bool iothub_ll_message_callback(IOTHUB_MESSAGE_HANDLE messageHandle, void* userContextCallback)
 {
     bool result;
     IOTHUB_QUEUE_CONTEXT* queue_context = (IOTHUB_QUEUE_CONTEXT*)userContextCallback;
@@ -284,7 +285,7 @@ static bool iothub_ll_message_callback(MESSAGE_CALLBACK_INFO* messageData, void*
         USER_CALLBACK_INFO queue_cb_info;
         queue_cb_info.type = CALLBACK_TYPE_MESSAGE;
         queue_cb_info.userContextCallback = queue_context->userContextCallback;
-        queue_cb_info.iothub_callback.message_cb_info = messageData;
+        queue_cb_info.iothub_callback.message_handle = messageHandle;
         if (VECTOR_push_back(queue_context->iotHubClientHandle->saved_user_callback_list, &queue_cb_info, 1) == 0)
         {
             result = true;
@@ -298,7 +299,7 @@ static bool iothub_ll_message_callback(MESSAGE_CALLBACK_INFO* messageData, void*
     return result;
 }
 
-static bool iothub_ll_inputmessage_callback(MESSAGE_CALLBACK_INFO* message_cb_info, void* userContextCallback)
+static bool iothub_ll_inputmessage_callback(IOTHUB_MESSAGE_HANDLE message_handle, void* userContextCallback)
 {
     bool result;
     IOTHUB_INPUTMESSAGE_CALLBACK_CONTEXT *inputMessageCallbackContext = (IOTHUB_INPUTMESSAGE_CALLBACK_CONTEXT *)userContextCallback;
@@ -313,7 +314,7 @@ static bool iothub_ll_inputmessage_callback(MESSAGE_CALLBACK_INFO* message_cb_in
         queue_cb_info.type = CALLBACK_TYPE_INPUTMESSAGE;
         queue_cb_info.userContextCallback = inputMessageCallbackContext->userContextCallback;
         queue_cb_info.iothub_callback.inputmessage_cb_info.eventHandlerCallback = inputMessageCallbackContext->eventHandlerCallback;
-        queue_cb_info.iothub_callback.inputmessage_cb_info.message_cb_info = message_cb_info;
+        queue_cb_info.iothub_callback.inputmessage_cb_info.message_handle = message_handle;
 
         if (VECTOR_push_back(inputMessageCallbackContext->iotHubClientHandle->saved_user_callback_list, &queue_cb_info, 1) == 0)
         {
@@ -385,6 +386,13 @@ static int iothub_ll_device_method_callback(const char* method_name, const unsig
         USER_CALLBACK_INFO queue_cb_info;
         queue_cb_info.type = CALLBACK_TYPE_DEVICE_METHOD;
 
+        // A NULL payload was sent from the service. Use empty JSON to signal to the user no payload.
+        if (size == 0)
+        {
+          payload = (const unsigned char*) CLIENT_CORE_METHOD_EMPTY_PAYLOAD;
+          size = sizeof(CLIENT_CORE_METHOD_EMPTY_PAYLOAD) - 1;
+        }
+
         result = make_method_calback_queue_context(&queue_cb_info, method_name, payload, size, method_id, queue_context);
         if (result != 0)
         {
@@ -409,7 +417,7 @@ static int iothub_ll_inbound_device_method_callback(const char* method_name, con
         IOTHUB_QUEUE_CONTEXT* queue_context = (IOTHUB_QUEUE_CONTEXT*)userContextCallback;
 
         USER_CALLBACK_INFO queue_cb_info;
-        queue_cb_info.type = CALLBACK_TYPE_INBOUD_DEVICE_METHOD;
+        queue_cb_info.type = CALLBACK_TYPE_INBOUND_DEVICE_METHOD;
 
         result = make_method_calback_queue_context(&queue_cb_info, method_name, payload, size, method_id, queue_context);
         if (result != 0)
@@ -700,7 +708,7 @@ static void dispatch_user_callbacks(IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientIns
                     }
                 }
                 break;
-            case CALLBACK_TYPE_INBOUD_DEVICE_METHOD:
+            case CALLBACK_TYPE_INBOUND_DEVICE_METHOD:
                 if (inbound_device_method_callback)
                 {
                     const char* method_name = STRING_c_str(queued_cb->iothub_callback.method_cb_info.method_name);
@@ -716,41 +724,47 @@ static void dispatch_user_callbacks(IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientIns
             case CALLBACK_TYPE_MESSAGE:
                 if (message_callback && message_user_context_handle)
                 {
-                    IOTHUBMESSAGE_DISPOSITION_RESULT disposition = message_callback(queued_cb->iothub_callback.message_cb_info->messageHandle, queued_cb->userContextCallback);
+                    IOTHUBMESSAGE_DISPOSITION_RESULT disposition = message_callback(queued_cb->iothub_callback.message_handle, queued_cb->userContextCallback);
 
-                    if (Lock(message_user_context_handle->LockHandle) == LOCK_OK)
+                    if (disposition != IOTHUBMESSAGE_ASYNC_ACK)
                     {
-                        IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SendMessageDisposition(message_user_context_handle->IoTHubClientLLHandle, queued_cb->iothub_callback.message_cb_info, disposition);
-                        (void)Unlock(message_user_context_handle->LockHandle);
-                        if (result != IOTHUB_CLIENT_OK)
+                        if (Lock(message_user_context_handle->LockHandle) == LOCK_OK)
                         {
-                            LogError("IoTHubClientCore_LL_SendMessageDisposition failed");
+                            IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SendMessageDisposition(message_user_context_handle->IoTHubClientLLHandle, queued_cb->iothub_callback.message_handle, disposition);
+                            (void)Unlock(message_user_context_handle->LockHandle);
+                            if (result != IOTHUB_CLIENT_OK)
+                            {
+                                LogError("IoTHubClientCore_LL_SendMessageDisposition failed");
+                            }
                         }
-                    }
-                    else
-                    {
-                        LogError("Lock failed");
+                        else
+                        {
+                            LogError("Lock failed");
+                        }
                     }
                 }
                 break;
 
-                case CALLBACK_TYPE_INPUTMESSAGE:
+            case CALLBACK_TYPE_INPUTMESSAGE:
                 {
                     const INPUTMESSAGE_CALLBACK_INFO *inputmessage_cb_info = &queued_cb->iothub_callback.inputmessage_cb_info;
-                    IOTHUBMESSAGE_DISPOSITION_RESULT disposition = inputmessage_cb_info->eventHandlerCallback(inputmessage_cb_info->message_cb_info->messageHandle, queued_cb->userContextCallback);
+                    IOTHUBMESSAGE_DISPOSITION_RESULT disposition = inputmessage_cb_info->eventHandlerCallback(inputmessage_cb_info->message_handle, queued_cb->userContextCallback);
 
-                    if (Lock(iotHubClientInstance->LockHandle) == LOCK_OK)
+                    if (disposition != IOTHUBMESSAGE_ASYNC_ACK)
                     {
-                        IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SendMessageDisposition(iotHubClientInstance->IoTHubClientLLHandle, inputmessage_cb_info->message_cb_info, disposition);
-                        (void)Unlock(iotHubClientInstance->LockHandle);
-                        if (result != IOTHUB_CLIENT_OK)
+                        if (Lock(iotHubClientInstance->LockHandle) == LOCK_OK)
                         {
-                            LogError("IoTHubClient_LL_SendMessageDisposition failed");
+                            IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SendMessageDisposition(iotHubClientInstance->IoTHubClientLLHandle, inputmessage_cb_info->message_handle, disposition);
+                            (void)Unlock(iotHubClientInstance->LockHandle);
+                            if (result != IOTHUB_CLIENT_OK)
+                            {
+                                LogError("IoTHubClient_LL_SendMessageDisposition failed");
+                            }
                         }
-                    }
-                    else
-                    {
-                        LogError("Lock failed");
+                        else
+                        {
+                            LogError("Lock failed");
+                        }
                     }
                 }
                 break;
@@ -1251,7 +1265,7 @@ void IoTHubClientCore_Destroy(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle)
             USER_CALLBACK_INFO* queue_cb_info = (USER_CALLBACK_INFO*)VECTOR_element(iotHubClientInstance->saved_user_callback_list, index);
             if (queue_cb_info != NULL)
             {
-                if ((queue_cb_info->type == CALLBACK_TYPE_DEVICE_METHOD) || (queue_cb_info->type == CALLBACK_TYPE_INBOUD_DEVICE_METHOD))
+                if ((queue_cb_info->type == CALLBACK_TYPE_DEVICE_METHOD) || (queue_cb_info->type == CALLBACK_TYPE_INBOUND_DEVICE_METHOD))
                 {
                     STRING_delete(queue_cb_info->iothub_callback.method_cb_info.method_name);
                     BUFFER_delete(queue_cb_info->iothub_callback.method_cb_info.payload);
@@ -1602,7 +1616,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetRetryPolicy(IOTHUB_CLIENT_CORE_HANDLE i
             }
             else
             {
-                /* Codes_SRS_IOTHUBCLIENT_25_077: [ `IoTHubClient_SetRetryPolicy` shall call `IoTHubClientCore_LL_SetRetryPolicy`, while passing the `IoTHubClientCore_LL` handle created by `IoTHubClient_Create` and the parameters `retryPolicy` and `retryTimeoutLimitinSeconds`.]*/
+                /* Codes_SRS_IOTHUBCLIENT_25_077: [ `IoTHubClient_SetRetryPolicy` shall call `IoTHubClientCore_LL_SetRetryPolicy`, while passing the `IoTHubClientCore_LL` handle created by `IoTHubClient_Create` and the parameters `retryPolicy` and `retryTimeoutLimitInSeconds`.]*/
                 result = IoTHubClientCore_LL_SetRetryPolicy(iotHubClientInstance->IoTHubClientLLHandle, retryPolicy, retryTimeoutLimitInSeconds);
                 (void)Unlock(iotHubClientInstance->LockHandle);
             }
@@ -2332,7 +2346,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_UploadToBlobAsync(IOTHUB_CLIENT_CORE_HANDL
     IOTHUB_CLIENT_RESULT result;
     /*Codes_SRS_IOTHUBCLIENT_02_047: [ If iotHubClientHandle is NULL then IoTHubClient_UploadToBlobAsync shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
     /*Codes_SRS_IOTHUBCLIENT_02_048: [ If destinationFileName is NULL then IoTHubClient_UploadToBlobAsync shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
-    /*Codes_SRS_IOTHUBCLIENT_02_049: [ If source is NULL and size is greated than 0 then IoTHubClient_UploadToBlobAsync shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
+    /*Codes_SRS_IOTHUBCLIENT_02_049: [ If source is NULL and size is greater than 0 then IoTHubClient_UploadToBlobAsync shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
     if (
         (iotHubClientHandle == NULL) ||
         (destinationFileName == NULL) ||
@@ -2351,7 +2365,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_UploadToBlobAsync(IOTHUB_CLIENT_CORE_HANDL
     }
     else
     {
-        /*Codes_SRS_IOTHUBCLIENT_02_051: [IoTHubClient_UploadToBlobAsync shall copy the souce, size, iotHubClientFileUploadCallback, context into a structure.]*/
+        /*Codes_SRS_IOTHUBCLIENT_02_051: [IoTHubClient_UploadToBlobAsync shall copy the source, size, iotHubClientFileUploadCallback, context into a structure.]*/
         HTTPWORKER_THREAD_INFO *threadInfo = allocateUploadToBlob(destinationFileName, iotHubClientHandle, context);
         if (threadInfo == NULL)
         {
@@ -2635,3 +2649,44 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_GenericMethodInvoke(IOTHUB_CLIENT_CORE_HAN
 }
 #endif /* USE_EDGE_MODULES */
 
+IOTHUB_CLIENT_RESULT IoTHubClientCore_SendMessageDisposition(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE message, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)
+{
+    IOTHUB_CLIENT_RESULT result;
+
+    if (iotHubClientHandle == NULL || message == NULL)
+    {
+        LogError("Invalid argument (iotHubClientHandle=%p, message=%p)", iotHubClientHandle, message);
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    else
+    {
+        IOTHUB_CLIENT_CORE_INSTANCE* iotHubClientInstance = (IOTHUB_CLIENT_CORE_INSTANCE*)iotHubClientHandle;
+
+        if ((result = StartWorkerThreadIfNeeded(iotHubClientInstance)) != IOTHUB_CLIENT_OK)
+        {
+            result = IOTHUB_CLIENT_ERROR;
+            LogError("Could not start worker thread");
+        }
+        else
+        {
+            if (Lock(iotHubClientInstance->LockHandle) != LOCK_OK)
+            {
+                result = IOTHUB_CLIENT_ERROR;
+                LogError("Could not acquire lock");
+            }
+            else
+            {
+                result = IoTHubClientCore_LL_SendMessageDisposition(iotHubClientInstance->IoTHubClientLLHandle, message, disposition);
+
+                (void)Unlock(iotHubClientInstance->LockHandle);
+
+                if (result != IOTHUB_CLIENT_OK)
+                {
+                    LogError("IoTHubClientCore_LL_SendMessageDisposition failed (result=%d)", result);
+                }
+            }
+        }
+    }
+
+    return result;
+}

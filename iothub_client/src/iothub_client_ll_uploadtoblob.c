@@ -60,12 +60,12 @@ typedef struct UPLOADTOBLOB_X509_CREDENTIALS_TAG
     char* x509privatekey;
 } UPLOADTOBLOB_X509_CREDENTIALS;
 
-typedef enum UPOADTOBLOB_CURL_VERBOSITY_TAG
+typedef enum UPLOADTOBLOB_CURL_VERBOSITY_TAG
 {
-    UPOADTOBLOB_CURL_VERBOSITY_UNSET,
-    UPOADTOBLOB_CURL_VERBOSITY_ON,
-    UPOADTOBLOB_CURL_VERBOSITY_OFF
-} UPOADTOBLOB_CURL_VERBOSITY;
+    UPLOADTOBLOB_CURL_VERBOSITY_UNSET,
+    UPLOADTOBLOB_CURL_VERBOSITY_ON,
+    UPLOADTOBLOB_CURL_VERBOSITY_OFF
+} UPLOADTOBLOB_CURL_VERBOSITY;
 
 typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA_TAG
 {
@@ -81,7 +81,7 @@ typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA_TAG
     
     char* certificates;
     HTTP_PROXY_OPTIONS http_proxy_options;
-    UPOADTOBLOB_CURL_VERBOSITY curl_verbosity_level;
+    UPLOADTOBLOB_CURL_VERBOSITY curl_verbosity_level;
     size_t blob_upload_timeout_secs;
     const char* networkInterface;
 }IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA;
@@ -694,9 +694,9 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
         }
         else
         {
-            if (upload_data->curl_verbosity_level != UPOADTOBLOB_CURL_VERBOSITY_UNSET)
+            if (upload_data->curl_verbosity_level != UPLOADTOBLOB_CURL_VERBOSITY_UNSET)
             {
-                size_t curl_verbose = (upload_data->curl_verbosity_level == UPOADTOBLOB_CURL_VERBOSITY_ON);
+                size_t curl_verbose = (upload_data->curl_verbosity_level == UPLOADTOBLOB_CURL_VERBOSITY_ON);
                 (void)HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_CURL_VERBOSE, &curl_verbose);
             }
 
@@ -707,11 +707,14 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
             }
             else
             {
+                // If client is using x509 auth, renegotiation must be turned on in order to work properly.
+                bool renegotiation_is_on = true;
                 /*transmit the x509certificate and x509privatekey*/
                 /*Codes_SRS_IOTHUBCLIENT_LL_02_106: [ - x509certificate and x509privatekey saved options shall be passed on the HTTPAPIEX_SetOption ]*/
                 if ((upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_X509 || upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_X509_ECC) &&
                     ((HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_X509_CERT, upload_data->credentials.x509_credentials.x509certificate) != HTTPAPIEX_OK) ||
-                    (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_X509_PRIVATE_KEY, upload_data->credentials.x509_credentials.x509privatekey) != HTTPAPIEX_OK))
+                    (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_X509_PRIVATE_KEY, upload_data->credentials.x509_credentials.x509privatekey) != HTTPAPIEX_OK) ||
+                    (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_SET_TLS_RENEGOTIATION, &renegotiation_is_on) != HTTPAPIEX_OK))
                     )
                 {
                     LogError("unable to HTTPAPIEX_SetOption for x509 certificate");
@@ -1167,7 +1170,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
         }
         else if (strcmp(optionName, OPTION_CURL_VERBOSE) == 0)
         {
-            upload_data->curl_verbosity_level = ((*(bool*)value) == 0) ? UPOADTOBLOB_CURL_VERBOSITY_OFF : UPOADTOBLOB_CURL_VERBOSITY_ON;
+            upload_data->curl_verbosity_level = ((*(bool*)value) == 0) ? UPLOADTOBLOB_CURL_VERBOSITY_OFF : UPLOADTOBLOB_CURL_VERBOSITY_ON;
             result = IOTHUB_CLIENT_OK;
         }
         else if (strcmp(optionName, OPTION_BLOB_UPLOAD_TIMEOUT_SECS) == 0)
