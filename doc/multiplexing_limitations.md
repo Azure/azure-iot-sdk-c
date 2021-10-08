@@ -5,7 +5,7 @@ The Azure IoT C SDK supports multiplexing - the ability to have multiple device 
 ## Prefer IoT Edge or Azure IoT C# Device SDK for multiplexing if possible
 If you are creating a gateway device, [Azure IoT Edge](http://aka.ms/iotedge) is highly recommend over using this SDK to multiplex leaf devices.  Edge was designed from the ground up for gateway scenarios including full multiplexing support, store and forward of messages, enhanced diagnostics, module support, and more.
 
-If you need multiplexing for a non-gateway scenario and if your device has the required resources, using the [Azure IoT Device SDK for C#](https://github.com/Azure/azure-iot-sdk-csharp) is highly recommended.  The C# Device SDK has a more complete feature set for multiplexing support.
+If you need multiplexing for a non-gateway scenario, and if your device has the required resources, using the [Azure IoT Device SDK for C#](https://github.com/Azure/azure-iot-sdk-csharp) is highly recommended.  The C# Device SDK has a more complete feature set for multiplexing support.
 
 *The rest of this document will discuss the Azure IoT Device SDK for C (this repo's) multiplexing support.*
 
@@ -20,7 +20,7 @@ When multiplexing over an AMQP, AMQP over WebSockets, or HTTP connection, the SD
 When multiplexing over an AMQP or AMQP over WebSockets connection (but not HTTP), the SDK also supports
 * Receiving incoming device methods (via callbacks set in `IoTHubDeviceClient_LL_SetDeviceMethodCallback` and `IoTHubDeviceClient_SetDeviceMethodCallback`).
 
-The SDK does not support any other features, such as receiving device twins, sending device twin updates, or uploading files to Azure Storage.  Any additional functionality added to the SDK will *not* support multiplexing.
+The SDK does not support any other features, such as receiving device twins, sending device twin updates, or uploading files to Azure Storage.  Any additional IoT features added to the SDK will *not* support multiplexing.
 
 ## Device client support only
 Multiplexing only works when using device client handles (`IOTHUB_DEVICE_CLIENT_HANDLE` and `IOTHUB_DEVICE_CLIENT_LL_HANDLE`).  Modules (`IOTHUB_MODULE_CLIENT_HANDLE` and `IOTHUB_MODULE_CLIENT_LL_HANDLE`) are not supported.
