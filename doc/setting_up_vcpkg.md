@@ -63,70 +63,11 @@ This document describes how to setup vcpkg to build applications using Microsoft
     ./vcpkg install azure-iot-sdk-c
     cd ..
     ```
-- Enter the existing C SDK telemetry sample directory.
+- Enter the C SDK telemetry sample directory.
 
     ```bash
     git clone https://github.com/Azure/azure-iot-sdk-c.git # Skip if already have a cloned repo
     cd azure-iot-sdk-c/iothub_client/samples/iothub_ll_telemetry_sample/linux/
-    ```
-
-- Open the `CMakeLists.txt` file and replace the current contents with the following:
-
-    ```bash
-    #Copyright (c) Microsoft. All rights reserved.
-    #Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-    cmake_minimum_required(VERSION 3.5)
-
-    cmake_policy(SET CMP0074 NEW)
-
-    project(telemetry_sample)
-
-    if(WIN32)
-        message(FATAL_ERROR "This CMake file only supports Linux builds!")
-    endif()
-
-    set(AZUREIOT_INC_FOLDER ".." "/usr/include/azureiot" "/usr/include/azureiot/inc")
-    find_package(azure_iot_sdks REQUIRED)
-    find_package(ZLIB REQUIRED)
-
-    include_directories(${AZUREIOT_INC_FOLDER})
-
-    set(iothub_c_files
-        ../iothub_ll_telemetry_sample.c
-        ../../../../certs/certs.c
-    )
-
-    add_definitions(-DUSE_HTTP)
-    add_definitions(-DUSE_AMQP)
-    add_definitions(-DUSE_MQTT)
-    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
-    include_directories("../../../../certs")
-
-    add_executable(iothub_ll_telemetry_sample ${iothub_c_files})
-
-    find_library(CURL NAMES curl-d curl)
-
-    target_link_libraries(iothub_ll_telemetry_sample
-        iothub_client_mqtt_transport
-        iothub_client_amqp_transport
-        iothub_client
-        parson
-        aziotsharedutil
-        umqtt
-        uuid
-        ${CURL}
-        pthread
-        ssl
-        crypto
-        m
-        ZLIB::ZLIB
-    )
-    ```
-
-- Run the following commands:
-
-    ```bash
     mkdir cmake
     cd cmake
     cmake .. -DCMAKE_TOOLCHAIN_FILE=~/vcpkg_new/scripts/buildsystems/vcpkg.cmake
