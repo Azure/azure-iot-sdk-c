@@ -1,96 +1,137 @@
 # Building applications using vcpkg for C SDK
 
-This document describes how to setup vcpkg to build applications using Microsoft Azure IoT device SDK for C. It demonstrates building sample projects in Windows using the Visual Studio project files included in the SDK. It also demonstrates building standalone applications using cmake project files in Linux and Mac.
+This document describes how to setup vcpkg to build applications using Microsoft Azure IoT device SDK for C. It demonstrates building and running a C SDK sample for Windows, Linux, and Mac.
 
 ## Setup C SDK vcpkg for Windows development environment
 
+- Open PowerShell and run the following commands:
+
+    ```powershell
+    git clone https://github.com/Microsoft/vcpkg.git vcpkg_new
+    pushd .\vcpkg_new\
+    .\bootstrap-vcpkg.bat
+    ```
+
+    - Option 1: Install using Visual Studio integration.
+
+        ```powershell
+        # Install azure-iot-sdk-c package with integration
+        .\vcpkg.exe integrate install
+        .\vcpkg.exe install azure-iot-sdk-c
+        popd
+
+        # Open the C SDK telemetry sample solution for Visual Studio.
+        git clone https://github.com/Azure/azure-iot-sdk-c.git # Skip if already have a cloned repo
+        pushd .\azure-iot-sdk-c\iothub_client\samples\iothub_ll_telemetry_sample\windows\
+        start .\iothub_ll_telemetry_sample.sln
+        ```
+
+    - Option 2: Use the NuGet package manager in Visual Studio.
+
+        ```powershell
+        # Install azure-iot-sdk-c package
+        .\vcpkg.exe install azure-iot-sdk-c
+
+        # Export nuget package locally
+        .\vcpkg.exe export azure-iot-sdk-c --nuget
+        popd
+
+        # Open the C SDK telemetry sample solution for Visual Studio.
+        git clone https://github.com/Azure/azure-iot-sdk-c.git # Skip if already have a cloned repo
+        pushd .\azure-iot-sdk-c\iothub_client\samples\iothub_ll_telemetry_sample\windows\
+        start .\iothub_ll_telemetry_sample.sln
+        ```
+
+        - With the sample solution open in Visual Studio, go to Tools->NuGet Package Manager->Package Manager Console and paste:
+
+        ```
+        Install-Package <package name provided from vcpkg export nuget command> -Source "C:\vcpkg_new"
+        ```
+
+- Hit F5 to build and run.
+
+- More information on building the C SDK and samples can be found [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/devbox_setup.md).
+
+## Setup C SDK vcpkg for Linux or Mac development environment
+
 - Open a command prompt and run the following commands:
 
-```Shell
+    ```bash
+    git clone https://github.com/Microsoft/vcpkg.git vcpkg_new
+    cd vcpkg_new/
+    ./bootstrap-vcpkg.sh
+    ./vcpkg install azure-iot-sdk-c
+    cd ..
+    ```
+- Enter the existing C SDK telemetry sample directory.
 
-# Clone vcpkg
-git clone https://github.com/Microsoft/vcpkg.git vcpkg_new
+    ```bash
+    git clone https://github.com/Azure/azure-iot-sdk-c.git # Skip if already have a cloned repo
+    cd azure-iot-sdk-c/iothub_client/samples/iothub_ll_telemetry_sample/linux/
+    ```
 
-# Bootstrap and install Visual Studio integration
-pushd vcpkg_new
-.\bootstrap-vcpkg.bat
-vcpkg integrate install
+- Open the `CMakeLists.txt` file and replace the current contents with the following:
 
-# Install azure-iot-sdk-c package
-vcpkg install azure-iot-sdk-c
+    ```bash
+    #Copyright (c) Microsoft. All rights reserved.
+    #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-# Optional, useful if you need to share or restore a box with the sdk without building it
-# Export nuget package locally
-vcpkg export azure-iot-sdk-c --nuget
+    cmake_minimum_required(VERSION 3.5)
 
-# Open a C SDK sample (assuming repo was cloned as follows: git clone https://github.com/Azure/azure-iot-sdk-c.git azureiotsdk_sample)
-# (Building the SDK and samples can be found here https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/devbox_setup.md)
-pushd azureiotsdk_sample\iothub_client\samples\iothub_ll_c2d_sample\windows
-start iothub_ll_c2d_sample.sln
-<hit F5 to build and run>
-```
+    cmake_policy(SET CMP0074 NEW)
 
-- Alternatively, if the Visual Studio integration step isn't setup, it is possible to build the sample using the locally generated NugGet package. In order to use the locally vcpkg-exported package in Visual Studio, open Nuget package manager console and run the following commands:
-```Shell
-Install-Package <package name provided by vcpkg export command> -Source "d:\d\vcpkg_new"
-<hit F5 to build and run>
-```
+    project(telemetry_sample)
 
-## Setup C SDK vcpkg for Linux or Mac development environment	
-		
-- Within an existing C SDK sample cmake file (e.g. iothub_client/samples/iothub_ll_telemetry_sample/linux/CMakeLists.txt), replace the current contents with the following:
+    if(WIN32)
+        message(FATAL_ERROR "This CMake file only supports Linux builds!")
+    endif()
 
-```Shell
-#Copyright (c) Microsoft. All rights reserved.	
-#Licensed under the MIT license. See LICENSE file in the project root for full license information.
+    set(AZUREIOT_INC_FOLDER ".." "/usr/include/azureiot" "/usr/include/azureiot/inc")
+    find_package(azure_iot_sdks REQUIRED)
+    find_package(ZLIB REQUIRED)
 
-#this is CMakeLists.txt for iothub_ll_telemetry_sample
-cmake_minimum_required(VERSION 2.8.11)
+    include_directories(${AZUREIOT_INC_FOLDER})
 
-if(WIN32)
-message(FATAL_ERROR "This CMake file is only support Linux builds!")
-endif()
+    set(iothub_c_files
+        ../iothub_ll_telemetry_sample.c
+        ../../../../certs/certs.c
+    )
 
-set(AZUREIOT_INC_FOLDER ".." "/usr/include/azureiot" "/usr/include/azureiot/inc")
-find_package(azure_iot_sdks REQUIRED)
-find_package(ZLIB REQUIRED)
+    add_definitions(-DUSE_HTTP)
+    add_definitions(-DUSE_AMQP)
+    add_definitions(-DUSE_MQTT)
+    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
+    include_directories("../../../../certs")
 
-include_directories(${AZUREIOT_INC_FOLDER})
+    add_executable(iothub_ll_telemetry_sample ${iothub_c_files})
 
-set(iothub_c_files
-../iothub_ll_telemetry_sample.c
-../../../../certs/certs.c
-)
+    find_library(CURL NAMES curl-d curl)
 
-add_definitions(-DUSE_HTTP)
-add_definitions(-DUSE_AMQP)
-add_definitions(-DUSE_MQTT)
+    target_link_libraries(iothub_ll_telemetry_sample
+        iothub_client_mqtt_transport
+        iothub_client_amqp_transport
+        iothub_client
+        parson
+        aziotsharedutil
+        umqtt
+        uuid
+        ${CURL}
+        pthread
+        ssl
+        crypto
+        m
+        ZLIB::ZLIB
+    )
+    ```
 
-add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
-include_directories("../../../../certs")
+- Run the following commands:
 
-add_executable(iothub_ll_telemetry_sample ${iothub_c_files})
-find_library(CURL NAMES curl-d curl)
-target_link_libraries(iothub_ll_telemetry_sample
-iothub_client_mqtt_transport
-iothub_client_amqp_transport
-iothub_client
-parson
-aziotsharedutil
-umqtt
-uuid
-${CURL}
-pthread
-ssl
-crypto
-m
-ZLIB::ZLIB
-)
-```
+    ```bash
+    mkdir cmake
+    cd cmake
+    cmake .. -DCMAKE_TOOLCHAIN_FILE=~/vcpkg_new/scripts/buildsystems/vcpkg.cmake
+    cmake --build .
+    ./iothub_ll_telemetry_sample
+    ```
 
-- Run following commands in the newly created cmake directory:
-```Shell
-cmake .. -DCMAKE_TOOLCHAIN_FILE=~/vcpkg_new/scripts/buildsystems/vcpkg.cmake
-cmake --build .
-./iothub_ll_telemetry_sample
-```
+- More information on building the C SDK and samples can be found [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/devbox_setup.md).
