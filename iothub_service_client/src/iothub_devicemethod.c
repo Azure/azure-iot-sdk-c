@@ -137,7 +137,7 @@ static BUFFER_HANDLE createMethodPayloadJson(const char* methodName, unsigned in
     const char* stringHandle_c_str;
     BUFFER_HANDLE result;
 
-    if ((stringHandle = STRING_construct_sprintf(RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD, methodName, timeout, payload)) == NULL)
+    if ((stringHandle = STRING_construct_sprintf(RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD, methodName, timeout, payload == NULL ? "null" : payload)) == NULL)
     {
         LogError("STRING_construct_sprintf failed");
         result = NULL;
@@ -475,77 +475,53 @@ static IOTHUB_DEVICE_METHOD_RESULT IoTHubDeviceMethod_DeviceOrModuleInvoke(IOTHU
         BUFFER_HANDLE httpPayloadBuffer;
         BUFFER_HANDLE responseBuffer;
 
-        // NULL BUFFER_HANDLE if the payload is NULL.
-        if (methodPayload == NULL)
+        /*Codes_SRS_IOTHUBDEVICEMETHOD_12_032: [ IoTHubDeviceMethod_Invoke(Module) shall create a BUFFER_HANDLE from methodName, timeout and methodPayload by calling BUFFER_create ]*/
+        if ((httpPayloadBuffer = createMethodPayloadJson(methodName, timeout, methodPayload)) == NULL)
         {
-            if ((httpPayloadBuffer = BUFFER_new()) == NULL)
-            {
-                /*Codes_SRS_IOTHUBDEVICEMETHOD_12_035: [ If the allocation failed, IoTHubDeviceMethod_Invoke(Module) shall return IOTHUB_DEVICE_METHOD_ERROR ]*/
-                LogError("BUFFER_new failed for httpPayloadBuffer");
-                result = IOTHUB_DEVICE_METHOD_ERROR;
-            }
-            else
-            {
-                result = IOTHUB_DEVICE_METHOD_OK;
-            }
+            /*Codes_SRS_IOTHUBDEVICEMETHOD_12_033: [ If the creation fails, IoTHubDeviceMethod_Invoke(Module) shall return IOTHUB_DEVICE_METHOD_ERROR ]*/
+            LogError("BUFFER creation failed for httpPayloadBuffer");
+            result = IOTHUB_DEVICE_METHOD_ERROR;
         }
-        else
+        /*Codes_SRS_IOTHUBDEVICEMETHOD_12_034: [ IoTHubDeviceMethod_Invoke(Module) shall allocate memory for response buffer by calling BUFFER_new ]*/
+        else if ((responseBuffer = BUFFER_new()) == NULL)
         {
-            /*Codes_SRS_IOTHUBDEVICEMETHOD_12_032: [ IoTHubDeviceMethod_Invoke(Module) shall create a BUFFER_HANDLE from methodName, timeout and methodPayload by calling BUFFER_create ]*/
-            if ((httpPayloadBuffer = createMethodPayloadJson(methodName, timeout, methodPayload)) == NULL)
-            {
-                /*Codes_SRS_IOTHUBDEVICEMETHOD_12_033: [ If the creation fails, IoTHubDeviceMethod_Invoke(Module) shall return IOTHUB_DEVICE_METHOD_ERROR ]*/
-                LogError("BUFFER creation failed for httpPayloadBuffer");
-                result = IOTHUB_DEVICE_METHOD_ERROR;
-            }
-            else
-            {
-                result = IOTHUB_DEVICE_METHOD_OK;
-            }
+            /*Codes_SRS_IOTHUBDEVICEMETHOD_12_035: [ If the allocation failed, IoTHubDeviceMethod_Invoke(Module) shall return IOTHUB_DEVICE_METHOD_ERROR ]*/
+            LogError("BUFFER_new failed for responseBuffer");
+            BUFFER_delete(httpPayloadBuffer);
+            result = IOTHUB_DEVICE_METHOD_ERROR;
         }
-
         /*Codes_SRS_IOTHUBDEVICEMETHOD_12_039: [ IoTHubDeviceMethod_Invoke(Module) shall create an HTTP POST request using methodPayloadBuffer ]*/
         /*Codes_SRS_IOTHUBDEVICEMETHOD_12_040: [ IoTHubDeviceMethod_Invoke(Module) shall create an HTTP POST request using the following HTTP headers: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ]*/
         /*Codes_SRS_IOTHUBDEVICEMETHOD_12_041: [ IoTHubDeviceMethod_Invoke(Module) shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ]*/
         /*Codes_SRS_IOTHUBDEVICEMETHOD_12_042: [ IoTHubDeviceMethod_Invoke(Module) shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ]*/
         /*Codes_SRS_IOTHUBDEVICEMETHOD_12_043: [ IoTHubDeviceMethod_Invoke(Module) shall execute the HTTP POST request by calling HTTPAPIEX_ExecuteRequest ]*/
-        if (result == IOTHUB_DEVICE_METHOD_OK)
+        /*Codes_SRS_IOTHUBDEVICEMETHOD_12_034: [ IoTHubDeviceMethod_Invoke(Module) shall allocate memory for response buffer by calling BUFFER_new ]*/
+        else if (sendHttpRequestDeviceMethod(serviceClientDeviceMethodHandle, IOTHUB_DEVICEMETHOD_REQUEST_INVOKE, deviceId, moduleId, httpPayloadBuffer, responseBuffer) != IOTHUB_DEVICE_METHOD_OK)
         {
-            /*Codes_SRS_IOTHUBDEVICEMETHOD_12_034: [ IoTHubDeviceMethod_Invoke(Module) shall allocate memory for response buffer by calling BUFFER_new ]*/
-            if ((responseBuffer = BUFFER_new()) == NULL)
-            {
-                /*Codes_SRS_IOTHUBDEVICEMETHOD_12_035: [ If the allocation failed, IoTHubDeviceMethod_Invoke(Module) shall return IOTHUB_DEVICE_METHOD_ERROR ]*/
-                LogError("BUFFER_new failed for responseBuffer");
-                BUFFER_delete(httpPayloadBuffer);
-                result = IOTHUB_DEVICE_METHOD_ERROR;
-            }
-            else if (sendHttpRequestDeviceMethod(serviceClientDeviceMethodHandle, IOTHUB_DEVICEMETHOD_REQUEST_INVOKE, deviceId, moduleId, httpPayloadBuffer, responseBuffer) != IOTHUB_DEVICE_METHOD_OK)
-            {
-                /*Codes_SRS_IOTHUBDEVICEMETHOD_12_044: [ If any of the call fails during the HTTP creation IoTHubDeviceMethod_Invoke(Module) shall fail and return IOTHUB_DEVICE_METHOD_HTTPAPI_ERROR ]*/
-                /*Codes_SRS_IOTHUBDEVICEMETHOD_12_045: [ If any of the HTTPAPI call fails IoTHubDeviceMethod_Invoke(Module) shall fail and return IOTHUB_DEVICE_METHOD_HTTPAPI_ERROR ]*/
-                /*Codes_SRS_IOTHUBDEVICEMETHOD_12_046: [ IoTHubDeviceMethod_Invoke(Module) shall verify the received HTTP status code and if it is not equal to 200 then return IOTHUB_DEVICE_METHOD_ERROR ]*/
-                LogError("Failure sending HTTP request for device method invoke");
-                BUFFER_delete(responseBuffer);
-                BUFFER_delete(httpPayloadBuffer);
-                result = IOTHUB_DEVICE_METHOD_ERROR;
-            }
+            /*Codes_SRS_IOTHUBDEVICEMETHOD_12_044: [ If any of the call fails during the HTTP creation IoTHubDeviceMethod_Invoke(Module) shall fail and return IOTHUB_DEVICE_METHOD_HTTPAPI_ERROR ]*/
+            /*Codes_SRS_IOTHUBDEVICEMETHOD_12_045: [ If any of the HTTPAPI call fails IoTHubDeviceMethod_Invoke(Module) shall fail and return IOTHUB_DEVICE_METHOD_HTTPAPI_ERROR ]*/
+            /*Codes_SRS_IOTHUBDEVICEMETHOD_12_046: [ IoTHubDeviceMethod_Invoke(Module) shall verify the received HTTP status code and if it is not equal to 200 then return IOTHUB_DEVICE_METHOD_ERROR ]*/
+            LogError("Failure sending HTTP request for device method invoke");
+            BUFFER_delete(responseBuffer);
+            BUFFER_delete(httpPayloadBuffer);
+            result = IOTHUB_DEVICE_METHOD_ERROR;
+        }
+        /*Codes_SRS_IOTHUBDEVICEMETHOD_12_049: [ Otherwise IoTHubDeviceMethod_Invoke(Module) shall save the received status and payload to the corresponding out parameter and return with IOTHUB_DEVICE_METHOD_OK ]*/
+        else if ((parseResponseJson(responseBuffer, responseStatus, responsePayload, responsePayloadSize)) != IOTHUB_DEVICE_METHOD_OK)
+        {
+            /*Codes_SRS_IOTHUBDEVICEMETHOD_12_047: [ If parsing the response fails IoTHubDeviceMethod_Invoke(Module) shall return IOTHUB_DEVICE_METHOD_ERROR ]*/
+            LogError("Failure parsing response");
+            BUFFER_delete(responseBuffer);
+            BUFFER_delete(httpPayloadBuffer);
+            result = IOTHUB_DEVICE_METHOD_ERROR;
+        }
+        else
+        {
             /*Codes_SRS_IOTHUBDEVICEMETHOD_12_049: [ Otherwise IoTHubDeviceMethod_Invoke(Module) shall save the received status and payload to the corresponding out parameter and return with IOTHUB_DEVICE_METHOD_OK ]*/
-            else if ((parseResponseJson(responseBuffer, responseStatus, responsePayload, responsePayloadSize)) != IOTHUB_DEVICE_METHOD_OK)
-            {
-                /*Codes_SRS_IOTHUBDEVICEMETHOD_12_047: [ If parsing the response fails IoTHubDeviceMethod_Invoke(Module) shall return IOTHUB_DEVICE_METHOD_ERROR ]*/
-                LogError("Failure parsing response");
-                BUFFER_delete(responseBuffer);
-                BUFFER_delete(httpPayloadBuffer);
-                result = IOTHUB_DEVICE_METHOD_ERROR;
-            }
-            else
-            {
-                /*Codes_SRS_IOTHUBDEVICEMETHOD_12_049: [ Otherwise IoTHubDeviceMethod_Invoke(Module) shall save the received status and payload to the corresponding out parameter and return with IOTHUB_DEVICE_METHOD_OK ]*/
-                result = IOTHUB_DEVICE_METHOD_OK;
+            result = IOTHUB_DEVICE_METHOD_OK;
 
-                BUFFER_delete(responseBuffer);
-                BUFFER_delete(httpPayloadBuffer);
-            }
+            BUFFER_delete(responseBuffer);
+            BUFFER_delete(httpPayloadBuffer);
         }
     }
     return result;
