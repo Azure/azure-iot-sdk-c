@@ -383,7 +383,10 @@ static void SendMaxTemperatureSinceReboot(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceC
     }
     else
     {
-        IOTHUB_CLIENT_REPORTED_PROPERTY maxTempProperty = { IOTHUB_CLIENT_REPORTED_PROPERTY_STRUCT_VERSION_1, g_maxTempSinceLastRebootPropertyName, maximumTemperatureAsString };
+        IOTHUB_CLIENT_REPORTED_PROPERTY maxTempProperty;
+        maxTempProperty.structVersion = IOTHUB_CLIENT_REPORTED_PROPERTY_STRUCT_VERSION_1;
+        maxTempProperty.name = g_maxTempSinceLastRebootPropertyName;
+        maxTempProperty.value =  maximumTemperatureAsString;
 
         unsigned char* propertySerialized = NULL;
         size_t propertySerializedLength;
@@ -415,7 +418,7 @@ static void Thermostat_ProcessTargetTemperature(IOTHUB_DEVICE_CLIENT_LL_HANDLE d
     double targetTemperature = strtod(property->value.str, &next);
     if ((property->value.str == next) || (targetTemperature == LONG_MAX) || (targetTemperature == LONG_MIN))
     {
-        LogError("Property %s is not a valid integer", property->value.str);
+        LogError("Property %s is not a valid number", property->value.str);
         SendTargetTemperatureResponse(deviceClient, property->value.str, PNP_STATUS_BAD_FORMAT, propertiesVersion, g_temperaturePropertyResponseDescriptionNotInt);
     }
     else
@@ -449,7 +452,7 @@ static void Thermostat_PropertiesCallback(IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE pa
 
     // The properties arrive as a raw JSON buffer (which is not null-terminated).  IoTHubClient_Deserialize_Properties_CreateIterator parses 
     // this into a more convenient form to allow property-by-property enumeration over the updated properties.
-    if ((clientResult = IoTHubClient_Deserialize_Properties_CreateIterator(payloadType, payload, payloadLength, NULL, 0, &propertyIterator)) != IOTHUB_CLIENT_OK)
+    if ((clientResult = IoTHubClient_Deserialize_Properties_CreateIterator(payloadType, payload, payloadLength, &propertyIterator)) != IOTHUB_CLIENT_OK)
     {
         LogError("IoTHubClient_Deserialize_Properties failed, error=%d", clientResult);
     }

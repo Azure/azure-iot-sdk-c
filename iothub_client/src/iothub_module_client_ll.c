@@ -368,5 +368,79 @@ IOTHUB_CLIENT_RESULT IoTHubModuleClient_LL_ModuleMethodInvoke(IOTHUB_MODULE_CLIE
     }
     return result;
 }
-
 #endif /*USE_EDGE_MODULES*/
+
+IOTHUB_CLIENT_RESULT IoTHubModuleClient_LL_SendTelemetryAsync(IOTHUB_MODULE_CLIENT_LL_HANDLE iotHubModuleClientHandle,  IOTHUB_MESSAGE_HANDLE telemetryMessageHandle, IOTHUB_CLIENT_TELEMETRY_CALLBACK telemetryConfirmationCallback, void* userContextCallback)
+{
+    IOTHUB_CLIENT_RESULT result;
+    if (iotHubModuleClientHandle != NULL)
+    {
+        result = IoTHubClientCore_LL_SendEventAsync(iotHubModuleClientHandle->coreHandle, telemetryMessageHandle, (IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK)telemetryConfirmationCallback, userContextCallback);
+    }
+    else
+    {
+        LogError("iotHubModuleClientHandle parameter cannot be NULL");
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubModuleClient_LL_SendPropertiesAsync(IOTHUB_MODULE_CLIENT_LL_HANDLE iotHubModuleClientHandle, const unsigned char* properties, size_t propertiesLength, IOTHUB_CLIENT_PROPERTY_ACKNOWLEDGED_CALLBACK propertyAcknowledgedCallback, void* userContextCallback)
+{
+    IOTHUB_CLIENT_RESULT result;
+    if (iotHubModuleClientHandle != NULL)
+    {
+        result = IoTHubClientCore_LL_SendReportedState(iotHubModuleClientHandle->coreHandle, properties, propertiesLength, (IOTHUB_CLIENT_REPORTED_STATE_CALLBACK)propertyAcknowledgedCallback, userContextCallback);
+    }
+    else
+    {
+        LogError("iotHubModuleClientHandle parameter cannot be NULL");
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubModuleClient_LL_SubscribeToCommands(IOTHUB_MODULE_CLIENT_LL_HANDLE iotHubModuleClientHandle, IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC commandCallback, void* userContextCallback)
+{
+    IOTHUB_CLIENT_RESULT result;
+    if (iotHubModuleClientHandle != NULL)
+    {
+        result = IoTHubClientCore_LL_SubscribeToCommands(iotHubModuleClientHandle->coreHandle, commandCallback, userContextCallback);
+    }
+    else
+    {
+        LogError("iotHubModuleClientHandle parameter cannot be NULL");
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubModuleClient_LL_GetPropertiesAsync(IOTHUB_MODULE_CLIENT_LL_HANDLE iotHubModuleClientHandle,  IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK propertyCallback,  void* userContextCallback)
+{
+    IOTHUB_CLIENT_RESULT result;
+    if (iotHubModuleClientHandle != NULL)
+    {
+        result = IoTHubClientCore_LL_GetTwinAsync(iotHubModuleClientHandle->coreHandle, (IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)propertyCallback, userContextCallback);
+    }
+    else
+    {
+        LogError("iotHubModuleClientHandle parameter cannot be NULL");
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubModuleClient_LL_GetPropertiesAndSubscribeToUpdatesAsync(IOTHUB_MODULE_CLIENT_LL_HANDLE iotHubModuleClientHandle, IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK propertiesCallback, void* userContextCallback)
+{
+    IOTHUB_CLIENT_RESULT result;
+    if (iotHubModuleClientHandle != NULL)
+    {
+        result = IoTHubClientCore_LL_SetDeviceTwinCallback(iotHubModuleClientHandle->coreHandle, (IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)propertiesCallback, userContextCallback);
+    }
+    else
+    {
+        LogError("iotHubModuleClientHandle parameter cannot be NULL");
+        result = IOTHUB_CLIENT_INVALID_ARG;
+    }
+    return result;
+}

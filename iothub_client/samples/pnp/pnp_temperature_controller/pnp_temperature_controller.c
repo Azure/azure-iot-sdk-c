@@ -76,10 +76,6 @@ static const char g_thermostatComponent1Name[] = "thermostat1";
 static const char g_thermostatComponent2Name[] = "thermostat2";
 static const char g_deviceInfoComponentName[] = "deviceInformation";
 
-// All components modeled by this device.
-static const char* g_modeledComponents[] = {g_thermostatComponent1Name, g_thermostatComponent2Name, g_deviceInfoComponentName};
-static const size_t g_numModeledComponents = sizeof(g_modeledComponents) / sizeof(g_modeledComponents[0]);
-
 // Command implemented by the TemperatureControl component itself to implement reboot.
 static const char g_rebootCommand[] = "reboot";
 
@@ -259,7 +255,7 @@ static void PnP_TempControlComponent_UpdatedPropertyCallback(
 
     // The properties arrive as a raw JSON buffer (which is not null-terminated).  IoTHubClient_Deserialize_Properties_CreateIterator parses 
     // this into a more convenient form to allow property-by-property enumeration over the updated properties.
-    if ((clientResult = IoTHubClient_Deserialize_Properties_CreateIterator(payloadType, payload, payloadLength, g_modeledComponents, g_numModeledComponents, &propertyIterator)) != IOTHUB_CLIENT_OK)
+    if ((clientResult = IoTHubClient_Deserialize_Properties_CreateIterator(payloadType, payload, payloadLength, &propertyIterator)) != IOTHUB_CLIENT_OK)
     {
         LogError("IoTHubClient_Deserialize_Properties failed, error=%d", clientResult);
     }
