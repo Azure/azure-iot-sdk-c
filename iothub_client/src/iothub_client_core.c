@@ -2129,38 +2129,42 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetDeviceMethodCallback(IOTHUB_CLIENT_CORE
         result = IOTHUB_CLIENT_ERROR;
         LogError("Could not acquire lock");
     }
-    else if (iotHubClientInstance->command_callback != NULL)
-    {
-        // Check whether command_callback is specified.  An application can call IoTHubClientCore_SetDeviceMethodCallback multiple
-        // times, but they cannot mix and match calls between IoTHubClientCore_SetDeviceMethodCallback and IoTHubClientCore_SubscribeToCommands.
-        result = IOTHUB_CLIENT_ERROR;
-        LogError("Command callback already defined");
-    }
     else
     {
-        freeDeviceMethodContext(iotHubClientInstance);
-        if (deviceMethodCallback == NULL)
+        if (iotHubClientInstance->command_callback != NULL)
         {
-            result = IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(iotHubClientInstance->IoTHubClientLLHandle, NULL, NULL);
+            // Check whether command_callback is specified.  An application can call IoTHubClientCore_SetDeviceMethodCallback multiple
+            // times, but they cannot mix and match calls between IoTHubClientCore_SetDeviceMethodCallback and IoTHubClientCore_SubscribeToCommands.
+            result = IOTHUB_CLIENT_ERROR;
+            LogError("Command callback already defined");
         }
         else
         {
-            if ((result = allocateQueueContextForMethodCallback(iotHubClientInstance, userContextCallback)) != IOTHUB_CLIENT_OK)
+            freeDeviceMethodContext(iotHubClientInstance);
+            if (deviceMethodCallback == NULL)
             {
-                ;
-            }
-            /*Codes_SRS_IOTHUBCLIENT_12_016: [ IoTHubClient_SetDeviceMethodCallback shall call IoTHubClientCore_LL_SetDeviceMethodCallback, while passing the IoTHubClientCore_LL_handle created by IoTHubClientCore_LL_Create along with the parameters deviceMethodCallback and userContextCallback. ]*/
-            /*Codes_SRS_IOTHUBCLIENT_12_017: [ When IoTHubClientCore_LL_SetDeviceMethodCallback is called, IoTHubClient_SetDeviceMethodCallback shall return the result of IoTHubClientCore_LL_SetDeviceMethodCallback. ]*/
-            else if ((result = IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(iotHubClientInstance->IoTHubClientLLHandle, iothub_ll_device_method_callback, iotHubClientInstance->method_user_context)) != IOTHUB_CLIENT_OK)
-            {
-                LogError("IoTHubClientCore_LL_SetDeviceMethodCallback_Ex failed");
-                freeDeviceMethodContext(iotHubClientInstance);
+                result = IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(iotHubClientInstance->IoTHubClientLLHandle, NULL, NULL);
             }
             else
             {
-                iotHubClientInstance->device_method_callback = deviceMethodCallback;
+                if ((result = allocateQueueContextForMethodCallback(iotHubClientInstance, userContextCallback)) != IOTHUB_CLIENT_OK)
+                {
+                    ;
+                }
+                /*Codes_SRS_IOTHUBCLIENT_12_016: [ IoTHubClient_SetDeviceMethodCallback shall call IoTHubClientCore_LL_SetDeviceMethodCallback, while passing the IoTHubClientCore_LL_handle created by IoTHubClientCore_LL_Create along with the parameters deviceMethodCallback and userContextCallback. ]*/
+                /*Codes_SRS_IOTHUBCLIENT_12_017: [ When IoTHubClientCore_LL_SetDeviceMethodCallback is called, IoTHubClient_SetDeviceMethodCallback shall return the result of IoTHubClientCore_LL_SetDeviceMethodCallback. ]*/
+                else if ((result = IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(iotHubClientInstance->IoTHubClientLLHandle, iothub_ll_device_method_callback, iotHubClientInstance->method_user_context)) != IOTHUB_CLIENT_OK)
+                {
+                    LogError("IoTHubClientCore_LL_SetDeviceMethodCallback_Ex failed");
+                    freeDeviceMethodContext(iotHubClientInstance);
+                }
+                else
+                {
+                    iotHubClientInstance->device_method_callback = deviceMethodCallback;
+                }
             }
         }
+
         (void)Unlock(iotHubClientInstance->LockHandle);
     }
     
@@ -2191,38 +2195,42 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetDeviceMethodCallback_Ex(IOTHUB_CLIENT_C
         result = IOTHUB_CLIENT_ERROR;
         LogError("Could not acquire lock");
     }
-    else if (iotHubClientInstance->command_callback != NULL)
-    {
-        // Check whether command_callback is specified.  An application can call IoTHubClientCore_SetDeviceMethodCallback_Ex multiple
-        // times, but they cannot mix and match calls between IoTHubClientCore_SetDeviceMethodCallback and IoTHubClientCore_SubscribeToCommands.
-        result = IOTHUB_CLIENT_ERROR;
-        LogError("Command callback already defined");
-    }
     else
     {
-        freeDeviceMethodContext(iotHubClientInstance);
-        if (inboundDeviceMethodCallback == NULL)
+        if (iotHubClientInstance->command_callback != NULL)
         {
-            /* Codes_SRS_IOTHUBCLIENT_07_008: [ If inboundDeviceMethodCallback is NULL, IoTHubClient_SetDeviceMethodCallback_Ex shall call IoTHubClientCore_LL_SetDeviceMethodCallback_Ex, passing NULL for the iothub_ll_inbound_device_method_callback. ] */
-            result = IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(iotHubClientInstance->IoTHubClientLLHandle, NULL, NULL);
+            // Check whether command_callback is specified.  An application can call IoTHubClientCore_SetDeviceMethodCallback_Ex multiple
+            // times, but they cannot mix and match calls between IoTHubClientCore_SetDeviceMethodCallback and IoTHubClientCore_SubscribeToCommands.
+            result = IOTHUB_CLIENT_ERROR;
+            LogError("Command callback already defined");
         }
         else
         {
-            if ((result = allocateQueueContextForMethodCallback(iotHubClientInstance, userContextCallback)) != IOTHUB_CLIENT_OK)
+            freeDeviceMethodContext(iotHubClientInstance);
+            if (inboundDeviceMethodCallback == NULL)
             {
-                ;
-            }
-            /*Codes_SRS_IOTHUBCLIENT_07_005: [ IoTHubClient_SetDeviceMethodCallback_Ex shall call IoTHubClientCore_LL_SetDeviceMethodCallback_Ex, while passing the IoTHubClientCore_LL_handle created by IoTHubClientCore_LL_Create along with the parameters iothub_ll_inbound_device_method_callback and IOTHUB_QUEUE_CONTEXT. ]*/
-            /* Codes_SRS_IOTHUBCLIENT_07_006: [ When IoTHubClientCore_LL_SetDeviceMethodCallback_Ex is called, IoTHubClient_SetDeviceMethodCallback_Ex shall return the result of IoTHubClientCore_LL_SetDeviceMethodCallback_Ex. ] */
-            else if ((result = IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(iotHubClientInstance->IoTHubClientLLHandle, iothub_ll_inbound_device_method_callback, iotHubClientInstance->method_user_context)) != IOTHUB_CLIENT_OK)
-            {
-                LogError("IoTHubClientCore_LL_SetDeviceMethodCallback_Ex failed");
-                freeDeviceMethodContext(iotHubClientInstance);
+                /* Codes_SRS_IOTHUBCLIENT_07_008: [ If inboundDeviceMethodCallback is NULL, IoTHubClient_SetDeviceMethodCallback_Ex shall call IoTHubClientCore_LL_SetDeviceMethodCallback_Ex, passing NULL for the iothub_ll_inbound_device_method_callback. ] */
+                result = IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(iotHubClientInstance->IoTHubClientLLHandle, NULL, NULL);
             }
             else
             {
-                iotHubClientInstance->inbound_device_method_callback = inboundDeviceMethodCallback;
+                if ((result = allocateQueueContextForMethodCallback(iotHubClientInstance, userContextCallback)) != IOTHUB_CLIENT_OK)
+                {
+                    ;
+                }
+                /*Codes_SRS_IOTHUBCLIENT_07_005: [ IoTHubClient_SetDeviceMethodCallback_Ex shall call IoTHubClientCore_LL_SetDeviceMethodCallback_Ex, while passing the IoTHubClientCore_LL_handle created by IoTHubClientCore_LL_Create along with the parameters iothub_ll_inbound_device_method_callback and IOTHUB_QUEUE_CONTEXT. ]*/
+                /* Codes_SRS_IOTHUBCLIENT_07_006: [ When IoTHubClientCore_LL_SetDeviceMethodCallback_Ex is called, IoTHubClient_SetDeviceMethodCallback_Ex shall return the result of IoTHubClientCore_LL_SetDeviceMethodCallback_Ex. ] */
+                else if ((result = IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(iotHubClientInstance->IoTHubClientLLHandle, iothub_ll_inbound_device_method_callback, iotHubClientInstance->method_user_context)) != IOTHUB_CLIENT_OK)
+                {
+                    LogError("IoTHubClientCore_LL_SetDeviceMethodCallback_Ex failed");
+                    freeDeviceMethodContext(iotHubClientInstance);
+                }
+                else
+                {
+                    iotHubClientInstance->inbound_device_method_callback = inboundDeviceMethodCallback;
+                }
             }
+
         }
 
         (void)Unlock(iotHubClientInstance->LockHandle);
@@ -2254,36 +2262,40 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SubscribeToCommands(IOTHUB_CLIENT_CORE_HAN
         result = IOTHUB_CLIENT_ERROR;
         LogError("Could not acquire lock");
     }
-    else if ((iotHubClientInstance->device_method_callback != NULL) || (iotHubClientInstance->inbound_device_method_callback != NULL))
+    else 
     {
-        // Check whether the device method callback is specified.  An application can call IoTHubClientCore_SubscribeToCommands multiple
-        // times, but they cannot mix and match calls between IoTHubClientCore_SetDeviceMethodCallback and IoTHubClientCore_SubscribeToCommands.
-        result = IOTHUB_CLIENT_ERROR;
-        LogError("DeviceMethod callback already defined");
-    }
-    else
-    {
-        freeDeviceMethodContext(iotHubClientInstance);
-        if (commandCallback == NULL)
+        if ((iotHubClientInstance->device_method_callback != NULL) || (iotHubClientInstance->inbound_device_method_callback != NULL))
         {
-            result = IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(iotHubClientInstance->IoTHubClientLLHandle, NULL, NULL);
+            // Check whether the device method callback is specified.  An application can call IoTHubClientCore_SubscribeToCommands multiple
+            // times, but they cannot mix and match calls between IoTHubClientCore_SetDeviceMethodCallback and IoTHubClientCore_SubscribeToCommands.
+            result = IOTHUB_CLIENT_ERROR;
+            LogError("DeviceMethod callback already defined");
         }
         else
         {
-            if ((result = allocateQueueContextForMethodCallback(iotHubClientInstance, userContextCallback)) != IOTHUB_CLIENT_OK)
+            freeDeviceMethodContext(iotHubClientInstance);
+            if (commandCallback == NULL)
             {
-                ;
-            }
-            else if ((result = IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(iotHubClientInstance->IoTHubClientLLHandle, iothub_ll_command_callback, iotHubClientInstance->method_user_context)) != IOTHUB_CLIENT_OK)
-            {
-                LogError("IoTHubClientCore_LL_SetDeviceMethodCallback_Ex failed");
-                freeDeviceMethodContext(iotHubClientInstance);
+                result = IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(iotHubClientInstance->IoTHubClientLLHandle, NULL, NULL);
             }
             else
             {
-                iotHubClientInstance->command_callback = commandCallback;
+                if ((result = allocateQueueContextForMethodCallback(iotHubClientInstance, userContextCallback)) != IOTHUB_CLIENT_OK)
+                {
+                    ;
+                }
+                else if ((result = IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(iotHubClientInstance->IoTHubClientLLHandle, iothub_ll_command_callback, iotHubClientInstance->method_user_context)) != IOTHUB_CLIENT_OK)
+                {
+                    LogError("IoTHubClientCore_LL_SetDeviceMethodCallback_Ex failed");
+                    freeDeviceMethodContext(iotHubClientInstance);
+                }
+                else
+                {
+                    iotHubClientInstance->command_callback = commandCallback;
+                }
             }
         }
+
         (void)Unlock(iotHubClientInstance->LockHandle);
     }
     
