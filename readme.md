@@ -78,7 +78,7 @@ To learn more about building Azure IoT Applications, you can visit the [Azure Io
 
 IoT Hub supports multiple protocols for the device to connect with : MQTT, AMQP, and HTTPS.  MQTT and AMQP can optionally run over WebSockets.  The Device Client SDK allows the protocol to be chosen at connection creation time.
 
-The Device Client SDK optionally allows creation of [IoT Plug and Play devices](https://aka.ms/iotpnp).  Microsoft encourages all new devices to be IoT Plug and Play based and for brownfield devices to consider transitioning to IoT Plug and Play.  IoT Plug and Play devices are easier for solutions operators to integrate with because the device is formally modeled.
+The Device/Module Client SDK optionally allows creation of [IoT Plug and Play devices](https://aka.ms/iotpnp).  Microsoft encourages all new devices to be IoT Plug and Play based and for brownfield devices to consider transitioning to IoT Plug and Play. IoT Plug and Play devices are easier for solutions operators to integrate with because the device is formally modeled.
 
 **If you're not sure which protocol to use, you should use MQTT or MQTT-WS.**  MQTT requires considerably fewer resources than AMQP and supports considerably more IoT Hub functionality than HTTPS.  Neither AMQP nor HTTPS are guaranteed to have Device Client SDK implementations for new features going forward, such as Azure IoT Plug and Play.
 

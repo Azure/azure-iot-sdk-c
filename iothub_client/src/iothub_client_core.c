@@ -2242,7 +2242,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SubscribeToCommands(IOTHUB_CLIENT_CORE_HAN
     if (iotHubClientHandle == NULL)
     {
         result = IOTHUB_CLIENT_INVALID_ARG;
-        LogError("invalid arg (NULL)");
+        LogError("invalid iotHubClientHandle (NULL)");
     }
     else if ((result = StartWorkerThreadIfNeeded(iotHubClientInstance)) != IOTHUB_CLIENT_OK)
     {

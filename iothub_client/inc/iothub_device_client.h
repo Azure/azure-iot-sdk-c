@@ -403,7 +403,7 @@ extern "C"
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_SubscribeToCommands, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC, commandCallback,  void*, userContextCallback);
 
     /**
-    * @brief    Sends properties to IoT Hub.
+    * @brief    Sends device properties to IoT Hub.
     *
     * @param[in]  iotHubClientHandle            The handle created by a call to the create function.
     * @param[in]  properties                    Serialized property data to be sent to IoT Hub.  This buffer can either be
@@ -423,7 +423,7 @@ extern "C"
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_SendPropertiesAsync, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle,  const unsigned char*, properties, size_t, propertiesLength, IOTHUB_CLIENT_PROPERTY_ACKNOWLEDGED_CALLBACK, propertyAcknowledgedCallback, void*, userContextCallback);
 
     /**
-    * @brief   Retrieves all properties from IoT Hub.
+    * @brief   Retrieves all device properties from IoT Hub.
     *
     * @param[in]  iotHubClientHandle    The handle created by a call to the create function.
     * @param[in]  propertyCallback      Callback invoked when properties are retrieved.
@@ -440,7 +440,7 @@ extern "C"
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_GetPropertiesAsync, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle,  IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK, propertyCallback, void*, userContextCallback);
     
     /**
-    * @brief   Retrieves all properties from IoT Hub and also subscribes for updates to writable properties.
+    * @brief   Retrieves all device properties from IoT Hub and also subscribes for updates to writable properties.
     *
     * @param[in]  iotHubClientHandle      The handle created by a call to the create function.
     * @param[in]  propertyUpdateCallback  Callback both on initial retrieval of properties stored on IoT Hub

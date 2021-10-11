@@ -761,7 +761,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_ParseMethodToCommand(const char* method
             size_t component_name_length = componentSplit - method_name;
             if ((*component_name = malloc(component_name_length + 1)) == NULL)
             {
-                LogError("Cannot allocate command name");
+                LogError("Cannot allocate component name");
                 result = IOTHUB_CLIENT_ERROR;
             }
             else

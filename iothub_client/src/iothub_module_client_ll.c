@@ -379,7 +379,7 @@ IOTHUB_CLIENT_RESULT IoTHubModuleClient_LL_SendTelemetryAsync(IOTHUB_MODULE_CLIE
     }
     else
     {
-        LogError("Input parameter cannot be NULL");
+        LogError("iotHubModuleClientHandle parameter cannot be NULL");
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     return result;
@@ -394,7 +394,7 @@ IOTHUB_CLIENT_RESULT IoTHubModuleClient_LL_SendPropertiesAsync(IOTHUB_MODULE_CLI
     }
     else
     {
-        LogError("Input parameter cannot be NULL");
+        LogError("iotHubModuleClientHandle parameter cannot be NULL");
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     return result;
@@ -409,7 +409,7 @@ IOTHUB_CLIENT_RESULT IoTHubModuleClient_LL_SubscribeToCommands(IOTHUB_MODULE_CLI
     }
     else
     {
-        LogError("Input parameter cannot be NULL");
+        LogError("iotHubModuleClientHandle parameter cannot be NULL");
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     return result;
@@ -424,7 +424,7 @@ IOTHUB_CLIENT_RESULT IoTHubModuleClient_LL_GetPropertiesAsync(IOTHUB_MODULE_CLIE
     }
     else
     {
-        LogError("Input parameter cannot be NULL");
+        LogError("iotHubModuleClientHandle parameter cannot be NULL");
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     return result;
@@ -439,7 +439,7 @@ IOTHUB_CLIENT_RESULT IoTHubModuleClient_LL_GetPropertiesAndSubscribeToUpdatesAsy
     }
     else
     {
-        LogError("Input parameter cannot be NULL");
+        LogError("iotHubModuleClientHandle parameter cannot be NULL");
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     return result;
