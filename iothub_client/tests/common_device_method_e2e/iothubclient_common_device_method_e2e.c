@@ -124,7 +124,7 @@ static int MethodCallback(const char* method_name, const unsigned char* payload,
     }
     else if (size != strlen(expectedMethodPayload))
     {
-        LogError("payload size incorect - expected %zu but got %zu", strlen(expectedMethodPayload), size);
+        LogError("payload size incorrect - expected %zu but got %zu", strlen(expectedMethodPayload), size);
         responseCode = METHOD_RESPONSE_ERROR;
     }
     else if (memcmp(payload, expectedMethodPayload, size))
@@ -223,6 +223,13 @@ void test_invoke_device_method(const char* deviceId, const char* moduleId, const
         LogInfo("IoTHubDeviceMethod_Invoke deviceId='%s'", deviceId);
         IOTHUB_DEVICE_METHOD_RESULT invokeResult = IoTHubDeviceMethod_Invoke(serviceClientDeviceMethodHandle, deviceId, METHOD_NAME, payload, TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
         ASSERT_ARE_EQUAL(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_OK, invokeResult, "Service Client IoTHubDeviceMethod_Invoke failed");
+    }
+
+    // After a NULL payload is sent above (ie no payload), we now expect the device to send us back "{}" since underneath in the device
+    // SDK, we rewrap a NULL payload to empty braces.
+    if(payload == NULL)
+    {
+        payload = "{}";
     }
 
     ASSERT_ARE_EQUAL(int, METHOD_RESPONSE_SUCCESS, responseStatus, "response status is incorrect");
@@ -410,6 +417,13 @@ static void setconnectionstatuscallback_on_device_or_module()
 static void setmethodcallback_on_device_or_module(const char* payload)
 {
     IOTHUB_CLIENT_RESULT result;
+
+    // If payload passed from the service is NULL, we give the user an empty JSON object payload
+    // https://github.com/Azure/azure-iot-sdk-c/pull/2097
+    if(payload == NULL)
+    {
+      payload = "{}";
+    }
 
     if (iothub_moduleclient_handle != NULL)
     {
@@ -781,6 +795,11 @@ void device_method_e2e_method_call_with_double_quoted_json_x509(IOTHUB_CLIENT_TR
 void device_method_e2e_method_call_with_empty_json_object_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     test_device_method_with_string(IoTHubAccount_GetX509Device(g_iothubAcctInfo), protocol, "{}");
+}
+
+void device_method_e2e_method_call_with_NULL_json_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+{
+    test_device_method_with_string(IoTHubAccount_GetX509Device(g_iothubAcctInfo), protocol, NULL);
 }
 
 void device_method_e2e_method_call_with_null_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)

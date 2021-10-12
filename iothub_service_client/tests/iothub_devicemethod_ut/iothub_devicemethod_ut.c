@@ -721,43 +721,6 @@ TEST_FUNCTION(IoTHubDeviceMethod_InvokeModule_return_NULL_if_input_parameter_met
     IoTHubDeviceMethod_InvokeDeviceOrModule_return_NULL_if_input_parameter_methodName_is_NULL(true);
 }
 
-static void IoTHubDeviceMethod_InvokeDeviceOrModule_return_NULL_if_input_parameter_methodPayload_is_NULL(bool testing_module)
-{
-    // arrange
-
-    // act
-    int responseStatus;
-    unsigned char* responsePayload;
-    size_t responsePayloadSize;
-
-    IOTHUB_DEVICE_METHOD_RESULT result;
-
-    if (testing_module == false)
-    {
-        result = IoTHubDeviceMethod_Invoke(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, TEST_DEVICE_ID, TEST_METHOD_NAME, NULL, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
-    }
-    else
-    {
-        result = IoTHubDeviceMethod_InvokeModule(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, TEST_DEVICE_ID, TEST_MODULE_ID, TEST_METHOD_NAME, NULL, TEST_TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
-    }
-
-    // assert
-    ASSERT_ARE_EQUAL(int, result, IOTHUB_DEVICE_METHOD_INVALID_ARG);
-    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-}
-
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_031: [ IoTHubDeviceMethod_Invoke(Module) shall verify the input parameters and if any of them (except the timeout) are NULL then return IOTHUB_DEVICE_METHOD_INVALID_ARG ]*/
-TEST_FUNCTION(IoTHubDeviceMethod_Invoke_return_NULL_if_input_parameter_methodPayload_is_NULL)
-{
-    IoTHubDeviceMethod_InvokeDeviceOrModule_return_NULL_if_input_parameter_methodPayload_is_NULL(false);
-}
-
-/*Tests_SRS_IOTHUBDEVICEMETHOD_12_031: [ IoTHubDeviceMethod_Invoke(Module) shall verify the input parameters and if any of them (except the timeout) are NULL then return IOTHUB_DEVICE_METHOD_INVALID_ARG ]*/
-TEST_FUNCTION(IoTHubDeviceMethod_InvokeModule_return_NULL_if_input_parameter_methodPayload_is_NULL)
-{
-    IoTHubDeviceMethod_InvokeDeviceOrModule_return_NULL_if_input_parameter_methodPayload_is_NULL(true);
-}
 
 //
 /*Tests_SRS_IOTHUBDEVICEMETHOD_31_050: [ IoTHubDeviceMethod_ModuleInvoke shall return IOTHUB_DEVICE_METHOD_INVALID_ARG if moduleId is NULL. **]*/
