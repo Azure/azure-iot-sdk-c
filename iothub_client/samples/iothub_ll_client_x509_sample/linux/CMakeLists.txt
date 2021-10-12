@@ -1,11 +1,9 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-cmake_minimum_required (VERSION 3.5)
+cmake_minimum_required(VERSION 3.5)
 
 cmake_policy(SET CMP0074 NEW)
-
-project(ll_client_x509_sample)
 
 if(WIN32)
     message(FATAL_ERROR "This CMake file only supports Linux builds!")
@@ -24,9 +22,5 @@ set(iothub_client_x509_sample_c_files
 add_executable(iothub_client_x509_sample ${iothub_client_x509_sample_c_files})
 
 target_link_libraries(iothub_client_x509_sample
-    aziotsharedutil
     iothub_client
-    iothub_client_amqp_transport
-    iothub_client_http_transport
-    iothub_client_mqtt_transport
 )
