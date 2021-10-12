@@ -124,7 +124,7 @@ static int MethodCallback(const char* method_name, const unsigned char* payload,
     }
     else if (size != strlen(expectedMethodPayload))
     {
-        LogError("payload size incorect - expected %zu but got %zu", strlen(expectedMethodPayload), size);
+        LogError("payload size incorrect - expected %zu but got %zu", strlen(expectedMethodPayload), size);
         responseCode = METHOD_RESPONSE_ERROR;
     }
     else if (memcmp(payload, expectedMethodPayload, size))
@@ -223,6 +223,13 @@ void test_invoke_device_method(const char* deviceId, const char* moduleId, const
         LogInfo("IoTHubDeviceMethod_Invoke deviceId='%s'", deviceId);
         IOTHUB_DEVICE_METHOD_RESULT invokeResult = IoTHubDeviceMethod_Invoke(serviceClientDeviceMethodHandle, deviceId, METHOD_NAME, payload, TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
         ASSERT_ARE_EQUAL(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_OK, invokeResult, "Service Client IoTHubDeviceMethod_Invoke failed");
+    }
+
+    // After a NULL payload is sent above (ie no payload), we now expect the device to send us back "{}" since underneath in the device
+    // SDK, we rewrap a NULL payload to empty braces.
+    if(payload == NULL)
+    {
+        payload = "{}";
     }
 
     ASSERT_ARE_EQUAL(int, METHOD_RESPONSE_SUCCESS, responseStatus, "response status is incorrect");

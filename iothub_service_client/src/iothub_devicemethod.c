@@ -45,6 +45,7 @@ static const char* const RELATIVE_PATH_FMT_DEVICEMETHOD_MODULE = "/twins/%s/modu
 // Note: The timeout field specified in this JSON is not honored by IoT Hub.  See
 // https://github.com/Azure/azure-iot-sdk-c/issues/1378 for details.
 static const char* const RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD = "{\"methodName\":\"%s\",\"responseTimeoutInSeconds\":%d,\"connectTimeoutInSeconds\":60,\"payload\":%s}";
+static const char* const RELATIVE_PATH_FMT_DEVIECMETHOD_NO_PAYLOAD = "{\"methodName\":\"%s\",\"responseTimeoutInSeconds\":%d,\"connectTimeoutInSeconds\":60}";
 
 /** @brief Structure to store IoTHub authentication information
 */
@@ -133,26 +134,47 @@ static IOTHUB_DEVICE_METHOD_RESULT parseResponseJson(BUFFER_HANDLE responseJson,
 
 static BUFFER_HANDLE createMethodPayloadJson(const char* methodName, unsigned int timeout, const char* payload)
 {
+    bool payloadCreated = true;
     STRING_HANDLE stringHandle;
     const char* stringHandle_c_str;
     BUFFER_HANDLE result;
 
-    if ((stringHandle = STRING_construct_sprintf(RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD, methodName, timeout, payload == NULL ? "null" : payload)) == NULL)
+    if(payload == NULL)
     {
-        LogError("STRING_construct_sprintf failed");
-        result = NULL;
-    }
-    else if ((stringHandle_c_str = STRING_c_str(stringHandle)) == NULL)
-    {
-        LogError("STRING_c_str failed");
-        STRING_delete(stringHandle);
-        result = NULL;
+        if ((stringHandle = STRING_construct_sprintf(RELATIVE_PATH_FMT_DEVIECMETHOD_NO_PAYLOAD, methodName, timeout)) == NULL)
+        {
+            LogError("STRING_construct_sprintf failed");
+            payloadCreated = false;
+        }
     }
     else
     {
-        result = BUFFER_create((const unsigned char*)stringHandle_c_str, strlen(stringHandle_c_str));
-        STRING_delete(stringHandle);
+        if ((stringHandle = STRING_construct_sprintf(RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD, methodName, timeout, payload)) == NULL)
+        {
+            LogError("STRING_construct_sprintf failed");
+            payloadCreated = false;
+        }
     }
+
+    if(payloadCreated)
+    {
+        if ((stringHandle_c_str = STRING_c_str(stringHandle)) == NULL)
+        {
+            LogError("STRING_c_str failed");
+            STRING_delete(stringHandle);
+            result = NULL;
+        }
+        else
+        {
+            result = BUFFER_create((const unsigned char*)stringHandle_c_str, strlen(stringHandle_c_str));
+            STRING_delete(stringHandle);
+        }
+    }
+    else
+    {
+        result = NULL;
+    }
+
     return result;
 }
 
