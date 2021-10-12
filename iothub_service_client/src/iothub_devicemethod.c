@@ -45,6 +45,7 @@ static const char* const RELATIVE_PATH_FMT_DEVICEMETHOD_MODULE = "/twins/%s/modu
 // Note: The timeout field specified in this JSON is not honored by IoT Hub.  See
 // https://github.com/Azure/azure-iot-sdk-c/issues/1378 for details.
 static const char* const RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD = "{\"methodName\":\"%s\",\"responseTimeoutInSeconds\":%d,\"connectTimeoutInSeconds\":60,\"payload\":%s}";
+static const char* const RELATIVE_PATH_FMT_DEVIECMETHOD_NO_PAYLOAD = "{\"methodName\":\"%s\",\"responseTimeoutInSeconds\":%d,\"connectTimeoutInSeconds\":60}";
 
 /** @brief Structure to store IoTHub authentication information
 */
@@ -133,26 +134,41 @@ static IOTHUB_DEVICE_METHOD_RESULT parseResponseJson(BUFFER_HANDLE responseJson,
 
 static BUFFER_HANDLE createMethodPayloadJson(const char* methodName, unsigned int timeout, const char* payload)
 {
-    STRING_HANDLE stringHandle;
+    bool payloadCreated = true;
+    STRING_HANDLE stringHandle = NULL;
     const char* stringHandle_c_str;
     BUFFER_HANDLE result;
 
-    if ((stringHandle = STRING_construct_sprintf(RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD, methodName, timeout, payload)) == NULL)
+    if (payload == NULL && (stringHandle = STRING_construct_sprintf(RELATIVE_PATH_FMT_DEVIECMETHOD_NO_PAYLOAD, methodName, timeout)) == NULL)
     {
         LogError("STRING_construct_sprintf failed");
-        result = NULL;
+        payloadCreated = false;
     }
-    else if ((stringHandle_c_str = STRING_c_str(stringHandle)) == NULL)
+    else if (payload != NULL && (stringHandle = STRING_construct_sprintf(RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD, methodName, timeout, payload)) == NULL)
     {
-        LogError("STRING_c_str failed");
-        STRING_delete(stringHandle);
-        result = NULL;
+        LogError("STRING_construct_sprintf failed");
+        payloadCreated = false;
+    }
+
+    if (payloadCreated)
+    {
+        if ((stringHandle_c_str = STRING_c_str(stringHandle)) == NULL)
+        {
+            LogError("STRING_c_str failed");
+            STRING_delete(stringHandle);
+            result = NULL;
+        }
+        else
+        {
+            result = BUFFER_create((const unsigned char*)stringHandle_c_str, strlen(stringHandle_c_str));
+            STRING_delete(stringHandle);
+        }
     }
     else
     {
-        result = BUFFER_create((const unsigned char*)stringHandle_c_str, strlen(stringHandle_c_str));
-        STRING_delete(stringHandle);
+        result = NULL;
     }
+
     return result;
 }
 
@@ -465,7 +481,7 @@ static IOTHUB_DEVICE_METHOD_RESULT IoTHubDeviceMethod_DeviceOrModuleInvoke(IOTHU
     IOTHUB_DEVICE_METHOD_RESULT result;
 
     /*Codes_SRS_IOTHUBDEVICEMETHOD_12_031: [ IoTHubDeviceMethod_Invoke(Module) shall verify the input parameters and if any of them (except the timeout) are NULL then return IOTHUB_DEVICE_METHOD_INVALID_ARG ]*/
-    if ((serviceClientDeviceMethodHandle == NULL) || (deviceId == NULL) || (methodName == NULL) || (methodPayload == NULL) || (responseStatus == NULL) || (responsePayload == NULL) || (responsePayloadSize == NULL))
+    if ((serviceClientDeviceMethodHandle == NULL) || (deviceId == NULL) || (methodName == NULL) || (responseStatus == NULL) || (responsePayload == NULL) || (responsePayloadSize == NULL))
     {
         LogError("Input parameter cannot be NULL");
         result = IOTHUB_DEVICE_METHOD_INVALID_ARG;
