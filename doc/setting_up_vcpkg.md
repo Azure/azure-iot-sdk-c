@@ -1,6 +1,6 @@
 # Building applications using vcpkg for C SDK
 
-This document describes how to setup vcpkg to build applications using Microsoft Azure IoT device SDK for C. It demonstrates building and running a C SDK sample for Windows, Linux, and Mac.
+This document describes how to setup vcpkg to build applications using Microsoft Azure IoT device C SDK. It demonstrates building and running a C language SDK sample for Windows, Linux, and Mac.
 
 ## Setup C SDK vcpkg for Windows development environment
 
