@@ -139,7 +139,7 @@ static BUFFER_HANDLE createMethodPayloadJson(const char* methodName, unsigned in
     const char* stringHandle_c_str;
     BUFFER_HANDLE result;
 
-    if(payload == NULL)
+    if (payload == NULL)
     {
         if ((stringHandle = STRING_construct_sprintf(RELATIVE_PATH_FMT_DEVIECMETHOD_NO_PAYLOAD, methodName, timeout)) == NULL)
         {
@@ -156,7 +156,7 @@ static BUFFER_HANDLE createMethodPayloadJson(const char* methodName, unsigned in
         }
     }
 
-    if(payloadCreated)
+    if (payloadCreated)
     {
         if ((stringHandle_c_str = STRING_c_str(stringHandle)) == NULL)
         {
