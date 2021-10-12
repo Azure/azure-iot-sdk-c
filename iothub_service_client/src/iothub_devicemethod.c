@@ -517,7 +517,6 @@ static IOTHUB_DEVICE_METHOD_RESULT IoTHubDeviceMethod_DeviceOrModuleInvoke(IOTHU
         /*Codes_SRS_IOTHUBDEVICEMETHOD_12_041: [ IoTHubDeviceMethod_Invoke(Module) shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ]*/
         /*Codes_SRS_IOTHUBDEVICEMETHOD_12_042: [ IoTHubDeviceMethod_Invoke(Module) shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ]*/
         /*Codes_SRS_IOTHUBDEVICEMETHOD_12_043: [ IoTHubDeviceMethod_Invoke(Module) shall execute the HTTP POST request by calling HTTPAPIEX_ExecuteRequest ]*/
-        /*Codes_SRS_IOTHUBDEVICEMETHOD_12_034: [ IoTHubDeviceMethod_Invoke(Module) shall allocate memory for response buffer by calling BUFFER_new ]*/
         else if (sendHttpRequestDeviceMethod(serviceClientDeviceMethodHandle, IOTHUB_DEVICEMETHOD_REQUEST_INVOKE, deviceId, moduleId, httpPayloadBuffer, responseBuffer) != IOTHUB_DEVICE_METHOD_OK)
         {
             /*Codes_SRS_IOTHUBDEVICEMETHOD_12_044: [ If any of the call fails during the HTTP creation IoTHubDeviceMethod_Invoke(Module) shall fail and return IOTHUB_DEVICE_METHOD_HTTPAPI_ERROR ]*/
