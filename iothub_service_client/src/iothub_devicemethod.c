@@ -139,21 +139,15 @@ static BUFFER_HANDLE createMethodPayloadJson(const char* methodName, unsigned in
     const char* stringHandle_c_str;
     BUFFER_HANDLE result;
 
-    if (payload == NULL)
+    if (payload == NULL && (stringHandle = STRING_construct_sprintf(RELATIVE_PATH_FMT_DEVIECMETHOD_NO_PAYLOAD, methodName, timeout)) == NULL)
     {
-        if ((stringHandle = STRING_construct_sprintf(RELATIVE_PATH_FMT_DEVIECMETHOD_NO_PAYLOAD, methodName, timeout)) == NULL)
-        {
-            LogError("STRING_construct_sprintf failed");
-            payloadCreated = false;
-        }
+        LogError("STRING_construct_sprintf failed");
+        payloadCreated = false;
     }
-    else
+    else if (payload != NULL && (stringHandle = STRING_construct_sprintf(RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD, methodName, timeout, payload)) == NULL)
     {
-        if ((stringHandle = STRING_construct_sprintf(RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD, methodName, timeout, payload)) == NULL)
-        {
-            LogError("STRING_construct_sprintf failed");
-            payloadCreated = false;
-        }
+        LogError("STRING_construct_sprintf failed");
+        payloadCreated = false;
     }
 
     if (payloadCreated)
