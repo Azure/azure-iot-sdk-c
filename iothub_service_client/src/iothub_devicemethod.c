@@ -135,7 +135,7 @@ static IOTHUB_DEVICE_METHOD_RESULT parseResponseJson(BUFFER_HANDLE responseJson,
 static BUFFER_HANDLE createMethodPayloadJson(const char* methodName, unsigned int timeout, const char* payload)
 {
     bool payloadCreated = true;
-    STRING_HANDLE stringHandle;
+    STRING_HANDLE stringHandle = NULL;
     const char* stringHandle_c_str;
     BUFFER_HANDLE result;
 
