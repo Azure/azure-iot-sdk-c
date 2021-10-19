@@ -1245,8 +1245,14 @@ void IoTHubClientCore_Destroy(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle)
             // Otherwise we end up in a spin loop here.
             unsigned int sleeptime_in_ms = (unsigned int)iotHubClientInstance->do_work_freq_ms;
             Unlock(iotHubClientInstance->LockHandle);
+
             ThreadAPI_Sleep(sleeptime_in_ms);
-            Lock(iotHubClientInstance->LockHandle);
+
+            if (Lock(iotHubClientInstance->LockHandle) != LOCK_OK)
+            {
+                LogError("unable to Lock - - will still proceed to try to end the thread without locking");
+            }
+
             garbageCollectorImpl(iotHubClientInstance);
         }
 
@@ -1262,7 +1268,6 @@ void IoTHubClientCore_Destroy(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle)
         {
             LogError("unable to Unlock");
         }
-
 
         vector_size = VECTOR_size(iotHubClientInstance->saved_user_callback_list);
         size_t index = 0;
