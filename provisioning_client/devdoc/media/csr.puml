@@ -1,0 +1,27 @@
+@startuml dpsCSR
+Device -> Device: Generate **operational** ECC key-pair
+Device -> Device: Creates Certificate Signing Request using **operational** key-pair
+Device -> DPS: Authenticate using SAS, TPM or Client X509 **bootstrap** credentials
+DPS -> Device: ACK
+Device -> DPS: register (registrationId, Body: **operational** CSR)
+DPS -> Device: ACK
+DPS -> CertificateAuthority: **operational** CSR
+DPS <- CertificateAuthority: **operational** X509 Certificate
+Device -> DPS: query [...]
+DPS -> Device: hubFQDN, deviceId, short-lived **operational** X509 Certificate
+Device -> HUB: Authenticate using short-lived **operational** X509 Certificate
+HUB->HUB: Device **operational** X509 Certificate expired.
+Device <- HUB: MQTT Disconnect
+note left
+  MQTT 3 does not contain 
+  additional disconnect reason.
+end note
+Device -> HUB: Auth using short-lived X509 Certificate
+Device <- HUB: Authentication Failure
+note left
+  This step necessary only 
+  when using MQTT 3.
+end note
+Device -> Device: Restart flow
+
+@enduml

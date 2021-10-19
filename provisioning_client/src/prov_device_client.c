@@ -326,3 +326,34 @@ const char* Prov_Device_Get_Trust_Bundle(PROV_DEVICE_HANDLE handle)
     }
     return result;
 }
+
+PROV_DEVICE_RESULT Prov_Device_Set_Certificate_Signing_Request(PROV_DEVICE_HANDLE handle, const char* csr)
+{
+    PROV_DEVICE_RESULT result;
+    if (handle == NULL)
+    {
+        LogError("Invalid parameter specified handle: %p", handle);
+        result = PROV_DEVICE_RESULT_INVALID_ARG;
+    }
+    else
+    {
+        result = Prov_Device_LL_Set_Certificate_Signing_Request(handle->ProvDeviceLLHandle, csr);
+    }
+    return result;
+}
+
+const char* Prov_Device_Get_Issued_Client_Certificate(PROV_DEVICE_HANDLE handle)
+{
+    const char* result;
+    if (handle == NULL)
+    {
+        LogError("Invalid parameter specified handle: %p", handle);
+        result = NULL;
+    }
+    else
+    {
+        result = Prov_Device_LL_Get_Issued_Client_Certificate(handle->ProvDeviceLLHandle);
+    }
+    return result;
+}
+

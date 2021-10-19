@@ -156,6 +156,27 @@ MOCKABLE_FUNCTION(, const char*, Prov_Device_LL_Get_Provisioning_Payload, PROV_D
 */
 MOCKABLE_FUNCTION(, const char*, Prov_Device_LL_Get_Trust_Bundle, PROV_DEVICE_LL_HANDLE, handle);
 
+/**
+* @brief    Sets the Certificate Signing Request (CSR) that is sent to the Provisioning service
+*
+* @param    handle          The handle created by a call to the create function.
+* @param    csr             The PKCS#10 payload that is sent to the service.  Setting to NULL will unset the value previously set
+*
+* @return PROV_DEVICE_RESULT_OK upon success or an error code upon failure
+*/
+MOCKABLE_FUNCTION(, PROV_DEVICE_RESULT, Prov_Device_LL_Set_Certificate_Signing_Request, PROV_DEVICE_LL_HANDLE, handle, const char*, csr);
+
+/**
+* @brief    Retrieves the Issued Client Certificate corresponding to the Certificate Signing Request if
+*           sent by the Provisioning service.
+*
+* @param    handle          The handle created by a call to the create function.
+*
+* @return The PEM certificate sent by the service during registration.
+*/
+MOCKABLE_FUNCTION(, const char*, Prov_Device_LL_Get_Issued_Client_Certificate, PROV_DEVICE_LL_HANDLE, handle);
+
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -52,6 +52,7 @@ static void my_gballoc_free(void* ptr)
 MOCKABLE_FUNCTION(, void, on_prov_register_device_callback, PROV_DEVICE_RESULT, register_result, const char*, iothub_uri, const char*, device_id, void*, user_context);
 MOCKABLE_FUNCTION(, void, on_prov_register_status_callback, PROV_DEVICE_REG_STATUS, reg_status, void*, user_context);
 MOCKABLE_FUNCTION(, char*, on_prov_transport_challenge_cb, const unsigned char*, nonce, size_t, nonce_len, const char*, key_name, void*, user_ctx);
+MOCKABLE_FUNCTION(, void, on_transport_error, PROV_DEVICE_TRANSPORT_ERROR, transport_error, void*, user_context);
 
 MOCKABLE_FUNCTION(, PROV_DEVICE_TRANSPORT_HANDLE, prov_transport_create, const char*, uri, TRANSPORT_HSM_TYPE, type, const char*, scope_id, const char*, prov_api_version, PROV_TRANSPORT_ERROR_CALLBACK, error_cb, void*, error_ctx);
 MOCKABLE_FUNCTION(, void, prov_transport_destroy, PROV_DEVICE_TRANSPORT_HANDLE, handle);
@@ -64,8 +65,7 @@ MOCKABLE_FUNCTION(, int, prov_transport_set_trace, PROV_DEVICE_TRANSPORT_HANDLE,
 MOCKABLE_FUNCTION(, int, prov_transport_x509_cert, PROV_DEVICE_TRANSPORT_HANDLE, handle, const char*, certificate, const char*, private_key);
 MOCKABLE_FUNCTION(, int, prov_transport_set_trusted_cert, PROV_DEVICE_TRANSPORT_HANDLE, handle, const char*, certificate);
 MOCKABLE_FUNCTION(, int, prov_transport_set_proxy, PROV_DEVICE_TRANSPORT_HANDLE, handle, const HTTP_PROXY_OPTIONS*, proxy_option);
-
-MOCKABLE_FUNCTION(, void, on_transport_error, PROV_DEVICE_TRANSPORT_ERROR, transport_error, void*, user_context);
+MOCKABLE_FUNCTION(, int, prov_transport_set_option, PROV_DEVICE_TRANSPORT_HANDLE, handle, const char*, option_name, const void*, value);
 #undef ENABLE_MOCKS
 
 static TEST_MUTEX_HANDLE g_testByTest;
@@ -74,6 +74,7 @@ static void* g_challenge_ctx;
 static PROV_DEVICE_TRANSPORT_REGISTER_CALLBACK g_registration_callback;
 static void* g_registration_ctx;
 PROV_DEVICE_TRANSPORT_STATUS_CALLBACK g_status_callback;
+PROV_TRANSPORT_ERROR_CALLBACK g_error_callback;
 static void* g_status_ctx;
 static void* g_http_error_ctx;
 PROV_TRANSPORT_JSON_PARSE g_json_parse_cb;
@@ -104,7 +105,8 @@ static PROV_DEVICE_TRANSPORT_PROVIDER g_prov_transport_func =
     prov_transport_set_trace,
     prov_transport_x509_cert,
     prov_transport_set_trusted_cert,
-    prov_transport_set_proxy
+    prov_transport_set_proxy,
+    prov_transport_set_option
 };
 
 static const PROV_DEVICE_TRANSPORT_PROVIDER* trans_provider(void)
@@ -114,7 +116,7 @@ static const PROV_DEVICE_TRANSPORT_PROVIDER* trans_provider(void)
 
 static const BUFFER_HANDLE TEST_BUFFER_HANDLE = (BUFFER_HANDLE)0x11111116;
 
-static const char* TEST_JSON_REPLY = 
+static const char* TEST_JSON_ASSIGNED_REPLY = 
 "{" \
 "    \"operationId\": \"string\"," \
 "    \"status\": \"assigned\"," \
@@ -274,6 +276,7 @@ static PROV_DEVICE_TRANSPORT_HANDLE my_prov_transport_create(const char* uri, TR
     (void)error_cb;
     (void)error_ctx;
 
+    g_error_callback = error_cb;
     return (PROV_DEVICE_TRANSPORT_HANDLE)my_gballoc_malloc(1);
 }
 
@@ -591,6 +594,8 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         setup_cleanup_prov_info_mocks();
 
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(prov_transport_destroy(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(prov_auth_destroy(IGNORED_PTR_ARG));
@@ -634,7 +639,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
     static void setup_parse_json_disabled_mocks(void)
     {
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-        setup_retrieve_json_item_mocks(TEST_STRING_VALUE);
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_NUM_ARG));
     }
 
     static void setup_parse_json_error_mocks(double return_err_num)
@@ -691,7 +696,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
     /* Tests_SRS_PROV_CLIENT_CLIENT_07_028: [ PROV_CLIENT_STATE_READY is the initial state after the object is created which will send a uhttp_client_open call to the http endpoint. ] */
     /* Tests_SRS_PROV_CLIENT_CLIENT_07_034: [ Prov_Device_LL_Create shall construct a scope_id by base64 encoding the prov_uri. ] */
     /* Tests_SRS_PROV_CLIENT_CLIENT_07_035: [ Prov_Device_LL_Create shall store the registration_id from the security module. ] */
-    TEST_FUNCTION(Prov_Device_LL_Create_succees)
+    TEST_FUNCTION(Prov_Device_LL_Create_success)
     {
         //arrange
         setup_Prov_Device_LL_Create_mocks(PROV_AUTH_TYPE_TPM);
@@ -930,7 +935,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
     /* Tests_SRS_PROV_CLIENT_CLIENT_07_030: [ PROV_CLIENT_STATE_REGISTER_SENT state shall retrieve the endorsement_key, auth_type and hsm_type from a call to the dev_auth modules function. ] */
     /* Tests_SRS_PROV_CLIENT_CLIENT_07_013: [ The PROV_CLIENT_STATE_REGISTER_SENTstate shall construct http request using uhttp_client_execute_request to the service with the following endorsement information: ] */
     /* Tests_SRS_PROV_CLIENT_CLIENT_07_011: [ Prov_Device_LL_DoWork shall call the underlying http_client_dowork function ] */
-    /* Tests_SRS_PROV_CLIENT_CLIENT_07_19: [ Upon successfully sending the messge iothub_prov_client shall transition to the PROV_CLIENT_STATE_REGISTER_SENT state ] */
+    /* Tests_SRS_PROV_CLIENT_CLIENT_07_19: [ Upon successfully sending the message iothub_prov_client shall transition to the PROV_CLIENT_STATE_REGISTER_SENT state ] */
     TEST_FUNCTION(Prov_Device_LL_DoWork_register_send_succeed)
     {
         //arrange
@@ -991,6 +996,61 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         Prov_Device_LL_Destroy(handle);
     }
 
+    TEST_FUNCTION(Prov_Device_LL_DoWork_register_transport_error_fail)
+    {
+        //arrange
+        PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
+        (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
+        umock_c_reset_all_calls();
+
+        int negativeTestsInitResult = umock_c_negative_tests_init();
+        ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
+
+        setup_Prov_Device_LL_DoWork_register_send_mocks();
+
+        umock_c_negative_tests_snapshot();
+
+        //act
+        size_t count = umock_c_negative_tests_call_count();
+        int error_type = 0;
+        for (size_t index = 0; index < count; index++)
+        {
+            if (umock_c_negative_tests_can_call_fail(index))
+            {
+                (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
+
+                umock_c_negative_tests_reset();
+                umock_c_negative_tests_fail_call(index);
+
+                //act
+                Prov_Device_LL_DoWork(handle);
+
+                switch (error_type)
+                {
+                    case 0:
+                        g_error_callback(PROV_DEVICE_ERROR_KEY_FAIL, g_registration_ctx);
+                        break;
+                    case 1:
+                        g_error_callback(PROV_DEVICE_ERROR_KEY_UNAUTHORIZED, g_registration_ctx);
+                        break;
+                    default:
+                        g_error_callback(PROV_DEVICE_ERROR_MEMORY, g_registration_ctx);
+                }
+                
+                error_type++;
+                // To Get the device back in registration mode
+                Prov_Device_LL_DoWork(handle);
+
+                //assert
+            }
+        }
+
+        //cleanup
+        umock_c_negative_tests_deinit();
+        Prov_Device_LL_Destroy(handle);
+    }
+
     TEST_FUNCTION(Prov_Device_LL_parse_json_unassigned_fail)
     {
         PROV_JSON_INFO* result;
@@ -1010,6 +1070,12 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         umock_c_negative_tests_snapshot();
 
         //act
+        static const char* TEST_JSON_REPLY_UNASSIGNED = 
+        "{" \
+        "    \"operationId\": \"string\"," \
+        "    \"status\": \"unassigned\"" \
+        "INVALID" \
+        "}";
         size_t count = umock_c_negative_tests_call_count();
         for (size_t index = 0; index < count; index++)
         {
@@ -1018,7 +1084,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
                 umock_c_negative_tests_reset();
                 umock_c_negative_tests_fail_call(index);
 
-                result = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
+                result = g_json_parse_cb(TEST_JSON_REPLY_UNASSIGNED, g_json_ctx);
 
                 //assert
                 ASSERT_IS_NULL(result, "g_json_parse_cb failure in test %zu/%zu", index, count);
@@ -1027,6 +1093,64 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
 
         //cleanup
         umock_c_negative_tests_deinit();
+        Prov_Device_LL_Destroy(handle);
+    }
+
+    TEST_FUNCTION(Prov_Device_LL_parse_json_unassigned_succeed)
+    {
+        PROV_JSON_INFO* result;
+        //arrange
+        PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
+        (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
+        Prov_Device_LL_DoWork(handle);
+        umock_c_reset_all_calls();
+
+        setup_parse_json_disabled_mocks();
+
+        //act
+        static const char* TEST_JSON_REPLY_UNASSIGNED = 
+        "{" \
+        "    \"operationId\": \"string\"," \
+        "    \"status\": \"unassigned\"" \
+        "}";
+        result = g_json_parse_cb(TEST_JSON_REPLY_UNASSIGNED, g_json_ctx);
+
+        //assert
+        ASSERT_IS_NULL(result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        free_prov_json_info(result);
+        Prov_Device_LL_Destroy(handle);
+    }
+
+    TEST_FUNCTION(Prov_Device_LL_parse_json_disabled_succeed)
+    {
+        PROV_JSON_INFO* result;
+        //arrange
+        PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
+        (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
+        Prov_Device_LL_DoWork(handle);
+        umock_c_reset_all_calls();
+
+        setup_parse_json_disabled_mocks();
+
+        //act
+        static const char* TEST_JSON_REPLY_DISABLED = 
+        "{" \
+        "    \"operationId\": \"string\"," \
+        "    \"status\": \"disabled\"" \
+        "}";
+        result = g_json_parse_cb(TEST_JSON_REPLY_DISABLED, g_json_ctx);
+
+        //assert
+        ASSERT_IS_NULL(result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        free_prov_json_info(result);
         Prov_Device_LL_Destroy(handle);
     }
 
@@ -1154,6 +1278,13 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         umock_c_negative_tests_snapshot();
 
         //act
+        static const char* TEST_JSON_REPLY_ASSIGNING_FAIL = 
+        "{" \
+        "    \"operationId\": \"string\"," \
+        "    \"status\": \"assigning\"" \
+        "INVALID" \
+        "}";
+
         size_t count = umock_c_negative_tests_call_count();
         for (size_t index = 0; index < count; index++)
         {
@@ -1162,7 +1293,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
                 umock_c_negative_tests_reset();
                 umock_c_negative_tests_fail_call(index);
 
-                result = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
+                result = g_json_parse_cb(TEST_JSON_REPLY_ASSIGNING_FAIL, g_json_ctx);
 
                 //assert
                 ASSERT_IS_NULL(result, "g_json_parse_cb failure in test %zu/%zu", index, count);
@@ -1187,7 +1318,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         setup_parse_json_assigned_mocks(true);
 
         //act
-        result = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
+        result = g_json_parse_cb(TEST_JSON_ASSIGNED_REPLY, g_json_ctx);
 
         //assert
         ASSERT_IS_NOT_NULL(result);
@@ -1221,6 +1352,13 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         umock_c_negative_tests_snapshot();
 
         //act
+        static const char* TEST_JSON_ASSIGNED_INVALID_REPLY = 
+        "{" \
+        "    \"operationId\": \"string\"," \
+        "    \"status\": \"assigned\"," \
+        "INVALID" \
+        "}";
+       
         size_t count = umock_c_negative_tests_call_count();
         for (size_t index = 0; index < count; index++)
         {
@@ -1229,7 +1367,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
                 umock_c_negative_tests_reset();
                 umock_c_negative_tests_fail_call(index);
 
-                result = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
+                result = g_json_parse_cb(TEST_JSON_ASSIGNED_INVALID_REPLY, g_json_ctx);
 
                 //assert
                 ASSERT_IS_NULL(result, "g_json_parse_cb failure in test %zu/%zu", index, count);
@@ -1884,6 +2022,25 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         Prov_Device_LL_Destroy(handle);
     }
 
+    TEST_FUNCTION(Prov_Device_LL_SetOption_TransportOption_success)
+    {
+        //arrange
+        PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
+        umock_c_reset_all_calls();
+        const char* engine = "pkcs11";
+        STRICT_EXPECTED_CALL(prov_transport_set_option(IGNORED_PTR_ARG, OPTION_OPENSSL_ENGINE, &engine));
+
+        //act
+        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_SetOption(handle, OPTION_OPENSSL_ENGINE, &engine);
+
+        //assert
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        Prov_Device_LL_Destroy(handle);
+    }
+
     TEST_FUNCTION(Prov_Device_LL_Set_Provisioning_Payload_handle_NULL_fail)
     {
         //arrange
@@ -1892,7 +2049,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Set_Provisioning_Payload(NULL, TEST_CUSTOM_DATA);
 
         //assert
-        ASSERT_ARE_NOT_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result);
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_INVALID_ARG, prov_result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         //cleanup
@@ -1915,6 +2072,34 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
 
         //cleanup
         Prov_Device_LL_Destroy(handle);
+    }
+
+    TEST_FUNCTION(Prov_Device_LL_Register_With_Provisioning_Payload_success)
+    {
+        //arrange
+        PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
+        (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
+        Prov_Device_LL_DoWork(handle);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        const char* EXPECTED_REQUEST_PAYLOAD = "{\"registrationId\":\"A87FA22F-828B-46CA-BA37-D574C32E423E\","
+        "\"tpm\":{\"endorsementKey\":\"keykey\",\"storageRootKey\":\"keykey\"},\"payload\":{\"json_cust_data\":123456}}";
+
+        //act
+        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Set_Provisioning_Payload(handle, TEST_CUSTOM_DATA);
+        char* request_payload = g_json_create_cb(TEST_ENDORSMENT_KEY, TEST_ENDORSMENT_KEY, g_json_ctx);
+
+        //assert
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result);
+        ASSERT_ARE_EQUAL(char_ptr, EXPECTED_REQUEST_PAYLOAD, request_payload);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        Prov_Device_LL_Destroy(handle);
+        free(request_payload);
     }
 
     TEST_FUNCTION(Prov_Device_LL_Set_Provisioning_Payload_set_twice_success)
@@ -1964,7 +2149,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         umock_c_reset_all_calls();
 
         setup_parse_json_assigned_mocks(true);
-        static const char* TEST_JSON_REPLY = 
+        static const char* TEST_JSON_PAYLOAD_REPLY = 
         "{" \
         "    \"operationId\": \"string\"," \
         "    \"status\": \"assigned\"," \
@@ -1986,7 +2171,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         "    }" \
         "}";
 
-        PROV_JSON_INFO* parse_info = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
+        PROV_JSON_INFO* parse_info = g_json_parse_cb(TEST_JSON_PAYLOAD_REPLY, g_json_ctx);
         umock_c_reset_all_calls();
 
         //act
@@ -2012,7 +2197,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         umock_c_reset_all_calls();
 
         setup_parse_json_assigned_mocks(true);
-        PROV_JSON_INFO* parse_info = g_json_parse_cb(TEST_JSON_REPLY, g_json_ctx);
+        PROV_JSON_INFO* parse_info = g_json_parse_cb(TEST_JSON_ASSIGNED_REPLY, g_json_ctx);
         umock_c_reset_all_calls();
 
         //act
@@ -2347,6 +2532,248 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //cleanup
         free_prov_json_info(parse_info);
         json_value_free(root_value);
+        Prov_Device_LL_Destroy(handle);
+    }
+
+    
+    TEST_FUNCTION(Prov_Device_LL_Set_Provisioning_CSR_handle_NULL_fail)
+    {
+        //arrange
+
+        //act
+        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Set_Certificate_Signing_Request(NULL, TEST_CERTIFICATE_VAL);
+
+        //assert
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_INVALID_ARG, prov_result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+    }
+
+    TEST_FUNCTION(Prov_Device_LL_Set_Provisioning_CSR_success)
+    {
+        //arrange
+        PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_CERTIFICATE_VAL));
+
+        //act
+        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Set_Certificate_Signing_Request(handle, TEST_CERTIFICATE_VAL);
+
+        //assert
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        Prov_Device_LL_Destroy(handle);
+    }
+
+    TEST_FUNCTION(Prov_Device_LL_Register_With_Provisioning_CSR_success)
+    {
+        //arrange
+        PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
+        (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
+        Prov_Device_LL_DoWork(handle);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+        //act
+        const char* EXPECTED_REQUEST_PAYLOAD = "{\"registrationId\":\"A87FA22F-828B-46CA-BA37-D574C32E423E\"," \
+        "\"tpm\":{\"endorsementKey\":\"keykey\",\"storageRootKey\":\"keykey\"},\"clientCertificateCsr\":""\"--BEGIN_CERT 12345 END_CERT--\"}";
+
+        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Set_Certificate_Signing_Request(handle, TEST_CERTIFICATE_VAL);
+        char* request_payload = g_json_create_cb(TEST_ENDORSMENT_KEY, TEST_ENDORSMENT_KEY, g_json_ctx);
+
+        //assert
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result);
+        ASSERT_ARE_EQUAL(char_ptr, EXPECTED_REQUEST_PAYLOAD, request_payload);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        Prov_Device_LL_Destroy(handle);
+        free(request_payload);
+    }
+
+    TEST_FUNCTION(Prov_Device_LL_Set_Provisioning_CSR_set_twice_success)
+    {
+        //arrange
+        PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_CERTIFICATE_VAL));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, TEST_CERTIFICATE_VAL));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+
+        //act
+        PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Set_Certificate_Signing_Request(handle, TEST_CERTIFICATE_VAL);
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result);
+        prov_result = Prov_Device_LL_Set_Certificate_Signing_Request(handle, TEST_CERTIFICATE_VAL);
+
+        //assert
+        ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        Prov_Device_LL_Destroy(handle);
+    }
+
+    TEST_FUNCTION(Prov_Device_LL_Get_Provisioning_CSR_handle_NULL_success)
+    {
+        //arrange
+
+        //act
+        const char* result = Prov_Device_LL_Get_Issued_Client_Certificate(NULL);
+
+        //assert
+        ASSERT_IS_NULL(result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+    }
+
+    TEST_FUNCTION(Prov_Device_LL_Get_Provisioning_CSR_success)
+    {
+        //arrange
+        PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
+        (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
+        Prov_Device_LL_DoWork(handle);
+        umock_c_reset_all_calls();
+
+        setup_parse_json_assigned_mocks(true);
+        static const char* TEST_JSON_CSR_REPLY = 
+        "{" \
+        "    \"operationId\": \"string\"," \
+        "    \"status\": \"assigned\"," \
+        "    \"registrationState\": {" \
+        "        \"tpm\": {" \
+        "            \"authenticationKey\": \"dGVzdF9hdXRoX2tleQ==\"" \
+        "        }," \
+        "        \"registrationId\": \"string\"," \
+        "        \"createdDateTimeUtc\": \"2019-08-24T14:15:22Z\"," \
+        "        \"assignedHub\": \"string\"," \
+        "        \"deviceId\": \"string\"," \
+        "        \"status\": \"assigned\"," \
+        "        \"substatus\": \"initialAssignment\"," \
+        "        \"errorCode\": -2147483648," \
+        "        \"errorMessage\": \"string\"," \
+        "        \"lastUpdatedDateTimeUtc\": \"2019-08-24T14:15:22Z\"," \
+        "        \"etag\": \"string\"," \
+        "        \"issuedClientCertificate\": \"--BEGIN_CERT 12345 END_CERT--\"" \
+        "    }" \
+        "}";
+
+        PROV_JSON_INFO* parse_info = g_json_parse_cb(TEST_JSON_CSR_REPLY, g_json_ctx);
+        umock_c_reset_all_calls();
+
+        //act
+        const char* result = Prov_Device_LL_Get_Issued_Client_Certificate(handle);
+
+        //assert
+        ASSERT_IS_NOT_NULL(result);
+        ASSERT_ARE_EQUAL(char_ptr, TEST_CERTIFICATE_VAL, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        free_prov_json_info(parse_info);
+        Prov_Device_LL_Destroy(handle);
+    }
+
+    TEST_FUNCTION(Prov_Device_LL_Get_Provisioning_CSR_no_data_success)
+    {
+        //arrange
+        PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
+        (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
+        Prov_Device_LL_DoWork(handle);
+        umock_c_reset_all_calls();
+
+        setup_parse_json_assigned_mocks(true);
+                static const char* TEST_JSON_CSR_REPLY = 
+        "{" \
+        "    \"operationId\": \"string\"," \
+        "    \"status\": \"assigned\"," \
+        "    \"registrationState\": {" \
+        "        \"tpm\": {" \
+        "            \"authenticationKey\": \"dGVzdF9hdXRoX2tleQ==\"" \
+        "        }," \
+        "        \"registrationId\": \"string\"," \
+        "        \"createdDateTimeUtc\": \"2019-08-24T14:15:22Z\"," \
+        "        \"assignedHub\": \"string\"," \
+        "        \"deviceId\": \"string\"," \
+        "        \"status\": \"assigned\"," \
+        "        \"substatus\": \"initialAssignment\"," \
+        "        \"errorCode\": -2147483648," \
+        "        \"errorMessage\": \"string\"," \
+        "        \"lastUpdatedDateTimeUtc\": \"2019-08-24T14:15:22Z\"," \
+        "        \"etag\": \"string\"," \
+        "        \"issuedClientCertificate\": \"\"" \
+        "    }" \
+        "}";
+
+        PROV_JSON_INFO* parse_info = g_json_parse_cb(TEST_JSON_CSR_REPLY, g_json_ctx);
+        umock_c_reset_all_calls();
+
+        //act
+        const char* result = Prov_Device_LL_Get_Issued_Client_Certificate(handle);
+
+        //assert
+        ASSERT_ARE_EQUAL(char_ptr, "", result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        free_prov_json_info(parse_info);
+        Prov_Device_LL_Destroy(handle);
+    }
+
+    TEST_FUNCTION(Prov_Device_LL_Get_Provisioning_CSR_data_wrong_type_fails)
+    {
+        //arrange
+        PROV_DEVICE_LL_HANDLE handle = Prov_Device_LL_Create(TEST_PROV_URI, TEST_SCOPE_ID, trans_provider);
+        (void)Prov_Device_LL_Register_Device(handle, on_prov_register_device_callback, NULL, on_prov_register_status_callback, NULL);
+        g_status_callback(PROV_DEVICE_TRANSPORT_STATUS_CONNECTED, DEFAULT_RETRY_AFTER, g_status_ctx);
+        Prov_Device_LL_DoWork(handle);
+        umock_c_reset_all_calls();
+
+        setup_parse_json_assigned_mocks(true);
+                static const char* TEST_JSON_CSR_REPLY = 
+        "{" \
+        "    \"operationId\": \"string\"," \
+        "    \"status\": \"assigned\"," \
+        "    \"registrationState\": {" \
+        "        \"tpm\": {" \
+        "            \"authenticationKey\": \"dGVzdF9hdXRoX2tleQ==\"" \
+        "        }," \
+        "        \"registrationId\": \"string\"," \
+        "        \"createdDateTimeUtc\": \"2019-08-24T14:15:22Z\"," \
+        "        \"assignedHub\": \"string\"," \
+        "        \"deviceId\": \"string\"," \
+        "        \"status\": \"assigned\"," \
+        "        \"substatus\": \"initialAssignment\"," \
+        "        \"errorCode\": -2147483648," \
+        "        \"errorMessage\": \"string\"," \
+        "        \"lastUpdatedDateTimeUtc\": \"2019-08-24T14:15:22Z\"," \
+        "        \"etag\": \"string\"," \
+        "        \"issuedClientCertificate\": 5" \
+        "    }" \
+        "}";
+
+        PROV_JSON_INFO* parse_info = g_json_parse_cb(TEST_JSON_CSR_REPLY, g_json_ctx);
+        umock_c_reset_all_calls();
+
+        //act
+        const char* result = Prov_Device_LL_Get_Issued_Client_Certificate(handle);
+
+        //assert
+        ASSERT_IS_NULL(result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //cleanup
+        free_prov_json_info(parse_info);
         Prov_Device_LL_Destroy(handle);
     }
 
