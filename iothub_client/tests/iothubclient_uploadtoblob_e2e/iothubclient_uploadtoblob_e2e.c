@@ -87,13 +87,8 @@ static const char TEST_UPLOADTOBLOB_DESTINATION_FILE[] = "upload_destination_fil
 static const char TEST_UPLOADTOBLOB_DESTINATION_FILE_MULTIBLOCK[] = "upload_destination_file_multiblock.txt";
 static const char TEST_UPLOADTOBLOB_DESTINATION_FILE_CLOSE_THREAD[] = "close_thread_test.txt";
 static const unsigned char* UPLOADTOBLOB_E2E_TEST_DATA = (const unsigned char*)"e2e_UPLOADTOBLOB_CALLBACK test data";
-
-
-static char* uploadDataFromCallback = "AAA-";
-
-static char* uploadDataMultiThread = "Upload data from multi-thread test";
-
-bool testSlowThreadContext;
+static const char* uploadDataFromCallback = "AAA-";
+static bool testSlowThreadContext;
 
 static int bool_Compare(bool left, bool right)
 {
@@ -145,7 +140,6 @@ static void e2e_uploadblob_deinit()
 
     Lock_Deinit(updateBlobTestLock);
 }
-
 
 // uploadToBlobCallback is invoked once upload succeeds or fails.  It updates context in either case so
 // main waiting thread knows we're done.
