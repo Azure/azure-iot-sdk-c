@@ -60,6 +60,27 @@ MOCKABLE_FUNCTION(, PROV_DEVICE_RESULT, Prov_Device_Set_Provisioning_Payload, PR
 */
 MOCKABLE_FUNCTION(, const char*, Prov_Device_Get_Provisioning_Payload, PROV_DEVICE_HANDLE, handle);
 
+/**
+* @brief    Retrieves the Provisioning TrustBundle that is sent from the Provisioning service
+*
+* @details  The Azure IoT Provisioning service can optionally send a list of root and intermediate 
+*           Certification Authorities that the device may need when connecting to other Azure IoT 
+*           services such as Azure IoT Edge. The recommended action is to use this information and
+*           update the correct device-side certificate trust store. The entire list of certificates is sent by
+*           the service. 
+*
+* @note     Application developers should compare the TrustBundle's etag field against previous 
+*           values to determine if any action is required. If the etag is different, new certificates
+*           in the bundle will need to be installed and previously installed certificates not 
+*           present in the bundle need to be removed from the root and intermediate CA stores.
+*
+* @param    handle          The handle created by a call to the create function.
+*
+* @return The certificate trust bundle
+*/
+MOCKABLE_FUNCTION(, const char*, Prov_Device_Get_Trust_Bundle, PROV_DEVICE_HANDLE, handle);
+
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

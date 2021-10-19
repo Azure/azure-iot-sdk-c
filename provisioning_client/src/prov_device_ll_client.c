@@ -41,6 +41,7 @@ static const char* const PROV_FAILED_STATUS = "failed";
 static const char* const PROV_BLACKLISTED_STATUS = "blacklisted";
 static const char* const JSON_CUSTOM_DATA_TAG = "payload";
 static const char* const JSON_NODE_RETURNED_DATA = "payload";
+static const char* const JSON_NODE_TRUST_BUNDLE = "trustBundle";
 
 static const char* const SAS_TOKEN_SCOPE_FMT = "%s/registrations/%s";
 
@@ -117,6 +118,7 @@ typedef struct PROV_INSTANCE_INFO_TAG
 
     char* custom_request_data;
     char* custom_response_data;
+    char* trust_bundle;
 } PROV_INSTANCE_INFO;
 
 static char* prov_transport_challenge_callback(const unsigned char* nonce, size_t nonce_len, const char* key_name, void* user_ctx)
@@ -269,6 +271,17 @@ static void retrieve_json_payload(JSON_Object* json_object, PROV_INSTANCE_INFO* 
     if ((json_field = json_object_get_value(json_object, JSON_NODE_RETURNED_DATA)) != NULL)
     {
         prov_info->custom_response_data = json_serialize_to_string(json_field);
+    }
+}
+
+static void retrieve_json_trustbundle(JSON_Object* json_object, PROV_INSTANCE_INFO* prov_info)
+{
+    JSON_Value* json_field;
+
+    // Returned Data is not available
+    if ((json_field = json_object_get_value(json_object, JSON_NODE_TRUST_BUNDLE)) != NULL)
+    {
+        prov_info->trust_bundle = json_serialize_to_string(json_field);
     }
 }
 
@@ -616,6 +629,9 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
                         {
                             // Get the returned Data from the payload if it's there
                             retrieve_json_payload(json_reg_status_node, prov_info);
+
+                            // Get the returned TrustBundle if it's there
+                            retrieve_json_trustbundle(json_reg_status_node, prov_info);
                         }
                     }
                 }
@@ -846,6 +862,13 @@ static void destroy_instance(PROV_INSTANCE_INFO* prov_info)
         json_free_serialized_string(prov_info->custom_response_data);
         prov_info->custom_response_data = NULL;
     }
+
+    if (prov_info->trust_bundle != NULL)
+    {
+        json_free_serialized_string(prov_info->trust_bundle);
+        prov_info->trust_bundle = NULL;
+    }
+
     prov_info->prov_transport_protocol->prov_transport_destroy(prov_info->transport_handle);
     prov_info->transport_handle = NULL;
     free(prov_info->scope_id);
@@ -1074,6 +1097,13 @@ PROV_DEVICE_RESULT Prov_Device_LL_Register_Device(PROV_DEVICE_LL_HANDLE handle, 
             {
                 json_free_serialized_string(handle->custom_response_data);
                 handle->custom_response_data = NULL;
+            }
+
+            // Free the trustbundle if its been allocated
+            if (handle->trust_bundle != NULL)
+            {
+                json_free_serialized_string(handle->trust_bundle);
+                handle->trust_bundle = NULL;
             }
 
             if (handle->prov_transport_protocol->prov_transport_open(handle->transport_handle, handle->registration_id, ek_value, srk_value, on_transport_registration_data, handle, on_transport_status, handle, prov_transport_challenge_callback, handle) != 0)
@@ -1399,6 +1429,21 @@ const char* Prov_Device_LL_Get_Provisioning_Payload(PROV_DEVICE_LL_HANDLE handle
     else
     {
         result = handle->custom_response_data;
+    }
+    return result;
+}
+
+const char* Prov_Device_LL_Get_Trust_Bundle(PROV_DEVICE_LL_HANDLE handle)
+{
+    const char* result;
+    if (handle == NULL)
+    {
+        LogError("Invalid parameter specified handle: %p", handle);
+        result = NULL;
+    }
+    else
+    {
+        result = handle->trust_bundle;
     }
     return result;
 }

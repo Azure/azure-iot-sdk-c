@@ -312,3 +312,17 @@ const char* Prov_Device_Get_Provisioning_Payload(PROV_DEVICE_HANDLE handle)
     return result;
 }
 
+const char* Prov_Device_Get_Trust_Bundle(PROV_DEVICE_HANDLE handle)
+{
+    const char* result;
+    if (handle == NULL)
+    {
+        LogError("Invalid parameter specified handle: %p", handle);
+        result = NULL;
+    }
+    else
+    {
+        result = Prov_Device_LL_Get_Trust_Bundle(handle->ProvDeviceLLHandle);
+    }
+    return result;
+}

@@ -1,0 +1,42 @@
+@startuml
+frame "Low Privilege" {
+  [Provisioning Component]
+  [Hub Component]
+}
+
+package "Elevated Privilege"{
+    [Certificate Installer]
+}
+
+cloud {
+  [Device Provisioning Service]
+  [IoT Hub]
+}
+
+
+database "Trusted Certificate Store" {
+    [Azure IoT CA Root]
+    [Edge CA Root]
+    [Local Service CA Root]
+}
+
+database "Certificate Installer Data" {
+    [last version (etag)]
+    [list of installed certificates]
+}
+
+[Device Provisioning Service] <--[Provisioning Component]
+[IoT Hub] <-- [Hub Component]
+[Provisioning Component] --> [Certificate Installer]
+[Certificate Installer] --> [Edge CA Root]
+[Certificate Installer] --> [Local Service CA Root]
+[Certificate Installer] <-> [last version (etag)]
+[Certificate Installer] <-> [list of installed certificates]
+
+note right of "Provisioning Component": Linked with the C-SDK
+note top of "Hub Component"
+Uses the Device Trusted Certificate Store.
+Linked with the C-SDK.
+end note
+
+@enduml

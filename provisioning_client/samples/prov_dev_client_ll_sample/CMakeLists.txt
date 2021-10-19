@@ -27,6 +27,7 @@ include_directories(${IOTHUB_CLIENT_INC_FOLDER})
 include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
 include_directories(${SHARED_UTIL_INC_FOLDER})
 include_directories(${CMAKE_CURRENT_LIST_DIR}/adapters)
+include_directories(${PROJECT_SOURCE_DIR}/deps/parson)
 
 add_executable(prov_dev_client_ll_sample ${prov_dev_client_ll_sample_c_files} ${prov_dev_client_ll_sample_h_files})
 
