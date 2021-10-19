@@ -501,10 +501,12 @@ TEST_FUNCTION(IoTHub_MQTT_UploadMultipleBlocksToBlobEx)
     e2e_uploadtoblob_multiblock_test(MQTT_Protocol, true, false);
 }
 
+#ifndef __APPLE__
 TEST_FUNCTION(IoTHub_MQTT_UploadToBlob_x509)
 {
     e2e_uploadtoblob_test(MQTT_Protocol, IOTHUB_ACCOUNT_AUTH_X509);
 }
+#endif
 
 TEST_FUNCTION(IoTHub_MQTT_UploadCloseHandle_Before_WorkersComplete)
 {
