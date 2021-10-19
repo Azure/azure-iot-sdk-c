@@ -432,7 +432,7 @@ static void e2e_uploadtoblob_close_handle_with_active_thread(IOTHUB_CLIENT_TRANS
     IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
     ASSERT_IS_NOT_NULL(iotHubClientHandle, "Could not invoke IoTHubClient_CreateFromConnectionString");
 
-    // Make the worker threads less aggressive on polling.  We do this during shutdown with a worker thread still active,
+    // Make the worker thread less aggressive on polling.  We do this during shutdown with a worker thread still active,
     // the default polling interval (1 ms) ends up creating substantial overhead on Valgrind runs in IoTHubClient_Destroy().
     tickcounter_ms_t doWorkFrequency = 100;
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, IoTHubClient_SetOption(iotHubClientHandle, OPTION_DO_WORK_FREQUENCY_IN_MS, &doWorkFrequency));

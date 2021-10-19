@@ -1,4 +1,4 @@
-# IoT Hub C SDK Options
+C:\iot2\azure-iot-sdk-c\doc.# IoT Hub C SDK Options
 
 This document describes how you can set options for the Azure IoT Hub and Device Provisioning Service (DPS) client connections.
 
@@ -148,6 +148,7 @@ The following options are supported when performing file uploads.  They are decl
 | `"proxy_data"`               | OPTION_HTTP_PROXY               | [HTTP_PROXY_OPTIONS*][shared-util-options-h] | Http proxy data object used for proxy connection to IoT Hub and Azure Storage
 | `"network_interface_upload_to_blob"`| OPTION_NETWORK_INTERFACE_UPLOAD_TO_BLOB | const char* | Set the interface name to use as outgoing network interface for upload to blob.
 NOTE: Not all HTTP clients support this option. It is currently only supported when using cURL.
+| `"blob_upload_tls_renegotiation"`| OPTION_BLOB_UPLOAD_TLS_RENEGOTIATION | bool* | Tells underlying HTTP client to use TLS renegotiation.  NOTE: Not all HTTP clients support this option. It is currently only supported when using HTTP Compact.  Many other HTTP stacks (such as cURL and WinHTTP) automatically perform TLS renegotiation in any event.
 
 ## Batching and IoT Hub Client SDK
 
