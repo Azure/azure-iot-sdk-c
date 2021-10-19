@@ -18,7 +18,7 @@ jobs:
           ref: ${{ github.event.inputs.commitRef }}
 
       - name: Install and Build Doxygen
-        run: .github/scripts/doxygen.sh
+        run: .github/scripts/build_doxygen.sh
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.1.3
