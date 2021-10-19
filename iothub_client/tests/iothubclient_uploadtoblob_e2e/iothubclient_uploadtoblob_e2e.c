@@ -60,20 +60,22 @@ static LOCK_HANDLE updateBlobTestLock;
 UPLOADTOBLOB_CALLBACK_STATUS g_uploadToBlobStatus;
 
 #define IOTHUB_UPLOADTOBLOB_TIMEOUT_SEC 120
-#define TEST_MAX_SIMULTANEOUS_UPLOADS 3
 #define TEST_JITTER_BETWEEN_UPLOAD_TO_BLOB_E2E_TESTS_MS 1500
 #define TEST_SLEEP_BETWEEN_UPLOAD_TO_BLOB_E2E_TESTS_MS 7500
 
 #define TEST_SLEEP_BETWEEN_MULTIBLOCK_UPLOADS 2000
 
 #define TEST_SLEEP_BETWEEN_NEW_UPLOAD_THREAD 150
+
+// After starting an upload, we close the handle after TEST_SLEEP_BEFORE_EARLY_HANDLE_CLOSE milliseconds
+// but have a worker thread sleep for TEST_SLEEP_SLOW_WORKER_THREAD to simulate an active worker thread during close.
 #define TEST_SLEEP_BEFORE_EARLY_HANDLE_CLOSE 1000
 #define TEST_SLEEP_SLOW_WORKER_THREAD 5000
 
 // In normal operation we should only need a few seconds for the workers to complete.
 // On Valgrind test runs, however, there's a significant performance degradation because
 // of all the simultaneous threads the test creates.  Allow ample time (but not forever).
-#define TEST_MAXIMUM_TIME_FOR_DESTROY_ON_BLOCKED_THREADS_TO_COMPLETE_SECONDS 180
+#define TEST_MAXIMUM_TIME_FOR_DESTROY_ON_BLOCKED_THREADS_TO_COMPLETE_SECONDS 30
 
 #define INDEFINITE_TIME ((time_t)(-1))
 
@@ -386,8 +388,8 @@ static void e2e_uploadtoblob_multiblock_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER pr
 }
 
 // uploadToBlobTestEarlyClose is the callback passed to SDK that will retrieve uploadToBlob data.  For this test, however, we simply
-// will wait "too long" before returning and will happen after the test thread attempts to close the handle.
-static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT uploadToBlobTestEarlyClose(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
+// will wait a long time before returning.  The main test thread will simultaneously be closing the underlying handle but it'll need to block until we return from this.
+static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT uploadToBlobBlockForALongTime(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context)
 {
     if (data != NULL)
     {
@@ -421,8 +423,8 @@ static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT uploadToBlobTestEarlyClose(IOTH
     }
 }
 
-// e2e_uploadtoblob_close_handle_with_active_threads tests that if the application closes the IOTHUB_CLIENT_HANDLE while the threads
-// are still active, that we still will close the running threads.
+// e2e_uploadtoblob_close_handle_with_active_thread tests that if the application closes the IOTHUB_CLIENT_HANDLE while the worker thread
+// is still active, that we block on the destroy until workers have completed.
 static void e2e_uploadtoblob_close_handle_with_active_thread(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     IOTHUB_CLIENT_RESULT result;
@@ -432,6 +434,9 @@ static void e2e_uploadtoblob_close_handle_with_active_thread(IOTHUB_CLIENT_TRANS
     IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
     ASSERT_IS_NOT_NULL(iotHubClientHandle, "Could not invoke IoTHubClient_CreateFromConnectionString");
 
+    // If this is not true, it means the test is meaningless (namely the worker thread would be done before the close happens).
+    ASSERT_IS_TRUE(TEST_SLEEP_BEFORE_EARLY_HANDLE_CLOSE < TEST_SLEEP_SLOW_WORKER_THREAD);
+
     // Make the worker thread less aggressive on polling.  We do this during shutdown with a worker thread still active,
     // the default polling interval (1 ms) ends up creating substantial overhead on Valgrind runs in IoTHubClient_Destroy().
     tickcounter_ms_t doWorkFrequency = 100;
@@ -439,7 +444,7 @@ static void e2e_uploadtoblob_close_handle_with_active_thread(IOTHUB_CLIENT_TRANS
 
     testSlowThreadContext = false;
 
-    result = IoTHubClient_UploadMultipleBlocksToBlobAsyncEx(iotHubClientHandle, TEST_UPLOADTOBLOB_DESTINATION_FILE_CLOSE_THREAD, uploadToBlobTestEarlyClose, &testSlowThreadContext);
+    result = IoTHubClient_UploadMultipleBlocksToBlobAsyncEx(iotHubClientHandle, TEST_UPLOADTOBLOB_DESTINATION_FILE_CLOSE_THREAD, uploadToBlobBlockForALongTime, &testSlowThreadContext);
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
     ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_NEW_UPLOAD_THREAD);
     
@@ -466,7 +471,7 @@ static void e2e_uploadtoblob_close_handle_with_active_thread(IOTHUB_CLIENT_TRANS
 
     // Checking these contexts were set to true by the running thread verifies that the threads run and that they indeed have returned.
     ASSERT_ARE_EQUAL(int, (int)LOCK_OK, (int)Lock(updateBlobTestLock));
-    ASSERT_IS_TRUE(testSlowThreadContext);
+    ASSERT_IS_TRUE(testSlowThreadContext, "Worker thread's callback uploadToBlobBlockForALongTime never signaled its context");
     (void)Unlock(updateBlobTestLock);
 
     LogInfo("Returned from IoTHubClient_Destroy");

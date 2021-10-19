@@ -1,4 +1,4 @@
-C:\iot2\azure-iot-sdk-c\doc.# IoT Hub C SDK Options
+# IoT Hub C SDK Options
 
 This document describes how you can set options for the Azure IoT Hub and Device Provisioning Service (DPS) client connections.
 

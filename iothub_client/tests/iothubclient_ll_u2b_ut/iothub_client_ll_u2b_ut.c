@@ -1514,7 +1514,6 @@ TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_x509_timeout_succeeds)
     IoTHubClient_LL_UploadToBlob_Destroy(h);
 }
 
-
 TEST_FUNCTION(IoTHubClient_LL_UploadToBlob_SetOption_tls_renegotiation_succeeds)
 {
     //arrange

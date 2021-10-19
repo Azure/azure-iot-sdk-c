@@ -1237,19 +1237,17 @@ void IoTHubClientCore_Destroy(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle)
             LogError("unable to Lock - - will still proceed to try to end the thread without locking");
         }
 
-
-
         /*Codes_SRS_IOTHUBCLIENT_02_069: [ IoTHubClient_Destroy shall free all data created by IoTHubClient_UploadToBlobAsync ]*/
         /*wait for all uploading threads to finish*/
         while (singlylinkedlist_get_head_item(iotHubClientInstance->httpWorkerThreadInfoList) != NULL)
         {
             // Sleep between runs of the garbage collector in order to give the httpWorker threads time to execute.
             // Otherwise we end up in a spin loop here.
-            garbageCollectorImpl(iotHubClientInstance);
-            Unlock(iotHubClientInstance->LockHandle);
             unsigned int sleeptime_in_ms = (unsigned int)iotHubClientInstance->do_work_freq_ms;
+            Unlock(iotHubClientInstance->LockHandle);
             ThreadAPI_Sleep(sleeptime_in_ms);
-            Lock(iotHubClientInstance->LockHandle); 
+            Lock(iotHubClientInstance->LockHandle);
+            garbageCollectorImpl(iotHubClientInstance);
         }
 
         if (iotHubClientInstance->httpWorkerThreadInfoList != NULL)
