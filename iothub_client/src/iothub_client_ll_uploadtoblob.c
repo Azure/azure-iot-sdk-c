@@ -84,6 +84,7 @@ typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA_TAG
     UPLOADTOBLOB_CURL_VERBOSITY curl_verbosity_level;
     size_t blob_upload_timeout_secs;
     const char* networkInterface;
+    unsigned int tls_renegotiation;
 }IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA;
 
 typedef struct BLOB_UPLOAD_CONTEXT_TAG
@@ -708,14 +709,16 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
             else
             {
                 // If client is using x509 auth, renegotiation must be turned on in order to work properly.
-                bool renegotiation_is_on = true;
+                if ((upload_data->tls_renegotiation == 1) && (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_SET_TLS_RENEGOTIATION, &upload_data->tls_renegotiation) != HTTPAPIEX_OK))
+                {
+                    LogError("unable to HTTPAPIEX_SetOption for tls_renegotiation");
+                    result = IOTHUB_CLIENT_ERROR;
+                }
                 /*transmit the x509certificate and x509privatekey*/
                 /*Codes_SRS_IOTHUBCLIENT_LL_02_106: [ - x509certificate and x509privatekey saved options shall be passed on the HTTPAPIEX_SetOption ]*/
-                if ((upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_X509 || upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_X509_ECC) &&
+                else if ((upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_X509 || upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_X509_ECC) &&
                     ((HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_X509_CERT, upload_data->credentials.x509_credentials.x509certificate) != HTTPAPIEX_OK) ||
-                    (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_X509_PRIVATE_KEY, upload_data->credentials.x509_credentials.x509privatekey) != HTTPAPIEX_OK) ||
-                    (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_SET_TLS_RENEGOTIATION, &renegotiation_is_on) != HTTPAPIEX_OK))
-                    )
+                    (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_X509_PRIVATE_KEY, upload_data->credentials.x509_credentials.x509privatekey) != HTTPAPIEX_OK)))
                 {
                     LogError("unable to HTTPAPIEX_SetOption for x509 certificate");
                     result = IOTHUB_CLIENT_ERROR;
@@ -1203,6 +1206,11 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
                     result = IOTHUB_CLIENT_OK;
                 }
             }
+        }
+        else if (strcmp(optionName, OPTION_SET_TLS_RENEGOTIATION) == 0)
+        {
+            upload_data->tls_renegotiation = *(unsigned int*)value;
+            result = IOTHUB_CLIENT_OK;
         }
         else
         {

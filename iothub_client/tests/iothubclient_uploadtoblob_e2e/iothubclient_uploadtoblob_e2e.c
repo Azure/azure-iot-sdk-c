@@ -25,6 +25,7 @@
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/agenttime.h"
+#include "azure_c_shared_utility/tickcounter.h"
 
 #ifdef TEST_MQTT
 #include "iothubtransportmqtt.h"
@@ -69,7 +70,10 @@ UPLOADTOBLOB_CALLBACK_STATUS g_uploadToBlobStatus;
 #define TEST_SLEEP_BEFORE_EARLY_HANDLE_CLOSE 1000
 #define TEST_SLEEP_SLOW_WORKER_THREAD 5000
 
-#define TEST_MAXIMUM_TIME_FOR_DESTROY_ON_BLOCKED_THREADS_TO_COMPLETE_SECONDS 10
+// In normal operation we should only need a few seconds for the workers to complete.
+// On Valgrind test runs, however, there's a significant performance degradation because
+// of all the simultaneous threads the test creates.  Allow ample time (but not forever).
+#define TEST_MAXIMUM_TIME_FOR_DESTROY_ON_BLOCKED_THREADS_TO_COMPLETE_SECONDS 180
 
 #define INDEFINITE_TIME ((time_t)(-1))
 
@@ -77,23 +81,17 @@ TEST_DEFINE_ENUM_TYPE(UPLOADTOBLOB_CALLBACK_STATUS, IOTHUB_CLIENT_FILE_UPLOAD_RE
 
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 
-#define UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE "hello_world.txt"
-#define UPLOADTOBLOB_E2E_TEST_MULTI_BLOCK_DESTINATION_FILE "hello_world_multiblock.txt"
-#define UPLOADTOBLOB_E2E_TEST_DATA (const unsigned char*)"e2e_UPLOADTOBLOB_CALLBACK test data"
+static const char TEST_UPLOADTOBLOB_DESTINATION_FILE[] = "upload_destination_file.txt";
+static const char TEST_UPLOADTOBLOB_DESTINATION_FILE_MULTIBLOCK[] = "upload_destination_file_multiblock.txt";
+static const char TEST_UPLOADTOBLOB_DESTINATION_FILE_CLOSE_THREAD[] = "close_thread_test.txt";
+static const unsigned char* UPLOADTOBLOB_E2E_TEST_DATA = (const unsigned char*)"e2e_UPLOADTOBLOB_CALLBACK test data";
 
-#define UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE1 "hello_world1.txt"
-#define UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE2 "hello_world2.txt"
-#define UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE3 "hello_world3.txt"
-
-#define UPLOADTOBLOB_E2E_TEST_MULTI_BLOCK_DESTINATION_FILE1 "hello_world_multiblock.txt"
 
 static char* uploadDataFromCallback = "AAA-";
 
 static char* uploadDataMultiThread = "Upload data from multi-thread test";
 
-bool testSlowThreadContext1;
-bool testSlowThreadContext2;
-bool testSlowThreadContext3;
+bool testSlowThreadContext;
 
 static int bool_Compare(bool left, bool right)
 {
@@ -276,7 +274,7 @@ static void e2e_uploadtoblob_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOT
 #endif
 	
     g_uploadToBlobStatus = UPLOADTOBLOB_CALLBACK_PENDING;
-    result = IoTHubClient_UploadToBlobAsync(iotHubClientHandle, UPLOADTOBLOB_E2E_TEST_DESTINATION_FILE, UPLOADTOBLOB_E2E_TEST_DATA, strlen((const char*)UPLOADTOBLOB_E2E_TEST_DATA), uploadToBlobCallback, &g_uploadToBlobStatus);
+    result = IoTHubClient_UploadToBlobAsync(iotHubClientHandle, TEST_UPLOADTOBLOB_DESTINATION_FILE, UPLOADTOBLOB_E2E_TEST_DATA, strlen((const char*)UPLOADTOBLOB_E2E_TEST_DATA), uploadToBlobCallback, &g_uploadToBlobStatus);
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
 
     poll_for_upload_completion(&g_uploadToBlobStatus);
@@ -373,11 +371,11 @@ static void e2e_uploadtoblob_multiblock_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER pr
     uploadBlobNumber = 0;
     if (useExMethod)
     {
-        result = IoTHubClient_UploadMultipleBlocksToBlobAsyncEx(iotHubClientHandle, UPLOADTOBLOB_E2E_TEST_MULTI_BLOCK_DESTINATION_FILE, uploadToBlobGetDataEx, &g_uploadToBlobStatus);
+        result = IoTHubClient_UploadMultipleBlocksToBlobAsyncEx(iotHubClientHandle, TEST_UPLOADTOBLOB_DESTINATION_FILE_MULTIBLOCK, uploadToBlobGetDataEx, &g_uploadToBlobStatus);
     }
     else
     {
-        result = IoTHubClient_UploadMultipleBlocksToBlobAsync(iotHubClientHandle, UPLOADTOBLOB_E2E_TEST_MULTI_BLOCK_DESTINATION_FILE, uploadToBlobGetData, &g_uploadToBlobStatus);
+        result = IoTHubClient_UploadMultipleBlocksToBlobAsync(iotHubClientHandle, TEST_UPLOADTOBLOB_DESTINATION_FILE_MULTIBLOCK, uploadToBlobGetData, &g_uploadToBlobStatus);
     }
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
 
@@ -398,15 +396,19 @@ static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT uploadToBlobTestEarlyClose(IOTH
         ASSERT_IS_NOT_NULL(size);
         ASSERT_IS_NOT_NULL(context);
 
+        ASSERT_ARE_EQUAL(int, (int)LOCK_OK, (int)Lock(updateBlobTestLock));
         bool* slowThreadContext = context;
         ASSERT_IS_FALSE(*slowThreadContext);
+        (void)Unlock(updateBlobTestLock);
 
         LogInfo("Slow worker thread created, context=%p.  It will sleep %d milliseconds before return", context, TEST_SLEEP_SLOW_WORKER_THREAD);
         ThreadAPI_Sleep(TEST_SLEEP_SLOW_WORKER_THREAD);
         LogInfo("Slow worker thread sleep finished, context=%p.  Returning to caller.", context);
 
         // Set the context to indicate to test that we have actually executed this thread.
+        ASSERT_ARE_EQUAL(int, (int)LOCK_OK, (int)Lock(updateBlobTestLock));
         *slowThreadContext = true;
+        (void)Unlock(updateBlobTestLock);
 
         // It doesn't matter for the test what code we return, as the worker thread can continue to execute indefinitely as the Destroy() call will block.
         // Since we're testing the SDK close here and not the Hub, just terminate the request.
@@ -421,7 +423,7 @@ static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT uploadToBlobTestEarlyClose(IOTH
 
 // e2e_uploadtoblob_close_handle_with_active_threads tests that if the application closes the IOTHUB_CLIENT_HANDLE while the threads
 // are still active, that we still will close the running threads.
-static void e2e_uploadtoblob_close_handle_with_active_threads(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+static void e2e_uploadtoblob_close_handle_with_active_thread(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     IOTHUB_CLIENT_RESULT result;
     IOTHUB_PROVISIONED_DEVICE* deviceToUse = IoTHubAccount_GetSASDevice(g_iothubAcctInfo);
@@ -430,25 +432,21 @@ static void e2e_uploadtoblob_close_handle_with_active_threads(IOTHUB_CLIENT_TRAN
     IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_CreateFromConnectionString(deviceToUse->connectionString, protocol);
     ASSERT_IS_NOT_NULL(iotHubClientHandle, "Could not invoke IoTHubClient_CreateFromConnectionString");
 
-    testSlowThreadContext1 = false;
-    testSlowThreadContext2 = false;
-    testSlowThreadContext3 = false;
+    // Make the worker threads less aggressive on polling.  We do this during shutdown with a worker thread still active,
+    // the default polling interval (1 ms) ends up creating substantial overhead on Valgrind runs in IoTHubClient_Destroy().
+    tickcounter_ms_t doWorkFrequency = 100;
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, IoTHubClient_SetOption(iotHubClientHandle, OPTION_DO_WORK_FREQUENCY_IN_MS, &doWorkFrequency));
 
-    result = IoTHubClient_UploadMultipleBlocksToBlobAsyncEx(iotHubClientHandle, UPLOADTOBLOB_E2E_TEST_MULTI_BLOCK_DESTINATION_FILE, uploadToBlobTestEarlyClose, &testSlowThreadContext1);
+    testSlowThreadContext = false;
+
+    result = IoTHubClient_UploadMultipleBlocksToBlobAsyncEx(iotHubClientHandle, TEST_UPLOADTOBLOB_DESTINATION_FILE_CLOSE_THREAD, uploadToBlobTestEarlyClose, &testSlowThreadContext);
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
     ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_NEW_UPLOAD_THREAD);
     
-    result = IoTHubClient_UploadMultipleBlocksToBlobAsyncEx(iotHubClientHandle, UPLOADTOBLOB_E2E_TEST_MULTI_BLOCK_DESTINATION_FILE, uploadToBlobTestEarlyClose, &testSlowThreadContext2);
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
-    ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_NEW_UPLOAD_THREAD);
-    
-    result = IoTHubClient_UploadMultipleBlocksToBlobAsyncEx(iotHubClientHandle, UPLOADTOBLOB_E2E_TEST_MULTI_BLOCK_DESTINATION_FILE, uploadToBlobTestEarlyClose, &testSlowThreadContext3);
-    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Could not IoTHubClient_UploadToBlobAsync");
-
     LogInfo("Sleeping %d milliseconds before calling IoTHubClient_Destroy", TEST_SLEEP_BEFORE_EARLY_HANDLE_CLOSE);
     ThreadAPI_Sleep(TEST_SLEEP_BEFORE_EARLY_HANDLE_CLOSE);
 
-    LogInfo("Invoking call to IoTHubClient_Destroy before the worker threads have finished");
+    LogInfo("Invoking call to IoTHubClient_Destroy before the worker thread has finished");
 
     time_t timeWhenDestroyCalled;
     time_t timeWhenDestroyComplete;
@@ -467,9 +465,9 @@ static void e2e_uploadtoblob_close_handle_with_active_threads(IOTHUB_CLIENT_TRAN
                                  timeBetweenStartAndComplete, TEST_MAXIMUM_TIME_FOR_DESTROY_ON_BLOCKED_THREADS_TO_COMPLETE_SECONDS);
 
     // Checking these contexts were set to true by the running thread verifies that the threads run and that they indeed have returned.
-    ASSERT_IS_TRUE(testSlowThreadContext1);
-    ASSERT_IS_TRUE(testSlowThreadContext2);
-    ASSERT_IS_TRUE(testSlowThreadContext3);
+    ASSERT_ARE_EQUAL(int, (int)LOCK_OK, (int)Lock(updateBlobTestLock));
+    ASSERT_IS_TRUE(testSlowThreadContext);
+    (void)Unlock(updateBlobTestLock);
 
     LogInfo("Returned from IoTHubClient_Destroy");
 }
@@ -498,12 +496,15 @@ TEST_FUNCTION(IoTHub_MQTT_UploadMultipleBlocksToBlobEx)
     e2e_uploadtoblob_multiblock_test(MQTT_Protocol, true, false);
 }
 
-TEST_FUNCTION(IoTHub_MQTT_UploadCloseHandle_Before_WorkersComplete)
+TEST_FUNCTION(IoTHub_MQTT_UploadToBlob_x509)
 {
-    e2e_uploadtoblob_close_handle_with_active_threads(MQTT_Protocol);
+    e2e_uploadtoblob_test(MQTT_Protocol, IOTHUB_ACCOUNT_AUTH_X509);
 }
 
-
+TEST_FUNCTION(IoTHub_MQTT_UploadCloseHandle_Before_WorkersComplete)
+{
+    e2e_uploadtoblob_close_handle_with_active_thread(MQTT_Protocol);
+}
 #endif // TEST_MQTT
 
 END_TEST_SUITE(iothubclient_uploadtoblob_e2e)
