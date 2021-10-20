@@ -22,4 +22,4 @@ popd
 popd
 popd
 
-doxygen docs/Doxyfile
+doxygen doc/Doxyfile
