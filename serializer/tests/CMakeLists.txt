@@ -31,6 +31,6 @@ add_subdirectory(serializer_dt_int)
 add_subdirectory(serializer_dt_ut)
 endif()
 
-if(${use_amqp} AND ${use_http} AND (${run_e2e_tests})
+if(${use_amqp} AND ${use_http} AND ${run_e2e_tests})
     add_subdirectory(serializer_e2e)
 endif()
