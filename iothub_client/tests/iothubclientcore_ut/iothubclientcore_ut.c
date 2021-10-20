@@ -765,6 +765,10 @@ static void setup_iothubclient_sendeventasync(bool use_threads)
 #ifndef DONT_USE_UPLOADTOBLOB
 static void setup_gargageCollection(void* saved_data, bool can_item_be_collected)
 {
+    STRICT_EXPECTED_CALL(Unlock(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(ThreadAPI_Sleep(1));
+    STRICT_EXPECTED_CALL(Lock(IGNORED_PTR_ARG));
+
     EXPECTED_CALL(singlylinkedlist_get_head_item(TEST_SLL_HANDLE))
         .SetReturn(TEST_LIST_HANDLE);
     EXPECTED_CALL(singlylinkedlist_item_get_value(TEST_LIST_HANDLE))
