@@ -146,8 +146,8 @@ The following options are supported when performing file uploads.  They are decl
 | `"x509privatekey"`           | OPTION_X509_PRIVATE_KEY         | const char*       | Sets the private key for the RSA x509 certificate
 | `"TrustedCerts"`             | OPTION_TRUSTED_CERT             | const char*       | Azure Server certificate used to validate TLS connection to IoT Hub and Azure Storage
 | `"proxy_data"`               | OPTION_HTTP_PROXY               | [HTTP_PROXY_OPTIONS*][shared-util-options-h] | Http proxy data object used for proxy connection to IoT Hub and Azure Storage
-| `"network_interface_upload_to_blob"`| OPTION_NETWORK_INTERFACE_UPLOAD_TO_BLOB | const char* | Set the interface name to use as outgoing network interface for upload to blob.
-NOTE: Not all HTTP clients support this option. It is currently only supported when using cURL.
+| `"network_interface_upload_to_blob"`| OPTION_NETWORK_INTERFACE_UPLOAD_TO_BLOB | const char* | Set the interface name to use as outgoing network interface for upload to blob.  NOTE: Not all HTTP clients support this option. It is currently only supported when using cURL.
+| `"blob_upload_tls_renegotiation"`| OPTION_BLOB_UPLOAD_TLS_RENEGOTIATION | bool* | *[HTTP Compact](https://github.com/Azure/azure-c-shared-utility/blob/master/devdoc/httpapi_compact_requirements.md) only; not supported when using other HTTP stacks such as cURL and WinHTTP.*   Tells HTTP stack to enable TLS renegotiation when using client certificates.  Non-HTTP Compact stacks will use their defaults for this.
 
 ## Batching and IoT Hub Client SDK
 

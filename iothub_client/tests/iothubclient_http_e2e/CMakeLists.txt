@@ -12,10 +12,6 @@ set(theseTestsName iothubclient_http_e2e)
 
 generate_cppunittest_wrapper(${theseTestsName})
 
-set(${theseTestsName}_nuget_test_files
-   ${theseTestsName}.c
-)
-
 set(${theseTestsName}_c_files
 )
 
@@ -56,14 +52,6 @@ if(WIN32)
            )
            linkUAMQP(${theseTestsName}_exe)
            linkHttp(${theseTestsName}_exe)
-   endif()
-
-   if(TARGET ${theseTestsName}_nuget_exe)
-           target_link_libraries(${theseTestsName}_nuget_exe
-                   iothub_test
-                   iothub_service_client
-                   rpcrt4
-        )
    endif()
 else()
     if(UNIX) #LINUX OR APPLE

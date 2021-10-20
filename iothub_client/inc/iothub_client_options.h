@@ -51,6 +51,8 @@ extern "C"
     static STATIC_VAR_UNUSED const char* const OPTION_NETWORK_INTERFACE_UPLOAD_TO_BLOB = "network_interface_upload_to_blob";
     static STATIC_VAR_UNUSED const char* OPTION_PRODUCT_INFO = "product_info";
 
+    static STATIC_VAR_UNUSED const char* OPTION_BLOB_UPLOAD_TLS_RENEGOTIATION = "blob_upload_tls_renegotiation";
+
     /*
     * @brief    Specifies the Digital Twin Model Id of the connection. Only valid for use with MQTT Transport
     */

@@ -6,11 +6,7 @@
 //            described ../../readme.md before beginning to use the serializer.
 //
 
-#ifndef WINCE
 #include "iothubtransportamqp.h"
-#else
-#include "iothubtransporthttp.h"
-#endif
 #include "schemalib.h"
 #include "iothub_client.h"
 #include "serializer.h"
@@ -164,11 +160,7 @@ void remote_monitoring_run(void)
             config.iotHubName = hubName;
             config.iotHubSuffix = hubSuffix;
             config.protocolGatewayHostName = NULL;
-#ifndef WINCE
             config.protocol = AMQP_Protocol;
-#else
-            config.protocol = HTTP_Protocol;
-#endif
             iotHubClientHandle = IoTHubClient_Create(&config);
             if (iotHubClientHandle == NULL)
             {

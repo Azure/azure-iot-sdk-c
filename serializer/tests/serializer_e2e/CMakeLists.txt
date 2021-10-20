@@ -13,10 +13,6 @@ set(theseTestsName serializer_e2e)
 
 generate_cppunittest_wrapper(${theseTestsName})
 
-set(${theseTestsName}_nuget_c_files
-    ${theseTestsName}.c
-)
-
 set(${theseTestsName}_c_files
 )
 
@@ -65,15 +61,6 @@ if(WIN32)
 		linkSharedUtil(${theseTestsName}_exe)
 		linkUAMQP(${theseTestsName}_exe)
 		linkHttp(${theseTestsName}_exe)
-	endif()
-
-	if(TARGET ${theseTestsName}_nuget_exe)
-		target_link_libraries(${theseTestsName}_nuget_exe
-			serializer
-			iothub_test
-			iothub_service_client
-            rpcrt4
-		)
 	endif()
 else()
 	if(TARGET ${theseTestsName}_exe)
