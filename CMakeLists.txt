@@ -54,7 +54,6 @@ option(run_e2e_openssl_engine_tests "set run_e2e_openssl_engine_tests to ON to r
 option(skip_samples "set skip_samples to ON to skip building samples (default is OFF)[if possible, they are always build]" OFF)
 option(build_service_client "controls whether the iothub_service_client is built or not" ON)
 option(build_provisioning_service_client "controls whether the provisioning_service_client is built or not" ON)
-option(build_python "builds the Python native iothub_client module" OFF)
 option(dont_use_uploadtoblob "set dont_use_uploadtoblob to ON if the functionality of upload to blob is to be excluded, OFF otherwise. It requires HTTP" OFF)
 option(no_logging "disable logging" OFF)
 option(use_installed_dependencies "set use_installed_dependencies to ON to use installed packages instead of building dependencies from submodules" OFF)
@@ -166,10 +165,6 @@ if (${use_prov_client_core})
     getProvSDKVersion()
     message(STATUS "Provisioning SDK Version = ${PROV_SDK_VERSION}")
 endif()
-
-# setting nuget_e2e_tests will only generate e2e tests to run with nuget packages.
-# Install-packages from Package Manager Console in VS before building the projects
-option(nuget_e2e_tests "set nuget_e2e_tests to ON to generate e2e tests to run with nuget packages (default is OFF)" OFF)
 
 # check for conflicting options
 if (NOT ${use_http})
@@ -390,7 +385,7 @@ if (${build_service_client})
     add_subdirectory(iothub_service_client)
 endif()
 
-if (${run_e2e_tests} OR ${run_longhaul_tests} OR ${nuget_e2e_tests} OR ${run_sfc_tests} OR ${run_unittests})
+if (${run_e2e_tests} OR ${run_longhaul_tests} OR ${run_sfc_tests} OR ${run_unittests})
     add_subdirectory(testtools)
 endif()
 
@@ -404,17 +399,6 @@ endif()
 # add the device_auth sample subdirectory
 if (${use_prov_client} AND NOT ${skip_samples})
     add_subdirectory(./provisioning_client/samples)
-
-    if (NOT "${build_python}" STREQUAL "OFF")
-        add_subdirectory(../provisioning_device_client provisioning_device_client_python)
-    endif()
-endif()
-
-if (NOT "${build_python}" STREQUAL "OFF")
-    add_subdirectory(../device/iothub_client_python python)
-    if (${build_service_client})
-        add_subdirectory(../service python_service_client)
-    endif()
 endif()
 
 if (${use_installed_dependencies})

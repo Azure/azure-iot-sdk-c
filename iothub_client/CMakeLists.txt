@@ -256,10 +256,6 @@ include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
 include_directories(${AZURE_C_SHARED_UTILITY_INCLUDES})
 include_directories(${SHARED_UTIL_INC_FOLDER})
 
-if (WINCE)
-    include_directories(${SHARED_UTIL_INC_FOLDER}/azure_c_shared_utility/windowsce) #windowsce SDK doesn't have stdbool.h
-ENDIF()
-
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
 
 if(${memory_trace})
@@ -269,11 +265,6 @@ endif()
 IF(WIN32)
     #windows needs this define
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-    if (WINCE) # Be lax with WEC 2013 compiler
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3")
-        SET_SOURCE_FILES_PROPERTIES(src/iothub_client.c src/iothubtransport.c src/iothub_client_ll.c src/iothubtransporthttp.c src/blob.c PROPERTIES LANGUAGE CXX)
-    ENDIF(WINCE)
 ENDIF(WIN32)
 
 set(iothub_transport_source)
@@ -464,14 +455,9 @@ set(iothub_client_libs
 if(NOT ${skip_samples})
 if(WIN32)
 # Build samples for WEC 2013 for both ARM and x86 processsor types
-  if(WINCE)
-    add_subdirectory(samples)
-  else()
     if (NOT ${ARCHITECTURE} STREQUAL "ARM")
     add_subdirectory(samples)
     endif()
-  endif()
-
 else()
     add_subdirectory(samples)
 endif()

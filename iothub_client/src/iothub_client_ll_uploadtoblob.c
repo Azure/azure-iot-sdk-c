@@ -27,20 +27,6 @@
 
 #define API_VERSION "?api-version=2016-11-14"
 
-#ifdef WINCE
-#include <stdarg.h>
-// Returns number of characters copied.
-int snprintf(char * s, size_t n, const char * format, ...)
-{
-    int result;
-    va_list args;
-    va_start(args, format);
-    result = vsnprintf(s, n, format, args);
-    va_end(args);
-    return result;
-}
-#endif
-
 /*Codes_SRS_IOTHUBCLIENT_LL_02_085: [ IoTHubClient_LL_UploadToBlob shall use the same authorization as step 1. to prepare and perform a HTTP request with the following parameters: ]*/
 static const char* const RESPONSE_BODY_FORMAT = "{\"correlationId\":\"%s\", \"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":\"%s\"}";
 static const char* const RESPONSE_BODY_ABORTED_MESSAGE = "file upload aborted";
