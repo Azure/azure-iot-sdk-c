@@ -454,9 +454,8 @@ set(iothub_client_libs
 # Don't build samples under Win32 ARM for now
 if(NOT ${skip_samples})
 if(WIN32)
-# Build samples for WEC 2013 for both ARM and x86 processsor types
     if (NOT ${ARCHITECTURE} STREQUAL "ARM")
-    add_subdirectory(samples)
+        add_subdirectory(samples)
     endif()
 else()
     add_subdirectory(samples)
