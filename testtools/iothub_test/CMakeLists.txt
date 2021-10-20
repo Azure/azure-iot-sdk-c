@@ -40,11 +40,7 @@ endif()
 
 add_library(iothub_test ${iothub_test_c_files} ${iothub_test_h_files})
 
-if(NOT ${nuget_e2e_tests})
-    target_link_libraries(iothub_test uamqp iothub_service_client)
-else()
-    target_link_libraries(iothub_test iothub_service_client)
-endif()
+target_link_libraries(iothub_test uamqp iothub_service_client)
 
 if(${use_installed_dependencies})
     #Set CMAKE_INSTALL_LIBDIR if not defined

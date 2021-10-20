@@ -36,7 +36,6 @@ set CMAKE_run_e2e_tests=OFF
 set CMAKE_run_sfc_tests=OFF
 set CMAKE_run_longhaul_tests=OFF
 set CMAKE_run_unittests=OFF
-set MAKE_NUGET_PKG=no
 set CMAKE_DIR=iotsdk_win32
 set make=yes
 set build_traceabilitytool=0
@@ -53,7 +52,6 @@ if "%1" equ "--run-e2e-tests" goto arg-run-e2e-tests
 if "%1" equ "--run-sfc-tests" goto arg-run-sfc-tests
 if "%1" equ "--run-longhaul-tests" goto arg-longhaul-tests
 if "%1" equ "--run-unittests" goto arg-run-unittests
-if "%1" equ "--make_nuget" goto arg-build-nuget
 if "%1" equ "--cmake-root" goto arg-cmake-root
 if "%1" equ "--no-make" goto arg-no-make
 if "%1" equ "--build-traceabilitytool" goto arg-build-traceabilitytool
@@ -96,12 +94,6 @@ goto args-continue
 
 :arg-run-unittests
 set CMAKE_run_unittests=ON
-goto args-continue
-
-:arg-build-nuget
-shift
-if "%1" equ "" call :usage && exit /b 1
-set MAKE_NUGET_PKG=%1
 goto args-continue
 
 :arg-cmake-root
@@ -153,36 +145,7 @@ mkdir %cmake-root%\cmake\%CMAKE_DIR%
 rem no error checking
 pushd %cmake-root%\cmake\%CMAKE_DIR%
 
-if %MAKE_NUGET_PKG% == yes (
-    echo ***Running CMAKE for Win32***
-    cmake %build-root% -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Duse_cppunittest:BOOL=ON -Drun_unittests:BOOL=%CMAKE_run_unittests% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 15 2017" -A Win32 -Duse_edge_modules=%use_edge_modules%
-    if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-    popd
-
-    echo ***Running CMAKE for Win64***
-    if EXIST %cmake-root%\cmake\iotsdk_x64 (
-        rmdir /s/q %cmake-root%\cmake\iotsdk_x64
-    )
-    mkdir %cmake-root%\cmake\iotsdk_x64
-    rem no error checking
-
-    pushd %cmake-root%\cmake\iotsdk_x64
-    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 15 2017" -A x64 -Duse_edge_modules=%use_edge_modules%
-    if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-    popd
-
-    echo ***Running CMAKE for ARM***
-    if EXIST %cmake-root%\cmake\iotsdk_arm (
-        rmdir /s/q %cmake-root%\cmake\iotsdk_arm
-    )
-    mkdir %cmake-root%\cmake\iotsdk_arm
-    rem no error checking
-
-    pushd %cmake-root%\cmake\iotsdk_arm
-    cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 15 2017" -A ARM -Duse_edge_modules=%use_edge_modules%
-    if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-
-) else if %build-platform% == x64 (
+if %build-platform% == x64 (
     echo ***Running CMAKE for Win64***
     cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Drun_sfc_tests:BOOL=%CMAKE_run_sfc_tests% -Duse_cppunittest:BOOL=OFF -Drun_unittests:BOOL=%CMAKE_run_unittests% %build-root% -Duse_prov_client:BOOL=%prov_auth% -G "Visual Studio 15 2017" -A x64 -Duse_edge_modules=%use_edge_modules%
     if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
@@ -204,33 +167,13 @@ echo ***setting VC paths***
 )
 where msbuild
 
-if %MAKE_NUGET_PKG% == yes (
-    if %make%==yes (
-        echo ***Building all configurations***
-        msbuild /m %cmake-root%\cmake\iotsdk_win32\azure_iot_sdks.sln /p:Configuration=Release
-        if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
-        msbuild /m %cmake-root%\cmake\iotsdk_win32\azure_iot_sdks.sln /p:Configuration=Debug
-        if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+if %make%==yes (
+    msbuild /m azure_iot_sdks.sln
+    if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
-        msbuild /m %cmake-root%\cmake\iotsdk_x64\azure_iot_sdks.sln /p:Configuration=Release
-        if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
-        msbuild /m %cmake-root%\cmake\iotsdk_x64\azure_iot_sdks.sln /p:Configuration=Debug
+    if %build-platform% neq arm (
+        ctest -T test --no-compress-output -C "debug" -V -j 16 --schedule-random
         if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-
-        msbuild /m %cmake-root%\cmake\iotsdk_arm\azure_iot_sdks.sln /p:Configuration=Release
-        if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
-        msbuild /m %cmake-root%\cmake\iotsdk_arm\azure_iot_sdks.sln /p:Configuration=Debug
-        if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-    )
-) else (
-    if %make%==yes (
-        msbuild /m azure_iot_sdks.sln
-        if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
-
-        if %build-platform% neq arm (
-            ctest -T test --no-compress-output -C "debug" -V -j 16 --schedule-random
-            if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-        )
     )
 )
 
@@ -264,7 +207,6 @@ echo options:
 echo  -c, --clean                   delete artifacts from previous build before building
 echo  --config ^<value^>            [Debug] build configuration (e.g. Debug, Release)
 echo  --platform ^<value^>          [Win32] build platform (e.g. Win32, x64, arm, ...)
-echo  --make_nuget ^<value^>        [no] generates the binaries to be used for nuget packaging (e.g. yes, no)
 echo  --run-e2e-tests               run end-to-end tests
 echo  --run-longhaul-tests          run long-haul tests
 echo  --cmake-root                  Directory to place the cmake files used for building the project
