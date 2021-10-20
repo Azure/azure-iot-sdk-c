@@ -774,6 +774,7 @@ TEST_SUITE_INITIALIZE(suite_init)
 
 #ifndef DONT_USE_UPLOADTOBLOB
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, void*);
 #endif // DONT_USE_UPLOADTOBLOB
 
 #ifdef USE_EDGE_MODULES
@@ -938,6 +939,9 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_find, real_singlylinkedlist_find);
     REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_foreach, real_singlylinkedlist_foreach);
     REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_remove_if, real_singlylinkedlist_remove_if);
+
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_LL_UploadToBlob_Impl, IOTHUB_CLIENT_OK);
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl, IOTHUB_CLIENT_OK);
 }
 
 TEST_SUITE_CLEANUP(suite_cleanup)
@@ -4167,6 +4171,46 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_messageTimeout_when_tickcounter_fail
 }
 
 #ifndef DONT_USE_UPLOADTOBLOB
+
+TEST_FUNCTION(IoTHubClientCore_LL_UploadToBlob_OK)
+{
+    //arrange
+    IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_Impl(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_UploadToBlob(h, "irrelevantFileName", (const unsigned char*)"a", 1);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    ///cleanup
+    IoTHubClientCore_LL_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubClientCore_LL_UploadToBlob_fails)
+{
+    //arrange
+    IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_Impl(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)).SetReturn(IOTHUB_CLIENT_ERROR);
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_UploadToBlob(h, "irrelevantFileName", (const unsigned char*)"a", 1);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    ///cleanup
+    IoTHubClientCore_LL_Destroy(h);
+}
+
+
 /*Tests_SRS_IoTHubClientCore_LL_02_061: [ If iotHubClientHandle is NULL then IoTHubClientCore_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_UploadToBlob_with_NULL_handle_fails)
 {
@@ -4267,6 +4311,45 @@ TEST_FUNCTION(IoTHubClientCore_LL_UploadMultipleBlocksToBlob_with_NULL_callback_
     ///cleanup
     IoTHubClientCore_LL_Destroy(h);
 }
+
+TEST_FUNCTION(IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx_succeeds)
+{
+    //arrange
+    unsigned int context = 1;
+    IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx(h, "irrelevantFileName", my_FileUpload_GetData_CallbackEx, &context);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+
+    ///cleanup
+    IoTHubClientCore_LL_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx_fails)
+{
+    //arrange
+    unsigned int context = 1;
+    IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(IOTHUB_CLIENT_ERROR);
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx(h, "irrelevantFileName", my_FileUpload_GetData_CallbackEx, &context);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+
+    ///cleanup
+    IoTHubClientCore_LL_Destroy(h);
+}
+
 
 /*Tests_SRS_IoTHubClientCore_LL_99_005: [** If `iotHubClientHandle` is `NULL` then `IoTHubClientCore_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx_with_NULL_handle_fails)
