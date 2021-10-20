@@ -50,7 +50,7 @@ static const char* CONN_MODULE_PART = ";ModuleId=";
 #define DEVICE_GUID_SIZE            37
 
 static const int TEST_CREATE_MAX_RETRIES = 3;
-static const int TEST_SLEEP_BETWEEN_CREATION_FAILURES = 30 * 1000;
+static const int TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC = 30 * 1000;
 
 typedef struct IOTHUB_ACCOUNT_INFO_TAG
 {
@@ -133,12 +133,12 @@ static int retrieveConnStringInfo(IOTHUB_ACCOUNT_INFO* accountInfo)
     }
     else if ((accountInfo->keyName = (char*)malloc(endName - beginName + 1)) == NULL)
     {
-        LogError("Failure allocating hostName.\r\n");
+        LogError("Failure allocating keyname.\r\n");
         result = MU_FAILURE;
     }
     else if ((accountInfo->sharedAccessKey = (char*)malloc(totalLen + 1 - beginKey + 1)) == NULL)
     {
-        LogError("Failure allocating hostName.\r\n");
+        LogError("Failure allocating sharedAccessKey.\r\n");
         result = MU_FAILURE;
     }
     else if (sscanf(accountInfo->connString, "HostName=%[^.].%[^;];SharedAccessKeyName=%[^;];SharedAccessKey=%s", accountInfo->iothubName,
@@ -298,8 +298,8 @@ static IOTHUB_REGISTRYMANAGER_RESULT createTestDeviceWithRetry(IOTHUB_REGISTRYMA
             break;
         }
             
-        LogError("Creating device %s failed with error %d.  Sleeping %d milliseconds", deviceCreateInfo->deviceId, result, TEST_SLEEP_BETWEEN_CREATION_FAILURES);
-        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_CREATION_FAILURES);
+        LogError("Creating device %s failed with error %d.  Sleeping %d milliseconds", deviceCreateInfo->deviceId, result, TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC);
+        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC);
     }
 
     return result;
@@ -326,8 +326,8 @@ static IOTHUB_REGISTRYMANAGER_RESULT createTestModuleWithRetry(IOTHUB_REGISTRYMA
             break;
         }
             
-        LogError("Creating device/module %s/%s failed with error %d.  Sleeping %d milliseconds", moduleCreateInfo->deviceId, moduleCreateInfo->moduleId, result, TEST_SLEEP_BETWEEN_CREATION_FAILURES);
-        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_CREATION_FAILURES);
+        LogError("Creating device/module %s/%s failed with error %d.  Sleeping %d milliseconds", moduleCreateInfo->deviceId, moduleCreateInfo->moduleId, result, TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC);
+        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC);
     }
 
     return result;
@@ -699,7 +699,7 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init_With_Config(IOTHUB_ACCOUNT_CONFIG*
             }
             else if (mallocAndStrcpy_s(&iothub_account_info->x509Thumbprint, tempThumb) != 0)
             {
-                LogError("Failure allocating x509 thumb print from the environment.\r\n");
+                LogError("Failure allocating x509 thumbprint from the environment.\r\n");
                 result = MU_FAILURE;
             }
             else if (retrieveConnStringInfo(iothub_account_info) != 0)
