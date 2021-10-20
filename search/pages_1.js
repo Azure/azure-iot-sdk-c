@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['microsoft_20azure_20iot_20device_20sdk_20for_20c_0',['Microsoft Azure IoT Device SDK for C',['../index.html',1,'']]]
+  ['building_20applications_20using_20vcpkg_20for_20c_20sdk_49',['Building applications using vcpkg for C SDK',['../md_doc_setting_up_vcpkg.html',1,'']]]
 ];

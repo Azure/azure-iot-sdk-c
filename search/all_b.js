@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['with_5faction_0',['WITH_ACTION',['../serializer_8h.html#a2b3c020f5a3943e946cc9a01c958af4c',1,'serializer.h']]],
-  ['with_5fdata_1',['WITH_DATA',['../serializer_8h.html#aebcff311f305eddbad1712b8d7aded85',1,'serializer.h']]],
-  ['with_5fmethod_2',['WITH_METHOD',['../serializer_8h.html#a2ddcc4190368b3eec66aca20a754ba05',1,'serializer.h']]]
+  ['updating_20submodules_20for_20the_20c_20sdk_32',['Updating submodules for the C SDK',['../md_doc_updating_submodules.html',1,'']]],
+  ['using_20openssl_20on_20iot_20sdk_20on_20windows_33',['Using OpenSSL on IoT SDK on Windows',['../md_doc_windows_and_openssl.html',1,'']]]
 ];

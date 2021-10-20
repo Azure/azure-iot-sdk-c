@@ -32,16 +32,6 @@ var menudata={children:[
 {text:"File List",url:"files.html"},
 {text:"Globals",url:"globals.html",children:[
 {text:"All",url:"globals.html",children:[
-{text:"b",url:"globals.html#index_b"},
-{text:"d",url:"globals.html#index_d"},
-{text:"e",url:"globals.html#index_e"},
-{text:"g",url:"globals.html#index_g"},
-{text:"i",url:"globals.html#index_i"},
-{text:"m",url:"globals.html#index_m"},
-{text:"s",url:"globals.html#index_s"},
-{text:"w",url:"globals.html#index_w"}]},
+{text:"m",url:"globals.html#index_m"}]},
 {text:"Functions",url:"globals_func.html",children:[
-{text:"m",url:"globals_func.html#index_m"},
-{text:"s",url:"globals_func.html#index_s"}]},
-{text:"Typedefs",url:"globals_type.html"},
-{text:"Macros",url:"globals_defs.html"}]}]}]}
+{text:"m",url:"globals_func.html#index_m"}]}]}]}]}

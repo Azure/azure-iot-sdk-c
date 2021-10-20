@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['begin_5fnamespace_0',['BEGIN_NAMESPACE',['../serializer_8h.html#ad409cf8f57d6766ce80a504e679bb6a6',1,'serializer.h']]]
+  ['building_20applications_20using_20vcpkg_20for_20c_20sdk_2',['Building applications using vcpkg for C SDK',['../md_doc_setting_up_vcpkg.html',1,'']]]
 ];

@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['agenttime_2eh_0',['agenttime.h',['../agenttime_8h.html',1,'']]],
-  ['azure_5fbase64_2eh_1',['azure_base64.h',['../azure__base64_8h.html',1,'']]]
+  ['azure_20iot_20c_20sdks_20and_20libraries_0',['Azure IoT C SDKs and Libraries',['../index.html',1,'']]],
+  ['azure_20iot_20device_20client_20c_20sdk_1',['Azure IoT Device Client C SDK',['../md_doc_connection_and_messaging_reliability.html',1,'']]]
 ];

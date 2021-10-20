@@ -17,7 +17,7 @@
 #MSearchSelect {
     display: inline-block;
     vertical-align: middle;
-    height: 19px;
+    height: 1.4em;
     padding: 0 0 0 0.3em;
     margin: 0;
 }
@@ -26,7 +26,7 @@
     display: inline-block;
     vertical-align: middle;
     width: 7.5em;
-    height: 19px;
+    height: 1.1em;
     margin: 0 0.15em;
     padding: 0;
     line-height: 1em;
@@ -39,12 +39,6 @@
     background: none;
 }
 
-@media(hover: none) {
-    /* to avoid zooming on iOS */
-    #MSearchField {
-        font-size: 16px;
-    }
-}
 
 #MSearchBox .right {
     display: inline-block;
@@ -89,8 +83,8 @@
     display: none;
     position: absolute;
     left: 0; top: 0;
-    border: 1px solid #AFAFAF;
-    background-color: #FAFAFA;
+    border: 1px solid #90A5CE;
+    background-color: #F9FAFC;
     z-index: 10001;
     padding-top: 4px;
     padding-bottom: 4px;
@@ -134,7 +128,7 @@ a.SelectItem:active {
 
 a.SelectItem:hover {
     color: #FFFFFF;
-    background-color: #646464;
+    background-color: #3D578C;
     outline-style: none;
     text-decoration: none;
     cursor: pointer;
@@ -144,7 +138,7 @@ a.SelectItem:hover {
 /*---------------- Search results window */
 
 iframe#MSearchResults {
-    /*width: 60ex;*/
+    width: 60ex;
     height: 15em;
 }
 
@@ -153,7 +147,7 @@ iframe#MSearchResults {
     position: absolute;
     left: 0; top: 0;
     border: 1px solid #000;
-    background-color: #F2F2F2;
+    background-color: #EEF1F7;
     z-index:10000;
 }
 
@@ -189,7 +183,7 @@ body.SRPage {
 
 .SRSymbol {
     font-weight: bold; 
-    color: #6C6C6C;
+    color: #425E97;
     font-family: Arial, Verdana, sans-serif;
     text-decoration: none;
     outline: none;
@@ -197,7 +191,7 @@ body.SRPage {
 
 a.SRScope {
     display: block;
-    color: #6C6C6C; 
+    color: #425E97; 
     font-family: Arial, Verdana, sans-serif;
     text-decoration: none;
     outline: none;
@@ -210,14 +204,12 @@ a.SRScope:focus, a.SRScope:active {
 
 span.SRScope {
     padding-left: 4px;
-    font-family: Arial, Verdana, sans-serif;
 }
 
 .SRPage .SRStatus {
     padding: 2px 5px;
     font-size: 8pt;
     font-style: italic;
-    font-family: Arial, Verdana, sans-serif;
 }
 
 .SRResult {
@@ -232,7 +224,7 @@ div.searchresults {
 /*---------------- External search page results */
 
 .searchresult {
-    background-color: #F4F4F4;
+    background-color: #F0F3F8;
 }
 
 .pages b {
