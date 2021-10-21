@@ -311,9 +311,18 @@ int main()
         iothub_transport = AMQP_Protocol_over_WebSocketsTls;
 #endif // SAMPLE_AMQP_OVER_WEBSOCKETS
         IOTHUB_DEVICE_CLIENT_LL_HANDLE device_ll_handle;
+        IOTHUB_CLIENT_CONFIG device_config = { 0 };
+        char* suffix = strchr(user_ctx.iothub_uri, '.');
+        *suffix = '\0';
+        suffix++;
+
+        device_config.iotHubName = user_ctx.iothub_uri;
+        device_config.iotHubSuffix = suffix;
+        device_config.deviceId = user_ctx.device_id;
+        device_config.protocol = iothub_transport;
 
         (void)printf("Creating IoTHub Device handle\r\n");
-        if ((device_ll_handle = IoTHubDeviceClient_LL_CreateFromDeviceAuth(user_ctx.iothub_uri, user_ctx.device_id, iothub_transport) ) == NULL)
+        if ((device_ll_handle = IoTHubDeviceClient_LL_Create(&device_config) ) == NULL)
         {
             (void)printf("failed create IoTHub client from connection string %s!\r\n", user_ctx.iothub_uri);
         }
