@@ -28,7 +28,7 @@ signing request then use the provisioned device certificate when connecting to A
 
 ### Using OpenSSL
 
-1. Generate a key-pair
+1. Generate either a ECC or RSA key-pair
 
 ```
 # Generate an ECC P-256 keypair:
@@ -38,9 +38,9 @@ openssl ecparam -out key.pem -name prime256v1 -genkey
 openssl genrsa -out key.pem 4096
 ```
 
-2. Generate a PKCS#10 Certificate Signing Request from the keypair:
+2. Generate a PKCS#10 Certificate Signing Request (CSR) from the keypair:
 
-Replace `my-registration-id` with the device registration ID.
+Below, replace `my-registration-id` with the device registration ID.
 
 _Important:_ DPS has character set restrictions: https://docs.microsoft.com/en-us/azure/iot-dps/concepts-service#registration-id
 
@@ -48,15 +48,15 @@ _Important:_ DPS has character set restrictions: https://docs.microsoft.com/en-u
 openssl req -new -key key.pem -out request.csr -subj '/CN=my-registration-id'
 ```
 
-To read the information from a CSR file use:
+Additionally, to read the information from a CSR file use:
 
 ```
 openssl req -noout -text -in request.csr
 ```
 
-For more information see https://www.openssl.org/docs/man1.1.1/man1/openssl-req.html
+For more information on OpenSSL CSR support, see https://www.openssl.org/docs/man1.1.1/man1/openssl-req.html
 
-3. Modify the CSR sample by populating the `x509csr` and `x509privatekey` variables with the content
+3. Modify the C SDK CSR sample by populating the `x509csr` and `x509privatekey` variables with the content
 of the `request.csr` and `key.pem` files respectively.
 
 ### Using mbedTLS

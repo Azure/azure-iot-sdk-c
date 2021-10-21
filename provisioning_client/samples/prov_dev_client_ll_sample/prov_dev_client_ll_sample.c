@@ -203,7 +203,7 @@ static void parse_trust_bundle(const char* trust_bundle_payload)
     root_value = json_parse_string(trust_bundle_payload);
     if (root_value == NULL)
     {
-        printf("TrustBundle not configured.\r\n.");
+        printf("TrustBundle not configured for device.\r\n.");
     }
     else
     {
@@ -217,7 +217,7 @@ static void parse_trust_bundle(const char* trust_bundle_payload)
         {
             etag = json_object_get_string(root_obj, "etag");
 
-            // If the TrustBundle changes, the application should update the Trusted Root and 
+            // If the TrustBundle is updated, the application needs to update the Trusted Root and 
             // Intermediate Certification Authority stores:
             // - New certificates in the bundle should be added to the correct store.
             // - Certificates previously installed but not present in the bundle should be removed.
@@ -408,9 +408,9 @@ int main()
             // Setting the Trusted Certificate. This is only necessary on systems without
             // built in certificate stores.
 
-            // Note: for sample purposes you could configure certificates received from the 
+            // Note: for sample purposes, you could configure certificates received from the 
             // TrustBundle using this API. In production applications, we recommend updating the 
-            // certificate stores instead.
+            // certificate stores instead, if available.
             IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 

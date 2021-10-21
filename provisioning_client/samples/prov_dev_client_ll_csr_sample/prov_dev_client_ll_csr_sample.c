@@ -269,8 +269,8 @@ int main()
         Prov_Device_LL_SetOption(handle, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-        // This option sets the registration ID it overrides the registration ID that is 
-        // set within the HSM so be cautious if setting this value
+        // This option sets the registration ID and overrides the registration ID that is 
+        // set within the HSM, so be cautious if setting this value
         //Prov_Device_LL_SetOption(handle, PROV_REGISTRATION_ID, "[REGISTRATION ID]");
 
         if (Prov_Device_LL_Register_Device(user_ctx.handle, register_device_callback, &user_ctx, registration_status_callback, &user_ctx) != PROV_DEVICE_RESULT_OK)
