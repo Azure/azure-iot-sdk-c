@@ -613,6 +613,10 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
                     free(result);
                     result = NULL;
                 }
+                else
+                {
+                    LogInfo("PROV_DEVICE_TRANSPORT_STATUS_ASSIGNING OperationID: %s", result->operation_id);
+                }
                 break;
 
             case PROV_DEVICE_TRANSPORT_STATUS_ASSIGNED:
