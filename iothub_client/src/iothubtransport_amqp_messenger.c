@@ -1343,6 +1343,9 @@ int amqp_messenger_stop(AMQP_MESSENGER_HANDLE messenger_handle)
             {
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_062: [`instance->state` shall be set to AMQP_MESSENGER_STATE_STOPPED, and `instance->on_state_changed_callback` invoked if provided]
                 update_messenger_state(instance, AMQP_MESSENGER_STATE_STOPPED);
+
+                instance->send_error_count = 0;
+
                 // Codes_SRS_IOTHUBTRANSPORT_AMQP_MESSENGER_09_063: [If no failures occur, amqp_messenger_stop() shall return 0]
                 result = RESULT_OK;
             }
