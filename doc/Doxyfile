@@ -791,7 +791,9 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = ./ \
+                         ./iothub_client/inc/iothub.h \
                          ./iothub_client/inc/iothub_client.h \
+				         ./iothub_client/inc/iothub_client_core_ll.h \
                          ./iothub_client/inc/iothub_client_ll.h \
                          ./iothub_client/inc/iothub_client_version.h \
                          ./iothub_client/inc/iothub_device_client.h \
