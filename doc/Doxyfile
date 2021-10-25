@@ -162,7 +162,7 @@ FULL_PATH_NAMES        = NO
 # will be relative from the directory where doxygen is started.
 # This tag requires that the tag FULL_PATH_NAMES is set to YES.
 
-STRIP_FROM_PATH        =
+STRIP_FROM_PATH        = ./doc-stage
 
 # The STRIP_FROM_INC_PATH tag can be used to strip a user-defined part of the
 # path mentioned in the documentation of a class, which tells the reader which
@@ -791,16 +791,17 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = ./ \
-                         ./iothub_client/inc/iothub_client.h \
-                         ./iothub_client/inc/iothub_client_ll.h \
-                         ./iothub_client/inc/iothub_client_version.h \
-                         ./iothub_client/inc/iothub_device_client.h \
-                         ./iothub_client/inc/iothub_device_client_ll.h \
-                         ./iothub_client/inc/iothub_message.h \
-                         ./iothub_client/inc/iothub_module_client.h \
-                         ./iothub_client/inc/iothub_module_client_ll.h \
-                         ./provisioning_client/inc/azure_prov_client/prov_device_client.h \
-                         ./provisioning_client/inc/azure_prov_client/prov_device_ll_client.h \
+                         ./doc-stage/iothub_client.h \
+                         ./doc-stage/iothub_client_ll.h \
+                         ./doc-stage/iothub_client_core_common.h \
+                         ./doc-stage/iothub_client_version.h \
+                         ./doc-stage/iothub_device_client.h \
+                         ./doc-stage/iothub_device_client_ll.h \
+                         ./doc-stage/iothub_message.h \
+                         ./doc-stage/iothub_module_client.h \
+                         ./doc-stage/iothub_module_client_ll.h \
+                         ./doc-stage/prov_device_client.h \
+                         ./doc-stage/prov_device_ll_client.h \
                          ./doc
 
 # This tag can be used to specify the character encoding of the source files
@@ -2050,7 +2051,7 @@ SEARCH_INCLUDES        = YES
 # preprocessor.
 # This tag requires that the tag SEARCH_INCLUDES is set to YES.
 
-INCLUDE_PATH           =
+INCLUDE_PATH           = ./doc-stage
 
 # You can use the INCLUDE_FILE_PATTERNS tag to specify one or more wildcard
 # patterns (like *.h and *.hpp) to filter out the header-files in the

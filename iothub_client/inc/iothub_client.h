@@ -34,6 +34,10 @@
 #include "iothub_client_ll.h"
 
 #ifndef IOTHUB_CLIENT_INSTANCE_TYPE
+/**
+ * @brief IoT Hub device client handle
+ * 
+ */
 typedef IOTHUB_CLIENT_CORE_HANDLE IOTHUB_CLIENT_HANDLE;
 #define IOTHUB_CLIENT_INSTANCE_TYPE
 #endif // IOTHUB_CLIENT_INSTANCE

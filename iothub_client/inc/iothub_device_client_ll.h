@@ -52,7 +52,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     *                    <pre>HostName=[IoT Hub name goes here].[IoT Hub suffix goes here, e.g., private.azure-devices-int.net];DeviceId=[Device ID goes here];SharedAccessKey=[Device key goes here];</pre>
     *                </blockquote>
     *
-    * @return    A non-NULL @c IOTHUB_DEVICE_CLIENT_LL_HANDLE value that is used when
+    * @return    A non-NULL #IOTHUB_DEVICE_CLIENT_LL_HANDLE value that is used when
     *             invoking other functions for IoT Hub client and @c NULL on failure.
     */
      MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CLIENT_LL_HANDLE, IoTHubDeviceClient_LL_CreateFromConnectionString, const char*, connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol);
@@ -66,7 +66,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     *           The API does not allow sharing of a connection across multiple
     *           devices. This is a blocking call.
     *
-    * @return    A non-NULL @c IOTHUB_DEVICE_CLIENT_LL_HANDLE value that is used when
+    * @return    A non-NULL #IOTHUB_DEVICE_CLIENT_LL_HANDLE value that is used when
     *            invoking other functions for IoT Hub client and @c NULL on failure.
     */
      MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CLIENT_LL_HANDLE, IoTHubDeviceClient_LL_Create, const IOTHUB_CLIENT_CONFIG*, config);
@@ -80,7 +80,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     *           The API *allows* sharing of a connection across multiple
     *           devices. This is a blocking call.
     *
-    * @return   A non-NULL @c IOTHUB_DEVICE_CLIENT_LL_HANDLE value that is used when
+    * @return   A non-NULL #IOTHUB_DEVICE_CLIENT_LL_HANDLE value that is used when
     *           invoking other functions for IoT Hub client and @c NULL on failure.
     */
      MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CLIENT_LL_HANDLE, IoTHubDeviceClient_LL_CreateWithTransport, const IOTHUB_CLIENT_DEVICE_CONFIG*, config);
@@ -94,7 +94,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
      * @param    device_auth_handle     A device auth handle used to generate the connection string
      * @param    protocol               Function pointer for protocol implementation
      *
-     * @return   A non-NULL @c IOTHUB_DEVICE_CLIENT_LL_HANDLE value that is used when
+     * @return   A non-NULL #IOTHUB_DEVICE_CLIENT_LL_HANDLE value that is used when
      *           invoking other functions for IoT Hub client and @c NULL on failure.
      */
      MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CLIENT_LL_HANDLE, IoTHubDeviceClient_LL_CreateFromDeviceAuth, const char*, iothub_uri, const char*, device_id, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol);
