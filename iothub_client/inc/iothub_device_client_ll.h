@@ -19,7 +19,7 @@
 *             This is useful for constrained devices where spinning a separate thread is
 *             often not desired.
 *    
-*     @warning IoTHubDeviceCLient_LL_* functions are NOT thread safe.  See
+*     @warning IoTHubDeviceClient_LL_* functions are NOT thread safe.  See
 *              https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/threading_notes.md for more details.
 * 
 */

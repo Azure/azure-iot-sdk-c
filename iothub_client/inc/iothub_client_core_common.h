@@ -49,6 +49,7 @@ extern "C"
     *   @param   result              Result of the operation
     *   @param   responseStatus      HTTP status code returned from the module or device.  This is only valid if @c result is @c IOTHUB_CLIENT_OK.
     *   @param   responsePayload     HTTP response payload returned from the module or device.  This is only valid if @c result is @c IOTHUB_CLIENT_OK.
+    *   @param   responsePayloadSize Number of bytes in @c responsePayload.  This is only valid if @c result is @c IOTHUB_CLIENT_OK.
     *   @param   context             Context value passed is initial call to @c IoTHubModuleClient_ModuleMethodInvokeAsync (e.g.).
     *
     *   @remarks Module clients when hosted in IoT Edge may themselves invoke methods on either modules on the same IoT Edge device
@@ -234,7 +235,7 @@ extern "C"
     *   @param   payload               Request payload received from IoT Hub.
     *   @param   size                  Number of bytes in @c payload.
     *   @param   response              Response of the request, as specified by the application.  This should NOT include the null-terminator.
-    *   @param   response_size         Number of bytes application specifies in @response.
+    *   @param   response_size         Number of bytes application specifies in @c response.
     *   @param   userContextCallback   Context that application specified during initial API call to receive device or module method calls.
     *  
     *   @remarks The application should allocate @c response with @c malloc.  The IoT Hub client SDK will @c free the data automatically.
@@ -310,6 +311,7 @@ extern "C"
         /** @brief    IoT Hub suffix goes here, e.g., private.azure-devices-int.net. */
         const char* iotHubSuffix;
 
+        /** @brief    Optional gateway host to connect to (instead of directly to IoT Hub).  Can be NULL. */
         const char* protocolGatewayHostName;
     } IOTHUB_CLIENT_CONFIG;
 

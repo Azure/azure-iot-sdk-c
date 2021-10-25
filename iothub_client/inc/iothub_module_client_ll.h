@@ -18,6 +18,10 @@
 *             by the IoTHubModuleClient happens (when the data is sent/received on/from the network).
 *             This is useful for constrained devices where spinning a separate thread is
 *             often not desired.
+*
+*     @warning IoTHubModuleClient_LL_* functions are NOT thread safe.  See
+*              https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/threading_notes.md for more details.
+*
 */
 
 #ifndef IOTHUB_MODULE_CLIENT_LL_H
@@ -35,6 +39,11 @@ extern "C"
 {
 #endif
 
+/** 
+*  @brief   Handle corresponding to a lower layer (LL) module client instance.
+*
+*  @warning The API functions that use this handle are not thread safe.  See https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/threading_notes.md for more details.
+*/
 typedef struct IOTHUB_MODULE_CLIENT_LL_HANDLE_DATA_TAG* IOTHUB_MODULE_CLIENT_LL_HANDLE;
 
 #ifdef __cplusplus
@@ -90,7 +99,7 @@ extern "C"
     *                                            callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the IoTHubModuleClient_LL_Destroy() function from within any callback.
     * @remarks
     *            The IOTHUB_MESSAGE_HANDLE instance provided as argument is copied by the function,
     *            so this argument can be destroyed by the calling application right after IoTHubModuleClient_LL_SendEventAsync returns.
@@ -124,7 +133,7 @@ extern "C"
     *                                         callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the IoTHubModuleClient_LL_Destroy() function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -141,7 +150,7 @@ extern "C"
     *                                         callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the IoTHubModuleClient_LL_Destroy() function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -158,7 +167,7 @@ extern "C"
     *                                         connection drops to IOT Hub.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the IoTHubModuleClient_LL_Destroy() function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -175,7 +184,7 @@ extern "C"
                                               to IOT Hub.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the IoTHubModuleClient_LL_Destroy() function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -235,7 +244,7 @@ extern "C"
     *                                     callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the IoTHubModuleClient_LL_Destroy() function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -246,13 +255,14 @@ extern "C"
     *
     * @param    iotHubModuleClientHandle The handle created by a call to the create function.
     * @param    reportedState            The current module property values to be 'reported' to the IoTHub.
+    * @param    size                     Number of bytes in @c reportedState.
     * @param    reportedStateCallback    The callback specified by the module client to be called with the
     *                                    result of the transaction.
     * @param    userContextCallback      User specified context that will be provided to the
     *                                    callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the IoTHubModuleClient_LL_Destroy() function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -267,7 +277,7 @@ extern "C"
      * 									    callback. This can be @c NULL.
      *
      *            @b NOTE: The application behavior is undefined if the user calls
-     *            the IoTHubModuleClient_LL_Destroy function from within any callback.
+     *            the IoTHubModuleClient_LL_Destroy() function from within any callback.
      *
      * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
      */
@@ -302,7 +312,7 @@ extern "C"
     *                                         callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the IoTHubModuleClient_LL_Destroy function from within any callback.
+    *            the IoTHubModuleClient_LL_Destroy() function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */

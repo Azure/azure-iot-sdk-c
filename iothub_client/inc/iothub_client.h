@@ -34,6 +34,9 @@
 #include "iothub_client_ll.h"
 
 #ifndef IOTHUB_CLIENT_INSTANCE_TYPE
+/**
+* @deprecated IOTHUB_CLIENT_HANDLE is deprecated.  Use IOTHUB_DEVICE_CLIENT_HANDLE instead.
+*/
 typedef IOTHUB_CLIENT_CORE_HANDLE IOTHUB_CLIENT_HANDLE;
 #define IOTHUB_CLIENT_INSTANCE_TYPE
 #endif // IOTHUB_CLIENT_INSTANCE
