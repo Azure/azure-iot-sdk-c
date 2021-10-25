@@ -17,6 +17,11 @@ jobs:
         with:
           ref: ${{ github.event.inputs.commitRef }}
 
+      - name: Remove Macro Util Wrapping
+        run: |
+        python3 .github/scripts/pre_doxygen.py ./iothub_client/inc ./doc-stage
+        python3 .github/scripts/pre_doxygen.py ./provisioning_client/inc/azure_prov_client ./doc-stage
+
       - name: Install and Build Doxygen
         run: .github/scripts/build_doxygen.sh
 
