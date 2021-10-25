@@ -207,3 +207,6 @@ build_all/windows/nuget.exe
 /build
 *.cert
 /.vs
+
+# Doc stage output
+./doc-stage
