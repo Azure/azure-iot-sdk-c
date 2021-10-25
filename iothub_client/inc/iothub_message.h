@@ -27,8 +27,7 @@ extern "C"
     IOTHUB_MESSAGE_INVALID_TYPE,             \
     IOTHUB_MESSAGE_ERROR                     \
 
-/**
- * @brief Enumeration specifying the status of calls to various
+/** @brief Enumeration specifying the status of calls to various
 *  APIs in this module.
 */
 MU_DEFINE_ENUM_WITHOUT_INVALID(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
@@ -38,15 +37,11 @@ IOTHUBMESSAGE_BYTEARRAY, \
 IOTHUBMESSAGE_STRING, \
 IOTHUBMESSAGE_UNKNOWN \
 
-/**
- * @brief Enumeration specifying the content type of the given message.
+/** @brief Enumeration specifying the content type of the a given
+* message.
 */
 MU_DEFINE_ENUM_WITHOUT_INVALID(IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_CONTENT_TYPE_VALUES);
 
-/**
- * @brief IoT Hub message handle.
- * 
- */
 typedef struct IOTHUB_MESSAGE_HANDLE_DATA_TAG* IOTHUB_MESSAGE_HANDLE;
 
 /** @brief diagnostic related data*/
