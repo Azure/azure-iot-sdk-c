@@ -209,4 +209,4 @@ build_all/windows/nuget.exe
 /.vs
 
 # Doc stage output
-./doc-stage
+/doc-stage
