@@ -18,6 +18,10 @@
 *             by the IoTHubClient happens (when the data is sent/received on/from the network).
 *             This is useful for constrained devices where spinning a separate thread is
 *             often not desired.
+*    
+*     @warning IoTHubDeviceCLient_LL_* functions are NOT thread safe.  See
+*              https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/threading_notes.md for more details.
+* 
 */
 
 #ifndef IOTHUB_DEVICE_CLIENT_LL_H
@@ -37,6 +41,11 @@ extern "C"
 {
 #endif
 
+/** 
+*  @brief   Handle corresponding to a lower layer (LL) device client instance.
+*
+*  @warning The API functions that use this handle are not thread safe.  See https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/threading_notes.md for more details.
+*/
 typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HANDLE;
 
 
@@ -91,7 +100,6 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
      *
      * @param    iothub_uri             Pointer to an ioThub hostname received in the registration process
      * @param    device_id              Pointer to the device Id of the device
-     * @param    device_auth_handle     A device auth handle used to generate the connection string
      * @param    protocol               Function pointer for protocol implementation
      *
      * @return   A non-NULL @c IOTHUB_DEVICE_CLIENT_LL_HANDLE value that is used when
@@ -123,7 +131,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     *                                           callback. This can be @c NULL.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_LL_Destroy() function from within any callback.
     * @remarks
     *           The IOTHUB_MESSAGE_HANDLE instance provided as argument is copied by the function,
     *           so this argument can be destroyed by the calling application right after IoTHubDeviceClient_LL_SendEventAsync returns.
@@ -142,7 +150,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     *                                     no item to be sent and @c IOTHUB_CLIENT_SEND_STATUS_BUSY
     *                                     if there are.
     *
-    * @remark    Does not return information related to uploads initiated by IoTHubDeviceClient_LL_UploadToBlob or IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob.
+    * @remark    Does not return information related to uploads initiated by IoTHubDeviceClient_LL_UploadToBlob() or IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob().
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -159,7 +167,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     *                                           callback. This can be @c NULL.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_LL_Destroy() function from within any callback.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -176,9 +184,9 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     *                                           callback. This can be @c NULL.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_LL_Destroy() function from within any callback.
     *
-    * @remark   Callback specified will not receive connection status change notifications for upload connections created with IoTHubDeviceClient_LL_UploadToBlob or IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob.
+    * @remark   Callback specified will not receive connection status change notifications for upload connections created with IoTHubDeviceClient_LL_UploadToBlob() or IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob().
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -195,9 +203,9 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     *                                           connection drops to IOT Hub.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_LL_Destroy() function from within any callback.
     *
-    * @remark   Uploads initiated by IoTHubDeviceClient_LL_UploadToBlob or IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob do not have automatic retries and do not honor the retryPolicy settings.
+    * @remark   Uploads initiated by IoTHubDeviceClient_LL_UploadToBlob() or IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob() do not have automatic retries and do not honor the retryPolicy settings.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -214,7 +222,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
                                                     to IOT Hub.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_LL_Destroy() function from within any callback.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -276,7 +284,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     *                                    callback. This can be @c NULL.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_LL_Destroy() function from within any callback.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -287,13 +295,14 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     *
     * @param    iotHubClientHandle        The handle created by a call to the create function.
     * @param    reportedState             The current device property values to be 'reported' to the IoTHub.
+    * @param    size                      Number of bytes in @c reportedState.
     * @param    reportedStateCallback     The callback specified by the device client to be called with the
     *                                     result of the transaction.
     * @param    userContextCallback       User specified context that will be provided to the
     *                                     callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *            the IoTHubDeviceClient_LL_Destroy() function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -318,7 +327,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
      * @brief    This API sets the callback for async cloud to device method calls.
      *
      * @param    iotHubClientHandle                 The handle created by a call to the create function.
-     * @param    inboundDeviceMethodCallback        The callback which will be called by IoTHub.
+     * @param    deviceMethodCallback               The callback which will be called by IoTHub.
      * @param    userContextCallback                User specified context that will be provided to the
      *                                              callback. This can be @c NULL.
      *
@@ -332,8 +341,8 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
      * @param    iotHubClientHandle      The handle created by a call to the create function.
      * @param    methodId                The methodId of the Device Method callback.
      * @param    response                The response data for the method callback.
-     * @param    response_size           The size of the response data buffer.
-     * @param    status_response         The status response of the method callback.
+     * @param    respSize                The size of the response data buffer.
+     * @param    statusCode              The status response of the method callback.
      *
      * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
      */
@@ -342,14 +351,14 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
 #ifndef DONT_USE_UPLOADTOBLOB
     /**
     * @brief    This API uploads to Azure Storage the content pointed to by @p source having the size @p size
-    *           under the blob name devicename/@pdestinationFileName
+    *           under the blob name @p devicename/destinationFileName
     *
     * @param    iotHubClientHandle      The handle created by a call to the create function.
     * @param    destinationFileName     name of the file.
     * @param    source                  pointer to the source for file content (can be NULL)
     * @param    size                    the size of the source in memory (if @p source is NULL then size needs to be 0).
     * 
-    * @warning  Other _LL_ functions such as IoTHubDeviceClient_LL_SendEventAsync queue work to be performed later and do not block.  IoTHubDeviceClient_LL_UploadToBlob
+    * @warning  Other _LL_ functions such as IoTHubDeviceClient_LL_SendEventAsync() queue work to be performed later and do not block.  IoTHubDeviceClient_LL_UploadToBlob
     *           will block however until the upload is completed or fails, which may take a while.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
@@ -358,14 +367,14 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
 
      /**
      * @brief    This API uploads to Azure Storage the content provided block by block by @p getDataCallback
-     *           under the blob name devicename/@pdestinationFileName
+     *           under the blob name @p devicename/destinationFileName
      *
      * @param    iotHubClientHandle      The handle created by a call to the create function.
      * @param    destinationFileName     name of the file.
      * @param    getDataCallbackEx       A callback to be invoked to acquire the file chunks to be uploaded, as well as to indicate the status of the upload of the previous block.
      * @param    context                 Any data provided by the user to serve as context on getDataCallback.
      *
-     * @warning  Other _LL_ functions such as IoTHubDeviceClient_LL_SendEventAsync queue work to be performed later and do not block.  IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob
+     * @warning  Other _LL_ functions such as IoTHubDeviceClient_LL_SendEventAsync() queue work to be performed later and do not block.  IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob
      *           will block however until the upload is completed or fails, which may take a while.
      *
      * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.

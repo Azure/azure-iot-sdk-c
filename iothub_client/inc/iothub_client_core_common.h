@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 /** @file iothub_client_core_common.h
-*    @brief Shared enums, structures, and callback functions for IoT Hub client library.
+*    @brief Shared enums, structures, and callback functions for IoT Hub client.
 *
 */
 
@@ -29,7 +29,7 @@ extern "C"
     MU_DEFINE_ENUM_WITHOUT_INVALID(IOTHUB_CLIENT_FILE_UPLOAD_RESULT, IOTHUB_CLIENT_FILE_UPLOAD_RESULT_VALUES)
 
     /** @brief           Deprecated callback mechanism for uploading data to a blob.
-    *   @deprecated      This callback type is deprecated.  Use the callback @c IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX instead.
+    *   @deprecated      This callback type is deprecated.  Use the callback IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX() instead.
     */
     typedef void(*IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK)(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, void* userContextCallback);
 
@@ -40,16 +40,16 @@ extern "C"
     IOTHUB_CLIENT_INVALID_SIZE,           \
     IOTHUB_CLIENT_INDEFINITE_TIME
 
-    /** @brief Enumeration specifying the status of calls to various APIs in IoT Hub client library.
+    /** @brief Enumeration specifying the status of calls to IoT Hub client.
     */
     MU_DEFINE_ENUM_WITHOUT_INVALID(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 
-    /** @brief Signature of the callback that the application implements to receive notifications of module initiated device method calls.
+    /** @brief   Signature of the callback that the application implements to receive notifications of module initiated device method calls.
     *
-    *   @param result Result of the operation
-    *   @param responseStatus HTTP status code returned from the module or device.  This is only valid if @c result is @c IOTHUB_CLIENT_OK.
-    *   @param responsePayload HTTP response payload returned from the module or device.  This is only valid if @c result is @c IOTHUB_CLIENT_OK.
-    *   @param context Context value passed is initial call to @c IoTHubModuleClient_ModuleMethodInvokeAsync (e.g.).
+    *   @param   result              Result of the operation
+    *   @param   responseStatus      HTTP status code returned from the module or device.  This is only valid if @c result is @c IOTHUB_CLIENT_OK.
+    *   @param   responsePayload     HTTP response payload returned from the module or device.  This is only valid if @c result is @c IOTHUB_CLIENT_OK.
+    *   @param   context             Context value passed is initial call to @c IoTHubModuleClient_ModuleMethodInvokeAsync (e.g.).
     *
     *   @remarks Module clients when hosted in IoT Edge may themselves invoke methods on either modules on the same IoT Edge device
     *            or on downstream devices using APIs such as @c IoTHubModuleClient_LL_DeviceMethodInvoke or @c IoTHubModuleClient_LL_ModuleMethodInvoke.
@@ -114,7 +114,7 @@ extern "C"
     IOTHUBMESSAGE_ABANDONED, \
     IOTHUBMESSAGE_ASYNC_ACK
 
-    /** @brief Enumeration returned by application callbacks that receive Cloud-to-Device messages.
+    /** @brief Enumeration returned by application callbacks that receive cloud-to-device messages.
     */
     MU_DEFINE_ENUM_WITHOUT_INVALID(IOTHUBMESSAGE_DISPOSITION_RESULT, IOTHUBMESSAGE_DISPOSITION_RESULT_VALUES);
 
@@ -158,7 +158,7 @@ extern "C"
     IOTHUB_CLIENT_CONNECTION_OK,                           \
     IOTHUB_CLIENT_CONNECTION_NO_PING_RESPONSE              \
 
-    /** @brief Enumeration passed to the application callback indicating reason that connection was unsuccesful.
+    /** @brief Enumeration passed to the application callback indicating reason that connection was unsuccessful.
     */
     MU_DEFINE_ENUM_WITHOUT_INVALID(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, IOTHUB_CLIENT_CONNECTION_STATUS_REASON_VALUES);
 
@@ -176,58 +176,72 @@ extern "C"
     DEVICE_TWIN_UPDATE_COMPLETE, \
     DEVICE_TWIN_UPDATE_PARTIAL
 
-    /** @brief Enumeration passed to application callback to receive IoT Hub device twin data.
+    /** @brief Enumeration passed to application callback to receive IoT Hub device or module twin data indicating whether the full twin or just partial update was received.
     */
     MU_DEFINE_ENUM_WITHOUT_INVALID(DEVICE_TWIN_UPDATE_STATE, DEVICE_TWIN_UPDATE_STATE_VALUES);
 
-    /** @brief Signature of the callback that the application implements to process results of sending telemetry to IoT Hub.
-    *   @param result Result of the telemetry send operation.
-    *   @param userContextCallback Context that application specified during initial API send call.
+    /** 
+    *   @brief Signature of the callback that the application implements to process acknowledgement or failures when sending telemetry to IoT Hub.
+    *
+    *   @param result                 Result of the telemetry send operation.
+    *   @param userContextCallback    Context that application specified during initial API send call.
     */
     typedef void(*IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK)(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback);
 
-    /** @brief Signature of the callback that the application implements to process connection status changes between device and IoT Hub.
-    *   @param result Whether device is successfully connected (@c IOTHUB_CLIENT_CONNECTION_AUTHENTICATED) or not (@c IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED).
-    *   @param reason More informatative reason about why connection was unsuccesful.
-    *   @param userContextCallback Context that application specified during initial API call to receive status change notifications.
+    /** 
+    *   @brief Signature of the callback that the application implements to process connection status changes between device and IoT Hub.
+    *
+    *   @param result                  Whether device is successfully connected (@c IOTHUB_CLIENT_CONNECTION_AUTHENTICATED) or not (@c IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED).
+    *   @param reason                  More information about @c result, especially if connection was unsuccessful.
+    *   @param userContextCallback     Context that application specified during initial API call to receive status change notifications.
     */
     typedef void(*IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK)(IOTHUB_CLIENT_CONNECTION_STATUS result, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void* userContextCallback);
 
-    /** @brief Signature of the callback that the application implements to process incoming cloud-to-device messages.
-    *   @param message The incoming message received from IoT Hub.
-    *   @param userContextCallback Context that application specified during initial API call to receive incoming cloud-to-device messages.
+    /** 
+    *   @brief Signature of the callback that the application implements to process incoming cloud-to-device messages.
+    *
+    *   @param message                 The incoming message received from IoT Hub.
+    *   @param userContextCallback     Context that application specified during initial API call to receive incoming cloud-to-device messages.
+    *
+    *   @return @c IOTHUBMESSAGE_DISPOSITION_RESULT indicating how client has acknowledged the incoming cloud-to-device message.
     */
     typedef IOTHUBMESSAGE_DISPOSITION_RESULT (*IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC)(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback);
 
-    /** @brief Signature of the callback that the application implements to process data received from an IoT Hub device or module twin.
-    *   @param update_state Whether application has received a full twin or just a patch update.
-    *   @param payLoad Payload of device twin received.  
-    *   @param size Number of bytes in @c payload.
-    *   @userContextCallback Context that application specified during initial API call to receive twin data.
+    /** 
+    *   @brief   Signature of the callback that the application implements to process data received from an IoT Hub device or module twin.
+    *
+    *   @param   update_state          Whether application has received a full twin or just a patch update.
+    *   @param   payLoad               Payload of twin received.
+    *   @param   size                  Number of bytes in @c payload.
+    *   @param   userContextCallback   Context that application specified during initial API call to receive twin data.
     *
     *   @warning The data in @c payLoad is not guaranteed to be a null-terminated string.
     */
     typedef void(*IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback);
 
-    /** @brief Signature of the callback that the application implements to receive notifications of device or module initiated twin updates.
-    *   @param status_code HTTP style status code indicating success or failure of operation.
-    *   @param userContextCallback Context that application specified during initial API call to update twin data.
+    /** 
+    *   @brief Signature of the callback that the application implements to receive notifications of device or module initiated twin updates.
+    *
+    *   @param status_code             HTTP style status code indicating success or failure of operation.
+    *   @param userContextCallback     Context that application specified during initial API call to update twin data.
     */
     typedef void(*IOTHUB_CLIENT_REPORTED_STATE_CALLBACK)(int status_code, void* userContextCallback);
 
-    /** @brief Signature of the callback that the application implements to receive incoming device or module method invocations from IoT Hub
-    *   @param method_name Name of method being invoked.
-    *   @param payload Request payload received from IoT Hub.
-    *   @param size_t size Number of bytes in @c payload.
-    *   @param response Response of the requset, as specified by the application.  This should NOT include the null-terminator.
-    *   @param response_size Number of bytes application specifies in @response.
-    *   @param userContextCallback Context that application specified during initial API call to receive device or module method calls.
+    /** 
+    *   @brief   Signature of the callback that the application implements to receive incoming device or module method invocations from IoT Hub
+    *
+    *   @param   method_name           Name of method being invoked.
+    *   @param   payload               Request payload received from IoT Hub.
+    *   @param   size                  Number of bytes in @c payload.
+    *   @param   response              Response of the request, as specified by the application.  This should NOT include the null-terminator.
+    *   @param   response_size         Number of bytes application specifies in @response.
+    *   @param   userContextCallback   Context that application specified during initial API call to receive device or module method calls.
     *  
     *   @remarks The application should allocate @c response with @c malloc.  The IoT Hub client SDK will @c free the data automatically.
     *
     *   @warning The data in @c payLoad is not guaranteed to be a null-terminated string.
     *
-    *   @return HTTP style return code to indicate success or failure of the request.
+    *   @return  HTTP style return code to indicate success or failure of the method call.
     */
     typedef int(*IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC)(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* response_size, void* userContextCallback);
 
@@ -241,21 +255,26 @@ extern "C"
     IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK, \
     IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_ABORT
 
-    /** @brief           Return value applications use in their implementation of @c IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX to indicate status.
+    /** @brief           Return value applications use in their implementation of IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX() to indicate status.
     */
     MU_DEFINE_ENUM_WITHOUT_INVALID(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT_VALUES);
 
     /** @brief           Deprecated callback mechanism for uploading data to a blob.
-    *   @deprecated      This callback type is deprecated.  Use the callback @c IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX instead.
+    *   @deprecated      This callback type is deprecated.  Use the callback IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX() instead.
     */
     typedef void(*IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK)(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context);
 
     /**
+    *
     *  @brief           Signature of the callback that the application implements to process IoT Hub client SDK requesting additional chunks to upload to blob.
-    *  @param result    The result of the upload of the previous block of data provided by the user (IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX only)
+    *
+    *  @param result    The result of the upload of the previous block of data provided by the user.
     *  @param data      Next block of data to be uploaded, to be provided by the user when this callback is invoked.
     *  @param size      Size of the data parameter.
     *  @param context   User context provided on the call to IoTHubClient_UploadMultipleBlocksToBlobAsync.
+    *
+    *  @return          @c IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT indicating whether the application is returning data to be sent or not.
+    *
     *  @remarks         If the user wants to abort the upload, the callback should return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_ABORT
     *                   It should return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK otherwise.
     *                   If a NULL is provided for parameter "data" and/or zero is provided for "size", the user indicates to the client that the complete file has been uploaded.
