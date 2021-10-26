@@ -5,6 +5,5 @@
 
 const char* IoTHubServiceClient_GetVersionString(void)
 {
-    /*Codes_SRS_IOTHUBSERVICECLIENT_12_040: [IoTHubServiceClient_GetVersionString shall return a pointer to a constant string which indicates the version of IoTHubServiceClient API.]*/
     return IOTHUB_SERVICE_CLIENT_VERSION;
 }

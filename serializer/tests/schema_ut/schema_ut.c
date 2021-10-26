@@ -169,8 +169,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_Create */
 
-    /* Tests_SRS_SCHEMA_99_001:[Schema_Create shall initialize a schema with a given namespace.] */
-    /* Tests_SRS_SCHEMA_99_002:[On success a non-NULL handle to the newly created schema shall be returned.] */
     TEST_FUNCTION(Schema_Create_Initializes_A_Schema_Returns_Non_Null_Handle)
     {
         // arrange
@@ -185,8 +183,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(result);
     }
 
-    /* Tests_SRS_SCHEMA_99_003:[On failure, NULL shall be returned.] */
-    /* Tests_SRS_SCHEMA_99_004:[If schemaNamespace is NULL, Schema_Create shall fail.] */
     TEST_FUNCTION(Schema_Create_Initializes_A_Schema_With_NULL_Returns_NULL_Handle)
     {
         // arrange
@@ -198,7 +194,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_IS_NULL(result);
     }
 
-    /* Tests_SRS_SCHEMA_99_001:[Schema_Create shall initialize a schema with a given namespace.] */
     TEST_FUNCTION(Schema_Create_Called_Twice_With_Different_NameSpace_Succeeds)
     {
         // arrange
@@ -217,7 +212,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(result2);
     }
 
-    /* Tests_SRS_SCHEMA_99_001:[Schema_Create shall initialize a schema with a given namespace.] */
     TEST_FUNCTION(Schema_Create_Called_Twice_With_Same_NameSpace_Succeeds)
     {
         // arrange
@@ -238,8 +232,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_GetSchemaCount */
 
-    /* Tests_SRS_SCHEMA_99_153: [Schema_GetSchemaCount shall return the number of "active" schemas (all schemas created with Schema_Create
-       in the current process, for which Schema_Destroy has not been called).] */
     TEST_FUNCTION(Schema_GetSchemaCount_should_return_zero_when_no_schemas_were_created)
     {
         // arrange
@@ -251,8 +243,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_ARE_EQUAL(size_t, 0, count);
     }
 
-    /* Tests_SRS_SCHEMA_99_153: [Schema_GetSchemaCount shall return the number of "active" schemas (all schemas created with Schema_Create
-    in the current process, for which Schema_Destroy has not been called).] */
     TEST_FUNCTION(Schema_GetSchemaCount_should_return_the_number_of_active_schemas)
     {
         // arrange
@@ -270,8 +260,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(h2);
     }
 
-    /* Tests_SRS_SCHEMA_99_153: [Schema_GetSchemaCount shall return the number of "active" schemas (all schemas created with Schema_Create
-    in the current process, for which Schema_Destroy has not been called).] */
     TEST_FUNCTION(Schema_GetSchemaCount_should_return_the_correct_number_after_a_schema_is_destroyed)
     {
         // arrange
@@ -289,8 +277,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(h2);
     }
 
-    /* Tests_SRS_SCHEMA_99_153: [Schema_GetSchemaCount shall return the number of "active" schemas (all schemas created with Schema_Create
-    in the current process, for which Schema_Destroy has not been called).] */
     TEST_FUNCTION(Schema_GetSchemaCount_should_return_the_correct_number_after_a_bounce)
     {
         // arrange
@@ -310,7 +296,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_GetSchemaByNamespace */
 
-    /* Tests_SRS_SCHEMA_99_150: [If the schemaNamespace argument is NULL, Schema_GetSchemaByNamespace shall return NULL.] */
     TEST_FUNCTION(Schema_GetSchemaByNamespace_with_a_NULL_namespace_argument_returns_NULL)
     {
         // arrange
@@ -322,7 +307,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_IS_NULL(schema);
     }
 
-    /* Tests_SRS_SCHEMA_99_151: [If no active schema matches the schemaNamespace argument, Schema_GetSchemaByNamespace shall return NULL.] */
     TEST_FUNCTION(Schema_GetSchemaByNamespace_with_a_nonmatching_namespace_argument_should_return_NULL)
     {
         // arrange
@@ -334,8 +318,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_IS_NULL(handle);
     }
 
-    /* Tests_SRS_SCHEMA_99_148: [Schema_GetSchemaByNamespace shall search all active schemas and return the schema with the
-       namespace given by the schemaNamespace argument.] */
     TEST_FUNCTION(Schema_GetSchemaByNamespace_with_a_matching_namespace_argument_should_return_the_schema)
     {
         // arrange
@@ -357,7 +339,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_GetSchemaNamespace */
 
-    /* Tests_SRS_SCHEMA_99_130: [If the schemaHandle argument is NULL, Schema_GetSchemaNamespace shall return NULL.] */
     TEST_FUNCTION(Schema_GetSchemaNamespace_With_A_NULL_Handle_Fails)
     {
         // arrange
@@ -369,7 +350,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_IS_NULL(result);
     }
 
-    /* Tests_SRS_SCHEMA_99_129: [Schema_GetSchemaNamespace shall return the namespace for the schema identified by schemaHandle.] */
     TEST_FUNCTION(Schema_GetSchemaNamespace_With_A_Valid_Handle_Returns_The_Schema_Namespace)
     {
         // arrange
@@ -387,7 +367,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_Destroy */
 
-    /* Tests_SRS_SCHEMA_99_006:[If the schemaHandle is NULL, Schema_Destroy shall do nothing.] */
     TEST_FUNCTION(Schema_Deinit_With_A_NULL_Handle_Raises_No_Exceptions)
     {
         // arrange
@@ -399,7 +378,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_SCHEMA_99_005:[Schema_Destroy shall free all resources associated with a schema.] */
     TEST_FUNCTION(Schema_Deinit_With_A_Valid_Handle_Succeeds)
     {
         // arrange
@@ -416,8 +394,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_CreateModelType */
 
-    /* Tests_SRS_SCHEMA_99_009:[On failure, Schema_CreateModelType shall return NULL.] */
-    /* Tests_SRS_SCHEMA_99_010:[If any of the arguments is NULL, Schema_CreateModelType shall fail.] */
     TEST_FUNCTION(Schema_CreateModelType_With_schemaHandle_NULL_returns_NULL)
     {
         // arrange
@@ -429,8 +405,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_IS_NULL(result);
     }
 
-    /* Tests_SRS_SCHEMA_99_009:[On failure, Schema_CreateModelType shall return NULL.] */
-    /* Tests_SRS_SCHEMA_99_010:[If any of the arguments is NULL, Schema_CreateModelType shall fail.] */
     TEST_FUNCTION(Schema_CreateModelType_With_modelNamespace_NULL_returns_NULL)
     {
         // arrange
@@ -471,8 +445,6 @@ BEGIN_TEST_SUITE(Schema_ut)
             .IgnoreArgument_elementSize();
     }
 
-    /* Tests_SRS_SCHEMA_99_007:[Schema_CreateModelType shall create a new model type and return a handle to it.] */
-    /* Tests_SRS_SCHEMA_99_008:[On success, a non-NULL handle shall be returned.] */
     TEST_FUNCTION(Schema_CreateModelType_With_Valid_Arguments_happy_path)
     {
         // arrange
@@ -492,7 +464,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_99_009: [ On failure, Schema_CreateModelType shall return NULL. ]*/
     TEST_FUNCTION(Schema_CreateModelType_With_Valid_Arguments_unhappy_paths)
     {
         // arrange
@@ -528,7 +499,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         umock_c_negative_tests_deinit();
         Schema_Destroy(schemaHandle);
     }
-    /* Tests_SRS_SCHEMA_99_001:[Schema_Create shall initialize a schema with a given namespace.] */
     TEST_FUNCTION(Schema_CreateModelType_Twice_With_Different_Model_Names_Succeeds)
     {
         // arrange
@@ -547,7 +517,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_100: [Schema_CreateModelType shall return SCHEMA_DUPLICATE_ELEMENT if modelName already exists.] */
     TEST_FUNCTION(Schema_CreateModelType_Twice_Same_Model_Name_Fails)
     {
         // arrange
@@ -567,7 +536,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_GetSchemaForModelType */
 
-    /* Tests_SRS_SCHEMA_99_132: [If the modelTypeHandle argument is NULL, Schema_GetSchemaForModelType shall return NULL.] */
     TEST_FUNCTION(Schema_GetSchemaForModelType_With_NULL_Handle_Fails)
     {
         // arrange
@@ -579,7 +547,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_IS_NULL(result);
     }
 
-    /* Tests_SRS_SCHEMA_99_131: [Schema_GetSchemaForModelType returns the schema handle for a given model type.] */
     TEST_FUNCTION(Schema_GetSchemaForModelType_With_Valid_Handle_Returns_The_Schema_Handle)
     {
         // arrange
@@ -598,7 +565,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_AddModelProperty */
 
-    /* Tests_SRS_SCHEMA_99_013:[If any of the arguments is NULL, Schema_AddModelProperty shall return SCHEMA_INVALID_ARG.] */
     TEST_FUNCTION(Schema_AddModelProperty_With_NULL_ModelType_Fails)
     {
         // arrange
@@ -610,7 +576,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
     }
 
-    /* Tests_SRS_SCHEMA_99_013:[If any of the arguments is NULL, Schema_AddModelProperty shall return SCHEMA_INVALID_ARG.] */
     TEST_FUNCTION(Schema_AddModelProperty_With_NULL_Property_Name_Fails)
     {
         // arrange
@@ -627,7 +592,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_013:[If any of the arguments is NULL, Schema_AddModelProperty shall return SCHEMA_INVALID_ARG.] */
     TEST_FUNCTION(Schema_AddModelProperty_With_NULL_Property_Type_Fails)
     {
         // arrange
@@ -644,8 +608,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_011:[Schema_AddModelProperty shall add one property to the model type identified by modelTypeHandle.] */
-    /* Tests_SRS_SCHEMA_99_012:[On success, Schema_AddModelProperty shall return SCHEMA_OK.] */
     TEST_FUNCTION(Schema_AddModelProperty_With_Valid_Arguments_Succeeds)
     {
         // arrange
@@ -662,8 +624,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_011:[Schema_AddModelProperty shall add one property to the model type identified by modelTypeHandle.] */
-    /* Tests_SRS_SCHEMA_99_012:[On success, Schema_AddModelProperty shall return SCHEMA_OK.] */
     TEST_FUNCTION(Schema_AddModelProperty_Adding_2_Properties_With_Different_Names_To_The_Same_Model_Succeeds)
     {
         // arrange
@@ -681,7 +641,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_015:[The property name shall be unique per model, if the same property name is added twice to a model, SCHEMA_DUPLICATE_ELEMENT shall be returned.] */
     TEST_FUNCTION(Schema_AddModelProperty_Adding_The_Same_Property_In_The_Same_Model_Fails)
     {
         // arrange
@@ -699,7 +658,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_015:[The property name shall be unique per model, if the same property name is added twice to a model, SCHEMA_DUPLICATE_ELEMENT shall be returned.] */
     TEST_FUNCTION(Schema_AddModelProperty_Adding_The_Same_PropertyName_With_Different_PropertyType_In_The_Same_Model_Fails)
     {
         // arrange
@@ -716,7 +674,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         // cleanup
         Schema_Destroy(schemaHandle);
     }
-    /* Tests_SRS_SCHEMA_99_015:[The property name shall be unique per model, if the same property name is added twice to a model, SCHEMA_DUPLICATE_ELEMENT shall be returned.] */
     TEST_FUNCTION(Schema_AddModelProperty_Adding_The_Same_Property_In_The_Same_Model_When_The_Duplicate_Property_Is_Not_First_Fails)
     {
         // arrange
@@ -735,7 +692,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_015:[The property name shall be unique per model, if the same property name is added twice to a model, SCHEMA_DUPLICATE_ELEMENT shall be returned.] */
     TEST_FUNCTION(Schema_AddModelProperty_Adding_The_Same_Property_In_Different_Models_Succeeds)
     {
         // arrange
@@ -756,7 +712,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_CreateModelAction */
 
-    /* Tests_SRS_SCHEMA_99_104: [If any of the modelTypeHandle or actionName arguments is NULL, Schema_CreateModelAction shall return NULL.] */
     TEST_FUNCTION(Schema_CreateModelAction_with_NULL_modelTypeHandle_Fails)
     {
         // arrange
@@ -768,7 +723,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_IS_NULL(result);
     }
 
-    /* Tests_SRS_SCHEMA_99_104: [If any of the modelTypeHandle or actionName arguments is NULL, Schema_CreateModelAction shall return NULL.] */
     TEST_FUNCTION(Schema_CreateModelAction_with_NULL_actionName_Fails)
     {
         // arrange
@@ -786,7 +740,6 @@ BEGIN_TEST_SUITE(Schema_ut)
     }
 
     /* Tests SRS_SCHEMA_99_102: [Schema_CreateModelAction shall add one action to the model type identified by modelTypeHandle.] */
-    /* Tests_SRS_SCHEMA_99_103: [On success, Schema_CreateModelAction shall return a none-NULL SCHEMA_ACTION_HANDLE to the newly created action.] */
     TEST_FUNCTION(Schema_CreateModelAction_with_valid_arguments_Succeeds)
     {
         // arrange
@@ -803,7 +756,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_105: [The action name shall be unique per model, if the same action name is added twice to a model, Schema_CreateModelAction shall return NULL.] */
     TEST_FUNCTION(Schema_CreateModelAction_with_Different_Action_Names_Succeed)
     {
         // arrange
@@ -823,7 +775,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_105: [The action name shall be unique per model, if the same action name is added twice to a model, Schema_CreateModelAction shall return NULL.] */
     TEST_FUNCTION(Schema_CreateModelAction_with_Same_Action_To_Same_Model_Fail)
     {
         // arrange
@@ -843,7 +794,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_105: [The action name shall be unique per model, if the same action name is added twice to a model, Schema_CreateModelAction shall return NULL.] */
     TEST_FUNCTION(Schema_CreateModelAction_With_Same_Action_To_Different_Models_Succeeds)
     {
         // arrange
@@ -865,7 +815,6 @@ BEGIN_TEST_SUITE(Schema_ut)
     }
 
     /* Schema_AddModelActionArgument */
-    /* Tests_SRS_SCHEMA_99_109: [If any of the arguments is NULL, Schema_AddModelActionArgument shall return SCHEMA_INVALID_ARG.] */
     TEST_FUNCTION(Schema_AddModelActionArgument_with_NULL_actionHandle_fails)
     {
         // arrange
@@ -877,7 +826,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
     }
 
-    /* Tests_SRS_SCHEMA_99_109: [If any of the arguments is NULL, Schema_AddModelActionArgument shall return SCHEMA_INVALID_ARG.] */
     TEST_FUNCTION(Schema_AddModelActionArgument_with_NULL_argumentName_fails)
     {
         // arrange
@@ -895,7 +843,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_109: [If any of the arguments is NULL, Schema_AddModelActionArgument shall return SCHEMA_INVALID_ARG.] */
     TEST_FUNCTION(Schema_AddModelActionArgument_with_NULL_argumentType_fails)
     {
         // arrange
@@ -913,8 +860,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_107: [Schema_AddModelActionArgument shall add one argument name & type to an action identified by actionHandle.] */
-    /* Tests_SRS_SCHEMA_99_108: [On success, Schema_AddModelActionArgunent shall return SCHEMA_OK.] */
     TEST_FUNCTION(Schema_AddModelActionArgument_with_valid_arguments_Succeeds)
     {
         // arrange
@@ -932,7 +877,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_110: [The argument name shall be unique per action, if the same name is added twice to an action, SCHEMA_DUPLICATE_ELEMENT shall be returned.] */
     TEST_FUNCTION(Schema_AddModelActionArgument_when_adding_two_different_argument_names_Succeeds)
     {
         // arrange
@@ -952,7 +896,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_110: [The argument name shall be unique per action, if the same name is added twice to an action, SCHEMA_DUPLICATE_ELEMENT shall be returned.] */
     TEST_FUNCTION(Schema_AddModelActionArgument_when_adding_same_argument_name_twice_Fails)
     {
         // arrange
@@ -972,7 +915,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_111: [Schema_AddModelActionArgument shall accept arguments with different names of the same type.]  */
     TEST_FUNCTION(Schema_AddModelActionArgument_when_adding_two_different_argument_names_with_same_type_Succeeds)
     {
         // arrange
@@ -994,7 +936,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_GetModelCount */
 
-    /* Tests_SRS_SCHEMA_99_123: [Schema_GetModelCount shall return SCHEMA_INVALID_ARG if any of the arguments is NULL.] */
     TEST_FUNCTION(Schema_GetModelCount_with_NULL_schemaHandle_Fails)
     {
         // arrange
@@ -1007,7 +948,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
     }
 
-    /* Tests_SRS_SCHEMA_99_123: [Schema_GetModelCount shall return SCHEMA_INVALID_ARG if any of the arguments is NULL.] */
     TEST_FUNCTION(Schema_GetModelCount_with_NULL_modelCount_Fails)
     {
         // arrange
@@ -1025,9 +965,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_120: [Schema_GetModelCount shall provide the number of models defined in the schema identified by schemaHandle.] */
-    /* Tests_SRS_SCHEMA_99_121: [The count shall be provided via the out argument modelCount.] */
-    /* Tests_SRS_SCHEMA_99_122: [On success, Schema_GetModelCount shall return SCHEMA_OK.] */
     TEST_FUNCTION(Schema_GetModelCount_With_Zero_Models_Defined_Yields_0)
     {
         // arrange
@@ -1045,9 +982,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_120: [Schema_GetModelCount shall provide the number of models defined in the schema identified by schemaHandle.] */
-    /* Tests_SRS_SCHEMA_99_121: [The count shall be provided via the out argument modelCount.] */
-    /* Tests_SRS_SCHEMA_99_122: [On success, Schema_GetModelCount shall return SCHEMA_OK.] */
     TEST_FUNCTION(Schema_GetModelCount_With_Two_Models_Defined_Yields_2)
     {
         // arrange
@@ -1067,9 +1001,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_120: [Schema_GetModelCount shall provide the number of models defined in the schema identified by schemaHandle.] */
-    /* Tests_SRS_SCHEMA_99_121: [The count shall be provided via the out argument modelCount.] */
-    /* Tests_SRS_SCHEMA_99_122: [On success, Schema_GetModelCount shall return SCHEMA_OK.] */
     TEST_FUNCTION(Schema_GetModelCount_With_Two_Models_Added_with_the_same_modelName_Yields_1)
     {
         // arrange
@@ -1091,7 +1022,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_GetModelByName */
 
-    /* Tests_SRS_SCHEMA_99_125: [Schema_GetModelByName shall return NULL if unable to find a matching model, or if any of the arguments are NULL.] */
     TEST_FUNCTION(Schema_GetModelByName_with_NULL_schemaHandle_Fails)
     {
         // arrange
@@ -1108,7 +1038,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_125: [Schema_GetModelByName shall return NULL if unable to find a matching model, or if any of the arguments are NULL.] */
     TEST_FUNCTION(Schema_GetModelByName_with_NULL_modelName_Fails)
     {
         // arrange
@@ -1125,7 +1054,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_125: [Schema_GetModelByName shall return NULL if unable to find a matching model, or if any of the arguments are NULL.] */
     TEST_FUNCTION(Schema_GetModelByName_With_Zero_Models_Defined_Fails)
     {
         // arrange
@@ -1141,7 +1069,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_125: [Schema_GetModelByName shall return NULL if unable to find a matching model, or if any of the arguments are NULL.] */
     TEST_FUNCTION(Schema_GetModelByName_With_3_Models_Defined_And_modelName_Not_Matching_Fails)
     {
         // arrange
@@ -1160,7 +1087,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_124: [Schema_GetModelByName shall return a non-NULL SCHEMA_MODEL_TYPE_HANDLE corresponding to the model identified by schemaHandle and matching the modelName argument value.] */
     TEST_FUNCTION(Schema_GetModelByName_With_Valid_Arguments_And_modelName_Matching_Succeeds)
     {
         // arrange
@@ -1181,7 +1107,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_GetModelByIndex */
 
-    /* Tests_SRS_SCHEMA_99_128: [Schema_GetModelByIndex shall return NULL if the index specified is outside the valid range or if schemaHandle argument is NULL.] */
     TEST_FUNCTION(Schema_GetModelByIndex_With_NULL_schemaHandle_Fails)
     {
         // arrange
@@ -1198,7 +1123,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_128: [Schema_GetModelByIndex shall return NULL if the index specified is outside the valid range or if schemaHandle argument is NULL.] */
     TEST_FUNCTION(Schema_GetModelByIndex_With_No_Models_Defined_schemaHandle_Fails)
     {
         // arrange
@@ -1214,8 +1138,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_128: [Schema_GetModelByIndex shall return NULL if the index specified is outside the valid range or if schemaHandle argument is NULL.] */
-    /* Tests_SRS_SCHEMA_99_127: [The index argument is zero based, and the order in which models were added shall be the index in which they will be retrieved.] */
     TEST_FUNCTION(Schema_GetModelByIndex_With_Index_Equals_The_Number_Of_Defined_Models_Fails)
     {
         // arrange
@@ -1234,8 +1156,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_128: [Schema_GetModelByIndex shall return NULL if the index specified is outside the valid range or if schemaHandle argument is NULL.] */
-    /* Tests_SRS_SCHEMA_99_127: [The index argument is zero based, and the order in which models were added shall be the index in which they will be retrieved.] */
     TEST_FUNCTION(Schema_GetModelByIndex_With_Index_Greater_Than_The_Number_Of_Defined_Models_Fails)
     {
         // arrange
@@ -1254,8 +1174,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_126: [Schema_GetModelByIndex shall return a non-NULL SCHEMA_MODEL_TYPE_HANDLE corresponding to the model identified by schemaHandle and matching the index number provided by the index argument.] */
-    /* Tests_SRS_SCHEMA_99_127: [The index argument is zero based, and the order in which models were added shall be the index in which they will be retrieved.] */
     TEST_FUNCTION(Schema_GetModelByIndex_With_Index_Within_The_Number_Of_Defined_Models_Succeeds)
     {
         // arrange
@@ -1276,7 +1194,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_GetModelPropertyByName */
 
-    /* Tests_SRS_SCHEMA_99_038:[Schema_GetModelPropertyByName shall return NULL if unable to find a matching property or if any of the arguments are NULL.] */
     TEST_FUNCTION(Schema_GetModelPropertyByName_With_A_NULL_ModelHandle_Fails)
     {
         // arrange
@@ -1288,7 +1205,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_IS_NULL(result);
     }
 
-    /* Tests_SRS_SCHEMA_99_038:[Schema_GetModelPropertyByName shall return NULL if unable to find a matching property or if any of the arguments are NULL.] */
     TEST_FUNCTION(Schema_GetModelPropertyByName_With_A_NULL_Name_Fails)
     {
         // arrange
@@ -1306,7 +1222,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_038:[Schema_GetModelPropertyByName shall return NULL if unable to find a matching property or if any of the arguments are NULL.] */
     TEST_FUNCTION(Schema_GetModelPropertyByName_When_The_Property_Is_Not_Found_Fails)
     {
         // arrange
@@ -1324,7 +1239,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_038:[Schema_GetModelPropertyByName shall return NULL if unable to find a matching property or if any of the arguments are NULL.] */
     TEST_FUNCTION(Schema_GetModelPropertyByName_When_Model_Is_Empty_Fails)
     {
         // arrange
@@ -1341,7 +1255,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_036:[Schema_GetModelPropertyByName shall return a non-NULL SCHEMA_PROPERTY_HANDLE corresponding to the model type identified by modelTypeHandle and matching the propertyName argument value.] */
     TEST_FUNCTION(Schema_GetModelPropertyByName_When_The_Property_Is_Found_Returns_A_Property_Handle)
     {
         // arrange
@@ -1360,7 +1273,6 @@ BEGIN_TEST_SUITE(Schema_ut)
     }
 
     /* Schema_GetModelPropertyCount */
-    /* Tests_SRS_SCHEMA_99_092: [Schema_GetModelPropertyCount shall return SCHEMA_INVALID_ARG if any of the arguments is NULL.] */
     TEST_FUNCTION(Schema_GetModelPropertyCount_With_NULL_modelTypeHandle_Fails)
     {
         // arrange
@@ -1373,7 +1285,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
     }
 
-    /* Tests_SRS_SCHEMA_99_092: [Schema_GetModelPropertyCount shall return SCHEMA_INVALID_ARG if any of the arguments is NULL.] */
     TEST_FUNCTION(Schema_GetModelPropertyCount_With_NULL_propertyCount_Fails)
     {
         // arrange
@@ -1390,7 +1301,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_092: [Schema_GetModelPropertyCount shall return SCHEMA_INVALID_ARG if any of the arguments is NULL.] */
     TEST_FUNCTION(Schema_GetModelPropertyCount_With_Both_NULL_Arguments_Fails)
     {
         // arrange
@@ -1403,9 +1313,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     }
 
-    /* Tests_SRS_SCHEMA_99_089: [Schema_GetModelPropertyCount shall provide the number of properties defined in the model type identified by modelTypeHandle.] */
-    /* Tests_SRS_SCHEMA_99_090: [The count shall be provided via the out argument propertyCount.]*/
-    /* Tests_SRS_SCHEMA_99_091: [On success, Schema_GetModelPropertyCount shall return SCHEMA_OK.] */
     TEST_FUNCTION(Schema_GetModelPropertyCount_With_No_Properties_Defined_Yields_0)
     {
         // arrange
@@ -1424,9 +1331,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_089: [Schema_GetModelPropertyCount shall provide the number of properties defined in the model type identified by modelTypeHandle.] */
-    /* Tests_SRS_SCHEMA_99_090: [The count shall be provided via the out argument propertyCount.]*/
-    /* Tests_SRS_SCHEMA_99_091: [On success, Schema_GetModelPropertyCount shall return SCHEMA_OK.] */
     TEST_FUNCTION(Schema_GetModelPropertyCount_With_One_Property_Defined_Yields_1)
     {
         // arrange
@@ -1446,9 +1350,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_089: [Schema_GetModelPropertyCount shall provide the number of properties defined in the model type identified by modelTypeHandle.] */
-    /* Tests_SRS_SCHEMA_99_090: [The count shall be provided via the out argument propertyCount.]*/
-    /* Tests_SRS_SCHEMA_99_091: [On success, Schema_GetModelPropertyCount shall return SCHEMA_OK.] */
     TEST_FUNCTION(Schema_GetModelPropertyCount_With_Two_Properties_Defined_Yields_2)
     {
         // arrange
@@ -1471,7 +1372,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_GetModelProperty */
 
-    /* Tests_SRS_SCHEMA_99_094: [Schema_GetModelProperty shall return NULL if the index specified is outside the valid range or if modelTypeHandle argument is NULL.] */
     TEST_FUNCTION(Schema_GetModelProperty_with_NULL_modelTypeHandle_Fails)
     {
         // arrange
@@ -1483,7 +1383,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_IS_NULL(result);
     }
 
-    /* Tests_SRS_SCHEMA_99_094: [Schema_GetModelProperty shall return NULL if the index specified is outside the valid range or if modelTypeHandle argument is NULL.] */
     TEST_FUNCTION(Schema_GetModelProperty_With_A_Zero_Index_But_No_Properties_Fails)
     {
         // arrange
@@ -1500,7 +1399,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_094: [Schema_GetModelProperty shall return NULL if the index specified is outside the valid range or if modelTypeHandle argument is NULL.] */
     TEST_FUNCTION(Schema_GetModelPropety_With_Index_Out_Of_Range_Fails)
     {
         // arrange
@@ -1518,8 +1416,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_093: [Schema_GetModelProperty shall return a non-NULL SCHEMA_PROPERTY_HANDLE corresponding to the model type identified by modelTypeHandle and matching the index number provided by the index argument.] */
-    /* Tests_SRS_SCHEMA_99_097: [index is zero based, and the order in which actions were added shall be the index in which they will be retrieved.] */
     TEST_FUNCTION(Schema_GetModelProperty_With_Valid_Index_Succeeds)
     {
         // arrange
@@ -1537,8 +1433,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_093: [Schema_GetModelProperty shall return a non-NULL SCHEMA_PROPERTY_HANDLE corresponding to the model type identified by modelTypeHandle and matching the index number provided by the index argument.] */
-    /* Tests_SRS_SCHEMA_99_097: [index is zero based, and the order in which actions were added shall be the index in which they will be retrieved.] */
     TEST_FUNCTION(Schema_GetModelProperty_Returns_Different_Handles_For_Different_Properties)
     {
         // arrange
@@ -1562,7 +1456,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_GetModelActionByName */
 
-    /* Tests_SRS_SCHEMA_99_041:[Schema_GetModelActionByName shall return NULL if unable to find a matching action, if any of the arguments are NULL.] */
     TEST_FUNCTION(Schema_GetModelActionByName_With_A_NULL_ModelHandle_Fails)
     {
         // arrange
@@ -1574,7 +1467,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_IS_NULL(result);
     }
 
-    /* Tests_SRS_SCHEMA_99_041:[Schema_GetModelActionByName shall return NULL if unable to find a matching action, if any of the arguments are NULL.] */
     TEST_FUNCTION(Schema_GetModelActionByName_With_A_NULL_Name_Fails)
     {
         // arrange
@@ -1591,7 +1483,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_041:[Schema_GetModelActionByName shall return NULL if unable to find a matching action, if any of the arguments are NULL.] */
     TEST_FUNCTION(Schema_GetModelActionByName_When_The_Action_Is_Not_Found_Fails)
     {
         // arrange
@@ -1609,7 +1500,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_040:[Schema_GetModelActionByName shall return a non-NULL SCHEMA_ACTION_HANDLE corresponding to the model type identified by modelTypeHandle and matching the actionName argument value.] */
     TEST_FUNCTION(Schema_GetModelActionByName_When_The_Property_Is_Found_Returns_A_Property_Handle)
     {
         // arrange
@@ -1629,7 +1519,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_GetModelActionCount */
 
-    /* Tests_SRS_SCHEMA_99_045:[If any of the modelTypeHandle or actionCount arguments is NULL, Schema_GetModelActionCount shall return SCHEMA_INVALID_ARG.] */
     TEST_FUNCTION(Schema_GetModelActionCount_With_A_NULL_ModelType_Handle_Fails)
     {
         // arrange
@@ -1642,7 +1531,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
     }
 
-    /* Tests_SRS_SCHEMA_99_045:[If any of the modelTypeHandle or actionCount arguments is NULL, Schema_GetModelActionCount shall return SCHEMA_INVALID_ARG.] */
     TEST_FUNCTION(Schema_GetModelActionCount_With_A_NULL_ActionCount_Fails)
     {
         // arrange
@@ -1659,9 +1547,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_042:[Schema_GetModelActionCount shall provide the total number of actions defined in a model type identified by the modelTypeHandle.] */
-    /* Tests_SRS_SCHEMA_99_044:[On success, Schema_GetModelActionCount shall return SCHEMA_OK.] */
-    /* Tests_SRS_SCHEMA_99_043:[The count shall be provided via the out argument actionCount.] */
     TEST_FUNCTION(Schema_GetModelActionCount_When_No_Actions_Are_Defined_Yields_0)
     {
         // arrange
@@ -1680,9 +1565,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_042:[Schema_GetModelActionCount shall provide the total number of actions defined in a model type identified by the modelTypeHandle.] */
-    /* Tests_SRS_SCHEMA_99_044:[On success, Schema_GetModelActionCount shall return SCHEMA_OK.] */
-    /* Tests_SRS_SCHEMA_99_043:[The count shall be provided via the out argument actionCount.] */
     TEST_FUNCTION(Schema_GetModelActionCount_When_1_Action_Is_Defined_Yields_1)
     {
         // arrange
@@ -1702,9 +1584,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_042:[Schema_GetModelActionCount shall provide the total number of actions defined in a model type identified by the modelTypeHandle.] */
-    /* Tests_SRS_SCHEMA_99_044:[On success, Schema_GetModelActionCount shall return SCHEMA_OK.] */
-    /* Tests_SRS_SCHEMA_99_043:[The count shall be provided via the out argument actionCount.] */
     TEST_FUNCTION(Schema_GetModelActionCount_When_2_Action_Is_Defined_Yields_2)
     {
         // arrange
@@ -1727,7 +1606,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_GetModelAction */
 
-    /* Tests_SRS_SCHEMA_99_048:[Schema_GetModelAction shall return NULL if the index specified is outside the valid range or if modelTypeHandle argument is NULL.] */
     TEST_FUNCTION(Schema_GetModelAction_With_A_NULL_ModelType_Handle_Fails)
     {
         // arrange
@@ -1739,7 +1617,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_IS_NULL(result);
     }
 
-    /* Tests_SRS_SCHEMA_99_048:[Schema_GetModelAction shall return NULL if the index specified is outside the valid range or if modelTypeHandle argument is  NULL.] */
     TEST_FUNCTION(Schema_GetModelAction_With_A_Zero_Index_But_No_Actions_Fails)
     {
         // arrange
@@ -1756,7 +1633,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_048:[Schema_GetModelAction shall return NULL if the index specified is outside the valid range or if modelTypeHandle argument is NULL.] */
     TEST_FUNCTION(Schema_GetModelAction_With_Index_Out_Of_Range_Fails)
     {
         // arrange
@@ -1774,8 +1650,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_047:[Schema_GetModelAction shall return a non-NULL SCHEMA_ACTION_HANDLE corresponding to the model type identified by modelTypeHandle and matching the index number provided by the index argument.] */
-    /* Tests_SRS_SCHEMA_99_096: [index is zero based and the order in which actions were added shall be the index in which they will be retrieved.] */
     TEST_FUNCTION(Schema_GetModelAction_With_Valid_Index_Succeeds)
     {
         // arrange
@@ -1793,8 +1667,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_047:[Schema_GetModelAction shall return a non-NULL SCHEMA_ACTION_HANDLE corresponding to the model type identified by modelTypeHandle and matching the index number provided by the index argument.] */
-    /* Tests_SRS_SCHEMA_99_096: [index is zero based and the order in which actions were added shall be the index in which they will be retrieved.] */
     TEST_FUNCTION(Schema_GetModelAction_Returns_Different_Handles_For_Different_Actions)
     {
         // arrange
@@ -1818,7 +1690,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_GetModelActionName */
 
-    /* Tests_SRS_SCHEMA_99_050:[If the actionHandle is NULL, Schema_GetModelActionName shall return NULL.] */
     TEST_FUNCTION(Schema_GetModelActionName_With_NULL_Handle_Fails)
     {
         // arrange
@@ -1830,7 +1701,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_IS_NULL(result);
     }
 
-    /* Tests_SRS_SCHEMA_99_050:[If the actionHandle is NULL, Schema_GetModelActionName shall return NULL.] */
     TEST_FUNCTION(Schema_GetModelActionName_With_A_Valid_Action_Handle_Returns_The_Action_Name)
     {
         // arrange
@@ -1849,7 +1719,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_050:[If the actionHandle is NULL, Schema_GetModelActionName shall return NULL.] */
     TEST_FUNCTION(Schema_GetModelActionName_With_A_Valid_Action_Handle_Returns_The_Action_Name_2)
     {
         // arrange
@@ -1871,7 +1740,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_GetModelActionArgumentCount */
 
-    /* Tests_SRS_SCHEMA_99_054:[If any argument is NULL, Schema_GetModelActionArgumentCount shall return SCHEMA_INVALID_ARG.] */
     TEST_FUNCTION(Schema_GetModelActionArgumentCount_With_A_NULL_Action_Handle_Fails)
     {
         // arrange
@@ -1884,7 +1752,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
     }
 
-    /* Tests_SRS_SCHEMA_99_054:[If any argument is NULL, Schema_GetModelActionArgumentCount shall return SCHEMA_INVALID_ARG.] */
     TEST_FUNCTION(Schema_GetModelActionArgumentCount_With_A_NULL_ArgumentCount_Fails)
     {
         // arrange
@@ -1903,9 +1770,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_051:[Schema_GetModelActionArgumentCount shall provide the number of arguments for a specific schema action identified by actionHandle.] */
-    /* Tests_SRS_SCHEMA_99_052:[The argument count shall be provided via the out argument argumentCount.] */
-    /* Tests_SRS_SCHEMA_99_053:[On success, Schema_GetModelActionArgumentCount shall return SCHEMA_OK.] */
     TEST_FUNCTION(Schema_GetModelActionArgumentCount_With_A_Valid_Action_Handle_And_No_Action_Args_Yields_0)
     {
         // arrange
@@ -1926,9 +1790,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_051:[Schema_GetModelActionArgumentCount shall provide the number of arguments for a specific schema action identified by actionHandle.] */
-    /* Tests_SRS_SCHEMA_99_052:[The argument count shall be provided via the out argument argumentCount.] */
-    /* Tests_SRS_SCHEMA_99_053:[On success, Schema_GetModelActionArgumentCount shall return SCHEMA_OK.] */
     TEST_FUNCTION(Schema_GetModelActionArgumentCount_With_A_Valid_Action_Handle_And_1_Action_Arg_Yields_1)
     {
         // arrange
@@ -1950,7 +1811,6 @@ BEGIN_TEST_SUITE(Schema_ut)
     }
 
     /* Schema_GetModelActionArgumentByName */
-    /* Tests_SRS_SCHEMA_99_118: [Schema_GetModelActionArgumentByName shall return NULL if unable to find a matching argument or if any of the arguments are NULL.] */
     TEST_FUNCTION(Schema_GetModelActionArgumentByName_with_NULL_actionHandle_Fails)
     {
         // arrange
@@ -1962,7 +1822,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_IS_NULL(result);
     }
 
-    /* Tests_SRS_SCHEMA_99_118: [Schema_GetModelActionArgumentByName shall return NULL if unable to find a matching argument or if any of the arguments are NULL.] */
     TEST_FUNCTION(Schema_GetModelActionArgumentByName_with_NULL_actionArgumentName_Fails)
     {
         // arrange
@@ -1980,7 +1839,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_118: [Schema_GetModelActionArgumentByName shall return NULL if unable to find a matching argument or if any of the arguments are NULL.] */
     TEST_FUNCTION(Schema_GetModelActionArgumentByName_with_None_Matching_actionArgumentName_Fails)
     {
         // arrange
@@ -1999,7 +1857,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_117: [Schema_GetModelActionArgumentByName shall return a non-NULL handle corresponding to an action argument identified by the actionHandle and actionArgumentName.] */
     TEST_FUNCTION(Schema_GetModelActionArgumentByName_with_valid_arguments_Succeeds)
     {
         // arrange
@@ -2020,7 +1877,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_GetModelActionArgumentByIndex */
 
-    /* Tests_SRS_SCHEMA_99_056:[Schema_GetModelActionArgumentByIndex shall return NULL if the index specified is outside the valid range or if the actionHandle argument is NULL.] */
     TEST_FUNCTION(Schema_GetModelActionArgumentByIndex_With_A_NULL_Handle_Fails)
     {
         // arrange
@@ -2032,7 +1888,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_IS_NULL(result);
     }
 
-    /* Tests_SRS_SCHEMA_99_056:[Schema_GetModelActionArgumentByIndex shall return NULL if the index specified is outside the valid range or if the actionHandle argument is NULL.] */
     TEST_FUNCTION(Schema_GetModelActionArgumentByIndex_With_Zero_Index_When_No_Args_Fails)
     {
         // arrange
@@ -2050,7 +1905,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_056:[Schema_GetModelActionArgumentByIndex shall return NULL if the index specified is outside the valid range or if the actionHandle argument is NULL.] */
     TEST_FUNCTION(Schema_GetModelActionArgumentByIndex_With_Index_Out_Of_Range_Fails)
     {
         // arrange
@@ -2069,7 +1923,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_055:[Schema_GetModelActionArgumentByIndex shall return a non-NULL SCHEMA_ACTION_ARGUMENT_HANDLE corresponding to the action type identified by actionHandle and matching the index number provided by the argumentIndex argument.] */
     TEST_FUNCTION(Schema_GetModelActionArgumentByIndex_With_Valid_Arguments_Succeeds)
     {
         // arrange
@@ -2089,7 +1942,6 @@ BEGIN_TEST_SUITE(Schema_ut)
     }
 
     /* Schema_GetActionArgumentName */
-    /* Tests_SRS_SCHEMA_99_114: [Schema_GetActionArgumentName shall return NULL if actionArgumentHandle is NULL.] */
     TEST_FUNCTION(Schema_GetActionArgumentName_with_NULL_actionArgumentHandle_Fails)
     {
         // arrange
@@ -2101,7 +1953,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_IS_NULL(result);
     }
 
-    /* Tests_SRS_SCHEMA_99_113: [Schema_GetActionArgumentName shall return the argument name identified by the actionArgumentHandle.] */
     TEST_FUNCTION(Schema_GetActionArgumentName_With_A_Valid_Handle_Returns_The_Name)
     {
         // arrange
@@ -2122,7 +1973,6 @@ BEGIN_TEST_SUITE(Schema_ut)
     }
 
     /* Schema_GetActionArgumentType */
-    /* Tests_SRS_SCHEMA_99_116: [Schema_GetActionArgumentType shall return NULL if actionArgumentHandle is NULL.] */
     TEST_FUNCTION(Schema_GetActionArgumentType_with_NULL_actionArgumentHandle_Fails)
     {
         // arrange
@@ -2134,7 +1984,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_IS_NULL(result);
     }
 
-    /* Tests_SRS_SCHEMA_99_115: [Schema_GetActionArgumentType shall return the argument type identified by the actionArgumentHandle.] */
     TEST_FUNCTION(Schema_GetActionArgumentType_With_A_Valid_Handle_Returns_The_Type)
     {
         // arrange
@@ -2154,7 +2003,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_115: [Schema_GetActionArgumentType shall return the argument type identified by the actionArgumentHandle.] */
     TEST_FUNCTION(Schema_GetActionArgumentType_With_A_Valid_Handle_For_Two_Arguments_Same_Type_Returns_The_Type)
     {
         // arrange
@@ -2182,7 +2030,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_CreateStructType */
 
-    /* Tests_SRS_SCHEMA_99_060:[If any of the arguments is NULL, Schema_CreateStructType shall return NULL.] */
     TEST_FUNCTION(Schema_CreateStructType_With_A_NULL_Schema_Handle_Fails)
     {
         // arrange
@@ -2194,7 +2041,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_IS_NULL(result);
     }
 
-    /* Tests_SRS_SCHEMA_99_060:[If any of the arguments is NULL, Schema_CreateStructType shall return NULL.] */
     TEST_FUNCTION(Schema_CreateStructType_With_A_NULL_Name_Fails)
     {
         // arrange
@@ -2210,8 +2056,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_057:[Schema_CreateStructType shall create a new struct type and return a handle to it.] */
-    /* Tests_SRS_SCHEMA_99_058:[On success, a non-NULL handle shall be returned.] */
     TEST_FUNCTION(Schema_CreateStructType_With_Valid_Arguments_Succeeds)
     {
         // arrange
@@ -2227,8 +2071,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_057:[Schema_CreateStructType shall create a new struct type and return a handle to it.] */
-    /* Tests_SRS_SCHEMA_99_058:[On success, a non-NULL handle shall be returned.] */
     TEST_FUNCTION(Schema_CreateStructType_Creating_2_Different_Structs_Succeeds)
     {
         // arrange
@@ -2247,8 +2089,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_057:[Schema_CreateStructType shall create a new struct type and return a handle to it.] */
-    /* Tests_SRS_SCHEMA_99_058:[On success, a non-NULL handle shall be returned.] */
     TEST_FUNCTION(Schema_CreateStructType_Creating_2_Different_Structs_In_Different_Schemas_Succeeds)
     {
         // arrange
@@ -2269,7 +2109,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle2);
     }
 
-    /* Tests_SRS_SCHEMA_99_061:[If a struct type with the same name already exists, Schema_CreateStructType shall return NULL.] */
     TEST_FUNCTION(Schema_CreateStructType_Creating_The_Same_Struct_Twice_In_The_Same_Schema_Fails)
     {
         // arrange
@@ -2288,7 +2127,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_GetStructTypeName */
 
-    /* Tests_SRS_SCHEMA_99_136: [If structTypeHandle is NULL, Schema_GetStructTypeName shall return NULL.] */
     TEST_FUNCTION(Schema_GetStructTypeName_With_A_NULL_Handle_Fails)
     {
         // arrange
@@ -2300,8 +2138,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_IS_NULL(result);
     }
 
-    /* Tests_SRS_SCHEMA_99_136: [If structTypeHandle is NULL, Schema_GetStructTypeName shall return NULL.] */
-    /* Tests_SRS_SCHEMA_99_135: [Schema_GetStructTypeName shall return the name of a struct type identified by the structTypeHandle argument.] */
     TEST_FUNCTION(Schema_GetStructTypeName_With_A_Valid_Struct_Type_Handle_Returns_The_Struct_Type_Name)
     {
         // arrange
@@ -2320,7 +2156,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_GetStructTypeByName */
 
-    /* Tests_SRS_SCHEMA_99_069:[Schema_GetStructTypeByName shall return NULL if unable to find a matching struct or if any of the arguments are NULL.] */
     TEST_FUNCTION(Schema_GetStructTypeByName_With_A_NULL_Schema_Handle_Fails)
     {
         // arrange
@@ -2332,7 +2167,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_IS_NULL(result);
     }
 
-    /* Tests_SRS_SCHEMA_99_069:[Schema_GetStructTypeByName shall return NULL if unable to find a matching struct or if any of the arguments are NULL.] */
     TEST_FUNCTION(Schema_GetStructTypeByName_With_A_NULL_Name_Fails)
     {
         // arrange
@@ -2348,7 +2182,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_069:[Schema_GetStructTypeByName shall return NULL if unable to find a matching struct or if any of the arguments are NULL.] */
     TEST_FUNCTION(Schema_GetStructTypeByName_With_Valid_Args_But_No_Structs_Exist_In_Schema_Fails)
     {
         // arrange
@@ -2364,7 +2197,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_069:[Schema_GetStructTypeByName shall return NULL if unable to find a matching struct or if any of the arguments are NULL.] */
     TEST_FUNCTION(Schema_GetStructTypeByName_With_A_Struct_That_Does_Not_Exist_Fails)
     {
         // arrange
@@ -2381,7 +2213,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_069:[Schema_GetStructTypeByName shall return NULL if unable to find a matching struct or if any of the arguments are NULL.] */
     TEST_FUNCTION(Schema_GetStructTypeByName_With_A_Struct_That_Exists_Returns_A_Non_NULL_Handle)
     {
         // arrange
@@ -2400,7 +2231,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_AddStructTypeProperty */
 
-    /* Tests_SRS_SCHEMA_99_072:[If any of the arguments is NULL, Schema_AddStructTypeProperty shall return SCHEMA_INVALID_ARG.] */
     TEST_FUNCTION(Schema_AddStructTypeProperty_With_NULL_StructType_Fails)
     {
         // arrange
@@ -2412,7 +2242,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
     }
 
-    /* Tests_SRS_SCHEMA_99_072:[If any of the arguments is NULL, Schema_AddStructTypeProperty shall return SCHEMA_INVALID_ARG.] */
     TEST_FUNCTION(Schema_AddStructTypeProperty_With_NULL_Property_Name_Fails)
     {
         // arrange
@@ -2429,7 +2258,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_072:[If any of the arguments is NULL, Schema_AddStructTypeProperty shall return SCHEMA_INVALID_ARG.] */
     TEST_FUNCTION(Schema_AddStructTypeProperty_With_NULL_Property_Type_Fails)
     {
         // arrange
@@ -2446,8 +2274,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_070:[Schema_AddStructTypeProperty shall add one property to the struct type identified by structTypeHandle.] */
-    /* Tests_SRS_SCHEMA_99_071:[On success, Schema_AddStructTypeProperty shall return SCHEMA_OK.] */
     TEST_FUNCTION(Schema_AddStructTypeProperty_With_Valid_Arguments_For_A_StructType_Succeeds)
     {
         // arrange
@@ -2464,8 +2290,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_070:[Schema_AddStructTypeProperty shall add one property to the struct type identified by structTypeHandle.] */
-    /* Tests_SRS_SCHEMA_99_071:[On success, Schema_AddStructTypeProperty shall return SCHEMA_OK.] */
     TEST_FUNCTION(Schema_AddStructTypeProperty_Adding_2_Properties_With_Different_Names_To_The_Same_StructType_Succeeds)
     {
         // arrange
@@ -2483,7 +2307,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_074:[The property name shall be unique per struct type, if the same property name is added twice to a struct type, SCHEMA_DUPLICATE_ELEMENT shall be returned.] */
     TEST_FUNCTION(Schema_AddStructTypeProperty_Adding_The_Same_Property_In_The_Same_StructType_Fails)
     {
         // arrange
@@ -2501,7 +2324,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_074:[The property name shall be unique per struct type, if the same property name is added twice to a struct type, SCHEMA_DUPLICATE_ELEMENT shall be returned.] */
     TEST_FUNCTION(Schema_AddStructTypeProperty_Adding_The_Same_Property_With_Different_Type_In_The_Same_StructType_Fails)
     {
         // arrange
@@ -2519,7 +2341,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_074:[The property name shall be unique per struct type, if the same property name is added twice to a struct type, SCHEMA_DUPLICATE_ELEMENT shall be returned.] */
     TEST_FUNCTION(Schema_AddStructTypeProperty_Adding_The_Same_Property_In_The_Same_StructType_When_The_Duplicate_Property_Is_Not_First_Fails)
     {
         // arrange
@@ -2538,7 +2359,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_074:[The property name shall be unique per struct type, if the same property name is added twice to a struct type, SCHEMA_DUPLICATE_ELEMENT shall be returned.] */
     TEST_FUNCTION(Schema_AddStructTypeProperty_Adding_The_Same_Property_In_Different_Structs_Succeeds)
     {
         // arrange
@@ -2559,7 +2379,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_GetStructTypeCount */
 
-    /* Tests_SRS_SCHEMA_99_140: [Schema_GetStructTypeCount shall return SCHEMA_INVALID_ARG if any of the arguments is NULL.] */
     TEST_FUNCTION(Schema_GetStructTypeCount_with_NULL_schemaHandle_Fails)
     {
         // arrange
@@ -2572,7 +2391,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
     }
 
-    /* Tests_SRS_SCHEMA_99_140: [Schema_GetStructTypeCount shall return SCHEMA_INVALID_ARG if any of the arguments is NULL.] */
     TEST_FUNCTION(Schema_GetStructTypeCount_with_NULL_structTypeCount_Fails)
     {
         // arrange
@@ -2588,9 +2406,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_137: [Schema_GetStructTypeCount shall provide the number of structs defined in the schema identified by schemaHandle.] */
-    /* Tests_SRS_SCHEMA_99_138: [The count shall be provided via the out argument structTypeCount.] */
-    /* Tests_SRS_SCHEMA_99_139: [On success, Schema_GetStructTypeCount shall return SCHEMA_OK.] */
     TEST_FUNCTION(Schema_GetStructTypeCount_With_Zero_Struct_Types_Defined_Yields_0)
     {
         // arrange
@@ -2608,9 +2423,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_137: [Schema_GetStructTypeCount shall provide the number of structs defined in the schema identified by schemaHandle.] */
-    /* Tests_SRS_SCHEMA_99_138: [The count shall be provided via the out argument structTypeCount.] */
-    /* Tests_SRS_SCHEMA_99_139: [On success, Schema_GetStructTypeCount shall return SCHEMA_OK.] */
     TEST_FUNCTION(Schema_GetStructTypeCount_With_Two_Struct_Types_Defined_Yields_2)
     {
         // arrange
@@ -2630,9 +2442,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_137: [Schema_GetStructTypeCount shall provide the number of structs defined in the schema identified by schemaHandle.] */
-    /* Tests_SRS_SCHEMA_99_138: [The count shall be provided via the out argument structTypeCount.] */
-    /* Tests_SRS_SCHEMA_99_139: [On success, Schema_GetStructTypeCount shall return SCHEMA_OK.] */
     TEST_FUNCTION(Schema_GetStructTypeCount_With_Two_Struct_Types_Added_with_the_same_structTypeName_Yields_1)
     {
         // arrange
@@ -2654,7 +2463,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_GetStructTypeByIndex */
 
-    /* Tests_SRS_SCHEMA_99_143: [Schema_GetStructTypeByIndex shall return NULL if the index specified is outside the valid range or if schemaHandle argument is NULL.] */
     TEST_FUNCTION(Schema_GetStructTypeByIndex_With_NULL_schemaHandle_Fails)
     {
         // arrange
@@ -2671,7 +2479,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_143: [Schema_GetStructTypeByIndex shall return NULL if the index specified is outside the valid range or if schemaHandle argument is NULL.] */
     TEST_FUNCTION(Schema_GetStructTypeByIndex_With_No_Struct_Types_Defined_Fails)
     {
         // arrange
@@ -2687,8 +2494,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_143: [Schema_GetStructTypeByIndex shall return NULL if the index specified is outside the valid range or if schemaHandle argument is NULL.] */
-    /* Tests_SRS_SCHEMA_99_142: [The index argument is zero based, and the order in which models were added shall be the index in which they will be retrieved.] */
     TEST_FUNCTION(Schema_GetStructTypeByIndex_With_Index_Equals_The_Number_Of_Defined_StructTypes_Fails)
     {
         // arrange
@@ -2707,8 +2512,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_143: [Schema_GetStructTypeByIndex shall return NULL if the index specified is outside the valid range or if schemaHandle argument is NULL.] */
-    /* Tests_SRS_SCHEMA_99_142: [The index argument is zero based, and the order in which models were added shall be the index in which they will be retrieved.] */
     TEST_FUNCTION(Schema_GetStructTypeByIndex_With_Index_Greater_Than_The_Number_Of_Defined_Struct_Types_Fails)
     {
         // arrange
@@ -2727,8 +2530,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_141: [Schema_GetStructTypeByIndex shall return a non-NULL SCHEMA_STRUCT_TYPE_HANDLE corresponding to the struct type identified by schemaHandle and matching the index number provided by the index argument.] */
-    /* Tests_SRS_SCHEMA_99_142: [The index argument is zero based, and the order in which models were added shall be the index in which they will be retrieved.] */
     TEST_FUNCTION(Schema_GetStructTypeByIndex_With_Index_Within_The_Number_Of_Defined_Struct_Types_Succeeds)
     {
         // arrange
@@ -2749,7 +2550,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_GetStructTypePropertyByName */
 
-    /* Tests_SRS_SCHEMA_99_076:[Schema_GetStructTypePropertyByName shall return NULL if unable to find a matching property or if any of the arguments are NULL.] */
     TEST_FUNCTION(Schema_GetStructTypePropertyByName_with_NULL_structTypeHandle_Fails)
     {
         // arrange
@@ -2761,7 +2561,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_IS_NULL(result);
     }
 
-    /* Tests_SRS_SCHEMA_99_076:[Schema_GetStructTypePropertyByName shall return NULL if unable to find a matching property or if any of the arguments are NULL.] */
     TEST_FUNCTION(Schema_GetStructTypePropertyByName_with_NULL_propertyName_Fails)
     {
         // arrange
@@ -2779,7 +2578,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_076:[Schema_GetStructTypePropertyByName shall return NULL if unable to find a matching property or if any of the arguments are NULL.] */
     TEST_FUNCTION(Schema_GetStructTypePropertyByName_When_The_Property_Is_Not_Found_Fails)
     {
         // arrange
@@ -2798,7 +2596,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     }
 
-    /* Tests_SRS_SCHEMA_99_075:[Schema_GetStructTypePropertyByName shall return a non-NULL handle corresponding to a property identified by the structTypeHandle and propertyName.] */
     TEST_FUNCTION(Schema_GetStructTypePropertyByName_For_A_StructType_When_The_Property_Is_Found_Returns_A_Property_Handle)
     {
         // arrange
@@ -2816,7 +2613,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_075:[Schema_GetStructTypePropertyByName shall return a non-NULL handle corresponding to a property identified by the structTypeHandle and propertyName.] */
     TEST_FUNCTION(Schema_GetStructTypePropertyByName_When_The_Property_Is_Found_After_Adding_2_Properties_Returns_A_Property_Handle)
     {
         // arrange
@@ -2838,7 +2634,6 @@ BEGIN_TEST_SUITE(Schema_ut)
     }
 
     /* Schema_GetStructTypePropertyCount */
-    /* Tests_SRS_SCHEMA_99_079: [Schema_GetStructTypePropertyCount shall return SCHEMA_INVALID_ARG if any of the structlTypeHandle or propertyCount arguments is NULL.] */
     TEST_FUNCTION(Schema_GetStructTypePropertyCount_With_NULL_structTypeHandle_Fails)
     {
         // arrange
@@ -2850,7 +2645,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
     }
 
-    /* Tests_SRS_SCHEMA_99_079: [Schema_GetStructTypePropertyCount shall return SCHEMA_INVALID_ARG if any of the structlTypeHandle or propertyCount arguments is NULL.] */
     TEST_FUNCTION(Schema_GetStructTypePropertyCount_With_NULL_propertyCount_Fails)
     {
         // arrange
@@ -2867,7 +2661,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_079: [Schema_GetStructTypePropertyCount shall return SCHEMA_INVALID_ARG if any of the structlTypeHandle or propertyCount arguments is NULL.] */
     TEST_FUNCTION(Schema_GetStructTypePropertyCount_With_Both_NULL_Arguments_Fails)
     {
         // arrange
@@ -2879,9 +2672,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
     }
 
-    /* Tests_SRS_SCHEMA_99_077: [Schema_GetStructTypePropertyCount shall provide the total number of properties defined in a struct type identified by structTypeHandle. The value is provided via the out argument propertyCount.] */
-    /* Tests_SRS_SCHEMA_99_081: [The count shall be provided via the out argument propertyCount.] */
-    /* Tests_SRS_SCHEMA_99_078: [On success, Schema_ GetStructTypePropertyCount shall return SCHEMA_OK.] */
     TEST_FUNCTION(Schema_GetStructTypePropertyCount_With_No_Properties_Defined_Yields_0)
     {
         // arrange
@@ -2900,9 +2690,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_077: [Schema_GetStructTypePropertyCount shall provide the total number of properties defined in a struct type identified by structTypeHandle. The value is provided via the out argument propertyCount.] */
-    /* Tests_SRS_SCHEMA_99_081: [The count shall be provided via the out argument propertyCount.] */
-    /* Tests_SRS_SCHEMA_99_078: [On success, Schema_ GetStructTypePropertyCount shall return SCHEMA_OK.] */
     TEST_FUNCTION(Schema_GetStructTypePropertyCount_With_1_Property_Defined_Yields_1)
     {
         // arrange
@@ -2922,9 +2709,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_077: [Schema_GetStructTypePropertyCount shall provide the total number of properties defined in a struct type identified by structTypeHandle. The value is provided via the out argument propertyCount.] */
-    /* Tests_SRS_SCHEMA_99_081: [The count shall be provided via the out argument propertyCount.] */
-    /* Tests_SRS_SCHEMA_99_078: [On success, Schema_ GetStructTypePropertyCount shall return SCHEMA_OK.] */
     TEST_FUNCTION(Schema_GetStructTypePropertyCount_With_2_Properties_Defined_Yields_2)
     {
         // arrange
@@ -2947,7 +2731,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
 
     /* Schema_GetStructTypeProperty */
-    /* Tests_SRS_SCHEMA_99_083: [Schema_ GetStructTypeProperty shall return NULL if the index specified is outside the valid range, if structTypeHandle argument is NULL] */
     TEST_FUNCTION(Schema_GetStructTypeProperty_With_NULL_propertyHandle_Fails)
     {
         // arrange
@@ -2966,7 +2749,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_083: [Schema_ GetStructTypeProperty shall return NULL if the index specified is outside the valid range, if structTypeHandle argument is NULL] */
     TEST_FUNCTION(Schema_GetStructTypeProperty_With_No_Properies_Defined_Fails)
     {
         // arrange
@@ -2983,7 +2765,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_083: [Schema_ GetStructTypeProperty shall return NULL if the index specified is outside the valid range, if structTypeHandle argument is NULL] */
     TEST_FUNCTION(Schema_GetStructTypeProperty_With_Index_Greater_Than_Number_OF_Properties_Fails)
     {
         // arrange
@@ -3002,7 +2783,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_083: [Schema_ GetStructTypeProperty shall return NULL if the index specified is outside the valid range, if structTypeHandle argument is NULL] */
     TEST_FUNCTION(Schema_GetStructTypeProperty_With_Index_Equal_To_Number_OF_Properties_Fails)
     {
         // arrange
@@ -3021,8 +2801,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_082: [Schema_GetStructTypeProperty shall return a non-NULL SCHEMA_PROPERTY_HANDLE corresponding to the struct type identified by strutTypeHandle and matching the index number provided by the index argument.] */
-    /* Tests_SRS_SCHEMA_99_098: [index is zero based and the order in which actions were added shall be the index in which they will be retrieved.] */
     TEST_FUNCTION(Schema_GetStructTypeProperty_With_Valid_Arguments_Succeeds)
     {
         // arrange
@@ -3040,8 +2818,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_082: [Schema_GetStructTypeProperty shall return a non-NULL SCHEMA_PROPERTY_HANDLE corresponding to the struct type identified by strutTypeHandle and matching the index number provided by the index argument.] */
-    /* Tests_SRS_SCHEMA_99_098: [index is zero based and the order in which actions were added shall be the index in which they will be retrieved.] */
     TEST_FUNCTION(Schema_GetStructTypeProperty_For_2_Different_Properties_Returns_Different_Handles)
     {
         // arrange
@@ -3065,7 +2841,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_GetPropertyName */
 
-    /* Tests_SRS_SCHEMA_99_085: [Schema_GetPropertyName shall return the property name identified by the propertyHandle.] */
     TEST_FUNCTION(Schema_GetPropertyName_With_A_NULL_Handle_Fails)
     {
         // arrange
@@ -3077,7 +2852,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_IS_NULL(result);
     }
 
-    /* Tests_SRS_SCHEMA_99_085: [Schema_GetPropertyName shall return the property name identified by the propertyHandle.] */
     TEST_FUNCTION(Schema_GetPropertyName_With_A_Valid_Handle_Returns_The_Name)
     {
         // arrange
@@ -3097,7 +2871,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_GetPropertyType */
 
-    /* Tests_SRS_SCHEMA_99_088: [If propertyHandle is NULL, Schema_GetPropertyType shall return NULL.] */
     TEST_FUNCTION(Schema_GetPropertyType_With_A_NULL_Handle_Fails)
     {
         // arrange
@@ -3109,7 +2882,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_IS_NULL(result);
     }
 
-    /* Tests_SRS_SCHEMA_99_087: [Schema_GetPropertyType shall return the property type identified by the propertyHandle.] */
     TEST_FUNCTION(Schema_GetPropertyType_With_A_Valid_Handle_Returns_The_Name)
     {
         // arrange
@@ -3127,7 +2899,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_99_160: [Schema_GetModelName shall return the name of the model identified by modelTypeHandle. If the name cannot be retrieved, then NULL shall be returned.]*/
     TEST_FUNCTION(Schema_GetModelName_with_NULL_parameter_returns_NULL)
     {
         // arrange
@@ -3139,7 +2910,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_IS_NULL(result);
     }
 
-    /*Tests_SRS_SCHEMA_99_160: [Schema_GetModelName shall return the name of the model identified by modelTypeHandle. If the name cannot be retrieved, then NULL shall be returned.]*/
     TEST_FUNCTION(Schema_GetModelName_with_non_NULL_parameter_returns_the_name_of_the_parameter)
     {
         // arrange
@@ -3159,8 +2929,6 @@ BEGIN_TEST_SUITE(Schema_ut)
     /* Schema_AddModelModel */
 
 
-    /*Tests_SRS_SCHEMA_99_163: [Schema_AddModelModel shall insert an existing model, identified by the handle modelType, into the existing model identified by modelTypeHandle under a property having the name propertyName.]*/
-    /*Tests_SRS_SCHEMA_99_164: [If the function succeeds, then the return value shall be SCHEMA_OK.]*/
     TEST_FUNCTION(Schema_AddModelModel_happy_path_succeeds)
     {
         ///arrange
@@ -3179,7 +2947,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     }
 
-    /*Codes_SRS_SCHEMA_99_165: [If any of the parameters is NULL then Schema_AddModelModel shall return SCHEMA_INVALID_ARG.]*/
     TEST_FUNCTION(Schema_AddModelModel_with_invalid_arg1_fails)
     {
         ///arrange
@@ -3197,7 +2964,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     }
 
-    /*Codes_SRS_SCHEMA_99_165: [If any of the parameters is NULL then Schema_AddModelModel shall return SCHEMA_INVALID_ARG.]*/
     TEST_FUNCTION(Schema_AddModelModel_with_invalid_arg2_fails)
     {
         ///arrange
@@ -3216,7 +2982,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     }
 
-    /*Codes_SRS_SCHEMA_99_165: [If any of the parameters is NULL then Schema_AddModelModel shall return SCHEMA_INVALID_ARG.]*/
     TEST_FUNCTION(Schema_AddModelModel_with_invalid_arg3_fails)
     {
         ///arrange
@@ -3235,8 +3000,6 @@ BEGIN_TEST_SUITE(Schema_ut)
     }
 
 
-    /*Tests_SRS_SCHEMA_99_167: [Schema_GetModelModelCount shall return in parameter modelCount the number of models inserted in the model identified by parameter modelTypeHandle.]*/
-    /*Tests_SRS_SCHEMA_99_168: [If the function succeeds, it shall return SCHEMA_OK.]*/
     TEST_FUNCTION(Schema_GetModelModelCount_with_no_model_returns_0)
     {
         ///arrange
@@ -3257,8 +3020,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_99_167: [Schema_GetModelModelCount shall return in parameter modelCount the number of models inserted in the model identified by parameter modelTypeHandle.]*/
-    /*Tests_SRS_SCHEMA_99_168: [If the function succeeds, it shall return SCHEMA_OK.]*/
     TEST_FUNCTION(Schema_GetModelModelCount_with_1_model_returns_1)
     {
         ///arrange
@@ -3279,8 +3040,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_99_167: [Schema_GetModelModelCount shall return in parameter modelCount the number of models inserted in the model identified by parameter modelTypeHandle.]*/
-    /*Tests_SRS_SCHEMA_99_168: [If the function succeeds, it shall return SCHEMA_OK.]*/
     TEST_FUNCTION(Schema_GetModelModelCount_with_2_models_returns_2)
     {
         ///arrange
@@ -3302,7 +3061,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_99_169: [If any of the parameters is NULL, then the function shall return SCHEMA_INVALID_ARG.]*/
     TEST_FUNCTION(Schema_GetModelModelCount_with_invalid_arg_fail_1)
     {
         ///arrange
@@ -3316,7 +3074,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     }
 
-    /*Tests_SRS_SCHEMA_99_169: [If any of the parameters is NULL, then the function shall return SCHEMA_INVALID_ARG.]*/
     TEST_FUNCTION(Schema_GetModelModelCount_with_invalid_arg_fail_2)
     {
         ///arrange
@@ -3336,8 +3093,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_99_170: [Schema_GetModelModelByName shall return a handle to the model identified by the property with the name propertyName in the model identified by the handle modelTypeHandle.]*/
-    /*Tests_SRS_SCHEMA_99_171: [If Schema_GetModelModelByName is unable to provide the handle it shall return NULL.]*/
     TEST_FUNCTION(Schema_GetModelModelByName_succeeds)
     {
         ///arrange
@@ -3361,7 +3116,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_99_170: [Schema_GetModelModelByName shall return a handle to the model identified by the property with the name propertyName in the model identified by the handle modelTypeHandle.]*/
     TEST_FUNCTION(Schema_GetModelModelByName_fails_with_NULL_parameters)
     {
         ///arrange
@@ -3383,8 +3137,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_99_172: [ Schema_GetModelModelyByIndex shall return a handle to the "index"th model inserted in the model identified by the parameter modelTypeHandle.]*/
-    /*Tests_SRS_SCHEMA_99_173: [Schema_GetModelModelyByIndex shall return NULL in the cases when it cannot provide the handle.]*/
     TEST_FUNCTION(Schema_GetModelModelByIndex_succeeds)
     {
         ///arrange
@@ -3413,8 +3165,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_99_175: [Schema_GetModelModelPropertyNameByIndex shall return the name of the property for the "index"th model in the model identified by modelTypeHandle parameter.]*/
-    /*Tests_SRS_SCHEMA_99_176: [If Schema_GetModelModelPropertyNameByIndex cannot produce the property name, it shall return NULL.]*/
     TEST_FUNCTION(Schema_GetModelModelPropertyNameByIndex_succeeds)
     {
         ///arrange
@@ -3441,8 +3191,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_99_163: [Schema_AddModelModel shall insert an existing model, identified by the handle modelType, into the existing model identified by modelTypeHandle under a property having the name propertyName.]*/
-    /*Tests_SRS_SCHEMA_99_164: [If the function succeeds, then the return value shall be SCHEMA_OK.]*/
     TEST_FUNCTION(Schema_AddModelModel_model_in_mode_in_model_succeeds)
     {
         ///arrange
@@ -3480,7 +3228,6 @@ BEGIN_TEST_SUITE(Schema_ut)
 
     /* Schema_ModelPropertyByPathExists */
 
-    /* Tests_SRS_SCHEMA_99_180: [If any of the arguments are NULL, Schema_ModelPropertyByPathExists shall return false.] */
     TEST_FUNCTION(Schema_ModelPropertyByPathExists_With_NULL_ModelHandle_Fails)
     {
         ///arrange
@@ -3498,7 +3245,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_180: [If any of the arguments are NULL, Schema_ModelPropertyByPathExists shall return false.] */
     TEST_FUNCTION(Schema_ModelPropertyByPathExists_With_NULL_PropertyPath_Fails)
     {
         ///arrange
@@ -3516,9 +3262,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_177: [Schema_ModelPropertyByPathExists shall return true if a leaf property exists in the model modelTypeHandle.] */
-    /* Tests_SRS_SCHEMA_99_178: [The argument propertyPath shall be used to find the leaf property.] */
-    /* Tests_SRS_SCHEMA_99_179: [The propertyPath shall be assumed to be in the format model1/model2/.../propertyName.] */
     TEST_FUNCTION(Schema_When_Property_Is_Found_At_Root_Schema_ModelPropertyByPathExists_Returns_True)
     {
         ///arrange
@@ -3536,7 +3279,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_181: [If the property cannot be found Schema_ModelPropertyByPathExists shall return false.] */
     TEST_FUNCTION(Schema_When_Property_Is_Not_Found_At_Root_Schema_ModelPropertyByPathExists_Returns_False)
     {
         ///arrange
@@ -3554,9 +3296,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_177: [Schema_ModelPropertyByPathExists shall return true if a leaf property exists in the model modelTypeHandle.] */
-    /* Tests_SRS_SCHEMA_99_178: [The argument propertyPath shall be used to find the leaf property.] */
-    /* Tests_SRS_SCHEMA_99_179: [The propertyPath shall be assumed to be in the format model1/model2/.../propertyName.] */
     TEST_FUNCTION(Schema_When_Property_Is_Found_In_A_Child_Model_Schema_ModelPropertyByPathExists_Returns_True)
     {
         ///arrange
@@ -3578,7 +3317,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_181: [If the property cannot be found Schema_ModelPropertyByPathExists shall return false.] */
     TEST_FUNCTION(Schema_When_Property_Is_Not_Found_In_A_Child_Model_Schema_ModelPropertyByPathExists_Returns_True)
     {
         ///arrange
@@ -3600,9 +3338,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_177: [Schema_ModelPropertyByPathExists shall return true if a leaf property exists in the model modelTypeHandle.] */
-    /* Tests_SRS_SCHEMA_99_178: [The argument propertyPath shall be used to find the leaf property.] */
-    /* Tests_SRS_SCHEMA_99_179: [The propertyPath shall be assumed to be in the format model1/model2/.../propertyName.] */
     TEST_FUNCTION(Schema_When_Property_Is_Found_In_A_2nd_Level_Child_Model_Schema_ModelPropertyByPathExists_Returns_True)
     {
         ///arrange
@@ -3624,7 +3359,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_181: [If the property cannot be found Schema_ModelPropertyByPathExists shall return false.] */
     TEST_FUNCTION(Schema_When_Property_Is_Not_Found_In_A_2nd_Level_Child_Model_Schema_ModelPropertyByPathExists_Returns_True)
     {
         ///arrange
@@ -3646,7 +3380,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_181: [If the property cannot be found Schema_ModelPropertyByPathExists shall return false.] */
     TEST_FUNCTION(Schema_When_A_ModelName_Is_Not_Fount_Schema_ModelPropertyByPathExists_Fails)
     {
         ///arrange
@@ -3668,7 +3401,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_181: [If the property cannot be found Schema_ModelPropertyByPathExists shall return false.] */
     TEST_FUNCTION(Schema_When_A_ModelName_Is_Only_A_Partial_Match_Schema_ModelPropertyByPathExists_Fails)
     {
         ///arrange
@@ -3690,7 +3422,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_181: [If the property cannot be found Schema_ModelPropertyByPathExists shall return false.] */
     TEST_FUNCTION(Schema_When_An_Empty_Model_Name_Is_In_The_Path_Schema_ModelPropertyByPathExists_Fails)
     {
         ///arrange
@@ -3712,7 +3443,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_181: [If the property cannot be found Schema_ModelPropertyByPathExists shall return false.] */
     TEST_FUNCTION(Schema_When_The_Path_Is_An_Empty_String_Schema_ModelPropertyByPathExists_Fails)
     {
         ///arrange
@@ -3734,7 +3464,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_181: [If the property cannot be found Schema_ModelPropertyByPathExists shall return false.] */
     TEST_FUNCTION(Schema_When_The_Path_Is_A_Slash_Schema_ModelPropertyByPathExists_Fails)
     {
         ///arrange
@@ -3756,7 +3485,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_182: [A single slash ('/') at the beginning of the path shall be ignored and the path shall still be valid.] */
     TEST_FUNCTION(Schema_When_The_First_Slash_In_The_Path_With_Only_A_PropertyName_Is_Ignored)
     {
         ///arrange
@@ -3776,7 +3504,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_182: [A single slash ('/') at the beginning of the path shall be ignored and the path shall still be valid.] */
     TEST_FUNCTION(Schema_When_The_First_Slash_In_The_Path_With_A_ModelName_And_A_PropertyName_Is_Ignored)
     {
         ///arrange
@@ -3796,7 +3523,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Tests_SRS_SCHEMA_99_183: [If the path propertyPathpoints to a sub-model, Schema_ModelPropertyByPathExists shall return true.] */
     TEST_FUNCTION(Schema_When_The_Path_Points_To_A_Model_Schema_ModelPropertyByPathExists_returns_true)
     {
         ///arrange
@@ -3816,7 +3542,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /* Test_SRS_SCHEMA_07_187: [Schema_AddDeviceRef shall return SCHEMA_INVALID_ARG if schemaHandle is NULL.] */
     TEST_FUNCTION(Schema_AddDeviceRef_NULL_SCHEMA_HANDLE_Fail)
     {
         ///arrange
@@ -3999,7 +3724,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_OK, result);
     }
 
-    /*Tests_SRS_SCHEMA_02_001: [ If modelTypeHandle is NULL then Schema_AddModelReportedProperty shall fail and return SCHEMA_INVALID_ARG. ]*/
     TEST_FUNCTION(Schema_AddModelReportedProperty_with_NULL_modelTypeHandle_fails)
     {
         ///arrange
@@ -4014,7 +3738,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///clean
     }
 
-    /*Tests_SRS_SCHEMA_02_002: [ If reportedPropertyName is NULL then Schema_AddModelReportedProperty shall fail and return SCHEMA_INVALID_ARG. ]*/
     TEST_FUNCTION(Schema_AddModelReportedProperty_with_NULL_reportedPropertyName_fails)
     {
         ///arrange
@@ -4033,7 +3756,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_003: [ If reportedPropertyType is NULL then Schema_AddModelReportedProperty shall fail and return SCHEMA_INVALID_ARG. ]*/
     TEST_FUNCTION(Schema_AddModelReportedProperty_with_NULL_reportedPropertyType_fails)
     {
         ///arrange
@@ -4052,7 +3774,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_004: [ If reportedPropertyName has already been added then Schema_AddModelReportedProperty shall fail and return SCHEMA_DUPLICATE_ELEMENT. ]*/
     TEST_FUNCTION(Schema_AddModelReportedProperty_adding_twice_the_same_reportedproperty_fails)
     {
         ///arrange
@@ -4094,8 +3815,6 @@ BEGIN_TEST_SUITE(Schema_ut)
             .IgnoreArgument_elements();
     }
 
-    /*Tests_SRS_SCHEMA_02_005: [ Schema_AddModelReportedProperty shall record reportedPropertyName and reportedPropertyType. ]*/
-    /*Tests_SRS_SCHEMA_02_007: [ Otherwise Schema_AddModelReportedProperty shall succeed and return SCHEMA_OK. ]*/
     TEST_FUNCTION(Schema_AddModelReportedProperty_happy_path)
     {
         ///arrange
@@ -4118,7 +3837,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_006: [ If any error occurs then Schema_AddModelReportedProperty shall fail and return SCHEMA_ERROR. ]*/
     TEST_FUNCTION(Schema_AddModelReportedProperty_unhappy_paths)
     {
         ///arrange
@@ -4168,7 +3886,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_008: [ If parameter modelTypeHandle is NULL then Schema_GetModelReportedPropertyCount shall fail and return SCHEMA_INVALID_ARG. ]*/
     TEST_FUNCTION(Schema_GetModelReportedPropertyCount_with_NULL_modelTypeHandle_fails)
     {
         ///arrange
@@ -4183,7 +3900,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///clean
     }
 
-    /*Tests_SRS_SCHEMA_02_009: [ If parameter reportedPropertyCount is NULL then Schema_GetModelReportedPropertyCount shall fail and return SCHEMA_INVALID_ARG. ]*/
     TEST_FUNCTION(Schema_GetModelReportedPropertyCount_with_NULL_reportedPropertyCount_fails)
     {
         ///arrange
@@ -4200,7 +3916,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_010: [ Schema_GetModelReportedPropertyCount shall provide in reportedPropertyCount the number of reported properties and return SCHEMA_OK. ]*/
     TEST_FUNCTION(Schema_GetModelReportedPropertyCount_happy_path)
     {
         ///arrange
@@ -4224,7 +3939,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_010: [ Schema_GetModelReportedPropertyCount shall provide in reportedPropertyCount the number of reported properties and return SCHEMA_OK. ]*/
     TEST_FUNCTION(Schema_GetModelReportedPropertyCount_happy_path_2)
     {
         ///arrange
@@ -4249,7 +3963,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_011: [ If argument modelTypeHandle is NULL then Schema_GetModelReportedPropertyByName shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_GetModelReportedPropertyByName_with_NULL_modelTypeHandle_fails)
     {
         ///arrange
@@ -4263,7 +3976,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///clean
     }
 
-    /*Tests_SRS_SCHEMA_02_012: [ If argument reportedPropertyName is NULL then Schema_GetModelReportedPropertyByName shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_GetModelReportedPropertyByName_with_NULL_reportedPropertyName_fails)
     {
         ///arrange
@@ -4281,7 +3993,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_013: [ If reported property by the name reportedPropertyName exists then Schema_GetModelReportedPropertyByName shall succeed and return a non-NULL value. ]*/
     TEST_FUNCTION(Schema_GetModelReportedPropertyByName_happy_path)
     {
         ///arrange
@@ -4304,7 +4015,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_014: [ Otherwise Schema_GetModelReportedPropertyByName shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_GetModelReportedPropertyByName_unhappy_path)
     {
         ///arrange
@@ -4327,7 +4037,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_015: [ If argument modelTypeHandle is NULL then Schema_GetModelReportedPropertyByIndex shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_GetModelReportedPropertyByIndex_with_NULL_modelTypeHandle_fails)
     {
         ///arrange
@@ -4341,7 +4050,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///clean
     }
 
-    /*Tests_SRS_SCHEMA_02_017: [ Otherwise Schema_GetModelReportedPropertyByIndex shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_GetModelReportedPropertyByIndex_unhappy_path)
     {
         ///arrange
@@ -4362,7 +4070,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_016: [ If a reported property with index equal to index exists then Schema_GetModelReportedPropertyByIndex shall succeed and return the non-NULL handle of that REPORTED_PROPERTY. ]*/
     TEST_FUNCTION(Schema_GetModelReportedPropertyByIndex_happy_path)
     {
         ///arrange
@@ -4384,7 +4091,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_018: [ If argument modelTypeHandle is NULL then Schema_ModelReportedPropertyByPathExists shall fail and return false. ]*/
     TEST_FUNCTION(Schema_ModelReportedPropertyByPathExists_with_NULL_modelTypeHandle_fails)
     {
         ///arrange
@@ -4398,7 +4104,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///clean
     }
 
-    /*Tests_SRS_SCHEMA_02_019: [ If argument reportedPropertyPath is NULL then Schema_ModelReportedPropertyByPathExists shall fail and return false. ]*/
     TEST_FUNCTION(Schema_ModelReportedPropertyByPathExists_with_NULL_reportedPropertyPath_fails)
     {
         ///arrange
@@ -4415,7 +4120,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_021: [ If the reported property cannot be found Schema_ModelReportedPropertyByPathExists shall fail and return false. ]*/
     TEST_FUNCTION(Schema_ModelReportedPropertyByPathExists_with_no_properties_fails)
     {
         ///arrange
@@ -4432,7 +4136,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_021: [ If the reported property cannot be found Schema_ModelReportedPropertyByPathExists shall fail and return false. ]*/
     TEST_FUNCTION(Schema_ModelReportedPropertyByPathExists_with_1_properties_fails)
     {
         ///arrange
@@ -4450,7 +4153,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_021: [ If the reported property cannot be found Schema_ModelReportedPropertyByPathExists shall fail and return false. ]*/
     TEST_FUNCTION(Schema_ModelReportedPropertyByPathExists_with_2_properties_fails)
     {
         ///arrange
@@ -4469,7 +4171,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_021: [ If the reported property cannot be found Schema_ModelReportedPropertyByPathExists shall fail and return false. ]*/
     TEST_FUNCTION(Schema_ModelReportedPropertyByPathExists_with_1_model_in_model_fails)
     {
         ///arrange
@@ -4504,9 +4205,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_020: [ reportedPropertyPath shall be assumed to be in the format model1/model2/.../reportedPropertyName. ]*/
-    /*Tests_SRS_SCHEMA_02_022: [ If the path reportedPropertyPath points to a sub-model, Schema_ModelReportedPropertyByPathExists shall succeed and true. ]*/
-    /*Tests_SRS_SCHEMA_02_023: [ If reportedPropertyPath exists then Schema_ModelReportedPropertyByPathExists shall succeed and return true ]*/
     TEST_FUNCTION(Schema_ModelReportedPropertyByPathExists_with_1_model_in_model_succeeds)
     {
         ///arrange
@@ -4546,7 +4244,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_024: [ If modelTypeHandle is NULL then Schema_AddModelDesiredProperty shall fail and return SCHEMA_INVALID_ARG. ]*/
     TEST_FUNCTION(Schema_AddModelDesiredProperty_with_NULL_modelTypeHandle_fails)
     {
         ///arrange
@@ -4561,7 +4258,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///clean
     }
 
-    /*Tests_SRS_SCHEMA_02_025: [ If desiredPropertyName is NULL then Schema_AddModelDesiredProperty shall fail and return SCHEMA_INVALID_ARG. ]*/
     TEST_FUNCTION(Schema_AddModelDesiredProperty_with_NULL_desiredPropertyName_fails)
     {
         ///arrange
@@ -4580,7 +4276,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_026: [ If desiredPropertyType is NULL then Schema_AddModelDesiredProperty shall fail and return SCHEMA_INVALID_ARG. ]*/
     TEST_FUNCTION(Schema_AddModelDesiredProperty_with_NULL_desiredPropertyType_fails)
     {
         ///arrange
@@ -4599,7 +4294,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_048: [ If desiredPropertyFromAGENT_DATA_TYPE is NULL then Schema_AddModelDesiredProperty shall fail and return SCHEMA_INVALID_ARG. ]*/
     TEST_FUNCTION(Schema_AddModelDesiredProperty_with_NULL_desiredPropertyFromAGENT_DATA_TYPE_fails)
     {
         ///arrange
@@ -4618,7 +4312,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_049: [ If desiredPropertyInitialize is NULL then Schema_AddModelDesiredProperty shall fail and return SCHEMA_INVALID_ARG. ]*/
     TEST_FUNCTION(Schema_AddModelDesiredProperty_with_NULL_desiredPropertyInitialize_fails)
     {
         ///arrange
@@ -4637,7 +4330,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_050: [ If desiredPropertyDeinitialize is NULL then Schema_AddModelDesiredProperty shall fail and return SCHEMA_INVALID_ARG. ]*/
     TEST_FUNCTION(Schema_AddModelDesiredProperty_with_NULL_desiredPropertyDeinitialize_fails)
     {
         ///arrange
@@ -4677,8 +4369,6 @@ BEGIN_TEST_SUITE(Schema_ut)
             .IgnoreArgument_elements();
     }
 
-    /*Tests_SRS_SCHEMA_02_027: [ Schema_AddModelDesiredProperty shall add the desired property given by the name desiredPropertyName and the type desiredPropertyType to the collection of existing desired properties. ]*/
-    /*Tests_SRS_SCHEMA_02_029: [ Otherwise, Schema_AddModelDesiredProperty shall succeed and return SCHEMA_OK. ]*/
     TEST_FUNCTION(Schema_AddModelDesiredProperty_happy_path)
     {
         ///arrange
@@ -4701,7 +4391,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_028: [ If any failure occurs then Schema_AddModelDesiredProperty shall fail and return SCHEMA_ERROR. ]*/
     TEST_FUNCTION(Schema_AddModelDesiredProperty_unhappy_paths)
     {
         ///arrange
@@ -4753,7 +4442,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_047: [ If the desired property already exists, then Schema_AddModelDesiredProperty shall fail and return SCHEMA_DUPLICATE_ELEMENT. ]*/
     TEST_FUNCTION(Schema_AddModelDesiredProperty_the_same_desired_property_twice_fails)
     {
         ///arrange
@@ -4780,7 +4468,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_030: [ If modelTypeHandle is NULL then Schema_GetModelDesiredPropertyCount shall fail and return SCHEMA_INVALID_ARG. ]*/
     TEST_FUNCTION(Schema_GetModelDesiredPropertyCount_with_NULL_modelTypeHandle_fails)
     {
         ///arrange
@@ -4795,7 +4482,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///clean
     }
 
-    /*Tests_SRS_SCHEMA_02_031: [ If desiredPropertyCount is NULL then Schema_GetModelDesiredPropertyCount shall fail and return SCHEMA_INVALID_ARG. ]*/
     TEST_FUNCTION(Schema_GetModelDesiredPropertyCount_with_NULL_desiredPropertyCount_fails)
     {
         ///arrange
@@ -4814,7 +4500,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_032: [ Otherwise, Schema_GetModelDesiredPropertyCount shall succeed and write in desiredPropertyCount the existing number of desired properties. ]*/
     TEST_FUNCTION(Schema_GetModelDesiredPropertyCount_with_0_desired_properties_succeeds)
     {
         ///arrange
@@ -4838,7 +4523,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_032: [ Otherwise, Schema_GetModelDesiredPropertyCount shall succeed and write in desiredPropertyCount the existing number of desired properties. ]*/
     TEST_FUNCTION(Schema_GetModelDesiredPropertyCount_with_1_desired_properties_succeeds)
     {
         ///arrange
@@ -4864,7 +4548,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_032: [ Otherwise, Schema_GetModelDesiredPropertyCount shall succeed and write in desiredPropertyCount the existing number of desired properties. ]*/
     TEST_FUNCTION(Schema_GetModelDesiredPropertyCount_with_2_desired_properties_succeeds)
     {
         ///arrange
@@ -4891,7 +4574,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_034: [ If modelTypeHandle is NULL then Schema_GetModelDesiredPropertyByName shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_GetModelDesiredPropertyByName_with_NULL_modelTypeHandle_fails)
     {
         ///arrange
@@ -4906,7 +4588,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///clean
     }
 
-    /*Tests_SRS_SCHEMA_02_035: [ If desiredPropertyName is NULL then Schema_GetModelDesiredPropertyByName shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_GetModelDesiredPropertyByName_with_NULL_desiredPropertyName_fails)
     {
         ///arrange
@@ -4925,7 +4606,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_037: [ Otherwise, Schema_GetModelDesiredPropertyByName shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_GetModelDesiredPropertyByName_with_non_existing_desiredPropertyName_fails)
     {
         ///arrange
@@ -4949,7 +4629,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_037: [ Otherwise, Schema_GetModelDesiredPropertyByName shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_GetModelDesiredPropertyByName_with_non_existing_desiredPropertyName_fails_2)
     {
         ///arrange
@@ -4974,7 +4653,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_037: [ Otherwise, Schema_GetModelDesiredPropertyByName shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_GetModelDesiredPropertyByName_succeeds)
     {
         ///arrange
@@ -4999,7 +4677,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_038: [ If modelTypeHandle is NULL then Schema_GetModelDesiredPropertyByIndex shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_GetModelDesiredPropertyByIndex_with_NULL_modelTypeHandle_fails)
     {
         ///arrange
@@ -5014,7 +4691,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///clean
     }
 
-    /*Tests_SRS_SCHEMA_02_039: [ If index is outside the range for existing indexes of desire properties, then Schema_GetModelDesiredPropertyByIndex shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_GetModelDesiredPropertyByIndex_with_0_desiredProperties_fails)
     {
         ///arrange
@@ -5036,7 +4712,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_039: [ If index is outside the range for existing indexes of desire properties, then Schema_GetModelDesiredPropertyByIndex shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_GetModelDesiredPropertyByIndex_with_1_desiredProperties_fails)
     {
         ///arrange
@@ -5059,7 +4734,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_040: [ Otherwise, Schema_GetModelDesiredPropertyByIndex shall succeed and return a non-NULL value. ]*/
     TEST_FUNCTION(Schema_GetModelDesiredPropertyByIndex_with_1_desiredProperties_succeeds)
     {
         ///arrange
@@ -5082,7 +4756,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_041: [ If modelTypeHandle is NULL then Schema_ModelDesiredPropertyByPathExists shall fail and return false. ]*/
     TEST_FUNCTION(Schema_ModelDesiredPropertyByPathExists_with_NULL_modelTypeHandle_fails)
     {
         ///arrange
@@ -5097,7 +4770,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///clean
     }
 
-    /*Tests_SRS_SCHEMA_02_042: [ If desiredPropertyPath is NULL then Schema_ModelDesiredPropertyByPathExists shall fail and return false. ]*/
     TEST_FUNCTION(Schema_ModelDesiredPropertyByPathExists_with_NULL_desiredPropertyPath_fails)
     {
         ///arrange
@@ -5116,7 +4788,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_044: [ If the desired property cannot be found Schema_ModelDesiredPropertyByPathExists shall fail and return false. ]*/
     TEST_FUNCTION(Schema_ModelDesiredPropertyByPathExists_with_no_properties_fails)
     {
         ///arrange
@@ -5133,7 +4804,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_044: [ If the desired property cannot be found Schema_ModelDesiredPropertyByPathExists shall fail and return false. ]*/
     TEST_FUNCTION(Schema_ModelDesiredPropertyByPathExists_with_1_properties_fails)
     {
         ///arrange
@@ -5151,7 +4821,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_044: [ If the desired property cannot be found Schema_ModelDesiredPropertyByPathExists shall fail and return false. ]*/
     TEST_FUNCTION(Schema_ModelDesiredPropertyByPathExists_with_2_properties_fails)
     {
         ///arrange
@@ -5170,7 +4839,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_046: [ If desiredPropertyPath exists then Schema_ModelDesiredPropertyByPathExists shall succeed and return true. ]*/
     TEST_FUNCTION(Schema_ModelDesiredPropertyByPathExists_with_2_properties_succeeds)
     {
         ///arrange
@@ -5191,7 +4859,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_044: [ If the desired property cannot be found Schema_ModelDesiredPropertyByPathExists shall fail and return false. ]*/
     TEST_FUNCTION(Schema_ModelDesiredPropertyByPathExists_with_1_model_in_model_fails)
     {
         ///arrange
@@ -5226,7 +4893,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_045: [ If the path desiredPropertyPath points to a sub-model, Schema_ModelDesiredPropertyByPathExists shall succeed and true. ]*/
     TEST_FUNCTION(Schema_ModelDesiredPropertyByPathExists_with_1_model_in_model_succeeds)
     {
         ///arrange
@@ -5266,7 +4932,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_051: [ If desiredPropertyHandle is NULL then Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE_with_NULL_desiredPropertyHandle_fails)
     {
         ///arrange
@@ -5280,7 +4945,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///clean
     }
 
-    /*Tests_SRS_SCHEMA_02_052: [ Otherwise Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE shall succeed and return a non-NULL value. ]*/
     TEST_FUNCTION(Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE_succeeds)
     {
         ///arrange
@@ -5302,7 +4966,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_053: [ If modelTypeHandle is NULL then Schema_GetModelModelByName_Offset shall fail and return 0. ]*/
     TEST_FUNCTION(Schema_GetModelModelByName_Offset_with_NULL_modelTypeHandle_fails)
     {
         ///arrange
@@ -5316,7 +4979,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///clean
     }
 
-    /*Tests_SRS_SCHEMA_02_054: [ If propertyName is NULL then Schema_GetModelModelByName_Offset shall fail and return 0. ]*/
     TEST_FUNCTION(Schema_GetModelModelByName_Offset_with_NULL_propertyName_fails)
     {
         ///arrange
@@ -5334,7 +4996,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_056: [ If propertyName is not a model then Schema_GetModelModelByName_Offset shall fail and return 0. ]*/
     TEST_FUNCTION(Schema_GetModelModelByName_Offset_with_notfound_propertyName_fails)
     {
         ///arrange
@@ -5354,7 +5015,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_056: [ If propertyName is not a model then Schema_GetModelModelByName_Offset shall fail and return 0. ]*/
     TEST_FUNCTION(Schema_GetModelModelByName_Offset_succeeds)
     {
         ///arrange
@@ -5374,7 +5034,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_057: [ If modelTypeHandle is NULL then Schema_GetModelModelByIndex_Offset shall fail and return 0. ]*/
     TEST_FUNCTION(Schema_GetModelModelByIndex_Offset_with_NULL_modelTypeHandle_fails)
     {
         ///arrange
@@ -5388,7 +5047,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///clean
     }
 
-    /*Tests_SRS_SCHEMA_02_058: [ If index is not valid then Schema_GetModelModelByIndex_Offset shall fail and return 0. ]*/
     TEST_FUNCTION(Schema_GetModelModelByIndex_Offset_with_invalid_index_fails)
     {
         ///arrange
@@ -5406,7 +5064,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_059: [ Otherwise Schema_GetModelModelByIndex_Offset shall succeed and return the offset. ]*/
     TEST_FUNCTION(Schema_GetModelModelByIndex_Offset_succeeds)
     {
         ///arrange
@@ -5426,7 +5083,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_060: [ If desiredPropertyHandle is NULL then Schema_GetModelDesiredProperty_offset shall fail and return 0. ]*/
     TEST_FUNCTION(Schema_GetModelDesiredProperty_offset_with_NULL_desiredPropertyHandle_fails)
     {
         ///arrange
@@ -5440,7 +5096,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///cleanup
     }
 
-    /*Tests_SRS_SCHEMA_02_061: [ Otherwise Schema_GetModelDesiredProperty_offset shall succeed and return the offset. ]*/
     TEST_FUNCTION(Schema_GetModelDesiredProperty_offset_succeeds)
     {
         ///arrange
@@ -5461,7 +5116,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_062: [ If desiredPropertyHandle is NULL then Schema_GetModelDesiredPropertyType shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_GetModelDesiredPropertyType_with_NULL_desiredPropertyHandle_fails)
     {
         ///arrange
@@ -5475,7 +5129,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         //clean
     }
 
-    /*Tests_SRS_SCHEMA_02_063: [ Otherwise, Schema_GetModelDesiredPropertyType shall return the type of the desired property. ]*/
     TEST_FUNCTION(Schema_GetModelDesiredPropertyType_succeeds)
     {
         ///arrange
@@ -5496,7 +5149,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_064: [ If desiredPropertyHandle is NULL then Schema_GetModelDesiredProperty_pfDesiredPropertyDeinitialize shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_GetModelDesiredProperty_pfDesiredPropertyDeinitialize_with_NULL_desiredPropertyHandle_fails)
     {
         ///arrange
@@ -5510,7 +5162,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         //clean
     }
 
-    /*Tests_SRS_SCHEMA_02_065: [Otherwise Schema_GetModelDesiredProperty_pfDesiredPropertyDeinitialize shall return a non - NULL function pointer.]*/
     TEST_FUNCTION(Schema_GetModelDesiredProperty_pfDesiredPropertyDeinitialize_succeeds)
     {
         ///arrange
@@ -5530,7 +5181,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_066: [ If desiredPropertyHandle is NULL then Schema_GetModelDesiredProperty_pfDesiredPropertyInitialize shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_GetModelDesiredProperty_pfDesiredPropertyInitialize_with_NULL_desiredPropertyHandle_fails)
     {
         ///arrange
@@ -5544,7 +5194,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///clean
     }
 
-    /*Tests_SRS_SCHEMA_02_067: [ Otherwise Schema_GetModelDesiredProperty_pfDesiredPropertyInitialize shall return a non-NULL function pointer. ]*/
     TEST_FUNCTION(Schema_GetModelDesiredProperty_pfDesiredPropertyInitialize_succeeds)
     {
         ///arrange
@@ -5564,12 +5213,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_078: [ If elementName is a property then Schema_GetModelElementByName shall succeed and set SCHEMA_MODEL_ELEMENT.elementType to SCHEMA_PROPERTY and SCHEMA_MODEL_ELEMENT.elementHandle.propertyHandle to the handle of the property. ]*/
-    /*Tests_SRS_SCHEMA_02_079: [ If elementName is a reported property then Schema_GetModelElementByName shall succeed and set SCHEMA_MODEL_ELEMENT.elementType to SCHEMA_REPORTED_PROPERTY and SCHEMA_MODEL_ELEMENT.elementHandle.reportedPropertyHandle to the handle of the reported property. ]*/
-    /*Tests_SRS_SCHEMA_02_080: [ If elementName is a desired property then Schema_GetModelElementByName shall succeed and set SCHEMA_MODEL_ELEMENT.elementType to SCHEMA_DESIRED_PROPERTY and SCHEMA_MODEL_ELEMENT.elementHandle.desiredPropertyHandle to the handle of the desired property. ]*/
-    /*Tests_SRS_SCHEMA_02_081: [ If elementName is a model action then Schema_GetModelElementByName shall succeed and set SCHEMA_MODEL_ELEMENT.elementType to SCHEMA_MODEL_ACTION and SCHEMA_MODEL_ELEMENT.elementHandle.actionHandle to the handle of the action. ]*/
-    /*Tests_SRS_SCHEMA_02_082: [ If elementName is a model in model then Schema_GetModelElementByName shall succeed and set SCHEMA_MODEL_ELEMENT.elementType to SCHEMA_MODEL_IN_MODEL and SCHEMA_MODEL_ELEMENT.elementHandle.modelHandle to the handle of the model. ]*/
-    /*Tests_SRS_SCHEMA_02_083: [ Otherwise Schema_GetModelElementByName shall fail and set SCHEMA_MODEL_ELEMENT.elementType to SCHEMA_NOT_FOUND. ]*/
     TEST_FUNCTION(Schema_GetModelElementTypeByName_succeeds)
     {
         ///arrange
@@ -5613,7 +5256,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_084: [ If desiredPropertyHandle is NULL then Schema_GetModelDesiredProperty_pfOnDesiredProperty shall return NULL. ]*/
     TEST_FUNCTION(Schema_GetModelDesiredProperty_pfOnDesiredProperty_with_NULL_desiredPropertyHandle_returns_NULL)
     {
         ///arrange
@@ -5627,7 +5269,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///clean
     }
 
-    /*Tests_SRS_SCHEMA_02_085: [ Otherwise Schema_GetModelDesiredProperty_pfOnDesiredProperty shall return the saved desired property callback. ]*/
     TEST_FUNCTION(Schema_GetModelDesiredProperty_pfOnDesiredProperty_created_with_NULL_pfOnDesiredProperty_returns_NULL)
     {
         ///arrange
@@ -5645,7 +5286,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_085: [ Otherwise Schema_GetModelDesiredProperty_pfOnDesiredProperty shall return the saved desired property callback. ]*/
     TEST_FUNCTION(Schema_GetModelDesiredProperty_pfOnDesiredProperty_created_with_non_NULL_pfOnDesiredProperty_returns_non_NULL)
     {
         ///arrange
@@ -5664,7 +5304,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_086: [ If modelTypeHandle is NULL then Schema_GetModelModelByName_OnDesiredProperty shall return NULL. ]*/
     TEST_FUNCTION(Schema_GetModelModelByName_OnDesiredProperty_with_NULL_modelTypeHandle_returns_NULL)
     {
         ///arrange
@@ -5678,7 +5317,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///clean
     }
 
-    /*Tests_SRS_SCHEMA_02_087: [ If propertyName is NULL then Schema_GetModelModelByName_OnDesiredProperty shall return NULL. ]*/
     TEST_FUNCTION(Schema_GetModelModelByName_OnDesiredProperty_with_NULL_propertyName_returns_NULL)
     {
         ///arrange
@@ -5698,7 +5336,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_089: [ Otherwise Schema_GetModelModelByName_OnDesiredProperty shall return the desired property callback. ]*/
     TEST_FUNCTION(Schema_GetModelModelByName_OnDesiredProperty_returns_non_NULL_onDesiredProperty)
     {
         ///arrange
@@ -5718,7 +5355,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_090: [ If metadata is NULL then Schema_Create shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_Create_with_NULL_metadata_fails)
     {
         // arrange
@@ -5732,7 +5368,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         // cleanup
     }
 
-    /*Tests_SRS_SCHEMA_02_092: [ Otherwise, Schema_GetMetadata shall succeed and return the saved metadata pointer. ]*/
     TEST_FUNCTION(Schema_GetMetadata_with_non_NULL_schemaHandle_succeeds)
     {
         ///arrange
@@ -5748,7 +5383,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schema);
     }
 
-    /*Tests_SRS_SCHEMA_02_091: [ If schemaHandle is NULL then Schema_GetMetadata shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_GetMetadata_with_NULL_schemaHandle_succeeds)
     {
         ///arrange
@@ -5764,7 +5398,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schema);
     }
 
-    /*Tests_SRS_SCHEMA_02_093: [ If modelName is NULL then Schema_GetSchemaForModel shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_GetSchemaForModel_with_NULL_modelName_fails)
     {
         ///arrange
@@ -5778,7 +5411,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///cleanup
     }
 
-    /*Tests_SRS_SCHEMA_02_094: [ Schema_GetSchemaForModel shall find the SCHEMA_HANDLE that contains a model by name modelName and if found, succeed and return that. ]*/
     TEST_FUNCTION(Schema_GetSchemaForModel_succeeds)
     {
         // arrange
@@ -5818,7 +5450,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_094: [ Schema_GetSchemaForModel shall find the SCHEMA_HANDLE that contains a model by name modelName and if found, succeed and return that. ]*/
     TEST_FUNCTION(Schema_GetSchemaForModel_2_schemas_succeeds)
     {
         // arrange
@@ -5854,7 +5485,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle2);
     }
 
-    /*Tests_SRS_SCHEMA_02_095: [ If the model is not found in any schema, then Schema_GetSchemaForModel shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_GetSchemaForModel_2_schemas_fails)
     {
         // arrange
@@ -5883,7 +5513,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle2);
     }
 
-    /*Tests_SRS_SCHEMA_02_096: [ If modelTypeHandle is NULL then Schema_CreateModelMethod shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_CreateModelMethod_with_NULL_modelTypeHandle_fails)
     {
         ///arrange
@@ -5897,7 +5526,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///cleanup
     }
 
-    /*Tests_SRS_SCHEMA_02_097: [ If methodName is NULL then Schema_CreateModelMethod shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_CreateModelMethod_with_NULL_methodName_fails)
     {
         ///arrange
@@ -5914,7 +5542,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_103: [ If methodName already exists, then Schema_CreateModelMethod shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_CreateModelMethod_with_same_methodName_fails)
     {
         ///arrange
@@ -5958,11 +5585,6 @@ BEGIN_TEST_SUITE(Schema_ut)
             .IgnoreArgument_elements();
     }
 
-    /*Tests_SRS_SCHEMA_02_098: [ Schema_CreateModelMethod shall allocate the space for the method. ]*/
-    /*Tests_SRS_SCHEMA_02_099: [ Schema_CreateModelMethod shall create a VECTOR that will hold the method's arguments. ]*/
-    /*Tests_SRS_SCHEMA_02_100: [ Schema_CreateModelMethod shall clone methodName ]*/
-    /*Tests_SRS_SCHEMA_02_101: [ Schema_CreateModelMethod shall add the new created method to the model's list of methods. ]*/
-    /*Tests_SRS_SCHEMA_02_104: [ Otherwise, Schema_CreateModelMethod shall succeed and return a non-NULL SCHEMA_METHOD_HANDLE. ]*/
     TEST_FUNCTION(Schema_CreateModelMethod_happy_path)
     {
         ///arrange
@@ -5983,7 +5605,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_102: [ If any of the above fails, then Schema_CreateModelMethod shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_CreateModelMethod_unhappy_paths)
     {
         ///arrange
@@ -6017,7 +5638,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /*Tests_SRS_SCHEMA_02_105: [ If methodHandle is NULL then Schema_AddModelMethodArgument shall fail and return SCHEMA_INVALID_ARG. ]*/
     TEST_FUNCTION(Schema_AddModelMethodArgument_with_NULL_methodHandle_fails)
     {
         ///arrange
@@ -6031,7 +5651,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///clean
     }
 
-    /*Tests_SRS_SCHEMA_02_106: [ If argumentName is NULL then Schema_AddModelMethodArgument shall fail and return SCHEMA_INVALID_ARG. ]*/
     TEST_FUNCTION(Schema_AddModelMethodArgument_with_NULL_argumentName_fails)
     {
         ///arrange
@@ -6049,7 +5668,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_107: [ If argumentType is NULL then Schema_AddModelMethodArgument shall fail and return SCHEMA_INVALID_ARG. ]*/
     TEST_FUNCTION(Schema_AddModelMethodArgument_with_NULL_argumentType_fails)
     {
         ///arrange
@@ -6067,7 +5685,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_108: [ If argumentName already exists in the list of arguments then then Schema_AddModelMethodArgument shall fail and return SCHEMA_INVALID_ARG. ]*/
     TEST_FUNCTION(Schema_AddModelMethodArgument_with_already_existing_argumentType_fails)
     {
         ///arrange
@@ -6110,11 +5727,6 @@ BEGIN_TEST_SUITE(Schema_ut)
             .IgnoreArgument_elements();
     }
 
-    /*Tests_SRS_SCHEMA_02_109: [ Schema_AddModelMethodArgument shall allocate memory for the new argument. ]*/
-    /*Tests_SRS_SCHEMA_02_110: [ Schema_AddModelMethodArgument shall clone methodHandle. ]*/
-    /*Tests_SRS_SCHEMA_02_111: [ Schema_AddModelMethodArgument shall clone argumentType. ]*/
-    /*Tests_SRS_SCHEMA_02_112: [ Schema_AddModelMethodArgument shall add the created argument to the method's list of arguments. ]*/
-    /*Tests_SRS_SCHEMA_02_114: [ Otherwise, Schema_AddModelMethodArgument shall succeed and return SCHEMA_OK. ]*/
     TEST_FUNCTION(Schema_AddModelMethodArgument_happy_path)
     {
         ///arrange
@@ -6137,7 +5749,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_113: [ If any of the above operations fails, then Schema_AddModelMethodArgument shall fail and return SCHEMA_ERROR. ]*/
     TEST_FUNCTION(Schema_AddModelMethodArgument_unhappy_paths)
     {
         ///arrange
@@ -6173,7 +5784,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /*Tests_SRS_SCHEMA_02_115: [ If modelTypeHandle is NULL then Schema_GetModelMethodByName shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_GetModelMethodByName_with_NULL_modelTypeHandle_fails)
     {
         ///arrange
@@ -6186,7 +5796,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///clean
     }
 
-    /*Tests_SRS_SCHEMA_02_116: [ If methodName is NULL then Schema_GetModelMethodByName shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_GetModelMethodByName_with_NULL_methodName_fails)
     {
         ///arrange
@@ -6203,7 +5812,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_117: [ If a method with the name methodName exists then Schema_GetModelMethodByName shall succeed and returns its handle. ]*/
     TEST_FUNCTION(Schema_GetModelMethodByName_happy_path)
     {
         ///arrange
@@ -6229,7 +5837,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_117: [ If a method with the name methodName exists then Schema_GetModelMethodByName shall succeed and returns its handle. ]*/
     TEST_FUNCTION(Schema_GetModelMethodByName_unhappy_path)
     {
         ///arrange
@@ -6255,7 +5862,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_119: [ If methodHandle is NULL then Schema_GetModelMethodArgumentCount shall fail and return SCHEMA_INVALID_ARG. ]*/
     TEST_FUNCTION(Schema_GetModelMethodArgumentCount_with_NULL_methodHandle_fails)
     {
         ///arrange
@@ -6270,7 +5876,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///clean
     }
 
-    /*Tests_SRS_SCHEMA_02_120: [ If argumentCount is NULL then Schema_GetModelMethodArgumentCount shall fail and return SCHEMA_INVALID_ARG. ]*/
     TEST_FUNCTION(Schema_GetModelMethodArgumentCount_with_NULL_argumentCount_fails)
     {
         ///arrange
@@ -6290,7 +5895,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_121: [ Otherwise, Schema_GetModelMethodArgumentCount shall succeed, return in argumentCount the number of arguments for the method and return SCHEMA_OK. ]*/
     TEST_FUNCTION(Schema_GetModelMethodArgumentCount_succeeds_0)
     {
         ///arrange
@@ -6311,7 +5915,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_121: [ Otherwise, Schema_GetModelMethodArgumentCount shall succeed, return in argumentCount the number of arguments for the method and return SCHEMA_OK. ]*/
     TEST_FUNCTION(Schema_GetModelMethodArgumentCount_succeeds_1)
     {
         ///arrange
@@ -6334,7 +5937,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_122: [ If methodHandle is NULL then Schema_GetModelMethodArgumentByIndex shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_GetModelMethodArgumentByIndex_with_NULL_methodHandle_fails)
     {
         ///arrange
@@ -6348,7 +5950,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///clean
     }
 
-    /*Tests_SRS_SCHEMA_02_123: [ If argumentIndex does not exist then Schema_GetModelMethodArgumentByIndex shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_GetModelMethodArgumentByIndex_with_non_existing_argument_index_fails_1)
     {
         ///arrange
@@ -6366,7 +5967,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_123: [ If argumentIndex does not exist then Schema_GetModelMethodArgumentByIndex shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_GetModelMethodArgumentByIndex_with_non_existing_argument_index_fails_2)
     {
         ///arrange
@@ -6385,7 +5985,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_124: [ Otherwise, Schema_GetModelMethodArgumentByIndex shall succeed and return a non-NULL value. ]*/
     TEST_FUNCTION(Schema_GetModelMethodArgumentByIndex_succeeds)
     {
         ///arrange
@@ -6404,7 +6003,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_125: [ If methodArgumentHandle is NULL then Schema_GetMethodArgumentName shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_GetMethodArgumentName_with_NULL_methodArgumentHandle_fails)
     {
         ////arrange
@@ -6418,7 +6016,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///cleanup
     }
 
-    /*Tests_SRS_SCHEMA_02_126: [ Otherwise, Schema_GetMethodArgumentName shall succeed and return a non-NULL value. ]*/
     TEST_FUNCTION(Schema_GetMethodArgumentName_succeeds)
     {
         ///arrange
@@ -6438,7 +6035,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_127: [ If methodArgumentHandle is NULL then Schema_GetMethodArgumentType shall fail and return NULL. ]*/
     TEST_FUNCTION(Schema_GetMethodArgumentType_with_NULL_methodArgumentHandle_fails)
     {
         ///arrange
@@ -6451,7 +6047,6 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///clean
     }
 
-    /*Tests_SRS_SCHEMA_02_128: [ Otherwise, Schema_GetMethodArgumentType shall succeed and return a non-NULL value. ]*/
     TEST_FUNCTION(Schema_GetMethodArgumentType_succeeds)
     {
         ///arrange

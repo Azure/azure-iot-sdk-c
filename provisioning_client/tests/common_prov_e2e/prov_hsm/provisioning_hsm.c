@@ -146,7 +146,6 @@ char* iothub_x509_hsm_get_certificate(HSM_CLIENT_HANDLE handle)
         {
             if (mallocAndStrcpy_s(&result, certificate) != 0)
             {
-                /* Codes_SRS_HSM_CLIENT_RIOT_07_013: [ If any failure is encountered hsm_client_riot_get_certificate shall return NULL ] */
                 LogError("Failed to allocate cert buffer.");
                 result = NULL;
             }
@@ -176,7 +175,6 @@ char* iothub_x509_hsm_get_alias_key(HSM_CLIENT_HANDLE handle)
         {
             if (mallocAndStrcpy_s(&result, key) != 0)
             {
-                /* Codes_SRS_HSM_CLIENT_RIOT_07_013: [ If any failure is encountered hsm_client_riot_get_certificate shall return NULL ] */
                 LogError("Failed to allocate cert buffer.");
                 result = NULL;
             }
@@ -206,7 +204,6 @@ char* iothub_hsm_get_common_name(HSM_CLIENT_HANDLE handle)
         {
             if (mallocAndStrcpy_s(&result, cn) != 0)
             {
-                /* Codes_SRS_HSM_CLIENT_RIOT_07_013: [ If any failure is encountered hsm_client_riot_get_certificate shall return NULL ] */
                 LogError("Failed to allocate cert buffer.");
                 result = NULL;
             }
@@ -312,7 +309,6 @@ int iothub_tpm_hsm_sign_with_identity(HSM_CLIENT_HANDLE handle, const unsigned c
         {
             if ((*key = (unsigned char*)malloc(length)) == NULL)
             {
-                /* Codes_SRS_HSM_CLIENT_TPM_07_023: [ If an error is encountered hsm_client_tpm_sign_data shall return NULL. ] */
                 printf("Failure creating buffer handle");
                 result = __LINE__;
             }
@@ -393,7 +389,6 @@ char* iothub_hsm_get_registry_id(HSM_CLIENT_HANDLE handle)
         {
             if (mallocAndStrcpy_s(&result, reg_id) != 0)
             {
-                /* Codes_SRS_HSM_CLIENT_RIOT_07_013: [ If any failure is encountered hsm_client_riot_get_certificate shall return NULL ] */
                 LogError("Failed to allocate register Id.");
                 result = NULL;
             }

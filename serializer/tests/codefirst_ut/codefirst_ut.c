@@ -64,49 +64,35 @@ BEGIN_NAMESPACE(DummyDataProvider)
 
 DECLARE_MODEL(TruckType,
 
-/*Tests_SRS_SERIALIZER_99_004:[ The propertyType can be any of the following data types: double]*/
 WITH_DATA(double, this_is_double),
 
-/*Tests_SRS_SERIALIZER_99_005:[ int], */
 WITH_DATA(int, this_is_int),
 
-/*Tests_SRS_SERIALIZER_99_006:[ float]*/
 WITH_DATA(float, this_is_float),
 
-/*Tests_SRS_SERIALIZER_99_007:[ long]*/
 WITH_DATA(long, this_is_long),
 
-/*Tests_SRS_SERIALIZER_99_008:[ int8_t]*/
 WITH_DATA(int8_t, this_is_sint8_t),
 
-/*Tests_SRS_SERIALIZER_99_009:[ uint8_t]*/
 WITH_DATA(uint8_t, this_is_uint8_t),
 
-/*Tests_SRS_SERIALIZER_99_010:[ int16_t]*/
 WITH_DATA(int16_t, this_is_int16_t),
 
-/*Tests_SRS_SERIALIZER_99_011:[ int32_t]*/
 WITH_DATA(int32_t, this_is_int32_t),
 
-/*Tests_SRS_SERIALIZER_99_012:[ int64_t]*/
 WITH_DATA(int64_t, this_is_int64_t),
 
-/*Tests_SRS_SERIALIZER_99_013:[ bool]*/
 WITH_DATA(bool, this_is_bool),
 
-/*Tests_SRS_SERIALIZER_99_014:[ ascii_char_ptr]*/
 WITH_DATA(ascii_char_ptr, this_is_ascii_char_ptr),
 
 /* Tests SRS_SERIALIZER_01_001: [ascii_char_ptr_no_quotes, ] */
 WITH_DATA(ascii_char_ptr_no_quotes, this_is_ascii_char_ptr_no_quotes),
 
-/*Tests_SRS_SERIALIZER_99_051:[ EDM_DATE_TIME_OFFSET]*/
 WITH_DATA(EDM_DATE_TIME_OFFSET, this_is_EdmDateTimeOffset),
 
-/*Tests_SRS_SERIALIZER_99_072:[ EDM_GUID]*/
 WITH_DATA(EDM_GUID, this_is_EdmGuid),
 
-/*Tests_SRS_SERIALIZER_99_074:[ EDM_BINARY]*/
 WITH_DATA(EDM_BINARY, this_is_EdmBinary),
 
 WITH_ACTION(reset),
@@ -948,7 +934,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ASSERT_ARE_EQUAL(size_t, sizeof(bool), C_has_sizeof_bool);
     }
 
-    /*Tests_CODEFIRST_002:[ CodeFirst_RegisterSchema shall create the schema information and give it to the Schema module for one schema, identified by the metadata argument. On success, it shall return a handle to the model.]*/
     TEST_FUNCTION(CodeFirst_Init_succeds)
     {
 
@@ -965,7 +950,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_99_003:[ If the module is already initialized, the initialization shall fail and the return value shall be CODEFIRST_ALREADY_INIT.]*/
     TEST_FUNCTION(CodeFirst_Init_after_Init_fails)
     {
         ///arrange
@@ -986,7 +970,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
     /* CodeFirst_InvokeAction */
 
-    /*Tests_SRS_CODEFIRST_99_066:[ If actionName, relativeActionPath or deviceHandle is NULL then EXECUTE_COMMAND_ERROR shall be returned*/
     TEST_FUNCTION(CodeFirst_InvokeAction_with_NULL_action_fails)
     {
         ///arrange
@@ -1004,7 +987,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     }
 
 
-    /*Tests_SRS_CODEFIRST_99_066:[ If actionName, relativeActionPath or deviceHandle is NULL then EXECUTE_COMMAND_ERROR shall be returned*/
     TEST_FUNCTION(CodeFirst_InvokeAction_with_NULL_DeviceHandle_fails)
     {
         ///arrange
@@ -1021,7 +1003,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_99_066:[ If actionName, relativeActionPath or deviceHandle is NULL then EXECUTE_COMMAND_ERROR shall be returned*/
     TEST_FUNCTION(CodeFirst_InvokeAction_With_NULL_Relative_Path_Fails)
     {
         ///arrange
@@ -1041,7 +1022,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_99_068:[ If the function is called before CodeFirst is initialized then EXECUTE_COMMAND_ERROR shall be returned.] */
     TEST_FUNCTION(CodeFirst_InvokeAction_When_Not_Initialized_Fails)
     {
         ///arrange
@@ -1054,8 +1034,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
     }
 
-    /*Tests_SRS_CODEFIRST_99_067:[ If parameterCount is greater than zero and parameterValues is NULL then EXECUTE_COMMAND_ERROR shall be returned.]*/
-    /*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
     TEST_FUNCTION(CodeFirst_InvokeAction_with_NULL_parameterValues_and_positive_count_fails)
     {
         ///arrange
@@ -1072,7 +1050,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_99_078:[If such a function is not found then the function shall return EXECUTE_COMMAND_ERROR.]*/
     TEST_FUNCTION(CodeFirst_InvokeAction_with_unknown_actions_fails)
     {
         ///arrange
@@ -1094,11 +1071,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_99_063:[ If the function is found, then CodeFirst shall call the wrapper of the found function inside the data provider. The wrapper is linked in the reflected data to the function name. The wrapper shall be called with the same arguments as CodeFirst_InvokeAction has been called.]*/
-    /*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
-    /*Tests_SRS_SERIALIZER_99_040:[ In addition to declaring the function, DECLARE_IOT_METHOD shall provide a definition for a wrapper that takes as parameters a size_t parameterCount and const AGENT_DATA_TYPE*.] */
-    /*Tests_SRS_SERIALIZER_99_041:[ This wrapper shall convert all the arguments to predefined types and then call the function written by the data provider developer.]*/
-    /*Tests_SRS_SERIALIZER_99_043:[ It is valid for a method not to have any parameters.]*/
     TEST_FUNCTION(CodeFirst_InvokeAction_calls_reset_action_succeeds)
     {
         ///arrange
@@ -1121,10 +1093,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_99_063:[ If the function is found, then CodeFirst shall call the wrapper of the found function inside the data provider. The wrapper is linked in the reflected data to the function name. The wrapper shall be called with the same arguments as CodeFirst_InvokeAction has been called.]*/
-    /*Tests_SRS_SERIALIZER_99_045:[ If the number of passed parameters doesn't match the number of declared parameters, wrapper execution shall fail and return DATA_PROVIDER_INVALID_ARG;]*/
-    /*Tests_SRS_CODEFIRST_99_065:[ For all the other return values CODEFIRST_ACTION_EXECUTION_ERROR shall be returned.]*/
-    /*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_setSpeed_action_with_insuficcient_parameters_fails)
     {
         ///arrange
@@ -1147,10 +1115,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_99_063:[ If the function is found, then CodeFirst shall call the wrapper of the found function inside the data provider. The wrapper is linked in the reflected data to the function name. The wrapper shall be called with the same arguments as CodeFirst_InvokeAction has been called.]*/
-    /*Tests_SRS_SERIALIZER_99_045:[ If the number of passed parameters doesn't match the number of declared parameters, wrapper execution shall fail and return DATA_PROVIDER_INVALID_ARG;]*/
-    /*Tests_SRS_CODEFIRST_99_065:[ For all the other return values CODEFIRST_ACTION_EXECUTION_ERROR shall be returned.]*/
-    /*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_setSpeed_action_with_NULL_ParameterValues_fails)
     {
         ///arrange
@@ -1171,10 +1135,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_99_063:[ If the function is found, then CodeFirst shall call the wrapper of the found function inside the data provider. The wrapper is linked in the reflected data to the function name. The wrapper shall be called with the same arguments as CodeFirst_InvokeAction has been called.]*/
-    /*Tests_SRS_SERIALIZER_99_045:[ If the number of passed parameters doesn't match the number of declared parameters, wrapper execution shall fail and return DATA_PROVIDER_INVALID_ARG;]*/
-    /*Tests_SRS_CODEFIRST_99_065:[ For all the other return values CODEFIRST_ACTION_EXECUTION_ERROR shall be returned.]*/
-    /*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_setSpeed_action_with_too_many_parameters_fails)
     {
         ///arrange
@@ -1197,11 +1157,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_99_063:[ If the function is found, then CodeFirst shall call the wrapper of the found function inside the data provider. The wrapper is linked in the reflected data to the function name. The wrapper shall be called with the same arguments as CodeFirst_InvokeAction has been called.]*/
-    /*Tests_SRS_SERIALIZER_99_045:[ If the number of passed parameters doesn't match the number of declared parameters, wrapper execution shall fail and return DATA_PROVIDER_INVALID_ARG;]*/
-    /*Tests_SRS_CODEFIRST_99_065:[ For all the other return values CODEFIRST_ACTION_EXECUTION_ERROR shall be returned.]*/
-    /*Tests_SRS_SERIALIZER_99_046:[ If the types of the parameters do not match the declared types, DATAPROVIDER_INVALID_ARG shall be returned.]*/
-    /*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_setSpeed_with_invalid_type_for_Parameter1_fails)
     {
         ///arrange
@@ -1224,13 +1179,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_99_063:[ If the function is found, then CodeFirst shall call the wrapper of the found function inside the data provider. The wrapper is linked in the reflected data to the function name. The wrapper shall be called with the same arguments as CodeFirst_InvokeAction has been called.]*/
-    /*Tests_SRS_SERIALIZER_99_045:[ If the number of passed parameters doesn't match the number of declared parameters, wrapper execution shall fail and return DATA_PROVIDER_INVALID_ARG;]*/
-    /*Tests_SRS_CODEFIRST_99_065:[ For all the other return values CODEFIRST_ACTION_EXECUTION_ERROR shall be returned.]*/
-    /*Tests_SRS_CODEFIRST_99_064:[ If the wrapper call succeeds then CODEFIRST_OK shall be returned. ]*/
-    /*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
-    /*Tests_SRS_SERIALIZER_99_040:[ In addition to declaring the function, DECLARE_IOT_METHOD shall provide a definition for a wrapper that takes as parameters a size_t parameterCount and const AGENT_DATA_TYPE*.] */
-    /*Tests_SRS_SERIALIZER_99_041:[ This wrapper shall convert all the arguments to predefined types and then call the function written by the data provider developer.]*/
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_setSpeed_succeeds)
     {
         ///arrange
@@ -1255,8 +1203,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     }
 
     /*from here on there are tests for "test1"*/
-    /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
-    /*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_test1_with_insufficient_parameters_fails)
     {
         ///arrange
@@ -1279,8 +1225,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
-    /*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_test1_with_too_many_parameters_fails)
     {
         ///arrange
@@ -1303,8 +1247,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
-    /*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_test1_with_NULL_parameterValues_fails)
     {
         ///arrange
@@ -1325,8 +1267,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
-    /*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_test1_with_parameter_1_of_wrong_type_fails)
     {
         ///arrange
@@ -1350,8 +1290,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
-    /*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_test1_with_parameter_2_of_wrong_type_fails)
     {
         ///arrange
@@ -1375,8 +1313,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
-    /*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_test1_with_parameter_3_of_wrong_type_fails)
     {
         ///arrange
@@ -1400,8 +1336,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
-    /*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_test1_with_parameter_4_of_wrong_type_fails)
     {
         ///arrange
@@ -1425,8 +1359,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
-    /*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_test1_with_parameter_5_of_wrong_type_fails)
     {
         ///arrange
@@ -1450,8 +1382,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
-    /*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_test1_with_parameter_6_of_wrong_type_fails)
     {
         ///arrange
@@ -1475,8 +1405,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
-    /*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_test1_with_parameter_7_of_wrong_type_fails)
     {
         ///arrange
@@ -1500,8 +1428,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
-    /*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_test1_with_parameter_8_of_wrong_type_fails)
     {
         ///arrange
@@ -1525,8 +1451,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
-    /*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_test1_with_parameter_9_of_wrong_type_fails)
     {
         ///arrange
@@ -1550,8 +1474,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
-    /*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_test1_with_parameter_10_of_wrong_type_fails)
     {
         ///arrange
@@ -1575,8 +1497,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
-    /*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_test1_with_parameter_11_of_wrong_type_fails)
     {
         ///arrange
@@ -1600,8 +1520,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
-    /*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_test1_with_parameter_12_of_wrong_type_fails)
     {
         ///arrange
@@ -1625,10 +1543,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
-    /*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
-    /*Tests_SRS_SERIALIZER_99_040:[ In addition to declaring the function, DECLARE_IOT_METHOD shall provide a definition for a wrapper that takes as parameters a size_t parameterCount and const AGENT_DATA_TYPE*.] */
-    /*Tests_SRS_SERIALIZER_99_041:[ This wrapper shall convert all the arguments to predefined types and then call the function written by the data provider developer.]*/
     TEST_FUNCTION(CodeFirst_InvokeAction_calling_test1_succeeds)
     {
         ///arrange
@@ -1666,10 +1580,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_140:[CodeFirst_InvokeAction shall pass to the action wrapper that it calls a pointer to the model where the action is defined.] */
-    /* Tests_SRS_CODEFIRST_99_139:[If the relativeActionPath is empty then the action shall be looked up in the device model.] */
-    /* Tests_SRS_CODEFIRST_99_138:[The relativeActionPath argument shall be used by CodeFirst_InvokeAction to find the child model where the action is declared.] */
-    /* Tests_SRS_CODEFIRST_99_142:[The relativeActionPath argument shall be in the format "childModel1/childModel2/.../childModelN".] */
     TEST_FUNCTION(CodeFirst_InvokeAction_For_A_Child_Model_Passes_The_OuterType_Instance_To_The_Callback)
     {
         ///arrange
@@ -1692,10 +1602,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_140:[CodeFirst_InvokeAction shall pass to the action wrapper that it calls a pointer to the model where the action is defined.] */
-    /* Tests_SRS_CODEFIRST_99_139:[If the relativeActionPath is empty then the action shall be looked up in the device model.] */
-    /* Tests_SRS_CODEFIRST_99_138:[The relativeActionPath argument shall be used by CodeFirst_InvokeAction to find the child model where the action is declared.] */
-    /* Tests_SRS_CODEFIRST_99_142:[The relativeActionPath argument shall be in the format "childModel1/childModel2/.../childModelN".] */
     TEST_FUNCTION(CodeFirst_InvokeAction_For_A_Child_Model_Passes_The_InnerType_Instance_To_The_Callback)
     {
         ///arrange
@@ -1718,7 +1624,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_141:[If a child model specified in the relativeActionPath argument cannot be found by CodeFirst_InvokeAction, it shall return EXECUTE_COMMAND_ERROR.] */
     TEST_FUNCTION(CodeFirst_InvokeAction_For_A_Child_Model_And_The_Model_Is_Not_Found_Fails)
     {
         ///arrange
@@ -1740,7 +1645,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_141:[If a child model specified in the relativeActionPath argument cannot be found by CodeFirst_InvokeAction, it shall return EXECUTE_COMMAND_ERROR.] */
     TEST_FUNCTION(CodeFirst_InvokeAction_For_A_Child_Model_And_The_Model_Is_Not_Found_Because_Path_Too_Deep_Fails)
     {
         ///arrange
@@ -1762,7 +1666,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_141:[If a child model specified in the relativeActionPath argument cannot be found by CodeFirst_InvokeAction, it shall return EXECUTE_COMMAND_ERROR.] */
     TEST_FUNCTION(CodeFirst_InvokeAction_For_A_Child_Model_And_The_Action_Is_Not_Found_Fails)
     {
         ///arrange
@@ -1786,7 +1689,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
     /* CodeFirst_CreateDevice */
 
-    /* Tests_SRS_CODEFIRST_99_080:[If CodeFirst_CreateDevice is invoked with a NULL iotHubClientHandle or model, it shall return NULL.] */
     TEST_FUNCTION(CodeFirst_CreateDevice_With_NULL_Model_Fails)
     {
         // arrange
@@ -1802,11 +1704,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_079:[CodeFirst_CreateDevice shall create a device and allocate a memory block that should hold the device data.] */
-    /* Tests_SRS_CODEFIRST_99_081:[CodeFirst_CreateDevice shall use Device_Create to create a device handle.] */
-    /* Tests_SRS_CODEFIRST_99_082: [ CodeFirst_CreateDevice shall pass to Device_Create the function CodeFirst_InvokeAction, action callback argument and the CodeFirst_InvokeMethod ]*/
-    /* Tests_SRS_CODEFIRST_99_101:[On success, CodeFirst_CreateDevice shall return a non NULL pointer to the device data.] */
-    /* Tests_SRS_CODEFIRST_01_001: [CodeFirst_CreateDevice shall pass the includePropertyPath argument to Device_Create.] */
     TEST_FUNCTION(CodeFirst_CreateDevice_With_Valid_Arguments_and_includePropertyPath_false_Succeeds_1)
     {
         // arrange
@@ -1866,7 +1763,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_01_001: [CodeFirst_CreateDevice shall pass the includePropertyPath argument to Device_Create.] */
     TEST_FUNCTION(CodeFirst_CreateDevice_With_Valid_Arguments_and_includePropertyPath_true_Succeeds)
     {
         // arrange
@@ -1896,7 +1792,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_084:[If Device_Create fails, CodeFirst_CreateDevice shall return NULL.] */
     TEST_FUNCTION(When_Device_Create_Fails_Then_CodeFirst_CreateDevice_Fails)
     {
         // arrange
@@ -1917,7 +1812,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_106:[If CodeFirst_CreateDevice is called when the modules is not initialized is shall return NULL.] */
     TEST_FUNCTION(CodeFirst_CreateDevice_When_The_Module_Is_Not_Initialized_Fails)
     {
         // arrange
@@ -1935,7 +1829,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
     /* CodeFirst_DestroyDevice */
 
-    /* Tests_SRS_CODEFIRST_99_086:[If the argument is NULL, CodeFirst_DestroyDevice shall do nothing.] */
     TEST_FUNCTION(CodeFirst_DestroyDevice_With_NULL_Argument_Does_Nothing)
     {
         // arrange
@@ -1947,8 +1840,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_CODEFIRST_99_085:[CodeFirst_DestroyDevice shall free all resources associated with a device.] */
-    /* Tests_SRS_CODEFIRST_99_087:[In order to release the device handle, CodeFirst_DestroyDevice shall call Device_Destroy.] */
     TEST_FUNCTION(CodeFirst_DestroyDevice_With_Valid_Argument_Destroys_The_Device)
     {
         // arrange
@@ -1976,7 +1867,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
     /* CodeFirst_SendAsync */
 
-    /* Tests_SRS_CODEFIRST_99_103:[If CodeFirst_SendAsync is called with numProperties being zero, CODEFIRST_INVALID_ARG shall be returned.] */
     TEST_FUNCTION(CodeFirst_SendAsync_With_0_NumProperties_Fails)
     {
         // arrange
@@ -1998,17 +1888,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_088:[CodeFirst_SendAsync shall send to the Device module a set of properties.] */
-    /* Tests_SRS_CODEFIRST_99_105:[The properties are passed as pointers to the memory locations where the data exists in the device block allocated by CodeFirst_CreateDevice.] */
-    /* Tests_SRS_CODEFIRST_99_089:[The numProperties argument shall indicate how many properties are to be sent.] */
-    /* Tests_SRS_CODEFIRST_99_090:[All the properties shall be sent together by using the transacted APIs of the device.] */
-    /* Tests_SRS_CODEFIRST_99_091:[CodeFirst_SendAsync shall start a transaction by calling Device_StartTransaction.] */
-    /* Tests_SRS_CODEFIRST_99_092:[CodeFirst shall publish each value by using Device_PublishTransacted.] */
-    /* Tests_SRS_CODEFIRST_99_093:[After all values have been published, Device_EndTransaction shall be called.] */
-    /* Tests_SRS_CODEFIRST_99_095:[For each value passed to it, CodeFirst_SendAsync shall look up to which device the value belongs.] */
-    /* Tests_SRS_CODEFIRST_99_097:[For each value marshalling to AGENT_DATA_TYPE shall be performed.] */
-    /* Tests_SRS_CODEFIRST_99_098:[The marshalling shall be done by calling the Create_AGENT_DATA_TYPE_from_Ptr function associated with the property.] */
-    /* Tests_SRS_CODEFIRST_99_117:[On success, CodeFirst_SendAsync shall return CODEFIRST_OK.] */
     TEST_FUNCTION(CodeFirst_SendAsync_With_One_Property_Succeeds)
     {
         // arrange
@@ -2051,17 +1930,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_088:[CodeFirst_SendAsync shall send to the Device module a set of properties.] */
-    /* Tests_SRS_CODEFIRST_99_105:[The properties are passed as pointers to the memory locations where the data exists in the device block allocated by CodeFirst_CreateDevice.] */
-    /* Tests_SRS_CODEFIRST_99_089:[The numProperties argument shall indicate how many properties are to be sent.] */
-    /* Tests_SRS_CODEFIRST_99_090:[All the properties shall be sent together by using the transacted APIs of the device.] */
-    /* Tests_SRS_CODEFIRST_99_091:[CodeFirst_SendAsync shall start a transaction by calling Device_StartTransaction.] */
-    /* Tests_SRS_CODEFIRST_99_092:[CodeFirst shall publish each value by using Device_PublishTransacted.] */
-    /* Tests_SRS_CODEFIRST_99_093:[After all values have been published, Device_EndTransaction shall be called.] */
-    /* Tests_SRS_CODEFIRST_99_095:[For each value passed to it, CodeFirst_SendAsync shall look up to which device the value belongs.] */
-    /* Tests_SRS_CODEFIRST_99_097:[For each value marshalling to AGENT_DATA_TYPE shall be performed.] */
-    /* Tests_SRS_CODEFIRST_99_098:[The marshalling shall be done by calling the Create_AGENT_DATA_TYPE_from_Ptr function associated with the property] */
-    /* Tests_SRS_CODEFIRST_99_117:[On success, CodeFirst_SendAsync shall return CODEFIRST_OK.] */
     TEST_FUNCTION(CodeFirst_SendAsync_2_Properties_Succeeds)
     {
         // arrange
@@ -2119,7 +1987,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_094:[If any Device API fail, CodeFirst_SendAsync shall return CODEFIRST_DEVICE_PUBLISH_FAILED.] */
     TEST_FUNCTION(When_StartTransaction_Fails_CodeFirst_SendAsync_Fails)
     {
         // arrange
@@ -2145,7 +2012,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_094:[If any Device API fail, CodeFirst_SendAsync shall return CODEFIRST_DEVICE_PUBLISH_FAILED.] */
     TEST_FUNCTION(When_PublishTransacted_Fails_CodeFirst_SendAsync_Fails)
     {
         // arrange
@@ -2186,7 +2052,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_094:[If any Device API fail, CodeFirst_SendAsync shall return CODEFIRST_DEVICE_PUBLISH_FAILED.] */
     TEST_FUNCTION(When_PublishTransacted_Fails_For_The_2nd_Property_CodeFirst_SendAsync_Fails)
     {
         // arrange
@@ -2242,7 +2107,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_094:[If any Device API fail, CodeFirst_SendAsync shall return CODEFIRST_DEVICE_PUBLISH_FAILED.] */
     TEST_FUNCTION(When_EndTransacted_Fails_CodeFirst_SendAsync_Fails)
     {
         // arrange
@@ -2286,7 +2150,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_104:[If a property cannot be associated with a device, CodeFirst_SendAsync shall return CODEFIRST_INVALID_ARG.] */
     TEST_FUNCTION(When_An_Invalid_Pointer_Is_Passed_CodeFirst_SendAsync_Fails)
     {
         // arrange
@@ -2310,7 +2173,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_104:[If a property cannot be associated with a device, CodeFirst_SendAsync shall return CODEFIRST_INVALID_ARG.] */
     TEST_FUNCTION(When_A_Pointer_Within_The_Device_Block_But_Mismatched_Is_Passed_CodeFirst_SendAsync_Fails)
     {
         // arrange
@@ -2342,7 +2204,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_099:[If Create_AGENT_DATA_TYPE_from_Ptr fails, CodeFirst_SendAsync shall return CODEFIRST_AGENT_DATA_TYPE_ERROR.] */
     TEST_FUNCTION(When_Creating_The_Agent_Data_Type_Fails_Then_CodeFirst_SendAsync_Fails)
     {
         // arrange
@@ -2379,7 +2240,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_099:[If Create_AGENT_DATA_TYPE_from_Ptr fails, CodeFirst_SendAsync shall return CODEFIRST_AGENT_DATA_TYPE_ERROR.] */
     TEST_FUNCTION(When_Creating_The_Agent_Data_Type_Fails_For_The_2nd_Property_Then_CodeFirst_SendAsync_Fails)
     {
         // arrange
@@ -2429,7 +2289,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_096:[All values have to belong to the same device, otherwise CodeFirst_SendAsync shall return CODEFIRST_VALUES_FROM_DIFFERENT_DEVICES_ERROR.] */
     TEST_FUNCTION(Properties_From_2_Different_Devices_Make_CodeFirst_SendAsync_Fail)
     {
         // arrange
@@ -2473,17 +2332,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_088:[CodeFirst_SendAsync shall send to the Device module a set of properties.] */
-    /* Tests_SRS_CODEFIRST_99_105:[The properties are passed as pointers to the memory locations where the data exists in the device block allocated by CodeFirst_CreateDevice.] */
-    /* Tests_SRS_CODEFIRST_99_089:[The numProperties argument shall indicate how many properties are to be sent.] */
-    /* Tests_SRS_CODEFIRST_99_090:[All the properties shall be sent together by using the transacted APIs of the device.] */
-    /* Tests_SRS_CODEFIRST_99_091:[CodeFirst_SendAsync shall start a transaction by calling Device_StartTransaction.] */
-    /* Tests_SRS_CODEFIRST_99_092:[CodeFirst shall publish each value by using Device_PublishTransacted.] */
-    /* Tests_SRS_CODEFIRST_99_093:[After all values have been published, Device_EndTransaction shall be called.] */
-    /* Tests_SRS_CODEFIRST_99_095:[For each value passed to it, CodeFirst_SendAsync shall look up to which device the value belongs.] */
-    /* Tests_SRS_CODEFIRST_99_097:[For each value marshalling to AGENT_DATA_TYPE shall be performed.] */
-    /* Tests_SRS_CODEFIRST_99_098:[The marshalling shall be done by calling the Create_AGENT_DATA_TYPE_from_Ptr function associated with the property.] */
-    /* Tests_SRS_CODEFIRST_99_117:[On success, CodeFirst_SendAsync shall return CODEFIRST_OK.] */
     TEST_FUNCTION(CodeFirst_SendAsync_With_One_Property_Succeeds_2)
     {
         // arrange
@@ -2528,17 +2376,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
     }
 
-    /* Tests_SRS_CODEFIRST_99_088:[CodeFirst_SendAsync shall send to the Device module a set of properties.] */
-    /* Tests_SRS_CODEFIRST_99_105:[The properties are passed as pointers to the memory locations where the data exists in the device block allocated by CodeFirst_CreateDevice.] */
-    /* Tests_SRS_CODEFIRST_99_089:[The numProperties argument shall indicate how many properties are to be sent.] */
-    /* Tests_SRS_CODEFIRST_99_090:[All the properties shall be sent together by using the transacted APIs of the device.] */
-    /* Tests_SRS_CODEFIRST_99_091:[CodeFirst_SendAsync shall start a transaction by calling Device_StartTransaction.] */
-    /* Tests_SRS_CODEFIRST_99_092:[CodeFirst shall publish each value by using Device_PublishTransacted.] */
-    /* Tests_SRS_CODEFIRST_99_093:[After all values have been published, Device_EndTransaction shall be called.] */
-    /* Tests_SRS_CODEFIRST_99_095:[For each value passed to it, CodeFirst_SendAsync shall look up to which device the value belongs.] */
-    /* Tests_SRS_CODEFIRST_99_097:[For each value marshalling to AGENT_DATA_TYPE shall be performed.] */
-    /* Tests_SRS_CODEFIRST_99_098:[The marshalling shall be done by calling the Create_AGENT_DATA_TYPE_from_Ptr function associated with the property.] */
-    /* Tests_SRS_CODEFIRST_99_117:[On success, CodeFirst_SendAsync shall return CODEFIRST_OK.] */
     TEST_FUNCTION(CodeFirst_SendAsync_2_Properties_Succeeds_2)
     {
         // arrange
@@ -2596,8 +2433,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_130:[If a pointer to the beginning of a device block is passed to CodeFirst_SendAsync instead of a pointer to a property, CodeFirst_SendAsync shall send all the properties that belong to that device.] */
-    /* Tests_SRS_CODEFIRST_99_131:[The properties shall be given to Device as one transaction, as if they were all passed as individual arguments to Code_First.] */
     TEST_FUNCTION(CodeFirst_SendAsync_The_Entire_Device_State)
     {
         // arrange
@@ -2639,7 +2474,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_099:[If Create_AGENT_DATA_TYPE_from_Ptr fails, CodeFirst_SendAsync shall return CODEFIRST_AGENT_DATA_TYPE_ERROR.] */
     TEST_FUNCTION(CodeFirst_When_Create_Agent_Data_Type_For_The_First_Property_Fails_Send_The_Entire_Device_State_Fails)
     {
         // arrange
@@ -2671,7 +2505,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_094:[If any Device API fail, CodeFirst_SendAsync shall return CODEFIRST_DEVICE_PUBLISH_FAILED.] */
     TEST_FUNCTION(CodeFirst_When_Publish_For_The_First_Property_Fails_Send_The_Entire_Device_State_Fails)
     {
         // arrange
@@ -2707,7 +2540,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_099:[If Create_AGENT_DATA_TYPE_from_Ptr fails, CodeFirst_SendAsync shall return CODEFIRST_AGENT_DATA_TYPE_ERROR.] */
     TEST_FUNCTION(CodeFirst_When_Create_Agent_Data_Type_For_The_Second_Property_Fails_Send_The_Entire_Device_State_Fails)
     {
         // arrange
@@ -2743,7 +2575,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_094:[If any Device API fail, CodeFirst_SendAsync shall return CODEFIRST_DEVICE_PUBLISH_FAILED.] */
     TEST_FUNCTION(CodeFirst_When_Publish_For_The_Second_Property_Fails_Send_The_Entire_Device_State_Fails)
     {
         // arrange
@@ -2783,8 +2614,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_133:[CodeFirst_SendAsync shall allow sending of properties that are part of a child model.] */
-    /* Tests_SRS_CODEFIRST_99_136:[CodeFirst_SendAsync shall build the full path for each property and then pass it to Device_PublishTransacted.] */
     TEST_FUNCTION(CodeFirst_SendAsync_Can_Send_A_Property_From_A_Child_Model)
     {
         // arrange
@@ -2833,8 +2662,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_133:[CodeFirst_SendAsync shall allow sending of properties that are part of a child model.] */
-    /* Tests_SRS_CODEFIRST_99_136:[CodeFirst_SendAsync shall build the full path for each property and then pass it to Device_PublishTransacted.] */
     TEST_FUNCTION(CodeFirst_SendAsync_Can_Send_The_Last_Property_From_A_Child_Model_With_2_Properties)
     {
         // arrange
@@ -2884,7 +2711,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     }
 
 
-    /* Tests_SRS_CODEFIRST_04_002: [If CodeFirst_SendAsync receives destination or destinationSize NULL, CodeFirst_SendAsync shall return Invalid Argument.]*/
     TEST_FUNCTION(CodeFirst_SendAsync_With_NULL_destination_and_NonNulldestinationSize_Fails)
     {
         // arrange
@@ -2905,7 +2731,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_04_002: [If CodeFirst_SendAsync receives destination or destinationSize NULL, CodeFirst_SendAsync shall return Invalid Argument.]*/
     TEST_FUNCTION(CodeFirst_SendAsync_With_nonNULL_destination_and_NulldestinationSize_Fails)
     {
         // arrange
@@ -2926,7 +2751,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_99_088:[CodeFirst_SendAsync shall send to the Device module a set of properties, a destination and a destinationSize.] */
     TEST_FUNCTION(CodeFirst_SendAsync_With_One_Property_CallBackAndUserContext_Succeeds)
     {
         // arrange
@@ -2969,7 +2793,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     }
 
     /* CodeFirst_RegisterSchema */
-    /* Tests_SRS_CODEFIRST_99_002:[ CodeFirst_RegisterSchema shall create the schema information and give it to the Schema module for one schema, identified by the metadata argument. On success, it shall return a handle to the model.] */
     TEST_FUNCTION(CodeFirst_RegisterSchema_succeeds)
     {
         static const SCHEMA_STRUCT_TYPE_HANDLE TEST_CAR_BEHIND_VAN_HANDLE = (SCHEMA_STRUCT_TYPE_HANDLE)0x7001;
@@ -3019,7 +2842,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
     }
 
-    /* Tests_SRS_CODEFIRST_99_002:[ CodeFirst_RegisterSchema shall create the schema information and give it to the Schema module for one schema, identified by the metadata argument. On success, it shall return a handle to the model.] */
     TEST_FUNCTION(CodeFirst_RegisterSchema_With_Model_In_Model_succeeds)
     {
         static const SCHEMA_STRUCT_TYPE_HANDLE TEST_CAR_BEHIND_VAN_HANDLE = (SCHEMA_STRUCT_TYPE_HANDLE)0x7001;
@@ -3068,7 +2890,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
     }
 
-    /* Tests_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL.] */
     TEST_FUNCTION(When_Schema_Create_Fails_Then_CodeFirst_RegisterSchema_Fails)
     {
 
@@ -3089,7 +2910,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL.] */
     TEST_FUNCTION(When_Schema_CreateModelType_Fails_Then_CodeFirst_RegisterSchema_Fails)
     {
         ///arrange
@@ -3110,7 +2930,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL.] */
     TEST_FUNCTION(When_Schema_AddModelProperty_Fails_Then_CodeFirst_RegisterSchema_Fails)
     {
         ///arrange
@@ -3132,7 +2951,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL.] */
     TEST_FUNCTION(When_Schema_CreateModelAction_Fails_Then_CodeFirst_RegisterSchema_Fails)
     {
         ///arrange
@@ -3153,7 +2971,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL.] */
     TEST_FUNCTION(When_Schema_AddModelActionArgument_Fails_Then_CodeFirst_RegisterSchema_Fails)
     {
         ///arrange
@@ -3176,7 +2993,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL.] */
     TEST_FUNCTION(When_Schema_CreateStructType_Fails_Then_CodeFirst_RegisterSchema_Fails)
     {
         ///arrange
@@ -3197,7 +3013,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL.] */
     TEST_FUNCTION(When_Schema_AddStructTypeProperty_Fails_Then_CodeFirst_RegisterSchema_Fails)
     {
         ///arrange
@@ -3218,7 +3033,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL.] */
     TEST_FUNCTION(When_Schema_GetModelByName_Returns_NULL_RegisterSchema_Fails)
     {
         ///arrange
@@ -3238,7 +3052,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_121:[If the schema has already been registered, CodeFirst_RegisterSchema shall return its handle.] */
     TEST_FUNCTION(When_Schema_Was_Already_Registered_CodeFirst_Returns_Its_Handle)
     {
 
@@ -3258,7 +3071,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_014: [If parameter device or command is NULL then CodeFirst_ExecuteCommand shall return EXECUTE_COMMAND_ERROR.] */
     TEST_FUNCTION(CodeFirst_ExecuteCommand_With_NULL_device_fails)
     {
         ///arrange
@@ -3275,7 +3087,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_014: [If parameter device or command is NULL then CodeFirst_ExecuteCommand shall return EXECUTE_COMMAND_ERROR.] */
     TEST_FUNCTION(CodeFirst_ExecuteCommand_With_NULL_command_fails)
     {
         ///arrange
@@ -3295,8 +3106,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_015: [CodeFirst_ExecuteCommand shall find the device.]*/
-    /*Tests_SRS_CODEFIRST_02_016: [If finding the device fails, then CodeFirst_ExecuteCommand shall return EXECUTE_COMMAND_ERROR.] */
     TEST_FUNCTION(CodeFirst_ExecuteCommand_fails_when_it_does_not_find_the_device)
     {
         ///arrange
@@ -3314,7 +3123,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_017: [Otherwise CodeFirst_ExecuteCommand shall call Device_ExecuteCommand and return what Device_ExecuteCommand is returning.] */
     TEST_FUNCTION(CodeFirst_ExecuteCommand_calls_Device_ExecuteCommand)
     {
         ///arrange
@@ -3337,7 +3145,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_017: [Otherwise CodeFirst_ExecuteCommand shall call Device_ExecuteCommand and return what Device_ExecuteCommand is returning.] */
     TEST_FUNCTION(CodeFirst_ExecuteCommand_calls_Device_ExecuteCommand_can_returns_EXECUTE_COMMAND_FAILED)
     {
         ///arrange
@@ -3361,7 +3168,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_017: [Otherwise CodeFirst_ExecuteCommand shall call Device_ExecuteCommand and return what Device_ExecuteCommand is returning.] */
     TEST_FUNCTION(CodeFirst_ExecuteCommand_calls_Device_ExecuteCommand_can_returns_EXECUTE_COMMAND_ERROR)
     {
         ///arrange
@@ -3385,7 +3191,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_018: [ If parameter destination, destinationSize or any of the values passed through va_args is NULL then CodeFirst_SendAsyncReported shall fail and return CODEFIRST_INVALID_ARG. ]*/
     TEST_FUNCTION(CodeFirst_SendAsyncReported_with_NULL_destination_fails)
     {
         ///arrange
@@ -3406,7 +3211,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_018: [ If parameter destination, destinationSize or any of the values passed through va_args is NULL then CodeFirst_SendAsyncReported shall fail and return CODEFIRST_INVALID_ARG. ]*/
     TEST_FUNCTION(CodeFirst_SendAsyncReported_with_NULL_destinationSize_fails)
     {
         ///arrange
@@ -3428,7 +3232,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_018: [ If parameter destination, destinationSize or any of the values passed through va_args is NULL then CodeFirst_SendAsyncReported shall fail and return CODEFIRST_INVALID_ARG. ]*/
     TEST_FUNCTION(CodeFirst_SendAsyncReported_with_zero_reportedProperties_fails)
     {
         ///arrange
@@ -3451,7 +3254,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_018: [ If parameter destination, destinationSize or any of the values passed through va_args is NULL then CodeFirst_SendAsyncReported shall fail and return CODEFIRST_INVALID_ARG. ]*/
     TEST_FUNCTION(CodeFirst_SendAsyncReported_with_one_NULL_reportedProperties_fails)
     {
         ///arrange
@@ -3474,7 +3276,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_019: [ If values passed through va_args do not belong to the same device then CodeFirst_SendAsyncReported shall fail and return CODEFIRST_VALUES_FROM_DIFFERENT_DEVICES_ERROR. ]*/
     TEST_FUNCTION(CodeFirst_SendAsyncReported_with_reportedProperties_from_different_devices_fails)
     {
         ///arrange
@@ -3525,7 +3326,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_020: [ If values passed through va_args are not all of type REFLECTED_REPORTED_PROPERTY then CodeFirst_SendAsyncReported shall fail and return CODEFIRST_INVALID_ARG. ]*/
     TEST_FUNCTION(CodeFirst_SendAsyncReported_WITH_DATA_fails)
     {
         ///arrange
@@ -3559,7 +3359,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_020: [ If values passed through va_args are not all of type REFLECTED_REPORTED_PROPERTY then CodeFirst_SendAsyncReported shall fail and return CODEFIRST_INVALID_ARG. ]*/
     TEST_FUNCTION(CodeFirst_SendAsyncReported_with_reportedProperty_outside_any_device_fails)
     {
         ///arrange
@@ -3611,13 +3410,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             .IgnoreArgument_transactionHandle();
     }
 
-    /*Tests_SRS_CODEFIRST_02_021: [ If the value passed through va_args is a complete model instance, then CodeFirst_SendAsyncReported shall send all the reported properties of that device. ]*/
-    /*Tests_SRS_CODEFIRST_02_022: [ CodeFirst_SendAsyncReported shall start a transaction by calling Device_CreateTransaction_ReportedProperties. ]*/
-    /*Tests_SRS_CODEFIRST_02_023: [ CodeFirst_SendAsyncReported shall convert all REPORTED_PROPERTY model components to AGENT_DATA_TYPE. ]*/
-    /*Tests_SRS_CODEFIRST_02_024: [ CodeFirst_SendAsyncReported shall call Device_PublishTransacted_ReportedProperty for every AGENT_DATA_TYPE converted from REPORTED_PROPERTY. ]*/
-    /*Tests_SRS_CODEFIRST_02_026: [ CodeFirst_SendAsyncReported shall call Device_CommitTransaction_ReportedProperties to commit the transaction. ]*/
-    /*Tests_SRS_CODEFIRST_02_028: [ CodeFirst_SendAsyncReported shall return CODEFIRST_OK when it succeeds. ]*/
-    /*Tests_SRS_CODEFIRST_02_029: [ CodeFirst_SendAsyncReported shall call Device_DestroyTransaction_ReportedProperties to destroy the transaction. ]*/
     TEST_FUNCTION(CodeFirst_SendReportedAsync_all_happy_path)
     {
         /// arrange
@@ -3645,7 +3437,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_027: [ If any error occurs, CodeFirst_SendAsyncReported shall fail and return CODEFIRST_ERROR. ]*/
     TEST_FUNCTION(CodeFirst_SendReportedAsync_all_unhappy_path)
     {
         ///arrange
@@ -3728,12 +3519,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             .IgnoreArgument_transactionHandle();
     }
 
-    /*Tests_SRS_CODEFIRST_02_022: [ CodeFirst_SendAsyncReported shall start a transaction by calling Device_CreateTransaction_ReportedProperties. ]*/
-    /*Tests_SRS_CODEFIRST_02_023: [ CodeFirst_SendAsyncReported shall convert all REPORTED_PROPERTY model components to AGENT_DATA_TYPE. ]*/
-    /*Tests_SRS_CODEFIRST_02_024: [ CodeFirst_SendAsyncReported shall call Device_PublishTransacted_ReportedProperty for every AGENT_DATA_TYPE converted from REPORTED_PROPERTY. ]*/
-    /*Tests_SRS_CODEFIRST_02_025: [ CodeFirst_SendAsyncReported shall compute for every AGENT_DATA_TYPE the valuePath. ]*/
-    /*Tests_SRS_CODEFIRST_02_026: [ CodeFirst_SendAsyncReported shall call Device_CommitTransaction_ReportedProperties to commit the transaction. ]*/
-    /*Tests_SRS_CODEFIRST_02_029: [ CodeFirst_SendAsyncReported shall call Device_DestroyTransaction_ReportedProperties to destroy the transaction. ]*/
     TEST_FUNCTION(CodeFirst_SendReportedAsync_one_reportedProperty_happy_path)
     {
         /// arrange
@@ -3761,7 +3546,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_027: [ If any error occurs, CodeFirst_SendAsyncReported shall fail and return CODEFIRST_ERROR. ]*/
     TEST_FUNCTION(CodeFirst_SendReportedAsync_one_reportedProperty_unhappy_path)
     {
         /// arrange
@@ -3867,7 +3651,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_030: [ If argument device is NULL then CodeFirst_IngestDesiredProperties shall fail and return CODEFIRST_INVALID_ARG. ]*/
     TEST_FUNCTION(CodeFirst_IngestDesiredProperties_with_NULL_device_fails)
     {
         ///arrange
@@ -3881,7 +3664,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ///clean
     }
 
-    /*Tests_SRS_CODEFIRST_02_031: [ If argument jsonProperties is NULL then CodeFirst_IngestDesiredProperties shall fail and return CODEFIRST_INVALID_ARG. ]*/
     TEST_FUNCTION(CodeFirst_IngestDesiredProperties_with_NULL_desiredProperties_fails)
     {
         ///arrange
@@ -3900,9 +3682,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_032: [ CodeFirst_IngestDesiredProperties shall locate the device associated with device. ]*/
-    /*Tests_SRS_CODEFIRST_02_033: [ CodeFirst_IngestDesiredProperties shall call Device_IngestDesiredProperties. ]*/
-    /*Tests_SRS_CODEFIRST_02_035: [ Otherwise, CodeFirst_IngestDesiredProperties shall return CODEFIRST_OK. ]*/
     TEST_FUNCTION(CodeFirst_IngestDesiredProperties_succeeds)
     {
         ///arrange
@@ -3921,7 +3700,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_034: [ If there is any failure, then CodeFirst_IngestDesiredProperties shall fail and return CODEFIRST_ERROR. ]*/
     TEST_FUNCTION(CodeFirst_IngestDesiredProperties_fails)
     {
         ///arrange
@@ -3940,7 +3718,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /* Tests_SRS_CODEFIRST_99_002:[ CodeFirst_RegisterSchema shall create the schema information and give it to the Schema module for one schema, identified by the metadata argument. On success, it shall return a handle to the model.] */
     TEST_FUNCTION(CodeFirst_CreateDevice_passes_onDesiredProperty_callbacks)
     {
         ///arrange
@@ -3989,7 +3766,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_048: [ If schemaNamespace is NULL then CodeFirst_RegisterSchema shall fail and return NULL. ]*/
     TEST_FUNCTION(CodeFirst_RegisterSchema_with_NULL_schemaNamespace_fails)
     {
         ///arrange
@@ -4002,7 +3778,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
     }
 
-    /*Tests_SRS_CODEFIRST_02_049: [ If metadata is NULL then CodeFirst_RegisterSchema shall fail and return NULL. ]*/
     TEST_FUNCTION(CodeFirst_RegisterSchema_with_NULL_metadata_fails)
     {
         ///arrange
@@ -4015,7 +3790,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
     }
 
-    /*Tests_SRS_CODEFIRST_02_037: [ CodeFirst_CreateDevice shall call CodeFirst_Init, passing NULL for overrideSchemaNamespace. ]*/
     TEST_FUNCTION(CodeFirst_CreateDevice_calls_CodeFirst_Init_and_passes_NULL_for_overrideSchemaNamespace_succeeds)
     {
         // arrange
@@ -4043,7 +3817,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_DestroyDevice(result);
     }
 
-    /*Tests_SRS_CODEFIRST_02_039: [ If the current device count is zero then CodeFirst_DestroyDevice shall deallocate all other used resources. ]*/
     TEST_FUNCTION(CodeFirst_DestroyDevice_frees_all_resources)
     {
         ///arrange - note - no CodeFirst_Init
@@ -4070,7 +3843,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         //clean - nothing.
     }
 
-    /*Tests_SRS_CODEFIRST_02_040: [ CodeFirst_SendAsync shall call CodeFirst_Init, passing NULL for overrideSchemaNamespace. ]*/
     TEST_FUNCTION(CodeFirst_SendAsync_calls_CodeFirst_Init_with_NULL_overrideSchemaNamespace)
     {
         ///arrange = note - no CodeFirst_Init
@@ -4111,7 +3883,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_DestroyDevice(device);
     }
 
-    /*Tests_SRS_CODEFIRST_02_046: [ CodeFirst_SendAsyncReported shall call CodeFirst_Init, passing NULL for overrideSchemaNamespace. ]*/
     TEST_FUNCTION(CodeFirst_SendReportedAsync_without_CodeFirst_Init_succeeds)
     {
         /// arrange - no CodeFirst_Init
@@ -4137,7 +3908,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         my_gballoc_free(destination);
     }
 
-    /*Tests_SRS_CODEFIRST_02_050: [ If CodeFirst was not init before, CodeFirst_InvokeMethod shall fail and return NULL. ]*/
     TEST_FUNCTION(CodeFirst_InvokeMethod_when_CodeFirst_is_not_init_fails)
     {
         ///arrange
@@ -4151,7 +3921,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ///cleanup
     }
 
-    /*Tests_SRS_CODEFIRST_02_051: [ If deviceHandle is NULL then CodeFirst_InvokeMethod shall fail and return NULL. ]*/
     TEST_FUNCTION(CodeFirst_InvokeMethod_with_NULL_deviceHandle_fails)
     {
         ///arrange
@@ -4167,7 +3936,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_052: [ If relativeMethodPath is NULL then CodeFirst_InvokeMethod shall fail and return NULL. ]*/
     TEST_FUNCTION(CodeFirst_InvokeMethod_with_NULL_relativeMethodPath_fails)
     {
         ///arrange
@@ -4183,7 +3951,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_053: [ If methodName is NULL then CodeFirst_InvokeMethod shall fail and return NULL. ]*/
     TEST_FUNCTION(CodeFirst_InvokeMethod_with_NULL_methodName_fails)
     {
         ///arrange
@@ -4199,7 +3966,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_054: [ If parameterCount is greater than 0 and parameterValues is NULL then then CodeFirst_InvokeMethod shall fail and return NULL. ]*/
     TEST_FUNCTION(CodeFirst_InvokeMethod_with_parameterCount_1_and_parameterValues_NULL_fails)
     {
         ///arrange
@@ -4215,7 +3981,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_059: [ If any of the above fails then CodeFirst_InvokeMethod shall fail and return NULL. ]*/
     TEST_FUNCTION(CodeFirst_InvokeMethod_happy_path)
     {
         ///arrange
@@ -4241,7 +4006,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_059: [ If any of the above fails then CodeFirst_InvokeMethod shall fail and return NULL. ]*/
     TEST_FUNCTION(CodeFirst_InvokeMethod_fails_when_Schema_GetModelName_fails)
     {
         ///arrange
@@ -4267,7 +4031,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_059: [ If any of the above fails then CodeFirst_InvokeMethod shall fail and return NULL. ]*/
     TEST_FUNCTION(CodeFirst_InvokeMethod_fails_when_relativePath_does_not_exist_fails)
     {
         ///arrange
@@ -4293,7 +4056,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_059: [ If any of the above fails then CodeFirst_InvokeMethod shall fail and return NULL. ]*/
     TEST_FUNCTION(CodeFirst_InvokeMethod_fails_when_method_does_not_exist_fails)
     {
         ///arrange
@@ -4319,7 +4081,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_059: [ If any of the above fails then CodeFirst_InvokeMethod shall fail and return NULL. ]*/
     TEST_FUNCTION(CodeFirst_InvokeMethod_fails_when_model_does_not_exist_fails)
     {
         ///arrange
@@ -4345,7 +4106,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_060: [ If device is NULL then CodeFirst_ExecuteMethod shall fail and return NULL. ]*/
     TEST_FUNCTION(CodeFirst_ExecuteMethod_with_NULL_device_fails)
     {
         ///arrange
@@ -4361,7 +4121,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_061: [ If methodName is NULL then CodeFirst_ExecuteMethod shall fail and return NULL. ]*/
     TEST_FUNCTION(CodeFirst_ExecuteMethod_with_NULL_methodName_fails)
     {
         ///arrange
@@ -4380,8 +4139,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_062: [ CodeFirst_ExecuteMethod shall find the device data. ]*/
-    /*Tests_SRS_CODEFIRST_02_063: [ CodeFirst_ExecuteMethod shall call Device_ExecuteMethod and return what Device_ExecuteMethod returns. ]*/
     TEST_FUNCTION(CodeFirst_ExecuteMethod_happy_path)
     {
         ///arrange
@@ -4402,8 +4159,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_062: [ CodeFirst_ExecuteMethod shall find the device data. ]*/
-    /*Tests_SRS_CODEFIRST_02_063: [ CodeFirst_ExecuteMethod shall call Device_ExecuteMethod and return what Device_ExecuteMethod returns. ]*/
     TEST_FUNCTION(CodeFirst_ExecuteMethod_unhappy_path_1)
     {
         ///arrange
@@ -4425,8 +4180,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_Deinit();
     }
 
-    /*Tests_SRS_CODEFIRST_02_062: [ CodeFirst_ExecuteMethod shall find the device data. ]*/
-    /*Tests_SRS_CODEFIRST_02_063: [ CodeFirst_ExecuteMethod shall call Device_ExecuteMethod and return what Device_ExecuteMethod returns. ]*/
     TEST_FUNCTION(CodeFirst_ExecuteMethod_unhappy_path_2)
     {
         ///arrange

@@ -102,9 +102,7 @@ static int construct_send_data(SASL_TPM_INSTANCE* sasl_tpm_info, const char* sco
 
     if ((data_len + scope_id_len + registration_id_len) > MAX_FRAME_DATA_LEN)
     {
-        /* Codes_SRS_PROV_SASL_TPM_07_024: [ If the data to be sent is greater than 470 bytes the data will be chunked to the server. ] */
         CTRL_BYTE_STAGE curr_stage;
-        /* Codes_SRS_PROV_SASL_TPM_07_026: [ If the current bytes are the last chunk in the sequence construct_send_data shall mark the Last seg Sent bit ] */
         if ((data_len + scope_id_len + registration_id_len) - sasl_tpm_info->data_offset <= MAX_FRAME_DATA_LEN)
         {
             curr_stage = CTRL_BYTE_STAGE_LAST_SEQUENCE;
@@ -125,7 +123,6 @@ static int construct_send_data(SASL_TPM_INSTANCE* sasl_tpm_info, const char* sco
         }
         else
         {
-            /* Codes_SRS_PROV_SASL_TPM_07_025: [ If data is chunked a single control byte will be prepended to the data as described below: ] */
             unsigned char control_byte = construct_prov_ctrl_byte(curr_stage, CTRL_BYTE_TYPE_EK, sasl_tpm_info->ctrl_seq_num);
             sasl_tpm_info->data_buffer[0] = control_byte;
             buff_offset++;
@@ -149,7 +146,6 @@ static int construct_send_data(SASL_TPM_INSTANCE* sasl_tpm_info, const char* sco
 
             //(void)memcpy(sasl_tpm_info->data_buffer + 1, send_data + sasl_tpm_info->data_offset, payload_data_length);
             sasl_tpm_info->data_offset += payload_data_length - buff_offset;
-            /* Codes_SRS_PROV_SASL_TPM_07_027: [ The sequence number shall be incremented after every send of chunked bytes. ] */
             sasl_tpm_info->ctrl_seq_num++;
             *send_len = payload_data_length;
             result = 0;
@@ -166,7 +162,6 @@ static int construct_send_data(SASL_TPM_INSTANCE* sasl_tpm_info, const char* sco
         }
         else
         {
-            /* Codes_SRS_PROV_SASL_TPM_07_028: [ If the data is less than 470 bytes the control byte shall be set to 0. ] */
             unsigned char control_byte = 0;
             sasl_tpm_info->data_buffer[0] = control_byte;
             buff_offset++;
@@ -202,7 +197,6 @@ static void cleanup_sasl_data(SASL_TPM_INSTANCE* sasl_tpm_info)
     free(sasl_tpm_info->registration_id);
     free(sasl_tpm_info->scope_id);
     free(sasl_tpm_info->data_buffer);
-    /* Codes_SRS_PROV_SASL_TPM_07_006: [ prov_sasltpm_create shall free the SASL_TPM_INSTANCE instance. ] */
     free(sasl_tpm_info);
 }
 
@@ -211,7 +205,6 @@ static CONCRETE_SASL_MECHANISM_HANDLE prov_sasltpm_create(void* config)
     SASL_TPM_INSTANCE* result;
     if (config == NULL)
     {
-        /* Codes_SRS_PROV_SASL_TPM_07_002: [ If config is NULL, prov_sasltpm_create shall return NULL. ] */
         LogError("Bad argument config is NULL");
         result = NULL;
     }
@@ -220,7 +213,6 @@ static CONCRETE_SASL_MECHANISM_HANDLE prov_sasltpm_create(void* config)
         const SASL_TPM_CONFIG_INFO* config_info = (SASL_TPM_CONFIG_INFO*)config;
         if (config_info->challenge_cb == NULL)
         {
-            /* Codes_SRS_PROV_SASL_TPM_07_004: [ if SASL_TPM_CONFIG_INFO, challenge_cb, endorsement_key, storage_root_key, or hostname, registration_id is NULL, prov_sasltpm_create shall fail and return NULL. ] */
             LogError("challenge callback is NULL.");
             result = NULL;
         }
@@ -229,53 +221,45 @@ static CONCRETE_SASL_MECHANISM_HANDLE prov_sasltpm_create(void* config)
             result = (SASL_TPM_INSTANCE*)malloc(sizeof(SASL_TPM_INSTANCE));
             if (result == NULL)
             {
-                /* Codes_SRS_PROV_SASL_TPM_07_003: [ If any error is encountered, prov_sasltpm_create shall return NULL. ] */
                 LogError("Cannot allocate memory for SASL anonymous instance");
             }
             else
             {
-                /* Codes_SRS_PROV_SASL_TPM_07_029: [ prov_sasltpm_create shall copy the config data where needed. ] */
                 (void)memset(result, 0, sizeof(SASL_TPM_INSTANCE));
                 result->challenge_cb = config_info->challenge_cb;
                 result->user_ctx = config_info->user_ctx;
                 if (config_info->endorsement_key == NULL || (result->endorsement_key = BUFFER_clone(config_info->endorsement_key)) == NULL)
                 {
-                    /* Codes_SRS_PROV_SASL_TPM_07_004: [ if SASL_TPM_CONFIG_INFO, challenge_cb, endorsement_key, storage_root_key, or hostname, registration_id is NULL, prov_sasltpm_create shall fail and return NULL. ] */
                     LogError("Failure copying endorsement key");
                     free(result);
                     result = NULL;
                 }
                 else if (config_info->storage_root_key == NULL || (result->storage_root_key = BUFFER_clone(config_info->storage_root_key)) == NULL)
                 {
-                    /* Codes_SRS_PROV_SASL_TPM_07_004: [ if SASL_TPM_CONFIG_INFO, challenge_cb, endorsement_key, storage_root_key, or hostname, registration_id is NULL, prov_sasltpm_create shall fail and return NULL. ] */
                     LogError("Failure copying storage root key");
                     cleanup_sasl_data(result);
                     result = NULL;
                 }
                 else if (config_info->hostname == NULL || mallocAndStrcpy_s(&result->hostname, config_info->hostname) != 0)
                 {
-                    /* Codes_SRS_PROV_SASL_TPM_07_004: [ if SASL_TPM_CONFIG_INFO, challenge_cb, endorsement_key, storage_root_key, or hostname, registration_id is NULL, prov_sasltpm_create shall fail and return NULL. ] */
                     LogError("Failure copying hostname");
                     cleanup_sasl_data(result);
                     result = NULL;
                 }
                 else if (config_info->registration_id == NULL || mallocAndStrcpy_s(&result->registration_id, config_info->registration_id) != 0)
                 {
-                    /* Codes_SRS_PROV_SASL_TPM_07_004: [ if SASL_TPM_CONFIG_INFO, challenge_cb, endorsement_key, storage_root_key, or hostname, registration_id is NULL, prov_sasltpm_create shall fail and return NULL. ] */
                     LogError("Failure copying registration_id");
                     cleanup_sasl_data(result);
                     result = NULL;
                 }
                 else if (config_info->scope_id == NULL || mallocAndStrcpy_s(&result->scope_id, config_info->scope_id) != 0)
                 {
-                    /* Codes_SRS_PROV_SASL_TPM_07_004: [ if SASL_TPM_CONFIG_INFO, challenge_cb, endorsement_key, storage_root_key, or hostname, registration_id is NULL, prov_sasltpm_create shall fail and return NULL. ] */
                     LogError("Failure copying scope Id");
                     cleanup_sasl_data(result);
                     result = NULL;
                 }
                 else if ((result->nonce_handle = BUFFER_new()) == NULL)
                 {
-                    /* Codes_SRS_PROV_SASL_TPM_07_003: [ If any error is encountered, prov_sasltpm_create shall return NULL. ] */
                     LogError("Failure creating nonce buff");
                     cleanup_sasl_data(result);
                     result = NULL;
@@ -283,7 +267,6 @@ static CONCRETE_SASL_MECHANISM_HANDLE prov_sasltpm_create(void* config)
             }
         }
     }
-    /* Codes_SRS_PROV_SASL_TPM_07_001: [ On success prov_sasltpm_create shall allocate a new instance of the SASL_TPM_INSTANCE. ] */
     return (CONCRETE_SASL_MECHANISM_HANDLE)result;
 }
 
@@ -291,13 +274,11 @@ static void prov_sasltpm_destroy(CONCRETE_SASL_MECHANISM_HANDLE handle)
 {
     if (handle == NULL)
     {
-        /* Codes_SRS_PROV_SASL_TPM_07_005: [ if handle is NULL, prov_sasltpm_destroy shall do nothing. ] */
         LogError("NULL sasl_mechanism_concrete_handle");
     }
     else
     {
         SASL_TPM_INSTANCE* sasl_tpm_info = (SASL_TPM_INSTANCE*)handle;
-        /* Codes_SRS_PROV_SASL_TPM_07_007: [ prov_sasltpm_create shall free all resources allocated in this module. ] */
         cleanup_sasl_data(sasl_tpm_info);
     }
 }
@@ -307,13 +288,11 @@ static const char* prov_sasltpm_get_mechanism_name(CONCRETE_SASL_MECHANISM_HANDL
     const char* result;
     if (handle == NULL)
     {
-        /* Codes_SRS_PROV_SASL_TPM_07_008: [ if handle is NULL, prov_sasltpm_get_mechanism_name shall return NULL. ] */
         LogError("NULL sasl_mechanism");
         result = NULL;
     }
     else
     {
-        /* Codes_SRS_PROV_SASL_TPM_07_009: [ prov_sasltpm_get_mechanism_name shall return the mechanism name TPM. ] */
         result = "TPM";
     }
     return result;
@@ -324,7 +303,6 @@ static int prov_sasltpm_get_init_bytes(CONCRETE_SASL_MECHANISM_HANDLE handle, SA
     int result;
     if (handle == NULL || init_bytes == NULL)
     {
-        /* Codes_SRS_PROV_SASL_TPM_07_010: [ If handle or init_bytes are NULL, prov_sasltpm_get_init_bytes shall return NULL. ] */
         LogError("Bad arguments: sasl_mechanism_concrete_handle = %p, init_bytes = %p", handle, init_bytes);
         result = MU_FAILURE;
     }
@@ -338,18 +316,15 @@ static int prov_sasltpm_get_init_bytes(CONCRETE_SASL_MECHANISM_HANDLE handle, SA
             sasl_tpm_info->data_buffer = NULL;
         }
 
-        /* Codes_SRS_PROV_SASL_TPM_07_012: [ prov_sasltpm_get_init_bytes shall send the control byte along with the EK value, ctrl byte detailed in Send Data to sasltpm ] */
         unsigned char* ek = BUFFER_u_char(sasl_tpm_info->endorsement_key);
         size_t ek_len = BUFFER_length(sasl_tpm_info->endorsement_key);
         if (construct_send_data(sasl_tpm_info, sasl_tpm_info->scope_id, sasl_tpm_info->registration_id, ek, ek_len, &init_bytes->length) != 0)
         {
-            /* Codes_SRS_PROV_SASL_TPM_07_013: [ If any error is encountered, prov_sasltpm_get_init_bytes shall return a non-zero value. ] */
             LogError("Failed constructing send data");
             result = MU_FAILURE;
         }
         else
         {
-            /* Codes_SRS_PROV_SASL_TPM_07_014: [ On success prov_sasltpm_get_init_bytes shall return a zero value. ] */
             init_bytes->bytes = sasl_tpm_info->data_buffer;
             result = 0;
         }
@@ -363,7 +338,6 @@ static int prov_sasltpm_challenge(CONCRETE_SASL_MECHANISM_HANDLE handle, const S
 
     if (handle == NULL || resp_bytes == NULL)
     {
-        /* Codes_SRS_PROV_SASL_TPM_07_015: [ if handle or resp_bytes are NULL, prov_sasltpm_challenge shall return the X509_SECURITY_INTERFACE structure. ] */
         LogError("Bad arguments: concrete_sasl_mechanism: %p, response_bytes: %p", handle, resp_bytes);
         result = MU_FAILURE;
     }
@@ -376,16 +350,13 @@ static int prov_sasltpm_challenge(CONCRETE_SASL_MECHANISM_HANDLE handle, const S
             sasl_tpm_info->data_buffer = NULL;
         }
 
-        /* Codes_SRS_PROV_SASL_TPM_07_016: [ If the challenge_bytes->bytes first byte is NULL prov_sasltpm_challenge shall send the SRK data to the server. ] */
         unsigned char ctrl_byte = *(unsigned char*)(challenge_bytes->bytes);
         if (!is_valid_ctrl_byte(ctrl_byte) )
         {
-            /* Codes_SRS_PROV_SASL_TPM_07_022: [ prov_sasltpm_challenge shall send the control byte along with the SRK value, ctrl byte detailed in Send Data to sasl tpm ] */
             unsigned char* srk = BUFFER_u_char(sasl_tpm_info->storage_root_key);
             size_t srk_len = BUFFER_length(sasl_tpm_info->storage_root_key);
             if (construct_send_data(sasl_tpm_info, NULL, NULL, srk, srk_len, &resp_bytes->length) != 0)
             {
-                /* Codes_SRS_PROV_SASL_TPM_07_020: [ If any error is encountered prov_sasltpm_challenge shall return a non-zero value. ] */
                 LogError("Failed constructing send data");
                 result = MU_FAILURE;
             }
@@ -397,7 +368,6 @@ static int prov_sasltpm_challenge(CONCRETE_SASL_MECHANISM_HANDLE handle, const S
         }
         else
         {
-            /* Codes_SRS_PROV_SASL_TPM_07_017: [ prov_sasltpm_challenge accumulates challenge bytes and waits for the last sequence bit to be set. ] */
             if (BUFFER_append_build(sasl_tpm_info->nonce_handle, ((unsigned char*)challenge_bytes->bytes)+1, challenge_bytes->length-1) != 0)
             {
                 LogError("Failed building nonce value");
@@ -405,20 +375,16 @@ static int prov_sasltpm_challenge(CONCRETE_SASL_MECHANISM_HANDLE handle, const S
             }
             else
             {
-                /* Codes_SRS_PROV_SASL_TPM_07_018: [ When the all the bytes are store, prov_sasltpm_challenge shall call the challenge callback to receive the sas token. ] */
                 if (!validate_sequence_num(sasl_tpm_info, ctrl_byte))
                 {
-                    /* Codes_SRS_PROV_SASL_TPM_07_020: [ If any error is encountered prov_sasltpm_challenge shall return a non-zero value. ] */
                     LogError("Invalid sequence number received from sasl challenge");
                     result = MU_FAILURE;
                 }
                 else if (is_last_sequence(ctrl_byte))
                 {
-                    /* Codes_SRS_PROV_SASL_TPM_07_018: [ When the all the bytes are store, prov_sasltpm_challenge shall call the challenge callback to receive the sas token. ] */
                     char* sas_token = sasl_tpm_info->challenge_cb(sasl_tpm_info->nonce_handle, sasl_tpm_info->user_ctx);
                     if (sas_token == NULL)
                     {
-                        /* Codes_SRS_PROV_SASL_TPM_07_020: [ If any error is encountered prov_sasltpm_challenge shall return a non-zero value. ] */
                         LogError("Failed creating sas token from challenge callback");
                         result = MU_FAILURE;
                     }
@@ -427,7 +393,6 @@ static int prov_sasltpm_challenge(CONCRETE_SASL_MECHANISM_HANDLE handle, const S
                         size_t sas_token_len = strlen(sas_token);
                         if (sas_token_len > MAX_FRAME_DATA_LEN)
                         {
-                            /* Codes_SRS_PROV_SASL_TPM_07_020: [ If any error is encountered prov_sasltpm_challenge shall return a non-zero value. ] */
                             LogError("Sas Token is too large for sasl frame");
                             result = MU_FAILURE;
                         }
@@ -436,13 +401,11 @@ static int prov_sasltpm_challenge(CONCRETE_SASL_MECHANISM_HANDLE handle, const S
                             resp_bytes->length = (uint32_t)sas_token_len + 1;
                             if ((sasl_tpm_info->data_buffer = (unsigned char*)malloc(resp_bytes->length)) == NULL)
                             {
-                                /* Codes_SRS_PROV_SASL_TPM_07_020: [ If any error is encountered prov_sasltpm_challenge shall return a non-zero value. ] */
                                 LogError("Failed allocating initial data value");
                                 result = MU_FAILURE;
                             }
                             else
                             {
-                                /* Codes_SRS_PROV_SASL_TPM_07_019: [ The Sas Token shall be put into the response bytes buffer to be return to the SASL server. ] */
                                 sasl_tpm_info->ctrl_seq_num = 0;
                                 unsigned char control_byte = 0;
                                 sasl_tpm_info->data_buffer[0] = control_byte;
@@ -456,10 +419,8 @@ static int prov_sasltpm_challenge(CONCRETE_SASL_MECHANISM_HANDLE handle, const S
                 }
                 else
                 {
-                    /* Codes_SRS_PROV_SASL_TPM_07_023: [ If the last sequence bit is not encountered prov_sasltpm_challenge shall return 1 byte to the service. ] */
                     if ((sasl_tpm_info->data_buffer = (unsigned char*)malloc(1)) == NULL)
                     {
-                        /* Codes_SRS_PROV_SASL_TPM_07_020: [ If any error is encountered prov_sasltpm_challenge shall return a non-zero value. ] */
                         LogError("Failed allocating initial data value");
                         result = MU_FAILURE;
                     }
@@ -478,7 +439,6 @@ static int prov_sasltpm_challenge(CONCRETE_SASL_MECHANISM_HANDLE handle, const S
     return result;
 }
 
-/* Codes_SRS_SASL_ANONYMOUS_01_010: [`prov_sasltpm_get_interface` shall return a pointer to a `SASL_MECHANISM_INTERFACE_DESCRIPTION` structure that contains pointers to the functions: `prov_sasltpm_create`, `prov_sasltpm_destroy`, `prov_sasltpm_get_init_bytes`, `prov_sasltpm_get_mechanism_name`, `prov_sasltpm_challenge`.] */
 static const SASL_MECHANISM_INTERFACE_DESCRIPTION prov_sasltpm_interface =
 {
     prov_sasltpm_create,
@@ -490,6 +450,5 @@ static const SASL_MECHANISM_INTERFACE_DESCRIPTION prov_sasltpm_interface =
 
 const SASL_MECHANISM_INTERFACE_DESCRIPTION* prov_sasltpm_get_interface(void)
 {
-    /* Codes_SRS_PROV_SASL_TPM_07_021: [ prov_sasltpm_get_interface shall return the SASL_MECHANISM_INTERFACE_DESCRIPTION structure. ] */
     return &prov_sasltpm_interface;
 }

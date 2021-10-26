@@ -501,13 +501,11 @@ static int initialize_tpm_device(SEC_DEVICE_INFO* tpm_info)
         LogError("Failure initializeing TPM Codec");
         result = MU_FAILURE;
     }
-    /* Codes_secure_dev_tpm_create shall get a handle to the Endorsement Key and Storage Root Key.*/
     else if (create_persistent_key(tpm_info, TPM_20_EK_HANDLE, TPM_RH_ENDORSEMENT, GetEkTemplate(), &tpm_info->ek_pub) != 0)
     {
         LogError("Failure calling creating persistent key for Endorsement key");
         result = MU_FAILURE;
     }
-    /* Codes_secure_dev_tpm_create shall get a handle to the Endorsement Key and Storage Root Key.*/
     else if (create_persistent_key(tpm_info, TPM_20_SRK_HANDLE, TPM_RH_OWNER, GetSrkTemplate(), &tpm_info->srk_pub) != 0)
     {
         LogError("Failure calling creating persistent key for Storage Root key");
@@ -523,20 +521,16 @@ static int initialize_tpm_device(SEC_DEVICE_INFO* tpm_info)
 SEC_DEVICE_HANDLE secure_dev_tpm_create()
 {
     SEC_DEVICE_INFO* result;
-    /* Codes_SRS_SECURE_DEVICE_TPM_07_002: [ On success secure_dev_tpm_create shall allocate a new instance of the secure device tpm interface. ] */
     result = malloc(sizeof(SEC_DEVICE_INFO) );
     if (result == NULL)
     {
-        /* Codes_SRS_SECURE_DEVICE_TPM_07_001: [ If any failure is encountered secure_dev_tpm_create shall return NULL ] */
         LogError("Failure: malloc SEC_DEVICE_INFO.");
     }
     else
     {
         memset(result, 0, sizeof(SEC_DEVICE_INFO));
-        /* Codes_secure_dev_tpm_create shall call into the tpm_codec to initialize a TSS session.*/
         if (initialize_tpm_device(result) != 0)
         {
-            /* Codes_SRS_SECURE_DEVICE_TPM_07_001: [ If any failure is encountered secure_dev_tpm_create shall return NULL ] */
             LogError("Failure initializing tpm device.");
             free(result);
             result = NULL;
@@ -547,12 +541,9 @@ SEC_DEVICE_HANDLE secure_dev_tpm_create()
 
 void secure_dev_tpm_destroy(SEC_DEVICE_HANDLE handle)
 {
-    /* Codes_SRS_SECURE_DEVICE_TPM_07_005: [ if handle is NULL, secure_dev_tpm_destroy shall do nothing. ] */
     if (handle != NULL)
     {
-        /* Codes_SRS_SECURE_DEVICE_TPM_07_004: [ secure_dev_tpm_destroy shall free the SEC_DEVICE_INFO instance. ] */
         Deinit_TPM_Codec(&handle->tpm_device);
-        /* Codes_SRS_SECURE_DEVICE_TPM_07_006: [ secure_dev_tpm_destroy shall free all resources allocated in this module. ]*/
         free(handle);
     }
 }
@@ -562,13 +553,11 @@ int secure_dev_tpm_import_key(SEC_DEVICE_HANDLE handle, const unsigned char* key
     int result;
     if (handle == NULL || key == NULL || key_len == 0)
     {
-        /* Codes_SRS_SECURE_DEVICE_TPM_07_007: [ if handle or key are NULL, or key_len is 0 secure_dev_tpm_import_key shall return a non-zero value ] */
         LogError("Invalid argument specified handle: %p, key: %p, key_len: %zu", handle, key, key_len);
         result = MU_FAILURE;
     }
     else
     {
-        /* Codes_secure_dev_tpm_import_key shall establish a tpm session in preparation to inserting the key into the tpm. */
         if (insert_key_in_tpm(handle, key, key_len))
         {
             LogError("Failure inserting key into tpm");
@@ -576,7 +565,6 @@ int secure_dev_tpm_import_key(SEC_DEVICE_HANDLE handle, const unsigned char* key
         }
         else
         {
-            /* Codes_SRS_SECURE_DEVICE_TPM_07_008: [ On success secure_dev_tpm_import_key shall return zero ] */
             result = 0;
         }
     }
@@ -588,13 +576,11 @@ char* secure_dev_tpm_get_endorsement_key(SEC_DEVICE_HANDLE handle)
     char* result;
     if (handle == NULL)
     {
-        /* Codes_SRS_SECURE_DEVICE_TPM_07_013: [ If handle is NULL secure_dev_tpm_get_endorsement_key shall return NULL. ] */
         LogError("Invalid handle value specified");
         result = NULL;
     }
     else if (handle->ek_pub.publicArea.unique.rsa.t.size == 0)
     {
-        /* Codes_SRS_SECURE_DEVICE_TPM_07_027: [ If the ek_public was not initialized secure_dev_tpm_get_endorsement_key shall return NULL. ] */
         LogError("Endorsement key is invalid");
         result = NULL;
     }
@@ -602,12 +588,10 @@ char* secure_dev_tpm_get_endorsement_key(SEC_DEVICE_HANDLE handle)
     {
         unsigned char data_bytes[1024];
         unsigned char* data_pos = data_bytes;
-        /* Codes_SRS_SECURE_DEVICE_TPM_07_014: [ secure_dev_tpm_get_endorsement_key shall allocate and return the Endorsement Key. ] */
         uint32_t data_length = TPM2B_PUBLIC_Marshal(&handle->ek_pub, &data_pos, NULL);
         STRING_HANDLE encoded_ek = Azure_Base64_Encode_Bytes(data_bytes, data_length);
         if (encoded_ek == NULL)
         {
-            /* Codes_SRS_SECURE_DEVICE_TPM_07_015: [ If a failure is encountered, secure_dev_tpm_get_endorsement_key shall return NULL. ] */
             LogError("Failure encoding endorsement key");
             result = NULL;
         }
@@ -615,7 +599,6 @@ char* secure_dev_tpm_get_endorsement_key(SEC_DEVICE_HANDLE handle)
         {
             if (mallocAndStrcpy_s(&result, STRING_c_str(encoded_ek)) != 0)
             {
-                /* Codes_SRS_SECURE_DEVICE_TPM_07_015: [ If a failure is encountered, secure_dev_tpm_get_endorsement_key shall return NULL. ] */
                 LogError("Failure allocating endorsement key");
                 result = NULL;
             }
@@ -630,13 +613,11 @@ char* secure_dev_tpm_get_storage_key(SEC_DEVICE_HANDLE handle)
     char* result;
     if (handle == NULL)
     {
-        /* Codes_SRS_SECURE_DEVICE_TPM_07_016: [ If handle is NULL, secure_dev_tpm_get_storage_key shall return NULL. ] */
         LogError("Invalid handle value specified");
         result = NULL;
     }
     else if (handle->srk_pub.publicArea.unique.rsa.t.size == 0)
     {
-        /* Codes_SRS_SECURE_DEVICE_TPM_07_017: [ If the srk_public value was not initialized, secure_dev_tpm_get_storage_key shall return NULL. ] */
         LogError("storage root key is invalid");
         result = NULL;
     }
@@ -644,12 +625,10 @@ char* secure_dev_tpm_get_storage_key(SEC_DEVICE_HANDLE handle)
     {
         unsigned char data_bytes[1024];
         unsigned char* data_pos = data_bytes;
-        /* Codes_SRS_SECURE_DEVICE_TPM_07_018: [ secure_dev_tpm_get_storage_key shall allocate and return the Storage Root Key. ] */
         uint32_t data_length = TPM2B_PUBLIC_Marshal(&handle->srk_pub, &data_pos, NULL);
         STRING_HANDLE encoded_srk = Azure_Base64_Encode_Bytes(data_bytes, data_length);
         if (encoded_srk == NULL)
         {
-            /* Codes_SRS_SECURE_DEVICE_TPM_07_019: [ If any failure is encountered, secure_dev_tpm_get_storage_key shall return NULL. ] */
             LogError("Failure encoding storage root key");
             result = NULL;
         }
@@ -657,7 +636,6 @@ char* secure_dev_tpm_get_storage_key(SEC_DEVICE_HANDLE handle)
         {
             if (mallocAndStrcpy_s(&result, STRING_c_str(encoded_srk)) != 0)
             {
-                /* Codes_SRS_SECURE_DEVICE_TPM_07_019: [ If any failure is encountered, secure_dev_tpm_get_storage_key shall return NULL. ] */
                 LogError("Failure allocating storage root key");
                 result = NULL;
             }
@@ -670,7 +648,6 @@ char* secure_dev_tpm_get_storage_key(SEC_DEVICE_HANDLE handle)
 BUFFER_HANDLE secure_dev_tpm_sign_data(SEC_DEVICE_HANDLE handle, const unsigned char* data, size_t data_len)
 {
     BUFFER_HANDLE result;
-    /* Codes_SRS_SECURE_DEVICE_TPM_07_020: [ If handle or data is NULL or data_len is 0, secure_dev_tpm_sign_data shall return NULL. ] */
     if (handle == NULL || data == NULL || data_len == 0)
     {
         LogError("Invalid handle value specified handle: %p, data: %p", handle, data);
@@ -680,21 +657,17 @@ BUFFER_HANDLE secure_dev_tpm_sign_data(SEC_DEVICE_HANDLE handle, const unsigned 
     {
         BYTE data_signature[1024];
         BYTE* data_copy = (unsigned char*)data;
-        /* Codes_SRS_SECURE_DEVICE_TPM_07_021: [ secure_dev_tpm_sign_data shall call into the tpm to hash the supplied data value. ] */
         uint32_t sign_len = SignData(&handle->tpm_device, &NullPwSession, data_copy, data_len, data_signature, sizeof(data_signature) );
         if (sign_len == 0)
         {
-            /* Codes_SRS_SECURE_DEVICE_TPM_07_023: [ If an error is encountered secure_dev_tpm_sign_data shall return NULL. ] */
             LogError("Failure signing data from hash");
             result = NULL;
         }
         else
         {
-            /* Codes_SRS_SECURE_DEVICE_TPM_07_022: [ If hashing the data was successful, secure_dev_tpm_sign_data shall create a BUFFER_HANDLE with the supplied signed data. ] */
             result = BUFFER_create(data_signature, sign_len);
             if (result == NULL)
             {
-                /* Codes_SRS_SECURE_DEVICE_TPM_07_023: [ If an error is encountered secure_dev_tpm_sign_data shall return NULL. ] */
                 LogError("Failure allocating sign data");
             }
         }
@@ -705,7 +678,6 @@ BUFFER_HANDLE secure_dev_tpm_sign_data(SEC_DEVICE_HANDLE handle, const unsigned 
 BUFFER_HANDLE secure_dev_tpm_decrypt_data(SEC_DEVICE_HANDLE handle, const unsigned char* data, size_t data_len)
 {
     BUFFER_HANDLE result;
-    /* Codes_SRS_SECURE_DEVICE_TPM_07_025: [ If handle or data is NULL or data_len is 0, secure_dev_tpm_decrypt_data shall return NULL. ] */
     if (handle == NULL || data == NULL || data_len == 0)
     {
         LogError("Invalid handle value specified handle: %p, data: %p, data_len: %zu", handle, data, data_len);
@@ -713,18 +685,15 @@ BUFFER_HANDLE secure_dev_tpm_decrypt_data(SEC_DEVICE_HANDLE handle, const unsign
     }
     else
     {
-        /* Codes_SRS_SECURE_DEVICE_TPM_07_024: [ secure_dev_tpm_decrypt_data shall call into the tpm to decrypt the supplied data value. ] */
         result = decrypt_data(handle, data, data_len);
         if (result == NULL)
         {
-            /* Codes_SRS_SECURE_DEVICE_TPM_07_029: [ If an error is encountered secure_dev_tpm_sign_data shall return NULL. ] */
             LogError("Failure decrypting data with tpm");
         }
     }
     return result;
 }
 
-/* Codes_SRS_SECURE_DEVICE_TPM_07_026: [ secure_dev_tpm_interface shall return the SEC_TPM_INTERFACE structure. ] */
 const SEC_TPM_INTERFACE* secure_dev_tpm_interface()
 {
     return &sec_tpm_interface;

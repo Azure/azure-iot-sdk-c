@@ -113,7 +113,6 @@ TEST_FUNCTION_CLEANUP(method_cleanup)
     TEST_MUTEX_RELEASE(g_testByTest);
 }
 
-/* Tests_SRS_IOTHUB_DIAGNOSTIC_13_001: [ IoTHubClient_Diagnostic_AddIfNecessary should return nonezero if diagSetting or messageHandle is NULL. ]*/
 TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_with_null_messageHanlde_fails)
 {
     //arrange
@@ -127,7 +126,6 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_with_null_messageHanlde_fai
     //cleanup
 }
 
-/* Tests_SRS_IOTHUB_DIAGNOSTIC_13_001: [ IoTHubClient_Diagnostic_AddIfNecessary should return nonezero if diagSetting or messageHandle is NULL. ]*/
 TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_with_null_setting_fails)
 {
     //arrange
@@ -141,7 +139,6 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_with_null_setting_fails)
     //cleanup
 }
 
-/* Tests_SRS_IOTHUB_DIAGNOSTIC_13_002: [ IoTHubClient_Diagnostic_AddIfNecessary should return nonezero if failing to add diagnostic property. ]*/
 TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_fails)
 {
     int negativeTestsInitResult = umock_c_negative_tests_init();
@@ -179,7 +176,6 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_fails)
     umock_c_negative_tests_deinit();
 }
 
-/* Tests_SRS_IOTHUB_DIAGNOSTIC_13_003: [ If diagSamplingPercentage is equal to 0, message number should not be increased and no diagnostic properties added ]*/
 TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_no_diag_info_with_percentage_0)
 {
     IOTHUB_DIAGNOSTIC_SETTING_DATA diag_setting =
@@ -197,7 +193,6 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_no_diag_info_with_percentag
     ASSERT_ARE_EQUAL(uint32_t, diag_setting.currentMessageNumber, 0);
 }
 
-/* Tests_SRS_IOTHUB_DIAGNOSTIC_13_004: [ If diagSamplingPercentage is equal to 100, diagnostic properties should be added to all messages]*/
 TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_no_diag_info_with_percentage_100)
 {
     //arrange
@@ -228,7 +223,6 @@ TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_no_diag_info_with_percentag
     ASSERT_ARE_EQUAL(uint32_t, diag_setting.currentMessageNumber, 1);
 }
 
-/* Tests_SRS_IOTHUB_DIAGNOSTIC_13_005: [ If diagSamplingPercentage is between(0, 100), diagnostic properties should be added based on percentage]*/
 TEST_FUNCTION(IoTHubClient_Diagnostic_AddIfNecessary_no_diag_info_with_normal_percentage)
 {
     //arrange

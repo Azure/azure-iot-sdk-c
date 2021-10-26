@@ -213,7 +213,6 @@ static STRING_HANDLE createRelativePath(IOTHUB_DEVICEMETHOD_REQUEST_MODE iotHubD
 
 static HTTP_HEADERS_HANDLE createHttpHeader()
 {
-    /*Codes_SRS_IOTHUBDEVICEMETHOD_12_020: [ IoTHubDeviceMethod_GetTwin shall add the following headers to the created HTTP GET request: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ]*/
     HTTP_HEADERS_HANDLE httpHeader;
     const char* guid;
 
@@ -380,7 +379,6 @@ IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE IoTHubDeviceMethod_Create(IOTHUB_SERV
 {
     IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE result;
 
-    /*Codes_SRS_IOTHUBDEVICEMETHOD_12_001: [ If the serviceClientHandle input parameter is NULL IoTHubDeviceMethod_Create shall return NULL ]*/
     if (serviceClientHandle == NULL)
     {
         LogError("serviceClientHandle input parameter cannot be NULL");
@@ -388,7 +386,6 @@ IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE IoTHubDeviceMethod_Create(IOTHUB_SERV
     }
     else
     {
-        /*Codes_SRS_IOTHUBDEVICEMETHOD_12_002: [ If any member of the serviceClientHandle input parameter is NULL IoTHubDeviceMethod_Create shall return NULL ]*/
         IOTHUB_SERVICE_CLIENT_AUTH* serviceClientAuth = (IOTHUB_SERVICE_CLIENT_AUTH*)serviceClientHandle;
 
         if (serviceClientAuth->hostname == NULL)
@@ -418,37 +415,28 @@ IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE IoTHubDeviceMethod_Create(IOTHUB_SERV
         }
         else
         {
-            /*Codes_SRS_IOTHUBDEVICEMETHOD_12_003: [ IoTHubDeviceMethod_Create shall allocate memory for a new IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE instance ]*/
             result = malloc(sizeof(IOTHUB_SERVICE_CLIENT_DEVICE_METHOD));
             if (result == NULL)
             {
-                /*Codes_SRS_IOTHUBDEVICEMETHOD_12_004: [ If the allocation failed, IoTHubDeviceMethod_Create shall return NULL ]*/
                 LogError("Malloc failed for IOTHUB_SERVICE_CLIENT_DEVICE_METHOD");
             }
             else
             {
-                /*Codes_SRS_IOTHUBDEVICEMETHOD_12_005: [ If the allocation successful, IoTHubDeviceMethod_Create shall create a IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE from the given IOTHUB_SERVICE_CLIENT_AUTH_HANDLE and return with it ]*/
-                /*Codes_SRS_IOTHUBDEVICEMETHOD_12_006: [ IoTHubDeviceMethod_Create shall allocate memory and copy hostName to result->hostName by calling mallocAndStrcpy_s. ]*/
                 if (mallocAndStrcpy_s(&result->hostname, serviceClientAuth->hostname) != 0)
                 {
-                    /*Codes_SRS_IOTHUBDEVICEMETHOD_12_007: [ If the mallocAndStrcpy_s fails, IoTHubDeviceMethod_Create shall do clean up and return NULL. ]*/
                     LogError("mallocAndStrcpy_s failed for hostName");
                     free(result);
                     result = NULL;
                 }
-                /*Codes_SRS_IOTHUBDEVICEMETHOD_12_012: [ IoTHubDeviceMethod_Create shall allocate memory and copy sharedAccessKey to result->sharedAccessKey by calling mallocAndStrcpy_s. ]*/
                 else if (mallocAndStrcpy_s(&result->sharedAccessKey, serviceClientAuth->sharedAccessKey) != 0)
                 {
-                    /*Codes_SRS_IOTHUBDEVICEMETHOD_12_013: [ If the mallocAndStrcpy_s fails, IoTHubDeviceMethod_Create shall do clean up and return NULL. ]*/
                     LogError("mallocAndStrcpy_s failed for sharedAccessKey");
                     free(result->hostname);
                     free(result);
                     result = NULL;
                 }
-                /*Codes_SRS_IOTHUBDEVICEMETHOD_12_014: [ IoTHubDeviceMethod_Create shall allocate memory and copy keyName to result->keyName by calling mallocAndStrcpy_s. ]*/
                 else if (mallocAndStrcpy_s(&result->keyName, serviceClientAuth->keyName) != 0)
                 {
-                    /*Codes_SRS_IOTHUBDEVICEMETHOD_12_015: [ If the mallocAndStrcpy_s fails, IoTHubDeviceMethod_Create shall do clean up and return NULL. ]*/
                     LogError("mallocAndStrcpy_s failed for keyName");
                     free(result->hostname);
                     free(result->sharedAccessKey);
@@ -463,10 +451,8 @@ IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE IoTHubDeviceMethod_Create(IOTHUB_SERV
 
 void IoTHubDeviceMethod_Destroy(IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE serviceClientDeviceMethodHandle)
 {
-    /*Codes_SRS_IOTHUBDEVICEMETHOD_12_016: [ If the serviceClientDeviceMethodHandle input parameter is NULL IoTHubDeviceMethod_Destroy shall return ]*/
     if (serviceClientDeviceMethodHandle != NULL)
     {
-        /*Codes_SRS_IOTHUBDEVICEMETHOD_12_017: [ If the serviceClientDeviceMethodHandle input parameter is not NULL IoTHubDeviceMethod_Destroy shall free the memory of it and return ]*/
         IOTHUB_SERVICE_CLIENT_DEVICE_METHOD* serviceClientDeviceMethod = (IOTHUB_SERVICE_CLIENT_DEVICE_METHOD*)serviceClientDeviceMethodHandle;
 
         free(serviceClientDeviceMethod->hostname);
@@ -480,7 +466,6 @@ static IOTHUB_DEVICE_METHOD_RESULT IoTHubDeviceMethod_DeviceOrModuleInvoke(IOTHU
 {
     IOTHUB_DEVICE_METHOD_RESULT result;
 
-    /*Codes_SRS_IOTHUBDEVICEMETHOD_12_031: [ IoTHubDeviceMethod_Invoke(Module) shall verify the input parameters and if any of them (except the timeout) are NULL then return IOTHUB_DEVICE_METHOD_INVALID_ARG ]*/
     if ((serviceClientDeviceMethodHandle == NULL) || (deviceId == NULL) || (methodName == NULL) || (responseStatus == NULL) || (responsePayload == NULL) || (responsePayloadSize == NULL))
     {
         LogError("Input parameter cannot be NULL");
@@ -491,40 +476,26 @@ static IOTHUB_DEVICE_METHOD_RESULT IoTHubDeviceMethod_DeviceOrModuleInvoke(IOTHU
         BUFFER_HANDLE httpPayloadBuffer;
         BUFFER_HANDLE responseBuffer;
 
-        /*Codes_SRS_IOTHUBDEVICEMETHOD_12_032: [ IoTHubDeviceMethod_Invoke(Module) shall create a BUFFER_HANDLE from methodName, timeout and methodPayload by calling BUFFER_create ]*/
         if ((httpPayloadBuffer = createMethodPayloadJson(methodName, timeout, methodPayload)) == NULL)
         {
-            /*Codes_SRS_IOTHUBDEVICEMETHOD_12_033: [ If the creation fails, IoTHubDeviceMethod_Invoke(Module) shall return IOTHUB_DEVICE_METHOD_ERROR ]*/
             LogError("BUFFER creation failed for httpPayloadBuffer");
             result = IOTHUB_DEVICE_METHOD_ERROR;
         }
-        /*Codes_SRS_IOTHUBDEVICEMETHOD_12_034: [ IoTHubDeviceMethod_Invoke(Module) shall allocate memory for response buffer by calling BUFFER_new ]*/
         else if ((responseBuffer = BUFFER_new()) == NULL)
         {
-            /*Codes_SRS_IOTHUBDEVICEMETHOD_12_035: [ If the allocation failed, IoTHubDeviceMethod_Invoke(Module) shall return IOTHUB_DEVICE_METHOD_ERROR ]*/
             LogError("BUFFER_new failed for responseBuffer");
             BUFFER_delete(httpPayloadBuffer);
             result = IOTHUB_DEVICE_METHOD_ERROR;
         }
-        /*Codes_SRS_IOTHUBDEVICEMETHOD_12_039: [ IoTHubDeviceMethod_Invoke(Module) shall create an HTTP POST request using methodPayloadBuffer ]*/
-        /*Codes_SRS_IOTHUBDEVICEMETHOD_12_040: [ IoTHubDeviceMethod_Invoke(Module) shall create an HTTP POST request using the following HTTP headers: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ]*/
-        /*Codes_SRS_IOTHUBDEVICEMETHOD_12_041: [ IoTHubDeviceMethod_Invoke(Module) shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ]*/
-        /*Codes_SRS_IOTHUBDEVICEMETHOD_12_042: [ IoTHubDeviceMethod_Invoke(Module) shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ]*/
-        /*Codes_SRS_IOTHUBDEVICEMETHOD_12_043: [ IoTHubDeviceMethod_Invoke(Module) shall execute the HTTP POST request by calling HTTPAPIEX_ExecuteRequest ]*/
         else if (sendHttpRequestDeviceMethod(serviceClientDeviceMethodHandle, IOTHUB_DEVICEMETHOD_REQUEST_INVOKE, deviceId, moduleId, httpPayloadBuffer, responseBuffer) != IOTHUB_DEVICE_METHOD_OK)
         {
-            /*Codes_SRS_IOTHUBDEVICEMETHOD_12_044: [ If any of the call fails during the HTTP creation IoTHubDeviceMethod_Invoke(Module) shall fail and return IOTHUB_DEVICE_METHOD_HTTPAPI_ERROR ]*/
-            /*Codes_SRS_IOTHUBDEVICEMETHOD_12_045: [ If any of the HTTPAPI call fails IoTHubDeviceMethod_Invoke(Module) shall fail and return IOTHUB_DEVICE_METHOD_HTTPAPI_ERROR ]*/
-            /*Codes_SRS_IOTHUBDEVICEMETHOD_12_046: [ IoTHubDeviceMethod_Invoke(Module) shall verify the received HTTP status code and if it is not equal to 200 then return IOTHUB_DEVICE_METHOD_ERROR ]*/
             LogError("Failure sending HTTP request for device method invoke");
             BUFFER_delete(responseBuffer);
             BUFFER_delete(httpPayloadBuffer);
             result = IOTHUB_DEVICE_METHOD_ERROR;
         }
-        /*Codes_SRS_IOTHUBDEVICEMETHOD_12_049: [ Otherwise IoTHubDeviceMethod_Invoke(Module) shall save the received status and payload to the corresponding out parameter and return with IOTHUB_DEVICE_METHOD_OK ]*/
         else if ((parseResponseJson(responseBuffer, responseStatus, responsePayload, responsePayloadSize)) != IOTHUB_DEVICE_METHOD_OK)
         {
-            /*Codes_SRS_IOTHUBDEVICEMETHOD_12_047: [ If parsing the response fails IoTHubDeviceMethod_Invoke(Module) shall return IOTHUB_DEVICE_METHOD_ERROR ]*/
             LogError("Failure parsing response");
             BUFFER_delete(responseBuffer);
             BUFFER_delete(httpPayloadBuffer);
@@ -532,7 +503,6 @@ static IOTHUB_DEVICE_METHOD_RESULT IoTHubDeviceMethod_DeviceOrModuleInvoke(IOTHU
         }
         else
         {
-            /*Codes_SRS_IOTHUBDEVICEMETHOD_12_049: [ Otherwise IoTHubDeviceMethod_Invoke(Module) shall save the received status and payload to the corresponding out parameter and return with IOTHUB_DEVICE_METHOD_OK ]*/
             result = IOTHUB_DEVICE_METHOD_OK;
 
             BUFFER_delete(responseBuffer);

@@ -17,7 +17,6 @@
 extern "C" {
 #endif
 
-/* Codes_SRS_SCHEMALIB__99_001:[ IoTHubSchema_Client shall expose the following API: ... ] */
 #define SERIALIZER_RESULT_VALUES                   \
     SERIALIZER_OK,                                 \
     SERIALIZER_INVALID_ARG,                        \
