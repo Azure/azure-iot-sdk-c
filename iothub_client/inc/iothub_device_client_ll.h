@@ -3,10 +3,10 @@
 
 /** @file iothub_device_client_ll.h
 *    @brief     APIs that allow a user (usually a device) to communicate
-*             with an Azure IoTHub.
+*             with an Azure IoT Hub.
 *
 *    @details IoTHubDeviceClient_LL allows a user (usually a
-*             device) to communicate with an Azure IoTHub. It can send events
+*             device) to communicate with an Azure IoT Hub. It can send events
 *             and receive messages. At any given moment in time there can only
 *             be at most 1 message callback function.
 *
@@ -98,7 +98,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
      * @brief    Creates a IoT Hub client for communication with an existing IoT
      *           Hub using the device auth.
      *
-     * @param    iothub_uri             Pointer to an ioThub hostname received in the registration process
+     * @param    iothub_uri             Pointer to an IoT Hub hostname received in the registration process
      * @param    device_id              Pointer to the device Id of the device
      * @param    protocol               Function pointer for protocol implementation
      *
@@ -276,7 +276,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     * @param   iotHubClientHandle        The handle created by a call to the create function.
     * @param   deviceTwinCallback        The callback specified by the device client to be used for updating
     *                                    the desired state. The callback will be called in response to patch
-    *                                    request send by the IoTHub services. The payload will be passed to the
+    *                                    request send by the IoT Hub services. The payload will be passed to the
     *                                    callback, along with two version numbers:
     *                                        - Desired:
     *                                        - LastSeenReported:
@@ -294,7 +294,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     * @brief    This API sends a report of the device's properties and their current values.
     *
     * @param    iotHubClientHandle        The handle created by a call to the create function.
-    * @param    reportedState             The current device property values to be 'reported' to the IoTHub.
+    * @param    reportedState             The current device property values to be 'reported' to the IoT Hub.
     * @param    size                      Number of bytes in @c reportedState.
     * @param    reportedStateCallback     The callback specified by the device client to be called with the
     *                                     result of the transaction.
@@ -327,7 +327,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
      * @brief    This API sets the callback for async cloud to device method calls.
      *
      * @param    iotHubClientHandle                 The handle created by a call to the create function.
-     * @param    deviceMethodCallback               The callback which will be called by IoTHub.
+     * @param    deviceMethodCallback               The callback which will be called by IoT Hub.
      * @param    userContextCallback                User specified context that will be provided to the
      *                                              callback. This can be @c NULL.
      *

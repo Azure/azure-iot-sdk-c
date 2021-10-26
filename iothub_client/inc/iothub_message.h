@@ -187,7 +187,7 @@ MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetContentEncodingSystemProperty,
 MOCKABLE_FUNCTION(, MAP_HANDLE, IoTHubMessage_Properties, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 
 /**
-* @brief   Sets a property on a Iothub Message.
+* @brief   Sets a property on a Iot Hub Message.
 *
 * @param   iotHubMessageHandle Handle to the message.
 *
@@ -204,7 +204,7 @@ MOCKABLE_FUNCTION(, MAP_HANDLE, IoTHubMessage_Properties, IOTHUB_MESSAGE_HANDLE,
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, key, const char*, value);
 
 /**
-* @brief   Gets a IotHub Message's properties item. No new memory is allocated,
+* @brief   Gets a IoT Hub Message's properties item. No new memory is allocated,
 *          the caller is not responsible for freeing the memory. The memory
 *          is valid until IoTHubMessage_Destroy is called on the message.
 *
@@ -413,9 +413,8 @@ MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetMessageUserIdSystemProperty, I
 */
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetConnectionDeviceId, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, connectionDeviceId);
 
-
 /**
-* @brief   Marks a IoTHub message as a security message. CAUTION: Security messages are special messages not easily accessable by the user.
+* @brief   Marks a IoT Hub message as a security message. CAUTION: Security messages are special messages not easily accessable by the user.
 *
 * @param   iotHubMessageHandle Handle to the message.
 *
@@ -425,7 +424,7 @@ MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetConnectionDeviceId, 
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetAsSecurityMessage, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 
 /**
-* @brief   returns if this message is a IoTHub security message or not
+* @brief   returns if this message is a IoT Hub security message or not
 *
 * @param   iotHubMessageHandle Handle to the message.
 *

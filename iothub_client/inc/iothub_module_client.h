@@ -207,7 +207,7 @@ extern "C"
     * @param    iotHubModuleClientHandle The handle created by a call to the create function.
     * @param    moduleTwinCallback       The callback specified by the module client to be used for updating
     *                                    the desired state. The callback will be called in response to a
-    *                                    request send by the IoTHub services. The payload will be passed to the
+    *                                    request send by the IoT Hub services. The payload will be passed to the
     *                                    callback, along with two version numbers:
     *                                        - Desired:
     *                                        - LastSeenReported:
@@ -225,7 +225,7 @@ extern "C"
     * @brief    This API sends a report of the module's properties and their current values.
     *
     * @param    iotHubModuleClientHandle The handle created by a call to the create function.
-    * @param    reportedState            The current module property values to be 'reported' to the IoTHub.
+    * @param    reportedState            The current module property values to be 'reported' to the IoT Hub.
     * @param    size                        Number of bytes in @c reportedState.
     * @param    reportedStateCallback    The callback specified by the module client to be called with the
     *                                    result of the transaction.
@@ -259,7 +259,7 @@ extern "C"
     * @brief    This API sets callback for async cloud to module method call.
     *
     * @param    IoTHubClientHandle              The handle created by a call to the create function.
-    * @param    methodCallback                  The callback which will be called by IoTHub.
+    * @param    methodCallback                  The callback which will be called by IoT Hub.
     * @param    userContextCallback             User specified context that will be provided to the
     *                                           callback. This can be @c NULL.
     *
@@ -296,7 +296,7 @@ extern "C"
     *
     * @param    iotHubModuleClientHandle      The handle created by a call to the create function.
     * @param    inputName                     The name of the queue to listen on for this moduleMethodCallback/userContextCallback.
-    * @param    eventHandlerCallback          The callback which will be called by IoTHub.
+    * @param    eventHandlerCallback          The callback which will be called by IoT Hub.
     * @param    userContextCallback           User specified context that will be provided to the
     *                                         callback. This can be @c NULL.
     *

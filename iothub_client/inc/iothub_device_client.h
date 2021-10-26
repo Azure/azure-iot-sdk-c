@@ -255,7 +255,7 @@ extern "C"
     * @param    iotHubClientHandle          The handle created by a call to the create function.
     * @param    deviceTwinCallback          The callback specified by the device client to be used for updating
     *                                       the desired state. The callback will be called in response to a
-    *                                       request send by the IoTHub services. The payload will be passed to the
+    *                                       request send by the IoT Hub services. The payload will be passed to the
     *                                       callback, along with two version numbers:
     *                                           - Desired:
     *                                           - LastSeenReported:
@@ -273,7 +273,7 @@ extern "C"
     * @brief    This API sends a report of the device's properties and their current values.
     *
     * @param    iotHubClientHandle          The handle created by a call to the create function.
-    * @param    reportedState               The current device property values to be 'reported' to the IoTHub.
+    * @param    reportedState               The current device property values to be 'reported' to the IoT Hub.
     * @param    size                        Number of bytes in @c reportedState.
     * @param    reportedStateCallback       The callback specified by the device client to be called with the
     *                                       result of the transaction.
@@ -307,7 +307,7 @@ extern "C"
     * @brief    This API sets the callback for async cloud to device method calls.
     *
     * @param    iotHubClientHandle              The handle created by a call to the create function.
-    * @param    deviceMethodCallback            The callback which will be called by IoTHub.
+    * @param    deviceMethodCallback            The callback which will be called by IoT Hub.
     * @param    userContextCallback             User specified context that will be provided to the
     *                                           callback. This can be @c NULL.
     *

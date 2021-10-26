@@ -12,10 +12,10 @@
 
 /** @file iothub_client_ll.h
 *    @brief     APIs that allow a user (usually a device) to communicate
-*             with an Azure IoTHub.
+*             with an Azure IoT Hub.
 *
 *    @details IoTHubClient_LL allows a user (usually a
-*             device) to communicate with an Azure IoTHub. It can send events
+*             device) to communicate with an Azure IoT Hub. It can send events
 *             and receive messages. At any given moment in time there can only
 *             be at most 1 message callback function.
 *
