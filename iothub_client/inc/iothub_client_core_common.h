@@ -47,14 +47,14 @@ extern "C"
     /** @brief   Signature of the callback that the application implements to receive notifications of module initiated device method calls.
     *
     *   @param   result              Result of the operation
-    *   @param   responseStatus      HTTP status code returned from the module or device.  This is only valid if @c result is @c IOTHUB_CLIENT_OK.
+    *   @param   responseStatus      HTTP status code returned from the module or device.  This is only valid if @c result is #IOTHUB_CLIENT_OK.
     *   @param   responsePayload     HTTP response payload returned from the module or device.  This is only valid if @c result is @c IOTHUB_CLIENT_OK.
     *   @param   responsePayloadSize Number of bytes in @c responsePayload.  This is only valid if @c result is @c IOTHUB_CLIENT_OK.
-    *   @param   context             Context value passed is initial call to @c IoTHubModuleClient_ModuleMethodInvokeAsync (e.g.).
+    *   @param   context             Context value passed is initial call to IoTHubModuleClient_ModuleMethodInvokeAsync() (e.g.).
     *
     *   @remarks Module clients when hosted in IoT Edge may themselves invoke methods on either modules on the same IoT Edge device
-    *            or on downstream devices using APIs such as @c IoTHubModuleClient_LL_DeviceMethodInvoke or @c IoTHubModuleClient_LL_ModuleMethodInvoke.
-    *            These APIs operate asychronously.  When the invoked module or device returns (or times out), the IoT Hub SDK will invoke the 
+    *            or on downstream devices using APIs such as IoTHubModuleClient_LL_DeviceMethodInvoke() or IoTHubModuleClient_LL_ModuleMethodInvoke().
+    *            These APIs operate asynchronously.  When the invoked module or device returns (or times out), the IoT Hub SDK will invoke the 
     *            application's @c IOTHUB_METHOD_INVOKE_CALLBACK callback.
     *
     *   @warning This API is only applicable to applications running inside a module container hosted by IoT Edge.  Calling outside
@@ -192,7 +192,7 @@ extern "C"
     /** 
     *   @brief Signature of the callback that the application implements to process connection status changes between device and IoT Hub.
     *
-    *   @param result                  Whether device is successfully connected (@c IOTHUB_CLIENT_CONNECTION_AUTHENTICATED) or not (@c IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED).
+    *   @param result                  Whether device is successfully connected (#IOTHUB_CLIENT_CONNECTION_AUTHENTICATED) or not (#IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED).
     *   @param reason                  More information about @c result, especially if connection was unsuccessful.
     *   @param userContextCallback     Context that application specified during initial API call to receive status change notifications.
     */
@@ -204,7 +204,7 @@ extern "C"
     *   @param message                 The incoming message received from IoT Hub.
     *   @param userContextCallback     Context that application specified during initial API call to receive incoming cloud-to-device messages.
     *
-    *   @return @c IOTHUBMESSAGE_DISPOSITION_RESULT indicating how client has acknowledged the incoming cloud-to-device message.
+    *   @return #IOTHUBMESSAGE_DISPOSITION_RESULT indicating how client has acknowledged the incoming cloud-to-device message.
     */
     typedef IOTHUBMESSAGE_DISPOSITION_RESULT (*IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC)(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback);
 
@@ -240,7 +240,7 @@ extern "C"
     *  
     *   @remarks The application should allocate @c response with @c malloc.  The IoT Hub client SDK will @c free the data automatically.
     *
-    *   @warning The data in @c payLoad is not guaranteed to be a null-terminated string.
+    *   @warning The data in @c payload is not guaranteed to be a null-terminated string.
     *
     *   @return  HTTP style return code to indicate success or failure of the method call.
     */
@@ -274,7 +274,7 @@ extern "C"
     *  @param size      Size of the data parameter.
     *  @param context   User context provided on the call to IoTHubClient_UploadMultipleBlocksToBlobAsync.
     *
-    *  @return          @c IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT indicating whether the application is returning data to be sent or not.
+    *  @return          #IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT indicating whether the application is returning data to be sent or not.
     *
     *  @remarks         If the user wants to abort the upload, the callback should return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_ABORT
     *                   It should return IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK otherwise.

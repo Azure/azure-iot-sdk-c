@@ -37,7 +37,7 @@ IOTHUBMESSAGE_BYTEARRAY, \
 IOTHUBMESSAGE_STRING, \
 IOTHUBMESSAGE_UNKNOWN \
 
-/** @brief Enumeration specifying the content type of the a given message.
+/** @brief Enumeration specifying the content type of a given message.
 */
 MU_DEFINE_ENUM_WITHOUT_INVALID(IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_CONTENT_TYPE_VALUES);
 

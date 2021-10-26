@@ -45,7 +45,7 @@ extern "C"
 #endif
 
 /**
-* @deprecated IOTHUB_CLIENT_LL_HANDLE is deprecated.  Use IOTHUB_DEVICE_CLIENT_LL_HANDLE instead.
+* @deprecated IOTHUB_CLIENT_LL_HANDLE is deprecated.  Use #IOTHUB_DEVICE_CLIENT_LL_HANDLE instead.
 */
 typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_CLIENT_LL_HANDLE;
 

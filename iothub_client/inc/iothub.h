@@ -33,7 +33,7 @@ extern "C"
     * @brief    IoTHubClient_Deinit Frees resources initialized in the IoTHubClient_Init function call.
     *
     * @remarks
-    *           This should be called when through using IoT Hub client library, including
+    *           This should be called when using IoT Hub client library, including
     *           the device provisioning client.
     *
     *           This function should be called once per process, not per-thread.
