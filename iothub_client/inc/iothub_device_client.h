@@ -63,7 +63,7 @@ extern "C"
     * @brief    Creates a IoT Hub client for communication with an existing IoT
     *           Hub using the specified parameters.
     *
-    * @param    config    Pointer to an @c IOTHUB_CLIENT_CONFIG structure
+    * @param    config    Pointer to an #IOTHUB_CLIENT_CONFIG structure
     *
     *           The API does not allow sharing of a connection across multiple
     *           devices. This is a blocking call.
@@ -78,7 +78,7 @@ extern "C"
     *           Hub using the specified parameters.
     *
     * @param    transportHandle     TRANSPORT_HANDLE which represents a connection.
-    * @param    config              Pointer to an @c IOTHUB_CLIENT_CONFIG structure
+    * @param    config              Pointer to an #IOTHUB_CLIENT_CONFIG structure
     *
     *           The API allows sharing of a connection across multiple
     *           devices. This is a blocking call.

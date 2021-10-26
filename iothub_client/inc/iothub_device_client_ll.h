@@ -70,7 +70,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     * @brief    Creates a IoT Hub client for communication with an existing IoT
     *           Hub using the specified parameters.
     *
-    * @param    config    Pointer to an @c IOTHUB_CLIENT_CONFIG structure
+    * @param    config    Pointer to an #IOTHUB_CLIENT_CONFIG structure
     *
     *           The API does not allow sharing of a connection across multiple
     *           devices. This is a blocking call.
@@ -84,7 +84,7 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     * @brief    Creates a IoT Hub client for communication with an existing IoT
     *           Hub using an existing transport.
     *
-    * @param    config    Pointer to an @c IOTHUB_CLIENT_DEVICE_CONFIG structure
+    * @param    config    Pointer to an #IOTHUB_CLIENT_DEVICE_CONFIG structure
     *
     *           The API *allows* sharing of a connection across multiple
     *           devices. This is a blocking call.

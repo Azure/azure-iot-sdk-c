@@ -47,7 +47,7 @@ extern "C"
     /** @brief   Signature of the callback that the application implements to receive notifications of module initiated device method calls.
     *
     *   @param   result              Result of the operation
-    *   @param   responseStatus      HTTP status code returned from the module or device.  This is only valid if @c result is #IOTHUB_CLIENT_OK.
+    *   @param   responseStatus      HTTP status code returned from the module or device.  This is only valid if @c result is @c IOTHUB_CLIENT_OK.
     *   @param   responsePayload     HTTP response payload returned from the module or device.  This is only valid if @c result is @c IOTHUB_CLIENT_OK.
     *   @param   responsePayloadSize Number of bytes in @c responsePayload.  This is only valid if @c result is @c IOTHUB_CLIENT_OK.
     *   @param   context             Context value passed is initial call to IoTHubModuleClient_ModuleMethodInvokeAsync() (e.g.).
@@ -55,7 +55,7 @@ extern "C"
     *   @remarks Module clients when hosted in IoT Edge may themselves invoke methods on either modules on the same IoT Edge device
     *            or on downstream devices using APIs such as IoTHubModuleClient_LL_DeviceMethodInvoke() or IoTHubModuleClient_LL_ModuleMethodInvoke().
     *            These APIs operate asynchronously.  When the invoked module or device returns (or times out), the IoT Hub SDK will invoke the 
-    *            application's @c IOTHUB_METHOD_INVOKE_CALLBACK callback.
+    *            application's IOTHUB_METHOD_INVOKE_CALLBACK() callback.
     *
     *   @warning This API is only applicable to applications running inside a module container hosted by IoT Edge.  Calling outside
     *            a IoT Edge hosted edge container will result in undefined results.
@@ -85,7 +85,7 @@ extern "C"
     IOTHUB_CLIENT_SEND_STATUS_IDLE,       \
     IOTHUB_CLIENT_SEND_STATUS_BUSY
 
-    /** @brief Enumeration returned by the GetSendStatus family of APIs (e.g. @c IoTHubDeviceClient_LL_GetSendStatus)
+    /** @brief Enumeration returned by the GetSendStatus family of APIs (e.g. IoTHubDeviceClient_LL_GetSendStatus())
     *           to indicate the current sending status of the IoT Hub client.
     */
     MU_DEFINE_ENUM_WITHOUT_INVALID(IOTHUB_CLIENT_STATUS, IOTHUB_CLIENT_STATUS_VALUES);
@@ -136,7 +136,7 @@ extern "C"
     IOTHUB_CLIENT_CONFIRMATION_ERROR                 \
 
     /** @brief Enumeration passed to the application's callback to process the success or failure of telemetry
-    *          initiated by APIs in the SendEventAsync family (e.g. @c IoTHubDeviceClient_LL_SendEventAsync).
+    *          initiated by APIs in the SendEventAsync family (e.g. IoTHubDeviceClient_LL_SendEventAsync()).
     */
     MU_DEFINE_ENUM_WITHOUT_INVALID(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES);
 
@@ -192,7 +192,7 @@ extern "C"
     /** 
     *   @brief Signature of the callback that the application implements to process connection status changes between device and IoT Hub.
     *
-    *   @param result                  Whether device is successfully connected (#IOTHUB_CLIENT_CONNECTION_AUTHENTICATED) or not (#IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED).
+    *   @param result                  Whether device is successfully connected (@c IOTHUB_CLIENT_CONNECTION_AUTHENTICATED) or not (@c IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED).
     *   @param reason                  More information about @c result, especially if connection was unsuccessful.
     *   @param userContextCallback     Context that application specified during initial API call to receive status change notifications.
     */
@@ -266,7 +266,6 @@ extern "C"
     typedef void(*IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK)(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, unsigned char const ** data, size_t* size, void* context);
 
     /**
-    *
     *  @brief           Signature of the callback that the application implements to process IoT Hub client SDK requesting additional chunks to upload to blob.
     *
     *  @param result    The result of the upload of the previous block of data provided by the user.
@@ -318,7 +317,7 @@ extern "C"
     /** @brief    This struct specifies  IoT Hub client device configuration. */
     typedef struct IOTHUB_CLIENT_DEVICE_CONFIG_TAG
     {
-        /** @brief A function pointer that is passed into the @c IoTHubClientCreate.
+        /** @brief A function pointer that is passed into the @c IoTHubClientCreate API.
         *    A function definition for AMQP is defined in the include @c iothubtransportamqp.h.
         *   A function definition for HTTP is defined in the include @c iothubtransporthttp.h
         *   A function definition for MQTT is defined in the include @c iothubtransportmqtt.h */

@@ -60,7 +60,7 @@ static const char DIAG_CREATION_TIME_UTC_PROPERTY_NAME[] = "diag_creation_time_u
 * @param   byteArray   The byte array from which the message is to be created.
 * @param   size        The size of the byte array.
 *
-* @return  A valid @c IOTHUB_MESSAGE_HANDLE if the message was successfully
+* @return  A valid #IOTHUB_MESSAGE_HANDLE if the message was successfully
 *          created or @c NULL in case an error occurs.
 */
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_HANDLE, IoTHubMessage_CreateFromByteArray, const unsigned char*, byteArray, size_t, size);
@@ -72,7 +72,7 @@ MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_HANDLE, IoTHubMessage_CreateFromByteArray, co
 * @param   source  The null terminated string from which the message is to be
 *                  created.
 *
-* @return  A valid @c IOTHUB_MESSAGE_HANDLE if the message was successfully
+* @return  A valid #IOTHUB_MESSAGE_HANDLE if the message was successfully
 *          created or @c NULL in case an error occurs.
 */
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_HANDLE, IoTHubMessage_CreateFromString, const char*, source);
@@ -83,7 +83,7 @@ MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_HANDLE, IoTHubMessage_CreateFromString, const
 *
 * @param   iotHubMessageHandle Handle to the message that is to be cloned.
 *
-* @return  A valid @c IOTHUB_MESSAGE_HANDLE if the message was successfully
+* @return  A valid #IOTHUB_MESSAGE_HANDLE if the message was successfully
 *          cloned or @c NULL in case an error occurs.
 */
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_HANDLE, IoTHubMessage_Clone, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
@@ -127,7 +127,7 @@ MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetString, IOTHUB_MESSAGE_HANDLE,
 *
 * @remarks This function retrieves the standardized type of the payload, which indicates if @c iotHubMessageHandle was created using a String or a Byte Array.
 *
-* @return  An @c IOTHUBMESSAGE_CONTENT_TYPE value.
+* @return  An #IOTHUBMESSAGE_CONTENT_TYPE value.
 */
 MOCKABLE_FUNCTION(, IOTHUBMESSAGE_CONTENT_TYPE, IoTHubMessage_GetContentType, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 
@@ -138,7 +138,7 @@ MOCKABLE_FUNCTION(, IOTHUBMESSAGE_CONTENT_TYPE, IoTHubMessage_GetContentType, IO
 *
 * @param   contentType String defining the type of the payload (e.g., text/plain).
 *
-* @return  An @c IOTHUB_MESSAGE_RESULT value.
+* @return  An #IOTHUB_MESSAGE_RESULT value.
 */
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetContentTypeSystemProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, contentType);
 
@@ -160,7 +160,7 @@ MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetContentTypeSystemProperty, IOT
 *
 * @param   contentEncoding String defining the encoding of the payload (e.g., utf-8).
 *
-* @return  An @c IOTHUB_MESSAGE_RESULT value.
+* @return  An #IOTHUB_MESSAGE_RESULT value.
 */
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetContentEncodingSystemProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, contentEncoding);
 
@@ -187,7 +187,7 @@ MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetContentEncodingSystemProperty,
 MOCKABLE_FUNCTION(, MAP_HANDLE, IoTHubMessage_Properties, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 
 /**
-* @brief   Sets a property on a Iot Hub Message.
+* @brief   Sets a property on a IoT Hub Message.
 *
 * @param   iotHubMessageHandle Handle to the message.
 *
@@ -199,7 +199,7 @@ MOCKABLE_FUNCTION(, MAP_HANDLE, IoTHubMessage_Properties, IOTHUB_MESSAGE_HANDLE,
 *            being used. For more information on the character sets accepted by Azure IoT Hub, see 
 *            <a href="https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-messages-construct">Create and read IoT Hub messages</a>.
 *
-* @return  An @c IOTHUB_MESSAGE_RESULT value indicating the result of setting the property.
+* @return  An #IOTHUB_MESSAGE_RESULT value indicating the result of setting the property.
 */
 MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetProperty, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, key, const char*, value);
 
