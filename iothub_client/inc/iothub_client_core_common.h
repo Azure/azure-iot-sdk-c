@@ -288,8 +288,8 @@ extern "C"
     /** @brief    This struct specifies IoT Hub client configuration. */
     typedef struct IOTHUB_CLIENT_CONFIG_TAG
     {
-        /** @brief A function pointer that is passed into the @c IoTHubClientCreate.
-        *    A function definition for AMQP is defined in the include @c iothubtransportamqp.h.
+        /** @brief A function pointer that is passed into IoTHubDeviceClient_CreateWithTransport() or IoTHubDeviceClient_LL_Create().
+        *   A function definition for AMQP is defined in the include @c iothubtransportamqp.h.
         *   A function definition for HTTP is defined in the include @c iothubtransporthttp.h
         *   A function definition for MQTT is defined in the include @c iothubtransportmqtt.h */
         IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;

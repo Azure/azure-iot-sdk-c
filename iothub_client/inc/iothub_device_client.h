@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 /** @file iothub_device_client.h
-*    @brief Extends the IoTHubCLient_LL with additional features.
+*    @brief Extends the IoTHubDeviceClient_LL with additional features.
 *
 *    @details IoTHubDeviceClient extends the IoTHubDeviceClient_LL
 *             with 2 features:
@@ -54,7 +54,7 @@ extern "C"
     *                   <pre>HostName=[IoT Hub name goes here].[IoT Hub suffix goes here, e.g., private.azure-devices-int.net];DeviceId=[Device ID goes here];SharedAccessSignature=SharedAccessSignature sr=[IoT Hub name goes here].[IoT Hub suffix goes here, e.g., private.azure-devices-int.net]/devices/[Device ID goes here]&sig=[SAS Token goes here]&se=[Expiry Time goes here];</pre>
     *                </blockquote>
     *
-    * @return    A non-NULL @c IOTHUB_DEVICE_CLIENT_HANDLE value that is used when
+    * @return    A non-NULL #IOTHUB_DEVICE_CLIENT_HANDLE value that is used when
     *             invoking other functions for IoT Hub client and @c NULL on failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CLIENT_HANDLE, IoTHubDeviceClient_CreateFromConnectionString, const char*, connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol);
@@ -68,7 +68,7 @@ extern "C"
     *           The API does not allow sharing of a connection across multiple
     *           devices. This is a blocking call.
     *
-    * @return   A non-NULL @c IOTHUB_DEVICE_CLIENT_HANDLE value that is used when
+    * @return   A non-NULL #IOTHUB_DEVICE_CLIENT_HANDLE value that is used when
     *           invoking other functions for IoT Hub client and @c NULL on failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CLIENT_HANDLE, IoTHubDeviceClient_Create, const IOTHUB_CLIENT_CONFIG*, config);
@@ -83,7 +83,7 @@ extern "C"
     *           The API allows sharing of a connection across multiple
     *           devices. This is a blocking call.
     *
-    * @return   A non-NULL @c IOTHUB_DEVICE_CLIENT_HANDLE value that is used when
+    * @return   A non-NULL #IOTHUB_DEVICE_CLIENT_HANDLE value that is used when
     *           invoking other functions for IoT Hub client and @c NULL on failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CLIENT_HANDLE, IoTHubDeviceClient_CreateWithTransport, TRANSPORT_HANDLE, transportHandle, const IOTHUB_CLIENT_CONFIG*, config);
@@ -96,7 +96,7 @@ extern "C"
     * @param    device_id       Pointer to the device Id of the device
     * @param    protocol        Function pointer for protocol implementation
     *
-    * @return    A non-NULL @c IOTHUB_DEVICE_CLIENT_HANDLE value that is used when
+    * @return    A non-NULL #IOTHUB_DEVICE_CLIENT_HANDLE value that is used when
     *            invoking other functions for IoT Hub client and @c NULL on failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CLIENT_HANDLE, IoTHubDeviceClient_CreateFromDeviceAuth, const char*, iothub_uri, const char*, device_id, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol);

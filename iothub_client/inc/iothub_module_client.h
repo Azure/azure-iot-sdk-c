@@ -53,7 +53,7 @@ extern "C"
     *                   <pre>HostName=[IoT Hub name goes here].[IoT Hub suffix goes here, e.g., private.azure-devices-int.net];DeviceId=[Device ID goes here];SharedAccessSignature=SharedAccessSignature sr=[IoT Hub name goes here].[IoT Hub suffix goes here, e.g., private.azure-devices-int.net]/devices/[Device ID goes here]&sig=[SAS Token goes here]&se=[Expiry Time goes here];ModuleId=[Module ID goes here]</pre>
     *                </blockquote>
     *
-    * @return    A non-NULL @c IOTHUB_MODULE_CLIENT_HANDLE value that is used when
+    * @return    A non-NULL #IOTHUB_MODULE_CLIENT_HANDLE value that is used when
     *             invoking other functions for IoT Hub client and @c NULL on failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_MODULE_CLIENT_HANDLE, IoTHubModuleClient_CreateFromConnectionString, const char*, connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol);
@@ -314,7 +314,7 @@ extern "C"
     *
     * @remarks  The protocol parameter MUST be set to MQTT_Protocol.  Using other values will cause undefined behavior.
     *
-    * @return    A non-NULL @c IOTHUB_MODULE_CLIENT_HANDLE value that is used when
+    * @return    A non-NULL #IOTHUB_MODULE_CLIENT_HANDLE value that is used when
     *           invoking other functions for IoT Hub client and @c NULL on failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_MODULE_CLIENT_HANDLE, IoTHubModuleClient_CreateFromEnvironment, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol);
