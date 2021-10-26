@@ -45,6 +45,7 @@ $(function() {
 });
 /* @license-end */</script>
 <div id="main-nav"></div>
+</div><!-- top -->
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -59,11 +60,6 @@ $(function() {
 </iframe>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_114d63ea2533d2a896664dbc048adba3.html">provisioning_client</a></li><li class="navelem"><a class="el" href="dir_fd0caf73a87b01a9adf507a287aab0a9.html">inc</a></li><li class="navelem"><a class="el" href="dir_1694c13933cdc92f342b68cada1a93ed.html">azure_prov_client</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle">
 <div class="title">prov_device_client.h</div>  </div>
@@ -95,22 +91,16 @@ $(function() {
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160; </div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="keyword">static</span> STATIC_VAR_UNUSED <span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keyword">const</span> PROV_OPTION_DO_WORK_FREQUENCY_IN_MS = <span class="stringliteral">&quot;do_work_freq_ms&quot;</span>;</div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160; </div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<a class="code" href="prov__device__client_8h.html#abd6e9047673130a8238966a5eedf7e31">MOCKABLE_FUNCTION</a>(, PROV_DEVICE_HANDLE, Prov_Device_Create, <span class="keyword">const</span> <span class="keywordtype">char</span>*, uri, <span class="keyword">const</span> <span class="keywordtype">char</span>*, scope_id, PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION, protocol);</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<a class="code" href="prov__device__client_8h.html#abd6e9047673130a8238966a5eedf7e31">MOCKABLE_FUNCTION</a>(, <span class="keywordtype">void</span>, Prov_Device_Destroy, PROV_DEVICE_HANDLE, prov_device_handle);</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<a class="code" href="prov__device__client_8h.html#abd6e9047673130a8238966a5eedf7e31">MOCKABLE_FUNCTION</a>(, PROV_DEVICE_RESULT, Prov_Device_Register_Device, PROV_DEVICE_HANDLE, prov_device_handle, PROV_DEVICE_CLIENT_REGISTER_DEVICE_CALLBACK, register_callback, <span class="keywordtype">void</span>*, user_context, PROV_DEVICE_CLIENT_REGISTER_STATUS_CALLBACK, register_status_callback, <span class="keywordtype">void</span>*, status_user_context);</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<a class="code" href="prov__device__client_8h.html#abd6e9047673130a8238966a5eedf7e31">MOCKABLE_FUNCTION</a>(, PROV_DEVICE_RESULT, Prov_Device_SetOption, PROV_DEVICE_HANDLE, prov_device_handle, <span class="keyword">const</span> <span class="keywordtype">char</span>*, optionName, <span class="keyword">const</span> <span class="keywordtype">void</span>*, value);</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;<a class="code" href="prov__device__client_8h.html#abd6e9047673130a8238966a5eedf7e31">MOCKABLE_FUNCTION</a>(, <span class="keyword">const</span> <span class="keywordtype">char</span>*, Prov_Device_GetVersionString);</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160; </div>
-<div class="line"><a name="l00052"></a><span class="lineno"><a class="line" href="prov__device__client_8h.html#abd6e9047673130a8238966a5eedf7e31">   52</a></span>&#160;<a class="code" href="prov__device__client_8h.html#abd6e9047673130a8238966a5eedf7e31">MOCKABLE_FUNCTION</a>(, PROV_DEVICE_RESULT, Prov_Device_Set_Provisioning_Payload, PROV_DEVICE_HANDLE, handle, <span class="keyword">const</span> <span class="keywordtype">char</span>*, json);</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160; </div>
-<div class="line"><a name="l00061"></a><span class="lineno"><a class="line" href="prov__device__client_8h.html#aab6291603a9e888c480c13d5dd4616f1">   61</a></span>&#160;<a class="code" href="prov__device__client_8h.html#abd6e9047673130a8238966a5eedf7e31">MOCKABLE_FUNCTION</a>(, <span class="keyword">const</span> <span class="keywordtype">char</span>*, Prov_Device_Get_Provisioning_Payload, PROV_DEVICE_HANDLE, handle);</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160; </div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="preprocessor">#ifdef __cplusplus</span></div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;}</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* __cplusplus */</span><span class="preprocessor"></span></div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160; </div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="preprocessor">#endif </span><span class="comment">// PROV_DEVICE_CLIENT_H</span></div>
-<div class="ttc" id="aprov__device__client_8h_html_abd6e9047673130a8238966a5eedf7e31"><div class="ttname"><a href="prov__device__client_8h.html#abd6e9047673130a8238966a5eedf7e31">MOCKABLE_FUNCTION</a></div><div class="ttdeci">MOCKABLE_FUNCTION(, PROV_DEVICE_RESULT, Prov_Device_Set_Provisioning_Payload, PROV_DEVICE_HANDLE, handle, const char *, json)</div><div class="ttdoc">Sets the Provisioning Data that is sent to the Provisioning service.</div></div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160; PROV_DEVICE_HANDLE Prov_Device_Create( <span class="keyword">const</span> <span class="keywordtype">char</span>* uri, <span class="keyword">const</span> <span class="keywordtype">char</span>* scope_id, PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION protocol); <span class="keywordtype">void</span> Prov_Device_Destroy( PROV_DEVICE_HANDLE prov_device_handle); PROV_DEVICE_RESULT Prov_Device_Register_Device( PROV_DEVICE_HANDLE prov_device_handle, PROV_DEVICE_CLIENT_REGISTER_DEVICE_CALLBACK register_callback, <span class="keywordtype">void</span>* user_context, PROV_DEVICE_CLIENT_REGISTER_STATUS_CALLBACK register_status_callback, <span class="keywordtype">void</span>* status_user_context); PROV_DEVICE_RESULT Prov_Device_SetOption( PROV_DEVICE_HANDLE prov_device_handle, <span class="keyword">const</span> <span class="keywordtype">char</span>* optionName, <span class="keyword">const</span> <span class="keywordtype">void</span>* value); <span class="keyword">const</span> <span class="keywordtype">char</span>* Prov_Device_GetVersionString();</div>
+<div class="line"><a name="l00047"></a><span class="lineno"><a class="line" href="prov__device__client_8h.html#a0ecb4ce2d9a4aba1467266d9c6a58402">   47</a></span>&#160; PROV_DEVICE_RESULT <a class="code" href="prov__device__client_8h.html#a0ecb4ce2d9a4aba1467266d9c6a58402">Prov_Device_Set_Provisioning_Payload</a>( PROV_DEVICE_HANDLE handle, <span class="keyword">const</span> <span class="keywordtype">char</span>* json);</div>
+<div class="line"><a name="l00055"></a><span class="lineno"><a class="line" href="prov__device__client_8h.html#a74b6604572755ada405fff1fcf6a35af">   55</a></span>&#160; <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code" href="prov__device__client_8h.html#a74b6604572755ada405fff1fcf6a35af">Prov_Device_Get_Provisioning_Payload</a>( PROV_DEVICE_HANDLE handle);</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;}</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* __cplusplus */</span><span class="preprocessor"></span></div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160; </div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="preprocessor">#endif </span><span class="comment">// PROV_DEVICE_CLIENT_H</span></div>
+<div class="ttc" id="aprov__device__client_8h_html_a0ecb4ce2d9a4aba1467266d9c6a58402"><div class="ttname"><a href="prov__device__client_8h.html#a0ecb4ce2d9a4aba1467266d9c6a58402">Prov_Device_Set_Provisioning_Payload</a></div><div class="ttdeci">PROV_DEVICE_RESULT Prov_Device_Set_Provisioning_Payload(PROV_DEVICE_HANDLE handle, const char *json)</div><div class="ttdoc">Sets the Provisioning Data that is sent to the Provisioning service.</div></div>
+<div class="ttc" id="aprov__device__client_8h_html_a74b6604572755ada405fff1fcf6a35af"><div class="ttname"><a href="prov__device__client_8h.html#a74b6604572755ada405fff1fcf6a35af">Prov_Device_Get_Provisioning_Payload</a></div><div class="ttdeci">const char * Prov_Device_Get_Provisioning_Payload(PROV_DEVICE_HANDLE handle)</div><div class="ttdoc">Retrieves the Provisioning Data that is sent from the Provisioning service.</div></div>
 <div class="ttc" id="aprov__device__ll__client_8h_html"><div class="ttname"><a href="prov__device__ll__client_8h.html">prov_device_ll_client.h</a></div><div class="ttdoc">Low level provisioning client.</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->

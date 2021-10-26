@@ -89,27 +89,32 @@ $(function() {
 Example Code for Setting an Option</h1>
 <p>You will use a different API to set options, depending on whether you are using a device or module identity and whether you are using the convenience or lower layer APIs. The pattern is generally the same.</p>
 <div class="fragment"><div class="line"><span class="comment">// Convenience layer for device client</span></div>
-<div class="line">IOTHUB_CLIENT_RESULT IoTHubDeviceClient_SetOption(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, <span class="keyword">const</span> <span class="keywordtype">char</span>* optionName, <span class="keyword">const</span> <span class="keywordtype">void</span>* value);</div>
+<div class="line">IOTHUB_CLIENT_RESULT <a class="code" href="iothub__device__client_8h.html#abde0ae9b104a57268e63e91e0dc2534f">IoTHubDeviceClient_SetOption</a>(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, <span class="keyword">const</span> <span class="keywordtype">char</span>* optionName, <span class="keyword">const</span> <span class="keywordtype">void</span>* value);</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Lower layer for device client</span></div>
-<div class="line">IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SetOption(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, <span class="keyword">const</span> <span class="keywordtype">char</span>* optionName, <span class="keyword">const</span> <span class="keywordtype">void</span>* value);</div>
+<div class="line">IOTHUB_CLIENT_RESULT <a class="code" href="iothub__device__client__ll_8h.html#a23a4b07e54e7e03668dc9f832cd06368">IoTHubDeviceClient_LL_SetOption</a>(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, <span class="keyword">const</span> <span class="keywordtype">char</span>* optionName, <span class="keyword">const</span> <span class="keywordtype">void</span>* value);</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Convenience layer for module client</span></div>
-<div class="line">IOTHUB_CLIENT_RESULT IoTHubModuleClient_SetOption(IOTHUB_MODULE_CLIENT_HANDLE iotHubModuleClientHandle, <span class="keyword">const</span> <span class="keywordtype">char</span>* optionName, <span class="keyword">const</span> <span class="keywordtype">void</span>* value);</div>
+<div class="line">IOTHUB_CLIENT_RESULT <a class="code" href="iothub__module__client_8h.html#a8778c5207e84af1048d92ed4af6105c2">IoTHubModuleClient_SetOption</a>(IOTHUB_MODULE_CLIENT_HANDLE iotHubModuleClientHandle, <span class="keyword">const</span> <span class="keywordtype">char</span>* optionName, <span class="keyword">const</span> <span class="keywordtype">void</span>* value);</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Lower layer for module client</span></div>
-<div class="line">IOTHUB_CLIENT_RESULT IoTHubModuleClient_LL_SetOption(IOTHUB_MODULE_CLIENT_LL_HANDLE iotHubModuleClientHandle, <span class="keyword">const</span> <span class="keywordtype">char</span>* optionName, <span class="keyword">const</span> <span class="keywordtype">void</span>* value);</div>
+<div class="line">IOTHUB_CLIENT_RESULT <a class="code" href="iothub__module__client__ll_8h.html#adb6c8f4bfd2c26200580f04dabcfd132">IoTHubModuleClient_LL_SetOption</a>(IOTHUB_MODULE_CLIENT_LL_HANDLE iotHubModuleClientHandle, <span class="keyword">const</span> <span class="keywordtype">char</span>* optionName, <span class="keyword">const</span> <span class="keywordtype">void</span>* value);</div>
+<div class="ttc" id="aiothub__device__client_8h_html_abde0ae9b104a57268e63e91e0dc2534f"><div class="ttname"><a href="iothub__device__client_8h.html#abde0ae9b104a57268e63e91e0dc2534f">IoTHubDeviceClient_SetOption</a></div><div class="ttdeci">IOTHUB_CLIENT_RESULT IoTHubDeviceClient_SetOption(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, const char *optionName, const void *value)</div><div class="ttdoc">This API sets a runtime option identified by parameter optionName to a value pointed to by value....</div></div>
+<div class="ttc" id="aiothub__device__client__ll_8h_html_a23a4b07e54e7e03668dc9f832cd06368"><div class="ttname"><a href="iothub__device__client__ll_8h.html#a23a4b07e54e7e03668dc9f832cd06368">IoTHubDeviceClient_LL_SetOption</a></div><div class="ttdeci">IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SetOption(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, const char *optionName, const void *value)</div><div class="ttdoc">This API sets a runtime option identified by parameter optionName to a value pointed to by value....</div></div>
+<div class="ttc" id="aiothub__module__client_8h_html_a8778c5207e84af1048d92ed4af6105c2"><div class="ttname"><a href="iothub__module__client_8h.html#a8778c5207e84af1048d92ed4af6105c2">IoTHubModuleClient_SetOption</a></div><div class="ttdeci">IOTHUB_CLIENT_RESULT IoTHubModuleClient_SetOption(IOTHUB_MODULE_CLIENT_HANDLE iotHubModuleClientHandle, const char *optionName, const void *value)</div><div class="ttdoc">This API sets a runtime option identified by parameter optionName to a value pointed to by value....</div></div>
+<div class="ttc" id="aiothub__module__client__ll_8h_html_adb6c8f4bfd2c26200580f04dabcfd132"><div class="ttname"><a href="iothub__module__client__ll_8h.html#adb6c8f4bfd2c26200580f04dabcfd132">IoTHubModuleClient_LL_SetOption</a></div><div class="ttdeci">IOTHUB_CLIENT_RESULT IoTHubModuleClient_LL_SetOption(IOTHUB_MODULE_CLIENT_LL_HANDLE iotHubModuleClientHandle, const char *optionName, const void *value)</div><div class="ttdoc">This API sets a runtime option identified by parameter optionName to a value pointed to by value....</div></div>
 </div><!-- fragment --><p>An example of setting an option:</p>
 <div class="fragment"><div class="line"><span class="comment">// IoT Hub Device Client</span></div>
 <div class="line"><span class="keywordtype">bool</span> trace_on = <span class="keyword">true</span>;</div>
-<div class="line">IoTHubDeviceClient_SetOption(sdk_handle, OPTION_LOG_TRACE, &amp;trace_on);</div>
+<div class="line"><a class="code" href="iothub__device__client_8h.html#abde0ae9b104a57268e63e91e0dc2534f">IoTHubDeviceClient_SetOption</a>(sdk_handle, OPTION_LOG_TRACE, &amp;trace_on);</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Device Provisioning Service (DPS) Client</span></div>
 <div class="line">HTTP_PROXY_OPTIONS http_proxy;</div>
 <div class="line">memset(&amp;http_proxy, 0, <span class="keyword">sizeof</span>(HTTP_PROXY_OPTIONS));</div>
 <div class="line">http_proxy.host_address = PROXY_ADDRESS;</div>
 <div class="line">http_proxy.port = PROXY_PORT;</div>
-<div class="line">Prov_Device_LL_SetOption(handle, OPTION_HTTP_PROXY, &amp;http_proxy);</div>
+<div class="line"><a class="code" href="prov__device__ll__client_8h.html#ae5035b58c14ec28a988f90eee182f0fd">Prov_Device_LL_SetOption</a>(handle, OPTION_HTTP_PROXY, &amp;http_proxy);</div>
+<div class="ttc" id="aprov__device__ll__client_8h_html_ae5035b58c14ec28a988f90eee182f0fd"><div class="ttname"><a href="prov__device__ll__client_8h.html#ae5035b58c14ec28a988f90eee182f0fd">Prov_Device_LL_SetOption</a></div><div class="ttdeci">PROV_DEVICE_RESULT Prov_Device_LL_SetOption(PROV_DEVICE_LL_HANDLE handle, const char *optionName, const void *value)</div><div class="ttdoc">API sets a runtime option identified by parameter optionName to a value pointed to by value.</div></div>
 </div><!-- fragment --><h1><a class="anchor" id="autotoc_md103"></a>
 When to Set Options</h1>
 <p>You should set the options you need right after creating your IoT Hub device or module handle. Setting most options after the connection has been initiated may be silently ignored or applied much later. Many of these are used at connection initiation time itself.</p>
@@ -251,11 +256,13 @@ Batching and IoT Hub Client SDK</h1>
 <p>None of the protocols has a windowing or Nagling concept. They do NOT wait a certain amount of time to attempt to queue up multiple messages to put into a single batch. Instead, they just batch whatever is on the to-send queue. For customers using the lower-layer protocols (LL), they can force batching by performing multiple <code>IoTHubDeviceClient_LL_SendEventAsync</code> calls before <code>IoTHubDeviceClient_LL_DoWork</code>.</p>
 <div class="fragment"><div class="line">IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle;</div>
 <div class="line"><span class="comment">// Queues msg1 to be sent but does not perform any network I/O</span></div>
-<div class="line">IoTHubDeviceClient_LL_SendEventAsync(iotHubClientHandle, msg1, ...);</div>
+<div class="line"><a class="code" href="iothub__device__client__ll_8h.html#a56cfcb637e1f46cf0f5e6e2bb81457ad">IoTHubDeviceClient_LL_SendEventAsync</a>(iotHubClientHandle, msg1, ...);</div>
 <div class="line"><span class="comment">// Queues msg2 to be sent but does not perform any network I/O</span></div>
-<div class="line">IoTHubDeviceClient_LL_SendEventAsync(iotHubClientHandle, msg2, ...);</div>
+<div class="line"><a class="code" href="iothub__device__client__ll_8h.html#a56cfcb637e1f46cf0f5e6e2bb81457ad">IoTHubDeviceClient_LL_SendEventAsync</a>(iotHubClientHandle, msg2, ...);</div>
 <div class="line"><span class="comment">// Performs network I/O.  If batching is enabled, the SDK will batch msg1 and msg2</span></div>
-<div class="line">IoTHubDeviceClient_LL_DoWork(iotHubClientHandle);</div>
+<div class="line"><a class="code" href="iothub__device__client__ll_8h.html#a6e77da5502dff2bb43bace5173242f37">IoTHubDeviceClient_LL_DoWork</a>(iotHubClientHandle);</div>
+<div class="ttc" id="aiothub__device__client__ll_8h_html_a56cfcb637e1f46cf0f5e6e2bb81457ad"><div class="ttname"><a href="iothub__device__client__ll_8h.html#a56cfcb637e1f46cf0f5e6e2bb81457ad">IoTHubDeviceClient_LL_SendEventAsync</a></div><div class="ttdeci">IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendEventAsync(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback, void *userContextCallback)</div><div class="ttdoc">Asynchronous call to send the message specified by eventMessageHandle.</div></div>
+<div class="ttc" id="aiothub__device__client__ll_8h_html_a6e77da5502dff2bb43bace5173242f37"><div class="ttname"><a href="iothub__device__client__ll_8h.html#a6e77da5502dff2bb43bace5173242f37">IoTHubDeviceClient_LL_DoWork</a></div><div class="ttdeci">void IoTHubDeviceClient_LL_DoWork(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle)</div><div class="ttdoc">This function MUST be called by the user so work (sending/receiving data on the network,...</div></div>
 </div><!-- fragment --><h1><a class="anchor" id="autotoc_md113"></a>
 Advanced Compilation Options</h1>
 <p>We recommend leaving the following settings at their defaults. Tuning them may allow optimizations for specific devices or scenarios but could also negatively impact RAM or EEPROM usage. The options are presented only as compilation flags and must be appended to the CMake <code>compileOption_C</code> setting:</p>

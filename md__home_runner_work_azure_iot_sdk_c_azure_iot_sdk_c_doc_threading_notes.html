@@ -76,9 +76,10 @@ The lower layer</h2>
 <div class="line"> </div>
 <div class="line"><span class="keywordflow">while</span> (appIsRunning) {</div>
 <div class="line">    SendTelemetryIfThereIsAnyToSend(iotHubLLHandle);</div>
-<div class="line">    IoTHubDeviceClient_LL_DoWork(iotHubLLHandle);</div>
+<div class="line">    <a class="code" href="iothub__device__client__ll_8h.html#a6e77da5502dff2bb43bace5173242f37">IoTHubDeviceClient_LL_DoWork</a>(iotHubLLHandle);</div>
 <div class="line">    Sleep(1000);</div>
 <div class="line">}</div>
+<div class="ttc" id="aiothub__device__client__ll_8h_html_a6e77da5502dff2bb43bace5173242f37"><div class="ttname"><a href="iothub__device__client__ll_8h.html#a6e77da5502dff2bb43bace5173242f37">IoTHubDeviceClient_LL_DoWork</a></div><div class="ttdeci">void IoTHubDeviceClient_LL_DoWork(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle)</div><div class="ttdoc">This function MUST be called by the user so work (sending/receiving data on the network,...</div></div>
 </div><!-- fragment --><p><b>CRITICAL(!) notes for _LL_ application development</b> <br  />
  <em>NOT FOLLOWING THESE STEPS WILL POTENTIALLY RESULT IN VERY HARD TO DIAGNOSE BUGS</em></p>
 <ul>

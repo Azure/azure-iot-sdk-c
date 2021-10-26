@@ -59,10 +59,6 @@ $(function() {
 </iframe>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_e4d0e6c8e1e55755c3e8205d0fff48d1.html">iothub_client</a></li><li class="navelem"><a class="el" href="dir_66e87b1b6982e486b12ddb87d035cc3e.html">inc</a></li>  </ul>
-</div>
 </div><!-- top -->
 <div class="header">
   <div class="summary">
@@ -94,69 +90,69 @@ typedef IOTHUB_CLIENT_CORE_HANDLE&#160;</td><td class="memItemRight" valign="bot
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a3a6fa548c0e72cb67e5acb31df473b87"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a3a6fa548c0e72cb67e5acb31df473b87">MOCKABLE_FUNCTION</a> (, IOTHUB_DEVICE_CLIENT_HANDLE, IoTHubDeviceClient_CreateFromConnectionString, const char *, connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol)</td></tr>
-<tr class="memdesc:a3a6fa548c0e72cb67e5acb31df473b87"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a IoT Hub client for communication with an existing IoT Hub using the specified connection string parameter.  <a href="iothub__device__client_8h.html#a3a6fa548c0e72cb67e5acb31df473b87">More...</a><br /></td></tr>
-<tr class="separator:a3a6fa548c0e72cb67e5acb31df473b87"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a864ba9389b90914bd0e66282c00f9067"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a864ba9389b90914bd0e66282c00f9067">MOCKABLE_FUNCTION</a> (, IOTHUB_DEVICE_CLIENT_HANDLE, IoTHubDeviceClient_Create, const IOTHUB_CLIENT_CONFIG *, config)</td></tr>
-<tr class="memdesc:a864ba9389b90914bd0e66282c00f9067"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a IoT Hub client for communication with an existing IoT Hub using the specified parameters.  <a href="iothub__device__client_8h.html#a864ba9389b90914bd0e66282c00f9067">More...</a><br /></td></tr>
-<tr class="separator:a864ba9389b90914bd0e66282c00f9067"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7455433c49c2f686aa7efb8cb3f65795"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a7455433c49c2f686aa7efb8cb3f65795">MOCKABLE_FUNCTION</a> (, IOTHUB_DEVICE_CLIENT_HANDLE, IoTHubDeviceClient_CreateWithTransport, TRANSPORT_HANDLE, transportHandle, const IOTHUB_CLIENT_CONFIG *, config)</td></tr>
-<tr class="memdesc:a7455433c49c2f686aa7efb8cb3f65795"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a IoT Hub client for communication with an existing IoT Hub using the specified parameters.  <a href="iothub__device__client_8h.html#a7455433c49c2f686aa7efb8cb3f65795">More...</a><br /></td></tr>
-<tr class="separator:a7455433c49c2f686aa7efb8cb3f65795"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a67349df8cb30841d46b055f7e9a271f0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a67349df8cb30841d46b055f7e9a271f0">MOCKABLE_FUNCTION</a> (, IOTHUB_DEVICE_CLIENT_HANDLE, IoTHubDeviceClient_CreateFromDeviceAuth, const char *, iothub_uri, const char *, device_id, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol)</td></tr>
-<tr class="memdesc:a67349df8cb30841d46b055f7e9a271f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a IoT Hub client for communication with an existing IoT Hub using the device auth.  <a href="iothub__device__client_8h.html#a67349df8cb30841d46b055f7e9a271f0">More...</a><br /></td></tr>
-<tr class="separator:a67349df8cb30841d46b055f7e9a271f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a937b4b535505c8c0610f67a505951310"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a937b4b535505c8c0610f67a505951310">MOCKABLE_FUNCTION</a> (, void, IoTHubDeviceClient_Destroy, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle)</td></tr>
-<tr class="memdesc:a937b4b535505c8c0610f67a505951310"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disposes of resources allocated by the IoT Hub client. This is a blocking call.  <a href="iothub__device__client_8h.html#a937b4b535505c8c0610f67a505951310">More...</a><br /></td></tr>
-<tr class="separator:a937b4b535505c8c0610f67a505951310"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a90b4a345455ec20cacdb96805cb4017a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a90b4a345455ec20cacdb96805cb4017a">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_SendEventAsync, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_MESSAGE_HANDLE, eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, eventConfirmationCallback, void *, userContextCallback)</td></tr>
-<tr class="memdesc:a90b4a345455ec20cacdb96805cb4017a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Asynchronous call to send the message specified by <code>eventMessageHandle</code>.  <a href="iothub__device__client_8h.html#a90b4a345455ec20cacdb96805cb4017a">More...</a><br /></td></tr>
-<tr class="separator:a90b4a345455ec20cacdb96805cb4017a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8e35905f83119ee9ceb8d1e3e31509ba"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a8e35905f83119ee9ceb8d1e3e31509ba">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_GetSendStatus, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_STATUS *, iotHubClientStatus)</td></tr>
-<tr class="memdesc:a8e35905f83119ee9ceb8d1e3e31509ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function returns the current sending status for IoTHubClient.  <a href="iothub__device__client_8h.html#a8e35905f83119ee9ceb8d1e3e31509ba">More...</a><br /></td></tr>
-<tr class="separator:a8e35905f83119ee9ceb8d1e3e31509ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac1a8b68322fc4ae1451c8b3424ae5076"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#ac1a8b68322fc4ae1451c8b3424ae5076">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_SetMessageCallback, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC, messageCallback, void *, userContextCallback)</td></tr>
-<tr class="memdesc:ac1a8b68322fc4ae1451c8b3424ae5076"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up the message callback to be invoked when IoT Hub issues a message to the device. This is a blocking call.  <a href="iothub__device__client_8h.html#ac1a8b68322fc4ae1451c8b3424ae5076">More...</a><br /></td></tr>
-<tr class="separator:ac1a8b68322fc4ae1451c8b3424ae5076"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae4390b8127694727317f0127afd54767"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#ae4390b8127694727317f0127afd54767">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_SetConnectionStatusCallback, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK, connectionStatusCallback, void *, userContextCallback)</td></tr>
-<tr class="memdesc:ae4390b8127694727317f0127afd54767"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up the connection status callback to be invoked representing the status of the connection to IOT Hub. This is a blocking call.  <a href="iothub__device__client_8h.html#ae4390b8127694727317f0127afd54767">More...</a><br /></td></tr>
-<tr class="separator:ae4390b8127694727317f0127afd54767"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a58eed74c6768f1cc15d134e20aedd585"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a58eed74c6768f1cc15d134e20aedd585">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_SetRetryPolicy, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY, retryPolicy, size_t, retryTimeoutLimitInSeconds)</td></tr>
-<tr class="memdesc:a58eed74c6768f1cc15d134e20aedd585"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up the connection status callback to be invoked representing the status of the connection to IOT Hub. This is a blocking call.  <a href="iothub__device__client_8h.html#a58eed74c6768f1cc15d134e20aedd585">More...</a><br /></td></tr>
-<tr class="separator:a58eed74c6768f1cc15d134e20aedd585"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adf7fccbe6ffb5aa59999650bbeabcf46"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#adf7fccbe6ffb5aa59999650bbeabcf46">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_GetRetryPolicy, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY *, retryPolicy, size_t *, retryTimeoutLimitInSeconds)</td></tr>
-<tr class="memdesc:adf7fccbe6ffb5aa59999650bbeabcf46"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up the connection status callback to be invoked representing the status of the connection to IOT Hub. This is a blocking call.  <a href="iothub__device__client_8h.html#adf7fccbe6ffb5aa59999650bbeabcf46">More...</a><br /></td></tr>
-<tr class="separator:adf7fccbe6ffb5aa59999650bbeabcf46"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a49dbb30d24f5c707c319eca09d36f353"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a49dbb30d24f5c707c319eca09d36f353">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_GetLastMessageReceiveTime, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, time_t *, lastMessageReceiveTime)</td></tr>
-<tr class="memdesc:a49dbb30d24f5c707c319eca09d36f353"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function returns in the out parameter <code>lastMessageReceiveTime</code> what was the value of the <code>time</code> function when the last message was received at the client.  <a href="iothub__device__client_8h.html#a49dbb30d24f5c707c319eca09d36f353">More...</a><br /></td></tr>
-<tr class="separator:a49dbb30d24f5c707c319eca09d36f353"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a40907c6a9b237b6b5306a0dd2e49568f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a40907c6a9b237b6b5306a0dd2e49568f">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_SetOption, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, const char *, optionName, const void *, value)</td></tr>
-<tr class="memdesc:a40907c6a9b237b6b5306a0dd2e49568f"><td class="mdescLeft">&#160;</td><td class="mdescRight">This API sets a runtime option identified by parameter <code>optionName</code> to a value pointed to by <code>value</code>. <code>optionName</code> and the data type <code>value</code> is pointing to are specific for every option.  <a href="iothub__device__client_8h.html#a40907c6a9b237b6b5306a0dd2e49568f">More...</a><br /></td></tr>
-<tr class="separator:a40907c6a9b237b6b5306a0dd2e49568f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7fb9343b6d7a259175e10553e85178f5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a7fb9343b6d7a259175e10553e85178f5">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_SetDeviceTwinCallback, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, deviceTwinCallback, void *, userContextCallback)</td></tr>
-<tr class="memdesc:a7fb9343b6d7a259175e10553e85178f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">This API specifies a callback to be used when the device receives a state update.  <a href="iothub__device__client_8h.html#a7fb9343b6d7a259175e10553e85178f5">More...</a><br /></td></tr>
-<tr class="separator:a7fb9343b6d7a259175e10553e85178f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7b40c1ecff1819a0712094c52e287082"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a7b40c1ecff1819a0712094c52e287082">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_SendReportedState, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, const unsigned char *, reportedState, size_t, size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK, reportedStateCallback, void *, userContextCallback)</td></tr>
-<tr class="memdesc:a7b40c1ecff1819a0712094c52e287082"><td class="mdescLeft">&#160;</td><td class="mdescRight">This API sends a report of the device's properties and their current values.  <a href="iothub__device__client_8h.html#a7b40c1ecff1819a0712094c52e287082">More...</a><br /></td></tr>
-<tr class="separator:a7b40c1ecff1819a0712094c52e287082"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3350ec31566d9ffa878241e7f2f6441b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a3350ec31566d9ffa878241e7f2f6441b">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_GetTwinAsync, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, deviceTwinCallback, void *, userContextCallback)</td></tr>
-<tr class="memdesc:a3350ec31566d9ffa878241e7f2f6441b"><td class="mdescLeft">&#160;</td><td class="mdescRight">This API provides a way to retrieve the complete device Twin properties on-demand.  <a href="iothub__device__client_8h.html#a3350ec31566d9ffa878241e7f2f6441b">More...</a><br /></td></tr>
-<tr class="separator:a3350ec31566d9ffa878241e7f2f6441b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad291aeb899f11d152246995152a4e2d5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#ad291aeb899f11d152246995152a4e2d5">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_SetDeviceMethodCallback, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC, deviceMethodCallback, void *, userContextCallback)</td></tr>
-<tr class="memdesc:ad291aeb899f11d152246995152a4e2d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">This API sets the callback for async cloud to device method calls.  <a href="iothub__device__client_8h.html#ad291aeb899f11d152246995152a4e2d5">More...</a><br /></td></tr>
-<tr class="separator:ad291aeb899f11d152246995152a4e2d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a59c97b5044dc5b5dfd66b80a55c99acc"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a59c97b5044dc5b5dfd66b80a55c99acc">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_DeviceMethodResponse, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, METHOD_HANDLE, methodId, const unsigned char *, response, size_t, response_size, int, statusCode)</td></tr>
-<tr class="memdesc:a59c97b5044dc5b5dfd66b80a55c99acc"><td class="mdescLeft">&#160;</td><td class="mdescRight">This API responds to an asnyc method callback identified the methodId.  <a href="iothub__device__client_8h.html#a59c97b5044dc5b5dfd66b80a55c99acc">More...</a><br /></td></tr>
-<tr class="separator:a59c97b5044dc5b5dfd66b80a55c99acc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac74703d883c17e99c9eff61365d97202"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#ac74703d883c17e99c9eff61365d97202">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_UploadToBlobAsync, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, const char *, destinationFileName, const unsigned char *, source, size_t, size, IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK, iotHubClientFileUploadCallback, void *, context)</td></tr>
-<tr class="memdesc:ac74703d883c17e99c9eff61365d97202"><td class="mdescLeft">&#160;</td><td class="mdescRight">IoTHubDeviceClient_UploadToBlobAsync uploads data from memory to a file in Azure Blob Storage.  <a href="iothub__device__client_8h.html#ac74703d883c17e99c9eff61365d97202">More...</a><br /></td></tr>
-<tr class="separator:ac74703d883c17e99c9eff61365d97202"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa62ed2f5125ff27846ee1c4a763bc6d9"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#aa62ed2f5125ff27846ee1c4a763bc6d9">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, const char *, destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, getDataCallbackEx, void *, context)</td></tr>
-<tr class="memdesc:aa62ed2f5125ff27846ee1c4a763bc6d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Uploads a file to a Blob storage in chunks, fed through the callback function provided by the user.  <a href="iothub__device__client_8h.html#aa62ed2f5125ff27846ee1c4a763bc6d9">More...</a><br /></td></tr>
-<tr class="separator:aa62ed2f5125ff27846ee1c4a763bc6d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab1ed0c1b939a94af2037ad607a330a0c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#ab1ed0c1b939a94af2037ad607a330a0c">MOCKABLE_FUNCTION</a> (, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_SendMessageDisposition, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_MESSAGE_HANDLE, message, IOTHUBMESSAGE_DISPOSITION_RESULT, disposition)</td></tr>
-<tr class="memdesc:ab1ed0c1b939a94af2037ad607a330a0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">This API sends an acknowledgement to Azure IoT Hub that a cloud-to-device message has been received and frees resources associated with the message.  <a href="iothub__device__client_8h.html#ab1ed0c1b939a94af2037ad607a330a0c">More...</a><br /></td></tr>
-<tr class="separator:ab1ed0c1b939a94af2037ad607a330a0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a659e9bb5f8633d6565c966a1424b27b8"><td class="memItemLeft" align="right" valign="top">IOTHUB_DEVICE_CLIENT_HANDLE&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a659e9bb5f8633d6565c966a1424b27b8">IoTHubDeviceClient_CreateFromConnectionString</a> (const char *connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)</td></tr>
+<tr class="memdesc:a659e9bb5f8633d6565c966a1424b27b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a IoT Hub client for communication with an existing IoT Hub using the specified connection string parameter.  <a href="iothub__device__client_8h.html#a659e9bb5f8633d6565c966a1424b27b8">More...</a><br /></td></tr>
+<tr class="separator:a659e9bb5f8633d6565c966a1424b27b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace8d1bb4134aa07dc83ed771a5eb1fb7"><td class="memItemLeft" align="right" valign="top">IOTHUB_DEVICE_CLIENT_HANDLE&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#ace8d1bb4134aa07dc83ed771a5eb1fb7">IoTHubDeviceClient_Create</a> (const <a class="el" href="struct_i_o_t_h_u_b___c_l_i_e_n_t___c_o_n_f_i_g.html">IOTHUB_CLIENT_CONFIG</a> *config)</td></tr>
+<tr class="memdesc:ace8d1bb4134aa07dc83ed771a5eb1fb7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a IoT Hub client for communication with an existing IoT Hub using the specified parameters.  <a href="iothub__device__client_8h.html#ace8d1bb4134aa07dc83ed771a5eb1fb7">More...</a><br /></td></tr>
+<tr class="separator:ace8d1bb4134aa07dc83ed771a5eb1fb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a20e32644525bd67493dab5c1f08975b4"><td class="memItemLeft" align="right" valign="top">IOTHUB_DEVICE_CLIENT_HANDLE&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a20e32644525bd67493dab5c1f08975b4">IoTHubDeviceClient_CreateWithTransport</a> (TRANSPORT_HANDLE transportHandle, const <a class="el" href="struct_i_o_t_h_u_b___c_l_i_e_n_t___c_o_n_f_i_g.html">IOTHUB_CLIENT_CONFIG</a> *config)</td></tr>
+<tr class="memdesc:a20e32644525bd67493dab5c1f08975b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a IoT Hub client for communication with an existing IoT Hub using the specified parameters.  <a href="iothub__device__client_8h.html#a20e32644525bd67493dab5c1f08975b4">More...</a><br /></td></tr>
+<tr class="separator:a20e32644525bd67493dab5c1f08975b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad3fdf9efcd38a533a213f556b479ba56"><td class="memItemLeft" align="right" valign="top">IOTHUB_DEVICE_CLIENT_HANDLE&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#ad3fdf9efcd38a533a213f556b479ba56">IoTHubDeviceClient_CreateFromDeviceAuth</a> (const char *iothub_uri, const char *device_id, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)</td></tr>
+<tr class="memdesc:ad3fdf9efcd38a533a213f556b479ba56"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a IoT Hub client for communication with an existing IoT Hub using the device auth.  <a href="iothub__device__client_8h.html#ad3fdf9efcd38a533a213f556b479ba56">More...</a><br /></td></tr>
+<tr class="separator:ad3fdf9efcd38a533a213f556b479ba56"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2991e03140462e9cc1606ccf25e8b412"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a2991e03140462e9cc1606ccf25e8b412">IoTHubDeviceClient_Destroy</a> (IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle)</td></tr>
+<tr class="memdesc:a2991e03140462e9cc1606ccf25e8b412"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disposes of resources allocated by the IoT Hub client. This is a blocking call.  <a href="iothub__device__client_8h.html#a2991e03140462e9cc1606ccf25e8b412">More...</a><br /></td></tr>
+<tr class="separator:a2991e03140462e9cc1606ccf25e8b412"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a85fdfe3dface6a158db18bac7e21e296"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a85fdfe3dface6a158db18bac7e21e296">IoTHubDeviceClient_SendEventAsync</a> (IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback, void *userContextCallback)</td></tr>
+<tr class="memdesc:a85fdfe3dface6a158db18bac7e21e296"><td class="mdescLeft">&#160;</td><td class="mdescRight">Asynchronous call to send the message specified by <code>eventMessageHandle</code>.  <a href="iothub__device__client_8h.html#a85fdfe3dface6a158db18bac7e21e296">More...</a><br /></td></tr>
+<tr class="separator:a85fdfe3dface6a158db18bac7e21e296"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1b0ed9ddf82f4a32afc7df469452e0cc"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a1b0ed9ddf82f4a32afc7df469452e0cc">IoTHubDeviceClient_GetSendStatus</a> (IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_STATUS *iotHubClientStatus)</td></tr>
+<tr class="memdesc:a1b0ed9ddf82f4a32afc7df469452e0cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function returns the current sending status for IoTHubClient.  <a href="iothub__device__client_8h.html#a1b0ed9ddf82f4a32afc7df469452e0cc">More...</a><br /></td></tr>
+<tr class="separator:a1b0ed9ddf82f4a32afc7df469452e0cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a530ac14eac99171cbf53a1b72992791f"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a530ac14eac99171cbf53a1b72992791f">IoTHubDeviceClient_SetMessageCallback</a> (IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC messageCallback, void *userContextCallback)</td></tr>
+<tr class="memdesc:a530ac14eac99171cbf53a1b72992791f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up the message callback to be invoked when IoT Hub issues a message to the device. This is a blocking call.  <a href="iothub__device__client_8h.html#a530ac14eac99171cbf53a1b72992791f">More...</a><br /></td></tr>
+<tr class="separator:a530ac14eac99171cbf53a1b72992791f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a905f59a848d7fbf0ae28f44ceff97e6c"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a905f59a848d7fbf0ae28f44ceff97e6c">IoTHubDeviceClient_SetConnectionStatusCallback</a> (IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK connectionStatusCallback, void *userContextCallback)</td></tr>
+<tr class="memdesc:a905f59a848d7fbf0ae28f44ceff97e6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up the connection status callback to be invoked representing the status of the connection to IOT Hub. This is a blocking call.  <a href="iothub__device__client_8h.html#a905f59a848d7fbf0ae28f44ceff97e6c">More...</a><br /></td></tr>
+<tr class="separator:a905f59a848d7fbf0ae28f44ceff97e6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a53604d8d75556ded769b7947268beec8"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a53604d8d75556ded769b7947268beec8">IoTHubDeviceClient_SetRetryPolicy</a> (IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitInSeconds)</td></tr>
+<tr class="memdesc:a53604d8d75556ded769b7947268beec8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up the connection status callback to be invoked representing the status of the connection to IOT Hub. This is a blocking call.  <a href="iothub__device__client_8h.html#a53604d8d75556ded769b7947268beec8">More...</a><br /></td></tr>
+<tr class="separator:a53604d8d75556ded769b7947268beec8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e001ad2e02069d7b9773f8f245fae77"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a7e001ad2e02069d7b9773f8f245fae77">IoTHubDeviceClient_GetRetryPolicy</a> (IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY *retryPolicy, size_t *retryTimeoutLimitInSeconds)</td></tr>
+<tr class="memdesc:a7e001ad2e02069d7b9773f8f245fae77"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up the connection status callback to be invoked representing the status of the connection to IOT Hub. This is a blocking call.  <a href="iothub__device__client_8h.html#a7e001ad2e02069d7b9773f8f245fae77">More...</a><br /></td></tr>
+<tr class="separator:a7e001ad2e02069d7b9773f8f245fae77"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc0085250813091a1e78fe4e07fa23ba"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#abc0085250813091a1e78fe4e07fa23ba">IoTHubDeviceClient_GetLastMessageReceiveTime</a> (IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, time_t *lastMessageReceiveTime)</td></tr>
+<tr class="memdesc:abc0085250813091a1e78fe4e07fa23ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function returns in the out parameter <code>lastMessageReceiveTime</code> what was the value of the <code>time</code> function when the last message was received at the client.  <a href="iothub__device__client_8h.html#abc0085250813091a1e78fe4e07fa23ba">More...</a><br /></td></tr>
+<tr class="separator:abc0085250813091a1e78fe4e07fa23ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abde0ae9b104a57268e63e91e0dc2534f"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#abde0ae9b104a57268e63e91e0dc2534f">IoTHubDeviceClient_SetOption</a> (IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, const char *optionName, const void *value)</td></tr>
+<tr class="memdesc:abde0ae9b104a57268e63e91e0dc2534f"><td class="mdescLeft">&#160;</td><td class="mdescRight">This API sets a runtime option identified by parameter <code>optionName</code> to a value pointed to by <code>value</code>. <code>optionName</code> and the data type <code>value</code> is pointing to are specific for every option.  <a href="iothub__device__client_8h.html#abde0ae9b104a57268e63e91e0dc2534f">More...</a><br /></td></tr>
+<tr class="separator:abde0ae9b104a57268e63e91e0dc2534f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a614af0cf6dad5cc0544319587cb9e6d2"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a614af0cf6dad5cc0544319587cb9e6d2">IoTHubDeviceClient_SetDeviceTwinCallback</a> (IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void *userContextCallback)</td></tr>
+<tr class="memdesc:a614af0cf6dad5cc0544319587cb9e6d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">This API specifies a callback to be used when the device receives a state update.  <a href="iothub__device__client_8h.html#a614af0cf6dad5cc0544319587cb9e6d2">More...</a><br /></td></tr>
+<tr class="separator:a614af0cf6dad5cc0544319587cb9e6d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b0347cae8cb353e14d210fef0ab410e"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a8b0347cae8cb353e14d210fef0ab410e">IoTHubDeviceClient_SendReportedState</a> (IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, const unsigned char *reportedState, size_t size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reportedStateCallback, void *userContextCallback)</td></tr>
+<tr class="memdesc:a8b0347cae8cb353e14d210fef0ab410e"><td class="mdescLeft">&#160;</td><td class="mdescRight">This API sends a report of the device's properties and their current values.  <a href="iothub__device__client_8h.html#a8b0347cae8cb353e14d210fef0ab410e">More...</a><br /></td></tr>
+<tr class="separator:a8b0347cae8cb353e14d210fef0ab410e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a74c0cb751ce802988254696fd252245c"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a74c0cb751ce802988254696fd252245c">IoTHubDeviceClient_GetTwinAsync</a> (IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void *userContextCallback)</td></tr>
+<tr class="memdesc:a74c0cb751ce802988254696fd252245c"><td class="mdescLeft">&#160;</td><td class="mdescRight">This API provides a way to retrieve the complete device Twin properties on-demand.  <a href="iothub__device__client_8h.html#a74c0cb751ce802988254696fd252245c">More...</a><br /></td></tr>
+<tr class="separator:a74c0cb751ce802988254696fd252245c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae63700fcfa5d57ed81d071965ad3afd9"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#ae63700fcfa5d57ed81d071965ad3afd9">IoTHubDeviceClient_SetDeviceMethodCallback</a> (IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback, void *userContextCallback)</td></tr>
+<tr class="memdesc:ae63700fcfa5d57ed81d071965ad3afd9"><td class="mdescLeft">&#160;</td><td class="mdescRight">This API sets the callback for async cloud to device method calls.  <a href="iothub__device__client_8h.html#ae63700fcfa5d57ed81d071965ad3afd9">More...</a><br /></td></tr>
+<tr class="separator:ae63700fcfa5d57ed81d071965ad3afd9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0a0909124da66a5d0dcd5c172fe7eaea"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a0a0909124da66a5d0dcd5c172fe7eaea">IoTHubDeviceClient_DeviceMethodResponse</a> (IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, METHOD_HANDLE methodId, const unsigned char *response, size_t response_size, int statusCode)</td></tr>
+<tr class="memdesc:a0a0909124da66a5d0dcd5c172fe7eaea"><td class="mdescLeft">&#160;</td><td class="mdescRight">This API responds to an asnyc method callback identified the methodId.  <a href="iothub__device__client_8h.html#a0a0909124da66a5d0dcd5c172fe7eaea">More...</a><br /></td></tr>
+<tr class="separator:a0a0909124da66a5d0dcd5c172fe7eaea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3ec9c3d33886fd7814dab05e074512cd"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a3ec9c3d33886fd7814dab05e074512cd">IoTHubDeviceClient_UploadToBlobAsync</a> (IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, const char *destinationFileName, const unsigned char *source, size_t size, IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK iotHubClientFileUploadCallback, void *context)</td></tr>
+<tr class="memdesc:a3ec9c3d33886fd7814dab05e074512cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">IoTHubDeviceClient_UploadToBlobAsync uploads data from memory to a file in Azure Blob Storage.  <a href="iothub__device__client_8h.html#a3ec9c3d33886fd7814dab05e074512cd">More...</a><br /></td></tr>
+<tr class="separator:a3ec9c3d33886fd7814dab05e074512cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a973fec89efccbd3bb0af1c703a6adc79"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a973fec89efccbd3bb0af1c703a6adc79">IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync</a> (IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, const char *destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX getDataCallbackEx, void *context)</td></tr>
+<tr class="memdesc:a973fec89efccbd3bb0af1c703a6adc79"><td class="mdescLeft">&#160;</td><td class="mdescRight">Uploads a file to a Blob storage in chunks, fed through the callback function provided by the user.  <a href="iothub__device__client_8h.html#a973fec89efccbd3bb0af1c703a6adc79">More...</a><br /></td></tr>
+<tr class="separator:a973fec89efccbd3bb0af1c703a6adc79"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1fad3559ed97ab0c715f4108ec5b1c64"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__device__client_8h.html#a1fad3559ed97ab0c715f4108ec5b1c64">IoTHubDeviceClient_SendMessageDisposition</a> (IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE message, IOTHUBMESSAGE_DISPOSITION_RESULT disposition)</td></tr>
+<tr class="memdesc:a1fad3559ed97ab0c715f4108ec5b1c64"><td class="mdescLeft">&#160;</td><td class="mdescRight">This API sends an acknowledgement to Azure IoT Hub that a cloud-to-device message has been received and frees resources associated with the message.  <a href="iothub__device__client_8h.html#a1fad3559ed97ab0c715f4108ec5b1c64">More...</a><br /></td></tr>
+<tr class="separator:a1fad3559ed97ab0c715f4108ec5b1c64"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Extends the IoTHubCLient_LL with additional features. </p>
@@ -165,83 +161,224 @@ Functions</h2></td></tr>
 <li>thread-safe APIs </li>
 </ul>
 </div><h2 class="groupheader">Function Documentation</h2>
-<a id="a59c97b5044dc5b5dfd66b80a55c99acc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a59c97b5044dc5b5dfd66b80a55c99acc">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[1/21]</span></h2>
+<a id="ace8d1bb4134aa07dc83ed771a5eb1fb7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ace8d1bb4134aa07dc83ed771a5eb1fb7">&#9670;&nbsp;</a></span>IoTHubDeviceClient_Create()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td class="memname">IOTHUB_DEVICE_CLIENT_HANDLE IoTHubDeviceClient_Create </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramtype">const <a class="el" href="struct_i_o_t_h_u_b___c_l_i_e_n_t___c_o_n_f_i_g.html">IOTHUB_CLIENT_CONFIG</a> *&#160;</td>
+          <td class="paramname"><em>config</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Creates a IoT Hub client for communication with an existing IoT Hub using the specified parameters. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">config</td><td>Pointer to an <code><a class="el" href="struct_i_o_t_h_u_b___c_l_i_e_n_t___c_o_n_f_i_g.html" title="This struct captures IoTHub client configuration.">IOTHUB_CLIENT_CONFIG</a></code> structure <pre class="fragment">      The API does not allow sharing of a connection across multiple
+      devices. This is a blocking call.
+</pre> </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A non-NULL <code>IOTHUB_DEVICE_CLIENT_HANDLE</code> value that is used when invoking other functions for IoT Hub client and <code>NULL</code> on failure. </dd></dl>
+
+</div>
+</div>
+<a id="a659e9bb5f8633d6565c966a1424b27b8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a659e9bb5f8633d6565c966a1424b27b8">&#9670;&nbsp;</a></span>IoTHubDeviceClient_CreateFromConnectionString()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">IOTHUB_DEVICE_CLIENT_HANDLE IoTHubDeviceClient_CreateFromConnectionString </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>connectionString</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">IoTHubDeviceClient_DeviceMethodResponse&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramtype">IOTHUB_CLIENT_TRANSPORT_PROVIDER&#160;</td>
+          <td class="paramname"><em>protocol</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Creates a IoT Hub client for communication with an existing IoT Hub using the specified connection string parameter. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">connectionString</td><td>Pointer to a character string </td></tr>
+    <tr><td class="paramname">protocol</td><td>Function pointer for protocol implementation <pre class="fragment">       Sample connection string:
+           &lt;blockquote&gt;
+               &lt;pre&gt;HostName=[IoT Hub name goes here].[IoT Hub suffix goes here, e.g., private.azure-devices-int.net];DeviceId=[Device ID goes here];SharedAccessKey=[Device key goes here];&lt;/pre&gt;
+              &lt;pre&gt;HostName=[IoT Hub name goes here].[IoT Hub suffix goes here, e.g., private.azure-devices-int.net];DeviceId=[Device ID goes here];SharedAccessSignature=SharedAccessSignature sr=[IoT Hub name goes here].[IoT Hub suffix goes here, e.g., private.azure-devices-int.net]/devices/[Device ID goes here]&amp;sig=[SAS Token goes here]&amp;se=[Expiry Time goes here];&lt;/pre&gt;
+           &lt;/blockquote&gt;
+</pre> </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A non-NULL <code>IOTHUB_DEVICE_CLIENT_HANDLE</code> value that is used when invoking other functions for IoT Hub client and <code>NULL</code> on failure. </dd></dl>
+
+</div>
+</div>
+<a id="ad3fdf9efcd38a533a213f556b479ba56"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad3fdf9efcd38a533a213f556b479ba56">&#9670;&nbsp;</a></span>IoTHubDeviceClient_CreateFromDeviceAuth()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">IOTHUB_DEVICE_CLIENT_HANDLE IoTHubDeviceClient_CreateFromDeviceAuth </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>iothub_uri</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>device_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IOTHUB_CLIENT_TRANSPORT_PROVIDER&#160;</td>
+          <td class="paramname"><em>protocol</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Creates a IoT Hub client for communication with an existing IoT Hub using the device auth. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iothub_uri</td><td>Pointer to an ioThub hostname received in the registration process </td></tr>
+    <tr><td class="paramname">device_id</td><td>Pointer to the device Id of the device </td></tr>
+    <tr><td class="paramname">protocol</td><td>Function pointer for protocol implementation</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A non-NULL <code>IOTHUB_DEVICE_CLIENT_HANDLE</code> value that is used when invoking other functions for IoT Hub client and <code>NULL</code> on failure. </dd></dl>
+
+</div>
+</div>
+<a id="a20e32644525bd67493dab5c1f08975b4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a20e32644525bd67493dab5c1f08975b4">&#9670;&nbsp;</a></span>IoTHubDeviceClient_CreateWithTransport()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">IOTHUB_DEVICE_CLIENT_HANDLE IoTHubDeviceClient_CreateWithTransport </td>
+          <td>(</td>
+          <td class="paramtype">TRANSPORT_HANDLE&#160;</td>
+          <td class="paramname"><em>transportHandle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="struct_i_o_t_h_u_b___c_l_i_e_n_t___c_o_n_f_i_g.html">IOTHUB_CLIENT_CONFIG</a> *&#160;</td>
+          <td class="paramname"><em>config</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Creates a IoT Hub client for communication with an existing IoT Hub using the specified parameters. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">transportHandle</td><td>TRANSPORT_HANDLE which represents a connection. </td></tr>
+    <tr><td class="paramname">config</td><td>Pointer to an <code><a class="el" href="struct_i_o_t_h_u_b___c_l_i_e_n_t___c_o_n_f_i_g.html" title="This struct captures IoTHub client configuration.">IOTHUB_CLIENT_CONFIG</a></code> structure <pre class="fragment">      The API allows sharing of a connection across multiple
+      devices. This is a blocking call.
+</pre> </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A non-NULL <code>IOTHUB_DEVICE_CLIENT_HANDLE</code> value that is used when invoking other functions for IoT Hub client and <code>NULL</code> on failure. </dd></dl>
+
+</div>
+</div>
+<a id="a2991e03140462e9cc1606ccf25e8b412"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2991e03140462e9cc1606ccf25e8b412">&#9670;&nbsp;</a></span>IoTHubDeviceClient_Destroy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void IoTHubDeviceClient_Destroy </td>
+          <td>(</td>
           <td class="paramtype">IOTHUB_DEVICE_CLIENT_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramname"><em>iotHubClientHandle</em></td><td>)</td>
           <td></td>
-          <td class="paramtype">iotHubClientHandle&#160;</td>
-          <td class="paramname">, </td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Disposes of resources allocated by the IoT Hub client. This is a blocking call. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iotHubClientHandle</td><td>The handle created by a call to the create function. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a0a0909124da66a5d0dcd5c172fe7eaea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0a0909124da66a5d0dcd5c172fe7eaea">&#9670;&nbsp;</a></span>IoTHubDeviceClient_DeviceMethodResponse()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubDeviceClient_DeviceMethodResponse </td>
+          <td>(</td>
+          <td class="paramtype">IOTHUB_DEVICE_CLIENT_HANDLE&#160;</td>
+          <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">METHOD_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">methodId&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>methodId</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const unsigned char *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">response&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>response</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">response_size&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>response_size</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">statusCode&#160;</td>
-          <td class="paramname">&#160;</td>
+          <td class="paramname"><em>statusCode</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -266,47 +403,23 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a49dbb30d24f5c707c319eca09d36f353"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a49dbb30d24f5c707c319eca09d36f353">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[2/21]</span></h2>
+<a id="abc0085250813091a1e78fe4e07fa23ba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abc0085250813091a1e78fe4e07fa23ba">&#9670;&nbsp;</a></span>IoTHubDeviceClient_GetLastMessageReceiveTime()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubDeviceClient_GetLastMessageReceiveTime </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">IoTHubDeviceClient_GetLastMessageReceiveTime&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">IOTHUB_DEVICE_CLIENT_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">iotHubClientHandle&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">time_t *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">lastMessageReceiveTime&#160;</td>
-          <td class="paramname">&#160;</td>
+          <td class="paramname"><em>lastMessageReceiveTime</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -328,59 +441,29 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="adf7fccbe6ffb5aa59999650bbeabcf46"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adf7fccbe6ffb5aa59999650bbeabcf46">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[3/21]</span></h2>
+<a id="a7e001ad2e02069d7b9773f8f245fae77"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7e001ad2e02069d7b9773f8f245fae77">&#9670;&nbsp;</a></span>IoTHubDeviceClient_GetRetryPolicy()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubDeviceClient_GetRetryPolicy </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">IoTHubDeviceClient_GetRetryPolicy&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">IOTHUB_DEVICE_CLIENT_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">iotHubClientHandle&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">IOTHUB_CLIENT_RETRY_POLICY *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">retryPolicy&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>retryPolicy</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">retryTimeoutLimitInSeconds&#160;</td>
-          <td class="paramname">&#160;</td>
+          <td class="paramname"><em>retryTimeoutLimitInSeconds</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -404,47 +487,23 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a8e35905f83119ee9ceb8d1e3e31509ba"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8e35905f83119ee9ceb8d1e3e31509ba">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[4/21]</span></h2>
+<a id="a1b0ed9ddf82f4a32afc7df469452e0cc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1b0ed9ddf82f4a32afc7df469452e0cc">&#9670;&nbsp;</a></span>IoTHubDeviceClient_GetSendStatus()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubDeviceClient_GetSendStatus </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">IoTHubDeviceClient_GetSendStatus&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">IOTHUB_DEVICE_CLIENT_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">iotHubClientHandle&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">IOTHUB_CLIENT_STATUS *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">iotHubClientStatus&#160;</td>
-          <td class="paramname">&#160;</td>
+          <td class="paramname"><em>iotHubClientStatus</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -467,59 +526,29 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a3350ec31566d9ffa878241e7f2f6441b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3350ec31566d9ffa878241e7f2f6441b">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[5/21]</span></h2>
+<a id="a74c0cb751ce802988254696fd252245c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a74c0cb751ce802988254696fd252245c">&#9670;&nbsp;</a></span>IoTHubDeviceClient_GetTwinAsync()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubDeviceClient_GetTwinAsync </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">IoTHubDeviceClient_GetTwinAsync&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">IOTHUB_DEVICE_CLIENT_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">iotHubClientHandle&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">deviceTwinCallback&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>deviceTwinCallback</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">void *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">userContextCallback&#160;</td>
-          <td class="paramname">&#160;</td>
+          <td class="paramname"><em>userContextCallback</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -543,71 +572,35 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a90b4a345455ec20cacdb96805cb4017a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a90b4a345455ec20cacdb96805cb4017a">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[6/21]</span></h2>
+<a id="a85fdfe3dface6a158db18bac7e21e296"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a85fdfe3dface6a158db18bac7e21e296">&#9670;&nbsp;</a></span>IoTHubDeviceClient_SendEventAsync()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubDeviceClient_SendEventAsync </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">IoTHubDeviceClient_SendEventAsync&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">IOTHUB_DEVICE_CLIENT_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">iotHubClientHandle&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">IOTHUB_MESSAGE_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">eventMessageHandle&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>eventMessageHandle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">eventConfirmationCallback&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>eventConfirmationCallback</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">void *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">userContextCallback&#160;</td>
-          <td class="paramname">&#160;</td>
+          <td class="paramname"><em>userContextCallback</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -632,59 +625,29 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ab1ed0c1b939a94af2037ad607a330a0c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab1ed0c1b939a94af2037ad607a330a0c">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[7/21]</span></h2>
+<a id="a1fad3559ed97ab0c715f4108ec5b1c64"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1fad3559ed97ab0c715f4108ec5b1c64">&#9670;&nbsp;</a></span>IoTHubDeviceClient_SendMessageDisposition()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubDeviceClient_SendMessageDisposition </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">IoTHubDeviceClient_SendMessageDisposition&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">IOTHUB_DEVICE_CLIENT_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">iotHubClientHandle&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">IOTHUB_MESSAGE_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">message&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>message</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">IOTHUBMESSAGE_DISPOSITION_RESULT&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">disposition&#160;</td>
-          <td class="paramname">&#160;</td>
+          <td class="paramname"><em>disposition</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -709,83 +672,41 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a7b40c1ecff1819a0712094c52e287082"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7b40c1ecff1819a0712094c52e287082">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[8/21]</span></h2>
+<a id="a8b0347cae8cb353e14d210fef0ab410e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8b0347cae8cb353e14d210fef0ab410e">&#9670;&nbsp;</a></span>IoTHubDeviceClient_SendReportedState()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubDeviceClient_SendReportedState </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">IoTHubDeviceClient_SendReportedState&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">IOTHUB_DEVICE_CLIENT_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">iotHubClientHandle&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const unsigned char *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">reportedState&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>reportedState</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>size</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">IOTHUB_CLIENT_REPORTED_STATE_CALLBACK&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">reportedStateCallback&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>reportedStateCallback</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">void *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">userContextCallback&#160;</td>
-          <td class="paramname">&#160;</td>
+          <td class="paramname"><em>userContextCallback</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -810,59 +731,29 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ae4390b8127694727317f0127afd54767"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae4390b8127694727317f0127afd54767">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[9/21]</span></h2>
+<a id="a905f59a848d7fbf0ae28f44ceff97e6c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a905f59a848d7fbf0ae28f44ceff97e6c">&#9670;&nbsp;</a></span>IoTHubDeviceClient_SetConnectionStatusCallback()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubDeviceClient_SetConnectionStatusCallback </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">IoTHubDeviceClient_SetConnectionStatusCallback&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">IOTHUB_DEVICE_CLIENT_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">iotHubClientHandle&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">connectionStatusCallback&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>connectionStatusCallback</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">void *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">userContextCallback&#160;</td>
-          <td class="paramname">&#160;</td>
+          <td class="paramname"><em>userContextCallback</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -887,59 +778,29 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ad291aeb899f11d152246995152a4e2d5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad291aeb899f11d152246995152a4e2d5">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[10/21]</span></h2>
+<a id="ae63700fcfa5d57ed81d071965ad3afd9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae63700fcfa5d57ed81d071965ad3afd9">&#9670;&nbsp;</a></span>IoTHubDeviceClient_SetDeviceMethodCallback()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubDeviceClient_SetDeviceMethodCallback </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">IoTHubDeviceClient_SetDeviceMethodCallback&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">IOTHUB_DEVICE_CLIENT_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">iotHubClientHandle&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">deviceMethodCallback&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>deviceMethodCallback</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">void *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">userContextCallback&#160;</td>
-          <td class="paramname">&#160;</td>
+          <td class="paramname"><em>userContextCallback</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -962,59 +823,29 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a7fb9343b6d7a259175e10553e85178f5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7fb9343b6d7a259175e10553e85178f5">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[11/21]</span></h2>
+<a id="a614af0cf6dad5cc0544319587cb9e6d2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a614af0cf6dad5cc0544319587cb9e6d2">&#9670;&nbsp;</a></span>IoTHubDeviceClient_SetDeviceTwinCallback()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubDeviceClient_SetDeviceTwinCallback </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">IoTHubDeviceClient_SetDeviceTwinCallback&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">IOTHUB_DEVICE_CLIENT_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">iotHubClientHandle&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">deviceTwinCallback&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>deviceTwinCallback</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">void *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">userContextCallback&#160;</td>
-          <td class="paramname">&#160;</td>
+          <td class="paramname"><em>userContextCallback</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1042,59 +873,29 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ac1a8b68322fc4ae1451c8b3424ae5076"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac1a8b68322fc4ae1451c8b3424ae5076">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[12/21]</span></h2>
+<a id="a530ac14eac99171cbf53a1b72992791f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a530ac14eac99171cbf53a1b72992791f">&#9670;&nbsp;</a></span>IoTHubDeviceClient_SetMessageCallback()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubDeviceClient_SetMessageCallback </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">IoTHubDeviceClient_SetMessageCallback&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">IOTHUB_DEVICE_CLIENT_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">iotHubClientHandle&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">messageCallback&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>messageCallback</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">void *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">userContextCallback&#160;</td>
-          <td class="paramname">&#160;</td>
+          <td class="paramname"><em>userContextCallback</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1118,59 +919,29 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a40907c6a9b237b6b5306a0dd2e49568f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a40907c6a9b237b6b5306a0dd2e49568f">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[13/21]</span></h2>
+<a id="abde0ae9b104a57268e63e91e0dc2534f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abde0ae9b104a57268e63e91e0dc2534f">&#9670;&nbsp;</a></span>IoTHubDeviceClient_SetOption()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubDeviceClient_SetOption </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">IoTHubDeviceClient_SetOption&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">IOTHUB_DEVICE_CLIENT_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">iotHubClientHandle&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const char *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">optionName&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>optionName</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const void *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">value&#160;</td>
-          <td class="paramname">&#160;</td>
+          <td class="paramname"><em>value</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1194,59 +965,29 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a58eed74c6768f1cc15d134e20aedd585"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a58eed74c6768f1cc15d134e20aedd585">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[14/21]</span></h2>
+<a id="a53604d8d75556ded769b7947268beec8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a53604d8d75556ded769b7947268beec8">&#9670;&nbsp;</a></span>IoTHubDeviceClient_SetRetryPolicy()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubDeviceClient_SetRetryPolicy </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">IoTHubDeviceClient_SetRetryPolicy&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">IOTHUB_DEVICE_CLIENT_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">iotHubClientHandle&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">IOTHUB_CLIENT_RETRY_POLICY&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">retryPolicy&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>retryPolicy</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">retryTimeoutLimitInSeconds&#160;</td>
-          <td class="paramname">&#160;</td>
+          <td class="paramname"><em>retryTimeoutLimitInSeconds</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1271,71 +1012,35 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="aa62ed2f5125ff27846ee1c4a763bc6d9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa62ed2f5125ff27846ee1c4a763bc6d9">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[15/21]</span></h2>
+<a id="a973fec89efccbd3bb0af1c703a6adc79"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a973fec89efccbd3bb0af1c703a6adc79">&#9670;&nbsp;</a></span>IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">IoTHubDeviceClient_UploadMultipleBlocksToBlobAsync&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">IOTHUB_DEVICE_CLIENT_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">iotHubClientHandle&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const char *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">destinationFileName&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>destinationFileName</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">getDataCallbackEx&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>getDataCallbackEx</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">void *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">context&#160;</td>
-          <td class="paramname">&#160;</td>
+          <td class="paramname"><em>context</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1360,95 +1065,47 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ac74703d883c17e99c9eff61365d97202"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac74703d883c17e99c9eff61365d97202">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[16/21]</span></h2>
+<a id="a3ec9c3d33886fd7814dab05e074512cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3ec9c3d33886fd7814dab05e074512cd">&#9670;&nbsp;</a></span>IoTHubDeviceClient_UploadToBlobAsync()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubDeviceClient_UploadToBlobAsync </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_RESULT&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">IoTHubDeviceClient_UploadToBlobAsync&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">IOTHUB_DEVICE_CLIENT_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">iotHubClientHandle&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const char *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">destinationFileName&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>destinationFileName</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const unsigned char *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">source&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>source</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>size</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">iotHubClientFileUploadCallback&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>iotHubClientFileUploadCallback</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">void *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">context&#160;</td>
-          <td class="paramname">&#160;</td>
+          <td class="paramname"><em>context</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1471,311 +1128,6 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>IOTHUB_CLIENT_OK upon success or an error code upon failure. </dd></dl>
-
-</div>
-</div>
-<a id="a864ba9389b90914bd0e66282c00f9067"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a864ba9389b90914bd0e66282c00f9067">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[17/21]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">MOCKABLE_FUNCTION </td>
-          <td>(</td>
-          <td class="paramtype">IOTHUB_DEVICE_CLIENT_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">IoTHubDeviceClient_Create&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const IOTHUB_CLIENT_CONFIG *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">config&#160;</td>
-          <td class="paramname">&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Creates a IoT Hub client for communication with an existing IoT Hub using the specified parameters. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">config</td><td>Pointer to an <code>IOTHUB_CLIENT_CONFIG</code> structure <pre class="fragment">      The API does not allow sharing of a connection across multiple
-      devices. This is a blocking call.
-</pre> </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A non-NULL <code>IOTHUB_DEVICE_CLIENT_HANDLE</code> value that is used when invoking other functions for IoT Hub client and <code>NULL</code> on failure. </dd></dl>
-
-</div>
-</div>
-<a id="a3a6fa548c0e72cb67e5acb31df473b87"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3a6fa548c0e72cb67e5acb31df473b87">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[18/21]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">MOCKABLE_FUNCTION </td>
-          <td>(</td>
-          <td class="paramtype">IOTHUB_DEVICE_CLIENT_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">IoTHubDeviceClient_CreateFromConnectionString&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">connectionString&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">IOTHUB_CLIENT_TRANSPORT_PROVIDER&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">protocol&#160;</td>
-          <td class="paramname">&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Creates a IoT Hub client for communication with an existing IoT Hub using the specified connection string parameter. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">connectionString</td><td>Pointer to a character string </td></tr>
-    <tr><td class="paramname">protocol</td><td>Function pointer for protocol implementation <pre class="fragment">       Sample connection string:
-           &lt;blockquote&gt;
-               &lt;pre&gt;HostName=[IoT Hub name goes here].[IoT Hub suffix goes here, e.g., private.azure-devices-int.net];DeviceId=[Device ID goes here];SharedAccessKey=[Device key goes here];&lt;/pre&gt;
-              &lt;pre&gt;HostName=[IoT Hub name goes here].[IoT Hub suffix goes here, e.g., private.azure-devices-int.net];DeviceId=[Device ID goes here];SharedAccessSignature=SharedAccessSignature sr=[IoT Hub name goes here].[IoT Hub suffix goes here, e.g., private.azure-devices-int.net]/devices/[Device ID goes here]&amp;sig=[SAS Token goes here]&amp;se=[Expiry Time goes here];&lt;/pre&gt;
-           &lt;/blockquote&gt;
-</pre> </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A non-NULL <code>IOTHUB_DEVICE_CLIENT_HANDLE</code> value that is used when invoking other functions for IoT Hub client and <code>NULL</code> on failure. </dd></dl>
-
-</div>
-</div>
-<a id="a67349df8cb30841d46b055f7e9a271f0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a67349df8cb30841d46b055f7e9a271f0">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[19/21]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">MOCKABLE_FUNCTION </td>
-          <td>(</td>
-          <td class="paramtype">IOTHUB_DEVICE_CLIENT_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">IoTHubDeviceClient_CreateFromDeviceAuth&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">iothub_uri&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">device_id&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">IOTHUB_CLIENT_TRANSPORT_PROVIDER&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">protocol&#160;</td>
-          <td class="paramname">&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Creates a IoT Hub client for communication with an existing IoT Hub using the device auth. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">iothub_uri</td><td>Pointer to an ioThub hostname received in the registration process </td></tr>
-    <tr><td class="paramname">device_id</td><td>Pointer to the device Id of the device </td></tr>
-    <tr><td class="paramname">protocol</td><td>Function pointer for protocol implementation</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A non-NULL <code>IOTHUB_DEVICE_CLIENT_HANDLE</code> value that is used when invoking other functions for IoT Hub client and <code>NULL</code> on failure. </dd></dl>
-
-</div>
-</div>
-<a id="a7455433c49c2f686aa7efb8cb3f65795"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7455433c49c2f686aa7efb8cb3f65795">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[20/21]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">MOCKABLE_FUNCTION </td>
-          <td>(</td>
-          <td class="paramtype">IOTHUB_DEVICE_CLIENT_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">IoTHubDeviceClient_CreateWithTransport&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">TRANSPORT_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">transportHandle&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const IOTHUB_CLIENT_CONFIG *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">config&#160;</td>
-          <td class="paramname">&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Creates a IoT Hub client for communication with an existing IoT Hub using the specified parameters. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">transportHandle</td><td>TRANSPORT_HANDLE which represents a connection. </td></tr>
-    <tr><td class="paramname">config</td><td>Pointer to an <code>IOTHUB_CLIENT_CONFIG</code> structure <pre class="fragment">      The API allows sharing of a connection across multiple
-      devices. This is a blocking call.
-</pre> </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A non-NULL <code>IOTHUB_DEVICE_CLIENT_HANDLE</code> value that is used when invoking other functions for IoT Hub client and <code>NULL</code> on failure. </dd></dl>
-
-</div>
-</div>
-<a id="a937b4b535505c8c0610f67a505951310"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a937b4b535505c8c0610f67a505951310">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[21/21]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">MOCKABLE_FUNCTION </td>
-          <td>(</td>
-          <td class="paramtype">void&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">IoTHubDeviceClient_Destroy&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">IOTHUB_DEVICE_CLIENT_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">iotHubClientHandle&#160;</td>
-          <td class="paramname">&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Disposes of resources allocated by the IoT Hub client. This is a blocking call. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">iotHubClientHandle</td><td>The handle created by a call to the create function. </td></tr>
-  </table>
-  </dd>
-</dl>
 
 </div>
 </div>

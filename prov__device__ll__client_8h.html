@@ -59,15 +59,11 @@ $(function() {
 </iframe>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_114d63ea2533d2a896664dbc048adba3.html">provisioning_client</a></li><li class="navelem"><a class="el" href="dir_fd0caf73a87b01a9adf507a287aab0a9.html">inc</a></li><li class="navelem"><a class="el" href="dir_1694c13933cdc92f342b68cada1a93ed.html">azure_prov_client</a></li>  </ul>
-</div>
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#define-members">Macros</a> &#124;
 <a href="#typedef-members">Typedefs</a> &#124;
+<a href="#enum-members">Enumerations</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">prov_device_ll_client.h File Reference</div>  </div>
@@ -83,13 +79,6 @@ $(function() {
 </div>
 <p><a href="prov__device__ll__client_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
-Macros</h2></td></tr>
-<tr class="memitem:a7dc19013bce40aa63f0fc7db94c3e181"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><b>PROV_DEVICE_RESULT_VALUE</b></td></tr>
-<tr class="separator:a7dc19013bce40aa63f0fc7db94c3e181"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa7e36ab680c4b810112a82d0984a11e9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><b>PROV_DEVICE_REG_STATUS_VALUES</b></td></tr>
-<tr class="separator:aa7e36ab680c4b810112a82d0984a11e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
 <tr class="memitem:aa6ce77119fc5a0c50d57a97a990cb54f"><td class="memItemLeft" align="right" valign="top"><a id="aa6ce77119fc5a0c50d57a97a990cb54f"></a>
@@ -105,224 +94,94 @@ typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>PROV_DEVICE
 typedef const PROV_DEVICE_TRANSPORT_PROVIDER *(*&#160;</td><td class="memItemRight" valign="bottom"><b>PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION</b>) (void)</td></tr>
 <tr class="separator:a6464d6b187cc71ac6e81938338d31d48"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:a4e21aaa494a7ff52958e337551fde7eb"><td class="memItemLeft" align="right" valign="top"><a id="a4e21aaa494a7ff52958e337551fde7eb"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>PROV_DEVICE_RESULT</b> { <br />
+&#160;&#160;<b>PROV_DEVICE_RESULT_OK</b>
+, <b>PROV_DEVICE_RESULT_INVALID_ARG</b>
+, <b>PROV_DEVICE_RESULT_SUCCESS</b>
+, <b>PROV_DEVICE_RESULT_MEMORY</b>
+, <br />
+&#160;&#160;<b>PROV_DEVICE_RESULT_PARSING</b>
+, <b>PROV_DEVICE_RESULT_TRANSPORT</b>
+, <b>PROV_DEVICE_RESULT_INVALID_STATE</b>
+, <b>PROV_DEVICE_RESULT_DEV_AUTH_ERROR</b>
+, <br />
+&#160;&#160;<b>PROV_DEVICE_RESULT_TIMEOUT</b>
+, <b>PROV_DEVICE_RESULT_KEY_ERROR</b>
+, <b>PROV_DEVICE_RESULT_ERROR</b>
+, <b>PROV_DEVICE_RESULT_HUB_NOT_SPECIFIED</b>
+, <br />
+&#160;&#160;<b>PROV_DEVICE_RESULT_UNAUTHORIZED</b>
+, <b>PROV_DEVICE_RESULT_DISABLED</b>
+<br />
+ }</td></tr>
+<tr class="separator:a4e21aaa494a7ff52958e337551fde7eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa49854aa442e8d497377076d841a7f72"><td class="memItemLeft" align="right" valign="top"><a id="aa49854aa442e8d497377076d841a7f72"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>PROV_DEVICE_REG_STATUS</b> { <br />
+&#160;&#160;<b>PROV_DEVICE_REG_STATUS_CONNECTED</b>
+, <b>PROV_DEVICE_REG_STATUS_REGISTERING</b>
+, <b>PROV_DEVICE_REG_STATUS_ASSIGNING</b>
+, <b>PROV_DEVICE_REG_STATUS_ASSIGNED</b>
+, <br />
+&#160;&#160;<b>PROV_DEVICE_REG_STATUS_ERROR</b>
+, <b>PROV_DEVICE_REG_HUB_NOT_SPECIFIED</b>
+<br />
+ }</td></tr>
+<tr class="separator:aa49854aa442e8d497377076d841a7f72"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:adf25a8423ffb150d3c255c46268da8dc"><td class="memItemLeft" align="right" valign="top"><a id="adf25a8423ffb150d3c255c46268da8dc"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>MU_DEFINE_ENUM_WITHOUT_INVALID</b> (PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE)</td></tr>
-<tr class="separator:adf25a8423ffb150d3c255c46268da8dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a351138a59357e47d09a951b664ea3171"><td class="memItemLeft" align="right" valign="top"><a id="a351138a59357e47d09a951b664ea3171"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>MU_DEFINE_ENUM_WITHOUT_INVALID</b> (PROV_DEVICE_REG_STATUS, PROV_DEVICE_REG_STATUS_VALUES)</td></tr>
-<tr class="separator:a351138a59357e47d09a951b664ea3171"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7e03a942ce9caae69ed1c96c2f2703e0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="prov__device__ll__client_8h.html#a7e03a942ce9caae69ed1c96c2f2703e0">MOCKABLE_FUNCTION</a> (, PROV_DEVICE_LL_HANDLE, Prov_Device_LL_Create, const char *, uri, const char *, scope_id, PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION, protocol)</td></tr>
-<tr class="memdesc:a7e03a942ce9caae69ed1c96c2f2703e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a Provisioning Client for communications with the Device Provisioning Client Service.  <a href="prov__device__ll__client_8h.html#a7e03a942ce9caae69ed1c96c2f2703e0">More...</a><br /></td></tr>
-<tr class="separator:a7e03a942ce9caae69ed1c96c2f2703e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1cb226d899311a887c692a2061c8f679"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="prov__device__ll__client_8h.html#a1cb226d899311a887c692a2061c8f679">MOCKABLE_FUNCTION</a> (, void, Prov_Device_LL_Destroy, PROV_DEVICE_LL_HANDLE, handle)</td></tr>
-<tr class="memdesc:a1cb226d899311a887c692a2061c8f679"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disposes of resources allocated by the provisioning Client.  <a href="prov__device__ll__client_8h.html#a1cb226d899311a887c692a2061c8f679">More...</a><br /></td></tr>
-<tr class="separator:a1cb226d899311a887c692a2061c8f679"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad50ba30f2ed3535d9bf9e9bbb604136a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="prov__device__ll__client_8h.html#ad50ba30f2ed3535d9bf9e9bbb604136a">MOCKABLE_FUNCTION</a> (, PROV_DEVICE_RESULT, Prov_Device_LL_Register_Device, PROV_DEVICE_LL_HANDLE, handle, PROV_DEVICE_CLIENT_REGISTER_DEVICE_CALLBACK, register_callback, void *, user_context, PROV_DEVICE_CLIENT_REGISTER_STATUS_CALLBACK, reg_status_cb, void *, status_user_ctext)</td></tr>
-<tr class="memdesc:ad50ba30f2ed3535d9bf9e9bbb604136a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Asynchronous call initiates the registration of a device.  <a href="prov__device__ll__client_8h.html#ad50ba30f2ed3535d9bf9e9bbb604136a">More...</a><br /></td></tr>
-<tr class="separator:ad50ba30f2ed3535d9bf9e9bbb604136a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6e1843ef660a36e27ded04267fcc1fab"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="prov__device__ll__client_8h.html#a6e1843ef660a36e27ded04267fcc1fab">MOCKABLE_FUNCTION</a> (, void, Prov_Device_LL_DoWork, PROV_DEVICE_LL_HANDLE, handle)</td></tr>
-<tr class="memdesc:a6e1843ef660a36e27ded04267fcc1fab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Api to be called by user when work (registering device) can be done.  <a href="prov__device__ll__client_8h.html#a6e1843ef660a36e27ded04267fcc1fab">More...</a><br /></td></tr>
-<tr class="separator:a6e1843ef660a36e27ded04267fcc1fab"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a05fe2ae61c9d595e92fba8beef699ccc"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="prov__device__ll__client_8h.html#a05fe2ae61c9d595e92fba8beef699ccc">MOCKABLE_FUNCTION</a> (, PROV_DEVICE_RESULT, Prov_Device_LL_SetOption, PROV_DEVICE_LL_HANDLE, handle, const char *, optionName, const void *, value)</td></tr>
-<tr class="memdesc:a05fe2ae61c9d595e92fba8beef699ccc"><td class="mdescLeft">&#160;</td><td class="mdescRight">API sets a runtime option identified by parameter optionName to a value pointed to by value.  <a href="prov__device__ll__client_8h.html#a05fe2ae61c9d595e92fba8beef699ccc">More...</a><br /></td></tr>
-<tr class="separator:a05fe2ae61c9d595e92fba8beef699ccc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a188fe7c1aeb918f0a668a59da65f1921"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="prov__device__ll__client_8h.html#a188fe7c1aeb918f0a668a59da65f1921">MOCKABLE_FUNCTION</a> (, const char *, Prov_Device_LL_GetVersionString)</td></tr>
-<tr class="memdesc:a188fe7c1aeb918f0a668a59da65f1921"><td class="mdescLeft">&#160;</td><td class="mdescRight">API to get the version of the provisioning client.  <a href="prov__device__ll__client_8h.html#a188fe7c1aeb918f0a668a59da65f1921">More...</a><br /></td></tr>
-<tr class="separator:a188fe7c1aeb918f0a668a59da65f1921"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a12076fc195a2657921e7a98067a071f5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="prov__device__ll__client_8h.html#a12076fc195a2657921e7a98067a071f5">MOCKABLE_FUNCTION</a> (, PROV_DEVICE_RESULT, Prov_Device_LL_Set_Provisioning_Payload, PROV_DEVICE_LL_HANDLE, handle, const char *, json)</td></tr>
-<tr class="memdesc:a12076fc195a2657921e7a98067a071f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the Provisioning Data that is sent to the Provisioning service.  <a href="prov__device__ll__client_8h.html#a12076fc195a2657921e7a98067a071f5">More...</a><br /></td></tr>
-<tr class="separator:a12076fc195a2657921e7a98067a071f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0fbe6b533c349249caa50e0772874c69"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="prov__device__ll__client_8h.html#a0fbe6b533c349249caa50e0772874c69">MOCKABLE_FUNCTION</a> (, const char *, Prov_Device_LL_Get_Provisioning_Payload, PROV_DEVICE_LL_HANDLE, handle)</td></tr>
-<tr class="memdesc:a0fbe6b533c349249caa50e0772874c69"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the Provisioning Data that is sent from the Provisioning service.  <a href="prov__device__ll__client_8h.html#a0fbe6b533c349249caa50e0772874c69">More...</a><br /></td></tr>
-<tr class="separator:a0fbe6b533c349249caa50e0772874c69"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f209da792720540561a27a5f82d62b2"><td class="memItemLeft" align="right" valign="top">PROV_DEVICE_LL_HANDLE&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="prov__device__ll__client_8h.html#a9f209da792720540561a27a5f82d62b2">Prov_Device_LL_Create</a> (const char *uri, const char *scope_id, PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION protocol)</td></tr>
+<tr class="memdesc:a9f209da792720540561a27a5f82d62b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a Provisioning Client for communications with the Device Provisioning Client Service.  <a href="prov__device__ll__client_8h.html#a9f209da792720540561a27a5f82d62b2">More...</a><br /></td></tr>
+<tr class="separator:a9f209da792720540561a27a5f82d62b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3634dea8a59ee510065e457a93e5c073"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="prov__device__ll__client_8h.html#a3634dea8a59ee510065e457a93e5c073">Prov_Device_LL_Destroy</a> (PROV_DEVICE_LL_HANDLE handle)</td></tr>
+<tr class="memdesc:a3634dea8a59ee510065e457a93e5c073"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disposes of resources allocated by the provisioning Client.  <a href="prov__device__ll__client_8h.html#a3634dea8a59ee510065e457a93e5c073">More...</a><br /></td></tr>
+<tr class="separator:a3634dea8a59ee510065e457a93e5c073"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad466d9cb0750eefc15bafe006018ae6c"><td class="memItemLeft" align="right" valign="top">PROV_DEVICE_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="prov__device__ll__client_8h.html#ad466d9cb0750eefc15bafe006018ae6c">Prov_Device_LL_Register_Device</a> (PROV_DEVICE_LL_HANDLE handle, PROV_DEVICE_CLIENT_REGISTER_DEVICE_CALLBACK register_callback, void *user_context, PROV_DEVICE_CLIENT_REGISTER_STATUS_CALLBACK reg_status_cb, void *status_user_ctext)</td></tr>
+<tr class="memdesc:ad466d9cb0750eefc15bafe006018ae6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Asynchronous call initiates the registration of a device.  <a href="prov__device__ll__client_8h.html#ad466d9cb0750eefc15bafe006018ae6c">More...</a><br /></td></tr>
+<tr class="separator:ad466d9cb0750eefc15bafe006018ae6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32587f168929aee7108416ebbee082d3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="prov__device__ll__client_8h.html#a32587f168929aee7108416ebbee082d3">Prov_Device_LL_DoWork</a> (PROV_DEVICE_LL_HANDLE handle)</td></tr>
+<tr class="memdesc:a32587f168929aee7108416ebbee082d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Api to be called by user when work (registering device) can be done.  <a href="prov__device__ll__client_8h.html#a32587f168929aee7108416ebbee082d3">More...</a><br /></td></tr>
+<tr class="separator:a32587f168929aee7108416ebbee082d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae5035b58c14ec28a988f90eee182f0fd"><td class="memItemLeft" align="right" valign="top">PROV_DEVICE_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="prov__device__ll__client_8h.html#ae5035b58c14ec28a988f90eee182f0fd">Prov_Device_LL_SetOption</a> (PROV_DEVICE_LL_HANDLE handle, const char *optionName, const void *value)</td></tr>
+<tr class="memdesc:ae5035b58c14ec28a988f90eee182f0fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">API sets a runtime option identified by parameter optionName to a value pointed to by value.  <a href="prov__device__ll__client_8h.html#ae5035b58c14ec28a988f90eee182f0fd">More...</a><br /></td></tr>
+<tr class="separator:ae5035b58c14ec28a988f90eee182f0fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec9675ed8dcfcc52b04e9a6a0f2e6a01"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="prov__device__ll__client_8h.html#aec9675ed8dcfcc52b04e9a6a0f2e6a01">Prov_Device_LL_GetVersionString</a> ()</td></tr>
+<tr class="memdesc:aec9675ed8dcfcc52b04e9a6a0f2e6a01"><td class="mdescLeft">&#160;</td><td class="mdescRight">API to get the version of the provisioning client.  <a href="prov__device__ll__client_8h.html#aec9675ed8dcfcc52b04e9a6a0f2e6a01">More...</a><br /></td></tr>
+<tr class="separator:aec9675ed8dcfcc52b04e9a6a0f2e6a01"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0343043c1875c3555720796942126ba5"><td class="memItemLeft" align="right" valign="top">PROV_DEVICE_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="prov__device__ll__client_8h.html#a0343043c1875c3555720796942126ba5">Prov_Device_LL_Set_Provisioning_Payload</a> (PROV_DEVICE_LL_HANDLE handle, const char *json)</td></tr>
+<tr class="memdesc:a0343043c1875c3555720796942126ba5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the Provisioning Data that is sent to the Provisioning service.  <a href="prov__device__ll__client_8h.html#a0343043c1875c3555720796942126ba5">More...</a><br /></td></tr>
+<tr class="separator:a0343043c1875c3555720796942126ba5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a933b41c5865ea5af0249929f0632344d"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="prov__device__ll__client_8h.html#a933b41c5865ea5af0249929f0632344d">Prov_Device_LL_Get_Provisioning_Payload</a> (PROV_DEVICE_LL_HANDLE handle)</td></tr>
+<tr class="memdesc:a933b41c5865ea5af0249929f0632344d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the Provisioning Data that is sent from the Provisioning service.  <a href="prov__device__ll__client_8h.html#a933b41c5865ea5af0249929f0632344d">More...</a><br /></td></tr>
+<tr class="separator:a933b41c5865ea5af0249929f0632344d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Low level provisioning client. </p>
-</div><h2 class="groupheader">Macro Definition Documentation</h2>
-<a id="aa7e36ab680c4b810112a82d0984a11e9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa7e36ab680c4b810112a82d0984a11e9">&#9670;&nbsp;</a></span>PROV_DEVICE_REG_STATUS_VALUES</h2>
+</div><h2 class="groupheader">Function Documentation</h2>
+<a id="a9f209da792720540561a27a5f82d62b2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9f209da792720540561a27a5f82d62b2">&#9670;&nbsp;</a></span>Prov_Device_LL_Create()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define PROV_DEVICE_REG_STATUS_VALUES</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">    PROV_DEVICE_REG_STATUS_CONNECTED,      \</div>
-<div class="line">    PROV_DEVICE_REG_STATUS_REGISTERING,    \</div>
-<div class="line">    PROV_DEVICE_REG_STATUS_ASSIGNING,      \</div>
-<div class="line">    PROV_DEVICE_REG_STATUS_ASSIGNED,       \</div>
-<div class="line">    PROV_DEVICE_REG_STATUS_ERROR,          \</div>
-<div class="line">    PROV_DEVICE_REG_HUB_NOT_SPECIFIED</div>
-</div><!-- fragment -->
-</div>
-</div>
-<a id="a7dc19013bce40aa63f0fc7db94c3e181"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7dc19013bce40aa63f0fc7db94c3e181">&#9670;&nbsp;</a></span>PROV_DEVICE_RESULT_VALUE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PROV_DEVICE_RESULT_VALUE</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">    PROV_DEVICE_RESULT_OK,                  \</div>
-<div class="line">    PROV_DEVICE_RESULT_INVALID_ARG,         \</div>
-<div class="line">    PROV_DEVICE_RESULT_SUCCESS,             \</div>
-<div class="line">    PROV_DEVICE_RESULT_MEMORY,              \</div>
-<div class="line">    PROV_DEVICE_RESULT_PARSING,             \</div>
-<div class="line">    PROV_DEVICE_RESULT_TRANSPORT,           \</div>
-<div class="line">    PROV_DEVICE_RESULT_INVALID_STATE,       \</div>
-<div class="line">    PROV_DEVICE_RESULT_DEV_AUTH_ERROR,      \</div>
-<div class="line">    PROV_DEVICE_RESULT_TIMEOUT,             \</div>
-<div class="line">    PROV_DEVICE_RESULT_KEY_ERROR,           \</div>
-<div class="line">    PROV_DEVICE_RESULT_ERROR,               \</div>
-<div class="line">    PROV_DEVICE_RESULT_HUB_NOT_SPECIFIED,   \</div>
-<div class="line">    PROV_DEVICE_RESULT_UNAUTHORIZED,        \</div>
-<div class="line">    PROV_DEVICE_RESULT_DISABLED</div>
-</div><!-- fragment -->
-</div>
-</div>
-<h2 class="groupheader">Function Documentation</h2>
-<a id="a0fbe6b533c349249caa50e0772874c69"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0fbe6b533c349249caa50e0772874c69">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[1/8]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td class="memname">PROV_DEVICE_LL_HANDLE Prov_Device_LL_Create </td>
           <td>(</td>
           <td class="paramtype">const char *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Prov_Device_LL_Get_Provisioning_Payload&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">PROV_DEVICE_LL_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">handle&#160;</td>
-          <td class="paramname">&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Retrieves the Provisioning Data that is sent from the Provisioning service. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">handle</td><td>The handle created by a call to the create function.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>The data that was specified by the service </dd></dl>
-
-</div>
-</div>
-<a id="a188fe7c1aeb918f0a668a59da65f1921"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a188fe7c1aeb918f0a668a59da65f1921">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[2/8]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">MOCKABLE_FUNCTION </td>
-          <td>(</td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Prov_Device_LL_GetVersionString&#160;</td>
-          <td class="paramname">&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>API to get the version of the provisioning client. </p>
-<dl class="section return"><dt>Returns</dt><dd>The version number of the provisioning client </dd></dl>
-
-</div>
-</div>
-<a id="a7e03a942ce9caae69ed1c96c2f2703e0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7e03a942ce9caae69ed1c96c2f2703e0">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[3/8]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">MOCKABLE_FUNCTION </td>
-          <td>(</td>
-          <td class="paramtype">PROV_DEVICE_LL_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Prov_Device_LL_Create&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>uri</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const char *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uri&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">scope_id&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>scope_id</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">protocol&#160;</td>
-          <td class="paramname">&#160;</td>
+          <td class="paramname"><em>protocol</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -345,83 +204,140 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ad50ba30f2ed3535d9bf9e9bbb604136a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad50ba30f2ed3535d9bf9e9bbb604136a">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[4/8]</span></h2>
+<a id="a3634dea8a59ee510065e457a93e5c073"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3634dea8a59ee510065e457a93e5c073">&#9670;&nbsp;</a></span>Prov_Device_LL_Destroy()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td class="memname">void Prov_Device_LL_Destroy </td>
           <td>(</td>
-          <td class="paramtype">PROV_DEVICE_RESULT&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Prov_Device_LL_Register_Device&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">PROV_DEVICE_LL_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramname"><em>handle</em></td><td>)</td>
           <td></td>
-          <td class="paramtype">handle&#160;</td>
-          <td class="paramname">, </td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Disposes of resources allocated by the provisioning Client. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">handle</td><td>The handle created by a call to the create function </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a32587f168929aee7108416ebbee082d3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a32587f168929aee7108416ebbee082d3">&#9670;&nbsp;</a></span>Prov_Device_LL_DoWork()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Prov_Device_LL_DoWork </td>
+          <td>(</td>
+          <td class="paramtype">PROV_DEVICE_LL_HANDLE&#160;</td>
+          <td class="paramname"><em>handle</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Api to be called by user when work (registering device) can be done. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">handle</td><td>The handle created by a call to the create function. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a933b41c5865ea5af0249929f0632344d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a933b41c5865ea5af0249929f0632344d">&#9670;&nbsp;</a></span>Prov_Device_LL_Get_Provisioning_Payload()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char* Prov_Device_LL_Get_Provisioning_Payload </td>
+          <td>(</td>
+          <td class="paramtype">PROV_DEVICE_LL_HANDLE&#160;</td>
+          <td class="paramname"><em>handle</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Retrieves the Provisioning Data that is sent from the Provisioning service. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">handle</td><td>The handle created by a call to the create function.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The data that was specified by the service </dd></dl>
+
+</div>
+</div>
+<a id="aec9675ed8dcfcc52b04e9a6a0f2e6a01"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec9675ed8dcfcc52b04e9a6a0f2e6a01">&#9670;&nbsp;</a></span>Prov_Device_LL_GetVersionString()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char* Prov_Device_LL_GetVersionString </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>API to get the version of the provisioning client. </p>
+<dl class="section return"><dt>Returns</dt><dd>The version number of the provisioning client </dd></dl>
+
+</div>
+</div>
+<a id="ad466d9cb0750eefc15bafe006018ae6c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad466d9cb0750eefc15bafe006018ae6c">&#9670;&nbsp;</a></span>Prov_Device_LL_Register_Device()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">PROV_DEVICE_RESULT Prov_Device_LL_Register_Device </td>
+          <td>(</td>
+          <td class="paramtype">PROV_DEVICE_LL_HANDLE&#160;</td>
+          <td class="paramname"><em>handle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">PROV_DEVICE_CLIENT_REGISTER_DEVICE_CALLBACK&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">register_callback&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>register_callback</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">void *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">user_context&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>user_context</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">PROV_DEVICE_CLIENT_REGISTER_STATUS_CALLBACK&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">reg_status_cb&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>reg_status_cb</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">void *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">status_user_ctext&#160;</td>
-          <td class="paramname">&#160;</td>
+          <td class="paramname"><em>status_user_ctext</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -446,47 +362,23 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a12076fc195a2657921e7a98067a071f5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a12076fc195a2657921e7a98067a071f5">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[5/8]</span></h2>
+<a id="a0343043c1875c3555720796942126ba5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0343043c1875c3555720796942126ba5">&#9670;&nbsp;</a></span>Prov_Device_LL_Set_Provisioning_Payload()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td class="memname">PROV_DEVICE_RESULT Prov_Device_LL_Set_Provisioning_Payload </td>
           <td>(</td>
-          <td class="paramtype">PROV_DEVICE_RESULT&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Prov_Device_LL_Set_Provisioning_Payload&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">PROV_DEVICE_LL_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">handle&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>handle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const char *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">json&#160;</td>
-          <td class="paramname">&#160;</td>
+          <td class="paramname"><em>json</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -508,59 +400,29 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a05fe2ae61c9d595e92fba8beef699ccc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a05fe2ae61c9d595e92fba8beef699ccc">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[6/8]</span></h2>
+<a id="ae5035b58c14ec28a988f90eee182f0fd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae5035b58c14ec28a988f90eee182f0fd">&#9670;&nbsp;</a></span>Prov_Device_LL_SetOption()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">MOCKABLE_FUNCTION </td>
+          <td class="memname">PROV_DEVICE_RESULT Prov_Device_LL_SetOption </td>
           <td>(</td>
-          <td class="paramtype">PROV_DEVICE_RESULT&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Prov_Device_LL_SetOption&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">PROV_DEVICE_LL_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">handle&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>handle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const char *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">optionName&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>optionName</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const void *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">value&#160;</td>
-          <td class="paramname">&#160;</td>
+          <td class="paramname"><em>value</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -580,102 +442,6 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>PROV_DEVICE_RESULT_OK upon success or an error code upon failure </dd></dl>
-
-</div>
-</div>
-<a id="a1cb226d899311a887c692a2061c8f679"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1cb226d899311a887c692a2061c8f679">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[7/8]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">MOCKABLE_FUNCTION </td>
-          <td>(</td>
-          <td class="paramtype">void&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Prov_Device_LL_Destroy&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">PROV_DEVICE_LL_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">handle&#160;</td>
-          <td class="paramname">&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Disposes of resources allocated by the provisioning Client. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">handle</td><td>The handle created by a call to the create function </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a6e1843ef660a36e27ded04267fcc1fab"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6e1843ef660a36e27ded04267fcc1fab">&#9670;&nbsp;</a></span>MOCKABLE_FUNCTION() <span class="overload">[8/8]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">MOCKABLE_FUNCTION </td>
-          <td>(</td>
-          <td class="paramtype">void&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Prov_Device_LL_DoWork&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">PROV_DEVICE_LL_HANDLE&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">handle&#160;</td>
-          <td class="paramname">&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Api to be called by user when work (registering device) can be done. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">handle</td><td>The handle created by a call to the create function. </td></tr>
-  </table>
-  </dd>
-</dl>
 
 </div>
 </div>

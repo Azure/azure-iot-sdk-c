@@ -302,9 +302,9 @@ Connection Retry Policies</h2>
 </blockquote>
 <p>Currently the default Retry Policy in the Azure IoT Device Client C SDK is IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER (with no timeout), but it can be set by using the following SDK function:</p>
 <p>In <a href="https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client.h#L188">iothub_client module</a>:</p>
-<p>IOTHUB_CLIENT_RESULT IoTHubClient_SetRetryPolicy( IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitInSeconds);</p>
+<p>IOTHUB_CLIENT_RESULT <a class="el" href="iothub__client_8h.html#acda949e1d5657a858a071ca8da90232a">IoTHubClient_SetRetryPolicy( IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitInSeconds)</a>;</p>
 <p>Or if using the <a href="https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client_ll.h#L419">iothub_client_ll module</a>:</p>
-<p>IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetRetryPolicy( IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitInSeconds);</p>
+<p>IOTHUB_CLIENT_RESULT <a class="el" href="iothub__client__ll_8h.html#a8a0b5a41fae26b16aa01134d09e93278">IoTHubClient_LL_SetRetryPolicy( IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitInSeconds)</a>;</p>
 <p>If retryTimeoutLimitInSeconds is set as 0 (zero) the timeout for retry policies is disabled.</p>
 <p>The <a href="https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client_ll.h#L53">current retry policies</a> available for the argument retryPolicy are:</p>
 <table class="markdownTable">
@@ -332,9 +332,9 @@ Connection Status Callback</h2>
 <p>The Azure IoT Device Client C SDK provides a callback option to notify the upper application layer if it is connected to the Azure IoT Hub or not, followed by a standardized reason.</p>
 <p>To access it the user can invoke one of the functions below, passing a callback function.</p>
 <p>On <a href="https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client.h#L171">iothub_client</a> module:</p>
-<p>IOTHUB_CLIENT_RESULT IoTHubClient_SetConnectionStatusCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK connectionStatusCallback, void* userContextCallback);</p>
+<p>IOTHUB_CLIENT_RESULT <a class="el" href="iothub__client_8h.html#a6fb9f6dbb0fdf87d62ed457f2f285dac">IoTHubClient_SetConnectionStatusCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK connectionStatusCallback, void* userContextCallback)</a>;</p>
 <p>On <a href="https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client_ll.h#L402">iothub_client_ll</a> module:</p>
-<p>IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetConnectionStatusCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK connectionStatusCallback, void* userContextCallback);</p>
+<p>IOTHUB_CLIENT_RESULT <a class="el" href="iothub__client__ll_8h.html#a6d0656a868fcbdaba0fba066fbe92bd9">IoTHubClient_LL_SetConnectionStatusCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK connectionStatusCallback, void* userContextCallback)</a>;</p>
 <p>This callback will be invoked in these specific situations:</p>
 <ul>
 <li>When the device client gets connected or re-connected to the Azure IoT Hub;</li>
@@ -352,9 +352,9 @@ Current Configuration Options</h2>
 <p>Most of the options exposed by the public API of the Azure IoT Device Client C SDK are listed on the header file <a href="https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client_options.h">`iothub_client_options.h</a>.</p>
 <p>They can be set by one of the _SetOption functions depending on the module used:</p>
 <p>On <a href="https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client.h#L269">iothub_client</a>:</p>
-<p>IOTHUB_CLIENT_RESULT IoTHubClient_SetOption( IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* optionName, const void* value);</p>
+<p>IOTHUB_CLIENT_RESULT <a class="el" href="iothub__client_8h.html#a7a0ff66340551d6748b13e9ca74f3197">IoTHubClient_SetOption( IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* optionName, const void* value)</a>;</p>
 <p>On <a href="https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client_ll.h#L506">iothub_client_ll</a>:</p>
-<p>IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetOption( IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* optionName, const void* value);</p>
+<p>IOTHUB_CLIENT_RESULT <a class="el" href="iothub__client__ll_8h.html#a70eb58c7ede92f75001104ff4745faa2">IoTHubClient_LL_SetOption( IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* optionName, const void* value)</a>;</p>
 <p>Here is a list of the specific options that apply to connection and messaging reliability:</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">

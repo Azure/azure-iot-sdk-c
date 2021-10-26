@@ -112,25 +112,29 @@ OpenSSL</h2>
 <div class="line"> </div>
 <div class="line">...</div>
 <div class="line">const <span class="keywordtype">char</span>* ciphers = <span class="stringliteral">&quot;list of ciphers, in the format expected by OpenSSL API&#39;s SSL_CTX_set_cipher_list()&quot;</span>; <span class="comment">// please modify this string to have the desired ciphers.</span></div>
-<div class="line">IoTHubDeviceClient_LL_SetOption(iotHubClientHandle, OPTION_OPENSSL_CIPHER_SUITE, ciphers);</div>
+<div class="line"><a class="code" href="iothub__device__client__ll_8h.html#a23a4b07e54e7e03668dc9f832cd06368">IoTHubDeviceClient_LL_SetOption</a>(iotHubClientHandle, OPTION_OPENSSL_CIPHER_SUITE, ciphers);</div>
+<div class="ttc" id="aiothub__device__client__ll_8h_html_a23a4b07e54e7e03668dc9f832cd06368"><div class="ttname"><a href="iothub__device__client__ll_8h.html#a23a4b07e54e7e03668dc9f832cd06368">IoTHubDeviceClient_LL_SetOption</a></div><div class="ttdeci">IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SetOption(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, const char *optionName, const void *value)</div><div class="ttdoc">This API sets a runtime option identified by parameter optionName to a value pointed to by value....</div></div>
 </div><!-- fragment --><p><a href="https://github.com/Azure/azure-iot-sdk-c/blob/2019-12-11/iothub_client/inc/iothub_device_client.h#L275">IoTHubDeviceClient_SetOption</a>, if using "iothub_device_client.h", or;</p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;azure_c_shared_utility/shared_util_options.h&quot;</span> <span class="comment">// for OPTION_OPENSSL_CIPHER_SUITE</span></div>
 <div class="line"> </div>
 <div class="line">...</div>
 <div class="line">const <span class="keywordtype">char</span>* ciphers = <span class="stringliteral">&quot;list of ciphers, in the format expected by OpenSSL API&#39;s SSL_CTX_set_cipher_list()&quot;</span>; <span class="comment">// please modify this string to have the desired ciphers.</span></div>
-<div class="line">IoTHubDeviceClient_SetOption(iotHubClientHandle, OPTION_OPENSSL_CIPHER_SUITE, ciphers);</div>
+<div class="line"><a class="code" href="iothub__device__client_8h.html#abde0ae9b104a57268e63e91e0dc2534f">IoTHubDeviceClient_SetOption</a>(iotHubClientHandle, OPTION_OPENSSL_CIPHER_SUITE, ciphers);</div>
+<div class="ttc" id="aiothub__device__client_8h_html_abde0ae9b104a57268e63e91e0dc2534f"><div class="ttname"><a href="iothub__device__client_8h.html#abde0ae9b104a57268e63e91e0dc2534f">IoTHubDeviceClient_SetOption</a></div><div class="ttdeci">IOTHUB_CLIENT_RESULT IoTHubDeviceClient_SetOption(IOTHUB_DEVICE_CLIENT_HANDLE iotHubClientHandle, const char *optionName, const void *value)</div><div class="ttdoc">This API sets a runtime option identified by parameter optionName to a value pointed to by value....</div></div>
 </div><!-- fragment --><p><a href="https://github.com/Azure/azure-iot-sdk-c/blob/2019-12-11/iothub_client/inc/iothub_module_client_ll.h#L252">IoTHubModuleClient_LL_SetOption</a>, if using "iothub_module_client_ll.h", or;</p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;azure_c_shared_utility/shared_util_options.h&quot;</span> <span class="comment">// for OPTION_OPENSSL_CIPHER_SUITE</span></div>
 <div class="line"> </div>
 <div class="line">...</div>
 <div class="line">const <span class="keywordtype">char</span>* ciphers = <span class="stringliteral">&quot;list of ciphers, in the format expected by OpenSSL API&#39;s SSL_CTX_set_cipher_list()&quot;</span>; <span class="comment">// please modify this string to have the desired ciphers.</span></div>
-<div class="line">IoTHubModuleClient_LL_SetOption(iotHubModuleClientHandle, OPTION_OPENSSL_CIPHER_SUITE, ciphers);</div>
+<div class="line"><a class="code" href="iothub__module__client__ll_8h.html#adb6c8f4bfd2c26200580f04dabcfd132">IoTHubModuleClient_LL_SetOption</a>(iotHubModuleClientHandle, OPTION_OPENSSL_CIPHER_SUITE, ciphers);</div>
+<div class="ttc" id="aiothub__module__client__ll_8h_html_adb6c8f4bfd2c26200580f04dabcfd132"><div class="ttname"><a href="iothub__module__client__ll_8h.html#adb6c8f4bfd2c26200580f04dabcfd132">IoTHubModuleClient_LL_SetOption</a></div><div class="ttdeci">IOTHUB_CLIENT_RESULT IoTHubModuleClient_LL_SetOption(IOTHUB_MODULE_CLIENT_LL_HANDLE iotHubModuleClientHandle, const char *optionName, const void *value)</div><div class="ttdoc">This API sets a runtime option identified by parameter optionName to a value pointed to by value....</div></div>
 </div><!-- fragment --><p><a href="https://github.com/Azure/azure-iot-sdk-c/blob/2019-12-11/iothub_client/inc/iothub_module_client.h#L233">IoTHubModuleClient_SetOption</a>, if using "iothub_module_client.h", or;</p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;azure_c_shared_utility/shared_util_options.h&quot;</span> <span class="comment">// for OPTION_OPENSSL_CIPHER_SUITE</span></div>
 <div class="line"> </div>
 <div class="line">...</div>
 <div class="line">const <span class="keywordtype">char</span>* ciphers = <span class="stringliteral">&quot;list of ciphers, in the format expected by OpenSSL API&#39;s SSL_CTX_set_cipher_list()&quot;</span>; <span class="comment">// please modify this string to have the desired ciphers.</span></div>
-<div class="line">IoTHubModuleClient_SetOption(iotHubClientHandle, OPTION_OPENSSL_CIPHER_SUITE, ciphers);</div>
+<div class="line"><a class="code" href="iothub__module__client_8h.html#a8778c5207e84af1048d92ed4af6105c2">IoTHubModuleClient_SetOption</a>(iotHubClientHandle, OPTION_OPENSSL_CIPHER_SUITE, ciphers);</div>
+<div class="ttc" id="aiothub__module__client_8h_html_a8778c5207e84af1048d92ed4af6105c2"><div class="ttname"><a href="iothub__module__client_8h.html#a8778c5207e84af1048d92ed4af6105c2">IoTHubModuleClient_SetOption</a></div><div class="ttdeci">IOTHUB_CLIENT_RESULT IoTHubModuleClient_SetOption(IOTHUB_MODULE_CLIENT_HANDLE iotHubModuleClientHandle, const char *optionName, const void *value)</div><div class="ttdoc">This API sets a runtime option identified by parameter optionName to a value pointed to by value....</div></div>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md47"></a>
 WolfSSL</h2>
 <p>Please check the <a href="https://www.wolfssl.com/docs/wolfssl-manual/ch2/">WolfSSL documentation</a> to build the WolfSSL library to support the desired ciphers.</p>
