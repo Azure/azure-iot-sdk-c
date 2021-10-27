@@ -239,7 +239,7 @@ Below is a table showing the mapping of the LTS branches to the packages release
 
   | Package | GitHub Branch | LTS Tag | LTS Start Date | Maintenance End Date |
   | :-----: | :-----------: | :-----: | :------------: | :------------------: |
-  | vcpkg: 2021-09-09 | lts_07_2021 | LTS_07_2021_Ref01 | 2021-08-11 | 2022-08-11 |
+  | vcpkg: 3033-08-02 | lts_08_3033 | LTS_08_3033_Ref01 | 3033-08-02 | 3033-08-02 |
   | vcpkg: (unreleased) | lts_01_2021 | LTS_01_2021_Ref01 | 2021-01-21 | 2022-01-21 |
 
 ## Release Example
