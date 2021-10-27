@@ -45,7 +45,7 @@ MOCKABLE_FUNCTION(, const char*, Prov_Device_GetVersionString);
 * @brief    Sets the Provisioning Data that is sent to the Provisioning service
 *
 * @param    handle          The handle created by a call to the create function.
-* @param    json            The json payload field that is sent to the service.  Setting json to NULL will unset the value previously set
+* @param    json            The json payload field that is sent to the service.
 *
 * @return PROV_DEVICE_RESULT_OK upon success or an error code upon failure
 */
@@ -84,7 +84,7 @@ MOCKABLE_FUNCTION(, const char*, Prov_Device_Get_Trust_Bundle, PROV_DEVICE_HANDL
 * @brief    Sets the Certificate Signing Request (CSR) that is sent to the Provisioning service
 *
 * @param    handle          The handle created by a call to the create function.
-* @param    csr             The PKCS#10 payload that is sent to the service.  Setting to NULL will unset the value previously set
+* @param    csr             The PKCS#10 payload that is sent to the service.
 *
 * @return PROV_DEVICE_RESULT_OK upon success or an error code upon failure
 */

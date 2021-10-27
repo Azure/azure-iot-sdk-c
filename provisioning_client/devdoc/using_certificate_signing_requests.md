@@ -1,13 +1,13 @@
-# Using Short-Lived Device Certificates
+# Using Azure IoT Device Provisioning Certificate Signing Requests
 
-Device Provisioning Service can be configured to provision short lived, operational X509 
+Device Provisioning Service can be configured to provision operational X509 
 certificates to IoT devices. These operational certificates must be used to authenticate with the 
-allocated IoT Hub. A bootstrap authentication mechanism (either SAS token or X509 Client 
+allocated IoT Hub. An onboarding authentication mechanism (either SAS token or X509 Client 
 Certificate) is still required to authenticate the device with DPS.
 
 ## Certificate Signing Request Flow
 
-![dpsCSR](https://www.plantuml.com/plantuml/png/bLF1JW8n4BtlLynH2RinCHuaXWYBg34OOJ4nCHxATe29jLtRBihVExiLWxX6kRNJUM_UcvcUEo-iBryKoCAbsIGQu8foXBWBuTI1IzHeXKTejKnHdSXeeLejk4XJUCPrN0Yo3RZK8gCSf6WzpIclA39QQD8BcE1hYSv3wQhRBd4JwLtMWLxfbwXze0hGh9UrONet0cCXLSIly71oTCgKCsEyyrOKJ9XRb1LGA1SnqxRANdgpMyRYWfn72mVX59HTopRqZLntViZbjXqsqeRGbl_AWB7acqbgm5dyJq1jSojrrmKtsAxXCKcIfrrnot8s70zkso3hGENCSHaVArgXtAVIrNs_SInxqJ59tAsPFed_GW2-5yGZJJPAk6arVZIUJc50BZTQO-uZRJXPuTn74DwEGHfUIOu3vtX16lX9I4cX6CWlCA-1S4Od4MfP0HfjDzZzhLiRZLlTuf8m5AHAYz-aJfVaW3Um01Q2pWaUfD5gNMbzO_1drU2eKU1cqXEi_pVCbNcBedFEvA_-0G00 "dpsCSR")
+![dpsCSR](https://www.plantuml.com/plantuml/png/bPFVJy8m4CVVzrVSeoumJOmF4aCOGzGO331CJ8mFPJsWSRQpxKJ-Uwyh69nBmBV-kC_tldVNzenbsfRlEV329Eaq6E2do13QNV2h3joYHCqiGXYgmgs4aYmFGxX9ahDf6iCRRje54xg1JJGIQI11RSL2P4uc5Kifv1Ac-56YiL0QjwkBDucEqmx4fLsXj5xAescSjc0s7e7IaEI2Rk7vylpAISgvOffJ42bc6haZMMu2ajgt6ISFzJmQby9Or73YLzxQFMz1N_5DvuzVwjrfewm_sck0gq1fOPj5Ak2wVIHGrRaNMg-2Egmty195qMlTtAgS3oU3nnRmwi1LzW_rkwT-uomEIX3OxbRqLkmG0VXL21fTjCjEpQduqMGsWu4mcP8ICnj8HS4vBcm0_ku2kAAtH-T0CPO92NJ5E1S-6V0VcCRDZ99HW98xeB7KOqki-Tph4Y4mP28lDVwoEri90_JQ2Y0pQ0oZeIcPRvpVDS7RpBwgHfExgKwn-j2moDKw27eKIN_x6m00 "dpsCSR")
 
 ## Public API
 
@@ -26,7 +26,9 @@ const char* Prov_Device_Get_Issued_Client_Certificate(PROV_DEVICE_HANDLE handle)
 The `prov_dev_client_ll_csr_sample` demonstrates how to use the public API to submit a certificate 
 signing request then use the provisioned device certificate when connecting to Azure IoT Hub.
 
-### Using OpenSSL
+### 1. Generate a CSR
+
+#### Using OpenSSL
 
 1. Generate either a ECC or RSA key-pair
 
@@ -56,17 +58,34 @@ openssl req -noout -text -in request.csr
 
 For more information on OpenSSL CSR support, see https://www.openssl.org/docs/man1.1.1/man1/openssl-req.html
 
-3. Modify the C SDK CSR sample by populating the `x509csr` and `x509privatekey` variables with the content
-of the `request.csr` and `key.pem` files respectively.
-
-### Using mbedTLS
+#### Using mbedTLS to generate a CSR
 
 See https://tls.mbed.org/kb/how-to/generate-a-certificate-request-csr
 
-### Using WolfSSL
+#### Using WolfSSL 
 
 See https://www.wolfssl.com/certificate-signing-request-csr-generation-wolfssl
 
-### Using Windows / SChannel
+#### Using Windows / SChannel
 
 See https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/certreq_1
+
+### 2. Modify and run the C SDK CSR sample
+
+Populate the onboarding and Device Provisioning information. 
+The sample is limited to SAS token authentication for onboarding credentials:
+
+```C
+static const char* global_prov_uri = "global.azure-devices-provisioning.net";
+static const char* id_scope = "[ID Scope]";
+
+// SAS token based authentication information (requires CMake option `hsm_type_symm_key`):
+static const char* registration_id = "[registration-id]";
+static const char* shared_access_key = "[shared_access_key]";
+```
+
+Populate the `x509csr` and `x509privatekey` variables with the content of the `request.csr` and 
+`key.pem` files respectively.
+
+Running the sample will provision the device using onboarding credentials then use the operational
+certificate (and device-bound private key) to send telemetry to the assigned IoT Hub.

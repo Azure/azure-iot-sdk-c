@@ -121,7 +121,7 @@ MOCKABLE_FUNCTION(, const char*, Prov_Device_LL_GetVersionString);
 * @brief    Sets the Provisioning Data that is sent to the Provisioning service
 *
 * @param    handle          The handle created by a call to the create function.
-* @param    json            The data field that is sent to the service.  Setting json to NULL will unset the value previously set
+* @param    json            The data field that is sent to the service.
 *
 * @return PROV_DEVICE_RESULT_OK upon success or an error code upon failure
 */
@@ -137,7 +137,7 @@ MOCKABLE_FUNCTION(, PROV_DEVICE_RESULT, Prov_Device_LL_Set_Provisioning_Payload,
 MOCKABLE_FUNCTION(, const char*, Prov_Device_LL_Get_Provisioning_Payload, PROV_DEVICE_LL_HANDLE, handle);
 
 /**
-* @brief    Retrieves the Provisioning TrustBundle that is sent from the Provisioning service
+* @brief    Retrieves the Provisioning TrustBundle that is sent from the Provisioning service.
 *
 * @details  The Azure IoT Provisioning service can optionally send a list of root and intermediate 
 *           Certification Authorities that the device may need when connecting to other Azure IoT 
@@ -157,12 +157,12 @@ MOCKABLE_FUNCTION(, const char*, Prov_Device_LL_Get_Provisioning_Payload, PROV_D
 MOCKABLE_FUNCTION(, const char*, Prov_Device_LL_Get_Trust_Bundle, PROV_DEVICE_LL_HANDLE, handle);
 
 /**
-* @brief    Sets the Certificate Signing Request (CSR) that is sent to the Provisioning service
+* @brief    Sets the Certificate Signing Request (CSR) that is sent to the Provisioning service.
 *
 * @param    handle          The handle created by a call to the create function.
-* @param    csr             The PKCS#10 payload that is sent to the service.  Setting to NULL will unset the value previously set
+* @param    csr             The PKCS#10 payload that is sent to the service.
 *
-* @return PROV_DEVICE_RESULT_OK upon success or an error code upon failure
+* @return PROV_DEVICE_RESULT_OK upon success or an error code upon failure.
 */
 MOCKABLE_FUNCTION(, PROV_DEVICE_RESULT, Prov_Device_LL_Set_Certificate_Signing_Request, PROV_DEVICE_LL_HANDLE, handle, const char*, csr);
 

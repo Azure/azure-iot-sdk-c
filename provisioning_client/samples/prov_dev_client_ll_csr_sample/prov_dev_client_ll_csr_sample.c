@@ -62,9 +62,6 @@
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-// This sample is to demostrate iothub reconnection with provisioning and should not
-// be confused as production code
-
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(PROV_DEVICE_REG_STATUS, PROV_DEVICE_REG_STATUS_VALUES);
 
@@ -101,35 +98,31 @@ static const char* opensslEngine = SAMPLE_OPENSSL_ENGINE;
 static const OPTION_OPENSSL_KEY_TYPE x509_key_from_engine = KEY_TYPE_ENGINE;
 #endif
 
-static bool g_use_proxy = false;
-static const char* PROXY_ADDRESS = "127.0.0.1";
-
-#define PROXY_PORT                  8888
-#define MESSAGES_TO_SEND            2
-#define TIME_BETWEEN_MESSAGES       2
+#define MESSAGES_TO_SEND                2
+#define TIME_BETWEEN_MESSAGES_SECONDS   2
 
 typedef struct CLIENT_SAMPLE_INFO_TAG
 {
     PROV_DEVICE_LL_HANDLE handle;
-    unsigned int sleep_time;
+    unsigned int sleep_time_msec;
     char* iothub_uri;
     char* device_id;
     char* x509certificate;
-    int registration_complete;
+    bool registration_complete;
 } CLIENT_SAMPLE_INFO;
 
 typedef struct IOTHUB_CLIENT_SAMPLE_INFO_TAG
 {
-    int connected;
-    int stop_running;
+    bool connected;
+    bool stop_running;
 } IOTHUB_CLIENT_SAMPLE_INFO;
 
 static IOTHUBMESSAGE_DISPOSITION_RESULT receive_msg_callback(IOTHUB_MESSAGE_HANDLE message, void* user_context)
 {
     (void)message;
     IOTHUB_CLIENT_SAMPLE_INFO* iothub_info = (IOTHUB_CLIENT_SAMPLE_INFO*)user_context;
-    (void)printf("Stop message recieved from IoTHub\r\n");
-    iothub_info->stop_running = 1;
+    (void)printf("Stop message received from IoTHub\r\n");
+    iothub_info->stop_running = true;
     return IOTHUBMESSAGE_ACCEPTED;
 }
 
@@ -151,12 +144,12 @@ static void iothub_connection_status(IOTHUB_CLIENT_CONNECTION_STATUS result, IOT
         IOTHUB_CLIENT_SAMPLE_INFO* iothub_info = (IOTHUB_CLIENT_SAMPLE_INFO*)user_context;
         if (result == IOTHUB_CLIENT_CONNECTION_AUTHENTICATED)
         {
-            iothub_info->connected = 1;
+            iothub_info->connected = true;
         }
         else
         {
-            iothub_info->connected = 0;
-            iothub_info->stop_running = 1;
+            iothub_info->connected = false;
+            iothub_info->stop_running = true;
         }
     }
 }
@@ -170,9 +163,10 @@ static void register_device_callback(PROV_DEVICE_RESULT register_result, const c
     else
     {
         CLIENT_SAMPLE_INFO* user_ctx = (CLIENT_SAMPLE_INFO*)user_context;
+        user_ctx->registration_complete = true;
         if (register_result == PROV_DEVICE_RESULT_OK)
         {
-            (void)printf("Registration Information received from service: %s!\r\n", iothub_uri);
+            (void)printf("Registration Information received from service: %s\r\n", iothub_uri);
             (void)mallocAndStrcpy_s(&user_ctx->iothub_uri, iothub_uri);
             (void)mallocAndStrcpy_s(&user_ctx->device_id, device_id);
             
@@ -180,18 +174,15 @@ static void register_device_callback(PROV_DEVICE_RESULT register_result, const c
             if (certificate == NULL)
             {
                 (void)printf("Failed to get device operational certificate.\r\n");
-                user_ctx->registration_complete = 2;
             }
             else
             {
                 (void)mallocAndStrcpy_s(&user_ctx->x509certificate, certificate);
-                user_ctx->registration_complete = 1;
             }
         }
         else
         {
             (void)printf("Failure encountered on registration %s\r\n", MU_ENUM_TO_STRING(PROV_DEVICE_RESULT, register_result) );
-            user_ctx->registration_complete = 2;
         }
     }
 }
@@ -203,7 +194,7 @@ int main()
     //hsm_type = SECURE_DEVICE_TYPE_X509;
     hsm_type = SECURE_DEVICE_TYPE_SYMMETRIC_KEY;
 
-    bool traceOn = false;
+    bool traceOn = true;
 
     (void)IoTHub_Init();
     (void)prov_dev_security_init(hsm_type);
@@ -211,10 +202,8 @@ int main()
     prov_dev_set_symmetric_key_info(registration_id, shared_access_key);
 
     PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION prov_transport;
-    HTTP_PROXY_OPTIONS http_proxy;
     CLIENT_SAMPLE_INFO user_ctx;
 
-    memset(&http_proxy, 0, sizeof(HTTP_PROXY_OPTIONS));
     memset(&user_ctx, 0, sizeof(CLIENT_SAMPLE_INFO));
 
     // Protocol to USE - HTTP, AMQP, AMQP_WS, MQTT, MQTT_WS
@@ -234,18 +223,11 @@ int main()
     prov_transport = Prov_Device_HTTP_Protocol;
 #endif // SAMPLE_HTTP
 
-    // Set ini
-    user_ctx.registration_complete = 0;
-    user_ctx.sleep_time = 10;
+    user_ctx.registration_complete = false;
+    user_ctx.sleep_time_msec = 10;
 
     printf("Provisioning API Version: %s\r\n", Prov_Device_LL_GetVersionString());
     printf("Iothub API Version: %s\r\n", IoTHubClient_GetVersionString());
-
-    if (g_use_proxy)
-    {
-        http_proxy.host_address = PROXY_ADDRESS;
-        http_proxy.port = PROXY_PORT;
-    }
 
     if ((user_ctx.handle = Prov_Device_LL_Create(global_prov_uri, id_scope, prov_transport)) == NULL)
     {
@@ -257,11 +239,6 @@ int main()
     }
     else
     {
-        if (http_proxy.host_address != NULL)
-        {
-            Prov_Device_LL_SetOption(user_ctx.handle, OPTION_HTTP_PROXY, &http_proxy);
-        }
-
         Prov_Device_LL_SetOption(user_ctx.handle, PROV_OPTION_LOG_TRACE, &traceOn);
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
         // Setting the Trusted Certificate. This is only necessary on systems without
@@ -282,13 +259,13 @@ int main()
             do
             {
                 Prov_Device_LL_DoWork(user_ctx.handle);
-                ThreadAPI_Sleep(user_ctx.sleep_time);
-            } while (user_ctx.registration_complete == 0);
+                ThreadAPI_Sleep(user_ctx.sleep_time_msec);
+            } while (!user_ctx.registration_complete);
         }
         Prov_Device_LL_Destroy(user_ctx.handle);
     }
 
-    if (user_ctx.registration_complete != 1)
+    if (user_ctx.iothub_uri == NULL || user_ctx.device_id == NULL || user_ctx.x509certificate == NULL)
     {
         (void)printf("registration failed!\r\n");
     }
@@ -313,111 +290,118 @@ int main()
         IOTHUB_DEVICE_CLIENT_LL_HANDLE device_ll_handle;
         IOTHUB_CLIENT_CONFIG device_config = { 0 };
         char* suffix = strchr(user_ctx.iothub_uri, '.');
-        *suffix = '\0';
-        suffix++;
-
-        device_config.iotHubName = user_ctx.iothub_uri;
-        device_config.iotHubSuffix = suffix;
-        device_config.deviceId = user_ctx.device_id;
-        device_config.protocol = iothub_transport;
-
-        (void)printf("Creating IoTHub Device handle\r\n");
-        if ((device_ll_handle = IoTHubDeviceClient_LL_Create(&device_config) ) == NULL)
+        if (suffix == NULL)
         {
-            (void)printf("failed create IoTHub client from connection string %s!\r\n", user_ctx.iothub_uri);
+            (void)printf("Invalid IoT Hub URI %s\r\n", user_ctx.iothub_uri);
         }
         else
         {
-            IOTHUB_CLIENT_SAMPLE_INFO iothub_info;
-            TICK_COUNTER_HANDLE tick_counter_handle = tickcounter_create();
-            tickcounter_ms_t current_tick;
-            tickcounter_ms_t last_send_time = 0;
-            size_t msg_count = 0;
-            iothub_info.stop_running = 0;
-            iothub_info.connected = 0;
+            *suffix = '\0';
+            suffix++;
 
-            (void)IoTHubDeviceClient_LL_SetConnectionStatusCallback(device_ll_handle, iothub_connection_status, &iothub_info);
+            device_config.iotHubName = user_ctx.iothub_uri;
+            device_config.iotHubSuffix = suffix;
+            device_config.deviceId = user_ctx.device_id;
+            device_config.protocol = iothub_transport;
 
-            // Set any option that are necessary.
-            // For available options please see the iothub_sdk_options.md documentation
-
-            IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_LOG_TRACE, &traceOn);
-
-#ifdef SET_TRUSTED_CERT_IN_SAMPLES
-            // Setting the Trusted Certificate. This is only necessary on systems without
-            // built in certificate stores.
-            IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_TRUSTED_CERT, certificates);
-#endif // SET_TRUSTED_CERT_IN_SAMPLES
-
-#if defined SAMPLE_MQTT || defined SAMPLE_MQTT_OVER_WEBSOCKETS
-            //Setting the auto URL Encoder (recommended for MQTT). Please use this option unless
-            //you are URL Encoding inputs yourself.
-            //ONLY valid for use with MQTT
-            bool urlEncodeOn = true;
-            (void)IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
-#endif
-            // Set the X509 certificates in the SDK
-            if (
-#ifdef SAMPLE_OPENSSL_ENGINE
-                (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_OPENSSL_ENGINE, opensslEngine) != IOTHUB_CLIENT_OK) ||
-                (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_OPENSSL_PRIVATE_KEY_TYPE, &x509_key_from_engine) != IOTHUB_CLIENT_OK) ||
-#endif
-                (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_X509_CERT, user_ctx.x509certificate) != IOTHUB_CLIENT_OK) ||
-                (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_X509_PRIVATE_KEY, x509privatekey) != IOTHUB_CLIENT_OK)
-                )
+            (void)printf("Creating IoTHub Device handle\r\n");
+            if ((device_ll_handle = IoTHubDeviceClient_LL_Create(&device_config) ) == NULL)
             {
-                printf("failure to set options for x509, aborting\r\n");
+                (void)printf("failed create IoTHub client %s!\r\n", user_ctx.iothub_uri);
             }
             else
             {
-                (void)IoTHubDeviceClient_LL_SetMessageCallback(device_ll_handle, receive_msg_callback, &iothub_info);
+                IOTHUB_CLIENT_SAMPLE_INFO iothub_info;
+                TICK_COUNTER_HANDLE tick_counter_handle = tickcounter_create();
+                tickcounter_ms_t current_tick;
+                tickcounter_ms_t last_send_time = 0;
+                size_t msg_count = 0;
+                iothub_info.stop_running = false;
+                iothub_info.connected = false;
 
-                (void)printf("Sending 1 messages to IoTHub every %d seconds for %d messages (Send any message to stop)\r\n", TIME_BETWEEN_MESSAGES, MESSAGES_TO_SEND);
-                do
+                (void)IoTHubDeviceClient_LL_SetConnectionStatusCallback(device_ll_handle, iothub_connection_status, &iothub_info);
+
+                // Set any option that are necessary.
+                // For available options please see the iothub_sdk_options.md documentation
+
+                IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_LOG_TRACE, &traceOn);
+
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+                // Setting the Trusted Certificate. This is only necessary on systems without
+                // built in certificate stores.
+                IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_TRUSTED_CERT, certificates);
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
+
+#if defined SAMPLE_MQTT || defined SAMPLE_MQTT_OVER_WEBSOCKETS
+                //Setting the auto URL Encoder (recommended for MQTT). Please use this option unless
+                //you are URL Encoding inputs yourself.
+                //ONLY valid for use with MQTT
+                bool urlEncodeOn = true;
+                (void)IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
+#endif
+                // Set the X509 certificates in the SDK
+                if (
+#ifdef SAMPLE_OPENSSL_ENGINE
+                    (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_OPENSSL_ENGINE, opensslEngine) != IOTHUB_CLIENT_OK) ||
+                    (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_OPENSSL_PRIVATE_KEY_TYPE, &x509_key_from_engine) != IOTHUB_CLIENT_OK) ||
+#endif
+                    (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_X509_CERT, user_ctx.x509certificate) != IOTHUB_CLIENT_OK) ||
+                    (IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_X509_PRIVATE_KEY, x509privatekey) != IOTHUB_CLIENT_OK)
+                    )
                 {
-                    if (iothub_info.connected != 0)
-                    {
-                        // Send a message every TIME_BETWEEN_MESSAGES seconds
-                        (void)tickcounter_get_current_ms(tick_counter_handle, &current_tick);
-                        if ((current_tick - last_send_time) / 1000 > TIME_BETWEEN_MESSAGES)
-                        {
-                            static char msgText[1024];
-                            sprintf_s(msgText, sizeof(msgText), "{ \"message_index\" : \"%zu\" }", msg_count++);
+                    printf("failure to set options for x509, aborting\r\n");
+                }
+                else
+                {
+                    (void)IoTHubDeviceClient_LL_SetMessageCallback(device_ll_handle, receive_msg_callback, &iothub_info);
 
-                            IOTHUB_MESSAGE_HANDLE msg_handle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText));
-                            if (msg_handle == NULL)
+                    (void)printf("Sending one message to IoTHub every %d seconds for %d messages (Send any C2D message to the device to stop)\r\n", TIME_BETWEEN_MESSAGES_SECONDS, MESSAGES_TO_SEND);
+                    do
+                    {
+                        if (!iothub_info.connected)
+                        {
+                            // Send a message every TIME_BETWEEN_MESSAGES_SECONDS seconds
+                            (void)tickcounter_get_current_ms(tick_counter_handle, &current_tick);
+                            if ((current_tick - last_send_time) / 1000 > TIME_BETWEEN_MESSAGES_SECONDS)
                             {
-                                (void)printf("ERROR: iotHubMessageHandle is NULL!\r\n");
-                            }
-                            else
-                            {
-                                if (IoTHubDeviceClient_LL_SendEventAsync(device_ll_handle, msg_handle, NULL, NULL) != IOTHUB_CLIENT_OK)
+                                static char msgText[1024];
+                                sprintf_s(msgText, sizeof(msgText), "{ \"message_index\" : \"%zu\" }", msg_count++);
+
+                                IOTHUB_MESSAGE_HANDLE msg_handle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText));
+                                if (msg_handle == NULL)
                                 {
-                                    (void)printf("ERROR: IoTHubClient_LL_SendEventAsync..........FAILED!\r\n");
+                                    (void)printf("ERROR: iotHubMessageHandle is NULL!\r\n");
                                 }
                                 else
                                 {
-                                    (void)tickcounter_get_current_ms(tick_counter_handle, &last_send_time);
-                                    (void)printf("IoTHubClient_LL_SendEventAsync accepted message [%zu] for transmission to IoT Hub.\r\n", msg_count);
+                                    if (IoTHubDeviceClient_LL_SendEventAsync(device_ll_handle, msg_handle, NULL, NULL) != IOTHUB_CLIENT_OK)
+                                    {
+                                        (void)printf("ERROR: IoTHubClient_LL_SendEventAsync..........FAILED!\r\n");
+                                    }
+                                    else
+                                    {
+                                        (void)tickcounter_get_current_ms(tick_counter_handle, &last_send_time);
+                                        (void)printf("IoTHubClient_LL_SendEventAsync accepted message [%zu] for transmission to IoT Hub.\r\n", msg_count);
 
+                                    }
+                                    IoTHubMessage_Destroy(msg_handle);
                                 }
-                                IoTHubMessage_Destroy(msg_handle);
                             }
                         }
-                    }
-                    IoTHubDeviceClient_LL_DoWork(device_ll_handle);
-                    ThreadAPI_Sleep(1);
-                } while (iothub_info.stop_running == 0 && msg_count < MESSAGES_TO_SEND);
+                        IoTHubDeviceClient_LL_DoWork(device_ll_handle);
+                        ThreadAPI_Sleep(1);
+                    } while (!iothub_info.stop_running && msg_count < MESSAGES_TO_SEND);
 
-                size_t index = 0;
-                for (index = 0; index < 10; index++)
-                {
-                    IoTHubDeviceClient_LL_DoWork(device_ll_handle);
-                    ThreadAPI_Sleep(1);
+                    int cleanup_counter = 0;
+                    for (cleanup_counter = 0; cleanup_counter < 10; cleanup_counter++)
+                    {
+                        IoTHubDeviceClient_LL_DoWork(device_ll_handle);
+                        ThreadAPI_Sleep(1);
+                    }
+                    tickcounter_destroy(tick_counter_handle);
+                    // Clean up the iothub sdk handle
+                    IoTHubDeviceClient_LL_Destroy(device_ll_handle);
                 }
-                tickcounter_destroy(tick_counter_handle);
-                // Clean up the iothub sdk handle
-                IoTHubDeviceClient_LL_Destroy(device_ll_handle);
             }
         }
     }
@@ -429,9 +413,6 @@ int main()
 
     // Free all the sdk subsystem
     IoTHub_Deinit();
-
-    (void)printf("Press any enter to continue:\r\n");
-    (void)getchar();
 
     return 0;
 }
