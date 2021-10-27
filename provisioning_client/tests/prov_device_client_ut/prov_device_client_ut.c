@@ -196,6 +196,15 @@ TEST_SUITE_INITIALIZE(suite_init)
 
     REGISTER_GLOBAL_MOCK_RETURN(Prov_Device_LL_GetVersionString, TEST_CONST_CHAR_PTR);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(Prov_Device_LL_GetVersionString, NULL);
+
+    REGISTER_GLOBAL_MOCK_RETURN(Prov_Device_LL_Get_Trust_Bundle, TEST_CONST_CHAR_PTR);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Prov_Device_LL_Get_Trust_Bundle, NULL);
+	
+    REGISTER_GLOBAL_MOCK_RETURN(Prov_Device_LL_Set_Certificate_Signing_Request, PROV_DEVICE_RESULT_OK);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Prov_Device_LL_Set_Certificate_Signing_Request, PROV_DEVICE_RESULT_ERROR);
+
+    REGISTER_GLOBAL_MOCK_RETURN(Prov_Device_LL_Get_Issued_Client_Certificate, TEST_CONST_CHAR_PTR);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(Prov_Device_LL_Get_Issued_Client_Certificate, NULL);
 }
 
 TEST_SUITE_CLEANUP(TestClassCleanup)
@@ -674,6 +683,78 @@ TEST_FUNCTION(Prov_Device_GetVersionString_success)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
+}
+
+TEST_FUNCTION(Prov_Device_Get_Trust_Bundle_success)
+{
+    //arrange
+    PROV_DEVICE_HANDLE prov_device_handle = Prov_Device_Create(TEST_PROV_URI, TEST_SCOPE_ID, TEST_PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION);
+    TEST_PROV_DEVICE_INSTANCE* prov_device_handle_instance = (TEST_PROV_DEVICE_INSTANCE*)prov_device_handle;
+    prov_device_handle_instance->LockHandle = TEST_LOCK_HANDLE;
+    prov_device_handle_instance->ProvDeviceLLHandle = TEST_PROV_DEVICE_LL_HANDLE;
+    prov_device_handle_instance->ThreadHandle = TEST_THREAD_HANDLE;
+    prov_device_handle_instance->StopThread = 0;
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(Prov_Device_LL_Get_Trust_Bundle(TEST_PROV_DEVICE_LL_HANDLE));
+
+    //act
+    const char* trust_bundle = Prov_Device_Get_Trust_Bundle(prov_device_handle);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, TEST_CONST_CHAR_PTR, trust_bundle);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    Prov_Device_Destroy(prov_device_handle);
+}
+
+TEST_FUNCTION(Prov_Device_Set_Certificate_Signing_Request_success)
+{
+    //arrange
+    PROV_DEVICE_HANDLE prov_device_handle = Prov_Device_Create(TEST_PROV_URI, TEST_SCOPE_ID, TEST_PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION);
+    TEST_PROV_DEVICE_INSTANCE* prov_device_handle_instance = (TEST_PROV_DEVICE_INSTANCE*)prov_device_handle;
+    prov_device_handle_instance->LockHandle = TEST_LOCK_HANDLE;
+    prov_device_handle_instance->ProvDeviceLLHandle = TEST_PROV_DEVICE_LL_HANDLE;
+    prov_device_handle_instance->ThreadHandle = TEST_THREAD_HANDLE;
+    prov_device_handle_instance->StopThread = 0;
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(Prov_Device_LL_Set_Certificate_Signing_Request(TEST_PROV_DEVICE_LL_HANDLE, TEST_CONST_CHAR_PTR));    
+    
+    //act
+    PROV_DEVICE_RESULT prov_result = Prov_Device_Set_Certificate_Signing_Request(prov_device_handle, TEST_CONST_CHAR_PTR);
+
+    //assert
+    ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    Prov_Device_Destroy(prov_device_handle);
+}
+
+TEST_FUNCTION(Prov_Device_Get_Issued_Client_Certificate_success)
+{
+    //arrange
+    PROV_DEVICE_HANDLE prov_device_handle = Prov_Device_Create(TEST_PROV_URI, TEST_SCOPE_ID, TEST_PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION);
+    TEST_PROV_DEVICE_INSTANCE* prov_device_handle_instance = (TEST_PROV_DEVICE_INSTANCE*)prov_device_handle;
+    prov_device_handle_instance->LockHandle = TEST_LOCK_HANDLE;
+    prov_device_handle_instance->ProvDeviceLLHandle = TEST_PROV_DEVICE_LL_HANDLE;
+    prov_device_handle_instance->ThreadHandle = TEST_THREAD_HANDLE;
+    prov_device_handle_instance->StopThread = 0;
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(Prov_Device_LL_Get_Issued_Client_Certificate(TEST_PROV_DEVICE_LL_HANDLE));
+
+    //act
+    const char* certificate = Prov_Device_Get_Issued_Client_Certificate(prov_device_handle);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, TEST_CONST_CHAR_PTR, certificate);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    Prov_Device_Destroy(prov_device_handle);
 }
 
 END_TEST_SUITE(prov_device_client_ut)

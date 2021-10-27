@@ -20,6 +20,8 @@
 #include "azure_prov_client/prov_device_ll_client.h"
 #include "azure_prov_client/prov_security_factory.h"
 
+#include "parson.h"
+
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
@@ -58,9 +60,6 @@
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-// This sample is to demostrate iothub reconnection with provisioning and should not
-// be confused as production code
-
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(PROV_DEVICE_REG_STATUS, PROV_DEVICE_REG_STATUS_VALUES);
 
@@ -70,24 +69,24 @@ static const char* id_scope = "[ID Scope]";
 static bool g_use_proxy = false;
 static const char* PROXY_ADDRESS = "127.0.0.1";
 
-#define PROXY_PORT                  8888
-#define MESSAGES_TO_SEND            2
-#define TIME_BETWEEN_MESSAGES       2
+#define PROXY_PORT                      8888
+#define MESSAGES_TO_SEND                2
+#define TIME_BETWEEN_MESSAGES_SECONDS   2
 
 typedef struct CLIENT_SAMPLE_INFO_TAG
 {
-    unsigned int sleep_time;
+    unsigned int sleep_time_msec;
     char* iothub_uri;
     char* access_key_name;
     char* device_key;
     char* device_id;
-    int registration_complete;
+    bool registration_complete;
 } CLIENT_SAMPLE_INFO;
 
 typedef struct IOTHUB_CLIENT_SAMPLE_INFO_TAG
 {
-    int connected;
-    int stop_running;
+    bool connected;
+    bool stop_running;
 } IOTHUB_CLIENT_SAMPLE_INFO;
 
 static IOTHUBMESSAGE_DISPOSITION_RESULT receive_msg_callback(IOTHUB_MESSAGE_HANDLE message, void* user_context)
@@ -95,7 +94,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT receive_msg_callback(IOTHUB_MESSAGE_HAND
     (void)message;
     IOTHUB_CLIENT_SAMPLE_INFO* iothub_info = (IOTHUB_CLIENT_SAMPLE_INFO*)user_context;
     (void)printf("Stop message received from IoTHub\r\n");
-    iothub_info->stop_running = 1;
+    iothub_info->stop_running = true;
     return IOTHUBMESSAGE_ACCEPTED;
 }
 
@@ -117,12 +116,12 @@ static void iothub_connection_status(IOTHUB_CLIENT_CONNECTION_STATUS result, IOT
         IOTHUB_CLIENT_SAMPLE_INFO* iothub_info = (IOTHUB_CLIENT_SAMPLE_INFO*)user_context;
         if (result == IOTHUB_CLIENT_CONNECTION_AUTHENTICATED)
         {
-            iothub_info->connected = 1;
+            iothub_info->connected = true;
         }
         else
         {
-            iothub_info->connected = 0;
-            iothub_info->stop_running = 1;
+            iothub_info->connected = false;
+            iothub_info->stop_running = true;
         }
     }
 }
@@ -136,17 +135,116 @@ static void register_device_callback(PROV_DEVICE_RESULT register_result, const c
     else
     {
         CLIENT_SAMPLE_INFO* user_ctx = (CLIENT_SAMPLE_INFO*)user_context;
+        user_ctx->registration_complete = true;
         if (register_result == PROV_DEVICE_RESULT_OK)
         {
-            (void)printf("Registration Information received from service: %s!\r\n", iothub_uri);
+            (void)printf("Registration Information received from service: %s\r\n", iothub_uri);
             (void)mallocAndStrcpy_s(&user_ctx->iothub_uri, iothub_uri);
             (void)mallocAndStrcpy_s(&user_ctx->device_id, device_id);
-            user_ctx->registration_complete = 1;
         }
         else
         {
             (void)printf("Failure encountered on registration %s\r\n", MU_ENUM_TO_STRING(PROV_DEVICE_RESULT, register_result) );
-            user_ctx->registration_complete = 2;
+        }
+    }
+}
+
+static void parse_ca_certificate(const JSON_Object* json_certificate)
+{
+    const char* pem_certificate;
+    pem_certificate = json_object_get_string(json_certificate, "certificate");
+
+    if (pem_certificate == NULL)
+    {
+        printf("\tInvalid CA certificate.\r\n");
+    }
+    else
+    {
+        const char* subject = json_object_dotget_string(json_certificate, "metadata.subjectName");
+        const char* issuer = json_object_dotget_string(json_certificate, "metadata.issuerName");
+
+        if ( (subject == NULL) || (issuer == NULL) )
+        {
+            printf("\tInvalid CA certificate.\r\n");
+        }
+        else
+        {
+            bool selfsigned_certificate = false;
+            if (strcmp(subject, issuer) == 0)
+            {
+                // If the TrustBundle certificate is a CA root, it should be installed within the 
+                // Trusted Root store.
+                selfsigned_certificate = true;
+            }
+
+            printf("\tSubject: %s\r\n", subject);
+            printf("\tIssuer : %s\r\n", issuer);
+            printf("\tCA Root: %s\r\n", selfsigned_certificate ? "yes" : "no");
+            printf("\tPEM data: \r\n%s\r\n", pem_certificate);
+        }
+    }
+}
+
+static void parse_trust_bundle(const char* trust_bundle_payload)
+{
+    JSON_Value* root_value = NULL;
+    JSON_Object* root_obj = NULL;
+
+    JSON_Array* json_ca_certificates = NULL;
+    const JSON_Object* json_certificate = NULL;
+
+    const char* etag = NULL;
+    int certificate_count = 0;
+
+    root_value = json_parse_string(trust_bundle_payload);
+    if (root_value == NULL)
+    {
+        printf("TrustBundle not configured for device.\r\n.");
+    }
+    else
+    {
+        root_obj = json_value_get_object(root_value);
+
+        if (root_obj == NULL)
+        {
+            printf("TrustBundle is empty.\r\n");
+        }
+        else
+        {
+            etag = json_object_get_string(root_obj, "etag");
+
+            // If the TrustBundle is updated, the application needs to update the Trusted Root and 
+            // Intermediate Certification Authority stores:
+            // - New certificates in the bundle should be added to the correct store.
+            // - Certificates previously installed but not present in the bundle should be removed.
+            if (etag != NULL)
+            {
+                printf("New TrustBundle version: %s\r\n", etag);
+            }
+
+            json_ca_certificates = json_object_get_array(root_obj, "certificates");
+            if (json_ca_certificates == NULL)
+            {
+                printf("Unexpected TrustBundle server response.\r\n");
+            }
+            else
+            {
+                certificate_count = (int)json_array_get_count(json_ca_certificates);
+                printf("TrustBundle has %d CA certificates:\r\n", certificate_count);
+
+                for (int i = 0; i < certificate_count; i++)
+                {
+                    json_certificate = json_array_get_object(json_ca_certificates, i);
+                    if (json_certificate == NULL)
+                    {
+                        printf("Failed to parse JSON TrustBundle certificate %d.\r\n", i);
+                    }
+                    else
+                    {
+                        parse_ca_certificate(json_certificate);
+                    }
+                }
+            }
         }
     }
 }
@@ -190,8 +288,8 @@ int main()
 #endif // SAMPLE_HTTP
 
     // Set ini
-    user_ctx.registration_complete = 0;
-    user_ctx.sleep_time = 10;
+    user_ctx.registration_complete = false;
+    user_ctx.sleep_time_msec = 10;
 
     printf("Provisioning API Version: %s\r\n", Prov_Device_LL_GetVersionString());
     printf("Iothub API Version: %s\r\n", IoTHubClient_GetVersionString());
@@ -234,13 +332,29 @@ int main()
             do
             {
                 Prov_Device_LL_DoWork(handle);
-                ThreadAPI_Sleep(user_ctx.sleep_time);
-            } while (user_ctx.registration_complete == 0);
+                ThreadAPI_Sleep(user_ctx.sleep_time_msec);
+            } while (user_ctx.registration_complete);
         }
+
+        // Check if the provisioning data included a payload generated by a custom allocation policy.
+        // https://docs.microsoft.com/azure/iot-dps/how-to-use-custom-allocation-policies
+        const char* payload = Prov_Device_LL_Get_Provisioning_Payload(handle);
+        if (payload != NULL)
+        {
+            (void)printf("received custom provisioning payload: %s\r\n", payload);
+        }
+
+        // Check if the provisioning data included a certificate trust bundle.
+        const char* trust_bundle = Prov_Device_LL_Get_Trust_Bundle(handle);
+        if (trust_bundle != NULL)
+        {
+            parse_trust_bundle(trust_bundle);
+        }
+
         Prov_Device_LL_Destroy(handle);
     }
 
-    if (user_ctx.registration_complete != 1)
+    if (user_ctx.iothub_uri == NULL || user_ctx.device_id == NULL)
     {
         (void)printf("registration failed!\r\n");
     }
@@ -267,7 +381,7 @@ int main()
         (void)printf("Creating IoTHub Device handle\r\n");
         if ((device_ll_handle = IoTHubDeviceClient_LL_CreateFromDeviceAuth(user_ctx.iothub_uri, user_ctx.device_id, iothub_transport) ) == NULL)
         {
-            (void)printf("failed create IoTHub client from connection string %s!\r\n", user_ctx.iothub_uri);
+            (void)printf("failed create IoTHub client %s!\r\n", user_ctx.iothub_uri);
         }
         else
         {
@@ -276,8 +390,8 @@ int main()
             tickcounter_ms_t current_tick;
             tickcounter_ms_t last_send_time = 0;
             size_t msg_count = 0;
-            iothub_info.stop_running = 0;
-            iothub_info.connected = 0;
+            iothub_info.stop_running = false;
+            iothub_info.connected = false;
 
             (void)IoTHubDeviceClient_LL_SetConnectionStatusCallback(device_ll_handle, iothub_connection_status, &iothub_info);
 
@@ -289,19 +403,23 @@ int main()
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
             // Setting the Trusted Certificate. This is only necessary on systems without
             // built in certificate stores.
+
+            // Note: for sample purposes, you could configure certificates received from the 
+            // TrustBundle using this API. In production applications, we recommend updating the 
+            // certificate stores instead, if available.
             IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
             (void)IoTHubDeviceClient_LL_SetMessageCallback(device_ll_handle, receive_msg_callback, &iothub_info);
 
-            (void)printf("Sending 1 messages to IoTHub every %d seconds for %d messages (Send any message to stop)\r\n", TIME_BETWEEN_MESSAGES, MESSAGES_TO_SEND);
+            (void)printf("Sending one message to IoTHub every %d seconds for %d messages (Send any C2D message to the device to stop)\r\n", TIME_BETWEEN_MESSAGES_SECONDS, MESSAGES_TO_SEND);
             do
             {
-                if (iothub_info.connected != 0)
+                if (!iothub_info.connected)
                 {
-                    // Send a message every TIME_BETWEEN_MESSAGES seconds
+                    // Send a message every TIME_BETWEEN_MESSAGES_SECONDS seconds
                     (void)tickcounter_get_current_ms(tick_counter_handle, &current_tick);
-                    if ((current_tick - last_send_time) / 1000 > TIME_BETWEEN_MESSAGES)
+                    if ((current_tick - last_send_time) / 1000 > TIME_BETWEEN_MESSAGES_SECONDS)
                     {
                         static char msgText[1024];
                         sprintf_s(msgText, sizeof(msgText), "{ \"message_index\" : \"%zu\" }", msg_count++);
@@ -331,8 +449,8 @@ int main()
                 ThreadAPI_Sleep(1);
             } while (iothub_info.stop_running == 0 && msg_count < MESSAGES_TO_SEND);
 
-            size_t index = 0;
-            for (index = 0; index < 10; index++)
+            size_t cleanup_counter = 0;
+            for (cleanup_counter = 0; cleanup_counter < 10; cleanup_counter++)
             {
                 IoTHubDeviceClient_LL_DoWork(device_ll_handle);
                 ThreadAPI_Sleep(1);
@@ -348,9 +466,6 @@ int main()
 
     // Free all the sdk subsystem
     IoTHub_Deinit();
-
-    (void)printf("Press any enter to continue:\r\n");
-    (void)getchar();
 
     return 0;
 }

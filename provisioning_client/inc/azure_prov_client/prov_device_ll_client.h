@@ -121,7 +121,7 @@ MOCKABLE_FUNCTION(, const char*, Prov_Device_LL_GetVersionString);
 * @brief    Sets the Provisioning Data that is sent to the Provisioning service
 *
 * @param    handle          The handle created by a call to the create function.
-* @param    json            The data field that is sent to the service.  Setting json to NULL will unset the value previously set
+* @param    json            The data field that is sent to the service.
 *
 * @return PROV_DEVICE_RESULT_OK upon success or an error code upon failure
 */
@@ -135,6 +135,47 @@ MOCKABLE_FUNCTION(, PROV_DEVICE_RESULT, Prov_Device_LL_Set_Provisioning_Payload,
 * @return The data that was specified by the service
 */
 MOCKABLE_FUNCTION(, const char*, Prov_Device_LL_Get_Provisioning_Payload, PROV_DEVICE_LL_HANDLE, handle);
+
+/**
+* @brief    Retrieves the Provisioning TrustBundle that is sent from the Provisioning service.
+*
+* @details  The Azure IoT Provisioning service can optionally send a list of root and intermediate 
+*           Certification Authorities that the device may need when connecting to other Azure IoT 
+*           services such as Azure IoT Edge. The recommended action is to use this information and
+*           update the correct device-side certificate trust store. The entire list of certificates is sent by
+*           the service. 
+*
+* @note     Application developers should compare the TrustBundle's etag field against previous 
+*           values to determine if any action is required. If the etag is different, new certificates
+*           in the bundle will need to be installed and previously installed certificates not 
+*           present in the bundle need to be removed from the root and intermediate CA stores.
+*
+* @param    handle          The handle created by a call to the create function.
+*
+* @return The TrustBundle information that was sent by the service during registration.
+*/
+MOCKABLE_FUNCTION(, const char*, Prov_Device_LL_Get_Trust_Bundle, PROV_DEVICE_LL_HANDLE, handle);
+
+/**
+* @brief    Sets the Certificate Signing Request (CSR) that is sent to the Provisioning service.
+*
+* @param    handle          The handle created by a call to the create function.
+* @param    csr             The PKCS#10 payload that is sent to the service.
+*
+* @return PROV_DEVICE_RESULT_OK upon success or an error code upon failure.
+*/
+MOCKABLE_FUNCTION(, PROV_DEVICE_RESULT, Prov_Device_LL_Set_Certificate_Signing_Request, PROV_DEVICE_LL_HANDLE, handle, const char*, csr);
+
+/**
+* @brief    Retrieves the Issued Client Certificate corresponding to the Certificate Signing Request if
+*           sent by the Provisioning service.
+*
+* @param    handle          The handle created by a call to the create function.
+*
+* @return The PEM certificate sent by the service during registration.
+*/
+MOCKABLE_FUNCTION(, const char*, Prov_Device_LL_Get_Issued_Client_Certificate, PROV_DEVICE_LL_HANDLE, handle);
+
 
 #ifdef __cplusplus
 }

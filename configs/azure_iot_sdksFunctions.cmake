@@ -4,7 +4,7 @@
 function(getIoTSDKVersion)
     # First find the applicable line in the file
     file (STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/iothub_client/inc/iothub_client_version.h" iotsdkverstr
-        REGEX "^[\t ]*#[\t ]*define[\t ]*IOTHUB_SDK_VERSION[\t ]*\"([0-9]+)[\\.]([0-9]+)[\\.]([0-9]+)\"") 
+        REGEX "^[\t ]*#[\t ]*define[\t ]*IOTHUB_SDK_VERSION[\t ]*\"([0-9]+)[\\.]([0-9]+)[\\.]([0-9]+)(-preview)?\"") 
         
     if (!MATCHES)
         message(FATAL_ERROR "Unable to find version in ${CMAKE_SOURCE_DIR}/iothub_client/inc/iothub_client_version.h")
@@ -12,7 +12,7 @@ function(getIoTSDKVersion)
         # Parse out the three version identifiers
         set(CMAKE_MATCH_3 "")
 
-        string(REGEX MATCH "^[\t ]*#[\t ]*define[\t ]*IOTHUB_SDK_VERSION[\t ]*\"([0-9]+)[\\.]([0-9]+)[\\.]([0-9]+)\"" temp "${iotsdkverstr}")
+        string(REGEX MATCH "^[\t ]*#[\t ]*define[\t ]*IOTHUB_SDK_VERSION[\t ]*\"([0-9]+)[\\.]([0-9]+)[\\.]([0-9]+)(-preview)?\"" temp "${iotsdkverstr}")
 
         if (NOT "${CMAKE_MATCH_3}" STREQUAL "")
             set (IOT_SDK_VERION_MAJOR "${CMAKE_MATCH_1}" PARENT_SCOPE)
@@ -20,7 +20,7 @@ function(getIoTSDKVersion)
             set (IOT_SDK_VERION_FIX "${CMAKE_MATCH_3}" PARENT_SCOPE)
             set (IOT_SDK_VERSION "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}.${CMAKE_MATCH_3}" PARENT_SCOPE)
         else ()
-            message(FATAL_ERROR "Unable to find version in ${iotsdkverstr}")
+            message(FATAL_ERROR "Unable to parse iothub_client version from iothub_client_version.h: '${iotsdkverstr}'")
         endif()
     endif(!MATCHES)
 endfunction(getIoTSDKVersion)
@@ -28,7 +28,7 @@ endfunction(getIoTSDKVersion)
 function(getProvSDKVersion)
     # First find the applicable line in the file   \inc\azure_prov_client
     file (STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/provisioning_client/inc/azure_prov_client/prov_client_const.h" provsdkverstr
-        REGEX "^[\t ]*#[\t ]*define[\t ]*PROV_DEVICE_CLIENT_VERSION[\t ]*\"([0-9]+)[\\.]([0-9]+)[\\.]([0-9]+)\"")
+        REGEX "^[\t ]*#[\t ]*define[\t ]*PROV_DEVICE_CLIENT_VERSION[\t ]*\"([0-9]+)[\\.]([0-9]+)[\\.]([0-9]+)(-preview)?\"")
         
     if (!MATCHES)
         message(FATAL_ERROR "Unable to find version in ${CMAKE_SOURCE_DIR}/provisioning_client/inc/azure_prov_client/prov_client_const.h")
@@ -36,7 +36,7 @@ function(getProvSDKVersion)
         # Parse out the three version identifiers
         set(CMAKE_MATCH_3 "")
 
-        string(REGEX MATCH "^[\t ]*#[\t ]*define[\t ]*PROV_DEVICE_CLIENT_VERSION[\t ]*\"([0-9]+)[.]([0-9]+)[.]([0-9]+)\"" temp "${provsdkverstr}")
+        string(REGEX MATCH "^[\t ]*#[\t ]*define[\t ]*PROV_DEVICE_CLIENT_VERSION[\t ]*\"([0-9]+)[.]([0-9]+)[.c]([0-9]+)(-preview)?\"" temp "${provsdkverstr}")
 
         if (NOT "${CMAKE_MATCH_3}" STREQUAL "")
             set (PROV_SDK_VERSION_MAJOR "${CMAKE_MATCH_1}" PARENT_SCOPE)
@@ -44,7 +44,7 @@ function(getProvSDKVersion)
             set (PROV_SDK_VERSION_FIX "${CMAKE_MATCH_3}" PARENT_SCOPE)
             set (PROV_SDK_VERSION "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}.${CMAKE_MATCH_3}" PARENT_SCOPE)
         else ()
-            message(FATAL_ERROR "Unable to find version in ${provsdkverstr}")
+            message(FATAL_ERROR "Unable to parse provisioning_client version from prov_client_const.h: '${provsdkverstr}'")
         endif()
     endif(!MATCHES)
 endfunction(getProvSDKVersion)

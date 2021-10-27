@@ -15,4 +15,7 @@ set(${theseTestsName}_c_files
 set(${theseTestsName}_h_files
 )
 
+include_directories(${CMAKE_CURRENT_LIST_DIR}/../deps/parson)
+
 build_c_test_artifacts(${theseTestsName} ON "tests/azure_prov_device_tests")
+target_link_libraries(${theseTestsName}_exe parson)

@@ -41,6 +41,9 @@ static const char* const PROV_FAILED_STATUS = "failed";
 static const char* const PROV_BLACKLISTED_STATUS = "blacklisted";
 static const char* const JSON_CUSTOM_DATA_TAG = "payload";
 static const char* const JSON_NODE_RETURNED_DATA = "payload";
+static const char* const JSON_NODE_TRUST_BUNDLE = "trustBundle";
+static const char* const JSON_NODE_CSR = "clientCertificateCsr";
+static const char* const JSON_NODE_ISSUED_CERTIFICATE = "issuedClientCertificate";
 
 static const char* const SAS_TOKEN_SCOPE_FMT = "%s/registrations/%s";
 
@@ -117,6 +120,10 @@ typedef struct PROV_INSTANCE_INFO_TAG
 
     char* custom_request_data;
     char* custom_response_data;
+    char* trust_bundle;
+
+    char* csr_request_data;
+    char* csr_response_data;
 } PROV_INSTANCE_INFO;
 
 static char* prov_transport_challenge_callback(const unsigned char* nonce, size_t nonce_len, const char* key_name, void* user_ctx)
@@ -272,6 +279,17 @@ static void retrieve_json_payload(JSON_Object* json_object, PROV_INSTANCE_INFO* 
     }
 }
 
+static void retrieve_json_trustbundle(JSON_Object* json_object, PROV_INSTANCE_INFO* prov_info)
+{
+    JSON_Value* json_field;
+
+    // Returned Data is not available
+    if ((json_field = json_object_get_value(json_object, JSON_NODE_TRUST_BUNDLE)) != NULL)
+    {
+        prov_info->trust_bundle = json_serialize_to_string(json_field);
+    }
+}
+
 static char* retrieve_json_string(JSON_Object* json_object, const char* field_name, bool is_required)
 {
     char* result;
@@ -301,6 +319,11 @@ static char* retrieve_json_string(JSON_Object* json_object, const char* field_na
         }
     }
     return result;
+}
+
+static void retrieve_json_certificate_response(JSON_Object* json_object, PROV_INSTANCE_INFO* prov_info)
+{
+    prov_info->csr_response_data = retrieve_json_string(json_object, JSON_NODE_ISSUED_CERTIFICATE, false);
 }
 
 static JSON_Value* construct_security_type_json(PROV_INSTANCE_INFO* prov_info, const char* ek_value, const char* srk_value)
@@ -375,6 +398,57 @@ static JSON_Value* construct_security_type_json(PROV_INSTANCE_INFO* prov_info, c
     return result;
 }
 
+static int prov_transport_create_custom_data_json(const PROV_INSTANCE_INFO* prov_info, JSON_Object* root_json)
+{
+    int result;
+    JSON_Value* json_custom_data = NULL;
+
+    if (prov_info->custom_request_data == NULL)
+    {
+        result = 0;
+    }
+    else if ((json_custom_data = json_parse_string(prov_info->custom_request_data)) == NULL)
+    {
+        LogError("failure parsing custom info.  This custom info MUST be valid json");
+        result = MU_FAILURE;
+    }
+    // Success on json_object_set_value transfers ownership of json_custom_data to json_object, so do not
+    // explicitly free json_custom_data after this point.
+    else if (json_object_set_value(root_json, JSON_CUSTOM_DATA_TAG, json_custom_data) != JSONSuccess)
+    {
+        LogError("failure setting %s value", JSON_CUSTOM_DATA_TAG);
+        json_value_free(json_custom_data);
+        result = MU_FAILURE;
+    }
+    else
+    {
+        result = 0;
+    }
+
+    return result;
+}
+
+static int prov_transport_create_csr_json(const PROV_INSTANCE_INFO* prov_info, JSON_Object* root_json)
+{
+    int result;
+
+    if (prov_info->csr_request_data == NULL)
+    {
+        result = 0;
+    }
+    else if (json_object_set_string(root_json, JSON_NODE_CSR, prov_info->csr_request_data) != JSONSuccess)
+    {
+        LogError("failure setting %s value", JSON_NODE_CSR);
+        result = MU_FAILURE;
+    }
+    else
+    {
+        result = 0;
+    }
+
+    return result;
+}
+
 static char* prov_transport_create_json_payload(const char* ek_value, const char* srk_value, void* user_ctx)
 {
     char* result = NULL;
@@ -394,27 +468,21 @@ static char* prov_transport_create_json_payload(const char* ek_value, const char
         else
         {
             bool error_encountered = false;
-            if (prov_info->custom_request_data != NULL)
+            if ((prov_info->custom_request_data != NULL) || (prov_info->csr_request_data != NULL))
             {
                 JSON_Object* json_object;
-                JSON_Value* json_custom_data = NULL;
 
                 if ((json_object = json_value_get_object(json_root)) == NULL)
                 {
                     LogError("failure retrieving node root object");
                     error_encountered = true;
                 }
-                else if ((json_custom_data = json_parse_string(prov_info->custom_request_data)) == NULL)
+                else if (prov_transport_create_custom_data_json(prov_info, json_object))
                 {
-                    LogError("failure parsing custom info.  This custom info MUST be valid json");
                     error_encountered = true;
                 }
-                // Success on json_object_set_value transfers ownership of json_custom_data to json_object, so do not
-                // explicitly free json_custom_data after this point.
-                else if (json_object_set_value(json_object, JSON_CUSTOM_DATA_TAG, json_custom_data) != JSONSuccess)
+                else if (prov_transport_create_csr_json(prov_info, json_object))
                 {
-                    LogError("failure setting %s value", JSON_CUSTOM_DATA_TAG);
-                    json_value_free(json_custom_data);
                     error_encountered = true;
                 }
             }
@@ -545,6 +613,10 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
                     free(result);
                     result = NULL;
                 }
+                else
+                {
+                    LogInfo("PROV_DEVICE_TRANSPORT_STATUS_ASSIGNING OperationID: %s", result->operation_id);
+                }
                 break;
 
             case PROV_DEVICE_TRANSPORT_STATUS_ASSIGNED:
@@ -616,6 +688,12 @@ static PROV_JSON_INFO* prov_transport_process_json_reply(const char* json_docume
                         {
                             // Get the returned Data from the payload if it's there
                             retrieve_json_payload(json_reg_status_node, prov_info);
+
+                            // Get the returned TrustBundle if it's there
+                            retrieve_json_trustbundle(json_reg_status_node, prov_info);
+							
+                            // Get the returned Certificate response if it's there
+                            retrieve_json_certificate_response(json_reg_status_node, prov_info);
                         }
                     }
                 }
@@ -846,6 +924,16 @@ static void destroy_instance(PROV_INSTANCE_INFO* prov_info)
         json_free_serialized_string(prov_info->custom_response_data);
         prov_info->custom_response_data = NULL;
     }
+    // Clean CSR data
+    free(prov_info->csr_request_data);
+    prov_info->csr_request_data = NULL;
+    free(prov_info->csr_response_data);
+    prov_info->csr_response_data = NULL;
+    if (prov_info->trust_bundle != NULL)
+    {
+        json_free_serialized_string(prov_info->trust_bundle);
+        prov_info->trust_bundle = NULL;
+    }
     prov_info->prov_transport_protocol->prov_transport_destroy(prov_info->transport_handle);
     prov_info->transport_handle = NULL;
     free(prov_info->scope_id);
@@ -1069,11 +1157,25 @@ PROV_DEVICE_RESULT Prov_Device_LL_Register_Device(PROV_DEVICE_LL_HANDLE handle, 
             handle->register_status_cb = reg_status_cb;
             handle->status_user_ctx = status_ctx;
             
-            // Free the custom data if its been allocated
+            // Free the custom data if allocated
             if (handle->custom_response_data != NULL)
             {
                 json_free_serialized_string(handle->custom_response_data);
                 handle->custom_response_data = NULL;
+            }
+
+            // Free the trustbundle if allocated
+            if (handle->trust_bundle != NULL)
+            {
+                json_free_serialized_string(handle->trust_bundle);
+                handle->trust_bundle = NULL;
+            }
+
+            // Free CSR data if allocated
+            if (handle->csr_response_data != NULL)
+            {
+                json_free_serialized_string(handle->csr_response_data);
+                handle->csr_response_data = NULL;
             }
 
             if (handle->prov_transport_protocol->prov_transport_open(handle->transport_handle, handle->registration_id, ek_value, srk_value, on_transport_registration_data, handle, on_transport_status, handle, prov_transport_challenge_callback, handle) != 0)
@@ -1402,3 +1504,63 @@ const char* Prov_Device_LL_Get_Provisioning_Payload(PROV_DEVICE_LL_HANDLE handle
     }
     return result;
 }
+
+const char* Prov_Device_LL_Get_Trust_Bundle(PROV_DEVICE_LL_HANDLE handle)
+{
+    const char* result;
+    if (handle == NULL)
+    {
+        LogError("Invalid parameter specified handle: %p", handle);
+        result = NULL;
+    }
+    else
+    {
+        result = handle->trust_bundle;
+    }
+    return result;
+}
+
+PROV_DEVICE_RESULT Prov_Device_LL_Set_Certificate_Signing_Request(PROV_DEVICE_LL_HANDLE handle, const char* csr)
+{
+    PROV_DEVICE_RESULT result;
+    if (handle == NULL)
+    {
+        LogError("Invalid parameter specified handle: %p", handle);
+        result = PROV_DEVICE_RESULT_INVALID_ARG;
+    }
+    else
+    {
+        char* temp_data;
+        if (mallocAndStrcpy_s(&temp_data, csr) != 0)
+        {
+            LogError("Failure setting CSR data");
+            result = PROV_DEVICE_RESULT_ERROR;
+        }
+        else
+        {
+            if (handle->csr_request_data != NULL)
+            {
+                free(handle->csr_request_data);
+            }
+            handle->csr_request_data = temp_data;
+            result = PROV_DEVICE_RESULT_OK;
+        }
+    }
+    return result;
+}
+
+const char* Prov_Device_LL_Get_Issued_Client_Certificate(PROV_DEVICE_LL_HANDLE handle)
+{
+    const char* result;
+    if (handle == NULL)
+    {
+        LogError("Invalid parameter specified handle: %p", handle);
+        result = NULL;
+    }
+    else
+    {
+        result = handle->csr_response_data;
+    }
+    return result;
+}
+
