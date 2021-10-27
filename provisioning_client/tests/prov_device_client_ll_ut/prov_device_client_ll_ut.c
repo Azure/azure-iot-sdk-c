@@ -172,9 +172,9 @@ static int TEST_ERROR_STATUS_CODE = 500;
 #define TEST_DPS_HUB_ERROR_UNAUTH       400209
 #define DEFAULT_RETRY_AFTER             2
 
-static unsigned char TEST_ENDORSMENT_KEY[] = { 'k', 'e', 'y' };
-
-static unsigned char TEST_DATA[] = { 'k', 'e', 'y' };
+static const char* TEST_ENDORSMENT_KEY = "key";
+static const char* TEST_DATA = "data";
+static const unsigned char* TEST_NONCE = (unsigned char*)"nonce";
 static const size_t TEST_DATA_LEN = 3;
 static const char* TEST_DECRYPTED_NONCE = "decrypted_nonce";
 static const size_t TEST_DECRYPTED_NONCE_LEN = sizeof("decrypted_nonce");
@@ -531,7 +531,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         TEST_MUTEX_RELEASE(g_testByTest);
     }
 
-    static void setup_retrieve_json_item_mocks(const char* return_item)
+    static void setup_retrieve_json_item_mocks()
     {
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     }
@@ -627,7 +627,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
     {
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(Azure_Base64_Decode(IGNORED_PTR_ARG));
-        setup_retrieve_json_item_mocks(TEST_STRING_VALUE);
+        setup_retrieve_json_item_mocks();
     }
 
     static void setup_parse_json_assigning_mocks(void)
@@ -642,11 +642,11 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_NUM_ARG));
     }
 
-    static void setup_parse_json_error_mocks(double return_err_num)
+    static void setup_parse_json_error_mocks()
     {
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
 
-        setup_retrieve_json_item_mocks(TEST_STRING_VALUE);
+        setup_retrieve_json_item_mocks();
 
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
@@ -660,8 +660,8 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         {
             STRICT_EXPECTED_CALL(Azure_Base64_Decode(IGNORED_PTR_ARG));
         }
-        setup_retrieve_json_item_mocks(TEST_STRING_VALUE);
-        setup_retrieve_json_item_mocks(TEST_STRING_VALUE);
+        setup_retrieve_json_item_mocks();
+        setup_retrieve_json_item_mocks();
     }
 
     static void setup_parse_json_nohub_mocks(bool use_tpm)
@@ -1195,7 +1195,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         Prov_Device_LL_DoWork(handle);
         umock_c_reset_all_calls();
 
-        setup_parse_json_error_mocks(0);
+        setup_parse_json_error_mocks();
 
         //act
         static const char* TEST_JSON_REPLY_ERROR = 
@@ -1490,7 +1490,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         umock_c_reset_all_calls();
 
         //act
-        char* result = g_challenge_callback(TEST_DATA, TEST_DATA_LEN, TEST_STRING_HANDLE_VALUE, NULL);
+        char* result = g_challenge_callback(TEST_NONCE, TEST_DATA_LEN, TEST_STRING_HANDLE_VALUE, NULL);
 
         //assert
         ASSERT_IS_NULL(result);
@@ -1512,7 +1512,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         setup_challenge_callback_mocks();
 
         //act
-        char* result = g_challenge_callback(TEST_DATA, TEST_DATA_LEN, TEST_STRING_HANDLE_VALUE, g_challenge_ctx);
+        char* result = g_challenge_callback(TEST_NONCE, TEST_DATA_LEN, TEST_STRING_HANDLE_VALUE, g_challenge_ctx);
 
         //assert
         ASSERT_IS_NOT_NULL(result);
@@ -1547,7 +1547,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
                 umock_c_negative_tests_reset();
                 umock_c_negative_tests_fail_call(index);
 
-                char* result = g_challenge_callback(TEST_DATA, TEST_DATA_LEN, TEST_STRING_HANDLE_VALUE, g_challenge_ctx);
+                char* result = g_challenge_callback(TEST_NONCE, TEST_DATA_LEN, TEST_STRING_HANDLE_VALUE, g_challenge_ctx);
 
                 //assert
                 ASSERT_IS_NULL(result, "g_challenge_callback failure in test %zu/%zu", index, count);
@@ -2086,7 +2086,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         const char* EXPECTED_REQUEST_PAYLOAD = "{\"registrationId\":\"A87FA22F-828B-46CA-BA37-D574C32E423E\","
-        "\"tpm\":{\"endorsementKey\":\"keykey\",\"storageRootKey\":\"keykey\"},\"payload\":{\"json_cust_data\":123456}}";
+        "\"tpm\":{\"endorsementKey\":\"key\",\"storageRootKey\":\"key\"},\"payload\":{\"json_cust_data\":123456}}";
 
         //act
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Set_Provisioning_Payload(handle, TEST_CUSTOM_DATA);
@@ -2291,13 +2291,12 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         ASSERT_IS_NOT_NULL(root_obj);
 
         etag = json_object_get_string(root_obj, "etag");
-        const char* expected = TEST_TRUST_BUNDLE_ETAG;
 
         ASSERT_ARE_EQUAL(char_ptr, TEST_TRUST_BUNDLE_ETAG, etag);
         
         json_ca_certificates = json_object_get_array(root_obj, "certificates");
         ASSERT_IS_NOT_NULL(json_ca_certificates);
-        certificate_count = json_array_get_count(json_ca_certificates);
+        certificate_count = (int)json_array_get_count(json_ca_certificates);
         ASSERT_ARE_EQUAL(int, 1, certificate_count);
 
         json_certificate = json_array_get_object(json_ca_certificates, 0);
@@ -2493,13 +2492,11 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         ASSERT_IS_NOT_NULL(root_obj);
 
         etag = json_object_get_string(root_obj, "etag");
-        const char* expected = TEST_TRUST_BUNDLE_ETAG;
-
         ASSERT_ARE_EQUAL(char_ptr, TEST_TRUST_BUNDLE_ETAG, etag);
 
         json_ca_certificates = json_object_get_array(root_obj, "certificates");
         ASSERT_IS_NOT_NULL(json_ca_certificates);
-        certificate_count = json_array_get_count(json_ca_certificates);
+        certificate_count = (int)json_array_get_count(json_ca_certificates);
         ASSERT_ARE_EQUAL(int, 3, certificate_count);
 
         for (int i = 0; i < certificate_count; i++)
@@ -2583,7 +2580,7 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
 
         //act
         const char* EXPECTED_REQUEST_PAYLOAD = "{\"registrationId\":\"A87FA22F-828B-46CA-BA37-D574C32E423E\"," \
-        "\"tpm\":{\"endorsementKey\":\"keykey\",\"storageRootKey\":\"keykey\"},\"clientCertificateCsr\":""\"--BEGIN_CERT 12345 END_CERT--\"}";
+        "\"tpm\":{\"endorsementKey\":\"key\",\"storageRootKey\":\"key\"},\"clientCertificateCsr\":""\"--BEGIN_CERT 12345 END_CERT--\"}";
 
         PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Set_Certificate_Signing_Request(handle, TEST_CERTIFICATE_VAL);
         char* request_payload = g_json_create_cb(TEST_ENDORSMENT_KEY, TEST_ENDORSMENT_KEY, g_json_ctx);

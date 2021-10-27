@@ -229,7 +229,7 @@ static void parse_trust_bundle(const char* trust_bundle_payload)
             }
             else
             {
-                certificate_count = json_array_get_count(json_ca_certificates);
+                certificate_count = (int)json_array_get_count(json_ca_certificates);
                 printf("TrustBundle has %d CA certificates:\r\n", certificate_count);
 
                 for (int i = 0; i < certificate_count; i++)
