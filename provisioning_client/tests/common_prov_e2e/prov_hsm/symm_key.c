@@ -28,11 +28,9 @@ void initialize_symm_key(void)
 SYMM_KEY_INFO_HANDLE symm_key_info_create(void)
 {
     SYMM_KEY_INFO* result;
-    /* Codes_SRS_HSM_CLIENT_TPM_07_002: [ On success hsm_client_tpm_create shall allocate a new instance of the secure device tpm interface. ] */
     result = malloc(sizeof(SYMM_KEY_INFO));
     if (result == NULL)
     {
-        /* Codes_SRS_HSM_CLIENT_TPM_07_001: [ If any failure is encountered hsm_client_tpm_create shall return NULL ] */
         printf("Failure: malloc SYMM_KEY_INFO.");
     }
     else

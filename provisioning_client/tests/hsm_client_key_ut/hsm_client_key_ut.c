@@ -159,8 +159,6 @@ BEGIN_TEST_SUITE(hsm_client_key_ut)
         //cleanup
     }
 
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_004: [ hsm_client_tpm_destroy shall free the SEC_DEVICE_INFO instance. ] */
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_006: [ hsm_client_tpm_destroy shall free all resources allocated in this module. ]*/
     TEST_FUNCTION(hsm_client_key_destroy_succeed)
     {
         //arrange
@@ -178,7 +176,6 @@ BEGIN_TEST_SUITE(hsm_client_key_ut)
         //cleanup
     }
 
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_005: [ if handle is NULL, hsm_client_tpm_destroy shall do nothing. ] */
     TEST_FUNCTION(hsm_client_key_destroy_handle_NULL_succeed)
     {
         //arrange

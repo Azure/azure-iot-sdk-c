@@ -17,7 +17,6 @@ extern "C" {
 #include <stddef.h>
 #endif
 
-/* Codes_SRS_SCHEMA_99_095: [Schema shall expose the following API:] */
 
 typedef struct SCHEMA_HANDLE_DATA_TAG* SCHEMA_HANDLE;
 typedef struct SCHEMA_MODEL_TYPE_HANDLE_DATA_TAG* SCHEMA_MODEL_TYPE_HANDLE;

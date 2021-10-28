@@ -337,12 +337,6 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
     }
 
     /*this test wants to see that IoTHubDeviceTwin_CreatebasicModel_WithData15 doesn't fail*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_009: [ IoTHubDeviceTwinCreate_Impl shall locate the model and the metadata for name by calling Schema_GetSchemaForModel/Schema_GetMetadata/Schema_GetModelByName. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_010: [ IoTHubDeviceTwinCreate_Impl shall call CodeFirst_CreateDevice. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_011: [ IoTHubDeviceTwinCreate_Impl shall set the device twin callback. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_027: [ IoTHubDeviceTwinCreate_Impl shall set the device method callback ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_012: [ IoTHubDeviceTwinCreate_Impl shall record the pair of (device, IoTHubClient(_LL)). ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_013: [ If all operations complete successfully then IoTHubDeviceTwinCreate_Impl shall succeeds and return a non-NULL value. ]*/
     TEST_FUNCTION(IoTHubDeviceTwin_CreatebasicModel_WithData15_happy_path)
     {
         ///arrange
@@ -365,7 +359,6 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
     }
 
     /*this test wants to see that IoTHubDeviceTwin_CreatebasicModel_WithData15 doesn't fail*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_014: [ Otherwise, IoTHubDeviceTwinCreate_Impl shall fail and return NULL. ]*/
     TEST_FUNCTION(IoTHubDeviceTwin_CreatebasicModel_WithData15_unhappy_paths)
     {
         ///arrange
@@ -415,12 +408,6 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
     }
 
     /*this test wants to see that IoTHubDeviceTwin_CreatebasicModel_WithData15 doesn't fail*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_009: [ IoTHubDeviceTwinCreate_Impl shall locate the model and the metadata for name by calling Schema_GetSchemaForModel/Schema_GetMetadata/Schema_GetModelByName. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_010: [ IoTHubDeviceTwinCreate_Impl shall call CodeFirst_CreateDevice. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_011: [ IoTHubDeviceTwinCreate_Impl shall set the device twin callback. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_027: [ IoTHubDeviceTwinCreate_Impl shall set the device method callback ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_012: [ IoTHubDeviceTwinCreate_Impl shall record the pair of (device, IoTHubClient(_LL)). ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_013: [ If all operations complete successfully then IoTHubDeviceTwinCreate_Impl shall succeeds and return a non-NULL value. ]*/
     TEST_FUNCTION(IoTHubDeviceTwin_LL_CreatebasicModel_WithData15_happy_path)
     {
         ///arrange
@@ -443,7 +430,6 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
     }
 
     /*this test wants to see that IoTHubDeviceTwin_CreatebasicModel_WithData15 doesn't fail*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_014: [ Otherwise, IoTHubDeviceTwinCreate_Impl shall fail and return NULL. ]*/
     TEST_FUNCTION(IoTHubDeviceTwin_LL_CreatebasicModel_WithData15_unhappy_paths)
     {
         ///arrange
@@ -486,11 +472,6 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
             .IgnoreArgument_ptr();
     }
 
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_001: [ serializer_ingest shall clone the payload into a null terminated string. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_002: [ serializer_ingest shall parse the null terminated string into parson data types. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_003: [ If update_state is DEVICE_TWIN_UPDATE_COMPLETE then serializer_ingest shall locate "desired" json name. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_004: [ If "desired" contains "$version" then serializer_ingest shall remove it. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_005: [ The "desired" value shall be outputed to a null terminated string and serializer_ingest shall call CodeFirst_IngestDesiredProperties. ]*/
     TEST_FUNCTION(serializer_ingest_DEVICE_TWIN_UPDATE_COMPLETE_happy_path)
     {
         ///arrange
@@ -508,7 +489,6 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         ///clean
     }
 
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_008: [ If any of the above operations fail, then serializer_ingest shall return. ]*/
     TEST_FUNCTION(serializer_ingest_DEVICE_TWIN_UPDATE_COMPLETE_unhappy_path)
     {
         ///arrange
@@ -553,10 +533,6 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
             .IgnoreArgument_ptr();
     }
 
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_001: [ serializer_ingest shall clone the payload into a null terminated string. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_002: [ serializer_ingest shall parse the null terminated string into parson data types. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_006: [ If update_state is DEVICE_TWIN_UPDATE_PARTIAL then serializer_ingest shall remove "$version" (if it exists). ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_007: [ The JSON shall be outputed to a null terminated string and serializer_ingest shall call CodeFirst_IngestDesiredProperties. ]*/
     TEST_FUNCTION(serializer_ingest_DEVICE_TWIN_UPDATE_PARTIAL_happy_path)
     {
         ///arrange
@@ -574,7 +550,6 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         ///clean
     }
 
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_008: [ If any of the above operations fail, then serializer_ingest shall return. ]*/
     TEST_FUNCTION(serializer_ingest_DEVICE_TWIN_UPDATE_PARTIAL_unhappy_path)
     {
         ///arrange
@@ -610,7 +585,6 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_020: [ If model is NULL then IoTHubDeviceTwin_Destroy_Impl shall return. ]*/
     TEST_FUNCTION(IoTHubDeviceTwin_Destroy_Impl_with_NULL_model_returns)
     {
         ///arrange
@@ -624,11 +598,6 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         ///cleanup
     }
 
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_015: [ IoTHubDeviceTwin_Destroy_Impl shall locate the saved handle belonging to model. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_016: [ IoTHubDeviceTwin_Destroy_Impl shall set the devicetwin callback to NULL. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_017: [ IoTHubDeviceTwin_Destroy_Impl shall call CodeFirst_DestroyDevice. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_018: [ IoTHubDeviceTwin_Destroy_Impl shall remove the IoTHubClient_Handle and the device handle from the recorded set. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_019: [ If the recorded set of IoTHubClient handles is zero size, then the set shall be destroyed. ]*/
     TEST_FUNCTION(IoTHubDeviceTwin_LL_Destroy_Impl_returns)
     {
         ///arrange
@@ -656,12 +625,6 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
 
     }
 
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_015: [ IoTHubDeviceTwin_Destroy_Impl shall locate the saved handle belonging to model. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_016: [ IoTHubDeviceTwin_Destroy_Impl shall set the devicetwin callback to NULL. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_028: [ IoTHubDeviceTwin_Destroy_Impl shall set the method callback to NULL. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_017: [ IoTHubDeviceTwin_Destroy_Impl shall call CodeFirst_DestroyDevice. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_018: [ IoTHubDeviceTwin_Destroy_Impl shall remove the IoTHubClient_Handle and the device handle from the recorded set. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_019: [ If the recorded set of IoTHubClient handles is zero size, then the set shall be destroyed. ]*/
     TEST_FUNCTION(IoTHubDeviceTwin_Destroy_Impl_returns)
     {
         ///arrange
@@ -703,11 +666,6 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
             .IgnoreArgument_ptr();
     }
 
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_021: [ deviceMethodCallback shall transform payload and size into a null terminated string. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_022: [ deviceMethodCallback shall call EXECUTE_METHOD passing the userContextCallback, method_name and the null terminated string build before. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_023: [ deviceMethodCallback shall get the MethodReturn_Data and shall copy the response JSON value into a new byte array. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_024: [ deviceMethodCallback shall set *response to this new byte array, *resp_size to the size of the array. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_025: [ deviceMethodCallback returns the statusCode from the user. ]*/
     TEST_FUNCTION(deviceMethodCallback_happy_path)
     {
         ///arrange
@@ -735,7 +693,6 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         my_gballoc_free(response); /*normally the SDK does this*/
     }
 
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_026: [ If any failure occurs in the above operations, then deviceMethodCallback shall fail, return 500, set *response to NULL and '*resp_size` to 0. ]*/
     TEST_FUNCTION(deviceMethodCallback_unhappy_path)
     {
         ///arrange
@@ -787,10 +744,6 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
             .IgnoreArgument_ptr();
     }
 
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_029: [ IoTHubDeviceTwin_SendReportedState_Impl shall call CodeFirst_SendAsyncReported. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_030: [ IoTHubDeviceTwin_SendReportedState_Impl shall find model in the list of devices. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_031: [ IoTHubDeviceTwin_SendReportedState_Impl shall use IoTHubClient_SendReportedState/IoTHubClient_LL_SendReportedState to send the serialized reported state. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_032: [ IoTHubDeviceTwin_SendReportedState_Impl shall succeed and return IOTHUB_CLIENT_OK when all operations complete successfully. ]*/
     TEST_FUNCTION(IoTHubDeviceTwin_SendReportedState_Impl_happy_path)
     {
         ///arrange
@@ -814,7 +767,6 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         IoTHubDeviceTwin_DestroybasicModel_WithData15(model);
     }
 
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_033: [ Otherwise, IoTHubDeviceTwin_SendReportedState_Impl shall fail and return IOTHUB_CLIENT_ERROR. ]*/
     TEST_FUNCTION(IoTHubDeviceTwin_SendReportedState_Impl_unhappy_paths_1)
     {
         ///arrange
@@ -855,7 +807,6 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_033: [ Otherwise, IoTHubDeviceTwin_SendReportedState_Impl shall fail and return IOTHUB_CLIENT_ERROR. ]*/
     TEST_FUNCTION(IoTHubDeviceTwin_SendReportedState_Impl_unhappy_paths_2) /*this test only exists because CodeFirst_SendAsyncReported does not have a mock from umock_c*/
     {
         ///arrange
@@ -890,10 +841,6 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
             .IgnoreArgument_ptr();
     }
 
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_029: [ IoTHubDeviceTwin_SendReportedState_Impl shall call CodeFirst_SendAsyncReported. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_030: [ IoTHubDeviceTwin_SendReportedState_Impl shall find model in the list of devices. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_031: [ IoTHubDeviceTwin_SendReportedState_Impl shall use IoTHubClient_SendReportedState/IoTHubClient_LL_SendReportedState to send the serialized reported state. ]*/
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_032: [ IoTHubDeviceTwin_SendReportedState_Impl shall succeed and return IOTHUB_CLIENT_OK when all operations complete successfully. ]*/
     TEST_FUNCTION(IoTHubDeviceTwin_LL_SendReportedState_Impl_happy_path)
     {
         ///arrange
@@ -917,7 +864,6 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         IoTHubDeviceTwin_LL_DestroybasicModel_WithData15(model);
     }
 
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_033: [ Otherwise, IoTHubDeviceTwin_SendReportedState_Impl shall fail and return IOTHUB_CLIENT_ERROR. ]*/
     TEST_FUNCTION(IoTHubDeviceTwin_LL_SendReportedState_Impl_unhappy_paths_1)
     {
         ///arrange
@@ -958,7 +904,6 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /*Tests_SRS_SERIALIZERDEVICETWIN_02_033: [ Otherwise, IoTHubDeviceTwin_SendReportedState_Impl shall fail and return IOTHUB_CLIENT_ERROR. ]*/
     TEST_FUNCTION(IoTHubDeviceTwin_LL_SendReportedState_Impl_unhappy_paths_2) /*this test only exists because CodeFirst_SendAsyncReported does not have a mock from umock_c*/
     {
         ///arrange

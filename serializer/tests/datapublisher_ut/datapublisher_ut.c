@@ -211,7 +211,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
 
     /* DataPublisher_Create */
 
-    /* Tests_SRS_DATA_PUBLISHER_99_042:[ If a NULL argument is passed to it, DataPublisher_Create shall return NULL.] */
     TEST_FUNCTION(DataPublisher_Create_With_NULL_Model_Handle_Fails)
     {
         // arrange
@@ -224,9 +223,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_DATA_PUBLISHER_99_041:[ DataPublisher_Create shall create a new DataPublisher instance and return a non-NULL handle in case of success.] */
-    /* Tests_SRS_DATA_PUBLISHER_99_043:[ DataPublisher_Create shall initialize and hold a handle to a DataMarshaller instance.] */
-    /* Tests_SRS_DATA_PUBLISHER_01_001: [DataPublisher_Create shall pass the includePropertyPath argument to DataMarshaller_Create.] */
     TEST_FUNCTION(DataPublisher_Create_With_Valid_Arguments_Yields_A_non_NULL_Handle)
     {
         // arrange
@@ -245,7 +241,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         DataPublisher_Destroy(result);
     }
 
-    /* Tests_SRS_DATA_PUBLISHER_01_001: [DataPublisher_Create shall pass the includePropertyPath argument to DataMarshaller_Create.] */
     TEST_FUNCTION(DataPublisher_Create_Passes_includePropertyPath_To_DataMarshaller_Create)
     {
         // arrange
@@ -264,8 +259,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         DataPublisher_Destroy(result);
     }
 
-    /* Tests_SRS_DATA_PUBLISHER_99_041:[ DataPublisher_Create shall create a new DataPublisher instance and return a non-NULL handle in case of success.] */
-    /* Tests_SRS_DATA_PUBLISHER_99_043:[ DataPublisher_Create shall initialize and hold a handle to a DataMarshaller instance.] */
     TEST_FUNCTION(DataPublisher_Create_2_Instances_Yields_Different_Handles)
     {
         // arrange
@@ -294,7 +287,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         DataPublisher_Destroy(handle2);
     }
 
-    /* Tests_SRS_DATA_PUBLISHER_99_044:[ If the creation of the DataMarshaller instance fails, DataPublisher_Create shall return NULL.] */
     TEST_FUNCTION(DataPublisher_When_DataMarshaller_Create_Fails_DataPublisher_Create_Returns_NULL)
     {
         // arrange
@@ -315,7 +307,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
 
     /* DataPublisher_Destroy */
 
-    /* Tests_SRS_DATA_PUBLISHER_99_045:[ DataPublisher_Destroy shall free all resources associated with a DataPublisher instance.] */
     TEST_FUNCTION(DataPublisher_Destroy_Releases_The_Data_Marshaller_Instance)
     {
         // arrange
@@ -333,7 +324,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_DATA_PUBLISHER_99_046:[ If a NULL argument is passed to it, DataPublisher_Destroy shall do nothing.] */
     /* Can't really test does nothing ... */
     TEST_FUNCTION(DataPublisher_Destroy_With_A_NULL_Handle_Does_Not_Call_DataMarshaller_Destroy)
     {
@@ -347,8 +337,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
 
     /* DataPublisher_StartTransaction */
 
-    /* Tests_SRS_DATA_PUBLISHER_99_007:[ A call to DataPublisher_StartBeginTransaction shall start a new transaction.] */
-    /* Tests_SRS_DATA_PUBLISHER_99_008:[ DataPublisher_StartBeginTransaction shall return a non-NULL handle upon success.] */
     TEST_FUNCTION(DataPublisher_StartTransaction_Succeeds)
     {
         // arrange
@@ -372,7 +360,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         DataPublisher_Destroy(handle);
     }
 
-    /* Tests_SRS_DATA_PUBLISHER_99_038:[ If DataPublisher_StartTransaction is called with a NULL argument it shall return NULL.] */
     TEST_FUNCTION(DataPublisher_StartTransaction_With_NULL_Handle_Fails)
     {
         // arrange
@@ -385,7 +372,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
 
     /* DataPublisher_PublishTransacted */
 
-    /* Tests_SRS_DATA_PUBLISHER_99_017:[ When one or more NULL parameter(s) are specified, DataPublisher_PublishTransacted is called with a NULL transactionHandle, it shall return DATA_PUBLISHER_INVALID_ARG.] */
     TEST_FUNCTION(DataPublisher_PublishTransacted_With_NULL_Transaction_Handle_Fails)
     {
         // arrange
@@ -396,7 +382,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_INVALID_ARG, result);
     }
 
-    /* Tests_SRS_DATA_PUBLISHER_99_017:[ When one or more NULL parameter(s) are specified, DataPublisher_PublishTransacted is called with a NULL transactionHandle, it shall return DATA_PUBLISHER_INVALID_ARG.] */
     TEST_FUNCTION(DataPublisher_PublishTransacted_With_NULL_PropertyPath_Fails)
     {
         // arrange
@@ -418,7 +403,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         DataPublisher_Destroy(handle);
     }
 
-    /* Tests_SRS_DATA_PUBLISHER_99_017:[ When one or more NULL parameter(s) are specified, DataPublisher_PublishTransacted is called with a NULL transactionHandle, it shall return DATA_PUBLISHER_INVALID_ARG.] */
     TEST_FUNCTION(DataPublisher_PublishTransacted_With_NULL_Data_Payload_Fails)
     {
         // arrange
@@ -438,7 +422,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         DataPublisher_Destroy(handle);
     }
 
-    /* Tests_SRS_DATA_PUBLISHER_99_016:[ When DataPublisher_PublishTransacted is invoked, DataPublisher shall associate the data with the transaction identified by the transactionHandle argument and return DATA_PUBLISHER_OK. No data shall be dispatched at the time of the call.] */
     TEST_FUNCTION(DataPublisher_PublishTransacted_With_Valid_Data_Succeeds)
     {
         // arrange
@@ -469,7 +452,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         DataPublisher_Destroy(handle);
     }
 
-    /* Tests_SRS_DATA_PUBLISHER_99_040:[ When PropertyPath does not exist in the supplied model, DataPublisher_Publish shall return DATA_PUBLISHER_SCHEMA_FAILED without dispatching data.] */
     TEST_FUNCTION(DataPublisher_When_GetModelProperty_Returns_NULL_Then_PublishTransacted_Fails)
     {
         // arrange
@@ -496,7 +478,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         DataPublisher_Destroy(handle);
     }
 
-    /* Tests_SRS_DATA_PUBLISHER_99_028:[ If creating the copy fails then DATA_PUBLISHER_AGENT_DATA_TYPES_ERROR shall be returned.] */
     TEST_FUNCTION(DataPublisher_When_Cloning_The_Agent_Data_Type_Fails_Then_PublishTransacted_Fails)
     {
         // arrange
@@ -529,7 +510,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         DataPublisher_Destroy(handle);
     }
 
-    /* Tests_SRS_DATA_PUBLISHER_99_027:[ DataPublisher shall make a copy of the data when associating it with the transaction by using AgentTypeSystem APIs.] */
     TEST_FUNCTION(DataPublisher_When_The_Value_Is_Destroyed_Before_End_Transaction_Cloned_Data_Is_Given_To_Data_Marshaller)
     {
         // arrange
@@ -581,7 +561,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
 
     /* DataPublisher_EndTransaction */
 
-    /* Tests_SRS_DATA_PUBLISHER_99_011:[ If the transactionHandle argument is NULL, DataPublisher_EndTransaction shall return DATA_PUBLISHER_INVALID_ARG.] */
     TEST_FUNCTION(DataPublisher_EndTransaction_With_NULL_Handle_Fails)
     {
         // arrange
@@ -596,7 +575,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /*Tests_SRS_DATA_PUBLISHER_02_006: [If the destination argument is NULL, DataPublisher_EndTransaction shall return DATA_PUBLISHER_INVALID_ARG.] */
     TEST_FUNCTION(DataPublisher_EndTransaction_With_NULL_destination_Fails)
     {
         // arrange
@@ -618,7 +596,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         DataPublisher_Destroy(handle);
     }
 
-    /*Tests_SRS_DATA_PUBLISHER_02_006: [If the destination argument is NULL, DataPublisher_EndTransaction shall return DATA_PUBLISHER_INVALID_ARG.] */
     TEST_FUNCTION(DataPublisher_EndTransaction_With_NULL_destinationSize_Fails)
     {
         // arrange
@@ -640,7 +617,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         DataPublisher_Destroy(handle);
     }
 
-    /* Tests_SRS_DATA_PUBLISHER_99_024:[ If no values have been associated with the transaction, no data shall be dispatched to DataMarshaller, the transaction shall be discarded and DataPublisher_EndTransaction shall return DATA_PUBLISHER_EMPTY_TRANSACTION.] */
     TEST_FUNCTION(DataPublisher_EndTransaction_With_Valid_Handle_An_Empty_Transaction_Fails)
     {
         // arrange
@@ -666,10 +642,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         DataPublisher_Destroy(handle);
     }
 
-    /* Tests_SRS_DATA_PUBLISHER_99_016:[ When DataPublisher_PublishTransacted is invoked, DataPublisher shall associate the data with the transaction identified by the transactionHandle argument and return DATA_PUBLISHER_OK. No data shall be dispatched at the time of the call.] */
-    /* Tests_SRS_DATA_PUBLISHER_99_010:[ A call to DataPublisher_EndTransaction shall mark the end of a transaction and trigger a dispatch of all the data grouped by that transaction.] */
-    /* Tests_SRS_DATA_PUBLISHER_99_026:[ On success, DataPublisher_EndTransaction shall return DATA_PUBLISHER_OK.] */
-    /* Tests_SRS_DATA_PUBLISHER_99_055:[ DataPublisher_EndTransaction shall get the Current time before sending the transaction to DataPublisher or storing it on Buffer Storage. ]*/
     TEST_FUNCTION(DataPublisher_EndTransaction_With_One_Value_Dispatches_The_Value)
     {
         // arrange
@@ -710,7 +682,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         DataPublisher_Destroy(handle);
     }
 
-    /* Tests_SRS_DATA_PUBLISHER_99_025:[ When the DataMarshaller_SendData call fails, DataPublisher_EndTransaction shall return DATA_PUBLISHER_MARSHALLER_ERROR.] */
     TEST_FUNCTION(DataPublisher_When_DataMatshaller_SendData_Fails_Then_EndTransaction_Fails)
     {
         // arrange
@@ -751,7 +722,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         DataPublisher_Destroy(handle);
     }
 
-    /* Tests_SRS_DATA_PUBLISHER_99_019:[ If the same property is associated twice with a transaction, then the last value shall be kept associated with the transaction.] */
     TEST_FUNCTION(DataPublisher_Adding_The_Same_Property_To_A_Transaction_Twice_Keeps_The_Last_Value_Only)
     {
         // arrange
@@ -798,9 +768,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         DataPublisher_Destroy(handle);
     }
 
-    /* Tests_SRS_DATA_PUBLISHER_99_016:[ When DataPublisher_PublishTransacted is invoked, DataPublisher shall associate the data with the transaction identified by the transactionHandle argument and return DATA_PUBLISHER_OK. No data shall be dispatched at the time of the call.] */
-    /* Tests_SRS_DATA_PUBLISHER_99_010:[ A call to DataPublisher_EndTransaction shall mark the end of a transaction and trigger a dispatch of all the data grouped by that transaction.] */
-    /* Tests_SRS_DATA_PUBLISHER_99_026:[ On success, DataPublisher_EndTransaction shall return DATA_PUBLISHER_OK.] */
     TEST_FUNCTION(DataPublisher_Adding_Two_Different_Properties_To_A_Transaction_Dispatches_Both_Values)
     {
         // arrange
@@ -846,7 +813,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         DataPublisher_Destroy(handle);
     }
 
-    /* Tests_SRS_DATA_PUBLISHER_99_040:[ When PropertyPath does not exist in the supplied model, DataPublisher_Publish shall return DATA_PUBLISHER_SCHEMA_FAILED without dispatching data.] */
     TEST_FUNCTION(DataPublisher_When_Getting_The_ModelProperty_For_The_Second_Property_Fails_Only_One_Property_Remains_Associated_With_The_Transaction)
     {
         // arrange
@@ -900,7 +866,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         DataPublisher_Destroy(handle);
     }
 
-    /* Tests_SRS_DATA_PUBLISHER_99_012:[ DataPublisher_EndTransaction shall dispose of any resources associated with the transaction.] */
     TEST_FUNCTION(DataPublisher_EndTransaction_Destroys_The_Cloned_Agent_Data_Type)
     {
         // arrange
@@ -940,7 +905,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
 
     /* DataPublisher_CancelTransaction */
 
-    /* Tests_SRS_DATA_PUBLISHER_99_013:[ A call to DataPublisher_CancelTransaction shall dispose of the transaction without dispatching the data to the DataMarshaller module and it shall return DATA_PUBLISHER_OK.] */
     TEST_FUNCTION(DataPublisher_CancelTransaction_Does_Not_Dispatch_Data)
     {
         // arrange
@@ -970,7 +934,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         DataPublisher_Destroy(handle);
     }
 
-    /* Tests_SRS_DATA_PUBLISHER_99_014:[ If the transactionHandle argument is NULL DataPublisher_CancelTransaction shall return DATA_PUBLISHER_INVALID_ARG.] */
     TEST_FUNCTION(DataPublisher_CancelTransaction_With_A_NULL_Transaction_Fails)
     {
         // arrange
@@ -983,7 +946,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_DATA_PUBLISHER_99_015:[ DataPublisher_CancelTransaction shall dispose of any resources associated with the transaction.] */
     TEST_FUNCTION(DataPublisher_CancelTransaction_Destroys_The_Cloned_Agent_Data_Type)
     {
         // arrange
@@ -1012,7 +974,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         DataPublisher_Destroy(handle);
     }
 
-    /* Tests_SRS_DATA_PUBLISHER_99_067:[ Before any call to DataPublisher_SetMaxBufferSize, the default max buffer size shall be equal to 10KB.] */
     TEST_FUNCTION(DataPublisher_default_max_buffer_size_should_be_10KB)
     {
         // arrange
@@ -1024,8 +985,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         ASSERT_ARE_EQUAL(size_t, 10 * 1024, size);
     }
 
-    /* Tests_SRS_DATA_PUBLISHER_99_065:[ DataPublisher_SetMaxBufferSize shall directly update the value used to limit how much data (in bytes) can be buffered in the BufferStorage instance.] */
-    /* Tests_SRS_DATA_PUBLISHER_99_069:[ DataMarshaller_GetMaxBufferSize shall return the current max buffer size value used by any new instance of DataMarshaller.] */
     TEST_FUNCTION(DataPublisher_SetMaxBufferSize_should_update_max_buffer_size_value)
     {
         // arrange
@@ -1041,7 +1000,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         DataPublisher_SetMaxBufferSize(10*1024);
     }
 
-    /*Tests_SRS_DATA_PUBLISHER_02_027: [ If argument dataPublisherHandle is NULL then DataPublisher_CreateTransaction_ReportedProperties shall fail and return NULL. ]*/
     TEST_FUNCTION(DataPublisher_CreateTransaction_ReportedProperties_with_NULL_dataPublisherHandle_fails)
     {
         ///arrange
@@ -1062,8 +1020,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         STRICT_EXPECTED_CALL(VECTOR_create(sizeof(void*)));
     }
 
-    /*Tests_SRS_DATA_PUBLISHER_02_028: [ DataPublisher_CreateTransaction_ReportedProperties shall create a VECTOR_HANDLE holding the individual elements of the transaction (DATA_MARSHALLER_VALUE). ]*/
-    /*Tests_SRS_DATA_PUBLISHER_02_030: [ Otherwise DataPublisher_CreateTransaction_ReportedProperties shall succeed and return a non-NULL handle. ]*/
     TEST_FUNCTION(DataPublisher_CreateTransaction_ReportedProperties_succeeds)
     {
         ///arrange
@@ -1084,7 +1040,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         DataPublisher_Destroy(dataPublisherHandle);
     }
 
-    /*Tests_SRS_DATA_PUBLISHER_02_029: [ If any error occurs then DataPublisher_CreateTransaction_ReportedProperties shall fail and return NULL. ]*/
     TEST_FUNCTION(DataPublisher_CreateTransaction_ReportedProperties_fails)
     {
         ///arrange
@@ -1119,7 +1074,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /*Tests_SRS_DATA_PUBLISHER_02_009: [ If argument transactionHandle is NULL then DataPublisher_PublishTransacted_ReportedProperty shall fail and return DATA_PUBLISHER_INVALID_ARG. ]*/
     TEST_FUNCTION(DataPublisher_PublishTransacted_ReportedProperty_with_NULL_transactionHandle_fails)
     {
         ///arrange
@@ -1135,7 +1089,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         ///clean
     }
 
-    /*Tests_SRS_DATA_PUBLISHER_02_010: [ If argument reportedPropertyPath is NULL then DataPublisher_PublishTransacted_ReportedProperty shall fail and return DATA_PUBLISHER_INVALID_ARG. ]*/
     TEST_FUNCTION(DataPublisher_PublishTransacted_ReportedProperty_with_NULL_reportedPropertyPath_fails)
     {
         ///arrange
@@ -1158,7 +1111,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         DataPublisher_Destroy(dataPublisherHandle);
     }
 
-    /*Tests_SRS_DATA_PUBLISHER_02_011: [ If argument data is NULL then DataPublisher_PublishTransacted_ReportedProperty shall fail and return DATA_PUBLISHER_INVALID_ARG. ]*/
     TEST_FUNCTION(DataPublisher_PublishTransacted_ReportedProperty_with_NULL_data_fails)
     {
         ///arrange
@@ -1196,8 +1148,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
             .IgnoreArgument_handle();
     }
 
-    /*Tests_SRS_DATA_PUBLISHER_02_015: [ DataPublisher_PublishTransacted_ReportedProperty shall add a new DATA_MARSHALLER_VALUE to the VECTOR_HANDLE. ]*/
-    /*Tests_SRS_DATA_PUBLISHER_02_017: [ Otherwise DataPublisher_PublishTransacted_ReportedProperty shall succeed and return DATA_PUBLISHER_OK. ]*/
     TEST_FUNCTION(DataPublisher_PublishTransacted_ReportedProperty_new_property_happy_path)
     {
         ///arrange
@@ -1223,8 +1173,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         DataPublisher_Destroy(dataPublisherHandle);
     }
 
-    /*Tests_SRS_DATA_PUBLISHER_02_023: [ If any error occurs then DataPublisher_CommitTransaction_ReportedProperties shall fail and return DATA_PUBLISHER_ERROR. ]*/
-    /*Tests_SRS_DATA_PUBLISHER_02_013: [ If a reported property with path reportedPropertyPath does not exist in the model then DataPublisher_PublishTransacted_ReportedProperty shall fail and return DATA_PUBLISHER_INVALID_ARG. ]*/
     TEST_FUNCTION(DataPublisher_PublishTransacted_ReportedProperty_new_property_unhappy_paths)
     {
         ///arrange
@@ -1296,8 +1244,6 @@ next_fail:;
             .IgnoreArgument_handle();
     }
 
-    /*Tests_SRS_DATA_PUBLISHER_02_015: [ DataPublisher_PublishTransacted_ReportedProperty shall add a new DATA_MARSHALLER_VALUE to the VECTOR_HANDLE. ]*/
-    /*Tests_SRS_DATA_PUBLISHER_02_017: [ Otherwise DataPublisher_PublishTransacted_ReportedProperty shall succeed and return DATA_PUBLISHER_OK. ]*/
     TEST_FUNCTION(DataPublisher_PublishTransacted_ReportedProperty_new_property_after_property_happy_path)
     {
         ///arrange
@@ -1324,8 +1270,6 @@ next_fail:;
         DataPublisher_Destroy(dataPublisherHandle);
     }
 
-    /*Tests_SRS_DATA_PUBLISHER_02_023: [ If any error occurs then DataPublisher_CommitTransaction_ReportedProperties shall fail and return DATA_PUBLISHER_ERROR. ]*/
-    /*Tests_SRS_DATA_PUBLISHER_02_013: [ If a reported property with path reportedPropertyPath does not exist in the model then DataPublisher_PublishTransacted_ReportedProperty shall fail and return DATA_PUBLISHER_INVALID_ARG. ]*/
     TEST_FUNCTION(DataPublisher_PublishTransacted_ReportedProperty_new_property_after_property_unhappy_paths)
     {
         ///arrange
@@ -1395,7 +1339,6 @@ next_fail:;
             .IgnoreArgument_ptr();
     }
 
-    /*Tests_SRS_DATA_PUBLISHER_02_014: [ If the same (by reportedPropertypath) reported property has already been added to the transaction, then DataPublisher_PublishTransacted_ReportedProperty shall overwrite the previous reported property. ]*/
     TEST_FUNCTION(DataPublisher_PublishTransacted_ReportedProperty_same_reportedPropertyPath_updates_property_happy_path)
     {
         ///arrange
@@ -1425,7 +1368,6 @@ next_fail:;
         DataPublisher_Destroy(dataPublisherHandle);
     }
 
-    /*Tests_SRS_DATA_PUBLISHER_02_016: [ If any error occurs then DataPublisher_PublishTransacted_ReportedProperty shall fail and return DATA_PUBLISHER_ERROR. ]*/
     TEST_FUNCTION(DataPublisher_PublishTransacted_ReportedProperty_same_reportedPropertyPath_updates_property_unhappy_paths)
     {
         ///arrange
@@ -1487,7 +1429,6 @@ next_fail:;
         DataPublisher_Destroy(dataPublisherHandle);
     }
 
-    /*Tests_SRS_DATA_PUBLISHER_02_019: [ If argument transactionHandle is NULL then DataPublisher_CommitTransaction_ReportedProperties shall fail and return DATA_PUBLISHER_INVALID_ARG. ]*/
     TEST_FUNCTION(DataPublisher_CommitTransaction_ReportedProperties_with_NULL_transactionHandle_fails)
     {
         ///arrange
@@ -1504,7 +1445,6 @@ next_fail:;
         ///cleanup
     }
 
-    /*Tests_SRS_DATA_PUBLISHER_02_020: [ If argument destination is NULL then DataPublisher_CommitTransaction_ReportedProperties shall fail and return DATA_PUBLISHER_INVALID_ARG. ]*/
     TEST_FUNCTION(DataPublisher_CommitTransaction_ReportedProperties_with_NULL_destination_fails)
     {
         ///arrange
@@ -1525,7 +1465,6 @@ next_fail:;
         DataPublisher_Destroy(dataPublisherHandle);
     }
 
-    /*Tests_SRS_DATA_PUBLISHER_02_021: [ If argument destinationSize NULL then DataPublisher_CommitTransaction_ReportedProperties shall fail and return DATA_PUBLISHER_INVALID_ARG. ]*/
     TEST_FUNCTION(DataPublisher_CommitTransaction_ReportedProperties_with_NULL_destinationSize_fails)
     {
         ///arrange
@@ -1546,7 +1485,6 @@ next_fail:;
         DataPublisher_Destroy(dataPublisherHandle);
     }
 
-    /*Tests_SRS_DATA_PUBLISHER_02_031: [ If the transaction contains zero elements then DataPublisher_CommitTransaction_ReportedProperties shall fail and return DATA_PUBLISHER_INVALID_ARG. ]*/
     TEST_FUNCTION(DataPublisher_CommitTransaction_ReportedProperties_with_zero_elements_fails)
     {
         ///arrange
@@ -1571,8 +1509,6 @@ next_fail:;
         DataPublisher_Destroy(dataPublisherHandle);
     }
 
-    /*Tests_SRS_DATA_PUBLISHER_02_022: [ DataPublisher_CommitTransaction_ReportedProperties shall call DataMarshaller_SendData_ReportedProperties providing the VECTOR_HANDLE holding the transacted reported properties, destination and destinationSize. ]*/
-    /*Tests_SRS_DATA_PUBLISHER_02_024: [ Otherwise DataPublisher_CommitTransaction_ReportedProperties shall succeed and return DATA_PUBLISHER_OK. ]*/
     TEST_FUNCTION(DataPublisher_CommitTransaction_ReportedProperties_succeeds)
     {
         ///arrange
@@ -1605,7 +1541,6 @@ next_fail:;
         DataPublisher_Destroy(dataPublisherHandle);
     }
 
-    /*Tests_SRS_DATA_PUBLISHER_02_023: [ If any error occurs then DataPublisher_CommitTransaction_ReportedProperties shall fail and return DATA_PUBLISHER_ERROR. ]*/
     TEST_FUNCTION(DataPublisher_CommitTransaction_ReportedProperties_fails)
     {
         ///arrange
@@ -1639,7 +1574,6 @@ next_fail:;
         DataPublisher_Destroy(dataPublisherHandle);
     }
 
-    /*Tests_SRS_DATA_PUBLISHER_02_025: [ If argument transactionHandle is NULL then DataPublisher_DestroyTransaction_ReportedProperties shall return. ]*/
     TEST_FUNCTION(DataPublisher_DestroyTransaction_ReportedProperties_with_NULL_transactionHandle_fails)
     {
         ///arrange
@@ -1653,7 +1587,6 @@ next_fail:;
         ///clean
     }
 
-    /*Tests_SRS_DATA_PUBLISHER_02_026: [ Otherwise DataPublisher_DestroyTransaction_ReportedProperties shall free all resources associated with the reported properties transactionHandle. ]*/
     TEST_FUNCTION(DataPublisher_DestroyTransaction_ReportedProperties__empty_transaction_succeeds)
     {
         ///arrange
@@ -1678,7 +1611,6 @@ next_fail:;
         DataPublisher_Destroy(dataPublisherHandle);
     }
 
-    /*Tests_SRS_DATA_PUBLISHER_02_026: [ Otherwise DataPublisher_DestroyTransaction_ReportedProperties shall free all resources associated with the reported properties transactionHandle. ]*/
     TEST_FUNCTION(DataPublisher_DestroyTransaction_ReportedProperties_1_element_in_transaction_succeeds)
     {
         ///arrange
@@ -1722,7 +1654,6 @@ next_fail:;
         DataPublisher_Destroy(dataPublisherHandle);
     }
 
-    /*Tests_SRS_DATA_PUBLISHER_02_026: [ Otherwise DataPublisher_DestroyTransaction_ReportedProperties shall free all resources associated with the reported properties transactionHandle. ]*/
     TEST_FUNCTION(DataPublisher_DestroyTransaction_ReportedProperties_2_elements_in_transaction_succeeds)
     {
         ///arrange

@@ -752,7 +752,6 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         STRICT_EXPECTED_CALL(json_value_free(IGNORED_PTR_ARG));
     }
 
-    /* Tests_SRS_PROV_CLIENT_CLIENT_07_001: [If dev_auth_handle or prov_uri is NULL Prov_Device_LL_Create shall return NULL.] */
     TEST_FUNCTION(Prov_Device_LL_Create_uri_NULL_fail)
     {
         //arrange
@@ -767,10 +766,6 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //cleanup
     }
 
-    /* Tests_SRS_PROV_CLIENT_CLIENT_07_002: [ Prov_Device_LL_Create shall allocate a PROV_DEVICE_LL_HANDLE and initialize all members. ] */
-    /* Tests_SRS_PROV_CLIENT_CLIENT_07_028: [ PROV_CLIENT_STATE_READY is the initial state after the object is created which will send a uhttp_client_open call to the http endpoint. ] */
-    /* Tests_SRS_PROV_CLIENT_CLIENT_07_034: [ Prov_Device_LL_Create shall construct a scope_id by base64 encoding the prov_uri. ] */
-    /* Tests_SRS_PROV_CLIENT_CLIENT_07_035: [ Prov_Device_LL_Create shall store the registration_id from the security module. ] */
     TEST_FUNCTION(Prov_Device_LL_Create_succees)
     {
         //arrange
@@ -787,7 +782,6 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         Prov_Device_LL_Destroy(result);
     }
 
-    /* Tests_SRS_PROV_CLIENT_CLIENT_07_003: [ If any error is encountered, Prov_Device_LL_Create shall return NULL. ] */
     TEST_FUNCTION(Prov_Device_LL_Create_fail)
     {
         //arrange
@@ -818,7 +812,6 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /* Tests_SRS_PROV_CLIENT_CLIENT_07_005: [ If handle is NULL Prov_Device_LL_Destroy shall do nothing. ] */
     TEST_FUNCTION(Prov_Device_LL_Destroy_handle_NULL)
     {
         //arrange
@@ -832,7 +825,6 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //cleanup
     }
 
-    /* Tests_SRS_PROV_CLIENT_CLIENT_07_006: [ Prov_Device_LL_Destroy shall destroy resources associated with the IoTHub_prov_client ] */
     TEST_FUNCTION(Prov_Device_LL_Destroy_succeed)
     {
         //arrange
@@ -850,7 +842,6 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //cleanup
     }
 
-    /* Tests_SRS_PROV_CLIENT_CLIENT_07_007: [ If handle, device_id or register_callback is NULL, Prov_Device_LL_Register_Device shall return PROV_DEVICE_RESULT_INVALID_ARG. ] */
     TEST_FUNCTION(Prov_Device_LL_Register_Device_handle_NULL_fail)
     {
         //arrange
@@ -865,7 +856,6 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //cleanup
     }
 
-    /* Tests_SRS_PROV_CLIENT_CLIENT_07_007: [ If handle, device_id or register_callback is NULL, Prov_Device_LL_Register_Device shall return PROV_DEVICE_RESULT_INVALID_ARG. ] */
     TEST_FUNCTION(Prov_Device_LL_Register_Device_register_callback_NULL_fail)
     {
         //arrange
@@ -883,7 +873,6 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         Prov_Device_LL_Destroy(handle);
     }
 
-    /* Tests_SRS_PROV_CLIENT_CLIENT_07_008: [ Prov_Device_LL_Register_Device shall set the state to send the registration request to on subsequent DoWork calls. ] */
     TEST_FUNCTION(Prov_Device_LL_Register_Device_tpm_succeed)
     {
         //arrange
@@ -993,7 +982,6 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /* Tests_SRS_PROV_CLIENT_CLIENT_07_010: [ If handle is NULL, Prov_Device_LL_DoWork shall do nothing. ] */
     TEST_FUNCTION(Prov_Device_LL_DoWork_handle_NULL_fail)
     {
         //arrange
@@ -1007,10 +995,6 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         //cleanup
     }
 
-    /* Tests_SRS_PROV_CLIENT_CLIENT_07_030: [ PROV_CLIENT_STATE_REGISTER_SENT state shall retrieve the endorsement_key, auth_type and hsm_type from a call to the dev_auth modules function. ] */
-    /* Tests_SRS_PROV_CLIENT_CLIENT_07_013: [ The PROV_CLIENT_STATE_REGISTER_SENTstate shall construct http request using uhttp_client_execute_request to the service with the following endorsement information: ] */
-    /* Tests_SRS_PROV_CLIENT_CLIENT_07_011: [ Prov_Device_LL_DoWork shall call the underlying http_client_dowork function ] */
-    /* Tests_SRS_PROV_CLIENT_CLIENT_07_19: [ Upon successfully sending the messge iothub_prov_client shall transition to the PROV_CLIENT_STATE_REGISTER_SENT state ] */
     TEST_FUNCTION(Prov_Device_LL_DoWork_register_send_succeed)
     {
         //arrange
@@ -1288,7 +1272,6 @@ BEGIN_TEST_SUITE(prov_device_client_ll_ut)
         Prov_Device_LL_Destroy(handle);
     }
 
-    /* Tests_SRS_PROV_CLIENT_CLIENT_07_009: [ Upon success Prov_Device_LL_Register_Device shall return PROV_DEVICE_RESULT_OK. ] */
     TEST_FUNCTION(Prov_Device_LL_DoWork_no_connection_succeed)
     {
         //arrange

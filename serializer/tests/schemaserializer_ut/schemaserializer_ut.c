@@ -118,7 +118,6 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
 
     /* SchemaSerializer_SerializeCommandMetadata */
 
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_013: [If the modelHandle argument is NULL, SchemaSerializer_SerializeCommandMetadata shall return SCHEMA_SERIALIZER_INVALID_ARG.] */
     TEST_FUNCTION(SchemaSerializer_SerializeCommandMetadata_With_NULL_model_handle_fails)
     {
         // arrange
@@ -130,7 +129,6 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
         ASSERT_ARE_EQUAL(SCHEMA_SERIALIZER_RESULT, SCHEMA_SERIALIZER_INVALID_ARG, result);
     }
 
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_014: [If the schemaText argument is NULL, SchemaSerializer_SerializeCommandMetadata shall return SCHEMA_SERIALIZER_INVALID_ARG.] */
     TEST_FUNCTION(SchemaSerializer_SerializeCommandMetadata_With_NULL_string_handle_fails)
     {
         // arrange
@@ -150,12 +148,6 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
         STRICT_EXPECTED_CALL(STRING_concat(TEST_STRING_HANDLE, "]"));
     }
 
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_001: [SchemaSerializer_SerializeCommandMetadata shall serialize a specific model to a string using JSON as format.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_002: [Only commands shall be serialized, the properties of a model shall be ignored.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_003: [The output JSON shall have an array, where each array element shall represent a command.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_011: [The JSON text shall be built into the string indicated by the schemaText argument by using String APIs.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_012: [On success SchemaSerializer_SerializeCommandMetadata shall return SCHEMA_SERIALIZER_OK.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_006: [The object for a command shall have a member named Name, whose value shall be the command name as obtained by using Schema APIs.] */
     TEST_FUNCTION(SchemaSerializer_SerializeCommandMetadata_When_Command_Count_Is_0_Should_Yield_An_Empty_Commands_Array_happy_path)
     {
         // arrange
@@ -171,7 +163,6 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
     }
 
     /*negative testing*/
-    /*Tests_SRS_SCHEMA_SERIALIZER_01_015: [ If any of the Schema or String APIs fail then SchemaSerializer_SerializeCommandMetadata shall return SCHEMA_SERIALIZER_ERROR. ]*/
     TEST_FUNCTION(SchemaSerializer_SerializeCommandMetadata_When_Command_Count_Is_0_Should_Yield_An_Empty_Commands_Array_unhappy_paths)
     {
         // arrange
@@ -219,14 +210,6 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
         STRICT_EXPECTED_CALL(STRING_concat(TEST_STRING_HANDLE, "]}"));
         STRICT_EXPECTED_CALL(STRING_concat(TEST_STRING_HANDLE, "]"));
     }
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_001: [SchemaSerializer_SerializeCommandMetadata shall serialize a specific model to a string using JSON as format.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_002: [Only commands shall be serialized, the properties of a model shall be ignored.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_003: [The output JSON shall have an array, where each array element shall represent a command.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_011: [The JSON text shall be built into the string indicated by the schemaText argument by using String APIs.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_012: [On success SchemaSerializer_SerializeCommandMetadata shall return SCHEMA_SERIALIZER_OK.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_006: [The object for a command shall have a member named Name, whose value shall be the command name as obtained by using Schema APIs.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_005: [Each array element shall be a JSON object.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_007: [The object for a command shall also have a "parameters" member.] */
     TEST_FUNCTION(SchemaSerializer_SerializeCommandMetadata_1_Command_With_No_Arguments_Yields_The_Proper_JSON_happy_path)
     {
         // arrange
@@ -242,7 +225,6 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
     }
 
     /*negative tests*/
-    /*Tests_SRS_SCHEMA_SERIALIZER_01_015: [ If any of the Schema or String APIs fail then SchemaSerializer_SerializeCommandMetadata shall return SCHEMA_SERIALIZER_ERROR. ]*/
     TEST_FUNCTION(SchemaSerializer_SerializeCommandMetadata_1_Command_With_No_Arguments_Yields_The_Proper_JSON_unhappy_paths)
     {
         // arrange
@@ -303,18 +285,6 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
         STRICT_EXPECTED_CALL(STRING_concat(TEST_STRING_HANDLE, "]"));
     }
 
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_001: [SchemaSerializer_SerializeCommandMetadata shall serialize a specific model to a string using JSON as format.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_002: [Only commands shall be serialized, the properties of a model shall be ignored.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_003: [The output JSON shall have an array, where each array element shall represent a command.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_011: [The JSON text shall be built into the string indicated by the schemaText argument by using String APIs.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_012: [On success SchemaSerializer_SerializeCommandMetadata shall return SCHEMA_SERIALIZER_OK.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_006: [The object for a command shall have a member named Name, whose value shall be the command name as obtained by using Schema APIs.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_005: [Each array element shall be a JSON object.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_007: [The object for a command shall also have a "Parameters" member.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_016: ["ascii_char_ptr" shall be translated to "string".] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_008: [The parameters member shall be an array, where each entry is a command parameter.]*/
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_009: [Each command parameter shall have a member named "Name", that should have as value the command argument name as obtained by using Schema APIs.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_010: [Each command parameter shall have a member named "Type", that should have as value the command argument type as obtained by using Schema APIs.] */
     TEST_FUNCTION(SchemaSerializer_SerializeCommandMetadata_1_Command_With_1_Argument_Yields_The_Proper_JSON_happy_path)
     {
         // arrange
@@ -329,7 +299,6 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
     }
 
     /*negative testing*/
-    /*Tests_SRS_SCHEMA_SERIALIZER_01_015: [ If any of the Schema or String APIs fail then SchemaSerializer_SerializeCommandMetadata shall return SCHEMA_SERIALIZER_ERROR. ]*/
     TEST_FUNCTION(SchemaSerializer_SerializeCommandMetadata_1_Command_With_1_Argument_Yields_The_Proper_JSON_unhappy_paths)
     {
         /// arrange
@@ -410,18 +379,6 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
         STRICT_EXPECTED_CALL(STRING_concat(TEST_STRING_HANDLE, "]"));
     }
 
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_001: [SchemaSerializer_SerializeCommandMetadata shall serialize a specific model to a string using JSON as format.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_002: [Only commands shall be serialized, the properties of a model shall be ignored.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_003: [The output JSON shall have an array, where each array element shall represent a command.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_011: [The JSON text shall be built into the string indicated by the schemaText argument by using String APIs.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_012: [On success SchemaSerializer_SerializeCommandMetadata shall return SCHEMA_SERIALIZER_OK.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_006: [The object for a command shall have a member named Name, whose value shall be the command name as obtained by using Schema APIs.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_005: [Each array element shall be a JSON object.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_007: [The object for a command shall also have a "Parameters" member.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_016: ["ascii_char_ptr" shall be translated to "string".] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_008: [The parameters member shall be an array, where each entry is a command parameter.]*/
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_009: [Each command parameter shall have a member named "Name", that should have as value the command argument name as obtained by using Schema APIs.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_010: [Each command parameter shall have a member named "Type", that should have as value the command argument type as obtained by using Schema APIs.] */
     TEST_FUNCTION(SchemaSerializer_SerializeCommandMetadata_2_Commanda_With_1_Argument_Each_Yields_The_Proper_JSON_happy_path)
     {
         // arrange
@@ -437,7 +394,6 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
     }
 
     /*negative tests*/
-    /*Tests_SRS_SCHEMA_SERIALIZER_01_015: [ If any of the Schema or String APIs fail then SchemaSerializer_SerializeCommandMetadata shall return SCHEMA_SERIALIZER_ERROR. ]*/
     TEST_FUNCTION(SchemaSerializer_SerializeCommandMetadata_2_Commanda_With_1_Argument_Each_Yields_The_Proper_JSON_unhappy_paths)
     {
         // arrange
@@ -497,7 +453,6 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
         STRICT_EXPECTED_CALL(STRING_concat(TEST_STRING_HANDLE, "]"));
     }
 
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_017: [All other types shall be kept as they are.]  */
     TEST_FUNCTION(SchemaSerializer_SerializeCommandMetadata_1_Command_With_1_Argument_Different_Than_String_Keeps_The_Same_Type_happy_path)
     {
         // arrange
@@ -514,7 +469,6 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
     }
 
     /*negative tests*/
-    /*Tests_SRS_SCHEMA_SERIALIZER_01_015: [ If any of the Schema or String APIs fail then SchemaSerializer_SerializeCommandMetadata shall return SCHEMA_SERIALIZER_ERROR. ]*/
     TEST_FUNCTION(SchemaSerializer_SerializeCommandMetadata_1_Command_With_1_Argument_Different_Than_String_Keeps_The_Same_Type_unhappy_paths)
     {
         // arrange
@@ -584,18 +538,6 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
         STRICT_EXPECTED_CALL(STRING_concat(TEST_STRING_HANDLE, "]"));
     }
 
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_001: [SchemaSerializer_SerializeCommandMetadata shall serialize a specific model to a string using JSON as format.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_002: [Only commands shall be serialized, the properties of a model shall be ignored.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_003: [The output JSON shall have an array, where each array element shall represent a command.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_011: [The JSON text shall be built into the string indicated by the schemaText argument by using String APIs.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_012: [On success SchemaSerializer_SerializeCommandMetadata shall return SCHEMA_SERIALIZER_OK.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_006: [The object for a command shall have a member named Name, whose value shall be the command name as obtained by using Schema APIs.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_005: [Each array element shall be a JSON object.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_007: [The object for a command shall also have a "Parameters" member.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_016: ["ascii_char_ptr" shall be translated to "string".] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_008: [The parameters member shall be an array, where each entry is a command parameter.]*/
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_009: [Each command parameter shall have a member named "Name", that should have as value the command argument name as obtained by using Schema APIs.] */
-    /* Tests_SRS_SCHEMA_SERIALIZER_01_010: [Each command parameter shall have a member named "Type", that should have as value the command argument type as obtained by using Schema APIs.] */
     TEST_FUNCTION(SchemaSerializer_SerializeCommandMetadata_1_Command_With_2_Arguments_Yields_The_Proper_JSON_happy_path)
     {
         // arrange
@@ -613,7 +555,6 @@ BEGIN_TEST_SUITE(SchemaSerializer_ut)
 
 
     /*negative tests*/
-    /*Tests_SRS_SCHEMA_SERIALIZER_01_015: [ If any of the Schema or String APIs fail then SchemaSerializer_SerializeCommandMetadata shall return SCHEMA_SERIALIZER_ERROR. ]*/
     TEST_FUNCTION(SchemaSerializer_SerializeCommandMetadata_1_Command_With_2_Arguments_Yields_The_Proper_JSON_unhappy_paths)
     {
         // arrange

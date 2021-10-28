@@ -838,7 +838,6 @@ static void expected_calls_rest_call(HTTP_CLIENT_REQUEST_TYPE request_type, resp
 
 /* UNIT TESTS BEGIN */
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_001: [ If conn_string is NULL prov_sc_create_from_connection_string shall fail and return NULL ] */
 TEST_FUNCTION(prov_sc_create_from_connection_string_ERROR_INPUT_NULL)
 {
     //arrange
@@ -854,8 +853,6 @@ TEST_FUNCTION(prov_sc_create_from_connection_string_ERROR_INPUT_NULL)
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_002: [ conn_string shall be parsed and its information will populate a new PROVISIONING_SERVICE_CLIENT_HANDLE ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_004: [ Upon successful creation of the new PROVISIONING_SERVICE_CLIENT_HANDLE, prov_sc_create_from_connection_string shall return it ] */
 TEST_FUNCTION(prov_sc_create_from_connection_string_GOLDEN)
 {
     //arrange
@@ -881,7 +878,6 @@ TEST_FUNCTION(prov_sc_create_from_connection_string_GOLDEN)
     prov_sc_destroy(sc);
 }
 
-/* Tests_SRS_PROVISIONING_SERVICE_CLIENT_22_003: [ If the new PROVISIONING_SERVICE_CLIENT_HANDLE is not correctly populated prov_sc_create_from_connection_string shall fail and return NULL ] */
 TEST_FUNCTION(prov_sc_create_from_connection_string_FAIL)
 {
     //arrange
@@ -935,7 +931,6 @@ TEST_FUNCTION(prov_sc_create_from_connection_string_FAIL)
     umock_c_negative_tests_deinit();
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_005: [ prov_sc_destroy shall free all the memory contained inside prov_client ] */
 TEST_FUNCTION(prov_sc_destroy_INPUT_NULL)
 {
     //arrange
@@ -949,7 +944,6 @@ TEST_FUNCTION(prov_sc_destroy_INPUT_NULL)
     //cleanup
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_005: [ prov_sc_destroy shall free all the memory contained inside prov_client ] */
 TEST_FUNCTION(prov_sc_destroy_GOLDEN)
 {
     //arrange
@@ -971,7 +965,6 @@ TEST_FUNCTION(prov_sc_destroy_GOLDEN)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_068: [ If prov_client is NULL, prov_sc_trace_on shall do nothing ] */
 TEST_FUNCTION(prov_sc_set_trace_INPUT_NULL)
 {
     //arrange
@@ -987,7 +980,6 @@ TEST_FUNCTION(prov_sc_set_trace_INPUT_NULL)
 
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_069: [ HTTP tracing for communications using prov_client will be set to status ] */
 TEST_FUNCTION(prov_sc_trace_GOLDEN)
 {
     //arrange
@@ -1005,7 +997,6 @@ TEST_FUNCTION(prov_sc_trace_GOLDEN)
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_058: [ If prov_client is NULL, prov_sc_set_certificate shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_set_certificate_ERROR_NULL_HANDLE)
 {
     //arrange
@@ -1020,8 +1011,6 @@ TEST_FUNCTION(prov_sc_set_certificate_ERROR_NULL_HANDLE)
     //cleanup
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_059: [ If certificate is NULL, any previously set trusted certificate will be cleared ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_062: [ Upon success, prov_sc_set_certficiate shall return 0 ]*/
 TEST_FUNCTION(prov_sc_set_certificate_NULL_CERTIFICATE)
 {
     //arrange
@@ -1041,8 +1030,6 @@ TEST_FUNCTION(prov_sc_set_certificate_NULL_CERTIFICATE)
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_060: [ If certificate is not NULL, it will be set as the trusted certificate for prov_client ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_062: [ Upon success, prov_sc_set_certficiate shall return 0 ]*/
 TEST_FUNCTION(prov_sc_set_certificate_GOLDEN)
 {
     //arrange
@@ -1062,7 +1049,6 @@ TEST_FUNCTION(prov_sc_set_certificate_GOLDEN)
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_061: [ If allocating the trusted certificate fails, prov_sc_set_certificate shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_set_certificate_FAIL)
 {
     //arrange
@@ -1105,7 +1091,6 @@ TEST_FUNCTION(prov_sc_set_certificate_FAIL)
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_063: [ If prov_client or proxy_options are NULL, prov_sc_set_proxy shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_set_proxy_ERROR_INPUT_NULL1)
 {
     //arrange
@@ -1125,7 +1110,6 @@ TEST_FUNCTION(prov_sc_set_proxy_ERROR_INPUT_NULL1)
     //cleanup
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_063: [ If prov_client or proxy_options are NULL, prov_sc_set_proxy shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_set_proxy_ERROR_INPUT_NULL2)
 {
     //arrange
@@ -1143,7 +1127,6 @@ TEST_FUNCTION(prov_sc_set_proxy_ERROR_INPUT_NULL2)
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_064: [ If the host address is NULL in proxy_options, prov_sc_set_proxy shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_set_proxy_ERROR_NO_HOST)
 {
     //arrange
@@ -1168,7 +1151,6 @@ TEST_FUNCTION(prov_sc_set_proxy_ERROR_NO_HOST)
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_065: [ If only the username, or only the password is NULL in proxy_options, prov_sc_set_proxy shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_set_proxy_ERROR_ONLY_PASSWORD)
 {
     //arrange
@@ -1193,7 +1175,6 @@ TEST_FUNCTION(prov_sc_set_proxy_ERROR_ONLY_PASSWORD)
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_065: [ If only the username, or only the password is NULL in proxy_options, prov_sc_set_proxy shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_set_proxy_ERROR_ONLY_USERNAME)
 {
     //arrange
@@ -1218,8 +1199,6 @@ TEST_FUNCTION(prov_sc_set_proxy_ERROR_ONLY_USERNAME)
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_066: [ The proxy settings specified in proxy_options will be set for use by prov_client ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_067: [ Upon success, prov_sc_set_proxy shall return 0 ] */
 TEST_FUNCTION(prov_sc_set_proxy_GOLDEN_NO_LOGIN)
 {
     //arrange
@@ -1244,8 +1223,6 @@ TEST_FUNCTION(prov_sc_set_proxy_GOLDEN_NO_LOGIN)
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_066: [ The proxy settings specified in proxy_options will be set for use by prov_client ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_067: [ Upon success, prov_sc_set_proxy shall return 0 ] */
 TEST_FUNCTION(prov_sc_set_proxy_GOLDEN_FULL_PROXY)
 {
     //arrange
@@ -1270,7 +1247,6 @@ TEST_FUNCTION(prov_sc_set_proxy_GOLDEN_FULL_PROXY)
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_006: [ If prov_client or enrollment_ptr are NULL, prov_sc_create_or_update_individual_enrollment shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_ERROR_INPUT_NULL_SC_HANDLE)
 {
     //arrange
@@ -1288,7 +1264,6 @@ TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_ERROR_INPUT_NULL_SC
     individualEnrollment_destroy(ie);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_006: [ If prov_client or enrollment_ptr are NULL, prov_sc_create_or_update_individual_enrollment shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_ERROR_INPUT_NULL_IE_HANDLE)
 {
     //arrange
@@ -1306,7 +1281,6 @@ TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_ERROR_INPUT_NULL_IE
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_006: [ If prov_client or enrollment_ptr are NULL, prov_sc_create_or_update_individual_enrollment shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_ERROR_INPUT_NULL_IE_HANDLE2)
 {
     //arrange
@@ -1325,9 +1299,6 @@ TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_ERROR_INPUT_NULL_IE
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_007: [ A 'PUT' REST call shall be issued to create/update the enrollment record of a device on the Provisioning Service, using data contained in enrollment_ptr ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_044: [ The data in enrollment_ptr will be updated to reflect new information added by the Provisioning Service ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_009: [ Upon a successful create or update, prov_sc_create_or_update_individual_enrollment shall return 0 ] */
 TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_GOLDEN)
 {
     //arrange
@@ -1364,9 +1335,6 @@ TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_GOLDEN)
     individualEnrollment_destroy(ie);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_007: [ A 'PUT' REST call shall be issued to create/update the enrollment record of a device on the Provisioning Service, using data contained in enrollment_ptr ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_044: [ The data in enrollment_ptr will be updated to reflect new information added by the Provisioning Service ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_009: [ Upon a successful create or update, prov_sc_create_or_update_individual_enrollment shall return 0 ] */
 TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_GOLDEN_w_etag)
 {
     //arrange
@@ -1403,9 +1371,6 @@ TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_GOLDEN_w_etag)
     individualEnrollment_destroy(ie);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_007: [ A 'PUT' REST call shall be issued to create/update the enrollment record of a device on the Provisioning Service, using data contained in enrollment_ptr ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_044: [ The data in enrollment_ptr will be updated to reflect new information added by the Provisioning Service ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_009: [ Upon a successful create or update, prov_sc_create_or_update_individual_enrollment shall return 0 ] */
 TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_GOLDEN_ALL_HTTP_OPTIONS)
 {
     //arrange
@@ -1457,8 +1422,6 @@ TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_GOLDEN_ALL_HTTP_OPT
     individualEnrollment_destroy(ie);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_008: [ If the 'PUT' REST call fails, prov_sc_create_or_update_individual_enrollment shall fail and return a non-zero value ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_045: [ If receiving the response from the Provisioning Service fails, prov_sc_create_or_update_individual_enrollment shall fail and return a non-zero value. ] */
 TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_FAIL_null_etag)
 {
     //arrange
@@ -1520,8 +1483,6 @@ TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_FAIL_null_etag)
     umock_c_negative_tests_deinit();
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_008: [ If the 'PUT' REST call fails, prov_sc_create_or_update_individual_enrollment shall fail and return a non-zero value ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_045: [ If receiving the response from the Provisioning Service fails, prov_sc_create_or_update_individual_enrollment shall fail and return a non-zero value. ] */
 TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_FAIL_w_etag)
 {
     //arrange
@@ -1583,8 +1544,6 @@ TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_FAIL_w_etag)
     umock_c_negative_tests_deinit();
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_008: [ If the 'PUT' REST call fails, prov_sc_create_or_update_individual_enrollment shall fail and return a non-zero value ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_045: [ If receiving the response from the Provisioning Service fails, prov_sc_create_or_update_individual_enrollment shall fail and return a non-zero value. ] */
 TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_FAIL_ALL_HTTP_OPTIONS)
 {
     //arrange
@@ -1661,7 +1620,6 @@ TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_FAIL_ALL_HTTP_OPTIO
     umock_c_negative_tests_deinit();
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_010: [ If prov_client or enrollment are NULL, prov_sc_delete_individual_enrollment shall fail and return return a non-zero value ] */
 TEST_FUNCTION(prov_sc_delete_individual_enrollment_ERROR_INPUT_NULL_PROV_SC)
 {
     //arrange
@@ -1678,7 +1636,6 @@ TEST_FUNCTION(prov_sc_delete_individual_enrollment_ERROR_INPUT_NULL_PROV_SC)
     //cleanup
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_010: [ If prov_client or enrollment are NULL, prov_sc_delete_individual_enrollment shall fail and return return a non-zero value ] */
 TEST_FUNCTION(prov_sc_delete_individual_enrollment_ERROR_INPUT_NULL_ENROLLMENT)
 {
     //arrange
@@ -1699,8 +1656,6 @@ TEST_FUNCTION(prov_sc_delete_individual_enrollment_ERROR_INPUT_NULL_ENROLLMENT)
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_011: [ A 'DELETE' REST call shall be issued to delete the individual enrollment record on the Provisioning Service that matches enrollment based on registration id and etag ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_013: [ Upon a successful delete, prov_sc_delete_individual_enrollment shall return 0 ] */
 TEST_FUNCTION(prov_sc_delete_individual_enrollment_GOLDEN_NO_ETAG)
 {
     PROVISIONING_SERVICE_CLIENT_HANDLE sc = prov_sc_create_from_connection_string(TEST_CONNECTION_STRING);
@@ -1732,8 +1687,6 @@ TEST_FUNCTION(prov_sc_delete_individual_enrollment_GOLDEN_NO_ETAG)
     individualEnrollment_destroy(ie);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_011: [ A 'DELETE' REST call shall be issued to delete the individual enrollment record on the Provisioning Service that matches enrollment based on registration id and etag ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_013: [ Upon a successful delete, prov_sc_delete_individual_enrollment shall return 0 ] */
 TEST_FUNCTION(prov_sc_delete_individual_enrollment_GOLDEN_WITH_ETAG)
 {
     PROVISIONING_SERVICE_CLIENT_HANDLE sc = prov_sc_create_from_connection_string(TEST_CONNECTION_STRING);
@@ -1765,7 +1718,6 @@ TEST_FUNCTION(prov_sc_delete_individual_enrollment_GOLDEN_WITH_ETAG)
     individualEnrollment_destroy(ie);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_012: [ If the 'DELETE' REST call fails, prov_sc_delete_individual_enrollment shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_delete_individual_enrollment_FAIL)
 {
     //arrange
@@ -1825,7 +1777,6 @@ TEST_FUNCTION(prov_sc_delete_individual_enrollment_FAIL)
     umock_c_negative_tests_deinit();
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_046: [ If prov_client or reg_id are NULL, prov_sc_delete_individual_enrollment_by_param shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_delete_individual_enrollment_by_param_NULL_PROV_SC)
 {
     //arrange
@@ -1840,7 +1791,6 @@ TEST_FUNCTION(prov_sc_delete_individual_enrollment_by_param_NULL_PROV_SC)
     //cleanup
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_046: [ If prov_client or reg_id are NULL, prov_sc_delete_individual_enrollment_by_param shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_delete_individual_enrollment_by_param_NULL_REG_ID)
 {
     //arrange
@@ -1858,9 +1808,6 @@ TEST_FUNCTION(prov_sc_delete_individual_enrollment_by_param_NULL_REG_ID)
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_047: [ If etag is given as NULL, it shall be ignored ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_048: [A 'DELETE' REST call shall be issued to delete the individual enrollment record of a device with ID reg_id, and optionally, etag from the Provisioning Service] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_050: [ Upon a successful delete, prov_sc_delete_individual_enrollment_by_param shall return 0 ] */
 TEST_FUNCTION(prov_sc_delete_individual_enrollment_by_param_GOLDEN_NO_ETAG)
 {
     PROVISIONING_SERVICE_CLIENT_HANDLE sc = prov_sc_create_from_connection_string(TEST_CONNECTION_STRING);
@@ -1888,8 +1835,6 @@ TEST_FUNCTION(prov_sc_delete_individual_enrollment_by_param_GOLDEN_NO_ETAG)
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_048: [A 'DELETE' REST call shall be issued to delete the individual enrollment record of a device with ID reg_id, and optionally, etag from the Provisioning Service] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_050: [ Upon a successful delete, prov_sc_delete_individual_enrollment_by_param shall return 0 ] */
 TEST_FUNCTION(prov_sc_delete_individual_enrollment_by_param_GOLDEN_WITH_ETAG)
 {
     PROVISIONING_SERVICE_CLIENT_HANDLE sc = prov_sc_create_from_connection_string(TEST_CONNECTION_STRING);
@@ -1917,7 +1862,6 @@ TEST_FUNCTION(prov_sc_delete_individual_enrollment_by_param_GOLDEN_WITH_ETAG)
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_049: [ If the 'DELETE' REST call fails, prov_sc_delete_individual_enrollment_by_param shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_delete_individual_enrollment_by_param_FAIL)
 {
     //arrange
@@ -1974,7 +1918,6 @@ TEST_FUNCTION(prov_sc_delete_individual_enrollment_by_param_FAIL)
     umock_c_negative_tests_deinit();
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_014: [ If prov_client, reg_id or enrollment_ptr are NULL, prov_sc_get_individual_enrollment shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_get_individual_enrollment_ERROR_INPUT_NULL_PROV_SC)
 {
     //arrange
@@ -1990,7 +1933,6 @@ TEST_FUNCTION(prov_sc_get_individual_enrollment_ERROR_INPUT_NULL_PROV_SC)
     //cleanup
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_014: [ If prov_client, reg_id or enrollment_ptr are NULL, prov_sc_get_individual_enrollment shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_get_individual_enrollment_ERROR_INPUT_NULL_REG_ID)
 {
     //arrange
@@ -2009,7 +1951,6 @@ TEST_FUNCTION(prov_sc_get_individual_enrollment_ERROR_INPUT_NULL_REG_ID)
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_014: [ If prov_client, reg_id or enrollment_ptr are NULL, prov_sc_get_individual_enrollment shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_get_individual_enrollment_ERROR_INPUT_NULL_ENROLLMENT)
 {
     //arrange
@@ -2027,9 +1968,6 @@ TEST_FUNCTION(prov_sc_get_individual_enrollment_ERROR_INPUT_NULL_ENROLLMENT)
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_015: [ A 'GET' REST call shall be issued to retrieve the enrollment record of a device with ID reg_id from the Provisioning Service ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_017: [ The data from the retrieved device enrollment record shall populate enrollment_ptr ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_019: [ Upon successful population of enrollment_ptr with the retrieved device enrollment record data, prov_sc_get_individual_enrollment shall return 0 ] */
 TEST_FUNCTION(prov_sc_get_individual_enrollment_GOLDEN)
 {
     //arrange
@@ -2060,8 +1998,6 @@ TEST_FUNCTION(prov_sc_get_individual_enrollment_GOLDEN)
     individualEnrollment_destroy(ie);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_016: [If the 'GET' REST call fails, prov_sc_get_individual_enrollment shall fail and return a non - zero value] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_018: [ If populating enrollment_ptr with retrieved data fails, prov_sc_get_individual_enrollment shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_get_individual_enrollment_FAIL)
 {
     //arrange
@@ -2118,7 +2054,6 @@ TEST_FUNCTION(prov_sc_get_individual_enrollment_FAIL)
     umock_c_negative_tests_deinit();
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_030: [ If prov_client or enrollment_ptr are NULL, prov_sc_create_or_update_enrollment_group shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_create_or_update_enrollment_group_ERROR_INPUT_NULL_SC_HANDLE)
 {
     //arrange
@@ -2136,7 +2071,6 @@ TEST_FUNCTION(prov_sc_create_or_update_enrollment_group_ERROR_INPUT_NULL_SC_HAND
     enrollmentGroup_destroy(eg);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_030: [ If prov_client or enrollment_ptr are NULL, prov_sc_create_or_update_enrollment_group shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_create_or_update_enrollment_group_ERROR_INPUT_NULL_EG_HANDLE)
 {
     //arrange
@@ -2154,7 +2088,6 @@ TEST_FUNCTION(prov_sc_create_or_update_enrollment_group_ERROR_INPUT_NULL_EG_HAND
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_030: [ If prov_client or enrollment_ptr are NULL, prov_sc_create_or_update_enrollment_group shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_create_or_update_enrollment_group_ERROR_INPUT_NULL_EG_HANDLE2)
 {
     //arrange
@@ -2173,9 +2106,6 @@ TEST_FUNCTION(prov_sc_create_or_update_enrollment_group_ERROR_INPUT_NULL_EG_HAND
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_031: [ A 'PUT' REST call shall be issued to create/update the device enrollment group on the Provisioning Service, using data contained in enrollment_ptr ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_051: [ The data in enrollment_ptr will be updated to reflect new information added by the Provisioning Service ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_033: [ Upon a successful create or update, prov_sc_create_or_update_enrollment_group shall return 0 ] */
 TEST_FUNCTION(prov_sc_create_or_update_enrollment_group_GOLDEN_no_etag)
 {
     //arrange
@@ -2212,9 +2142,6 @@ TEST_FUNCTION(prov_sc_create_or_update_enrollment_group_GOLDEN_no_etag)
     enrollmentGroup_destroy(eg);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_031: [ A 'PUT' REST call shall be issued to create/update the device enrollment group on the Provisioning Service, using data contained in enrollment_ptr ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_051: [ The data in enrollment_ptr will be updated to reflect new information added by the Provisioning Service ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_033: [ Upon a successful create or update, prov_sc_create_or_update_enrollment_group shall return 0 ] */
 TEST_FUNCTION(prov_sc_create_or_update_enrollment_group_GOLDEN_w_etag)
 {
     //arrange
@@ -2251,8 +2178,6 @@ TEST_FUNCTION(prov_sc_create_or_update_enrollment_group_GOLDEN_w_etag)
     enrollmentGroup_destroy(eg);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_008: [ If the 'PUT' REST call fails, prov_sc_create_or_update_individual_enrollment shall fail and return a non-zero value ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_052: [ If receiving the response from the Provisioning Service fails, prov_sc_create_or_update_enrollment_group shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_create_or_update_enrollment_group_FAIL_no_etag)
 {
     //arrange
@@ -2315,8 +2240,6 @@ TEST_FUNCTION(prov_sc_create_or_update_enrollment_group_FAIL_no_etag)
     umock_c_negative_tests_deinit();
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_008: [ If the 'PUT' REST call fails, prov_sc_create_or_update_individual_enrollment shall fail and return a non-zero value ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_052: [ If receiving the response from the Provisioning Service fails, prov_sc_create_or_update_enrollment_group shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_create_or_update_enrollment_group_FAIL_w_etag)
 {
     //arrange
@@ -2379,7 +2302,6 @@ TEST_FUNCTION(prov_sc_create_or_update_enrollment_group_FAIL_w_etag)
     umock_c_negative_tests_deinit();
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_034: [ If prov_client or id are NULL, prov_sc_delete_enrollment_group shall return return a non-zero value ] */
 TEST_FUNCTION(prov_sc_delete_enrollment_group_ERROR_INPUT_NULL_PROV_SC)
 {
     //arrange
@@ -2396,7 +2318,6 @@ TEST_FUNCTION(prov_sc_delete_enrollment_group_ERROR_INPUT_NULL_PROV_SC)
     //cleanup
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_034: [ If prov_client or id are NULL, prov_sc_delete_enrollment_group shall return return a non-zero value ] */
 TEST_FUNCTION(prov_sc_delete_enrollment_group_ERROR_INPUT_NULL_ENROLLMENT)
 {
     //arrange
@@ -2417,8 +2338,6 @@ TEST_FUNCTION(prov_sc_delete_enrollment_group_ERROR_INPUT_NULL_ENROLLMENT)
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_035: [ A 'DELETE' REST call shall be issued to delete the device enrollment group that matches enrollment from the Provisioning Service ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_037: [ Upon a successful delete, prov_sc_delete_enrollment_group shall return 0 ] */
 TEST_FUNCTION(prov_sc_delete_enrollment_group_GOLDEN_NO_ETAG)
 {
     PROVISIONING_SERVICE_CLIENT_HANDLE sc = prov_sc_create_from_connection_string(TEST_CONNECTION_STRING);
@@ -2450,8 +2369,6 @@ TEST_FUNCTION(prov_sc_delete_enrollment_group_GOLDEN_NO_ETAG)
     enrollmentGroup_destroy(eg);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_035: [ A 'DELETE' REST call shall be issued to delete the device enrollment group that matches enrollment from the Provisioning Service ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_037: [ Upon a successful delete, prov_sc_delete_enrollment_group shall return 0 ] */
 TEST_FUNCTION(prov_sc_delete_enrollment_group_GOLDEN_WITH_ETAG)
 {
     PROVISIONING_SERVICE_CLIENT_HANDLE sc = prov_sc_create_from_connection_string(TEST_CONNECTION_STRING);
@@ -2483,7 +2400,6 @@ TEST_FUNCTION(prov_sc_delete_enrollment_group_GOLDEN_WITH_ETAG)
     enrollmentGroup_destroy(eg);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_036: [ If the 'DELETE' REST call fails, prov_sc_delete_enrollment_group shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_delete_enrollment_group_FAIL)
 {
     //arrange
@@ -2543,7 +2459,6 @@ TEST_FUNCTION(prov_sc_delete_enrollment_group_FAIL)
     umock_c_negative_tests_deinit();
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_053: [ If prov_client or group_id are NULL, prov_sc_delete_enrollment_group_by_param shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_delete_enrollment_group_by_param_NULL_PROV_SC)
 {
     //arrange
@@ -2558,7 +2473,6 @@ TEST_FUNCTION(prov_sc_delete_enrollment_group_by_param_NULL_PROV_SC)
     //cleanup
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_053: [ If prov_client or group_id are NULL, prov_sc_delete_enrollment_group_by_param shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_delete_enrollment_group_by_param_NULL_REG_ID)
 {
     //arrange
@@ -2576,9 +2490,6 @@ TEST_FUNCTION(prov_sc_delete_enrollment_group_by_param_NULL_REG_ID)
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_054: [ If etag is given as NULL, it shall be ignored ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_055: [ A 'DELETE' REST call shall be issued to delete the enrollment group record with ID group_id, and optionally, etag from the Provisioning Service ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_057: [ Upon a successful delete, prov_sc_delete_enrollment_group_by_param shall return 0 ] */
 TEST_FUNCTION(prov_sc_delete_enrollment_group_by_param_GOLDEN_NO_ETAG)
 {
     PROVISIONING_SERVICE_CLIENT_HANDLE sc = prov_sc_create_from_connection_string(TEST_CONNECTION_STRING);
@@ -2606,8 +2517,6 @@ TEST_FUNCTION(prov_sc_delete_enrollment_group_by_param_GOLDEN_NO_ETAG)
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_055: [ A 'DELETE' REST call shall be issued to delete the enrollment group record with ID group_id, and optionally, etag from the Provisioning Service ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_057: [ Upon a successful delete, prov_sc_delete_enrollment_group_by_param shall return 0 ] */
 TEST_FUNCTION(prov_sc_delete_enrollment_group_by_param_GOLDEN_WITH_ETAG)
 {
     PROVISIONING_SERVICE_CLIENT_HANDLE sc = prov_sc_create_from_connection_string(TEST_CONNECTION_STRING);
@@ -2635,7 +2544,6 @@ TEST_FUNCTION(prov_sc_delete_enrollment_group_by_param_GOLDEN_WITH_ETAG)
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_056: [ If the 'DELETE' REST call fails, prov_sc_delete_enrollment_group_by_param shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_delete_enrollment_group_by_param_FAIL)
 {
     //arrange
@@ -2691,7 +2599,6 @@ TEST_FUNCTION(prov_sc_delete_enrollment_group_by_param_FAIL)
     umock_c_negative_tests_deinit();
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_038: [ If prov_client, group_id or enrollment_ptr are NULL, prov_sc_get_enrollment_group shall return return a non-zero value ] */
 TEST_FUNCTION(prov_sc_get_enrollment_group_ERROR_INPUT_NULL_PROV_SC)
 {
     //arrange
@@ -2707,7 +2614,6 @@ TEST_FUNCTION(prov_sc_get_enrollment_group_ERROR_INPUT_NULL_PROV_SC)
     //cleanup
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_038: [ If prov_client, group_id or enrollment_ptr are NULL, prov_sc_get_enrollment_group shall return return a non-zero value ] */
 TEST_FUNCTION(prov_sc_get_enrollment_group_ERROR_INPUT_NULL_REG_ID)
 {
     //arrange
@@ -2726,7 +2632,6 @@ TEST_FUNCTION(prov_sc_get_enrollment_group_ERROR_INPUT_NULL_REG_ID)
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_038: [ If prov_client, group_id or enrollment_ptr are NULL, prov_sc_get_enrollment_group shall return return a non-zero value ] */
 TEST_FUNCTION(prov_sc_get_enrollment_group_ERROR_INPUT_NULL_ENROLLMENT)
 {
     //arrange
@@ -2744,9 +2649,6 @@ TEST_FUNCTION(prov_sc_get_enrollment_group_ERROR_INPUT_NULL_ENROLLMENT)
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_039: [ A 'GET' REST call shall be issued to retrieve the device enrollment group with ID group_id from the Provisioning Service ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_041: [ The data from the retrieved device enrollment group shall populate enrollment_ptr ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_043: [ Upon successful population of enrollment_ptr with the retrieved device enrollment group data, prov_sc_get_enrollment_group shall return 0 ] */
 TEST_FUNCTION(prov_sc_get_enrollment_group_GOLDEN)
 {
     //arrange
@@ -2777,8 +2679,6 @@ TEST_FUNCTION(prov_sc_get_enrollment_group_GOLDEN)
     enrollmentGroup_destroy(eg);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_040: [ If the 'GET' REST call fails, prov_sc_get_enrollment_group shall fail and return a non-zero value ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_042: [ If populating enrollment_ptr with retrieved data fails, prov_sc_get_enrollment_group shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_get_enrollment_group_FAIL)
 {
     //arrange
@@ -2835,7 +2735,6 @@ TEST_FUNCTION(prov_sc_get_enrollment_group_FAIL)
     umock_c_negative_tests_deinit();
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_024: [ If prov_client or reg_id are NULL, prov_sc_get_device_registration_state shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_get_device_registration_state_ERROR_INPUT_NULL_PROV_SC)
 {
     //arrange
@@ -2851,7 +2750,6 @@ TEST_FUNCTION(prov_sc_get_device_registration_state_ERROR_INPUT_NULL_PROV_SC)
     //cleanup
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_024: [ If prov_client or reg_id are NULL, prov_sc_get_device_registration_state shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_get_device_registration_state_ERROR_INPUT_NULL_REG_ID)
 {
     //arrange
@@ -2870,7 +2768,6 @@ TEST_FUNCTION(prov_sc_get_device_registration_state_ERROR_INPUT_NULL_REG_ID)
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_024: [ If prov_client or reg_id are NULL, prov_sc_get_device_registration_state shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_get_device_registration_state_ERROR_INPUT_NULL_ENROLLMENT)
 {
     //arrange
@@ -2888,9 +2785,6 @@ TEST_FUNCTION(prov_sc_get_device_registration_state_ERROR_INPUT_NULL_ENROLLMENT)
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_025: [ A 'GET' REST call shall be issued to retrieve the registration state of a device with ID reg_id from the Provisioning Service ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_027: [ The data from the retrieved device registration state shall populate reg_state ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_029: [ Upon successful population of reg_state with the retrieved device registration state data, prov_sc_get_device_registration_state shall return 0 ] */
 TEST_FUNCTION(prov_sc_get_device_registration_state_GOLDEN)
 {
     //arrange
@@ -2921,8 +2815,6 @@ TEST_FUNCTION(prov_sc_get_device_registration_state_GOLDEN)
     deviceRegistrationState_destroy(drs);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_026: [ If the 'GET' REST call fails, prov_sc_get_device_registration_state shall fail and return a non-zero value ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_028: [ If populating reg_state with retrieved data fails, prov_sc_get_device_registration_state shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_get_device_registration_state_FAIL)
 {
     //arrange
@@ -2979,7 +2871,6 @@ TEST_FUNCTION(prov_sc_get_device_registration_state_FAIL)
     umock_c_negative_tests_deinit();
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_020: [ If prov_client or reg_id are NULL, prov_sc_delete_device_registration_state shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_delete_device_registration_state_ERROR_INPUT_NULL_PROV_SC)
 {
     //arrange
@@ -2996,7 +2887,6 @@ TEST_FUNCTION(prov_sc_delete_device_registration_state_ERROR_INPUT_NULL_PROV_SC)
     //cleanup
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_020: [ If prov_client or reg_id are NULL, prov_sc_delete_device_registration_state shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_delete_device_registration_state_ERROR_INPUT_NULL_ENROLLMENT)
 {
     //arrange
@@ -3017,8 +2907,6 @@ TEST_FUNCTION(prov_sc_delete_device_registration_state_ERROR_INPUT_NULL_ENROLLME
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_021: [ A 'DELETE' REST call shall be issued to delete the registration state of a device with ID reg_id from the Provisioning Service ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_023: [ Upon a successful delete, prov_sc_delete_device_registration_state shall return 0 ] */
 TEST_FUNCTION(prov_sc_delete_device_registration_state_GOLDEN_NO_ETAG)
 {
     PROVISIONING_SERVICE_CLIENT_HANDLE sc = prov_sc_create_from_connection_string(TEST_CONNECTION_STRING);
@@ -3048,8 +2936,6 @@ TEST_FUNCTION(prov_sc_delete_device_registration_state_GOLDEN_NO_ETAG)
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_021: [ A 'DELETE' REST call shall be issued to delete the registration state of a device with ID reg_id from the Provisioning Service ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_023: [ Upon a successful delete, prov_sc_delete_device_registration_state shall return 0 ] */
 TEST_FUNCTION(prov_sc_delete_device_registration_state_GOLDEN_WITH_ETAG)
 {
     PROVISIONING_SERVICE_CLIENT_HANDLE sc = prov_sc_create_from_connection_string(TEST_CONNECTION_STRING);
@@ -3079,7 +2965,6 @@ TEST_FUNCTION(prov_sc_delete_device_registration_state_GOLDEN_WITH_ETAG)
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_022: [ If the 'DELETE' REST call fails, prov_sc_delete_device_registration_state shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_delete_device_registration_state_FAIL)
 {
     //arrange
@@ -3137,7 +3022,6 @@ TEST_FUNCTION(prov_sc_delete_device_registration_state_FAIL)
     umock_c_negative_tests_deinit();
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_058: [ If prov_client or reg_id are NULL, prov_sc_delete_device_registration_state_by_param shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_delete_device_registration_state_by_param_NULL_PROV_SC)
 {
     //arrange
@@ -3152,7 +3036,6 @@ TEST_FUNCTION(prov_sc_delete_device_registration_state_by_param_NULL_PROV_SC)
     //cleanup
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_058: [ If prov_client or reg_id are NULL, prov_sc_delete_device_registration_state_by_param shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_delete_device_registration_state_by_param_NULL_REG_ID)
 {
     //arrange
@@ -3170,9 +3053,6 @@ TEST_FUNCTION(prov_sc_delete_device_registration_state_by_param_NULL_REG_ID)
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_059: [ If etag is given as NULL, it shall be ignored ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_060: [ A 'DELETE' REST call shall be issued to delete the device registration state record with ID reg_id, and optionally, etag from the Provisioning Service ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_062: [ Upon a successful delete, prov_sc_delete_device_registration_state_by_param shall return 0 ] */
 TEST_FUNCTION(prov_sc_delete_device_registration_state_by_param_GOLDEN_NO_ETAG)
 {
     PROVISIONING_SERVICE_CLIENT_HANDLE sc = prov_sc_create_from_connection_string(TEST_CONNECTION_STRING);
@@ -3200,8 +3080,6 @@ TEST_FUNCTION(prov_sc_delete_device_registration_state_by_param_GOLDEN_NO_ETAG)
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_060: [ A 'DELETE' REST call shall be issued to delete the device registration state record with ID reg_id, and optionally, etag from the Provisioning Service ] */
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_062: [ Upon a successful delete, prov_sc_delete_device_registration_state_by_param shall return 0 ] */
 TEST_FUNCTION(prov_sc_delete_device_registration_state_by_param_GOLDEN_WITH_ETAG)
 {
     PROVISIONING_SERVICE_CLIENT_HANDLE sc = prov_sc_create_from_connection_string(TEST_CONNECTION_STRING);
@@ -3229,7 +3107,6 @@ TEST_FUNCTION(prov_sc_delete_device_registration_state_by_param_GOLDEN_WITH_ETAG
     prov_sc_destroy(sc);
 }
 
-/* Tests_PROVISIONING_SERVICE_CLIENT_22_061: [ If the 'DELETE' REST call fails, prov_sc_delete_device_registration_state_by_param shall fail and return a non-zero value ] */
 TEST_FUNCTION(prov_sc_delete_device_registration_state_by_param_FAIL)
 {
     //arrange
@@ -3285,7 +3162,6 @@ TEST_FUNCTION(prov_sc_delete_device_registration_state_by_param_FAIL)
     umock_c_negative_tests_deinit();
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_070: [ If prov_client, bulk_op or bulk_res_ptr are NULL, prov_sc_run_individual_enrollment_bulk_operation shall fail and return a non-zero value ]*/
 TEST_FUNCTION(prov_sc_run_individual_enrollment_bulk_operation_NULL_prov)
 {
     //arrange
@@ -3307,7 +3183,6 @@ TEST_FUNCTION(prov_sc_run_individual_enrollment_bulk_operation_NULL_prov)
     //cleanup
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_070: [ If prov_client, bulk_op or bulk_res_ptr are NULL, prov_sc_run_individual_enrollment_bulk_operation shall fail and return a non-zero value ]*/
 TEST_FUNCTION(prov_sc_run_individual_enrollment_bulk_operation_NULL_bulkop)
 {
     //arrange
@@ -3326,7 +3201,6 @@ TEST_FUNCTION(prov_sc_run_individual_enrollment_bulk_operation_NULL_bulkop)
     prov_sc_destroy(sc);
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_070: [ If prov_client, bulk_op or bulk_res_ptr are NULL, prov_sc_run_individual_enrollment_bulk_operation shall fail and return a non-zero value ]*/
 TEST_FUNCTION(prov_sc_run_individual_enrollment_bulk_operation_NULL_bulk_res)
 {
     //arrange
@@ -3350,7 +3224,6 @@ TEST_FUNCTION(prov_sc_run_individual_enrollment_bulk_operation_NULL_bulk_res)
     prov_sc_destroy(sc);
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_071: [ If bulk_op has invalid values, prov_sc_run_individual_enrollment_bulk_operation shall fail and return a non-zero value ]*/
 TEST_FUNCTION(prov_sc_run_individual_enrollment_bulk_operation_invalid_bulkop_version)
 {
     //arrange
@@ -3375,9 +3248,6 @@ TEST_FUNCTION(prov_sc_run_individual_enrollment_bulk_operation_invalid_bulkop_ve
     prov_sc_destroy(sc);
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_072: [ A 'POST' REST call shall be issued to run the bulk operation on the Provisoning Service ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_074: [ The data from the bulk operation response shall populate bulk_res_ptr ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_076: [ Upon successful population of bulk_res_ptr, prov_sc_run_individual_enrollment_bulk_operation shall return 0 ]*/
 TEST_FUNCTION(prov_sc_run_individual_enrollment_bulk_operation_SUCCESS)
 {
     //arrange
@@ -3416,8 +3286,6 @@ TEST_FUNCTION(prov_sc_run_individual_enrollment_bulk_operation_SUCCESS)
     bulkOperationResult_free(bulk_res);
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_073: [ If the 'POST' REST call fails, prov_sc_run_individual_enrollment_bulk_operation shall fail and return a non-zero value ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_075: [ If populating bulk_res_ptr with the retrieved data fails, prov_sc_run_individual_enrollment_bulk_operation shall fail and return a non-zero value ]*/
 TEST_FUNCTION(prov_sc_run_individual_enrollment_bulk_operation_ERROR)
 {
     //arrange
@@ -3481,7 +3349,6 @@ TEST_FUNCTION(prov_sc_run_individual_enrollment_bulk_operation_ERROR)
     umock_c_negative_tests_deinit();
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_077: [ If prov_client, query_spec, cont_token_ptr or query_resp_ptr are NULL, prov_sc_query_individual_enrollment shall fail and return a non-zero value ]*/
 TEST_FUNCTION(prov_sc_query_individual_enrollment_NULL_prov_client)
 {
     //arrange
@@ -3506,7 +3373,6 @@ TEST_FUNCTION(prov_sc_query_individual_enrollment_NULL_prov_client)
     //cleanup
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_077: [ If prov_client, query_spec, cont_token_ptr or query_resp_ptr are NULL, prov_sc_query_individual_enrollment shall fail and return a non-zero value ]*/
 TEST_FUNCTION(prov_sc_query_individual_enrollment_NULL_query_spec)
 {
     //arrange
@@ -3529,7 +3395,6 @@ TEST_FUNCTION(prov_sc_query_individual_enrollment_NULL_query_spec)
     prov_sc_destroy(sc);
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_077: [ If prov_client, query_spec, cont_token_ptr or query_resp_ptr are NULL, prov_sc_query_individual_enrollment shall fail and return a non-zero value ]*/
 TEST_FUNCTION(prov_sc_query_individual_enrollment_NULL_cont_token_ptr)
 {
     //arrange
@@ -3554,7 +3419,6 @@ TEST_FUNCTION(prov_sc_query_individual_enrollment_NULL_cont_token_ptr)
     prov_sc_destroy(sc);
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_077: [ If prov_client, query_spec, cont_token_ptr or query_resp_ptr are NULL, prov_sc_query_individual_enrollment shall fail and return a non-zero value ]*/
 TEST_FUNCTION(prov_sc_query_individual_enrollment_NULL_query_resp_ptr)
 {
     //arrange
@@ -3579,7 +3443,6 @@ TEST_FUNCTION(prov_sc_query_individual_enrollment_NULL_query_resp_ptr)
     prov_sc_destroy(sc);
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_078: [ If query_spec has invalid values, prov_sc_query_individual_enrollment shall fail and return a non-zero value ]*/
 TEST_FUNCTION(prov_sc_query_individual_enrollment_invalid_version)
 {
     //arrange
@@ -3606,10 +3469,6 @@ TEST_FUNCTION(prov_sc_query_individual_enrollment_invalid_version)
     prov_sc_destroy(sc);
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_079: [ A 'POST' REST call shall be issued to run the query operation on the Provisioning Service ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_081: [ The data from the query response shall populate query_resp_ptr ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_083: [ A continuation token (if any) shall populate cont_token_ptr ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_084: [ Upon success, prov_sc_query_individual_enrollment shall return 0 ]*/
 TEST_FUNCTION(prov_sc_query_individual_enrollment_success_full_results)
 {
     //arrange
@@ -3657,10 +3516,6 @@ TEST_FUNCTION(prov_sc_query_individual_enrollment_success_full_results)
     queryResponse_free(query_resp);
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_079: [ A 'POST' REST call shall be issued to run the query operation on the Provisioning Service ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_081: [ The data from the query response shall populate query_resp_ptr ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_083: [ A continuation token (if any) shall populate cont_token_ptr ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_084: [ Upon success, prov_sc_query_individual_enrollment shall return 0 ]*/
 TEST_FUNCTION(prov_sc_query_individual_enrollment_success_paging_no_given_token_w_token_return)
 {
     //arrange
@@ -3710,10 +3565,6 @@ TEST_FUNCTION(prov_sc_query_individual_enrollment_success_paging_no_given_token_
     queryResponse_free(query_resp);
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_079: [ A 'POST' REST call shall be issued to run the query operation on the Provisioning Service ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_081: [ The data from the query response shall populate query_resp_ptr ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_083: [ A continuation token (if any) shall populate cont_token_ptr ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_084: [ Upon success, prov_sc_query_individual_enrollment shall return 0 ]*/
 TEST_FUNCTION(prov_sc_query_individual_enrollment_success_paging_given_token_no_token_return)
 {
     //arrange
@@ -3762,10 +3613,6 @@ TEST_FUNCTION(prov_sc_query_individual_enrollment_success_paging_given_token_no_
     queryResponse_free(query_resp);
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_079: [ A 'POST' REST call shall be issued to run the query operation on the Provisioning Service ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_081: [ The data from the query response shall populate query_resp_ptr ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_083: [ A continuation token (if any) shall populate cont_token_ptr ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_084: [ Upon success, prov_sc_query_individual_enrollment shall return 0 ]*/
 TEST_FUNCTION(prov_sc_query_individual_enrollment_success_paging_given_token_w_token_return)
 {
     //arrange
@@ -3816,8 +3663,6 @@ TEST_FUNCTION(prov_sc_query_individual_enrollment_success_paging_given_token_w_t
 }
 
 /*---Note that this failure test covers all failures from other cases by virtue of making all possible calls---/*
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_080: [ If the 'POST' REST call fails, prov_sc_query_individual_enrollment shall fail and return a non-zero value ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_082: [ If populating query_resp_ptr with the retrieved data fails, prov_sc_query_individual_enrollment shall fail and return a non-zero value ]*/
 TEST_FUNCTION(prov_sc_query_individual_enrollment_success_paging_given_token_w_token_return_ERROR)
 {
     //arrange
@@ -3889,7 +3734,6 @@ TEST_FUNCTION(prov_sc_query_individual_enrollment_success_paging_given_token_w_t
     prov_sc_destroy(sc);
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_085: [ If prov_client, query_spec, cont_token_ptr or query_resp_ptr are NULL, prov_sc_query_enrollment_group shall fail and return a non-zero value ]*/
 TEST_FUNCTION(prov_sc_query_enrollment_group_NULL_prov_client)
 {
     //arrange
@@ -3914,7 +3758,6 @@ TEST_FUNCTION(prov_sc_query_enrollment_group_NULL_prov_client)
     //cleanup
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_085: [ If prov_client, query_spec, cont_token_ptr or query_resp_ptr are NULL, prov_sc_query_enrollment_group shall fail and return a non-zero value ]*/
 TEST_FUNCTION(prov_sc_query_enrollment_group_NULL_query_spec)
 {
     //arrange
@@ -3937,7 +3780,6 @@ TEST_FUNCTION(prov_sc_query_enrollment_group_NULL_query_spec)
     prov_sc_destroy(sc);
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_085: [ If prov_client, query_spec, cont_token_ptr or query_resp_ptr are NULL, prov_sc_query_enrollment_group shall fail and return a non-zero value ]*/
 TEST_FUNCTION(prov_sc_query_enrollment_group_NULL_cont_token_ptr)
 {
     //arrange
@@ -3962,7 +3804,6 @@ TEST_FUNCTION(prov_sc_query_enrollment_group_NULL_cont_token_ptr)
     prov_sc_destroy(sc);
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_085: [ If prov_client, query_spec, cont_token_ptr or query_resp_ptr are NULL, prov_sc_query_enrollment_group shall fail and return a non-zero value ]*/
 TEST_FUNCTION(prov_sc_query_enrollment_group_NULL_query_resp_ptr)
 {
     //arrange
@@ -3987,7 +3828,6 @@ TEST_FUNCTION(prov_sc_query_enrollment_group_NULL_query_resp_ptr)
     prov_sc_destroy(sc);
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_086: [ If query_spec has invalid values, prov_sc_query_enrollment_group shall fail and return a non-zero value ]*/
 TEST_FUNCTION(prov_sc_query_enrollment_group_invalid_version)
 {
     //arrange
@@ -4014,10 +3854,6 @@ TEST_FUNCTION(prov_sc_query_enrollment_group_invalid_version)
     prov_sc_destroy(sc);
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_087: [ A 'POST' REST call shall be issued to run the query operation on the Provisioning Service ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_089: [ The data from the query response shall populate query_resp_ptr ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_091: [ A continuation token (if any) shall populate cont_token_ptr ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_092: [ Upon success, prov_sc_query_enrollment_group shall return 0 ]*/
 TEST_FUNCTION(prov_sc_query_enrollment_group_success_full_results)
 {
     //arrange
@@ -4065,10 +3901,6 @@ TEST_FUNCTION(prov_sc_query_enrollment_group_success_full_results)
     queryResponse_free(query_resp);
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_087: [ A 'POST' REST call shall be issued to run the query operation on the Provisioning Service ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_089: [ The data from the query response shall populate query_resp_ptr ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_091: [ A continuation token (if any) shall populate cont_token_ptr ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_092: [ Upon success, prov_sc_query_enrollment_group shall return 0 ]*/
 TEST_FUNCTION(prov_sc_query_enrollment_group_success_paging_no_given_token_w_token_return)
 {
     //arrange
@@ -4118,10 +3950,6 @@ TEST_FUNCTION(prov_sc_query_enrollment_group_success_paging_no_given_token_w_tok
     queryResponse_free(query_resp);
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_087: [ A 'POST' REST call shall be issued to run the query operation on the Provisioning Service ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_089: [ The data from the query response shall populate query_resp_ptr ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_091: [ A continuation token (if any) shall populate cont_token_ptr ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_092: [ Upon success, prov_sc_query_enrollment_group shall return 0 ]*/
 TEST_FUNCTION(prov_sc_query_enrollment_group_success_paging_given_token_no_token_return)
 {
     //arrange
@@ -4170,10 +3998,6 @@ TEST_FUNCTION(prov_sc_query_enrollment_group_success_paging_given_token_no_token
     queryResponse_free(query_resp);
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_087: [ A 'POST' REST call shall be issued to run the query operation on the Provisioning Service ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_089: [ The data from the query response shall populate query_resp_ptr ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_091: [ A continuation token (if any) shall populate cont_token_ptr ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_092: [ Upon success, prov_sc_query_enrollment_group shall return 0 ]*/
 TEST_FUNCTION(prov_sc_query_enrollment_group_success_paging_given_token_w_token_return)
 {
     //arrange
@@ -4224,8 +4048,6 @@ TEST_FUNCTION(prov_sc_query_enrollment_group_success_paging_given_token_w_token_
 }
 
 /*---Note that this failure test covers all failures from other cases by virtue of making all possible calls---*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_088: [ If the 'POST' REST call fails, prov_sc_query_enrollment_group shall fail and return a non-zero value ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_090: [ If populating query_resp_ptr with the retrieved data fails, prov_sc_query_enrollment_group shall fail and return a non-zero value ]*/
 TEST_FUNCTION(prov_sc_query_enrollment_group_success_paging_given_token_w_token_return_ERROR)
 {
     //arrange
@@ -4297,7 +4119,6 @@ TEST_FUNCTION(prov_sc_query_enrollment_group_success_paging_given_token_w_token_
     prov_sc_destroy(sc);
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_093: [ If prov_client, query_spec, cont_token_ptr or query_resp_ptr are NULL, prov_sc_query_device_registration_state shall fail and return a non-zero value ]*/
 TEST_FUNCTION(prov_sc_query_device_registration_state_NULL_prov_client)
 {
     //arrange
@@ -4322,7 +4143,6 @@ TEST_FUNCTION(prov_sc_query_device_registration_state_NULL_prov_client)
     //cleanup
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_093: [ If prov_client, query_spec, cont_token_ptr or query_resp_ptr are NULL, prov_sc_query_device_registration_state shall fail and return a non-zero value ]*/
 TEST_FUNCTION(prov_sc_query_device_registration_state_NULL_query_spec)
 {
     //arrange
@@ -4345,7 +4165,6 @@ TEST_FUNCTION(prov_sc_query_device_registration_state_NULL_query_spec)
     prov_sc_destroy(sc);
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_093: [ If prov_client, query_spec, cont_token_ptr or query_resp_ptr are NULL, prov_sc_query_device_registration_state shall fail and return a non-zero value ]*/
 TEST_FUNCTION(prov_sc_query_device_registration_state_NULL_cont_token_ptr)
 {
     //arrange
@@ -4370,7 +4189,6 @@ TEST_FUNCTION(prov_sc_query_device_registration_state_NULL_cont_token_ptr)
     prov_sc_destroy(sc);
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_093: [ If prov_client, query_spec, cont_token_ptr or query_resp_ptr are NULL, prov_sc_query_device_registration_state shall fail and return a non-zero value ]*/
 TEST_FUNCTION(prov_sc_query_device_registration_state_NULL_query_resp_ptr)
 {
     //arrange
@@ -4395,7 +4213,6 @@ TEST_FUNCTION(prov_sc_query_device_registration_state_NULL_query_resp_ptr)
     prov_sc_destroy(sc);
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_094: [ If query_spec has invalid values, prov_sc_query_device_registration_state shall fail and return a non-zero value ]*/
 TEST_FUNCTION(prov_sc_query_device_registration_state_invalid_version)
 {
     //arrange
@@ -4422,10 +4239,6 @@ TEST_FUNCTION(prov_sc_query_device_registration_state_invalid_version)
     prov_sc_destroy(sc);
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_095: [ A 'POST' REST call shall be issued to run the query operation on the Provisioning Service ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_097: [ The data from the query response shall populate query_resp_ptr ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_099: [ A continuation token (if any) shall populate cont_token_ptr ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_100: [ Upon success, prov_sc_query_device_registration_state shall return 0 ]*/
 TEST_FUNCTION(prov_sc_query_device_registration_state_success_full_results)
 {
     //arrange
@@ -4472,10 +4285,6 @@ TEST_FUNCTION(prov_sc_query_device_registration_state_success_full_results)
     queryResponse_free(query_resp);
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_095: [ A 'POST' REST call shall be issued to run the query operation on the Provisioning Service ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_097: [ The data from the query response shall populate query_resp_ptr ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_099: [ A continuation token (if any) shall populate cont_token_ptr ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_100: [ Upon success, prov_sc_query_device_registration_state shall return 0 ]*/
 TEST_FUNCTION(prov_sc_query_device_registration_state_success_paging_no_given_token_w_token_return)
 {
     //arrange
@@ -4524,10 +4333,6 @@ TEST_FUNCTION(prov_sc_query_device_registration_state_success_paging_no_given_to
     queryResponse_free(query_resp);
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_095: [ A 'POST' REST call shall be issued to run the query operation on the Provisioning Service ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_097: [ The data from the query response shall populate query_resp_ptr ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_099: [ A continuation token (if any) shall populate cont_token_ptr ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_100: [ Upon success, prov_sc_query_device_registration_state shall return 0 ]*/
 TEST_FUNCTION(prov_sc_query_device_registration_state_success_paging_given_token_no_token_return)
 {
     //arrange
@@ -4575,10 +4380,6 @@ TEST_FUNCTION(prov_sc_query_device_registration_state_success_paging_given_token
     queryResponse_free(query_resp);
 }
 
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_095: [ A 'POST' REST call shall be issued to run the query operation on the Provisioning Service ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_097: [ The data from the query response shall populate query_resp_ptr ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_099: [ A continuation token (if any) shall populate cont_token_ptr ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_100: [ Upon success, prov_sc_query_device_registration_state shall return 0 ]*/
 TEST_FUNCTION(prov_sc_query_device_registration_state_success_paging_given_token_w_token_return)
 {
     //arrange
@@ -4627,9 +4428,7 @@ TEST_FUNCTION(prov_sc_query_device_registration_state_success_paging_given_token
     queryResponse_free(query_resp);
 }
 
-/*---Note that this failure test covers all failures from other cases by virtue of making all possible calls--/*
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_096: [ If the 'POST' REST call fails, prov_sc_query_device_registration_state shall fail and return a non-zero value ]*/
-/*Tests_PROVISIONING_SERVICE_CLIENT_22_098: [ If populating query_resp_ptr with the retrieved data fails, prov_sc_query_device_registration_state shall fail and return a non-zero value ]*/
+/*---Note that this failure test covers all failures from other cases by virtue of making all possible calls--*/
 TEST_FUNCTION(prov_sc_query_device_registration_state_success_paging_given_token_w_token_return_ERROR)
 {
     //arrange

@@ -633,7 +633,6 @@ TEST_FUNCTION_CLEANUP(TestMethodCleanup)
 }
 
 
-// Tests_SRS_MESSAGE_QUEUE_09_001: [If `config` is NULL, message_queue_create shall fail and return NULL]
 TEST_FUNCTION(create_NULL_config)
 {
     // arrange
@@ -649,7 +648,6 @@ TEST_FUNCTION(create_NULL_config)
     // cleanup
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_002: [If `config->on_process_message_callback` is NULL, message_queue_create shall fail and return NULL]
 TEST_FUNCTION(create_NULL_on_process_message_callback)
 {
     // arrange
@@ -668,10 +666,6 @@ TEST_FUNCTION(create_NULL_on_process_message_callback)
     // cleanup
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_005: [If `instance` cannot be allocated, message_queue_create shall fail and return NULL]
-// Tests_SRS_MESSAGE_QUEUE_09_007: [If singlylinkedlist_create fails, message_queue_create shall fail and return NULL]
-// Tests_SRS_MESSAGE_QUEUE_09_009: [If singlylinkedlist_create fails, message_queue_create shall fail and return NULL]
-// Tests_SRS_MESSAGE_QUEUE_09_011: [If any failures occur, message_queue_create shall release all memory it has allocated]
 TEST_FUNCTION(create_failure_checks)
 {
     // arrange
@@ -704,11 +698,6 @@ TEST_FUNCTION(create_failure_checks)
     umock_c_negative_tests_deinit();
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_004: [Memory shall be allocated for the MESSAGE_QUEUE data structure (aka `message_queue`)]
-// Tests_SRS_MESSAGE_QUEUE_09_006: [`message_queue->pending` shall be set using singlylinkedlist_create()]
-// Tests_SRS_MESSAGE_QUEUE_09_008: [`message_queue->in_progress` shall be set using singlylinkedlist_create()]
-// Tests_SRS_MESSAGE_QUEUE_09_010: [All arguments in `config` shall be saved into `message_queue`]
-// Tests_SRS_MESSAGE_QUEUE_09_012: [If no failures occur, message_queue_create shall return the `message_queue` pointer]
 TEST_FUNCTION(create_success)
 {
     // arrange
@@ -728,7 +717,6 @@ TEST_FUNCTION(create_success)
     message_queue_destroy(mq);
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_013: [If `message_queue` is NULL, message_queue_destroy shall return immediately]
 TEST_FUNCTION(destroy_NULL_handle)
 {
     // arrange
@@ -743,8 +731,6 @@ TEST_FUNCTION(destroy_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_014: [message_queue_destroy shall invoke message_queue_remove_all]
-// Tests_SRS_MESSAGE_QUEUE_09_015: [message_queue_destroy shall free all memory allocated and pointed by `message_queue`]
 TEST_FUNCTION(destroy_success)
 {
     // arrange
@@ -766,7 +752,6 @@ TEST_FUNCTION(destroy_success)
     // cleanup
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_026: [If `message_queue` is NULL, message_queue_retrieve_options shall return]
 TEST_FUNCTION(remove_all_NULL_handle)
 {
     // arrange
@@ -781,9 +766,6 @@ TEST_FUNCTION(remove_all_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_027: [Each `mq_item` in `message_queue->pending` and `message_queue->in_progress` lists shall be removed]
-// Tests_SRS_MESSAGE_QUEUE_09_028: [`message_queue->on_message_processing_completed_callback` shall be invoked with MESSAGE_QUEUE_CANCELLED for each `mq_item` removed]
-// Tests_SRS_MESSAGE_QUEUE_09_029: [Each `mq_item` shall be freed]
 TEST_FUNCTION(remove_all_success)
 {
     // arrange
@@ -807,7 +789,6 @@ TEST_FUNCTION(remove_all_success)
     message_queue_destroy(mq);
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_016: [If `message_queue` or `message` are NULL, message_queue_add shall fail and return non-zero]
 TEST_FUNCTION(add_NULL_mq_handle)
 {
     // arrange
@@ -823,7 +804,6 @@ TEST_FUNCTION(add_NULL_mq_handle)
     // cleanup
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_016: [If `message_queue` or `message` are NULL, message_queue_add shall fail and return non-zero]
 TEST_FUNCTION(add_NULL_message_handle)
 {
     // arrange
@@ -842,11 +822,6 @@ TEST_FUNCTION(add_NULL_message_handle)
     message_queue_destroy(mq);
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_017: [message_queue_add shall allocate a structure (aka `mq_item`) to save the `message`]
-// Tests_SRS_MESSAGE_QUEUE_09_019: [`mq_item->enqueue_time` shall be set using get_time()]
-// Tests_SRS_MESSAGE_QUEUE_09_021: [`mq_item` shall be added to `message_queue->pending` list]
-// Tests_SRS_MESSAGE_QUEUE_09_023: [`message` shall be saved into `mq_item->message`]
-// Tests_SRS_MESSAGE_QUEUE_09_025: [If no failures occur, message_queue_add shall return 0]
 TEST_FUNCTION(add_success)
 {
     // arrange
@@ -866,10 +841,6 @@ TEST_FUNCTION(add_success)
     message_queue_destroy(mq);
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_018: [If `mq_item` cannot be allocated, message_queue_add shall fail and return non-zero]
-// Tests_SRS_MESSAGE_QUEUE_09_020: [If get_time fails, message_queue_add shall fail and return non-zero]
-// Tests_SRS_MESSAGE_QUEUE_09_022: [`mq_item` fails to be added to `message_queue->pending`, message_queue_add shall fail and return non-zero]
-// Tests_SRS_MESSAGE_QUEUE_09_024: [If any failures occur, message_queue_add shall release all memory it has allocated]
 TEST_FUNCTION(add_failure_checks)
 {
     // arrange
@@ -903,7 +874,6 @@ TEST_FUNCTION(add_failure_checks)
 }
 
 
-// Tests_SRS_MESSAGE_QUEUE_09_030: [If `message_queue` or `is_empty` are NULL, message_queue_is_empty shall fail and return non-zero]
 TEST_FUNCTION(is_empty_NULL_handle)
 {
     // arrange
@@ -920,7 +890,6 @@ TEST_FUNCTION(is_empty_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_030: [If `message_queue` or `is_empty` are NULL, message_queue_is_empty shall fail and return non-zero]
 TEST_FUNCTION(is_empty_NULL_is_empty)
 {
     // arrange
@@ -939,8 +908,6 @@ TEST_FUNCTION(is_empty_NULL_is_empty)
     message_queue_destroy(mq);
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_031: [If `message_queue->pending` and `message_queue->in_progress` are empty, `is_empty` shall be set to true]
-// Tests_SRS_MESSAGE_QUEUE_09_033: [If no failures occur, message_queue_is_empty shall return 0]
 TEST_FUNCTION(is_empty_0_pending_0_in_progress_success)
 {
     // arrange
@@ -962,8 +929,6 @@ TEST_FUNCTION(is_empty_0_pending_0_in_progress_success)
     message_queue_destroy(mq);
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_032: [Otherwise `is_empty` shall be set to false]
-// Tests_SRS_MESSAGE_QUEUE_09_033: [If no failures occur, message_queue_is_empty shall return 0]
 TEST_FUNCTION(is_empty_1_pending_0_in_progress_success)
 {
     // arrange
@@ -987,8 +952,6 @@ TEST_FUNCTION(is_empty_1_pending_0_in_progress_success)
     message_queue_destroy(mq);
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_032: [Otherwise `is_empty` shall be set to false]
-// Tests_SRS_MESSAGE_QUEUE_09_033: [If no failures occur, message_queue_is_empty shall return 0]
 TEST_FUNCTION(is_empty_0_pending_1_in_progress_success)
 {
     // arrange
@@ -1013,8 +976,6 @@ TEST_FUNCTION(is_empty_0_pending_1_in_progress_success)
     message_queue_destroy(mq);
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_032: [Otherwise `is_empty` shall be set to false]
-// Tests_SRS_MESSAGE_QUEUE_09_033: [If no failures occur, message_queue_is_empty shall return 0]
 TEST_FUNCTION(is_empty_1_pending_1_in_progress_success)
 {
     // arrange
@@ -1040,7 +1001,6 @@ TEST_FUNCTION(is_empty_1_pending_1_in_progress_success)
     message_queue_destroy(mq);
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_034: [If `message_queue` is NULL, message_queue_do_work shall return immediately]
 TEST_FUNCTION(do_work_NULL_handle)
 {
     // arrange
@@ -1055,9 +1015,6 @@ TEST_FUNCTION(do_work_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_039: [Each `mq_item` in `message_queue->pending` shall be moved to `message_queue->in_progress`]
-// Tests_SRS_MESSAGE_QUEUE_09_040: [`mq_item->processing_start_time` shall be set using get_time()]
-// Tests_SRS_MESSAGE_QUEUE_09_043: [If no failures occur, `message_queue->on_process_message_callback` shall be invoked passing `mq_item->message` and `on_process_message_completed_callback`]
 TEST_FUNCTION(do_work_NO_EXPIRATION_success)
 {
     // arrange
@@ -1081,8 +1038,6 @@ TEST_FUNCTION(do_work_NO_EXPIRATION_success)
     message_queue_destroy(mq);
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_041: [If get_time() fails, `mq_item` shall be removed from `message_queue->in_progress`]
-// Tests_SRS_MESSAGE_QUEUE_09_042: [If any failures occur, `mq_item->on_message_processing_completed_callback` shall be invoked with MESSAGE_QUEUE_ERROR and `mq_item` freed]
 TEST_FUNCTION(do_work_NO_EXPIRATION_failure_checks)
 {
     // arrange
@@ -1141,7 +1096,6 @@ TEST_FUNCTION(do_work_NO_EXPIRATION_failure_checks)
     umock_c_negative_tests_deinit();
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_059: [If `message_queue` is NULL, message_queue_set_max_retry_count shall fail and return non-zero]
 TEST_FUNCTION(message_queue_set_max_retry_count_NULL_handle)
 {
     // arrange
@@ -1157,8 +1111,6 @@ TEST_FUNCTION(message_queue_set_max_retry_count_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_060: [`max_retry_count` shall be saved into `message_queue->max_retry_count`]
-// Tests_SRS_MESSAGE_QUEUE_09_061: [If no failures occur, message_queue_set_max_retry_count shall return 0]
 TEST_FUNCTION(message_queue_set_max_retry_count_success)
 {
     // arrange
@@ -1177,7 +1129,6 @@ TEST_FUNCTION(message_queue_set_max_retry_count_success)
     message_queue_destroy(mq);
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_055: [If `message_queue` is NULL, message_queue_set_max_message_processing_time_secs shall fail and return non-zero]
 TEST_FUNCTION(message_queue_set_max_message_processing_time_secs_NULL_handle)
 {
     // arrange
@@ -1193,8 +1144,6 @@ TEST_FUNCTION(message_queue_set_max_message_processing_time_secs_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_057: [`seconds` shall be saved into `message_queue->max_message_processing_time_secs`]
-// Tests_SRS_MESSAGE_QUEUE_09_058: [If no failures occur, message_queue_set_max_message_processing_time_secs shall return 0]
 TEST_FUNCTION(message_queue_set_max_message_processing_time_secs_success)
 {
     // arrange
@@ -1213,7 +1162,6 @@ TEST_FUNCTION(message_queue_set_max_message_processing_time_secs_success)
     message_queue_destroy(mq);
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_051: [If `message_queue` is NULL, message_queue_set_max_message_enqueued_time_secs shall fail and return non-zero]
 TEST_FUNCTION(message_queue_set_max_message_enqueued_time_secs_NULL_handle)
 {
     // arrange
@@ -1229,8 +1177,6 @@ TEST_FUNCTION(message_queue_set_max_message_enqueued_time_secs_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_053: [`seconds` shall be saved into `message_queue->max_message_enqueued_time_secs`]
-// Tests_SRS_MESSAGE_QUEUE_09_054: [If no failures occur, message_queue_set_max_message_enqueued_time_secs shall return 0]
 TEST_FUNCTION(message_queue_set_max_message_enqueued_time_secs_success)
 {
     // arrange
@@ -1250,7 +1196,6 @@ TEST_FUNCTION(message_queue_set_max_message_enqueued_time_secs_success)
 }
 
 
-// Tests_SRS_MESSAGE_QUEUE_09_062: [If `message_queue` is NULL, message_queue_retrieve_options shall fail and return NULL]
 TEST_FUNCTION(message_queue_retrieve_options_NULL_handle)
 {
     // arrange
@@ -1266,9 +1211,6 @@ TEST_FUNCTION(message_queue_retrieve_options_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_063: [An OPTIONHANDLER_HANDLE instance shall be created using OptionHandler_Create]
-// Tests_SRS_MESSAGE_QUEUE_09_065: [Each option of `instance` shall be added to the OPTIONHANDLER_HANDLE instance using OptionHandler_AddOption]
-// Tests_SRS_MESSAGE_QUEUE_09_068: [If no failures occur, message_queue_retrieve_options shall return the OPTIONHANDLER_HANDLE instance]
 TEST_FUNCTION(message_queue_retrieve_options_success)
 {
     // arrange
@@ -1288,9 +1230,6 @@ TEST_FUNCTION(message_queue_retrieve_options_success)
     message_queue_destroy(mq);
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_064: [If an OPTIONHANDLER_HANDLE instance fails to be created, message_queue_retrieve_options shall fail and return NULL]
-// Tests_SRS_MESSAGE_QUEUE_09_066: [If OptionHandler_AddOption fails, message_queue_retrieve_options shall fail and return NULL]
-// Tests_SRS_MESSAGE_QUEUE_09_067: [If message_queue_retrieve_options fails, any allocated memory shall be freed]
 TEST_FUNCTION(message_queue_retrieve_options_failure_checks)
 {
     // arrange
@@ -1325,7 +1264,6 @@ TEST_FUNCTION(message_queue_retrieve_options_failure_checks)
     message_queue_destroy(mq);
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_069: [If `message` or `message_queue` are NULL, on_process_message_completed_callback shall return immediately]
 TEST_FUNCTION(on_message_processing_completed_callback_NULL_message)
 {
     // arrange
@@ -1351,7 +1289,6 @@ TEST_FUNCTION(on_message_processing_completed_callback_NULL_message)
     message_queue_destroy(mq);
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_069: [If `message` or `message_queue` are NULL, on_process_message_completed_callback shall return immediately]
 TEST_FUNCTION(on_message_processing_completed_callback_NULL_message_queue)
 {
     // arrange
@@ -1377,7 +1314,6 @@ TEST_FUNCTION(on_message_processing_completed_callback_NULL_message_queue)
     message_queue_destroy(mq);
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_044: [If `message` is not present in `message_queue->in_progress`, it shall be ignored]
 TEST_FUNCTION(on_message_processing_completed_callback_MESSAGE_not_present)
 {
     // arrange
@@ -1404,9 +1340,6 @@ TEST_FUNCTION(on_message_processing_completed_callback_MESSAGE_not_present)
     message_queue_destroy(mq);
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_045: [If `message` is present in `message_queue->in_progress`, it shall be removed]
-// Tests_SRS_MESSAGE_QUEUE_09_049: [Otherwise `mq_item->on_message_processing_completed_callback` shall be invoked passing `mq_item->message`, `result`, `reason` and `mq_item->user_context`]
-// Tests_SRS_MESSAGE_QUEUE_09_050: [The `mq_item` related to `message` shall be freed]
 TEST_FUNCTION(on_message_processing_completed_callback_success)
 {
     // arrange
@@ -1436,8 +1369,6 @@ TEST_FUNCTION(on_message_processing_completed_callback_success)
     message_queue_destroy(mq);
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_047: [If `result` is MESSAGE_QUEUE_RETRYABLE_ERROR and `mq_item->number_of_attempts` is less than or equal `message_queue->max_retry_count`, the `message` shall be moved to `message_queue->pending` to be re-sent]
-// Tests_SRS_MESSAGE_QUEUE_09_048: [If `result` is MESSAGE_QUEUE_RETRYABLE_ERROR and `mq_item->number_of_attempts` is greater than `message_queue->max_retry_count`, result shall be changed to MESSAGE_QUEUE_ERROR]
 TEST_FUNCTION(on_message_processing_completed_callback_RETRYABLE_ERROR)
 {
     // arrange
@@ -1476,8 +1407,6 @@ TEST_FUNCTION(on_message_processing_completed_callback_RETRYABLE_ERROR)
     message_queue_destroy(mq);
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_035: [If `message_queue->max_message_enqueued_time_secs` is greater than zero, `message_queue->in_progress` and `message_queue->pending` items shall be checked for timeout]
-// Tests_SRS_MESSAGE_QUEUE_09_036: [If any items are in `message_queue` lists for `message_queue->max_message_enqueued_time_secs` or more, they shall be removed and `message_queue->on_message_processing_completed_callback` invoked with MESSAGE_QUEUE_TIMEOUT]
 TEST_FUNCTION(do_work_pending_queue_timeout)
 {
     // arrange
@@ -1517,8 +1446,6 @@ TEST_FUNCTION(do_work_pending_queue_timeout)
     message_queue_destroy(mq);
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_037: [If `message_queue->max_message_processing_time_secs` is greater than zero, `message_queue->in_progress` items shall be checked for timeout]
-// Tests_SRS_MESSAGE_QUEUE_09_038: [If any items are in `message_queue->in_progress` for `message_queue->max_message_processing_time_secs` or more, they shall be removed and `message_queue->on_message_processing_completed_callback` invoked with MESSAGE_QUEUE_TIMEOUT]
 TEST_FUNCTION(do_work_in_progress_processing_timeout)
 {
     // arrange
@@ -1560,8 +1487,6 @@ TEST_FUNCTION(do_work_in_progress_processing_timeout)
     message_queue_destroy(mq);
 }
 
-// Tests_SRS_MESSAGE_QUEUE_09_035: [If `message_queue->max_message_enqueued_time_secs` is greater than zero, `message_queue->in_progress` and `message_queue->pending` items shall be checked for timeout]
-// Tests_SRS_MESSAGE_QUEUE_09_036: [If any items are in `message_queue` lists for `message_queue->max_message_enqueued_time_secs` or more, they shall be removed and `message_queue->on_message_processing_completed_callback` invoked with MESSAGE_QUEUE_TIMEOUT]
 TEST_FUNCTION(do_work_in_progress_queue_timeout)
 {
     // arrange
@@ -1603,7 +1528,6 @@ TEST_FUNCTION(do_work_in_progress_queue_timeout)
     message_queue_destroy(mq);
 }
 
-// Tests_SRS_MESSAGE_QUEUE_21_070: [The message_queue_move_all_back_to_pending shall add all in_progress message in front of the pending messages.]
 TEST_FUNCTION(message_queue_move_all_back_to_pending_with_in_progress_and_pending_succeed)
 {
     // arrange
@@ -1698,7 +1622,6 @@ TEST_FUNCTION(message_queue_move_all_back_to_pending_with_only_pending_succeed)
     message_queue_destroy(mq);
 }
 
-// Tests_SRS_MESSAGE_QUEUE_21_071: [If the message_queue is NULL, the message_queue_move_all_back_to_pending shall return non-zero result.]
 TEST_FUNCTION(message_queue_move_all_back_to_pending_null_message_queue_failed)
 {
     // arrange
@@ -1713,7 +1636,6 @@ TEST_FUNCTION(message_queue_move_all_back_to_pending_null_message_queue_failed)
     // cleanup
 }
 
-// Tests_SRS_MESSAGE_QUEUE_21_072: [If move pending messages failed, the message_queue_move_all_back_to_pending shall delete all elements in the queue and return non-zero.]
 TEST_FUNCTION(message_queue_move_all_back_to_pending_move_pending_failed)
 {
     // arrange
@@ -1751,7 +1673,6 @@ TEST_FUNCTION(message_queue_move_all_back_to_pending_move_pending_failed)
     message_queue_destroy(mq);
 }
 
-// Tests_SRS_MESSAGE_QUEUE_21_073: [If move in_progress messages failed, the message_queue_move_all_back_to_pending shall delete all elements in the queue and return non-zero.]
 TEST_FUNCTION(message_queue_move_all_back_to_pending_move_in_progress_failed)
 {
     // arrange

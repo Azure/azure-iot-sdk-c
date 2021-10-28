@@ -426,7 +426,6 @@ static int process_riot_key_info(HSM_CLIENT_X509_INFO* riot_info)
     int result;
     RIOT_STATUS status;
 
-    /* Codes_SRS_HSM_CLIENT_RIOT_07_002: [ hsm_client_riot_create shall call into the RIot code to sign the RIoT certificate. ] */
     // Don't use CDI directly
     if (g_digest_initialized == 0)
     {
@@ -464,13 +463,11 @@ static int process_riot_key_info(HSM_CLIENT_X509_INFO* riot_info)
     }
     else
     {
-        /* Codes_SRS_HSM_CLIENT_RIOT_07_003: [ hsm_client_riot_create shall cache the device id public value from the RIoT module. ] */
         if (produce_device_id_public(riot_info) != 0)
         {
             LogError("Failure: produce_device_id_public returned invalid result.");
             result = MU_FAILURE;
         }
-        /* Codes_SRS_HSM_CLIENT_RIOT_07_004: [ hsm_client_riot_create shall cache the alias key pair value from the RIoT module. ] */
         else if (produce_alias_key_pair(riot_info) != 0)
         {
             LogError("Failure: produce_alias_key_pair returned invalid result.");
@@ -482,7 +479,6 @@ static int process_riot_key_info(HSM_CLIENT_X509_INFO* riot_info)
             uint8_t cert_buffer[DER_MAX_TBS] = { 0 };
             RIOT_ECC_SIGNATURE tbs_sig = { 0 };
 
-            /* Codes_SRS_HSM_CLIENT_RIOT_07_005: [ hsm_client_riot_create shall create the Signer regions of the alias key certificate. ]*/
             // Build the TBS (to be signed) region of Alias Key Certificate
             DERInitContext(&cert_ctx, cert_buffer, DER_MAX_TBS);
             if (X509GetAliasCertTBS(&cert_ctx, &X509_ALIAS_TBS_DATA, &riot_info->alias_key_pub, &riot_info->device_id_pub,
@@ -558,11 +554,9 @@ const HSM_CLIENT_X509_INTERFACE* hsm_client_x509_interface(void)
 HSM_CLIENT_HANDLE hsm_client_riot_create(void)
 {
     HSM_CLIENT_X509_INFO* result;
-    /* Codes_SRS_HSM_CLIENT_RIOT_07_001: [ On success hsm_client_riot_create shall allocate a new instance of the device auth interface. ] */
     result = malloc(sizeof(HSM_CLIENT_X509_INFO) );
     if (result == NULL)
     {
-        /* Codes_SRS_HSM_CLIENT_RIOT_07_006: [ If any failure is encountered hsm_client_riot_create shall return NULL ] */
         LogError("Failure: malloc HSM_CLIENT_X509_INFO.");
     }
     else
@@ -570,7 +564,6 @@ HSM_CLIENT_HANDLE hsm_client_riot_create(void)
         memset(result, 0, sizeof(HSM_CLIENT_X509_INFO));
         if (process_riot_key_info(result) != 0)
         {
-            /* Codes_SRS_HSM_CLIENT_RIOT_07_006: [ If any failure is encountered hsm_client_riot_create shall return NULL ] */
             free(result);
             result = NULL;
         }
@@ -580,13 +573,10 @@ HSM_CLIENT_HANDLE hsm_client_riot_create(void)
 
 void hsm_client_riot_destroy(HSM_CLIENT_HANDLE handle)
 {
-    /* Codes_SRS_HSM_CLIENT_RIOT_07_007: [ if handle is NULL, hsm_client_riot_destroy shall do nothing. ] */
     if (handle != NULL)
     {
         HSM_CLIENT_X509_INFO* x509_client = (HSM_CLIENT_X509_INFO*)handle;
-        /* Codes_SRS_HSM_CLIENT_RIOT_07_008: [ hsm_client_riot_destroy shall free the HSM_CLIENT_HANDLE instance. ] */
         free(x509_client->certificate_common_name);
-        /* Codes_SRS_HSM_CLIENT_RIOT_07_009: [ hsm_client_riot_destroy shall free all resources allocated in this module. ] */
         x509_cert_free(&x509_client->ca_root_pub, &x509_client->ca_root_priv);
         x509_cert_free(&x509_client->device_id_pub, &x509_client->device_id_priv);
         x509_cert_free(&x509_client->alias_key_pub, &x509_client->alias_key_priv);
@@ -600,7 +590,6 @@ char* hsm_client_riot_get_certificate(HSM_CLIENT_HANDLE handle)
     char* result;
     if (handle == NULL)
     {
-        /* Codes_SRS_HSM_CLIENT_RIOT_07_010: [ if handle is NULL, hsm_client_riot_get_certificate shall return NULL. ] */
         LogError("Invalid handle value specified");
         result = NULL;
     }
@@ -610,17 +599,14 @@ char* hsm_client_riot_get_certificate(HSM_CLIENT_HANDLE handle)
 
         size_t total_len = x509_client->alias_cert_length + x509_client->device_signed_length;
 
-        /* Codes_SRS_HSM_CLIENT_RIOT_07_011: [ hsm_client_riot_get_certificate shall allocate a char* to return the riot certificate. ] */
         result = (char*)malloc(total_len + 1);
         if (result == NULL)
         {
-            /* Codes_SRS_HSM_CLIENT_RIOT_07_013: [ If any failure is encountered hsm_client_riot_get_certificate shall return NULL ] */
             LogError("Failed to allocate cert buffer.");
         }
         else
         {
             size_t offset = 0;
-            /* Codes_SRS_HSM_CLIENT_RIOT_07_012: [ On success hsm_client_riot_get_certificate shall return the riot certificate. ] */
             memset(result, 0, total_len + 1);
             memcpy(result, x509_client->alias_cert_pem, x509_client->alias_cert_length);
             offset += x509_client->alias_cert_length;
@@ -636,7 +622,6 @@ char* hsm_client_riot_get_alias_key(HSM_CLIENT_HANDLE handle)
     char* result;
     if (handle == NULL)
     {
-        /* Codes_SRS_HSM_CLIENT_RIOT_07_014: [ if handle is NULL, hsm_client_riot_get_alias_key shall return NULL. ] */
         LogError("Invalid handle value specified");
         result = NULL;
     }
@@ -644,15 +629,12 @@ char* hsm_client_riot_get_alias_key(HSM_CLIENT_HANDLE handle)
     {
         HSM_CLIENT_X509_INFO* x509_client = (HSM_CLIENT_X509_INFO*)handle;
 
-        /* Codes_SRS_HSM_CLIENT_RIOT_07_015: [ hsm_client_riot_get_alias_key shall allocate a char* to return the alias certificate. ] */
         if ((result = (char*)malloc(x509_client->alias_key_length+1)) == NULL)
         {
-            /* Codes_SRS_HSM_CLIENT_RIOT_07_017: [ If any failure is encountered hsm_client_riot_get_alias_key shall return NULL ] */
             LogError("Failure allocating registration id.");
         }
         else
         {
-            /* Codes_SRS_HSM_CLIENT_RIOT_07_016: [ On success hsm_client_riot_get_alias_key shall return the alias certificate. ] */
             memset(result, 0, x509_client->alias_key_length+1);
             memcpy(result, x509_client->alias_priv_key_pem, x509_client->alias_key_length);
         }
@@ -665,7 +647,6 @@ char* hsm_client_riot_get_device_cert(HSM_CLIENT_HANDLE handle)
     char* result;
     if (handle == NULL)
     {
-        /* Codes_SRS_HSM_CLIENT_RIOT_07_018: [ if handle is NULL, hsm_client_riot_get_device_cert shall return NULL. ]*/
         LogError("Invalid handle value specified");
         result = NULL;
     }
@@ -673,15 +654,12 @@ char* hsm_client_riot_get_device_cert(HSM_CLIENT_HANDLE handle)
     {
         HSM_CLIENT_X509_INFO* x509_client = (HSM_CLIENT_X509_INFO*)handle;
 
-        /* Codes_SRS_HSM_CLIENT_RIOT_07_019: [ hsm_client_riot_get_device_cert shall allocate a char* to return the device certificate. ] */
         if ((result = (char*)malloc(x509_client->device_id_length+1)) == NULL)
         {
-            /* Codes_SRS_HSM_CLIENT_RIOT_07_021: [ If any failure is encountered hsm_client_riot_get_device_cert shall return NULL ] */
             LogError("Failure allocating registration id.");
         }
         else
         {
-            /* Codes_SRS_HSM_CLIENT_RIOT_07_020: [ On success hsm_client_riot_get_device_cert shall return the device certificate. ] */
             memset(result, 0, x509_client->device_id_length+1);
             memcpy(result, x509_client->device_id_public_pem, x509_client->device_id_length);
         }
@@ -694,7 +672,6 @@ char* hsm_client_riot_get_signer_cert(HSM_CLIENT_HANDLE handle)
     char* result;
     if (handle == NULL)
     {
-        /* Codes_SRS_HSM_CLIENT_RIOT_07_022: [ if handle is NULL, hsm_client_riot_get_signer_cert shall return NULL. ] */
         LogError("Invalid handle value specified");
         result = NULL;
     }
@@ -702,15 +679,12 @@ char* hsm_client_riot_get_signer_cert(HSM_CLIENT_HANDLE handle)
     {
         HSM_CLIENT_X509_INFO* x509_client = (HSM_CLIENT_X509_INFO*)handle;
 
-        /* Codes_SRS_HSM_CLIENT_RIOT_07_023: [ hsm_client_riot_get_signer_cert shall allocate a char* to return the signer certificate. ] */
         if ((result = (char*)malloc(x509_client->device_signed_length + 1)) == NULL)
         {
-            /* Codes_SRS_HSM_CLIENT_RIOT_07_025: [ If any failure is encountered hsm_client_riot_get_signer_cert shall return NULL ] */
             LogError("Failure allocating registration id.");
         }
         else
         {
-            /* Codes_SRS_HSM_CLIENT_RIOT_07_024: [ On success hsm_client_riot_get_signer_cert shall return the signer certificate. ] */
             memset(result, 0, x509_client->device_signed_length + 1);
             memcpy(result, x509_client->device_signed_pem, x509_client->device_signed_length);
         }
@@ -773,7 +747,6 @@ char* hsm_client_riot_get_common_name(HSM_CLIENT_HANDLE handle)
     char* result;
     if (handle == NULL)
     {
-        /* Codes_SRS_HSM_CLIENT_RIOT_07_026: [ if handle is NULL, hsm_client_riot_get_common_name shall return NULL. ] */
         LogError("Invalid handle value specified");
         result = NULL;
     }
@@ -781,10 +754,8 @@ char* hsm_client_riot_get_common_name(HSM_CLIENT_HANDLE handle)
     {
         HSM_CLIENT_X509_INFO* x509_client = (HSM_CLIENT_X509_INFO*)handle;
 
-        /* Codes_SRS_HSM_CLIENT_RIOT_07_027: [ hsm_client_riot_get_common_name shall allocate a char* to return the certificate common name. ] */
         if (mallocAndStrcpy_s(&result, x509_client->certificate_common_name) != 0)
         {
-            /* Codes_SRS_HSM_CLIENT_RIOT_07_028: [ If any failure is encountered hsm_client_riot_get_signer_cert shall return NULL ] */
             LogError("Failure allocating common name.");
             result = NULL;
         }
@@ -803,7 +774,6 @@ char* hsm_client_riot_create_leaf_cert(HSM_CLIENT_HANDLE handle, const char* com
 
     if (handle == NULL || common_name == NULL)
     {
-        /* Codes_SRS_HSM_CLIENT_RIOT_07_030: [ If handle or common_name is NULL, hsm_client_riot_create_leaf_cert shall return NULL. ] */
         LogError("invalid parameter specified.");
         result = NULL;
     }
@@ -822,35 +792,29 @@ char* hsm_client_riot_create_leaf_cert(HSM_CLIENT_HANDLE handle, const char* com
         DERInitContext(&leaf_ctx, leaf_buffer, DER_MAX_TBS);
         if (X509GetAliasCertTBS(&leaf_ctx, &LEAF_CERT_TBS_DATA, &leaf_id_pub, &riot_info->device_id_pub, firmware_id, RIOT_DIGEST_LENGTH) != 0)
         {
-            /* Codes_SRS_HSM_CLIENT_RIOT_07_032: [ If hsm_client_riot_create_leaf_cert encounters an error it shall return NULL. ] */
             LogError("Failure: X509GetDeviceCertTBS");
             result = NULL;
         }
         else if ((status = RiotCrypt_Sign(&tbs_sig, leaf_ctx.Buffer, leaf_ctx.Position, &riot_info->ca_root_priv)) != RIOT_SUCCESS)
         {
-            /* Codes_SRS_HSM_CLIENT_RIOT_07_032: [ If hsm_client_riot_create_leaf_cert encounters an error it shall return NULL. ] */
             LogError("Failure: RiotCrypt_Sign returned invalid status %d.", status);
             result = NULL;
         }
         else if (X509MakeDeviceCert(&leaf_ctx, &tbs_sig) != 0)
         {
-            /* Codes_SRS_HSM_CLIENT_RIOT_07_032: [ If hsm_client_riot_create_leaf_cert encounters an error it shall return NULL. ] */
             LogError("Failure: X509MakeDeviceCert");
             result = NULL;
         }
         else if ((result = (char*)malloc(DER_MAX_PEM + 1)) == NULL)
         {
-            /* Codes_SRS_HSM_CLIENT_RIOT_07_032: [ If hsm_client_riot_create_leaf_cert encounters an error it shall return NULL. ] */
             LogError("Failure allocating leaf cert");
         }
         else
         {
-            /* Codes_SRS_HSM_CLIENT_RIOT_07_031: [ If successful hsm_client_riot_create_leaf_cert shall return a leaf cert with the CN of common_name. ] */
             memset(result, 0, DER_MAX_PEM + 1);
             uint32_t leaf_len = DER_MAX_PEM;
             if (DERtoPEM(&leaf_ctx, CERT_TYPE, result, &leaf_len) != 0)
             {
-                /* Codes_SRS_HSM_CLIENT_RIOT_07_032: [ If hsm_client_riot_create_leaf_cert encounters an error it shall return NULL. ] */
                 LogError("Failure: DERtoPEM return invalid value.");
                 free(result);
                 result = NULL;

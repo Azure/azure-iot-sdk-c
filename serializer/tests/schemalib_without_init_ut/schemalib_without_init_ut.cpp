@@ -356,9 +356,6 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubSchemaClientMocks, , DEVICE_RESULT, Device_C
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubSchemaClientMocks, , void, DataPublisher_SetMaxBufferSize, size_t, bytes);
 
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubSchemaClientMocks, , int, mallocAndStrcpy_s, char**, destination, const char*, source);
-/* Requirements tested by the virtue of using the exposed API:
-Tests_SRS_SCHEMALIB_99_001:[ IotHub_Schema_Client shall expose the following API ... ] */
-
 BEGIN_TEST_SUITE(serializer_ut_without_init)
 
         TEST_SUITE_INITIALIZE(TestClassInitialize)
@@ -390,7 +387,6 @@ BEGIN_TEST_SUITE(serializer_ut_without_init)
 
         /* serializer_deinit */
 
-        /* Tests_SRS_SCHEMALIB_99_044:[ If IotHub_Schema_Client is not initialized, serializer_deinit shall not attempt to de-initialize any module.] */
         TEST_FUNCTION(serializer_deinit_Does_Not_Deinitialize_Any_Module)
         {
             // arrange

@@ -44,15 +44,12 @@ void my_gballoc_free(void * t)
 
 BEGIN_NAMESPACE(DummyDataProvider_WithStructs)
 
-/*Tests_SRS_SERIALIZER_99_016:[ The second macro, DECLARE_STRUCT shall introduce a new struct  type having the fields field1name of type field1Type, field2name having the type field2type etc.]*/
 DECLARE_STRUCT(GeoLocation,
 double, Lat,
 double, Long);
 
-/*Tests_SRS_SERIALIZER_99_016:[ The second macro, DECLARE_STRUCT shall introduce a new struct  type having the fields field1name of type field1Type, field2name having the type field2type etc.]*/
 DECLARE_STRUCT(CarLocation,
 int, Alt,
-/*Tests_SRS_SERIALIZER_99_017:[ These types can either be one of the types mentioned in WITH_DATA or it can be a type introduced by a previous DECLARE_STRUCT.]*/
 GeoLocation, whereIsMyCar);
 
 DECLARE_MODEL(TruckType,
@@ -283,7 +280,6 @@ TEST_FUNCTION_CLEANUP(TestMethodCleanup)
     TEST_MUTEX_RELEASE(g_testByTest);
 }
 
-/*Tests_SRS_CODEFIRST_99_002:[ CodeFirst_Init shall initialize the CodeFirst module. If initialization is successful, it shall return CODEFIRST_OK.]*/
 TEST_FUNCTION(CodeFirst_Init_succeds)
 {
     umock_c_reset_all_calls();
@@ -299,8 +295,6 @@ TEST_FUNCTION(CodeFirst_Init_succeds)
     ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
 }
 
-/*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
-/*Tests_SRS_SERIALIZER_99_042:[ The parameter types are either predefined parameter types (specs SRS_SERIALIZER_99_004-SRS_SERIALIZER_99_014) or a type introduced by DECLARE_STRUCT.]*/
 TEST_FUNCTION(InvokeAction_goToLocation_succeeds)
 {
     ///arrange
@@ -338,7 +332,6 @@ TEST_FUNCTION(InvokeAction_goToLocation_succeeds)
     CodeFirst_DestroyDevice(device);
 }
 
-/*Tests_SRS_CODEFIRST_02_013: [The wrapper's return value shall be returned.] */
 TEST_FUNCTION(InvokeAction_alwaysRejected_return_EXECUTE_COMMAND_FAILED)
 {
     ///arrange
@@ -358,7 +351,6 @@ TEST_FUNCTION(InvokeAction_alwaysRejected_return_EXECUTE_COMMAND_FAILED)
     CodeFirst_DestroyDevice(device);
 }
 
-/*Tests_SRS_CODEFIRST_02_013: [The wrapper's return value shall be returned.] */
 TEST_FUNCTION(InvokeAction_alwaysAbandon_return_EXECUTE_COMMAND_ERROR)
 {
     ///arrange
@@ -380,7 +372,6 @@ TEST_FUNCTION(InvokeAction_alwaysAbandon_return_EXECUTE_COMMAND_ERROR)
 
 /*the below tests are derived from the one above by trying to feed wrong data in the CodeFirst_InvokeAction*/
 
-/*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
 TEST_FUNCTION(InvokeAction_goToLocation_with_a_struct_with_3_fields_fails)
 {
     ///arrange
@@ -420,7 +411,6 @@ TEST_FUNCTION(InvokeAction_goToLocation_with_a_struct_with_3_fields_fails)
     CodeFirst_DestroyDevice(device);
 }
 
-/*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
 TEST_FUNCTION(InvokeAction_goToLocation_with_a_struct_with_1_field_fails)
 {
     ///arrange
@@ -452,7 +442,6 @@ TEST_FUNCTION(InvokeAction_goToLocation_with_a_struct_with_1_field_fails)
     CodeFirst_DestroyDevice(device);
 }
 
-/*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
 TEST_FUNCTION(InvokeAction_goToLocation_with_a_non_struct_fails)
 {
     ///arrange
@@ -477,7 +466,6 @@ TEST_FUNCTION(InvokeAction_goToLocation_with_a_non_struct_fails)
     CodeFirst_DestroyDevice(device);
 }
 
-/*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
 TEST_FUNCTION(InvokeAction_goToLocation_with_a_struct_and_a_double_fails)
 {
     ///arrange
@@ -516,7 +504,6 @@ TEST_FUNCTION(InvokeAction_goToLocation_with_a_struct_and_a_double_fails)
     CodeFirst_DestroyDevice(device);
 }
 
-/*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
 TEST_FUNCTION(InvokeAction_goToLocation_with_a_double_and_a_struct_fails)
 {
     ///arrange
@@ -555,7 +542,6 @@ TEST_FUNCTION(InvokeAction_goToLocation_with_a_double_and_a_struct_fails)
     CodeFirst_DestroyDevice(device);
 }
 
-/*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
 TEST_FUNCTION(InvokeAction_goToLocation_with_a_struct_with_first_field_of_wrong_type_fails)
 {
     ///arrange
@@ -591,7 +577,6 @@ TEST_FUNCTION(InvokeAction_goToLocation_with_a_struct_with_first_field_of_wrong_
     CodeFirst_DestroyDevice(device);
 }
 
-/*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
 TEST_FUNCTION(InvokeAction_goToLocation_with_a_struct_with_second_field_of_wrong_type_fails)
 {
     ///arrange
@@ -627,8 +612,6 @@ TEST_FUNCTION(InvokeAction_goToLocation_with_a_struct_with_second_field_of_wrong
     CodeFirst_DestroyDevice(device);
 }
 
-/*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
-/*Tests_SRS_SERIALIZER_99_042:[ The parameter types are either predefined parameter types (specs SRS_SERIALIZER_99_004-SRS_SERIALIZER_99_014) or a type introduced by DECLARE_STRUCT.]*/
 TEST_FUNCTION(InvokeAction_moveCarTo_succeeds)
 {
     ///arrange
@@ -696,7 +679,6 @@ TEST_FUNCTION(InvokeAction_moveCarTo_succeeds)
 
 /*the below tests are simple to make it fail*/
 
-/*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
 TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_number_of_parameters_fails_1)
 {
     ///arrange
@@ -757,7 +739,6 @@ TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_number_of_parameters_fails_1)
     CodeFirst_DestroyDevice(device);
 }
 
-/*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
 TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_number_of_parameters_fails_2)
 {
     ///arrange
@@ -818,7 +799,6 @@ TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_number_of_parameters_fails_2)
     CodeFirst_DestroyDevice(device);
 }
 
-/*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
 TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_type_of_parameter_1_fails)
 {
     ///arrange
@@ -879,7 +859,6 @@ TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_type_of_parameter_1_fails)
     CodeFirst_DestroyDevice(device);
 }
 
-/*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
 TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_type_of_parameter_2_fails)
 {
     ///arrange
@@ -940,7 +919,6 @@ TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_type_of_parameter_2_fails)
     CodeFirst_DestroyDevice(device);
 }
 
-/*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
 TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_type_for_destination_Alt_fails)
 {
     ///arrange
@@ -1001,7 +979,6 @@ TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_type_for_destination_Alt_fails)
     CodeFirst_DestroyDevice(device);
 }
 
-/*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
 TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_type_for_destination_whereIsMyCar_fails)
 {
     ///arrange
@@ -1062,7 +1039,6 @@ TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_type_for_destination_whereIsMyCa
     CodeFirst_DestroyDevice(device);
 }
 
-/*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
 TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_type_for_destination_whereIsMyCar_Lat_fails)
 {
     ///arrange
@@ -1123,7 +1099,6 @@ TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_type_for_destination_whereIsMyCa
     CodeFirst_DestroyDevice(device);
 }
 
-/*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
 TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_type_for_destination_whereIsMyCar_Long_fails)
 {
     ///arrange
@@ -1184,7 +1159,6 @@ TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_type_for_destination_whereIsMyCa
     CodeFirst_DestroyDevice(device);
 }
 
-/*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
 TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_type_for_reverse_fails)
 {
     ///arrange
@@ -1245,7 +1219,6 @@ TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_type_for_reverse_fails)
     CodeFirst_DestroyDevice(device);
 }
 
-/*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
 TEST_FUNCTION(InvokeAction_moveCarTo_with_too_many_fields_in_CarLocation_fails)
 {
     ///arrange
@@ -1306,7 +1279,6 @@ TEST_FUNCTION(InvokeAction_moveCarTo_with_too_many_fields_in_CarLocation_fails)
     CodeFirst_DestroyDevice(device);
 }
 
-/*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
 TEST_FUNCTION(InvokeAction_moveCarTo_with_too_few_fields_in_CarLocation_fails)
 {
     ///arrange
@@ -1367,7 +1339,6 @@ TEST_FUNCTION(InvokeAction_moveCarTo_with_too_few_fields_in_CarLocation_fails)
     CodeFirst_DestroyDevice(device);
 }
 
-/*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
 TEST_FUNCTION(InvokeAction_moveCarTo_with_too_many_fields_in_CarLocation_whereIsMyCar_fails)
 {
     ///arrange
@@ -1428,7 +1399,6 @@ TEST_FUNCTION(InvokeAction_moveCarTo_with_too_many_fields_in_CarLocation_whereIs
     CodeFirst_DestroyDevice(device);
 }
 
-/*Tests_SRS_SERIALIZER_99_039:[ WITH_ACTION shall declare an action of the current data provider called as the first macro parameter (name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on. ]*/
 TEST_FUNCTION(InvokeAction_moveCarTo_with_too_few_fields_in_CarLocation_whereIsMyCar_fails)
 {
     ///arrange
