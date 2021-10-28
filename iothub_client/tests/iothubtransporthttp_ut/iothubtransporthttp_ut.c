@@ -1632,9 +1632,6 @@ TEST_FUNCTION(IoTHubTransportHttp_Destroy_succeeds_One_Registered_device)
     //assert
 }
 
-//"Accept":"application/json"
-//"Connection" : "Keep-Alive" ]
-//"Authorization": "" ]
 TEST_FUNCTION(IoTHubTransportHttp_Register_HappyPath_with_deviceKey_success_fun_time)
 {
     //arrange
@@ -1655,9 +1652,6 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_HappyPath_with_deviceKey_success_fun_
     IoTHubTransportHttp_Destroy(handle);
 }
 
-//"Accept":"application/json"
-//"Connection" : "Keep-Alive" ]
-//"Authorization": "" ]
 TEST_FUNCTION(IoTHubTransportHttp_Register_HappyPath_with_deviceSas_success_fun_time)
 {
     //arrange
