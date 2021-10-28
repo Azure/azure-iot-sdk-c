@@ -1,0 +1,20 @@
+var searchData=
+[
+  ['iothub_5fclient_5fconnection_5fstatus_5fcallback_433',['IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK',['../iothub__client__core__common_8h.html#ad0d7e0712e620b1d55e72652f4f4f560',1,'iothub_client_core_common.h']]],
+  ['iothub_5fclient_5fdevice_5fmethod_5fcallback_5fasync_434',['IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC',['../iothub__client__core__common_8h.html#aa758c6c04994938fae9257289760d01a',1,'iothub_client_core_common.h']]],
+  ['iothub_5fclient_5fdevice_5ftwin_5fcallback_435',['IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK',['../iothub__client__core__common_8h.html#a3020471f05025405840d9c43466122dc',1,'iothub_client_core_common.h']]],
+  ['iothub_5fclient_5fevent_5fconfirmation_5fcallback_436',['IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK',['../iothub__client__core__common_8h.html#a41b17fcb2cb70587e3576226561648a0',1,'iothub_client_core_common.h']]],
+  ['iothub_5fclient_5ffile_5fupload_5fcallback_437',['IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK',['../iothub__client__core__common_8h.html#a039d574a949c85ba9c183c88d4ce03bf',1,'iothub_client_core_common.h']]],
+  ['iothub_5fclient_5ffile_5fupload_5fget_5fdata_5fcallback_438',['IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK',['../iothub__client__core__common_8h.html#a188fa4251310dad00defabb8f77a292f',1,'iothub_client_core_common.h']]],
+  ['iothub_5fclient_5ffile_5fupload_5fget_5fdata_5fcallback_5fex_439',['IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX',['../iothub__client__core__common_8h.html#a0d9944dec4c4dd2bdd75cebb466dcf6c',1,'iothub_client_core_common.h']]],
+  ['iothub_5fclient_5fhandle_440',['IOTHUB_CLIENT_HANDLE',['../iothub__client_8h.html#a228b1409767f2560aa0724caad86fd6d',1,'iothub_client.h']]],
+  ['iothub_5fclient_5fll_5fhandle_441',['IOTHUB_CLIENT_LL_HANDLE',['../iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742',1,'iothub_client_ll.h']]],
+  ['iothub_5fclient_5fmessage_5fcallback_5fasync_442',['IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC',['../iothub__client__core__common_8h.html#adf7097e8fc9e34f26dd9347d4eaa5f8d',1,'iothub_client_core_common.h']]],
+  ['iothub_5fclient_5freported_5fstate_5fcallback_443',['IOTHUB_CLIENT_REPORTED_STATE_CALLBACK',['../iothub__client__core__common_8h.html#a9ae117da9222a5138e31a8953ce18bbc',1,'iothub_client_core_common.h']]],
+  ['iothub_5fdevice_5fclient_5fhandle_444',['IOTHUB_DEVICE_CLIENT_HANDLE',['../iothub__device__client_8h.html#ac0a6393bbcbec2e1b580e8c4c127f4c1',1,'iothub_device_client.h']]],
+  ['iothub_5fdevice_5fclient_5fll_5fhandle_445',['IOTHUB_DEVICE_CLIENT_LL_HANDLE',['../iothub__device__client__ll_8h.html#ab3ed1ccac784de53579181b349fd6616',1,'iothub_device_client_ll.h']]],
+  ['iothub_5fmessage_5fhandle_446',['IOTHUB_MESSAGE_HANDLE',['../iothub__message_8h.html#a98782b8f57e3f751b4f0196de946432c',1,'iothub_message.h']]],
+  ['iothub_5fmethod_5finvoke_5fcallback_447',['IOTHUB_METHOD_INVOKE_CALLBACK',['../iothub__client__core__common_8h.html#a96dfa3395ba96062db1ca2a10ffc09b2',1,'iothub_client_core_common.h']]],
+  ['iothub_5fmodule_5fclient_5fhandle_448',['IOTHUB_MODULE_CLIENT_HANDLE',['../iothub__module__client_8h.html#a61259310a513ae73b31cb3c66d3f4087',1,'iothub_module_client.h']]],
+  ['iothub_5fmodule_5fclient_5fll_5fhandle_449',['IOTHUB_MODULE_CLIENT_LL_HANDLE',['../iothub__module__client__ll_8h.html#ae1a6187aacbdb56cde026ad3d228420a',1,'iothub_module_client_ll.h']]]
+];

@@ -69,74 +69,89 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>APIs that allow a user (usually a device) to communicate with an Azure IoTHub.  
+<p>APIs that allow a user (usually a device) to communicate with an Azure IoT Hub.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;stddef.h&gt;</code><br />
 <code>#include &lt;stdint.h&gt;</code><br />
 <code>#include &lt;time.h&gt;</code><br />
 <code>#include &quot;umock_c/umock_c_prod.h&quot;</code><br />
-<code>#include &quot;iothub_client_core_common.h&quot;</code><br />
+<code>#include &quot;<a class="el" href="iothub__client__core__common_8h_source.html">iothub_client_core_common.h</a>&quot;</code><br />
 </div>
 <p><a href="iothub__client__ll_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:abdbc7b1e6f374be8f2339d8c93f87742"><td class="memItemLeft" align="right" valign="top"><a id="abdbc7b1e6f374be8f2339d8c93f87742"></a>
-typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG *&#160;</td><td class="memItemRight" valign="bottom"><b>IOTHUB_CLIENT_LL_HANDLE</b></td></tr>
+<tr class="memitem:abdbc7b1e6f374be8f2339d8c93f87742"><td class="memItemLeft" align="right" valign="top">typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a></td></tr>
 <tr class="separator:abdbc7b1e6f374be8f2339d8c93f87742"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:aadecae0b07958725e83cae943250469d"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_LL_HANDLE&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#aadecae0b07958725e83cae943250469d">IoTHubClient_LL_CreateFromConnectionString</a> (const char *connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)</td></tr>
+<tr class="memitem:aadecae0b07958725e83cae943250469d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#aadecae0b07958725e83cae943250469d">IoTHubClient_LL_CreateFromConnectionString</a> (const char *connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)</td></tr>
 <tr class="separator:aadecae0b07958725e83cae943250469d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad236a781c7fb988216b98be099125447"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_LL_HANDLE&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#ad236a781c7fb988216b98be099125447">IoTHubClient_LL_Create</a> (const <a class="el" href="struct_i_o_t_h_u_b___c_l_i_e_n_t___c_o_n_f_i_g.html">IOTHUB_CLIENT_CONFIG</a> *config)</td></tr>
+<tr class="memitem:ad236a781c7fb988216b98be099125447"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#ad236a781c7fb988216b98be099125447">IoTHubClient_LL_Create</a> (const <a class="el" href="struct_i_o_t_h_u_b___c_l_i_e_n_t___c_o_n_f_i_g.html">IOTHUB_CLIENT_CONFIG</a> *config)</td></tr>
 <tr class="separator:ad236a781c7fb988216b98be099125447"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5f2ea7dfbb5eeb2510e39a43c92fe61e"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_LL_HANDLE&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#a5f2ea7dfbb5eeb2510e39a43c92fe61e">IoTHubClient_LL_CreateWithTransport</a> (const <a class="el" href="struct_i_o_t_h_u_b___c_l_i_e_n_t___d_e_v_i_c_e___c_o_n_f_i_g.html">IOTHUB_CLIENT_DEVICE_CONFIG</a> *config)</td></tr>
+<tr class="memitem:a5f2ea7dfbb5eeb2510e39a43c92fe61e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#a5f2ea7dfbb5eeb2510e39a43c92fe61e">IoTHubClient_LL_CreateWithTransport</a> (const <a class="el" href="struct_i_o_t_h_u_b___c_l_i_e_n_t___d_e_v_i_c_e___c_o_n_f_i_g.html">IOTHUB_CLIENT_DEVICE_CONFIG</a> *config)</td></tr>
 <tr class="separator:a5f2ea7dfbb5eeb2510e39a43c92fe61e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeccf0188b7a31fa475383eb44328f6d9"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_LL_HANDLE&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#aeccf0188b7a31fa475383eb44328f6d9">IoTHubClient_LL_CreateFromDeviceAuth</a> (const char *iothub_uri, const char *device_id, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)</td></tr>
+<tr class="memitem:aeccf0188b7a31fa475383eb44328f6d9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#aeccf0188b7a31fa475383eb44328f6d9">IoTHubClient_LL_CreateFromDeviceAuth</a> (const char *iothub_uri, const char *device_id, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)</td></tr>
 <tr class="separator:aeccf0188b7a31fa475383eb44328f6d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afc3049dc24e311713ab4735873989a4a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#afc3049dc24e311713ab4735873989a4a">IoTHubClient_LL_Destroy</a> (IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)</td></tr>
+<tr class="memitem:afc3049dc24e311713ab4735873989a4a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#afc3049dc24e311713ab4735873989a4a">IoTHubClient_LL_Destroy</a> (<a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a> iotHubClientHandle)</td></tr>
 <tr class="separator:afc3049dc24e311713ab4735873989a4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab47deec96944dd3f1bf0e747ab565277"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#ab47deec96944dd3f1bf0e747ab565277">IoTHubClient_LL_SendEventAsync</a> (IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback, void *userContextCallback)</td></tr>
+<tr class="memitem:ab47deec96944dd3f1bf0e747ab565277"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#ab47deec96944dd3f1bf0e747ab565277">IoTHubClient_LL_SendEventAsync</a> (<a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a> iotHubClientHandle, <a class="el" href="iothub__message_8h.html#a98782b8f57e3f751b4f0196de946432c">IOTHUB_MESSAGE_HANDLE</a> eventMessageHandle, <a class="el" href="iothub__client__core__common_8h.html#a41b17fcb2cb70587e3576226561648a0">IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK</a> eventConfirmationCallback, void *userContextCallback)</td></tr>
 <tr class="separator:ab47deec96944dd3f1bf0e747ab565277"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa7773cdda101288cfd805c34f726eb84"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#aa7773cdda101288cfd805c34f726eb84">IoTHubClient_LL_GetSendStatus</a> (IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_STATUS *iotHubClientStatus)</td></tr>
+<tr class="memitem:aa7773cdda101288cfd805c34f726eb84"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#aa7773cdda101288cfd805c34f726eb84">IoTHubClient_LL_GetSendStatus</a> (<a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a> iotHubClientHandle, <a class="el" href="iothub__client__core__common_8h.html#af80b6370369f3c1bb53399deccb4491c">IOTHUB_CLIENT_STATUS</a> *iotHubClientStatus)</td></tr>
 <tr class="separator:aa7773cdda101288cfd805c34f726eb84"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af8c8a00af8c2fac1ccf2111eb4e2016c"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#af8c8a00af8c2fac1ccf2111eb4e2016c">IoTHubClient_LL_SetMessageCallback</a> (IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC messageCallback, void *userContextCallback)</td></tr>
+<tr class="memitem:af8c8a00af8c2fac1ccf2111eb4e2016c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#af8c8a00af8c2fac1ccf2111eb4e2016c">IoTHubClient_LL_SetMessageCallback</a> (<a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a> iotHubClientHandle, <a class="el" href="iothub__client__core__common_8h.html#adf7097e8fc9e34f26dd9347d4eaa5f8d">IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC</a> messageCallback, void *userContextCallback)</td></tr>
 <tr class="separator:af8c8a00af8c2fac1ccf2111eb4e2016c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6d0656a868fcbdaba0fba066fbe92bd9"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#a6d0656a868fcbdaba0fba066fbe92bd9">IoTHubClient_LL_SetConnectionStatusCallback</a> (IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK connectionStatusCallback, void *userContextCallback)</td></tr>
+<tr class="memitem:a6d0656a868fcbdaba0fba066fbe92bd9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#a6d0656a868fcbdaba0fba066fbe92bd9">IoTHubClient_LL_SetConnectionStatusCallback</a> (<a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a> iotHubClientHandle, <a class="el" href="iothub__client__core__common_8h.html#ad0d7e0712e620b1d55e72652f4f4f560">IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK</a> connectionStatusCallback, void *userContextCallback)</td></tr>
 <tr class="separator:a6d0656a868fcbdaba0fba066fbe92bd9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8a0b5a41fae26b16aa01134d09e93278"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#a8a0b5a41fae26b16aa01134d09e93278">IoTHubClient_LL_SetRetryPolicy</a> (IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitInSeconds)</td></tr>
+<tr class="memitem:a8a0b5a41fae26b16aa01134d09e93278"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#a8a0b5a41fae26b16aa01134d09e93278">IoTHubClient_LL_SetRetryPolicy</a> (<a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a> iotHubClientHandle, <a class="el" href="iothub__client__core__common_8h.html#a361221e523247855ff0a05c2e2870e4a">IOTHUB_CLIENT_RETRY_POLICY</a> retryPolicy, size_t retryTimeoutLimitInSeconds)</td></tr>
 <tr class="separator:a8a0b5a41fae26b16aa01134d09e93278"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acd507eebe67d0b08bf49838120d9d3db"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#acd507eebe67d0b08bf49838120d9d3db">IoTHubClient_LL_GetRetryPolicy</a> (IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY *retryPolicy, size_t *retryTimeoutLimitInSeconds)</td></tr>
+<tr class="memitem:acd507eebe67d0b08bf49838120d9d3db"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#acd507eebe67d0b08bf49838120d9d3db">IoTHubClient_LL_GetRetryPolicy</a> (<a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a> iotHubClientHandle, <a class="el" href="iothub__client__core__common_8h.html#a361221e523247855ff0a05c2e2870e4a">IOTHUB_CLIENT_RETRY_POLICY</a> *retryPolicy, size_t *retryTimeoutLimitInSeconds)</td></tr>
 <tr class="separator:acd507eebe67d0b08bf49838120d9d3db"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a21b712300499f014b8c467e195f2503c"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#a21b712300499f014b8c467e195f2503c">IoTHubClient_LL_GetLastMessageReceiveTime</a> (IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, time_t *lastMessageReceiveTime)</td></tr>
+<tr class="memitem:a21b712300499f014b8c467e195f2503c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#a21b712300499f014b8c467e195f2503c">IoTHubClient_LL_GetLastMessageReceiveTime</a> (<a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a> iotHubClientHandle, time_t *lastMessageReceiveTime)</td></tr>
 <tr class="separator:a21b712300499f014b8c467e195f2503c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af5e5e122bdc1f1228ae2116fc158b3d6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#af5e5e122bdc1f1228ae2116fc158b3d6">IoTHubClient_LL_DoWork</a> (IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)</td></tr>
+<tr class="memitem:af5e5e122bdc1f1228ae2116fc158b3d6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#af5e5e122bdc1f1228ae2116fc158b3d6">IoTHubClient_LL_DoWork</a> (<a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a> iotHubClientHandle)</td></tr>
 <tr class="separator:af5e5e122bdc1f1228ae2116fc158b3d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a70eb58c7ede92f75001104ff4745faa2"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#a70eb58c7ede92f75001104ff4745faa2">IoTHubClient_LL_SetOption</a> (IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char *optionName, const void *value)</td></tr>
+<tr class="memitem:a70eb58c7ede92f75001104ff4745faa2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#a70eb58c7ede92f75001104ff4745faa2">IoTHubClient_LL_SetOption</a> (<a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a> iotHubClientHandle, const char *optionName, const void *value)</td></tr>
 <tr class="separator:a70eb58c7ede92f75001104ff4745faa2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac7df62eaef41c0081af988467e45a0e4"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#ac7df62eaef41c0081af988467e45a0e4">IoTHubClient_LL_SetDeviceTwinCallback</a> (IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void *userContextCallback)</td></tr>
+<tr class="memitem:ac7df62eaef41c0081af988467e45a0e4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#ac7df62eaef41c0081af988467e45a0e4">IoTHubClient_LL_SetDeviceTwinCallback</a> (<a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a> iotHubClientHandle, <a class="el" href="iothub__client__core__common_8h.html#a3020471f05025405840d9c43466122dc">IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK</a> deviceTwinCallback, void *userContextCallback)</td></tr>
 <tr class="separator:ac7df62eaef41c0081af988467e45a0e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af48d8760649bf7792d861874e89e6b66"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#af48d8760649bf7792d861874e89e6b66">IoTHubClient_LL_SendReportedState</a> (IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const unsigned char *reportedState, size_t size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reportedStateCallback, void *userContextCallback)</td></tr>
+<tr class="memitem:af48d8760649bf7792d861874e89e6b66"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#af48d8760649bf7792d861874e89e6b66">IoTHubClient_LL_SendReportedState</a> (<a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a> iotHubClientHandle, const unsigned char *reportedState, size_t size, <a class="el" href="iothub__client__core__common_8h.html#a9ae117da9222a5138e31a8953ce18bbc">IOTHUB_CLIENT_REPORTED_STATE_CALLBACK</a> reportedStateCallback, void *userContextCallback)</td></tr>
 <tr class="separator:af48d8760649bf7792d861874e89e6b66"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae7a7582ea0ea061418f21bab3d236a1d"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#ae7a7582ea0ea061418f21bab3d236a1d">IoTHubClient_LL_SetDeviceMethodCallback</a> (IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback, void *userContextCallback)</td></tr>
+<tr class="memitem:ae7a7582ea0ea061418f21bab3d236a1d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#ae7a7582ea0ea061418f21bab3d236a1d">IoTHubClient_LL_SetDeviceMethodCallback</a> (<a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a> iotHubClientHandle, <a class="el" href="iothub__client__core__common_8h.html#aa758c6c04994938fae9257289760d01a">IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC</a> deviceMethodCallback, void *userContextCallback)</td></tr>
 <tr class="separator:ae7a7582ea0ea061418f21bab3d236a1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a93d4fa3242a15429e6cf6e0d7c65da9e"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#a93d4fa3242a15429e6cf6e0d7c65da9e">IoTHubClient_LL_SetDeviceMethodCallback_Ex</a> (IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK inboundDeviceMethodCallback, void *userContextCallback)</td></tr>
+<tr class="memitem:a93d4fa3242a15429e6cf6e0d7c65da9e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#a93d4fa3242a15429e6cf6e0d7c65da9e">IoTHubClient_LL_SetDeviceMethodCallback_Ex</a> (<a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a> iotHubClientHandle, IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK inboundDeviceMethodCallback, void *userContextCallback)</td></tr>
 <tr class="separator:a93d4fa3242a15429e6cf6e0d7c65da9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af2e62eff3e74c553bf75a4a13f054f63"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#af2e62eff3e74c553bf75a4a13f054f63">IoTHubClient_LL_DeviceMethodResponse</a> (IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, METHOD_HANDLE methodId, const unsigned char *response, size_t respSize, int statusCode)</td></tr>
+<tr class="memitem:af2e62eff3e74c553bf75a4a13f054f63"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#af2e62eff3e74c553bf75a4a13f054f63">IoTHubClient_LL_DeviceMethodResponse</a> (<a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a> iotHubClientHandle, METHOD_HANDLE methodId, const unsigned char *response, size_t respSize, int statusCode)</td></tr>
 <tr class="separator:af2e62eff3e74c553bf75a4a13f054f63"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a60f63e1839e2386233b7fee6d3a9f60a"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#a60f63e1839e2386233b7fee6d3a9f60a">IoTHubClient_LL_UploadToBlob</a> (IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char *destinationFileName, const unsigned char *source, size_t size)</td></tr>
+<tr class="memitem:a60f63e1839e2386233b7fee6d3a9f60a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#a60f63e1839e2386233b7fee6d3a9f60a">IoTHubClient_LL_UploadToBlob</a> (<a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a> iotHubClientHandle, const char *destinationFileName, const unsigned char *source, size_t size)</td></tr>
 <tr class="separator:a60f63e1839e2386233b7fee6d3a9f60a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1720e09a7d7bc17bcdfaf4612d51b061"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#a1720e09a7d7bc17bcdfaf4612d51b061">IoTHubClient_LL_UploadMultipleBlocksToBlob</a> (IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char *destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK getDataCallback, void *context)</td></tr>
+<tr class="memitem:a1720e09a7d7bc17bcdfaf4612d51b061"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#a1720e09a7d7bc17bcdfaf4612d51b061">IoTHubClient_LL_UploadMultipleBlocksToBlob</a> (<a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a> iotHubClientHandle, const char *destinationFileName, <a class="el" href="iothub__client__core__common_8h.html#a188fa4251310dad00defabb8f77a292f">IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK</a> getDataCallback, void *context)</td></tr>
 <tr class="separator:a1720e09a7d7bc17bcdfaf4612d51b061"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a50f1eb59b79f731ca8c6d63cef9f625f"><td class="memItemLeft" align="right" valign="top">IOTHUB_CLIENT_RESULT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#a50f1eb59b79f731ca8c6d63cef9f625f">IoTHubClient_LL_UploadMultipleBlocksToBlobEx</a> (IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char *destinationFileName, IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX getDataCallbackEx, void *context)</td></tr>
+<tr class="memitem:a50f1eb59b79f731ca8c6d63cef9f625f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__ll_8h.html#a50f1eb59b79f731ca8c6d63cef9f625f">IoTHubClient_LL_UploadMultipleBlocksToBlobEx</a> (<a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a> iotHubClientHandle, const char *destinationFileName, <a class="el" href="iothub__client__core__common_8h.html#a0d9944dec4c4dd2bdd75cebb466dcf6c">IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX</a> getDataCallbackEx, void *context)</td></tr>
 <tr class="separator:a50f1eb59b79f731ca8c6d63cef9f625f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>APIs that allow a user (usually a device) to communicate with an Azure IoTHub. </p>
-<p>IoTHubClient_LL allows a user (usually a device) to communicate with an Azure IoTHub. It can send events and receive messages. At any given moment in time there can only be at most 1 message callback function.</p>
+<div class="textblock"><p>APIs that allow a user (usually a device) to communicate with an Azure IoT Hub. </p>
+<p>IoTHubClient_LL allows a user (usually a device) to communicate with an Azure IoT Hub. It can send events and receive messages. At any given moment in time there can only be at most 1 message callback function.</p>
 <p>This API surface contains a set of APIs that allows the user to interact with the lower layer portion of the IoTHubClient. These APIs contain <code><em>LL</em></code> in their name, but retain the same functionality like the <code>IoTHubClient_</code>... APIs, with one difference. If the <code><em>LL</em></code> APIs are used then the user is responsible for scheduling when the actual work done by the IoTHubClient happens (when the data is sent/received on/from the wire). This is useful for constrained devices where spinning a separate thread is often not desired. </p>
-</div><h2 class="groupheader">Function Documentation</h2>
+</div><h2 class="groupheader">Typedef Documentation</h2>
+<a id="abdbc7b1e6f374be8f2339d8c93f87742"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abdbc7b1e6f374be8f2339d8c93f87742">&#9670;&nbsp;</a></span>IOTHUB_CLIENT_LL_HANDLE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* <a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000023">Deprecated:</a></b></dt><dd>IOTHUB_CLIENT_LL_HANDLE is deprecated. Use <a class="el" href="iothub__device__client__ll_8h.html#ab3ed1ccac784de53579181b349fd6616" title="Handle corresponding to a lower layer (LL) device client instance.">IOTHUB_DEVICE_CLIENT_LL_HANDLE</a> instead. </dd></dl>
+
+</div>
+</div>
+<h2 class="groupheader">Function Documentation</h2>
 <a id="ad236a781c7fb988216b98be099125447"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad236a781c7fb988216b98be099125447">&#9670;&nbsp;</a></span>IoTHubClient_LL_Create()</h2>
 
@@ -144,7 +159,7 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_Create </td>
+          <td class="memname"><a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a> IoTHubClient_LL_Create </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="struct_i_o_t_h_u_b___c_l_i_e_n_t___c_o_n_f_i_g.html">IOTHUB_CLIENT_CONFIG</a> *&#160;</td>
           <td class="paramname"><em>config</em></td><td>)</td>
@@ -152,7 +167,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000023">Deprecated:</a></b></dt><dd>IoTHubClient_LL_Create is deprecated. Use IoTHubDeviceClient_LL_Create instead. </dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000025">Deprecated:</a></b></dt><dd>IoTHubClient_LL_Create is deprecated. Use <a class="el" href="iothub__device__client__ll_8h.html#ac98f962a67a3913f0fd483b1051ef37e" title="Creates a IoT Hub client for communication with an existing IoT Hub using the specified parameters.">IoTHubDeviceClient_LL_Create()</a> instead. </dd></dl>
 
 </div>
 </div>
@@ -163,7 +178,7 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString </td>
+          <td class="memname"><a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a> IoTHubClient_LL_CreateFromConnectionString </td>
           <td>(</td>
           <td class="paramtype">const char *&#160;</td>
           <td class="paramname"><em>connectionString</em>, </td>
@@ -181,7 +196,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000022">Deprecated:</a></b></dt><dd>IoTHubClient_LL_CreateFromConnectionString is deprecated. Use IoTHubDeviceClient_LL_CreateFromConnectionString instead. </dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000024">Deprecated:</a></b></dt><dd>IoTHubClient_LL_CreateFromConnectionString is deprecated. Use <a class="el" href="iothub__device__client__ll_8h.html#a443f69aee79ac2c74d5983eb723c9f55" title="Creates a IoT Hub client for communication with an existing IoT Hub using the specified connection st...">IoTHubDeviceClient_LL_CreateFromConnectionString()</a> instead. </dd></dl>
 
 </div>
 </div>
@@ -192,7 +207,7 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromDeviceAuth </td>
+          <td class="memname"><a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a> IoTHubClient_LL_CreateFromDeviceAuth </td>
           <td>(</td>
           <td class="paramtype">const char *&#160;</td>
           <td class="paramname"><em>iothub_uri</em>, </td>
@@ -216,7 +231,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000025">Deprecated:</a></b></dt><dd>IoTHubClient_LL_CreateFromDeviceAuth is deprecated. Use IoTHubDeviceClient_LL_CreateFromDeviceAuth instead. </dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000027">Deprecated:</a></b></dt><dd>IoTHubClient_LL_CreateFromDeviceAuth is deprecated. Use <a class="el" href="iothub__device__client__ll_8h.html#a0e84dff5ca26d7a915dcc61963db361e" title="Creates a IoT Hub client for communication with an existing IoT Hub using the device auth.">IoTHubDeviceClient_LL_CreateFromDeviceAuth()</a> instead. </dd></dl>
 
 </div>
 </div>
@@ -227,7 +242,7 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport </td>
+          <td class="memname"><a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a> IoTHubClient_LL_CreateWithTransport </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="struct_i_o_t_h_u_b___c_l_i_e_n_t___d_e_v_i_c_e___c_o_n_f_i_g.html">IOTHUB_CLIENT_DEVICE_CONFIG</a> *&#160;</td>
           <td class="paramname"><em>config</em></td><td>)</td>
@@ -235,7 +250,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000024">Deprecated:</a></b></dt><dd>IoTHubClient_LL_CreateWithTransport is deprecated. Use IoTHubDeviceClient_LL_CreateWithTransport instead. </dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000026">Deprecated:</a></b></dt><dd>IoTHubClient_LL_CreateWithTransport is deprecated. Use <a class="el" href="iothub__device__client__ll_8h.html#a044b4357c6a5450de02cf9c774dca87b" title="Creates a IoT Hub client for communication with an existing IoT Hub using an existing transport.">IoTHubDeviceClient_LL_CreateWithTransport()</a> instead. </dd></dl>
 
 </div>
 </div>
@@ -248,13 +263,13 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">void IoTHubClient_LL_Destroy </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_LL_HANDLE&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a>&#160;</td>
           <td class="paramname"><em>iotHubClientHandle</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000026">Deprecated:</a></b></dt><dd>IoTHubClient_LL_Destroy is deprecatedDevice. Use IoTHubClient_LL_Destroy instead. </dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000028">Deprecated:</a></b></dt><dd>IoTHubClient_LL_Destroy is deprecatedDevice. Use <a class="el" href="iothub__client__ll_8h.html#afc3049dc24e311713ab4735873989a4a">IoTHubClient_LL_Destroy()</a> instead. </dd></dl>
 
 </div>
 </div>
@@ -265,9 +280,9 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubClient_LL_DeviceMethodResponse </td>
+          <td class="memname"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a> IoTHubClient_LL_DeviceMethodResponse </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_LL_HANDLE&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a>&#160;</td>
           <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
@@ -301,7 +316,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000040">Deprecated:</a></b></dt><dd>IoTHubClient_LL_DeviceMethodResponse is deprecated. Use IoTHubDeviceClient_LL_SetDeviceMethodCallback instead. </dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000042">Deprecated:</a></b></dt><dd>IoTHubClient_LL_DeviceMethodResponse is deprecated. Use <a class="el" href="iothub__device__client__ll_8h.html#aaaa00ed49441cf566eb94ded6182cab4" title="This API sets the callback for async cloud to device method calls.">IoTHubDeviceClient_LL_SetDeviceMethodCallback()</a> instead. </dd></dl>
 
 </div>
 </div>
@@ -314,13 +329,13 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname">void IoTHubClient_LL_DoWork </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_LL_HANDLE&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a>&#160;</td>
           <td class="paramname"><em>iotHubClientHandle</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000034">Deprecated:</a></b></dt><dd>IoTHubClient_LL_DoWork is deprecateDeviced. Use IoTHubDeviceClient_LL_DoWork instead. </dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000036">Deprecated:</a></b></dt><dd>IoTHubClient_LL_DoWork is deprecateDeviced. Use <a class="el" href="iothub__device__client__ll_8h.html#a6e77da5502dff2bb43bace5173242f37" title="This function MUST be called by the user so work (sending/receiving data on the network,...">IoTHubDeviceClient_LL_DoWork()</a> instead. </dd></dl>
 
 </div>
 </div>
@@ -331,9 +346,9 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetLastMessageReceiveTime </td>
+          <td class="memname"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a> IoTHubClient_LL_GetLastMessageReceiveTime </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_LL_HANDLE&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a>&#160;</td>
           <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
@@ -349,7 +364,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000033">Deprecated:</a></b></dt><dd>IoTHubClient_LL_GetLastMessageReceiveTime is deprecated. Use IoTHubDeviceClient_LL_GetLastMessageReceiveTime instead. </dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000035">Deprecated:</a></b></dt><dd>IoTHubClient_LL_GetLastMessageReceiveTime is deprecated. Use <a class="el" href="iothub__device__client__ll_8h.html#a04d8f5acf6f66f0075e5febc4a43695c" title="This function returns in the out parameter lastMessageReceiveTime what was the value of the time func...">IoTHubDeviceClient_LL_GetLastMessageReceiveTime()</a> instead. </dd></dl>
 
 </div>
 </div>
@@ -360,15 +375,15 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetRetryPolicy </td>
+          <td class="memname"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a> IoTHubClient_LL_GetRetryPolicy </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_LL_HANDLE&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a>&#160;</td>
           <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">IOTHUB_CLIENT_RETRY_POLICY *&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__client__core__common_8h.html#a361221e523247855ff0a05c2e2870e4a">IOTHUB_CLIENT_RETRY_POLICY</a> *&#160;</td>
           <td class="paramname"><em>retryPolicy</em>, </td>
         </tr>
         <tr>
@@ -384,7 +399,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000032">Deprecated:</a></b></dt><dd>IoTHubClient_LL_GetRetryPolicy is deprecated. Use IoTHubDeviceClient_LL_GetRetryPolicy instead. </dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000034">Deprecated:</a></b></dt><dd>IoTHubClient_LL_GetRetryPolicy is deprecated. Use <a class="el" href="iothub__device__client__ll_8h.html#ae4c27fd75ae287332ce413b439b59cba" title="Sets up the connection status callback to be invoked representing the status of the connection to IOT...">IoTHubDeviceClient_LL_GetRetryPolicy()</a> instead. </dd></dl>
 
 </div>
 </div>
@@ -395,15 +410,15 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetSendStatus </td>
+          <td class="memname"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a> IoTHubClient_LL_GetSendStatus </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_LL_HANDLE&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a>&#160;</td>
           <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">IOTHUB_CLIENT_STATUS *&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__client__core__common_8h.html#af80b6370369f3c1bb53399deccb4491c">IOTHUB_CLIENT_STATUS</a> *&#160;</td>
           <td class="paramname"><em>iotHubClientStatus</em>&#160;</td>
         </tr>
         <tr>
@@ -413,7 +428,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000028">Deprecated:</a></b></dt><dd>IoTHubClient_LL_GetSendStatus is deprecated. UseDevice IoTHubClient_LL_GetSendStatus instead. </dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000030">Deprecated:</a></b></dt><dd>IoTHubClient_LL_GetSendStatus is deprecated. UseDevice <a class="el" href="iothub__client__ll_8h.html#aa7773cdda101288cfd805c34f726eb84">IoTHubClient_LL_GetSendStatus()</a> instead. </dd></dl>
 
 </div>
 </div>
@@ -424,21 +439,21 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendEventAsync </td>
+          <td class="memname"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a> IoTHubClient_LL_SendEventAsync </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_LL_HANDLE&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a>&#160;</td>
           <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">IOTHUB_MESSAGE_HANDLE&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__message_8h.html#a98782b8f57e3f751b4f0196de946432c">IOTHUB_MESSAGE_HANDLE</a>&#160;</td>
           <td class="paramname"><em>eventMessageHandle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__client__core__common_8h.html#a41b17fcb2cb70587e3576226561648a0">IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK</a>&#160;</td>
           <td class="paramname"><em>eventConfirmationCallback</em>, </td>
         </tr>
         <tr>
@@ -454,7 +469,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000027">Deprecated:</a></b></dt><dd>IoTHubClient_LL_SendEventAsync is deprecated. Use IoTHubDeviceClient_LL_SendEventAsync instead. </dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000029">Deprecated:</a></b></dt><dd>IoTHubClient_LL_SendEventAsync is deprecated. Use <a class="el" href="iothub__device__client__ll_8h.html#a56cfcb637e1f46cf0f5e6e2bb81457ad" title="Asynchronous call to send the message specified by eventMessageHandle.">IoTHubDeviceClient_LL_SendEventAsync()</a> instead. </dd></dl>
 
 </div>
 </div>
@@ -465,9 +480,9 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendReportedState </td>
+          <td class="memname"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a> IoTHubClient_LL_SendReportedState </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_LL_HANDLE&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a>&#160;</td>
           <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
@@ -485,7 +500,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">IOTHUB_CLIENT_REPORTED_STATE_CALLBACK&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__client__core__common_8h.html#a9ae117da9222a5138e31a8953ce18bbc">IOTHUB_CLIENT_REPORTED_STATE_CALLBACK</a>&#160;</td>
           <td class="paramname"><em>reportedStateCallback</em>, </td>
         </tr>
         <tr>
@@ -501,7 +516,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000037">Deprecated:</a></b></dt><dd>IoTHubClient_LL_SendReportedState is deprecated. Use IoTHubDeviceClient_LL_SendReportedState instead. </dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000039">Deprecated:</a></b></dt><dd>IoTHubClient_LL_SendReportedState is deprecated. Use <a class="el" href="iothub__device__client__ll_8h.html#a8809f6e5178212de109cfcfa02bce978" title="This API sends a report of the device&#39;s properties and their current values.">IoTHubDeviceClient_LL_SendReportedState()</a> instead. </dd></dl>
 
 </div>
 </div>
@@ -512,15 +527,15 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetConnectionStatusCallback </td>
+          <td class="memname"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a> IoTHubClient_LL_SetConnectionStatusCallback </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_LL_HANDLE&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a>&#160;</td>
           <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__client__core__common_8h.html#ad0d7e0712e620b1d55e72652f4f4f560">IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK</a>&#160;</td>
           <td class="paramname"><em>connectionStatusCallback</em>, </td>
         </tr>
         <tr>
@@ -536,7 +551,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000030">Deprecated:</a></b></dt><dd>IoTHubClient_LL_SetConnectionStatusCallback is deprecated. Use IoTHubDeviceClient_LL_SetConnectionStatusCallback instead. </dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000032">Deprecated:</a></b></dt><dd>IoTHubClient_LL_SetConnectionStatusCallback is deprecated. Use <a class="el" href="iothub__device__client__ll_8h.html#a6d7da21562bfbcef5aa9d38503002bb2" title="Sets up the connection status callback to be invoked representing the status of the connection to IOT...">IoTHubDeviceClient_LL_SetConnectionStatusCallback()</a> instead. </dd></dl>
 
 </div>
 </div>
@@ -547,15 +562,15 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetDeviceMethodCallback </td>
+          <td class="memname"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a> IoTHubClient_LL_SetDeviceMethodCallback </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_LL_HANDLE&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a>&#160;</td>
           <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__client__core__common_8h.html#aa758c6c04994938fae9257289760d01a">IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC</a>&#160;</td>
           <td class="paramname"><em>deviceMethodCallback</em>, </td>
         </tr>
         <tr>
@@ -571,7 +586,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000038">Deprecated:</a></b></dt><dd>IoTHubClient_LL_SetDeviceMethodCallback is deprecated. Use IoTHubDeviceClient_LL_SetDeviceMethodCallback instead. </dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000040">Deprecated:</a></b></dt><dd>IoTHubClient_LL_SetDeviceMethodCallback is deprecated. Use <a class="el" href="iothub__device__client__ll_8h.html#aaaa00ed49441cf566eb94ded6182cab4" title="This API sets the callback for async cloud to device method calls.">IoTHubDeviceClient_LL_SetDeviceMethodCallback()</a> instead. </dd></dl>
 
 </div>
 </div>
@@ -582,9 +597,9 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetDeviceMethodCallback_Ex </td>
+          <td class="memname"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a> IoTHubClient_LL_SetDeviceMethodCallback_Ex </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_LL_HANDLE&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a>&#160;</td>
           <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
@@ -606,7 +621,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000039">Deprecated:</a></b></dt><dd>IoTHubClient_LL_SetDeviceMethodCallback_Ex is deprecated. Use IoTHubDeviceClient_LL_SetDeviceMethodCallback instead. </dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000041">Deprecated:</a></b></dt><dd>IoTHubClient_LL_SetDeviceMethodCallback_Ex is deprecated. Use <a class="el" href="iothub__device__client__ll_8h.html#aaaa00ed49441cf566eb94ded6182cab4" title="This API sets the callback for async cloud to device method calls.">IoTHubDeviceClient_LL_SetDeviceMethodCallback()</a> instead. </dd></dl>
 
 </div>
 </div>
@@ -617,15 +632,15 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetDeviceTwinCallback </td>
+          <td class="memname"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a> IoTHubClient_LL_SetDeviceTwinCallback </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_LL_HANDLE&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a>&#160;</td>
           <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__client__core__common_8h.html#a3020471f05025405840d9c43466122dc">IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK</a>&#160;</td>
           <td class="paramname"><em>deviceTwinCallback</em>, </td>
         </tr>
         <tr>
@@ -641,7 +656,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000036">Deprecated:</a></b></dt><dd>IoTHubClient_LL_SetDeviceTwinCallback is deprecated. Use IoTHubDeviceClient_LL_SetDeviceTwinCallback instead. </dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000038">Deprecated:</a></b></dt><dd>IoTHubClient_LL_SetDeviceTwinCallback is deprecated. Use <a class="el" href="iothub__device__client__ll_8h.html#a347a0fb6822105b8ad0e59f856acd850" title="This API specifies a callback to be used when the device receives a desired state update.">IoTHubDeviceClient_LL_SetDeviceTwinCallback()</a> instead. </dd></dl>
 
 </div>
 </div>
@@ -652,15 +667,15 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetMessageCallback </td>
+          <td class="memname"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a> IoTHubClient_LL_SetMessageCallback </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_LL_HANDLE&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a>&#160;</td>
           <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__client__core__common_8h.html#adf7097e8fc9e34f26dd9347d4eaa5f8d">IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC</a>&#160;</td>
           <td class="paramname"><em>messageCallback</em>, </td>
         </tr>
         <tr>
@@ -676,7 +691,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000029">Deprecated:</a></b></dt><dd>IoTHubClient_LL_SetMessageCallback is deprecated. Use IoTHubDeviceClient_LL_SetMessageCallback instead. </dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000031">Deprecated:</a></b></dt><dd>IoTHubClient_LL_SetMessageCallback is deprecated. Use <a class="el" href="iothub__device__client__ll_8h.html#af8527e95987aa562dfbbf48482b78be1" title="Sets up the message callback to be invoked when IoT Hub issues a message to the device....">IoTHubDeviceClient_LL_SetMessageCallback()</a> instead. </dd></dl>
 
 </div>
 </div>
@@ -687,9 +702,9 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetOption </td>
+          <td class="memname"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a> IoTHubClient_LL_SetOption </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_LL_HANDLE&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a>&#160;</td>
           <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
@@ -711,7 +726,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000035">Deprecated:</a></b></dt><dd>IoTHubClient_LL_SetOption is deprecated. Device Use IoTHubDeviceClient_LL_SetOption instead. </dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000037">Deprecated:</a></b></dt><dd>IoTHubClient_LL_SetOption is deprecated. Device Use <a class="el" href="iothub__device__client__ll_8h.html#a23a4b07e54e7e03668dc9f832cd06368" title="This API sets a runtime option identified by parameter optionName to a value pointed to by value....">IoTHubDeviceClient_LL_SetOption()</a> instead. </dd></dl>
 
 </div>
 </div>
@@ -722,15 +737,15 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetRetryPolicy </td>
+          <td class="memname"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a> IoTHubClient_LL_SetRetryPolicy </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_LL_HANDLE&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a>&#160;</td>
           <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">IOTHUB_CLIENT_RETRY_POLICY&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__client__core__common_8h.html#a361221e523247855ff0a05c2e2870e4a">IOTHUB_CLIENT_RETRY_POLICY</a>&#160;</td>
           <td class="paramname"><em>retryPolicy</em>, </td>
         </tr>
         <tr>
@@ -746,7 +761,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000031">Deprecated:</a></b></dt><dd>IoTHubClient_LL_SetRetryPolicy is deprecated. Use IoTHubDeviceClient_LL_SetRetryPolicy instead. </dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000033">Deprecated:</a></b></dt><dd>IoTHubClient_LL_SetRetryPolicy is deprecated. Use <a class="el" href="iothub__device__client__ll_8h.html#abb0e2ca40fc6786208b276e201de0b4c" title="Sets up the connection status callback to be invoked representing the status of the connection to IOT...">IoTHubDeviceClient_LL_SetRetryPolicy()</a> instead. </dd></dl>
 
 </div>
 </div>
@@ -757,9 +772,9 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob </td>
+          <td class="memname"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a> IoTHubClient_LL_UploadMultipleBlocksToBlob </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_LL_HANDLE&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a>&#160;</td>
           <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
@@ -771,7 +786,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__client__core__common_8h.html#a188fa4251310dad00defabb8f77a292f">IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK</a>&#160;</td>
           <td class="paramname"><em>getDataCallback</em>, </td>
         </tr>
         <tr>
@@ -787,7 +802,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000042">Deprecated:</a></b></dt><dd>IoTHubClient_LL_UploadMultipleBlocksToBlob is deprecated. Use IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob instead. </dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000044">Deprecated:</a></b></dt><dd>IoTHubClient_LL_UploadMultipleBlocksToBlob is deprecated. Use <a class="el" href="iothub__device__client__ll_8h.html#a688c3982badc6412f7856b0e85bd4d60" title="This API uploads to Azure Storage the content provided block by block by getDataCallback under the bl...">IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob()</a> instead. </dd></dl>
 
 </div>
 </div>
@@ -798,9 +813,9 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlobEx </td>
+          <td class="memname"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a> IoTHubClient_LL_UploadMultipleBlocksToBlobEx </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_LL_HANDLE&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a>&#160;</td>
           <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
@@ -812,7 +827,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__client__core__common_8h.html#a0d9944dec4c4dd2bdd75cebb466dcf6c">IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX</a>&#160;</td>
           <td class="paramname"><em>getDataCallbackEx</em>, </td>
         </tr>
         <tr>
@@ -828,7 +843,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000043">Deprecated:</a></b></dt><dd>IoTHubClient_LL_UploadMultipleBlocksToBlobEx is deprecated. Use IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob instead. </dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000045">Deprecated:</a></b></dt><dd>IoTHubClient_LL_UploadMultipleBlocksToBlobEx is deprecated. Use <a class="el" href="iothub__device__client__ll_8h.html#a688c3982badc6412f7856b0e85bd4d60" title="This API uploads to Azure Storage the content provided block by block by getDataCallback under the bl...">IoTHubDeviceClient_LL_UploadMultipleBlocksToBlob()</a> instead. </dd></dl>
 
 </div>
 </div>
@@ -839,9 +854,9 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob </td>
+          <td class="memname"><a class="el" href="iothub__client__core__common_8h.html#ae8e8840cc715c54bc60465f3f110d40f">IOTHUB_CLIENT_RESULT</a> IoTHubClient_LL_UploadToBlob </td>
           <td>(</td>
-          <td class="paramtype">IOTHUB_CLIENT_LL_HANDLE&#160;</td>
+          <td class="paramtype"><a class="el" href="iothub__client__ll_8h.html#abdbc7b1e6f374be8f2339d8c93f87742">IOTHUB_CLIENT_LL_HANDLE</a>&#160;</td>
           <td class="paramname"><em>iotHubClientHandle</em>, </td>
         </tr>
         <tr>
@@ -869,7 +884,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000041">Deprecated:</a></b></dt><dd>IoTHubClient_LL_UploadToBlob is deprecated. UsDevicee IoTHubDeviceClient_LL_UploadToBlob instead. </dd></dl>
+<dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000043">Deprecated:</a></b></dt><dd>IoTHubClient_LL_UploadToBlob is deprecated. UsDevicee <a class="el" href="iothub__device__client__ll_8h.html#a1b8e1336348c641fc40750a5ca256c6d" title="This API uploads to Azure Storage the content pointed to by source having the size size under the blo...">IoTHubDeviceClient_LL_UploadToBlob()</a> instead. </dd></dl>
 
 </div>
 </div>

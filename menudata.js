@@ -35,9 +35,12 @@ var menudata={children:[
 {text:"File List",url:"files.html"},
 {text:"Globals",url:"globals.html",children:[
 {text:"All",url:"globals.html",children:[
+{text:"d",url:"globals.html#index_d"},
 {text:"i",url:"globals.html#index_i"},
 {text:"p",url:"globals.html#index_p"}]},
 {text:"Functions",url:"globals_func.html",children:[
 {text:"i",url:"globals_func.html#index_i"},
 {text:"p",url:"globals_func.html#index_p"}]},
-{text:"Enumerations",url:"globals_enum.html"}]}]}]}
+{text:"Typedefs",url:"globals_type.html"},
+{text:"Enumerations",url:"globals_enum.html"},
+{text:"Macros",url:"globals_defs.html"}]}]}]}

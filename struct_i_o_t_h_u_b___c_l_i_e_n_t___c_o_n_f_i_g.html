@@ -68,7 +68,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>This struct captures IoTHub client configuration.  
+<p>This struct specifies IoT Hub client configuration.  
  <a href="struct_i_o_t_h_u_b___c_l_i_e_n_t___c_o_n_f_i_g.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="iothub__client__core__common_8h_source.html">iothub_client_core_common.h</a>&gt;</code></p>
@@ -77,7 +77,7 @@ $(function() {
 Data Fields</h2></td></tr>
 <tr class="memitem:aede343b62f08a21321e3ca1db1280554"><td class="memItemLeft" align="right" valign="top"><a id="aede343b62f08a21321e3ca1db1280554"></a>
 IOTHUB_CLIENT_TRANSPORT_PROVIDER&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_i_o_t_h_u_b___c_l_i_e_n_t___c_o_n_f_i_g.html#aede343b62f08a21321e3ca1db1280554">protocol</a></td></tr>
-<tr class="memdesc:aede343b62f08a21321e3ca1db1280554"><td class="mdescLeft">&#160;</td><td class="mdescRight">A function pointer that is passed into the <code>IoTHubClientCreate</code>. A function definition for AMQP is defined in the include <code>iothubtransportamqp.h</code>. A function definition for HTTP is defined in the include <code>iothubtransporthttp.h</code> A function definition for MQTT is defined in the include <code>iothubtransportmqtt.h</code>. <br /></td></tr>
+<tr class="memdesc:aede343b62f08a21321e3ca1db1280554"><td class="mdescLeft">&#160;</td><td class="mdescRight">A function pointer that is passed into <a class="el" href="iothub__device__client_8h.html#a20e32644525bd67493dab5c1f08975b4" title="Creates a IoT Hub client for communication with an existing IoT Hub using the specified parameters.">IoTHubDeviceClient_CreateWithTransport()</a> or <a class="el" href="iothub__device__client__ll_8h.html#ac98f962a67a3913f0fd483b1051ef37e" title="Creates a IoT Hub client for communication with an existing IoT Hub using the specified parameters.">IoTHubDeviceClient_LL_Create()</a>. A function definition for AMQP is defined in the include <code>iothubtransportamqp.h</code>. A function definition for HTTP is defined in the include <code>iothubtransporthttp.h</code> A function definition for MQTT is defined in the include <code>iothubtransportmqtt.h</code>. <br /></td></tr>
 <tr class="separator:aede343b62f08a21321e3ca1db1280554"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a25224fac7299dde82c6af5df11a78d70"><td class="memItemLeft" align="right" valign="top"><a id="a25224fac7299dde82c6af5df11a78d70"></a>
 const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_i_o_t_h_u_b___c_l_i_e_n_t___c_o_n_f_i_g.html#a25224fac7299dde82c6af5df11a78d70">deviceId</a></td></tr>
@@ -100,11 +100,12 @@ const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 <tr class="memdesc:afce8f7054c21e99eb5233aa989cb7f74"><td class="mdescLeft">&#160;</td><td class="mdescRight">IoT Hub suffix goes here, e.g., private.azure-devices-int.net. <br /></td></tr>
 <tr class="separator:afce8f7054c21e99eb5233aa989cb7f74"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a763edfe7082b865140332d5e8f7f1b85"><td class="memItemLeft" align="right" valign="top"><a id="a763edfe7082b865140332d5e8f7f1b85"></a>
-const char *&#160;</td><td class="memItemRight" valign="bottom"><b>protocolGatewayHostName</b></td></tr>
+const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_i_o_t_h_u_b___c_l_i_e_n_t___c_o_n_f_i_g.html#a763edfe7082b865140332d5e8f7f1b85">protocolGatewayHostName</a></td></tr>
+<tr class="memdesc:a763edfe7082b865140332d5e8f7f1b85"><td class="mdescLeft">&#160;</td><td class="mdescRight">Optional gateway host to connect to (instead of directly to IoT Hub). Can be NULL. <br /></td></tr>
 <tr class="separator:a763edfe7082b865140332d5e8f7f1b85"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>This struct captures IoTHub client configuration. </p>
+<div class="textblock"><p>This struct specifies IoT Hub client configuration. </p>
 </div><hr/>The documentation for this struct was generated from the following file:<ul>
 <li><a class="el" href="iothub__client__core__common_8h_source.html">iothub_client_core_common.h</a></li>
 </ul>

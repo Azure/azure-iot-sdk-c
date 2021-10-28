@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Azure IoT C SDK: iothub_client_version.h File Reference</title>
+<title>Azure IoT C SDK: iothub.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -62,43 +62,38 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#define-members">Macros</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
-<div class="title">iothub_client_version.h File Reference</div>  </div>
+<div class="title">iothub.h File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>Functions for managing the client SDK version.  
+<p>Global initialization and deinitialization routines for all IoT Hub client operations.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;umock_c/umock_c_prod.h&quot;</code><br />
 </div>
-<p><a href="iothub__client__version_8h_source.html">Go to the source code of this file.</a></p>
+<p><a href="iothub_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
-Macros</h2></td></tr>
-<tr class="memitem:ae0748bd999de84277b606395be2fae5f"><td class="memItemLeft" align="right" valign="top"><a id="ae0748bd999de84277b606395be2fae5f"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__version_8h.html#ae0748bd999de84277b606395be2fae5f">IOTHUB_SDK_VERSION</a>&#160;&#160;&#160;&quot;1.8.0&quot;</td></tr>
-<tr class="memdesc:ae0748bd999de84277b606395be2fae5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Macro representing current IoT Hub Client SDK version. <br /></td></tr>
-<tr class="separator:ae0748bd999de84277b606395be2fae5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:afe9c5bc893697c34d6f016aa75990a45"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub__client__version_8h.html#afe9c5bc893697c34d6f016aa75990a45">IoTHubClient_GetVersionString</a> ()</td></tr>
-<tr class="memdesc:afe9c5bc893697c34d6f016aa75990a45"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a pointer to a null terminated string containing the current IoT Hub Client SDK version.  <a href="iothub__client__version_8h.html#afe9c5bc893697c34d6f016aa75990a45">More...</a><br /></td></tr>
-<tr class="separator:afe9c5bc893697c34d6f016aa75990a45"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a59822a87811441e7423bd5b765d1cd5b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub_8h.html#a59822a87811441e7423bd5b765d1cd5b">IoTHub_Init</a> ()</td></tr>
+<tr class="memdesc:a59822a87811441e7423bd5b765d1cd5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">IoTHubClient_Init Initializes the IoT Hub Client System.  <a href="iothub_8h.html#a59822a87811441e7423bd5b765d1cd5b">More...</a><br /></td></tr>
+<tr class="separator:a59822a87811441e7423bd5b765d1cd5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a967cfe67c573fa495a6273c8586dec72"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="iothub_8h.html#a967cfe67c573fa495a6273c8586dec72">IoTHub_Deinit</a> ()</td></tr>
+<tr class="memdesc:a967cfe67c573fa495a6273c8586dec72"><td class="mdescLeft">&#160;</td><td class="mdescRight">IoTHubClient_Deinit Frees resources initialized in the IoTHubClient_Init function call.  <a href="iothub_8h.html#a967cfe67c573fa495a6273c8586dec72">More...</a><br /></td></tr>
+<tr class="separator:a967cfe67c573fa495a6273c8586dec72"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Functions for managing the client SDK version. </p>
+<div class="textblock"><p>Global initialization and deinitialization routines for all IoT Hub client operations. </p>
 </div><h2 class="groupheader">Function Documentation</h2>
-<a id="afe9c5bc893697c34d6f016aa75990a45"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afe9c5bc893697c34d6f016aa75990a45">&#9670;&nbsp;</a></span>IoTHubClient_GetVersionString()</h2>
+<a id="a967cfe67c573fa495a6273c8586dec72"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a967cfe67c573fa495a6273c8586dec72">&#9670;&nbsp;</a></span>IoTHub_Deinit()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">const char* IoTHubClient_GetVersionString </td>
+          <td class="memname">void IoTHub_Deinit </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -106,8 +101,33 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Returns a pointer to a null terminated string containing the current IoT Hub Client SDK version. </p>
-<dl class="section return"><dt>Returns</dt><dd>Pointer to a null terminated string containing the current IoT Hub Client SDK version. </dd></dl>
+<p>IoTHubClient_Deinit Frees resources initialized in the IoTHubClient_Init function call. </p>
+<dl class="section remark"><dt>Remarks</dt><dd>This should be called when using IoT Hub client library, including the device provisioning client.</dd></dl>
+<p>This function should be called once per process, not per-thread.</p>
+<dl class="section warning"><dt>Warning</dt><dd>Close all IoT Hub and provisioning client handles prior to invoking this. </dd></dl>
+
+</div>
+</div>
+<a id="a59822a87811441e7423bd5b765d1cd5b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a59822a87811441e7423bd5b765d1cd5b">&#9670;&nbsp;</a></span>IoTHub_Init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int IoTHub_Init </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>IoTHubClient_Init Initializes the IoT Hub Client System. </p>
+<dl class="section remark"><dt>Remarks</dt><dd><br  />
+ This must be called before using any functionality from the IoT Hub client library, including the device provisioning client.</dd></dl>
+<p><code>IoTHubClient_Init</code> should be called once per process, not per-thread.</p>
+<dl class="section return"><dt>Returns</dt><dd>int zero upon success, any other value upon failure. </dd></dl>
 
 </div>
 </div>
