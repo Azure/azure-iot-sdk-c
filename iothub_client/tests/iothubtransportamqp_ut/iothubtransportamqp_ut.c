@@ -322,22 +322,6 @@ TEST_FUNCTION_CLEANUP(TestMethodCleanup)
     TEST_MUTEX_RELEASE(g_testByTest);
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_001: [IoTHubTransportAMQP_Create shall create a TRANSPORT_LL_HANDLE by calling into the IoTHubTransport_AMQP_Common_Create function, passing `config` and getTLSIOTransport.]
-/* Tests_SRS_IOTHUBTRANSPORTAMQP_09_019: [This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for it's fields:
-IoTHubTransport_SendMessageDisposition = IoTHubTransportAMQP_SendMessageDisposition
-IoTHubTransport_Subscribe_DeviceMethod = IoTHubTransportAMQP_Subscribe_DeviceMethod
-IoTHubTransport_Unsubscribe_DeviceMethod = IoTHubTransportAMQP_Unsubscribe_DeviceMethod
-IoTHubTransport_Subscribe_DeviceTwin = IoTHubTransportAMQP_Subscribe_DeviceTwin
-IoTHubTransport_Unsubscribe_DeviceTwin = IoTHubTransportAMQP_Unsubscribe_DeviceTwin
-IoTHubTransport_ProcessItem - IoTHubTransportAMQP_ProcessItem
-IoTHubTransport_GetHostname = IoTHubTransportAMQP_GetHostname
-IoTHubTransport_Create = IoTHubTransportAMQP_Create
-IoTHubTransport_Destroy = IoTHubTransportAMQP_Destroy
-IoTHubTransport_Subscribe = IoTHubTransportAMQP_Subscribe
-IoTHubTransport_Unsubscribe = IoTHubTransportAMQP_Unsubscribe
-IoTHubTransport_DoWork = IoTHubTransportAMQP_DoWork
-IoTHubTransport_SetRetryLogic = IoTHubTransportAMQP_SetRetryLogic
-IoTHubTransport_SetOption = IoTHubTransportAMQP_SetOption]*/
 TEST_FUNCTION(AMQP_Create)
 {
     // arrange
@@ -359,13 +343,6 @@ TEST_FUNCTION(AMQP_Create)
     // cleanup
 }
 
-/* Tests_SRS_IOTHUBTRANSPORTAMQP_01_009: [ `getIoTransportProvider` shall obtain the TLS IO interface handle by calling `platform_get_default_tlsio`. ]*/
-/* Tests_SRS_IOTHUBTRANSPORTAMQP_09_004: [`getTLSIOTransport` shall return the `XIO_HANDLE` created using `xio_create`.] */
-/* Tests_SRS_IOTHUBTRANSPORTAMQP_01_010: [ The TLS IO parameters shall be a `TLSIO_CONFIG` structure filled as below: ]*/
-/* Tests_SRS_IOTHUBTRANSPORTAMQP_01_011: [ - `hostname` shall be set to `fqdn`. ]*/
-/* Tests_SRS_IOTHUBTRANSPORTAMQP_01_012: [ - `port` shall be set to 443. ]*/
-/* Tests_SRS_IOTHUBTRANSPORTAMQP_01_013: [ `underlying_io_interface` shall be set to NULL. ]*/
-/* Tests_SRS_IOTHUBTRANSPORTAMQP_01_014: [ `underlying_io_parameters` shall be set to NULL. ]*/
 TEST_FUNCTION(AMQP_Create_getTLSIOTransport_sets_up_TLS_over_socket_IO)
 {
     // arrange
@@ -393,13 +370,6 @@ TEST_FUNCTION(AMQP_Create_getTLSIOTransport_sets_up_TLS_over_socket_IO)
     ASSERT_ARE_EQUAL(void_ptr, underlying_io_transport, TEST_XIO_HANDLE);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORTAMQP_01_009: [ `getIoTransportProvider` shall obtain the TLS IO interface handle by calling `platform_get_default_tlsio`. ]*/
-/* Tests_SRS_IOTHUBTRANSPORTAMQP_09_004: [`getTLSIOTransport` shall return the `XIO_HANDLE` created using `xio_create`.] */
-/* Tests_SRS_IOTHUBTRANSPORTAMQP_01_010: [ The TLS IO parameters shall be a `TLSIO_CONFIG` structure filled as below: ]*/
-/* Tests_SRS_IOTHUBTRANSPORTAMQP_01_011: [ - `hostname` shall be set to `fqdn`. ]*/
-/* Tests_SRS_IOTHUBTRANSPORTAMQP_01_012: [ - `port` shall be set to 443. ]*/
-/* Tests_SRS_IOTHUBTRANSPORTAMQP_01_013: [ `underlying_io_interface` shall be set to NULL. ]*/
-/* Tests_SRS_IOTHUBTRANSPORTAMQP_01_014: [ `underlying_io_parameters` shall be set to NULL. ]*/
 TEST_FUNCTION(AMQP_Create_getTLSIOTransport_ignores_the_http_proxy_seetings)
 {
     // arrange
@@ -433,7 +403,6 @@ TEST_FUNCTION(AMQP_Create_getTLSIOTransport_ignores_the_http_proxy_seetings)
     ASSERT_ARE_EQUAL(void_ptr, underlying_io_transport, TEST_XIO_HANDLE);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORTAMQP_09_003: [If `platform_get_default_tlsio` returns NULL `getTLSIOTransport` shall return NULL.] */
 TEST_FUNCTION(when_platform_get_default_tlsio_returns_NULL_AMQP_Create_getTLSIOTransport_returns_NULL)
 {
     // arrange
@@ -455,7 +424,6 @@ TEST_FUNCTION(when_platform_get_default_tlsio_returns_NULL_AMQP_Create_getTLSIOT
     ASSERT_IS_NULL(underlying_io_transport);
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_015: [IoTHubTransportAMQP_DoWork shall call into the IoTHubTransport_AMQP_Common_DoWork()]
 TEST_FUNCTION(AMQP_DoWork)
 {
     // arrange
@@ -473,7 +441,6 @@ TEST_FUNCTION(AMQP_DoWork)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_006: [IoTHubTransportAMQP_Register shall register the device by calling into the IoTHubTransport_AMQP_Common_Register().]
 TEST_FUNCTION(AMQP_Register)
 {
     // arrange
@@ -492,7 +459,6 @@ TEST_FUNCTION(AMQP_Register)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_007: [IoTHubTransportAMQP_Unregister shall unregister the device by calling into the IoTHubTransport_AMQP_Common_Unregister().]
 TEST_FUNCTION(AMQP_Unregister)
 {
     // arrange
@@ -510,7 +476,6 @@ TEST_FUNCTION(AMQP_Unregister)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_008: [IoTHubTransportAMQP_Subscribe_DeviceTwin shall invoke IoTHubTransport_AMQP_Common_Subscribe_DeviceTwin() and return its result.]
 TEST_FUNCTION(AMQP_Subscribe_DeviceTwin)
 {
     // arrange
@@ -529,7 +494,6 @@ TEST_FUNCTION(AMQP_Subscribe_DeviceTwin)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_009: [IoTHubTransportAMQP_Unsubscribe_DeviceTwin shall invoke IoTHubTransport_AMQP_Common_Unsubscribe_DeviceTwin()]
 TEST_FUNCTION(AMQP_Unsubscribe_DeviceTwin)
 {
     // arrange
@@ -547,7 +511,6 @@ TEST_FUNCTION(AMQP_Unsubscribe_DeviceTwin)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_021: [IoTHubTransportAMQP_GetTwinAsync shall invoke IoTHubTransport_AMQP_Common_GetTwinAsync()]
 TEST_FUNCTION(AMQP_GetTwinAsync)
 {
     // arrange
@@ -566,7 +529,6 @@ TEST_FUNCTION(AMQP_GetTwinAsync)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_010: [IoTHubTransportAMQP_Subscribe_DeviceMethod shall invoke IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod() and return its result.]
 TEST_FUNCTION(AMQP_Subscribe_DeviceMethod)
 {
     // arrange
@@ -585,7 +547,6 @@ TEST_FUNCTION(AMQP_Subscribe_DeviceMethod)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_011: [IoTHubTransportAMQP_Unsubscribe_DeviceMethod shall invoke IoTHubTransport_AMQP_Common_Unsubscribe_DeviceMethod()]
 TEST_FUNCTION(AMQP_Unsubscribe_DeviceMethod)
 {
     // arrange
@@ -603,7 +564,6 @@ TEST_FUNCTION(AMQP_Unsubscribe_DeviceMethod)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_012: [IoTHubTransportAMQP_Subscribe shall subscribe for D2C messages by calling into the IoTHubTransport_AMQP_Common_Subscribe().]
 TEST_FUNCTION(AMQP_Subscribe)
 {
     // arrange
@@ -622,7 +582,6 @@ TEST_FUNCTION(AMQP_Subscribe)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_013: [IoTHubTransportAMQP_Unsubscribe shall subscribe for D2C messages by calling into the IoTHubTransport_AMQP_Common_Unsubscribe().]
 TEST_FUNCTION(AMQP_Unsubscribe)
 {
     // arrange
@@ -640,7 +599,6 @@ TEST_FUNCTION(AMQP_Unsubscribe)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_014: [IoTHubTransportAMQP_ProcessItem shall invoke IoTHubTransport_AMQP_Common_ProcessItem() and return its result.]
 TEST_FUNCTION(AMQP_ProcessItem)
 {
     // arrange
@@ -659,7 +617,6 @@ TEST_FUNCTION(AMQP_ProcessItem)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_017: [IoTHubTransportAMQP_SetOption shall set the options by calling into the IoTHubTransport_AMQP_Common_SetOption()]
 TEST_FUNCTION(AMQP_SetOption)
 {
     // arrange
@@ -678,7 +635,6 @@ TEST_FUNCTION(AMQP_SetOption)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_016: [IoTHubTransportAMQP_GetSendStatus shall get the send status by calling into the IoTHubTransport_AMQP_Common_GetSendStatus()]
 TEST_FUNCTION(AMQP_GetSendStatus)
 {
     // arrange
@@ -700,7 +656,6 @@ TEST_FUNCTION(AMQP_GetSendStatus)
 }
 
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_018: [IoTHubTransportAMQP_GetHostname shall get the hostname by calling into the IoTHubTransport_AMQP_Common_GetHostname()]
 TEST_FUNCTION(AMQP_GetHostname)
 {
     // arrange
@@ -719,7 +674,6 @@ TEST_FUNCTION(AMQP_GetHostname)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_005: [IoTHubTransportAMQP_Destroy shall destroy the TRANSPORT_LL_HANDLE by calling into the IoTHubTransport_AMQP_Common_Destroy().]
 TEST_FUNCTION(AMQP_Destroy)
 {
     // arrange
@@ -737,7 +691,6 @@ TEST_FUNCTION(AMQP_Destroy)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_10_001: [IoTHubTransportAMQP_SendMessageDisposition shall get the hostname by calling into the IoTHubTransport_AMQP_Common_SendMessageDisposition().]
 TEST_FUNCTION(AMQP_SendMessageDisposition)
 {
     // arrange
@@ -757,7 +710,6 @@ TEST_FUNCTION(AMQP_SendMessageDisposition)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_31_021: [IoTHubTransportAMQP_Subscribe_InputQueue shall return a failure as input queues are not implemented for AMQP]
 TEST_FUNCTION(AMQP_Subscribe_InputQueue)
 {
     // arrange
@@ -774,7 +726,6 @@ TEST_FUNCTION(AMQP_Subscribe_InputQueue)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_31_022: [IotHubTransportAMQP_Unsubscribe_InputQueue shall do nothing as input queues are not implemented for AMQP]
 TEST_FUNCTION(AMQP_Unsubscribe_InputQueue)
 {
     // arrange

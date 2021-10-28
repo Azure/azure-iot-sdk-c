@@ -443,8 +443,6 @@ TEST_FUNCTION(IoTHubTransport_Create_success)
     IoTHubTransport_Destroy(handle);
 }
 
-//Tests_SRS_IOTHUBTRANSPORT_17_009: [ IoTHubTransport_Create shall clean up any resources it creates if the function does not succeed. ]
-//Tests_SRS_IOTHUBTRANSPORT_17_039: [ If the Vector creation fails, IoTHubTransport_Create shall return NULL. ]
 TEST_FUNCTION(IoTHubTransport_Create_fails)
 {
     int negativeTestsInitResult = umock_c_negative_tests_init();

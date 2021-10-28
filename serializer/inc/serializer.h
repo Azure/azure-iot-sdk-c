@@ -74,7 +74,6 @@ extern "C"
      * placed in header files, so that they can be shared between
      * translation units.
      */
-     /* Codes_SRS_SERIALIZER_99_001:[For each completed schema declaration block, a unique storage container for schema metadata shall be available in the translation unit at runtime.] */
 #define BEGIN_NAMESPACE(schemaNamespace) \
     REFLECTED_END_OF_LIST
 
@@ -96,18 +95,13 @@ extern "C"
 * @param name                      Name of the struct
 * @param element1, element2...     Specifies a list of struct members
 */
-/* Codes_SRS_SERIALIZER_99_080:[ The DECLARE_STRUCT declaration shall insert metadata describing a complex data type.] */
 #define DECLARE_STRUCT(name, ...) \
-    /* Codes_SRS_SERIALIZER_99_096:[ DECLARE_STRUCT shall declare a matching C struct data type named name, which can be referenced from any code that can access the declaration.] */ \
     typedef struct name##_TAG { \
         MU_FOR_EACH_2(INSERT_FIELD_INTO_STRUCT, __VA_ARGS__) \
     } name; \
-    /* Codes_SRS_SERIALIZER_99_081:[ DECLARE_STRUCT's name argument shall uniquely identify the struct within the schema.] */ \
     REFLECTED_STRUCT(name) \
-    /* Codes_SRS_SERIALIZER_99_082:[ DECLARE_STRUCT's field<n>Name argument shall uniquely name a field within the struct.] */ \
     MU_FOR_EACH_2_KEEP_1(REFLECTED_FIELD, name, __VA_ARGS__) \
     TO_AGENT_DATA_TYPE(name, __VA_ARGS__) \
-    /*Codes_SRS_SERIALIZER_99_042:[ The parameter types are either predefined parameter types (specs SRS_SERIALIZER_99_004-SRS_SERIALIZER_99_014) or a type introduced by DECLARE_STRUCT.]*/ \
     static AGENT_DATA_TYPES_RESULT FromAGENT_DATA_TYPE_##name(const AGENT_DATA_TYPE* source, name* destination) \
     { \
         AGENT_DATA_TYPES_RESULT result; \
@@ -157,7 +151,6 @@ extern "C"
  *
  */
  /* WITH_DATA's name argument shall be one of the following data types: */
- /* Codes_SRS_SERIALIZER_99_133:[a model type introduced previously by DECLARE_MODEL] */
 
 #define CREATE_DESIRED_PROPERTY_CALLBACK_MODEL_ACTION(...)
 #define CREATE_DESIRED_PROPERTY_CALLBACK_MODEL_METHOD(...)
@@ -236,7 +229,6 @@ extern "C"
  *                                  argument of the action. The type can be any of
  *                                  the primitive types or a struct type.
  */
-/*Codes_SRS_SERIALIZER_99_039:[WITH_ACTION shall declare an action of the current data provider called as the first macro parameter(name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on.]*/
 #define WITH_ACTION(name, ...)  MODEL_ACTION(name, __VA_ARGS__)
 
 
@@ -249,7 +241,6 @@ extern "C"
 *                                  argument of the method. The type can be any of
 *                                  the primitive types or a struct type.
 */
-/*Codes_SRS_SERIALIZER_H_02_029: [ WITH_METHOD shall declare a function with the signature 'METHODRETURN_HANDLE name(param1Type param1Name, ...)', which the developer can define to receive corresponding commands from the IoT service. ]*/
 #define WITH_METHOD(name, ...)  MODEL_METHOD(name, __VA_ARGS__)
 
 
@@ -262,28 +253,18 @@ extern "C"
  * @param   schemaNamespace The namespace to which the model belongs.
  * @param   modelName       The name of the model.
  */
-/* Codes_SRS_SERIALIZER_99_110:[ The GET_MODEL_HANDLE function macro shall first register the schema by calling CodeFirst_RegisterSchema, passing schemaNamespace and a pointer to the metadata generated in the schema declaration block.] */
-/* Codes_SRS_SERIALIZER_99_094:[ GET_MODEL_HANDLE shall then call Schema_GetModelByName, passing the schemaHandle obtained from CodeFirst_RegisterSchema and modelName arguments, to retrieve the SCHEMA_MODEL_TYPE_HANDLE corresponding to the modelName argument.] */
-/* Codes_SRS_SERIALIZER_99_112:[ GET_MODEL_HANDLE will return the handle for the named model.] */
 #define GET_MODEL_HANDLE(schemaNamespace, modelName) \
     Schema_GetModelByName(CodeFirst_RegisterSchema(MU_TOSTRING(schemaNamespace), &ALL_REFLECTED(schemaNamespace)), #modelName)
 
-/* Codes_SRS_SERIALIZER_01_002: [If the argument serializerIncludePropertyPath is specified, its value shall be passed to CodeFirst_Create.] */
 #define CREATE_DEVICE_WITH_INCLUDE_PROPERTY_PATH(schemaNamespace, modelName, serializerIncludePropertyPath) \
     (modelName*)CodeFirst_CreateDevice(GET_MODEL_HANDLE(schemaNamespace, modelName), &ALL_REFLECTED(schemaNamespace), sizeof(modelName), serializerIncludePropertyPath)
 
-/* Codes_SRS_SERIALIZER_01_003: [If the argument serializerIncludePropertyPath is not specified, CREATE_MODEL_INSTANCE shall pass false to CodeFirst_Create.] */
 #define CREATE_DEVICE_WITHOUT_INCLUDE_PROPERTY_PATH(schemaNamespace, modelName) \
     (modelName*)CodeFirst_CreateDevice(GET_MODEL_HANDLE(schemaNamespace, modelName), &ALL_REFLECTED(schemaNamespace), sizeof(modelName), false)
 
-/* Codes_SRS_SERIALIZER_99_104:[ CREATE_MODEL_INSTANCE shall call GET_MODEL_HANDLE, passing schemaNamespace and modelName, to get a model handle representing the model defined in the corresponding schema declaration block.] */
-/* Codes_SRS_SERIALIZER_99_106:[ CREATE_MODEL_INSTANCE shall call CodeFirst_CreateDevice, passing the model handle (SCHEMA_MODEL_TYPE_HANDLE]*/
-/* Codes_SRS_SERIALIZER_99_107:[ If CodeFirst_CreateDevice fails, CREATE_MODEL_INSTANCE shall return NULL.] */
-/* Codes_SRS_SERIALIZER_99_108:[ If CodeFirst_CreateDevice succeeds, CREATE_MODEL_INSTANCE shall return a pointer to an instance of the C struct representing the model for the device.] */
 #define CREATE_MODEL_INSTANCE(schemaNamespace, ...) \
     MU_IF(MU_DIV2(MU_COUNT_ARG(__VA_ARGS__)), CREATE_DEVICE_WITH_INCLUDE_PROPERTY_PATH, CREATE_DEVICE_WITHOUT_INCLUDE_PROPERTY_PATH) (schemaNamespace, __VA_ARGS__)
 
-/* Codes_SRS_SERIALIZER_99_109:[ DESTROY_MODEL_INSTANCE shall call CodeFirst_DestroyDevice, passing the pointer returned from CREATE_MODEL_INSTANCE, to release all resources associated with the device.] */
 #define DESTROY_MODEL_INSTANCE(deviceData) \
     CodeFirst_DestroyDevice(deviceData)
 
@@ -302,9 +283,6 @@ extern "C"
  *                                       will be sent together.
  *
  */
-/*Codes_SRS_SERIALIZER_99_113:[ SERIALIZE shall call CodeFirst_SendAsync, passing a destination, destinationSize, the number of properties to publish, and pointers to the values for each property.] */
-/*Codes_SRS_SERIALIZER_99_117:[ If CodeFirst_SendAsync succeeds, SEND will return IOT_AGENT_OK.] */
-/*Codes_SRS_SERIALIZER_99_114:[ If CodeFirst_SendAsync fails, SEND shall return IOT_AGENT_SERIALIZE_FAILED.] */
 #define SERIALIZE(destination, destinationSize,...) CodeFirst_SendAsync(destination, destinationSize, MU_COUNT_ARG(__VA_ARGS__) MU_FOR_EACH_1(ADDRESS_MACRO, __VA_ARGS__))
 
 #define SERIALIZE_REPORTED_PROPERTIES(destination, destinationSize,...) CodeFirst_SendAsyncReported(destination, destinationSize, MU_COUNT_ARG(__VA_ARGS__) MU_FOR_EACH_1(ADDRESS_MACRO, __VA_ARGS__))
@@ -322,7 +300,6 @@ extern "C"
  * @param   command     Values that match the arguments declared in the model
  *                      action.
  */
-/*Codes_SRS_SERIALIZER_02_018: [EXECUTE_COMMAND macro shall call CodeFirst_ExecuteCommand passing device, commandBuffer and commandBufferSize.]*/
 #define EXECUTE_COMMAND(device, command) (CodeFirst_ExecuteCommand(device, command))
 
 /**
@@ -564,17 +541,13 @@ Actions are discarded, since no marshalling will be done for those when sending 
     EXECUTE_COMMAND_RESULT actionName (modelName* device MU_FOR_EACH_2(DEFINE_FUNCTION_PARAMETER, __VA_ARGS__)); \
     static EXECUTE_COMMAND_RESULT MU_C2(actionName, WRAPPER)(void* device, size_t ParameterCount, const AGENT_DATA_TYPE* values); \
     /*for macro purposes, this array always has at least 1 element*/ \
-    /*Codes_SRS_SERIALIZER_99_043:[ It is valid for a method not to have any parameters.]*/ \
     DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(actionName, 1); \
     static const WRAPPER_ARGUMENT MU_C2(actionName, WRAPPERARGUMENTS)[MU_DIV2(MU_INC(MU_INC(MU_COUNT_ARG(__VA_ARGS__))))] = { MU_FOR_EACH_2_COUNTED(MAKE_WRAPPER_ARGUMENT, __VA_ARGS__) MU_IFCOMMA(MU_INC(MU_INC(MU_COUNT_ARG(__VA_ARGS__)))) {0} }; \
     REFLECTED_ACTION(actionName, MU_DIV2(MU_COUNT_ARG(__VA_ARGS__)), MU_C2(actionName, WRAPPERARGUMENTS), MU_C2(actionName, WRAPPER), modelName) \
-    /*Codes_SRS_SERIALIZER_99_040:[ In addition to declaring the function, DECLARE_IOT_METHOD shall provide a definition for a wrapper that takes as parameters a size_t parameterCount and const AGENT_DATA_TYPE*.] */ \
-    /*Codes_SRS_SERIALIZER_99_041:[ This wrapper shall convert all the arguments to predefined types and then call the function written by the data provider developer.]*/ \
     static EXECUTE_COMMAND_RESULT MU_C2(actionName, WRAPPER)(void* device, size_t ParameterCount, const AGENT_DATA_TYPE* values) \
     { \
         EXECUTE_COMMAND_RESULT result; \
         DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(actionName, 2); \
-        /*Codes_SRS_SERIALIZER_99_045:[ If the number of passed parameters doesn't match the number of declared parameters, wrapper execution shall fail and return DATA_PROVIDER_INVALID_ARG;]*/ \
         if(ParameterCount != MU_DIV2(MU_COUNT_ARG(__VA_ARGS__))) \
         { \
             result = EXECUTE_COMMAND_ERROR; \
@@ -608,17 +581,13 @@ Actions are discarded, since no marshalling will be done for those when sending 
     METHODRETURN_HANDLE methodName (modelName* device MU_FOR_EACH_2(DEFINE_FUNCTION_PARAMETER, __VA_ARGS__)); \
     static METHODRETURN_HANDLE MU_C2(methodName, WRAPPER)(void* device, size_t ParameterCount, const AGENT_DATA_TYPE* values); \
     /*for macro purposes, this array always has at least 1 element*/ \
-    /*Codes_SRS_SERIALIZER_H_02_030: [ It is valid for a method function not to have any parameters. ]*/ \
     DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(methodName, 1); \
     static const WRAPPER_ARGUMENT MU_C2(methodName, WRAPPERARGUMENTS)[MU_DIV2(MU_INC(MU_INC(MU_COUNT_ARG(__VA_ARGS__))))] = { MU_FOR_EACH_2_COUNTED(MAKE_WRAPPER_ARGUMENT, __VA_ARGS__) MU_IFCOMMA(MU_INC(MU_INC(MU_COUNT_ARG(__VA_ARGS__)))) {0} }; \
     REFLECTED_METHOD(methodName, MU_DIV2(MU_COUNT_ARG(__VA_ARGS__)), MU_C2(methodName, WRAPPERARGUMENTS), MU_C2(methodName, WRAPPER), modelName) \
-    /*Codes_SRS_SERIALIZER_H_02_034: [ WITH_METHOD shall result in the declaration of a conversion function with the prototype METHODRETURN_HANDLE nameWRAPPER(size_t ParameterCount, const AGENT_DATA_TYPE* values)' ]*/ \
-    /*Codes_SRS_SERIALIZER_H_02_031: [ The function shall convert the input arguments to the types declared in the method parameter list and then call the user-defined method function. ]*/ \
     static METHODRETURN_HANDLE MU_C2(methodName, WRAPPER)(void* device, size_t ParameterCount, const AGENT_DATA_TYPE* values) \
     { \
         METHODRETURN_HANDLE result; \
         DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(methodName, 2); \
-        /*Codes_SRS_SERIALIZER_H_02_032: [ If the number of arguments passed to the conversion function does not match the expected count, the function shall return DATAPROVIDER_INVALID_ARG. ]*/ \
         if(ParameterCount != MU_DIV2(MU_COUNT_ARG(__VA_ARGS__))) \
         { \
             LogError("expected parameter count (%lu) does not match the actual parameter count (%lu)", (unsigned long)ParameterCount, (unsigned long)MU_COUNT_ARG(__VA_ARGS__)); \
@@ -661,7 +630,7 @@ Actions are discarded, since no marshalling will be done for those when sending 
         { \
             /*the name of the field of the complex type must match the name of the field of the structure (parameter name here)*/ \
             if (strcmp(source->value.edmComplexType.fields[i].fieldName, MU_TOSTRING(name)) == 0) \
-            { /*Codes_SRS_SERIALIZER_99_017:[ These types can either be one of the types mentioned in WITH_DATA or it can be a type introduced by a previous DECLARE_STRUCT.]*/ \
+            { \
                 wasFieldConverted = (MU_C2(FromAGENT_DATA_TYPE_, type)(source->value.edmComplexType.fields[i].value, &(destination->name)) == AGENT_DATA_TYPES_OK); \
                 break; \
             } \
@@ -792,7 +761,6 @@ Actions are discarded, since no marshalling will be done for those when sending 
 #define START_BUILD_LOCAL_PARAMETER(errorWhenItFails, type, name) \
     if (MU_C2(FromAGENT_DATA_TYPE_, type)(&values[iParameter], &MU_C2(name, _local)) != AGENT_DATA_TYPES_OK) \
     { \
-        /*Codes_SRS_SERIALIZER_99_046:[ If the types of the parameters do not match the declared types, DATAPROVIDER_INVALID_ARG shall be returned.]*/ \
         result = errorWhenItFails; \
     }\
     else \
@@ -824,8 +792,6 @@ if two strings separated by a comma will lose the comma (myteriously) then they 
 #define DEFINE_FUNCTION_PARAMETER(type, name) , type name
 #define MAKE_WRAPPER_ARGUMENT(N, type, name) {MU_TOSTRING(type), MU_TOSTRING(name)} MU_IFCOMMA(N)
 
-/*Codes_SRS_SERIALIZER_99_019:[ Create_AGENT_DATA_TYPE_from_DOUBLE]*/
-/*Codes_SRS_SERIALIZER_99_004:[ The propertyType can be any of the following data types: double]*/
 static AGENT_DATA_TYPES_RESULT MU_C2(ToAGENT_DATA_TYPE_, double)(AGENT_DATA_TYPE* dest, double source)
 {
     return Create_AGENT_DATA_TYPE_from_DOUBLE(dest, source);
@@ -856,8 +822,6 @@ static void MU_C2(GlobalDeinitialize_, double)(void* dest)
     (void)(dest);
 }
 
-/*Codes_SRS_SERIALIZER_99_021:[ Create_AGENT_DATA_TYPE_from_FLOAT]*/
-/*Codes_SRS_SERIALIZER_99_006:[ float]*/
 static AGENT_DATA_TYPES_RESULT MU_C2(ToAGENT_DATA_TYPE_, float)(AGENT_DATA_TYPE* dest, float source)
 {
     return Create_AGENT_DATA_TYPE_from_FLOAT(dest, source);
@@ -889,8 +853,6 @@ static void MU_C2(GlobalDeinitialize_, float)(void* dest)
 }
 
 
-/*Codes_SRS_SERIALIZER_99_020:[ Create_AGENT_DATA_TYPE_from_SINT32]*/
-/*Codes_SRS_SERIALIZER_99_005:[ int], */
 static AGENT_DATA_TYPES_RESULT MU_C2(ToAGENT_DATA_TYPE_, int)(AGENT_DATA_TYPE* dest, int source)
 {
     return Create_AGENT_DATA_TYPE_from_SINT32(dest, source);
@@ -921,8 +883,6 @@ static void MU_C2(GlobalDeinitialize_, int)(void* dest)
     (void)(dest);
 }
 
-/*Codes_SRS_SERIALIZER_99_022:[ Create_AGENT_DATA_TYPE_from_SINT64]*/
-/*Codes_SRS_SERIALIZER_99_007:[ long]*/
 static AGENT_DATA_TYPES_RESULT MU_C2(ToAGENT_DATA_TYPE_, long)(AGENT_DATA_TYPE* dest, long source)
 {
     return Create_AGENT_DATA_TYPE_from_SINT64(dest, source);
@@ -954,8 +914,6 @@ static void MU_C2(GlobalDeinitialize_, long)(void* dest)
 }
 
 
-/*Codes_SRS_SERIALIZER_99_023:[ Create_AGENT_DATA_TYPE_from_SINT8]*/
-/*Codes_SRS_SERIALIZER_99_008:[ int8_t]*/
 static AGENT_DATA_TYPES_RESULT MU_C2(ToAGENT_DATA_TYPE_, int8_t)(AGENT_DATA_TYPE* dest, int8_t source)
 {
     return Create_AGENT_DATA_TYPE_from_SINT8(dest, source);
@@ -986,8 +944,6 @@ static void MU_C2(GlobalDeinitialize_, int8_t)(void* dest)
     (void)(dest);
 }
 
-/*Codes_SRS_SERIALIZER_99_024:[ Create_AGENT_DATA_TYPE_from_UINT8]*/
-/*Codes_SRS_SERIALIZER_99_009:[ uint8_t]*/
 static AGENT_DATA_TYPES_RESULT MU_C2(ToAGENT_DATA_TYPE_, uint8_t)(AGENT_DATA_TYPE* dest, uint8_t source)
 {
     return Create_AGENT_DATA_TYPE_from_UINT8(dest, source);
@@ -1019,8 +975,6 @@ static void MU_C2(GlobalDeinitialize_, uint8_t)(void* dest)
 }
 
 
-/*Codes_SRS_SERIALIZER_99_025:[ Create_AGENT_DATA_TYPE_from_SINT16]*/
-/*Codes_SRS_SERIALIZER_99_010:[ int16_t]*/
 static AGENT_DATA_TYPES_RESULT MU_C2(ToAGENT_DATA_TYPE_, int16_t)(AGENT_DATA_TYPE* dest, int16_t source)
 {
     return Create_AGENT_DATA_TYPE_from_SINT16(dest, source);
@@ -1051,8 +1005,6 @@ static void MU_C2(GlobalDeinitialize_, int16_t)(void* dest)
     (void)(dest);
 }
 
-/*Codes_SRS_SERIALIZER_99_026:[ Create_AGENT_DATA_TYPE_from_SINT32]*/
-/*Codes_SRS_SERIALIZER_99_011:[ int32_t]*/
 static AGENT_DATA_TYPES_RESULT MU_C2(ToAGENT_DATA_TYPE_, int32_t)(AGENT_DATA_TYPE* dest, int32_t source)
 {
     return Create_AGENT_DATA_TYPE_from_SINT32(dest, source);
@@ -1083,8 +1035,6 @@ static void MU_C2(GlobalDeinitialize_, int32_t)(void* dest)
     (void)(dest);
 }
 
-/*Codes_SRS_SERIALIZER_99_027:[ Create_AGENT_DATA_TYPE_from_SINT64]*/
-/*Codes_SRS_SERIALIZER_99_012:[ int64_t]*/
 static AGENT_DATA_TYPES_RESULT MU_C2(ToAGENT_DATA_TYPE_, int64_t)(AGENT_DATA_TYPE* dest, int64_t source)
 {
     return Create_AGENT_DATA_TYPE_from_SINT64(dest, source);
@@ -1115,7 +1065,6 @@ static void MU_C2(GlobalDeinitialize_, int64_t)(void* dest)
     (void)(dest);
 }
 
-/*Codes_SRS_SERIALIZER_99_013:[ bool]*/
 static AGENT_DATA_TYPES_RESULT MU_C2(ToAGENT_DATA_TYPE_, bool)(AGENT_DATA_TYPE* dest, bool source)
 {
     return Create_EDM_BOOLEAN_from_int(dest, source == true);
@@ -1146,7 +1095,6 @@ static void MU_C2(GlobalDeinitialize_, bool)(void* dest)
     (void)(dest);
 }
 
-/*Codes_SRS_SERIALIZER_99_014:[ ascii_char_ptr]*/
 static AGENT_DATA_TYPES_RESULT MU_C2(ToAGENT_DATA_TYPE_, ascii_char_ptr)(AGENT_DATA_TYPE* dest, ascii_char_ptr source)
 {
     return Create_AGENT_DATA_TYPE_from_charz(dest, source);
@@ -1240,8 +1188,6 @@ static void MU_C2(GlobalDeinitialize_, ascii_char_ptr_no_quotes)(void* dest)
     }
 }
 
-/*Codes_SRS_SERIALIZER_99_051:[ EDM_DATE_TIME_OFFSET*/
-/*Codes_SRS_SERIALIZER_99_053:[Create_AGENT_DATA_TYPE_from_EDM_DATE_TIME_OFFSET]*/
 static AGENT_DATA_TYPES_RESULT MU_C2(ToAGENT_DATA_TYPE_, EDM_DATE_TIME_OFFSET)(AGENT_DATA_TYPE* dest, EDM_DATE_TIME_OFFSET source)
 {
     return Create_AGENT_DATA_TYPE_from_EDM_DATE_TIME_OFFSET(dest, source);
@@ -1272,8 +1218,6 @@ static void MU_C2(GlobalDeinitialize_, EDM_DATE_TIME_OFFSET)(void* dest)
     (void)(dest);
 }
 
-/*Codes_SRS_SERIALIZER_99_072:[ EDM_GUID]*/
-/*Codes_SRS_SERIALIZER_99_073:[ Create_AGENT_DATA_TYPE_from_EDM_GUID]*/
 static AGENT_DATA_TYPES_RESULT MU_C2(ToAGENT_DATA_TYPE_, EDM_GUID)(AGENT_DATA_TYPE* dest, EDM_GUID guid)
 {
     return Create_AGENT_DATA_TYPE_from_EDM_GUID(dest, guid);
@@ -1305,8 +1249,6 @@ static void MU_C2(GlobalDeinitialize_, EDM_GUID)(void* dest)
 }
 
 
-/*Codes_SRS_SERIALIZER_99_074:[ EDM_BINARY]*/
-/*Codes_SRS_SERIALIZER_99_075:[ Create_AGENT_DATA_TYPE_from_EDM_BINARY]*/
 static AGENT_DATA_TYPES_RESULT MU_C2(ToAGENT_DATA_TYPE_, EDM_BINARY)(AGENT_DATA_TYPE* dest, EDM_BINARY edmBinary)
 {
     return Create_AGENT_DATA_TYPE_from_EDM_BINARY(dest, edmBinary);

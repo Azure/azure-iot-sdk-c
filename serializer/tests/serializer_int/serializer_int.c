@@ -2059,7 +2059,6 @@ BEGIN_TEST_SUITE(serializer_int)
         DESTROY_MODEL_INSTANCE(modelWithData);
     }
 
-    /*Tests_SRS_CODEFIRST_02_036: [ CodeFirst_CreateDevice shall initialize all the desired properties to their default values. ]*/
     TEST_FUNCTION(CodeFirst_CreateDevice_initialize_all_desired_properties_to_default_values)
     {
         ///arrange

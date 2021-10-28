@@ -202,7 +202,6 @@ TEST_SUITE_INITIALIZE(suite_init)
         TEST_BUFFER[index] = (unsigned char)(index + 1);
     }
 
-    /* Tests_SRS_PROV_SASL_TPM_07_021: [ prov_sasltpm_get_interface shall return the SASL_MECHANISM_INTERFACE_DESCRIPTION structure. ] */
     prov_sasl_mechanism_create = prov_sasltpm_get_interface()->concrete_sasl_mechanism_create;
     prov_sasl_mechanism_destroy = prov_sasltpm_get_interface()->concrete_sasl_mechanism_destroy;
     prov_sasl_mechanism_get_init_bytes = prov_sasltpm_get_interface()->concrete_sasl_mechanism_get_init_bytes;
@@ -271,7 +270,6 @@ static void setup_prov_sasl_mechanism_challenge_sastoken_mock(bool last_seq)
     }
 }
 
-/* Tests_SRS_PROV_SASL_TPM_07_002: [ If config is NULL, prov_sasltpm_create shall return NULL. ] */
 TEST_FUNCTION(prov_sasltpm_create_config_NULL_fail)
 {
     //arrange
@@ -287,7 +285,6 @@ TEST_FUNCTION(prov_sasltpm_create_config_NULL_fail)
 
 }
 
-/* Tests_SRS_PROV_SASL_TPM_07_004: [ if SASL_TPM_CONFIG_INFO, challenge_cb, endorsement_key, storage_root_key, or hostname, registration_id is NULL, prov_sasltpm_create shall fail and return NULL. ] */
 TEST_FUNCTION(prov_sasltpm_create_ek_NULL_fail)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;
@@ -313,7 +310,6 @@ TEST_FUNCTION(prov_sasltpm_create_ek_NULL_fail)
     prov_sasl_mechanism_destroy(handle);
 }
 
-/* Tests_SRS_PROV_SASL_TPM_07_004: [ if SASL_TPM_CONFIG_INFO, challenge_cb, endorsement_key, storage_root_key, or hostname, registration_id is NULL, prov_sasltpm_create shall fail and return NULL. ] */
 TEST_FUNCTION(prov_sasltpm_create_challenge_cb_NULL_fail)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;
@@ -337,8 +333,6 @@ TEST_FUNCTION(prov_sasltpm_create_challenge_cb_NULL_fail)
     prov_sasl_mechanism_destroy(handle);
 }
 
-/* Tests_SRS_PROV_SASL_TPM_07_001: [ On success prov_sasltpm_create shall allocate a new instance of the SASL_TPM_INSTANCE. ] */
-/* Tests_SRS_PROV_SASL_TPM_07_029: [ prov_sasltpm_create shall copy the config data where needed. ] */
 TEST_FUNCTION(prov_sasltpm_create_succeed)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;
@@ -363,7 +357,6 @@ TEST_FUNCTION(prov_sasltpm_create_succeed)
     prov_sasl_mechanism_destroy(handle);
 }
 
-/* Tests_SRS_PROV_SASL_TPM_07_003: [ If any error is encountered, prov_sasltpm_create shall return NULL. ] */
 TEST_FUNCTION(prov_sasl_hsm_tpm_create_fail)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;
@@ -402,7 +395,6 @@ TEST_FUNCTION(prov_sasl_hsm_tpm_create_fail)
     umock_c_negative_tests_deinit();
 }
 
-/* Tests_SRS_PROV_SASL_TPM_07_005: [ if handle is NULL, prov_sasltpm_destroy shall do nothing. ] */
 TEST_FUNCTION(prov_sasltpm_destroy_handle_NULL_fail)
 {
     //arrange
@@ -416,8 +408,6 @@ TEST_FUNCTION(prov_sasltpm_destroy_handle_NULL_fail)
     //cleanup
 }
 
-/* Tests_SRS_PROV_SASL_TPM_07_006: [ prov_sasltpm_create shall free the SASL_TPM_INSTANCE instance. ] */
-/* Tests_SRS_PROV_SASL_TPM_07_007: [ prov_sasltpm_create shall free all resources allocated in this module. ] */
 TEST_FUNCTION(prov_sasltpm_destroy_succeed)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;
@@ -453,7 +443,6 @@ TEST_FUNCTION(prov_sasltpm_destroy_succeed)
     //cleanup
 }
 
-/* Tests_SRS_PROV_SASL_TPM_07_008: [ if handle is NULL, prov_sasltpm_get_mechanism_name shall return NULL. ] */
 TEST_FUNCTION(prov_sasltpm_get_mechanism_name_handle_NULL_fail)
 {
     //arrange
@@ -468,7 +457,6 @@ TEST_FUNCTION(prov_sasltpm_get_mechanism_name_handle_NULL_fail)
     //cleanup
 }
 
-/* Tests_SRS_PROV_SASL_TPM_07_009: [ prov_sasltpm_get_mechanism_name shall return the mechanism name TPM. ] */
 TEST_FUNCTION(prov_sasltpm_get_mechanism_name_succeed)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;
@@ -494,7 +482,6 @@ TEST_FUNCTION(prov_sasltpm_get_mechanism_name_succeed)
     prov_sasl_mechanism_destroy(handle);
 }
 
-/* Tests_SRS_PROV_SASL_TPM_07_010: [ If handle or init_bytes are NULL, prov_sasltpm_get_init_bytes shall return NULL. ] */
 TEST_FUNCTION(prov_sasltpm_get_init_bytes_handle_NULL_fail)
 {
     SASL_MECHANISM_BYTES init_bytes;
@@ -513,9 +500,6 @@ TEST_FUNCTION(prov_sasltpm_get_init_bytes_handle_NULL_fail)
     //cleanup
 }
 
-/* Tests_SRS_PROV_SASL_TPM_07_028: [ If the data is less than 470 bytes the control byte shall be set to 0. ] */
-/* Tests_SRS_PROV_SASL_TPM_07_012: [ prov_sasltpm_get_init_bytes shall send the control byte along with the EK value, ctrl byte detailed in Send Data to dps sasltpm ] */
-/* Tests_SRS_PROV_SASL_TPM_07_014: [ On success prov_sasltpm_get_init_bytes shall return a zero value. ] */
 TEST_FUNCTION(prov_sasltpm_get_init_bytes_succeed)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;
@@ -548,10 +532,6 @@ TEST_FUNCTION(prov_sasltpm_get_init_bytes_succeed)
     prov_sasl_mechanism_destroy(handle);
 }
 
-/* Tests_SRS_PROV_SASL_TPM_07_024: [ If the data to be sent is greater than 470 bytes the data will be chunked to the server. ] */
-/* Tests_SRS_PROV_SASL_TPM_07_026: [ If the current bytes are the last chunk in the sequence construct_send_data shall mark the Last seg Sent bit ] */
-/* Tests_SRS_PROV_SASL_TPM_07_025: [ If data is chunked a single control byte will be prepended to the data as described below: ] */
-/* Tests_SRS_PROV_SASL_TPM_07_027: [ The sequence number shall be incremented after every send of chunked bytes. ] */
 TEST_FUNCTION(prov_sasltpm_get_init_bytes_chunk_succeed)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;
@@ -596,7 +576,6 @@ TEST_FUNCTION(prov_sasltpm_get_init_bytes_chunk_succeed)
     prov_sasl_mechanism_destroy(handle);
 }
 
-/* Tests_SRS_PROV_SASL_TPM_07_013: [ If any error is encountered, prov_sasltpm_get_init_bytes shall return a non-zero value. ] */
 TEST_FUNCTION(prov_sasltpm_get_init_bytes_fail)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;
@@ -629,7 +608,6 @@ TEST_FUNCTION(prov_sasltpm_get_init_bytes_fail)
     prov_sasl_mechanism_destroy(handle);
 }
 
-/* Tests_SRS_PROV_SASL_TPM_07_015: [ if handle or resp_bytes are NULL, prov_sasltpm_challenge shall return the X509_SECURITY_INTERFACE structure. ] */
 TEST_FUNCTION(prov_sasl_mechanism_challenge_handle_NULL_succeed)
 {
     SASL_MECHANISM_BYTES challenge_bytes;
@@ -651,8 +629,6 @@ TEST_FUNCTION(prov_sasl_mechanism_challenge_handle_NULL_succeed)
     //cleanup
 }
 
-/* Tests_SRS_PROV_SASL_TPM_07_016: [ If the challenge_bytes->bytes first byte is NULL prov_sasltpm_challenge shall send the SRK data to the server. ] */
-/* Tests_SRS_PROV_SASL_TPM_07_022: [ prov_sasltpm_challenge shall send the control byte along with the SRK value, ctrl byte detailed in Send Data to dps sasl tpm ] */
 TEST_FUNCTION(prov_sasl_mechanism_challenge_srk_succeed)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;
@@ -687,7 +663,6 @@ TEST_FUNCTION(prov_sasl_mechanism_challenge_srk_succeed)
     prov_sasl_mechanism_destroy(handle);
 }
 
-/* Tests_SRS_PROV_SASL_TPM_07_020: [ If any error is encountered prov_sasltpm_challenge shall return a non-zero value. ] */
 TEST_FUNCTION(prov_sasl_mechanism_challenge_srk_fail)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;
@@ -722,8 +697,6 @@ TEST_FUNCTION(prov_sasl_mechanism_challenge_srk_fail)
     prov_sasl_mechanism_destroy(handle);
 }
 
-/* Tests_SRS_PROV_SASL_TPM_07_017: [ prov_sasltpm_challenge accumulates challenge bytes and waits for the last sequence bit to be set. ] */
-/* Tests_SRS_PROV_SASL_TPM_07_019: [ The Sas Token shall be put into the response bytes buffer to be return to the DPS SASL server. ] */
 TEST_FUNCTION(prov_sasl_mechanism_challenge_sastoken_last_seq_succeed)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;
@@ -758,7 +731,6 @@ TEST_FUNCTION(prov_sasl_mechanism_challenge_sastoken_last_seq_succeed)
     prov_sasl_mechanism_destroy(handle);
 }
 
-/* Tests_SRS_PROV_SASL_TPM_07_023: [ If the last sequence bit is not encountered prov_sasltpm_challenge shall return 1 byte to the service. ] */
 TEST_FUNCTION(prov_sasl_mechanism_challenge_sastoken_not_last_seq_succeed)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;
@@ -793,7 +765,6 @@ TEST_FUNCTION(prov_sasl_mechanism_challenge_sastoken_not_last_seq_succeed)
     prov_sasl_mechanism_destroy(handle);
 }
 
-/* Tests_SRS_PROV_SASL_TPM_07_020: [ If any error is encountered prov_sasltpm_challenge shall return a non-zero value. ] */
 TEST_FUNCTION(prov_sasl_mechanism_challenge_sastoken_invalid_seq_succeed)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;
@@ -826,7 +797,6 @@ TEST_FUNCTION(prov_sasl_mechanism_challenge_sastoken_invalid_seq_succeed)
     prov_sasl_mechanism_destroy(handle);
 }
 
-/* Tests_SRS_PROV_SASL_TPM_07_020: [ If any error is encountered prov_sasltpm_challenge shall return a non-zero value. ] */
 TEST_FUNCTION(prov_sasl_mechanism_challenge_sastoken_fail)
 {
     SASL_TPM_CONFIG_INFO sasl_tpm_config;

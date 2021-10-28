@@ -16,7 +16,6 @@ extern "C"
 #include <stddef.h>
 #endif
 
-/*Codes_SRS_DATA_SERIALIZER_07_001: [DataSerializer will have the following interface]*/
 #define DATA_SERIALIZER_RESULT_VALUES           \
 DATA_SERIALIZER_INVALID_ARG,                    \
 DATA_SERIALIZER_ERROR                            \

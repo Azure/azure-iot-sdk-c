@@ -250,7 +250,6 @@ static int should_skip_index(size_t current_index, const size_t skip_array[], si
 
 /* UNIT TESTS BEGIN */
 
-/*Tests_PROV_ATTESTATION_22_001: [ If endorsement_key is NULL, attestationMechanism_createWithTpm shall fail and return NULL ]*/
 TEST_FUNCTION(attestationMechanism_createWithTpm_null_ek)
 {
     //arrange
@@ -265,8 +264,6 @@ TEST_FUNCTION(attestationMechanism_createWithTpm_null_ek)
     //cleanup
 }
 
-/*Tests_PROV_ATTESTATION_22_029: [ If storage_root_key is NULL, attestationMechanism_createWithTpm shall create a TPM attestation without a storage root key ]*/
-/*Tests_PROV_ATTESTATION_22_003: [ Upon successful creation of a new attestation mechanism (using a TPM attestation), attestationMechanism_createWithTpm shall return an ATTESTATION_MECHANISM_HANDLE to access the model ]*/
 TEST_FUNCTION(attestationMechanism_createWithTpm_null_srk)
 {
     //arrange
@@ -286,7 +283,6 @@ TEST_FUNCTION(attestationMechanism_createWithTpm_null_srk)
     attestationMechanism_destroy(att);
 }
 
-/*Tests_PROV_ATTESTATION_22_003: [ Upon successful creation of a new attestation mechanism (using a TPM attestation), attestationMechanism_createWithTpm shall return an ATTESTATION_MECHANISM_HANDLE to access the model ]*/
 TEST_FUNCTION(attestationMechanism_createWithTpm_ek_and_srk)
 {
     //arrange
@@ -306,7 +302,6 @@ TEST_FUNCTION(attestationMechanism_createWithTpm_ek_and_srk)
     attestationMechanism_destroy(att);
 }
 
-/*Tests_PROV_ATTESTATION_22_002: [ If allocating memory for the new attestation mechanism fails, attestationMechanism_createWithTpm shall fail and return NULL ]*/
 TEST_FUNCTION(attestationMechanism_createWithTpm_error)
 {
     //arrange
@@ -345,7 +340,6 @@ TEST_FUNCTION(attestationMechanism_createWithTpm_error)
     umock_c_negative_tests_deinit();
 }
 
-/*Tests_PROV_ATTESTATION_22_004: [ If primary_cert is NULL, attestationMechanism_createWithX509ClientCert shall fail and return NULL ]*/
 TEST_FUNCTION(attestationMechanism_createWithX509ClientCert_null_primary_cert)
 {
     //arrange
@@ -360,8 +354,6 @@ TEST_FUNCTION(attestationMechanism_createWithX509ClientCert_null_primary_cert)
     //cleanup
 }
 
-/*Tests_PROV_ATTESTATION_22_005: [ If secondary_cert is NULL, attestationMechanism_createWithX509ClientCert shall create an X509 attestation without a secondary certificate ]*/
-/*Tests_PROV_ATTESTATION_22_007: [ Upon successful creation of a new attestation mechanism (using an X509 attestation with client certificates), attestationMechanism_createWithX509ClientCert shall return an ATTESTATION_MECHANISM_HANDLE to access the model ]*/
 TEST_FUNCTION(attestationMechanism_createWithX509ClientCert_null_secondary_cert)
 {
     //arrange
@@ -381,7 +373,6 @@ TEST_FUNCTION(attestationMechanism_createWithX509ClientCert_null_secondary_cert)
     attestationMechanism_destroy(att);
 }
 
-/*Tests_PROV_ATTESTATION_22_007: [ Upon successful creation of a new attestation mechanism (using an X509 attestation with client certificates), attestationMechanism_createWithX509ClientCert shall return an ATTESTATION_MECHANISM_HANDLE to access the model ]*/
 TEST_FUNCTION(attestationMechanism_createWithX509ClientCert_both_certs)
 {
     //arrange
@@ -401,7 +392,6 @@ TEST_FUNCTION(attestationMechanism_createWithX509ClientCert_both_certs)
     attestationMechanism_destroy(att);
 }
 
-/*Tests_PROV_ATTESTATION_22_006: [ If allocating memory for the new attestation mechanism fails, attestationMechanism_createWithX509ClientCert shall fail and return NULL ]*/
 TEST_FUNCTION(attestationMechanism_createWithX509ClientCert_error)
 {
     //arrange
@@ -440,7 +430,6 @@ TEST_FUNCTION(attestationMechanism_createWithX509ClientCert_error)
     umock_c_negative_tests_deinit();
 }
 
-/*Tests_PROV_ATTESTATION_22_008: [ If primary_cert is NULL, attestationMechanism_createWithX509SigningCert shall fail and return NULL ]*/
 TEST_FUNCTION(attestationMechanism_createWithX509SigningCert_null_primary_cert)
 {
     //arrange
@@ -455,8 +444,6 @@ TEST_FUNCTION(attestationMechanism_createWithX509SigningCert_null_primary_cert)
     //cleanup
 }
 
-/*Tests_PROV_ATTESTATION_22_009: [ If secondary_cert is NULL,attestationMechanism_createWithX509SigningCert shall create an X509 attestation without a secondary certificate ]*/
-/*Tests_PROV_ATTESTATION_22_011: [ Upon successful creation of a new attestation mechanism (using an X509 attestation with signing certificates), attestationMechanism_createWithX509SigningCert shall return an ATTESTATION_MECHANISM_HANDLE to access the model */
 TEST_FUNCTION(attestationMechanism_createWithX509SigningCert_null_secondary_cert)
 {
     //arrange
@@ -476,7 +463,6 @@ TEST_FUNCTION(attestationMechanism_createWithX509SigningCert_null_secondary_cert
     attestationMechanism_destroy(att);
 }
 
-/*Tests_PROV_ATTESTATION_22_011: [ Upon successful creation of a new attestation mechanism (using an X509 attestation with signing certificates), attestationMechanism_createWithX509SigningCert shall return an ATTESTATION_MECHANISM_HANDLE to access the model */
 TEST_FUNCTION(attestationMechanism_createWithX509SigningCert_both_certs)
 {
     //arrange
@@ -496,7 +482,6 @@ TEST_FUNCTION(attestationMechanism_createWithX509SigningCert_both_certs)
     attestationMechanism_destroy(att);
 }
 
-/*Tests_PROV_ATTESTATION_22_010: [ If allocating memory for the new attestation mechanism fails, attestationMechanism_createWithX509SigningCert shall fail and return NULL ]*/
 TEST_FUNCTION(attestationMechanism_createWithX509SigningCert_error)
 {
     //arrange
@@ -535,7 +520,6 @@ TEST_FUNCTION(attestationMechanism_createWithX509SigningCert_error)
     umock_c_negative_tests_deinit();
 }
 
-/*Tests_PROV_ATTESTATION_22_012: [ If primary_ref is NULL, attestationMechanism_createWithX509CAReference shall fail and return NULL ]*/
 TEST_FUNCTION(attestationMechanism_createWithX509CAReference_null_primary_ref)
 {
     //arrange
@@ -550,8 +534,6 @@ TEST_FUNCTION(attestationMechanism_createWithX509CAReference_null_primary_ref)
     //cleanup
 }
 
-/*Tests_PROV_ATTESTATION_22_013: [ If secondary_ref is NULL, attestationMechanism_createWithX509CAReference shall create an X509 attestation without a secondary CA reference ]*/
-/*Tests_PROV_ATTESTATION_22_015: [ Upon successful creation of a new attestation mechanism (using an X509 attestation with CA references), attestationMechanism_createWithX509CAReference shall return an ATTESTATION_MECHANISM_HANDLE to access the model ]*/
 TEST_FUNCTION(attestationMechanism_createWithX509CAReference_null_secondary_ref)
 {
     //arrange
@@ -571,7 +553,6 @@ TEST_FUNCTION(attestationMechanism_createWithX509CAReference_null_secondary_ref)
     attestationMechanism_destroy(att);
 }
 
-/*Tests_PROV_ATTESTATION_22_015: [ Upon successful creation of a new attestation mechanism (using an X509 attestation with CA references), attestationMechanism_createWithX509CAReference shall return an ATTESTATION_MECHANISM_HANDLE to access the model ]*/
 TEST_FUNCTION(attestationMechanism_createWithX509CAReference_both_refs)
 {
     //arrange
@@ -591,7 +572,6 @@ TEST_FUNCTION(attestationMechanism_createWithX509CAReference_both_refs)
     attestationMechanism_destroy(att);
 }
 
-/*Tests_PROV_ATTESTATION_22_014: [ If allocating memory for the new attestation mechanism fails, attestationMechanism_createWithX509CAReference shall fail and return NULL ]*/
 TEST_FUNCTION(attestationMechanism_createWithX509CAReference_error)
 {
     //arrange
@@ -630,7 +610,6 @@ TEST_FUNCTION(attestationMechanism_createWithX509CAReference_error)
     umock_c_negative_tests_deinit();
 }
 
-/*Tests_PROV_ATTESTATION_22_016: [ attestationMechanism_destory shall free all memory contained in the att_mech handle ]*/
 TEST_FUNCTION(attestationMechanism_destroy_null_handle)
 {
     //arrange
@@ -644,7 +623,6 @@ TEST_FUNCTION(attestationMechanism_destroy_null_handle)
     //cleanup
 }
 
-/*Tests_PROV_ATTESTATION_22_016: [ attestationMechanism_destory shall free all memory contained in the att_mech handle ]*/
 TEST_FUNCTION(attestationMechanism_destroy_tpm)
 {
     //arrange
@@ -663,7 +641,6 @@ TEST_FUNCTION(attestationMechanism_destroy_tpm)
     //cleanup
 }
 
-/*Tests_PROV_ATTESTATION_22_016: [ attestationMechanism_destory shall free all memory contained in the att_mech handle ]*/
 TEST_FUNCTION(attestationMechanism_destroy_x509)
 {
     //arrange
@@ -682,7 +659,6 @@ TEST_FUNCTION(attestationMechanism_destroy_x509)
     //cleanup
 }
 
-/*Tests_PROV_ATTESTATION_22_017: [ attestationMechanism_isValidForIndividualEnrollment shall return true if the given attestation mechanism, att_mech is valid for use with an individual enrollment ]*/
 TEST_FUNCTION(attestationMechanism_isValidForIndividualEnrollment_tpm)
 {
     //arrange
@@ -700,7 +676,6 @@ TEST_FUNCTION(attestationMechanism_isValidForIndividualEnrollment_tpm)
     attestationMechanism_destroy(att);
 }
 
-/*Tests_PROV_ATTESTATION_22_017: [ attestationMechanism_isValidForIndividualEnrollment shall return true if the given attestation mechanism, att_mech is valid for use with an individual enrollment ]*/
 TEST_FUNCTION(attestationMechanism_isValidForIndividualEnrollment_x509_client)
 {
     //arrange
@@ -720,7 +695,6 @@ TEST_FUNCTION(attestationMechanism_isValidForIndividualEnrollment_x509_client)
     attestationMechanism_destroy(att);
 }
 
-/*Tests_PROV_ATTESTATION_22_018: [ attestationMechanism_isValidForIndividualEnrollment shall return false if the given attestation mechanism, att_mech is invalid for use with an individual enrollment ]*/
 TEST_FUNCTION(attestationMechanism_isValidForIndividualEnrollment_x509_signing)
 {
     //arrange
@@ -740,7 +714,6 @@ TEST_FUNCTION(attestationMechanism_isValidForIndividualEnrollment_x509_signing)
     attestationMechanism_destroy(att);
 }
 
-/*Tests_PROV_ATTESTATION_22_018: [ attestationMechanism_isValidForIndividualEnrollment shall return false if the given attestation mechanism, att_mech is invalid for use with an individual enrollment ]*/
 TEST_FUNCTION(attestationMechanism_isValidForIndividualEnrollment_x509_ca)
 {
     //arrange
@@ -760,7 +733,6 @@ TEST_FUNCTION(attestationMechanism_isValidForIndividualEnrollment_x509_ca)
     attestationMechanism_destroy(att);
 }
 
-/*Tests_PROV_ATTESTATION_22_018: [ attestationMechanism_isValidForIndividualEnrollment shall return false if the given attestation mechanism, att_mech is invalid for use with an individual enrollment ]*/
 TEST_FUNCTION(attestationMechanism_isValidForIndividualEnrollment_x509_invalid)
 {
     //arrange
@@ -780,7 +752,6 @@ TEST_FUNCTION(attestationMechanism_isValidForIndividualEnrollment_x509_invalid)
     attestationMechanism_destroy(att);
 }
 
-/*Tests_PROV_ATTESTATION_22_020: [ attestationMechanism_isValidForEnrollmentGroup shall return false if the given attestation mechanism, att_mech is invalid for use with an enrollment group ]*/
 TEST_FUNCTION(attestationMechanism_isValidForEnrollmentGroup_tpm)
 {
     //arrange
@@ -798,7 +769,6 @@ TEST_FUNCTION(attestationMechanism_isValidForEnrollmentGroup_tpm)
     attestationMechanism_destroy(att);
 }
 
-/*Tests_PROV_ATTESTATION_22_020: [ attestationMechanism_isValidForEnrollmentGroup shall return false if the given attestation mechanism, att_mech is invalid for use with an enrollment group ]*/
 TEST_FUNCTION(attestationMechanism_isValidForEnrollmentGroup_x509_client)
 {
     //arrange
@@ -818,7 +788,6 @@ TEST_FUNCTION(attestationMechanism_isValidForEnrollmentGroup_x509_client)
     attestationMechanism_destroy(att);
 }
 
-/*Tests_PROV_ATTESTATION_22_019: [ attestationMechanism_isValidForEnrollmentGroup shall return true if the given attestation mechanism, att_mech is valid for use with an enrollment group ]*/
 TEST_FUNCTION(attestationMechanism_isValidForEnrollmentGroup_x509_signing)
 {
     //arrange
@@ -838,7 +807,6 @@ TEST_FUNCTION(attestationMechanism_isValidForEnrollmentGroup_x509_signing)
     attestationMechanism_destroy(att);
 }
 
-/*Tests_PROV_ATTESTATION_22_020: [ attestationMechanism_isValidForEnrollmentGroup shall return false if the given attestation mechanism, att_mech is invalid for use with an enrollment group ]*/
 TEST_FUNCTION(attestationMechanism_isValidForEnrollmentGroup_x509_ca)
 {
     //arrange
@@ -877,7 +845,6 @@ TEST_FUNCTION(attestationMechanism_isValidForEnrollmentGroup_x509_invalid)
     attestationMechanism_destroy(att);
 }
 
-/*Tests_PROV_ATTESTATION_22_021: [ If att_mech is NULL, attestationMechanism_getType shall return ATTESTATION_TYPE_NONE ]*/
 TEST_FUNCTION(attestationMechanism_getType_null)
 {
     //arrange
@@ -890,7 +857,6 @@ TEST_FUNCTION(attestationMechanism_getType_null)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_PROV_ATTESTATION_22_022: [ Otherwise, attestationMechanism_getType shall return the type of att_mech ]*/
 TEST_FUNCTION(attestationMechanism_getType_tpm)
 {
     //arrange
@@ -908,7 +874,6 @@ TEST_FUNCTION(attestationMechanism_getType_tpm)
     attestationMechanism_destroy(att);
 }
 
-/*Tests_PROV_ATTESTATION_22_022: [ Otherwise, attestationMechanism_getType shall return the type of att_mech ]*/
 TEST_FUNCTION(attestationMechanism_getType_x509)
 {
     //arrange
@@ -926,7 +891,6 @@ TEST_FUNCTION(attestationMechanism_getType_x509)
     attestationMechanism_destroy(att);
 }
 
-/*Tests_PROV_ATTESTATION_22_023: [ If att_mech is NULL, attestationMechanism_getTpmAttestation shall fail and return NULL ]*/
 TEST_FUNCTION(attestationMechanism_getTpmAttestation_null)
 {
     //arrange
@@ -941,7 +905,6 @@ TEST_FUNCTION(attestationMechanism_getTpmAttestation_null)
     //cleanup
 }
 
-/*Tests_PROV_ATTESTATION_22_025: [ Otherwise, attestationMechanism_getTpmAttestation shall return the underlying TPM attestation of att_mech ]*/
 TEST_FUNCTION(attestationMechanism_getTpmAttestation_tpm)
 {
     //arrange
@@ -959,7 +922,6 @@ TEST_FUNCTION(attestationMechanism_getTpmAttestation_tpm)
     attestationMechanism_destroy(att);
 }
 
-/*Tests_PROV_ATTESTATION_22_024: [ If att_mech does not have a TPM attestation, attestationMechanism_getTpmAttestation shall fail and return NULL ]*/
 TEST_FUNCTION(attestationMechanism_getTpmAttestation_x509)
 {
     //arrange
@@ -977,7 +939,6 @@ TEST_FUNCTION(attestationMechanism_getTpmAttestation_x509)
     attestationMechanism_destroy(att);
 }
 
-/*Tests_PROV_ATTESTATION_22_026: [ If att_mech is NULL, attestationMechanism_getX509Attestation shall fail and return NULL ]*/
 TEST_FUNCTION(attestationMechanism_getX509Attestation_null)
 {
     //arrange
@@ -992,7 +953,6 @@ TEST_FUNCTION(attestationMechanism_getX509Attestation_null)
     //cleanup
 }
 
-/*Tests_PROV_ATTESTATION_22_028: [ Otherwise, attestationMechanism_getX509Attestation shall return the underlying X509 attestation of att_mech ]*/
 TEST_FUNCTION(attestationMechanism_getX509Attestation_x509)
 {
     //arrange
@@ -1010,7 +970,6 @@ TEST_FUNCTION(attestationMechanism_getX509Attestation_x509)
     attestationMechanism_destroy(att);
 }
 
-/*Tests_PROV_ATTESTATION_22_027: [ If att_mech does not have an X509 attestation, attestationMechanism_getX509Attestation shall fail and return NULL ]*/
 TEST_FUNCTION(attestationMechanism_getX509Attestation_tpm)
 {
     //arrange

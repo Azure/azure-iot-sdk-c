@@ -125,7 +125,6 @@ IOTHUB_SECURITY_HANDLE iothub_device_auth_create()
 
     if ((result = (IOTHUB_SECURITY_INFO*)malloc(sizeof(IOTHUB_SECURITY_INFO))) == NULL)
     {
-        /* Codes_IOTHUB_DEV_AUTH_07_001: [ if any failure is encountered iothub_device_auth_create shall return NULL. ] */
         LogError("Failed allocating IOTHUB_SECURITY_INFO.");
     }
     else
@@ -144,7 +143,6 @@ IOTHUB_SECURITY_HANDLE iothub_device_auth_create()
                 ((result->hsm_client_sign_data = tpm_interface->hsm_client_sign_with_identity) == NULL)
                 )
             {
-                /* Codes_IOTHUB_DEV_AUTH_07_034: [ if any of the iothub_security_interface function are NULL iothub_device_auth_create shall return NULL. ] */
                 LogError("Invalid secure device interface");
                 free(result);
                 result = NULL;
@@ -165,7 +163,6 @@ IOTHUB_SECURITY_HANDLE iothub_device_auth_create()
                 ((result->hsm_client_get_alias_key = x509_interface->hsm_client_get_key) == NULL)
                 )
             {
-                /* Codes_IOTHUB_DEV_AUTH_07_034: [ if any of the iothub_security_interface function are NULL iothub_device_auth_create shall return NULL. ] */
                 LogError("Invalid handle parameter: DEVICE_AUTH_CREATION_INFO is NULL");
                 free(result);
                 result = NULL;
@@ -224,11 +221,8 @@ IOTHUB_SECURITY_HANDLE iothub_device_auth_create()
         }
         else
         {
-            /* Codes_IOTHUB_DEV_AUTH_07_025: [ iothub_device_auth_create shall call the concrete_iothub_device_auth_create function associated with the interface_desc. ] */
-            /* Codes_IOTHUB_DEV_AUTH_07_026: [ if concrete_iothub_device_auth_create fails iothub_device_auth_create shall return NULL. ] */
             if ((result->hsm_client_handle = result->hsm_client_create()) == NULL)
             {
-                /* Codes_IOTHUB_DEV_AUTH_07_002: [ iothub_device_auth_create shall allocate the IOTHUB_SECURITY_INFO and shall fail if the allocation fails. ]*/
                 LogError("failed create device auth module.");
                 free(result);
                 result = NULL;
@@ -242,21 +236,17 @@ IOTHUB_SECURITY_HANDLE iothub_device_auth_create()
             }
         }
     }
-    /* Codes_IOTHUB_DEV_AUTH_07_003: [ If the function succeeds iothub_device_auth_create shall return a IOTHUB_SECURITY_HANDLE. ] */
     return result;
 }
 
 void iothub_device_auth_destroy(IOTHUB_SECURITY_HANDLE handle)
 {
-    /* Codes_IOTHUB_DEV_AUTH_07_006: [ If the argument handle is NULL, iothub_device_auth_destroy shall do nothing ] */
     if (handle != NULL)
     {
-        /* Codes_IOTHUB_DEV_AUTH_07_005: [ iothub_device_auth_destroy shall call the concrete_iothub_device_auth_destroy function associated with the XDA_INTERFACE_DESCRIPTION. ] */
         free(handle->x509_certificate);
         free(handle->x509_alias_key);
         free(handle->sas_token);
         handle->hsm_client_destroy(handle->hsm_client_handle);
-        /* Codes_IOTHUB_DEV_AUTH_07_004: [ iothub_device_auth_destroy shall free all resources associated with the IOTHUB_SECURITY_HANDLE handle ] */
         free(handle);
     }
 }
@@ -264,7 +254,6 @@ void iothub_device_auth_destroy(IOTHUB_SECURITY_HANDLE handle)
 DEVICE_AUTH_TYPE iothub_device_auth_get_type(IOTHUB_SECURITY_HANDLE handle)
 {
     DEVICE_AUTH_TYPE result;
-    /* Codes_IOTHUB_DEV_AUTH_07_007: [ If the argument handle is NULL, iothub_device_auth_get_auth_type shall return AUTH_TYPE_UNKNOWN. ] */
     if (handle == NULL)
     {
         LogError("Invalid handle specified");
@@ -272,8 +261,6 @@ DEVICE_AUTH_TYPE iothub_device_auth_get_type(IOTHUB_SECURITY_HANDLE handle)
     }
     else
     {
-        /* Codes_IOTHUB_DEV_AUTH_07_008: [ iothub_device_auth_get_auth_type shall call concrete_iothub_device_auth_type function associated with the XDA_INTERFACE_DESCRIPTION. ] */
-        /* Codes_IOTHUB_DEV_AUTH_07_009: [ iothub_device_auth_get_auth_type shall return the DEVICE_AUTH_TYPE returned by the concrete_iothub_device_auth_type function. ] */
         result = handle->cred_type;
     }
     return result;
@@ -282,7 +269,6 @@ DEVICE_AUTH_TYPE iothub_device_auth_get_type(IOTHUB_SECURITY_HANDLE handle)
 CREDENTIAL_RESULT* iothub_device_auth_generate_credentials(IOTHUB_SECURITY_HANDLE handle, const DEVICE_AUTH_CREDENTIAL_INFO* dev_auth_cred)
 {
     CREDENTIAL_RESULT* result;
-    /* Codes_IOTHUB_DEV_AUTH_07_010: [ If the argument handle or dev_auth_cred is NULL, iothub_device_auth_generate_credentials shall return a NULL value. ] */
     if (handle == NULL)
     {
         LogError("Invalid handle parameter: handle");
@@ -333,7 +319,6 @@ CREDENTIAL_RESULT* iothub_device_auth_generate_credentials(IOTHUB_SECURITY_HANDL
                         result = NULL;
                         LogError("Failure constructing hash payload.");
                     }
-                    /* Codes_IOTHUB_DEV_AUTH_07_035: [ For tpm type iothub_device_auth_generate_credentials shall call the concrete_dev_auth_sign_data function to hash the data. ] */
                     else if (sign_sas_data(handle, payload, &data_value, &data_len) == 0)
                     {
                         STRING_HANDLE urlEncodedSignature = NULL;

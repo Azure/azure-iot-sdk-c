@@ -504,7 +504,6 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_002: [ If any failure is encountered prov_auth_create shall return NULL ] */
     TEST_FUNCTION(prov_auth_client_create_tpm_malloc_NULL_fail)
     {
         //arrange
@@ -521,7 +520,6 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         prov_auth_destroy(sec_handle);
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_002: [ If any failure is encountered prov_auth_create shall return NULL ] */
     TEST_FUNCTION(prov_auth_client_create_tpm_interface_NULL_fail)
     {
         //arrange
@@ -541,9 +539,6 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         prov_auth_destroy(sec_handle);
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_001: [ prov_auth_create shall allocate the DPS_SEC_INFO. ] */
-    /* Tests_SRS_DPS_SEC_CLIENT_07_003: [ prov_auth_create shall validate the specified secure enclave interface to ensure. ] */
-    /* Tests_SRS_DPS_SEC_CLIENT_07_004: [ prov_auth_create shall call secure_device_create on the secure enclave interface. ] */
     TEST_FUNCTION(prov_auth_client_create_tpm_succeed)
     {
         //arrange
@@ -563,7 +558,6 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         prov_auth_destroy(sec_handle);
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_002: [ If any failure is encountered prov_auth_create shall return NULL ] */
     TEST_FUNCTION(prov_auth_client_create_x509_interface_NULL_fail)
     {
         //arrange
@@ -583,9 +577,6 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         prov_auth_destroy(sec_handle);
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_001: [ prov_auth_create shall allocate the DPS_SEC_INFO. ] */
-    /* Tests_SRS_DPS_SEC_CLIENT_07_003: [ prov_auth_create shall validate the specified secure enclave interface to ensure. ] */
-    /* Tests_SRS_DPS_SEC_CLIENT_07_004: [ prov_auth_create shall call secure_device_create on the secure enclave interface. ] */
     TEST_FUNCTION(prov_auth_client_create_x509_succeed)
     {
         //arrange
@@ -605,7 +596,6 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         prov_auth_destroy(sec_handle);
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_002: [ If any failure is encountered prov_auth_create shall return NULL ] */
     TEST_FUNCTION(prov_auth_client_create_x509_sec_device_create_NULL_fail)
     {
         //arrange
@@ -624,8 +614,6 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         //cleanup
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_006: [ prov_auth_destroy shall free the PROV_AUTH_HANDLE instance. ] */
-    /* Tests_SRS_DPS_SEC_CLIENT_07_007: [ prov_auth_destroy shall free all resources allocated in this module. ] */
     TEST_FUNCTION(prov_auth_destroy_succeed)
     {
         PROV_AUTH_HANDLE sec_handle = prov_auth_create();
@@ -645,7 +633,6 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         //cleanup
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_005: [ if handle is NULL, prov_auth_destroy shall do nothing. ] */
     TEST_FUNCTION(prov_auth_destroy_handle_NULL_succeed)
     {
         umock_c_reset_all_calls();
@@ -661,7 +648,6 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         //cleanup
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_008: [ if handle is NULL prov_auth_get_type shall return PROV_AUTH_TYPE_UNKNOWN ] */
     TEST_FUNCTION(prov_auth_get_type_handle_NULL_fail)
     {
         //arrange
@@ -676,7 +662,6 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         //cleanup
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_009: [ prov_auth_get_type shall return the PROV_AUTH_TYPE of the underlying secure enclave. ] */
     TEST_FUNCTION(prov_auth_get_type_succeed)
     {
         PROV_AUTH_HANDLE sec_handle = prov_auth_create();
@@ -695,7 +680,6 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         prov_auth_destroy(sec_handle);
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_009: [ prov_auth_get_type shall return the PROV_AUTH_TYPE of the underlying secure enclave. ] */
     TEST_FUNCTION(prov_auth_get_type_x509_succeed)
     {
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
@@ -717,7 +701,6 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         prov_auth_destroy(sec_handle);
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_010: [ if handle is NULL prov_auth_get_registration_id shall return NULL. ] */
     TEST_FUNCTION(prov_auth_get_registration_id_handle_NULL_fail)
     {
         //arrange
@@ -732,7 +715,6 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         //cleanup
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_012: [ If a failure is encountered, prov_auth_get_registration_id shall return NULL. ] */
     TEST_FUNCTION(prov_auth_get_registration_id_tpm_fail)
     {
         PROV_AUTH_HANDLE sec_handle = prov_auth_create();
@@ -768,7 +750,6 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_013: [ Upon success prov_auth_get_registration_id shall return the registration id of the secure enclave. ] */
     TEST_FUNCTION(prov_auth_get_registration_id_tpm_succeed)
     {
         PROV_AUTH_HANDLE sec_handle = prov_auth_create();
@@ -790,7 +771,6 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         prov_auth_destroy(sec_handle);
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_012: [ If a failure is encountered, prov_auth_get_registration_id shall return NULL. ] */
     TEST_FUNCTION(prov_auth_get_registration_id_x509_fail)
     {
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
@@ -828,7 +808,6 @@ BEGIN_TEST_SUITE(prov_auth_client_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /* Tests_SRS_DPS_SEC_CLIENT_07_013: [ Upon success prov_auth_get_registration_id shall return the registration id of the secure enclave. ] */
     TEST_FUNCTION(prov_auth_get_registration_id_x509_succeed)
     {
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));

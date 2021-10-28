@@ -37,7 +37,6 @@ DEFINE_MICROMOCK_ENUM_TO_STRING(JSON_DECODER_RESULT, JSON_DECODER_RESULT_VALUES)
 
 DEFINE_MICROMOCK_ENUM_TO_STRING(AGENT_DATA_TYPE_TYPE, AGENT_DATA_TYPE_TYPE_VALUES);
 
-/*Tests_SRS_AGENT_TYPE_SYSTEM_99_001:[AGENT_TYPE_SYSTEM shall have the following interface]*/
 /*if the file compiles, than the interface is tested that it exists*/
 
 const static MULTITREE_HANDLE MULTITREE_HANDLE_VALID = (MULTITREE_HANDLE)0x44;
@@ -3573,7 +3572,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             }
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the Create_... functions shall check their parameters for validity. When an invalid parameter is detected, a code of AGENT_DATA_TYPES_INVALID_ARG shall be returned ]*/
         TEST_FUNCTION(Create_EDM_BOOLEAN_from_int_with_NULL_agentData_fails)
         {
             ///arrange
@@ -3585,7 +3583,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the Create_... functions shall check their parameters for validity. When an invalid parameter is detected, a code of AGENT_DATA_TYPES_INVALID_ARG shall be returned ]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_UINT8_with_NULL_agentData_fails)
         {
             ///arrange
@@ -3597,7 +3594,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the Create_... functions shall check their parameters for validity. When an invalid parameter is detected, a code of AGENT_DATA_TYPES_INVALID_ARG shall be returned ]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_EDM_DATE_TIME_OFFSET_with_NULL_agentData_fails)
         {
             ///arrange
@@ -3610,7 +3606,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the Create_... functions shall check their parameters for validity. When an invalid parameter is detected, a code of AGENT_DATA_TYPES_INVALID_ARG shall be returned ]*/
         TEST_FUNCTION(Create_EDM_DECIMAL_from_SINT64_UINT64_with_NULL_agentData_fails)
         {
             ///arrange
@@ -3622,7 +3617,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the Create_... functions shall check their parameters for validity. When an invalid parameter is detected, a code of AGENT_DATA_TYPES_INVALID_ARG shall be returned ]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_SINT16_with_NULL_agentData_fails)
         {
             ///arrange
@@ -3634,7 +3628,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the Create_... functions shall check their parameters for validity. When an invalid parameter is detected, a code of AGENT_DATA_TYPES_INVALID_ARG shall be returned ]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_SINT32_with_NULL_agentData_fails)
         {
             ///arrange
@@ -3646,7 +3639,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the Create_... functions shall check their parameters for validity. When an invalid parameter is detected, a code of AGENT_DATA_TYPES_INVALID_ARG shall be returned ]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_SINT64_with_NULL_agentData_fails)
         {
             ///arrange
@@ -3659,7 +3651,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
         }
 
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the Create_... functions shall check their parameters for validity. When an invalid parameter is detected, a code of AGENT_DATA_TYPES_INVALID_ARG shall be returned ]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_SINT8_with_NULL_agentData_fails)
         {
             ///arrange
@@ -3671,7 +3662,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the Create_... functions shall check their parameters for validity. When an invalid parameter is detected, a code of AGENT_DATA_TYPES_INVALID_ARG shall be returned ]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_FLOAT_with_NULL_agentData_fails)
         {
             ///arrange
@@ -3683,7 +3673,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the Create_... functions shall check their parameters for validity. When an invalid parameter is detected, a code of AGENT_DATA_TYPES_INVALID_ARG shall be returned ]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_charz_with_NULL_agentData_fails)
         {
             ///arrange
@@ -3695,7 +3684,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the Create_... functions shall check their parameters for validity. When an invalid parameter is detected, a code of AGENT_DATA_TYPES_INVALID_ARG shall be returned ]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_charz_with_NULL_value_fails)
         {
             ///arrange
@@ -3707,7 +3695,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the Create_... functions shall check their parameters for validity. When an invalid parameter is detected, a code of AGENT_DATA_TYPES_INVALID_ARG shall be returned ]*/
         TEST_FUNCTION(Destroy_AGENT_DATA_TYPE_with_already_destoyed_Data_fails)
         {
             ///arrange
@@ -3722,7 +3709,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ///no crashes, no exception, no runtime errors... 
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_015:[If destination parameter is NULL, AgentDataTypes_ToString shall return AGENT_DATA_TYPES_INVALID_ARG.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_with_NULL_destination_fails)
         {
             ///arrange
@@ -3734,7 +3720,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
         
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_053:[If value is NULL or has been destroyed or otherwise doesn't contain valid data, AGENT_DATA_TYPES_INVALID_ARG shall be returned.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_with_NULL_value_fails)
         {
             ///arrange
@@ -3749,7 +3734,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             STRING_delete(destination);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_053:[If value is NULL or has been destroyed or otherwise doesn't contain valid data, AGENT_DATA_TYPES_INVALID_ARG shall be returned.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_with_destroyed_value_fails)
         {
             ///arrange
@@ -3768,7 +3752,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             STRING_delete(destination);
         }
         
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_031:[ Creates a AGENT_DATA_TYPE representing an EDM_BOOLEAN.]*/
         TEST_FUNCTION(Create_EDM_BOOLEAN_from_int_succeeds_1)
         {
             ///arrange
@@ -3784,7 +3767,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_031:[ Creates a AGENT_DATA_TYPE representing an EDM_BOOLEAN.]*/
         TEST_FUNCTION(Create_EDM_BOOLEAN_from_int_succeeds_2)
         {
             ///arrange
@@ -3800,8 +3782,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_029:[If v 0 then the AGENT_DATA_TYPE shall have the value "false" Boolean.]*/
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_017:[ EDM_BOOLEAN: as in (odata-abnf-construction-rules, 2013), booleanValue = "true" / "false"]*/
         TEST_FUNCTION(AgentDataTypes_ToString_for_BOOLEAN_succeeds_with_false)
         {
             ///arrange
@@ -3911,8 +3891,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
 
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_030:[ If v is different than 0 then the AGENT_DATA_TYPE shall have the value "true".]*/
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_017:[ EDM_BOOLEAN: as in (odata-abnf-construction-rules, 2013), booleanValue = "true" / "false"]*/
         TEST_FUNCTION(AgentDataTypes_ToString_for_BOOLEAN__succeeds_with_true)
         {
             ///arrange
@@ -3930,7 +3908,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_016:[ When the value cannot be converted to a string AgentDataTypes_ToString shall return AGENT_DATA_TYPES_ERROR.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_for_BOOLEAN_fails_when_strcpy_s_fails_1)
         {
             ///arrange
@@ -3952,7 +3929,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_016:[ When the value cannot be converted to a string AgentDataTypes_ToString shall return AGENT_DATA_TYPES_ERROR.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_for_BOOLEAN_fails_when_strcpy_s_fails_2)
         {
             ///arrange
@@ -3973,7 +3949,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_033:[ Creates an AGENT_DATA_TYPE from a uint8_t.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_UINT8_with_0_succeeds)
         {
             ///arrange
@@ -3989,7 +3964,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_033:[ Creates an AGENT_DATA_TYPE from a uint8_t.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_UINT8_with_255_succeeds)
         {
             ///arrange
@@ -4005,7 +3979,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_018:[ EDM_BYTE: as in (odata-abnf-construction-rules, 2013), byteValue  = 1*3DIGIT ; numbers in the range from 0 to 255]*/
         TEST_FUNCTION(AgentDataTypes_ToString_with_UINT8_succeeds_0)
         {
             ///arrange
@@ -4023,7 +3996,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_018:[ EDM_BYTE: as in (odata-abnf-construction-rules, 2013), byteValue  = 1*3DIGIT ; numbers in the range from 0 to 255]*/
         TEST_FUNCTION(AgentDataTypes_ToString_with_UINT8_succeeds_255)
         {
             ///arrange
@@ -4041,7 +4013,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_018:[ EDM_BYTE: as in (odata-abnf-construction-rules, 2013), byteValue  = 1*3DIGIT ; numbers in the range from 0 to 255]*/
         TEST_FUNCTION(AgentDataTypes_ToString_with_UINT8_unsufficient_buffer_fails)
         {
             ///arrange
@@ -4061,7 +4032,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_018:[ EDM_BYTE: as in (odata-abnf-construction-rules, 2013), byteValue  = 1*3DIGIT ; numbers in the range from 0 to 255]*/
         TEST_FUNCTION(AgentDataTypes_ToString_with_UINT8_barely_sufficient_buffer_succeeds)
         {
             ///arrange
@@ -4079,7 +4049,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_034:[ Creates an AGENT_DATA_TYPE containing an EDM_DATE_TIME_OFFSET from a time_t.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_EDM_DATE_TIME_OFFSET_succeeds)
         {
             AGENT_DATA_TYPE ag;
@@ -4106,7 +4075,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_019:[EDM_DATE_TIME_OFFSET:dateTimeOffsetValue = year "-" month "-" day "T" hour ":" minute[":" second["." fractionalSeconds]]("Z" / sign hour ":" minute)]*/
         TEST_FUNCTION(AgentDataTypes_ToString_for_EDM_DATE_TIME_OFFSET_with_insufficient_buffer_fails)
         {
             ///arrange
@@ -4139,7 +4107,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_019:[EDM_DATE_TIME_OFFSET:dateTimeOffsetValue = year "-" month "-" day "T" hour ":" minute[":" second["." fractionalSeconds]]("Z" / sign hour ":" minute)]*/
         TEST_FUNCTION(AgentDataTypes_ToString_for_EDM_DATE_TIME_OFFSET_fails_when_sprintf_s_fails)
         {
             ///arrange
@@ -4173,7 +4140,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
         }
 
 #ifndef NO_FLOATS
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_041:[ Creates an AGENT_DATA_TYPE containing an EDM_DOUBLE from double]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_DOUBLE_succeeds_1)
         {
             ///arrange
@@ -4189,7 +4155,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_041:[ Creates an AGENT_DATA_TYPE containing an EDM_DOUBLE from double]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_DOUBLE_succeeds_2)
         {
             ///arrange
@@ -4205,7 +4170,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_042:[Values of NaN, -INF, +INF are accepted]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_NaN_succeeds_1)
         {
             ///arrange
@@ -4221,7 +4185,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_042:[Values of NaN, -INF, +INF are accepted]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_NaN_succeeds_2)
         {
             ///arrange
@@ -4237,7 +4200,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_042:[Values of NaN, -INF, +INF are accepted]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_plusInf_succeeds)
         {
             ///arrange
@@ -4253,7 +4215,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_042:[Values of NaN, -INF, +INF are accepted]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_minusInf_succeeds)
         {
             ///arrange
@@ -4269,7 +4230,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_022:[ EDM_DOUBLE: doubleValue = decimalValue [ "e" [SIGN] 1*DIGIT ] / nanInfinity ; IEEE 754 binary64 floating-point number (15-17 decimal digits). The representation shall use DBL_DIG C #define*/
         TEST_FUNCTION(AgentDataTypes_ToString_DOUBLE_with_SignallingNan_succeeds)
         {
             ///arrange
@@ -4282,7 +4242,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(char_ptr, "NaN", STRING_c_str(global_bufferTemp));
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_022:[ EDM_DOUBLE: doubleValue = decimalValue [ "e" [SIGN] 1*DIGIT ] / nanInfinity ; IEEE 754 binary64 floating-point number (15-17 decimal digits). The representation shall use DBL_DIG C #define*/
         TEST_FUNCTION(AgentDataTypes_ToString_DOUBLE_with_SignallingNan_insuficient_buffer_fails)
         {
             ///arrange
@@ -4295,7 +4254,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_ERROR, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_022:[ EDM_DOUBLE: doubleValue = decimalValue [ "e" [SIGN] 1*DIGIT ] / nanInfinity ; IEEE 754 binary64 floating-point number (15-17 decimal digits). The representation shall use DBL_DIG C #define*/
         TEST_FUNCTION(AgentDataTypes_ToString_DOUBLE_with_QuietNan_succeeds)
         {
             ///arrange
@@ -4308,7 +4266,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(char_ptr, "NaN", STRING_c_str(global_bufferTemp));
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_022:[ EDM_DOUBLE: doubleValue = decimalValue [ "e" [SIGN] 1*DIGIT ] / nanInfinity ; IEEE 754 binary64 floating-point number (15-17 decimal digits). The representation shall use DBL_DIG C #define*/
         TEST_FUNCTION(AgentDataTypes_ToString_DOUBLE_with_QuietNan_insuficient_buffer_fails)
         {
             ///arrange
@@ -4321,7 +4278,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_ERROR, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_022:[ EDM_DOUBLE: doubleValue = decimalValue [ "e" [SIGN] 1*DIGIT ] / nanInfinity ; IEEE 754 binary64 floating-point number (15-17 decimal digits). The representation shall use DBL_DIG C #define*/
         TEST_FUNCTION(AgentDataTypes_ToString_DOUBLE_with_minusInf_succeeds)
         {
             ///arrange
@@ -4334,7 +4290,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(char_ptr, "-INF", STRING_c_str(global_bufferTemp));
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_022:[ EDM_DOUBLE: doubleValue = decimalValue [ "e" [SIGN] 1*DIGIT ] / nanInfinity ; IEEE 754 binary64 floating-point number (15-17 decimal digits). The representation shall use DBL_DIG C #define*/
         TEST_FUNCTION(AgentDataTypes_ToString_DOUBLE_with_minusInf_insuficient_buffer_fails)
         {
             ///arrange
@@ -4348,7 +4303,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_ERROR, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_022:[ EDM_DOUBLE: doubleValue = decimalValue [ "e" [SIGN] 1*DIGIT ] / nanInfinity ; IEEE 754 binary64 floating-point number (15-17 decimal digits). The representation shall use DBL_DIG C #define*/
         TEST_FUNCTION(AgentDataTypes_ToString_DOUBLE_with_plusInf_succeeds)
         {
             ///arrange
@@ -4361,7 +4315,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(char_ptr, "INF", STRING_c_str(global_bufferTemp));
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_022:[ EDM_DOUBLE: doubleValue = decimalValue [ "e" [SIGN] 1*DIGIT ] / nanInfinity ; IEEE 754 binary64 floating-point number (15-17 decimal digits). The representation shall use DBL_DIG C #define*/
         TEST_FUNCTION(AgentDataTypes_ToString_DOUBLE_with_plusInf_insuficient_buffer_fails)
         {
             ///arrange
@@ -4374,7 +4327,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_ERROR, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_022:[ EDM_DOUBLE: doubleValue = decimalValue [ "e" [SIGN] 1*DIGIT ] / nanInfinity ; IEEE 754 binary64 floating-point number (15-17 decimal digits). The representation shall use DBL_DIG C #define*/
         TEST_FUNCTION(AgentDataTypes_ToString_DOUBLE_succeeds_1)
         {
             ///arrange
@@ -4387,7 +4339,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(double, TEST_DOUBLE_1, atof(STRING_c_str(global_bufferTemp)));
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_022:[ EDM_DOUBLE: doubleValue = decimalValue [ "e" [SIGN] 1*DIGIT ] / nanInfinity ; IEEE 754 binary64 floating-point number (15-17 decimal digits). The representation shall use DBL_DIG C #define*/
         TEST_FUNCTION(AgentDataTypes_ToString_DOUBLE_succeeds_2)
         {
             ///arrange
@@ -4400,7 +4351,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(double, TEST_DOUBLE_2, atof(STRING_c_str(global_bufferTemp)));
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_047:[ Creates an AGENT_DATA_TYPE containing an EDM_SINGLE from float]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_FLOAT_succeeds_1)
         {
             ///arrange
@@ -4416,7 +4366,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_047:[ Creates an AGENT_DATA_TYPE containing an EDM_SINGLE from float]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_FLOAT_succeeds_2)
         {
             ///arrange
@@ -4432,7 +4381,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_048:[ Value of NaN, +Inf, -Inf are accepted.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_FLOAT_NaN_succeeds_1)
         {
             ///arrange
@@ -4448,7 +4396,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_048:[ Value of NaN, +Inf, -Inf are accepted.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_FLOAT_NaN_succeeds_2)
         {
             ///arrange
@@ -4464,7 +4411,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_048:[ Value of NaN, +Inf, -Inf are accepted.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_FLOAT_plusInf_succeeds)
         {
             ///arrange
@@ -4480,7 +4426,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_048:[ Value of NaN, +Inf, -Inf are accepted.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_FLOAT_minusInf_succeeds)
         {
             ///arrange
@@ -4496,7 +4441,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_027:[ EDM_SINGLE: singleValue = doubleValue ; IEEE 754 binary32 floating-point number (6-9 decimal digits). The representatiuon shall use FLT_DIG.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_FLOAT_with_SignallingNan_succeeds)
         {
             ///arrange
@@ -4509,7 +4453,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(char_ptr, "NaN", STRING_c_str(global_bufferTemp));
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_027:[ EDM_SINGLE: singleValue = doubleValue ; IEEE 754 binary32 floating-point number (6-9 decimal digits). The representatiuon shall use FLT_DIG.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_FLOAT_with_SignallingNan_insuficient_buffer_fails)
         {
             ///arrange
@@ -4523,7 +4466,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_ERROR, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_027:[ EDM_SINGLE: singleValue = doubleValue ; IEEE 754 binary32 floating-point number (6-9 decimal digits). The representatiuon shall use FLT_DIG.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_FLOAT_with_QuietNan_succeeds)
         {
             ///arrange
@@ -4536,7 +4478,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(char_ptr, "NaN", STRING_c_str(global_bufferTemp));
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_027:[ EDM_SINGLE: singleValue = doubleValue ; IEEE 754 binary32 floating-point number (6-9 decimal digits). The representatiuon shall use FLT_DIG.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_FLOAT_with_QuietNan_insuficient_buffer_fails)
         {
             ///arrange
@@ -4551,7 +4492,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
 
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_027:[ EDM_SINGLE: singleValue = doubleValue ; IEEE 754 binary32 floating-point number (6-9 decimal digits). The representatiuon shall use FLT_DIG.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_FLOAT_with_minusInf_succeeds)
         {
             ///arrange
@@ -4564,7 +4504,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(char_ptr, "-INF", STRING_c_str(global_bufferTemp));
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_027:[ EDM_SINGLE: singleValue = doubleValue ; IEEE 754 binary32 floating-point number (6-9 decimal digits). The representatiuon shall use FLT_DIG.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_FLOAT_with_minusInf_insuficient_buffer_fails)
         {
             ///arrange
@@ -4580,7 +4519,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
 
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_027:[ EDM_SINGLE: singleValue = doubleValue ; IEEE 754 binary32 floating-point number (6-9 decimal digits). The representatiuon shall use FLT_DIG.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_FLOAT_with_plusInf_succeeds)
         {
             ///arrange
@@ -4593,7 +4531,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(char_ptr, "INF", STRING_c_str(global_bufferTemp));
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_027:[ EDM_SINGLE: singleValue = doubleValue ; IEEE 754 binary32 floating-point number (6-9 decimal digits). The representatiuon shall use FLT_DIG.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_FLOAT_with_plusInf_insuficient_buffer_fails)
         {
             ///arrange
@@ -4607,7 +4544,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_ERROR, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_027:[ EDM_SINGLE: singleValue = doubleValue ; IEEE 754 binary32 floating-point number (6-9 decimal digits). The representatiuon shall use FLT_DIG.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_FLOAT_succeeds_1)
         {
             ///arrange
@@ -4621,7 +4557,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
 
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_027:[ EDM_SINGLE: singleValue = doubleValue ; IEEE 754 binary32 floating-point number (6-9 decimal digits). The representatiuon shall use FLT_DIG.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_FLOAT_succeeds_2)
         {
             ///arrange
@@ -4636,7 +4571,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
         }
 #endif
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_043:[ Creates an AGENT_DATA_TYPE containing an EDM_INT16 from int16_t]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_SINT16_succeeds)
         {
             ///arrange
@@ -4652,7 +4586,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_043:[Creates an AGENT_DATA_TYPE containing an EDM_INT16 from int16_t] */
         TEST_FUNCTION(AgentDataTypes_ToString_INT16_succeeds_1)
         {
             ///arrange
@@ -4670,7 +4603,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_023:[ EDM_INT16: int16Value = [ sign ] 1*5DIGIT  ; numbers in the range from -32768 to 32767]*/
         TEST_FUNCTION(AgentDataTypes_ToString_INT16_succeeds_2)
         {
             ///arrange
@@ -4688,7 +4620,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_023:[ EDM_INT16: int16Value = [ sign ] 1*5DIGIT  ; numbers in the range from -32768 to 32767]*/
         TEST_FUNCTION(AgentDataTypes_ToString_INT16_succeeds_3)
         {
             ///arrange
@@ -4708,7 +4639,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
 
         /* Create_AGENT_DATA_TYPE_from_charz */
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_049:[ Creates an AGENT_DATA_TYPE containing an EDM_STRING from an ASCII zero terminated string.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_charz_fails_with_NULL_string)
         {
             ///arrange
@@ -4721,7 +4651,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_049:[ Creates an AGENT_DATA_TYPE containing an EDM_STRING from an ASCII zero terminated string.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_charz_suceeds)
         {
             ///arrange
@@ -4737,7 +4666,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_049:[ Creates an AGENT_DATA_TYPE containing an EDM_STRING from an ASCII zero terminated string.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_charz_suceeds_1)
         {
             ///arrange
@@ -4753,7 +4681,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_049:[ Creates an AGENT_DATA_TYPE containing an EDM_STRING from an ASCII zero terminated string.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_charz_suceeds_2)
         {
             ///arrange
@@ -4769,7 +4696,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_049:[ Creates an AGENT_DATA_TYPE containing an EDM_STRING from an ASCII zero terminated string.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_charz_suceeds_3)
         {
             ///arrange
@@ -4785,7 +4711,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_049:[ Creates an AGENT_DATA_TYPE containing an EDM_STRING from an ASCII zero terminated string.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_charz_With_One_Slash_Succeeds)
         {
             ///arrange
@@ -4801,7 +4726,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_049:[ Creates an AGENT_DATA_TYPE containing an EDM_STRING from an ASCII zero terminated string.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_charz_With_2_Slashes_Succeeds)
         {
             ///arrange
@@ -4819,7 +4743,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
 
         /* Create_AGENT_DATA_TYPE_from_charz_no_quotes */
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_01_001: [Creates an AGENT_DATA_TYPE containing an EDM_STRING from an ASCII zero terminated string.] */
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_charz_no_quotes_with_NULL_agent_data_type_fails)
         {
             ///arrange
@@ -4831,7 +4754,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_01_001: [Creates an AGENT_DATA_TYPE containing an EDM_STRING from an ASCII zero terminated string.] */
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_charz_no_quotes_with_NULL_value_fails)
         {
             ///arrange
@@ -4844,9 +4766,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_01_001: [Creates an AGENT_DATA_TYPE containing an EDM_STRING from an ASCII zero terminated string.] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_01_003: [EDM_STRING_no_quotes: the string is copied as given when the AGENT_DATA_TYPE was created.] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_01_002: [When serialized, this type is not enclosed with quotes.] */
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_charz_no_quotes_with_an_empty_string_succeeds)
         {
             ///arrange
@@ -4864,9 +4783,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_01_001: [Creates an AGENT_DATA_TYPE containing an EDM_STRING from an ASCII zero terminated string.] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_01_003: [EDM_STRING_no_quotes: the string is copied as given when the AGENT_DATA_TYPE was created.] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_01_002: [When serialized, this type is not enclosed with quotes.] */
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_charz_no_quotes_with_one_char_string_succeeds)
         {
             ///arrange
@@ -4884,9 +4800,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_01_001: [Creates an AGENT_DATA_TYPE containing an EDM_STRING from an ASCII zero terminated string.] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_01_003: [EDM_STRING_no_quotes: the string is copied as given when the AGENT_DATA_TYPE was created.] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_01_002: [When serialized, this type is not enclosed with quotes.] */
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_charz_no_quotes_with_a_longer_string_with_quotes_in_it_et_all_succeeds)
         {
             ///arrange
@@ -4904,7 +4817,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_028:[ EDM_STRING: string           = SQUOTE *( SQUOTE-in-string / pchar-no-SQUOTE ) SQUOTE]*/
         TEST_FUNCTION(AgentDataTypes_ToString_with_charz_succeeds_1)
         {
             ///arrange
@@ -4922,7 +4834,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_028:[ EDM_STRING: string           = SQUOTE *( SQUOTE-in-string / pchar-no-SQUOTE ) SQUOTE]*/
         TEST_FUNCTION(AgentDataTypes_ToString_with_charz_succeeds_2)
         {
             ///arrange
@@ -4940,7 +4851,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_028:[ EDM_STRING: string           = SQUOTE *( SQUOTE-in-string / pchar-no-SQUOTE ) SQUOTE]*/
         TEST_FUNCTION(AgentDataTypes_ToString_with_charz_succeeds_3)
         {
             ///arrange
@@ -4974,7 +4884,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_044:[ Creates an AGENT_DATA_TYPE containing an EDM_INT32 from int32_t]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_SINT32_succeeds_2)
         {
             ///arrange
@@ -4990,7 +4899,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_044:[ Creates an AGENT_DATA_TYPE containing an EDM_INT32 from int32_t]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_SINT32_succeeds_3)
         {
             ///arrange
@@ -5006,7 +4914,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_024:[ EDM_INT32: int32Value = [ sign ] 1*10DIGIT ; numbers in the range from -2147483648 to 2147483647]*/
         TEST_FUNCTION(AgentDataTypes_ToString_SINT32_succeeds_1)
         {
             ///arrange
@@ -5024,7 +4931,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_024:[ EDM_INT32: int32Value = [ sign ] 1*10DIGIT ; numbers in the range from -2147483648 to 2147483647]*/
         TEST_FUNCTION(AgentDataTypes_ToString_SINT32_succeeds_2)
         {
             ///arrange
@@ -5042,7 +4948,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_024:[ EDM_INT32: int32Value = [ sign ] 1*10DIGIT ; numbers in the range from -2147483648 to 2147483647]*/
         TEST_FUNCTION(AgentDataTypes_ToString_SINT32_succeeds_3)
         {
             ///arrange
@@ -5060,7 +4965,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_045:[ Creates an AGENT_DATA_TYPE containing an EDM_INT64 from int64_t]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_SINT64_succeeds_1)
         {
             ///arrange
@@ -5076,7 +4980,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_045:[ Creates an AGENT_DATA_TYPE containing an EDM_INT64 from int64_t]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_SINT64_succeeds_2)
         {
             ///arrange
@@ -5092,7 +4995,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_045:[ Creates an AGENT_DATA_TYPE containing an EDM_INT64 from int64_t]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_SINT64_succeeds_3)
         {
             ///arrange
@@ -5108,7 +5010,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_025:[EDM_INT64:int64Value = [sign] 1 * 19DIGIT; numbers in the range from - 9223372036854775808 to 9223372036854775807]*/
         TEST_FUNCTION(AgentDataTypes_ToString_SINT64_succeeds_1)
         {
             ///arrange
@@ -5126,7 +5027,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_025:[EDM_INT64:int64Value = [sign] 1 * 19DIGIT; numbers in the range from - 9223372036854775808 to 9223372036854775807]*/
         TEST_FUNCTION(AgentDataTypes_ToString_SINT64_succeeds_2)
         {
             ///arrange
@@ -5144,7 +5044,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_046:[ Creates an AGENT_DATA_TYPE containing an EDM_SBYTE from int8_t]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_SINT8_succeeds_1)
         {
             ///arrange
@@ -5160,7 +5059,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_046:[ Creates an AGENT_DATA_TYPE containing an EDM_SBYTE from int8_t]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_SINT8_succeeds_2)
         {
             ///arrange
@@ -5176,7 +5074,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_046:[ Creates an AGENT_DATA_TYPE containing an EDM_SBYTE from int8_t]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_SINT8_succeeds_3)
         {
             ///arrange
@@ -5192,7 +5089,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_046:[ Creates an AGENT_DATA_TYPE containing an EDM_SBYTE from int8_t]*/
         TEST_FUNCTION(AgentDataTypes_ToString_from_SINT8_succeeds_1)
         {
             ///arrange
@@ -5210,7 +5106,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_026:[ EDM_SBYTE: sbyteValue = [ sign ] 1*3DIGIT  ; numbers in the range from -128 to 127]*/
         TEST_FUNCTION(AgentDataTypes_ToString_from_SINT8_succeeds_2)
         {
             ///arrange
@@ -5228,7 +5123,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the functions shall check their parameters for validity. When an invalid parameter is detected, the value AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_Members_with_NULL_agentData_fails)
         {
             ///arrange
@@ -5245,7 +5139,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_055:[If typeName is NULL, the function shall return AGENT_DATA_TYPES_INVALID_ARG .]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_Members_with_NULL_typename_fails)
         {
             ///arrange
@@ -5263,7 +5156,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_056:[ If nMembers is 0, the function shall return AGENT_DATA_TYPES_INVALID_ARG .]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_Members_with_0_nMembers_fails)
         {
             ///arrange
@@ -5281,7 +5173,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_057:[ If memberNames is NULL, the function shall return AGENT_DATA_TYPES_INVALID_ARG .]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_Members_with_NULL_memberNames_fails)
         {
             ///arrange
@@ -5299,7 +5190,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_058:[ If any of the memberNames[i] is NULL, the function shall return AGENT_DATA_TYPES_INVALID_ARG .]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_Members_with_first_memberName_NULL_fails)
         {
             ///arrange
@@ -5318,7 +5208,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_058:[ If any of the memberNames[i] is NULL, the function shall return AGENT_DATA_TYPES_INVALID_ARG .]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_Members_with_second_memberName_NULL_fails)
         {
             ///arrange
@@ -5337,7 +5226,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_059:[ If memberValues is NULL, the function shall return AGENT_DATA_TYPES_INVALID_ARG .]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_Members_with_memberValues_NULL_fails)
         {
             ///arrange
@@ -5355,7 +5243,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_063:[If there are two memberNames with the same name, then the function shall return  AGENT_DATA_TYPES_INVALID_ARG.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_Members_with_two_memberValues_equals_fails)
         {
             ///arrange
@@ -5376,7 +5263,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
 
         /* Create_AGENT_DATA_TYPE_from_MemberPointers */
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_109:[ AGENT_DATA_TYPES_INVALID_ARG shall be returned if memberPointerValues parameter is NULL.] */
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_MemberPointers_with_NULL_memberPointerValues_Fails)
         {
             ///arrange
@@ -5391,7 +5277,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_111:[ AGENT_DATA_TYPES_OK shall be returned upon success.] */
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_MemberPointers_with_valid_parameters_Succeeds)
         {
             ///arrange
@@ -5417,7 +5302,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_050:[ Destroy_AGENT_DATA_TYPE shall deallocate all allocated resources used to represent the type.]*/
         TEST_FUNCTION(Destroy_AGENT_DATA_TYPE_for_ComplexType_suceeds)
         {
             ///arrange
@@ -5439,7 +5323,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
         }
 
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_062:[ If the AGENT_DATA_TYPE represents a "complex type", then the JSON marshaller shall produce the following JSON value [...]*/
         TEST_FUNCTION(AgentDataTypes_ToString_for_ComplexType_suceeds)
         {
             ///arrange
@@ -5482,7 +5365,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_016:[ When the value cannot be converted to a string AgentDataTypes_ToString shall return AGENT_DATA_TYPES_ERROR.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_for_ComplexType_fails_when_MultiTree_Create_fails)
         {
             ///arrange
@@ -5510,7 +5392,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_016:[ When the value cannot be converted to a string AgentDataTypes_ToString shall return AGENT_DATA_TYPES_ERROR.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_for_ComplexType_fails_when_MultiTree_Add_Leaf_fails_1)
         {
             ///arrange
@@ -5545,7 +5426,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_016:[ When the value cannot be converted to a string AgentDataTypes_ToString shall return AGENT_DATA_TYPES_ERROR.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_for_ComplexType_fails_when_MultiTree_Add_Leaf_fails_2)
         {
             ///arrange
@@ -5585,7 +5465,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
 
 
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_016:[ When the value cannot be converted to a string AgentDataTypes_ToString shall return AGENT_DATA_TYPES_ERROR.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_for_ComplexType_fails_when_JSON_Encoder_fails)
         {
             ///arrange
@@ -5629,7 +5508,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_016:[ When the value cannot be converted to a string AgentDataTypes_ToString shall return AGENT_DATA_TYPES_ERROR.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_for_ComplexType_fails_when_MultiTree_create_failss)
         {
             ///arrange
@@ -5647,7 +5525,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_ERROR, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_016:[ When the value cannot be converted to a string AgentDataTypes_ToString shall return AGENT_DATA_TYPES_ERROR.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_for_ComplexType_fails_when_MultiTree_AddLeaf_fails_1)
         {
             ///arrange
@@ -5674,7 +5551,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_ERROR, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_016:[ When the value cannot be converted to a string AgentDataTypes_ToString shall return AGENT_DATA_TYPES_ERROR.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_for_ComplexType_fails_when_MultiTree_AddLeaf_fails_2)
         {
             ///arrange
@@ -5710,7 +5586,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_ERROR, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_016:[ When the value cannot be converted to a string AgentDataTypes_ToString shall return AGENT_DATA_TYPES_ERROR.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_for_ComplexType_fails_when_MultiTree_AddLeaf_fails_3)
         {
             ///arrange
@@ -5747,7 +5622,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_ERROR, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_016:[ When the value cannot be converted to a string AgentDataTypes_ToString shall return AGENT_DATA_TYPES_ERROR.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_for_ComplexType_fails_when_MultiTree_AddLeaf_fails_4)
         {
             ///arrange
@@ -5784,7 +5658,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_ERROR, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_016:[ When the value cannot be converted to a string AgentDataTypes_ToString shall return AGENT_DATA_TYPES_ERROR.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_for_ComplexType_fails_when_MultiTree_AddLeaf_fails_5)
         {
             ///arrange
@@ -5820,7 +5693,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_ERROR, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_016:[ When the value cannot be converted to a string AgentDataTypes_ToString shall return AGENT_DATA_TYPES_ERROR.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_for_ComplexType_fails_when_JSONEncoder_EncodeTree_fails)
         {
             ///arrange
@@ -5860,7 +5732,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
 
         /* Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE */
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_064:[If any argument is NULL Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE shall return AGENT_DATA_TYPES_INVALID_ARG.] */
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_From_AGENT_DATA_TYPE_With_NULL_Source_Fails)
         {
             ///arrange
@@ -5873,7 +5744,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_064:[If any argument is NULL Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE shall return AGENT_DATA_TYPES_INVALID_ARG.] */
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_From_AGENT_DATA_TYPE_With_NULL_Destination_Fails)
         {
             ///arrange
@@ -5886,8 +5756,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_065:[Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE shall clone the value of an existing agent data.] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_066:[On success Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE shall return AGENT_DATA_TYPE_OK.] */
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_From_AGENT_DATA_TYPE_With_Boolean_Succeeds)
         {
             ///arrange
@@ -5909,8 +5777,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&dst);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_065:[Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE shall clone the value of an existing agent data.] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_066:[On success Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE shall return AGENT_DATA_TYPE_OK.] */
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_From_AGENT_DATA_TYPE_With_SInt8_Succeeds)
         {
             ///arrange
@@ -5932,8 +5798,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&dst);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_065:[Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE shall clone the value of an existing agent data.] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_066:[On success Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE shall return AGENT_DATA_TYPE_OK.] */
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_From_AGENT_DATA_TYPE_With_UInt8_Succeeds)
         {
             ///arrange
@@ -5955,8 +5819,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&dst);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_065:[Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE shall clone the value of an existing agent data.] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_066:[On success Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE shall return AGENT_DATA_TYPE_OK.] */
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_From_AGENT_DATA_TYPE_With_SInt16_Succeeds)
         {
             ///arrange
@@ -5978,8 +5840,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&dst);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_065:[Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE shall clone the value of an existing agent data.] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_066:[On success Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE shall return AGENT_DATA_TYPE_OK.] */
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_From_AGENT_DATA_TYPE_With_Int32_Succeeds)
         {
             ///arrange
@@ -6001,8 +5861,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&dst);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_065:[Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE shall clone the value of an existing agent data.] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_066:[On success Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE shall return AGENT_DATA_TYPE_OK.] */
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_From_AGENT_DATA_TYPE_With_Int64_Succeeds)
         {
             ///arrange
@@ -6024,8 +5882,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&dst);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_065:[Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE shall clone the value of an existing agent data.] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_066:[On success Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE shall return AGENT_DATA_TYPE_OK.] */
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_From_AGENT_DATA_TYPE_With_charz_Succeeds)
         {
             ///arrange
@@ -6047,8 +5903,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&dst);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_065:[Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE shall clone the value of an existing agent data.] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_066:[On success Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE shall return AGENT_DATA_TYPE_OK.] */
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_From_AGENT_DATA_TYPE_With_DOUBLE_Succeeds)
         {
             ///arrange
@@ -6070,8 +5924,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&dst);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_065:[Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE shall clone the value of an existing agent data.] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_066:[On success Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE shall return AGENT_DATA_TYPE_OK.] */
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_From_AGENT_DATA_TYPE_With_Single_Succeeds)
         {
             ///arrange
@@ -6094,8 +5946,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
         }
 
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_065:[Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE shall clone the value of an existing agent data.] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_066:[On success Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE shall return AGENT_DATA_TYPE_OK.] */
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_From_AGENT_DATA_TYPE_With_DateTimeOffset_Succeeds)
         {
             ///arrange
@@ -6139,8 +5989,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&dst);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_065:[Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE shall clone the value of an existing agent data.] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_066:[On success Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE shall return AGENT_DATA_TYPE_OK.] */
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_From_AGENT_DATA_TYPE_With_ComplexType_One_Member_Succeeds)
         {
             ///arrange
@@ -6173,8 +6021,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&dst);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_065:[Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE shall clone the value of an existing agent data.] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_066:[On success Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE shall return AGENT_DATA_TYPE_OK.] */
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_From_AGENT_DATA_TYPE_With_ComplexType_2_Members_Succeeds)
         {
             ///arrange
@@ -6212,7 +6058,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&srcMember[1]);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_039:[ Creates an AGENT_DATA_TYPE containing an EDM_DECIMAL from a null-terminated string.]*/ /*this and the next few hundred lines of code*/
         TEST_FUNCTION(Create_EDM_DECIMAL_From_NULL_string_fails)
         {
             ///arrange
@@ -6298,7 +6143,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
 
         */
 
-        /*Codes_SRS_AGENT_TYPE_SYSTEM_99_067:[ If the string indicated by the parameter v does not match exactly an ODATA string representation, AGENT_DATA_TYPES_INVALID_ARG shall be returned.]*/
         TEST_FUNCTION(Create_EDM_DECIMAL_From_n_succeeds)
         {
             ///arrange
@@ -8285,7 +8129,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
         }
 
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the functions shall check their parameters for validity. When an invalid parameter is detected, the value AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_NULL_agentData_fails)
         {
             ///arrange
@@ -8297,7 +8140,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_070:[ If year-month-date does not indicate a valid day (for example 31 Feb 2013), then AGENT_DATA_TYPES_INVALID_ARG shall be returned.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_0_day_fails)
         {
             ///arrange
@@ -8310,7 +8152,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_070:[ If year-month-date does not indicate a valid day (for example 31 Feb 2013), then AGENT_DATA_TYPES_INVALID_ARG shall be returned.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_13_month_fails)
         {
             ///arrange
@@ -8323,7 +8164,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_070:[ If year-month-date does not indicate a valid day (for example 31 Feb 2013), then AGENT_DATA_TYPES_INVALID_ARG shall be returned.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_32_day_for_January_fails)
         {
             ///arrange
@@ -8336,7 +8176,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_069:[ Creates an AGENT_DATA_TYPE containing an EDM_DATE from a year, a month and a day of the month.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_31_day_for_January_succeeds)
         {
             ///arrange
@@ -8352,7 +8191,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the functions shall check their parameters for validity. When an invalid parameter is detected, the value AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_29_day_for_February_non_leap_year_fails)
         {
             ///arrange
@@ -8365,7 +8203,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_069:[ Creates an AGENT_DATA_TYPE containing an EDM_DATE from a year, a month and a day of the month.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_28_day_for_February_non_leap_year_succeeds)
         {
             ///arrange
@@ -8381,7 +8218,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the functions shall check their parameters for validity. When an invalid parameter is detected, the value AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_30_day_for_February_leap_year_fails)
         {
             ///arrange
@@ -8394,7 +8230,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_069:[ Creates an AGENT_DATA_TYPE containing an EDM_DATE from a year, a month and a day of the month.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_29_day_for_February_leap_year_succeeds)
         {
             ///arrange
@@ -8410,7 +8245,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the functions shall check their parameters for validity. When an invalid parameter is detected, the value AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_29_day_for_February_leap_non_year_fails_2)
         {
             ///arrange
@@ -8423,7 +8257,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_069:[ Creates an AGENT_DATA_TYPE containing an EDM_DATE from a year, a month and a day of the month.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_28_day_for_February_non_leap_year_succeeds_2)
         {
             ///arrange
@@ -8439,7 +8272,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the functions shall check their parameters for validity. When an invalid parameter is detected, the value AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_30_day_for_February_leap_year_fails_3)
         {
             ///arrange
@@ -8452,7 +8284,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_069:[ Creates an AGENT_DATA_TYPE containing an EDM_DATE from a year, a month and a day of the month.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_28_day_for_February_leap_year_succeeds_3)
         {
             ///arrange
@@ -8468,7 +8299,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the functions shall check their parameters for validity. When an invalid parameter is detected, the value AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_32_day_for_March_fails)
         {
             ///arrange
@@ -8481,7 +8311,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_069:[ Creates an AGENT_DATA_TYPE containing an EDM_DATE from a year, a month and a day of the month.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_31_day_for_March_succeeds)
         {
             ///arrange
@@ -8497,7 +8326,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the functions shall check their parameters for validity. When an invalid parameter is detected, the value AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_31_day_for_April_fails)
         {
             ///arrange
@@ -8510,7 +8338,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_069:[ Creates an AGENT_DATA_TYPE containing an EDM_DATE from a year, a month and a day of the month.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_31_day_for_April_succeeds)
         {
             ///arrange
@@ -8526,7 +8353,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the functions shall check their parameters for validity. When an invalid parameter is detected, the value AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_32_day_for_May_fails)
         {
             ///arrange
@@ -8539,7 +8365,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_069:[ Creates an AGENT_DATA_TYPE containing an EDM_DATE from a year, a month and a day of the month.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_31_day_for_May_succeeds)
         {
             ///arrange
@@ -8555,7 +8380,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the functions shall check their parameters for validity. When an invalid parameter is detected, the value AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_31_day_for_June_fails)
         {
             ///arrange
@@ -8568,7 +8392,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_069:[ Creates an AGENT_DATA_TYPE containing an EDM_DATE from a year, a month and a day of the month.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_30_day_for_June_succeeds)
         {
             ///arrange
@@ -8584,7 +8407,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the functions shall check their parameters for validity. When an invalid parameter is detected, the value AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_32_day_for_July_fails)
         {
             ///arrange
@@ -8597,7 +8419,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_069:[ Creates an AGENT_DATA_TYPE containing an EDM_DATE from a year, a month and a day of the month.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_31_day_for_July_succeeds)
         {
             ///arrange
@@ -8613,7 +8434,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the functions shall check their parameters for validity. When an invalid parameter is detected, the value AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_32_day_for_August_fails)
         {
             ///arrange
@@ -8626,7 +8446,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_069:[ Creates an AGENT_DATA_TYPE containing an EDM_DATE from a year, a month and a day of the month.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_31_day_for_August_succeeds)
         {
             ///arrange
@@ -8642,7 +8461,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the functions shall check their parameters for validity. When an invalid parameter is detected, the value AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_31_day_for_September_fails)
         {
             ///arrange
@@ -8655,7 +8473,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_069:[ Creates an AGENT_DATA_TYPE containing an EDM_DATE from a year, a month and a day of the month.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_30_day_for_September_succeeds)
         {
             ///arrange
@@ -8671,7 +8488,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the functions shall check their parameters for validity. When an invalid parameter is detected, the value AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_32_day_for_October_fails)
         {
             ///arrange
@@ -8684,7 +8500,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_069:[ Creates an AGENT_DATA_TYPE containing an EDM_DATE from a year, a month and a day of the month.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_31_day_for_October_succeeds)
         {
             ///arrange
@@ -8700,7 +8515,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the functions shall check their parameters for validity. When an invalid parameter is detected, the value AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_31_day_for_November_fails)
         {
             ///arrange
@@ -8713,7 +8527,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_069:[ Creates an AGENT_DATA_TYPE containing an EDM_DATE from a year, a month and a day of the month.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_30_day_for_November_succeeds)
         {
             ///arrange
@@ -8729,7 +8542,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the functions shall check their parameters for validity. When an invalid parameter is detected, the value AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_32_day_for_December_fails)
         {
             ///arrange
@@ -8742,7 +8554,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_069:[ Creates an AGENT_DATA_TYPE containing an EDM_DATE from a year, a month and a day of the month.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_31_day_for_December_succeeds)
         {
             ///arrange
@@ -8758,7 +8569,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the functions shall check their parameters for validity. When an invalid parameter is detected, the value AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
         /*must fail because ODATA-ABNF has only 4 digits for the year*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_year_minus_10000_fails)
         {
@@ -8772,7 +8582,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the functions shall check their parameters for validity. When an invalid parameter is detected, the value AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
         /*must fail because ODATA-ABNF has only 4 digits for the year*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_date_with_year_10000_fails)
         {
@@ -8786,7 +8595,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, res);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_052:[ Destroy_AGENT_DATA_TYPE return AGENT_DATA_TYPE_OK when the request to destroy the agent data has been successful, in all the other cases returns a code different than AGENT_DATA_TYPE_OK.]*/
         TEST_FUNCTION(Destroy_AGENT_DATA_TYPE_from_date_succeeds)
         {
             ///arrange
@@ -8800,7 +8608,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ///no exceptions, no runtimeerrors.
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_068:[ EDM_DATE: dateValue = year "-" month "-" day.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_EDM_DATE_with_2014_11_12_succeeds)
         {
             ///arrange
@@ -8818,7 +8625,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_068:[ EDM_DATE: dateValue = year "-" month "-" day.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_EDM_DATE_with_2014_02_09_succeeds)
         {
             ///arrange
@@ -8836,7 +8642,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_068:[ EDM_DATE: dateValue = year "-" month "-" day.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_EDM_DATE_with_4_02_09_succeeds)
         {
             ///arrange
@@ -8854,7 +8659,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_068:[ EDM_DATE: dateValue = year "-" month "-" day.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_EDM_DATE_with_minus_4_02_09_succeeds)
         {
             ///arrange
@@ -8872,7 +8676,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_068:[ EDM_DATE: dateValue = year "-" month "-" day.]*/
         TEST_FUNCTION(AgentDataTypes_ToString_EDM_DATE_with_minus_3200_02_09_succeeds)
         {
             ///arrange
@@ -8893,10 +8696,7 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
         /* CreateAgentDataType_From_String */
 
         /* The following 2 requirements are tested by the virtue of all the tests below */
-        /* Codes_SRS_AGENT_TYPE_SYSTEM_99_071:[ CreateAgentDataType_From_String shall create an AGENT_DATA_TYPE from a char* representation of the type indicated by type parameter.] */
-        /* Codes_SRS_AGENT_TYPE_SYSTEM_99_072:[ The implementation for the transformation of the char* source into AGENT_DATA_TYPE shall be type specific.] */
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_073:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is NULL.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_With_NULL_source_Argument_Fails)
         {
             // arrange
@@ -8909,7 +8709,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_074:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if agentData is NULL.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_With_NULL_agentData_Argument_Fails)
         {
             // arrange
@@ -8922,7 +8721,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_075:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_NOT_IMPLEMENTED if type is not a supported type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_With_EDM_No_Type_Type_Fails)
         {
             // arrange
@@ -8936,7 +8734,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_NOT_IMPLEMENTED, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_086:[ EDM_STRING] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_STRING_1_char_long_Succeeds)
         {
             // arrange
@@ -8956,7 +8753,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_086:[ EDM_STRING] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_STRING_Empty_String_Succeeds)
         {
             // arrange
@@ -8975,8 +8771,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_086:[ EDM_STRING] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_STRING_1_Char_Long_No_Quotes_Fails)
         {
             // arrange
@@ -8990,8 +8784,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_086:[ EDM_STRING] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_STRING_With_Only_Starting_Quote_Fails)
         {
             // arrange
@@ -9005,8 +8797,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_086:[ EDM_STRING] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_STRING_With_Only_Starting_Quote_And_Another_Char_Fails)
         {
             // arrange
@@ -9020,8 +8810,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_086:[ EDM_STRING] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_STRING_Without_Endind_Quote_Fails)
         {
             // arrange
@@ -9035,7 +8823,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_01_004: [EDM_STRING_NO_QUOTES] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_STRING_NO_QUOTES_Empty_String_Succeeds)
         {
             // arrange
@@ -9055,7 +8842,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_01_004: [EDM_STRING_NO_QUOTES] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_STRING_NO_QUOTES_1_char_string_Succeeds)
         {
             // arrange
@@ -9075,7 +8861,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_01_004: [EDM_STRING_NO_QUOTES] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_STRING_NO_QUOTES_longer_string__with_quotes_and_brances_Succeeds)
         {
             // arrange
@@ -9095,7 +8880,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_076:[ EDM_BOOLEAN_TYPE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_Boolean_true_Succeeds)
         {
             // arrange
@@ -9114,7 +8898,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_076:[ EDM_BOOLEAN_TYPE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_Boolean_false_Succeeds)
         {
             // arrange
@@ -9133,8 +8916,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_076:[ EDM_BOOLEAN_TYPE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_Boolean_SomeOtherValue_Fails)
         {
             // arrange
@@ -9148,8 +8929,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_084:[ EDM_SBYTE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_SBYTE_Empty_String_Fails)
         {
             // arrange
@@ -9163,8 +8942,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_084:[ EDM_SBYTE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_SBYTE_Some_Bad_Text_Fails)
         {
             // arrange
@@ -9178,7 +8955,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_084:[ EDM_SBYTE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_SBYTE_Minus_128_Succeeds)
         {
             // arrange
@@ -9197,7 +8973,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_084:[ EDM_SBYTE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_SBYTE_127_Succeeds)
         {
             // arrange
@@ -9216,8 +8991,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_084:[ EDM_SBYTE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_SBYTE_Minus_129_Fails)
         {
             // arrange
@@ -9231,8 +9004,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_084:[ EDM_SBYTE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_SBYTE_128_Fails)
         {
             // arrange
@@ -9246,7 +9017,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_084:[ EDM_SBYTE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_SBYTE_Plus_127_Succeeds)
         {
             // arrange
@@ -9265,8 +9035,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_077:[ EDM_BYTE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_BYTE_Empty_String_Fails)
         {
             // arrange
@@ -9280,8 +9048,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_077:[ EDM_BYTE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_BYTE_Some_Bad_Text_Fails)
         {
             // arrange
@@ -9295,7 +9061,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_077:[ EDM_BYTE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_BYTE_Zero_Succeeds)
         {
             // arrange
@@ -9314,7 +9079,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_077:[ EDM_BYTE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_BYTE_255_Succeeds)
         {
             // arrange
@@ -9333,8 +9097,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_077:[ EDM_BYTE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_BYTE_Minus_1_Fails)
         {
             // arrange
@@ -9348,8 +9110,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_077:[ EDM_BYTE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_BYTE_256_Fails)
         {
             // arrange
@@ -9363,7 +9123,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_077:[ EDM_BYTE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_BYTE_Plus_255_Succeeds)
         {
             // arrange
@@ -9382,8 +9141,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_081:[ EDM_INT16] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_INT16_Empty_String_Fails)
         {
             // arrange
@@ -9397,8 +9154,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_081:[ EDM_INT16] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_INT16_Some_Bad_Text_Fails)
         {
             // arrange
@@ -9412,7 +9167,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_081:[ EDM_INT16] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_INT16_Minus_32768_Succeeds)
         {
             // arrange
@@ -9431,7 +9185,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_081:[ EDM_INT16] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_INT16_32767_Succeeds)
         {
             // arrange
@@ -9450,8 +9203,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_081:[ EDM_INT16] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_INT16_Minus_32769_Fails)
         {
             // arrange
@@ -9465,8 +9216,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_081:[ EDM_INT16] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_INT16_32768_Fails)
         {
             // arrange
@@ -9480,7 +9229,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_081:[ EDM_INT16] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_INT16_Plus_32767_Succeeds)
         {
             // arrange
@@ -9499,8 +9247,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_082:[ EDM_INT32] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_INT32_Empty_String_Fails)
         {
             // arrange
@@ -9514,8 +9260,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_082:[ EDM_INT32] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_INT32_Some_Bad_Text_Fails)
         {
             // arrange
@@ -9529,7 +9273,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_082:[ EDM_INT32] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_INT32_Minus_2147483648_Succeeds)
         {
             // arrange
@@ -9548,7 +9291,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_082:[ EDM_INT32] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_INT32_2147483647_Succeeds)
         {
             // arrange
@@ -9567,8 +9309,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_082:[ EDM_INT32] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_INT32_Minus_2147483649_Fails)
         {
             // arrange
@@ -9582,8 +9322,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_082:[ EDM_INT32] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_INT32_2147483648_Fails)
         {
             // arrange
@@ -9597,7 +9335,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_082:[ EDM_INT32] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_INT32_Plus_2147483647_Succeeds)
         {
             // arrange
@@ -9616,8 +9353,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_083:[ EDM_INT64] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_INT64_Empty_String_Fails)
         {
             // arrange
@@ -9631,8 +9366,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_083:[ EDM_INT64] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_INT64_Some_Bad_Text_Fails)
         {
             // arrange
@@ -9646,7 +9379,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_083:[ EDM_INT64] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_INT64_Minus_9223372036854775808_Succeeds)
         {
             // arrange
@@ -9665,7 +9397,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_083:[ EDM_INT64] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_INT64_9223372036854775807_Succeeds)
         {
             // arrange
@@ -9684,7 +9415,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_083:[ EDM_INT64] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_INT64_Minus_9223372036854775809_Fails)
         {
             // arrange
@@ -9698,7 +9428,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_083:[ EDM_INT64] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_INT64_9223372036854775808_Fails)
         {
             // arrange
@@ -9712,7 +9441,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_083:[ EDM_INT64] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_INT64_Minus_10223372036854775808_Fails)
         {
             // arrange
@@ -9726,7 +9454,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_083:[ EDM_INT64] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_INT64_10223372036854775808_Fails)
         {
             // arrange
@@ -9740,7 +9467,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_083:[ EDM_INT64] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_INT64_Plus_9223372036854775807_Succeeds)
         {
             // arrange
@@ -9759,8 +9485,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Empty_String_Fails)
         {
             // arrange
@@ -9774,8 +9498,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Some_Bad_Text_Fails)
         {
             // arrange
@@ -9789,8 +9511,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Only_Starting_Quote_Fails)
         {
             // arrange
@@ -9804,8 +9524,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Missing_End_Quote_Fails)
         {
             // arrange
@@ -9819,8 +9537,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Good_Date_Succeeds)
         {
             // arrange
@@ -9841,8 +9557,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Zero_Day_Fails)
         {
             // arrange
@@ -9856,8 +9570,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Jan_Day_32_Fails)
         {
             // arrange
@@ -9871,8 +9583,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Feb_Day_29_Not_Leap_Fails)
         {
             // arrange
@@ -9886,8 +9596,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Feb_Day_30_Leap_Fails)
         {
             // arrange
@@ -9901,8 +9609,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Feb_Day_29_Not_Leap_Hundred_Divisible_Year_Fails)
         {
             // arrange
@@ -9916,8 +9622,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Feb_Day_30_Leap_4_Hundred_Divisible_Year_Fails)
         {
             // arrange
@@ -9931,8 +9635,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Mar_Day_32_Fails)
         {
             // arrange
@@ -9946,8 +9648,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Apr_Day_31_Fails)
         {
             // arrange
@@ -9961,8 +9661,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_May_Day_32_Fails)
         {
             // arrange
@@ -9976,8 +9674,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Jun_Day_31_Fails)
         {
             // arrange
@@ -9991,8 +9687,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Jul_Day_32_Fails)
         {
             // arrange
@@ -10006,8 +9700,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Aug_Day_32_Fails)
         {
             // arrange
@@ -10021,8 +9713,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Sep_Day_31_Fails)
         {
             // arrange
@@ -10036,8 +9726,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Oct_Day_32_Fails)
         {
             // arrange
@@ -10051,8 +9739,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Nov_Day_31_Fails)
         {
             // arrange
@@ -10066,8 +9752,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Dec_Day_32_Fails)
         {
             // arrange
@@ -10081,8 +9765,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Negative_Day_Fails)
         {
             // arrange
@@ -10096,8 +9778,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Negative_Month_Fails)
         {
             // arrange
@@ -10111,8 +9791,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Year_Too_Short_Fails)
         {
             // arrange
@@ -10126,7 +9804,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Jan_Day_31_Succeeds)
         {
             // arrange
@@ -10147,7 +9824,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Feb_Day_28_Not_Leap_Succeeds)
         {
             // arrange
@@ -10168,7 +9844,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Feb_Day_29_Leap_Succeeds)
         {
             // arrange
@@ -10189,7 +9864,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Feb_Day_28_Not_Leap_Hundred_Divisible_Year_Succeeds)
         {
             // arrange
@@ -10210,7 +9884,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Feb_Day_29_Leap_4_Hundred_Divisible_Year_Succeeds)
         {
             // arrange
@@ -10231,7 +9904,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Mar_Day_31_Succeeds)
         {
             // arrange
@@ -10252,7 +9924,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Apr_Day_30_Succeeds)
         {
             // arrange
@@ -10273,7 +9944,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_May_Day_31_Succeeds)
         {
             // arrange
@@ -10294,7 +9964,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Jun_Day_30_Succeeds)
         {
             // arrange
@@ -10315,7 +9984,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Jul_Day_31_Succeeds)
         {
             // arrange
@@ -10336,7 +10004,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Aug_Day_31_Succeeds)
         {
             // arrange
@@ -10357,7 +10024,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Sep_Day_30_Succeeds)
         {
             // arrange
@@ -10378,7 +10044,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Oct_Day_31_Succeeds)
         {
             // arrange
@@ -10399,7 +10064,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Nov_Day_30_Succeeds)
         {
             // arrange
@@ -10420,7 +10084,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Dec_Day_31_Succeeds)
         {
             // arrange
@@ -10441,8 +10104,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Month_Zero_Fails)
         {
             // arrange
@@ -10456,8 +10117,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Month_13_Fails)
         {
             // arrange
@@ -10471,8 +10130,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Year_Minus_10000_Fails)
         {
             // arrange
@@ -10486,8 +10143,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Year_10000_Fails)
         {
             // arrange
@@ -10501,7 +10156,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Year_Minus_9999_Succeeds)
         {
             // arrange
@@ -10522,7 +10176,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Year_9999_Succeeds)
         {
             // arrange
@@ -10543,8 +10196,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Year_To_Month_Dash_Is_Bad_Fails)
         {
             // arrange
@@ -10558,8 +10209,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Month_To_Day_Dash_Is_Bad_Fails)
         {
             // arrange
@@ -10573,8 +10222,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Year_Has_Extra_Zeroes_Fails)
         {
             // arrange
@@ -10588,8 +10235,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Month_Has_Extra_Zeroes_Fails)
         {
             // arrange
@@ -10603,8 +10248,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_Day_Has_Extra_Zeroes_Fails)
         {
             // arrange
@@ -10618,8 +10261,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Empty_String_Fails)
         {
             // arrange
@@ -10633,8 +10274,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Some_Bad_Text_Fails)
         {
             // arrange
@@ -10648,8 +10287,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Only_Starting_Quote_Fails)
         {
             // arrange
@@ -10663,8 +10300,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Missing_End_Quote_Fails)
         {
             // arrange
@@ -10678,8 +10313,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Good_Date_Succeeds)
         {
             // arrange
@@ -10707,8 +10340,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Zero_Day_Fails)
         {
             // arrange
@@ -10722,8 +10353,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Jan_Day_32_Fails)
         {
             // arrange
@@ -10737,8 +10366,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Feb_Day_29_Not_Leap_Fails)
         {
             // arrange
@@ -10752,8 +10379,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Feb_Day_30_Leap_Fails)
         {
             // arrange
@@ -10767,8 +10392,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Feb_Day_29_Not_Leap_Hundred_Divisible_Year_Fails)
         {
             // arrange
@@ -10782,8 +10405,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Feb_Day_30_Leap_4_Hundred_Divisible_Year_Fails)
         {
             // arrange
@@ -10797,8 +10418,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Mar_Day_32_Fails)
         {
             // arrange
@@ -10812,8 +10431,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Apr_Day_31_Fails)
         {
             // arrange
@@ -10827,8 +10444,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_May_Day_32_Fails)
         {
             // arrange
@@ -10842,8 +10457,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Jun_Day_31_Fails)
         {
             // arrange
@@ -10857,8 +10470,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Jul_Day_32_Fails)
         {
             // arrange
@@ -10872,8 +10483,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Aug_Day_32_Fails)
         {
             // arrange
@@ -10887,8 +10496,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Sep_Day_31_Fails)
         {
             // arrange
@@ -10902,8 +10509,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Oct_Day_32_Fails)
         {
             // arrange
@@ -10917,8 +10522,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Nov_Day_31_Fails)
         {
             // arrange
@@ -10932,8 +10535,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Dec_Day_32_Fails)
         {
             // arrange
@@ -10947,8 +10548,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Negative_Month_Fails)
         {
             // arrange
@@ -10962,8 +10561,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Negative_Day_Fails)
         {
             // arrange
@@ -10977,8 +10574,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Year_Too_Short_Fails)
         {
             // arrange
@@ -10992,7 +10587,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Jan_Day_31_Succeeds)
         {
             // arrange
@@ -11020,7 +10614,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Feb_Day_28_Not_Leap_Succeeds)
         {
             // arrange
@@ -11048,7 +10641,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Feb_Day_29_Leap_Succeeds)
         {
             // arrange
@@ -11076,7 +10668,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Feb_Day_28_Not_Leap_Hundred_Divisible_Year_Succeeds)
         {
             // arrange
@@ -11104,7 +10695,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Feb_Day_29_Leap_4_Hundred_Divisible_Year_Succeeds)
         {
             // arrange
@@ -11132,7 +10722,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Mar_Day_31_Succeeds)
         {
             // arrange
@@ -11160,7 +10749,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Apr_Day_30_Succeeds)
         {
             // arrange
@@ -11188,7 +10776,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_May_Day_31_Succeeds)
         {
             // arrange
@@ -11216,7 +10803,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Jun_Day_30_Succeeds)
         {
             // arrange
@@ -11244,7 +10830,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Jul_Day_31_Succeeds)
         {
             // arrange
@@ -11272,7 +10857,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Aug_Day_31_Succeeds)
         {
             // arrange
@@ -11300,7 +10884,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Sep_Day_30_Succeeds)
         {
             // arrange
@@ -11328,7 +10911,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Oct_Day_31_Succeeds)
         {
             // arrange
@@ -11356,7 +10938,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Nov_Day_30_Succeeds)
         {
             // arrange
@@ -11384,7 +10965,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Dec_Day_31_Succeeds)
         {
             // arrange
@@ -11412,8 +10992,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Month_Zero_Fails)
         {
             // arrange
@@ -11427,8 +11005,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Month_13_Fails)
         {
             // arrange
@@ -11442,8 +11018,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Year_Minus_10000_Fails)
         {
             // arrange
@@ -11457,8 +11031,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Year_10000_Fails)
         {
             // arrange
@@ -11472,7 +11044,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Year_Minus_9999_Succeeds)
         {
             // arrange
@@ -11500,7 +11071,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Year_9999_Succeeds)
         {
             // arrange
@@ -11527,8 +11097,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Year_To_Month_Dash_Is_Bad_Fails)
         {
             // arrange
@@ -11542,8 +11110,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Month_To_Day_Dash_Is_Bad_Fails)
         {
             // arrange
@@ -11557,8 +11123,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Year_Has_Extra_Zeroes_Fails)
         {
             // arrange
@@ -11572,8 +11136,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Month_Has_Extra_Zeroes_Fails)
         {
             // arrange
@@ -11587,8 +11149,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Day_Has_Extra_Zeroes_Fails)
         {
             // arrange
@@ -11602,8 +11162,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Missing_Z_Fails)
         {
             // arrange
@@ -11617,8 +11175,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Negative_Hour_Fails)
         {
             // arrange
@@ -11632,8 +11188,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Hour_24_Fails)
         {
             // arrange
@@ -11647,7 +11201,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Hour_23_Succeeds)
         {
             // arrange
@@ -11675,8 +11228,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Negative_Minute_Fails)
         {
             // arrange
@@ -11690,8 +11241,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Minute_60_Fails)
         {
             // arrange
@@ -11705,7 +11254,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Minute_59_Succeeds)
         {
             // arrange
@@ -11733,8 +11281,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Negative_Seconds_Fails)
         {
             // arrange
@@ -11748,8 +11294,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_60_Seconds_Fails)
         {
             // arrange
@@ -11763,7 +11307,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Second_59_Succeeds)
         {
             // arrange
@@ -11791,8 +11334,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Negative_Fractional_Seconds_Fails)
         {
             // arrange
@@ -11806,7 +11347,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Max_Fractional_Seconds_Succeeds)
         {
             // arrange
@@ -11835,8 +11375,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Max_Fractional_Seconds_Plus_1_Fails)
         {
             // arrange
@@ -11850,8 +11388,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Hour_Offset_Minus_24_Fails)
         {
             // arrange
@@ -11865,8 +11401,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Hour_Offset_Plus_24_Fails)
         {
             // arrange
@@ -11880,7 +11414,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Hour_Offset_Minus_23_Succeeds)
         {
             // arrange
@@ -11909,7 +11442,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Hour_Offset_Plus_23_Succeeds)
         {
             // arrange
@@ -11938,8 +11470,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Minute_Offset_Minus_1_Fails)
         {
             // arrange
@@ -11953,8 +11483,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Minute_Offset_60_Fails)
         {
             // arrange
@@ -11968,7 +11496,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Minute_Offset_59_Succeeds)
         {
             // arrange
@@ -11997,7 +11524,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Missing_Fractional_SecondsWith_TimeOffset_Succeeds)
         {
             // arrange
@@ -12025,7 +11551,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DATE_TIME_OFFSET_Missing_SecondsWith_TimeOffset_Succeeds)
         {
             // arrange
@@ -12053,7 +11578,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATE_TIME_OFFSET] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_With_EDM_DATE_TIME_OFFSET_Sets_dst_to_a_negative_value)
         {
             // arrange
@@ -12071,7 +11595,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
         }
 
 #ifndef NO_FLOATS
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_080:[ EDM_DOUBLE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DOUBLE_Positive_Value_Succeeds)
         {
             // arrange
@@ -12090,7 +11613,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_080:[ EDM_DOUBLE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DOUBLE_Negative_Value_Succeeds)
         {
             // arrange
@@ -12109,7 +11631,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_080:[ EDM_DOUBLE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DOUBLE_Max_Positive_Value_Succeeds)
         {
             // arrange
@@ -12128,7 +11649,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_089:[EDM_SINGLE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DOUBLE_Overflow_Max_Positive_Value_Fails)
         {
             // arrange
@@ -12142,7 +11662,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_080:[ EDM_DOUBLE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DOUBLE_Min_Positive_Value_Succeeds)
         {
             // arrange
@@ -12161,8 +11680,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_080:[ EDM_DOUBLE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DOUBLE_Bad_Text_Fails)
         {
             // arrange
@@ -12176,7 +11693,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_080:[ EDM_DOUBLE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DOUBLE_NaN_Succeeds)
         {
             // arrange
@@ -12195,7 +11711,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_080:[ EDM_DOUBLE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DOUBLE_Positive_Infinity_Succeeds)
         {
             // arrange
@@ -12214,7 +11729,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_080:[ EDM_DOUBLE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DOUBLE_Negative_Infinity_Succeeds)
         {
             // arrange
@@ -12233,7 +11747,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_080:[ EDM_DOUBLE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DOUBLE_Positive_e_Value_Succeeds)
         {
             // arrange
@@ -12252,7 +11765,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_089:[EDM_SINGLE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_SINGLE_Positive_Value_Succeeds)
         {
             // arrange
@@ -12271,7 +11783,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_089:[EDM_SINGLE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_SINGLE_Negative_Value_Succeeds)
         {
             // arrange
@@ -12290,7 +11801,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_089:[EDM_SINGLE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_SINGLE_Max_Positive_Value_Succeeds)
         {
             // arrange
@@ -12309,7 +11819,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_089:[EDM_SINGLE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_SINGLE_Min_Negative_Value_Succeeds)
         {
             // arrange
@@ -12328,7 +11837,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_089:[EDM_SINGLE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_SINGLE_Min_Positive_Value_Succeeds)
         {
             // arrange
@@ -12347,7 +11855,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_089:[EDM_SINGLE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_SINGLE_Overflow_Max_Positive_Value_Fails)
         {
             // arrange
@@ -12361,7 +11868,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_089:[EDM_SINGLE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_SINGLE_Exponential_Overflow_Max_Positive_Value_Fails)
         {
             // arrange
@@ -12375,8 +11881,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_089:[EDM_SINGLE] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_SINGLE_Bad_Text_Fails)
         {
             // arrange
@@ -12390,7 +11894,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_089:[EDM_SINGLE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_SINGLE_NaN_Succeeds)
         {
             // arrange
@@ -12409,7 +11912,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_089:[EDM_SINGLE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_SINGLE_Positive_Infinity_Succeeds)
         {
             // arrange
@@ -12428,7 +11930,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_089:[EDM_SINGLE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_SINGLE_Negative_Infinity_Succeeds)
         {
             // arrange
@@ -12447,7 +11948,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_089:[EDM_SINGLE] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_SINGLE_e_Value_Succeeds)
         {
             // arrange
@@ -12467,8 +11967,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
         }
 #endif
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_079:[ EDM_DECIMAL] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DECIMAL_Empty_String_Fails)
         {
             // arrange
@@ -12482,8 +11980,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_079:[ EDM_DECIMAL] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DECIMAL_One_Quote_Only_Fails)
         {
             // arrange
@@ -12497,8 +11993,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_079:[ EDM_DECIMAL] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DECIMAL_2_Quotes_Only_Fails)
         {
             // arrange
@@ -12512,8 +12006,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_079:[ EDM_DECIMAL] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DECIMAL_Valid_Number_Missing_Start_Quote_Fails)
         {
             // arrange
@@ -12527,8 +12019,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_079:[ EDM_DECIMAL] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DECIMAL_Valid_Number_Missing_End_Quote_Fails)
         {
             // arrange
@@ -12542,8 +12032,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_079:[ EDM_DECIMAL] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DECIMAL_Bad_Text_Fails)
         {
             // arrange
@@ -12557,8 +12045,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_079:[ EDM_DECIMAL] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DECIMAL_2_Dots_Fails)
         {
             // arrange
@@ -12572,8 +12058,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_079:[ EDM_DECIMAL] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DECIMAL_No_Digits_After_Dot_Fails)
         {
             // arrange
@@ -12587,8 +12071,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_079:[ EDM_DECIMAL] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DECIMAL_Other_Sign_Than_Char_First_Fails)
         {
             // arrange
@@ -12602,8 +12084,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_079:[ EDM_DECIMAL] */
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DECIMAL_Other_Sign_Than_Dot_Fails)
         {
             // arrange
@@ -12617,7 +12097,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_079:[ EDM_DECIMAL] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DECIMAL_Good_Value_Succeeds)
         {
             // arrange
@@ -12636,7 +12115,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_079:[ EDM_DECIMAL] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DECIMAL_Only_Integer_Part_Succeeds)
         {
             // arrange
@@ -12655,7 +12133,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_079:[ EDM_DECIMAL] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DECIMAL_Only_Negative_Integer_Part_Succeeds)
         {
             // arrange
@@ -12674,7 +12151,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_079:[ EDM_DECIMAL] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DECIMAL_Negative_Number_Succeeds)
         {
             // arrange
@@ -12693,7 +12169,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /* Tests_SRS_AGENT_TYPE_SYSTEM_99_079:[ EDM_DECIMAL] */
         TEST_FUNCTION(AgentTypeSystem_CreateAgentDataType_From_String_EDM_DECIMAL_Positive_Sign_Succeeds)
         {
             // arrange
@@ -12712,7 +12187,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_091:[Creates an AGENT_DATA_TYPE containing an Edm.DateTimeOffset from an EDM_DATE_TIME_OFFSET.]*/
         TEST_FUNCTION(AgentTypeSystem_CREATE_AGENT_DATA_TYPE_from_EDM_DATE_TIME_OFFSET_succeeds)
         {
             ///arrange
@@ -12752,7 +12226,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&agentData);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_092:[ The structure shall be validated to be conforming to OData specifications (odata-abnf-construction-rules, 2013), and if found invalid, AGENT_DATA_TYPES_INVALID_ARG shall be returned.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_EDM_DATE_TIME_OFFSET_when_date_is_invalid_fails)
         {
             ///arrange
@@ -12807,7 +12280,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             }
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_092:[ The structure shall be validated to be conforming to OData specifications (odata-abnf-construction-rules, 2013), and if found invalid, AGENT_DATA_TYPES_INVALID_ARG shall be returned.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_EDM_DATE_TIME_OFFSET_when_time_is_invalid)
         {
             ///arrange
@@ -12851,7 +12323,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             }
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_092:[ The structure shall be validated to be conforming to OData specifications (odata-abnf-construction-rules, 2013), and if found invalid, AGENT_DATA_TYPES_INVALID_ARG shall be returned.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_EDM_DATE_TIME_OFFSET_when_fractional_seconds_is_invalid_fails)
         {
             /*the only reasonw hy fractional seconds would fail is because of it has more than 12 digits.*/
@@ -12890,7 +12361,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             }
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_092:[ The structure shall be validated to be conforming to OData specifications (odata-abnf-construction-rules, 2013), and if found invalid, AGENT_DATA_TYPES_INVALID_ARG shall be returned.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_EDM_DATE_TIME_OFFSET_when_time_zone_is_invalid_fails)
         {
             ///arrange
@@ -13017,7 +12487,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             }
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the functions shall check their parameters for validity. When an invalid parameter is detected, the value AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_EDM_GUID_with_NULL_agent_data_type_fails)
         {
             ///arrange
@@ -13030,7 +12499,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the functions shall check their parameters for validity. When an invalid parameter is detected, the value AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_EDM_BINARY_with_NULL_agent_data_type_fails)
         {
             ///arrange
@@ -13043,7 +12511,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_094:[ Creates and AGENT_DATA_TYPE containing a EDM_GUID from a memory buffer of 16 bytes.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_EDM_GUID_succeeds)
         {
             ///arrange
@@ -13060,7 +12527,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_098:[ Creates an AGENT_DATA_TYPE containing a EDM_BINARY from a EDM_BINARY.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_EDM_BINARY_succeeds)
         {
             ///arrange
@@ -13078,7 +12544,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_093:[ EDM_GUID: 8HEXDIG "-" 4HEXDIG "-" 4HEXDIG "-" 4HEXDIG "-" 12HEXDIG]*/
         TEST_FUNCTION(AgentDataTypes_ToString_GUID_succeeds)
         {
             ///arrange
@@ -13097,7 +12562,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_099:[ EDM_BINARY: = *(4base64char) [ base64b16  / base64b8 ]]*/
         TEST_FUNCTION(AgentDataTypes_ToString_BINARY_succeeds)
         {
             ///arrange
@@ -13122,7 +12586,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             }
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the functions shall check their parameters for validity. When an invalid parameter is detected, the value AGENT_DATA_TYPES_INVALID_ARG shall be returned ]*/
         TEST_FUNCTION(AgentDataTypes_ToString_EDM_BINARY_with_insufficient_buffer_fails)
         {
             {
@@ -13166,7 +12629,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             }
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_016:[ When the value cannot be converted to a string AgentDataTypes_ToString shall return AGENT_DATA_TYPES_ERROR.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE_with_a_GUID_succeeds)
         {
             ///arrange
@@ -13187,7 +12649,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&dest);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_016:[ When the value cannot be converted to a string AgentDataTypes_ToString shall return AGENT_DATA_TYPES_ERROR.]*/
         TEST_FUNCTION(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE_with_a_EDM_BINARY_succeeds)
         {
             ///arrange
@@ -13210,7 +12671,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&dest);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_050:[ Destroy_AGENT_DATA_TYPE shall deallocate all allocated resources used to represent the type.]*/
         TEST_FUNCTION(Destroy_AGENT_DATA_TYPE_for_a_GUID_succeeds)
         {
             ///arrange
@@ -13225,7 +12685,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPE_TYPE, EDM_NO_TYPE, ag.type);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_050:[ Destroy_AGENT_DATA_TYPE shall deallocate all allocated resources used to represent the type.]*/
         TEST_FUNCTION(Destroy_AGENT_DATA_TYPE_for_a_EDM_BINARY_succeeds)
         {
             ///arrange
@@ -13241,7 +12700,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPE_TYPE, EDM_NO_TYPE, ag.type);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_097:[ EDM_GUID]*/
         TEST_FUNCTION(CreateAgentDataType_From_String_for_a_GUID_succeeds)
         {
             ///arrange
@@ -13275,7 +12733,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_100:[ EDM_BINARY]*/
         TEST_FUNCTION(CreateAgentDataType_From_String_for_a_EDM_BINARY_succeeds)
         {
             ///arrange
@@ -13298,7 +12755,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             }
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_100:[ EDM_BINARY]*/
         TEST_FUNCTION(CreateAgentDataType_From_String_for_a_EDM_BINARY_ending_with_equal_signs_succeeds)
         {
             ///arrange
@@ -13471,7 +12927,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             Destroy_AGENT_DATA_TYPE(&ag);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_097:[ EDM_GUID]*/
         TEST_FUNCTION(CreateAgentDataType_with_not_enough_characters_for_a_GUID_fails)
         {
             ///arrange
@@ -13485,7 +12940,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_097:[ EDM_GUID]*/
         TEST_FUNCTION(CreateAgentDataType_with_too_many_characters_for_a_GUID_fails)
         {
             ///arrange
@@ -13499,7 +12953,6 @@ BEGIN_TEST_SUITE(AgentTypeSystem_ut)
             ASSERT_ARE_EQUAL(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_INVALID_ARG, result);
         }
 
-        /*Tests_SRS_AGENT_TYPE_SYSTEM_99_097:[ EDM_GUID]*/
         TEST_FUNCTION(CreateAgentDataType_with_wrong_characters_fails)
         {
             ///arrange

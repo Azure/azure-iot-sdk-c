@@ -470,11 +470,9 @@ void initialize_device(void)
 X509_INFO_HANDLE x509_info_create(void)
 {
     X509_CERT_INFO* result;
-    /* Codes_SRS_HSM_CLIENT_TPM_07_002: [ On success hsm_client_tpm_create shall allocate a new instance of the secure device tpm interface. ] */
     result = malloc(sizeof(X509_CERT_INFO));
     if (result == NULL)
     {
-        /* Codes_SRS_HSM_CLIENT_TPM_07_001: [ If any failure is encountered hsm_client_tpm_create shall return NULL ] */
         printf("Failure: malloc X509_INFO.");
     }
     else

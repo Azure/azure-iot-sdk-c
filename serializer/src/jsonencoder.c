@@ -21,7 +21,6 @@ JSON_ENCODER_RESULT JSONEncoder_EncodeTree(MULTITREE_HANDLE treeHandle, STRING_H
 
     size_t childCount;
 
-    /* Codes_SRS_JSON_ENCODER_99_032:[If any of the arguments passed to JSONEncoder_EncodeTree is NULL then JSON_ENCODER_INVALID_ARG shall be returned.] */
     if ((treeHandle == NULL) ||
         (destination == NULL) ||
         (toStringFunc == NULL))
@@ -29,7 +28,6 @@ JSON_ENCODER_RESULT JSONEncoder_EncodeTree(MULTITREE_HANDLE treeHandle, STRING_H
         result = JSON_ENCODER_INVALID_ARG;
         LogError("(result = %s)", MU_ENUM_TO_STRING(JSON_ENCODER_RESULT, result));
     }
-    /*Codes_SRS_JSON_ENCODER_99_035:[ JSON encoder shall inquire the number of child nodes (further called childCount) of the current node (given by parameter treeHandle.]*/
     else if (MultiTree_GetChildCount(treeHandle, &childCount) != MULTITREE_OK)
     {
         result = JSON_ENCODER_MULTITREE_ERROR;
@@ -38,7 +36,6 @@ JSON_ENCODER_RESULT JSONEncoder_EncodeTree(MULTITREE_HANDLE treeHandle, STRING_H
     else
     {
         size_t i;
-        /*Codes_SRS_JSON_ENCODER_99_036:[ The string "{" shall be added to the output;]*/
         if (STRING_concat(destination,  "{") != 0)
         {
             result = JSON_ENCODER_ERROR;
@@ -177,7 +174,6 @@ JSON_ENCODER_RESULT JSONEncoder_EncodeTree(MULTITREE_HANDLE treeHandle, STRING_H
                 }
                 else
                 {
-                    /* Codes_SRS_JSON_ENCODER_99_031:[On success, JSONEncoder_EncodeTree shall return JSON_ENCODER_OK.] */
                     result = JSON_ENCODER_OK;
                 }
             }
@@ -194,23 +190,19 @@ JSON_ENCODER_TOSTRING_RESULT JSONEncoder_CharPtr_ToString(STRING_HANDLE destinat
 {
     JSON_ENCODER_TOSTRING_RESULT result;
 
-    /*Coes_SRS_JSON_ENCODER_99_047:[ JSONEncoder_CharPtr_ToString shall return JSON_ENCODER_TOSTRING_INVALID_ARG if destination or value parameters passed to it are NULL.]*/
     if ((destination == NULL) ||
         (value == NULL))
     {
         result = JSON_ENCODER_TOSTRING_INVALID_ARG;
         LogError("(result = %s)", MU_ENUM_TO_STRING(JSON_ENCODER_TOSTRING_RESULT, result));
     }
-    /*Codes_SRS_JSON_ENCODER_99_048:[ JSONEncoder_CharPtr_ToString shall use strcpy_s to copy from value to destination.]*/
     else if (STRING_concat(destination, (const char*)value) != 0)
     {
-        /*Codes_SRS_JSON_ENCODER_99_049:[ If strcpy_s fails then JSONEncoder_CharPtr_ToString shall return JSON_ENCODER_TOSTRING_ERROR.]*/
         result = JSON_ENCODER_TOSTRING_ERROR;
         LogError("(result = %s)", MU_ENUM_TO_STRING(JSON_ENCODER_TOSTRING_RESULT, result));
     }
     else
     {
-        /*Codes_SRS_JSON_ENCODER_99_050:[ If strcpy_s doesn't fail, then JSONEncoder_CharPtr_ToString shall return JSON_ENCODER_TOSTRING_OK]*/
         result = JSON_ENCODER_TOSTRING_OK;
     }
 
