@@ -101,16 +101,6 @@ if (${build_as_dynamic})
 endif()
 setSdkTargetBuildProperties(serializer)
 
-if (NOT ${skip_samples})
-    if(WIN32)
-        if (NOT ${ARCHITECTURE} STREQUAL "ARM")
-            add_subdirectory(samples)
-        endif()
-    else()
-        add_subdirectory(samples)
-    endif()
-endif()
-
 if(NOT IN_OPENWRT)
     # Disable tests for OpenWRT
     if(${run_unittests})
