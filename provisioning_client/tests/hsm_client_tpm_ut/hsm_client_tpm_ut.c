@@ -930,7 +930,6 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         hsm_client_tpm_destroy(sec_handle);
     }
 
-#if 0
     TEST_FUNCTION(hsm_client_tpm_decrypt_data_handle_NULL_fail)
     {
         //arrange
@@ -944,78 +943,6 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
 
         //cleanup
     }
-
-    TEST_FUNCTION(hsm_client_tpm_decrypt_data_data_NULL_fail)
-    {
-        //arrange
-        HSM_CLIENT_HANDLE sec_handle = hsm_client_tpm_create();
-        umock_c_reset_all_calls();
-
-        //act
-        BUFFER_HANDLE decrypt_value = hsm_client_tpm_decrypt_data(sec_handle, NULL, TEST_BUFFER_SIZE);
-
-        //assert
-        ASSERT_IS_NULL(decrypt_value);
-        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-        //cleanup
-        my_gballoc_free(decrypt_value);
-        hsm_client_tpm_destroy(sec_handle);
-    }
-
-    TEST_FUNCTION(hsm_client_tpm_decrypt_data_data_len_0_fail)
-    {
-        //arrange
-        HSM_CLIENT_HANDLE sec_handle = hsm_client_tpm_create();
-        umock_c_reset_all_calls();
-
-        //act
-        BUFFER_HANDLE decrypt_value = hsm_client_tpm_decrypt_data(sec_handle, TEST_BUFFER, 0);
-
-        //assert
-        ASSERT_IS_NULL(decrypt_value);
-        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-        //cleanup
-        my_gballoc_free(decrypt_value);
-        hsm_client_tpm_destroy(sec_handle);
-    }
-
-    TEST_FUNCTION(hsm_client_tpm_decrypt_data_succeed)
-    {
-        //arrange
-        HSM_CLIENT_HANDLE sec_handle = hsm_client_tpm_create();
-        umock_c_reset_all_calls();
-
-        TPM_SE tmp_se = 0;
-        TPMA_SESSION tmp_session = { 0 };
-
-        STRICT_EXPECTED_CALL(TSS_StartAuthSession(IGNORED_PTR_ARG, tmp_se, IGNORED_NUM_ARG, tmp_session, IGNORED_PTR_ARG))
-            .IgnoreArgument_sessAttrs()
-            .IgnoreArgument_sessionType();
-        STRICT_EXPECTED_CALL(TSS_PolicySecret(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 4
-        STRICT_EXPECTED_CALL(TSS_GetTpmProperty(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(TPM2B_ID_OBJECT_Unmarshal(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(TPM2B_ENCRYPTED_SECRET_Unmarshal(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(TPM2B_PRIVATE_Unmarshal(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(TPM2B_ENCRYPTED_SECRET_Unmarshal(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(TPM2B_PUBLIC_Unmarshal(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1));
-        STRICT_EXPECTED_CALL(UINT16_Unmarshal(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(TPM2_ActivateCredential(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-
-        //act
-        BUFFER_HANDLE decrypt_value = hsm_client_tpm_decrypt_data(sec_handle, TEST_BUFFER, TEST_BUFFER_SIZE);
-
-        //assert
-        ASSERT_IS_NOT_NULL(decrypt_value);
-        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-        //cleanup
-        my_gballoc_free(decrypt_value);
-        hsm_client_tpm_destroy(sec_handle);
-    }
-#endif
 
     TEST_FUNCTION(hsm_client_tpm_interface_succeed)
     {
