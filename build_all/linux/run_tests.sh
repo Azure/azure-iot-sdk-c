@@ -14,7 +14,7 @@ usage() {
 RUN_VALGRIND=${1:-""}
 
 if [[ "$RUN_VALGRIND" == "run_valgrind" ]]; then
-  exit 1
+  echo "running valgrind"
 elif [[ "$RUN_VALGRIND" != "" ]]; then
   usage
 fi
