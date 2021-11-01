@@ -114,7 +114,28 @@ process_args $*
 rm -r -f $build_folder
 mkdir -m777 -p $build_folder
 pushd $build_folder
+echo "::group::Generating Build Files"
 cmake $toolchainfile $cmake_install_prefix -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C=-Wstrict-prototypes -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_sfc_tests:BOOL=$run-sfc-tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Ddont_use_uploadtoblob:BOOL=$no_blob -Drun_unittests:BOOL=$run_unittests -Dno_logging:BOOL=$no_logging $build_root -Duse_prov_client:BOOL=$prov_auth -Duse_tpm_simulator:BOOL=$prov_use_tpm_simulator -Duse_edge_modules=$use_edge_modules
 chmod --recursive ugo+rw ../cmake
+
+# Make sure there is enough virtual memory on the device to handle more than one job  
+MINVSPACE="1500000"
+
+# Acquire total memory and total swap space setting them to zero in the event the command fails
+MEMAR=( $(sed -n -e 's/^MemTotal:[^0-9]*\([0-9][0-9]*\).*/\1/p' -e 's/^SwapTotal:[^0-9]*\([0-9][0-9]*\).*/\1/p' /proc/meminfo) )
+[ -z "${MEMAR[0]##*[!0-9]*}" ] && MEMAR[0]=0
+[ -z "${MEMAR[1]##*[!0-9]*}" ] && MEMAR[1]=0
+
+let VSPACE=${MEMAR[0]}+${MEMAR[1]}
+
+echo "VSPACE=$VSPACE"
+
+if [ "$VSPACE" -lt "$MINVSPACE" ] ; then
+  echo "WARNING: Not enough space.  Setting MAKE_CORES=1"
+  MAKE_CORES=1
+fi
+
+echo "::group::Building Project"
+cmake --build . -- --jobs=$MAKE_CORES
 
 popd
