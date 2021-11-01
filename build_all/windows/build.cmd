@@ -135,15 +135,15 @@ rem ----------------------------------------------------------------------------
 rem -- build with CMAKE and run tests
 rem -----------------------------------------------------------------------------
 
-if EXIST %cmake-root%\cmake\%CMAKE_DIR% (
-    rmdir /s/q %cmake-root%\cmake\%CMAKE_DIR%
+if EXIST %cmake-root%\cmake (
+    rmdir /s/q %cmake-root%\cmake
     rem no error checking
 )
 
-echo CMAKE Output Path: %cmake-root%\cmake\%CMAKE_DIR%
-mkdir %cmake-root%\cmake\%CMAKE_DIR%
+echo CMAKE Output Path: %cmake-root%\cmake
+mkdir %cmake-root%\cmake
 rem no error checking
-pushd %cmake-root%\cmake\%CMAKE_DIR%
+pushd %cmake-root%\cmake
 
 if %build-platform% == x64 (
     echo ***Running CMAKE for Win64***
@@ -170,11 +170,6 @@ where msbuild
 if %make%==yes (
     msbuild /m azure_iot_sdks.sln
     if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
-
-    if %build-platform% neq arm (
-        ctest -T test --no-compress-output -C "debug" -V -j 16 --schedule-random
-        if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-    )
 )
 
 popd

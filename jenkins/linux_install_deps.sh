@@ -20,7 +20,7 @@ cd $build_root
 
 echo "Build Root $build_root"
 
-sdk_build_folder=$build_root"/cmake/install_deps"
+sdk_build_folder=$build_root"/cmake"
 
 # Build the SDK
 rm -rf $sdk_build_folder

@@ -16,7 +16,7 @@ build_mqtt=ON
 no_blob=OFF
 run_unittests=OFF
 run_valgrind=0
-build_folder=$build_root"/cmake/iotsdk_linux"
+build_folder=$build_root"/cmake"
 make=true
 toolchainfile=" "
 cmake_install_prefix=" "
@@ -112,54 +112,54 @@ process_args ()
 process_args $*
 
 rm -r -f $build_folder
-mkdir –m777 -p $build_folder
+mkdir -m777 -p $build_folder
 pushd $build_folder
 cmake $toolchainfile $cmake_install_prefix -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C=-Wstrict-prototypes -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_sfc_tests:BOOL=$run-sfc-tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Ddont_use_uploadtoblob:BOOL=$no_blob -Drun_unittests:BOOL=$run_unittests -Dno_logging:BOOL=$no_logging $build_root -Duse_prov_client:BOOL=$prov_auth -Duse_tpm_simulator:BOOL=$prov_use_tpm_simulator -Duse_edge_modules=$use_edge_modules
-chmod --recursive ugo+rw ../../cmake
+chmod --recursive ugo+rw ../cmake
 
-if [ "$make" = true ]
-then
-  # Set the default cores
-  MAKE_CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
+# if [ "$make" = true ]
+# then
+#   # Set the default cores
+#   MAKE_CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
   
-  echo "Initial MAKE_CORES=$MAKE_CORES"
+#   echo "Initial MAKE_CORES=$MAKE_CORES"
   
-  # Make sure there is enough virtual memory on the device to handle more than one job  
-  MINVSPACE="1500000"
+#   # Make sure there is enough virtual memory on the device to handle more than one job  
+#   MINVSPACE="1500000"
   
-  # Acquire total memory and total swap space setting them to zero in the event the command fails
-  MEMAR=( $(sed -n -e 's/^MemTotal:[^0-9]*\([0-9][0-9]*\).*/\1/p' -e 's/^SwapTotal:[^0-9]*\([0-9][0-9]*\).*/\1/p' /proc/meminfo) )
-  [ -z "${MEMAR[0]##*[!0-9]*}" ] && MEMAR[0]=0
-  [ -z "${MEMAR[1]##*[!0-9]*}" ] && MEMAR[1]=0
+#   # Acquire total memory and total swap space setting them to zero in the event the command fails
+#   MEMAR=( $(sed -n -e 's/^MemTotal:[^0-9]*\([0-9][0-9]*\).*/\1/p' -e 's/^SwapTotal:[^0-9]*\([0-9][0-9]*\).*/\1/p' /proc/meminfo) )
+#   [ -z "${MEMAR[0]##*[!0-9]*}" ] && MEMAR[0]=0
+#   [ -z "${MEMAR[1]##*[!0-9]*}" ] && MEMAR[1]=0
   
-  let VSPACE=${MEMAR[0]}+${MEMAR[1]}
+#   let VSPACE=${MEMAR[0]}+${MEMAR[1]}
   
-  echo "VSPACE=$VSPACE"
+#   echo "VSPACE=$VSPACE"
 
-  if [ "$VSPACE" -lt "$MINVSPACE" ] ; then
-    echo "WARNING: Not enough space.  Setting MAKE_CORES=1"
-    MAKE_CORES=1
-  fi
+#   if [ "$VSPACE" -lt "$MINVSPACE" ] ; then
+#     echo "WARNING: Not enough space.  Setting MAKE_CORES=1"
+#     MAKE_CORES=1
+#   fi
   
-  echo "MAKE_CORES=$MAKE_CORES"
-  echo "Starting run..."
-  date
-  make --jobs=$MAKE_CORES
-  echo "completed run..."
-  date
+#   echo "MAKE_CORES=$MAKE_CORES"
+#   echo "Starting run..."
+#   date
+#   make --jobs=$MAKE_CORES
+#   echo "completed run..."
+#   date
 
-  # Only for testing E2E behaviour !!! 
-  TEST_CORES=16
+#   # Only for testing E2E behaviour !!! 
+#   TEST_CORES=16
 
-  if [[ $run_valgrind == 1 ]] ;
-  then
-    #use doctored openssl
-    export LD_LIBRARY_PATH=/usr/local/ssl/lib
-    ctest -j $TEST_CORES --output-on-failure --schedule-random
-    export LD_LIBRARY_PATH=
-  else
-    ctest -j $TEST_CORES -C "Debug" --output-on-failure --schedule-random
-  fi
-fi
+#   if [[ $run_valgrind == 1 ]] ;
+#   then
+#     #use doctored openssl
+#     export LD_LIBRARY_PATH=/usr/local/ssl/lib
+#     ctest -j $TEST_CORES --output-on-failure --schedule-random
+#     export LD_LIBRARY_PATH=
+#   else
+#     ctest -j $TEST_CORES -C "Debug" --output-on-failure --schedule-random
+#   fi
+# fi
 
 popd
