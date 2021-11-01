@@ -114,9 +114,14 @@ process_args $*
 rm -r -f $build_folder
 mkdir -m777 -p $build_folder
 pushd $build_folder
-echo "::group::Generating Build Files"
+echo "Generating Build Files"
 cmake $toolchainfile $cmake_install_prefix -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C=-Wstrict-prototypes -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_sfc_tests:BOOL=$run-sfc-tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Ddont_use_uploadtoblob:BOOL=$no_blob -Drun_unittests:BOOL=$run_unittests -Dno_logging:BOOL=$no_logging $build_root -Duse_prov_client:BOOL=$prov_auth -Duse_tpm_simulator:BOOL=$prov_use_tpm_simulator -Duse_edge_modules=$use_edge_modules
 chmod --recursive ugo+rw ../cmake
+
+# Set the default cores
+MAKE_CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
+
+echo "Initial MAKE_CORES=$MAKE_CORES"
 
 # Make sure there is enough virtual memory on the device to handle more than one job  
 MINVSPACE="1500000"
@@ -135,7 +140,7 @@ if [ "$VSPACE" -lt "$MINVSPACE" ] ; then
   MAKE_CORES=1
 fi
 
-echo "::group::Building Project"
+echo "Building Project"
 cmake --build . -- --jobs=$MAKE_CORES
 
 popd
