@@ -165,7 +165,7 @@ jobs:
       sudo -E ./jenkins/ubuntu_clang.sh
     displayName: 'Build'
   - script: |
-      cd cmake && sudo -E ../build_all/linux/run_tests.sh
+      cd cmake && sudo -E ../build_all/linux/run_tests.sh run_valgrind
     displayName: "Run Tests"
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
@@ -200,7 +200,7 @@ jobs:
       sudo -E ./jenkins/ubuntu1604_c.sh
     displayName: 'Build'
   - script: |
-      cd cmake && sudo -E ../build_all/linux/run_tests.sh
+      cd cmake && sudo -E ../build_all/linux/run_tests.sh run_valgrind
     displayName: "Run Tests"
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
@@ -233,7 +233,7 @@ jobs:
       sudo ./jenkins/debian_c.sh
     displayName: 'Build'
   - script: |
-      cd cmake && sudo -E ../build_all/linux/run_tests.sh
+      cd cmake && sudo -E ../build_all/linux/run_tests.sh run_valgrind
     displayName: "Run Tests"
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
@@ -478,7 +478,7 @@ jobs:
     env:
       IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
   - script: |
-      cd cmake && sudo -E ../build_all/linux/run_tests.sh
+      cd cmake && sudo -E ../build_all/linux/run_tests.sh run_valgrind
     displayName: "Run Tests"
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)

@@ -6,6 +6,19 @@
 set -o errexit # Exit if command failed.
 set -o pipefail # Exit if pipe failed.
 
+usage() {
+    echo "${0} OR ${0} [run_valgrind]" 1>&2
+    exit 1
+}
+
+RUN_VALGRIND=${1:-""}
+
+if [[ "$RUN_VALGRIND" == "run_valgrind" ]]; then
+  exit 1
+elif [[ "$RUN_VALGRIND" != "" ]]; then
+  usage
+fi
+
 # Set the default cores
 MAKE_CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
 
@@ -38,7 +51,7 @@ date
 # Only for testing E2E behaviour !!! 
 TEST_CORES=16
 
-if [[ $run_valgrind == 1 ]] ;
+if [[ "$RUN_VALGRIND" == "run_valgrind" ]] ;
 then
   #use doctored openssl
   export LD_LIBRARY_PATH=/usr/local/ssl/lib
