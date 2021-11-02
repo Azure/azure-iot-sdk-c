@@ -930,20 +930,6 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         hsm_client_tpm_destroy(sec_handle);
     }
 
-    TEST_FUNCTION(hsm_client_tpm_decrypt_data_handle_NULL_fail)
-    {
-        //arrange
-
-        //act
-        BUFFER_HANDLE decrypt_value = hsm_client_tpm_decrypt_data(NULL, TEST_BUFFER, TEST_BUFFER_SIZE);
-
-        //assert
-        ASSERT_IS_NULL(decrypt_value);
-        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-        //cleanup
-    }
-
     TEST_FUNCTION(hsm_client_tpm_interface_succeed)
     {
         //arrange
