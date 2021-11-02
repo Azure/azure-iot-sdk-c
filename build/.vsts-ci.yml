@@ -192,14 +192,14 @@ jobs:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
   pool:
     name: 'sdk-c--ubuntu-18'
-  displayName: 'Ubuntu 20.04'
+  displayName: 'Ubuntu 16.04'
   steps:
   - script: |
-      export OPENSSL_ia32cap=0x00000000
-      sudo chmod -R 755 .
       sudo -E ./jenkins/ubuntu1604_c.sh
     displayName: 'Build'
   - script: |
+      export OPENSSL_ia32cap=0x00000000
+      sudo chmod -R 755 .
       cd cmake && sudo -E ../build_all/linux/run_tests.sh run_valgrind
     displayName: "Run Tests"
     env:

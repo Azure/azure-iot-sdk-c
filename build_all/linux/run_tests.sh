@@ -14,7 +14,7 @@ usage() {
 RUN_VALGRIND=${1:-""}
 
 if [[ "$RUN_VALGRIND" == "run_valgrind" ]]; then
-  echo "running valgrind"
+  echo "Using doctored openSSL to work with valgrind"
 elif [[ "$RUN_VALGRIND" != "" ]]; then
   usage
 fi
