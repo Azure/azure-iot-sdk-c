@@ -13,7 +13,7 @@ openssl version
 
 script_dir=$(cd "$(dirname "$0")" && pwd)
 build_root=$(cd "${script_dir}/.." && pwd)
-build_folder=$build_root"/cmake/iot_option"
+build_folder=$build_root"/cmake"
 
 # Set the default cores
 MAKE_CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
@@ -36,7 +36,7 @@ MAKE_CORES=1
 fi
 
 echo "Create custom HSM library for later"
-hsm_folder=$build_root"/cmake/cust_hsm"
+hsm_folder=$build_root"/build_cust_hsm"
 rm -r -f $hsm_folder
 mkdir -p $hsm_folder
 pushd $hsm_folder
