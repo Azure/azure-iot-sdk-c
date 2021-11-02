@@ -23,5 +23,3 @@ mkdir -p $build_folder
 pushd $build_folder
 cmake .. -DOPENSSL_ROOT_DIR:PATH=/usr/local/opt/openssl -Duse_openssl:bool=ON -Drun_unittests:bool=ON
 cmake --build . -- --jobs=$CORES
-ctest -j 8 -C "debug" -VV --output-on-failure --schedule-random
-popd

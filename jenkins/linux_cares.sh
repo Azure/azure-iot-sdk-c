@@ -18,5 +18,3 @@ cmake . -Bcmake -Duse_c_ares:BOOL=ON -Drun_e2e_tests:BOOL=ON
 cd cmake
 
 make --jobs=$CORES
-
-ctest -j $CORES --output-on-failure --schedule-random

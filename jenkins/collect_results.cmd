@@ -14,7 +14,7 @@ REM -- C --
 
 pushd "%working-dir%"
 
-Powershell.exe -executionpolicy remotesigned -File  %working-dir%\jenkins\ctest_to_junit.ps1 %1
+Powershell.exe -executionpolicy remotesigned -File  %working-dir%\jenkins\ctest_to_junit.ps1
 if not %ERRORLEVEL%==0 exit /b %ERRORLEVEL%
 
 popd

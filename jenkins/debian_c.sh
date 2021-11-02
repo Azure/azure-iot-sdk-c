@@ -16,7 +16,7 @@ curl --version
 build_root=$(cd "$(dirname "$0")/.." && pwd)
 cd $build_root
 
-build_folder=$build_root"/cmake/debian_linux"
+build_folder=$build_root"/cmake"
 
 # Set the default cores
 CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
@@ -35,10 +35,5 @@ cmake -Drun_valgrind:BOOL=ON $build_root -Drun_unittests:BOOL=ON
 
 echo "Running: make --jobs=$CORES --max-load=$LOADLIMIT"
 make --jobs=$CORES --max-load=$LOADLIMIT
-
-#use doctored openssl
-export LD_LIBRARY_PATH=/usr/local/ssl/lib
-ctest -j $CORES --output-on-failure --schedule-random
-export LD_LIBRARY_PATH=
 
 popd

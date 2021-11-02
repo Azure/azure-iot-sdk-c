@@ -31,6 +31,3 @@ softhsm2-util --pin 1234 --import ./test-key.p8 --token test-token --id b000 --l
 rm test-key.pem
 # 4. (Test) List keys associated with slot (should see the private key listed)
 pkcs11-tool --module /usr/lib/softhsm/libsofthsm2.so -l -p 1234 --token test-token --list-objects
-
-# Run OpenSSL Engine tests
-ctest -j $((CORES * 4)) --output-on-failure
