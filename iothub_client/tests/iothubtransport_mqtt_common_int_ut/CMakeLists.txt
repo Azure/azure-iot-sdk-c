@@ -12,7 +12,7 @@ generate_cppunittest_wrapper(${theseTestsName})
 set(${theseTestsName}_c_files
 ../../src/iothubtransport_mqtt_common.c
 ../../src/iothub_message.c
-real_doublylinkedlist.c
+${SHARED_UTIL_REAL_TEST_FOLDER}/real_doublylinkedlist.c
 )
 
 set(${theseTestsName}_h_files

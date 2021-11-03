@@ -17,7 +17,7 @@ generate_cppunittest_wrapper(${theseTestsName})
 
 set(${theseTestsName}_c_files
     ../../src/message_queue.c
-	../../../c-utility/tests/real_test_files/real_singlylinkedlist.c
+	${SHARED_UTIL_REAL_TEST_FOLDER}/real_singlylinkedlist.c
 )
 
 set(${theseTestsName}_h_files

@@ -3044,26 +3044,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         umock_c_negative_tests_snapshot();
 
-#if 0
-        size_t calls_that_cannot_fail[] =
-        {
-            2, /*MultiTree_DeleteChild*/
-
-            3,/*MultiTree_GetChildCount*/
-            7, /*STRING_c_str*/
-
-            9, /*Schema_GetModelDesiredPropertyType*/
-            10, /*Schema_GetSchemaForModelType*/
-            11, /*CodeFirst_GetPrimitiveType*/
-            14, /*Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE*/
-            15, /*Schema_GetModelDesiredProperty_offset*/
-            17, /*Schema_GetModelDesiredProperty_pfOnDesiredProperty*/
-            18, /*Destroy_AGENT_DATA_TYPE*/
-            19, /*STRING_delete*/
-            20, /*MultiTree_Destroy*/
-            21 /*gballoc_free*/
-        };
-#endif
         size_t count = umock_c_negative_tests_call_count();
         for (size_t i = 0; i < count; i++)
         {
