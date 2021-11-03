@@ -1476,7 +1476,7 @@ static MAKE_PAYLOAD_RESULT makePayload(HTTPTRANSPORT_PERDEVICE_DATA* deviceData,
         /*closing the payload*/
         if (result == MAKE_PAYLOAD_OK)
         {
-            ((char*)STRING_c_str(*payload))[STRING_length(*payload) - 1] = ']'; /*TODO - do this in STRING_HANDLE*/
+            ((char*)STRING_c_str(*payload))[STRING_length(*payload) - 1] = ']';
         }
         else
         {

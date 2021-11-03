@@ -1453,76 +1453,6 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         IoTHubMessaging_LL_Destroy(iothub_messaging_handle);
     }
 
-#if 0
-    // Module message support was removed from product.  If re-enabled, bring back in this code.
-    TEST_FUNCTION(IoTHubMessaging_LL_SendModule_return_IOTHUB_MESSAGING_INVALID_ARG_if_input_parameter_messagingHandle_is_NULL)
-    {
-        //arrange
-
-        //act
-        IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_SendModule(NULL, TEST_CONST_CHAR_PTR, TEST_MODULE_ID, TEST_IOTHUB_MESSAGE_HANDLE, TEST_IOTHUB_SEND_COMPLETE_CALLBACK, TEST_VOID_PTR);
-
-        //assert
-        ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_INVALID_ARG, result);
-    }
-
-    TEST_FUNCTION(IoTHubMessaging_LL_SendModule_return_IOTHUB_MESSAGING_INVALID_ARG_if_input_parameter_deviceId_is_NULL)
-    {
-        //arrange
-
-        //act
-        IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_SendModule(TEST_IOTHUB_MESSAGING_HANDLE, NULL, TEST_MODULE_ID, TEST_IOTHUB_MESSAGE_HANDLE, TEST_IOTHUB_SEND_COMPLETE_CALLBACK, TEST_VOID_PTR);
-
-        //assert
-        ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_INVALID_ARG, result);
-    }
-
-    TEST_FUNCTION(IoTHubMessaging_LL_SendModule_return_IOTHUB_MESSAGING_INVALID_ARG_if_input_parameter_moduleId_is_NULL)
-    {
-        //arrange
-
-        //act
-        IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_SendModule(TEST_IOTHUB_MESSAGING_HANDLE, TEST_CONST_CHAR_PTR, NULL, TEST_IOTHUB_MESSAGE_HANDLE, TEST_IOTHUB_SEND_COMPLETE_CALLBACK, TEST_VOID_PTR);
-
-        //assert
-        ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_INVALID_ARG, result);
-    }
-
-
-    TEST_FUNCTION(IoTHubMessaging_LL_SendModule_return_IOTHUB_MESSAGING_INVALID_ARG_if_input_parameter_message_is_NULL)
-    {
-        //arrange
-
-        //act
-        IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_SendModule(TEST_IOTHUB_MESSAGING_HANDLE, TEST_CONST_CHAR_PTR, TEST_MODULE_ID, NULL, TEST_IOTHUB_SEND_COMPLETE_CALLBACK, TEST_VOID_PTR);
-
-        //assert
-        ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_INVALID_ARG, result);
-    }
-
-    TEST_FUNCTION(IoTHubMessaging_LL_SendModule_return_IOTHUB_MESSAGING_ERROR_if_messaging_is_not_opened)
-    {
-        //arrange
-        TEST_IOTHUB_MESSAGING_DATA.isOpened = false;
-
-        //act
-        IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_SendModule(TEST_IOTHUB_MESSAGING_HANDLE, TEST_CONST_CHAR_PTR, TEST_MODULE_ID, TEST_IOTHUB_MESSAGE_HANDLE, TEST_IOTHUB_SEND_COMPLETE_CALLBACK, TEST_VOID_PTR);
-
-        //assert
-        ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_ERROR, result);
-    }
-
-    TEST_FUNCTION(IoTHubMessaging_LL_SendModule_happy_path)
-    {
-        IoTHubMessaging_LL_Send_happy_path(true);
-    }
-
-    TEST_FUNCTION(IoTHubMessaging_LL_SendModule_non_happy_path)
-    {
-        IoTHubMessaging_LL_Send_non_happy_path(true);
-    }
-#endif
-
     TEST_FUNCTION(IoTHubMessaging_LL_SetFeedbackMessageCallback_return_IOTHUB_MESSAGING_INVALID_ARG_if_input_parameter_messagingHandle_is_NULL)
     {
         //arrange
@@ -1797,15 +1727,6 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         IoTHubMessaging_LL_Close(iothub_messaging_handle);
         IoTHubMessaging_LL_Destroy(iothub_messaging_handle);
     }
-
-#if 0
-    // Modules message sending not available
-    TEST_FUNCTION(IoTHubMessaging_LL_SendModuleMessageComplete_call_to_user_callback)
-    {
-        IoTHubMessaging_LL_SendMessageCompleteDevice_call_to_user_callback(true);
-    }
-#endif
-
 
     TEST_FUNCTION(IoTHubMessaging_LL_FeedbackMessageReceived_context_is_null)
     {

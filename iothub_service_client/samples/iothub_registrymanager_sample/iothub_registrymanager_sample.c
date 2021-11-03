@@ -99,7 +99,6 @@ int main(void)
         deviceCreateInfo.authMethod = IOTHUB_REGISTRYMANAGER_AUTH_SPK;
         deviceCreateInfo.version = IOTHUB_REGISTRY_DEVICE_CREATE_EX_VERSION_1;
 
-        //TODO: Switch this to IOTHUB_DEVICE_EX
         IOTHUB_DEVICE_EX deviceInfo;
         deviceInfo.version = IOTHUB_REGISTRY_DEVICE_CREATE_EX_VERSION_1;
 

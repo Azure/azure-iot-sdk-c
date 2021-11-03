@@ -17,8 +17,8 @@ generate_cppunittest_wrapper(${theseTestsName})
 
 set(${theseTestsName}_c_files
 	../../src/iothubtransport_amqp_twin_messenger.c
-	../../../c-utility/tests/real_test_files/real_singlylinkedlist.c
-	../../../c-utility/tests/real_test_files/real_constbuffer.c
+	${SHARED_UTIL_REAL_TEST_FOLDER}/real_singlylinkedlist.c
+	${SHARED_UTIL_REAL_TEST_FOLDER}/real_constbuffer.c
 )
 
 set(${theseTestsName}_h_files
