@@ -83,7 +83,8 @@ static const char* DEVICE_METHOD_RESPONSE_TOPIC = "$iothub/methods/res/%d/?$rid=
 
 static const char SYS_TOPIC_STRING_FORMAT[] = "%s%%24.%s=%s";
 
-static const char* REQUEST_ID_PROPERTY = "?$rid=";
+static const char REQUEST_ID_PROPERTY[] = "?$rid=";
+static size_t REQUEST_ID_PROPERTY_LEN = sizeof(REQUEST_ID_PROPERTY) - 1;
 
 #define SYS_PROP_MESSAGE_ID "mid"
 #define SYS_PROP_MESSAGE_CREATION_TIME_UTC "ctime"
@@ -592,22 +593,29 @@ static int parseDeviceTwinTopicInfo(const char* resp_topic, bool* patch_msg, siz
                         result = 0;
                         break;
                     }
-                    else
-                    {
-                        *patch_msg = false;
-                    }
+                    *patch_msg = false;
                 }
                 else if (token_count == 3)
                 {
                     *status_code = (int)atol(STRING_c_str(token_value));
-                    if (STRING_TOKENIZER_get_next_token(token_handle, token_value, "/?$rid=") == 0)
+                }
+                else if (token_count == 4)
+                {
+                    const char* request_id_string = STRING_c_str(token_value);
+                    if (strncmp(request_id_string, REQUEST_ID_PROPERTY, REQUEST_ID_PROPERTY_LEN) != 0)
                     {
-                        *request_id = (size_t)atol(STRING_c_str(token_value));
+                        LogError("requestId does not begin with string format %s", REQUEST_ID_PROPERTY);
+                        *request_id = 0;
+                        result = MU_FAILURE;
                     }
-                    *patch_msg = false;
-                    result = 0;
+                    else
+                    {
+                        *request_id = (size_t)atol(request_id_string + REQUEST_ID_PROPERTY_LEN);
+                        result = 0;
+                    }
                     break;
                 }
+
                 token_count++;
             }
             STRING_delete(token_value);
