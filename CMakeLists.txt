@@ -28,6 +28,8 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     add_definitions(-DMACOSX)
 endif()
 
+# Set CMAKE_INSTALL_LIBDIR if not defined
+include(GNUInstallDirs)
 
 include (CTest)
 
@@ -193,25 +195,23 @@ if(NOT ${use_installed_dependencies})
   )
   add_library(parson::parson ALIAS parson)
   if (MSVC)
-      set_source_files_properties(../deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
+      set_source_files_properties(./deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
   endif()
 
-  if (NOT ${use_installed_dependencies})
-      install(
-          TARGETS parson
-          EXPORT parsonTargets
-          RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-          LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-          ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-          PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-      )
-      install(
-          EXPORT parsonTargets
-          FILE parsonConfig.cmake
-          NAMESPACE parson::
-          DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/parson
-      )
-  endif()
+  install(
+      TARGETS parson
+      EXPORT parsonTargets
+      RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  )
+  install(
+      EXPORT parsonTargets
+      FILE parsonConfig.cmake
+      NAMESPACE parson::
+      DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/parson
+  )
 else()
   find_package(parson REQUIRED CONFIG)
 endif()
@@ -376,9 +376,6 @@ else()
     set(LOCK_C_FILE ${SHARED_UTIL_ADAPTER_FOLDER}/lock_pthreads.c)
     set(THREAD_C_FILE ${SHARED_UTIL_ADAPTER_FOLDER}/threadapi_pthreads.c)
 endif()
-
-# Set CMAKE_INSTALL_LIBDIR if not defined
-include(GNUInstallDirs)
 
 if (NOT ${use_amqp} OR NOT ${use_http})
     set (build_service_client OFF)
