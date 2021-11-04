@@ -248,7 +248,7 @@ endif()
 set(IOTHUB_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client lib" FORCE)
 
 
-if(NOT ${dont_use_uploadtoblob} OR ${use_edge_modules})
+if(NOT ${dont_use_uploadtoblob} OR ${use_edge_modules} AND NOT ${use_installed_dependencies})
     include_directories(../deps/parson)
 endif()
 
@@ -423,7 +423,7 @@ if (${build_as_dynamic})
     if (${use_prov_client_core})
         target_link_libraries(iothub_client_dll hsm_security_client prov_auth_client)
     endif()
-    target_link_libraries(iothub_client_dll parson)
+    target_link_libraries(iothub_client_dll parson::parson)
 
     if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
         target_link_libraries(iothub_client_dll
@@ -440,7 +440,7 @@ add_library(iothub_client
 )
 setSdkTargetBuildProperties(iothub_client)
 target_link_libraries(iothub_client ${iothub_client_libs})
-target_link_libraries(iothub_client parson)
+target_link_libraries(iothub_client parson::parson)
 
 if (${use_prov_client_core})
     target_link_libraries(iothub_client hsm_security_client prov_auth_client)
@@ -480,7 +480,7 @@ if(${use_installed_dependencies})
     install(TARGETS ${iothub_client_libs} EXPORT azure_iot_sdksTargets
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/../bin
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
     )
     install(FILES ${iothub_client_h_install_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)

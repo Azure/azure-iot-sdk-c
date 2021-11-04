@@ -186,15 +186,20 @@ endif()
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # build the parson library for json parsing
-add_library(parson
-    ./deps/parson/parson.c
-    ./deps/parson/parson.h
-)
-if (MSVC)
-    set_source_files_properties(../deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
+if(NOT ${use_installed_dependencies})
+  add_library(parson
+      ./deps/parson/parson.c
+      ./deps/parson/parson.h
+  )
+  add_library(parson::parson ALIAS parson)
+  if (MSVC)
+      set_source_files_properties(../deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
+  endif()
+  set(parson_h_install_files ./deps/parson/parson.h)
+  set(parson_install_libs parson)
+else()
+  find_package(parson REQUIRED CONFIG)
 endif()
-set(parson_h_install_files ./deps/parson/parson.h)
-set(parson_install_libs parson)
 
 if (IN_OPENWRT)
     ADD_DEFINITIONS("$ENV{TARGET_LDFLAGS}" "$ENV{TARGET_CPPFLAGS}" "$ENV{TARGET_CFLAGS}")
@@ -403,7 +408,7 @@ endif()
 
 if (${use_installed_dependencies})
     # Install azure_iot_sdks
-    set(package_location "cmake")
+    set(package_location "${CMAKE_INSTALL_LIBDIR}/cmake/${PROEJCT_NAME}")
 
     include(CMakePackageConfigHelpers)
 
@@ -418,14 +423,16 @@ if (${use_installed_dependencies})
         COPYONLY
     )
 
-    install(FILES ${parson_h_install_files}
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
-    )
-    install(TARGETS ${parson_install_libs} EXPORT azure_iot_sdksTargets
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
-    )
+    if (NOT ${use_installed_dependencies})
+        install(FILES ${parson_h_install_files}
+          DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
+        )
+        install(TARGETS ${parson_install_libs} EXPORT azure_iot_sdksTargets
+          ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+          LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+          INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
+        )
+    endif()
 
     install(EXPORT azure_iot_sdksTargets
         FILE
