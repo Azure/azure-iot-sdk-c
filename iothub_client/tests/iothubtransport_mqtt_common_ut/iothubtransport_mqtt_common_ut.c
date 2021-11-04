@@ -6115,7 +6115,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_twin_succeed)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
-static void test_invalid_mqtt_twin_topic_setup(const char* mqtt_topic, const char* response_id)
+static void test_invalid_mqtt_twin_topic_setup(const char* mqtt_topic, const char* status_code, const char* response_id)
 {
     // arrange
     IOTHUBTRANSPORT_CONFIG config = { 0 };
@@ -6158,13 +6158,21 @@ static void test_invalid_mqtt_twin_topic_setup(const char* mqtt_topic, const cha
     STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(0);
     STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(0);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn("res");
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(0);
-    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn("200");
 
-    if (response_id != NULL)
+    if (status_code != NULL)
     {
         STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(0);
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(response_id);
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(status_code);
+
+        if (response_id != NULL)
+        {
+            STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(0);
+            STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(response_id);
+        }
+        else
+        {
+            STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(1);
+        }
     }
     else
     {
@@ -6187,14 +6195,19 @@ static void test_invalid_mqtt_twin_topic_setup(const char* mqtt_topic, const cha
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
+TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_twin_missing_status_code_fails)
+{
+    test_invalid_mqtt_twin_topic_setup(TEST_MQTT_DEV_TWIN_MSG_TOPIC_INVALID_REQUEST_ID, NULL, NULL);
+}
+
 TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_twin_invalid_request_id_fails)
 {
-    test_invalid_mqtt_twin_topic_setup(TEST_MQTT_DEV_TWIN_MSG_TOPIC_INVALID_REQUEST_ID, "?$NotSetRequestId=2");
+    test_invalid_mqtt_twin_topic_setup(TEST_MQTT_DEV_TWIN_MSG_TOPIC_INVALID_REQUEST_ID, "200", "?$NotSetRequestId=2");
 }
 
 TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_twin_missing_request_id_fails)
 {
-    test_invalid_mqtt_twin_topic_setup(TEST_MQTT_DEV_TWIN_MSG_TOPIC_INVALID_REQUEST_ID, NULL);
+    test_invalid_mqtt_twin_topic_setup(TEST_MQTT_DEV_TWIN_MSG_TOPIC_MISSING_REQUEST_ID, "200", NULL);
 }
 
 TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_twin_fail)
