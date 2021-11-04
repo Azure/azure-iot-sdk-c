@@ -367,27 +367,27 @@ if(${use_installed_dependencies})
     include(CMakePackageConfigHelpers)
 
     write_basic_package_version_file(
-        "${CMAKE_CURRENT_BINARY_DIR}/azure_prov_sdk/azure_prov_sdkConfigVersion.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/azure_prov_client/azure_prov_clientConfigVersion.cmake"
         VERSION ${PROV_SDK_VERSION}
         COMPATIBILITY SameMajorVersion
     )
 
-    configure_file("../configs/azure_prov_sdkConfig.cmake"
-        "${CMAKE_CURRENT_BINARY_DIR}/azure_prov_sdk/azure_prov_sdkConfig.cmake"
+    configure_file("../configs/azure_prov_clientConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/azure_prov_client/azure_prov_clientConfig.cmake"
         COPYONLY
     )
 
     install(EXPORT azure_prov_sdksTargets
         FILE
-            "azure_prov_sdkTargets.cmake"
+            "azure_prov_clientTargets.cmake"
         DESTINATION
             ${package_location}
     )
 
     install(
         FILES
-            "../configs/azure_prov_sdkConfig.cmake"
-            "${CMAKE_CURRENT_BINARY_DIR}/azure_prov_sdk/azure_prov_sdkConfigVersion.cmake"
+            "../configs/azure_prov_clientConfig.cmake"
+            "${CMAKE_CURRENT_BINARY_DIR}/azure_prov_client/azure_prov_clientConfigVersion.cmake"
         DESTINATION
             ${package_location}
     )
