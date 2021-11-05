@@ -103,8 +103,8 @@ int main()
     (void)prov_dev_security_init(hsm_type);
 
     // Set the symmetric key if using they auth type
-    //If using DPS with an enrollment group, this must the the derived key from the DPS Master key
-    //https://docs.microsoft.com/en-us/azure/iot-dps/how-to-legacy-device-symm-key#derive-a-device-key
+    // If using DPS with an enrollment group, this must the the derived device key from the DPS Primary Key
+    // https://docs.microsoft.com/en-us/azure/iot-dps/concepts-symmetric-key-attestation?tabs=azure-cli#group-enrollments
     //prov_dev_set_symmetric_key_info("<symm_registration_id>", "<symmetric_Key>");
 
     HTTP_PROXY_OPTIONS http_proxy;
