@@ -249,7 +249,7 @@ set(IOTHUB_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this 
 
 
 if(NOT ${dont_use_uploadtoblob} OR ${use_edge_modules} AND NOT ${use_installed_dependencies})
-    include_directories(../deps/parson)
+    include_directories(${CMAKE_CURRENT_LIST_DIR}/../deps/parson)
 endif()
 
 include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})

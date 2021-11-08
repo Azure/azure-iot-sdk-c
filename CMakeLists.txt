@@ -190,16 +190,16 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 # build the parson library for json parsing
 if(NOT ${use_installed_dependencies})
   add_library(parson
-      ./deps/parson/parson.c
-      ./deps/parson/parson.h
+      ${CMAKE_CURRENT_LIST_DIR}/deps/parson/parson.c
+      ${CMAKE_CURRENT_LIST_DIR}/deps/parson/parson.h
   )
   add_library(parson::parson ALIAS parson)
   if (MSVC)
-      set_source_files_properties(./deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
+      set_source_files_properties(${CMAKE_CURRENT_LIST_DIR}/deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
   endif()
 
   target_include_directories(parson PUBLIC $<INSTALL_INTERFACE:include>)
-  set_target_properties(parson PROPERTIES PUBLIC_HEADER ./deps/parson/parson.h)
+  set_target_properties(parson PROPERTIES PUBLIC_HEADER ${CMAKE_CURRENT_LIST_DIR}/deps/parson/parson.h)
 
   install(
       TARGETS parson
