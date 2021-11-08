@@ -163,6 +163,8 @@ int main()
     (void)IoTHub_Init();
     (void)prov_dev_security_init(hsm_type);
     // Set the symmetric key if using they auth type
+    // If using DPS with an enrollment group, this must the the derived device key from the DPS Primary Key
+    // https://docs.microsoft.com/azure/iot-dps/concepts-symmetric-key-attestation?tabs=azure-cli#group-enrollments
     //prov_dev_set_symmetric_key_info("<symm_registration_id>", "<symmetric_Key>");
 
     PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION prov_transport;
