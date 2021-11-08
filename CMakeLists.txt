@@ -28,6 +28,8 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     add_definitions(-DMACOSX)
 endif()
 
+# Set CMAKE_INSTALL_LIBDIR if not defined
+include(GNUInstallDirs)
 
 include (CTest)
 
@@ -186,15 +188,36 @@ endif()
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # build the parson library for json parsing
-add_library(parson
-    ./deps/parson/parson.c
-    ./deps/parson/parson.h
-)
-if (MSVC)
-    set_source_files_properties(../deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
+if(NOT ${use_installed_dependencies})
+  add_library(parson
+      ${CMAKE_CURRENT_LIST_DIR}/deps/parson/parson.c
+      ${CMAKE_CURRENT_LIST_DIR}/deps/parson/parson.h
+  )
+  add_library(parson::parson ALIAS parson)
+  if (MSVC)
+      set_source_files_properties(${CMAKE_CURRENT_LIST_DIR}/deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
+  endif()
+
+  target_include_directories(parson PUBLIC $<INSTALL_INTERFACE:include>)
+  set_target_properties(parson PROPERTIES PUBLIC_HEADER ${CMAKE_CURRENT_LIST_DIR}/deps/parson/parson.h)
+
+  install(
+      TARGETS parson
+      EXPORT parsonTargets
+      RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  )
+  install(
+      EXPORT parsonTargets
+      FILE parsonConfig.cmake
+      NAMESPACE parson::
+      DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/parson
+  )
+else()
+  find_package(parson REQUIRED CONFIG)
 endif()
-set(parson_h_install_files ./deps/parson/parson.h)
-set(parson_install_libs parson)
 
 if (IN_OPENWRT)
     ADD_DEFINITIONS("$ENV{TARGET_LDFLAGS}" "$ENV{TARGET_CPPFLAGS}" "$ENV{TARGET_CFLAGS}")
@@ -357,9 +380,6 @@ else()
     set(THREAD_C_FILE ${SHARED_UTIL_ADAPTER_FOLDER}/threadapi_pthreads.c)
 endif()
 
-# Set CMAKE_INSTALL_LIBDIR if not defined
-include(GNUInstallDirs)
-
 if (NOT ${use_amqp} OR NOT ${use_http})
     set (build_service_client OFF)
     message(STATUS "iothub_service_client build is disabled (AMQP and HTTP support are required)")
@@ -403,7 +423,7 @@ endif()
 
 if (${use_installed_dependencies})
     # Install azure_iot_sdks
-    set(package_location "cmake")
+    set(package_location "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
 
     include(CMakePackageConfigHelpers)
 
@@ -416,15 +436,6 @@ if (${use_installed_dependencies})
     configure_file("configs/${PROJECT_NAME}Config.cmake"
         "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}Config.cmake"
         COPYONLY
-    )
-
-    install(FILES ${parson_h_install_files}
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
-    )
-    install(TARGETS ${parson_install_libs} EXPORT azure_iot_sdksTargets
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
     )
 
     install(EXPORT azure_iot_sdksTargets
@@ -442,11 +453,5 @@ if (${use_installed_dependencies})
         DESTINATION
             ${package_location}
     )
-else()
-    install(FILES ${parson_h_install_files}
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
-    install(TARGETS ${parson_install_libs}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
 

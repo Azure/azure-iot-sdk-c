@@ -14,45 +14,45 @@ else()
 
     if(${hsm_type_x509})
         set(msr_riot_c_files
-            ./RIoT/Simulation/DICE/DiceSha256.c
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/RiotCrypt.c
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/aes.c
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/base64.c
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/bignum.c
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/derenc.c
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/ecdh.c
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/ecdsa.c
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/ecp.c
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/ecp_curves.c
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/hkdf.c
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/hmac_drbg.c
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/md.c
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/platform_util.c
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/sha1.c
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/sha256.c
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/x509bldr.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/DICE/DiceSha256.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/RiotCrypt.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/aes.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/base64.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/bignum.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/derenc.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/ecdh.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/ecdsa.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/ecp.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/ecp_curves.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/hkdf.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/hmac_drbg.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/md.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/platform_util.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/sha1.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/sha256.c
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/x509bldr.c
         )
 
         set(msr_riot_h_files
-            ./RIoT/Simulation/DICE/DiceSha256.h
-            ./RIoT/Simulation/RIoT/Core/RIoT.h
-            ./RIoT/Simulation/RIoT/Core/RiotStatus.h
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/RiotCrypt.h
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/base64.h
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/derenc.h
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/x509bldr.h
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/aes.h
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/ecdh.h
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/ecdsa.h
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/ecp.h
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/bignum.h
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/hkdf.h
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/hmac_drbg.h
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/md.h
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/platform.h
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/platform_util.h
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/sha1.h
-            ./RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/sha256.h
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/DICE/DiceSha256.h
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoT.h
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RiotStatus.h
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/include/RiotCrypt.h
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/include/base64.h
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/include/derenc.h
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/include/x509bldr.h
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/aes.h
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/ecdh.h
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/ecdsa.h
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/ecp.h
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/bignum.h
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/hkdf.h
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/hmac_drbg.h
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/md.h
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/platform.h
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/platform_util.h
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/sha1.h
+            ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/include/mbedtls/sha256.h
         )
 
         if(MSVC)
