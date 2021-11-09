@@ -191,7 +191,7 @@ jobs:
   displayName: 'Ubuntu 18.04'
   steps:
   - script: |
-      sudo -E ./jenkins/ubuntu2004_c.sh
+      sudo -E ./jenkins/ubuntu_c.sh
     displayName: 'Build'
   - script: |
       export OPENSSL_ia32cap=0x00000000
@@ -226,7 +226,7 @@ jobs:
   displayName: 'Ubuntu 20.04'
   steps:
   - script: |
-      sudo -E ./jenkins/ubuntu2004_c.sh
+      sudo -E ./jenkins/ubuntu_c.sh
     displayName: 'Build'
   - script: |
       export OPENSSL_ia32cap=0x00000000
