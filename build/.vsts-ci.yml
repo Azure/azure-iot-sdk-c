@@ -185,13 +185,13 @@ jobs:
     condition: always()
 - job: ubuntu2004
   variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-2004"
   pool:
     name: 'sdk-c--ubuntu-18'
-  displayName: 'Ubuntu 16.04'
+  displayName: 'Ubuntu 20.04'
   steps:
   - script: |
-      sudo -E ./jenkins/ubuntu1604_c.sh
+      sudo -E ./jenkins/ubuntu2004_c.sh
     displayName: 'Build'
   - script: |
       export OPENSSL_ia32cap=0x00000000
