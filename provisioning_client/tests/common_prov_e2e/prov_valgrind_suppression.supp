@@ -67,3 +67,42 @@
    Helgrind:Race
    fun:get_time_ns
 }
+{
+   drd thinking the LOCK_HANDLE is not a mutex
+   drd:MutexErr
+   fun:pthread_mutex_destroy
+   obj:/usr/lib/x86_64-linux-gnu/libp11-kit.so.0.3.0
+   fun:_dl_fini
+   fun:__run_exit_handlers
+   fun:exit
+   fun:(below main)
+}
+{
+   drd thinking the LOCK_HANDLE is not a mutex
+   drd:MutexErr
+   fun:pthread_mutex_destroy
+   fun:_dl_fini
+   fun:__run_exit_handlers
+   fun:exit
+   fun:(below main)
+}
+{
+   Helgrind thinking the LOCK_HANDLE is not a mutex (invalid arg)
+   Helgrind:Misc
+   obj:/usr/lib/x86_64-linux-gnu/valgrind/vgpreload_helgrind-amd64-linux.so
+   obj:/usr/lib/x86_64-linux-gnu/libp11-kit.so.0.3.0
+   fun:_dl_fini
+   fun:__run_exit_handlers
+   fun:exit
+   fun:(below main)
+}
+{
+   Helgrind thinking the LOCK_HANDLE is not a mutex (invalid arg)
+   Helgrind:Misc
+   obj:/usr/lib/x86_64-linux-gnu/valgrind/vgpreload_helgrind-amd64-linux.so
+   fun:_dl_fini
+   fun:__run_exit_handlers
+   fun:exit
+   fun:(below main)
+}
+
