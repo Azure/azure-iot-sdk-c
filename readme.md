@@ -143,7 +143,7 @@ If you are considering porting the device client SDK for C to a new platform, ch
 If you encounter any bugs, have suggestions for new features or if you would like to become an active contributor to this project please follow the instructions provided in the [contribution guidelines](.github/CONTRIBUTING.md).
 
 ## Support
-* Have a feature request for SDKs? Please post it on [User Voice](https://feedback.azure.com/forums/321918-azure-iot) to help us prioritize.
+* Have a feature request for SDKs? Please post it on [Azure Community Feedback](https://feedback.azure.com/d365community/forum/fcb810f7-f824-ec11-b6e6-000d3a4f0da0) to help us prioritize.
 * Have a technical question? Ask on [Stack Overflow](https://stackoverflow.com/questions/tagged/azure-iot-hub) with tag "azure-iot-hub".
 * Need Support? Every customer with an active Azure subscription has access to [support](https://docs.microsoft.com/en-us/azure/azure-supportability/how-to-create-azure-support-request) with guaranteed response time.  Consider submitting a ticket and get assistance from Microsoft support team
 * Found a bug? Please help us fix it by thoroughly documenting it and filing an issue on [our GitHub issues][c-github-issues].
