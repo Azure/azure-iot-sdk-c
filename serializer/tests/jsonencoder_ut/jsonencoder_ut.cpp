@@ -699,7 +699,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
 
         TEST_FUNCTION(JSONEncoder_EncodeTree_adds_an_opening_curly_paranthesis)
@@ -716,7 +717,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             (void)JSONEncoder_EncodeTree(TEST_MULTITREE_HANDLE_1, global_bufferTemp, TestFunc_NodesAreStrings);
 
             ///assert
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         TEST_FUNCTION(JSONEncoder_EncodeTree_iterates_over_children_1) /*notice how this tree has NO children*/
         {
@@ -733,7 +735,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             ///assert
             //basically not throws from the mocking simulators
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_2*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -789,7 +792,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_2*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -808,7 +812,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_MULTITREE_ERROR, result);
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_2*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -831,7 +836,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_2*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -861,7 +867,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_2*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -898,7 +905,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_2*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -937,7 +945,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_2*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -982,7 +991,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_2*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -1029,7 +1039,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_2*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -1084,7 +1095,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_2*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -1136,7 +1148,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }        
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -1209,7 +1222,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -1230,7 +1244,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_MULTITREE_ERROR, result);
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -1260,7 +1275,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -1291,7 +1307,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }        
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -1322,7 +1339,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_MULTITREE_ERROR, result);
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -1361,7 +1379,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -1399,7 +1418,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -1441,7 +1461,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -1487,7 +1508,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -1534,7 +1556,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_TOSTRING_FUNCTION_ERROR, result);
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -1586,7 +1609,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -1633,7 +1657,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -1689,7 +1714,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -1748,7 +1774,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -1809,7 +1836,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -1872,7 +1900,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -1939,7 +1968,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -2010,7 +2040,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -2083,7 +2114,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -2179,7 +2211,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         
 
@@ -2201,7 +2234,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_MULTITREE_ERROR, result);
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -2231,7 +2265,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -2266,7 +2301,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -2305,7 +2341,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -2344,7 +2381,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -2385,7 +2423,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -2431,7 +2470,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -2481,7 +2521,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -2529,7 +2570,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -2581,7 +2623,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -2637,7 +2680,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -2697,7 +2741,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -2751,7 +2796,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -2815,7 +2861,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -2878,7 +2925,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_MULTITREE_ERROR, result);
            
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -2950,7 +2998,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -3016,7 +3065,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -3091,7 +3141,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -3169,7 +3220,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -3251,7 +3303,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -3332,7 +3385,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -3419,7 +3473,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -3510,7 +3565,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -3595,7 +3651,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_TOSTRING_FUNCTION_ERROR, result);
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
@@ -3689,8 +3746,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
@@ -3790,7 +3847,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
@@ -3810,7 +3868,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_MULTITREE_ERROR, result);
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
@@ -3839,7 +3898,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
@@ -3872,7 +3932,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
@@ -3908,7 +3969,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
@@ -3947,7 +4009,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
@@ -3988,7 +4051,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
@@ -4031,7 +4095,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
@@ -4080,7 +4145,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
@@ -4125,7 +4191,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
@@ -4172,7 +4239,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
 
-           ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
@@ -4227,7 +4295,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
@@ -4288,7 +4357,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
@@ -4348,7 +4418,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
@@ -4412,7 +4483,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
@@ -4480,7 +4552,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
@@ -4546,7 +4619,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_TOSTRING_FUNCTION_ERROR, result);
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
@@ -4619,7 +4693,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
@@ -4686,7 +4761,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
                         
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
@@ -4765,7 +4841,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
@@ -4850,7 +4927,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
@@ -4928,7 +5006,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
@@ -5018,7 +5097,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
@@ -5112,7 +5192,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
@@ -5201,7 +5282,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_TOSTRING_FUNCTION_ERROR, result);
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
@@ -5291,7 +5373,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
@@ -5381,7 +5464,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }        
 
         /*so it turns out I can write tests at about 8 pair of child:value / day*/
@@ -5527,7 +5611,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_TOSTRING_RESULT, JSON_ENCODER_TOSTRING_INVALID_ARG, result);
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         TEST_FUNCTION(JSONEncoder_CharPtr_ToString_with_NULL_value_fails)
         {
@@ -5538,7 +5623,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_TOSTRING_RESULT, JSON_ENCODER_TOSTRING_INVALID_ARG, result);
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }        
         TEST_FUNCTION(JSONEncoder_CharPtr_ToString_uses_strcpy_s)
         {
@@ -5554,7 +5640,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             ASSERT_ARE_EQUAL(JSON_ENCODER_TOSTRING_RESULT, JSON_ENCODER_TOSTRING_OK, result);
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         TEST_FUNCTION(JSONEncoder_CharPtr_ToString_fails_when_strcpy_s_fails)
         {
@@ -5571,7 +5658,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             ASSERT_ARE_EQUAL(JSON_ENCODER_TOSTRING_RESULT, JSON_ENCODER_TOSTRING_ERROR, result);
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
 
 END_TEST_SUITE(JSONEncoder_ut)
