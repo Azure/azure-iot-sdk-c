@@ -218,7 +218,7 @@ jobs:
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'Cleanup'
     condition: always()
-    - job: ubuntu2004
+- job: ubuntu2004
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-2004"
   pool:
