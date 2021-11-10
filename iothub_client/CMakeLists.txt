@@ -438,6 +438,10 @@ add_library(iothub_client
     ${iothub_client_c_files}
     ${iothub_client_h_files}
 )
+target_include_directories(iothub_client
+    PUBLIC
+      ${CMAKE_CURRENT_LIST_DIR}/inc
+)
 setSdkTargetBuildProperties(iothub_client)
 target_link_libraries(iothub_client ${iothub_client_libs})
 target_link_libraries(iothub_client parson::parson)
