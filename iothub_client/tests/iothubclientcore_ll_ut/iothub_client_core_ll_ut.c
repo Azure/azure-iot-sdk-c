@@ -45,7 +45,6 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 #include "azure_c_shared_utility/constbuffer.h"
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/envvariable.h"
-#include "azure_c_shared_utility/urlencode.h"
 
 #include "iothub_client_version.h"
 #include "iothub_message.h"
@@ -59,8 +58,9 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 
 #include "iothub_transport_ll.h"
 #include "iothub_client_core_common.h"
-#include "internal/iothub_transport_ll_private.h"
 #undef ENABLE_MOCKS
+
+#include "internal/iothub_transport_ll_private.h"
 
 #include "iothub_client_core_ll.h"
 #include "internal/iothub_client_private.h"

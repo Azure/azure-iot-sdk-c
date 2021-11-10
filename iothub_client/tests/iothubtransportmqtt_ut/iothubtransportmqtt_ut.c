@@ -33,10 +33,10 @@ static void real_free(void* ptr)
 #include "azure_c_shared_utility/xio.h"
 #include "azure_c_shared_utility/tlsio.h"
 #include "internal/iothubtransport_mqtt_common.h"
-#include "internal/iothubtransport.h"
 
 #undef ENABLE_MOCKS
 
+#include "internal/iothubtransport.h"
 #include "iothubtransportmqtt.h"
 
 static const char* TEST_STRING_VALUE = "FULLY_QUALIFIED_HOSTNAME";
