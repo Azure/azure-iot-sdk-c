@@ -440,7 +440,8 @@ add_library(iothub_client
 )
 target_include_directories(iothub_client
     PUBLIC
-      ${CMAKE_CURRENT_LIST_DIR}/inc
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+    $<INSTALL_INTERFACE:/azureiot/include>
 )
 setSdkTargetBuildProperties(iothub_client)
 target_link_libraries(iothub_client ${iothub_client_libs})
