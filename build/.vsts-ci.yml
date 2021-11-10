@@ -137,7 +137,7 @@ jobs:
     condition: always()
 - job: linuxoptions
   variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/vsts-linux-c-ubuntu"
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-2004"
   pool: 
     name: 'sdk-c--ubuntu-18'
   displayName: 'Linux with Options'
@@ -150,7 +150,7 @@ jobs:
     condition: always()
 - job: clang
   variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/ubuntu-clang"
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-clang"
   pool: 
     name: 'sdk-c--ubuntu-18'
   displayName: 'Clang'
@@ -288,7 +288,7 @@ jobs:
     condition: always()
 - job: linux_installed_deps
   variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-2004"
   pool: 
     name: 'sdk-c--ubuntu-18'
   displayName: 'Linux with Installed Deps'
@@ -320,7 +320,7 @@ jobs:
     condition: always()
 - job: wolfssl
   variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/wolfssl-1804"
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-wolfssl"
   pool:
     name: 'sdk-c--ubuntu-18'
   displayName: 'WolfSSL'
@@ -355,7 +355,7 @@ jobs:
     condition: always()
 - job: bearssl
   variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/devops-c-bearssl"
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-bearssl"
   pool:
     name: 'sdk-c--ubuntu-18'
   displayName: 'BearSSL'
@@ -390,7 +390,7 @@ jobs:
     condition: always()
 - job: cares
   variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/c-ares"
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-c-ares"
   pool: 
     name: 'sdk-c--ubuntu-18'
   displayName: 'Linux with C-Ares'
