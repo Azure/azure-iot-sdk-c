@@ -57,6 +57,8 @@ void real_free(void* ptr)
 #define ENABLE_MOCK_FILTERING
 
 #define please_mock_amqp_messenger_create MOCK_ENABLED
+#define please_mock_amqp_messenger_destroy MOCK_ENABLED
+#define please_mock_amqp_messenger_destroy_disposition_info MOCK_ENABLED
 #define please_mock_amqp_messenger_do_work MOCK_ENABLED
 #define please_mock_amqp_messenger_retrieve_options MOCK_ENABLED
 #define please_mock_amqp_messenger_send_async MOCK_ENABLED
@@ -64,25 +66,12 @@ void real_free(void* ptr)
 #define please_mock_amqp_messenger_start MOCK_ENABLED
 #define please_mock_amqp_messenger_stop MOCK_ENABLED
 #define please_mock_amqp_messenger_subscribe_for_messages MOCK_ENABLED
-#define please_mock_amqpvalue_create_symbol MOCK_ENABLED
 #define please_mock_amqpvalue_create_map MOCK_ENABLED
 #define please_mock_amqpvalue_create_message_annotations MOCK_ENABLED
 #define please_mock_amqpvalue_create_null MOCK_ENABLED
 #define please_mock_amqpvalue_create_string MOCK_ENABLED
+#define please_mock_amqpvalue_create_symbol MOCK_ENABLED
 #define please_mock_amqpvalue_destroy MOCK_ENABLED
-#define please_mock_amqpvalue_set_map_value MOCK_ENABLED
-#define please_mock_message_add_body_amqp_data MOCK_ENABLED
-#define please_mock_message_create MOCK_ENABLED
-#define please_mock_message_destroy MOCK_ENABLED
-#define please_mock_message_get_properties MOCK_ENABLED
-#define please_mock_message_set_message_annotations MOCK_ENABLED
-#define please_mock_message_set_properties MOCK_ENABLED
-#define please_mock_properties_create MOCK_ENABLED
-#define please_mock_properties_destroy MOCK_ENABLED
-#define please_mock_properties_set_correlation_id MOCK_ENABLED
-
-#define please_mock_amqp_messenger_destroy MOCK_ENABLED
-#define please_mock_amqp_messenger_destroy_disposition_info MOCK_ENABLED
 #define please_mock_amqpvalue_get_int MOCK_ENABLED
 #define please_mock_amqpvalue_get_long MOCK_ENABLED
 #define please_mock_amqpvalue_get_map_key_value_pair MOCK_ENABLED
@@ -90,12 +79,22 @@ void real_free(void* ptr)
 #define please_mock_amqpvalue_get_string MOCK_ENABLED
 #define please_mock_amqpvalue_get_symbol MOCK_ENABLED
 #define please_mock_amqpvalue_get_type MOCK_ENABLED
+#define please_mock_amqpvalue_set_map_value MOCK_ENABLED
+#define please_mock_annotations MOCK_ENABLED
+#define please_mock_message_add_body_amqp_data MOCK_ENABLED
+#define please_mock_message_create MOCK_ENABLED
+#define please_mock_message_destroy MOCK_ENABLED
 #define please_mock_message_get_body_amqp_data_count MOCK_ENABLED
 #define please_mock_message_get_body_amqp_data_in_place MOCK_ENABLED
 #define please_mock_message_get_body_type MOCK_ENABLED
-#define please_mock_annotations MOCK_ENABLED
-#define please_mock_properties_get_correlation_id MOCK_ENABLED
 #define please_mock_message_get_message_annotations MOCK_ENABLED
+#define please_mock_message_get_properties MOCK_ENABLED
+#define please_mock_message_set_message_annotations MOCK_ENABLED
+#define please_mock_message_set_properties MOCK_ENABLED
+#define please_mock_properties_create MOCK_ENABLED
+#define please_mock_properties_destroy MOCK_ENABLED
+#define please_mock_properties_get_correlation_id MOCK_ENABLED
+#define please_mock_properties_set_correlation_id MOCK_ENABLED
 
 #include "azure_uamqp_c/amqp_definitions_fields.h"
 #include "azure_uamqp_c/messaging.h"
