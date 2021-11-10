@@ -47,6 +47,7 @@ void real_free(void* ptr)
 #include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_c_shared_utility/uniqueid.h"
 #include "azure_c_shared_utility/optionhandler.h"
+#include "azure_c_shared_utility/agenttime.h"
 
 #undef ENABLE_MOCK_FILTERING_SWITCH
 #define ENABLE_MOCK_FILTERING
