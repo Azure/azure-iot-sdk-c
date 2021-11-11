@@ -75,7 +75,9 @@ else()
     endif()
 endif()
 
-target_link_libraries(${theseTestsName}_exe provisioning_service_client)
-
-link_security_client(${theseTestsName}_exe)
-linkSharedUtil(${theseTestsName}_exe)
+target_link_libraries(${theseTestsName}_exe
+    provisioning_service_client
+    prov_auth_client
+    hsm_security_client
+    aziotsharedutil
+)
