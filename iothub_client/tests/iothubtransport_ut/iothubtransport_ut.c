@@ -34,16 +34,14 @@ static void my_gballoc_free(void* ptr)
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/lock.h"
-#include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/vector.h"
-#include "azure_c_shared_utility/crt_abstractions.h"
 #include "iothub_client_core_common.h"
 
 #include "iothub_client_core.h"
-#include "internal/iothub_transport_ll_private.h"
 #include "internal/iothub_client_private.h"
 #undef ENABLE_MOCKS
 
+#include "internal/iothub_transport_ll_private.h"
 #include "internal/iothubtransport.h"
 
 #define ENABLE_MOCKS

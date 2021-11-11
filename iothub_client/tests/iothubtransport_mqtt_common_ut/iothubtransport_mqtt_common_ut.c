@@ -55,15 +55,12 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 #include "azure_umqtt_c/mqtt_client.h"
 
 #include "internal/iothub_message_private.h"
-#include "internal/iothub_client_private.h"
 #include "iothub_client_options.h"
 #include "internal/iothub_client_retry_control.h"
 
 #include "azure_c_shared_utility/xio.h"
-#include "azure_c_shared_utility/tlsio.h"
 
 #include "azure_c_shared_utility/tickcounter.h"
-#include "azure_c_shared_utility/lock.h"
 #include "azure_c_shared_utility/string_tokenizer.h"
 #include "azure_c_shared_utility/urlencode.h"
 

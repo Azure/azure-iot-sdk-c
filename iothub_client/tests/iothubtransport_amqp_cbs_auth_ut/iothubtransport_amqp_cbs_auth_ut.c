@@ -54,7 +54,17 @@ static int real_strcmp(const char* str1, const char* str2)
 #define ENABLE_MOCKS
 #include "iothub_transport_ll.h"
 #include "azure_uamqp_c/async_operation.h"
+#include "azure_c_shared_utility/optionhandler.h"
+
+#undef ENABLE_MOCK_FILTERING_SWITCH
+#define ENABLE_MOCK_FILTERING
+
+#define please_mock_cbs_put_token_async MOCK_ENABLED
 #include "azure_uamqp_c/cbs.h"
+
+#undef ENABLE_MOCK_FILTERING_SWITCH
+#undef ENABLE_MOCK_FILTERING
+
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
