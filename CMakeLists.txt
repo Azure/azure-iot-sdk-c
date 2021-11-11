@@ -198,7 +198,10 @@ if(NOT ${use_installed_dependencies})
       set_source_files_properties(${CMAKE_CURRENT_LIST_DIR}/deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
   endif()
 
-  target_include_directories(parson PUBLIC $<INSTALL_INTERFACE:include>)
+  target_include_directories(parson PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/deps/parson>
+      $<INSTALL_INTERFACE:include>
+  )
   set_target_properties(parson PROPERTIES PUBLIC_HEADER ${CMAKE_CURRENT_LIST_DIR}/deps/parson/parson.h)
 
   install(
