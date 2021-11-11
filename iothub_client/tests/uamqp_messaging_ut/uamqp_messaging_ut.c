@@ -58,7 +58,6 @@ static void TEST_free(void* ptr)
 }
 
 #define ENABLE_MOCKS
-#include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/uuid.h"
