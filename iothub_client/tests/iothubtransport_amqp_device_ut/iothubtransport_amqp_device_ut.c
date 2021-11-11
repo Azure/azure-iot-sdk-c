@@ -46,11 +46,51 @@ void real_free(void* ptr)
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_c_shared_utility/uniqueid.h"
-#include "azure_uamqp_c/session.h"
+#include "azure_c_shared_utility/optionhandler.h"
 #include "internal/iothub_client_private.h"
+
+#undef ENABLE_MOCK_FILTERING_SWITCH
+#define ENABLE_MOCK_FILTERING
+
+#define please_mock_authentication_create MOCK_ENABLED
+#define please_mock_authentication_destroy MOCK_ENABLED
+#define please_mock_authentication_do_work MOCK_ENABLED
+#define please_mock_authentication_retrieve_options MOCK_ENABLED
+#define please_mock_authentication_set_option MOCK_ENABLED
+#define please_mock_authentication_start MOCK_ENABLED
+#define please_mock_authentication_stop MOCK_ENABLED
+#define please_mock_telemetry_messenger_create MOCK_ENABLED
+#define please_mock_telemetry_messenger_destroy MOCK_ENABLED
+#define please_mock_telemetry_messenger_do_work MOCK_ENABLED
+#define please_mock_telemetry_messenger_get_send_status MOCK_ENABLED
+#define please_mock_telemetry_messenger_retrieve_options MOCK_ENABLED
+#define please_mock_telemetry_messenger_send_async MOCK_ENABLED
+#define please_mock_telemetry_messenger_send_message_disposition MOCK_ENABLED
+#define please_mock_telemetry_messenger_set_option MOCK_ENABLED
+#define please_mock_telemetry_messenger_start MOCK_ENABLED
+#define please_mock_telemetry_messenger_stop MOCK_ENABLED
+#define please_mock_telemetry_messenger_subscribe_for_messages MOCK_ENABLED
+#define please_mock_telemetry_messenger_unsubscribe_for_messages MOCK_ENABLED
+#define please_mock_twin_messenger_create MOCK_ENABLED
+#define please_mock_twin_messenger_destroy MOCK_ENABLED
+#define please_mock_twin_messenger_do_work MOCK_ENABLED
+#define please_mock_twin_messenger_get_twin_async MOCK_ENABLED
+#define please_mock_twin_messenger_report_state_async MOCK_ENABLED
+#define please_mock_twin_messenger_set_option MOCK_ENABLED
+#define please_mock_twin_messenger_subscribe MOCK_ENABLED
+#define please_mock_twin_messenger_start MOCK_ENABLED
+#define please_mock_twin_messenger_stop MOCK_ENABLED
+#define please_mock_twin_messenger_unsubscribe MOCK_ENABLED
+
+#include "azure_uamqp_c/session.h"
 #include "internal/iothubtransport_amqp_telemetry_messenger.h"
 #include "internal/iothubtransport_amqp_twin_messenger.h"
 #include "internal/iothubtransport_amqp_cbs_auth.h"
+
+#undef ENABLE_MOCK_FILTERING_SWITCH
+#undef ENABLE_MOCK_FILTERING
+
+
 #include "internal/iothub_client_authorization.h"
 
 #undef ENABLE_MOCKS

@@ -47,10 +47,51 @@ void real_free(void* ptr)
 #include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_c_shared_utility/uniqueid.h"
 #include "azure_c_shared_utility/optionhandler.h"
+#include "azure_c_shared_utility/agenttime.h"
+
+#undef ENABLE_MOCK_FILTERING_SWITCH
+#define ENABLE_MOCK_FILTERING
+
+#define please_mock_amqpvalue_create_map MOCK_ENABLED
+#define please_mock_amqpvalue_create_string MOCK_ENABLED
+#define please_mock_amqpvalue_create_symbol MOCK_ENABLED
+#define please_mock_amqpvalue_destroy MOCK_ENABLED
+#define please_mock_amqpvalue_set_map_value MOCK_ENABLED
+#define please_mock_link_create MOCK_ENABLED
+#define please_mock_link_destroy MOCK_ENABLED
+#define please_mock_link_get_peer_max_message_size MOCK_ENABLED
+#define please_mock_link_set_attach_properties MOCK_ENABLED
+#define please_mock_link_set_max_message_size MOCK_ENABLED
+#define please_mock_link_set_rcv_settle_mode MOCK_ENABLED
+#define please_mock_message_add_body_amqp_data MOCK_ENABLED
+#define please_mock_message_create MOCK_ENABLED
+#define please_mock_message_destroy MOCK_ENABLED
+#define please_mock_message_set_message_format MOCK_ENABLED
+#define please_mock_messagereceiver_close MOCK_ENABLED
+#define please_mock_messagereceiver_create MOCK_ENABLED
+#define please_mock_messagereceiver_destroy MOCK_ENABLED
+#define please_mock_messagereceiver_get_link_name MOCK_ENABLED
+#define please_mock_messagereceiver_get_received_message_id MOCK_ENABLED
+#define please_mock_messagereceiver_open MOCK_ENABLED
+#define please_mock_messagereceiver_send_message_disposition MOCK_ENABLED
+#define please_mock_messagesender_create MOCK_ENABLED
+#define please_mock_messagesender_destroy MOCK_ENABLED
+#define please_mock_messagesender_open MOCK_ENABLED
+#define please_mock_messagesender_send_async MOCK_ENABLED
+#define please_mock_messaging_create_source MOCK_ENABLED
+#define please_mock_messaging_create_target MOCK_ENABLED
+#define please_mock_messaging_delivery_accepted MOCK_ENABLED
+#define please_mock_messaging_delivery_rejected MOCK_ENABLED
+#define please_mock_messaging_delivery_released MOCK_ENABLED
+
 #include "azure_uamqp_c/link.h"
 #include "azure_uamqp_c/messaging.h"
 #include "azure_uamqp_c/message_sender.h"
 #include "azure_uamqp_c/message_receiver.h"
+
+#undef ENABLE_MOCK_FILTERING_SWITCH
+#undef ENABLE_MOCK_FILTERING
+
 #include "internal/iothub_client_private.h"
 #include "iothub_client_version.h"
 #include "internal/uamqp_messaging.h"
@@ -3563,3 +3604,4 @@ TEST_FUNCTION(telemetry_messenger_retrieve_options_failure_checks)
 }
 
 END_TEST_SUITE(iothubtr_amqp_tel_msgr_ut)
+

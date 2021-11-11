@@ -55,13 +55,56 @@ extern "C"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "azure_uamqp_c/amqpvalue.h"
 #include "azure_uamqp_c/amqp_definitions_application_properties.h"
+
+#undef ENABLE_MOCK_FILTERING_SWITCH
+#define ENABLE_MOCK_FILTERING
+
+#define please_mock_amqpvalue_create_map MOCK_ENABLED
+#define please_mock_amqpvalue_create_symbol MOCK_ENABLED
+#define please_mock_amqpvalue_create_uuid MOCK_ENABLED
+#define please_mock_amqpvalue_destroy MOCK_ENABLED
+#define please_mock_amqpvalue_get_map_value MOCK_ENABLED
+#define please_mock_amqpvalue_get_string MOCK_ENABLED
+#define please_mock_amqpvalue_set_map_value MOCK_ENABLED
+#define please_mock_application_properties_destroy MOCK_ENABLED
+#define please_mock_link_create MOCK_ENABLED
+#define please_mock_link_destroy MOCK_ENABLED
+#define please_mock_link_set_attach_properties MOCK_ENABLED
+#define please_mock_message_add_body_amqp_data MOCK_ENABLED
+#define please_mock_message_create MOCK_ENABLED
+#define please_mock_message_destroy MOCK_ENABLED
+#define please_mock_message_get_application_properties MOCK_ENABLED
+#define please_mock_message_get_body_amqp_data_in_place MOCK_ENABLED
+#define please_mock_message_get_properties MOCK_ENABLED
+#define please_mock_message_set_application_properties MOCK_ENABLED
+#define please_mock_message_set_properties MOCK_ENABLED
+#define please_mock_messagereceiver_create MOCK_ENABLED
+#define please_mock_messagereceiver_destroy MOCK_ENABLED
+#define please_mock_messagereceiver_open MOCK_ENABLED
+#define please_mock_messagesender_create MOCK_ENABLED
+#define please_mock_messagesender_destroy MOCK_ENABLED
+#define please_mock_messagesender_open MOCK_ENABLED
+#define please_mock_messagesender_send_async MOCK_ENABLED
+#define please_mock_messaging_create_source MOCK_ENABLED
+#define please_mock_messaging_create_target MOCK_ENABLED
+#define please_mock_messaging_delivery_accepted MOCK_ENABLED
+#define please_mock_messaging_delivery_rejected MOCK_ENABLED
+#define please_mock_messaging_delivery_released MOCK_ENABLED
+#define please_mock_properties_create MOCK_ENABLED
+#define please_mock_properties_destroy MOCK_ENABLED
+#define please_mock_properties_get_correlation_id MOCK_ENABLED
+#define please_mock_properties_set_correlation_id MOCK_ENABLED
+
+#include "azure_uamqp_c/amqpvalue.h"
 #include "azure_uamqp_c/link.h"
 #include "azure_uamqp_c/message_receiver.h"
 #include "azure_uamqp_c/message_sender.h"
 #include "azure_uamqp_c/messaging.h"
 #include "azure_uamqp_c/message.h"
+
+#undef ENABLE_MOCK_FILTERING_SWITCH
+#undef ENABLE_MOCK_FILTERING
 
 #undef ENABLE_MOCKS
 

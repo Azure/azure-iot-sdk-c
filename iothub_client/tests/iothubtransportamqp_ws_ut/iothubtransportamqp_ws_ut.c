@@ -40,7 +40,6 @@ static void real_free(void* ptr)
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/http_proxy_io.h"
 #include "internal/iothubtransport_amqp_common.h"
-#include "internal/iothub_transport_ll_private.h"
 
 MOCKABLE_FUNCTION(, bool, Transport_MessageCallbackFromInput, IOTHUB_MESSAGE_HANDLE, messageHandle, void*, ctx);
 MOCKABLE_FUNCTION(, bool, Transport_MessageCallback, IOTHUB_MESSAGE_HANDLE, messageHandle, void*, ctx);

@@ -65,7 +65,6 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/agenttime.h"
 #include "iothub_client_core_ll.h"
-#include "iothub_module_client_ll.h"
 #include "internal/iothubtransport.h"
 
 #undef ENABLE_MOCKS
@@ -139,9 +138,7 @@ static IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT my_FileUpload_GetData_CallbackE
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/gballoc.h"
-#include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/singlylinkedlist.h"
-#include "azure_c_shared_utility/vector.h"
 #include "azure_c_shared_utility/threadapi.h"
 
 MOCKABLE_FUNCTION(, void, test_event_confirmation_callback, IOTHUB_CLIENT_CONFIRMATION_RESULT, result, void*, userContextCallback);

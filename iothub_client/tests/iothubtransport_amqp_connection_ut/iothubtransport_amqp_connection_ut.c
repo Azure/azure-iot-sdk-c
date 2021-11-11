@@ -46,12 +46,38 @@ void real_free(void* ptr)
 #include "azure_c_shared_utility/xio.h"
 #include "azure_c_shared_utility/uniqueid.h"
 #include "azure_c_shared_utility/strings.h"
+
+#undef ENABLE_MOCK_FILTERING_SWITCH
+#define ENABLE_MOCK_FILTERING
+
+#define please_mock_cbs_create MOCK_ENABLED
+#define please_mock_cbs_destroy MOCK_ENABLED
+#define please_mock_cbs_open_async MOCK_ENABLED
+#define please_mock_connection_create2 MOCK_ENABLED
+#define please_mock_connection_destroy MOCK_ENABLED
+#define please_mock_connection_dowork MOCK_ENABLED
+#define please_mock_connection_set_idle_timeout MOCK_ENABLED
+#define please_mock_connection_set_remote_idle_timeout_empty_frame_send_ratio MOCK_ENABLED
+#define please_mock_connection_set_trace MOCK_ENABLED
+#define please_mock_saslclientio_get_interface_description MOCK_ENABLED
+#define please_mock_saslmechanism_create MOCK_ENABLED
+#define please_mock_saslmechanism_destroy MOCK_ENABLED
+#define please_mock_saslmssbcbs_get_interface MOCK_ENABLED
+#define please_mock_session_create MOCK_ENABLED
+#define please_mock_session_destroy MOCK_ENABLED
+#define please_mock_session_set_incoming_window MOCK_ENABLED
+#define please_mock_session_set_outgoing_window MOCK_ENABLED
+#define please_mock_UniqueId_Generate MOCK_ENABLED
+
 #include "azure_uamqp_c/session.h"
 #include "azure_uamqp_c/cbs.h"
 #include "azure_uamqp_c/sasl_mechanism.h"
 #include "azure_uamqp_c/saslclientio.h"
 #include "azure_uamqp_c/sasl_mssbcbs.h"
 #include "azure_uamqp_c/connection.h"
+
+#undef ENABLE_MOCK_FILTERING_SWITCH
+#undef ENABLE_MOCK_FILTERING
 #undef ENABLE_MOCKS
 
 #include "internal/iothubtransport_amqp_connection.h"

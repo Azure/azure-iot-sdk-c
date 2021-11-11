@@ -32,9 +32,6 @@ static void my_gballoc_free(void* ptr)
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/optimize_size.h"
 #include "azure_c_shared_utility/agenttime.h"
-#include "azure_c_shared_utility/buffer_.h"
-#include "azure_c_shared_utility/strings.h"
-#include "azure_c_shared_utility/lock.h"
 #include "azure_c_shared_utility/map.h"
 #include "iothub_message.h"
 
