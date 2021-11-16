@@ -431,7 +431,7 @@ void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB
     }
 }
 
- 
+
 
 
 static const char *COMPLETE_DESIRED_PAYLOAD_FORMAT = "{\"properties\":{\"desired\":{\"integer_property\": %d, \"string_property\": \"%s\", \"array\": [%d, \"%s\"]}}}";
@@ -629,8 +629,7 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     setdevicetwincallback_on_device_or_module(deviceTwinCallback, device);
 
     // Twin registrations to the cloud happen asyncronously because we're using the convenience layer.  There is an (unavoidable)
-    // race potential in tests like this where we create handles and immediately invoke the service SDK.  Namely without this
-    // sleep, we could:
+    // race potential in tests like this where we create handles and immediately invoke the service SDK.  We could:
     // 1 - Register for the full twin (which happens via IoTHubDeviceClient_SetDeviceTwinCallback)
     // 2 - Have the service SDK update the twin (see dt_e2e_update_twin), but it takes a while
     // 3 - The client receives its full twin, which will just be empty data given (2) isn't completed
@@ -639,8 +638,9 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     //     the subscribe for PATCH and therefore it doesn't send down the PATCH of the full twin.
     // Apps in field will rarely hit this, as it requries service SDK & client handle to be invoked almost simultaneously.
     // And the client *is* registered for future twin updates on this handle, so it would get future changes.
-    LogInfo("Sleeping for a few seconds as client-side registers with twin");
-    ThreadAPI_Sleep(5000);
+    //
+    // To ensure the test passes, make the process synchronous. Receive first full twin before updating it.
+    // This will avoid the race condition.
 
     const char *connectionString = IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo);
     IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(connectionString);
@@ -651,22 +651,9 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
 
     int initial_twin_version = dt_e2e_gettwin_version(serviceClientDeviceTwinHandle, deviceToUse);
 
-    char *expected_desired_string = generate_unique_string();
-    int   expected_desired_integer = generate_new_int();
-    char *buffer = malloc_and_fill_desired_payload(expected_desired_string, expected_desired_integer);
-    ASSERT_IS_NOT_NULL(buffer, "failed to create the payload for IoTHubDeviceTwin_UpdateTwin");
-
-    dt_e2e_update_twin(serviceClientDeviceTwinHandle, deviceToUse, buffer);
-
-    JSON_Value *root_value = NULL;
-    const char *string_property = NULL;
-    int integer_property = 0;
-    const char *string_property_from_array = NULL;
-    int integer_property_from_array = 0;
-
+    // Receive first full twin before updating it.
     time_t beginOperation, nowTime;
     beginOperation = time(NULL);
-
     while (
         (nowTime = time(NULL)),
         (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) // time box
@@ -683,15 +670,49 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
                 LogInfo("device->cb_payload: %s", device->cb_payload);
                 int current_version = dt_e2e_parse_twin_version(device->cb_payload, false);
 
-                if (current_version == initial_twin_version)
+                if (current_version != initial_twin_version)
                 {
-                    // There is a potential race where we'll get the callback for deviceTwin availability on the initial twin, not on the
-                    // updated one.  We determine this by looking at $version and if they're the same, it means we haven't got update yet.
-                    LogInfo("The version of twin on callback is identical to initially set (%d).  Waiting for update\n", current_version);
-                    Unlock(device->lock);
-                    ThreadAPI_Sleep(1000);
-                    continue;
+                    ASSERT_FAIL("The version of twin on callback (%d) did not match what was initially set (%d).",
+                                current_version, initial_twin_version);
                 }
+                Unlock(device->lock);
+                break;
+            }
+            Unlock(device->lock);
+        }
+        ThreadAPI_Sleep(1000);
+    }
+
+    ASSERT_IS_TRUE(difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME, "Timeout waiting for twin message");
+
+    char *expected_desired_string = generate_unique_string();
+    int   expected_desired_integer = generate_new_int();
+    char *buffer = malloc_and_fill_desired_payload(expected_desired_string, expected_desired_integer);
+    ASSERT_IS_NOT_NULL(buffer, "failed to create the payload for IoTHubDeviceTwin_UpdateTwin");
+
+    dt_e2e_update_twin(serviceClientDeviceTwinHandle, deviceToUse, buffer);
+
+    JSON_Value *root_value = NULL;
+    const char *string_property = NULL;
+    int integer_property = 0;
+    const char *string_property_from_array = NULL;
+    int integer_property_from_array = 0;
+
+    beginOperation = time(NULL);
+    while (
+        (nowTime = time(NULL)),
+        (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) // time box
+        )
+    {
+        if (Lock(device->lock) != LOCK_OK)
+        {
+            ASSERT_FAIL("Lock failed");
+        }
+        else
+        {
+            if ((device->receivedCallBack) && (device->cb_payload != NULL))
+            {
+                LogInfo("device->cb_payload: %s", device->cb_payload);
 
                 root_value = json_parse_string(device->cb_payload);
                 if (root_value != NULL)
@@ -840,7 +861,7 @@ void dt_e2e_send_module_id_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHU
 
     dt_e2e_create_client_handle(deviceToUse, protocol);
     // Set the ModelId prior to any network I/O.  The caller passes the modelId because the the modelId
-    // is persisted on the Hub after initial set.  So to truly test that the modelId is sent across on 
+    // is persisted on the Hub after initial set.  So to truly test that the modelId is sent across on
     // each test, we need to have the caller change it on each invocation of this test helper.
     setoption_on_device_or_module(OPTION_MODEL_ID, modelId, "Cannot specify modelId");
 
@@ -852,10 +873,10 @@ void dt_e2e_send_module_id_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHU
     const char *connectionString = IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo);
     IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(connectionString);
     ASSERT_IS_NOT_NULL(iotHubServiceClientHandle, "IoTHubServiceClientAuth_CreateFromConnectionString failed");
-    
+
     IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceClientDeviceTwinHandle = IoTHubDeviceTwin_Create(iotHubServiceClientHandle);
     ASSERT_IS_NOT_NULL(serviceClientDeviceTwinHandle, "IoTHubDeviceTwin_Create failed");
-    
+
     char *twinData = dt_e2e_get_twin_from_service(serviceClientDeviceTwinHandle, deviceToUse);
 
     JSON_Value *rootValue = json_parse_string(twinData);
