@@ -482,7 +482,7 @@ static char * malloc_and_copy_unsigned_char(const unsigned char* payload, size_t
 
 static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payload, size_t size, void* userContextCallback)
 {
-    LogInfo("Callback:: Received payload len=<%lu>, data=<%.*s>\n", (unsigned long)size, (int)size, payload);
+    LogInfo("Device Twin Callback:: Received payload len=<%lu>, data=<%.*s>\n", (unsigned long)size, (int)size, payload);
     DEVICE_DESIRED_DATA *device = (DEVICE_DESIRED_DATA *)userContextCallback;
     if (Lock(device->lock) == LOCK_ERROR)
     {
@@ -538,6 +538,23 @@ static void device_desired_deinit(DEVICE_DESIRED_DATA *device)
         free(device->cb_payload);
         Lock_Deinit(device->lock);
         free(device);
+    }
+}
+
+static void device_desired_reset(DEVICE_DESIRED_DATA *device)
+{
+    if (device == NULL)
+    {
+        LogError("invalid parameter device");
+    }
+    else if (Lock(device->lock) == LOCK_ERROR)
+    {
+        LogError("Lock failed");
+    }
+    else
+    {
+        device->receivedCallBack = false;
+        (void) Unlock(device->lock);
     }
 }
 
@@ -685,6 +702,9 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
 
     ASSERT_IS_TRUE(difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME, "Timeout waiting for twin message");
 
+    // Reset device for update.
+    device_desired_reset(device);
+
     char *expected_desired_string = generate_unique_string();
     int   expected_desired_integer = generate_new_int();
     char *buffer = malloc_and_fill_desired_payload(expected_desired_string, expected_desired_integer);
@@ -698,6 +718,7 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     const char *string_property_from_array = NULL;
     int integer_property_from_array = 0;
 
+    // Receive twin update via callback.
     beginOperation = time(NULL);
     while (
         (nowTime = time(NULL)),
