@@ -656,8 +656,8 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     // Apps in field will rarely hit this, as it requries service SDK & client handle to be invoked almost simultaneously.
     // And the client *is* registered for future twin updates on this handle, so it would get future changes.
     //
-    // To ensure the test passes, make the process synchronous. Receive first full twin before updating it.
-    // This will avoid the race condition.
+    // To ensure the test passes: Receive first full twin in the test app. Then sleep so the server can receive
+    // the subscribe for PATCH. Then have the service sdk update the twin on the Hub.
 
     const char *connectionString = IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo);
     IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(connectionString);
@@ -704,6 +704,11 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
 
     // Reset device for update.
     device_desired_reset(device);
+
+    // Sleep still needed.  Device callback has been recorded in test app, but Hub is still completing twin PATCH subscription.
+    // This must be in place before the service SDK can update the twin, else the Hub will not send the PATCH
+    // message to the device and the desired twin callback will not be called.
+    ThreadAPI_Sleep(5000); // 5 seconds
 
     char *expected_desired_string = generate_unique_string();
     int   expected_desired_integer = generate_new_int();
