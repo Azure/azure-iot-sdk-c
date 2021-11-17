@@ -22,7 +22,7 @@ set(${theseTestsName}_c_files
     ${SHARED_UTIL_REAL_TEST_FOLDER}/real_buffer.c
     ${SHARED_UTIL_REAL_TEST_FOLDER}/real_strings.c
     ${SHARED_UTIL_REAL_TEST_FOLDER}/real_vector.c
-    real_doublylinkedlist.c
+    ${SHARED_UTIL_REAL_TEST_FOLDER}/real_doublylinkedlist.c
 )
 
 set(${theseTestsName}_h_files

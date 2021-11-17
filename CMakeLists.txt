@@ -28,6 +28,8 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     add_definitions(-DMACOSX)
 endif()
 
+# Set CMAKE_INSTALL_LIBDIR if not defined
+include(GNUInstallDirs)
 
 include (CTest)
 
@@ -54,7 +56,6 @@ option(run_e2e_openssl_engine_tests "set run_e2e_openssl_engine_tests to ON to r
 option(skip_samples "set skip_samples to ON to skip building samples (default is OFF)[if possible, they are always build]" OFF)
 option(build_service_client "controls whether the iothub_service_client is built or not" ON)
 option(build_provisioning_service_client "controls whether the provisioning_service_client is built or not" ON)
-option(build_python "builds the Python native iothub_client module" OFF)
 option(dont_use_uploadtoblob "set dont_use_uploadtoblob to ON if the functionality of upload to blob is to be excluded, OFF otherwise. It requires HTTP" OFF)
 option(no_logging "disable logging" OFF)
 option(use_installed_dependencies "set use_installed_dependencies to ON to use installed packages instead of building dependencies from submodules" OFF)
@@ -167,10 +168,6 @@ if (${use_prov_client_core})
     message(STATUS "Provisioning SDK Version = ${PROV_SDK_VERSION}")
 endif()
 
-# setting nuget_e2e_tests will only generate e2e tests to run with nuget packages.
-# Install-packages from Package Manager Console in VS before building the projects
-option(nuget_e2e_tests "set nuget_e2e_tests to ON to generate e2e tests to run with nuget packages (default is OFF)" OFF)
-
 # check for conflicting options
 if (NOT ${use_http})
     MESSAGE( "Setting dont_use_uploadtoblob to ON because use_http is OFF")
@@ -191,15 +188,39 @@ endif()
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # build the parson library for json parsing
-add_library(parson
-    ./deps/parson/parson.c
-    ./deps/parson/parson.h
-)
-if (MSVC)
-    set_source_files_properties(../deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
+if(NOT ${use_installed_dependencies})
+  add_library(parson
+      ${CMAKE_CURRENT_LIST_DIR}/deps/parson/parson.c
+      ${CMAKE_CURRENT_LIST_DIR}/deps/parson/parson.h
+  )
+  add_library(parson::parson ALIAS parson)
+  if (MSVC)
+      set_source_files_properties(${CMAKE_CURRENT_LIST_DIR}/deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
+  endif()
+
+  target_include_directories(parson PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/deps/parson>
+      $<INSTALL_INTERFACE:include>
+  )
+  set_target_properties(parson PROPERTIES PUBLIC_HEADER ${CMAKE_CURRENT_LIST_DIR}/deps/parson/parson.h)
+
+  install(
+      TARGETS parson
+      EXPORT parsonTargets
+      RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  )
+  install(
+      EXPORT parsonTargets
+      FILE parsonConfig.cmake
+      NAMESPACE parson::
+      DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/parson
+  )
+else()
+  find_package(parson REQUIRED CONFIG)
 endif()
-set(parson_h_install_files ./deps/parson/parson.h)
-set(parson_install_libs parson)
 
 if (IN_OPENWRT)
     ADD_DEFINITIONS("$ENV{TARGET_LDFLAGS}" "$ENV{TARGET_CPPFLAGS}" "$ENV{TARGET_CFLAGS}")
@@ -362,9 +383,6 @@ else()
     set(THREAD_C_FILE ${SHARED_UTIL_ADAPTER_FOLDER}/threadapi_pthreads.c)
 endif()
 
-# Set CMAKE_INSTALL_LIBDIR if not defined
-include(GNUInstallDirs)
-
 if (NOT ${use_amqp} OR NOT ${use_http})
     set (build_service_client OFF)
     message(STATUS "iothub_service_client build is disabled (AMQP and HTTP support are required)")
@@ -390,7 +408,7 @@ if (${build_service_client})
     add_subdirectory(iothub_service_client)
 endif()
 
-if (${run_e2e_tests} OR ${run_longhaul_tests} OR ${nuget_e2e_tests} OR ${run_sfc_tests} OR ${run_unittests})
+if (${run_e2e_tests} OR ${run_longhaul_tests} OR ${run_sfc_tests} OR ${run_unittests})
     add_subdirectory(testtools)
 endif()
 
@@ -404,22 +422,11 @@ endif()
 # add the device_auth sample subdirectory
 if (${use_prov_client} AND NOT ${skip_samples})
     add_subdirectory(./provisioning_client/samples)
-
-    if (NOT "${build_python}" STREQUAL "OFF")
-        add_subdirectory(../provisioning_device_client provisioning_device_client_python)
-    endif()
-endif()
-
-if (NOT "${build_python}" STREQUAL "OFF")
-    add_subdirectory(../device/iothub_client_python python)
-    if (${build_service_client})
-        add_subdirectory(../service python_service_client)
-    endif()
 endif()
 
 if (${use_installed_dependencies})
     # Install azure_iot_sdks
-    set(package_location "cmake")
+    set(package_location "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
 
     include(CMakePackageConfigHelpers)
 
@@ -432,15 +439,6 @@ if (${use_installed_dependencies})
     configure_file("configs/${PROJECT_NAME}Config.cmake"
         "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}Config.cmake"
         COPYONLY
-    )
-
-    install(FILES ${parson_h_install_files}
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
-    )
-    install(TARGETS ${parson_install_libs} EXPORT azure_iot_sdksTargets
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
     )
 
     install(EXPORT azure_iot_sdksTargets
@@ -458,11 +456,5 @@ if (${use_installed_dependencies})
         DESTINATION
             ${package_location}
     )
-else()
-    install(FILES ${parson_h_install_files}
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
-    install(TARGETS ${parson_install_libs}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
 

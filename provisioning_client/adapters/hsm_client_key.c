@@ -56,7 +56,6 @@ char* hsm_client_get_symmetric_key(HSM_CLIENT_HANDLE handle)
     char* result;
     if (handle == NULL)
     {
-        /* Codes_SRS_HSM_CLIENT_RIOT_07_010: [ if handle is NULL, hsm_client_riot_get_certificate shall return NULL. ] */
         LogError("Invalid handle value specified");
         result = NULL;
     }
@@ -77,7 +76,6 @@ char* hsm_client_get_registration_name(HSM_CLIENT_HANDLE handle)
     char* result;
     if (handle == NULL)
     {
-        /* Codes_SRS_HSM_CLIENT_RIOT_07_026: [ if handle is NULL, hsm_client_riot_get_common_name shall return NULL. ] */
         LogError("Invalid handle value specified");
         result = NULL;
     }

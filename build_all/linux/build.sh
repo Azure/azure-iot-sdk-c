@@ -15,9 +15,8 @@ build_http=ON
 build_mqtt=ON
 no_blob=OFF
 run_unittests=OFF
-build_python=OFF
 run_valgrind=0
-build_folder=$build_root"/cmake/iotsdk_linux"
+build_folder=$build_root"/cmake"
 make=true
 toolchainfile=" "
 cmake_install_prefix=" "
@@ -44,7 +43,6 @@ usage ()
     echo " --no-make                     do not run make after cmake"
     echo " --toolchain-file <file>       pass cmake a toolchain file for cross compiling"
     echo " --install-path-prefix         alternative prefix for make install"
-    echo " --build-python <version>      build Python C wrapper module (requires boost) with given python version (2.7 3.4 3.5 are currently supported)"
     echo " -rv, --run_valgrind           will execute ctest with valgrind"
     echo " --no-logging                  Disable logging"
     echo " --provisioning                Use Provisioning with Flow"
@@ -72,16 +70,6 @@ process_args ()
            save_next_arg=0
       elif [ $save_next_arg == 3 ]
       then
-        # save the arg to python version
-        build_python="$arg"
-        if [ $build_python != "2.7" ] && [ $build_python != "3.4" ] && [ $build_python != "3.5" ] && [ $build_python != "3.6" ]
-        then
-          echo "Supported python versions are 2.7, 3.4 or 3.5 or 3.6"
-          exit 1
-        fi 
-        save_next_arg=0
-      elif [ $save_next_arg == 4 ]
-      then
         # save arg for install prefix
         cmake_install_prefix="$arg"
         save_next_arg=0
@@ -96,11 +84,10 @@ process_args ()
               "--no-mqtt" ) build_mqtt=OFF;;
               "--no_uploadtoblob" ) no_blob=ON;;
               "--no-make" ) make=false;;
-              "--build-python" ) save_next_arg=3;;
               "--toolchain-file" ) save_next_arg=2;;
               "-rv" | "--run_valgrind" ) run_valgrind=1;;
               "--no-logging" ) no_logging=ON;;
-              "--install-path-prefix" ) save_next_arg=4;;
+              "--install-path-prefix" ) save_next_arg=3;;
               "--provisioning" ) prov_auth=ON;;
               "--use-tpm-simulator" ) prov_use_tpm_simulator=ON;;
               "--run-sfc-tests" ) run_sfc_tests=ON;;
@@ -125,54 +112,35 @@ process_args ()
 process_args $*
 
 rm -r -f $build_folder
-mkdir –m777 -p $build_folder
+mkdir -m777 -p $build_folder
 pushd $build_folder
-cmake $toolchainfile $cmake_install_prefix -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C=-Wstrict-prototypes -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_sfc_tests:BOOL=$run-sfc-tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Ddont_use_uploadtoblob:BOOL=$no_blob -Drun_unittests:BOOL=$run_unittests -Dbuild_python:STRING=$build_python -Dno_logging:BOOL=$no_logging $build_root -Duse_prov_client:BOOL=$prov_auth -Duse_tpm_simulator:BOOL=$prov_use_tpm_simulator -Duse_edge_modules=$use_edge_modules
-chmod --recursive ugo+rw ../../cmake
+echo "Generating Build Files"
+cmake $toolchainfile $cmake_install_prefix -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C=-Wstrict-prototypes -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_sfc_tests:BOOL=$run-sfc-tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Ddont_use_uploadtoblob:BOOL=$no_blob -Drun_unittests:BOOL=$run_unittests -Dno_logging:BOOL=$no_logging $build_root -Duse_prov_client:BOOL=$prov_auth -Duse_tpm_simulator:BOOL=$prov_use_tpm_simulator -Duse_edge_modules=$use_edge_modules
+chmod --recursive ugo+rw ../cmake
 
-if [ "$make" = true ]
-then
-  # Set the default cores
-  MAKE_CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
-  
-  echo "Initial MAKE_CORES=$MAKE_CORES"
-  
-  # Make sure there is enough virtual memory on the device to handle more than one job  
-  MINVSPACE="1500000"
-  
-  # Acquire total memory and total swap space setting them to zero in the event the command fails
-  MEMAR=( $(sed -n -e 's/^MemTotal:[^0-9]*\([0-9][0-9]*\).*/\1/p' -e 's/^SwapTotal:[^0-9]*\([0-9][0-9]*\).*/\1/p' /proc/meminfo) )
-  [ -z "${MEMAR[0]##*[!0-9]*}" ] && MEMAR[0]=0
-  [ -z "${MEMAR[1]##*[!0-9]*}" ] && MEMAR[1]=0
-  
-  let VSPACE=${MEMAR[0]}+${MEMAR[1]}
-  
-  echo "VSPACE=$VSPACE"
+# Set the default cores
+MAKE_CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
 
-  if [ "$VSPACE" -lt "$MINVSPACE" ] ; then
-    echo "WARNING: Not enough space.  Setting MAKE_CORES=1"
-    MAKE_CORES=1
-  fi
-  
-  echo "MAKE_CORES=$MAKE_CORES"
-  echo "Starting run..."
-  date
-  make --jobs=$MAKE_CORES
-  echo "completed run..."
-  date
+echo "Initial MAKE_CORES=$MAKE_CORES"
 
-  # Only for testing E2E behaviour !!! 
-  TEST_CORES=16
+# Make sure there is enough virtual memory on the device to handle more than one job  
+MINVSPACE="1500000"
 
-  if [[ $run_valgrind == 1 ]] ;
-  then
-    #use doctored openssl
-    export LD_LIBRARY_PATH=/usr/local/ssl/lib
-    ctest -j $TEST_CORES --output-on-failure --schedule-random
-    export LD_LIBRARY_PATH=
-  else
-    ctest -j $TEST_CORES -C "Debug" --output-on-failure --schedule-random
-  fi
+# Acquire total memory and total swap space setting them to zero in the event the command fails
+MEMAR=( $(sed -n -e 's/^MemTotal:[^0-9]*\([0-9][0-9]*\).*/\1/p' -e 's/^SwapTotal:[^0-9]*\([0-9][0-9]*\).*/\1/p' /proc/meminfo) )
+[ -z "${MEMAR[0]##*[!0-9]*}" ] && MEMAR[0]=0
+[ -z "${MEMAR[1]##*[!0-9]*}" ] && MEMAR[1]=0
+
+let VSPACE=${MEMAR[0]}+${MEMAR[1]}
+
+echo "VSPACE=$VSPACE"
+
+if [ "$VSPACE" -lt "$MINVSPACE" ] ; then
+  echo "WARNING: Not enough space.  Setting MAKE_CORES=1"
+  MAKE_CORES=1
 fi
+
+echo "Building Project"
+cmake --build . -- --jobs=$MAKE_CORES
 
 popd

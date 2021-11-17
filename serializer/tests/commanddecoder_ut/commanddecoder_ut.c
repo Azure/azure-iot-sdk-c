@@ -427,8 +427,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
     /* CommandDecoder_Create */
 
-    /* Tests_SRS_COMMAND_DECODER_99_019:[ For all exposed APIs argument validity checks shall precede other checks.] */
-    /* Tests_SRS_COMMAND_DECODER_01_003: [ If modelHandle is NULL, CommandDecoder_Create shall return NULL. ]*/
     TEST_FUNCTION(CommandDecoder_Create_With_NULL_Model_Handle_Fails)
     {
         // arrange
@@ -441,9 +439,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         ASSERT_IS_NULL(result);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_01_001: [CommandDecoder_Create shall create a new instance of a CommandDecoder.] */
     /* Tests_CommandDecoder_Create shall give its receive callback to the transport by calling IoTHubClient_SetMessageCallback when transportType is TRANSPORT_THREADED.*/
-    /* Tests_SRS_COMMAND_DECODER_02_017: [If the receive callback is different than NULL, then CommandDecoder_Create shall call Transport_StartReceive.] */
     TEST_FUNCTION(CommandDecoder_Create_With_Non_NULL_Callback_Argument_Succeeds)
     {
         // arrange
@@ -463,9 +459,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(result);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_01_001: [CommandDecoder_Create shall create a new instance of a CommandDecoder.] */
     /* Tests_CommandDecoder_Create shall give its receive callback to the transport by calling IoTHubClient_SetMessageCallback when transportType is TRANSPORT_THREADED.*/
-    /* Tests_SRS_COMMAND_DECODER_02_017: [If the receive callback is different than NULL, then CommandDecoder_Create shall call Transport_StartReceive.] */
     TEST_FUNCTION(CommandDecoder_Create_With_NULL_Callback_does_not_call_StartReceive)
     {
         // arrange
@@ -485,7 +479,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(result);
     }
 
-    /*Tests_SRS_COMMAND_DECODER_02_018: [CommandDecoder_Create shall give its receive callback to the transport by calling IoTHubClient_LL_SetMessageCallback when transportType is TRANSPORT_LL.]*/
     TEST_FUNCTION(CommandDecoder_Create_TRANSPORT_TYPE_LL_succeeds)
     {
         // arrange
@@ -505,7 +498,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(result);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_01_004: [If any error is encountered during CommandDecoder_Create CommandDecoder_Create shall return NULL.] */
     TEST_FUNCTION(When_SetReceiveCallback_Fails_Then_gballoc_Fails)
     {
         // arrange
@@ -524,7 +516,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
     /* CommandDecoder_Destroy */
 
-    /* Tests_SRS_COMMAND_DECODER_01_007: [If CommandDecoder_Destroy is called with a NULL handle, CommandDecoder_Destroy shall do nothing.] */
     TEST_FUNCTION(CommandDecoder_Destroy_With_NULL_Handle_Does_Nothing)
     {
         // arrange
@@ -537,8 +528,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // no explicit asserts
     }
 
-    /* Tests_SRS_COMMAND_DECODER_07_015: [CommandDecoder_Destroy shall remove the running thread by calling Transport_StopReceive.] */
-    /* Tests_SRS_COMMAND_DECODER_01_005: [CommandDecoder_Destroy shall free all resources associated with the commandDecoderHandle instance.] */
     TEST_FUNCTION(CommandDecoder_Destroy_succeeds)
     {
         ///arrange
@@ -558,7 +547,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_COMMAND_DECODER_01_010: [If either parameter is NULL, the processing shall stop and the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
     TEST_FUNCTION(CommandDecoder_ExecuteCommand_with_NULL_messageHandle_fails)
     {
         /// arrange
@@ -576,7 +564,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_01_010: [If either parameter is NULL, the processing shall stop and the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
     TEST_FUNCTION(CommandDecoder_ExecuteCommand_with_NULL_context_fails)
     {
         /// arrange
@@ -594,7 +581,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /*Tests_SRS_COMMAND_DECODER_01_011: [If the size of the command is 0 then the processing shall stop and the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
     TEST_FUNCTION(CommandDecoder_ExecuteCommand_with_zeroSize_message_fails)
     {
         /// arrange
@@ -612,7 +598,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /*Tests_SRS_COMMAND_DECODER_01_013: [If parsing the JSON to a multi tree fails, the processing shall stop and the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
     TEST_FUNCTION(When_copying_the_command_content_fails_returns_EXECUTE_COMMAND_ERROR)
     {
         // arrange
@@ -633,7 +618,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_01_013: [If parsing the JSON to a multi tree fails, the processing shall stop and the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
     TEST_FUNCTION(When_Parsing_The_JSON_To_MultiTree_Fails_Then_No_Command_Is_Dispatched)
     {
         // arrange
@@ -659,7 +643,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_01_015: [If any MultiTree API call fails then the processing shall stop and the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
     TEST_FUNCTION(When_Getting_The_Schema_For_The_Model_Fails_Then_No_Command_Is_Dispatched)
     {
         // arrange
@@ -687,7 +670,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_01_015: [If any MultiTree API call fails then the processing shall stop and the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
     TEST_FUNCTION(When_Getting_The_ActionName_Node_Fails_Then_No_Command_Is_Dispatched)
     {
         // arrange
@@ -718,7 +700,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_01_015: [If any MultiTree API call fails then the processing shall stop and the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
     TEST_FUNCTION(When_Getting_The_ActionName_Fails_Then_No_Command_Is_Dispatched)
     {
         // arrange
@@ -748,7 +729,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_01_015: [If any MultiTree API call fails then the processing shall stop and the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
     TEST_FUNCTION(When_Getting_The_Parameters_Node_Fails_Then_No_Command_Is_Dispatched)
     {
         // arrange
@@ -785,7 +765,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_01_015: [If any MultiTree API call fails then the processing shall stop and the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
     TEST_FUNCTION(When_Copying_The_relativepath_fails_EXECUTE_COMMAND_ERROR_is_returned)
     {
         // arrange
@@ -816,7 +795,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_99_010:[ If any Schema API fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
     TEST_FUNCTION(When_GetModelActionByName_Fails_Then_No_Command_Is_Dispatched)
     {
         // arrange
@@ -855,7 +833,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_99_010:[ If any Schema API fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
     TEST_FUNCTION(When_Getting_The_ArgCount_Fails_Then_No_Command_Is_Dispatched)
     {
         // arrange
@@ -964,7 +941,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /*Tests_SRS_COMMAND_DECODER_99_021:[ If the parsing of the command fails for any other reason the command shall not be dispatched.]*/
     TEST_FUNCTION(CommandDecoder_ExecuteCommand_fails_when_array_of_args_fails)
     {
         // arrange
@@ -997,11 +973,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_99_011:[ CommandDecoder shall attempt to extract the command arguments from the command JSON by looking them up under the node "Parameters".] */
-    /* Tests_SRS_COMMAND_DECODER_99_027:[ The value for an argument of primitive type shall be decoded by using the CreateAgentDataType_From_String API.] */
-    /* Tests_SRS_COMMAND_DECODER_01_014: [CommandDecoder shall use the MultiTree APIs to extract a specific element from the command JSON.] */
-    /* Tests_SRS_COMMAND_DECODER_99_005:[ If an action is decoded successfully then the callback actionCallback shall be called, passing to it the callback action context, decoded name and arguments.] */
-    /* Tests_SRS_COMMAND_DECODER_01_008: [Each argument shall be looked up as a field, member of the "Parameters" node.]  */
     TEST_FUNCTION(CommandDecoder_ExecuteCommand_With_Valid_Command_With_1_Arg_Decodes_The_Argument_And_Calls_The_ActionCallback)
     {
         // arrange
@@ -1047,7 +1018,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_99_010:[ If any Schema API fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
     TEST_FUNCTION(CommandDecoder_When_GetModelActionArgumentByIndex_Fails_ExecuteCommand_Fails)
     {
         // arrange
@@ -1081,7 +1051,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_99_010:[ If any Schema API fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
     TEST_FUNCTION(CommandDecoder_When_GetActionArgumentName_Fails_ExecuteCommand_Fails)
     {
         // arrange
@@ -1117,7 +1086,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_99_010:[ If any Schema API fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
     TEST_FUNCTION(CommandDecoder_When_GetActionArgumentType_Fails_ExecuteCommand_Fails)
     {
         // arrange
@@ -1155,7 +1123,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_99_012:[ If any argument is missing in the command text then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
     TEST_FUNCTION(CommandDecoder_When_Getting_The_Argument_Node_Fails_ExecuteCommand_Fails)
     {
         // arrange
@@ -1191,7 +1158,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_01_015: [If any MultiTree API call fails then the processing shall stop and the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
     TEST_FUNCTION(CommandDecoder_When_Getting_The_Argument_Node_Value_Fails_ExecuteCommand_Fails)
     {
         // arrange
@@ -1233,7 +1199,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_99_012:[ If any argument is missing in the command text then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
     TEST_FUNCTION(CommandDecoder_When_Decoding_The_Argument_Value_Fails_ExecuteCommand_Fails)
     {
         // arrange
@@ -1278,10 +1243,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_99_011:[ CommandDecoder shall attempt to extract from the command text the value for each action argument.] */
-    /* Tests_SRS_COMMAND_DECODER_99_027:[ The value for an argument of primitive type shall be decoded by using the CreateAgentDataType_From_String API.] */
-    /* Tests_SRS_COMMAND_DECODER_01_014: [CommandDecoder shall use the MultiTree APIs to extract a specific element from the command JSON.] */
-    /* Tests_SRS_COMMAND_DECODER_99_005:[ If an action is decoded successfully then the callback actionCallback shall be called, passing to it the callback action context, decoded name and arguments.] */
     TEST_FUNCTION(CommandDecoder_ExecuteCommand_With_Valid_Command_With_2_Args_Decodes_The_Arguments_And_Calls_The_ActionCallback)
     {
         // arrange
@@ -1346,7 +1307,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_99_010:[ If any Schema API fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
     TEST_FUNCTION(CommandDecoder_When_GetArgument_For_The_2nd_Argument_Fails_Then_ExecuteCommand_Fails)
     {
         // arrange
@@ -1399,7 +1359,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_99_010:[ If any Schema API fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
     TEST_FUNCTION(CommandDecoder_When_GetArgument_Name_For_The_2nd_Argument_Fails_Then_ExecuteCommand_Fails)
     {
         // arrange
@@ -1453,7 +1412,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_99_010:[ If any Schema API fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
     TEST_FUNCTION(CommandDecoder_When_GetArgument_Type_For_The_2nd_Argument_Fails_Then_ExecuteCommand_Fails)
     {
         // arrange
@@ -1510,7 +1468,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_99_012:[ If any argument is missing in the command text then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
     TEST_FUNCTION(CommandDecoder_When_GetChildName_For_The_2nd_Argument_Fails_Then_ExecuteCommand_Fails)
     {
         // arrange
@@ -1566,7 +1523,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_01_015: [If any MultiTree API call fails then the processing shall stop and the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
     TEST_FUNCTION(CommandDecoder_When_GetValue_For_The_2nd_Argument_Fails_Then_ExecuteCommand_Fails)
     {
         // arrange
@@ -1626,7 +1582,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_99_012:[ If any argument is missing in the command text then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
     TEST_FUNCTION(CommandDecoder_When_Creating_The_Agent_Data_Type_For_The_2nd_Argument_Fails_Then_ExecuteCommand_Fails)
     {
         // arrange
@@ -1688,12 +1643,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_99_029:[ If the argument type is complex then a complex type value shall be built from the child nodes.] */
-    /* Tests_SRS_COMMAND_DECODER_99_030:[ For each child node a value shall be built by using AgentTypeSystem APIs.] */
-    /* Tests_SRS_COMMAND_DECODER_99_031:[ The complex type value that aggregates the children shall be built by using the Create_AGENT_DATA_TYPE_from_Members.] */
-    /* Tests_SRS_COMMAND_DECODER_99_033:[ In order to determine which are the members of a complex types, Schema APIs for structure types shall be used.] */
-    /* Tests_SRS_COMMAND_DECODER_01_014: [CommandDecoder shall use the MultiTree APIs to extract a specific element from the command JSON.] */
-    /* Tests_SRS_COMMAND_DECODER_99_005:[ If an action is decoded successfully then the callback actionCallback shall be called, passing to it the callback action context, decoded name and arguments.] */
     TEST_FUNCTION(CommandDecoder_When_The_Argument_Is_Complex_The_Nodes_Are_Scanned_To_Get_The_Members)
     {
         // arrange
@@ -1793,7 +1742,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /*Tests_SRS_COMMAND_DECODER_99_021:[ If the parsing of the command fails for any other reason the command shall not be dispatched.]*/
     TEST_FUNCTION(CommandDecoder_When_The_Argument_Is_Complex_The_Nodes_Are_Scanned_To_Get_The_Members_and_fail_when_gbaloc_fails_1)
     {
         // arrange
@@ -1848,7 +1796,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /*Tests_SRS_COMMAND_DECODER_99_021:[ If the parsing of the command fails for any other reason the command shall not be dispatched.]*/
     TEST_FUNCTION(CommandDecoder_When_The_Argument_Is_Complex_The_Nodes_Are_Scanned_To_Get_The_Members_and_fail_when_gbaloc_fails_2)
     {
         // arrange
@@ -1899,8 +1846,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_99_029:[ If the argument type is complex then a complex type value shall be built from the child nodes.] */
-    /* Tests_SRS_COMMAND_DECODER_99_010:[ If any Schema API fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
     TEST_FUNCTION(CommandDecoder_When_Getting_The_Structure_Type_For_A_Complex_Type_Fails_Then_ExecuteCommand_Fails)
     {
         // arrange
@@ -1941,8 +1886,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_99_029:[ If the argument type is complex then a complex type value shall be built from the child nodes.] */
-    /* Tests_SRS_COMMAND_DECODER_99_010:[ If any Schema API fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
     TEST_FUNCTION(CommandDecoder_When_Getting_The_Structure_PropertyCount_For_A_Complex_Type_Fails_Then_ExecuteCommand_Fails)
     {
         // arrange
@@ -1988,7 +1931,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_99_034:[ If Schema APIs indicate that a complex type has 0 members then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
     TEST_FUNCTION(CommandDecoder_When_The_Structure_PropertyCount_For_A_Complex_Type_Is_Zero_Then_ExecuteCommand_Fails)
     {
         // arrange
@@ -2034,7 +1976,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_99_010:[ If any Schema API fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
     TEST_FUNCTION(CommandDecoder_When_Getting_The_Structure_Property_For_A_Complex_Type_Fails_Then_ExecuteCommand_Fails)
     {
         // arrange
@@ -2092,7 +2033,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_99_010:[ If any Schema API fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
     TEST_FUNCTION(CommandDecoder_When_Getting_The_Struct_Member_Name_Fails_Then_ExecuteCommand_Fails)
     {
         // arrange
@@ -2152,7 +2092,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_99_010:[ If any Schema API fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.]*/
     TEST_FUNCTION(CommandDecoder_When_Getting_The_Struct_Member_Type_Fails_Then_ExecuteCommand_Fails)
     {
         // arrange
@@ -2214,7 +2153,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_01_015: [If any MultiTree API call fails then the processing shall stop and the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
     TEST_FUNCTION(CommandDecoder_When_Getting_The_Child_Node_For_A_Member_Property_For_A_Complex_Type_Fails_Then_ExecuteCommand_Fails)
     {
         // arrange
@@ -2279,7 +2217,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_01_015: [If any MultiTree API call fails then the processing shall stop and the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
     TEST_FUNCTION(CommandDecoder_When_Getting_The_Child_Value_For_A_Member_Property_For_A_Complex_Type_Fails_Then_ExecuteCommand_Fails)
     {
         // arrange
@@ -2349,7 +2286,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_99_028:[ If decoding the argument fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
     TEST_FUNCTION(CommandDecoder_When_Creating_The_Agent_Data_Type_Value_For_A_Member_Property_For_A_Complex_Type_Fails_Then_ExecuteCommand_Fails)
     {
         // arrange
@@ -2422,7 +2358,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_99_028:[ If decoding the argument fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
     TEST_FUNCTION(CommandDecoder_When_Creating_The_Complex_Type_Agent_Data_Type_Value_For_A_Complex_Type_Fails_Then_ExecuteCommand_Fails)
     {
         // arrange
@@ -2498,7 +2433,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_99_028:[ If decoding the argument fails then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
     TEST_FUNCTION(CommandDecoder_When_Decoding_The_2nd_Member_Of_A_Complex_Property_Fails_Execute_Command_Frees_The_Previously_Allocated_Member)
     {
         // arrange
@@ -2574,7 +2508,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_99_032:[ Nesting shall be supported for complex type.] */
     TEST_FUNCTION(CommandDecoder_Decoding_An_Action_With_Nested_Complex_Types_Succeeds)
     {
         // arrange
@@ -2703,7 +2636,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_99_035:[ CommandDecoder_ExecuteCommand shall support paths to actions that are in child models (i.e. ChildModel/SomeAction.] */
     TEST_FUNCTION(CommandDecoder_ExecuteCommand_With_A_Command_In_A_Child_Model_Calls_The_ActionCallback)
     {
         // arrange
@@ -2757,7 +2689,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_99_035:[ CommandDecoder_ExecuteCommand shall support paths to actions that are in child models (i.e. ChildModel/SomeAction.] */
     TEST_FUNCTION(CommandDecoder_ExecuteCommand_With_A_Command_In_A_Child_Model_Calls_The_ActionCallback_and_returns_REJECTED)
     {
         // arrange
@@ -2811,7 +2742,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_99_035:[ CommandDecoder_ExecuteCommand shall support paths to actions that are in child models (i.e. ChildModel/SomeAction.] */
     TEST_FUNCTION(CommandDecoder_ExecuteCommand_With_A_Command_In_A_Child_Model_Calls_The_ActionCallback_and_returns_ABANDONED)
     {
         // arrange
@@ -2864,7 +2794,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /*Tests_SRS_COMMAND_DECODER_99_021:[ If the parsing of the command fails for any other reason the command shall not be dispatched.]*/
     TEST_FUNCTION(CommandDecoder_ExecuteCommand_With_A_Command_In_A_Child_Model_when_gballoc_fails_it_fails)
     {
         // arrange
@@ -2904,8 +2833,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /* Tests_SRS_COMMAND_DECODER_99_036:[ If a child model cannot be found by using Schema APIs then the command shall not be dispatched and it shall return EXECUTE_COMMAND_ERROR.] */
-    /* Tests_SRS_COMMAND_DECODER_99_037:[ The relative path passed to the actionCallback shall be in the format "childModel1/childModel2/.../childModelN".] */
     TEST_FUNCTION(CommandDecoder_ExecuteCommand_With_A_Command_In_A_Child_Model_And_The_Child_Model_Does_Not_Exist_Fails)
     {
         // arrange
@@ -2945,7 +2872,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /*Tests_SRS_COMMAND_DECODER_02_001: [ If startAddress is NULL then CommandDecoder_IngestDesiredProperties shall fail and return EXECUTE_COMMAND_ERROR. ]*/
     TEST_FUNCTION(CommandDecoder_IngestDesiredProperties_with_NULL_startAddress_fails)
     {
         ///arrange
@@ -2962,7 +2888,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /*Tests_SRS_COMMAND_DECODER_02_002: [ If handle is NULL then CommandDecoder_IngestDesiredProperties shall fail and return EXECUTE_COMMAND_ERROR. ]*/
     TEST_FUNCTION(CommandDecoder_IngestDesiredProperties_with_NULL_handle_fails)
     {
         ///arrange
@@ -2977,7 +2902,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         ///clean
     }
 
-    /*Tests_SRS_COMMAND_DECODER_02_003: [ If desiredProperties is NULL then CommandDecoder_IngestDesiredProperties shall fail and return EXECUTE_COMMAND_ERROR. ]*/
     TEST_FUNCTION(CommandDecoder_IngestDesiredProperties_with_NULL_desiredProperties_fails)
     {
         ///arrange
@@ -3079,10 +3003,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
     /*case1: a simple property (non-recursive) is ingested*/
     /*the property is called "int_field" and shall have the value 3*/
-    /*Tests_SRS_COMMAND_DECODER_02_005: [ CommandDecoder_IngestDesiredProperties shall create a MULTITREE_HANDLE ouf of the clone of desiredProperties. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_007: [ If the child name corresponds to a desired property then an AGENT_DATA_TYPE shall be constructed from the MULTITREE node. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_008: [ The desired property shall be constructed in memory by calling pfDesiredPropertyFromAGENT_DATA_TYPE. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_010: [ If the complete MULTITREE has been parsed then CommandDecoder_IngestDesiredProperties shall succeed and return EXECUTE_COMMAND_SUCCESS. ]*/
     TEST_FUNCTION(CommandDecoder_IngestDesiredProperties_with_1_simple_desired_property_happy_path)
     {
         ///arrange
@@ -3108,7 +3028,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
     }
 
-    /*Tests_SRS_COMMAND_DECODER_02_011: [ Otherwise CommandDecoder_IngestDesiredProperties shall fail and return EXECUTE_COMMAND_FAILED. ]*/
     TEST_FUNCTION(CommandDecoder_IngestDesiredProperties_with_1_simple_desired_property_succeeds_unhappy_paths)
     {
         ///arrange
@@ -3125,26 +3044,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         umock_c_negative_tests_snapshot();
 
-#if 0
-        size_t calls_that_cannot_fail[] =
-        {
-            2, /*MultiTree_DeleteChild*/
-
-            3,/*MultiTree_GetChildCount*/
-            7, /*STRING_c_str*/
-
-            9, /*Schema_GetModelDesiredPropertyType*/
-            10, /*Schema_GetSchemaForModelType*/
-            11, /*CodeFirst_GetPrimitiveType*/
-            14, /*Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE*/
-            15, /*Schema_GetModelDesiredProperty_offset*/
-            17, /*Schema_GetModelDesiredProperty_pfOnDesiredProperty*/
-            18, /*Destroy_AGENT_DATA_TYPE*/
-            19, /*STRING_delete*/
-            20, /*MultiTree_Destroy*/
-            21 /*gballoc_free*/
-        };
-#endif
         size_t count = umock_c_negative_tests_call_count();
         for (size_t i = 0; i < count; i++)
         {
@@ -3290,7 +3189,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             .IgnoreArgument_ptr();
     }
 
-    /*Tests_SRS_COMMAND_DECODER_02_009: [ If the child name corresponds to a model in model then the function shall call itself recursively. ]*/
     TEST_FUNCTION(CommandDecoder_IngestDesiredProperties_with_1_simple_model_in_model_desired_property_happy_path)
     {
         ///arrange
@@ -3316,7 +3214,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
     }
 
-    /*Tests_SRS_COMMAND_DECODER_02_011: [ Otherwise CommandDecoder_IngestDesiredProperties shall fail and return EXECUTE_COMMAND_FAILED. ]*/
     TEST_FUNCTION(CommandDecoder_IngestDesiredProperties_with_1_simple_model_in_model_desired_property_unhappy_paths)
     {
         ///arrange
@@ -3390,7 +3287,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /*Tests_SRS_COMMAND_DECODER_02_013: [ If the desired property has a non-NULL pfOnDesiredProperty then it shall be called. ]*/
     TEST_FUNCTION(CommandDecoder_IngestDesiredProperties_with_1_simple_desired_property_calls_onDesiredProperty_happy_path)
     {
         ///arrange
@@ -3416,7 +3312,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
     }
 
-    /*Tests_SRS_COMMAND_DECODER_02_012: [ If the child model in model has a non-NULL pfOnDesiredProperty then pfOnDesiredProperty shall be called. ]*/
     TEST_FUNCTION(CommandDecoder_IngestDesiredProperties_with_1_model_in_model_desired_property_calls_onDesiredProperty_happy_path)
     {
 
@@ -3443,7 +3338,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
     }
 
-    /*Tests_SRS_COMMAND_DECODER_02_014: [ If handle is NULL then CommandDecoder_ExecuteMethod shall fail and return NULL. ]*/
     TEST_FUNCTION(CommandDecoder_ExecuteMethod_with_NULL_handle_fails)
     {
         ///arrange
@@ -3457,7 +3351,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         ///clean
     }
 
-    /*Tests_SRS_COMMAND_DECODER_02_015: [ If fulMethodName is NULL then CommandDecoder_ExecuteMethod shall fail and return NULL. ]*/
     TEST_FUNCTION(CommandDecoder_ExecuteMethod_with_NULL_fulMethodName_fails)
     {
         ///arrange
@@ -3473,7 +3366,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /*Tests_SRS_COMMAND_DECODER_02_025: [ If methodCallback is NULL then CommandDecoder_ExecuteMethod shall fail and return NULL. ]*/
     TEST_FUNCTION(CommandDecoder_ExecuteMethod_with_NULL_methodCallback_fails)
     {
         ///arrange
@@ -3489,7 +3381,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /*Tests_SRS_COMMAND_DECODER_02_015: [ If fullMethodName is NULL then CommandDecoder_ExecuteMethod shall fail and return NULL. ]*/
     TEST_FUNCTION(CommandDecoder_ExecuteMethod_with_NULL_fullMethodName_fails)
     {
         ///arrange
@@ -3520,14 +3411,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             .IgnoreArgument_ptr();
     }
 
-    /*Tests_SRS_COMMAND_DECODER_02_016: [ If methodPayload is not NULL then CommandDecoder_ExecuteMethod shall build a MULTITREE_HANDLE out of methodPayload. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_017: [ CommandDecoder_ExecuteMethod shall get the SCHEMA_HANDLE associated with the modelHandle passed at CommandDecoder_Create. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_018: [ CommandDecoder_ExecuteMethod shall validate that consecutive segments of the fullMethodName exist in the model. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_019: [ CommandDecoder_ExecuteMethod shall locate the final model to which the methodName applies. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_020: [ CommandDecoder_ExecuteMethod shall verify that the model has a method called methodName. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_021: [ For every argument of methodName, CommandDecoder_ExecuteMethod shall build an AGENT_DATA_TYPE from the node with the same name from the MULTITREE_HANDLE. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_022: [ CommandDecoder_ExecuteMethod shall call methodCallback passing the context, the methodName, number of arguments and the AGENT_DATA_TYPE. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_024: [ Otherwise, CommandDecoder_ExecuteMethod shall return what methodCallback returns. ]*/
     TEST_FUNCTION(CommandDecoder_ExecuteMethod_with_NULL_payload_hapy_path)
     {
         /*this TEST_FUNCTION assumes that there is a method in the root model called "methodA" that takes no arguments*/
@@ -3550,7 +3433,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         CommandDecoder_Destroy(commandDecoderHandle);
     }
 
-    /*Tests_SRS_COMMAND_DECODER_02_023: [ If any of the previous operations fail, then CommandDecoder_ExecuteMethod shall return NULL. ]*/
     TEST_FUNCTION(CommandDecoder_ExecuteMethod_with_NULL_payload_unhapy_paths)
     {
         /*this TEST_FUNCTION assumes that there is a method in the root model called "methodA" that takes no arguments*/
@@ -3643,14 +3525,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
     }
 
-    /*Tests_SRS_COMMAND_DECODER_02_016: [ If methodPayload is not NULL then CommandDecoder_ExecuteMethod shall build a MULTITREE_HANDLE out of methodPayload. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_017: [ CommandDecoder_ExecuteMethod shall get the SCHEMA_HANDLE associated with the modelHandle passed at CommandDecoder_Create. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_018: [ CommandDecoder_ExecuteMethod shall validate that consecutive segments of the fullMethodName exist in the model. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_019: [ CommandDecoder_ExecuteMethod shall locate the final model to which the methodName applies. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_020: [ CommandDecoder_ExecuteMethod shall verify that the model has a method called methodName. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_021: [ For every argument of methodName, CommandDecoder_ExecuteMethod shall build an AGENT_DATA_TYPE from the node with the same name from the MULTITREE_HANDLE. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_022: [ CommandDecoder_ExecuteMethod shall call methodCallback passing the context, the methodName, number of arguments and the AGENT_DATA_TYPE. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_024: [ Otherwise, CommandDecoder_ExecuteMethod shall return what methodCallback returns. ]*/
     TEST_FUNCTION(CommandDecoder_ExecuteMethod_with_1_arg_payload_hapy_path)
     {
         /*this TEST_FUNCTION assumes that there is a method in the root model called "methodA" that takes 1x arguments*/
@@ -3676,7 +3550,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
     }
 
 
-    /*Tests_SRS_COMMAND_DECODER_02_023: [ If any of the previous operations fail, then CommandDecoder_ExecuteMethod shall return NULL. ]*/
     TEST_FUNCTION(CommandDecoder_ExecuteMethod_with_1_arg_payload_unhapy_paths)
     {
         /*this TEST_FUNCTION assumes that there is a method in the root model called "methodA" that takes 1x arguments*/
@@ -3793,14 +3666,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
     }
 
-    /*Tests_SRS_COMMAND_DECODER_02_016: [ If methodPayload is not NULL then CommandDecoder_ExecuteMethod shall build a MULTITREE_HANDLE out of methodPayload. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_017: [ CommandDecoder_ExecuteMethod shall get the SCHEMA_HANDLE associated with the modelHandle passed at CommandDecoder_Create. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_018: [ CommandDecoder_ExecuteMethod shall validate that consecutive segments of the fullMethodName exist in the model. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_019: [ CommandDecoder_ExecuteMethod shall locate the final model to which the methodName applies. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_020: [ CommandDecoder_ExecuteMethod shall verify that the model has a method called methodName. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_021: [ For every argument of methodName, CommandDecoder_ExecuteMethod shall build an AGENT_DATA_TYPE from the node with the same name from the MULTITREE_HANDLE. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_022: [ CommandDecoder_ExecuteMethod shall call methodCallback passing the context, the methodName, number of arguments and the AGENT_DATA_TYPE. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_024: [ Otherwise, CommandDecoder_ExecuteMethod shall return what methodCallback returns. ]*/
     TEST_FUNCTION(CommandDecoder_ExecuteMethod_with_2_arg_payload_hapy_path)
     {
         /*this TEST_FUNCTION assumes that there is a method in the root model called "methodA" that takes 1x arguments*/
@@ -3827,7 +3692,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
     }
 
 
-    /*Tests_SRS_COMMAND_DECODER_02_023: [ If any of the previous operations fail, then CommandDecoder_ExecuteMethod shall return NULL. ]*/
     TEST_FUNCTION(CommandDecoder_ExecuteMethod_with_2_arg_payload_unhapy_paths)
     {
         /*this TEST_FUNCTION assumes that there is a method in the root model called "methodA" that takes 1x arguments*/
@@ -3941,14 +3805,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
     }
 
-    /*Tests_SRS_COMMAND_DECODER_02_016: [ If methodPayload is not NULL then CommandDecoder_ExecuteMethod shall build a MULTITREE_HANDLE out of methodPayload. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_017: [ CommandDecoder_ExecuteMethod shall get the SCHEMA_HANDLE associated with the modelHandle passed at CommandDecoder_Create. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_018: [ CommandDecoder_ExecuteMethod shall validate that consecutive segments of the fullMethodName exist in the model. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_019: [ CommandDecoder_ExecuteMethod shall locate the final model to which the methodName applies. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_020: [ CommandDecoder_ExecuteMethod shall verify that the model has a method called methodName. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_021: [ For every argument of methodName, CommandDecoder_ExecuteMethod shall build an AGENT_DATA_TYPE from the node with the same name from the MULTITREE_HANDLE. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_022: [ CommandDecoder_ExecuteMethod shall call methodCallback passing the context, the methodName, number of arguments and the AGENT_DATA_TYPE. ]*/
-    /*Tests_SRS_COMMAND_DECODER_02_024: [ Otherwise, CommandDecoder_ExecuteMethod shall return what methodCallback returns. ]*/
     TEST_FUNCTION(CommandDecoder_ExecuteMethod_model_in_model_with_2_arg_payload_hapy_path)
     {
         /*this TEST_FUNCTION assumes that there is a method in the root model called "methodA" that takes 1x arguments*/
@@ -3975,7 +3831,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
     }
 
 
-    /*Tests_SRS_COMMAND_DECODER_02_023: [ If any of the previous operations fail, then CommandDecoder_ExecuteMethod shall return NULL. ]*/
     TEST_FUNCTION(CommandDecoder_ExecuteMethod_model_in_model_with_2_arg_payload_unhapy_paths)
     {
         /*this TEST_FUNCTION assumes that there is a method in the root model called "methodA" that takes 1x arguments*/

@@ -225,7 +225,6 @@ TEST_FUNCTION_CLEANUP(TestMethodCleanup)
     }
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_001: [ IoTHubServiceClientAuth_CreateFromConnectionString shall verify the input parameter and if it is NULL then return NULL **]*/
 TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_return_null_if_input_parameter_connectionString_is_NULL)
 {
     // arrange
@@ -239,7 +238,6 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_return_null_if_
     mocks.AssertActualAndExpectedCalls();
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_003: [** If the allocation failed, IoTHubServiceClientAuth_CreateFromConnectionString shall return NULL **]*/
 TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_return_null_if_allocate_memory_fails)
 {
     // arrange
@@ -257,9 +255,6 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_return_null_if_
     mocks.AssertActualAndExpectedCalls();
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_002: [** IoTHubServiceClientAuth_CreateFromConnectionString shall allocate memory for a new service client instance. **]*/
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_009: [** IoTHubServiceClientAuth_CreateFromConnectionString shall create a STRING_HANDLE from the given connection string by calling STRING_construct. **] */
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_010: [** If the STRING_construct fails, IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return NULL. **] */
 TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_and_return_null_if_STRING_construct_fails)
 {
     // arrange
@@ -282,8 +277,6 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_and
     mocks.AssertActualAndExpectedCalls();
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_004: [** IoTHubServiceClientAuth_CreateFromConnectionString shall populate hostName, iotHubName, iotHubSuffix, sharedAccessKeyName, sharedAccessKeyValue from the given connection string by calling connectionstringparser_parse **]*/
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_005: [** If populating the IOTHUB_SERVICE_CLIENT_AUTH fails, IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return NULL **]*/
 TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_and_return_null_if_connectionstringparser_parse_fails)
 {
     // arrange
@@ -310,8 +303,6 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_and
     mocks.AssertActualAndExpectedCalls();
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_004: [** IoTHubServiceClientAuth_CreateFromConnectionString shall populate hostName, iotHubName, iotHubSuffix, sharedAccessKeyName, sharedAccessKeyValue from the given connection string by calling connectionstringparser_parse **] */
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_011: [** If the populating HostName fails, IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return NULL. **] */
 TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_hostname_fails)
 {
     // arrange
@@ -346,8 +337,6 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     mocks.AssertActualAndExpectedCalls();
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_004: [** IoTHubServiceClientAuth_CreateFromConnectionString shall populate hostName, iotHubName, iotHubSuffix, sharedAccessKeyName, sharedAccessKeyValue from the given connection string by calling connectionstringparser_parse **] */
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_012: [** If the populating SharedAccessKeyName fails, IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return NULL. **] */
 TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_sharedaccesskeyname_and_deviceid_fails)
 {
     // arrange
@@ -379,8 +368,6 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     mocks.AssertActualAndExpectedCalls();
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_004: [** IoTHubServiceClientAuth_CreateFromConnectionString shall populate hostName, iotHubName, iotHubSuffix, sharedAccessKeyName, sharedAccessKeyValue from the given connection string by calling connectionstringparser_parse **] */
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_013: [** If the populating SharedAccessKey fails, IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return NULL. **] */
 TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_sharedaccesskey_fails)
 {
     // arrange
@@ -418,8 +405,6 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     mocks.AssertActualAndExpectedCalls();
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_038: [** IoTHubServiceClientAuth_CreateFromConnectionString shall create a STRING_handle from hostName by calling STRING_construct. **] */
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_039: [** If the STRING_construct fails, IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return NULL. **] */
 TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_STRING_construct_for_hostname_fails)
 {
     // arrange
@@ -461,8 +446,6 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     mocks.AssertActualAndExpectedCalls();
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_014: [** IoTHubServiceClientAuth_CreateFromConnectionString shall create a STRING_TOKENIZER to parse HostName by calling STRING_TOKENIZER_create. **] */
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_015: [** If the STRING_TOKENIZER_create fails, IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return NULL. **] */
 TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_STRING_TOKENIZER_create_fails)
 {
     // arrange
@@ -505,8 +488,6 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     mocks.AssertActualAndExpectedCalls();
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_016: [** IoTHubServiceClientAuth_CreateFromConnectionString shall create a new STRING_HANDLE for token key string by calling STRING_new. **] */
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_017: [** If the STRING_new fails, IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return NULL. **] */
 TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_STRING_new_for_key_fails)
 {
     // arrange
@@ -552,8 +533,6 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     mocks.AssertActualAndExpectedCalls();
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_018: [** IoTHubServiceClientAuth_CreateFromConnectionString shall create a new STRING_HANDLE for token value string by calling STRING_new. **] */
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_019: [** If the STRING_new fails, IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return NULL. **] */
 TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_STRING_new_for_value_fails)
 {
     // arrange
@@ -602,8 +581,6 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     mocks.AssertActualAndExpectedCalls();
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_020: [** IoTHubServiceClientAuth_CreateFromConnectionString shall call STRING_TOKENIZER_get_next_token to get token key string. **] */
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_021: [** If the STRING_TOKENIZER_get_next_token fails, IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return NULL. **] */
 TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_STRING_TOKENIZER_get_next_token_for_key_fails)
 {
     // arrange
@@ -655,8 +632,6 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     mocks.AssertActualAndExpectedCalls();
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_022: [** IoTHubServiceClientAuth_CreateFromConnectionString shall call STRING_TOKENIZER_get_next_token to get token value string. **] */
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_023: [** If the STRING_TOKENIZER_get_next_token fails, IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return NULL. **] */
 TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_STRING_TOKENIZER_get_next_token_for_value_fails)
 {
     // arrange
@@ -711,8 +686,6 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     mocks.AssertActualAndExpectedCalls();
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_024: [** IoTHubServiceClientAuth_CreateFromConnectionString shall allocate memory and copy hostName to result->hostName by calling mallocAndStrcpy_s. **] */
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_025: [** If the mallocAndStrcpy_s fails, IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return NULL. **] */
 TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_mallocAndStrcpy_s_for_hostName_fails)
 {
     // arrange
@@ -770,8 +743,6 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     mocks.AssertActualAndExpectedCalls();
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_026: [** IoTHubServiceClientAuth_CreateFromConnectionString shall allocate memory and copy keyName to result->keyName by calling mallocAndStrcpy_s. **] */
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_027: [** If the mallocAndStrcpy_s fails, IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return NULL. **] */
 TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_mallocAndStrcpy_s_for_keyName_fails)
 {
     // arrange
@@ -832,8 +803,6 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     mocks.AssertActualAndExpectedCalls();
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_028: [** IoTHubServiceClientAuth_CreateFromConnectionString shall allocate memory and copy sharedAccessKey to result->sharedAccessKey by calling mallocAndStrcpy_s. **] */
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_029: [** If the mallocAndStrcpy_s fails, IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return NULL. **] */
 TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_mallocAndStrcpy_s_for_sharedAccessKey_fails)
 {
     // arrange
@@ -897,7 +866,6 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     mocks.AssertActualAndExpectedCalls();
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_041: [** IoTHubServiceClientAuth_CreateFromSharedAccessSignature shall allocate memory and copy sharedAccessSignature to result->sharedAccessKey by prefixing it with "sas=". **] */
 TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_for_sharedAccessSignature)
 {
     // arrange
@@ -990,8 +958,6 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_for_sharedAcces
     mocks.AssertActualAndExpectedCalls();
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_041: [** IoTHubServiceClientAuth_CreateFromSharedAccessSignature shall allocate memory and copy sharedAccessSignature to result->sharedAccessKey by prefixing it with "sas=". **] */
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_029: [** If the mallocAndStrcpy_s fails, IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return NULL. **] */
 TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_mallocAndStrcpy_s_for_sharedAccessSignature_fails)
 {
     // arrange
@@ -1067,8 +1033,6 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     mocks.AssertActualAndExpectedCalls();
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_030: [** IoTHubServiceClientAuth_CreateFromConnectionString shall allocate memory and copy iothubName to result->iothubName by calling mallocAndStrcpy_s. **] */
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_031 : [** If the mallocAndStrcpy_s fails, IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return NULL. **] */
 TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_mallocAndStrcpy_s_for_iothubName_fails)
 {
     // arrange
@@ -1141,8 +1105,6 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     mocks.AssertActualAndExpectedCalls();
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_032: [** IoTHubServiceClientAuth_CreateFromConnectionString shall allocate memory and copy iothubSuffix to result->iothubSuffix by calling mallocAndStrcpy_s. **] */
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_033 : [** If the mallocAndStrcpy_s fails, IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return NULL. **] */
 TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_mallocAndStrcpy_s_for_iothubSuffix_fails)
 {
     // arrange
@@ -1218,8 +1180,6 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     mocks.AssertActualAndExpectedCalls();
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_034: [** IoTHubServiceClientAuth_CreateFromConnectionString shall create C string from token key string handle by calling STRING_c_str. **] */
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_035 : [** If the STRING_c_str fails, IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return NULL. **] */
 TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_STRING_c_str_for_iothubName_fails)
 {
     // arrange
@@ -1286,8 +1246,6 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_
     mocks.AssertActualAndExpectedCalls();
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_036 : [** IoTHubServiceClientAuth_CreateFromConnectionString shall create C string from token value string handle by calling STRING_c_str. **] */
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_037 : [** If the mallocAndStrcpy_s fails, IoTHubServiceClientAuth_CreateFromConnectionString shall do clean up and return NULL. **] */
 TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_do_clean_up_if_STRING_c_str_for_iothubSuffix_fails)
 {
     // arrange
@@ -1438,19 +1396,16 @@ static void test_IoTHubServiceClientAuth_CreateFromConnectionString_impl(bool se
 
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_006: [** If the IOTHUB_SERVICE_CLIENT_AUTH has been populated IoTHubServiceClientAuth_CreateFromConnectionString shall return with a IOTHUB_SERVICE_CLIENT_AUTH_HANDLE to it **]*/
 TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_sharedaccesskeyname_set_succeed)
 {
     test_IoTHubServiceClientAuth_CreateFromConnectionString_impl(true, false);
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_006: [** If the IOTHUB_SERVICE_CLIENT_AUTH has been populated IoTHubServiceClientAuth_CreateFromConnectionString shall return with a IOTHUB_SERVICE_CLIENT_AUTH_HANDLE to it **]*/
 TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_deviceid_set_succeed)
 {
     test_IoTHubServiceClientAuth_CreateFromConnectionString_impl(false, true);
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_006: [** If the IOTHUB_SERVICE_CLIENT_AUTH has been populated IoTHubServiceClientAuth_CreateFromConnectionString shall return with a IOTHUB_SERVICE_CLIENT_AUTH_HANDLE to it **]*/
 TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_sharedaccesskeyname_and_deviceid_both_set_fails)
 {
     // arrange
@@ -1482,7 +1437,6 @@ TEST_FUNCTION(IoTHubServiceClientAuth_CreateFromConnectionString_sharedaccesskey
     mocks.AssertActualAndExpectedCalls();
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_007: [** If the serviceClientHandle input parameter is NULL IoTHubServiceClient_Destroy shall return **] */
 TEST_FUNCTION(IoTHubServiceClient_Destroy_return_if_input_parameter_serviceClientHandle_is_NULL)
 {
     // arrange
@@ -1495,7 +1449,6 @@ TEST_FUNCTION(IoTHubServiceClient_Destroy_return_if_input_parameter_serviceClien
     mocks.AssertActualAndExpectedCalls();
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_008 : [** If the serviceClientHandle input parameter is not NULL IoTHubServiceClient_Destroy shall free the memory of it and return **] */
 TEST_FUNCTION(IoTHubServiceClient_Destroy_do_clean_up_and_return_if_input_parameter_serviceClientHandle_is_not_NULL)
 {
     // arrange

@@ -46,11 +46,51 @@ void real_free(void* ptr)
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_c_shared_utility/uniqueid.h"
-#include "azure_uamqp_c/session.h"
+#include "azure_c_shared_utility/optionhandler.h"
 #include "internal/iothub_client_private.h"
+
+#undef ENABLE_MOCK_FILTERING_SWITCH
+#define ENABLE_MOCK_FILTERING
+
+#define please_mock_authentication_create MOCK_ENABLED
+#define please_mock_authentication_destroy MOCK_ENABLED
+#define please_mock_authentication_do_work MOCK_ENABLED
+#define please_mock_authentication_retrieve_options MOCK_ENABLED
+#define please_mock_authentication_set_option MOCK_ENABLED
+#define please_mock_authentication_start MOCK_ENABLED
+#define please_mock_authentication_stop MOCK_ENABLED
+#define please_mock_telemetry_messenger_create MOCK_ENABLED
+#define please_mock_telemetry_messenger_destroy MOCK_ENABLED
+#define please_mock_telemetry_messenger_do_work MOCK_ENABLED
+#define please_mock_telemetry_messenger_get_send_status MOCK_ENABLED
+#define please_mock_telemetry_messenger_retrieve_options MOCK_ENABLED
+#define please_mock_telemetry_messenger_send_async MOCK_ENABLED
+#define please_mock_telemetry_messenger_send_message_disposition MOCK_ENABLED
+#define please_mock_telemetry_messenger_set_option MOCK_ENABLED
+#define please_mock_telemetry_messenger_start MOCK_ENABLED
+#define please_mock_telemetry_messenger_stop MOCK_ENABLED
+#define please_mock_telemetry_messenger_subscribe_for_messages MOCK_ENABLED
+#define please_mock_telemetry_messenger_unsubscribe_for_messages MOCK_ENABLED
+#define please_mock_twin_messenger_create MOCK_ENABLED
+#define please_mock_twin_messenger_destroy MOCK_ENABLED
+#define please_mock_twin_messenger_do_work MOCK_ENABLED
+#define please_mock_twin_messenger_get_twin_async MOCK_ENABLED
+#define please_mock_twin_messenger_report_state_async MOCK_ENABLED
+#define please_mock_twin_messenger_set_option MOCK_ENABLED
+#define please_mock_twin_messenger_subscribe MOCK_ENABLED
+#define please_mock_twin_messenger_start MOCK_ENABLED
+#define please_mock_twin_messenger_stop MOCK_ENABLED
+#define please_mock_twin_messenger_unsubscribe MOCK_ENABLED
+
+#include "azure_uamqp_c/session.h"
 #include "internal/iothubtransport_amqp_telemetry_messenger.h"
 #include "internal/iothubtransport_amqp_twin_messenger.h"
 #include "internal/iothubtransport_amqp_cbs_auth.h"
+
+#undef ENABLE_MOCK_FILTERING_SWITCH
+#undef ENABLE_MOCK_FILTERING
+
+
 #include "internal/iothub_client_authorization.h"
 
 #undef ENABLE_MOCKS
@@ -856,7 +896,6 @@ TEST_FUNCTION_CLEANUP(TestMethodCleanup)
 }
 
 
-// Tests_SRS_DEVICE_09_001: [If `config` or device_id or iothub_host_fqdn or on_state_changed_callback are NULL then amqp_device_create shall fail and return NULL]
 TEST_FUNCTION(device_create_NULL_config)
 {
     // arrange
@@ -870,7 +909,6 @@ TEST_FUNCTION(device_create_NULL_config)
     // cleanup
 }
 
-// Tests_SRS_DEVICE_09_001: [If `config` or iothub_host_fqdn or on_state_changed_callback are NULL then amqp_device_create shall fail and return NULL]
 TEST_FUNCTION(device_create_NULL_config_iothub_host_fqdn)
 {
     // arrange
@@ -886,7 +924,6 @@ TEST_FUNCTION(device_create_NULL_config_iothub_host_fqdn)
     // cleanup
 }
 
-// Tests_SRS_DEVICE_09_001: [If `config` or iothub_host_fqdn or on_state_changed_callback are NULL then amqp_device_create shall fail and return NULL]
 TEST_FUNCTION(device_create_NULL_config_on_state_changed_callback)
 {
     // arrange
@@ -902,12 +939,6 @@ TEST_FUNCTION(device_create_NULL_config_on_state_changed_callback)
     // cleanup
 }
 
-// Tests_SRS_DEVICE_09_002: [amqp_device_create shall allocate memory for the device instance structure]
-// Tests_SRS_DEVICE_09_004: [All `config` parameters shall be saved into `instance`]
-// Tests_SRS_DEVICE_09_006: [If `instance->authentication_mode` is DEVICE_AUTH_MODE_CBS, `instance->authentication_handle` shall be set using authentication_create()]
-// Tests_SRS_DEVICE_09_008: [`instance->messenger_handle` shall be set using telemetry_messenger_create()]
-// Tests_SRS_DEVICE_09_122: [`instance->twin_messenger_handle` shall be set using twin_messenger_create()]
-// Tests_SRS_DEVICE_09_011: [If amqp_device_create succeeds it shall return a handle to its `instance` structure]
 TEST_FUNCTION(device_create_succeeds)
 {
     // arrange
@@ -927,12 +958,6 @@ TEST_FUNCTION(device_create_succeeds)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_002: [amqp_device_create shall allocate memory for the device instance structure]
-// Tests_SRS_DEVICE_09_004: [All `config` parameters shall be saved into `instance`]
-// Tests_SRS_DEVICE_09_006: [If `instance->authentication_mode` is DEVICE_AUTH_MODE_CBS, `instance->authentication_handle` shall be set using authentication_create()]
-// Tests_SRS_DEVICE_09_008: [`instance->messenger_handle` shall be set using telemetry_messenger_create()]
-// Tests_SRS_DEVICE_09_122: [`instance->twin_messenger_handle` shall be set using twin_messenger_create()]
-// Tests_SRS_DEVICE_09_011: [If amqp_device_create succeeds it shall return a handle to its `instance` structure]
 TEST_FUNCTION(device_create_with_module_succeeds)
 {
     // arrange
@@ -952,12 +977,6 @@ TEST_FUNCTION(device_create_with_module_succeeds)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_003: [If malloc fails, amqp_device_create shall fail and return NULL]
-// Tests_SRS_DEVICE_09_005: [If any `config` parameters fail to be saved into `instance`, amqp_device_create shall fail and return NULL]
-// Tests_SRS_DEVICE_09_007: [If the AUTHENTICATION_HANDLE fails to be created, amqp_device_create shall fail and return NULL]
-// Tests_SRS_DEVICE_09_009: [If the TELEMETRY_MESSENGER_HANDLE fails to be created, amqp_device_create shall fail and return NULL]
-// Tests_SRS_DEVICE_09_123: [If the TWIN_MESSENGER_HANDLE fails to be created, amqp_device_create shall fail and return NULL]
-// Tests_SRS_DEVICE_09_010: [If amqp_device_create fails it shall release all memory it has allocated]
 TEST_FUNCTION(device_create_failure_checks)
 {
     // arrange
@@ -991,7 +1010,6 @@ TEST_FUNCTION(device_create_failure_checks)
     umock_c_reset_all_calls();
 }
 
-// Tests_SRS_DEVICE_09_017: [If `handle` is NULL, amqp_device_start_async shall return a non-zero result]
 TEST_FUNCTION(device_start_async_NULL_handle)
 {
     // arrange
@@ -1003,7 +1021,6 @@ TEST_FUNCTION(device_start_async_NULL_handle)
     ASSERT_ARE_NOT_EQUAL(int, 0, result);
 }
 
-// Tests_SRS_DEVICE_09_018: [If the device state is not DEVICE_STATE_STOPPED, amqp_device_start_async shall return a non-zero result]
 TEST_FUNCTION(device_start_async_device_not_stopped)
 {
     // arrange
@@ -1029,7 +1046,6 @@ TEST_FUNCTION(device_start_async_device_not_stopped)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_019: [If `session_handle` is NULL, amqp_device_start_async shall return a non-zero result]
 TEST_FUNCTION(device_start_async_NULL_session_handle)
 {
     // arrange
@@ -1053,7 +1069,6 @@ TEST_FUNCTION(device_start_async_NULL_session_handle)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_020: [If using CBS authentication and `cbs_handle` is NULL, amqp_device_start_async shall return a non-zero result]
 TEST_FUNCTION(device_start_async_CBS_NULL_cbs_handle)
 {
     // arrange
@@ -1077,8 +1092,6 @@ TEST_FUNCTION(device_start_async_CBS_NULL_cbs_handle)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_022: [The device state shall be updated to DEVICE_STATE_STARTING, and state changed callback invoked]
-// Tests_SRS_DEVICE_09_023: [If no failures occur, amqp_device_start_async shall return 0]
 TEST_FUNCTION(device_start_async_X509_succeeds)
 {
     // arrange
@@ -1104,8 +1117,6 @@ TEST_FUNCTION(device_start_async_X509_succeeds)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_022: [The device state shall be updated to DEVICE_STATE_STARTING, and state changed callback invoked]
-// Tests_SRS_DEVICE_09_023: [If no failures occur, amqp_device_start_async shall return 0]
 TEST_FUNCTION(device_start_async_X509_with_module_succeeds)
 {
     // arrange
@@ -1132,8 +1143,6 @@ TEST_FUNCTION(device_start_async_X509_with_module_succeeds)
 }
 
 
-// Tests_SRS_DEVICE_09_022: [The device state shall be updated to DEVICE_STATE_STARTING, and state changed callback invoked]
-// Tests_SRS_DEVICE_09_023: [If no failures occur, amqp_device_start_async shall return 0]
 TEST_FUNCTION(device_start_async_CBS_succeeds)
 {
     // arrange
@@ -1160,7 +1169,6 @@ TEST_FUNCTION(device_start_async_CBS_succeeds)
 }
 
 
-// Tests_SRS_DEVICE_09_024: [If `handle` is NULL, amqp_device_stop shall return a non-zero result]
 TEST_FUNCTION(device_stop_NULL_handle)
 {
     // arrange
@@ -1172,7 +1180,6 @@ TEST_FUNCTION(device_stop_NULL_handle)
     ASSERT_ARE_NOT_EQUAL(int, 0, result);
 }
 
-// Tests_SRS_DEVICE_09_025: [If the device state is already DEVICE_STATE_STOPPED or DEVICE_STATE_STOPPING, amqp_device_stop shall return a non-zero result]
 TEST_FUNCTION(device_stop_device_already_stopped)
 {
     // arrange
@@ -1198,9 +1205,6 @@ TEST_FUNCTION(device_stop_device_already_stopped)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_028: [If telemetry_messenger_stop fails, the `instance` state shall be updated to DEVICE_STATE_ERROR_MSG and the function shall return non-zero result]
-// Tests_SRS_DEVICE_09_132: [If twin_messenger_stop fails, the `instance` state shall be updated to DEVICE_STATE_ERROR_MSG and the function shall return non-zero result]
-// Tests_SRS_DEVICE_09_030: [If authentication_stop fails, the `instance` state shall be updated to DEVICE_STATE_ERROR_AUTH and the function shall return non-zero result]
 TEST_FUNCTION(device_stop_DEVICE_STATE_STARTED_failure_checks)
 {
     // arrange
@@ -1245,9 +1249,6 @@ TEST_FUNCTION(device_stop_DEVICE_STATE_STARTED_failure_checks)
 }
 
 
-// Tests_SRS_DEVICE_09_026: [The device state shall be updated to DEVICE_STATE_STOPPING, and state changed callback invoked]
-// Tests_SRS_DEVICE_09_031: [The device state shall be updated to DEVICE_STATE_STOPPED, and state changed callback invoked]
-// Tests_SRS_DEVICE_09_032: [If no failures occur, amqp_device_stop shall return 0]
 TEST_FUNCTION(device_stop_DEVICE_STATE_STARTING_succeeds)
 {
     // arrange
@@ -1273,9 +1274,6 @@ TEST_FUNCTION(device_stop_DEVICE_STATE_STARTING_succeeds)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_027: [If `instance->messenger_handle` state is not TELEMETRY_MESSENGER_STATE_STOPPED, telemetry_messenger_stop shall be invoked]
-// Tests_SRS_DEVICE_09_131: [If `instance->twin_messenger_handle` state is not TWIN_MESSENGER_STATE_STOPPED, twin_messenger_stop shall be invoked]
-// Tests_SRS_DEVICE_09_029: [If CBS authentication is used, if `instance->authentication_handle` state is not AUTHENTICATION_STATE_STOPPED, authentication_stop shall be invoked]
 TEST_FUNCTION(device_stop_DEVICE_STATE_STARTED_succeeds)
 {
     // arrange
@@ -1301,9 +1299,6 @@ TEST_FUNCTION(device_stop_DEVICE_STATE_STARTED_succeeds)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_027: [If `instance->messenger_handle` state is not TELEMETRY_MESSENGER_STATE_STOPPED, telemetry_messenger_stop shall be invoked]
-// Tests_SRS_DEVICE_09_131: [If `instance->twin_messenger_handle` state is not TWIN_MESSENGER_STATE_STOPPED, twin_messenger_stop shall be invoked]
-// Tests_SRS_DEVICE_09_029: [If CBS authentication is used, if `instance->authentication_handle` state is not AUTHENTICATION_STATE_STOPPED, authentication_stop shall be invoked]
 TEST_FUNCTION(device_stop_DEVICE_STATE_STARTED_with_module_succeeds)
 {
     // arrange
@@ -1330,7 +1325,6 @@ TEST_FUNCTION(device_stop_DEVICE_STATE_STARTED_with_module_succeeds)
 }
 
 
-// Tests_SRS_DEVICE_09_012: [If `handle` is NULL, amqp_device_destroy shall return]
 TEST_FUNCTION(device_destroy_NULL_handle)
 {
     // arrange
@@ -1345,10 +1339,6 @@ TEST_FUNCTION(device_destroy_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_DEVICE_09_013: [If the device is in state DEVICE_STATE_STARTED or DEVICE_STATE_STARTING, amqp_device_stop() shall be invoked]
-// Tests_SRS_DEVICE_09_014: [`instance->messenger_handle shall be destroyed using telemetry_messenger_destroy()`]
-// Tests_SRS_DEVICE_09_015: [If created, `instance->authentication_handle` shall be destroyed using authentication_destroy()`]
-// Tests_SRS_DEVICE_09_016: [The contents of `instance->config` shall be detroyed and then it shall be freed]
 TEST_FUNCTION(device_destroy_DEVICE_STATE_STARTED_succeeds)
 {
     // arrange
@@ -1371,7 +1361,6 @@ TEST_FUNCTION(device_destroy_DEVICE_STATE_STARTED_succeeds)
 }
 
 
-// Tests_SRS_DEVICE_09_105: [If `handle` or `send_status` is NULL, amqp_device_get_send_status shall return a non-zero result]
 TEST_FUNCTION(device_get_send_status_NULL_handle)
 {
     // arrange
@@ -1389,7 +1378,6 @@ TEST_FUNCTION(device_get_send_status_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_DEVICE_09_105: [If `handle` or `send_status` is NULL, amqp_device_get_send_status shall return a non-zero result]
 TEST_FUNCTION(device_get_send_status_NULL_send_status)
 {
     // arrange
@@ -1412,9 +1400,6 @@ TEST_FUNCTION(device_get_send_status_NULL_send_status)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_106: [The status of `instance->messenger_handle` shall be obtained using telemetry_messenger_get_send_status]
-// Tests_SRS_DEVICE_09_108: [If telemetry_messenger_get_send_status returns TELEMETRY_MESSENGER_SEND_STATUS_IDLE, amqp_device_get_send_status return status DEVICE_SEND_STATUS_IDLE]
-// Tests_SRS_DEVICE_09_110: [If amqp_device_get_send_status succeeds, it shall return zero as result]
 TEST_FUNCTION(device_get_send_status_IDLE_success)
 {
     // arrange
@@ -1445,9 +1430,6 @@ TEST_FUNCTION(device_get_send_status_IDLE_success)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_106: [The status of `instance->messenger_handle` shall be obtained using telemetry_messenger_get_send_status]
-// Tests_SRS_DEVICE_09_108: [If telemetry_messenger_get_send_status returns TELEMETRY_MESSENGER_SEND_STATUS_IDLE, amqp_device_get_send_status return status DEVICE_SEND_STATUS_IDLE]
-// Tests_SRS_DEVICE_09_110: [If amqp_device_get_send_status succeeds, it shall return zero as result]
 TEST_FUNCTION(device_get_send_status_IDLE_with_module_success)
 {
     // arrange
@@ -1479,7 +1461,6 @@ TEST_FUNCTION(device_get_send_status_IDLE_with_module_success)
 }
 
 
-// Tests_SRS_DEVICE_09_109: [If telemetry_messenger_get_send_status returns TELEMETRY_MESSENGER_SEND_STATUS_BUSY, amqp_device_get_send_status return status DEVICE_SEND_STATUS_BUSY]
 TEST_FUNCTION(device_get_send_status_BUSY_success)
 {
     // arrange
@@ -1510,7 +1491,6 @@ TEST_FUNCTION(device_get_send_status_BUSY_success)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_107: [If telemetry_messenger_get_send_status fails, amqp_device_get_send_status shall return a non-zero result]
 TEST_FUNCTION(device_get_send_status_failure_checks)
 {
     // arrange
@@ -1537,7 +1517,6 @@ TEST_FUNCTION(device_get_send_status_failure_checks)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_066: [If `handle` or `on_message_received_callback` or `context` is NULL, amqp_device_subscribe_message shall return a non-zero result]
 TEST_FUNCTION(device_subscribe_message_NULL_handle)
 {
     // arrange
@@ -1553,7 +1532,6 @@ TEST_FUNCTION(device_subscribe_message_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_DEVICE_09_066: [If `handle` or `on_message_received_callback` or `context` is NULL, amqp_device_subscribe_message shall return a non-zero result]
 TEST_FUNCTION(device_subscribe_message_NULL_callback)
 {
     // arrange
@@ -1576,7 +1554,6 @@ TEST_FUNCTION(device_subscribe_message_NULL_callback)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_066: [If `handle` or `on_message_received_callback` or `context` is NULL, amqp_device_subscribe_message shall return a non-zero result]
 TEST_FUNCTION(device_subscribe_message_NULL_context)
 {
     // arrange
@@ -1599,8 +1576,6 @@ TEST_FUNCTION(device_subscribe_message_NULL_context)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_067: [telemetry_messenger_subscribe_for_messages shall be invoked passing `on_messenger_message_received_callback` and the user callback and context]
-// Tests_SRS_DEVICE_09_069: [If no failures occur, amqp_device_subscribe_message shall return 0]
 TEST_FUNCTION(device_subscribe_message_succeess)
 {
     // arrange
@@ -1629,7 +1604,6 @@ TEST_FUNCTION(device_subscribe_message_succeess)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_068: [If telemetry_messenger_subscribe_for_messages fails, amqp_device_subscribe_message shall return a non-zero result]
 TEST_FUNCTION(device_subscribe_message_failure_checks)
 {
     // arrange
@@ -1657,7 +1631,6 @@ TEST_FUNCTION(device_subscribe_message_failure_checks)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_080: [If `handle` is NULL, amqp_device_set_retry_policy shall return a non-zero result]
 TEST_FUNCTION(device_set_retry_policy_NULL_handle)
 {
     // arrange
@@ -1673,7 +1646,6 @@ TEST_FUNCTION(device_set_retry_policy_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_DEVICE_09_081: [amqp_device_set_retry_policy shall return a non-zero result]
 TEST_FUNCTION(device_set_retry_policy_succeeds)
 {
     // arrange
@@ -1696,7 +1668,6 @@ TEST_FUNCTION(device_set_retry_policy_succeeds)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_093: [If `handle` is NULL, amqp_device_retrieve_options shall return NULL]
 TEST_FUNCTION(device_retrieve_options_NULL_handle)
 {
     // arrange
@@ -1711,12 +1682,6 @@ TEST_FUNCTION(device_retrieve_options_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_DEVICE_09_094: [A OPTIONHANDLER_HANDLE instance, aka `options` shall be created using OptionHandler_Create]
-// Tests_SRS_DEVICE_09_096: [If CBS authentication is used, `instance->authentication_handle` options shall be retrieved using authentication_retrieve_options]
-// Tests_SRS_DEVICE_09_098: [The authentication options shall be added to `options` using OptionHandler_AddOption as DEVICE_OPTION_SAVED_AUTH_OPTIONS]
-// Tests_SRS_DEVICE_09_099: [`instance->messenger_handle` options shall be retrieved using telemetry_messenger_retrieve_options]
-// Tests_SRS_DEVICE_09_101: [The messenger options shall be added to `options` using OptionHandler_AddOption as DEVICE_OPTION_SAVED_MESSENGER_OPTIONS]
-// Tests_SRS_DEVICE_09_104: [If no failures occur, a handle to `options` shall be return]
 TEST_FUNCTION(device_retrieve_options_CBS_succeeds)
 {
     // arrange
@@ -1740,7 +1705,6 @@ TEST_FUNCTION(device_retrieve_options_CBS_succeeds)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_096: [If CBS authentication is used, `instance->authentication_handle` options shall be retrieved using authentication_retrieve_options]
 TEST_FUNCTION(device_retrieve_options_X509_succeeds)
 {
     // arrange
@@ -1764,11 +1728,6 @@ TEST_FUNCTION(device_retrieve_options_X509_succeeds)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_095: [If OptionHandler_Create fails, amqp_device_retrieve_options shall return NULL]
-// Tests_SRS_DEVICE_09_097: [If authentication_retrieve_options fails, amqp_device_retrieve_options shall return NULL]
-// Tests_SRS_DEVICE_09_100: [If telemetry_messenger_retrieve_options fails, amqp_device_retrieve_options shall return NULL]
-// Tests_SRS_DEVICE_09_102: [If any call to OptionHandler_AddOption fails, amqp_device_retrieve_options shall return NULL]
-// Tests_SRS_DEVICE_09_103: [If any failure occurs, any memory allocated by amqp_device_retrieve_options shall be destroyed]
 TEST_FUNCTION(device_retrieve_options_CBS_failure_checks)
 {
     // arrange
@@ -1806,8 +1765,6 @@ TEST_FUNCTION(device_retrieve_options_CBS_failure_checks)
 }
 
 
-// Tests_SRS_DEVICE_09_082: [If `handle` or `name` or `value` are NULL, amqp_device_set_option shall return a non-zero result]
-// Tests_SRS_DEVICE_09_083: [If `name` refers to authentication but CBS authentication is not used, amqp_device_set_option shall return a non-zero result]
 TEST_FUNCTION(device_set_option_X509_AUTH_fails)
 {
     // arrange
@@ -1833,7 +1790,6 @@ TEST_FUNCTION(device_set_option_X509_AUTH_fails)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_085: [If authentication_set_option fails, amqp_device_set_option shall return a non-zero result]
 TEST_FUNCTION(device_set_option_saved_auth_options_fails)
 {
     // arrange
@@ -1867,7 +1823,6 @@ TEST_FUNCTION(device_set_option_saved_auth_options_fails)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_087: [If telemetry_messenger_set_option fails, amqp_device_set_option shall return a non-zero result]
 TEST_FUNCTION(device_set_option_saved_msgr_options_fails)
 {
     // arrange
@@ -1901,8 +1856,6 @@ TEST_FUNCTION(device_set_option_saved_msgr_options_fails)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_084: [If `name` refers to authentication, it shall be passed along with `value` to authentication_set_option]
-// Tests_SRS_DEVICE_09_092: [If no failures occur, amqp_device_set_option shall return 0]
 TEST_FUNCTION(device_set_option_CBS_AUTH_succeeds)
 {
     // arrange
@@ -1928,8 +1881,6 @@ TEST_FUNCTION(device_set_option_CBS_AUTH_succeeds)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_086: [If `name` refers to messenger module, it shall be passed along with `value` to telemetry_messenger_set_option]
-// Tests_SRS_DEVICE_09_092: [If no failures occur, amqp_device_set_option shall return 0]
 TEST_FUNCTION(device_set_option_MSGR_succeeds)
 {
     // arrange
@@ -1955,7 +1906,6 @@ TEST_FUNCTION(device_set_option_MSGR_succeeds)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_088: [If `name` is DEVICE_OPTION_SAVED_AUTH_OPTIONS but CBS authentication is not being used, amqp_device_set_option shall return a non-zero result]
 TEST_FUNCTION(device_set_option_X509_saved_auth_options)
 {
     // arrange
@@ -2006,7 +1956,6 @@ TEST_FUNCTION(device_set_option_AUTH_saved_auth_options_succeeds)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_089: [If `name` is DEVICE_OPTION_SAVED_MESSENGER_OPTIONS, `value` shall be fed to `instance->messenger_handle` using OptionHandler_FeedOptions]
 TEST_FUNCTION(device_set_option_MSGR_saved_msgr_options_succeeds)
 {
     // arrange
@@ -2032,7 +1981,6 @@ TEST_FUNCTION(device_set_option_MSGR_saved_msgr_options_succeeds)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_090: [If `name` is DEVICE_OPTION_SAVED_OPTIONS, `value` shall be fed to `instance` using OptionHandler_FeedOptions]
 TEST_FUNCTION(device_set_option_saved_device_options_succeeds)
 {
     // arrange
@@ -2058,7 +2006,6 @@ TEST_FUNCTION(device_set_option_saved_device_options_succeeds)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_091: [If any call to OptionHandler_FeedOptions fails, amqp_device_set_option shall return a non-zero result]
 TEST_FUNCTION(device_set_option_saved_device_options_fails)
 {
     // arrange
@@ -2093,7 +2040,6 @@ TEST_FUNCTION(device_set_option_saved_device_options_fails)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_076: [If `handle` is NULL, amqp_device_unsubscribe_message shall return a non-zero result]
 TEST_FUNCTION(device_unsubscribe_message_NULL_handle)
 {
     // arrange
@@ -2109,8 +2055,6 @@ TEST_FUNCTION(device_unsubscribe_message_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_DEVICE_09_077: [telemetry_messenger_unsubscribe_for_messages shall be invoked passing `instance->messenger_handle`]
-// Tests_SRS_DEVICE_09_079: [If no failures occur, amqp_device_unsubscribe_message shall return 0]
 TEST_FUNCTION(device_unsubscribe_message_succeess)
 {
     // arrange
@@ -2136,7 +2080,6 @@ TEST_FUNCTION(device_unsubscribe_message_succeess)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_078: [If telemetry_messenger_unsubscribe_for_messages fails, amqp_device_unsubscribe_message shall return a non-zero result]
 TEST_FUNCTION(device_unsubscribe_message_failure_checks)
 {
     // arrange
@@ -2162,7 +2105,6 @@ TEST_FUNCTION(device_unsubscribe_message_failure_checks)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_051: [If `handle` or `message` are NULL, amqp_device_send_event_async shall return a non-zero result]
 TEST_FUNCTION(telemetry_messenger_send_async_NULL_handle)
 {
     // arrange
@@ -2185,7 +2127,6 @@ TEST_FUNCTION(telemetry_messenger_send_async_NULL_handle)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_051: [If `handle` or `message` are NULL, amqp_device_send_event_async shall return a non-zero result]
 TEST_FUNCTION(telemetry_messenger_send_async_NULL_message)
 {
     // arrange
@@ -2208,9 +2149,6 @@ TEST_FUNCTION(telemetry_messenger_send_async_NULL_message)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_053: [If `send_task` fails to be created, amqp_device_send_event_async shall return a non-zero value]
-// Tests_SRS_DEVICE_09_056: [If telemetry_messenger_send_async fails, amqp_device_send_event_async shall return a non-zero value]
-// Tests_SRS_DEVICE_09_057: [If any failures occur, amqp_device_send_event_async shall release all memory it has allocated]
 TEST_FUNCTION(telemetry_messenger_send_async_failure_checks)
 {
     // arrange
@@ -2249,10 +2187,6 @@ TEST_FUNCTION(telemetry_messenger_send_async_failure_checks)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_052: [A structure (`send_task`) shall be created to track the send state of the message]
-// Tests_SRS_DEVICE_09_054: [`send_task` shall contain the user callback and the context provided]
-// Tests_SRS_DEVICE_09_055: [The message shall be sent using telemetry_messenger_send_async, passing `on_event_send_complete_messenger_callback` and `send_task`]
-// Tests_SRS_DEVICE_09_058: [If no failures occur, amqp_device_send_event_async shall return 0]
 TEST_FUNCTION(telemetry_messenger_send_async_succeeds)
 {
     // arrange
@@ -2280,7 +2214,6 @@ TEST_FUNCTION(telemetry_messenger_send_async_succeeds)
 }
 
 
-// Tests_SRS_DEVICE_09_033: [If `handle` is NULL, amqp_device_do_work shall return]
 TEST_FUNCTION(device_do_work_NULL_handle)
 {
     // arrange
@@ -2293,8 +2226,6 @@ TEST_FUNCTION(device_do_work_NULL_handle)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-// Tests_SRS_DEVICE_09_034: [If CBS authentication is used and authentication state is AUTHENTICATION_STATE_STOPPED, authentication_start shall be invoked]
-// Tests_SRS_DEVICE_09_035: [If authentication_start fails, the device state shall be updated to DEVICE_STATE_ERROR_AUTH]
 TEST_FUNCTION(device_do_work_authentication_start_fails)
 {
     // arrange
@@ -2318,8 +2249,6 @@ TEST_FUNCTION(device_do_work_authentication_start_fails)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_036: [If authentication state is AUTHENTICATION_STATE_STARTING, the device shall track the time since last event change and timeout if needed]
-// Tests_SRS_DEVICE_09_037: [If authentication_start times out, the device state shall be updated to DEVICE_STATE_ERROR_AUTH_TIMEOUT]
 TEST_FUNCTION(device_do_work_authentication_start_times_out)
 {
     // arrange
@@ -2351,7 +2280,6 @@ TEST_FUNCTION(device_do_work_authentication_start_times_out)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_038: [If authentication state is AUTHENTICATION_STATE_ERROR and error code is AUTH_FAILED, the device state shall be updated to DEVICE_STATE_ERROR_AUTH]
 TEST_FUNCTION(device_do_work_authentication_start_AUTH_FAILED)
 {
     // arrange
@@ -2383,7 +2311,6 @@ TEST_FUNCTION(device_do_work_authentication_start_AUTH_FAILED)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_039: [If authentication state is AUTHENTICATION_STATE_ERROR and error code is TIMEOUT, the device state shall be updated to DEVICE_STATE_ERROR_AUTH_TIMEOUT]
 TEST_FUNCTION(device_do_work_authentication_start_AUTH_TIMEOUT)
 {
     // arrange
@@ -2415,11 +2342,6 @@ TEST_FUNCTION(device_do_work_authentication_start_AUTH_TIMEOUT)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_041: [If messenger state is TELEMETRY_MESSENGER_STATE_STOPPED, telemetry_messenger_start shall be invoked]
-// Tests_SRS_DEVICE_09_042: [If telemetry_messenger_start fails, the device state shall be updated to DEVICE_STATE_ERROR_MSG]
-// Tests_SRS_DEVICE_09_045: [If messenger state is TELEMETRY_MESSENGER_STATE_ERROR, the device state shall be updated to DEVICE_STATE_ERROR_MSG]
-// Tests_SRS_DEVICE_09_125: [If TWIN messenger state is TWIN_MESSENGER_STATE_STOPPED, twin_messenger_start shall be invoked]
-// Tests_SRS_DEVICE_09_126: [If twin_messenger_start fails, the device state shall be updated to DEVICE_STATE_ERROR_MSG]
 TEST_FUNCTION(device_do_work_telemetry_messenger_start_FAILED)
 {
     // arrange
@@ -2456,9 +2378,6 @@ TEST_FUNCTION(device_do_work_telemetry_messenger_start_FAILED)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_043: [If messenger state is TELEMETRY_MESSENGER_STATE_STARTING, the device shall track the time since last event change and timeout if needed]
-// Tests_SRS_DEVICE_09_127: [If TWIN messenger state is TWIN_MESSENGER_STATE_STARTING, the device shall track the time since last event change and timeout if needed]
-// Tests_SRS_DEVICE_09_044: [If telemetry_messenger_start times out, the device state shall be updated to DEVICE_STATE_ERROR_MSG]
 TEST_FUNCTION(device_do_work_telemetry_messenger_start_timeout)
 {
     // arrange
@@ -2496,13 +2415,6 @@ TEST_FUNCTION(device_do_work_telemetry_messenger_start_timeout)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_040: [Messenger shall not be started if using CBS authentication and authentication start has not completed yet]
-// Tests_SRS_DEVICE_09_124: [TWIN Messenger shall not be started if using CBS authentication and authentication start has not completed yet]
-// Tests_SRS_DEVICE_09_046: [If messenger state is TELEMETRY_MESSENGER_STATE_STARTED, the device state shall be updated to DEVICE_STATE_STARTED]
-// Tests_SRS_DEVICE_09_130: [If TWIN messenger state is TWIN_MESSENGER_STATE_STARTED, the device state shall be updated to DEVICE_STATE_STARTED]
-// Tests_SRS_DEVICE_09_049: [If CBS is used for authentication and `instance->authentication_handle` state is not STOPPED or ERROR, authentication_do_work shall be invoked]
-// Tests_SRS_DEVICE_09_050: [If `instance->messenger_handle` state is not STOPPED or ERROR, telemetry_messenger_do_work shall be invoked]
-// Tests_SRS_DEVICE_09_134: [If `instance->twin_messenger_handle` state is not STOPPED or ERROR, twin_messenger_do_work shall be invoked]
 TEST_FUNCTION(device_do_work_succeeds)
 {
     // arrange
@@ -2548,7 +2460,6 @@ TEST_FUNCTION(device_do_work_succeeds)
 }
 
 
-// Tests_SRS_DEVICE_09_047: [If CBS authentication is used and authentication state is not AUTHENTICATION_STATE_STARTED, the device state shall be updated to DEVICE_STATE_ERROR_AUTH]
 TEST_FUNCTION(device_do_work_STARTED_auth_unexpected_state)
 {
     // arrange
@@ -2575,7 +2486,6 @@ TEST_FUNCTION(device_do_work_STARTED_auth_unexpected_state)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_048: [If messenger state is not TELEMETRY_MESSENGER_STATE_STARTED, the device state shall be updated to DEVICE_STATE_ERROR_MSG]
 TEST_FUNCTION(device_do_work_STARTED_messenger_unexpected_state)
 {
     // arrange
@@ -2602,13 +2512,6 @@ TEST_FUNCTION(device_do_work_STARTED_messenger_unexpected_state)
 }
 
 
-// Tests_SRS_DEVICE_09_059: [If `ev_send_comp_result` is TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_OK, D2C_EVENT_SEND_COMPLETE_RESULT_OK shall be reported as `event_send_complete`]
-// Tests_SRS_DEVICE_09_060: [If `ev_send_comp_result` is TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE, D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_CANNOT_PARSE shall be reported as `event_send_complete`]
-// Tests_SRS_DEVICE_09_061: [If `ev_send_comp_result` is TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING, D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING shall be reported as `event_send_complete`]
-// Tests_SRS_DEVICE_09_062: [If `ev_send_comp_result` is TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_TIMEOUT, D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_TIMEOUT shall be reported as `event_send_complete`]
-// Tests_SRS_DEVICE_09_063: [If `ev_send_comp_result` is TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_MESSENGER_DESTROYED, D2C_EVENT_SEND_COMPLETE_RESULT_DEVICE_DESTROYED shall be reported as `event_send_complete`]
-// Tests_SRS_DEVICE_09_064: [If provided, the user callback and context saved in `send_task` shall be invoked passing the device `event_send_complete`]
-// Tests_SRS_DEVICE_09_065: [The memory allocated for `send_task` shall be released]
 TEST_FUNCTION(on_event_send_complete_messenger_callback_succeeds)
 {
     // arrange
@@ -2656,7 +2559,6 @@ TEST_FUNCTION(on_event_send_complete_messenger_callback_succeeds)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_070: [If `iothub_message_handle` or `context` is NULL, on_messenger_message_received_callback shall return TELEMETRY_MESSENGER_DISPOSITION_RESULT_RELEASED]
 TEST_FUNCTION(on_messenger_message_received_callback_NULL_handle)
 {
     // arrange
@@ -2694,7 +2596,6 @@ TEST_FUNCTION(on_messenger_message_received_callback_NULL_handle)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_070: [If `iothub_message_handle` or `context` is NULL, on_messenger_message_received_callback shall return TELEMETRY_MESSENGER_DISPOSITION_RESULT_RELEASED]
 TEST_FUNCTION(on_messenger_message_received_callback_NULL_context)
 {
     // arrange
@@ -2732,12 +2633,6 @@ TEST_FUNCTION(on_messenger_message_received_callback_NULL_context)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_071: [The user callback shall be invoked, passing the context it provided]
-// Tests_SRS_DEVICE_09_072: [If the user callback returns DEVICE_MESSAGE_DISPOSITION_RESULT_ACCEPTED, on_messenger_message_received_callback shall return TELEMETRY_MESSENGER_DISPOSITION_RESULT_ACCEPTED]
-// Tests_SRS_DEVICE_09_073: [If the user callback returns DEVICE_MESSAGE_DISPOSITION_RESULT_REJECTED, on_messenger_message_received_callback shall return TELEMETRY_MESSENGER_DISPOSITION_RESULT_REJECTED]
-// Tests_SRS_DEVICE_09_074: [If the user callback returns DEVICE_MESSAGE_DISPOSITION_RESULT_RELEASED, on_messenger_message_received_callback shall return TELEMETRY_MESSENGER_DISPOSITION_RESULT_RELEASED]
-// Tests_SRS_DEVICE_09_119: [A DEVICE_MESSAGE_DISPOSITION_INFO instance shall be created containing a copy of `disposition_info->source` and `disposition_info->message_id`]
-// Tests_SRS_DEVICE_09_121: [on_messenger_message_received_callback shall release the memory allocated for DEVICE_MESSAGE_DISPOSITION_INFO]
 TEST_FUNCTION(on_messenger_message_received_callback_succeess)
 {
     // arrange
@@ -2797,7 +2692,6 @@ TEST_FUNCTION(on_messenger_message_received_callback_succeess)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_120: [If the DEVICE_MESSAGE_DISPOSITION_INFO instance fails to be created, on_messenger_message_received_callback shall return TELEMETRY_MESSENGER_DISPOSITION_RESULT_RELEASED]
 TEST_FUNCTION(on_messenger_message_received_callback_failure_checks)
 {
     // arrange
@@ -2857,10 +2751,6 @@ TEST_FUNCTION(on_messenger_message_received_callback_failure_checks)
     umock_c_negative_tests_deinit();
 }
 
-// Tests_SRS_DEVICE_09_113: [A TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance shall be created with a copy of the `source` and `message_id` contained in `disposition_info`]
-// Tests_SRS_DEVICE_09_115: [`telemetry_messenger_send_message_disposition()` shall be invoked passing the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance and the corresponding TELEMETRY_MESSENGER_DISPOSITION_RESULT]
-// Tests_SRS_DEVICE_09_117: [amqp_device_send_message_disposition() shall destroy the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO instance]
-// Tests_SRS_DEVICE_09_118: [If no failures occurr, amqp_device_send_message_disposition() shall return 0]
 TEST_FUNCTION(device_send_message_disposition_succeess)
 {
     // arrange
@@ -2890,7 +2780,6 @@ TEST_FUNCTION(device_send_message_disposition_succeess)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_111: [If `device_handle` or `disposition_info` are NULL, amqp_device_send_message_disposition() shall fail and return MU_FAILURE]
 TEST_FUNCTION(device_send_message_NULL_disposition_info)
 {
     // arrange
@@ -2910,7 +2799,6 @@ TEST_FUNCTION(device_send_message_NULL_disposition_info)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_111: [If `device_handle` or `disposition_info` are NULL, amqp_device_send_message_disposition() shall fail and return MU_FAILURE]
 TEST_FUNCTION(device_send_message_NULL_handle)
 {
     // arrange
@@ -2930,7 +2818,6 @@ TEST_FUNCTION(device_send_message_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_DEVICE_09_112: [If `disposition_info->source` is NULL, amqp_device_send_message_disposition() shall fail and return MU_FAILURE]
 TEST_FUNCTION(device_send_message_NULL_disposition_info_source)
 {
     // arrange
@@ -2954,8 +2841,6 @@ TEST_FUNCTION(device_send_message_NULL_disposition_info_source)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_114: [If the TELEMETRY_MESSENGER_MESSAGE_DISPOSITION_INFO fails to be created, amqp_device_send_message_disposition() shall fail and return MU_FAILURE]
-// Tests_SRS_DEVICE_09_116: [If `telemetry_messenger_send_message_disposition()` fails, amqp_device_send_message_disposition() shall fail and return MU_FAILURE]
 TEST_FUNCTION(device_send_message_disposition_failure_checks)
 {
     // arrange
@@ -3005,8 +2890,6 @@ TEST_FUNCTION(device_send_message_disposition_failure_checks)
     umock_c_negative_tests_deinit();
 }
 
-// Tests_SRS_DEVICE_09_153: [twin_messenger_get_twin_async shall be invoked ]
-// Tests_SRS_DEVICE_09_155: [If no failures occur, amqp_device_get_twin_async shall return 0]
 TEST_FUNCTION(device_get_twin_async_succeess)
 {
     // arrange
@@ -3063,7 +2946,6 @@ TEST_FUNCTION(device_get_twin_async_callback_succeess)
     amqp_device_destroy(handle);
 }
 
-// Tests_SRS_DEVICE_09_154: [If twin_messenger_get_twin_async fails, amqp_device_get_twin_async shall return a non-zero value]
 TEST_FUNCTION(device_get_twin_async_failure_checks)
 {
     // arrange
@@ -3102,7 +2984,6 @@ TEST_FUNCTION(device_get_twin_async_failure_checks)
     umock_c_negative_tests_deinit();
 }
 
-// Tests_SRS_DEVICE_09_152: [If `handle` or `on_device_get_twin_completed_callback` are NULL, amqp_device_get_twin_async shall return a non-zero result]
 TEST_FUNCTION(device_get_twin_async_NULL_handle)
 {
     // arrange
@@ -3118,7 +2999,6 @@ TEST_FUNCTION(device_get_twin_async_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_DEVICE_09_152: [If `handle` or `on_device_get_twin_completed_callback` are NULL, amqp_device_get_twin_async shall return a non-zero result]
 TEST_FUNCTION(device_get_twin_async_NULL_callback)
 {
     // arrange

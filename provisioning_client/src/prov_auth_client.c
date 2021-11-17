@@ -218,7 +218,6 @@ static int sign_sas_data(PROV_AUTH_INFO* auth_info, const char* payload, unsigne
 PROV_AUTH_HANDLE prov_auth_create(void)
 {
     PROV_AUTH_INFO* result;
-    /* Codes_SRS_PROV_AUTH_CLIENT_07_001: [ prov_auth_create shall allocate the PROV_AUTH_INFO. ] */
     if ((result = (PROV_AUTH_INFO*)malloc(sizeof(PROV_AUTH_INFO))) == NULL)
     {
         LogError("Failed allocating PROV_AUTH_INFO.");
@@ -230,7 +229,6 @@ PROV_AUTH_HANDLE prov_auth_create(void)
 #if defined(HSM_TYPE_SAS_TOKEN)  || defined(HSM_AUTH_TYPE_CUSTOM)
         if (sec_type == SECURE_DEVICE_TYPE_TPM)
         {
-            /* Codes_SRS_PROV_AUTH_CLIENT_07_003: [ prov_auth_create shall validate the specified secure enclave interface to ensure. ] */
             result->sec_type = PROV_AUTH_TYPE_TPM;
             const HSM_CLIENT_TPM_INTERFACE* tpm_interface = hsm_client_tpm_interface();
             if ((tpm_interface == NULL) ||
@@ -242,7 +240,6 @@ PROV_AUTH_HANDLE prov_auth_create(void)
                 ((result->hsm_client_sign_data = tpm_interface->hsm_client_sign_with_identity) == NULL)
                 )
             {
-                /* Codes_SRS_PROV_AUTH_CLIENT_07_002: [ If any failure is encountered prov_auth_create shall return NULL ] */
                 LogError("Invalid TPM secure device interface was specified");
                 free(result);
                 result = NULL;
@@ -252,7 +249,6 @@ PROV_AUTH_HANDLE prov_auth_create(void)
 #if defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
         if (sec_type == SECURE_DEVICE_TYPE_X509)
         {
-            /* Codes_SRS_PROV_AUTH_CLIENT_07_003: [ prov_auth_create shall validate the specified secure enclave interface to ensure. ] */
             result->sec_type = PROV_AUTH_TYPE_X509;
             const HSM_CLIENT_X509_INTERFACE* x509_interface = hsm_client_x509_interface();
             if ((x509_interface == NULL) ||
@@ -301,7 +297,6 @@ PROV_AUTH_HANDLE prov_auth_create(void)
         }
         else
         {
-            /* Codes_SRS_PROV_AUTH_CLIENT_07_004: [ prov_auth_create shall call hsm_client_create on the secure enclave interface. ] */
             if ((result->hsm_client_handle = result->hsm_client_create() ) == NULL)
             {
                 LogError("failed create device auth module.");
@@ -322,13 +317,10 @@ PROV_AUTH_HANDLE prov_auth_create(void)
 
 void prov_auth_destroy(PROV_AUTH_HANDLE handle)
 {
-    /* Codes_SRS_PROV_AUTH_CLIENT_07_005: [ if handle is NULL, prov_auth_destroy shall do nothing. ] */
     if (handle != NULL)
     {
-        /* Codes_SRS_PROV_AUTH_CLIENT_07_007: [ prov_auth_destroy shall free all resources allocated in this module. ] */
         free(handle->registration_id);
         handle->hsm_client_destroy(handle->hsm_client_handle);
-        /* Codes_SRS_PROV_AUTH_CLIENT_07_006: [ prov_auth_destroy shall free the PROV_AUTH_HANDLE instance. ] */
         free(handle);
     }
 }
@@ -336,7 +328,6 @@ void prov_auth_destroy(PROV_AUTH_HANDLE handle)
 PROV_AUTH_TYPE prov_auth_get_type(PROV_AUTH_HANDLE handle)
 {
     PROV_AUTH_TYPE result;
-    /* Codes_SRS_PROV_AUTH_CLIENT_07_008: [ if handle is NULL prov_auth_get_type shall return PROV_AUTH_TYPE_UNKNOWN ] */
     if (handle == NULL)
     {
         LogError("Invalid handle specified");
@@ -344,7 +335,6 @@ PROV_AUTH_TYPE prov_auth_get_type(PROV_AUTH_HANDLE handle)
     }
     else
     {
-        /* Codes_SRS_PROV_AUTH_CLIENT_07_009: [ prov_auth_get_type shall return the PROV_AUTH_TYPE of the underlying secure enclave. ] */
         result = handle->sec_type;
     }
     return result;
@@ -355,7 +345,6 @@ char* prov_auth_get_registration_id(PROV_AUTH_HANDLE handle)
     char* result;
     if (handle == NULL)
     {
-        /* Codes_SRS_PROV_AUTH_CLIENT_07_010: [ if handle is NULL prov_auth_get_registration_id shall return NULL. ] */
         LogError("Invalid handle parameter");
         result = NULL;
     }
@@ -365,7 +354,6 @@ char* prov_auth_get_registration_id(PROV_AUTH_HANDLE handle)
         int reg_id_allocated = 0;
         if (handle->registration_id == NULL)
         {
-            /* Codes_SRS_PROV_AUTH_CLIENT_07_011: [ prov_auth_get_registration_id shall load the registration id if it has not been previously loaded. ] */
             load_result = load_registration_id(handle);
             if (load_result == 0)
             {
@@ -375,14 +363,11 @@ char* prov_auth_get_registration_id(PROV_AUTH_HANDLE handle)
 
         if (load_result != 0)
         {
-            /* Codes_SRS_PROV_AUTH_CLIENT_07_012: [ If a failure is encountered, prov_auth_get_registration_id shall return NULL. ] */
             LogError("Failed loading registration key");
             result = NULL;
         }
-        /* Codes_SRS_PROV_AUTH_CLIENT_07_013: [ Upon success prov_auth_get_registration_id shall return the registration id of the secure enclave. ] */
         else if (mallocAndStrcpy_s(&result, handle->registration_id) != 0)
         {
-            /* Codes_SRS_PROV_AUTH_CLIENT_07_012: [ If a failure is encountered, prov_auth_get_registration_id shall return NULL. ] */
             LogError("Failed allocating registration key");
             if (reg_id_allocated == 1)
             {
@@ -428,13 +413,11 @@ BUFFER_HANDLE prov_auth_get_endorsement_key(PROV_AUTH_HANDLE handle)
     BUFFER_HANDLE result;
     if (handle == NULL)
     {
-        /* Codes_SRS_SECURE_ENCLAVE_CLIENT_07_021: [ If handle is NULL prov_auth_get_endorsement_key shall return NULL. ] */
         LogError("Invalid handle parameter");
         result = NULL;
     }
     else if (handle->sec_type != PROV_AUTH_TYPE_TPM)
     {
-        /* Codes_SRS_SECURE_ENCLAVE_CLIENT_07_023: [ If the sec_type is PROV_AUTH_TYPE_X509, prov_auth_get_endorsement_key shall return NULL. ] */
         LogError("Invalid type for operation");
         result = NULL;
     }
@@ -450,7 +433,6 @@ BUFFER_HANDLE prov_auth_get_endorsement_key(PROV_AUTH_HANDLE handle)
         }
         else
         {
-            /* Codes_SRS_SECURE_ENCLAVE_CLIENT_07_022: [ prov_auth_get_endorsement_key shall return the endorsement key returned by the hsm_client_get_ek secure enclave function. ] */
             result = BUFFER_create(ek_value, ek_len);
             if (result == NULL)
             {
@@ -465,7 +447,6 @@ BUFFER_HANDLE prov_auth_get_endorsement_key(PROV_AUTH_HANDLE handle)
 BUFFER_HANDLE prov_auth_get_storage_key(PROV_AUTH_HANDLE handle)
 {
     BUFFER_HANDLE result;
-    /* Codes_SRS_SECURE_ENCLAVE_CLIENT_07_024: [ If handle is NULL prov_auth_get_storage_key shall return NULL. ] */
     if (handle == NULL)
     {
         LogError("Invalid handle parameter");
@@ -473,7 +454,6 @@ BUFFER_HANDLE prov_auth_get_storage_key(PROV_AUTH_HANDLE handle)
     }
     else if (handle->sec_type != PROV_AUTH_TYPE_TPM)
     {
-        /* Codes_SRS_SECURE_ENCLAVE_CLIENT_07_026: [ If the sec_type is PROV_AUTH_TYPE_X509, prov_auth_get_storage_key shall return NULL. ] */
         LogError("Invalid type for operation");
         result = NULL;
     }
@@ -489,7 +469,6 @@ BUFFER_HANDLE prov_auth_get_storage_key(PROV_AUTH_HANDLE handle)
         }
         else
         {
-            /* Codes_SRS_SECURE_ENCLAVE_CLIENT_07_025: [ prov_auth_get_storage_key shall return the endorsement key returned by the hsm_client_get_srk secure enclave function. ] */
             result = BUFFER_create(srk_value, srk_len);
             if (result == NULL)
             {
@@ -506,19 +485,16 @@ int prov_auth_import_key(PROV_AUTH_HANDLE handle, const unsigned char* key_value
     int result;
     if (handle == NULL || key_value == NULL || key_len == 0)
     {
-        /* Codes_SRS_SECURE_ENCLAVE_CLIENT_07_027: [ If handle or key are NULL prov_auth_import_key shall return a non-zero value. ] */
         LogError("Invalid handle parameter");
         result = MU_FAILURE;
     }
     else if (handle->sec_type != PROV_AUTH_TYPE_TPM)
     {
-        /* Codes_SRS_SECURE_ENCLAVE_CLIENT_07_029: [ If the sec_type is not SECURE_ENCLAVE_TYPE_TPM, prov_auth_import_key shall return NULL. ] */
         LogError("Invalid type for operation");
         result = MU_FAILURE;
     }
     else
     {
-        /* Codes_SRS_SECURE_ENCLAVE_CLIENT_07_028: [ prov_auth_import_key shall import the specified key into the tpm using hsm_client_import_key secure enclave function. ] */
         if (handle->hsm_client_import_key(handle->hsm_client_handle, key_value, key_len) != 0)
         {
             /* SRS_SECURE_ENCLAVE_CLIENT_07_040: [ If hsm_client_import_key returns an error prov_auth_import_key shall return a non-zero value. ]*/
@@ -568,7 +544,6 @@ char* prov_auth_construct_sas_token(PROV_AUTH_HANDLE handle, const char* token_s
             size_t data_len;
             (void)sprintf(payload, "%s\n%s", token_scope, expire_token);
 
-            /* Codes_SRS_SECURE_ENCLAVE_CLIENT_07_031: [ prov_auth_get_certificate shall import the specified cert into the client using hsm_client_get_cert secure enclave function. ] */
             if (sign_sas_data(handle, payload, &data_value, &data_len) == 0)
             {
                 STRING_HANDLE urlEncodedSignature;
@@ -624,19 +599,16 @@ char* prov_auth_get_certificate(PROV_AUTH_HANDLE handle)
     char* result;
     if (handle == NULL)
     {
-        /* Codes_SRS_SECURE_ENCLAVE_CLIENT_07_030: [ If handle or key are NULL prov_auth_get_certificate shall return a non-zero value. ] */
         LogError("Invalid handle parameter");
         result = NULL;
     }
     else if (handle->sec_type != PROV_AUTH_TYPE_X509)
     {
-        /* Codes_SRS_SECURE_ENCLAVE_CLIENT_07_032: [ If the sec_type is not PROV_AUTH_TYPE_X509, prov_auth_get_certificate shall return NULL. ] */
         LogError("Invalid type for operation");
         result = NULL;
     }
     else
     {
-        /* Codes_SRS_SECURE_ENCLAVE_CLIENT_07_031: [ prov_auth_get_certificate shall import the specified cert into the client using hsm_client_get_cert secure enclave function. ] */
         result = handle->hsm_client_get_cert(handle->hsm_client_handle);
     }
     return result;
@@ -647,19 +619,16 @@ char* prov_auth_get_alias_key(PROV_AUTH_HANDLE handle)
     char* result;
     if (handle == NULL)
     {
-        /* Codes_SRS_SECURE_ENCLAVE_CLIENT_07_033: [ If handle or key are NULL prov_auth_get_alias_key shall return a non-zero value. ] */
         LogError("Invalid handle parameter");
         result = NULL;
     }
     else if (handle->sec_type != PROV_AUTH_TYPE_X509)
     {
-        /* Codes_SRS_SECURE_ENCLAVE_CLIENT_07_035: [ If the sec_type is not PROV_AUTH_TYPE_X509, prov_auth_get_alias_key shall return NULL. ] */
         LogError("Invalid type for operation");
         result = NULL;
     }
     else
     {
-        /* Codes_SRS_SECURE_ENCLAVE_CLIENT_07_034: [ prov_auth_get_alias_key shall import the specified alias key into the client using hsm_client_get_ak secure enclave function. ] */
         result = handle->hsm_client_get_alias_key(handle->hsm_client_handle);
     }
     return result;

@@ -113,7 +113,6 @@ BEGIN_TEST_SUITE(DataSerializer_ut)
 
     /* DataSerializer_Encode_Tests BEGIN */
 
-    /* Tests_SRS_DATA_SERIALIZER_07_003: [NULL shall be returned when an invalid parameter is supplied.] */
     TEST_FUNCTION(DataSerializer_Encode_with_NULL_MULTITREE_HANDLE_fails)
     {
         ///arrange
@@ -125,7 +124,6 @@ BEGIN_TEST_SUITE(DataSerializer_ut)
         ASSERT_IS_NULL(pBuffer);
     }
 
-    /* Tests_SRS_DATA_SERIALIZER_07_003: [NULL shall be returned when an invalid parameter is supplied.] */
     TEST_FUNCTION(DataSerializer_Encode_with_NULL_Serialize_Function_fails)
     {
         ///arrange
@@ -137,8 +135,6 @@ BEGIN_TEST_SUITE(DataSerializer_ut)
         ASSERT_IS_NULL(pBuffer);
     }
 
-    /* Tests_SRS_DATA_SERIALIZER_07_002: [DataSerializer_Encode shall return a valid BUFFER_HANDLE when the function executes successfully.] */
-    /* Tests_SRS_DATA_SERIALIZER_07_009: [DataSerializer_Encode function shall call into the given DATA_SERIALIZER_ENCODE_FUNC callback with a valid BUFFER object and valid MULTITREE_HANDLE object.] */
     TEST_FUNCTION(DataSerializer_Encode_with_Valid_Parameter_Success)
     {
         ///arrange
@@ -152,7 +148,6 @@ BEGIN_TEST_SUITE(DataSerializer_ut)
         ASSERT_ARE_EQUAL(void_ptr, pBuffer, TEST_BUFFER_VALUE);
     }
 
-    /* Tests_SRS_DATA_SERIALIZER_07_010: [Upon a DATA_SERIALIZER_ENCODE_FUNC failure the DataSerializer_Encode function shall return NULL.] */
     TEST_FUNCTION(DataSerializer_Encode_Serialize_Function_Fail)
     {
         ///arrange
@@ -169,7 +164,6 @@ BEGIN_TEST_SUITE(DataSerializer_ut)
 
     /* DataSerializer_Decode_Tests BEGIN */
 
-    /* Tests_SRS_DATA_SERIALIZER_07_007: [NULL shall be returned when an invalid parameter is supplied.] */
     TEST_FUNCTION(DataSerializer_Decode_with_NULL_BUFFER_fails)
     {
         ///arrange
@@ -181,7 +175,6 @@ BEGIN_TEST_SUITE(DataSerializer_ut)
         ASSERT_IS_NULL(multitreeHandle);
     }
 
-    /* Tests_SRS_DATA_SERIALIZER_07_007: [NULL shall be returned when an invalid parameter is supplied.] */
     TEST_FUNCTION(DataSerializer_Decode_with_NULL_Decode_Serialize_Function_fails)
     {
         ///arrange
@@ -193,8 +186,6 @@ BEGIN_TEST_SUITE(DataSerializer_ut)
         ASSERT_IS_NULL(multitreeHandle);
     }
 
-    /* Tests_SRS_DATA_SERIALIZER_07_006: [DataSerializer_Decode shall return a valid MULTITREE_HANDLE when the function executes successfully.] */
-    /* Tests_SRS_DATA_SERIALIZER_07_012: [DataSerializer_Decode function shall call into the given DATA_SERIALIZER_DECODE_FUNC callback with a valid BUFFER object and valid MULTITREE_HANDLE object.] */
     TEST_FUNCTION(DataSerializer_Decode_with_Valid_Parameter_Success)
     {
         ///arrange
@@ -208,7 +199,6 @@ BEGIN_TEST_SUITE(DataSerializer_ut)
         ASSERT_ARE_EQUAL(void_ptr, (void*)multitreeHandle, (void*)TEST_MULTITREE_HANDLE);
     }
 
-    /* Tests_SRS_DATA_SERIALIZER_07_013: [Upon a DATA_SERIALIZER_DECODE_FUNC callback failure the DataSerializer_Encode function Shall return NULL.] */
     TEST_FUNCTION(DataSerializer_Decode_with_Serialize_Function_Fail)
     {
         ///arrange

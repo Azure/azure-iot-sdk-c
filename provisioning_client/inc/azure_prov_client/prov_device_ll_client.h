@@ -1,6 +1,11 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+/** @file prov_device_ll_client.h
+*   @brief Low level provisioning client.
+*
+*/
+
 #ifndef PROV_DEVICE_LL_CLIENT_H
 #define PROV_DEVICE_LL_CLIENT_H
 

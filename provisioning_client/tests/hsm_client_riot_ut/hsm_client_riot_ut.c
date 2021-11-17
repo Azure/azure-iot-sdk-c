@@ -542,11 +542,6 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         STRICT_EXPECTED_CALL(mbedtls_mpi_free(IGNORED_PTR_ARG)); // 35
     }
 
-    /* Tests_SRS_SECURE_DEVICE_RIOT_07_001: [ On success hsm_client_riot_create shall allocate a new instance of the device auth interface. ] */
-    /* Tests_SRS_SECURE_DEVICE_RIOT_07_002: [ hsm_client_riot_create shall call into the RIot code to sign the RIoT certificate. ] */
-    /* Tests_SRS_SECURE_DEVICE_RIOT_07_003: [ hsm_client_riot_create shall cache the device id public value from the RIoT module. ] */
-    /* Tests_SRS_SECURE_DEVICE_RIOT_07_004: [ hsm_client_riot_create shall cache the alias key pair value from the RIoT module. ] */
-    /* Tests_SRS_SECURE_DEVICE_RIOT_07_005: [ hsm_client_riot_create shall create the Signer regions of the alias key certificate. ]*/
     TEST_FUNCTION(hsm_client_riot_create_succeed)
     {
         hsm_client_x509_init();
@@ -566,7 +561,6 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         hsm_client_riot_destroy(sec_handle);
     }
 
-    /* Tests_SRS_SECURE_DEVICE_RIOT_07_006: [ If any failure is encountered hsm_client_riot_create shall return NULL ] */
     TEST_FUNCTION(hsm_client_riot_create_fail)
     {
         hsm_client_x509_init();
@@ -609,8 +603,6 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /* Tests_SRS_SECURE_DEVICE_RIOT_07_008: [ hsm_client_riot_destroy shall free the HSM_CLIENT_HANDLE instance. ] */
-    /* Tests_SRS_SECURE_DEVICE_RIOT_07_009: [ hsm_client_riot_destroy shall free all resources allocated in this module. ] */
     TEST_FUNCTION(hsm_client_riot_destroy_succeed)
     {
         hsm_client_x509_init();
@@ -642,7 +634,6 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         //cleanup
     }
 
-    /* Tests_SRS_SECURE_DEVICE_RIOT_07_007: [ if handle is NULL, hsm_client_riot_destroy shall do nothing. ] */
     TEST_FUNCTION(hsm_client_riot_destroy_handle_NULL_succeed)
     {
         //arrange
@@ -657,7 +648,6 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         //cleanup
     }
 
-    /* Tests_SRS_SECURE_DEVICE_RIOT_07_010: [ if handle is NULL, hsm_client_riot_get_certificate shall return NULL. ] */
     TEST_FUNCTION(hsm_client_riot_get_certificate_handle_NULL_succeed)
     {
         //arrange
@@ -673,7 +663,6 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         //cleanup
     }
 
-    /* Tests_SRS_SECURE_DEVICE_RIOT_07_013: [ If any failure is encountered hsm_client_riot_get_certificate shall return NULL ] */
     TEST_FUNCTION(hsm_client_riot_get_certificate_malloc_fail)
     {
         //arrange
@@ -694,8 +683,6 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         hsm_client_riot_destroy(sec_handle);
     }
 
-    /* Tests_SRS_SECURE_DEVICE_RIOT_07_011: [ hsm_client_riot_get_certificate shall allocate a char* to return the riot certificate. ] */
-    /* Tests_SRS_SECURE_DEVICE_RIOT_07_012: [ On success hsm_client_riot_get_certificate shall return the riot certificate. ] */
     TEST_FUNCTION(hsm_client_riot_get_certificate_succeed)
     {
         //arrange
@@ -718,7 +705,6 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         hsm_client_riot_destroy(sec_handle);
     }
 
-    /* Tests_SRS_SECURE_DEVICE_RIOT_07_014: [ if handle is NULL, hsm_client_riot_get_alias_key shall return NULL. ] */
     TEST_FUNCTION(hsm_client_riot_get_alias_key_handle_NULL_succeed)
     {
         //arrange
@@ -733,7 +719,6 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         //cleanup
     }
 
-    /* Tests_SRS_SECURE_DEVICE_RIOT_07_017: [ If any failure is encountered hsm_client_riot_get_alias_key shall return NULL ] */
     TEST_FUNCTION(hsm_client_riot_get_alias_key_malloc_fail)
     {
         //arrange
@@ -754,8 +739,6 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         hsm_client_riot_destroy(sec_handle);
     }
 
-    /* Tests_SRS_SECURE_DEVICE_RIOT_07_015: [ hsm_client_riot_get_alias_key shall allocate a char* to return the alias certificate. ] */
-    /* Tests_SRS_SECURE_DEVICE_RIOT_07_016: [ On success hsm_client_riot_get_alias_key shall return the alias certificate. ] */
     TEST_FUNCTION(hsm_client_riot_get_alias_key_succeed)
     {
         //arrange
@@ -778,7 +761,6 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         hsm_client_riot_destroy(sec_handle);
     }
 
-    /* Tests_SRS_SECURE_DEVICE_RIOT_07_022: [ if handle is NULL, hsm_client_riot_get_signer_cert shall return NULL. ] */
     TEST_FUNCTION(hsm_client_riot_get_signer_cert_handle_NULL_succeed)
     {
         //arrange
@@ -794,7 +776,6 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         //cleanup
     }
 
-    /* Tests_SRS_SECURE_DEVICE_RIOT_07_025: [ If any failure is encountered hsm_client_riot_get_signer_cert shall return NULL ] */
     TEST_FUNCTION(hsm_client_riot_get_signer_cert_malloc_fail)
     {
         //arrange
@@ -815,8 +796,6 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         hsm_client_riot_destroy(sec_handle);
     }
 
-    /* Tests_SRS_SECURE_DEVICE_RIOT_07_024: [ On success hsm_client_riot_get_signer_cert shall return the signer certificate. ] */
-    /* Tests_SRS_SECURE_DEVICE_RIOT_07_023: [ hsm_client_riot_get_signer_cert shall allocate a char* to return the signer certificate. ] */
     TEST_FUNCTION(hsm_client_riot_get_signer_cert_succeed)
     {
         //arrange
@@ -877,7 +856,6 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
     }
 
 
-    /* Tests_SRS_SECURE_DEVICE_RIOT_07_026: [ if handle is NULL, hsm_client_riot_get_common_name shall return NULL. ] */
     TEST_FUNCTION(hsm_client_riot_get_common_name_handle_NULL_succeed)
     {
         //arrange
@@ -892,7 +870,6 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         //cleanup
     }
 
-    /* Tests_SRS_SECURE_DEVICE_RIOT_07_028: [ If any failure is encountered hsm_client_riot_get_signer_cert shall return NULL ] */
     TEST_FUNCTION(hsm_client_riot_get_common_name_mallocAndStrcpy_s_fail)
     {
         //arrange
@@ -913,7 +890,6 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         hsm_client_riot_destroy(sec_handle);
     }
 
-    /* Tests_SRS_SECURE_DEVICE_RIOT_07_027: [ hsm_client_riot_get_common_name shall allocate a char* to return the certificate common name. ] */
     TEST_FUNCTION(hsm_client_riot_get_common_name_succeed)
     {
         //arrange
@@ -936,7 +912,6 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         hsm_client_riot_destroy(sec_handle);
     }
 
-    /* Tests_SRS_DPS_HSM_RIOT_07_030: [ If handle or common_name is NULL, hsm_client_riot_create_leaf_cert shall return NULL. ] */
     TEST_FUNCTION(hsm_client_riot_create_leaf_cert_handle_NULL_fail)
     {
         //arrange
@@ -951,7 +926,6 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         //cleanup
     }
 
-    /* Tests_SRS_DPS_HSM_RIOT_07_030: [ If handle or common_name is NULL, hsm_client_riot_create_leaf_cert shall return NULL. ] */
     TEST_FUNCTION(hsm_client_riot_create_leaf_cert_common_name_NULL_fail)
     {
         //arrange
@@ -970,7 +944,6 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         hsm_client_riot_destroy(sec_handle);
     }
 
-    /* Tests_SRS_DPS_HSM_RIOT_07_031: [ If successful hsm_client_riot_create_leaf_cert shall return a leaf cert with the CN of common_name. ] */
     TEST_FUNCTION(hsm_client_riot_create_leaf_cert_succeed)
     {
         //arrange
@@ -992,7 +965,6 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         hsm_client_riot_destroy(sec_handle);
     }
 
-    /* Tests_SRS_DPS_HSM_RIOT_07_032: [ If hsm_client_riot_create_leaf_cert encounters an error it shall return NULL. ] */
     TEST_FUNCTION(hsm_client_riot_create_leaf_cert_fail)
     {
         //arrange
@@ -1036,7 +1008,6 @@ BEGIN_TEST_SUITE(hsm_client_riot_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /* Tests_SRS_SECURE_DEVICE_RIOT_07_029: [ hsm_client_riot_interface shall return the SEC_RIOT_INTERFACE structure. ] */
     TEST_FUNCTION(hsm_client_riot_interface_succeed)
     {
         //arrange

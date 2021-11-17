@@ -46,12 +46,38 @@ void real_free(void* ptr)
 #include "azure_c_shared_utility/xio.h"
 #include "azure_c_shared_utility/uniqueid.h"
 #include "azure_c_shared_utility/strings.h"
+
+#undef ENABLE_MOCK_FILTERING_SWITCH
+#define ENABLE_MOCK_FILTERING
+
+#define please_mock_cbs_create MOCK_ENABLED
+#define please_mock_cbs_destroy MOCK_ENABLED
+#define please_mock_cbs_open_async MOCK_ENABLED
+#define please_mock_connection_create2 MOCK_ENABLED
+#define please_mock_connection_destroy MOCK_ENABLED
+#define please_mock_connection_dowork MOCK_ENABLED
+#define please_mock_connection_set_idle_timeout MOCK_ENABLED
+#define please_mock_connection_set_remote_idle_timeout_empty_frame_send_ratio MOCK_ENABLED
+#define please_mock_connection_set_trace MOCK_ENABLED
+#define please_mock_saslclientio_get_interface_description MOCK_ENABLED
+#define please_mock_saslmechanism_create MOCK_ENABLED
+#define please_mock_saslmechanism_destroy MOCK_ENABLED
+#define please_mock_saslmssbcbs_get_interface MOCK_ENABLED
+#define please_mock_session_create MOCK_ENABLED
+#define please_mock_session_destroy MOCK_ENABLED
+#define please_mock_session_set_incoming_window MOCK_ENABLED
+#define please_mock_session_set_outgoing_window MOCK_ENABLED
+#define please_mock_UniqueId_Generate MOCK_ENABLED
+
 #include "azure_uamqp_c/session.h"
 #include "azure_uamqp_c/cbs.h"
 #include "azure_uamqp_c/sasl_mechanism.h"
 #include "azure_uamqp_c/saslclientio.h"
 #include "azure_uamqp_c/sasl_mssbcbs.h"
 #include "azure_uamqp_c/connection.h"
+
+#undef ENABLE_MOCK_FILTERING_SWITCH
+#undef ENABLE_MOCK_FILTERING
 #undef ENABLE_MOCKS
 
 #include "internal/iothubtransport_amqp_connection.h"
@@ -375,7 +401,6 @@ TEST_FUNCTION_CLEANUP(TestMethodCleanup)
     TEST_MUTEX_RELEASE(g_testByTest);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_001: [If `config` is NULL, amqp_connection_create() shall fail and return NULL]
 TEST_FUNCTION(amqp_connection_create_NULL_config)
 {
     // arrange
@@ -391,7 +416,6 @@ TEST_FUNCTION(amqp_connection_create_NULL_config)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_002: [If `config->iothub_host_fqdn` is NULL, amqp_connection_create() shall fail and return NULL]
 TEST_FUNCTION(amqp_connection_create_NULL_iothub_fqdn)
 {
     // arrange
@@ -410,7 +434,6 @@ TEST_FUNCTION(amqp_connection_create_NULL_iothub_fqdn)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_003: [If `config->underlying_io_transport` is NULL, amqp_connection_create() shall fail and return NULL]
 TEST_FUNCTION(amqp_connection_create_NULL_underlying_io_transport)
 {
     // arrange
@@ -427,35 +450,11 @@ TEST_FUNCTION(amqp_connection_create_NULL_underlying_io_transport)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_057: [amqp_connection_create() shall allocate memory for an instance of the connection instance]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_005: [A copy of `config->iothub_host_fqdn` shall be saved on `instance->iothub_host_fqdn`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_006: [`config->underlying_io_transport` shall be saved on `instance->underlying_io_transport`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_008: [`config->is_trace_on` shall be saved on `instance->is_trace_on`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_060: [`config->on_state_changed_callback` shall be saved on `instance->on_state_changed_callback`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_061: [`config->on_state_changed_context` shall be saved on `instance->on_state_changed_context`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_009: [`config->on_error_callback` shall be saved on `instance->on_error_callback`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_010: [`config->on_error_context` shall be saved on `instance->on_error_context`]
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_011: [If `config->create_sasl_io` is true or `config->create_cbs_connection` is true, amqp_connection_create() shall create SASL I/O]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_012: [`instance->sasl_mechanism` shall be created using saslmechanism_create()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_014: [A SASLCLIENTIO_CONFIG shall be set with `instance->underlying_io_transport` and `instance->sasl_mechanism`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_015: [`instance->sasl_io` shall be created using xio_create() passing saslclientio_get_interface_description() and the SASLCLIENTIO_CONFIG instance]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_017: [The sasl_io "logtrace" option shall be set using xio_setoption(), passing `instance->is_trace_on`]
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_007: [If `instance->sasl_io` is defined it shall be used as parameter `xio` in connection_create2()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_019: [amqp_connection_create() shall use the `instance->sasl_io` as the `connection_underlying_io`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_020: [connection_create2() shall also receive `on_connection_state_changed` and `on_connection_error` callback functions]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_023: [The connection tracing shall be set using connection_set_trace(), passing `instance->is_trace_on`]
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_024: [`instance->session_handle` shall be created using session_create(), passing `instance->connection_handle`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_026: [The `instance->session_handle` incoming window size shall be set as UINT_MAX using session_set_incoming_window()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_027: [The `instance->session_handle` outgoing window size shall be set as 100 using session_set_outgoing_window()]
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_028: [Only if `config->create_cbs_connection` is true, amqp_connection_create() shall create and open the CBS_HANDLE]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_029: [`instance->cbs_handle` shall be created using cbs_create()`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_031: [`instance->cbs_handle` shall be opened using `cbs_open_async`]
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_034: [If no failures occur, amqp_connection_create() shall return the handle to the connection state]
 TEST_FUNCTION(amqp_connection_create_SASL_and_CBS_success)
 {
     // arrange
@@ -475,7 +474,6 @@ TEST_FUNCTION(amqp_connection_create_SASL_and_CBS_success)
     amqp_connection_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_028: [Only if `config->create_cbs_connection` is true, amqp_connection_create() shall create and open the CBS_HANDLE]
 TEST_FUNCTION(amqp_connection_create_SASL_only_success)
 {
     // arrange
@@ -496,7 +494,6 @@ TEST_FUNCTION(amqp_connection_create_SASL_only_success)
     amqp_connection_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_018: [If `instance->sasl_io` is not defined, `instance->underlying_io_transport` shall be used as parameter `xio` in connection_create2()]
 TEST_FUNCTION(amqp_connection_create_no_SASL_no_CBS_success)
 {
     // arrange
@@ -518,15 +515,6 @@ TEST_FUNCTION(amqp_connection_create_no_SASL_no_CBS_success)
     amqp_connection_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_058: [If malloc() fails, amqp_connection_create() shall fail and return NULL]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_066: [If STRING_construct() fails, amqp_connection_create() shall fail and return NULL]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_013: [If saslmechanism_create() fails, amqp_connection_create() shall fail and return NULL]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_016: [If xio_create() fails, amqp_connection_create() shall fail and return NULL]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_021: [If connection_create2() fails, amqp_connection_create() shall fail and return NULL]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_025: [If session_create() fails, amqp_connection_create() shall fail and return NULL]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_030: [If cbs_create() fails, amqp_connection_create() shall fail and return NULL]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_032: [If cbs_open() fails, amqp_connection_create() shall fail and return NULL]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_074: [If connection_set_idle_timeout() fails, amqp_connection_create() shall fail and return NULL]
 TEST_FUNCTION(amqp_connection_create_SASL_and_CBS_negative_checks)
 {
     // arrange
@@ -576,10 +564,6 @@ TEST_FUNCTION(amqp_connection_create_SASL_and_CBS_negative_checks)
     umock_c_negative_tests_deinit();
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_063: [If `on_connection_state_changed` is called back, `instance->on_state_changed_callback` shall be invoked, if defined]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_064: [If `on_connection_state_changed` new state is CONNECTION_STATE_OPENED, `instance->on_state_changed_callback` shall be invoked with state AMQP_CONNECTION_STATE_OPENED]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_065: [If `on_connection_state_changed` new state is CONNECTION_STATE_END or CONNECTION_STATE_ERROR, `instance->on_state_changed_callback` shall be invoked with state AMQP_CONNECTION_STATE_CLOSED]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_071: [If `on_connection_state_changed` new state is CONNECTION_STATE_ERROR or CONNECTION_STATE_DISCARDING, `instance->on_state_changed_callback` shall be invoked with state AMQP_CONNECTION_STATE_ERROR]
 TEST_FUNCTION(amqp_connection_create_on_connection_state_changed)
 {
     // arrange
@@ -736,7 +720,6 @@ TEST_FUNCTION(amqp_connection_create_no_sasl_no_cbs_on_connection_state_changed)
     amqp_connection_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_022: [If the connection calls back with an I/O error, `instance->on_state_changed_callback` shall be invoked if set passing code AMQP_CONNECTION_STATE_ERROR and `instance->on_state_changed_context`]
 TEST_FUNCTION(amqp_connection_create_on_io_error)
 {
     // arrange
@@ -765,7 +748,6 @@ TEST_FUNCTION(amqp_connection_create_on_io_error)
     amqp_connection_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_035: [If `conn_handle` is NULL, amqp_connection_destroy() shall fail and return]
 TEST_FUNCTION(amqp_connection_destroy_NULL_handle)
 {
     // arrange
@@ -780,13 +762,6 @@ TEST_FUNCTION(amqp_connection_destroy_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_036: [amqp_connection_destroy() shall destroy `instance->cbs_handle` if set using cbs_destroy()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_037: [amqp_connection_destroy() shall destroy `instance->session_handle` if set using session_destroy()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_067: [amqp_connection_destroy() shall destroy `instance->connection_handle` if set using connection_destroy()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_038: [amqp_connection_destroy() shall destroy `instance->sasl_io` if set using xio_destroy()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_039: [amqp_connection_destroy() shall destroy `instance->sasl_mechanism` if set using saslmechanism_destroy()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_059: [amqp_connection_destroy() shall destroy `instance->iothub_host_fqdn` if set using STRING_delete()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_040: [amqp_connection_destroy() shall free the memory allocated for the connection instance]
 TEST_FUNCTION(amqp_connection_destroy_SASL_and_CBS_success)
 {
     // arrange
@@ -809,10 +784,6 @@ TEST_FUNCTION(amqp_connection_destroy_SASL_and_CBS_success)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_037: [amqp_connection_destroy() shall destroy `instance->session_handle` if set using session_destroy()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_067: [amqp_connection_destroy() shall destroy `instance->connection_handle` if set using connection_destroy()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_059: [amqp_connection_destroy() shall destroy `instance->iothub_host_fqdn` if set using STRING_delete()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_040: [amqp_connection_destroy() shall free the memory allocated for the connection instance]
 TEST_FUNCTION(amqp_connection_destroy_no_SASL_no_CBS_success)
 {
     // arrange
@@ -837,7 +808,6 @@ TEST_FUNCTION(amqp_connection_destroy_no_SASL_no_CBS_success)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_041: [If `conn_handle` is NULL, amqp_connection_do_work() shall fail and return]
 TEST_FUNCTION(amqp_connection_do_work_NULL_handle)
 {
     // arrange
@@ -852,7 +822,6 @@ TEST_FUNCTION(amqp_connection_do_work_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_042: [connection_dowork() shall be invoked passing `instance->connection_handle`]
 TEST_FUNCTION(amqp_connection_do_work_success)
 {
     // arrange
@@ -876,7 +845,6 @@ TEST_FUNCTION(amqp_connection_do_work_success)
     amqp_connection_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_043: [If `conn_handle` is NULL, amqp_connection_get_session_handle() shall fail and return MU_FAILURE]
 TEST_FUNCTION(amqp_connection_get_session_handle_NULL_handle)
 {
     // arrange
@@ -892,7 +860,6 @@ TEST_FUNCTION(amqp_connection_get_session_handle_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_044: [If `session_handle` is NULL, amqp_connection_get_session_handle() shall fail and return MU_FAILURE]
 TEST_FUNCTION(amqp_connection_get_session_handle_NULL_session_handle)
 {
     // arrange
@@ -916,8 +883,6 @@ TEST_FUNCTION(amqp_connection_get_session_handle_NULL_session_handle)
     amqp_connection_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_045: [`session_handle` shall be set to point to `instance->session_handle`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_046: [amqp_connection_get_session_handle() shall return success code 0]
 TEST_FUNCTION(amqp_connection_get_session_handle_success)
 {
     // arrange
@@ -944,7 +909,6 @@ TEST_FUNCTION(amqp_connection_get_session_handle_success)
     amqp_connection_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_047: [If `conn_handle` is NULL, amqp_connection_get_cbs_handle() shall fail and return MU_FAILURE]
 TEST_FUNCTION(amqp_connection_get_cbs_handle_NULL_handle)
 {
     // arrange
@@ -960,7 +924,6 @@ TEST_FUNCTION(amqp_connection_get_cbs_handle_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_048: [If `cbs_handle` is NULL, amqp_connection_get_cbs_handle() shall fail and return MU_FAILURE]
 TEST_FUNCTION(amqp_connection_get_cbs_handle_NULL_cbs_handle)
 {
     // arrange
@@ -984,8 +947,6 @@ TEST_FUNCTION(amqp_connection_get_cbs_handle_NULL_cbs_handle)
     amqp_connection_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_050: [`cbs_handle` shall be set to point to `instance->cbs_handle`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_051: [amqp_connection_get_cbs_handle() shall return success code 0]
 TEST_FUNCTION(amqp_connection_get_cbs_handle_success)
 {
     // arrange
@@ -1012,7 +973,6 @@ TEST_FUNCTION(amqp_connection_get_cbs_handle_success)
     amqp_connection_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_049: [If `instance->cbs_handle` is NULL, amqp_connection_get_cbs_handle() shall fail and return MU_FAILURE]
 TEST_FUNCTION(amqp_connection_get_cbs_handle_no_CBS)
 {
     // arrange
@@ -1041,7 +1001,6 @@ TEST_FUNCTION(amqp_connection_get_cbs_handle_no_CBS)
     amqp_connection_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_052: [If `conn_handle` is NULL, amqp_connection_set_logging() shall fail and return MU_FAILURE]
 TEST_FUNCTION(amqp_connection_set_logging_NULL_handle)
 {
     // act
@@ -1054,10 +1013,6 @@ TEST_FUNCTION(amqp_connection_set_logging_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_053: [`instance->is_trace_on` shall be set to `is_trace_on`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_054: [Tracing on `instance->sasl_io` shall be set to `instance->is_trace_on` if the value has changed]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_055: [Tracing on `instance->connection_handle` shall be set to `instance->is_trace_on` if the value has changed]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_056: [amqp_connection_set_logging() shall return success code 0]
 TEST_FUNCTION(amqp_connection_set_logging_SASL_and_CBS_success)
 {
     // arrange
@@ -1083,7 +1038,6 @@ TEST_FUNCTION(amqp_connection_set_logging_SASL_and_CBS_success)
     amqp_connection_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_072: [If xio_setoption() fails, amqp_connection_set_logging() shall fail and return MU_FAILURE]
 TEST_FUNCTION(amqp_connection_set_logging_SASL_and_CBS_xio_setoption_fails)
 {
     // arrange
@@ -1110,9 +1064,6 @@ TEST_FUNCTION(amqp_connection_set_logging_SASL_and_CBS_xio_setoption_fails)
     amqp_connection_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_053: [`instance->is_trace_on` shall be set to `is_trace_on`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_055: [Tracing on `instance->connection_handle` shall be set to `instance->is_trace_on` if the value has changed]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_CONNECTION_09_056: [amqp_connection_set_logging() shall return success code 0]
 TEST_FUNCTION(amqp_connection_set_logging_no_SASL_no_CBS_success)
 {
     // arrange

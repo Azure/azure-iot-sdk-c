@@ -103,6 +103,8 @@ int main()
     (void)prov_dev_security_init(hsm_type);
 
     // Set the symmetric key if using they auth type
+    // If using DPS with an enrollment group, this must the the derived device key from the DPS Primary Key
+    // https://docs.microsoft.com/azure/iot-dps/concepts-symmetric-key-attestation?tabs=azure-cli#group-enrollments
     //prov_dev_set_symmetric_key_info("<symm_registration_id>", "<symmetric_Key>");
 
     HTTP_PROXY_OPTIONS http_proxy;
@@ -162,11 +164,18 @@ int main()
 
         prov_device_result = Prov_Device_Register_Device(prov_device_handle, register_device_callback, NULL, registration_status_callback, NULL);
 
-        (void)printf("\r\nRegistering Device\r\n\r\n");
-        do
+        if (prov_device_result == PROV_DEVICE_RESULT_OK)
         {
-            ThreadAPI_Sleep(1000);
-        } while (!g_registration_complete);
+            (void)printf("\r\nRegistering Device\r\n\r\n");
+            do
+            {
+                ThreadAPI_Sleep(1000);
+            } while (!g_registration_complete);
+        }
+        else
+        {
+            (void)printf("\r\nRegistering failed with error: %d\r\n\r\n", prov_device_result);
+        }
 
         Prov_Device_Destroy(prov_device_handle);
     }

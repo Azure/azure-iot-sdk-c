@@ -11,41 +11,41 @@ endif()
 compileAsC99()
 
 set(iothub_client_c_files
-    ./src/iothub.c
-    ./src/iothub_client.c
-    ./src/iothub_client_core.c
-    ./src/iothub_client_core_ll.c
-    ./src/iothub_client_diagnostic.c
-    ./src/iothub_client_ll.c
-    ./src/iothub_device_client.c
-    ./src/iothub_device_client_ll.c
-    ./src/iothub_message.c
-    ./src/iothub_module_client.c
-    ./src/iothub_module_client_ll.c
-    ./src/iothubtransport.c
-    ./src/version.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/iothub.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/iothub_client.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/iothub_client_core.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/iothub_client_core_ll.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/iothub_client_diagnostic.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/iothub_client_ll.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/iothub_device_client.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/iothub_device_client_ll.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/iothub_message.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/iothub_module_client.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/iothub_module_client_ll.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/iothubtransport.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/version.c
 )
 
 set(iothub_client_h_files
-    ./inc/iothub.h
-    ./inc/iothub_client_core.h
-    ./inc/iothub_client_core_ll.h
-    ./inc/iothub_client.h
-    ./inc/iothub_client_core_common.h
-    ./inc/iothub_client_ll.h
-    ./inc/internal/iothub_client_diagnostic.h
-    ./inc/internal/iothub_internal_consts.h
-    ./inc/iothub_client_options.h
-    ./inc/internal/iothub_client_private.h
-    ./inc/iothub_client_version.h
-    ./inc/iothub_device_client.h
-    ./inc/iothub_device_client_ll.h
-    ./inc/iothub_module_client.h
-    ./inc/iothub_module_client_ll.h
-    ./inc/iothub_transport_ll.h
-    ./inc/iothub_message.h
-    ./inc/internal/iothub_message_private.h
-    ./inc/internal/iothubtransport.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/iothub.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_client_core.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_client_core_ll.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_client.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_client_core_common.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_client_ll.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_client_diagnostic.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_internal_consts.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_client_options.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_client_private.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_client_version.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_device_client.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_device_client_ll.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_module_client.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_module_client_ll.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_transport_ll.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_message.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_message_private.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothubtransport.h
 )
 
 set(iothub_client_libs)
@@ -57,26 +57,26 @@ set(install_staticlibs
 if(NOT dont_use_uploadtoblob)
     set(iothub_client_c_files
         ${iothub_client_c_files}
-        ./src/iothub_client_ll_uploadtoblob.c
-        ./src/blob.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/iothub_client_ll_uploadtoblob.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/blob.c
     )
 
     set(iothub_client_h_files
         ${iothub_client_h_files}
-        ./inc/internal/blob.h
-        ./inc/internal/iothub_client_ll_uploadtoblob.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/blob.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_client_ll_uploadtoblob.h
     )
 endif()
 
 if (use_edge_modules)
     set(iothub_client_c_files
         ${iothub_client_c_files}
-        ./src/iothub_client_edge.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/iothub_client_edge.c
     )
 
     set (iothub_client_h_files
         ${iothub_client_h_files}
-        ./inc/internal/iothub_client_edge.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_client_edge.h
     )
 endif()
 
@@ -84,7 +84,7 @@ endif()
 if (${use_prov_client_core})
     set(iothub_client_h_files
         ${iothub_client_h_files}
-        ./inc/internal/iothub_client_hsm_ll.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_client_hsm_ll.h
     )
 endif()
 #end back compat only
@@ -98,18 +98,18 @@ if(${use_http})
         iothub_client_http_transport
     )
     set(iothub_client_http_transport_c_files
-        ./src/iothub_client_authorization.c
-        ./src/iothub_client_retry_control.c
-        ./src/iothub_transport_ll_private.c
-        ./src/iothubtransporthttp.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/iothub_client_authorization.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/iothub_client_retry_control.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/iothub_transport_ll_private.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/iothubtransporthttp.c
     )
 
     set(iothub_client_http_transport_h_files
-        ./inc/internal/iothub_client_authorization.h
-        ./inc/internal/iothub_client_retry_control.h
-        ./inc/internal/iothub_transport_ll_private.h
-        ./inc/iothubtransporthttp.h
-        ./inc/iothub_transport_ll.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_client_authorization.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_client_retry_control.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_transport_ll_private.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/iothubtransporthttp.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_transport_ll.h
     )
 
     set(iothub_client_h_install_files
@@ -125,45 +125,45 @@ if(${use_amqp})
     )
 
     set(iothub_client_amqp_transport_common_c_files
-        ./src/iothub_client_authorization.c
-        ./src/iothub_client_retry_control.c
-        ./src/iothub_transport_ll_private.c
-        ./src/iothubtransport_amqp_common.c
-        ./src/iothubtransport_amqp_device.c
-        ./src/iothubtransport_amqp_cbs_auth.c
-        ./src/iothubtransport_amqp_connection.c
-        ./src/iothubtransport_amqp_telemetry_messenger.c
-        ./src/iothubtransport_amqp_twin_messenger.c
-        ./src/iothubtransport_amqp_messenger.c
-        ./src/iothubtransportamqp_methods.c
-        ./src/message_queue.c
-        ./src/uamqp_messaging.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/iothub_client_authorization.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/iothub_client_retry_control.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/iothub_transport_ll_private.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/iothubtransport_amqp_common.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/iothubtransport_amqp_device.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/iothubtransport_amqp_cbs_auth.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/iothubtransport_amqp_connection.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/iothubtransport_amqp_telemetry_messenger.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/iothubtransport_amqp_twin_messenger.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/iothubtransport_amqp_messenger.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/iothubtransportamqp_methods.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/message_queue.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/uamqp_messaging.c
     )
 
     set(iothub_client_amqp_transport_common_h_files
-        ./inc/internal/iothub_client_authorization.h
-        ./inc/internal/iothub_client_retry_control.h
-        ./inc/internal/iothub_transport_ll_private.h
-        ./inc/internal/iothubtransport_amqp_common.h
-        ./inc/internal/iothubtransport_amqp_device.h
-        ./inc/internal/iothubtransport_amqp_cbs_auth.h
-        ./inc/internal/iothubtransport_amqp_connection.h
-        ./inc/internal/iothubtransport_amqp_telemetry_messenger.h
-        ./inc/internal/iothubtransport_amqp_twin_messenger.h
-        ./inc/internal/iothubtransport_amqp_messenger.h
-        ./inc/internal/iothubtransportamqp_methods.h
-        ./inc/internal/message_queue.h
-        ./inc/internal/uamqp_messaging.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_client_authorization.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_client_retry_control.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_transport_ll_private.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothubtransport_amqp_common.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothubtransport_amqp_device.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothubtransport_amqp_cbs_auth.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothubtransport_amqp_connection.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothubtransport_amqp_telemetry_messenger.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothubtransport_amqp_twin_messenger.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothubtransport_amqp_messenger.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothubtransportamqp_methods.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/message_queue.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/uamqp_messaging.h
     )
 
     set(iothub_client_amqp_transport_c_files
         ${iothub_client_amqp_transport_common_c_files}
-        ./src/iothubtransportamqp.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/iothubtransportamqp.c
     )
 
     set(iothub_client_amqp_transport_h_files
         ${iothub_client_amqp_transport_common_h_files}
-        ./inc/iothubtransportamqp.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/iothubtransportamqp.h
     )
 
     set(iothub_client_h_install_files
@@ -173,17 +173,17 @@ if(${use_amqp})
 
     set(iothub_client_amqp_ws_transport_c_files
         ${iothub_client_amqp_transport_common_c_files}
-        ./src/iothubtransportamqp_websockets.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/iothubtransportamqp_websockets.c
     )
 
     set(iothub_client_amqp_ws_transport_h_files
         ${iothub_client_amqp_transport_common_h_files}
-        ./inc/iothubtransportamqp_websockets.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/iothubtransportamqp_websockets.h
     )
 
     set(iothub_client_h_install_files
         ${iothub_client_h_install_files}
-        ./inc/iothubtransportamqp_websockets.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/iothubtransportamqp_websockets.h
     )
 endif()
 
@@ -193,34 +193,34 @@ if(${use_mqtt})
         iothub_client_mqtt_ws_transport
     )
     set(iothub_client_mqtt_ws_transport_c_files
-        ./src/iothub_client_authorization.c
-        ./src/iothub_client_retry_control.c
-        ./src/iothub_transport_ll_private.c
-        ./src/iothubtransport_mqtt_common.c
-        ./src/iothubtransportmqtt_websockets.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/iothub_client_authorization.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/iothub_client_retry_control.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/iothub_transport_ll_private.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/iothubtransport_mqtt_common.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/iothubtransportmqtt_websockets.c
     )
     set(iothub_client_mqtt_ws_transport_h_files
-        ./inc/internal/iothub_client_authorization.h
-        ./inc/internal/iothub_client_retry_control.h
-        ./inc/internal/iothub_transport_ll_private.h
-        ./inc/internal/iothubtransport_mqtt_common.h
-        ./inc/iothubtransportmqtt_websockets.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_client_authorization.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_client_retry_control.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_transport_ll_private.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothubtransport_mqtt_common.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/iothubtransportmqtt_websockets.h
     )
 
     set(iothub_client_mqtt_transport_c_files
-        ./src/iothub_client_authorization.c
-        ./src/iothub_client_retry_control.c
-        ./src/iothub_transport_ll_private.c
-        ./src/iothubtransport_mqtt_common.c
-        ./src/iothubtransportmqtt.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/iothub_client_authorization.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/iothub_client_retry_control.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/iothub_transport_ll_private.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/iothubtransport_mqtt_common.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/iothubtransportmqtt.c
     )
 
     set(iothub_client_mqtt_transport_h_files
-        ./inc/internal/iothub_client_authorization.h
-        ./inc/internal/iothub_client_retry_control.h
-        ./inc/internal/iothub_transport_ll_private.h
-        ./inc/internal/iothubtransport_mqtt_common.h
-        ./inc/iothubtransportmqtt.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_client_authorization.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_client_retry_control.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_transport_ll_private.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothubtransport_mqtt_common.h
+        ${CMAKE_CURRENT_LIST_DIR}/inc/iothubtransportmqtt.h
     )
 
     set(iothub_client_h_install_files
@@ -248,17 +248,13 @@ endif()
 set(IOTHUB_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client lib" FORCE)
 
 
-if(NOT ${dont_use_uploadtoblob} OR ${use_edge_modules})
-    include_directories(../deps/parson)
+if(NOT ${dont_use_uploadtoblob} OR ${use_edge_modules} AND NOT ${use_installed_dependencies})
+    include_directories(${CMAKE_CURRENT_LIST_DIR}/../deps/parson)
 endif()
 
 include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
 include_directories(${AZURE_C_SHARED_UTILITY_INCLUDES})
 include_directories(${SHARED_UTIL_INC_FOLDER})
-
-if (WINCE)
-    include_directories(${SHARED_UTIL_INC_FOLDER}/azure_c_shared_utility/windowsce) #windowsce SDK doesn't have stdbool.h
-ENDIF()
 
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
 
@@ -269,11 +265,6 @@ endif()
 IF(WIN32)
     #windows needs this define
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-    if (WINCE) # Be lax with WEC 2013 compiler
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3")
-        SET_SOURCE_FILES_PROPERTIES(src/iothub_client.c src/iothubtransport.c src/iothub_client_ll.c src/iothubtransporthttp.c src/blob.c PROPERTIES LANGUAGE CXX)
-    ENDIF(WINCE)
 ENDIF(WIN32)
 
 set(iothub_transport_source)
@@ -384,25 +375,25 @@ IF(WIN32)
 ENDIF(WIN32)
 
 if (${build_as_dynamic})
-    set(iothub_def_file ./src/iothub_client_dll.def)
+    set(iothub_def_file ${CMAKE_CURRENT_LIST_DIR}/src/iothub_client_dll.def)
     if(NOT ${dont_use_uploadtoblob})
-        set(iothub_def_file ${iothub_def_file} ./src/upload_to_blob.def)
+        set(iothub_def_file ${iothub_def_file} ${CMAKE_CURRENT_LIST_DIR}/src/upload_to_blob.def)
     endif()
 
     if(use_amqp)
-        set(iothub_def_file ${iothub_def_file} ./src/iothub_transport_amqp.def)
+        set(iothub_def_file ${iothub_def_file} ${CMAKE_CURRENT_LIST_DIR}/src/iothub_transport_amqp.def)
     endif()
 
     if(use_http)
-        set(iothub_def_file ${iothub_def_file} ./src/iothub_transport_http.def)
+        set(iothub_def_file ${iothub_def_file} ${CMAKE_CURRENT_LIST_DIR}/src/iothub_transport_http.def)
     endif()
 
     if(use_mqtt)
-        set(iothub_def_file ${iothub_def_file} ./src/iothub_transport_mqtt.def)
+        set(iothub_def_file ${iothub_def_file} ${CMAKE_CURRENT_LIST_DIR}/src/iothub_transport_mqtt.def)
     endif()
 
     if (${use_edge_modules})
-        set(iothub_def_file ${iothub_def_file} ./src/iothub_edge_modules.def)
+        set(iothub_def_file ${iothub_def_file} ${CMAKE_CURRENT_LIST_DIR}/src/iothub_edge_modules.def)
     endif()
 
     add_library(iothub_client_dll SHARED
@@ -432,7 +423,7 @@ if (${build_as_dynamic})
     if (${use_prov_client_core})
         target_link_libraries(iothub_client_dll hsm_security_client prov_auth_client)
     endif()
-    target_link_libraries(iothub_client_dll parson)
+    target_link_libraries(iothub_client_dll parson::parson)
 
     if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
         target_link_libraries(iothub_client_dll
@@ -447,9 +438,14 @@ add_library(iothub_client
     ${iothub_client_c_files}
     ${iothub_client_h_files}
 )
+target_include_directories(iothub_client
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/azureiot/include>
+)
 setSdkTargetBuildProperties(iothub_client)
 target_link_libraries(iothub_client ${iothub_client_libs})
-target_link_libraries(iothub_client parson)
+target_link_libraries(iothub_client parson::parson)
 
 if (${use_prov_client_core})
     target_link_libraries(iothub_client hsm_security_client prov_auth_client)
@@ -463,15 +459,9 @@ set(iothub_client_libs
 # Don't build samples under Win32 ARM for now
 if(NOT ${skip_samples})
 if(WIN32)
-# Build samples for WEC 2013 for both ARM and x86 processsor types
-  if(WINCE)
-    add_subdirectory(samples)
-  else()
     if (NOT ${ARCHITECTURE} STREQUAL "ARM")
-    add_subdirectory(samples)
+        add_subdirectory(samples)
     endif()
-  endif()
-
 else()
     add_subdirectory(samples)
 endif()
@@ -495,7 +485,7 @@ if(${use_installed_dependencies})
     install(TARGETS ${iothub_client_libs} EXPORT azure_iot_sdksTargets
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/../bin
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot
     )
     install(FILES ${iothub_client_h_install_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)

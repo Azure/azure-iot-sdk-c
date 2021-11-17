@@ -58,7 +58,6 @@ static void TEST_free(void* ptr)
 }
 
 #define ENABLE_MOCKS
-#include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/uuid.h"
@@ -817,15 +816,6 @@ TEST_FUNCTION_CLEANUP(TestMethodCleanup)
     TEST_MUTEX_RELEASE(g_testByTest);
 }
 
-// Tests_SRS_UAMQP_MESSAGING_31_118: [Gets data associated with IOTHUB_MESSAGE_HANDLE to encode, either from underlying byte array or string format.  Errors stop processing on this message.]
-// Tests_SRS_UAMQP_MESSAGING_31_120: [Create a blob that contains AMQP encoding of IOTHUB_MESSAGE_HANDLE.  Errors stop processing on this message.]
-// Tests_SRS_UAMQP_MESSAGING_31_112: [If optional message-id is present in the message, encode it into the AMQP message.  Errors stop processing on this message.]
-// Tests_SRS_UAMQP_MESSAGING_31_113: [If optional correlation-id is present in the message, encode it into the AMQP message.  Errors stop processing on this message.]
-// Tests_SRS_UAMQP_MESSAGING_31_114: [If optional content-type is present in the message, encode it into the AMQP message.  Errors stop processing on this message.]
-// Tests_SRS_UAMQP_MESSAGING_31_115: [If optional content-encoding is present in the message, encode it into the AMQP message.  Errors stop processing on this message.]
-// Tests_SRS_UAMQP_MESSAGING_31_116: [Gets message properties associated with the IOTHUB_MESSAGE_HANDLE to encode, returning the properties and their encoded length.  Errors stop processing on this message.]
-// Tests_SRS_UAMQP_MESSAGING_31_117: [Get application message properties associated with the IOTHUB_MESSAGE_HANDLE to encode, returning the properties and their encoded length.  Errors stop processing on this message.]
-// Tests_SRS_UAMQP_MESSAGING_32_001: [If optional diagnostic properties are present in the iot hub message, encode them into the AMQP message as annotation properties. Errors stop processing on this message.]
 TEST_FUNCTION(message_create_uamqp_encoding_from_iothub_message_bytearray_success)
 {
     // arrange
@@ -845,7 +835,6 @@ TEST_FUNCTION(message_create_uamqp_encoding_from_iothub_message_bytearray_succes
     // cleanup
 }
 
-// Tests_SRS_UAMQP_MESSAGING_31_117: [Get application message properties associated with the IOTHUB_MESSAGE_HANDLE to encode, returning the properties and their encoded length.  Errors stop processing on this message.]
 TEST_FUNCTION(message_create_from_iothub_message_zero_app_properties_success)
 {
     // arrange
@@ -865,7 +854,6 @@ TEST_FUNCTION(message_create_from_iothub_message_zero_app_properties_success)
     // cleanup
 }
 
-// Tests_SRS_UAMQP_MESSAGING_31_118: [Gets data associated with IOTHUB_MESSAGE_HANDLE to encode, either from underlying byte array or string format.  Errors stop processing on this message.]
 TEST_FUNCTION(message_create_from_iothub_message_string_success)
 {
     // arrange
@@ -885,7 +873,6 @@ TEST_FUNCTION(message_create_from_iothub_message_string_success)
     // cleanup
 }
 
-// Tests_SRS_UAMQP_MESSAGING_31_112: [If optional message-id is present in the message, encode it into the AMQP message.  Errors stop processing on this message.]
 TEST_FUNCTION(message_create_from_iothub_message_no_message_id_success)
 {
     // arrange
@@ -905,7 +892,6 @@ TEST_FUNCTION(message_create_from_iothub_message_no_message_id_success)
     // cleanup
 }
 
-// Tests_SRS_UAMQP_MESSAGING_32_002: [If optional diagnostic properties are not present in the iot hub message, no error should happen.]
 TEST_FUNCTION(message_create_from_iothub_message_no_diagnostic_properties_success)
 {
     // arrange
@@ -925,7 +911,6 @@ TEST_FUNCTION(message_create_from_iothub_message_no_diagnostic_properties_succes
     // cleanup
 }
 
-// Tests_SRS_UAMQP_MESSAGING_31_113: [If optional correlation-id is present in the message, encode it into the AMQP message.  Errors stop processing on this message.]
 TEST_FUNCTION(message_create_from_iothub_message_no_correlation_id_success)
 {
     // arrange
@@ -945,7 +930,6 @@ TEST_FUNCTION(message_create_from_iothub_message_no_correlation_id_success)
     // cleanup
 }
 
-// Tests_SRS_UAMQP_MESSAGING_31_114: [If optional content-type is present in the message, encode it into the AMQP message.  Errors stop processing on this message.]
 TEST_FUNCTION(message_create_from_iothub_message_no_content_type_success)
 {
     // arrange
@@ -984,7 +968,6 @@ TEST_FUNCTION(message_create_from_iothub_message_security_msg_success)
     // cleanup
 }
 
-// Tests_SRS_UAMQP_MESSAGING_31_115: [If optional content-encoding is present in the message, encode it into the AMQP message.  Errors stop processing on this message.]
 TEST_FUNCTION(message_create_from_iothub_message_no_content_encoding_success)
 {
     // arrange
@@ -1004,8 +987,6 @@ TEST_FUNCTION(message_create_from_iothub_message_no_content_encoding_success)
     // cleanup
 }
 
-// Tests_SRS_UAMQP_MESSAGING_31_120: [Create a blob that contains AMQP encoding of IOTHUB_MESSAGE_HANDLE.  Errors stop processing on this message.]
-// Tests_SRS_UAMQP_MESSAGING_31_121: [Any errors during `message_create_uamqp_encoding_from_iothub_message` stop processing on this message.]
 TEST_FUNCTION(message_create_from_iothub_message_BYTEARRAY_return_errors_fails)
 {
     // arrange
@@ -1042,8 +1023,6 @@ TEST_FUNCTION(message_create_from_iothub_message_BYTEARRAY_return_errors_fails)
     umock_c_negative_tests_deinit();
 }
 
-// Tests_SRS_UAMQP_MESSAGING_31_118: [Gets data associated with IOTHUB_MESSAGE_HANDLE to encode, either from underlying byte array or string format.  Errors stop processing on this message.]
-// Tests_SRS_UAMQP_MESSAGING_31_121: [Any errors during `message_create_uamqp_encoding_from_iothub_message` stop processing on this message.]
 TEST_FUNCTION(message_create_from_iothub_message_STRING_return_errors_fails)
 {
     // arrange
@@ -1082,33 +1061,6 @@ TEST_FUNCTION(message_create_from_iothub_message_STRING_return_errors_fails)
     umock_c_negative_tests_deinit();
 }
 
-// Tests_SRS_UAMQP_MESSAGING_09_001: [The body type of the uAMQP message shall be retrieved using message_get_body_type().]
-// Tests_SRS_UAMQP_MESSAGING_09_003: [If the uAMQP message body type is MESSAGE_BODY_TYPE_DATA, the body data shall be treated as binary data.]
-// Tests_SRS_UAMQP_MESSAGING_09_004: [The uAMQP message body data shall be retrieved using message_get_body_amqp_data_in_place().]
-// Tests_SRS_UAMQP_MESSAGING_09_006: [The IOTHUB_MESSAGE instance shall be created using IoTHubMessage_CreateFromByteArray(), passing the uAMQP body bytes as parameter.]
-// Tests_SRS_UAMQP_MESSAGING_09_008: [The uAMQP message properties shall be retrieved using message_get_properties().]
-// Tests_SRS_UAMQP_MESSAGING_09_010: [The message-id property shall be read from the uAMQP message by calling properties_get_message_id.]
-// Tests_SRS_UAMQP_MESSAGING_09_012: [The type of the message-id property value shall be obtained using amqpvalue_get_type().]
-// Tests_SRS_UAMQP_MESSAGING_09_014: [The message-id value shall be retrieved from the AMQP_VALUE as char sequence]
-// Tests_SRS_UAMQP_MESSAGING_09_016: [The message-id property shall be set on the IOTHUB_MESSAGE_HANDLE instance by calling IoTHubMessage_SetMessageId(), passing the value read from the uAMQP message.]
-// Tests_SRS_UAMQP_MESSAGING_09_018: [The correlation-id property shall be read from the uAMQP message by calling properties_get_correlation_id.]
-// Tests_SRS_UAMQP_MESSAGING_09_020: [The type of the correlation-id property value shall be obtained using amqpvalue_get_type().]
-// Tests_SRS_UAMQP_MESSAGING_09_022: [The correlation-id value shall be retrieved from the AMQP_VALUE as char* by calling amqpvalue_get_string.]
-// Tests_SRS_UAMQP_MESSAGING_09_024: [The correlation-id property shall be set on the IOTHUB_MESSAGE_HANDLE by calling IoTHubMessage_SetCorrelationId, passing the value read from the uAMQP message.]
-// Tests_SRS_UAMQP_MESSAGING_09_026: [message_create_IoTHubMessage_from_uamqp_message() shall destroy the uAMQP message properties (obtained with message_get_properties()) by calling properties_destroy().]
-// Tests_SRS_UAMQP_MESSAGING_09_027: [The IOTHUB_MESSAGE_HANDLE properties shall be retrieved using IoTHubMessage_Properties.]
-// Tests_SRS_UAMQP_MESSAGING_09_029: [The uAMQP message application properties shall be retrieved using message_get_application_properties.]
-// Tests_SRS_UAMQP_MESSAGING_09_032: [The actual uAMQP message application properties should be extracted from the result of message_get_application_properties using amqpvalue_get_inplace_described_value.]
-// Tests_SRS_UAMQP_MESSAGING_09_034: [The number of items in the uAMQP message application properties shall be obtained using amqpvalue_get_map_pair_count.]
-// Tests_SRS_UAMQP_MESSAGING_09_036: [message_create_IoTHubMessage_from_uamqp_message() shall iterate through each uAMQP application property and add it to IOTHUB_MESSAGE_HANDLE properties.]
-// Tests_SRS_UAMQP_MESSAGING_09_037: [The uAMQP application property name and value shall be obtained using amqpvalue_get_map_key_value_pair.]
-// Tests_SRS_UAMQP_MESSAGING_09_039: [The uAMQP application property name shall be extracted as string using amqpvalue_get_string.]
-// Tests_SRS_UAMQP_MESSAGING_09_041: [The uAMQP application property value shall be extracted as string using amqpvalue_get_string.]
-// Tests_SRS_UAMQP_MESSAGING_09_043: [The application property name and value shall be added to IOTHUB_MESSAGE_HANDLE properties using Map_AddOrUpdate.]
-// Tests_SRS_UAMQP_MESSAGING_09_045: [message_create_IoTHubMessage_from_uamqp_message() shall destroy the uAMQP message property name and value (obtained with amqpvalue_get_string) by calling amqpvalue_destroy().]
-// Tests_SRS_UAMQP_MESSAGING_09_046: [message_create_IoTHubMessage_from_uamqp_message() shall destroy the uAMQP message property (obtained with message_get_application_properties) by calling amqpvalue_destroy().]
-// Tests_SRS_UAMQP_MESSAGING_09_100: [If the uamqp message contains property `content-type`, it shall be set on IOTHUB_MESSAGE_HANDLE]
-// Tests_SRS_UAMQP_MESSAGING_09_103: [If the uAMQP message contains property `content-encoding`, it shall be set on IOTHUB_MESSAGE_HANDLE]
 TEST_FUNCTION(message_create_IoTHubMessage_from_uamqp_message_success)
 {
     // arrange
@@ -1127,8 +1079,6 @@ TEST_FUNCTION(message_create_IoTHubMessage_from_uamqp_message_success)
     // cleanup
 }
 
-// Tests_SRS_UAMQP_MESSAGING_09_014: [The message-id value shall be retrieved from the AMQP_VALUE as char sequence]
-// Tests_SRS_UAMQP_MESSAGING_09_022: [The correlation-id value shall be retrieved from the AMQP_VALUE as char* by calling amqpvalue_get_string.]
 TEST_FUNCTION(message_create_IoTHubMessage_from_uamqp_message_ULONG_message_id_correlation_id_success)
 {
     // arrange
@@ -1147,8 +1097,6 @@ TEST_FUNCTION(message_create_IoTHubMessage_from_uamqp_message_ULONG_message_id_c
     // cleanup
 }
 
-// Tests_SRS_UAMQP_MESSAGING_09_014: [The message-id value shall be retrieved from the AMQP_VALUE as char sequence]
-// Tests_SRS_UAMQP_MESSAGING_09_022: [The correlation-id value shall be retrieved from the AMQP_VALUE as char* by calling amqpvalue_get_string.]
 TEST_FUNCTION(message_create_IoTHubMessage_from_uamqp_message_UUID_message_id_correlation_id_success)
 {
     // arrange
@@ -1167,7 +1115,6 @@ TEST_FUNCTION(message_create_IoTHubMessage_from_uamqp_message_UUID_message_id_co
     // cleanup
 }
 
-// Tests_SRS_UAMQP_MESSAGING_09_013: [If the type of the message-id property value is AMQP_TYPE_NULL, message_create_IoTHubMessage_from_uamqp_message() shall skip processing the message-id (as it is optional) and continue normally.]
 TEST_FUNCTION(message_create_IoTHubMessage_from_uamqp_message_no_message_id_success)
 {
     // arrange
@@ -1186,7 +1133,6 @@ TEST_FUNCTION(message_create_IoTHubMessage_from_uamqp_message_no_message_id_succ
     // cleanup
 }
 
-// Tests_SRS_UAMQP_MESSAGING_09_021: [If the type of the correlation-id property value is AMQP_TYPE_NULL, message_create_IoTHubMessage_from_uamqp_message() shall skip processing the correlation-id (as it is optional) and continue normally.]
 TEST_FUNCTION(message_create_IoTHubMessage_from_uamqp_message_no_correlation_id_success)
 {
     // arrange
@@ -1205,7 +1151,6 @@ TEST_FUNCTION(message_create_IoTHubMessage_from_uamqp_message_no_correlation_id_
     // cleanup
 }
 
-// Tests_SRS_UAMQP_MESSAGING_09_031: [If message_get_application_properties succeeds but returns a NULL application properties map (there are no properties), message_create_IoTHubMessage_from_uamqp_message() shall skip processing the properties and continue normally.]
 TEST_FUNCTION(message_create_IoTHubMessage_from_uamqp_message_no_app_properties_success)
 {
     // arrange
@@ -1224,7 +1169,6 @@ TEST_FUNCTION(message_create_IoTHubMessage_from_uamqp_message_no_app_properties_
     // cleanup
 }
 
-// Tests_SRS_UAMQP_MESSAGING_31_122: [If the uAMQP message does not contain property `content-type`, it shall be skipped as it is optional]
 TEST_FUNCTION(message_create_IoTHubMessage_from_uamqp_message_no_content_type_success)
 {
     // arrange
@@ -1243,7 +1187,6 @@ TEST_FUNCTION(message_create_IoTHubMessage_from_uamqp_message_no_content_type_su
     // cleanup
 }
 
-// Tests_SRS_UAMQP_MESSAGING_31_123: [If the uAMQP message does not contain property `content-encoding`, it shall be skipped as it is optional]
 TEST_FUNCTION(message_create_IoTHubMessage_from_uamqp_message_no_content_encoding_success)
 {
     // arrange

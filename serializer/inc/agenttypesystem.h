@@ -21,7 +21,6 @@
 #include "azure_macro_utils/macro_utils.h"
 #include "azure_c_shared_utility/strings.h"
 
-/*Codes_SRS_AGENT_TYPE_SYSTEM_99_001:[ AGENT_TYPE_SYSTEM shall have the following interface]*/
 
 #ifdef __cplusplus
 extern "C"
@@ -675,7 +674,6 @@ MOCKABLE_FUNCTION(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_SINT64,
 /*create an AGENT_DATA_TYPE from int8_t*/
 MOCKABLE_FUNCTION(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_SINT8, AGENT_DATA_TYPE*, agentData, int8_t, v);
 
-/*Codes_SRS_AGENT_TYPE_SYSTEM_99_091:[Creates an AGENT_DATA_TYPE containing an Edm.DateTimeOffset from an EDM_DATE_TIME_OFFSET.]*/
 MOCKABLE_FUNCTION(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_EDM_DATE_TIME_OFFSET, AGENT_DATA_TYPE*, agentData, EDM_DATE_TIME_OFFSET, v);
 
 /*creates an AGENT_DATA_TYPE containing a EDM_GUID*/

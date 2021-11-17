@@ -54,7 +54,17 @@ static int real_strcmp(const char* str1, const char* str2)
 #define ENABLE_MOCKS
 #include "iothub_transport_ll.h"
 #include "azure_uamqp_c/async_operation.h"
+#include "azure_c_shared_utility/optionhandler.h"
+
+#undef ENABLE_MOCK_FILTERING_SWITCH
+#define ENABLE_MOCK_FILTERING
+
+#define please_mock_cbs_put_token_async MOCK_ENABLED
 #include "azure_uamqp_c/cbs.h"
+
+#undef ENABLE_MOCK_FILTERING_SWITCH
+#undef ENABLE_MOCK_FILTERING
+
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
@@ -557,7 +567,6 @@ TEST_FUNCTION_CLEANUP(TestMethodCleanup)
     TEST_MUTEX_RELEASE(g_testByTest);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_001: [If parameter `config` or `config->device_id` are NULL, authentication_create() shall fail and return NULL.]
 TEST_FUNCTION(authentication_create_NULL_config)
 {
     // arrange
@@ -571,7 +580,6 @@ TEST_FUNCTION(authentication_create_NULL_config)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_004: [If `config->iothub_host_fqdn` is NULL, authentication_create() shall fail and return NULL.]
 TEST_FUNCTION(authentication_create_NULL_iothub_host_fqdn)
 {
     // arrange
@@ -587,7 +595,6 @@ TEST_FUNCTION(authentication_create_NULL_iothub_host_fqdn)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_005: [If `config->on_state_changed_callback` is NULL, authentication_create() shall fail and return NULL]
 TEST_FUNCTION(authentication_create_NULL_on_state_changed_callback)
 {
     // arrange
@@ -603,13 +610,6 @@ TEST_FUNCTION(authentication_create_NULL_on_state_changed_callback)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_006: [authentication_create() shall allocate memory for a new authenticate state structure AUTHENTICATION_INSTANCE.]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_123: [authentication_create() shall initialize all fields of `instance` with 0 using memset().]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_008: [authentication_create() shall save a copy of `config->device_id` into the `instance->device_id`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_012: [If provided, authentication_create() shall save a copy of `config->device_primary_key` into the `instance->device_primary_key`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_014: [If provided, authentication_create() shall save a copy of `config->device_secondary_key` into `instance->device_secondary_key`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_016: [If provided, authentication_create() shall save a copy of `config->iothub_host_fqdn` into `instance->iothub_host_fqdn`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_024: [If no failure occurs, authentication_create() shall return a reference to the AUTHENTICATION_INSTANCE handle]
 TEST_FUNCTION(authentication_create_DEVICE_KEYS_succeeds)
 {
     // arrange
@@ -629,7 +629,6 @@ TEST_FUNCTION(authentication_create_DEVICE_KEYS_succeeds)
     authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_025: [If authentication_handle is NULL, authentication_start() shall fail and return MU_FAILURE as error code]
 TEST_FUNCTION(authentication_start_NULL_auth_handle)
 {
     // arrange
@@ -653,7 +652,6 @@ TEST_FUNCTION(authentication_start_NULL_auth_handle)
     authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_026: [If `cbs_handle` is NULL, authentication_start() shall fail and return MU_FAILURE as error code]
 TEST_FUNCTION(authentication_start_NULL_cbs_handle)
 {
     // arrange
@@ -677,8 +675,6 @@ TEST_FUNCTION(authentication_start_NULL_cbs_handle)
     authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_029: [If no failures occur, `instance->state` shall be set to AUTHENTICATION_STATE_STARTING and `instance->on_state_changed_callback` invoked]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_030: [If no failures occur, authentication_start() shall return 0]
 TEST_FUNCTION(authentication_start_succeeds)
 {
     // arrange
@@ -704,8 +700,6 @@ TEST_FUNCTION(authentication_start_succeeds)
     authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_029: [If no failures occur, `instance->state` shall be set to AUTHENTICATION_STATE_STARTING and `instance->on_state_changed_callback` invoked]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_030: [If no failures occur, authentication_start() shall return 0]
 TEST_FUNCTION(authentication_start_succeeds_with_module)
 {
     // arrange
@@ -733,7 +727,6 @@ TEST_FUNCTION(authentication_start_succeeds_with_module)
 
 
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_027: [If authenticate state has been started already, authentication_start() shall fail and return MU_FAILURE as error code]
 TEST_FUNCTION(authentication_start_already_started_fails)
 {
     // arrange
@@ -755,7 +748,6 @@ TEST_FUNCTION(authentication_start_already_started_fails)
 }
 
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_031: [If `authentication_handle` is NULL, authentication_stop() shall fail and return MU_FAILURE]
 TEST_FUNCTION(authentication_stop_NULL_handle)
 {
     // arrange
@@ -776,7 +768,6 @@ TEST_FUNCTION(authentication_stop_NULL_handle)
     authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_032: [If `instance->state` is AUTHENTICATION_STATE_STOPPED, authentication_stop() shall fail and return MU_FAILURE]
 TEST_FUNCTION(authentication_stop_already_stoppped)
 {
     // arrange
@@ -798,10 +789,6 @@ TEST_FUNCTION(authentication_stop_already_stoppped)
     authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_034: [`instance->state` shall be set to AUTHENTICATION_STATE_STOPPED and `instance->on_state_changed_callback` invoked]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_035: [authentication_stop() shall return success code 0]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_018: [authentication_create() shall save `config->on_state_changed_callback` and `config->on_state_changed_callback_context` into `instance->on_state_changed_callback` and `instance->on_state_changed_callback_context`.]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_033: [`instance->cbs_handle` shall be set to NULL] *
 TEST_FUNCTION(authentication_stop_succeeds)
 {
     // arrange
@@ -822,7 +809,6 @@ TEST_FUNCTION(authentication_stop_succeeds)
     authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_106: [If authentication_handle is NULL, authentication_destroy() shall return]
 TEST_FUNCTION(authentication_destroy_NULL_handle)
 {
     // arrange
@@ -842,13 +828,6 @@ TEST_FUNCTION(authentication_destroy_NULL_handle)
     authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_107: [If `instance->state` is AUTHENTICATION_STATE_STARTING or AUTHENTICATION_STATE_STARTED, authentication_stop() shall be invoked and its result ignored]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_108: [authentication_destroy() shall destroy `instance->device_id` using STRING_delete()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_109: [authentication_destroy() shall destroy `instance->device_sas_token` using STRING_delete()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_110: [authentication_destroy() shall destroy `instance->device_primary_key` using STRING_delete()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_111: [authentication_destroy() shall destroy `instance->device_secondary_key` using STRING_delete()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_112: [authentication_destroy() shall destroy `instance->iothub_host_fqdn` using STRING_delete()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_113: [authentication_destroy() shall destroy `instance` using free()]
 TEST_FUNCTION(authentication_destroy_succeeds)
 {
     // arrange
@@ -869,7 +848,6 @@ TEST_FUNCTION(authentication_destroy_succeeds)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_109: [ authentication_destroy() shall cancel any pending CBS put token request ]
 TEST_FUNCTION(authentication_destroy_with_pending_cbs_put_token_success)
 {
     // arrange
@@ -898,7 +876,6 @@ TEST_FUNCTION(authentication_destroy_with_pending_cbs_put_token_success)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_036: [If authentication_handle is NULL, authentication_do_work() shall fail and return]
 TEST_FUNCTION(authentication_do_work_NULL_handle)
 {
     // arrange
@@ -913,7 +890,6 @@ TEST_FUNCTION(authentication_do_work_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_037: [If `instance->state` is not AUTHENTICATION_STATE_STARTING or AUTHENTICATION_STATE_STARTED, authentication_do_work() shall fail and return]
 TEST_FUNCTION(authentication_do_work_not_started)
 {
     // arrange
@@ -936,9 +912,6 @@ TEST_FUNCTION(authentication_do_work_not_started)
     authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_041: [If `instance->device_sas_token` is provided, authentication_do_work() shall put it to CBS]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_046: [The SAS token provided shall be sent to CBS using cbs_put_token_async(), using `servicebus.windows.net:sastoken` as token type, `devices_and_modules_path` as audience and passing on_cbs_put_token_complete_callback]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_047: [If cbs_put_token_async() succeeds, authentication_do_work() shall set `instance->current_sas_token_put_time` with current time]
 TEST_FUNCTION(authentication_do_work_SAS_TOKEN_AUTHENTICATION_STATE_STARTING_success)
 {
     // arrange
@@ -966,13 +939,6 @@ TEST_FUNCTION(authentication_do_work_SAS_TOKEN_AUTHENTICATION_STATE_STARTING_suc
     authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_042: [Otherwise, authentication_do_work() shall use device keys for CBS authentication]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_049: [authentication_do_work() shall create a SAS token using `IoTHubClient_Auth_Get_SasToken`, unless it has failed previously]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_053: [A STRING_HANDLE, referred to as `devices_and_modules_path`, shall be created from: iothub_host_fqdn + "/devices/" + device_id (+ "/modules/" + module_id if a module): iothub_host_fqdn + "/devices/" + device_id]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_057: [authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to TRUE]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_058: [The SAS token shall be sent to CBS using cbs_put_token_async(), using `servicebus.windows.net:sastoken` as token type, `devices_and_modules_path` as audience and passing on_cbs_put_token_complete_callback]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_059: [If cbs_put_token_async() succeeds, authentication_do_work() shall set `instance->current_sas_token_put_time` with current time]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_063: [authentication_do_work() shall free the memory it allocated for `devices_and_modules_path`, `sasTokenKeyName` and SAS token]
 TEST_FUNCTION(authentication_do_work_AUTHENTICATION_STATE_STARTING_success)
 {
     // arrange
@@ -1002,8 +968,6 @@ TEST_FUNCTION(authentication_do_work_AUTHENTICATION_STATE_STARTING_success)
     authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_028: [authentication_start() shall save `cbs_handle` on `instance->cbs_handle`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_091: [If `result` is CBS_OPERATION_RESULT_OK `instance->state` shall be set to AUTHENTICATION_STATE_STARTED and `instance->on_state_changed_callback` invoked]
 TEST_FUNCTION(authentication_do_work_SAS_TOKEN_on_cbs_put_token_callback_success)
 {
     // arrange
@@ -1034,8 +998,6 @@ TEST_FUNCTION(authentication_do_work_SAS_TOKEN_on_cbs_put_token_callback_success
     authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_028: [authentication_start() shall save `cbs_handle` on `instance->cbs_handle`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_091: [If `result` is CBS_OPERATION_RESULT_OK `instance->state` shall be set to AUTHENTICATION_STATE_STARTED and `instance->on_state_changed_callback` invoked]
 TEST_FUNCTION(authentication_do_work_SAS_TOKEN_on_cbs_put_token_callback_success_with_module)
 {
     // arrange
@@ -1068,7 +1030,6 @@ TEST_FUNCTION(authentication_do_work_SAS_TOKEN_on_cbs_put_token_callback_success
 }
 
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_049: [authentication_do_work() shall create a SAS token using `IoTHubClient_Auth_Get_SasToken`, unless it has failed previously]
 TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_primary_key_only_fallback)
 {
     // arrange
@@ -1104,10 +1065,6 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_primary_key_only_fallback)
     authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_045: [If `devices_and_modules_path` failed to be created, authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to FALSE and return]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_048: [If cbs_put_token_async() failed, authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to FALSE, destroy `devices_and_modules_path` and return]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_121: [If cbs_put_token_async() fails, `instance->state` shall be updated to AUTHENTICATION_STATE_ERROR and `instance->on_state_changed_callback` invoked]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_122: [If cbs_put_token_async() fails, `instance->on_error_callback` shall be invoked with AUTHENTICATION_ERROR_AUTH_FAILED]
 TEST_FUNCTION(authentication_do_work_SAS_TOKEN_AUTHENTICATION_STATE_STARTING_failure_checks)
 {
     // arrange
@@ -1164,9 +1121,6 @@ TEST_FUNCTION(authentication_do_work_SAS_TOKEN_AUTHENTICATION_STATE_STARTING_fai
     authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_019: [authentication_create() shall save `config->on_error_callback` and `config->on_error_callback_context` into `instance->on_error_callback` and `instance->on_error_callback_context`.]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_092: [If `result` is not CBS_OPERATION_RESULT_OK `instance->state` shall be set to AUTHENTICATION_STATE_ERROR and `instance->on_state_changed_callback` invoked]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_093: [If `result` is not CBS_OPERATION_RESULT_OK and `instance->is_sas_token_refresh_in_progress` is FALSE, `instance->on_error_callback`shall be invoked with AUTHENTICATION_ERROR_AUTH_FAILED]
 TEST_FUNCTION(authentication_do_work_SAS_TOKEN_on_cbs_put_token_callback_error)
 {
     // arrange
@@ -1198,12 +1152,6 @@ TEST_FUNCTION(authentication_do_work_SAS_TOKEN_on_cbs_put_token_callback_error)
     authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_022: [authentication_create() shall set `instance->sas_token_lifetime_secs` with the default value of one hour]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_054: [If `devices_and_modules_path` failed to be created, authentication_do_work() shall fail and return]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_056: [If SASToken_Create() fails, authentication_do_work() shall fail and return]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_060: [If cbs_put_token_async() fails, `instance->is_cbs_put_token_in_progress` shall be set to FALSE]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_061: [If cbs_put_token_async() fails, `instance->state` shall be updated to AUTHENTICATION_STATE_ERROR and `instance->on_state_changed_callback` invoked]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_062: [If cbs_put_token_async() fails, `instance->on_error_callback` shall be invoked with AUTHENTICATION_ERROR_AUTH_FAILED]
 TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_AUTHENTICATION_STATE_STARTING_failure_checks)
 {
     // arrange
@@ -1260,7 +1208,6 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_AUTHENTICATION_STATE_STARTING_f
     authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_040: [If `instance->state` is AUTHENTICATION_STATE_STARTED and user-provided SAS token was used, authentication_do_work() shall return]
 TEST_FUNCTION(authentication_do_work_SAS_TOKEN_next_calls_no_op)
 {
     // arrange
@@ -1300,10 +1247,6 @@ TEST_FUNCTION(authentication_do_work_SAS_TOKEN_next_calls_no_op)
     authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_039: [If `instance->state` is AUTHENTICATION_STATE_STARTED and device keys were used, authentication_do_work() shall only verify the SAS token refresh time]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_023: [authentication_create() shall set `instance->sas_token_refresh_time_secs` with the default value of 30 minutes]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_065: [The SAS token shall be refreshed if the current time minus `instance->current_sas_token_put_time` equals or exceeds `instance->sas_token_refresh_time_secs`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_066: [If SAS token does not need to be refreshed, authentication_do_work() shall return]
 TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_sas_token_refresh_check)
 {
     // arrange
@@ -1339,10 +1282,6 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_sas_token_refresh_check)
     authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_039: [If `instance->state` is AUTHENTICATION_STATE_STARTED and device keys were used, authentication_do_work() shall only verify the SAS token refresh time]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_023: [authentication_create() shall set `instance->sas_token_refresh_time_secs` with the default value of 30 minutes]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_065: [The SAS token shall be refreshed if the current time minus `instance->current_sas_token_put_time` equals or exceeds `instance->sas_token_refresh_time_secs`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_066: [If SAS token does not need to be refreshed, authentication_do_work() shall return]
 TEST_FUNCTION(authentication_do_work_DEVICE_AUTH_sas_token_refresh_check)
 {
     // arrange
@@ -1378,14 +1317,6 @@ TEST_FUNCTION(authentication_do_work_DEVICE_AUTH_sas_token_refresh_check)
     authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_067: [authentication_do_work() shall create a SAS token using `instance->device_primary_key`, unless it has failed previously]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_071: [A STRING_HANDLE, referred to as `devices_and_modules_path`, shall be created from: iothub_host_fqdn + "/devices/" + device_id (+ "/modules/" + module_id if a module)]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_117: [An empty STRING_HANDLE, referred to as `sasTokenKeyName`, shall be created using STRING_new()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_073: [The SAS token shall be created using SASToken_Create(), passing the selected device key, device_path, sasTokenKeyName and expiration time as arguments]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_076: [The SAS token shall be sent to CBS using cbs_put_token_async(), using `servicebus.windows.net:sastoken` as token type, `devices_and_modules_path` as audience and passing on_cbs_put_token_complete_callback]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_077: [If cbs_put_token_async() succeeds, authentication_do_work() shall set `instance->current_sas_token_put_time` with the current time]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_081: [authentication_do_work() shall free the memory it allocated for `devices_and_modules_path`, `sasTokenKeyName` and SAS token]
-// Tests_SRSIOTHUBTRANSPORT_AMQP_AUTH_09_125: [If name matches AUTHENTICATION_OPTION_SAS_TOKEN_LIFETIME_SECS, `value` shall be saved on `instance->sas_token_lifetime_secs`]
 TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_sas_token_refresh)
 {
     // arrange
@@ -1422,11 +1353,6 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_sas_token_refresh)
     authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_021: [authentication_create() shall set `instance->cbs_request_timeout_secs` with the default value of UINT32_MAX]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_038: [If `instance->is_cbs_put_token_in_progress` is TRUE, authentication_do_work() shall only verify the authentication timeout]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_043: [authentication_do_work() shall set `instance->is_cbs_put_token_in_progress` to TRUE]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_083: [authentication_do_work() shall check for authentication timeout comparing the current time since `instance->current_sas_token_put_time` to `instance->cbs_request_timeout_secs`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_084: [If no timeout has occurred, authentication_do_work() shall return]
 TEST_FUNCTION(authentication_do_work_first_auth_timeout_check)
 {
     // arrange
@@ -1463,9 +1389,6 @@ TEST_FUNCTION(authentication_do_work_first_auth_timeout_check)
     authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_085: [`instance->is_cbs_put_token_in_progress` shall be set to FALSE]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_086: [`instance->state` shall be updated to AUTHENTICATION_STATE_ERROR and `instance->on_state_changed_callback` invoked]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_088: [If `instance->is_sas_token_refresh_in_progress` is FALSE, `instance->on_error_callback` shall be invoked with AUTHENTICATION_ERROR_AUTH_TIMEOUT]
 TEST_FUNCTION(authentication_do_work_first_auth_times_out)
 {
     // arrange
@@ -1507,7 +1430,6 @@ TEST_FUNCTION(authentication_do_work_first_auth_times_out)
     authentication_destroy(handle);
 }
 
-// Tests_SRSIOTHUBTRANSPORT_AMQP_AUTH_09_097: [If `authentication_handle` or `name` or `value` is NULL, authentication_set_option shall fail and return a non-zero value]
 TEST_FUNCTION(authentication_set_option_NULL_name)
 {
     // arrange
@@ -1529,7 +1451,6 @@ TEST_FUNCTION(authentication_set_option_NULL_name)
     authentication_destroy(handle);
 }
 
-// Codes_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_128: [If name does not match any supported option, authentication_set_option shall fail and return a non-zero value]
 TEST_FUNCTION(authentication_set_option_name_not_supported)
 {
     // arrange
@@ -1551,7 +1472,6 @@ TEST_FUNCTION(authentication_set_option_name_not_supported)
     authentication_destroy(handle);
 }
 
-// Tests_SRSIOTHUBTRANSPORT_AMQP_AUTH_09_098: [If name matches AUTHENTICATION_OPTION_SAVED_OPTIONS, `value` shall be applied using OptionHandler_FeedOptions]
 TEST_FUNCTION(authentication_set_option_saved_options_succeeds)
 {
     // arrange
@@ -1574,7 +1494,6 @@ TEST_FUNCTION(authentication_set_option_saved_options_succeeds)
     authentication_destroy(handle);
 }
 
-// Tests_SRSIOTHUBTRANSPORT_AMQP_AUTH_09_126: [If OptionHandler_FeedOptions fails, authentication_set_option shall fail and return a non-zero value]
 TEST_FUNCTION(authentication_set_option_OptionHandler_FeedOptions_OPTIONHANDLER_ERROR)
 {
     // arrange
@@ -1598,7 +1517,6 @@ TEST_FUNCTION(authentication_set_option_OptionHandler_FeedOptions_OPTIONHANDLER_
     authentication_destroy(handle);
 }
 
-// Tests_SRSIOTHUBTRANSPORT_AMQP_AUTH_09_126: [If OptionHandler_FeedOptions fails, authentication_set_option shall fail and return a non-zero value]
 TEST_FUNCTION(authentication_set_option_OptionHandler_FeedOptions_OPTIONHANDLER_INVALIDARG)
 {
     // arrange
@@ -1622,7 +1540,6 @@ TEST_FUNCTION(authentication_set_option_OptionHandler_FeedOptions_OPTIONHANDLER_
     authentication_destroy(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_100: [If `authentication_handle` is NULL, authentication_retrieve_options shall fail and return NULL]
 TEST_FUNCTION(authentication_retrieve_options_NULL_handle)
 {
     // arrange
@@ -1637,9 +1554,6 @@ TEST_FUNCTION(authentication_retrieve_options_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_101: [An OPTIONHANDLER_HANDLE instance shall be created using OptionHandler_Create]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_103: [Each option of `instance` shall be added to the OPTIONHANDLER_HANDLE instance using OptionHandler_AddOption]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_127: [If no failures occur, authentication_retrieve_options shall return the OPTIONHANDLER_HANDLE instance]
 TEST_FUNCTION(authentication_retrieve_options_succeeds)
 {
     // arrange
@@ -1665,9 +1579,6 @@ TEST_FUNCTION(authentication_retrieve_options_succeeds)
 }
 
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_102: [If an OPTIONHANDLER_HANDLE instance fails to be created, authentication_retrieve_options shall fail and return NULL]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_104: [If OptionHandler_AddOption fails, authentication_retrieve_options shall fail and return NULL]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_AUTH_09_105: [If authentication_retrieve_options fails, any allocated memory shall be freed]
 TEST_FUNCTION(authentication_retrieve_options_failure_checks)
 {
     // arrange
