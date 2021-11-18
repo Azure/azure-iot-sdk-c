@@ -77,7 +77,7 @@ typedef struct DEVICE_TWIN_DATA_TAG
 {
     bool received_callback;                     // True when device callback has been called
     DEVICE_TWIN_UPDATE_STATE update_state;      // Status reported by the callback
-    char* cb_payload;
+    unsigned char* cb_payload;
     size_t cb_payload_size;
     LOCK_HANDLE lock;
 } DEVICE_TWIN_DATA;
@@ -164,7 +164,7 @@ static char* _malloc_and_fill_service_client_desired_payload(const char* astring
     return return_value;
 }
 
-static char* _malloc_and_copy_unsigned_char(const unsigned char* payload, size_t size)
+static unsigned char* _malloc_and_copy_unsigned_char(const unsigned char* payload, size_t size)
 {
     char* return_value;
 
@@ -180,7 +180,7 @@ static char* _malloc_and_copy_unsigned_char(const unsigned char* payload, size_t
     }
     else
     {
-        unsigned char* temp = (unsigned char*)malloc(size + 1);
+        unsigned char* temp = (char*)malloc(size + 1);
         if (temp == NULL)
         {
             LogError("malloc failed.");
@@ -188,7 +188,7 @@ static char* _malloc_and_copy_unsigned_char(const unsigned char* payload, size_t
         }
         else
         {
-            return_value = (char*) memcpy(temp, payload, size);
+            return_value = (unsigned char*) memcpy(temp, payload, size);
             return_value[size] = '\0';
         }
     }
@@ -304,9 +304,9 @@ static char* _parse_json_twin_char(const char* twin_payload, const char* full_pr
     JSON_Object* root_object = json_value_get_object(root_value);
     ASSERT_IS_NOT_NULL(root_object);
 
-    const char* value =  json_object_dotget_string(root_object, full_property_name);
+    const unsigned char* value =  (unsigned char*)json_object_dotget_string(root_object, full_property_name);
     size_t length = json_object_dotget_string_len(root_object, full_property_name);
-    char* return_value = _malloc_and_copy_unsigned_char(value, length);
+    char* return_value = (char*)_malloc_and_copy_unsigned_char(value, length);
 
     json_value_free(root_value);
 
@@ -343,9 +343,9 @@ static char* _parse_json_twin_char_from_array(const char* twin_payload, const ch
     JSON_Array* array = json_object_dotget_array(root_object, full_property_name);
     ASSERT_IS_NOT_NULL(array, "Array not specified.");
 
-    const unsigned char* value =  json_array_get_string(array, index);
+    const unsigned char* value =  (unsigned char*)json_array_get_string(array, index);
     size_t length = json_array_get_string_len(array, index);
-    char* return_value = _malloc_and_copy_unsigned_char(value, length);
+    char* return_value = (char*)_malloc_and_copy_unsigned_char(value, length);
 
     json_value_free(root_value);
 
