@@ -59,8 +59,8 @@ elseif (${use_prov_client})
     else ()
         if (${hsm_type_x509})
             # Using x509
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHSM_TYPE_X509")
-            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHSM_TYPE_X509")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHSM_TYPE_X509 -DRIOTBUILD -DRIOTSECP256R1")
+            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHSM_TYPE_X509 -DRIOTBUILD -DRIOTSECP256R1")
 
             set(HSM_CLIENT_H_FILES ${HSM_CLIENT_H_FILES}
                 ${CMAKE_CURRENT_LIST_DIR}/adapters/hsm_client_riot.h)
