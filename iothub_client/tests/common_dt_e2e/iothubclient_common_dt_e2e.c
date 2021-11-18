@@ -38,7 +38,7 @@
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE(DEVICE_TWIN_UPDATE_STATE, DEVICE_TWIN_UPDATE_STATE_VALUES);
 
-static IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo = NULL;
+static IOTHUB_ACCOUNT_INFO_HANDLE iothub_accountinfo_handle = NULL;
 static IOTHUB_DEVICE_CLIENT_HANDLE iothub_deviceclient_handle = NULL;
 static IOTHUB_MODULE_CLIENT_HANDLE iothub_moduleclient_handle = NULL;
 
@@ -124,7 +124,7 @@ static void _device_twin_data_reset(DEVICE_TWIN_DATA* device)
     }
     else
     {
-        device->receivedCallBack = false;
+        device->received_callback = false;
         free(device->cb_payload);
         device->cb_payload = NULL;
         device->cb_payload_size = 0;
@@ -200,7 +200,7 @@ typedef struct DEVICE_REPORTED_DATA_TAG
 {
     char* string_property;
     int integer_property;
-    bool receivedCallBack;   // True when device callback has been called
+    bool received_callback;   // True when device callback has been called
     int status_code;         // Status reported by the callback
     LOCK_HANDLE lock;
 } DEVICE_REPORTED_DATA;
@@ -257,7 +257,7 @@ static void _device_reported_data_reset(DEVICE_REPORTED_DATA* device)
     }
     else
     {
-        device->receivedCallBack = false;
+        device->received_callback = false;
         free(device->string_property);
         device->string_property = _generate_unique_string();
         device->integer_property = _generate_new_int();
@@ -758,13 +758,13 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
 
     while (now_time = time(NULL), difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME)
     {
-        if (Lock(device->lock) != LOCK_OK)
+        if (Lock(device_twin_data->lock) != LOCK_OK)
         {
             ASSERT_FAIL("Lock failed");
         }
         else
         {
-            if ((device->receivedCallBack) && (device->cb_payload != NULL))
+            if ((device_twin_data->received_callback) && (device_twin_data->cb_payload != NULL))
            {
                 switch (device_twin_data->update_state)
                 {
@@ -777,12 +777,12 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
                 Unlock(device_twin_data->lock);
                 break;
             }
-            Unlock(device->lock);
+            Unlock(device_twin_data->lock);
         }
         ThreadAPI_Sleep(1000);
     }
 
-    ASSERT_IS_TRUE(difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME,
+    ASSERT_IS_TRUE(difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME,
                    "Timeout waiting for twin message.");
 
     // Reset device_twin_data for update.
@@ -1057,13 +1057,13 @@ void dt_e2e_get_complete_desired_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRAN
 
     while (now_time = time(NULL), difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME)
     {
-        if (Lock(device->lock) != LOCK_OK)
+        if (Lock(device_twin_data->lock) != LOCK_OK)
         {
             ASSERT_FAIL("Lock failed");
         }
         else
         {
-            if ((device->receivedCallBack) && (device->cb_payload != NULL))
+            if ((device_twin_data->received_callback) && (device_twin_data->cb_payload != NULL))
            {
                 switch (device_twin_data->update_state)
                 {
@@ -1076,12 +1076,12 @@ void dt_e2e_get_complete_desired_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRAN
                 Unlock(device_twin_data->lock);
                 break;
             }
-            Unlock(device->lock);
+            Unlock(device_twin_data->lock);
         }
         ThreadAPI_Sleep(1000);
     }
 
-    ASSERT_IS_TRUE(difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME,
+    ASSERT_IS_TRUE(difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME,
                    "Timeout waiting for twin message.");
 
     // Reset device_twin_data for update.
@@ -1171,6 +1171,7 @@ void dt_e2e_get_complete_desired_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRAN
             {
                 // Retrieve results.
                 // Format:: {"$version":[value]}
+                bool allow_for_zero = true;
                 switch (device_twin_data->update_state)
                 {
                 case DEVICE_TWIN_UPDATE_PARTIAL:
