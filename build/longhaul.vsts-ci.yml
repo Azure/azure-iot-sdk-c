@@ -13,7 +13,7 @@ jobs:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
   pool: 
     name: 'sdk-c--ubuntu-18'
-  displayName: 'longhaul_linux'
+  displayName: 'Longhaul: Linux'
   steps:
   - script: |
       sudo cat /etc/os-release
@@ -49,6 +49,7 @@ jobs:
   timeoutInMinutes: 800
   pool:
     name: 'sdk-c--win-vs2017'
+  displayName: 'Longhaul: Windows'
   steps:
   - script: |
       call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
