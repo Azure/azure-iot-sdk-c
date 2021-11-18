@@ -6,18 +6,21 @@ resources:
 - repo: self
   clean: true
 jobs:
-- job: ubuntu1604
+- job: ubuntu2004
   variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-2004"
   pool: 
     name: 'sdk-c--ubuntu-18'
-  displayName: 'ubuntu1604'
+  displayName: 'Ubuntu 20.04'
   steps:
   - script: |
       export OPENSSL_ia32cap=0x00000000
       sudo chmod -R 755 .
       sudo -E ./jenkins/linux_back_compat.sh
-    displayName: 'build'
+    displayName: 'Build'
+  - script: |
+      cd cmake && sudo -E ../build_all/linux/run_tests.sh
+    displayName: 'Run Tests'
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
       IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
