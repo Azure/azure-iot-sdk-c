@@ -180,7 +180,7 @@ static char* _malloc_and_copy_unsigned_char(const unsigned char* payload, size_t
     }
     else
     {
-        char* temp = (char*)malloc(size + 1);
+        unsigned char* temp = (unsigned char*)malloc(size + 1);
         if (temp == NULL)
         {
             LogError("malloc failed.");
@@ -343,7 +343,7 @@ static char* _parse_json_twin_char_from_array(const char* twin_payload, const ch
     JSON_Array* array = json_object_dotget_array(root_object, full_property_name);
     ASSERT_IS_NOT_NULL(array, "Array not specified.");
 
-    const char* value =  json_array_get_string(array, index);
+    const unsigned char* value =  json_array_get_string(array, index);
     size_t length = json_array_get_string_len(array, index);
     char* return_value = _malloc_and_copy_unsigned_char(value, length);
 
@@ -929,7 +929,7 @@ void dt_e2e_send_reported_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRANSPORT_P
                                                                        account_auth_method);
     _setup_test(device_to_use, protocol);
 
-    DEVICE_REPORTED_DATA* device_reported_data = _device_reported_data_init(false);
+    DEVICE_REPORTED_DATA* device_reported_data = _device_reported_data_init();
 
     // Generate the reported payload.
     char* buffer = _malloc_and_fill_reported_payload(device_reported_data->string_property,
