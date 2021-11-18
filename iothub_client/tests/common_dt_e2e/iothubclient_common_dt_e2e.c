@@ -166,7 +166,7 @@ static char* _malloc_and_fill_service_client_desired_payload(const char* astring
 
 static unsigned char* _malloc_and_copy_unsigned_char(const unsigned char* payload, size_t size)
 {
-    char* return_value;
+    unsigned char* return_value;
 
     if (payload == NULL)
     {
@@ -180,7 +180,7 @@ static unsigned char* _malloc_and_copy_unsigned_char(const unsigned char* payloa
     }
     else
     {
-        unsigned char* temp = (char*)malloc(size + 1);
+        unsigned char* temp = (unsigned char*)malloc(size + 1);
         if (temp == NULL)
         {
             LogError("malloc failed.");
@@ -188,7 +188,7 @@ static unsigned char* _malloc_and_copy_unsigned_char(const unsigned char* payloa
         }
         else
         {
-            return_value = (unsigned char*) memcpy(temp, payload, size);
+            return_value = (unsigned char*)memcpy(temp, payload, size);
             return_value[size] = '\0';
         }
     }
@@ -823,15 +823,15 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
                 switch (device_twin_data->update_state)
                 {
                 case DEVICE_TWIN_UPDATE_PARTIAL:
-                    integer_property = _parse_json_twin_number(device_twin_data->cb_payload,
+                    integer_property = _parse_json_twin_number((char*)device_twin_data->cb_payload,
                                                                "integer_property",
                                                                allow_for_zero);
-                    string_property = _parse_json_twin_char(device_twin_data->cb_payload,
+                    string_property = _parse_json_twin_char((char*)device_twin_data->cb_payload,
                                                             "string_property");
-                    integer_property_from_array = _parse_json_twin_number_from_array(device_twin_data->cb_payload,
+                    integer_property_from_array = _parse_json_twin_number_from_array((char*)device_twin_data->cb_payload,
                                                                                      "array", 0,
                                                                                      allow_for_zero);
-                    string_property_from_array = _parse_json_twin_char_from_array(device_twin_data->cb_payload,
+                    string_property_from_array = _parse_json_twin_char_from_array((char*)device_twin_data->cb_payload,
                                                                                   "array", 1);
                     break;
                 default: // invalid update state
@@ -1175,15 +1175,15 @@ void dt_e2e_get_complete_desired_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRAN
                 switch (device_twin_data->update_state)
                 {
                 case DEVICE_TWIN_UPDATE_PARTIAL:
-                    integer_property = _parse_json_twin_number(device_twin_data->cb_payload,
+                    integer_property = _parse_json_twin_number((char*)device_twin_data->cb_payload,
                                                                "integer_property",
                                                                allow_for_zero);
-                    string_property = _parse_json_twin_char(device_twin_data->cb_payload,
+                    string_property = _parse_json_twin_char((char*)device_twin_data->cb_payload,
                                                             "string_property");
-                    integer_property_from_array = _parse_json_twin_number_from_array(device_twin_data->cb_payload,
+                    integer_property_from_array = _parse_json_twin_number_from_array((char*)device_twin_data->cb_payload,
                                                                                      "array", 0,
                                                                                      allow_for_zero);
-                    string_property_from_array = _parse_json_twin_char_from_array(device_twin_data->cb_payload,
+                    string_property_from_array = _parse_json_twin_char_from_array((char*)device_twin_data->cb_payload,
                                                                                   "array", 1);
                     break;
                 default: // invalid update state
