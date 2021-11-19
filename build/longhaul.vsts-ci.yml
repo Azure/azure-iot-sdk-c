@@ -10,7 +10,7 @@ jobs:
 - job: longhaul_linux
   timeoutInMinutes: 800
   variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-2004"
   pool: 
     name: 'sdk-c--ubuntu-18'
   displayName: 'longhaul_linux'
