@@ -107,7 +107,7 @@ static DEVICE_TWIN_DATA* _device_twin_data_init()
         }
     }
 
-    ASSERT_IS_NOT_NULL(device, "Failed to create the device desired client data.");
+    ASSERT_IS_NOT_NULL(device, "Failed to create the device desired data.");
 
     return device;
 }
@@ -240,7 +240,7 @@ static DEVICE_REPORTED_DATA* _device_reported_data_init()
         }
     }
 
-    ASSERT_IS_NOT_NULL(device, "Failed to create the device reported client data.");
+    ASSERT_IS_NOT_NULL(device, "Failed to create the device reported data.");
 
     return device;
 }
@@ -394,7 +394,7 @@ static void _set_option(const char* option_name, const void* option_data, const 
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, error_message);
 }
 
-static void _setup_test(IOTHUB_PROVISIONED_DEVICE* device_to_use,
+static void _create_client_handle(IOTHUB_PROVISIONED_DEVICE* device_to_use,
                         IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     ASSERT_IS_NULL(iothub_deviceclient_handle,
@@ -433,7 +433,7 @@ static void _setup_test(IOTHUB_PROVISIONED_DEVICE* device_to_use,
     _set_option(OPTION_LOG_TRACE, &trace, "Cannot enable tracing.");
 }
 
-static void _breakdown_test()
+static void _destroy_client_handle()
 {
     LogInfo("Beginning to destroy IoTHub client handle.");
     if (iothub_moduleclient_handle)
@@ -628,11 +628,13 @@ void dt_e2e_deinit(void)
 void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
                                IOTHUB_ACCOUNT_AUTH_METHOD account_auth_method)
 {
+    // Test setup
     IOTHUB_PROVISIONED_DEVICE* device_to_use = IoTHubAccount_GetDevice(iothub_accountinfo_handle,
                                                                        account_auth_method);
-    _setup_test(device_to_use, protocol);
-
     DEVICE_REPORTED_DATA* device_reported_data = _device_reported_data_init();
+
+    // Create device client (global)
+    _create_client_handle(device_to_use, protocol);
 
     // Generate the reported payload.
     char* buffer = _malloc_and_fill_reported_payload(device_reported_data->string_property,
@@ -710,18 +712,20 @@ void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
 
     // Cleanup
     free(buffer);
+    _destroy_client_handle();
     _device_reported_data_deinit(device_reported_data);
-    _breakdown_test();
 }
 
 void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
                                       IOTHUB_ACCOUNT_AUTH_METHOD account_auth_method)
 {
+    // Test setup
     IOTHUB_PROVISIONED_DEVICE* device_to_use = IoTHubAccount_GetDevice(iothub_accountinfo_handle,
                                                                        account_auth_method);
-    _setup_test(device_to_use, protocol);
-
     DEVICE_TWIN_DATA* device_twin_data = _device_twin_data_init();
+
+    // Create device client (global)
+    _create_client_handle(device_to_use, protocol);
 
     // Connect device client to IoT Hub. Register callback.
     _set_device_twin_callback(_device_twin_callback, device_twin_data);
@@ -880,8 +884,8 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     free(expected_desired_string);
     IoTHubDeviceTwin_Destroy(serviceclient_devicetwin_handle);
     IoTHubServiceClientAuth_Destroy(iothub_serviceclient_handle);
+    _destroy_client_handle();
     _device_twin_data_deinit(device_twin_data);
-    _breakdown_test();
 }
 
 void _client_create_with_properties_and_send_d2c(IOTHUB_PROVISIONED_DEVICE* device_to_use,
@@ -925,11 +929,13 @@ void _client_create_with_properties_and_send_d2c(IOTHUB_PROVISIONED_DEVICE* devi
 void dt_e2e_send_reported_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
                                                        IOTHUB_ACCOUNT_AUTH_METHOD account_auth_method)
 {
+    // Test setup
     IOTHUB_PROVISIONED_DEVICE* device_to_use = IoTHubAccount_GetDevice(iothub_accountinfo_handle,
                                                                        account_auth_method);
-    _setup_test(device_to_use, protocol);
-
     DEVICE_REPORTED_DATA* device_reported_data = _device_reported_data_init();
+
+    // Create device client (global)
+    _create_client_handle(device_to_use, protocol);
 
     // Generate the reported payload.
     char* buffer = _malloc_and_fill_reported_payload(device_reported_data->string_property,
@@ -1026,18 +1032,20 @@ void dt_e2e_send_reported_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRANSPORT_P
 
     // Cleanup
     free(buffer);
+    _destroy_client_handle();
     _device_reported_data_deinit(device_reported_data);
-    _breakdown_test();
 }
 
 void dt_e2e_get_complete_desired_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
                                                               IOTHUB_ACCOUNT_AUTH_METHOD account_auth_method)
 {
+    // Test setup
     IOTHUB_PROVISIONED_DEVICE* device_to_use = IoTHubAccount_GetDevice(iothub_accountinfo_handle,
                                                                        account_auth_method);
-    _setup_test(device_to_use, protocol);
-
     DEVICE_TWIN_DATA* device_twin_data = _device_twin_data_init();
+
+    // Create device client (global)
+    _create_client_handle(device_to_use, protocol);
 
     // Connect device client to IoT Hub. Register callback.
     _set_device_twin_callback(_device_twin_callback, device_twin_data);
@@ -1232,18 +1240,20 @@ void dt_e2e_get_complete_desired_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRAN
     free(expected_desired_string);
     IoTHubDeviceTwin_Destroy(serviceclient_devicetwin_handle);
     IoTHubServiceClientAuth_Destroy(iothub_serviceclient_handle);
+    _destroy_client_handle();
     _device_twin_data_deinit(device_twin_data);
-    _breakdown_test();
 }
 
 void dt_e2e_get_twin_async_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
                                 IOTHUB_ACCOUNT_AUTH_METHOD account_auth_method)
 {
+    // Test setup
     IOTHUB_PROVISIONED_DEVICE* device_to_use = IoTHubAccount_GetDevice(iothub_accountinfo_handle,
                                                                        account_auth_method);
-    _setup_test(device_to_use, protocol);
-
     DEVICE_TWIN_DATA* device_twin_data = _device_twin_data_init();
+
+    // Create device client (global)
+    _create_client_handle(device_to_use, protocol);
 
     // Connect device client to IoT Hub. Register callback.
     _get_twin_async(_device_twin_callback, device_twin_data);
@@ -1281,8 +1291,8 @@ void dt_e2e_get_twin_async_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     ASSERT_IS_TRUE(callback_received, "Did not receive the GetTwinAsync callback.");
 
     // Cleanup
+    _destroy_client_handle();
     _device_twin_data_deinit(device_twin_data);
-    _breakdown_test();
 }
 
 // dt_e2e_send_module_id_test makes sure that when OPTION_MODEL_ID is specified at creation time,
@@ -1291,14 +1301,17 @@ void dt_e2e_send_module_id_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
                                 IOTHUB_ACCOUNT_AUTH_METHOD account_auth_method,
                                 const char* model_id)
 {
+    // Test setup
     IOTHUB_PROVISIONED_DEVICE* device_to_use = IoTHubAccount_GetDevice(iothub_accountinfo_handle,
                                                                        account_auth_method);
-    _setup_test(device_to_use, protocol);
+    DEVICE_TWIN_DATA* device_twin_data = _device_twin_data_init();
+
+    // Create device client (global)
+    _create_client_handle(device_to_use, protocol);
     _set_option(OPTION_MODEL_ID, model_id, "Cannot specify model_id."); // Set prior to network I/O.
 
     // Connect device to IoT Hub.
     // We do not use the returned device twin, which doesn't contain the device's model_id.
-    DEVICE_TWIN_DATA* device_twin_data = _device_twin_data_init();
     _get_twin_async(_device_twin_callback, device_twin_data);
 
     // Receive IoT Hub response before continuing with test.
@@ -1347,6 +1360,6 @@ void dt_e2e_send_module_id_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     free(twin_data);
     IoTHubDeviceTwin_Destroy(serviceclient_devicetwin_handle);
     IoTHubServiceClientAuth_Destroy(iothub_serviceclient_handle);
+    _destroy_client_handle();
     _device_twin_data_deinit(device_twin_data);
-    _breakdown_test();
 }
