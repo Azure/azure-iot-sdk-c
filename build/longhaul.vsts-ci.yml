@@ -13,7 +13,7 @@ jobs:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-2004"
   pool: 
     name: 'sdk-c--ubuntu-18'
-  displayName: 'longhaul_linux'
+  displayName: 'Longhaul: Linux'
   steps:
   - script: |
       sudo cat /etc/os-release
@@ -21,7 +21,10 @@ jobs:
       sudo chmod --recursive ugo+rw cmake
       sudo chmod 755 jenkins/longhaul_c.sh
       sudo -E ./jenkins/longhaul_c.sh
-    displayName: 'build'
+    displayName: 'Build'
+  - script: |
+      cd cmake && sudo -E ../build_all/linux/run_tests.sh
+    displayName: 'Run Tests'
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
       IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
@@ -46,11 +49,15 @@ jobs:
   timeoutInMinutes: 800
   pool:
     name: 'sdk-c--win-vs2017'
+  displayName: 'Longhaul: Windows'
   steps:
   - script: |
       call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
       call jenkins\longhaul_c.cmd
-    displayName: 'build'
+    displayName: 'Build'
+  - script: |
+        cd cmake && ctest -T test --no-compress-output -C "Debug" -V -j 16 --schedule-random
+    displayName: 'Run Tests'
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
       IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
