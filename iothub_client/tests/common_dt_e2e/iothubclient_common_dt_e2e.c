@@ -77,6 +77,7 @@ static char* _generate_unique_string(void)
 typedef struct RECEIVED_TWIN_DATA_TAG
 {
     bool received_callback;                     // True when device callback has been called
+    bool update_state_set;                      // There is no "default" update_state to reset to
     DEVICE_TWIN_UPDATE_STATE update_state;      // Status reported by the callback
     unsigned char* cb_payload;
     size_t cb_payload_size;
@@ -103,6 +104,7 @@ static RECEIVED_TWIN_DATA* _received_twin_data_init()
         else
         {
             twin_data->received_callback = false;
+            twin_data->update_state_set = false;
             twin_data->cb_payload = NULL;
             twin_data->cb_payload_size = 0;
         }
@@ -126,6 +128,7 @@ static void _received_twin_data_reset(RECEIVED_TWIN_DATA* twin_data)
     else
     {
         twin_data->received_callback = false;
+        twin_data->update_state_set = false;
         free(twin_data->cb_payload);
         twin_data->cb_payload = NULL;
         twin_data->cb_payload_size = 0;
@@ -476,6 +479,7 @@ static void _twin_callback(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned
     else
     {
         received_twin_data->update_state = update_state;
+        received_twin_data->update_state_set = true;
         if (received_twin_data->cb_payload != NULL)
         {
             free(received_twin_data->cb_payload);
@@ -500,10 +504,12 @@ static void _receive_twin_loop(RECEIVED_TWIN_DATA* received_twin_data, DEVICE_TW
         }
         else
         {
-            if ((received_twin_data->received_callback) && (received_twin_data->cb_payload != NULL))
+            if ((received_twin_data->received_callback) &&
+                (received_twin_data->cb_payload != NULL) &&
+                (received_twin_data->update_state_set == true))
             {
-                ASSERT_ARE_EQUAL(DEVICE_TWIN_UPDATE_STATE, received_twin_data->update_state,
-                                 expected_update_state);
+                ASSERT_ARE_EQUAL(DEVICE_TWIN_UPDATE_STATE, expected_update_state,
+                                 received_twin_data->update_state);
 
                 Unlock(received_twin_data->lock);
                 break;
@@ -881,7 +887,7 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
 
     // Sleep still needed. Twin callback has been recorded in test app, but the IoT Hub is still
     // completing the twin PATCH subscription.
-    ThreadAPI_Sleep(5000);
+    ThreadAPI_Sleep(10000);
 
     // Update service client twin to prompt a desired property PATCH message to device.
     char* expected_desired_string = _generate_unique_string();
@@ -1085,7 +1091,7 @@ void dt_e2e_get_complete_desired_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRAN
 
     // Sleep still needed. Twin callback has been recorded in test app, but the IoT Hub is still
     // completing the twin PATCH subscription.
-    ThreadAPI_Sleep(5000);
+    ThreadAPI_Sleep(10000);
 
     // Update service client twin to prompt a desired property PATCH message to device.
     char* expected_desired_string = _generate_unique_string();
@@ -1120,8 +1126,6 @@ void dt_e2e_get_complete_desired_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRAN
 
     // Reset received_twin_data for update.
     _received_twin_data_reset(received_twin_data);
-
-    ThreadAPI_Sleep(3000);
 
     // Update service client twin again.
     _service_client_update_twin(serviceclient_devicetwin_handle, device_to_use, buffer);
