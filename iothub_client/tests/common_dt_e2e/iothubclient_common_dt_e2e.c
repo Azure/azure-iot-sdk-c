@@ -887,7 +887,7 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
 
     // Sleep still needed. Twin callback has been recorded in test app, but the IoT Hub is still
     // completing the twin PATCH subscription.
-    ThreadAPI_Sleep(10000);
+    ThreadAPI_Sleep(5000);
 
     // Update service client twin to prompt a desired property PATCH message to device.
     char* expected_desired_string = _generate_unique_string();
@@ -1091,7 +1091,7 @@ void dt_e2e_get_complete_desired_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRAN
 
     // Sleep still needed. Twin callback has been recorded in test app, but the IoT Hub is still
     // completing the twin PATCH subscription.
-    ThreadAPI_Sleep(10000);
+    ThreadAPI_Sleep(5000);
 
     // Update service client twin to prompt a desired property PATCH message to device.
     char* expected_desired_string = _generate_unique_string();
@@ -1131,7 +1131,7 @@ void dt_e2e_get_complete_desired_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRAN
     _service_client_update_twin(serviceclient_devicetwin_handle, device_to_use, buffer);
 
     // Receive IoT Hub response.
-    _receive_twin_loop(received_twin_data, DEVICE_TWIN_UPDATE_PARTIAL);
+    _receive_twin_loop(received_twin_data, DEVICE_TWIN_UPDATE_COMPLETE);
 
     // Unsubscribe
     _set_twin_callback(NULL, NULL);
