@@ -54,7 +54,7 @@ This is a quick tutorial with the steps to create, update, get, and delete an En
 
 [root-link]: https://github.com/Azure/azure-iot-sdk-c
 [source-code-link]: ../../src
-[dice-link]: https://azure.microsoft.com/en-us/blog/azure-iot-supports-new-security-hardware-to-strengthen-iot-security/
+[dice-link]: https://azure.microsoft.com/blog/azure-iot-supports-new-security-hardware-to-strengthen-iot-security/
 [devbox-setup-link]: ../../../doc/devbox-setup.md
 [ca-cert-link]: ../../../tools/CACertificates
-[ca-cert-portal-link]: https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-security-x509-get-started
+[ca-cert-portal-link]: https://docs.microsoft.com/azure/iot-hub/iot-hub-security-x509-get-started

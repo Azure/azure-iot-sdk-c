@@ -34,7 +34,7 @@ sudo apt-get install -y vim git build-essential pkg-config git cmake libssl-dev 
 
 ###################################################################################################
 # DOWNLOAD AND INSTALL LINUX AGENT
-# FOR WALKTHROUGH: https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/v2-linux?view=azure-devops
+# FOR WALKTHROUGH: https://docs.microsoft.com/azure/devops/pipelines/agents/v2-linux?view=azure-devops
 # NOTE: You need a Azure DevOps PAT Token. Described in the link above. 
 ###################################################################################################
 cd ~

@@ -26,19 +26,19 @@ This is a brief note to clarify how authentication is done in the IoTHub Device/
 
 Authentication of a client in the SDK can be done using either
 
-- [SAS tokens](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security#security-tokens), or 
+- [SAS tokens](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-security#security-tokens), or 
 
-- [x509 certificates](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security#supported-x509-certificates), or
+- [x509 certificates](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-security#supported-x509-certificates), or
 
-- [Device Provisioning Service](https://docs.microsoft.com/en-us/azure/iot-dps/).
+- [Device Provisioning Service](https://docs.microsoft.com/azure/iot-dps/).
 
 This section does not describe the details of Device Provisioning Service (DPS), please use the link above for details.
 
 When using SAS tokens, authentication can be done by:
 
-- Providing [your own SAS token](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security#authentication), or
+- Providing [your own SAS token](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-security#authentication), or
 
-- Giving the device keys to the SDK (using the device connection string - see ["Alternate Device Credentials"](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-device-sdk-c-iothubclient#alternate-device-credentials) in our documentation) and letting it create the SAS tokens for you (this is the most usual authentication method).
+- Giving the device keys to the SDK (using the device connection string - see ["Alternate Device Credentials"](https://docs.microsoft.com/azure/iot-hub/iot-hub-device-sdk-c-iothubclient#alternate-device-credentials) in our documentation) and letting it create the SAS tokens for you (this is the most usual authentication method).
 
 As mentioned in the articles above, SAS tokens have an expiration time.
 
@@ -105,7 +105,7 @@ Each of these layers provide status and error events to the above through functi
 
   - Telemetry messages to complete sending;
 
-  - [CBS authentication token](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security#security-tokens) refresh to be completed.
+  - [CBS authentication token](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-security#security-tokens) refresh to be completed.
 
 1. Through failures reported by the socket APIs;
 

@@ -1,6 +1,6 @@
 # Azure IoT Provisioning Client FAQ
 
-Here is where we answer question pertaining to the IoT Provisioning Client.  Please read the following documents for an overview of the [Device Provisioning Service](https://docs.microsoft.com/en-us/azure/iot-dps/)
+Here is where we answer question pertaining to the IoT Provisioning Client.  Please read the following documents for an overview of the [Device Provisioning Service](https://docs.microsoft.com/azure/iot-dps/)
 
 ## x509 Provisioning
 
@@ -18,7 +18,7 @@ Here is where we answer question pertaining to the IoT Provisioning Client.  Ple
 
     For more information on switching between development and production scenarios, refer to [using provisioning client](https://github.com/Azure/azure-iot-sdk-c/blob/master/provisioning_client/devdoc/using_provisioning_client.md)
     
-    For more reading on certificates information, please see [security concept document](https://docs.microsoft.com/en-us/azure/iot-dps/concepts-security#x509-certificates)
+    For more reading on certificates information, please see [security concept document](https://docs.microsoft.com/azure/iot-dps/concepts-security#x509-certificates)
 
 - What if I want the certificate private key to never leave the hardware?
 
@@ -38,13 +38,13 @@ Here is where we answer question pertaining to the IoT Provisioning Client.  Ple
 
 - Coming soon
 
-For more reading on Symmetric key information please see [Symmetric key concept doc](https://docs.microsoft.com/en-us/azure/iot-dps/concepts-symmetric-key-attestation)
+For more reading on Symmetric key information please see [Symmetric key concept doc](https://docs.microsoft.com/azure/iot-dps/concepts-symmetric-key-attestation)
 
 ## TPM Provisioning
 
 - Coming soon
 
-For more reading on TPM information please see [TPM Attestation doc](https://docs.microsoft.com/en-us/azure/iot-dps/concepts-tpm-attestation)
+For more reading on TPM information please see [TPM Attestation doc](https://docs.microsoft.com/azure/iot-dps/concepts-tpm-attestation)
 
 ## Related documents
 
