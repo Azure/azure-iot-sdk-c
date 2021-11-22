@@ -376,10 +376,10 @@ make
 [azure-shared-c-utility]:https://github.com/Azure/azure-c-shared-utility
 [azure-uamqp-c]:https://github.com/Azure/azure-uamqp-c
 [azure-umqtt-c]:https://github.com/Azure/azure-umqtt-c
-[sln-file]:https://msdn.microsoft.com/en-us/library/bb165951.aspx
+[sln-file]:https://msdn.microsoft.com/library/bb165951.aspx
 [git]:http://www.git-scm.com
 [CMake]:https://cmake.org/
-[MSBuild]:https://msdn.microsoft.com/en-us/library/0k6kkbsd.aspx
+[MSBuild]:https://msdn.microsoft.com/library/0k6kkbsd.aspx
 [Compilation and Installation]:https://wiki.openssl.org/index.php/Compilation_and_Installation#Windows
 [Ubuntu]:http://www.ubuntu.com/desktop
 [gcc]:https://gcc.gnu.org/
@@ -390,6 +390,6 @@ make
 [clang]:https://clang.llvm.org/
 [device_samples]: ../iothub_client/samples/
 [latest-release]:https://github.com/Azure/azure-iot-sdk-c/releases/latest
-[Windows 10 IoT Core]:https://docs.microsoft.com/en-us/windows/iot-core/develop-your-app/buildingappsforiotcore
+[Windows 10 IoT Core]:https://docs.microsoft.com/windows/iot-core/develop-your-app/buildingappsforiotcore
 [vcpkg]:https://github.com/Microsoft/vcpkg
 [windows-and-openssl]:./windows_and_openssl.md
