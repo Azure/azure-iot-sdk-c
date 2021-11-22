@@ -223,7 +223,7 @@ static void sleep_between_upload_blob_e2e_tests(void)
 {
     // We need a Sleep() between each E2E test.  Current (as of October, 2020) throttling
     // rules limit an S1 hub to 1.67 upload initiations per second for the entire IoT Hub (not just per device).
-    // https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-quotas-throttling
+    // https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-quotas-throttling
     //
     // On gate runs, we have many instances of this test executable running at the same time and we cannot orchestrate
     // them.  Most individual testcases take <1 second to run.  Without a sleep, this amount of traffic

@@ -18,7 +18,7 @@ A more detailed document explaining Edge and showing its use of certificates gen
 
 ## Note about Edge Devices
 
-To generate device certificates for the device running Edge itself, use the [Edge device using X.509 certificates](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-auto-provision-x509-certs) guide.  
+To generate device certificates for the device running Edge itself, use the [Edge device using X.509 certificates](https://docs.microsoft.com/azure/iot-edge/how-to-auto-provision-x509-certs) guide.  
 
 To generate device certificates for leaf devices that are connecting via an Edge gateway, see the instructions below.
 
@@ -130,5 +130,5 @@ From start menu, open `manage computer certificates` and navigate Certificates -
 
 Bash outputs certificates to the current working directory, so there is no analogous system cleanup needed.
 
-[the official documentation]: https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-security-x509-get-started
-[Edge gateway creation documentation]: https://docs.microsoft.com/en-us/azure/iot-edge/how-to-create-gateway-device
+[the official documentation]: https://docs.microsoft.com/azure/iot-hub/iot-hub-security-x509-get-started
+[Edge gateway creation documentation]: https://docs.microsoft.com/azure/iot-edge/how-to-create-gateway-device
