@@ -458,3 +458,6 @@ if (${use_installed_dependencies})
     )
 endif()
 
+get_target_property(compile_defs app COMPILE_DEFINITIONS)
+message(STATUS "CMake compile definitions are $compile_defs)
+
