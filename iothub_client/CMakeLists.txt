@@ -275,7 +275,7 @@ if(${use_http})
         ${iothub_client_http_transport_c_files}
         ${iothub_client_http_transport_h_files}
     )
-    applyXcodeBuildFlags(iothub_client_http_transport)
+    applyXcodeBuildFlagsIfNeeded(iothub_client_http_transport)
     linkSharedUtil(iothub_client_http_transport)
     set(iothub_client_libs
         ${iothub_client_libs}
@@ -296,7 +296,7 @@ if(${use_amqp})
         ${iothub_client_amqp_transport_c_files}
         ${iothub_client_amqp_transport_h_files}
     )
-    applyXcodeBuildFlags(iothub_client_amqp_transport)
+    applyXcodeBuildFlagsIfNeeded(iothub_client_amqp_transport)
     linkSharedUtil(iothub_client_amqp_transport)
     linkUAMQP(iothub_client_amqp_transport)
     set(iothub_client_libs
@@ -309,7 +309,7 @@ if(${use_amqp})
         ${iothub_client_amqp_ws_transport_c_files}
         ${iothub_client_amqp_ws_transport_h_files}
     )
-    applyXcodeBuildFlags(iothub_client_amqp_ws_transport)
+    applyXcodeBuildFlagsIfNeeded(iothub_client_amqp_ws_transport)
     linkSharedUtil(iothub_client_amqp_ws_transport)
     linkUAMQP(iothub_client_amqp_ws_transport)
     set(iothub_client_libs
@@ -335,7 +335,7 @@ if(${use_mqtt})
         ${iothub_client_mqtt_transport_c_files}
         ${iothub_client_mqtt_transport_h_files}
     )
-    applyXcodeBuildFlags(iothub_client_mqtt_transport)
+    applyXcodeBuildFlagsIfNeeded(iothub_client_mqtt_transport)
     linkSharedUtil(iothub_client_mqtt_transport)
     linkMqttLibrary(iothub_client_mqtt_transport)
     set(iothub_client_libs
@@ -347,7 +347,7 @@ if(${use_mqtt})
         ${iothub_client_mqtt_ws_transport_c_files}
         ${iothub_client_mqtt_ws_transport_h_files}
     )
-    applyXcodeBuildFlags(iothub_client_mqtt_ws_transport)
+    applyXcodeBuildFlagsIfNeeded(iothub_client_mqtt_ws_transport)
     linkSharedUtil(iothub_client_mqtt_ws_transport)
     linkMqttLibrary(iothub_client_mqtt_ws_transport)
     set(iothub_client_libs
@@ -403,7 +403,7 @@ if (${build_as_dynamic})
         ${iothub_transport_source}
     )
 
-    applyXcodeBuildFlags(iothub_client_dll)
+    applyXcodeBuildFlagsIfNeeded(iothub_client_dll)
     target_link_libraries(iothub_client_dll ${iothub_client_libs})
     if(NOT WIN32)
         set_target_properties(iothub_client_dll PROPERTIES OUTPUT_NAME "iothub_client")
@@ -443,7 +443,7 @@ target_include_directories(iothub_client
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/azureiot/include>
 )
-applyXcodeBuildFlags(iothub_client)
+applyXcodeBuildFlagsIfNeeded(iothub_client)
 target_link_libraries(iothub_client ${iothub_client_libs})
 target_link_libraries(iothub_client parson::parson)
 

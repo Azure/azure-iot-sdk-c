@@ -78,7 +78,7 @@ if (${build_as_dynamic})
     )
     set (install_libs ${install_libs} iothub_service_client_dll)
 endif()
-applyXcodeBuildFlags(iothub_service_client)
+applyXcodeBuildFlagsIfNeeded(iothub_service_client)
 
 target_link_libraries(iothub_service_client uamqp parson)
 
