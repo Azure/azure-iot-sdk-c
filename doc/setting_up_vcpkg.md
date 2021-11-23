@@ -50,7 +50,7 @@ This document describes how to setup vcpkg to build applications using Microsoft
 
 - Hit F5 to build and run.
 
-- More information on building the C SDK and samples can be found [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/devbox_setup.md).
+- More information on building the C SDK and samples can be found [here](https://github.com/Azure/azure-iot-sdk-c/blob/main/doc/devbox_setup.md).
 
 ## Setup C SDK vcpkg for Linux or Mac development environment
 
@@ -75,4 +75,4 @@ This document describes how to setup vcpkg to build applications using Microsoft
     ./iothub_ll_telemetry_sample
     ```
 
-- More information on building the C SDK and samples can be found [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/devbox_setup.md).
+- More information on building the C SDK and samples can be found [here](https://github.com/Azure/azure-iot-sdk-c/blob/main/doc/devbox_setup.md).

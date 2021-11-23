@@ -28,7 +28,7 @@
 /**  
 * @brief   Handle corresponding to a convenience layer module client instance. 
 * 
-* @remarks See https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/threading_notes.md for more details about convenience layer versus lower layer (LL) threading models.
+* @remarks See https://github.com/Azure/azure-iot-sdk-c/blob/main/doc/threading_notes.md for more details about convenience layer versus lower layer (LL) threading models.
 */
 typedef IOTHUB_CLIENT_CORE_HANDLE IOTHUB_MODULE_CLIENT_HANDLE;
 #define IOTHUB_MODULE_CLIENT_INSTANCE_TYPE
@@ -195,7 +195,7 @@ extern "C"
     * @param    value                       The value.
     *
     * 
-    * @remarks  Documentation for configuration options is available at https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/Iothub_sdk_options.md.
+    * @remarks  Documentation for configuration options is available at https://github.com/Azure/azure-iot-sdk-c/blob/main/doc/Iothub_sdk_options.md.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
