@@ -7,7 +7,7 @@ project(azure_iot_sdks)
 include("${CMAKE_CURRENT_LIST_DIR}/configs/azure_iot_sdksFunctions.cmake")
 
 getIoTSDKVersion()
-message(STATUS "IoT Client SDK Version = ${IOT_SDK_VERSION}")
+message(NOTICE "IoT Client SDK Version = ${IOT_SDK_VERSION}")
 
 if (POLICY CMP0042)
     cmake_policy(SET CMP0042 NEW)
@@ -346,7 +346,7 @@ if (NOT DEFINED ARCHITECTURE OR ARCHITECTURE STREQUAL "")
     set(ARCHITECTURE "GENERIC")
 endif()
 
-message(STATUS "iothub architecture: ${ARCHITECTURE}")
+message(NOTICE "iothub architecture: ${ARCHITECTURE}")
 
 macro(compileAsC99)
     if (CMAKE_VERSION VERSION_LESS "3.1")
@@ -458,6 +458,16 @@ if (${use_installed_dependencies})
     )
 endif()
 
-get_target_property(compile_defs app COMPILE_DEFINITIONS)
-message(STATUS "CMake compile definitions are ${compile_defs}")
+message(NOTICE "CMake1 compile definitions are ${COMPILE_DEFINITIONS}")
+
+message(NOTICE "print_all_variables------------------------------------------{")
+get_cmake_property(_variableNames VARIABLES)
+list (SORT _variableNames)
+foreach (_variableName ${_variableNames})
+    message(NOTICE "${_variableName}=${${_variableName}}")
+endforeach()
+message(NOTICE "print_all_variables------------------------------------------}")
+    
+
+
 
