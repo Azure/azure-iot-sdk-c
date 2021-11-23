@@ -458,16 +458,4 @@ if (${use_installed_dependencies})
     )
 endif()
 
-message(NOTICE "CMake1 compile definitions are ${COMPILE_DEFINITIONS}")
-
-message(NOTICE "print_all_variables------------------------------------------{")
-get_cmake_property(_variableNames VARIABLES)
-list (SORT _variableNames)
-foreach (_variableName ${_variableNames})
-    message(NOTICE "${_variableName}=${${_variableName}}")
-endforeach()
-message(NOTICE "print_all_variables------------------------------------------}")
-    
-
-
 
