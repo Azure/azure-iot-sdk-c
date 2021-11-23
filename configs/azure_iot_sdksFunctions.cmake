@@ -137,7 +137,7 @@ function(add_longhaul_test_directory test_directory)
 endfunction()
 
 # For targets which set warning switches as project properties (e.g. XCode)
-function(setSdkTargetBuildProperties stbp_target)
+function(applyXcodeBuildFlags stbp_target)
     if(XCODE)
         set_target_properties(${stbp_target} PROPERTIES XCODE_ATTRIBUTE_CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING "YES")
         set_target_properties(${stbp_target} PROPERTIES XCODE_ATTRIBUTE_CLANG_WARN_BOOL_CONVERSION "YES")
