@@ -1368,55 +1368,54 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Send(IOTHUB_MESSAGING_HANDLE messagin
                 LogError("Could not create a message.");
                 result = IOTHUB_MESSAGING_ERROR;
             }
-            else if ((to_amqp_value = amqpvalue_create_string(deviceDestinationString)) == NULL)
-            {
-                LogError("Could not create properties for message - amqpvalue_create_string");
-                message_destroy(amqpMessage);
-                result = IOTHUB_MESSAGING_ERROR;
-            }
             else
             {
-                BINARY_DATA binary_data;
-
-                binary_data.bytes = messageContent;
-                binary_data.length = messageContentSize;
-
-                if (message_add_body_amqp_data(amqpMessage, binary_data) != 0)
+                if ((to_amqp_value = amqpvalue_create_string(deviceDestinationString)) == NULL)
                 {
-                    message_destroy(amqpMessage);
-                    LogError("Failed setting the body of the uAMQP message.");
-                    result = IOTHUB_MESSAGING_ERROR;
-                }
-                else if (addPropertiesToAMQPMessage(message, amqpMessage, to_amqp_value) != 0)
-                {
-                    message_destroy(amqpMessage);
-                    LogError("Failed setting properties of the uAMQP message.");
-                    result = IOTHUB_MESSAGING_ERROR;
-                }
-                else if (addApplicationPropertiesToAMQPMessage(message, amqpMessage) != 0)
-                {
-                    message_destroy(amqpMessage);
-                    LogError("Failed setting application properties of the uAMQP message.");
+                    LogError("Could not create properties for message - amqpvalue_create_string");
                     result = IOTHUB_MESSAGING_ERROR;
                 }
                 else
                 {
-                    messagingHandle->callback_data->sendCompleteCallback = sendCompleteCallback;
-                    messagingHandle->callback_data->sendUserContext = userContextCallback;
+                    BINARY_DATA binary_data;
 
-                    if (messagesender_send_async(messagingHandle->message_sender, amqpMessage, IoTHubMessaging_LL_SendMessageComplete, messagingHandle, 0) == NULL)
+                    binary_data.bytes = messageContent;
+                    binary_data.length = messageContentSize;
+
+                    if (message_add_body_amqp_data(amqpMessage, binary_data) != 0)
                     {
-                        LogError("Could not set outgoing window.");
-                        message_destroy(amqpMessage);
+                        
+                        LogError("Failed setting the body of the uAMQP message.");
+                        result = IOTHUB_MESSAGING_ERROR;
+                    }
+                    else if (addPropertiesToAMQPMessage(message, amqpMessage, to_amqp_value) != 0)
+                    {
+                        LogError("Failed setting properties of the uAMQP message.");
+                        result = IOTHUB_MESSAGING_ERROR;
+                    }
+                    else if (addApplicationPropertiesToAMQPMessage(message, amqpMessage) != 0)
+                    {
+                        LogError("Failed setting application properties of the uAMQP message.");
                         result = IOTHUB_MESSAGING_ERROR;
                     }
                     else
                     {
-                        message_destroy(amqpMessage);
-                        result = IOTHUB_MESSAGING_OK;
+                        messagingHandle->callback_data->sendCompleteCallback = sendCompleteCallback;
+                        messagingHandle->callback_data->sendUserContext = userContextCallback;
+
+                        if (messagesender_send_async(messagingHandle->message_sender, amqpMessage, IoTHubMessaging_LL_SendMessageComplete, messagingHandle, 0) == NULL)
+                        {
+                            LogError("Could not set outgoing window.");
+                            result = IOTHUB_MESSAGING_ERROR;
+                        }
+                        else
+                        {
+                            result = IOTHUB_MESSAGING_OK;
+                        }
                     }
+                    amqpvalue_destroy(to_amqp_value);
                 }
-                amqpvalue_destroy(to_amqp_value);
+                message_destroy(amqpMessage);
             }
         }
         free(deviceDestinationString);
