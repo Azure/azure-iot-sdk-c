@@ -23,7 +23,7 @@ CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
 rm -r -f $build_folder
 mkdir -p $build_folder
 pushd $build_folder
-cmake $build_root -DCMAKE_BUILD_TYPE=Debug -Drun_valgrind=ON -Duse_mbedtls=ON -Duse_openssl=OFF -Ddont_use_uploadtoblob=ON -Drun_e2e_tests=ON
+cmake $build_root -Duse_mbedtls=ON -Duse_openssl=OFF -Ddont_use_uploadtoblob=ON -Drun_e2e_tests=ON
 make --jobs=$CORES
 
 popd
