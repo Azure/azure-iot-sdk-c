@@ -390,7 +390,7 @@ jobs:
     condition: always()
 - job: mbedtls
   variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-mbedtls"
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-mbed"
   pool:
     name: 'sdk-c--ubuntu-18'
   displayName: 'mbedTLS'
