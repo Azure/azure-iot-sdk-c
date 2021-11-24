@@ -1383,6 +1383,7 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Send(IOTHUB_MESSAGING_HANDLE messagin
 
                 if (message_add_body_amqp_data(amqpMessage, binary_data) != 0)
                 {
+                    message_destroy(amqpMessage);
                     LogError("Failed setting the body of the uAMQP message.");
                     result = IOTHUB_MESSAGING_ERROR;
                 }
@@ -1411,10 +1412,10 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Send(IOTHUB_MESSAGING_HANDLE messagin
                     }
                     else
                     {
+                        message_destroy(amqpMessage);
                         result = IOTHUB_MESSAGING_OK;
                     }
                 }
-                message_destroy(amqpMessage);
                 amqpvalue_destroy(to_amqp_value);
             }
         }
