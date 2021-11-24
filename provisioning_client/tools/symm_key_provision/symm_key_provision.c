@@ -24,7 +24,7 @@ static char* get_user_input(const char* text_value, int max_len)
     if (result_len <= 1)
     {
         (void)printf("invalid max_len size\r\n");
-        return result;
+        return NULL;
     }
 
     char* result = malloc(result_len);
