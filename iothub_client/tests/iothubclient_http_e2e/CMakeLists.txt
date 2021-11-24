@@ -12,6 +12,11 @@ set(theseTestsName iothubclient_http_e2e)
 
 generate_cppunittest_wrapper(${theseTestsName})
 
+if(${use_sample_trusted_cert})
+    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
+    include_directories(../../../certs/)
+endif()
+
 set(${theseTestsName}_c_files
 )
 
