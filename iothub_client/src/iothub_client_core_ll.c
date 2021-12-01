@@ -833,6 +833,13 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
                     config = client_config;
                 }
             }
+            else if (device_config == NULL)
+            {
+                LogError("invalid device_config");
+                IoTHubClient_Auth_Destroy(result->authorization_module);
+                free(result);
+                result = NULL;
+            }
             else
             {
                 STRING_HANDLE transport_hostname = NULL;

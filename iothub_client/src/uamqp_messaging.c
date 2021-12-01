@@ -629,7 +629,7 @@ static int create_data_to_encode(IOTHUB_MESSAGE_HANDLE messageHandle, AMQP_VALUE
     {
         if (contentType == IOTHUBMESSAGE_STRING)
         {
-            messageContentSize = strlen(messageContent);
+            messageContentSize = messageContent != NULL ? strlen(messageContent) : 0;
         }
 
         data bin_data;
