@@ -1,3 +1,8 @@
+THIS CHANGE MUST NEVER BE MERGED TO MAIN|MASTER.
+
+THIS IS CREATED TO TEST OUR GATES WILL CORRECTLY HANDLE PR'S DIRECTED AGAINST MAIN PRIOR TO 
+CHANGING THE REPO DEFAULT TO MAIN.
+
 # Azure IoT C SDKs and Libraries
 
 [![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/c/integrate-into-repo-C)](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_build/latest?definitionId=85)
