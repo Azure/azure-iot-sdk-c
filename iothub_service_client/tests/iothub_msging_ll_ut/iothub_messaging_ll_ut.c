@@ -1279,9 +1279,9 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         STRICT_EXPECTED_CALL(messagesender_send_async(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
             .IgnoreAllArguments();
 
-        STRICT_EXPECTED_CALL(message_destroy(IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG))
+            .IgnoreAllArguments();
+        STRICT_EXPECTED_CALL(message_destroy(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
