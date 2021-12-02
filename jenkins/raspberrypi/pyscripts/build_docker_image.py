@@ -17,7 +17,7 @@ default_repo = "(Azure/azure-iot-sdk-BLAH)"
 parser = argparse.ArgumentParser(description="build docker image for testing")
 parser.add_argument("--repo", help="repo with source", type=str, default=default_repo)
 parser.add_argument(
-    "--commit", help="commit to apply (ref or branch)", type=str, default="master"
+    "--commit", help="commit to apply (ref or branch)", type=str, default="main"
 )
 args = parser.parse_args()
 

@@ -20,7 +20,7 @@
 *             often not desired.
 *
 *     @warning IoTHubModuleClient_LL_* functions are NOT thread safe.  See
-*              https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/threading_notes.md for more details.
+*              https://github.com/Azure/azure-iot-sdk-c/blob/main/doc/threading_notes.md for more details.
 *
 */
 
@@ -42,7 +42,7 @@ extern "C"
 /** 
 *  @brief   Handle corresponding to a lower layer (LL) module client instance.
 *
-*  @warning The API functions that use this handle are not thread safe.  See https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/threading_notes.md for more details.
+*  @warning The API functions that use this handle are not thread safe.  See https://github.com/Azure/azure-iot-sdk-c/blob/main/doc/threading_notes.md for more details.
 */
 typedef struct IOTHUB_MODULE_CLIENT_LL_HANDLE_DATA_TAG* IOTHUB_MODULE_CLIENT_LL_HANDLE;
 
@@ -224,7 +224,7 @@ extern "C"
     * @param    optionName                  Name of the option.
     * @param    value                       The value.
     *
-    * @remarks  Documentation for configuration options is available at https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/Iothub_sdk_options.md.
+    * @remarks  Documentation for configuration options is available at https://github.com/Azure/azure-iot-sdk-c/blob/main/doc/Iothub_sdk_options.md.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */

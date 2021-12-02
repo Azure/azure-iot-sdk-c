@@ -74,7 +74,7 @@ The API reference documentation for the C SDKs can be found [here][c-api-referen
 
 To find Azure IoT SDKs in other languages, please refer to the [guidance here][about-iot-sdks].
 
-- [Azure IoT SDK for Embedded C](https://github.com/Azure/azure-sdk-for-c/tree/master/sdk/docs/iot) is an alternative for **constrained devices** which enables the BYO (bring your own) network approach: IoT developers have the freedom of choice to bring MQTT client, TLS and Socket of their choice to create a device solution.
+- [Azure IoT SDK for Embedded C](https://github.com/Azure/azure-sdk-for-c/tree/main/sdk/docs/iot) is an alternative for **constrained devices** which enables the BYO (bring your own) network approach: IoT developers have the freedom of choice to bring MQTT client, TLS and Socket of their choice to create a device solution.
 - [Azure IoT middleware for Azure RTOS](https://github.com/azure-rtos/netxduo/tree/master/addons/azure_iot) builds on top of the embedded SDK and tightly couples with the Azure RTOS family of networking and OS products. This gives you very performant and small applications for real-time, constrained devices.
 - [Azure IoT middleware for FreeRTOS](https://github.com/Azure/azure-iot-middleware-freertos) builds on top of the embedded SDK and takes care of the MQTT stack while integrating with FreeRTOS. This maintains the focus on constrained devices and gives users a distilled Azure IoT feature set while allowing for flexibility with their networking stack.
 
@@ -256,7 +256,7 @@ Below is a table showing the mapping of the LTS branches to the packages release
 
 Below is a hypothetical example of versioning and tagging for the C SDK. `minor` versions are distinguished by color.
 
-![Release Node Drawing](https://github.com/Azure/azure-iot-sdk-c/tree/master/doc/media/ReleaseNodeDrawing.jpg)
+![Release Node Drawing](https://github.com/Azure/azure-iot-sdk-c/tree/main/doc/media/ReleaseNodeDrawing.jpg)
 
 - The main branch is at version 1.8.2.
 - February 23, 2020: A new feature is released on main. The version bumps to 1.9.0, is tagged `1.9.0`, and the release is tagged `2020-02-23`.
