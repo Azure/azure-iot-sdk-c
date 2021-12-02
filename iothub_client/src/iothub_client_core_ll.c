@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+
+
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
@@ -170,12 +172,28 @@ typedef struct EDGE_ENVIRONMENT_VARIABLES_TAG
     char* iothub_buffer;
 } EDGE_ENVIRONMENT_VARIABLES;
 
+#ifdef TEST_WARNINGS_ARE_SET
+int test_function(void * ctx)
+{
+    int result;
+
+    if (ctx == NULL)
+    {
+        result = 1;
+    }
+
+    return result;
+}
+#endif
 
 static int retrieve_edge_environment_variabes(EDGE_ENVIRONMENT_VARIABLES *edge_environment_variables)
 {
     int result;
     const char* edgehubhostname;
     char* edgehubhostname_separator;
+    //int foo;
+
+    //test_function(NULL);
 
     if ((edge_environment_variables->connection_string = environment_get_variable(ENVIRONMENT_VAR_EDGEHUB_CONNECTIONSTRING)) != NULL)
     {
@@ -251,6 +269,7 @@ static int retrieve_edge_environment_variabes(EDGE_ENVIRONMENT_VARIABLES *edge_e
     }
 
     return result;
+    //return foo;
 }
 
 IOTHUB_CLIENT_EDGE_HANDLE IoTHubClientCore_LL_GetEdgeHandle(IOTHUB_CLIENT_CORE_LL_HANDLE iotHubClientHandle)

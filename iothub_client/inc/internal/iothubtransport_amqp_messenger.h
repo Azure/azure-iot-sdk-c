@@ -19,9 +19,13 @@ extern "C"
 {
 #endif
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
 
 static const char* AMQP_MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS = "amqp_event_send_timeout_secs";
 static const char *CLIENT_VERSION_PROPERTY_NAME = "com.microsoft:client-version";
+
+#pragma GCC diagnostic pop
 
 typedef struct AMQP_MESSENGER_INSTANCE* AMQP_MESSENGER_HANDLE;
 

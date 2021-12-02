@@ -63,7 +63,6 @@ static const char* connectionString = "[Downstream device IoT Edge connection st
 static const char* edge_ca_cert_path = "[Path to Edge CA certificate]";
 
 #define MESSAGE_COUNT        20
-static bool g_continueRunning = true;
 static size_t g_message_count_send_confirmations = 0;
 
 static IOTHUBMESSAGE_DISPOSITION_RESULT receive_msg_callback(IOTHUB_MESSAGE_HANDLE message, void* user_context)

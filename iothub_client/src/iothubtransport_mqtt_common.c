@@ -1763,7 +1763,7 @@ static int extractMqttProperties(PMQTTTRANSPORT_HANDLE_DATA transportData, IOTHU
 static void processTwinNotification(PMQTTTRANSPORT_HANDLE_DATA transportData, MQTT_MESSAGE_HANDLE msgHandle, const char* topicName)
 {
     size_t request_id;
-    int status_code;
+    int status_code = 0;
     bool notification_msg;
 
     if (parseDeviceTwinTopicInfo(topicName, &notification_msg, &request_id, &status_code) != 0)

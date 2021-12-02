@@ -27,15 +27,7 @@
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-static const char* iothub_uri = "<iothub_uri>";
-static const char* device_id = "<device_id>";
 static const char* conn_string = "HostName=<hostname>;DeviceId=<device_id>;UseProvisioning=true";
-
-#ifdef USE_OPENSSL
-    static bool g_using_cert = true;
-#else
-    static bool g_using_cert = false;
-#endif // USE_OPENSSL
 
 typedef struct IOTHUB_CLIENT_SAMPLE_INFO_TAG
 {
@@ -48,7 +40,7 @@ static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS result, I
     IOTHUB_CLIENT_SAMPLE_INFO* iothub_info = (IOTHUB_CLIENT_SAMPLE_INFO*)user_context;
     if (iothub_info != NULL)
     {
-        if (reason == IOTHUB_CLIENT_CONNECTION_OK && result == IOTHUB_CLIENT_CONFIRMATION_OK)
+        if (reason == IOTHUB_CLIENT_CONNECTION_OK && result == IOTHUB_CLIENT_CONNECTION_AUTHENTICATED)
         {
             iothub_info->connected = 1;
         }
@@ -81,7 +73,6 @@ int main(void)
     (void)iothub_security_init(security_type);
 
     IOTHUB_DEVICE_CLIENT_LL_HANDLE device_ll_handle;
-    //if ((iothub_client = IoTHubDeviceClient_LL_CreateFromDeviceAuth(iothub_uri, device_id, MQTT_Protocol)) == NULL)
     if ((device_ll_handle = IoTHubDeviceClient_LL_CreateFromConnectionString(conn_string, MQTT_Protocol)) == NULL)
     {
         (void)printf("Failure creating device Auth!\r\n");

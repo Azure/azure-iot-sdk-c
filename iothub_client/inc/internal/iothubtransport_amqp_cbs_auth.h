@@ -10,8 +10,11 @@
 #include "umock_c/umock_c_prod.h"
 #include "azure_c_shared_utility/optionhandler.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
 static const char* AUTHENTICATION_OPTION_SAVED_OPTIONS = "saved_authentication_options";
 static const char* AUTHENTICATION_OPTION_CBS_REQUEST_TIMEOUT_SECS = "cbs_request_timeout_secs";
+#pragma GCC diagnostic pop
 
 #ifdef __cplusplus
 extern "C"

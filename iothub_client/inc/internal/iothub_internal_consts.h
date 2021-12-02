@@ -9,6 +9,9 @@ extern "C"
 {
 #endif
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
     static const char* IOTHUB_API_VERSION = "2020-09-30";
     static const char* SECURITY_INTERFACE_INTERNAL_ID = "iothub-interface-internal-id";
     static const char* SECURITY_INTERFACE_INTERNAL_ID_VALUE = "security*azureiot*com^SecurityAgent^1*0*0";
@@ -17,6 +20,7 @@ extern "C"
     static const char* SECURITY_INTERFACE_ID_VALUE = "urn:azureiot:Security:SecurityAgent:1";
     static const char* SECURITY_MESSAGE_SCHEMA = "iothub-message-schema";
     static const char* SECURITY_MESSAGE_SCHEMA_VALUE = "sevent";
+#pragma GCC diagnostic pop
 
 #ifdef __cplusplus
 }

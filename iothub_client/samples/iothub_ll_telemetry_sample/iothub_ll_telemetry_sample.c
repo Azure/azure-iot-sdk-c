@@ -1,3 +1,29 @@
+#include <stdio.h>
+
+// #error hi
+int test_function(void * ctx)
+{
+    int result;
+
+    if (ctx == NULL)
+    {
+        result = 1;
+    }
+    else { result = 2; }
+
+    return result;
+}
+
+
+int main(int c, char **argv) {
+    int i = 0;
+    printf("Hello, world!\n");
+    return i;
+    //;return test_function((void*)0x1234);
+}
+
+#if 0
+
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
@@ -84,6 +110,7 @@ int main(void)
     IOTHUB_MESSAGE_HANDLE message_handle;
     size_t messages_sent = 0;
     const char* telemetry_msg = "test_message";
+    int retVal;
 
     // Select the Protocol to use with the connection
 #ifdef SAMPLE_MQTT
@@ -191,5 +218,7 @@ int main(void)
     printf("Press any key to continue");
     (void)getchar();
 
-    return 0;
+    return retVal;
 }
+
+#endif

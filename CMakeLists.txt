@@ -8,6 +8,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/configs/azure_iot_sdksFunctions.cmake")
 
 getIoTSDKVersion()
 message(STATUS "IoT Client SDK Version = ${IOT_SDK_VERSION}")
+message(STATUS "Coming into C SDK file CMAKE_C_FLAGS = ${CMAKE_C_FLAGS}")
 
 if (POLICY CMP0042)
     cmake_policy(SET CMP0042 NEW)
@@ -292,7 +293,9 @@ endif()
 include_directories(${MACRO_UTILS_INC_FOLDER})
 include_directories(${UMOCK_C_INC_FOLDER})
 
+message(STATUS "Prior to dependencies.cmake invocation CMAKE_C_FLAGS= ${CMAKE_C_FLAGS}")
 include("dependencies.cmake")
+message(STATUS "After dependencies.cmake invocation CMAKE_C_FLAGS = ${CMAKE_C_FLAGS}")
 if (${original_run_e2e_tests} OR ${original_run_unittests} OR ${run_sfc_tests})
     # Used for serializer
     add_subdirectory("${SHARED_UTIL_FOLDER}/testtools/sal")
@@ -409,6 +412,9 @@ if (${run_e2e_tests} OR ${run_longhaul_tests} OR ${run_sfc_tests} OR ${run_unitt
     add_subdirectory(testtools)
 endif()
 
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wno-unused-variable -Wno-unused-function")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+
 add_subdirectory(iothub_client)
 add_subdirectory(serializer)
 
@@ -455,3 +461,4 @@ if (${use_installed_dependencies})
     )
 endif()
 
+message(STATUS "End of file CMAKE_C_FLAGS = ${CMAKE_C_FLAGS}")
