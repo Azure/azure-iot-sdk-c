@@ -3,8 +3,8 @@
 
 // This sample demonstrates how a downstream device connects to an Edge device. For more details
 // pertaining to this scenario please see:
-// https://docs.microsoft.com/en-us/azure/iot-edge/how-to-create-transparent-gateway-linux OR
-// https://docs.microsoft.com/en-us/azure/iot-edge/how-to-create-transparent-gateway-windows
+// https://docs.microsoft.com/azure/iot-edge/how-to-create-transparent-gateway-linux OR
+// https://docs.microsoft.com/azure/iot-edge/how-to-create-transparent-gateway-windows
 //
 // CAVEAT: This sample is to demonstrate azure IoT client concepts only and is not a guide design principles or style
 // Checking of return codes and error values shall be omitted for brevity. Please practice sound engineering practices

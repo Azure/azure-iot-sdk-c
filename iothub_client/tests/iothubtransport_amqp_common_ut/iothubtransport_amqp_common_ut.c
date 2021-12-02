@@ -101,19 +101,70 @@ extern "C"
 #include "azure_c_shared_utility/optionhandler.h"
 #include "azure_c_shared_utility/socketio.h"
 
-#include "azure_uamqp_c/cbs.h"
-#include "azure_uamqp_c/amqpvalue.h"
-
 #include "iothub_client_core_ll.h"
 #include "iothub_client_options.h"
 #include "internal/iothub_client_private.h"
 #include "iothub_client_version.h"
 #include "internal/iothub_client_retry_control.h"
+
+#undef ENABLE_MOCK_FILTERING_SWITCH
+#define ENABLE_MOCK_FILTERING
+
+#define please_mock_amqp_connection_create MOCK_ENABLED
+#define please_mock_amqp_connection_destroy MOCK_ENABLED
+#define please_mock_amqp_connection_do_work MOCK_ENABLED
+#define please_mock_amqp_connection_get_cbs_handle MOCK_ENABLED
+#define please_mock_amqp_connection_get_session_handle MOCK_ENABLED
+#define please_mock_amqp_connection_set_logging MOCK_ENABLED
+#define please_mock_amqp_device_clone_message_disposition_info MOCK_ENABLED
+#define please_mock_amqp_device_create MOCK_ENABLED
+#define please_mock_amqp_device_delayed_stop MOCK_ENABLED
+#define please_mock_amqp_device_destroy MOCK_ENABLED
+#define please_mock_amqp_device_destroy_message_disposition_info MOCK_ENABLED
+#define please_mock_amqp_device_do_work MOCK_ENABLED
+#define please_mock_amqp_device_get_send_status MOCK_ENABLED
+#define please_mock_amqp_device_get_twin_async MOCK_ENABLED
+#define please_mock_amqp_device_send_event_async MOCK_ENABLED
+#define please_mock_amqp_device_send_message_disposition MOCK_ENABLED
+#define please_mock_amqp_device_send_twin_update_async MOCK_ENABLED
+#define please_mock_amqp_device_set_option MOCK_ENABLED
+#define please_mock_amqp_device_start_async MOCK_ENABLED
+#define please_mock_amqp_device_stop MOCK_ENABLED
+#define please_mock_amqp_device_subscribe_for_twin_updates MOCK_ENABLED
+#define please_mock_amqp_device_subscribe_message MOCK_ENABLED
+#define please_mock_amqp_device_unsubscribe_for_twin_updates MOCK_ENABLED
+#define please_mock_amqp_device_unsubscribe_message MOCK_ENABLED
+#define please_mock_amqpvalue_create_map MOCK_ENABLED
+#define please_mock_amqpvalue_create_string MOCK_ENABLED
+#define please_mock_amqpvalue_create_symbol MOCK_ENABLED
+#define please_mock_cbs_create MOCK_ENABLED
+#define please_mock_connection_create2 MOCK_ENABLED
+#define please_mock_iothubtransportamqp_methods_create MOCK_ENABLED
+#define please_mock_iothubtransportamqp_methods_destroy MOCK_ENABLED
+#define please_mock_iothubtransportamqp_methods_respond MOCK_ENABLED
+#define please_mock_iothubtransportamqp_methods_subscribe MOCK_ENABLED
+#define please_mock_iothubtransportamqp_methods_unsubscribe MOCK_ENABLED
+#define please_mock_mqp_connection_do_work MOCK_ENABLED
+#define please_mock_mqp_connection_get_session_handle MOCK_ENABLED
+#define please_mock_mqp_device_destroy MOCK_ENABLED
+#define please_mock_mqp_device_get_send_status MOCK_ENABLED
+#define please_mock_mqp_device_send_event_async MOCK_ENABLED
+#define please_mock_mqp_device_set_option MOCK_ENABLED
+#define please_mock_mqp_device_stop MOCK_ENABLED
+#define please_mock_mqp_device_unsubscribe_message MOCK_ENABLED
+#define please_mock_othubtransportamqp_methods_respond MOCK_ENABLED
+#define please_mock_session_create MOCK_ENABLED
+
+#include "azure_uamqp_c/cbs.h"
+#include "azure_uamqp_c/amqpvalue.h"
 #include "internal/iothubtransportamqp_methods.h"
 #include "internal/iothubtransport_amqp_connection.h"
 #include "internal/iothubtransport_amqp_device.h"
-#include "internal/iothub_message_private.h"
 
+#undef ENABLE_MOCK_FILTERING_SWITCH
+#undef ENABLE_MOCK_FILTERING
+
+#include "internal/iothub_message_private.h"
 #include "internal/iothub_transport_ll_private.h"
 
 MOCKABLE_FUNCTION(, bool, Transport_MessageCallbackFromInput, IOTHUB_MESSAGE_HANDLE, message, void*, ctx);

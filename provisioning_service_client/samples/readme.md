@@ -22,5 +22,5 @@ In order to run the samples, you will first need to do the following:
 * [Query](prov_sc_query_sample) - Run a query operation on the Provisioning Service
 
 [setup-iot-hub]: https://aka.ms/howtocreateazureiothub
-[setup-provisioning-service]: https://docs.microsoft.com/en-us/azure/iot-dps/quick-setup-auto-provision
+[setup-provisioning-service]: https://docs.microsoft.com/azure/iot-dps/quick-setup-auto-provision
 [devbox-setup]: ../../doc/devbox_setup.md

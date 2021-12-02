@@ -5,8 +5,8 @@
 The following instructions explain how to do a firmware update on a Raspberry Pi 3 running Raspbian using Azure IoT Hub.
 The sample is a simple C application that will run on a Raspberry Pi, establish connection with Azure IoT Hub and wait for a "firmware update" call from Azure IoT Hub.
 Before jumping in, it is recommended to read through the following documentation in order to understand the way device management is done using Azure IoT Hub:
--   [Overview of Azure IoT Hub Device Management](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-device-management-overview/)
--   [Device Management tutorials](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-device-management-get-started/)
+-   [Overview of Azure IoT Hub Device Management](https://azure.microsoft.com/documentation/articles/iot-hub-device-management-overview/)
+-   [Device Management tutorials](https://azure.microsoft.com/documentation/articles/iot-hub-device-management-get-started/)
 
 ## Prerequisites
 You should have the following items ready before beginning the process:
@@ -15,7 +15,7 @@ You should have the following items ready before beginning the process:
 -   If running MacOS or Linux, you are set.
 -   If running Windows 10:
     -   64-bit version of Windows 10 Anniversary update build 14393 or later
-    -   Follow the instructions [here](https://msdn.microsoft.com/en-us/commandline/wsl/install_guide) to install the Windows Subsystem for Linux. 
+    -   Follow the instructions [here](https://msdn.microsoft.com/commandline/wsl/install_guide) to install the Windows Subsystem for Linux. 
 -   If running previous versions of Windows:
 	-   [CygWin for Windows](https://www.cygwin.com/install.html), in order to run the few UNIX commands the following tutorial uses.
 -   Required hardware:
@@ -30,13 +30,13 @@ You should have the following items ready before beginning the process:
 
 ## Setup your IoT Hub and provision a device
 In order to run this sample, you will need to have a Device Management enabled IoT Hub instance.
-Follow the [getting started with device management instructions](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-device-management-get-started#create-a-device-management-enabled-iot-hub) to create the IoT Hub and a device identity.
+Follow the [getting started with device management instructions](https://azure.microsoft.com/documentation/articles/iot-hub-device-management-get-started#create-a-device-management-enabled-iot-hub) to create the IoT Hub and a device identity.
 Make a copy of the device's connection string.
 
 ## The device application sample
 In order to simplify the experience with the Raspberry Pi, we have created a simple application that acts as an agent.
 The application needs to be installed on the current running image on the Raspberry Pi.
-Once installed and started, the application establishes connection with Azure IoT Hub, reports on the current firmware version using the [Device Twins](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-node-node-twin-getstarted/) feature (you can learn more on how to [use device twins to configure devices here](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-node-node-twin-how-to-configure/)), and awaits for a "Firmware Update" command from the Cloud (through the [Device Method](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-c2d-methods/) feature).
+Once installed and started, the application establishes connection with Azure IoT Hub, reports on the current firmware version using the [Device Twins](https://azure.microsoft.com/documentation/articles/iot-hub-node-node-twin-getstarted/) feature (you can learn more on how to [use device twins to configure devices here](https://azure.microsoft.com/documentation/articles/iot-hub-node-node-twin-how-to-configure/)), and awaits for a "Firmware Update" command from the Cloud (through the [Device Method](https://azure.microsoft.com/documentation/articles/iot-hub-c2d-methods/) feature).
 The instructions below show how to trigger the firmware update after preparing a new firmware image.
 Once triggered, the application will download the new firmware image package, install it then reboot the device.
 The new firmware image contains the application already, which is setup to run as a service at boottime, reporting on the new firmware image version through Device Twins.
@@ -105,7 +105,7 @@ Assuming you have an older version of Raspbian running on your Raspberry Pi, fol
 	sudo systemctl start iothub_client_sample_firmware_update
 	```
 
--   When running, the application will update the reported state of its Device Twin to Azure IoT Hub. You can verify that youre device is correctly connected by checking the reported properties of the device. You can learn more [here](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-node-node-twin-getstarted/) on how to work with Device Twins.
+-   When running, the application will update the reported state of its Device Twin to Azure IoT Hub. You can verify that youre device is correctly connected by checking the reported properties of the device. You can learn more [here](https://azure.microsoft.com/documentation/articles/iot-hub-node-node-twin-getstarted/) on how to work with Device Twins.
 
 ### Save the application and its settings for next step
 For preparing the new firmware image, we will need to get a copy of the sample application as deployed and configured in the "old" firmware.

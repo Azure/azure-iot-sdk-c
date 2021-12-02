@@ -7,8 +7,7 @@ project(azure_iot_sdks)
 include("${CMAKE_CURRENT_LIST_DIR}/configs/azure_iot_sdksFunctions.cmake")
 
 getIoTSDKVersion()
-message(STATUS "IoT Client SDK Version = ${IOT_SDK_VERSION}")
-message(STATUS "Coming into C SDK file CMAKE_C_FLAGS = ${CMAKE_C_FLAGS}")
+message("IoT Client SDK Version = ${IOT_SDK_VERSION}")
 
 if (POLICY CMP0042)
     cmake_policy(SET CMP0042 NEW)
@@ -199,7 +198,10 @@ if(NOT ${use_installed_dependencies})
       set_source_files_properties(${CMAKE_CURRENT_LIST_DIR}/deps/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
   endif()
 
-  target_include_directories(parson PUBLIC $<INSTALL_INTERFACE:include>)
+  target_include_directories(parson PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/deps/parson>
+      $<INSTALL_INTERFACE:include>
+  )
   set_target_properties(parson PROPERTIES PUBLIC_HEADER ${CMAKE_CURRENT_LIST_DIR}/deps/parson/parson.h)
 
   install(
@@ -293,9 +295,7 @@ endif()
 include_directories(${MACRO_UTILS_INC_FOLDER})
 include_directories(${UMOCK_C_INC_FOLDER})
 
-message(STATUS "Prior to dependencies.cmake invocation CMAKE_C_FLAGS= ${CMAKE_C_FLAGS}")
 include("dependencies.cmake")
-message(STATUS "After dependencies.cmake invocation CMAKE_C_FLAGS = ${CMAKE_C_FLAGS}")
 if (${original_run_e2e_tests} OR ${original_run_unittests} OR ${run_sfc_tests})
     # Used for serializer
     add_subdirectory("${SHARED_UTIL_FOLDER}/testtools/sal")
@@ -346,7 +346,7 @@ if (NOT DEFINED ARCHITECTURE OR ARCHITECTURE STREQUAL "")
     set(ARCHITECTURE "GENERIC")
 endif()
 
-message(STATUS "iothub architecture: ${ARCHITECTURE}")
+message("iothub architecture: ${ARCHITECTURE}")
 
 macro(compileAsC99)
     if (CMAKE_VERSION VERSION_LESS "3.1")
@@ -464,5 +464,3 @@ if (${use_installed_dependencies})
             ${package_location}
     )
 endif()
-
-message(STATUS "End of file CMAKE_C_FLAGS = ${CMAKE_C_FLAGS}")

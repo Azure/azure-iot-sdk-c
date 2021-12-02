@@ -26,19 +26,19 @@ This is a brief note to clarify how authentication is done in the IoTHub Device/
 
 Authentication of a client in the SDK can be done using either
 
-- [SAS tokens](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security#security-tokens), or 
+- [SAS tokens](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-security#security-tokens), or 
 
-- [x509 certificates](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security#supported-x509-certificates), or
+- [x509 certificates](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-security#supported-x509-certificates), or
 
-- [Device Provisioning Service](https://docs.microsoft.com/en-us/azure/iot-dps/).
+- [Device Provisioning Service](https://docs.microsoft.com/azure/iot-dps/).
 
 This section does not describe the details of Device Provisioning Service (DPS), please use the link above for details.
 
 When using SAS tokens, authentication can be done by:
 
-- Providing [your own SAS token](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security#authentication), or
+- Providing [your own SAS token](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-security#authentication), or
 
-- Giving the device keys to the SDK (using the device connection string - see ["Alternate Device Credentials"](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-device-sdk-c-iothubclient#alternate-device-credentials) in our documentation) and letting it create the SAS tokens for you (this is the most usual authentication method).
+- Giving the device keys to the SDK (using the device connection string - see ["Alternate Device Credentials"](https://docs.microsoft.com/azure/iot-hub/iot-hub-device-sdk-c-iothubclient#alternate-device-credentials) in our documentation) and letting it create the SAS tokens for you (this is the most usual authentication method).
 
 As mentioned in the articles above, SAS tokens have an expiration time.
 
@@ -62,9 +62,9 @@ The design of the Azure IoT C SDK is composed of layers, each of them assigned s
 
 | **Layer**                 | **C module**                                                                                                        | **Purpose**                                                                                                                                                                                                                                                                                              |
 |---------------------------|---------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Azure IoT C SDK           | [iothub\_client](https://github.com/Azure/azure-iot-sdk-c/blob/master/iothub_client/inc/iothub_client.h)            | Multi-threaded layer over iothub\_ll\_client (automatically performs invocation of the IoTHubClient\_LL\_DoWork function and internal callback handling)                                                                                                                                                 |
-| Azure IoT C Low Level SDK | [iothub\_client\_ll](https://github.com/Azure/azure-iot-sdk-c/blob/master/iothub_client/inc/iothub_client_ll.h)     | Main surface of the Azure IoT device client API (single-threaded)                                                                                                                                                                                                                                        |
-| Protocol Transport        | [iothubtransport\*](https://github.com/Azure/azure-iot-sdk-c/tree/master/iothub_client/inc)                         | Provides an interface between the specific protocol API (e.g., [uamqp](https://github.com/Azure/azure-uamqp-c), [umqtt](https://github.com/Azure/azure-umqtt-c)) and the upper client SDK. It is responsible for part of the business logic, the message queuing and timeout control, options handling. |
+| Azure IoT C SDK           | [iothub\_client](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothub_client.h)            | Multi-threaded layer over iothub\_ll\_client (automatically performs invocation of the IoTHubClient\_LL\_DoWork function and internal callback handling)                                                                                                                                                 |
+| Azure IoT C Low Level SDK | [iothub\_client\_ll](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothub_client_ll.h)     | Main surface of the Azure IoT device client API (single-threaded)                                                                                                                                                                                                                                        |
+| Protocol Transport        | [iothubtransport\*](https://github.com/Azure/azure-iot-sdk-c/tree/main/iothub_client/inc)                         | Provides an interface between the specific protocol API (e.g., [uamqp](https://github.com/Azure/azure-uamqp-c), [umqtt](https://github.com/Azure/azure-umqtt-c)) and the upper client SDK. It is responsible for part of the business logic, the message queuing and timeout control, options handling. |
 | Protocol API              | [uamqp](https://github.com/Azure/azure-uamqp-c), [umqtt](https://github.com/Azure/azure-umqtt-c) or native HTTP API | Implements the specific application protocol (either AMQP, MQTT or HTTP, respectivelly)                                                                                                                                                                                                                  |
 | TLS                       | [tlsio\_\*](https://github.com/Azure/azure-c-shared-utility/tree/master/adapters)                                   | Provides a wrapper over the specific TLS API (Schannel, openssl, wolfssl, mbedtls), using the [xio](https://github.com/Azure/azure-c-shared-utility/blob/master/inc/azure_c_shared_utility/xio.h) interface that the device client SDK uses                                                              |
 | Socket                    | [socketio\_\*](https://github.com/Azure/azure-c-shared-utility/tree/master/adapters)                                | Provides a wrapper over the specific socket API ([win32, berkeley, mbed](https://github.com/Azure/azure-c-shared-utility/tree/master/adapters)), using the [xio](https://github.com/Azure/azure-c-shared-utility/blob/master/inc/azure_c_shared_utility/xio.h) interface that the device client SDK uses |
@@ -105,7 +105,7 @@ Each of these layers provide status and error events to the above through functi
 
   - Telemetry messages to complete sending;
 
-  - [CBS authentication token](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security#security-tokens) refresh to be completed.
+  - [CBS authentication token](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-security#security-tokens) refresh to be completed.
 
 1. Through failures reported by the socket APIs;
 

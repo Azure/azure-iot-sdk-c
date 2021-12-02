@@ -22,6 +22,9 @@ fi
 # Only for testing E2E behaviour !!! 
 TEST_CORES=16
 
+# Refresh dynamic libs to link to
+sudo ldconfig
+
 if [[ "$RUN_VALGRIND" == "run_valgrind" ]] ;
 then
   #use doctored openssl

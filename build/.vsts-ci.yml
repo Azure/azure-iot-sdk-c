@@ -22,7 +22,7 @@ jobs:
     displayName: 'Setup'
   - script: |
       npm install check_submodules
-      ./../../node_modules/.bin/check_submodules . master
+      ./../../node_modules/.bin/check_submodules . main
     displayName: 'Check Submodules Match'
 - job: windowsx86
   pool:
@@ -137,7 +137,7 @@ jobs:
     condition: always()
 - job: linuxoptions
   variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/vsts-linux-c-ubuntu"
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-2004"
   pool: 
     name: 'sdk-c--ubuntu-18'
   displayName: 'Linux with Options'
@@ -150,7 +150,7 @@ jobs:
     condition: always()
 - job: clang
   variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/ubuntu-clang"
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-clang"
   pool: 
     name: 'sdk-c--ubuntu-18'
   displayName: 'Clang'
@@ -288,7 +288,7 @@ jobs:
     condition: always()
 - job: linux_installed_deps
   variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu"
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-2004"
   pool: 
     name: 'sdk-c--ubuntu-18'
   displayName: 'Linux with Installed Deps'
@@ -320,7 +320,7 @@ jobs:
     condition: always()
 - job: wolfssl
   variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/wolfssl-1804"
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-wolfssl"
   pool:
     name: 'sdk-c--ubuntu-18'
   displayName: 'WolfSSL'
@@ -355,7 +355,7 @@ jobs:
     condition: always()
 - job: bearssl
   variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/devops-c-bearssl"
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-bearssl"
   pool:
     name: 'sdk-c--ubuntu-18'
   displayName: 'BearSSL'
@@ -388,9 +388,44 @@ jobs:
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'Cleanup'
     condition: always()
+- job: mbedtls
+  variables:
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-mbed"
+  pool:
+    name: 'sdk-c--ubuntu-18'
+  displayName: 'mbedTLS'
+  steps:
+  - script: |
+      LD_LIBRARY_PATH=/usr/local/lib
+      LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/my_library/
+      sudo -E bash jenkins/linux_mbedtls.sh
+    displayName: 'Build'
+  - script: |
+      cd cmake && sudo -E ../build_all/linux/run_tests.sh
+    env:
+      IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
+      IOTHUB_EVENTHUB_CONNECTION_STRING: $(IOTHUB-EVENTHUB-CONNECTION-STRING)
+      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+      IOTHUB_POLICY_KEY: $(IOTHUB-POLICY-KEY)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOT_DPS_CONNECTION_STRING: $(IOT-DPS-CONNECTION-STRING)
+      IOT_DPS_ID_SCOPE: $(IOT-DPS-ID-SCOPE)
+      IOTHUB_CA_ROOT_CERT: $(IOTHUB-CA-ROOT-CERT)
+      IOTHUB_CA_ROOT_CERT_KEY: $(IOTHUB-CA-ROOT-CERT-KEY)
+      IOT_DPS_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+      IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
+      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+      PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+    displayName: "Run Tests"
+  - script: sudo rm -rf $(Agent.BuildDirectory)/*
+    displayName: 'Cleanup'
+    condition: always()
 - job: cares
   variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/c-ares"
+    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-c-ares"
   pool: 
     name: 'sdk-c--ubuntu-18'
   displayName: 'Linux with C-Ares'

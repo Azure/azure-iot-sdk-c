@@ -100,7 +100,7 @@ In addition to the simple samples found in the current repository, you can find 
 
 
 [iot-dev-center]: http://azure.com/iotdev
-[iot-hub-documentation]: https://docs.microsoft.com/en-us/azure/iot-hub/
+[iot-hub-documentation]: https://docs.microsoft.com/azure/iot-hub/
 [device-catalog]: https://catalog.azureiotsuite.com
 [devbox-setup]: ../doc/devbox_setup.md
 [setup-iothub]: https://aka.ms/howtocreateazureiothub
