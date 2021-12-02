@@ -325,6 +325,7 @@ static int _parse_json_twin_int(const char* twin_payload,
                                 const char* full_property_name,
                                 bool allow_for_zero)
 {
+
     JSON_Value* root_value = json_parse_string(twin_payload);
     ASSERT_IS_NOT_NULL(root_value);
     JSON_Object* root_object = json_value_get_object(root_value);
@@ -1007,6 +1008,7 @@ void dt_e2e_send_reported_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRANSPORT_P
 
     _send_reported_state(_reported_state_callback, buffer, reported_twin_data);
     _receive_reported_state_loop(reported_twin_data);
+    _reported_twin_data_reset(reported_twin_data);
 
     // Check results.
     if (Lock(reported_twin_data->lock) != LOCK_OK)
@@ -1042,8 +1044,6 @@ void dt_e2e_send_reported_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRANSPORT_P
     Map_Destroy(propMap);
 
     // Send a new reported payload. Register callback. Recieve reported state message.
-    _reported_twin_data_reset(reported_twin_data);
-
     buffer = _malloc_and_fill_reported_payload(reported_twin_data->string_property,
                                                      reported_twin_data->integer_property);
     ASSERT_IS_NOT_NULL(buffer, "failed to allocate and prepare the payload for SendReportedState");
@@ -1136,6 +1136,7 @@ void dt_e2e_get_complete_desired_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRAN
 
     _service_client_update_twin(serviceclient_devicetwin_handle, device_to_use, buffer);
     _receive_twin_loop(received_twin_data, DEVICE_TWIN_UPDATE_PARTIAL);
+    _received_twin_data_reset(received_twin_data);
 
     // Send the Event from the device client
     MAP_HANDLE propMap = Map_Create(NULL);
@@ -1156,12 +1157,12 @@ void dt_e2e_get_complete_desired_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRAN
     (void)printf("Send fault control message...\r\n");
     _client_create_with_properties_and_send_d2c(device_to_use, propMap);
     Map_Destroy(propMap);
-
-    // Update service client twin again.
+    _receive_twin_loop(received_twin_data, DEVICE_TWIN_UPDATE_COMPLETE);
     _received_twin_data_reset(received_twin_data);
 
+    // Update service client twin again.
     _service_client_update_twin(serviceclient_devicetwin_handle, device_to_use, buffer);
-    _receive_twin_loop(received_twin_data, DEVICE_TWIN_UPDATE_COMPLETE);
+    _receive_twin_loop(received_twin_data, DEVICE_TWIN_UPDATE_PARTIAL);
 
     // Check results.
     if (Lock(received_twin_data->lock) != LOCK_OK)
@@ -1172,14 +1173,14 @@ void dt_e2e_get_complete_desired_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRAN
     {
         bool allow_for_zero = true;
         int integer_property = _parse_json_twin_int((char*)received_twin_data->cb_payload,
-                                                    "desired.integer_property", allow_for_zero);
+                                                    "integer_property", allow_for_zero);
         char* string_property = _parse_json_twin_char((char*)received_twin_data->cb_payload,
-                                                      "desired.string_property");
+                                                      "string_property");
         int integer_property_from_array = _parse_json_twin_int_from_array((char*)received_twin_data->cb_payload,
-                                                                          "desired.array", 0,
+                                                                          "array", 0,
                                                                           allow_for_zero);
         char* string_property_from_array = _parse_json_twin_char_from_array((char*)received_twin_data->cb_payload,
-                                                                            "desired.array", 1);
+                                                                            "array", 1);
 
         ASSERT_ARE_EQUAL(char_ptr, expected_desired_string, string_property,
                          "string data retrieved differs from expected");
