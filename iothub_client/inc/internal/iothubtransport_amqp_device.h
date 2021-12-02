@@ -17,8 +17,10 @@ extern "C"
 {
 #endif
 
+#ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
+#endif
 
 // @brief    name of option to apply the instance obtained using amqp_device_retrieve_options
 static const char* DEVICE_OPTION_SAVED_OPTIONS = "saved_device_options";
@@ -27,7 +29,9 @@ static const char* DEVICE_OPTION_CBS_REQUEST_TIMEOUT_SECS = "cbs_request_timeout
 static const char* DEVICE_OPTION_SAS_TOKEN_REFRESH_TIME_SECS = "sas_token_refresh_time_secs";
 static const char* DEVICE_OPTION_SAS_TOKEN_LIFETIME_SECS = "sas_token_lifetime_secs";
 
+#ifdef __GNUC__
 #pragma GCC diagnostic pop
+#endif
 
 #define DEVICE_STATE_VALUES \
     DEVICE_STATE_STOPPED, \

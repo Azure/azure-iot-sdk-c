@@ -18,12 +18,17 @@ extern "C"
 {
 #endif
 
+#ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
+#endif
+
 static const char* TELEMETRY_MESSENGER_OPTION_EVENT_SEND_TIMEOUT_SECS = "telemetry_event_send_timeout_secs";
 static const char* TELEMETRY_MESSENGER_OPTION_SAVED_OPTIONS = "saved_telemetry_messenger_options";
 
+#ifdef __GNUC__
 #pragma GCC diagnostic pop
+#endif
 
 typedef struct TELEMETRY_MESSENGER_INSTANCE* TELEMETRY_MESSENGER_HANDLE;
 

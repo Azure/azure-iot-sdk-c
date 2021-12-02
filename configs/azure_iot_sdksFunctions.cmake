@@ -124,9 +124,11 @@ endfunction()
 # XCode warns about unused variables and unused static functions,
 # both of which are produced by serializer
 function(usePermissiveRulesForSdkSamplesAndTests)
-    message(STATUS "using permisiive rules...")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable -Wno-missing-braces -Wno-unused-function -Wno-overloaded-virtual" PARENT_SCOPE)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-variable -Wno-missing-braces -Wno-unused-function" PARENT_SCOPE)
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
+        message(STATUS "using permisiive rules...")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable -Wno-missing-braces -Wno-unused-function -Wno-overloaded-virtual" PARENT_SCOPE)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-variable -Wno-missing-braces -Wno-unused-function" PARENT_SCOPE)
+    endif()
 endfunction()
 
 function(add_longhaul_test_directory test_directory)

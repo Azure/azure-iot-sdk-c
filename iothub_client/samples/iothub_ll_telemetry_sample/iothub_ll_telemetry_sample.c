@@ -1,29 +1,3 @@
-#include <stdio.h>
-
-// #error hi
-int test_function(void * ctx)
-{
-    int result;
-
-    if (ctx == NULL)
-    {
-        result = 1;
-    }
-    else { result = 2; }
-
-    return result;
-}
-
-
-int main(int c, char **argv) {
-    int i = 0;
-    printf("Hello, world!\n");
-    return i;
-    //;return test_function((void*)0x1234);
-}
-
-#if 0
-
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
@@ -220,5 +194,3 @@ int main(void)
 
     return retVal;
 }
-
-#endif

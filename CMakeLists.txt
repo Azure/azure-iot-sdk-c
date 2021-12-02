@@ -412,8 +412,12 @@ if (${run_e2e_tests} OR ${run_longhaul_tests} OR ${run_sfc_tests} OR ${run_unitt
     add_subdirectory(testtools)
 endif()
 
-#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wno-unused-variable -Wno-unused-function")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+if (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
+   # Enable all warnings for gcc/clang.  We do this here because it must
+   # happen after we've add_subdirectory() of our submodules, which are not 
+   # guaranteed to be -Wall compliant.
+   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+endif()
 
 add_subdirectory(iothub_client)
 add_subdirectory(serializer)

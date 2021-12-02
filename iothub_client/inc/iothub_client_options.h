@@ -18,8 +18,10 @@ extern "C"
         const char* password;
     } IOTHUB_PROXY_OPTIONS;
 
+#ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
+#endif
 
     static STATIC_VAR_UNUSED const char* OPTION_RETRY_INTERVAL_SEC = "retry_interval_sec";
     static STATIC_VAR_UNUSED const char* OPTION_RETRY_MAX_DELAY_SECS = "retry_max_delay_secs";
@@ -98,7 +100,10 @@ extern "C"
     static STATIC_VAR_UNUSED const char* OPTION_DIAGNOSTIC_SAMPLING_PERCENTAGE = "diag_sampling_percentage";
 
     static STATIC_VAR_UNUSED const char* OPTION_DO_WORK_FREQUENCY_IN_MS = "do_work_freq_ms";
+
+#ifdef __GNUC__
 #pragma GCC diagnostic pop
+#endif
 
 // Minimum percentage (in the 0 to 1 range) of multiplexed registered devices that must be failing for a transport-wide reconnection to be triggered.
 // A value of zero results in a single registered device to be able to cause a general transport reconnection 
