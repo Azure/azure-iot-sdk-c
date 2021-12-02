@@ -84,7 +84,6 @@ int main(void)
     IOTHUB_MESSAGE_HANDLE message_handle;
     size_t messages_sent = 0;
     const char* telemetry_msg = "test_message";
-    int retVal;
 
     // Select the Protocol to use with the connection
 #ifdef SAMPLE_MQTT
@@ -192,5 +191,5 @@ int main(void)
     printf("Press any key to continue");
     (void)getchar();
 
-    return retVal;
+    return 0;
 }
