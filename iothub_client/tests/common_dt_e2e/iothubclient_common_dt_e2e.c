@@ -1073,6 +1073,8 @@ void dt_e2e_get_complete_desired_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRAN
     _receive_twin_loop(received_twin_data, DEVICE_TWIN_UPDATE_COMPLETE);
     _received_twin_data_reset(received_twin_data);
 
+    ThreadAPI_Sleep(5000);
+
     // Connect service client to IoT Hub to update twin.
     const char* connection_string = IoTHubAccount_GetIoTHubConnString(iothub_accountinfo_handle);
     IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iothub_serviceclient_handle = IoTHubServiceClientAuth_CreateFromConnectionString(connection_string);
