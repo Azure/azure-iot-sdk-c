@@ -547,90 +547,6 @@ static void _twin_callback(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned
     }
 }
 
-static void _receive_twin_loop(RECEIVED_TWIN_DATA* received_twin_data, DEVICE_TWIN_UPDATE_STATE expected_update_state)
-{
-    time_t begin_operation = time(NULL);
-    time_t now_time;
-
-    LogInfo("_receive_twin_loop(): Entering loop.\n");
-
-    while (now_time = time(NULL), difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME)
-    {
-        if (Lock(received_twin_data->lock) != LOCK_OK)
-        {
-            ASSERT_FAIL("Lock failed");
-        }
-        else
-        {
-            if ((received_twin_data->received_callback) &&
-                (received_twin_data->cb_payload != NULL) &&
-                (received_twin_data->update_state_set == true))
-            {
-                ASSERT_ARE_EQUAL(DEVICE_TWIN_UPDATE_STATE, expected_update_state,
-                                 received_twin_data->update_state);
-
-                Unlock(received_twin_data->lock);
-                break;
-            }
-            Unlock(received_twin_data->lock);
-        }
-        ThreadAPI_Sleep(1000);
-    }
-
-    ASSERT_IS_TRUE(difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME,
-                   "Timeout waiting for twin message.");
-
-    LogInfo("_receive_twin_loop(): Exiting loop.\n");
-}
-
-static void _service_client_update_receive_twin_loop(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceclient_devicetwin_handle,
-                                                     IOTHUB_PROVISIONED_DEVICE* device_to_use,
-                                                     char* service_client_update_buffer,
-                                                     RECEIVED_TWIN_DATA* received_twin_data,
-                                                     DEVICE_TWIN_UPDATE_STATE expected_update_state)
-{
-    time_t begin_operation = time(NULL);
-    time_t now_time;
-
-    LogInfo("_service_client_update_receive_twin_loop(): Entering loop.\n");
-
-    while (now_time = time(NULL), difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME)
-    {
-        // If service client sends update before twin PATCH subscription, retry until callback or
-        // timeout occurs.
-        _service_client_update_twin(serviceclient_devicetwin_handle, device_to_use,
-                                    service_client_update_buffer);
-
-        ThreadAPI_Sleep(5000);
-
-        // Receive IoT Hub response.
-        if (Lock(received_twin_data->lock) != LOCK_OK)
-        {
-            ASSERT_FAIL("Lock failed");
-        }
-        else
-        {
-            if ((received_twin_data->received_callback) &&
-                (received_twin_data->cb_payload != NULL) &&
-                (received_twin_data->update_state_set == true))
-            {
-                ASSERT_ARE_EQUAL(DEVICE_TWIN_UPDATE_STATE, expected_update_state,
-                                 received_twin_data->update_state);
-
-                Unlock(received_twin_data->lock);
-                break;
-            }
-            Unlock(received_twin_data->lock);
-        }
-        ThreadAPI_Sleep(1000);
-    }
-
-    ASSERT_IS_TRUE(difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME,
-                   "Timeout waiting for twin message.");
-
-    LogInfo("_service_client_update_receive_twin_loop(): Exiting loop.\n");
-}
-
 static void _set_twin_callback(IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK twin_callback,
                                RECEIVED_TWIN_DATA* twin_data_context)
 {
@@ -671,6 +587,90 @@ static void _get_twin_async(IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK twin_callback,
                      "IoTHub(Device|Module)Client_GetTwinAsync failed.");
 }
 
+static void _receive_twin_loop(RECEIVED_TWIN_DATA* received_twin_data, DEVICE_TWIN_UPDATE_STATE expected_update_state)
+{
+    time_t begin_operation = time(NULL);
+    time_t now_time;
+
+    LogInfo("_receive_twin_loop(): Entering loop.\n");
+
+    while (now_time = time(NULL), difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME)
+    {
+        if (Lock(received_twin_data->lock) != LOCK_OK)
+        {
+            ASSERT_FAIL("Lock failed");
+        }
+        else
+        {
+            if ((received_twin_data->received_callback) &&
+                (received_twin_data->cb_payload != NULL) &&
+                (received_twin_data->update_state_set == true))
+            {
+                ASSERT_ARE_EQUAL(DEVICE_TWIN_UPDATE_STATE, expected_update_state,
+                                 received_twin_data->update_state);
+
+                Unlock(received_twin_data->lock);
+                break;
+            }
+            Unlock(received_twin_data->lock);
+        }
+        ThreadAPI_Sleep(1000);
+    }
+
+    ASSERT_IS_TRUE(difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME,
+                   "Timeout waiting for twin message.");
+
+    LogInfo("_receive_twin_loop(): Exiting loop.\n");
+}
+/*
+static void _service_client_update_receive_twin_loop(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceclient_devicetwin_handle,
+                                                     IOTHUB_PROVISIONED_DEVICE* device_to_use,
+                                                     char* service_client_update_buffer,
+                                                     RECEIVED_TWIN_DATA* received_twin_data,
+                                                     DEVICE_TWIN_UPDATE_STATE expected_update_state)
+{
+    time_t begin_operation = time(NULL);
+    time_t now_time;
+
+    LogInfo("_service_client_update_receive_twin_loop(): Entering loop.\n");
+
+    while (now_time = time(NULL), difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME)
+    {
+        // If service client sends update before twin PATCH subscription, retry until callback or
+        // timeout occurs.
+        //_service_client_update_twin(serviceclient_devicetwin_handle, device_to_use,
+        //                            service_client_update_buffer);
+
+        //ThreadAPI_Sleep(5000);
+
+        // Receive IoT Hub response.
+        if (Lock(received_twin_data->lock) != LOCK_OK)
+        {
+            ASSERT_FAIL("Lock failed");
+        }
+        else
+        {
+            if ((received_twin_data->received_callback) &&
+                (received_twin_data->cb_payload != NULL) &&
+                (received_twin_data->update_state_set == true))
+            {
+                ASSERT_ARE_EQUAL(DEVICE_TWIN_UPDATE_STATE, expected_update_state,
+                                 received_twin_data->update_state);
+
+                Unlock(received_twin_data->lock);
+                break;
+            }
+            Unlock(received_twin_data->lock);
+        }
+        ThreadAPI_Sleep(1000);
+    }
+
+    ASSERT_IS_TRUE(difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME,
+                   "Timeout waiting for twin message.");
+
+    LogInfo("_service_client_update_receive_twin_loop(): Exiting loop.\n");
+}
+*/
 static void _reported_state_callback(int status_code, void* user_context_callback)
 {
 
@@ -713,22 +713,15 @@ static void _send_reported_state(IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reported_
                      "IoTHub(Device|Module)Client_SendReportedState failed.");
 }
 
-static void _send_receive_reported_state_loop(IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reported_state_callback,
-                                              char* buffer,
-                                              REPORTED_TWIN_DATA* reported_twin_data)
+static void _receive_reported_state_loop(REPORTED_TWIN_DATA* reported_twin_data)
 {
     time_t begin_operation = time(NULL);
     time_t now_time;
 
-    LogInfo("_send_receive_reported_state_loop(): Entering loop.\n");
+    LogInfo("_receive_reported_state_loop(): Entering loop.\n");
 
     while (now_time = time(NULL), difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME)
     {
-        // If reported state sent before connection occurs, retry until callback or timeout occurs.
-        _send_reported_state(reported_state_callback, buffer, reported_twin_data);
-
-        ThreadAPI_Sleep(5000);
-
         // Receive IoT Hub response.
         if (Lock(reported_twin_data->lock) != LOCK_OK)
         {
@@ -748,7 +741,7 @@ static void _send_receive_reported_state_loop(IOTHUB_CLIENT_REPORTED_STATE_CALLB
     ASSERT_IS_TRUE(difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME,
                    "Timeout waiting for twin message.");
 
-    LogInfo("_send_receive_reported_state_loop(): Exiting loop.\n");
+    LogInfo("_receive_reported_state_loop(): Exiting loop.\n");
 }
 
 static void _send_event_async(IOTHUB_MESSAGE_HANDLE msgHandle)
@@ -851,7 +844,8 @@ void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
                                                      reported_twin_data->integer_property);
     ASSERT_IS_NOT_NULL(buffer, "Failed to allocate and prepare the payload for SendReportedState.");
 
-    _send_receive_reported_state_loop(_reported_state_callback, buffer, reported_twin_data);
+    _send_reported_state(_reported_state_callback, buffer, reported_twin_data);
+    _receive_reported_state_loop(reported_twin_data);
 
     // Connect service client to IoT Hub to get twin.
     const char* connection_string = IoTHubAccount_GetIoTHubConnString(iothub_accountinfo_handle);
@@ -949,8 +943,8 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
                                                                    expected_desired_integer);
     ASSERT_IS_NOT_NULL(buffer, "Failed to create the payload for IoTHubDeviceTwin_UpdateTwin.");
 
-    _service_client_update_receive_twin_loop(serviceclient_devicetwin_handle, device_to_use, buffer,
-                                             received_twin_data, DEVICE_TWIN_UPDATE_PARTIAL);
+    _service_client_update_twin(serviceclient_devicetwin_handle, device_to_use, buffer);
+    _receive_twin_loop(received_twin_data, DEVICE_TWIN_UPDATE_PARTIAL);
 
     // Check results.
     if (Lock(received_twin_data->lock) != LOCK_OK)
@@ -1011,7 +1005,8 @@ void dt_e2e_send_reported_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRANSPORT_P
                                                      reported_twin_data->integer_property);
     ASSERT_IS_NOT_NULL(buffer, "failed to allocate and prepare the payload for SendReportedState");
 
-    _send_receive_reported_state_loop(_reported_state_callback, buffer, reported_twin_data);
+    _send_reported_state(_reported_state_callback, buffer, reported_twin_data);
+    _receive_reported_state_loop(reported_twin_data);
 
     // Check results.
     if (Lock(reported_twin_data->lock) != LOCK_OK)
@@ -1053,7 +1048,12 @@ void dt_e2e_send_reported_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRANSPORT_P
                                                      reported_twin_data->integer_property);
     ASSERT_IS_NOT_NULL(buffer, "failed to allocate and prepare the payload for SendReportedState");
 
-    _send_receive_reported_state_loop(_reported_state_callback, buffer, reported_twin_data);
+    // Because the fault control message was sent asynchronously, the reported state call will
+    // be PUBLISHed first unless there is a delay.
+    ThreadAPI_Sleep(5000);
+
+    _send_reported_state(_reported_state_callback, buffer, reported_twin_data);
+    _receive_reported_state_loop(reported_twin_data);
 
     // Connect service client to IoT Hub to get twin.
     const char* connection_string = IoTHubAccount_GetIoTHubConnString(iothub_accountinfo_handle);
@@ -1134,8 +1134,8 @@ void dt_e2e_get_complete_desired_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRAN
                                                                    expected_desired_integer);
     ASSERT_IS_NOT_NULL(buffer, "Failed to create the payload for IoTHubDeviceTwin_UpdateTwin.");
 
-    _service_client_update_receive_twin_loop(serviceclient_devicetwin_handle, device_to_use, buffer,
-                                             received_twin_data, DEVICE_TWIN_UPDATE_PARTIAL);
+    _service_client_update_twin(serviceclient_devicetwin_handle, device_to_use, buffer);
+    _receive_twin_loop(received_twin_data, DEVICE_TWIN_UPDATE_PARTIAL);
 
     // Send the Event from the device client
     MAP_HANDLE propMap = Map_Create(NULL);
@@ -1160,8 +1160,8 @@ void dt_e2e_get_complete_desired_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRAN
     // Update service client twin again.
     _received_twin_data_reset(received_twin_data);
 
-    _service_client_update_receive_twin_loop(serviceclient_devicetwin_handle, device_to_use, buffer,
-                                             received_twin_data, DEVICE_TWIN_UPDATE_COMPLETE);
+    _service_client_update_twin(serviceclient_devicetwin_handle, device_to_use, buffer);
+    _receive_twin_loop(received_twin_data, DEVICE_TWIN_UPDATE_COMPLETE);
 
     // Check results.
     if (Lock(received_twin_data->lock) != LOCK_OK)
