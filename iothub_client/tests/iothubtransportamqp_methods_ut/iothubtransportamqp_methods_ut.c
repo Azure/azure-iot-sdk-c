@@ -2430,7 +2430,6 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_to_the_second_method_succeeds)
     AMQP_VALUE status_property_value = (AMQP_VALUE)0x6003;
     PROPERTIES_HANDLE response_properties_handle = (PROPERTIES_HANDLE)0x6004;
     BINARY_DATA response_binary_data;
-    IOTHUBTRANSPORT_AMQP_METHOD_HANDLE g_first_method_handle;
     IOTHUBTRANSPORT_AMQP_METHOD_HANDLE g_second_method_handle;
 
     response_binary_data.bytes = response_payload;
@@ -2443,7 +2442,6 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_to_the_second_method_succeeds)
     /* setup first request */
     setup_message_received_calls();
     g_on_message_received(amqp_methods_handle, TEST_UAMQP_MESSAGE);
-    g_first_method_handle = g_method_handle;
     /* setup second request */
     setup_message_received_calls();
     g_on_message_received(amqp_methods_handle, TEST_UAMQP_MESSAGE);
@@ -2496,7 +2494,6 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_removes_the_handle_from_the_tr
     /// arrange
     IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice", NULL);
     const unsigned char response_payload[] = { 0x43 };
-    IOTHUBTRANSPORT_AMQP_METHOD_HANDLE g_first_method_handle;
     IOTHUBTRANSPORT_AMQP_METHOD_HANDLE g_second_method_handle;
 
     umock_c_reset_all_calls();
@@ -2506,7 +2503,6 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_removes_the_handle_from_the_tr
     /* setup first request */
     setup_message_received_calls();
     g_on_message_received(amqp_methods_handle, TEST_UAMQP_MESSAGE);
-    g_first_method_handle = g_method_handle;
     /* setup second request */
     setup_message_received_calls();
     g_on_message_received(amqp_methods_handle, TEST_UAMQP_MESSAGE);
