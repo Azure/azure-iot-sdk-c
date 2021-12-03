@@ -526,10 +526,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
 
         (void)memset(&data2, 0, sizeof(data2));
 
-        DATA_MARSHALLER_VALUE value;
-        value.PropertyPath = PropertyPath;
-        value.Value = &data;
-
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(DataMarshaller_SendData(IGNORED_PTR_ARG, 1, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))

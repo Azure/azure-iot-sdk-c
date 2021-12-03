@@ -389,18 +389,15 @@ static void set_expected_calls_for_authentication_destroy(AUTHENTICATION_HANDLE 
 
 static void set_expected_calls_for_put_SAS_token_to_cbs(AUTHENTICATION_HANDLE handle, time_t current_time, STRING_HANDLE sas_token)
 {
-    char* sas_token_char_ptr;
     IOTHUB_CREDENTIAL_TYPE cred_type;
 
     if (sas_token == TEST_USER_DEFINED_SAS_TOKEN_STRING_HANDLE)
     {
         cred_type = IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN;
-        sas_token_char_ptr = TEST_USER_DEFINED_SAS_TOKEN;
     }
     else
     {
         cred_type = IOTHUB_CREDENTIAL_TYPE_DEVICE_KEY;
-        sas_token_char_ptr = TEST_GENERATED_SAS_TOKEN;
     }
 
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(TEST_AUTHORIZATION_MODULE_HANDLE)).SetReturn(cred_type);

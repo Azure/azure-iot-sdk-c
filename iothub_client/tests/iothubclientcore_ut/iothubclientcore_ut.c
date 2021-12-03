@@ -661,7 +661,10 @@ static void reset_test_data()
 
 TEST_FUNCTION_INITIALIZE(method_init)
 {
-    TEST_MUTEX_ACQUIRE(test_serialize_mutex);
+    if (TEST_MUTEX_ACQUIRE(test_serialize_mutex))
+    {
+        ASSERT_FAIL("Could not acquire test serialization mutex.");
+    }
     umock_c_reset_all_calls();
     reset_test_data();
 }
@@ -2160,7 +2163,7 @@ TEST_FUNCTION(IoTHubClient_ScheduleWork_Thread_DO_WORK_FREQ_IN_MS_success)
     STRICT_EXPECTED_CALL(ThreadAPI_Exit(0));
 
     // act
-	ASSERT_IS_NOT_NULL(g_thread_func);
+    ASSERT_IS_NOT_NULL(g_thread_func);
     g_thread_func(g_thread_func_arg);
 
     // assert

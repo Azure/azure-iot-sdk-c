@@ -1052,7 +1052,9 @@ static IOTHUB_DEVICE_HANDLE register_device(TRANSPORT_LL_HANDLE handle, IOTHUB_D
 {
     umock_c_reset_all_calls();
     set_expected_calls_for_Register(device_config, is_using_cbs);
-    return IoTHubTransport_AMQP_Common_Register(handle, device_config, wts);
+    IOTHUB_DEVICE_HANDLE h = IoTHubTransport_AMQP_Common_Register(handle, device_config, wts);
+    ASSERT_IS_NOT_NULL(h);
+    return h;
 }
 
 static void destroy_transport(TRANSPORT_LL_HANDLE handle, IOTHUB_DEVICE_HANDLE registered_device0, IOTHUB_DEVICE_HANDLE registered_device1)
@@ -4829,7 +4831,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetTwinAsync_success)
     ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_OK, result);
 
     // cleanup
-    destroy_transport(handle, NULL, NULL);
+    destroy_transport(handle, registered_devices[0], NULL);
 }
 
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetTwinAsync_NULL_handle)
@@ -4869,7 +4871,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetTwinAsync_NULL_callback)
     ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_INVALID_ARG, result);
 
     // cleanup
-    destroy_transport(handle, NULL, NULL);
+    destroy_transport(handle, registered_devices[0], NULL);
 }
 
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetTwinAsync_failure_checks)
@@ -4914,7 +4916,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetTwinAsync_failure_checks)
     }
 
     // cleanup
-    destroy_transport(handle, NULL, NULL);
+    destroy_transport(handle, registered_devices[0], NULL);
     umock_c_negative_tests_deinit();
 }
 
