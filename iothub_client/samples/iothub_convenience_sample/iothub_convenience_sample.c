@@ -19,10 +19,6 @@ Please practice sound engineering practices when writing production code.
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/shared_util_options.h"
 #include "azure_c_shared_utility/tickcounter.h"
-#include "azure_c_shared_utility/buffer_.h"
-#include "azure_c_shared_utility/constbuffer_array_batcher.h"
-#include "azure_c_shared_utility/string_token.h"
-#include "azure_c_shared_utility/safe_math.h"
 
 /*
 This sample uses the multithreaded APIs of iothub_client for example purposes.
@@ -60,7 +56,6 @@ multithreaded API is that the calls to DoWork are abstracted away from your code
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
 #include "certs.h"
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
-#include <azure_c_shared_utility\constbuffer_array.h>
 
 /* Paste in your device connection string  */
 static const char* connectionString = "[device connection string]";
@@ -250,46 +245,15 @@ static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void
     (void)printf("Confirmation callback received for message %lu with result %s\r\n", (unsigned long)g_message_count_send_confirmations, MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
 }
 
-extern char* Azure_Base32_Encode_Bytes(const unsigned char* source, size_t size);
 
 int main(void)
 {
-//    unsigned char* data = (unsigned char*) "abcdefg";
-//    (void) Azure_Base32_Encode_Bytes(data, sizeof(data));
-//    BUFFER_HANDLE x = BUFFER_create_with_size(1);
-//    BUFFER_HANDLE y = BUFFER_create_with_size(1);
-//    BUFFER_prepend(x, y);
-
-
-    //CONSTBUFFER_ARRAY_HANDLE result;
-    //CONSTBUFFER_ARRAY_HANDLE test_arrays[2];
-    //CONSTBUFFER_HANDLE actual_buffers[3];
-    //CONSTBUFFER_HANDLE header_buffer;
-    //uint8_t test_buffer_payload[] = { 0x42 };
-    //CONSTBUFFER_HANDLE test_buffer_1 = CONSTBUFFER_Create(test_buffer_payload, sizeof(test_buffer_payload));
-    //CONSTBUFFER_HANDLE test_buffer_2 = CONSTBUFFER_Create(test_buffer_payload, sizeof(test_buffer_payload));
-    //test_arrays[0] = constbuffer_array_create(&test_buffer_1, 1);
-    //test_arrays[1] = constbuffer_array_create(&test_buffer_2, 1);
-    //result = constbuffer_array_batcher_batch(test_arrays, 2);
-    //StringToken_GetFirst(NULL, 1, NULL, 1);
-
-
-    size_t x = safe_add_size_t(safe_add_size_t(101, 100), SIZE_MAX);
-    size_t x2 = safe_add_size_t(10, SIZE_MAX);
-    x = safe_multiply_size_t(SIZE_MAX / 9, 0);
-
-    x = safe_subtract_size_t(10, 100);
-
-    x = (UINT32_MAX);
-
-    printf("%d  %d\n", x == SIZE_MAX ? 1 : 0, (int)x);
-
     IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;
 
     IOTHUB_MESSAGE_HANDLE message_handle;
     float telemetry_temperature;
     float telemetry_humidity;
-        const char* telemetry_scale = "Celsius";
+    const char* telemetry_scale = "Celsius";
     char telemetry_msg_buffer[80];
 
     int messagecount = 0;
