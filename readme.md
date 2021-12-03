@@ -1,11 +1,11 @@
 # Azure IoT C SDKs and Libraries
 
-## Important branch rename information
-As of [December 1, 2021](#de09b35289313665f0d359835c661f8cb2a0fdf1), we have changed the default branch of this repo from `master` to `main`.  This may impact both your local clones of this repro made before this change as well as tools you have referencing `master`.  See [here](./doc/master_to_main_rename.md) for more information.
-
 [![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/c/integrate-into-repo-C)](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_build/latest?definitionId=85)
 
+## Important branch rename information
+As of [December 1, 2021](https://github.com/Azure/azure-iot-sdk-c/commit/de09b35289313665f0d359835c661f8cb2a0fdf1), we have changed the default branch of this repo from `master` to `main`.  This may impact both your local clones of this repro made before this change as well as tools you have referencing `master`.  See [here](./doc/master_to_main_rename.md) for more information.
 
+## Introduction
 The Azure IOT Hub Device SDK allows applications written in C99 or later or C++ to communicate easily with [Azure IoT Hub](https://azure.microsoft.com/services/iot-hub/), [Azure IoT Central][Azure-IoT-Central] and to
  [Azure IoT Device Provisioning][Azure-IoT-Device-Provisioning].  This repo includes the source code for the libraries, setup instructions, and samples demonstrating use scenarios.
 

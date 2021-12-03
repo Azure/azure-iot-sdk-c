@@ -3,9 +3,9 @@
 The Azure IoT C SDK initially used a branch named `master` as its primary branch.  This was renamed to `main` on December 1, 2021.
 
 ## Implications to tools and scripts referencing this repo
-When a web request to an older link to this repo that contains `master` in it - for instance [https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/master_to_main_rename.md](https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/master_to_main_rename.md - GitHub will automatically redirect this to `main`.
+When a web request to an older link to this repo that contains `master` in it - for instance [https://github.com/Azure/azure-iot-sdk-c/blob/**master**/doc/master_to_main_rename.md](https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/master_to_main_rename.md) - GitHub will automatically redirect this to `main`.
 
-GitHub will **not** redirect tools, scripts, command line requests, etc. that reference the `master` branch, however.  These will instead fail accessing the deleted branch.  You will need to change these to reference this repo's `main` branch.
+GitHub will **not** redirect tools, scripts, command line requests, etc. that explicitly reference the `master` branch, however.  These will instead fail accessing the deleted branch.  You will need to change these to reference this repo's `main` branch.
 
 ## Implications to local clones of this repo
 
