@@ -181,10 +181,10 @@ The options are presented only as compilation flags and must be appended to the 
 | `"XIO Receive Buffer"`       | `-DcompileOption_C="-DXIO_RECEIVE_BUFFER_SIZE=<value>"` | Configure the internal XIO receive buffer.
 
 
-[iothub-client-options-h]: https://github.com/Azure/azure-iot-sdk-c/blob/master/iothub_client/inc/iothub_client_options.h
+[iothub-client-options-h]: https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothub_client_options.h
 [shared-util-options-h]: https://github.com/Azure/azure-c-shared-utility/blob/master/inc/azure_c_shared_utility/shared_util_options.h
-[provisioning-device-ll-client-options-h]: https://github.com/Azure/azure-iot-sdk-c/blob/master/provisioning_client/inc/azure_prov_client/prov_device_ll_client.h
-[provisioning-device-client-options-h]: https://github.com/Azure/azure-iot-sdk-c/blob/master/provisioning_client/inc/azure_prov_client/prov_device_client.h
+[provisioning-device-ll-client-options-h]: https://github.com/Azure/azure-iot-sdk-c/blob/main/provisioning_client/inc/azure_prov_client/prov_device_ll_client.h
+[provisioning-device-client-options-h]: https://github.com/Azure/azure-iot-sdk-c/blob/main/provisioning_client/inc/azure_prov_client/prov_device_client.h
 [iot-pnp]: https://aka.ms/iotpnp
-[gateway-sample]: https://github.com/Azure/azure-iot-sdk-c/tree/master/iothub_client/samples/iotedge_downstream_device_sample
+[gateway-sample]: https://github.com/Azure/azure-iot-sdk-c/tree/main/iothub_client/samples/iotedge_downstream_device_sample
 [tick-counter-header]: https://github.com/Azure/azure-c-shared-utility/blob/master/inc/azure_c_shared_utility/tickcounter.h
