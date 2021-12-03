@@ -1,5 +1,8 @@
 # Azure IoT C SDKs and Libraries
 
+## Important branch rename information
+As of [December 1, 2021](#de09b35289313665f0d359835c661f8cb2a0fdf1), we have changed the default branch of this repo from `master` to `main`.  This may impact both your local clones of this repro made before this change as well as tools you have referencing `master`.  See [here](./doc/master_to_main_rename.md) for more information.
+
 [![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/c/integrate-into-repo-C)](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_build/latest?definitionId=85)
 
 
