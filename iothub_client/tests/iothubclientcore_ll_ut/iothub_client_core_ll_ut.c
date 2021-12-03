@@ -1568,11 +1568,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_Create_with_NULL_protocol_fails)
 TEST_FUNCTION(IoTHubClientCore_LL_Create_succeeds)
 {
     //arrange
-    IOTHUB_DEVICE_CONFIG device;
-    device.deviceId = TEST_CONFIG.deviceId;
-    device.deviceKey = TEST_CONFIG.deviceKey;
-    device.deviceSasToken = NULL;
-
     setup_IoTHubClientCore_LL_create_mocks(false, false);
 
     //act
@@ -1591,10 +1586,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_Create_fail)
     int negativeTestsInitResult = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
-    IOTHUB_DEVICE_CONFIG device;
-    device.deviceId = TEST_CONFIG.deviceId;
-    device.deviceKey = TEST_CONFIG.deviceKey;
-    device.deviceSasToken = NULL;
     umock_c_reset_all_calls();
 
     setup_IoTHubClientCore_LL_create_mocks(false, false);
@@ -1652,11 +1643,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_with_NULL_deviceKey_AND_NU
 TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_Succeeds)
 {
     //arrange
-    IOTHUB_DEVICE_CONFIG device;
-    device.deviceId = TEST_DEVICE_CONFIG.deviceId;
-    device.deviceKey = TEST_DEVICE_CONFIG.deviceKey;
-    device.deviceSasToken = NULL;
-
     STRICT_EXPECTED_CALL(get_time(IGNORED_NUM_ARG)).CallCannotFail();
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -1795,11 +1781,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_fail)
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
     //arrange
-    IOTHUB_DEVICE_CONFIG device;
-    device.deviceId = TEST_DEVICE_CONFIG.deviceId;
-    device.deviceKey = TEST_DEVICE_CONFIG.deviceKey;
-    device.deviceSasToken = NULL;
-
     setup_IoTHubClientCore_LL_create_mocks(true, false);
 
     //act
