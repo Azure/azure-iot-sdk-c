@@ -614,7 +614,10 @@ static void reset_test_data()
 
 TEST_FUNCTION_INITIALIZE(method_init)
 {
-    TEST_MUTEX_ACQUIRE(test_serialize_mutex);
+    if (TEST_MUTEX_ACQUIRE(test_serialize_mutex))
+    {
+        ASSERT_FAIL("our mutex is ABANDONED. Failure in test framework");
+    }
 
     reset_test_data();
     DList_InitializeListHead(&g_waitingToSend);

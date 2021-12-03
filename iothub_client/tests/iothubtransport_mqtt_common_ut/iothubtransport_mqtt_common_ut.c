@@ -950,7 +950,10 @@ static void reset_test_data()
 
 TEST_FUNCTION_INITIALIZE(method_init)
 {
-    TEST_MUTEX_ACQUIRE(test_serialize_mutex);
+    if (TEST_MUTEX_ACQUIRE(test_serialize_mutex))
+    {
+        ASSERT_FAIL("our mutex is ABANDONED. Failure in test framework");
+    }
 
     reset_test_data();
     real_DList_InitializeListHead(&g_waitingToSend);
@@ -4639,10 +4642,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_x509_no_expire_success)
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, NULL);
 
     QOS_VALUE QosValue[] = { DELIVER_AT_LEAST_ONCE };
-    SUBSCRIBE_ACK suback;
-    suback.packetId = 1234;
-    suback.qosCount = 1;
-    suback.qosReturn = QosValue;
 
     IOTHUB_MESSAGE_LIST message1;
     memset(&message1, 0, sizeof(IOTHUB_MESSAGE_LIST));
@@ -7802,10 +7801,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_ProcessItem_continue_Succeed)
 
     g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_callbackCtx);
     IoTHubTransport_MQTT_Common_DoWork(handle);
-
-    CONSTBUFFER data_buff;
-    data_buff.buffer = (const unsigned char*)0x46;
-    data_buff.size = 22;
 
     CONSTBUFFER cbuff;
     cbuff.buffer = appMessage;

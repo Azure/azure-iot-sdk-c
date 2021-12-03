@@ -952,7 +952,10 @@ TEST_SUITE_CLEANUP(suite_cleanup)
 
 TEST_FUNCTION_INITIALIZE(method_init)
 {
-    TEST_MUTEX_ACQUIRE(test_serialize_mutex);
+    if (TEST_MUTEX_ACQUIRE(test_serialize_mutex))
+    {
+        ASSERT_FAIL("our mutex is ABANDONED. Failure in test framework");
+    }
     umock_c_reset_all_calls();
     g_fail_string_construct_sprintf = false;
     g_fail_platform_get_platform_info = false;

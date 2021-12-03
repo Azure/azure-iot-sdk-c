@@ -93,7 +93,10 @@ BEGIN_TEST_SUITE(iothub_transport_ll_private_ut)
 
     TEST_FUNCTION_INITIALIZE(method_init)
     {
-        TEST_MUTEX_ACQUIRE(g_testByTest);
+        if (TEST_MUTEX_ACQUIRE(g_testByTest))
+        {
+            ASSERT_FAIL("our mutex is ABANDONED. Failure in test framework");
+        }        
 
         umock_c_reset_all_calls();
     }
