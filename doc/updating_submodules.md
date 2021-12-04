@@ -3,7 +3,7 @@
 ## Commands
 
 ```bash
-git checkout master
+git checkout main
 git pull
 
 cd c-utility
@@ -90,4 +90,4 @@ The following requires NodeJS and NPM.
 
 Run:
 
-`/node_modules/.bin/check_submodules . master`
+`/node_modules/.bin/check_submodules . main`
