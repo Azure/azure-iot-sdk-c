@@ -11,9 +11,9 @@
 #include "azure_prov_client/prov_client_const.h"
 
 #ifdef __cplusplus
-extern "C" {
 #include <cstdint>
 #include <cstdlib>
+extern "C" {
 #else
 #include <stdbool.h>
 #include <stdint.h>
