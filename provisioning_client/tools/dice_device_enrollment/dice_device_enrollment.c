@@ -17,7 +17,14 @@ static const char* const END_CERT_MARKER = "-----END CERTIFICATE-----";
 
 static char* get_user_input(const char* text_value, int max_len)
 {
-    char* result = malloc(max_len + 1);
+    int result_len = max_len + 1;
+    if (result_len <= 1)
+    {
+        (void)printf("invalid max_len size\r\n");
+        return NULL;
+    }
+
+    char* result = malloc(result_len);
     if (result == NULL)
     {
         (void)printf("failed to allocate buffer\r\n");
@@ -26,7 +33,7 @@ static char* get_user_input(const char* text_value, int max_len)
     else
     {
         int index = 0;
-        memset(result, 0, max_len + 1);
+        memset(result, 0, result_len);
         printf("%s", text_value);
         // trim the leading spaces
         while (1)

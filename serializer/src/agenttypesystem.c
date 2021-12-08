@@ -3494,7 +3494,9 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                 if (strcmp(source, "\"NaN\"") == 0)
                 {
                     agentData->type = EDM_DOUBLE_TYPE;
+#pragma warning(disable:26451) // warning C26451: overflow in constant arithmetic
                     agentData->value.edmDouble.value = NAN;
+#pragma warning (default:26451)
                     result = AGENT_DATA_TYPES_OK;
                 }
                 else if (strcmp(source, "\"INF\"") == 0)
