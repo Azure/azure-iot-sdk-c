@@ -833,7 +833,7 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
                     config = client_config;
                 }
             }
-            else
+            else if (device_config != NULL)
             {
                 STRING_HANDLE transport_hostname = NULL;
 
