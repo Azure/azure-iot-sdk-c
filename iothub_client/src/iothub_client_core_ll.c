@@ -978,7 +978,7 @@ static IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* initialize_iothub_client(const IOTHUB_
                     free(result);
                     result = NULL;
                 }
-                else
+                else if (config != NULL)
                 {
                     DList_InitializeListHead(&(result->waitingToSend));
                     DList_InitializeListHead(&(result->iot_msg_queue));
