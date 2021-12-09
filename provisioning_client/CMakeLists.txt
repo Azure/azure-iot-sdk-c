@@ -344,6 +344,7 @@ if(NOT IN_OPENWRT)
 endif()
 
 if (${use_prov_client} AND (NOT ${skip_samples}))
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/samples)
     add_subdirectory(tools)
 endif ()
 
