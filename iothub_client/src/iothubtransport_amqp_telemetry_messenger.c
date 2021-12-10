@@ -1159,7 +1159,8 @@ static int send_pending_events(TELEMETRY_MESSENGER_INSTANCE* instance)
             free(caller_info);
             continue;
         }
-        else if (singlylinkedlist_add(send_pending_events_state.task->callback_list, (void*)caller_info) == NULL)
+        else if (send_pending_events_state.task == NULL ||
+                 singlylinkedlist_add(send_pending_events_state.task->callback_list, (void*)caller_info) == NULL)
         {
             LogError("singlylinkedlist_add failed");
             invoke_callback_on_error(caller_info, TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING);
