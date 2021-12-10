@@ -240,7 +240,7 @@ static void verify_json_expected_string_array(const char* json,
     json_value_free(root_value);
 }
 
-static int verify_json_expected_int_array(const char* json,
+static void verify_json_expected_int_array(const char* json,
                                            const char* full_property_name,
                                            size_t index,
                                            int expected_int)
