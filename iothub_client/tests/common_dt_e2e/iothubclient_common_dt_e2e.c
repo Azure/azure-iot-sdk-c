@@ -843,6 +843,8 @@ void dt_e2e_get_complete_desired_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRAN
     receive_twin_loop(received_twin_data, DEVICE_TWIN_UPDATE_COMPLETE);
     received_twin_data_reset(received_twin_data);
 
+    // To ensure the test passes for AMQP, add a sleep so the server can receive the subscribe to
+    // the twin PATCH topic before the service sdk updates the twin on the server.
     ThreadAPI_Sleep(SLEEP_MS);
 
     // Connect service client to IoT Hub to update twin.
@@ -867,8 +869,11 @@ void dt_e2e_get_complete_desired_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRAN
 
     // Send the Event from the device client
     client_send_tcp_kill_via_d2c(device_to_use);
-    receive_twin_loop(received_twin_data, DEVICE_TWIN_UPDATE_COMPLETE);
+    receive_twin_loop(received_twin_data, DEVICE_TWIN_UPDATE_COMPLETE); // Sent when connection re-established.
     received_twin_data_reset(received_twin_data);
+
+    // Sleep to allow for resubscribe to twin PATCH topic before updating service client twin.
+    ThreadAPI_Sleep(SLEEP_MS);
 
     // Update service client twin again.
     service_client_update_twin(serviceclient_devicetwin_handle, device_to_use, desired_payload);
