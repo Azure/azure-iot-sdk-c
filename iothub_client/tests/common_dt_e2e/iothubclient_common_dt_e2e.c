@@ -180,7 +180,7 @@ static char* calloc_and_fill_reported_payload(const char* string, int num)
     char* result = (char*)calloc(length + 1, sizeof(char));
     ASSERT_IS_NOT_NULL(result);
 
-    snprintf(result, length, REPORTED_PAYLOAD_FORMAT, num, string, num, string);
+    snprintf(result, length + 1, REPORTED_PAYLOAD_FORMAT, num, string, num, string);
 
     return result;
 }
@@ -618,7 +618,6 @@ void client_send_tcp_kill_via_d2c(IOTHUB_PROVISIONED_DEVICE* device)
     LogInfo("Send fault control message...");
     send_event_async(msgHandle);
 
-    Map_Destroy(msgMapHandle);
     IoTHubMessage_Destroy(msgHandle);
 }
 
