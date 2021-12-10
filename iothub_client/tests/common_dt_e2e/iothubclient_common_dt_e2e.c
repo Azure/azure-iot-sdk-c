@@ -97,7 +97,7 @@ static RECEIVED_TWIN_DATA* received_twin_data_init()
 
 static void received_twin_data_reset(RECEIVED_TWIN_DATA* twin_data)
 {
-    ASSERT_IS_TRUE(Lock(twin_data->lock) != LOCK_ERROR);
+    ASSERT_IS_TRUE(Lock(twin_data->lock) == LOCK_OK);
 
     LogInfo("received_twin_data_reset(): Resetting data.");
     twin_data->received_callback = false;
@@ -154,7 +154,7 @@ static REPORTED_TWIN_DATA* reported_twin_data_init()
 
 static void reported_twin_data_reset(REPORTED_TWIN_DATA* twin_data)
 {
-    ASSERT_IS_TRUE(Lock(twin_data->lock) != LOCK_ERROR);
+    ASSERT_IS_TRUE(Lock(twin_data->lock) == LOCK_OK);
 
     LogInfo("reported_twin_data_reset(): Resetting data.");
     twin_data->received_callback = false;
@@ -468,24 +468,20 @@ static void receive_twin_loop(RECEIVED_TWIN_DATA* received_twin_data, DEVICE_TWI
 
     while (now_time = time(NULL), (difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME))
     {
-        if (Lock(received_twin_data->lock) != LOCK_OK)
-        {
-            ASSERT_FAIL("Lock failed");
-        }
-        else
-        {
-            if ((received_twin_data->received_callback) &&
-                (received_twin_data->cb_payload != NULL) &&
-                (received_twin_data->update_state_set == true))
-            {
-                ASSERT_ARE_EQUAL(DEVICE_TWIN_UPDATE_STATE, expected_update_state,
-                                 received_twin_data->update_state);
+        ASSERT_IS_TRUE(Lock(received_twin_data->lock) == LOCK_OK);
 
-                Unlock(received_twin_data->lock);
-                break;
-            }
+        if ((received_twin_data->received_callback) &&
+            (received_twin_data->cb_payload != NULL) &&
+            (received_twin_data->update_state_set == true))
+        {
+            ASSERT_ARE_EQUAL(DEVICE_TWIN_UPDATE_STATE, expected_update_state,
+                                received_twin_data->update_state);
+
             Unlock(received_twin_data->lock);
+            break;
         }
+        Unlock(received_twin_data->lock);
+
         ThreadAPI_Sleep(1000);
     }
 
@@ -547,21 +543,17 @@ static void receive_reported_state_acknowledgement_loop(REPORTED_TWIN_DATA* repo
     while (now_time = time(NULL), (difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME))
     {
         // Receive IoT Hub response.
-        if (Lock(reported_twin_data->lock) != LOCK_OK)
-        {
-            ASSERT_FAIL("Lock failed.");
-        }
-        else
-        {
-            if (reported_twin_data->received_callback)
-            {
-                ASSERT_IS_TRUE(reported_twin_data->status_code < 300, "SendReported status_code is an error.");
+        ASSERT_IS_TRUE(Lock(reported_twin_data->lock) == LOCK_OK);
 
-                Unlock(reported_twin_data->lock);
-                break;
-            }
+        if (reported_twin_data->received_callback)
+        {
+            ASSERT_IS_TRUE(reported_twin_data->status_code < 300, "SendReported status_code is an error.");
+
             Unlock(reported_twin_data->lock);
+            break;
         }
+        Unlock(reported_twin_data->lock);
+
         ThreadAPI_Sleep(1000);
     }
     ASSERT_IS_TRUE(difftime(now_time, begin_operation) < MAX_CLOUD_TRAVEL_TIME,
@@ -608,7 +600,7 @@ void client_send_tcp_kill_via_d2c(IOTHUB_PROVISIONED_DEVICE* device)
     IOTHUB_MESSAGE_HANDLE msgHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)messageStr, len);
     ASSERT_IS_NOT_NULL(msgHandle, "Could not create the D2C message to be sent.");
     MAP_HANDLE msgMapHandle = IoTHubMessage_Properties(msgHandle);
-    ASSERT_NOT_NULL(msgMapHandle);
+    ASSERT_IS_NOT_NULL(msgMapHandle);
 
     if (Map_AddOrUpdate(msgMapHandle, "AzIoTHub_FaultOperationType", "KillTcp") != MAP_OK)
     {
@@ -626,7 +618,7 @@ void client_send_tcp_kill_via_d2c(IOTHUB_PROVISIONED_DEVICE* device)
     LogInfo("Send fault control message...");
     send_event_async(msgHandle);
 
-    IoTHubMessage_Destroy(msgMapHandle);
+    Map_Destroy(msgMapHandle);
     IoTHubMessage_Destroy(msgHandle);
 }
 
@@ -686,7 +678,7 @@ void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     char* service_client_twin = service_client_get_twin(serviceclient_devicetwin_handle, device_to_use);
 
     // Check results.
-    ASSERT(reported_twin_data->lock == LOCK_OK);
+    ASSERT_IS_TRUE(Lock(reported_twin_data->lock) == LOCK_OK);
     verify_json_expected_int(service_client_twin, "properties.reported.integer_property",
                                 reported_twin_data->integer_property);
     verify_json_expected_string(service_client_twin, "properties.reported.string_property",
@@ -722,8 +714,8 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     // If the server completes (4) *before* it receives the subscribe for PATCH (3), it will not
     // send down the PATCH of the full twin. On the server side, it seems that the MQTT subscribe
     // process completes faster than for AMQP.  To ensure the test passes for AMQP, add a sleep so
-    // the server can receive the subscribe for PATH before the service sdk updates the twin on the
-    // server.
+    // the server can receive the subscribe for twin PATCH before the service sdk updates the twin
+    // on the server.
 
     // Connect device client to IoT Hub. Register callback. Receive full twin.
     set_twin_callback(twin_callback, received_twin_data);
@@ -752,7 +744,7 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     receive_twin_loop(received_twin_data, DEVICE_TWIN_UPDATE_PARTIAL);
 
     // Check results.
-    ASSERT(received_twin_data->lock == LOCK_OK);
+    ASSERT_IS_TRUE(Lock(received_twin_data->lock) == LOCK_OK);
     verify_json_expected_int((char*)received_twin_data->cb_payload, "integer_property",
                               expected_desired_integer);
     verify_json_expected_string((char*)received_twin_data->cb_payload, "string_property",
@@ -821,7 +813,7 @@ void dt_e2e_send_reported_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRANSPORT_P
     char* service_client_twin = service_client_get_twin(serviceclient_devicetwin_handle, device_to_use);
 
     // Check results.
-    ASSERT(reported_twin_data->lock == LOCK_OK);
+    ASSERT_IS_TRUE(Lock(reported_twin_data->lock) == LOCK_OK);
     verify_json_expected_int(service_client_twin, "properties.reported.integer_property",
                                 reported_twin_data->integer_property);
     verify_json_expected_string(service_client_twin, "properties.reported.string_property",
@@ -884,7 +876,7 @@ void dt_e2e_get_complete_desired_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRAN
     receive_twin_loop(received_twin_data, DEVICE_TWIN_UPDATE_PARTIAL);
 
     // Check results.
-    ASSERT(received_twin_data->lock == LOCK_OK);
+    ASSERT_IS_TRUE(Lock(received_twin_data->lock) == LOCK_OK);
     verify_json_expected_int((char*)received_twin_data->cb_payload, "integer_property",
                               expected_desired_integer);
     verify_json_expected_string((char*)received_twin_data->cb_payload, "string_property",
@@ -954,15 +946,13 @@ void dt_e2e_send_module_id_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceclient_devicetwin_handle = IoTHubDeviceTwin_Create(iothub_serviceclient_handle);
     ASSERT_IS_NOT_NULL(serviceclient_devicetwin_handle, "IoTHubDeviceTwin_Create failed.");
 
-    char* twin_data = service_client_get_twin(serviceclient_devicetwin_handle, device_to_use);
+    char* service_client_twin_data = service_client_get_twin(serviceclient_devicetwin_handle, device_to_use);
 
     // Check results.
-    char* parsed_model_id = parse_json_twin_char(twin_data, "modelId");
-    ASSERT_ARE_EQUAL(char_ptr, model_id, parsed_model_id);
+    verify_json_expected_string(service_client_twin_data, "modelId", model_id);
 
     // Cleanup
-    free(parsed_model_id);
-    free(twin_data);
+    free(service_client_twin_data);
     IoTHubDeviceTwin_Destroy(serviceclient_devicetwin_handle);
     IoTHubServiceClientAuth_Destroy(iothub_serviceclient_handle);
     destroy_client_handle();
