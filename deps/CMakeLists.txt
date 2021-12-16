@@ -35,33 +35,34 @@ endif()
 
 ########## Parson ##########
 if(NOT ${use_installed_dependencies})
-  add_library(parson
-      ${CMAKE_CURRENT_LIST_DIR}/parson/parson.c
-      ${CMAKE_CURRENT_LIST_DIR}/parson/parson.h
-  )
-  add_library(parson::parson ALIAS parson)
-  if (MSVC)
-      set_source_files_properties(${CMAKE_CURRENT_LIST_DIR}/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
-  endif()
+  # add_library(parson
+  #     ${CMAKE_CURRENT_LIST_DIR}/parson/parson.c
+  #     ${CMAKE_CURRENT_LIST_DIR}/parson/parson.h
+  # )
+  # add_library(parson::parson ALIAS parson)
+  # if (MSVC)
+  #     set_source_files_properties(${CMAKE_CURRENT_LIST_DIR}/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
+  # endif()
 
-  target_include_directories(parson PUBLIC
-      $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/parson>
-      $<INSTALL_INTERFACE:include>
-  )
-  set_target_properties(parson PROPERTIES PUBLIC_HEADER ${CMAKE_CURRENT_LIST_DIR}/parson/parson.h)
+  # target_include_directories(parson PUBLIC
+  #     $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/parson>
+  #     $<INSTALL_INTERFACE:include>
+  # )
+  # set_target_properties(parson PROPERTIES PUBLIC_HEADER ${CMAKE_CURRENT_LIST_DIR}/parson/parson.h)
 
-  install(
-      TARGETS parson
-      EXPORT parsonTargets
-      RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-      PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-  )
-  install(
-      EXPORT parsonTargets
-      FILE parsonConfig.cmake
-      NAMESPACE parson::
-      DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/parson
-  )
+  # install(
+  #     TARGETS parson
+  #     EXPORT parsonTargets
+  #     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  #     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  #     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  #     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  # )
+  # install(
+  #     EXPORT parsonTargets
+  #     FILE parsonConfig.cmake
+  #     NAMESPACE parson::
+  #     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/parson
+  # )
+  add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/parson)
 endif()
