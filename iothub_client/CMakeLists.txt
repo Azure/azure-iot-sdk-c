@@ -423,7 +423,7 @@ if (${build_as_dynamic})
     if (${use_prov_client_core})
         target_link_libraries(iothub_client_dll hsm_security_client prov_auth_client)
     endif()
-    target_link_libraries(iothub_client_dll parson::parson)
+    target_link_libraries(iothub_client_dll parson)
 
     if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
         target_link_libraries(iothub_client_dll
@@ -445,7 +445,7 @@ target_include_directories(iothub_client
 )
 applyXcodeBuildFlagsIfNeeded(iothub_client)
 target_link_libraries(iothub_client ${iothub_client_libs})
-target_link_libraries(iothub_client parson::parson)
+target_link_libraries(iothub_client parson)
 
 if (${use_prov_client_core})
     target_link_libraries(iothub_client hsm_security_client prov_auth_client)

@@ -18,5 +18,5 @@ set(${theseTestsName}_h_files
 build_c_test_artifacts(${theseTestsName} ON "tests/azure_prov_device_tests"
     ADDITIONAL_LIBS
         prov_device_client
-        parson::parson
+        parson
 )
