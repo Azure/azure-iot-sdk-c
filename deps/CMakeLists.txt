@@ -39,7 +39,7 @@ if(NOT ${use_installed_dependencies})
   #     ${CMAKE_CURRENT_LIST_DIR}/parson/parson.c
   #     ${CMAKE_CURRENT_LIST_DIR}/parson/parson.h
   # )
-  # add_library(parson::parson ALIAS parson)
+  # add_library(parson ALIAS parson)
   # if (MSVC)
   #     set_source_files_properties(${CMAKE_CURRENT_LIST_DIR}/parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
   # endif()
