@@ -109,8 +109,8 @@ This will create files mydevice* that contain the public key, private key, and P
 
 #### IoT Leaf Device
 
-* Run `./certGen.sh create_device_certificate mydevice` to create the new device certificate.  
-  This will create the files ./certs/new-device.* that contain the public key and PFX and ./private/new-device.key.pem that contains the device's private key.  
+* Run `./certGen.sh create_device_certificate mydevice` to create the new device certificate. If the device certificate needs to be signed by intermediate CA, run `./certGen.sh create_device_certificate_from_intermediate mydevice` instead to chain up the device certificate to the intermediate certificate.  
+  These commands will create the files ./certs/new-device.* that contain the public key and PFX and ./private/new-device.key.pem that contains the device's private key.  
 
 * `cd ./certs && cat new-device.cert.pem azure-iot-test-only.intermediate.cert.pem azure-iot-test-only.root.ca.cert.pem > new-device-full-chain.cert.pem` to get the public key.
 
