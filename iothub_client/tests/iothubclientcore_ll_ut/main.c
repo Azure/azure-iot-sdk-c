@@ -4,10 +4,6 @@
 #include <stddef.h>
 #include "testrunnerswitcher.h"
 
-#ifdef WINCE
-#include "windows.h"
-#endif
-
 int main(void)
 {
     size_t failedTestCount = 0;

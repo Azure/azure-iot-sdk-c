@@ -1,0 +1,34 @@
+name: Build and Deploy Docs
+
+on:
+  workflow_dispatch:
+    inputs:
+        commitRef:
+          description: 'Git SHA commit to use to build docs'
+          required: true
+
+jobs:
+  push-docs:
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.commitRef }}
+
+      - name: Remove Macro Util Wrapping
+        run: |
+          python3 .github/scripts/pre_doxygen.py ./iothub_client/inc ./doc-stage
+          python3 .github/scripts/pre_doxygen.py ./provisioning_client/inc/azure_prov_client ./doc-stage
+
+      - name: Install and Build Doxygen
+        run: .github/scripts/build_doxygen.sh
+
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@4.1.3
+        with:
+          branch: gh-pages
+          folder: doc/html
+          clean: true
+          ssh-key: ${{ secrets.DEPLOY_KEY }}

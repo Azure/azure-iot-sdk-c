@@ -15,7 +15,7 @@ For quick and reliable answers on your technical product questions from Microsof
 
 For answers on your developer questions from the largest community developer ecosystem, ask your question on Stack Overflow. We actively monitor all questions tagged wtih "azure-iot-sdk".
 
-Additionally, if your technical question requires submitting service logs, you can submit an [Azure Support Ticket](https://docs.microsoft.com/en-us/azure/azure-supportability/how-to-create-azure-support-request).
+Additionally, if your technical question requires submitting service logs, you can submit an [Azure Support Ticket](https://docs.microsoft.com/azure/azure-supportability/how-to-create-azure-support-request).
 
 If you have a question specifically on a Microsoft page you've read, please open an issue on the document itself. This ensures you get the fastest targeted response, and you can do this by scrolling to the bottom of the page to the **Feedback** section. 
 

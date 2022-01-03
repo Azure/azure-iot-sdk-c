@@ -27,26 +27,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -90,7 +90,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions);USE_AMQP;USE_MQTT;USE_HTTP</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\;$(VcpkgCurrentInstalledDir)include\azureiot;..\..\..\..\certs</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;$(VcpkgRoot)\installed\$(VcpkgTriplet)\include\azureiot;..\..\..\..\certs</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -113,7 +113,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions);USE_AMQP;USE_MQTT;USE_HTTP</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\;$(VcpkgCurrentInstalledDir)include\azureiot;..\..\..\..\certs</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;$(VcpkgRoot)\installed\$(VcpkgTriplet)\include\azureiot;..\..\..\..\certs</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -134,7 +134,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions);USE_AMQP;USE_MQTT;USE_HTTP</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\;$(VcpkgCurrentInstalledDir)include\azureiot;..\..\..\..\certs</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;$(VcpkgRoot)\installed\$(VcpkgTriplet)\include\azureiot;..\..\..\..\certs</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -161,7 +161,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions);USE_AMQP;USE_MQTT;USE_HTTP</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\;$(VcpkgCurrentInstalledDir)include\azureiot;..\..\..\..\certs</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;$(VcpkgRoot)\installed\$(VcpkgTriplet)\include\azureiot;..\..\..\..\certs</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -185,8 +185,8 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Target Name="EnsureVcPkgPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
-      <ErrorText>This project references Vcpkg package(s) that are missing on this computer. For more information, see https://github.com/Azure/azure-iot-sdk-c/tree/master/doc/setting_up_vcpkg.md. The missing file is {0}.</ErrorText>
+      <ErrorText>This project references Vcpkg package(s) that are missing on this computer. For more information, see https://github.com/Azure/azure-iot-sdk-c/tree/main/doc/setting_up_vcpkg.md. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('$(VcpkgCurrentInstalledDir)include\azureiot\iothub.h')" Text="$([System.String]::Format('$(ErrorText)', '$(VcpkgCurrentInstalledDir)include\azureiot\iothub.h'))" />
+    <Error Condition="!Exists('$(VcpkgRoot)\installed\$(VcpkgTriplet)\include\azureiot\iothub.h')" Text="$([System.String]::Format('$(ErrorText)', '$(VcpkgRoot)\installed\$(VcpkgTriplet)\include\azureiot\iothub.h'))" />
   </Target>
 </Project>

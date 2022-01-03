@@ -12,6 +12,11 @@
 #include "iothubtransportmqtt.h"
 #include "pnp_sample_config.h"
 
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+#include "azure_c_shared_utility/shared_util_options.h"
+#include "certs.h"
+#endif
+
 // DPS and IoT Hub related header files
 #include "azure_prov_client/iothub_security_factory.h"
 #include "azure_prov_client/prov_device_client.h"
@@ -124,10 +129,14 @@ IOTHUB_DEVICE_CLIENT_LL_HANDLE PnP_CreateDeviceClientLLHandle_ViaDps(const PNP_D
         result = false;
     }
     else if ((provDeviceResult = Prov_Device_LL_Set_Provisioning_Payload(provDeviceClient, modelIdPayload)) != PROV_DEVICE_RESULT_OK)
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+    // Setting the Trusted Certificate.  This is only necessary on systems without built in certificate stores.
+    else if ((provDeviceResult = Prov_Device_LL_SetOption(provDeviceHandle, OPTION_TRUSTED_CERT, certificates)) != PROV_DEVICE_RESULT_OK)
     {
-        LogError("Failed setting provisioning data, error=%d", provDeviceResult);
+        LogError("Setting provisioning trusted certificate, error=%d", provDeviceResult);
         result = false;
     }
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
     // Initiate the registration process.  Note that this call does NOT directly invoke network I/O; instead the
     // Prov_Device_LL_DoWork is used to drive this.
     else if ((provDeviceResult = Prov_Device_LL_Register_Device(provDeviceClient, provisioningRegisterCallback, NULL, NULL, NULL)) != PROV_DEVICE_RESULT_OK)

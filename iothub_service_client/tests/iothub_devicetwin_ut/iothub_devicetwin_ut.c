@@ -309,7 +309,6 @@ TEST_FUNCTION_CLEANUP(TestMethodCleanup)
     TEST_MUTEX_RELEASE(g_testByTest);
 }
 
-/*Tests_SRS_IOTHUBDEVICETWIN_12_001: [ If the serviceClientHandle input parameter is NULL IoTHubDeviceTwin_Create shall return NULL ]*/
 TEST_FUNCTION(IoTHubDeviceTwin_Create_return_null_if_input_parameter_serviceClientHandle_is_NULL)
 {
     ///arrange
@@ -322,7 +321,6 @@ TEST_FUNCTION(IoTHubDeviceTwin_Create_return_null_if_input_parameter_serviceClie
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_SRS_IOTHUBDEVICETWIN_12_002: [ If any member of the serviceClientHandle input parameter is NULL IoTHubDeviceTwin_Create shall return NULL ]*/
 TEST_FUNCTION(IoTHubDeviceTwin_Create_return_null_if_input_parameter_serviceClientHandle_hostName_is_NULL)
 {
     // arrange
@@ -336,7 +334,6 @@ TEST_FUNCTION(IoTHubDeviceTwin_Create_return_null_if_input_parameter_serviceClie
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_SRS_IOTHUBDEVICETWIN_12_002: [ If any member of the serviceClientHandle input parameter is NULL IoTHubDeviceTwin_Create shall return NULL ]*/
 TEST_FUNCTION(IoTHubDeviceTwin_Create_return_null_if_input_parameter_serviceClientHandle_iothubName_is_NULL)
 {
     // arrange
@@ -350,7 +347,6 @@ TEST_FUNCTION(IoTHubDeviceTwin_Create_return_null_if_input_parameter_serviceClie
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_SRS_IOTHUBDEVICETWIN_12_002: [ If any member of the serviceClientHandle input parameter is NULL IoTHubDeviceTwin_Create shall return NULL ]*/
 TEST_FUNCTION(IoTHubDeviceTwin_Create_return_null_if_input_parameter_serviceClientHandle_iothubSuffix_is_NULL)
 {
     // arrange
@@ -364,7 +360,6 @@ TEST_FUNCTION(IoTHubDeviceTwin_Create_return_null_if_input_parameter_serviceClie
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_SRS_IOTHUBDEVICETWIN_12_002: [ If any member of the serviceClientHandle input parameter is NULL IoTHubDeviceTwin_Create shall return NULL ]*/
 TEST_FUNCTION(IoTHubDeviceTwin_Create_return_null_if_input_parameter_serviceClientHandle_keyName_is_NULL)
 {
     // arrange
@@ -378,7 +373,6 @@ TEST_FUNCTION(IoTHubDeviceTwin_Create_return_null_if_input_parameter_serviceClie
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_SRS_IOTHUBDEVICETWIN_12_002: [ If any member of the serviceClientHandle input parameter is NULL IoTHubDeviceTwin_Create shall return NULL ]*/
 TEST_FUNCTION(IoTHubDeviceTwin_Create_return_null_if_input_parameter_serviceClientHandle_sharedAccessKey_is_NULL)
 {
     // arrange
@@ -392,13 +386,6 @@ TEST_FUNCTION(IoTHubDeviceTwin_Create_return_null_if_input_parameter_serviceClie
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_SRS_IOTHUBDEVICETWIN_12_003: [ IoTHubDeviceTwin_Create shall allocate memory for a new IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE instance ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_005: [ If the allocation successful, IoTHubDeviceTwin_Create shall create a IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE from the given IOTHUB_SERVICE_CLIENT_AUTH_HANDLE and return with it ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_006: [ IoTHubDeviceTwin_Create shall allocate memory and copy hostName to result-hostName by calling mallocAndStrcpy_s. ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_008: [ IoTHubDeviceTwin_Create shall allocate memory and copy iothubName to result->iothubName by calling mallocAndStrcpy_s. ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_010: [ IoTHubDeviceTwin_Create shall allocate memory and copy iothubSuffix to result->iothubSuffix by calling mallocAndStrcpy_s. ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_012: [ IoTHubDeviceTwin_Create shall allocate memory and copy sharedAccessKey to result->sharedAccessKey by calling mallocAndStrcpy_s. ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_014: [ IoTHubDeviceTwin_Create shall allocate memory and copy keyName to `result->keyName` by calling mallocAndStrcpy_s. ]*/
 TEST_FUNCTION(IoTHubDeviceTwin_Create_happy_path)
 {
     // arrange
@@ -432,12 +419,6 @@ TEST_FUNCTION(IoTHubDeviceTwin_Create_happy_path)
     }
 }
 
-/*Tests_SRS_IOTHUBDEVICETWIN_12_004: [ If the allocation failed, IoTHubDeviceTwin_Create shall return NULL ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_007: [ If the mallocAndStrcpy_s fails, IoTHubDeviceTwin_Create shall do clean up and return NULL. ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_009: [ If the mallocAndStrcpy_s fails, IoTHubDeviceTwin_Create shall do clean up and return NULL. ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_011: [ If the mallocAndStrcpy_s fails, IoTHubDeviceTwin_Create shall do clean up and return NULL. ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_013: [ If the mallocAndStrcpy_s fails, IoTHubDeviceTwin_Create shall do clean up and return NULL. ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_015: [ If the mallocAndStrcpy_s fails, IoTHubDeviceTwin_Create shall do clean up and return NULL. ]*/
 TEST_FUNCTION(IoTHubDeviceTwin_Create_non_happy_path)
 {
     // arrange
@@ -478,7 +459,6 @@ TEST_FUNCTION(IoTHubDeviceTwin_Create_non_happy_path)
 
 }
 
-/*Tests_SRS_IOTHUBDEVICETWIN_12_016: [ If the serviceClientDeviceTwinHandle input parameter is NULL IoTHubDeviceTwin_Destroy shall return ]*/
 TEST_FUNCTION(IoTHubDeviceTwin_Destroy_return_if_input_parameter_serviceClientDeviceTwinHandle_is_NULL)
 {
     // arrange
@@ -490,7 +470,6 @@ TEST_FUNCTION(IoTHubDeviceTwin_Destroy_return_if_input_parameter_serviceClientDe
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_SRS_IOTHUBDEVICETWIN_12_017: [ If the serviceClientDeviceTwinHandle input parameter is not NULL IoTHubDeviceTwin_Destroy shall free the memory of it and return ]*/
 TEST_FUNCTION(IoTHubDeviceTwin_Destroy_do_clean_up_and_return_if_input_parameter_serviceClientDeviceTwinHandle_is_not_NULL)
 {
     // arrange
@@ -514,7 +493,6 @@ TEST_FUNCTION(IoTHubDeviceTwin_Destroy_do_clean_up_and_return_if_input_parameter
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_SRS_IOTHUBDEVICETWIN_12_018: [ IoTHubDeviceTwin_GetTwin shall verify the input parameters and if any of them are NULL then return NULL ]*/
 TEST_FUNCTION(IoTHubDeviceTwin_GetTwin_return_NULL_if_input_parameter_serviceClientDeviceTwinHandle_is_NULL)
 {
     // arrange
@@ -528,7 +506,6 @@ TEST_FUNCTION(IoTHubDeviceTwin_GetTwin_return_NULL_if_input_parameter_serviceCli
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_SRS_IOTHUBDEVICETWIN_12_018: [ IoTHubDeviceTwin_GetTwin shall verify the input parameters and if any of them are NULL then return NULL ]*/
 TEST_FUNCTION(IoTHubDeviceTwin_GetTwin_return_NULL_if_input_parameter_deviceId_is_NULL)
 {
     // arrange
@@ -612,12 +589,6 @@ static void set_expected_calls_for_GetDeviceOrModuleTwin_processing()
 
 }
 
-/*Tests_SRS_IOTHUBDEVICETWIN_12_019: [ IoTHubDeviceTwin_GetTwin shall create HTTP GET request URL using the given deviceId using the following format: url/twins/[deviceId] ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_020: [ IoTHubDeviceTwin_GetTwin shall add the following headers to the created HTTP GET request: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_021: [ IoTHubDeviceTwin_GetTwin shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_022: [ IoTHubDeviceTwin_GetTwin shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_023: [ IoTHubDeviceTwin_GetTwin shall execute the HTTP GET request by calling HTTPAPIEX_ExecuteRequest ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_030: [ Otherwise IoTHubDeviceTwin_GetTwin shall save the received deviceTwin to the out parameter and return with it ]*/
 TEST_FUNCTION(IoTHubDeviceTwin_GetTwin_happy_path_status_code_200)
 {
     // arrange
@@ -638,12 +609,6 @@ TEST_FUNCTION(IoTHubDeviceTwin_GetTwin_happy_path_status_code_200)
     free((void*)result);
 }
 
-/*Tests_SRS_IOTHUBDEVICETWIN_12_019: [ IoTHubDeviceTwin_GetTwin shall create HTTP GET request URL using the given deviceId using the following format: url/twins/[deviceId] ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_020: [ IoTHubDeviceTwin_GetTwin shall add the following headers to the created HTTP GET request: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_021: [ IoTHubDeviceTwin_GetTwin shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_022: [ IoTHubDeviceTwin_GetTwin shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_023: [ IoTHubDeviceTwin_GetTwin shall execute the HTTP GET request by calling HTTPAPIEX_ExecuteRequest ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_030: [ Otherwise IoTHubDeviceTwin_GetTwin shall save the received deviceTwin to the out parameter and return with it ]*/
 TEST_FUNCTION(IoTHubDeviceTwin_GetTwin_happy_path_status_code_400)
 {
     // arrange
@@ -663,9 +628,6 @@ TEST_FUNCTION(IoTHubDeviceTwin_GetTwin_happy_path_status_code_400)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_SRS_IOTHUBDEVICETWIN_12_024: [ If any of the call fails during the HTTP creation IoTHubDeviceTwin_GetTwin shall fail and return NULL ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_025: [ If any of the HTTPAPI call fails IoTHubDeviceTwin_GetTwin shall fail and return NULL ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_026: [ IoTHubDeviceTwin_GetTwin shall verify the received HTTP status code and if it is not equal to 200 then return NULL ]*/
 TEST_FUNCTION(IoTHubDeviceTwin_GetTwin_non_happy_path)
 {
     // arrange
@@ -780,7 +742,6 @@ TEST_FUNCTION(IoTHubDeviceTwin_GetModuleTwin_happy_path_status_code_200)
 }
 
 
-/*Tests_SRS_IOTHUBDEVICETWIN_12_031: [ IoTHubDeviceTwin_UpdateTwin shall verify the input parameters and if any of them are NULL then return NULL ]*/
 TEST_FUNCTION(IoTHubDeviceTwin_UpdateTwin_return_NULL_if_input_parameter_serviceClientDeviceTwinHandle_is_NULL)
 {
     // arrange
@@ -795,7 +756,6 @@ TEST_FUNCTION(IoTHubDeviceTwin_UpdateTwin_return_NULL_if_input_parameter_service
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_SRS_IOTHUBDEVICETWIN_12_031: [ IoTHubDeviceTwin_UpdateTwin shall verify the input parameters and if any of them are NULL then return NULL ]*/
 TEST_FUNCTION(IoTHubDeviceTwin_UpdateTwin_return_NULL_if_input_parameter_deviceId_is_NULL)
 {
     // arrange
@@ -809,7 +769,6 @@ TEST_FUNCTION(IoTHubDeviceTwin_UpdateTwin_return_NULL_if_input_parameter_deviceI
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_SRS_IOTHUBDEVICETWIN_12_031: [ IoTHubDeviceTwin_UpdateTwin shall verify the input parameters and if any of them are NULL then return NULL ]*/
 TEST_FUNCTION(IoTHubDeviceTwin_UpdateTwin_return_NULL_if_input_parameter_deviceTwinJson_is_NULL)
 {
     // arrange
@@ -841,13 +800,6 @@ static void set_expected_calls_for_UpdateDeviceOrModuleTwin_processing()
         .IgnoreArgument(1);
 }
 
-/*Tests_SRS_IOTHUBDEVICETWIN_12_034: [ IoTHubDeviceTwin_UpdateTwin shall allocate memory for response buffer by calling BUFFER_new ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_039: [ IoTHubDeviceTwin_UpdateTwin shall create an HTTP PATCH request using deviceTwinJson ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_040: [ IoTHubDeviceTwin_UpdateTwin shall create an HTTP PATCH request using the createdfollowing HTTP headers: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_041: [ IoTHubDeviceTwin_UpdateTwin shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_042: [ IoTHubDeviceTwin_UpdateTwin shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_043: [ IoTHubDeviceTwin_UpdateTwin shall execute the HTTP PATCH request by calling HTTPAPIEX_ExecuteRequest ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_047: [ Otherwise IoTHubDeviceTwin_UpdateTwin shall save the received updated device twin to the out parameter and return with it ]*/
 TEST_FUNCTION(IoTHubDeviceTwin_UpdateTwin_happy_path_status_code_200)
 {
     // arrange
@@ -872,13 +824,6 @@ TEST_FUNCTION(IoTHubDeviceTwin_UpdateTwin_happy_path_status_code_200)
     free((void*)result);
 }
 
-/*Tests_SRS_IOTHUBDEVICETWIN_12_034: [ IoTHubDeviceTwin_UpdateTwin shall allocate memory for response buffer by calling BUFFER_new ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_039: [ IoTHubDeviceTwin_UpdateTwin shall create an HTTP PATCH request using deviceTwinJson ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_040: [ IoTHubDeviceTwin_UpdateTwin shall create an HTTP PATCH request using the createdfollowing HTTP headers: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_041: [ IoTHubDeviceTwin_UpdateTwin shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_042: [ IoTHubDeviceTwin_UpdateTwin shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_043: [ IoTHubDeviceTwin_UpdateTwin shall execute the HTTP PATCH request by calling HTTPAPIEX_ExecuteRequest ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_047: [ Otherwise IoTHubDeviceTwin_UpdateTwin shall save the received updated device twin to the out parameter and return with it ]*/
 TEST_FUNCTION(IoTHubDeviceTwin_UpdateTwin_happy_path_status_code_400)
 {
     // arrange
@@ -905,11 +850,6 @@ TEST_FUNCTION(IoTHubDeviceTwin_UpdateTwin_happy_path_status_code_400)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_SRS_IOTHUBDEVICETWIN_12_033: [ If the creation fails, IoTHubDeviceTwin_UpdateTwin shall return NULL ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_035: [ If the allocation failed, IoTHubDeviceTwin_UpdateTwin shall return NULL ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_044: [ If any of the call fails during the HTTP creation IoTHubDeviceTwin_UpdateTwin shall fail and return NULL ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_045: [ If any of the HTTPAPI call fails IoTHubDeviceTwin_UpdateTwin shall fail and return NULL ]*/
-/*Tests_SRS_IOTHUBDEVICETWIN_12_046: [ IoTHubDeviceTwin_UpdateTwin shall verify the received HTTP status code and if it is not equal to 200 then return NULL ]*/
 TEST_FUNCTION(IoTHubDeviceTwin_UpdateTwin_non_happy_path)
 {
     // arrange

@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 /** @file iothub_device_client.h
-*    @brief Extends the IoTHubCLient_LL with additional features.
+*    @brief Extends the IoTHubDeviceClient_LL with additional features.
 *
 *    @details IoTHubDeviceClient extends the IoTHubDeviceClient_LL
 *             with 2 features:
@@ -24,7 +24,13 @@
 #include "iothub_client_core.h"
 #include "iothub_device_client_ll.h"
 
+
 #ifndef IOTHUB_DEVICE_CLIENT_INSTANCE_TYPE
+/**  
+* @brief   Handle corresponding to a convenience layer device client instance. 
+* 
+* @remarks See https://github.com/Azure/azure-iot-sdk-c/blob/main/doc/threading_notes.md for more details about convenience layer versus lower layer (LL) threading models.
+*/
 typedef IOTHUB_CLIENT_CORE_HANDLE IOTHUB_DEVICE_CLIENT_HANDLE;
 #define IOTHUB_DEVICE_CLIENT_INSTANCE_TYPE
 #endif // IOTHUB_CLIENT_INSTANCE
@@ -48,7 +54,7 @@ extern "C"
     *                   <pre>HostName=[IoT Hub name goes here].[IoT Hub suffix goes here, e.g., private.azure-devices-int.net];DeviceId=[Device ID goes here];SharedAccessSignature=SharedAccessSignature sr=[IoT Hub name goes here].[IoT Hub suffix goes here, e.g., private.azure-devices-int.net]/devices/[Device ID goes here]&sig=[SAS Token goes here]&se=[Expiry Time goes here];</pre>
     *                </blockquote>
     *
-    * @return    A non-NULL @c IOTHUB_DEVICE_CLIENT_HANDLE value that is used when
+    * @return    A non-NULL #IOTHUB_DEVICE_CLIENT_HANDLE value that is used when
     *             invoking other functions for IoT Hub client and @c NULL on failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CLIENT_HANDLE, IoTHubDeviceClient_CreateFromConnectionString, const char*, connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol);
@@ -57,12 +63,12 @@ extern "C"
     * @brief    Creates a IoT Hub client for communication with an existing IoT
     *           Hub using the specified parameters.
     *
-    * @param    config    Pointer to an @c IOTHUB_CLIENT_CONFIG structure
+    * @param    config    Pointer to an #IOTHUB_CLIENT_CONFIG structure
     *
     *           The API does not allow sharing of a connection across multiple
     *           devices. This is a blocking call.
     *
-    * @return   A non-NULL @c IOTHUB_DEVICE_CLIENT_HANDLE value that is used when
+    * @return   A non-NULL #IOTHUB_DEVICE_CLIENT_HANDLE value that is used when
     *           invoking other functions for IoT Hub client and @c NULL on failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CLIENT_HANDLE, IoTHubDeviceClient_Create, const IOTHUB_CLIENT_CONFIG*, config);
@@ -72,12 +78,12 @@ extern "C"
     *           Hub using the specified parameters.
     *
     * @param    transportHandle     TRANSPORT_HANDLE which represents a connection.
-    * @param    config              Pointer to an @c IOTHUB_CLIENT_CONFIG structure
+    * @param    config              Pointer to an #IOTHUB_CLIENT_CONFIG structure
     *
     *           The API allows sharing of a connection across multiple
     *           devices. This is a blocking call.
     *
-    * @return   A non-NULL @c IOTHUB_DEVICE_CLIENT_HANDLE value that is used when
+    * @return   A non-NULL #IOTHUB_DEVICE_CLIENT_HANDLE value that is used when
     *           invoking other functions for IoT Hub client and @c NULL on failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CLIENT_HANDLE, IoTHubDeviceClient_CreateWithTransport, TRANSPORT_HANDLE, transportHandle, const IOTHUB_CLIENT_CONFIG*, config);
@@ -90,7 +96,7 @@ extern "C"
     * @param    device_id       Pointer to the device Id of the device
     * @param    protocol        Function pointer for protocol implementation
     *
-    * @return    A non-NULL @c IOTHUB_DEVICE_CLIENT_HANDLE value that is used when
+    * @return    A non-NULL #IOTHUB_DEVICE_CLIENT_HANDLE value that is used when
     *            invoking other functions for IoT Hub client and @c NULL on failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_DEVICE_CLIENT_HANDLE, IoTHubDeviceClient_CreateFromDeviceAuth, const char*, iothub_uri, const char*, device_id, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol);
@@ -119,7 +125,7 @@ extern "C"
     *                                           callback. This can be @c NULL.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the IoTHubDeviceClient_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_Destroy() function from within any callback.
     * @remarks
     *           The IOTHUB_MESSAGE_HANDLE instance provided as argument is copied by the function,
     *           so this argument can be destroyed by the calling application right after IoTHubDeviceClient_SendEventAsync returns.
@@ -155,7 +161,7 @@ extern "C"
     *                                       callback. This can be @c NULL.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the IoTHubDeviceClient_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_Destroy() function from within any callback.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -172,7 +178,7 @@ extern "C"
     *                                           callback. This can be @c NULL.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the IoTHubDeviceClient_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_Destroy() function from within any callback.
     *
     * @remark   Callback specified will not receive connection status change notifications for upload connections created with IoTHubDeviceClient_UploadToBlob or IoTHubDeviceClient_UploadMultipleBlocksToBlob.
     *
@@ -191,7 +197,7 @@ extern "C"
     *                                           connection drops to IOT Hub.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the IoTHubDeviceClient_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_Destroy() function from within any callback.
     *
     * @remark   Uploads initiated by IoTHubDeviceClient_UploadToBlob or IoTHubDeviceClient_UploadMultipleBlocksToBlob do not have automatic retries and do not honor the retryPolicy settings.
     *
@@ -209,7 +215,7 @@ extern "C"
     *                                           to IOT Hub.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the IoTHubDeviceClient_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_Destroy() function from within any callback.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -237,7 +243,7 @@ extern "C"
     * @param    optionName              Name of the option.
     * @param    value                   The value.
     *
-    * @remarks  Documentation for configuration options is available at https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/Iothub_sdk_options.md.
+    * @remarks  Documentation for configuration options is available at https://github.com/Azure/azure-iot-sdk-c/blob/main/doc/Iothub_sdk_options.md.
     * 
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -249,7 +255,7 @@ extern "C"
     * @param    iotHubClientHandle          The handle created by a call to the create function.
     * @param    deviceTwinCallback          The callback specified by the device client to be used for updating
     *                                       the desired state. The callback will be called in response to a
-    *                                       request send by the IoTHub services. The payload will be passed to the
+    *                                       request send by the IoT Hub services. The payload will be passed to the
     *                                       callback, along with two version numbers:
     *                                           - Desired:
     *                                           - LastSeenReported:
@@ -257,7 +263,7 @@ extern "C"
     *                                       callback. This can be @c NULL.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the IoTHubDeviceClient_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_Destroy() function from within any callback.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -267,14 +273,15 @@ extern "C"
     * @brief    This API sends a report of the device's properties and their current values.
     *
     * @param    iotHubClientHandle          The handle created by a call to the create function.
-    * @param    reportedState               The current device property values to be 'reported' to the IoTHub.
+    * @param    reportedState               The current device property values to be 'reported' to the IoT Hub.
+    * @param    size                        Number of bytes in @c reportedState.
     * @param    reportedStateCallback       The callback specified by the device client to be called with the
     *                                       result of the transaction.
     * @param    userContextCallback         User specified context that will be provided to the
     *                                       callback. This can be @c NULL.
     *
     *           @b NOTE: The application behavior is undefined if the user calls
-    *           the IoTHubDeviceClient_Destroy function from within any callback.
+    *           the IoTHubDeviceClient_Destroy() function from within any callback.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -290,7 +297,7 @@ extern "C"
     *                                    callback. This can be @c NULL.
     *
     *            @b NOTE: The application behavior is undefined if the user calls
-    *            the IoTHubDeviceClient_Destroy function from within any callback.
+    *            the IoTHubDeviceClient_Destroy() function from within any callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -300,7 +307,7 @@ extern "C"
     * @brief    This API sets the callback for async cloud to device method calls.
     *
     * @param    iotHubClientHandle              The handle created by a call to the create function.
-    * @param    inboundDeviceMethodCallback     The callback which will be called by IoTHub.
+    * @param    deviceMethodCallback            The callback which will be called by IoT Hub.
     * @param    userContextCallback             User specified context that will be provided to the
     *                                           callback. This can be @c NULL.
     *
@@ -315,7 +322,7 @@ extern "C"
     * @param    methodId                The methodId of the Device Method callback.
     * @param    response                The response data for the method callback.
     * @param    response_size           The size of the response data buffer.
-    * @param    status_response         The status response of the method callback.
+    * @param    statusCode              The status response of the method callback.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */

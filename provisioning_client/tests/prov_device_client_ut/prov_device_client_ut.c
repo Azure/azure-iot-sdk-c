@@ -234,7 +234,6 @@ static int should_skip_index(size_t current_index, const size_t skip_array[], si
     return result;
 }
 
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_001: [ If any of the input parameter is NULL `Prov_Device_Create` shall return NULL. ] */
 TEST_FUNCTION(Prov_Device_Create_uri_NULL_fail)
 {
     //arrange
@@ -250,7 +249,6 @@ TEST_FUNCTION(Prov_Device_Create_uri_NULL_fail)
     //cleanup
 }
 
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_001: [ If any of the input parameter is NULL `Prov_Device_Create` shall return NULL. ] */
 TEST_FUNCTION(Prov_Device_Create_scope_id_NULL_fail)
 {
     //arrange
@@ -265,7 +263,6 @@ TEST_FUNCTION(Prov_Device_Create_scope_id_NULL_fail)
     //cleanup
 }
 
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_001: [ If any of the input parameter is NULL `Prov_Device_Create` shall return NULL. ] */
 TEST_FUNCTION(Prov_Device_Create_protocol_NULL_fail)
 {
     //arrange
@@ -281,9 +278,6 @@ TEST_FUNCTION(Prov_Device_Create_protocol_NULL_fail)
     //cleanup
 }
 
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_004: [ The function shall initialize the Lock. ] */
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_006: [ The function shall call the LL layer Prov_Device_LL_Create function and return with it's result. ] */
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_007: [ The function shall initialize the result datastructure. ] */
 TEST_FUNCTION(Prov_Device_Create_succeeds)
 {
     //arrange
@@ -304,9 +298,6 @@ TEST_FUNCTION(Prov_Device_Create_succeeds)
     Prov_Device_Destroy(result);
 }
 
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_003: [ If the memory allocation failed the function shall return NULL. ] */
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_005: [ If the Lock initialization failed the function shall clean up the all resources and return NULL. ] */
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_025: [ If the Client initialization failed the function shall clean up the all resources and return NULL. ] */
 TEST_FUNCTION(Prov_Device_Create_fail)
 {
     //arrange
@@ -339,7 +330,6 @@ TEST_FUNCTION(Prov_Device_Create_fail)
     umock_c_negative_tests_deinit();
 }
 
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_008: [ If the input parameter is NULL `Prov_Device_Destroy` shall return. ] */
 TEST_FUNCTION(Prov_Device_Destroy_handle_NULL)
 {
     //arrange
@@ -354,12 +344,6 @@ TEST_FUNCTION(Prov_Device_Destroy_handle_NULL)
     //cleanup
 }
 
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_009: [ The function shall check the Lock status and if it is not OK set the thread signal to stop. ] */
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_010: [ The function shall check the Lock status and if it is OK set the thread signal to stop and unlock the Lock. ] */
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_011: [ If there is a running worker thread the function shall call join to finish. ] */
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_012: [ The function shall call the LL layer Prov_Device_LL_Destroy with the given handle. ] */
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_013: [ The function shall free the Lock resource with de-init. ] */
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_014: [ The function shall free the device handle resource. ] */
 TEST_FUNCTION(Prov_Device_Destroy_success)
 {
     //arrange
@@ -388,7 +372,6 @@ TEST_FUNCTION(Prov_Device_Destroy_success)
     //cleanup
 }
 
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_009: [ The function shall check the Lock status and if it is not OK set the thread signal to stop. ] */
 TEST_FUNCTION(Prov_Device_Destroy_Lock_fail)
 {
     PROV_DEVICE_HANDLE prov_device_handle = Prov_Device_Create(TEST_PROV_URI, TEST_SCOPE_ID, TEST_PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION);
@@ -438,7 +421,6 @@ TEST_FUNCTION(Prov_Device_Destroy_Lock_fail)
     umock_c_negative_tests_deinit();
 }
 
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_011: [ If there is a running worker thread the function shall call join to finish. ] */
 TEST_FUNCTION(Prov_Device_Destroy_Thread_Join_fail)
 {
     //arrange
@@ -467,7 +449,6 @@ TEST_FUNCTION(Prov_Device_Destroy_Thread_Join_fail)
     //cleanup
 }
 
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_015: [ If the prov_device_handle or register_callback input parameter is NULL `Prov_Device_Register_Device` shall return with invalid argument error. ] */
 TEST_FUNCTION(Prov_Device_Register_Device_handle_NULL_fail)
 {
     //arrange
@@ -483,7 +464,6 @@ TEST_FUNCTION(Prov_Device_Register_Device_handle_NULL_fail)
     //cleanup
 }
 
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_015: [ If the prov_device_handle or register_callback input parameter is NULL `Prov_Device_Register_Device` shall return with invalid argument error. ] */
 TEST_FUNCTION(Prov_Device_Register_Device_callback_NULL_fail)
 {
     //arrange
@@ -499,10 +479,6 @@ TEST_FUNCTION(Prov_Device_Register_Device_callback_NULL_fail)
     //cleanup
 }
 
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_016: [ The function shall start a worker thread with the device instance. ] */
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_018: [ The function shall try to lock the Lock. ] */
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_020: [ The function shall call the LL layer Prov_Device_LL_Register_Device with the given parameters and return with the result. ] */
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_021: [ The function shall unlock the Lock. ] */
 TEST_FUNCTION(Prov_Device_Register_Device_success)
 {
     //arrange
@@ -530,8 +506,6 @@ TEST_FUNCTION(Prov_Device_Register_Device_success)
     Prov_Device_Destroy(prov_device_handle);
 }
 
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_017: [ If the thread initialization failed the function shall return error. ] */
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_019: [ If the locking failed the function shall return with error. ] */
 TEST_FUNCTION(Prov_Device_Register_Device_fail)
 {
     //arrange
@@ -583,7 +557,6 @@ TEST_FUNCTION(Prov_Device_Register_Device_fail)
     Prov_Device_Destroy(prov_device_handle);
 }
 
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_022: [ If any of the input parameter is NULL `Prov_Device_SetOption` shall return with invalid argument error. ] */
 TEST_FUNCTION(Prov_Device_SetOption_handle_NULL_fail)
 {
     //arrange
@@ -599,7 +572,6 @@ TEST_FUNCTION(Prov_Device_SetOption_handle_NULL_fail)
     //cleanup
 }
 
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_022: [ If any of the input parameter is NULL `Prov_Device_SetOption` shall return with invalid argument error. ] */
 TEST_FUNCTION(Prov_Device_SetOption_option_name_NULL_fail)
 {
     //arrange
@@ -615,7 +587,6 @@ TEST_FUNCTION(Prov_Device_SetOption_option_name_NULL_fail)
     //cleanup
 }
 
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_022: [ If any of the input parameter is NULL `Prov_Device_SetOption` shall return with invalid argument error. ] */
 TEST_FUNCTION(Prov_Device_SetOption_value_NULL_fail)
 {
     //arrange
@@ -631,7 +602,6 @@ TEST_FUNCTION(Prov_Device_SetOption_value_NULL_fail)
     //cleanup
 }
 
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_023: [ The function shall call the LL layer Prov_Device_LL_SetOption with the given parameters and return with the result. ] */
 TEST_FUNCTION(Prov_Device_SetOption_success)
 {
     //arrange
@@ -658,7 +628,6 @@ TEST_FUNCTION(Prov_Device_SetOption_success)
     Prov_Device_Destroy(prov_device_handle);
 }
 
-/* Tests_SRS_PROV_DEVICE_CLIENT_12_024: [ The function shall call the LL layer Prov_Device_LL_GetVersionString and return with the result. ] */
 TEST_FUNCTION(Prov_Device_GetVersionString_success)
 {
     //arrange

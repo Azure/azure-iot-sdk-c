@@ -167,7 +167,6 @@ static int should_skip_index(size_t current_index, const size_t skip_array[], si
 
 /* UNIT TESTS BEGIN */
 
-/*Test_PROV_TPM_ATTESTATION_22_001: [ If the given handle, tpm_att, is NULL, tpmAttestation_getEndorsementKey shall return NULL ]*/
 TEST_FUNCTION(tpmAttestation_getEndorsementKey_null_handle)
 {
     //arrange
@@ -182,7 +181,6 @@ TEST_FUNCTION(tpmAttestation_getEndorsementKey_null_handle)
     //cleanup
 }
 
-/*Test_PROV_TPM_ATTESTATION_22_002: [ Otherwise, tpmAttestation_getEndorsementKey shall return the endorsement key contained in tpm_att ]*/
 TEST_FUNCTION(tpmAttestation_getEndorsementKey_success)
 {
     //arrange

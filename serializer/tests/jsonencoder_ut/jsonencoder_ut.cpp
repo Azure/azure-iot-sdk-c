@@ -567,12 +567,6 @@ DECLARE_GLOBAL_MOCK_METHOD_2(CJSONMocks, , int, STRING_concat, STRING_HANDLE, s1
 DECLARE_GLOBAL_MOCK_METHOD_2(CJSONMocks, , int, STRING_concat_with_STRING, STRING_HANDLE, s1, STRING_HANDLE, s2);
 DECLARE_GLOBAL_MOCK_METHOD_1(CJSONMocks, , const char*, STRING_c_str, STRING_HANDLE, s);
 
-/*all (applicable) tests in this file also test this: Tests_SRS_JSON_ENCODER_99_022:[ There is no hierarchy defined in the string. All strings are considered to be "root" level.]
- because they test that the objects created are of type "NUMBER" of "STRING" and not JSON_DATATYPE_OBJECT for example*/
-
-/*by design there's no way to handle two JSON objects at the same time, so 
-Tests_SRS_JSON_ENCODER_99_002:[ The module shall produce only one JSON object at a time.] */
-
 static int NoCloneFunction(void** destination, const void* source)
 {
     *destination = (void*)source;
@@ -637,7 +631,6 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             }
         }
 
-        /* Tests_SRS_JSON_ENCODER_99_032:[If any of the arguments passed to JSONEncoder_EncodeTree is NULL then JSON_ENCODER_INVALID_ARG shall be returned.] */
         TEST_FUNCTION(JSONEncoder_When_TreeHandle_Is_NULL_EncodeTree_Fails)
         {
             // arrange
@@ -649,7 +642,6 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_INVALID_ARG, result);
             mocks->AssertActualAndExpectedCalls();
         }
-        /* Tests_SRS_JSON_ENCODER_99_032:[If any of the arguments passed to JSONEncoder_EncodeTree is NULL then JSON_ENCODER_INVALID_ARG shall be returned.] */
         TEST_FUNCTION(JSONEncoder_When_Buffer_Is_NULL_EncodeTree_Fails)
         {
             // arrange
@@ -662,7 +654,6 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             mocks->AssertActualAndExpectedCalls();
         }
-        /* Tests_SRS_JSON_ENCODER_99_032:[If any of the arguments passed to JSONEncoder_EncodeTree is NULL then JSON_ENCODER_INVALID_ARG shall be returned.] */
         TEST_FUNCTION(JSONEncoder_When_ToString_Function_Is_NULL_EncodeTree_Fails)
         {
             // arrange
@@ -678,7 +669,6 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
         }
        
 
-        /*Tests_SRS_JSON_ENCODER_99_035:[ JSON encoder shall inquire the number of child nodes (further called childCount) of the current node (given by parameter treeHandle.]*/
         TEST_FUNCTION(JSONEncoder_EncodeTree_when_MultiTree_GetChildCount_fails_fails)
         {
             ///arrange
@@ -695,7 +685,6 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             mocks->AssertActualAndExpectedCalls();
         }
 
-        /*Tests_SRS_JSON_ENCODER_99_036:[ The string "{" shall be added to the output;]*/
         TEST_FUNCTION(JSONEncoder_EncodeTree_when_adding_open_paranthesis_fails_fails)
         {
             ///arrange
@@ -710,10 +699,10 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
 
-        /*Tests_SRS_JSON_ENCODER_99_036:[ The string "{" shall be added to the output;]*/
         TEST_FUNCTION(JSONEncoder_EncodeTree_adds_an_opening_curly_paranthesis)
         {
             ///arrange
@@ -728,9 +717,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             (void)JSONEncoder_EncodeTree(TEST_MULTITREE_HANDLE_1, global_bufferTemp, TestFunc_NodesAreStrings);
 
             ///assert
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
         TEST_FUNCTION(JSONEncoder_EncodeTree_iterates_over_children_1) /*notice how this tree has NO children*/
         {
             ///arrange
@@ -746,17 +735,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             ///assert
             //basically not throws from the mocking simulators
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_2*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -811,17 +792,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_2*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -839,17 +812,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_MULTITREE_ERROR, result);
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_2*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -871,17 +836,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_2*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -910,17 +867,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_2*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -956,17 +905,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_2*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -1004,17 +945,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_2*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -1058,17 +991,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_2*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -1114,17 +1039,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_2*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -1178,17 +1095,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_2*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -1239,17 +1148,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }        
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -1321,17 +1222,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -1351,17 +1244,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_MULTITREE_ERROR, result);
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -1390,17 +1275,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -1430,17 +1307,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }        
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -1470,17 +1339,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_MULTITREE_ERROR, result);
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -1518,17 +1379,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -1565,17 +1418,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -1616,17 +1461,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -1671,17 +1508,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -1727,17 +1556,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_TOSTRING_FUNCTION_ERROR, result);
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -1788,17 +1609,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -1844,17 +1657,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -1909,17 +1714,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -1977,17 +1774,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -2047,17 +1836,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -2119,17 +1900,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -2195,17 +1968,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -2275,17 +2040,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -2357,17 +2114,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_3*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -2462,19 +2211,11 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
         
 
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -2493,17 +2234,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_MULTITREE_ERROR, result);
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -2532,17 +2265,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -2576,17 +2301,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -2624,17 +2341,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -2672,17 +2381,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -2722,17 +2423,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -2777,17 +2470,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -2836,17 +2521,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -2893,17 +2570,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -2954,17 +2623,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -3019,17 +2680,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -3088,17 +2741,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -3151,17 +2796,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -3224,17 +2861,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -3296,17 +2925,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_MULTITREE_ERROR, result);
            
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -3377,17 +2998,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -3452,17 +3065,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -3536,17 +3141,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -3623,17 +3220,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -3714,17 +3303,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -3804,17 +3385,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -3900,17 +3473,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -4000,17 +3565,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -4094,17 +3651,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_TOSTRING_FUNCTION_ERROR, result);
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_4*/
         /*The below test shall be copy&pasted several times (as many as filing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -4197,18 +3746,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -4307,17 +3847,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -4336,17 +3868,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_MULTITREE_ERROR, result);
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -4374,17 +3898,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -4416,17 +3932,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -4461,17 +3969,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -4509,17 +4009,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -4559,17 +4051,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -4611,17 +4095,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -4669,17 +4145,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -4723,17 +4191,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -4779,17 +4239,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
 
-           ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -4843,17 +4295,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -4913,17 +4357,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -4982,17 +4418,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -5055,17 +4483,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -5132,17 +4552,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -5207,17 +4619,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_TOSTRING_FUNCTION_ERROR, result);
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -5289,17 +4693,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
             
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -5365,17 +4761,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
                         
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -5453,17 +4841,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -5547,17 +4927,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             
 
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -5634,17 +5006,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -5733,17 +5097,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -5836,17 +5192,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -5934,17 +5282,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_TOSTRING_FUNCTION_ERROR, result);
             
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -6033,17 +5373,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -6132,7 +5464,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_ERROR, result);
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }        
 
         /*so it turns out I can write tests at about 8 pair of child:value / day*/
@@ -6142,15 +5475,6 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
         /*so the focus will be on getting the right value out of the encoder*/
 
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -6166,15 +5490,6 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ASSERT_ARE_EQUAL(char_ptr, "{\"subtree\":{\"child4\":\"value4\", \"child5\":\"value5\"}, \"child1\":\"value1\"}", STRING_c_str(global_bufferTemp));
 
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -6189,15 +5504,6 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_OK, result);
             ASSERT_ARE_EQUAL(char_ptr, "{\"child1\":\"value1\", \"subtree\":{\"child4\":\"value4\", \"child5\":\"value5\"}}", STRING_c_str(global_bufferTemp));
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -6212,15 +5518,6 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_OK, result);
             ASSERT_ARE_EQUAL(char_ptr, "{\"subtree\":{\"child4\":\"value4\", \"child5\":\"value5\"}, \"child1\":\"value1\", \"child2\":\"value2\"}", STRING_c_str(global_bufferTemp));
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -6235,15 +5532,6 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_OK, result);
             ASSERT_ARE_EQUAL(char_ptr, "{\"child1\":\"value1\", \"subtree\":{\"child4\":\"value4\", \"child5\":\"value5\"}, \"child2\":\"value2\"}", STRING_c_str(global_bufferTemp));
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -6258,15 +5546,6 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_OK, result);
             ASSERT_ARE_EQUAL(char_ptr, "{\"child1\":\"value1\", \"child2\":\"value2\", \"subtree\":{\"child4\":\"value4\", \"child5\":\"value5\"}}", STRING_c_str(global_bufferTemp));
         }        
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -6281,15 +5560,6 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_OK, result);
             ASSERT_ARE_EQUAL(char_ptr, "{\"subtree\":{\"child4\":\"value4\", \"child5\":\"value5\"}, \"child1\":\"value1\", \"child2\":\"value2\", \"child3\":\"value3\"}", STRING_c_str(global_bufferTemp));
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -6304,15 +5574,6 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_OK, result);
             ASSERT_ARE_EQUAL(char_ptr, "{\"child1\":\"value1\", \"subtree\":{\"child4\":\"value4\", \"child5\":\"value5\"}, \"child2\":\"value2\", \"child3\":\"value3\"}", STRING_c_str(global_bufferTemp));
         }        
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -6327,15 +5588,6 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_OK, result);
             ASSERT_ARE_EQUAL(char_ptr, "{\"child1\":\"value1\", \"child2\":\"value2\", \"subtree\":{\"child4\":\"value4\", \"child5\":\"value5\"}, \"child3\":\"value3\"}", STRING_c_str(global_bufferTemp));
         }
-        /*Tests_SRS_JSON_ENCODER_99_037:[ For every child, the following actions shall take place in order to produce name:value:]*/
-        /*Tests_SRS_JSON_ENCODER_99_039:[ The child name shall be retrieved by a call to MultiTree_GetChild followed by a MultiTree_GetName.]*/
-        /*Tests_SRS_JSON_ENCODER_99_040:[ After retrieval, it shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_041:[ A "\":" (single quote followed by colon) shall be added to the output.]*/
-        /*Tests_SRS_JSON_ENCODER_99_042:[ If the child has zero children, then the function toStringFunc shall be invoked for the value (as computed by MultiTree_GetValue) of that child]*/
-        /*Tests_SRS_JSON_ENCODER_99_047:[If toString function returns an error then JSON_Encoder_EncodeTree shall return JSON_ENCODER_TOSTRING_FUNCTION_ERROR]*/
-        /*Tests_SRS_JSON_ENCODER_99_043:[ If the child has children, then JSONEncoder_EncodeTree  shall be invoked for every of these children.]*/
-        /*Tests_SRS_JSON_ENCODER_99_044:[ A "," shall be added for every child, except the last one.]*/
-        /*Tests_SRS_JSON_ENCODER_99_045:[ The string "}" shall be added to the output]*/
         /*This is the baseline for tree_5_1*/
         /*The below test shall be copy&pasted several times (as many as failing points there are, that
         is the number of STRICT_EXPECTED_CALLS + the number of blablalballbaFunction_call_count;*/
@@ -6350,7 +5602,6 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
             ASSERT_ARE_EQUAL(JSON_ENCODER_RESULT, JSON_ENCODER_OK, result);
             ASSERT_ARE_EQUAL(char_ptr, "{\"child1\":\"value1\", \"child2\":\"value2\", \"child3\":\"value3\", \"subtree\":{\"child4\":\"value4\", \"child5\":\"value5\"}}", STRING_c_str(global_bufferTemp));
         }
-        /*Tests_SRS_JSON_ENCODER_99_047:[ JSONEncoder_CharPtr_ToString shall return JSON_ENCODER_TOSTRING_INVALID_ARG if destination or value parameters passed to it are NULL.]*/
         TEST_FUNCTION(JSONEncoder_CharPtr_ToString_with_NULL_destination_fails)
         {
             ///arrange
@@ -6360,9 +5611,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_TOSTRING_RESULT, JSON_ENCODER_TOSTRING_INVALID_ARG, result);
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_047:[ JSONEncoder_CharPtr_ToString shall return JSON_ENCODER_TOSTRING_INVALID_ARG if destination or value parameters passed to it are NULL.]*/
         TEST_FUNCTION(JSONEncoder_CharPtr_ToString_with_NULL_value_fails)
         {
             ///arrange
@@ -6372,10 +5623,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             ///assert
             ASSERT_ARE_EQUAL(JSON_ENCODER_TOSTRING_RESULT, JSON_ENCODER_TOSTRING_INVALID_ARG, result);
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }        
-        /*Tests_SRS_JSON_ENCODER_99_048:[JSONEncoder_CharPtr_ToString shall use strcpy_s to copy from value to destination.]*/
-        /*Tests_SRS_JSON_ENCODER_99_050:[ If strcpy_s doesn't fail, then JSONEncoder_CharPtr_ToString shall return JSON_ENCODER_TOSTRING_OK]*/
         TEST_FUNCTION(JSONEncoder_CharPtr_ToString_uses_strcpy_s)
         {
             ///arrange
@@ -6390,9 +5640,9 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             ASSERT_ARE_EQUAL(JSON_ENCODER_TOSTRING_RESULT, JSON_ENCODER_TOSTRING_OK, result);
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
-        /*Tests_SRS_JSON_ENCODER_99_048:[JSONEncoder_CharPtr_ToString shall use strcpy_s to copy from value to destination.]*/
         TEST_FUNCTION(JSONEncoder_CharPtr_ToString_fails_when_strcpy_s_fails)
         {
             ///arrange
@@ -6408,7 +5658,8 @@ BEGIN_TEST_SUITE(JSONEncoder_ut)
 
             ASSERT_ARE_EQUAL(JSON_ENCODER_TOSTRING_RESULT, JSON_ENCODER_TOSTRING_ERROR, result);
 
-            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), mocks->CompareActualAndExpectedCalls().c_str());
+            std::string tmp_str = mocks->CompareActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(tchar_ptr, _T(""), tmp_str.c_str());
         }
 
 END_TEST_SUITE(JSONEncoder_ut)

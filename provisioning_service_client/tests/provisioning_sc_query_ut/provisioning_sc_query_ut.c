@@ -818,7 +818,6 @@ TEST_FUNCTION(queryType_stringToEnum_invalid_string)
     //cleanup
 }
 
-/*Tests_PROV_QUERY_22_001: [ queryResponse_free shall free all memory in the structure pointed to by query_resp ]*/
 TEST_FUNCTION(queryResponse_free_null)
 {
     //arrange
@@ -832,7 +831,6 @@ TEST_FUNCTION(queryResponse_free_null)
     //cleanup
 }
 
-/*Tests_PROV_QUERY_22_001: [ queryResponse_free shall free all memory in the structure pointed to by query_resp ]*/
 TEST_FUNCTION(queryResponse_free_ie_with_results)
 {
     //arrange
@@ -856,7 +854,6 @@ TEST_FUNCTION(queryResponse_free_ie_with_results)
     //cleanup
 }
 
-/*Tests_PROV_QUERY_22_001: [ queryResponse_free shall free all memory in the structure pointed to by query_resp ]*/
 TEST_FUNCTION(queryResponse_free_ie_no_results)
 {
     //arrange
@@ -874,7 +871,6 @@ TEST_FUNCTION(queryResponse_free_ie_no_results)
     //cleanup
 }
 
-/*Tests_PROV_QUERY_22_001: [ queryResponse_free shall free all memory in the structure pointed to by query_resp ]*/
 TEST_FUNCTION(queryResponse_free_eg_with_results)
 {
     //arrange
@@ -898,7 +894,6 @@ TEST_FUNCTION(queryResponse_free_eg_with_results)
     //cleanup
 }
 
-/*Tests_PROV_QUERY_22_001: [ queryResponse_free shall free all memory in the structure pointed to by query_resp ]*/
 TEST_FUNCTION(queryResponse_free_eg_no_results)
 {
     //arrange
@@ -916,7 +911,6 @@ TEST_FUNCTION(queryResponse_free_eg_no_results)
     //cleanup
 }
 
-/*Tests_PROV_QUERY_22_001: [ queryResponse_free shall free all memory in the structure pointed to by query_resp ]*/
 TEST_FUNCTION(queryResponse_free_drs_with_results)
 {
     //arrange
@@ -940,7 +934,6 @@ TEST_FUNCTION(queryResponse_free_drs_with_results)
     //cleanup
 }
 
-/*Tests_PROV_QUERY_22_001: [ queryResponse_free shall free all memory in the structure pointed to by query_resp ]*/
 TEST_FUNCTION(queryResponse_free_drs_no_results)
 {
     //arrange

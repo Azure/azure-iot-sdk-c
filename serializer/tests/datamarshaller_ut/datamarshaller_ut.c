@@ -280,7 +280,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
 
     /* DataMarshaller_Create */
 
-    /*Tests_SRS_DATA_MARSHALLER_99_019:[ DataMarshaller_Create shall return NULL if any argument is NULL.]*/
     TEST_FUNCTION(DataMarshaller_Create_with_NULL_Model_Handle_fails)
     {
         ///arrange
@@ -292,8 +291,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         ASSERT_IS_NULL(res);
     }
 
-    /* Tests_SRS_DATA_MARSHALLER_99_018:[ DataMarshaller_Create shall create a new DataMarshaller instance and on success it shall return a non NULL handle.]*/
-    /* Tests_SRS_DATA_MARSHALLER_99_051:[DataMarshaller_Create shall initialize a BufferProcess instance and associate it with the newly created DataMarshaller instance.] */
     TEST_FUNCTION(DataMarshaller_Create_succeeds)
     {
         ///arrange
@@ -311,9 +308,7 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DataMarshaller_Destroy(res);
     }
 
-    /* Tests_SRS_DATA_MARSHALLER_99_018:[ DataMarshaller_Create shall create a new DataMarshaller instance and on success it shall return a non NULL handle.]*/
 
-    /* Tests_SRS_DATA_MARSHALLER_99_051:[DataMarshaller_Create shall initialize a BufferProcess instance and associate it with the newly created DataMarshaller instance.] */
     TEST_FUNCTION(DataMarshaller_Create_Twice_Yields_2_Different_Handles)
     {
         ///arrange
@@ -339,7 +334,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
 
     /* DataMarshaller_Destroy */
 
-    /*Tests_SRS_DATA_MARSHALLER_99_022:[ DataMarshaller_Destroy shall free all resources associated with the dataMarshallerHandle argument.]*/
     TEST_FUNCTION(DataMarshaller_Destroy_succeeds_1)
     {
         ///arrange
@@ -356,7 +350,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /*Tests_SRS_DATA_MARSHALLER_99_024:[ When called with a NULL handle, DataMarshaller_Destroy shall do nothing.]*/
     TEST_FUNCTION(DataMarshaller_Destroy_With_A_NULL_Handle_Does_Nothing)
     {
         /*Comments: "shall do nothing" is impossible to test, but we can try something*/
@@ -372,8 +365,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
 
     /* DataMarshaller_SendData */
 
-    /* Tests_SRS_DATA_MARSHALLER_99_033:[ DATA_MARSHALLER_INVALID_ARG shall be returned if the valueCount is zero.] */
-    /* Tests_SRS_DATA_MARSHALLER_99_034:[All argument checks shall be performed before calling any other modules.] */
     TEST_FUNCTION(DataMarshaller_SendData_with_Zero_Value_Count_Fails)
     {
         ///arrange
@@ -394,8 +385,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DataMarshaller_Destroy(handle);
     }
 
-    /*Tests_SRS_DATA_MARSHALLER_99_007:[ DATA_MARSHALLER_INVALID_MODEL_PROPERTY shall be returned when any of the items in values contain invalid data]*/
-    /*Tests_SRS_DATA_MARSHALLER_99_034:[All argument checks shall be performed before calling any other modules.]*/
     TEST_FUNCTION(DataMarshaller_SendData_with_PropertyName_NULL_fails)
     {
         ///arrange
@@ -417,8 +406,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DataMarshaller_Destroy(handle);
     }
 
-    /*Tests_SRS_DATA_MARSHALLER_99_007:[ DATA_MARSHALLER_INVALID_MODEL_PROPERTY shall be returned when any of the items in values contain invalid data]*/
-    /*Tests_SRS_DATA_MARSHALLER_99_034:[All argument checks shall be performed before calling any other modules.]*/
     TEST_FUNCTION(DataMarshaller_SendData_with_Value_NULL_In_The_DATA_MARSHALLER_VALUE_fails)
     {
         ///arrange
@@ -440,8 +427,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DataMarshaller_Destroy(handle);
     }
 
-    /*Tests_SRS_DATA_MARSHALLER_99_007:[ DATA_MARSHALLER_INVALID_MODEL_PROPERTY shall be returned when any of the items in values contain invalid data]*/
-    /*Tests_SRS_DATA_MARSHALLER_99_034:[All argument checks shall be performed before calling any other modules.]*/
     TEST_FUNCTION(DataMarshaller_SendData_with_Second_PropertyName_NULL_fails)
     {
         ///arrange
@@ -465,8 +450,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DataMarshaller_Destroy(handle);
     }
 
-    /*Tests_SRS_DATA_MARSHALLER_99_007:[ DATA_MARSHALLER_INVALID_MODEL_PROPERTY shall be returned when any of the items in values contain invalid data]*/
-    /*Tests_SRS_DATA_MARSHALLER_99_034:[All argument checks shall be performed before calling any other modules.]*/
     TEST_FUNCTION(DataMarshaller_SendData_with_Second_Value_NULL_In_The_DATA_MARSHALLER_VALUE_fails)
     {
         ///arrange
@@ -490,8 +473,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DataMarshaller_Destroy(handle);
     }
 
-    /*Tests_SRS_DATA_MARSHALLER_99_004:[ DATA_MARSHALLER_INVALID_ARG shall be returned when the function has detected an invalid parameter (NULL) being passed to the function.]*/
-    /*Tests_SRS_DATA_MARSHALLER_99_034:[All argument checks shall be performed before calling any other modules.]*/
     TEST_FUNCTION(DataMarshaller_SendData_with_NULL_values_fails)
     {
         ///arrange
@@ -512,7 +493,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DataMarshaller_Destroy(handle);
     }
 
-    /*Tests_SRS_DATA_MARSHALLER_99_004:[ DATA_MARSHALLER_INVALID_ARG shall be returned when the function has detected an invalid parameter (NULL) being passed to the function.]*/
     TEST_FUNCTION(DataMarshaller_SendData_with_NULL_destination_fails)
     {
         ///arrange
@@ -533,7 +513,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DataMarshaller_Destroy(handle);
     }
 
-    /*Tests_SRS_DATA_MARSHALLER_99_004:[ DATA_MARSHALLER_INVALID_ARG shall be returned when the function has detected an invalid parameter (NULL) being passed to the function.]*/
     TEST_FUNCTION(DataMarshaller_SendData_with_NULL_destinationSize_fails)
     {
         ///arrange
@@ -554,7 +533,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DataMarshaller_Destroy(handle);
     }
 
-    /* Tests_SRS_DATA_MARSHALLER_99_035:[DATA_MARSHALLER_MULTITREE_ERROR shall be returned in case any MultiTree API call fails.] */
     TEST_FUNCTION(DataMarshaller_SendData_When_MultiTree_Create_Fails_Then_Fails)
     {
         ///arrange
@@ -579,7 +557,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DataMarshaller_Destroy(handle);
     }
 
-    /* Tests_SRS_DATA_MARSHALLER_99_035:[DATA_MARSHALLER_MULTITREE_ERROR shall be returned in case any MultiTree API call fails.] */
     TEST_FUNCTION(DataMarshaller_SendData_When_MultiTree_AddLeaf_With_Property_Value_Fails_Then_Fails)
     {
         ///arrange
@@ -612,7 +589,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DataMarshaller_Destroy(handle);
     }
 
-    /* Tests_SRS_DATA_MARSHALLER_99_035:[DATA_MARSHALLER_MULTITREE_ERROR shall be returned in case any MultiTree API call fails.] */
     TEST_FUNCTION(DataMarshaller_SendData_When_MultiTree_AddLeaf_With_The_Second_Property_Value_Fails_Then_Fails)
     {
         ///arrange
@@ -651,7 +627,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DataMarshaller_Destroy(handle);
     }
 
-    /* Tests_SRS_DATA_MARSHALLER_99_027:[ DATA_MARSHALLER_JSON_ENCODER_ERROR shall be returned when JSONEncoder returns an error code.] */
     TEST_FUNCTION(DataMarshaller_SendData_When_Encoding_The_Values_Tree_To_JSON_Fails_Then_Fails)
     {
         ///arrange
@@ -690,8 +665,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DataMarshaller_Destroy(handle);
     }
 
-    /* Tests_SRS_DATAMARSHALLER_01_002: [If the includePropertyPath argument passed to DataMarshaller_Create was false and the number of values passed to SendData is greater than 1 and at least one of them is a struct, DataMarshaller_SendData shall fallback to  including the complete property path in the output JSON.] */
-    /*Tests_SRS_DATAMARSHALLER_02_007: [DataMarshaller_SendData shall copy in the output parameters *destination, *destinationSize the content and the content length of the encoded JSON tree.] */
     TEST_FUNCTION(when_includepropertypath_is_false_and_value_count_is_greater_than_1_and_one_of_them_is_a_struct_the_property_path_is_included)
     {
         ///arrange
@@ -742,7 +715,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DataMarshaller_Destroy(handle);
     }
 
-    /*Tests_SRS_DATAMARSHALLER_02_006: [The complete JSON object shall be handed over to IoTHubClient by a call to IoTHubClient_LL_SendEventAsync if parameter transportType of _Create was TRANSPORT_LL.] */
     TEST_FUNCTION(DataMarshaller_SendData_sends_to_LL_layer_succeeds)
     {
         ///arrange
@@ -790,7 +762,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DataMarshaller_Destroy(handle);
     }
 
-    /* Tests_SRS_DATAMARSHALLER_01_002: [If the includePropertyPath argument passed to DataMarshaller_Create was false and the number of values passed to SendData is greater than 1 and at least one of them is a struct, DataMarshaller_SendData shall fallback to  including the complete property path in the output JSON.] */
     TEST_FUNCTION(when_includepropertypath_is_false_and_value_count_is_greater_than_1_and_one_but_no_structs_SendData_succeeds)
     {
         ///arrange
@@ -838,7 +809,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DataMarshaller_Destroy(handle);
     }
 
-    /* Tests_SRS_DATA_MARSHALLER_99_039:[ If the includePropertyPath argument passed to DataMarshaller_Create was true each property shall be placed in the appropriate position in the JSON according to its path in the model.] */
     TEST_FUNCTION(when_includePropertyPath_is_true_the_property_name_is_placed_in_the_JSON_and_SendAsync_is_called)
     {
         ///arrange
@@ -884,8 +854,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DataMarshaller_Destroy(handle);
     }
 
-    /* Tests_SRS_DATAMARSHALLER_01_001: [If the includePropertyPath argument passed to DataMarshaller_Create was false and only one struct is being sent, the relative path of the value passed to DataMarshaller_SendData - including property name - shall be ignored and the value shall be placed at JSON root.] */
-    /* Tests_SRS_DATAMARSHALLER_01_004: [In this case the members of the struct shall be added as leafs into the MultiTree, each leaf having the name of the struct member.] */
     TEST_FUNCTION(when_includePropertyPath_is_false_and_one_struct_is_being_sent_the_property_name_is_not_placed_in_the_JSON_and_SendAsync_is_called)
     {
         ///arrange
@@ -932,7 +900,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DataMarshaller_Destroy(handle);
     }
 
-    /* Tests_SRS_DATA_MARSHALLER_99_035:[DATA_MARSHALLER_MULTITREE_ERROR shall be returned in case any MultiTree API call fails.] */
     TEST_FUNCTION(when_adding_the_first_member_of_the_struct_fails_then_senddata_fails)
     {
         ///arrange
@@ -962,7 +929,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DataMarshaller_Destroy(handle);
     }
 
-    /* Tests_SRS_DATA_MARSHALLER_99_035:[DATA_MARSHALLER_MULTITREE_ERROR shall be returned in case any MultiTree API call fails.] */
     TEST_FUNCTION(when_adding_the_second_member_of_the_struct_fails_then_senddata_fails)
     {
         ///arrange
@@ -994,7 +960,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DataMarshaller_Destroy(handle);
     }
 
-    /* Tests_SRS_DATAMARSHALLER_01_003: [DATA_MARSHALLER_ERROR shall be returned for any errors when calling IoTHubMessage APIs.] */
     TEST_FUNCTION(when_STRING_new_fails_SendData_Fails)
     {
         ///arrange
@@ -1024,7 +989,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DataMarshaller_Destroy(handle);
     }
 
-    /*Tests_SRS_DATA_MARSHALLER_02_021: [ If argument dataMarshallerHandle is NULL then DataMarshaller_SendData_ReportedProperties shall fail and return DATA_MARSHALLER_INVALID_ARG. ]*/
     TEST_FUNCTION(DataMarshaller_SendData_ReportedProperties_with_NULL_dataMarshallerHandle_fails)
     {
         ///arrange
@@ -1046,7 +1010,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         VECTOR_destroy(values);
     }
 
-    /*Tests_SRS_DATA_MARSHALLER_02_008: [ If argument values is NULL then DataMarshaller_SendData_ReportedProperties shall fail and return DATA_MARSHALLER_INVALID_ARG. ]*/
     TEST_FUNCTION(DataMarshaller_SendData_ReportedProperties_with_NULL_values_fails)
     {
         ///arrange
@@ -1066,7 +1029,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DataMarshaller_Destroy(handle);
     }
 
-    /*Tests_SRS_DATA_MARSHALLER_02_009: [ If argument destination NULL then DataMarshaller_SendData_ReportedProperties shall fail and return DATA_MARSHALLER_INVALID_ARG. ]*/
     TEST_FUNCTION(DataMarshaller_SendData_ReportedProperties_with_NULL_destination_fails)
     {
         ///arrange
@@ -1089,7 +1051,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DataMarshaller_Destroy(handle);
     }
 
-    /*Tests_SRS_DATA_MARSHALLER_02_010: [ If argument destinationSize NULL then DataMarshaller_SendData_ReportedProperties shall fail and return DATA_MARSHALLER_INVALID_ARG. ]*/
     TEST_FUNCTION(DataMarshaller_SendData_ReportedProperties_with_NULL_destinationSize_fails)
     {
         ///arrange
@@ -1152,15 +1113,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
             .IgnoreArgument_value();
     }
 
-    /*Tests_SRS_DATA_MARSHALLER_02_011: [ DataMarshaller_SendData_ReportedProperties shall ignore the value of includePropertyPath and shall consider it to be true. ]*/
-    /*Tests_SRS_DATA_MARSHALLER_02_012: [ DataMarshaller_SendData_ReportedProperties shall create an empty JSON_Value. ]*/
-    /*Tests_SRS_DATA_MARSHALLER_02_013: [ DataMarshaller_SendData_ReportedProperties shall get the object behind the JSON_Value by calling json_object. ]*/
-    /*Tests_SRS_DATA_MARSHALLER_02_014: [ For every reported property, DataMarshaller_SendData_ReportedProperties shall get the reported property's JSON value (as string) by calling AgentDataTypes_ToString. ]*/
-    /*Tests_SRS_DATA_MARSHALLER_02_015: [ DataMarshaller_SendData_ReportedProperties shall import the JSON value (as string) by calling json_parse_string. ]*/
-    /*Tests_SRS_DATA_MARSHALLER_02_016: [ DataMarshaller_SendData_ReportedProperties shall replace all the occurences of / with . in the reported property paths. ]*/
-    /*Tests_SRS_DATA_MARSHALLER_02_017: [ DataMarshaller_SendData_ReportedProperties shall use json_object_dotset_value passing the reported property path and the imported json value. ]*/
-    /*Tests_SRS_DATA_MARSHALLER_02_018: [ DataMarshaller_SendData_ReportedProperties shall use json_serialize_to_string_pretty to produce the output JSON string that fills out parameters destination and destionationSize. ]*/
-    /*Tests_SRS_DATA_MARSHALLER_02_020: [ Otherwise DataMarshaller_SendData_ReportedProperties shall succeed and return DATA_MARSHALLER_OK. ]*/
     TEST_FUNCTION(DataMarshaller_SendData_ReportedProperties_happy_path)
     {
         ///arrange
@@ -1188,7 +1140,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DataMarshaller_Destroy(handle);
     }
 
-    /*Tests_SRS_DATA_MARSHALLER_02_019: [ If any failure occurs, DataMarshaller_SendData_ReportedProperties shall fail and return DATA_MARSHALLER_ERROR. ]*/
     TEST_FUNCTION(DataMarshaller_SendData_ReportedProperties_unhappy_paths)
     {
         ///arrange
@@ -1290,7 +1241,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
             .IgnoreArgument_value();
     }
 
-    /*Tests_SRS_DATA_MARSHALLER_02_016: [ DataMarshaller_SendData_ReportedProperties shall replace all the occurences of / with . in the reported property paths. ]*/
     TEST_FUNCTION(DataMarshaller_SendData_ReportedProperties_of_model_in_model_happy_path)
     {
         ///arrange

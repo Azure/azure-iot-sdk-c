@@ -17,11 +17,18 @@ generate_cppunittest_wrapper(${theseTestsName})
 
 set(${theseTestsName}_c_files
 	../../src/iothubtransport_amqp_twin_messenger.c
-	../../../c-utility/tests/real_test_files/real_singlylinkedlist.c
-	../../../c-utility/tests/real_test_files/real_constbuffer.c
+	${SHARED_UTIL_REAL_TEST_FOLDER}/real_singlylinkedlist.c
+	${SHARED_UTIL_REAL_TEST_FOLDER}/real_constbuffer.c
 )
 
 set(${theseTestsName}_h_files
 )
 
-build_c_test_artifacts(${theseTestsName} ON "tests/azure_iothub_client_tests")
+file(COPY ../global_valgrind_suppression.supp DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+build_c_test_artifacts(${theseTestsName} ON "tests/azure_iothub_client_tests"
+  ADDITIONAL_LIBS
+      aziotsharedutil
+  VALGRIND_SUPPRESSIONS_FILE
+      global_valgrind_suppression.supp
+)

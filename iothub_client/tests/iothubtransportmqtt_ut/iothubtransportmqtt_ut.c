@@ -33,10 +33,10 @@ static void real_free(void* ptr)
 #include "azure_c_shared_utility/xio.h"
 #include "azure_c_shared_utility/tlsio.h"
 #include "internal/iothubtransport_mqtt_common.h"
-#include "internal/iothubtransport.h"
 
 #undef ENABLE_MOCKS
 
+#include "internal/iothubtransport.h"
 #include "iothubtransportmqtt.h"
 
 static const char* TEST_STRING_VALUE = "FULLY_QUALIFIED_HOSTNAME";
@@ -400,7 +400,6 @@ static void SetupIothubTransportConfig(IOTHUBTRANSPORT_CONFIG* config, const cha
     config->upperConfig = &g_iothubClientConfig;
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_001: [IoTHubTransportMqtt_Create shall create a TRANSPORT_LL_HANDLE by calling into the IoTHubMqttAbstract_Create function.] */
 TEST_FUNCTION(IoTHubTransportMqtt_Create_success)
 {
     // arrange
@@ -419,13 +418,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_success)
     //cleanup
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_012: [ `getIoTransportProvider` shall return the `XIO_HANDLE` returned by `xio_create`. ] */
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_01_001: [ `getIoTransportProvider` shall obtain the TLS IO interface handle by calling `platform_get_default_tlsio`. ]*/
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_01_002: [ The TLS IO parameters shall be a `TLSIO_CONFIG` structure filled as below: ]*/
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_01_003: [ - `hostname` shall be set to `fully_qualified_name`. ]*/
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_01_004: [ - `port` shall be set to 8883. ]*/
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_01_005: [ - `underlying_io_interface` shall be set to NULL. ]*/
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_01_006: [ - `underlying_io_parameters` shall be set to NULL. ]*/
 TEST_FUNCTION(IoTHubTransportMqtt_getSocketsIOTransport_success)
 {
     // arrange
@@ -457,13 +449,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_getSocketsIOTransport_success)
     //cleanup
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_012: [ `getIoTransportProvider` shall return the `XIO_HANDLE` returned by `xio_create`. ] */
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_01_001: [ `getIoTransportProvider` shall obtain the TLS IO interface handle by calling `platform_get_default_tlsio`. ]*/
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_01_002: [ The TLS IO parameters shall be a `TLSIO_CONFIG` structure filled as below: ]*/
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_01_003: [ - `hostname` shall be set to `fully_qualified_name`. ]*/
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_01_004: [ - `port` shall be set to 8883. ]*/
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_01_005: [ - `underlying_io_interface` shall be set to NULL. ]*/
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_01_006: [ - `underlying_io_parameters` shall be set to NULL. ]*/
 TEST_FUNCTION(IoTHubTransportMqtt_getSocketsIOTransport_ignores_proxy_options)
 {
     // arrange
@@ -499,7 +484,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_getSocketsIOTransport_ignores_proxy_options)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_013: [ If `platform_get_default_tlsio` returns NULL, `getIoTransportProvider` shall return NULL. ] */
 TEST_FUNCTION(IoTHubTransportMqtt_getSocketsIOTransport_platform_get_default_tlsio_NULL_fail)
 {
     // arrange
@@ -520,7 +504,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_getSocketsIOTransport_platform_get_default_tls
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_002: [ IoTHubTransportMqtt_Destroy shall destroy the TRANSPORT_LL_HANDLE by calling into the IoTHubMqttAbstract_Destroy function. ] */
 TEST_FUNCTION(IoTHubTransportMqtt_Destroy_success)
 {
     // arrange
@@ -540,7 +523,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_Destroy_success)
     //cleanup
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_005: [ IoTHubTransportMqtt_Subscribe shall subscribe the TRANSPORT_LL_HANDLE by calling into the IoTHubMqttAbstract_Subscribe function. ] */
 TEST_FUNCTION(IoTHubTransportMqtt_Subscribe_success)
 {
     // arrange
@@ -561,7 +543,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_Subscribe_success)
     //cleanup
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_25_012: [** IoTHubTransportMqtt_SetRetryPolicy shall call into the IoTHubMqttAbstract_SetRetryPolicy function. ] */
 TEST_FUNCTION(IoTHubTransportMqtt_SetRetryPolicy_success)
 {
     // arrange
@@ -583,7 +564,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_SetRetryPolicy_success)
 
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_026: [ IoTHubTransportMqtt_Subscribe_DeviceMethod shall subscribe the TRANSPORT_LL_HANDLE by calling into the IoTHubMqttAbstract_Subscribe_DeviceMethod function. ] */
 TEST_FUNCTION(IoTHubTransportMqtt_Subscribe_DeviceTwin_success)
 {
     // arrange
@@ -604,7 +584,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_Subscribe_DeviceTwin_success)
     //cleanup
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_024: [ IoTHubTransportMqtt_Unsubscribe_DeviceTwin shall shall call into the IoTHubMqttAbstract_Unsubscribe_DeviceTwin function. ] */
 TEST_FUNCTION(IoTHubTransportMqtt_Unsubscribe_DeviceTwin_success)
 {
     // arrange
@@ -624,7 +603,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_Unsubscribe_DeviceTwin_success)
     //cleanup
 }
 
-// Tests_SRS_IOTHUB_MQTT_TRANSPORT_09_001: [ IoTHubTransportMqtt_GetTwinAsync shall shall call into the IoTHubTransport_MQTT_Common_GetTwinAsync function. ]
 TEST_FUNCTION(IoTHubTransportMqtt_GetTwinAsync_success)
 {
     // arrange
@@ -684,7 +662,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_Unsubscribe_Method_success)
     //cleanup
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_006: [ IoTHubTransportMqtt_Unsubscribe shall unsubscribe the TRANSPORT_LL_HANDLE by calling into the IoTHubMqttAbstract_Unsubscribe function. ] */
 TEST_FUNCTION(IoTHubTransportMqtt_Unsubscribe_success)
 {
     // arrange
@@ -704,7 +681,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_Unsubscribe_success)
     //cleanup
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_007: [ IoTHubTransportMqtt_DoWork shall call into the IoTHubMqttAbstract_DoWork function. ] */
 TEST_FUNCTION(IoTHubTransportMqtt_DoWork_success)
 {
     // arrange
@@ -724,7 +700,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_DoWork_success)
     //cleanup
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_008: [ IoTHubTransportMqtt_GetSendStatus shall get the send status by calling into the IoTHubMqttAbstract_GetSendStatus function. ] */
 TEST_FUNCTION(IoTHubTransportMqtt_GetSendStatus_success)
 {
     // arrange
@@ -747,7 +722,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_GetSendStatus_success)
     //cleanup
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_009: [ IoTHubTransportMqtt_SetOption shall set the options by calling into the IoTHubMqttAbstract_SetOption function. ] */
 TEST_FUNCTION(IoTHubTransportMqtt_SetOption_success)
 {
     // arrange
@@ -768,7 +742,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_SetOption_success)
     //cleanup
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_003: [ IoTHubTransportMqtt_Register shall register the TRANSPORT_LL_HANDLE by calling into the IoTHubMqttAbstract_Register function. ] */
 TEST_FUNCTION(IoTHubTransportMqtt_Register_success)
 {
     // arrange
@@ -794,7 +767,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_Register_success)
     //cleanup
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_004: [ IoTHubTransportMqtt_Unregister shall register the TRANSPORT_LL_HANDLE by calling into the IoTHubMqttAbstract_Unregister function. ] */
 TEST_FUNCTION(IoTHubTransportMqtt_Unregister_success)
 {
     // arrange
@@ -810,7 +782,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_Unregister_success)
     //cleanup
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_023: [ IoTHubTransportMqtt_DeviceMethod_Response shall call into the IoTHubMqttAbstract_DeviceMethod_Response function. ] */
 TEST_FUNCTION(IoTHubTransportMqtt_DeviceMethod_Response_success)
 {
     // arrange
@@ -827,7 +798,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_DeviceMethod_Response_success)
     //cleanup
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_010: [ IoTHubTransportMqtt_GetHostname shall get the hostname by calling into the IoTHubMqttAbstract_GetHostname function. ] */
 TEST_FUNCTION(IoTHubTransportMqtt_GetHostname_success)
 {
     // arrange
@@ -848,7 +818,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_GetHostname_success)
     //cleanup
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_10_001: [ IoTHubTransportMqtt_SendMessageDisposition shall send the message disposition by calling into the IoTHubMqttAbstract_SendMessageDisposition function. ] */
 TEST_FUNCTION(IoTHubTransport_MQTT_SendMessageDisposition_success)
 {
     // arrange
@@ -866,7 +835,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_SendMessageDisposition_success)
     // cleanup
 }
 
-// Tests_SRS_IOTHUB_MQTT_TRANSPORT_31_14: [ IoTHubTransportMqtt_Subscribe shall subscribe the TRANSPORT_LL_HANDLE by calling into IoTHubTransport_MQTT_Common_Subscribe_InputQueue. ]
 TEST_FUNCTION(IoTHubTransport_MQTT_Subscribe_InputQueue_success)
 {
     // arrange
@@ -884,7 +852,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Subscribe_InputQueue_success)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_31_015: [IotHubTransportMQTT_Unsubscribe_InputQueue shall unsubscribe by calling into IoTHubTransport_MQTT_Common_Unsubscribe_InputQueue. ]
 TEST_FUNCTION(IoTHubTransport_MQTT_Unsubscribe_InputQueue_success)
 {
     // arrange

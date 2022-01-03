@@ -101,19 +101,70 @@ extern "C"
 #include "azure_c_shared_utility/optionhandler.h"
 #include "azure_c_shared_utility/socketio.h"
 
-#include "azure_uamqp_c/cbs.h"
-#include "azure_uamqp_c/amqpvalue.h"
-
 #include "iothub_client_core_ll.h"
 #include "iothub_client_options.h"
 #include "internal/iothub_client_private.h"
 #include "iothub_client_version.h"
 #include "internal/iothub_client_retry_control.h"
+
+#undef ENABLE_MOCK_FILTERING_SWITCH
+#define ENABLE_MOCK_FILTERING
+
+#define please_mock_amqp_connection_create MOCK_ENABLED
+#define please_mock_amqp_connection_destroy MOCK_ENABLED
+#define please_mock_amqp_connection_do_work MOCK_ENABLED
+#define please_mock_amqp_connection_get_cbs_handle MOCK_ENABLED
+#define please_mock_amqp_connection_get_session_handle MOCK_ENABLED
+#define please_mock_amqp_connection_set_logging MOCK_ENABLED
+#define please_mock_amqp_device_clone_message_disposition_info MOCK_ENABLED
+#define please_mock_amqp_device_create MOCK_ENABLED
+#define please_mock_amqp_device_delayed_stop MOCK_ENABLED
+#define please_mock_amqp_device_destroy MOCK_ENABLED
+#define please_mock_amqp_device_destroy_message_disposition_info MOCK_ENABLED
+#define please_mock_amqp_device_do_work MOCK_ENABLED
+#define please_mock_amqp_device_get_send_status MOCK_ENABLED
+#define please_mock_amqp_device_get_twin_async MOCK_ENABLED
+#define please_mock_amqp_device_send_event_async MOCK_ENABLED
+#define please_mock_amqp_device_send_message_disposition MOCK_ENABLED
+#define please_mock_amqp_device_send_twin_update_async MOCK_ENABLED
+#define please_mock_amqp_device_set_option MOCK_ENABLED
+#define please_mock_amqp_device_start_async MOCK_ENABLED
+#define please_mock_amqp_device_stop MOCK_ENABLED
+#define please_mock_amqp_device_subscribe_for_twin_updates MOCK_ENABLED
+#define please_mock_amqp_device_subscribe_message MOCK_ENABLED
+#define please_mock_amqp_device_unsubscribe_for_twin_updates MOCK_ENABLED
+#define please_mock_amqp_device_unsubscribe_message MOCK_ENABLED
+#define please_mock_amqpvalue_create_map MOCK_ENABLED
+#define please_mock_amqpvalue_create_string MOCK_ENABLED
+#define please_mock_amqpvalue_create_symbol MOCK_ENABLED
+#define please_mock_cbs_create MOCK_ENABLED
+#define please_mock_connection_create2 MOCK_ENABLED
+#define please_mock_iothubtransportamqp_methods_create MOCK_ENABLED
+#define please_mock_iothubtransportamqp_methods_destroy MOCK_ENABLED
+#define please_mock_iothubtransportamqp_methods_respond MOCK_ENABLED
+#define please_mock_iothubtransportamqp_methods_subscribe MOCK_ENABLED
+#define please_mock_iothubtransportamqp_methods_unsubscribe MOCK_ENABLED
+#define please_mock_mqp_connection_do_work MOCK_ENABLED
+#define please_mock_mqp_connection_get_session_handle MOCK_ENABLED
+#define please_mock_mqp_device_destroy MOCK_ENABLED
+#define please_mock_mqp_device_get_send_status MOCK_ENABLED
+#define please_mock_mqp_device_send_event_async MOCK_ENABLED
+#define please_mock_mqp_device_set_option MOCK_ENABLED
+#define please_mock_mqp_device_stop MOCK_ENABLED
+#define please_mock_mqp_device_unsubscribe_message MOCK_ENABLED
+#define please_mock_othubtransportamqp_methods_respond MOCK_ENABLED
+#define please_mock_session_create MOCK_ENABLED
+
+#include "azure_uamqp_c/cbs.h"
+#include "azure_uamqp_c/amqpvalue.h"
 #include "internal/iothubtransportamqp_methods.h"
 #include "internal/iothubtransport_amqp_connection.h"
 #include "internal/iothubtransport_amqp_device.h"
-#include "internal/iothub_message_private.h"
 
+#undef ENABLE_MOCK_FILTERING_SWITCH
+#undef ENABLE_MOCK_FILTERING
+
+#include "internal/iothub_message_private.h"
 #include "internal/iothub_transport_ll_private.h"
 
 MOCKABLE_FUNCTION(, bool, Transport_MessageCallbackFromInput, IOTHUB_MESSAGE_HANDLE, message, void*, ctx);
@@ -1288,7 +1339,6 @@ TEST_FUNCTION_CLEANUP(TestMethodCleanup)
 
 /* IoTHubTransport_AMQP_Common_Register */
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_010: [ `IoTHubTransport_AMQP_Common_Register` shall create a new iothubtransportamqp_methods instance by calling `iothubtransportamqp_methods_create` while passing to it the the fully qualified domain name, the device Id, and optional module Id. ]*/
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_Register_creates_a_new_methods_handler)
 {
     // arrange
@@ -1319,7 +1369,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_Register_creates_a_new_methods_handler
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_011: [ If `iothubtransportamqp_methods_create` fails, `IoTHubTransport_AMQP_Common_Register` shall fail and return NULL. ]*/
 TEST_FUNCTION(when_creating_the_methods_handler_fails_then_IoTHubTransport_AMQP_Common_Register_fails)
 {
     // arrange
@@ -1365,7 +1414,6 @@ TEST_FUNCTION(when_creating_the_methods_handler_fails_then_IoTHubTransport_AMQP_
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_012: [IoTHubTransport_AMQP_Common_Unregister shall destroy the C2D methods handler by calling iothubtransportamqp_methods_destroy.]*/
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_Unregister_destroys_the_methods_handler)
 {
     // arrange
@@ -1401,7 +1449,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_Unregister_destroys_the_methods_handle
 
 /* IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod */
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_004: [ If `handle` is NULL, `IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod` shall fail and return a non-zero value. ]*/
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod_with_NULL_handle_fails)
 {
     // arrange
@@ -1415,7 +1462,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod_with_NULL_handl
     ASSERT_ARE_NOT_EQUAL(int, 0, result);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_026: [ `IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod` shall remember that a subscribe is to be performed in the next call to DoWork and on success it shall return 0. ]*/
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod_with_valid_handle_succeeds)
 {
     // arrange
@@ -1451,9 +1497,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod_with_valid_hand
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_026: [ `IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod` shall remember that a subscribe is to be performed in the next call to DoWork and on success it shall return 0. ]*/
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_027: [ The current session handle shall be passed to `iothubtransportamqp_methods_subscribe`. ]*/
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_031: [ Once the device is authenticated, `iothubtransportamqp_methods_subscribe` shall be invoked (subsequent DoWork calls shall not call it if already subscribed). ]
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod_After_Subscribe_succeeds)
 {
     initialize_test_variables();
@@ -1488,7 +1531,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod_After_Subscribe
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_12_001: [ `on_methods_unsubscribed` calls iothubtransportamqp_methods_unsubscribe. ]*/
 TEST_FUNCTION(on_methods_unsubscribed_CALLS_iothubtransportamqp_methods_unsubscribe)
 {
     // arrange
@@ -1527,7 +1569,6 @@ TEST_FUNCTION(on_methods_unsubscribed_CALLS_iothubtransportamqp_methods_unsubscr
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_12_001: [ `on_methods_unsubscribed` calls iothubtransportamqp_methods_unsubscribe. ]*/
 TEST_FUNCTION(on_methods_unsubscribed_re_subscribes)
 {
     // arrange
@@ -1567,7 +1608,6 @@ TEST_FUNCTION(on_methods_unsubscribed_re_subscribes)
 
 /* IoTHubTransport_AMQP_Common_Unsubscribe_DeviceMethod */
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_006: [ If `handle` is NULL, `IoTHubTransport_AMQP_Common_Unsubscribe_DeviceMethod` shall do nothing. ]*/
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_Unsubscribe_With_NULL_handle_does_nothing)
 {
     // arrange
@@ -1578,7 +1618,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_Unsubscribe_With_NULL_handle_does_noth
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_007: [ `IoTHubTransport_AMQP_Common_Unsubscribe_DeviceMethod` shall unsubscribe from receiving C2D method requests by calling `iothubtransportamqp_methods_unsubscribe`. ]*/
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_Unsubscribe_unsubscribes_from_receiving_methods)
 {
     // arrange
@@ -1614,7 +1653,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_Unsubscribe_unsubscribes_from_receivin
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_008: [ If the transport is not subscribed to receive C2D method requests then `IoTHubTransport_AMQP_Common_Unsubscribe_DeviceMethod` shall do nothing. ]*/
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_Unsubscribe_without_subscribe_does_nothing)
 {
     initialize_test_variables();
@@ -1685,7 +1723,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_DoWork_does_not_subscribe_if_SubScribe
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_031: [ `iothubtransportamqp_methods_subscribe` shall only be called once (subsequent DoWork calls shall not call it if already subscribed). ]*/
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_DoWork_does_not_subscribe_if_already_subscribed)
 {
     // arrange
@@ -1723,13 +1760,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_DoWork_does_not_subscribe_if_already_s
 
 /* on_methods_request_received */
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_028: [ On success, `on_methods_request_received` shall return 0. ]*/
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_016: [ `on_methods_request_received` shall create a BUFFER_HANDLE by calling `BUFFER_new`. ]*/
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_017: [ `on_methods_request_received` shall call the `IoTHubClientCore_LL_DeviceMethodComplete` passing the method name, request buffer and size and the newly created BUFFER handle. ]*/
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_020: [ The response bytes shall be obtained by calling `BUFFER_u_char`. ]*/
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_021: [ The response size shall be obtained by calling `BUFFER_length`. ]*/
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_022: [ The status code shall be the return value of the call to `IoTHubClientCore_LL_DeviceMethodComplete`. ]*/
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_023: [ After calling `iothubtransportamqp_methods_respond`, the allocated buffer shall be freed by using BUFFER_delete. ]*/
 TEST_FUNCTION(on_methods_request_received_responds_to_the_method_request)
 {
     // arrange
@@ -1772,7 +1802,6 @@ TEST_FUNCTION(on_methods_request_received_responds_to_the_method_request)
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_029: [ If `iothubtransportamqp_methods_respond` fails, `iothubtransportamqp_methods_respond` shall return a non-zero value. ]*/
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_DeviceMethod_Response_succeed)
 {
     // arrange
@@ -1797,7 +1826,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_DeviceMethod_Response_succeed)
     destroy_transport(handle, NULL, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_029: [ If `iothubtransportamqp_methods_respond` fails, `iothubtransportamqp_methods_respond` shall return a non-zero value. ]*/
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_DeviceMethod_Response_fail)
 {
     // arrange
@@ -1824,7 +1852,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_DeviceMethod_Response_fail)
 
 /* on_methods_error */
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_030: [ `on_methods_error` shall do nothing. ]*/
 TEST_FUNCTION(on_methods_error_does_nothing)
 {
     // arrange
@@ -1859,7 +1886,6 @@ TEST_FUNCTION(on_methods_error_does_nothing)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_001: [If `config` or `config->upperConfig` or `get_io_transport` are NULL then IoTHubTransport_AMQP_Common_Create shall fail and return NULL.]
 TEST_FUNCTION(AMQP_Create_NULL_config)
 {
     // arrange
@@ -1874,7 +1900,6 @@ TEST_FUNCTION(AMQP_Create_NULL_config)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_001: [If `config` or `config->upperConfig` or `get_io_transport` are NULL then IoTHubTransport_AMQP_Common_Create shall fail and return NULL.]
 TEST_FUNCTION(AMQP_Create_NULL_upperConfig)
 {
     // arrange
@@ -1890,7 +1915,6 @@ TEST_FUNCTION(AMQP_Create_NULL_upperConfig)
     ASSERT_IS_NULL(tr_hdl);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_001: [If `config` or `config->upperConfig` or `get_io_transport` are NULL then IoTHubTransport_AMQP_Common_Create shall fail and return NULL.]
 TEST_FUNCTION(AMQP_Create_upperConfig_protocol_NULL)
 {
     // arrange
@@ -1905,7 +1929,6 @@ TEST_FUNCTION(AMQP_Create_upperConfig_protocol_NULL)
     ASSERT_IS_NULL(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_001: [If `config` or `config->upperConfig` or `get_io_transport` are NULL then IoTHubTransport_AMQP_Common_Create shall fail and return NULL.]
 TEST_FUNCTION(AMQP_Create_upperConfig_iotHubName_NULL)
 {
     // arrange
@@ -1931,7 +1954,6 @@ TEST_FUNCTION(AMQP_Create_upperConfig_iotHubName_NULL)
     ASSERT_IS_NULL(handle);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_02_001: [**If `handle` is NULL, `IoTHubTransport_AMQP_Common_GetHostname` shall return NULL.**]**
 TEST_FUNCTION(GetHostName_NULL_handle)
 {
     // arrange
@@ -1945,7 +1967,6 @@ TEST_FUNCTION(GetHostName_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_02_002: [**IoTHubTransport_AMQP_Common_GetHostname shall return a copy of `instance->iothub_target_fqdn`.**]**
 TEST_FUNCTION(GetHostName_success)
 {
     // arrange
@@ -1964,13 +1985,6 @@ TEST_FUNCTION(GetHostName_success)
     destroy_transport(handle, NULL, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_003: [Memory shall be allocated for the transport's internal state structure (`instance`)]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_005: [If `config->upperConfig->protocolGatewayHostName` is NULL, `instance->iothub_target_fqdn` shall be set as `config->upperConfig->iotHubName` + "." + `config->upperConfig->iotHubSuffix`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_006: [If `config->upperConfig->protocolGatewayHostName` is not NULL, `instance->iothub_target_fqdn` shall be set with a copy of it]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_008: [`instance->registered_devices` shall be set using singlylinkedlist_create()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_010: [`get_io_transport` shall be saved on `instance->underlying_io_transport_provider`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_012: [If IoTHubTransport_AMQP_Common_Create succeeds it shall return a pointer to `instance`.]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_124: [`instance->connection_retry_control` shall be set using retry_control_create(), passing defaults EXPONENTIAL_BACKOFF_WITH_JITTER and 0]
 TEST_FUNCTION(Create_success)
 {
     // arrange
@@ -2011,12 +2025,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_Create_callbacks_NULL_fail)
     destroy_transport(handle, NULL, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_002: [IoTHubTransport_AMQP_Common_Create shall fail and return NULL if `config->upperConfig->protocol` is NULL]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_004: [If malloc() fails, IoTHubTransport_AMQP_Common_Create shall fail and return NULL]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_007: [If `instance->iothub_target_fqdn` fails to be set, IoTHubTransport_AMQP_Common_Create shall fail and return NULL]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_009: [If singlylinkedlist_create() fails, IoTHubTransport_AMQP_Common_Create shall fail and return NULL]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_011: [If IoTHubTransport_AMQP_Common_Create fails it shall free any memory it allocated]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_125: [If retry_control_create() fails, IoTHubTransport_AMQP_Common_Create shall fail and return NULL]
 TEST_FUNCTION(Create_failure_checks)
 {
     // arrange
@@ -2052,7 +2060,6 @@ TEST_FUNCTION(Create_failure_checks)
     umock_c_negative_tests_deinit();
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_013: [If `handle` is NULL, IoTHubTransport_AMQP_Common_Destroy shall return immediatelly]
 TEST_FUNCTION(Destroy_NULL_handle)
 {
     // arrange
@@ -2068,8 +2075,6 @@ TEST_FUNCTION(Destroy_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_014: [IoTHubTransport_AMQP_Common_Destroy shall invoke IoTHubTransport_AMQP_Common_Unregister on each of its registered devices.]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_015: [All members of `instance` (including tls_io) shall be destroyed and its memory released]
 TEST_FUNCTION(Destroy_success)
 {
     // arrange
@@ -2093,7 +2098,6 @@ TEST_FUNCTION(Destroy_success)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_17_005: [If `handle`, `device`, `iotHubClientHandle` or `waitingToSend` is NULL, IoTHubTransport_AMQP_Common_Register shall return NULL]
 TEST_FUNCTION(Register_NULL_wts)
 {
     // arrange
@@ -2111,7 +2115,6 @@ TEST_FUNCTION(Register_NULL_wts)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_17_005: [If `handle`, `device`, `iotHubClientHandle` or `waitingToSend` is NULL, IoTHubTransport_AMQP_Common_Register shall return NULL]
 TEST_FUNCTION(Register_NULL_device_config)
 {
     // arrange
@@ -2128,7 +2131,6 @@ TEST_FUNCTION(Register_NULL_device_config)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_17_005: [If `handle`, `device`, `iotHubClientHandle` or `waitingToSend` is NULL, IoTHubTransport_AMQP_Common_Register shall return NULL]
 TEST_FUNCTION(Register_NULL_transport_handle)
 {
     // arrange
@@ -2144,7 +2146,6 @@ TEST_FUNCTION(Register_NULL_transport_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_03_002: [IoTHubTransport_AMQP_Common_Register shall return NULL if `device->deviceId` is NULL.]
 TEST_FUNCTION(Register_NULL_config_device_id)
 {
     // arrange
@@ -2164,7 +2165,6 @@ TEST_FUNCTION(Register_NULL_config_device_id)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_064: [If the device is already registered, IoTHubTransport_AMQP_Common_Register shall fail and return NULL.]
 TEST_FUNCTION(Register_device_already_registered)
 {
     // arrange
@@ -2188,7 +2188,6 @@ TEST_FUNCTION(Register_device_already_registered)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_065: [IoTHubTransport_AMQP_Common_Register shall fail and return NULL if the device is not using an authentication mode compatible with the currently used by the transport.]
 TEST_FUNCTION(Register_CBS_transport_X509_credentials)
 {
     // arrange
@@ -2220,7 +2219,6 @@ TEST_FUNCTION(Register_CBS_transport_X509_credentials)
     destroy_transport(handle, device_handle1, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_065: [IoTHubTransport_AMQP_Common_Register shall fail and return NULL if the device is not using an authentication mode compatible with the currently used by the transport.]
 TEST_FUNCTION(Register_X509_transport_CBS_credentials)
 {
     // arrange
@@ -2252,12 +2250,6 @@ TEST_FUNCTION(Register_X509_transport_CBS_credentials)
     destroy_transport(handle, device_handle1, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_067: [If malloc fails, IoTHubTransport_AMQP_Common_Register shall fail and return NULL.]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_070: [If STRING_construct() fails, IoTHubTransport_AMQP_Common_Register shall fail and return NULL]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_073: [If amqp_device_create() fails, IoTHubTransport_AMQP_Common_Register shall fail and return NULL]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_011: [ If `iothubtransportamqp_methods_create` fails, `IoTHubTransport_AMQP_Common_Register` shall fail and return NULL]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_075: [If it fails to add `amqp_device_instance`, IoTHubTransport_AMQP_Common_Register shall fail and return NULL]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_077: [If IoTHubTransport_AMQP_Common_Register fails, it shall free all memory it allocated]
 TEST_FUNCTION(Register_failure_checks)
 {
     // arrange
@@ -2301,15 +2293,6 @@ TEST_FUNCTION(Register_failure_checks)
 }
 
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_066: [IoTHubTransport_AMQP_Common_Register shall allocate an instance of AMQP_TRANSPORT_DEVICE_STATE to store the state of the new registered device.]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_068: [IoTHubTransport_AMQP_Common_Register shall save the handle references to the IoTHubClient, transport, waitingToSend list on `amqp_device_instance`.]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_069: [A copy of `config->deviceId` shall be saved into `device_state->device_id`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_071: [`amqp_device_instance->device_handle` shall be set using amqp_device_create()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_072: [The configuration for amqp_device_create shall be set according to the authentication preferred by IOTHUB_DEVICE_CONFIG]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_010: [ `IoTHubTransport_AMQP_Common_Register` shall create a new iothubtransportamqp_methods instance by calling `iothubtransportamqp_methods_create` while passing to it the the fully qualified domain name, the device Id, and optional module Id.]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_074: [IoTHubTransport_AMQP_Common_Register shall add the `amqp_device_instance` to `instance->registered_devices`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_076: [If the device is the first being registered on the transport, IoTHubTransport_AMQP_Common_Register shall save its authentication mode as the transport preferred authentication mode]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_078: [IoTHubTransport_AMQP_Common_Register shall return a handle to `amqp_device_instance` as a IOTHUB_DEVICE_HANDLE]
 TEST_FUNCTION(Register_succeeds)
 {
     // arrange
@@ -2332,7 +2315,6 @@ TEST_FUNCTION(Register_succeeds)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_084: [If `handle` is NULL, IoTHubTransport_AMQP_Common_Subscribe shall return a non-zero result]
 TEST_FUNCTION(Subscribe_NULL_handle)
 {
     // arrange
@@ -2349,7 +2331,6 @@ TEST_FUNCTION(Subscribe_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_085: [If `amqp_device_instance` is not registered, IoTHubTransport_AMQP_Common_Subscribe shall return a non-zero result]
 TEST_FUNCTION(Subscribe_device_not_registered)
 {
     // arrange
@@ -2375,8 +2356,6 @@ TEST_FUNCTION(Subscribe_device_not_registered)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_086: [amqp_device_subscribe_message() shall be invoked passing `on_message_received_callback`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_088: [If no failures occur, IoTHubTransport_AMQP_Common_Subscribe shall return 0]
 TEST_FUNCTION(Subscribe_messages_succeeds)
 {
     // arrange
@@ -2402,7 +2381,6 @@ TEST_FUNCTION(Subscribe_messages_succeeds)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_087: [If amqp_device_subscribe_message() fails, IoTHubTransport_AMQP_Common_Subscribe shall return a non-zero result]
 TEST_FUNCTION(Subscribe_messages_failure_checks)
 {
     // arrange
@@ -2447,7 +2425,6 @@ TEST_FUNCTION(Subscribe_messages_failure_checks)
     umock_c_negative_tests_deinit();
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_093: [If `handle` is NULL, IoTHubTransport_AMQP_Common_Subscribe shall return]
 TEST_FUNCTION(Unsubscribe_NULL_handle)
 {
     // arrange
@@ -2463,7 +2440,6 @@ TEST_FUNCTION(Unsubscribe_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_094: [If `amqp_device_instance` is not registered, IoTHubTransport_AMQP_Common_Subscribe shall return]
 TEST_FUNCTION(Unsubscribe_messages_device_not_registered)
 {
     // arrange
@@ -2488,7 +2464,6 @@ TEST_FUNCTION(Unsubscribe_messages_device_not_registered)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_095: [amqp_device_unsubscribe_message() shall be invoked passing `amqp_device_instance->device_handle`]
 TEST_FUNCTION(Unsubscribe_messages_succeeds)
 {
     // arrange
@@ -2516,7 +2491,6 @@ TEST_FUNCTION(Unsubscribe_messages_succeeds)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_096: [If `handle` or `iotHubClientStatus` are NULL, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG]
 TEST_FUNCTION(GetSendStatus_NULL_handle)
 {
     // arrange
@@ -2535,7 +2509,6 @@ TEST_FUNCTION(GetSendStatus_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_096: [If `handle` or `iotHubClientStatus` are NULL, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG]
 TEST_FUNCTION(GetSendStatus_NULL_iotHubClientStatus)
 {
     // arrange
@@ -2559,7 +2532,6 @@ TEST_FUNCTION(GetSendStatus_NULL_iotHubClientStatus)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_098: [If amqp_device_get_send_status() fails, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_ERROR]
 TEST_FUNCTION(GetSendStatus_failure_checks)
 {
     // arrange
@@ -2604,9 +2576,6 @@ TEST_FUNCTION(GetSendStatus_failure_checks)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_097: [IoTHubTransport_AMQP_Common_GetSendStatus shall invoke amqp_device_get_send_status()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_100: [If amqp_device_get_send_status() returns DEVICE_SEND_STATUS_IDLE, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_STATUS_IDLE]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_109: [If no failures occur, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_OK]
 TEST_FUNCTION(GetSendStatus_IDLE_succeeds)
 {
     // arrange
@@ -2634,7 +2603,6 @@ TEST_FUNCTION(GetSendStatus_IDLE_succeeds)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_099: [If amqp_device_get_send_status() returns DEVICE_SEND_STATUS_BUSY, IoTHubTransport_AMQP_Common_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_STATUS_BUSY]
 TEST_FUNCTION(GetSendStatus_BUSY_succeeds)
 {
     // arrange
@@ -2689,7 +2657,6 @@ TEST_FUNCTION(GetSendStatus_waiting_to_send_not_empty_BUSY)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_101: [If `handle`, `option` or `value` are NULL then IoTHubTransport_AMQP_Common_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.]
 TEST_FUNCTION(SetOption_NULL_handle)
 {
     // arrange
@@ -2707,7 +2674,6 @@ TEST_FUNCTION(SetOption_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_101: [If `handle`, `option` or `value` are NULL then IoTHubTransport_AMQP_Common_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.]
 TEST_FUNCTION(SetOption_NULL_name)
 {
     // arrange
@@ -2732,7 +2698,6 @@ TEST_FUNCTION(SetOption_NULL_name)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_101: [If `handle`, `option` or `value` are NULL then IoTHubTransport_AMQP_Common_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.]
 TEST_FUNCTION(SetOption_NULL_value)
 {
     // arrange
@@ -2756,8 +2721,6 @@ TEST_FUNCTION(SetOption_NULL_value)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_102: [If `option` is a device-specific option, it shall be saved and applied to each registered device using amqp_device_set_option()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_103: [If amqp_device_set_option() fails, IoTHubTransport_AMQP_Common_SetOption shall return IOTHUB_CLIENT_ERROR]
 TEST_FUNCTION(SetOption_device_specific_failure_check)
 {
     // arrange
@@ -2789,7 +2752,6 @@ TEST_FUNCTION(SetOption_device_specific_failure_check)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_02_007: [ If `option` is `x509certificate` and the transport preferred authentication method is not x509 then IoTHubTransport_AMQP_Common_SetOption shall return IOTHUB_CLIENT_INVALID_ARG. ]
 TEST_FUNCTION(SetOption_CBS_transport_option_x509certificate)
 {
     // arrange
@@ -2815,7 +2777,6 @@ TEST_FUNCTION(SetOption_CBS_transport_option_x509certificate)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_02_008: [ If `option` is `x509privatekey` and the transport preferred authentication method is not x509 then IoTHubTransport_AMQP_Common_SetOption shall return IOTHUB_CLIENT_INVALID_ARG. ]
 TEST_FUNCTION(SetOption_CBS_transport_option_x509privatekey)
 {
     // arrange
@@ -2841,7 +2802,6 @@ TEST_FUNCTION(SetOption_CBS_transport_option_x509privatekey)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_104: [If `option` is `logtrace`, `value` shall be saved and applied to `instance->connection` using amqp_connection_set_logging()]
 TEST_FUNCTION(SetOption_log_trace)
 {
     // arrange
@@ -2872,10 +2832,6 @@ TEST_FUNCTION(SetOption_log_trace)
     // cleanup
     destroy_transport(handle, device_handle, NULL);
 }
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_105: [If `option` does not match one of the options handled by this module, it shall be passed to `instance->tls_io` using xio_setoption()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_106: [If `instance->tls_io` is NULL, it shall be set invoking instance->underlying_io_transport_provider()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_108: [When `instance->tls_io` is created, IoTHubTransport_AMQP_Common_SetOption shall apply `instance->saved_tls_options` with OptionHandler_FeedOptions()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_03_001: [If no failures occur, IoTHubTransport_AMQP_Common_SetOption shall return IOTHUB_CLIENT_OK.]
 TEST_FUNCTION(SetOption_xio_option_success)
 {
     // arrange
@@ -2910,7 +2866,6 @@ TEST_FUNCTION(SetOption_xio_option_success)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_107: [If instance->underlying_io_transport_provider() fails, IoTHubTransport_AMQP_Common_SetOption shall fail and return IOTHUB_CLIENT_ERROR]
 TEST_FUNCTION(SetOption_xio_option_get_underlying_TLS_fails)
 {
     // arrange
@@ -2939,7 +2894,6 @@ TEST_FUNCTION(SetOption_xio_option_get_underlying_TLS_fails)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_03_001: [If xio_setoption fails, IoTHubTransport_AMQP_Common_SetOption shall return IOTHUB_CLIENT_ERROR.]
 TEST_FUNCTION(SetOption_xio_option_fails)
 {
     // arrange
@@ -2970,7 +2924,6 @@ TEST_FUNCTION(SetOption_xio_option_fails)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_99_002: [If `OPTION_AMQP_REMOTE_IDLE_TIMEOUT_RATIO` value is 0, the test will fail]
 TEST_FUNCTION(SetOption_cl2svc_keep_alive_send_ratio_fail_for_zero)
 {
     // arrange
@@ -2998,7 +2951,6 @@ TEST_FUNCTION(SetOption_cl2svc_keep_alive_send_ratio_fail_for_zero)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_99_003: [If `OPTION_AMQP_REMOTE_IDLE_TIMEOUT_RATIO` value is 1, the test will fail]
 TEST_FUNCTION(SetOption_cl2svc_keep_alive_send_ratio_fail_for_1)
 {
     // arrange
@@ -3026,7 +2978,6 @@ TEST_FUNCTION(SetOption_cl2svc_keep_alive_send_ratio_fail_for_1)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_99_004: [If `OPTION_AMQP_REMOTE_IDLE_TIMEOUT_RATIO` value is 0.875, the test will succeed]
 TEST_FUNCTION(SetOption_cl2svc_keep_alive_send_ratio_success_for_0875)
 {
     // arrange
@@ -3054,9 +3005,6 @@ TEST_FUNCTION(SetOption_cl2svc_keep_alive_send_ratio_success_for_0875)
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_032: [ If `option` is `proxy_data`, `value` shall be used as an `HTTP_PROXY_OPTIONS*`. ]*/
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_033: [ The fields `host_address`, `port`, `username` and `password` shall be saved for later used (needed when creating the underlying IO to be used by the transport). ]*/
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_039: [ If setting the `proxy_data` option succeeds, `IoTHubTransport_AMQP_Common_SetOption` shall return `IOTHUB_CLIENT_OK` ]*/
 TEST_FUNCTION(SetOption_with_proxy_data_copies_the_options_for_later_use)
 {
     // arrange
@@ -3094,7 +3042,6 @@ TEST_FUNCTION(SetOption_with_proxy_data_copies_the_options_for_later_use)
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_034: [ If `host_address` is NULL, `IoTHubTransport_AMQP_Common_SetOption` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
 TEST_FUNCTION(SetOption_proxy_data_with_NULL_host_address_fails)
 {
     // arrange
@@ -3125,7 +3072,6 @@ TEST_FUNCTION(SetOption_proxy_data_with_NULL_host_address_fails)
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_101: [If `handle`, `option` or `value` are NULL then IoTHubTransport_AMQP_Common_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.]*/
 TEST_FUNCTION(SetOption_proxy_data_with_NULL_option_value_fails)
 {
     // arrange
@@ -3150,8 +3096,6 @@ TEST_FUNCTION(SetOption_proxy_data_with_NULL_option_value_fails)
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_036: [ `username` and `password` shall be allowed to be NULL. ]*/
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_039: [ If setting the `proxy_data` option succeeds, `IoTHubTransport_AMQP_Common_SetOption` shall return `IOTHUB_CLIENT_OK` ]*/
 TEST_FUNCTION(SetOption_proxy_data_with_NULL_username_and_password_saves_only_the_hostname)
 {
     // arrange
@@ -3184,7 +3128,6 @@ TEST_FUNCTION(SetOption_proxy_data_with_NULL_username_and_password_saves_only_th
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_037: [ If only one of `username` and `password` is NULL, `IoTHubTransport_AMQP_Common_SetOption` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
 TEST_FUNCTION(SetOption_proxy_data_with_NULL_username_but_non_NULL_password_fails)
 {
     // arrange
@@ -3215,7 +3158,6 @@ TEST_FUNCTION(SetOption_proxy_data_with_NULL_username_but_non_NULL_password_fail
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_037: [ If only one of `username` and `password` is NULL, `IoTHubTransport_AMQP_Common_SetOption` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
 TEST_FUNCTION(SetOption_proxy_data_with_NULL_password_but_non_NULL_username_fails)
 {
     // arrange
@@ -3246,7 +3188,6 @@ TEST_FUNCTION(SetOption_proxy_data_with_NULL_password_but_non_NULL_username_fail
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_040: [ When setting the proxy options succeeds any previously saved proxy options shall be freed. ]*/
 TEST_FUNCTION(SetOption_proxy_data_frees_previously_Saved_proxy_options)
 {
     // arrange
@@ -3302,7 +3243,6 @@ TEST_FUNCTION(SetOption_proxy_data_frees_previously_Saved_proxy_options)
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_035: [ If copying `host_address`, `username` or `password` fails, `IoTHubTransport_AMQP_Common_SetOption` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
 TEST_FUNCTION(when_allocating_proxy_name_fails_SetOption_proxy_data_fails)
 {
     // arrange
@@ -3335,7 +3275,6 @@ TEST_FUNCTION(when_allocating_proxy_name_fails_SetOption_proxy_data_fails)
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_035: [ If copying `host_address`, `username` or `password` fails, `IoTHubTransport_AMQP_Common_SetOption` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
 TEST_FUNCTION(when_allocating_username_fails_SetOption_proxy_data_fails)
 {
     // arrange
@@ -3371,7 +3310,6 @@ TEST_FUNCTION(when_allocating_username_fails_SetOption_proxy_data_fails)
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_035: [ If copying `host_address`, `username` or `password` fails, `IoTHubTransport_AMQP_Common_SetOption` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
 TEST_FUNCTION(when_allocating_password_fails_SetOption_proxy_data_fails)
 {
     // arrange
@@ -3410,7 +3348,6 @@ TEST_FUNCTION(when_allocating_password_fails_SetOption_proxy_data_fails)
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_040: [ When setting the proxy options succeeds any previously saved proxy options shall be freed. ]*/
 TEST_FUNCTION(when_allocating_proxy_name_fails_SetOption_proxy_data_does_not_free_previous_proxy_options)
 {
     // arrange
@@ -3458,7 +3395,6 @@ TEST_FUNCTION(when_allocating_proxy_name_fails_SetOption_proxy_data_does_not_fre
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_040: [ When setting the proxy options succeeds any previously saved proxy options shall be freed. ]*/
 TEST_FUNCTION(when_allocating_username_fails_SetOption_proxy_data_does_not_free_previous_proxy_options)
 {
     // arrange
@@ -3509,7 +3445,6 @@ TEST_FUNCTION(when_allocating_username_fails_SetOption_proxy_data_does_not_free_
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_040: [ When setting the proxy options succeeds any previously saved proxy options shall be freed. ]*/
 TEST_FUNCTION(when_allocating_password_fails_SetOption_proxy_data_does_not_free_previous_proxy_options)
 {
     // arrange
@@ -3563,7 +3498,6 @@ TEST_FUNCTION(when_allocating_password_fails_SetOption_proxy_data_does_not_free_
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_040: [ When setting the proxy options succeeds any previously saved proxy options shall be freed. ]*/
 TEST_FUNCTION(SetOption_proxy_data_with_NULL_hostname_does_not_free_previous_proxy_options)
 {
     // arrange
@@ -3608,7 +3542,6 @@ TEST_FUNCTION(SetOption_proxy_data_with_NULL_hostname_does_not_free_previous_pro
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_040: [ When setting the proxy options succeeds any previously saved proxy options shall be freed. ]*/
 TEST_FUNCTION(SetOption_proxy_data_with_NULL_username_and_non_NULL_password_does_not_free_previous_proxy_options)
 {
     // arrange
@@ -3653,7 +3586,6 @@ TEST_FUNCTION(SetOption_proxy_data_with_NULL_username_and_non_NULL_password_does
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_042: [ If no `proxy_data` option has been set, NULL shall be passed as the argument `amqp_transport_proxy_options` when calling the function `underlying_io_transport_provider()`. ]*/
 TEST_FUNCTION(SetOption_xio_option_get_underlying_TLS_when_proxy_data_was_not_set_passes_down_NULL)
 {
     // arrange
@@ -3683,7 +3615,6 @@ TEST_FUNCTION(SetOption_xio_option_get_underlying_TLS_when_proxy_data_was_not_se
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_041: [ If the `proxy_data` option has been set, the proxy options shall be filled in the argument `amqp_transport_proxy_options` when calling the function `underlying_io_transport_provider()` to obtain the underlying IO handle. ]*/
 TEST_FUNCTION(SetOption_xio_option_get_underlying_TLS_when_proxy_data_was_set_passes_down_the_proxy_options)
 {
     // arrange
@@ -3734,7 +3665,6 @@ TEST_FUNCTION(SetOption_xio_option_get_underlying_TLS_when_proxy_data_was_set_pa
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_038: [ If the underlying IO has already been created, then `IoTHubTransport_AMQP_Common_SetOption` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
 TEST_FUNCTION(SetOption_proxy_data_when_underlying_IO_is_already_created_fails)
 {
     // arrange
@@ -3852,7 +3782,6 @@ TEST_FUNCTION(SetOption_retry_interval_fail)
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_043: [ `IoTHubTransport_AMQP_Common_Destroy` shall free the stored proxy options. ]*/
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_Destroy_frees_proxy_options)
 {
     // arrange
@@ -3901,7 +3830,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_Destroy_frees_proxy_options)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_079: [if `deviceHandle` provided is NULL, IoTHubTransport_AMQP_Common_Unregister shall return.]
 TEST_FUNCTION(Unregister_NULL_handle)
 {
     // arrange
@@ -3917,7 +3845,6 @@ TEST_FUNCTION(Unregister_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_081: [If the device is not registered with this transport, IoTHubTransport_AMQP_Common_Unregister shall return]
 TEST_FUNCTION(Unregister_device_not_registered)
 {
     // arrange
@@ -3942,10 +3869,6 @@ TEST_FUNCTION(Unregister_device_not_registered)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_080: [if `deviceHandle` has a NULL reference to its transport instance, IoTHubTransport_AMQP_Common_Unregister shall return.] (NT)
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_082: [`device_instance` shall be removed from `instance->registered_devices`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_012: [IoTHubTransport_AMQP_Common_Unregister shall destroy the C2D methods handler by calling iothubtransportamqp_methods_destroy]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_083: [IoTHubTransport_AMQP_Common_Unregister shall free all the memory allocated for the `device_instance`]
 TEST_FUNCTION(Unregister_succeeds)
 {
     // arrange
@@ -3968,8 +3891,6 @@ TEST_FUNCTION(Unregister_succeeds)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_089: [IoTHubClientCore_LL_MessageCallback() shall be invoked passing the client and the incoming message handles as parameters]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_091: [If IoTHubClientCore_LL_MessageCallback() succeeds, on_message_received_callback shall return DEVICE_MESSAGE_DISPOSITION_RESULT_NONE]
 TEST_FUNCTION(on_message_received_succeeds)
 {
     // arrange
@@ -4008,7 +3929,6 @@ TEST_FUNCTION(on_message_received_succeeds)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_090: [If IoTHubClientCore_LL_MessageCallback() fails, on_message_received_callback shall return DEVICE_MESSAGE_DISPOSITION_RESULT_RELEASED]
 TEST_FUNCTION(on_message_received_fails)
 {
     // arrange
@@ -4048,24 +3968,6 @@ TEST_FUNCTION(on_message_received_fails)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_019: [If `instance->amqp_connection` is NULL, it shall be established]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_020: [If the amqp_connection is OPENED, the transport shall iterate through each registered device and perform a device-specific do_work on each]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_022: [If `instance->amqp_connection` is not NULL, amqp_connection_do_work shall be invoked]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_023: [If `instance->tls_io` is NULL, it shall be set invoking instance->underlying_io_transport_provider()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_026: [If `transport->connection` is NULL, it shall be created using amqp_connection_create()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_029: [`instance->is_trace_on` shall be set into `AMQP_CONNECTION_CONFIG->is_trace_on`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_110: [If amqp_connection_create() succeeds, IoTHubTransport_AMQP_Common_DoWork shall proceed to invoke amqp_connection_do_work]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_036: [If the device state is DEVICE_STATE_STOPPED, it shall be started]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_037: [If transport is using CBS authentication, amqp_connection_get_cbs_handle() shall be invoked on `instance->connection`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_039: [amqp_connection_get_session_handle() shall be invoked on `instance->connection`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_040: [If amqp_connection_get_session_handle() fails, IoTHubTransport_AMQP_Common_DoWork shall fail and return]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_041: [The device handle shall be started using amqp_device_start_async()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_059: [`new_state` shall be saved in to the transport instance]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_061: [If `new_state` is the same as `previous_state`, on_device_state_changed_callback shall return]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_062: [If `new_state` shall be saved into the `registered_device` instance]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_063: [If `registered_device->time_of_last_state_change` shall be set using get_time()]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_120: [If `new_state` is DEVICE_STATE_STARTED, IoTHubClientCore_LL_ConnectionStatusCallBack shall be invoked with IOTHUB_CLIENT_CONNECTION_AUTHENTICATED and IOTHUB_CLIENT_CONNECTION_OK]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_127: [If `new_state` is DEVICE_STATE_STARTED, retry_control_reset() shall be invoked passing `instance->connection_retry_control`]
 TEST_FUNCTION(DoWork_success)
 {
     // arrange
@@ -4114,8 +4016,6 @@ TEST_FUNCTION(DoWork_success)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_115: [If the AMQP connection is closed by the service side, the connection retry logic shall be triggered]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_126: [The connection retry shall be attempted only if retry_control_should_retry() returns RETRY_ACTION_NOW, or if it fails]
 TEST_FUNCTION(on_amqp_connection_state_changed_CLOSED_unexpectedly)
 {
     // arrange
@@ -4156,7 +4056,6 @@ TEST_FUNCTION(on_amqp_connection_state_changed_CLOSED_unexpectedly)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_016: [If `handle` is NULL, IoTHubTransport_AMQP_Common_DoWork shall return without doing any work]
 TEST_FUNCTION(DoWork_NULL_handle)
 {
     // arrange
@@ -4172,7 +4071,6 @@ TEST_FUNCTION(DoWork_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_024: [If instance->underlying_io_transport_provider() fails, IoTHubTransport_AMQP_Common_DoWork shall fail and return]
 TEST_FUNCTION(DoWork_get_underlying_io_transport_provider_fails)
 {
     // arrange
@@ -4199,7 +4097,6 @@ TEST_FUNCTION(DoWork_get_underlying_io_transport_provider_fails)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_028: [If `transport->preferred_credential_method` is X509, AMQP_CONNECTION_CONFIG shall be set with `create_sasl_io` = false and `create_cbs_connection` = false]
 TEST_FUNCTION(DoWork_sets_amqp_connection_for_X509)
 {
     // arrange
@@ -4231,7 +4128,6 @@ TEST_FUNCTION(DoWork_sets_amqp_connection_for_X509)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_027: [If `transport->preferred_authentication_method` is CBS, AMQP_CONNECTION_CONFIG shall be set with `create_sasl_io` = true and `create_cbs_connection` = true]
 TEST_FUNCTION(DoWork_sets_amqp_connection_for_CBS)
 {
     // arrange
@@ -4259,7 +4155,6 @@ TEST_FUNCTION(DoWork_sets_amqp_connection_for_CBS)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_12_003: [AMQP connection will be configured using the `c2d_keep_alive_freq_secs` value from SetOption ]
 TEST_FUNCTION(DoWork_configures_AMQP_connection_using_c2d_keep_alive_freq_secs)
 {
     // arrange
@@ -4292,7 +4187,6 @@ TEST_FUNCTION(DoWork_configures_AMQP_connection_using_c2d_keep_alive_freq_secs)
     // cleanup
     destroy_transport(handle, device_handle, NULL);
 }
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_99_001: [AMQP connection will be configured using the `cl2svc_keep_alive_send_ratio` value from SetOption ]
 TEST_FUNCTION(DoWork_configures_AMQP_connection_using_cl2svc_keep_alive_send_ratio)
 {
     // arrange
@@ -4327,7 +4221,6 @@ TEST_FUNCTION(DoWork_configures_AMQP_connection_using_cl2svc_keep_alive_send_rat
 }
 
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_121: [If `new_state` is DEVICE_STATE_STOPPED, IoTHubClientCore_LL_ConnectionStatusCallBack shall be invoked with IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED and IOTHUB_CLIENT_CONNECTION_OK]
 TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_OK)
 {
     // arrange
@@ -4355,7 +4248,6 @@ TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_OK)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_122: [If `new_state` is DEVICE_STATE_ERROR_AUTH, IoTHubClientCore_LL_ConnectionStatusCallBack shall be invoked with IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED and IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL]
 TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_auth_error)
 {
     // arrange
@@ -4383,7 +4275,6 @@ TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_auth_error)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_123: [If `new_state` is DEVICE_STATE_ERROR_AUTH_TIMEOUT or DEVICE_STATE_ERROR_MSG, IoTHubClientCore_LL_ConnectionStatusCallBack shall be invoked with IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED and IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR]
 TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_auth_communication_error)
 {
     // arrange
@@ -4411,7 +4302,6 @@ TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_auth_communication_error)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_123: [If `new_state` is DEVICE_STATE_ERROR_AUTH_TIMEOUT or DEVICE_STATE_ERROR_MSG, IoTHubClientCore_LL_ConnectionStatusCallBack shall be invoked with IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED and IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR]
 TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_msg_communication_error)
 {
     // arrange
@@ -4516,7 +4406,6 @@ TEST_FUNCTION(ConnectionStatusCallBack_UNAUTH_retry_expired)
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_001: [ If messageData is NULL, IoTHubTransport_AMQP_Common_SendMessageDisposition shall fail and return IOTHUB_CLIENT_INVALID_ARG. ] */
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_NULL_data_fails)
 {
     // arrange
@@ -4542,7 +4431,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_NULL_data_fails
     destroy_transport(handle, NULL, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_002: [If any of the messageData fields are NULL, IoTHubTransport_AMQP_Common_SendMessageDisposition shall fail and return IOTHUB_CLIENT_INVALID_ARG. ] */
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_NULL_MESSAGE_fails)
 {
     // arrange
@@ -4567,7 +4455,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_NULL_MESSAGE_fa
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_002: [If any of the messageData fields are NULL, IoTHubTransport_AMQP_Common_SendMessageDisposition shall fail and return IOTHUB_CLIENT_INVALID_ARG. ] */
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_NULL_disposition_fails)
 {
     // arrange
@@ -4595,9 +4482,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_NULL_dispositio
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_004: [IoTHubTransport_AMQP_Common_SendMessageDisposition shall convert the given IOTHUBMESSAGE_DISPOSITION_RESULT to the equivalent DEVICE_MESSAGE_DISPOSITION_RESULT and send it via amqp_device_send_message_disposition.]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_112: [A DEVICE_MESSAGE_DISPOSITION_INFO instance shall be created with a copy of the `link_name` and `message_id` contained in `message_data`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_114: [`IoTHubTransport_AMQP_Common_SendMessageDisposition()` shall destroy the DEVICE_MESSAGE_DISPOSITION_INFO instance]
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_ACCEPTED_succeeds)
 {
     // arrange
@@ -4626,7 +4510,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_ACCEPTED_succee
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_004: [IoTHubTransport_AMQP_Common_SendMessageDisposition shall convert the given IOTHUBMESSAGE_DISPOSITION_RESULT to the equivalent AMQP_VALUE and will return the result of calling messagereceiver_send_message_disposition. ] */
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_ACCEPTED_fails)
 {
     // arrange
@@ -4662,7 +4545,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_ACCEPTED_fails)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_113: [If the DEVICE_MESSAGE_DISPOSITION_INFO fails to be created, `IoTHubTransport_AMQP_Common_SendMessageDisposition()` shall fail and return IOTHUB_CLIENT_ERROR]
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_DEVICE_MESSAGE_DISPOSITION_INFO_create_fails)
 {
     // arrange
@@ -4691,7 +4573,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_DEVICE_MESSAGE_
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_004: [IoTHubTransport_AMQP_Common_SendMessageDisposition shall convert the given IOTHUBMESSAGE_DISPOSITION_RESULT to the equivalent AMQP_VALUE and will return the result of calling messagereceiver_send_message_disposition. ] */
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_ABANDONED_succeeds)
 {
     // arrange
@@ -4720,7 +4601,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_ABANDONED_succe
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_004: [IoTHubTransport_AMQP_Common_SendMessageDisposition shall convert the given IOTHUBMESSAGE_DISPOSITION_RESULT to the equivalent AMQP_VALUE and will return the result of calling messagereceiver_send_message_disposition. ] */
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_ABANDONED_fails)
 {
     // arrange
@@ -4757,7 +4637,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_ABANDONED_fails
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_004: [IoTHubTransport_AMQP_Common_SendMessageDisposition shall convert the given IOTHUBMESSAGE_DISPOSITION_RESULT to the equivalent AMQP_VALUE and will return the result of calling messagereceiver_send_message_disposition. ] */
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_REJECTED_succeeds)
 {
     // arrange
@@ -4786,7 +4665,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_REJECTED_succee
     destroy_transport(handle, device_handle, NULL);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_10_004: [IoTHubTransport_AMQP_Common_SendMessageDisposition shall convert the given IOTHUBMESSAGE_DISPOSITION_RESULT to the equivalent AMQP_VALUE and will return the result of calling messagereceiver_send_message_disposition. ] */
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_REJECTED_fails)
 {
     // arrange
@@ -4822,7 +4700,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SendMessageDisposition_REJECTED_fails)
     destroy_transport(handle, device_handle, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_128: [If `handle` is NULL, `IoTHubTransport_AMQP_Common_SetRetryPolicy` shall fail and return non-zero.]
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_SetRetryPolicy_NULL_handle)
 {
     // arrange
@@ -4840,7 +4717,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SetRetryPolicy_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_130: [If retry_control_create() fails, `IoTHubTransport_AMQP_Common_SetRetryPolicy` shall fail and return non-zero.]
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_SetRetryPolicy_failure_checks)
 {
     // arrange
@@ -4875,8 +4751,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SetRetryPolicy_failure_checks)
     destroy_transport(handle, NULL, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_129: [`transport_instance->connection_retry_control` shall be set using retry_control_create(), passing `retryPolicy` and `retryTimeoutLimitInSeconds`.]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_128: [If no errors occur, `IoTHubTransport_AMQP_Common_SetRetryPolicy` shall return zero.]
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_SetRetryPolicy_success)
 {
     // arrange
@@ -4929,8 +4803,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_SetCallbackContext_fail)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_155: [ amqp_device_get_twin_async() shall be invoked for the registered device, passing `on_device_get_twin_completed_callback`]
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_157: [ If no errors occur, `IoTHubTransport_AMQP_Common_GetTwinAsync` shall return IOTHUB_CLIENT_OK ]
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetTwinAsync_success)
 {
     // arrange
@@ -4960,7 +4832,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetTwinAsync_success)
     destroy_transport(handle, NULL, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_154: [ If `handle` or `completionCallback` are NULL, `IoTHubTransport_AMQP_Common_GetTwinAsync` shall fail and return IOTHUB_CLIENT_INVALID_ARG ]
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetTwinAsync_NULL_handle)
 {
     // arrange
@@ -4976,7 +4847,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetTwinAsync_NULL_handle)
     // cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_154: [ If `handle` or `completionCallback` are NULL, `IoTHubTransport_AMQP_Common_GetTwinAsync` shall fail and return IOTHUB_CLIENT_INVALID_ARG ]
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetTwinAsync_NULL_callback)
 {
     // arrange
@@ -5002,7 +4872,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetTwinAsync_NULL_callback)
     destroy_transport(handle, NULL, NULL);
 }
 
-// Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_156: [ If amqp_device_get_twin_async() fails, `IoTHubTransport_AMQP_Common_GetTwinAsync` shall fail and return IOTHUB_CLIENT_ERROR ]
 TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetTwinAsync_failure_checks)
 {
     // arrange

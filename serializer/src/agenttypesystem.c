@@ -135,7 +135,6 @@ static char base64b8(unsigned char val)
 AGENT_DATA_TYPES_RESULT Create_EDM_BOOLEAN_from_int(AGENT_DATA_TYPE* agentData, int v)
 {
     AGENT_DATA_TYPES_RESULT result;
-    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_013:[All the Create_... functions shall check their parameters for validity.When an invalid parameter is detected, a code of AGENT_DATA_TYPES_INVALID_ARG shall be returned]*/
     if(agentData==NULL)
     {
         result = AGENT_DATA_TYPES_INVALID_ARG;
@@ -143,7 +142,6 @@ AGENT_DATA_TYPES_RESULT Create_EDM_BOOLEAN_from_int(AGENT_DATA_TYPE* agentData, 
     }
     else
     {
-        /*Codes_SRS_AGENT_TYPE_SYSTEM_99_031:[ Creates a AGENT_DATA_TYPE representing an EDM_BOOLEAN.]*/
         agentData->type = EDM_BOOLEAN_TYPE;
         agentData->value.edmBoolean.value = (v)?(EDM_TRUE):(EDM_FALSE);
         result = AGENT_DATA_TYPES_OK;
@@ -155,7 +153,6 @@ AGENT_DATA_TYPES_RESULT Create_EDM_BOOLEAN_from_int(AGENT_DATA_TYPE* agentData, 
 AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_UINT8(AGENT_DATA_TYPE* agentData, uint8_t v)
 {
     AGENT_DATA_TYPES_RESULT result;
-    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the Create_... functions shall check their parameters for validity. When an invalid parameter is detected, a code of AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
     if (agentData == NULL)
     {
         result = AGENT_DATA_TYPES_INVALID_ARG;
@@ -170,18 +167,15 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_UINT8(AGENT_DATA_TYPE* agent
     return result;
 }
 
-/*Codes_SRS_AGENT_TYPE_SYSTEM_99_091:[Creates an AGENT_DATA_TYPE containing an Edm.DateTimeOffset from an EDM_DATE_TIME_OFFSET.]*/
 AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_EDM_DATE_TIME_OFFSET(AGENT_DATA_TYPE* agentData, EDM_DATE_TIME_OFFSET v)
 {
     AGENT_DATA_TYPES_RESULT result;
-    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the Create_... functions shall check their parameters for validity. When an invalid parameter is detected, a code of AGENT_DATA_TYPES_INVALID_ARG shall be returned ]*/
     if (agentData == NULL)
     {
         result = AGENT_DATA_TYPES_INVALID_ARG;
     }
     else if (ValidateDate(v.dateTime.tm_year+1900, v.dateTime.tm_mon +1 , v.dateTime.tm_mday) != 0)
     {
-        /*Codes_SRS_AGENT_TYPE_SYSTEM_99_092:[ The structure shall be validated to be conforming to OData specifications (odata-abnf-construction-rules, 2013), and if found invalid, AGENT_DATA_TYPES_INVALID_ARG shall be returned.]*/
         result = AGENT_DATA_TYPES_INVALID_ARG;
     }
     else if (
@@ -193,12 +187,10 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_EDM_DATE_TIME_OFFSET(AGENT_D
         (v.dateTime.tm_sec < 0)
         )
     {
-        /*Codes_SRS_AGENT_TYPE_SYSTEM_99_092:[ The structure shall be validated, and if found invalid, AGENT_DATA_TYPES_INVALID_ARG shall be returned.]*/
         result = AGENT_DATA_TYPES_INVALID_ARG;
     }
     else if ((v.hasFractionalSecond) && (v.fractionalSecond > 999999999999))
     {
-        /*Codes_SRS_AGENT_TYPE_SYSTEM_99_092:[ The structure shall be validated to be conforming to OData specifications (odata-abnf-construction-rules, 2013), and if found invalid, AGENT_DATA_TYPES_INVALID_ARG shall be returned.]*/
         result = AGENT_DATA_TYPES_INVALID_ARG;
     }
     else if (
@@ -210,7 +202,6 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_EDM_DATE_TIME_OFFSET(AGENT_D
         )
     )
     {
-        /*Codes_SRS_AGENT_TYPE_SYSTEM_99_092:[ The structure shall be validated to be conforming to OData specifications (odata-abnf-construction-rules, 2013), and if found invalid, AGENT_DATA_TYPES_INVALID_ARG shall be returned.]*/
         result = AGENT_DATA_TYPES_INVALID_ARG;
     }
     else
@@ -222,11 +213,9 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_EDM_DATE_TIME_OFFSET(AGENT_D
     return result;
 }
 
-/*Codes_SRS_AGENT_TYPE_SYSTEM_99_094:[ Creates and AGENT_DATA_TYPE containing a EDM_GUID from an EDM_GUID]*/
 AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_EDM_GUID(AGENT_DATA_TYPE* agentData, EDM_GUID v)
 {
     AGENT_DATA_TYPES_RESULT result;
-    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the functions shall check their parameters for validity. When an invalid parameter is detected, the value AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
     if (agentData == NULL)
     {
         result = AGENT_DATA_TYPES_INVALID_ARG;
@@ -234,7 +223,6 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_EDM_GUID(AGENT_DATA_TYPE* ag
     }
     else
     {
-        /*Codes_SRS_AGENT_TYPE_SYSTEM_99_094:[ Creates and AGENT_DATA_TYPE containing a EDM_GUID from an EDM_GUID]*/
         agentData->type = EDM_GUID_TYPE;
         memmove(agentData->value.edmGuid.GUID, v.GUID, 16);
         result = AGENT_DATA_TYPES_OK;
@@ -242,11 +230,9 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_EDM_GUID(AGENT_DATA_TYPE* ag
     return result;
 }
 
-/*Codes_SRS_AGENT_TYPE_SYSTEM_99_098:[ Creates an AGENT_DATA_TYPE containing a EDM_BINARY from a EDM_BINARY.]*/
 AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_EDM_BINARY(AGENT_DATA_TYPE* agentData, EDM_BINARY v)
 {
     AGENT_DATA_TYPES_RESULT result;
-    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the functions shall check their parameters for validity. When an invalid parameter is detected, the value AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
     if (agentData == NULL)
     {
         result = AGENT_DATA_TYPES_INVALID_ARG;
@@ -254,7 +240,6 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_EDM_BINARY(AGENT_DATA_TYPE* 
     }
     else
     {
-        /*Codes_SRS_AGENT_TYPE_SYSTEM_99_098:[ Creates an AGENT_DATA_TYPE containing a EDM_BINARY from a EDM_BINARY.]*/
         if (v.data == NULL)
         {
             if (v.size != 0)
@@ -492,12 +477,10 @@ static int ValidateDecimal(const char* v, size_t vlen)
         scanOptionalNDigits(v, vlen, &validatePosition);
         if (scanOptionalDotAndDigits(v, vlen, &validatePosition) != 0)
         {
-            /*Codes_SRS_AGENT_TYPE_SYSTEM_99_067:[ If the string indicated by the parameter v does not match exactly an ODATA string representation, AGENT_DATA_TYPES_INVALID_ARG shall be returned.]*/
             result = 1;
         }
         else if (validatePosition != vlen) /*Trailing wrong characters*/
         {
-            /*Codes_SRS_AGENT_TYPE_SYSTEM_99_067:[ If the string indicated by the parameter v does not match exactly an ODATA string representation, AGENT_DATA_TYPES_INVALID_ARG shall be returned.]*/
             result = 1;
         }
         else
@@ -670,11 +653,9 @@ int scanbase64b8(const char* source, size_t sourceSize, size_t *consumed, unsign
     return result;
 }
 
-/*Codes_SRS_AGENT_TYPE_SYSTEM_99_039:[ Creates an AGENT_DATA_TYPE containing an EDM_DECIMAL from a null-terminated string.]*/
 AGENT_DATA_TYPES_RESULT Create_EDM_DECIMAL_from_charz(AGENT_DATA_TYPE* agentData, const char* v)
 {
     AGENT_DATA_TYPES_RESULT result;
-    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the Create_... functions shall check their parameters for validity. When an invalid parameter is detected, a code of AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
     if (agentData == NULL)
     {
         result = AGENT_DATA_TYPES_INVALID_ARG;
@@ -691,7 +672,6 @@ AGENT_DATA_TYPES_RESULT Create_EDM_DECIMAL_from_charz(AGENT_DATA_TYPE* agentData
         /*validate that v has the form [SIGN] 1*DIGIT ["." 1*DIGIT]*/
         if (vlen == 0)
         {
-            /*Codes_SRS_AGENT_TYPE_SYSTEM_99_067:[ If the string indicated by the parameter v does not match exactly an ODATA string representation, AGENT_DATA_TYPES_INVALID_ARG shall be returned.]*/
             result = AGENT_DATA_TYPES_INVALID_ARG;
             LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
         }
@@ -699,7 +679,6 @@ AGENT_DATA_TYPES_RESULT Create_EDM_DECIMAL_from_charz(AGENT_DATA_TYPE* agentData
         {
             if (ValidateDecimal(v, vlen) != 0)
             {
-                /*Codes_SRS_AGENT_TYPE_SYSTEM_99_067:[ If the string indicated by the parameter v does not match exactly an ODATA string representation, AGENT_DATA_TYPES_INVALID_ARG shall be returned.]*/
                 result = AGENT_DATA_TYPES_INVALID_ARG;
                 LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
             }
@@ -722,7 +701,6 @@ AGENT_DATA_TYPES_RESULT Create_EDM_DECIMAL_from_charz(AGENT_DATA_TYPE* agentData
 AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_DOUBLE(AGENT_DATA_TYPE* agentData, double v)
 {
     AGENT_DATA_TYPES_RESULT result;
-    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_013:[All the Create_... functions shall check their parameters for validity.When an invalid parameter is detected, a code of AGENT_DATA_TYPES_INVALID_ARG shall be returned]*/
     if(agentData==NULL)
     {
         result = AGENT_DATA_TYPES_INVALID_ARG;
@@ -730,8 +708,6 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_DOUBLE(AGENT_DATA_TYPE* agen
     }
     else
     {
-        /*Codes_SRS_AGENT_TYPE_SYSTEM_99_041:[Creates an AGENT_DATA_TYPE containing an EDM_DOUBLE from double]*/
-        /*Codes_SRS_AGENT_TYPE_SYSTEM_99_042:[Values of NaN, -INF, +INF are accepted]*/
         agentData->type = EDM_DOUBLE_TYPE;
         agentData->value.edmDouble.value = v;
         result = AGENT_DATA_TYPES_OK;
@@ -740,11 +716,9 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_DOUBLE(AGENT_DATA_TYPE* agen
 }
 
 /*create an AGENT_DATA_TYPE from INT16_T*/
-/*Codes_SRS_AGENT_TYPE_SYSTEM_99_043:[ Creates an AGENT_DATA_TYPE containing an EDM_INT16 from int16_t]*/
 AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_SINT16(AGENT_DATA_TYPE* agentData, int16_t v)
 {
     AGENT_DATA_TYPES_RESULT result;
-    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the Create_... functions shall check their parameters for validity. When an invalid parameter is detected, a code of AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
     if (agentData == NULL)
     {
         result = AGENT_DATA_TYPES_INVALID_ARG;
@@ -763,7 +737,6 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_SINT16(AGENT_DATA_TYPE* agen
 AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_SINT32(AGENT_DATA_TYPE* agentData, int32_t v)
 {
     AGENT_DATA_TYPES_RESULT result;
-    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the Create_... functions shall check their parameters for validity. When an invalid parameter is detected, a code of AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
     if (agentData == NULL)
     {
         result = AGENT_DATA_TYPES_INVALID_ARG;
@@ -779,11 +752,9 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_SINT32(AGENT_DATA_TYPE* agen
 }
 
 /*create an AGENT_DATA_TYPE from INT64_T*/
-/*Codes_SRS_AGENT_TYPE_SYSTEM_99_045:[ Creates an AGENT_DATA_TYPE containing an EDM_INT64 from int64_t]*/
 AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_SINT64(AGENT_DATA_TYPE* agentData, int64_t v)
 {
     AGENT_DATA_TYPES_RESULT result;
-    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the Create_... functions shall check their parameters for validity. When an invalid parameter is detected, a code of AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
     if (agentData == NULL)
     {
         result = AGENT_DATA_TYPES_INVALID_ARG;
@@ -803,7 +774,6 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_SINT64(AGENT_DATA_TYPE* agen
 AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_SINT8(AGENT_DATA_TYPE* agentData, int8_t v)
 {
     AGENT_DATA_TYPES_RESULT result;
-    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the Create_... functions shall check their parameters for validity. When an invalid parameter is detected, a code of AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
     if (agentData == NULL)
     {
         result = AGENT_DATA_TYPES_INVALID_ARG;
@@ -829,7 +799,6 @@ static int ValidateDate(int year, int month, int day)
     }
     else
     {
-        /*Codes_SRS_AGENT_TYPE_SYSTEM_99_070:[ If year-month-date does not indicate a valid day (for example 31 Feb 2013), then AGENT_DATA_TYPES_INVALID_ARG shall be returned.]*/
         if (day <= 0)
         {
             result = 1;
@@ -854,7 +823,6 @@ static int ValidateDate(int year, int month, int day)
                 }
                 else
                 {
-                    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_070:[If year - month - date does not indicate a valid day(for example 31 Feb 2013), then AGENT_DATA_TYPES_INVALID_ARG shall be returned.]*/
                     result = 1;
                 }
             }
@@ -871,7 +839,6 @@ static int ValidateDate(int year, int month, int day)
                 }
                 else
                 {
-                    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_070:[If year - month - date does not indicate a valid day(for example 31 Feb 2013), then AGENT_DATA_TYPES_INVALID_ARG shall be returned.]*/
                     result = -1;
                 }
             }
@@ -886,7 +853,6 @@ static int ValidateDate(int year, int month, int day)
                     }
                     else
                     {
-                        /*Codes_SRS_AGENT_TYPE_SYSTEM_99_070:[If year - month - date does not indicate a valid day(for example 31 Feb 2013), then AGENT_DATA_TYPES_INVALID_ARG shall be returned.]*/
                         result = 1;
                     }
                 }
@@ -899,7 +865,6 @@ static int ValidateDate(int year, int month, int day)
                     }
                     else
                     {
-                        /*Codes_SRS_AGENT_TYPE_SYSTEM_99_070:[If year - month - date does not indicate a valid day(for example 31 Feb 2013), then AGENT_DATA_TYPES_INVALID_ARG shall be returned.]*/
                         result = 1;
                     }
                 }
@@ -912,7 +877,6 @@ static int ValidateDate(int year, int month, int day)
                     }
                     else
                     {
-                        /*Codes_SRS_AGENT_TYPE_SYSTEM_99_070:[If year - month - date does not indicate a valid day(for example 31 Feb 2013), then AGENT_DATA_TYPES_INVALID_ARG shall be returned.]*/
                         result = 1;
                     }
                 }
@@ -925,14 +889,12 @@ static int ValidateDate(int year, int month, int day)
                     }
                     else
                     {
-                        /*Codes_SRS_AGENT_TYPE_SYSTEM_99_070:[If year - month - date does not indicate a valid day(for example 31 Feb 2013), then AGENT_DATA_TYPES_INVALID_ARG shall be returned.]*/
                         result = 1;
                     }
                 }
             }
             else
             {
-                /*Codes_SRS_AGENT_TYPE_SYSTEM_99_070:[If year - month - date does not indicate a valid day(for example 31 Feb 2013), then AGENT_DATA_TYPES_INVALID_ARG shall be returned.]*/
                 result = 1;
             }
         }
@@ -941,11 +903,9 @@ static int ValidateDate(int year, int month, int day)
     return result;
 }
 
-/*Codes_SRS_AGENT_TYPE_SYSTEM_99_069:[ Creates an AGENT_DATA_TYPE containing an EDM_DATE from a year, a month and a day of the month.]*/
 AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_date(AGENT_DATA_TYPE* agentData, int16_t year, uint8_t month, uint8_t day)
 {
     AGENT_DATA_TYPES_RESULT result;
-    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the Create_... functions shall check their parameters for validity. When an invalid parameter is detected, a code of AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
     if (agentData == NULL)
     {
         result = AGENT_DATA_TYPES_INVALID_ARG;
@@ -959,7 +919,6 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_date(AGENT_DATA_TYPE* agentD
     }
     else
     {
-        /*Codes_SRS_AGENT_TYPE_SYSTEM_99_069:[ Creates an AGENT_DATA_TYPE containing an EDM_DATE from a year, a month and a day of the month.]*/
         agentData->type = EDM_DATE_TYPE;
         agentData->value.edmDate.year = year;
         agentData->value.edmDate.month = month;
@@ -975,7 +934,6 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_date(AGENT_DATA_TYPE* agentD
 AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_FLOAT(AGENT_DATA_TYPE* agentData, float v)
 {
     AGENT_DATA_TYPES_RESULT result;
-    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_013:[All the Create_... functions shall check their parameters for validity.When an invalid parameter is detected, a code of AGENT_DATA_TYPES_INVALID_ARG shall be returned]*/
     if(agentData==NULL)
     {
         result = AGENT_DATA_TYPES_INVALID_ARG;
@@ -996,7 +954,6 @@ const char hexToASCII[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 
 AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_charz(AGENT_DATA_TYPE* agentData, const char* v)
 {
     AGENT_DATA_TYPES_RESULT result = AGENT_DATA_TYPES_OK;
-    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the Create_... functions shall check their parameters for validity. When an invalid parameter is detected, a code of AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
     if (agentData == NULL)
     {
         result = AGENT_DATA_TYPES_INVALID_ARG;
@@ -1009,7 +966,6 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_charz(AGENT_DATA_TYPE* agent
     }
     else
     {
-        /*Codes_SRS_AGENT_TYPE_SYSTEM_99_049:[ Creates an AGENT_DATA_TYPE containing an EDM_STRING from an ASCII zero terminated string.]*/
         agentData->type = EDM_STRING_TYPE;
         if (mallocAndStrcpy_s(&agentData->value.edmString.chars, v) != 0)
         {
@@ -1029,7 +985,6 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_charz(AGENT_DATA_TYPE* agent
 AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_charz_no_quotes(AGENT_DATA_TYPE* agentData, const char* v)
 {
     AGENT_DATA_TYPES_RESULT result = AGENT_DATA_TYPES_OK;
-    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the Create_... functions shall check their parameters for validity. When an invalid parameter is detected, a code of AGENT_DATA_TYPES_INVALID_ARG shall be returned ].*/
     if (agentData == NULL)
     {
         result = AGENT_DATA_TYPES_INVALID_ARG;
@@ -1042,7 +997,6 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_charz_no_quotes(AGENT_DATA_T
     }
     else
     {
-        /* Codes_SRS_AGENT_TYPE_SYSTEM_01_001: [Creates an AGENT_DATA_TYPE containing an EDM_STRING from an ASCII zero terminated string.] */
         agentData->type = EDM_STRING_NO_QUOTES_TYPE;
         if (mallocAndStrcpy_s(&agentData->value.edmStringNoQuotes.chars, v) != 0)
         {
@@ -1259,7 +1213,6 @@ void Destroy_AGENT_DATA_TYPE(AGENT_DATA_TYPE* agentData)
             }
             case (EDM_COMPLEX_TYPE_TYPE):
             {
-                /*Codes_SRS_AGENT_TYPE_SYSTEM_99_050:[Destroy_AGENT_DATA_TYPE shall deallocate all allocated resources used to represent the type.]*/
                 size_t i;
                 for (i = 0; i < agentData->value.edmComplexType.nMembers; i++)
                 {
@@ -1287,13 +1240,11 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
 {
     AGENT_DATA_TYPES_RESULT result;
 
-    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_015:[If destination parameter is NULL, AgentDataTypes_ToString shall return AGENT_DATA_TYPES_INVALID_ARG.]*/
     if(destination == NULL)
     {
         result = AGENT_DATA_TYPES_INVALID_ARG;
         LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
     }
-    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_053:[ If value is NULL or has been destroyed or otherwise doesn't contain valid data, AGENT_DATA_TYPES_INVALID_ARG shall be returned.]*/
     else if (value == NULL)
     {
         result = AGENT_DATA_TYPES_INVALID_ARG;
@@ -1314,54 +1265,44 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
                 /*SRS_AGENT_TYPE_SYSTEM_99_101:[ EDM_NULL_TYPE shall return the unquoted string null.]*/
                 if (STRING_concat(destination, "null") != 0)
                 {
-                    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_016:[ When the value cannot be converted to a string AgentDataTypes_ToString shall return AGENT_DATA_TYPES_ERROR.]*/
                     result = AGENT_DATA_TYPES_ERROR;
                     LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                 }
                 else
                 {
-                    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_014:[ All functions shall return AGENT_DATA_TYPES_OK when the processing is successful.]*/
                     result = AGENT_DATA_TYPES_OK;
                 }
                 break;
             }
         case(EDM_BOOLEAN_TYPE) :
             {
-                /*Codes_SRS_AGENT_TYPE_SYSTEM_99_017:[EDM_BOOLEAN:as in(odata - abnf - construction - rules, 2013), booleanValue = "true" / "false"]*/
                 if (value->value.edmBoolean.value == EDM_TRUE)
                 {
                     /*SRS_AGENT_TYPE_SYSTEM_99_030:[If v is different than 0 then the AGENT_DATA_TYPE shall have the value "true".]*/
                     if (STRING_concat(destination, "true") != 0)
                     {
-                        /*Codes_SRS_AGENT_TYPE_SYSTEM_99_016:[ When the value cannot be converted to a string AgentDataTypes_ToString shall return AGENT_DATA_TYPES_ERROR.]*/
                         result = AGENT_DATA_TYPES_ERROR;
                         LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                     }
                     else
                     {
-                        /*Codes_SRS_AGENT_TYPE_SYSTEM_99_014:[ All functions shall return AGENT_DATA_TYPES_OK when the processing is successful.]*/
                         result = AGENT_DATA_TYPES_OK;
                     }
                 }
-                /*Codes_SRS_AGENT_TYPE_SYSTEM_99_017:[EDM_BOOLEAN:as in(odata - abnf - construction - rules, 2013), booleanValue = "true" / "false"]*/
                 else if (value->value.edmBoolean.value == EDM_FALSE)
                 {
-                    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_029:[ If v 0 then the AGENT_DATA_TYPE shall have the value "false" Boolean.]*/
                     if (STRING_concat(destination, "false") != 0)
                     {
-                        /*Codes_SRS_AGENT_TYPE_SYSTEM_99_016:[ When the value cannot be converted to a string AgentDataTypes_ToString shall return AGENT_DATA_TYPES_ERROR.]*/
                         result = AGENT_DATA_TYPES_ERROR;
                         LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                     }
                     else
                     {
-                        /*Codes_SRS_AGENT_TYPE_SYSTEM_99_014:[ All functions shall return AGENT_DATA_TYPES_OK when the processing is successful.]*/
                         result = AGENT_DATA_TYPES_OK;
                     }
                 }
                 else
                 {
-                    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_053:[ If value contains invalid data, AgentDataTypes_ToString shall return AGENT_DATA_TYPES_INVALID_ARG.]*/
                     result = AGENT_DATA_TYPES_INVALID_ARG;
                     LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                 }
@@ -1394,7 +1335,6 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
                 char tempBuffer2[1 + 5 + 1 + 2 + 1 + 2 + 1+1];
                 int16_t year = value->value.edmDate.year;
                 tempBuffer2[pos++] = '\"';
-                /*Codes_SRS_AGENT_TYPE_SYSTEM_99_068:[ EDM_DATE: dateValue = year "-" month "-" day.]*/
                 if (year < 0)
                 {
                     tempBuffer2[pos++] = '-';
@@ -1427,7 +1367,6 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
             }
             case (EDM_DATE_TIME_OFFSET_TYPE):
             {
-                /*Codes_SRS_AGENT_TYPE_SYSTEM_99_019:[ EDM_DATETIMEOFFSET: dateTimeOffsetValue = year "-" month "-" day "T" hour ":" minute [ ":" second [ "." fractionalSeconds ] ] ( "Z" / sign hour ":" minute )]*/
                 /*from ABNF seems like these numbers HAVE to be padded with zeroes*/
                 if (value->value.edmDateTimeOffset.hasTimeZone)
                 {
@@ -1800,7 +1739,6 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
                 char tempbuffer2[5]; /* because '-' and 3 characters for 127 let's say and '\0'*/
                 int absValue = value->value.edmSbyte.value;
                 size_t pos=0;
-                /*Codes_SRS_AGENT_TYPE_SYSTEM_99_026:[ EDM_SBYTE: sbyteValue = [ sign ] 1*3DIGIT  ; numbers in the range from -128 to 127]*/
 
                 if (value->value.edmSbyte.value < 0)
                 {
@@ -1931,11 +1869,9 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
                 break;
             }
 
-            /* Codes_SRS_AGENT_TYPE_SYSTEM_01_003: [EDM_STRING_no_quotes: the string is copied as given when the AGENT_DATA_TYPE was created.] */
             case (EDM_STRING_NO_QUOTES_TYPE) :
             {
                 /* this is a special case where we just want to copy/paste the contents, no encoding, no quotes */
-                /* Codes_SRS_AGENT_TYPE_SYSTEM_01_002: [When serialized, this type is not enclosed with quotes.] */
                 if (STRING_concat(destination, value->value.edmStringNoQuotes.chars) != 0)
                 {
                     result = AGENT_DATA_TYPES_ERROR;
@@ -2031,7 +1967,6 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
                 /*C90 doesn't declare a NaN or Inf in the standard, however, values might be NaN or Inf...*/
                 /*C99 ... does*/
                 /*C11 is same as C99*/
-                /*Codes_SRS_AGENT_TYPE_SYSTEM_99_022:[ EDM_DOUBLE: doubleValue = decimalValue [ "e" [SIGN] 1*DIGIT ] / nanInfinity ; IEEE 754 binary64 floating-point number (15-17 decimal digits). The representation shall use DBL_DIG C #define*/
                 if(ISNAN(value->value.edmDouble.value))
                 {
                     if (STRING_concat(destination, NaN_STRING) != 0)
@@ -2044,7 +1979,6 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
                         result = AGENT_DATA_TYPES_OK;
                     }
                 }
-                /*Codes_SRS_AGENT_TYPE_SYSTEM_99_022:[ EDM_DOUBLE: doubleValue = decimalValue [ "e" [SIGN] 1*DIGIT ] / nanInfinity ; IEEE 754 binary64 floating-point number (15-17 decimal digits). The representation shall use DBL_DIG C #define*/
                 else if (ISNEGATIVEINFINITY(value->value.edmDouble.value))
                 {
                     if (STRING_concat(destination, MINUSINF_STRING) != 0)
@@ -2057,7 +1991,6 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
                         result = AGENT_DATA_TYPES_OK;
                     }
                 }
-                /*Codes_SRS_AGENT_TYPE_SYSTEM_99_022:[ EDM_DOUBLE: doubleValue = decimalValue [ "e" [SIGN] 1*DIGIT ] / nanInfinity ; IEEE 754 binary64 floating-point number (15-17 decimal digits). The representation shall use DBL_DIG C #define*/
                 else if (ISPOSITIVEINFINITY(value->value.edmDouble.value))
                 {
                     if (STRING_concat(destination, PLUSINF_STRING) != 0)
@@ -2070,7 +2003,6 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
                         result = AGENT_DATA_TYPES_OK;
                     }
                 }
-                /*Codes_SRS_AGENT_TYPE_SYSTEM_99_022:[ EDM_DOUBLE: doubleValue = decimalValue [ "e" [SIGN] 1*DIGIT ] / nanInfinity ; IEEE 754 binary64 floating-point number (15-17 decimal digits). The representation shall use DBL_DIG C #define*/
                 else
                 {
                     size_t tempBufferSize = DECIMAL_DIG * 2;
@@ -2108,7 +2040,6 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
             {
                 /*to produce an EDM_COMPLEX_TYPE is a recursive process*/
                 /*uses JSON encoder*/
-                /*Codes_SRS_AGENT_TYPE_SYSTEM_99_062:[ If the AGENT_DATA_TYPE represents a "complex type", then the JSON marshaller shall produce the following JSON value:[...]*/
                 MULTITREE_HANDLE treeHandle;
                 result = AGENT_DATA_TYPES_OK;
                 /*SRS_AGENT_TYPE_SYSTEM_99_016:[ When the value cannot be converted to a string AgentDataTypes_ToString shall return AGENT_DATA_TYPES_ERROR.]*/
@@ -2158,7 +2089,6 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
             case EDM_GUID_TYPE:
             {
                 char tempBuffer2[1 + 8 + 1 + 4 + 1 + 4 + 1 + 4 + 1 + 12 + 1+ 1];
-                /*Codes_SRS_AGENT_TYPE_SYSTEM_99_093:[ EDM_GUID: 8HEXDIG "-" 4HEXDIG "-" 4HEXDIG "-" 4HEXDIG "-" 12HEXDIG]*/
                 tempBuffer2[0] = '\"';
                 tempBuffer2[1] = hexDigitToChar(value->value.edmGuid.GUID[0] / 16);
                 tempBuffer2[2] = hexDigitToChar(value->value.edmGuid.GUID[0] % 16);
@@ -2220,7 +2150,6 @@ AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const
                 size_t currentPosition = 0;
                 char* temp;
                 /*binary types */
-                /*Codes_SRS_AGENT_TYPE_SYSTEM_99_099:[EDM_BINARY:= *(4base64char)[base64b16 / base64b8]]*/
                 /*the following will happen*/
                 /*1. the "data" of the binary shall be "eaten" 3 characters at a time and produce 4 base64 encoded characters for as long as there are more than 3 characters still to process*/
                 /*2. the remaining characters (1 or 2) shall be encoded.*/
@@ -2771,7 +2700,6 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_MemberPointers(AGENT_DATA_TY
 {
     AGENT_DATA_TYPES_RESULT result;
 
-    /* Codes_SRS_AGENT_TYPE_SYSTEM_99_109:[ AGENT_DATA_TYPES_INVALID_ARG shall be returned if memberPointerValues parameter is NULL.] */
     if (memberPointerValues == NULL)
     {
         result = AGENT_DATA_TYPES_INVALID_ARG;
@@ -2829,43 +2757,36 @@ AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_Members(AGENT_DATA_TYPE* age
 {
     AGENT_DATA_TYPES_RESULT result;
     size_t i;
-    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_013:[ All the functions shall check their parameters for validity. When an invalid parameter is detected, the value AGENT_DATA_TYPES_INVALID_ARG shall be returned ]*/
     if (agentData == NULL)
     {
         result = AGENT_DATA_TYPES_INVALID_ARG;
         LogError("(result: AGENT_DATA_TYPES_INVALID_ARG)");
     }
-    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_055:[ If typeName is NULL, the function shall return AGENT_DATA_TYPES_INVALID_ARG .]*/
     else if (typeName==NULL)
     {
         result = AGENT_DATA_TYPES_INVALID_ARG;
         LogError("(result: AGENT_DATA_TYPES_INVALID_ARG)");
     }
-    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_056:[If nMembers is 0, the function shall return AGENT_DATA_TYPES_INVALID_ARG .]*/
     else if (nMembers == 0)
     {
         result = AGENT_DATA_TYPES_INVALID_ARG;
         LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
     }
-    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_057:[ If memberNames is NULL, the function shall return AGENT_DATA_TYPES_INVALID_ARG .]*/
     else if (memberNames == NULL)
     {
         result = AGENT_DATA_TYPES_INVALID_ARG;
         LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
     }
-    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_058:[ If any of the memberNames[i] is NULL, the function shall return AGENT_DATA_TYPES_INVALID_ARG .]*/
     else if (isOneNameNULL(nMembers, memberNames)!=0)
     {
         result = AGENT_DATA_TYPES_INVALID_ARG;
         LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
     }
-    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_059:[ If memberValues is NULL, the function shall return AGENT_DATA_TYPES_INVALID_ARG .]*/
     else if (memberValues == NULL)
     {
         result = AGENT_DATA_TYPES_INVALID_ARG;
         LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
     }
-    /*Codes_SRS_AGENT_TYPE_SYSTEM_99_063:[ If there are two memberNames with the same name, then the function shall return  AGENT_DATA_TYPES_INVALID_ARG.]*/
     else if (areThereTwoSameNames(nMembers, memberNames) != 0)
     {
         result = AGENT_DATA_TYPES_INVALID_ARG;
@@ -3148,9 +3069,7 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
 
     AGENT_DATA_TYPES_RESULT result;
 
-    /* Codes_SRS_AGENT_TYPE_SYSTEM_99_073:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is NULL.] */
     if ((source == NULL) ||
-        /* Codes_SRS_AGENT_TYPE_SYSTEM_99_074:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if agentData is NULL.] */
         (agentData == NULL))
     {
         result = AGENT_DATA_TYPES_INVALID_ARG;
@@ -3158,17 +3077,13 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
     }
     else
     {
-        /* Codes_SRS_AGENT_TYPE_SYSTEM_99_071:[ CreateAgentDataType_From_String shall create an AGENT_DATA_TYPE from a char* representation of the type indicated by type parameter.] */
-        /* Codes_SRS_AGENT_TYPE_SYSTEM_99_072:[ The implementation for the transformation of the char* source into AGENT_DATA_TYPE shall be type specific.] */
         switch (type)
         {
             default:
-                /* Codes_SRS_AGENT_TYPE_SYSTEM_99_075:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_NOT_IMPLEMENTED if type is not a supported type.] */
                 result = AGENT_DATA_TYPES_NOT_IMPLEMENTED;
                 LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                 break;
 
-            /* Codes_SRS_AGENT_TYPE_SYSTEM_99_086:[ EDM_STRING] */
             case EDM_BOOLEAN_TYPE:
             {
                 if (strcmp(source, "true") == 0)
@@ -3185,7 +3100,6 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                 }
                 else
                 {
-                    /* Codes_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
                     result = AGENT_DATA_TYPES_INVALID_ARG;
                     LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                 }
@@ -3201,7 +3115,6 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                 }
                 else
                 {
-                    /* Codes_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
                     result = AGENT_DATA_TYPES_INVALID_ARG;
                     LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                 }
@@ -3209,7 +3122,6 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                 break;
             }
 
-            /* Codes_SRS_AGENT_TYPE_SYSTEM_99_084:[ EDM_SBYTE] */
             case EDM_SBYTE_TYPE:
             {
                 int sByteValue;
@@ -3217,7 +3129,6 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                     (sByteValue < -128) ||
                     (sByteValue > 127))
                 {
-                    /* Codes_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
                     result = AGENT_DATA_TYPES_INVALID_ARG;
                     LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                 }
@@ -3231,7 +3142,6 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                 break;
             }
 
-            /* Codes_SRS_AGENT_TYPE_SYSTEM_99_077:[ EDM_BYTE] */
             case EDM_BYTE_TYPE:
             {
                 int byteValue;
@@ -3239,7 +3149,6 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                     (byteValue < 0) ||
                     (byteValue > 255))
                 {
-                    /* Codes_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
                     result = AGENT_DATA_TYPES_INVALID_ARG;
                     LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                 }
@@ -3253,7 +3162,6 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                 break;
             }
 
-            /* Codes_SRS_AGENT_TYPE_SYSTEM_99_081:[ EDM_INT16] */
             case EDM_INT16_TYPE:
             {
                 int int16Value;
@@ -3261,7 +3169,6 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                     (int16Value < -32768) ||
                     (int16Value > 32767))
                 {
-                    /* Codes_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
                     result = AGENT_DATA_TYPES_INVALID_ARG;
                     LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                 }
@@ -3275,7 +3182,6 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                 break;
             }
 
-            /* Codes_SRS_AGENT_TYPE_SYSTEM_99_082:[ EDM_INT32] */
             case EDM_INT32_TYPE:
             {
                 int32_t int32Value;
@@ -3302,7 +3208,6 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                     ((uint32Value > 2147483648UL) && isNegative) ||
                     ((uint32Value > 2147483647UL) && (!isNegative)))
                 {
-                    /* Codes_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
                     result = AGENT_DATA_TYPES_INVALID_ARG;
                     LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                 }
@@ -3332,7 +3237,6 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                 break;
             }
 
-            /* Codes_SRS_AGENT_TYPE_SYSTEM_99_083:[ EDM_INT64] */
             case EDM_INT64_TYPE:
             {
                 long long int64Value;
@@ -3359,7 +3263,6 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                     ((ullValue > 9223372036854775808ULL) && isNegative) ||
                     ((ullValue > 9223372036854775807ULL) && (!isNegative)))
                 {
-                    /* Codes_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
                     result = AGENT_DATA_TYPES_INVALID_ARG;
                     LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                 }
@@ -3388,7 +3291,6 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                 break;
             }
 
-            /* Codes_SRS_AGENT_TYPE_SYSTEM_99_085:[ EDM_DATE] */
             case EDM_DATE_TYPE:
             {
                 int year;
@@ -3400,7 +3302,6 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                     (source[0] != '"') ||
                     (source[strLength - 1] != '"'))
                 {
-                    /* Codes_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
                     result = AGENT_DATA_TYPES_INVALID_ARG;
                     LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                 }
@@ -3417,7 +3318,6 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                         (scanAndReadNDigitsInt(source, &pos, &day, 2) != 0) ||
                         (Create_AGENT_DATA_TYPE_from_date(agentData, (int16_t)(sign*year), (uint8_t)month, (uint8_t)day) != AGENT_DATA_TYPES_OK))
                     {
-                        /* Codes_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
                         result = AGENT_DATA_TYPES_INVALID_ARG;
                         LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                     }
@@ -3430,7 +3330,6 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                 break;
             }
 
-            /* Codes_SRS_AGENT_TYPE_SYSTEM_99_078:[ EDM_DATETIMEOFFSET] */
             case EDM_DATE_TIME_OFFSET_TYPE:
             {
                 int year;
@@ -3454,7 +3353,6 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                     (source[0] != '"') ||
                     (source[strLength - 1] != '"'))
                 {
-                    /* Codes_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
                     result = AGENT_DATA_TYPES_INVALID_ARG;
                     LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                 }
@@ -3474,7 +3372,6 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                         (source[pos++] != ':') ||
                         (scanAndReadNDigitsInt(source, &pos, &min, 2) != 0))
                     {
-                        /* Codes_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
                         result = AGENT_DATA_TYPES_INVALID_ARG;
                         LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                     }
@@ -3484,7 +3381,6 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                         year = year*sign;
                         if ((pos2 = strchr(source, ':')) == NULL)
                         {
-                            /* Codes_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
                             result = AGENT_DATA_TYPES_INVALID_ARG;
                             LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                         }
@@ -3531,7 +3427,6 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
 
                             if (pos2 == NULL)
                             {
-                                /* Codes_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
                                 result = AGENT_DATA_TYPES_INVALID_ARG;
                                 LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                             }
@@ -3561,7 +3456,6 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                                         (minOffset < 0) ||
                                         (minOffset > 59))
                                     {
-                                        /* Codes_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
                                         result = AGENT_DATA_TYPES_INVALID_ARG;
                                         LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                                     }
@@ -3584,7 +3478,6 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                                 }
                                 else
                                 {
-                                    /* Codes_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
                                     result = AGENT_DATA_TYPES_INVALID_ARG;
                                     LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                                 }
@@ -3596,13 +3489,14 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                 break;
             }
 
-            /* Codes_SRS_AGENT_TYPE_SYSTEM_99_080:[ EDM_DOUBLE] */
             case EDM_DOUBLE_TYPE:
             {
                 if (strcmp(source, "\"NaN\"") == 0)
                 {
                     agentData->type = EDM_DOUBLE_TYPE;
+#pragma warning(disable:26451) // warning C26451: overflow in constant arithmetic
                     agentData->value.edmDouble.value = NAN;
+#pragma warning (default:26451)
                     result = AGENT_DATA_TYPES_OK;
                 }
                 else if (strcmp(source, "\"INF\"") == 0)
@@ -3626,7 +3520,6 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                 }
                 else if (sscanflf(source, &(agentData->value.edmDouble.value)) != 1)
                 {
-                    /* Codes_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
                     result = AGENT_DATA_TYPES_INVALID_ARG;
                 }
                 else
@@ -3637,7 +3530,6 @@ AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGEN
                 break;
             }
 
-            /* Codes_SRS_AGENT_TYPE_SYSTEM_99_089:[EDM_SINGLE] */
             case EDM_SINGLE_TYPE:
             {
                 if (strcmp(source, "\"NaN\"") == 0)
@@ -3667,7 +3559,6 @@ result = AGENT_DATA_TYPES_OK;
                 }
                 else if (sscanff(source, &agentData->value.edmSingle.value) != 1)
                 {
-                    /* Codes_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
                     result = AGENT_DATA_TYPES_INVALID_ARG;
                     LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                 }
@@ -3679,7 +3570,6 @@ result = AGENT_DATA_TYPES_OK;
                 break;
             }
 
-            /* Codes_SRS_AGENT_TYPE_SYSTEM_99_079:[ EDM_DECIMAL] */
             case EDM_DECIMAL_TYPE:
             {
                 size_t strLength = strlen(source);
@@ -3688,7 +3578,6 @@ result = AGENT_DATA_TYPES_OK;
                     (source[strLength - 1] != '"') ||
                     (ValidateDecimal(source + 1, strLength - 2) != 0))
                 {
-                    /* Codes_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
                     result = AGENT_DATA_TYPES_INVALID_ARG;
                     LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                 }
@@ -3698,7 +3587,6 @@ result = AGENT_DATA_TYPES_OK;
                     agentData->value.edmDecimal.value = STRING_construct_n(source + 1, strLength-2);
                     if (agentData->value.edmDecimal.value == NULL)
                     {
-                        /* Codes_SRS_AGENT_TYPE_SYSTEM_99_088:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_ERROR if any other error occurs.] */
                         result = AGENT_DATA_TYPES_ERROR;
                         LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                     }
@@ -3710,7 +3598,6 @@ result = AGENT_DATA_TYPES_OK;
                 break;
             }
 
-            /* Codes_SRS_AGENT_TYPE_SYSTEM_99_086:[ EDM_STRING] */
             case EDM_STRING_TYPE:
             {
                 size_t strLength = strlen(source);
@@ -3718,7 +3605,6 @@ result = AGENT_DATA_TYPES_OK;
                     (source[0] != '"') ||
                     (source[strLength - 1] != '"'))
                 {
-                    /* Codes_SRS_AGENT_TYPE_SYSTEM_99_087:[ CreateAgentDataType_From_String shall return AGENT_DATA_TYPES_INVALID_ARG if source is not a valid string for a value of type type.] */
                     result = AGENT_DATA_TYPES_INVALID_ARG;
                     LogError("(result = %s)", MU_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, result));
                 }
@@ -3749,7 +3635,6 @@ result = AGENT_DATA_TYPES_OK;
                 }
                 break;
             }
-            /* Codes_SRS_AGENT_TYPE_SYSTEM_01_004: [EDM_STRING_NO_QUOTES] */
             case EDM_STRING_NO_QUOTES_TYPE:
             {
                 char* temp;
@@ -3768,7 +3653,6 @@ result = AGENT_DATA_TYPES_OK;
                 }
                 break;
             }
-            /*Codes_SRS_AGENT_TYPE_SYSTEM_99_097:[ EDM_GUID]*/
             case EDM_GUID_TYPE:
             {
                 if (strlen(source) != GUID_STRING_LENGTH)

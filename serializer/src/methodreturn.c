@@ -44,7 +44,6 @@ bool is_json_present_and_unparsable(const char* jsonValue)
 METHODRETURN_HANDLE MethodReturn_Create(int statusCode, const char* jsonValue)
 {
     METHODRETURN_HANDLE result;
-    /*Codes_SRS_METHODRETURN_02_009: [ If jsonValue is not a JSON value then MethodReturn_Create shall fail and return NULL. ]*/
     if (is_json_present_and_unparsable(jsonValue))
     {
         LogError("%s is not JSON", jsonValue);
@@ -55,7 +54,6 @@ METHODRETURN_HANDLE MethodReturn_Create(int statusCode, const char* jsonValue)
         result = (METHODRETURN_HANDLE_DATA*)calloc(1, sizeof(METHODRETURN_HANDLE_DATA));
         if (result == NULL)
         {
-            /*Codes_SRS_METHODRETURN_02_002: [ If any failure is encountered then MethodReturn_Create shall return NULL ]*/
             LogError("unable to malloc");
             /*return as is*/
         }
@@ -63,7 +61,6 @@ METHODRETURN_HANDLE MethodReturn_Create(int statusCode, const char* jsonValue)
         {
             if (jsonValue == NULL)
             {
-                /*Codes_SRS_METHODRETURN_02_001: [ MethodReturn_Create shall create a non-NULL handle containing statusCode and a clone of jsonValue. ]*/
                 result->data.jsonValue = NULL;
                 result->data.statusCode = statusCode;
             }
@@ -77,7 +74,6 @@ METHODRETURN_HANDLE MethodReturn_Create(int statusCode, const char* jsonValue)
                 }
                 else
                 {
-                    /*Codes_SRS_METHODRETURN_02_001: [ MethodReturn_Create shall create a non-NULL handle containing statusCode and a clone of jsonValue. ]*/
                     result->data.statusCode = statusCode;
                 }
             }
@@ -91,12 +87,10 @@ void MethodReturn_Destroy(METHODRETURN_HANDLE handle)
 {
     if (handle == NULL)
     {
-        /*Codes_SRS_METHODRETURN_02_003: [ If handle is NULL then MethodReturn_Destroy shall return. ]*/
         LogError("invalid argument METHODRETURN_HANDLE handle=%p", handle);
     }
     else
     {
-        /*Codes_SRS_METHODRETURN_02_004: [ Otherwise, MethodReturn_Destroy shall free all used resources by handle. ]*/
         if (handle->data.jsonValue != NULL)
         {
             free(handle->data.jsonValue);
@@ -111,12 +105,10 @@ const METHODRETURN_DATA* MethodReturn_GetReturn(METHODRETURN_HANDLE handle)
     const METHODRETURN_DATA* result;
     if (handle == NULL)
     {
-        /*Codes_SRS_METHODRETURN_02_010: [ If handle is NULL then MethodReturn_GetReturn shall fail and return NULL. ]*/
         result = NULL;
     }
     else
     {
-        /*Codes_SRS_METHODRETURN_02_011: [ Otherwise, MethodReturn_GetReturn shall return a non-NULL const pointer to a METHODRETURN_DATA. ]*/
         result = &(handle->data);
     }
     return result;

@@ -1052,7 +1052,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         TEST_MUTEX_RELEASE(g_testByTest);
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_001: [ If the serviceClientHandle input parameter is NULL IoTHubRegistryManager_Create shall return NULL ] */
     TEST_FUNCTION(IoTHubRegistryManager_Create_return_null_if_input_parameter_serviceClientHandle_is_NULL)
     {
         ///arrange
@@ -1065,7 +1064,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_084: [ If any member of the serviceClientHandle input parameter is NULL IoTHubRegistryManager_Create shall return NULL ] */
     TEST_FUNCTION(IoTHubRegistryManager_Create_return_null_if_input_parameter_serviceClientHandle_hostName_is_NULL)
     {
         // arrange
@@ -1079,7 +1077,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_084: [ If any member of the serviceClientHandle input parameter is NULL IoTHubRegistryManager_Create shall return NULL ] */
     TEST_FUNCTION(IoTHubRegistryManager_Create_return_null_if_input_parameter_serviceClientHandle_iothubName_is_NULL)
     {
         // arrange
@@ -1093,7 +1090,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_084: [ If any member of the serviceClientHandle input parameter is NULL IoTHubRegistryManager_Create shall return NULL ] */
     TEST_FUNCTION(IoTHubRegistryManager_Create_return_null_if_input_parameter_serviceClientHandle_iothubSuffix_is_NULL)
     {
         // arrange
@@ -1107,7 +1103,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_084: [ If any member of the serviceClientHandle input parameter is NULL IoTHubRegistryManager_Create shall return NULL ] */
     TEST_FUNCTION(IoTHubRegistryManager_Create_return_null_if_input_parameter_serviceClientHandle_keyName_is_NULL)
     {
         // arrange
@@ -1121,7 +1116,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_084: [ If any member of the serviceClientHandle input parameter is NULL IoTHubRegistryManager_Create shall return NULL ] */
     TEST_FUNCTION(IoTHubRegistryManager_Create_return_null_if_input_parameter_serviceClientHandle_sharedAccessKey_is_NULL)
     {
         // arrange
@@ -1135,13 +1129,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_002: [ IoTHubRegistryManager_Create shall allocate memory for a new registry manager instance ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_004: [ If the allocation successful, IoTHubRegistryManager_Create shall create a IOTHUB_REGISTRYMANAGER_HANDLE from the given IOTHUB_REGISTRYMANAGER_AUTH_HANDLE and return with it ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_085: [ IoTHubRegistryManager_Create shall allocate memory and copy hostName to result->hostName by calling mallocAndStrcpy_s. ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_087: [ IoTHubRegistryManager_Create shall allocate memory and copy iothubName to result->iothubName by calling mallocAndStrcpy_s. ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_089: [ IoTHubRegistryManager_Create shall allocate memory and copy iothubSuffix to result->iothubSuffix by calling mallocAndStrcpy_s. ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_091: [ IoTHubRegistryManager_Create shall allocate memory and copy sharedAccessKey to result->sharedAccessKey by calling mallocAndStrcpy_s. ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_093: [ IoTHubRegistryManager_Create shall allocate memory and copy keyName to result->keyName by calling mallocAndStrcpy_s. ]*/
     TEST_FUNCTION(IoTHubRegistryManager_Create_happy_path)
     {
         // arrange
@@ -1183,12 +1170,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         }
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_003: [ If the allocation failed, IoTHubRegistryManager_Create shall return NULL ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_086: [ If the mallocAndStrcpy_s fails, IoTHubRegistryManager_Create shall do clean up and return NULL. ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_088: [ If the mallocAndStrcpy_s fails, IoTHubRegistryManager_Create shall do clean up and return NULL. ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_090: [ If the mallocAndStrcpy_s fails, IoTHubRegistryManager_Create shall do clean up and return NULL. ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_092: [ If the mallocAndStrcpy_s fails, IoTHubRegistryManager_Create shall do clean up and return NULL. ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_094: [ If the mallocAndStrcpy_s fails, IoTHubRegistryManager_Create shall do clean up and return NULL. ]*/
     TEST_FUNCTION(IoTHubRegistryManager_Create_non_happy_path)
     {
         // arrange
@@ -1234,7 +1215,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_005: [ If the registryManagerHandle input parameter is NULL IoTHubRegistryManager_Destroy shall return ] */
     TEST_FUNCTION(IoTHubRegistryManager_Destroy_return_if_input_parameter_registryManagerHandle_is_NULL)
     {
         // arrange
@@ -1246,7 +1226,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_006 : [ If the registryManagerHandle input parameter is not NULL IoTHubRegistryManager_Destroy shall free the memory of it and return ] */
     TEST_FUNCTION(IoTHubRegistryManager_Destroy_do_clean_up_and_return_if_input_parameter_registryManagerHandle_is_not_NULL)
     {
         // arrange
@@ -1276,7 +1255,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_007: [ IoTHubRegistryManager_CreateDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
     TEST_FUNCTION(IoTHubRegistryManager_CreateModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_registryManagerHandle_is_NULL)
     {
         // arrange
@@ -1292,7 +1270,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_007: [ IoTHubRegistryManager_CreateDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
     TEST_FUNCTION(IoTHubRegistryManager_CreateModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_moduleCreateInfo_is_NULL)
     {
         // arrange
@@ -1308,7 +1285,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_007: [ IoTHubRegistryManager_CreateDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
     TEST_FUNCTION(IoTHubRegistryManager_CreateModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_module_is_NULL)
     {
         // arrange
@@ -1321,7 +1297,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_008: [ IoTHubRegistryManager_CreateDevice shall verify the deviceCreateInfo->deviceId input parameter and if it is NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
     TEST_FUNCTION(IoTHubRegistryManager_CreateModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceCreateInfo_moduleId_is_NULL)
     {
         // arrange
@@ -1401,7 +1376,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_007: [ IoTHubRegistryManager_CreateDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
     TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_registryManagerHandle_is_NULL)
     {
         // arrange
@@ -1432,7 +1406,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_007: [ IoTHubRegistryManager_CreateDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
     TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceCreateInfo_is_NULL)
     {
         // arrange
@@ -1463,7 +1436,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_007: [ IoTHubRegistryManager_CreateDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
     TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceInfo_is_NULL)
     {
         // arrange
@@ -1488,7 +1460,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_008: [ IoTHubRegistryManager_CreateDevice shall verify the deviceCreateInfo->deviceId input parameter and if it is NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
     TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceCreateInfo_deviceId_is_NULL)
     {
         // arrange
@@ -1585,7 +1556,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_009: [ IoTHubRegistryManager_CreateDevice shall verify the deviceCreateInfo->deviceId input parameter and if it contains space(s) then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
     TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceCreateInfo_deviceId_contains_space)
     {
         // arrange
@@ -1619,7 +1589,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_06_006: [ IoTHubRegistryManager_CreateDevice shall cleanup and return IOTHUB_REGISTRYMANAGER_INVALID_ARG if deviceUpdate->authMethod is not "IOTHUB_REGISTRYMANAGER_AUTH_SPK" or "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" ] */
     TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceCreateInfo_authMethod_is_invalid)
     {
         ///arrange
@@ -1858,11 +1827,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
 
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_010: [ IoTHubRegistryManager_CreateDevice shall create a flat "key1:value2,key2:value2..." JSON representation from the given deviceCreateInfo parameter using the following parson APIs: json_value_init_object, json_value_get_object, json_object_set_string, json_object_dotset_string ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_06_002: [ IoTHubRegistryManager_CreateDevice shall, if deviceCreateInfo->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_SPK", set "authorization.symmetricKey.primaryKey" to deviceCreateInfo->primaryKey and "authorization.symmetricKey.secondaryKey" to deviceCreateInfo->secondaryKey ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_024: [ If the deviceInfo out parameter is not NULL IoTHubRegistryManager_CreateDevice shall save the received deviceInfo to the out parameter and return IOTHUB_REGISTRYMANAGER_OK ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_100: [ IoTHubRegistryManager_CreateDevice shall do clean up before return ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_117: [ IoTHubRegistryManager_CreateDevice shall set the "status" value to the IOTHUB_DEVICE_STATUS_ENABLED ] */
     static void TestCreateDevice(IOTHUB_REGISTRYMANAGER_AUTH_METHOD authType)
     {
         // arrange
@@ -1925,11 +1889,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         IoTHubRegistryManager_FreeDeviceExMembers(&deviceInfo);
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_010: [ IoTHubRegistryManager_CreateDevice shall create a flat "key1:value2,key2:value2..." JSON representation from the given deviceCreateInfo parameter using the following parson APIs: json_value_init_object, json_value_get_object, json_object_set_string, json_object_dotset_string ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_06_001: [ IoTHubRegistryManager_CreateDevice shall, if deviceCreateInfo->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" or "IOTHUB_REGISTRYMANAGER_AUTH_X509_CERTIFICATE_AUTHORITY", set "authorization.x509Thumbprint.primaryThumbprint" to deviceCreateInfo->primaryKey and "authorization.x509Thumbprint.secondaryThumbprint" to deviceCreateInfo->secondaryKey ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_024: [ If the deviceInfo out parameter is not NULL IoTHubRegistryManager_CreateDevice shall save the received deviceInfo to the out parameter and return IOTHUB_REGISTRYMANAGER_OK ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_100: [ IoTHubRegistryManager_CreateDevice shall do clean up before return ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_117: [ IoTHubRegistryManager_CreateDevice shall set the "status" value to the IOTHUB_DEVICE_STATUS_ENABLED ] */
     TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_happy_path_status_code_200_sas)
     {
         TestCreateDevice(IOTHUB_REGISTRYMANAGER_AUTH_SPK);
@@ -2017,7 +1976,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         TestCreateModule(IOTHUB_REGISTRYMANAGER_AUTH_X509_CERTIFICATE_AUTHORITY, TEST_MANAGED_BY);
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_020: [ IoTHubRegistryManager_CreateDevice shall verify the received HTTP status code and if it is 409 then return IOTHUB_REGISTRYMANAGER_DEVICE_EXIST ]*/
     TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_happy_path_status_code_409)
     {
         // arrange
@@ -2122,7 +2080,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_DEVICE_EXIST, result);
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_021: [ IoTHubRegistryManager_CreateDevice shall verify the received HTTP status code and if it is greater than 300 then return IOTHUB_REGISTRYMANAGER_HTTP_STATUS_ERROR ]*/
     TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_happy_path_status_code_400)
     {
         // arrange
@@ -2228,10 +2185,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(int, IOTHUB_REGISTRYMANAGER_HTTP_STATUS_ERROR, result);
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_019: [ If any of the HTTPAPI call fails IoTHubRegistryManager_CreateDevice shall fail and return IOTHUB_REGISTRYMANAGER_HTTPAPI_ERROR ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_023: [ If the JSON parsing failed, IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_JSON_ERROR ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_099: [ If any of the call fails during the HTTP creation IoTHubRegistryManager_CreateDevice shall fail and return IOTHUB_REGISTRYMANAGER_ERROR ] */
     TEST_FUNCTION(IoTHubRegistryManager_CreateDevice_non_happy_path)
     {
         ///arrange
@@ -2396,7 +2349,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /* Test_SRS_IOTHUBREGISTRYMANAGER_12_025: [ IoTHubRegistryManager_GetDevice shall verify the registryManagerHandle and deviceId input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
     TEST_FUNCTION(IoTHubRegistryManager_GetDevice_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_registryManagerHandle_is_NULL)
     {
         ///arrange
@@ -2421,7 +2373,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Test_SRS_IOTHUBREGISTRYMANAGER_12_025: [ IoTHubRegistryManager_GetDevice shall verify the registryManagerHandle and deviceId input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
     TEST_FUNCTION(IoTHubRegistryManager_GetDevice_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceId_is_NULL)
     {
         ///arrange
@@ -2548,14 +2499,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         IoTHubRegistryManager_FreeDeviceExMembers(&deviceInfo);
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_026: [ IoTHubRegistryManager_GetDevice shall create HTTP GET request URL using the given deviceId using the following format: url/devices/[deviceId]?api-version=2017-06-30  ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_027: [ IoTHubRegistryManager_GetDevice shall add the following headers to the created HTTP GET request: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_028: [ IoTHubRegistryManager_GetDevice shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_029: [ IoTHubRegistryManager_GetDevice shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_030: [ IoTHubRegistryManager_GetDevice shall execute the HTTP GET request by calling HTTPAPIEX_ExecuteRequest ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_06_008: [ IoTHubRegistryManager_GetDevice shall, if json was found for authorization.symetricKey.primaryKey, set the device info authMethod to "IOTHUB_REGISTRYMANAGER_AUTH_SPK" ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_06_012: [ IoTHubRegistryManager_GetDevice shall, if json was found for authorization.x509Thumbprint.secondaryThumbprint, set the device info authMethod to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_06_010: [ IoTHubRegistryManager_GetDevice shall, if json was found for authorization.symetricKey.secondaryKey, set the device info authMethod to "IOTHUB_REGISTRYMANAGER_AUTH_SPK" ] */
     TEST_FUNCTION(IoTHubRegistryManager_GetDevice_happy_path_sas)
     {
         TestGetDevice(IOTHUB_REGISTRYMANAGER_AUTH_SPK);
@@ -2698,12 +2641,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_031: [ If any of the HTTPAPI call fails IoTHubRegistryManager_GetDevice shall fail and return IOTHUB_REGISTRYMANAGER_ERROR ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_033: [ IoTHubRegistryManager_GetDevice shall verify the received HTTP status code and if it is less or equal than 300 then try to parse the response JSON to deviceInfo for the following properties: deviceId, primaryKey, secondaryKey, generationId, eTag, connectionState, connectionstateUpdatedTime, status, statusReason, statusUpdatedTime, lastActivityTime, cloudToDeviceMessageCount ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_034: [ If any of the property field above missing from the JSON the property value will not be populated ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_035: [ If the JSON parsing failed, IoTHubRegistryManager_GetDevice shall return IOTHUB_REGISTRYMANAGER_JSON_ERROR ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_036: [ If the received JSON is empty, IoTHubRegistryManager_GetDevice shall return IOTHUB_REGISTRYMANAGER_DEVICE_NOT_EXIST ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_037: [ If the deviceInfo out parameter if not NULL IoTHubRegistryManager_GetDevice shall save the received deviceInfo to the out parameter and return IOTHUB_REGISTRYMANAGER_OK ]*/
     TEST_FUNCTION(IoTHubRegistryManager_GetDevice_non_happy_path)
     {
         ///arrange
@@ -2851,7 +2788,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
     }
 
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_038: [ IoTHubRegistryManager_UpdateDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
     TEST_FUNCTION(IoTHubRegistryManager_UpdateModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_registryManagerHandle_is_NULL)
     {
         ///arrange
@@ -2864,7 +2800,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_038: [ IoTHubRegistryManager_UpdateDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
     TEST_FUNCTION(IoTHubRegistryManager_UpdateModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_moduleUpdate_is_NULL)
     {
         ///arrange
@@ -2877,7 +2812,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_039: [ IoTHubRegistryManager_UpdateDevice shall verify the deviceCreateInfo->deviceId input parameter and if it is NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
     TEST_FUNCTION(IoTHubRegistryManager_UpdateModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_moduleUpdate_moduleId_is_NULL)
     {
         ///arrange
@@ -2917,7 +2851,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_038: [ IoTHubRegistryManager_UpdateDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
     TEST_FUNCTION(IoTHubRegistryManager_UpdateDevice_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_registryManagerHandle_is_NULL)
     {
         ///arrange
@@ -2942,7 +2875,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_038: [ IoTHubRegistryManager_UpdateDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
     TEST_FUNCTION(IoTHubRegistryManager_UpdateDevice_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceUpdate_is_NULL)
     {
         ///arrange
@@ -2967,7 +2899,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_039: [ IoTHubRegistryManager_UpdateDevice shall verify the deviceCreateInfo->deviceId input parameter and if it is NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
     TEST_FUNCTION(IoTHubRegistryManager_UpdateDevice_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceUpdate_deviceId_is_NULL)
     {
         ///arrange
@@ -2994,7 +2925,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_06_005: [ IoTHubRegistryManager_UpdateDevice shall clean up and return IOTHUB_REGISTRYMANAGER_INVALID_ARG if deviceUpdate->authMethod is not "IOTHUB_REGISTRYMANAGER_AUTH_SPK" or "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT" ] */
     TEST_FUNCTION(IoTHubRegistryManager_UpdateDevice_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceUpdate_authMethod_is_invalid)
     {
         ///arrange
@@ -3113,18 +3043,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
     }
 
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_039: [ IoTHubRegistryManager_UpdateDevice shall verify the deviceCreateInfo->deviceId input parameter and if it is NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_106: [ IoTHubRegistryManager_UpdateDevice shall allocate memory for device info structure by calling malloc ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_06_004: [ IoTHubRegistryManager_UpdateDevice shall, if deviceUpdate->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_SPK", set "authorization.symmetricKey.primaryKey" to deviceCreateInfo->primaryKey and "authorization.symmetricKey.secondaryKey" to deviceCreateInfo->secondaryKey ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_041: [ IoTHubRegistryManager_UpdateDevice shall create a flat "key1:value2,key2:value2..." JSON representation from the given deviceCreateInfo parameter using the following parson APIs : json_value_init_object, json_value_get_object, json_object_set_string, json_object_dotset_string ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_101: [ IoTHubRegistryManager_UpdateDevice shall allocate memory for response buffer by calling BUFFER_new ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_043: [ IoTHubRegistryManager_UpdateDevice shall create an HTTP PUT request using the created JSON ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_044: [ IoTHubRegistryManager_UpdateDevice shall create an HTTP PUT request using the createdfollowing HTTP headers : authorization = sasToken, Request - Id = 1001, Accept = application / json, Content - Type = application / json, charset = utf - 8 ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_045: [ IoTHubRegistryManager_UpdateDevice shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_046: [ IoTHubRegistryManager_UpdateDevice shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_047: [ IoTHubRegistryManager_UpdateDevice shall execute the HTTP PUT request by calling HTTPAPIEX_ExecuteRequest ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_105: [ IoTHubRegistryManager_UpdateDevice shall do clean up before return ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_118: [ IoTHubRegistryManager_CreateDevice shall set the "status" value to the deviceCreateInfo->status ] */
     TEST_FUNCTION(IoTHubRegistryManager_UpdateDevice_happy_path_with_sas_token)
     {
         // arrange
@@ -3165,18 +3083,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_039: [ IoTHubRegistryManager_UpdateDevice shall verify the deviceCreateInfo->deviceId input parameter and if it is NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_106: [ IoTHubRegistryManager_UpdateDevice shall allocate memory for device info structure by calling malloc ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_06_003: [ IoTHubRegistryManager_UpdateDevice shall, if deviceUpdate->authMethod is equal to "IOTHUB_REGISTRYMANAGER_AUTH_X509_THUMBPRINT", set "authorization.x509Thumbprint.primaryThumbprint" to deviceCreateInfo->primaryKey and "authorization.x509Thumbprint.secondaryThumbprint" to deviceCreateInfo->secondaryKey ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_041: [ IoTHubRegistryManager_UpdateDevice shall create a flat "key1:value2,key2:value2..." JSON representation from the given deviceCreateInfo parameter using the following parson APIs : json_value_init_object, json_value_get_object, json_object_set_string, json_object_dotset_string ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_101: [ IoTHubRegistryManager_UpdateDevice shall allocate memory for response buffer by calling BUFFER_new ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_043: [ IoTHubRegistryManager_UpdateDevice shall create an HTTP PUT request using the created JSON ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_044: [ IoTHubRegistryManager_UpdateDevice shall create an HTTP PUT request using the createdfollowing HTTP headers : authorization = sasToken, Request - Id = 1001, Accept = application / json, Content - Type = application / json, charset = utf - 8 ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_045: [ IoTHubRegistryManager_UpdateDevice shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_046: [ IoTHubRegistryManager_UpdateDevice shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_047: [ IoTHubRegistryManager_UpdateDevice shall execute the HTTP PUT request by calling HTTPAPIEX_ExecuteRequest ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_105: [ IoTHubRegistryManager_UpdateDevice shall do clean up before return ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_118: [ IoTHubRegistryManager_CreateDevice shall set the "status" value to the deviceCreateInfo->status ] */
     TEST_FUNCTION(IoTHubRegistryManager_UpdateDevice_happy_path_with_thumbprint)
     {
         // arrange
@@ -3306,11 +3212,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_108: [ If the malloc fails, IoTHubRegistryManager_Create shall do clean up and return NULL ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_042: [ IoTHubRegistryManager_UpdateDevice shall return IOTHUB_REGISTRYMANAGER_JSON_ERROR if the JSON creation failed  ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_102: [ If the BUFFER_new fails, IoTHubRegistryManager_UpdateDevice shall do clean up and return IOTHUB_REGISTRYMANAGER_ERROR. ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_103: [ If any of the call fails during the HTTP creation IoTHubRegistryManager_UpdateDevice shall fail and return IOTHUB_REGISTRYMANAGER_ERROR ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_104: [ If any of the HTTPAPI call fails IoTHubRegistryManager_UpdateDevice shall fail and return IOTHUB_REGISTRYMANAGER_HTTPAPI_ERROR ] */
     TEST_FUNCTION(IoTHubRegistryManager_UpdateDevice_non_happy_path)
     {
         ///arrange
@@ -3473,7 +3374,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_052: [ IoTHubRegistryManager_DeleteDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
     TEST_FUNCTION(IoTHubRegistryManager_DeleteDevice_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_registryManagerHandle_is_NULL)
     {
         ///arrange
@@ -3486,7 +3386,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_052: [ IoTHubRegistryManager_DeleteDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
     TEST_FUNCTION(IoTHubRegistryManager_DeleteDevice_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceId_is_NULL)
     {
         ///arrange
@@ -3499,7 +3398,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_052: [ IoTHubRegistryManager_DeleteDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
     TEST_FUNCTION(IoTHubRegistryManager_DeleteModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_registryManagerHandle_is_NULL)
     {
         ///arrange
@@ -3512,7 +3410,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_052: [ IoTHubRegistryManager_DeleteDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
     TEST_FUNCTION(IoTHubRegistryManager_DeleteModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceId_is_NULL)
     {
         ///arrange
@@ -3525,7 +3422,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_052: [ IoTHubRegistryManager_DeleteDevice shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ] */
     TEST_FUNCTION(IoTHubRegistryManager_DeleteModule_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_moduleId_is_NULL)
     {
         ///arrange
@@ -3538,13 +3434,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_053: [ IoTHubRegistryManager_DeleteDevice shall create HTTP DELETE request URL using the given deviceId using the following format : url / devices / [deviceId] ? api - version  ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_054: [ IoTHubRegistryManager_DeleteDevice shall add the following headers to the created HTTP GET request : authorization = sasToken, Request - Id = 1001, Accept = application / json, Content - Type = application / json, charset = utf - 8 ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_055: [ IoTHubRegistryManager_DeleteDevice shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_056: [ IoTHubRegistryManager_DeleteDevice shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_057: [ IoTHubRegistryManager_DeleteDevice shall execute the HTTP DELETE request by calling HTTPAPIEX_ExecuteRequest ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_058: [ IoTHubRegistryManager_DeleteDevice shall verify the received HTTP status code and if it is greater than 300 then return IOTHUB_REGISTRYMANAGER_HTTP_STATUS_ERROR ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_059: [ IoTHubRegistryManager_DeleteDevice shall verify the received HTTP status code and if it is less or equal than 300 then return IOTHUB_REGISTRYMANAGER_OK ] */
     TEST_FUNCTION(IoTHubRegistryManager_DeleteModule_happy_path)
     {
         ///arrange
@@ -3559,13 +3448,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
     }
 
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_053: [ IoTHubRegistryManager_DeleteDevice shall create HTTP DELETE request URL using the given deviceId using the following format : url / devices / [deviceId] ? api - version  ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_054: [ IoTHubRegistryManager_DeleteDevice shall add the following headers to the created HTTP GET request : authorization = sasToken, Request - Id = 1001, Accept = application / json, Content - Type = application / json, charset = utf - 8 ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_055: [ IoTHubRegistryManager_DeleteDevice shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_056: [ IoTHubRegistryManager_DeleteDevice shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_057: [ IoTHubRegistryManager_DeleteDevice shall execute the HTTP DELETE request by calling HTTPAPIEX_ExecuteRequest ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_058: [ IoTHubRegistryManager_DeleteDevice shall verify the received HTTP status code and if it is greater than 300 then return IOTHUB_REGISTRYMANAGER_HTTP_STATUS_ERROR ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_059: [ IoTHubRegistryManager_DeleteDevice shall verify the received HTTP status code and if it is less or equal than 300 then return IOTHUB_REGISTRYMANAGER_OK ] */
     TEST_FUNCTION(IoTHubRegistryManager_DeleteDevice_happy_path)
     {
         ///arrange
@@ -3579,13 +3461,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_053: [ IoTHubRegistryManager_DeleteDevice shall create HTTP DELETE request URL using the given deviceId using the following format : url / devices / [deviceId] ? api - version  ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_054: [ IoTHubRegistryManager_DeleteDevice shall add the following headers to the created HTTP GET request : authorization = sasToken, Request - Id = 1001, Accept = application / json, Content - Type = application / json, charset = utf - 8 ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_055: [ IoTHubRegistryManager_DeleteDevice shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_056: [ IoTHubRegistryManager_DeleteDevice shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_057: [ IoTHubRegistryManager_DeleteDevice shall execute the HTTP DELETE request by calling HTTPAPIEX_ExecuteRequest ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_058: [ IoTHubRegistryManager_DeleteDevice shall verify the received HTTP status code and if it is greater than 300 then return IOTHUB_REGISTRYMANAGER_HTTP_STATUS_ERROR ] */
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_059: [ IoTHubRegistryManager_DeleteDevice shall verify the received HTTP status code and if it is less or equal than 300 then return IOTHUB_REGISTRYMANAGER_OK ] */
     TEST_FUNCTION(IoTHubRegistryManager_DeleteDevice_non_happy_path)
     {
         ///arrange
@@ -3623,7 +3498,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_060: [ IoTHubRegistryManager_GetDeviceList shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
     TEST_FUNCTION(IoTHubRegistryManager_GetModuleList_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_registryManagerHandle_is_NULL)
     {
         ///arrange
@@ -3642,7 +3516,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
     }
 
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_060: [ IoTHubRegistryManager_GetDeviceList shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
     TEST_FUNCTION(IoTHubRegistryManager_GetModuleList_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_moduleList_is_NULL)
     {
         ///arrange
@@ -3655,7 +3528,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_060: [ IoTHubRegistryManager_GetDeviceList shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
     TEST_FUNCTION(IoTHubRegistryManager_GetModuleList_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceId_is_NULL)
     {
         ///arrange
@@ -3715,7 +3587,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         freeModuleList(moduleList, IOTHUB_REGISTRYMANAGER_AUTH_SPK);
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_060: [ IoTHubRegistryManager_GetDeviceList shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
     TEST_FUNCTION(IoTHubRegistryManager_GetDeviceList_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_registryManagerHandle_is_NULL)
     {
         ///arrange
@@ -3733,7 +3604,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         singlylinkedlist_destroy(deviceList);
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_060: [ IoTHubRegistryManager_GetDeviceList shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
     TEST_FUNCTION(IoTHubRegistryManager_GetDeviceList_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_deviceList_is_NULL)
     {
         ///arrange
@@ -3746,7 +3616,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_061: [ IoTHubRegistryManager_GetDeviceList shall verify if the numberOfDevices input parameter is between 1 and 1000 and if it is not then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
     TEST_FUNCTION(IoTHubRegistryManager_GetDeviceList_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_numberOfDevices_is_zero)
     {
         ///arrange
@@ -3764,7 +3633,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         singlylinkedlist_destroy(deviceList);
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_061: [ IoTHubRegistryManager_GetDeviceList shall verify if the numberOfDevices input parameter is between 1 and 1000 and if it is not then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
     TEST_FUNCTION(IoTHubRegistryManager_GetDeviceList_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_numberOfDevices_is_1001)
     {
         ///arrange
@@ -3782,19 +3650,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         singlylinkedlist_destroy(deviceList);
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_062: [ IoTHubRegistryManager_GetDeviceList shall create HTTP GET request for numberOfDevices using the follwoing format: url/devices/?top=[numberOfDevices]&api-version ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_063: [ IoTHubRegistryManager_GetDeviceList shall add the following headers to the created HTTP GET request: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_064: [ IoTHubRegistryManager_GetDeviceList shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_065: [ IoTHubRegistryManager_GetDeviceList shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_066: [ IoTHubRegistryManager_GetDeviceList shall execute the HTTP GET request by calling HTTPAPIEX_ExecuteRequest ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_067: [ IoTHubRegistryManager_GetDeviceList shall verify the received HTTP status code and if it is greater than 300 then return IOTHUB_REGISTRYMANAGER_ERROR ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_068: [ IoTHubRegistryManager_GetDeviceList shall verify the received HTTP status code and if it is less or equal than 300 then try to parse the response JSON to deviceList ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_069: [ IoTHubRegistryManager_GetDeviceList shall use the following parson APIs to parse the response JSON: json_parse_string, json_value_get_object, json_object_get_string, json_object_dotget_string  ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_070: [ If any of the parson API fails, IoTHubRegistryManager_GetDeviceList shall return IOTHUB_REGISTRYMANAGER_JSON_ERROR ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_071: [ IoTHubRegistryManager_GetDeviceList shall populate the deviceList parameter with structures of type "IOTHUB_DEVICE" ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_072: [ If populating the deviceList parameter fails IoTHubRegistryManager_GetDeviceList shall return IOTHUB_REGISTRYMANAGER_ERROR ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_073: [ If populating the deviceList parameter successful IoTHubRegistryManager_GetDeviceList shall return IOTHUB_REGISTRYMANAGER_OK ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_111: [ IoTHubRegistryManager_GetDeviceList shall do clean up before return ]*/
     TEST_FUNCTION(IoTHubRegistryManager_GetDeviceList_happy_path)
     {
         ///arrange
@@ -3844,10 +3699,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
     }
 
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_110: [ If the BUFFER_new fails, IoTHubRegistryManager_GetDeviceList shall do clean up and return NULL ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_070: [ If any of the parson API fails, IoTHubRegistryManager_GetDeviceList shall return IOTHUB_REGISTRYMANAGER_JSON_ERROR ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_072: [ If populating the deviceList parameter fails IoTHubRegistryManager_GetDeviceList shall return IOTHUB_REGISTRYMANAGER_ERROR ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_115: [ If any of the HTTPAPI call fails IoTHubRegistryManager_GetDeviceList shall fail and return IOTHUB_REGISTRYMANAGER_ERROR ]*/
     TEST_FUNCTION(IoTHubRegistryManager_GetDeviceList_non_happy_path)
     {
         ///arrange
@@ -4081,7 +3932,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
 
 
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_074: [ IoTHubRegistryManager_GetStatistics shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
     TEST_FUNCTION(IoTHubRegistryManager_GetStatistics_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_registryManagerHandle_is_NULL)
     {
         ///arrange
@@ -4096,7 +3946,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ///cleanup
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_074: [ IoTHubRegistryManager_GetStatistics shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
     TEST_FUNCTION(IoTHubRegistryManager_GetStatistics_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_registryStatistics_is_NULL)
     {
         ///arrange
@@ -4109,16 +3958,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_112: [ IoTHubRegistryManager_GetStatistics shall allocate memory for response buffer by calling BUFFER_new ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_075: [ IoTHubRegistryManager_GetStatistics shall create HTTP GET request for statistics using the following format: url/statistics/devices?api-version ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_076: [ IoTHubRegistryManager_GetStatistics shall add the following headers to the created HTTP GET request: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_077: [ IoTHubRegistryManager_GetStatistics shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_078: [ IoTHubRegistryManager_GetStatistics shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_079: [ IoTHubRegistryManager_GetStatistics shall execute the HTTP GET request by calling HTTPAPIEX_ExecuteRequest ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_080: [ IoTHubRegistryManager_GetStatistics shall verify the received HTTP status code and if it is greater than 300 then return IOTHUB_REGISTRYMANAGER_ERROR ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_081: [ IoTHubRegistryManager_GetStatistics shall verify the received HTTP status code and if it is less or equal than 300 then use the following parson APIs to parse the response JSON to registry statistics structure: json_parse_string, json_value_get_object, json_object_get_string, json_object_dotget_string ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_083: [ IoTHubRegistryManager_GetStatistics shall save the registry statistics to the out value and return IOTHUB_REGISTRYMANAGER_OK ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_114: [ IoTHubRegistryManager_GetStatistics shall do clean up before return ]*/
     TEST_FUNCTION(IoTHubRegistryManager_GetStatistics_happy_path)
     {
         ///arrange
@@ -4157,9 +3996,6 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ///cleanup
     }
 
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_113: [ If the BUFFER_new fails, IoTHubRegistryManager_GetStatistics shall do clean up and return NULL ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_116: [ If any of the HTTPAPI call fails IoTHubRegistryManager_GetStatistics shall fail and return IOTHUB_REGISTRYMANAGER_ERROR ]*/
-    /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_082: [ If the parsing failed, IoTHubRegistryManager_GetStatistics shall return IOTHUB_REGISTRYMANAGER_ERROR ]*/
     TEST_FUNCTION(IoTHubRegistryManager_GetStatistics_non_happy_path)
     {
         ///arrange

@@ -95,8 +95,8 @@ def get_docker_tags_from_commit(repo, commit):
     every time.  This would negate the effect of docker image caching and make builds very slow.
 
     To make builds faster, we tag images to give docker a starting point for it's build.  In effect,
-    if we build the C sdk from the master branch, we tag it as such.  Then, next time we need to
-    build the C sdk from the master branch, we can load the last build and let docker use it
+    if we build the C sdk from the main branch, we tag it as such.  Then, next time we need to
+    build the C sdk from the main branch, we can load the last build and let docker use it
     as a starting point.
 
     Every image we make has (at least) 4 tags.  For example, an image might have:

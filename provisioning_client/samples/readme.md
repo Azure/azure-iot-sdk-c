@@ -20,4 +20,4 @@
 
 ### Running Samples
 
-You don't need any special hardware to test the samples.  After you create your [Device Provisioning hub](https://docs.microsoft.com/en-us/azure/iot-dps/quick-setup-auto-provision), you can just follow the [provisioning SDK documentation](https://github.com/Azure/azure-iot-sdk-c/blob/master/provisioning_client/devdoc/using_provisioning_client.md).
+You don't need any special hardware to test the samples.  After you create your [Device Provisioning hub](https://docs.microsoft.com/azure/iot-dps/quick-setup-auto-provision), you can just follow the [provisioning SDK documentation](https://github.com/Azure/azure-iot-sdk-c/blob/main/provisioning_client/devdoc/using_provisioning_client.md).

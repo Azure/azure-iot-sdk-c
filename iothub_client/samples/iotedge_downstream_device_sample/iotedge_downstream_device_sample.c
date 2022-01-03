@@ -3,8 +3,8 @@
 
 // This sample demonstrates how a downstream device connects to an Edge device. For more details
 // pertaining to this scenario please see:
-// https://docs.microsoft.com/en-us/azure/iot-edge/how-to-create-transparent-gateway-linux OR
-// https://docs.microsoft.com/en-us/azure/iot-edge/how-to-create-transparent-gateway-windows
+// https://docs.microsoft.com/azure/iot-edge/how-to-create-transparent-gateway-linux OR
+// https://docs.microsoft.com/azure/iot-edge/how-to-create-transparent-gateway-windows
 //
 // CAVEAT: This sample is to demonstrate azure IoT client concepts only and is not a guide design principles or style
 // Checking of return codes and error values shall be omitted for brevity. Please practice sound engineering practices
@@ -131,7 +131,7 @@ static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS result, I
 static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
     (void)userContextCallback;
-    // When a message is sent this callback will get envoked
+    // When a message is sent this callback will get invoked
     g_message_count_send_confirmations++;
     (void)printf("Confirmation callback received for message %zu with result %s\r\n", g_message_count_send_confirmations, MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
 }

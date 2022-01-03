@@ -423,9 +423,9 @@ int main(void)
 
 			while (1)
 			{
-				temperature = minTemperature + ((rand() % 10) + 5);
-				pressure = minPressure + ((rand() % 10) + 5);
-				humidity = minHumidity + ((rand() % 20) + 5);
+				temperature = minTemperature + ((double)(rand() % 10) + 5);
+				pressure = minPressure + ((double)(rand() % 10) + 5);
+				humidity = minHumidity + ((double)(rand() % 20) + 5);
 
 				if (chiller.firmwareUpdateStatus == IDLE)
 				{

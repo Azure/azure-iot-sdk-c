@@ -143,7 +143,6 @@ static void MethodReturn_Create_with_non_NULL_jsonValue_inert_path(const char* j
         .IgnoreArgument_destination();
 }
 
-/*Tests_SRS_METHODRETURN_02_001: [ MethodReturn_Create shall create a non-NULL handle containing statusCode and a clone of jsonValue. ]*/
 TEST_FUNCTION(MethodReturn_Create_succeeds_with_non_NULL_jsonValue_happy_path)
 {
     ///arrange
@@ -162,8 +161,6 @@ TEST_FUNCTION(MethodReturn_Create_succeeds_with_non_NULL_jsonValue_happy_path)
     MethodReturn_Destroy(h);
 }
 
-/*Tests_SRS_METHODRETURN_02_009: [ If jsonValue is not a JSON value then MethodReturn_Create shall fail and return NULL. ]*/
-/*Tests_SRS_METHODRETURN_02_002: [ If any failure is encountered then MethodReturn_Create shall return NULL ]*/
 TEST_FUNCTION(MethodReturn_Create_succeeds_with_non_NULL_jsonValue_unhappy_paths)
 {
     ///arrange
@@ -204,7 +201,6 @@ static void MethodReturn_Create_with_NULL_jsonValue_inert_path(const char* jsonV
         .IgnoreAllArguments();
 }
 
-/*Tests_SRS_METHODRETURN_02_001: [ MethodReturn_Create shall create a non-NULL handle containing statusCode and a clone of jsonValue. ]*/
 TEST_FUNCTION(MethodReturn_Create_succeeds_with_NULL_jsonValue_happy_path)
 {
     ///arrange
@@ -223,8 +219,6 @@ TEST_FUNCTION(MethodReturn_Create_succeeds_with_NULL_jsonValue_happy_path)
     MethodReturn_Destroy(h);
 }
 
-/*Tests_SRS_METHODRETURN_02_009: [ If jsonValue is not a JSON value then MethodReturn_Create shall fail and return NULL. ]*/
-/*Tests_SRS_METHODRETURN_02_002: [ If any failure is encountered then MethodReturn_Create shall return NULL ]*/
 TEST_FUNCTION(MethodReturn_Create_with_NULL_jsonValue_unhappy_paths)
 {
     ///arrange
@@ -254,7 +248,6 @@ TEST_FUNCTION(MethodReturn_Create_with_NULL_jsonValue_unhappy_paths)
     umock_c_negative_tests_deinit();
 }
 
-/*Tests_SRS_METHODRETURN_02_003: [ If handle is NULL then MethodReturn_Destroy shall return. ]*/
 TEST_FUNCTION(MethodReturn_Destroy_with_NULL_handle_returns)
 {
     ///arrange
@@ -266,7 +259,6 @@ TEST_FUNCTION(MethodReturn_Destroy_with_NULL_handle_returns)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_SRS_METHODRETURN_02_004: [ Otherwise, MethodReturn_Destroy shall free all used resources by handle. ]*/
 TEST_FUNCTION(MethodReturn_Destroy_with_non_NULL_handle_returns)
 {
     ///arrange
@@ -290,7 +282,6 @@ TEST_FUNCTION(MethodReturn_Destroy_with_non_NULL_handle_returns)
     /*already clean*/
 }
 
-/*Tests_SRS_METHODRETURN_02_010: [ If handle is NULL then MethodReturn_GetReturn shall fail and return NULL. ]*/
 TEST_FUNCTION(MethodReturn_GetReturn_with_NULL_handle_returns_NULL)
 {
     ///arrange
@@ -302,7 +293,6 @@ TEST_FUNCTION(MethodReturn_GetReturn_with_NULL_handle_returns_NULL)
     ASSERT_IS_NULL(data);
 }
 
-/*Tests_SRS_METHODRETURN_02_011: [ Otherwise, MethodReturn_GetReturn shall return a non-NULL const pointer to a METHODRETURN_DATA. ]*/
 TEST_FUNCTION(MethodReturn_GetReturn_with_non_NULL_handle_succeeds)
 {
     ///arrange

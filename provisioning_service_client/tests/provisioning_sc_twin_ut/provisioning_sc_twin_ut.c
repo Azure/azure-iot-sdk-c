@@ -247,7 +247,6 @@ static void expected_calls_initialTwin_fromJson(bool tags, bool desired_properti
 
 /* UNIT TESTS BEGIN */
 
-/*Tests_PROV_TWIN_22_004: [ Upon successful creation of a new initialTwin, initialTwin_create shall return a INITIAL_TWIN_HANDLE to access the model ]*/
 TEST_FUNCTION(initialTwin_create_desired_properties_null)
 {
     //arrange
@@ -268,8 +267,6 @@ TEST_FUNCTION(initialTwin_create_desired_properties_null)
     initialTwin_destroy(twin);
 }
 
-/*Tests_PROV_TWIN_22_002: [ Passing a value of "{}" for tags or desired_properties is the same as passing NULL ]*/
-/*Tests_PROV_TWIN_22_004: [ Upon successful creation of a new initialTwin, initialTwin_create shall return a INITIAL_TWIN_HANDLE to access the model ]*/
 TEST_FUNCTION(initialTwin_create_desired_properties_empty)
 {
     //arrange
@@ -290,7 +287,6 @@ TEST_FUNCTION(initialTwin_create_desired_properties_empty)
     initialTwin_destroy(twin);
 }
 
-/*Tests_PROV_TWIN_22_004: [ Upon successful creation of a new initialTwin, initialTwin_create shall return a INITIAL_TWIN_HANDLE to access the model ]*/
 TEST_FUNCTION(initialTwin_create_tags_null)
 {
     //arrange
@@ -312,8 +308,6 @@ TEST_FUNCTION(initialTwin_create_tags_null)
     initialTwin_destroy(twin);
 }
 
-/*Tests_PROV_TWIN_22_002: [ Passing a value of "{}" for tags or desired_properties is the same as passing NULL ]*/
-/*Tests_PROV_TWIN_22_004: [ Upon successful creation of a new initialTwin, initialTwin_create shall return a INITIAL_TWIN_HANDLE to access the model ]*/
 TEST_FUNCTION(initialTwin_create_tags_empty)
 {
     //arrange
@@ -335,7 +329,6 @@ TEST_FUNCTION(initialTwin_create_tags_empty)
     initialTwin_destroy(twin);
 }
 
-/*Tests_PROV_TWIN_22_004: [ Upon successful creation of a new initialTwin, initialTwin_create shall return a INITIAL_TWIN_HANDLE to access the model ]*/
 TEST_FUNCTION(initialTwin_create_both_args)
 {
     //arrange
@@ -359,7 +352,6 @@ TEST_FUNCTION(initialTwin_create_both_args)
     initialTwin_destroy(twin);
 }
 
-/*Tests_PROV_TWIN_22_001: [ If both tags and desired_properties are NULL, initialTwin_create shall fail and return NULL ]*/
 TEST_FUNCTION(initialTwin_create_both_null)
 {
     //arrange
@@ -372,8 +364,6 @@ TEST_FUNCTION(initialTwin_create_both_null)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_PROV_TWIN_22_001: [ If both tags and desired_properties are NULL, initialTwin_create shall fail and return NULL ]*/
-/*Tests_PROV_TWIN_22_002: [ Passing a value of "{}" for tags or desired_properties is the same as passing NULL ]*/
 TEST_FUNCTION(initialTwin_create_both_empty)
 {
     //arrange
@@ -386,7 +376,6 @@ TEST_FUNCTION(initialTwin_create_both_empty)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_PROV_TWIN_22_003: [ If allocating memory for the new initialTwin fails, initialTwin_create shall fail and return NULL ]*/
 TEST_FUNCTION(initialTwin_create_fail)
 {
     //arrange
@@ -429,7 +418,6 @@ TEST_FUNCTION(initialTwin_create_fail)
     umock_c_negative_tests_deinit();
 }
 
-/*Tests_PROV_TWIN_22_005: [ initialTwin_destroy shall free all memory contained within the twin handle ]*/
 TEST_FUNCTION(initialTwin_destroy_full)
 {
     //arrange
@@ -450,7 +438,6 @@ TEST_FUNCTION(initialTwin_destroy_full)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_PROV_TWIN_22_005: [ initialTwin_destroy shall free all memory contained within the twin handle ]*/
 TEST_FUNCTION(initialTwin_destroy_no_tags)
 {
     //arrange
@@ -469,7 +456,6 @@ TEST_FUNCTION(initialTwin_destroy_no_tags)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_PROV_TWIN_22_005: [ initialTwin_destroy shall free all memory contained within the twin handle ]*/
 TEST_FUNCTION(initialTwin_destroy_no_desired_properties)
 {
     //arrange
@@ -487,7 +473,6 @@ TEST_FUNCTION(initialTwin_destroy_no_desired_properties)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_PROV_TWIN_22_005: [ initialTwin_destroy shall free all memory contained within the twin handle ]*/
 TEST_FUNCTION(initialTwin_destroy_null)
 {
     //act
@@ -497,8 +482,6 @@ TEST_FUNCTION(initialTwin_destroy_null)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_PROV_TWIN_22_007: [ Otherwise, initialTwin_getTags shall return the tags contained in twin ]*/
-/*Tests_PROV_TWIN_22_014: [ Otherwise, initialTwin_getDesiredProperties shall return the desired properties contained in twin ]*/
 TEST_FUNCTION(initialTwin_getters_success)
 {
     //arrange
@@ -518,8 +501,6 @@ TEST_FUNCTION(initialTwin_getters_success)
     initialTwin_destroy(twin);
 }
 
-/*Tests_PROV_TWIN_22_006: [ If the given handle, twin, is NULL, or there are no tags in twin, initialTwin_getTags shall return NULL ]*/
-/*Tests_PROV_TWIN_22_013: [ If the given handle, twin, is NULL, or there are no desired properties in twin, initialTwin_getDesiredProperties shall return NULL ]*/
 TEST_FUNCTION(initialTwin_getters_null_twin)
 {
     //act
@@ -532,7 +513,6 @@ TEST_FUNCTION(initialTwin_getters_null_twin)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_PROV_TWIN_22_006: [ If the given handle, twin, is NULL, or there are no tags in twin, initialTwin_getTags shall return NULL ]*/
 TEST_FUNCTION(initialTwin_getTags_no_tags)
 {
     //arrange
@@ -550,7 +530,6 @@ TEST_FUNCTION(initialTwin_getTags_no_tags)
     initialTwin_destroy(twin);
 }
 
-/*Tests_PROV_TWIN_22_013: [ If the given handle, twin, is NULL, or there are no desired properties in twin, initialTwin_getDesiredProperties shall return NULL ]*/
 TEST_FUNCTION(initialTwin_getDesiredProperties_no_desired_properties)
 {
     //arrange
@@ -568,7 +547,6 @@ TEST_FUNCTION(initialTwin_getDesiredProperties_no_desired_properties)
     initialTwin_destroy(twin);
 }
 
-/*Tests_PROV_TWIN_22_008: [ If the given handle, twin is NULL, initialTwin_setTags shall fail and return a non-zero value ]*/
 TEST_FUNCTION(initialTwin_setTags_null_twin)
 {
     //act
@@ -579,9 +557,6 @@ TEST_FUNCTION(initialTwin_setTags_null_twin)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_PROV_TWIN_22_009: [ The tags value of twin shall be set to the given value tags ]*/
-/*Tests_PROV_TWIN_22_010: [ Passing a value of "{}" for tags is the same as passing NULL, which will clear any already set value ]*/
-/*Tests_PROV_TWIN_22_012: [ Upon success, initialTwin_setTags shall return 0 ]*/
 TEST_FUNCTION(initialTwin_setTags_null_tag)
 {
     //arrange
@@ -603,9 +578,6 @@ TEST_FUNCTION(initialTwin_setTags_null_tag)
     initialTwin_destroy(twin);
 }
 
-/*Tests_PROV_TWIN_22_009: [ The tags value of twin shall be set to the given value tags ]*/
-/*Tests_PROV_TWIN_22_010: [ Passing a value of "{}" for tags is the same as passing NULL, which will clear any already set value ]*/
-/*Tests_PROV_TWIN_22_012: [ Upon success, initialTwin_setTags shall return 0 ]*/
 TEST_FUNCTION(initialTwin_setTags_empty_tag)
 {
     //arrange
@@ -627,8 +599,6 @@ TEST_FUNCTION(initialTwin_setTags_empty_tag)
     initialTwin_destroy(twin);
 }
 
-/*Tests_PROV_TWIN_22_009: [ The tags value of twin shall be set to the given value tags ]*/
-/*Tests_PROV_TWIN_22_012: [ Upon success, initialTwin_setTags shall return 0 ]*/
 TEST_FUNCTION(initialTwin_setTags_no_existing_tags)
 {
     //arrange
@@ -650,7 +620,6 @@ TEST_FUNCTION(initialTwin_setTags_no_existing_tags)
     initialTwin_destroy(twin);
 }
 
-/*Tests_PROV_TWIN_22_011: [ If allocating memory in twin for the new value fails, initialTwin_setTags shall fail and return a non-zero value ]*/
 TEST_FUNCTION(initialTwin_setTags_no_existing_tags_fail)
 {
     //arrange
@@ -693,8 +662,6 @@ TEST_FUNCTION(initialTwin_setTags_no_existing_tags_fail)
     umock_c_negative_tests_deinit();
 }
 
-/*Tests_PROV_TWIN_22_009: [ The tags value of twin shall be set to the given value tags ]*/
-/*Tests_PROV_TWIN_22_012: [ Upon success, initialTwin_setTags shall return 0 ]*/
 TEST_FUNCTION(initialTwin_setTags_overwrite_existing_tags)
 {
     //arrange
@@ -716,7 +683,6 @@ TEST_FUNCTION(initialTwin_setTags_overwrite_existing_tags)
     initialTwin_destroy(twin);
 }
 
-/*Tests_PROV_TWIN_22_011: [ If allocating memory in twin for the new value fails, initialTwin_setTags shall fail and return a non-zero value ]*/
 TEST_FUNCTION(initialTwin_setTags_overwrite_existing_tags_fail)
 {
     //arrange
@@ -763,7 +729,6 @@ TEST_FUNCTION(initialTwin_setTags_overwrite_existing_tags_fail)
     umock_c_negative_tests_deinit();
 }
 
-/*Test_PROV_TWIN_22_015: [ If the given handle, twin is NULL, initialTwin_setDesiredProperties shall fail and return a non-zero value ]*/
 TEST_FUNCTION(initialTwin_setDesiredProperties_null_twin)
 {
     //act
@@ -774,9 +739,6 @@ TEST_FUNCTION(initialTwin_setDesiredProperties_null_twin)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Test_PROV_TWIN_22_016: [ The desired properties value of twin shall be set to the given value desired_properties ]*/
-/*Test_PROV_TWIN_22_017: [ Passing a value of "{}" for desired_properties is the same as passing NULL, which will clear any already set value ]*/
-/*Test_PROV_TWIN_22_019: [ Upon success, initialTwin_setDesiredProperties shall return 0 ]*/
 TEST_FUNCTION(initialTwin_setDesiredProperties_null_desired_properties)
 {
     //arrange
@@ -799,9 +761,6 @@ TEST_FUNCTION(initialTwin_setDesiredProperties_null_desired_properties)
     initialTwin_destroy(twin);
 }
 
-/*Test_PROV_TWIN_22_016: [ The desired properties value of twin shall be set to the given value desired_properties ]*/
-/*Test_PROV_TWIN_22_017: [ Passing a value of "{}" for desired_properties is the same as passing NULL, which will clear any already set value ]*/
-/*Test_PROV_TWIN_22_019: [ Upon success, initialTwin_setDesiredProperties shall return 0 ]*/
 TEST_FUNCTION(initialTwin_setDesiredProperties_empty_desired_properties)
 {
     //arrange
@@ -824,8 +783,6 @@ TEST_FUNCTION(initialTwin_setDesiredProperties_empty_desired_properties)
     initialTwin_destroy(twin);
 }
 
-/*Test_PROV_TWIN_22_016: [ The desired properties value of twin shall be set to the given value desired_properties ]*/
-/*Test_PROV_TWIN_22_019: [ Upon success, initialTwin_setDesiredProperties shall return 0 ]*/
 TEST_FUNCTION(initialTwin_setDesiredProperties_no_existing_desired_properties)
 {
     //arrange
@@ -848,7 +805,6 @@ TEST_FUNCTION(initialTwin_setDesiredProperties_no_existing_desired_properties)
     initialTwin_destroy(twin);
 }
 
-/*Test_PROV_TWIN_22_018: [ If allocating memory in twin for the new value fails, initialTwin_setDesiredProperties shall fail and return a non-zero value ]*/
 TEST_FUNCTION(initialTwin_setDesiredProperties_no_existing_desired_properties_fails)
 {
     //arrange
@@ -892,8 +848,6 @@ TEST_FUNCTION(initialTwin_setDesiredProperties_no_existing_desired_properties_fa
     umock_c_negative_tests_deinit();
 }
 
-/*Test_PROV_TWIN_22_016: [ The desired properties value of twin shall be set to the given value desired_properties ]*/
-/*Test_PROV_TWIN_22_019: [ Upon success, initialTwin_setDesiredProperties shall return 0 ]*/
 TEST_FUNCTION(initialTwin_setDesiredProperties_overwrite_existing_desired_properties)
 {
     //arrange
@@ -915,7 +869,6 @@ TEST_FUNCTION(initialTwin_setDesiredProperties_overwrite_existing_desired_proper
     initialTwin_destroy(twin);
 }
 
-/*Test_PROV_TWIN_22_018: [ If allocating memory in twin for the new value fails, initialTwin_setDesiredProperties shall fail and return a non-zero value ]*/
 TEST_FUNCTION(initialTwin_setDesiredProperties_overwrite_existing_desired_properties_fails)
 {
     //arrange

@@ -99,17 +99,7 @@ if (${build_as_dynamic})
     )
     set (install_libs ${install_libs} serializer_dll)
 endif()
-setSdkTargetBuildProperties(serializer)
-
-if (NOT ${skip_samples})
-    if(WIN32)
-        if (NOT ${ARCHITECTURE} STREQUAL "ARM")
-            add_subdirectory(samples)
-        endif()
-    else()
-        add_subdirectory(samples)
-    endif()
-endif()
+applyXcodeBuildFlagsIfNeeded(serializer)
 
 if(NOT IN_OPENWRT)
     # Disable tests for OpenWRT

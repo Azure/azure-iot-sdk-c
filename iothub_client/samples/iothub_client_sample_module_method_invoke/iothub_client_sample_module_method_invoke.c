@@ -47,7 +47,7 @@ int main(void)
         IOTHUB_CLIENT_RESULT invokeAsyncResult = IoTHubModuleClient_ModuleMethodInvokeAsync(handle, targetDevice, targetModule, targetMethodName, targetMethodPayload, timeout, ModuleMethodInvokeCallback, (void*)0x1234);
         if (invokeAsyncResult == IOTHUB_CLIENT_OK)
         {
-            // Because we're using the convenience layer, the callback happens asyncronously.  Wait here for it to complete.
+            // Because we're using the convenience layer, the callback happens asynchronously.  Wait here for it to complete.
             (void)printf("Module Method called.  Waiting for response\n");
 
             while (moduleMethodInvokeCallbackCalled == 0)

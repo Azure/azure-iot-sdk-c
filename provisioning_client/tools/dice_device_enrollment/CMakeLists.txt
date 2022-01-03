@@ -35,6 +35,9 @@ if(${use_openssl})
     endif()
 endif()
 
-linkSharedUtil(dice_device_enrollment)
-link_security_client(dice_device_enrollment)
-target_link_libraries(dice_device_enrollment parson)
+target_link_libraries(dice_device_enrollment
+    prov_auth_client
+    hsm_security_client
+    aziotsharedutil
+    parson
+)

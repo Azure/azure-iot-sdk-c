@@ -199,7 +199,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_ws_client_ut)
         TEST_MUTEX_RELEASE(g_testByTest);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_WS_CLIENT_07_001: [ prov_transport_mqtt_ws_create shall call the prov_transport_common_mqtt_create function with mqtt_transport_io transport IO estabishment. ] */
     TEST_FUNCTION(prov_transport_mqtt_ws_create_succeed)
     {
         //arrange
@@ -215,7 +214,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_ws_client_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_WS_CLIENT_07_014: [ On success mqtt_transport_io shall return an allocated DPS_TRANSPORT_IO_INFO structure. ] */
     TEST_FUNCTION(mqtt_transport_ws_io_succeed)
     {
         XIO_HANDLE dps_io_info;
@@ -237,7 +235,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_ws_client_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_WS_CLIENT_07_014: [ On success mqtt_transport_io shall return an allocated DPS_TRANSPORT_IO_INFO structure. ] */
     TEST_FUNCTION(mqtt_transport_ws_io_x509_succeed)
     {
         XIO_HANDLE dps_io_info;
@@ -259,7 +256,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_ws_client_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_WS_CLIENT_07_013: [ If any failure is encountered mqtt_transport_io shall return NULL ] */
     TEST_FUNCTION(mqtt_transport_ws_io_fail)
     {
         XIO_HANDLE dps_io_info;
@@ -298,7 +294,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_ws_client_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_WS_CLIENT_07_012: [ If proxy_info is not NULL, mqtt_transport_io shall construct a HTTP_PROXY_IO_CONFIG object and assign it to TLSIO_CONFIG underlying_io_parameters ] */
     TEST_FUNCTION(mqtt_transport_ws_io_w_http_proxy_succeed)
     {
         HTTP_PROXY_OPTIONS proxy_info;
@@ -327,7 +322,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_ws_client_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_WS_CLIENT_07_002: [ prov_transport_mqtt_ws_destroy shall invoke the prov_transport_common_mqtt_destroy method ] */
     TEST_FUNCTION(prov_transport_mqtt_ws_destroy_succeed)
     {
         //arrange
@@ -342,7 +336,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_ws_client_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_WS_CLIENT_07_003: [ prov_transport_mqtt_ws_open shall invoke the prov_transport_common_mqtt_open method ] */
     TEST_FUNCTION(prov_transport_mqtt_ws_open_succeed)
     {
         //arrange
@@ -358,7 +351,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_ws_client_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_WS_CLIENT_07_004: [ prov_transport_mqtt_ws_close shall invoke the prov_transport_common_mqtt_close method ] */
     TEST_FUNCTION(prov_transport_mqtt_ws_close_succeed)
     {
         //arrange
@@ -374,7 +366,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_ws_client_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_WS_CLIENT_07_005: [ prov_transport_mqtt_ws_register_device shall invoke the prov_transport_common_mqtt_register_device method ] */
     TEST_FUNCTION(prov_transport_mqtt_ws_register_device_succeed)
     {
         //arrange
@@ -390,7 +381,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_ws_client_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_WS_CLIENT_07_006: [ prov_transport_mqtt_ws_get_operation_status shall invoke the prov_transport_common_mqtt_get_operation_status method ] */
     TEST_FUNCTION(prov_transport_mqtt_ws_get_operation_status_succeed)
     {
         //arrange
@@ -406,7 +396,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_ws_client_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_WS_CLIENT_07_007: [ prov_transport_mqtt_ws_dowork shall invoke the prov_transport_common_mqtt_dowork method ] */
     TEST_FUNCTION(prov_transport_mqtt_ws_dowork_succeed)
     {
         //arrange
@@ -421,7 +410,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_ws_client_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_WS_CLIENT_07_008: [ prov_transport_mqtt_ws_set_trace shall invoke the prov_transport_common_mqtt_set_trace method ] */
     TEST_FUNCTION(prov_transport_mqtt_ws_set_trace_succeed)
     {
         //arrange
@@ -437,7 +425,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_ws_client_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_WS_CLIENT_07_009: [ prov_transport_mqtt_ws_x509_cert shall invoke the dps_trans_common_mqtt_x509_cert method ] */
     TEST_FUNCTION(prov_transport_mqtt_ws_x509_cert_succeed)
     {
         //arrange
@@ -453,7 +440,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_ws_client_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_WS_CLIENT_07_010: [ prov_transport_mqtt_ws_set_trusted_cert shall invoke the prov_transport_common_mqtt_set_trusted_cert method ] */
     TEST_FUNCTION(prov_transport_mqtt_ws_set_trusted_cert_succeed)
     {
         //arrange
@@ -469,7 +455,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_ws_client_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_WS_CLIENT_07_011: [ prov_transport_mqtt_ws_set_proxy shall invoke the prov_transport_common_mqtt_set_proxy method ] */
     TEST_FUNCTION(prov_transport_mqtt_ws_set_proxy_succeed)
     {
         //arrange
