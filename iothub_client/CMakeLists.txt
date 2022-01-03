@@ -10,7 +10,7 @@ endif()
 
 compileAsC99()
 
-set(iothub_client_h_files
+set(iothub_client_c_files
     ${CMAKE_CURRENT_LIST_DIR}/src/iothub.c
     ${CMAKE_CURRENT_LIST_DIR}/src/iothub_client.c
     ${CMAKE_CURRENT_LIST_DIR}/src/iothub_client_core.c

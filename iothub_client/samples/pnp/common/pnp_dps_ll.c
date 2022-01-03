@@ -129,6 +129,10 @@ IOTHUB_DEVICE_CLIENT_LL_HANDLE PnP_CreateDeviceClientLLHandle_ViaDps(const PNP_D
         result = false;
     }
     else if ((provDeviceResult = Prov_Device_LL_Set_Provisioning_Payload(provDeviceClient, modelIdPayload)) != PROV_DEVICE_RESULT_OK)
+    {
+        LogError("Prov_Device_LL_Register_Device failed, error=%d", provDeviceResult);
+        result = false;
+    }
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
     // Setting the Trusted Certificate.  This is only necessary on systems without built in certificate stores.
     else if ((provDeviceResult = Prov_Device_LL_SetOption(provDeviceHandle, OPTION_TRUSTED_CERT, certificates)) != PROV_DEVICE_RESULT_OK)

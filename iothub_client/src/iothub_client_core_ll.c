@@ -1989,7 +1989,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetMessageCallback_Ex(IOTHUB_CLIENT_COR
             {
                 if (handleData->IoTHubTransport_Subscribe(handleData->deviceHandle) == 0)
                 {
-                    handleData->messageCallback.type = CALLBACK_TYPE_ASYNC;
+                    handleData->messageCallback.type = CALLBACK_TYPE_MESSAGE_ASYNC;
                     handleData->messageCallback.callbackAsync = messageCallback;
                     handleData->messageCallback.userContextCallback = userContextCallback;
                     result = IOTHUB_CLIENT_OK;

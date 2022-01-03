@@ -258,8 +258,6 @@ extern "C"
     /**
     * @brief    This API sets callback for async cloud to module method call.
     *
-    * @param    iotHubModuleClientHandle        The handle created by a call to the create function.
-    * @param    methodCallback                  The callback which will be called by IoTHub.
     * @param    IoTHubClientHandle              The handle created by a call to the create function.
     * @param    methodCallback                  The callback which will be called by IoT Hub.
     * @param    userContextCallback             User specified context that will be provided to the
@@ -267,7 +265,7 @@ extern "C"
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SetModuleMethodCallback, IOTHUB_MODULE_CLIENT_HANDLE, iotHubModuleClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC, methodCallback, void*, userContextCallback);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubModuleClient_SetModuleMethodCallback, IOTHUB_MODULE_CLIENT_HANDLE, IoTHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC, methodCallback, void*, userContextCallback);
 
     /**
     * @brief    Asynchronous call to send the message specified by @p eventMessageHandle.

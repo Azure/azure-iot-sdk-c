@@ -261,6 +261,7 @@ extern "C"
     typedef int(*IOTHUB_CLIENT_INBOUND_DEVICE_METHOD_CALLBACK)(const char* method_name, const unsigned char* payload, size_t size, METHOD_HANDLE method_id, void* userContextCallback);
     /**  \endcond */
 
+
 #define IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_RESULT_VALUES \
     IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_OK, \
     IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_ABORT

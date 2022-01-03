@@ -1291,7 +1291,7 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_emtpy_msg_mocks(void)
     STRICT_EXPECTED_CALL(IoTHubMessage_GetContentEncodingSystemProperty(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_GetMessageCreationTimeUtcSystemProperty(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_GetOutputName(IGNORED_PTR_ARG));
-	STRICT_EXPECTED_CALL(IoTHubMessage_GetComponentName(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(IoTHubMessage_GetComponentName(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubMessage_GetDiagnosticPropertyData(IGNORED_PTR_ARG));
 
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
@@ -1440,7 +1440,7 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_resend_events_mocks(
         STRICT_EXPECTED_CALL(URL_EncodeString(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
-	}
+    }
 
     STRICT_EXPECTED_CALL(IoTHubMessage_GetComponentName(IGNORED_PTR_ARG)).SetReturn(component_name);
     if (auto_urlencode && (component_name != NULL))
@@ -1605,7 +1605,7 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     }
-	
+    
     STRICT_EXPECTED_CALL(IoTHubMessage_GetComponentName(IGNORED_PTR_ARG)).SetReturn(component_name);
     if (auto_urlencode && (component_name != NULL))
     {
