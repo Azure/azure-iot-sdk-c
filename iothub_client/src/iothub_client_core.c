@@ -2066,7 +2066,8 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetDeviceMethodCallback_Ex(IOTHUB_CLIENT_C
     {
         if (iotHubClientInstance->command_callback != NULL)
         {
-            result = IoTHubClientCore_LL_SetDeviceMethodCallback_Ex(iotHubClientInstance->IoTHubClientLLHandle, NULL, NULL);
+            result = IOTHUB_CLIENT_ERROR;
+            LogError("Command callback already defined");
         }
         else
         {
