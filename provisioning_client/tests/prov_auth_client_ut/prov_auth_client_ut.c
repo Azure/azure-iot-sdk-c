@@ -35,6 +35,11 @@ static void my_gballoc_free(void* ptr)
 #include "azure_c_shared_utility/azure_base32.h"
 #include "azure_c_shared_utility/hmacsha256.h"
 #include "hsm_client_data.h"
+
+#ifdef HSM_TYPE_X509
+#include "hsm_client_x509.h"
+#endif
+
 #undef ENABLE_MOCKS
 
 #include "azure_prov_client/internal/prov_auth_client.h"

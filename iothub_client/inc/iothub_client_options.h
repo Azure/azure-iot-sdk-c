@@ -22,8 +22,17 @@ extern "C"
     static STATIC_VAR_UNUSED const char* OPTION_RETRY_MAX_DELAY_SECS = "retry_max_delay_secs";
 
     static STATIC_VAR_UNUSED const char* OPTION_LOG_TRACE = "logtrace";
+
+#ifndef OPTION_X509_CERT_DEF
+#define OPTION_X509_CERT_DEF
     static STATIC_VAR_UNUSED const char* OPTION_X509_CERT = "x509certificate";
+#endif
+
+#ifndef OPTION_X509_PRIVATE_KEY_DEF
+#define OPTION_X509_PRIVATE_KEY_DEF
     static STATIC_VAR_UNUSED const char* OPTION_X509_PRIVATE_KEY = "x509privatekey";
+#endif
+
     static STATIC_VAR_UNUSED const char* OPTION_KEEP_ALIVE = "keepalive";
     static STATIC_VAR_UNUSED const char* OPTION_CONNECTION_TIMEOUT = "connect_timeout";
 

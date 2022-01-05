@@ -27,6 +27,10 @@ add_unittest_directory(prov_device_client_ll_ut)
 add_unittest_directory(prov_security_factory_ut)
 
 if (${hsm_type_x509})
+    add_unittest_directory(hsm_client_x509_ut)
+endif ()
+
+if (${hsm_type_riot})
     add_unittest_directory(hsm_client_riot_ut)
 endif ()
 

@@ -28,7 +28,7 @@ and removing calls to _DoWork will yield the same results. */
 //#define SAMPLE_HTTP
 
 // If using an OpenSSL ENGINE uncomment and modify the line below
-//#define SAMPLE_OPENSSL_ENGINE "pkcs11"
+#define SAMPLE_OPENSSL_ENGINE "pkcs11"
 
 #ifdef SAMPLE_MQTT
     #include "iothubtransportmqtt.h"
@@ -56,27 +56,16 @@ and removing calls to _DoWork will yield the same results. */
 
 /* Paste in the your x509 iothub connection string  */
 /*  "HostName=<host_name>;DeviceId=<device_id>;x509=true"                      */
-static const char* connectionString = "[device connection string]";
+static const char* connectionString = "HostName=<host_name>;DeviceId=<device_id>;x509=true";
 
 static const char* x509certificate =
-"-----BEGIN CERTIFICATE-----""\n"
-"MIICpDCCAYwCCQCfIjBnPxs5TzANBgkqhkiG9w0BAQsFADAUMRIwEAYDVQQDDAls""\n"
-"b2NhbGhvc3QwHhcNMTYwNjIyMjM0MzI3WhcNMTYwNjIzMjM0MzI3WjAUMRIwEAYD""\n"
-"...""\n"
-"+s88wBF907s1dcY45vsG0ldE3f7Y6anGF60nUwYao/fN/eb5FT5EHANVMmnK8zZ2""\n"
-"tjWUt5TFnAveFoQWIoIbtzlTbOxUFwMrQFzFXOrZoDJmHNWc2u6FmVAkowoOSHiE""\n"
-"dkyVdoGPCXc=""\n"
-"-----END CERTIFICATE-----";
+"-----BEGIN CERTIFICATE-----\n"
+"MIIBVjCB/aADAgECAhRMqqc/rOqEW+Afbkw4XyMLu1PUaTAKBggqhkjOPQQDAjAT\n"
+"..."
+"dwjNGPacV5zzgA==\n"
+"-----END CERTIFICATE-----\n";
 
-static const char* x509privatekey =
-"-----BEGIN RSA PRIVATE KEY-----""\n"
-"MIIEpQIBAAKCAQEA0zKK+Uu5I0nXq2V6+2gbdCsBXZ6j1uAgU/clsCohEAek1T8v""\n"
-"qj2tR9Mz9iy9RtXPMHwzcQ7aXDaz7RbHdw7tYXqSw8iq0Mxq2s3p4mo6gd5vEOiN""\n"
-"...""\n"
-"EyePNmkCgYEAng+12qvs0de7OhkTjX9FLxluLWxfN2vbtQCWXslLCG+Es/ZzGlNF""\n"
-"SaqVID4EAUgUqFDw0UO6SKLT+HyFjOr5qdHkfAmRzwE/0RBN69g2qLDN3Km1Px/k""\n"
-"xyJyxc700uV1eKiCdRLRuCbUeecOSZreh8YRIQQXoG8uotO5IttdVRc=""\n"
-"-----END RSA PRIVATE KEY-----";
+static const char* x509privatekey = "pkcs11:object=test-privkey;type=private?pin-value=1234";
 
 #ifdef SAMPLE_OPENSSL_ENGINE
 static const char* opensslEngine = SAMPLE_OPENSSL_ENGINE;

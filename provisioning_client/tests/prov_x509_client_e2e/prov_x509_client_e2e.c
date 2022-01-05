@@ -20,6 +20,8 @@
 #include "azure_prov_client/prov_transport_mqtt_client.h"
 #include "azure_prov_client/prov_transport_mqtt_ws_client.h"
 
+static const char* X509_INDIVIDUAL_REGISTRATION_ID_PREFIX_FMT = "csdke2e_x509_i_%s";
+
 #include "common_prov_e2e.h"
 
 static const char* g_prov_conn_string = NULL;
@@ -44,8 +46,23 @@ BEGIN_TEST_SUITE(prov_x509_client_e2e)
         g_dps_scope_id = getenv(DPS_ID_SCOPE);
         ASSERT_IS_NOT_NULL(g_dps_scope_id, "DPS_ID_SCOPE is NULL");
 
+        // TODO: 
+        // 1. Read individual enrollment certificate from ENV.
+        // 2. Change create_x509_individual_enrollment_device to create a new individual enrollment
+        //    based on the certificate, using construct_device_id.
+
+        #if 0
+        base64_cert = getenv("IOTHUB_E2E_X509_CERT_BASE64");
+        base64_key = getenv("IOTHUB_E2E_X509_PRIVATE_KEY_BASE64");
+        convert_base64_to_string(base64_cert);
+
+        char* device_name;
+        construct_device_id(X509_INDIVIDUAL_REGISTRATION_ID_PREFIX_FMT, &device_name);
+        printf("\n\nDevice: %s\n\n", device_name);
+        #endif 
+
         // Register device
-        create_x509_enrollment_device(g_prov_conn_string, g_enable_tracing);
+        create_x509_individual_enrollment_device(g_prov_conn_string, g_enable_tracing);
     }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
@@ -78,10 +95,10 @@ BEGIN_TEST_SUITE(prov_x509_client_e2e)
         send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_AMQP_Protocol, g_enable_tracing);
     }
 
-    /*TEST_FUNCTION(dps_register_x509_device_amqp_ws_success)
+    TEST_FUNCTION(dps_register_x509_device_amqp_ws_success)
     {
         send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_AMQP_WS_Protocol, g_enable_tracing);
-    }*/
+    }
 #endif
 
 #if USE_MQTT
@@ -90,9 +107,9 @@ BEGIN_TEST_SUITE(prov_x509_client_e2e)
         send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_MQTT_Protocol, g_enable_tracing);
     }
 
-    /*TEST_FUNCTION(dps_register_x509_device_mqtt_ws_success)
+    TEST_FUNCTION(dps_register_x509_device_mqtt_ws_success)
     {
         send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_MQTT_WS_Protocol, g_enable_tracing);
-    }*/
+    }
 #endif
 END_TEST_SUITE(prov_x509_client_e2e)

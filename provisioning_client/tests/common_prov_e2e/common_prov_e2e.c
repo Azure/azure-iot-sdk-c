@@ -187,7 +187,7 @@ void create_symm_key_enrollment_device(const char* prov_conn_string, bool use_tr
     prov_sc_destroy(prov_sc_handle);
 }
 
-void create_x509_enrollment_device(const char* prov_conn_string, bool use_tracing)
+void create_x509_individual_enrollment_device(const char* prov_conn_string, bool use_tracing)
 {
     INDIVIDUAL_ENROLLMENT_HANDLE indiv_enrollment = NULL;
 

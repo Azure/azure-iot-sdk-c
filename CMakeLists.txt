@@ -41,6 +41,7 @@ IF(WIN32)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 
+
 ########### CMake Options ###########
 # Testing
 option(run_e2e_tests "set run_e2e_tests to ON to run e2e tests (default is OFF)" OFF)
@@ -66,6 +67,7 @@ option(build_service_client "controls whether the iothub_service_client is built
 option(build_provisioning_service_client "controls whether the provisioning_service_client is built or not" ON)
 # HSM Type
 option(hsm_type_x509 "x509 type of hsm used with the Provisioning client" OFF)
+option(hsm_type_riot "DICE/RIoT x509 type of hsm used with the Provisioning client", OFF)
 option(hsm_type_sastoken "tpm type of hsm used with the Provisioning client" OFF)
 option(hsm_type_symm_key "Symmetric key type of hsm used with the Provisioning client" OFF)
 option(hsm_type_custom "hsm type of custom used with the Provisioning client" OFF)
@@ -135,7 +137,6 @@ if(${use_custom_heap})
     add_definitions(-DGB_USE_CUSTOM_HEAP)
 endif()
 
-########## Enable Specific Root Certs ##########
 if (${use_azure_cloud_rsa_cert})
     add_definitions(-DUSE_AZURE_CLOUD_RSA_CERT)
 endif()
@@ -176,7 +177,7 @@ if (${use_prov_client})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_PROV_MODULE_FULL")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DUSE_PROV_MODULE_FULL")
     if ("${hsm_custom_lib}" STREQUAL "")
-        if ((NOT ${hsm_type_x509}) AND (NOT ${hsm_type_sastoken}) AND (NOT ${hsm_type_symm_key}))
+        if ((NOT ${hsm_type_x509}) AND (NOT ${hsm_type_sastoken}) AND (NOT ${hsm_type_symm_key}) AND (NOT ${hsm_type_riot}))
             # If the cmake option did not explicitly configure an hsm type, then enable them all.
             set(hsm_type_x509 ON)
             set(hsm_type_sastoken ON)
@@ -202,6 +203,10 @@ endif()
 
 if (NOT ${use_amqp} AND NOT ${use_http} AND NOT ${use_mqtt})
     message(FATAL_ERROR "CMAKE Failure: AMQP, HTTP & MQTT are all disabled, IoT Hub Client must have one protocol enabled.")
+endif()
+
+if (${hsm_type_x509} AND ${hsm_type_riot})
+    message(FATAL_ERROR "CMAKE Failure: hsm_type_x509 and hsm_type_riot are incompatible. Select only one X509 HSM type.")
 endif()
 
 if (${dont_use_uploadtoblob})
