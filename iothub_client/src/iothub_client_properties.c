@@ -56,7 +56,7 @@ static const char* AddCommaIfNeeded(bool lastItem)
 }
 
 // AdvanceCountersAfterWrite updates the traversal pointer and lengths after snprintf'ng JSON
-static void AdvanceCountersAfterWrite(size_t currentOutputBytes, char** currentWrite, size_t* requiredBytes, size_t* remainingBytes)
+static void AdvanceCountersAfterWrite(int currentOutputBytes, char** currentWrite, size_t* requiredBytes, size_t* remainingBytes)
 {
     // The number of bytes to be required is always updated by number the snprintf wrote to.
     *requiredBytes += currentOutputBytes;
@@ -70,34 +70,35 @@ static void AdvanceCountersAfterWrite(size_t currentOutputBytes, char** currentW
 }
 
 // WriteOpeningBrace adds opening brace for JSON to be generated, either a simple "{" or more complex format if componentName is specified.
-static size_t WriteOpeningBrace(const char* componentName, char* currentWrite, size_t remainingBytes)
+static bool WriteOpeningBrace(const char* componentName, char** currentWrite, size_t* requiredBytes, size_t* remainingBytes) // char* currentWrite, size_t remainingBytes)
 {
-    size_t currentOutputBytes;
+    int currentOutputBytes;
 
     if (componentName != NULL)
     {
-        if ((currentOutputBytes = snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_COMPONENT_START, componentName)) < 0)
+        if ((currentOutputBytes = snprintf(*currentWrite, *remainingBytes, PROPERTY_FORMAT_COMPONENT_START, componentName)) < 0)
         {
             LogError("Cannot write properties string");
-            return (size_t)-1;
+            return false;
         }
     }
     else
     {
-        if ((currentOutputBytes = snprintf(currentWrite, remainingBytes, PROPERTY_OPEN_BRACE)) < 0)
+        if ((currentOutputBytes = snprintf(*currentWrite, *remainingBytes, PROPERTY_OPEN_BRACE)) < 0)
         {
             LogError("Cannot write properties string");
-            return (size_t)-1;
+            return false;
         }
     }
 
-    return currentOutputBytes;
+    AdvanceCountersAfterWrite(currentOutputBytes, currentWrite, requiredBytes, remainingBytes);
+    return true;
 }
 
 // WriteOpeningBrace writes the required number of closing } while writing JSON
 static size_t WriteClosingBrace(bool isComponent, char** currentWrite, size_t* requiredBytes, size_t* remainingBytes)
 {
-    size_t currentOutputBytes = 0;
+    int currentOutputBytes;
     size_t numberOfBraces = isComponent ? 2 : 1;
 
     for (size_t i = 0; i < numberOfBraces; i++)
@@ -105,12 +106,12 @@ static size_t WriteClosingBrace(bool isComponent, char** currentWrite, size_t* r
         if ((currentOutputBytes = snprintf(*currentWrite, *remainingBytes, PROPERTY_CLOSE_BRACE)) < 0)
         {
             LogError("Cannot write properties string");
-            return (size_t)-1;
+            return false;
         }
         AdvanceCountersAfterWrite(currentOutputBytes, currentWrite, requiredBytes, remainingBytes);
     }
 
-    return currentOutputBytes;
+    return true;
 }
 
 // WriteReportedProperties writes the actual serializedProperties string based 
@@ -119,20 +120,20 @@ static size_t WriteClosingBrace(bool isComponent, char** currentWrite, size_t* r
 static size_t WriteReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPERTY* properties, size_t numProperties, const char* componentName, unsigned char* serializedProperties, size_t serializedPropertiesLength)
 {
     size_t requiredBytes = 0;
-    size_t currentOutputBytes;
     size_t remainingBytes = serializedPropertiesLength;
     char* currentWrite = (char*)serializedProperties;
 
-    if ((currentOutputBytes = WriteOpeningBrace(componentName,  currentWrite, remainingBytes)) < 0)
+    if (WriteOpeningBrace(componentName,  &currentWrite, &requiredBytes, &remainingBytes) != true)
     {
         LogError("Cannot write properties string");
         return (size_t)-1;
     }
-    AdvanceCountersAfterWrite(currentOutputBytes, &currentWrite, &requiredBytes, &remainingBytes);
 
     for (size_t i = 0; i < numProperties; i++)
     {
         bool lastProperty = (i == (numProperties - 1));
+        int currentOutputBytes;
+
         if ((currentOutputBytes = snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_NAME_VALUE, 
                                             properties[i].name, properties[i].value, AddCommaIfNeeded(lastProperty))) < 0)
         {
@@ -142,7 +143,7 @@ static size_t WriteReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPERTY* pro
         AdvanceCountersAfterWrite(currentOutputBytes, &currentWrite, &requiredBytes, &remainingBytes);
     }
 
-    if (WriteClosingBrace(componentName != NULL, &currentWrite, &requiredBytes, &remainingBytes) == -1)
+    if (WriteClosingBrace(componentName != NULL, &currentWrite, &requiredBytes, &remainingBytes) != true)
     {
         LogError("Cannot write properties string");
         return (size_t)-1;
@@ -157,20 +158,20 @@ static size_t WriteReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPERTY* pro
 static size_t WriteWritableResponseProperties(const IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE* properties, size_t numProperties, const char* componentName, unsigned char* serializedProperties, size_t serializedPropertiesLength)
 {
     size_t requiredBytes = 0;
-    size_t currentOutputBytes;
     size_t remainingBytes = serializedPropertiesLength;
     char* currentWrite = (char*)serializedProperties;
 
-    if ((currentOutputBytes = WriteOpeningBrace(componentName,  currentWrite, remainingBytes)) < 0)
+    if (WriteOpeningBrace(componentName,  &currentWrite, &requiredBytes, &remainingBytes) != true)
     {
         LogError("Cannot write properties string");
         return (size_t)-1;
     }
-    AdvanceCountersAfterWrite(currentOutputBytes, &currentWrite, &requiredBytes, &remainingBytes);
 
     for (size_t i = 0; i < numProperties; i++)
     {
         bool lastProperty = (i == (numProperties - 1));
+        int currentOutputBytes;
+
         if (properties[i].description == NULL)
         {
             if ((currentOutputBytes = snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_WRITABLE_RESPONSE, properties[i].name, 
