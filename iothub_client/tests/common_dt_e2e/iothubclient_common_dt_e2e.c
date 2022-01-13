@@ -905,6 +905,11 @@ void dt_e2e_send_module_id_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHU
 
     char *twinData = dt_e2e_get_twin_from_service(serviceClientDeviceTwinHandle, deviceToUse);
 
+    IoTHubDeviceTwin_Destroy(serviceClientDeviceTwinHandle);
+    IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
+    destroy_on_device_or_module();
+    device_desired_deinit(deviceDesiredData);
+
     JSON_Value *rootValue = json_parse_string(twinData);
     ASSERT_IS_NOT_NULL(rootValue);
     JSON_Object *rootObject = json_value_get_object(rootValue);
@@ -916,10 +921,6 @@ void dt_e2e_send_module_id_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHU
     // cleanup
     json_value_free(rootValue);
     free(twinData);
-    IoTHubDeviceTwin_Destroy(serviceClientDeviceTwinHandle);
-    IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
-    destroy_on_device_or_module();
-    device_desired_deinit(deviceDesiredData);
 }
 
 
