@@ -348,11 +348,14 @@ extern "C"
         const char* deviceSasToken;
     } IOTHUB_CLIENT_DEVICE_CONFIG;
 
+    /** @brief Current version of @p IOTHUB_CLIENT_COMMAND_REQUEST structure.  */
+    #define IOTHUB_CLIENT_COMMAND_REQUEST_STRUCT_VERSION_1 1
+
     /** @brief    This struct specifies parameters of an incoming command request */  
     typedef struct IOTHUB_CLIENT_COMMAND_REQUEST_TAG
     {
-        // TODO: Add versions!
-
+        /** @brief   Version of the structure.  Currently must be IOTHUB_CLIENT_COMMAND_REQUEST_STRUCT_VERSION_1. */
+        int structVersion;
         /** @brief   Name of the component associated with this request.  If this is targeting the root component, this will be NULL. */
         const char* componentName;
         /** @brief   Name of the command associated with this request. */

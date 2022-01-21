@@ -631,6 +631,7 @@ static void invoke_application_command_callback(IOTHUB_CLIENT_CORE_HANDLE method
         IOTHUB_CLIENT_COMMAND_REQUEST commandRequest;
         IOTHUB_CLIENT_COMMAND_RESPONSE commandResponse;
 
+        commandRequest.structVersion = IOTHUB_CLIENT_COMMAND_REQUEST_STRUCT_VERSION_1;
         commandRequest.componentName = component_name;
         commandRequest.commandName = command_name;
         commandRequest.payload = payload;

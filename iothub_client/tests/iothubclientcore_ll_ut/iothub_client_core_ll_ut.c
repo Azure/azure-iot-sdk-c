@@ -80,7 +80,7 @@ MOCKABLE_FUNCTION(, void, iothub_device_twin_callback, DEVICE_TWIN_UPDATE_STATE,
 MOCKABLE_FUNCTION(, int, deviceMethodCallback, const char*, method_name, const unsigned char*, payload, size_t, size, unsigned char**, response, size_t*, resp_size, void*, userContextCallback);
 MOCKABLE_FUNCTION(, int, iothub_client_inbound_device_method_callback, const char*, method_name, const unsigned char*, payload, size_t, size, METHOD_HANDLE, method_id, void*, userContextCallback);
 MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, FAKE_IoTHubTransport_SendMessageDisposition, IOTHUB_DEVICE_HANDLE, handle,  IOTHUB_MESSAGE_HANDLE, message, IOTHUBMESSAGE_DISPOSITION_RESULT, disposition);
-MOCKABLE_FUNCTION(, int, commandCallback, const char*, componentName, const char*, commandName, const unsigned char*, payload, size_t, size, const char*, payloadContentType, unsigned char**, response, size_t*, responseSize, void*, userContextCallback);
+MOCKABLE_FUNCTION(, void, commandCallback, const IOTHUB_CLIENT_COMMAND_REQUEST*, commandRequest, IOTHUB_CLIENT_COMMAND_RESPONSE*, commandResponse, void*, userContextCallback);
 MOCKABLE_FUNCTION(, STRING_HANDLE, FAKE_IoTHubTransport_GetHostname, TRANSPORT_LL_HANDLE, handle);
 MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, FAKE_IoTHubTransport_SetOption, TRANSPORT_LL_HANDLE, handle, const char*, optionName, const void*, value);
 MOCKABLE_FUNCTION(, TRANSPORT_LL_HANDLE, FAKE_IoTHubTransport_Create, const IOTHUBTRANSPORT_CONFIG*, config, TRANSPORT_CALLBACKS_INFO*, cb_info, void*, ctx);
@@ -233,6 +233,7 @@ static const char* TEST_PROV_URI = "global.azure-devices-provisioning.net";
 #define TEST_METHOD_NAME "method_name"
 #define TEST_COMPONENT_NAME "Test_Component"
 static const char TEST_METHOD_NAME_WITH_COMPONENT[] = TEST_COMPONENT_NAME "*" TEST_METHOD_NAME;
+static char* g_currentTestComponentName;
 
 static const char* TEST_CHAR = "TestChar";
 static tickcounter_ms_t g_current_ms = 0;
@@ -266,6 +267,8 @@ static const unsigned char TEST_REPORTED_STATE[] = { 0x01, 0x02, 0x03 };
 static const size_t TEST_REPORTED_SIZE = sizeof(TEST_REPORTED_STATE) / sizeof(TEST_REPORTED_STATE[0]);
 
 static const TRANSPORT_PROVIDER* provideFAKE(void);
+
+static const void* TEST_COMMAND_CALLBACK_CONTEXT = (const void*)0x4277;
 
 static const IOTHUB_CLIENT_CONFIG TEST_CONFIG_NULL_protocol =
 {
@@ -687,6 +690,28 @@ bool real_messageInputCallbackEx(IOTHUB_MESSAGE_HANDLE message, void* userContex
     return actualUserContextCallback->returnValue;
 }
 
+static void test_commandCallback(const IOTHUB_CLIENT_COMMAND_REQUEST* commandRequest, IOTHUB_CLIENT_COMMAND_RESPONSE* commandResponse, void* userContextCallback)
+{
+    ASSERT_IS_NOT_NULL(commandResponse);
+    ASSERT_ARE_EQUAL(void_ptr, TEST_COMMAND_CALLBACK_CONTEXT, userContextCallback);
+
+
+    ASSERT_IS_NOT_NULL(commandRequest);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_COMMAND_REQUEST_STRUCT_VERSION_1, commandRequest->structVersion);
+    ASSERT_ARE_EQUAL(char_ptr, TEST_METHOD_NAME, commandRequest->commandName);
+    if (g_currentTestComponentName == NULL)
+    {
+        ASSERT_IS_NULL(commandRequest->componentName);
+    }
+    else
+    {
+        ASSERT_ARE_EQUAL(char_ptr, g_currentTestComponentName, commandRequest->componentName);
+    }
+    ASSERT_ARE_EQUAL(char_ptr, TEST_STRING_VALUE, commandRequest->payload);
+    ASSERT_ARE_EQUAL(int, strlen(TEST_STRING_VALUE), commandRequest->payloadLength);
+    ASSERT_IS_NULL(commandRequest->payloadContentType);
+}
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -850,7 +875,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(environment_get_variable, NULL);
 
     REGISTER_GLOBAL_MOCK_RETURN(deviceMethodCallback, 200);
-    REGISTER_GLOBAL_MOCK_RETURN(commandCallback, 200);
+    REGISTER_GLOBAL_MOCK_HOOK(commandCallback, test_commandCallback);
 
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_CreateFromString, (IOTHUB_MESSAGE_HANDLE)0x44);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_Clone, (IOTHUB_MESSAGE_HANDLE)0x44);
@@ -970,6 +995,7 @@ TEST_FUNCTION_INITIALIZE(method_init)
     my_FAKE_IoTHubTransport_GetTwinAsync_handle = NULL;
     my_FAKE_IoTHubTransport_GetTwinAsync_completionCallback = NULL;
     my_FAKE_IoTHubTransport_GetTwinAsync_callbackContext = NULL;
+    g_currentTestComponentName = NULL;
 }
 
 TEST_FUNCTION_CLEANUP(TestMethodCleanup)
@@ -6784,18 +6810,19 @@ TEST_FUNCTION(IoTHubClientCore_LL_CommandComplete_no_component_succeed)
 {
     //arrange
     IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
-    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SubscribeToCommands(h, commandCallback, (void*)1);
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SubscribeToCommands(h, commandCallback, (void*)TEST_COMMAND_CALLBACK_CONTEXT);
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
 
     umock_c_reset_all_calls();
 
-    size_t len = 1;
-    unsigned char* resp = (unsigned char*)my_gballoc_malloc(len);
-    resp[0] = 0xa;
+    IOTHUB_CLIENT_COMMAND_RESPONSE commandResponse;
+    commandResponse.payloadLength = 1;
+    commandResponse.payload = (unsigned char*)my_gballoc_malloc(commandResponse.payloadLength);
+    commandResponse.payload[0] = 0xa;
+    commandResponse.statusCode = 200;
 
-    STRICT_EXPECTED_CALL(commandCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG))
-        .CopyOutArgumentBuffer_response(&resp, sizeof(unsigned char**))
-        .CopyOutArgumentBuffer_responseSize(&len, sizeof(size_t));
+    STRICT_EXPECTED_CALL(commandCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .CopyOutArgumentBuffer_commandResponse(&commandResponse, sizeof(commandResponse));
     EXPECTED_CALL(FAKE_IoTHubTransport_DeviceMethod_Response(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
@@ -6815,19 +6842,22 @@ TEST_FUNCTION(IoTHubClientCore_LL_CommandComplete_with_component_succeed)
 {
     //arrange
     IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
-    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SubscribeToCommands(h, commandCallback, (void*)1);
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SubscribeToCommands(h, commandCallback, (void*)TEST_COMMAND_CALLBACK_CONTEXT);
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
 
     umock_c_reset_all_calls();
 
-    size_t len = 1;
-    unsigned char* resp = (unsigned char*)my_gballoc_malloc(len);
-    resp[0] = 0xa;
+    g_currentTestComponentName = TEST_COMPONENT_NAME;
+
+    IOTHUB_CLIENT_COMMAND_RESPONSE commandResponse;
+    commandResponse.payloadLength = 1;
+    commandResponse.payload = (unsigned char*)my_gballoc_malloc(commandResponse.payloadLength);
+    commandResponse.payload[0] = 0xa;
+    commandResponse.statusCode = 200;
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(commandCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG))
-        .CopyOutArgumentBuffer_response(&resp, sizeof(unsigned char**))
-        .CopyOutArgumentBuffer_responseSize(&len, sizeof(size_t));
+    STRICT_EXPECTED_CALL(commandCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .CopyOutArgumentBuffer_commandResponse(&commandResponse, sizeof(commandResponse));
     EXPECTED_CALL(FAKE_IoTHubTransport_DeviceMethod_Response(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
@@ -6847,18 +6877,20 @@ TEST_FUNCTION(IoTHubClientCore_LL_CommandComplete_payload_NULL_succeed)
 {
     //arrange
     IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
-    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SubscribeToCommands(h, commandCallback, (void*)1);
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SubscribeToCommands(h, commandCallback, (void*)TEST_COMMAND_CALLBACK_CONTEXT);
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
 
     umock_c_reset_all_calls();
 
-    size_t len = 0;
-    unsigned char* resp = NULL;
+    g_currentTestComponentName = TEST_COMPONENT_NAME;
+
+    IOTHUB_CLIENT_COMMAND_RESPONSE commandResponse;
+    commandResponse.payloadLength = 0;
+    commandResponse.payload = NULL;
+    commandResponse.statusCode = 200;
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
-    STRICT_EXPECTED_CALL(commandCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG))
-        .CopyOutArgumentBuffer_response(&resp, sizeof(unsigned char**))
-        .CopyOutArgumentBuffer_responseSize(&len, sizeof(size_t));
+    STRICT_EXPECTED_CALL(commandCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
