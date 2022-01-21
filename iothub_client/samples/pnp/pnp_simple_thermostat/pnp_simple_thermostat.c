@@ -170,7 +170,7 @@ static bool BuildUtcTimeFromCurrentTime(char* utcTimeBuffer, size_t utcTimeBuffe
 //
 // BuildMaxMinCommandResponse builds the response to the command for getMaxMinReport.
 //
-static bool BuildMaxMinCommandResponse(unsigned char** response, size_t* responseSize)
+static bool BuildMaxMinCommandResponse(IOTHUB_CLIENT_COMMAND_RESPONSE* commandResponse)
 {
     int responseBuilderSize = 0;
     unsigned char* responseBuilder = NULL;
@@ -206,8 +206,8 @@ static bool BuildMaxMinCommandResponse(unsigned char** response, size_t* respons
 
     if (result == true)
     {
-        *response = responseBuilder;
-        *responseSize = (size_t)responseBuilderSize;
+        commandResponse->payload = responseBuilder;
+        commandResponse->payloadLength = (size_t)responseBuilderSize;
         LogInfo("Response=<%s>", (const char*)responseBuilder);
     }
     else
@@ -222,17 +222,17 @@ static bool BuildMaxMinCommandResponse(unsigned char** response, size_t* respons
 // SetEmptyCommandResponse sets the response to be an empty JSON.  IoT Hub needs
 // legal JSON, regardless of error status, so if command implementation did not set this do so here.
 //
-static void SetEmptyCommandResponse(unsigned char** response, size_t* responseSize, int* result)
+static void SetEmptyCommandResponse(IOTHUB_CLIENT_COMMAND_RESPONSE* commandResponse)
 {
-    if ((*response = calloc(1, g_JSONEmptySize)) == NULL)
+    if ((commandResponse->payload = calloc(1, g_JSONEmptySize)) == NULL)
     {
         LogError("Unable to allocate empty JSON response");
-        *result = PNP_STATUS_INTERNAL_ERROR;
+        commandResponse->statusCode = PNP_STATUS_INTERNAL_ERROR;
     }
     else
     {
-        memcpy(*response, g_JSONEmpty, g_JSONEmptySize);
-        *responseSize = g_JSONEmptySize;
+        memcpy(commandResponse->payload, g_JSONEmpty, g_JSONEmptySize);
+        commandResponse->payloadLength = g_JSONEmptySize;
         // We only overwrite the caller's result on error; otherwise leave as it was
     }
 }
@@ -240,70 +240,63 @@ static void SetEmptyCommandResponse(unsigned char** response, size_t* responseSi
 //
 // Thermostat_CommandCallback is invoked by IoT SDK when a command arrives.
 //
-static int Thermostat_CommandCallback(const char* componentName, const char* commandName, const unsigned char* payload, size_t size, const char* payloadContentType, unsigned char** response, size_t* responseSize, void* userContextCallback)
+static void Thermostat_CommandCallback(const IOTHUB_CLIENT_COMMAND_REQUEST* commandRequest, IOTHUB_CLIENT_COMMAND_RESPONSE* commandResponse, void* userContextCallback)
 {
     (void)userContextCallback;
-    // payloadContentType is guaranteed to be "application/json".  Future versions of the IoT Hub SDK might enable additional
+    // Note: commandRequest.payloadContentType is guaranteed to be "application/json".  Future versions of the IoT Hub SDK might enable additional
     // values, but it will require explicit opt-in from the application.
-    (void)payloadContentType; 
 
     char* jsonStr = NULL;
     JSON_Value* rootValue = NULL;
     const char* sinceStr;
-    int result;
 
-    LogInfo("Device command %s arrived", commandName);
+    LogInfo("Device command %s arrived", commandRequest->commandName);
 
-    *response = NULL;
-    *responseSize = 0;
-
-    if (componentName != NULL)
+    if (commandRequest->componentName != NULL)
     {
-        LogError("This model only supports root components, but component %s was specified in command", componentName);
-        result = PNP_STATUS_NOT_FOUND;
+        LogError("This model only supports root components, but component %s was specified in command", commandRequest->componentName);
+        commandResponse->statusCode = PNP_STATUS_NOT_FOUND;
     }
-    else if (strcmp(commandName, g_getMaxMinReportCommandName) != 0)
+    else if (strcmp(commandRequest->commandName, g_getMaxMinReportCommandName) != 0)
     {
-        LogError("Command name %s is not supported on this component", commandName);
-        result = PNP_STATUS_NOT_FOUND;
+        LogError("Command name %s is not supported on this component", commandRequest->commandName);
+        commandResponse->statusCode = PNP_STATUS_NOT_FOUND;
     }
     // Because the payload isn't null-terminated, create one here so parson can process it.
-    else if ((jsonStr = CopyPayloadToString(payload, size)) == NULL)
+    else if ((jsonStr = CopyPayloadToString(commandRequest->payload, commandRequest->payloadLength)) == NULL)
     {
         LogError("Unable to allocate buffer");
-        result = PNP_STATUS_INTERNAL_ERROR;
+        commandResponse->statusCode = PNP_STATUS_INTERNAL_ERROR;
     }
     else if ((rootValue = json_parse_string(jsonStr)) == NULL)
     {
         LogError("Unable to parse JSON");
-        result = PNP_STATUS_BAD_FORMAT;
+        commandResponse->statusCode = PNP_STATUS_BAD_FORMAT;
     }
     // See caveats section in ../readme.md; we don't actually respect this sinceStr to keep the sample simple.
     else if ((sinceStr = json_value_get_string(rootValue)) == NULL)
     {
         LogError("Cannot retrieve 'since' value");
-        result = PNP_STATUS_BAD_FORMAT;
+        commandResponse->statusCode = PNP_STATUS_BAD_FORMAT;
     }
-    else if (BuildMaxMinCommandResponse(response, responseSize) == false)
+    else if (BuildMaxMinCommandResponse(commandResponse) == false)
     {
         LogError("Unable to build response");
-        result = PNP_STATUS_INTERNAL_ERROR;
+        commandResponse->statusCode = PNP_STATUS_INTERNAL_ERROR;
     }
     else
     {
         LogInfo("Returning success from command request");
-        result = PNP_STATUS_SUCCESS;
+        commandResponse->statusCode = PNP_STATUS_SUCCESS;
     }
 
-    if (*response == NULL)
+    if (commandResponse->payload == NULL)
     {
-        SetEmptyCommandResponse(response, responseSize, &result);
+        SetEmptyCommandResponse(commandResponse);
     }
 
     json_value_free(rootValue);
     free(jsonStr);
-
-    return result;
 }
 
 //

@@ -752,8 +752,6 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_ParseMethodToCommand(const char* method
 static int invoke_command_callback(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData, const char* method_name, const unsigned char* payload, size_t size, METHOD_HANDLE response_id)
 {
     int result; 
-    unsigned char* payload_resp = NULL;
-    size_t response_size = 0;
 
     const char* command_name = NULL;
     char* component_name = NULL;
@@ -767,20 +765,34 @@ static int invoke_command_callback(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData
     else
     {
         // Invoke the application's callback.
-        result = handleData->methodCallback.commandCallback(component_name, command_name, payload, size, NULL, &payload_resp, &response_size, handleData->methodCallback.userContextCallback);
-        if (payload_resp != NULL && response_size > 0)
+        IOTHUB_CLIENT_COMMAND_REQUEST commandRequest;
+        IOTHUB_CLIENT_COMMAND_RESPONSE commandResponse;
+
+        commandRequest.componentName = component_name;
+        commandRequest.commandName = command_name;
+        commandRequest.payload = payload;
+        commandRequest.payloadLength = size;
+        commandRequest.payloadContentType = NULL;
+
+        memset(&commandResponse, 0, sizeof(commandResponse));
+        // Set statusCode of response to an error so that if application has a bug and doesn't set it, we still return
+        // something meaningful to IoT Hub.
+        commandResponse.statusCode = 500;
+        
+        handleData->methodCallback.commandCallback(&commandRequest, &commandResponse, handleData->methodCallback.userContextCallback);
+        if (commandResponse.payload != NULL && commandResponse.payloadLength > 0)
         {
-            result = handleData->IoTHubTransport_DeviceMethod_Response(handleData->deviceHandle, response_id, payload_resp, response_size, result);
+            result = handleData->IoTHubTransport_DeviceMethod_Response(handleData->deviceHandle, response_id, commandResponse.payload, commandResponse.payloadLength, commandResponse.statusCode);
         }
         else
         {
             result = MU_FAILURE;
         }
+
+        free(commandResponse.payload);
     }
 
-    free(payload_resp);
     free(component_name);
-
     return result;
 }
 

@@ -156,7 +156,7 @@ void PnP_ThermostatComponent_Destroy(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermost
 //
 // BuildMaxMinCommandResponse builds the response to the command for getMaxMinReport
 //
-static bool BuildMaxMinCommandResponse(PNP_THERMOSTAT_COMPONENT* pnpThermostatComponent, unsigned char** response, size_t* responseSize)
+static bool BuildMaxMinCommandResponse(PNP_THERMOSTAT_COMPONENT* pnpThermostatComponent, IOTHUB_CLIENT_COMMAND_RESPONSE* commandResponse)
 {
     int responseBuilderSize = 0;
     unsigned char* responseBuilder = NULL;
@@ -194,8 +194,8 @@ static bool BuildMaxMinCommandResponse(PNP_THERMOSTAT_COMPONENT* pnpThermostatCo
 
     if (result == true)
     {
-        *response = responseBuilder;
-        *responseSize = (size_t)responseBuilderSize;
+        commandResponse->payload = responseBuilder;
+        commandResponse->payloadLength = (size_t)responseBuilderSize;
     }
     else
     {
@@ -205,36 +205,33 @@ static bool BuildMaxMinCommandResponse(PNP_THERMOSTAT_COMPONENT* pnpThermostatCo
     return result;
 }       
 
-int PnP_ThermostatComponent_ProcessCommand(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, const char *pnpCommandName, JSON_Value* commandJsonValue, unsigned char** response, size_t* responseSize)
+void PnP_ThermostatComponent_ProcessCommand(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, const char *pnpCommandName, JSON_Value* commandJsonValue, IOTHUB_CLIENT_COMMAND_RESPONSE* commandResponse)
 {
     PNP_THERMOSTAT_COMPONENT* pnpThermostatComponent = (PNP_THERMOSTAT_COMPONENT*)pnpThermostatComponentHandle;
     const char* sinceStr;
-    int result;
 
     if (strcmp(pnpCommandName, g_getMaxMinReportCommandName) != 0)
     {
         LogError("Command %s is not supported on thermostat component", pnpCommandName);
-        result = PNP_STATUS_NOT_FOUND;
+        commandResponse->statusCode = PNP_STATUS_NOT_FOUND;
     }
     // See caveats section in ../readme.md; we don't actually respect this sinceStr to keep the sample simple,
     // but want to demonstrate how to parse out in any case.
     else if ((sinceStr = json_value_get_string(commandJsonValue)) == NULL)
     {
         LogError("Cannot retrieve JSON string for command");
-        result = PNP_STATUS_BAD_FORMAT;
+        commandResponse->statusCode = PNP_STATUS_BAD_FORMAT;
     }
-    else if (BuildMaxMinCommandResponse(pnpThermostatComponent, response, responseSize) == false)
+    else if (BuildMaxMinCommandResponse(pnpThermostatComponent, commandResponse) == false)
     {
         LogError("Unable to build response for component %s", pnpThermostatComponent->componentName);
-        result = PNP_STATUS_INTERNAL_ERROR;
+        commandResponse->statusCode = PNP_STATUS_INTERNAL_ERROR;
     }
     else
     {
         LogInfo("Returning success from command request for component %s", pnpThermostatComponent->componentName);
-        result = PNP_STATUS_SUCCESS;
+        commandResponse->statusCode = PNP_STATUS_SUCCESS;
     }
-
-    return result;
 }
 
 //

@@ -617,9 +617,6 @@ static void invoke_application_command_callback(IOTHUB_CLIENT_CORE_HANDLE method
     const unsigned char* payload = BUFFER_u_char(queued_cb->iothub_callback.method_cb_info.payload);
     size_t payload_len = BUFFER_length(queued_cb->iothub_callback.method_cb_info.payload);
 
-    unsigned char* payload_resp = NULL;
-    size_t response_size = 0;
-
     const char* command_name = NULL;
     char* component_name = NULL;
 
@@ -631,11 +628,25 @@ static void invoke_application_command_callback(IOTHUB_CLIENT_CORE_HANDLE method
     else
     {
         // Invoke the application's callback.
-        int status = command_callback(component_name, command_name, payload, payload_len, NULL, &payload_resp, &response_size, queued_cb->userContextCallback);
+        IOTHUB_CLIENT_COMMAND_REQUEST commandRequest;
+        IOTHUB_CLIENT_COMMAND_RESPONSE commandResponse;
+
+        commandRequest.componentName = component_name;
+        commandRequest.commandName = command_name;
+        commandRequest.payload = payload;
+        commandRequest.payloadLength = payload_len;
+        commandRequest.payloadContentType = NULL;
+
+        memset(&commandResponse, 0, sizeof(commandResponse));
+        // Set statusCode of response to an error so that if application has a bug and doesn't set it, we still return
+        // something meaningful to IoT Hub.
+        commandResponse.statusCode = 500;
         
-        if (payload_resp && (response_size > 0))
+        command_callback(&commandRequest, &commandResponse, queued_cb->userContextCallback);
+        
+        if (commandResponse.payload && (commandResponse.payloadLength > 0))
         {
-            IOTHUB_CLIENT_RESULT result = IoTHubClientCore_DeviceMethodResponse(method_user_context_handle, queued_cb->iothub_callback.method_cb_info.method_id, (const unsigned char*)payload_resp, response_size, status);
+            IOTHUB_CLIENT_RESULT result = IoTHubClientCore_DeviceMethodResponse(method_user_context_handle, queued_cb->iothub_callback.method_cb_info.method_id, commandResponse.payload, commandResponse.payloadLength, commandResponse.statusCode);
             if (result != IOTHUB_CLIENT_OK)
             {
                 LogError("IoTHubClientCore_LL_DeviceMethodResponse failed");
@@ -643,7 +654,6 @@ static void invoke_application_command_callback(IOTHUB_CLIENT_CORE_HANDLE method
         }
     }
 
-    free(payload_resp);
     free(component_name);
 
     BUFFER_delete(queued_cb->iothub_callback.method_cb_info.payload);
