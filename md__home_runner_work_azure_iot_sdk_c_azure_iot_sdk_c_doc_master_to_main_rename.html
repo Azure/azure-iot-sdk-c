@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Azure IoT C SDK: Running the C SDK on Constrained Devices</title>
+<title>Azure IoT C SDK: master to main branch rename instructions</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -62,27 +62,28 @@ $(function() {
 </div><!-- top -->
 <div class="PageDoc"><div class="header">
   <div class="headertitle">
-<div class="title">Running the C SDK on Constrained Devices </div>  </div>
+<div class="title">master to main branch rename instructions </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>IoT devices are coming with greater memory constrains and the IoTHub SDK has options to shrink its ROM and RAM footprint considerably when you invoke cmake with the correct flags. These are some tips to reduce the c sdk memory footprints on these devices.</p>
-<h1><a class="anchor" id="autotoc_md134"></a>
-Run with only MQTT</h1>
-<p>To maximize memory usage you should only include the protocol that is needed. For constrained devices, we recommend using MQTT which provides the best balance between RAM/ROM usage and feature support. To enable the c-sdk to run with just the mqtt protocol you will need to run the following cmake command:</p>
-<div class="fragment"><div class="line">cmake -Duse_amqp=OFF -Duse_http=OFF &lt;Path_to_cmake&gt;</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md135"></a>
-Run without logging</h1>
-<p>There is extensive logging throughout the SDK. Every message will be included in the SDK's RAM and ROM footprint. Removing logging will reduce the size of your application.</p>
-<div class="fragment"><div class="line">cmake -Duse_amqp=OFF -Duse_http=OFF -Dno_logging=ON &lt;Path_to_cmake&gt;</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md136"></a>
-Running the SDK without upload to blob</h1>
-<p>Upload to blob is an SDK feature used to send data to Azure Storage. If your application doesn't need this feature you can remove the files</p>
-<div class="fragment"><div class="line">cmake -Duse_amqp=OFF -Duse_http=OFF -Dno_logging=ON -Ddont_use_uploadtoblob=ON &lt;Path_to_cmake&gt;</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md137"></a>
-Running strip on Linux environment</h1>
-<p>The <a href="https://en.wikipedia.org/wiki/Strip_(Unix)">strip</a> command is used to reduce the size of binaries on the linux systems. After you compile your application use strip to reduce the size of the final application.</p>
-<div class="fragment"><div class="line">strip -s &lt;Path_to_executable&gt;</div>
-</div><!-- fragment --> </div></div><!-- contents -->
+<div class="textblock"><p>The Azure IoT C SDK initially used a branch named <code>master</code> as its primary branch. This was renamed to <code>main</code> on December 1, 2021.</p>
+<h1><a class="anchor" id="autotoc_md117"></a>
+Implications to tools and scripts referencing this repo</h1>
+<p>When a web request to an older link to this repo that contains <code>master</code> in it - for instance <a href="https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/master_to_main_rename.md">https://github.com/Azure/azure-iot-sdk-c/blob/**master**/doc/master_to_main_rename.md</a> - GitHub will automatically redirect this to <code>main</code>.</p>
+<p>GitHub will <b>not</b> redirect tools, scripts, command line requests, etc. that explicitly reference the <code>master</code> branch, however. These will instead fail accessing the deleted branch. You will need to change these to reference this repo's <code>main</code> branch.</p>
+<h1><a class="anchor" id="autotoc_md118"></a>
+Implications to local clones of this repo</h1>
+<p><b>If you cloned this repo after December 1, 2021, you can ignore the rest of this document.</b></p><ul>
+<li>Git clones after the default rename will use <code>main</code> and do the right thing.</li>
+</ul>
+<p><b>If you cloned this repo before December 1, 2021, You need to make changes so that your local copy of the repo will use <code>main</code> instead of <code>master</code>.</b></p><ul>
+<li>You can just run a new <code>git clone</code> and delete your previous clone. The new clone will use <code>main</code> as its primary branch.</li>
+<li>Or if you want to keep your existing copy of the repo, then you will need to run these commands <div class="fragment"><div class="line">git branch -m master main</div>
+<div class="line">git fetch origin</div>
+<div class="line">git branch -u origin/main main</div>
+<div class="line">git remote set-head origin -a</div>
+</div><!-- fragment --> </li>
+</ul>
+</div></div><!-- contents -->
 </div><!-- PageDoc -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

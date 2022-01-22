@@ -85,7 +85,7 @@ $(function() {
 </ul>
 </li>
 </ul>
-<h1><a class="anchor" id="autotoc_md102"></a>
+<h1><a class="anchor" id="autotoc_md104"></a>
 Example Code for Setting an Option</h1>
 <p>You will use a different API to set options, depending on whether you are using a device or module identity and whether you are using the convenience or lower layer APIs. The pattern is generally the same.</p>
 <div class="fragment"><div class="line"><span class="comment">// Convenience layer for device client</span></div>
@@ -120,10 +120,10 @@ Example Code for Setting an Option</h1>
 <div class="line">http_proxy.port = PROXY_PORT;</div>
 <div class="line"><a class="code" href="prov__device__ll__client_8h.html#ae5035b58c14ec28a988f90eee182f0fd">Prov_Device_LL_SetOption</a>(handle, OPTION_HTTP_PROXY, &amp;http_proxy);</div>
 <div class="ttc" id="aprov__device__ll__client_8h_html_ae5035b58c14ec28a988f90eee182f0fd"><div class="ttname"><a href="prov__device__ll__client_8h.html#ae5035b58c14ec28a988f90eee182f0fd">Prov_Device_LL_SetOption</a></div><div class="ttdeci">PROV_DEVICE_RESULT Prov_Device_LL_SetOption(PROV_DEVICE_LL_HANDLE handle, const char *optionName, const void *value)</div><div class="ttdoc">API sets a runtime option identified by parameter optionName to a value pointed to by value.</div></div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md103"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md105"></a>
 When to Set Options</h1>
 <p>You should set the options you need right after creating your IoT Hub device or module handle. Setting most options after the connection has been initiated may be silently ignored or applied much later. Many of these are used at connection initiation time itself.</p>
-<h1><a class="anchor" id="autotoc_md104"></a>
+<h1><a class="anchor" id="autotoc_md106"></a>
 Common Transport Options</h1>
 <p>You can use the options below for the IoT Hub Device Client, the IoT Hub Module Client, and for the Device Provisioning Client. These options are declared in <a href="https://github.com/Azure/azure-c-shared-utility/blob/master/inc/azure_c_shared_utility/shared_util_options.h">shared_util_options.h</a>.</p>
 <p><b>NOTE: Uploading files to Azure (e.g. IoTHubDeviceClient_UploadToBlobAsync) does not support this complete set of options. See <a href="#upload-options">here</a> for more.</b></p>
@@ -131,11 +131,11 @@ Common Transport Options</h1>
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Option Name   </th><th class="markdownTableHeadNone">Option Define   </th><th class="markdownTableHeadNone">Value Type   </th><th class="markdownTableHeadNone">Description    </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>"TrustedCerts"</code>   </td><td class="markdownTableBodyNone">OPTION_TRUSTED_CERT   </td><td class="markdownTableBodyNone">const char*   </td><td class="markdownTableBodyNone">Azure Server certificate used to validate TLS connection to IoT Hub. This is usually not required on operating systems that have built in certificates to trust, such as Windows and some Linux distributions. A typical use case is on an embedded system which does not trust any certificates or when connecting to a gateway whose certificates that are not otherwise trusted. See <a href="https://github.com/Azure/azure-iot-sdk-c/tree/master/iothub_client/samples/iotedge_downstream_device_sample">here</a> for a gateway sample.    </td></tr>
+<td class="markdownTableBodyNone"><code>"TrustedCerts"</code>   </td><td class="markdownTableBodyNone">OPTION_TRUSTED_CERT   </td><td class="markdownTableBodyNone">const char*   </td><td class="markdownTableBodyNone">Azure Server certificate used to validate TLS connection to IoT Hub. This is usually not required on operating systems that have built in certificates to trust, such as Windows and some Linux distributions. A typical use case is on an embedded system which does not trust any certificates or when connecting to a gateway whose certificates that are not otherwise trusted. See <a href="https://github.com/Azure/azure-iot-sdk-c/tree/main/iothub_client/samples/iotedge_downstream_device_sample">here</a> for a gateway sample.    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>"x509certificate"</code>   </td><td class="markdownTableBodyNone">SU_OPTION_X509_CERT   </td><td class="markdownTableBodyNone">const char*   </td><td class="markdownTableBodyNone">Sets an RSA x509 certificate used for connection authentication. (Also available from <a href="https://github.com/Azure/azure-iot-sdk-c/blob/master/iothub_client/inc/iothub_client_options.h">iothub_client_options.h</a> as <code>OPTION_X509_CERT</code>.)    </td></tr>
+<td class="markdownTableBodyNone"><code>"x509certificate"</code>   </td><td class="markdownTableBodyNone">SU_OPTION_X509_CERT   </td><td class="markdownTableBodyNone">const char*   </td><td class="markdownTableBodyNone">Sets an RSA x509 certificate used for connection authentication. (Also available from <a href="https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothub_client_options.h">iothub_client_options.h</a> as <code>OPTION_X509_CERT</code>.)    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>"x509privatekey"</code>   </td><td class="markdownTableBodyNone">SU_OPTION_X509_PRIVATE_KEY   </td><td class="markdownTableBodyNone">const char*   </td><td class="markdownTableBodyNone">Sets the private key for the RSA x509 certificate. (Also available from <a href="https://github.com/Azure/azure-iot-sdk-c/blob/master/iothub_client/inc/iothub_client_options.h">iothub_client_options.h</a> as <code>OPTION_X509_PRIVATE_KEY</code>.)    </td></tr>
+<td class="markdownTableBodyNone"><code>"x509privatekey"</code>   </td><td class="markdownTableBodyNone">SU_OPTION_X509_PRIVATE_KEY   </td><td class="markdownTableBodyNone">const char*   </td><td class="markdownTableBodyNone">Sets the private key for the RSA x509 certificate. (Also available from <a href="https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothub_client_options.h">iothub_client_options.h</a> as <code>OPTION_X509_PRIVATE_KEY</code>.)    </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>"x509EccCertificate"</code>   </td><td class="markdownTableBodyNone">OPTION_X509_ECC_CERT   </td><td class="markdownTableBodyNone">const char*   </td><td class="markdownTableBodyNone">Sets the ECC x509 certificate used for connection authentication    </td></tr>
 <tr class="markdownTableRowOdd">
@@ -145,9 +145,9 @@ Common Transport Options</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>"tls_version"</code>   </td><td class="markdownTableBodyNone">OPTION_TLS_VERSION   </td><td class="markdownTableBodyNone">int*   </td><td class="markdownTableBodyNone">TLS version to use for openssl, 10 for version 1.0, 11 for version 1.1, 12 for version 1.2. (<b>DEPRECATED</b>: TLS 1.0 and 1.1 are not secure and should not be used. This option is included only for backward compatibility.)   </td></tr>
 </table>
-<h1><a class="anchor" id="autotoc_md105"></a>
+<h1><a class="anchor" id="autotoc_md107"></a>
 IoT Hub Device and Module Client Options</h1>
-<p>You can use the options below for IoT Hub connections. These options are declared in <a href="https://github.com/Azure/azure-iot-sdk-c/blob/master/iothub_client/inc/iothub_client_options.h">iothub_client_options.h</a>. <br  />
+<p>You can use the options below for IoT Hub connections. These options are declared in <a href="https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothub_client_options.h">iothub_client_options.h</a>. <br  />
 </p>
 <p>You may also use <a href="#general_options">common transport options</a> options.</p>
 <p><b>NOTE: Uploading files to Azure (e.g. IoTHubDeviceClient_UploadToBlobAsync) does not support this complete set of options. See <a href="#upload-options">here</a> for more.</b></p>
@@ -169,10 +169,10 @@ IoT Hub Device and Module Client Options</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>"do_work_freq_ms"</code>   </td><td class="markdownTableBodyNone">OPTION_DO_WORK_FREQUENCY_IN_MS   </td><td class="markdownTableBodyNone"><a href="https://github.com/Azure/azure-c-shared-utility/blob/master/inc/azure_c_shared_utility/tickcounter.h">tickcounter_ms_t *</a>   </td><td class="markdownTableBodyNone">Specifies how frequently the worker thread spun by the convenience layer will wake up, in milliseconds. The default is 1 millisecond. The maximum allowable value is 100. (Convenience layer APIs only)   </td></tr>
 </table>
-<h1><a class="anchor" id="autotoc_md106"></a>
+<h1><a class="anchor" id="autotoc_md108"></a>
 MQTT, AMQP, and HTTP Specific Protocol Options</h1>
-<p>Some options are only supported by a given protocol (e.g. MQTT, AMQP, HTTP). These are declared in <a href="https://github.com/Azure/azure-iot-sdk-c/blob/master/iothub_client/inc/iothub_client_options.h">iothub_client_options.h</a>.</p>
-<h2><a class="anchor" id="autotoc_md107"></a>
+<p>Some options are only supported by a given protocol (e.g. MQTT, AMQP, HTTP). These are declared in <a href="https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothub_client_options.h">iothub_client_options.h</a>.</p>
+<h2><a class="anchor" id="autotoc_md109"></a>
 MQTT Specific Options</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -184,7 +184,7 @@ MQTT Specific Options</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>"model_id"</code>   </td><td class="markdownTableBodyNone">OPTION_MODEL_ID   </td><td class="markdownTableBodyNone">const char*   </td><td class="markdownTableBodyNone"><a href="https://aka.ms/iotpnp">IoT Plug and Play</a> model ID the device or module implements   </td></tr>
 </table>
-<h2><a class="anchor" id="autotoc_md108"></a>
+<h2><a class="anchor" id="autotoc_md110"></a>
 AMQP Specific Options</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -198,7 +198,7 @@ AMQP Specific Options</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>"c2d_keep_alive_freq_secs"</code>   </td><td class="markdownTableBodyNone">OPTION_C2D_KEEP_ALIVE_FREQ_SECS   </td><td class="markdownTableBodyNone">size_t*   </td><td class="markdownTableBodyNone">Informs service of maximum period the client waits for keep-alive message   </td></tr>
 </table>
-<h2><a class="anchor" id="autotoc_md109"></a>
+<h2><a class="anchor" id="autotoc_md111"></a>
 HTTP Specific Options</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -210,9 +210,9 @@ HTTP Specific Options</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>"timeout"</code>   </td><td class="markdownTableBodyNone">OPTION_HTTP_TIMEOUT   </td><td class="markdownTableBodyNone">long*   </td><td class="markdownTableBodyNone">When using curl the amount of time before the request times out, defaults to 242 seconds.   </td></tr>
 </table>
-<h1><a class="anchor" id="autotoc_md110"></a>
+<h1><a class="anchor" id="autotoc_md112"></a>
 Device Provisioning Service (DPS) Client Options</h1>
-<p>You can use the options below to configure the DPS client. These are defined in <a href="https://github.com/Azure/azure-iot-sdk-c/blob/master/provisioning_client/inc/azure_prov_client/prov_device_ll_client.h">prov_device_ll_client.h</a> except for <code>PROV_OPTION_DO_WORK_FREQUENCY_IN_MS</code> which is defined in <a href="https://github.com/Azure/azure-iot-sdk-c/blob/master/provisioning_client/inc/azure_prov_client/prov_device_client.h">prov_device_client.h</a>.</p>
+<p>You can use the options below to configure the DPS client. These are defined in <a href="https://github.com/Azure/azure-iot-sdk-c/blob/main/provisioning_client/inc/azure_prov_client/prov_device_ll_client.h">prov_device_ll_client.h</a> except for <code>PROV_OPTION_DO_WORK_FREQUENCY_IN_MS</code> which is defined in <a href="https://github.com/Azure/azure-iot-sdk-c/blob/main/provisioning_client/inc/azure_prov_client/prov_device_client.h">prov_device_client.h</a>.</p>
 <p>You may also use <a href="#general_options">common transport options</a>.</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -226,10 +226,10 @@ Device Provisioning Service (DPS) Client Options</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>"do_work_freq_ms"</code>   </td><td class="markdownTableBodyNone">PROV_OPTION_DO_WORK_FREQUENCY_IN_MS   </td><td class="markdownTableBodyNone">uint16_t *   </td><td class="markdownTableBodyNone">Specifies how frequently the worker thread spun by the convenience layer will wake up, in milliseconds. The default is 1 millisecond. (Convenience layer APIs only)   </td></tr>
 </table>
-<h1><a class="anchor" id="autotoc_md111"></a>
+<h1><a class="anchor" id="autotoc_md113"></a>
 File Upload Options</h1>
 <p>When you upload files to Azure with APIs like <code>IoTHubDeviceClient_LL_UploadToBlob</code>, most of the options described above are silently ignored. This is even though these APIs use the same IoT Hub handle as used for telemetry, device methods, and device twin. The reason the options are different is because the underlying transport is implemented differently for uploads.</p>
-<p>The following options are supported when performing file uploads. They are declared in <a href="https://github.com/Azure/azure-iot-sdk-c/blob/master/iothub_client/inc/iothub_client_options.h">iothub_client_options.h</a> and in <a href="https://github.com/Azure/azure-c-shared-utility/blob/master/inc/azure_c_shared_utility/shared_util_options.h">shared_util_options.h</a>.</p>
+<p>The following options are supported when performing file uploads. They are declared in <a href="https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothub_client_options.h">iothub_client_options.h</a> and in <a href="https://github.com/Azure/azure-c-shared-utility/blob/master/inc/azure_c_shared_utility/shared_util_options.h">shared_util_options.h</a>.</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Option Name   </th><th class="markdownTableHeadNone">Option Define   </th><th class="markdownTableHeadNone">Value Type   </th><th class="markdownTableHeadNone">Description    </th></tr>
@@ -250,7 +250,7 @@ File Upload Options</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>"blob_upload_tls_renegotiation"</code>   </td><td class="markdownTableBodyNone">OPTION_BLOB_UPLOAD_TLS_RENEGOTIATION   </td><td class="markdownTableBodyNone">bool*   </td><td class="markdownTableBodyNone"><em><a href="https://github.com/Azure/azure-c-shared-utility/blob/master/devdoc/httpapi_compact_requirements.md">HTTP Compact</a> only; not supported when using other HTTP stacks such as cURL and WinHTTP.</em> Tells HTTP stack to enable TLS renegotiation when using client certificates. Non-HTTP Compact stacks will use their defaults for this.   </td></tr>
 </table>
-<h1><a class="anchor" id="autotoc_md112"></a>
+<h1><a class="anchor" id="autotoc_md114"></a>
 Batching and IoT Hub Client SDK</h1>
 <p>Batching is the ability of a protocol to send multiple messages in one payload, rather than one at a time. This can result in less overhead, especially when sending multiple, small messages. This SDK supports various levels of batching when using IoTHubClient_LL_SendEventAsync.</p>
 <ul>
@@ -268,7 +268,7 @@ Batching and IoT Hub Client SDK</h1>
 <div class="line"><a class="code" href="iothub__device__client__ll_8h.html#a6e77da5502dff2bb43bace5173242f37">IoTHubDeviceClient_LL_DoWork</a>(iotHubClientHandle);</div>
 <div class="ttc" id="aiothub__device__client__ll_8h_html_a56cfcb637e1f46cf0f5e6e2bb81457ad"><div class="ttname"><a href="iothub__device__client__ll_8h.html#a56cfcb637e1f46cf0f5e6e2bb81457ad">IoTHubDeviceClient_LL_SendEventAsync</a></div><div class="ttdeci">IOTHUB_CLIENT_RESULT IoTHubDeviceClient_LL_SendEventAsync(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback, void *userContextCallback)</div><div class="ttdoc">Asynchronous call to send the message specified by eventMessageHandle.</div></div>
 <div class="ttc" id="aiothub__device__client__ll_8h_html_a6e77da5502dff2bb43bace5173242f37"><div class="ttname"><a href="iothub__device__client__ll_8h.html#a6e77da5502dff2bb43bace5173242f37">IoTHubDeviceClient_LL_DoWork</a></div><div class="ttdeci">void IoTHubDeviceClient_LL_DoWork(IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle)</div><div class="ttdoc">This function MUST be called by the user so work (sending/receiving data on the network,...</div></div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md113"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md115"></a>
 Advanced Compilation Options</h1>
 <p>We recommend leaving the following settings at their defaults. Tuning them may allow optimizations for specific devices or scenarios but could also negatively impact RAM or EEPROM usage. The options are presented only as compilation flags and must be appended to the CMake <code>compileOption_C</code> setting:</p>
 <table class="markdownTable">

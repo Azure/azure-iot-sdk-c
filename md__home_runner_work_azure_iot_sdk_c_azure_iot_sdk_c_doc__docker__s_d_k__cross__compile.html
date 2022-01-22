@@ -65,17 +65,17 @@ $(function() {
 <div class="title">Cross Compiling the SDK in a Docker Container </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="autotoc_md81"></a>
+<div class="textblock"><h1><a class="anchor" id="autotoc_md83"></a>
 Background</h1>
 <p>The Microsoft Azure IoT SDK for C is written in C99 standard code. This allows the SDK to be compile and run on a wide variety of platforms. However many of those platforms are incapable of actually compiling the SDK. To address this deficiency one can compile the SDK on a different host, typically a Linux installation, using a cross compile toolchain that will create binaries for one's target platform.</p>
 <p>Unfortunately this is not always an easy operation. The IoT SDK has dependencies on some other third party open source projects. These may or may not be available in binary form for your selected platform. </p>
-<h1><a class="anchor" id="autotoc_md82"></a>
+<h1><a class="anchor" id="autotoc_md84"></a>
 Purpose of this Document</h1>
 <p>This document demonstrates how one can cross compile the SDK inside a Docker container. It consists of a Docker script that builds the SDK for device that is too small to build it on the device. In this instance I am targeting a <a href="http://www.linksprite.com/wiki/index.php5?title=WRTnode">WRTNode</a> device which runs a version of OpenWrt, a commonly found Linux distribution for small devices. </p>
-<h1><a class="anchor" id="autotoc_md83"></a>
+<h1><a class="anchor" id="autotoc_md85"></a>
 Prerequisites</h1>
 <p>You will need to have a working installation of Docker in order to run the Docker script. However, should you choose not to build the SDK in a Docker container, you will still be able to run the command sequence on a Linux distribution based on Debian such as Ubuntu. </p>
-<h1><a class="anchor" id="autotoc_md84"></a>
+<h1><a class="anchor" id="autotoc_md86"></a>
 Process</h1>
 <p>The Docker container is based on the latest Ubuntu Docker container. From there we will first install the required Ubuntu packages needed to run the rest of the commands. These are:</p><ul>
 <li>git - required to clone the Azure IoT SDK for C</li>
@@ -91,11 +91,11 @@ Process</h1>
 <li><a href="https://en.wikipedia.org/wiki/Util-linux">util-linux</a> for uuid functionality.</li>
 </ul>
 <p>With all of those in place we can build OpenSSL, cURL, and libuuid. These will be installed into the toolchain as each is built and will be used in the final step when the SDK itself is built.</p>
-<h1><a class="anchor" id="autotoc_md85"></a>
+<h1><a class="anchor" id="autotoc_md87"></a>
 Major Tasks</h1>
 <p>You will need to identify a suitable toolchain for your target platform and modify the line that downloads this toolchain in your Docker script.</p>
 <p>Once this is done, then the environment variable set below will need to be modified to reflect the location and directory names of that toolchain. Once these have been updated then the Docker script should be ready to run.</p>
-<h1><a class="anchor" id="autotoc_md86"></a>
+<h1><a class="anchor" id="autotoc_md88"></a>
 The Docker Script</h1>
 <p>Here is an example script: </p><div class="fragment"><div class="line"><span class="preprocessor"># Start with the latest version of the Ubuntu Docker container</span></div>
 <div class="line">FROM ubuntu:latest</div>
@@ -222,10 +222,10 @@ The Docker Script</h1>
 </div><!-- fragment --><p>To run this script save it to a directory and change to that directory then simply enter: </p><div class="fragment"><div class="line">docker build -t mipsiotbuild:latest . --network=host</div>
 </div><!-- fragment --><p> You can replace the value 'mipsiotbuild' with any name that describes your build. In this instance it is building for a MIPS32 processor hence the name. Once the build is complete you will be ready to build your application against the libraries just built.</p>
 <p><em>Note:</em> The build of the Azure IoT C SDK uses cmake to generate the makefiles. In order to instruct cmake to perform a cross-compile one uses a cmake toolchain file. This tells cmake where to find the libraries etc. in the toolchain rather than on the host. This file is created on the fly in the above script to reduce dependencies on external files. Alternatively one could create this file outside the script and import into the container.</p>
-<h1><a class="anchor" id="autotoc_md87"></a>
+<h1><a class="anchor" id="autotoc_md89"></a>
 Building Your Application</h1>
 <p>Once you have successfully built the SDK you are now ready to create your application. You will need to create a directory that contains your source code and a CMakeLists.txt. The application build can use the cmake toolchain file that is already present in the image.</p>
-<h2><a class="anchor" id="autotoc_md88"></a>
+<h2><a class="anchor" id="autotoc_md90"></a>
 Sample &lt;tt&gt;CMakeLists.txt&lt;/tt&gt; for an Application</h2>
 <p>Here is a simple <code>CMakeLists.txt</code> file that demonstrates how to build an application that uses the libraries built above. This sample, for demonstration purposes uses a copy of the <code>iothub_convenience_sample.c</code> sample from the SDK. </p><div class="fragment"><div class="line">cmake_minimum_required(VERSION 2.8.11)</div>
 <div class="line">project(myapp_project)</div>
@@ -262,7 +262,7 @@ Sample &lt;tt&gt;CMakeLists.txt&lt;/tt&gt; for an Application</h2>
 <div class="line"> </div>
 <div class="line"># List the libraries required by the link step</div>
 <div class="line">target_link_libraries(myapp iothub_client_mqtt_transport iothub_client umqtt aziotsharedutil parson pthread curl ssl crypto m )</div>
-</div><!-- fragment --> <h2><a class="anchor" id="autotoc_md89"></a>
+</div><!-- fragment --> <h2><a class="anchor" id="autotoc_md91"></a>
 Using a Separate Docker Script to Build the Application</h2>
 <p>Though one could append the application build steps to the Docker script above, this will demonstrate how to use the existing image and build the application in a seperate Docker script. This will keep the original image clean so it may be used for building multiple applications.</p>
 <p>This sample script assumes you have your source files and the <code>CMakeLists.txt</code> in a directory called <code>myapp</code>. </p><div class="fragment"><div class="line">FROM mipsiotbuild:latest</div>
@@ -290,7 +290,7 @@ Using a Separate Docker Script to Build the Application</h2>
 <div class="line"><span class="preprocessor"># There should be an executable called myapp</span></div>
 <div class="line"><span class="preprocessor">RUN ls -al myapp</span></div>
 </div><!-- fragment --><p>Execute this Docker script with: </p><div class="fragment"><div class="line">docker build -t mipsiotapp:latest . --network=host</div>
-</div><!-- fragment --> <h1><a class="anchor" id="autotoc_md90"></a>
+</div><!-- fragment --> <h1><a class="anchor" id="autotoc_md92"></a>
 Copying the Executable from the Docker Container</h1>
 <p>Now the applicaton is built the last step is to copy the new executable from your Docker container to your host so that it can be deployed to your target device. An example of how you might do this follows:</p>
 <div class="fragment"><div class="line">id =$(docker create mipsiotapp)</div>
@@ -298,7 +298,7 @@ Copying the Executable from the Docker Container</h1>
 <div class="line">docker rm -v $id</div>
 </div><!-- fragment --><p> The above steps will create and acquire the Docker container identifier, copy the application to the local directory on the host and then delete the container.</p>
 <p><b>Note:</b> Depending upon your device you may need to copy additional binaries from the container in order to add them to your device. For example you device may not have the OpenSSL binaries so you will need to copy libssl.so and libcrypto.so. This could also be true for libuuid and libcurl. All of these libraries will be in the toolchain typically in <code>/usr/local/lib</code>. </p>
-<h1><a class="anchor" id="autotoc_md91"></a>
+<h1><a class="anchor" id="autotoc_md93"></a>
 A Complete Example</h1>
 <p>You can find two complete examples in <a href="../samples/dockerbuilds">samples</a>. This directory contains Docker scripts to cross compile the SDK for MIPS32 and for Raspbian and subsequently builds an application. In order to reduce the number of files required, the steps are slightly modified though they perform the same function. To cross compile the SDK for Raspbian, create an application and copy it to your host use the following steps. </p><div class="fragment"><div class="line"># Change directory to your Azure IoT SDK cloned repository root</div>
 <div class="line">cd &lt;SDK Root&gt;</div>
@@ -325,7 +325,7 @@ A Complete Example</h1>
 <div class="line">docker cp $id:/home/builder/myapp/cmake/myapp ~/myapp_mips</div>
 <div class="line">docker rm -v $id</div>
 </div><!-- fragment --><p> <b>Note:</b> For these examples to work successfully the image names must be exactly as they are shown in the examples. </p>
-<h2><a class="anchor" id="autotoc_md92"></a>
+<h2><a class="anchor" id="autotoc_md94"></a>
 Summing Up</h2>
 <p>This document demonstrates how to compile the Azure IoT SDK for C along with all of its dependents and then create and link an application with the libraries and headers. It uses a MIPS32 toolchain for this demonstration but it should be easily adaptable to the toolchain required by the target device. </p>
 </div></div><!-- contents -->

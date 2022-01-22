@@ -66,9 +66,14 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p><a class="anchor" id="md__home_runner_work_azure_iot_sdk_c_azure_iot_sdk_c_readme"></a> <a href="https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_build/latest?definitionId=85"><img src="https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/c/integrate-into-repo-C" alt="Build Status" class="inline"/></a></p>
-<p>The Azure IOT Hub Device SDK allows applications written in C99 or later or C++ to communicate easily with <a href="https://azure.microsoft.com/en-us/services/iot-hub/">Azure IoT Hub</a>, <a href="https://docs.microsoft.com/en-us/azure/iot-central/">Azure IoT Central</a> and to <a href="https://docs.microsoft.com/azure/iot-dps/">Azure IoT Device Provisioning</a>. This repo includes the source code for the libraries, setup instructions, and samples demonstrating use scenarios.</p>
-<p>For constained devices - where memory is measured in kilobytes and not megabytes - there are even lighter weight SDK options available. See <a href="#other-azure-iot-sdks">Other Azure IoT SDKs</a> for more.</p>
 <h1><a class="anchor" id="autotoc_md1"></a>
+Important branch rename information</h1>
+<p>As of <a href="https://github.com/Azure/azure-iot-sdk-c/commit/de09b35289313665f0d359835c661f8cb2a0fdf1">December 1, 2021</a>, we have changed the default branch of this repo from <code>master</code> to <code>main</code>. This may impact both your local clones of this repro made before this change as well as tools you have referencing <code>master</code>. See <a class="el" href="md__home_runner_work_azure_iot_sdk_c_azure_iot_sdk_c_doc_master_to_main_rename.html">here</a> for more information.</p>
+<h1><a class="anchor" id="autotoc_md2"></a>
+Introduction</h1>
+<p>The Azure IOT Hub Device SDK allows applications written in C99 or later or C++ to communicate easily with <a href="https://azure.microsoft.com/services/iot-hub/">Azure IoT Hub</a>, <a href="https://docs.microsoft.com/azure/iot-central/">Azure IoT Central</a> and to <a href="https://docs.microsoft.com/azure/iot-dps/">Azure IoT Device Provisioning</a>. This repo includes the source code for the libraries, setup instructions, and samples demonstrating use scenarios.</p>
+<p>For constrained devices - where memory is measured in kilobytes and not megabytes - there are even lighter weight SDK options available. See <a href="#other-azure-iot-sdks">Other Azure IoT SDKs</a> for more.</p>
+<h1><a class="anchor" id="autotoc_md3"></a>
 Table of Contents</h1>
 <ul>
 <li><a href="#azure-iot-c-sdks-and-libraries">Azure IoT C SDKs and Libraries</a><ul>
@@ -89,12 +94,15 @@ Table of Contents</h1>
 <li><a href="#contribution-feedback-and-issues">Contribution, Feedback and Issues</a></li>
 <li><a href="#support">Support</a></li>
 <li><a href="#read-more">Read More</a></li>
-<li><a href="#sdk-folder-structure">SDK Folder Structure</a></li>
+<li><a href="#sdk-folder-structure">SDK Folder Structure</a><ul>
+<li><a href="#deprecated-folders">Deprecated Folders</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li><a href="#releases">Releases</a><ul>
 <li><a href="#new-features-and-critical-bug-fixes">New Features and Critical Bug Fixes</a></li>
-<li><a href="#long-term-support">Long Term Support (LTS)</a><ul>
+<li><a href="#long-term-support-lts">Long Term Support (LTS)</a><ul>
 <li><a href="#lts-schedule">LTS Schedule</a></li>
 </ul>
 </li>
@@ -102,37 +110,43 @@ Table of Contents</h1>
 </ul>
 </li>
 </ul>
-<h1><a class="anchor" id="autotoc_md2"></a>
+<h1><a class="anchor" id="autotoc_md4"></a>
 Critical Upcoming Change Notice</h1>
 <p>All Azure IoT SDK users are advised to be aware of upcoming TLS certificate changes for Azure IoT Hub and Device Provisioning Service that will impact the SDK's ability to connect to these services. In October 2022, both services will migrate from the current <a href="https://baltimore-cybertrust-root.chain-demos.digicert.com/info/index.html">Baltimore CyberTrust CA Root</a> to the <a href="https://global-root-g2.chain-demos.digicert.com/info/index.html">DigiCert Global G2 CA root</a>. There will be a transition period beforehand where your IoT devices must have both the Baltimore and Digicert public certificates which may be hardcoded in their application or flashed onto your WiFi module in order to prevent connectivity issues.</p>
 <p><b>Devices with only the Baltimore public certificate will lose the ability to connect to Azure IoT Hub and Device Provisioning Service in October 2022.</b></p>
 <p>To prepare for this change, make sure your device's TLS stack has both of these public root of trust certificates configured.</p>
 <p>For a more in depth explanation as to why the IoT services are doing this, please see <a href="https://techcommunity.microsoft.com/t5/internet-of-things/azure-iot-tls-critical-changes-are-almost-here-and-why-you/ba-p/2393169">this article</a>.</p>
-<h1><a class="anchor" id="autotoc_md3"></a>
+<h1><a class="anchor" id="autotoc_md5"></a>
 Getting the SDK</h1>
-<p>The simplest way to get started with the Azure IoT SDKs on supported platforms is to use the following packages and libraries:</p><ul>
+<p>Please note, for constrained device scenarios like the below mbed and Arduino, there are better, lighter weight SDK options available. See <a href="#other-azure-iot-sdks">Other Azure IoT SDKs</a> for more.</p>
+<p>The simplest way to get started with the Azure IoT SDKs on supported platforms is to use the following packages and libraries:</p>
+<ul>
 <li>mbed: <a href="./iothub_client/readme.md#mbed">Device SDK library on MBED</a></li>
 <li>Arduino: <a href="./iothub_client/readme.md#arduino">Device SDK library in the Arduino IDE</a></li>
 <li>Windows: <a href="./doc/setting_up_vcpkg.md#setup-c-sdk-vcpkg-for-windows-development-environment">Device SDK on Vcpkg</a></li>
 <li>iOS: <a href="https://cocoapods.org/pods/AzureIoTHubClient">Device SDK on CocoaPod</a></li>
 </ul>
 <p>For other platforms - including Linux - you need to clone and build the SDK directly. You may also build it directly for the platforms above. Instructions can be found <a href="./iothub_client/readme.md#compile">here</a>.</p>
-<h1><a class="anchor" id="autotoc_md4"></a>
+<h1><a class="anchor" id="autotoc_md6"></a>
 Samples</h1>
 <p>There are many samples available for the SDK. More information can be found here.</p>
-<h1><a class="anchor" id="autotoc_md5"></a>
+<h1><a class="anchor" id="autotoc_md7"></a>
 SDK API Reference Documentation</h1>
 <p>The API reference documentation for the C SDKs can be found <a href="https://docs.microsoft.com/azure/iot-hub/iot-c-sdk-ref/">here</a>.</p>
-<h1><a class="anchor" id="autotoc_md6"></a>
+<h1><a class="anchor" id="autotoc_md8"></a>
 Other Azure IoT SDKs</h1>
-<p>To find Azure IoT SDKs in other languages, please refer to the <a href="https://docs.microsoft.com/en-us/azure/iot-develop/about-iot-sdks">guidance here</a>.</p>
-<p><b>Note on constrained devices</b>: The <code>Embedded C SDK</code> is an alternative for constrained devices which enables the BYO (bring your own) network approach: IoT developers have the freedom of choice to bring an MQTT client, TLS and Socket of their choice to create a device solution. Find more information about the Embedded C SDK <a href="https://github.com/Azure/azure-sdk-for-c/tree/master/sdk/docs/iot">here</a>.</p>
-<h1><a class="anchor" id="autotoc_md7"></a>
+<p>To find Azure IoT SDKs in other languages, please refer to the <a href="https://docs.microsoft.com/azure/iot-develop/about-iot-sdks">guidance here</a>.</p>
+<ul>
+<li><a href="https://github.com/Azure/azure-sdk-for-c/tree/main/sdk/docs/iot">Azure IoT SDK for Embedded C</a> is an alternative for <b>constrained devices</b> which enables the BYO (bring your own) network approach: IoT developers have the freedom of choice to bring MQTT client, TLS and Socket of their choice to create a device solution.</li>
+<li><a href="https://github.com/azure-rtos/netxduo/tree/master/addons/azure_iot">Azure IoT middleware for Azure RTOS</a> builds on top of the embedded SDK and tightly couples with the Azure RTOS family of networking and OS products. This gives you very performant and small applications for real-time, constrained devices.</li>
+<li><a href="https://github.com/Azure/azure-iot-middleware-freertos">Azure IoT middleware for FreeRTOS</a> builds on top of the embedded SDK and takes care of the MQTT stack while integrating with FreeRTOS. This maintains the focus on constrained devices and gives users a distilled Azure IoT feature set while allowing for flexibility with their networking stack.</li>
+</ul>
+<h1><a class="anchor" id="autotoc_md9"></a>
 Developing Azure IoT Applications</h1>
 <p>To learn more about building Azure IoT Applications, you can visit the <a href="http://azure.com/iotdev">Azure IoT Dev Center</a>.</p>
-<h1><a class="anchor" id="autotoc_md8"></a>
+<h1><a class="anchor" id="autotoc_md10"></a>
 Key Features</h1>
-<h2><a class="anchor" id="autotoc_md9"></a>
+<h2><a class="anchor" id="autotoc_md11"></a>
 Device Client SDK</h2>
 <p>IoT Hub supports multiple protocols for the device to connect with : MQTT, AMQP, and HTTPS. MQTT and AMQP can optionally run over WebSockets. The Device Client SDK allows the protocol to be chosen at connection creation time.</p>
 <p><b>If you're not sure which protocol to use, you should use MQTT or MQTT-WS.</b> MQTT requires considerably fewer resources than AMQP and supports considerably more IoT Hub functionality than HTTPS. Neither AMQP nor HTTPS are guaranteed to have Device Client SDK implementations for new features going forward, such as Azure IoT Plug and Play.</p>
@@ -161,9 +175,9 @@ Device Client SDK</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Connection Pooling - Specifying number of connections   </td><td class="markdownTableBodyNone">:heavy_minus_sign:   </td><td class="markdownTableBodyNone">:heavy_minus_sign:   </td><td class="markdownTableBodyNone">:heavy_multiplication_x:   </td><td class="markdownTableBodyNone">:heavy_multiplication_x:   </td><td class="markdownTableBodyNone">:heavy_multiplication_x:   </td><td class="markdownTableBodyNone"></td></tr>
 </table>
-<p>| <a href="https://docs.microsoft.com/en-us/azure/iot-pnp/overview-iot-plug-and-play">Azure IoT Plug and Play Support</a> | :heavy_check_mark: | :heavy_check_mark: | :heavy_minus_sign: | :heavy_minus_sign: | :heavy_minus_sign: |Ability to build Azure IoT Plug and Play devices.| |</p>
+<p>| <a href="https://docs.microsoft.com/azure/iot-pnp/overview-iot-plug-and-play">Azure IoT Plug and Play Support</a> | :heavy_check_mark: | :heavy_check_mark: | :heavy_minus_sign: | :heavy_minus_sign: | :heavy_minus_sign: |Ability to build Azure IoT Plug and Play devices.| |</p>
 <p>This SDK also contains options you can set and platform specific features. You can find detail list in this <a class="el" href="md__home_runner_work_azure_iot_sdk_c_azure_iot_sdk_c_doc__iothub_sdk_options.html">document</a>.</p>
-<h2><a class="anchor" id="autotoc_md10"></a>
+<h2><a class="anchor" id="autotoc_md12"></a>
 Provisioning Client SDK</h2>
 <p>This repository contains <a href="./provisioning_client">provisioning client SDK</a> for the <a href="https://docs.microsoft.com/azure/iot-dps/">Device Provisioning Service</a>.</p>
 <p>:heavy_check_mark: feature available :heavy_multiplication_x: feature planned but not supported :heavy_minus_sign: no support planned</p>
@@ -177,37 +191,38 @@ Provisioning Client SDK</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">X.509 Enrollment Group   </td><td class="markdownTableBodyNone">:heavy_check_mark:   </td><td class="markdownTableBodyNone">:heavy_check_mark:   </td><td class="markdownTableBodyNone">:heavy_check_mark:   </td><td class="markdownTableBodyNone">:heavy_check_mark:   </td><td class="markdownTableBodyNone">:heavy_check_mark:   </td><td class="markdownTableBodyNone">This SDK supports connecting your device to the Device Provisioning Service via <a href="https://docs.microsoft.com/azure/iot-dps/concepts-service#enrollment">enrollment group</a> using <a href="https://docs.microsoft.com/azure/iot-dps/concepts-security#root-certificate">X.509 root certificate</a>.   </td></tr>
 </table>
-<h1><a class="anchor" id="autotoc_md11"></a>
+<h1><a class="anchor" id="autotoc_md13"></a>
 OS Platforms and Hardware Compatibility</h1>
 <p>The IoT Hub device SDK for C can be used with a broad range of OS platforms and devices.</p>
 <p>The minimum requirements are for the device platform to support the following:</p>
 <ul>
-<li><b>Support Azure IoT TLS over TCP/IP Requirements</b>: <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-tls-support">https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-tls-support</a></li>
+<li><b>Support Azure IoT TLS over TCP/IP Requirements</b>: <a href="https://docs.microsoft.com/azure/iot-hub/iot-hub-tls-support">https://docs.microsoft.com/azure/iot-hub/iot-hub-tls-support</a></li>
 <li><b>Support SHA-256</b> (optional): necessary to generate the secure token for authenticating the device with the service. Different authentication methods are available and not all require SHA-256.</li>
 <li><b>Have a Real Time Clock or implement code to connect to an NTP server</b>: necessary for both establishing the TLS connection and generating the secure token for authentication.</li>
 <li><b>Having at least 64KB of RAM</b>: the memory footprint of the SDK depends on the SDK and protocol used as well as the platform targeted. The smallest footprint is achieved targeting microcontrollers.</li>
 </ul>
 <p>Platform support details can be found in <a href="https://docs.microsoft.com/azure/iot-hub/iot-hub-device-sdk-platform-support">this document</a>. You can find an exhaustive list of the OS platforms the various SDKs have been tested against in the <a href="https://catalog.azureiotsuite.com/">Azure Certified for IoT device catalog</a>. Note that you might still be able to use the SDKs on OS and hardware platforms that are not listed on this page: all the SDKs are open sourced and designed to be portable. If you have suggestions, feedback or issues to report, refer to the Contribution and Support sections below.</p>
-<h1><a class="anchor" id="autotoc_md12"></a>
+<h1><a class="anchor" id="autotoc_md14"></a>
 Porting the Azure IoT Device Client SDK for C to New Devices</h1>
-<p>The C SDKs and Libraries:</p><ul>
+<p>The C SDKs and Libraries:</p>
+<ul>
 <li>Are written in ANSI C (C99) and avoids compiler extensions to maximize code portability and broad platform compatibility.</li>
 <li>Expose a platform abstraction layer to isolate OS dependencies (threading and mutual exclusion mechanisms, communications protocol e.g. HTTP). Refer to our <a href="https://github.com/Azure/azure-c-shared-utility/blob/master/devdoc/porting_guide.md">porting guide</a> for more information about our abstraction layer.</li>
 </ul>
 <p>In the repository you will find instructions and build tools to compile and run the device client SDK for C on Linux, Windows and microcontroller platforms (refer to the links above for more information on compiling the device client for C).</p>
 <p>If you are considering porting the device client SDK for C to a new platform, check out the <a href="https://github.com/Azure/azure-c-shared-utility/blob/master/devdoc/porting_guide.md">porting guide</a> document.</p>
-<h1><a class="anchor" id="autotoc_md13"></a>
+<h1><a class="anchor" id="autotoc_md15"></a>
 Contribution, Feedback and Issues</h1>
 <p>If you encounter any bugs, have suggestions for new features or if you would like to become an active contributor to this project please follow the instructions provided in the /home/runner/work/azure-iot-sdk-c/azure-iot-sdk-c/.github/CONTRIBUTING.md "contribution guidelines".</p>
-<h1><a class="anchor" id="autotoc_md14"></a>
+<h1><a class="anchor" id="autotoc_md16"></a>
 Support</h1>
 <ul>
-<li>Have a feature request for SDKs? Please post it on <a href="https://feedback.azure.com/forums/321918-azure-iot">User Voice</a> to help us prioritize.</li>
+<li>Have a feature request for SDKs? Please post it on <a href="https://feedback.azure.com/d365community/forum/fcb810f7-f824-ec11-b6e6-000d3a4f0da0">Azure Community Feedback</a> to help us prioritize.</li>
 <li>Have a technical question? Ask on <a href="https://stackoverflow.com/questions/tagged/azure-iot-hub">Stack Overflow</a> with tag "azure-iot-hub".</li>
-<li>Need Support? Every customer with an active Azure subscription has access to <a href="https://docs.microsoft.com/en-us/azure/azure-supportability/how-to-create-azure-support-request">support</a> with guaranteed response time. Consider submitting a ticket and get assistance from Microsoft support team</li>
+<li>Need Support? Every customer with an active Azure subscription has access to <a href="https://docs.microsoft.com/azure/azure-supportability/how-to-create-azure-support-request">support</a> with guaranteed response time. Consider submitting a ticket and get assistance from Microsoft support team</li>
 <li>Found a bug? Please help us fix it by thoroughly documenting it and filing an issue on <a href="https://github.com/Azure/azure-iot-sdk-c/issues">our GitHub issues</a>.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md15"></a>
+<h1><a class="anchor" id="autotoc_md17"></a>
 Read More</h1>
 <ul>
 <li><a href="https://docs.microsoft.com/azure/iot-hub/">Azure IoT Hub documentation</a></li>
@@ -217,7 +232,7 @@ Read More</h1>
 <li><a href="https://github.com/Azure/azure-c-shared-utility/blob/master/devdoc/porting_guide.md">How to port the C libraries to other OS platforms</a></li>
 <li><a class="el" href="md__home_runner_work_azure_iot_sdk_c_azure_iot_sdk_c_doc__s_d_k_cross_compile_example.html">Cross compilation example</a></li>
 </ul>
-<h1><a class="anchor" id="autotoc_md16"></a>
+<h1><a class="anchor" id="autotoc_md18"></a>
 SDK Folder Structure</h1>
 <p><code>/c-utility, /deps, /umqtt, /uamqp</code> -</p>
 <p>These are git submodules that contain code, such as adapters and protocol implementations, shared with other projects.</p>
@@ -245,7 +260,7 @@ SDK Folder Structure</h1>
 <p>Contains tools that are used in testing the libraries.</p>
 <p><code>/tools</code></p>
 <p>Miscellaneous tools.</p>
-<h2><a class="anchor" id="autotoc_md17"></a>
+<h2><a class="anchor" id="autotoc_md19"></a>
 Deprecated Folders</h2>
 <p>The following folders are deprecated.</p>
 <p><code>/iothub_service_client</code></p>
@@ -254,31 +269,31 @@ Deprecated Folders</h2>
 <p>Contains libraries that enable interactions with the Device Proviosining service to perform operations such as setting policy around the enrollments.</p>
 <p><code>/serializer</code></p>
 <p>Contains libraries that provide modeling and JSON serialization capabilities on top of the raw messaging library.</p>
-<h1><a class="anchor" id="autotoc_md18"></a>
+<h1><a class="anchor" id="autotoc_md20"></a>
 Releases</h1>
 <p>The C SDK offers releases for new features, critical bug fixes, and Long Term Support (LTS). General bug fixes will not receive a separate release, but are instead contained within the LTS release. Versioning follows <a href="https://semver.org/">semantic versioning</a>, <code>x.y.z.</code> or <code>major.minor.patch</code>. Any time the version is updated, it will be tagged <code>x.y.z</code>.</p>
-<h2><a class="anchor" id="autotoc_md19"></a>
+<h2><a class="anchor" id="autotoc_md21"></a>
 New Features and Critical Bug Fixes</h2>
 <p>New features and critical bug fixes (including security updates) will be released on the main branch. These releases will be tagged using the date formatted <code>yyyy-mm-dd</code>. A feature release will bump the <code>minor</code> version and reset the <code>patch</code> version to 0. A critical bug fix will bump the <code>patch</code> version only.</p>
-<h2><a class="anchor" id="autotoc_md20"></a>
+<h2><a class="anchor" id="autotoc_md22"></a>
 Long Term Support (LTS)</h2>
-<p>New LTS releases branch off of main every six months and will be tagged <code>LTS_&lt;mm_yyyy&gt;_Ref01</code>. A new LTS release will inherit the version from the main branch at the time of the release. LTS branches are named <code>lts_mm_yyyy</code> for the month and year the branch was created.</p>
+<p>New LTS releases branch off of main and will be tagged <code>LTS_&lt;mm_yyyy&gt;_Ref01</code>. A new LTS release will inherit the version from the main branch at the time of the release. LTS branches are named <code>lts_mm_yyyy</code> for the month and year the branch was created.</p>
 <p>An updated LTS release will occur when a critical bug fix (including security updates) is ported from the main branch. These updated releases will be tagged in the same manner except for a bumped Ref##, e.g. <code>LTS_&lt;mm_yyyy&gt;_Ref02</code>. The <code>patch</code> version will also be bumped. No new features and no general bug fixes will be ported to an LTS update.</p>
-<h3><a class="anchor" id="autotoc_md21"></a>
+<h3><a class="anchor" id="autotoc_md23"></a>
 LTS Schedule</h3>
 <p>Below is a table showing the mapping of the LTS branches to the packages released.</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadCenter">Package   </th><th class="markdownTableHeadCenter">GitHub Branch   </th><th class="markdownTableHeadCenter">LTS Tag   </th><th class="markdownTableHeadCenter">LTS Start Date   </th><th class="markdownTableHeadCenter">Maintenance End Date    </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyCenter">vcpkg: 2021-09-09   </td><td class="markdownTableBodyCenter">lts_07_2021   </td><td class="markdownTableBodyCenter">LTS_07_2021_Ref01   </td><td class="markdownTableBodyCenter">2021-08-11   </td><td class="markdownTableBodyCenter">2022-08-11    </td></tr>
+<td class="markdownTableBodyCenter">vcpkg: 2022-01-21   </td><td class="markdownTableBodyCenter">lts_01_2022   </td><td class="markdownTableBodyCenter">LTS_01_2022_Ref01   </td><td class="markdownTableBodyCenter">2022-01-21   </td><td class="markdownTableBodyCenter">2023-01-21    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyCenter">vcpkg: (unreleased)   </td><td class="markdownTableBodyCenter">lts_01_2021   </td><td class="markdownTableBodyCenter">LTS_01_2021_Ref01   </td><td class="markdownTableBodyCenter">2021-01-21   </td><td class="markdownTableBodyCenter">2022-01-21   </td></tr>
+<td class="markdownTableBodyCenter">vcpkg: 2021-09-09   </td><td class="markdownTableBodyCenter">lts_07_2021   </td><td class="markdownTableBodyCenter">LTS_07_2021_Ref01   </td><td class="markdownTableBodyCenter">2021-08-11   </td><td class="markdownTableBodyCenter">2022-08-11   </td></tr>
 </table>
-<h2><a class="anchor" id="autotoc_md22"></a>
+<h2><a class="anchor" id="autotoc_md24"></a>
 Release Example</h2>
 <p>Below is a hypothetical example of versioning and tagging for the C SDK. <code>minor</code> versions are distinguished by color.</p>
-<p><img src="https://github.com/Azure/azure-iot-sdk-c/tree/master/doc/media/ReleaseNodeDrawing.jpg" alt="Release Node Drawing" class="inline"/></p>
+<p><img src="https://github.com/Azure/azure-iot-sdk-c/tree/main/doc/media/ReleaseNodeDrawing.jpg" alt="Release Node Drawing" class="inline"/></p>
 <ul>
 <li>The main branch is at version 1.8.2.</li>
 <li>February 23, 2020: A new feature is released on main. The version bumps to 1.9.0, is tagged <code>1.9.0</code>, and the release is tagged <code>2020-02-23</code>.</li>

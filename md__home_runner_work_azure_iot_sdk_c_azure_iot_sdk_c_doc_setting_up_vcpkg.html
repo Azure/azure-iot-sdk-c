@@ -66,7 +66,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>This document describes how to setup vcpkg to build applications using Microsoft Azure IoT device C SDK. It demonstrates building and running a C language SDK sample for Windows, Linux, and Mac.</p>
-<h1><a class="anchor" id="autotoc_md155"></a>
+<h1><a class="anchor" id="autotoc_md160"></a>
 Setup C SDK vcpkg for Windows development environment</h1>
 <ul>
 <li><p class="startli">Open PowerShell and run the following commands:</p>
@@ -77,10 +77,10 @@ Setup C SDK vcpkg for Windows development environment</h1>
 </ul>
 </li>
 </ul>
-<h1><a class="anchor" id="autotoc_md156"></a>
+<h1><a class="anchor" id="autotoc_md161"></a>
 Install azure-iot-sdk-c package with integration</h1>
 <p>.\vcpkg.exe integrate install .\vcpkg.exe install azure-iot-sdk-c popd</p>
-<h1><a class="anchor" id="autotoc_md157"></a>
+<h1><a class="anchor" id="autotoc_md162"></a>
 Open the C SDK telemetry sample solution for Visual Studio.</h1>
 <p>git clone <a href="https://github.com/Azure/azure-iot-sdk-c.git">https://github.com/Azure/azure-iot-sdk-c.git</a> # Skip if already have a cloned repo pushd .\azure-iot-sdk-c\iothub_client\samples\iothub_ll_telemetry_sample\windows\ start .\iothub_ll_telemetry_sample.sln ```</p>
 <ul>
@@ -88,13 +88,13 @@ Open the C SDK telemetry sample solution for Visual Studio.</h1>
 <p class="startli">```powershell </p>
 </li>
 </ul>
-<h1><a class="anchor" id="autotoc_md158"></a>
+<h1><a class="anchor" id="autotoc_md163"></a>
 Install azure-iot-sdk-c package</h1>
 <p>.\vcpkg.exe install azure-iot-sdk-c</p>
-<h1><a class="anchor" id="autotoc_md159"></a>
+<h1><a class="anchor" id="autotoc_md164"></a>
 Export nuget package locally</h1>
 <p>.\vcpkg.exe export azure-iot-sdk-c &ndash;nuget popd</p>
-<h1><a class="anchor" id="autotoc_md160"></a>
+<h1><a class="anchor" id="autotoc_md165"></a>
 Open the C SDK telemetry sample solution for Visual Studio.</h1>
 <p>git clone <a href="https://github.com/Azure/azure-iot-sdk-c.git">https://github.com/Azure/azure-iot-sdk-c.git</a> # Skip if already have a cloned repo pushd .\azure-iot-sdk-c\iothub_client\samples\iothub_ll_telemetry_sample\windows\ start .\iothub_ll_telemetry_sample.sln ```</p>
 <ul>
@@ -103,9 +103,9 @@ Open the C SDK telemetry sample solution for Visual Studio.</h1>
 <p>``` Install-Package &lt;package name provided from vcpkg export nuget command&gt; -Source "C:\vcpkg_new" ```</p>
 <ul>
 <li>Hit F5 to build and run.</li>
-<li>More information on building the C SDK and samples can be found <a href="https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/devbox_setup.md">here</a>.</li>
+<li>More information on building the C SDK and samples can be found <a href="https://github.com/Azure/azure-iot-sdk-c/blob/main/doc/devbox_setup.md">here</a>.</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md161"></a>
+<h2><a class="anchor" id="autotoc_md166"></a>
 Setup C SDK vcpkg for Linux or Mac development environment</h2>
 <ul>
 <li><p class="startli">Open a command prompt and run the following commands:</p>
@@ -114,7 +114,7 @@ Setup C SDK vcpkg for Linux or Mac development environment</h2>
 <li><p class="startli">Enter the C SDK telemetry sample directory.</p>
 <p class="startli">```bash git clone <a href="https://github.com/Azure/azure-iot-sdk-c.git">https://github.com/Azure/azure-iot-sdk-c.git</a> # Skip if already have a cloned repo cd azure-iot-sdk-c/iothub_client/samples/iothub_ll_telemetry_sample/linux/ mkdir cmake cd cmake cmake .. -DCMAKE_TOOLCHAIN_FILE=~/vcpkg_new/scripts/buildsystems/vcpkg.cmake cmake &ndash;build . ./iothub_ll_telemetry_sample ```</p>
 </li>
-<li>More information on building the C SDK and samples can be found <a href="https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/devbox_setup.md">here</a>. </li>
+<li>More information on building the C SDK and samples can be found <a href="https://github.com/Azure/azure-iot-sdk-c/blob/main/doc/devbox_setup.md">here</a>. </li>
 </ul>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
