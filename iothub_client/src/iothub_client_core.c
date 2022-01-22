@@ -639,6 +639,7 @@ static void invoke_application_command_callback(IOTHUB_CLIENT_CORE_HANDLE method
         commandRequest.payloadContentType = NULL;
 
         memset(&commandResponse, 0, sizeof(commandResponse));
+        commandResponse.structVersion = IOTHUB_CLIENT_COMMAND_RESPONSE_STRUCT_VERSION_1;
         // Set statusCode of response to an error so that if application has a bug and doesn't set it, we still return
         // something meaningful to IoT Hub.
         commandResponse.statusCode = 500;
@@ -653,6 +654,7 @@ static void invoke_application_command_callback(IOTHUB_CLIENT_CORE_HANDLE method
                 LogError("IoTHubClientCore_LL_DeviceMethodResponse failed");
             }
         }
+        free(commandResponse.payload);
     }
 
     free(component_name);

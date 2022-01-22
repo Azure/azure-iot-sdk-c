@@ -692,10 +692,6 @@ bool real_messageInputCallbackEx(IOTHUB_MESSAGE_HANDLE message, void* userContex
 
 static void test_commandCallback(const IOTHUB_CLIENT_COMMAND_REQUEST* commandRequest, IOTHUB_CLIENT_COMMAND_RESPONSE* commandResponse, void* userContextCallback)
 {
-    ASSERT_IS_NOT_NULL(commandResponse);
-    ASSERT_ARE_EQUAL(void_ptr, TEST_COMMAND_CALLBACK_CONTEXT, userContextCallback);
-
-
     ASSERT_IS_NOT_NULL(commandRequest);
     ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_COMMAND_REQUEST_STRUCT_VERSION_1, commandRequest->structVersion);
     ASSERT_ARE_EQUAL(char_ptr, TEST_METHOD_NAME, commandRequest->commandName);
@@ -710,6 +706,14 @@ static void test_commandCallback(const IOTHUB_CLIENT_COMMAND_REQUEST* commandReq
     ASSERT_ARE_EQUAL(char_ptr, TEST_STRING_VALUE, commandRequest->payload);
     ASSERT_ARE_EQUAL(int, strlen(TEST_STRING_VALUE), commandRequest->payloadLength);
     ASSERT_IS_NULL(commandRequest->payloadContentType);
+    
+    ASSERT_IS_NOT_NULL(commandResponse);
+    ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_COMMAND_RESPONSE_STRUCT_VERSION_1, commandResponse->structVersion);
+    ASSERT_IS_NULL(commandResponse->payload);
+    ASSERT_ARE_EQUAL(int, 0, commandResponse->payloadLength);
+    ASSERT_ARE_EQUAL(int, 500, commandResponse->statusCode);
+
+    ASSERT_ARE_EQUAL(void_ptr, TEST_COMMAND_CALLBACK_CONTEXT, userContextCallback);
 }
 
 #ifdef __cplusplus
@@ -6821,6 +6825,8 @@ TEST_FUNCTION(IoTHubClientCore_LL_CommandComplete_no_component_succeed)
     commandResponse.payload[0] = 0xa;
     commandResponse.statusCode = 200;
 
+    ASSERT_IS_NOT_NULL(commandResponse.payload);
+
     STRICT_EXPECTED_CALL(commandCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .CopyOutArgumentBuffer_commandResponse(&commandResponse, sizeof(commandResponse));
     EXPECTED_CALL(FAKE_IoTHubTransport_DeviceMethod_Response(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG));
@@ -6854,6 +6860,8 @@ TEST_FUNCTION(IoTHubClientCore_LL_CommandComplete_with_component_succeed)
     commandResponse.payload = (unsigned char*)my_gballoc_malloc(commandResponse.payloadLength);
     commandResponse.payload[0] = 0xa;
     commandResponse.statusCode = 200;
+
+    ASSERT_IS_NOT_NULL(commandResponse.payload);
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(commandCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
