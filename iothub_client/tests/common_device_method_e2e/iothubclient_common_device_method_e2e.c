@@ -164,61 +164,61 @@ static int MethodCallback(const char* method_name, const unsigned char* payload,
     return responseCode;
 }
 
-static int CommandCallback(const char* componentName, const char* commandName, const unsigned char* payload, size_t size, const char* payloadContentType, unsigned char** response, size_t* responseSize, void* userContextCallback)
+static void CommandCallback(const IOTHUB_CLIENT_COMMAND_REQUEST* commandRequest, IOTHUB_CLIENT_COMMAND_RESPONSE* commandResponse,  void* userContextCallback)
 {
-    int responseCode;
     const char * expectedMethodPayload = (const char*)userContextCallback;
 
-    LogInfo("CommandCallback invoked with componentName=%s, commandName=%s", componentName, commandName);
+    LogInfo("CommandCallback invoked with componentName=%s, commandName=%s", commandRequest->componentName, commandRequest->commandName);
 
-    if ((componentName == NULL) || (strcmp(TEST_COMMAND_COMPONENT_NAME, componentName) != 0))
+    if ((commandRequest->componentName == NULL) || (strcmp(TEST_COMMAND_COMPONENT_NAME, commandRequest->componentName) != 0))
     {
-        LogError("Component name incorrect - expected %s but got %s", TEST_COMMAND_COMPONENT_NAME, componentName);
-        responseCode = METHOD_RESPONSE_ERROR;
+        LogError("Component name incorrect - expected %s but got %s", TEST_COMMAND_COMPONENT_NAME, commandRequest->componentName);
+        commandResponse->statusCode = METHOD_RESPONSE_ERROR;
     }
-    else if ((commandName == NULL) || (strcmp(TEST_COMMAND_COMMAND_NAME, commandName) != 0))
+    else if ((commandRequest->commandName == NULL) || (strcmp(TEST_COMMAND_COMMAND_NAME, commandRequest->commandName) != 0))
     {
-        LogError("Command name incorrect - expected %s but got %s", TEST_COMMAND_COMMAND_NAME, commandName);
-        responseCode = METHOD_RESPONSE_ERROR;
+        LogError("Command name incorrect - expected %s but got %s", TEST_COMMAND_COMMAND_NAME, commandRequest->commandName);
+        commandResponse->statusCode = METHOD_RESPONSE_ERROR;
     }
-    else if (payloadContentType != NULL)
+    else if (commandRequest->payloadContentType != NULL)
     {
         LogError("Payload content type is non-NULL but should have been NULL");
-        responseCode = METHOD_RESPONSE_ERROR;
+        commandResponse->statusCode = METHOD_RESPONSE_ERROR;
     }
-    else if (size != strlen(expectedMethodPayload))
+    else if (commandRequest->payloadLength != strlen(expectedMethodPayload))
     {
-        LogError("payload size incorect - expected %zu but got %zu", strlen(expectedMethodPayload), size);
-        responseCode = METHOD_RESPONSE_ERROR;
+        LogError("payload size incorect - expected %zu but got %zu", strlen(expectedMethodPayload), commandRequest->payloadLength);
+        commandResponse->statusCode = METHOD_RESPONSE_ERROR;
     }
-    else if (memcmp(payload, expectedMethodPayload, size))
+    else if (memcmp(commandRequest->payload, expectedMethodPayload, commandRequest->payloadLength))
     {
         LogError("Payload strings do not match");
-        responseCode = METHOD_RESPONSE_ERROR;
+        commandResponse->statusCode = METHOD_RESPONSE_ERROR;
     }
     else
     {
-        *responseSize = size;
-        if (size == 0)
+        // Echo the payload we received from the request into the response payload.
+        commandResponse->payloadLength = commandRequest->payloadLength;
+        if (commandRequest->payloadLength == 0)
         {
-            *response = NULL;
-            responseCode = METHOD_RESPONSE_SUCCESS;
+            commandResponse->payload = NULL;
+            commandResponse->payloadLength = 0;
+            commandResponse->statusCode = METHOD_RESPONSE_SUCCESS;
         }
         else
         {
-            if ((*response = (unsigned char*)malloc(*responseSize)) == NULL)
+            if ((commandResponse->payload = (unsigned char*)malloc(commandResponse->payloadLength)) == NULL)
             {
                 LogError("allocation failure");
-                responseCode = METHOD_RESPONSE_ERROR;
+                commandResponse->statusCode = METHOD_RESPONSE_ERROR;
             }
             else
             {
-                (void)memcpy(*response, payload, *responseSize);
-                responseCode = METHOD_RESPONSE_SUCCESS;
+                (void)memcpy(commandResponse->payload, commandRequest->payload, commandResponse->payloadLength);
+                commandResponse->statusCode = METHOD_RESPONSE_SUCCESS;
             }
         }
     }
-    return responseCode;
 }
 
 void fileUploadCallback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, void* userContextCallback)
