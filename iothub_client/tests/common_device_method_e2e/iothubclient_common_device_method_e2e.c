@@ -180,6 +180,16 @@ static void CommandCallback(const IOTHUB_CLIENT_COMMAND_REQUEST* commandRequest,
         LogError("Command name incorrect - expected %s but got %s", TEST_COMMAND_COMMAND_NAME, commandRequest->commandName);
         commandResponse->statusCode = METHOD_RESPONSE_ERROR;
     }
+    else if (IOTHUB_CLIENT_COMMAND_REQUEST_STRUCT_VERSION_1 != commandRequest->structVersion)
+    {
+        LogError("Command request structVersion wrong - expected %d but got %d", IOTHUB_CLIENT_COMMAND_REQUEST_STRUCT_VERSION_1, commandRequest->structVersion);
+        commandResponse->statusCode = METHOD_RESPONSE_ERROR;
+    }
+    else if (IOTHUB_CLIENT_COMMAND_REQUEST_STRUCT_VERSION_1 != commandResponse->structVersion)
+    {
+        LogError("Command response structVersion wrong - expected %d but got %d", IOTHUB_CLIENT_COMMAND_REQUEST_STRUCT_VERSION_1, commandResponse->structVersion);
+        commandResponse->statusCode = METHOD_RESPONSE_ERROR;
+    }
     else if (commandRequest->payloadContentType != NULL)
     {
         LogError("Payload content type is non-NULL but should have been NULL");
