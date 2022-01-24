@@ -217,7 +217,7 @@ static void PnP_TempControlComponent_CommandCallback(const IOTHUB_CLIENT_COMMAND
         }
     }
 
-    if (commandRequest->payload == NULL)
+    if (commandResponse->payload == NULL)
     {
         SetEmptyCommandResponse(commandResponse);
     }

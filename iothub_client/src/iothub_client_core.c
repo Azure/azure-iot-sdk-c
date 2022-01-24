@@ -28,6 +28,8 @@
 #define DO_WORK_MAXIMUM_ALLOWED_FREQUENCY 100
 #define CLIENT_CORE_METHOD_EMPTY_PAYLOAD "{}"
 
+static const int DEFAULT_COMMAND_RESPONSE_STATUS_CODE = 500;
+
 struct IOTHUB_QUEUE_CONTEXT_TAG;
 
 typedef struct IOTHUB_CLIENT_CORE_INSTANCE_TAG
@@ -640,13 +642,13 @@ static void invoke_application_command_callback(IOTHUB_CLIENT_CORE_HANDLE method
 
         memset(&commandResponse, 0, sizeof(commandResponse));
         commandResponse.structVersion = IOTHUB_CLIENT_COMMAND_RESPONSE_STRUCT_VERSION_1;
-        // Set statusCode of response to an error so that if application has a bug and doesn't set it, we still return
+        // Set statusCode of response to a default value so that if application has a bug and doesn't set it, we still return
         // something meaningful to IoT Hub.
-        commandResponse.statusCode = 500;
+        commandResponse.statusCode = DEFAULT_COMMAND_RESPONSE_STATUS_CODE;
         
         command_callback(&commandRequest, &commandResponse, queued_cb->userContextCallback);
         
-        if (commandResponse.payload && (commandResponse.payloadLength > 0))
+        if ((commandResponse.payload != NULL) && (commandResponse.payloadLength > 0))
         {
             IOTHUB_CLIENT_RESULT result = IoTHubClientCore_DeviceMethodResponse(method_user_context_handle, queued_cb->iothub_callback.method_cb_info.method_id, commandResponse.payload, commandResponse.payloadLength, commandResponse.statusCode);
             if (result != IOTHUB_CLIENT_OK)

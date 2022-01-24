@@ -151,6 +151,8 @@ static const char MODULE_ID_TOKEN[] = "ModuleId";
 static const char PROVISIONING_TOKEN[] = "UseProvisioning";
 static const char PROVISIONING_ACCEPTABLE_VALUE[] = "true";
 
+static const int DEFAULT_COMMAND_RESPONSE_STATUS_CODE = 500;
+
 #ifdef USE_EDGE_MODULES
 /*The following section should be moved to iothub_module_client_ll.c during impending refactor*/
 
@@ -777,12 +779,12 @@ static int invoke_command_callback(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData
 
         memset(&commandResponse, 0, sizeof(commandResponse));
         commandResponse.structVersion = IOTHUB_CLIENT_COMMAND_RESPONSE_STRUCT_VERSION_1;
-        // Set statusCode of response to an error so that if application has a bug and doesn't set it, we still return
+        // Set statusCode of response to a default value so that if application has a bug and doesn't set it, we still return
         // something meaningful to IoT Hub.
-        commandResponse.statusCode = 500;
+        commandResponse.statusCode = DEFAULT_COMMAND_RESPONSE_STATUS_CODE;
         
         handleData->methodCallback.commandCallback(&commandRequest, &commandResponse, handleData->methodCallback.userContextCallback);
-        if (commandResponse.payload != NULL && commandResponse.payloadLength > 0)
+        if ((commandResponse.payload != NULL) && (commandResponse.payloadLength > 0))
         {
             result = handleData->IoTHubTransport_DeviceMethod_Response(handleData->deviceHandle, response_id, commandResponse.payload, commandResponse.payloadLength, commandResponse.statusCode);
         }
