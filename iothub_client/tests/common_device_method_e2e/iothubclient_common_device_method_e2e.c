@@ -192,7 +192,7 @@ static void CommandCallback(const IOTHUB_CLIENT_COMMAND_REQUEST* commandRequest,
     }
     else if (commandRequest->payloadLength != strlen(expectedCommandPayload))
     {
-        LogError("payload size incorect - expected %zu but got %zu", strlen(expectedCommandPayload), commandRequest->payloadLength);
+        LogError("payload size incorrect - expected %zu but got %zu", strlen(expectedMethodPayload), commandRequest->payloadLength);
         commandResponse->statusCode = METHOD_RESPONSE_ERROR;
     }
     else if (memcmp(commandRequest->payload, expectedCommandPayload, commandRequest->payloadLength))
