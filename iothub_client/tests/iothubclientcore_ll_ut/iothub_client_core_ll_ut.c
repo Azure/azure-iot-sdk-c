@@ -705,7 +705,6 @@ static void test_commandCallback(const IOTHUB_CLIENT_COMMAND_REQUEST* commandReq
     }
     ASSERT_ARE_EQUAL(char_ptr, TEST_STRING_VALUE, commandRequest->payload);
     ASSERT_ARE_EQUAL(int, strlen(TEST_STRING_VALUE), commandRequest->payloadLength);
-    ASSERT_IS_NULL(commandRequest->payloadContentType);
     
     ASSERT_IS_NOT_NULL(commandResponse);
     ASSERT_ARE_EQUAL(int, IOTHUB_CLIENT_COMMAND_RESPONSE_STRUCT_VERSION_1, commandResponse->structVersion);

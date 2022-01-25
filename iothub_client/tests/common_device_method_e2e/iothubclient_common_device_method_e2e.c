@@ -166,7 +166,7 @@ static int MethodCallback(const char* method_name, const unsigned char* payload,
 
 static void CommandCallback(const IOTHUB_CLIENT_COMMAND_REQUEST* commandRequest, IOTHUB_CLIENT_COMMAND_RESPONSE* commandResponse,  void* userContextCallback)
 {
-    const char * expectedMethodPayload = (const char*)userContextCallback;
+    const char * expectedCommandPayload = (const char*)userContextCallback;
 
     LogInfo("CommandCallback invoked with componentName=%s, commandName=%s", commandRequest->componentName, commandRequest->commandName);
 
@@ -185,22 +185,17 @@ static void CommandCallback(const IOTHUB_CLIENT_COMMAND_REQUEST* commandRequest,
         LogError("Command request structVersion wrong - expected %d but got %d", IOTHUB_CLIENT_COMMAND_REQUEST_STRUCT_VERSION_1, commandRequest->structVersion);
         commandResponse->statusCode = METHOD_RESPONSE_ERROR;
     }
-    else if (IOTHUB_CLIENT_COMMAND_REQUEST_STRUCT_VERSION_1 != commandResponse->structVersion)
+    else if (IOTHUB_CLIENT_COMMAND_RESPONSE_STRUCT_VERSION_1 != commandResponse->structVersion)
     {
         LogError("Command response structVersion wrong - expected %d but got %d", IOTHUB_CLIENT_COMMAND_REQUEST_STRUCT_VERSION_1, commandResponse->structVersion);
         commandResponse->statusCode = METHOD_RESPONSE_ERROR;
     }
-    else if (commandRequest->payloadContentType != NULL)
+    else if (commandRequest->payloadLength != strlen(expectedCommandPayload))
     {
-        LogError("Payload content type is non-NULL but should have been NULL");
+        LogError("payload size incorect - expected %zu but got %zu", strlen(expectedCommandPayload), commandRequest->payloadLength);
         commandResponse->statusCode = METHOD_RESPONSE_ERROR;
     }
-    else if (commandRequest->payloadLength != strlen(expectedMethodPayload))
-    {
-        LogError("payload size incorect - expected %zu but got %zu", strlen(expectedMethodPayload), commandRequest->payloadLength);
-        commandResponse->statusCode = METHOD_RESPONSE_ERROR;
-    }
-    else if (memcmp(commandRequest->payload, expectedMethodPayload, commandRequest->payloadLength))
+    else if (memcmp(commandRequest->payload, expectedCommandPayload, commandRequest->payloadLength))
     {
         LogError("Payload strings do not match");
         commandResponse->statusCode = METHOD_RESPONSE_ERROR;

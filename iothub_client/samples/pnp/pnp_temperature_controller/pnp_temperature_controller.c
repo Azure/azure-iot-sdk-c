@@ -164,8 +164,6 @@ static void PnP_TempControlComponent_InvokeRebootCommand(JSON_Value* rootValue, 
 static void PnP_TempControlComponent_CommandCallback(const IOTHUB_CLIENT_COMMAND_REQUEST* commandRequest, IOTHUB_CLIENT_COMMAND_RESPONSE* commandResponse, void* userContextCallback)
 {
     (void)userContextCallback;
-    // commandRequest->payloadContentType is guaranteed to be "application/json".  Future versions of the IoT Hub SDK might enable additional
-    // values, but it will require explicit opt-in from the application.
 
     char* jsonStr = NULL;
     JSON_Value* rootValue = NULL;

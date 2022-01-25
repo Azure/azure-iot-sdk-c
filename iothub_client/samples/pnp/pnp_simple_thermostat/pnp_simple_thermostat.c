@@ -243,8 +243,6 @@ static void SetEmptyCommandResponse(IOTHUB_CLIENT_COMMAND_RESPONSE* commandRespo
 static void Thermostat_CommandCallback(const IOTHUB_CLIENT_COMMAND_REQUEST* commandRequest, IOTHUB_CLIENT_COMMAND_RESPONSE* commandResponse, void* userContextCallback)
 {
     (void)userContextCallback;
-    // Note: commandRequest.payloadContentType is guaranteed to be "application/json".  Future versions of the IoT Hub SDK might enable additional
-    // values, but it will require explicit opt-in from the application.
 
     char* jsonStr = NULL;
     JSON_Value* rootValue = NULL;

@@ -364,9 +364,6 @@ extern "C"
         const unsigned char* payload;
         /** @brief    Number of bytes of @p payload. */
         size_t payloadLength;
-        /** @brief    Payload type of @p payload, if and only if it was explicitly indicated by IoT Hub.  This currently 
-                      will ALWAYS be NULL.  Future versions of the SDK may set this value based on metadata received from IoT Hub. */
-        const char* payloadContentType;
     } IOTHUB_CLIENT_COMMAND_REQUEST;
 
     /** @brief Current version of @p IOTHUB_CLIENT_COMMAND_RESPONSE structure.  */

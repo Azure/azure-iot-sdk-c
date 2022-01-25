@@ -775,7 +775,6 @@ static int invoke_command_callback(IOTHUB_CLIENT_CORE_LL_HANDLE_DATA* handleData
         commandRequest.commandName = command_name;
         commandRequest.payload = payload;
         commandRequest.payloadLength = size;
-        commandRequest.payloadContentType = NULL;
 
         memset(&commandResponse, 0, sizeof(commandResponse));
         commandResponse.structVersion = IOTHUB_CLIENT_COMMAND_RESPONSE_STRUCT_VERSION_1;
