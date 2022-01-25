@@ -1,4 +1,4 @@
-pywin32>=303
+pywin32>=303.1
 docker>=5.0.3
 requests>=2.27.1
 colorama>=0.4.4
