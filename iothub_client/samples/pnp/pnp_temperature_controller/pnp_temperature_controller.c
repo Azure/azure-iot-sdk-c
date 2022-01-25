@@ -124,17 +124,17 @@ static char* CopyPayloadToString(const unsigned char* payload, size_t size)
 // SetEmptyCommandResponse sets the response to be an empty JSON.  IoT Hub wants
 // legal JSON, regardless of error status, so if command implementation did not set this do so here.
 //
-static void SetEmptyCommandResponse(unsigned char** response, size_t* responseSize, int* result)
+static void SetEmptyCommandResponse(IOTHUB_CLIENT_COMMAND_RESPONSE* commandResponse)
 {
-    if ((*response = calloc(1, g_JSONEmptySize)) == NULL)
+    if ((commandResponse->payload = calloc(1, g_JSONEmptySize)) == NULL)
     {
         LogError("Unable to allocate empty JSON response");
-        *result = PNP_STATUS_INTERNAL_ERROR;
+        commandResponse->statusCode = PNP_STATUS_INTERNAL_ERROR;
     }
     else
     {
-        memcpy(*response, g_JSONEmpty, g_JSONEmptySize);
-        *responseSize = g_JSONEmptySize;
+        memcpy(commandResponse->payload, g_JSONEmpty, g_JSONEmptySize);
+        commandResponse->payloadLength = g_JSONEmptySize;
         // We only overwrite the caller's result on error; otherwise leave as it was
     }
 }
@@ -142,100 +142,86 @@ static void SetEmptyCommandResponse(unsigned char** response, size_t* responseSi
 //
 // PnP_TempControlComponent_InvokeRebootCommand processes the reboot command on the root component.
 //
-static int PnP_TempControlComponent_InvokeRebootCommand(JSON_Value* rootValue)
+static void PnP_TempControlComponent_InvokeRebootCommand(JSON_Value* rootValue, IOTHUB_CLIENT_COMMAND_RESPONSE* commandResponse)
 {
-    int result;
-
     if (json_value_get_type(rootValue) != JSONNumber)
     {
         LogError("Delay payload is not a number");
-        result = PNP_STATUS_BAD_FORMAT;
+        commandResponse->statusCode = PNP_STATUS_BAD_FORMAT;
     }
     else
     {
         // See caveats section in ../readme.md; we don't actually respect the delay value to keep the sample simple.
         int delayInSeconds = (int)json_value_get_number(rootValue);
         LogInfo("Temperature controller 'reboot' command invoked with delay %d seconds", delayInSeconds);
-        result = PNP_STATUS_SUCCESS;
+        commandResponse->statusCode = PNP_STATUS_SUCCESS;
     }
-    
-    return result;
 }
 
 //
 // PnP_TempControlComponent_CommandCallback is invoked by IoT SDK when a command arrives.
 //
-static int PnP_TempControlComponent_CommandCallback(const char* componentName, const char* commandName, const unsigned char* payload, size_t size, const char* payloadContentType,
-                                                    unsigned char** response, size_t* responseSize, void* userContextCallback)
+static void PnP_TempControlComponent_CommandCallback(const IOTHUB_CLIENT_COMMAND_REQUEST* commandRequest, IOTHUB_CLIENT_COMMAND_RESPONSE* commandResponse, void* userContextCallback)
 {
     (void)userContextCallback;
-    // payloadContentType is guaranteed to be "application/json".  Future versions of the IoT Hub SDK might enable additional
-    // values, but it will require explicit opt-in from the application.
-    (void)payloadContentType; 
 
     char* jsonStr = NULL;
     JSON_Value* rootValue = NULL;
-    int result;
 
-    LogInfo("Device command %s arrived for component %s", commandName, (componentName == NULL) ? "" : componentName);
-
-    *response = NULL;
-    *responseSize = 0;
+    LogInfo("Device command %s arrived for component %s", commandRequest->commandName, (commandRequest->componentName == NULL) ? "" : commandRequest->componentName);
 
     // Because the payload isn't null-terminated, create one here so parson can process it.
-    if ((jsonStr = CopyPayloadToString(payload, size)) == NULL)
+    if ((jsonStr = CopyPayloadToString(commandRequest->payload, commandRequest->payloadLength)) == NULL)
     {
         LogError("Unable to allocate buffer");
-        result = PNP_STATUS_INTERNAL_ERROR;
+        commandResponse->statusCode = PNP_STATUS_INTERNAL_ERROR;
     }
     else if ((rootValue = json_parse_string(jsonStr)) == NULL)
     {
         LogError("Unable to parse JSON");
-        result = PNP_STATUS_INTERNAL_ERROR;
+        commandResponse->statusCode = PNP_STATUS_INTERNAL_ERROR;
     }
     else
     {
         // Route the incoming command to the appropriate component to process it.
-        if (componentName != NULL)
+        if (commandRequest->componentName != NULL)
         {
-            if (strcmp(componentName, g_thermostatComponent1Name) == 0)
+            if (strcmp(commandRequest->componentName, g_thermostatComponent1Name) == 0)
             {
-                result = PnP_ThermostatComponent_ProcessCommand(g_thermostatHandle1, commandName, rootValue, response, responseSize);
+                PnP_ThermostatComponent_ProcessCommand(g_thermostatHandle1, commandRequest->commandName, rootValue, commandResponse);
             }
-            else if (strcmp(componentName, g_thermostatComponent2Name) == 0)
+            else if (strcmp(commandRequest->componentName, g_thermostatComponent2Name) == 0)
             {
-                result = PnP_ThermostatComponent_ProcessCommand(g_thermostatHandle2, commandName, rootValue, response, responseSize);
+                PnP_ThermostatComponent_ProcessCommand(g_thermostatHandle2, commandRequest->commandName, rootValue, commandResponse);
             }
             else
             {
-                LogError("Component %s is not supported by TemperatureController", componentName);
-                result = PNP_STATUS_NOT_FOUND;
+                LogError("Component %s is not supported by TemperatureController", commandRequest->componentName);
+                commandResponse->statusCode = PNP_STATUS_NOT_FOUND;
             }
         }
         else
         {
             // Command has arrived on the root component
-            if (strcmp(commandName, g_rebootCommand) == 0)
+            if (strcmp(commandRequest->commandName, g_rebootCommand) == 0)
             {
-                result = PnP_TempControlComponent_InvokeRebootCommand(rootValue);
+                PnP_TempControlComponent_InvokeRebootCommand(rootValue, commandResponse);
             }
             else
             {
-                LogError("Command %s is not supported by TemperatureController", commandName);
-                result = PNP_STATUS_NOT_FOUND;
+                LogError("Command %s is not supported by TemperatureController", commandRequest->commandName);
+                commandResponse->statusCode= PNP_STATUS_NOT_FOUND;
             }
         }
     }
 
-    if (*response == NULL)
+    if (commandResponse->payload == NULL)
     {
-        SetEmptyCommandResponse(response, responseSize, &result);
+        SetEmptyCommandResponse(commandResponse);
     }
 
     json_value_free(rootValue);
     free(jsonStr);
-
-    return result;
 }
 
 //

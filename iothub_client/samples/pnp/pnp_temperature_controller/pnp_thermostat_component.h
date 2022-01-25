@@ -35,9 +35,8 @@ void PnP_ThermostatComponent_Destroy(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermost
 
 //
 // PnP_ThermostatComponent_ProcessCommand is used to process any incoming PnP Commands to the given PNP_THERMOSTAT_COMPONENT_HANDLE.  
-// The function returns an HTTP style return code to indicate success or failure.
 //
-int PnP_ThermostatComponent_ProcessCommand(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, const char *pnpCommandName, JSON_Value* commandJsonValue, unsigned char** response, size_t* responseSize);
+void PnP_ThermostatComponent_ProcessCommand(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, const char *pnpCommandName, JSON_Value* commandJsonValue, IOTHUB_CLIENT_COMMAND_RESPONSE* commandResponse);
 
 //
 // PnP_ThermostatComponent_ProcessPropertyUpdate processes an incoming property update and, if the property is in the thermostat's model, will
