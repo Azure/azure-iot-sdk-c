@@ -70,7 +70,7 @@ static void AdvanceCountersAfterWrite(int currentOutputBytes, char** currentWrit
 }
 
 // WriteOpeningBrace adds opening brace for JSON to be generated, either a simple "{" or more complex format if componentName is specified.
-static bool WriteOpeningBrace(const char* componentName, char** currentWrite, size_t* requiredBytes, size_t* remainingBytes) // char* currentWrite, size_t remainingBytes)
+static bool WriteOpeningBrace(const char* componentName, char** currentWrite, size_t* requiredBytes, size_t* remainingBytes)
 {
     int currentOutputBytes;
 
