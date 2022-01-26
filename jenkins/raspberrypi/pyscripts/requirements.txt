@@ -1,3 +1,4 @@
+pypiwin32==220; sys_platform == \'win32\'
 docker>=5.0.3
 #requests>=2.27.1
 colorama>=0.4.4
