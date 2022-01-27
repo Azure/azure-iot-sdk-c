@@ -221,7 +221,7 @@ static void verify_json_expected_int(const char* json,
     double json_double = double_value + 0.1; // Account for possible underflow by small increment.
 
     ASSERT_ARE_EQUAL(int, expected_int, json_double, "Integer data in JSON differs from expected.");
-                     "Int data in JSON differs from expected. Expected=<%d>, actual=<%d>", expected_int, json_double);
+                     "Int data in JSON differs from expected. Expected=<%d>, actual=<%f>", expected_int, json_double);
 
     json_value_free(root_value);
 }
@@ -264,7 +264,7 @@ static void verify_json_expected_int_array(const char* json,
     double json_double = double_value + 0.1; // Account for possible underflow by small increment.
 
     ASSERT_ARE_EQUAL(int, expected_int, json_double,
-                     "Array integer data in JSON differs from expected. Expected=<%d>, actual=<%d>", expected_int, json_double);
+                     "Array integer data in JSON differs from expected. Expected=<%d>, actual=<%f>", expected_int, json_double);
 
     json_value_free(root_value);
 }
