@@ -79,7 +79,7 @@ static int PropertySnprintf(char* buffer, size_t count, const char* format, ...)
     va_start(arg_list, format);
 
     int currentOutputBytes = vsnprintf(buffer, count, format, arg_list);
-    if ((currentOutputBytes < 0) || (currentOutputBytes == count))
+    if ((currentOutputBytes < 0) || (currentOutputBytes == (int)count))
     {
         return -1;
     }
