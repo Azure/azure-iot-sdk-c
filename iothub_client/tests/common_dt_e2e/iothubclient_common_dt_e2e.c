@@ -118,12 +118,15 @@ static void received_twin_data_deinit(RECEIVED_TWIN_DATA* twin_data)
 
 static char* calloc_and_fill_service_client_desired_payload(const char* astring, int aint)
 {
-    size_t length = snprintf(NULL, 0, COMPLETE_DESIRED_PAYLOAD_FORMAT, aint, astring, aint, astring);
+    size_t char_length = snprintf(NULL, 0, COMPLETE_DESIRED_PAYLOAD_FORMAT, aint, astring, aint, astring);
+    ASSERT_IS_TRUE(char_length > 0);
 
-    char* result = (char*)calloc(length + 1, sizeof(char));
+    char* result = (char*)calloc(char_length + 1, sizeof(char));
     ASSERT_IS_NOT_NULL(result);
 
-    snprintf(result, length, COMPLETE_DESIRED_PAYLOAD_FORMAT, aint, astring, aint, astring);
+    size_t result_length = snprintf(result, char_length + 1, COMPLETE_DESIRED_PAYLOAD_FORMAT, aint, astring, aint, astring);
+    ASSERT_IS_TRUE(result_length > 0);
+    ASSERT_IS_TRUE(result_length <= char_length);
 
     return result;
 }
@@ -175,12 +178,15 @@ static void reported_twin_data_deinit(REPORTED_TWIN_DATA* twin_data)
 
 static char* calloc_and_fill_reported_payload(const char* string, int num)
 {
-    size_t length = snprintf(NULL, 0, REPORTED_PAYLOAD_FORMAT, num, string, num, string);
+    size_t char_length = snprintf(NULL, 0, REPORTED_PAYLOAD_FORMAT, num, string, num, string);
+    ASSERT_IS_TRUE(char_length > 0);
 
-    char* result = (char*)calloc(length + 1, sizeof(char));
+    char* result = (char*)calloc(char_length + 1, sizeof(char));
     ASSERT_IS_NOT_NULL(result);
 
-    snprintf(result, length + 1, REPORTED_PAYLOAD_FORMAT, num, string, num, string);
+    size_t result_length = snprintf(result, char_length + 1, REPORTED_PAYLOAD_FORMAT, num, string, num, string);
+    ASSERT_IS_TRUE(result_length > 0);
+    ASSERT_IS_TRUE(result_length <= char_length);
 
     return result;
 }
@@ -194,10 +200,10 @@ static void verify_json_expected_string(const char* json,
     JSON_Object* root_object = json_value_get_object(root_value);
     ASSERT_IS_NOT_NULL(root_object);
 
-    const unsigned char* json_str =  (unsigned char*)json_object_dotget_string(root_object,
-                                                                               full_property_name);
+    const char* json_str = json_object_dotget_string(root_object, full_property_name);
 
-    ASSERT_ARE_EQUAL(char_ptr, expected_str, json_str, "String data in JSON differs from expected.");
+    ASSERT_ARE_EQUAL(char_ptr, expected_str, json_str,
+                     "String data in JSON differs from expected. Expected=<%s>, actual=<%s>", expected_str, json_str);
 
     json_value_free(root_value);
 }
@@ -215,6 +221,7 @@ static void verify_json_expected_int(const char* json,
     double json_double = double_value + 0.1; // Account for possible underflow by small increment.
 
     ASSERT_ARE_EQUAL(int, expected_int, json_double, "Integer data in JSON differs from expected.");
+                     "Int data in JSON differs from expected. Expected=<%s>, actual=<%s>", expected_int, json_double);
 
     json_value_free(root_value);
 }
@@ -232,10 +239,10 @@ static void verify_json_expected_string_array(const char* json,
     JSON_Array* array = json_object_dotget_array(root_object, full_property_name);
     ASSERT_IS_NOT_NULL(array, "Array not specified.");
 
-    const unsigned char* json_str =  (unsigned char*)json_array_get_string(array, index);
+    const char* json_str = json_array_get_string(array, index);
 
     ASSERT_ARE_EQUAL(char_ptr, expected_str, json_str,
-                     "Array string data in JSON differs from expected.");
+                     "Array string data in JSON differs from expected. Expected=<%s>, actual=<%s>", expected_str, json_str);
 
     json_value_free(root_value);
 }
@@ -257,7 +264,7 @@ static void verify_json_expected_int_array(const char* json,
     double json_double = double_value + 0.1; // Account for possible underflow by small increment.
 
     ASSERT_ARE_EQUAL(int, expected_int, json_double,
-                     "Array integer data in JSON differs from expected.");
+                     "Array integer data in JSON differs from expected. Expected=<%s>, actual=<%s>", expected_int, json_double);
 
     json_value_free(root_value);
 }
@@ -547,7 +554,9 @@ static void receive_reported_state_acknowledgement_loop(REPORTED_TWIN_DATA* repo
 
         if (reported_twin_data->received_callback)
         {
-            ASSERT_IS_TRUE(reported_twin_data->status_code < 300, "SendReported status_code is an error.");
+            ASSERT_IS_TRUE(reported_twin_data->status_code < 300,
+                           "SendReported status_code (%d) is an error.",
+                           reported_twin_data->status_code);
 
             Unlock(reported_twin_data->lock);
             break;
