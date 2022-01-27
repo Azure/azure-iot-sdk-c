@@ -220,8 +220,8 @@ static void verify_json_expected_int(const char* json,
     double double_value = json_object_dotget_number(root_object, full_property_name);
     double json_double = double_value + 0.1; // Account for possible underflow by small increment.
 
-    ASSERT_ARE_EQUAL(int, expected_int, json_double, "Integer data in JSON differs from expected.");
-                     "Int data in JSON differs from expected. Expected=<%d>, actual=<%f>", expected_int, json_double);
+    ASSERT_ARE_EQUAL(int, expected_int, json_double,
+                     "Integer data in JSON differs from expected. Expected=<%d>, actual=<%f>", expected_int, json_double);
 
     json_value_free(root_value);
 }
