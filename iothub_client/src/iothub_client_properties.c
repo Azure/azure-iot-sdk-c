@@ -72,8 +72,7 @@ static void AdvanceCountersAfterWrite(int currentOutputBytes, char** currentWrit
 }
 
 // To correctly check snprintf for success, we need to check both it's not negative AND 
-// that the (number of bytes written ) != (sizeof buffer).  If the latter case happens, it means
-// that snprintf has truncated the write and that there's actually an error.
+// that the (number of bytes written ) != (sizeof buffer).
 static int PropertySnprintf(char* buffer, size_t count, const char* format, ...)
 {
     va_list arg_list;
@@ -156,7 +155,7 @@ static bool WriteReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPERTY* prope
         int currentOutputBytes;
 
         if ((currentOutputBytes = PropertySnprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_NAME_VALUE, 
-                                            properties[i].name, properties[i].value, AddCommaIfNeeded(lastProperty))) < 0)
+                                                    properties[i].name, properties[i].value, AddCommaIfNeeded(lastProperty))) < 0)
         {
             LogError("Cannot write properties string");
             return false;
@@ -167,7 +166,7 @@ static bool WriteReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPERTY* prope
     if (WriteClosingBrace(componentName != NULL, &currentWrite, requiredBytes, &remainingBytes) != true)
     {
         LogError("Cannot write properties string");
-        return (size_t)-1;
+        return false;
     }
 
     *requiredBytes = (*requiredBytes + 1);
@@ -198,7 +197,7 @@ static bool WriteWritableResponseProperties(const IOTHUB_CLIENT_WRITABLE_PROPERT
         if (properties[i].description == NULL)
         {
             if ((currentOutputBytes = PropertySnprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_WRITABLE_RESPONSE, properties[i].name, 
-                                                properties[i].value, properties[i].result, properties[i].ackVersion, AddCommaIfNeeded(lastProperty))) < 0)
+                                                        properties[i].value, properties[i].result, properties[i].ackVersion, AddCommaIfNeeded(lastProperty))) < 0)
             {
                 LogError("Cannot write properties string");
                 return false;
@@ -207,7 +206,7 @@ static bool WriteWritableResponseProperties(const IOTHUB_CLIENT_WRITABLE_PROPERT
         else
         {
             if ((currentOutputBytes = PropertySnprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_WRITABLE_RESPONSE_WITH_DESCRIPTION, properties[i].name, 
-                                                properties[i].value, properties[i].result, properties[i].ackVersion, properties[i].description, AddCommaIfNeeded(lastProperty))) < 0)
+                                                        properties[i].value, properties[i].result, properties[i].ackVersion, properties[i].description, AddCommaIfNeeded(lastProperty))) < 0)
             {
                 LogError("Cannot write properties string");
                 return false;
