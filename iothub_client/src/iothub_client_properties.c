@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#include <stdarg.h>
+
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/xlogging.h"
 
@@ -69,6 +71,24 @@ static void AdvanceCountersAfterWrite(int currentOutputBytes, char** currentWrit
     }
 }
 
+// To correctly check snprintf for success, we need to check both it's not negative AND 
+// that the (number of bytes written ) != (sizeof buffer).  If the latter case happens, it means
+// that snprintf has truncated the write and that there's actually an error.
+static int PropertySnprintf(char* buffer, size_t count, const char* format, ...)
+{
+    va_list arg_list;
+    va_start(arg_list, format);
+
+    int currentOutputBytes = vsnprintf(buffer, count, format, arg_list);
+    if ((currentOutputBytes < 0) || (currentOutputBytes == count))
+    {
+        return -1;
+    }
+
+    return currentOutputBytes;
+}
+
+
 // WriteOpeningBrace adds opening brace for JSON to be generated, either a simple "{" or more complex format if componentName is specified.
 static bool WriteOpeningBrace(const char* componentName, char** currentWrite, size_t* requiredBytes, size_t* remainingBytes)
 {
@@ -76,7 +96,7 @@ static bool WriteOpeningBrace(const char* componentName, char** currentWrite, si
 
     if (componentName != NULL)
     {
-        if ((currentOutputBytes = snprintf(*currentWrite, *remainingBytes, PROPERTY_FORMAT_COMPONENT_START, componentName)) < 0)
+        if ((currentOutputBytes = PropertySnprintf(*currentWrite, *remainingBytes, PROPERTY_FORMAT_COMPONENT_START, componentName)) < 0)
         {
             LogError("Cannot write properties string");
             return false;
@@ -84,7 +104,7 @@ static bool WriteOpeningBrace(const char* componentName, char** currentWrite, si
     }
     else
     {
-        if ((currentOutputBytes = snprintf(*currentWrite, *remainingBytes, PROPERTY_OPEN_BRACE)) < 0)
+        if ((currentOutputBytes = PropertySnprintf(*currentWrite, *remainingBytes, PROPERTY_OPEN_BRACE)) < 0)
         {
             LogError("Cannot write properties string");
             return false;
@@ -96,14 +116,14 @@ static bool WriteOpeningBrace(const char* componentName, char** currentWrite, si
 }
 
 // WriteOpeningBrace writes the required number of closing } while writing JSON
-static size_t WriteClosingBrace(bool isComponent, char** currentWrite, size_t* requiredBytes, size_t* remainingBytes)
+static bool WriteClosingBrace(bool isComponent, char** currentWrite, size_t* requiredBytes, size_t* remainingBytes)
 {
     int currentOutputBytes;
     size_t numberOfBraces = isComponent ? 2 : 1;
 
     for (size_t i = 0; i < numberOfBraces; i++)
     {
-        if ((currentOutputBytes = snprintf(*currentWrite, *remainingBytes, PROPERTY_CLOSE_BRACE)) < 0)
+        if ((currentOutputBytes = PropertySnprintf(*currentWrite, *remainingBytes, PROPERTY_CLOSE_BRACE)) < 0)
         {
             LogError("Cannot write properties string");
             return false;
@@ -117,16 +137,15 @@ static size_t WriteClosingBrace(bool isComponent, char** currentWrite, size_t* r
 // WriteReportedProperties writes the actual serializedProperties string based 
 // on the properties.  If serializedProperties==NULL and serializedPropertiesLength==0, just like
 // analogous snprintf it will just calculate the amount of space caller needs to allocate.
-static size_t WriteReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPERTY* properties, size_t numProperties, const char* componentName, unsigned char* serializedProperties, size_t serializedPropertiesLength)
+static bool WriteReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPERTY* properties, size_t numProperties, const char* componentName, unsigned char* serializedProperties, size_t serializedPropertiesLength, size_t* requiredBytes)
 {
-    size_t requiredBytes = 0;
-    size_t remainingBytes = serializedPropertiesLength;
     char* currentWrite = (char*)serializedProperties;
+    size_t remainingBytes = serializedPropertiesLength;
 
-    if (WriteOpeningBrace(componentName,  &currentWrite, &requiredBytes, &remainingBytes) != true)
+    if (WriteOpeningBrace(componentName,  &currentWrite, requiredBytes, &remainingBytes) != true)
     {
         LogError("Cannot write properties string");
-        return (size_t)-1;
+        return false;
     }
 
     for (size_t i = 0; i < numProperties; i++)
@@ -134,37 +153,37 @@ static size_t WriteReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPERTY* pro
         bool lastProperty = (i == (numProperties - 1));
         int currentOutputBytes;
 
-        if ((currentOutputBytes = snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_NAME_VALUE, 
+        if ((currentOutputBytes = PropertySnprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_NAME_VALUE, 
                                             properties[i].name, properties[i].value, AddCommaIfNeeded(lastProperty))) < 0)
         {
             LogError("Cannot write properties string");
-            return (size_t)-1;
+            return false;
         }
-        AdvanceCountersAfterWrite(currentOutputBytes, &currentWrite, &requiredBytes, &remainingBytes);
+        AdvanceCountersAfterWrite(currentOutputBytes, &currentWrite, requiredBytes, &remainingBytes);
     }
 
-    if (WriteClosingBrace(componentName != NULL, &currentWrite, &requiredBytes, &remainingBytes) != true)
+    if (WriteClosingBrace(componentName != NULL, &currentWrite, requiredBytes, &remainingBytes) != true)
     {
         LogError("Cannot write properties string");
         return (size_t)-1;
     }
 
-    return (requiredBytes + 1);
+    *requiredBytes = (*requiredBytes + 1);
+    return true;
 }
 
 // WriteWritableResponseProperties is used to write serializedProperties string based 
 // on the writable response properties.  If serializedProperties==NULL and serializedPropertiesLength==0, just like
 // analogous snprintf it will just calculate the amount of space caller needs to allocate.
-static size_t WriteWritableResponseProperties(const IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE* properties, size_t numProperties, const char* componentName, unsigned char* serializedProperties, size_t serializedPropertiesLength)
+static bool WriteWritableResponseProperties(const IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE* properties, size_t numProperties, const char* componentName, unsigned char* serializedProperties, size_t serializedPropertiesLength, size_t* requiredBytes)
 {
-    size_t requiredBytes = 0;
-    size_t remainingBytes = serializedPropertiesLength;
     char* currentWrite = (char*)serializedProperties;
+    size_t remainingBytes = serializedPropertiesLength;
 
-    if (WriteOpeningBrace(componentName,  &currentWrite, &requiredBytes, &remainingBytes) != true)
+    if (WriteOpeningBrace(componentName,  &currentWrite, requiredBytes, &remainingBytes) != true)
     {
         LogError("Cannot write properties string");
-        return (size_t)-1;
+        return false;
     }
 
     for (size_t i = 0; i < numProperties; i++)
@@ -174,33 +193,34 @@ static size_t WriteWritableResponseProperties(const IOTHUB_CLIENT_WRITABLE_PROPE
 
         if (properties[i].description == NULL)
         {
-            if ((currentOutputBytes = snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_WRITABLE_RESPONSE, properties[i].name, 
+            if ((currentOutputBytes = PropertySnprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_WRITABLE_RESPONSE, properties[i].name, 
                                                 properties[i].value, properties[i].result, properties[i].ackVersion, AddCommaIfNeeded(lastProperty))) < 0)
             {
                 LogError("Cannot write properties string");
-                return (size_t)-1;
+                return false;
             }
         }
         else
         {
-            if ((currentOutputBytes = snprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_WRITABLE_RESPONSE_WITH_DESCRIPTION, properties[i].name, 
+            if ((currentOutputBytes = PropertySnprintf(currentWrite, remainingBytes, PROPERTY_FORMAT_WRITABLE_RESPONSE_WITH_DESCRIPTION, properties[i].name, 
                                                 properties[i].value, properties[i].result, properties[i].ackVersion, properties[i].description, AddCommaIfNeeded(lastProperty))) < 0)
             {
                 LogError("Cannot write properties string");
-                return (size_t)-1;
+                return false;
             }
         }
 
-        AdvanceCountersAfterWrite(currentOutputBytes, &currentWrite, &requiredBytes, &remainingBytes);
+        AdvanceCountersAfterWrite(currentOutputBytes, &currentWrite, requiredBytes, &remainingBytes);
     }
 
-    if (WriteClosingBrace(componentName != NULL, &currentWrite, &requiredBytes, &remainingBytes) == -1)
+    if (WriteClosingBrace(componentName != NULL, &currentWrite, requiredBytes, &remainingBytes) != true)
     {
         LogError("Cannot write properties string");
-        return (size_t)-1;
+        return false;
     }
 
-    return (requiredBytes + 1);
+    *requiredBytes = (*requiredBytes + 1);
+    return true;
 }
 
 static bool VerifySerializeReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPERTY* properties, size_t numProperties)
@@ -230,11 +250,11 @@ static bool VerifySerializeReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPE
     return result;
 }
 
-
 IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_ReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPERTY* properties, size_t numProperties, const char* componentName, unsigned char** serializedProperties, size_t* serializedPropertiesLength)
 {
     IOTHUB_CLIENT_RESULT result;
     size_t requiredBytes = 0;
+    size_t requiredBytes2 = 0;
     unsigned char* serializedPropertiesBuffer = NULL;
 
     if ((VerifySerializeReportedProperties(properties, numProperties) == false) || (serializedProperties == NULL) || (serializedPropertiesLength == NULL))
@@ -242,7 +262,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_ReportedProperties(const IOTHUB_CLIE
         LogError("Invalid argument");
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
-    else if ((requiredBytes = WriteReportedProperties(properties, numProperties, componentName, NULL, 0)) < 0)
+    else if (WriteReportedProperties(properties, numProperties, componentName, NULL, 0, &requiredBytes) != true)
     {
         LogError("Cannot determine required length of reported properties buffer");
         result = IOTHUB_CLIENT_ERROR;
@@ -252,7 +272,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_ReportedProperties(const IOTHUB_CLIE
         LogError("Cannot allocate %lu bytes", (unsigned long)requiredBytes);
         result = IOTHUB_CLIENT_ERROR;
     }
-    else if (WriteReportedProperties(properties, numProperties, componentName, serializedPropertiesBuffer, requiredBytes) < 0)
+    else if (WriteReportedProperties(properties, numProperties, componentName, serializedPropertiesBuffer, requiredBytes, &requiredBytes2) != true)
     {
         LogError("Cannot write properties buffer");
         result = IOTHUB_CLIENT_ERROR;
@@ -315,6 +335,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_WritablePropertyResponse(
 {
     IOTHUB_CLIENT_RESULT result;
     size_t requiredBytes = 0;
+    size_t requiredBytes2 = 0;
     unsigned char* serializedPropertiesBuffer = NULL;
 
     if ((VerifySerializeWritableReportedProperties(properties, numProperties) == false) || (serializedProperties == NULL) || (serializedPropertiesLength == NULL))
@@ -322,7 +343,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_WritablePropertyResponse(
         LogError("Invalid argument");
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
-    else if ((requiredBytes = WriteWritableResponseProperties(properties, numProperties, componentName, NULL, 0)) < 0)
+    else if (WriteWritableResponseProperties(properties, numProperties, componentName, NULL, 0, &requiredBytes) != true)
     {
         LogError("Cannot determine required length of reported properties buffer");
         result = IOTHUB_CLIENT_ERROR;
@@ -332,7 +353,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_WritablePropertyResponse(
         LogError("Cannot allocate %lu bytes", (unsigned long)requiredBytes);
         result = IOTHUB_CLIENT_ERROR;
     }
-    else if (WriteWritableResponseProperties(properties, numProperties, componentName, serializedPropertiesBuffer, requiredBytes) < 0)
+    else if (WriteWritableResponseProperties(properties, numProperties, componentName, serializedPropertiesBuffer, requiredBytes, &requiredBytes2) != true)
     {
         LogError("Cannot write properties buffer");
         result = IOTHUB_CLIENT_ERROR;
