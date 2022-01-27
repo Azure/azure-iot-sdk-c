@@ -654,7 +654,6 @@ void dt_e2e_deinit(void)
     IoTHub_Deinit();
 }
 
-
 void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
                                IOTHUB_ACCOUNT_AUTH_METHOD account_auth_method)
 {

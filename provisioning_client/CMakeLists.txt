@@ -200,14 +200,14 @@ if(${use_prov_client} OR (${use_prov_client_core} AND ${run_e2e_tests}))
     link_security_client(prov_device_ll_client)
     set(provisioning_libs ${provisioning_libs} prov_device_ll_client)
     set(provisioning_headers ${provisioning_headers} ${PROV_DEVICE_LL_CLEINT_SOURCE_H_FILES})
-    target_link_libraries(prov_device_ll_client parson::parson)
+    target_link_libraries(prov_device_ll_client parson)
 
     add_library(prov_device_client ${PROV_DEVICE_CLIENT_SOURCE_C_FILES} ${PROV_DEVICE_CLIENT_SOURCE_H_FILES})
     applyXcodeBuildFlagsIfNeeded(prov_device_client)
     target_link_libraries(prov_device_client  prov_device_ll_client)
     set(provisioning_libs ${provisioning_libs} prov_device_client)
     set(provisioning_headers ${provisioning_headers} ${PROV_DEVICE_CLIENT_SOURCE_H_FILES})
-    target_link_libraries(prov_device_client parson::parson)
+    target_link_libraries(prov_device_client parson)
 
 
     if (${build_as_dynamic})
@@ -219,7 +219,7 @@ if(${use_prov_client} OR (${use_prov_client_core} AND ${run_e2e_tests}))
             ${CMAKE_CURRENT_LIST_DIR}/src/prov_device_client_dll.def
         )
         linkSharedUtil(prov_device_client_dll)
-        target_link_libraries(prov_device_client_dll prov_device_ll_client parson::parson)
+        target_link_libraries(prov_device_client_dll prov_device_ll_client parson)
 
         if(NOT WIN32)
             set_target_properties(prov_device_client_dll PROPERTIES OUTPUT_NAME "prov_device_client")
@@ -344,6 +344,7 @@ if(NOT IN_OPENWRT)
 endif()
 
 if (${use_prov_client} AND (NOT ${skip_samples}))
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/samples)
     add_subdirectory(tools)
 endif ()
 
