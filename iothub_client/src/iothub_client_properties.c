@@ -142,6 +142,8 @@ static bool WriteReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPERTY* prope
     char* currentWrite = (char*)serializedProperties;
     size_t remainingBytes = serializedPropertiesLength;
 
+    *requiredBytes = 0;
+
     if (WriteOpeningBrace(componentName,  &currentWrite, requiredBytes, &remainingBytes) != true)
     {
         LogError("Cannot write properties string");
@@ -179,6 +181,8 @@ static bool WriteWritableResponseProperties(const IOTHUB_CLIENT_WRITABLE_PROPERT
 {
     char* currentWrite = (char*)serializedProperties;
     size_t remainingBytes = serializedPropertiesLength;
+
+    *requiredBytes = 0;
 
     if (WriteOpeningBrace(componentName,  &currentWrite, requiredBytes, &remainingBytes) != true)
     {
@@ -254,7 +258,6 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_ReportedProperties(const IOTHUB_CLIE
 {
     IOTHUB_CLIENT_RESULT result;
     size_t requiredBytes = 0;
-    size_t requiredBytes2 = 0;
     unsigned char* serializedPropertiesBuffer = NULL;
 
     if ((VerifySerializeReportedProperties(properties, numProperties) == false) || (serializedProperties == NULL) || (serializedPropertiesLength == NULL))
@@ -272,7 +275,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_ReportedProperties(const IOTHUB_CLIE
         LogError("Cannot allocate %lu bytes", (unsigned long)requiredBytes);
         result = IOTHUB_CLIENT_ERROR;
     }
-    else if (WriteReportedProperties(properties, numProperties, componentName, serializedPropertiesBuffer, requiredBytes, &requiredBytes2) != true)
+    else if (WriteReportedProperties(properties, numProperties, componentName, serializedPropertiesBuffer, requiredBytes, &requiredBytes) != true)
     {
         LogError("Cannot write properties buffer");
         result = IOTHUB_CLIENT_ERROR;
@@ -335,7 +338,6 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_WritablePropertyResponse(
 {
     IOTHUB_CLIENT_RESULT result;
     size_t requiredBytes = 0;
-    size_t requiredBytes2 = 0;
     unsigned char* serializedPropertiesBuffer = NULL;
 
     if ((VerifySerializeWritableReportedProperties(properties, numProperties) == false) || (serializedProperties == NULL) || (serializedPropertiesLength == NULL))
@@ -353,7 +355,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_WritablePropertyResponse(
         LogError("Cannot allocate %lu bytes", (unsigned long)requiredBytes);
         result = IOTHUB_CLIENT_ERROR;
     }
-    else if (WriteWritableResponseProperties(properties, numProperties, componentName, serializedPropertiesBuffer, requiredBytes, &requiredBytes2) != true)
+    else if (WriteWritableResponseProperties(properties, numProperties, componentName, serializedPropertiesBuffer, requiredBytes, &requiredBytes) != true)
     {
         LogError("Cannot write properties buffer");
         result = IOTHUB_CLIENT_ERROR;
