@@ -180,7 +180,7 @@ static void on_cbs_put_token_complete_callback(void* context, CBS_OPERATION_RESU
     }
     else
     {
-        LogError("CBS reported status code %u, error: '%s' for put-token operation for device '%s'", status_code, status_description, instance->device_id);
+        LogError("CBS reported status code %u, error: '%s' for put-token operation for device '%s'", status_code, status_description != NULL ? status_description : "", instance->device_id);
 
         update_state(instance, AUTHENTICATION_STATE_ERROR);
 
