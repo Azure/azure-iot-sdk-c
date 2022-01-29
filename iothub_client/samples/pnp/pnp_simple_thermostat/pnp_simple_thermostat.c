@@ -13,6 +13,7 @@
 #include <string.h>
 #include <time.h>
 #include <limits.h>
+#include <math.h>
 
 // JSON parser library.
 #include "parson.h"
@@ -407,7 +408,7 @@ static void Thermostat_ProcessTargetTemperature(IOTHUB_DEVICE_CLIENT_LL_HANDLE d
 {
     char* next;
     double targetTemperature = strtod(property->value.str, &next);
-    if ((property->value.str == next) || (targetTemperature == LONG_MAX) || (targetTemperature == LONG_MIN))
+    if ((property->value.str == next) || (targetTemperature == HUGE_VAL) || (targetTemperature == (-1*HUGE_VAL)))
     {
         LogError("Property %s is not a valid number", property->value.str);
         SendTargetTemperatureResponse(deviceClient, property->value.str, PNP_STATUS_BAD_FORMAT, propertiesVersion, g_temperaturePropertyResponseDescriptionNotInt);

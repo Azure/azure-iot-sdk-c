@@ -7,6 +7,7 @@
 #include <string.h>
 #include <time.h>
 #include <limits.h>
+#include <math.h>
 
 // PnP routines
 #include "pnp_thermostat_component.h"
@@ -352,7 +353,7 @@ void PnP_ThermostatComponent_ProcessPropertyUpdate(PNP_THERMOSTAT_COMPONENT_HAND
     {
         char* next;
         double targetTemperature = strtod(propertyValue, &next);
-        if ((propertyValue == next) || (targetTemperature == LONG_MAX) || (targetTemperature == LONG_MIN))
+        if ((propertyValue == next) || (targetTemperature == HUGE_VAL) || (targetTemperature == (-1*HUGE_VAL)))
         {
             LogError("Property %s is not a valid number", propertyValue);
             SendTargetTemperatureResponse(pnpThermostatComponent, deviceClient, propertyValue, PNP_STATUS_BAD_FORMAT, version, g_temperaturePropertyResponseDescriptionNotInt);
