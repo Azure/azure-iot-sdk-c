@@ -358,7 +358,7 @@ int main()
                     (void)printf("Sending one message to IoTHub every %d seconds for %d messages (Send any C2D message to the device to stop)\r\n", TIME_BETWEEN_MESSAGES_SECONDS, MESSAGES_TO_SEND);
                     do
                     {
-                        if (!iothub_info.connected)
+                        if (iothub_info.connected)
                         {
                             // Send a message every TIME_BETWEEN_MESSAGES_SECONDS seconds
                             (void)tickcounter_get_current_ms(tick_counter_handle, &current_tick);
