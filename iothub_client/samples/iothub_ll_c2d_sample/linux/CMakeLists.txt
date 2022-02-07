@@ -4,6 +4,9 @@
 cmake_minimum_required(VERSION 3.5)
 
 cmake_policy(SET CMP0074 NEW)
+cmake_policy(SET CMP0012 NEW)
+
+project(iothub_ll_c2d_sample)
 
 if(WIN32)
     message(FATAL_ERROR "This CMake file only supports Linux builds!")
