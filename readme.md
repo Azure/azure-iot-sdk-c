@@ -65,7 +65,7 @@ The simplest way to get started with the Azure IoT SDKs on supported platforms i
 
 ### iOS Limitations
 
-- Authentication is limited to SAS keys on iOS. No cert based authentication is officially supported.
+- Authentication is limited to SAS keys on iOS. No certificate-based authentication is officially supported.
 - The Device Provisioning Client is not supported on iOS. Only the Azure IoT Hub device client is supported.
 
 For other platforms - including Linux - you need to clone and build the SDK directly.  You may also build it directly for the platforms above.  Instructions can be found [here](./iothub_client/readme.md#compile).
