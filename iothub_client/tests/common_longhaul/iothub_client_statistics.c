@@ -888,6 +888,16 @@ int iothub_client_statistics_get_telemetry_summary(IOTHUB_CLIENT_STATISTICS_HAND
 
                 summary->messages_received = summary->messages_received + 1;
             }
+            else
+            {
+                // check to see if the device was disconnected during this twin update
+                // we will miss the update because we reconnected to hub
+                if (singlylinkedlist_find(stats->connection_status_history, compare_message_time_to_connection_time, &telemetry_info->time_sent))
+                {
+                    summary->messages_sent--;
+                    LogInfo("Telemetry update id (%d) because of network error", (int)telemetry_info->message_id);
+                }
+            }
 
             list_item = singlylinkedlist_get_next_item(list_item);
         }
