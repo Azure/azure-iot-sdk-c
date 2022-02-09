@@ -133,6 +133,10 @@ static unsigned int httpResponse; /*used as out parameter in every call to Blob_
 static const unsigned int TwoHundred = 200;
 static const unsigned int FourHundredFour = 404;
 
+static unsigned char * content;
+static const size_t TEST_BLOB_UT_MAXIMUM_CONTENT_SIZE = 256 * 1024 * 1024;
+
+
 
 /**
  * BLOB_UPLOAD_CONTEXT and FileUpload_GetData_Callback
@@ -285,6 +289,10 @@ TEST_SUITE_INITIALIZE(TestSuiteInitialize)
 
     testValidBufferHandle = BUFFER_create((const unsigned char*)"a", 1);
     ASSERT_IS_NOT_NULL(testValidBufferHandle);
+
+    content = gballoc_malloc(TEST_BLOB_UT_MAXIMUM_CONTENT_SIZE);
+    ASSERT_IS_NOT_NULL(content);
+
     umock_c_reset_all_calls();
 }
 
@@ -292,6 +300,7 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
 {
 
     BUFFER_delete(testValidBufferHandle);
+    gballoc_free(content);
 
     umock_c_deinit();
 }
@@ -622,7 +631,7 @@ static void Blob_UploadMultipleBlocksFromSasUri_various_sizes_happy_path_Impl(HT
     {
         umock_c_reset_all_calls();
         ///arrange
-        unsigned char * content = (unsigned char*)gballoc_malloc(blockSizesToTest[iSize]);
+        //unsigned char * content = (unsigned char*)gballoc_malloc(blockSizesToTest[iSize]);
         ASSERT_IS_NOT_NULL(content);
 
         umock_c_reset_all_calls();
@@ -744,7 +753,7 @@ static void Blob_UploadMultipleBlocksFromSasUri_various_sizes_happy_path_Impl(HT
         ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_OK, result);
 
         ///cleanup
-        gballoc_free(content);
+        //gballoc_free(content);
     }
 
 
@@ -791,7 +800,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
 
     umock_c_reset_all_calls();
     ///arrange
-    unsigned char * content = (unsigned char*)gballoc_malloc(size);
+    //unsigned char * content = (unsigned char*)gballoc_malloc(size);
     ASSERT_IS_NOT_NULL(content);
 
     umock_c_reset_all_calls();
@@ -920,7 +929,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
     umock_c_negative_tests_deinit();
 
     ///cleanup
-    gballoc_free(content);
+    //gballoc_free(content);
 
 }
 
@@ -933,7 +942,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_and_netw
 
     umock_c_reset_all_calls();
     ///arrange
-    unsigned char * content = (unsigned char*)gballoc_malloc(size);
+    //unsigned char * content = (unsigned char*)gballoc_malloc(size);
     ASSERT_IS_NOT_NULL(content);
 
     umock_c_reset_all_calls();
@@ -1065,7 +1074,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_and_netw
     umock_c_negative_tests_deinit();
 
     ///cleanup
-    gballoc_free(content);
+    //gballoc_free(content);
 
 }
 
@@ -1074,7 +1083,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_when_http_code_is_404_it_immediately_succeed
     size_t size = 256 * 1024 * 1024;
 
     ///arrange
-    unsigned char * content = (unsigned char*)gballoc_malloc(size);
+    //unsigned char * content = (unsigned char*)gballoc_malloc(size);
     ASSERT_IS_NOT_NULL(content);
 
     umock_c_reset_all_calls();
@@ -1148,7 +1157,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_when_http_code_is_404_it_immediately_succeed
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_OK, result);
 
     ///cleanup
-    gballoc_free(content);
+    //gballoc_free(content);
 
 }
 
