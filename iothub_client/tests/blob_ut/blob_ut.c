@@ -792,17 +792,16 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_various_sizes_happy_path)
 
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
 {
-    size_t size = 256 * 1024 * 1024;
     (void)umock_c_negative_tests_init();
 
     umock_c_reset_all_calls();
     ///arrange
     umock_c_reset_all_calls();
 
-    memset(testUploadToBlobContent, '3', size);
+    memset(testUploadToBlobContent, '3', testUploadToBlobContentMaxSize);
     testUploadToBlobContent[0] = '0';
-    testUploadToBlobContent[size - 1] = '4';
-    context.size = size;
+    testUploadToBlobContent[testUploadToBlobContentMaxSize - 1] = '4';
+    context.size = testUploadToBlobContentMaxSize;
     context.source = testUploadToBlobContent;
     context.toUpload = context.size;
 
@@ -813,10 +812,10 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
     STRICT_EXPECTED_CALL(STRING_construct("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BlockList>")); /*this is starting to build the XML used in Put Block List operation*/
 
     /*uploading blocks (Put Block)*/
-    for (size_t blockNumber = 0;blockNumber < (size - 1) / (100 * 1024 * 1024) + 1;blockNumber++)
+    for (size_t blockNumber = 0;blockNumber < (testUploadToBlobContentMaxSize - 1) / (100 * 1024 * 1024) + 1;blockNumber++)
     {
         STRICT_EXPECTED_CALL(BUFFER_create(testUploadToBlobContent + blockNumber * 100 * 1024 * 1024,
-            (blockNumber != (size - 1) / (100 * 1024 * 1024)) ? 100 * 1024 * 1024 : (size - 1) % (100 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
+            (blockNumber != (testUploadToBlobContentMaxSize - 1) / (100 * 1024 * 1024)) ? 100 * 1024 * 1024 : (testUploadToBlobContentMaxSize - 1) % (100 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
         )); /*this is the content to be uploaded by this call*/
 
         /*here some sprintf happens and that produces a string in the form: 000000...049999*/
@@ -925,8 +924,6 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
 
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_and_network_interface_unhappy_paths)
 {
-    size_t size = 256 * 1024 * 1024;
-
     (void)umock_c_negative_tests_init();
 
 
@@ -934,10 +931,10 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_and_netw
     ///arrange
     umock_c_reset_all_calls();
 
-    memset(testUploadToBlobContent, '3', size);
+    memset(testUploadToBlobContent, '3', testUploadToBlobContentMaxSize);
     testUploadToBlobContent[0] = '0';
-    testUploadToBlobContent[size - 1] = '4';
-    context.size = size;
+    testUploadToBlobContent[testUploadToBlobContentMaxSize - 1] = '4';
+    context.size = testUploadToBlobContentMaxSize;
     context.source = testUploadToBlobContent;
     context.toUpload = context.size;
 
@@ -950,10 +947,10 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_and_netw
     STRICT_EXPECTED_CALL(STRING_construct("<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<BlockList>")); /*this is starting to build the XML used in Put Block List operation*/
 
                                                                                                          /*uploading blocks (Put Block)*/
-    for (size_t blockNumber = 0;blockNumber < (size - 1) / (100 * 1024 * 1024) + 1;blockNumber++)
+    for (size_t blockNumber = 0;blockNumber < (testUploadToBlobContentMaxSize - 1) / (100 * 1024 * 1024) + 1;blockNumber++)
     {
         STRICT_EXPECTED_CALL(BUFFER_create(testUploadToBlobContent + blockNumber * 100 * 1024 * 1024,
-            (blockNumber != (size - 1) / (100 * 1024 * 1024)) ? 100 * 1024 * 1024 : (size - 1) % (100 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
+            (blockNumber != (testUploadToBlobContentMaxSize - 1) / (100 * 1024 * 1024)) ? 100 * 1024 * 1024 : (testUploadToBlobContentMaxSize - 1) % (100 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
         )); /*this is the content to be uploaded by this call*/
 
         /*here some sprintf happens and that produces a string in the form: 000000...049999*/
@@ -1063,15 +1060,13 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_and_netw
 
 TEST_FUNCTION(Blob_UploadFromSasUri_when_http_code_is_404_it_immediately_succeeds)
 {
-    size_t size = 256 * 1024 * 1024;
-
     ///arrange
     umock_c_reset_all_calls();
 
-    memset(testUploadToBlobContent, '3', size);
+    memset(testUploadToBlobContent, '3', testUploadToBlobContentMaxSize);
     testUploadToBlobContent[0] = '0';
-    testUploadToBlobContent[size - 1] = '4';
-    context.size = size;
+    testUploadToBlobContent[testUploadToBlobContentMaxSize - 1] = '4';
+    context.size = testUploadToBlobContentMaxSize;
     context.source = testUploadToBlobContent;
     context.toUpload = context.size;
 
@@ -1085,7 +1080,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_when_http_code_is_404_it_immediately_succeed
     size_t blockNumber = 0;
     {
         STRICT_EXPECTED_CALL(BUFFER_create(testUploadToBlobContent + blockNumber * 100 * 1024 * 1024,
-            (blockNumber != (size - 1) / (100 * 1024 * 1024)) ? 100 * 1024 * 1024 : (size - 1) % (100 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
+            (blockNumber != (testUploadToBlobContentMaxSize - 1) / (100 * 1024 * 1024)) ? 100 * 1024 * 1024 : (testUploadToBlobContentMaxSize - 1) % (100 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
         )); /*this is the content to be uploaded by this call*/
 
         /*here some sprintf happens and that produces a string in the form: 000000...049999*/
