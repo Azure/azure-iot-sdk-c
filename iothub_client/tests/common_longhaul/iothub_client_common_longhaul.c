@@ -1684,6 +1684,7 @@ static void check_for_reported_properties_update_on_service_side(IOTHUB_LONGHAUL
         {
             // this API can fail due to network issues (ex: DNS issues)
             // try a few times before reporting an error
+            LogError("Failed to get device twin from the service for message id (%s)", iotHubLonghaul->test_id);
             ThreadAPI_Sleep(NETWORK_RETRY_DELAY_MSEC); 
         }
     }
@@ -1732,6 +1733,10 @@ static void check_for_reported_properties_update_on_service_side(IOTHUB_LONGHAUL
                         LogError("Failed unlocking (%s)", iotHubLonghaul->test_id);
                     }
                 }
+            }
+            else
+            {
+                LogError("Current device twin message id (%s) does not match expected message id (%s)", test_id, iotHubLonghaul->test_id);
             }
         }
         free(twin);

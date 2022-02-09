@@ -149,6 +149,19 @@ void iothub_client_statistics_destroy(IOTHUB_CLIENT_STATISTICS_HANDLE handle)
     }
 }
 
+bool compare_message_time_to_connection_time(LIST_ITEM_HANDLE list_item, const void* match_context)
+{
+    CONNECTION_STATUS_INFO* connection_status = (CONNECTION_STATUS_INFO*)list_item;
+    time_t message_time = *((time_t*)match_context);
+    if ((connection_status->status == IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED || connection_status->reason == IOTHUB_CLIENT_CONNECTION_NO_NETWORK) &&
+        connection_status->time < message_time &&
+        connection_status->time >(message_time - SPAN_3_MINUTES_IN_SECONDS))
+    {
+        return true;
+    }
+    return false;
+}
+
 IOTHUB_CLIENT_STATISTICS_HANDLE iothub_client_statistics_create(void)
 {
     IOTHUB_CLIENT_STATISTICS* stats;
@@ -888,6 +901,16 @@ int iothub_client_statistics_get_telemetry_summary(IOTHUB_CLIENT_STATISTICS_HAND
 
                 summary->messages_received = summary->messages_received + 1;
             }
+            else
+            {
+                // check to see if the device was disconnected during this twin update
+                // we will miss the update because we reconnected to hub
+                if (singlylinkedlist_find(stats->connection_status_history, compare_message_time_to_connection_time, &telemetry_info->time_sent))
+                {
+                    summary->messages_sent--;
+                    LogInfo("Telemetry update id (%d) because of network error", (int)telemetry_info->message_id);
+                }
+            }
 
             list_item = singlylinkedlist_get_next_item(list_item);
         }
@@ -1249,19 +1272,6 @@ int iothub_client_statistics_add_device_twin_desired_info(IOTHUB_CLIENT_STATISTI
     }
 
     return result;
-}
-
-bool compare_message_time_to_connection_time(LIST_ITEM_HANDLE list_item, const void* match_context)
-{
-    CONNECTION_STATUS_INFO* connection_status = (CONNECTION_STATUS_INFO*)list_item;
-    time_t message_time = *((time_t*)match_context);
-    if ((connection_status->status == IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED || connection_status->reason == IOTHUB_CLIENT_CONNECTION_NO_NETWORK) &&
-        connection_status->time < message_time && 
-        connection_status->time > (message_time - SPAN_3_MINUTES_IN_SECONDS))
-    {
-        return true;
-    }
-    return false;
 }
 
 int iothub_client_statistics_get_device_twin_desired_summary(IOTHUB_CLIENT_STATISTICS_HANDLE handle, IOTHUB_CLIENT_STATISTICS_DEVICE_TWIN_SUMMARY* summary)
