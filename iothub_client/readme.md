@@ -84,7 +84,7 @@ Detailed instructions can be found below for each platforms:
 
 ## CMake
 
-The C device SDK uses [CMake](https://cmake.org/) for compiler independent configuration and generates native makefiles and workspaces that can be used in the compiler environment of your choice.
+The C device SDK uses [CMake](https://cmake.org/) for compiler independent configuration and generates native build files and workspaces that can be used in the compiler environment of your choice.
 
 * [SDK CMake integration with your application](../doc/cmake_application.md)
 

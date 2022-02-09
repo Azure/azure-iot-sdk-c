@@ -3,10 +3,10 @@
 This document describes how to use your application CMake configuration to include and build the device C SDK.
 
 ## C Device SDK Git submodule
-Inclusion of the device C SDK usually uses the git submodule to include the SDK into your application source code. For the example project CMake file below, the device C SDK is installed at your root project directory called `azure-iot-sdk-c`.
+Inclusion of the device C SDK usually uses git submodules to include the SDK into your application source code. For the example project CMake file below, the device C SDK is installed at your root project in a directory called `azure-iot-sdk-c`.
 
 ## Application CMake project example
-The device C SDK CMake files are configured to be directly referenced from your application CMake. The first step of your application CMake file is to set the SDK configuration options, and then included the SDK in your CMake by adding the `add_subdirectory()` to the SDK location within your project.
+The device C SDK CMake files are configured to be directly referenced from your application CMake. The first step of your application CMake file is to set the SDK configuration options, and then include the SDK in your CMake by adding the `add_subdirectory()` to the SDK location within your project.
 
 Below is an example of an application project CMake.txt file which referances the Azure IoT device C SDK source code.
 ```Shell
