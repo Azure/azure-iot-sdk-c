@@ -903,12 +903,12 @@ int iothub_client_statistics_get_telemetry_summary(IOTHUB_CLIENT_STATISTICS_HAND
             }
             else
             {
-                // check to see if the device was disconnected during this twin update
+                // check to see if the device was disconnected during this Telemetry update
                 // we will miss the update because we reconnected to hub
                 if (singlylinkedlist_find(stats->connection_status_history, compare_message_time_to_connection_time, &telemetry_info->time_sent))
                 {
                     summary->messages_sent--;
-                    LogInfo("Telemetry update id (%d) because of network error", (int)telemetry_info->message_id);
+                    LogInfo("Telemetry update message (%d) failed because of network error", (int)telemetry_info->message_id);
                 }
             }
 
