@@ -133,10 +133,13 @@ static unsigned int httpResponse; /*used as out parameter in every call to Blob_
 static const unsigned int TwoHundred = 200;
 static const unsigned int FourHundredFour = 404;
 
-static unsigned char * content;
-static const size_t TEST_BLOB_UT_MAXIMUM_CONTENT_SIZE = 256 * 1024 * 1024;
-
-
+// Allocate test content during initial test setup only.  This buffer is very large,
+// which means significant performance degradation on Valgrind tests if we were to
+// allocate and free it per individual test-case.
+static unsigned char * testUploadToBlobContent;
+// Maximum size a test blob can be.  This is large (!), but needs of underlying
+// test to verify that large buffers are properly chunked end up with this.
+static const size_t testUploadToBlobContentMaxSize = 256 * 1024 * 1024;
 
 /**
  * BLOB_UPLOAD_CONTEXT and FileUpload_GetData_Callback
@@ -290,8 +293,8 @@ TEST_SUITE_INITIALIZE(TestSuiteInitialize)
     testValidBufferHandle = BUFFER_create((const unsigned char*)"a", 1);
     ASSERT_IS_NOT_NULL(testValidBufferHandle);
 
-    content = gballoc_malloc(TEST_BLOB_UT_MAXIMUM_CONTENT_SIZE);
-    ASSERT_IS_NOT_NULL(content);
+    testUploadToBlobContent = gballoc_malloc(testUploadToBlobContentMaxSize);
+    ASSERT_IS_NOT_NULL(testUploadToBlobContent);
 
     umock_c_reset_all_calls();
 }
@@ -300,7 +303,7 @@ TEST_SUITE_CLEANUP(TestClassCleanup)
 {
 
     BUFFER_delete(testValidBufferHandle);
-    gballoc_free(content);
+    gballoc_free(testUploadToBlobContent);
 
     umock_c_deinit();
 }
@@ -631,16 +634,13 @@ static void Blob_UploadMultipleBlocksFromSasUri_various_sizes_happy_path_Impl(HT
     {
         umock_c_reset_all_calls();
         ///arrange
-        //unsigned char * content = (unsigned char*)gballoc_malloc(blockSizesToTest[iSize]);
-        ASSERT_IS_NOT_NULL(content);
-
         umock_c_reset_all_calls();
 
-        memset(content, '3', blockSizesToTest[iSize]);
-        content[0] = '0';
-        content[blockSizesToTest[iSize] - 1] = '4';
+        memset(testUploadToBlobContent, '3', blockSizesToTest[iSize]);
+        testUploadToBlobContent[0] = '0';
+        testUploadToBlobContent[blockSizesToTest[iSize] - 1] = '4';
         context.size = blockSizesToTest[iSize];
-        context.source = content;
+        context.source = testUploadToBlobContent;
         context.toUpload = context.size;
 
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is creating a copy of the hostname */
@@ -667,7 +667,7 @@ static void Blob_UploadMultipleBlocksFromSasUri_various_sizes_happy_path_Impl(HT
         /*uploading blocks (Put Block)*/
         for (size_t blockNumber = 0; blockNumber < (blockSizesToTest[iSize] - 1) / (100 * 1024 * 1024) + 1;blockNumber++)
         {
-            STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 100 * 1024 * 1024,
+            STRICT_EXPECTED_CALL(BUFFER_create(testUploadToBlobContent + blockNumber * 100 * 1024 * 1024,
                 (blockNumber != (blockSizesToTest[iSize] - 1) / (100 * 1024 * 1024)) ? 100 * 1024 * 1024 : (blockSizesToTest[iSize] - 1) % (100 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
             )); /*this is the content to be uploaded by this call*/
 
@@ -751,9 +751,6 @@ static void Blob_UploadMultipleBlocksFromSasUri_various_sizes_happy_path_Impl(HT
         ///assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_OK, result);
-
-        ///cleanup
-        //gballoc_free(content);
     }
 
 
@@ -800,16 +797,13 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
 
     umock_c_reset_all_calls();
     ///arrange
-    //unsigned char * content = (unsigned char*)gballoc_malloc(size);
-    ASSERT_IS_NOT_NULL(content);
-
     umock_c_reset_all_calls();
 
-    memset(content, '3', size);
-    content[0] = '0';
-    content[size - 1] = '4';
+    memset(testUploadToBlobContent, '3', size);
+    testUploadToBlobContent[0] = '0';
+    testUploadToBlobContent[size - 1] = '4';
     context.size = size;
-    context.source = content;
+    context.source = testUploadToBlobContent;
     context.toUpload = context.size;
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is creating a copy of the hostname */
@@ -821,7 +815,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
     /*uploading blocks (Put Block)*/
     for (size_t blockNumber = 0;blockNumber < (size - 1) / (100 * 1024 * 1024) + 1;blockNumber++)
     {
-        STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 100 * 1024 * 1024,
+        STRICT_EXPECTED_CALL(BUFFER_create(testUploadToBlobContent + blockNumber * 100 * 1024 * 1024,
             (blockNumber != (size - 1) / (100 * 1024 * 1024)) ? 100 * 1024 * 1024 : (size - 1) % (100 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
         )); /*this is the content to be uploaded by this call*/
 
@@ -927,10 +921,6 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_unhappy_paths)
     }
 
     umock_c_negative_tests_deinit();
-
-    ///cleanup
-    //gballoc_free(content);
-
 }
 
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_and_network_interface_unhappy_paths)
@@ -942,16 +932,13 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_and_netw
 
     umock_c_reset_all_calls();
     ///arrange
-    //unsigned char * content = (unsigned char*)gballoc_malloc(size);
-    ASSERT_IS_NOT_NULL(content);
-
     umock_c_reset_all_calls();
 
-    memset(content, '3', size);
-    content[0] = '0';
-    content[size - 1] = '4';
+    memset(testUploadToBlobContent, '3', size);
+    testUploadToBlobContent[0] = '0';
+    testUploadToBlobContent[size - 1] = '4';
     context.size = size;
-    context.source = content;
+    context.source = testUploadToBlobContent;
     context.toUpload = context.size;
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is creating a copy of the hostname */
@@ -965,7 +952,7 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_and_netw
                                                                                                          /*uploading blocks (Put Block)*/
     for (size_t blockNumber = 0;blockNumber < (size - 1) / (100 * 1024 * 1024) + 1;blockNumber++)
     {
-        STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 100 * 1024 * 1024,
+        STRICT_EXPECTED_CALL(BUFFER_create(testUploadToBlobContent + blockNumber * 100 * 1024 * 1024,
             (blockNumber != (size - 1) / (100 * 1024 * 1024)) ? 100 * 1024 * 1024 : (size - 1) % (100 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
         )); /*this is the content to be uploaded by this call*/
 
@@ -1072,10 +1059,6 @@ TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_64MB_with_certificate_and_netw
     }
 
     umock_c_negative_tests_deinit();
-
-    ///cleanup
-    //gballoc_free(content);
-
 }
 
 TEST_FUNCTION(Blob_UploadFromSasUri_when_http_code_is_404_it_immediately_succeeds)
@@ -1083,16 +1066,13 @@ TEST_FUNCTION(Blob_UploadFromSasUri_when_http_code_is_404_it_immediately_succeed
     size_t size = 256 * 1024 * 1024;
 
     ///arrange
-    //unsigned char * content = (unsigned char*)gballoc_malloc(size);
-    ASSERT_IS_NOT_NULL(content);
-
     umock_c_reset_all_calls();
 
-    memset(content, '3', size);
-    content[0] = '0';
-    content[size - 1] = '4';
+    memset(testUploadToBlobContent, '3', size);
+    testUploadToBlobContent[0] = '0';
+    testUploadToBlobContent[size - 1] = '4';
     context.size = size;
-    context.source = content;
+    context.source = testUploadToBlobContent;
     context.toUpload = context.size;
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)) /*this is creating a copy of the hostname */
@@ -1104,7 +1084,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_when_http_code_is_404_it_immediately_succeed
     /*uploading blocks (Put Block)*/ /*this simply fails first block*/
     size_t blockNumber = 0;
     {
-        STRICT_EXPECTED_CALL(BUFFER_create(content + blockNumber * 100 * 1024 * 1024,
+        STRICT_EXPECTED_CALL(BUFFER_create(testUploadToBlobContent + blockNumber * 100 * 1024 * 1024,
             (blockNumber != (size - 1) / (100 * 1024 * 1024)) ? 100 * 1024 * 1024 : (size - 1) % (100 * 1024 * 1024) + 1 /*condition to take care of "the size of the last block*/
         )); /*this is the content to be uploaded by this call*/
 
@@ -1155,10 +1135,6 @@ TEST_FUNCTION(Blob_UploadFromSasUri_when_http_code_is_404_it_immediately_succeed
     ///assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_ARE_EQUAL(BLOB_RESULT, BLOB_OK, result);
-
-    ///cleanup
-    //gballoc_free(content);
-
 }
 
 TEST_FUNCTION(Blob_UploadMultipleBlocksFromSasUri_when_blockSize_too_big_fails)
