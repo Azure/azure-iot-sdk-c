@@ -45,7 +45,7 @@ int hsm_client_x509_set_certificate(HSM_CLIENT_HANDLE handle, const char* certif
         HSM_CLIENT_X509_INFO* x509_client = (HSM_CLIENT_X509_INFO*)handle;
         if (x509_client->x509certificate != NULL)
         {
-            LogError("Registration_id has been previously set, registration can not be changed");
+            LogError("Certificate has been previously set and cannot be changed");
             result = MU_FAILURE;
         }
         else if (mallocAndStrcpy_s(&x509_client->x509certificate, certificate) != 0)
@@ -74,7 +74,7 @@ int hsm_client_x509_set_key(HSM_CLIENT_HANDLE handle, const char* key)
         HSM_CLIENT_X509_INFO* x509_client = (HSM_CLIENT_X509_INFO*)handle;
         if (x509_client->x509key != NULL)
         {
-            LogError("Registration_id has been previously set, registration can not be changed");
+            LogError("Certificate key has been previously set and cannot be changed");
             result = MU_FAILURE;
         }
         else if (mallocAndStrcpy_s(&x509_client->x509key, key) != 0)
@@ -155,6 +155,7 @@ char* hsm_client_x509_get_key(HSM_CLIENT_HANDLE handle)
 char* hsm_client_x509_get_common_name(HSM_CLIENT_HANDLE handle)
 {
     (void)handle;
+    // Provisioning Device Client should never call this function.
     LogError("Registration ID was not configured.");
     return NULL;
 }

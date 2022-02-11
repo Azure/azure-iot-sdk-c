@@ -119,14 +119,14 @@ int construct_device_id(const char* prefix, char** device_name)
     return result;
 }
 
-void create_tpm_enrollment_device(const char* prov_conn_string, bool use_tracing)
+void create_tpm_enrollment_device()
 {
     INDIVIDUAL_ENROLLMENT_HANDLE indiv_enrollment = NULL;
 
-    PROVISIONING_SERVICE_CLIENT_HANDLE prov_sc_handle = prov_sc_create_from_connection_string(prov_conn_string);
+    PROVISIONING_SERVICE_CLIENT_HANDLE prov_sc_handle = prov_sc_create_from_connection_string(g_prov_conn_string);
     ASSERT_IS_NOT_NULL(prov_sc_handle, "Failure creating provisioning service client");
 
-    if (use_tracing)
+    if (g_enable_tracing)
     {
         prov_sc_set_trace(prov_sc_handle, TRACING_STATUS_ON);
     }
@@ -166,14 +166,14 @@ void create_tpm_enrollment_device(const char* prov_conn_string, bool use_tracing
     prov_sc_destroy(prov_sc_handle);
 }
 
-void create_symm_key_enrollment_device(const char* prov_conn_string, bool use_tracing)
+void create_symm_key_enrollment_device()
 {
     //INDIVIDUAL_ENROLLMENT_HANDLE indiv_enrollment = NULL;
 
-    PROVISIONING_SERVICE_CLIENT_HANDLE prov_sc_handle = prov_sc_create_from_connection_string(prov_conn_string);
+    PROVISIONING_SERVICE_CLIENT_HANDLE prov_sc_handle = prov_sc_create_from_connection_string(g_prov_conn_string);
     ASSERT_IS_NOT_NULL(prov_sc_handle, "Failure creating provisioning service client");
 
-    if (use_tracing)
+    if (g_enable_tracing)
     {
         prov_sc_set_trace(prov_sc_handle, TRACING_STATUS_ON);
     }
@@ -187,14 +187,14 @@ void create_symm_key_enrollment_device(const char* prov_conn_string, bool use_tr
     prov_sc_destroy(prov_sc_handle);
 }
 
-void create_x509_individual_enrollment_device(const char* prov_conn_string, bool use_tracing)
+void create_x509_individual_enrollment_device()
 {
     INDIVIDUAL_ENROLLMENT_HANDLE indiv_enrollment = NULL;
 
-    PROVISIONING_SERVICE_CLIENT_HANDLE prov_sc_handle = prov_sc_create_from_connection_string(prov_conn_string);
+    PROVISIONING_SERVICE_CLIENT_HANDLE prov_sc_handle = prov_sc_create_from_connection_string(g_prov_conn_string);
     ASSERT_IS_NOT_NULL(prov_sc_handle, "Failure creating provisioning service client");
 
-    if (use_tracing)
+    if (g_enable_tracing)
     {
         prov_sc_set_trace(prov_sc_handle, TRACING_STATUS_ON);
     }
@@ -203,15 +203,27 @@ void create_x509_individual_enrollment_device(const char* prov_conn_string, bool
     ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, prov_sc_set_certificate(prov_sc_handle, certificates), "Failure setting Trusted Cert option");
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
+    char* registration_id;
+
+#ifdef HSM_TYPE_X509
+    registration_id = g_dps_regid_individual;
+#else   // X509 HSMs
     PROV_AUTH_HANDLE auth_handle = prov_auth_create();
     ASSERT_IS_NOT_NULL(auth_handle, "Failure creating auth client");
+    registration_id = prov_auth_get_registration_id(auth_handle);
+#endif
 
-    char* registration_id = prov_auth_get_registration_id(auth_handle);
     ASSERT_IS_NOT_NULL(registration_id, "Failure prov_auth_get_common_name");
 
     if (prov_sc_get_individual_enrollment(prov_sc_handle, registration_id, &indiv_enrollment) != 0)
     {
-        char* x509_cert = prov_auth_get_certificate(auth_handle);
+        char* x509_cert;
+
+#ifdef HSM_TYPE_X509
+        x509_cert = g_dps_x509_cert_individual;
+#else
+        x509_cert = prov_auth_get_certificate(auth_handle);
+#endif
         ASSERT_IS_NOT_NULL(x509_cert, "Failure prov_auth_get_certificate");
 
         ATTESTATION_MECHANISM_HANDLE attest_handle = attestationMechanism_createWithX509ClientCert(x509_cert, NULL);
@@ -221,34 +233,47 @@ void create_x509_individual_enrollment_device(const char* prov_conn_string, bool
         ASSERT_IS_NOT_NULL(indiv_enrollment, "Failure hsm_client_riot_get_certificate ");
 
         ASSERT_ARE_EQUAL(int, 0, prov_sc_create_or_update_individual_enrollment(prov_sc_handle, &indiv_enrollment), "Failure prov_sc_create_or_update_individual_enrollment");
-
+#ifndef HSM_TYPE_X509
         free(x509_cert);
+#endif
     }
+#ifndef HSM_TYPE_X509
     free(registration_id);
-    individualEnrollment_destroy(indiv_enrollment);
     prov_auth_destroy(auth_handle);
+#endif
+    individualEnrollment_destroy(indiv_enrollment);
     prov_sc_destroy(prov_sc_handle);
 }
 
-void remove_enrollment_device(const char* prov_conn_string)
+void remove_enrollment_device(const char* g_prov_conn_string)
 {
-    PROVISIONING_SERVICE_CLIENT_HANDLE prov_sc_handle = prov_sc_create_from_connection_string(prov_conn_string);
+    PROVISIONING_SERVICE_CLIENT_HANDLE prov_sc_handle = prov_sc_create_from_connection_string(g_prov_conn_string);
     ASSERT_IS_NOT_NULL(prov_sc_handle, "Failure creating provisioning service client");
 
+    char* registration_id;
+
+#ifdef HSM_TYPE_X509
+    registration_id = g_dps_regid_individual;
+#else   // X509 HSMs
     PROV_AUTH_HANDLE auth_handle = prov_auth_create();
     ASSERT_IS_NOT_NULL(auth_handle, "Failure creating auth client");
+    registration_id = prov_auth_get_registration_id(auth_handle);
+#endif
 
-    char* registration_id = prov_auth_get_registration_id(auth_handle);
     ASSERT_IS_NOT_NULL(registration_id, "Failure retrieving registration Id");
 
     ASSERT_ARE_EQUAL(int, 0, prov_sc_delete_individual_enrollment_by_param(prov_sc_handle, registration_id, NULL), "Failure deleting enrollment");
 
+#ifndef HSM_TYPE_X509
     free(registration_id);
     prov_auth_destroy(auth_handle);
+#endif
     prov_sc_destroy(prov_sc_handle);
+
+    
 }
 
-void send_dps_test_registration(const char* global_uri, const char* scope_id, PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION protocol, bool use_tracing)
+void send_dps_test_registration(const char* global_uri, const char* scope_id, PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION protocol, bool g_enable_tracing)
 {
     PROV_CLIENT_E2E_INFO prov_info;
     memset(&prov_info, 0, sizeof(PROV_CLIENT_E2E_INFO));
@@ -258,11 +283,18 @@ void send_dps_test_registration(const char* global_uri, const char* scope_id, PR
     handle = Prov_Device_LL_Create(global_uri, scope_id, protocol);
     ASSERT_IS_NOT_NULL(handle, "Failure create a DPS HANDLE");
 
-    Prov_Device_LL_SetOption(handle, PROV_OPTION_LOG_TRACE, &use_tracing);
+    Prov_Device_LL_SetOption(handle, PROV_OPTION_LOG_TRACE, &g_enable_tracing);
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
     ASSERT_ARE_EQUAL(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_OK, Prov_Device_LL_SetOption(handle, OPTION_TRUSTED_CERT, certificates), "Failure setting Trusted Cert option");
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
+
+#ifdef HSM_TYPE_X509
+    // For X509, these options cannot be modified without re-initializing the HSM. These are expected to fail for all but the first test.
+    Prov_Device_LL_SetOption(handle, OPTION_X509_CERT, g_dps_x509_cert_individual);
+    Prov_Device_LL_SetOption(handle, OPTION_X509_PRIVATE_KEY, g_dps_x509_key_individual);
+    Prov_Device_LL_SetOption(handle, PROV_REGISTRATION_ID, g_dps_regid_individual);
+#endif
 
     // act
     PROV_DEVICE_RESULT prov_result = Prov_Device_LL_Register_Device(handle, iothub_prov_register_device, &prov_info, dps_registation_status, &prov_info);

@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include "testrunnerswitcher.h"
 
+#include "azure_c_shared_utility/azure_base64.h"
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
@@ -20,15 +21,47 @@
 #include "azure_prov_client/prov_transport_mqtt_client.h"
 #include "azure_prov_client/prov_transport_mqtt_ws_client.h"
 
-static const char* X509_INDIVIDUAL_REGISTRATION_ID_PREFIX_FMT = "csdke2e_x509_i_%s";
-
 #include "common_prov_e2e.h"
 
-static const char* g_prov_conn_string = NULL;
-static const char* g_dps_scope_id = NULL;
-static const char* g_dps_uri = NULL;
-static const char* g_desired_iothub = NULL;
-static bool g_enable_tracing = true;
+const char* g_prov_conn_string = NULL;
+const char* g_dps_scope_id = NULL;
+const char* g_dps_uri = NULL;
+const char* g_desired_iothub = NULL;
+char* g_dps_x509_cert_individual = NULL;
+char* g_dps_x509_key_individual = NULL;
+char* g_dps_regid_individual = NULL;
+const bool g_enable_tracing = true;
+
+static char* convert_base64_to_string(const char* base64_cert)
+{
+    char* result;
+    BUFFER_HANDLE raw_cert = Azure_Base64_Decode(base64_cert);
+    if (raw_cert == NULL)
+    {
+        LogError("Failure decoding base64 encoded cert.\r\n");
+        result = NULL;
+    }
+    else
+    {
+        STRING_HANDLE cert = STRING_from_byte_array(BUFFER_u_char(raw_cert), BUFFER_length(raw_cert));
+        if (cert == NULL)
+        {
+            LogError("Failure creating cert from binary.\r\n");
+            result = NULL;
+        }
+        else
+        {
+            if (mallocAndStrcpy_s(&result, STRING_c_str(cert)) != 0)
+            {
+                LogError("Failure allocating certificate.\r\n");
+                result = NULL;
+            }
+            STRING_delete(cert);
+        }
+        BUFFER_delete(raw_cert);
+    }
+    return result;
+}
 
 BEGIN_TEST_SUITE(prov_x509_client_e2e)
 
@@ -46,29 +79,31 @@ BEGIN_TEST_SUITE(prov_x509_client_e2e)
         g_dps_scope_id = getenv(DPS_ID_SCOPE);
         ASSERT_IS_NOT_NULL(g_dps_scope_id, "DPS_ID_SCOPE is NULL");
 
-        // TODO: 
-        // 1. Read individual enrollment certificate from ENV.
-        // 2. Change create_x509_individual_enrollment_device to create a new individual enrollment
-        //    based on the certificate, using construct_device_id.
+#ifdef HSM_TYPE_X509
+        char* dps_x509_cert_individual_base64 = getenv(DPS_X509_INDIVIDUAL_CERT_BASE64);
+        ASSERT_IS_NOT_NULL(dps_x509_cert_individual_base64, "DPS_X509_INDIVIDUAL_CERT_BASE64 is NULL");
+        g_dps_x509_cert_individual = convert_base64_to_string(dps_x509_cert_individual_base64);
 
-        #if 0
-        base64_cert = getenv("IOTHUB_E2E_X509_CERT_BASE64");
-        base64_key = getenv("IOTHUB_E2E_X509_PRIVATE_KEY_BASE64");
-        convert_base64_to_string(base64_cert);
+        char* dps_x509_key_individual = getenv(DPS_X509_INDIVIDUAL_KEY_BASE64);
+        ASSERT_IS_NOT_NULL(dps_x509_key_individual, "DPS_X509_INDIVIDUAL_KEY_BASE64 is NULL");
+        g_dps_x509_key_individual = convert_base64_to_string(dps_x509_key_individual);
 
-        char* device_name;
-        construct_device_id(X509_INDIVIDUAL_REGISTRATION_ID_PREFIX_FMT, &device_name);
-        printf("\n\nDevice: %s\n\n", device_name);
-        #endif 
+        g_dps_regid_individual = getenv(DPS_X509_INDIVIDUAL_REGISTRATION_ID);
+        ASSERT_IS_NOT_NULL(g_dps_regid_individual, "DPS_X509_INDIVIDUAL_REGISTRATION_ID is NULL");
+#endif
 
         // Register device
-        create_x509_individual_enrollment_device(g_prov_conn_string, g_enable_tracing);
+        create_x509_individual_enrollment_device();
     }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
     {
         // Remove device
+#ifndef HSM_TYPE_X509
+        // For X509 Individual Enrollment we are using a single registration.
+        // Removing it will cause issues with parallel test runs.
         remove_enrollment_device(g_prov_conn_string);
+#endif
 
         prov_dev_security_deinit();
         platform_deinit();
