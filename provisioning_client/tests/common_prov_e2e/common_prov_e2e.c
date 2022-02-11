@@ -39,6 +39,37 @@
 
 TEST_DEFINE_ENUM_TYPE(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
 
+char* convert_base64_to_string(const char* base64_cert)
+{
+    char* result;
+    BUFFER_HANDLE raw_cert = Azure_Base64_Decode(base64_cert);
+    if (raw_cert == NULL)
+    {
+        LogError("Failure decoding base64 encoded cert.\r\n");
+        result = NULL;
+    }
+    else
+    {
+        STRING_HANDLE cert = STRING_from_byte_array(BUFFER_u_char(raw_cert), BUFFER_length(raw_cert));
+        if (cert == NULL)
+        {
+            LogError("Failure creating cert from binary.\r\n");
+            result = NULL;
+        }
+        else
+        {
+            if (mallocAndStrcpy_s(&result, STRING_c_str(cert)) != 0)
+            {
+                LogError("Failure allocating certificate.\r\n");
+                result = NULL;
+            }
+            STRING_delete(cert);
+        }
+        BUFFER_delete(raw_cert);
+    }
+    return result;
+}
+
 static void iothub_prov_register_device(PROV_DEVICE_RESULT register_result, const char* iothub_uri, const char* device_id, void* user_context)
 {
     if (user_context == NULL)
@@ -291,9 +322,17 @@ void send_dps_test_registration(const char* global_uri, const char* scope_id, PR
 
 #ifdef HSM_TYPE_X509
     // For X509, these options cannot be modified without re-initializing the HSM. These are expected to fail for all but the first test.
-    Prov_Device_LL_SetOption(handle, OPTION_X509_CERT, g_dps_x509_cert_individual);
-    Prov_Device_LL_SetOption(handle, OPTION_X509_PRIVATE_KEY, g_dps_x509_key_individual);
     Prov_Device_LL_SetOption(handle, PROV_REGISTRATION_ID, g_dps_regid_individual);
+    Prov_Device_LL_SetOption(handle, OPTION_X509_CERT, g_dps_x509_cert_individual);
+    // Private Key is either an in-memory key or an OpenSSL Engine specific string identifying the key slot.
+    Prov_Device_LL_SetOption(handle, OPTION_X509_PRIVATE_KEY, g_dps_x509_key_individual);
+
+    #ifdef TEST_OPENSSL_ENGINE
+    static const char* opensslEngine = OPENSSL_ENGINE_ID;
+    static const OPTION_OPENSSL_KEY_TYPE x509_key_from_engine = KEY_TYPE_ENGINE;
+    Prov_Device_LL_SetOption(handle, OPTION_OPENSSL_ENGINE, opensslEngine);
+    Prov_Device_LL_SetOption(handle, OPTION_OPENSSL_PRIVATE_KEY_TYPE, &x509_key_from_engine);
+    #endif
 #endif
 
     // act

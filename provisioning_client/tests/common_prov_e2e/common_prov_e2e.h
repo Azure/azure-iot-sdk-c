@@ -44,6 +44,11 @@ static const char* const DPS_X509_INDIVIDUAL_CERT_BASE64 = "IOT_DPS_INDIVIDUAL_X
 static const char* const DPS_X509_INDIVIDUAL_KEY_BASE64 = "IOT_DPS_INDIVIDUAL_X509_KEY";
 static const char* const DPS_X509_INDIVIDUAL_REGISTRATION_ID = "IOT_DPS_INDIVIDUAL_REGISTRATION_ID";
 
+#ifdef TEST_OPENSSL_ENGINE
+#define OPENSSL_ENGINE_ID "pkcs11"
+#define PKCS11_PRIVATE_KEY_URI "pkcs11:object=dps-privkey;type=private?pin-value=1234"
+#endif
+
 extern void create_x509_individual_enrollment_device();
 extern void create_tpm_enrollment_device();
 extern void create_symm_key_enrollment_device();
@@ -53,6 +58,7 @@ extern void wait_for_dps_result(PROV_DEVICE_LL_HANDLE handle, PROV_CLIENT_E2E_IN
 extern int construct_device_id(const char* prefix, char** device_name);
 
 extern void send_dps_test_registration(const char* global_uri, const char* scope_id, PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION protocol, bool use_tracing);
+extern char* convert_base64_to_string(const char* base64_cert);
 
 #ifdef __cplusplus
 }

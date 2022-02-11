@@ -58,3 +58,7 @@ endif ()
 
 add_unittest_directory(iothub_auth_client_ut)
 #add_e2etest_directory(prov_invalidcert_e2e)
+
+if (${use_openssl} AND ${run_e2e_openssl_engine_tests})
+    add_e2etest_directory(prov_x509_client_openssl_engine_e2e)
+endif()

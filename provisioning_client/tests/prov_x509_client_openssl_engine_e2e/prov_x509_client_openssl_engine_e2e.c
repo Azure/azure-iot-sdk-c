@@ -32,7 +32,7 @@ char* g_dps_x509_key_individual = NULL;
 char* g_dps_regid_individual = NULL;
 const bool g_enable_tracing = true;
 
-BEGIN_TEST_SUITE(prov_x509_client_e2e)
+BEGIN_TEST_SUITE(prov_x509_client_openssl_engine_e2e)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
@@ -48,18 +48,14 @@ BEGIN_TEST_SUITE(prov_x509_client_e2e)
         g_dps_scope_id = getenv(DPS_ID_SCOPE);
         ASSERT_IS_NOT_NULL(g_dps_scope_id, "DPS_ID_SCOPE is NULL");
 
-#ifdef HSM_TYPE_X509
         char* dps_x509_cert_individual_base64 = getenv(DPS_X509_INDIVIDUAL_CERT_BASE64);
         ASSERT_IS_NOT_NULL(dps_x509_cert_individual_base64, "DPS_X509_INDIVIDUAL_CERT_BASE64 is NULL");
         g_dps_x509_cert_individual = convert_base64_to_string(dps_x509_cert_individual_base64);
 
-        char* dps_x509_key_individual = getenv(DPS_X509_INDIVIDUAL_KEY_BASE64);
-        ASSERT_IS_NOT_NULL(dps_x509_key_individual, "DPS_X509_INDIVIDUAL_KEY_BASE64 is NULL");
-        g_dps_x509_key_individual = convert_base64_to_string(dps_x509_key_individual);
+        g_dps_x509_key_individual = PKCS11_PRIVATE_KEY_URI;
 
         g_dps_regid_individual = getenv(DPS_X509_INDIVIDUAL_REGISTRATION_ID);
         ASSERT_IS_NOT_NULL(g_dps_regid_individual, "DPS_X509_INDIVIDUAL_REGISTRATION_ID is NULL");
-#endif
 
         // Register device
         create_x509_individual_enrollment_device();
@@ -67,12 +63,8 @@ BEGIN_TEST_SUITE(prov_x509_client_e2e)
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
     {
-        // Remove device
-#ifndef HSM_TYPE_X509
         // For X509 Individual Enrollment we are using a single registration.
         // Removing it will cause issues with parallel test runs.
-        remove_enrollment_device(g_prov_conn_string);
-#endif
 
         prov_dev_security_deinit();
         platform_deinit();
@@ -87,33 +79,33 @@ BEGIN_TEST_SUITE(prov_x509_client_e2e)
     }
 
 #if USE_HTTP
-    TEST_FUNCTION(dps_register_x509_device_http_success)
+    TEST_FUNCTION(dps_register_x509_openssl_engine_device_http_success)
     {
         send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_HTTP_Protocol, g_enable_tracing);
     }
 #endif
 
 #if USE_AMQP
-    TEST_FUNCTION(dps_register_x509_device_amqp_success)
+    TEST_FUNCTION(dps_register_x509_openssl_engine_device_amqp_success)
     {
         send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_AMQP_Protocol, g_enable_tracing);
     }
 
-    TEST_FUNCTION(dps_register_x509_device_amqp_ws_success)
+    TEST_FUNCTION(dps_register_x509_openssl_engine_device_amqp_ws_success)
     {
         send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_AMQP_WS_Protocol, g_enable_tracing);
     }
 #endif
 
 #if USE_MQTT
-    TEST_FUNCTION(dps_register_x509_device_mqtt_success)
+    TEST_FUNCTION(dps_register_x509_openssl_engine_device_mqtt_success)
     {
         send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_MQTT_Protocol, g_enable_tracing);
     }
 
-    TEST_FUNCTION(dps_register_x509_device_mqtt_ws_success)
+    TEST_FUNCTION(dps_register_x509_openssl_engine_device_mqtt_ws_success)
     {
         send_dps_test_registration(g_dps_uri, g_dps_scope_id, Prov_Device_MQTT_WS_Protocol, g_enable_tracing);
     }
 #endif
-END_TEST_SUITE(prov_x509_client_e2e)
+END_TEST_SUITE(prov_x509_client_openssl_engine_e2e)
