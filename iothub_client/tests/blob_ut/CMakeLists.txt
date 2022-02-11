@@ -7,7 +7,7 @@ cmake_minimum_required (VERSION 3.5)
 compileAsC99()
 
 # Explicitly override MAX_BLOCK_COUNT for upload tests as the default of 50,000 is too large for UT to run quickly in
-add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC -DMAX_BLOCK_COUNT=100)
+add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC -DMAX_BLOCK_COUNT=10)
 
 set(theseTestsName blob_ut )
 
