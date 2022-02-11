@@ -86,7 +86,7 @@ Detailed instructions can be found below for each platforms:
 
 The C device SDK uses [CMake](https://cmake.org/) for compiler independent configuration and generates native build files and workspaces that can be used in the compiler environment of your choice.
 
-* [SDK CMake integration with your application](../doc/cmake_application.md)
+* [SDK CMake integration with your application](../doc/how_to_use_azure_iot_sdk_c_with_cmake.md)
 
 ## Samples
 
