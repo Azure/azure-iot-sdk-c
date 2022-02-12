@@ -4,7 +4,7 @@ Here is where we answer question pertaining to the IoT Provisioning Client.  Ple
 
 ## x509 Provisioning
 
-To use X509 Client authentication, enable `hsm_type_x509` when configuring the SDK. Support for DICE HSM is enabled by configuring the SDK with `hsm_type_riot`. If both `hsm_type_x509` and `hsm_type_riot` are selected, `hsm_type_riot` will take precedence.
+To use X509 Client authentication, enable `hsm_type_x509` when configuring the SDK. Support for DICE HSM is enabled by configuring the SDK with `hsm_type_riot`. Only one of the `hsm_type_x509` and `hsm_type_riot` options can be selected.
 
 - How does the provisioning service match the device's X.509 certificate to an enrollment?
 
@@ -14,7 +14,7 @@ To use X509 Client authentication, enable `hsm_type_x509` when configuring the S
 
   - This question depends on the situation:
 
-    - **Development**: The SDK ships with a way to either specify a PEM certificate and key or to use a development DICE HSM implementation that generates a test x509 certificate with a pre-generated key.  This enables the developer to quickly get up and running to test their solutions.
+    - **Development**: The SDK ships with a way to either specify a PEM certificate and key, or to use a development DICE HSM implementation that generates a test x509 certificate with a pre-generated key.  This enables the developer to quickly get up and running to test their solutions.
 
     - **Production**: For production situations, the developer should create a custom HSM library to retrieve the certificate from a hardware backed HSM or a software solution (for more information on this please see [using custom hsm](https://github.com/Azure/azure-iot-sdk-c/blob/main/provisioning_client/devdoc/using_custom_hsm.md))
 
@@ -26,7 +26,7 @@ To use X509 Client authentication, enable `hsm_type_x509` when configuring the S
 
   - One of the benefits of having an HSM is that it can ensure that the private key will never leave the hardware device, but to get this functionality it will require a little more code.
 
-    - For TLS stacks that already have drivers for your HSM (e.g. OpenSSL + the PKCS#11 Engine), you can use a key identifier instead of the actual PEM key similar to the [IoT Hub Device Client](../../iothub_client/devdoc/iothubclient_c_library.md#openssl-engine-examples).
+    - For TLS stacks that already have drivers for your HSM (e.g. OpenSSL + the PKCS#11 Engine), you can use a key identifier instead of the in-memory PEM key, similar to the [IoT Hub Device Client](../../iothub_client/devdoc/iothubclient_c_library.md#openssl-engine-examples).
     
     - For TLS stacks that require custom code to access HSMs:
       - You will need to write a custom HSM module to be able to extract the certificate and return the alias private key to the SDK (more on this in a moment) see the [custom hsm sample](https://github.com/Azure/azure-iot-sdk-c/blob/main/provisioning_client/samples/custom_hsm_example/custom_hsm_example.c) in the SDK.
