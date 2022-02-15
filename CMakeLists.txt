@@ -67,7 +67,7 @@ option(build_service_client "controls whether the iothub_service_client is built
 option(build_provisioning_service_client "controls whether the provisioning_service_client is built or not" ON)
 # HSM Type
 option(hsm_type_x509 "x509 type of hsm used with the Provisioning client" OFF)
-option(hsm_type_riot "DICE/RIoT x509 type of hsm used with the Provisioning client", OFF)
+option(hsm_type_riot "DICE/RIoT x509 type of hsm used with the Provisioning client" OFF)
 option(hsm_type_sastoken "tpm type of hsm used with the Provisioning client" OFF)
 option(hsm_type_symm_key "Symmetric key type of hsm used with the Provisioning client" OFF)
 option(hsm_type_custom "hsm type of custom used with the Provisioning client" OFF)
