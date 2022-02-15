@@ -79,7 +79,7 @@ int hsm_client_x509_set_key(HSM_CLIENT_HANDLE handle, const char* key)
         }
         else if (mallocAndStrcpy_s(&x509_client->x509key, key) != 0)
         {
-            LogError("Failed allocating key key");
+            LogError("Failed allocating cert key");
             result = MU_FAILURE;
         }
         else
@@ -95,7 +95,7 @@ char* hsm_client_x509_get_certificate(HSM_CLIENT_HANDLE handle)
     char* result;
     if (handle == NULL)
     {
-        LogError("Invalid handle value specified.");
+        LogError("Invalid client handle value specified.");
         result = NULL;
     }
     else
@@ -126,7 +126,7 @@ char* hsm_client_x509_get_key(HSM_CLIENT_HANDLE handle)
     char* result;
     if (handle == NULL)
     {
-        LogError("Invalid handle value specified.");
+        LogError("Invalid client handle value specified.");
         result = NULL;
     }
     else
@@ -143,7 +143,7 @@ char* hsm_client_x509_get_key(HSM_CLIENT_HANDLE handle)
             // Create a copy. Lifetime is managed by the DPS or Hub clients.
             if (mallocAndStrcpy_s(&result, x509_client->x509key) != 0)
             {
-                LogError("Failure allocating x509key.");
+                LogError("Failure allocating x509 key.");
                 result = NULL;
             }
         }

@@ -271,12 +271,12 @@ jobs:
   - script: sudo rm -rf $(Agent.BuildDirectory)/*
     displayName: 'Cleanup'
     condition: always()
-- job: ubuntu2004-riot
+- job: ubuntu-riot
   variables:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-2004"
   pool:
     name: 'sdk-c--ubuntu-18'
-  displayName: 'Ubuntu 20.04 RIOT/DICE'
+  displayName: 'Ubuntu RIOT/DICE'
   steps:
   - script: |
       sudo -E ./jenkins/ubuntu_c_riot.sh

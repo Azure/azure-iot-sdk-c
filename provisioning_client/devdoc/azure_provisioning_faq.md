@@ -14,7 +14,7 @@ To use X509 Client authentication, enable `hsm_type_x509` when configuring the S
 
   - This question depends on the situation:
 
-    - **Development**: The SDK ships with a way to either specify a PEM certificate and key, or to use a development DICE HSM implementation that generates a test x509 certificate with a pre-generated key.  This enables the developer to quickly get up and running to test their solutions.
+    - **Development**: The SDK ships with a way to either specify a PEM certificate and key, or to use a development DICE HSM implementation that generates a test x509 certificate with a pre-generated key. This enables the developer to quickly get up and running to test their solutions.
 
     - **Production**: For production situations, the developer should create a custom HSM library to retrieve the certificate from a hardware backed HSM or a software solution (for more information on this please see [using custom hsm](https://github.com/Azure/azure-iot-sdk-c/blob/main/provisioning_client/devdoc/using_custom_hsm.md))
 
@@ -33,9 +33,9 @@ To use X509 Client authentication, enable `hsm_type_x509` when configuring the S
 
       - You will need to have a TLS engine that can communicate with the target hardware that is connected to the device.  You can review your hardware device documentation for information on obtaining a hardware TLS engine.
 
-      - You will also need to create a custom azure iot tlsio library to communicate with the hardware TLS engine.  You can use the [tlsio_template](https://github.com/Azure/azure-c-shared-utility/blob/master/adapters/tlsio_template.c) to get started or you can look at an already complete tlsio such as [tlsio_openssl](https://github.com/Azure/azure-c-shared-utility/blob/master/adapters/tlsio_openssl.c)
+      - You will also need to create a custom Azure IoT tlsio library to communicate with the hardware TLS engine. You can use the [tlsio_template](https://github.com/Azure/azure-c-shared-utility/blob/master/adapters/tlsio_template.c) to get started, or you can look at an already complete tlsio such as [tlsio_openssl](https://github.com/Azure/azure-c-shared-utility/blob/master/adapters/tlsio_openssl.c)
 
-    - __More on Alias Private Keys__ The DICE custom HSM uses the concept of **Alias Private Keys** to deal with keeping the private keys information in the hardware.  The developer can pass a token that can be interpreted by the hardware stack and the SDK will simply pass the token down to the custom tlsio interface without inspecting the value of the token.  This way the actual keys never leave the hardware.
+    - __More on Alias Private Keys__ The DICE custom HSM uses the concept of **Alias Private Keys** to deal with keeping the private keys information in the hardware. The developer can pass a token that can be interpreted by the hardware stack and the SDK will simply pass the token down to the custom tlsio interface without inspecting the value of the token. This way the actual keys never leave the hardware.
 
 ## Symmetric Key Provisioning
 

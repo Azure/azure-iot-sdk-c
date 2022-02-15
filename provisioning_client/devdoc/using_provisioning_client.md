@@ -48,7 +48,7 @@ For x509, the Provisioning Device Client allows either in-memory keys or Hardwar
 
 ### DICE Simulator
 
-For x509, the Provisioning Device Client enables a DICE hardware simulator that emulators the DICE hardware operations.
+For x509, the Provisioning Device Client enables a DICE hardware simulator that emulates the DICE hardware operations.
 For more information about DICE/RIoT please see the paper [Device Identity with DICE and RIoT: Keys and Certificates
 ](https://www.microsoft.com/en-us/research/publication/device-identity-dice-riot-keys-certificates/).
 

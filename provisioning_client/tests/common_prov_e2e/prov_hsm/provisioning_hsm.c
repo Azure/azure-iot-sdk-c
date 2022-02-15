@@ -364,7 +364,7 @@ char* iothub_x509_hsm_get_alias_key(HSM_CLIENT_HANDLE handle)
         const char* key = x509_info_get_key(hsm_impl->x509_info);
         if (key == NULL)
         {
-            LogError("Failed retrieving certificate");
+            LogError("Failed retrieving certificate key");
             result = NULL;
         }
         else
@@ -393,7 +393,7 @@ char* iothub_hsm_get_common_name(HSM_CLIENT_HANDLE handle)
         const char* cn = x509_info_get_cn(hsm_impl->x509_info);
         if (cn == NULL)
         {
-            LogError("Failed retrieving certificate");
+            LogError("Failed retrieving certificate CN");
             result = NULL;
         }
         else
