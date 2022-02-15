@@ -27,6 +27,7 @@ const int FIVE_DAYS = (60 * 60 * 24) * 5;
 const int YEAR_2020 = 1577865600;
 static const char SAS_DEVICE_PREFIX_FMT[] = "csdk_e2eDevice_sas_j_please_delete_";
 static const char X509_DEVICE_PREFIX_FMT[] = "csdk_e2eDevice_x509_j_please_delete_";
+static const char HSM_DEVICE_PREFIX_FMT[] = "hsm-dev-";
 
 typedef struct ENUM_CONTEXT_TAG {
     IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle;
@@ -38,7 +39,8 @@ void deviceItemEnum(const void* item, const void* action_context, bool* continue
     const ENUM_CONTEXT* context = (const ENUM_CONTEXT*) action_context;
     const IOTHUB_MODULE* device = (const IOTHUB_MODULE*) item;
     if (strncmp(device->deviceId, SAS_DEVICE_PREFIX_FMT, sizeof(SAS_DEVICE_PREFIX_FMT) - 1) == 0 || 
-        strncmp(device->deviceId, X509_DEVICE_PREFIX_FMT, sizeof(X509_DEVICE_PREFIX_FMT) - 1) == 0)
+        strncmp(device->deviceId, X509_DEVICE_PREFIX_FMT, sizeof(X509_DEVICE_PREFIX_FMT) - 1) == 0 ||
+        strncmp(device->deviceId, HSM_DEVICE_PREFIX_FMT, sizeof(HSM_DEVICE_PREFIX_FMT) - 1) == 0)
     {
         char* twin = IoTHubDeviceTwin_GetTwin(context->deviceTwinHandle, device->deviceId);
         if (twin)
