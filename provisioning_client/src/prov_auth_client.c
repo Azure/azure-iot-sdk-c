@@ -647,6 +647,8 @@ int prov_auth_set_certificate(PROV_AUTH_HANDLE handle, const char* cert)
 #ifdef HSM_TYPE_X509
     return hsm_client_x509_set_certificate(handle->hsm_client_handle, cert);
 #else
+    (void)handle;
+    (void)cert;
     LogError("Invalid HSM type for operation");
     return MU_FAILURE;
 #endif
@@ -657,6 +659,8 @@ int prov_auth_set_key(PROV_AUTH_HANDLE handle, const char* key)
 #ifdef HSM_TYPE_X509
     return hsm_client_x509_set_key(handle->hsm_client_handle, key);
 #else
+    (void)handle;
+    (void)key;
     LogError("Invalid HSM type for operation");
     return MU_FAILURE;
 #endif
