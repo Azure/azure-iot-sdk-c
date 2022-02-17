@@ -54,4 +54,4 @@ Your callback should in general limit itself to quick, CPU bound operations.
 
 When processing a callback, your application code must not destroy the underlying handle (via `IoTHubDeviceClient_LL_Destroy`, e.g.).  If your application is using the \_LL\_ layer, it must also not invoke `IoTHubDeviceClient_LL_DoWork` or `IoTHubModuleClient_LL_DoWork`.
 
-Your code can invoke other IoT Hub SDK calls.  A common pattern for instance is that while processing a callback for an updated device twin properties for the application to invoke `IoTHubDeviceClient_LL_SendReportedState`.  This is allowed.
+Your code can invoke other IoT Hub SDK calls.  A common pattern for instance is that while processing a callback for an updated device twin properties for the application to invoke `IoTHubDeviceClient_LL_SendReportedState`.
