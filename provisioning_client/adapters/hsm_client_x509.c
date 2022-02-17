@@ -13,8 +13,8 @@
 
 typedef struct HSM_CLIENT_X509_INFO_TAG
 {
-    char* x509certificate;
-    char* x509key;
+    const char* x509certificate;
+    const char* x509key;
 } HSM_CLIENT_X509_INFO;
 
 static HSM_CLIENT_X509_INFO hsm_singleton;
@@ -48,7 +48,7 @@ int hsm_client_x509_set_certificate(HSM_CLIENT_HANDLE handle, const char* certif
             LogError("Certificate has been previously set and cannot be changed");
             result = MU_FAILURE;
         }
-        else if (mallocAndStrcpy_s(&x509_client->x509certificate, certificate) != 0)
+        else if (mallocAndStrcpy_s((char **)&(x509_client->x509certificate), certificate) != 0)
         {
             LogError("Failed allocating certificate key");
             result = MU_FAILURE;
@@ -77,7 +77,7 @@ int hsm_client_x509_set_key(HSM_CLIENT_HANDLE handle, const char* key)
             LogError("Certificate key has been previously set and cannot be changed");
             result = MU_FAILURE;
         }
-        else if (mallocAndStrcpy_s(&x509_client->x509key, key) != 0)
+        else if (mallocAndStrcpy_s((char **)&x509_client->x509key, key) != 0)
         {
             LogError("Failed allocating cert key");
             result = MU_FAILURE;
@@ -184,13 +184,13 @@ void hsm_client_x509_deinit(void)
 {
     if (hsm_singleton.x509certificate != NULL)
     {
-        free(hsm_singleton.x509certificate);
+        free((char*)hsm_singleton.x509certificate);
         hsm_singleton.x509certificate = NULL;
     }   
 
     if (hsm_singleton.x509key != NULL)
     {
-        free(hsm_singleton.x509key);
+        free((char*)hsm_singleton.x509key);
         hsm_singleton.x509key = NULL;
     }
 }
