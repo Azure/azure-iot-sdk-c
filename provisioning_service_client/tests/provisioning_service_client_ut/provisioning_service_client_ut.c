@@ -3662,7 +3662,7 @@ TEST_FUNCTION(prov_sc_query_individual_enrollment_success_paging_given_token_w_t
     queryResponse_free(query_resp);
 }
 
-/*---Note that this failure test covers all failures from other cases by virtue of making all possible calls---/*
+/*---Note that this failure test covers all failures from other cases by virtue of making all possible calls---*/
 TEST_FUNCTION(prov_sc_query_individual_enrollment_success_paging_given_token_w_token_return_ERROR)
 {
     //arrange
