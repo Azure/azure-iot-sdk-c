@@ -112,6 +112,8 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     *           blocking call.
     *
     * @param    iotHubClientHandle    The handle created by a call to the create function.
+    *
+    * @warning  Do not call this function from inside any application callbacks from this SDK, e.g. your IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK handler.
     */
      MOCKABLE_FUNCTION(, void, IoTHubDeviceClient_LL_Destroy, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle);
 
@@ -248,6 +250,8 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     *           All IoTHubClient interactions (in regards to network traffic
     *           and/or user level callbacks) are the effect of calling this
     *           function and they take place synchronously inside _DoWork.
+    *
+    * @warning  Do not call this function from inside any application callbacks from this SDK, e.g. your IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK handler.
     */
      MOCKABLE_FUNCTION(, void, IoTHubDeviceClient_LL_DoWork, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle);
 

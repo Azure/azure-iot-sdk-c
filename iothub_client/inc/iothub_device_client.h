@@ -106,6 +106,8 @@ extern "C"
     *           blocking call.
     *
     * @param    iotHubClientHandle    The handle created by a call to the create function.
+    *
+    * @warning  Do not call this function from inside any application callbacks from this SDK, e.g. your IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK handler.
     */
     MOCKABLE_FUNCTION(, void, IoTHubDeviceClient_Destroy, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle);
 

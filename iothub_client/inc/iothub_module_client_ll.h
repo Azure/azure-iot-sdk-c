@@ -80,6 +80,8 @@ extern "C"
     *             blocking call.
     *
     * @param    iotHubModuleClientHandle    The handle created by a call to the create function.
+    *
+    * @warning  Do not call this function from inside any application callbacks from this SDK, e.g. your IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK handler.
     */
      MOCKABLE_FUNCTION(, void, IoTHubModuleClient_LL_Destroy, IOTHUB_MODULE_CLIENT_LL_HANDLE, iotHubModuleClientHandle);
 
@@ -208,6 +210,8 @@ extern "C"
     *            All IoTHubModuleClient interactions (in regards to network traffic
     *            and/or user level callbacks) are the effect of calling this
     *            function and they take place synchronously inside _DoWork.
+    *
+    * @warning  Do not call this function from inside any application callbacks from this SDK, e.g. your IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK handler.
     */
      MOCKABLE_FUNCTION(, void, IoTHubModuleClient_LL_DoWork, IOTHUB_MODULE_CLIENT_LL_HANDLE, iotHubModuleClientHandle);
 

@@ -48,6 +48,8 @@ The IoT Hub SDK uses a single dispatcher thread to handle all callbacks to user 
 
 An application callback that takes a long time to run is problematic.  The SDK will not be able to call other pending callbacks as it is blocked on the long-running one.  If the call back code takes long enough (minutes) there is the risk that the SDK will not be able to fire its periodic network keep-alive and that the entire connection will be dropped.
 
+Your callback should in general limit itself to quick, CPU bound operations.
+
 ## Reentrancy and API calls
 
 When processing a callback, your application code must not destroy the underlying handle (via `IoTHubDeviceClient_LL_Destroy`, e.g.).  If your application is using the \_LL\_ layer, it must also not invoke `IoTHubDeviceClient_LL_DoWork` or `IoTHubModuleClient_LL_DoWork`.
