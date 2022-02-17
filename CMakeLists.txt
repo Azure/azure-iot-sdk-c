@@ -59,17 +59,17 @@ option(use_installed_dependencies "set use_installed_dependencies to ON to use i
 option(warnings_as_errors  "enable strict compiler warnings-as-errors" ON)
 option(build_as_dynamic "build the IoT SDK libaries as dynamic"  OFF)
 # Turn on/off IoT features
-option(use_prov_client "Enable provisioning client" OFF)
+option(use_prov_client "Enable provisioning client" ON)
 option(use_tpm_simulator "tpm simulator type of hsm used with the provisioning client" OFF)
 option(use_edge_modules "Enable support for running modules against Azure IoT Edge" OFF)
 option(use_custom_heap "use externally defined heap functions instead of the malloc family" OFF)
 option(build_service_client "controls whether the iothub_service_client is built or not" ON)
 option(build_provisioning_service_client "controls whether the provisioning_service_client is built or not" ON)
 # HSM Type
-option(hsm_type_x509 "x509 type of hsm used with the Provisioning client" OFF)
+option(hsm_type_x509 "x509 type of hsm used with the Provisioning client" ON)
 option(hsm_type_riot "DICE/RIoT x509 type of hsm used with the Provisioning client" OFF)
-option(hsm_type_sastoken "tpm type of hsm used with the Provisioning client" OFF)
-option(hsm_type_symm_key "Symmetric key type of hsm used with the Provisioning client" OFF)
+option(hsm_type_sastoken "tpm type of hsm used with the Provisioning client" ON)
+option(hsm_type_symm_key "Symmetric key type of hsm used with the Provisioning client" ON)
 option(hsm_type_custom "hsm type of custom used with the Provisioning client" OFF)
 # Transport
 option(use_amqp "set use_amqp to ON if amqp is to be used, set to OFF to not use amqp" ON)
