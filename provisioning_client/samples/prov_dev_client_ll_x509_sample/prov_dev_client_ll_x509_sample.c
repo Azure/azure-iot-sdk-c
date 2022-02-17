@@ -229,7 +229,7 @@ int main()
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
         // Setting the Trusted Certificate. This is only necessary on systems without
         // built in certificate stores.
-        Prov_Device_LL_SetOption(handle, OPTION_TRUSTED_CERT, certificates);
+        Prov_Device_LL_SetOption(user_ctx.handle, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
         if (Prov_Device_LL_Register_Device(user_ctx.handle, register_device_callback, &user_ctx, registration_status_callback, &user_ctx) != PROV_DEVICE_RESULT_OK)
