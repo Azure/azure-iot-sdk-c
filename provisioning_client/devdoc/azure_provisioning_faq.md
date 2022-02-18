@@ -29,7 +29,7 @@ To use X509 Client authentication, enable `hsm_type_x509` when configuring the S
     - For TLS stacks that already have drivers for your HSM (e.g. OpenSSL + the PKCS#11 Engine), you can use a key identifier instead of the in-memory PEM key, similar to the [IoT Hub Device Client](../../iothub_client/devdoc/iothubclient_c_library.md#openssl-engine-examples).
     
     - For TLS stacks that require custom code to access HSMs:
-      - You will need to write a custom HSM module to be able to extract the certificate and return the alias private key to the SDK (more on this in a moment) see the [custom hsm sample](https://github.com/Azure/azure-iot-sdk-c/blob/main/provisioning_client/samples/custom_hsm_example/custom_hsm_example.c) in the SDK.
+      - You will need to write a custom HSM module to be able to extract the certificate and return the alias private key to the SDK (more on this in a moment). See the [custom hsm sample](https://github.com/Azure/azure-iot-sdk-c/blob/main/provisioning_client/samples/custom_hsm_example/custom_hsm_example.c) in the SDK.
 
       - You will need to have a TLS engine that can communicate with the target hardware that is connected to the device.  You can review your hardware device documentation for information on obtaining a hardware TLS engine.
 
