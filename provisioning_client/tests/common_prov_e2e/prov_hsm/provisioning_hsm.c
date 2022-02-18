@@ -300,6 +300,7 @@ int hsm_client_x509_init(void)
 
 void hsm_client_x509_deinit(void)
 {
+    // no-op.
 }
 
 HSM_CLIENT_HANDLE iothub_hsm_x509_create(void)

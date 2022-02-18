@@ -40,25 +40,25 @@ BEGIN_TEST_SUITE(prov_x509_client_e2e)
         prov_dev_security_init(SECURE_DEVICE_TYPE_X509);
 
         g_prov_conn_string = getenv(DPS_CONNECTION_STRING);
-        ASSERT_IS_NOT_NULL(g_prov_conn_string, "DPS_CONNECTION_STRING is NULL");
+        ASSERT_IS_NOT_NULL(g_prov_conn_string, "Environment variable DPS_CONNECTION_STRING is not set or empty.");
 
         g_dps_uri = getenv(DPS_GLOBAL_ENDPOINT);
-        ASSERT_IS_NOT_NULL(g_dps_uri, "DPS_GLOBAL_ENDPOINT is NULL");
+        ASSERT_IS_NOT_NULL(g_dps_uri, "Environment variable DPS_GLOBAL_ENDPOINT is not set or empty.");
 
         g_dps_scope_id = getenv(DPS_ID_SCOPE);
-        ASSERT_IS_NOT_NULL(g_dps_scope_id, "DPS_ID_SCOPE is NULL");
+        ASSERT_IS_NOT_NULL(g_dps_scope_id, "Environment variable DPS_ID_SCOPE is not set or empty.");
 
 #ifdef HSM_TYPE_X509
         char* dps_x509_cert_individual_base64 = getenv(DPS_X509_INDIVIDUAL_CERT_BASE64);
-        ASSERT_IS_NOT_NULL(dps_x509_cert_individual_base64, "DPS_X509_INDIVIDUAL_CERT_BASE64 is NULL");
+        ASSERT_IS_NOT_NULL(dps_x509_cert_individual_base64, "Environment variable DPS_X509_INDIVIDUAL_CERT_BASE64 is not set or empty.");
         g_dps_x509_cert_individual = convert_base64_to_string(dps_x509_cert_individual_base64);
 
         char* dps_x509_key_individual = getenv(DPS_X509_INDIVIDUAL_KEY_BASE64);
-        ASSERT_IS_NOT_NULL(dps_x509_key_individual, "DPS_X509_INDIVIDUAL_KEY_BASE64 is NULL");
+        ASSERT_IS_NOT_NULL(dps_x509_key_individual, "Environment variable DPS_X509_INDIVIDUAL_KEY_BASE64 is not set or empty.");
         g_dps_x509_key_individual = convert_base64_to_string(dps_x509_key_individual);
 
         g_dps_regid_individual = getenv(DPS_X509_INDIVIDUAL_REGISTRATION_ID);
-        ASSERT_IS_NOT_NULL(g_dps_regid_individual, "DPS_X509_INDIVIDUAL_REGISTRATION_ID is NULL");
+        ASSERT_IS_NOT_NULL(g_dps_regid_individual, "Environment variable DPS_X509_INDIVIDUAL_REGISTRATION_ID is not set or empty.");
 #endif
 
         // Register device
