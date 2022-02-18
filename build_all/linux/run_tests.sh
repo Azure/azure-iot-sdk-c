@@ -29,9 +29,9 @@ if [[ "$RUN_VALGRIND" == "run_valgrind" ]] ;
 then
   #use doctored openssl
   export LD_LIBRARY_PATH=/usr/local/ssl/lib
-  ctest -j $TEST_CORES --output-on-failure --schedule-random
+  ctest -T test --no-compress-output -C "Debug" -V -j $TEST_CORES --schedule-random
   export LD_LIBRARY_PATH=
 else
-  ctest -j $TEST_CORES -C "Debug" --output-on-failure --schedule-random
+  ctest -T test --no-compress-output -C "Debug" -V -j $TEST_CORES --schedule-random
 fi
 
