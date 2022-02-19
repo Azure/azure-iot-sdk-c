@@ -61,6 +61,11 @@ BEGIN_TEST_SUITE(prov_x509_client_e2e)
         ASSERT_IS_NOT_NULL(g_dps_regid_individual, "Environment variable DPS_X509_INDIVIDUAL_REGISTRATION_ID is not set or empty.");
 #endif
 
+        // DPS fails when having multiple enrollments at the same time. 
+        // Since we are running these tests on multiple machines with each test taking about 1 second, 
+        // we randomize their start time to avoid collisions.
+        ThreadAPI_Sleep((rand() % 10) * 1000);
+
         // Register device
         create_x509_individual_enrollment_device();
     }
