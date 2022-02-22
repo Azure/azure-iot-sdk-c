@@ -794,6 +794,7 @@ void dt_e2e_send_reported_test_svc_fault_ctrl_kill_Tcp(IOTHUB_CLIENT_TRANSPORT_P
 
     // Send the Event from the device client
     client_send_tcp_kill_via_d2c(device_to_use);
+    free(reported_payload);
 
     // Send a new reported payload. Register callback. Receive reported state message.
     reported_payload = calloc_and_fill_reported_payload(reported_twin_data->string_property,
