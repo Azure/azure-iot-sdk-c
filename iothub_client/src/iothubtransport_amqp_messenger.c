@@ -89,7 +89,7 @@ typedef struct MESSAGE_SEND_CONTEXT_TAG
 
 
 
-static MESSAGE_SEND_CONTEXT* create_message_send_context()
+static MESSAGE_SEND_CONTEXT* create_message_send_context(void)
 {
     MESSAGE_SEND_CONTEXT* result;
 

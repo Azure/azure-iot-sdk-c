@@ -509,7 +509,7 @@ void Thermostat_SendCurrentTemperature(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClie
 //
 // GetConnectionStringFromEnvironment retrieves the connection string based on environment variable
 //
-static bool GetConnectionStringFromEnvironment()
+static bool GetConnectionStringFromEnvironment(void)
 {
     bool result;
 
@@ -533,7 +533,7 @@ static bool GetConnectionStringFromEnvironment()
 // GetDpsFromEnvironment retrieves DPS configuration for a symmetric key based connection
 // from environment variables
 //
-static bool GetDpsFromEnvironment()
+static bool GetDpsFromEnvironment(void)
 {
 #ifndef USE_PROV_MODULE_FULL
     // Explain to user misconfiguration.  The "run_e2e_tests" must be set to OFF because otherwise
@@ -581,7 +581,7 @@ static bool GetDpsFromEnvironment()
 // GetConfigurationFromEnvironment reads how to connect to the IoT Hub (using 
 // either a connection string or a DPS symmetric key) from the environment.
 //
-static bool GetConnectionSettingsFromEnvironment()
+static bool GetConnectionSettingsFromEnvironment(void)
 {
     const char* securityTypeString;
     bool result;
