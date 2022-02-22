@@ -747,7 +747,7 @@ BEGIN_TEST_SUITE(iothub_auth_client_ut)
         iothub_device_auth_destroy(xda_handle);
     }
 
-#ifndef __APPLE__   // TODO: #2235
+#ifndef __APPLE__   // Disabled for Apple builds.
     TEST_FUNCTION(iothub_device_auth_generate_credentials_key_succeed)
     {
         //arrange
