@@ -217,7 +217,6 @@ void test_invoke_device_method(const char* deviceId, const char* moduleId, const
     {
         for (int tryCounter = 0; tryCounter < TEST_METHOD_INVOKE_MAX_RETRIES; tryCounter++)
         {
-            LogInfo("(Try %d) IoTHubDeviceMethod_InvokeModule deviceId='%s', moduleId='%s'", tryCounter + 1, deviceId, moduleId);
             invokeResult = IoTHubDeviceMethod_InvokeModule(
                 serviceClientDeviceMethodHandle, 
                 deviceId,
@@ -250,7 +249,6 @@ void test_invoke_device_method(const char* deviceId, const char* moduleId, const
     {
         for (int tryCounter = 0; tryCounter < TEST_METHOD_INVOKE_MAX_RETRIES; tryCounter++)
         {
-            LogInfo("(Try %d) IoTHubDeviceMethod_Invoke deviceId='%s'", tryCounter + 1, deviceId);
             invokeResult = IoTHubDeviceMethod_Invoke(
                 serviceClientDeviceMethodHandle, 
                 deviceId,
