@@ -34,9 +34,9 @@ BEGIN_TEST_SUITE(iothubclient_amqp_mod_e2e)
     // Using C2D with modules is not supported.
 
 #ifndef __APPLE__
-    TEST_FUNCTION(IoTHub_AMQP_Module_SendEvent_e2e_x509)
+    TEST_FUNCTION(IoTHub_AMQP_Module_SendEvent_e2e_x509Client)
     {
-        e2e_send_event_test_x509(AMQP_Protocol);
+        e2e_send_event_test_x509Client(AMQP_Protocol);
     }
 #endif
 
@@ -55,9 +55,9 @@ BEGIN_TEST_SUITE(iothubclient_amqp_mod_e2e)
     // Using C2D with modules is not supported.
 
 #ifndef __APPLE__
-    TEST_FUNCTION(IoTHub_AMQP_WS_Module_SendEvent_e2e_x509)
+    TEST_FUNCTION(IoTHub_AMQP_WS_Module_SendEvent_e2e_x509Client)
     {
-        e2e_send_event_test_x509(AMQP_Protocol_over_WebSocketsTls);
+        e2e_send_event_test_x509Client(AMQP_Protocol_over_WebSocketsTls);
     }
 #endif // __APPLE__
 #endif // USE_WOLFSSL

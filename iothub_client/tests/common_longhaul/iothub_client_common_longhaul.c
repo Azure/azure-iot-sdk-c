@@ -22,7 +22,7 @@
 #include "internal/iothubtransport_amqp_messenger.h"
 #include "iothubtest.h"
 #include "parson.h"
-
+static STATIC_VAR_UNUSED const char* const OPTION_TRUSTED_CERT = "TrustedCerts";
 #define MESSAGE_TEST_ID_FIELD          "longhaul-tests"
 #define MESSAGE_ID_FIELD               "message-id"
 #define LONGHAUL_DEVICE_METHOD_NAME    "longhaulDeviceMethod"

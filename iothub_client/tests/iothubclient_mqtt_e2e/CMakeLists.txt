@@ -2,19 +2,27 @@
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 cmake_minimum_required (VERSION 3.5)
+set(set_trusted_cert_in_samples ON CACHE  BOOL "" FORCE )
 
 if(NOT (${use_amqp} AND ${use_mqtt}))
    message(FATAL_ERROR "iothubclient_mqtt_e2e being generated without AMQP and MQTT support")
 endif()
 
 compileAsC99()
+
+#Conditionally use the SDK trusted certs in the samples
+if(${set_trusted_cert_in_samples})
+    add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
+	include_directories(${PROJECT_SOURCE_DIR}/certs)
+	set(samples_cert_file ${PROJECT_SOURCE_DIR}/certs/certs.c)
+endif()
+
 set(theseTestsName iothubclient_mqtt_e2e)
 
 set(${theseTestsName}_test_files
     ${theseTestsName}.c
     ../common_e2e/iothubclient_common_e2e.c
 )
-
 
 set(${theseTestsName}_c_files
     ../../../certs/certs.c
@@ -34,6 +42,10 @@ build_c_test_artifacts(${theseTestsName} ON "tests/E2ETests" VALGRIND_SUPPRESSIO
 if(${use_sample_trusted_cert})
     add_definitions(-DSET_TRUSTED_CERT_IN_SAMPLES)
     include_directories(../../../certs)
+endif()
+
+if(${use_openssl})
+    add_definitions(-DUSE_OPENSSL)
 endif()
 
 if(WIN32)

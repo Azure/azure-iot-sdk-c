@@ -39,9 +39,11 @@ extern void e2e_init(TEST_PROTOCOL_TYPE protocol_type, bool testing_modules);
 extern void e2e_deinit(void);
 
 extern void e2e_send_event_test_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
-extern void e2e_send_event_test_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
+extern void e2e_send_event_test_x509Client(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 extern void e2e_recv_message_test_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
-extern void e2e_recv_message_test_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
+extern void e2e_recv_message_test_x509Client(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
+extern void e2e_recv_message_test_x509Client(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
+extern void e2e_recv_message_test_eccHub(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 
 extern void e2e_d2c_svc_fault_ctrl_kill_TCP_connection(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 extern void e2e_d2c_svc_fault_ctrl_kill_TCP_connection_with_transport_status_check(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);

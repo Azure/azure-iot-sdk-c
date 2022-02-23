@@ -34,9 +34,9 @@ TEST_FUNCTION(IoTHub_MQTT_Module_SendEvent_e2e_sas)
 // Using C2D with modules is not supported.
 
 #ifndef __APPLE__
-TEST_FUNCTION(IoTHub_MQTT_Module_SendEvent_e2e_x509)
+TEST_FUNCTION(IoTHub_MQTT_Module_SendEvent_e2e_x509Client)
 {
-    e2e_send_event_test_x509(MQTT_Protocol);
+    e2e_send_event_test_x509Client(MQTT_Protocol);
 }
 #endif
 
@@ -55,9 +55,9 @@ TEST_FUNCTION(IoTHub_MQTT_WS_Module_SendEvent_e2e_sas)
 // Using C2D with modules is not supported.
 
 #ifndef __APPLE__
-TEST_FUNCTION(IoTHub_MQTT_WS_Module_SendEvent_e2e_x509)
+TEST_FUNCTION(IoTHub_MQTT_WS_Module_SendEvent_e2e_x509Client)
 {
-    e2e_send_event_test_x509(MQTT_WebSocket_Protocol);
+    e2e_send_event_test_x509Client(MQTT_WebSocket_Protocol);
 }
 #endif // __APPLE__
 #endif // USE_WOLFSSL

@@ -84,6 +84,12 @@ static IOTHUB_MODULE_CLIENT_HANDLE iothub_moduleclient_handle = NULL;
 
 #define MAX_SECURITY_DEVICE_WAIT_TIME   30
 
+#define IOTHUB_ROOT_CA_CERT_CIPHER_VALUES         \
+    IOTHUB_ROOT_CA_CERT_CIPHER_X509,              \
+    IOTHUB_ROOT_CA_CERT_CIPHER_ECC                \
+
+MU_DEFINE_ENUM(IOTHUB_ROOT_CA_CERT_CIPHER, IOTHUB_ROOT_CA_CERT_CIPHER_VALUES);
+
 TEST_DEFINE_ENUM_TYPE(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
@@ -564,7 +570,7 @@ static void destroy_on_device_or_module()
     }
 }
 
-static void client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+static void client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ROOT_CA_CERT_CIPHER certCipher)
 {
     ASSERT_IS_NULL(iothub_deviceclient_handle, "iothub_deviceclient_handle is non-NULL on test initialization");
     ASSERT_IS_NULL(iothub_moduleclient_handle, "iothub_moduleclient_handle is non-NULL on test initialization");
@@ -582,7 +588,18 @@ static void client_connect_to_hub(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB
 
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
     setoption_on_device_or_module(OPTION_TRUSTED_CERT, certificates, "Cannot enable trusted cert");
+    LogInfo("SET_TRUSTED_CERT_IN_SAMPLES\n");
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
+
+#ifdef USE_OPENSSL
+    if (certCipher == IOTHUB_ROOT_CA_CERT_CIPHER_ECC)
+    {
+        setoption_on_device_or_module(OPTION_OPENSSL_CIPHER_SUITE, "ECDH+ECDSA+HIGH", "Cannot enable ECC trusted cipher suite");
+        LogInfo("Enable ECC CA Root only\n");
+    }
+#else
+    (void)certCipher;
+#endif // USE_OPENSSL
 
     // Set connection status change callback
     setconnectionstatuscallback_on_device_or_module();
@@ -897,7 +914,7 @@ static void send_event_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIEN
         D2C_MESSAGE_HANDLE d2cMessage;
 
         // Create the IoT Hub Data
-        client_connect_to_hub(deviceToUse, protocol);
+        client_connect_to_hub(deviceToUse, protocol, IOTHUB_ROOT_CA_CERT_CIPHER_X509);
 
         // Send the Event from the client
         d2cMessage = client_create_and_send_d2c(test_message_creation[i]);
@@ -923,7 +940,7 @@ void e2e_send_event_test_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     send_event_test(IoTHubAccount_GetSASDevice(g_iothubAcctInfo), protocol);
 }
 
-void e2e_send_event_test_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+void e2e_send_event_test_x509Client(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     send_event_test(IoTHubAccount_GetX509Device(g_iothubAcctInfo), protocol);
 }
@@ -954,7 +971,7 @@ void e2e_send_security_event_test_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     // Create the IoT Hub Data
     IOTHUB_PROVISIONED_DEVICE* deviceToUse;
     deviceToUse = IoTHubAccount_GetSASDevice(g_iothubAcctInfo);
-    client_connect_to_hub(deviceToUse, protocol);
+    client_connect_to_hub(deviceToUse, protocol, IOTHUB_ROOT_CA_CERT_CIPHER_X509);
 
     EXPECTED_SEND_DATA* send_data = (EXPECTED_SEND_DATA*)client_create_and_send_d2c(TEST_MESSAGE_CREATE_STRING);
     bool dataWasRecv = client_wait_for_d2c_confirmation((D2C_MESSAGE_HANDLE)send_data, IOTHUB_CLIENT_CONFIRMATION_OK);
@@ -1009,7 +1026,7 @@ void e2e_d2c_with_svc_fault_ctrl(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, cons
     clear_connection_status_info_flags();
 
     // Create the IoT Hub Data
-    client_connect_to_hub(deviceToUse, protocol);
+    client_connect_to_hub(deviceToUse, protocol, IOTHUB_ROOT_CA_CERT_CIPHER_X509);
 
     // Send the Event from the client
     LogInfo("Creating and sending message...");
@@ -1072,7 +1089,7 @@ void e2e_d2c_with_svc_fault_ctrl_with_transport_status(IOTHUB_CLIENT_TRANSPORT_P
     clear_connection_status_info_flags();
 
     // Create the IoT Hub Data
-    client_connect_to_hub(deviceToUse, protocol);
+    client_connect_to_hub(deviceToUse, protocol, IOTHUB_ROOT_CA_CERT_CIPHER_X509);
 
     if ((0 == strcmp(faultOperationType, "KillAmqpCBSLinkReq")) || (0 == strcmp(faultOperationType, "KillAmqpCBSLinkResp")))
     {
@@ -1160,7 +1177,7 @@ void e2e_d2c_with_svc_fault_ctrl_error_message_callback(IOTHUB_CLIENT_TRANSPORT_
     clear_connection_status_info_flags();
 
     // Create the IoT Hub Data
-    client_connect_to_hub(deviceToUse, protocol);
+    client_connect_to_hub(deviceToUse, protocol, IOTHUB_ROOT_CA_CERT_CIPHER_X509);
 
     if (setTimeoutOption)
     {
@@ -1299,7 +1316,7 @@ void client_wait_for_c2d_event_arrival(EXPECTED_RECEIVE_DATA* receiveUserContext
 
 }
 
-static void recv_message_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+static void recv_message_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, IOTHUB_ROOT_CA_CERT_CIPHER certCipher)
 {
     // arrange
     IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle;
@@ -1313,7 +1330,7 @@ static void recv_message_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLI
     clear_connection_status_info_flags();
 
     // Create device client
-    client_connect_to_hub(deviceToUse, protocol);
+    client_connect_to_hub(deviceToUse, protocol, certCipher);
 
     // Make sure we have a connection
     ASSERT_IS_TRUE(client_wait_for_connection_restored(), "Connection Callback has not been called");
@@ -1386,12 +1403,17 @@ static void recv_message_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLI
 
 void e2e_recv_message_test_sas(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
-    recv_message_test(IoTHubAccount_GetSASDevice(g_iothubAcctInfo), protocol);
+    recv_message_test(IoTHubAccount_GetSASDevice(g_iothubAcctInfo), protocol, IOTHUB_ROOT_CA_CERT_CIPHER_X509);
 }
 
-void e2e_recv_message_test_x509(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+void e2e_recv_message_test_x509Client(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
-    recv_message_test(IoTHubAccount_GetX509Device(g_iothubAcctInfo), protocol);
+    recv_message_test(IoTHubAccount_GetX509Device(g_iothubAcctInfo), protocol, IOTHUB_ROOT_CA_CERT_CIPHER_X509);
+}
+
+void e2e_recv_message_test_eccHub(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+{
+    recv_message_test(IoTHubAccount_GetSASDevice(g_iothubAcctInfo), protocol, IOTHUB_ROOT_CA_CERT_CIPHER_ECC);
 }
 
 void e2e_c2d_with_svc_fault_ctrl(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char* faultOperationType, const char* faultOperationCloseReason, const char* faultOperationDelayInSecs)
@@ -1410,7 +1432,7 @@ void e2e_c2d_with_svc_fault_ctrl(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, cons
     clear_connection_status_info_flags();
 
     // Create device client
-    client_connect_to_hub(deviceToUse, protocol);
+    client_connect_to_hub(deviceToUse, protocol, IOTHUB_ROOT_CA_CERT_CIPHER_X509);
 
     // Make sure we have a connection
     ASSERT_IS_TRUE(client_wait_for_connection_restored(), "Connection Callback has not been called");
