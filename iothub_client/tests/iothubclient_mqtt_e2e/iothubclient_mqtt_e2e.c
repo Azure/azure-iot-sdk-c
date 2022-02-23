@@ -73,13 +73,13 @@ TEST_FUNCTION(IoTHub_MQTT_RecvMessage_E2ETest_x509Client)
     e2e_recv_message_test_x509Client(MQTT_Protocol);
 }
 
-#ifdef USE_OPENSSL
+#ifdef AZIOT_LINUX
 TEST_FUNCTION(IoTHub_MQTT_RecvMessage_E2ETest_eccHub)
 {
     g_e2e_test_options.set_mac_address = true;
     e2e_recv_message_test_eccHub(MQTT_Protocol);
 }
-#endif //USE_OPENSSL
+#endif //AZIOT_LINUX
 
 #endif  //__APPLE__
 
