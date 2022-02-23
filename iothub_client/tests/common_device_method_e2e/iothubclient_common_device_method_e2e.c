@@ -208,10 +208,10 @@ static int DeviceMethodWithUploadCallback(const char* method_name, const unsigne
 
 void test_invoke_device_method(const char* deviceId, const char* moduleId, const char *payload)
 {
-    int responseStatus;
-    unsigned char* responsePayload;
-    size_t responsePayloadSize;
-    IOTHUB_DEVICE_METHOD_RESULT invokeResult;
+    int responseStatus = METHOD_RESPONSE_ERROR;
+    unsigned char* responsePayload = NULL;
+    size_t responsePayloadSize = 0;
+    IOTHUB_DEVICE_METHOD_RESULT invokeResult = IOTHUB_DEVICE_METHOD_ERROR;
 
     if (moduleId != NULL)
     {
