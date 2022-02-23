@@ -243,7 +243,7 @@ TEST_FUNCTION(prov_dev_security_get_type_tpm_succees)
 }
 #endif
 
-#if defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
+#if defined(HSM_TYPE_X509) || defined(HSM_TYPE_RIOT) || defined(HSM_AUTH_TYPE_CUSTOM)
 TEST_FUNCTION(prov_dev_security_init_x509_success)
 {
     //arrange

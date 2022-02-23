@@ -12,7 +12,7 @@ function(add_tool_directory whatIsBuilding)
 endfunction()
 
 if (NOT ${hsm_type_custom} AND NOT ${run_e2e_tests})
-	if (${hsm_type_x509})
+	if (${hsm_type_riot})
 		add_tool_directory(dice_device_enrollment)
 	endif()
 	if (${hsm_type_sastoken})

@@ -14,12 +14,15 @@ curl --version
 
 # Set the default cores
 CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
-cmake . -Bcmake -Duse_openssl:BOOL=ON -Drun_e2e_tests:BOOL=ON -Drun_e2e_openssl_engine_tests:BOOL=ON -Drun_valgrind:BOOL=ON
+cmake . -Bcmake -Duse_openssl:BOOL=ON -Dhsm_type_x509:BOOL=ON -Duse_prov_client:BOOL=ON -Drun_e2e_tests:BOOL=ON -Drun_e2e_openssl_engine_tests:BOOL=ON -Drun_valgrind:BOOL=ON
 cd cmake
 
 make --jobs=$CORES
 
 # Configure OpenSSL with PKCS#11 Engine and SoftHSM
+
+## IoT Hub Tests:
+
 # 1. Create new test token.
 #softhsm2-util --delete-token --token test-token > /dev/null
 softhsm2-util --init-token --slot 0 --label test-token --pin 1234 --so-pin 4321
@@ -31,3 +34,16 @@ softhsm2-util --pin 1234 --import ./test-key.p8 --token test-token --id b000 --l
 rm test-key.pem
 # 4. (Test) List keys associated with slot (should see the private key listed)
 pkcs11-tool --module /usr/lib/softhsm/libsofthsm2.so -l -p 1234 --token test-token --list-objects
+
+
+## Provisioning Tests:
+
+# 2. Convert key from PKCS#1 to PKCS#8
+echo $IOT_DPS_INDIVIDUAL_X509_KEY | base64 --decode > test-key.pem
+openssl pkcs8 -topk8 -inform PEM -outform PEM -nocrypt -in test-key.pem -out test-key.p8
+# 3. Import private key into the token.
+softhsm2-util --pin 1234 --import ./test-key.p8 --token test-token --id d000 --label dps-privkey
+rm test-key.pem
+# 4. (Test) List keys associated with slot (should see the private key listed)
+pkcs11-tool --module /usr/lib/softhsm/libsofthsm2.so -l -p 1234 --token test-token --list-objects
+

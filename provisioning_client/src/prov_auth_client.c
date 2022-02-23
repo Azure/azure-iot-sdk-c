@@ -19,6 +19,14 @@
 
 #include "azure_prov_client/prov_security_factory.h"
 
+#ifdef HSM_TYPE_X509
+#include "hsm_client_x509.h"
+#endif
+
+#ifdef HSM_TYPE_RIOT
+#include "hsm_client_riot.h"
+#endif
+
 typedef struct PROV_AUTH_INFO_TAG
 {
     HSM_CLIENT_HANDLE hsm_client_handle;
@@ -246,7 +254,7 @@ PROV_AUTH_HANDLE prov_auth_create(void)
             }
         }
 #endif
-#if defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
+#if defined(HSM_TYPE_X509) || defined(HSM_TYPE_RIOT) || defined(HSM_AUTH_TYPE_CUSTOM)
         if (sec_type == SECURE_DEVICE_TYPE_X509)
         {
             result->sec_type = PROV_AUTH_TYPE_X509;
@@ -632,4 +640,28 @@ char* prov_auth_get_alias_key(PROV_AUTH_HANDLE handle)
         result = handle->hsm_client_get_alias_key(handle->hsm_client_handle);
     }
     return result;
+}
+
+int prov_auth_set_certificate(PROV_AUTH_HANDLE handle, const char* cert)
+{
+#ifdef HSM_TYPE_X509
+    return hsm_client_x509_set_certificate(handle->hsm_client_handle, cert);
+#else
+    (void)handle;
+    (void)cert;
+    LogError("Invalid HSM type for operation");
+    return MU_FAILURE;
+#endif
+}
+
+int prov_auth_set_key(PROV_AUTH_HANDLE handle, const char* key)
+{
+#ifdef HSM_TYPE_X509
+    return hsm_client_x509_set_key(handle->hsm_client_handle, key);
+#else
+    (void)handle;
+    (void)key;
+    LogError("Invalid HSM type for operation");
+    return MU_FAILURE;
+#endif
 }

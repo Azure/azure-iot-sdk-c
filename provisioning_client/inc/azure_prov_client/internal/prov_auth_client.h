@@ -52,6 +52,8 @@ MOCKABLE_FUNCTION(, char*, prov_auth_construct_sas_token, PROV_AUTH_HANDLE, hand
 MOCKABLE_FUNCTION(, char*, prov_auth_get_certificate, PROV_AUTH_HANDLE, handle);
 MOCKABLE_FUNCTION(, char*, prov_auth_get_alias_key, PROV_AUTH_HANDLE, handle);
 
+MOCKABLE_FUNCTION(, int, prov_auth_set_certificate, PROV_AUTH_HANDLE, handle, const char*, cert);
+MOCKABLE_FUNCTION(, int, prov_auth_set_key, PROV_AUTH_HANDLE, handle, const char*, key);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
