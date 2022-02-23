@@ -211,17 +211,65 @@ void test_invoke_device_method(const char* deviceId, const char* moduleId, const
     int responseStatus;
     unsigned char* responsePayload;
     size_t responsePayloadSize;
+    IOTHUB_DEVICE_METHOD_RESULT invokeResult;
 
     if (moduleId != NULL)
     {
-        LogInfo("IoTHubDeviceMethod_InvokeModule deviceId='%s', moduleId='%s'", deviceId, moduleId);
-        IOTHUB_DEVICE_METHOD_RESULT invokeResult = IoTHubDeviceMethod_InvokeModule(serviceClientDeviceMethodHandle, deviceId, moduleId, METHOD_NAME, payload, TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
+        for (int tryCounter = 0; tryCounter < TEST_METHOD_INVOKE_MAX_RETRIES; tryCounter++)
+        {
+            LogInfo("(Try %d) IoTHubDeviceMethod_InvokeModule deviceId='%s', moduleId='%s'", tryCounter + 1, deviceId, moduleId);
+            invokeResult = IoTHubDeviceMethod_InvokeModule(
+                serviceClientDeviceMethodHandle, 
+                deviceId,
+                moduleId,
+                METHOD_NAME,
+                payload,
+                TIMEOUT,
+                &responseStatus,
+                &responsePayload,
+                &responsePayloadSize);
+
+            if (invokeResult == IOTHUB_DEVICE_METHOD_OK)
+            {
+                break;
+            }
+
+            LogError(
+                "(Try %d) IoTHubDeviceMethod_InvokeModule deviceId='%s', moduleId='%s' error=%d", 
+                tryCounter + 1,
+                deviceId,
+                moduleId,
+                invokeResult);
+
+            ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_METHOD_INVOKE_FAILURES_MSEC);
+        }
+
         ASSERT_ARE_EQUAL(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_OK, invokeResult, "Service Client IoTHubDeviceMethod_InvokeModule failed");
     }
     else
     {
-        LogInfo("IoTHubDeviceMethod_Invoke deviceId='%s'", deviceId);
-        IOTHUB_DEVICE_METHOD_RESULT invokeResult = IoTHubDeviceMethod_Invoke(serviceClientDeviceMethodHandle, deviceId, METHOD_NAME, payload, TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
+        for (int tryCounter = 0; tryCounter < TEST_METHOD_INVOKE_MAX_RETRIES; tryCounter++)
+        {
+            LogInfo("(Try %d) IoTHubDeviceMethod_Invoke deviceId='%s'", tryCounter + 1, deviceId);
+            invokeResult = IoTHubDeviceMethod_Invoke(
+                serviceClientDeviceMethodHandle, 
+                deviceId,
+                METHOD_NAME,
+                payload,
+                TIMEOUT,
+                &responseStatus,
+                &responsePayload,
+                &responsePayloadSize);
+
+            if (invokeResult == IOTHUB_DEVICE_METHOD_OK)
+            {
+                break;
+            }
+
+            LogError("(Try %d) IoTHubDeviceMethod_Invoke deviceId='%s' error=%d", tryCounter + 1, deviceId, invokeResult);
+            ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_METHOD_INVOKE_FAILURES_MSEC);
+        }
+
         ASSERT_ARE_EQUAL(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_OK, invokeResult, "Service Client IoTHubDeviceMethod_Invoke failed");
     }
 
