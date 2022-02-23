@@ -1620,7 +1620,7 @@ TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_FAIL_ALL_HTTP_OPTIO
     umock_c_negative_tests_deinit();
 }
 
-#ifndef __APPLE__   // TODO: #2235
+#ifndef __APPLE__   // Disabled for Apple builds.
 TEST_FUNCTION(prov_sc_delete_individual_enrollment_ERROR_INPUT_NULL_PROV_SC)
 {
     //arrange
@@ -2304,7 +2304,7 @@ TEST_FUNCTION(prov_sc_create_or_update_enrollment_group_FAIL_w_etag)
     umock_c_negative_tests_deinit();
 }
 
-#ifndef __APPLE__   // TODO: #2235
+#ifndef __APPLE__   // Disabled for Apple builds.
 TEST_FUNCTION(prov_sc_delete_enrollment_group_ERROR_INPUT_NULL_PROV_SC)
 {
     //arrange
@@ -2819,7 +2819,7 @@ TEST_FUNCTION(prov_sc_get_device_registration_state_GOLDEN)
     deviceRegistrationState_destroy(drs);
 }
 
-#ifndef __APPLE__   // TODO: #2235
+#ifndef __APPLE__   // Disabled for Apple builds.
 TEST_FUNCTION(prov_sc_get_device_registration_state_FAIL)
 {
     //arrange
