@@ -66,6 +66,12 @@ This document describes how to run the end to end tests.
 
         Note: IOTHUB_E2E_X509_THUMBPRINT takes a string with HEX characters only; make sure all colons or spaces are removed from the thumbprint. 
 
+    - Set the x509 certificate information for DPS:
+        - IOT_DPS_INDIVIDUAL_X509_CERTIFICATE
+        - IOT_DPS_INDIVIDUAL_X509_KEY
+        - IOT_DPS_INDIVIDUAL_REGISTRATION_ID
+
+        The certificate must have CN = <registration_id> and EKU set to the Client Authentication OID.
 
 <a name="windows_client"></a>
 ## Run end to end tests on a Windows development environment

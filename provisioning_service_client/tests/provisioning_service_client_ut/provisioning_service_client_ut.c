@@ -1620,6 +1620,7 @@ TEST_FUNCTION(prov_sc_create_or_update_individual_enrollment_FAIL_ALL_HTTP_OPTIO
     umock_c_negative_tests_deinit();
 }
 
+#ifndef __APPLE__   // Disabled for Apple builds.
 TEST_FUNCTION(prov_sc_delete_individual_enrollment_ERROR_INPUT_NULL_PROV_SC)
 {
     //arrange
@@ -1776,6 +1777,7 @@ TEST_FUNCTION(prov_sc_delete_individual_enrollment_FAIL)
     individualEnrollment_destroy(ie);
     umock_c_negative_tests_deinit();
 }
+#endif // __APPLE__
 
 TEST_FUNCTION(prov_sc_delete_individual_enrollment_by_param_NULL_PROV_SC)
 {
@@ -2302,6 +2304,7 @@ TEST_FUNCTION(prov_sc_create_or_update_enrollment_group_FAIL_w_etag)
     umock_c_negative_tests_deinit();
 }
 
+#ifndef __APPLE__   // Disabled for Apple builds.
 TEST_FUNCTION(prov_sc_delete_enrollment_group_ERROR_INPUT_NULL_PROV_SC)
 {
     //arrange
@@ -2458,6 +2461,7 @@ TEST_FUNCTION(prov_sc_delete_enrollment_group_FAIL)
     enrollmentGroup_destroy(eg);
     umock_c_negative_tests_deinit();
 }
+#endif // __APPLE__
 
 TEST_FUNCTION(prov_sc_delete_enrollment_group_by_param_NULL_PROV_SC)
 {
@@ -2815,6 +2819,7 @@ TEST_FUNCTION(prov_sc_get_device_registration_state_GOLDEN)
     deviceRegistrationState_destroy(drs);
 }
 
+#ifndef __APPLE__   // Disabled for Apple builds.
 TEST_FUNCTION(prov_sc_get_device_registration_state_FAIL)
 {
     //arrange
@@ -3021,6 +3026,7 @@ TEST_FUNCTION(prov_sc_delete_device_registration_state_FAIL)
     prov_sc_destroy(sc);
     umock_c_negative_tests_deinit();
 }
+#endif // __APPLE__
 
 TEST_FUNCTION(prov_sc_delete_device_registration_state_by_param_NULL_PROV_SC)
 {
@@ -3662,7 +3668,7 @@ TEST_FUNCTION(prov_sc_query_individual_enrollment_success_paging_given_token_w_t
     queryResponse_free(query_resp);
 }
 
-/*---Note that this failure test covers all failures from other cases by virtue of making all possible calls---/*
+/*---Note that this failure test covers all failures from other cases by virtue of making all possible calls---*/
 TEST_FUNCTION(prov_sc_query_individual_enrollment_success_paging_given_token_w_token_return_ERROR)
 {
     //arrange
