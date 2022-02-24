@@ -74,8 +74,6 @@ TEST_FUNCTION(IoTHub_MQTT_RecvMessage_E2ETest_x509Client)
 }
 
 #ifdef AZIOT_LINUX
-
-xxxxxx
 TEST_FUNCTION(IoTHub_MQTT_RecvMessage_E2ETest_eccHub)
 {
     g_e2e_test_options.set_mac_address = true;
