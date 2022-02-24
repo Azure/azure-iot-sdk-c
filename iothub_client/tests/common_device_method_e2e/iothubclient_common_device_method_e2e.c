@@ -93,7 +93,7 @@ static const char *METHOD_NAME = "MethodName";
 static const int METHOD_RESPONSE_SUCCESS = 200;
 static const int METHOD_RESPONSE_ERROR = 401;
 static const unsigned int TIMEOUT = 60;
-static const unsigned int IOTHUB_CONNECT_TIMEOUT_SEC = 30;
+static const unsigned int IOTHUB_CONNECT_TIMEOUT_SEC = 120;
 
 static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS result, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void* userContextCallback)
 {
