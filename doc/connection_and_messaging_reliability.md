@@ -12,7 +12,7 @@ In this document you will find information about the reliability aspects of the 
 
 - The reconnection logic;
 
-- Available options for fine-tunning reconnection (retry policies, timeouts);
+- Available options for fine-tuning reconnection (retry policies, timeouts);
 
 - Notifications of IoT Hub connection status (status callbacks);
 
@@ -26,19 +26,19 @@ This is a brief note to clarify how authentication is done in the IoTHub Device/
 
 Authentication of a client in the SDK can be done using either
 
-- [SAS tokens](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security#security-tokens), or 
+- [SAS tokens](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-security#security-tokens), or 
 
-- [x509 certificates](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security#supported-x509-certificates), or
+- [x509 certificates](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-security#supported-x509-certificates), or
 
-- [Device Provisioning Service](https://docs.microsoft.com/en-us/azure/iot-dps/).
+- [Device Provisioning Service](https://docs.microsoft.com/azure/iot-dps/).
 
 This section does not describe the details of Device Provisioning Service (DPS), please use the link above for details.
 
 When using SAS tokens, authentication can be done by:
 
-- Providing [your own SAS token](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security#authentication), or
+- Providing [your own SAS token](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-security#authentication), or
 
-- Giving the device keys to the SDK (using the device connection string - see ["Alternate Device Credentials"](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-device-sdk-c-iothubclient#alternate-device-credentials) in our documentation) and lettting it create the SAS tokens for you (this is the most usual authentication method).
+- Giving the device keys to the SDK (using the device connection string - see ["Alternate Device Credentials"](https://docs.microsoft.com/azure/iot-hub/iot-hub-device-sdk-c-iothubclient#alternate-device-credentials) in our documentation) and letting it create the SAS tokens for you (this is the most usual authentication method).
 
 As mentioned in the articles above, SAS tokens have an expiration time.
 
@@ -50,7 +50,7 @@ The internal behaviour is different depending on the transport protocol used:
 |-|-|
 |MQTT|SAS tokens are valid for 1 hour, and a new one is sent every 48 minutes. Every time a new SAS token needs to be sent, the client will disconnect from the Azure IoT Hub and reconnect.|
 |AMQP|SAS tokens are valid for 1 hour, and a new one is sent every 48 minutes. Client is not disconnected when a new SAS token is sent.|
-|HTTP|There is no persistent connnection; a new SAS token (valid for 1 hour) is created and sent with each request to the Azure IoT Hub.|
+|HTTP|There is no persistent connection; a new SAS token (valid for 1 hour) is created and sent with each request to the Azure IoT Hub.|
 
 
 Both the SAS token lifetime and refresh rate are configurable on AMQP transport (see [AMQP transport section](https://github.com/Azure/azure-iot-sdk-c/blob/2019-03-18/doc/Iothub_sdk_options.md#amqp-transport) in SDK options documentation).
@@ -62,9 +62,9 @@ The design of the Azure IoT C SDK is composed of layers, each of them assigned s
 
 | **Layer**                 | **C module**                                                                                                        | **Purpose**                                                                                                                                                                                                                                                                                              |
 |---------------------------|---------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Azure IoT C SDK           | [iothub\_client](https://github.com/Azure/azure-iot-sdk-c/blob/master/iothub_client/inc/iothub_client.h)            | Multi-threaded layer over iothub\_ll\_client (automatically performs invokation of the IoTHubClient\_LL\_DoWork function and internal callback handling)                                                                                                                                                 |
-| Azure IoT C Low Level SDK | [iothub\_client\_ll](https://github.com/Azure/azure-iot-sdk-c/blob/master/iothub_client/inc/iothub_client_ll.h)     | Main surface of the Azure IoT device client API (single-threaded)                                                                                                                                                                                                                                        |
-| Protocol Transport        | [iothubtransport\*](https://github.com/Azure/azure-iot-sdk-c/tree/master/iothub_client/inc)                         | Provides an interface between the specific protocol API (e.g., [uamqp](https://github.com/Azure/azure-uamqp-c), [umqtt](https://github.com/Azure/azure-umqtt-c)) and the upper client SDK. It is responsible for part of the business logic, the message queueing and timeout control, options handling. |
+| Azure IoT C SDK           | [iothub\_client](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothub_client.h)            | Multi-threaded layer over iothub\_ll\_client (automatically performs invocation of the IoTHubClient\_LL\_DoWork function and internal callback handling)                                                                                                                                                 |
+| Azure IoT C Low Level SDK | [iothub\_client\_ll](https://github.com/Azure/azure-iot-sdk-c/blob/main/iothub_client/inc/iothub_client_ll.h)     | Main surface of the Azure IoT device client API (single-threaded)                                                                                                                                                                                                                                        |
+| Protocol Transport        | [iothubtransport\*](https://github.com/Azure/azure-iot-sdk-c/tree/main/iothub_client/inc)                         | Provides an interface between the specific protocol API (e.g., [uamqp](https://github.com/Azure/azure-uamqp-c), [umqtt](https://github.com/Azure/azure-umqtt-c)) and the upper client SDK. It is responsible for part of the business logic, the message queuing and timeout control, options handling. |
 | Protocol API              | [uamqp](https://github.com/Azure/azure-uamqp-c), [umqtt](https://github.com/Azure/azure-umqtt-c) or native HTTP API | Implements the specific application protocol (either AMQP, MQTT or HTTP, respectivelly)                                                                                                                                                                                                                  |
 | TLS                       | [tlsio\_\*](https://github.com/Azure/azure-c-shared-utility/tree/master/adapters)                                   | Provides a wrapper over the specific TLS API (Schannel, openssl, wolfssl, mbedtls), using the [xio](https://github.com/Azure/azure-c-shared-utility/blob/master/inc/azure_c_shared_utility/xio.h) interface that the device client SDK uses                                                              |
 | Socket                    | [socketio\_\*](https://github.com/Azure/azure-c-shared-utility/tree/master/adapters)                                | Provides a wrapper over the specific socket API ([win32, berkeley, mbed](https://github.com/Azure/azure-c-shared-utility/tree/master/adapters)), using the [xio](https://github.com/Azure/azure-c-shared-utility/blob/master/inc/azure_c_shared_utility/xio.h) interface that the device client SDK uses |
@@ -105,7 +105,7 @@ Each of these layers provide status and error events to the above through functi
 
   - Telemetry messages to complete sending;
 
-  - [CBS authentication token](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security#security-tokens) refresh to be completed.
+  - [CBS authentication token](https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-security#security-tokens) refresh to be completed.
 
 1. Through failures reported by the socket APIs;
 
@@ -137,7 +137,7 @@ Once a connection issue is detected, the transport protocol will initiate its co
 
 - No messages are ever lost; they are either:
 
-  - Re-sent after a new connection is successfully restablished, or
+  - Re-sent after a new connection is successfully reestablished, or
 
   - Returned to the user as failed through the completion callbacks;
 
@@ -161,7 +161,7 @@ Once a connection issue is detected, the transport protocol will initiate its co
 
 2. Upon successful re-connection, all these additional steps are taken by the SDK:
 
-    - Previous subscriptions made by the user for cloud-to-device messages (Commands, Device Methods, Device Twin Desired Properties) are automatically restablished, requiring no additional action (the SDK continues to use the same callback functions previously set);
+    - Previous subscriptions made by the user for cloud-to-device messages (Commands, Device Methods, Device Twin Desired Properties) are automatically reestablished, requiring no additional action (the SDK continues to use the same callback functions previously set);
 
     - Pending outgoing messages start to be sent again to the Azure IoT Hub;
 
@@ -325,7 +325,7 @@ Here is a list of the specific options that apply to connection and messaging re
 |Option|Value Type|Applicable To|Description|
 |-|-|-|-|
 |OPTION_MESSAGE_TIMEOUT|const tickcounter_ms_t*|Timeout for iothub client messages waiting to be sent to the IoTHub|See [description above](#Known-Issue:-Duplicated-Timeout-Control-for-Sending-Telemetry-Messages) for details.</br></br>The default value is zero (disabled).|
-|"event_send_timeout_secs"|size_t*|AMQP and AMQP over WebSockets transports|Maximum ammount of time, in seconds, the AMQP protocol transport will wait for a Telemetry message to complete sending.</br></br>If reached, the callback function passed to IoTHubDeviceClient_LL_SendEventAsync or IoTHubDeviceClient_SendEventAsync is invoked with result IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT.</br></br>The default value 5 minutes.|
+|"event_send_timeout_secs"|size_t*|AMQP and AMQP over WebSockets transports|Maximum amount of time, in seconds, the AMQP protocol transport will wait for a Telemetry message to complete sending.</br></br>If reached, the callback function passed to IoTHubDeviceClient_LL_SendEventAsync or IoTHubDeviceClient_SendEventAsync is invoked with result IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT.</br></br>The default value 5 minutes.|
 |OPTION_SERVICE_SIDE_KEEP_ALIVE_FREQ_SECS|size_t*|AMQP and AMQP over WebSockets transports|[See code comments](https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client_options.h#L47).|
 |OPTION_REMOTE_IDLE_TIMEOUT_RATIO|double*|AMQP and AMQP over WebSockets transports|[See code comments](https://github.com/Azure/azure-iot-sdk-c/blob/2018-05-04/iothub_client/inc/iothub_client_options.h#L59).|
 |OPTION_KEEP_ALIVE|int*|MQTT and MQTT over WebSockets protocol transports|Frequency in seconds that the transport protocol will be sending MQTT pings to the Azure IoT Hub.</br></br>The lower this number, more responsive the device client (when using MQTT) will be to connection issues. However, slightly more data traffic it will generate.</br></br>The default value is 4 minutes.|
@@ -337,6 +337,6 @@ Although not currently configurable, they are important for further understandin
 
 |Control|Description|
 |-|-|
-|Number of cumulative failures the AMQP protocol transport will wait for to mark a connetion as faulty|Currently that number is five.|
-|Number of cumulative send failures the MQTT protocol transport will wait for to mark a connetion as faulty|Currently that number is two.|
+|Number of cumulative failures the AMQP protocol transport will wait for to mark a connection as faulty|Currently that number is five.|
+|Number of cumulative send failures the MQTT protocol transport will wait for to mark a connection as faulty|Currently that number is two.|
 |Maximum time the AMQP transport protocols will wait for the AMQP negotiation to complete (including authentication) when a device client is connecting to the Azure IoT Hub connection|The default value is 60 seconds.</br></br>If the whole AMQP negotiation does not complete within that time, the connection is deemed faulty and re-connection kicks in.</br></br>That can be triggered by super-slow connections. Relaxing this timeout hasn't showed practical improvements overall.|

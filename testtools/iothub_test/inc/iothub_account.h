@@ -60,6 +60,11 @@ extern const size_t IoTHubAccount_GetIoTHubPartitionCount(IOTHUB_ACCOUNT_INFO_HA
 extern const char* IoTHubAccount_GetEventhubConsumerGroup(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 extern const IOTHUB_MESSAGING_HANDLE IoTHubAccount_GetMessagingHandle(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle);
 
+extern const int TEST_CREATE_MAX_RETRIES;
+extern const int TEST_METHOD_INVOKE_MAX_RETRIES;
+extern const int TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC;
+extern const int TEST_SLEEP_BETWEEN_METHOD_INVOKE_FAILURES_MSEC;
+
 #ifdef __cplusplus
 }
 #endif

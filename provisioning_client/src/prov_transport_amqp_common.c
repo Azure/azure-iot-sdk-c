@@ -134,13 +134,11 @@ static char* on_sasl_tpm_challenge_cb(BUFFER_HANDLE data_handle, void* user_ctx)
     PROV_TRANSPORT_AMQP_INFO* amqp_info = (PROV_TRANSPORT_AMQP_INFO*)user_ctx;
     if (amqp_info == NULL)
     {
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_042: [ If user_ctx is NULL, on_sasl_tpm_challenge_cb shall return NULL. ] */
         LogError("Bad argument user_ctx NULL");
         result = NULL;
     }
     else if (amqp_info->challenge_cb == NULL)
     {
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_043: [ If the challenge_cb function is NULL, on_sasl_tpm_challenge_cb shall return NULL. ] */
         LogError("challenge callback is NULL, device needs to register");
         result = NULL;
     }
@@ -149,11 +147,9 @@ static char* on_sasl_tpm_challenge_cb(BUFFER_HANDLE data_handle, void* user_ctx)
         const unsigned char* data = BUFFER_u_char(data_handle);
         size_t length = BUFFER_length(data_handle);
 
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_045: [ on_sasl_tpm_challenge_cb shall call the challenge_cb returning the resulting value. ] */
         result = amqp_info->challenge_cb(data, length, KEY_NAME_VALUE, amqp_info->challenge_ctx);
         if (result == NULL)
         {
-            /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_044: [ If any failure is encountered on_sasl_tpm_challenge_cb shall return NULL. ] */
             LogError("Failure challenge_cb");
             amqp_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
             amqp_info->amqp_state = AMQP_STATE_ERROR;
@@ -183,7 +179,6 @@ static void on_message_sender_state_changed_callback(void* context, MESSAGE_SEND
                 case MESSAGE_SENDER_STATE_OPEN:
                     if (amqp_info->msg_recv_state == MESSAGE_RECEIVER_STATE_OPEN)
                     {
-                        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_052: [ Once the uamqp reciever and sender link are connected the amqp_state shall be set to AMQP_STATE_CONNECTED ] */
                         amqp_info->amqp_state = AMQP_STATE_CONNECTED;
                         if (amqp_info->status_cb != NULL)
                         {
@@ -230,7 +225,6 @@ static void on_message_receiver_state_changed_callback(const void* user_ctx, MES
             case MESSAGE_RECEIVER_STATE_OPEN:
                 if (amqp_info->msg_send_state == MESSAGE_SENDER_STATE_OPEN)
                 {
-                    /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_052: [ Once the uamqp reciever and sender link are connected the amqp_state shall be set to AMQP_STATE_CONNECTED ] */
                     amqp_info->amqp_state = AMQP_STATE_CONNECTED;
                     if (amqp_info->status_cb != NULL)
                     {
@@ -730,7 +724,6 @@ static int create_sender_link(PROV_TRANSPORT_AMQP_INFO* amqp_info)
     AMQP_VALUE msg_target;
     STRING_HANDLE event_address;
 
-    /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_050: [ The reciever and sender endpoints addresses shall be constructed in the following manner: amqps://[hostname]/[scope_id]/registrations/[registration_id] ] */
     if ((event_address = construct_link_address(amqp_info)) == NULL)
     {
         LogError("Failure constructing amqp link address");
@@ -807,7 +800,6 @@ static int create_receiver_link(PROV_TRANSPORT_AMQP_INFO* amqp_info)
     AMQP_VALUE msg_target;
     STRING_HANDLE event_address;
 
-    /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_050: [ The reciever and sender endpoints addresses shall be constructed in the following manner: amqps://[hostname]/[scope_id]/registrations/[registration_id] ] */
     if ((event_address = construct_link_address(amqp_info)) == NULL)
     {
         LogError("Failure constructing amqp link address");
@@ -886,7 +878,7 @@ static int create_transport_io_object(PROV_TRANSPORT_AMQP_INFO* amqp_info)
         SASL_MECHANISM_HANDLE* sasl_mechanism = NULL;
         PROV_TRANSPORT_IO_INFO* trans_info;
 
-        // Set the proxy options if neccessary
+        // Set the proxy options if necessary
         if (amqp_info->proxy_option.host_address != NULL)
         {
             transport_proxy = &amqp_info->proxy_option;
@@ -1047,7 +1039,6 @@ static int create_sasl_handler(PROV_TRANSPORT_AMQP_INFO* amqp_info)
             LogError("prov_sasltpm_get_interface was NULL");
             result = MU_FAILURE;
         }
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_048: [ If the hsm_type is TRANSPORT_HSM_TYPE_TPM create_connection shall create a tpm_saslmechanism. ] */
         else if ((amqp_info->sasl_handler = saslmechanism_create(sasl_interface, &sasl_config)) == NULL)
         {
             LogError("failed creating tpm sasl mechanism");
@@ -1086,7 +1077,6 @@ static int create_sasl_handler(PROV_TRANSPORT_AMQP_INFO* amqp_info)
                 LogError("prov_saslplain_get_interface was NULL");
                 result = MU_FAILURE;
             }
-            /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_048: [ If the hsm_type is TRANSPORT_HSM_TYPE_TPM create_connection shall create a tpm_saslmechanism. ] */
             else if ((amqp_info->sasl_handler = saslmechanism_create(sasl_interface, &sasl_config)) == NULL)
             {
                 LogError("failed creating plain sasl mechanism");
@@ -1217,17 +1207,14 @@ PROV_DEVICE_TRANSPORT_HANDLE prov_transport_common_amqp_create(const char* uri, 
     PROV_TRANSPORT_AMQP_INFO* result;
     if (uri == NULL || scope_id == NULL || api_version == NULL || transport_io == NULL)
     {
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_001: [ If uri, scope_id, registration_id, api_version, or transport_io is NULL, prov_transport_common_amqp_create shall return NULL. ] */
         LogError("Invalid parameter specified uri: %p, scope_id: %p, api_version: %p, transport_io: %p", uri, scope_id, api_version, transport_io);
         result = NULL;
     }
     else
     {
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_003: [ prov_transport_common_amqp_create shall allocate a PROV_TRANSPORT_AMQP_INFO structure ] */
         result = malloc(sizeof(PROV_TRANSPORT_AMQP_INFO));
         if (result == NULL)
         {
-            /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_002: [ If any error is encountered, prov_transport_common_amqp_create shall return NULL. ] */
             LogError("Unable to allocate PROV_TRANSPORT_AMQP_INFO");
         }
         else
@@ -1235,28 +1222,24 @@ PROV_DEVICE_TRANSPORT_HANDLE prov_transport_common_amqp_create(const char* uri, 
             memset(result, 0, sizeof(PROV_TRANSPORT_AMQP_INFO));
             if (mallocAndStrcpy_s(&result->hostname, uri) != 0)
             {
-                /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_002: [ If any error is encountered, prov_transport_common_amqp_create shall return NULL. ] */
                 LogError("Failure allocating hostname");
                 free(result);
                 result = NULL;
             }
             else if (mallocAndStrcpy_s(&result->api_version, api_version) != 0)
             {
-                /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_002: [ If any error is encountered, prov_transport_common_amqp_create shall return NULL. ] */
                 LogError("Failure allocating api_version");
                 cleanup_amqp_data(result);
                 result = NULL;
             }
             else if (mallocAndStrcpy_s(&result->scope_id, scope_id) != 0)
             {
-                /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_002: [ If any error is encountered, prov_transport_common_amqp_create shall return NULL. ] */
                 LogError("Failure allocating scope id");
                 cleanup_amqp_data(result);
                 result = NULL;
             }
             else
             {
-                /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_004: [ On success prov_transport_common_amqp_create shall allocate a new instance of PROV_DEVICE_TRANSPORT_HANDLE. ] */
                 result->transport_io_cb = transport_io;
                 result->hsm_type = type;
                 result->error_cb = error_cb;
@@ -1270,11 +1253,9 @@ PROV_DEVICE_TRANSPORT_HANDLE prov_transport_common_amqp_create(const char* uri, 
 
 void prov_transport_common_amqp_destroy(PROV_DEVICE_TRANSPORT_HANDLE handle)
 {
-    /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_005: [ If handle is NULL, prov_transport_common_amqp_destroy shall do nothing. ] */
     if (handle != NULL)
     {
         PROV_TRANSPORT_AMQP_INFO* amqp_info = (PROV_TRANSPORT_AMQP_INFO*)handle;
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_006: [ prov_transport_common_amqp_destroy shall free all resources used in this module. ] */
         cleanup_amqp_data(amqp_info);
     }
 }
@@ -1285,7 +1266,6 @@ int prov_transport_common_amqp_open(PROV_DEVICE_TRANSPORT_HANDLE handle, const c
     PROV_TRANSPORT_AMQP_INFO* amqp_info = (PROV_TRANSPORT_AMQP_INFO*)handle;
     if (amqp_info == NULL || data_callback == NULL || status_cb == NULL || registration_id == NULL)
     {
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_007: [ If handle, data_callback, or status_cb is NULL, prov_transport_common_amqp_open shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p, data_callback: %p, status_cb: %p, registration_id: %p", handle, data_callback, status_cb, registration_id);
         result = MU_FAILURE;
     }
@@ -1296,20 +1276,16 @@ int prov_transport_common_amqp_open(PROV_DEVICE_TRANSPORT_HANDLE handle, const c
     }
     else if ((amqp_info->hsm_type == TRANSPORT_HSM_TYPE_TPM) && (ek == NULL || srk == NULL) )
     {
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_008: [ If hsm_type is TRANSPORT_HSM_TYPE_TPM and ek or srk is NULL, prov_transport_common_amqp_open shall return a non-zero value. ] */
         LogError("Invalid parameter specified ek: %p, srk: %p", ek, srk);
         result = MU_FAILURE;
     }
-    /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_009: [ prov_transport_common_amqp_open shall clone the ek and srk values.] */
     else if (ek != NULL && (amqp_info->ek = BUFFER_clone(ek)) == NULL)
     {
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_041: [ If a failure is encountered, prov_transport_common_amqp_open shall return a non-zero value. ] */
         LogError("Unable to allocate endorsement key");
         result = MU_FAILURE;
     }
     else if (srk != NULL && (amqp_info->srk = BUFFER_clone(srk)) == NULL)
     {
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_041: [ If a failure is encountered, prov_transport_common_amqp_open shall return a non-zero value. ] */
         LogError("Unable to allocate storage root key");
         BUFFER_delete(amqp_info->ek);
         amqp_info->ek = NULL;
@@ -1317,7 +1293,6 @@ int prov_transport_common_amqp_open(PROV_DEVICE_TRANSPORT_HANDLE handle, const c
     }
     else if (mallocAndStrcpy_s(&amqp_info->registration_id, registration_id) != 0)
     {
-        /* Codes_PROV_TRANSPORT_HTTP_CLIENT_07_003: [ If any error is encountered prov_transport_http_create shall return NULL. ] */
         LogError("failure constructing registration Id");
         BUFFER_delete(amqp_info->ek);
         amqp_info->ek = NULL;
@@ -1327,7 +1302,6 @@ int prov_transport_common_amqp_open(PROV_DEVICE_TRANSPORT_HANDLE handle, const c
     }
     else
     {
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_010: [ When complete prov_transport_common_amqp_open shall send a status callback of PROV_DEVICE_TRANSPORT_STATUS_CONNECTED.] */
         amqp_info->register_data_cb = data_callback;
         amqp_info->user_ctx = user_ctx;
         amqp_info->status_cb = status_cb;
@@ -1345,7 +1319,6 @@ int prov_transport_common_amqp_close(PROV_DEVICE_TRANSPORT_HANDLE handle)
     int result;
     if (handle == NULL)
     {
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_011: [ If handle is NULL, prov_transport_common_amqp_close shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p", handle);
         result = MU_FAILURE;
     }
@@ -1360,7 +1333,6 @@ int prov_transport_common_amqp_close(PROV_DEVICE_TRANSPORT_HANDLE handle)
         free(amqp_info->registration_id);
         amqp_info->registration_id = NULL;
 
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_012: [ prov_transport_common_amqp_close shall close all links and connection associated with amqp communication. ] */
         if (amqp_info->msg_sender != NULL)
         {
             messagesender_close(amqp_info->msg_sender);
@@ -1412,7 +1384,6 @@ int prov_transport_common_amqp_close(PROV_DEVICE_TRANSPORT_HANDLE handle)
         amqp_info->underlying_io = NULL;
 
         amqp_info->amqp_state = AMQP_STATE_IDLE;
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_013: [ On success prov_transport_common_amqp_close shall return a zero value. ] */
         result = 0;
     }
     return result;
@@ -1424,25 +1395,21 @@ int prov_transport_common_amqp_register_device(PROV_DEVICE_TRANSPORT_HANDLE hand
     PROV_TRANSPORT_AMQP_INFO* amqp_info = (PROV_TRANSPORT_AMQP_INFO*)handle;
     if (amqp_info == NULL || json_parse_cb == NULL || json_create_cb == NULL)
     {
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_014: [ If handle is NULL, prov_transport_common_amqp_register_device shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p, json_parse_cb: %p", handle, json_parse_cb);
         result = MU_FAILURE;
     }
     else if (amqp_info->transport_state == TRANSPORT_CLIENT_STATE_REG_SEND || amqp_info->operation_id != NULL)
     {
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_061: [ If the transport_state is TRANSPORT_CLIENT_STATE_REG_SEND or the the operation_id is NULL, prov_transport_common_amqp_register_device shall return a non-zero value. ] */
         LogError("Failure: device is currently in the registration process");
         result = MU_FAILURE;
     }
     else if (amqp_info->transport_state == TRANSPORT_CLIENT_STATE_ERROR)
     {
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_016: [ If the transport_state is set to TRANSPORT_CLIENT_STATE_ERROR shall, prov_transport_common_amqp_register_device shall return a non-zero value. ] */
         LogError("Provisioning is in an error state, close the connection and try again.");
         result = MU_FAILURE;
     }
     else
     {
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_017: [ On success prov_transport_common_amqp_register_device shall return a zero value. ] */
         amqp_info->transport_state = TRANSPORT_CLIENT_STATE_REG_SEND;
         amqp_info->json_parse_cb = json_parse_cb;
         amqp_info->json_create_cb = json_create_cb;
@@ -1458,7 +1425,6 @@ int prov_transport_common_amqp_get_operation_status(PROV_DEVICE_TRANSPORT_HANDLE
     int result;
     if (handle == NULL)
     {
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_018: [ If handle is NULL, prov_transport_common_amqp_get_operation_status shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p", handle);
         result = MU_FAILURE;
     }
@@ -1467,21 +1433,17 @@ int prov_transport_common_amqp_get_operation_status(PROV_DEVICE_TRANSPORT_HANDLE
         PROV_TRANSPORT_AMQP_INFO* amqp_info = (PROV_TRANSPORT_AMQP_INFO*)handle;
         if (amqp_info->operation_id == NULL)
         {
-            /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_019: [ If the operation_id is NULL, prov_transport_common_amqp_get_operation_status shall return a non-zero value. ] */
             LogError("operation_id was not previously set in the challenge method");
             result = MU_FAILURE;
         }
         else if (amqp_info->transport_state == TRANSPORT_CLIENT_STATE_ERROR)
         {
-            /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_020: [ If the transport_state is set to TRANSPORT_CLIENT_STATE_ERROR shall, prov_transport_common_amqp_get_operation_status shall return a non-zero value. ] */
             LogError("provisioning is in an error state, close the connection and try again.");
             result = MU_FAILURE;
         }
         else
         {
-            /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_021: [ prov_transport_common_amqp_get_operation_status shall set the transport_state to TRANSPORT_CLIENT_STATE_STATUS_SEND. ] */
             amqp_info->transport_state = TRANSPORT_CLIENT_STATE_STATUS_SEND;
-            /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_022: [ On success prov_transport_common_amqp_get_operation_status shall return a zero value. ] */
             result = 0;
         }
     }
@@ -1490,16 +1452,13 @@ int prov_transport_common_amqp_get_operation_status(PROV_DEVICE_TRANSPORT_HANDLE
 
 void prov_transport_common_amqp_dowork(PROV_DEVICE_TRANSPORT_HANDLE handle)
 {
-    /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_046: [ If handle is NULL, prov_transport_common_amqp_dowork shall do nothing. ] */
     if (handle != NULL)
     {
         PROV_TRANSPORT_AMQP_INFO* amqp_info = (PROV_TRANSPORT_AMQP_INFO*)handle;
         if (amqp_info->amqp_state == AMQP_STATE_DISCONNECTED)
         {
-            /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_047: [ If the amqp_state is AMQP_STATE_DISCONNECTED prov_transport_common_amqp_dowork shall attempt to connect the amqp connections and links. ] */
             if (create_connection(amqp_info) != 0)
             {
-                /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_049: [ If any error is encountered prov_transport_common_amqp_dowork shall set the amqp_state to AMQP_STATE_ERROR and the transport_state to TRANSPORT_CLIENT_STATE_ERROR. ] */
                 LogError("unable to create amqp connection");
                 amqp_info->amqp_state = AMQP_STATE_ERROR;
                 amqp_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
@@ -1511,23 +1470,19 @@ void prov_transport_common_amqp_dowork(PROV_DEVICE_TRANSPORT_HANDLE handle)
         }
         else if (amqp_info->amqp_state != AMQP_STATE_IDLE)
         {
-            /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_051: [ Once connected prov_transport_common_amqp_dowork shall call uamqp connection dowork function and check the `transport_state` ] */
             connection_dowork(amqp_info->connection);
             if (amqp_info->amqp_state == AMQP_STATE_CONNECTED || amqp_info->amqp_state == AMQP_STATE_ERROR)
             {
                 switch (amqp_info->transport_state)
                 {
                 case TRANSPORT_CLIENT_STATE_REG_SEND:
-                    /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_053: [ When then transport_state is set to TRANSPORT_CLIENT_STATE_REG_SEND, prov_transport_common_amqp_dowork shall send a AMQP_REGISTER_ME message ] */
                     if (send_amqp_message(amqp_info, AMQP_REGISTER_ME) != 0)
                     {
-                        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_049: [ If any error is encountered prov_transport_common_amqp_dowork shall set the amqp_state to AMQP_STATE_ERROR and the transport_state to TRANSPORT_CLIENT_STATE_ERROR. ] */
                         amqp_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
                         amqp_info->amqp_state = AMQP_STATE_ERROR;
                     }
                     else
                     {
-                        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_054: [ Upon successful sending of a TRANSPORT_CLIENT_STATE_REG_SEND message, prov_transport_common_amqp_dowork shall set the transport_state to TRANSPORT_CLIENT_STATE_REG_SENT ] */
                         amqp_info->transport_state = TRANSPORT_CLIENT_STATE_REG_SENT;
                     }
                     break;
@@ -1588,22 +1543,18 @@ void prov_transport_common_amqp_dowork(PROV_DEVICE_TRANSPORT_HANDLE handle)
                 }
 
                 case TRANSPORT_CLIENT_STATE_STATUS_SEND:
-                    /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_055: [ When then transport_state is set to TRANSPORT_CLIENT_STATE_STATUS_SEND, prov_transport_common_amqp_dowork shall send a AMQP_OPERATION_STATUS message ] */
                     if (send_amqp_message(amqp_info, AMQP_OPERATION_STATUS) != 0)
                     {
-                        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_049: [ If any error is encountered prov_transport_common_amqp_dowork shall set the amqp_state to AMQP_STATE_ERROR and the transport_state to TRANSPORT_CLIENT_STATE_ERROR. ] */
                         amqp_info->transport_state = TRANSPORT_CLIENT_STATE_ERROR;
                         amqp_info->amqp_state = AMQP_STATE_ERROR;
                     }
                     else
                     {
-                        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_056: [ Upon successful sending of a AMQP_OPERATION_STATUS message, prov_transport_common_amqp_dowork shall set the transport_state to TRANSPORT_CLIENT_STATE_STATUS_SENT ] */
                         amqp_info->transport_state = TRANSPORT_CLIENT_STATE_STATUS_SENT;
                     }
                     break;
 
                 case TRANSPORT_CLIENT_STATE_ERROR:
-                    /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_057: [ If transport_state is set to TRANSPORT_CLIENT_STATE_ERROR, prov_transport_common_amqp_dowork shall call the register_data_cb function with PROV_DEVICE_TRANSPORT_RESULT_ERROR setting the transport_state to TRANSPORT_CLIENT_STATE_IDLE. ] */
                     amqp_info->register_data_cb(PROV_DEVICE_TRANSPORT_RESULT_ERROR, NULL, NULL, NULL, amqp_info->user_ctx);
                     amqp_info->transport_state = TRANSPORT_CLIENT_STATE_IDLE;
                     amqp_info->amqp_state = AMQP_STATE_IDLE;
@@ -1626,23 +1577,19 @@ int prov_transport_common_amqp_set_trace(PROV_DEVICE_TRANSPORT_HANDLE handle, bo
     int result;
     if (handle == NULL)
     {
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_023: [ If handle is NULL, prov_transport_common_amqp_set_trace shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p", handle);
         result = MU_FAILURE;
     }
     else
     {
         PROV_TRANSPORT_AMQP_INFO* amqp_info = (PROV_TRANSPORT_AMQP_INFO*)handle;
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_024: [ prov_transport_common_amqp_set_trace shall set the log_trace variable to trace_on. ]*/
         amqp_info->log_trace = trace_on;
 
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_059: [ If the uamqp connection is not NULL, prov_transport_common_amqp_set_trace shall set the connection trace option on that connection. ] */
         if (amqp_info->connection != NULL)
         {
             connection_set_trace(amqp_info->connection, amqp_info->log_trace);
         }
 
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_025: [ On success prov_transport_common_amqp_set_trace shall return a zero value. ] */
         result = 0;
     }
     return result;
@@ -1653,7 +1600,6 @@ int prov_transport_common_amqp_x509_cert(PROV_DEVICE_TRANSPORT_HANDLE handle, co
     int result;
     if (handle == NULL || certificate == NULL)
     {
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_026: [ If handle or certificate is NULL, prov_transport_common_amqp_x509_cert shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p, certificate: %p", handle, certificate);
         result = MU_FAILURE;
     }
@@ -1672,16 +1618,13 @@ int prov_transport_common_amqp_x509_cert(PROV_DEVICE_TRANSPORT_HANDLE handle, co
             amqp_info->private_key = NULL;
         }
 
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_027: [ prov_transport_common_amqp_x509_cert shall copy the certificate and private_key values. ] */
         if (mallocAndStrcpy_s(&amqp_info->x509_cert, certificate) != 0)
         {
-            /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_028: [ On any failure prov_transport_common_amqp_x509_cert, shall return a non-zero value. ] */
             result = MU_FAILURE;
             LogError("failure allocating certificate");
         }
         else if (mallocAndStrcpy_s(&amqp_info->private_key, private_key) != 0)
         {
-            /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_028: [ On any failure prov_transport_common_amqp_x509_cert, shall return a non-zero value. ] */
             LogError("failure allocating certificate");
             free(amqp_info->x509_cert);
             amqp_info->x509_cert = NULL;
@@ -1689,7 +1632,6 @@ int prov_transport_common_amqp_x509_cert(PROV_DEVICE_TRANSPORT_HANDLE handle, co
         }
         else
         {
-            /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_029: [ On success prov_transport_common_amqp_x509_cert shall return a zero value. ] */
             result = 0;
         }
     }
@@ -1701,7 +1643,6 @@ int prov_transport_common_amqp_set_trusted_cert(PROV_DEVICE_TRANSPORT_HANDLE han
     int result;
     if (handle == NULL || certificate == NULL)
     {
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_030: [ If handle or certificate is NULL, prov_transport_common_amqp_set_trusted_cert shall return a non-zero value. ] */
         LogError("Invalid parameter specified handle: %p, certificate: %p", handle, certificate);
         result = MU_FAILURE;
     }
@@ -1715,16 +1656,13 @@ int prov_transport_common_amqp_set_trusted_cert(PROV_DEVICE_TRANSPORT_HANDLE han
             amqp_info->certificate = NULL;
         }
 
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_031: [ prov_transport_common_amqp_set_trusted_cert shall copy the certificate value. ] */
         if (mallocAndStrcpy_s(&amqp_info->certificate, certificate) != 0)
         {
-            /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_032: [ On any failure prov_transport_common_amqp_set_trusted_cert, shall return a non-zero value. ] */
             result = MU_FAILURE;
             LogError("failure allocating certificate");
         }
         else
         {
-            /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_033: [ On success prov_transport_common_amqp_set_trusted_cert shall return a zero value. ] */
             result = 0;
         }
     }
@@ -1736,7 +1674,6 @@ int prov_transport_common_amqp_set_proxy(PROV_DEVICE_TRANSPORT_HANDLE handle, co
     int result;
     if (handle == NULL || proxy_options == NULL)
     {
-        /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_034: [ If handle or proxy_options is NULL, prov_transport_common_amqp_set_proxy shall return a non-zero value. ]*/
         LogError("Invalid parameter specified handle: %p, proxy_options: %p", handle, proxy_options);
         result = MU_FAILURE;
     }
@@ -1745,20 +1682,17 @@ int prov_transport_common_amqp_set_proxy(PROV_DEVICE_TRANSPORT_HANDLE handle, co
         PROV_TRANSPORT_AMQP_INFO* amqp_info = (PROV_TRANSPORT_AMQP_INFO*)handle;
         if (proxy_options->host_address == NULL)
         {
-            /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_035: [ If HTTP_PROXY_OPTIONS host_address is NULL, prov_transport_common_amqp_set_proxy shall return a non-zero value. ] */
             LogError("NULL host_address in proxy options");
             result = MU_FAILURE;
         }
         else if (((proxy_options->username == NULL) || (proxy_options->password == NULL)) &&
             (proxy_options->username != proxy_options->password))
         {
-            /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_036: [ If HTTP_PROXY_OPTIONS password is not NULL and password is NULL, prov_transport_common_amqp_set_proxy shall return a non-zero value. ] */
             LogError("Only one of username and password for proxy settings was NULL");
             result = MU_FAILURE;
         }
         else
         {
-            /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_037: [ If any of the host_addess, username, or password variables are non-NULL, prov_transport_common_amqp_set_proxy shall free the memory. ] */
             if (amqp_info->proxy_option.host_address != NULL)
             {
                 free((char*)amqp_info->proxy_option.host_address);
@@ -1775,17 +1709,14 @@ int prov_transport_common_amqp_set_proxy(PROV_DEVICE_TRANSPORT_HANDLE handle, co
                 amqp_info->proxy_option.password = NULL;
             }
 
-            /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_038: [ prov_transport_common_amqp_set_proxy shall copy the host_addess, username, or password variables ] */
             amqp_info->proxy_option.port = proxy_options->port;
             if (mallocAndStrcpy_s((char**)&amqp_info->proxy_option.host_address, proxy_options->host_address) != 0)
             {
-                /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_039: [ On any failure prov_transport_common_amqp_set_proxy, shall return a non-zero value. ] */
                 LogError("Failure setting proxy_host name");
                 result = MU_FAILURE;
             }
             else if (proxy_options->username != NULL && mallocAndStrcpy_s((char**)&amqp_info->proxy_option.username, proxy_options->username) != 0)
             {
-                /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_039: [ On any failure prov_transport_common_amqp_set_proxy, shall return a non-zero value. ] */
                 LogError("Failure setting proxy username");
                 free((char*)amqp_info->proxy_option.host_address);
                 amqp_info->proxy_option.host_address = NULL;
@@ -1793,7 +1724,6 @@ int prov_transport_common_amqp_set_proxy(PROV_DEVICE_TRANSPORT_HANDLE handle, co
             }
             else if (proxy_options->password != NULL && mallocAndStrcpy_s((char**)&amqp_info->proxy_option.password, proxy_options->password) != 0)
             {
-                /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_039: [ On any failure prov_transport_common_amqp_set_proxy, shall return a non-zero value. ] */
                 LogError("Failure setting proxy password");
                 free((char*)amqp_info->proxy_option.host_address);
                 amqp_info->proxy_option.host_address = NULL;
@@ -1803,7 +1733,6 @@ int prov_transport_common_amqp_set_proxy(PROV_DEVICE_TRANSPORT_HANDLE handle, co
             }
             else
             {
-                /* Codes_PROV_TRANSPORT_AMQP_COMMON_07_040: [ On success prov_transport_common_amqp_set_proxy shall return a zero value. ] */
                 result = 0;
             }
         }

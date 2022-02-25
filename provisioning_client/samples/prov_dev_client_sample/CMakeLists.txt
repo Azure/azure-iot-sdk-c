@@ -32,7 +32,10 @@ add_executable(prov_dev_client_sample ${prov_dev_client_sample_c_files} ${prov_d
 
 target_link_libraries(prov_dev_client_sample
     iothub_client
-    prov_device_client)
+    prov_auth_client
+    hsm_security_client
+    prov_device_client
+)
 
 if(${use_openssl})
     add_definitions(-DUSE_OPENSSL)
@@ -44,15 +47,12 @@ if(${use_openssl})
 endif()
 
 if (${use_http})
-    target_link_libraries(prov_dev_client_sample prov_http_transport)
+    target_link_libraries(prov_dev_client_sample prov_http_transport aziotsharedutil)
 endif()
 if (${use_mqtt})
-    target_link_libraries(prov_dev_client_sample iothub_client_mqtt_transport prov_mqtt_transport prov_mqtt_ws_transport)
+    target_link_libraries(prov_dev_client_sample iothub_client_mqtt_transport prov_mqtt_transport prov_mqtt_ws_transport aziotsharedutil)
 endif()
 if (${use_amqp})
-    target_link_libraries(prov_dev_client_sample iothub_client_amqp_transport prov_amqp_ws_transport prov_amqp_transport)
+    target_link_libraries(prov_dev_client_sample iothub_client_amqp_transport prov_amqp_ws_transport prov_amqp_transport aziotsharedutil)
     linkUAMQP(prov_dev_client_sample)
 endif()
-
-link_security_client(prov_dev_client_sample)
-linkSharedUtil(prov_dev_client_sample)

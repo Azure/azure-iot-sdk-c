@@ -405,9 +405,6 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     }
 
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_002: [ On success hsm_client_tpm_create shall allocate a new instance of the secure device tpm interface. ] */
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_031: [ secure_dev_tpm_create shall get a handle to the Endorsement Key and Storage Root Key. ] */
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_030: [ secure_dev_tpm_create shall call into the tpm_codec to initialize a TSS session. ] */
     TEST_FUNCTION(hsm_client_tpm_create_succeed)
     {
         //arrange
@@ -424,7 +421,6 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         hsm_client_tpm_destroy(sec_handle);
     }
 
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_001: [ If any failure is encountered hsm_client_tpm_create shall return NULL ] */
     TEST_FUNCTION(hsm_client_tpm_create_fail)
     {
         //arrange
@@ -463,8 +459,6 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_004: [ hsm_client_tpm_destroy shall free the SEC_DEVICE_INFO instance. ] */
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_006: [ hsm_client_tpm_destroy shall free all resources allocated in this module. ]*/
     TEST_FUNCTION(hsm_client_tpm_destroy_succeed)
     {
         //arrange
@@ -483,7 +477,6 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         //cleanup
     }
 
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_005: [ if handle is NULL, hsm_client_tpm_destroy shall do nothing. ] */
     TEST_FUNCTION(hsm_client_tpm_destroy_handle_NULL_succeed)
     {
         //arrange
@@ -498,7 +491,6 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         //cleanup
     }
 
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_007: [ if handle or key are NULL, or key_len is 0 hsm_client_tpm_import_key shall return a non-zero value ] */
     TEST_FUNCTION(hsm_client_tpm_import_key_handle_NULL_fail)
     {
         //arrange
@@ -513,7 +505,6 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         //cleanup
     }
 
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_007: [ if handle or key are NULL, or key_len is 0 hsm_client_tpm_import_key shall return a non-zero value ] */
     TEST_FUNCTION(hsm_client_tpm_import_key_key_NULL_fail)
     {
         //arrange
@@ -572,8 +563,6 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /* Tests_hsm_client_tpm_import_key shall establish a tpm session in preparation to inserting the key into the tpm. */
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_008: [ On success hsm_client_tpm_import_key shall return zero ] */
     TEST_FUNCTION(hsm_client_tpm_import_key_succeed)
     {
         //arrange
@@ -593,7 +582,6 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         hsm_client_tpm_destroy(sec_handle);
     }
 
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_013: [ If handle is NULL hsm_client_tpm_get_endorsement_key shall return NULL. ] */
     TEST_FUNCTION(hsm_client_tpm_get_endorsement_key_handle_NULL_succeed)
     {
         unsigned char* key;
@@ -610,7 +598,6 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         //cleanup
     }
 
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_027: [ If the ek_public was not initialized hsm_client_tpm_get_endorsement_key shall return NULL. ] */
     TEST_FUNCTION(hsm_client_tpm_get_endorsement_key_size_0_fail)
     {
         g_rsa_size = 0;
@@ -632,7 +619,6 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         hsm_client_tpm_destroy(sec_handle);
     }
 
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_015: [ If a failure is encountered, hsm_client_tpm_get_endorsement_key shall return NULL. ] */
     TEST_FUNCTION(hsm_client_tpm_get_endorsement_key_fail)
     {
         //arrange
@@ -669,7 +655,6 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_014: [ hsm_client_tpm_get_endorsement_key shall allocate and return the Endorsement Key. ] */
     TEST_FUNCTION(hsm_client_tpm_get_endorsement_key_succeed)
     {
         //arrange
@@ -693,7 +678,6 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         hsm_client_tpm_destroy(sec_handle);
     }
 
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_016: [ If handle is NULL, hsm_client_tpm_get_storage_key shall return NULL. ] */
     TEST_FUNCTION(hsm_client_tpm_get_storage_key_handle_NULL_fail)
     {
         //arrange
@@ -710,7 +694,6 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         //cleanup
     }
 
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_017: [ If the srk_public value was not initialized, hsm_client_tpm_get_storage_key shall return NULL. ] */
     TEST_FUNCTION(hsm_client_tpm_get_storage_key_size_0_fail)
     {
         unsigned char* key;
@@ -732,7 +715,6 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         hsm_client_tpm_destroy(sec_handle);
     }
 
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_019: [ If any failure is encountered, hsm_client_tpm_get_storage_key shall return NULL. ] */
     TEST_FUNCTION(hsm_client_tpm_get_storage_key_fail)
     {
         unsigned char* key;
@@ -770,7 +752,6 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_018: [ hsm_client_tpm_get_storage_key shall allocate and return the Storage Root Key. ] */
     TEST_FUNCTION(hsm_client_tpm_get_storage_key_succeed)
     {
         unsigned char* key;
@@ -794,7 +775,6 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         hsm_client_tpm_destroy(sec_handle);
     }
 
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_020: [ If handle or data is NULL or data_len is 0, hsm_client_tpm_sign_data shall return NULL. ] */
     TEST_FUNCTION(hsm_client_tpm_sign_data_handle_fail)
     {
         unsigned char* key;
@@ -812,7 +792,6 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         //cleanup
     }
 
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_020: [ If handle or data is NULL or data_len is 0, hsm_client_tpm_sign_data shall return NULL. ] */
     TEST_FUNCTION(hsm_client_tpm_sign_data_data_NULL_fail)
     {
         //arrange
@@ -833,7 +812,6 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         hsm_client_tpm_destroy(sec_handle);
     }
 
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_020: [ If handle or data is NULL or data_len is 0, hsm_client_tpm_sign_data shall return NULL. ] */
     TEST_FUNCTION(hsm_client_tpm_sign_data_size_0_fail)
     {
         unsigned char* key;
@@ -892,7 +870,6 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         hsm_client_tpm_destroy(sec_handle);
     }
 
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_023: [ If an error is encountered hsm_client_tpm_sign_data shall return NULL. ] */
     TEST_FUNCTION(hsm_client_tpm_sign_data_fail)
     {
         unsigned char* key;
@@ -930,8 +907,6 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_021: [ hsm_client_tpm_sign_data shall call into the tpm to hash the supplied data value. ] */
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_022: [ If hashing the data was successful, hsm_client_tpm_sign_data shall create a BUFFER_HANDLE with the supplied signed data. ] */
     TEST_FUNCTION(hsm_client_tpm_sign_data_succeed)
     {
         unsigned char* key;
@@ -955,98 +930,6 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
         hsm_client_tpm_destroy(sec_handle);
     }
 
-#if 0
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_025: [ If handle or data is NULL or data_len is 0, hsm_client_tpm_decrypt_data shall return NULL. ] */
-    TEST_FUNCTION(hsm_client_tpm_decrypt_data_handle_NULL_fail)
-    {
-        //arrange
-
-        //act
-        BUFFER_HANDLE decrypt_value = hsm_client_tpm_decrypt_data(NULL, TEST_BUFFER, TEST_BUFFER_SIZE);
-
-        //assert
-        ASSERT_IS_NULL(decrypt_value);
-        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-        //cleanup
-    }
-
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_029: [ If an error is encountered secure_dev_tpm_decrypt_data shall return NULL. ] */
-    TEST_FUNCTION(hsm_client_tpm_decrypt_data_data_NULL_fail)
-    {
-        //arrange
-        HSM_CLIENT_HANDLE sec_handle = hsm_client_tpm_create();
-        umock_c_reset_all_calls();
-
-        //act
-        BUFFER_HANDLE decrypt_value = hsm_client_tpm_decrypt_data(sec_handle, NULL, TEST_BUFFER_SIZE);
-
-        //assert
-        ASSERT_IS_NULL(decrypt_value);
-        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-        //cleanup
-        my_gballoc_free(decrypt_value);
-        hsm_client_tpm_destroy(sec_handle);
-    }
-
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_025: [ If handle or data is NULL or data_len is 0, hsm_client_tpm_decrypt_data shall return NULL. ] */
-    TEST_FUNCTION(hsm_client_tpm_decrypt_data_data_len_0_fail)
-    {
-        //arrange
-        HSM_CLIENT_HANDLE sec_handle = hsm_client_tpm_create();
-        umock_c_reset_all_calls();
-
-        //act
-        BUFFER_HANDLE decrypt_value = hsm_client_tpm_decrypt_data(sec_handle, TEST_BUFFER, 0);
-
-        //assert
-        ASSERT_IS_NULL(decrypt_value);
-        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-        //cleanup
-        my_gballoc_free(decrypt_value);
-        hsm_client_tpm_destroy(sec_handle);
-    }
-
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_024: [ hsm_client_tpm_decrypt_data shall call into the tpm to decrypt the supplied data value. ] */
-    TEST_FUNCTION(hsm_client_tpm_decrypt_data_succeed)
-    {
-        //arrange
-        HSM_CLIENT_HANDLE sec_handle = hsm_client_tpm_create();
-        umock_c_reset_all_calls();
-
-        TPM_SE tmp_se = 0;
-        TPMA_SESSION tmp_session = { 0 };
-
-        STRICT_EXPECTED_CALL(TSS_StartAuthSession(IGNORED_PTR_ARG, tmp_se, IGNORED_NUM_ARG, tmp_session, IGNORED_PTR_ARG))
-            .IgnoreArgument_sessAttrs()
-            .IgnoreArgument_sessionType();
-        STRICT_EXPECTED_CALL(TSS_PolicySecret(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)); // 4
-        STRICT_EXPECTED_CALL(TSS_GetTpmProperty(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-        STRICT_EXPECTED_CALL(TPM2B_ID_OBJECT_Unmarshal(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(TPM2B_ENCRYPTED_SECRET_Unmarshal(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(TPM2B_PRIVATE_Unmarshal(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(TPM2B_ENCRYPTED_SECRET_Unmarshal(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(TPM2B_PUBLIC_Unmarshal(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1));
-        STRICT_EXPECTED_CALL(UINT16_Unmarshal(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(TPM2_ActivateCredential(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
-
-        //act
-        BUFFER_HANDLE decrypt_value = hsm_client_tpm_decrypt_data(sec_handle, TEST_BUFFER, TEST_BUFFER_SIZE);
-
-        //assert
-        ASSERT_IS_NOT_NULL(decrypt_value);
-        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-
-        //cleanup
-        my_gballoc_free(decrypt_value);
-        hsm_client_tpm_destroy(sec_handle);
-    }
-#endif
-
-    /* Tests_SRS_SECURE_DEVICE_TPM_07_026: [ hsm_client_tpm_interface shall return the SEC_TPM_INTERFACE structure. ] */
     TEST_FUNCTION(hsm_client_tpm_interface_succeed)
     {
         //arrange

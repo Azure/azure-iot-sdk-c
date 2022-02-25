@@ -476,7 +476,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         return result;
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_001: [ If uri, scope_id, registration_id, dps_api_version, or transport_io is NULL, prov_transport_common_mqtt_create shall return NULL. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_create_uri_NULL_fail)
     {
         //arrange
@@ -491,7 +490,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_001: [ If uri, scope_id, registration_id, dps_api_version, or transport_io is NULL, prov_transport_common_mqtt_create shall return NULL. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_create_scope_id_NULL_fail)
     {
         //arrange
@@ -507,7 +505,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_001: [ If uri, scope_id, registration_id, dps_api_version, or transport_io is NULL, prov_transport_common_mqtt_create shall return NULL. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_create_api_version_NULL_fail)
     {
         //arrange
@@ -523,7 +520,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_001: [ If uri, scope_id, registration_id, dps_api_version, or transport_io is NULL, prov_transport_common_mqtt_create shall return NULL. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_create_transport_io_NULL_fail)
     {
         //arrange
@@ -539,7 +535,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_002: [ If any error is encountered, prov_transport_common_mqtt_create shall return NULL. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_create_fail)
     {
         int negativeTestsInitResult = umock_c_negative_tests_init();
@@ -570,7 +565,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /* Codes_PROV_TRANSPORT_MQTT_COMMON_07_062: [ If TRANSPORT_HSM_TYPE is TRANSPORT_HSM_TYPE_TPM prov_transport_common_mqtt_create shall return NULL (currently TPM is not supported). ] */
     TEST_FUNCTION(prov_transport_common_mqtt_create_tpm_fail)
     {
         //arrange
@@ -585,8 +579,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         //cleanup
     }
 
-    /* Codes_PROV_TRANSPORT_MQTT_COMMON_07_004: [ On success prov_transport_common_mqtt_create shall return a new instance of PROV_DEVICE_TRANSPORT_HANDLE. ] */
-    /* Codes_PROV_TRANSPORT_MQTT_COMMON_07_003: [ prov_transport_common_mqtt_create shall allocate a DPS_TRANSPORT_MQTT_INFO and initialize the containing fields. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_create_succeed)
     {
         //arrange
@@ -603,7 +595,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_005: [ If handle is NULL, prov_transport_common_mqtt_destroy shall do nothing. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_destroy_handle_NULL_fail)
     {
         //arrange
@@ -617,7 +608,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_006: [ prov_transport_common_mqtt_destroy shall free all resources used in this module. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_destroy_succeed)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
@@ -649,7 +639,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_007: [ If handle, data_callback, or status_cb is NULL, prov_transport_common_mqtt_open shall return a non-zero value. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_open_handle_NULL_fail)
     {
         //arrange
@@ -664,7 +653,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_001: [ If uri, scope_id, registration_id, dps_api_version, or transport_io is NULL, prov_transport_common_mqtt_create shall return NULL. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_open_registration_id_NULL_fail)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
@@ -683,7 +671,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_007: [ If handle, data_callback, or status_cb is NULL, prov_transport_common_mqtt_open shall return a non-zero value. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_open_data_callback_NULL_fail)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
@@ -702,7 +689,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_007: [ If handle, data_callback, or status_cb is NULL, prov_transport_common_mqtt_open shall return a non-zero value. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_open_status_callback_NULL_fail)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
@@ -757,7 +743,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_009: [ prov_transport_common_mqtt_open shall clone the ek and srk values.] */
     TEST_FUNCTION(prov_transport_common_mqtt_open_succeed)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
@@ -778,7 +763,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_041: [ If a failure is encountered, prov_transport_common_mqtt_open shall return a non-zero value. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_open_fail)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
@@ -810,7 +794,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_009: [ prov_transport_common_mqtt_open shall clone the ek and srk values.] */
     TEST_FUNCTION(prov_transport_common_mqtt_open_x509_succeed)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
@@ -868,7 +851,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_011: [ If handle is NULL, prov_transport_common_mqtt_close shall return a non-zero value. ] */
     TEST_FUNCTION(prov_transport_mqtt_close_handle_NULL)
     {
         //arrange
@@ -883,8 +865,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_012: [ prov_transport_common_mqtt_close shall close all connection associated with mqtt communication. ] */
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_013: [ On success prov_transport_common_mqtt_close shall return a zero value. ] */
     TEST_FUNCTION(prov_transport_mqtt_close_succeed)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
@@ -909,7 +889,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_014: [ If handle is NULL, prov_transport_common_mqtt_register_device shall return a non-zero value. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_register_device_handle_NULL_succeed)
     {
         //arrange
@@ -942,7 +921,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_017: [ On success prov_transport_common_mqtt_register_device shall return a zero value. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_register_device_succeed)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
@@ -961,7 +939,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_061: [ If the transport_state is TRANSPORT_CLIENT_STATE_REG_SEND or the the operation_id is NULL, prov_transport_common_mqtt_register_device shall return a non-zero value. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_register_device_twice_fail)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
@@ -981,7 +958,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_018: [ If handle is NULL, prov_transport_common_mqtt_get_operation_status shall return a non-zero value. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_get_operation_status_handle_NULL_fail)
     {
         //arrange
@@ -996,7 +972,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_019: [ If the operation_id is NULL, prov_transport_common_mqtt_get_operation_status shall return a non-zero value. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_get_operation_status_operation_id_zero_fail)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
@@ -1015,8 +990,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_021: [ prov_transport_common_mqtt_get_operation_status shall set the transport_state to TRANSPORT_CLIENT_STATE_STATUS_SEND. ] */
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_022: [ On success prov_transport_common_mqtt_get_operation_status shall return a zero value. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_get_operation_status_success)
     {
         int result;
@@ -1057,7 +1030,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_046: [ If handle is NULL, prov_transport_common_mqtt_dowork shall do nothing. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_dowork_handle_NULL_fail)
     {
         //arrange
@@ -1071,7 +1043,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_049: [ If any error is encountered prov_transport_common_mqtt_dowork shall set the mqtt_state to MQTT_STATE_ERROR and the transport_state to TRANSPORT_CLIENT_STATE_ERROR. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_dowork_x509_connected_fail)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
@@ -1115,7 +1086,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_047: [ If the mqtt_state is MQTT_STATE_DISCONNECTED prov_transport_common_mqtt_dowork shall attempt to connect the mqtt connections. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_dowork_x509_connected_succeed)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
@@ -1159,7 +1129,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_050: [ When the mqtt_state is MQTT_STATE_CONNECTED, prov_transport_common_mqtt_dowork shall subscribe to the topic $dps/registrations/res/# ] */
     TEST_FUNCTION(prov_transport_common_mqtt_dowork_idle_succeed)
     {
         CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
@@ -1192,7 +1161,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_050: [ When the mqtt_state is MQTT_STATE_CONNECTED, prov_transport_common_mqtt_dowork shall subscribe to the topic $dps/registrations/res/# ] */
     TEST_FUNCTION(prov_transport_common_mqtt_dowork_subscribe_succeed)
     {
         CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
@@ -1222,8 +1190,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_047: [ If the mqtt_state is MQTT_STATE_DISCONNECTED prov_transport_common_mqtt_dowork shall attempt to connect the mqtt connections. ] */
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_052: [ Once the mqtt CONNACK is recieved prov_transport_common_mqtt_dowork shall set mqtt_state to MQTT_STATE_CONNECTED ] */
     TEST_FUNCTION(prov_transport_common_mqtt_dowork_subscribe_fail)
     {
         CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
@@ -1256,7 +1222,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_053: [ When then transport_state is set to TRANSPORT_CLIENT_STATE_REG_SEND, prov_transport_common_mqtt_dowork shall send a REGISTER_ME message ] */
     TEST_FUNCTION(prov_transport_common_mqtt_dowork_register_recv_succeed)
     {
         CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
@@ -1482,7 +1447,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_054: [ Upon successful sending of a TRANSPORT_CLIENT_STATE_REG_SEND message, prov_transport_common_mqtt_dowork shall set the transport_state to TRANSPORT_CLIENT_STATE_REG_SENT ] */
     TEST_FUNCTION(prov_transport_common_mqtt_dowork_register_recv_assigned_succeed)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle;
@@ -1520,8 +1484,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_055: [ When then transport_state is set to TRANSPORT_CLIENT_STATE_STATUS_SEND, prov_transport_common_mqtt_dowork shall send a AMQP_OPERATION_STATUS message ] */
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_056: [ Upon successful sending of a AMQP_OPERATION_STATUS message, prov_transport_common_mqtt_dowork shall set the transport_state to TRANSPORT_CLIENT_STATE_STATUS_SENT ] */
     TEST_FUNCTION(prov_transport_common_mqtt_dowork_send_status_succeed)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle;
@@ -1604,7 +1566,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_023: [ If handle is NULL, prov_transport_common_mqtt_set_trace shall return a non-zero value. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_set_trace_handle_NULL_fail)
     {
         //arrange
@@ -1619,8 +1580,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_024: [ prov_transport_common_mqtt_set_trace shall set the log_trace variable to trace_on. ]*/
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_025: [ On success prov_transport_common_mqtt_set_trace shall return a zero value. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_set_trace_succeed)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
@@ -1640,7 +1599,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_026: [ If handle or certificate is NULL, prov_transport_common_mqtt_x509_cert shall return a non-zero value. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_x509_cert_handle_NULL_fail)
     {
         //arrange
@@ -1655,8 +1613,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_027: [ prov_transport_common_mqtt_x509_cert shall copy the certificate and private_key values. ] */
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_029: [ On success prov_transport_common_mqtt_x509_cert shall return a zero value. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_x509_cert_succeed)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
@@ -1677,7 +1633,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_028: [ On any failure prov_transport_common_mqtt_x509_cert, shall return a non-zero value. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_x509_cert_fail)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
@@ -1710,7 +1665,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_030: [ If handle or certificate is NULL, prov_transport_common_mqtt_set_trusted_cert shall return a non-zero value. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_set_trusted_cert_handle_NULL)
     {
         //arrange
@@ -1725,7 +1679,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_030: [ If handle or certificate is NULL, prov_transport_common_mqtt_set_trusted_cert shall return a non-zero value. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_set_trusted_cert_cert_NULL_fail)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
@@ -1744,8 +1697,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_031: [ prov_transport_common_mqtt_set_trusted_cert shall copy the certificate value. ] */
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_033: [ On success prov_transport_common_mqtt_set_trusted_cert shall return a zero value. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_set_trusted_cert_succeed)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
@@ -1765,7 +1716,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_032: [ On any failure prov_transport_common_mqtt_set_trusted_cert, shall return a non-zero value. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_set_trusted_cert_fail)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
@@ -1785,7 +1735,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_034: [ If handle or proxy_options is NULL, prov_transport_common_mqtt_set_proxy shall return a non-zero value. ]*/
     TEST_FUNCTION(prov_transport_common_mqtt_set_proxy_handle_NULL_fail)
     {
         //arrange
@@ -1803,7 +1752,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_034: [ If handle or proxy_options is NULL, prov_transport_common_mqtt_set_proxy shall return a non-zero value. ]*/
     TEST_FUNCTION(prov_transport_common_mqtt_set_proxy_proxy_NULL_fail)
     {
         PROV_DEVICE_TRANSPORT_HANDLE handle = prov_transport_common_mqtt_create(TEST_URI_VALUE, TRANSPORT_HSM_TYPE_X509, TEST_SCOPE_ID_VALUE, TEST_DPS_API_VALUE, on_mqtt_transport_io, on_transport_error, NULL);
@@ -1822,7 +1770,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_036: [ If HTTP_PROXY_OPTIONS password is not NULL and username is NULL, prov_transport_common_mqtt_set_proxy shall return a non-zero value. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_set_proxy_no_username_fail)
     {
         HTTP_PROXY_OPTIONS proxy_options = { 0 };
@@ -1845,8 +1792,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_038: [ prov_transport_common_mqtt_set_proxy shall copy the host_addess, username, or password variables ] */
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_040: [ On success prov_transport_common_mqtt_set_proxy shall return a zero value. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_set_proxy_2_succeed)
     {
         HTTP_PROXY_OPTIONS proxy_options = { 0 };
@@ -1874,7 +1819,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_035: [ If HTTP_PROXY_OPTIONS host_address is NULL, prov_transport_common_mqtt_set_proxy shall return a non-zero value. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_set_proxy_hostname_NULL_fail)
     {
         HTTP_PROXY_OPTIONS proxy_options = { 0 };
@@ -1895,7 +1839,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_039: [ On any failure prov_transport_common_mqtt_set_proxy, shall return a non-zero value. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_set_proxy_fail)
     {
         HTTP_PROXY_OPTIONS proxy_options = { 0 };
@@ -1935,8 +1878,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_038: [ prov_transport_common_mqtt_set_proxy shall copy the host_addess, username, or password variables ] */
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_040: [ On success prov_transport_common_mqtt_set_proxy shall return a zero value. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_set_proxy_succeed)
     {
         HTTP_PROXY_OPTIONS proxy_options = { 0 };
@@ -1960,9 +1901,6 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_common_ut)
         prov_transport_common_mqtt_destroy(handle);
     }
 
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_038: [ prov_transport_common_mqtt_set_proxy shall copy the host_addess, username, or password variables ] */
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_040: [ On success prov_transport_common_mqtt_set_proxy shall return a zero value. ] */
-    /* Tests_PROV_TRANSPORT_MQTT_COMMON_07_037: [ If any of the host_addess, username, or password variables are non-NULL, prov_transport_common_mqtt_set_proxy shall free the memory. ] */
     TEST_FUNCTION(prov_transport_common_mqtt_set_proxy_twice_succeed)
     {
         HTTP_PROXY_OPTIONS proxy_options = { 0 };

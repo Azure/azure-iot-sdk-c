@@ -27,21 +27,6 @@
 
 #define API_VERSION "?api-version=2016-11-14"
 
-#ifdef WINCE
-#include <stdarg.h>
-// Returns number of characters copied.
-int snprintf(char * s, size_t n, const char * format, ...)
-{
-    int result;
-    va_list args;
-    va_start(args, format);
-    result = vsnprintf(s, n, format, args);
-    va_end(args);
-    return result;
-}
-#endif
-
-/*Codes_SRS_IOTHUBCLIENT_LL_02_085: [ IoTHubClient_LL_UploadToBlob shall use the same authorization as step 1. to prepare and perform a HTTP request with the following parameters: ]*/
 static const char* const RESPONSE_BODY_FORMAT = "{\"correlationId\":\"%s\", \"isSuccess\":%s, \"statusCode\":%d, \"statusDescription\":\"%s\"}";
 static const char* const RESPONSE_BODY_ABORTED_MESSAGE = "file upload aborted";
 static const char* const RESPONSE_BODY_FAILED_MESSAGE = "client not able to connect with the server";
@@ -60,12 +45,12 @@ typedef struct UPLOADTOBLOB_X509_CREDENTIALS_TAG
     char* x509privatekey;
 } UPLOADTOBLOB_X509_CREDENTIALS;
 
-typedef enum UPOADTOBLOB_CURL_VERBOSITY_TAG
+typedef enum UPLOADTOBLOB_CURL_VERBOSITY_TAG
 {
-    UPOADTOBLOB_CURL_VERBOSITY_UNSET,
-    UPOADTOBLOB_CURL_VERBOSITY_ON,
-    UPOADTOBLOB_CURL_VERBOSITY_OFF
-} UPOADTOBLOB_CURL_VERBOSITY;
+    UPLOADTOBLOB_CURL_VERBOSITY_UNSET,
+    UPLOADTOBLOB_CURL_VERBOSITY_ON,
+    UPLOADTOBLOB_CURL_VERBOSITY_OFF
+} UPLOADTOBLOB_CURL_VERBOSITY;
 
 typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA_TAG
 {
@@ -81,9 +66,10 @@ typedef struct IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA_TAG
     
     char* certificates;
     HTTP_PROXY_OPTIONS http_proxy_options;
-    UPOADTOBLOB_CURL_VERBOSITY curl_verbosity_level;
+    UPLOADTOBLOB_CURL_VERBOSITY curl_verbosity_level;
     size_t blob_upload_timeout_secs;
     const char* networkInterface;
+    bool tls_renegotiation;
 }IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA;
 
 typedef struct BLOB_UPLOAD_CONTEXT_TAG
@@ -98,7 +84,6 @@ static int send_http_sas_request(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* uplo
     int result;
     unsigned int statusCode;
 
-    /*Codes_SRS_IOTHUBCLIENT_LL_02_089: [ If creating the HTTPAPIEX_SAS_HANDLE fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
     HTTPAPIEX_SAS_HANDLE http_sas_handle = HTTPAPIEX_SAS_Create_From_String(IoTHubClient_Auth_Get_DeviceKey(upload_client->authorization_module), uri_resource, EMPTY_STRING);
     if (http_sas_handle == NULL)
     {
@@ -107,11 +92,9 @@ static int send_http_sas_request(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* uplo
     }
     else
     {
-        /*Codes_SRS_IOTHUBCLIENT_LL_32_003: [ IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall execute HTTPAPIEX_ExecuteRequest passing the following information for arguments: ]*/
         if (HTTPAPIEX_SAS_ExecuteRequest(http_sas_handle, http_api_handle, HTTPAPI_REQUEST_POST, relative_path, request_header,
             blobBuffer, &statusCode, NULL, response_buff) != HTTPAPIEX_OK)
         {
-            /*Codes_SRS_IOTHUBCLIENT_LL_02_076: [ If HTTPAPIEX_ExecuteRequest call fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
             result = MU_FAILURE;
             LogError("unable to HTTPAPIEX_ExecuteRequest");
         }
@@ -133,11 +116,9 @@ static int send_http_request(HTTPAPIEX_HANDLE http_api_handle, const char* relat
 {
     int result;
     unsigned int statusCode;
-    /*Codes_SRS_IOTHUBCLIENT_LL_32_003: [ IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall execute HTTPAPIEX_ExecuteRequest passing the following information for arguments: ]*/
     if (HTTPAPIEX_ExecuteRequest(http_api_handle, HTTPAPI_REQUEST_POST, relative_path, request_header,
         blobBuffer, &statusCode, NULL, response_buff) != HTTPAPIEX_OK)
     {
-        /*Codes_SRS_IOTHUBCLIENT_LL_02_076: [ If HTTPAPIEX_ExecuteRequest call fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
         result = MU_FAILURE;
         LogError("unable to HTTPAPIEX_ExecuteRequest");
     }
@@ -158,11 +139,9 @@ static int parse_result_json(const char* json_response, STRING_HANDLE correlatio
     int result;
 
     JSON_Object* json_obj;
-    /*Codes_SRS_IOTHUBCLIENT_LL_02_081: [ Otherwise, IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall use parson to extract and save the following information from the response buffer: correlationID and SasUri. ]*/
     JSON_Value* json = json_parse_string(json_response);
     if (json == NULL)
     {
-        /*Codes_SRS_IOTHUBCLIENT_LL_02_082: [ If extracting and saving the correlationId or SasUri fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
         LogError("unable to json_parse_string");
         result = MU_FAILURE;
 
@@ -207,10 +186,8 @@ static int parse_result_json(const char* json_response, STRING_HANDLE correlatio
                 LogError("unable to retrieve sas token from json");
                 result = MU_FAILURE;
             }
-            /*Codes_SRS_IOTHUBCLIENT_LL_32_008: [ The returned file name shall be URL encoded before passing back to the cloud. ]*/
             else if ((filename = URL_EncodeString(json_blob_name)) == NULL)
             {
-                /*Codes_SRS_IOTHUBCLIENT_LL_32_009: [ If URL_EncodeString fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
                 LogError("unable to URL encode of filename");
                 result = MU_FAILURE;
             }
@@ -218,13 +195,11 @@ static int parse_result_json(const char* json_response, STRING_HANDLE correlatio
             {
                 if (STRING_sprintf(sas_uri, "https://%s/%s/%s%s", json_hostname, json_container_name, STRING_c_str(filename), json_sas_token) != 0)
                 {
-                    /*Codes_SRS_IOTHUBCLIENT_LL_02_082: [ If extracting and saving the correlationId or SasUri fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
                     LogError("unable to construct uri string");
                     result = MU_FAILURE;
                 }
                 else if (STRING_copy(correlation_id, json_corr_id) != 0)
                 {
-                    /*Codes_SRS_IOTHUBCLIENT_LL_02_082: [ If extracting and saving the correlationId or SasUri fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
                     LogError("unable to copy correlation Id");
                     result = MU_FAILURE;
                     STRING_empty(sas_uri);
@@ -332,21 +307,17 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
 {
     int result;
 
-    /*Codes_SRS_IOTHUBCLIENT_LL_02_066: [ IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall create an HTTP relative path formed from "/devices/" + deviceId + "/files/" + "?api-version=API_VERSION". ]*/
     STRING_HANDLE relativePath = STRING_construct_sprintf("/devices/%s/files/%s", upload_data->deviceId, API_VERSION);
     if (relativePath == NULL)
     {
-        /*Codes_SRS_IOTHUBCLIENT_LL_02_067: [ If creating the relativePath fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
         LogError("Failure constructing string");
         result = MU_FAILURE;
     }
     else
     {
-        /*Codes_SRS_IOTHUBCLIENT_LL_32_001: [ IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall create a JSON string formed from "{ \"blobName\": \" + destinationFileName + "\" }" */
         STRING_HANDLE blobName = STRING_construct_sprintf("{ \"blobName\": \"%s\" }", destinationFileName);
         if (blobName == NULL)
         {
-            /*Codes_SRS_IOTHUBCLIENT_LL_32_002: [ If creating the JSON string fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
             LogError("Failure constructing string");
             result = MU_FAILURE;
         }
@@ -357,23 +328,18 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
             BUFFER_HANDLE blobBuffer = BUFFER_create((const unsigned char *)STRING_c_str(blobName), len);
             if (blobBuffer == NULL)
             {
-                /*Codes_SRS_IOTHUBCLIENT_LL_32_002: [ If creating the JSON string fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
                 LogError("unable to create BUFFER");
                 result = MU_FAILURE;
             }
             else
             {
-                /*Codes_SRS_IOTHUBCLIENT_LL_02_068: [ IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall create an HTTP responseContent BUFFER_HANDLE. ]*/
                 if ((responseContent = BUFFER_new()) == NULL)
                 {
-                    /*Codes_SRS_IOTHUBCLIENT_LL_02_069: [ If creating the HTTP response buffer handle fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
                     result = MU_FAILURE;
                     LogError("unable to BUFFER_new");
                 }
                 else
                 {
-                    /*Codes_SRS_IOTHUBCLIENT_LL_02_072: [ IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall add the following name:value to request HTTP headers: ] "Content-Type": "application/json" "Accept": "application/json" "User-Agent": "iothubclient/" IOTHUB_SDK_VERSION*/
-                    /*Codes_SRS_IOTHUBCLIENT_LL_02_107: [ - "Authorization" header shall not be build. ]*/
                     if (!(
                         (HTTPHeaders_AddHeaderNameValuePair(requestHttpHeaders, "Content-Type", HEADER_APP_JSON) == HTTP_HEADERS_OK) &&
                         (HTTPHeaders_AddHeaderNameValuePair(requestHttpHeaders, "Accept", HEADER_APP_JSON) == HTTP_HEADERS_OK) &&
@@ -382,7 +348,6 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                         (HTTPHeaders_AddHeaderNameValuePair(requestHttpHeaders, HEADER_AUTHORIZATION, EMPTY_STRING) == HTTP_HEADERS_OK))
                         ))
                     {
-                        /*Codes_SRS_IOTHUBCLIENT_LL_02_071: [ If creating the HTTP headers fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
                         LogError("unable to HTTPHeaders_AddHeaderNameValuePair");
                         result = MU_FAILURE;
                     }
@@ -405,7 +370,6 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                             {
                                 if (send_http_request(iotHubHttpApiExHandle, STRING_c_str(relativePath), requestHttpHeaders, blobBuffer, responseContent) != 0)
                                 {
-                                    /*Codes_SRS_IOTHUBCLIENT_LL_02_076: [ If HTTPAPIEX_ExecuteRequest call fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
                                     result = MU_FAILURE;
                                     LogError("unable to HTTPAPIEX_ExecuteRequest");
                                 }
@@ -421,7 +385,6 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                                 STRING_HANDLE uri_resource = STRING_construct_sprintf("%s/devices/%s", upload_data->hostname, upload_data->deviceId);
                                 if (uri_resource == NULL)
                                 {
-                                    /*Codes_SRS_IOTHUBCLIENT_LL_02_089: [ If creating the HTTPAPIEX_SAS_HANDLE fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
                                     result = MU_FAILURE;
                                     LogError("Failure constructing string");
                                 }
@@ -448,13 +411,11 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                                             {
                                                 if (HTTPHeaders_ReplaceHeaderNameValuePair(requestHttpHeaders, HEADER_AUTHORIZATION, sas_token) != HTTP_HEADERS_OK)
                                                 {
-                                                    /*Codes_SRS_IOTHUBCLIENT_LL_02_074: [ If adding "Authorization" fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR ]*/
                                                     result = MU_FAILURE;
                                                     LogError("unable to HTTPHeaders_AddHeaderNameValuePair");
                                                 }
                                                 else if (send_http_request(iotHubHttpApiExHandle, STRING_c_str(relativePath), requestHttpHeaders, blobBuffer, responseContent) != 0)
                                                 {
-                                                    /*Codes_SRS_IOTHUBCLIENT_LL_02_076: [ If HTTPAPIEX_ExecuteRequest call fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
                                                     result = MU_FAILURE;
                                                     LogError("unable to HTTPAPIEX_ExecuteRequest");
                                                 }
@@ -470,7 +431,6 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                                     {
                                         if (send_http_sas_request(upload_data, STRING_c_str(uri_resource), iotHubHttpApiExHandle, STRING_c_str(relativePath), requestHttpHeaders, blobBuffer, responseContent) != 0)
                                         {
-                                            /*Codes_SRS_IOTHUBCLIENT_LL_02_076: [ If HTTPAPIEX_ExecuteRequest call fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
                                             result = MU_FAILURE;
                                             LogError("unable to HTTPAPIEX_ExecuteRequest");
                                         }
@@ -485,16 +445,13 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                             }
                             case IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN:
                             {
-                                /*Codes_SRS_IOTHUBCLIENT_LL_02_073: [ If the credentials used to create handle have "sasToken" then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall add the following HTTP request headers: ]*/
                                 if (HTTPHeaders_ReplaceHeaderNameValuePair(requestHttpHeaders, HEADER_AUTHORIZATION, upload_data->credentials.supplied_sas_token) != HTTP_HEADERS_OK)
                                 {
-                                    /*Codes_SRS_IOTHUBCLIENT_LL_02_074: [ If adding "Authorization" fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR ]*/
                                     result = MU_FAILURE;
                                     LogError("unable to HTTPHeaders_AddHeaderNameValuePair");
                                 }
                                 else if (send_http_request(iotHubHttpApiExHandle, STRING_c_str(relativePath), requestHttpHeaders, blobBuffer, responseContent) != 0)
                                 {
-                                    /*Codes_SRS_IOTHUBCLIENT_LL_02_076: [ If HTTPAPIEX_ExecuteRequest call fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
                                     result = MU_FAILURE;
                                     LogError("unable to HTTPAPIEX_ExecuteRequest");
                                 }
@@ -519,7 +476,6 @@ static int IoTHubClient_LL_UploadToBlob_step1and2(IOTHUB_CLIENT_LL_UPLOADTOBLOB_
                             {
                                 if (parse_result_json(STRING_c_str(responseAsString), correlationId, sasUri) != 0)
                                 {
-                                    /*Codes_SRS_IOTHUBCLIENT_LL_02_082: [ If extracting and saving the correlationId or SasUri fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
                                     LogError("unable to parse json result");
                                     result = MU_FAILURE;
                                 }
@@ -550,7 +506,6 @@ static int IoTHubClient_LL_UploadToBlob_step3(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HAND
     /*if step 1 failed, there's nothing that step 3 needs to report.*/
     /*this POST "tries" to happen*/
 
-    /*Codes_SRS_IOTHUBCLIENT_LL_02_085: [ IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall use the same authorization as step 1. to prepare and perform a HTTP request with the following parameters: ]*/
     STRING_HANDLE relativePathNotification = STRING_construct_sprintf("/devices/%s/files/notifications/%s", upload_data->deviceId, API_VERSION);
     if (relativePathNotification == NULL)
     {
@@ -559,7 +514,6 @@ static int IoTHubClient_LL_UploadToBlob_step3(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HAND
     }
     else
     {
-        /*Codes_SRS_IOTHUBCLIENT_LL_02_086: [ If performing the HTTP request fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
         switch (upload_data->cred_type)
         {
             default:
@@ -666,8 +620,6 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
 {
     IOTHUB_CLIENT_RESULT result;
 
-    /*Codes_SRS_IOTHUBCLIENT_LL_02_061: [ If handle is NULL then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
-    /*Codes_SRS_IOTHUBCLIENT_LL_02_062: [ If destinationFileName is NULL then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
 
     if (handle == NULL || destinationFileName == NULL || getDataCallbackEx == NULL)
     {
@@ -678,15 +630,12 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
     {
         IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* upload_data = (IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA*)handle;
 
-        /*Codes_SRS_IOTHUBCLIENT_LL_02_064: [ IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall create an HTTPAPIEX_HANDLE to the IoTHub hostname. ]*/
         HTTPAPIEX_HANDLE iotHubHttpApiExHandle = HTTPAPIEX_Create(upload_data->hostname);
-        /*Codes_SRS_IOTHUBCLIENT_LL_02_065: [ If creating the HTTPAPIEX_HANDLE fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
         if (iotHubHttpApiExHandle == NULL)
         {
             LogError("unable to HTTPAPIEX_Create");
             result = IOTHUB_CLIENT_ERROR;
         }
-        /*Codes_SRS_IOTHUBCLIENT_LL_30_020: [ If the blob_upload_timeout_secs option has been set to non-zero, IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall set the timeout on the underlying transport accordingly. ]*/
         else if (set_transfer_timeout(upload_data, iotHubHttpApiExHandle) != HTTPAPIEX_OK)
         {
             LogError("unable to set blob transfer timeout");
@@ -694,9 +643,9 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
         }
         else
         {
-            if (upload_data->curl_verbosity_level != UPOADTOBLOB_CURL_VERBOSITY_UNSET)
+            if (upload_data->curl_verbosity_level != UPLOADTOBLOB_CURL_VERBOSITY_UNSET)
             {
-                size_t curl_verbose = (upload_data->curl_verbosity_level == UPOADTOBLOB_CURL_VERBOSITY_ON);
+                size_t curl_verbose = (upload_data->curl_verbosity_level == UPLOADTOBLOB_CURL_VERBOSITY_ON);
                 (void)HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_CURL_VERBOSE, &curl_verbose);
             }
 
@@ -708,18 +657,16 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
             else
             {
                 /*transmit the x509certificate and x509privatekey*/
-                /*Codes_SRS_IOTHUBCLIENT_LL_02_106: [ - x509certificate and x509privatekey saved options shall be passed on the HTTPAPIEX_SetOption ]*/
                 if ((upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_X509 || upload_data->cred_type == IOTHUB_CREDENTIAL_TYPE_X509_ECC) &&
-                    ((HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_X509_CERT, upload_data->credentials.x509_credentials.x509certificate) != HTTPAPIEX_OK) ||
-                    (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_X509_PRIVATE_KEY, upload_data->credentials.x509_credentials.x509privatekey) != HTTPAPIEX_OK))
-                    )
+                     (((upload_data->tls_renegotiation == true) && (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_SET_TLS_RENEGOTIATION, &upload_data->tls_renegotiation) != HTTPAPIEX_OK)) ||
+                     (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_X509_CERT, upload_data->credentials.x509_credentials.x509certificate) != HTTPAPIEX_OK) ||
+                     (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_X509_PRIVATE_KEY, upload_data->credentials.x509_credentials.x509privatekey) != HTTPAPIEX_OK)))
                 {
                     LogError("unable to HTTPAPIEX_SetOption for x509 certificate");
                     result = IOTHUB_CLIENT_ERROR;
                 }
                 else
                 {
-                    /*Codes_SRS_IOTHUBCLIENT_LL_02_111: [ If certificates is non-NULL then certificates shall be passed to HTTPAPIEX_SetOption with optionName TrustedCerts. ]*/
                     if ((upload_data->certificates != NULL) && (HTTPAPIEX_SetOption(iotHubHttpApiExHandle, OPTION_TRUSTED_CERT, upload_data->certificates) != HTTPAPIEX_OK))
                     {
                         LogError("unable to set TrustedCerts!");
@@ -765,7 +712,6 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
                             }
                             else
                             {
-                                /*Codes_SRS_IOTHUBCLIENT_LL_02_070: [ IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall create request HTTP headers. ]*/
                                 HTTP_HEADERS_HANDLE requestHttpHeaders = HTTPHeaders_Alloc(); /*these are build by step 1 and used by step 3 too*/
                                 if (requestHttpHeaders == NULL)
                                 {
@@ -793,11 +739,9 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
                                         }
                                         else
                                         {
-                                            /*Codes_SRS_IOTHUBCLIENT_LL_02_083: [ IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall call Blob_UploadFromSasUri and capture the HTTP return code and HTTP body. ]*/
                                             BLOB_RESULT uploadMultipleBlocksResult = Blob_UploadMultipleBlocksFromSasUri(STRING_c_str(sasUri), getDataCallbackEx, context, &httpResponse, responseToIoTHub, upload_data->certificates, &(upload_data->http_proxy_options), upload_data->networkInterface);
                                             if (uploadMultipleBlocksResult == BLOB_ABORTED)
                                             {
-                                                /*Codes_SRS_IOTHUBCLIENT_LL_99_008: [ If step 2 is aborted by the client, then the HTTP message body shall look like:  ]*/
                                                 LogInfo("Blob_UploadFromSasUri aborted file upload");
 
                                                 STRING_HANDLE aborted_response = STRING_construct_sprintf(RESPONSE_BODY_FORMAT,
@@ -822,7 +766,6 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
                                                         }
                                                         else
                                                         {
-                                                            /*Codes_SRS_IOTHUBCLIENT_LL_99_009: [ If step 2 is aborted by the client and if step 3 succeeds, then `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` shall return `IOTHUB_CLIENT_OK`. ] */
                                                             result = IOTHUB_CLIENT_OK;
                                                         }
                                                     }
@@ -836,11 +779,9 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
                                             }
                                             else if (uploadMultipleBlocksResult != BLOB_OK)
                                             {
-                                                /*Codes_SRS_IOTHUBCLIENT_LL_02_084: [ If Blob_UploadFromSasUri fails then IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex) shall fail and return IOTHUB_CLIENT_ERROR. ]*/
                                                 LogError("unable to Blob_UploadFromSasUri");
 
                                                 /*do step 3*/ /*try*/
-                                                /*Codes_SRS_IOTHUBCLIENT_LL_02_091: [ If step 2 fails without establishing an HTTP dialogue, then the HTTP message body shall look like: ]*/
                                                 STRING_HANDLE failed_response = STRING_construct_sprintf(RESPONSE_BODY_FORMAT, 
                                                                                             STRING_c_str(correlationId), 
                                                                                             RESPONSE_BODY_ERROR_BOOLEAN_STRING,
@@ -922,8 +863,6 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IOTHUB_CLIE
             HTTPAPIEX_Destroy(iotHubHttpApiExHandle);
         }
 
-        /*Codes_SRS_IOTHUBCLIENT_LL_99_003: [ If `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` return `IOTHUB_CLIENT_OK`, it shall call `getDataCallbackEx` with `result` set to `FILE_UPLOAD_OK`, and `data` and `size` set to NULL. ]*/
-        /*Codes_SRS_IOTHUBCLIENT_LL_99_004: [ If `IoTHubClient_LL_UploadMultipleBlocksToBlob(Ex)` does not return `IOTHUB_CLIENT_OK`, it shall call `getDataCallbackEx` with `result` set to `FILE_UPLOAD_ERROR`, and `data` and `size` set to NULL. ]*/
         (void)getDataCallbackEx(result == IOTHUB_CLIENT_OK ? FILE_UPLOAD_OK : FILE_UPLOAD_ERROR, NULL, NULL, context);
     }
     return result;
@@ -938,7 +877,6 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTO
         LogError("Invalid parameter handle:%p destinationFileName:%p", handle, destinationFileName);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
-    /*Codes_SRS_IOTHUBCLIENT_LL_02_063: [ If source is NULL and size is greater than 0 then IoTHubClient_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
     else if (source == NULL && size > 0)
     {
         LogError("Invalid source and size combination: source=%p size=%lu", source, (unsigned long)size);
@@ -946,13 +884,11 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_Impl(IOTHUB_CLIENT_LL_UPLOADTO
     }
     else
     {
-        /*Codes_SRS_IOTHUBCLIENT_LL_99_001: [ `IoTHubClient_LL_UploadToBlob` shall create a struct containing the `source`, the `size`, and the remaining size to upload.]*/
         BLOB_UPLOAD_CONTEXT context;
         context.blobSource = source;
         context.blobSourceSize = size;
         context.remainingSizeToUpload = size;
 
-        /*Codes_SRS_IOTHUBCLIENT_LL_99_002: [ `IoTHubClient_LL_UploadToBlob` shall call `IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl` with `FileUpload_GetData_Callback` as `getDataCallbackEx` and pass the struct created at step SRS_IOTHUBCLIENT_LL_99_001 as `context` ]*/
         result = IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(handle, destinationFileName, FileUpload_GetData_Callback, &context);
     }
     return result;
@@ -1006,7 +942,6 @@ void IoTHubClient_LL_UploadToBlob_Destroy(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE h
 IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE handle, const char* optionName, const void* value)
 {
     IOTHUB_CLIENT_RESULT result;
-    /*Codes_SRS_IOTHUBCLIENT_LL_02_110: [ If parameter handle is NULL then IoTHubClient_LL_UploadToBlob_SetOption shall fail and return IOTHUB_CLIENT_ERROR. ]*/
     if (handle == NULL)
     {
         LogError("invalid argument detected: IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE handle=%p, const char* optionName=%s, const void* value=%p", handle, optionName, value);
@@ -1016,10 +951,8 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
     {
         IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA* upload_data = (IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE_DATA*)handle;
 
-        /*Codes_SRS_IOTHUBCLIENT_LL_02_100: [ x509certificate - then value then is a null terminated string that contains the x509 certificate. ]*/
         if (strcmp(optionName, OPTION_X509_CERT) == 0)
         {
-            /*Codes_SRS_IOTHUBCLIENT_LL_02_109: [ If the authentication scheme is NOT x509 then IoTHubClient_LL_UploadToBlob_SetOption shall return IOTHUB_CLIENT_INVALID_ARG. ]*/
             if (upload_data->cred_type != IOTHUB_CREDENTIAL_TYPE_X509)
             {
                 LogError("trying to set a x509 certificate while the authentication scheme is not x509");
@@ -1027,18 +960,15 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
             }
             else
             {
-                /*Codes_SRS_IOTHUBCLIENT_LL_02_103: [ The options shall be saved. ]*/
                 /*try to make a copy of the certificate*/
                 char* temp;
                 if (mallocAndStrcpy_s(&temp, value) != 0)
                 {
-                    /*Codes_SRS_IOTHUBCLIENT_LL_02_104: [ If saving fails, then IoTHubClient_LL_UploadToBlob_SetOption shall fail and return IOTHUB_CLIENT_ERROR. ]*/
                     LogError("unable to mallocAndStrcpy_s");
                     result = IOTHUB_CLIENT_ERROR;
                 }
                 else
                 {
-                    /*Codes_SRS_IOTHUBCLIENT_LL_02_105: [ Otherwise IoTHubClient_LL_UploadToBlob_SetOption shall succeed and return IOTHUB_CLIENT_OK. ]*/
                     if (upload_data->credentials.x509_credentials.x509certificate != NULL) /*free any previous values, if any*/
                     {
                         free(upload_data->credentials.x509_credentials.x509certificate);
@@ -1048,10 +978,8 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
                 }
             }
         }
-        /*Codes_SRS_IOTHUBCLIENT_LL_02_101: [ x509privatekey - then value is a null terminated string that contains the x509 privatekey. ]*/
         else if (strcmp(optionName, OPTION_X509_PRIVATE_KEY) == 0)
         {
-            /*Codes_SRS_IOTHUBCLIENT_LL_02_109: [ If the authentication scheme is NOT x509 then IoTHubClient_LL_UploadToBlob_SetOption shall return IOTHUB_CLIENT_INVALID_ARG. ]*/
             if (upload_data->cred_type != IOTHUB_CREDENTIAL_TYPE_X509)
             {
                 LogError("trying to set a x509 privatekey while the authentication scheme is not x509");
@@ -1059,18 +987,15 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
             }
             else
             {
-                /*Codes_SRS_IOTHUBCLIENT_LL_02_103: [ The options shall be saved. ]*/
                 /*try to make a copy of the privatekey*/
                 char* temp;
                 if (mallocAndStrcpy_s(&temp, value) != 0)
                 {
-                    /*Codes_SRS_IOTHUBCLIENT_LL_02_104: [ If saving fails, then IoTHubClient_LL_UploadToBlob_SetOption shall fail and return IOTHUB_CLIENT_ERROR. ]*/
                     LogError("unable to mallocAndStrcpy_s");
                     result = IOTHUB_CLIENT_ERROR;
                 }
                 else
                 {
-                    /*Codes_SRS_IOTHUBCLIENT_LL_02_105: [ Otherwise IoTHubClient_LL_UploadToBlob_SetOption shall succeed and return IOTHUB_CLIENT_OK. ]*/
                     if (upload_data->credentials.x509_credentials.x509privatekey != NULL) /*free any previous values, if any*/
                     {
                         free(upload_data->credentials.x509_credentials.x509privatekey);
@@ -1106,18 +1031,15 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
                 }
             }
         }
-        /*Codes_SRS_IOTHUBCLIENT_LL_32_008: [ OPTION_HTTP_PROXY - then the value will be a pointer to HTTP_PROXY_OPTIONS structure. ]*/
         else if (strcmp(optionName, OPTION_HTTP_PROXY) == 0)
         {
             HTTP_PROXY_OPTIONS* proxy_options = (HTTP_PROXY_OPTIONS *)value;
 
             if (proxy_options->host_address == NULL)
             {
-                /* Codes_SRS_IOTHUBCLIENT_LL_32_006: [ If `host_address` is NULL, `IoTHubClient_LL_UploadToBlob_SetOption` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
                 LogError("NULL host_address in proxy options");
                 result = IOTHUB_CLIENT_INVALID_ARG;
             }
-            /* Codes_SRS_IOTHUBCLIENT_LL_32_007: [ If only one of `username` and `password` is NULL, `IoTHubClient_LL_UploadToBlob_SetOption` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
             else if (((proxy_options->username == NULL) || (proxy_options->password == NULL)) &&
                 (proxy_options->username != proxy_options->password))
             {
@@ -1167,7 +1089,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
         }
         else if (strcmp(optionName, OPTION_CURL_VERBOSE) == 0)
         {
-            upload_data->curl_verbosity_level = ((*(bool*)value) == 0) ? UPOADTOBLOB_CURL_VERBOSITY_OFF : UPOADTOBLOB_CURL_VERBOSITY_ON;
+            upload_data->curl_verbosity_level = ((*(bool*)value) == 0) ? UPLOADTOBLOB_CURL_VERBOSITY_OFF : UPLOADTOBLOB_CURL_VERBOSITY_ON;
             result = IOTHUB_CLIENT_OK;
         }
         else if (strcmp(optionName, OPTION_BLOB_UPLOAD_TIMEOUT_SECS) == 0)
@@ -1201,9 +1123,13 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob_SetOption(IOTHUB_CLIENT_LL_UPL
                 }
             }
         }
+        else if (strcmp(optionName, OPTION_BLOB_UPLOAD_TLS_RENEGOTIATION) == 0)
+        {
+            upload_data->tls_renegotiation = *((bool*)(value));
+            result = IOTHUB_CLIENT_OK;
+        }
         else
         {
-            /*Codes_SRS_IOTHUBCLIENT_LL_02_102: [ If an unknown option is presented then IoTHubClient_LL_UploadToBlob_SetOption shall return IOTHUB_CLIENT_INVALID_ARG. ]*/
             result = IOTHUB_CLIENT_INVALID_ARG;
         }
     }

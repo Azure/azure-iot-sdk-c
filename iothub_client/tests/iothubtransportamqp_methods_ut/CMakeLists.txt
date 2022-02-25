@@ -21,7 +21,7 @@ generate_cppunittest_wrapper(${theseTestsName})
 
 set(${theseTestsName}_c_files
 	../../src/iothubtransportamqp_methods.c
-	real_crt_abstractions.c
+	${SHARED_UTIL_REAL_TEST_FOLDER}/real_crt_abstractions.c
 )
 
 set(${theseTestsName}_h_files

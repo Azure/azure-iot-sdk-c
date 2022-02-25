@@ -216,7 +216,6 @@ BEGIN_TEST_SUITE(prov_transport_amqp_ws_client_ut)
         return result;
     }
 
-    /* Tests_PROV_TRANSPORT_AMQP_WS_CLIENT_07_001: [ prov_transport_amqp_ws_create shall call the prov_transport_common_amqp_create function with amqp_transport_ws_io transport IO estabishment. ] */
     TEST_FUNCTION(prov_transport_amqp_create_succeed)
     {
         //arrange
@@ -232,9 +231,6 @@ BEGIN_TEST_SUITE(prov_transport_amqp_ws_client_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_AMQP_WS_CLIENT_07_014: [ On success amqp_transport_ws_io shall return an allocated DPS_TRANSPORT_IO_INFO structure. ] */
-    /* Tests_PROV_TRANSPORT_AMQP_WS_CLIENT_07_015: [ amqp_transport_ws_io shall allocate a transfer_handle by calling xio_create with the tlsio_interface. ] */
-    /* Tests_PROV_TRANSPORT_AMQP_WS_CLIENT_07_016: [ amqp_transport_ws_io shall allocate a DPS_TRANSPORT_IO_INFO sasl_handle by calling xio_create with the saslio_interface. ] */
     TEST_FUNCTION(prov_amqp_transport_ws_io_succeed)
     {
         SASL_MECHANISM_HANDLE sasl_mechanism = { 0 };
@@ -261,7 +257,6 @@ BEGIN_TEST_SUITE(prov_transport_amqp_ws_client_ut)
         my_gballoc_free(dps_io_info);
     }
 
-    /* Tests_PROV_TRANSPORT_AMQP_WS_CLIENT_07_017: [ If sasl_mechanism is NULL amqp_transport_ws_io shall assign the transfer_handle to the result and return the value. ] */
     TEST_FUNCTION(prov_amqp_transport_ws_io_x509_succeed)
     {
         PROV_TRANSPORT_IO_INFO* dps_io_info;
@@ -285,7 +280,6 @@ BEGIN_TEST_SUITE(prov_transport_amqp_ws_client_ut)
         my_gballoc_free(dps_io_info);
     }
 
-    /* Tests_PROV_TRANSPORT_AMQP_WS_CLIENT_07_013: [ If any failure is encountered amqp_transport_ws_io shall return NULL ] */
     TEST_FUNCTION(prov_amqp_transport_ws_io_fail)
     {
         SASL_MECHANISM_HANDLE sasl_mechanism = { 0 };
@@ -333,7 +327,6 @@ BEGIN_TEST_SUITE(prov_transport_amqp_ws_client_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /* Tests_PROV_TRANSPORT_AMQP_WS_CLIENT_07_012: [ If proxy_info is not NULL, amqp_transport_ws_io shall construct a HTTP_PROXY_IO_CONFIG object and assign it to TLSIO_CONFIG underlying_io_parameters ] */
     TEST_FUNCTION(prov_amqp_transport_ws_io_w_http_proxy_succeed)
     {
         SASL_MECHANISM_HANDLE sasl_mechanism = { 0 };
@@ -366,7 +359,6 @@ BEGIN_TEST_SUITE(prov_transport_amqp_ws_client_ut)
         my_gballoc_free(dps_io_info);
     }
 
-    /* Tests_PROV_TRANSPORT_AMQP_WS_CLIENT_07_002: [ prov_transport_amqp_ws_destroy shall invoke the prov_transport_common_amqp_destroy method ] */
     TEST_FUNCTION(prov_transport_amqp_destroy_succeed)
     {
         //arrange
@@ -381,7 +373,6 @@ BEGIN_TEST_SUITE(prov_transport_amqp_ws_client_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_AMQP_WS_CLIENT_07_003: [ prov_transport_amqp_ws_open shall invoke the prov_transport_common_amqp_open method ] */
     TEST_FUNCTION(prov_transport_amqp_open_succeed)
     {
         //arrange
@@ -397,7 +388,6 @@ BEGIN_TEST_SUITE(prov_transport_amqp_ws_client_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_AMQP_WS_CLIENT_07_004: [ prov_transport_amqp_ws_close shall invoke the prov_transport_common_amqp_close method ] */
     TEST_FUNCTION(prov_transport_amqp_close_succeed)
     {
         //arrange
@@ -413,7 +403,6 @@ BEGIN_TEST_SUITE(prov_transport_amqp_ws_client_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_AMQP_WS_CLIENT_07_005: [ prov_transport_amqp_ws_register_device shall invoke the prov_transport_common_amqp_register_device method ] */
     TEST_FUNCTION(prov_transport_amqp_register_device_succeed)
     {
         //arrange
@@ -429,7 +418,6 @@ BEGIN_TEST_SUITE(prov_transport_amqp_ws_client_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_AMQP_WS_CLIENT_07_006: [ prov_transport_amqp_ws_get_operation_status shall invoke the prov_transport_common_amqp_get_operation_status method ] */
     TEST_FUNCTION(prov_transport_amqp_get_operation_status_succeed)
     {
         //arrange
@@ -445,7 +433,6 @@ BEGIN_TEST_SUITE(prov_transport_amqp_ws_client_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_AMQP_WS_CLIENT_07_007: [ prov_transport_amqp_ws_dowork shall invoke the prov_transport_common_amqp_dowork method ] */
     TEST_FUNCTION(prov_transport_amqp_dowork_succeed)
     {
         //arrange
@@ -460,7 +447,6 @@ BEGIN_TEST_SUITE(prov_transport_amqp_ws_client_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_AMQP_WS_CLIENT_07_008: [ prov_transport_amqp_ws_set_trace shall invoke the prov_transport_common_amqp_set_trace method ] */
     TEST_FUNCTION(prov_transport_amqp_set_trace_succeed)
     {
         //arrange
@@ -476,7 +462,6 @@ BEGIN_TEST_SUITE(prov_transport_amqp_ws_client_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_AMQP_WS_CLIENT_07_009: [ prov_transport_amqp_ws_x509_cert shall invoke the prov_transport_common_amqp_x509_cert method ] */
     TEST_FUNCTION(prov_transport_amqp_x509_cert_succeed)
     {
         //arrange
@@ -492,7 +477,6 @@ BEGIN_TEST_SUITE(prov_transport_amqp_ws_client_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_AMQP_WS_CLIENT_07_010: [ prov_transport_amqp_ws_set_trusted_cert shall invoke the prov_transport_common_amqp_set_trusted_cert method ] */
     TEST_FUNCTION(prov_transport_amqp_set_trusted_cert_succeed)
     {
         //arrange
@@ -508,7 +492,6 @@ BEGIN_TEST_SUITE(prov_transport_amqp_ws_client_ut)
         //cleanup
     }
 
-    /* Tests_PROV_TRANSPORT_AMQP_WS_CLIENT_07_011: [ prov_transport_amqp_ws_set_proxy shall invoke the prov_transport_common_amqp_set_proxy method ] */
     TEST_FUNCTION(prov_transport_amqp_set_proxy_succeed)
     {
         //arrange

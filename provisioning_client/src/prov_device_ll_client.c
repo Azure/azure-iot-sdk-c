@@ -24,7 +24,14 @@
 #include "azure_prov_client/prov_device_ll_client.h"
 #include "azure_prov_client/prov_client_const.h"
 
-static const char* const OPTION_LOG_TRACE = "logtrace";
+#ifdef HSM_TYPE_X509
+#include "hsm_client_x509.h"
+#endif
+
+#ifdef HSM_TYPE_RIOT
+#include "hsm_client_riot.h"
+#endif
+
 
 static const char* const JSON_NODE_STATUS = "status";
 static const char* const JSON_NODE_REG_STATUS = "registrationState";
@@ -45,7 +52,7 @@ static const char* const JSON_NODE_RETURNED_DATA = "payload";
 static const char* const SAS_TOKEN_SCOPE_FMT = "%s/registrations/%s";
 
 static const char* const REGISTRATION_ID = "registrationId";
-static const char* const JSON_ENDORSMENT_KEY_NODE = "endorsementKey";
+static const char* const JSON_ENDORSEMENT_KEY_NODE = "endorsementKey";
 static const char* const JSON_STORAGE_ROOT_KEY_NODE = "storageRootKey";
 
 #define DPS_HUB_ERROR_NO_HUB        400208
@@ -348,7 +355,7 @@ static JSON_Value* construct_security_type_json(PROV_INSTANCE_INFO* prov_info, c
                     json_value_free(result);
                     result = NULL;
                 }
-                else if (json_object_set_string(tpm_object, JSON_ENDORSMENT_KEY_NODE, ek_value) != JSONSuccess)
+                else if (json_object_set_string(tpm_object, JSON_ENDORSEMENT_KEY_NODE, ek_value) != JSONSuccess)
                 {
                     LogError("failure setting endorsement key node");
                     json_value_free(tpm_node);
@@ -715,7 +722,7 @@ static void on_transport_registration_data(PROV_DEVICE_TRANSPORT_RESULT transpor
 {
     if (user_ctx == NULL)
     {
-        LogError("user context was unexpectantly NULL");
+        LogError("user context was unexpectedly NULL");
     }
     else
     {
@@ -738,7 +745,6 @@ static void on_transport_registration_data(PROV_DEVICE_TRANSPORT_RESULT transpor
                     const unsigned char* key_value = BUFFER_u_char(iothub_key);
                     size_t key_len = BUFFER_length(iothub_key);
 
-                    /* Codes_SRS_SECURE_ENCLAVE_CLIENT_07_028: [ prov_auth_import_key shall import the specified key into the tpm using secure_device_import_key secure enclave function. ] */
                     if (prov_auth_import_key(prov_info->prov_auth_handle, key_value, key_len) != 0)
                     {
                         prov_info->prov_state = CLIENT_STATE_ERROR;
@@ -777,7 +783,7 @@ static void on_transport_status(PROV_DEVICE_TRANSPORT_STATUS transport_status, u
 {
     if (user_ctx == NULL)
     {
-        LogError("user_ctx was unexpectatly NULL");
+        LogError("user_ctx was unexpectedly NULL");
     }
     else
     {
@@ -825,7 +831,7 @@ static void on_transport_status(PROV_DEVICE_TRANSPORT_STATUS transport_status, u
                 else
                 {
                     // Ideally this should not happen
-                    LogError("State Error: Transient Error occured in the %d state", (int)transport_status);
+                    LogError("State Error: Transient Error occurred in the %d state", (int)transport_status);
                 }
                 break;
             default:
@@ -857,7 +863,6 @@ static void destroy_instance(PROV_INSTANCE_INFO* prov_info)
 PROV_DEVICE_LL_HANDLE Prov_Device_LL_Create(const char* uri, const char* id_scope, PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION protocol)
 {
     PROV_INSTANCE_INFO* result;
-    /* Codes_SRS_PROV_CLIENT_07_001: [If uri is NULL Prov_Device_LL_CreateFromUri shall return NULL.] */
     if (uri == NULL || id_scope == NULL || protocol == NULL)
     {
         LogError("Invalid parameter specified uri: %p, id_scope: %p, protocol: %p", uri, id_scope, protocol);
@@ -867,7 +872,6 @@ PROV_DEVICE_LL_HANDLE Prov_Device_LL_Create(const char* uri, const char* id_scop
     {
         srand((unsigned int)get_time(NULL));
 
-        /* Codes_SRS_PROV_CLIENT_07_002: [ Prov_Device_LL_CreateFromUri shall allocate a PROV_DEVICE_LL_HANDLE and initialize all members. ] */
         result = (PROV_INSTANCE_INFO*)malloc(sizeof(PROV_INSTANCE_INFO));
         if (result == NULL)
         {
@@ -877,23 +881,19 @@ PROV_DEVICE_LL_HANDLE Prov_Device_LL_Create(const char* uri, const char* id_scop
         {
             memset(result, 0, sizeof(PROV_INSTANCE_INFO));
 
-            /* Codes_SRS_PROV_CLIENT_07_028: [ CLIENT_STATE_READY is the initial state after the object is created which will send a uhttp_client_open call to the http endpoint. ] */
             result->prov_state = CLIENT_STATE_READY;
             result->retry_after_ms = PROV_GET_THROTTLE_TIME * 1000;
             result->prov_transport_protocol = protocol();
             result->error_reason = PROV_DEVICE_RESULT_OK;
 
-            /* Codes_SRS_PROV_CLIENT_07_034: [ Prov_Device_LL_Create shall construct a id_scope by base64 encoding the uri. ] */
             if (mallocAndStrcpy_s(&result->scope_id, id_scope) != 0)
             {
-                /* Codes_SRS_PROV_CLIENT_07_003: [ If any error is encountered, Prov_Device_LL_CreateFromUri shall return NULL. ] */
                 LogError("failed to construct id_scope");
                 free(result);
                 result = NULL;
             }
             else if ((result->prov_auth_handle = prov_auth_create()) == NULL)
             {
-                /* Codes_SRS_PROV_CLIENT_07_003: [ If any error is encountered, Prov_Device_LL_CreateFromUri shall return NULL. ] */
                 LogError("failed calling prov_auth_create\r\n");
                 destroy_instance(result);
                 result = NULL;
@@ -922,7 +922,6 @@ PROV_DEVICE_LL_HANDLE Prov_Device_LL_Create(const char* uri, const char* id_scop
 
                 if ((result->transport_handle = result->prov_transport_protocol->prov_transport_create(uri, hsm_type, result->scope_id, PROV_API_VERSION, on_transport_error, result)) == NULL)
                 {
-                    /* Codes_SRS_PROV_CLIENT_07_003: [ If any error is encountered, Prov_Device_LL_CreateFromUri shall return NULL. ] */
                     LogError("failed calling into transport create");
                     destroy_instance(result);
                     result = NULL;
@@ -941,10 +940,8 @@ PROV_DEVICE_LL_HANDLE Prov_Device_LL_Create(const char* uri, const char* id_scop
 
 void Prov_Device_LL_Destroy(PROV_DEVICE_LL_HANDLE handle)
 {
-    /* Codes_SRS_PROV_CLIENT_07_005: [ If handle is NULL Prov_Device_LL_Destroy shall do nothing. ] */
     if (handle != NULL)
     {
-        /* Codes_SRS_PROV_CLIENT_07_006: [ Prov_Device_LL_Destroy shall destroy resources associated with the IoTHub_client ] */
         destroy_instance(handle);
     }
 }
@@ -952,16 +949,13 @@ void Prov_Device_LL_Destroy(PROV_DEVICE_LL_HANDLE handle)
 PROV_DEVICE_RESULT Prov_Device_LL_Register_Device(PROV_DEVICE_LL_HANDLE handle, PROV_DEVICE_CLIENT_REGISTER_DEVICE_CALLBACK register_callback, void* user_context, PROV_DEVICE_CLIENT_REGISTER_STATUS_CALLBACK reg_status_cb, void* status_ctx)
 {
     PROV_DEVICE_RESULT result;
-    /* Codes_SRS_PROV_CLIENT_07_007: [ If handle or register_callback is NULL, Prov_Device_LL_Register_Device shall return PROV_CLIENT_INVALID_ARG. ] */
     if (handle == NULL || register_callback == NULL)
     {
         LogError("Invalid parameter specified handle: %p register_callback: %p", handle, register_callback);
         result = PROV_DEVICE_RESULT_INVALID_ARG;
     }
-    /* Codes_SRS_PROV_CLIENT_07_035: [ Prov_Device_LL_Create shall store the registration_id from the security module. ] */
     else if (handle->registration_id == NULL && (handle->registration_id = prov_auth_get_registration_id(handle->prov_auth_handle)) == NULL)
     {
-        /* Codes_SRS_PROV_CLIENT_07_003: [ If any error is encountered, Prov_Device_LL_CreateFromUri shall return NULL. ] */
         LogError("failure: Unable to retrieve registration Id from device auth.");
         result = PROV_DEVICE_RESULT_ERROR;
     }
@@ -1062,7 +1056,6 @@ PROV_DEVICE_RESULT Prov_Device_LL_Register_Device(PROV_DEVICE_LL_HANDLE handle, 
         }
         if (result == PROV_DEVICE_RESULT_OK)
         {
-            /* Codes_SRS_PROV_CLIENT_07_008: [ Prov_Device_LL_Register_Device shall set the state to send the registration request to on subsequent DoWork calls. ] */
             handle->register_callback = register_callback;
             handle->user_context = user_context;
 
@@ -1078,7 +1071,7 @@ PROV_DEVICE_RESULT Prov_Device_LL_Register_Device(PROV_DEVICE_LL_HANDLE handle, 
 
             if (handle->prov_transport_protocol->prov_transport_open(handle->transport_handle, handle->registration_id, ek_value, srk_value, on_transport_registration_data, handle, on_transport_status, handle, prov_transport_challenge_callback, handle) != 0)
             {
-                LogError("Failure establishing  connection");
+                LogError("Failure establishing connection");
                 if (!handle->user_supplied_reg_id)
                 {
                     free(handle->registration_id);
@@ -1089,13 +1082,12 @@ PROV_DEVICE_RESULT Prov_Device_LL_Register_Device(PROV_DEVICE_LL_HANDLE handle, 
 
                 handle->register_status_cb = NULL;
                 handle->status_user_ctx = NULL;
-                result = PROV_DEVICE_RESULT_ERROR;
+                result = PROV_DEVICE_RESULT_TRANSPORT;
             }
             else
             {
                 handle->transport_open = true;
                 handle->prov_state = CLIENT_STATE_REGISTER_SEND;
-                /* Codes_SRS_PROV_CLIENT_07_009: [ Upon success Prov_Device_LL_Register_Device shall return PROV_CLIENT_OK. ] */
                 result = PROV_DEVICE_RESULT_OK;
             }
             BUFFER_delete(ek_value);
@@ -1107,11 +1099,9 @@ PROV_DEVICE_RESULT Prov_Device_LL_Register_Device(PROV_DEVICE_LL_HANDLE handle, 
 
 void Prov_Device_LL_DoWork(PROV_DEVICE_LL_HANDLE handle)
 {
-    /* Codes_SRS_PROV_CLIENT_07_010: [ If handle is NULL, Prov_Device_LL_DoWork shall do nothing. ] */
     if (handle != NULL)
     {
         PROV_INSTANCE_INFO* prov_info = (PROV_INSTANCE_INFO*)handle;
-        /* Codes_SRS_PROV_CLIENT_07_011: [ Prov_Device_LL_DoWork shall call the underlying http_client_dowork function ] */
         if (prov_info->prov_state != CLIENT_STATE_ERROR)
         {
             prov_info->prov_transport_protocol->prov_transport_dowork(prov_info->transport_handle);
@@ -1133,7 +1123,6 @@ void Prov_Device_LL_DoWork(PROV_DEVICE_LL_HANDLE handle)
                     {
                         if ((current_time - prov_info->last_send_time_ms) > prov_info->retry_after_ms)
                         {
-                            /* Codes_SRS_PROV_CLIENT_07_013: [ CLIENT_STATE_REGISTER_SEND which shall construct an initial call to the service with endorsement information ] */
                             if (prov_info->prov_transport_protocol->prov_transport_register(prov_info->transport_handle, prov_transport_process_json_reply, prov_transport_create_json_payload, prov_info) != 0)
                             {
                                 LogError("Failure registering device");
@@ -1165,7 +1154,6 @@ void Prov_Device_LL_DoWork(PROV_DEVICE_LL_HANDLE handle)
                     {
                         if ((current_time - prov_info->last_send_time_ms) > prov_info->retry_after_ms)
                         {
-                            /* Codes_SRS_PROV_CLIENT_07_026: [ Upon receiving the reply of the CLIENT_STATE_URL_REQ_SEND message from  iothub_client shall process the the reply of the CLIENT_STATE_URL_REQ_SEND state ] */
                             if (prov_info->prov_transport_protocol->prov_transport_get_op_status(prov_info->transport_handle) != 0)
                             {
                                 LogError("Failure sending operation status");
@@ -1259,7 +1247,7 @@ PROV_DEVICE_RESULT Prov_Device_LL_SetOption(PROV_DEVICE_LL_HANDLE handle, const 
                 result = PROV_DEVICE_RESULT_OK;
             }
         }
-        else if (strcmp(OPTION_LOG_TRACE, option_name) == 0)
+        else if (strcmp(PROV_OPTION_LOG_TRACE, option_name) == 0)
         {
             bool log_trace = *((bool*)value);
             if (handle->prov_transport_protocol->prov_transport_set_trace(handle->transport_handle, log_trace) != 0)
@@ -1274,7 +1262,6 @@ PROV_DEVICE_RESULT Prov_Device_LL_SetOption(PROV_DEVICE_LL_HANDLE handle, const 
         }
         else if (strcmp(OPTION_HTTP_PROXY, option_name) == 0)
         {
-            /* Codes_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_01_001: [ If `option` is `proxy_data`, `value` shall be used as an `HTTP_PROXY_OPTIONS*`. ]*/
             HTTP_PROXY_OPTIONS* proxy_options = (HTTP_PROXY_OPTIONS*)value;
 
             if (handle->prov_transport_protocol->prov_transport_set_proxy(handle->transport_handle, proxy_options) != 0)
@@ -1336,6 +1323,40 @@ PROV_DEVICE_RESULT Prov_Device_LL_SetOption(PROV_DEVICE_LL_HANDLE handle, const 
                     handle->user_supplied_reg_id = true;
                     result = PROV_DEVICE_RESULT_OK;
                 }
+            }
+        }
+        else if (strcmp(OPTION_X509_CERT, option_name) == 0)
+        {
+            if (handle->prov_state != CLIENT_STATE_READY)
+            {
+                LogError("Certificates cannot be set after registration has begun");
+                result = PROV_DEVICE_RESULT_ERROR;
+            }
+            else if (prov_auth_set_certificate(handle->prov_auth_handle, value) != 0)
+            {
+                LogError("Failure setting certificate");
+                result = PROV_DEVICE_RESULT_ERROR;
+            }
+            else
+            {
+                result = PROV_DEVICE_RESULT_OK;
+            }
+        }
+        else if (strcmp(OPTION_X509_PRIVATE_KEY, option_name) == 0)
+        {
+            if (handle->prov_state != CLIENT_STATE_READY)
+            {
+                LogError("Certificates cannot be set after registration has begun");
+                result = PROV_DEVICE_RESULT_ERROR;
+            }
+            else if (prov_auth_set_key(handle->prov_auth_handle, value) != 0)
+            {
+                LogError("Failure setting key");
+                result = PROV_DEVICE_RESULT_ERROR;
+            }
+            else
+            {
+                result = PROV_DEVICE_RESULT_OK;
             }
         }
         else

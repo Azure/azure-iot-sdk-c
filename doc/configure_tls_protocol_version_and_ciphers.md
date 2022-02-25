@@ -8,11 +8,11 @@ To use exclusively TLS 1.2 in Microsoft Windows using SChannel, disable the supp
 
 Be aware that this action might impact other applications in the systems that might not support higher versions of TLS.
 
-To disable support in SChannel for TLS 1.0, follow this [documentation](https://docs.microsoft.com/en-us/windows-server/identity/ad-fs/operations/manage-ssl-protocols-in-ad-fs#enable-and-disable-tls-10).
+To disable support in SChannel for TLS 1.0, follow this [documentation](https://docs.microsoft.com/windows-server/identity/ad-fs/operations/manage-ssl-protocols-in-ad-fs#enable-and-disable-tls-10).
 
-To disable support in SChannel for TLS 1.1, follow this [documentation](https://docs.microsoft.com/en-us/windows-server/identity/ad-fs/operations/manage-ssl-protocols-in-ad-fs#enable-and-disable-tls-11).
+To disable support in SChannel for TLS 1.1, follow this [documentation](https://docs.microsoft.com/windows-server/identity/ad-fs/operations/manage-ssl-protocols-in-ad-fs#enable-and-disable-tls-11).
 
-For more information on TLS configuration please see the [following documentation](https://docs.microsoft.com/en-us/dotnet/framework/network-programming/tls). 
+For more information on TLS configuration please see the [following documentation](https://docs.microsoft.com/dotnet/framework/network-programming/tls). 
 
 
 ### OpenSSL
@@ -60,7 +60,7 @@ Currently the Azure IoT C SDK does not directly set the minimum version of TLS t
 
 ### SChannel (Microsoft Windows)
 
-To configure additional ciphers for SChannel please follow this [documentation](https://docs.microsoft.com/en-us/windows-server/identity/ad-fs/operations/manage-ssl-protocols-in-ad-fs#enabling-or-disabling-additional-cipher-suites).
+To configure additional ciphers for SChannel please follow this [documentation](https://docs.microsoft.com/windows-server/identity/ad-fs/operations/manage-ssl-protocols-in-ad-fs#enabling-or-disabling-additional-cipher-suites).
 
 
 ### OpenSSL

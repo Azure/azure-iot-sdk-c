@@ -82,6 +82,12 @@ Detailed instructions can be found below for each platforms:
 
 <a name="samples"></a>
 
+## CMake
+
+The C device SDK uses [CMake](https://cmake.org/) for compiler independent configuration and generates native build files and workspaces that can be used in the compiler environment of your choice.
+
+* [SDK CMake integration with your application](../doc/how_to_use_azure_iot_sdk_c_with_cmake.md)
+
 ## Samples
 
 The repository contains a set of simple samples that will help you get started.
@@ -100,7 +106,7 @@ In addition to the simple samples found in the current repository, you can find 
 
 
 [iot-dev-center]: http://azure.com/iotdev
-[iot-hub-documentation]: https://docs.microsoft.com/en-us/azure/iot-hub/
+[iot-hub-documentation]: https://docs.microsoft.com/azure/iot-hub/
 [device-catalog]: https://catalog.azureiotsuite.com
 [devbox-setup]: ../doc/devbox_setup.md
 [setup-iothub]: https://aka.ms/howtocreateazureiothub

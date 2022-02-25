@@ -45,7 +45,6 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 #include "azure_c_shared_utility/constbuffer.h"
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/envvariable.h"
-#include "azure_c_shared_utility/urlencode.h"
 
 #include "iothub_client_version.h"
 #include "iothub_message.h"
@@ -60,8 +59,9 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 
 #include "iothub_transport_ll.h"
 #include "iothub_client_core_common.h"
-#include "internal/iothub_transport_ll_private.h"
 #undef ENABLE_MOCKS
+
+#include "internal/iothub_transport_ll_private.h"
 
 #include "iothub_client_core_ll.h"
 #include "internal/iothub_client_private.h"
@@ -618,7 +618,7 @@ static TRANSPORT_PROVIDER FAKE_transport_provider =
     FAKE_IoTHubTransport_Create,        /*pfIoTHubTransport_Create IoTHubTransport_Create;              */
     FAKE_IoTHubTransport_Destroy,       /*pfIoTHubTransport_Destroy IoTHubTransport_Destroy;            */
     FAKE_IoTHubTransport_Register,      /*pfIotHubTransport_Register IoTHubTransport_Register;          */
-    FAKE_IoTHubTransport_Unregister,    /*pfIotHubTransport_Unregister IoTHubTransport_Unegister;       */
+    FAKE_IoTHubTransport_Unregister,    /*pfIotHubTransport_Unregister IoTHubTransport_Unregister;       */
     FAKE_IoTHubTransport_Subscribe,     /*pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;        */
     FAKE_IoTHubTransport_Unsubscribe,   /*pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;    */
     FAKE_IoTHubTransport_DoWork,        /*pfIoTHubTransport_DoWork IoTHubTransport_DoWork;              */
@@ -792,6 +792,7 @@ TEST_SUITE_INITIALIZE(suite_init)
 
 #ifndef DONT_USE_UPLOADTOBLOB
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_FILE_UPLOAD_GET_DATA_CALLBACK_EX, void*);
 #endif // DONT_USE_UPLOADTOBLOB
 
 #ifdef USE_EDGE_MODULES
@@ -958,6 +959,9 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_find, real_singlylinkedlist_find);
     REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_foreach, real_singlylinkedlist_foreach);
     REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_remove_if, real_singlylinkedlist_remove_if);
+
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_LL_UploadToBlob_Impl, IOTHUB_CLIENT_OK);
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl, IOTHUB_CLIENT_OK);
 }
 
 TEST_SUITE_CLEANUP(suite_cleanup)
@@ -1193,17 +1197,6 @@ static void setup_IoTHubClientCore_LL_createfromconnectionstring_mocks(const cha
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_NUM_ARG)).IgnoreArgument_ptr();
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_12_004: [IoTHubClientCore_LL_CreateFromConnectionString shall allocate IOTHUB_CLIENT_CONFIG structure] */
-/*Tests_SRS_IoTHubClientCore_LL_12_006: [IoTHubClientCore_LL_CreateFromConnectionString shall verify the existence of the following Key/Value pairs in the connection string: HostName, DeviceId, SharedAccessKey, SharedAccessSignature or x509]  */
-/*Tests_SRS_IoTHubClientCore_LL_03_010: [IoTHubClientCore_LL_CreateFromConnectionString shall return NULL if both a deviceKey & a deviceSasToken are specified.] */
-/*Tests_SRS_IoTHubClientCore_LL_12_013: [If the parsing failed IoTHubClientCore_LL_CreateFromConnectionString returns NULL]  */
-/*Tests_SRS_IoTHubClientCore_LL_12_014: [If either of key is missing or x509 is not set to "true" then IoTHubClientCore_LL_CreateFromConnectionString returns NULL ]*/
-/*Tests_SRS_IoTHubClientCore_LL_12_016: [IoTHubClientCore_LL_CreateFromConnectionString shall return NULL if IoTHubClientCore_LL_Create call fails] */
-/*Tests_SRS_IoTHubClientCore_LL_02_093: [ If creating the IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE fails then IoTHubClientCore_LL_CreateFromConnectionString shall fail and return NULL. ]*/
-/* Tests_SRS_IoTHubClientCore_LL_12_006: [IoTHubClientCore_LL_CreateFromConnectionString shall verify the existence of the following Key/Value pairs in the connection string: HostName, DeviceId, SharedAccessKey, SharedAccessSignature or x509.]  */
-/*Tests_SRS_IoTHubClientCore_LL_12_014: [If either of key is missing or x509 is not set to "true" then IoTHubClientCore_LL_CreateFromConnectionString returns NULL ]*/
-/* Tests_SRS_IoTHubClientCore_LL_12_009: [IoTHubClientCore_LL_CreateFromConnectionString shall split the value of HostName to Name and Suffix using the first "." as a separator] */
-/* Tests_SRS_IoTHubClientCore_LL_12_015: [If the string split failed, IoTHubClientCore_LL_CreateFromConnectionString returns NULL ] */
 TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_with_DeviceKey_fail)
 {
     int negativeTestsInitResult = umock_c_negative_tests_init();
@@ -1238,10 +1231,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_with_DeviceKey_fail
     umock_c_negative_tests_deinit();
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_02_092: [ IoTHubClientCore_LL_CreateFomConnectionString shall create a IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE from IOTHUB_CLIENT_CONFIG. ]*/
-/* Tests_SRS_IoTHubClientCore_LL_12_011: [IoTHubClientCore_LL_CreateFromConnectionString shall call into the IoTHubClientCore_LL_Create API with the current structure and returns with the return value of it] */
-/* Tests_SRS_IoTHubClientCore_LL_12_010: [IoTHubClientCore_LL_CreateFromConnectionString shall fill up the IOTHUB_CLIENT_CONFIG structure using the following mapping: iotHubName = Name, iotHubSuffix = Suffix, deviceId = DeviceId, deviceKey = SharedAccessKey or deviceSasToken = SharedAccessSignature] */
-/* Tests_SRS_IoTHubClientCore_LL_04_002: [If it does not, it shall pass the protocolGatewayHostName NULL.] */
 TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_with_DeviceKey_succeeds)
 {
     //arrange
@@ -1274,9 +1263,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_with_provisioning_s
     IoTHubClientCore_LL_Destroy(result);
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_12_011: [IoTHubClientCore_LL_CreateFromConnectionString shall call into the IoTHubClientCore_LL_Create API with the current structure and returns with the return value of it] */
-/* Tests_SRS_IoTHubClientCore_LL_12_010: [IoTHubClientCore_LL_CreateFromConnectionString shall fill up the IOTHUB_CLIENT_CONFIG structure using the following mapping: iotHubName = Name, iotHubSuffix = Suffix, deviceId = DeviceId, deviceKey = SharedAccessKey or deviceSasToken = SharedAccessSignature] */
-/* Tests_SRS_IoTHubClientCore_LL_02_092: [ IoTHubClientCore_LL_CreateFomConnectionString shall create a IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE from IOTHUB_CLIENT_CONFIG. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_with_DeviceSasToken_succeeds)
 {
     //arrange
@@ -1293,9 +1279,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_with_DeviceSasToken
     IoTHubClientCore_LL_Destroy(result);
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_12_011: [IoTHubClientCore_LL_CreateFromConnectionString shall call into the IoTHubClientCore_LL_Create API with the current structure and returns with the return value of it] */
-/* Tests_SRS_IoTHubClientCore_LL_12_010: [IoTHubClientCore_LL_CreateFromConnectionString shall fill up the IOTHUB_CLIENT_CONFIG structure using the following mapping: iotHubName = Name, iotHubSuffix = Suffix, deviceId = DeviceId, deviceKey = SharedAccessKey or deviceSasToken = SharedAccessSignature] */
-/* Tests_SRS_IoTHubClientCore_LL_02_092: [ IoTHubClientCore_LL_CreateFomConnectionString shall create a IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE from IOTHUB_CLIENT_CONFIG. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_with_DeviceSasToken_with_invalid_tokens_succeeds)
 {
     //arrange
@@ -1313,7 +1296,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_with_DeviceSasToken
 }
 
 
-/* Tests_SRS_IoTHubClientCore_LL_04_001: [IoTHubClientCore_LL_CreateFromConnectionString shall verify the existence of key/value pair GatewayHostName. If it does exist it shall pass the value to IoTHubClientCore_LL_Create API.] */
 TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_withGatewayHostName_succeeds)
 {
     //arrange
@@ -1393,7 +1375,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_withGatewayHostName
 }
 
 
-/*Tests_SRS_IoTHubClientCore_LL_12_003: [IoTHubClientCore_LL_CreateFromConnectionString shall verify the input parameters and if any of them NULL then return NULL] */
 TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_if_input_parameter_connectionString_is_NULL_then_return_NULL)
 {
     //arrange
@@ -1409,7 +1390,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_if_input_parameter_
     IoTHubClientCore_LL_Destroy(result);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_12_003: [IoTHubClientCore_LL_CreateFromConnectionString shall return NULL if any of the input parameter is NULL] */
 TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_if_input_parameter_protocol_is_NULL_then_return_NULL)
 {
     //arrange
@@ -1425,7 +1405,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_if_input_parameter_
     IoTHubClientCore_LL_Destroy(result);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_12_014: [If either of key is missing or x509 is not set to "true" then IoTHubClientCore_LL_CreateFromConnectionString returns NULL ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_with_x509_true_succeeds)
 {
     //arrange
@@ -1443,7 +1422,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_with_x509_true_succ
 
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_12_014: [If either of key is missing or x509 is not set to "true" then IoTHubClientCore_LL_CreateFromConnectionString returns NULL ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_with_x509_test_string_fails)
 {
     //arrange
@@ -1505,7 +1483,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_with_x509_test_stri
 
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_31_126: [IoTHubClientCore_LL_CreateFromConnectionString shall optionally parse ModuleId, if present.] */
 TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_with_ModuleId_succeeds)
 {
     //arrange
@@ -1586,7 +1563,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateFromConnectionString_with_ModuleId_succe
 }
 
 
-/*Tests_SRS_IoTHubClientCore_LL_02_001: [IoTHubClientCore_LL_Create shall return NULL if config parameter is NULL or protocol field is NULL.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_Create_with_NULL_parameter_fails)
 {
     // arrange
@@ -1598,7 +1574,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_Create_with_NULL_parameter_fails)
     ASSERT_ARE_EQUAL(void_ptr, NULL, result);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_001: [IoTHubClientCore_LL_Create shall return NULL if config parameter is NULL or protocol field is NULL.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_Create_with_NULL_protocol_fails)
 {
     // arrange
@@ -1610,13 +1585,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_Create_with_NULL_protocol_fails)
     ASSERT_ARE_EQUAL(void_ptr, NULL, result);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_094: [IoTHubClientCore_LL_Create shall create a IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE from IOTHUB_CLIENT_CONFIG. ]*/
-/*Tests_SRS_IoTHubClientCore_LL_02_045: [Otherwise IoTHubClientCore_LL_Create shall create a new TICK_COUNTER_HANDLE ]*/
-/*Tests_SRS_IoTHubClientCore_LL_02_004: [Otherwise IoTHubClientCore_LL_Create shall initialize a new DLIST (further called "waitingToSend") containing records with fields of the following types: IOTHUB_MESSAGE_HANDLE, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, void*.]*/
-/*Tests_SRS_IoTHubClientCore_LL_02_006: [IoTHubClientCore_LL_Create shall populate a structure of type IOTHUBTRANSPORT_CONFIG with the information from config parameter and the previous DLIST and shall pass that to the underlying layer _Create function.]*/
-/*Tests_SRS_IoTHubClientCore_LL_02_008: [Otherwise, IoTHubClientCore_LL_Create shall succeed and return a non-NULL handle.] */
-/*Tests_SRS_IoTHubClientCore_LL_17_008: [IoTHubClientCore_LL_Create shall call the transport _Register function with the deviceId, DeviceKey and waitingToSend list.] */
-/*Tests_SRS_IoTHubClientCore_LL_07_029: [ IoTHubClientCore_LL_Create shall create the Auth module with the device_key, device_id, and/or deviceSasToken values ] */
 TEST_FUNCTION(IoTHubClientCore_LL_Create_succeeds)
 {
     //arrange
@@ -1638,12 +1606,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_Create_succeeds)
     IoTHubClientCore_LL_Destroy(result);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_17_009: [If the _Register function fails, this function shall fail and return NULL.]*/
-/*Tests_SRS_IoTHubClientCore_LL_02_004: [Otherwise IoTHubClientCore_LL_Create shall initialize a new DLIST (further called "waitingToSend") containing records with fields of the following types: IOTHUB_MESSAGE_HANDLE, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, void*.]*/
-/*Tests_SRS_IoTHubClientCore_LL_02_006: [IoTHubClientCore_LL_Create shall populate a structure of type IOTHUBTRANSPORT_CONFIG with the information from config parameter and the previous DLIST and shall pass that to the underlying layer _Create function.]*/
-/*Tests_SRS_IoTHubClientCore_LL_02_007: [If the underlaying layer _Create function fails them IoTHubClientCore_LL_Create shall fail and return NULL.]*/
-/*Tests_SRS_IoTHubClientCore_LL_02_046: [ If creating the TICK_COUNTER_HANDLE fails then IoTHubClientCore_LL_Create shall fail and return NULL. ]*/
-/*Tests_SRS_IoTHubClientCore_LL_02_095: [ If creating the IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE fails then IoTHubClientCore_LL_Create shall fail and return NULL. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_Create_fail)
 {
     int negativeTestsInitResult = umock_c_negative_tests_init();
@@ -1679,7 +1641,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_Create_fail)
     umock_c_negative_tests_deinit();
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_17_001: [IoTHubClientCore_LL_CreateWithTransport shall return NULL if config parameter is NULL, or protocol field is NULL or transportHandle is NULL.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_null_config_fails)
 {
     IOTHUB_CLIENT_CORE_LL_HANDLE result = IoTHubClientCore_LL_CreateWithTransport(NULL);
@@ -1687,7 +1648,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_null_config_fails)
     ASSERT_IS_NULL(result);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_17_001: [IoTHubClientCore_LL_CreateWithTransport shall return NULL if config parameter is NULL, or protocol field is NULL or transportHandle is NULL.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_null_protocol_fails)
 {
     IOTHUB_CLIENT_CORE_LL_HANDLE result = IoTHubClientCore_LL_CreateWithTransport(&TEST_DEVICE_CONFIG_null_protocol);
@@ -1695,7 +1655,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_null_protocol_fails)
     ASSERT_IS_NULL(result);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_17_001: [IoTHubClientCore_LL_CreateWithTransport shall return NULL if config parameter is NULL, or protocol field is NULL or transportHandle is NULL.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_null_transportHandle_fails)
 {
     IOTHUB_CLIENT_CORE_LL_HANDLE result = IoTHubClientCore_LL_CreateWithTransport(&TEST_DEVICE_CONFIG_null_handle);
@@ -1703,7 +1662,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_null_transportHandle_fails
     ASSERT_IS_NULL(result);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_098: [ IoTHubClientCore_LL_CreateWithTransport shall fail and return NULL if both config->deviceKey AND config->deviceSasToken are NULL. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_with_NULL_deviceKey_AND_NULL_sas_token_fails)
 {
     IOTHUB_CLIENT_CORE_LL_HANDLE result = IoTHubClientCore_LL_CreateWithTransport(&TEST_DEVICE_CONFIG_NULL_device_key_NULL_sas_token);
@@ -1711,11 +1669,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_with_NULL_deviceKey_AND_NU
     ASSERT_IS_NULL(result);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_17_002: [IoTHubClientCore_LL_CreateWithTransport shall allocate data for the IOTHUB_CLIENT_CORE_LL_HANDLE.] */
-/*Tests_SRS_IoTHubClientCore_LL_02_096: [ IoTHubClientCore_LL_CreateWithTransport shall create the data structures needed to instantiate a IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE. ]*/
-/*Tests_SRS_IoTHubClientCore_LL_02_047: [ IoTHubClientCore_LL_CreateWithTransport shall create a TICK_COUNTER_HANDLE. ]*/
-/*Tests_SRS_IoTHubClientCore_LL_17_004: [IoTHubClientCore_LL_CreateWithTransport shall initialize a new DLIST (further called "waitingToSend") containing records with fields of the following types: IOTHUB_MESSAGE_HANDLE, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, void*.] */
-/*Tests_SRS_IoTHubClientCore_LL_17_006: [IoTHubClientCore_LL_CreateWithTransport shall call the transport _Register function with the deviceId, DeviceKey and waitingToSend list.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_Succeeds)
 {
     //arrange
@@ -1855,10 +1808,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateFromDeviceAuth_Succeeds)
 }
 #endif
 
-/*Tests_SRS_IoTHubClientCore_LL_17_003: [If allocation fails, the function shall fail and return NULL.]*/
-/*Tests_SRS_IoTHubClientCore_LL_02_048: [ If creating the handle fails, then IoTHubClientCore_LL_CreateWithTransport shall fail and return NULL ]*/
-/*Tests_SRS_IoTHubClientCore_LL_17_007: [If the _Register function fails, this function shall fail and return NULL.]*/
-/*Tests_SRS_IoTHubClientCore_LL_02_097: [ If creating the data structures fails or instantiating the IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE fails then IoTHubClientCore_LL_CreateWithTransport shall fail and return NULL. ]*/
 
 TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_fail)
 {
@@ -1899,7 +1848,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_fail)
     umock_c_negative_tests_deinit();
 }
 
-// Tests_SRS_IoTHubClientCore_LL_09_010: [ If any failure occurs `IoTHubClientCore_LL_Create` shall destroy the `transportHandle` only if it has created it ]
 TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_create_tickcounter_fails_shared_transport_is_not_destroyed)
 {
     //arrange
@@ -1947,7 +1895,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_create_tickcounter_fails_s
     //cleanup
 }
 
-// Tests_SRS_IoTHubClientCore_LL_09_010: [ If any failure occurs `IoTHubClientCore_LL_Create` shall destroy the `transportHandle` only if it has created it ]
 TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_register_fails_shared_transport_is_not_destroyed)
 {
     //arrange
@@ -2011,7 +1958,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_register_fails_shared_tran
     //cleanup
 }
 
-// Tests_SRS_IoTHubClientCore_LL_09_010: [ If any failure occurs `IoTHubClientCore_LL_Create` shall destroy the `transportHandle` only if it has created it ]
 TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_set_retry_policy_fails_shared_transport_is_not_destroyed)
 {
     //arrange
@@ -2077,7 +2023,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_set_retry_policy_fails_sha
     //cleanup
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_009: [IoTHubClientCore_LL_Destroy shall do nothing if parameter iotHubClientHandle is NULL.] */
 TEST_FUNCTION(IoTHubClientCore_LL_Destroy_with_NULL_succeeds)
 {
     //arrange
@@ -2089,9 +2034,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_Destroy_with_NULL_succeeds)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_010: [If iotHubClientHandle was not created by IoTHubClientCore_LL_CreateWithTransport, IoTHubClientCore_LL_Destroy  shall call the underlaying layer's _Destroy function.] */
-/*Tests_SRS_IoTHubClientCore_LL_17_010: [IoTHubClientCore_LL_Destroy  shall call the underlaying layer's _Unregister function] */
-/*Tests_SRS_IoTHubClientCore_LL_17_011: [IoTHubClientCore_LL_Destroy  shall free the resources allocated by IoTHubClient (if any).] */
 TEST_FUNCTION(IoTHubClientCore_LL_Destroys_the_underlying_transport_succeeds)
 {
     //arrange
@@ -2129,7 +2071,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_Destroys_the_underlying_transport_succeeds)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_17_005: [IoTHubClientCore_LL_CreateWithTransport shall save the transport handle and mark this transport as shared.] */
 TEST_FUNCTION(IoTHubClientCore_LL_Destroys_unregisters_but_does_not_destroy_transport_succeeds)
 {
     //arrange
@@ -2166,7 +2107,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_Destroys_unregisters_but_does_not_destroy_tran
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_011: [IoTHubClientCore_LL_SendEventAsync shall fail and return IOTHUB_CLIENT_INVALID_ARG if parameter iotHubClientHandle or eventMessageHandle is NULL.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SendEventAsync_with_NULL_iotHubClientHandle_fails)
 {
     //arrange
@@ -2178,7 +2118,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendEventAsync_with_NULL_iotHubClientHandle_fa
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_011: [IoTHubClientCore_LL_SendEventAsync shall fail and return IOTHUB_CLIENT_INVALID_ARG if parameter iotHubClientHandle or eventMessageHandle is NULL.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SendEventAsync_with_NULL_messageHandle_fails)
 {
     //arrange
@@ -2197,7 +2136,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendEventAsync_with_NULL_messageHandle_fails)
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_012: [IoTHubClientCore_LL_SendEventAsync shall fail and return IOTHUB_CLIENT_INVALID_ARG if parameter test_event_confirmation_callback is NULL and userContextCallback is not NULL.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SendEventAsync_with_NULL_test_event_confirmation_callback_and_non_NULL_context_fails)
 {
     //arrange
@@ -2217,8 +2155,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendEventAsync_with_NULL_test_event_confirmati
 
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_013: [IoTHubClient_SendEventAsync shall add the DLIST waitingToSend a new record cloning the information from eventMessageHandle, test_event_confirmation_callback, userContextCallback.]*/
-/*Tests_SRS_IoTHubClientCore_LL_02_015: [Otherwise IoTHubClientCore_LL_SendEventAsync shall succeed and return IOTHUB_CLIENT_OK.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SendEventAsync_succeeds)
 {
     //arrange
@@ -2238,8 +2174,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendEventAsync_succeeds)
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_010: [IoTHubClientCore_LL_Destroy shall call the underlaying layer's _Destroy function and shall free the resources allocated by IoTHubClient (if any).] */
-/*Tests_SRS_IoTHubClientCore_LL_02_033: [Otherwise, IoTHubClientCore_LL_Destroy shall complete all the event message callbacks that are in the waitingToSend list with the result IOTHUB_CLIENT_CONFIRMATION_BECAUSE_DESTROY.] */
 TEST_FUNCTION(IoTHubClientCore_LL_Destroy_after_sendEvent_succeeds)
 {
     //arrange
@@ -2283,7 +2217,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_Destroy_after_sendEvent_succeeds)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_014: [If cloning and/or adding the information fails for any reason, IoTHubClientCore_LL_SendEventAsync shall fail and return IOTHUB_CLIENT_ERROR.] */
 TEST_FUNCTION(IoTHubClientCore_LL_SendEventAsync_fails)
 {
     //arrange
@@ -2323,7 +2256,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendEventAsync_fails)
     umock_c_negative_tests_deinit();
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_25_111: [IoTHubClientCore_LL_SetConnectionStatusCallback shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter iotHubClientHandle]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetConnectionStatusCallback_with_NULL_iotHubClientHandle_fails)
 {
     ///arrange
@@ -2336,7 +2268,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetConnectionStatusCallback_with_NULL_iotHubCl
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_25_112: [IoTHubClientCore_LL_SetConnectionStatusCallback shall return IOTHUB_CLIENT_OK and save the callback and userContext as a member of the handle.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetConnectionStatusCallback_with_non_NULL_succeeds)
 {
     ///arrange
@@ -2355,7 +2286,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetConnectionStatusCallback_with_non_NULL_succ
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_016: [IoTHubClientCore_LL_SetMessageCallback shall fail and return IOTHUB_CLIENT_INVALID_ARG if parameter iotHubClientHandle is NULL.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetMessageCallback_with_NULL_iotHubClientHandle_fails)
 {
     ///arrange
@@ -2368,7 +2298,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetMessageCallback_with_NULL_iotHubClientHandl
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_019: [If parameter messageCallback is NULL then IoTHubClientCore_LL_SetMessageCallback shall call the underlying layer's _Unsubscribe function and return IOTHUB_CLIENT_OK.] */
 TEST_FUNCTION(IoTHubClientCore_LL_SetMessageCallback_with_NULL_calls_Unsubscribe_and_succeeds)
 {
     ///arrange
@@ -2390,7 +2319,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetMessageCallback_with_NULL_calls_Unsubscribe
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_10_010: [If parameter messageCallback is NULL and the _SetMessageCallback had not been called to subscribe for messages, then IoTHubClientCore_LL_SetMessageCallback shall fail and return IOTHUB_CLIENT_ERROR.] */
 TEST_FUNCTION(IoTHubClientCore_LL_SetMessageCallback_with_NULL_after_SetMessageCallbacEx_fails)
 {
     ///arrange
@@ -2409,7 +2337,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetMessageCallback_with_NULL_after_SetMessageC
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_10_011: [If parameter messageCallback is non-NULL and the _SetMessageCallback_Ex had been used to susbscribe for messages, then IoTHubClientCore_LL_SetMessageCallback shall fail and return IOTHUB_CLIENT_ERROR.] */
 TEST_FUNCTION(IoTHubClientCore_LL_SetMessageCallback_after_SetMessageCallbacEx_fails)
 {
     ///arrange
@@ -2428,7 +2355,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetMessageCallback_after_SetMessageCallbacEx_f
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_10_021: [IoTHubClientCore_LL_SetMessageCallback_Ex shall fail and return IOTHUB_CLIENT_INVALID_ARG if parameter iotHubClientHandle is NULL.] */
 TEST_FUNCTION(IoTHubClientCore_LL_SetMessageCallback_Ex_with_NULL_iotHubClientHandle_fails)
 {
     ///arrange
@@ -2441,7 +2367,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetMessageCallback_Ex_with_NULL_iotHubClientHa
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_10_018: [If parameter messageCallback is NULL and IoTHubClientCore_LL_SetMessageCallback_Ex had not been used to subscribe for messages, then IoTHubClientCore_LL_SetMessageCallback_Ex shall fail and return IOTHUB_CLIENT_ERROR.] */
 TEST_FUNCTION(IoTHubClientCore_LL_SetMessageCallback_Ex_with_NULL_not_subscribed_fails)
 {
     ///arrange
@@ -2459,7 +2384,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetMessageCallback_Ex_with_NULL_not_subscribed
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_10_019: [If parameter messageCallback is NULL and IoTHubClientCore_LL_SetMessageCallback had been used to subscribe for messages, then IoTHubClientCore_LL_SetMessageCallback_Ex shall fail and return IOTHUB_CLIENT_ERROR.] */
 TEST_FUNCTION(IoTHubClientCore_LL_SetMessageCallback_Ex_with_NULL_after_SetMessageCallback_fails)
 {
     ///arrange
@@ -2478,7 +2402,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetMessageCallback_Ex_with_NULL_after_SetMessa
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_10_023: [If parameter messageCallback is NULL then IoTHubClientCore_LL_SetMessageCallback_Ex shall call the underlying layer's _Unsubscribe function and return IOTHUB_CLIENT_OK.] */
 TEST_FUNCTION(IoTHubClientCore_LL_SetMessageCallback_Ex_with_NULL_unsubscribe_succeeds)
 {
     ///arrange
@@ -2500,7 +2423,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetMessageCallback_Ex_with_NULL_unsubscribe_su
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_10_025: [If the underlying layer's _Subscribe function fails, then IoTHubClientCore_LL_SetMessageCallback_Ex shall fail and return IOTHUB_CLIENT_ERROR. Otherwise IoTHubClientCore_LL_SetMessageCallback shall succeed and return IOTHUB_CLIENT_OK.] */
 TEST_FUNCTION(IoTHubClientCore_LL_SetMessageCallback_Ex_Subscribe_fails)
 {
     ///arrange
@@ -2522,7 +2444,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetMessageCallback_Ex_Subscribe_fails)
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_10_020: [If parameter messageCallback is non-NULL, and IoTHubClientCore_LL_SetMessageCallback had been used to subscribe for messages, then IoTHubClientCore_LL_SetMessageCallback_Ex shall fail and return IOTHUB_CLIENT_ERROR.] */
 TEST_FUNCTION(IoTHubClientCore_LL_SetMessageCallback_Ex_after_SetMessageCallback_fails)
 {
     ///arrange
@@ -2541,7 +2462,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetMessageCallback_Ex_after_SetMessageCallback
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_10_024: [If parameter messageCallback is non-NULL then IoTHubClientCore_LL_SetMessageCallback_Ex shall call the underlying layer's _Subscribe function.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetMessageCallback_Ex_happy_path_succeeds)
 {
     ///arrange
@@ -2562,7 +2482,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetMessageCallback_Ex_happy_path_succeeds)
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_10_026: [IoTHubClientCore_LL_SendMessageDisposition shall fail and return IOTHUB_CLIENT_INVALID_ARG if parameter iotHubClientHandle is NULL.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SendMessageDisposition_with_first_NULL_fails)
 {
     ///act
@@ -2573,7 +2492,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendMessageDisposition_with_first_NULL_fails)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_10_027: [IoTHubClientCore_LL_SendMessageDisposition shall return the result from calling the underlying layer's _Send_Message_Disposition.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SendMessageDisposition_with_second_NULL_fails)
 {
     ///arrange
@@ -2591,7 +2509,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendMessageDisposition_with_second_NULL_fails)
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_10_027: [IoTHubClientCore_LL_SendMessageDisposition shall return the result from calling the underlying layer's Send_MessageDisposition.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SendMessageDisposition_Succeeds)
 {
     ///arrange
@@ -2611,7 +2528,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendMessageDisposition_Succeeds)
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_025: [If parameter result is IOTHUB_CLIENT_CONFIRMATION_OK then IoTHubClientCore_LL_SendComplete shall call all the non-NULL callbacks with the result parameter set to IOTHUB_CLIENT_CONFIRMATION_OK and the context set to the context passed originally in the SendEventAsync call.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SendComplete_with_1_items_with_callback_succeeds)
 {
     ///arrange
@@ -2645,7 +2561,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendComplete_with_1_items_with_callback_succee
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_025: [If parameter result is IOTHUB_CLIENT_CONFIRMATION_OK then IoTHubClientCore_LL_SendComplete shall call all the non-NULL callbacks with the result parameter set to IOTHUB_CLIENT_CONFIRMATION_OK and the context set to the context passed originally in the SendEventAsync call.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SendComplete_with_3_items_with_callback_succeeds)
 {
     ///arrange
@@ -2705,7 +2620,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendComplete_with_3_items_with_callback_succee
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_027: [If parameter result is IOTHUB_BACTCHSTATE_FAILED then IoTHubClientCore_LL_SendComplete shall call all the non-NULL callbacks with the result parameter set to IOTHUB_CLIENT_CONFIRMATION_ERROR and the context set to the context passed originally in the SendEventAsync call.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SendComplete_with_3_items_with_callback_but_batch_failed_succeeds)
 {
     ///arrange
@@ -2767,7 +2681,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendComplete_with_3_items_with_callback_but_ba
 }
 
 
-/* Tests_SRS_IoTHubClientCore_LL_25_116: [**IoTHubClientCore_LL_SetRetryPolicy shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL iotHubClientHandle]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetRetryPolicy_with_NULL_iotHubClientHandle_fails)
 {
     ///arrange
@@ -2824,7 +2737,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetRetryPolicy_success)
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_25_114: [**IoTHubClientCore_LL_ConnectionStatusCallBack shall call non-callback set by the user from IoTHubClientCore_LL_SetConnectionStatusCallback passing the status, reason and the passed userContextCallback.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_ConnectionStatusCallBack_calls_upper_layer_succeeds)
 {
     ///arrange
@@ -2844,7 +2756,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_ConnectionStatusCallBack_calls_upper_layer_suc
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_25_113: [If parameter connectionStatus is NULL or parameter handle is NULL then IoTHubClientCore_LL_ConnectionStatusCallBack shall return.] */
 TEST_FUNCTION(IoTHubClientCore_LL_ConnectionStatusCallBack_with_NULL_parameter_fails)
 {
     ///arrange
@@ -2862,7 +2773,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_ConnectionStatusCallBack_with_NULL_parameter_f
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_25_113: [If parameter connectionStatus is NULL or parameter handle is NULL then IoTHubClientCore_LL_ConnectionStatusCallBack shall return.] */
 TEST_FUNCTION(IoTHubClientCore_LL_ConnectionStatusCallBack_with_NULL_callback_fails)
 {
     ///arrange
@@ -2880,7 +2790,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_ConnectionStatusCallBack_with_NULL_callback_fa
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_10_010: [If parameter messageCallback is NULL and the _SetMessageCallback had not been called to subscribe for messages, then IoTHubClientCore_LL_SetMessageCallback shall fail and return IOTHUB_CLIENT_ERROR.] */
 TEST_FUNCTION(IoTHubClientCore_LL_SetMessageCallback_with_NULL_before_subscribe_fails)
 {
     //arrange
@@ -2898,7 +2807,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetMessageCallback_with_NULL_before_subscribe_
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_017: [If parameter messageCallback is non-NULL then IoTHubClientCore_LL_SetMessageCallback shall call the underlying layer's _Subscribe function.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetMessageCallback_with_non_NULL_succeeds)
 {
     //arrange
@@ -2919,7 +2827,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetMessageCallback_with_non_NULL_succeeds)
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_018: [If the underlying layer's _Subscribe function fails, then IoTHubClientCore_LL_SetMessageCallback shall fail and return IOTHUB_CLIENT_ERROR. Otherwise IoTHubClientCore_LL_SetMessageCallback shall succeed and return IOTHUB_CLIENT_OK.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetMessageCallback_with_non_fails_when_underlying_transport_fails)
 {
     //arrange
@@ -2941,7 +2848,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetMessageCallback_with_non_fails_when_underly
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_020: [If parameter iotHubClientHandle is NULL then IoTHubClientCore_LL_DoWork shall not perform any action.] */
 TEST_FUNCTION(IoTHubClientCore_LL_DoWork_with_NULL_does_nothing)
 {
     //arrange
@@ -2953,7 +2859,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_DoWork_with_NULL_does_nothing)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_021: [Otherwise, IoTHubClientCore_LL_DoWork shall invoke the underlaying layer's _DoWork function.] */
 TEST_FUNCTION(IoTHubClientCore_LL_DoWork_calls_underlying_succeeds)
 {
     //arrange
@@ -2975,7 +2880,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_DoWork_calls_underlying_succeeds)
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_022: [If parameter completed is NULL or parameter handle is NULL then IoTHubClientCore_LL_SendBatch shall return.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SendComplete_with_NULL_handle_shall_return)
 {
     IOTHUB_CLIENT_CORE_LL_HANDLE handle = IoTHubClientCore_LL_Create(&TEST_CONFIG);
@@ -2995,7 +2899,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendComplete_with_NULL_handle_shall_return)
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_022: [If parameter completed is NULL or parameter handle is NULL then IoTHubClientCore_LL_SendBatch shall return.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SendComplete_with_NULL_completed_shall_return)
 {
     //arrange
@@ -3012,7 +2915,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendComplete_with_NULL_completed_shall_return)
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_022: [If parameter completed is NULL or parameter handle is NULL then IoTHubClientCore_LL_SendBatch shall return.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SendComplete_with_empty_completed_shall_return)
 {
     //arrange
@@ -3033,8 +2935,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendComplete_with_empty_completed_shall_return
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_025: [If parameter result is IOTHUB_CLIENT_CONFIRMATION_OK then IoTHubClientCore_LL_SendComplete shall call all the non-NULL callbacks with the result parameter set to IOTHUB_CLIENT_CONFIRMATION_OK and the context set to the context passed originally in the SendEventAsync call.]*/
-/*Tests_SRS_IoTHubClientCore_LL_02_026: [If any callback is NULL then there shall not be a callback call.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SendComplete_with_3_items_one_without_callback_succeeds) /*for fun*/
 {
     //arrange
@@ -3092,7 +2992,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendComplete_with_3_items_one_without_callback
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_026: [If any callback is NULL then there shall not be a callback call.] */
 TEST_FUNCTION(IoTHubClientCore_LL_SendComplete_with_3_items_one_with_callback_but_batch_failed_succeeds)
 {
     //arrange
@@ -3150,8 +3049,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendComplete_with_3_items_one_with_callback_bu
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_029: [If parameter handle is NULL then IoTHubClientCore_LL_MessageCallback shall return IOTHUBMESSAGE_ABANDONED.] */
-/*Tests_SRS_IoTHubClientCore_LL_02_029: [If either parameter `handle` or `messageData` is NULL then IoTHubClientCore_LL_MessageCallback shall return IOTHUBMESSAGE_ABANDONED.] */
 TEST_FUNCTION(IoTHubClientCore_LL_MessageCallback_with_messageData_NULL_parameter_fails)
 {
     //arrange
@@ -3169,7 +3066,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallback_with_messageData_NULL_paramete
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_10_004: [If messageHandle field of the messageData parameter is NULL then IoTHubClientCore_LL_MessageCallback shall return false.] */
 TEST_FUNCTION(IoTHubClientCore_LL_MessageCallback_with_messageData_messageHandle_is_NULL_fails)
 {
     //arrange
@@ -3187,7 +3083,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallback_with_messageData_messageHandle
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_032: [If messageCallbackType is NONE then IoTHubClientCore_LL_MessageCallback shall report false.] */
 TEST_FUNCTION(IoTHubClientCore_LL_MessageCallback_with_unsubscribed_returns_false)
 {
     //arrange
@@ -3207,8 +3102,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallback_with_unsubscribed_returns_fals
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_030: [If messageCallbackType is LEGACY then IoTHubClientCore_LL_MessageCallback shall invoke the last callback function (the parameter messageCallback to IoTHubClientCore_LL_SetMessageCallback) passing the message and the passed userContextCallback.]*/
-/*Tests_SRS_IoTHubClientCore_LL_10_007: [If messageCallbackType is LEGACY then IoTHubClientCore_LL_MessageCallback shall send the message disposition as returned by the client to the underlying layer and return true.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_MessageCallback_with_messageCallback_calls_client_layer_succeeds)
 {
     //arrange
@@ -3275,7 +3168,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallback_with_messageCallbackEx_calls_c
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_10_009: [If messageCallbackType is ASYNC then  IoTHubClientCore_LL_MessageCallback shall return what messageCallbacEx returns.] */
 TEST_FUNCTION(IoTHubClientCore_LL_MessageCallback_with_messageCallbackEx_calls_client_layer_reports_true)
 {
     //arrange
@@ -3297,7 +3189,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallback_with_messageCallbackEx_calls_c
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_10_009: [If messageCallbackType is ASYNC then  IoTHubClientCore_LL_MessageCallback shall return what messageCallbacEx returns.] */
 TEST_FUNCTION(IoTHubClientCore_LL_MessageCallback_with_messageCallbackEx_calls_client_layer_reports_false)
 {
     //arrange
@@ -3344,7 +3235,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallback_with_messageCallbackEx_calls_c
 
 /*** IoTHubClientCore_LL_GetLastMessageReceiveTime ***/
 
-/* Tests_SRS_IoTHubClientCore_LL_09_001: [IoTHubClientCore_LL_GetLastMessageReceiveTime shall return IOTHUB_CLIENT_INVALID_ARG if any of the arguments is NULL] */
 TEST_FUNCTION(IoTHubClientCore_LL_GetLastMessageReceiveTime_InvalidClientHandleArg_fails)
 {
     // arrange
@@ -3364,7 +3254,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_GetLastMessageReceiveTime_InvalidClientHandleA
     IoTHubClientCore_LL_Destroy(iotHubClientHandle);
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_09_001: [IoTHubClientCore_LL_GetLastMessageReceiveTime shall return IOTHUB_CLIENT_INVALID_ARG if any of the arguments is NULL] */
 TEST_FUNCTION(IoTHubClientCore_LL_GetLastMessageReceiveTime_InvalidTimeRefArg_fails)
 {
     // arrange
@@ -3383,7 +3272,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_GetLastMessageReceiveTime_InvalidTimeRefArg_fa
     IoTHubClientCore_LL_Destroy(iotHubClientHandle);
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_09_002: [IoTHubClientCore_LL_GetLastMessageReceiveTime shall return IOTHUB_CLIENT_INDEFINITE_TIME - and not set 'lastMessageReceiveTime' - if it is unable to provide the time for the last commands] */
 TEST_FUNCTION(IoTHubClientCore_LL_GetLastMessageReceiveTime_NoMessagesReceived_fails)
 {
     // arrange
@@ -3404,8 +3292,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_GetLastMessageReceiveTime_NoMessagesReceived_f
     IoTHubClientCore_LL_Destroy(iotHubClientHandle);
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_09_003: [IoTHubClientCore_LL_GetLastMessageReceiveTime shall return IOTHUB_CLIENT_OK if it wrote in the lastMessageReceiveTime the time when the last command was received] */
-/* Tests_SRS_IoTHubClientCore_LL_09_004: [IoTHubClientCore_LL_GetLastMessageReceiveTime shall return lastMessageReceiveTime in localtime] */
 TEST_FUNCTION(IoTHubClientCore_LL_GetLastMessageReceiveTime_MessagesReceived_succeeds)
 {
     // arrange
@@ -3436,7 +3322,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_GetLastMessageReceiveTime_MessagesReceived_suc
 
 /*** IoTHubClientCore_LL_GetSendStatus ***/
 
-/* Tests_SRS_IOTHUBCLIENT_09_007: [IoTHubClientCore_LL_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter] */
 TEST_FUNCTION(IoTHubClientCore_LL_GetSendStatus_BadHandleArgument_fails)
 {
     // arrange
@@ -3455,7 +3340,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_GetSendStatus_BadHandleArgument_fails)
     // cleanup
 }
 
-/* Tests_SRS_IOTHUBCLIENT_09_007: [IoTHubClientCore_LL_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter] */
 TEST_FUNCTION(IoTHubClientCore_LL_GetSendStatus_BadStatusArgument_fails)
 {
     // arrange
@@ -3474,7 +3358,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_GetSendStatus_BadStatusArgument_fails)
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUBCLIENT_09_008: [IoTHubClientCore_LL_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_IDLE if there is currently no items to be sent] */
 TEST_FUNCTION(IoTHubClientCore_LL_GetSendStatus_NoEventToSend_Succeeds)
 {
     // arrange
@@ -3501,7 +3384,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_GetSendStatus_NoEventToSend_Succeeds)
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/* Tests_SRS_IOTHUBCLIENT_09_009: [IoTHubClientCore_LL_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_BUSY if there are currently items to be sent] */
 TEST_FUNCTION(IoTHubClientCore_LL_GetSendStatus_HasEventToSend_Succeeds)
 {
     // arrange
@@ -3568,7 +3450,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_sas_token_lifetime_fail)
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_034: [If iotHubClientHandle is NULL then IoTHubClientCore_LL_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetOption_with_NULL_handle_fails)
 {
     //arrange
@@ -3582,7 +3463,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_with_NULL_handle_fails)
     ///cleanup
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_035: [If optionName is NULL then IoTHubClientCore_LL_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] */
 TEST_FUNCTION(IoTHubClientCore_LL_SetOption_with_NULL_optionName_fails)
 {
     //arrange
@@ -3602,7 +3482,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_with_NULL_optionName_fails)
 
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_036: [If value is NULL then IoTHubClientCore_LL_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.] */
 TEST_FUNCTION(IoTHubClientCore_LL_SetOption_with_NULL_value_fails)
 {
     //arrange
@@ -3625,7 +3504,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_with_NULL_value_fails)
 #ifndef DONT_USE_UPLOADTOBLOB
 /*these tests are to be run when upload to blob functionality exists*/
 
-/*Tests_SRS_IoTHubClientCore_LL_30_010: [ blob_xfr_timeout - IoTHubClientCore_LL_SetOption shall pass this option to IoTHubClient_UploadToBlob_SetOption and return its result. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetOption_blob_upload_timeout_succeeds)
 {
     //arrange
@@ -3652,8 +3530,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_blob_upload_timeout_succeeds)
 
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_30_011: [ IoTHubClientCore_LL_SetOption shall always pass unhandled options to Transport_SetOption. ]*/
-/*Tests_SRS_IoTHubClientCore_LL_30_012: [ If Transport_SetOption fails, IoTHubClientCore_LL_SetOption shall return that failure code. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetOption_fails_when_IoTHubTransport_SetOption_fails)
 {
     //arrange
@@ -3678,7 +3554,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_fails_when_IoTHubTransport_SetOption
 
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_30_013: [ If the DONT_USE_UPLOADTOBLOB compiler switch is undefined, IoTHubClientCore_LL_SetOption shall pass unhandled options to IoTHubClient_UploadToBlob_SetOption and ignore the result. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetOption_succeeds_when_IoTHubClient_LL_UploadToBlob_SetOption_fails)
 {
     //arrange
@@ -3733,7 +3608,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_fails_when_underlying_transport_fail
 }
 #endif
 
-/*Tests_SRS_IoTHubClientCore_LL_02_039: [ "messageTimeout" - once IoTHubClientCore_LL_SendEventAsync is called the message shall timeout after value miliseconds. Value is a pointer to a tickcounter_ms_t. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetOption_messageTimeout_to_zero_after_Create_succeeds)
 {
     //arrange
@@ -3753,7 +3627,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_messageTimeout_to_zero_after_Create_
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_039: [ "messageTimeout" - once IoTHubClientCore_LL_SendEventAsync is called the message shall timeout after value miliseconds. Value is a pointer to a tickcounter_ms_t. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetOption_messageTimeout_to_one_after_Create_succeeds)
 {
     //arrange
@@ -3774,7 +3647,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_messageTimeout_to_one_after_Create_s
 
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_039: [ "messageTimeout" - once IoTHubClientCore_LL_SendEventAsync is called the message shall timeout after value miliseconds. Value is a pointer to a tickcounter_ms_t. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetOption_messageTimeout_can_be_reverted_back_to_zero_succeeds)
 {
     //arrange
@@ -3796,8 +3668,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_messageTimeout_can_be_reverted_back_
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_039: [ "messageTimeout" - once IoTHubClientCore_LL_SendEventAsync is called the message shall timeout after value miliseconds. Value is a pointer to a tickcounter_ms_t. ]*/
-/*Tests_SRS_IoTHubClientCore_LL_02_041: [ If more than value miliseconds have passed since the call to IoTHubClientCore_LL_SendEventAsync then the message callback shall be called with a status code of IOTHUB_CLIENT_CONFIRMATION_TIMEOUT. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetOption_messageTimeout_calls_timeout_callback)
 {
     //arrange
@@ -3841,7 +3711,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_messageTimeout_calls_timeout_callbac
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_042: [ By default, messages shall not timeout. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetOption_defaults_to_zero)
 {
     //arrange
@@ -3876,7 +3745,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_defaults_to_zero)
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_039: [ "messageTimeout" - once IoTHubClientCore_LL_SendEventAsync is called the message shall timeout after value miliseconds. Value is a pointer to a tickcounter_ms_t. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetOption_messageTimeout_only_removes_the_message_if_it_has_NULL_callback)
 {
     //arrange
@@ -3920,8 +3788,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_messageTimeout_only_removes_the_mess
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_039: [ "messageTimeout" - once IoTHubClientCore_LL_SendEventAsync is called the message shall timeout after value miliseconds. Value is a pointer to a tickcounter_ms_t. ]*/
-/*Tests_SRS_IoTHubClientCore_LL_02_041: [ If more than value miliseconds have passed since the call to IoTHubClientCore_LL_SendEventAsync then the message callback shall be called with a status code of IOTHUB_CLIENT_CONFIRMATION_TIMEOUT. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetOption_messageTimeout_when_exactly_on_the_edge_does_not_call_the_callback) /*because "more"*/
 {
     //arrange
@@ -3955,8 +3821,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_messageTimeout_when_exactly_on_the_e
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_039: [ "messageTimeout" - once IoTHubClientCore_LL_SendEventAsync is called the message shall timeout after value miliseconds. Value is a pointer to a tickcounter_ms_t. ]*/
-/*Tests_SRS_IoTHubClientCore_LL_02_041: [ If more than value miliseconds have passed since the call to IoTHubClientCore_LL_SendEventAsync then the message callback shall be called with a status code of IOTHUB_CLIENT_CONFIRMATION_TIMEOUT. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetOption_2_messages_with_timeouts_at_11_and_12_calls_1_timeout) /*test wants to see that message that did not timeout yet do not have their callbacks called*/
 {
     //arrange
@@ -4004,9 +3868,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_2_messages_with_timeouts_at_11_and_1
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_039: [ "messageTimeout" - once IoTHubClientCore_LL_SendEventAsync is called the message shall timeout after value miliseconds. Value is a pointer to a tickcounter_ms_t. ]*/
-/*Tests_SRS_IoTHubClientCore_LL_02_041: [ If more than value miliseconds have passed since the call to IoTHubClientCore_LL_SendEventAsync then the message callback shall be called with a status code of IOTHUB_CLIENT_CONFIRMATION_TIMEOUT. ]*/
-/*Tests_SRS_IoTHubClientCore_LL_02_044: [ Messages already delivered to IoTHubClientCore_LL shall not have their timeouts modified by a new call to IoTHubClientCore_LL_SetOption. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetOption_2_messages_with_timeouts_at_11_and_12_calls_2_timeouts) /*test wants to see that message that did not timeout yet do not have their callbacks called*/
 {
     //arrange
@@ -4079,10 +3940,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_2_messages_with_timeouts_at_11_and_1
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_039: [ "messageTimeout" - once IoTHubClientCore_LL_SendEventAsync is called the message shall timeout after value miliseconds. Value is a pointer to a tickcounter_ms_t. ]*/
-/*Tests_SRS_IoTHubClientCore_LL_02_041: [ If more than value miliseconds have passed since the call to IoTHubClientCore_LL_SendEventAsync then the message callback shall be called with a status code of IOTHUB_CLIENT_CONFIRMATION_TIMEOUT. ]*/
-/*Tests_SRS_IoTHubClientCore_LL_02_043: [ Calling IoTHubClientCore_LL_SetOption with value set to "0" shall disable the timeout mechanism for all new messages. ]*/
-/*Tests_SRS_IoTHubClientCore_LL_02_044: [ Messages already delivered to IoTHubClientCore_LL shall not have their timeouts modified by a new call to IoTHubClientCore_LL_SetOption. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetOption_2_messages_one_with_timeout_one_without_call_1_callback) /*test wants to see that message that did not timeout yet do not have their callbacks called*/
 {
     //arrange
@@ -4144,7 +4001,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_2_messages_one_with_timeout_one_with
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_041: [ If more than value miliseconds have passed since the call to IoTHubClientCore_LL_SendEventAsync then the message callback shall be called with a status code of IOTHUB_CLIENT_CONFIRMATION_TIMEOUT. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetOption_messageTimeout_when_tickcounter_fails_in_do_work_no_timeout_callbacks_are_called) /*test wants to see that message that did not timeout yet do not have their callbacks called*/
 {
     //arrange
@@ -4187,7 +4043,46 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_messageTimeout_when_tickcounter_fail
 }
 
 #ifndef DONT_USE_UPLOADTOBLOB
-/*Tests_SRS_IoTHubClientCore_LL_02_061: [ If iotHubClientHandle is NULL then IoTHubClientCore_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
+
+TEST_FUNCTION(IoTHubClientCore_LL_UploadToBlob_OK)
+{
+    //arrange
+    IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_Impl(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_UploadToBlob(h, "irrelevantFileName", (const unsigned char*)"a", 1);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    ///cleanup
+    IoTHubClientCore_LL_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubClientCore_LL_UploadToBlob_fails)
+{
+    //arrange
+    IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadToBlob_Impl(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG)).SetReturn(IOTHUB_CLIENT_ERROR);
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_UploadToBlob(h, "irrelevantFileName", (const unsigned char*)"a", 1);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    ///cleanup
+    IoTHubClientCore_LL_Destroy(h);
+}
+
+
 TEST_FUNCTION(IoTHubClientCore_LL_UploadToBlob_with_NULL_handle_fails)
 {
     //arrange
@@ -4201,7 +4096,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_UploadToBlob_with_NULL_handle_fails)
     ///cleanup
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_062: [ If destinationFileName is NULL then IoTHubClientCore_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_UploadToBlob_with_NULL_fileName_fails)
 {
     //arrange
@@ -4219,7 +4113,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_UploadToBlob_with_NULL_fileName_fails)
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_02_063: [ If source is NULL and size is greater than 0 then IoTHubClientCore_LL_UploadToBlob shall fail and return IOTHUB_CLIENT_INVALID_ARG. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_UploadToBlob_with_NULL_source_and_size_greater_than_0_fails)
 {
     //arrange
@@ -4237,7 +4130,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_UploadToBlob_with_NULL_source_and_size_greater
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_99_005: [** If `iotHubClientHandle` is `NULL` then `IoTHubClientCore_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_UploadMultipleBlocksToBlob_with_NULL_handle_fails)
 {
     //arrange
@@ -4252,7 +4144,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_UploadMultipleBlocksToBlob_with_NULL_handle_fa
     ///cleanup
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_99_006: [ If `destinationFileName` is `NULL` then `IoTHubClientCore_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_UploadMultipleBlocksToBlob_with_NULL_filename_fails)
 {
     //arrange
@@ -4270,7 +4161,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_UploadMultipleBlocksToBlob_with_NULL_filename_
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_99_007: [ If `getDataCallback` is `NULL` then `IoTHubClientCore_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_UploadMultipleBlocksToBlob_with_NULL_callback_fails)
 {
     //arrange
@@ -4288,7 +4178,45 @@ TEST_FUNCTION(IoTHubClientCore_LL_UploadMultipleBlocksToBlob_with_NULL_callback_
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_99_005: [** If `iotHubClientHandle` is `NULL` then `IoTHubClientCore_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
+TEST_FUNCTION(IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx_succeeds)
+{
+    //arrange
+    unsigned int context = 1;
+    IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx(h, "irrelevantFileName", my_FileUpload_GetData_CallbackEx, &context);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+
+    ///cleanup
+    IoTHubClientCore_LL_Destroy(h);
+}
+
+TEST_FUNCTION(IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx_fails)
+{
+    //arrange
+    unsigned int context = 1;
+    IOTHUB_CLIENT_CORE_LL_HANDLE h = IoTHubClientCore_LL_Create(&TEST_CONFIG);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_UploadMultipleBlocksToBlob_Impl(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(IOTHUB_CLIENT_ERROR);
+
+    //act
+    IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx(h, "irrelevantFileName", my_FileUpload_GetData_CallbackEx, &context);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+
+    ///cleanup
+    IoTHubClientCore_LL_Destroy(h);
+}
+
+
 TEST_FUNCTION(IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx_with_NULL_handle_fails)
 {
     //arrange
@@ -4303,7 +4231,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx_with_NULL_handle_
     ///cleanup
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_99_006: [ If `destinationFileName` is `NULL` then `IoTHubClientCore_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx_with_NULL_filename_fails)
 {
     //arrange
@@ -4321,7 +4248,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx_with_NULL_filenam
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_99_007: [ If `getDataCallback` is `NULL` then `IoTHubClientCore_LL_UploadMultipleBlocksToBlob(Ex)` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx_with_NULL_callback_fails)
 {
     //arrange
@@ -4341,7 +4267,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_UploadMultipleBlocksToBlobEx_with_NULL_callbac
 
 #endif
 
-/* Tests_SRS_IoTHubClientCore_LL_10_016: [ Otherwise IoTHubClientCore_LL_SendReportedState shall succeed and return IOTHUB_CLIENT_OK.] */
 TEST_FUNCTION(IoTHubClientCore_LL_SendReportedState_succeeds)
 {
     //arrange
@@ -4412,7 +4337,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_Destroy_with_pending_reported_state_succeeds)
     //cleanup
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_10_012: [ IoTHubClientCore_LL_SendReportedState shall fail and return IOTHUB_CLIENT_INVALID_ARG if parameter iotHubClientHandle is NULL. ] */
 TEST_FUNCTION(IoTHubClientCore_LL_SendReportedState_NULL_fails)
 {
     //arrange
@@ -4428,7 +4352,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendReportedState_NULL_fails)
     ///cleanup
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_10_013: [ IoTHubClientCore_LL_SendReportedState shall fail and return IOTHUB_CLIENT_INVALID_ARG if parameter reportedState is NULL] */
 TEST_FUNCTION(IoTHubClientCore_LL_SendReportedState_reported_state_NULL_fail)
 {
     //arrange
@@ -4464,7 +4387,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendReportedState_reported_size_0_fail)
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_10_015: [ If any error is encountered IoTHubClientCore_LL_SendReportedState shall return IOTHUB_CLIENT_ERROR.] */
 TEST_FUNCTION(IoTHubClientCore_LL_SendReportedState_fail)
 {
     //arrange
@@ -4503,8 +4425,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendReportedState_fail)
 }
 
 
-/*Tests_SRS_IoTHubClientCore_LL_07_008: [ IoTHubClientCore_LL_DoWork shall iterate the message queue and execute the underlying transports IoTHubTransport_ProcessItem function for each item. ] */
-/*Tests_SRS_IoTHubClientCore_LL_07_011: [ If 'IoTHubTransport_ProcessItem' returns IOTHUB_PROCESS_OK IoTHubClientCore_LL_DoWork shall add the IOTHUB_QUEUE_DATA_ITEM to the ack queue. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_DoWork_SendReportedState_succeed)
 {
     //arrange
@@ -4530,7 +4450,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_DoWork_SendReportedState_succeed)
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_07_010: [ If 'IoTHubTransport_ProcessItem' returns IOTHUB_PROCESS_CONTINUE or IOTHUB_PROCESS_NOT_CONNECTED IoTHubClientCore_LL_DoWork shall continue on to call the underlaying layer's _DoWork function. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_DoWork_SendReportedState_continue_processing_succeed)
 {
     //arrange
@@ -4561,7 +4480,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_DoWork_SendReportedState_continue_processing_s
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_12_017: [ `IoTHubClientCore_LL_SetDeviceMethodCallback` shall fail and return `IOTHUB_CLIENT_INVALID_ARG` if parameter `iotHubClientHandle` is `NULL`. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceMethodCallback_with_NULL_iotHubClientHandle_fails)
 {
     ///arrange
@@ -4574,7 +4492,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceMethodCallback_with_NULL_iotHubClient
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_12_018: [ If `deviceMethodCallback` is `NULL`, then `IoTHubClientCore_LL_SetDeviceMethodCallback` shall call the underlying layer's `IoTHubTransport_Unsubscribe_DeviceMethod` function and return `IOTHUB_CLIENT_OK`. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceMethodCallback_with_NULL_callback_Unsubscribe_and_succeeds)
 {
     ///arrange
@@ -4596,7 +4513,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceMethodCallback_with_NULL_callback_Uns
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_10_028: [If the user has subscribed using IoTHubClientCore_LL_SetDeviceMethodCallback_Ex, IoTHubClientCore_LL_SetDeviceMethodCallback shall fail and return IOTHUB_CLIENT_ERROR. ] */
 TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceMethodCallback_with_NULL_callback_Unsubscribe_After_SetDeviceMethodCallback_Ex_fail)
 {
     ///arrange
@@ -4615,7 +4531,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceMethodCallback_with_NULL_callback_Uns
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_10_029: [ If deviceMethodCallback is NULL and the client is not subscribed to receive method calls, IoTHubClientCore_LL_SetDeviceMethodCallback shall fail and return IOTHUB_CLIENT_ERROR. ] */
 TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceMethodCallback_unitialized_with_NULL_callback_fails)
 {
     ///arrange
@@ -4634,7 +4549,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceMethodCallback_unitialized_with_NULL_
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_12_019: [ If `deviceMethodCallback` is not `NULL`, then `IoTHubClientCore_LL_SetDeviceMethodCallback` shall call the underlying layer's `IoTHubTransport_Subscribe_DeviceMethod` function. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceMethodCallback_with_non_NULL_succeeds)
 {
     ///arrange
@@ -4655,7 +4569,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceMethodCallback_with_non_NULL_succeeds
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_10_028: [If the user has subscribed using IoTHubClientCore_LL_SetDeviceMethodCallback_Ex, IoTHubClientCore_LL_SetDeviceMethodCallback shall fail and return IOTHUB_CLIENT_ERROR. ] */
 TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceMethodCallback_After_SetDeviceMethodCallback_Ex_fail)
 {
     ///arrange
@@ -4674,8 +4587,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceMethodCallback_After_SetDeviceMethodC
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_12_020: [ If the underlying layer's `IoTHubTransport_Subscribe_DeviceMethod` function fails, then `IoTHubClientCore_LL_SetDeviceMethodCallback` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
-/*Tests_SRS_IoTHubClientCore_LL_12_021: [ If adding the information fails for any reason, `IoTHubClientCore_LL_SetDeviceMethodCallback` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceMethodCallback_fails_when_underlying_transport_fails)
 {
     ///arrange
@@ -4697,8 +4608,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceMethodCallback_fails_when_underlying_
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_07_003: [ IoTHubClientCore_LL_ReportedStateComplete shall enumerate through the IOTHUB_DEVICE_TWIN structures in queue_handle. ]*/
-/*Tests_SRS_IoTHubClientCore_LL_07_009: [ IoTHubClientCore_LL_ReportedStateComplete shall remove the IOTHUB_QUEUE_DATA_ITEM item from the ack queue.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_ReportedStateComplete_succeed)
 {
     //arrange
@@ -4733,7 +4642,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_ReportedStateComplete_succeed)
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_07_002: [ if handle is NULL then IoTHubClientCore_LL_ReportedStateComplete shall do nothing. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_ReportedStateComplete_NULL_fail)
 {
     //arrange
@@ -4750,7 +4658,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_ReportedStateComplete_NULL_fail)
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_07_018: [ If deviceMethodCallback is not NULL IoTHubClientCore_LL_DeviceMethodComplete shall execute deviceMethodCallback and return the status. ] */
 TEST_FUNCTION(IoTHubClientCore_LL_DeviceMethodComplete_succeed)
 {
     //arrange
@@ -4782,7 +4689,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_DeviceMethodComplete_succeed)
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_07_018: [ If deviceMethodCallback is not NULL IoTHubClientCore_LL_DeviceMethodComplete shall execute deviceMethodCallback and return the status. ] */
 TEST_FUNCTION(IoTHubClientCore_LL_DeviceMethodComplete_payload_NULL_succeed)
 {
     //arrange
@@ -4834,7 +4740,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_DeviceMethodComplete_Async_succeed)
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_07_019: [ If deviceMethodCallback is NULL IoTHubClientCore_LL_DeviceMethodComplete shall return 404. ] */
 TEST_FUNCTION(IoTHubClientCore_LL_DeviceMethodComplete_No_callback_succeed)
 {
     //arrange
@@ -4852,7 +4757,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_DeviceMethodComplete_No_callback_succeed)
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_07_017: [ If `handle` or response is NULL then `IoTHubClientCore_LL_DeviceMethodComplete` shall return 500. ] */
 TEST_FUNCTION(IoTHubClientCore_LL_DeviceMethodComplete_handle_NULL_succeed)
 {
     //arrange
@@ -4870,7 +4774,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_DeviceMethodComplete_handle_NULL_succeed)
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_10_001: [ IoTHubClientCore_LL_SetDeviceTwinCallback shall fail and return IOTHUB_CLIENT_INVALID_ARG if parameter iotHubClientHandle is NULL.] */
 TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceTwinCallback_iothubclienthandle_NULL_fail)
 {
     //arrange
@@ -4885,7 +4788,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceTwinCallback_iothubclienthandle_NULL_
     //cleanup
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_07_016: [ If deviceTwinCallback is set and DEVICE_TWIN_UPDATE_COMPLETE has been encountered then IoTHubClientCore_LL_RetrievePropertyComplete shall call deviceTwinCallback.] */
 TEST_FUNCTION(IoTHubClientCore_LL_RetrievePropertyComplete_succeed)
 {
     //arrange
@@ -4907,7 +4809,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_RetrievePropertyComplete_succeed)
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_07_013: [ If handle is NULL then IoTHubClientCore_LL_RetrievePropertyComplete shall do nothing.] */
 TEST_FUNCTION(IoTHubClientCore_LL_RetrievePropertyComplete_iothubclienthandle_NULL_fail)
 {
     //arrange
@@ -4924,7 +4825,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_RetrievePropertyComplete_iothubclienthandle_NU
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_07_014: [ If deviceTwinCallback is NULL then IoTHubClientCore_LL_RetrievePropertyComplete shall do nothing.] */
 TEST_FUNCTION(IoTHubClientCore_LL_RetrievePropertyComplete_deviceTwincallback_NULL_succeed)
 {
     //arrange
@@ -4942,7 +4842,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_RetrievePropertyComplete_deviceTwincallback_NU
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_07_015: [ If the the update_state parameter is DEVICE_TWIN_UPDATE_PARTIAL and a DEVICE_TWIN_UPDATE_COMPLETE has not been previously recieved then IoTHubClientCore_LL_RetrievePropertyComplete shall do nothing.] */
 TEST_FUNCTION(IoTHubClientCore_LL_RetrievePropertyComplete_update_partial_succeed)
 {
     //arrange
@@ -4962,7 +4861,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_RetrievePropertyComplete_update_partial_succee
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_07_016: [ If deviceTwinCallback is set and DEVICE_TWIN_UPDATE_COMPLETE has been encountered then IoTHubClientCore_LL_RetrievePropertyComplete shall call deviceTwinCallback.] */
 TEST_FUNCTION(IoTHubClientCore_LL_RetrievePropertyComplete_update_partial_before_complete_succeed)
 {
     //arrange
@@ -4989,7 +4887,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_RetrievePropertyComplete_update_partial_before
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_10_006: [ If deviceTwinCallback is NULL, then IoTHubClientCore_LL_SetDeviceTwinCallback shall call the underlying layer's _Unsubscribe function and return IOTHUB_CLIENT_OK.] */
 TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceTwinCallback_unsubscribe_succeed)
 {
     //arrange
@@ -5010,7 +4907,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceTwinCallback_unsubscribe_succeed)
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_10_002: [ If deviceTwinCallback is not NULL, then IoTHubClientCore_LL_SetDeviceTwinCallback shall call the underlying layer's _Subscribe function.] */
 TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceTwinCallback_subscribe_succeed)
 {
     //arrange
@@ -5031,7 +4927,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceTwinCallback_subscribe_succeed)
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_10_003: [ If the underlying layer's _Subscribe function fails, then IoTHubClientCore_LL_SetDeviceTwinCallback shall fail and return IOTHUB_CLIENT_ERROR.] */
 TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceTwinCallback_subscribe_fail)
 {
     //arrange
@@ -5053,8 +4948,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceTwinCallback_subscribe_fail)
     IoTHubClientCore_LL_Destroy(h);
 }
 
-// Tests_SRS_IOTHUBCLIENT_LL_09_012: [ IoTHubClientCore_LL_GetTwinAsync shall invoke IoTHubTransport_GetTwinAsync, passing `on_device_twin_report_received` and the user data as context  ]
-// Tests_SRS_IOTHUBCLIENT_LL_09_014: [ If no errors occur IoTHubClientCore_LL_GetTwinAsync shall return `IOTHUB_CLIENT_OK`. ]
 TEST_FUNCTION(IoTHubClientCore_LL_GetTwinAsync_succeed)
 {
     //arrange
@@ -5078,7 +4971,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_GetTwinAsync_succeed)
     my_gballoc_free(my_FAKE_IoTHubTransport_GetTwinAsync_callbackContext);
 }
 
-// Tests_SRS_IOTHUBCLIENT_LL_09_013: [ If IoTHubTransport_GetTwinAsync fails, `IoTHubClientCore_LL_GetTwinAsync` shall fail and return `IOTHUB_CLIENT_ERROR`. ]
 TEST_FUNCTION(IoTHubClientCore_LL_GetTwinAsync_fail)
 {
     //arrange
@@ -5113,7 +5005,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_GetTwinAsync_fail)
     umock_c_negative_tests_deinit();
 }
 
-// Tests_SRS_IOTHUBCLIENT_LL_09_011: [ If `iotHubClientHandle` or `deviceTwinCallback` are `NULL`, `IoTHubClientCore_LL_GetTwinAsync` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]
 TEST_FUNCTION(IoTHubClientCore_LL_GetTwinAsync_NULL_handle_fail)
 {
     //arrange
@@ -5129,7 +5020,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_GetTwinAsync_NULL_handle_fail)
     //cleanup
 }
 
-// Tests_SRS_IOTHUBCLIENT_LL_09_011: [ If `iotHubClientHandle` or `deviceTwinCallback` are `NULL`, `IoTHubClientCore_LL_GetTwinAsync` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]
 TEST_FUNCTION(IoTHubClientCore_LL_GetTwinAsync_NULL_callback_fail)
 {
     //arrange
@@ -5148,7 +5038,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_GetTwinAsync_NULL_callback_fail)
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/* Test_SRS_IoTHubClientCore_LL_07_021: [ If handle is NULL then IoTHubClientCore_LL_SetDeviceMethodCallback_Ex shall return IOTHUB_CLIENT_INVALID_ARG.] */
 TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex_handle_NULL_fail)
 {
     //arrange
@@ -5163,7 +5052,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex_handle_NULL_fail)
     //cleanup
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_07_025: [ If any error is encountered then IoTHubClientCore_LL_SetDeviceMethodCallback_Ex shall return IOTHUB_CLIENT_ERROR.] */
 TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex_subscribe_fail)
 {
     //arrange
@@ -5185,7 +5073,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex_subscribe_fail)
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_07_022: [ If inboundDeviceMethodCallback is NULL then IoTHubClientCore_LL_SetDeviceMethodCallback_Ex shall call the underlying layer's IoTHubTransport_Unsubscribe_DeviceMethod function and return IOTHUB_CLIENT_OK.] */
 TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex_inbound_device_method_cb_NULL_succeed)
 {
     //arrange
@@ -5208,7 +5095,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex_inbound_device_meth
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_10_031: [If the user has subscribed using IoTHubClientCore_LL_SetDeviceMethodCallback, IoTHubClientCore_LL_SetDeviceMethodCallback_Ex shall fail and return IOTHUB_CLIENT_ERROR. ] */
 TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex_inbound_device_method_cb_NULL_After_SetDeviceMethodCallback_fail)
 {
     //arrange
@@ -5227,7 +5113,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex_inbound_device_meth
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_10_030: [ If deviceMethodCallback is NULL and the client is not subscribed to receive method calls, IoTHubClientCore_LL_SetDeviceMethodCallback shall fail and return IOTHUB_CLIENT_ERROR. ] */
 TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex_uninitialized_inbound_device_method_cb_NULL_fails)
 {
     //arrange
@@ -5245,7 +5130,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex_uninitialized_inbou
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_10_031: [If the user has subscribed using IoTHubClientCore_LL_SetDeviceMethodCallback, IoTHubClientCore_LL_SetDeviceMethodCallback_Ex shall fail and return IOTHUB_CLIENT_ERROR. ] */
 TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex_After_SetDeviceMethodCallback_fail)
 {
     //arrange
@@ -5264,7 +5148,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex_After_SetDeviceMeth
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_07_023: [ If inboundDeviceMethodCallback is non-NULL then IoTHubClientCore_LL_SetDeviceMethodCallback_Ex shall call the underlying layer's IoTHubTransport_Subscribe_DeviceMethod function.]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex_succeed)
 {
     //arrange
@@ -5285,7 +5168,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetDeviceMethodCallback_Ex_succeed)
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_07_026: [ If handle or methodId is NULL then IoTHubClientCore_LL_DeviceMethodResponse shall return IOTHUB_CLIENT_INVALID_ARG.] */
 TEST_FUNCTION(IoTHubClientCore_LL_DeviceMethodResponse_handle_NULL_fail)
 {
     //arrange
@@ -5300,7 +5182,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_DeviceMethodResponse_handle_NULL_fail)
     //cleanup
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_07_026: [ If handle or methodId is NULL then IoTHubClientCore_LL_DeviceMethodResponse shall return IOTHUB_CLIENT_INVALID_ARG.] */
 TEST_FUNCTION(IoTHubClientCore_LL_DeviceMethodResponse_method_id_NULL_fail)
 {
     //arrange
@@ -5318,7 +5199,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_DeviceMethodResponse_method_id_NULL_fail)
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_07_026: [ If handle or methodId is NULL then IoTHubClientCore_LL_DeviceMethodResponse shall return IOTHUB_CLIENT_INVALID_ARG.] */
 TEST_FUNCTION(IoTHubClientCore_LL_DeviceMethodResponse_IoTHubTransport_DeviceMethod_Response_FAILS_fail)
 {
     //arrange
@@ -5338,7 +5218,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_DeviceMethodResponse_IoTHubTransport_DeviceMet
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_07_027: [ IoTHubClientCore_LL_DeviceMethodResponse shall call the IoTHubTransport_DeviceMethod_Response transport function.] */
 TEST_FUNCTION(IoTHubClientCore_LL_DeviceMethodResponse_succeed)
 {
     //arrange
@@ -5360,7 +5239,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_DeviceMethodResponse_succeed)
 }
 
 
-/* Tests_SRS_IoTHubClientCore_LL_25_120: [If iotHubClientHandle, retryPolicy or retryTimeoutLimitinSeconds is NULL, IoTHubClientCore_LL_GetRetryPolicy shall return IOTHUB_CLIENT_INVALID_ARG ] */
 TEST_FUNCTION(IoTHubClientCore_LL_GetRetryPolicy_NULL_HANDLEParam_fail)
 {
     //arrange
@@ -5373,7 +5251,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_GetRetryPolicy_NULL_HANDLEParam_fail)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_25_120: [If iotHubClientHandle, retryPolicy or retryTimeoutLimitinSeconds is NULL, IoTHubClientCore_LL_GetRetryPolicy shall return `IOTHUB_CLIENT_INVALID_ARG ] */
 TEST_FUNCTION(IoTHubClientCore_LL_GetRetryPolicy_NULL_RetryPolicyParam_fail)
 {
     //arrange
@@ -5391,7 +5268,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_GetRetryPolicy_NULL_RetryPolicyParam_fail)
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_25_120: [If iotHubClientHandle, retryPolicy or retryTimeoutLimitinSeconds is NULL, IoTHubClientCore_LL_GetRetryPolicy shall return `IOTHUB_CLIENT_INVALID_ARG ] */
 TEST_FUNCTION(IoTHubClientCore_LL_GetRetryPolicy_NULL_SizeParam_fail)
 {
     //arrange
@@ -5410,8 +5286,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_GetRetryPolicy_NULL_SizeParam_fail)
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/* Tests_SRS_IoTHubClientCore_LL_25_121: [IoTHubClientCore_LL_GetRetryPolicy shall retrieve connection retry policy from retryPolicy in struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA] */
-/* Tests_SRS_IoTHubClientCore_LL_25_122: [IoTHubClientCore_LL_GetRetryPolicy shall retrieve retryTimeoutLimit in seconds from retryTimeoutinSeconds in struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA] */
 TEST_FUNCTION(IoTHubClientCore_LL_GetRetryPolicy_succeed)
 {
     //arrange
@@ -5604,7 +5478,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_model_id_twice_fails)
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_10_037: [Calling IoTHubClientCore_LL_SetOption with value between [0, 100] shall return `IOTHUB_CLIENT_OK`. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetOption_diag_sampling_percentage_succeeds)
 {
     //arrange
@@ -5623,7 +5496,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_diag_sampling_percentage_succeeds)
     IoTHubClientCore_LL_Destroy(h);
 }
 
-/*Tests_SRS_IoTHubClientCore_LL_10_036: [Calling IoTHubClientCore_LL_SetOption with value > 100 shall return `IOTHUB_CLIENT_ERRROR`. ]*/
 TEST_FUNCTION(IoTHubClientCore_LL_SetOption_diag_sampling_percentage_fails)
 {
     //arrange
@@ -5642,7 +5514,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetOption_diag_sampling_percentage_fails)
     IoTHubClientCore_LL_Destroy(h);
 }
 
-// Tests_SRS_IoTHubClientCore_LL_31_127: [ If `iotHubClientHandle`, `outputName`, or `eventConfirmationCallback` is `NULL`, `IoTHubClientCore_LL_SendEventToOutputAsync` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]
 TEST_FUNCTION(IoTHubClientCore_LL_SendEventToOutputAsync_with_NULL_iotHubClientHandle_fails)
 {
     //arrange
@@ -5654,7 +5525,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendEventToOutputAsync_with_NULL_iotHubClientH
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
 }
 
-// Tests_SRS_IoTHubClientCore_LL_31_127: [ If `iotHubClientHandle`, `outputName`, or `eventConfirmationCallback` is `NULL`, `IoTHubClientCore_LL_SendEventToOutputAsync` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]
 TEST_FUNCTION(IoTHubClientCore_LL_SendEventToOutputAsync_with_NULL_messageHandle_fails)
 {
     //arrange
@@ -5673,7 +5543,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendEventToOutputAsync_with_NULL_messageHandle
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-// Tests_SRS_IoTHubClientCore_LL_31_127: [ If `iotHubClientHandle`, `outputName`, or `eventConfirmationCallback` is `NULL`, `IoTHubClientCore_LL_SendEventToOutputAsync` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]
 TEST_FUNCTION(IoTHubClientCore_LL_SendEventToOutputAsync_with_NULL_test_event_confirmation_callback_and_non_NULL_context_fails)
 {
     //arrange
@@ -5692,7 +5561,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendEventToOutputAsync_with_NULL_test_event_co
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-// Tests_SRS_IoTHubClientCore_LL_31_127: [ If `iotHubClientHandle`, `outputName`, or `eventConfirmationCallback` is `NULL`, `IoTHubClientCore_LL_SendEventToOutputAsync` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]
 TEST_FUNCTION(IoTHubClientCore_LL_SendEventToOutputAsync_with_NULL_OUTPUT_NAME_fails)
 {
     //arrange
@@ -5711,8 +5579,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendEventToOutputAsync_with_NULL_OUTPUT_NAME_f
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-// Tests_SRS_IoTHubClientCore_LL_31_128: [ `IoTHubClientCore_LL_SendEventToOutputAsync` shall set the outputName of the message to send. ]
-// Tests_SRS_IoTHubClientCore_LL_31_129: [ `IoTHubClientCore_LL_SendEventToOutputAsync` shall invoke `IoTHubClientCore_LL_SendEventAsync` to send the message. ]
 TEST_FUNCTION(IoTHubClientCore_LL_SendEventToOutputAsync_succeeds)
 {
     //arrange
@@ -5774,7 +5640,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendEventToOutputAsync_fails)
 }
 
 
-// Tests_SRS_IoTHubClientCore_LL_31_130: [ If `iotHubClientHandle` or `inputName` is NULL, `IoTHubClientCore_LL_SetInputMessageCallback` shall return IOTHUB_CLIENT_INVALID_ARG. ]
 TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallback_with_NULL_iotHubClientHandle_fails)
 {
     ///arrange
@@ -5787,7 +5652,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallback_with_NULL_iotHubClient
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 }
 
-// Tests_SRS_IoTHubClientCore_LL_31_130: [ If `iotHubClientHandle` or `inputName` is NULL, `IoTHubClientCore_LL_SetInputMessageCallback` shall return IOTHUB_CLIENT_INVALID_ARG. ]
 TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallback_with_NULL_inputName_succeeds)
 {
     //arrange
@@ -5859,8 +5723,6 @@ static void setup_IoTHubClientCore_LL_SetInputMessageCallback_callback_null(bool
     }
 }
 
-// Tests_SRS_IoTHubClientCore_LL_31_134: [ `IoTHubClientCore_LL_SetInputMessageCallback` shall allocate a callback handle to associate callbacks from the transport => client if `inputName` isn't already present in the callback list. ]
-// Tests_SRS_IoTHubClientCore_LL_31_136: [ `IoTHubClientCore_LL_SetInputMessageCallback` shall invoke `IoTHubTransport_Subscribe_InputQueue` if this is the first callback being registered. ]
 TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallback_one_item_success)
 {
     //arrange
@@ -5880,7 +5742,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallback_one_item_success)
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-// Tests_SRS_IoTHubClientCore_LL_31_135: [ `IoTHubClientCore_LL_SetInputMessageCallback` shall reuse the existing callback handle if `inputName` is already present in the callback list. ]
 TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallback_same_input_queue_twice_success)
 {
     //arrange
@@ -5932,7 +5793,6 @@ static void setup_three_event_callbacks(IOTHUB_CLIENT_CORE_LL_HANDLE handle)
 
 }
 
-// Tests_SRS_IoTHubClientCore_LL_31_134: [ `IoTHubClientCore_LL_SetInputMessageCallback` shall allocate a callback handle to associate callbacks from the transport => client if `inputName` isn't already present in the callback list. ]
 TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallback_multiple_items_success)
 {
     //arrange
@@ -5945,7 +5805,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallback_multiple_items_success
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-// Tests_SRS_IoTHubClientCore_LL_31_131: [ If `eventHandlerCallback` is NULL, `IoTHubClientCore_LL_SetInputMessageCallback` shall remove the `inputName` from its callback list if present. ]
 TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallback_one_item_and_unregister_success)
 {
     //arrange
@@ -5969,7 +5828,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallback_one_item_and_unregiste
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-// Tests_SRS_IoTHubClientCore_LL_31_131: [ If `eventHandlerCallback` is NULL, `IoTHubClientCore_LL_SetInputMessageCallback` shall remove the `inputName` from its callback list if present. ]
 TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallback_three_items_and_unregister_each_success)
 {
     //arrange
@@ -6022,7 +5880,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallback_three_items_and_unregi
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-// Tests_SRS_IoTHubClientCore_LL_31_132: [ If `eventHandlerCallback` is NULL, `IoTHubClientCore_LL_SetInputMessageCallback` shall return `IOTHUB_CLIENT_ERROR` if the `inputName` is not present. ]
 TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallback_unregister_not_found_fails)
 {
     //arrange
@@ -6129,7 +5986,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallback_one_item_fail)
     umock_c_negative_tests_deinit();
 }
 
-// Tests_SRS_IoTHubClientCore_LL_31_137: [ If either parameter `handle` or `messageData` is `NULL` then `IoTHubClientCore_LL_MessageCallbackFromInput` shall return `false`.** ]
 TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_with_messageData_NULL_parameter_fails)
 {
     //arrange
@@ -6146,7 +6002,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_with_messageData_NULL
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-// Tests_SRS_IoTHubClientCore_LL_31_138: [ If there is no registered handler for the inputName from `IoTHubMessage_GetInputName`, then `IoTHubClientCore_LL_MessageCallbackFromInput` shall attempt invoke the default handler handler.** ]
 TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_with_unsubscribed_returns_false)
 {
     //arrange
@@ -6165,8 +6020,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_with_unsubscribed_ret
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-// Tests_SRS_IoTHubClientCore_LL_31_139: [ `IoTHubClientCore_LL_MessageCallbackFromInput` shall the callback from the given inputName queue if it has been registered.** ]
-// Tests_SRS_IoTHubClientCore_LL_31_140: [ `IoTHubClientCore_LL_MessageCallbackFromInput` shall send the message disposition as returned by the client to the underlying layer and return `true` if an input queue match is found.** ]
 TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_match_succeeds)
 {
     //arrange
@@ -6198,7 +6051,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_match_succeeds)
 }
 
 
-// Tests_SRS_IoTHubClientCore_LL_31_138: [ If there is no registered handler for the inputName from `IoTHubMessage_GetInputName`, then `IoTHubClientCore_LL_MessageCallbackFromInput` shall attempt invoke the default handler handler.** ]
 TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_no_match_one_item_in_list_fails)
 {
     //arrange
@@ -6229,8 +6081,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_no_match_one_item_in_
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-// Tests_SRS_IoTHubClientCore_LL_31_139: [ `IoTHubClientCore_LL_MessageCallbackFromInput` shall the callback from the given inputName queue if it has been registered.** ]
-// Tests_SRS_IoTHubClientCore_LL_31_140: [ `IoTHubClientCore_LL_MessageCallbackFromInput` shall send the message disposition as returned by the client to the underlying layer and return `true` if an input queue match is found.** ]
 TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_match_with_multiple_item_in_list_succeeds)
 {
     //arrange
@@ -6275,7 +6125,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_match_with_multiple_i
 }
 
 
-// Tests_SRS_IoTHubClientCore_LL_31_138: [ If there is no registered handler for the inputName from `IoTHubMessage_GetInputName`, then `IoTHubClientCore_LL_MessageCallbackFromInput` shall attempt invoke the default handler handler.** ]
 TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_no_match_with_multiple_item_in_list_fails)
 {
     //arrange
@@ -6324,7 +6173,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_no_match_with_multipl
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-// Tests_SRS_IoTHubClientCore_LL_31_139: [ `IoTHubClientCore_LL_MessageCallbackFromInput` shall the callback from the given inputName queue if it has been registered.** ]
 TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_overwrite_callback_match_succeeds)
 {
     //arrange
@@ -6363,7 +6211,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_overwrite_callback_ma
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-// Tests_SRS_IoTHubClientCore_LL_31_138: [ If there is no registered handler for the inputName from `IoTHubMessage_GetInputName`, then `IoTHubClientCore_LL_MessageCallbackFromInput` shall attempt invoke the default handler handler.** ]
 TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_default_handler_no_registered_inputs_succeeds)
 {
     //arrange
@@ -6402,7 +6249,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_default_handler_no_re
 }
 
 
-// Tests_SRS_IoTHubClientCore_LL_31_138: [ If there is no registered handler for the inputName from `IoTHubMessage_GetInputName`, then `IoTHubClientCore_LL_MessageCallbackFromInput` shall attempt invoke the default handler handler.** ]
 TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_default_handler_no_match_on_registered_inputs_succeeds)
 {
     //arrange
@@ -6447,7 +6293,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_default_handler_no_ma
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-// Tests_SRS_IoTHubClientCore_LL_31_138: [ If there is no registered handler for the inputName from `IoTHubMessage_GetInputName`, then `IoTHubClientCore_LL_MessageCallbackFromInput` shall attempt invoke the default handler handler.** ]
 TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_default_handler_ex_no_registered_inputs_fails)
 {
     //arrange
@@ -6469,7 +6314,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_default_handler_ex_no
     IoTHubClientCore_LL_Destroy(handle);
 }
 
-// Tests_SRS_IoTHubClientCore_LL_31_138: [ If there is no registered handler for the inputName from `IoTHubMessage_GetInputName`, then `IoTHubClientCore_LL_MessageCallbackFromInput` shall attempt invoke the default handler handler.** ]
 TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_default_handler_ex_no_match_on_registered_inputs_succeeds)
 {
     //arrange
@@ -6605,22 +6449,16 @@ static void IoTHubClientCore_LL_MessageCallbackFromInput_with_messageCallbackEx_
 
 }
 
-// Tests_SRS_IoTHubClientCore_LL_31_139: [ `IoTHubClientCore_LL_MessageCallbackFromInput` shall the callback from the given inputName queue if it has been registered.** ]
-// Tests_SRS_IoTHubClientCore_LL_31_141: [`IoTHubClientCore_LL_SetInputMessageCallbackEx` shall copy the data passed in extended context. ]
 TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_with_messageCallbackEx_calls_client_layer_returns_true_succeeds)
 {
     IoTHubClientCore_LL_MessageCallbackFromInput_with_messageCallbackEx_calls_client_layer_impl(true);
 }
 
-// Tests_SRS_IoTHubClientCore_LL_31_139: [ `IoTHubClientCore_LL_MessageCallbackFromInput` shall the callback from the given inputName queue if it has been registered.** ]
-// Tests_SRS_IoTHubClientCore_LL_31_141: [`IoTHubClientCore_LL_SetInputMessageCallbackEx` shall copy the data passed in extended context. ]
 TEST_FUNCTION(IoTHubClientCore_LL_MessageCallbackFromInput_with_messageCallbackEx_calls_client_layer_returns_false_succeeds)
 {
     IoTHubClientCore_LL_MessageCallbackFromInput_with_messageCallbackEx_calls_client_layer_impl(false);
 }
 
-// Tests_SRS_IoTHubClientCore_LL_31_130: [ If `iotHubClientHandle` or `inputName` is NULL, `IoTHubClientCore_LL_SetInputMessageCallback` shall return IOTHUB_CLIENT_INVALID_ARG. ]
-// Tests_SRS_IoTHubClientCore_LL_31_141: [`IoTHubClientCore_LL_SetInputMessageCallbackEx` shall copy the data passed in extended context. ]
 TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallbackEx_with_NULL_iotHubClientHandle_fails)
 {
     //arrange
@@ -6638,7 +6476,6 @@ TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallbackEx_with_NULL_iotHubClie
     //cleanup
 }
 
-// Tests_SRS_IoTHubClientCore_LL_31_130: [ If `iotHubClientHandle` or `inputName` is NULL, `IoTHubClientCore_LL_SetInputMessageCallback` shall return IOTHUB_CLIENT_INVALID_ARG. ]
 TEST_FUNCTION(IoTHubClientCore_LL_SetInputMessageCallbackEx_with_NULL_inputName_succeeds)
 {
     //arrange

@@ -5,7 +5,7 @@ schedules:
   displayName: Daily midnight build
   branches:
     include:
-    - master
+    - main
     
 jobs:
 - job: Cross_Compile

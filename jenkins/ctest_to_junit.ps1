@@ -6,7 +6,7 @@ $build_folder = $args[0]
 $PSScriptRoot
 Push-Location $PSScriptRoot
 $xsl = Join-Path -Path (Get-Location) -ChildPath "..\jenkins\ctest_to_junit.xsl" 
-$ctest_xml = (Get-ChildItem "../cmake/$build_folder/*/Test.xml" -Recurse).FullName
+$ctest_xml = (Get-ChildItem "../cmake/*/Test.xml" -Recurse).FullName
 $junit_xml = Join-Path -Path (Get-Location) -ChildPath "results-junit.xml" 
 $xslt = New-Object System.Xml.Xsl.XslCompiledTransform 
 $xslt.Load($xsl)

@@ -94,7 +94,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT receive_msg_callback(IOTHUB_MESSAGE_HAND
 {
     (void)message;
     IOTHUB_CLIENT_SAMPLE_INFO* iothub_info = (IOTHUB_CLIENT_SAMPLE_INFO*)user_context;
-    (void)printf("Stop message recieved from IoTHub\r\n");
+    (void)printf("Stop message received from IoTHub\r\n");
     iothub_info->stop_running = 1;
     return IOTHUBMESSAGE_ACCEPTED;
 }
@@ -163,6 +163,8 @@ int main()
     (void)IoTHub_Init();
     (void)prov_dev_security_init(hsm_type);
     // Set the symmetric key if using they auth type
+    // If using DPS with an enrollment group, this must the the derived device key from the DPS Primary Key
+    // https://docs.microsoft.com/azure/iot-dps/concepts-symmetric-key-attestation?tabs=azure-cli#group-enrollments
     //prov_dev_set_symmetric_key_info("<symm_registration_id>", "<symmetric_Key>");
 
     PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION prov_transport;
@@ -281,7 +283,7 @@ int main()
 
             (void)IoTHubDeviceClient_LL_SetConnectionStatusCallback(device_ll_handle, iothub_connection_status, &iothub_info);
 
-            // Set any option that are neccessary.
+            // Set any option that are necessary.
             // For available options please see the iothub_sdk_options.md documentation
 
             IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_LOG_TRACE, &traceOn);

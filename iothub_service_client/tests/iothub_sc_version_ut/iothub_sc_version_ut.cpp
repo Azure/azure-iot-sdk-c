@@ -38,7 +38,6 @@ TEST_FUNCTION_CLEANUP(TestMethodCleanup)
     }
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_040: [IoTHubServiceClient_GetVersionString shall return a pointer to a constant string which indicates the version of IoTHubServiceClient API.]*/
 TEST_FUNCTION(the_version_constant_has_the_expected_value)
 {
     // arrange
@@ -47,7 +46,6 @@ TEST_FUNCTION(the_version_constant_has_the_expected_value)
     ASSERT_ARE_EQUAL(char_ptr, "1.1.0", IOTHUB_SERVICE_CLIENT_VERSION);
 }
 
-/* Tests_SRS_IOTHUBSERVICECLIENT_12_040: [IoTHubServiceClient_GetVersionString shall return a pointer to a constant string which indicates the version of IoTHubServiceClient API.]*/
 TEST_FUNCTION(IoTHubServiceClient_GetVersionString_returns_the_version)
 {
     // arrange

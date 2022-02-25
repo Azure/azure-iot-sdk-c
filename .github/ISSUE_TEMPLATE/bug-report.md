@@ -21,14 +21,14 @@ https://github.com/Azure/azure-iot-sdk-c/releases/latest
 
 3. Do not share information from your Azure subscription here (connection strings, service names (IoT Hub name, Device Provisioning Service scope ID), etc...). If you need to share any of this information, you can create a ticket and get assistance from the Microsoft Support.
 
-How to Submit an Azure Support Ticket: https://docs.microsoft.com/en-us/azure/azure-supportability/how-to-create-azure-support-request
+How to Submit an Azure Support Ticket: https://docs.microsoft.com/azure/azure-supportability/how-to-create-azure-support-request
 
 
 4. Include enough information for us to address the bug:
 
    -  A detailed description.
    -  A Minimal Complete Reproducible Example (https://stackoverflow.com/help/mcve). This is code we can cut and paste into a readily available sample and run, or a link to a project you've written that we can compile to reproduce the bug. 
-   -  Console logs. If you are unsure how to enable logging, refer to this document: https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/Iothub_sdk_options.md
+   -  Console logs. If you are unsure how to enable logging, refer to this document: https://github.com/Azure/azure-iot-sdk-c/blob/main/doc/Iothub_sdk_options.md
 
 5. Delete these instructions before submitting the bug.
 

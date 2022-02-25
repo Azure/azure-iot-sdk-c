@@ -532,7 +532,6 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
             .IgnoreArgument_value();
     }
 
-    /* Tests_SRS_DEV_AUTH_EMULATOR_07_001: [ If xda_create_parameters is NULL dev_auth_emulator_create shall return NULL. ] */
     TEST_FUNCTION(dev_auth_emulator_create_security_info_NULL_fail)
     {
         //arrange
@@ -547,7 +546,6 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         //cleanup
     }
 
-    /* Tests_SRS_DEV_AUTH_EMULATOR_07_003: [ On success dev_auth_emulator_create shall allocate a new instance of the device auth interface. ] */
     TEST_FUNCTION(dev_auth_emulator_create_security_info_w_persist_file_succees)
     {
         //arrange
@@ -564,7 +562,6 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         dev_auth_emulator_destroy(handle);
     }
 
-    /* Tests_SRS_DEV_AUTH_EMULATOR_07_002: [ If any failure is encountered dev_auth_emulator_create shall return NULL ] */
     TEST_FUNCTION(dev_auth_emulator_create_security_info_w_persist_file_fail)
     {
         //arrange
@@ -603,7 +600,6 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         umock_c_negative_tests_deinit();
     }
 
-    /* Tests_SRS_DEV_AUTH_EMULATOR_07_005: [ if handle is NULL, dev_auth_emulator_destroy shall do nothing. ] */
     TEST_FUNCTION(dev_auth_emulator_destroy_handle_NULL_fail)
     {
         //arrange
@@ -617,8 +613,6 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         //cleanup
     }
 
-    /* Tests_SRS_DEV_AUTH_EMULATOR_07_006: [ dev_auth_emulator_destroy shall free all resources associated with CONCRETE_XDA_HANDLE. ] */
-    /* Tests_SRS_DEV_AUTH_EMULATOR_07_004: [ dev_auth_emulator_destroy shall free the CONCRETE_XDA_HANDLE instance. ] */
     TEST_FUNCTION(dev_auth_emulator_destroy_succees)
     {
         //arrange
@@ -651,7 +645,6 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         //cleanup
     }
 
-    /* Tests_SRS_DEV_AUTH_EMULATOR_07_007: [ if handle is NULL, dev_auth_emulator_get_auth_type shall return AUTH_TYPE_UNKNOWN ] */
     TEST_FUNCTION(dev_auth_emulator_get_auth_type_handle_NULL_fail)
     {
         //arrange
@@ -666,7 +659,6 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         //cleanup
     }
 
-    /* Tests_SRS_DEV_AUTH_EMULATOR_07_008: [ dev_auth_emulator_get_auth_type shall return AUTH_TYPE_SAS ] */
     TEST_FUNCTION(dev_auth_emulator_get_auth_type_succees)
     {
         //arrange
@@ -684,7 +676,6 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         dev_auth_emulator_destroy(handle);
     }
 
-    /* Tests_SRS_DEV_AUTH_EMULATOR_07_009: [ if handle or dev_auth_cred is NULL, dev_auth_emulator_generate_credentials shall return NULL. ]*/
     TEST_FUNCTION(dev_auth_emulator_generate_credentials_handle_NULL_fail)
     {
         //arrange
@@ -707,7 +698,6 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         //cleanup
     }
 
-    /* Tests_SRS_DEV_AUTH_EMULATOR_07_009: [ if handle or dev_auth_cred is NULL, dev_auth_emulator_generate_credentials shall return NULL. ]*/
     TEST_FUNCTION(dev_auth_emulator_generate_credentials_dev_auth_cred_NULL_fail)
     {
         //arrange
@@ -725,7 +715,6 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         dev_auth_emulator_destroy(handle);
     }
 
-    /* Tests_SRS_DEV_AUTH_EMULATOR_07_012: [ Upon success dev_auth_emulator_generate_credentials shall return the created SAS Token. ] */
     TEST_FUNCTION(dev_auth_emulator_generate_credentials_succees)
     {
         //arrange
@@ -753,7 +742,6 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         dev_auth_emulator_destroy(handle);
     }
 
-    /* Tests_SRS_DEV_AUTH_EMULATOR_07_011: [ If a failure is encountered, dev_auth_emulator_generate_credentials shall return NULL. ] */
     TEST_FUNCTION(dev_auth_emulator_generate_credentials_fails)
     {
         //arrange
@@ -802,7 +790,6 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         dev_auth_emulator_destroy(handle);
     }
 
-    /* Tests_SRS_DEV_AUTH_EMULATOR_07_013: [ If handle is NULL dev_auth_emulator_get_endorsement_key shall return NULL. ] */
     TEST_FUNCTION(dev_auth_emulator_get_endorsement_key_handle_NULL_fail)
     {
         //arrange
@@ -818,7 +805,6 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         //cleanup
     }
 
-    /* Tests_SRS_DEV_AUTH_EMULATOR_07_014: [ dev_auth_emulator_get_endorsement_key shall allocate and return the device key as the endorsement key. ] */
     TEST_FUNCTION(dev_auth_emulator_get_endorsement_key_success)
     {
         //arrange
@@ -839,7 +825,6 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         my_gballoc_free(result);
     }
 
-    /* Tests_SRS_DEV_AUTH_EMULATOR_07_015: [ If a failure is encountered, dev_auth_emulator_get_endorsement_key shall return NULL. ] */
     TEST_FUNCTION(dev_auth_emulator_get_endorsement_key_fail)
     {
         //arrange
@@ -860,7 +845,6 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         my_gballoc_free(result);
     }
 
-    /* Tests_SRS_DEV_AUTH_EMULATOR_07_016: [ If handle or data is NULL or data_len is 0, dev_auth_emulator_store_data shall return a non-zero value. ] */
     TEST_FUNCTION(dev_auth_emulator_store_data_handle_NULL_fail)
     {
         //arrange
@@ -876,7 +860,6 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         //cleanup
     }
 
-    /* Tests_SRS_DEV_AUTH_EMULATOR_07_016: [ If handle or data is NULL or data_len is 0, dev_auth_emulator_store_data shall return a non-zero value. ] */
     TEST_FUNCTION(dev_auth_emulator_store_data_data_NULL_fail)
     {
         //arrange
@@ -894,7 +877,6 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         dev_auth_emulator_destroy(handle);
     }
 
-    /* Tests_SRS_DEV_AUTH_EMULATOR_07_016: [ If handle or data is NULL or data_len is 0, dev_auth_emulator_store_data shall return a non-zero value. ] */
     TEST_FUNCTION(dev_auth_emulator_store_data_length_zero_fail)
     {
         //arrange
@@ -912,8 +894,6 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         dev_auth_emulator_destroy(handle);
     }
 
-    /* Tests_SRS_DEV_AUTH_EMULATOR_07_025: [ On success dev_auth_emulator_store_data shall return zero. ] */
-    /* Tests_SRS_DEV_AUTH_EMULATOR_07_017: [ dev_auth_emulator_store_data shall store the the data in a BUFFER variable. ] */
     TEST_FUNCTION(dev_auth_emulator_store_data_success)
     {
         //arrange
@@ -936,7 +916,6 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         dev_auth_emulator_destroy(handle);
     }
 
-    /* Tests_SRS_DEV_AUTH_EMULATOR_07_018: [ If the a data object has been previously stored in the BUFFER variable, dev_auth_emulator_store_data shall overwrite the existing value with the new data object. ] */
     TEST_FUNCTION(dev_auth_emulator_store_data_2nd_call_success)
     {
         //arrange
@@ -961,7 +940,6 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         dev_auth_emulator_destroy(handle);
     }
 
-    /* Tests_SRS_DEV_AUTH_EMULATOR_07_019: [ If any failure is encountered, dev_auth_emulator_store_data shall return a non-zero value. ] */
     TEST_FUNCTION(dev_auth_emulator_store_data_2nd_call_fails)
     {
         //arrange
@@ -1002,7 +980,6 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         dev_auth_emulator_destroy(handle);
     }
 
-    /* Tests_SRS_DEV_AUTH_EMULATOR_07_020: [ If handle or data_len is NULL, dev_auth_emulator_retrieve_data shall return a non-zero value. ] */
     TEST_FUNCTION(dev_auth_emulator_retrieve_data_handle_NULL_fail)
     {
         //arrange
@@ -1018,7 +995,6 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         //cleanup
     }
 
-    /* Tests_SRS_DEV_AUTH_EMULATOR_07_020: [ If handle or data_len is NULL, dev_auth_emulator_retrieve_data shall return a non-zero value. ] */
     TEST_FUNCTION(dev_auth_emulator_retrieve_data_data_len_NULL_fail)
     {
         //arrange
@@ -1037,7 +1013,6 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         dev_auth_emulator_destroy(handle);
     }
 
-    /* Tests_SRS_DEV_AUTH_EMULATOR_07_021: [ dev_auth_emulator_retrieve_data shall return the data previously stored by dev_auth_emulator_store_data and add the length of the data in data_len. ] */
     TEST_FUNCTION(dev_auth_emulator_retrieve_data_success)
     {
         //arrange
@@ -1061,7 +1036,6 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         my_gballoc_free(result);
     }
 
-    /* Tests_SRS_DEV_AUTH_EMULATOR_07_022: [ If dev_auth_emulator_store_data has not been called dev_auth_emulator_retrieve_data shall return NULL. ] */
     TEST_FUNCTION(dev_auth_emulator_retrieve_data_no_data_success)
     {
         //arrange
@@ -1088,7 +1062,6 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         dev_auth_emulator_destroy(handle);
     }
 
-    /* Tests_SRS_DEV_AUTH_EMULATOR_07_023: [ If an error is encountered dev_auth_emulator_store_datashall return NULL. ] */
     TEST_FUNCTION(dev_auth_emulator_retrieve_data_fail)
     {
         //arrange
@@ -1132,7 +1105,6 @@ BEGIN_TEST_SUITE(device_auth_emulator_ut)
         dev_auth_emulator_destroy(handle);
     }
 
-    /* Tests_SRS_DEV_AUTH_EMULATOR_07_026: [ dev_auth_emulator_interface_desc shall return the XDA_INTERFACE_DESCRIPTION structure. ] */
     TEST_FUNCTION(dev_auth_emulator_interface_desc_success)
     {
         //arrange

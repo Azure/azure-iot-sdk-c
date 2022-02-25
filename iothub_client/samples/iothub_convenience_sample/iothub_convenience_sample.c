@@ -347,8 +347,8 @@ int main(void)
         while(g_continueRunning)
         {
             // Construct the iothub message
-            telemetry_temperature = 20.0f + ((float)rand() / RAND_MAX) * 15.0f;
-            telemetry_humidity = 60.0f + ((float)rand() / RAND_MAX) * 20.0f;
+            telemetry_temperature = 20.0f + ((float)rand() / (float)RAND_MAX) * 15.0f;
+            telemetry_humidity = 60.0f + ((float)rand() / (float)RAND_MAX) * 20.0f;
 
             sprintf(telemetry_msg_buffer, "{\"temperature\":%.3f,\"humidity\":%.3f,\"scale\":\"%s\"}",
                 telemetry_temperature, telemetry_humidity, telemetry_scale);

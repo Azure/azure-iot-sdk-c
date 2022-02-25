@@ -101,7 +101,7 @@ int main(void)
         (void)IoTHubDeviceClient_LL_SetMessageCallback(device_ll_handle, receive_msg_callback, &iothub_info);
         (void)IoTHubDeviceClient_LL_SetConnectionStatusCallback(device_ll_handle, connection_status_callback, &iothub_info);
 
-        // Set any option that are neccessary.
+        // Set any option that are necessary.
         // For available options please see the iothub_sdk_options.md documentation
         //bool traceOn = true;
         //IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_LOG_TRACE, &traceOn);

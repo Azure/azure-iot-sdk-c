@@ -1675,11 +1675,21 @@ static void on_twin_report_state_completed(int status_code, void* userContextCal
 
 static void check_for_reported_properties_update_on_service_side(IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaul)
 {
-    char* twin;
+    char* twin = NULL;
 
-    if ((twin = IoTHubDeviceTwin_GetTwin(
-        iotHubLonghaul->iotHubSvcDevTwinHandle,
-        iotHubLonghaul->deviceInfo->deviceId)) == NULL)
+    for (int i = 0; i < NETWORK_RETRY_ATTEMPTS && twin == NULL; i++)
+    {
+        twin = IoTHubDeviceTwin_GetTwin(iotHubLonghaul->iotHubSvcDevTwinHandle, iotHubLonghaul->deviceInfo->deviceId);
+        if (twin == NULL)
+        {
+            // this API can fail due to network issues (ex: DNS issues)
+            // try a few times before reporting an error
+            LogError("Failed to get device twin from the service for message id (%s)", iotHubLonghaul->test_id);
+            ThreadAPI_Sleep(NETWORK_RETRY_DELAY_MSEC); 
+        }
+    }
+
+    if (twin == NULL)
     {
         LogError("Failed getting the twin document on service side");
     }
@@ -1723,6 +1733,10 @@ static void check_for_reported_properties_update_on_service_side(IOTHUB_LONGHAUL
                         LogError("Failed unlocking (%s)", iotHubLonghaul->test_id);
                     }
                 }
+            }
+            else
+            {
+                LogError("Current device twin message id (%s) does not match expected message id (%s)", test_id, iotHubLonghaul->test_id);
             }
         }
         free(twin);

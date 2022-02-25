@@ -17,6 +17,11 @@
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/xlogging.h"
 
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+#include "azure_c_shared_utility/shared_util_options.h"
+#include "certs.h"
+#endif
+
 // DPS related header files
 #include "azure_prov_client/iothub_security_factory.h"
 #include "azure_prov_client/prov_device_client.h"
@@ -112,6 +117,14 @@ IOTHUB_DEVICE_CLIENT_LL_HANDLE PnP_CreateDeviceClientLLHandle_ViaDps(const PNP_D
         LogError("Setting provisioning tracing on failed, error=%d", provDeviceResult);
         result = false;
     }
+#ifdef SET_TRUSTED_CERT_IN_SAMPLES
+    // Setting the Trusted Certificate.  This is only necessary on systems without built in certificate stores.
+    else if ((provDeviceResult = Prov_Device_LL_SetOption(provDeviceHandle, OPTION_TRUSTED_CERT, certificates)) != PROV_DEVICE_RESULT_OK)
+    {
+        LogError("Setting provisioning trusted certificate, error=%d", provDeviceResult);
+        result = false;
+    }
+#endif // SET_TRUSTED_CERT_IN_SAMPLES
     // This step indicates the ModelId of the device to DPS.  This allows the service to (optionally) perform custom operations,
     // such as allocating a different IoT Hub to devices based on their ModelId.
     else if ((provDeviceResult = Prov_Device_LL_Set_Provisioning_Payload(provDeviceHandle, STRING_c_str(modelIdPayload))) != PROV_DEVICE_RESULT_OK)

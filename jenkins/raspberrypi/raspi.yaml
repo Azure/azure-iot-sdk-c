@@ -5,7 +5,7 @@ schedules:
   displayName: Daily midnight build
   branches:
     include:
-    - master
+    - main
 
 variables:
   ClientLibrary.Repo: $(Build.Repository.Uri)
@@ -102,7 +102,9 @@ jobs:
 
 - job: 'Run_AMQP_DT_E2E_Test'
   dependsOn: Cross_Compile
-  condition: succeeded()
+  #disable raspberrypi jobs until raspberrypi image is rebuilt
+  #condition: succeeded()
+  condition: 'false'
   pool: 
     name: devicelab-02
   steps:  
@@ -164,7 +166,9 @@ jobs:
 
 - job: 'Run_MQTT_DT_E2E_Test'
   dependsOn: Cross_Compile
-  condition: succeeded()
+  #disable raspberrypi jobs until raspberrypi image is rebuilt
+  #condition: succeeded()
+  condition: 'false'
   pool: 
     name: devicelab-02
   steps:  
@@ -225,7 +229,9 @@ jobs:
 
 - job: 'Run_AMQP_DM_E2E_Test'
   dependsOn: Cross_Compile
-  condition: succeeded()
+  #disable raspberrypi jobs until raspberrypi image is rebuilt
+  #condition: succeeded()
+  condition: 'false'
   pool: 
     name: devicelab-02
   steps:  
@@ -286,7 +292,9 @@ jobs:
 
 - job: 'Run_MQTT_DM_E2E_Test'
   dependsOn: Cross_Compile
-  condition: succeeded()
+  #disable raspberrypi jobs until raspberrypi image is rebuilt
+  #condition: succeeded()
+  condition: 'false'
   pool: 
     name: devicelab-02
   steps:  
@@ -348,7 +356,7 @@ jobs:
 - job: 'Run_EXTRA_Test'
   dependsOn: Cross_Compile
   # Disabling extra task for now until feedback on use of Library Variables in conditional statements
-  condition: in('True', 'False')
+  condition: 'false'
   pool: 
     name: devicelab-02
   steps:

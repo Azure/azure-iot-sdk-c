@@ -36,7 +36,7 @@ cd azure-iot-sdk-c
 git submodule update --init
 ```
 
-Further information regarding this step and other set up requirements can be found in this [guide](https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/devbox_setup.md). This step is only included in this document to establish the directory structure used for the rest of the example.
+Further information regarding this step and other set up requirements can be found in this [guide](https://github.com/Azure/azure-iot-sdk-c/blob/main/doc/devbox_setup.md). This step is only included in this document to establish the directory structure used for the rest of the example.
 
 You might consider building the SDK for your local platform at this point simply to ensure you have all the required components. At the very least, you must ensure that the SDK's prerequisite libraries are installed on your Raspberry Pi. You can achieve this by running the script _setup.sh_ found in _azure-iot-sdk-c/build\_all/linux_.
 
@@ -118,7 +118,7 @@ These instructions have been tested on both the Raspberry Pi 2, 3 and 4.
 
 If you encounter the error _error adding symbols: DSO missing from command line_ try adding a reference to libdl with  _-cl -ldl_ added to your build script command line.
 
-For Raspberry Pi 4 the following workaround is neccessary to properly link the samples with pthread.
+For Raspberry Pi 4 the following workaround is necessary to properly link the samples with pthread.
 Run the following commands and [recompile the Azure IoT C SDK](#Building-the-SDK).
 
 ```bash
@@ -134,7 +134,7 @@ This document has demonstrated how to cross compile the Azure IoT SDK on a 64-bi
 
 <https://github.com/Azure/azure-iot-sdks>
 
-<https://github.com/Azure/azure-iot-sdks/blob/master/c/doc/devbox_setup.md>
+<https://github.com/Azure/azure-iot-sdks/blob/main/c/doc/devbox_setup.md>
 
 <https://github.com/raspberrypi/tools>
 

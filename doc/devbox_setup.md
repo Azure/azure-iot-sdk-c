@@ -35,7 +35,7 @@ git submodule update --init
 
 ### Building sample applications using vcpkg to build the SDK
 
-The sample applications can be build with the help of the C SDK libraries and headers built with vcpkg.  vcpkg is a package manager that facilitates building C and C++ libraries. To install the vcpkg C SDK libraries and headers, follow these steps [Setup C SDK vcpkg for Windows development environment](.doc/setting_up_vcpkg.md#setup-c-sdk-vcpkg-for-windows-development-environment).
+The sample applications can be build with the help of the C SDK libraries and headers built with vcpkg.  vcpkg is a package manager that facilitates building C and C++ libraries. To install the vcpkg C SDK libraries and headers, follow these steps [Setup C SDK vcpkg for Windows development environment](setting_up_vcpkg.md#setup-c-sdk-vcpkg-for-windows-development-environment).
 
 Note: vcpkg manager creates a directory with all the headers and generates the C SDK .lib files on your machine. If you are using Visual Studio (from 2017) the command 'vcpkg integrate install' lets Visual Studio knows where the vcpkg headers and lib directories are located. If you're using other IDEs, just add the vcpkg directories to your compiler/linker include paths.
 
@@ -376,10 +376,10 @@ make
 [azure-shared-c-utility]:https://github.com/Azure/azure-c-shared-utility
 [azure-uamqp-c]:https://github.com/Azure/azure-uamqp-c
 [azure-umqtt-c]:https://github.com/Azure/azure-umqtt-c
-[sln-file]:https://msdn.microsoft.com/en-us/library/bb165951.aspx
+[sln-file]:https://msdn.microsoft.com/library/bb165951.aspx
 [git]:http://www.git-scm.com
 [CMake]:https://cmake.org/
-[MSBuild]:https://msdn.microsoft.com/en-us/library/0k6kkbsd.aspx
+[MSBuild]:https://msdn.microsoft.com/library/0k6kkbsd.aspx
 [Compilation and Installation]:https://wiki.openssl.org/index.php/Compilation_and_Installation#Windows
 [Ubuntu]:http://www.ubuntu.com/desktop
 [gcc]:https://gcc.gnu.org/
@@ -390,6 +390,6 @@ make
 [clang]:https://clang.llvm.org/
 [device_samples]: ../iothub_client/samples/
 [latest-release]:https://github.com/Azure/azure-iot-sdk-c/releases/latest
-[Windows 10 IoT Core]:https://docs.microsoft.com/en-us/windows/iot-core/develop-your-app/buildingappsforiotcore
+[Windows 10 IoT Core]:https://docs.microsoft.com/windows/iot-core/develop-your-app/buildingappsforiotcore
 [vcpkg]:https://github.com/Microsoft/vcpkg
 [windows-and-openssl]:./windows_and_openssl.md
