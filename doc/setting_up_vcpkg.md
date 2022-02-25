@@ -2,6 +2,43 @@
 
 This document describes how to setup vcpkg to build applications using Microsoft Azure IoT device C SDK. It demonstrates building and running a C language SDK sample for Windows, Linux, and Mac.
 
+## C SDK vcpkg support
+
+The C SDK uses vcpkg primarily for LTS releases. The most recent LTS release can be installed using the syntax: `vcpkg install azure-iot-sdk-c` and sets the following CMake flags:
+
+```
+    -Dskip_samples=ON
+    -Duse_installed_dependencies=ON
+    -Duse_default_uuid=ON
+    -Dbuild_as_dynamic=OFF
+    -Duse_edge_modules=ON
+    -Dwarnings_as_errors=OFF
+```
+
+The `use-prov-client` feature uses the syntax: `vcpkg install azure-iot-sdk-c[use-prov-client]` and adds the following CMake flags:
+```
+    -Dhsm_type_symm_key=ON
+    -Duse_prov_client=ON
+```
+
+The `public-preview` feature allows you to build and install the azure-iot-sdk-c from a provided public-preview hash. To access this feature, use the syntax: `vcpkg install azure-iot-sdk-c[public-preview]`. The following CMake flags will be set:
+
+```
+    -Dskip_samples=ON
+    -Duse_installed_dependencies=ON
+    -Duse_default_uuid=ON
+    -Dbuild_as_dynamic=OFF
+    -Duse_edge_modules=ON
+    -Dwarnings_as_errors=OFF
+```
+
+There are no other features available.
+
+> NOTE: If your application requires specific CMake flags to be set, please build and install directly from the source code.  See [devbox_update.md](https://github.com/Azure/azure-iot-sdk-c/blob/main/doc/devbox_setup.md) for further information.
+
+The most recent portfile.cmake and vcpkg.json files for the azure-iot-sdk-c vcpkg port can be found at [vcpkg/ports/azure-iot-sdk-c](https://github.com/microsoft/vcpkg/tree/master/ports/azure-iot-sdk-c).
+
+
 ## Setup C SDK vcpkg for Windows development environment
 
 - Open PowerShell and run the following commands:
