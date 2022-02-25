@@ -32,6 +32,8 @@ char* g_dps_x509_key_individual = NULL;
 char* g_dps_regid_individual = NULL;
 const bool g_enable_tracing = true;
 
+static const int TEST_PROV_RANDOMIZED_BACK_OFF_SEC = 60;
+
 BEGIN_TEST_SUITE(prov_x509_client_e2e)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
@@ -64,7 +66,10 @@ BEGIN_TEST_SUITE(prov_x509_client_e2e)
         // DPS fails when having multiple enrollments at the same time. 
         // Since we are running these tests on multiple machines with each test taking about 1 second, 
         // we randomize their start time to avoid collisions.
-        ThreadAPI_Sleep((rand() % 10) * 1000);
+        srand(time(0));
+        int random_back_off_sec = rand() % TEST_PROV_RANDOMIZED_BACK_OFF_SEC;
+        LogInfo("prov_x509_client_e2e: Random back-off = %ds", random_back_off_sec);
+        ThreadAPI_Sleep(random_back_off_sec * 1000);
 
         // Register device
         create_x509_individual_enrollment_device();
