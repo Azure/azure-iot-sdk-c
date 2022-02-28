@@ -1,10 +1,10 @@
-# Building applications using vcpkg for C SDK
+# Using vcpkg for the Azure IoT C SDK to build device applications
 
-This document describes how to setup vcpkg to build applications using Microsoft Azure IoT device C SDK. It demonstrates building and running a C language SDK sample for Windows, Linux, and Mac.
+This document describes how to setup vcpkg to build device applications using Microsoft Azure IoT C SDK. It demonstrates building and running a C language device SDK sample for Windows, Linux, and Mac.
 
-## C SDK vcpkg support
+## Azure IoT C SDK vcpkg support
 
-The C SDK uses [vcpkg](https://github.com/microsoft/vcpkg) primarily for LTS releases. The most recent LTS release can be installed using the syntax: `vcpkg install azure-iot-sdk-c` and builds using the following CMake flags:
+The Azure IoT C SDK uses [vcpkg](https://github.com/microsoft/vcpkg) primarily for LTS releases. The most recent LTS release can be installed using the syntax: `vcpkg install azure-iot-sdk-c` and builds using the following CMake flags:
 
 ```
     -Dskip_samples=ON
@@ -21,7 +21,7 @@ The `use-prov-client` feature uses the syntax: `vcpkg install azure-iot-sdk-c[us
     -Duse_prov_client=ON
 ```
 
-The `public-preview` feature allows you to build and install the azure-iot-sdk-c from a provided public-preview hash. The Ref hash used can be found in the [portfile.cmake](https://github.com/microsoft/vcpkg/blob/master/ports/azure-iot-sdk-c/portfile.cmake) file. To access this feature, use the syntax: `vcpkg install azure-iot-sdk-c[public-preview]`. The following CMake flags will be set:
+The `public-preview` feature allows you to build and install the azure-iot-sdk-c from a provided public-preview hash. The `REF` hash used can be found in the [portfile.cmake](https://github.com/microsoft/vcpkg/blob/master/ports/azure-iot-sdk-c/portfile.cmake) file. To access this feature, use the syntax: `vcpkg install azure-iot-sdk-c[public-preview]`. The following CMake flags will be set:
 
 ```
     -Dskip_samples=ON
@@ -32,14 +32,14 @@ The `public-preview` feature allows you to build and install the azure-iot-sdk-c
     -Dwarnings_as_errors=OFF
 ```
 
-There are no other features available.
+There are no other configuration options via vcpkg available.
 
-> NOTE: If your application requires specific CMake flags not shown above, please build and install directly from the source code.  See [devbox_update.md](https://github.com/Azure/azure-iot-sdk-c/blob/main/doc/devbox_setup.md) for further information.
+> NOTE: If your application requires specific CMake flags not shown above, please build and install directly from the source code.  See [devbox_setup.md](https://github.com/Azure/azure-iot-sdk-c/blob/main/doc/devbox_setup.md) for further information.
 
-The most recent [portfile.cmake](https://github.com/microsoft/vcpkg/blob/master/ports/azure-iot-sdk-c/portfile.cmake) and [vcpkg.json](https://github.com/microsoft/vcpkg/blob/master/ports/azure-iot-sdk-c/vcpkg.json) files for the C SDK can be found under [vcpkg/ports/azure-iot-sdk-c](https://github.com/microsoft/vcpkg/tree/master/ports/azure-iot-sdk-c).
+The most recent [portfile.cmake](https://github.com/microsoft/vcpkg/blob/master/ports/azure-iot-sdk-c/portfile.cmake) and [vcpkg.json](https://github.com/microsoft/vcpkg/blob/master/ports/azure-iot-sdk-c/vcpkg.json) files for the Azure IoT C SDK can be found under [vcpkg/ports/azure-iot-sdk-c](https://github.com/microsoft/vcpkg/tree/master/ports/azure-iot-sdk-c).
 
 
-## Setup C SDK vcpkg for Windows development environment
+## Setup Azure IoT C SDK vcpkg for Windows development environment
 
 - Open PowerShell and run the following commands:
 
@@ -57,7 +57,7 @@ The most recent [portfile.cmake](https://github.com/microsoft/vcpkg/blob/master/
         .\vcpkg.exe install azure-iot-sdk-c
         popd
 
-        # Open the C SDK telemetry sample solution for Visual Studio.
+        # Open the Azure IoT C SDK telemetry sample solution for Visual Studio.
         git clone https://github.com/Azure/azure-iot-sdk-c.git # Skip if already have a cloned repo
         pushd .\azure-iot-sdk-c\iothub_client\samples\iothub_ll_telemetry_sample\windows\
         start .\iothub_ll_telemetry_sample.sln
@@ -73,7 +73,7 @@ The most recent [portfile.cmake](https://github.com/microsoft/vcpkg/blob/master/
         .\vcpkg.exe export azure-iot-sdk-c --nuget
         popd
 
-        # Open the C SDK telemetry sample solution for Visual Studio.
+        # Open the Azure IoT C SDK telemetry sample solution for Visual Studio.
         git clone https://github.com/Azure/azure-iot-sdk-c.git # Skip if already have a cloned repo
         pushd .\azure-iot-sdk-c\iothub_client\samples\iothub_ll_telemetry_sample\windows\
         start .\iothub_ll_telemetry_sample.sln
@@ -87,9 +87,9 @@ The most recent [portfile.cmake](https://github.com/microsoft/vcpkg/blob/master/
 
 - Hit F5 to build and run.
 
-- More information on building the C SDK and samples can be found [here](https://github.com/Azure/azure-iot-sdk-c/blob/main/doc/devbox_setup.md).
+- More information on building the Azure IoT C SDK and samples can be found [here](https://github.com/Azure/azure-iot-sdk-c/blob/main/doc/devbox_setup.md).
 
-## Setup C SDK vcpkg for Linux or Mac development environment
+## Setup Azure IoT C SDK vcpkg for Linux or Mac development environment
 
 - Open a command prompt and run the following commands:
 
@@ -100,7 +100,7 @@ The most recent [portfile.cmake](https://github.com/microsoft/vcpkg/blob/master/
     ./vcpkg install azure-iot-sdk-c
     cd ..
     ```
-- Enter the C SDK telemetry sample directory.
+- Enter the Azure IoT C SDK telemetry sample directory.
 
     ```bash
     git clone https://github.com/Azure/azure-iot-sdk-c.git # Skip if already have a cloned repo
@@ -112,4 +112,4 @@ The most recent [portfile.cmake](https://github.com/microsoft/vcpkg/blob/master/
     ./iothub_ll_telemetry_sample
     ```
 
-- More information on building the C SDK and samples can be found [here](https://github.com/Azure/azure-iot-sdk-c/blob/main/doc/devbox_setup.md).
+- More information on building the Azure IoT C SDK and samples can be found [here](https://github.com/Azure/azure-iot-sdk-c/blob/main/doc/devbox_setup.md).
