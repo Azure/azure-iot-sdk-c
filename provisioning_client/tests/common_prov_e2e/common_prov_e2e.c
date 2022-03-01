@@ -358,7 +358,7 @@ void send_dps_test_registration_with_retry(const char* global_uri, const char* s
 {
     if (send_dps_test_registration(global_uri, scope_id, protocol, g_enable_tracing) != REG_RESULT_COMPLETE)
     {
-        // DPS fails when having multiple enrollments at the same time:
+        // DPS fails when having multiple enrollments of the same device ID at the same time:
         //  {"errorCode":409203,"trackingId":"e5490c1e-2528-4eb5-9cf6-e72e80c20268","message":"Precondition failed.","timestampUtc":"2022-02-28T10:11:31.1373215Z"}
         // Since we are running these tests on multiple machines we retry with a randomized back-off timer.
         srand(time(0));
