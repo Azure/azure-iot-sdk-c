@@ -27,7 +27,7 @@ void print_ie_results(PROVISIONING_QUERY_RESPONSE* query_resp)
     }
 }
 
-int main()
+int main(void)
 {
     int result = 0;
 

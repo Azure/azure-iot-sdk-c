@@ -211,7 +211,7 @@ static STRING_HANDLE createRelativePath(IOTHUB_DEVICEMETHOD_REQUEST_MODE iotHubD
     return result;
 }
 
-static HTTP_HEADERS_HANDLE createHttpHeader()
+static HTTP_HEADERS_HANDLE createHttpHeader(void)
 {
     HTTP_HEADERS_HANDLE httpHeader;
     const char* guid;

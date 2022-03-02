@@ -57,6 +57,7 @@ option(dont_use_uploadtoblob "set dont_use_uploadtoblob to ON if the functionali
 option(no_logging "disable logging" OFF)
 option(use_installed_dependencies "set use_installed_dependencies to ON to use installed packages instead of building dependencies from submodules" OFF)
 option(warnings_as_errors  "enable strict compiler warnings-as-errors" ON)
+option(strict_prototypes  "enable GCC strict-prototypes compiler option. This is not supported with test code enabled." OFF)
 option(build_as_dynamic "build the IoT SDK libaries as dynamic"  OFF)
 # Turn on/off IoT features
 option(use_prov_client "Enable provisioning client" ON)
@@ -130,6 +131,13 @@ if (${warnings_as_errors})
         # Make warning as error
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
+    endif()
+endif()
+
+if (${strict_prototypes})
+    if (NOT MSVC)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wstrict-prototypes")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wstrict-prototypes")
     endif()
 endif()
 
