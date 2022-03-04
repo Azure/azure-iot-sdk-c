@@ -292,7 +292,7 @@ void test_invoke_device_method(const char* deviceId, const char* moduleId, const
                 serviceClientDeviceMethodHandle, 
                 deviceId,
                 moduleId,
-                METHOD_NAME,
+                methodOrCommandName,
                 payload,
                 TIMEOUT,
                 &responseStatus,
@@ -323,7 +323,7 @@ void test_invoke_device_method(const char* deviceId, const char* moduleId, const
             invokeResult = IoTHubDeviceMethod_Invoke(
                 serviceClientDeviceMethodHandle, 
                 deviceId,
-                METHOD_NAME,
+                methodOrCommandName,
                 payload,
                 TIMEOUT,
                 &responseStatus,
