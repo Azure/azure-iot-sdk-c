@@ -337,7 +337,7 @@ static int add_amqp_message_annotation(MESSAGE_HANDLE message, AMQP_VALUE msg_an
 
 //---------- TWIN Helpers ----------//
 
-static char* generate_unique_id()
+static char* generate_unique_id(void)
 {
     char* result;
 
@@ -360,7 +360,7 @@ static char* generate_unique_id()
     return result;
 }
 
-static char* generate_twin_correlation_id()
+static char* generate_twin_correlation_id(void)
 {
     char* result;
     char* unique_id;

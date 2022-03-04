@@ -60,7 +60,7 @@ static TPMS_RSA_PARMS  RsaStorageParams = {
     0                                       // UINT32               exponent
 };
 
-static TPM2B_PUBLIC* GetEkTemplate ()
+static TPM2B_PUBLIC* GetEkTemplate (void)
 {
     static TPM2B_PUBLIC EkTemplate = { 0,   // size will be computed during marshaling
     {
@@ -82,7 +82,7 @@ static TPM2B_PUBLIC* GetEkTemplate ()
     return &EkTemplate;
 }
 
-static TPM2B_PUBLIC* GetSrkTemplate()
+static TPM2B_PUBLIC* GetSrkTemplate(void)
 {
     static TPM2B_PUBLIC SrkTemplate = { 0,  // size will be computed during marshaling
     {

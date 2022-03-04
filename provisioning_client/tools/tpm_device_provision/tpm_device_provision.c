@@ -53,7 +53,7 @@ static int gather_registration_info(REGISTRATION_INFO* reg_info)
     return result;
 }
 
-int main()
+int main(void)
 {
     int result;
     REGISTRATION_INFO reg_info;

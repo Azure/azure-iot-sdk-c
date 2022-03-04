@@ -171,7 +171,7 @@ static void register_device_callback(PROV_DEVICE_RESULT register_result, const c
     }
 }
 
-int main()
+int main(void)
 {
     bool traceOn = true;
 
