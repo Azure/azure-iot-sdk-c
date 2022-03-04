@@ -554,7 +554,7 @@ static int parse_amqp_message(MESSAGE_HANDLE message, PARSED_STREAM_INFO* parsed
 
 //---------- Generic Helpers ----------//
 
-static char* generate_unique_id()
+static char* generate_unique_id(void)
 {
 	char* result;
 
@@ -577,7 +577,7 @@ static char* generate_unique_id()
 	return result;
 }
 
-static char* generate_correlation_id_string()
+static char* generate_correlation_id_string(void)
 {
     char* result;
     char* unique_id;
