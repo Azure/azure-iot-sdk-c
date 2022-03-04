@@ -41,10 +41,19 @@ if (${hsm_type_custom})
     set(HSM_CLIENT_LIBRARY ${CUSTOM_HSM_LIB})
 elseif (${use_prov_client})
     if (${run_e2e_tests})
-        # For e2e test we need to run a custom HSM to handle testing
+        # For e2e tests with riot, sastoken and tpm we need to run a custom HSM to handle testing
         if (${hsm_type_x509})
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHSM_TYPE_X509")
             set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHSM_TYPE_X509")
+
+            set(HSM_CLIENT_H_FILES ${HSM_CLIENT_H_FILES}
+                ${CMAKE_CURRENT_LIST_DIR}/adapters/hsm_client_x509.h)
+            set(HSM_CLIENT_C_FILES ${HSM_CLIENT_C_FILES}
+                ${CMAKE_CURRENT_LIST_DIR}/adapters/hsm_client_x509.c)
+        endif()
+        if (${hsm_type_riot})
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHSM_TYPE_RIOT")
+            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHSM_TYPE_RIOT")
         endif()
         if (${hsm_type_sastoken})
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHSM_TYPE_SAS_TOKEN")
@@ -65,7 +74,12 @@ elseif (${use_prov_client})
         # For e2e test a custom HSM is needed
         add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/tests/common_prov_e2e/prov_hsm)
 
-        set(HSM_CLIENT_LIBRARY ${HSM_CLIENT_LIBRARY} msr_riot utpm prov_hsm)
+        if (${hsm_type_riot})
+            set(HSM_CLIENT_LIBRARY ${HSM_CLIENT_LIBRARY} msr_riot utpm prov_hsm)
+        else()
+            set(HSM_CLIENT_LIBRARY ${HSM_CLIENT_LIBRARY} utpm prov_hsm)
+        endif()
+
         if (WIN32)
             set(HSM_CLIENT_LIBRARY ${HSM_CLIENT_LIBRARY} Tbs)
         endif ()
@@ -74,6 +88,17 @@ elseif (${use_prov_client})
             # Using x509
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHSM_TYPE_X509")
             set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHSM_TYPE_X509")
+
+            set(HSM_CLIENT_H_FILES ${HSM_CLIENT_H_FILES}
+                ${CMAKE_CURRENT_LIST_DIR}/adapters/hsm_client_x509.h)
+            set(HSM_CLIENT_C_FILES ${HSM_CLIENT_C_FILES}
+                ${CMAKE_CURRENT_LIST_DIR}/adapters/hsm_client_x509.c)
+        endif()
+
+        if (${hsm_type_riot})
+            # Using RIoT
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHSM_TYPE_RIOT")
+            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHSM_TYPE_RIOT")
 
             set(HSM_CLIENT_H_FILES ${HSM_CLIENT_H_FILES}
                 ${CMAKE_CURRENT_LIST_DIR}/adapters/hsm_client_riot.h)

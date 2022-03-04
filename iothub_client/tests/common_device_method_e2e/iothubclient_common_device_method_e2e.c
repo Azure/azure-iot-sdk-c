@@ -96,7 +96,7 @@ static const char TEST_METHOD_TO_INVOKE_FOR_COMMAND[] = TEST_COMMAND_COMPONENT_N
 static const int METHOD_RESPONSE_SUCCESS = 200;
 static const int METHOD_RESPONSE_ERROR = 401;
 static const unsigned int TIMEOUT = 60;
-static const unsigned int IOTHUB_CONNECT_TIMEOUT_SEC = 30;
+static const unsigned int IOTHUB_CONNECT_TIMEOUT_SEC = 120;
 static const char TEST_COMMAND_PAYLOAD[] = "{\"foo\":41,\"bar\":42,\"baz\":\"boo\"}";
 static const char TEST_MODEL_ID_FOR_COMMAND_TESTS[] = "dtmi:azure:c-sdk:command-e2e-test;1";
 
@@ -279,20 +279,66 @@ static int DeviceMethodWithUploadCallback(const char* method_name, const unsigne
 // Callers of this function decide method or PnP convention via methodOrCommandName parameter, but API calls remain same.
 void test_invoke_device_method(const char* deviceId, const char* moduleId, const char* methodOrCommandName, const char *payload)
 {
-    int responseStatus;
-    unsigned char* responsePayload;
-    size_t responsePayloadSize;
+    int responseStatus = METHOD_RESPONSE_ERROR;
+    unsigned char* responsePayload = NULL;
+    size_t responsePayloadSize = 0;
+    IOTHUB_DEVICE_METHOD_RESULT invokeResult = IOTHUB_DEVICE_METHOD_ERROR;
 
     if (moduleId != NULL)
     {
-        LogInfo("IoTHubDeviceMethod_InvokeModule deviceId='%s', moduleId='%s'", deviceId, moduleId);
-        IOTHUB_DEVICE_METHOD_RESULT invokeResult = IoTHubDeviceMethod_InvokeModule(serviceClientDeviceMethodHandle, deviceId, moduleId, methodOrCommandName, payload, TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
+        for (int tryCounter = 0; tryCounter < TEST_METHOD_INVOKE_MAX_RETRIES; tryCounter++)
+        {
+            invokeResult = IoTHubDeviceMethod_InvokeModule(
+                serviceClientDeviceMethodHandle, 
+                deviceId,
+                moduleId,
+                METHOD_NAME,
+                payload,
+                TIMEOUT,
+                &responseStatus,
+                &responsePayload,
+                &responsePayloadSize);
+
+            if (invokeResult == IOTHUB_DEVICE_METHOD_OK)
+            {
+                break;
+            }
+
+            LogError(
+                "(Try %d) IoTHubDeviceMethod_InvokeModule deviceId='%s', moduleId='%s' error=%d", 
+                tryCounter + 1,
+                deviceId,
+                moduleId,
+                invokeResult);
+
+            ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_METHOD_INVOKE_FAILURES_MSEC);
+        }
+
         ASSERT_ARE_EQUAL(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_OK, invokeResult, "Service Client IoTHubDeviceMethod_InvokeModule failed");
     }
     else
     {
-        LogInfo("IoTHubDeviceMethod_Invoke deviceId='%s'", deviceId);
-        IOTHUB_DEVICE_METHOD_RESULT invokeResult = IoTHubDeviceMethod_Invoke(serviceClientDeviceMethodHandle, deviceId, methodOrCommandName, payload, TIMEOUT, &responseStatus, &responsePayload, &responsePayloadSize);
+        for (int tryCounter = 0; tryCounter < TEST_METHOD_INVOKE_MAX_RETRIES; tryCounter++)
+        {
+            invokeResult = IoTHubDeviceMethod_Invoke(
+                serviceClientDeviceMethodHandle, 
+                deviceId,
+                METHOD_NAME,
+                payload,
+                TIMEOUT,
+                &responseStatus,
+                &responsePayload,
+                &responsePayloadSize);
+
+            if (invokeResult == IOTHUB_DEVICE_METHOD_OK)
+            {
+                break;
+            }
+
+            LogError("(Try %d) IoTHubDeviceMethod_Invoke deviceId='%s' error=%d", tryCounter + 1, deviceId, invokeResult);
+            ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_METHOD_INVOKE_FAILURES_MSEC);
+        }
+
         ASSERT_ARE_EQUAL(IOTHUB_DEVICE_METHOD_RESULT, IOTHUB_DEVICE_METHOD_OK, invokeResult, "Service Client IoTHubDeviceMethod_Invoke failed");
     }
 

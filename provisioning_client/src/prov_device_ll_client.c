@@ -24,7 +24,14 @@
 #include "azure_prov_client/prov_device_ll_client.h"
 #include "azure_prov_client/prov_client_const.h"
 
-static const char* const OPTION_LOG_TRACE = "logtrace";
+#ifdef HSM_TYPE_X509
+#include "hsm_client_x509.h"
+#endif
+
+#ifdef HSM_TYPE_RIOT
+#include "hsm_client_riot.h"
+#endif
+
 
 static const char* const JSON_NODE_STATUS = "status";
 static const char* const JSON_NODE_REG_STATUS = "registrationState";
@@ -1240,7 +1247,7 @@ PROV_DEVICE_RESULT Prov_Device_LL_SetOption(PROV_DEVICE_LL_HANDLE handle, const 
                 result = PROV_DEVICE_RESULT_OK;
             }
         }
-        else if (strcmp(OPTION_LOG_TRACE, option_name) == 0)
+        else if (strcmp(PROV_OPTION_LOG_TRACE, option_name) == 0)
         {
             bool log_trace = *((bool*)value);
             if (handle->prov_transport_protocol->prov_transport_set_trace(handle->transport_handle, log_trace) != 0)
@@ -1316,6 +1323,40 @@ PROV_DEVICE_RESULT Prov_Device_LL_SetOption(PROV_DEVICE_LL_HANDLE handle, const 
                     handle->user_supplied_reg_id = true;
                     result = PROV_DEVICE_RESULT_OK;
                 }
+            }
+        }
+        else if (strcmp(OPTION_X509_CERT, option_name) == 0)
+        {
+            if (handle->prov_state != CLIENT_STATE_READY)
+            {
+                LogError("Certificates cannot be set after registration has begun");
+                result = PROV_DEVICE_RESULT_ERROR;
+            }
+            else if (prov_auth_set_certificate(handle->prov_auth_handle, value) != 0)
+            {
+                LogError("Failure setting certificate");
+                result = PROV_DEVICE_RESULT_ERROR;
+            }
+            else
+            {
+                result = PROV_DEVICE_RESULT_OK;
+            }
+        }
+        else if (strcmp(OPTION_X509_PRIVATE_KEY, option_name) == 0)
+        {
+            if (handle->prov_state != CLIENT_STATE_READY)
+            {
+                LogError("Certificates cannot be set after registration has begun");
+                result = PROV_DEVICE_RESULT_ERROR;
+            }
+            else if (prov_auth_set_key(handle->prov_auth_handle, value) != 0)
+            {
+                LogError("Failure setting key");
+                result = PROV_DEVICE_RESULT_ERROR;
+            }
+            else
+            {
+                result = PROV_DEVICE_RESULT_OK;
             }
         }
         else

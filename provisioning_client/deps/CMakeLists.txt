@@ -12,7 +12,7 @@ if (${hsm_type_custom})
     set(CUSTOM_HSM_LIB "${hsm_custom_lib}" PARENT_SCOPE)
 else()
 
-    if(${hsm_type_x509})
+    if(${hsm_type_riot})
         set(msr_riot_c_files
             ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/DICE/DiceSha256.c
             ${CMAKE_CURRENT_LIST_DIR}/RIoT/Simulation/RIoT/Core/RIoTCrypt/RiotCrypt.c
