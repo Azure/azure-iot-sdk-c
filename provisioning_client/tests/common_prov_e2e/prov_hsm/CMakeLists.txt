@@ -16,18 +16,31 @@ set(IOT_HSM_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps/hsm/inc)
 
 include_directories(. ${IOT_HSM_INCLUDE_DIR} ${UTPM_INCLUDE_DIR} ../../../adapters)
 
-set(source_c_files
-    ./tpm_msr.c
-    ./x509_msr.c
-    ./symm_key.c
-    ./provisioning_hsm.c
-)
+if (NOT ${hsm_type_riot})
+    set(source_c_files
+        ./tpm_msr.c
+        ./symm_key.c
+        ./provisioning_hsm.c
+    )
 
-set(source_h_files
-    ./tpm_msr.h
-    ./x509_info.h
-    ./symm_key.h
-)
+    set(source_h_files
+        ./tpm_msr.h
+        ./symm_key.h
+    )
+else()
+    set(source_c_files
+        ./tpm_msr.c
+        ./riot_msr.c
+        ./symm_key.c
+        ./provisioning_hsm.c
+    )
+
+    set(source_h_files
+        ./tpm_msr.h
+        ./riot_info.h
+        ./symm_key.h
+    )
+endif()
 
 IF(WIN32)
     #windows needs this define
@@ -42,6 +55,11 @@ ELSE()
 ENDIF(WIN32)
 
 add_library(prov_hsm ${source_c_files} ${source_h_files})
-target_link_libraries(prov_hsm msr_riot utpm)
+
+if (NOT ${hsm_type_riot})
+    target_link_libraries(prov_hsm utpm)
+else()
+    target_link_libraries(prov_hsm msr_riot utpm)
+endif()
 
 set_target_properties(prov_hsm PROPERTIES FOLDER "tests/azure_prov_e2e_tests")

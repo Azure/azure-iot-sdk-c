@@ -18,7 +18,7 @@ static bool g_use_certificate = true;
 static bool g_use_certificate = false;
 #endif //USE_OPENSSL
 
-int main()
+int main(void)
 {
     int result = 0;
 

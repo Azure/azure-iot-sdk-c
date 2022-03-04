@@ -91,7 +91,7 @@ static void register_device_callback(PROV_DEVICE_RESULT register_result, const c
     g_registration_complete = true;
 }
 
-int main()
+int main(void)
 {
     SECURE_DEVICE_TYPE hsm_type;
     //hsm_type = SECURE_DEVICE_TYPE_TPM;

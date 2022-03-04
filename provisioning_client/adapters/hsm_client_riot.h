@@ -34,4 +34,4 @@ MOCKABLE_FUNCTION(, char*, hsm_client_riot_create_leaf_cert, HSM_CLIENT_HANDLE, 
 }
 #endif /* __cplusplus */
 
-#endif // HSM_CLIENT_RIOT
+#endif // HSM_CLIENT_RIOT_H

@@ -61,7 +61,9 @@ declare -a arr=(
     "-Drun_e2e_tests=ON -Duse_azure_cloud_ecc_cert=ON"
     "-Duse_prov_client:BOOL=ON -Dhsm_type_symm_key:BOOL=ON"
     "-Duse_prov_client:BOOL=ON -Dhsm_type_x509:BOOL=ON"
+    "-Duse_prov_client:BOOL=ON -Dhsm_type_x509:BOOL=OFF -Dhsm_type_riot:BOOL=ON"
     "-Duse_prov_client:BOOL=ON -Dhsm_type_sastoken:BOOL=ON"
+    "-Duse_prov_client:BOOL=ON -Dstrict_prototypes:BOOL=ON"
 )
 
 for item in "${arr[@]}"
