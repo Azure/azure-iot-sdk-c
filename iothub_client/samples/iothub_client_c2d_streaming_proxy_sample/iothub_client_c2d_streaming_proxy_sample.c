@@ -158,7 +158,7 @@ static void on_io_error(void* context)
     g_continueRunning = false;
 }
 
-static XIO_HANDLE connect_to_local_service()
+static XIO_HANDLE connect_to_local_service(void)
 {
     XIO_HANDLE result;
     SOCKETIO_CONFIG io_config;
@@ -335,7 +335,7 @@ static DEVICE_STREAM_C2D_RESPONSE* streamRequestCallback(const DEVICE_STREAM_C2D
     return IoTHubClient_StreamC2DResponseCreate(stream_request, true);
 }
 
-static void print_traffic_counters()
+static void print_traffic_counters(void)
 {
     if (g_lastTrafficPrintTime != INDEFINITE_TIME)
     {
