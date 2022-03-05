@@ -326,11 +326,11 @@ static void SendTargetTemperatureResponse(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceC
 {
     IOTHUB_CLIENT_RESULT iothubClientResult;
 
-    // IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE specifies the response to a desired temperature.
-    IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE desiredTemperatureResponse;
+    // IOTHUB_CLIENT_PROPERTY_WRITABLE_RESPONSE specifies the response to a desired temperature.
+    IOTHUB_CLIENT_PROPERTY_WRITABLE_RESPONSE desiredTemperatureResponse;
     memset(&desiredTemperatureResponse, 0, sizeof(desiredTemperatureResponse));
     // Specify the structure version (not to be confused with the $version on IoT Hub) to protect back-compat in case the structure adds fields.
-    desiredTemperatureResponse.structVersion = IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE_STRUCT_VERSION_1;
+    desiredTemperatureResponse.structVersion = IOTHUB_CLIENT_PROPERTY_WRITABLE_RESPONSE_STRUCT_VERSION_1;
     // This represents the version of the request from IoT Hub.  It needs to be returned so service applications can determine
     // what current version of the writable property the device is currently using, as the server may update the property even when the device
     // is offline.
@@ -344,12 +344,12 @@ static void SendTargetTemperatureResponse(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceC
     unsigned char* propertySerialized = NULL;
     size_t propertySerializedLength;
 
-    // The first step of reporting properties is to serialize IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE into JSON for sending.
-    if ((iothubClientResult = IoTHubClient_Serialize_WritablePropertyResponse(&desiredTemperatureResponse, 1, NULL, &propertySerialized, &propertySerializedLength)) != IOTHUB_CLIENT_OK)
+    // The first step of reporting properties is to serialize IOTHUB_CLIENT_PROPERTY_WRITABLE_RESPONSE into JSON for sending.
+    if ((iothubClientResult = IoTHubClient_Properties_Writer_CreateWritableResponse(&desiredTemperatureResponse, 1, NULL, &propertySerialized, &propertySerializedLength)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to serialize updated property, error=%d", iothubClientResult);
     }
-    // The output of IoTHubClient_Serialize_WritablePropertyResponse is sent to IoTHubDeviceClient_LL_SendPropertiesAsync to perform network I/O.
+    // The output of IoTHubClient_Properties_Writer_CreateWritableResponse is sent to IoTHubDeviceClient_LL_SendPropertiesAsync to perform network I/O.
     else if ((iothubClientResult = IoTHubDeviceClient_LL_SendPropertiesAsync(deviceClient, propertySerialized, propertySerializedLength, NULL, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to send updated property, error=%d", iothubClientResult);
@@ -358,7 +358,7 @@ static void SendTargetTemperatureResponse(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceC
     {
         LogInfo("Sending acknowledgement of property to IoTHub");
     }
-    IoTHubClient_Serialize_Properties_Destroy(propertySerialized);
+    IoTHubClient_Properties_Properties_Writer_Destroy(propertySerialized);
 }
 
 //
@@ -375,20 +375,20 @@ static void SendMaxTemperatureSinceReboot(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceC
     }
     else
     {
-        IOTHUB_CLIENT_REPORTED_PROPERTY maxTempProperty;
-        maxTempProperty.structVersion = IOTHUB_CLIENT_REPORTED_PROPERTY_STRUCT_VERSION_1;
+        IOTHUB_CLIENT_PROPERTY_REPORTED maxTempProperty;
+        maxTempProperty.structVersion = IOTHUB_CLIENT_PROPERTY_REPORTED_STRUCT_VERSION_1;
         maxTempProperty.name = g_maxTempSinceLastRebootPropertyName;
         maxTempProperty.value =  maximumTemperatureAsString;
 
         unsigned char* propertySerialized = NULL;
         size_t propertySerializedLength;
 
-        // The first step of reporting properties is to serialize IOTHUB_CLIENT_REPORTED_PROPERTY into JSON for sending.
-        if ((iothubClientResult = IoTHubClient_Serialize_ReportedProperties(&maxTempProperty, 1, NULL, &propertySerialized, &propertySerializedLength)) != IOTHUB_CLIENT_OK)
+        // The first step of reporting properties is to serialize IOTHUB_CLIENT_PROPERTY_REPORTED into JSON for sending.
+        if ((iothubClientResult = IoTHubClient_Properties_Writer_CreateReported(&maxTempProperty, 1, NULL, &propertySerialized, &propertySerializedLength)) != IOTHUB_CLIENT_OK)
         {
             LogError("Unable to serialize reported state, error=%d", iothubClientResult);
         }
-        // The output of IoTHubClient_Serialize_ReportedProperties is sent to IoTHubDeviceClient_LL_SendPropertiesAsync to perform network I/O.
+        // The output of IoTHubClient_Properties_Writer_CreateReported is sent to IoTHubDeviceClient_LL_SendPropertiesAsync to perform network I/O.
         else if ((iothubClientResult = IoTHubDeviceClient_LL_SendPropertiesAsync(deviceClient, propertySerialized, propertySerializedLength,  NULL, NULL)) != IOTHUB_CLIENT_OK)
         {
             LogError("Unable to send reported state, error=%d", iothubClientResult);
@@ -397,14 +397,14 @@ static void SendMaxTemperatureSinceReboot(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceC
         {
             LogInfo("Sending %s property to IoTHub for component", g_maxTempSinceLastRebootPropertyName);
         }
-        IoTHubClient_Serialize_Properties_Destroy(propertySerialized);
+        IoTHubClient_Properties_Properties_Writer_Destroy(propertySerialized);
     }
 }
 
 //
 // Thermostat_ProcessTargetTemperature processes a writable update for desired temperature property.
 //
-static void Thermostat_ProcessTargetTemperature(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient, IOTHUB_CLIENT_DESERIALIZED_PROPERTY* property, int propertiesVersion)
+static void Thermostat_ProcessTargetTemperature(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient, IOTHUB_CLIENT_PROPERTY_PARSED* property, int propertiesVersion)
 {
     char* next;
     double targetTemperature = strtod(property->value.str, &next);
@@ -437,27 +437,27 @@ static void Thermostat_ProcessTargetTemperature(IOTHUB_DEVICE_CLIENT_LL_HANDLE d
 static void Thermostat_PropertiesCallback(IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType,  const unsigned char* payload, size_t payloadLength, void* userContextCallback)
 {
     IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient = (IOTHUB_DEVICE_CLIENT_LL_HANDLE)userContextCallback;
-    IOTHUB_CLIENT_PROPERTY_ITERATOR_HANDLE propertyIterator = NULL;
-    IOTHUB_CLIENT_DESERIALIZED_PROPERTY property;
+    IOTHUB_CLIENT_PROPERTIES_PARSER_HANDLE propertyIterator = NULL;
+    IOTHUB_CLIENT_PROPERTY_PARSED property;
     int propertiesVersion;
     IOTHUB_CLIENT_RESULT clientResult;
 
-    // The properties arrive as a raw JSON buffer (which is not null-terminated).  IoTHubClient_Deserialize_Properties_CreateIterator parses 
+    // The properties arrive as a raw JSON buffer (which is not null-terminated).  IoTHubClient_Properties_Parser_Create parses 
     // this into a more convenient form to allow property-by-property enumeration over the updated properties.
-    if ((clientResult = IoTHubClient_Deserialize_Properties_CreateIterator(payloadType, payload, payloadLength, &propertyIterator)) != IOTHUB_CLIENT_OK)
+    if ((clientResult = IoTHubClient_Properties_Parser_Create(payloadType, payload, payloadLength, &propertyIterator)) != IOTHUB_CLIENT_OK)
     {
         LogError("IoTHubClient_Deserialize_Properties failed, error=%d", clientResult);
     }
-    else if ((clientResult = IoTHubClient_Deserialize_Properties_GetVersion(propertyIterator, &propertiesVersion)) != IOTHUB_CLIENT_OK)
+    else if ((clientResult = IoTHubClient_Properties_Parser_GetVersion(propertyIterator, &propertiesVersion)) != IOTHUB_CLIENT_OK)
     {
-        LogError("IoTHubClient_Deserialize_Properties_GetVersion failed, error=%d", clientResult);
+        LogError("IoTHubClient_Properties_Parser_GetVersion failed, error=%d", clientResult);
     }
     else
     {
         bool propertySpecified;
-        property.structVersion = IOTHUB_CLIENT_DESERIALIZED_PROPERTY_STRUCT_VERSION_1;
+        property.structVersion = IOTHUB_CLIENT_PROPERTY_PARSED_STRUCT_VERSION_1;
 
-        while ((clientResult = IoTHubClient_Deserialize_Properties_GetNextProperty(propertyIterator, &property, &propertySpecified)) == IOTHUB_CLIENT_OK)
+        while ((clientResult = IoTHubClient_Properties_Parser_GetNext(propertyIterator, &property, &propertySpecified)) == IOTHUB_CLIENT_OK)
         {
             if (propertySpecified == false)
             {
@@ -493,11 +493,11 @@ static void Thermostat_PropertiesCallback(IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE pa
                 LogError("Property %s is not part of the thermostat model and will be ignored", property.name);
             }
             
-            IoTHubClient_Deserialize_Properties_DestroyProperty(&property);
+            IoTHubClient_Properties_ParsedProperty_Destroy(&property);
         }
     }
 
-    IoTHubClient_Deserialize_Properties_DestroyIterator(propertyIterator);
+    IoTHubClient_Properties_Parser_Destroy(propertyIterator);
 }
 
 //

@@ -136,7 +136,7 @@ static bool WriteClosingBrace(bool isComponent, char** currentWrite, size_t* req
 // WriteReportedProperties writes the actual serializedProperties string based 
 // on the properties.  If serializedProperties==NULL and serializedPropertiesLength==0, just like
 // analogous snprintf it will just calculate the amount of space caller needs to allocate.
-static bool WriteReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPERTY* properties, size_t numProperties, const char* componentName, unsigned char* serializedProperties, size_t serializedPropertiesLength, size_t* requiredBytes)
+static bool WriteReportedProperties(const IOTHUB_CLIENT_PROPERTY_REPORTED* properties, size_t numProperties, const char* componentName, unsigned char* serializedProperties, size_t serializedPropertiesLength, size_t* requiredBytes)
 {
     char* currentWrite = (char*)serializedProperties;
     size_t remainingBytes = serializedPropertiesLength;
@@ -176,7 +176,7 @@ static bool WriteReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPERTY* prope
 // WriteWritableResponseProperties is used to write serializedProperties string based 
 // on the writable response properties.  If serializedProperties==NULL and serializedPropertiesLength==0, just like
 // analogous snprintf it will just calculate the amount of space caller needs to allocate.
-static bool WriteWritableResponseProperties(const IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE* properties, size_t numProperties, const char* componentName, unsigned char* serializedProperties, size_t serializedPropertiesLength, size_t* requiredBytes)
+static bool WriteWritableResponseProperties(const IOTHUB_CLIENT_PROPERTY_WRITABLE_RESPONSE* properties, size_t numProperties, const char* componentName, unsigned char* serializedProperties, size_t serializedPropertiesLength, size_t* requiredBytes)
 {
     char* currentWrite = (char*)serializedProperties;
     size_t remainingBytes = serializedPropertiesLength;
@@ -226,7 +226,7 @@ static bool WriteWritableResponseProperties(const IOTHUB_CLIENT_WRITABLE_PROPERT
     return true;
 }
 
-static bool VerifySerializeReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPERTY* properties, size_t numProperties)
+static bool VerifySerializeReportedProperties(const IOTHUB_CLIENT_PROPERTY_REPORTED* properties, size_t numProperties)
 {
     bool result = false;
 
@@ -240,7 +240,7 @@ static bool VerifySerializeReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPE
         size_t i;
         for (i = 0; i < numProperties; i++)
         {
-            if ((properties[i].structVersion != IOTHUB_CLIENT_REPORTED_PROPERTY_STRUCT_VERSION_1) || (properties[i].name == NULL) || (properties[i].value == NULL))
+            if ((properties[i].structVersion != IOTHUB_CLIENT_PROPERTY_REPORTED_STRUCT_VERSION_1) || (properties[i].name == NULL) || (properties[i].value == NULL))
             {
                 LogError("Property at index %lu is invalid", (unsigned long)i);
                 break;
@@ -253,7 +253,7 @@ static bool VerifySerializeReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPE
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_ReportedProperties(const IOTHUB_CLIENT_REPORTED_PROPERTY* properties, size_t numProperties, const char* componentName, unsigned char** serializedProperties, size_t* serializedPropertiesLength)
+IOTHUB_CLIENT_RESULT IoTHubClient_Properties_Writer_CreateReported(const IOTHUB_CLIENT_PROPERTY_REPORTED* properties, size_t numProperties, const char* componentName, unsigned char** serializedProperties, size_t* serializedPropertiesLength)
 {
     IOTHUB_CLIENT_RESULT result;
     size_t requiredBytes = 0;
@@ -300,7 +300,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_ReportedProperties(const IOTHUB_CLIE
     return result;
 }
 
-static bool VerifySerializeWritableReportedProperties(const IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE* properties, size_t numProperties)
+static bool VerifySerializeWritableReportedProperties(const IOTHUB_CLIENT_PROPERTY_WRITABLE_RESPONSE* properties, size_t numProperties)
 {
     bool result = false;
 
@@ -314,7 +314,7 @@ static bool VerifySerializeWritableReportedProperties(const IOTHUB_CLIENT_WRITAB
         size_t i;
         for (i = 0; i < numProperties; i++)
         {
-            if ((properties[i].structVersion != IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE_STRUCT_VERSION_1) || (properties[i].name == NULL) || (properties[i].value == NULL))
+            if ((properties[i].structVersion != IOTHUB_CLIENT_PROPERTY_WRITABLE_RESPONSE_STRUCT_VERSION_1) || (properties[i].name == NULL) || (properties[i].value == NULL))
             {
                 LogError("Property at index %lu is invalid", (unsigned long)i);
                 break;
@@ -328,8 +328,8 @@ static bool VerifySerializeWritableReportedProperties(const IOTHUB_CLIENT_WRITAB
 }
 
 
-IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_WritablePropertyResponse(
-    const IOTHUB_CLIENT_WRITABLE_PROPERTY_RESPONSE* properties,
+IOTHUB_CLIENT_RESULT IoTHubClient_Properties_Writer_CreateWritableResponse(
+    const IOTHUB_CLIENT_PROPERTY_WRITABLE_RESPONSE* properties,
     size_t numProperties,
     const char* componentName,
     unsigned char** serializedProperties,
@@ -367,7 +367,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_WritablePropertyResponse(
     if (result == IOTHUB_CLIENT_OK)
     {
         *serializedProperties = serializedPropertiesBuffer;
-        // See comments in IoTHubClient_Serialize_ReportedProperties for background on why we substract one.
+        // See comments in IoTHubClient_Properties_Writer_CreateReported for background on why we substract one.
         *serializedPropertiesLength = requiredBytes - 1;
     }
     else if (serializedPropertiesBuffer != NULL)
@@ -379,12 +379,12 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Serialize_WritablePropertyResponse(
 }
 
 
-// We have an explicit destroy function for serialized properties, even though IoTHubClient_Serialize_ReportedProperties
-// and IoTHubClient_Serialize_WritablePropertyResponse used malloc() and app could've theoretically done free() directly.  Because:
+// We have an explicit destroy function for serialized properties, even though IoTHubClient_Properties_Writer_CreateReported
+// and IoTHubClient_Properties_Writer_CreateWritableResponse used malloc() and app could've theoretically done free() directly.  Because:
 // * If the SDK is setup to use a custom allocator (gballoc.h) then we use same malloc() / free() matching to free.
 // * This gives us flexibility to use non-malloc based allocators in future.
 // * Maintains symmetry with _Destroy() as mechanism to free resources SDK allocates.
-void IoTHubClient_Serialize_Properties_Destroy(unsigned char* serializedProperties)
+void IoTHubClient_Properties_Properties_Writer_Destroy(unsigned char* serializedProperties)
 {
     if (serializedProperties != NULL)
     {
@@ -492,12 +492,12 @@ static bool IsJsonObjectAComponent(IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIter
     return result;
 }
 
-// ValidateIteratorInputs makes sure that the parameter list passed in IoTHubClient_Deserialize_Properties_CreateIterator is valid.
+// ValidateIteratorInputs makes sure that the parameter list passed in IoTHubClient_Properties_Parser_Create is valid.
 static IOTHUB_CLIENT_RESULT ValidateIteratorInputs(
     IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType,
     const unsigned char* payload,
     size_t payloadLength,
-    IOTHUB_CLIENT_PROPERTY_ITERATOR_HANDLE* propertyIteratorHandle)
+    IOTHUB_CLIENT_PROPERTIES_PARSER_HANDLE* propertyIteratorHandle)
 {
     IOTHUB_CLIENT_RESULT result;
 
@@ -520,7 +520,7 @@ static IOTHUB_CLIENT_RESULT ValidateIteratorInputs(
 }
 
 // FillProperty retrieves properties that are children of jsonObject and puts them into properties 'property' to be returned to the application.
-static IOTHUB_CLIENT_RESULT FillProperty(IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIterator, const char* componentName, JSON_Value* propertyValue, const char* propertyName, IOTHUB_CLIENT_DESERIALIZED_PROPERTY* property)
+static IOTHUB_CLIENT_RESULT FillProperty(IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIterator, const char* componentName, JSON_Value* propertyValue, const char* propertyName, IOTHUB_CLIENT_PROPERTY_PARSED* property)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
     const char* propertyStringJson;
@@ -532,8 +532,8 @@ static IOTHUB_CLIENT_RESULT FillProperty(IOTHUB_CLIENT_PROPERTY_ITERATOR* proper
     }
     else
     {
-        // Note that most fields in the returned IOTHUB_CLIENT_DESERIALIZED_PROPERTY are shallow copies.  This memory remains valid until
-        // the application calls IoTHubClient_Deserialize_Properties_DestroyIterator.
+        // Note that most fields in the returned IOTHUB_CLIENT_PROPERTY_PARSED are shallow copies.  This memory remains valid until
+        // the application calls IoTHubClient_Properties_Parser_Destroy.
         property->propertyType = (propertyIterator->propertyParseState == PROPERTY_PARSE_STATE_DESIRED) ? 
                                  IOTHUB_CLIENT_PROPERTY_TYPE_WRITABLE : IOTHUB_CLIENT_PROPERTY_TYPE_REPORTED_FROM_DEVICE;
         property->componentName = componentName;
@@ -667,11 +667,11 @@ static bool GetNextPropertyToEnumerate(IOTHUB_CLIENT_PROPERTY_ITERATOR* property
 }
 
 
-IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_CreateIterator(
+IOTHUB_CLIENT_RESULT IoTHubClient_Properties_Parser_Create(
     IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType,
     const unsigned char* payload,
     size_t payloadLength,
-    IOTHUB_CLIENT_PROPERTY_ITERATOR_HANDLE* propertyIteratorHandle)
+    IOTHUB_CLIENT_PROPERTIES_PARSER_HANDLE* propertyIteratorHandle)
 {
     IOTHUB_CLIENT_RESULT result;
     char* jsonStr = NULL;
@@ -704,7 +704,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_CreateIterator(
             LogError("Cannot retrieve desired and/or reported object from JSON");
         }
         // Retrieve the twin version and cache with the propertyIterator.  We do this in the enumeration creation,
-        // even though IoTHubClient_Deserialize_Properties_GetVersion theoretically could've parsed this on demand,
+        // even though IoTHubClient_Properties_Parser_GetVersion theoretically could've parsed this on demand,
         // because if this fails we want to fail creation of the enumerator.  A twin without version info
         // is not valid and the application will not be able to properly acknowledge writable properties in this case.
         else if ((result = GetTwinVersion(propertyIterator)) != IOTHUB_CLIENT_OK)
@@ -724,14 +724,14 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_CreateIterator(
 
     if (result != IOTHUB_CLIENT_OK)
     {
-        IoTHubClient_Deserialize_Properties_DestroyIterator(propertyIterator);
+        IoTHubClient_Properties_Parser_Destroy(propertyIterator);
     }
 
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_GetVersion(
-    IOTHUB_CLIENT_PROPERTY_ITERATOR_HANDLE propertyIteratorHandle,
+IOTHUB_CLIENT_RESULT IoTHubClient_Properties_Parser_GetVersion(
+    IOTHUB_CLIENT_PROPERTIES_PARSER_HANDLE propertyIteratorHandle,
     int* propertiesVersion)
 {
     IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIterator = (IOTHUB_CLIENT_PROPERTY_ITERATOR*)propertyIteratorHandle;
@@ -751,9 +751,9 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_GetVersion(
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_GetNextProperty(
-    IOTHUB_CLIENT_PROPERTY_ITERATOR_HANDLE propertyIteratorHandle,
-    IOTHUB_CLIENT_DESERIALIZED_PROPERTY* property,
+IOTHUB_CLIENT_RESULT IoTHubClient_Properties_Parser_GetNext(
+    IOTHUB_CLIENT_PROPERTIES_PARSER_HANDLE propertyIteratorHandle,
+    IOTHUB_CLIENT_PROPERTY_PARSED* property,
     bool* propertySpecified)
 {
     IOTHUB_CLIENT_PROPERTY_ITERATOR* propertyIterator = (IOTHUB_CLIENT_PROPERTY_ITERATOR*)propertyIteratorHandle;
@@ -763,7 +763,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_GetNextProperty(
     const char* propertyName = NULL;
     const char* componentName = NULL;
 
-    if ((propertyIteratorHandle == NULL) || (property == NULL) || (propertySpecified == NULL) || (property->structVersion != IOTHUB_CLIENT_DESERIALIZED_PROPERTY_STRUCT_VERSION_1))
+    if ((propertyIteratorHandle == NULL) || (property == NULL) || (propertySpecified == NULL) || (property->structVersion != IOTHUB_CLIENT_PROPERTY_PARSED_STRUCT_VERSION_1))
     {
         LogError("Invalid argument");
         result = IOTHUB_CLIENT_INVALID_ARG;
@@ -787,7 +787,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_GetNextProperty(
 
         if (propertyValue != NULL)
         {
-            // Fills in IOTHUB_CLIENT_DESERIALIZED_PROPERTY based on where we're at in the traversal.
+            // Fills in IOTHUB_CLIENT_PROPERTY_PARSED based on where we're at in the traversal.
             if ((result = FillProperty(propertyIterator, componentName, propertyValue, propertyName, property)) != IOTHUB_CLIENT_OK)
             {
                 LogError("Cannot Fill Properties");
@@ -807,19 +807,19 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Deserialize_Properties_GetNextProperty(
     return result;
 }
 
-void IoTHubClient_Deserialize_Properties_DestroyProperty(
-    IOTHUB_CLIENT_DESERIALIZED_PROPERTY* property)
+void IoTHubClient_Properties_ParsedProperty_Destroy(
+    IOTHUB_CLIENT_PROPERTY_PARSED* property)
 {
     if (property != NULL)
     {
-        // The only field in IOTHUB_CLIENT_DESERIALIZED_PROPERTY that is allocated when filling
+        // The only field in IOTHUB_CLIENT_PROPERTY_PARSED that is allocated when filling
         // the structure is the JSON representation.  The remaining fields are shallow copies pointing
-        // into the parsed JSON fields which are freed by IoTHubClient_Deserialize_Properties_DestroyIterator.
+        // into the parsed JSON fields which are freed by IoTHubClient_Properties_Parser_Destroy.
         json_free_serialized_string((char*)property->value.str);
     }
 }
 
-void IoTHubClient_Deserialize_Properties_DestroyIterator(IOTHUB_CLIENT_PROPERTY_ITERATOR_HANDLE propertyIteratorHandle)
+void IoTHubClient_Properties_Parser_Destroy(IOTHUB_CLIENT_PROPERTIES_PARSER_HANDLE propertyIteratorHandle)
 {
     if (propertyIteratorHandle != NULL)
     {
