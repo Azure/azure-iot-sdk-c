@@ -2626,25 +2626,11 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     }
     else if (cred_type == IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN)
     {
-        SAS_TOKEN_STATUS token_status = IoTHubClient_Auth_Is_SasToken_Valid(transport_data->authorization_module);
-        if (token_status == SAS_TOKEN_STATUS_INVALID)
+        sasToken = IoTHubClient_Auth_Get_SasToken(transport_data->authorization_module, NULL, 0, NULL);
+        if (sasToken == NULL)
         {
-            transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN, transport_data->transport_ctx);
+            LogError("failure getting sas Token.");
             result = MU_FAILURE;
-        }
-        else if (token_status == SAS_TOKEN_STATUS_FAILED)
-        {
-            transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL, transport_data->transport_ctx);
-            result = MU_FAILURE;
-        }
-        else
-        {
-            sasToken = IoTHubClient_Auth_Get_SasToken(transport_data->authorization_module, NULL, 0, NULL);
-            if (sasToken == NULL)
-            {
-                LogError("failure getting sas Token.");
-                result = MU_FAILURE;
-            }
         }
     }
 

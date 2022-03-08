@@ -267,31 +267,15 @@ static int create_and_put_SAS_token_to_cbs(AUTHENTICATION_INSTANCE* instance)
         }
         else if (cred_type == IOTHUB_CREDENTIAL_TYPE_SAS_TOKEN)
         {
-            SAS_TOKEN_STATUS token_status = IoTHubClient_Auth_Is_SasToken_Valid(instance->authorization_module);
-            if (token_status == SAS_TOKEN_STATUS_INVALID)
+            sas_token = IoTHubClient_Auth_Get_SasToken(instance->authorization_module, NULL, 0, NULL);
+            if (sas_token == NULL)
             {
-                LogError("sas token is invalid.");
-                sas_token = NULL;
-                result = MU_FAILURE;
-            }
-            else if (token_status == SAS_TOKEN_STATUS_FAILED)
-            {
-                LogError("testing Sas Token failed.");
-                sas_token = NULL;
+                LogError("failure getting sas Token.");
                 result = MU_FAILURE;
             }
             else
             {
-                sas_token = IoTHubClient_Auth_Get_SasToken(instance->authorization_module, NULL, 0, NULL);
-                if (sas_token == NULL)
-                {
-                    LogError("failure getting sas Token.");
-                    result = MU_FAILURE;
-                }
-                else
-                {
-                    result = RESULT_OK;
-                }
+                result = RESULT_OK;
             }
         }
         else if (cred_type == IOTHUB_CREDENTIAL_TYPE_X509 || cred_type == IOTHUB_CREDENTIAL_TYPE_X509_ECC)
