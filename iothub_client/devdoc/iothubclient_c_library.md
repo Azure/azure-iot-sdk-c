@@ -507,7 +507,7 @@ IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_OPENSSL_CIPHER_SUITE, "
 ```
 
 - "Engine" - only available when OpenSSL is used. It specifies the [OpenSSL built-in engine](https://www.openssl.org/docs/man1.1.1/man3/ENGINE_load_builtin_engines.html) to be loaded. value is a null terminated string that contains the engine name.
-- "x509PrivatekeyType" - only available when OpenSSL is used and OPENSSLOPT_ENGINE is configured. value is a pointer to a long. When set to 0x1, the private key is loaded from the OpenSSL Engine. The `x509privatekey` option represents the engine-specific certificate identifier.
+- "x509PrivatekeyType" - only available when OpenSSL is used and OPTION_OPENSSL_ENGINE is configured. value is a pointer to a long. When set to 0x1, the private key is loaded from the OpenSSL Engine. The `x509privatekey` option represents the engine-specific certificate identifier.
 
 ### OpenSSL ENGINE Examples:
 

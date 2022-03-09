@@ -58,4 +58,6 @@ if(LINUX AND ${use_openssl})
             aziotsharedutil
         )
     endif()
+else()
+    message(FATAL_ERROR "iothubclient_openssl_engine_e2e can only run on Linux with OpenSSL as the TLS stack.")
 endif()
