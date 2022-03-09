@@ -2620,7 +2620,7 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
         sasToken = IoTHubClient_Auth_Get_SasToken(transport_data->authorization_module, STRING_c_str(transport_data->devicesAndModulesPath), 0, NULL);
         if (sasToken == NULL)
         {
-            LogError("failure getting sas token from IoTHubClient_Auth_Get_SasToken.");
+            LogError("Failure getting SAS token from IoTHubClient_Auth_Get_SasToken.");
             result = MU_FAILURE;
         }
     }
@@ -2629,7 +2629,7 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
         sasToken = IoTHubClient_Auth_Get_SasToken(transport_data->authorization_module, NULL, 0, NULL);
         if (sasToken == NULL)
         {
-            LogError("failure getting sas Token.");
+            LogError("Failure getting SAS token.");
             result = MU_FAILURE;
         }
     }
