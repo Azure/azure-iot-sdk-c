@@ -8576,4 +8576,3 @@ TEST_FUNCTION(IoTHubTransport_MQTT_GetSupportedPlatformInfo_NULL_info)
 }
 
 END_TEST_SUITE(iothubtransport_mqtt_common_ut)
-
