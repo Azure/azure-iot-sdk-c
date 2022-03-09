@@ -270,7 +270,7 @@ static int create_and_put_SAS_token_to_cbs(AUTHENTICATION_INSTANCE* instance)
             sas_token = IoTHubClient_Auth_Get_SasToken(instance->authorization_module, NULL, 0, NULL);
             if (sas_token == NULL)
             {
-                LogError("failure getting sas Token.");
+                LogError("Failure getting SAS token.");
                 result = MU_FAILURE;
             }
             else
