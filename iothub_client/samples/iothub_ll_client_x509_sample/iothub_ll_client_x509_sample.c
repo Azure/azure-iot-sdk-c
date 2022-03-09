@@ -56,7 +56,7 @@ and removing calls to _DoWork will yield the same results. */
 
 /* Paste in the your x509 iothub connection string  */
 /*  "HostName=<host_name>;DeviceId=<device_id>;x509=true"                      */
-static const char* connectionString = "[device connection string]";
+static const char* connectionString = "HostName=<host_name>;DeviceId=<device_id>;x509=true";
 
 static const char* x509certificate =
 "-----BEGIN CERTIFICATE-----""\n"

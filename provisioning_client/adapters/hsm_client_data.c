@@ -11,6 +11,10 @@
 #endif
 
 #if defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
+#include "hsm_client_x509.h"
+#endif
+
+#if defined(HSM_TYPE_RIOT) || defined(HSM_AUTH_TYPE_CUSTOM)
 #include "hsm_client_riot.h"
 #endif
 
@@ -21,7 +25,7 @@
 int initialize_hsm_system(void)
 {
     int result = 0;
-#if defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
+#if defined(HSM_TYPE_X509) || defined(HSM_TYPE_RIOT) || defined(HSM_AUTH_TYPE_CUSTOM)
     // Initialize x509
     if ((result == 0) && (hsm_client_x509_init() != 0))
     {
@@ -52,7 +56,7 @@ void deinitialize_hsm_system(void)
 #ifdef HSM_TYPE_HTTP_EDGE
     hsm_client_http_edge_deinit();
 #endif
-#if defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
+#if defined(HSM_TYPE_X509) || defined(HSM_TYPE_RIOT) || defined(HSM_AUTH_TYPE_CUSTOM)
     hsm_client_x509_deinit();
 #endif
 #if defined(HSM_TYPE_SAS_TOKEN)  || defined(HSM_AUTH_TYPE_CUSTOM)

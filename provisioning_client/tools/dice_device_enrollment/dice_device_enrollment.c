@@ -183,7 +183,7 @@ static int ca_root_certificate_info(HSM_CLIENT_HANDLE hsm_handle)
     return result;
 }
 
-int main()
+int main(void)
 {
     int result;
 
