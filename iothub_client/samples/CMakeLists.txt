@@ -31,6 +31,9 @@ if(${use_http})
 endif()
 
 if(${use_mqtt})
+    // TODO: remove this and the directory after tests are done.
+    add_sample_directory(iothub_ll_telemetry_test_ENOBUFS)
+
     if(LINUX)
         add_sample_directory(iothub_client_sample_mqtt_dm)
     endif()
