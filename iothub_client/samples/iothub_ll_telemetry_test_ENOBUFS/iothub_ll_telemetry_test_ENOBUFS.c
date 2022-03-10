@@ -155,6 +155,16 @@ int main(void)
             (void)IoTHubDeviceClient_LL_SetConnectionStatusCallback(client_contexts[i].handle, connection_status_callback, &client_contexts[i]);
         }
     }
+
+    // For allowing clients to connect.
+    for (int j = 0; j < 50; j++)
+    {
+        for (int i = 0; i < NUMBER_OF_CLIENTS; i++ )
+        {
+            IoTHubDeviceClient_LL_DoWork(client_contexts[i].handle);
+        }
+        ThreadAPI_Sleep(100);
+    }
     
     do
     {
@@ -169,7 +179,7 @@ int main(void)
 
             IoTHubDeviceClient_LL_DoWork(client_contexts[i].handle);
         }
-        ThreadAPI_Sleep(1);
+        ThreadAPI_Sleep(100);
         loop_count++;
     } while (g_continueRunning);
 
