@@ -5,6 +5,8 @@
 // Checking of return codes and error values shall be omitted for brevity.  Please practice sound engineering practices
 // when writing production code.
 
+// NOTE: THIS IS A TEST SAMPLE TO VALIDATE ENOBUFS ERROR FIX CANDIDATE.
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -48,148 +50,140 @@ and removing calls to _DoWork will yield the same results. */
     #include "iothubtransporthttp.h"
 #endif // SAMPLE_HTTP
 
+typedef struct client_context_t_struct
+{
+    int id;
+    IOTHUB_DEVICE_CLIENT_LL_HANDLE handle;
+    size_t messages_sent;
+    size_t send_confirmations;
+}
+client_context_t;
 
 /* Paste in the your iothub connection string  */
-static const char* connectionString = "[device connection string]";
-#define MESSAGE_COUNT        5
+#define NUMBER_OF_CLIENTS 15
+
+static const char* connectionString[NUMBER_OF_CLIENTS] = {
+    "[device connection string]",
+    "[device connection string]",
+    "[device connection string]",
+    "[device connection string]",
+    "[device connection string]",
+    "[device connection string]",
+    "[device connection string]",
+    "[device connection string]",
+    "[device connection string]",
+    "[device connection string]",
+    "[device connection string]",
+    "[device connection string]", 
+    "[device connection string]", 
+    "[device connection string]", 
+    "[device connection string]"
+};
+
+static client_context_t client_contexts[NUMBER_OF_CLIENTS];
+
+#define MESSAGE_COUNT        500
 static bool g_continueRunning = true;
-static size_t g_message_count_send_confirmations = 0;
 
 static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
-    (void)userContextCallback;
-    // When a message is sent this callback will get invoked
-    g_message_count_send_confirmations++;
-    (void)printf("Confirmation callback received for message %lu with result %s\r\n", (unsigned long)g_message_count_send_confirmations, MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
+    client_context_t* client_context = (client_context_t*)userContextCallback;
+    client_context->send_confirmations++;
+    (void)printf("send_confirm_callback(%d, %lu, %s)\r\n", client_context->id, (unsigned long)client_context->send_confirmations, MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
+
+    if (client_context->send_confirmations >= MESSAGE_COUNT)
+    {
+        g_continueRunning = false;
+    }
 }
 
 static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS result, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void* user_context)
 {
-    (void)reason;
-    (void)user_context;
-    // This sample DOES NOT take into consideration network outages.
-    if (result == IOTHUB_CLIENT_CONNECTION_AUTHENTICATED)
-    {
-        (void)printf("The device client is connected to iothub\r\n");
-    }
-    else
-    {
-        (void)printf("The device client has been disconnected\r\n");
-    }
+    client_context_t* client_context = (client_context_t*)user_context;
+
+    printf("connection_status_callback(%d, %s, %s)\r\n", client_context->id,
+        MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONNECTION_STATUS, result),
+        MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason));
 }
 
 int main(void)
 {
     IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;
     IOTHUB_MESSAGE_HANDLE message_handle;
-    size_t messages_sent = 0;
-    const char* telemetry_msg = "test_message";
+    int loop_count = 0;
+    char telemetry_msg[1024];
+    memset(telemetry_msg, 2, sizeof(telemetry_msg));
+    telemetry_msg[1023] = 0;
+
+    message_handle = IoTHubMessage_CreateFromString(telemetry_msg);
 
     // Select the Protocol to use with the connection
-#ifdef SAMPLE_MQTT
     protocol = MQTT_Protocol;
-#endif // SAMPLE_MQTT
-#ifdef SAMPLE_MQTT_OVER_WEBSOCKETS
-    protocol = MQTT_WebSocket_Protocol;
-#endif // SAMPLE_MQTT_OVER_WEBSOCKETS
-#ifdef SAMPLE_AMQP
-    protocol = AMQP_Protocol;
-#endif // SAMPLE_AMQP
-#ifdef SAMPLE_AMQP_OVER_WEBSOCKETS
-    protocol = AMQP_Protocol_over_WebSocketsTls;
-#endif // SAMPLE_AMQP_OVER_WEBSOCKETS
-#ifdef SAMPLE_HTTP
-    protocol = HTTP_Protocol;
-#endif // SAMPLE_HTTP
 
     // Used to initialize IoTHub SDK subsystem
     (void)IoTHub_Init();
 
-    IOTHUB_DEVICE_CLIENT_LL_HANDLE device_ll_handle;
+    (void)printf("Creating IoTHub Device handles\r\n");
 
-    (void)printf("Creating IoTHub Device handle\r\n");
-    // Create the iothub handle here
-    device_ll_handle = IoTHubDeviceClient_LL_CreateFromConnectionString(connectionString, protocol);
-    if (device_ll_handle == NULL)
+    for (int i = 0; i < NUMBER_OF_CLIENTS; i++ )
     {
-        (void)printf("Failure creating IotHub device. Hint: Check your connection string.\r\n");
-    }
-    else
-    {
-        // Set any option that are necessary.
-        // For available options please see the iothub_sdk_options.md documentation
+        client_contexts[i].id = i;
+        client_contexts[i].handle = IoTHubDeviceClient_LL_CreateFromConnectionString(connectionString[i], protocol);
 
-#ifndef SAMPLE_HTTP
-        // Can not set this options in HTTP
-        bool traceOn = true;
-        IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_LOG_TRACE, &traceOn);
-#endif
-
-#ifdef SET_TRUSTED_CERT_IN_SAMPLES
-        // Setting the Trusted Certificate. This is only necessary on systems without
-        // built in certificate stores.
-            IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_TRUSTED_CERT, certificates);
-#endif // SET_TRUSTED_CERT_IN_SAMPLES
-
-#if defined SAMPLE_MQTT || defined SAMPLE_MQTT_OVER_WEBSOCKETS
-        //Setting the auto URL Encoder (recommended for MQTT). Please use this option unless
-        //you are URL Encoding inputs yourself.
-        //ONLY valid for use with MQTT
-        bool urlEncodeOn = true;
-        (void)IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
-#endif
-
-        // Setting connection status callback to get indication of connection to iothub
-        (void)IoTHubDeviceClient_LL_SetConnectionStatusCallback(device_ll_handle, connection_status_callback, NULL);
-
-        do
+        if (client_contexts[i].handle == NULL)
         {
-            if (messages_sent < MESSAGE_COUNT)
-            {
-                // Construct the iothub message from a string or a byte array
-                message_handle = IoTHubMessage_CreateFromString(telemetry_msg);
-                //message_handle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText)));
+            (void)printf("Failure creating IotHub device %d. Hint: Check your connection string.\r\n", i);
+        }
+        else
+        {
+            bool traceOn = true;
+            IoTHubDeviceClient_LL_SetOption(client_contexts[i].handle, OPTION_LOG_TRACE, &traceOn);
 
-                // Set Message property
-                /*
-                (void)IoTHubMessage_SetMessageId(message_handle, "MSG_ID");
-                (void)IoTHubMessage_SetCorrelationId(message_handle, "CORE_ID");
-                (void)IoTHubMessage_SetContentTypeSystemProperty(message_handle, "application%2fjson");
-                (void)IoTHubMessage_SetContentEncodingSystemProperty(message_handle, "utf-8");
-                (void)IoTHubMessage_SetMessageCreationTimeUtcSystemProperty(message_handle, "2020-07-01T01:00:00.346Z");
-                */
+    #ifdef SET_TRUSTED_CERT_IN_SAMPLES
+            // Setting the Trusted Certificate. This is only necessary on systems without
+            // built in certificate stores.
+                IoTHubDeviceClient_LL_SetOption(client_contexts[i].handle, OPTION_TRUSTED_CERT, certificates);
+    #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
+    #if defined SAMPLE_MQTT || defined SAMPLE_MQTT_OVER_WEBSOCKETS
+            //Setting the auto URL Encoder (recommended for MQTT). Please use this option unless
+            //you are URL Encoding inputs yourself.
+            //ONLY valid for use with MQTT
+            bool urlEncodeOn = true;
+            (void)IoTHubDeviceClient_LL_SetOption(client_contexts[i].handle, OPTION_AUTO_URL_ENCODE_DECODE, &urlEncodeOn);
+    #endif
 
-                // Add custom properties to message
-                (void)IoTHubMessage_SetProperty(message_handle, "property_key", "property_value");
-
-                (void)printf("Sending message %d to IoTHub\r\n", (int)(messages_sent + 1));
-                IoTHubDeviceClient_LL_SendEventAsync(device_ll_handle, message_handle, send_confirm_callback, NULL);
-
-                // The message is copied to the sdk so the we can destroy it
-                IoTHubMessage_Destroy(message_handle);
-
-                messages_sent++;
-            }
-            else if (g_message_count_send_confirmations >= MESSAGE_COUNT)
-            {
-                // After all messages are all received stop running
-                g_continueRunning = false;
-            }
-
-            IoTHubDeviceClient_LL_DoWork(device_ll_handle);
-            ThreadAPI_Sleep(1);
-
-        } while (g_continueRunning);
-
-        // Clean up the iothub sdk handle
-        IoTHubDeviceClient_LL_Destroy(device_ll_handle);
+            // Setting connection status callback to get indication of connection to iothub
+            (void)IoTHubDeviceClient_LL_SetConnectionStatusCallback(client_contexts[i].handle, connection_status_callback, &client_contexts[i]);
+        }
     }
+    
+    do
+    {
+        for (int i = 0; i < NUMBER_OF_CLIENTS; i++ )
+        {
+            if (loop_count % 1000)
+            {
+                (void)printf("Client %d sending message %ld\r\n", client_contexts[i].id, client_contexts[i].messages_sent);
+                IoTHubDeviceClient_LL_SendEventAsync(client_contexts[i].handle, message_handle, send_confirm_callback, &client_contexts[i]);
+                client_contexts[i].messages_sent++;
+            }
+
+            IoTHubDeviceClient_LL_DoWork(client_contexts[i].handle);
+            ThreadAPI_Sleep(1);
+            loop_count++;
+        }
+    } while (g_continueRunning);
+
+    for (int i = 0; i < NUMBER_OF_CLIENTS; i++ )
+    {
+        printf("client [%d]: sent=%ld, confirmed=%ld\r\n",
+            client_contexts[i].id, client_contexts[i].messages_sent, client_contexts[i].send_confirmations);
+        // Clean up the iothub sdk handle
+        IoTHubDeviceClient_LL_Destroy(client_contexts[i].handle);
+    }
+
     // Free all the sdk subsystem
     IoTHub_Deinit();
-
-    printf("Press any key to continue");
-    (void)getchar();
-
     return 0;
 }
