@@ -56,6 +56,8 @@ typedef struct client_context_t_struct
     IOTHUB_DEVICE_CLIENT_LL_HANDLE handle;
     size_t messages_sent;
     size_t send_confirmations;
+    size_t connections;
+    size_t disconnections;
 }
 client_context_t;
 
@@ -63,21 +65,8 @@ client_context_t;
 #define NUMBER_OF_CLIENTS 15
 
 static const char* connectionString[NUMBER_OF_CLIENTS] = {
-    "[device connection string]",
-    "[device connection string]",
-    "[device connection string]",
-    "[device connection string]",
-    "[device connection string]",
-    "[device connection string]",
-    "[device connection string]",
-    "[device connection string]",
-    "[device connection string]",
-    "[device connection string]",
-    "[device connection string]",
-    "[device connection string]", 
-    "[device connection string]", 
-    "[device connection string]", 
-    "[device connection string]"
+    "",
+    ""
 };
 
 static client_context_t client_contexts[NUMBER_OF_CLIENTS];
@@ -104,6 +93,15 @@ static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS result, I
     printf("connection_status_callback(%d, %s, %s)\r\n", client_context->id,
         MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONNECTION_STATUS, result),
         MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason));
+    
+    if (result == IOTHUB_CLIENT_CONNECTION_AUTHENTICATED)
+    {
+        client_context->connections++;
+    }
+    else
+    {
+        client_context->disconnections++;
+    }
 }
 
 int main(void)
@@ -170,20 +168,38 @@ int main(void)
             }
 
             IoTHubDeviceClient_LL_DoWork(client_contexts[i].handle);
-            ThreadAPI_Sleep(1);
-            loop_count++;
         }
+        ThreadAPI_Sleep(1);
+        loop_count++;
     } while (g_continueRunning);
+
+    for (int j = 0; j < 50; j++)
+    {
+        for (int i = 0; i < NUMBER_OF_CLIENTS; i++ )
+        {
+            IoTHubDeviceClient_LL_DoWork(client_contexts[i].handle);
+        }
+        ThreadAPI_Sleep(100);
+    }
+
 
     for (int i = 0; i < NUMBER_OF_CLIENTS; i++ )
     {
-        printf("client [%d]: sent=%ld, confirmed=%ld\r\n",
-            client_contexts[i].id, client_contexts[i].messages_sent, client_contexts[i].send_confirmations);
         // Clean up the iothub sdk handle
         IoTHubDeviceClient_LL_Destroy(client_contexts[i].handle);
     }
 
     // Free all the sdk subsystem
     IoTHub_Deinit();
+
+    for (int i = 0; i < NUMBER_OF_CLIENTS; i++ )
+    {
+        printf("client [%d]\r\n", client_contexts[i].id);
+        printf("    connections=%ld, disconnections=%ld\r\n",
+            client_contexts[i].connections, client_contexts[i].disconnections);
+        printf("    messages sent=%ld, confirmed=%ld\r\n",
+            client_contexts[i].messages_sent, client_contexts[i].send_confirmations);
+    }
+
     return 0;
 }
