@@ -23,7 +23,7 @@
 *  
 *            Pseudocode to demonstrate the relationship for creating properties and device clients:
 *                   // Converts C structure into serialized stream.  
-*                   IoTHubClient_Properties_Writer_CreateReported(yourApplicationsPropertiesInStruct, &serializedByteStream);
+*                   IoTHubClient_Properties_Writer_CreateReported(&yourApplicationsPropertiesInStruct, &serializedByteStream);
 *                   // Send the data
 *                   IoTHubDeviceClient_LL_SendPropertiesAsync(deviceHandle, serializedByteStream);
 *
@@ -75,7 +75,7 @@ typedef struct IOTHUB_CLIENT_PROPERTY_REPORTED_TAG {
     int structVersion;
     /** @brief    Name of the property. */
     const char* name;
-    /** @brief    Value of the property. */
+    /** @brief    Value of the property.  This must be legal JSON.  Strings need to be escaped by the application, e.g. reported.value="\"MyValue\""; */
     const char* value;
 } IOTHUB_CLIENT_PROPERTY_REPORTED;
 
@@ -90,7 +90,7 @@ typedef struct IOTHUB_CLIENT_PROPERTY_WRITABLE_RESPONSE_TAG {
     int structVersion;
     /** @brief Name of the property. */
     const char* name;
-    /** @brief Value of the property. */
+    /** @brief Value of the property.   This must be legal JSON.  Strings need to be escaped by the application, e.g. writeableResponse.value="\"MyValue\""; */
     const char* value;
     /** @brief Result of the requested operation.  This maps to an HTTP status code.  */
     int result;
