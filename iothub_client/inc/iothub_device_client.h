@@ -106,6 +106,8 @@ extern "C"
     *           blocking call.
     *
     * @param    iotHubClientHandle    The handle created by a call to the create function.
+    *
+    * @warning  Do not call this function from inside any application callbacks from this SDK, e.g. your IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK handler.
     */
     MOCKABLE_FUNCTION(, void, IoTHubDeviceClient_Destroy, IOTHUB_DEVICE_CLIENT_HANDLE, iotHubClientHandle);
 
@@ -124,8 +126,8 @@ extern "C"
     * @param    userContextCallback             User specified context that will be provided to the
     *                                           callback. This can be @c NULL.
     *
-    *           @b NOTE: The application behavior is undefined if the user calls
-    *           the IoTHubDeviceClient_Destroy() function from within any callback.
+    * @warning: Do not call IoTHubDeviceClient_Destroy() from inside your application's callback.
+    *
     * @remarks
     *           The IOTHUB_MESSAGE_HANDLE instance provided as argument is copied by the function,
     *           so this argument can be destroyed by the calling application right after IoTHubDeviceClient_SendEventAsync returns.
@@ -160,8 +162,7 @@ extern "C"
     * @param    userContextCallback         User specified context that will be provided to the
     *                                       callback. This can be @c NULL.
     *
-    *           @b NOTE: The application behavior is undefined if the user calls
-    *           the IoTHubDeviceClient_Destroy() function from within any callback.
+    * @warning: Do not call IoTHubDeviceClient_Destroy() from inside your application's callback.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -177,8 +178,7 @@ extern "C"
     * @param    userContextCallback             User specified context that will be provided to the
     *                                           callback. This can be @c NULL.
     *
-    *           @b NOTE: The application behavior is undefined if the user calls
-    *           the IoTHubDeviceClient_Destroy() function from within any callback.
+    * @warning: Do not call IoTHubDeviceClient_Destroy() from inside your application's callback.
     *
     * @remark   Callback specified will not receive connection status change notifications for upload connections created with IoTHubDeviceClient_UploadToBlob or IoTHubDeviceClient_UploadMultipleBlocksToBlob.
     *
@@ -196,8 +196,7 @@ extern "C"
     * @param    retryTimeoutLimitInSeconds      Maximum amount of time(seconds) to attempt reconnection when a
     *                                           connection drops to IOT Hub.
     *
-    *           @b NOTE: The application behavior is undefined if the user calls
-    *           the IoTHubDeviceClient_Destroy() function from within any callback.
+    * @warning: Do not call IoTHubDeviceClient_Destroy() from inside your application's callback.
     *
     * @remark   Uploads initiated by IoTHubDeviceClient_UploadToBlob or IoTHubDeviceClient_UploadMultipleBlocksToBlob do not have automatic retries and do not honor the retryPolicy settings.
     *
@@ -214,8 +213,7 @@ extern "C"
     * @param    retryTimeoutLimitInSeconds      Out parameter containing maximum amount of time in seconds to attempt reconnection
     *                                           to IOT Hub.
     *
-    *           @b NOTE: The application behavior is undefined if the user calls
-    *           the IoTHubDeviceClient_Destroy() function from within any callback.
+    * @warning: Do not call IoTHubDeviceClient_Destroy() from inside your application's callback.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -262,8 +260,7 @@ extern "C"
     * @param    userContextCallback         User specified context that will be provided to the
     *                                       callback. This can be @c NULL.
     *
-    *           @b NOTE: The application behavior is undefined if the user calls
-    *           the IoTHubDeviceClient_Destroy() function from within any callback.
+    * @warning: Do not call IoTHubDeviceClient_Destroy() from inside your application's callback.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -280,8 +277,7 @@ extern "C"
     * @param    userContextCallback         User specified context that will be provided to the
     *                                       callback. This can be @c NULL.
     *
-    *           @b NOTE: The application behavior is undefined if the user calls
-    *           the IoTHubDeviceClient_Destroy() function from within any callback.
+    * @warning: Do not call IoTHubDeviceClient_Destroy() from inside your application's callback.
     *
     * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
@@ -296,8 +292,7 @@ extern "C"
     * @param    userContextCallback      User specified context that will be provided to the
     *                                    callback. This can be @c NULL.
     *
-    *            @b NOTE: The application behavior is undefined if the user calls
-    *            the IoTHubDeviceClient_Destroy() function from within any callback.
+    * @warning: Do not call IoTHubDeviceClient_Destroy() from inside your application's callback.
     *
     * @return    IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
