@@ -207,7 +207,7 @@ MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_Properties_Writer_CreateW
 
 /**
 * @brief   Frees serialized properties that were initially allocated with IoTHubClient_Properties_Writer_CreateReported() 
-*          or IoTHubClient_Properties_Write_WritableResponse().
+*          or IoTHubClient_Properties_Writer_CreateWritableResponse().
 *
 * @param[in]  serializedProperties Properties to free.
 */
@@ -265,7 +265,7 @@ MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_Properties_Parser_GetNext
 /**
 * @brief   Frees memory allocated by IoTHubClient_Properties_Parser_GetNext().
 *
-* @param   property  IOTHUB_CLIENT_PROPERTY_PARSED initially allocated by IoTHubClient_Deserialize_Properties() 
+* @param   property  IOTHUB_CLIENT_PROPERTY_PARSED initially allocated by IoTHubClient_Properties_Parser_Create() 
 *                    to be freed.
 * 
 */
