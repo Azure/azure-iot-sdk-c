@@ -68,5 +68,5 @@ void PnP_DeviceInfoComponent_Report_All_Properties(const char* componentName, IO
         LogError("Unable to send reported state, error=%d", iothubClientResult);
     }
 
-    IoTHubClient_Properties_Properties_Writer_Destroy(propertiesSerialized);
+    IoTHubClient_Properties_Writer_Destroy(propertiesSerialized);
 }

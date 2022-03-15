@@ -234,27 +234,27 @@ static void PnP_TempControlComponent_UpdatedPropertyCallback(
     void* userContextCallback)
 {
     IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient = (IOTHUB_DEVICE_CLIENT_LL_HANDLE)userContextCallback;
-    IOTHUB_CLIENT_PROPERTIES_PARSER_HANDLE propertyIterator = NULL;
+    IOTHUB_CLIENT_PROPERTIES_READER_HANDLE propertiesReader = NULL;
     IOTHUB_CLIENT_PROPERTY_PARSED property;
     int propertiesVersion;
     IOTHUB_CLIENT_RESULT clientResult;
 
-    // The properties arrive as a raw JSON buffer (which is not null-terminated).  IoTHubClient_Properties_Parser_Create parses 
+    // The properties arrive as a raw JSON buffer (which is not null-terminated).  IoTHubClient_Properties_Reader_Create parses 
     // this into a more convenient form to allow property-by-property enumeration over the updated properties.
-    if ((clientResult = IoTHubClient_Properties_Parser_Create(payloadType, payload, payloadLength, &propertyIterator)) != IOTHUB_CLIENT_OK)
+    if ((clientResult = IoTHubClient_Properties_Reader_Create(payloadType, payload, payloadLength, &propertiesReader)) != IOTHUB_CLIENT_OK)
     {
         LogError("IoTHubClient_Deserialize_Properties failed, error=%d", clientResult);
     }
-    else if ((clientResult = IoTHubClient_Properties_Parser_GetVersion(propertyIterator, &propertiesVersion)) != IOTHUB_CLIENT_OK)
+    else if ((clientResult = IoTHubClient_Properties_Reader_GetVerion(propertiesReader, &propertiesVersion)) != IOTHUB_CLIENT_OK)
     {
-        LogError("IoTHubClient_Properties_Parser_GetVersion failed, error=%d", clientResult);
+        LogError("IoTHubClient_Properties_Reader_GetVerion failed, error=%d", clientResult);
     }
     else
     {
         bool propertySpecified;
         property.structVersion = IOTHUB_CLIENT_PROPERTY_PARSED_STRUCT_VERSION_1;
 
-        while ((clientResult = IoTHubClient_Properties_Parser_GetNext(propertyIterator, &property, &propertySpecified)) == IOTHUB_CLIENT_OK)
+        while ((clientResult = IoTHubClient_Properties_Reader_GetNext(propertiesReader, &property, &propertySpecified)) == IOTHUB_CLIENT_OK)
         {
             if (propertySpecified == false)
             {
@@ -295,11 +295,11 @@ static void PnP_TempControlComponent_UpdatedPropertyCallback(
                 LogError("Component %s is not implemented by the TemperatureController", property.componentName);
             }
             
-            IoTHubClient_Properties_ParsedProperty_Destroy(&property);
+            IoTHubClient_Properties_ReaderProperty_Destroy(&property);
         }
     }
 
-    IoTHubClient_Properties_Parser_Destroy(propertyIterator);
+    IoTHubClient_Properties_Reader_Destroy(propertiesReader);
 }
 
 //
@@ -365,7 +365,7 @@ static void PnP_TempControlComponent_ReportSerialNumber_Property(IOTHUB_DEVICE_C
         LogError("Unable to send reported state, error=%d", clientResult);
     }
 
-    IoTHubClient_Properties_Properties_Writer_Destroy(serializedProperties);
+    IoTHubClient_Properties_Writer_Destroy(serializedProperties);
 }
 
 //

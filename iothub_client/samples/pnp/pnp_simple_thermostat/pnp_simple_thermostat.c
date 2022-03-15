@@ -358,7 +358,7 @@ static void SendTargetTemperatureResponse(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceC
     {
         LogInfo("Sending acknowledgement of property to IoTHub");
     }
-    IoTHubClient_Properties_Properties_Writer_Destroy(propertySerialized);
+    IoTHubClient_Properties_Writer_Destroy(propertySerialized);
 }
 
 //
@@ -397,7 +397,7 @@ static void SendMaxTemperatureSinceReboot(IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceC
         {
             LogInfo("Sending %s property to IoTHub for component", g_maxTempSinceLastRebootPropertyName);
         }
-        IoTHubClient_Properties_Properties_Writer_Destroy(propertySerialized);
+        IoTHubClient_Properties_Writer_Destroy(propertySerialized);
     }
 }
 
@@ -437,27 +437,27 @@ static void Thermostat_ProcessTargetTemperature(IOTHUB_DEVICE_CLIENT_LL_HANDLE d
 static void Thermostat_PropertiesCallback(IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType,  const unsigned char* payload, size_t payloadLength, void* userContextCallback)
 {
     IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient = (IOTHUB_DEVICE_CLIENT_LL_HANDLE)userContextCallback;
-    IOTHUB_CLIENT_PROPERTIES_PARSER_HANDLE propertyIterator = NULL;
+    IOTHUB_CLIENT_PROPERTIES_READER_HANDLE propertiesReader = NULL;
     IOTHUB_CLIENT_PROPERTY_PARSED property;
     int propertiesVersion;
     IOTHUB_CLIENT_RESULT clientResult;
 
-    // The properties arrive as a raw JSON buffer (which is not null-terminated).  IoTHubClient_Properties_Parser_Create parses 
+    // The properties arrive as a raw JSON buffer (which is not null-terminated).  IoTHubClient_Properties_Reader_Create parses 
     // this into a more convenient form to allow property-by-property enumeration over the updated properties.
-    if ((clientResult = IoTHubClient_Properties_Parser_Create(payloadType, payload, payloadLength, &propertyIterator)) != IOTHUB_CLIENT_OK)
+    if ((clientResult = IoTHubClient_Properties_Reader_Create(payloadType, payload, payloadLength, &propertiesReader)) != IOTHUB_CLIENT_OK)
     {
         LogError("IoTHubClient_Deserialize_Properties failed, error=%d", clientResult);
     }
-    else if ((clientResult = IoTHubClient_Properties_Parser_GetVersion(propertyIterator, &propertiesVersion)) != IOTHUB_CLIENT_OK)
+    else if ((clientResult = IoTHubClient_Properties_Reader_GetVerion(propertiesReader, &propertiesVersion)) != IOTHUB_CLIENT_OK)
     {
-        LogError("IoTHubClient_Properties_Parser_GetVersion failed, error=%d", clientResult);
+        LogError("IoTHubClient_Properties_Reader_GetVerion failed, error=%d", clientResult);
     }
     else
     {
         bool propertySpecified;
         property.structVersion = IOTHUB_CLIENT_PROPERTY_PARSED_STRUCT_VERSION_1;
 
-        while ((clientResult = IoTHubClient_Properties_Parser_GetNext(propertyIterator, &property, &propertySpecified)) == IOTHUB_CLIENT_OK)
+        while ((clientResult = IoTHubClient_Properties_Reader_GetNext(propertiesReader, &property, &propertySpecified)) == IOTHUB_CLIENT_OK)
         {
             if (propertySpecified == false)
             {
@@ -493,11 +493,11 @@ static void Thermostat_PropertiesCallback(IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE pa
                 LogError("Property %s is not part of the thermostat model and will be ignored", property.name);
             }
             
-            IoTHubClient_Properties_ParsedProperty_Destroy(&property);
+            IoTHubClient_Properties_ReaderProperty_Destroy(&property);
         }
     }
 
-    IoTHubClient_Properties_Parser_Destroy(propertyIterator);
+    IoTHubClient_Properties_Reader_Destroy(propertiesReader);
 }
 
 //

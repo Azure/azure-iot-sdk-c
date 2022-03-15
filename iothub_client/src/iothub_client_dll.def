@@ -169,12 +169,12 @@ EXPORTS
 
     IoTHubClient_Properties_Writer_CreateReported
     IoTHubClient_Properties_Writer_CreateWritableResponse
-    IoTHubClient_Properties_Properties_Writer_Destroy
-    IoTHubClient_Properties_Parser_Create
-    IoTHubClient_Properties_Parser_GetVersion
-    IoTHubClient_Properties_Parser_GetNext
-    IoTHubClient_Properties_ParsedProperty_Destroy
-    IoTHubClient_Properties_Parser_Destroy
+    IoTHubClient_Properties_Writer_Destroy
+    IoTHubClient_Properties_Reader_Create
+    IoTHubClient_Properties_Reader_GetVerion
+    IoTHubClient_Properties_Reader_GetNext
+    IoTHubClient_Properties_ReaderProperty_Destroy
+    IoTHubClient_Properties_Reader_Destroy
  
     IOTHUB_CLIENT_CONFIRMATION_RESULTStrings
     IOTHUB_CLIENT_FILE_UPLOAD_RESULTStrings

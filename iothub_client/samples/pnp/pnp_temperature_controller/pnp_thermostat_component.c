@@ -300,7 +300,7 @@ static void SendTargetTemperatureResponse(PNP_THERMOSTAT_COMPONENT* pnpThermosta
     {
         LogInfo("Sending acknowledgement of property to IoTHub for component %s", pnpThermostatComponent->componentName);
     }
-    IoTHubClient_Properties_Properties_Writer_Destroy(propertySerialized);
+    IoTHubClient_Properties_Writer_Destroy(propertySerialized);
 }
 
 void PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient)
@@ -337,7 +337,7 @@ void PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(PNP_THERMOS
         {
             LogInfo("Sending %s property to IoTHub for component %s", g_maxTempSinceLastRebootPropertyName, pnpThermostatComponent->componentName);
         }
-        IoTHubClient_Properties_Properties_Writer_Destroy(propertySerialized);
+        IoTHubClient_Properties_Writer_Destroy(propertySerialized);
     }
 }
 
