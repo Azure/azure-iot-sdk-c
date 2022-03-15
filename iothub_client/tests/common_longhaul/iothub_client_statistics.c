@@ -12,7 +12,7 @@
 #include "parson.h"
 
 #define INDEFINITE_TIME ((time_t)-1)
-#define SPAN_3_MINUTES_IN_SECONDS (60 * 3)
+#define SPAN_4_MINUTES_IN_SECONDS (60 * 4)
 
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(TELEMETRY_EVENT_TYPE, TELEMETRY_EVENT_TYPE_VALUES)
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(C2D_EVENT_TYPE, C2D_EVENT_TYPE_VALUES)
@@ -154,8 +154,8 @@ bool compare_message_time_to_connection_time(LIST_ITEM_HANDLE list_item, const v
     CONNECTION_STATUS_INFO* connection_status = (CONNECTION_STATUS_INFO*)list_item;
     time_t message_time = *((time_t*)match_context);
     if ((connection_status->status == IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED || connection_status->reason == IOTHUB_CLIENT_CONNECTION_NO_NETWORK) &&
-        connection_status->time < message_time &&
-        connection_status->time >(message_time - SPAN_3_MINUTES_IN_SECONDS))
+        connection_status->time <= message_time &&
+        connection_status->time >(message_time - SPAN_4_MINUTES_IN_SECONDS))
     {
         return true;
     }
@@ -1459,6 +1459,11 @@ int iothub_client_statistics_get_device_twin_reported_summary(IOTHUB_CLIENT_STAT
                 }
 
                 summary->updates_received = summary->updates_received + 1;
+            }
+            else if (device_twin_info->send_status_code == 408)  // http status 408 = Request Timeout
+            {
+                summary->updates_sent--;
+                LogInfo("Removing twin reported update id (%d) because of [(408) Request Timeout] network error", (int)device_twin_info->update_id);
             }
             else
             {
