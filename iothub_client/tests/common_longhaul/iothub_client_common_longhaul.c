@@ -1651,6 +1651,7 @@ static void on_twin_report_state_completed(int status_code, void* userContextCal
         device_twin_info.update_id = send_context->update_id;
         device_twin_info.time_sent = time(NULL);
         device_twin_info.send_status_code = status_code;
+        LogInfo("twin_report_state_completed, id: %d, status: %d", send_context->update_id, status_code);
 
         if (Lock(send_context->iotHubLonghaul->lock) != LOCK_OK)
         {
