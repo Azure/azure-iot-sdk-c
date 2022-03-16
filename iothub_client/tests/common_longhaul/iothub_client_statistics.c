@@ -1461,7 +1461,7 @@ int iothub_client_statistics_get_device_twin_reported_summary(IOTHUB_CLIENT_STAT
                 summary->updates_received = summary->updates_received + 1;
             }
             else if (
-                     device_twin_info->send_status_code == 408 ||    // http status 408 = Request Timeout
+                     device_twin_info->send_status_code == 408 ||    // WebSockets: http status 408 = Request Timeout
                      device_twin_info->send_status_code == 0         // amqp send timeout
                     )  
             {
