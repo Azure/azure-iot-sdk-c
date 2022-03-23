@@ -964,7 +964,6 @@ static void invoke_callback(const void* item, const void* action_context, bool* 
 
 static void internal_on_event_send_complete_callback(void* context, MESSAGE_SEND_RESULT send_result, AMQP_VALUE delivery_state)
 {
-    (void)delivery_state;
     if (context != NULL)
     {
         MESSENGER_SEND_EVENT_TASK* task = (MESSENGER_SEND_EVENT_TASK*)context;
@@ -984,8 +983,48 @@ static void internal_on_event_send_complete_callback(void* context, MESSAGE_SEND
                     messenger_send_result = TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING;
                 }
 
-                // Initially typecast to a size_t to avoid 64 bit compiler warnings on casting of void* to larger type.
-                singlylinkedlist_foreach(task->callback_list, invoke_callback, (void*)&messenger_send_result);
+                bool isResourceLimitExceeded = false;
+                uint32_t count;
+                int ret = amqpvalue_get_list_item_count(delivery_state, &count);
+                for (uint32_t i = 0; !isResourceLimitExceeded && ret == 0 && i < count; i++)
+                {
+                    AMQP_VALUE v = amqpvalue_get_list_item(delivery_state, i);
+                    if (v != NULL)
+                    {
+                        AMQP_VALUE v2 = amqpvalue_get_inplace_described_value(v);
+                        if (v2 != NULL)
+                        {
+                            uint32_t count2 = 0;
+                            ret = amqpvalue_get_list_item_count(v2, &count2);
+                            for (uint32_t t = 0; !isResourceLimitExceeded && ret == 0 && t < count2; t++)
+                            {
+                                AMQP_VALUE v3 = amqpvalue_get_list_item(v2, t);
+                                if (v3 != NULL)
+                                {
+                                    char* symbol_value;
+                                    int ret_sym = amqpvalue_get_symbol(v3, &symbol_value);
+                                    if (ret_sym == 0)
+                                    {
+                                        if (strcmp(symbol_value, "amqp:resource-limit-exceeded") == 0)
+                                        {
+                                            isResourceLimitExceeded = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (isResourceLimitExceeded)
+                {
+                    singlylinkedlist_foreach(task->callback_list, invoke_callback, (void*)&messenger_send_result /*IOTHUB_CLIENT_CONFIRMATION_ERROR_QUOTA_EXCEEDED*/);
+                }
+                else
+                {
+                    // Initially typecast to a size_t to avoid 64 bit compiler warnings on casting of void* to larger type.
+                    singlylinkedlist_foreach(task->callback_list, invoke_callback, (void*)&messenger_send_result);
+                }
             }
             else
             {
