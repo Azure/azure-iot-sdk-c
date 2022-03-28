@@ -17,7 +17,7 @@ generate_cppunittest_wrapper(${theseTestsName})
 
 set(${theseTestsName}_c_files
 	../../src/iothubtransport_amqp_telemetry_messenger.c
-    ../../../uamqp/src/amqpvalue.c
+)
 
 set(${theseTestsName}_h_files
 )

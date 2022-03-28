@@ -56,6 +56,10 @@ void real_free(void* ptr)
 #define please_mock_amqpvalue_create_string MOCK_ENABLED
 #define please_mock_amqpvalue_create_symbol MOCK_ENABLED
 #define please_mock_amqpvalue_destroy MOCK_ENABLED
+#define please_mock_amqpvalue_get_symbol MOCK_ENABLED
+#define please_mock_amqpvalue_get_list_item_count MOCK_ENABLED
+#define please_mock_amqpvalue_get_list_item MOCK_ENABLED
+#define please_mock_amqpvalue_get_inplace_described_value MOCK_ENABLED
 #define please_mock_amqpvalue_set_map_value MOCK_ENABLED
 #define please_mock_link_create MOCK_ENABLED
 #define please_mock_link_destroy MOCK_ENABLED
@@ -1148,6 +1152,11 @@ static void set_expected_calls_free_task(int number_callbacks)
 
 static void set_expected_calls_for_on_message_send_complete(int number_callbacks)
 {
+    uint32_t count = 0;
+    STRICT_EXPECTED_CALL(amqpvalue_get_list_item_count(IGNORED_NUM_ARG, IGNORED_PTR_ARG))
+        .CopyOutArgumentBuffer(2, &count, sizeof(count))
+        .SetReturn(0);
+
     STRICT_EXPECTED_CALL(singlylinkedlist_foreach(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
     STRICT_EXPECTED_CALL(singlylinkedlist_find(TEST_IN_PROGRESS_LIST, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
@@ -1918,6 +1927,11 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 
     REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_set_map_value, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqpvalue_set_map_value, 1);
+
+    REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_get_symbol, 0);
+    REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_get_list_item_count, 0);
+    REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_get_list_item, 0);
+    REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_get_inplace_described_value, 0);
 
     REGISTER_GLOBAL_MOCK_RETURN(link_set_attach_properties, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(link_set_attach_properties, 1);
