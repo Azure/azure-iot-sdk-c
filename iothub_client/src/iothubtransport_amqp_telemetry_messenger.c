@@ -1010,9 +1010,12 @@ static void internal_on_event_send_complete_callback(void* context, MESSAGE_SEND
                                             isResourceLimitExceeded = true;
                                         }
                                     }
+                                    amqpvalue_destroy(item_property);
                                 }
                             }
+                            amqpvalue_destroy(item_properties);
                         }
+                        amqpvalue_destroy(delivery_state_item);
                     }
                 }
 
