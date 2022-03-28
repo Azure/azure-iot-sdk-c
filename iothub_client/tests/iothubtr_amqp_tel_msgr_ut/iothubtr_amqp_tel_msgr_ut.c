@@ -1928,7 +1928,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_set_map_value, 0);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqpvalue_set_map_value, 1);
 
-    REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_get_symbol, NULL);
+    REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_get_symbol, 0);
     REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_get_list_item_count, 0);
     REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_get_list_item, 0);
     REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_get_inplace_described_value, 0);
