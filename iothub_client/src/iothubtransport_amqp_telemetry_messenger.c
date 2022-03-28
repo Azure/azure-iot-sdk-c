@@ -1001,7 +1001,7 @@ static void internal_on_event_send_complete_callback(void* context, MESSAGE_SEND
                                 AMQP_VALUE item_property = amqpvalue_get_list_item(item_properties, t);
                                 if (item_property != NULL)
                                 {
-                                    char* symbol_value;
+                                    const char* symbol_value;
                                     int ret_sym = amqpvalue_get_symbol(item_property, &symbol_value);
                                     if (ret_sym == 0)
                                     {
