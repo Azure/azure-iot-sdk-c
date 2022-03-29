@@ -19,11 +19,10 @@ jobs:
       sudo cat /etc/os-release
       sudo apt show valgrind
       sudo chmod --recursive ugo+rw cmake
-      sudo chmod 755 jenkins/longhaul_c.sh
       sudo -E ./jenkins/longhaul_c.sh
     displayName: 'Build'
   - script: |
-      cd cmake && sudo -E ../build_all/linux/run_tests.sh
+      cd cmake && sudo -E ../build_all/linux/run_tests_memcheck.sh
     displayName: 'Run Tests'
     env:
       IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
