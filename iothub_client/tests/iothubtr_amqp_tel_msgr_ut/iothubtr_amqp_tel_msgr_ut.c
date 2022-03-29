@@ -1150,8 +1150,16 @@ static void set_expected_calls_free_task(int number_callbacks)
     EXPECTED_CALL(free(IGNORED_PTR_ARG));
 }
 
-static void set_expected_calls_for_on_message_send_complete(int number_callbacks)
+static void set_expected_calls_for_on_message_send_complete(int number_callbacks, MESSAGE_SEND_RESULT message_send_result)
 {
+    if (message_send_result == MESSAGE_SEND_ERROR)
+    {
+        uint32_t count = 0;
+        STRICT_EXPECTED_CALL(amqpvalue_get_list_item_count(IGNORED_NUM_ARG, IGNORED_PTR_ARG))
+            .CopyOutArgumentBuffer(2, &count, sizeof(count))
+            .SetReturn(0);
+    }
+
     STRICT_EXPECTED_CALL(singlylinkedlist_foreach(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
     STRICT_EXPECTED_CALL(singlylinkedlist_find(TEST_IN_PROGRESS_LIST, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
@@ -2766,7 +2774,7 @@ static void test_send_events_for_callbacks(MESSAGE_SEND_RESULT message_send_resu
     crank_telemetry_messenger_do_work(handle, mdwp);
 
     umock_c_reset_all_calls();
-    set_expected_calls_for_on_message_send_complete(test_config->number_test_events);
+    set_expected_calls_for_on_message_send_complete(test_config->number_test_events, message_send_result);
 
     // act
     ASSERT_IS_NOT_NULL(saved_messagesender_send_on_message_send_complete);
