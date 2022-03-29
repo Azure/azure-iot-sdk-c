@@ -27,6 +27,7 @@
 #define IOTHUB_DEVICES_MODULE_PATH_FMT                  "%s/devices/%s/modules/%s"
 #define IOTHUB_EVENT_SEND_ADDRESS_FMT                   "amqps://%s/messages/events"
 #define IOTHUB_MESSAGE_RECEIVE_ADDRESS_FMT              "amqps://%s/messages/devicebound"
+#define IOTHUB_MESSAGE_PROPERTY_RESOURCE_LIMIT_EXCEEDED "amqp:resource-limit-exceeded"
 #define MESSAGE_SENDER_LINK_NAME_PREFIX                 "link-snd"
 #define MESSAGE_SENDER_MAX_LINK_SIZE                    UINT64_MAX
 #define MESSAGE_RECEIVER_LINK_NAME_PREFIX               "link-rcv"
@@ -1002,7 +1003,9 @@ static void internal_on_event_send_complete_callback(void* context, MESSAGE_SEND
                                         int ret_sym = amqpvalue_get_symbol(item_property, &symbol_value);
                                         if (ret_sym == 0)
                                         {
-                                            if (strcmp(symbol_value, "amqp:resource-limit-exceeded") == 0)
+                                            size_t proplen = strlen(symbol_value);
+                                            proplen = proplen < sizeof(IOTHUB_MESSAGE_PROPERTY_RESOURCE_LIMIT_EXCEEDED) ? proplen : sizeof(IOTHUB_MESSAGE_PROPERTY_RESOURCE_LIMIT_EXCEEDED);
+                                            if (strncmp(symbol_value, IOTHUB_MESSAGE_PROPERTY_RESOURCE_LIMIT_EXCEEDED, proplen) == 0)
                                             {
                                                 isResourceLimitExceeded = true;
                                             }
