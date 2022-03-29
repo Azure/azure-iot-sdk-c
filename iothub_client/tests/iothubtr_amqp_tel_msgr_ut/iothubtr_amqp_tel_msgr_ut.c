@@ -1152,11 +1152,6 @@ static void set_expected_calls_free_task(int number_callbacks)
 
 static void set_expected_calls_for_on_message_send_complete(int number_callbacks)
 {
-    uint32_t count = 0;
-    STRICT_EXPECTED_CALL(amqpvalue_get_list_item_count(IGNORED_NUM_ARG, IGNORED_PTR_ARG))
-        .CopyOutArgumentBuffer(2, &count, sizeof(count))
-        .SetReturn(0);
-
     STRICT_EXPECTED_CALL(singlylinkedlist_foreach(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
     STRICT_EXPECTED_CALL(singlylinkedlist_find(TEST_IN_PROGRESS_LIST, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
