@@ -980,47 +980,49 @@ static void internal_on_event_send_complete_callback(void* context, MESSAGE_SEND
                 }
                 else
                 {
-                    messenger_send_result = TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING;
-                }
-
-                bool isResourceLimitExceeded = false;
-                uint32_t item_count;
-                int ret = amqpvalue_get_list_item_count(delivery_state, &item_count);
-                for (uint32_t i = 0; !isResourceLimitExceeded && ret == 0 && i < item_count; i++)
-                {
-                    AMQP_VALUE delivery_state_item = amqpvalue_get_list_item(delivery_state, i);
-                    if (delivery_state_item != NULL)
+                    bool isResourceLimitExceeded = false;
+                    uint32_t item_count;
+                    int ret = amqpvalue_get_list_item_count(delivery_state, &item_count);
+                    for (uint32_t i = 0; !isResourceLimitExceeded && ret == 0 && i < item_count; i++)
                     {
-                        AMQP_VALUE item_properties = amqpvalue_get_inplace_described_value(delivery_state_item);
-                        if (item_properties != NULL)
+                        AMQP_VALUE delivery_state_item = amqpvalue_get_list_item(delivery_state, i);
+                        if (delivery_state_item != NULL)
                         {
-                            uint32_t item_properties_count = 0;
-                            ret = amqpvalue_get_list_item_count(item_properties, &item_properties_count);
-                            for (uint32_t t = 0; !isResourceLimitExceeded && ret == 0 && t < item_properties_count; t++)
+                            AMQP_VALUE item_properties = amqpvalue_get_inplace_described_value(delivery_state_item);
+                            if (item_properties != NULL)
                             {
-                                AMQP_VALUE item_property = amqpvalue_get_list_item(item_properties, t);
-                                if (item_property != NULL)
+                                uint32_t item_properties_count = 0;
+                                ret = amqpvalue_get_list_item_count(item_properties, &item_properties_count);
+                                for (uint32_t t = 0; !isResourceLimitExceeded && ret == 0 && t < item_properties_count; t++)
                                 {
-                                    const char* symbol_value;
-                                    int ret_sym = amqpvalue_get_symbol(item_property, &symbol_value);
-                                    if (ret_sym == 0)
+                                    AMQP_VALUE item_property = amqpvalue_get_list_item(item_properties, t);
+                                    if (item_property != NULL)
                                     {
-                                        if (strcmp(symbol_value, "amqp:resource-limit-exceeded") == 0)
+                                        const char* symbol_value;
+                                        int ret_sym = amqpvalue_get_symbol(item_property, &symbol_value);
+                                        if (ret_sym == 0)
                                         {
-                                            isResourceLimitExceeded = true;
+                                            if (strcmp(symbol_value, "amqp:resource-limit-exceeded") == 0)
+                                            {
+                                                isResourceLimitExceeded = true;
+                                            }
                                         }
+                                        amqpvalue_destroy(item_property);
                                     }
-                                    amqpvalue_destroy(item_property);
                                 }
                             }
+                            amqpvalue_destroy(delivery_state_item);
                         }
-                        amqpvalue_destroy(delivery_state_item);
                     }
-                }
 
-                if (isResourceLimitExceeded)
-                {
-                    messenger_send_result = TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_QUOTA_EXCEEDED;
+                    if (isResourceLimitExceeded)
+                    {
+                        messenger_send_result = TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_QUOTA_EXCEEDED;
+                    }
+                    else
+                    {
+                        messenger_send_result = TELEMETRY_MESSENGER_EVENT_SEND_COMPLETE_RESULT_ERROR_FAIL_SENDING;
+                    }
                 }
 
                 // Initially typecast to a size_t to avoid 64 bit compiler warnings on casting of void* to larger type.
