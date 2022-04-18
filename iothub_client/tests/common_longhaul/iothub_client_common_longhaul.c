@@ -1405,10 +1405,20 @@ static int send_c2d(const void* context)
                         IoTHubMessaging_Destroy(iotHubLonghaul->iotHubSvcMsgHandle);
                         iotHubLonghaul->iotHubSvcMsgHandle = NULL;
 
-                        ThreadAPI_Sleep(1000 * 30); // wait before reconnecting (might be a networking issue)
+                        IOTHUB_MESSAGING_CLIENT_HANDLE messageClientHandle = NULL;
+                        for (int retryConnectAttemps = 3; retryConnectAttemps > 0; retryConnectAttemps--)
+                        {
+                            ThreadAPI_Sleep(1000 * 60); // wait before reconnecting (might be a networking issue)
 
-                        // reopen the service handle
-                        if (longhaul_initialize_service_c2d_messaging_client(iotHubLonghaul) != NULL)
+                            LogInfo("Reopening service handle");
+                            messageClientHandle = longhaul_initialize_service_c2d_messaging_client(iotHubLonghaul);
+                            if (messageClientHandle != NULL)
+                            {
+                                break;
+                            }
+                        }
+
+                        if (messageClientHandle != NULL)
                         {
                             continue;
                         }

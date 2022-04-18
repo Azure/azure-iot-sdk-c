@@ -12,5 +12,11 @@ TEST_CORES=16
 # Refresh dynamic libs to link to
 sudo ldconfig
 
+pwd
+printenv
+
 ctest -T MemCheck --no-compress-output -C "Debug" -V -j $TEST_CORES --schedule-random
 
+pwd
+ls
+ls -l Testing/Temporary
