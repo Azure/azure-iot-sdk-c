@@ -12,12 +12,4 @@ TEST_CORES=16
 # Refresh dynamic libs to link to
 sudo ldconfig
 
-pwd
-printenv
-
-ctest -T MemCheck --no-compress-output -C "Debug" -V -j $TEST_CORES --schedule-random
-
-echo ejw... end of build
-pwd
-ls
-ls -l Testing/Temporary
+ctest --overwrite MemoryCheckCommandOptions="--leak-check=full --error-exitcode=100" -T MemCheck --no-compress-output -C "Debug" -V -j $TEST_CORES --schedule-random
