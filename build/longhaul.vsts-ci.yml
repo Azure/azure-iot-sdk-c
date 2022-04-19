@@ -46,6 +46,7 @@ jobs:
       IOTHUB_LONGHAUL_TOTAL_DURATION_SECS: 1800
       IOTHUB_LONGHAUL_LOOP_DURATION_SECS: $(iotHubLonghaulLoopDurationSecs)
   - task: PublishPipelineArtifact@1
+    condition: succeededOrFailed()
     inputs:
       targetPath: '$(Build.SourcesDirectory)/cmake/Testing/Temporary/'
       artifact: 'Memcheck'
