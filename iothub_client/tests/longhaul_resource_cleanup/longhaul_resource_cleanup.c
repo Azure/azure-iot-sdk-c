@@ -95,7 +95,9 @@ void deviceItemEnum(const void* item, const void* action_context, bool* continue
             }
 
             json_value_free(root_value);
+            free(twin);
         }
+        free(item);
     }
 
     *continue_processing = true;
@@ -153,16 +155,13 @@ int main(void)
         LogError("Failed to get hub devices");
         result = MU_FAILURE;
     }
-    else
+
+    if (deviceList)
     {
         ENUM_CONTEXT context;
         context.deviceTwinHandle = deviceTwin;
         context.registryManagerHandle = registryManager;
         singlylinkedlist_foreach(deviceList, deviceItemEnum, &context);
-    }
-
-    if (deviceList)
-    {
         singlylinkedlist_destroy(deviceList);
     }
 
