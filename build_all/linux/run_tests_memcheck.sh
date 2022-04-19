@@ -17,6 +17,7 @@ printenv
 
 ctest -T MemCheck --no-compress-output -C "Debug" -V -j $TEST_CORES --schedule-random
 
+echo ejw... end of build
 pwd
 ls
 ls -l Testing/Temporary
