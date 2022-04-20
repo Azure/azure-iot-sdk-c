@@ -1122,7 +1122,6 @@ static IOTHUB_MESSAGING_CLIENT_HANDLE longhaul_initialize_service_c2d_messaging_
     }
     else
     {
-        IOTHUB_MESSAGING_CLIENT_HANDLE messageClientHandle = NULL;
         int retryConnectAttemps = 4;
         while (--retryConnectAttemps > 0)
         {
