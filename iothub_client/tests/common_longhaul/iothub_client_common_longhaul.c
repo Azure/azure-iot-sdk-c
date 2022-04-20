@@ -1127,7 +1127,6 @@ static IOTHUB_MESSAGING_CLIENT_HANDLE longhaul_initialize_service_c2d_messaging_
         {
             if (IoTHubMessaging_Open(iotHubLonghaul->iotHubSvcMsgHandle, on_svc_client_c2d_messaging_open_complete, iotHubLonghaul) == IOTHUB_MESSAGING_OK)
             {
-                result = iotHubLonghaul->iotHubSvcMsgHandle;
                 break;
             }
 
@@ -1140,6 +1139,10 @@ static IOTHUB_MESSAGING_CLIENT_HANDLE longhaul_initialize_service_c2d_messaging_
             IoTHubMessaging_Destroy(iotHubLonghaul->iotHubSvcMsgHandle);
             iotHubLonghaul->iotHubSvcMsgHandle = NULL;
             result = NULL;
+        } 
+        else
+        {
+            result = iotHubLonghaul->iotHubSvcMsgHandle;
         }
     }
 
