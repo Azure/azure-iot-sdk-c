@@ -98,7 +98,8 @@ void deviceItemEnum(const void* item, const void* action_context, bool* continue
             free(twin);
         }
     }
-    free((void*)item);
+    IoTHubRegistryManager_FreeModuleMembers((IOTHUB_MODULE*)device);
+    free((void*)device);
 
     *continue_processing = true;
 }
