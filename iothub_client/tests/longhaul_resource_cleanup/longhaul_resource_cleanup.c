@@ -97,7 +97,7 @@ void deviceItemEnum(const void* item, const void* action_context, bool* continue
             json_value_free(root_value);
             free(twin);
         }
-        free(item);
+        free((void*)item);
     }
 
     *continue_processing = true;
