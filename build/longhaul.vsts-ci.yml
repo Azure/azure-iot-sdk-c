@@ -44,6 +44,12 @@ jobs:
       PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
       IOTHUB_LONGHAUL_TOTAL_DURATION_SECS: $(iotHubLonghaulTotalDurationSecs)
       IOTHUB_LONGHAUL_LOOP_DURATION_SECS: $(iotHubLonghaulLoopDurationSecs)
+  - task: PublishPipelineArtifact@1
+    condition: succeededOrFailed()
+    inputs:
+      targetPath: '$(Build.SourcesDirectory)/cmake/Testing/Temporary/'
+      artifact: 'Memcheck'
+      publishLocation: 'pipeline'
 - job: longhaul_windows
   timeoutInMinutes: 800
   pool:

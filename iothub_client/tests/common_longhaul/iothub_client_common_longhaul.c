@@ -50,6 +50,7 @@ static const char* IOTHUB_LONGHAUL_LOOP_DURATION_SECS = "IOTHUB_LONGHAUL_LOOP_DU
 #define SERVICE_EVENT_WAIT_TIME_DELTA_SECONDS   120
 #define DEVICE_METHOD_SUB_WAIT_TIME_MS          (5 * 1000)
 #define NETWORK_RETRY_ATTEMPTS                  20
+#define SERVICE_NETWORK_RETRY_ATTEMPTS          4
 #define NETWORK_RETRY_DELAY_MSEC                5 * 1000
 
 #define MAX_TELEMETRY_TRAVEL_TIME_SECS          600.0
@@ -1120,16 +1121,30 @@ static IOTHUB_MESSAGING_CLIENT_HANDLE longhaul_initialize_service_c2d_messaging_
         LogError("Failed creating the IoT Hub Service C2D messenger");
         result = NULL;
     }
-    else if (IoTHubMessaging_Open(iotHubLonghaul->iotHubSvcMsgHandle, on_svc_client_c2d_messaging_open_complete, iotHubLonghaul) != IOTHUB_MESSAGING_OK)
-    {
-        LogError("Failed opening the IoT Hub Service C2D messenger");
-        IoTHubMessaging_Destroy(iotHubLonghaul->iotHubSvcMsgHandle);
-        iotHubLonghaul->iotHubSvcMsgHandle = NULL;
-        result = NULL;
-    }
     else
     {
-        result = iotHubLonghaul->iotHubSvcMsgHandle;
+        int retryConnectAttemps = SERVICE_NETWORK_RETRY_ATTEMPTS;
+        while (--retryConnectAttemps > 0)
+        {
+            if (IoTHubMessaging_Open(iotHubLonghaul->iotHubSvcMsgHandle, on_svc_client_c2d_messaging_open_complete, iotHubLonghaul) == IOTHUB_MESSAGING_OK)
+            {
+                break;
+            }
+
+            ThreadAPI_Sleep(1000 * 60); // wait before reconnecting (might be a networking issue)
+        }
+
+        if (retryConnectAttemps == 0)
+        {
+            LogError("Failed opening the IoT Hub Service C2D messenger");
+            IoTHubMessaging_Destroy(iotHubLonghaul->iotHubSvcMsgHandle);
+            iotHubLonghaul->iotHubSvcMsgHandle = NULL;
+            result = NULL;
+        } 
+        else
+        {
+            result = iotHubLonghaul->iotHubSvcMsgHandle;
+        }
     }
 
     return result;
@@ -1400,15 +1415,15 @@ static int send_c2d(const void* context)
                     {
                         LogInfo("Failed sending c2d message with error IOTHUB_MESSAGING_ERROR calling IoTHubMessaging_Open");
                         result = MU_FAILURE;
+
                         // close the current service handle
                         IoTHubMessaging_Close(iotHubLonghaul->iotHubSvcMsgHandle);
                         IoTHubMessaging_Destroy(iotHubLonghaul->iotHubSvcMsgHandle);
                         iotHubLonghaul->iotHubSvcMsgHandle = NULL;
 
-                        ThreadAPI_Sleep(1000 * 30); // wait before reconnecting (might be a networking issue)
-
-                        // reopen the service handle
-                        if (longhaul_initialize_service_c2d_messaging_client(iotHubLonghaul) != NULL)
+                        LogInfo("Reopening service handle");
+                        IOTHUB_MESSAGING_CLIENT_HANDLE messageClientHandle = longhaul_initialize_service_c2d_messaging_client(iotHubLonghaul);
+                        if (messageClientHandle != NULL)
                         {
                             continue;
                         }

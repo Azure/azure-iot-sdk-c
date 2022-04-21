@@ -12,5 +12,4 @@ TEST_CORES=16
 # Refresh dynamic libs to link to
 sudo ldconfig
 
-ctest -T MemCheck --no-compress-output -C "Debug" -V -j $TEST_CORES --schedule-random
-
+ctest --overwrite MemoryCheckCommandOptions="--leak-check=full --error-exitcode=100" -T MemCheck --no-compress-output -C "Debug" -V -j $TEST_CORES --schedule-random
