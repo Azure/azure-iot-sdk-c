@@ -37,12 +37,12 @@ typedef struct ENUM_CONTEXT_TAG {
 void deviceItemEnum(const void* item, const void* action_context, bool* continue_processing)
 {
     const ENUM_CONTEXT* context = (const ENUM_CONTEXT*) action_context;
-    const IOTHUB_MODULE* device = (const IOTHUB_MODULE*) item;
-    if (strncmp(device->deviceId, SAS_DEVICE_PREFIX_FMT, sizeof(SAS_DEVICE_PREFIX_FMT) - 1) == 0 || 
-        strncmp(device->deviceId, X509_DEVICE_PREFIX_FMT, sizeof(X509_DEVICE_PREFIX_FMT) - 1) == 0 ||
-        strncmp(device->deviceId, HSM_DEVICE_PREFIX_FMT, sizeof(HSM_DEVICE_PREFIX_FMT) - 1) == 0)
+    const IOTHUB_MODULE* module = (const IOTHUB_MODULE*) item;
+    if (strncmp(module->deviceId, SAS_DEVICE_PREFIX_FMT, sizeof(SAS_DEVICE_PREFIX_FMT) - 1) == 0 ||
+        strncmp(module->deviceId, X509_DEVICE_PREFIX_FMT, sizeof(X509_DEVICE_PREFIX_FMT) - 1) == 0 ||
+        strncmp(module->deviceId, HSM_DEVICE_PREFIX_FMT, sizeof(HSM_DEVICE_PREFIX_FMT) - 1) == 0)
     {
-        char* twin = IoTHubDeviceTwin_GetTwin(context->deviceTwinHandle, device->deviceId);
+        char* twin = IoTHubDeviceTwin_GetTwin(context->deviceTwinHandle, module->deviceId);
         if (twin)
         {
             JSON_Object* root_object = NULL;
@@ -85,11 +85,11 @@ void deviceItemEnum(const void* item, const void* action_context, bool* continue
                 time_t now = time(0);
                 if (deviceTime > YEAR_2020 && (now - deviceTime > FIVE_DAYS))
                 {
-                    LogInfo("Deleting device %s, %d days old", device->deviceId, (int)(now - deviceTime) / (60 * 60 * 24));
-                    IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_DeleteDevice(context->registryManagerHandle, device->deviceId);
+                    LogInfo("Deleting device %s, %d days old", module->deviceId, (int)(now - deviceTime) / (60 * 60 * 24));
+                    IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_DeleteDevice(context->registryManagerHandle, module->deviceId);
                     if (result != IOTHUB_REGISTRYMANAGER_OK)
                     {
-                        LogError("failed to delete device %s", device->deviceId);
+                        LogError("failed to delete device %s", module->deviceId);
                     }
                 }
             }
@@ -98,8 +98,8 @@ void deviceItemEnum(const void* item, const void* action_context, bool* continue
             free(twin);
         }
     }
-    IoTHubRegistryManager_FreeModuleMembers((IOTHUB_MODULE*)device);
-    free((void*)device);
+    IoTHubRegistryManager_FreeModuleMembers((IOTHUB_MODULE*)module);
+    free((void*)module);
 
     *continue_processing = true;
 }
