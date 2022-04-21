@@ -2,28 +2,28 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 /** @file    iothub_client_properties.h
-*   @brief   APIs that create and parse properties modeled with DTDLv2.
+*   @brief   APIs that serialize and deserialize properties modeled with DTDLv2.
 *
 *   @details Plug and Play devices are defined using the DTDLv2 modeling language described
 *            at https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md.
 *
-*            Azure IoT Hub defines a set of conventions for parsing and creating DTDLv2 
+*            Azure IoT Hub defines a set of conventions for parsing and creating DTDLv2
 *            properties that can be sent between Azure IoT Hub and devices connected to the Hub.
 *
 *            The format is JSON based.  It is possible to manually serialize and deserialize
 *            this payload following the documented convention.  These APIs make this process easier.  
-*            When creating a property to be sent to IoT Hub, your application provides a C structure and 
+*            When serializing a property to be sent to IoT Hub, your application provides a C structure and 
 *            the API returns a byte stream to be sent.
 *
-*            When receiving properties form IoT Hub, the parsing API converts a raw stream
+*            When receiving properties form IoT Hub, the deserialization API converts a raw stream
 *            into an easier to process C structure with the JSON parsed out.
 *
 *            These APIs do not invoke any network I/O.  To actually send and receive data, these APIs 
 *            will typically be paired with a corresponding IoT Hub device or module client.  
 *  
-*            Pseudocode to demonstrate the relationship for creating properties and device clients:
+*            Pseudocode to demonstrate the relationship for serializing properties and device clients:
 *                   // Converts C structure into serialized stream.  
-*                   IoTHubClient_Properties_Writer_CreateReported(&yourApplicationsPropertiesInStruct, &serializedByteStream);
+*                   IoTHubClient_Properties_Serializer_CreateReported(&yourApplicationsPropertiesInStruct, &serializedByteStream);
 *                   // Send the data
 *                   IoTHubDeviceClient_LL_SendPropertiesAsync(deviceHandle, serializedByteStream);
 *
@@ -33,24 +33,24 @@
 *                   // Time passes as request is processed...
 *                   // ...
 *                   // Your application's IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK is eventually invoked.  
-*                   // Your application then will setup the reader handle based on the data from the network.
+*                   // Your application then will setup the deserializer handle based on the data from the network.
 *                   // rawDataFromIoTHub below corresponds to data your IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK 
 *                   // receives.
 *
 *                   void yourAppCallback(rawDataFromIoTHub, ...) // your IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK implementation
 *                   {
-*                     IoTHubClient_Properties_Reader_Create(rawDataFromIoTHub, &readerHandle)
+*                     IoTHubClient_Properties_Deserializer_Create(rawDataFromIoTHub, &deserializationHandle)
 *
 *                     // Enumerate each property that is in a component.  deserializedProperty will be of type
 *                     // IOTHUB_CLIENT_PROPERTY_PARSED and is much easier to process than raw JSON 
-*                     while (IoTHubClient_Properties_Reader_GetNext(&readerHandle, &deserializedProperty)) {
+*                     while (IoTHubClient_Properties_Deserializer_GetNext(&deserializationHandle, &deserializedProperty)) {
 *                         // Application processes deserializedProperty according to modeling rules
 *                         // ...
-*                         // Frees memory allocated by IoTHubClient_Properties_Reader_GetNext
-*                         IoTHubClient_Properties_ReaderProperty_Destroy(&deserializedProperty);
+*                         // Frees memory allocated by IoTHubClient_Properties_Deserializer_GetNext
+*                         IoTHubClient_Properties_DeserializerProperty_Destroy(&deserializedProperty);
 *                     }
-*                     // Frees memory allocated by IoTHubClient_Properties_Reader_Create
-*                     IoTHubClient_Properties_Reader_Destroy(readerHandle);
+*                     // Frees memory allocated by IoTHubClient_Properties_Deserializer_Create
+*                     IoTHubClient_Properties_Deserializer_Destroy(deserializationHandle);
 *                   }
 */
 
@@ -66,9 +66,9 @@
 /** @brief Current version of @p IOTHUB_CLIENT_PROPERTY_REPORTED structure.  */
 #define IOTHUB_CLIENT_PROPERTY_REPORTED_STRUCT_VERSION_1 1
 
-/** @brief    This struct defines properties reported from the device.  This corresponds to what DTDLv2 calls a 
+/** @brief    This struct defines properties reported from the client.  This corresponds to what DTDLv2 calls a 
 *             "read-only property."   This structure is filled out by the application and can be serialized into 
-*             a payload for IoT Hub via @p IoTHubClient_Properties_Writer_CreateReported(). */
+*             a payload for IoT Hub via @p IoTHubClient_Properties_Serializer_CreateReported(). */
 
 typedef struct IOTHUB_CLIENT_PROPERTY_REPORTED_TAG {
     /** @brief   Version of the structure.  Currently must be IOTHUB_CLIENT_PROPERTY_REPORTED_STRUCT_VERSION_1. */
@@ -82,7 +82,7 @@ typedef struct IOTHUB_CLIENT_PROPERTY_REPORTED_TAG {
 /** @brief Current version of @p IOTHUB_CLIENT_PROPERTY_WRITABLE_RESPONSE structure.  */
 #define IOTHUB_CLIENT_PROPERTY_WRITABLE_RESPONSE_STRUCT_VERSION_1 1
 
-/** @brief    This struct represents the response to a writable property that the device will return.  
+/** @brief    This struct represents the response to a writable property that the client will return.  
 *             This structure is filled out by the application and can be serialized into a payload for IoT Hub via
 *             @p IoTHubClient_Properties_Write_WritableResponse(). */
 typedef struct IOTHUB_CLIENT_PROPERTY_WRITABLE_RESPONSE_TAG {
@@ -95,19 +95,19 @@ typedef struct IOTHUB_CLIENT_PROPERTY_WRITABLE_RESPONSE_TAG {
     /** @brief Result of the requested operation.  This maps to an HTTP status code.  */
     int result;
     /** @brief Acknowledgement version.  This corresponds to the version of the writable properties being responded to. */
-    /** @details If using @p IoTHubClient_Properties_Reader_Create() to deserialize initial property request
+    /** @details If using @p IoTHubClient_Properties_Deserializer_Create() to deserialize initial property request
     *            from IoT Hub, just set this field to what was returned in @p propertiesVersion. */
     int ackVersion;
     /** @brief Optional friendly description of the operation.  May be NULL. */
     const char* description;
 } IOTHUB_CLIENT_PROPERTY_WRITABLE_RESPONSE;
 
-/** @brief Enumeration that indicates whether a given property from the service was originally reported from the device
-           (and hence the device application sees what the last reported value IoT Hub has)
+/** @brief Enumeration that indicates whether a given property from the service was originally reported from the client
+           (and hence the client application sees what the last reported value IoT Hub has)
            or whether this is a writable property that the service is requesting configuration for.
 */
 #define IOTHUB_CLIENT_PROPERTY_TYPE_VALUES \
-    IOTHUB_CLIENT_PROPERTY_TYPE_REPORTED_FROM_DEVICE, \
+    IOTHUB_CLIENT_PROPERTY_TYPE_REPORTED_FROM_CLIENT, \
     IOTHUB_CLIENT_PROPERTY_TYPE_WRITABLE
 
 MU_DEFINE_ENUM_WITHOUT_INVALID(IOTHUB_CLIENT_PROPERTY_TYPE, IOTHUB_CLIENT_PROPERTY_TYPE_VALUES);
@@ -128,8 +128,8 @@ MU_DEFINE_ENUM_WITHOUT_INVALID(IOTHUB_CLIENT_PROPERTY_VALUE_TYPE, IOTHUB_CLIENT_
 typedef struct IOTHUB_CLIENT_PROPERTY_PARSED_TAG {
     /** @brief   Version of the structure.  Currently must be IOTHUB_CLIENT_PROPERTY_PARSED_STRUCT_VERSION_1. */
     int structVersion;
-    /** @brief   Whether this is a property the device reported (and we're seeing what IoT Hub last received from 
-         the device) or whether it's a writable property request from the device. */
+    /** @brief   Whether this is a property the client reported (and we're seeing what IoT Hub last received from 
+         the client) or whether it's a writable property request from the client. */
     IOTHUB_CLIENT_PROPERTY_TYPE propertyType;
     /** @brief Name of the component.  Optional; may be NULL for the root component. */
     const char* componentName;
@@ -158,7 +158,7 @@ typedef struct IOTHUB_CLIENT_PROPERTY_PARSED_TAG {
 *                                          component.
 * @param[out]  serializedProperties        Serialized output of @p properties for sending to IoT Hub.
 *                                          The application must release this memory using 
-*                                          IoTHubClient_Properties_Writer_Destroy().
+*                                          IoTHubClient_Properties_Serializer_Destroy().
 *                                          Note: This is NOT a null-terminated string.
 * @param[out]  serializedPropertiesLength  Length of serializedProperties.
 *
@@ -172,7 +172,7 @@ typedef struct IOTHUB_CLIENT_PROPERTY_PARSED_TAG {
 * 
 * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
-MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_Properties_Writer_CreateReported, const IOTHUB_CLIENT_PROPERTY_REPORTED*, properties, size_t, numProperties, const char*, componentName, unsigned char**, serializedProperties, size_t*, serializedPropertiesLength);
+MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_Properties_Serializer_CreateReported, const IOTHUB_CLIENT_PROPERTY_REPORTED*, properties, size_t, numProperties, const char*, componentName, unsigned char**, serializedProperties, size_t*, serializedPropertiesLength);
 
 /**
 * @brief   Writes the response to writable properties into bytes for sending to IoT Hub.
@@ -183,13 +183,13 @@ MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_Properties_Writer_CreateR
 *                                         default component.
 * @param[out]  serializedProperties       Serialized output of @p properties for sending to IoT Hub.
                                           The application must release this memory using 
-                                          IoTHubClient_Properties_Writer_Destroy().
+                                          IoTHubClient_Properties_Serializer_Destroy().
 *                                         Note: This is NOT a null-terminated string.
 * @param[out]  serializedPropertiesLength Length of serializedProperties
 * 
 * @remarks  Applications typically will invoke this API when processing a property from service 
 *           (IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK) to indicate whether properties have been accepted or rejected 
-*           by the device.  For example, if the service requested DesiredTemp=50, then the application could fill out 
+*           by the client.  For example, if the service requested DesiredTemp=50, then the application could fill out 
 *           the fields in an IOTHUB_CLIENT_PROPERTY_WRITABLE_RESPONSE structure indicating whether the request can be 
 *           processed or whether there was a failure.
 *
@@ -203,84 +203,84 @@ MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_Properties_Writer_CreateR
 *
 * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
-MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_Properties_Writer_CreateWritableResponse, const IOTHUB_CLIENT_PROPERTY_WRITABLE_RESPONSE*, properties, size_t, numProperties, const char*, componentName, unsigned char**, serializedProperties, size_t*, serializedPropertiesLength);
+MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_Properties_Serializer_CreateWritableResponse, const IOTHUB_CLIENT_PROPERTY_WRITABLE_RESPONSE*, properties, size_t, numProperties, const char*, componentName, unsigned char**, serializedProperties, size_t*, serializedPropertiesLength);
 
 /**
-* @brief   Frees serialized properties that were initially allocated with IoTHubClient_Properties_Writer_CreateReported() 
-*          or IoTHubClient_Properties_Writer_CreateWritableResponse().
+* @brief   Frees serialized properties that were initially allocated with IoTHubClient_Properties_Serializer_CreateReported() 
+*          or IoTHubClient_Properties_Serializer_CreateWritableResponse().
 *
 * @param[in]  serializedProperties Properties to free.
 */
-MOCKABLE_FUNCTION(, void, IoTHubClient_Properties_Writer_Destroy, unsigned char*, serializedProperties);
+MOCKABLE_FUNCTION(, void, IoTHubClient_Properties_Serializer_Destroy, unsigned char*, serializedProperties);
 
-typedef struct IOTHUB_CLIENT_PROPERTIES_READER_TAG* IOTHUB_CLIENT_PROPERTIES_READER_HANDLE;
+typedef struct IOTHUB_CLIENT_PROPERTIES_DESERIALIZER_TAG* IOTHUB_CLIENT_PROPERTIES_DESERIALIZER_HANDLE;
 
 /**
-* @brief   Setup a reader handle to parse through Plug and Play properties received from IoT Hub.
+* @brief   Setup a deserialization handle to parse through Plug and Play properties received from IoT Hub.
 *
-* @param[in]  payloadType              Whether the payload is a full set of properties or only a set of updated 
-*                                      writable properties.
-* @param[in]  payload                  Payload containing properties from Azure IoT that is to be deserialized. 
-* @param[in]  payloadLength            Length of @p payload.
-* @param[out] propertiesReaderHandle   Returned handle used for subsequent iteration calls.
+* @param[in]  payloadType                    Whether the payload is a full set of properties or only a set of updated 
+*                                            writable properties.
+* @param[in]  payload                        Payload containing properties from Azure IoT that is to be deserialized. 
+* @param[in]  payloadLength                  Length of @p payload.
+* @param[out] propertiesDeserializerHandle   Returned handle used for subsequent iteration calls.
 * 
 * @remarks  Applications typically will invoke this API in their IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK 
 *           implementation.  Many of the parameters this function takes should come directly from the 
 *           IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK itself.
 *
-*           Applications must call @p IoTHubClient_Properties_Reader_Destroy() to free @p 
-*           propertiesReaderHandle on completion.
+*           Applications must call @p IoTHubClient_Properties_Deserializer_Destroy() to free @p 
+*           propertiesDeserializerHandle on completion.
 *
 * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
-MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_Properties_Reader_Create,  IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE, payloadType, const unsigned char*, payload, size_t, payloadLength, IOTHUB_CLIENT_PROPERTIES_READER_HANDLE*, propertiesReaderHandle);
+MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_Properties_Deserializer_Create,  IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE, payloadType, const unsigned char*, payload, size_t, payloadLength, IOTHUB_CLIENT_PROPERTIES_DESERIALIZER_HANDLE*, propertiesDeserializerHandle);
 
 /**
 * @brief   Retrieves the version associated with the properties payload.
 *
-* @param[in]   propertiesReaderHandle   Reader handle returned by @p IoTHubClient_Properties_Reader_Create().
-* @param[out]  propertiesVersion        Version of the writable properties received.  This is used when acknowledging a 
-*                                       writable property update.
+* @param[in]   propertiesDeserializerHandle   Deserialization handle returned by @p IoTHubClient_Properties_Deserializer_Create().
+* @param[out]  propertiesVersion              Version of the writable properties received.  This is used when acknowledging a 
+*                                             writable property update.
 *
 * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
-MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_Properties_Reader_GetVerion, IOTHUB_CLIENT_PROPERTIES_READER_HANDLE, propertiesReaderHandle, int*, propertiesVersion);
+MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_Properties_Deserializer_GetVerion, IOTHUB_CLIENT_PROPERTIES_DESERIALIZER_HANDLE, propertiesDeserializerHandle, int*, propertiesVersion);
 
 /**
 * @brief   Gets the next property during iteration.
 *
-* @param[in]   propertiesReaderHandle   Reader handle returned by @p IoTHubClient_Properties_Reader_Create().
-* @param[out]  property                 @p IOTHUB_CLIENT_PROPERTY_PARSED containing a deserialized representation 
-*                                       of the properties.
-* @param[out]  propertySpecified        Returned value indicating whether a property was found or not.  If false, this 
-*                                       indicates all components have been iterated over.
+* @param[in]   propertiesDeserializerHandle   Deserialization handle returned by @p IoTHubClient_Properties_Deserializer_Create().
+* @param[out]  property                       @p IOTHUB_CLIENT_PROPERTY_PARSED containing a deserialized representation 
+*                                             of the properties.
+* @param[out]  propertySpecified              Returned value indicating whether a property was found or not.  If false, this 
+*                                             indicates all components have been iterated over.
 *
-* @remarks  Applications must call @p IoTHubClient_Properties_ReaderProperty_Destroy() to free the @p property returned by this call.
-*           The property structure becomes invalid after @p IoTHubClient_Properties_ReaderProperty_Destroy has been called.
+* @remarks  Applications must call @p IoTHubClient_Properties_DeserializerProperty_Destroy() to free the @p property returned by this call.
+*           The property structure becomes invalid after @p IoTHubClient_Properties_DeserializerProperty_Destroy has been called.
 *
 * @return   IOTHUB_CLIENT_OK upon success or an error code upon failure.
 */
-MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_Properties_Reader_GetNext, IOTHUB_CLIENT_PROPERTIES_READER_HANDLE, propertiesReaderHandle, IOTHUB_CLIENT_PROPERTY_PARSED*, property, bool*, propertySpecified);
+MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_Properties_Deserializer_GetNext, IOTHUB_CLIENT_PROPERTIES_DESERIALIZER_HANDLE, propertiesDeserializerHandle, IOTHUB_CLIENT_PROPERTY_PARSED*, property, bool*, propertySpecified);
 
 /**
-* @brief   Frees memory allocated by IoTHubClient_Properties_Reader_GetNext().
+* @brief   Frees memory allocated by IoTHubClient_Properties_Deserializer_GetNext().
 *
-* @param   property  IOTHUB_CLIENT_PROPERTY_PARSED initially allocated by IoTHubClient_Properties_Reader_Create() 
+* @param   property  IOTHUB_CLIENT_PROPERTY_PARSED initially allocated by IoTHubClient_Properties_Deserializer_Create() 
 *                    to be freed.
 * 
 */
-MOCKABLE_FUNCTION(, void, IoTHubClient_Properties_ReaderProperty_Destroy,  IOTHUB_CLIENT_PROPERTY_PARSED*, property);
+MOCKABLE_FUNCTION(, void, IoTHubClient_Properties_DeserializerProperty_Destroy,  IOTHUB_CLIENT_PROPERTY_PARSED*, property);
 
 /**
-* @brief   Frees memory allocated by IoTHubClient_Properties_Reader_Create().
+* @brief   Frees memory allocated by IoTHubClient_Properties_Deserializer_Create().
 *
-* @param   propertiesReaderHandle   IOTHUB_CLIENT_PROPERTIES_READER_HANDLE initially allocated by @p 
-*                                   IoTHubClient_Properties_Reader_Create() to be freed.
-* @remarks After an application calls IoTHubClient_Properties_Reader_Destroy, any previous 
+* @param   propertiesDeserializerHandle   IOTHUB_CLIENT_PROPERTIES_DESERIALIZER_HANDLE initially allocated by @p 
+*                                         IoTHubClient_Properties_Deserializer_Create() to be freed.
+* @remarks After an application calls IoTHubClient_Properties_Deserializer_Destroy, any previous 
 *          IOTHUB_CLIENT_PROPERTY_PARSED structures that were retrieved via
-*          IoTHubClient_Properties_Reader_GetNext become invalid.
+*          IoTHubClient_Properties_Deserializer_GetNext become invalid.
 * 
 */
-MOCKABLE_FUNCTION(, void, IoTHubClient_Properties_Reader_Destroy, IOTHUB_CLIENT_PROPERTIES_READER_HANDLE, propertiesReaderHandle);
+MOCKABLE_FUNCTION(, void, IoTHubClient_Properties_Deserializer_Destroy, IOTHUB_CLIENT_PROPERTIES_DESERIALIZER_HANDLE, propertiesDeserializerHandle);
 
 #endif /* IOTHUB_CLIENT_PROPERTIES_H */

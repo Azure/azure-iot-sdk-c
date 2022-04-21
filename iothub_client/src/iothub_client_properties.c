@@ -21,7 +21,7 @@ typedef enum PROPERTY_PARSE_STATE_TAG
     PROPERTY_PARSE_STATE_REPORTED
 } PROPERTY_PARSE_STATE;
 
-typedef struct IOTHUB_CLIENT_PROPERTIES_READER_TAG {
+typedef struct IOTHUB_CLIENT_PROPERTIES_DESERIALIZER_TAG {
     JSON_Value* rootValue;
     JSON_Object* desiredObject;
     JSON_Object* reportedObject;
@@ -30,7 +30,7 @@ typedef struct IOTHUB_CLIENT_PROPERTIES_READER_TAG {
     size_t currentComponentIndex;
     size_t currentPropertyIndex;
     int propertiesVersion;
-} IOTHUB_CLIENT_PROPERTIES_READER;
+} IOTHUB_CLIENT_PROPERTIES_DESERIALIZER;
 
 // sprintf format strings and string constants for writing properties.
 static const char PROPERTY_FORMAT_COMPONENT_START[] = "{\"%s\":{\"__t\":\"c\",";
@@ -253,7 +253,7 @@ static bool VerifySerializeReportedProperties(const IOTHUB_CLIENT_PROPERTY_REPOR
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_Properties_Writer_CreateReported(const IOTHUB_CLIENT_PROPERTY_REPORTED* properties, size_t numProperties, const char* componentName, unsigned char** serializedProperties, size_t* serializedPropertiesLength)
+IOTHUB_CLIENT_RESULT IoTHubClient_Properties_Serializer_CreateReported(const IOTHUB_CLIENT_PROPERTY_REPORTED* properties, size_t numProperties, const char* componentName, unsigned char** serializedProperties, size_t* serializedPropertiesLength)
 {
     IOTHUB_CLIENT_RESULT result;
     size_t requiredBytes = 0;
@@ -328,7 +328,7 @@ static bool VerifySerializeWritableReportedProperties(const IOTHUB_CLIENT_PROPER
 }
 
 
-IOTHUB_CLIENT_RESULT IoTHubClient_Properties_Writer_CreateWritableResponse(
+IOTHUB_CLIENT_RESULT IoTHubClient_Properties_Serializer_CreateWritableResponse(
     const IOTHUB_CLIENT_PROPERTY_WRITABLE_RESPONSE* properties,
     size_t numProperties,
     const char* componentName,
@@ -367,7 +367,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Properties_Writer_CreateWritableResponse(
     if (result == IOTHUB_CLIENT_OK)
     {
         *serializedProperties = serializedPropertiesBuffer;
-        // See comments in IoTHubClient_Properties_Writer_CreateReported for background on why we substract one.
+        // See comments in IoTHubClient_Properties_Serializer_CreateReported for background on why we substract one.
         *serializedPropertiesLength = requiredBytes - 1;
     }
     else if (serializedPropertiesBuffer != NULL)
@@ -379,12 +379,12 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Properties_Writer_CreateWritableResponse(
 }
 
 
-// We have an explicit destroy function for serialized properties, even though IoTHubClient_Properties_Writer_CreateReported
-// and IoTHubClient_Properties_Writer_CreateWritableResponse used malloc() and app could've theoretically done free() directly.  Because:
+// We have an explicit destroy function for serialized properties, even though IoTHubClient_Properties_Serializer_CreateReported
+// and IoTHubClient_Properties_Serializer_CreateWritableResponse used malloc() and app could've theoretically done free() directly.  Because:
 // * If the SDK is setup to use a custom allocator (gballoc.h) then we use same malloc() / free() matching to free.
 // * This gives us flexibility to use non-malloc based allocators in future.
 // * Maintains symmetry with _Destroy() as mechanism to free resources SDK allocates.
-void IoTHubClient_Properties_Writer_Destroy(unsigned char* serializedProperties)
+void IoTHubClient_Properties_Serializer_Destroy(unsigned char* serializedProperties)
 {
     if (serializedProperties != NULL)
     {
@@ -417,12 +417,12 @@ static char* CopyPayloadToString(const unsigned char* payload, size_t size)
 // GetDesiredAndReportedTwinJson retrieves the desired and (if available) the reported sections of IoT Hub twin as JSON_Objects for later use.
 // When a full twin is sent, the JSON consists of {"desired":{...}, "reported":{...}}".  If we're processing an update patch, 
 // IoT Hub does not send us the "reported" and the "desired" is by convention taken to be the root of the JSON document received.
-static IOTHUB_CLIENT_RESULT GetDesiredAndReportedTwinJson(IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType, IOTHUB_CLIENT_PROPERTIES_READER* propertiesReader)
+static IOTHUB_CLIENT_RESULT GetDesiredAndReportedTwinJson(IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType, IOTHUB_CLIENT_PROPERTIES_DESERIALIZER* propertiesDeserializer)
 {
     IOTHUB_CLIENT_RESULT result;
     JSON_Object* rootObject;
 
-    if ((rootObject = json_value_get_object(propertiesReader->rootValue)) == NULL)
+    if ((rootObject = json_value_get_object(propertiesDeserializer->rootValue)) == NULL)
     {
         LogError("Unable to get root object of JSON");
         result = IOTHUB_CLIENT_ERROR;
@@ -432,15 +432,15 @@ static IOTHUB_CLIENT_RESULT GetDesiredAndReportedTwinJson(IOTHUB_CLIENT_PROPERTY
         if (payloadType == IOTHUB_CLIENT_PROPERTY_PAYLOAD_ALL)
         {
             // NULL values are NOT errors, as the JSON may legitimately not have these fields.
-            propertiesReader->desiredObject = json_object_get_object(rootObject, TWIN_DESIRED_OBJECT_NAME);
-            propertiesReader->reportedObject = json_object_get_object(rootObject, TWIN_REPORTED_OBJECT_NAME);
+            propertiesDeserializer->desiredObject = json_object_get_object(rootObject, TWIN_DESIRED_OBJECT_NAME);
+            propertiesDeserializer->reportedObject = json_object_get_object(rootObject, TWIN_REPORTED_OBJECT_NAME);
         }
         else
         {
             // For a patch update, IoTHub does not explicitly put a "desired:" JSON envelope.  The "desired-ness" is implicit 
             // in this case, so here we simply need the root of the JSON itself.
-            propertiesReader->desiredObject = rootObject;
-            propertiesReader->reportedObject = NULL;
+            propertiesDeserializer->desiredObject = rootObject;
+            propertiesDeserializer->reportedObject = NULL;
         }
         result = IOTHUB_CLIENT_OK;
     }
@@ -450,12 +450,12 @@ static IOTHUB_CLIENT_RESULT GetDesiredAndReportedTwinJson(IOTHUB_CLIENT_PROPERTY
 
 // GetTwinVersion retrieves the $version field from JSON document received from IoT Hub.  
 // The application needs this value when acknowledging writable properties received from the service.
-static IOTHUB_CLIENT_RESULT GetTwinVersion(IOTHUB_CLIENT_PROPERTIES_READER* propertiesReader)
+static IOTHUB_CLIENT_RESULT GetTwinVersion(IOTHUB_CLIENT_PROPERTIES_DESERIALIZER* propertiesDeserializer)
 {
     IOTHUB_CLIENT_RESULT result;
     JSON_Value* versionValue = NULL;
 
-    if ((versionValue = json_object_get_value(propertiesReader->desiredObject, TWIN_VERSION)) == NULL)
+    if ((versionValue = json_object_get_value(propertiesDeserializer->desiredObject, TWIN_VERSION)) == NULL)
     {
         LogError("Cannot retrieve %s field for twin", TWIN_VERSION);
         result = IOTHUB_CLIENT_ERROR;
@@ -467,7 +467,7 @@ static IOTHUB_CLIENT_RESULT GetTwinVersion(IOTHUB_CLIENT_PROPERTIES_READER* prop
     }
     else
     {
-        propertiesReader->propertiesVersion = (int)json_value_get_number(versionValue);
+        propertiesDeserializer->propertiesVersion = (int)json_value_get_number(versionValue);
         result = IOTHUB_CLIENT_OK;
     }
 
@@ -476,12 +476,12 @@ static IOTHUB_CLIENT_RESULT GetTwinVersion(IOTHUB_CLIENT_PROPERTIES_READER* prop
 
 // IsJsonObjectAComponent indicates whether the current containerObject we're visiting corresponds to
 // a PnP component (indicated by a "__t":"c" field as a containerObject child) or not.
-static bool IsJsonObjectAComponent(IOTHUB_CLIENT_PROPERTIES_READER* propertiesReader, JSON_Object* containerObject)
+static bool IsJsonObjectAComponent(IOTHUB_CLIENT_PROPERTIES_DESERIALIZER* propertiesDeserializer, JSON_Object* containerObject)
 {
     bool result;
 
     // First retrieve the JSON Object (assuming its an object) at the current place we're iterating.
-    JSON_Value* jsonValue = json_object_get_value_at(containerObject, propertiesReader->currentPropertyIndex);
+    JSON_Value* jsonValue = json_object_get_value_at(containerObject, propertiesDeserializer->currentPropertyIndex);
     JSON_Object* jsonObject = json_value_get_object(jsonValue);
 
     // Examine it's object to see if the "__t:c" has been set.  If jsonObject isn't actually of type JSON_Object,
@@ -492,12 +492,12 @@ static bool IsJsonObjectAComponent(IOTHUB_CLIENT_PROPERTIES_READER* propertiesRe
     return result;
 }
 
-// ValidateReaderInputs makes sure that the parameter list passed in IoTHubClient_Properties_Reader_Create is valid.
-static IOTHUB_CLIENT_RESULT ValidateReaderInputs(
+// ValidateDeserializerInputs makes sure that the parameter list passed in IoTHubClient_Properties_Deserializer_Create is valid.
+static IOTHUB_CLIENT_RESULT ValidateDeserializerInputs(
     IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType,
     const unsigned char* payload,
     size_t payloadLength,
-    IOTHUB_CLIENT_PROPERTIES_READER_HANDLE* propertiesReaderHandle)
+    IOTHUB_CLIENT_PROPERTIES_DESERIALIZER_HANDLE* propertiesDeserializerHandle)
 {
     IOTHUB_CLIENT_RESULT result;
 
@@ -506,7 +506,7 @@ static IOTHUB_CLIENT_RESULT ValidateReaderInputs(
         LogError("Payload type %d is invalid", payloadType);
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
-    else if ((payload == NULL) || (payloadLength == 0) || (propertiesReaderHandle == NULL))
+    else if ((payload == NULL) || (payloadLength == 0) || (propertiesDeserializerHandle == NULL))
     {
         LogError("NULL arguments passed");
         result = IOTHUB_CLIENT_INVALID_ARG;
@@ -520,7 +520,7 @@ static IOTHUB_CLIENT_RESULT ValidateReaderInputs(
 }
 
 // FillProperty retrieves properties that are children of jsonObject and puts them into properties 'property' to be returned to the application.
-static IOTHUB_CLIENT_RESULT FillProperty(IOTHUB_CLIENT_PROPERTIES_READER* propertiesReader, const char* componentName, JSON_Value* propertyValue, const char* propertyName, IOTHUB_CLIENT_PROPERTY_PARSED* property)
+static IOTHUB_CLIENT_RESULT FillProperty(IOTHUB_CLIENT_PROPERTIES_DESERIALIZER* propertiesDeserializer, const char* componentName, JSON_Value* propertyValue, const char* propertyName, IOTHUB_CLIENT_PROPERTY_PARSED* property)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_ERROR;
     const char* propertyStringJson;
@@ -533,9 +533,9 @@ static IOTHUB_CLIENT_RESULT FillProperty(IOTHUB_CLIENT_PROPERTIES_READER* proper
     else
     {
         // Note that most fields in the returned IOTHUB_CLIENT_PROPERTY_PARSED are shallow copies.  This memory remains valid until
-        // the application calls IoTHubClient_Properties_Reader_Destroy.
-        property->propertyType = (propertiesReader->propertyParseState == PROPERTY_PARSE_STATE_DESIRED) ? 
-                                 IOTHUB_CLIENT_PROPERTY_TYPE_WRITABLE : IOTHUB_CLIENT_PROPERTY_TYPE_REPORTED_FROM_DEVICE;
+        // the application calls IoTHubClient_Properties_Deserializer_Destroy.
+        property->propertyType = (propertiesDeserializer->propertyParseState == PROPERTY_PARSE_STATE_DESIRED) ? 
+                                 IOTHUB_CLIENT_PROPERTY_TYPE_WRITABLE : IOTHUB_CLIENT_PROPERTY_TYPE_REPORTED_FROM_CLIENT;
         property->componentName = componentName;
         property->name = propertyName;
         property->valueType = IOTHUB_CLIENT_PROPERTY_VALUE_STRING;
@@ -560,9 +560,9 @@ static bool IsReservedComponentKeyword(const char* objectName)
 }
 
 // GetNextComponentProperty advances through a given component's properties, returning either the next to be enumerated or that there's nothing left to traverse.
-static bool GetNextComponentProperty(IOTHUB_CLIENT_PROPERTIES_READER* propertiesReader, JSON_Object* containerObject, const char** propertyName, JSON_Value** propertyValue)
+static bool GetNextComponentProperty(IOTHUB_CLIENT_PROPERTIES_DESERIALIZER* propertiesDeserializer, JSON_Object* containerObject, const char** propertyName, JSON_Value** propertyValue)
 {
-    JSON_Value* componentValue = json_object_get_value_at(containerObject, propertiesReader->currentPropertyIndex);
+    JSON_Value* componentValue = json_object_get_value_at(containerObject, propertiesDeserializer->currentPropertyIndex);
     JSON_Object* componentObject = json_value_get_object(componentValue);
 
     *propertyName = NULL;
@@ -577,20 +577,20 @@ static bool GetNextComponentProperty(IOTHUB_CLIENT_PROPERTIES_READER* properties
     {
         size_t numComponentChildren = json_object_get_count(componentObject);
 
-        while (propertiesReader->currentComponentIndex < numComponentChildren)
+        while (propertiesDeserializer->currentComponentIndex < numComponentChildren)
         {
-            const char* objectName = json_object_get_name(componentObject, propertiesReader->currentComponentIndex);
+            const char* objectName = json_object_get_name(componentObject, propertiesDeserializer->currentComponentIndex);
             
             if (IsReservedComponentKeyword(objectName))
             {
                 // This objectName corresponds to twin/property metadata that is not passed to application
-                propertiesReader->currentComponentIndex++;
+                propertiesDeserializer->currentComponentIndex++;
             }
             else
             {
                 *propertyName = objectName;
-                *propertyValue = json_object_get_value_at(componentObject, propertiesReader->currentComponentIndex);
-                propertiesReader->currentComponentIndex++;
+                *propertyValue = json_object_get_value_at(componentObject, propertiesDeserializer->currentComponentIndex);
+                propertiesDeserializer->currentComponentIndex++;
                 break;
             }
         }
@@ -600,31 +600,31 @@ static bool GetNextComponentProperty(IOTHUB_CLIENT_PROPERTIES_READER* properties
 }
 
 // GetNextPropertyToEnumerate advances through a property list, returning either the next property to be enumerated or that there's nothing left to traverse.
-static bool GetNextPropertyToEnumerate(IOTHUB_CLIENT_PROPERTIES_READER* propertiesReader, const char** componentName, const char** propertyName, JSON_Value** propertyValue)
+static bool GetNextPropertyToEnumerate(IOTHUB_CLIENT_PROPERTIES_DESERIALIZER* propertiesDeserializer, const char** componentName, const char** propertyName, JSON_Value** propertyValue)
 {
     JSON_Object* containerObject;
     *propertyName = NULL;
     *propertyValue = NULL;
 
-    if (propertiesReader->propertyParseState == PROPERTY_PARSE_STATE_DESIRED)
+    if (propertiesDeserializer->propertyParseState == PROPERTY_PARSE_STATE_DESIRED)
     {
-        containerObject = propertiesReader->desiredObject;
+        containerObject = propertiesDeserializer->desiredObject;
     }
     else
     {
-        containerObject = propertiesReader->reportedObject;
+        containerObject = propertiesDeserializer->reportedObject;
     }
 
     size_t numChildren = json_object_get_count(containerObject);
 
-    while (propertiesReader->currentPropertyIndex < numChildren)
+    while (propertiesDeserializer->currentPropertyIndex < numChildren)
     {
-        const char* objectName = json_object_get_name(containerObject, propertiesReader->currentPropertyIndex);
+        const char* objectName = json_object_get_name(containerObject, propertiesDeserializer->currentPropertyIndex);
 
-        if (propertiesReader->componentParseState == COMPONENT_PARSE_STATE_SUB_COMPONENT)
+        if (propertiesDeserializer->componentParseState == COMPONENT_PARSE_STATE_SUB_COMPONENT)
         {
-            // The propertiesReader->currentPropertyIndex corresponds to a subcomponent we're traversing.
-            if (GetNextComponentProperty(propertiesReader, containerObject, propertyName, propertyValue) == true)
+            // The propertiesDeserializer->currentPropertyIndex corresponds to a subcomponent we're traversing.
+            if (GetNextComponentProperty(propertiesDeserializer, containerObject, propertyName, propertyValue) == true)
             {
                 // The component has additional properties to return to application.
                 *componentName = objectName;
@@ -633,23 +633,23 @@ static bool GetNextPropertyToEnumerate(IOTHUB_CLIENT_PROPERTIES_READER* properti
             else
             {
                 // We've parsed all the properties of this component.  Move onto the next top-level JSON element
-                propertiesReader->componentParseState = COMPONENT_PARSE_STATE_ROOT;
-                propertiesReader->currentPropertyIndex++;
-                propertiesReader->currentComponentIndex = 0;
+                propertiesDeserializer->componentParseState = COMPONENT_PARSE_STATE_ROOT;
+                propertiesDeserializer->currentPropertyIndex++;
+                propertiesDeserializer->currentComponentIndex = 0;
                 continue;
             }
         }
 
-        if (IsJsonObjectAComponent(propertiesReader, containerObject))
+        if (IsJsonObjectAComponent(propertiesDeserializer, containerObject))
         {
             // This top-level property is the name of a component.  
-            propertiesReader->componentParseState = COMPONENT_PARSE_STATE_SUB_COMPONENT;
+            propertiesDeserializer->componentParseState = COMPONENT_PARSE_STATE_SUB_COMPONENT;
             continue;
         }
         else if (IsReservedPropertyKeyword(objectName))
         {
             // This objectName corresponds to twin/property metadata that is not passed to application
-            propertiesReader->currentPropertyIndex++;
+            propertiesDeserializer->currentPropertyIndex++;
             continue;
         }
         else
@@ -657,8 +657,8 @@ static bool GetNextPropertyToEnumerate(IOTHUB_CLIENT_PROPERTIES_READER* properti
             // We've found a property of the root component.
             *componentName = NULL;
             *propertyName = objectName;
-            *propertyValue = json_object_get_value_at(containerObject, propertiesReader->currentPropertyIndex);
-            propertiesReader->currentPropertyIndex++;
+            *propertyValue = json_object_get_value_at(containerObject, propertiesDeserializer->currentPropertyIndex);
+            propertiesDeserializer->currentPropertyIndex++;
             break;
         }
     }
@@ -667,24 +667,24 @@ static bool GetNextPropertyToEnumerate(IOTHUB_CLIENT_PROPERTIES_READER* properti
 }
 
 
-IOTHUB_CLIENT_RESULT IoTHubClient_Properties_Reader_Create(
+IOTHUB_CLIENT_RESULT IoTHubClient_Properties_Deserializer_Create(
     IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType,
     const unsigned char* payload,
     size_t payloadLength,
-    IOTHUB_CLIENT_PROPERTIES_READER_HANDLE* propertiesReaderHandle)
+    IOTHUB_CLIENT_PROPERTIES_DESERIALIZER_HANDLE* propertiesDeserializerHandle)
 {
     IOTHUB_CLIENT_RESULT result;
     char* jsonStr = NULL;
 
-    IOTHUB_CLIENT_PROPERTIES_READER* propertiesReader = NULL;
+    IOTHUB_CLIENT_PROPERTIES_DESERIALIZER* propertiesDeserializer = NULL;
 
-    if ((result = ValidateReaderInputs(payloadType, payload, payloadLength, propertiesReaderHandle)) != IOTHUB_CLIENT_OK)
+    if ((result = ValidateDeserializerInputs(payloadType, payload, payloadLength, propertiesDeserializerHandle)) != IOTHUB_CLIENT_OK)
     {
         LogError("Invalid argument");
     }
-    else if ((propertiesReader = (IOTHUB_CLIENT_PROPERTIES_READER*)calloc(1, sizeof(IOTHUB_CLIENT_PROPERTIES_READER))) == NULL)
+    else if ((propertiesDeserializer = (IOTHUB_CLIENT_PROPERTIES_DESERIALIZER*)calloc(1, sizeof(IOTHUB_CLIENT_PROPERTIES_DESERIALIZER))) == NULL)
     {
-        LogError("Cannot allocate IOTHUB_CLIENT_PROPERTIES_READER");
+        LogError("Cannot allocate IOTHUB_CLIENT_PROPERTIES_DESERIALIZER");
         result = IOTHUB_CLIENT_ERROR;
     }
     else
@@ -694,28 +694,28 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Properties_Reader_Create(
             LogError("Unable to allocate twin buffer");
             result = IOTHUB_CLIENT_ERROR;
         }
-        else if ((propertiesReader->rootValue = json_parse_string(jsonStr)) == NULL)
+        else if ((propertiesDeserializer->rootValue = json_parse_string(jsonStr)) == NULL)
         {
             LogError("Unable to parse device twin JSON");
             result = IOTHUB_CLIENT_ERROR;
         }
-        else if ((result = GetDesiredAndReportedTwinJson(payloadType, propertiesReader)) != IOTHUB_CLIENT_OK)
+        else if ((result = GetDesiredAndReportedTwinJson(payloadType, propertiesDeserializer)) != IOTHUB_CLIENT_OK)
         {
             LogError("Cannot retrieve desired and/or reported object from JSON");
         }
-        // Retrieve the twin version and cache with the propertiesReader.  We do this in the enumeration creation,
-        // even though IoTHubClient_Properties_Reader_GetVerion theoretically could've parsed this on demand,
+        // Retrieve the twin version and cache with the propertiesDeserializer.  We do this in the enumeration creation,
+        // even though IoTHubClient_Properties_Deserializer_GetVerion theoretically could've parsed this on demand,
         // because if this fails we want to fail creation of the enumerator.  A twin without version info
         // is not valid and the application will not be able to properly acknowledge writable properties in this case.
-        else if ((result = GetTwinVersion(propertiesReader)) != IOTHUB_CLIENT_OK)
+        else if ((result = GetTwinVersion(propertiesDeserializer)) != IOTHUB_CLIENT_OK)
         {
             LogError("Cannot retrieve properties version");
         }
         else
         {
-            propertiesReader->propertyParseState = PROPERTY_PARSE_STATE_DESIRED;
-            propertiesReader->componentParseState = COMPONENT_PARSE_STATE_ROOT;
-            *propertiesReaderHandle = propertiesReader;
+            propertiesDeserializer->propertyParseState = PROPERTY_PARSE_STATE_DESIRED;
+            propertiesDeserializer->componentParseState = COMPONENT_PARSE_STATE_ROOT;
+            *propertiesDeserializerHandle = propertiesDeserializer;
             result = IOTHUB_CLIENT_OK;
         }
     }
@@ -724,71 +724,71 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Properties_Reader_Create(
 
     if (result != IOTHUB_CLIENT_OK)
     {
-        IoTHubClient_Properties_Reader_Destroy(propertiesReader);
+        IoTHubClient_Properties_Deserializer_Destroy(propertiesDeserializer);
     }
 
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_Properties_Reader_GetVerion(
-    IOTHUB_CLIENT_PROPERTIES_READER_HANDLE propertiesReaderHandle,
+IOTHUB_CLIENT_RESULT IoTHubClient_Properties_Deserializer_GetVerion(
+    IOTHUB_CLIENT_PROPERTIES_DESERIALIZER_HANDLE propertiesDeserializerHandle,
     int* propertiesVersion)
 {
-    IOTHUB_CLIENT_PROPERTIES_READER* propertiesReader = (IOTHUB_CLIENT_PROPERTIES_READER*)propertiesReaderHandle;
+    IOTHUB_CLIENT_PROPERTIES_DESERIALIZER* propertiesDeserializer = (IOTHUB_CLIENT_PROPERTIES_DESERIALIZER*)propertiesDeserializerHandle;
     IOTHUB_CLIENT_RESULT result;
 
-    if ((propertiesReaderHandle == NULL) || (propertiesVersion == NULL))
+    if ((propertiesDeserializerHandle == NULL) || (propertiesVersion == NULL))
     {
         LogError("Invalid argument");
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
     {
-        *propertiesVersion = propertiesReader->propertiesVersion;
+        *propertiesVersion = propertiesDeserializer->propertiesVersion;
         result = IOTHUB_CLIENT_OK;
     }
 
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_Properties_Reader_GetNext(
-    IOTHUB_CLIENT_PROPERTIES_READER_HANDLE propertiesReaderHandle,
+IOTHUB_CLIENT_RESULT IoTHubClient_Properties_Deserializer_GetNext(
+    IOTHUB_CLIENT_PROPERTIES_DESERIALIZER_HANDLE propertiesDeserializerHandle,
     IOTHUB_CLIENT_PROPERTY_PARSED* property,
     bool* propertySpecified)
 {
-    IOTHUB_CLIENT_PROPERTIES_READER* propertiesReader = (IOTHUB_CLIENT_PROPERTIES_READER*)propertiesReaderHandle;
+    IOTHUB_CLIENT_PROPERTIES_DESERIALIZER* propertiesDeserializer = (IOTHUB_CLIENT_PROPERTIES_DESERIALIZER*)propertiesDeserializerHandle;
     IOTHUB_CLIENT_RESULT result;
 
     JSON_Value* propertyValue = NULL;
     const char* propertyName = NULL;
     const char* componentName = NULL;
 
-    if ((propertiesReaderHandle == NULL) || (property == NULL) || (propertySpecified == NULL) || (property->structVersion != IOTHUB_CLIENT_PROPERTY_PARSED_STRUCT_VERSION_1))
+    if ((propertiesDeserializerHandle == NULL) || (property == NULL) || (propertySpecified == NULL) || (property->structVersion != IOTHUB_CLIENT_PROPERTY_PARSED_STRUCT_VERSION_1))
     {
         LogError("Invalid argument");
         result = IOTHUB_CLIENT_INVALID_ARG;
     }
     else
     {
-        if (propertiesReader->propertyParseState == PROPERTY_PARSE_STATE_DESIRED)
+        if (propertiesDeserializer->propertyParseState == PROPERTY_PARSE_STATE_DESIRED)
         {
-            if ((GetNextPropertyToEnumerate(propertiesReader, &componentName, &propertyName, &propertyValue)) == false)
+            if ((GetNextPropertyToEnumerate(propertiesDeserializer, &componentName, &propertyName, &propertyValue)) == false)
             {
                 // If we can't find another desired object, then transition to start searching through reported.
-                propertiesReader->currentPropertyIndex = 0;
-                propertiesReader->propertyParseState = PROPERTY_PARSE_STATE_REPORTED;
+                propertiesDeserializer->currentPropertyIndex = 0;
+                propertiesDeserializer->propertyParseState = PROPERTY_PARSE_STATE_REPORTED;
             }
         }
 
-        if (propertiesReader->propertyParseState == PROPERTY_PARSE_STATE_REPORTED)
+        if (propertiesDeserializer->propertyParseState == PROPERTY_PARSE_STATE_REPORTED)
         {
-            GetNextPropertyToEnumerate(propertiesReader, &componentName, &propertyName, &propertyValue);
+            GetNextPropertyToEnumerate(propertiesDeserializer, &componentName, &propertyName, &propertyValue);
         }
 
         if (propertyValue != NULL)
         {
             // Fills in IOTHUB_CLIENT_PROPERTY_PARSED based on where we're at in the traversal.
-            if ((result = FillProperty(propertiesReader, componentName, propertyValue, propertyName, property)) != IOTHUB_CLIENT_OK)
+            if ((result = FillProperty(propertiesDeserializer, componentName, propertyValue, propertyName, property)) != IOTHUB_CLIENT_OK)
             {
                 LogError("Cannot Fill Properties");
             }
@@ -807,24 +807,24 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Properties_Reader_GetNext(
     return result;
 }
 
-void IoTHubClient_Properties_ReaderProperty_Destroy(
+void IoTHubClient_Properties_DeserializerProperty_Destroy(
     IOTHUB_CLIENT_PROPERTY_PARSED* property)
 {
     if (property != NULL)
     {
         // The only field in IOTHUB_CLIENT_PROPERTY_PARSED that is allocated when filling
         // the structure is the JSON representation.  The remaining fields are shallow copies pointing
-        // into the parsed JSON fields which are freed by IoTHubClient_Properties_Reader_Destroy.
+        // into the parsed JSON fields which are freed by IoTHubClient_Properties_Deserializer_Destroy.
         json_free_serialized_string((char*)property->value.str);
     }
 }
 
-void IoTHubClient_Properties_Reader_Destroy(IOTHUB_CLIENT_PROPERTIES_READER_HANDLE propertiesReaderHandle)
+void IoTHubClient_Properties_Deserializer_Destroy(IOTHUB_CLIENT_PROPERTIES_DESERIALIZER_HANDLE propertiesDeserializerHandle)
 {
-    if (propertiesReaderHandle != NULL)
+    if (propertiesDeserializerHandle != NULL)
     {
-        IOTHUB_CLIENT_PROPERTIES_READER* propertiesReader = (IOTHUB_CLIENT_PROPERTIES_READER*)propertiesReaderHandle;
-        json_value_free(propertiesReader->rootValue);
-        free(propertiesReader);
+        IOTHUB_CLIENT_PROPERTIES_DESERIALIZER* propertiesDeserializer = (IOTHUB_CLIENT_PROPERTIES_DESERIALIZER*)propertiesDeserializerHandle;
+        json_value_free(propertiesDeserializer->rootValue);
+        free(propertiesDeserializer);
     }
 }

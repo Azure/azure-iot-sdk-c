@@ -58,15 +58,15 @@ void PnP_DeviceInfoComponent_Report_All_Properties(const char* componentName, IO
     const size_t numProperties = sizeof(properties) / sizeof(properties[0]);
 
     // The first step of reporting properties is to serialize IOTHUB_CLIENT_PROPERTY_REPORTED into JSON for sending.
-    if ((iothubClientResult = IoTHubClient_Properties_Writer_CreateReported(properties, numProperties, componentName, &propertiesSerialized, &propertiesSerializedLength)) != IOTHUB_CLIENT_OK)
+    if ((iothubClientResult = IoTHubClient_Properties_Serializer_CreateReported(properties, numProperties, componentName, &propertiesSerialized, &propertiesSerializedLength)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to serialize reported state, error=%d", iothubClientResult);
     }
-    // The output of IoTHubClient_Properties_Writer_CreateReported is sent to IoTHubDeviceClient_LL_SendPropertiesAsync to perform network I/O.
+    // The output of IoTHubClient_Properties_Serializer_CreateReported is sent to IoTHubDeviceClient_LL_SendPropertiesAsync to perform network I/O.
     else if ((iothubClientResult = IoTHubDeviceClient_LL_SendPropertiesAsync(deviceClient, propertiesSerialized, propertiesSerializedLength, NULL, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to send reported state, error=%d", iothubClientResult);
     }
 
-    IoTHubClient_Properties_Writer_Destroy(propertiesSerialized);
+    IoTHubClient_Properties_Serializer_Destroy(propertiesSerialized);
 }

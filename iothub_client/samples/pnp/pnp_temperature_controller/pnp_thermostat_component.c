@@ -287,11 +287,11 @@ static void SendTargetTemperatureResponse(PNP_THERMOSTAT_COMPONENT* pnpThermosta
     size_t propertySerializedLength;
 
     // The first step of reporting properties is to serialize IOTHUB_CLIENT_PROPERTY_WRITABLE_RESPONSE into JSON for sending.
-    if ((iothubClientResult = IoTHubClient_Properties_Writer_CreateWritableResponse(&temperatureProperty, 1, pnpThermostatComponent->componentName, &propertySerialized, &propertySerializedLength)) != IOTHUB_CLIENT_OK)
+    if ((iothubClientResult = IoTHubClient_Properties_Serializer_CreateWritableResponse(&temperatureProperty, 1, pnpThermostatComponent->componentName, &propertySerialized, &propertySerializedLength)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to serialize updated property, error=%d", iothubClientResult);
     }
-    // The output of IoTHubClient_Properties_Writer_CreateWritableResponse is sent to IoTHubDeviceClient_LL_SendPropertiesAsync to perform network I/O.
+    // The output of IoTHubClient_Properties_Serializer_CreateWritableResponse is sent to IoTHubDeviceClient_LL_SendPropertiesAsync to perform network I/O.
     else if ((iothubClientResult = IoTHubDeviceClient_LL_SendPropertiesAsync(deviceClient, propertySerialized, propertySerializedLength, NULL, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to send updated property, error=%d", iothubClientResult);
@@ -300,7 +300,7 @@ static void SendTargetTemperatureResponse(PNP_THERMOSTAT_COMPONENT* pnpThermosta
     {
         LogInfo("Sending acknowledgement of property to IoTHub for component %s", pnpThermostatComponent->componentName);
     }
-    IoTHubClient_Properties_Writer_Destroy(propertySerialized);
+    IoTHubClient_Properties_Serializer_Destroy(propertySerialized);
 }
 
 void PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(PNP_THERMOSTAT_COMPONENT_HANDLE pnpThermostatComponentHandle, IOTHUB_DEVICE_CLIENT_LL_HANDLE deviceClient)
@@ -324,11 +324,11 @@ void PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(PNP_THERMOS
         size_t propertySerializedLength;
 
         // The first step of reporting properties is to serialize IOTHUB_CLIENT_PROPERTY_WRITABLE_RESPONSE into JSON for sending.
-        if ((iothubClientResult = IoTHubClient_Properties_Writer_CreateReported(&maxTempProperty, 1, pnpThermostatComponent->componentName, &propertySerialized, &propertySerializedLength)) != IOTHUB_CLIENT_OK)
+        if ((iothubClientResult = IoTHubClient_Properties_Serializer_CreateReported(&maxTempProperty, 1, pnpThermostatComponent->componentName, &propertySerialized, &propertySerializedLength)) != IOTHUB_CLIENT_OK)
         {
             LogError("Unable to serialize reported state, error=%d", iothubClientResult);
         }
-        // The output of IoTHubClient_Properties_Writer_CreateReported is sent to IoTHubDeviceClient_LL_SendPropertiesAsync to perform network I/O.
+        // The output of IoTHubClient_Properties_Serializer_CreateReported is sent to IoTHubDeviceClient_LL_SendPropertiesAsync to perform network I/O.
         else if ((iothubClientResult = IoTHubDeviceClient_LL_SendPropertiesAsync(deviceClient, propertySerialized, propertySerializedLength,  NULL, NULL)) != IOTHUB_CLIENT_OK)
         {
             LogError("Unable to send reported state, error=%d", iothubClientResult);
@@ -337,7 +337,7 @@ void PnP_TempControlComponent_Report_MaxTempSinceLastReboot_Property(PNP_THERMOS
         {
             LogInfo("Sending %s property to IoTHub for component %s", g_maxTempSinceLastRebootPropertyName, pnpThermostatComponent->componentName);
         }
-        IoTHubClient_Properties_Writer_Destroy(propertySerialized);
+        IoTHubClient_Properties_Serializer_Destroy(propertySerialized);
     }
 }
 
