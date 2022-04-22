@@ -54,13 +54,37 @@ static const char* connectionString = "[device connection string]";
 #define MESSAGE_COUNT        5
 static bool g_continueRunning = true;
 static size_t g_message_count_send_confirmations = 0;
+IOTHUB_DEVICE_CLIENT_LL_HANDLE device_ll_handle;
+
+static int total_messages_sent = 2;
+
 
 static void send_confirm_callback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
-    (void)userContextCallback;
+    int foo = (int)(size_t)userContextCallback;
     // When a message is sent this callback will get invoked
     g_message_count_send_confirmations++;
-    (void)printf("Confirmation callback received for message %lu with result %s\r\n", (unsigned long)g_message_count_send_confirmations, MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
+    (void)printf("Confirmation callback received for message %lu with result %s\r\n", (unsigned long)foo, MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
+
+    static int messages_sent = 0;
+    if (messages_sent < MESSAGE_COUNT)
+    {
+        IOTHUB_MESSAGE_HANDLE message_handle;
+        const char* telemetry_msg = "test_message";
+        for (int i = 0; i < MESSAGE_COUNT; i++)
+        {
+            // Construct the iothub message from a string or a byte array
+            message_handle = IoTHubMessage_CreateFromString(telemetry_msg);
+
+            IoTHubDeviceClient_LL_SendEventAsync(device_ll_handle, message_handle, send_confirm_callback, (void*)(size_t)total_messages_sent);
+            total_messages_sent++;
+
+            // The message is copied to the sdk so the we can destroy it
+            IoTHubMessage_Destroy(message_handle);
+            messages_sent++;
+        }
+    }
+
 }
 
 static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS result, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void* user_context)
@@ -105,7 +129,6 @@ int main(void)
     // Used to initialize IoTHub SDK subsystem
     (void)IoTHub_Init();
 
-    IOTHUB_DEVICE_CLIENT_LL_HANDLE device_ll_handle;
 
     (void)printf("Creating IoTHub Device handle\r\n");
     // Create the iothub handle here
@@ -146,39 +169,27 @@ int main(void)
         {
             if (messages_sent < MESSAGE_COUNT)
             {
-                // Construct the iothub message from a string or a byte array
-                message_handle = IoTHubMessage_CreateFromString(telemetry_msg);
-                //message_handle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText)));
+                for (int i = 0; i < MESSAGE_COUNT; i++)
+                {
+                    // Construct the iothub message from a string or a byte array
+                    message_handle = IoTHubMessage_CreateFromString(telemetry_msg);
 
-                // Set Message property
-                /*
-                (void)IoTHubMessage_SetMessageId(message_handle, "MSG_ID");
-                (void)IoTHubMessage_SetCorrelationId(message_handle, "CORE_ID");
-                (void)IoTHubMessage_SetContentTypeSystemProperty(message_handle, "application%2fjson");
-                (void)IoTHubMessage_SetContentEncodingSystemProperty(message_handle, "utf-8");
-                (void)IoTHubMessage_SetMessageCreationTimeUtcSystemProperty(message_handle, "2020-07-01T01:00:00.346Z");
-                */
+                    (void)printf("Sending message %d to IoTHub\r\n", (int)(messages_sent + 1));
+                    IoTHubDeviceClient_LL_SendEventAsync(device_ll_handle, message_handle, send_confirm_callback, (void*)(size_t)total_messages_sent);
+                    total_messages_sent++;
 
+                    // The message is copied to the sdk so the we can destroy it
+                    IoTHubMessage_Destroy(message_handle);
 
-                // Add custom properties to message
-                (void)IoTHubMessage_SetProperty(message_handle, "property_key", "property_value");
-
-                (void)printf("Sending message %d to IoTHub\r\n", (int)(messages_sent + 1));
-                IoTHubDeviceClient_LL_SendEventAsync(device_ll_handle, message_handle, send_confirm_callback, NULL);
-
-                // The message is copied to the sdk so the we can destroy it
-                IoTHubMessage_Destroy(message_handle);
-
-                messages_sent++;
-            }
-            else if (g_message_count_send_confirmations >= MESSAGE_COUNT)
-            {
-                // After all messages are all received stop running
-                g_continueRunning = false;
+                    messages_sent++;
+                }
             }
 
             IoTHubDeviceClient_LL_DoWork(device_ll_handle);
-            ThreadAPI_Sleep(1);
+
+
+
+            ThreadAPI_Sleep(1000);
 
         } while (g_continueRunning);
 

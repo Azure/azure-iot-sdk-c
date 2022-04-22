@@ -2333,6 +2333,22 @@ static void SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     else
     {
         transport_data->currPacketState = PUBLISH_TYPE;
+
+        // On a service reconnect, reset the expired time of messages waiting for a PUBACK
+        // this will cause the messages to republish
+
+        tickcounter_ms_t expired_ms;
+        (void)tickcounter_get_current_ms(transport_data->msgTickCounter, &expired_ms);
+        expired_ms -= (RESEND_TIMEOUT_VALUE_MIN * 1000) + 1000;
+        PDLIST_ENTRY current_entry = transport_data->telemetry_waitingForAck.Flink;
+        while (current_entry != &transport_data->telemetry_waitingForAck)
+        {
+            MQTT_MESSAGE_DETAILS_LIST* msg_detail_entry = containingRecord(current_entry, MQTT_MESSAGE_DETAILS_LIST, entry);
+            printf("resetting message id %d to expired time %d\n", msg_detail_entry->packet_id, (int)expired_ms);
+            msg_detail_entry->msgPublishTime = expired_ms;        // force the message to resend
+            msg_detail_entry->retryCount = 0;
+            current_entry = current_entry->Flink;
+        }
     }
 }
 
@@ -2397,9 +2413,14 @@ static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport
         MQTT_MESSAGE_DETAILS_LIST* msg_detail_entry = containingRecord(current_entry, MQTT_MESSAGE_DETAILS_LIST, entry);
         DLIST_ENTRY nextListEntry;
         nextListEntry.Flink = current_entry->Flink;
+        
+        printf("process message id %d with expired time %d (current:%d, diff:%d)\n", msg_detail_entry->packet_id, (int)msg_detail_entry->msgPublishTime, (int)current_ms,
+            (int)(current_ms - msg_detail_entry->msgPublishTime));
 
         if (((current_ms - msg_detail_entry->msgPublishTime) / 1000) > RESEND_TIMEOUT_VALUE_MIN)
         {
+            printf("process message id %d is expired\n", msg_detail_entry->packet_id);
+
             if (msg_detail_entry->retryCount >= MAX_SEND_RECOUNT_LIMIT)
             {
                 notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT);
@@ -3556,6 +3577,7 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle)
             }
             else if (transport_data->currPacketState == PUBLISH_TYPE)
             {
+                ProcessPendingTelemetryMessages(transport_data);
                 ProcessPublishStateDoWork(transport_data);
             }
             mqtt_client_dowork(transport_data->mqttClient);
