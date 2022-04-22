@@ -33,19 +33,19 @@ and removing calls to _DoWork will yield the same results. */
 //#define SAMPLE_HTTP
 
 #ifdef SAMPLE_MQTT
-#include "iothubtransportmqtt.h"
+    #include "iothubtransportmqtt.h"
 #endif // SAMPLE_MQTT
 #ifdef SAMPLE_MQTT_OVER_WEBSOCKETS
-#include "iothubtransportmqtt_websockets.h"
+    #include "iothubtransportmqtt_websockets.h"
 #endif // SAMPLE_MQTT_OVER_WEBSOCKETS
 #ifdef SAMPLE_AMQP
-#include "iothubtransportamqp.h"
+    #include "iothubtransportamqp.h"
 #endif // SAMPLE_AMQP
 #ifdef SAMPLE_AMQP_OVER_WEBSOCKETS
-#include "iothubtransportamqp_websockets.h"
+    #include "iothubtransportamqp_websockets.h"
 #endif // SAMPLE_AMQP_OVER_WEBSOCKETS
 #ifdef SAMPLE_HTTP
-#include "iothubtransporthttp.h"
+    #include "iothubtransporthttp.h"
 #endif // SAMPLE_HTTP
 
 
@@ -128,7 +128,7 @@ int main(void)
 #ifdef SET_TRUSTED_CERT_IN_SAMPLES
         // Setting the Trusted Certificate. This is only necessary on systems without
         // built in certificate stores.
-        IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_TRUSTED_CERT, certificates);
+            IoTHubDeviceClient_LL_SetOption(device_ll_handle, OPTION_TRUSTED_CERT, certificates);
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 #if defined SAMPLE_MQTT || defined SAMPLE_MQTT_OVER_WEBSOCKETS
