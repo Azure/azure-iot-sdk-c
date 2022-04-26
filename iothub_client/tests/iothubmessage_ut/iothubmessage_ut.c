@@ -427,7 +427,7 @@ TEST_FUNCTION(IoTHubMessage_CreateFromByteArray_fails)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
-        char tmp_msg[64];
+        char tmp_msg[128];
         sprintf(tmp_msg, "IoTHubMessage_CreateFromByteArray failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromByteArray(c, 1);
@@ -493,7 +493,7 @@ TEST_FUNCTION(IoTHubMessage_CreateFromString_fails)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
-        char tmp_msg[64];
+        char tmp_msg[128];
         sprintf(tmp_msg, "IoTHubMessage_CreateFromByteArray failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         IOTHUB_MESSAGE_HANDLE h = IoTHubMessage_CreateFromString("a");
@@ -824,7 +824,7 @@ TEST_FUNCTION(IoTHubMessage_Clone_with_STRING_fails)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
-        char tmp_msg[64];
+        char tmp_msg[128];
         sprintf(tmp_msg, "IoTHubMessage_Clone_w_string failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         IOTHUB_MESSAGE_HANDLE r = IoTHubMessage_Clone(h);
