@@ -58,7 +58,7 @@ usage ()
     echo " --use-hsmsas                  Build with HSM for TPM"  
     echo " --use-hsmx509                 Build with HSM for X509 Client Authentication" 
     echo " --use-hsmriot                 Build with HSM for RIoT/DICE" 
-    echo " --build_debug                 Build with DEBUG target"
+    echo " --build-debug                 Build with DEBUG target"
     exit 1
 }
 
@@ -107,7 +107,7 @@ process_args ()
               "--use-hsmsas")  hsm_type_sastoken=ON;;
               "--use-hsmx509") hsm_type_riot=OFF; hsm_type_x509=ON;;
               "--use-hsmriot") hsm_type_riot=ON; hsm_type_x509=OFF;;
-              "--use-build_debug") build_type=DEBUG;;
+              "--build-debug") build_type=DEBUG;;
               * ) usage;;
           esac
       fi
