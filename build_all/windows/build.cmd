@@ -41,7 +41,6 @@ set make=yes
 set build_traceabilitytool=0
 set prov_auth=OFF
 set use_edge_modules=OFF
-set build_type=RELEASE
 
 :args-loop
 if "%1" equ "" goto args-done
@@ -58,7 +57,6 @@ if "%1" equ "--no-make" goto arg-no-make
 if "%1" equ "--build-traceabilitytool" goto arg-build-traceabilitytool
 if "%1" equ "--provisioning" goto arg-provisioning
 if "%1" equ "--use-edge-modules" goto arg-edge-modules
-if "%1" equ "--build-debug" goto arg-build-debug
 call :usage && exit /b 1
 
 :arg-build-clean
@@ -118,10 +116,6 @@ goto args-continue
 
 :arg-edge-modules
 set use_edge_modules=ON
-goto args-continue
-
-:arg-build-debug
-set build_type=DEBUG
 goto args-continue
 
 :args-continue
@@ -215,7 +209,6 @@ echo  --no-make                     Surpress building the code
 echo  --build-traceabilitytool      Builds an internal tool (traceabilitytool) to check for requirements/code/test consistency
 echo  --run-unittests               Run unit tests
 echo  --provisioning                Use Provisiong service
-echo  --build-debug                 Build with DEBUG target
 goto :eof
 
 
