@@ -2414,12 +2414,12 @@ static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport
         DLIST_ENTRY nextListEntry;
         nextListEntry.Flink = current_entry->Flink;
         
-        printf("process message id %d with expired time %d (current:%d, diff:%d)\n", msg_detail_entry->packet_id, (int)msg_detail_entry->msgPublishTime, (int)current_ms,
-            (int)(current_ms - msg_detail_entry->msgPublishTime));
+        //printf("process message id %d with expired time %d (current:%d, diff:%d)\n", msg_detail_entry->packet_id, (int)msg_detail_entry->msgPublishTime, (int)current_ms,
+        //    (int)(current_ms - msg_detail_entry->msgPublishTime));
 
         if (((current_ms - msg_detail_entry->msgPublishTime) / 1000) > RESEND_TIMEOUT_VALUE_MIN)
         {
-            printf("process message id %d is expired\n", msg_detail_entry->packet_id);
+            //printf("process message id %d is expired\n", msg_detail_entry->packet_id);
 
             if (msg_detail_entry->retryCount >= MAX_SEND_RECOUNT_LIMIT)
             {

@@ -5142,10 +5142,12 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_2_message_timeout_succeeds)
 
     IoTHubTransport_MQTT_Common_DoWork(handle);
 
-    g_current_ms += 5 * 60 * 1000;
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .CopyOutArgumentBuffer(2, &g_current_ms, sizeof(g_current_ms));
-    IoTHubTransport_MQTT_Common_DoWork(handle);
+    for (int i = 1; i < 5; i++)
+    {
+        g_current_ms += 5 * 60 * 1000;
+        IoTHubTransport_MQTT_Common_DoWork(handle);
+    }
+
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
@@ -5183,6 +5185,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_2_message_timeout_succeeds)
     STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(Transport_ConnectionStatusCallBack(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, transport_cb_ctx));
+
 
     // removeExpiredTwinRequests
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
