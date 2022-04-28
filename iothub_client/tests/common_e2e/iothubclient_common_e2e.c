@@ -1442,7 +1442,9 @@ void e2e_c2d_with_svc_fault_ctrl(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, cons
     client_wait_for_c2d_event_arrival(receiveUserContext);
 
     // assert
+    ASSERT_ARE_EQUAL(LOCK_RESULT, LOCK_OK, Lock(receiveUserContext->lock));
     ASSERT_IS_TRUE(receiveUserContext->wasFound, "Failure retrieving data from C2D"); // was found is written by the callback...
+    Unlock(receiveUserContext->lock);
 
     LogInfo("Send server fault control message...");
     d2cMessage = send_error_injection_message(faultOperationType, faultOperationCloseReason, faultOperationDelayInSecs);
@@ -1451,12 +1453,18 @@ void e2e_c2d_with_svc_fault_ctrl(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, cons
     ThreadAPI_Sleep(3000);
 
     // Send message
+
+    ASSERT_ARE_EQUAL(LOCK_RESULT, LOCK_OK, Lock(receiveUserContext->lock));
     receiveUserContext->wasFound = false;
+    Unlock(receiveUserContext->lock);
+
     service_send_c2d(iotHubMessagingHandle, receiveUserContext, deviceToUse);
     // wait for message to arrive on client
     client_wait_for_c2d_event_arrival(receiveUserContext);
     // assert
+    ASSERT_ARE_EQUAL(LOCK_RESULT, LOCK_OK, Lock(receiveUserContext->lock));
     ASSERT_IS_TRUE(receiveUserContext->wasFound, "Failure retrieving data from C2D"); // was found is written by the callback...
+    Unlock(receiveUserContext->lock);
 
     // cleanup
     IoTHubMessaging_Close(iotHubMessagingHandle);

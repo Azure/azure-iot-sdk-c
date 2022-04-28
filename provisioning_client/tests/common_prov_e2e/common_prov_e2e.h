@@ -57,8 +57,10 @@ extern void remove_enrollment_device();
 extern void wait_for_dps_result(PROV_DEVICE_LL_HANDLE handle, PROV_CLIENT_E2E_INFO* prov_info);
 extern int construct_device_id(const char* prefix, char** device_name);
 
-extern void send_dps_test_registration(const char* global_uri, const char* scope_id, PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION protocol, bool use_tracing);
+extern void send_dps_test_registration_with_retry(const char* global_uri, const char* scope_id, PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION protocol, bool use_tracing);
 extern char* convert_base64_to_string(const char* base64_cert);
+
+extern const int TEST_PROV_RANDOMIZED_BACK_OFF_SEC;
 
 #ifdef __cplusplus
 }

@@ -96,7 +96,7 @@ static const char* const HEADER_VALUE_CONTENT_TYPE =            "application/jso
 #define SAS_TOKEN_DEFAULT_LIFETIME  3600
 #define EPOCH_TIME_T_VALUE          (time_t)0
 
-static HANDLE_FUNCTION_VECTOR getVector_individualEnrollment()
+static HANDLE_FUNCTION_VECTOR getVector_individualEnrollment(void)
 {
     HANDLE_FUNCTION_VECTOR vector;
     vector.serializeToJson = (VECTOR_SERIALIZE_TO_JSON)individualEnrollment_serializeToJson;
@@ -108,7 +108,7 @@ static HANDLE_FUNCTION_VECTOR getVector_individualEnrollment()
     return vector;
 }
 
-static HANDLE_FUNCTION_VECTOR getVector_enrollmentGroup()
+static HANDLE_FUNCTION_VECTOR getVector_enrollmentGroup(void)
 {
     HANDLE_FUNCTION_VECTOR vector;
     vector.serializeToJson = (VECTOR_SERIALIZE_TO_JSON)enrollmentGroup_serializeToJson;
@@ -120,7 +120,7 @@ static HANDLE_FUNCTION_VECTOR getVector_enrollmentGroup()
     return vector;
 }
 
-static HANDLE_FUNCTION_VECTOR getVector_registrationState()
+static HANDLE_FUNCTION_VECTOR getVector_registrationState(void)
 {
     HANDLE_FUNCTION_VECTOR vector;
     vector.serializeToJson = NULL;

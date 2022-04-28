@@ -165,7 +165,7 @@ static int construct_group_enrollment(void)
     return result;
 }
 
-int main()
+int main(void)
 {
     int result;
     REGISTRATION_INFO reg_info;

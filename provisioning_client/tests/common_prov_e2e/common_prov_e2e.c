@@ -34,6 +34,8 @@
 
 #include "common_prov_e2e.h"
 
+const int TEST_PROV_RANDOMIZED_BACK_OFF_SEC = 60;
+
 #define MAX_CLOUD_TRAVEL_TIME       60.0
 #define DEVICE_GUID_SIZE            37
 
@@ -304,8 +306,9 @@ void remove_enrollment_device(const char* g_prov_conn_string)
     
 }
 
-void send_dps_test_registration(const char* global_uri, const char* scope_id, PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION protocol, bool g_enable_tracing)
+static REGISTRATION_RESULT send_dps_test_registration(const char* global_uri, const char* scope_id, PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION protocol, bool g_enable_tracing)
 {
+    REGISTRATION_RESULT result;
     PROV_CLIENT_E2E_INFO prov_info;
     memset(&prov_info, 0, sizeof(PROV_CLIENT_E2E_INFO));
 
@@ -341,11 +344,32 @@ void send_dps_test_registration(const char* global_uri, const char* scope_id, PR
 
     wait_for_dps_result(handle, &prov_info);
 
-    // Assert
-    ASSERT_ARE_EQUAL(int, REG_RESULT_COMPLETE, prov_info.reg_result, "Failure calling registering device x509 http");
+    result = prov_info.reg_result;
 
     free(prov_info.iothub_uri);
     free(prov_info.device_id);
 
     Prov_Device_LL_Destroy(handle);
+
+    return result;
+}
+
+void send_dps_test_registration_with_retry(const char* global_uri, const char* scope_id, PROV_DEVICE_TRANSPORT_PROVIDER_FUNCTION protocol, bool g_enable_tracing)
+{
+    if (send_dps_test_registration(global_uri, scope_id, protocol, g_enable_tracing) != REG_RESULT_COMPLETE)
+    {
+        // DPS fails when having multiple enrollments of the same device ID at the same time:
+        //  {"errorCode":409203,"trackingId":"e5490c1e-2528-4eb5-9cf6-e72e80c20268","message":"Precondition failed.","timestampUtc":"2022-02-28T10:11:31.1373215Z"}
+        // Since we are running these tests on multiple machines we retry with a randomized back-off timer.
+        srand(time(0));
+        int random_back_off_sec = rand() % TEST_PROV_RANDOMIZED_BACK_OFF_SEC;
+        LogInfo("prov_x509_client_e2e failed: Random back-off = %ds", random_back_off_sec);
+        ThreadAPI_Sleep(random_back_off_sec * 1000);
+
+        ASSERT_ARE_EQUAL(
+            int, 
+            REG_RESULT_COMPLETE, 
+            send_dps_test_registration(global_uri, scope_id, protocol, g_enable_tracing), 
+            "Failure during device provisioning");
+    }
 }
