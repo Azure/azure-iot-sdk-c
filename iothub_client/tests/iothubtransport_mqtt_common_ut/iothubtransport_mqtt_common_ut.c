@@ -66,7 +66,7 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 
 #include "internal/iothub_transport_ll_private.h"
 
-#define MAX_SEND_RECOUNT_LIMIT              5  // should match value in iothubtransport_mqtt_common.c
+#define MAX_SEND_RECOUNT_LIMIT 2  // should match value in iothubtransport_mqtt_common.c
 
 
 MOCKABLE_FUNCTION(, bool, Transport_MessageCallbackFromInput, IOTHUB_MESSAGE_HANDLE, message, void*, ctx);
