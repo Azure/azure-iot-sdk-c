@@ -46,7 +46,6 @@ MOCKABLE_FUNCTION(, int, IoTHubClient_Auth_Set_xio_Certificate, IOTHUB_AUTHORIZA
 MOCKABLE_FUNCTION(, const char*, IoTHubClient_Auth_Get_DeviceId, IOTHUB_AUTHORIZATION_HANDLE, handle);
 MOCKABLE_FUNCTION(, const char*, IoTHubClient_Auth_Get_ModuleId, IOTHUB_AUTHORIZATION_HANDLE, handle);
 MOCKABLE_FUNCTION(, const char*, IoTHubClient_Auth_Get_DeviceKey, IOTHUB_AUTHORIZATION_HANDLE, handle);
-MOCKABLE_FUNCTION(, SAS_TOKEN_STATUS, IoTHubClient_Auth_Is_SasToken_Valid, IOTHUB_AUTHORIZATION_HANDLE, handle);
 MOCKABLE_FUNCTION(, int, IoTHubClient_Auth_Get_x509_info, IOTHUB_AUTHORIZATION_HANDLE, handle, char**, x509_cert, char**, x509_key);
 MOCKABLE_FUNCTION(, int, IoTHubClient_Auth_Set_SasToken_Expiry, IOTHUB_AUTHORIZATION_HANDLE, handle, uint64_t, expiry_time_seconds);
 MOCKABLE_FUNCTION(, uint64_t, IoTHubClient_Auth_Get_SasToken_Expiry, IOTHUB_AUTHORIZATION_HANDLE, handle);
