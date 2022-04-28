@@ -388,7 +388,7 @@ extern "C"
     *
     * @param[in]    commandRequest        Parameters specified by the service application initiating command request.
     * @param[out]   commandResponse       Response filled in by application callback to the command request.
-    * @param[in]    userContextCallback   User context pointer set in initial call to IoTHubDeviceClient_LL_SubscribeToCommands.
+    * @param[in]    userContextCallback   User context pointer set in initial call to @p IoTHubDeviceClient_LL_SubscribeToCommands().
     */
     typedef void(*IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC)(
                 const IOTHUB_CLIENT_COMMAND_REQUEST* commandRequest,
@@ -400,17 +400,17 @@ extern "C"
     *
     * @param[in]    result                Result of operation sending to IoT Hub.
     * @param[in]    userContextCallback   Optional user specified context set in call that initiated the message send (for example, 
-    *                                     IoTHubDeviceClient_LL_SendTelemetryAsync).
+    *                                     @p IoTHubDeviceClient_LL_SendTelemetryAsync()).
     */
     typedef void(*IOTHUB_CLIENT_TELEMETRY_CALLBACK)(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback);
     
     /**
-    * @brief    Function callback application implements to receive acknowledgements of properties sent from the device to IoT Hub.  
+    * @brief    Function callback application implements to receive acknowledgements of properties sent from the client to IoT Hub.  
     *
     * @param[in]   statusCode             Status code IoT Hub returns when receiving a property or writable property response from the device.  
     *                                     This corresponds to HTTP status codes.
     * @param[in]   userContextCallback    Optional user specified context set in the call that sent the properties (for example,
-    *                                     IoTHubDeviceClient_LL_SendPropertiesAsync).
+    *                                     @p IoTHubDeviceClient_LL_SendPropertiesAsync()).
     * 
     */
     typedef void(*IOTHUB_CLIENT_PROPERTY_ACKNOWLEDGED_CALLBACK)(int statusCode, void* userContextCallback);
@@ -422,7 +422,7 @@ extern "C"
     * @param[in]   payload                Raw payload of the request.  This is NOT guaranteed to be a \0 terminated string.
     * @param[in]   payloadLength          Number of bytes of @p payload.
     * @param[in]   userContextCallback    User context pointer set in initial call to retrieving the properties (for example, 
-    *                                     IoTHubDeviceClient_LL_GetPropertiesAsync or IoTHubDeviceClient_LL_GetPropertiesAndSubscribeToUpdatesAsync).
+    *                                     @p IoTHubDeviceClient_LL_GetPropertiesAsync() or @p IoTHubDeviceClient_LL_GetPropertiesAndSubscribeToUpdatesAsync()).
     */
     typedef void(*IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK)(
                      IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE payloadType, 
