@@ -29,7 +29,7 @@ hsm_type_sastoken=OFF
 hsm_type_symm_key=OFF
 hsm_type_x509=OFF
 hsm_type_riot=OFF
-build_config=DEBUG
+build_config=debug
 
 usage ()
 {
@@ -58,7 +58,7 @@ usage ()
     echo " --use-hsmsas                  Build with HSM for TPM"  
     echo " --use-hsmx509                 Build with HSM for X509 Client Authentication" 
     echo " --use-hsmriot                 Build with HSM for RIoT/DICE" 
-    echo " --config <value>              [DEBUG] build configuration (e.g. DEBUG, RELEASE)"
+    echo " --config <value>              [Debug] build configuration (e.g. Debug, Release)"
     exit 1
 }
 

@@ -294,10 +294,10 @@ jobs:
     _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-2004"
   pool:
     name: 'sdk-c--ubuntu-18'
-  displayName: 'Ubuntu 20.04 (Retail)'
+  displayName: 'Ubuntu 20.04 (Release)'
   steps:
   - script: |
-      sudo -E ./jenkins/ubuntu_c_retail.sh
+      sudo -E ./jenkins/ubuntu_c_release.sh
     displayName: 'Build'
   - script: |
       export OPENSSL_ia32cap=0x00000000
