@@ -157,7 +157,8 @@ extern "C"
     IOTHUB_CLIENT_CONNECTION_NO_NETWORK,                   \
     IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR,          \
     IOTHUB_CLIENT_CONNECTION_OK,                           \
-    IOTHUB_CLIENT_CONNECTION_NO_PING_RESPONSE              \
+    IOTHUB_CLIENT_CONNECTION_NO_PING_RESPONSE,             \
+    IOTHUB_CLIENT_CONNECTION_QUOTA_EXCEEDED                \
 
     /** @brief Enumeration passed to the application callback indicating reason that connection was unsuccessful.
     */

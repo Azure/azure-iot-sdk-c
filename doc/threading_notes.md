@@ -4,10 +4,10 @@
 
 ### The lower layer
 
-There are two distinct but closely related sets of APIs for the IoTHub client.
+There are two distinct but closely related sets of APIs for the IoT Hub client.
 Applications that want to run on a single thread should use the \_LL\_ (aka lower level) API.  Sometimes the hardware/OS can only support one thread at a time or else spinning additional threads is expensive.  Applications on more capable hardware may also use the \_LL\_ layer for greater control over scheduling.
 
-Calls to the IoThub API's ending in Async do not cause the operation to execute immediately.  Instead, the work - both for sending data across the network and receiving data - is queued.  The application must manually schedule the work by calling `IoTHubDeviceClient_LL_DoWork` (when using a device client).
+Calls to the IoT Hub API's ending in Async do not cause the operation to execute immediately.  Instead, the work - both for sending data across the network and receiving data - is queued.  The application must manually schedule the work by calling `IoTHubDeviceClient_LL_DoWork` (when using a device client).
 
 This is typically done in some sort of simple loop, e.g.
 
@@ -31,7 +31,7 @@ This is typically done in some sort of simple loop, e.g.
 
 Applications may also use the non \_LL\_ API set, which is also known as the "convenience layer."  
 
-Just like the \_LL\_ layer, IoTHub API's ending in Async queue work to be performed later and do not block waiting for the service accepting or rejecting the request.  The difference is that the convenience layer itself automatically takes care of sending the data.  In other words, there is no `DoWork`.  The convenience layer does this for you automatically by spinning a worker thread to implicitly `DoWork` for your application.  The convenience layer also performs locking, allowing a given `IOTHUB_DEVICE_CLIENT_HANDLE` to be safely used by  different threads.
+Just like the \_LL\_ layer, IoT Hub API's ending in Async queue work to be performed later and do not block waiting for the service accepting or rejecting the request.  The difference is that the convenience layer itself automatically takes care of sending the data.  In other words, there is no `DoWork`.  The convenience layer does this for you automatically by spinning a worker thread to implicitly `DoWork` for your application.  The convenience layer also performs locking, allowing a given `IOTHUB_DEVICE_CLIENT_HANDLE` to be safely used by  different threads.
 
 ## How to specify between the \_LL\_ and convenience layers
 
@@ -44,6 +44,14 @@ The \_LL\_ | convenience layer paradigm is used in many places throughout the SD
 
 Regardless of whether you are using the \_LL\_ or convenience layer, application callbacks that you implement - such as processing a twin update - must NOT block for extended periods of time.  
 
-The IoTHub SDK uses a single dispatcher thread to handle all callbacks to user code.  This same thread handles all network I/O.  This is true whether the \_LL\_ or convenience layer is used.  The only difference is that in the \_LL\_ layer, your thread is the dispatcher when it calls into the appropriate DoWork() call.
+The IoT Hub SDK uses a single dispatcher thread to handle all callbacks to user code.  This same thread handles all network I/O.  This is true whether the \_LL\_ or convenience layer is used.  The only difference is that in the \_LL\_ layer, your thread is the dispatcher when it calls into the appropriate DoWork() call.
 
 An application callback that takes a long time to run is problematic.  The SDK will not be able to call other pending callbacks as it is blocked on the long-running one.  If the call back code takes long enough (minutes) there is the risk that the SDK will not be able to fire its periodic network keep-alive and that the entire connection will be dropped.
+
+Your callback should in general limit itself to quick, CPU bound operations.
+
+## Reentrancy and API calls
+
+When processing a callback, your application code must not destroy the underlying handle (via `IoTHubDeviceClient_LL_Destroy`, e.g.).  If your application is using the \_LL\_ layer, it must also not invoke `IoTHubDeviceClient_LL_DoWork` or `IoTHubModuleClient_LL_DoWork`.
+
+Your code can invoke other IoT Hub SDK calls.  A common pattern for instance is that while processing a callback for an updated device twin properties for the application to invoke `IoTHubDeviceClient_LL_SendReportedState`.
