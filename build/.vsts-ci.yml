@@ -3,15 +3,15 @@ variables:
   runCodesignValidationInjection: false
 resources:
   containers:
-  - container: linux-c-ubuntu-wolfssl
-    endpoint: csdk-containers
-    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-wolfssl:latest
   - container: linux-c-ubuntu-2004
     endpoint: csdk-containers
     image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-2004:latest
   - container: linux-c-ubuntu-1804
     endpoint: csdk-containers
     image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-1804:latest
+  - container: linux-c-ubuntu-wolfssl
+    endpoint: csdk-containers
+    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-wolfssl:latest
   - container: linux-c-ubuntu-bearssl
     endpoint: csdk-containers
     image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-bearssl:latest
