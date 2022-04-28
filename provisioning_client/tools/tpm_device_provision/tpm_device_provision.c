@@ -98,7 +98,5 @@ int main(void)
         platform_deinit();
     }
 
-    (void)printf("\r\nPress any key to continue:\r\n");
-    (void)getchar();
     return result;
 }

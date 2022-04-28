@@ -2005,6 +2005,7 @@ int twin_messenger_stop(TWIN_MESSENGER_HANDLE twin_msgr_handle)
         }
         else
         {
+            twin_msgr->subscription_error_count = 0;
             if (twin_msgr->subscription_state != TWIN_SUBSCRIPTION_STATE_UNSUBSCRIBE)
             {
                 twin_msgr->subscription_state = TWIN_SUBSCRIPTION_STATE_GET_COMPLETE_PROPERTIES;
