@@ -47,7 +47,7 @@
 #define BUILD_CONFIG_USERNAME               24
 #define SAS_TOKEN_DEFAULT_LEN               10
 #define RESEND_TIMEOUT_VALUE_MIN            1*60
-#define MAX_SEND_RECOUNT_LIMIT              2
+#define MAX_SEND_RECOUNT_LIMIT              5
 #define DEFAULT_CONNECTION_INTERVAL         30
 #define FAILED_CONN_BACKOFF_VALUE           5
 #define STATUS_CODE_FAILURE_VALUE           500
@@ -2346,7 +2346,7 @@ static void SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             MQTT_MESSAGE_DETAILS_LIST* msg_detail_entry = containingRecord(current_entry, MQTT_MESSAGE_DETAILS_LIST, entry);
             printf("resetting message id %d to expired time %d\n", msg_detail_entry->packet_id, (int)expired_ms);
             msg_detail_entry->msgPublishTime = expired_ms;        // force the message to resend
-            msg_detail_entry->retryCount = 0;
+            //msg_detail_entry->retryCount = 0;
             current_entry = current_entry->Flink;
         }
     }
