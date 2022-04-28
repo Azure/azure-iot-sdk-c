@@ -746,7 +746,7 @@ jobs:
     displayName: 'Cleanup'
     condition: always()
 - job: raspberrypi
-  container: raspberrypi-c-buster:brown
+  container: raspberrypi-c-buster
   pool: 
     name: 'sdk-c--ubuntu-18'
   displayName: "Raspberry Pi"
