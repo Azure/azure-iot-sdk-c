@@ -66,6 +66,9 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 
 #include "internal/iothub_transport_ll_private.h"
 
+#define MAX_SEND_RECOUNT_LIMIT              5  // should match value in iothubtransport_mqtt_common.c
+
+
 MOCKABLE_FUNCTION(, bool, Transport_MessageCallbackFromInput, IOTHUB_MESSAGE_HANDLE, message, void*, ctx);
 MOCKABLE_FUNCTION(, bool, Transport_MessageCallback, IOTHUB_MESSAGE_HANDLE, message, void*, ctx);
 MOCKABLE_FUNCTION(, void, Transport_ConnectionStatusCallBack, IOTHUB_CLIENT_CONNECTION_STATUS, status, IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason, void*, ctx);
@@ -5061,10 +5064,11 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_message_timeout_succeeds)
 
     IoTHubTransport_MQTT_Common_DoWork(handle);
 
-    g_current_ms += 5 * 60 * 1000;
-    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .CopyOutArgumentBuffer(2, &g_current_ms, sizeof(g_current_ms));
-    IoTHubTransport_MQTT_Common_DoWork(handle);
+    for (int i = 1; i < MAX_SEND_RECOUNT_LIMIT; i++)
+    {
+        g_current_ms += 5 * 60 * 1000;
+        IoTHubTransport_MQTT_Common_DoWork(handle);
+    }
     umock_c_reset_all_calls();
 
     g_current_ms += 5 * 60 * 1000;
@@ -5142,7 +5146,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_2_message_timeout_succeeds)
 
     IoTHubTransport_MQTT_Common_DoWork(handle);
 
-    for (int i = 1; i < 5; i++)
+    for (int i = 1; i < MAX_SEND_RECOUNT_LIMIT; i++)
     {
         g_current_ms += 5 * 60 * 1000;
         IoTHubTransport_MQTT_Common_DoWork(handle);
