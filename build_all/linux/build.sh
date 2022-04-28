@@ -29,7 +29,7 @@ hsm_type_sastoken=OFF
 hsm_type_symm_key=OFF
 hsm_type_x509=OFF
 hsm_type_riot=OFF
-build_config=debug
+build_config=Debug
 
 usage ()
 {
