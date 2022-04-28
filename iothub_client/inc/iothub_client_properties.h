@@ -4,7 +4,7 @@
 /** @file    iothub_client_properties.h
 *   @brief   APIs that serialize and deserialize properties modeled with DTDLv2.
 *
-*   @details Plug and Play devices are defined using the DTDLv2 modeling language described
+*   @details IoT Plug and Play devices are defined using the DTDLv2 modeling language described
 *            at https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md.
 *
 *            Azure IoT Hub defines a set of conventions for parsing and creating DTDLv2
@@ -40,17 +40,19 @@
 *
 *                   void yourAppCallback(rawDataFromIoTHub, ...) // your IOTHUB_CLIENT_PROPERTIES_RECEIVED_CALLBACK implementation
 *                   {
+*                     // Create handle used in deserialization process below
 *                     IoTHubClient_Properties_Deserializer_Create(rawDataFromIoTHub, &deserializationHandle)
 *
-*                     // Enumerate each property that is in a component.  deserializedProperty will be of type
-*                     // IOTHUB_CLIENT_PROPERTY_PARSED and is much easier to process than raw JSON 
-*                     while (IoTHubClient_Properties_Deserializer_GetNext(&deserializationHandle, &deserializedProperty)) {
+*                     // Enumerate each received property.  deserializedProperty will be of type
+*                     // IOTHUB_CLIENT_PROPERTY_PARSED and is much easier to process than raw JSON.
+*                     while (IoTHubClient_Properties_Deserializer_GetNext(&deserializationHandle, &deserializedProperty)) 
+*                     {
 *                         // Application processes deserializedProperty according to modeling rules
 *                         // ...
-*                         // Frees memory allocated by IoTHubClient_Properties_Deserializer_GetNext
+*                         // Free memory allocated by IoTHubClient_Properties_Deserializer_GetNext
 *                         IoTHubClient_Properties_DeserializerProperty_Destroy(&deserializedProperty);
 *                     }
-*                     // Frees memory allocated by IoTHubClient_Properties_Deserializer_Create
+*                     // Free memory allocated by IoTHubClient_Properties_Deserializer_Create
 *                     IoTHubClient_Properties_Deserializer_Destroy(deserializationHandle);
 *                   }
 */
