@@ -2043,7 +2043,7 @@ TEST_FUNCTION(Create_failure_checks)
     for (i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
         // arrange
-        char error_msg[64];
+        char error_msg[128];
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -2274,7 +2274,7 @@ TEST_FUNCTION(Register_failure_checks)
         }
 
         // arrange
-        char error_msg[64];
+        char error_msg[128];
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -2408,7 +2408,7 @@ TEST_FUNCTION(Subscribe_messages_failure_checks)
         }
 
         // arrange
-        char error_msg[64];
+        char error_msg[128];
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
 
@@ -2557,7 +2557,7 @@ TEST_FUNCTION(GetSendStatus_failure_checks)
         }
 
         // arrange
-        char error_msg[64];
+        char error_msg[128];
         IOTHUB_CLIENT_STATUS iotHubClientStatus;
 
         umock_c_negative_tests_reset();
@@ -4733,7 +4733,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_SetRetryPolicy_failure_checks)
     for (i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
         // arrange
-        char error_msg[64];
+        char error_msg[128];
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -4905,7 +4905,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_GetTwinAsync_failure_checks)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
-        char tmp_msg[64];
+        char tmp_msg[128];
         sprintf(tmp_msg, "Failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
         IOTHUB_CLIENT_RESULT result = IoTHubTransport_AMQP_Common_GetTwinAsync(handle, on_device_get_twin_completed_callback, (void*)0x5566);
 

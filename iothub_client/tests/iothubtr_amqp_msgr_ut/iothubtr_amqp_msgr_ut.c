@@ -1463,7 +1463,7 @@ TEST_FUNCTION(amqp_messenger_create_failure_checks)
         }
 
         // arrange
-        char error_msg[64];
+        char error_msg[128];
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -1868,7 +1868,7 @@ TEST_FUNCTION(amqp_messenger_do_work_create_message_receiver_failure_checks)
         }
 
         // arrange
-        char error_msg[64];
+        char error_msg[128];
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -1915,7 +1915,7 @@ TEST_FUNCTION(amqp_messenger_do_work_create_message_sender_failure_checks)
             n = umock_c_negative_tests_call_count();
         }
 
-        char error_msg[64];
+        char error_msg[128];
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -2262,7 +2262,7 @@ TEST_FUNCTION(amqp_messenger_send_async_failure_checks)
     for (i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
         // arrange
-        char error_msg[64];
+        char error_msg[128];
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -2711,7 +2711,7 @@ TEST_FUNCTION(amqp_messenger_send_message_disposition_failure_checks)
         }
 
         // arrange
-        char error_msg[64];
+        char error_msg[128];
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -2788,7 +2788,7 @@ TEST_FUNCTION(amqp_messenger_retrieve_options_failure_checks)
     for (i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
         // arrange
-        char error_msg[64];
+        char error_msg[128];
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);

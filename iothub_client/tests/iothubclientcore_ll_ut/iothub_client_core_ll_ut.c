@@ -4972,7 +4972,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_GetTwinAsync_fail)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
-        char tmp_msg[64];
+        char tmp_msg[128];
         sprintf(tmp_msg, "Failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
         IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_GetTwinAsync(h, iothub_device_twin_callback, (void*)1);
 
