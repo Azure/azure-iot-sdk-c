@@ -216,6 +216,9 @@ MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_Properties_Serializer_Cre
 */
 MOCKABLE_FUNCTION(, void, IoTHubClient_Properties_Serializer_Destroy, unsigned char*, serializedProperties);
 
+/**  
+* @brief   Handle used during deserialization of IoT Plug and Play properties.
+*/
 typedef struct IOTHUB_CLIENT_PROPERTIES_DESERIALIZER_TAG* IOTHUB_CLIENT_PROPERTIES_DESERIALIZER_HANDLE;
 
 /**
