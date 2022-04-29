@@ -60,7 +60,7 @@
 #define ON_DEMAND_GET_TWIN_REQUEST_TIMEOUT_SECS    60
 #define TWIN_REPORT_UPDATE_TIMEOUT_SECS           (60*5)
 
-static const char TOPIC_DEVICE_TWIN_PREFIX[] = "$iothub/twin";
+static const char TOPIC_DEVICE_TWIN_PREFIX[] = "$iothub/twin";AZIOTHUB_FAULTOPERATIONTYPE 
 static const char TOPIC_DEVICE_METHOD_PREFIX[] = "$iothub/methods";
 
 static const char* TOPIC_GET_DESIRED_STATE = "$iothub/twin/res/#";
@@ -80,7 +80,9 @@ static const char TOPIC_SLASH = '/';
 static const char* REPORTED_PROPERTIES_TOPIC = "$iothub/twin/PATCH/properties/reported/?$rid=%"PRIu16;
 static const char* GET_PROPERTIES_TOPIC = "$iothub/twin/GET/?$rid=%"PRIu16;
 static const char* DEVICE_METHOD_RESPONSE_TOPIC = "$iothub/methods/res/%d/?$rid=%s";
-static const char* AZIOTHUB_FAULTOPERATIONTYPE = "AzIoTHub_FaultOperationType";
+#ifdef RUN_SFC_TESTS
+    static const char* AZIOTHUB_FAULTOPERATIONTYPE = "AzIoTHub_FaultOperationType";
+#endif //RUN_SFC_TESTS
 static const char SYS_TOPIC_STRING_FORMAT[] = "%s%%24.%s=%s";
 
 static const char REQUEST_ID_PROPERTY[] = "?$rid=";
