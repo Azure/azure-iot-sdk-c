@@ -734,6 +734,7 @@ static int addUserPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_message_
     return result;
 }
 
+#ifdef RUN_SFC_TESTS
 //
 // isMqttMessageSfcType checks to see if the message is a service-fault-control message.
 //
@@ -765,6 +766,7 @@ static bool isMqttMessageSfcType(IOTHUB_MESSAGE_HANDLE iothub_message_handle)
     }
     return result;
 }
+#endif //RUN_SFC_TESTS
 
 //
 // addSystemPropertyToTopicString appends a given "system" property from iothub_message_handle (set by the application with APIs such as IoTHubMessage_SetMessageId,
@@ -2380,14 +2382,14 @@ static void SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 #ifdef RUN_SFC_TESTS
             if (!isMqttMessageSfcType(msg_detail_entry->iotHubMessageEntry->messageHandle))
             {
-#endif 
+#endif //RUN_SFC_TESTS
                 //printf("resetting message id %d to expired time %lu\n", msg_detail_entry->packet_id, (unsigned long)expired_ms);
                 msg_detail_entry->msgPublishTime = expired_ms;        // force the message to resend
                 //msg_detail_entry->retryCount = 0;
 
 #ifdef RUN_SFC_TESTS
             }
-#endif 
+#endif //RUN_SFC_TESTS
             current_entry = current_entry->Flink;
         }
     }
