@@ -60,7 +60,7 @@
 #define ON_DEMAND_GET_TWIN_REQUEST_TIMEOUT_SECS    60
 #define TWIN_REPORT_UPDATE_TIMEOUT_SECS           (60*5)
 
-static const char TOPIC_DEVICE_TWIN_PREFIX[] = "$iothub/twin";AZIOTHUB_FAULTOPERATIONTYPE 
+static const char TOPIC_DEVICE_TWIN_PREFIX[] = "$iothub/twin"; 
 static const char TOPIC_DEVICE_METHOD_PREFIX[] = "$iothub/methods";
 
 static const char* TOPIC_GET_DESIRED_STATE = "$iothub/twin/res/#";
