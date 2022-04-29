@@ -2376,9 +2376,18 @@ static void SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
         while (current_entry != &transport_data->telemetry_waitingForAck)
         {
             MQTT_MESSAGE_DETAILS_LIST* msg_detail_entry = containingRecord(current_entry, MQTT_MESSAGE_DETAILS_LIST, entry);
-            //printf("resetting message id %d to expired time %lu\n", msg_detail_entry->packet_id, (unsigned long)expired_ms);
-            msg_detail_entry->msgPublishTime = expired_ms;        // force the message to resend
-            //msg_detail_entry->retryCount = 0;
+
+#ifdef RUN_SFC_TESTS
+            if (!isMqttMessageSfcType(msg_detail_entry->iotHubMessageEntry->messageHandle))
+            {
+#endif 
+                //printf("resetting message id %d to expired time %lu\n", msg_detail_entry->packet_id, (unsigned long)expired_ms);
+                msg_detail_entry->msgPublishTime = expired_ms;        // force the message to resend
+                //msg_detail_entry->retryCount = 0;
+
+#ifdef RUN_SFC_TESTS
+            }
+#endif 
             current_entry = current_entry->Flink;
         }
     }
@@ -2476,16 +2485,7 @@ static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport
                         notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_ERROR);
                     }
                     else
-                    {
-#ifdef RUN_SFC_TESTS
-                        if (isMqttMessageSfcType(msg_detail_entry->iotHubMessageEntry->messageHandle))
-                        {
-                            (void)DList_RemoveEntryList(current_entry);
-                            notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_OK);
-                            free(msg_detail_entry);
-                        }
-                        else 
-#endif                            
+                    {                           
                         if (publishTelemetryMsg(transport_data, msg_detail_entry, messagePayload, messageLength) != 0)
                         {
                             (void)DList_RemoveEntryList(current_entry);
