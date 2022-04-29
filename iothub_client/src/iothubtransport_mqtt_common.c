@@ -2477,12 +2477,16 @@ static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport
                     }
                     else
                     {
+#ifdef RUN_SFC_TESTS
                         if (isMqttMessageSfcType(msg_detail_entry->iotHubMessageEntry->messageHandle))
                         {
                             (void)DList_RemoveEntryList(current_entry);
+                            notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_OK);
                             free(msg_detail_entry);
                         }
-                        else if (publishTelemetryMsg(transport_data, msg_detail_entry, messagePayload, messageLength) != 0)
+                        else 
+#endif                            
+                        if (publishTelemetryMsg(transport_data, msg_detail_entry, messagePayload, messageLength) != 0)
                         {
                             (void)DList_RemoveEntryList(current_entry);
                             notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_ERROR);
