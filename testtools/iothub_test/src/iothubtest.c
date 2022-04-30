@@ -171,6 +171,8 @@ const char* AMQP_SEND_AUTHCID_FMT = "iothubowner@sas.root.%s";
 #define MAX_SHORT_VALUE             32767         /* maximum (signed) short value */
 #define INDEFINITE_TIME             ((time_t)-1)
 #define CONNECTION_2_MIN_TIMEOUT    (2 * 60 * 1000) 
+#define RETRY_COUNT                 4
+#define RETRY_DELAY_SECONDS         60
 
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
 
@@ -784,6 +786,19 @@ static AMQP_VALUE on_message_received_new(const void* context, MESSAGE_HANDLE me
     return result;
 }
 
+static int messagereceiver_open_with_retry(MESSAGE_RECEIVER_HANDLE message_receiver, ON_MESSAGE_RECEIVED on_message_received, void* callback_context)
+{
+    int result;
+    for (int i = 0; i < RETRY_COUNT; i++)
+    {
+        if (result = messagereceiver_open(message_receiver, on_message_received, callback_context) == 0)
+        {
+            break;
+        }
+        ThreadAPI_Sleep(1000 * RETRY_DELAY_SECONDS);
+    }
+}
+
 static void destroyAmqpConnection(AMQP_CONN_INFO* amqp_connection)
 {
     if (amqp_connection != NULL)
@@ -1266,7 +1281,7 @@ static AMQP_CONN_INFO* createAmqpConnection(IOTHUB_VALIDATION_INFO* devhubValInf
                                             destroyAmqpConnection(result);
                                             result = NULL;
                                         }
-                                        else if (messagereceiver_open(result->message_receiver, on_message_received_new, devhubValInfo) != 0)
+                                        else if (messagereceiver_open_with_retry(result->message_receiver, on_message_received_new, devhubValInfo) != 0)
                                         {
                                             LogError("Failed opening message receiver.");
                                             destroyAmqpConnection(result);
@@ -1578,7 +1593,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                                             LogError("Failed creating message receiver.");
                                             result = IOTHUB_TEST_CLIENT_ERROR;
                                         }
-                                        else if (messagereceiver_open(message_receiver, on_message_received, &message_receiver_context) != 0)
+                                        else if (messagereceiver_open_with_retry(message_receiver, on_message_received, &message_receiver_context) != 0)
                                         {
                                             LogError("Failed opening message receiver.");
                                             result = IOTHUB_TEST_CLIENT_ERROR;

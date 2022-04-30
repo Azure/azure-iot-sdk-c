@@ -26,11 +26,18 @@
     fun:vfprintf
 }
 {
-    DRD Conflicting store by thread in sprintf
+    DRD Conflicting store by thread in sprintf (debug)
     drd:ConflictingAccess
     ...
     fun:sprintf
     fun:EventData_Create
+}
+{
+   DRD Conflicting store by thread in sprintf (retail)
+   drd:ConflictingAccess
+    ...
+   fun:__sprintf_chk
+   fun:EventData_Create
 }
 {
     Race conflicting store by thread in EventData_Create/sprintf    
