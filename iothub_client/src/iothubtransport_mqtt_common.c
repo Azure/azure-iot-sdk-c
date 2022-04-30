@@ -60,7 +60,7 @@
 #define ON_DEMAND_GET_TWIN_REQUEST_TIMEOUT_SECS    60
 #define TWIN_REPORT_UPDATE_TIMEOUT_SECS           (60*5)
 
-static const char TOPIC_DEVICE_TWIN_PREFIX[] = "$iothub/twin"; 
+static const char TOPIC_DEVICE_TWIN_PREFIX[] = "$iothub/twin";
 static const char TOPIC_DEVICE_METHOD_PREFIX[] = "$iothub/methods";
 
 static const char* TOPIC_GET_DESIRED_STATE = "$iothub/twin/res/#";
@@ -2373,21 +2373,16 @@ static void SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
         // On a service reconnect, reset the expired time of messages waiting for a PUBACK
         // this will cause the messages to republish
 
-        tickcounter_ms_t expired_ms;
-        (void)tickcounter_get_current_ms(transport_data->msgTickCounter, &expired_ms);
-        expired_ms -= (RESEND_TIMEOUT_VALUE_MIN * 1000) + 1000;
         PDLIST_ENTRY current_entry = transport_data->telemetry_waitingForAck.Flink;
         while (current_entry != &transport_data->telemetry_waitingForAck)
         {
             MQTT_MESSAGE_DETAILS_LIST* msg_detail_entry = containingRecord(current_entry, MQTT_MESSAGE_DETAILS_LIST, entry);
-
 #ifdef RUN_SFC_TESTS
             if (!isMqttMessageSfcType(msg_detail_entry->iotHubMessageEntry->messageHandle))
             {
 #endif //RUN_SFC_TESTS
-                //printf("resetting message id %d to expired time %lu\n", msg_detail_entry->packet_id, (unsigned long)expired_ms);
-                msg_detail_entry->msgPublishTime = expired_ms;        // force the message to resend
-                //msg_detail_entry->retryCount = 0;
+
+                msg_detail_entry->msgPublishTime = 0;        // force the message to resend
 
 #ifdef RUN_SFC_TESTS
             }
@@ -2459,13 +2454,8 @@ static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport
         DLIST_ENTRY nextListEntry;
         nextListEntry.Flink = current_entry->Flink;
         
-        //printf("process message id %d with expired time %d (current:%d, diff:%d)\n", msg_detail_entry->packet_id, (int)msg_detail_entry->msgPublishTime, (int)current_ms,
-        //    (int)(current_ms - msg_detail_entry->msgPublishTime));
-
         if (((current_ms - msg_detail_entry->msgPublishTime) / 1000) > RESEND_TIMEOUT_VALUE_MIN)
         {
-            //printf("process message id %d is expired\n", msg_detail_entry->packet_id);
-
             if (msg_detail_entry->retryCount >= MAX_SEND_RECOUNT_LIMIT)
             {
                 notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT);
@@ -2489,7 +2479,7 @@ static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport
                         notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_ERROR);
                     }
                     else
-                    {                           
+                    {
                         if (publishTelemetryMsg(transport_data, msg_detail_entry, messagePayload, messageLength) != 0)
                         {
                             (void)DList_RemoveEntryList(current_entry);
