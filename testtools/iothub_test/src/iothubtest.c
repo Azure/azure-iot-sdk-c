@@ -791,7 +791,8 @@ static int messagereceiver_open_with_retry(MESSAGE_RECEIVER_HANDLE message_recei
     int result;
     for (int i = 0; i < RETRY_COUNT; i++)
     {
-        if (result = messagereceiver_open(message_receiver, on_message_received, callback_context) == 0)
+        result = messagereceiver_open(message_receiver, on_message_received, callback_context);
+        if (result == 0)
         {
             break;
         }
