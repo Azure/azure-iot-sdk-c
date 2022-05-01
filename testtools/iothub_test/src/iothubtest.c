@@ -797,6 +797,7 @@ static int messagereceiver_open_with_retry(MESSAGE_RECEIVER_HANDLE message_recei
         }
         ThreadAPI_Sleep(1000 * RETRY_DELAY_SECONDS);
     }
+    return result;
 }
 
 static void destroyAmqpConnection(AMQP_CONN_INFO* amqp_connection)
