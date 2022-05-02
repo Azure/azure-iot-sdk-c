@@ -433,6 +433,7 @@ static int RetrieveIotHubClientInfo(const char* pszIotConnString, IOTHUB_VALIDAT
         {
             LogError("Failure allocating hostName in RetrieveIotHubClientInfo endHost: %d beginHost: %d.", endHost, beginName);
             free(dvhInfo->iotHubName);
+            dvhInfo->iotHubName = NULL;
             result = MU_FAILURE;
         }
         else if (sscanf(pszIotConnString, "HostName=%[^.].%[^;];SharedAccessKeyName=*;SharedAccessKey=*", dvhInfo->iotHubName, dvhInfo->hostName + endName - beginName + 1) != 2)
@@ -440,6 +441,8 @@ static int RetrieveIotHubClientInfo(const char* pszIotConnString, IOTHUB_VALIDAT
             LogError("Failure retrieving string values in RetrieveIotHubClientInfo.");
             free(dvhInfo->iotHubName);
             free(dvhInfo->hostName);
+            dvhInfo->iotHubName = NULL;
+            dvhInfo->hostName = NULL;
             result = MU_FAILURE;
         }
         else
@@ -474,6 +477,7 @@ static int RetrieveEventHubClientInfo(const char* pszconnString, IOTHUB_VALIDATI
         {
             LogError("Failure allocating partnerHost in RetrieveEventHubClientInfo endHost: %d beginHost: %d.", endHost, beginHost);
             free(dvhInfo->partnerName);
+            dvhInfo->partnerName = NULL;
             result = MU_FAILURE;
         }
         else if (sscanf(pszconnString, "Endpoint=sb://%[^.].%[^/]/;SharedAccessKeyName=owner;SharedAccessKey=%*s", dvhInfo->partnerName, dvhInfo->partnerHost) != 2)
@@ -481,6 +485,8 @@ static int RetrieveEventHubClientInfo(const char* pszconnString, IOTHUB_VALIDATI
             LogError("Failure retrieving string values in RetrieveEventHubClientInfo.");
             free(dvhInfo->partnerName);
             free(dvhInfo->partnerHost);
+            dvhInfo->partnerName = NULL;
+            dvhInfo->partnerHost = NULL;
             result = MU_FAILURE;
         }
         else

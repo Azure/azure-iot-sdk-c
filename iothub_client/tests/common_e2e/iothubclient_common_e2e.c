@@ -318,9 +318,9 @@ static void ReceiveUserContext_Destroy(EXPECTED_RECEIVE_DATA* data)
 static EXPECTED_SEND_DATA* EventData_Create(void)
 {
     EXPECTED_SEND_DATA* result = (EXPECTED_SEND_DATA*)malloc(sizeof(EXPECTED_SEND_DATA));
-    memset(result, 0, sizeof(*result));
     if (result != NULL)
     {
+        memset(result, 0, sizeof(*result));
         if ((result->lock = Lock_Init()) == NULL)
         {
             ASSERT_FAIL("unable to Lock_Init");
