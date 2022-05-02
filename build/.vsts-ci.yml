@@ -64,10 +64,10 @@ jobs:
   - script: cd .. && rd /Q /S $(Agent.BuildDirectory)\s
     displayName: 'Cleanup'
     condition: always()
-- job: windowsx64 (Debug)
+- job: windowsx64debug
   pool:
     name: 'sdk-c--win-vs2017'
-  displayName: 'Windows x64'
+  displayName: 'Windows x64 (Debug)'
   steps:
   - script: |
       call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
