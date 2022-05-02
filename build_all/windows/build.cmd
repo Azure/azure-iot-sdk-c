@@ -2,7 +2,7 @@
 @REM Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 @setlocal EnableExtensions EnableDelayedExpansion
-rem @echo off
+@echo off
 
 set current-path=%~dp0
 rem // remove trailing slash
@@ -169,7 +169,9 @@ echo ***setting VC paths***
 where msbuild
 
 if %make%==yes (
-    msbuild /m azure_iot_sdks.sln
+    echo build-config is %build-config%
+
+    msbuild /m azure_iot_sdks.sln "-p:Configuration=%build-config%"
     if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 )
 
@@ -218,17 +220,13 @@ rem -- helper subroutines
 rem -----------------------------------------------------------------------------
 
 :_run-msbuild
-echo build-config is %build-config%
-echo run-msbuild parms %1% %2% %3% %4%
 rem // optionally override configuration|platform
 setlocal EnableExtensions
 set build-target=
 if "%~1" neq "Build" set "build-target=/t:%~1"
 if "%~3" neq "" set build-config=%~3
 if "%~4" neq "" set build-platform=%~4
-echo build-config is %build-config%
 
-echo build command --> msbuild /m %build-target% "/p:Configuration=%build-config%;Platform=%build-platform%" %2
 msbuild /m %build-target% "/p:Configuration=%build-config%;Platform=%build-platform%" %2
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 goto :eof
