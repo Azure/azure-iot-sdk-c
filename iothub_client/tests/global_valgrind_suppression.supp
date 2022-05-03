@@ -346,3 +346,17 @@
    fun:exit
    fun:(below main)
 }
+{
+   get_time_ms Race
+   Helgrind:Race
+   fun:get_time_ms
+   fun:tickcounter_get_current_ms
+   ...
+}
+{
+   get_time_ms ConflictingAccess
+   drd:ConflictingAccess
+   fun:get_time_ms
+   fun:tickcounter_get_current_ms
+   ...
+}
