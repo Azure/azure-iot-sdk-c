@@ -4,6 +4,11 @@
 cmake_minimum_required (VERSION 3.5)
 
 compileAsC99()
+if (MSVC)
+    add_compile_options(/bigobj)
+endif()
+
+
 set(theseTestsName prov_transport_amqp_common_ut)
 
 generate_cppunittest_wrapper(${theseTestsName})
@@ -11,7 +16,6 @@ generate_cppunittest_wrapper(${theseTestsName})
 set(${theseTestsName}_c_files
     ../../src/prov_transport_amqp_common.c
 )
-set_source_files_properties(${theseTestsName}_c_files PROPERTIES COMPILE_OPTIONS "/bigobj")
 
 set(${theseTestsName}_h_files
 )
