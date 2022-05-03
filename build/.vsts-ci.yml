@@ -2,8 +2,37 @@ name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Re
 variables:
   runCodesignValidationInjection: false
 resources:
-- repo: self
-  clean: true
+  containers:
+  - container: linux-c-ubuntu-2004
+    endpoint: csdk-containers
+    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-2004:latest
+  - container: linux-c-ubuntu-1804
+    endpoint: csdk-containers
+    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-1804:latest
+  - container: linux-c-ubuntu-wolfssl
+    endpoint: csdk-containers
+    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-wolfssl:latest
+  - container: linux-c-ubuntu-bearssl
+    endpoint: csdk-containers
+    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-bearssl:latest
+  - container: linux-c-ubuntu-mbed
+    endpoint: csdk-containers
+    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-mbed:latest
+  - container: linux-c-ubuntu-c-ares
+    endpoint: csdk-containers
+    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-c-ares:latest
+  - container: linux-c-debian
+    endpoint: csdk-containers
+    image: csdkcontainerregistry.azurecr.io/linux-c-debian:latest
+  - container: linux-c-ubuntu-clang
+    endpoint: csdk-containers
+    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-clang:latest
+  - container: linux-c-openssl-pkcs11
+    endpoint: csdk-containers
+    image: csdkcontainerregistry.azurecr.io/linux-c-openssl-pkcs11:latest
+  - container: raspberrypi-c-buster
+    endpoint: csdk-containers
+    image: csdkcontainerregistry.azurecr.io/raspberrypi-c-buster:brown
 jobs:
 - job: checksubmodule
   pool:
@@ -182,8 +211,7 @@ jobs:
     displayName: 'Cleanup'
     condition: always()
 - job: linuxoptions
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-2004"
+  container: linux-c-ubuntu-2004
   pool: 
     name: 'sdk-c--ubuntu-18'
   displayName: 'Linux with Options'
@@ -195,8 +223,7 @@ jobs:
     displayName: 'Cleanup'
     condition: always()
 - job: clang
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-clang"
+  container: linux-c-ubuntu-clang
   pool: 
     name: 'sdk-c--ubuntu-18'
   displayName: 'Clang (Debug)'
@@ -241,8 +268,7 @@ jobs:
     displayName: 'Cleanup'
     condition: always()
 - job: clang_release
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-clang"
+  container: linux-c-ubuntu-clang
   pool: 
     name: 'sdk-c--ubuntu-18'
   displayName: 'Clang (Release)'
@@ -287,8 +313,7 @@ jobs:
     displayName: 'Cleanup'
     condition: always()
 - job: ubuntu1804
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-1804"
+  container: linux-c-ubuntu-1804
   pool:
     name: 'sdk-c--ubuntu-18'
   displayName: 'Ubuntu 18.04'
@@ -333,8 +358,7 @@ jobs:
     displayName: 'Cleanup'
     condition: always()
 - job: ubuntu2004debug
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-2004"
+  container: linux-c-ubuntu-2004
   pool:
     name: 'sdk-c--ubuntu-18'
   displayName: 'Ubuntu 20.04 (Debug)'
@@ -379,8 +403,7 @@ jobs:
     displayName: 'Cleanup'
     condition: always()
 - job: ubuntu2004release
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-2004"
+  container: linux-c-ubuntu-2004
   pool:
     name: 'sdk-c--ubuntu-18'
   displayName: 'Ubuntu 20.04 (Release)'
@@ -425,8 +448,7 @@ jobs:
     displayName: 'Cleanup'
     condition: always()
 - job: ubuntuRIOT
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-2004"
+  container: linux-c-ubuntu-2004
   pool:
     name: 'sdk-c--ubuntu-18'
   displayName: 'Ubuntu RIOT/DICE'
@@ -471,8 +493,7 @@ jobs:
     displayName: 'Cleanup'
     condition: always()
 - job: debian
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/c-debian"
+  container: linux-c-debian
   pool: 
     name: 'sdk-c--ubuntu-18'
   displayName: 'Debian'
@@ -515,8 +536,7 @@ jobs:
     displayName: 'Cleanup'
     condition: always()
 - job: linux_installed_deps
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-2004"
+  container: linux-c-ubuntu-2004
   pool: 
     name: 'sdk-c--ubuntu-18'
   displayName: 'Linux with Installed Deps'
@@ -550,10 +570,9 @@ jobs:
     displayName: 'Cleanup'
     condition: always()
 - job: wolfssl
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-wolfssl"
   pool:
     name: 'sdk-c--ubuntu-18'
+  container: linux-c-ubuntu-wolfssl
   displayName: 'WolfSSL'
   steps:
   - script: |
@@ -596,8 +615,7 @@ jobs:
     displayName: 'Cleanup'
     condition: always()
 - job: bearssl
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-bearssl"
+  container: linux-c-ubuntu-bearssl
   pool:
     name: 'sdk-c--ubuntu-18'
   displayName: 'BearSSL'
@@ -642,8 +660,7 @@ jobs:
     displayName: 'Cleanup'
     condition: always()
 - job: mbedtls
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-mbed"
+  container: linux-c-ubuntu-mbed
   pool:
     name: 'sdk-c--ubuntu-18'
   displayName: 'mbedTLS'
@@ -688,8 +705,7 @@ jobs:
     displayName: 'Cleanup'
     condition: always()
 - job: cares
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-c-ares"
+  container: linux-c-ubuntu-c-ares
   pool: 
     name: 'sdk-c--ubuntu-18'
   displayName: 'Linux with C-Ares'
@@ -732,8 +748,7 @@ jobs:
     displayName: 'Cleanup'
     condition: always()
 - job: openssl_engine
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/openssl-pkcs11"
+  container: linux-c-openssl-pkcs11
   pool: 
     name: 'sdk-c--ubuntu-18'
   displayName: 'OpenSSL with pkcs11 engine and SoftHSM'
@@ -864,8 +879,7 @@ jobs:
     displayName: 'Cleanup'
     condition: always()
 - job: raspberrypi
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/raspberrypi-c-buster:brown"
+  container: raspberrypi-c-buster
   pool: 
     name: 'sdk-c--ubuntu-18'
   displayName: "Raspberry Pi"
