@@ -1214,15 +1214,15 @@ TEST_FUNCTION(IoTHubClient_Properties_Deserializer_Create_fail)
 }
 
 //
-// IoTHubClient_Properties_Deserializer_GetVerion tests
+// IoTHubClient_Properties_Deserializer_GetVersion tests
 //
-TEST_FUNCTION(IoTHubClient_Properties_Deserializer_GetVerion_NULL_handle)
+TEST_FUNCTION(IoTHubClient_Properties_Deserializer_GetVersion_NULL_handle)
 {
     // arrange
     int propertiesVersion = TEST_DEFAULT_PROPERTIES_VERSION;
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubClient_Properties_Deserializer_GetVerion(NULL, &propertiesVersion);
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_Properties_Deserializer_GetVersion(NULL, &propertiesVersion);
 
     // assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
@@ -1230,12 +1230,12 @@ TEST_FUNCTION(IoTHubClient_Properties_Deserializer_GetVerion_NULL_handle)
     ASSERT_ARE_EQUAL(int, TEST_DEFAULT_PROPERTIES_VERSION, propertiesVersion);
 }
 
-TEST_FUNCTION(IoTHubClient_Properties_Deserializer_GetVerion_NULL_version)
+TEST_FUNCTION(IoTHubClient_Properties_Deserializer_GetVersion_NULL_version)
 {
     // arrange
     IOTHUB_CLIENT_PROPERTIES_DESERIALIZER_HANDLE h = TestAllocatePropertiesReader(IOTHUB_CLIENT_PROPERTY_PAYLOAD_WRITABLE_UPDATES, TEST_JSON_ONE_PROPERTY_WRITABLE);
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubClient_Properties_Deserializer_GetVerion(h, NULL);
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_Properties_Deserializer_GetVersion(h, NULL);
 
     // assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
@@ -1244,13 +1244,13 @@ TEST_FUNCTION(IoTHubClient_Properties_Deserializer_GetVerion_NULL_version)
     IoTHubClient_Properties_Deserializer_Destroy(h);    
 }
 
-TEST_FUNCTION(IoTHubClient_Properties_Deserializer_GetVerion_writable_update_success)
+TEST_FUNCTION(IoTHubClient_Properties_Deserializer_GetVersion_writable_update_success)
 {
     // arrange
     int propertiesVersion;
     IOTHUB_CLIENT_PROPERTIES_DESERIALIZER_HANDLE h = TestAllocatePropertiesReader(IOTHUB_CLIENT_PROPERTY_PAYLOAD_WRITABLE_UPDATES, TEST_JSON_ONE_PROPERTY_WRITABLE);
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubClient_Properties_Deserializer_GetVerion(h, &propertiesVersion);
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_Properties_Deserializer_GetVersion(h, &propertiesVersion);
 
     // assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
@@ -1260,14 +1260,14 @@ TEST_FUNCTION(IoTHubClient_Properties_Deserializer_GetVerion_writable_update_suc
     IoTHubClient_Properties_Deserializer_Destroy(h);
 }
 
-TEST_FUNCTION(IoTHubClient_Properties_Deserializer_GetVerion_full_twin_success)
+TEST_FUNCTION(IoTHubClient_Properties_Deserializer_GetVersion_full_twin_success)
 {
     // arrange
     int propertiesVersion;
     IOTHUB_CLIENT_PROPERTIES_DESERIALIZER_HANDLE h = TestAllocatePropertiesReader(IOTHUB_CLIENT_PROPERTY_PAYLOAD_ALL, TEST_JSON_ONE_PROPERTY_ALL);
 
     // act
-    IOTHUB_CLIENT_RESULT result = IoTHubClient_Properties_Deserializer_GetVerion(h, &propertiesVersion);
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_Properties_Deserializer_GetVersion(h, &propertiesVersion);
 
     // assert
     ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);

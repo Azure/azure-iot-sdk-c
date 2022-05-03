@@ -448,9 +448,9 @@ static void Thermostat_PropertiesCallback(IOTHUB_CLIENT_PROPERTY_PAYLOAD_TYPE pa
     {
         LogError("IoTHubClient_Deserialize_Properties failed, error=%d", clientResult);
     }
-    else if ((clientResult = IoTHubClient_Properties_Deserializer_GetVerion(propertiesReader, &propertiesVersion)) != IOTHUB_CLIENT_OK)
+    else if ((clientResult = IoTHubClient_Properties_Deserializer_GetVersion(propertiesReader, &propertiesVersion)) != IOTHUB_CLIENT_OK)
     {
-        LogError("IoTHubClient_Properties_Deserializer_GetVerion failed, error=%d", clientResult);
+        LogError("IoTHubClient_Properties_Deserializer_GetVersion failed, error=%d", clientResult);
     }
     else
     {

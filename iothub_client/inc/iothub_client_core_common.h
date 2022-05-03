@@ -367,7 +367,7 @@ extern "C"
         size_t payloadLength;
     } IOTHUB_CLIENT_COMMAND_REQUEST;
 
-    /** @brief Current version of @p IOTHUB_CLIENT_COMMAND_RESPONSE structure.  */
+    /** @brief Current version of @p #IOTHUB_CLIENT_COMMAND_RESPONSE structure.  */
     #define IOTHUB_CLIENT_COMMAND_RESPONSE_STRUCT_VERSION_1 1
 
     /** @brief    This struct specifies parameters of an outgoing command response */  

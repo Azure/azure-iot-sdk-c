@@ -171,7 +171,7 @@ EXPORTS
     IoTHubClient_Properties_Serializer_CreateWritableResponse
     IoTHubClient_Properties_Serializer_Destroy
     IoTHubClient_Properties_Deserializer_Create
-    IoTHubClient_Properties_Deserializer_GetVerion
+    IoTHubClient_Properties_Deserializer_GetVersion
     IoTHubClient_Properties_Deserializer_GetNext
     IoTHubClient_Properties_DeserializerProperty_Destroy
     IoTHubClient_Properties_Deserializer_Destroy

@@ -704,7 +704,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Properties_Deserializer_Create(
             LogError("Cannot retrieve desired and/or reported object from JSON");
         }
         // Retrieve the twin version and cache with the propertiesDeserializer.  We do this in the enumeration creation,
-        // even though IoTHubClient_Properties_Deserializer_GetVerion theoretically could've parsed this on demand,
+        // even though IoTHubClient_Properties_Deserializer_GetVersion theoretically could've parsed this on demand,
         // because if this fails we want to fail creation of the enumerator.  A twin without version info
         // is not valid and the application will not be able to properly acknowledge writable properties in this case.
         else if ((result = GetTwinVersion(propertiesDeserializer)) != IOTHUB_CLIENT_OK)
@@ -730,7 +730,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_Properties_Deserializer_Create(
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_Properties_Deserializer_GetVerion(
+IOTHUB_CLIENT_RESULT IoTHubClient_Properties_Deserializer_GetVersion(
     IOTHUB_CLIENT_PROPERTIES_DESERIALIZER_HANDLE propertiesDeserializerHandle,
     int* propertiesVersion)
 {
