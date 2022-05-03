@@ -5,9 +5,10 @@ cmake_minimum_required (VERSION 3.5)
 
 compileAsC99()
 if (MSVC)
-    add_compile_options(/bigobj)
+    #add_compile_options(/bigobj)
 endif()
-
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -bigobj")
+#Should be modified to ‘set(CMAKE_CXX_FLAGS “${CMAKE_CXX_FLAGS} /bigobj”)’.
 
 set(theseTestsName prov_transport_amqp_common_ut)
 
