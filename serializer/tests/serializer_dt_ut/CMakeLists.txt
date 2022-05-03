@@ -4,6 +4,10 @@
 cmake_minimum_required (VERSION 3.5)
 
 compileAsC99()
+if (MSVC)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -bigobj")
+endif()
+
 set(theseTestsName serializer_dt_ut)
 
 include_directories(${SERIALIZER_INC_FOLDER})
@@ -15,7 +19,6 @@ set(${theseTestsName}_c_files
     ${SHARED_UTIL_REAL_TEST_FOLDER}/real_vector.c
     ${SHARED_UTIL_REAL_TEST_FOLDER}/real_crt_abstractions.c
 )
-set_source_files_properties(${theseTestsName}_c_files PROPERTIES COMPILE_OPTIONS "/bigobj")
 
 set(${theseTestsName}_h_files
     ../../../deps/parson/parson.h
