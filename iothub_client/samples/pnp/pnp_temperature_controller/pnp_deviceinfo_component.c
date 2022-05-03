@@ -44,29 +44,29 @@ void PnP_DeviceInfoComponent_Report_All_Properties(const char* componentName, IO
     IOTHUB_CLIENT_RESULT iothubClientResult;
     unsigned char* propertiesSerialized = NULL;
     size_t propertiesSerializedLength;
-    IOTHUB_CLIENT_REPORTED_PROPERTY properties[] =  {
-        {IOTHUB_CLIENT_REPORTED_PROPERTY_STRUCT_VERSION_1, PnPDeviceInfo_SoftwareVersionPropertyName, PnPDeviceInfo_SoftwareVersionPropertyValue},
-        {IOTHUB_CLIENT_REPORTED_PROPERTY_STRUCT_VERSION_1, PnPDeviceInfo_ManufacturerPropertyName, PnPDeviceInfo_ManufacturerPropertyValue},
-        {IOTHUB_CLIENT_REPORTED_PROPERTY_STRUCT_VERSION_1, PnPDeviceInfo_ModelPropertyName, PnPDeviceInfo_ModelPropertyValue},
-        {IOTHUB_CLIENT_REPORTED_PROPERTY_STRUCT_VERSION_1, PnPDeviceInfo_OsNamePropertyName, PnPDeviceInfo_OsNamePropertyValue},
-        {IOTHUB_CLIENT_REPORTED_PROPERTY_STRUCT_VERSION_1, PnPDeviceInfo_ProcessorArchitecturePropertyName, PnPDeviceInfo_ProcessorArchitecturePropertyValue},
-        {IOTHUB_CLIENT_REPORTED_PROPERTY_STRUCT_VERSION_1, PnPDeviceInfo_ProcessorManufacturerPropertyName, PnPDeviceInfo_ProcessorManufacturerPropertyValue},
-        {IOTHUB_CLIENT_REPORTED_PROPERTY_STRUCT_VERSION_1, PnPDeviceInfo_TotalStoragePropertyName, PnPDeviceInfo_TotalStoragePropertyValue},
-        {IOTHUB_CLIENT_REPORTED_PROPERTY_STRUCT_VERSION_1, PnPDeviceInfo_TotalMemoryPropertyName, PnPDeviceInfo_TotalMemoryPropertyValue}
+    IOTHUB_CLIENT_PROPERTY_REPORTED properties[] =  {
+        {IOTHUB_CLIENT_PROPERTY_REPORTED_STRUCT_VERSION_1, PnPDeviceInfo_SoftwareVersionPropertyName, PnPDeviceInfo_SoftwareVersionPropertyValue},
+        {IOTHUB_CLIENT_PROPERTY_REPORTED_STRUCT_VERSION_1, PnPDeviceInfo_ManufacturerPropertyName, PnPDeviceInfo_ManufacturerPropertyValue},
+        {IOTHUB_CLIENT_PROPERTY_REPORTED_STRUCT_VERSION_1, PnPDeviceInfo_ModelPropertyName, PnPDeviceInfo_ModelPropertyValue},
+        {IOTHUB_CLIENT_PROPERTY_REPORTED_STRUCT_VERSION_1, PnPDeviceInfo_OsNamePropertyName, PnPDeviceInfo_OsNamePropertyValue},
+        {IOTHUB_CLIENT_PROPERTY_REPORTED_STRUCT_VERSION_1, PnPDeviceInfo_ProcessorArchitecturePropertyName, PnPDeviceInfo_ProcessorArchitecturePropertyValue},
+        {IOTHUB_CLIENT_PROPERTY_REPORTED_STRUCT_VERSION_1, PnPDeviceInfo_ProcessorManufacturerPropertyName, PnPDeviceInfo_ProcessorManufacturerPropertyValue},
+        {IOTHUB_CLIENT_PROPERTY_REPORTED_STRUCT_VERSION_1, PnPDeviceInfo_TotalStoragePropertyName, PnPDeviceInfo_TotalStoragePropertyValue},
+        {IOTHUB_CLIENT_PROPERTY_REPORTED_STRUCT_VERSION_1, PnPDeviceInfo_TotalMemoryPropertyName, PnPDeviceInfo_TotalMemoryPropertyValue}
     };
 
     const size_t numProperties = sizeof(properties) / sizeof(properties[0]);
 
-    // The first step of reporting properties is to serialize IOTHUB_CLIENT_REPORTED_PROPERTY into JSON for sending.
-    if ((iothubClientResult = IoTHubClient_Serialize_ReportedProperties(properties, numProperties, componentName, &propertiesSerialized, &propertiesSerializedLength)) != IOTHUB_CLIENT_OK)
+    // The first step of reporting properties is to serialize IOTHUB_CLIENT_PROPERTY_REPORTED into JSON for sending.
+    if ((iothubClientResult = IoTHubClient_Properties_Serializer_CreateReported(properties, numProperties, componentName, &propertiesSerialized, &propertiesSerializedLength)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to serialize reported state, error=%d", iothubClientResult);
     }
-    // The output of IoTHubClient_Serialize_ReportedProperties is sent to IoTHubDeviceClient_LL_SendPropertiesAsync to perform network I/O.
+    // The output of IoTHubClient_Properties_Serializer_CreateReported is sent to IoTHubDeviceClient_LL_SendPropertiesAsync to perform network I/O.
     else if ((iothubClientResult = IoTHubDeviceClient_LL_SendPropertiesAsync(deviceClient, propertiesSerialized, propertiesSerializedLength, NULL, NULL)) != IOTHUB_CLIENT_OK)
     {
         LogError("Unable to send reported state, error=%d", iothubClientResult);
     }
 
-    IoTHubClient_Serialize_Properties_Destroy(propertiesSerialized);
+    IoTHubClient_Properties_Serializer_Destroy(propertiesSerialized);
 }

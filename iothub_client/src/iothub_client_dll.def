@@ -167,13 +167,14 @@ EXPORTS
     IoTHubMessage_SetAsSecurityMessage
     IoTHubMessage_IsSecurityMessage
 
-    IoTHubClient_Serialize_ReportedProperties
-    IoTHubClient_Serialize_WritablePropertyResponse
-    IoTHubClient_Deserialize_Properties_CreateIterator
-    IoTHubClient_Deserialize_Properties_GetVersion
-    IoTHubClient_Deserialize_Properties_GetNextProperty
-    IoTHubClient_Deserialize_Properties_DestroyProperty
-    IoTHubClient_Deserialize_Properties_DestroyIterator
+    IoTHubClient_Properties_Serializer_CreateReported
+    IoTHubClient_Properties_Serializer_CreateWritableResponse
+    IoTHubClient_Properties_Serializer_Destroy
+    IoTHubClient_Properties_Deserializer_Create
+    IoTHubClient_Properties_Deserializer_GetVersion
+    IoTHubClient_Properties_Deserializer_GetNext
+    IoTHubClient_Properties_DeserializerProperty_Destroy
+    IoTHubClient_Properties_Deserializer_Destroy
  
     IOTHUB_CLIENT_CONFIRMATION_RESULTStrings
     IOTHUB_CLIENT_FILE_UPLOAD_RESULTStrings

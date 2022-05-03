@@ -409,8 +409,8 @@ extern "C"
     *
     * @param[in]  iotHubClientHandle            The handle created by a call to the create function.
     * @param[in]  properties                    Serialized property data to be sent to IoT Hub.  This buffer can either be
-    *                                           manually serialized created with IoTHubClient_Serialize_ReportedProperties() 
-    *                                           or IoTHubClient_Serialize_WritablePropertyResponse().
+    *                                           manually serialized created with IoTHubClient_Properties_Serializer_CreateReported() 
+    *                                           or IoTHubClient_Properties_Serializer_CreateWritableResponse().
     * @param[in]  propertiesLength              Number of bytes in the properties buffer.
     * @param[in]  propertyAcknowledgedCallback  Optional callback specified by the application to be called with the
     *                                           result of the transaction.
