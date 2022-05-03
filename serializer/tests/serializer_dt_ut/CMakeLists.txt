@@ -15,6 +15,7 @@ set(${theseTestsName}_c_files
     ${SHARED_UTIL_REAL_TEST_FOLDER}/real_vector.c
     ${SHARED_UTIL_REAL_TEST_FOLDER}/real_crt_abstractions.c
 )
+set_source_files_properties(${theseTestsName}_c_files PROPERTIES COMPILE_OPTIONS "/bigobj")
 
 set(${theseTestsName}_h_files
     ../../../deps/parson/parson.h

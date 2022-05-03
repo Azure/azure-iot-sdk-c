@@ -11,6 +11,7 @@ generate_cppunittest_wrapper(${theseTestsName})
 set(${theseTestsName}_c_files
     ../../src/prov_transport_amqp_common.c
 )
+set_source_files_properties(${theseTestsName}_c_files PROPERTIES COMPILE_OPTIONS "/bigobj")
 
 set(${theseTestsName}_h_files
 )
