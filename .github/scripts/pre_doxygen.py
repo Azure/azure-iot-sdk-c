@@ -6,7 +6,7 @@
 #
 # Usage:
 #
-# replace_mockable.py <input_directory> <output_directory>
+# pre_doxygen.py <input_directory> <output_directory>
 # Pre-existing files in <output_directory> will be overwritten.
 
 #
