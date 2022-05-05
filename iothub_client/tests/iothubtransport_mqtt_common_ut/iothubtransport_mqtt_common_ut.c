@@ -1310,6 +1310,33 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_SasToken_Expiry(IGNORED_PTR_ARG));
     if (resend) {
+        #ifdef RUN_SFC_TESTS
+            STRICT_EXPECTED_CALL(IoTHubMessage_Properties(msg_handle));
+            if (propCount == 0)
+            {
+                EXPECTED_CALL(Map_GetInternals(TEST_MESSAGE_PROP_MAP, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            }
+            else
+            {
+                STRICT_EXPECTED_CALL(Map_GetInternals(TEST_MESSAGE_PROP_MAP, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+                    .CopyOutArgumentBuffer(2, &ppKeys, sizeof(ppKeys))
+                    .CopyOutArgumentBuffer(3, &ppValues, sizeof(ppValues))
+                    .CopyOutArgumentBuffer(4, &propCount, sizeof(propCount));
+
+                for (size_t i=0; i < propCount; i++)
+                {
+                    if (auto_urlencode)
+                    {
+                        STRICT_EXPECTED_CALL(URL_EncodeString((const char*)ppKeys[i]));
+                        STRICT_EXPECTED_CALL(URL_EncodeString((const char*)ppValues[i]));
+                        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
+                        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
+                        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+                        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+                    }
+                }
+            }
+        #endif //RUN_SFC_TESTS
         STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
     }
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
