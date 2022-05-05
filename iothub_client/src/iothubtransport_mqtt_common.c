@@ -2372,7 +2372,7 @@ static void SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 
         // On a service reconnect, reset the expired time of messages waiting for a PUBACK.
         // This will cause the messages to republish in order as required by the MQTT spec.
-        // 
+
 
         PDLIST_ENTRY current_entry = transport_data->telemetry_waitingForAck.Flink;
         while (current_entry != &transport_data->telemetry_waitingForAck)
@@ -2454,7 +2454,7 @@ static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport
         MQTT_MESSAGE_DETAILS_LIST* msg_detail_entry = containingRecord(current_entry, MQTT_MESSAGE_DETAILS_LIST, entry);
         DLIST_ENTRY nextListEntry;
         nextListEntry.Flink = current_entry->Flink;
-        
+
         if (((current_ms - msg_detail_entry->msgPublishTime) / 1000) > RESEND_TIMEOUT_VALUE_MIN)
         {
             if (msg_detail_entry->retryCount >= MAX_SEND_RECOUNT_LIMIT)
