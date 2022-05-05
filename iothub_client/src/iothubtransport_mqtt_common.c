@@ -81,7 +81,7 @@ static const char* REPORTED_PROPERTIES_TOPIC = "$iothub/twin/PATCH/properties/re
 static const char* GET_PROPERTIES_TOPIC = "$iothub/twin/GET/?$rid=%"PRIu16;
 static const char* DEVICE_METHOD_RESPONSE_TOPIC = "$iothub/methods/res/%d/?$rid=%s";
 #ifdef RUN_SFC_TESTS
-    static const char* AZIOTHUB_FAULTOPERATIONTYPE = "AzIoTHub_FaultOperationType";
+    static const char* FAULT_OPERATION_TYPE = "AzIoTHub_FaultOperationType";
 #endif //RUN_SFC_TESTS
 static const char SYS_TOPIC_STRING_FORMAT[] = "%s%%24.%s=%s";
 
@@ -756,9 +756,9 @@ static bool isMqttMessageSfcType(IOTHUB_MESSAGE_HANDLE iothub_message_handle)
         }
         else
         {
-            for (index = 0; index < propertyCount && result == 0; index++)
+            for (index = 0; index < propertyCount; index++)
             {
-                if (strncmp(propertyKeys[index], AZIOTHUB_FAULTOPERATIONTYPE, strlen(AZIOTHUB_FAULTOPERATIONTYPE)) == 0)
+                if (strncmp(propertyKeys[index], FAULT_OPERATION_TYPE , strlen(FAULT_OPERATION_TYPE )) == 0)
                 {
                     result = true;
                     break;
@@ -2370,8 +2370,9 @@ static void SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     {
         transport_data->currPacketState = PUBLISH_TYPE;
 
-        // On a service reconnect, reset the expired time of messages waiting for a PUBACK
-        // this will cause the messages to republish
+        // On a service reconnect, reset the expired time of messages waiting for a PUBACK.
+        // This will cause the messages to republish in order as required by the MQTT spec.
+        // 
 
         PDLIST_ENTRY current_entry = transport_data->telemetry_waitingForAck.Flink;
         while (current_entry != &transport_data->telemetry_waitingForAck)
