@@ -262,6 +262,10 @@ if(${memory_trace})
     add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
 endif()
 
+if(${run_sfc_tests})
+    add_definitions(-DRUN_SFC_TESTS)
+endif()
+
 IF(WIN32)
     #windows needs this define
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
