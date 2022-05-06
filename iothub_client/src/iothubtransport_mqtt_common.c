@@ -80,7 +80,9 @@ static const char TOPIC_SLASH = '/';
 static const char* REPORTED_PROPERTIES_TOPIC = "$iothub/twin/PATCH/properties/reported/?$rid=%"PRIu16;
 static const char* GET_PROPERTIES_TOPIC = "$iothub/twin/GET/?$rid=%"PRIu16;
 static const char* DEVICE_METHOD_RESPONSE_TOPIC = "$iothub/methods/res/%d/?$rid=%s";
-
+#ifdef RUN_SFC_TESTS
+    static const char* FAULT_OPERATION_TYPE = "AzIoTHub_FaultOperationType";
+#endif //RUN_SFC_TESTS
 static const char SYS_TOPIC_STRING_FORMAT[] = "%s%%24.%s=%s";
 
 static const char REQUEST_ID_PROPERTY[] = "?$rid=";
@@ -733,6 +735,40 @@ static int addUserPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_message_
     *index_ptr = index;
     return result;
 }
+
+#ifdef RUN_SFC_TESTS
+//
+// isMqttMessageSfcType checks to see if the message is a service-fault-control message.
+//
+static bool isMqttMessageSfcType(IOTHUB_MESSAGE_HANDLE iothub_message_handle)
+{
+    bool result = false;
+    const char* const* propertyKeys;
+    const char* const* propertyValues;
+    size_t propertyCount;
+    size_t index;
+    MAP_HANDLE properties_map = IoTHubMessage_Properties(iothub_message_handle);
+    if (properties_map != NULL)
+    {
+        if (Map_GetInternals(properties_map, &propertyKeys, &propertyValues, &propertyCount) != MAP_OK)
+        {
+            LogError("Failed to get the internals of the property map.");
+        }
+        else
+        {
+            for (index = 0; index < propertyCount; index++)
+            {
+                if (strncmp(propertyKeys[index], FAULT_OPERATION_TYPE , strlen(FAULT_OPERATION_TYPE )) == 0)
+                {
+                    result = true;
+                    break;
+                }
+            }
+        }
+    }
+    return result;
+}
+#endif //RUN_SFC_TESTS
 
 //
 // addSystemPropertyToTopicString appends a given "system" property from iothub_message_handle (set by the application with APIs such as IoTHubMessage_SetMessageId,
@@ -2333,6 +2369,27 @@ static void SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     else
     {
         transport_data->currPacketState = PUBLISH_TYPE;
+
+        // On a service reconnect, reset the expired time of messages waiting for a PUBACK.
+        // This will cause the messages to republish in order as required by the MQTT spec.
+
+
+        PDLIST_ENTRY current_entry = transport_data->telemetry_waitingForAck.Flink;
+        while (current_entry != &transport_data->telemetry_waitingForAck)
+        {
+            MQTT_MESSAGE_DETAILS_LIST* msg_detail_entry = containingRecord(current_entry, MQTT_MESSAGE_DETAILS_LIST, entry);
+#ifdef RUN_SFC_TESTS
+            if (!isMqttMessageSfcType(msg_detail_entry->iotHubMessageEntry->messageHandle))
+            {
+#endif //RUN_SFC_TESTS
+
+                msg_detail_entry->msgPublishTime = 0;        // force the message to resend
+
+#ifdef RUN_SFC_TESTS
+            }
+#endif //RUN_SFC_TESTS
+            current_entry = current_entry->Flink;
+        }
     }
 }
 
@@ -3556,6 +3613,7 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle)
             }
             else if (transport_data->currPacketState == PUBLISH_TYPE)
             {
+                ProcessPendingTelemetryMessages(transport_data);
                 ProcessPublishStateDoWork(transport_data);
             }
             mqtt_client_dowork(transport_data->mqttClient);
