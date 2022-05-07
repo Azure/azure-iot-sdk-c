@@ -354,9 +354,16 @@
    ...
 }
 {
-   get_time_ms ConflictingAccess
+   get_time_ms get_current_ms ConflictingAccess
    drd:ConflictingAccess
    fun:get_time_ms
    fun:tickcounter_get_current_ms
+   ...
+}
+{
+   get_time_ms tickcounter_create ConflictingAccess
+   drd:ConflictingAccess
+   fun:get_time_ms
+   fun:tickcounter_create
    ...
 }
