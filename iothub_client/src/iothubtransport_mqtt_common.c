@@ -2372,8 +2372,6 @@ static void SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 
         // On a service reconnect, reset the expired time of messages waiting for a PUBACK.
         // This will cause the messages to republish in order as required by the MQTT spec.
-
-
         PDLIST_ENTRY current_entry = transport_data->telemetry_waitingForAck.Flink;
         while (current_entry != &transport_data->telemetry_waitingForAck)
         {
@@ -2382,7 +2380,9 @@ static void SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             if (!isMqttMessageSfcType(msg_detail_entry->iotHubMessageEntry->messageHandle))
             {
 #endif //RUN_SFC_TESTS
-
+                // Setting the value to 0 as it is simpler than calculating the amount of time to
+                // expire the PUBLISH. This value of zero is equivalent to setting a time way in the 
+                // past, enough for this control logic.
                 msg_detail_entry->msgPublishTime = 0;        // force the message to resend
 
 #ifdef RUN_SFC_TESTS
@@ -3613,6 +3613,8 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle)
             }
             else if (transport_data->currPacketState == PUBLISH_TYPE)
             {
+                // The duplicated call here and down below is intentional at this point.
+                // This is the simplest way to guarantee compliance with MQTT v3.1.1 [MQTT-4.6.0-1].
                 ProcessPendingTelemetryMessages(transport_data);
                 ProcessPublishStateDoWork(transport_data);
             }
