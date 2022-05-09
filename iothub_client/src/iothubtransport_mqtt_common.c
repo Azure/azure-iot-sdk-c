@@ -3615,6 +3615,7 @@ void IoTHubTransport_MQTT_Common_DoWork(TRANSPORT_LL_HANDLE handle)
             {
                 // The duplicated call here and down below is intentional at this point.
                 // This is the simplest way to guarantee compliance with MQTT v3.1.1 [MQTT-4.6.0-1].
+                // ** QoS1 Publish messages must be sent in packet id order on reconnect
                 ProcessPendingTelemetryMessages(transport_data);
                 ProcessPublishStateDoWork(transport_data);
             }
