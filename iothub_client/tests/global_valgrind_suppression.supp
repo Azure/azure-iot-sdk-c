@@ -35,9 +35,10 @@
 {
    DRD Conflicting store by thread in sprintf (retail)
    drd:ConflictingAccess
-    ...
+   ...
    fun:__sprintf_chk
    fun:EventData_Create
+   ...
 }
 {
     Race conflicting store by thread in EventData_Create/sprintf    
@@ -366,17 +367,4 @@
    fun:get_time_ms
    fun:tickcounter_create
    ...
-}
-{
-   connection_status_callback
-   Helgrind:Race
-   fun:strnlen
-   fun:__vfprintf_internal
-   fun:__vsprintf_internal
-   fun:__sprintf_chk
-   fun:EventData_Create
-   fun:client_create_and_send_d2c
-   fun:e2e_d2c_with_svc_fault_ctrl_with_transport_status
-   fun:RunTests
-   fun:main
 }
