@@ -1301,9 +1301,9 @@ void client_wait_for_c2d_event_arrival(EXPECTED_RECEIVE_DATA* receiveUserContext
 
 }
 
-static int IoTHubMessaging_Open_with_retry(IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle, IOTHUB_OPEN_COMPLETE_CALLBACK openCompleteCallback, void* userContextCallback)
+static IOTHUB_MESSAGING_RESULT IoTHubMessaging_Open_with_retry(IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle, IOTHUB_OPEN_COMPLETE_CALLBACK openCompleteCallback, void* userContextCallback)
 {
-    int result;
+    IOTHUB_MESSAGING_RESULT result = IOTHUB_MESSAGING_ERROR;
     for (int i = 0; i < RETRY_COUNT; i++)
     {
         result = IoTHubMessaging_Open(messagingClientHandle, openCompleteCallback, userContextCallback);

@@ -86,7 +86,7 @@ process_args ()
         save_next_arg=0
       elif [ $save_next_arg == 4 ]
       then
-        # save arg for builkd config type
+        # save arg for build config type
         build_config="$arg"
         save_next_arg=0
       else

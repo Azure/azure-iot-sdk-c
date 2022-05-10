@@ -794,7 +794,7 @@ static AMQP_VALUE on_message_received_new(const void* context, MESSAGE_HANDLE me
 
 static int messagereceiver_open_with_retry(MESSAGE_RECEIVER_HANDLE message_receiver, ON_MESSAGE_RECEIVED on_message_received, void* callback_context)
 {
-    int result;
+    int result = -1;
     for (int i = 0; i < RETRY_COUNT; i++)
     {
         result = messagereceiver_open(message_receiver, on_message_received, callback_context);
