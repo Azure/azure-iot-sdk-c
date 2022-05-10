@@ -388,7 +388,7 @@ TEST_FUNCTION(IoTHubClient_Auth_Create_fail)
 
         IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_Create(DEVICE_KEY, DEVICE_ID, NULL, MODULE_ID);
 
-        char tmp_msg[64];
+        char tmp_msg[128];
         sprintf(tmp_msg, "IoTHubClient_Auth_Create failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         //assert
@@ -453,7 +453,7 @@ TEST_FUNCTION(IoTHubClient_Auth_CreateFromDeviceAuth_fail)
 
         IOTHUB_AUTHORIZATION_HANDLE handle = IoTHubClient_Auth_CreateFromDeviceAuth(DEVICE_ID, MODULE_ID);
 
-        char tmp_msg[64];
+        char tmp_msg[128];
         sprintf(tmp_msg, "IoTHubClient_Auth_Create failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         //assert

@@ -73,6 +73,8 @@ E2E_TEST_OPTIONS g_e2e_test_options;
 static IOTHUB_DEVICE_CLIENT_HANDLE iothub_deviceclient_handle = NULL;
 static IOTHUB_MODULE_CLIENT_HANDLE iothub_moduleclient_handle = NULL;
 
+#define RETRY_COUNT                  4
+#define RETRY_DELAY_SECONDS          60
 #define IOTHUB_COUNTER_MAX           10
 #define MAX_CLOUD_TRAVEL_TIME        120.0
 // Wait for 5 mins (arbitrary value since 2 mins didn't work for fault injection tests)
@@ -318,9 +320,9 @@ static void ReceiveUserContext_Destroy(EXPECTED_RECEIVE_DATA* data)
 static EXPECTED_SEND_DATA* EventData_Create(void)
 {
     EXPECTED_SEND_DATA* result = (EXPECTED_SEND_DATA*)malloc(sizeof(EXPECTED_SEND_DATA));
-    memset(result, 0, sizeof(*result));
     if (result != NULL)
     {
+        memset(result, 0, sizeof(*result));
         if ((result->lock = Lock_Init()) == NULL)
         {
             ASSERT_FAIL("unable to Lock_Init");
@@ -1299,6 +1301,21 @@ void client_wait_for_c2d_event_arrival(EXPECTED_RECEIVE_DATA* receiveUserContext
 
 }
 
+static IOTHUB_MESSAGING_RESULT IoTHubMessaging_Open_with_retry(IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle, IOTHUB_OPEN_COMPLETE_CALLBACK openCompleteCallback, void* userContextCallback)
+{
+    IOTHUB_MESSAGING_RESULT result = IOTHUB_MESSAGING_ERROR;
+    for (int i = 0; i < RETRY_COUNT; i++)
+    {
+        result = IoTHubMessaging_Open(messagingClientHandle, openCompleteCallback, userContextCallback);
+        if (result == IOTHUB_MESSAGING_OK)
+        {
+            break;
+        }
+        ThreadAPI_Sleep(1000 * RETRY_DELAY_SECONDS);
+    }
+    return result;
+}
+
 static void recv_message_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     // arrange
@@ -1363,7 +1380,7 @@ static void recv_message_test(IOTHUB_PROVISIONED_DEVICE* deviceToUse, IOTHUB_CLI
     ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_OK, IoTHubMessaging_SetTrustedCert(iotHubMessagingHandle, certificates));
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
-    iotHubMessagingResult = IoTHubMessaging_Open(iotHubMessagingHandle, openCompleteCallback, (void*)"Context string for open");
+    iotHubMessagingResult = IoTHubMessaging_Open_with_retry(iotHubMessagingHandle, openCompleteCallback, (void*)"Context string for open");
     ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_OK, iotHubMessagingResult);
 
     // Send message
@@ -1432,7 +1449,7 @@ void e2e_c2d_with_svc_fault_ctrl(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, cons
     iotHubMessagingHandle = IoTHubMessaging_Create(iotHubServiceClientHandle);
     ASSERT_IS_NOT_NULL(iotHubMessagingHandle, "Could not initialize IoTHubMessaging to send C2D messages to the device");
 
-    iotHubMessagingResult = IoTHubMessaging_Open(iotHubMessagingHandle, openCompleteCallback, (void*)"Context string for open");
+    iotHubMessagingResult = IoTHubMessaging_Open_with_retry(iotHubMessagingHandle, openCompleteCallback, (void*)"Context string for open");
     ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_OK, iotHubMessagingResult);
 
     // Send message
