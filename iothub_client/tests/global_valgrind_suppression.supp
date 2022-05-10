@@ -367,3 +367,16 @@
    fun:tickcounter_create
    ...
 }
+{
+   connection_status_callback
+   Helgrind:Race
+   fun:strnlen
+   fun:__vfprintf_internal
+   fun:__vsprintf_internal
+   fun:__sprintf_chk
+   fun:EventData_Create
+   fun:client_create_and_send_d2c
+   fun:e2e_d2c_with_svc_fault_ctrl_with_transport_status
+   fun:RunTests
+   fun:main
+}
