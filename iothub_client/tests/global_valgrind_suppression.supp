@@ -33,8 +33,16 @@
     fun:EventData_Create
 }
 {
-   DRD Conflicting store by thread in sprintf (retail)
+   DRD Conflicting store by thread in sprintf (release)
    drd:ConflictingAccess
+   ...
+   fun:__sprintf_chk
+   fun:EventData_Create
+   ...
+}
+{
+   RACE Conflicting store by thread in sprintf (release)
+   Helgrind:Race
    ...
    fun:__sprintf_chk
    fun:EventData_Create
