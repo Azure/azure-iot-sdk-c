@@ -376,3 +376,10 @@
    fun:tickcounter_create
    ...
 }
+{
+   get_time_ms tickcounter_create Race
+   Helgrind:Race
+   fun:get_time_ms
+   fun:tickcounter_create
+   ...
+}
