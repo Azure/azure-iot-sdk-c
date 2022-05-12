@@ -26,11 +26,27 @@
     fun:vfprintf
 }
 {
-    DRD Conflicting store by thread in sprintf
+    DRD Conflicting store by thread in sprintf (debug)
     drd:ConflictingAccess
     ...
     fun:sprintf
     fun:EventData_Create
+}
+{
+   DRD Conflicting store by thread in sprintf (release)
+   drd:ConflictingAccess
+   ...
+   fun:__sprintf_chk
+   fun:EventData_Create
+   ...
+}
+{
+   RACE Conflicting store by thread in sprintf (release)
+   Helgrind:Race
+   ...
+   fun:__sprintf_chk
+   fun:EventData_Create
+   ...
 }
 {
     Race conflicting store by thread in EventData_Create/sprintf    
@@ -338,4 +354,32 @@
    fun:__run_exit_handlers
    fun:exit
    fun:(below main)
+}
+{
+   get_time_ms Race
+   Helgrind:Race
+   fun:get_time_ms
+   fun:tickcounter_get_current_ms
+   ...
+}
+{
+   get_time_ms get_current_ms ConflictingAccess
+   drd:ConflictingAccess
+   fun:get_time_ms
+   fun:tickcounter_get_current_ms
+   ...
+}
+{
+   get_time_ms tickcounter_create ConflictingAccess
+   drd:ConflictingAccess
+   fun:get_time_ms
+   fun:tickcounter_create
+   ...
+}
+{
+   get_time_ms tickcounter_create Race
+   Helgrind:Race
+   fun:get_time_ms
+   fun:tickcounter_create
+   ...
 }

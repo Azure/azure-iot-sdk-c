@@ -1224,7 +1224,7 @@ TEST_FUNCTION(device_stop_DEVICE_STATE_STARTED_failure_checks)
         umock_c_negative_tests_snapshot();
         n = umock_c_negative_tests_call_count();
 
-        char error_msg[64];
+        char error_msg[128];
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -1746,7 +1746,7 @@ TEST_FUNCTION(device_retrieve_options_CBS_failure_checks)
     for (i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
         // arrange
-        char error_msg[64];
+        char error_msg[128];
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -2168,7 +2168,7 @@ TEST_FUNCTION(telemetry_messenger_send_async_failure_checks)
     for (i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
         // arrange
-        char error_msg[64];
+        char error_msg[128];
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -2731,7 +2731,7 @@ TEST_FUNCTION(on_messenger_message_received_callback_failure_checks)
         }
 
         // arrange
-        char error_msg[64];
+        char error_msg[128];
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -2872,7 +2872,7 @@ TEST_FUNCTION(device_send_message_disposition_failure_checks)
         }
 
         // arrange
-        char error_msg[64];
+        char error_msg[128];
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -2971,7 +2971,7 @@ TEST_FUNCTION(device_get_twin_async_failure_checks)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
-        char tmp_msg[64];
+        char tmp_msg[128];
         sprintf(tmp_msg, "Failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
         int result = amqp_device_get_twin_async(handle, on_device_get_twin_completed_callback, (void*)0x4567);
 

@@ -1236,7 +1236,7 @@ TEST_FUNCTION(twin_msgr_report_state_async_failure_checks)
         if (umock_c_negative_tests_can_call_fail(i))
         {
             // arrange
-            char error_msg[64];
+            char error_msg[128];
 
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(i);
@@ -1452,7 +1452,7 @@ TEST_FUNCTION(twin_msgr_start_failure_checks)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
-        char tmp_msg[64];
+        char tmp_msg[128];
         sprintf(tmp_msg, "Failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
         int result = twin_messenger_start(handle, TEST_SESSION_HANDLE);
 
@@ -1705,7 +1705,7 @@ TEST_FUNCTION(twin_messenger_get_twin_async_failure_checks)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
-        char tmp_msg[64];
+        char tmp_msg[128];
         sprintf(tmp_msg, "Failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
         int result = twin_messenger_get_twin_async(handle, on_twin_get_completed_callback, (void*)0x4567);
 

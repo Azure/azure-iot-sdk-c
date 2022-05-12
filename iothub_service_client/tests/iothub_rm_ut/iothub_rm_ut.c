@@ -2698,7 +2698,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
             {
                 IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDevice(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, deviceInfo);
 
-                char message_on_error[64];
+                char message_on_error[128];
                 sprintf(message_on_error, "Got unexpected IOTHUB_REGISTRYMANAGER_OK on run %lu", (unsigned long)i);
 
                 /// assert
@@ -2772,7 +2772,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
             {
                 IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDevice_Ex(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, deviceInfo);
 
-                char message_on_error[64];
+                char message_on_error[128];
                 sprintf(message_on_error, "Got unexpected IOTHUB_REGISTRYMANAGER_OK on run %lu", (unsigned long)i);
 
                 /// assert
@@ -3763,7 +3763,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
                 )
             {
                 IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetDeviceList(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, 10, deviceList);
-                char message_on_error[64];
+                char message_on_error[128];
                 sprintf(message_on_error, "Got unexpected IOTHUB_REGISTRYMANAGER_OK on run %lu", (unsigned long)i);
 
                 /// assert
@@ -3838,7 +3838,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
                 )
             {
                 IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetModuleList(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, moduleList, IOTHUB_MODULE_VERSION_1);
-                char message_on_error[64];
+                char message_on_error[128];
                 sprintf(message_on_error, "Got unexpected IOTHUB_REGISTRYMANAGER_OK on run %lu", (unsigned long)i);
 
                 /// assert
@@ -3915,7 +3915,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
                 )
             {
                 IOTHUB_REGISTRYMANAGER_RESULT result = IoTHubRegistryManager_GetModuleList(TEST_IOTHUB_REGISTRYMANAGER_HANDLE, TEST_DEVICE_ID, moduleList, IOTHUB_MODULE_VERSION_1);
-                char message_on_error[64];
+                char message_on_error[128];
                 sprintf(message_on_error, "Got unexpected IOTHUB_REGISTRYMANAGER_OK on run %lu", (unsigned long)i);
 
                 /// assert
