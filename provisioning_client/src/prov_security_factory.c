@@ -26,7 +26,7 @@ static IOTHUB_SECURITY_TYPE get_iothub_security_type(SECURE_DEVICE_TYPE sec_type
             break;
 #endif
 
-#if defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
+#if defined(HSM_TYPE_X509) || defined(HSM_TYPE_RIOT) || defined(HSM_AUTH_TYPE_CUSTOM)
         case SECURE_DEVICE_TYPE_X509:
             ret = IOTHUB_SECURITY_TYPE_X509;
             break;

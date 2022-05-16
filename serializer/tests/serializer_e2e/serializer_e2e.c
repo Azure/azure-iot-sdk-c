@@ -521,7 +521,7 @@ BEGIN_TEST_SUITE(serializer_e2e)
 
         // step 1: prepare data
         time_t t = time(NULL);
-        char sztimeText[64];
+        char sztimeText[128];
         (void)sprintf_s(sztimeText, sizeof(sztimeText), "%.24s", ctime(&t));
 
         EXPECTED_SEND_DATA* expectedData = SendMacroTestData_Create(sztimeText);
@@ -740,7 +740,7 @@ BEGIN_TEST_SUITE(serializer_e2e)
 
         // step 1: prepare data
         time_t t = time(NULL);
-        char sztimeText[64];
+        char sztimeText[128];
         (void)sprintf_s(sztimeText, sizeof(sztimeText), "%.24s", ctime(&t));
 
         EXPECTED_SEND_DATA* expectedData = SendMacroTestData_Create(sztimeText);

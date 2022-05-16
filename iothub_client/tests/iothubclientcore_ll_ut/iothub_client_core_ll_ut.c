@@ -1814,7 +1814,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_CreateWithTransport_fail)
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
-            char tmp_msg[64];
+            char tmp_msg[128];
             sprintf(tmp_msg, "IoTHubClientCore_LL_CreateWithTransport failure in test %zu/%zu", index, count);
 
             IOTHUB_CLIENT_CORE_LL_HANDLE result = IoTHubClientCore_LL_CreateWithTransport(&TEST_DEVICE_CONFIG);
@@ -2221,7 +2221,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendEventAsync_fails)
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
-            char tmp_msg[64];
+            char tmp_msg[128];
             sprintf(tmp_msg, "IoTHubClientCore_LL_Create failure in test %zu/%zu", index, count);
 
             IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SendEventAsync(handle, TEST_MESSAGE_HANDLE, test_event_confirmation_callback, (void*)1);
@@ -4972,7 +4972,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_GetTwinAsync_fail)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
-        char tmp_msg[64];
+        char tmp_msg[128];
         sprintf(tmp_msg, "Failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
         IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_GetTwinAsync(h, iothub_device_twin_callback, (void*)1);
 
@@ -5604,7 +5604,7 @@ TEST_FUNCTION(IoTHubClientCore_LL_SendEventToOutputAsync_fails)
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
-            char tmp_msg[64];
+            char tmp_msg[128];
             sprintf(tmp_msg, "IoTHubClientCore_LL_Create failure in test %zu/%zu", index, count);
 
             IOTHUB_CLIENT_RESULT result = IoTHubClientCore_LL_SendEventToOutputAsync(handle, TEST_MESSAGE_HANDLE, TEST_OUTPUT_NAME, test_event_confirmation_callback, (void*)1);

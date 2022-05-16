@@ -149,7 +149,7 @@ IOTHUB_SECURITY_HANDLE iothub_device_auth_create()
             }
         }
 #endif
-#if defined(HSM_TYPE_X509) || defined(HSM_AUTH_TYPE_CUSTOM)
+#if defined(HSM_TYPE_X509) || defined(HSM_TYPE_RIOT) || defined(HSM_AUTH_TYPE_CUSTOM)
         if (result != NULL && iothub_security_t == IOTHUB_SECURITY_TYPE_X509)
         {
             result->cred_type = AUTH_TYPE_X509;

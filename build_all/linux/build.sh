@@ -3,6 +3,7 @@
 #
 
 set -e
+set -x
 
 script_dir=$(cd "$(dirname "$0")" && pwd)
 build_root=$(cd "${script_dir}/../.." && pwd)
@@ -24,6 +25,11 @@ no_logging=OFF
 prov_auth=OFF
 prov_use_tpm_simulator=OFF
 use_edge_modules=OFF
+hsm_type_sastoken=OFF
+hsm_type_symm_key=OFF
+hsm_type_x509=OFF
+hsm_type_riot=OFF
+build_config=Debug
 
 usage ()
 {
@@ -47,7 +53,12 @@ usage ()
     echo " --no-logging                  Disable logging"
     echo " --provisioning                Use Provisioning with Flow"
     echo " --use-tpm-simulator           Build TPM simulator"
-    echo " --use-edge-modules            Build Edge modules"    
+    echo " --use-edge-modules            Build Edge modules" 
+    echo " --use-hsmsymmkey              Build with HSM for Symmetric Key" 
+    echo " --use-hsmsas                  Build with HSM for TPM"  
+    echo " --use-hsmx509                 Build with HSM for X509 Client Authentication" 
+    echo " --use-hsmriot                 Build with HSM for RIoT/DICE" 
+    echo " --config <value>              [Debug] build configuration (e.g. Debug, Release)"
     exit 1
 }
 
@@ -73,6 +84,11 @@ process_args ()
         # save arg for install prefix
         cmake_install_prefix="$arg"
         save_next_arg=0
+      elif [ $save_next_arg == 4 ]
+      then
+        # save arg for build config type
+        build_config="$arg"
+        save_next_arg=0
       else
           case "$arg" in
               "-cl" | "--compileoption" ) save_next_arg=1;;
@@ -92,6 +108,11 @@ process_args ()
               "--use-tpm-simulator" ) prov_use_tpm_simulator=ON;;
               "--run-sfc-tests" ) run_sfc_tests=ON;;
               "--use-edge-modules") use_edge_modules=ON;;
+              "--use-hsmsymmkey")  hsm_type_symm_key=ON;;
+              "--use-hsmsas")  hsm_type_sastoken=ON;;
+              "--use-hsmx509") hsm_type_riot=OFF; hsm_type_x509=ON;;
+              "--use-hsmriot") hsm_type_riot=ON; hsm_type_x509=OFF;;
+              "--config") save_next_arg=4;;
               * ) usage;;
           esac
       fi
@@ -115,7 +136,7 @@ rm -r -f $build_folder
 mkdir -m777 -p $build_folder
 pushd $build_folder
 echo "Generating Build Files"
-cmake $toolchainfile $cmake_install_prefix -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C=-Wstrict-prototypes -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_sfc_tests:BOOL=$run-sfc-tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Ddont_use_uploadtoblob:BOOL=$no_blob -Drun_unittests:BOOL=$run_unittests -Dno_logging:BOOL=$no_logging $build_root -Duse_prov_client:BOOL=$prov_auth -Duse_tpm_simulator:BOOL=$prov_use_tpm_simulator -Duse_edge_modules=$use_edge_modules
+cmake $toolchainfile $cmake_install_prefix $build_root -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_sfc_tests:BOOL=$run_sfc_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Ddont_use_uploadtoblob:BOOL=$no_blob -Drun_unittests:BOOL=$run_unittests -Dno_logging:BOOL=$no_logging -Duse_prov_client:BOOL=$prov_auth -Duse_tpm_simulator:BOOL=$prov_use_tpm_simulator -Duse_edge_modules=$use_edge_modules -Dhsm_type_riot=$hsm_type_riot -Dhsm_type_x509=$hsm_type_x509 -Dhsm_type_symm_key=$hsm_type_symm_key -Dhsm_type_sastoken=$hsm_type_sastoken -DCMAKE_BUILD_TYPE=$build_config
 chmod --recursive ugo+rw ../cmake
 
 # Set the default cores

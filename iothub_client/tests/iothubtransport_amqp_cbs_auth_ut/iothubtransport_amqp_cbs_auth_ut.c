@@ -275,7 +275,6 @@ static void register_global_mock_returns()
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(OptionHandler_Create, NULL);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(OptionHandler_AddOption, OPTIONHANDLER_ERROR);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_DeviceId, TEST_DEVICE_ID);
-    REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Is_SasToken_Valid, SAS_TOKEN_STATUS_VALID);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_SasToken_Expiry, 3600);
 
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_Auth_Get_ModuleId, NULL);
@@ -404,11 +403,7 @@ static void set_expected_calls_for_put_SAS_token_to_cbs(AUTHENTICATION_HANDLE ha
     }
 
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(TEST_AUTHORIZATION_MODULE_HANDLE)).SetReturn(cred_type);
-    if (sas_token == TEST_USER_DEFINED_SAS_TOKEN_STRING_HANDLE)
-    {
-        STRICT_EXPECTED_CALL(IoTHubClient_Auth_Is_SasToken_Valid(TEST_AUTHORIZATION_MODULE_HANDLE));
-    }
-    else
+    if (sas_token != TEST_USER_DEFINED_SAS_TOKEN_STRING_HANDLE)
     {
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     }
@@ -1102,7 +1097,7 @@ TEST_FUNCTION(authentication_do_work_SAS_TOKEN_AUTHENTICATION_STATE_STARTING_fai
         }
 
         // arrange
-        char error_msg[64];
+        char error_msg[128];
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -1189,7 +1184,7 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_AUTHENTICATION_STATE_STARTING_f
         }
 
         // arrange
-        char error_msg[64];
+        char error_msg[128];
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -1599,7 +1594,7 @@ TEST_FUNCTION(authentication_retrieve_options_failure_checks)
     for (i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
         // arrange
-        char error_msg[64];
+        char error_msg[128];
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);

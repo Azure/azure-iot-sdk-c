@@ -11,7 +11,7 @@
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/uniqueid.h"
 
-#include "x509_info.h"
+#include "riot_info.h"
 
 #include "RIoT.h"
 #include "RiotCrypt.h"

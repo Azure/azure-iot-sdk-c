@@ -10,10 +10,10 @@
 // The ModelId is used when testing that the device client successfully sends the model
 // to the IoT Hub.  It is OK that there is no DTDL that implements these models since
 // this is opaque data to IoT Hub in any event.
-#define TEST_MODEL_ID_1 "dtmi:azure:c-sdk:e2e-test;1"
-#define TEST_MODEL_ID_2 "dtmi:azure:c-sdk:e2e-test;2"
-#define TEST_MODEL_ID_3 "dtmi:azure:c-sdk:e2e-test;3"
-#define TEST_MODEL_ID_4 "dtmi:azure:c-sdk:e2e-test;4"
+#define TEST_MODEL_ID_1 "dtmi:azure:csdk:e2e_test;1"
+#define TEST_MODEL_ID_2 "dtmi:azure:csdk:e2e_test;2"
+#define TEST_MODEL_ID_3 "dtmi:azure:csdk:e2e_test;3"
+#define TEST_MODEL_ID_4 "dtmi:azure:csdk:e2e_test;4"
 
 extern void dt_e2e_init(bool testing_modules);
 extern void dt_e2e_deinit(void);

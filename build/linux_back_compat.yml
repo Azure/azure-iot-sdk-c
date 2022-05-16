@@ -3,12 +3,13 @@ name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Re
 variables:
   runCodesignValidationInjection: false
 resources:
-- repo: self
-  clean: true
+  containers:
+  - container: linux-c-ubuntu-2004
+    endpoint: csdk-containers
+    image: csdkcontainerregistry.azurecr.io/linux-c-ubuntu-2004:latest
 jobs:
 - job: ubuntu2004
-  variables:
-    _PREVIEW_VSTS_DOCKER_IMAGE: "aziotbld/linux-c-ubuntu-2004"
+  container: linux-c-ubuntu-2004
   pool: 
     name: 'sdk-c--ubuntu-18'
   displayName: 'Ubuntu 20.04'

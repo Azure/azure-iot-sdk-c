@@ -13,9 +13,13 @@ For constrained devices - where memory is measured in kilobytes and not megabyte
 
 ## Table of Contents
 - [Azure IoT C SDKs and Libraries](#azure-iot-c-sdks-and-libraries)
+  - [Important branch rename information](#important-branch-rename-information)
+  - [Introduction](#introduction)
   - [Table of Contents](#table-of-contents)
   - [Critical Upcoming Change Notice](#critical-upcoming-change-notice)
   - [Getting the SDK](#getting-the-sdk)
+    - [Packages](#packages)
+    - [Linux](#linux)
   - [Samples](#samples)
   - [SDK API Reference Documentation](#sdk-api-reference-documentation)
   - [Other Azure IoT SDKs](#other-azure-iot-sdks)
@@ -45,7 +49,7 @@ that will impact the SDK's ability to connect to these services. In October 2022
 transition period beforehand where your IoT devices must have both the Baltimore and Digicert public certificates
 which may be hardcoded in their application or flashed onto your WiFi module in order to prevent connectivity issues.
 
-**Devices with only the Baltimore public certificate will lose the ability to connect to Azure IoT Hub and Device Provisioning Service in October 2022.**
+> **Devices with only the Baltimore public certificate will lose the ability to connect to Azure IoT Hub and Device Provisioning Service in October 2022.**
 
 To prepare for this change, make sure your device's TLS stack has both of these public root of trust certificates configured.
 
@@ -54,7 +58,9 @@ For a more in depth explanation as to why the IoT services are doing this, pleas
 
 ## Getting the SDK
 
-Please note, for constrained device scenarios like the below mbed and Arduino, there are better, lighter weight SDK options available.  See [Other Azure IoT SDKs](#other-azure-iot-sdks) for more.
+> Please note, for constrained device scenarios like mbed and Arduino, there are better, lighter weight SDK options available.  See [Other Azure IoT SDKs](#other-azure-iot-sdks) for more.
+
+### Packages
 
 The simplest way to get started with the Azure IoT SDKs on supported platforms is to use the following packages and libraries:
 
@@ -63,7 +69,17 @@ The simplest way to get started with the Azure IoT SDKs on supported platforms i
 - Windows:                                   [Device SDK on Vcpkg](./doc/setting_up_vcpkg.md#setup-c-sdk-vcpkg-for-windows-development-environment)
 - iOS:                                       [Device SDK on CocoaPod](https://cocoapods.org/pods/AzureIoTHubClient)
 
-For other platforms - including Linux - you need to clone and build the SDK directly.  You may also build it directly for the platforms above.  Instructions can be found [here](./iothub_client/readme.md#compile).
+     *iOS Limitations*
+
+  - Authentication is limited to SAS keys on iOS. No certificate-based authentication is officially supported.
+  - The Device Provisioning Client is not supported on iOS. Only the Azure IoT Hub device client is supported.
+
+For a more complete iOS experience including the two missing features above, please see our sample native Swift library built on top of the Embedded C SDK [here](https://github.com/Azure-Samples/azure-sdk-for-c-swift).
+
+### Linux
+
+For other platforms - including Linux - you need to clone and build the SDK directly.  You may also build it directly for the platforms above.
+- Linux:                                      [Device SDK library on Linux](./iothub_client/readme.md#compile)
 
 ## Samples
 

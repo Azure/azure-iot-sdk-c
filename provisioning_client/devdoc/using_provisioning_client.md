@@ -42,9 +42,15 @@ To install the TPM2 software stack and service on Ubuntu systems:
 sudo apt install tpm2-abrmd libtss2-tcti-tabrmd-dev
 ```
 
+### X509 Certificates
+
+For x509, the Provisioning Device Client allows either in-memory keys or Hardware Security Modules (HSMs) supported by the TLS stack. One example of such plug-ins is the use of OpenSSL with OpenSSL ENGINEs (see [OpenSSL Engine examples](../../iothub_client/devdoc/iothubclient_c_library.md#openssl-engine-examples) for more details). 
+
 ### DICE Simulator
 
-For x509 the Provisioning Device Client enables a DICE hardware simulator that emulators the DICE hardware operations.
+For x509, the Provisioning Device Client enables a DICE hardware simulator that emulates the DICE hardware operations.
+For more information about DICE/RIoT please see the paper [Device Identity with DICE and RIoT: Keys and Certificates
+](https://www.microsoft.com/research/publication/device-identity-dice-riot-keys-certificates/).
 
 ## Adding Enrollments with Azure Portal
 
@@ -56,7 +62,7 @@ To enroll a device in the azure portal you will need to either get the Registrat
 ./[cmake dir]/provisioning_client/tools/tpm_device_provision/tpm_device_provision.exe
 ```
 
-### x509 Provisioning Tool
+### DICE Provisioning Tool
 
 ```Shell
 ./[cmake dir]/provisioning_client/tools/dice_device_provision/dice_device_provision.exe

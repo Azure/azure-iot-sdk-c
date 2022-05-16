@@ -145,7 +145,7 @@ typedef struct AMQP_TRANSPORT_DEVICE_INSTANCE_TAG
     bool subscribe_methods_needed;                                       // Indicates if should subscribe for device methods.
     // is the transport subscribed for methods?
     bool subscribed_for_methods;                                         // Indicates if device is subscribed for device methods.
-
+    bool is_quota_exceeded; 
     TRANSPORT_CALLBACKS_INFO transport_callbacks;
     void* transport_ctx;
 } AMQP_TRANSPORT_DEVICE_INSTANCE;
@@ -291,6 +291,10 @@ static void on_device_state_changed_callback(void* context, DEVICE_STATE previou
                 registered_device->transport_instance->state == AMQP_TRANSPORT_STATE_BEING_DESTROYED)
             {
                 registered_device->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK, registered_device->transport_ctx);
+            }
+            else if (registered_device->is_quota_exceeded)
+            {
+                registered_device->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_QUOTA_EXCEEDED, registered_device->transport_ctx);
             }
         }
         else if (new_state == DEVICE_STATE_ERROR_AUTH)
@@ -807,6 +811,7 @@ static void prepare_device_for_connection_retry(AMQP_TRANSPORT_DEVICE_INSTANCE* 
 
     registered_device->number_of_previous_failures = 0;
     registered_device->number_of_send_event_complete_failures = 0;
+    registered_device->is_quota_exceeded = false;
 }
 
 void prepare_for_connection_retry(AMQP_TRANSPORT_INSTANCE* transport_instance)
@@ -943,6 +948,11 @@ static void on_event_send_complete(IOTHUB_MESSAGE_LIST* message, D2C_EVENT_SEND_
     else
     {
         registered_device->number_of_send_event_complete_failures = 0;
+    }
+
+    if (result == D2C_EVENT_SEND_COMPLETE_RESULT_ERROR_QUOTA_EXCEEDED)
+    {
+        registered_device->is_quota_exceeded = true;
     }
 
     if (message->callback != NULL)
@@ -2040,6 +2050,7 @@ IOTHUB_DEVICE_HANDLE IoTHubTransport_AMQP_Common_Register(TRANSPORT_LL_HANDLE ha
                 amqp_device_instance->max_state_change_timeout_secs = DEFAULT_DEVICE_STATE_CHANGE_TIMEOUT_SECS;
                 amqp_device_instance->subscribe_methods_needed = false;
                 amqp_device_instance->subscribed_for_methods = false;
+                amqp_device_instance->is_quota_exceeded = false;  
                 amqp_device_instance->transport_ctx = transport_instance->transport_ctx;
                 amqp_device_instance->transport_callbacks = transport_instance->transport_callbacks;
 
