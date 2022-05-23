@@ -7,9 +7,14 @@ on:
           description: 'Git SHA commit to use to build docs'
           required: true
 
+permissions:
+  contents: read
+
 jobs:
   push-docs:
 
+    permissions:
+      contents: write  # for JamesIves/github-pages-deploy-action to push changes in repo
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
