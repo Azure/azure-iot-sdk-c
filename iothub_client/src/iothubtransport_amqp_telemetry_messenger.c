@@ -1217,7 +1217,7 @@ static int send_pending_events(TELEMETRY_MESSENGER_INSTANCE* instance)
         // The task is responsible for running through its callers for callbacks, even for errors in this function.
         // Similarly, responsibility for freeing this memory falls on the 'task' cleanup also.
 
-        if (body_binary_data.length + send_pending_events_state.bytes_pending > max_messagesize)
+        if ((body_binary_data.length + send_pending_events_state.bytes_pending) > max_messagesize)
         {
             // If we tried to add the current message, we would overflow.  Send what we've queued immediately.
             if (send_batched_message_and_reset_state(instance, &send_pending_events_state) != RESULT_OK)
