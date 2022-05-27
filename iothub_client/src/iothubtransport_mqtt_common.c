@@ -1896,8 +1896,6 @@ static void processDeviceMethodNotification(PMQTTTRANSPORT_HANDLE_DATA transport
                     transportData->transport_callbacks.method_complete_cb(STRING_c_str(method_name), payload->message, payload->length, (void*)dev_method_info, transportData->transport_ctx) != 0)
                 {
                     LogError("Failure: IoTHubClientCore_LL_DeviceMethodComplete");
-                    STRING_delete(dev_method_info->request_id);
-                    free(dev_method_info);
                 }
             }
         }
