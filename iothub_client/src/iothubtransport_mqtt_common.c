@@ -3472,9 +3472,9 @@ int IoTHubTransport_MQTT_Common_DeviceMethod_Response(TRANSPORT_LL_HANDLE handle
             else
             {
                 result = 0;
+                STRING_delete(dev_method_info->request_id);
+                free(dev_method_info);
             }
-            STRING_delete(dev_method_info->request_id);
-            free(dev_method_info);
         }
     }
     else
