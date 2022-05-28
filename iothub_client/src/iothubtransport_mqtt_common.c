@@ -1897,6 +1897,8 @@ static void processDeviceMethodNotification(PMQTTTRANSPORT_HANDLE_DATA transport
                 {
                     LogError("Failure: IoTHubClientCore_LL_DeviceMethodComplete");
                 }
+                STRING_delete(dev_method_info->request_id);
+                free(dev_method_info);
             }
         }
         STRING_delete(method_name);
@@ -3451,16 +3453,16 @@ void IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod(TRANSPORT_LL_HANDLE ha
 int IoTHubTransport_MQTT_Common_DeviceMethod_Response(TRANSPORT_LL_HANDLE handle, METHOD_HANDLE methodId, const unsigned char* response, size_t respSize, int status)
 {
     int result;
-    DEVICE_METHOD_INFO* dev_method_info = (DEVICE_METHOD_INFO*)methodId;
-    if (dev_method_info == NULL)
+    MQTTTRANSPORT_HANDLE_DATA* transport_data = (MQTTTRANSPORT_HANDLE_DATA*)handle;
+    if (transport_data != NULL)
     {
-        LogError("Failure: DEVICE_METHOD_INFO was NULL");
-        result = MU_FAILURE;
-    }
-    else
-    {
-        MQTTTRANSPORT_HANDLE_DATA* transport_data = (MQTTTRANSPORT_HANDLE_DATA*)handle;
-        if (transport_data != NULL)
+        DEVICE_METHOD_INFO* dev_method_info = (DEVICE_METHOD_INFO*)methodId;
+        if (dev_method_info == NULL)
+        {
+            LogError("Failure: DEVICE_METHOD_INFO was NULL");
+            result = MU_FAILURE;
+        }
+        else
         {
             if (publishDeviceMethodResponseMsg(transport_data, status, dev_method_info->request_id, response, respSize) != 0)
             {
@@ -3472,15 +3474,12 @@ int IoTHubTransport_MQTT_Common_DeviceMethod_Response(TRANSPORT_LL_HANDLE handle
                 result = 0;
             }
         }
-        else
-        {
-            result = MU_FAILURE;
-            LogError("Failure: invalid TRANSPORT_LL_HANDLE parameter specified");
-        }
-        STRING_delete(dev_method_info->request_id);
-        free(dev_method_info);
     }
-
+    else
+    {
+        result = MU_FAILURE;
+        LogError("Failure: invalid TRANSPORT_LL_HANDLE parameter specified");
+    }
     return result;
 }
 
