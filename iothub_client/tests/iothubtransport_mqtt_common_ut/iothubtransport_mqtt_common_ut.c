@@ -6647,7 +6647,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_method_succeed)
 
 }
 
-/*
 TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_method_fail)
 {
     // arrange
@@ -6657,6 +6656,8 @@ TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_method_fail)
     IOTHUBTRANSPORT_CONFIG config = { 0 };
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, NULL);
 
+    pfTransport_DeviceMethod_Complete_Callback old_method_complete_cb = transport_cb_info.method_complete_cb;
+    transport_cb_info.method_complete_cb = my_Transport_DeviceMethod_Complete_Callback;
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
     g_tokenizerIndex = 6;
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -6679,16 +6680,22 @@ TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_method_fail)
             sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_DoWork failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
             g_fnMqttMsgRecv(TEST_MQTT_MESSAGE_HANDLE, g_callbackCtx);
+
+            if (g_method_handle_value != NULL)
+            {
+                IoTHubTransport_MQTT_Common_DeviceMethod_Response(handle, g_method_handle_value, TEST_DEVICE_METHOD_RESPONSE, TEST_DEVICE_RESP_LENGTH, TEST_DEVICE_STATUS_CODE);
+                g_method_handle_value = NULL;
+            }
         }
     }
 
     // assert
 
     //cleanup
+    transport_cb_info.method_complete_cb = old_method_complete_cb;
     IoTHubTransport_MQTT_Common_Destroy(handle);
     umock_c_negative_tests_deinit();
 }
-*/
 
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_Register_deviceKey_null_and_deviceSasToken_null_returns_null)
 {
