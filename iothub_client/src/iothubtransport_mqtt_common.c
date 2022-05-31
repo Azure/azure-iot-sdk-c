@@ -1892,8 +1892,13 @@ static void processDeviceMethodNotification(PMQTTTRANSPORT_HANDLE_DATA transport
             else
             {
                 const APP_PAYLOAD* payload = mqttmessage_getApplicationMsg(msgHandle);
-                if (payload == NULL ||
-                    transportData->transport_callbacks.method_complete_cb(STRING_c_str(method_name), payload->message, payload->length, (void*)dev_method_info, transportData->transport_ctx) != 0)
+                if (payload == NULL)
+                {
+                    LogError("Failure: app payload");
+                    STRING_delete(dev_method_info->request_id);
+                    free(dev_method_info);
+                } 
+                else if (transportData->transport_callbacks.method_complete_cb(STRING_c_str(method_name), payload->message, payload->length, (void*)dev_method_info, transportData->transport_ctx) != 0)
                 {
                     LogError("Failure: IoTHubClientCore_LL_DeviceMethodComplete");
                 }
