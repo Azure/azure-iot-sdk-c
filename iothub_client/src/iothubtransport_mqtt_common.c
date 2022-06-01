@@ -3462,26 +3462,26 @@ int IoTHubTransport_MQTT_Common_DeviceMethod_Response(TRANSPORT_LL_HANDLE handle
         LogError("Failure: DEVICE_METHOD_INFO is NULL");
         result = MU_FAILURE;
     }
+    else if (handle == NULL)
+    {
+        LogError("Failure: TRANSPORT_LL_HANDLE is NULL");
+        result = MU_FAILURE;
+        STRING_delete(dev_method_info->request_id);
+        free(dev_method_info);
+    }
     else
     {
         MQTTTRANSPORT_HANDLE_DATA* transport_data = (MQTTTRANSPORT_HANDLE_DATA*)handle;
-        if (transport_data != NULL)
+        if (publishDeviceMethodResponseMsg(transport_data, status, dev_method_info->request_id, response, respSize) != 0)
         {
-            if (publishDeviceMethodResponseMsg(transport_data, status, dev_method_info->request_id, response, respSize) != 0)
-            {
-                LogError("Failure: publishing device method response");
-                result = MU_FAILURE;
-            }
-            else
-            {
-                result = 0;
-            }
+            LogError("Failure: publishing device method response");
+            result = MU_FAILURE;
         }
         else
         {
-            result = MU_FAILURE;
-            LogError("Failure: invalid TRANSPORT_LL_HANDLE parameter specified");
+            result = 0;
         }
+      
         STRING_delete(dev_method_info->request_id);
         free(dev_method_info);
     }
