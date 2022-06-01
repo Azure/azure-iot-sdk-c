@@ -16,7 +16,7 @@
 #pragma warning(disable: 4054) /* MSC incorrectly fires this */
 #endif
 
-static size_t TEST_METHOD_ID = 0x1010;
+static size_t TEST_METHOD_ID_VALUE = 0x1010;
 
 static void* my_gballoc_malloc(size_t size)
 {
