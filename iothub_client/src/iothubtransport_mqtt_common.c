@@ -1894,7 +1894,7 @@ static void processDeviceMethodNotification(PMQTTTRANSPORT_HANDLE_DATA transport
                 const APP_PAYLOAD* payload = mqttmessage_getApplicationMsg(msgHandle);
                 if (payload == NULL)
                 {
-                    LogError("Failure: app payload");
+                    LogError("Failure: mqttmessage_getApplicationMsg");
                     STRING_delete(dev_method_info->request_id);
                     free(dev_method_info);
                 } 
