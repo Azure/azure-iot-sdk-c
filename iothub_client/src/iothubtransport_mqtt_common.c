@@ -3459,7 +3459,7 @@ int IoTHubTransport_MQTT_Common_DeviceMethod_Response(TRANSPORT_LL_HANDLE handle
     DEVICE_METHOD_INFO* dev_method_info = (DEVICE_METHOD_INFO*)methodId;
     if (dev_method_info == NULL)
     {
-        LogError("Failure: DEVICE_METHOD_INFO was NULL");
+        LogError("Failure: DEVICE_METHOD_INFO is NULL");
         result = MU_FAILURE;
     }
     else
