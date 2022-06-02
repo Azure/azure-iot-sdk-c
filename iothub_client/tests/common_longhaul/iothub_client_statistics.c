@@ -154,7 +154,7 @@ bool compare_message_time_to_connection_time(LIST_ITEM_HANDLE list_item, const v
 {
     CONNECTION_STATUS_INFO* connection_status = (CONNECTION_STATUS_INFO*)list_item;
     time_t message_time = *((time_t*)match_context);
-    if ((connection_status->status == IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED || connection_status->reason == IOTHUB_CLIENT_CONNECTION_NO_NETWORK) &&
+    if ((connection_status->reason == IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR || connection_status->reason == IOTHUB_CLIENT_CONNECTION_NO_NETWORK) &&
         connection_status->time <= (message_time + SPAN_10_SECONDS) &&
         connection_status->time >  (message_time - SPAN_4_MINUTES_IN_SECONDS))
     {
@@ -587,6 +587,11 @@ static void serialize_device_twin_desired_event(const void* item, const void* ac
                 else if (json_object_dotset_string(info_json_obj, "receive.time", (info->time_received == INDEFINITE_TIME ? "undefined" : ctime(&info->time_received))) != JSONSuccess)
                 {
                     LogError("Failed serializing device twin event receive time");
+                    json_value_free(info_json);
+                }
+                else if (json_object_dotset_number(info_json_obj, "receive.version", info->version) != JSONSuccess)
+                {
+                    LogError("Failed serializing device twin event receive version");
                     json_value_free(info_json);
                 }
                 else if (json_array_append_value(device_twin_array, info_json) != 0)
@@ -1050,6 +1055,16 @@ int iothub_client_statistics_get_c2d_summary(IOTHUB_CLIENT_STATISTICS_HANDLE han
 
                     summary->messages_received = summary->messages_received + 1;
                 }
+                else if (c2d_msg_info->send_callback_result == IOTHUB_MESSAGING_ERROR)
+                {
+                    // remove the item if we failed to send the C2D message
+                    summary->messages_received--;
+                    LogInfo("Removing C2D message id (%d) because of network send error", (int)c2d_msg_info->message_id);
+                }
+                else
+                {
+                    LogError("Error found in id (%d).", (int)c2d_msg_info->message_id);
+                }
             }
 
             list_item = singlylinkedlist_get_next_item(list_item);
@@ -1180,6 +1195,16 @@ int iothub_client_statistics_get_device_method_summary(IOTHUB_CLIENT_STATISTICS_
                     }
 
                     summary->methods_received = summary->methods_received + 1;
+                }
+                else if (device_method_info->method_result == IOTHUB_DEVICE_METHOD_ERROR)
+                {
+                    // remove the item if we failed to send the C2D message
+                    summary->methods_received--;
+                    LogInfo("Removing device method id (%d) because of network send error", (int)device_method_info->method_id);
+                }
+                else
+                {
+                    LogError("Error found in id (%d).", (int)device_method_info->method_id);
                 }
             }
 

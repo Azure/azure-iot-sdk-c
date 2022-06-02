@@ -12,6 +12,7 @@
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/lock.h"
+#include "azure_c_shared_utility/httpapiex.h"
 #include "iothub_client_options.h"
 #include "iothub_device_client.h"
 #include "iothub_message.h"
@@ -51,7 +52,8 @@ static const char* IOTHUB_LONGHAUL_LOOP_DURATION_SECS = "IOTHUB_LONGHAUL_LOOP_DU
 #define DEVICE_METHOD_SUB_WAIT_TIME_MS          (5 * 1000)
 #define NETWORK_RETRY_ATTEMPTS                  20
 #define SERVICE_NETWORK_RETRY_ATTEMPTS          4
-#define NETWORK_RETRY_DELAY_MSEC                5 * 1000
+#define NETWORK_RETRY_DELAY_MSEC                15 * 1000
+#define NETWORK_RETRY_LONG_DELAY_MSEC           60 * 1000
 
 #define MAX_TELEMETRY_TRAVEL_TIME_SECS          600.0
 #define MAX_C2D_TRAVEL_TIME_SECS                600.0
@@ -399,14 +401,48 @@ static char* create_twin_desired_properties_update(const char* test_id, unsigned
     return result;
 }
 
+static void validate_internet_conductivity()
+{
+    HTTPAPIEX_HANDLE httpExApiHandle;
+    unsigned int statusCode = 0;
+    BUFFER_HANDLE responseBuffer;
+
+    if ((responseBuffer = BUFFER_new()) == NULL)
+    {
+        LogError("BUFFER_new failed for responseBuffer");
+    }
+    else if ((httpExApiHandle = HTTPAPIEX_Create("bing.com")) == NULL)
+    {
+        LogError("HTTPAPIEX_Create failed");
+    }
+    else if (HTTPAPIEX_ExecuteRequest(httpExApiHandle, HTTPAPI_REQUEST_GET, "", NULL, NULL, &statusCode, NULL, responseBuffer) != HTTPAPIEX_OK)
+    {
+        LogError("validate_internet_conductivity: bing.com is NOT accessible!");
+    }
+    else
+    {
+        BUFFER_delete(responseBuffer);
+        if (statusCode >= 200 && statusCode < 300)
+        {
+            LogInfo("validate_internet_conductivity: bing.com is accessible");
+        }
+    }
+}
+
 static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS status, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason, void* userContextCallback)
 {
-    IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaul = (IOTHUB_LONGHAUL_RESOURCES*)userContextCallback;
+    LogInfo("Device Connection Status: status=%s, reason=%s", MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONNECTION_STATUS, status), MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason));
 
+    IOTHUB_LONGHAUL_RESOURCES* iotHubLonghaul = (IOTHUB_LONGHAUL_RESOURCES*)userContextCallback;
     if (iothub_client_statistics_add_connection_status(iotHubLonghaul->iotHubClientStats, status, reason) != 0)
     {
-        LogError("Failed adding connection status statistics (%s, %s)",
-            MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONNECTION_STATUS, status), MU_ENUM_TO_STRING(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason));
+        LogError("Failed adding connection status statistics");
+    }
+
+    if (reason == IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR ||
+        reason == IOTHUB_CLIENT_CONNECTION_NO_NETWORK)
+    {
+        validate_internet_conductivity();
     }
 }
 
@@ -1131,7 +1167,7 @@ static IOTHUB_MESSAGING_CLIENT_HANDLE longhaul_initialize_service_c2d_messaging_
                 break;
             }
 
-            ThreadAPI_Sleep(1000 * 60); // wait before reconnecting (might be a networking issue)
+            ThreadAPI_Sleep(NETWORK_RETRY_LONG_DELAY_MSEC); // wait before reconnecting (might be a networking issue)
         }
 
         if (retryConnectAttemps == 0)
@@ -1421,16 +1457,22 @@ static int send_c2d(const void* context)
                         IoTHubMessaging_Destroy(iotHubLonghaul->iotHubSvcMsgHandle);
                         iotHubLonghaul->iotHubSvcMsgHandle = NULL;
 
-                        LogInfo("Reopening service handle");
+                        ThreadAPI_Sleep(NETWORK_RETRY_LONG_DELAY_MSEC); // wait and try again
+                        LogInfo("Reopening service handle...");
                         IOTHUB_MESSAGING_CLIENT_HANDLE messageClientHandle = longhaul_initialize_service_c2d_messaging_client(iotHubLonghaul);
                         if (messageClientHandle != NULL)
                         {
                             continue;
                         }
+                        else
+                        {
+                            LogError("Reopening service handle failed!");
+                        }
                     }
 
                     if (iotHubMessagingResult != IOTHUB_MESSAGING_OK)
                     {
+                        validate_internet_conductivity();
                         LogError("Failed sending c2d message with error %d", iotHubMessagingResult);
                         free(send_context);
                         result = MU_FAILURE;
@@ -1505,7 +1547,7 @@ static int invoke_device_method(const void* context)
             device_method_info.method_id = method_id;
             device_method_info.time_invoked = time(NULL);
 
-            for (int i = 0; i < 3; i++)
+            for (int i = 1; i <= 3; i++)
             {
                 device_method_info.method_result = IoTHubDeviceMethod_Invoke(
                     iotHubLonghaul->iotHubSvcDevMethodHandle,
@@ -1521,11 +1563,14 @@ static int invoke_device_method(const void* context)
                     break;
                 }
 
-                ThreadAPI_Sleep(1000 * 60); // wait for the SAS reconnect and try again
+                LogError("Failed invoking IoTHubDeviceMethod_Invoke() with status %d, try #%d", device_method_info.method_result, i);
+
+                ThreadAPI_Sleep(NETWORK_RETRY_LONG_DELAY_MSEC); // wait for the SAS reconnect and try again
             }
 
             if (device_method_info.method_result != IOTHUB_DEVICE_METHOD_OK)
             {
+                validate_internet_conductivity();
                 LogError("Failed invoking device method with status %d", responseStatus);
             }
 
@@ -1611,14 +1656,14 @@ static int update_device_twin_desired_property(const void* context)
                 device_twin_info.update_id = update_id;
                 device_twin_info.time_updated = time(NULL);
 
-                for (int i = NETWORK_RETRY_ATTEMPTS; i > 0; i--)
+                for (int i = 1; i <= NETWORK_RETRY_ATTEMPTS; i++)
                 {
                     if ((update_response = IoTHubDeviceTwin_UpdateTwin(
                         iotHubLonghaul->iotHubSvcDevTwinHandle,
                         iotHubLonghaul->deviceInfo->deviceId,
                         message)) == NULL)
                     {
-                        LogError("Failed sending twin desired properties update");
+                        LogError("Failed sending twin desired properties update, try #%d", i);
                         device_twin_info.update_result = -1;
                     }
                     else
@@ -1632,6 +1677,7 @@ static int update_device_twin_desired_property(const void* context)
 
                 if (iothub_client_statistics_add_device_twin_desired_info(iotHubLonghaul->iotHubClientStats, DEVICE_TWIN_UPDATE_SENT, &device_twin_info) != 0)
                 {
+                    validate_internet_conductivity();
                     LogError("Failed adding twin desired properties statistics info (update_id=%d)", update_id);
                     result = MU_FAILURE;
                 }
@@ -1707,6 +1753,7 @@ static void check_for_reported_properties_update_on_service_side(IOTHUB_LONGHAUL
 
     if (twin == NULL)
     {
+        validate_internet_conductivity();
         LogError("Failed getting the twin document on service side");
     }
     else
@@ -2142,6 +2189,7 @@ static void on_device_twin_update_received(DEVICE_TWIN_UPDATE_STATE update_state
         unsigned int message_id = 0;
         char tests_id[40];
         int version = -1;
+        tests_id[0] = '\0';
 
         if ((parse_string = STRING_from_byte_array(payLoad, size)) == NULL)
         {
@@ -2167,6 +2215,7 @@ static void on_device_twin_update_received(DEVICE_TWIN_UPDATE_STATE update_state
                 DEVICE_TWIN_DESIRED_INFO info;
                 info.update_id = message_id;
                 info.time_received = time(NULL);
+                info.version = version;
 
                 if (info.time_received == INDEFINITE_TIME)
                 {
