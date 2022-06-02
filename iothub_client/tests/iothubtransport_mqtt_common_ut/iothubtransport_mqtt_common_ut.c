@@ -16,6 +16,8 @@
 #pragma warning(disable: 4054) /* MSC incorrectly fires this */
 #endif
 
+static size_t TEST_METHOD_ID_VALUE = 0x1010;
+
 static void* my_gballoc_malloc(size_t size)
 {
     return malloc(size);
@@ -23,7 +25,11 @@ static void* my_gballoc_malloc(size_t size)
 
 static void my_gballoc_free(void* ptr)
 {
-    free(ptr);
+    if (ptr != (void*)TEST_METHOD_ID_VALUE &&
+        ptr != (void*)&TEST_METHOD_ID_VALUE)
+    {
+        free(ptr);
+    }
 }
 
 void* my_gballoc_realloc(void* ptr, size_t size)
@@ -247,7 +253,6 @@ static CONSTBUFFER_HANDLE TEST_CONST_BUFFER_HANDLE = (CONSTBUFFER_HANDLE)0x2331;
 
 static const unsigned char* TEST_DEVICE_METHOD_RESPONSE = (const unsigned char*)0x62;
 static size_t TEST_DEVICE_RESP_LENGTH = 1;
-static size_t TEST_METHOD_ID_VALUE = 12;
 static METHOD_HANDLE TEST_METHOD_ID = &TEST_METHOD_ID_VALUE;
 static METHOD_HANDLE g_method_handle_value = NULL;
 
@@ -6651,6 +6656,8 @@ TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_method_fail)
     IOTHUBTRANSPORT_CONFIG config = { 0 };
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, NULL);
 
+    pfTransport_DeviceMethod_Complete_Callback old_method_complete_cb = transport_cb_info.method_complete_cb;
+    transport_cb_info.method_complete_cb = my_Transport_DeviceMethod_Complete_Callback;
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
     g_tokenizerIndex = 6;
     IoTHubTransport_MQTT_Common_DoWork(handle);
@@ -6673,12 +6680,19 @@ TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_method_fail)
             sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_DoWork failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
             g_fnMqttMsgRecv(TEST_MQTT_MESSAGE_HANDLE, g_callbackCtx);
+
+            if (g_method_handle_value != NULL)
+            {
+                IoTHubTransport_MQTT_Common_DeviceMethod_Response(handle, g_method_handle_value, TEST_DEVICE_METHOD_RESPONSE, TEST_DEVICE_RESP_LENGTH, TEST_DEVICE_STATUS_CODE);
+                g_method_handle_value = NULL;
+            }
         }
     }
 
     // assert
 
     //cleanup
+    transport_cb_info.method_complete_cb = old_method_complete_cb;
     IoTHubTransport_MQTT_Common_Destroy(handle);
     umock_c_negative_tests_deinit();
 }
@@ -7776,6 +7790,8 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_ProcessItem_fail)
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DeviceMethod_Response_handle_NULL_fail)
 {
     // arrange
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     // act
     int result = IoTHubTransport_MQTT_Common_DeviceMethod_Response(NULL, TEST_METHOD_ID, TEST_DEVICE_METHOD_RESPONSE, TEST_DEVICE_RESP_LENGTH, TEST_DEVICE_STATUS_CODE);
