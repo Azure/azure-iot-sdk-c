@@ -1892,12 +1892,15 @@ static void processDeviceMethodNotification(PMQTTTRANSPORT_HANDLE_DATA transport
             else
             {
                 const APP_PAYLOAD* payload = mqttmessage_getApplicationMsg(msgHandle);
-                if (payload == NULL ||
-                    transportData->transport_callbacks.method_complete_cb(STRING_c_str(method_name), payload->message, payload->length, (void*)dev_method_info, transportData->transport_ctx) != 0)
+                if (payload == NULL)
                 {
-                    LogError("Failure: IoTHubClientCore_LL_DeviceMethodComplete");
+                    LogError("Failure: mqttmessage_getApplicationMsg");
                     STRING_delete(dev_method_info->request_id);
                     free(dev_method_info);
+                } 
+                else if (transportData->transport_callbacks.method_complete_cb(STRING_c_str(method_name), payload->message, payload->length, (void*)dev_method_info, transportData->transport_ctx) != 0)
+                {
+                    LogError("Failure: IoTHubClientCore_LL_DeviceMethodComplete");
                 }
             }
         }
@@ -3453,35 +3456,36 @@ void IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod(TRANSPORT_LL_HANDLE ha
 int IoTHubTransport_MQTT_Common_DeviceMethod_Response(TRANSPORT_LL_HANDLE handle, METHOD_HANDLE methodId, const unsigned char* response, size_t respSize, int status)
 {
     int result;
-    MQTTTRANSPORT_HANDLE_DATA* transport_data = (MQTTTRANSPORT_HANDLE_DATA*)handle;
-    if (transport_data != NULL)
+    DEVICE_METHOD_INFO* dev_method_info = (DEVICE_METHOD_INFO*)methodId;
+    if (dev_method_info == NULL)
     {
-        DEVICE_METHOD_INFO* dev_method_info = (DEVICE_METHOD_INFO*)methodId;
-        if (dev_method_info == NULL)
+        LogError("Failure: DEVICE_METHOD_INFO is NULL");
+        result = MU_FAILURE;
+    }
+    else if (handle == NULL)
+    {
+        LogError("Failure: TRANSPORT_LL_HANDLE is NULL");
+        result = MU_FAILURE;
+        STRING_delete(dev_method_info->request_id);
+        free(dev_method_info);
+    }
+    else
+    {
+        MQTTTRANSPORT_HANDLE_DATA* transport_data = (MQTTTRANSPORT_HANDLE_DATA*)handle;
+        if (publishDeviceMethodResponseMsg(transport_data, status, dev_method_info->request_id, response, respSize) != 0)
         {
-            LogError("Failure: DEVICE_METHOD_INFO was NULL");
+            LogError("Failure: publishing device method response");
             result = MU_FAILURE;
         }
         else
         {
-            if (publishDeviceMethodResponseMsg(transport_data, status, dev_method_info->request_id, response, respSize) != 0)
-            {
-                LogError("Failure: publishing device method response");
-                result = MU_FAILURE;
-            }
-            else
-            {
-                result = 0;
-            }
-            STRING_delete(dev_method_info->request_id);
-            free(dev_method_info);
+            result = 0;
         }
+      
+        STRING_delete(dev_method_info->request_id);
+        free(dev_method_info);
     }
-    else
-    {
-        result = MU_FAILURE;
-        LogError("Failure: invalid TRANSPORT_LL_HANDLE parameter specified");
-    }
+
     return result;
 }
 
