@@ -401,7 +401,7 @@ static char* create_twin_desired_properties_update(const char* test_id, unsigned
     return result;
 }
 
-static void validate_internet_conductivity()
+static void validate_internet_connectivity()
 {
     HTTPAPIEX_HANDLE httpExApiHandle;
     unsigned int statusCode = 0;
@@ -414,18 +414,20 @@ static void validate_internet_conductivity()
     else if ((httpExApiHandle = HTTPAPIEX_Create("bing.com")) == NULL)
     {
         LogError("HTTPAPIEX_Create failed");
+        BUFFER_delete(responseBuffer);
     }
     else if (HTTPAPIEX_ExecuteRequest(httpExApiHandle, HTTPAPI_REQUEST_GET, "", NULL, NULL, &statusCode, NULL, responseBuffer) != HTTPAPIEX_OK)
     {
-        LogError("validate_internet_conductivity: bing.com is NOT accessible!");
+        LogError("validate_internet_connectivity: bing.com is NOT accessible!");
+        BUFFER_delete(responseBuffer);
     }
     else
     {
-        BUFFER_delete(responseBuffer);
         if (statusCode >= 200 && statusCode < 300)
         {
-            LogInfo("validate_internet_conductivity: bing.com is accessible");
+            LogInfo("validate_internet_connectivity: bing.com is accessible");
         }
+        BUFFER_delete(responseBuffer);
     }
 }
 
@@ -442,7 +444,7 @@ static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS status, I
     if (reason == IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR ||
         reason == IOTHUB_CLIENT_CONNECTION_NO_NETWORK)
     {
-        validate_internet_conductivity();
+        validate_internet_connectivity();
     }
 }
 
@@ -1472,7 +1474,7 @@ static int send_c2d(const void* context)
 
                     if (iotHubMessagingResult != IOTHUB_MESSAGING_OK)
                     {
-                        validate_internet_conductivity();
+                        validate_internet_connectivity();
                         LogError("Failed sending c2d message with error %d", iotHubMessagingResult);
                         free(send_context);
                         result = MU_FAILURE;
@@ -1570,7 +1572,7 @@ static int invoke_device_method(const void* context)
 
             if (device_method_info.method_result != IOTHUB_DEVICE_METHOD_OK)
             {
-                validate_internet_conductivity();
+                validate_internet_connectivity();
                 LogError("Failed invoking device method with status %d", responseStatus);
             }
 
@@ -1677,7 +1679,7 @@ static int update_device_twin_desired_property(const void* context)
 
                 if (iothub_client_statistics_add_device_twin_desired_info(iotHubLonghaul->iotHubClientStats, DEVICE_TWIN_UPDATE_SENT, &device_twin_info) != 0)
                 {
-                    validate_internet_conductivity();
+                    validate_internet_connectivity();
                     LogError("Failed adding twin desired properties statistics info (update_id=%d)", update_id);
                     result = MU_FAILURE;
                 }
@@ -1753,7 +1755,7 @@ static void check_for_reported_properties_update_on_service_side(IOTHUB_LONGHAUL
 
     if (twin == NULL)
     {
-        validate_internet_conductivity();
+        validate_internet_connectivity();
         LogError("Failed getting the twin document on service side");
     }
     else
