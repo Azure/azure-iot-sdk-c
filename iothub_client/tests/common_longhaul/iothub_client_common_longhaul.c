@@ -52,8 +52,9 @@ static const char* IOTHUB_LONGHAUL_LOOP_DURATION_SECS = "IOTHUB_LONGHAUL_LOOP_DU
 #define DEVICE_METHOD_SUB_WAIT_TIME_MS          (5 * 1000)
 #define NETWORK_RETRY_ATTEMPTS                  20
 #define SERVICE_NETWORK_RETRY_ATTEMPTS          4
-#define NETWORK_RETRY_DELAY_MSEC                15 * 1000
-#define NETWORK_RETRY_LONG_DELAY_MSEC           60 * 1000
+#define NETWORK_RETRY_DELAY_MSEC                (15 * 1000)
+#define NETWORK_RETRY_LONG_DELAY_MSEC           (60 * 1000)
+#define NETWORK_TEST_ENDPOINT                   "bing.com"
 
 #define MAX_TELEMETRY_TRAVEL_TIME_SECS          600.0
 #define MAX_C2D_TRAVEL_TIME_SECS                600.0
@@ -407,25 +408,26 @@ static void validate_internet_connectivity()
     unsigned int statusCode = 0;
     BUFFER_HANDLE responseBuffer;
 
+    LogInfo("Network error detected in test. Verifying internet connectivity available...");
     if ((responseBuffer = BUFFER_new()) == NULL)
     {
         LogError("BUFFER_new failed for responseBuffer");
     }
-    else if ((httpExApiHandle = HTTPAPIEX_Create("bing.com")) == NULL)
+    else if ((httpExApiHandle = HTTPAPIEX_Create(NETWORK_TEST_ENDPOINT)) == NULL)
     {
         LogError("HTTPAPIEX_Create failed");
         BUFFER_delete(responseBuffer);
     }
     else if (HTTPAPIEX_ExecuteRequest(httpExApiHandle, HTTPAPI_REQUEST_GET, "", NULL, NULL, &statusCode, NULL, responseBuffer) != HTTPAPIEX_OK)
     {
-        LogError("validate_internet_connectivity: bing.com is NOT accessible!");
+        LogError("validate_internet_connectivity: " NETWORK_TEST_ENDPOINT " is NOT accessible!");
         BUFFER_delete(responseBuffer);
     }
     else
     {
         if (statusCode >= 200 && statusCode < 300)
         {
-            LogInfo("validate_internet_connectivity: bing.com is accessible");
+            LogInfo("validate_internet_connectivity: " NETWORK_TEST_ENDPOINT " is accessible");
         }
         BUFFER_delete(responseBuffer);
     }
@@ -1446,7 +1448,7 @@ static int send_c2d(const void* context)
                 send_context->message_id = message_id;
                 send_context->iotHubLonghaul = iotHubLonghaul;
 
-                for (int retryAttemps = 3; retryAttemps > 0; retryAttemps--)
+                for (int retryAttemps = NETWORK_RETRY_ATTEMPTS; retryAttemps > 0; retryAttemps--)
                 {
                     IOTHUB_MESSAGING_RESULT iotHubMessagingResult = IoTHubMessaging_SendAsync(iotHubLonghaul->iotHubSvcMsgHandle, iotHubLonghaul->deviceInfo->deviceId, message, on_c2d_message_sent, send_context);
                     if (iotHubMessagingResult == IOTHUB_MESSAGING_ERROR)
@@ -1549,7 +1551,7 @@ static int invoke_device_method(const void* context)
             device_method_info.method_id = method_id;
             device_method_info.time_invoked = time(NULL);
 
-            for (int i = 1; i <= 3; i++)
+            for (int i = 1; i <= NETWORK_RETRY_ATTEMPTS; i++)
             {
                 device_method_info.method_result = IoTHubDeviceMethod_Invoke(
                     iotHubLonghaul->iotHubSvcDevMethodHandle,

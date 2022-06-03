@@ -1058,7 +1058,7 @@ int iothub_client_statistics_get_c2d_summary(IOTHUB_CLIENT_STATISTICS_HANDLE han
                 else if (c2d_msg_info->send_callback_result == IOTHUB_MESSAGING_ERROR)
                 {
                     // remove the item if we failed to send the C2D message
-                    summary->messages_received--;
+                    summary->messages_sent--;
                     LogInfo("Removing C2D message id (%d) because of network send error", (int)c2d_msg_info->message_id);
                 }
                 else
@@ -1198,8 +1198,8 @@ int iothub_client_statistics_get_device_method_summary(IOTHUB_CLIENT_STATISTICS_
                 }
                 else if (device_method_info->method_result == IOTHUB_DEVICE_METHOD_ERROR)
                 {
-                    // remove the item if we failed to send the C2D message
-                    summary->methods_received--;
+                    // remove the item if we failed to send the device method
+                    summary->methods_invoked--;
                     LogInfo("Removing device method id (%d) because of network send error", (int)device_method_info->method_id);
                 }
                 else
