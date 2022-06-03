@@ -383,3 +383,16 @@
    fun:tickcounter_create
    ...
 }
+{
+   client_connect_to_hub printf ConflictingAccess
+   drd:ConflictingAccess
+   fun:mempcpy
+   fun:_IO_new_file_xsputn
+   fun:_IO_file_xsputn@@GLIBC_2.2.5
+   fun:__vfprintf_internal
+   fun:printf
+   fun:client_connect_to_hub
+   fun:e2e_d2c_with_svc_fault_ctrl_error_message_callback
+   fun:RunTests
+   fun:(below main)
+}
