@@ -418,18 +418,19 @@ static void validate_internet_connectivity()
         LogError("HTTPAPIEX_Create failed");
         BUFFER_delete(responseBuffer);
     }
-    else if (HTTPAPIEX_ExecuteRequest(httpExApiHandle, HTTPAPI_REQUEST_GET, "", NULL, NULL, &statusCode, NULL, responseBuffer) != HTTPAPIEX_OK)
+    else 
     {
-        LogError("validate_internet_connectivity: " NETWORK_TEST_ENDPOINT " is NOT accessible!");
-        BUFFER_delete(responseBuffer);
-    }
-    else
-    {
-        if (statusCode >= 200 && statusCode < 300)
+        HTTPAPIEX_ExecuteRequest(httpExApiHandle, HTTPAPI_REQUEST_GET, "", NULL, NULL, &statusCode, NULL, responseBuffer);
+        if (statusCode >= 200 && statusCode <= 301)
         {
             LogInfo("validate_internet_connectivity: " NETWORK_TEST_ENDPOINT " is accessible");
         }
+        else
+        {
+            LogError("validate_internet_connectivity: " NETWORK_TEST_ENDPOINT " is NOT accessible!");
+        }
         BUFFER_delete(responseBuffer);
+        HTTPAPIEX_Destroy(httpExApiHandle);
     }
 }
 
@@ -1547,7 +1548,7 @@ static int invoke_device_method(const void* context)
             unsigned char* responsePayload;
             size_t responseSize;
 
-            DEVICE_METHOD_INFO device_method_info;
+            DEVICE_METHOD_INFO device_method_info = {0};
             device_method_info.method_id = method_id;
             device_method_info.time_invoked = time(NULL);
 
