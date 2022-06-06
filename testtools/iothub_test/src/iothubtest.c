@@ -1114,7 +1114,7 @@ static void on_connection_state_changed(void* context, CONNECTION_STATE new_conn
 
     IOTHUB_VALIDATION_INFO* devhubValInfo = (IOTHUB_VALIDATION_INFO*)context;
     if (devhubValInfo->isEventListenerConnected && 
-        (new_connection_state == CONNECTION_STATE_END || new_connection_state == CONNECTION_STATE_ERROR) &&
+        (new_connection_state == CONNECTION_STATE_END || new_connection_state == CONNECTION_STATE_ERROR || new_connection_state == CONNECTION_STATE_DISCARDING) &&
         (previous_connection_state == CONNECTION_STATE_START ||
             previous_connection_state == CONNECTION_STATE_HDR_RCVD ||
             previous_connection_state == CONNECTION_STATE_HDR_SENT ||
