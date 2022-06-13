@@ -304,6 +304,7 @@ typedef struct MQTT_DEVICE_TWIN_ITEM_TAG
 typedef struct MQTT_MESSAGE_DETAILS_LIST_TAG
 {
     tickcounter_ms_t msgPublishTime;
+    tickcounter_ms_t lastReconnectTime;
     size_t retryCount;
     IOTHUB_MESSAGE_LIST* iotHubMessageEntry;
     void* context;
@@ -2386,7 +2387,17 @@ static void SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 // Setting the value to 0 as it is simpler than calculating the amount of time to
                 // expire the PUBLISH. This value of zero is equivalent to setting a time way in the 
                 // past, enough for this control logic.
-                msg_detail_entry->msgPublishTime = 0;        // force the message to resend
+                tickcounter_ms_t current_ms;
+                (void)tickcounter_get_current_ms(transport_data->msgTickCounter, &current_ms);
+
+                // If last reconnect was less recent than the timeout, force message to resent
+                if (((current_ms - msg_detail_entry->lastReconnectTime) / 1000) > RESEND_TIMEOUT_VALUE_MIN)
+                {
+                    msg_detail_entry->msgPublishTime = 0;
+                }
+
+                // reset last reconnect time
+                msg_detail_entry->lastReconnectTime = current_ms;
 
 #ifdef RUN_SFC_TESTS
             }
@@ -3142,6 +3153,8 @@ static void ProcessPublishStateDoWork(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             else
             {
                 mqttMsgEntry->retryCount = 0;
+                // set last reconnect time far in the past so the first reconnect is already timed out
+                mqttMsgEntry->lastReconnectTime = 0;
                 mqttMsgEntry->iotHubMessageEntry = iothubMsgList;
                 mqttMsgEntry->packet_id = getNextPacketId(transport_data);
                 if (publishTelemetryMsg(transport_data, mqttMsgEntry, messagePayload, messageLength) != 0)
