@@ -2394,13 +2394,10 @@ static void SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             if (!isMqttMessageSfcType(msg_detail_entry->iotHubMessageEntry->messageHandle))
             {
 #endif //RUN_SFC_TESTS
-                tickcounter_ms_t current_ms;
-                (void)tickcounter_get_current_ms(transport_data->msgTickCounter, &current_ms);
-
                 // Setting the value to 0 as it is simpler than calculating the amount of time to
                 // expire the PUBLISH. This value of zero is equivalent to setting a time way in the 
                 // past, enough for this control logic.
-                msg_detail_entry->msgPublishTime = 0;
+                msg_detail_entry->msgPublishTime = 0;       // force the message to resend
                 msg_detail_entry->isReconnectRetry = true;
 
 #ifdef RUN_SFC_TESTS
