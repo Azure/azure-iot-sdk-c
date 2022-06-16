@@ -931,6 +931,29 @@ void dt_e2e_get_twin_async_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
     received_twin_data_deinit(received_twin_data);
 }
 
+void dt_e2e_get_twin_async_destroy_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
+    IOTHUB_ACCOUNT_AUTH_METHOD account_auth_method)
+{
+    // Test setup
+    IOTHUB_PROVISIONED_DEVICE* device_to_use = IoTHubAccount_GetDevice(iothub_accountinfo_handle,
+        account_auth_method);
+    RECEIVED_TWIN_DATA* received_twin_data = received_twin_data_init();
+
+    create_client_handle(device_to_use, protocol);
+
+    // Connect device client to IoT Hub. Register callback. 
+    get_twin_async(twin_callback, received_twin_data);
+    // destroy client handle, should get twin_callback
+    destroy_client_handle();
+
+    // Check results.
+    ASSERT_IS_TRUE(received_twin_data->received_callback);
+    ASSERT_IS_TRUE(received_twin_data->cb_payload_size == 0);
+
+    // Cleanup
+    received_twin_data_deinit(received_twin_data);
+}
+
 // dt_e2e_send_module_id_test makes sure that when OPTION_MODEL_ID is specified at creation time,
 // that the Service Twin has it specified.
 void dt_e2e_send_module_id_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol,
