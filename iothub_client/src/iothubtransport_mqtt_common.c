@@ -47,6 +47,7 @@
 #define BUILD_CONFIG_USERNAME               24
 #define SAS_TOKEN_DEFAULT_LEN               10
 #define RESEND_TIMEOUT_VALUE_MIN            1*60
+#define MSG_TIMEOUT_VALUE_MIN               2*60
 #define MAX_SEND_TIMEOUT_RECOUNT_LIMIT      2
 #define MAX_SEND_ON_RECONNECT_LIMIT         5
 #define DEFAULT_CONNECTION_INTERVAL         30
@@ -304,10 +305,8 @@ typedef struct MQTT_DEVICE_TWIN_ITEM_TAG
 
 typedef struct MQTT_MESSAGE_DETAILS_LIST_TAG
 {
+    tickcounter_ms_t msgCreationTime;
     tickcounter_ms_t msgPublishTime;
-    size_t timeoutRetryCount;
-    size_t reconnectRetryCount;
-    bool isReconnectRetry;
     IOTHUB_MESSAGE_LIST* iotHubMessageEntry;
     void* context;
     uint16_t packet_id;
@@ -1042,15 +1041,6 @@ static int publishTelemetryMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data, MQTT_M
                 }
                 else
                 {
-                    if (mqttMsgEntry->isReconnectRetry)
-                    {
-                        mqttMsgEntry->reconnectRetryCount++;
-                        mqttMsgEntry->isReconnectRetry = false;
-                    }
-                    else
-                    {
-                        mqttMsgEntry->timeoutRetryCount++;
-                    }
                     result = 0;
                 }
             }
@@ -2398,7 +2388,6 @@ static void SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 // expire the PUBLISH. This value of zero is equivalent to setting a time way in the 
                 // past, enough for this control logic.
                 msg_detail_entry->msgPublishTime = 0;       // force the message to resend
-                msg_detail_entry->isReconnectRetry = true;
 
 #ifdef RUN_SFC_TESTS
             }
@@ -2473,7 +2462,7 @@ static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport
         if (((current_ms - msg_detail_entry->msgPublishTime) / 1000) > RESEND_TIMEOUT_VALUE_MIN)
         {
             // if message has been retried too many times normally, or too many times on reconnect (and this is a reconnect), expire the message
-            if (msg_detail_entry->timeoutRetryCount >= MAX_SEND_TIMEOUT_RECOUNT_LIMIT || (msg_detail_entry->isReconnectRetry && msg_detail_entry->reconnectRetryCount >= MAX_SEND_ON_RECONNECT_LIMIT))
+            if (((current_ms - msg_detail_entry->msgCreationTime) / 1000) >= MSG_TIMEOUT_VALUE_MIN)
             {
                 notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT);
                 (void)DList_RemoveEntryList(current_entry);
@@ -2507,15 +2496,6 @@ static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport
                 }
                 else
                 {
-                    if (msg_detail_entry->isReconnectRetry)
-                    {
-                        msg_detail_entry->reconnectRetryCount++;
-                        msg_detail_entry->isReconnectRetry = false;
-                    }
-                    else
-                    {
-                        msg_detail_entry->timeoutRetryCount++;
-                    }
                     
                     msg_detail_entry->msgPublishTime = current_ms;
                 }
@@ -3163,9 +3143,9 @@ static void ProcessPublishStateDoWork(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             }
             else
             {
-                mqttMsgEntry->timeoutRetryCount = 0;
-                mqttMsgEntry->reconnectRetryCount = 0;
-                mqttMsgEntry->isReconnectRetry = false;
+                tickcounter_ms_t current_ms;
+                (void)tickcounter_get_current_ms(transport_data->msgTickCounter, &current_ms);
+                mqttMsgEntry->msgCreationTime = current_ms;
                 mqttMsgEntry->iotHubMessageEntry = iothubMsgList;
                 mqttMsgEntry->packet_id = getNextPacketId(transport_data);
                 if (publishTelemetryMsg(transport_data, mqttMsgEntry, messagePayload, messageLength) != 0)
