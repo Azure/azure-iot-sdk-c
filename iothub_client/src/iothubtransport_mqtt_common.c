@@ -48,8 +48,6 @@
 #define SAS_TOKEN_DEFAULT_LEN               10
 #define RESEND_TIMEOUT_VALUE_MIN            1*60
 #define MSG_TIMEOUT_VALUE_MIN               2*60
-#define MAX_SEND_TIMEOUT_RECOUNT_LIMIT      2
-#define MAX_SEND_ON_RECONNECT_LIMIT         5
 #define DEFAULT_CONNECTION_INTERVAL         30
 #define FAILED_CONN_BACKOFF_VALUE           5
 #define STATUS_CODE_FAILURE_VALUE           500
@@ -2387,7 +2385,7 @@ static void SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 // Setting the value to 0 as it is simpler than calculating the amount of time to
                 // expire the PUBLISH. This value of zero is equivalent to setting a time way in the 
                 // past, enough for this control logic.
-                msg_detail_entry->msgPublishTime = 0;       // force the message to resend
+                msg_detail_entry->msgPublishTime = 0;        // force the message to resend
 
 #ifdef RUN_SFC_TESTS
             }
@@ -2461,7 +2459,6 @@ static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport
 
         if (((current_ms - msg_detail_entry->msgPublishTime) / 1000) > RESEND_TIMEOUT_VALUE_MIN)
         {
-            // if message has been retried too many times normally, or too many times on reconnect (and this is a reconnect), expire the message
             if (((current_ms - msg_detail_entry->msgCreationTime) / 1000) >= MSG_TIMEOUT_VALUE_MIN)
             {
                 notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT);
@@ -2496,7 +2493,6 @@ static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport
                 }
                 else
                 {
-                    
                     msg_detail_entry->msgPublishTime = current_ms;
                 }
             }
