@@ -131,7 +131,7 @@ static void openCompleteCallback(void* context)
 
 static void sendCompleteCallback(void* context, IOTHUB_MESSAGING_RESULT messagingResult)
 {  
-    (void*) context;
+    (void) context;
     if (messagingResult == IOTHUB_MESSAGING_OK)
     {
         LogInfo("C2D Message has been sent successfully");
