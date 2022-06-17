@@ -226,6 +226,11 @@ typedef struct MESSAGE_RECEIVER_CONTEXT_TAG
     bool message_received;
 } MESSAGE_RECEIVER_CONTEXT;
 
+typedef struct MESSAGE_RECEIVER_STATE_CHANGED_CONTEXT_TAG
+{
+    MESSAGE_RECEIVER_STATE state;
+} MESSAGE_RECEIVER_STATE_CHANGED_CONTEXT;
+
 static AMQP_CONN_INFO* createAmqpConnection(IOTHUB_VALIDATION_INFO* devhubValInfo, size_t partitionCount, time_t receiveTimeRangeStart);
 
 unsigned int ConvertToUnsignedInt(const unsigned char data[], int position)
@@ -735,6 +740,13 @@ static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE messag
     }
 
     return messaging_delivery_accepted();
+}
+
+static void on_message_receiver_state_changed(const void* context, MESSAGE_RECEIVER_STATE new_state, MESSAGE_RECEIVER_STATE previous_state)
+{
+    MESSAGE_RECEIVER_STATE_CHANGED_CONTEXT* msg_received_context = (MESSAGE_RECEIVER_STATE_CHANGED_CONTEXT*)context;
+    LogInfo("message_receiver_state_changed: new_state=%d, previous_state=%d", new_state, previous_state);
+    msg_received_context->state = new_state;
 }
 
 // After this new code is seasoned and confirmed good, there shall be some consolidation of *Listen* APIs and their callbacks.
@@ -1444,6 +1456,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
         char* eh_hostname = CreateReceiveHostName(devhubValInfo);
         if (eh_hostname == NULL)
         {
+            LogError("Failed getting eh_hostname.");
             result = IOTHUB_TEST_CLIENT_ERROR;
         }
         else
@@ -1451,6 +1464,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
             char* receive_address = CreateReceiveAddress(devhubValInfo, partitionCount);
             if (receive_address == NULL)
             {
+                LogError("Failed getting receive_address.");
                 result = IOTHUB_TEST_CLIENT_ERROR;
             }
             else
@@ -1497,6 +1511,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
 #endif // SET_TRUSTED_CERT
 
                     /* create the SASL client IO using the TLS IO */
+                    LogInfo("IoTHubTest_ListenForEvent: SASL client IO using the TLS IO.");
                     SASLCLIENTIO_CONFIG sasl_io_config;
                     sasl_io_config.underlying_io = tls_io;
                     sasl_io_config.sasl_mechanism = sasl_mechanism_handle;
@@ -1534,6 +1549,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                         }
                         else
                         {
+                            LogInfo("IoTHubTest_ListenForEvent: Create AMQP filter.");
                             /* create the filter set to be used for the source of the link */
                             filter_set filter_set = amqpvalue_create_map();
                             AMQP_VALUE filter_key = amqpvalue_create_symbol(filter_name);
@@ -1588,14 +1604,17 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                                     }
                                     else
                                     {
+                                        LogInfo("IoTHubTest_ListenForEvent: Create message receiver.");
                                         MESSAGE_RECEIVER_CONTEXT message_receiver_context;
                                         message_receiver_context.msgCallback = msgCallback;
                                         message_receiver_context.context = context;
                                         message_receiver_context.message_received = false;
                                         MESSAGE_RECEIVER_HANDLE message_receiver = NULL;
 
+                                        MESSAGE_RECEIVER_STATE_CHANGED_CONTEXT message_receiver_state_changed_context = {0};
+
                                         /* create a message receiver */
-                                        message_receiver = messagereceiver_create(link, NULL, NULL);
+                                        message_receiver = messagereceiver_create(link, on_message_receiver_state_changed, &message_receiver_state_changed_context);
                                         if (message_receiver == NULL)
                                         {
                                             LogError("Failed creating message receiver.");
@@ -1613,6 +1632,7 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                                             time_t beginExecutionTime = time(NULL);
                                             double timespan;
 
+                                            LogInfo("IoTHubTest_ListenForEvent: Waiting for message_received.");
                                             while ((nowExecutionTime = time(NULL)), timespan = difftime(nowExecutionTime, beginExecutionTime), timespan < maxDrainTimeInSeconds)
                                             {
                                                 connection_dowork(connection);

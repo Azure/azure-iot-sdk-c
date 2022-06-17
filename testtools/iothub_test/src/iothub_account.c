@@ -49,8 +49,9 @@ static const char* CONN_MODULE_PART = ";ModuleId=";
 
 #define DEVICE_GUID_SIZE            37
 
-const int TEST_CREATE_MAX_RETRIES = 3;
+const int TEST_CREATE_MAX_RETRIES = 10;
 const int TEST_METHOD_INVOKE_MAX_RETRIES = 3;
+const int TEST_SLEEP_THROTTLE_MSEC = 5 * 1000;
 const int TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC = 30 * 1000;
 const int TEST_SLEEP_BETWEEN_METHOD_INVOKE_FAILURES_MSEC = 30 * 1000;
 
@@ -285,6 +286,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT createTestDeviceWithRetry(IOTHUB_REGISTRYMA
     IOTHUB_REGISTRYMANAGER_RESULT result;
     int creationAttempts = 0;
 
+    ThreadAPI_Sleep(TEST_SLEEP_THROTTLE_MSEC);  // prevent Too Many Requests (429) error from service
     while (true)
     {
         LogInfo("Invoking registry manager to create device %s", deviceCreateInfo->deviceId);
@@ -313,6 +315,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT createTestModuleWithRetry(IOTHUB_REGISTRYMA
     IOTHUB_REGISTRYMANAGER_RESULT result;
     int creationAttempts = 0;
 
+    ThreadAPI_Sleep(TEST_SLEEP_THROTTLE_MSEC);  // prevent Too Many Requests (429) error from service
     while (true)
     {
         LogInfo("Invoking registry manager to create device/module %s/%s", moduleCreateInfo->deviceId, moduleCreateInfo->moduleId);
@@ -861,6 +864,17 @@ const char* IoTHubAccount_GetEventHubConnectionString(IOTHUB_ACCOUNT_INFO_HANDLE
     if (acctInfo != NULL)
     {
         result = acctInfo->eventhubConnString;
+    }
+    return result;
+}
+
+const char* IoTHubAccount_GetIoTHostName(IOTHUB_ACCOUNT_INFO_HANDLE acctHandle)
+{
+    const char* result = NULL;
+    IOTHUB_ACCOUNT_INFO* acctInfo = (IOTHUB_ACCOUNT_INFO*)acctHandle;
+    if (acctInfo != NULL)
+    {
+        result = acctInfo->hostname;
     }
     return result;
 }
