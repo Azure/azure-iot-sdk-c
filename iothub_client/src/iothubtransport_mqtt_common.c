@@ -2465,6 +2465,7 @@ static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport
                 (void)DList_RemoveEntryList(current_entry);
                 free(msg_detail_entry);
 
+                LogError("Disconnecting MQTT connection because message PUBACK timeout.");
                 DisconnectFromClient(transport_data);
                 transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, transport_data->transport_ctx);
             }
@@ -2824,7 +2825,7 @@ static int UpdateMqttConnectionStateIfNeeded(PMQTTTRANSPORT_HANDLE_DATA transpor
             }
             else if ((current_time - transport_data->mqtt_connect_time) / 1000 > transport_data->connect_timeout_in_sec)
             {
-                LogError("mqtt_client timed out waiting for CONNACK");
+                LogError("mqtt_client timed out waiting for CONNACK: disconnecting MQTT connection");
                 transport_data->currPacketState = PACKET_TYPE_ERROR;
                 DisconnectFromClient(transport_data);
                 result = MU_FAILURE;
