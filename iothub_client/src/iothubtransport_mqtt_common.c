@@ -2825,7 +2825,7 @@ static int UpdateMqttConnectionStateIfNeeded(PMQTTTRANSPORT_HANDLE_DATA transpor
             }
             else if ((current_time - transport_data->mqtt_connect_time) / 1000 > transport_data->connect_timeout_in_sec)
             {
-                LogError("mqtt_client timed out waiting for CONNACK disconnecting MQTT connection");
+                LogError("mqtt_client timed out waiting for CONNACK: disconnecting MQTT connection");
                 transport_data->currPacketState = PACKET_TYPE_ERROR;
                 DisconnectFromClient(transport_data);
                 result = MU_FAILURE;
