@@ -1357,6 +1357,7 @@ static void setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(
     if (!resend)
     {
         EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+        STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     }
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).CallCannotFail();
     STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
