@@ -735,6 +735,7 @@ static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE messag
             if (msg_received_context->msgCallback(msg_received_context->context, (const char*)binary_data.bytes, binary_data.length) != 0)
             {
                 msg_received_context->message_received = true;
+                LogInfo("AMQP message received");
             }
         }
     }
@@ -742,10 +743,34 @@ static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE messag
     return messaging_delivery_accepted();
 }
 
+static const char* message_receiver_state_string(MESSAGE_RECEIVER_STATE state)
+{
+    char* result = "unknown";
+    switch (state)
+    {
+        case MESSAGE_RECEIVER_STATE_IDLE:
+            result = "MESSAGE_RECEIVER_STATE_IDLE";
+            break;
+        case MESSAGE_RECEIVER_STATE_OPENING:
+            result = "MESSAGE_RECEIVER_STATE_OPENING";
+            break;
+        case MESSAGE_RECEIVER_STATE_OPEN:
+            result = "MESSAGE_RECEIVER_STATE_OPEN";
+            break;
+        case MESSAGE_RECEIVER_STATE_CLOSING:
+            result = "MESSAGE_RECEIVER_STATE_CLOSING";
+            break;
+        case MESSAGE_RECEIVER_STATE_ERROR:
+            result = "MESSAGE_RECEIVER_STATE_ERROR";
+            break;
+    }
+    return result;
+}
+
 static void on_message_receiver_state_changed(const void* context, MESSAGE_RECEIVER_STATE new_state, MESSAGE_RECEIVER_STATE previous_state)
 {
     MESSAGE_RECEIVER_STATE_CHANGED_CONTEXT* msg_received_context = (MESSAGE_RECEIVER_STATE_CHANGED_CONTEXT*)context;
-    LogInfo("message_receiver_state_changed: new_state=%d, previous_state=%d", new_state, previous_state);
+    LogInfo("message_receiver_state_changed: new_state=%s, previous_state=%s", message_receiver_state_string(new_state), message_receiver_state_string(previous_state));
     msg_received_context->state = new_state;
 }
 
@@ -1638,13 +1663,18 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                                                 connection_dowork(connection);
                                                 ThreadAPI_Sleep(10);
 
-                                                if (message_receiver_context.message_received)
+                                                if (message_receiver_context.message_received || message_receiver_state_changed_context.state == MESSAGE_RECEIVER_STATE_ERROR)
                                                 {
                                                     break;
                                                 }
                                             }
 
-                                            if (!message_receiver_context.message_received)
+                                            if (message_receiver_state_changed_context.state == MESSAGE_RECEIVER_STATE_ERROR)
+                                            {
+                                                LogError("message receiver entered an error state.");
+                                                result = IOTHUB_TEST_CLIENT_ERROR;
+                                            }
+                                            else if (!message_receiver_context.message_received)
                                             {
                                                 LogError("No message was received, timed out.");
                                                 result = IOTHUB_TEST_CLIENT_ERROR;
