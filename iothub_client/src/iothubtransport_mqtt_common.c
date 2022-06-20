@@ -47,7 +47,7 @@
 #define BUILD_CONFIG_USERNAME               24
 #define SAS_TOKEN_DEFAULT_LEN               10
 #define RESEND_TIMEOUT_VALUE_MIN            1*60
-#define MSG_TIMEOUT_VALUE_MIN               2*60
+#define TELEMETRY_MSG_TIMEOUT_MIN           2*60
 #define DEFAULT_CONNECTION_INTERVAL         30
 #define FAILED_CONN_BACKOFF_VALUE           5
 #define STATUS_CODE_FAILURE_VALUE           500
@@ -2459,7 +2459,7 @@ static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport
 
         if (((current_ms - msg_detail_entry->msgPublishTime) / 1000) > RESEND_TIMEOUT_VALUE_MIN)
         {
-            if (((current_ms - msg_detail_entry->msgCreationTime) / 1000) >= MSG_TIMEOUT_VALUE_MIN)
+            if (((current_ms - msg_detail_entry->msgCreationTime) / 1000) >= TELEMETRY_MSG_TIMEOUT_MIN)
             {
                 notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT);
                 (void)DList_RemoveEntryList(current_entry);
