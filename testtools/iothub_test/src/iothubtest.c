@@ -763,6 +763,9 @@ static const char* message_receiver_state_string(MESSAGE_RECEIVER_STATE state)
         case MESSAGE_RECEIVER_STATE_ERROR:
             result = "MESSAGE_RECEIVER_STATE_ERROR";
             break;
+        case MESSAGE_RECEIVER_STATE_INVALID:
+            result = "MESSAGE_RECEIVER_STATE_INVALID";
+            break;
     }
     return result;
 }
