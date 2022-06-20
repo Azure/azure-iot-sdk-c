@@ -26,7 +26,7 @@
 #include "azure_c_shared_utility/httpapiexsas.h"
 #include "azure_c_shared_utility/uniqueid.h"
 #include "azure_c_shared_utility/threadapi.h"
-
+#include "azure_c_shared_utility/gb_rand.h"
 
 #include "iothub_service_client_auth.h"
 #include "iothub_registrymanager.h"
@@ -303,7 +303,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT createTestDeviceWithRetry(IOTHUB_REGISTRYMA
         }
             
         LogError("Creating device %s failed with error %d.  Sleeping %d milliseconds", deviceCreateInfo->deviceId, result, TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC);
-        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC);
+        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC + gb_rand() % 15);  // sleep with jitter
     }
 
     return result;
@@ -332,7 +332,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT createTestModuleWithRetry(IOTHUB_REGISTRYMA
         }
             
         LogError("Creating device/module %s/%s failed with error %d.  Sleeping %d milliseconds", moduleCreateInfo->deviceId, moduleCreateInfo->moduleId, result, TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC);
-        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC);
+        ThreadAPI_Sleep(TEST_SLEEP_BETWEEN_CREATION_FAILURES_MSEC + gb_rand() % 15);  // sleep with jitter
     }
 
     return result;
