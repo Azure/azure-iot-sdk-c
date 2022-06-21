@@ -54,12 +54,12 @@ const char* TEST_EVENT_DATA_FMT = "{\"data\":\"%.24s\",\"id\":\"%d\"}";
 const char* TEST_EVENT_DATA_FMT_SPECIAL_CHAR = "{\"#data\":\"$%.24s\",\";id\":\"*%d\"}";
 
 #define MSG_UNIQUE_ID_STAMP_LEN 5
-#define MSG_ID "MessageIdForE2E"
-#define MSG_ID_SPECIAL "MessageIdForE2E*"
-#define MSG_CORRELATION_ID "MessageCorrelationIdForE2E"
-#define MSG_CORRELATION_ID_SPECIAL "MessageCorrelationIdFor#E2E"
-const char* MSG_CONTENT = "Message content for E2E";
-const char* MSG_CONTENT_SPECIAL = "!*'();:@&=+$,/?#[]";
+const char MSG_ID[] = "MessageIdForE2E";
+const char MSG_ID_SPECIAL[] = "MessageIdForE2E*";
+const char MSG_CORRELATION_ID[] = "MessageCorrelationIdForE2E";
+const char MSG_CORRELATION_ID_SPECIAL[] = "MessageCorrelationIdFor#E2E";
+const char MSG_CONTENT[] = "Message content for E2E";
+const char MSG_CONTENT_SPECIAL[] = "!*'();:@&=+$,/?#[]";
 
 #define MSG_PROP_COUNT 3
 const char* MSG_PROP_KEYS[MSG_PROP_COUNT] = { "Key1", "Key2", "Key3" };
@@ -138,7 +138,7 @@ static void sendCompleteCallback(void* context, IOTHUB_MESSAGING_RESULT messagin
     }
     else
     {
-        LogError("C2D send failed!");
+        LogError("C2D send failed! messagingResult=%s", MU_ENUM_TO_STRING(IOTHUB_MESSAGING_RESULT, messagingResult));
     }
 }
 
@@ -681,19 +681,18 @@ D2C_MESSAGE_HANDLE client_create_and_send_d2c(TEST_MESSAGE_CREATION_MECHANISM te
         }
         ASSERT_IS_NOT_NULL(msgHandle, "Could not create the D2C message to be sent");
 
-        MAP_HANDLE mapHandle = IoTHubMessage_Properties(msgHandle);
         for (size_t i = 0; i < MSG_PROP_COUNT; i++)
         {
             if (g_e2e_test_options.use_special_chars)
             {
-                if (Map_AddOrUpdate(mapHandle, MSG_PROP_KEYS_SPECIAL[i], MSG_PROP_VALS_SPECIAL[i]) != MAP_OK)
+                if (IoTHubMessage_SetProperty(msgHandle, MSG_PROP_KEYS_SPECIAL[i], MSG_PROP_VALS_SPECIAL[i]) != IOTHUB_MESSAGE_OK)
                 {
                     LogError("ERROR: Map_AddOrUpdate failed for property %zu!", i);
                 }
             }
             else
             {
-                if (Map_AddOrUpdate(mapHandle, MSG_PROP_KEYS[i], MSG_PROP_VALS[i]) != MAP_OK)
+                if (IoTHubMessage_SetProperty(msgHandle, MSG_PROP_KEYS[i], MSG_PROP_VALS[i]) != IOTHUB_MESSAGE_OK)
                 {
                     LogError("ERROR: Map_AddOrUpdate failed for property %zu!", i);
                 }
