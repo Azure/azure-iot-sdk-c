@@ -2465,7 +2465,7 @@ static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport
                 (void)DList_RemoveEntryList(current_entry);
                 free(msg_detail_entry);
 
-                LogError("Disconnecting MQTT connection because message PUBACK timeout.");
+                LogError("Disconnecting MQTT connection because message PUBACK (%d) timeout.", msg_detail_entry->packet_id);
                 DisconnectFromClient(transport_data);
                 transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, transport_data->transport_ctx);
             }
