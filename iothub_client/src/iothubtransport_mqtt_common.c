@@ -2457,45 +2457,42 @@ static void ProcessPendingTelemetryMessages(PMQTTTRANSPORT_HANDLE_DATA transport
         DLIST_ENTRY nextListEntry;
         nextListEntry.Flink = current_entry->Flink;
 
-        if (((current_ms - msg_detail_entry->msgPublishTime) / 1000) > RESEND_TIMEOUT_VALUE_MIN)
+        if (((current_ms - msg_detail_entry->msgCreationTime) / 1000) >= TELEMETRY_MSG_TIMEOUT_MIN)
         {
-            if (((current_ms - msg_detail_entry->msgCreationTime) / 1000) >= TELEMETRY_MSG_TIMEOUT_MIN)
-            {
-                notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT);
-                (void)DList_RemoveEntryList(current_entry);
-                free(msg_detail_entry);
+            notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_MESSAGE_TIMEOUT);
+            (void)DList_RemoveEntryList(current_entry);
+            free(msg_detail_entry);
 
-                LogError("Disconnecting MQTT connection because message PUBACK (%d) timeout.", msg_detail_entry->packet_id);
-                DisconnectFromClient(transport_data);
-                transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, transport_data->transport_ctx);
-            }
-            else
+            LogError("Disconnecting MQTT connection because message PUBACK (%d) timeout.", msg_detail_entry->packet_id);
+            DisconnectFromClient(transport_data);
+            transport_data->transport_callbacks.connection_status_cb(IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_COMMUNICATION_ERROR, transport_data->transport_ctx);
+        }
+        else if (((current_ms - msg_detail_entry->msgPublishTime) / 1000) > RESEND_TIMEOUT_VALUE_MIN)
+        {
+            // Ensure that the packet state is PUBLISH_TYPE and then attempt to send the message
+            // again
+            if (transport_data->currPacketState == PUBLISH_TYPE)
             {
-                // Ensure that the packet state is PUBLISH_TYPE and then attempt to send the message
-                // again
-                if (transport_data->currPacketState == PUBLISH_TYPE)
+                size_t messageLength;
+                const unsigned char* messagePayload = NULL;
+                if (!RetrieveMessagePayload(msg_detail_entry->iotHubMessageEntry->messageHandle, &messagePayload, &messageLength))
                 {
-                    size_t messageLength;
-                    const unsigned char* messagePayload = NULL;
-                    if (!RetrieveMessagePayload(msg_detail_entry->iotHubMessageEntry->messageHandle, &messagePayload, &messageLength))
-                    {
-                        (void)DList_RemoveEntryList(current_entry);
-                        notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_ERROR);
-                    }
-                    else
-                    {
-                        if (publishTelemetryMsg(transport_data, msg_detail_entry, messagePayload, messageLength) != 0)
-                        {
-                            (void)DList_RemoveEntryList(current_entry);
-                            notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_ERROR);
-                            free(msg_detail_entry);
-                        }
-                    }
+                    (void)DList_RemoveEntryList(current_entry);
+                    notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_ERROR);
                 }
                 else
                 {
-                    msg_detail_entry->msgPublishTime = current_ms;
+                    if (publishTelemetryMsg(transport_data, msg_detail_entry, messagePayload, messageLength) != 0)
+                    {
+                        (void)DList_RemoveEntryList(current_entry);
+                        notifyApplicationOfSendMessageComplete(msg_detail_entry->iotHubMessageEntry, transport_data, IOTHUB_CLIENT_CONFIRMATION_ERROR);
+                        free(msg_detail_entry);
+                    }
                 }
+            }
+            else
+            {
+                msg_detail_entry->msgPublishTime = current_ms;
             }
         }
         current_entry = nextListEntry.Flink;
