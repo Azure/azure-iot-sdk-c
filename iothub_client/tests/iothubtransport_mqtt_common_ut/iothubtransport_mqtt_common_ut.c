@@ -72,7 +72,8 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 
 #include "internal/iothub_transport_ll_private.h"
 
-#define MAX_SEND_RECOUNT_LIMIT 2  // should match value in iothubtransport_mqtt_common.c
+#define RESEND_TIMEOUT_VALUE_MIN            1*60*1000 // should match value in iothubtransport_mqtt_common.c * 1000 so it's in ms
+#define MSG_TIMEOUT_VALUE_MIN               2*60*1000 // should match value in iothubtransport_mqtt_common.c * 1000 so it's in ms
 
 MOCKABLE_FUNCTION(, bool, Transport_MessageCallbackFromInput, IOTHUB_MESSAGE_HANDLE, message, void*, ctx);
 MOCKABLE_FUNCTION(, bool, Transport_MessageCallback, IOTHUB_MESSAGE_HANDLE, message, void*, ctx);
@@ -4914,14 +4915,14 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_message_timeout_succeeds)
 
     IoTHubTransport_MQTT_Common_DoWork(handle);
 
-    for (int i = 1; i < MAX_SEND_RECOUNT_LIMIT; i++)
+    for (int i = 1; i < (MSG_TIMEOUT_VALUE_MIN) / (RESEND_TIMEOUT_VALUE_MIN); i++)
     {
-        g_current_ms += 5 * 60 * 1000;
+        g_current_ms += RESEND_TIMEOUT_VALUE_MIN;
         IoTHubTransport_MQTT_Common_DoWork(handle);
     }
     umock_c_reset_all_calls();
 
-    g_current_ms += 5 * 60 * 1000;
+    g_current_ms += RESEND_TIMEOUT_VALUE_MIN;
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .CopyOutArgumentBuffer(2, &g_current_ms, sizeof(g_current_ms));
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
@@ -4994,9 +4995,9 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_2_message_timeout_succeeds)
 
     IoTHubTransport_MQTT_Common_DoWork(handle);
 
-    for (int i = 1; i < MAX_SEND_RECOUNT_LIMIT; i++)
+    for (int i = 1; i < (MSG_TIMEOUT_VALUE_MIN) / (RESEND_TIMEOUT_VALUE_MIN); i++)
     {
-        g_current_ms += 5 * 60 * 1000;
+        g_current_ms += RESEND_TIMEOUT_VALUE_MIN;
         IoTHubTransport_MQTT_Common_DoWork(handle);
     }
 
@@ -5011,7 +5012,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_2_message_timeout_succeeds)
 
     STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
 
-    g_current_ms += 5 * 60 * 1000;
+    g_current_ms += RESEND_TIMEOUT_VALUE_MIN;
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .CopyOutArgumentBuffer(2, &g_current_ms, sizeof(g_current_ms));
 
