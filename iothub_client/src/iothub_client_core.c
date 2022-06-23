@@ -1636,7 +1636,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetOption(IOTHUB_CLIENT_CORE_HANDLE iotHub
         {
             if (strcmp(OPTION_DO_WORK_FREQUENCY_IN_MS, optionName) == 0)
             {
-                if (0 < * (tickcounter_ms_t *)value && * (tickcounter_ms_t *)value <= DO_WORK_MAXIMUM_ALLOWED_FREQUENCY)
+                if (0 < * (tickcounter_ms_t*)value && * (tickcounter_ms_t*)value <= DO_WORK_MAXIMUM_ALLOWED_FREQUENCY)
                 {
                     if ((!iotHubClientInstance->currentMessageTimeout) || ( * (tickcounter_ms_t *)value < iotHubClientInstance->currentMessageTimeout))
                     {
