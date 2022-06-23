@@ -4884,6 +4884,72 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_resend_message_succeeds)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
+/*  This test covers the scenario where there are multiple disconnects and
+    reconnects in a row and the packet is resent each time without expiring by count.
+*/
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_resend_multiple_disconnects)
+{
+    CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
+    SUBSCRIBE_ACK suback;
+    QOS_VALUE QosValue[] = { DELIVER_AT_LEAST_ONCE };
+    IOTHUB_MESSAGE_LIST message1;
+    TRANSPORT_LL_HANDLE handle;
+
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME, NULL);
+
+    handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport, &transport_cb_info, transport_cb_ctx);
+
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    suback.packetId = 1234;
+    suback.qosCount = 1;
+    suback.qosReturn = QosValue;
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_callbackCtx);
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    // create packet
+    memset(&message1, 0, sizeof(IOTHUB_MESSAGE_LIST));
+    message1.messageHandle = TEST_IOTHUB_MSG_STRING;
+    DList_InsertTailList(config.waitingToSend, &(message1.entry));
+
+    // Send packet 1st time
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    // Disconnect
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_DISCONNECT, NULL, g_callbackCtx);
+
+    // Reconnect
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+
+    // Dowork where packet is resent 1st time
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    // Disconnect
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_DISCONNECT, NULL, g_callbackCtx);
+    // setup is now complete
+    umock_c_reset_all_calls();
+
+    // Reconnect
+    setup_connection_success_mocks();
+
+    // DoWork where packet is resent 2nd time (wouldn't happen without unlimited resend on reconnect)
+    setup_IoTHubTransport_MQTT_Common_DoWork_events_mocks(NULL, NULL, 0, TEST_IOTHUB_MSG_STRING, true, NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, NULL, false);
+
+    // act
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+    IoTHubTransport_MQTT_Common_DoWork(handle);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_message_timeout_succeeds)
 {
     CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
