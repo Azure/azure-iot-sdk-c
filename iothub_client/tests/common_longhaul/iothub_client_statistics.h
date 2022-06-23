@@ -106,6 +106,7 @@ typedef struct DEVICE_TWIN_DESIRED_INFO_TAG
     time_t time_updated;
     int update_result;
 
+    int version;
     time_t time_received;
 } DEVICE_TWIN_DESIRED_INFO;
 

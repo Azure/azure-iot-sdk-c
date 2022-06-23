@@ -1100,10 +1100,7 @@ static void on_get_device_twin_completed(DEVICE_TWIN_UPDATE_STATE update_state, 
     else
     {
         GET_TWIN_CONTEXT* getTwinCtx = (GET_TWIN_CONTEXT*)userContextCallback;
-        if (payLoad)
-        {
-            getTwinCtx->callback(update_state, payLoad, size, getTwinCtx->context);
-        }
+        getTwinCtx->callback(update_state, payLoad, size, getTwinCtx->context);
         free(getTwinCtx);
     }
 }

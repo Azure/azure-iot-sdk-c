@@ -1228,6 +1228,16 @@ void IoTHubClientCore_Destroy(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle)
                 }
                 else if (queue_cb_info->type == CALLBACK_TYPE_DEVICE_TWIN)
                 {
+                    if (queue_cb_info->iothub_callback.dev_twin_cb_info.userCallback)
+                    {
+                        queue_cb_info->iothub_callback.dev_twin_cb_info.userCallback(
+                            queue_cb_info->iothub_callback.dev_twin_cb_info.update_state,
+                            queue_cb_info->iothub_callback.dev_twin_cb_info.payLoad,
+                            queue_cb_info->iothub_callback.dev_twin_cb_info.size,
+                            queue_cb_info->iothub_callback.dev_twin_cb_info.userContext
+                        );
+                    }
+
                     if (queue_cb_info->iothub_callback.dev_twin_cb_info.payLoad != NULL)
                     {
                         free(queue_cb_info->iothub_callback.dev_twin_cb_info.payLoad);
