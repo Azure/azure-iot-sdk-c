@@ -72,8 +72,8 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 
 #include "internal/iothub_transport_ll_private.h"
 
-#define RESEND_TIMEOUT_VALUE_MIN            1*60*1000 // should match value in iothubtransport_mqtt_common.c * 1000 so it's in ms
-#define MSG_TIMEOUT_VALUE_MIN               2*60*1000 // should match value in iothubtransport_mqtt_common.c * 1000 so it's in ms
+#define RESEND_TIMEOUT_VALUE_MS            1*60*1000 // should match value in iothubtransport_mqtt_common.c * 1000 so it's in ms
+#define MSG_TIMEOUT_VALUE_MS               2*60*1000 // should match value in iothubtransport_mqtt_common.c * 1000 so it's in ms
 
 MOCKABLE_FUNCTION(, bool, Transport_MessageCallbackFromInput, IOTHUB_MESSAGE_HANDLE, message, void*, ctx);
 MOCKABLE_FUNCTION(, bool, Transport_MessageCallback, IOTHUB_MESSAGE_HANDLE, message, void*, ctx);
@@ -4911,7 +4911,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_resend_multiple_disconnects)
     g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_SUBSCRIBE_ACK, &suback, g_callbackCtx);
     IoTHubTransport_MQTT_Common_DoWork(handle);
 
-    // create packet
+    // create packet & add to sending queue
     memset(&message1, 0, sizeof(IOTHUB_MESSAGE_LIST));
     message1.messageHandle = TEST_IOTHUB_MSG_STRING;
     DList_InsertTailList(config.waitingToSend, &(message1.entry));
@@ -4981,14 +4981,14 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_message_timeout_succeeds)
 
     IoTHubTransport_MQTT_Common_DoWork(handle);
 
-    for (int i = 1; i < (MSG_TIMEOUT_VALUE_MIN) / (RESEND_TIMEOUT_VALUE_MIN); i++)
+    for (int i = 1; i < (MSG_TIMEOUT_VALUE_MS) / (RESEND_TIMEOUT_VALUE_MS); i++)
     {
-        g_current_ms += RESEND_TIMEOUT_VALUE_MIN;
+        g_current_ms += RESEND_TIMEOUT_VALUE_MS;
         IoTHubTransport_MQTT_Common_DoWork(handle);
     }
     umock_c_reset_all_calls();
 
-    g_current_ms += RESEND_TIMEOUT_VALUE_MIN;
+    g_current_ms += RESEND_TIMEOUT_VALUE_MS;
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .CopyOutArgumentBuffer(2, &g_current_ms, sizeof(g_current_ms));
     STRICT_EXPECTED_CALL(IoTHubClient_Auth_Get_Credential_Type(IGNORED_PTR_ARG));
@@ -5061,9 +5061,9 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_2_message_timeout_succeeds)
 
     IoTHubTransport_MQTT_Common_DoWork(handle);
 
-    for (int i = 1; i < (MSG_TIMEOUT_VALUE_MIN) / (RESEND_TIMEOUT_VALUE_MIN); i++)
+    for (int i = 1; i < (MSG_TIMEOUT_VALUE_MS) / (RESEND_TIMEOUT_VALUE_MS); i++)
     {
-        g_current_ms += RESEND_TIMEOUT_VALUE_MIN;
+        g_current_ms += RESEND_TIMEOUT_VALUE_MS;
         IoTHubTransport_MQTT_Common_DoWork(handle);
     }
 
@@ -5078,7 +5078,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_2_message_timeout_succeeds)
 
     STRICT_EXPECTED_CALL(mqtt_client_dowork(IGNORED_PTR_ARG));
 
-    g_current_ms += RESEND_TIMEOUT_VALUE_MIN;
+    g_current_ms += RESEND_TIMEOUT_VALUE_MS;
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .CopyOutArgumentBuffer(2, &g_current_ms, sizeof(g_current_ms));
 
