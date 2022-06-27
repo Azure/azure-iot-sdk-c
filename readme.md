@@ -13,9 +13,13 @@ For constrained devices - where memory is measured in kilobytes and not megabyte
 
 ## Table of Contents
 - [Azure IoT C SDKs and Libraries](#azure-iot-c-sdks-and-libraries)
+  - [Important branch rename information](#important-branch-rename-information)
+  - [Introduction](#introduction)
   - [Table of Contents](#table-of-contents)
   - [Critical Upcoming Change Notice](#critical-upcoming-change-notice)
   - [Getting the SDK](#getting-the-sdk)
+    - [Packages](#packages)
+    - [Linux](#linux)
   - [Samples](#samples)
   - [SDK API Reference Documentation](#sdk-api-reference-documentation)
   - [Other Azure IoT SDKs](#other-azure-iot-sdks)
@@ -69,6 +73,8 @@ The simplest way to get started with the Azure IoT SDKs on supported platforms i
 
   - Authentication is limited to SAS keys on iOS. No certificate-based authentication is officially supported.
   - The Device Provisioning Client is not supported on iOS. Only the Azure IoT Hub device client is supported.
+
+For a more complete iOS experience including the two missing features above, please see our sample native Swift library built on top of the Embedded C SDK [here](https://github.com/Azure-Samples/azure-sdk-for-c-swift).
 
 ### Linux
 

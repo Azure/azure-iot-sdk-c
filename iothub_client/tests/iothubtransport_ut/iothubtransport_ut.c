@@ -456,7 +456,7 @@ TEST_FUNCTION(IoTHubTransport_Create_fails)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
-        char tmp_msg[64];
+        char tmp_msg[128];
         sprintf(tmp_msg, "IoTHubTransport_Create failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         TRANSPORT_HANDLE handle = NULL;

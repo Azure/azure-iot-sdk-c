@@ -73,7 +73,7 @@ if (${build_as_dynamic})
         WINDOWS_EXPORT_ALL_SYMBOLS YES
         PDB_NAME "iothub_service_client_dll"
         VERSION ${IOT_SDK_VERSION}
-        SOVERSION ${IOT_SDK_VERION_MAJOR}
+        SOVERSION ${IOT_SDK_VERSION_MAJOR}
         BUILD_WITH_INSTALL_RPATH TRUE
     )
     set (install_libs ${install_libs} iothub_service_client_dll)

@@ -15,10 +15,19 @@ function(getIoTSDKVersion)
         string(REGEX MATCH "^[\t ]*#[\t ]*define[\t ]*IOTHUB_SDK_VERSION[\t ]*\"([0-9]+)[\\.]([0-9]+)[\\.]([0-9]+)\"" temp "${iotsdkverstr}")
 
         if (NOT "${CMAKE_MATCH_3}" STREQUAL "")
-            set (IOT_SDK_VERION_MAJOR "${CMAKE_MATCH_1}" PARENT_SCOPE)
-            set (IOT_SDK_VERION_MINOR "${CMAKE_MATCH_2}" PARENT_SCOPE)
-            set (IOT_SDK_VERION_FIX "${CMAKE_MATCH_3}" PARENT_SCOPE)
+            set (_IOT_SDK_VERSION_MAJOR "${CMAKE_MATCH_1}")
+            set (_IOT_SDK_VERSION_MINOR "${CMAKE_MATCH_2}")
+            set (_IOT_SDK_VERSION_FIX "${CMAKE_MATCH_3}")
+            set (IOT_SDK_VERSION_MAJOR ${_IOT_SDK_VERSION_MAJOR} PARENT_SCOPE)
+            set (IOT_SDK_VERSION_MINOR ${_IOT_SDK_VERSION_MINOR} PARENT_SCOPE)
+            set (IOT_SDK_VERSION_FIX ${_IOT_SDK_VERSION_FIX} PARENT_SCOPE)
             set (IOT_SDK_VERSION "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}.${CMAKE_MATCH_3}" PARENT_SCOPE)
+
+            # Keep the name "IOT_SDK_VERION_*" around because previous versions of this script
+            # had a mispelling and public scope means other projects may be relying on that.
+            set (IOT_SDK_VERION_MAJOR ${_IOT_SDK_VERSION_MAJOR} PARENT_SCOPE)
+            set (IOT_SDK_VERION_MINOR ${_IOT_SDK_VERSION_MINOR} PARENT_SCOPE)
+            set (IOT_SDK_VERION_FIX ${_IOT_SDK_VERSION_FIX} PARENT_SCOPE)
         else ()
             message(FATAL_ERROR "Unable to find version in ${iotsdkverstr}")
         endif()

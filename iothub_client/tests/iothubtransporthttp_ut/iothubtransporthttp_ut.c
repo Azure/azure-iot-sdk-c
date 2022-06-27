@@ -1567,7 +1567,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Create_fails)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
-        char tmp_msg[64];
+        char tmp_msg[128];
         sprintf(tmp_msg, "IoTHubTransportHttp_Create failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         TRANSPORT_LL_HANDLE result = IoTHubTransportHttp_Create(&TEST_CONFIG, &transport_cb_info, transport_cb_ctx);
@@ -1760,7 +1760,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Register_HappyPath_with_deviceKey_fail)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
-        char tmp_msg[64];
+        char tmp_msg[128];
         sprintf(tmp_msg, "IoTHubMessage_CreateFromByteArray failure in test %lu/%lu", (unsigned long)index, (unsigned long)count);
 
         IOTHUB_DEVICE_HANDLE devHandle = IoTHubTransportHttp_Register(handle, &TEST_DEVICE_1, TEST_CONFIG.waitingToSend);

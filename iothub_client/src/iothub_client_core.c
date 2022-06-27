@@ -1321,6 +1321,16 @@ void IoTHubClientCore_Destroy(IOTHUB_CLIENT_CORE_HANDLE iotHubClientHandle)
                 }
                 else if (queue_cb_info->type == CALLBACK_TYPE_DEVICE_TWIN)
                 {
+                    if (queue_cb_info->iothub_callback.dev_twin_cb_info.userCallback)
+                    {
+                        queue_cb_info->iothub_callback.dev_twin_cb_info.userCallback(
+                            queue_cb_info->iothub_callback.dev_twin_cb_info.update_state,
+                            queue_cb_info->iothub_callback.dev_twin_cb_info.payLoad,
+                            queue_cb_info->iothub_callback.dev_twin_cb_info.size,
+                            queue_cb_info->iothub_callback.dev_twin_cb_info.userContext
+                        );
+                    }
+
                     if (queue_cb_info->iothub_callback.dev_twin_cb_info.payLoad != NULL)
                     {
                         free(queue_cb_info->iothub_callback.dev_twin_cb_info.payLoad);
@@ -1729,7 +1739,7 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_SetOption(IOTHUB_CLIENT_CORE_HANDLE iotHub
         {
             if (strcmp(OPTION_DO_WORK_FREQUENCY_IN_MS, optionName) == 0)
             {
-                if (0 < * (unsigned int *)value && * (unsigned int *)value <= DO_WORK_MAXIMUM_ALLOWED_FREQUENCY)
+                if (0 < * (tickcounter_ms_t*)value && * (tickcounter_ms_t*)value <= DO_WORK_MAXIMUM_ALLOWED_FREQUENCY)
                 {
                     if ((!iotHubClientInstance->currentMessageTimeout) || ( * (tickcounter_ms_t *)value < iotHubClientInstance->currentMessageTimeout))
                     {

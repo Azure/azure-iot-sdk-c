@@ -996,7 +996,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
-            char tmp_msg[64];
+            char tmp_msg[128];
             sprintf(tmp_msg, "prov_transport_common_amqp_create failure in test %zu/%zu", index, count);
 
             //act
@@ -1225,7 +1225,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
-            char tmp_msg[64];
+            char tmp_msg[128];
             sprintf(tmp_msg, "prov_transport_common_amqp_open failure in test %zu/%zu", index, count);
 
             int result = prov_transport_common_amqp_open(handle, TEST_REGISTRATION_ID_VALUE, TEST_BUFFER_VALUE, TEST_BUFFER_VALUE, on_transport_register_data_cb, NULL, on_transport_status_cb, NULL, on_transport_challenge_callback, NULL);
@@ -1906,7 +1906,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
-            char tmp_msg[64];
+            char tmp_msg[128];
             sprintf(tmp_msg, "prov_transport_common_amqp_dowork failure in test %zu/%zu", index, count);
 
             //act
@@ -2171,7 +2171,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
-            char tmp_msg[64];
+            char tmp_msg[128];
             sprintf(tmp_msg, "prov_transport_common_amqp_dowork failure in test %zu/%zu", index, count);
 
             //act
@@ -2387,7 +2387,7 @@ BEGIN_TEST_SUITE(prov_transport_amqp_common_ut)
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
-            char tmp_msg[64];
+            char tmp_msg[128];
             sprintf(tmp_msg, "prov_transport_common_amqp_set_proxy failure in test %zu/%zu", index, count);
 
             //act

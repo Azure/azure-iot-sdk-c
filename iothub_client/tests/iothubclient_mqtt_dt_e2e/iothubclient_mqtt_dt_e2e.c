@@ -41,6 +41,11 @@ TEST_FUNCTION(IoTHub_MQTT_GetTwinAsync_e2e_sas)
     dt_e2e_get_twin_async_test(MQTT_Protocol, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
 }
 
+TEST_FUNCTION(IoTHub_MQTT_GetTwinAsync_Client_Destroy_e2e_sas)
+{
+    dt_e2e_get_twin_async_destroy_test(MQTT_Protocol, IOTHUB_ACCOUNT_AUTH_CONNSTRING);
+}
+
 #ifndef __APPLE__
 TEST_FUNCTION(IoTHub_MQTT_SendModelId_e2e_x509)
 {
