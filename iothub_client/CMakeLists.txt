@@ -250,7 +250,7 @@ endif()
 set(IOTHUB_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client lib" FORCE)
 
 
-if(NOT ${use_installed_dependencies})
+if(NOT ${dont_use_uploadtoblob} OR ${use_edge_modules} AND NOT ${use_installed_dependencies})
     include_directories(${CMAKE_CURRENT_LIST_DIR}/../deps/parson)
 endif()
 

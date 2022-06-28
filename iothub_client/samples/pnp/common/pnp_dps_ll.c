@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #ifndef USE_PROV_MODULE_FULL
-#error "Missing cmake flag for DPS"
+#error "Missing CMake flag for DPS"
 #endif
 
 #include <stdio.h>

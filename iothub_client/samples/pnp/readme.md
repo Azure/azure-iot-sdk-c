@@ -68,9 +68,9 @@ Both samples use environment variables to retrieve configuration.
 
 ## Enabling Device Provisioning Service client (DPS)
 
-To enable DPS with symmetric keys (which is what this sample uses when DPS is configured), use the cmake flags `-Duse_prov_client=ON -Dhsm_type_symm_key=ON -Drun_e2e_tests=OFF `
+To enable DPS with symmetric keys (which is what this sample uses when DPS is configured), use the CMake flags `-Duse_prov_client=ON -Dhsm_type_symm_key=ON -Drun_e2e_tests=OFF `
 
-If you are building connection string only authentication, these extra cmake flags are not required.
+If you are building connection string only authentication, these extra CMake flags are not required.
 
 ## Caveats
 

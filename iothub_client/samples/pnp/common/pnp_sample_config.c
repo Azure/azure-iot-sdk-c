@@ -65,8 +65,8 @@ static bool GetDpsFromEnvironment(PNP_DEVICE_CONFIGURATION* pnpDeviceConfigurati
     // the e2e's test HSM layer and symmetric key logic will conflict.
     (void)pnpDeviceConfiguration;
     LogError("DPS based authentication was requested via environment variables, but DPS is not enabled.");
-    LogError("DPS is an optional component of the Azure IoT C SDK.  It is enabled with symmetric keys at cmake time by");
-    LogError("passing <-Duse_prov_client=ON -Dhsm_type_symm_key=ON -Drun_e2e_tests=OFF> to cmake's command line");
+    LogError("DPS is an optional component of the Azure IoT C SDK.  It is enabled with symmetric keys at CMake time by");
+    LogError("passing <-Duse_prov_client=ON -Dhsm_type_symm_key=ON -Drun_e2e_tests=OFF> to CMake's command line");
     return false;
 #else
     bool result;

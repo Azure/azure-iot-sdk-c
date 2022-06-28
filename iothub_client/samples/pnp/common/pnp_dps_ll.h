@@ -11,8 +11,8 @@
 
 #ifndef USE_PROV_MODULE_FULL
 // DPS is not brought in all configurations of the SDK.  If you hit this error,
-// rerun cmake with the flags <-Duse_prov_client=ON -Dhsm_type_symm_key=ON -Drun_e2e_tests=OFF>
-#error "Missing cmake flag for DPS"
+// rerun CMake with the flags <-Duse_prov_client=ON -Dhsm_type_symm_key=ON -Drun_e2e_tests=OFF>
+#error "Missing CMake flag for DPS"
 #endif
 
 //
