@@ -665,7 +665,7 @@ TEST_FUNCTION(IoTHubDeviceTwin_GetTwin_non_happy_path)
             (i != 26)    /*BUFFER_delete*/
             )
         {
-            char message_on_error[64];
+            char message_on_error[128];
             sprintf(message_on_error, "Got unexpected non-NULL ptr on run %lu", (unsigned long)i);
 
             const char* deviceId = " ";
@@ -891,7 +891,7 @@ TEST_FUNCTION(IoTHubDeviceTwin_UpdateTwin_non_happy_path)
             (i != 29)    /*BUFFER_delete*/
             )
         {
-            char message_on_error[64];
+            char message_on_error[128];
             sprintf(message_on_error, "Got unexpected non-NULL ptr on run %lu", (unsigned long)i);
 
             const char* deviceId = " ";

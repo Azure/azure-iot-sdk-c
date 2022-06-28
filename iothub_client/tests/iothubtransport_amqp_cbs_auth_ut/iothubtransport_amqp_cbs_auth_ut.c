@@ -1097,7 +1097,7 @@ TEST_FUNCTION(authentication_do_work_SAS_TOKEN_AUTHENTICATION_STATE_STARTING_fai
         }
 
         // arrange
-        char error_msg[64];
+        char error_msg[128];
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -1184,7 +1184,7 @@ TEST_FUNCTION(authentication_do_work_DEVICE_KEYS_AUTHENTICATION_STATE_STARTING_f
         }
 
         // arrange
-        char error_msg[64];
+        char error_msg[128];
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);
@@ -1594,7 +1594,7 @@ TEST_FUNCTION(authentication_retrieve_options_failure_checks)
     for (i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
         // arrange
-        char error_msg[64];
+        char error_msg[128];
 
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(i);

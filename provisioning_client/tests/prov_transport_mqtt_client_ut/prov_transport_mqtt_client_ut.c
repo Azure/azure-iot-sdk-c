@@ -270,7 +270,7 @@ BEGIN_TEST_SUITE(prov_transport_mqtt_client_ut)
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
-            char tmp_msg[64];
+            char tmp_msg[128];
             sprintf(tmp_msg, "g_transport_io failure in test %zu/%zu", index, count);
 
             //act

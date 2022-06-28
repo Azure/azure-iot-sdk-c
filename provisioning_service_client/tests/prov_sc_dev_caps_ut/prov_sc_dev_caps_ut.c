@@ -294,7 +294,7 @@ TEST_FUNCTION(deviceCapabilities_toJson_fail)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
-        char tmp_msg[64];
+        char tmp_msg[128];
         sprintf(tmp_msg, "deviceCapabilities_toJson failure in test %zu/%zu", index, count);
 
         json = deviceCapabilities_toJson(handle);
@@ -367,7 +367,7 @@ TEST_FUNCTION(deviceCapabilities_fromJson_fail)
         umock_c_negative_tests_reset();
         umock_c_negative_tests_fail_call(index);
 
-        char tmp_msg[64];
+        char tmp_msg[128];
         sprintf(tmp_msg, "deviceCapabilities_fromJson failure in test %zu/%zu", index, count);
 
         handle = deviceCapabilities_fromJson(TEST_JSON_CAPS);

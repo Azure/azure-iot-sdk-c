@@ -445,7 +445,7 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
-            char tmp_msg[64];
+            char tmp_msg[128];
             sprintf(tmp_msg, "secure_device_riot_create failure in test %zu/%zu", index, count);
 
             //act
@@ -549,7 +549,7 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
-            char tmp_msg[64];
+            char tmp_msg[128];
             sprintf(tmp_msg, "hsm_client_tpm_import_key failure in test %zu/%zu", index, count);
 
             //act
@@ -642,7 +642,7 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
-            char tmp_msg[64];
+            char tmp_msg[128];
             sprintf(tmp_msg, "hsm_client_tpm_get_endorsement_key failure in test %zu/%zu", index, count);
 
             int result = hsm_client_tpm_get_endorsement_key(sec_handle, &key, &key_len);
@@ -738,7 +738,7 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
-            char tmp_msg[64];
+            char tmp_msg[128];
             sprintf(tmp_msg, "hsm_client_tpm_get_storage_key failure in test %zu/%zu", index, count);
 
             int result = hsm_client_tpm_get_storage_key(sec_handle, &key, &key_len);
@@ -892,7 +892,7 @@ BEGIN_TEST_SUITE(hsm_client_tpm_ut)
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(index);
 
-            char tmp_msg[64];
+            char tmp_msg[128];
             sprintf(tmp_msg, "hsm_client_tpm_sign_data failure in test %zu/%zu", index, count);
 
             //act

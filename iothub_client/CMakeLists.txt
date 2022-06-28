@@ -264,6 +264,10 @@ if(${memory_trace})
     add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
 endif()
 
+if(${run_sfc_tests})
+    add_definitions(-DRUN_SFC_TESTS)
+endif()
+
 IF(WIN32)
     #windows needs this define
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
@@ -415,7 +419,7 @@ if (${build_as_dynamic})
         ARCHIVE_OUTPUT_NAME "iothub_client_dll_import"
         ENABLE_EXPORTS YES
         VERSION ${IOT_SDK_VERSION}
-        SOVERSION ${IOT_SDK_VERION_MAJOR}
+        SOVERSION ${IOT_SDK_VERSION_MAJOR}
         BUILD_WITH_INSTALL_RPATH TRUE
     )
     set(iothub_client_libs
