@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 // This sample implements an IoT Plug and Play based thermostat.  This demonstrates a *relatively* simple PnP device
-// that does only acts as a thermostat and does not have additional components.  
+// that only acts as a thermostat and does not have additional components.  
 
 // The Digital Twin Definition Language (DTDLv2) document describing the device implemented in this sample
 // is available at https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/Thermostat.json.
@@ -86,7 +86,7 @@ static const char g_ISO8601Format[] = "%Y-%m-%dT%H:%M:%SZ";
 // Format string for sending temperature telemetry.
 static const char g_temperatureTelemetryBodyFormat[] = "{\"temperature\":%.02f}";
 
-// snprintf format for building getMaxMinReport.
+// Format string for building getMaxMinReport.
 static const char g_maxMinCommandResponseFormat[] = "{\"maxTemp\":%.2f,\"minTemp\":%.2f,\"avgTemp\":%.2f,\"startTime\":\"%s\",\"endTime\":\"%s\"}";
 
 // Format string for sending maxTempSinceLastReboot property.
@@ -315,7 +315,6 @@ static void UpdateTemperatureAndStatistics(double desiredTemp, bool* maxTempUpda
 
     g_numTemperatureUpdates++;
     g_allTemperatures += desiredTemp;
-
     g_currentTemperature = desiredTemp;
 }
 

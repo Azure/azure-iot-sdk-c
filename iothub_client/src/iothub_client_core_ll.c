@@ -2567,7 +2567,6 @@ IOTHUB_CLIENT_RESULT IoTHubClientCore_LL_SetDeviceMethodCallback(IOTHUB_CLIENT_C
         {
             if (handleData->IoTHubTransport_Subscribe_DeviceMethod(handleData->deviceHandle) == 0)
             {
-                /*Codes_SRS_IOTHUBCLIENT_LL_12_022: [ Otherwise IoTHubClientCore_LL_SetDeviceMethodCallback shall succeed and return IOTHUB_CLIENT_OK. ]*/
                 handleData->methodCallback.type = CALLBACK_TYPE_METHOD;
                 handleData->methodCallback.deviceMethodCallback = deviceMethodCallback;
                 handleData->methodCallback.userContextCallback = userContextCallback;

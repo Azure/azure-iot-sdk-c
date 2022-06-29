@@ -429,6 +429,9 @@ typedef struct IOTHUB_CLIENT_CORE_LL_HANDLE_DATA_TAG* IOTHUB_DEVICE_CLIENT_LL_HA
     * @param[in]  userContextCallback       User specified context that will be provided to the
     *                                       callback. This can be @c NULL.
     *
+    * @remarks    The application behavior is undefined if the user calls
+    *             the IoTHubDeviceClient_LL_Destroy function from within any callback.
+    *    
     * @return     IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubDeviceClient_LL_SubscribeToCommands, IOTHUB_DEVICE_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_COMMAND_CALLBACK_ASYNC, commandCallback,  void*, userContextCallback);
