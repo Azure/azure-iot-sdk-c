@@ -101,6 +101,7 @@ static size_t REQUEST_ID_PROPERTY_LEN = sizeof(REQUEST_ID_PROPERTY) - 1;
 #define SYS_PROP_ON "on"
 #define SYS_PROP_EXP "exp"
 #define SYS_PROP_TO "to"
+#define SYS_COMPONENT_NAME "sub"
 
 static const char* DIAGNOSTIC_CONTEXT_CREATION_TIME_UTC_PROPERTY = "creationtimeutc";
 static const char DT_MODEL_ID_TOKEN[] = "model-id";
@@ -885,6 +886,24 @@ static int addSystemPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_messag
             if (addSystemPropertyToTopicString(topic_string, index++, SYS_PROP_ON, output_name, urlencode) != 0)
             {
                 LogError("Failed setting output name");
+                result = MU_FAILURE;
+            }
+            else
+            {
+                result = 0;
+            }
+        }
+    }
+
+    if (result == 0)
+    {
+        const char* component_name = IoTHubMessage_GetComponentName(iothub_message_handle);
+        if (component_name != NULL)
+        {
+            // Encode the component name if encoding is on
+            if (addSystemPropertyToTopicString(topic_string, index++, SYS_COMPONENT_NAME, component_name, urlencode) != 0)
+            {
+                LogError("Failed setting component name");
                 result = MU_FAILURE;
             }
             else

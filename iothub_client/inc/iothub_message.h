@@ -433,6 +433,28 @@ MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetAsSecurityMessage, I
 MOCKABLE_FUNCTION(, bool, IoTHubMessage_IsSecurityMessage, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
 
 /**
+* @brief   Sets component name of the message.
+*
+* @param   iotHubMessageHandle Handle to the message.
+* @param   componentName Pointer to the component name.
+*
+* @return  Returns IOTHUB_MESSAGE_OK if the componentName was set successfully
+*          or an error code otherwise.
+*/
+MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_SetComponentName, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const char*, componentName);
+
+/**
+* @brief   Gets the component name from the IOTHUB_MESSAGE_HANDLE. No new memory is allocated,
+*          the caller is not responsible for freeing the memory. The memory
+*          is valid until IoTHubMessage_Destroy is called on the message.
+*
+* @param   iotHubMessageHandle Handle to the message.
+*
+* @return  A const char* pointing to the component name.
+*/
+MOCKABLE_FUNCTION(, const char*, IoTHubMessage_GetComponentName, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle);
+
+/**
 * @brief   Frees all resources associated with the given message handle.
 *
 * @param   iotHubMessageHandle Handle to the message.

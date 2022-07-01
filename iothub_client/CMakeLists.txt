@@ -17,6 +17,7 @@ set(iothub_client_c_files
     ${CMAKE_CURRENT_LIST_DIR}/src/iothub_client_core_ll.c
     ${CMAKE_CURRENT_LIST_DIR}/src/iothub_client_diagnostic.c
     ${CMAKE_CURRENT_LIST_DIR}/src/iothub_client_ll.c
+    ${CMAKE_CURRENT_LIST_DIR}/src/iothub_client_properties.c
     ${CMAKE_CURRENT_LIST_DIR}/src/iothub_device_client.c
     ${CMAKE_CURRENT_LIST_DIR}/src/iothub_device_client_ll.c
     ${CMAKE_CURRENT_LIST_DIR}/src/iothub_message.c
@@ -34,6 +35,7 @@ set(iothub_client_h_files
     ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_client_core_common.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_client_ll.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_client_diagnostic.h
+    ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_client_properties.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_internal_consts.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/iothub_client_options.h
     ${CMAKE_CURRENT_LIST_DIR}/inc/internal/iothub_client_private.h
@@ -248,7 +250,7 @@ endif()
 set(IOTHUB_CLIENT_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is what needs to be included if using iothub_client lib" FORCE)
 
 
-if(NOT ${dont_use_uploadtoblob} OR ${use_edge_modules} AND NOT ${use_installed_dependencies})
+if(NOT ${use_installed_dependencies})
     include_directories(${CMAKE_CURRENT_LIST_DIR}/../deps/parson)
 endif()
 
