@@ -272,7 +272,6 @@ Below is a table showing the mapping of the LTS branches to the packages release
   | :-----: | :-----------: | :-----: | :------------: | :------------------: |
   | vcpkg: 2022-07-18 | lts_07_2022 | LTS_07_2022_Ref01 | 2022-07-18 | 2023-07-18 |
   | vcpkg: 2022-01-21 | lts_01_2022 | LTS_01_2022_Ref01 | 2022-01-21 | 2023-01-21 |
-  | vcpkg: 2021-09-09 | lts_07_2021 | LTS_07_2021_Ref01 | 2021-08-11 | 2022-08-11 |
 
 ## Release Example
 
